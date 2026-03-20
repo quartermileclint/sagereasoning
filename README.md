@@ -40,7 +40,7 @@ The Stoic Brain is a structured, machine-readable and human-readable dataset enc
 | `stoic-brain/schema.json` | Data structure definition | ✅ v1.0 |
 | `stoic-brain/virtues.json` | 4 cardinal virtues + 16 sub-virtues + scoring weights | ✅ v1.0 |
 | `stoic-brain/indifferents.json` | Preferred/dispreferred indifferents + virtue relevance | ✅ v1.0 |
-| `stoic-brain/scoring-rules.json` | Action scoring algorithm | ⏳ Phase 2 |
+| `stoic-brain/scoring-rules.json` | Action scoring algorithm | ✅ v1.0 |
 
 ---
 
@@ -48,10 +48,41 @@ The Stoic Brain is a structured, machine-readable and human-readable dataset enc
 
 | Phase | Priorities | Status |
 |-------|-----------|--------|
-| **Phase 1 — Foundation** | P1: Research, P2: Format, P3: Stoic Brain data | 🔄 In progress |
-| **Phase 2 — Build** | P4: API, P5: Indifferents scoring, P6: Past action scoring, P7: Action advice, P10: Auth | ⏳ Planned |
-| **Phase 3 — Ship** | P8: Website, P9: AI agent testing | ⏳ Planned |
+| **Phase 1 — Foundation** | P1: Research, P2: Format, P3: Stoic Brain data | ✅ Complete |
+| **Phase 2 — Build** | P4: API, P5: Indifferents scoring, P6: Past action scoring, P7: Action advice, P10: Auth | ✅ Complete |
+| **Phase 3 — Ship** | P8: Website build, P9: AI agent testing | 🔄 In progress |
 | **Phase 4 — Launch** | P11: Go live | ⏳ Planned |
+
+---
+
+## Phase 2 Complete: Supabase Backend & Auth Live
+
+**Database (PostgreSQL on Supabase)**
+- `profiles` — auto-created on user signup via trigger
+- `action_scores` — stores individual action evaluations (wisdom, justice, courage, temperance scores + total + alignment tier)
+- `user_stoic_profiles` — aggregated per-user stats (averages, strongest/weakest virtues, trend)
+- Triggers: `on_auth_user_created`, `on_action_score_added` (auto-recalculates stoic profile on each new score)
+- RLS enabled — users can only access their own data
+
+**Authentication**
+- Email provider (password + magic link sign-in)
+- Site URL: `https://sagereasoning.com`
+- Redirect URLs: production + localhost:3000 (dev)
+
+**API Specification (OpenAPI 3.1)**
+- `/api/v1/virtues` — cardinal virtues taxonomy
+- `/api/v1/indifferents` — preferred/dispreferred indifferents
+- `/api/v1/stoic-brain` — master data entry point
+- `/api/v1/score-action` — POST action → receive virtue scores + sage alignment
+- `/api/v1/advise-action` — GET action guidance from stoic brain
+- `/api/v1/rank-indifferents` — GET ranked indifferents based on virtue-alignment
+- `/api/v1/user/scores` — GET user's past action scores
+- `/api/v1/user/profile` — GET user's aggregated stoic profile
+
+**Project Configuration**
+- GitHub repo: `github.com/quartermileclint/sagereasoning`
+- Supabase project ref: `raqorxgrxdyezuntnojw` (ap-southeast-1)
+- `.env.local` configured with live Supabase keys (not committed to git)
 
 ---
 
@@ -89,3 +120,25 @@ All data is derived from:
 - Cicero, *De Finibus* Book 3 (45 BCE)
 
 See `research/sources-index.md` for full source catalogue.
+
+---
+
+## Phase 3 — Next Steps: Website & Deployment
+
+**When ready (P8 — Website build):**
+1. Create Next.js app scaffolding in `website/` directory
+2. Build authentication UI (login/signup/magic link)
+3. Build action scoring interface (user inputs action, receives sage alignment + reasoning)
+4. Build user dashboard (view past scores, stoic profile, strongest/growth virtues)
+5. Connect frontend to Supabase Auth + API endpoints
+6. Deploy to Vercel (automatic deploys on GitHub push)
+
+**Timeline:** Start in next development session once P3 kickoff approved.
+
+---
+
+## Questions?
+
+- Review `docs/ai-agent-guide.md` for how AI agents integrate with the Stoic Brain
+- Check `api/api-spec.yaml` for full endpoint documentation
+- See `stoic-brain/scoring-rules.json` for the virtue-weighting algorithm details
