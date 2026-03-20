@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SageReasoning — Project Setup Plan</title>
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #f5e6b8;
+    --slate: #1e293b;
+    --slate-mid: #334155;
+    --slate-light: #475569;
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --green: #22c55e;
+    --blue: #3b82f6;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --purple: #a78bfa;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  header { text-align: center; padding: 3rem 0 2rem; border-bottom: 2px solid var(--gold); margin-bottom: 3rem; }
+  header h1 { font-size: 2.4rem; color: var(--gold); letter-spacing: 2px; margin-bottom: 0.5rem; }
+  header p { color: var(--text-dim); font-size: 1.1rem; }
+
+  .section { margin-bottom: 3rem; }
+  .section h2 { color: var(--gold); font-size: 1.5rem; margin-bottom: 1.2rem; border-left: 4px solid var(--gold); padding-left: 12px; }
+
+  /* Architecture Diagram */
+  .arch-diagram { background: var(--card-bg); border-radius: 12px; padding: 2rem; overflow-x: auto; }
+  .arch-row { display: flex; gap: 1rem; justify-content: center; align-items: stretch; margin-bottom: 0.5rem; flex-wrap: wrap; }
+  .arch-box { background: var(--slate-mid); border: 2px solid var(--slate-light); border-radius: 10px; padding: 1rem 1.2rem; text-align: center; min-width: 140px; flex: 1; max-width: 220px; }
+  .arch-box.highlight { border-color: var(--gold); background: rgba(201,168,76,0.1); }
+  .arch-box h4 { color: var(--gold); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem; }
+  .arch-box p { color: var(--text-dim); font-size: 0.8rem; }
+  .arch-box .service { color: var(--blue); font-weight: 600; font-size: 0.95rem; }
+  .arch-box .cost { color: var(--green); font-size: 0.75rem; margin-top: 4px; }
+  .arrow-down { text-align: center; color: var(--gold); font-size: 1.5rem; margin: 0.3rem 0; }
+  .arrow-label { text-align: center; color: var(--text-dim); font-size: 0.75rem; margin-bottom: 0.3rem; }
+
+  /* Folder Tree */
+  .folder-tree { background: var(--card-bg); border-radius: 12px; padding: 1.5rem 2rem; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9rem; line-height: 1.8; }
+  .folder-tree .folder { color: var(--gold); }
+  .folder-tree .file { color: var(--text-dim); }
+  .folder-tree .note { color: var(--blue); font-style: italic; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 0.8rem; }
+
+  /* Priority Map */
+  .priority-grid { display: grid; grid-template-columns: 1fr; gap: 0.8rem; }
+  .priority-card { background: var(--card-bg); border-radius: 10px; padding: 1.2rem 1.5rem; display: grid; grid-template-columns: 50px 1fr 200px; gap: 1rem; align-items: center; border-left: 4px solid var(--slate-light); }
+  .priority-card.phase-now { border-left-color: var(--green); }
+  .priority-card.phase-next { border-left-color: var(--blue); }
+  .priority-card.phase-later { border-left-color: var(--purple); }
+  .priority-card.phase-final { border-left-color: var(--orange); }
+  .p-num { font-size: 1.4rem; font-weight: 700; color: var(--gold); text-align: center; }
+  .p-desc h4 { color: var(--text); font-size: 0.95rem; margin-bottom: 2px; }
+  .p-desc p { color: var(--text-dim); font-size: 0.8rem; }
+  .p-action { text-align: right; }
+  .p-action .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge-now { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-next { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .badge-later { background: rgba(167,139,250,0.15); color: var(--purple); }
+  .badge-final { background: rgba(245,158,11,0.15); color: var(--orange); }
+
+  /* Setup Checklist */
+  .checklist { background: var(--card-bg); border-radius: 12px; padding: 1.5rem 2rem; }
+  .check-group { margin-bottom: 1.5rem; }
+  .check-group h4 { color: var(--gold); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.6rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--slate-mid); }
+  .check-item { display: flex; gap: 0.8rem; align-items: flex-start; padding: 0.4rem 0; }
+  .check-icon { width: 20px; height: 20px; border: 2px solid var(--slate-light); border-radius: 4px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; cursor: pointer; }
+  .check-icon:hover { border-color: var(--gold); }
+  .check-item .label { font-size: 0.9rem; }
+  .check-item .sublabel { color: var(--text-dim); font-size: 0.8rem; }
+
+  /* Cost Summary */
+  .cost-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 12px; overflow: hidden; }
+  .cost-table th { background: var(--slate-mid); color: var(--gold); text-align: left; padding: 0.8rem 1.2rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .cost-table td { padding: 0.7rem 1.2rem; border-bottom: 1px solid var(--slate-mid); font-size: 0.9rem; }
+  .cost-table tr:last-child td { border-bottom: none; }
+  .cost-table .total td { font-weight: 700; color: var(--gold); background: rgba(201,168,76,0.08); }
+
+  /* Connector Cards */
+  .connector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+  .conn-card { background: var(--card-bg); border-radius: 10px; padding: 1.2rem; border: 1px solid var(--slate-mid); }
+  .conn-card h4 { color: var(--text); font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .conn-card .when { color: var(--gold); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .conn-card p { color: var(--text-dim); font-size: 0.82rem; }
+
+  /* Data Flow */
+  .flow-diagram { background: var(--card-bg); border-radius: 12px; padding: 2rem; }
+  .flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+  .flow-box { background: var(--slate-mid); border: 1px solid var(--slate-light); border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.85rem; text-align: center; }
+  .flow-box.data { border-color: var(--gold); color: var(--gold); }
+  .flow-box.human { border-color: var(--green); color: var(--green); }
+  .flow-box.ai { border-color: var(--blue); color: var(--blue); }
+  .flow-arrow { color: var(--text-dim); font-size: 1.2rem; }
+
+  /* Recommendation box */
+  .rec-box { background: rgba(201,168,76,0.08); border: 1px solid var(--gold); border-radius: 10px; padding: 1.2rem 1.5rem; margin-top: 1rem; }
+  .rec-box h4 { color: var(--gold); margin-bottom: 0.4rem; font-size: 0.9rem; }
+  .rec-box p { color: var(--text); font-size: 0.88rem; }
+
+  /* Adjustment callout */
+  .adjust { background: rgba(245,158,11,0.08); border: 1px solid var(--orange); border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; }
+  .adjust h4 { color: var(--orange); font-size: 0.85rem; margin-bottom: 0.3rem; }
+  .adjust p { color: var(--text-dim); font-size: 0.85rem; }
+
+  @media (max-width: 700px) {
+    .priority-card { grid-template-columns: 40px 1fr; }
+    .p-action { grid-column: 1 / -1; text-align: left; }
+    .arch-row { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>SAGE REASONING</h1>
+  <p>Project Setup & Configuration Plan — March 2026</p>
+</header>
+
+<!-- ==================== SECTION 1: ARCHITECTURE ==================== -->
+<div class="section">
+  <h2>1. Recommended Architecture</h2>
+  <p style="color:var(--text-dim); margin-bottom:1.2rem;">
+    Stack chosen for: zero coding required, under $20/month, full user accounts, AI + human access to Stoic Brain data.
+  </p>
+
+  <div class="arch-diagram">
+    <!-- Top: Users -->
+    <div class="arch-row">
+      <div class="arch-box">
+        <h4>Human Users</h4>
+        <p>Browser / Mobile</p>
+        <div class="service">sagereasoning.com</div>
+      </div>
+      <div class="arch-box">
+        <h4>AI Agents</h4>
+        <p>API requests</p>
+        <div class="service">REST / JSON</div>
+      </div>
+      <div class="arch-box">
+        <h4>You (Admin)</h4>
+        <p>Desktop / Cowork</p>
+        <div class="service">Supabase Dashboard</div>
+      </div>
+    </div>
+
+    <div class="arrow-down">&#8595; &#8595; &#8595;</div>
+    <div class="arrow-label">All traffic routes through</div>
+
+    <!-- Middle: Services -->
+    <div class="arch-row">
+      <div class="arch-box highlight">
+        <h4>Website Host</h4>
+        <div class="service">Vercel</div>
+        <p>Hosts the website files</p>
+        <div class="cost">FREE tier</div>
+      </div>
+      <div class="arch-box highlight">
+        <h4>Database + Auth + API</h4>
+        <div class="service">Supabase</div>
+        <p>User accounts, scoring data, stoic brain queries</p>
+        <div class="cost">FREE tier (50K users)</div>
+      </div>
+    </div>
+
+    <div class="arrow-down">&#8595; &#8595;</div>
+    <div class="arrow-label">Powered by</div>
+
+    <!-- Bottom: Data -->
+    <div class="arch-row">
+      <div class="arch-box highlight">
+        <h4>Stoic Brain</h4>
+        <div class="service">JSON + Database</div>
+        <p>Reference file on GitHub<br>+ queryable via Supabase API</p>
+        <div class="cost">FREE</div>
+      </div>
+      <div class="arch-box">
+        <h4>Source Code</h4>
+        <div class="service">GitHub</div>
+        <p>Version control for all project files</p>
+        <div class="cost">FREE</div>
+      </div>
+      <div class="arch-box">
+        <h4>Domain</h4>
+        <div class="service">sagereasoning.com</div>
+        <p>Register via Cloudflare or Namecheap</p>
+        <div class="cost">~$10-12/year</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rec-box">
+    <h4>Why this stack?</h4>
+    <p>
+      <strong>Vercel</strong> deploys your website automatically when you update code on GitHub — no server management.
+      <strong>Supabase</strong> gives you a full database, user login system, and auto-generated API in one place — no backend coding.
+      <strong>GitHub</strong> stores your Stoic Brain reference file where both humans and AI can access it directly.
+      Total cost: ~$1/month for domain. Everything else is free tier.
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SECTION 2: STOIC BRAIN DATA FLOW ==================== -->
+<div class="section">
+  <h2>2. How the Stoic Brain Works (Both Access Modes)</h2>
+
+  <div class="flow-diagram">
+    <p style="color:var(--text-dim); margin-bottom:1rem; text-align:center; font-size:0.85rem;">
+      MODE A: Reference File (download/read) &nbsp;&nbsp;|&nbsp;&nbsp; MODE B: Live API (query/score)
+    </p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+      <!-- Mode A -->
+      <div>
+        <p style="color:var(--green); text-align:center; font-weight:600; margin-bottom:0.8rem;">MODE A — Reference File</p>
+        <div class="flow-row" style="flex-direction:column;">
+          <div class="flow-box data">stoic-brain.json on GitHub</div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-box human">Human downloads / reads</div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-box ai">AI agent loads file into context</div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-box">Both use it for reasoning</div>
+        </div>
+        <p style="color:var(--text-dim); font-size:0.78rem; text-align:center; margin-top:0.5rem;">
+          Good for: offline use, AI system prompts, research
+        </p>
+      </div>
+      <!-- Mode B -->
+      <div>
+        <p style="color:var(--blue); text-align:center; font-weight:600; margin-bottom:0.8rem;">MODE B — Live API</p>
+        <div class="flow-row" style="flex-direction:column;">
+          <div class="flow-box data">Stoic Brain in Supabase DB</div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-box human">Website sends query (e.g. "rate this action")</div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-box ai">AI agent calls API endpoint</div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-box">Returns virtue scores + reasoning</div>
+        </div>
+        <p style="color:var(--text-dim); font-size:0.78rem; text-align:center; margin-top:0.5rem;">
+          Good for: scoring, dashboards, real-time advice
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 3: FOLDER STRUCTURE ==================== -->
+<div class="section">
+  <h2>3. Recommended Folder Structure</h2>
+  <p style="color:var(--text-dim); margin-bottom:1rem;">
+    This lives in your Claude-work folder AND mirrors to GitHub.
+  </p>
+
+  <div class="folder-tree">
+<span class="folder">sagereasoning/</span>
+├── <span class="folder">research/</span>                    <span class="note">← P1: Historic stoic texts & translations</span>
+│   ├── <span class="file">sources-index.md</span>          <span class="note">   Catalogue of all source texts</span>
+│   ├── <span class="file">meditations-marcus-aurelius.md</span>
+│   ├── <span class="file">discourses-epictetus.md</span>
+│   ├── <span class="file">letters-seneca.md</span>
+│   └── <span class="file">fragments-chrysippus-zeno.md</span>
+│
+├── <span class="folder">stoic-brain/</span>                  <span class="note">← P2-P3: The core data product</span>
+│   ├── <span class="file">stoic-brain.json</span>           <span class="note">   Main reference file (human + AI readable)</span>
+│   ├── <span class="file">schema.json</span>                <span class="note">   Defines the data structure</span>
+│   ├── <span class="file">virtues.json</span>               <span class="note">   The 4 cardinal virtues + sub-virtues</span>
+│   ├── <span class="file">indifferents.json</span>          <span class="note">   Preferred/dispreferred indifferents</span>
+│   └── <span class="file">scoring-rules.json</span>         <span class="note">   P5-P7: How actions are scored</span>
+│
+├── <span class="folder">website/</span>                      <span class="note">← P8: Next.js website (AI-built)</span>
+│   ├── <span class="folder">public/</span>                   <span class="note">   Static assets, images, brand files</span>
+│   ├── <span class="folder">src/</span>
+│   │   ├── <span class="folder">app/</span>                  <span class="note">   Pages: home, login, dashboard, scoring</span>
+│   │   ├── <span class="folder">components/</span>           <span class="note">   Reusable UI components</span>
+│   │   └── <span class="folder">lib/</span>                  <span class="note">   Supabase client, utilities</span>
+│   ├── <span class="file">package.json</span>
+│   └── <span class="file">next.config.js</span>
+│
+├── <span class="folder">api/</span>                          <span class="note">← P4: API documentation & edge functions</span>
+│   ├── <span class="file">api-spec.yaml</span>              <span class="note">   OpenAPI spec for AI agent access</span>
+│   └── <span class="folder">functions/</span>                <span class="note">   Supabase Edge Functions</span>
+│
+├── <span class="folder">docs/</span>                         <span class="note">← Documentation for all audiences</span>
+│   ├── <span class="file">human-guide.md</span>             <span class="note">   How humans use the stoic brain</span>
+│   ├── <span class="file">ai-agent-guide.md</span>          <span class="note">   How AI agents interface with it</span>
+│   └── <span class="file">scoring-methodology.md</span>     <span class="note">   How the stoic score works</span>
+│
+├── <span class="file">.env.example</span>                    <span class="note">← Template for secrets (never commit real .env)</span>
+├── <span class="file">README.md</span>
+└── <span class="file">LICENSE</span>
+  </div>
+</div>
+
+<!-- ==================== SECTION 4: PRIORITY MAPPING ==================== -->
+<div class="section">
+  <h2>4. Your Priorities → Action Phases</h2>
+  <p style="color:var(--text-dim); margin-bottom:1rem;">
+    Each of your 11 priorities mapped to a phase and concrete first action.
+  </p>
+
+  <div class="priority-grid">
+    <div class="priority-card phase-now">
+      <div class="p-num">P1</div>
+      <div class="p-desc">
+        <h4>Research historic stoic writings</h4>
+        <p>Compile translations of Meditations, Discourses, Letters, Fragments into research/ folder</p>
+      </div>
+      <div class="p-action"><span class="badge badge-now">Phase 1 — Now</span></div>
+    </div>
+
+    <div class="priority-card phase-now">
+      <div class="p-num">P2</div>
+      <div class="p-desc">
+        <h4>Research data file format</h4>
+        <p>JSON chosen: readable by humans, natively parsed by AI, importable to databases. Schema-first approach.</p>
+      </div>
+      <div class="p-action"><span class="badge badge-now">Phase 1 — Now</span></div>
+    </div>
+
+    <div class="priority-card phase-now">
+      <div class="p-num">P3</div>
+      <div class="p-desc">
+        <h4>Derive the Stoic Brain data file</h4>
+        <p>Extract virtues, sub-virtues, indifferents from research into stoic-brain.json</p>
+      </div>
+      <div class="p-action"><span class="badge badge-now">Phase 1 — Now</span></div>
+    </div>
+
+    <div class="priority-card phase-next">
+      <div class="p-num">P4</div>
+      <div class="p-desc">
+        <h4>Research access for humans + AI</h4>
+        <p>Create OpenAPI spec, Supabase REST endpoints, human-readable docs</p>
+      </div>
+      <div class="p-action"><span class="badge badge-next">Phase 2 — Build</span></div>
+    </div>
+
+    <div class="priority-card phase-next">
+      <div class="p-num">P5</div>
+      <div class="p-desc">
+        <h4>Rank external indifferent goals</h4>
+        <p>Define scoring algorithm: map indifferents to virtue alignment weights</p>
+      </div>
+      <div class="p-action"><span class="badge badge-next">Phase 2 — Build</span></div>
+    </div>
+
+    <div class="priority-card phase-next">
+      <div class="p-num">P6</div>
+      <div class="p-desc">
+        <h4>Rank past actions (stoic score)</h4>
+        <p>Build scoring engine that evaluates completed actions against virtue framework</p>
+      </div>
+      <div class="p-action"><span class="badge badge-next">Phase 2 — Build</span></div>
+    </div>
+
+    <div class="priority-card phase-next">
+      <div class="p-num">P7</div>
+      <div class="p-desc">
+        <h4>Advise on possible actions</h4>
+        <p>Real-time scoring: input a potential action, receive virtue-weighted score + reasoning</p>
+      </div>
+      <div class="p-action"><span class="badge badge-next">Phase 2 — Build</span></div>
+    </div>
+
+    <div class="priority-card phase-later">
+      <div class="p-num">P8</div>
+      <div class="p-desc">
+        <h4>Build & test website</h4>
+        <p>AI builds Next.js site with Supabase auth, dashboard, scoring UI. You review & approve.</p>
+      </div>
+      <div class="p-action"><span class="badge badge-later">Phase 3 — Ship</span></div>
+    </div>
+
+    <div class="priority-card phase-later">
+      <div class="p-num">P9</div>
+      <div class="p-desc">
+        <h4>AI agent test & improve</h4>
+        <p>AI agent runs through all user flows, stress-tests scoring, reports issues</p>
+      </div>
+      <div class="p-action"><span class="badge badge-later">Phase 3 — Ship</span></div>
+    </div>
+
+    <div class="priority-card phase-final">
+      <div class="p-num">P10</div>
+      <div class="p-desc">
+        <h4>Registration system</h4>
+        <p>Supabase Auth handles this: email/password, magic links, OAuth. Configure onboarding flow.</p>
+      </div>
+      <div class="p-action"><span class="badge badge-final">Phase 4 — Launch</span></div>
+    </div>
+
+    <div class="priority-card phase-final">
+      <div class="p-num">P11</div>
+      <div class="p-desc">
+        <h4>Go Live</h4>
+        <p>Connect domain, enable production mode, monitor, iterate</p>
+      </div>
+      <div class="p-action"><span class="badge badge-final">Phase 4 — Launch</span></div>
+    </div>
+  </div>
+
+  <div class="adjust">
+    <h4>Suggested Priority Adjustment</h4>
+    <p>
+      <strong>P10 (Registration) should move earlier — into Phase 2.</strong>
+      Supabase Auth is a configuration step, not a build step. Setting it up early means P5-P7 scoring features
+      can be user-specific from the start, avoiding a retrofit later. This is a 15-minute setup, not a weeks-long task.
+    </p>
+  </div>
+</div>
+
+<!-- ==================== SECTION 5: WHAT YOU SET UP NOW ==================== -->
+<div class="section">
+  <h2>5. Accounts & Logins You Need</h2>
+
+  <div class="checklist">
+    <div class="check-group">
+      <h4>Set Up Now (Phase 1 — this week)</h4>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <div>
+          <div class="label"><strong>GitHub account</strong> — github.com</div>
+          <div class="sublabel">Free. Stores all project files + Stoic Brain reference. Create repo "sagereasoning".</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <div>
+          <div class="label"><strong>Supabase account</strong> — supabase.com</div>
+          <div class="sublabel">Free tier. Create project "sagereasoning". This gives you: database, user auth, API — all in one.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <div>
+          <div class="label"><strong>Domain registration</strong> — sagereasoning.com</div>
+          <div class="sublabel">~$10-12/year via Cloudflare Registrar (cheapest) or Namecheap. Check if already registered.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="check-group">
+      <h4>Set Up in Phase 2 (when building)</h4>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <div>
+          <div class="label"><strong>Vercel account</strong> — vercel.com</div>
+          <div class="sublabel">Free tier. Sign up with your GitHub account. Auto-deploys website when you push code.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <div>
+          <div class="label"><strong>Cloudflare account</strong> — cloudflare.com</div>
+          <div class="sublabel">Free tier. Points your domain to Vercel. Adds security + speed.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="check-group">
+      <h4>Optional / Later</h4>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <div>
+          <div class="label"><strong>Anthropic API key</strong> — console.anthropic.com</div>
+          <div class="sublabel">Only if you want AI-powered scoring on the website itself (Claude evaluating actions). Pay-per-use.</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <div>
+          <div class="label"><strong>Analytics</strong> — Plausible or Vercel Analytics</div>
+          <div class="sublabel">Track visitors. Plausible is privacy-focused (~$9/mo) or Vercel Analytics (free basic).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 6: COST SUMMARY ==================== -->
+<div class="section">
+  <h2>6. Monthly Cost Breakdown</h2>
+
+  <table class="cost-table">
+    <thead>
+      <tr><th>Service</th><th>Purpose</th><th>Tier</th><th>Cost/month</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>GitHub</td><td>Code + Stoic Brain repo</td><td>Free</td><td>$0</td></tr>
+      <tr><td>Supabase</td><td>Database, Auth, API</td><td>Free (500MB, 50K users)</td><td>$0</td></tr>
+      <tr><td>Vercel</td><td>Website hosting</td><td>Free (100GB bandwidth)</td><td>$0</td></tr>
+      <tr><td>Cloudflare</td><td>DNS + CDN + security</td><td>Free</td><td>$0</td></tr>
+      <tr><td>Domain</td><td>sagereasoning.com</td><td>Annual registration</td><td>~$1</td></tr>
+      <tr class="total"><td colspan="3">Total at launch</td><td>~$1/month</td></tr>
+    </tbody>
+  </table>
+
+  <p style="color:var(--text-dim); font-size:0.85rem; margin-top:0.8rem;">
+    Growth trigger: If you exceed 50K database rows or 500MB storage, Supabase Pro is $25/month.
+    That's a good problem to have — means people are using it.
+  </p>
+</div>
+
+<!-- ==================== SECTION 7: CONNECTORS ==================== -->
+<div class="section">
+  <h2>7. Recommended Cowork Connectors</h2>
+  <p style="color:var(--text-dim); margin-bottom:1rem;">
+    These let me (Claude) interact directly with your services during our sessions.
+  </p>
+
+  <div class="connector-grid">
+    <div class="conn-card">
+      <h4>GitHub</h4>
+      <div class="when">Connect Now</div>
+      <p>Lets me create repos, push code, manage files directly. Essential for storing the Stoic Brain and website code.</p>
+    </div>
+    <div class="conn-card">
+      <h4>Supabase (via MCP)</h4>
+      <div class="when">Connect in Phase 2</div>
+      <p>Lets me set up database tables, configure auth rules, and test API endpoints without you needing to learn SQL.</p>
+    </div>
+    <div class="conn-card">
+      <h4>Vercel</h4>
+      <div class="when">Connect in Phase 3</div>
+      <p>Lets me trigger deployments and check build status. Auto-connects via GitHub integration.</p>
+    </div>
+    <div class="conn-card">
+      <h4>Cloudflare</h4>
+      <div class="when">Connect in Phase 3</div>
+      <p>Lets me configure DNS and domain routing when it's time to connect sagereasoning.com.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 8: IMMEDIATE NEXT ACTIONS ==================== -->
+<div class="section">
+  <h2>8. Your Immediate Next Actions</h2>
+
+  <div class="checklist">
+    <div class="check-group">
+      <h4>This Session (if you approve this plan)</h4>
+      <div class="check-item">
+        <div class="check-icon">1</div>
+        <div>
+          <div class="label">I create the full folder structure in your Claude-work/PROJECTS/sagereasoning/ folder</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon">2</div>
+        <div>
+          <div class="label">I create the stoic-brain JSON schema (the template/structure the data will follow)</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon">3</div>
+        <div>
+          <div class="label">I begin P1 research: compile key stoic source texts into research/ folder</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="check-group">
+      <h4>You Do (Time Block 4 tonight or this weekend)</h4>
+      <div class="check-item">
+        <div class="check-icon">A</div>
+        <div>
+          <div class="label">Create GitHub account (if you don't have one) → github.com/signup</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon">B</div>
+        <div>
+          <div class="label">Create Supabase account → supabase.com (sign up with GitHub)</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-icon">C</div>
+        <div>
+          <div class="label">Check domain availability: sagereasoning.com → cloudflare.com/products/registrar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer style="text-align:center; padding:2rem 0; color:var(--text-dim); font-size:0.8rem; border-top:1px solid var(--slate-mid); margin-top:2rem;">
+  SageReasoning Setup Plan — Generated March 2026 — Review and confirm before implementation begins
+</footer>
+
+</div>
+</body>
+</html>

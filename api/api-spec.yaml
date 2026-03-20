@@ -1,0 +1,543 @@
+openapi: 3.1.0
+info:
+  title: SageReasoning API
+  description: |
+    The SageReasoning API provides access to the Stoic Brain — a structured dataset
+    encoding Stoic philosophy for virtue-based reasoning and action scoring.
+
+    Designed for:
+    - AI agents integrating Stoic reasoning into their decision-making
+    - The sagereasoning.com website (scoring dashboards, user history)
+    - Human developers building Stoic-aligned products
+
+    Authentication: Bearer token (Supabase JWT). Public endpoints (virtues, indifferents)
+    require only the anon key. User-specific endpoints (scores, history) require a
+    valid user session token.
+  version: 1.0.0
+  contact:
+    email: zeus@sagereasoning.com
+    url: https://sagereasoning.com
+  license:
+    name: Creative Commons Attribution 4.0
+    url: https://creativecommons.org/licenses/by/4.0/
+
+servers:
+  - url: https://sagereasoning.com/api/v1
+    description: Production
+  - url: http://localhost:3000/api/v1
+    description: Local development
+
+security:
+  - BearerAuth: []
+
+paths:
+
+  # ============================================================
+  # PUBLIC ENDPOINTS — Stoic Brain reference data
+  # ============================================================
+
+  /virtues:
+    get:
+      summary: Get all virtues
+      description: Returns the full taxonomy of the four cardinal Stoic virtues and their sub-virtues with scoring weights. No authentication required.
+      tags: [Stoic Brain]
+      security: []
+      responses:
+        '200':
+          description: Full virtue taxonomy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtuesResponse'
+
+  /virtues/{virtue_id}:
+    get:
+      summary: Get a single virtue
+      tags: [Stoic Brain]
+      security: []
+      parameters:
+        - name: virtue_id
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [wisdom, justice, courage, temperance]
+      responses:
+        '200':
+          description: Single virtue with sub-virtues
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Virtue'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /indifferents:
+    get:
+      summary: Get all indifferents
+      description: Returns all Stoic indifferents (preferred, dispreferred, neutral) with virtue relevance scores. No authentication required.
+      tags: [Stoic Brain]
+      security: []
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [preferred, dispreferred, neutral]
+          description: Filter by category
+      responses:
+        '200':
+          description: All indifferents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndifferentsResponse'
+
+  /stoic-brain:
+    get:
+      summary: Get full Stoic Brain (meta + foundations)
+      description: Returns the master stoic-brain.json — ideal for AI agents loading full context. No authentication required.
+      tags: [Stoic Brain]
+      security: []
+      responses:
+        '200':
+          description: Full Stoic Brain meta and foundations
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # ============================================================
+  # SCORING ENDPOINTS — P6, P7
+  # ============================================================
+
+  /score-action:
+    post:
+      summary: Score a past action (P6)
+      description: |
+        Submit a description of a completed action and receive a full Stoic virtue score.
+        Returns individual virtue scores, composite score, alignment tier, reasoning,
+        and an improvement path (what a sage would have done differently).
+
+        For AI agents: this is the primary endpoint for evaluating whether an action
+        aligns with Stoic virtue. The score reflects intention and reasoning quality,
+        not outcome alone.
+      tags: [Scoring]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScoreActionRequest'
+            example:
+              action_description: "I stayed silent in a meeting when I disagreed, to avoid conflict with my manager."
+              context: "Weekly team meeting. My manager proposed an approach I believed was flawed."
+              intended_outcome: "To keep the peace and avoid confrontation."
+      responses:
+        '200':
+          description: Virtue score with full reasoning
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionScore'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /advise-action:
+    post:
+      summary: Advise on a proposed action (P7)
+      description: |
+        Submit a proposed action (before taking it) and receive Stoic guidance on whether
+        to proceed, what the sage path recommends, and how different alternatives compare.
+
+        Use this for real-time decision support. The response includes a sage_framing field
+        that reframes the situation as a sage would see it — particularly useful for
+        AI agents advising users.
+      tags: [Scoring]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdviseActionRequest'
+            example:
+              proposed_action: "Accept a higher-paying job that requires me to compromise my values."
+              alternatives:
+                - "Stay in current role and continue developing virtue without the pay increase"
+                - "Negotiate the new role to remove the ethically problematic elements"
+              context: "The new role pays 40% more but requires signing off on practices I believe are unjust."
+              concerns: "I am worried about money but also about my integrity."
+      responses:
+        '200':
+          description: Stoic guidance on proposed action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionAdvice'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /rank-indifferents:
+    post:
+      summary: Rank competing external goals (P5)
+      description: |
+        Given a list of external goals (indifferents) a user is considering pursuing,
+        returns a virtue-weighted ranking of which to prioritise and why.
+      tags: [Scoring]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RankIndifferentsRequest'
+      responses:
+        '200':
+          description: Ranked indifferents with reasoning
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndifferentsRanking'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================================
+  # USER ENDPOINTS — P10 (Auth required)
+  # ============================================================
+
+  /user/scores:
+    get:
+      summary: Get user's score history (P6)
+      description: Returns all past action scores for the authenticated user, with trend data.
+      tags: [User]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Score history with trend
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreHistory'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /user/scores/{score_id}:
+    get:
+      summary: Get a single scored action
+      tags: [User]
+      parameters:
+        - name: score_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Single action score
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionScore'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /user/profile:
+    get:
+      summary: Get user's stoic profile
+      description: Returns the user's aggregate virtue scores, progression tier, and summary statistics.
+      tags: [User]
+      responses:
+        '200':
+          description: User stoic profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+# ============================================================
+# COMPONENTS
+# ============================================================
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase JWT token. Obtain via Supabase Auth (email/password or magic link).
+
+  schemas:
+    Virtue:
+      type: object
+      properties:
+        id:
+          type: string
+          example: wisdom
+        name:
+          type: string
+          example: Wisdom
+        greek:
+          type: string
+          example: phronesis
+        description:
+          type: string
+        sage_definition:
+          type: string
+        scoring_weight:
+          type: number
+          example: 0.30
+        sub_virtues:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              name: { type: string }
+              description: { type: string }
+              scoring_weight: { type: number }
+
+    VirtuesResponse:
+      type: object
+      properties:
+        cardinal_virtues:
+          type: array
+          items:
+            $ref: '#/components/schemas/Virtue'
+        scoring_alignment_tiers:
+          type: object
+
+    IndifferentsResponse:
+      type: object
+      properties:
+        indifferents:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              name: { type: string }
+              category:
+                type: string
+                enum: [preferred, dispreferred, neutral]
+              description: { type: string }
+              virtue_relevance: { type: object }
+              sage_stance: { type: string }
+
+    ScoreActionRequest:
+      type: object
+      required: [action_description]
+      properties:
+        action_description:
+          type: string
+          minLength: 10
+          description: What did the agent do?
+        context:
+          type: string
+          description: Relevant background (role, relationships, constraints)
+        intended_outcome:
+          type: string
+          description: What was the agent trying to achieve?
+        actual_outcome:
+          type: string
+          description: What actually happened?
+
+    ActionScore:
+      type: object
+      properties:
+        score_id:
+          type: string
+          format: uuid
+        action_description:
+          type: string
+        virtue_scores:
+          type: object
+          properties:
+            wisdom: { type: number, minimum: 0, maximum: 100 }
+            justice: { type: number, minimum: 0, maximum: 100 }
+            courage: { type: number, minimum: 0, maximum: 100 }
+            temperance: { type: number, minimum: 0, maximum: 100 }
+        total_score:
+          type: number
+          minimum: 0
+          maximum: 100
+        sage_alignment:
+          type: string
+          enum: [sage, progressing, aware, misaligned, contrary]
+        reasoning:
+          type: string
+        improvement_path:
+          type: string
+          description: What a sage would have done differently
+        strength:
+          type: string
+          description: Which virtue was most expressed
+        growth_area:
+          type: string
+          description: Which virtue needs most development
+        key_indifferents:
+          type: array
+          items: { type: string }
+        created_at:
+          type: string
+          format: date-time
+
+    AdviseActionRequest:
+      type: object
+      required: [proposed_action]
+      properties:
+        proposed_action:
+          type: string
+        alternatives:
+          type: array
+          items: { type: string }
+        context:
+          type: string
+        concerns:
+          type: string
+
+    ActionAdvice:
+      type: object
+      properties:
+        recommended_action:
+          type: string
+        sage_framing:
+          type: string
+          description: How a sage would think about this situation
+        virtue_alignment_scores:
+          type: object
+          description: Projected scores for each alternative if alternatives were provided
+        key_considerations:
+          type: array
+          items: { type: string }
+        indifferents_at_stake:
+          type: array
+          items: { type: string }
+        caution:
+          type: string
+          description: Passion or false belief likely to distort judgement
+
+    RankIndifferentsRequest:
+      type: object
+      required: [goals]
+      properties:
+        goals:
+          type: array
+          items: { type: string }
+          description: List of external goals the user is considering
+        context:
+          type: string
+          description: Current roles, duties, and constraints
+
+    IndifferentsRanking:
+      type: object
+      properties:
+        ranked_goals:
+          type: array
+          items:
+            type: object
+            properties:
+              goal: { type: string }
+              rank: { type: integer }
+              virtue_score: { type: number }
+              reasoning: { type: string }
+              risk: { type: string }
+        summary: { type: string }
+
+    ScoreHistory:
+      type: object
+      properties:
+        scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionScore'
+        total_count:
+          type: integer
+        average_score:
+          type: number
+        trend:
+          type: string
+          enum: [improving, declining, stable]
+        virtue_averages:
+          type: object
+          properties:
+            wisdom: { type: number }
+            justice: { type: number }
+            courage: { type: number }
+            temperance: { type: number }
+
+    UserProfile:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        sage_alignment:
+          type: string
+          enum: [sage, progressing, aware, misaligned, contrary]
+        overall_score:
+          type: number
+        virtue_averages:
+          type: object
+        strongest_virtue:
+          type: string
+        growth_virtue:
+          type: string
+        actions_scored:
+          type: integer
+        member_since:
+          type: string
+          format: date-time
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+              message: { type: string }
+    Unauthorized:
+      description: Missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string, example: unauthorized }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string, example: not_found }
+
+tags:
+  - name: Stoic Brain
+    description: Public reference data — virtues, indifferents, foundations
+  - name: Scoring
+    description: Action scoring and advice endpoints (P5, P6, P7)
+  - name: User
+    description: User profile and score history (requires authentication)

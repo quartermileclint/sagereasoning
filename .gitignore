@@ -1,0 +1,22 @@
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.production
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+
+# Node.js (for website phase)
+node_modules/
+.next/
+out/
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
