@@ -50,8 +50,9 @@ The Stoic Brain is a structured, machine-readable and human-readable dataset enc
 |-------|-----------|--------|
 | **Phase 1 — Foundation** | P1: Research, P2: Format, P3: Stoic Brain data | ✅ Complete |
 | **Phase 2 — Build** | P4: API, P5: Indifferents scoring, P6: Past action scoring, P7: Action advice, P10: Auth | ✅ Complete |
-| **Phase 3 — Ship** | P8: Website build, P9: AI agent testing | 🔄 In progress |
-| **Phase 4 — Launch** | P11: Go live | ⏳ Planned |
+| **Phase 3 — Ship** | P8: Website build, P9: AI agent testing | ✅ Complete |
+| **Phase 4 — Scoring Engine** | Claude API server-side scoring | ✅ Complete |
+| **Phase 5 — Launch** | P10: Registration/onboarding, P11: Go live | ⏳ Next |
 
 ---
 
@@ -123,17 +124,34 @@ See `research/sources-index.md` for full source catalogue.
 
 ---
 
-## Phase 3 — Next Steps: Website & Deployment
+## Phase 3 Complete: Website Live at sagereasoning.com
 
-**When ready (P8 — Website build):**
-1. Create Next.js app scaffolding in `website/` directory
-2. Build authentication UI (login/signup/magic link)
-3. Build action scoring interface (user inputs action, receives sage alignment + reasoning)
-4. Build user dashboard (view past scores, stoic profile, strongest/growth virtues)
-5. Connect frontend to Supabase Auth + API endpoints
-6. Deploy to Vercel (automatic deploys on GitHub push)
+**Tech deployed**
+- Next.js 14 App Router + TypeScript + Tailwind CSS
+- 5 pages: Landing, Auth (sign in/up/magic link), Score Action, Dashboard, API Docs
+- Brand-matched: EB Garamond + Cormorant Garamond, sage green palette, all logo assets
+- Deployed to Vercel — auto-deploys on every GitHub push to `main`
+- Custom domain `sagereasoning.com` + `www.sagereasoning.com` live and green
 
-**Timeline:** Start in next development session once P3 kickoff approved.
+---
+
+## Phase 4 Complete: Claude API Scoring Engine Live
+
+**What changed**
+- Replaced client-side keyword heuristic (`heuristic-v1`) with server-side Claude API scoring
+- New API route: `POST /api/score` — calls `claude-sonnet-4-6` with full Stoic virtue prompt
+- Scores each action against Wisdom (30%), Justice (25%), Courage (25%), Temperance (20%)
+- Returns virtue scores 0–100, weighted total, alignment tier, reasoning, improvement path, strength + growth area
+- All scores now recorded as `scored_by: 'claude-api-v1'` in Supabase
+- `ANTHROPIC_API_KEY` stored securely in Vercel environment variables (not in code)
+
+---
+
+## Phase 5 — Next Session: Registration & Go Live
+
+**Priorities:**
+1. **P10 — Registration/onboarding system** — welcome email, profile setup flow, consistent access for new users
+2. **P11 — Go live** — marketing, announcement, client onboarding
 
 ---
 
