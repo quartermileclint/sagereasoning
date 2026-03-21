@@ -37,73 +37,44 @@ export default function ScoreActionPage() {
     setResult(null)
     setSaved(false)
 
-    // Client-side heuristic scoring (placeholder until Claude API scoring is wired)
-    // This gives users immediate feedback using virtue-weight analysis
-    const actionLower = action.toLowerCase() + ' ' + context.toLowerCase() + ' ' + intendedOutcome.toLowerCase()
-
-    const wisdomSignals = ['think', 'consider', 'plan', 'reason', 'learn', 'study', 'reflect', 'understand', 'analyse', 'research', 'calculate']
-    const justiceSignals = ['help', 'fair', 'honest', 'share', 'give', 'serve', 'community', 'kind', 'volunteer', 'support', 'right thing']
-    const courageSignals = ['difficult', 'despite', 'fear', 'challenge', 'stand up', 'confront', 'persist', 'endure', 'risk', 'brave', 'hard']
-    const temperanceSignals = ['patience', 'restrain', 'moderate', 'calm', 'control', 'discipline', 'consistent', 'steady', 'balanced', 'waited']
-
-    const countSignals = (signals: string[]) => {
-      const hits = signals.filter(s => actionLower.includes(s)).length
-      return Math.min(40 + hits * 12 + Math.floor(Math.random() * 15), 95)
-    }
-
-    const scores = {
-      wisdom_score: countSignals(wisdomSignals),
-      justice_score: countSignals(justiceSignals),
-      courage_score: countSignals(courageSignals),
-      temperance_score: countSignals(temperanceSignals),
-    }
-
-    const total = Math.round(
-      scores.wisdom_score * 0.30 +
-      scores.justice_score * 0.25 +
-      scores.courage_score * 0.25 +
-      scores.temperance_score * 0.20
-    )
-
-    const tier = getAlignmentTier(total)
-    const virtueScores = [
-      { name: 'Wisdom', score: scores.wisdom_score },
-      { name: 'Justice', score: scores.justice_score },
-      { name: 'Courage', score: scores.courage_score },
-      { name: 'Temperance', score: scores.temperance_score },
-    ]
-    const strongest = virtueScores.reduce((a, b) => a.score > b.score ? a : b)
-    const weakest = virtueScores.reduce((a, b) => a.score < b.score ? a : b)
-
-    const scoreResult: ScoreResult = {
-      ...scores,
-      total_score: total,
-      sage_alignment: tier.id,
-      reasoning: `This action shows ${tier.label.toLowerCase()} alignment with Stoic virtue. Your strongest expression was in ${strongest.name.toLowerCase()}, suggesting good grounding in that virtue. The area with most room for growth is ${weakest.name.toLowerCase()}.`,
-      improvement_path: `Consider how the virtue of ${weakest.name.toLowerCase()} could be more deliberately expressed in this situation. A Sage would ask: "Am I acting with full ${weakest.name.toLowerCase()} here?"`,
-      strength: strongest.name,
-      growth_area: weakest.name,
-    }
-
-    setResult(scoreResult)
-
-    // Save to Supabase if user is logged in
-    if (user) {
-      const { error } = await supabase.from('action_scores').insert({
-        user_id: user.id,
-        action_description: action,
-        context,
-        intended_outcome: intendedOutcome,
-        ...scores,
-        total_score: total,
-        sage_alignment: tier.id,
-        reasoning: scoreResult.reasoning,
-        improvement_path: scoreResult.improvement_path,
-        strength: scoreResult.strength,
-        growth_area: scoreResult.growth_area,
-        scored_by: 'heuristic-v1',
+    try {
+      // Server-side Claude API scoring
+      const response = await fetch('/api/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, context, intendedOutcome }),
       })
-      if (!error) setSaved(true)
+
+      if (!response.ok) {
+        throw new Error('Scoring failed')
+      }
+
+      const scoreResult: ScoreResult = await response.json()
+      setResult(scoreResult)
+
+      // Save to Supabase if user is logged in
+      if (user) {
+        const { error } = await supabase.from('action_scores').insert({
+          user_id: user.id,
+          action_description: action,
+          context,
+          intended_outcome: intendedOutcome,
+          wisdom_score: scoreResult.wisdom_score,
+          justice_score: scoreResult.justice_score,
+          courage_score: scoreResult.courage_score,
+          temperance_score: scoreResult.temperance_score,
+          total_score: scoreResult.total_score,
+          sage_alignment: scoreResult.sage_alignment,
+          reasoning: scoreResult.reasoning,
+          improvement_path: scoreResult.improvement_path,
+          strength: scoreResult.strength,
+          growth_area: scoreResult.growth_area,
+          scored_by: 'claude-api-v1',
+        })
+        if (!error) setSaved(true)
+      }
+    } catch {
+      alert('Scoring failed. Please try again.')
     }
 
     setLoading(false)
