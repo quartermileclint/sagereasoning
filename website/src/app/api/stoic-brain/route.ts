@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
         website: 'https://www.sagereasoning.com',
         documentation: 'https://www.sagereasoning.com/api-docs',
         discovery: 'https://www.sagereasoning.com/llms.txt',
+        github: 'https://github.com/quartermileclint/stoic-brain',
         endpoints: {
           stoic_brain: 'GET https://www.sagereasoning.com/api/stoic-brain',
           score_action: 'POST https://www.sagereasoning.com/api/score',

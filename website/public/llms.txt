@@ -72,3 +72,4 @@ All Stoic Brain data is derived from primary sources:
 
 Website: https://www.sagereasoning.com
 Project: https://github.com/quartermileclint/sagereasoning
+Open dataset: https://github.com/quartermileclint/stoic-brain
