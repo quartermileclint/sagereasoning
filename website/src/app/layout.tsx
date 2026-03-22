@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import NavBar from '@/components/NavBar'
 
 export const metadata: Metadata = {
   title: 'SageReasoning — Flourish Together',
@@ -22,20 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen paper-texture">
-        <nav className="border-b border-sage-200 bg-sage-50/90 backdrop-blur-sm sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="/" className="flex items-center gap-3">
-              <img src="/images/sagelogosmall.PNG" alt="SageReasoning" className="w-10 h-10 rounded-full" />
-              <span className="font-display text-xl font-medium text-sage-800">sagereasoning</span>
-            </a>
-            <div className="flex items-center gap-6 font-display text-sm">
-              <a href="/score" className="text-sage-700 hover:text-sage-900 transition-colors">Score Action</a>
-              <a href="/dashboard" className="text-sage-700 hover:text-sage-900 transition-colors">Dashboard</a>
-              <a href="/api-docs" className="text-sage-700 hover:text-sage-900 transition-colors">API</a>
-              <a href="/auth" className="px-4 py-2 bg-sage-400 text-white rounded hover:bg-sage-500 transition-colors">Sign In</a>
-            </div>
-          </div>
-        </nav>
+        <NavBar />
 
         <main>{children}</main>
 
