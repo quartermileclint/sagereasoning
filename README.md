@@ -52,7 +52,7 @@ The Stoic Brain is a structured, machine-readable and human-readable dataset enc
 | **Phase 2 — Build** | P4: API, P5: Indifferents scoring, P6: Past action scoring, P7: Action advice, P10: Auth | ✅ Complete |
 | **Phase 3 — Ship** | P8: Website build, P9: AI agent testing | ✅ Complete |
 | **Phase 4 — Scoring Engine** | Claude API server-side scoring | ✅ Complete |
-| **Phase 5 — Launch** | P10: Registration/onboarding, P11: Go live | ⏳ Next |
+| **Phase 5 — Launch** | P10: Registration/onboarding, P11: Go live | ✅ Complete |
 
 ---
 
@@ -147,11 +147,22 @@ See `research/sources-index.md` for full source catalogue.
 
 ---
 
-## Phase 5 — Next Session: Registration & Go Live
+## Phase 5 Complete: Registration & Go Live
 
-**Priorities:**
-1. **P10 — Registration/onboarding system** — welcome email, profile setup flow, consistent access for new users
-2. **P11 — Go live** — marketing, announcement, client onboarding
+**What changed**
+- Auth-aware navigation bar — shows user display name + avatar initial when signed in, dropdown menu with Dashboard/Score/Sign Out
+- Extracted NavBar into client component (`src/components/NavBar.tsx`) that listens for real-time Supabase auth state changes
+- Fixed Vercel deployment — env vars (including `ANTHROPIC_API_KEY`) now properly injected after redeploy
+- Full registration flow verified end-to-end: sign up → email confirmation → sign in → score action → view dashboard
+
+**Live registration system**
+- Email + password sign-up with display name
+- Magic link (passwordless) sign-in
+- Email confirmation required before first sign-in
+- Auto-profile creation on sign-up (Supabase trigger)
+- Auto-stoic-profile recalculation on each new score (Supabase trigger)
+
+**Site is live at sagereasoning.com** — all 11 priorities complete through P11
 
 ---
 
