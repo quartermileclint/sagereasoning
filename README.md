@@ -54,7 +54,7 @@ The Stoic Brain is a structured, machine-readable and human-readable dataset enc
 | **Phase 4 — Scoring Engine** | Claude API server-side scoring | ✅ Complete |
 | **Phase 5 — Launch** | P10: Registration/onboarding, P11: Go live | ✅ Complete |
 | **Phase 6 — Analytics** | Admin metrics dashboard, event tracking | ✅ Complete |
-| **Phase 7 — Marketing** | SEO, LLMO, MCP, AI agent acquisition | 🔄 In Progress |
+| **Phase 7 — Marketing** | SEO, LLMO, MCP, AI agent acquisition | 🔄 In Progress (items 1–4 complete) |
 
 ---
 
@@ -238,20 +238,20 @@ Full strategy document: `SageReasoning-Marketing-Strategy.docx`
 
 ### Priority Action Roadmap
 
-| # | Timing | Action | Effort |
-|---|--------|--------|--------|
-| 1 | This week | Create `/llms.txt` file | 30 min |
-| 2 | This week | Add `_meta` field to `/api/stoic-brain` response | 1 hr |
-| 3 | This week | Add Schema.org JSON-LD to key pages | 2 hrs |
-| 4 | Week 2 | Publish stoic-brain.json on GitHub (public repo, MIT) | 1 hr |
-| 5 | Week 2 | Write 3 long-tail SEO articles | 4 hrs |
-| 6 | Week 3 | Build MCP server wrapping stoic-brain API | 4 hrs |
-| 7 | Week 3 | Register MCP server on Smithery + mcpmarket.com | 1 hr |
-| 8 | Week 4 | Publish OpenAPI spec at `/api/openapi.json` | 2 hrs |
-| 9 | Week 4 | Post on Hacker News, Dev.to, r/stoicism | 2 hrs |
-| 10 | Ongoing | Daily stoic prompt email + streak tracking | 6 hrs |
+| # | Action | Status |
+|---|--------|--------|
+| 1 | Create `/llms.txt` file | ✅ Done — live at sagereasoning.com/llms.txt |
+| 2 | Add `_meta` field to `/api/stoic-brain` response | ✅ Done — includes github, endpoints, usage guide for AI agents |
+| 3 | Add Schema.org JSON-LD to key pages | ✅ Done — homepage (WebSite/Organization/Dataset), api-docs (SoftwareApplication/WebAPI), score (SoftwareApplication) |
+| 4 | Publish stoic-brain.json on GitHub (public repo, MIT) | ✅ Done — github.com/quartermileclint/stoic-brain (7 files, MIT license, README) |
+| 5 | Write 3 long-tail SEO articles | ⏳ Next |
+| 6 | Build MCP server wrapping stoic-brain API | ⏳ Pending |
+| 7 | Register MCP server on Smithery + mcpmarket.com | ⏳ Pending |
+| 8 | Publish OpenAPI spec at `/api/openapi.json` | ⏳ Pending |
+| 9 | Post on Hacker News, Dev.to, r/stoicism | ⏳ Pending |
+| 10 | Daily stoic prompt email + streak tracking | ⏳ Pending |
 
-**Total estimated effort: ~23 hours across 4 weeks**
+**Session date: 22 March 2026 — Resume at item 5**
 
 ---
 
