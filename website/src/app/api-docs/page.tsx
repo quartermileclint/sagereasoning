@@ -1,6 +1,37 @@
 import { VIRTUES, ALIGNMENT_TIERS } from '@/lib/stoic-brain'
 import PageTracker from '@/components/PageTracker'
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'SoftwareApplication',
+      '@id': 'https://www.sagereasoning.com/#api',
+      name: 'SageReasoning Stoic Brain API',
+      description: 'A REST API providing Stoic virtue data and action scoring for humans and AI agents. Endpoints include stoic-brain data fetch, action scoring against cardinal virtues, and user profile management.',
+      url: 'https://www.sagereasoning.com/api-docs',
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'Any',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      provider: { '@id': 'https://www.sagereasoning.com/#organization' },
+      keywords: ['stoicism', 'virtue ethics', 'AI alignment', 'decision scoring', 'REST API', 'ethical reasoning', 'moral framework'],
+    },
+    {
+      '@type': 'WebAPI',
+      '@id': 'https://www.sagereasoning.com/#webapi',
+      name: 'SageReasoning API',
+      description: 'REST API for accessing the Stoic Brain dataset and scoring actions against Stoic virtue principles.',
+      documentation: 'https://www.sagereasoning.com/api-docs',
+      provider: { '@id': 'https://www.sagereasoning.com/#organization' },
+      termsOfService: 'https://www.sagereasoning.com',
+      availableChannel: {
+        '@type': 'ServiceChannel',
+        serviceUrl: 'https://www.sagereasoning.com/api/stoic-brain',
+      },
+    },
+  ],
+}
+
 const endpoints = [
   {
     method: 'GET',
@@ -140,6 +171,10 @@ const endpoints = [
 export default function ApiDocsPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <PageTracker eventType="api_docs_view" />
       <div className="mb-12">
         <h1 className="font-display text-3xl md:text-4xl font-medium text-sage-800 mb-3">API Reference</h1>

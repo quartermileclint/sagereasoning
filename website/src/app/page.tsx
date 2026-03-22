@@ -1,8 +1,54 @@
 import { VIRTUES, ALIGNMENT_TIERS } from '@/lib/stoic-brain'
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': 'https://www.sagereasoning.com/#website',
+      url: 'https://www.sagereasoning.com',
+      name: 'SageReasoning',
+      description: 'A single point of reference for Stoic-based reasoning for humans and AI agents to measure, guide, and improve decisions against the standard of perfect Stoic sage reasoning.',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://www.sagereasoning.com/score',
+        'query-input': 'required name=action',
+      },
+    },
+    {
+      '@type': 'Organization',
+      '@id': 'https://www.sagereasoning.com/#organization',
+      name: 'SageReasoning',
+      url: 'https://www.sagereasoning.com',
+      logo: 'https://www.sagereasoning.com/images/sagelogo.PNG',
+      description: 'Provider of Stoic reasoning frameworks for humans and AI agents.',
+      sameAs: ['https://github.com/quartermileclint/sagereasoning'],
+    },
+    {
+      '@type': 'Dataset',
+      '@id': 'https://www.sagereasoning.com/#stoic-brain',
+      name: 'Stoic Brain',
+      description: 'A machine-readable encoding of Stoic philosophy covering the four cardinal virtues (Wisdom, Justice, Courage, Temperance), 16 sub-virtues, preferred and dispreferred indifferents, and action-scoring rules. Derived from original Stoic texts by Marcus Aurelius, Epictetus, Seneca, and Cicero.',
+      url: 'https://www.sagereasoning.com/api/stoic-brain',
+      distribution: {
+        '@type': 'DataDownload',
+        encodingFormat: 'application/json',
+        contentUrl: 'https://www.sagereasoning.com/api/stoic-brain',
+      },
+      license: 'https://opensource.org/licenses/MIT',
+      creator: { '@id': 'https://www.sagereasoning.com/#organization' },
+      keywords: ['stoicism', 'virtue ethics', 'AI reasoning', 'decision framework', 'ethical AI', 'moral philosophy', 'flourishing', 'eudaimonia'],
+    },
+  ],
+}
+
 export default function HomePage() {
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div

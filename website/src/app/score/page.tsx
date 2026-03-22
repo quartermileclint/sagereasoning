@@ -86,8 +86,35 @@ export default function ScoreActionPage() {
 
   const tier = result ? getAlignmentTier(result.total_score) : null
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'SageReasoning — Score an Action',
+    description: 'Score any action against the four Stoic cardinal virtues (Wisdom, Justice, Courage, Temperance) and receive a sage alignment rating with personalised guidance.',
+    url: 'https://www.sagereasoning.com/score',
+    applicationCategory: 'LifestyleApplication',
+    operatingSystem: 'Any',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    featureList: [
+      'Score actions against four cardinal Stoic virtues',
+      'Receive weighted alignment score (0-100)',
+      'Get personalised improvement path',
+      'Identify your strongest and weakest virtue expression',
+      'Save score history when signed in',
+    ],
+    provider: {
+      '@type': 'Organization',
+      name: 'SageReasoning',
+      url: 'https://www.sagereasoning.com',
+    },
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="text-center mb-12">
         <h1 className="font-display text-3xl md:text-4xl font-medium text-sage-800 mb-3">Score an Action</h1>
         <p className="font-body text-sage-700 max-w-xl mx-auto">
