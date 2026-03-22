@@ -60,6 +60,7 @@ Return only the JSON score object.`
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
+      temperature: 0.2,
       system: SYSTEM_PROMPT,
       messages: [
         { role: 'user', content: userMessage }
