@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
 import { VIRTUES, getAlignmentTier } from '@/lib/stoic-brain'
 import type { User } from '@supabase/supabase-js'
 
@@ -51,6 +52,9 @@ export default function ScoreActionPage() {
 
       const scoreResult: ScoreResult = await response.json()
       setResult(scoreResult)
+
+      // Track scoring event
+      trackEvent({ event_type: 'score_action', metadata: { total_score: scoreResult.total_score, sage_alignment: scoreResult.sage_alignment } })
 
       // Save to Supabase if user is logged in
       if (user) {

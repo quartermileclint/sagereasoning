@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
 
 type AuthMode = 'signin' | 'signup' | 'magic'
 
@@ -22,6 +23,7 @@ export default function AuthPage() {
     if (error) {
       setError(error.message)
     } else {
+      trackEvent({ event_type: 'sign_in' })
       window.location.href = '/dashboard'
     }
     setLoading(false)
@@ -39,6 +41,7 @@ export default function AuthPage() {
     if (error) {
       setError(error.message)
     } else {
+      trackEvent({ event_type: 'sign_up', metadata: { method: 'email' } })
       setMessage('Check your email for a confirmation link.')
     }
     setLoading(false)

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
 import { VIRTUES, getAlignmentTier } from '@/lib/stoic-brain'
 import type { User } from '@supabase/supabase-js'
 
@@ -54,6 +55,9 @@ export default function DashboardPage() {
       if (profileRes.data) setProfile(profileRes.data)
       if (scoresRes.data) setScores(scoresRes.data)
       setLoading(false)
+
+      // Track dashboard view
+      trackEvent({ event_type: 'dashboard_view' })
     }
     load()
   }, [])

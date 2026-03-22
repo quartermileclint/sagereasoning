@@ -1,4 +1,5 @@
 import { VIRTUES, ALIGNMENT_TIERS } from '@/lib/stoic-brain'
+import PageTracker from '@/components/PageTracker'
 
 const endpoints = [
   {
@@ -139,6 +140,7 @@ const endpoints = [
 export default function ApiDocsPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-16">
+      <PageTracker eventType="api_docs_view" />
       <div className="mb-12">
         <h1 className="font-display text-3xl md:text-4xl font-medium text-sage-800 mb-3">API Reference</h1>
         <p className="font-body text-sage-700 max-w-2xl leading-relaxed">
