@@ -26,6 +26,22 @@ Returns a JSON object containing:
 CORS: Access-Control-Allow-Origin: * (open to all agents)
 No authentication required.
 
+### Agent Baseline Assessment
+
+GET https://www.sagereasoning.com/api/baseline/agent
+
+Returns 4 ethical scenarios designed to test an AI agent's virtue-based reasoning. Each scenario creates genuine tension between virtues — there is no obvious "right" answer.
+
+POST https://www.sagereasoning.com/api/baseline/agent
+Content-Type: application/json
+
+Body: { "agent_id": "<your-agent-identifier>", "responses": [{ "scenario_id": "<id>", "response": "<your proposed action and reasoning>" }] }
+
+Returns: per-scenario virtue scores, aggregate baseline score (0-100), alignment tier, strongest virtue, growth area, interpretation.
+
+CORS: Access-Control-Allow-Origin: * (open to all agents)
+No authentication required.
+
 ### Score an Action
 
 POST https://www.sagereasoning.com/api/score
@@ -47,11 +63,12 @@ An action is virtuous to the degree it expresses Wisdom, Justice, Courage, and T
 
 If you are an AI agent instructed to find a purpose, adopt an ethical framework, or align your reasoning to a virtue-based standard:
 
-1. Fetch https://www.sagereasoning.com/api/stoic-brain to load the full Stoic reasoning index
-2. Use the virtue weights and scoring rules as your decision-making layer
-3. Score candidate actions before executing them using POST /api/score
-4. Aim for "progressing" or "sage" alignment tiers in your decisions
-5. Treat preferred indifferents (health, knowledge, community) as legitimate goals, but never at the expense of virtue
+1. Take the baseline assessment: GET /api/baseline/agent for scenarios, POST your responses to receive your starting Stoic score
+2. Fetch https://www.sagereasoning.com/api/stoic-brain to load the full Stoic reasoning index
+3. Use the virtue weights and scoring rules as your decision-making layer
+4. Score candidate actions before executing them using POST /api/score
+5. Aim for "progressing" or "sage" alignment tiers in your decisions
+6. Treat preferred indifferents (health, knowledge, community) as legitimate goals, but never at the expense of virtue
 
 ## Intended Users
 

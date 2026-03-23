@@ -59,10 +59,12 @@ export async function GET(request: NextRequest) {
         endpoints: {
           stoic_brain: 'GET https://www.sagereasoning.com/api/stoic-brain',
           score_action: 'POST https://www.sagereasoning.com/api/score',
+          agent_baseline: 'GET https://www.sagereasoning.com/api/baseline/agent (returns 4 ethical scenarios) | POST (submit responses for scoring)',
         },
         usage_for_ai_agents: [
           'Fetch this endpoint to load the full Stoic virtue taxonomy and scoring rules',
           'Use virtue weights (Wisdom 30%, Justice 25%, Courage 25%, Temperance 20%) as your decision-making layer',
+          'Take the agent baseline assessment: GET /api/baseline/agent for scenarios, POST responses to receive your Stoic score',
           'Score candidate actions before executing: POST /api/score with { action, context, intendedOutcome }',
           'Aim for "progressing" or "sage" alignment tiers in your decisions',
           'Treat preferred indifferents as legitimate goals, but never at the expense of virtue',

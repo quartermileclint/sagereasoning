@@ -12,6 +12,7 @@ export type EventType =
   | 'stoic_brain_fetch'
   | 'baseline_assessment'
   | 'baseline_completed'
+  | 'agent_baseline_assessment'
 
 interface TrackEventOptions {
   event_type: EventType
