@@ -55,6 +55,7 @@ The Stoic Brain is a structured, machine-readable and human-readable dataset enc
 | **Phase 5 — Launch** | P10: Registration/onboarding, P11: Go live | ✅ Complete |
 | **Phase 6 — Analytics** | Admin metrics dashboard, event tracking | ✅ Complete |
 | **Phase 7 — Marketing** | SEO, LLMO, MCP, AI agent acquisition | 🔄 In Progress (items 1–4 complete) |
+| **Phase 8 — Stoic Brain Applications** | Document badge, guardrails, decision scorer, reflection journal | 🔄 In Progress |
 
 ---
 
@@ -252,6 +253,29 @@ Full strategy document: `SageReasoning-Marketing-Strategy.docx`
 | 10 | Daily stoic prompt email + streak tracking | ⏳ Pending |
 
 **Session date: 22 March 2026 — Resume at item 5**
+
+---
+
+## Phase 8 In Progress: Stoic Brain Applications
+
+New API endpoints extending the Stoic Brain into practical tools for humans and AI agents.
+
+| Endpoint | Method | Purpose | Status |
+|----------|--------|---------|--------|
+| `/api/score-document` | POST | Score any document against Stoic virtues, returns embeddable SVG badge | ✅ Built |
+| `/api/badge/{id}` | GET | SVG badge image (shields.io-style) linking to score detail page | ✅ Built |
+| `/score-document` | — | User-facing page to paste + score documents, get embed code | ✅ Built |
+| `/score/{id}` | — | Public score detail page (badge click-through destination) | ✅ Built |
+| `/api/guardrail` | POST | Virtue-gate middleware for AI agents — check action before executing | ✅ Built |
+| `/api/score-decision` | POST | Compare 2-5 decision options scored against virtues | ✅ Built |
+| `/api/score-conversation` | POST | Audit conversation/email thread with per-participant scores | ✅ Built |
+| `/api/reflect` | POST | Daily reflection journal — sage perspective + evening prompt | ✅ Built |
+
+**Supabase migrations needed:**
+- `supabase-document-scores-migration.sql` — document_scores table
+- `supabase-reflections-migration.sql` — reflections table
+
+**Session date: 23 March 2026 — Run migrations, commit, push**
 
 ---
 

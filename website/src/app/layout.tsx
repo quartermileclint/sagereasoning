@@ -39,6 +39,7 @@ export default function RootLayout({
                 <div>
                   <p className="font-display font-medium mb-2">Product</p>
                   <a href="/score" className="block hover:text-sage-900">Score Action</a>
+                  <a href="/score-document" className="block hover:text-sage-900">Score Document</a>
                   <a href="/dashboard" className="block hover:text-sage-900">Dashboard</a>
                   <a href="/api-docs" className="block hover:text-sage-900">API Docs</a>
                 </div>

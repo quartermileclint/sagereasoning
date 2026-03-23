@@ -60,6 +60,12 @@ export async function GET(request: NextRequest) {
           stoic_brain: 'GET https://www.sagereasoning.com/api/stoic-brain',
           score_action: 'POST https://www.sagereasoning.com/api/score',
           agent_baseline: 'GET https://www.sagereasoning.com/api/baseline/agent (returns 4 ethical scenarios) | POST (submit responses for scoring)',
+          score_document: 'POST https://www.sagereasoning.com/api/score-document (score any text against Stoic virtues, returns badge URL)',
+          badge: 'GET https://www.sagereasoning.com/api/badge/{id} (returns SVG badge for a scored document)',
+          guardrail: 'POST https://www.sagereasoning.com/api/guardrail (virtue-gate: check an action before executing) | GET (usage docs)',
+          score_decision: 'POST https://www.sagereasoning.com/api/score-decision (compare 2-5 options against Stoic virtues)',
+          score_conversation: 'POST https://www.sagereasoning.com/api/score-conversation (audit a conversation or email thread)',
+          reflect: 'POST https://www.sagereasoning.com/api/reflect (daily reflection journal with sage perspective)',
         },
         usage_for_ai_agents: [
           'Fetch this endpoint to load the full Stoic virtue taxonomy and scoring rules',

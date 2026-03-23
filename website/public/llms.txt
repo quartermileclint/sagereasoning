@@ -42,6 +42,34 @@ Returns: per-scenario virtue scores, aggregate baseline score (0-100), alignment
 CORS: Access-Control-Allow-Origin: * (open to all agents)
 No authentication required.
 
+### Score a Document
+
+POST https://www.sagereasoning.com/api/score-document
+Content-Type: application/json
+
+Body: { "text": "<document content>", "title": "<optional title>" }
+
+Returns: virtue scores (0-100) for Wisdom, Justice, Courage, Temperance; weighted total; alignment tier; reasoning; badge_url (embeddable SVG); embed_html (copy-paste HTML snippet).
+
+The badge_url returns an SVG image (shields.io-style) that links to a public score detail page. Authors can embed this badge in README files, articles, websites, or publications to display their document's Stoic alignment score.
+
+GET https://www.sagereasoning.com/api/badge/{score_id}
+
+Returns: SVG badge image for the scored document. Publicly cacheable.
+
+### Guardrail — Virtue-Gate for AI Agents
+
+POST https://www.sagereasoning.com/api/guardrail
+Content-Type: application/json
+
+Body: { "action": "<action about to be taken>", "context": "<optional>", "threshold": 50, "agent_id": "<optional>" }
+
+Returns: proceed (boolean), total_score, per-virtue scores, alignment_tier, recommendation (proceed/proceed_with_caution/pause_for_review/do_not_proceed), reasoning, improvement_hint.
+
+Use this as middleware before executing any action. If proceed is false, the action does not meet the agent's ethical threshold and should be reconsidered.
+
+GET https://www.sagereasoning.com/api/guardrail — Returns usage documentation and integration example.
+
 ### Score an Action
 
 POST https://www.sagereasoning.com/api/score
@@ -50,6 +78,33 @@ Content-Type: application/json
 Body: { "action": "<description>", "context": "<optional>", "intendedOutcome": "<optional>" }
 
 Returns: virtue scores (0-100) for Wisdom, Justice, Courage, Temperance; weighted total; sage alignment tier (sage/progressing/aware/misaligned/contrary); reasoning; improvement path; strength; growth area.
+
+### Score a Decision
+
+POST https://www.sagereasoning.com/api/score-decision
+Content-Type: application/json
+
+Body: { "decision": "<what you're deciding>", "options": ["option 1", "option 2", ...], "context": "<optional>" }
+
+Returns: Each option scored individually with virtue breakdown, sorted by total score. Includes recommended option (highest-scoring). 2-5 options supported.
+
+### Score a Conversation
+
+POST https://www.sagereasoning.com/api/score-conversation
+Content-Type: application/json
+
+Body: { "conversation": "<paste transcript, email thread, or chat log>", "context": "<optional>", "format": "<optional: slack, email, meeting>" }
+
+Returns: Overall conversation virtue score + per-participant scores (if identifiable). Useful for team communication audits.
+
+### Daily Reflection
+
+POST https://www.sagereasoning.com/api/reflect
+Content-Type: application/json
+
+Body: { "what_happened": "<describe what happened today>", "how_i_responded": "<optional: how you responded>", "user_id": "<optional>" }
+
+Returns: Virtue scores for your actions, what you did well, sage perspective (what a Stoic sage would have done), and an evening reflective prompt.
 
 ### API Documentation
 

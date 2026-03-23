@@ -13,6 +13,11 @@ export type EventType =
   | 'baseline_assessment'
   | 'baseline_completed'
   | 'agent_baseline_assessment'
+  | 'document_score'
+  | 'guardrail_check'
+  | 'decision_score'
+  | 'conversation_score'
+  | 'daily_reflection'
 
 interface TrackEventOptions {
   event_type: EventType

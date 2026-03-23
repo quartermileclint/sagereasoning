@@ -41,6 +41,7 @@ export default function NavBar() {
         </a>
         <div className="flex items-center gap-6 font-display text-sm">
           <a href="/score" className="text-sage-700 hover:text-sage-900 transition-colors">Score Action</a>
+          <a href="/score-document" className="text-sage-700 hover:text-sage-900 transition-colors">Score Document</a>
           <a href="/dashboard" className="text-sage-700 hover:text-sage-900 transition-colors">Dashboard</a>
           <a href="/api-docs" className="text-sage-700 hover:text-sage-900 transition-colors">API</a>
 
