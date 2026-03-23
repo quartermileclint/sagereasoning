@@ -24,6 +24,16 @@ export default function AuthPage() {
       setError(error.message)
     } else {
       trackEvent({ event_type: 'sign_in' })
+      // Check if user has completed baseline assessment
+      const { data: { user: signedInUser } } = await supabase.auth.getUser()
+      if (signedInUser) {
+        const res = await fetch(`/api/baseline?user_id=${signedInUser.id}`)
+        const baseline = await res.json()
+        if (!baseline.has_baseline) {
+          window.location.href = '/baseline'
+          return
+        }
+      }
       window.location.href = '/dashboard'
     }
     setLoading(false)
@@ -42,7 +52,7 @@ export default function AuthPage() {
       setError(error.message)
     } else {
       trackEvent({ event_type: 'sign_up', metadata: { method: 'email' } })
-      setMessage('Check your email for a confirmation link.')
+      setMessage('Check your email for a confirmation link. Once confirmed, you\'ll begin with a quick Stoic baseline assessment.')
     }
     setLoading(false)
   }

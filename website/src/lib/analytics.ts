@@ -10,6 +10,8 @@ export type EventType =
   | 'api_docs_view'
   | 'dashboard_view'
   | 'stoic_brain_fetch'
+  | 'baseline_assessment'
+  | 'baseline_completed'
 
 interface TrackEventOptions {
   event_type: EventType

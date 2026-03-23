@@ -32,11 +32,32 @@ interface ActionScore {
   created_at: string
 }
 
+interface BaselineData {
+  total_score: number
+  wisdom_score: number
+  justice_score: number
+  courage_score: number
+  temperance_score: number
+  alignment_tier: string
+  strongest_virtue: string
+  growth_area: string
+  interpretation: string
+  created_at: string
+}
+
+interface BaselineStatus {
+  has_baseline: boolean
+  baseline?: BaselineData
+  retake_eligible?: boolean
+  retake_eligible_date?: string
+}
+
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<StoicProfile | null>(null)
   const [scores, setScores] = useState<ActionScore[]>([])
+  const [baselineStatus, setBaselineStatus] = useState<BaselineStatus | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -47,16 +68,17 @@ export default function DashboardPage() {
       }
       setUser(user)
 
-      const [profileRes, scoresRes] = await Promise.all([
+      const [profileRes, scoresRes, baselineRes] = await Promise.all([
         supabase.from('user_stoic_profiles').select('*').eq('user_id', user.id).single(),
         supabase.from('action_scores').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
+        fetch(`/api/baseline?user_id=${user.id}`).then(r => r.json()),
       ])
 
       if (profileRes.data) setProfile(profileRes.data)
       if (scoresRes.data) setScores(scoresRes.data)
+      setBaselineStatus(baselineRes)
       setLoading(false)
 
-      // Track dashboard view
       trackEvent({ event_type: 'dashboard_view' })
     }
     load()
@@ -75,7 +97,9 @@ export default function DashboardPage() {
     )
   }
 
-  const tier = profile ? getAlignmentTier(profile.avg_total) : null
+  const baseline = baselineStatus?.baseline
+  const baselineTier = baseline ? getAlignmentTier(baseline.total_score) : null
+  const profileTier = profile ? getAlignmentTier(profile.avg_total) : null
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
@@ -93,8 +117,105 @@ export default function DashboardPage() {
         </button>
       </div>
 
+      {/* Baseline prompt for existing users without one */}
+      {baselineStatus && !baselineStatus.has_baseline && (
+        <div className="bg-sage-50 border-2 border-sage-300 rounded-lg p-8 mb-8 text-center">
+          <img src="/images/sagelogosmall.PNG" alt="Sage" className="w-14 h-14 mx-auto mb-4 rounded-full" />
+          <h2 className="font-display text-2xl text-sage-800 mb-2">Complete Your Baseline Assessment</h2>
+          <p className="font-body text-sage-600 mb-1">
+            Discover your starting Stoic score with a quick 5-question assessment.
+          </p>
+          <p className="font-display text-sage-700 italic mb-6">
+            &ldquo;Begin your path toward truth by answering truthfully.&rdquo;
+          </p>
+          <a
+            href="/baseline"
+            className="inline-block px-8 py-3 bg-sage-400 text-white font-display text-lg rounded hover:bg-sage-500 transition-colors"
+          >
+            Take Baseline Assessment
+          </a>
+        </div>
+      )}
+
+      {/* Baseline score section */}
+      {baseline && baselineTier && (
+        <div className="bg-white/60 border border-sage-200 rounded-lg p-8 mb-8">
+          <div className="flex items-start justify-between mb-6">
+            <h2 className="font-display text-xl font-medium text-sage-800">Baseline Assessment</h2>
+            <div className="text-right">
+              {baselineStatus?.retake_eligible ? (
+                <a
+                  href="/baseline"
+                  className="px-4 py-2 border border-sage-300 text-sage-600 font-display text-sm rounded hover:bg-sage-100 transition-colors"
+                >
+                  Retake Baseline
+                </a>
+              ) : (
+                <div>
+                  <span className="font-body text-xs text-sage-400 block">Retake available</span>
+                  <span className="font-display text-sm text-sage-500">
+                    {baselineStatus?.retake_eligible_date
+                      ? new Date(baselineStatus.retake_eligible_date).toLocaleDateString('en-AU', {
+                          day: 'numeric', month: 'short', year: 'numeric',
+                        })
+                      : '—'}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Score + tier */}
+            <div className="text-center">
+              <p className="font-body text-sm text-sage-500 mb-2">Baseline Score</p>
+              <p className="font-display text-5xl font-bold mb-1" style={{ color: baselineTier.color }}>
+                {baseline.total_score}
+              </p>
+              <p className="font-display text-lg font-medium" style={{ color: baselineTier.color }}>
+                {baselineTier.label}
+              </p>
+              <p className="font-body text-xs text-sage-400 mt-2">
+                Taken {new Date(baseline.created_at).toLocaleDateString('en-AU', {
+                  day: 'numeric', month: 'short', year: 'numeric',
+                })}
+              </p>
+            </div>
+
+            {/* Virtue breakdown bars */}
+            <div className="space-y-3">
+              {VIRTUES.map((virtue) => {
+                const score = baseline[`${virtue.id}_score` as keyof BaselineData] as number
+                return (
+                  <div key={virtue.id} className="flex items-center gap-3">
+                    <img src={virtue.icon} alt={virtue.name} className="w-6 h-6" />
+                    <span className="font-display text-sm w-24 text-sage-800">{virtue.name}</span>
+                    <div className="flex-1 bg-sage-100 rounded-full h-2.5">
+                      <div
+                        className="h-2.5 rounded-full transition-all duration-1000"
+                        style={{ width: `${score}%`, backgroundColor: virtue.color }}
+                      />
+                    </div>
+                    <span className="font-display text-sm font-bold w-8 text-right" style={{ color: virtue.color }}>
+                      {score}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Interpretation */}
+          {baseline.interpretation && (
+            <p className="font-body text-sm text-sage-600 mt-6 pt-6 border-t border-sage-100 leading-relaxed">
+              {baseline.interpretation}
+            </p>
+          )}
+        </div>
+      )}
+
       {!profile || scores.length === 0 ? (
-        /* Empty state */
+        /* Empty state — no scored actions yet */
         <div className="bg-white/60 border border-sage-200 rounded-lg p-12 text-center">
           <img src="/images/sagelogo.PNG" alt="Sage" className="w-20 h-20 mx-auto mb-6 opacity-60" />
           <h2 className="font-display text-2xl text-sage-800 mb-3">No actions scored yet</h2>
@@ -109,24 +230,21 @@ export default function DashboardPage() {
         <div className="space-y-8">
           {/* Overview cards */}
           <div className="grid md:grid-cols-4 gap-4">
-            {/* Total score */}
             <div className="bg-white/60 border border-sage-200 rounded-lg p-6 text-center">
               <p className="font-body text-sm text-sage-500 mb-2">Average Score</p>
-              <p className="font-display text-4xl font-bold" style={{ color: tier?.color }}>
+              <p className="font-display text-4xl font-bold" style={{ color: profileTier?.color }}>
                 {Math.round(profile!.avg_total)}
               </p>
-              <p className="font-display text-sm font-medium mt-1" style={{ color: tier?.color }}>
-                {tier?.label}
+              <p className="font-display text-sm font-medium mt-1" style={{ color: profileTier?.color }}>
+                {profileTier?.label}
               </p>
             </div>
 
-            {/* Actions scored */}
             <div className="bg-white/60 border border-sage-200 rounded-lg p-6 text-center">
               <p className="font-body text-sm text-sage-500 mb-2">Actions Scored</p>
               <p className="font-display text-4xl font-bold text-sage-800">{profile!.actions_scored}</p>
             </div>
 
-            {/* Strongest virtue */}
             <div className="bg-white/60 border border-sage-200 rounded-lg p-6 text-center">
               <p className="font-body text-sm text-sage-500 mb-2">Strongest Virtue</p>
               <p className="font-display text-xl font-bold text-sage-800 capitalize">{profile!.strongest_virtue}</p>
@@ -139,7 +257,6 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Growth area */}
             <div className="bg-white/60 border border-sage-200 rounded-lg p-6 text-center">
               <p className="font-body text-sm text-sage-500 mb-2">Growth Area</p>
               <p className="font-display text-xl font-bold text-sage-800 capitalize">{profile!.growth_virtue}</p>
