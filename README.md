@@ -1,122 +1,269 @@
 # SageReasoning
 
 **The world's leading reference for Stoic-based reasoning.**
-**Website:** sagereasoning.com
+**Website:** [sagereasoning.com](https://sagereasoning.com)
 
 ---
 
 ## What This Project Is
 
-SageReasoning provides a single-point-of-reference data set — the "Stoic Brain" — for both humans and AI agents to measure, guide, and improve their decisions against the standard of perfect Stoic sage reasoning.
+SageReasoning is a system that encodes 2,000 years of Stoic philosophy into a structured, machine-readable "Stoic Brain" — a single reference point that both humans and AI can use to measure, guide, and improve decisions against the standard of a perfect Stoic sage.
 
-Clients:
-1. **Humans** seeking a Stoic decision-making framework
-2. **AI agents** seeking virtue-based reasoning grounded in original Stoic philosophy
-3. **Developers** integrating Stoic reasoning into AI systems
+The core idea: give any action, document, conversation, or decision to the Stoic Brain and receive a score (0–100) across the four cardinal virtues of Stoicism — Wisdom, Justice, Courage, and Temperance — along with reasoning and a path toward improvement.
 
----
-
-## Project Structure
-
-```
-sagereasoning/
-├── research/           P1: Historic stoic texts and passage-level references
-├── stoic-brain/        P2-P3: The core data product (JSON files)
-├── website/            P8: Next.js website (Phase 3)
-├── api/                P4: API spec and edge functions (Phase 2)
-├── docs/               Human and AI agent documentation
-└── README.md
-```
+**Who it's for:**
+- Humans seeking a Stoic decision-making framework to prompt their actions
+- AI agents seeking virtue-based reasoning grounded in original Stoic philosophy
+- Developers integrating Stoic reasoning into AI systems and applications
 
 ---
 
-## The Stoic Brain (Current Status: v1.0)
+## The Four Virtues (Core of Everything)
 
-The Stoic Brain is a structured, machine-readable and human-readable dataset encoding Stoic philosophy for practical use.
+All scoring, reasoning, and advice flows from these four virtues with these weights:
 
-| File | Purpose | Status |
-|------|---------|--------|
-| `stoic-brain/stoic-brain.json` | Master file — entry point for AI agents | ✅ v1.0 |
-| `stoic-brain/schema.json` | Data structure definition | ✅ v1.0 |
-| `stoic-brain/virtues.json` | 4 cardinal virtues + 16 sub-virtues + scoring weights | ✅ v1.0 |
-| `stoic-brain/indifferents.json` | Preferred/dispreferred indifferents + virtue relevance | ✅ v1.0 |
-| `stoic-brain/scoring-rules.json` | Action scoring algorithm | ✅ v1.0 |
+| Virtue | Greek | Weight | What it means |
+|--------|-------|--------|---------------|
+| Wisdom | Phronesis | 30% | Sound judgement; knowing what is truly good vs merely preferred; reasoning before acting |
+| Justice | Dikaiosyne | 25% | Fairness; honesty; proper treatment of others; serving the common good |
+| Courage | Andreia | 25% | Acting rightly despite fear or difficulty; not shrinking from what is right |
+| Temperance | Sophrosyne | 20% | Self-control; moderation; ordering desires by reason, not impulse |
 
----
+**Alignment tiers** (what a score means):
 
-## Development Phases
-
-| Phase | Priorities | Status |
-|-------|-----------|--------|
-| **Phase 1 — Foundation** | P1: Research, P2: Format, P3: Stoic Brain data | ✅ Complete |
-| **Phase 2 — Build** | P4: API, P5: Indifferents scoring, P6: Past action scoring, P7: Action advice, P10: Auth | ✅ Complete |
-| **Phase 3 — Ship** | P8: Website build, P9: AI agent testing | ✅ Complete |
-| **Phase 4 — Scoring Engine** | Claude API server-side scoring | ✅ Complete |
-| **Phase 5 — Launch** | P10: Registration/onboarding, P11: Go live | ✅ Complete |
-| **Phase 6 — Analytics** | Admin metrics dashboard, event tracking | ✅ Complete |
-| **Phase 7 — Marketing** | SEO, LLMO, MCP, AI agent acquisition | 🔄 In Progress (items 1–4 complete) |
-| **Phase 8 — Stoic Brain Applications** | Document badge, guardrails, decision scorer, reflection journal | 🔄 In Progress |
+| Score | Tier | Meaning |
+|-------|------|---------|
+| 95–100 | Sage | Near-perfect Stoic alignment |
+| 70–94 | Progressing | Consistently virtuous with minor gaps |
+| 40–69 | Aware | Some virtue, some conflict |
+| 15–39 | Misaligned | Actions driven more by impulse than reason |
+| 0–14 | Contrary | Acting against virtue |
 
 ---
 
-## Phase 2 Complete: Supabase Backend & Auth Live
+## Everything That Makes Up This Project
 
-**Database (PostgreSQL on Supabase)**
-- `profiles` — auto-created on user signup via trigger
-- `action_scores` — stores individual action evaluations (wisdom, justice, courage, temperance scores + total + alignment tier)
-- `user_stoic_profiles` — aggregated per-user stats (averages, strongest/weakest virtues, trend)
-- Triggers: `on_auth_user_created`, `on_action_score_added` (auto-recalculates stoic profile on each new score)
-- RLS enabled — users can only access their own data
+### 1. The Stoic Brain Data Files
+*Location: `stoic-brain/` folder and [GitHub public repo](https://github.com/quartermileclint/stoic-brain)*
 
-**Authentication**
-- Email provider (password + magic link sign-in)
-- Site URL: `https://sagereasoning.com`
-- Redirect URLs: production + localhost:3000 (dev)
+These are the foundational data files — the "knowledge base" that every scoring engine draws from. Derived from original Stoic texts.
 
-**API Specification (OpenAPI 3.1)**
-- `/api/v1/virtues` — cardinal virtues taxonomy
-- `/api/v1/indifferents` — preferred/dispreferred indifferents
-- `/api/v1/stoic-brain` — master data entry point
-- `/api/v1/score-action` — POST action → receive virtue scores + sage alignment
-- `/api/v1/advise-action` — GET action guidance from stoic brain
-- `/api/v1/rank-indifferents` — GET ranked indifferents based on virtue-alignment
-- `/api/v1/user/scores` — GET user's past action scores
-- `/api/v1/user/profile` — GET user's aggregated stoic profile
+| File | What it contains | Human-readable? |
+|------|-----------------|-----------------|
+| `stoic-brain.json` | Master entry point — links to all other files. This is what AI agents fetch first. | Yes |
+| `virtues.json` | The 4 cardinal virtues + 16 sub-virtues (e.g. prudence, honesty, endurance), each with definitions and scoring weights | Yes |
+| `indifferents.json` | External things ranked by virtue-alignment — health, wealth, reputation (preferred) vs poverty, illness (dispreferred). Neither is truly good or bad, only virtue matters. | Yes |
+| `scoring-rules.json` | The algorithm: how to weight virtue scores, how to calculate totals, what defines each alignment tier | Yes |
+| `schema.json` | Technical definition of the data structure (for developers) | Technical |
+| `README.md` | Documentation for anyone using the public GitHub repo | Yes |
+| `LICENSE` | MIT — free to use, modify, and distribute | Yes |
 
-**Project Configuration**
-- GitHub repo: `github.com/quartermileclint/sagereasoning`
-- Supabase project ref: `raqorxgrxdyezuntnojw` (ap-southeast-1)
-- `.env.local` configured with live Supabase keys (not committed to git)
+**Where to find it:**
+- Local: `stoic-brain/` folder in this project
+- Public: [github.com/quartermileclint/stoic-brain](https://github.com/quartermileclint/stoic-brain)
+- Via API: `GET https://www.sagereasoning.com/api/stoic-brain`
+
+---
+
+### 2. The Website
+*Location: `website/` folder — deployed at [sagereasoning.com](https://sagereasoning.com)*
+
+Built with Next.js (a web framework), hosted on Vercel (free), auto-deploys every time you push to GitHub.
+
+**Pages a visitor can see:**
+
+| Page | URL | What it does |
+|------|-----|-------------|
+| Homepage | `/` | Landing page — explains the project, the four virtues, how it works |
+| Sign In / Sign Up | `/auth` | Email + password or magic link (passwordless). New users go straight to baseline assessment. |
+| Baseline Assessment | `/baseline` | 5-question assessment to establish a user's starting Stoic score |
+| Score an Action | `/score` | Type any action → receive virtue scores, tier, reasoning, and improvement path |
+| Score a Document | `/score-document` | Paste any document → receive a Stoic score + embeddable badge with copy-paste HTML |
+| Dashboard | `/dashboard` | Personal history of scores, virtue breakdown, baseline score, retake option |
+| API Docs | `/api-docs` | Documentation for developers and AI agents to use the API |
+| Admin | `/admin` | Private metrics dashboard (Clinton only) — usage stats, event tracking |
+| Score Detail | `/score/{id}` | Public page showing a scored document's full virtue breakdown (where badge links go) |
+
+**Key code files in the website:**
+
+| File | Plain English — what it does |
+|------|------------------------------|
+| `src/lib/baseline-assessment.ts` | The 5-question baseline quiz logic — questions, answer options, scoring formula, branching |
+| `src/lib/agent-baseline.ts` | 4 ethical scenarios used to assess AI agents (instead of a quiz) |
+| `src/lib/document-scorer.ts` | Scoring logic and prompts for the document scorer |
+| `src/lib/guardrails.ts` | The AI agent guardrail logic — virtue-gate before action execution |
+| `src/lib/analytics.ts` | Tracks usage events (sign-ins, scores, page views) for the admin dashboard |
+| `src/lib/supabase.ts` | Connection to the database (user-facing) |
+| `src/lib/supabase-server.ts` | Connection to the database (admin-level, bypasses user restrictions) |
+| `src/components/NavBar.tsx` | The navigation bar at the top of every page |
+| `public/llms.txt` | A plain-text file that tells AI agents and LLMs what this site does and how to use it |
+
+---
+
+### 3. The API (What developers and AI agents call)
+*All endpoints live at `https://www.sagereasoning.com/api/...`*
+
+These are the "doors" that external programs, AI agents, and developers use to interact with the Stoic Brain. All are open (no login needed) and support cross-origin access (any program can call them).
+
+**Core data endpoints:**
+
+| Endpoint | Method | What it does |
+|----------|--------|-------------|
+| `/api/stoic-brain` | GET | Returns the full Stoic Brain JSON — the master data file. This is what AI agents fetch to load Stoic reasoning. |
+| `/api/score` | POST | Send an action description → receive virtue scores, tier, reasoning, improvement path |
+
+**Assessment endpoints:**
+
+| Endpoint | Method | What it does |
+|----------|--------|-------------|
+| `/api/baseline` | POST/GET | Submit answers to the 5-question human baseline quiz → receive starting Stoic score |
+| `/api/baseline/agent` | GET/POST | AI agent baseline: GET returns 4 ethical scenarios, POST scores the agent's responses |
+
+**Application endpoints (Phase 8):**
+
+| Endpoint | Method | What it does |
+|----------|--------|-------------|
+| `/api/score-document` | POST | Send any text document → receive virtue scores + embeddable SVG badge URL + HTML embed code |
+| `/api/badge/{id}` | GET | Returns an SVG image badge (coloured by tier) for a scored document — embeds in websites, READMEs, articles |
+| `/api/guardrail` | POST/GET | AI agent virtue-gate: send a proposed action → receive `proceed: true/false`, score, and recommendation before executing |
+| `/api/score-decision` | POST | Send a decision + 2-5 options → each option scored individually, sorted by virtue score, recommends highest |
+| `/api/score-conversation` | POST | Paste a conversation, email thread, or chat log → overall score + per-participant breakdown |
+| `/api/reflect` | POST | Daily reflection journal: describe your day → virtue score, what you did well, sage perspective, evening prompt |
+
+**Internal endpoints (website only):**
+
+| Endpoint | What it does |
+|----------|-------------|
+| `/api/analytics` | Logs usage events to the database |
+| `/api/admin/metrics` | Returns usage data for the admin dashboard (Clinton only) |
+
+---
+
+### 4. The Database
+*Hosted on [Supabase](https://supabase.com) — project ref: `raqorxgrxdyezuntnojw` (Singapore region)*
+
+Supabase is a free cloud database. Think of it as a spreadsheet in the cloud that the website reads from and writes to. Each row is locked to the user who created it (Row Level Security).
+
+**Tables:**
+
+| Table | What it stores |
+|-------|---------------|
+| `profiles` | One row per user — display name, email, created date |
+| `action_scores` | Every action a user has ever scored — the action text, all 4 virtue scores, total, tier, date |
+| `user_stoic_profiles` | Aggregated stats per user — average scores, strongest/weakest virtue, trend. Auto-updates when a new score is added. |
+| `baseline_assessments` | A user's baseline quiz result — all 4 virtue scores, tier, date taken, retake eligibility |
+| `document_scores` | Scored documents — title, word count, virtue scores, reasoning. Public read (needed for badge lookups). |
+| `reflections` | Daily journal entries — what happened, how responded, virtue scores, sage perspective |
+| `analytics_events` | Usage tracking — every sign-in, score, page view, API fetch. Used to populate the admin dashboard. |
+
+**SQL migration files** (run these in Supabase SQL Editor to create tables):
+
+| File | Table it creates |
+|------|-----------------|
+| `website/supabase-baseline-migration.sql` | `baseline_assessments` |
+| `website/supabase-document-scores-migration.sql` | `document_scores` |
+| `website/supabase-reflections-migration.sql` | `reflections` |
+
+---
+
+### 5. External Services & Accounts
+
+| Service | What it's used for | Login |
+|---------|-------------------|-------|
+| [Vercel](https://vercel.com) | Hosts the website. Auto-deploys on every GitHub push. Free tier. | GitHub login |
+| [Supabase](https://supabase.com) | Database, authentication, and user management. Free tier. | clintonaitkenhead@hotmail.com |
+| [GitHub](https://github.com/quartermileclint/sagereasoning) | Source code storage and version control. | quartermileclint |
+| [GitHub (stoic-brain)](https://github.com/quartermileclint/stoic-brain) | Public repo for the Stoic Brain data files (MIT licence). | quartermileclint |
+| [Anthropic API](https://console.anthropic.com) | The AI scoring engine — every virtue score is calculated by Claude (claude-sonnet-4-6). | clintonaitkenhead@hotmail.com |
+| sagereasoning.com | The domain name. Managed separately. | ~$1/month |
+
+**Environment variables** (stored in Vercel — never committed to code):
+
+| Variable | What it's for |
+|----------|--------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | The database address |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public database key (safe to expose) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Admin database key (secret — bypasses user restrictions) |
+| `ANTHROPIC_API_KEY` | Unlocks the Claude scoring engine (secret — costs money per use) |
+| `ADMIN_USER_ID` | Clinton's user ID — restricts `/admin` to owner only |
+| `NEXT_PUBLIC_SITE_URL` | The live site URL, used for generating badge links |
+
+---
+
+### 6. Discovery Files (How AI Agents Find This)
+
+These files sit in public locations so AI crawlers, search engines, and AI agents can discover and understand the Stoic Brain automatically.
+
+| File / URL | What it is | Where it lives |
+|------------|-----------|----------------|
+| `public/llms.txt` → `sagereasoning.com/llms.txt` | Plain-text guide for LLMs and AI agents — explains all endpoints and how to adopt Stoic reasoning | Website public folder |
+| Schema.org JSON-LD on homepage | Structured data (Dataset, WebSite, Organization) that tells Google and AI crawlers what this site is | Embedded in homepage HTML |
+| Schema.org JSON-LD on API Docs | Structured data (SoftwareApplication, WebAPI) for the API | Embedded in api-docs page |
+| `_meta` field in `/api/stoic-brain` response | Self-describing JSON — when an AI agent fetches the Stoic Brain, the response explains what it is and how to use it | API response |
+| `stoic-brain/README.md` on GitHub | Public documentation for anyone who finds the data repo | github.com/quartermileclint/stoic-brain |
+
+---
+
+## Current Priorities (as of 24 March 2026)
+
+### Phase 8 — Stoic Brain Applications
+*Built and deployed. Pending: commit, push, run 2 SQL migrations.*
+
+| # | Action | Status |
+|---|--------|--------|
+| 1 | Document Score Badge — `/api/score-document`, `/api/badge/{id}`, `/score-document`, `/score/{id}` | ✅ Built |
+| 2 | AI Agent Guardrails — `/api/guardrail` virtue-gate middleware | ✅ Built |
+| 3 | Decision Scorer — `/api/score-decision` compares 2–5 options | ✅ Built |
+| 4 | Conversation Auditor — `/api/score-conversation` with per-participant scores | ✅ Built |
+| 5 | Daily Reflection Journal — `/api/reflect` with sage perspective + evening prompt | ✅ Built |
+| 6 | Run `supabase-document-scores-migration.sql` in Supabase | ✅ Done |
+| 7 | Run `supabase-reflections-migration.sql` in Supabase | ✅ Done |
+| 8 | Commit and push via GitHub Desktop | ⏳ Next |
+| 9 | Verify live: `/score-document` page, badge renders, badge click-through | ⏳ Next |
+
+### Phase 8 — Remaining Applications (to build)
+
+| # | Application | Who it serves | What it does | Build approach |
+|---|-------------|--------------|-------------|----------------|
+| A | **Hiring Assessment** | HR teams, founders | Candidates respond to ethical scenarios; score measures virtue alignment. Less gameable than personality tests — no obvious right answer. | New endpoint `/api/score-hiring` + candidate-facing page. Scenarios tailored by role type (leadership, customer-facing, technical). |
+| B | **Contract / Policy Reviewer** | Legal, compliance teams | Score legal documents, terms of service, or company policies. Flags clauses that score low on justice or temperance. | Extend `/api/score-document` with `mode: "policy"` param that shifts the scoring prompt to weight justice and temperance clauses more heavily. |
+| C | **Social Media Filter** | Individual users, community managers | Score a post before publishing. "This scores 23/100 on temperance — consider revising." Can also score others' posts in-feed. | Browser extension (separate project) + `/api/score-social` endpoint tuned for short-form text (max 280 characters). |
+| D | **Therapy / Coaching Companion** | Therapists, coaches, clients | Therapists assign Stoic exercises. Client logs responses via `/api/reflect`. Therapist sees virtue development over time. | Add practitioner-role dashboard view to existing reflection API. Requires `practitioner_id` and shared-access model in Supabase. |
+| E | **Parenting / Education Scenarios** | Parents, schools | Age-appropriate ethical dilemmas for students. Track virtue development over time. | New `/api/score-scenario` with `audience: "child" | "teen" | "adult"` param. Adjusts scenario complexity and language. |
+
+### Phase 7 — Marketing (items 1–4 complete, items 5–10 pending)
+
+| # | Action | Status |
+|---|--------|--------|
+| 1 | Create `/llms.txt` | ✅ Done |
+| 2 | Add `_meta` to `/api/stoic-brain` | ✅ Done |
+| 3 | Schema.org JSON-LD on key pages | ✅ Done |
+| 4 | Publish stoic-brain.json on GitHub (MIT) | ✅ Done — [github.com/quartermileclint/stoic-brain](https://github.com/quartermileclint/stoic-brain) |
+| 5 | Write 3 long-tail SEO articles | ⏳ Pending |
+| 6 | Build MCP server wrapping stoic-brain API | ⏳ Pending |
+| 7 | Register MCP server on Smithery + mcpmarket.com | ⏳ Pending |
+| 8 | Publish OpenAPI spec at `/api/openapi.json` | ⏳ Pending |
+| 9 | Post on Hacker News, Dev.to, r/stoicism | ⏳ Pending |
+| 10 | Daily stoic prompt email + streak tracking | ⏳ Pending |
 
 ---
 
 ## Tech Stack
 
-| Component | Service | Tier |
-|-----------|---------|------|
-| Website host | Vercel | Free |
-| Database + Auth + API | Supabase | Free |
-| Source control | GitHub | Free |
-| Domain | sagereasoning.com | ~$1/mo |
-
----
-
-## For AI Agents
-
-To use the Stoic Brain in your reasoning:
-
-1. Fetch `stoic-brain/stoic-brain.json` — this is the master index
-2. Load `stoic-brain/virtues.json` for the full virtue taxonomy and scoring weights
-3. Load `stoic-brain/indifferents.json` for the classification of external things
-4. When the scoring API is live (Phase 2), use `POST /api/v1/score-action`
-
-**Core principle for AI reasoning:** An action is virtuous to the degree it expresses wisdom, justice, courage, and temperance simultaneously — as judged by the agent's intention and reasoning, not outcome alone.
+| Component | Service | Cost | What it does |
+|-----------|---------|------|-------------|
+| Website framework | Next.js (React) | Free | Builds the pages and API routes |
+| Website hosting | Vercel | Free | Serves the site, auto-deploys from GitHub |
+| Database + Auth | Supabase (PostgreSQL) | Free | Stores users, scores, reflections; handles login |
+| AI scoring engine | Anthropic Claude API (claude-sonnet-4-6) | Pay per use | Scores every action, document, reflection against the four virtues |
+| Source control | GitHub | Free | Stores and versions all code |
+| Domain | sagereasoning.com | ~$1/mo | The web address |
 
 ---
 
 ## Primary Sources
 
-All data is derived from:
+All Stoic Brain data is derived from original texts:
 - Marcus Aurelius, *Meditations* (~170-180 CE)
 - Epictetus, *Discourses* and *Enchiridion* (~108 CE)
 - Seneca, *Letters to Lucilius* (~65 CE)
@@ -124,163 +271,3 @@ All data is derived from:
 - Cicero, *De Finibus* Book 3 (45 BCE)
 
 See `research/sources-index.md` for full source catalogue.
-
----
-
-## Phase 3 Complete: Website Live at sagereasoning.com
-
-**Tech deployed**
-- Next.js 14 App Router + TypeScript + Tailwind CSS
-- 5 pages: Landing, Auth (sign in/up/magic link), Score Action, Dashboard, API Docs
-- Brand-matched: EB Garamond + Cormorant Garamond, sage green palette, all logo assets
-- Deployed to Vercel — auto-deploys on every GitHub push to `main`
-- Custom domain `sagereasoning.com` + `www.sagereasoning.com` live and green
-
----
-
-## Phase 4 Complete: Claude API Scoring Engine Live
-
-**What changed**
-- Replaced client-side keyword heuristic (`heuristic-v1`) with server-side Claude API scoring
-- New API route: `POST /api/score` — calls `claude-sonnet-4-6` with full Stoic virtue prompt
-- Scores each action against Wisdom (30%), Justice (25%), Courage (25%), Temperance (20%)
-- Returns virtue scores 0–100, weighted total, alignment tier, reasoning, improvement path, strength + growth area
-- All scores now recorded as `scored_by: 'claude-api-v1'` in Supabase
-- `ANTHROPIC_API_KEY` stored securely in Vercel environment variables (not in code)
-
----
-
-## Phase 5 Complete: Registration & Go Live
-
-**What changed**
-- Auth-aware navigation bar — shows user display name + avatar initial when signed in, dropdown menu with Dashboard/Score/Sign Out
-- Extracted NavBar into client component (`src/components/NavBar.tsx`) that listens for real-time Supabase auth state changes
-- Fixed Vercel deployment — env vars (including `ANTHROPIC_API_KEY`) now properly injected after redeploy
-- Full registration flow verified end-to-end: sign up → email confirmation → sign in → score action → view dashboard
-
-**Live registration system**
-- Email + password sign-up with display name
-- Magic link (passwordless) sign-in
-- Email confirmation required before first sign-in
-- Auto-profile creation on sign-up (Supabase trigger)
-- Auto-stoic-profile recalculation on each new score (Supabase trigger)
-
-**Site is live at sagereasoning.com** — all 11 priorities complete through P11
-
----
-
-## Phase 6 Complete: Analytics & Admin Metrics Dashboard
-
-**What changed**
-- Analytics event tracking across all pages (client-side `trackEvent()` → server-side `/api/analytics`)
-- Admin-only dashboard at `/admin` (locked to ADMIN_USER_ID env var)
-- Tracks 6 metrics: score actions, sign-ins, sign-ups, dashboard views, API docs views, AI agent stoic-brain fetches
-- `/api/stoic-brain` endpoint serves JSON data and logs each fetch (with AI agent detection via user-agent)
-- CORS enabled (`Access-Control-Allow-Origin: *`) for cross-origin AI agent access
-- Auto-refreshes every 30 seconds, shows Today / Last 7 Days / All Time breakdowns
-- Recent Activity feed (last 50 events) with colour-coded event badges
-
-**New files**
-- `src/lib/analytics.ts` — client-side event tracker
-- `src/lib/supabase-server.ts` — server-side Supabase client (service_role key, bypasses RLS)
-- `src/app/api/analytics/route.ts` — POST endpoint for event logging
-- `src/app/api/stoic-brain/route.ts` — GET endpoint for AI agents (serves JSON + logs request)
-- `src/app/api/admin/metrics/route.ts` — GET endpoint for admin dashboard data
-- `src/app/admin/page.tsx` — admin metrics dashboard page
-- `src/components/PageTracker.tsx` — invisible component for tracking page views
-- `src/components/NavBar.tsx` — auth-aware navigation bar
-
-**Environment variables added**
-- `SUPABASE_SERVICE_ROLE_KEY` — bypasses RLS for admin writes
-- `ADMIN_USER_ID` — restricts `/admin` to project owner
-
----
-
-## Phase 7 In Progress: Marketing Strategy
-
-Full strategy document: `SageReasoning-Marketing-Strategy.docx`
-
-### Metric 1 — Humans Scoring Actions
-- Long-tail SEO targeting intent phrases ("is my decision stoic", "what would a stoic do about [X]")
-- Answer Engine Optimization (AEO) — structure content for AI search citation (schema markup, FAQ format)
-- Weekly articles applying stoic scoring to real dilemmas, each ending with CTA to score their own action
-- Allow anonymous scoring (no sign-up for first 3 scores) to reduce friction
-
-### Metric 2 — Human Sign-ins (Returning Users)
-- Daily stoic prompt email with one-click link to score an action
-- Practice streak counter on dashboard (habit loop)
-- Weekly digest email summarising score trends
-
-### Metric 3 — New Registrations
-- Value gating: 3 free anonymous scores, then prompt registration
-- "Save your scores" CTA after anonymous scoring
-- Add Google OAuth for single-click sign-up
-- Dynamic social proof ("Join 50+ stoic practitioners")
-
-### Metric 4 — Dashboard Views (Engagement)
-- Score history trend chart (visible progress)
-- Sage alignment milestones/badges ("Apprentice Stoic", "Practitioner", "Sage")
-- Comparative benchmarks against anonymous aggregate
-- Shareable score cards for social media
-
-### Metric 5 — API Docs Views (Developer Adoption)
-- Developer tutorials on Dev.to ("How to add stoic reasoning to your AI agent")
-- Open-source stoic-brain.json on GitHub (MIT license)
-- Post on Hacker News, r/stoicism, r/machinelearning
-- Add Python/JS/curl code examples to API docs page
-
-### Metric 6 — AI Agent Stoic-Brain Fetches (Key Differentiator)
-- **llms.txt** — Create `/llms.txt` file telling AI agents about the stoic-brain endpoint and how to adopt it
-- **MCP Server** — Build Model Context Protocol server wrapping the stoic-brain API; register on Smithery + mcpmarket.com
-- **LLMO** — Entity-rich content optimised for LLM citation; get third-party mentions (85% of AI citations come from external sources)
-- **OpenAPI spec** — Publish `/api/openapi.json` for agent frameworks that auto-discover APIs
-- **Self-describing API** — Add `_meta` field to stoic-brain JSON explaining what the data is and how agents should use it
-- **Schema.org structured data** — JSON-LD (Dataset, SoftwareApplication) on key pages for AI crawler parsing
-
-### Priority Action Roadmap
-
-| # | Action | Status |
-|---|--------|--------|
-| 1 | Create `/llms.txt` file | ✅ Done — live at sagereasoning.com/llms.txt |
-| 2 | Add `_meta` field to `/api/stoic-brain` response | ✅ Done — includes github, endpoints, usage guide for AI agents |
-| 3 | Add Schema.org JSON-LD to key pages | ✅ Done — homepage (WebSite/Organization/Dataset), api-docs (SoftwareApplication/WebAPI), score (SoftwareApplication) |
-| 4 | Publish stoic-brain.json on GitHub (public repo, MIT) | ✅ Done — github.com/quartermileclint/stoic-brain (7 files, MIT license, README) |
-| 5 | Write 3 long-tail SEO articles | ⏳ Next |
-| 6 | Build MCP server wrapping stoic-brain API | ⏳ Pending |
-| 7 | Register MCP server on Smithery + mcpmarket.com | ⏳ Pending |
-| 8 | Publish OpenAPI spec at `/api/openapi.json` | ⏳ Pending |
-| 9 | Post on Hacker News, Dev.to, r/stoicism | ⏳ Pending |
-| 10 | Daily stoic prompt email + streak tracking | ⏳ Pending |
-
-**Session date: 22 March 2026 — Resume at item 5**
-
----
-
-## Phase 8 In Progress: Stoic Brain Applications
-
-New API endpoints extending the Stoic Brain into practical tools for humans and AI agents.
-
-| Endpoint | Method | Purpose | Status |
-|----------|--------|---------|--------|
-| `/api/score-document` | POST | Score any document against Stoic virtues, returns embeddable SVG badge | ✅ Built |
-| `/api/badge/{id}` | GET | SVG badge image (shields.io-style) linking to score detail page | ✅ Built |
-| `/score-document` | — | User-facing page to paste + score documents, get embed code | ✅ Built |
-| `/score/{id}` | — | Public score detail page (badge click-through destination) | ✅ Built |
-| `/api/guardrail` | POST | Virtue-gate middleware for AI agents — check action before executing | ✅ Built |
-| `/api/score-decision` | POST | Compare 2-5 decision options scored against virtues | ✅ Built |
-| `/api/score-conversation` | POST | Audit conversation/email thread with per-participant scores | ✅ Built |
-| `/api/reflect` | POST | Daily reflection journal — sage perspective + evening prompt | ✅ Built |
-
-**Supabase migrations needed:**
-- `supabase-document-scores-migration.sql` — document_scores table
-- `supabase-reflections-migration.sql` — reflections table
-
-**Session date: 23 March 2026 — Run migrations, commit, push**
-
----
-
-## Questions?
-
-- Review `docs/ai-agent-guide.md` for how AI agents integrate with the Stoic Brain
-- Check `api/api-spec.yaml` for full endpoint documentation
-- See `stoic-brain/scoring-rules.json` for the virtue-weighting algorithm details
