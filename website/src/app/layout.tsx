@@ -37,9 +37,14 @@ export default function RootLayout({
               </div>
               <div className="flex gap-8 text-sage-700">
                 <div>
-                  <p className="font-display font-medium mb-2">Product</p>
+                  <p className="font-display font-medium mb-2">Tools</p>
                   <a href="/score" className="block hover:text-sage-900">Score Action</a>
                   <a href="/score-document" className="block hover:text-sage-900">Score Document</a>
+                  <a href="/score-policy" className="block hover:text-sage-900">Review Policy</a>
+                  <a href="/score-social" className="block hover:text-sage-900">Social Filter</a>
+                  <a href="/hiring" className="block hover:text-sage-900">Hiring</a>
+                  <a href="/therapy" className="block hover:text-sage-900">Coaching</a>
+                  <a href="/scenarios" className="block hover:text-sage-900">Scenarios</a>
                   <a href="/dashboard" className="block hover:text-sage-900">Dashboard</a>
                   <a href="/api-docs" className="block hover:text-sage-900">API Docs</a>
                 </div>

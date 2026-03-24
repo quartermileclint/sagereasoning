@@ -8,6 +8,7 @@ export default function NavBar() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [toolsOpen, setToolsOpen] = useState(false)
 
   useEffect(() => {
     // Check current session
@@ -40,8 +41,31 @@ export default function NavBar() {
           <span className="font-display text-xl font-medium text-sage-800">sagereasoning</span>
         </a>
         <div className="flex items-center gap-6 font-display text-sm">
-          <a href="/score" className="text-sage-700 hover:text-sage-900 transition-colors">Score Action</a>
-          <a href="/score-document" className="text-sage-700 hover:text-sage-900 transition-colors">Score Document</a>
+          <a href="/score" className="text-sage-700 hover:text-sage-900 transition-colors">Score</a>
+          <div className="relative">
+            <button
+              onClick={() => setToolsOpen(!toolsOpen)}
+              className="text-sage-700 hover:text-sage-900 transition-colors flex items-center gap-1"
+            >
+              Tools
+              <svg className="w-3 h-3 text-sage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {toolsOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setToolsOpen(false)} />
+                <div className="absolute right-0 mt-2 w-56 bg-white border border-sage-200 rounded-lg shadow-lg z-50 py-1">
+                  <a href="/score-document" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setToolsOpen(false)}>Score a Document</a>
+                  <a href="/score-policy" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setToolsOpen(false)}>Review a Policy</a>
+                  <a href="/score-social" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setToolsOpen(false)}>Social Media Filter</a>
+                  <a href="/hiring" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setToolsOpen(false)}>Hiring Assessment</a>
+                  <a href="/therapy" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setToolsOpen(false)}>Coaching Companion</a>
+                  <a href="/scenarios" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setToolsOpen(false)}>Ethical Scenarios</a>
+                </div>
+              </>
+            )}
+          </div>
           <a href="/dashboard" className="text-sage-700 hover:text-sage-900 transition-colors">Dashboard</a>
           <a href="/api-docs" className="text-sage-700 hover:text-sage-900 transition-colors">API</a>
 

@@ -83,6 +83,11 @@ Built with Next.js (a web framework), hosted on Vercel (free), auto-deploys ever
 | API Docs | `/api-docs` | Documentation for developers and AI agents to use the API |
 | Admin | `/admin` | Private metrics dashboard (Clinton only) — usage stats, event tracking |
 | Score Detail | `/score/{id}` | Public page showing a scored document's full virtue breakdown (where badge links go) |
+| Review a Policy | `/score-policy` | Score contracts, terms of service, or company policies — justice and temperance weighted more heavily, flags problematic clauses |
+| Social Media Filter | `/score-social` | Score a post before publishing — get publish/revise/reconsider recommendation |
+| Hiring Assessment | `/hiring` | Generate role-specific ethical scenarios for candidates, score their moral reasoning |
+| Coaching Companion | `/therapy` | Stoic therapeutic exercises — practitioners assign, clients journal, virtue feedback returned |
+| Ethical Scenarios | `/scenarios` | Age-appropriate ethical dilemmas (child/teen/adult) with options and scoring |
 
 **Key code files in the website:**
 
@@ -123,12 +128,16 @@ These are the "doors" that external programs, AI agents, and developers use to i
 
 | Endpoint | Method | What it does |
 |----------|--------|-------------|
-| `/api/score-document` | POST | Send any text document → receive virtue scores + embeddable SVG badge URL + HTML embed code |
+| `/api/score-document` | POST | Send any text document → virtue scores + badge. Add `mode: "policy"` for contract/policy review with adjusted weights and flagged clauses. |
 | `/api/badge/{id}` | GET | Returns an SVG image badge (coloured by tier) for a scored document — embeds in websites, READMEs, articles |
 | `/api/guardrail` | POST/GET | AI agent virtue-gate: send a proposed action → receive `proceed: true/false`, score, and recommendation before executing |
 | `/api/score-decision` | POST | Send a decision + 2-5 options → each option scored individually, sorted by virtue score, recommends highest |
 | `/api/score-conversation` | POST | Paste a conversation, email thread, or chat log → overall score + per-participant breakdown |
 | `/api/reflect` | POST | Daily reflection journal: describe your day → virtue score, what you did well, sage perspective, evening prompt |
+| `/api/score-hiring` | GET/POST | GET returns role-specific ethical scenarios (leadership, customer-facing, technical, general). POST scores candidate responses. |
+| `/api/score-social` | POST | Score short-form text (tweets, comments, posts) before publishing — returns publish/revise/reconsider recommendation |
+| `/api/score-therapy` | GET/POST | GET generates a Stoic therapeutic exercise for a focus area. POST scores a client's journal response with practitioner notes. |
+| `/api/score-scenario` | GET/POST | GET generates age-appropriate ethical dilemmas (child/teen/adult). POST scores the user's response. |
 
 **Internal endpoints (website only):**
 
@@ -221,15 +230,15 @@ These files sit in public locations so AI crawlers, search engines, and AI agent
 | 8 | Commit and push via GitHub Desktop | ⏳ Next |
 | 9 | Verify live: `/score-document` page, badge renders, badge click-through | ⏳ Next |
 
-### Phase 8 — Remaining Applications (to build)
+### Phase 8 — All Applications (complete)
 
-| # | Application | Who it serves | What it does | Build approach |
-|---|-------------|--------------|-------------|----------------|
-| A | **Hiring Assessment** | HR teams, founders | Candidates respond to ethical scenarios; score measures virtue alignment. Less gameable than personality tests — no obvious right answer. | New endpoint `/api/score-hiring` + candidate-facing page. Scenarios tailored by role type (leadership, customer-facing, technical). |
-| B | **Contract / Policy Reviewer** | Legal, compliance teams | Score legal documents, terms of service, or company policies. Flags clauses that score low on justice or temperance. | Extend `/api/score-document` with `mode: "policy"` param that shifts the scoring prompt to weight justice and temperance clauses more heavily. |
-| C | **Social Media Filter** | Individual users, community managers | Score a post before publishing. "This scores 23/100 on temperance — consider revising." Can also score others' posts in-feed. | Browser extension (separate project) + `/api/score-social` endpoint tuned for short-form text (max 280 characters). |
-| D | **Therapy / Coaching Companion** | Therapists, coaches, clients | Therapists assign Stoic exercises. Client logs responses via `/api/reflect`. Therapist sees virtue development over time. | Add practitioner-role dashboard view to existing reflection API. Requires `practitioner_id` and shared-access model in Supabase. |
-| E | **Parenting / Education Scenarios** | Parents, schools | Age-appropriate ethical dilemmas for students. Track virtue development over time. | New `/api/score-scenario` with `audience: "child" | "teen" | "adult"` param. Adjusts scenario complexity and language. |
+| # | Application | Status | Endpoint | UI Page |
+|---|-------------|--------|----------|---------|
+| A | **Hiring Assessment** | ✅ Built | `/api/score-hiring` (GET scenarios, POST scores) | `/hiring` |
+| B | **Contract / Policy Reviewer** | ✅ Built | `/api/score-document` with `mode: "policy"` | `/score-policy` |
+| C | **Social Media Filter** | ✅ Built | `/api/score-social` | `/score-social` |
+| D | **Therapy / Coaching Companion** | ✅ Built | `/api/score-therapy` (GET exercises, POST scores) | `/therapy` |
+| E | **Parenting / Education Scenarios** | ✅ Built | `/api/score-scenario` (GET scenarios, POST scores) | `/scenarios` |
 
 ### Phase 7 — Marketing (items 1–4 complete, items 5–10 pending)
 

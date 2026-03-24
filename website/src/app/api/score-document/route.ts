@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import {
   getAlignmentTier,
   DOCUMENT_SCORING_PROMPT,
+  POLICY_SCORING_PROMPT,
   type DocumentScore,
 } from '@/lib/document-scorer'
 
@@ -16,7 +17,9 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sagereasoning.
 // POST — Score a document and return the result + badge URLs
 export async function POST(request: NextRequest) {
   try {
-    const { text, title } = await request.json()
+    const { text, title, mode } = await request.json()
+    const isPolicy = mode === 'policy'
+    const scoringPrompt = isPolicy ? POLICY_SCORING_PROMPT : DOCUMENT_SCORING_PROMPT
 
     if (!text || typeof text !== 'string' || text.trim().length === 0) {
       return NextResponse.json({ error: 'text is required' }, { status: 400 })
@@ -39,7 +42,7 @@ export async function POST(request: NextRequest) {
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       temperature: 0.2,
-      system: DOCUMENT_SCORING_PROMPT,
+      system: scoringPrompt,
       messages: [
         {
           role: 'user',
@@ -111,7 +114,7 @@ export async function POST(request: NextRequest) {
     const badgeUrl = `${BASE_URL}/api/badge/${scoreId}`
     const embedHtml = `<a href="${BASE_URL}/score/${scoreId}" target="_blank" rel="noopener"><img src="${badgeUrl}" alt="Stoic Score: ${scoreData.total_score} — ${tier}" height="40" /></a>`
 
-    const result: DocumentScore = {
+    const result: DocumentScore & { mode?: string; flagged_clauses?: unknown[] } = {
       total_score: scoreData.total_score,
       wisdom_score: scoreData.wisdom_score,
       justice_score: scoreData.justice_score,
@@ -124,6 +127,7 @@ export async function POST(request: NextRequest) {
       scored_at: new Date().toISOString(),
       badge_url: badgeUrl,
       embed_html: embedHtml,
+      ...(isPolicy && { mode: 'policy', flagged_clauses: scoreData.flagged_clauses || [] }),
     }
 
     // Analytics
