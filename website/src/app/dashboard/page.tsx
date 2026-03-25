@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/analytics'
 import { VIRTUES, getAlignmentTier } from '@/lib/stoic-brain'
+import PracticeCalendar from '@/components/PracticeCalendar'
 import type { User } from '@supabase/supabase-js'
 
 interface StoicProfile {
@@ -286,6 +287,9 @@ export default function DashboardPage() {
               })}
             </div>
           </div>
+
+          {/* Practice Calendar */}
+          {user && <PracticeCalendar userId={user.id} />}
 
           {/* Recent scores */}
           <div className="bg-white/60 border border-sage-200 rounded-lg p-8">
