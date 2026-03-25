@@ -6,6 +6,9 @@ import { trackEvent } from '@/lib/analytics'
 import { VIRTUES, getAlignmentTier } from '@/lib/stoic-brain'
 import type { User } from '@supabase/supabase-js'
 
+/** Stamp threshold — matches the practice calendar and milestone system */
+const STAMP_THRESHOLD = 70
+
 interface ScoreResult {
   wisdom_score: number
   justice_score: number
@@ -17,7 +20,12 @@ interface ScoreResult {
   improvement_path: string
   strength: string
   growth_area: string
+  growth_action: string
+  growth_action_projected_score: number
 }
+
+// Quick lookup for virtue metadata by name (e.g. "Wisdom" → virtue object)
+const VIRTUE_BY_NAME = Object.fromEntries(VIRTUES.map(v => [v.name, v]))
 
 export default function ScoreActionPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -27,6 +35,8 @@ export default function ScoreActionPage() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<ScoreResult | null>(null)
   const [saved, setSaved] = useState(false)
+  // Track whether the user chose to re-score with the growth action
+  const [rescoringGrowth, setRescoringGrowth] = useState(false)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
@@ -37,23 +47,20 @@ export default function ScoreActionPage() {
     setLoading(true)
     setResult(null)
     setSaved(false)
+    setRescoringGrowth(false)
 
     try {
-      // Server-side Claude API scoring
       const response = await fetch('/api/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, context, intendedOutcome }),
       })
 
-      if (!response.ok) {
-        throw new Error('Scoring failed')
-      }
+      if (!response.ok) throw new Error('Scoring failed')
 
       const scoreResult: ScoreResult = await response.json()
       setResult(scoreResult)
 
-      // Track scoring event
       trackEvent({ event_type: 'score_action', metadata: { total_score: scoreResult.total_score, sage_alignment: scoreResult.sage_alignment } })
 
       // Save to Supabase if user is logged in
@@ -84,7 +91,22 @@ export default function ScoreActionPage() {
     setLoading(false)
   }
 
+  /** Pre-fill the form with the growth action suggestion so the user can score it properly */
+  const handleScoreGrowthAction = () => {
+    if (!result) return
+    setRescoringGrowth(true)
+    // Pre-fill the action field with the growth suggestion, keep context
+    setAction(result.growth_action)
+    setIntendedOutcome('To act with greater virtue in this situation')
+    setResult(null)
+    setSaved(false)
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const tier = result ? getAlignmentTier(result.total_score) : null
+  const earnsStamp = result ? result.total_score >= STAMP_THRESHOLD : false
+  const strongestVirtue = result?.strength ? VIRTUE_BY_NAME[result.strength] : null
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -100,6 +122,8 @@ export default function ScoreActionPage() {
       'Receive weighted alignment score (0-100)',
       'Get personalised improvement path',
       'Identify your strongest and weakest virtue expression',
+      'Preview your practice calendar stamp',
+      'See the sage growth path alternative',
       'Save score history when signed in',
     ],
     provider: {
@@ -124,6 +148,16 @@ export default function ScoreActionPage() {
       </div>
 
       <form onSubmit={handleScore} className="bg-white/60 border border-sage-200 rounded-lg p-8 space-y-6 mb-12">
+        {/* Show hint when re-scoring with growth action */}
+        {rescoringGrowth && (
+          <div className="bg-sage-50 border border-sage-200 rounded-lg px-5 py-4">
+            <p className="font-body text-sm text-sage-700">
+              The growth action has been pre-filled below. Feel free to refine it in your own words
+              before scoring — the more specific you are, the more accurate the score.
+            </p>
+          </div>
+        )}
+
         <div>
           <label className="block font-display text-sm font-medium text-sage-700 mb-1">
             What action did you take (or plan to take)?
@@ -169,7 +203,7 @@ export default function ScoreActionPage() {
           disabled={loading || !action}
           className="w-full py-3 bg-sage-400 text-white font-display text-lg rounded hover:bg-sage-500 transition-colors disabled:opacity-50"
         >
-          {loading ? 'Analysing against Stoic virtues...' : 'Score This Action'}
+          {loading ? 'Analysing against Stoic virtues...' : (rescoringGrowth ? 'Score the Growth Action' : 'Score This Action')}
         </button>
 
         {!user && (
@@ -182,7 +216,7 @@ export default function ScoreActionPage() {
       {/* Results */}
       {result && tier && (
         <div className="space-y-8">
-          {/* Overall score */}
+          {/* Overall score + Stamp preview */}
           <div className="bg-white/60 border border-sage-200 rounded-lg p-8 text-center">
             <div className="inline-flex items-center justify-center w-32 h-32 rounded-full border-4 mb-4" style={{ borderColor: tier.color }}>
               <div>
@@ -192,8 +226,40 @@ export default function ScoreActionPage() {
             </div>
             <h2 className="font-display text-2xl font-medium text-sage-800 mb-1">{tier.label}</h2>
             <p className="font-body text-sage-600 text-sm">{tier.description}</p>
+
+            {/* Stamp preview */}
+            <div className="mt-6 pt-5 border-t border-sage-100">
+              <p className="font-display text-sm text-sage-500 mb-3">Calendar Stamp</p>
+              {earnsStamp && strongestVirtue ? (
+                <div className="inline-flex flex-col items-center gap-2">
+                  <div
+                    className="w-16 h-16 rounded-xl border-2 flex items-center justify-center"
+                    style={{ borderColor: strongestVirtue.color, backgroundColor: strongestVirtue.color + '10' }}
+                  >
+                    <img src={strongestVirtue.icon} alt={strongestVirtue.name} className="w-11 h-11 drop-shadow-sm" />
+                  </div>
+                  <span className="font-display text-sm font-medium" style={{ color: strongestVirtue.color }}>
+                    {strongestVirtue.name} stamp earned
+                  </span>
+                </div>
+              ) : (
+                <div className="inline-flex flex-col items-center gap-2">
+                  <div className="w-16 h-16 rounded-xl border-2 border-sage-200 bg-sage-50/50 flex items-center justify-center">
+                    {strongestVirtue ? (
+                      <img src={strongestVirtue.icon} alt={strongestVirtue.name} className="w-11 h-11 opacity-20 grayscale" />
+                    ) : (
+                      <span className="font-display text-2xl text-sage-200">?</span>
+                    )}
+                  </div>
+                  <span className="font-body text-sm text-sage-400">
+                    Score 70+ to earn a stamp
+                  </span>
+                </div>
+              )}
+            </div>
+
             {saved && (
-              <p className="mt-3 text-sm text-sage-500 font-body italic">Score saved to your profile.</p>
+              <p className="mt-4 text-sm text-sage-500 font-body italic">Score saved to your profile.</p>
             )}
           </div>
 
@@ -242,6 +308,104 @@ export default function ScoreActionPage() {
               </div>
             </div>
           </div>
+
+          {/* Growth Action — shown when below stamp threshold */}
+          {!earnsStamp && result.growth_action && (
+            <div className="bg-sage-50/80 border-2 border-sage-300 rounded-lg p-8 space-y-5">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-sage-200/50 flex items-center justify-center">
+                  <img src="/images/sagelogosmall.PNG" alt="Sage" className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-medium text-sage-800 mb-2">What a Sage Might Consider</h3>
+                  <p className="font-body text-sage-700 leading-relaxed">{result.growth_action}</p>
+                </div>
+              </div>
+
+              {/* Projected stamp comparison */}
+              <div className="flex items-center gap-6 pt-3 border-t border-sage-200">
+                {/* Current action result */}
+                <div className="flex-1 text-center">
+                  <p className="font-body text-xs text-sage-400 mb-1">Your action</p>
+                  <p className="font-display text-2xl font-bold text-sage-400">{result.total_score}</p>
+                  <div className="w-10 h-10 rounded-lg border border-sage-200 bg-white/50 flex items-center justify-center mx-auto mt-2">
+                    {strongestVirtue ? (
+                      <img src={strongestVirtue.icon} alt="" className="w-7 h-7 opacity-20 grayscale" />
+                    ) : (
+                      <span className="text-sage-200">—</span>
+                    )}
+                  </div>
+                  <p className="font-body text-xs text-sage-300 mt-1">No stamp</p>
+                </div>
+
+                {/* Arrow */}
+                <div className="flex-shrink-0">
+                  <svg className="w-8 h-8 text-sage-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+
+                {/* Growth action projection */}
+                <div className="flex-1 text-center">
+                  <p className="font-body text-xs text-sage-500 mb-1">Growth action</p>
+                  <p className="font-display text-2xl font-bold" style={{ color: result.growth_action_projected_score >= STAMP_THRESHOLD ? '#7d9468' : '#B2AC88' }}>
+                    ~{result.growth_action_projected_score}
+                  </p>
+                  <div
+                    className="w-10 h-10 rounded-lg border-2 flex items-center justify-center mx-auto mt-2"
+                    style={result.growth_action_projected_score >= STAMP_THRESHOLD && strongestVirtue ? {
+                      borderColor: strongestVirtue.color,
+                      backgroundColor: strongestVirtue.color + '10',
+                    } : {
+                      borderColor: '#d1cdb8',
+                      backgroundColor: '#fafaf5',
+                    }}
+                  >
+                    {result.growth_action_projected_score >= STAMP_THRESHOLD && strongestVirtue ? (
+                      <img src={strongestVirtue.icon} alt="" className="w-7 h-7 drop-shadow-sm" />
+                    ) : (
+                      <span className="text-sage-300">—</span>
+                    )}
+                  </div>
+                  <p className="font-body text-xs mt-1" style={{ color: result.growth_action_projected_score >= STAMP_THRESHOLD ? '#7d9468' : '#B2AC88' }}>
+                    {result.growth_action_projected_score >= STAMP_THRESHOLD ? 'Stamp earned' : 'Closer to stamp'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Re-score button */}
+              <button
+                onClick={handleScoreGrowthAction}
+                className="w-full py-3 bg-sage-400 text-white font-display text-base rounded hover:bg-sage-500 transition-colors"
+              >
+                Score This Growth Action Instead
+              </button>
+
+              {/* Stoic reminder */}
+              <p className="font-body text-xs text-sage-400 text-center italic leading-relaxed">
+                The stamp marks the action — it is not the reason for it.
+                Virtue is its own reward; the calendar simply records your practice.
+              </p>
+            </div>
+          )}
+
+          {/* When stamp IS earned — still show growth action if available, but as encouragement */}
+          {earnsStamp && result.growth_action && (
+            <div className="bg-white/60 border border-sage-200 rounded-lg p-8">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-sage-100 flex items-center justify-center">
+                  <img src="/images/sagelogosmall.PNG" alt="Sage" className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="font-display text-base font-medium text-sage-800 mb-1">The Sage Path Forward</h3>
+                  <p className="font-body text-sage-600 leading-relaxed text-sm">{result.growth_action}</p>
+                  <p className="font-body text-xs text-sage-400 mt-3 italic">
+                    There is always a higher expression of virtue. The sage never stops progressing.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

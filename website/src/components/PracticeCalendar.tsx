@@ -14,6 +14,8 @@ interface DayActivity {
 interface DayData {
   virtues: string[]
   strongest_virtue: string | null
+  stamp_earned: boolean
+  best_total_score: number
   activities: DayActivity[]
 }
 
@@ -96,8 +98,11 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
     return calendarData.days[getDayStr(day)] || null
   }
 
-  // Count active practice days this month
+  // Count active practice days and stamped days this month
   const activeDays = calendarData ? Object.keys(calendarData.days).length : 0
+  const stampedDays = calendarData
+    ? Object.values(calendarData.days).filter(d => d.stamp_earned).length
+    : 0
 
   // Selected day details
   const selectedDayData = selectedDay && calendarData ? calendarData.days[selectedDay] : null
@@ -110,7 +115,7 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
           <h2 className="font-display text-xl font-medium text-sage-800">Practice Calendar</h2>
           <p className="font-body text-sm text-sage-500 mt-1">
             {activeDays > 0
-              ? `${activeDays} day${activeDays !== 1 ? 's' : ''} of practice this month`
+              ? `${stampedDays} stamp${stampedDays !== 1 ? 's' : ''} earned from ${activeDays} day${activeDays !== 1 ? 's' : ''} of practice`
               : 'Your virtue practice will appear here'}
           </p>
         </div>
@@ -179,6 +184,7 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
             const isSelected = dayStr === selectedDay
             const isFuture = new Date(year, month, day) > today
             const strongestVirtue = dayData?.strongest_virtue ? VIRTUE_MAP[dayData.strongest_virtue] : null
+            const hasStamp = dayData?.stamp_earned ?? false
 
             return (
               <button
@@ -194,23 +200,35 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
                   ${isFuture ? 'opacity-30' : ''}
                 `}
                 style={dayData && strongestVirtue ? {
-                  borderColor: strongestVirtue.color,
-                  backgroundColor: strongestVirtue.color + '10',
+                  borderColor: hasStamp ? strongestVirtue.color : (strongestVirtue.color + '60'),
+                  backgroundColor: hasStamp ? (strongestVirtue.color + '10') : (strongestVirtue.color + '06'),
                 } : undefined}
                 disabled={!dayData}
-                aria-label={`${monthNames[month]} ${day}${strongestVirtue ? ` - ${strongestVirtue.name}` : ''}`}
+                aria-label={`${monthNames[month]} ${day}${strongestVirtue ? ` - ${strongestVirtue.name}${hasStamp ? ' (stamp earned)' : ''}` : ''}`}
               >
-                {/* Active day: large virtue logo covering the cell */}
-                {dayData && strongestVirtue ? (
+                {/* Stamped day: full-colour virtue logo */}
+                {dayData && strongestVirtue && hasStamp ? (
                   <div className="relative w-full h-full flex items-center justify-center">
                     <img
                       src={strongestVirtue.icon}
                       alt={strongestVirtue.name}
-                      title={`${strongestVirtue.name} — ${dayData.activities.length} ${dayData.activities.length === 1 ? 'activity' : 'activities'}`}
+                      title={`${strongestVirtue.name} stamp — scored ${dayData.best_total_score}`}
                       className="w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 drop-shadow-sm"
                     />
-                    {/* Day number overlay — small, top-left corner */}
                     <span className="absolute top-0 left-0.5 font-display text-[10px] leading-none font-bold" style={{ color: strongestVirtue.color }}>
+                      {day}
+                    </span>
+                  </div>
+                ) : dayData && strongestVirtue && !hasStamp ? (
+                  /* Active day without stamp: muted icon + score hint */
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <img
+                      src={strongestVirtue.icon}
+                      alt={strongestVirtue.name}
+                      title={`Practiced but below stamp threshold (scored ${dayData.best_total_score}/70)`}
+                      className="w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 opacity-30 grayscale"
+                    />
+                    <span className="absolute top-0 left-0.5 font-display text-[10px] leading-none font-medium text-sage-400">
                       {day}
                     </span>
                   </div>

@@ -69,7 +69,13 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: true }),
   ])
 
+  // Stamp threshold — a day only earns a calendar stamp when the best activity
+  // that day scores a weighted total of 70+ (aligned with the "Progressing" tier).
+  // Individual virtues are still tracked for detail panels regardless of threshold.
+  const STAMP_THRESHOLD = 70
+
   // Virtue demonstration threshold — score >= 50 means the virtue was meaningfully present
+  // (used for per-virtue tracking within the day detail panel)
   const VIRTUE_THRESHOLD = 50
   const virtueKeys = ['wisdom', 'justice', 'courage', 'temperance'] as const
 
@@ -127,9 +133,12 @@ export async function GET(request: NextRequest) {
   }
 
   // Convert Sets to arrays and compute strongest virtue per day
+  // Also determine whether the day earns a calendar stamp (best total_score >= 70)
   const serializedDays: Record<string, {
     virtues: string[]
     strongest_virtue: string | null
+    stamp_earned: boolean
+    best_total_score: number
     activities: typeof days[string]['activities']
   }> = {}
 
@@ -138,9 +147,6 @@ export async function GET(request: NextRequest) {
     const virtueTotals: Record<string, { sum: number; count: number }> = {}
     for (const activity of data.activities) {
       for (const v of virtueKeys) {
-        // Find the raw score from the original records
-        // We already have virtues_demonstrated, but need actual scores for ranking
-        // Use a simple heuristic: if demonstrated (>= threshold), count it
         if (!virtueTotals[v]) virtueTotals[v] = { sum: 0, count: 0 }
       }
       for (const v of activity.virtues_demonstrated) {
@@ -159,9 +165,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Check if any activity this day meets the stamp threshold (total_score >= 70)
+    const bestTotalScore = Math.max(...data.activities.map(a => a.total_score), 0)
+    const stampEarned = bestTotalScore >= STAMP_THRESHOLD
+
     serializedDays[day] = {
       virtues: Array.from(data.virtues),
       strongest_virtue: strongest,
+      stamp_earned: stampEarned,
+      best_total_score: bestTotalScore,
       activities: data.activities,
     }
   }

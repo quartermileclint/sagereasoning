@@ -27,6 +27,8 @@ Alignment tiers (based on weighted total):
 - misaligned (15–39): Actions driven more by impulse than reason
 - contrary (0–14): Acting against virtue
 
+A calendar stamp is earned when the total_score reaches 70 or above ("Progressing" tier). When scoring, you must also suggest a more virtuous alternative action the user could take in the same situation, and project what that action would score.
+
 You must return ONLY valid JSON — no markdown, no explanation outside the JSON. Use this exact structure:
 {
   "wisdom_score": <0-100 integer>,
@@ -38,7 +40,9 @@ You must return ONLY valid JSON — no markdown, no explanation outside the JSON
   "reasoning": "<2-3 sentences: what stoic virtues are expressed, which are absent, and why — be specific to the action described>",
   "improvement_path": "<1-2 sentences: concrete stoic guidance on how to bring the weakest virtue more fully into this type of action>",
   "strength": "<single virtue name e.g. Wisdom>",
-  "growth_area": "<single virtue name e.g. Temperance>"
+  "growth_area": "<single virtue name e.g. Temperance>",
+  "growth_action": "<1-3 sentences: a specific alternative action a sage might consider in the same situation — phrased as an invitation, e.g. 'A sage might consider...' — concrete and actionable>",
+  "growth_action_projected_score": <integer 0-100: your honest estimate of the total_score this growth action would achieve if taken thoughtfully>
 }`
 
 export async function POST(request: NextRequest) {
@@ -81,7 +85,7 @@ Return only the JSON score object.`
     }
 
     // Validate required fields
-    const required = ['wisdom_score', 'justice_score', 'courage_score', 'temperance_score', 'total_score', 'sage_alignment', 'reasoning', 'improvement_path', 'strength', 'growth_area']
+    const required = ['wisdom_score', 'justice_score', 'courage_score', 'temperance_score', 'total_score', 'sage_alignment', 'reasoning', 'improvement_path', 'strength', 'growth_area', 'growth_action', 'growth_action_projected_score']
     for (const field of required) {
       if (scoreData[field] === undefined) {
         return NextResponse.json({ error: `Missing field: ${field}` }, { status: 500 })
