@@ -222,7 +222,7 @@ export default function BaselineAssessmentPage() {
               const isGrowth = virtue.id === result.growth_area
               return (
                 <div key={virtue.id} className="flex items-center gap-4">
-                  <img src={virtue.icon} alt={virtue.name} className="w-8 h-8" />
+                  <img src={virtue.icon} alt={virtue.name} className="w-12 h-12" />
                   <div className="w-28">
                     <span className="font-display text-sage-800">{virtue.name}</span>
                     {isStrongest && <span className="block text-xs text-sage-500 font-body">Strongest</span>}

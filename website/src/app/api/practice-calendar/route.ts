@@ -126,11 +126,42 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Convert Sets to arrays for JSON serialization
-  const serializedDays: Record<string, { virtues: string[]; activities: typeof days[string]['activities'] }> = {}
+  // Convert Sets to arrays and compute strongest virtue per day
+  const serializedDays: Record<string, {
+    virtues: string[]
+    strongest_virtue: string | null
+    activities: typeof days[string]['activities']
+  }> = {}
+
   for (const [day, data] of Object.entries(days)) {
+    // Calculate average score per virtue across all activities that day
+    const virtueTotals: Record<string, { sum: number; count: number }> = {}
+    for (const activity of data.activities) {
+      for (const v of virtueKeys) {
+        // Find the raw score from the original records
+        // We already have virtues_demonstrated, but need actual scores for ranking
+        // Use a simple heuristic: if demonstrated (>= threshold), count it
+        if (!virtueTotals[v]) virtueTotals[v] = { sum: 0, count: 0 }
+      }
+      for (const v of activity.virtues_demonstrated) {
+        virtueTotals[v].sum += 1
+        virtueTotals[v].count += 1
+      }
+    }
+
+    // Find the virtue demonstrated most frequently that day
+    let strongest: string | null = null
+    let highestCount = 0
+    for (const [v, totals] of Object.entries(virtueTotals)) {
+      if (totals.count > highestCount) {
+        highestCount = totals.count
+        strongest = v
+      }
+    }
+
     serializedDays[day] = {
       virtues: Array.from(data.virtues),
+      strongest_virtue: strongest,
       activities: data.activities,
     }
   }

@@ -13,6 +13,7 @@ interface DayActivity {
 
 interface DayData {
   virtues: string[]
+  strongest_virtue: string | null
   activities: DayActivity[]
 }
 
@@ -139,7 +140,7 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
       </div>
 
       {/* Day-of-week headers */}
-      <div className="grid grid-cols-7 gap-1 mb-1">
+      <div className="grid grid-cols-7 gap-1.5 mb-1.5">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
           <div key={d} className="text-center font-display text-xs text-sage-400 py-2">
             {d}
@@ -150,20 +151,20 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
       {/* Calendar grid */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             {VIRTUES.map((v, i) => (
               <img
                 key={v.id}
                 src={v.icon}
                 alt={v.name}
-                className="w-6 h-6 opacity-40"
-                style={{ animation: `pulse 1.5s ease-in-out ${i * 0.2}s infinite` }}
+                className="w-10 h-10 opacity-40"
+                style={{ animation: `calPulse 1.5s ease-in-out ${i * 0.2}s infinite` }}
               />
             ))}
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-1.5">
           {/* Empty cells before first day */}
           {Array.from({ length: startOffset }).map((_, i) => (
             <div key={`empty-${i}`} className="aspect-square" />
@@ -177,47 +178,47 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
             const isToday = dayStr === todayStr
             const isSelected = dayStr === selectedDay
             const isFuture = new Date(year, month, day) > today
+            const strongestVirtue = dayData?.strongest_virtue ? VIRTUE_MAP[dayData.strongest_virtue] : null
 
             return (
               <button
                 key={day}
                 onClick={() => dayData ? setSelectedDay(isSelected ? null : dayStr) : undefined}
                 className={`
-                  aspect-square rounded-lg border transition-all duration-200 relative flex flex-col items-center justify-center gap-0.5 p-1
-                  ${isToday ? 'border-sage-400 ring-1 ring-sage-300' : 'border-transparent'}
-                  ${isSelected ? 'bg-sage-100 border-sage-400 shadow-sm' : ''}
-                  ${dayData ? 'hover:bg-sage-50 cursor-pointer' : 'cursor-default'}
-                  ${isFuture ? 'opacity-40' : ''}
+                  aspect-square rounded-lg border-2 transition-all duration-200 relative flex items-center justify-center p-0.5
+                  ${isToday && !dayData ? 'border-sage-300 bg-sage-50/50' : ''}
+                  ${isToday && dayData ? 'ring-2 ring-sage-400 ring-offset-1' : ''}
+                  ${isSelected ? 'shadow-md scale-105' : ''}
+                  ${dayData && !isSelected ? 'hover:scale-105 hover:shadow-sm cursor-pointer' : ''}
+                  ${!dayData ? 'border-transparent cursor-default' : ''}
+                  ${isFuture ? 'opacity-30' : ''}
                 `}
+                style={dayData && strongestVirtue ? {
+                  borderColor: strongestVirtue.color,
+                  backgroundColor: strongestVirtue.color + '10',
+                } : undefined}
                 disabled={!dayData}
-                aria-label={`${monthNames[month]} ${day}${dayData ? ` - ${dayData.virtues.length} virtues practiced` : ''}`}
+                aria-label={`${monthNames[month]} ${day}${strongestVirtue ? ` - ${strongestVirtue.name}` : ''}`}
               >
-                {/* Day number */}
-                <span className={`font-display text-xs leading-none ${isToday ? 'text-sage-700 font-bold' : dayData ? 'text-sage-700' : 'text-sage-300'}`}>
-                  {day}
-                </span>
-
-                {/* Virtue logos for active days */}
-                {dayData && dayData.virtues.length > 0 && (
-                  <div className="flex flex-wrap justify-center gap-px mt-0.5">
-                    {dayData.virtues.map(virtueId => {
-                      const virtue = VIRTUE_MAP[virtueId]
-                      if (!virtue) return null
-                      return (
-                        <img
-                          key={virtueId}
-                          src={virtue.icon}
-                          alt={virtue.name}
-                          title={virtue.name}
-                          className="w-3.5 h-3.5 sm:w-4 sm:h-4"
-                          style={{
-                            filter: 'none',
-                            transition: 'transform 0.2s ease',
-                          }}
-                        />
-                      )
-                    })}
+                {/* Active day: large virtue logo covering the cell */}
+                {dayData && strongestVirtue ? (
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <img
+                      src={strongestVirtue.icon}
+                      alt={strongestVirtue.name}
+                      title={`${strongestVirtue.name} — ${dayData.activities.length} ${dayData.activities.length === 1 ? 'activity' : 'activities'}`}
+                      className="w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 drop-shadow-sm"
+                    />
+                    {/* Day number overlay — small, top-left corner */}
+                    <span className="absolute top-0 left-0.5 font-display text-[10px] leading-none font-bold" style={{ color: strongestVirtue.color }}>
+                      {day}
+                    </span>
                   </div>
+                ) : (
+                  /* Inactive day: just the date number */
+                  <span className={`font-display text-sm ${isToday ? 'text-sage-700 font-bold' : 'text-sage-300'}`}>
+                    {day}
+                  </span>
                 )}
               </button>
             )
@@ -226,56 +227,61 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
       )}
 
       {/* Virtue legend */}
-      <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-sage-100">
+      <div className="flex items-center justify-center gap-6 mt-5 pt-4 border-t border-sage-100">
         {VIRTUES.map(v => (
-          <div key={v.id} className="flex items-center gap-1.5">
-            <img src={v.icon} alt={v.name} className="w-4 h-4" />
-            <span className="font-body text-xs" style={{ color: v.color }}>{v.name}</span>
+          <div key={v.id} className="flex items-center gap-2">
+            <img src={v.icon} alt={v.name} className="w-6 h-6" />
+            <span className="font-body text-sm" style={{ color: v.color }}>{v.name}</span>
           </div>
         ))}
       </div>
 
       {/* Selected day detail panel */}
       {selectedDayData && selectedDay && (
-        <div className="mt-4 pt-4 border-t border-sage-200">
-          <div className="flex items-center gap-2 mb-3">
-            <h3 className="font-display text-sm font-medium text-sage-800">
-              {new Date(selectedDay + 'T12:00:00').toLocaleDateString('en-AU', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-              })}
-            </h3>
-            <div className="flex gap-1">
-              {selectedDayData.virtues.map(virtueId => {
-                const virtue = VIRTUE_MAP[virtueId]
-                return virtue ? (
-                  <img key={virtueId} src={virtue.icon} alt={virtue.name} className="w-5 h-5" />
-                ) : null
-              })}
+        <div className="mt-5 pt-5 border-t border-sage-200">
+          <div className="flex items-center gap-3 mb-4">
+            {selectedDayData.strongest_virtue && VIRTUE_MAP[selectedDayData.strongest_virtue] && (
+              <img
+                src={VIRTUE_MAP[selectedDayData.strongest_virtue].icon}
+                alt={VIRTUE_MAP[selectedDayData.strongest_virtue].name}
+                className="w-10 h-10"
+              />
+            )}
+            <div>
+              <h3 className="font-display text-base font-medium text-sage-800">
+                {new Date(selectedDay + 'T12:00:00').toLocaleDateString('en-AU', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                })}
+              </h3>
+              {selectedDayData.strongest_virtue && VIRTUE_MAP[selectedDayData.strongest_virtue] && (
+                <p className="font-body text-sm" style={{ color: VIRTUE_MAP[selectedDayData.strongest_virtue].color }}>
+                  Strongest virtue: {VIRTUE_MAP[selectedDayData.strongest_virtue].name}
+                </p>
+              )}
             </div>
           </div>
 
           <div className="space-y-2">
             {selectedDayData.activities.map((activity, i) => (
-              <div key={i} className="flex items-start gap-3 bg-sage-50/50 rounded px-3 py-2">
-                {/* Activity type icon */}
+              <div key={i} className="flex items-start gap-3 bg-sage-50/50 rounded-lg px-4 py-3">
+                {/* Activity type */}
                 <span className="font-body text-xs text-sage-400 w-16 flex-shrink-0 pt-0.5">
                   {activity.type === 'action' ? 'Action' : 'Reflection'}
                 </span>
 
-                {/* Description */}
+                {/* Description + virtue logos */}
                 <div className="flex-1 min-w-0">
                   {activity.description && (
                     <p className="font-body text-sm text-sage-700 truncate">{activity.description}</p>
                   )}
-                  {/* Virtue logos for this specific activity */}
-                  <div className="flex gap-1 mt-1">
+                  <div className="flex gap-2 mt-1.5">
                     {activity.virtues_demonstrated.map(virtueId => {
                       const virtue = VIRTUE_MAP[virtueId]
                       return virtue ? (
                         <div key={virtueId} className="flex items-center gap-1">
-                          <img src={virtue.icon} alt={virtue.name} className="w-3.5 h-3.5" />
+                          <img src={virtue.icon} alt={virtue.name} className="w-5 h-5" />
                           <span className="font-body text-xs" style={{ color: virtue.color }}>{virtue.name}</span>
                         </div>
                       ) : null
@@ -284,7 +290,7 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
                 </div>
 
                 {/* Score */}
-                <span className="font-display text-sm font-bold text-sage-700 flex-shrink-0">
+                <span className="font-display text-base font-bold text-sage-700 flex-shrink-0">
                   {activity.total_score}
                 </span>
               </div>
@@ -295,7 +301,7 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
 
       {/* Pulse animation for loading state */}
       <style jsx>{`
-        @keyframes pulse {
+        @keyframes calPulse {
           0%, 100% { opacity: 0.3; transform: scale(1); }
           50% { opacity: 0.7; transform: scale(1.15); }
         }

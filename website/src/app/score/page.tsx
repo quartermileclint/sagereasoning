@@ -203,7 +203,7 @@ export default function ScoreActionPage() {
               const score = result[`${virtue.id}_score` as keyof ScoreResult] as number
               return (
                 <div key={virtue.id} className="bg-white/60 border border-sage-200 rounded-lg p-5 flex items-center gap-4">
-                  <img src={virtue.icon} alt={virtue.name} className="w-12 h-12" />
+                  <img src={virtue.icon} alt={virtue.name} className="w-16 h-16 drop-shadow-sm" />
                   <div className="flex-1">
                     <div className="flex justify-between items-center mb-1">
                       <span className="font-display font-medium text-sage-800">{virtue.name}</span>

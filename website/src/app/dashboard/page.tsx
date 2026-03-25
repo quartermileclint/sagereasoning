@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/analytics'
 import { VIRTUES, getAlignmentTier } from '@/lib/stoic-brain'
 import PracticeCalendar from '@/components/PracticeCalendar'
+import VirtueConstellation from '@/components/VirtueConstellation'
+import MilestonesDisplay from '@/components/MilestonesDisplay'
 import type { User } from '@supabase/supabase-js'
 
 interface StoicProfile {
@@ -93,7 +95,24 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto px-6 py-20 text-center">
+        <div className="flex items-center justify-center gap-4 mb-4">
+          {VIRTUES.map((v, i) => (
+            <img
+              key={v.id}
+              src={v.icon}
+              alt={v.name}
+              className="w-12 h-12 opacity-40"
+              style={{ animation: `dashPulse 1.5s ease-in-out ${i * 0.2}s infinite` }}
+            />
+          ))}
+        </div>
         <p className="font-body text-sage-600 text-lg">Loading your Stoic profile...</p>
+        <style>{`
+          @keyframes dashPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.15); }
+          }
+        `}</style>
       </div>
     )
   }
@@ -189,7 +208,7 @@ export default function DashboardPage() {
                 const score = baseline[`${virtue.id}_score` as keyof BaselineData] as number
                 return (
                   <div key={virtue.id} className="flex items-center gap-3">
-                    <img src={virtue.icon} alt={virtue.name} className="w-6 h-6" />
+                    <img src={virtue.icon} alt={virtue.name} className="w-10 h-10" />
                     <span className="font-display text-sm w-24 text-sage-800">{virtue.name}</span>
                     <div className="flex-1 bg-sage-100 rounded-full h-2.5">
                       <div
@@ -229,39 +248,55 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="space-y-8">
-          {/* Overview cards */}
-          <div className="grid md:grid-cols-4 gap-4">
-            <div className="bg-white/60 border border-sage-200 rounded-lg p-6 text-center">
-              <p className="font-body text-sm text-sage-500 mb-2">Average Score</p>
-              <p className="font-display text-4xl font-bold" style={{ color: profileTier?.color }}>
-                {Math.round(profile!.avg_total)}
-              </p>
-              <p className="font-display text-sm font-medium mt-1" style={{ color: profileTier?.color }}>
-                {profileTier?.label}
-              </p>
-            </div>
+          {/* Virtue Constellation + Stats side by side */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <VirtueConstellation
+              avgWisdom={profile!.avg_wisdom}
+              avgJustice={profile!.avg_justice}
+              avgCourage={profile!.avg_courage}
+              avgTemperance={profile!.avg_temperance}
+              avgTotal={profile!.avg_total}
+            />
+            <div className="grid grid-cols-2 gap-4 content-start">
+              <div className="bg-white/60 border border-sage-200 rounded-lg p-6 text-center">
+                <p className="font-body text-sm text-sage-500 mb-2">Average Score</p>
+                <p className="font-display text-4xl font-bold" style={{ color: profileTier?.color }}>
+                  {Math.round(profile!.avg_total)}
+                </p>
+                <p className="font-display text-sm font-medium mt-1" style={{ color: profileTier?.color }}>
+                  {profileTier?.label}
+                </p>
+              </div>
 
-            <div className="bg-white/60 border border-sage-200 rounded-lg p-6 text-center">
-              <p className="font-body text-sm text-sage-500 mb-2">Actions Scored</p>
-              <p className="font-display text-4xl font-bold text-sage-800">{profile!.actions_scored}</p>
-            </div>
+              <div className="bg-white/60 border border-sage-200 rounded-lg p-6 text-center">
+                <p className="font-body text-sm text-sage-500 mb-2">Actions Scored</p>
+                <p className="font-display text-4xl font-bold text-sage-800">{profile!.actions_scored}</p>
+              </div>
 
-            <div className="bg-white/60 border border-sage-200 rounded-lg p-6 text-center">
-              <p className="font-body text-sm text-sage-500 mb-2">Strongest Virtue</p>
-              <p className="font-display text-xl font-bold text-sage-800 capitalize">{profile!.strongest_virtue}</p>
-              {profile!.strongest_virtue && (
-                <img
-                  src={VIRTUES.find(v => v.id === profile!.strongest_virtue)?.icon}
-                  alt={profile!.strongest_virtue}
-                  className="w-10 h-10 mx-auto mt-2"
-                />
-              )}
-            </div>
+              <div className="bg-white/60 border border-sage-200 rounded-lg p-6 text-center">
+                <p className="font-body text-sm text-sage-500 mb-2">Strongest Virtue</p>
+                <p className="font-display text-lg font-bold text-sage-800 capitalize">{profile!.strongest_virtue}</p>
+                {profile!.strongest_virtue && (
+                  <img
+                    src={VIRTUES.find(v => v.id === profile!.strongest_virtue)?.icon}
+                    alt={profile!.strongest_virtue}
+                    className="w-14 h-14 mx-auto mt-2 drop-shadow-sm"
+                  />
+                )}
+              </div>
 
-            <div className="bg-white/60 border border-sage-200 rounded-lg p-6 text-center">
-              <p className="font-body text-sm text-sage-500 mb-2">Growth Area</p>
-              <p className="font-display text-xl font-bold text-sage-800 capitalize">{profile!.growth_virtue}</p>
-              <p className="font-body text-xs text-sage-500 mt-2 capitalize">{profile!.trend}</p>
+              <div className="bg-white/60 border border-sage-200 rounded-lg p-6 text-center">
+                <p className="font-body text-sm text-sage-500 mb-2">Growth Area</p>
+                <p className="font-display text-lg font-bold text-sage-800 capitalize">{profile!.growth_virtue}</p>
+                {profile!.growth_virtue && (
+                  <img
+                    src={VIRTUES.find(v => v.id === profile!.growth_virtue)?.icon}
+                    alt={profile!.growth_virtue}
+                    className="w-14 h-14 mx-auto mt-2 opacity-50 drop-shadow-sm"
+                  />
+                )}
+                <p className="font-body text-xs text-sage-500 mt-1 capitalize">{profile!.trend}</p>
+              </div>
             </div>
           </div>
 
@@ -273,7 +308,7 @@ export default function DashboardPage() {
                 const avg = Math.round(profile![`avg_${virtue.id}` as keyof StoicProfile] as number)
                 return (
                   <div key={virtue.id} className="flex items-center gap-4">
-                    <img src={virtue.icon} alt={virtue.name} className="w-8 h-8" />
+                    <img src={virtue.icon} alt={virtue.name} className="w-12 h-12" />
                     <span className="font-display w-28 text-sage-800">{virtue.name}</span>
                     <div className="flex-1 bg-sage-100 rounded-full h-3">
                       <div
@@ -290,6 +325,9 @@ export default function DashboardPage() {
 
           {/* Practice Calendar */}
           {user && <PracticeCalendar userId={user.id} />}
+
+          {/* Virtue Milestones */}
+          {user && <MilestonesDisplay userId={user.id} />}
 
           {/* Recent scores */}
           <div className="bg-white/60 border border-sage-200 rounded-lg p-8">

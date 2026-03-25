@@ -129,7 +129,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {VIRTUES.map((virtue) => (
               <div key={virtue.id} className="bg-white/80 border border-sage-200 rounded-lg p-6 text-center">
-                <img src={virtue.icon} alt={virtue.name} className="w-16 h-16 mx-auto mb-4" />
+                <img src={virtue.icon} alt={virtue.name} className="w-24 h-24 mx-auto mb-4 drop-shadow-md" />
                 <h3 className="font-display text-lg font-semibold text-sage-800">{virtue.name}</h3>
                 <p className="font-display text-sm italic text-sage-600 mb-2">{virtue.greek}</p>
                 <p className="font-body text-sm text-sage-700 leading-relaxed mb-3">{virtue.description}</p>
