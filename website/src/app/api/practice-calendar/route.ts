@@ -51,8 +51,8 @@ export async function GET(request: NextRequest) {
     },
   })
 
-  // Fetch action scores and reflections for the month in parallel
-  const [actionsRes, reflectionsRes] = await Promise.all([
+  // Fetch action scores, reflections, and journal entries for the month in parallel
+  const [actionsRes, reflectionsRes, journalRes] = await Promise.all([
     supabase
       .from('action_scores')
       .select('id, action_description, total_score, wisdom_score, justice_score, courage_score, temperance_score, created_at')
@@ -63,6 +63,13 @@ export async function GET(request: NextRequest) {
     supabase
       .from('reflections')
       .select('id, total_score, wisdom_score, justice_score, courage_score, temperance_score, created_at')
+      .eq('user_id', userId)
+      .gte('created_at', startDate)
+      .lt('created_at', endDate)
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('journal_entries')
+      .select('id, day_number, created_at')
       .eq('user_id', userId)
       .gte('created_at', startDate)
       .lt('created_at', endDate)
@@ -128,6 +135,19 @@ export async function GET(request: NextRequest) {
         type: 'reflection',
         total_score: reflection.total_score,
         virtues_demonstrated: demonstrated,
+      })
+    }
+  }
+
+  // Process journal entries — these earn stamps for tenacity (completion) not virtue scores
+  if (journalRes.data) {
+    for (const journal of journalRes.data) {
+      const day = ensureDay(journal.created_at)
+      days[day].activities.push({
+        type: 'journal' as any,
+        description: `Journal Day ${journal.day_number}`,
+        total_score: 70, // meets stamp threshold — journal completion always earns a stamp
+        virtues_demonstrated: [],
       })
     }
   }

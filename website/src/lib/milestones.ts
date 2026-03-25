@@ -75,6 +75,49 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     icon: '/images/sagelogosmall.PNG',
     quote: '"Begin at once to live, and count each separate day as a separate life." — Seneca',
   },
+  // ─── Journal milestones ───
+  {
+    id: 'first_page',
+    name: 'First Page',
+    description: 'Completed the first journal entry',
+    icon: '/images/sagelogosmall.PNG',
+    quote: '"The beginning of philosophy is self-awareness." — Epictetus',
+  },
+  {
+    id: 'examined_week',
+    name: 'The Examined Week',
+    description: 'Completed 7 journal entries',
+    icon: '/images/sagelogo.PNG',
+    quote: '"An unexamined life is not worth living." — Socrates',
+  },
+  {
+    id: 'foundation_layer',
+    name: 'Foundation Layer',
+    description: 'Completed Phase 1 of the journal (Days 1–10)',
+    icon: '/images/sagelogo.PNG',
+    quote: '"First say to yourself what you would be; and then do what you have to do." — Epictetus',
+  },
+  {
+    id: 'halfway_mark',
+    name: 'Halfway Mark',
+    description: 'Completed 28 journal entries',
+    icon: '/images/sagelogo.PNG',
+    quote: '"Progress is not achieved by luck or accident, but by working on yourself daily." — Epictetus',
+  },
+  {
+    id: 'journal_prokoptos',
+    name: 'The Prokoptos',
+    description: 'Completed all 56 journal entries',
+    icon: '/images/sagelogo.PNG',
+    quote: '"Waste no more time arguing about what a good man should be. Be one." — Marcus Aurelius',
+  },
+  {
+    id: 'journal_return',
+    name: 'Return to the Path',
+    description: 'Resumed journaling after a 7+ day gap',
+    icon: '/images/sagelogosmall.PNG',
+    quote: '"Begin at once to live, and count each separate day as a separate life." — Seneca',
+  },
 ]
 
 export const MILESTONE_MAP = Object.fromEntries(
@@ -99,6 +142,10 @@ export interface MilestoneCheckData {
   hasBaseline: boolean
   avgTotal: number
   daysSinceLastAction: number | null  // null if this is first action
+  // Journal-specific data (optional for backward compatibility)
+  journalEntriesCompleted?: number
+  journalPhase1Complete?: boolean
+  daysSinceLastJournalEntry?: number | null
 }
 
 export function checkNewMilestones(data: MilestoneCheckData): string[] {
@@ -144,6 +191,39 @@ export function checkNewMilestones(data: MilestoneCheckData): string[] {
   // Returning Practitioner — returned after 7+ day gap
   if (data.daysSinceLastAction !== null && data.daysSinceLastAction >= 7) {
     award('returning_practitioner')
+  }
+
+  // ─── Journal milestones ───
+  const journalCount = data.journalEntriesCompleted ?? 0
+
+  // First Page — completed first journal entry
+  if (journalCount >= 1) {
+    award('first_page')
+  }
+
+  // The Examined Week — 7 journal entries
+  if (journalCount >= 7) {
+    award('examined_week')
+  }
+
+  // Foundation Layer — Phase 1 complete (days 1–10)
+  if (data.journalPhase1Complete) {
+    award('foundation_layer')
+  }
+
+  // Halfway Mark — 28 journal entries
+  if (journalCount >= 28) {
+    award('halfway_mark')
+  }
+
+  // The Prokoptos (journal) — all 56 entries
+  if (journalCount >= 56) {
+    award('journal_prokoptos')
+  }
+
+  // Return to the Path — resumed journaling after 7+ day gap
+  if (data.daysSinceLastJournalEntry != null && data.daysSinceLastJournalEntry >= 7) {
+    award('journal_return')
   }
 
   return newMilestones
