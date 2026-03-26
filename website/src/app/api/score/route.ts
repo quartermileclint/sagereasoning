@@ -109,7 +109,16 @@ Return only the JSON score object.`
       }
     }
 
-    return NextResponse.json(scoreData, { headers: corsHeaders() })
+    // Add AI transparency metadata to every scoring response
+    // (NAIC guidance on AI-generated content labelling; OECD AI Principles transparency)
+    const responsePayload = {
+      ...scoreData,
+      ai_generated: true,
+      ai_model: 'claude-sonnet-4-6',
+      disclaimer: 'This score is AI-generated using Stoic virtue criteria. It is for personal reflection only and does not constitute professional advice. See sagereasoning.com/transparency',
+    }
+
+    return NextResponse.json(responsePayload, { headers: corsHeaders() })
   } catch (error) {
     console.error('Score API error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

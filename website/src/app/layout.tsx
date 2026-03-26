@@ -42,9 +42,9 @@ export default function RootLayout({
                   <a href="/score-document" className="block hover:text-sage-900">Score Document</a>
                   <a href="/score-policy" className="block hover:text-sage-900">Review Policy</a>
                   <a href="/score-social" className="block hover:text-sage-900">Social Filter</a>
-                  <a href="/hiring" className="block hover:text-sage-900">Hiring</a>
-                  <a href="/therapy" className="block hover:text-sage-900">Coaching</a>
                   <a href="/scenarios" className="block hover:text-sage-900">Scenarios</a>
+                  <a href="/journal" className="block hover:text-sage-900">Journal</a>
+                  <a href="/community" className="block hover:text-sage-900">Community</a>
                   <a href="/dashboard" className="block hover:text-sage-900">Dashboard</a>
                   <a href="/api-docs" className="block hover:text-sage-900">API Docs</a>
                 </div>
@@ -52,10 +52,20 @@ export default function RootLayout({
                   <p className="font-display font-medium mb-2">Philosophy</p>
                   <a href="/#virtues" className="block hover:text-sage-900">The Four Virtues</a>
                   <a href="/#how-it-works" className="block hover:text-sage-900">How It Works</a>
+                  <a href="/methodology" className="block hover:text-sage-900">Methodology</a>
+                </div>
+                <div>
+                  <p className="font-display font-medium mb-2">Legal</p>
+                  <a href="/terms" className="block hover:text-sage-900">Terms of Service</a>
+                  <a href="/privacy" className="block hover:text-sage-900">Privacy Policy</a>
+                  <a href="/transparency" className="block hover:text-sage-900">AI Transparency</a>
                 </div>
               </div>
             </div>
-            <p className="mt-8 pt-4 border-t border-sage-200 text-center text-sage-500">&copy; {new Date().getFullYear()} SageReasoning. Flourish together.</p>
+            <div className="mt-8 pt-4 border-t border-sage-200 flex flex-col md:flex-row items-center justify-between gap-2 text-sage-500">
+              <p>&copy; {new Date().getFullYear()} SageReasoning. Flourish together.</p>
+              <p className="text-xs italic">Scores and reasoning are AI-generated and do not constitute professional advice. <a href="/transparency" className="underline hover:text-sage-700">Learn more</a></p>
+            </div>
           </div>
         </footer>
       </body>

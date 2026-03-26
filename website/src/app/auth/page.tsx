@@ -11,6 +11,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
+  const [privacyConsent, setPrivacyConsent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -41,6 +42,10 @@ export default function AuthPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!privacyConsent) {
+      setError('Please accept the privacy and AI processing terms to create an account.')
+      return
+    }
     setLoading(true)
     setError('')
     const { error } = await supabase.auth.signUp({
@@ -139,10 +144,31 @@ export default function AuthPage() {
           </div>
         )}
 
+        {/* Privacy consent — shown only on sign-up */}
+        {mode === 'signup' && (
+          <div className="flex items-start gap-3 p-3 bg-sage-50 border border-sage-200 rounded">
+            <input
+              id="privacy-consent"
+              type="checkbox"
+              checked={privacyConsent}
+              onChange={(e) => setPrivacyConsent(e.target.checked)}
+              className="mt-1 w-4 h-4 accent-sage-500 flex-shrink-0 cursor-pointer"
+            />
+            <label htmlFor="privacy-consent" className="font-body text-sm text-sage-700 leading-snug cursor-pointer">
+              I understand that text I submit for scoring will be processed by{' '}
+              <strong>Anthropic&rsquo;s Claude AI</strong> (US-based), and that my account data
+              is stored on <strong>Supabase</strong> (Singapore region). I have read and accept the{' '}
+              <a href="/privacy" target="_blank" className="text-sage-600 underline hover:text-sage-800">Privacy Policy</a>{' '}
+              and{' '}
+              <a href="/terms" target="_blank" className="text-sage-600 underline hover:text-sage-800">Terms of Service</a>.
+            </label>
+          </div>
+        )}
+
         <button
           type="submit"
-          disabled={loading}
-          className="w-full py-3 bg-sage-400 text-white font-display text-lg rounded hover:bg-sage-500 transition-colors disabled:opacity-50"
+          disabled={loading || (mode === 'signup' && !privacyConsent)}
+          className="w-full py-3 bg-sage-400 text-white font-display text-lg rounded hover:bg-sage-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Working...' : mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Send Magic Link'}
         </button>

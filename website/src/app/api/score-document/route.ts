@@ -155,9 +155,16 @@ export async function POST(request: NextRequest) {
       })
       .then(() => {})
 
-    return NextResponse.json(result, {
-      headers: corsHeaders(),
-    })
+    // Add AI transparency metadata (NAIC guidance; OECD principles)
+    return NextResponse.json(
+      {
+        ...result,
+        ai_generated: true,
+        ai_model: 'claude-sonnet-4-6',
+        disclaimer: 'This score is AI-generated using Stoic virtue criteria. The badge reflects an AI assessment, not a certified evaluation. See sagereasoning.com/transparency',
+      },
+      { headers: corsHeaders() }
+    )
   } catch (error) {
     console.error('Document score API error:', error)
     return NextResponse.json(

@@ -388,6 +388,63 @@ export default function DashboardPage() {
             </p>
           </div>
         </div>
+
+        {/* ── Data & Account Controls ────────────────────────────────────────── */}
+        {/* Privacy Act compliance: right to access, export, and delete personal data */}
+        <div className="mt-12 bg-white/60 border border-sage-200 rounded-xl p-6">
+          <h2 className="font-display text-lg font-semibold text-sage-800 mb-1">Your Data</h2>
+          <p className="font-body text-sm text-sage-600 mb-5 leading-relaxed">
+            Under the Australian Privacy Act, you have the right to access, export, and delete
+            your personal data at any time.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+
+            {/* Export data — placeholder until /api/user/export is implemented */}
+            <button
+              disabled
+              title="Data export is coming soon — this feature is in development (Priority 9, Phase 3)"
+              className="flex items-center gap-2 px-4 py-2.5 border border-sage-300 text-sage-500 font-display text-sm rounded cursor-not-allowed opacity-60"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Export my data
+              <span className="text-xs font-body italic">(coming soon)</span>
+              {/* TODO (Phase 3): Wire to /api/user/export once implemented.
+                  Should return JSON containing account data, all scored actions,
+                  baseline result, and journal entries. */}
+            </button>
+
+            {/* Delete account — placeholder until /api/user/delete is implemented */}
+            <button
+              disabled
+              title="Account deletion is coming soon — this feature is in development (Priority 9, Phase 3)"
+              className="flex items-center gap-2 px-4 py-2.5 border border-red-200 text-red-400 font-display text-sm rounded cursor-not-allowed opacity-60"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete my account
+              <span className="text-xs font-body italic">(coming soon)</span>
+              {/* TODO (Phase 3): Wire to /api/user/delete. Must:
+                  1. Confirm intent with a dialog ("Type DELETE to confirm")
+                  2. Delete all user data from Supabase (account, scores, journal, location)
+                  3. Sign the user out and redirect to homepage
+                  4. Complete within 30 days per Privacy Policy commitment */}
+            </button>
+
+          </div>
+          <p className="font-body text-xs text-sage-400 mt-3 italic">
+            Need help now? Email{' '}
+            <a href="mailto:support@sagereasoning.com"
+               className="underline hover:text-sage-600">support@sagereasoning.com</a>
+            {' '}and we will handle your request manually.
+          </p>
+        </div>
+        {/* ─────────────────────────────────────────────────────────────────── */}
+
       )}
     </div>
   )

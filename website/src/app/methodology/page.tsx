@@ -1,0 +1,195 @@
+import type { Metadata } from 'next'
+import { VIRTUES, ALIGNMENT_TIERS } from '@/lib/stoic-brain'
+
+export const metadata: Metadata = {
+  title: 'Methodology — SageReasoning',
+  description: 'How SageReasoning scores actions and documents against Stoic virtue — explained in plain language.',
+}
+
+export default function MethodologyPage() {
+  return (
+    <div className="max-w-3xl mx-auto px-6 py-16 font-body text-sage-800">
+      <div className="mb-10">
+        <h1 className="font-display text-3xl font-medium text-sage-900 mb-2">Methodology</h1>
+        <p className="text-sage-600 text-sm italic">How scoring works — in plain language</p>
+        <p className="mt-4 text-sage-700 leading-relaxed">
+          Transparency is a core Stoic value. This page explains exactly how SageReasoning
+          calculates your scores, where those criteria come from, and what the numbers mean.
+        </p>
+      </div>
+
+      <section className="space-y-10 leading-relaxed">
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">The philosophical foundation</h2>
+          <p>
+            SageReasoning is based on <strong>Stoic virtue ethics</strong>, one of the oldest and
+            most coherent frameworks for practical morality. The Stoics held that the only true good
+            is virtue &mdash; that flourishing (<em>eudaimonia</em>) comes from living in accordance
+            with reason and nature, guided by the four cardinal virtues.
+          </p>
+          <p className="mt-3">
+            Our scoring criteria are derived from primary Stoic texts: Marcus Aurelius&rsquo;{' '}
+            <em>Meditations</em>, Epictetus&rsquo; <em>Discourses</em> and <em>Enchiridion</em>,
+            Seneca&rsquo;s <em>Letters</em>, and Cicero&rsquo;s <em>De Officiis</em>. All source
+            texts are in the public domain.
+          </p>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">The Stoic Brain data</h2>
+          <p>
+            We encoded Stoic philosophy into a structured data file called the{' '}
+            <strong>Stoic Brain</strong>. It defines:
+          </p>
+          <ul className="list-disc pl-6 mt-2 space-y-1 text-sage-700">
+            <li>The four cardinal virtues and their relative weights</li>
+            <li>16 sub-virtues (four per cardinal virtue)</li>
+            <li>Preferred and dispreferred indifferents (health, wealth, reputation, etc.)</li>
+            <li>Scoring criteria for each virtue at each level</li>
+            <li>The alignment tier definitions</li>
+          </ul>
+          <p className="mt-3">
+            The Stoic Brain is open-source (MIT licence) and freely available at{' '}
+            <a href="/api/stoic-brain" className="text-sage-600 underline hover:text-sage-800">
+              /api/stoic-brain
+            </a>{' '}
+            or via the{' '}
+            <a href="/api-docs" className="text-sage-600 underline hover:text-sage-800">API</a>.
+          </p>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">The four virtues and their weights</h2>
+          <p className="mb-4">
+            Each action is scored on all four virtues. The weights reflect the relative emphasis
+            the Stoics placed on each virtue in practical reasoning:
+          </p>
+          <div className="space-y-3">
+            {VIRTUES.map((virtue) => (
+              <div key={virtue.id}
+                   className="flex items-start gap-4 bg-white/60 border border-sage-200 rounded-lg p-4">
+                <div className="flex-shrink-0 w-12 h-12">
+                  <img src={virtue.icon} alt={virtue.name}
+                       className="w-12 h-12 object-contain" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-display font-semibold text-sage-800">{virtue.name}</span>
+                    <span className="font-body text-sage-500 text-sm italic">({virtue.greek})</span>
+                    <span className="ml-auto text-xs font-display font-medium px-2 py-0.5 bg-sage-100 rounded">
+                      {(virtue.weight * 100)}% weight
+                    </span>
+                  </div>
+                  <p className="text-sm text-sage-700">{virtue.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">The scoring scale</h2>
+          <p className="mb-4">Each virtue is scored 0–100. The scale means:</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-sage-100">
+                  <th className="text-left px-3 py-2 border border-sage-200 font-display font-semibold">Score range</th>
+                  <th className="text-left px-3 py-2 border border-sage-200 font-display font-semibold">Meaning</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['90–100', 'Near-perfect expression of this virtue in this action'],
+                  ['70–89', 'Strong, consistent expression with minor gaps'],
+                  ['40–69', 'Partial expression — some virtue present, some conflict'],
+                  ['15–39', 'Mostly driven by impulse, passion, or external concern over virtue'],
+                  ['0–14',  'Acting contrary to this virtue'],
+                ].map(([range, meaning], i) => (
+                  <tr key={range} className={i % 2 === 1 ? 'bg-sage-50' : ''}>
+                    <td className="px-3 py-2 border border-sage-200 font-mono text-sage-600">{range}</td>
+                    <td className="px-3 py-2 border border-sage-200">{meaning}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-sage-600 text-sm">
+            The composite score is calculated as:{' '}
+            <span className="font-mono">
+              (Wisdom × 0.30) + (Justice × 0.25) + (Courage × 0.25) + (Temperance × 0.20)
+            </span>
+          </p>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">Alignment tiers</h2>
+          <p className="mb-4">
+            Your composite score places you in one of five alignment tiers, measured against
+            the ideal of the perfect Stoic Sage:
+          </p>
+          <div className="space-y-2">
+            {ALIGNMENT_TIERS.map((tier) => (
+              <div key={tier.id}
+                   className="flex items-center gap-3 bg-white/60 border border-sage-200 rounded-lg p-3">
+                <div className="w-3 h-3 rounded-full flex-shrink-0"
+                     style={{ backgroundColor: tier.color }} />
+                <span className="font-display font-medium text-sage-800 w-28">{tier.label}</span>
+                <span className="font-mono text-sage-500 text-sm w-20">{tier.range}</span>
+                <p className="text-sm text-sage-700 hidden md:block">{tier.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">How AI applies the criteria</h2>
+          <p>
+            When you submit an action, document, or post for scoring, the following happens:
+          </p>
+          <ol className="list-decimal pl-6 mt-2 space-y-2 text-sage-700">
+            <li>Your text is sent to Claude (Anthropic&rsquo;s AI) along with the Stoic Brain scoring criteria.</li>
+            <li>Claude evaluates your text against each virtue&rsquo;s criteria and assigns a 0–100 score.</li>
+            <li>Claude generates explanatory reasoning for each score.</li>
+            <li>The weighted composite score and alignment tier are calculated.</li>
+            <li>Results are returned and stored in your history.</li>
+          </ol>
+          <p className="mt-3 text-sage-600 text-sm italic">
+            See our <a href="/transparency" className="underline hover:text-sage-800">AI Transparency Statement</a> for
+            details on limitations and how to challenge a score.
+          </p>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">What scores don&rsquo;t measure</h2>
+          <p>Stoic virtue scoring is explicitly not:</p>
+          <ul className="list-disc pl-6 mt-2 space-y-1 text-sage-700">
+            <li>A measure of your worth as a person</li>
+            <li>A measure of your intelligence or competence</li>
+            <li>A personality assessment or psychological profile</li>
+            <li>A measure of outcomes (a Stoically virtuous action may still result in a poor outcome — that is not within our control)</li>
+          </ul>
+          <p className="mt-3">
+            The Stoics held that virtue is entirely within our control, and that outcomes are not.
+            A score of 40 on one action does not mean you are a bad person &mdash; it means there
+            may be room to reflect on how virtue could guide that type of action more fully.
+          </p>
+        </div>
+
+      </section>
+
+      <div className="mt-12 pt-6 border-t border-sage-200 text-center">
+        <p className="text-sage-600 text-sm italic">
+          &ldquo;He who has a why to live can bear almost any how.&rdquo;
+        </p>
+        <p className="text-sage-500 text-xs mt-1">
+          Questions about methodology?{' '}
+          <a href="mailto:support@sagereasoning.com" className="underline hover:text-sage-700">
+            Contact us
+          </a>
+        </p>
+      </div>
+    </div>
+  )
+}

@@ -59,8 +59,6 @@ export default function NavBar() {
                   <a href="/score-document" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setToolsOpen(false)}>Score a Document</a>
                   <a href="/score-policy" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setToolsOpen(false)}>Review a Policy</a>
                   <a href="/score-social" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setToolsOpen(false)}>Social Media Filter</a>
-                  <a href="/hiring" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setToolsOpen(false)}>Hiring Assessment</a>
-                  <a href="/therapy" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setToolsOpen(false)}>Coaching Companion</a>
                   <a href="/scenarios" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setToolsOpen(false)}>Ethical Scenarios</a>
                 </div>
               </>
@@ -70,6 +68,7 @@ export default function NavBar() {
           <a href="/community" className="text-sage-700 hover:text-sage-900 transition-colors">Community</a>
           <a href="/dashboard" className="text-sage-700 hover:text-sage-900 transition-colors">Dashboard</a>
           <a href="/api-docs" className="text-sage-700 hover:text-sage-900 transition-colors">API</a>
+          <a href="/pricing" className="text-sage-700 hover:text-sage-900 transition-colors">Pricing</a>
 
           {loading ? (
             <span className="px-4 py-2 text-sage-400">...</span>

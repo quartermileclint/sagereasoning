@@ -118,9 +118,16 @@ Return the JSON score.`
       })
       .then(() => {})
 
-    return NextResponse.json(result, {
-      headers: corsHeaders(),
-    })
+    // Add AI transparency metadata (NAIC guidance; OECD principles)
+    return NextResponse.json(
+      {
+        ...result,
+        ai_generated: true,
+        ai_model: 'claude-sonnet-4-6',
+        disclaimer: 'This score is AI-generated using Stoic virtue criteria. It is for personal reflection only. See sagereasoning.com/transparency',
+      },
+      { headers: corsHeaders() }
+    )
   } catch (error) {
     console.error('Social score API error:', error)
     return NextResponse.json(
