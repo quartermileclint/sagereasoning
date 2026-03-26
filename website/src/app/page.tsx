@@ -56,7 +56,7 @@ export default function HomePage() {
           style={{ backgroundImage: 'url(/images/Background.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}
         />
         <div className="relative max-w-6xl mx-auto px-6 py-24 md:py-36 text-center">
-          <img src="/images/sagelogo.PNG" alt="Sage leaf" className="w-28 h-28 mx-auto mb-8 drop-shadow-lg" />
+          <img src="/images/sagelogo.PNG" alt="Sage leaf" className="w-36 h-36 mx-auto mb-8 drop-shadow-lg object-contain" />
           <h1 className="font-display text-4xl md:text-5xl font-medium text-sage-900 mb-4">
             sagereasoning
           </h1>
@@ -129,7 +129,14 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {VIRTUES.map((virtue) => (
               <div key={virtue.id} className="bg-white/80 border border-sage-200 rounded-lg p-6 text-center">
-                <img src={virtue.icon} alt={virtue.name} className="w-24 h-24 mx-auto mb-4 drop-shadow-md" />
+                {/* Fixed-size container ensures all logos appear the same size regardless of source dimensions */}
+                <div className="w-40 h-40 mx-auto mb-4 flex items-center justify-center">
+                  <img
+                    src={virtue.icon}
+                    alt={virtue.name}
+                    className="w-40 h-40 object-contain drop-shadow-md"
+                  />
+                </div>
                 <h3 className="font-display text-lg font-semibold text-sage-800">{virtue.name}</h3>
                 <p className="font-display text-sm italic text-sage-600 mb-2">{virtue.greek}</p>
                 <p className="font-body text-sm text-sage-700 leading-relaxed mb-3">{virtue.description}</p>
@@ -179,9 +186,27 @@ export default function HomePage() {
       {/* Alignment Tiers */}
       <section className="bg-sage-300/20 py-20">
         <div className="max-w-4xl mx-auto px-6">
-          <h2 className="font-display text-2xl md:text-3xl italic text-sage-800 text-center mb-12">
+          <h2 className="font-display text-2xl md:text-3xl italic text-sage-800 text-center mb-4">
             Alignment Tiers
           </h2>
+          <p className="font-body text-sage-700 text-center max-w-2xl mx-auto mb-10">
+            Your actions are measured against the standard of the perfect Stoic Sage.
+          </p>
+
+          {/* Zeus — the ideal of the perfect Sage */}
+          <div className="flex flex-col items-center mb-10">
+            <div className="relative">
+              <img
+                src="/images/Zeus.PNG"
+                alt="The Perfect Sage"
+                className="w-40 h-40 object-contain drop-shadow-xl rounded-full border-4 border-amber-200 bg-amber-50/60"
+              />
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-amber-100 border border-amber-300 rounded-full px-3 py-0.5">
+                <span className="font-display text-xs text-amber-800 whitespace-nowrap">The Perfect Sage (100)</span>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-3">
             {ALIGNMENT_TIERS.map((tier) => (
               <div key={tier.id} className="flex items-center gap-4 bg-white/60 border border-sage-200 rounded-lg p-4">
@@ -200,8 +225,24 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Community Map */}
+      <section className="max-w-6xl mx-auto px-6 py-20 text-center">
+        <h2 className="font-display text-2xl md:text-3xl italic text-sage-800 mb-4">
+          Sages Around the World
+        </h2>
+        <p className="font-body text-sage-700 mb-8 max-w-xl mx-auto leading-relaxed">
+          Join a growing community of people applying Stoic virtue to their daily decisions.
+        </p>
+        <a
+          href="/community"
+          className="inline-block px-6 py-3 border border-sage-400 text-sage-700 font-display rounded hover:bg-sage-100 transition-colors"
+        >
+          View the Community Map
+        </a>
+      </section>
+
       {/* CTA */}
-      <section className="max-w-4xl mx-auto px-6 py-20 text-center">
+      <section className="max-w-4xl mx-auto px-6 py-20 text-center border-t border-sage-100">
         <h2 className="font-display text-2xl md:text-3xl text-sage-800 mb-4">
           Begin your path toward the Sage
         </h2>

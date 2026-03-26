@@ -228,9 +228,18 @@ export default function DashboardPage() {
 
           {/* Interpretation */}
           {baseline.interpretation && (
-            <p className="font-body text-sm text-sage-600 mt-6 pt-6 border-t border-sage-100 leading-relaxed">
-              {baseline.interpretation}
-            </p>
+            <div className="mt-6 pt-6 border-t border-sage-100">
+              <div className="flex items-center gap-3 mb-3">
+                <img src="/images/Zeus.PNG" alt="The Sage" className="w-10 h-10 object-contain rounded-full border border-amber-200 bg-amber-50/50" />
+                <span className="font-display text-sm text-amber-800 italic">Ancient Advice* — Your Path Forward</span>
+              </div>
+              <p className="font-body text-sm text-sage-600 leading-relaxed">
+                {baseline.interpretation}
+              </p>
+              <p className="font-body text-xs text-sage-400 mt-2 italic">
+                * ancient advice does not consider your legal or personal obligations.
+              </p>
+            </div>
           )}
         </div>
       )}
@@ -360,14 +369,23 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     {score.reasoning && (
-                      <p className="font-body text-sm text-sage-600 mt-3 border-t border-sage-100 pt-3">
-                        {score.reasoning}
-                      </p>
+                      <div className="mt-3 border-t border-sage-100 pt-3">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <img src="/images/Zeus.PNG" alt="The Sage" className="w-6 h-6 object-contain rounded-full border border-amber-200 bg-amber-50/50" />
+                          <span className="font-body text-xs text-amber-700 italic">ancient advice*</span>
+                        </div>
+                        <p className="font-body text-sm text-sage-600">
+                          {score.reasoning}
+                        </p>
+                      </div>
                     )}
                   </div>
                 )
               })}
             </div>
+            <p className="font-body text-xs text-sage-400 mt-6 pt-4 border-t border-sage-100 italic">
+              * ancient advice does not consider your legal or personal obligations.
+            </p>
           </div>
         </div>
       )}

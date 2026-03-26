@@ -67,6 +67,7 @@ export default function NavBar() {
             )}
           </div>
           <a href="/journal" className="text-sage-700 hover:text-sage-900 transition-colors">Journal</a>
+          <a href="/community" className="text-sage-700 hover:text-sage-900 transition-colors">Community</a>
           <a href="/dashboard" className="text-sage-700 hover:text-sage-900 transition-colors">Dashboard</a>
           <a href="/api-docs" className="text-sage-700 hover:text-sage-900 transition-colors">API</a>
 

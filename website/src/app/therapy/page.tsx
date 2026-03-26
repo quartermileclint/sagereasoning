@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
 import { authFetch } from '@/lib/auth-fetch'
 
 interface Exercise {
@@ -25,6 +26,16 @@ interface TherapyResult {
   scored_at: string
 }
 
+interface LocalSession {
+  id: string
+  timestamp: string
+  focus: string
+  exercise_title: string
+  total_score: number
+  alignment_tier: string
+  client_feedback: string
+}
+
 const tierColors: Record<string, string> = {
   sage: 'text-emerald-700',
   progressing: 'text-green-600',
@@ -46,7 +57,39 @@ const FOCUS_AREAS = [
   'self-worth', 'decision paralysis', 'perfectionism', 'burnout', 'general resilience',
 ]
 
+// ─── Local history helpers ───
+function getLocalSessions(userId: string): LocalSession[] {
+  try {
+    const raw = localStorage.getItem(`therapy_history_${userId}`)
+    return raw ? JSON.parse(raw) : []
+  } catch { return [] }
+}
+
+function saveLocalSession(userId: string, session: LocalSession) {
+  try {
+    const sessions = getLocalSessions(userId)
+    sessions.unshift(session)
+    localStorage.setItem(`therapy_history_${userId}`, JSON.stringify(sessions.slice(0, 50)))
+  } catch { /* storage full */ }
+}
+
+function getHistoryPreference(userId: string): boolean {
+  try {
+    return localStorage.getItem(`therapy_save_history_${userId}`) === 'true'
+  } catch { return false }
+}
+
+function setHistoryPreference(userId: string, value: boolean) {
+  try {
+    localStorage.setItem(`therapy_save_history_${userId}`, value ? 'true' : 'false')
+  } catch { /* ignore */ }
+}
+
 export default function TherapyPage() {
+  const [userId, setUserId] = useState<string | null>(null)
+  const [saveHistory, setSaveHistory] = useState(false)
+  const [localSessions, setLocalSessions] = useState<LocalSession[]>([])
+  const [showHistory, setShowHistory] = useState(false)
   const [focus, setFocus] = useState('general resilience')
   const [exercise, setExercise] = useState<Exercise | null>(null)
   const [response, setResponse] = useState('')
@@ -56,6 +99,26 @@ export default function TherapyPage() {
   const [error, setError] = useState<string | null>(null)
   const [step, setStep] = useState<'setup' | 'respond' | 'result'>('setup')
   const [showPractitionerNotes, setShowPractitionerNotes] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data.user?.id ?? null
+      setUserId(uid)
+      if (uid) {
+        const pref = getHistoryPreference(uid)
+        setSaveHistory(pref)
+        if (pref) setLocalSessions(getLocalSessions(uid))
+      }
+    })
+  }, [])
+
+  function handleToggleSaveHistory() {
+    if (!userId) return
+    const newVal = !saveHistory
+    setSaveHistory(newVal)
+    setHistoryPreference(userId, newVal)
+    if (newVal) setLocalSessions(getLocalSessions(userId))
+  }
 
   async function loadExercise() {
     setLoadingExercise(true)
@@ -98,9 +161,24 @@ export default function TherapyPage() {
         throw new Error(data.error || 'Scoring failed')
       }
 
-      const data = await res.json()
+      const data: TherapyResult = await res.json()
       setResult(data)
       setStep('result')
+
+      // Save session to localStorage if user opted in
+      if (userId && saveHistory && exercise) {
+        const session: LocalSession = {
+          id: crypto.randomUUID(),
+          timestamp: new Date().toISOString(),
+          focus,
+          exercise_title: exercise.exercise_title,
+          total_score: data.total_score,
+          alignment_tier: data.alignment_tier,
+          client_feedback: data.client_feedback,
+        }
+        saveLocalSession(userId, session)
+        setLocalSessions(getLocalSessions(userId))
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
@@ -118,13 +196,72 @@ export default function TherapyPage() {
   return (
     <div className="min-h-screen py-16 px-6">
       <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="font-display text-4xl text-sage-900 mb-3">Stoic Coaching Companion</h1>
           <p className="font-body text-sage-600 max-w-xl mx-auto">
             Stoic-based therapeutic exercises for practitioners and clients. Generate exercises,
             journal responses, and receive virtue-based feedback on your growth.
           </p>
         </div>
+
+        {/* Privacy notice + history toggle */}
+        <div className="bg-sage-50 border border-sage-200 rounded-lg p-4 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-start gap-2">
+            <svg className="w-4 h-4 text-sage-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <p className="font-body text-xs text-sage-600">
+              Your responses are processed by our AI for scoring but <strong>not stored on our servers</strong>.
+              Only anonymous score statistics are logged.
+            </p>
+          </div>
+          {userId && (
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="font-body text-xs text-sage-500 whitespace-nowrap">Save session history on this device</span>
+              <button
+                onClick={handleToggleSaveHistory}
+                className={`relative w-10 h-5 rounded-full transition-colors focus:outline-none ${saveHistory ? 'bg-sage-500' : 'bg-sage-200'}`}
+                aria-label="Toggle local session history"
+              >
+                <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${saveHistory ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Local session history */}
+        {userId && saveHistory && localSessions.length > 0 && (
+          <div className="mb-8">
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className="font-display text-sm text-sage-600 hover:text-sage-800 flex items-center gap-2 mb-3"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {showHistory ? 'Hide' : 'Show'} session history ({localSessions.length} session{localSessions.length !== 1 ? 's' : ''} on this device)
+            </button>
+            {showHistory && (
+              <div className="space-y-2">
+                {localSessions.slice(0, 5).map(s => (
+                  <div key={s.id} className="bg-white border border-sage-200 rounded-lg p-4 flex items-center gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display text-sm text-sage-800 truncate">{s.exercise_title}</p>
+                      <p className="font-body text-xs text-sage-500 capitalize">{s.focus} · {new Date(s.timestamp).toLocaleDateString()}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-display text-lg font-bold text-sage-700">{s.total_score}</p>
+                      <p className={`font-body text-xs capitalize ${tierColors[s.alignment_tier] || 'text-sage-500'}`}>{s.alignment_tier}</p>
+                    </div>
+                  </div>
+                ))}
+                {localSessions.length > 5 && (
+                  <p className="font-body text-xs text-sage-400 text-center">{localSessions.length - 5} more sessions stored locally</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Step 1: Choose focus */}
         {step === 'setup' && (
@@ -212,6 +349,9 @@ export default function TherapyPage() {
                     {result.alignment_tier}
                   </span>
                 </div>
+                {userId && saveHistory && (
+                  <p className="font-body text-xs text-sage-400 mt-2">Session saved to this device</p>
+                )}
               </div>
 
               <div className="space-y-3 mb-6">
@@ -226,19 +366,16 @@ export default function TherapyPage() {
                 ))}
               </div>
 
-              {/* Client feedback */}
               <div className="bg-white/50 rounded-lg p-4 mb-4">
                 <p className="font-body text-sage-700 text-sm">{result.client_feedback}</p>
               </div>
 
-              {/* Next step */}
               <div className="bg-sage-100/50 rounded-lg p-4">
                 <p className="font-display text-sm text-sage-700 mb-1">Next Step</p>
                 <p className="font-body text-sage-600 text-sm">{result.next_exercise_suggestion}</p>
               </div>
             </div>
 
-            {/* Practitioner notes (hidden by default) */}
             <div className="bg-sage-50 rounded-xl border border-sage-200 p-6">
               <button
                 onClick={() => setShowPractitionerNotes(!showPractitionerNotes)}

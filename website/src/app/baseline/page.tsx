@@ -9,6 +9,16 @@ import { authFetch } from '@/lib/auth-fetch'
 
 type Phase = 'intro' | 'questions' | 'q5' | 'loading' | 'result'
 
+// ─── Local storage backup helpers ───
+function saveBaselineLocally(userId: string, result: FinalBaselineResult) {
+  try {
+    localStorage.setItem(`baseline_result_${userId}`, JSON.stringify({
+      ...result,
+      saved_at: new Date().toISOString(),
+    }))
+  } catch { /* storage full */ }
+}
+
 export default function BaselineAssessmentPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [phase, setPhase] = useState<Phase>('intro')
@@ -45,7 +55,6 @@ export default function BaselineAssessmentPage() {
     if (currentQuestion < CORE_QUESTIONS.length - 1) {
       setCurrentQuestion(currentQuestion + 1)
     } else {
-      // All 4 core questions answered — submit to API
       submitAssessment(newAnswers)
     }
   }
@@ -71,16 +80,20 @@ export default function BaselineAssessmentPage() {
         return
       }
 
-      // Check if Q5 is needed
       if (data.needs_q5) {
         setQ5Branch(data.needs_q5)
         setPhase('q5')
         return
       }
 
-      // We have a final result
       setResult(data)
       setPhase('result')
+
+      // Save a local backup of the result so users can always access it
+      if (userId) {
+        saveBaselineLocally(userId, data)
+      }
+
       trackEvent({ event_type: 'baseline_completed', metadata: { score: data.total_score, tier: data.alignment_tier } })
     } catch {
       setError('Network error. Please try again.')
@@ -107,7 +120,7 @@ export default function BaselineAssessmentPage() {
         <p className="font-display text-sage-700 italic mb-8">
           &ldquo;Begin your path toward truth by answering truthfully.&rdquo;
         </p>
-        <div className="bg-white/60 border border-sage-200 rounded-lg p-6 mb-8 text-left">
+        <div className="bg-white/60 border border-sage-200 rounded-lg p-6 mb-6 text-left">
           <p className="font-body text-sage-600 text-sm mb-3">
             This assessment measures your current alignment with the four Stoic cardinal virtues:
             Wisdom, Justice, Courage, and Temperance.
@@ -119,6 +132,24 @@ export default function BaselineAssessmentPage() {
             4 core questions, plus 1 follow-up if needed. Takes about 2 minutes.
           </p>
         </div>
+
+        {/* Privacy notice */}
+        <div className="bg-sage-50 border border-sage-200 rounded-lg p-4 mb-8 text-left">
+          <div className="flex items-start gap-2">
+            <svg className="w-4 h-4 text-sage-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p className="font-body text-xs text-sage-600 mb-1">
+                <strong>What is stored:</strong> Your selected answer options (not any free text) and your scores are saved to your account to track your progress over time. Your results are also saved as a local backup in this browser.
+              </p>
+              <p className="font-body text-xs text-sage-500">
+                You can retake this assessment every 30 days. Your baseline helps calibrate your virtue trend on the dashboard.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <button
           onClick={() => setPhase('questions')}
           className="px-8 py-3 bg-sage-400 text-white font-display text-lg rounded hover:bg-sage-500 transition-colors"
@@ -209,6 +240,16 @@ export default function BaselineAssessmentPage() {
             {tier.label}
           </p>
           <p className="font-body text-sage-500 text-sm mt-1">{tier.description}</p>
+
+          {/* Local backup notice */}
+          <div className="mt-5 pt-4 border-t border-sage-100">
+            <p className="font-body text-xs text-sage-400 flex items-center justify-center gap-1.5">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Saved to your account and as a local backup in this browser
+            </p>
+          </div>
         </div>
 
         {/* Virtue breakdown */}
@@ -244,8 +285,17 @@ export default function BaselineAssessmentPage() {
 
         {/* Interpretation */}
         <div className="bg-white/60 border border-sage-200 rounded-lg p-8 mb-8">
-          <h2 className="font-display text-xl font-medium text-sage-800 mb-4">Your Path Forward</h2>
+          <div className="flex items-center gap-3 mb-4">
+            <img src="/images/Zeus.PNG" alt="The Sage" className="w-14 h-14 object-contain rounded-full border-2 border-amber-200 bg-amber-50/50 drop-shadow-sm" />
+            <div>
+              <h2 className="font-display text-xl font-medium text-sage-800">Your Path Forward</h2>
+              <span className="font-body text-xs text-amber-700 italic">ancient advice*</span>
+            </div>
+          </div>
           <p className="font-body text-sage-700 leading-relaxed">{result.interpretation}</p>
+          <p className="font-body text-xs text-sage-400 mt-4 italic">
+            * ancient advice does not consider your legal or personal obligations.
+          </p>
         </div>
 
         {/* CTA */}
@@ -270,7 +320,6 @@ export default function BaselineAssessmentPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-16">
-      {/* Progress */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <span className="font-display text-sm text-sage-500">
@@ -292,12 +341,10 @@ export default function BaselineAssessmentPage() {
         </div>
       )}
 
-      {/* Question */}
       <h2 className="font-display text-2xl text-sage-800 mb-8 leading-relaxed">
         {question.question}
       </h2>
 
-      {/* Options */}
       <div className="space-y-3">
         {question.options.map((option) => (
           <button
@@ -314,7 +361,6 @@ export default function BaselineAssessmentPage() {
         ))}
       </div>
 
-      {/* Next button */}
       <div className="mt-8 flex justify-end">
         <button
           onClick={handleNext}
