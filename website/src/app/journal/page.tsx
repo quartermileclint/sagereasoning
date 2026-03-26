@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/analytics'
 import { JOURNAL_ENTRIES, PHASES, TOTAL_JOURNAL_DAYS, getJournalEntry, getPhaseForDay } from '@/lib/journal-content'
 import type { User } from '@supabase/supabase-js'
+import { authFetch } from '@/lib/auth-fetch'
 
 type StorageMode = 'cloud' | 'local' | null
 
@@ -147,11 +148,9 @@ export default function JournalPage() {
     try {
       if (storageMode === 'cloud') {
         // Save to Supabase
-        const res = await fetch('/api/journal', {
+        const res = await authFetch('/api/journal', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            user_id: user.id,
             day_number: dayToSubmit,
             phase_number: getPhaseForDay(dayToSubmit)?.number || 1,
             reflection_text: reflectionText.trim(),
@@ -169,11 +168,9 @@ export default function JournalPage() {
         saveLocalEntry(user.id, dayToSubmit, reflectionText.trim())
 
         // Still record completion flag on server for calendar stamps
-        await fetch('/api/journal', {
+        await authFetch('/api/journal', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            user_id: user.id,
             day_number: dayToSubmit,
             phase_number: getPhaseForDay(dayToSubmit)?.number || 1,
             reflection_text: '__local__', // flag: text stored locally

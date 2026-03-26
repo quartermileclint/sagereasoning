@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { getAlignmentTier } from '@/lib/document-scorer'
+import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -51,6 +52,11 @@ const FOCUS_AREAS = [
 
 // GET — Generate a Stoic exercise for a client
 export async function GET(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+
   try {
     const { searchParams } = new URL(request.url)
     const focus = searchParams.get('focus') || 'general resilience'
@@ -104,7 +110,7 @@ Return the JSON exercise.`
       .then(() => {})
 
     return NextResponse.json(result, {
-      headers: { 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(),
     })
   } catch (error) {
     console.error('Therapy exercise generation error:', error)
@@ -117,6 +123,11 @@ Return the JSON exercise.`
 
 // POST — Score a client's exercise response
 export async function POST(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+
   try {
     const { exercise_title, journaling_prompt, response, focus, client_id, practitioner_id } =
       await request.json()
@@ -126,6 +137,27 @@ export async function POST(request: NextRequest) {
         { error: 'response is required — the client\'s journaling response (min 10 characters)' },
         { status: 400 }
       )
+    }
+
+    // Validate text length for response field
+    const responseErr = validateTextLength(response, 'response', TEXT_LIMITS.medium)
+    if (responseErr) {
+      return NextResponse.json({ error: responseErr }, { status: 400 })
+    }
+
+    // Validate optional fields if present
+    if (exercise_title) {
+      const titleErr = validateTextLength(exercise_title, 'exercise_title', TEXT_LIMITS.medium)
+      if (titleErr) {
+        return NextResponse.json({ error: titleErr }, { status: 400 })
+      }
+    }
+
+    if (journaling_prompt) {
+      const promptErr = validateTextLength(journaling_prompt, 'journaling_prompt', TEXT_LIMITS.medium)
+      if (promptErr) {
+        return NextResponse.json({ error: promptErr }, { status: 400 })
+      }
     }
 
     const userMessage = `Score this client's therapy exercise response.
@@ -189,7 +221,7 @@ Return the JSON score with practitioner notes and client feedback.`
       .then(() => {})
 
     return NextResponse.json(result, {
-      headers: { 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(),
     })
   } catch (error) {
     console.error('Therapy score API error:', error)
@@ -202,12 +234,5 @@ Return the JSON score with practitioner notes and client feedback.`
 
 // OPTIONS — CORS preflight
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  })
+  return corsPreflightResponse()
 }

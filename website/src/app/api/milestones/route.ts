@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkNewMilestones, type MilestoneCheckData } from '@/lib/milestones'
+import { checkRateLimit, RATE_LIMITS, requireAuth } from '@/lib/security'
 
 /**
  * GET /api/milestones?user_id=...
@@ -12,12 +13,12 @@ import { checkNewMilestones, type MilestoneCheckData } from '@/lib/milestones'
  */
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const userId = searchParams.get('user_id')
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
 
-  if (!userId) {
-    return NextResponse.json({ error: 'user_id required' }, { status: 400 })
-  }
+  const userId = auth.user.id
 
   const { data: milestones, error } = await supabaseAdmin
     .from('milestones')
@@ -34,12 +35,12 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const userId = searchParams.get('user_id')
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
 
-  if (!userId) {
-    return NextResponse.json({ error: 'user_id required' }, { status: 400 })
-  }
+  const userId = auth.user.id
 
   // Gather all data needed for milestone checks in parallel
   const [

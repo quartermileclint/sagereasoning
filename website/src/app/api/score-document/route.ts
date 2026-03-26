@@ -7,6 +7,7 @@ import {
   POLICY_SCORING_PROMPT,
   type DocumentScore,
 } from '@/lib/document-scorer'
+import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -16,6 +17,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sagereasoning.
 
 // POST — Score a document and return the result + badge URLs
 export async function POST(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+
   try {
     const { text, title, mode } = await request.json()
     const isPolicy = mode === 'policy'
@@ -23,6 +29,11 @@ export async function POST(request: NextRequest) {
 
     if (!text || typeof text !== 'string' || text.trim().length === 0) {
       return NextResponse.json({ error: 'text is required' }, { status: 400 })
+    }
+
+    const textValidationError = validateTextLength(text, 'text', TEXT_LIMITS.document)
+    if (textValidationError) {
+      return NextResponse.json({ error: textValidationError }, { status: 400 })
     }
 
     const trimmed = text.trim()
@@ -145,9 +156,7 @@ export async function POST(request: NextRequest) {
       .then(() => {})
 
     return NextResponse.json(result, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: corsHeaders(),
     })
   } catch (error) {
     console.error('Document score API error:', error)
@@ -160,12 +169,5 @@ export async function POST(request: NextRequest) {
 
 // OPTIONS — CORS preflight
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  })
+  return corsPreflightResponse()
 }

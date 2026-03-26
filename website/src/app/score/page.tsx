@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { authFetch } from '@/lib/auth-fetch'
 import { trackEvent } from '@/lib/analytics'
 import { VIRTUES, getAlignmentTier } from '@/lib/stoic-brain'
 import type { User } from '@supabase/supabase-js'
@@ -50,9 +51,8 @@ export default function ScoreActionPage() {
     setRescoringGrowth(false)
 
     try {
-      const response = await fetch('/api/score', {
+      const response = await authFetch('/api/score', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, context, intendedOutcome }),
       })
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { checkRateLimit, RATE_LIMITS, requireAuth } from '@/lib/security'
 
 // Use client-side supabase with user's auth token for RLS
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -26,13 +27,14 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
  * }
  */
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const userId = searchParams.get('user_id')
-  const month = searchParams.get('month') // format: "2026-03"
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
 
-  if (!userId) {
-    return NextResponse.json({ error: 'user_id required' }, { status: 400 })
-  }
+  const { searchParams } = new URL(request.url)
+  const userId = auth.user.id
+  const month = searchParams.get('month') // format: "2026-03"
 
   // Default to current month
   const now = new Date()

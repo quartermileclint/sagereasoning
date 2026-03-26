@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { authFetch } from '@/lib/auth-fetch'
 
 interface ScenarioOption {
   label: string
@@ -63,7 +64,7 @@ export default function ScenariosPage() {
     setLoadingScenario(true)
     setError(null)
     try {
-      const res = await fetch(`/api/score-scenario?audience=${audience}`)
+      const res = await authFetch(`/api/score-scenario?audience=${audience}`)
       const data = await res.json()
       setScenario(data)
       setSelectedOption(null)
@@ -87,9 +88,8 @@ export default function ScenariosPage() {
     setError(null)
 
     try {
-      const res = await fetch('/api/score-scenario', {
+      const res = await authFetch('/api/score-scenario', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           scenario: scenario?.scenario,
           response: responseText,

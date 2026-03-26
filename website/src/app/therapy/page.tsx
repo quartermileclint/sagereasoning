@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { authFetch } from '@/lib/auth-fetch'
 
 interface Exercise {
   exercise_title: string
@@ -60,7 +61,7 @@ export default function TherapyPage() {
     setLoadingExercise(true)
     setError(null)
     try {
-      const res = await fetch(`/api/score-therapy?focus=${encodeURIComponent(focus)}`)
+      const res = await authFetch(`/api/score-therapy?focus=${encodeURIComponent(focus)}`)
       const data = await res.json()
       setExercise(data)
       setResponse('')
@@ -82,9 +83,8 @@ export default function TherapyPage() {
     setError(null)
 
     try {
-      const res = await fetch('/api/score-therapy', {
+      const res = await authFetch('/api/score-therapy', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           exercise_title: exercise?.exercise_title,
           journaling_prompt: exercise?.journaling_prompt,

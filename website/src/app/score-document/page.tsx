@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { authFetch } from '@/lib/auth-fetch'
 
 interface DocumentResult {
   total_score: number
@@ -53,9 +54,8 @@ export default function ScoreDocumentPage() {
     setResult(null)
 
     try {
-      const res = await fetch('/api/score-document', {
+      const res = await authFetch('/api/score-document', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: text.trim(), title: title.trim() || undefined }),
       })
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { scoreCore, applyQ5, finalizeWithoutQ5, RETAKE_INTERVAL_DAYS } from '@/lib/baseline-assessment'
+import { checkRateLimit, RATE_LIMITS, requireAuth } from '@/lib/security'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,13 +9,16 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+  const user_id = auth.user.id
+
   try {
     const body = await request.json()
-    const { answers, q5_answer, user_id } = body
-
-    if (!user_id) {
-      return NextResponse.json({ error: 'user_id is required' }, { status: 400 })
-    }
+    const { answers, q5_answer } = body
 
     if (!answers || !Array.isArray(answers) || answers.length !== 4) {
       return NextResponse.json({ error: 'Exactly 4 answer IDs required' }, { status: 400 })
@@ -95,17 +99,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(finalResult)
   } catch (error: unknown) {
     console.error('Baseline assessment error:', error)
-    const message = error instanceof Error ? error.message : 'Internal server error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 // GET — check if user has a baseline and when retake is eligible
 export async function GET(request: NextRequest) {
-  const userId = request.nextUrl.searchParams.get('user_id')
-  if (!userId) {
-    return NextResponse.json({ error: 'user_id is required' }, { status: 400 })
-  }
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+  const userId = auth.user.id
 
   const { data } = await supabaseAdmin
     .from('baseline_assessments')

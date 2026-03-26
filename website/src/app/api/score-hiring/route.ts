@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { getAlignmentTier } from '@/lib/document-scorer'
+import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -72,6 +73,11 @@ const SCENARIOS: Record<string, string[]> = {
 
 // GET — Return scenarios for a given role type
 export async function GET(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+
   const { searchParams } = new URL(request.url)
   const role = searchParams.get('role') || 'general'
 
@@ -85,14 +91,38 @@ export async function GET(request: NextRequest) {
       instructions:
         'Have the candidate respond to each scenario. Then POST their responses back to this endpoint for scoring.',
     },
-    { headers: { 'Access-Control-Allow-Origin': '*' } }
+    { headers: corsHeaders() }
   )
 }
 
 // POST — Score candidate responses
 export async function POST(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+
   try {
     const { role, responses, candidate_name } = await request.json()
+
+    // Validate text lengths
+    if (candidate_name) {
+      const nameErr = validateTextLength(candidate_name, 'candidate_name', TEXT_LIMITS.medium)
+      if (nameErr) {
+        return NextResponse.json({ error: nameErr }, { status: 400 })
+      }
+    }
+
+    if (responses && Array.isArray(responses)) {
+      for (const r of responses) {
+        if (r.response) {
+          const responseErr = validateTextLength(r.response, 'response', TEXT_LIMITS.medium)
+          if (responseErr) {
+            return NextResponse.json({ error: responseErr }, { status: 400 })
+          }
+        }
+      }
+    }
 
     const roleKey = role && SCENARIOS[role] ? role : 'general'
     const scenarios = SCENARIOS[roleKey]
@@ -185,7 +215,7 @@ Score each scenario response and provide an overall assessment. Return the JSON.
       .then(() => {})
 
     return NextResponse.json(result, {
-      headers: { 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(),
     })
   } catch (error) {
     console.error('Hiring assessment API error:', error)
@@ -198,12 +228,5 @@ Score each scenario response and provide an overall assessment. Return the JSON.
 
 // OPTIONS — CORS preflight
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  })
+  return corsPreflightResponse()
 }

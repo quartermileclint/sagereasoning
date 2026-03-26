@@ -7,6 +7,7 @@ import {
   type GuardrailResponse,
 } from '@/lib/guardrails'
 import { getAlignmentTier } from '@/lib/document-scorer'
+import { checkRateLimit, RATE_LIMITS, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -14,11 +15,26 @@ const client = new Anthropic({
 
 // POST — Check an action against Stoic virtue guardrails before executing
 export async function POST(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.publicAgent)
+  if (rateLimitError) return rateLimitError
+
   try {
     const { action, context, threshold = 50, agent_id } = await request.json()
 
     if (!action || typeof action !== 'string' || action.trim().length === 0) {
       return NextResponse.json({ error: 'action is required' }, { status: 400 })
+    }
+
+    const actionErr = validateTextLength(action, 'action', TEXT_LIMITS.medium)
+    if (actionErr) {
+      return NextResponse.json({ error: actionErr }, { status: 400 })
+    }
+
+    if (context) {
+      const contextErr = validateTextLength(context, 'context', TEXT_LIMITS.medium)
+      if (contextErr) {
+        return NextResponse.json({ error: contextErr }, { status: 400 })
+      }
     }
 
     const clampedThreshold = Math.max(0, Math.min(100, Number(threshold) || 50))
@@ -91,7 +107,7 @@ Return the JSON score.`
 
     return NextResponse.json(result, {
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        ...publicCorsHeaders(),
       },
     })
   } catch (error) {
@@ -104,7 +120,10 @@ Return the JSON score.`
 }
 
 // GET — Return usage documentation
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.publicAgent)
+  if (rateLimitError) return rateLimitError
+
   return NextResponse.json(
     {
       name: 'SageReasoning Stoic Guardrail',
@@ -150,7 +169,7 @@ if (!check.proceed) {
     },
     {
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        ...publicCorsHeaders(),
         'Cache-Control': 'public, max-age=3600',
       },
     }
@@ -159,12 +178,5 @@ if (!check.proceed) {
 
 // OPTIONS — CORS preflight
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  })
+  return publicCorsPreflightResponse()
 }

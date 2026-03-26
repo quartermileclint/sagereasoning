@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { getTierColor, getTierLabel, getAlignmentTier } from '@/lib/document-scorer'
+import { checkRateLimit, RATE_LIMITS, publicCorsHeaders } from '@/lib/security'
 
 // Generate an SVG badge for a scored document
 // Format: shields.io-style badge with SageReasoning branding
@@ -42,9 +43,12 @@ function generateBadgeSvg(
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.publicAgent)
+  if (rateLimitError) return rateLimitError
+
   const { id } = await params
 
   // Preview badge (not from DB)
@@ -54,7 +58,7 @@ export async function GET(
       headers: {
         'Content-Type': 'image/svg+xml',
         'Cache-Control': 'public, max-age=60',
-        'Access-Control-Allow-Origin': '*',
+        ...publicCorsHeaders(),
       },
     })
   }
@@ -73,7 +77,7 @@ export async function GET(
         status: 404,
         headers: {
           'Content-Type': 'image/svg+xml',
-          'Access-Control-Allow-Origin': '*',
+          ...publicCorsHeaders(),
         },
       })
     }
@@ -85,7 +89,7 @@ export async function GET(
       headers: {
         'Content-Type': 'image/svg+xml',
         'Cache-Control': 'public, max-age=3600, s-maxage=86400',
-        'Access-Control-Allow-Origin': '*',
+        ...publicCorsHeaders(),
       },
     })
   } catch (error) {

@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import fs from 'fs'
 import path from 'path'
+import { checkRateLimit, RATE_LIMITS, publicCorsHeaders } from '@/lib/security'
 
 // Serve the stoic-brain.json file and log the request for AI agent tracking
 export async function GET(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.publicAgent)
+  if (rateLimitError) return rateLimitError
+
   try {
     const userAgent = request.headers.get('user-agent') || 'unknown'
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
@@ -90,7 +94,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response, {
       headers: {
         'Cache-Control': 'public, max-age=3600, s-maxage=86400',
-        'Access-Control-Allow-Origin': '*', // Allow AI agents from any origin
+        ...publicCorsHeaders(),
       },
     })
   } catch (error) {

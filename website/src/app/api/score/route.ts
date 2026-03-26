@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -46,12 +47,28 @@ You must return ONLY valid JSON — no markdown, no explanation outside the JSON
 }`
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+
+  // Authentication required
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+
   try {
     const { action, context, intendedOutcome } = await request.json()
 
     if (!action || action.trim().length === 0) {
       return NextResponse.json({ error: 'Action is required' }, { status: 400 })
     }
+
+    // Text length limits
+    const actionErr = validateTextLength(action, 'Action', TEXT_LIMITS.short)
+    if (actionErr) return NextResponse.json({ error: actionErr }, { status: 400 })
+    const contextErr = validateTextLength(context, 'Context', TEXT_LIMITS.medium)
+    if (contextErr) return NextResponse.json({ error: contextErr }, { status: 400 })
+    const outcomeErr = validateTextLength(intendedOutcome, 'Intended outcome', TEXT_LIMITS.short)
+    if (outcomeErr) return NextResponse.json({ error: outcomeErr }, { status: 400 })
 
     const userMessage = `Please score the following action against the four Stoic virtues.
 
@@ -92,9 +109,14 @@ Return only the JSON score object.`
       }
     }
 
-    return NextResponse.json(scoreData)
+    return NextResponse.json(scoreData, { headers: corsHeaders() })
   } catch (error) {
     console.error('Score API error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
+}
+
+// OPTIONS — CORS preflight
+export async function OPTIONS() {
+  return corsPreflightResponse()
 }

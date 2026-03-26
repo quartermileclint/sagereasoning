@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { authFetch } from '@/lib/auth-fetch'
 
 interface FlaggedClause {
   clause_summary: string
@@ -63,9 +64,8 @@ export default function ScorePolicyPage() {
     setResult(null)
 
     try {
-      const res = await fetch('/api/score-document', {
+      const res = await authFetch('/api/score-document', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: text.trim(), title: title.trim() || undefined, mode: 'policy' }),
       })
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { authFetch } from '@/lib/auth-fetch'
 
 interface ScenarioItem {
   number: number
@@ -71,7 +72,7 @@ export default function HiringPage() {
     setLoadingScenarios(true)
     setError(null)
     try {
-      const res = await fetch(`/api/score-hiring?role=${role}`)
+      const res = await authFetch(`/api/score-hiring?role=${role}`)
       const data = await res.json()
       setScenarios(data.scenarios)
       setResponses({})
@@ -94,9 +95,8 @@ export default function HiringPage() {
     setError(null)
 
     try {
-      const res = await fetch('/api/score-hiring', {
+      const res = await authFetch('/api/score-hiring', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           role,
           candidate_name: candidateName.trim() || undefined,

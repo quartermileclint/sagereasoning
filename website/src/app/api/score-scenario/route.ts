@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { getAlignmentTier } from '@/lib/document-scorer'
+import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -52,6 +53,11 @@ const TOPIC_POOLS: Record<Audience, string[]> = {
 
 // GET — Generate a scenario
 export async function GET(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+
   try {
     const { searchParams } = new URL(request.url)
     const audience = (searchParams.get('audience') || 'teen') as Audience
@@ -108,7 +114,7 @@ Return the JSON scenario with options.`
       .then(() => {})
 
     return NextResponse.json(result, {
-      headers: { 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(),
     })
   } catch (error) {
     console.error('Scenario generation error:', error)
@@ -121,6 +127,11 @@ Return the JSON scenario with options.`
 
 // POST — Score a response to a scenario
 export async function POST(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+
   try {
     const { scenario, response, audience, user_id } = await request.json()
 
@@ -136,6 +147,17 @@ export async function POST(request: NextRequest) {
         { error: 'response is required — the user\'s answer (min 5 characters)' },
         { status: 400 }
       )
+    }
+
+    // Validate text lengths
+    const scenarioErr = validateTextLength(scenario, 'scenario', TEXT_LIMITS.medium)
+    if (scenarioErr) {
+      return NextResponse.json({ error: scenarioErr }, { status: 400 })
+    }
+
+    const responseErr = validateTextLength(response, 'response', TEXT_LIMITS.medium)
+    if (responseErr) {
+      return NextResponse.json({ error: responseErr }, { status: 400 })
     }
 
     const validAudience = audience || 'teen'
@@ -198,7 +220,7 @@ Score this response. Return the JSON.`
       .then(() => {})
 
     return NextResponse.json(result, {
-      headers: { 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(),
     })
   } catch (error) {
     console.error('Scenario score API error:', error)
@@ -211,12 +233,5 @@ Score this response. Return the JSON.`
 
 // OPTIONS — CORS preflight
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  })
+  return corsPreflightResponse()
 }

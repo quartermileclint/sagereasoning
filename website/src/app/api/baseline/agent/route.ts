@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { AGENT_SCENARIOS, type AgentBaselineResult } from '@/lib/agent-baseline'
+import { checkRateLimit, RATE_LIMITS, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -60,7 +61,7 @@ export async function GET() {
     })),
   }, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      ...publicCorsHeaders(),
       'Cache-Control': 'public, max-age=86400',
     },
   })
@@ -68,6 +69,9 @@ export async function GET() {
 
 // POST — score the agent's responses
 export async function POST(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.publicAgent)
+  if (rateLimitError) return rateLimitError
+
   try {
     const body = await request.json()
     const { agent_id, responses } = body
@@ -88,6 +92,9 @@ export async function POST(request: NextRequest) {
       }
       if (!r.response || typeof r.response !== 'string' || r.response.trim().length < 20) {
         return NextResponse.json({ error: `Response for ${r.scenario_id} must be at least 20 characters` }, { status: 400 })
+      }
+      if (r.response.length > TEXT_LIMITS.medium) {
+        return NextResponse.json({ error: `Response for ${r.scenario_id} exceeds maximum length` }, { status: 400 })
       }
     }
 
@@ -198,7 +205,7 @@ Return only the JSON score object.`
     }).then(() => {})
 
     return NextResponse.json(result, {
-      headers: { 'Access-Control-Allow-Origin': '*' },
+      headers: publicCorsHeaders(),
     })
   } catch (error) {
     console.error('Agent baseline error:', error)
@@ -208,12 +215,5 @@ Return only the JSON score object.`
 
 // Handle CORS preflight
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  })
+  return publicCorsPreflightResponse()
 }

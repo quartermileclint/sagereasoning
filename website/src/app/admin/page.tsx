@@ -55,10 +55,13 @@ export default function AdminPage() {
   const [error, setError] = useState('')
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
 
-  const fetchMetrics = useCallback(async (userId: string) => {
+  const fetchMetrics = useCallback(async (_userId: string) => {
     try {
+      const { data: { session } } = await supabase.auth.getSession()
       const response = await fetch('/api/admin/metrics', {
-        headers: { 'x-user-id': userId },
+        headers: {
+          'Authorization': `Bearer ${session?.access_token || ''}`,
+        },
       })
       if (!response.ok) {
         throw new Error('Unauthorized or fetch failed')

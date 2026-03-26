@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { authFetch } from '@/lib/auth-fetch'
 
 interface SocialResult {
   total_score: number
@@ -56,9 +57,8 @@ export default function ScoreSocialPage() {
     setResult(null)
 
     try {
-      const res = await fetch('/api/score-social', {
+      const res = await authFetch('/api/score-social', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text: text.trim(),
           platform: platform || undefined,

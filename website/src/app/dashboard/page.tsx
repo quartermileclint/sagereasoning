@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { authFetch } from '@/lib/auth-fetch'
 import { trackEvent } from '@/lib/analytics'
 import { VIRTUES, getAlignmentTier } from '@/lib/stoic-brain'
 import PracticeCalendar from '@/components/PracticeCalendar'
@@ -74,7 +75,7 @@ export default function DashboardPage() {
       const [profileRes, scoresRes, baselineRes] = await Promise.all([
         supabase.from('user_stoic_profiles').select('*').eq('user_id', user.id).single(),
         supabase.from('action_scores').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
-        fetch(`/api/baseline?user_id=${user.id}`).then(r => r.json()),
+        authFetch('/api/baseline').then(r => r.json()),
       ])
 
       if (profileRes.data) setProfile(profileRes.data)

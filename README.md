@@ -98,9 +98,14 @@ Built with Next.js (a web framework), hosted on Vercel (free), auto-deploys ever
 | `src/lib/document-scorer.ts` | Scoring logic and prompts for the document scorer |
 | `src/lib/guardrails.ts` | The AI agent guardrail logic — virtue-gate before action execution |
 | `src/lib/analytics.ts` | Tracks usage events (sign-ins, scores, page views) for the admin dashboard |
+| `src/lib/milestones.ts` | All milestone definitions and the logic that checks when they are earned (includes journal milestones) |
+| `src/lib/journal-content.ts` | All 56 Stoic journal entries — teachings, reflective questions, phase structure |
+| `src/lib/stoic-brain.ts` | The four virtues, alignment tiers, and helper functions used across the website |
 | `src/lib/supabase.ts` | Connection to the database (user-facing) |
 | `src/lib/supabase-server.ts` | Connection to the database (admin-level, bypasses user restrictions) |
 | `src/components/NavBar.tsx` | The navigation bar at the top of every page |
+| `src/components/PracticeCalendar.tsx` | Monthly calendar showing daily activity — action stamps, reflection stamps, and journal stamps |
+| `src/components/MilestonesDisplay.tsx` | Visual milestone progress display on the dashboard |
 | `public/llms.txt` | A plain-text file that tells AI agents and LLMs what this site does and how to use it |
 
 ---
@@ -163,15 +168,17 @@ Supabase is a free cloud database. Think of it as a spreadsheet in the cloud tha
 | `baseline_assessments` | A user's baseline quiz result — all 4 virtue scores, tier, date taken, retake eligibility |
 | `document_scores` | Scored documents — title, word count, virtue scores, reasoning. Public read (needed for badge lookups). |
 | `reflections` | Daily journal entries — what happened, how responded, virtue scores, sage perspective |
+| `journal_entries` | The Path of the Prokoptos journal — day number, phase, reflection text (or `__local__` flag for local-storage users), word count, completion timestamp |
 | `analytics_events` | Usage tracking — every sign-in, score, page view, API fetch. Used to populate the admin dashboard. |
 
 **SQL migration files** (run these in Supabase SQL Editor to create tables):
 
-| File | Table it creates |
-|------|-----------------|
-| `website/supabase-baseline-migration.sql` | `baseline_assessments` |
-| `website/supabase-document-scores-migration.sql` | `document_scores` |
-| `website/supabase-reflections-migration.sql` | `reflections` |
+| File | Table it creates | Status |
+|------|-----------------|--------|
+| `website/supabase-baseline-migration.sql` | `baseline_assessments` | ✅ Done |
+| `website/supabase-document-scores-migration.sql` | `document_scores` | ✅ Done |
+| `website/supabase-reflections-migration.sql` | `reflections` | ✅ Done |
+| `api/migrations/add-journal-entries-table.sql` | `journal_entries` | ✅ Done 26 March 2026 |
 
 ---
 
@@ -213,34 +220,95 @@ These files sit in public locations so AI crawlers, search engines, and AI agent
 
 ---
 
-## Current Priorities (as of 24 March 2026)
+## Current Status (as of 26 March 2026)
 
-### Phase 8 — Stoic Brain Applications
-*Built and deployed. Pending: commit, push, run 2 SQL migrations.*
+### Live Features
 
-| # | Action | Status |
-|---|--------|--------|
-| 1 | Document Score Badge — `/api/score-document`, `/api/badge/{id}`, `/score-document`, `/score/{id}` | ✅ Built |
-| 2 | AI Agent Guardrails — `/api/guardrail` virtue-gate middleware | ✅ Built |
-| 3 | Decision Scorer — `/api/score-decision` compares 2–5 options | ✅ Built |
-| 4 | Conversation Auditor — `/api/score-conversation` with per-participant scores | ✅ Built |
-| 5 | Daily Reflection Journal — `/api/reflect` with sage perspective + evening prompt | ✅ Built |
-| 6 | Run `supabase-document-scores-migration.sql` in Supabase | ✅ Done |
-| 7 | Run `supabase-reflections-migration.sql` in Supabase | ✅ Done |
-| 8 | Commit and push via GitHub Desktop | ⏳ Next |
-| 9 | Verify live: `/score-document` page, badge renders, badge click-through | ⏳ Next |
+| Feature | URL | Status |
+|---------|-----|--------|
+| Homepage | `/` | ✅ Live |
+| Sign In / Sign Up | `/auth` | ✅ Live |
+| Baseline Assessment | `/baseline` | ✅ Live |
+| Score an Action | `/score` | ✅ Live |
+| Score a Document | `/score-document` | ✅ Live |
+| Review a Policy | `/score-policy` | ✅ Live |
+| Social Media Filter | `/score-social` | ✅ Live |
+| Hiring Assessment | `/hiring` | ✅ Live |
+| Coaching Companion | `/therapy` | ✅ Live |
+| Ethical Scenarios | `/scenarios` | ✅ Live |
+| Dashboard | `/dashboard` | ✅ Live |
+| **Stoic Journal** | `/journal` | ✅ Live — deployed 26 March 2026 |
+| API Docs | `/api-docs` | ✅ Live |
+| Admin | `/admin` | ✅ Live (owner only) |
 
-### Phase 8 — All Applications (complete)
+---
 
-| # | Application | Status | Endpoint | UI Page |
-|---|-------------|--------|----------|---------|
-| A | **Hiring Assessment** | ✅ Built | `/api/score-hiring` (GET scenarios, POST scores) | `/hiring` |
-| B | **Contract / Policy Reviewer** | ✅ Built | `/api/score-document` with `mode: "policy"` | `/score-policy` |
-| C | **Social Media Filter** | ✅ Built | `/api/score-social` | `/score-social` |
-| D | **Therapy / Coaching Companion** | ✅ Built | `/api/score-therapy` (GET exercises, POST scores) | `/therapy` |
-| E | **Parenting / Education Scenarios** | ✅ Built | `/api/score-scenario` (GET scenarios, POST scores) | `/scenarios` |
+### Priority 4 — Stoic Journal (COMPLETE ✅)
 
-### Phase 7 — Marketing (items 1–4 complete, items 5–10 pending)
+The Path of the Prokoptos — a 56-day structured Stoic journal. Deployed 26 March 2026.
+
+**What was built:**
+
+| File | What it does |
+|------|-------------|
+| `src/lib/journal-content.ts` | All 56 journal entries as static data — teaching passage + reflective question per day, across 7 phases |
+| `src/app/journal/page.tsx` | The full journal page with storage choice setup, entry display, writing area, curriculum map, and day navigation |
+| `src/app/api/journal/route.ts` | POST (submit entries with pace control) and GET (retrieve progress) endpoints |
+| `api/migrations/add-journal-entries-table.sql` | Database migration — run in Supabase to create the `journal_entries` table |
+
+**Journal design:**
+- 56 days across 7 phases: Foundation → Wisdom → Thoughts → Emotions → Acceptance → Gratitude → Integration
+- Every entry derived from the Stoic Brain virtue framework, sub-virtues, and scoring philosophy
+- Format: READ a succinct teaching → REFLECT by writing honestly about your own experience
+- One entry per day (pace-controlled server-side)
+- Entries are **not virtue-scored** — the journal is a safe space for honest reflection
+- Completing an entry earns a **calendar stamp** for tenacity tracking
+- 6 new milestones: First Page, Examined Week, Foundation Layer, Halfway Mark, The Prokoptos, Return to the Path
+
+**Local Storage option (Priority 5 partial implementation):**
+
+At setup, users choose how their written reflections are stored:
+- **Cloud** — saved to their account, accessible from any device, full history
+- **Local Only** — text stays in browser localStorage, never sent to the server. Only a completion flag is sent for calendar stamps.
+
+**SQL migration required:**
+Run `api/migrations/add-journal-entries-table.sql` in Supabase SQL Editor. ✅ Done 26 March 2026.
+
+---
+
+### Phase 8 — Stoic Brain Applications (COMPLETE ✅)
+
+| Application | Endpoint | UI Page | Status |
+|-------------|----------|---------|--------|
+| Document Score Badge | `/api/score-document`, `/api/badge/{id}` | `/score-document`, `/score/{id}` | ✅ Live |
+| AI Agent Guardrails | `/api/guardrail` | — | ✅ Live |
+| Decision Scorer | `/api/score-decision` | — | ✅ Live |
+| Conversation Auditor | `/api/score-conversation` | — | ✅ Live |
+| Daily Reflection | `/api/reflect` | — | ✅ Live |
+| Hiring Assessment | `/api/score-hiring` | `/hiring` | ✅ Live |
+| Policy Reviewer | `/api/score-document` (mode: policy) | `/score-policy` | ✅ Live |
+| Social Media Filter | `/api/score-social` | `/score-social` | ✅ Live |
+| Coaching Companion | `/api/score-therapy` | `/therapy` | ✅ Live |
+| Ethical Scenarios | `/api/score-scenario` | `/scenarios` | ✅ Live |
+
+---
+
+### Remaining Priorities
+
+| Priority | Item | Status |
+|----------|------|--------|
+| P1 | Brainstorm and implement more Stoic Brain use cases | ⏳ Ongoing |
+| P2 | Research gamification that doesn't violate Stoic values | ⏳ Pending |
+| P3 | Design a unique Stoic social platform | ⏳ Pending |
+| P5 | Local storage options for sensitive features (journal: done) | 🔄 Partial |
+| P6 | World map showing user locations with sage logos | ⏳ Pending |
+| P7 | Security review of files and data | ⏳ Pending |
+| P8 | New marketing strategy based on fully featured website | ⏳ Pending |
+| P9 | Legal implications research | ⏳ Pending |
+| P10 | Income model research to cover escalating costs | ⏳ Pending |
+| P13 | Implement marketing strategy | ⏳ Pending |
+
+### Phase 7 — Marketing (items 1–4 complete)
 
 | # | Action | Status |
 |---|--------|--------|

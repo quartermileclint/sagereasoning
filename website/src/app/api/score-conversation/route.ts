@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { getAlignmentTier } from '@/lib/document-scorer'
+import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -43,8 +44,27 @@ If participant names cannot be identified, return an empty participants array.`
 
 // POST — Score a conversation
 export async function POST(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+
   try {
     const { conversation, context, format } = await request.json()
+
+    // Validate text length
+    if (conversation && typeof conversation === 'string' && conversation.length > TEXT_LIMITS.long) {
+      return NextResponse.json(
+        { error: `conversation exceeds maximum length of ${TEXT_LIMITS.long} characters` },
+        { status: 400 }
+      )
+    }
+    if (context && typeof context === 'string' && context.length > TEXT_LIMITS.long) {
+      return NextResponse.json(
+        { error: `context exceeds maximum length of ${TEXT_LIMITS.long} characters` },
+        { status: 400 }
+      )
+    }
 
     if (!conversation || typeof conversation !== 'string' || conversation.trim().length < 20) {
       return NextResponse.json(
@@ -122,7 +142,7 @@ Return the JSON score.`
       .then(() => {})
 
     return NextResponse.json(result, {
-      headers: { 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(),
     })
   } catch (error) {
     console.error('Conversation score API error:', error)
@@ -135,12 +155,5 @@ Return the JSON score.`
 
 // OPTIONS — CORS preflight
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  })
+  return corsPreflightResponse()
 }

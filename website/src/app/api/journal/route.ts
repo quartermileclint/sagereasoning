@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -10,23 +11,35 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
  * Submit a journal entry. Creates a record in journal_entries and
  * also registers a journal completion in the practice calendar system.
  *
- * Body: { user_id, day_number, phase_number, reflection_text }
+ * Body: { day_number, phase_number, reflection_text }
+ * User identity is extracted from the JWT — not from the request body.
  *
  * For local-storage users, reflection_text will be '__local__' — the actual
  * text stays on their device. We still record the completion for calendar stamps.
  */
 export async function POST(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+  const user_id = auth.user.id
+
   try {
     const body = await request.json()
-    const { user_id, day_number, phase_number, reflection_text } = body
+    const { day_number, phase_number, reflection_text } = body
 
-    if (!user_id || !day_number || !reflection_text) {
-      return NextResponse.json({ error: 'user_id, day_number, and reflection_text are required' }, { status: 400 })
+    if (!day_number || !reflection_text) {
+      return NextResponse.json({ error: 'day_number and reflection_text are required' }, { status: 400 })
     }
 
     if (day_number < 1 || day_number > 56) {
       return NextResponse.json({ error: 'day_number must be between 1 and 56' }, { status: 400 })
     }
+
+    // Text length validation
+    const textErr = validateTextLength(reflection_text, 'Reflection text', TEXT_LIMITS.medium)
+    if (textErr) return NextResponse.json({ error: textErr }, { status: 400 })
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
@@ -95,20 +108,22 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * GET /api/journal?user_id=...
- * GET /api/journal?user_id=...&day=5
+ * GET /api/journal?day=5
  *
- * Retrieve journal entries. If day is specified, returns that single entry.
- * Otherwise returns all entries for the user.
+ * Retrieve journal entries for the authenticated user.
+ * If day is specified, returns that single entry.
+ * Otherwise returns all entries.
  */
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const userId = searchParams.get('user_id')
-  const day = searchParams.get('day')
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
 
-  if (!userId) {
-    return NextResponse.json({ error: 'user_id required' }, { status: 400 })
-  }
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+  const userId = auth.user.id
+
+  const { searchParams } = new URL(request.url)
+  const day = searchParams.get('day')
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 

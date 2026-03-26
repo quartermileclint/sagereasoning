@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { CORE_QUESTIONS, Q5_BRANCHES, type FinalBaselineResult } from '@/lib/baseline-assessment'
 import { VIRTUES, getAlignmentTier } from '@/lib/stoic-brain'
 import { trackEvent } from '@/lib/analytics'
+import { authFetch } from '@/lib/auth-fetch'
 
 type Phase = 'intro' | 'questions' | 'q5' | 'loading' | 'result'
 
@@ -54,13 +55,11 @@ export default function BaselineAssessmentPage() {
     setError('')
 
     try {
-      const res = await fetch('/api/baseline', {
+      const res = await authFetch('/api/baseline', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           answers: coreAnswers,
           q5_answer: q5Answer || undefined,
-          user_id: userId,
         }),
       })
 

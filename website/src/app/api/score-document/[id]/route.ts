@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { checkRateLimit, RATE_LIMITS, publicCorsHeaders } from '@/lib/security'
 
 // GET — Retrieve a saved document score by ID
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+
   const { id } = await params
 
   try {
@@ -22,7 +26,7 @@ export async function GET(
     return NextResponse.json(data, {
       headers: {
         'Cache-Control': 'public, max-age=3600',
-        'Access-Control-Allow-Origin': '*',
+        ...publicCorsHeaders(),
       },
     })
   } catch (error) {

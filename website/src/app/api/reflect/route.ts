@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { getAlignmentTier } from '@/lib/document-scorer'
+import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -31,8 +32,25 @@ Return ONLY valid JSON:
 
 // POST — Submit a daily reflection
 export async function POST(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+
   try {
     const { what_happened, how_i_responded, user_id } = await request.json()
+
+    const textLengthError = validateTextLength(what_happened, 'what_happened', TEXT_LIMITS.medium)
+    if (textLengthError) {
+      return NextResponse.json({ error: textLengthError }, { status: 400 })
+    }
+
+    if (how_i_responded) {
+      const responseError = validateTextLength(how_i_responded, 'how_i_responded', TEXT_LIMITS.medium)
+      if (responseError) {
+        return NextResponse.json({ error: responseError }, { status: 400 })
+      }
+    }
 
     if (!what_happened || typeof what_happened !== 'string' || what_happened.trim().length < 10) {
       return NextResponse.json(
@@ -116,7 +134,7 @@ Score my actions and give me the sage perspective.`
       .then(() => {})
 
     return NextResponse.json(result, {
-      headers: { 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(),
     })
   } catch (error) {
     console.error('Reflection API error:', error)
@@ -129,12 +147,5 @@ Score my actions and give me the sage perspective.`
 
 // OPTIONS — CORS preflight
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  })
+  return corsPreflightResponse()
 }

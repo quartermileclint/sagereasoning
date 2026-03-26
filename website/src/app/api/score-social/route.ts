@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { getAlignmentTier } from '@/lib/document-scorer'
+import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -38,6 +39,11 @@ Return ONLY valid JSON:
 
 // POST — Score a social media post before publishing
 export async function POST(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+
   try {
     const { text, platform, context } = await request.json()
 
@@ -46,6 +52,11 @@ export async function POST(request: NextRequest) {
         { error: 'text is required — the post you want to score before publishing' },
         { status: 400 }
       )
+    }
+
+    const textErr = validateTextLength(text, 'text', TEXT_LIMITS.medium)
+    if (textErr) {
+      return NextResponse.json({ error: textErr }, { status: 400 })
     }
 
     // Social media is short-form — cap at 2000 characters
@@ -108,7 +119,7 @@ Return the JSON score.`
       .then(() => {})
 
     return NextResponse.json(result, {
-      headers: { 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders(),
     })
   } catch (error) {
     console.error('Social score API error:', error)
@@ -121,12 +132,5 @@ Return the JSON score.`
 
 // OPTIONS — CORS preflight
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  })
+  return corsPreflightResponse()
 }

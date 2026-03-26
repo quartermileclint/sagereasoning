@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { checkRateLimit, RATE_LIMITS, getAuthenticatedUser } from '@/lib/security'
 
 // Admin user ID — only this user can access metrics
 const ADMIN_USER_ID = process.env.ADMIN_USER_ID
 
 export async function GET(request: NextRequest) {
-  // Verify admin access via auth header
-  const authHeader = request.headers.get('x-user-id')
-  if (!ADMIN_USER_ID || authHeader !== ADMIN_USER_ID) {
+  // Rate limiting
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.admin)
+  if (rateLimitError) return rateLimitError
+
+  // Verify admin access via proper JWT authentication
+  const user = await getAuthenticatedUser(request)
+  if (!user || !ADMIN_USER_ID || user.id !== ADMIN_USER_ID) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
