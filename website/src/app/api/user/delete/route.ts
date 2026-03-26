@@ -56,7 +56,7 @@ export async function DELETE(request: NextRequest) {
         'This feature is in development. To delete your account now, please email support@sagereasoning.com with the subject "Account Deletion Request".',
       status: 'coming_soon',
     },
-    { status: 503, headers: corsHeaders }
+    { status: 503, headers: corsHeaders() }
   )
   // ─────────────────────────────────────────────────────────────────────────
 }

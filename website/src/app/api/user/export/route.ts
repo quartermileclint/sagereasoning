@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
         'This feature is in development. To request your data now, please email support@sagereasoning.com.',
       status: 'coming_soon',
     },
-    { status: 503, headers: corsHeaders }
+    { status: 503, headers: corsHeaders() }
   )
   // ─────────────────────────────────────────────────────────────────────────
 }
