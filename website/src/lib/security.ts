@@ -243,7 +243,7 @@ export function publicCorsPreflightResponse(): NextResponse {
 /** Valid endpoints that require API key gating */
 export type GatedEndpoint = 'guardrail' | 'score_iterate' | 'agent_baseline' | 'other'
 
-export interface ApiKeyValidationResult {
+export type ApiKeyValidationResult = {
   valid: true
   api_key_id: string
   label: string
