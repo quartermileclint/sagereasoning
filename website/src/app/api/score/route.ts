@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
-    const { action, context, intendedOutcome } = await request.json()
+    const { action, context, intendedOutcome, prior_feedback } = await request.json()
 
     if (!action || action.trim().length === 0) {
       return NextResponse.json({ error: 'Action is required' }, { status: 400 })
@@ -70,11 +70,31 @@ export async function POST(request: NextRequest) {
     const outcomeErr = validateTextLength(intendedOutcome, 'Intended outcome', TEXT_LIMITS.short)
     if (outcomeErr) return NextResponse.json({ error: outcomeErr }, { status: 400 })
 
+    // Optional: prior_feedback allows agents to pass previous sage feedback as context
+    // This enables lightweight iteration via /api/score without needing /api/score-iterate
+    let priorFeedbackBlock = ''
+    if (prior_feedback && typeof prior_feedback === 'object') {
+      const pf = prior_feedback as {
+        previous_action?: string
+        previous_score?: number
+        sage_reasoning?: string
+        sage_growth_action?: string
+      }
+      if (pf.previous_action || pf.previous_score || pf.sage_reasoning) {
+        priorFeedbackBlock = `\n\nDELIBERATION CONTEXT (the agent is iterating on a previous action):
+Previous action: ${pf.previous_action || 'not provided'}
+Previous score: ${pf.previous_score ?? 'not provided'}
+Sage reasoning on previous action: ${pf.sage_reasoning || 'not provided'}
+Sage suggested growth action: ${pf.sage_growth_action || 'not provided'}
+Note: Score the current action on its own merits, but acknowledge if it addresses the sage's prior feedback.`
+      }
+    }
+
     const userMessage = `Please score the following action against the four Stoic virtues.
 
 Action: ${action.trim()}
 ${context?.trim() ? `Context: ${context.trim()}` : ''}
-${intendedOutcome?.trim() ? `Intended outcome: ${intendedOutcome.trim()}` : ''}
+${intendedOutcome?.trim() ? `Intended outcome: ${intendedOutcome.trim()}` : ''}${priorFeedbackBlock}
 
 Return only the JSON score object.`
 

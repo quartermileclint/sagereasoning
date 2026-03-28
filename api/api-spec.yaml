@@ -205,6 +205,140 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 
   # ============================================================
+  # DELIBERATION ENDPOINTS — Iterative scoring for AI agents
+  # ============================================================
+
+  /score-iterate:
+    get:
+      summary: Deliberation engine documentation
+      description: Returns usage documentation for the iterative scoring endpoint.
+      tags: [Deliberation]
+      security: []
+      responses:
+        '200':
+          description: API usage documentation
+
+    post:
+      summary: Start or continue a deliberation chain
+      description: |
+        Two modes of operation:
+
+        **Start a new chain:** Send `action` (required) plus optional `context`, `intended_outcome`,
+        and `agent_id`. Returns a `chain_id`, the initial virtue score, sage feedback, and a
+        `growth_action` suggestion.
+
+        **Continue a chain:** Send `chain_id` (from the initial response) and `revised_action`
+        (required). The sage scores the revised action with full awareness of the deliberation
+        history — acknowledging improvements and noting regressions. Returns updated score,
+        `score_delta`, and further sage feedback.
+
+        No iteration cap if API access is paid. A Stoic advisory is issued every 5th iteration
+        encouraging decisive action. Scores can go down if revisions drift from virtue.
+      tags: [Deliberation]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/StartChainRequest'
+                - $ref: '#/components/schemas/ContinueChainRequest'
+            examples:
+              start_chain:
+                summary: Start a new deliberation chain
+                value:
+                  action: "Recommend the cheapest supplier to save costs, even though their labor practices are questionable"
+                  context: "Procurement decision for a mid-size company"
+                  agent_id: "my-agent-v1"
+              continue_chain:
+                summary: Continue an existing chain with revised action
+                value:
+                  chain_id: "550e8400-e29b-41d4-a716-446655440000"
+                  revised_action: "Recommend a supplier that balances cost with verified ethical labor practices"
+                  revision_rationale: "Addressed justice concerns while maintaining fiscal responsibility"
+      responses:
+        '200':
+          description: Score result with deliberation context
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliberationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Deliberation chain not found
+
+  /deliberation-chain/{chain_id}:
+    get:
+      summary: Get deliberation chain summary
+      description: |
+        Returns a summary of the deliberation chain including score trajectory, first and
+        latest step summaries, and net improvement. Add `?full=true` to get all steps
+        for deep reflection.
+      tags: [Deliberation]
+      security: []
+      parameters:
+        - name: chain_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: full
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: If true, includes all deliberation steps (not just first/latest summary)
+      responses:
+        '200':
+          description: Chain summary with optional full steps
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChainSummaryResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /deliberation-chain/{chain_id}/conclude:
+    post:
+      summary: Conclude or abandon a deliberation chain
+      description: |
+        Mark a chain as concluded (agent decided on final action) or abandoned
+        (agent chose not to act). Returns final statistics and a sage reflection.
+      tags: [Deliberation]
+      security: []
+      parameters:
+        - name: chain_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                abandon:
+                  type: boolean
+                  default: false
+                  description: Set to true to mark as abandoned rather than concluded
+      responses:
+        '200':
+          description: Chain conclusion summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChainConclusionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ============================================================
   # USER ENDPOINTS — P10 (Auth required)
   # ============================================================
 
@@ -507,6 +641,163 @@ components:
           type: string
           format: date-time
 
+    StartChainRequest:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          description: The action to score and begin deliberating on
+        context:
+          type: string
+          description: Situation context
+        intended_outcome:
+          type: string
+          description: What the agent hopes to achieve
+        agent_id:
+          type: string
+          description: Agent identifier for tracking
+
+    ContinueChainRequest:
+      type: object
+      required: [chain_id, revised_action]
+      properties:
+        chain_id:
+          type: string
+          format: uuid
+          description: The chain ID from the initial response
+        revised_action:
+          type: string
+          description: The revised action based on sage feedback
+        revision_rationale:
+          type: string
+          description: Why the agent changed the action
+        agent_id:
+          type: string
+          description: Agent identifier (must match original if provided)
+
+    DeliberationResponse:
+      type: object
+      properties:
+        chain_id:
+          type: string
+          format: uuid
+        step_number:
+          type: integer
+        iteration_mode:
+          type: string
+          enum: [initial, revision]
+        wisdom_score: { type: integer, minimum: 0, maximum: 100 }
+        justice_score: { type: integer, minimum: 0, maximum: 100 }
+        courage_score: { type: integer, minimum: 0, maximum: 100 }
+        temperance_score: { type: integer, minimum: 0, maximum: 100 }
+        total_score: { type: integer, minimum: 0, maximum: 100 }
+        sage_alignment:
+          type: string
+          enum: [sage, progressing, aware, misaligned, contrary]
+        reasoning: { type: string }
+        improvement_path: { type: string }
+        strength: { type: string }
+        growth_area: { type: string }
+        growth_action: { type: string }
+        growth_action_projected_score: { type: integer }
+        deliberation_note:
+          type: string
+          description: Sage's acknowledgment of the deliberation effort (revision mode only)
+        score_delta:
+          type: number
+          description: Change from previous step (revision mode only)
+        previous_score:
+          type: number
+          description: Score of the previous step (revision mode only)
+        best_score_in_chain:
+          type: number
+          description: Highest score achieved in this chain (revision mode only)
+        iteration_warning:
+          type: string
+          description: Stoic advisory issued every 5th iteration
+        next_step_hint:
+          type: string
+          description: How to iterate further or conclude
+
+    ChainSummaryResponse:
+      type: object
+      properties:
+        summary:
+          type: object
+          properties:
+            chain_id: { type: string, format: uuid }
+            status: { type: string, enum: [active, concluded, abandoned] }
+            original_action: { type: string }
+            initial_score: { type: number }
+            current_score: { type: number }
+            best_score: { type: number }
+            total_iterations: { type: integer }
+            score_trajectory:
+              type: array
+              items: { type: number }
+              description: total_score at each step
+            net_improvement: { type: number }
+            sage_growth_action: { type: string }
+            first_step:
+              $ref: '#/components/schemas/StepSummary'
+            latest_step:
+              $ref: '#/components/schemas/StepSummary'
+        steps:
+          type: array
+          description: Full step list (only when ?full=true)
+          items:
+            $ref: '#/components/schemas/DeliberationStep'
+
+    StepSummary:
+      type: object
+      properties:
+        step_number: { type: integer }
+        action_description: { type: string }
+        wisdom_score: { type: integer }
+        justice_score: { type: integer }
+        courage_score: { type: integer }
+        temperance_score: { type: integer }
+        total_score: { type: number }
+        sage_alignment: { type: string }
+        reasoning: { type: string }
+        growth_action: { type: string }
+
+    DeliberationStep:
+      type: object
+      properties:
+        step_number: { type: integer }
+        action_description: { type: string }
+        revision_rationale: { type: string }
+        wisdom_score: { type: integer }
+        justice_score: { type: integer }
+        courage_score: { type: integer }
+        temperance_score: { type: integer }
+        total_score: { type: number }
+        sage_alignment: { type: string }
+        reasoning: { type: string }
+        improvement_path: { type: string }
+        strength: { type: string }
+        growth_area: { type: string }
+        growth_action: { type: string }
+        growth_action_projected_score: { type: number }
+        score_delta: { type: number }
+        iteration_warning_issued: { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    ChainConclusionResponse:
+      type: object
+      properties:
+        chain_id: { type: string, format: uuid }
+        status: { type: string, enum: [concluded, abandoned] }
+        initial_score: { type: number }
+        final_score: { type: number }
+        best_score: { type: number }
+        total_iterations: { type: integer }
+        net_improvement: { type: number }
+        message: { type: string }
+        reflection_url: { type: string, format: uri }
+
   responses:
     BadRequest:
       description: Invalid request
@@ -539,5 +830,7 @@ tags:
     description: Public reference data — virtues, indifferents, foundations
   - name: Scoring
     description: Action scoring and advice endpoints (P5, P6, P7)
+  - name: Deliberation
+    description: Iterative scoring for AI agents — start a chain, revise actions, track improvement
   - name: User
     description: User profile and score history (requires authentication)
