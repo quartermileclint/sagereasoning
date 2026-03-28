@@ -224,3 +224,215 @@ export function publicCorsPreflightResponse(): NextResponse {
     headers: publicCorsHeaders(),
   })
 }
+
+// =============================================================================
+// API KEY VALIDATION — Minimum viable cost protection
+// Bridges to Stripe; no payment processing here, just usage gating.
+//
+// Free tier limits (with 50% contingency baked in):
+//   monthly_limit: 667 calls  (enforcement cap; overshooting 50% = ~1,000 = budget)
+//   daily_limit:   50 calls   (burst protection; runaway agent can't burn month in hours)
+//   max_chain_iterations: 20  (each deliberation iteration = 1 Claude API call)
+//
+// Key format:  sr_live_<32 hex chars>
+// Stored as:   SHA-256(key) in api_keys.key_hash
+// Sent as:     Authorization: Bearer sr_live_... OR X-Api-Key: sr_live_...
+// =============================================================================
+
+import crypto from 'crypto'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+
+/** Valid endpoints that require API key gating */
+export type GatedEndpoint = 'guardrail' | 'score_iterate' | 'agent_baseline' | 'other'
+
+export interface ApiKeyValidationResult {
+  valid: true
+  api_key_id: string
+  label: string
+  tier: 'free' | 'paid'
+  monthly_remaining: number
+  daily_remaining: number
+  max_chain_iterations: number
+  monthly_calls_after: number
+  daily_calls_after: number
+} | {
+  valid: false
+  error: NextResponse
+}
+
+function hashKey(rawKey: string): string {
+  return crypto.createHash('sha256').update(rawKey).digest('hex')
+}
+
+function extractRawKey(request: NextRequest): string | null {
+  // Accept: Authorization: Bearer sr_live_... OR X-Api-Key: sr_live_...
+  const authHeader = request.headers.get('authorization')
+  if (authHeader?.startsWith('Bearer sr_live_')) {
+    return authHeader.slice(7).trim()
+  }
+  const apiKeyHeader = request.headers.get('x-api-key')
+  if (apiKeyHeader?.startsWith('sr_live_')) {
+    return apiKeyHeader.trim()
+  }
+  return null
+}
+
+/**
+ * Validate an API key and atomically increment its usage counter.
+ * Returns valid=false with a ready-to-send NextResponse on any failure.
+ * Returns valid=true with usage info on success.
+ *
+ * IMPORTANT: Call this BEFORE making any Claude API call.
+ * The counter is incremented on every call to this function —
+ * don't call it speculatively.
+ */
+export async function validateApiKey(
+  request: NextRequest,
+  endpoint: GatedEndpoint
+): Promise<ApiKeyValidationResult> {
+  const rawKey = extractRawKey(request)
+
+  if (!rawKey) {
+    return {
+      valid: false,
+      error: NextResponse.json(
+        {
+          error: 'API key required',
+          message: 'Public agent endpoints require an API key. Pass it as: Authorization: Bearer sr_live_<key> or X-Api-Key: sr_live_<key>',
+          docs: 'https://www.sagereasoning.com/api-docs',
+          get_key: 'Contact zeus@sagereasoning.com to request a free API key during beta.',
+        },
+        { status: 401, headers: publicCorsHeaders() }
+      ),
+    }
+  }
+
+  const keyHash = hashKey(rawKey)
+
+  // Use service role to bypass RLS
+  const admin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  // Fetch the key record
+  const { data: keyRecord, error: keyErr } = await admin
+    .from('api_keys')
+    .select('id, label, tier, is_active, suspended_reason, monthly_limit, daily_limit, max_chain_iterations')
+    .eq('key_hash', keyHash)
+    .single()
+
+  if (keyErr || !keyRecord) {
+    return {
+      valid: false,
+      error: NextResponse.json(
+        { error: 'Invalid API key', message: 'The provided API key was not recognised.' },
+        { status: 401, headers: publicCorsHeaders() }
+      ),
+    }
+  }
+
+  if (!keyRecord.is_active) {
+    return {
+      valid: false,
+      error: NextResponse.json(
+        {
+          error: 'API key suspended',
+          message: keyRecord.suspended_reason || 'This API key has been suspended. Contact zeus@sagereasoning.com.',
+        },
+        { status: 403, headers: publicCorsHeaders() }
+      ),
+    }
+  }
+
+  // Atomically increment usage and get new totals
+  const now = new Date()
+  const year = now.getUTCFullYear()
+  const month = now.getUTCMonth() + 1
+  const day = now.getUTCDate()
+
+  const { data: usageRows, error: usageErr } = await admin.rpc('increment_api_usage', {
+    p_api_key_id: keyRecord.id,
+    p_year: year,
+    p_month: month,
+    p_day: day,
+    p_endpoint: endpoint,
+  })
+
+  if (usageErr || !usageRows || usageRows.length === 0) {
+    console.error('Usage increment error:', usageErr)
+    // Fail open with a warning rather than blocking valid keys due to DB issues
+    // Log it — this should be investigated
+    return {
+      valid: true,
+      api_key_id: keyRecord.id,
+      label: keyRecord.label,
+      tier: keyRecord.tier,
+      monthly_remaining: keyRecord.monthly_limit,
+      daily_remaining: keyRecord.daily_limit,
+      max_chain_iterations: keyRecord.max_chain_iterations,
+      monthly_calls_after: 0,
+      daily_calls_after: 0,
+    }
+  }
+
+  const { new_monthly_total, new_daily_total, monthly_limit, daily_limit } = usageRows[0]
+
+  // Check monthly cap (enforcement cap already includes 50% contingency)
+  if (new_monthly_total > monthly_limit) {
+    return {
+      valid: false,
+      error: NextResponse.json(
+        {
+          error: 'Monthly quota exceeded',
+          message: `This API key has reached its monthly limit of ${monthly_limit} calls. Resets on the 1st of next month.`,
+          monthly_calls: new_monthly_total,
+          monthly_limit,
+          upgrade: 'Contact zeus@sagereasoning.com to upgrade your API key for unlimited calls.',
+        },
+        { status: 429, headers: publicCorsHeaders() }
+      ),
+    }
+  }
+
+  // Check daily burst cap
+  if (new_daily_total > daily_limit) {
+    return {
+      valid: false,
+      error: NextResponse.json(
+        {
+          error: 'Daily limit exceeded',
+          message: `This API key has reached its daily limit of ${daily_limit} calls. Resets at midnight UTC.`,
+          daily_calls: new_daily_total,
+          daily_limit,
+        },
+        { status: 429, headers: publicCorsHeaders() }
+      ),
+    }
+  }
+
+  return {
+    valid: true,
+    api_key_id: keyRecord.id,
+    label: keyRecord.label,
+    tier: keyRecord.tier,
+    monthly_remaining: monthly_limit - new_monthly_total,
+    daily_remaining: daily_limit - new_daily_total,
+    max_chain_iterations: keyRecord.max_chain_iterations,
+    monthly_calls_after: new_monthly_total,
+    daily_calls_after: new_daily_total,
+  }
+}
+
+/** Add usage headers to a response for agent transparency */
+export function withUsageHeaders(
+  headers: Record<string, string>,
+  usage: Extract<ApiKeyValidationResult, { valid: true }>
+): Record<string, string> {
+  return {
+    ...headers,
+    'X-RateLimit-Monthly-Remaining': String(usage.monthly_remaining),
+    'X-RateLimit-Daily-Remaining': String(usage.daily_remaining),
+    'X-RateLimit-Monthly-Used': String(usage.monthly_calls_after),
+  }
+}

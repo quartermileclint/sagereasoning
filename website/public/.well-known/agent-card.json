@@ -1,0 +1,122 @@
+{
+  "name": "SageReasoning Stoic Brain",
+  "description": "A virtue-based ethical reasoning engine grounded in Stoic philosophy. Scores actions against the four cardinal virtues (Wisdom, Justice, Courage, Temperance), provides sage-guided feedback, and supports iterative deliberation chains for continuous improvement toward virtuous action.",
+  "url": "https://www.sagereasoning.com",
+  "version": "1.0.0",
+  "provider": {
+    "organization": "SageReasoning",
+    "url": "https://www.sagereasoning.com"
+  },
+  "documentationUrl": "https://www.sagereasoning.com/api-docs",
+  "capabilities": [
+    {
+      "id": "stoic-brain-data",
+      "name": "Stoic Brain Reference Data",
+      "description": "Load the complete Stoic philosophical framework: four cardinal virtues with 16 sub-virtues, preferred/dispreferred indifferents, and scoring rules. MIT-licensed, machine-readable JSON.",
+      "endpoint": "https://www.sagereasoning.com/api/stoic-brain",
+      "method": "GET",
+      "inputModes": [],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "action-scoring",
+      "name": "Virtue Action Scoring",
+      "description": "Score any action (past or proposed) against the four Stoic virtues. Returns individual virtue scores (0-100), composite score, alignment tier, reasoning, and a sage-recommended growth action with projected score.",
+      "endpoint": "https://www.sagereasoning.com/api/guardrail",
+      "method": "POST",
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "guardrail-middleware",
+      "name": "Virtue Guardrail Gate",
+      "description": "Pre-action virtue check. Submit a proposed action and threshold — returns proceed/block decision with virtue scores and improvement hints. Use as middleware before executing any consequential action.",
+      "endpoint": "https://www.sagereasoning.com/api/guardrail",
+      "method": "POST",
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "deliberation-chain",
+      "name": "Iterative Deliberation Engine",
+      "description": "Start a deliberation chain: score an action, receive sage feedback, revise, and re-score with tracked history. The sage scores each revision with full awareness of prior iterations. Supports unlimited iterations with Stoic advisories every 5th step.",
+      "endpoint": "https://www.sagereasoning.com/api/score-iterate",
+      "method": "POST",
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "agent-baseline",
+      "name": "Agent Virtue Baseline Assessment",
+      "description": "Establish your agent's baseline virtue alignment through 4 ethical scenarios testing Wisdom, Justice, Courage, and Temperance. Returns a starting score and identifies strengths and growth areas.",
+      "endpoint": "https://www.sagereasoning.com/api/baseline/agent",
+      "method": "GET",
+      "inputModes": [],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "decision-scoring",
+      "name": "Decision Comparison",
+      "description": "Submit 2-5 decision options and receive virtue-ranked comparison with the sage-recommended choice.",
+      "endpoint": "https://www.sagereasoning.com/api/score-decision",
+      "method": "POST",
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    }
+  ],
+  "authentication": {
+    "schemes": [
+      {
+        "type": "none",
+        "description": "Public endpoints (stoic-brain, guardrail, baseline, score-iterate, score-decision) require no authentication. CORS is fully open."
+      }
+    ]
+  },
+  "rateLimits": {
+    "publicAgent": {
+      "maxRequests": 30,
+      "windowSeconds": 60,
+      "description": "30 requests per minute per IP for public agent endpoints"
+    }
+  },
+  "skills": [
+    "ethical-reasoning",
+    "virtue-scoring",
+    "decision-support",
+    "action-evaluation",
+    "moral-philosophy",
+    "guardrail-middleware",
+    "deliberation",
+    "stoic-philosophy"
+  ],
+  "tags": [
+    "ethics",
+    "stoicism",
+    "virtue",
+    "reasoning",
+    "AI-safety",
+    "guardrails",
+    "decision-making",
+    "philosophy",
+    "moral-reasoning",
+    "agent-alignment"
+  ],
+  "quickStart": {
+    "steps": [
+      "1. Fetch the Stoic Brain: GET https://www.sagereasoning.com/api/stoic-brain",
+      "2. Take the baseline assessment: GET then POST to /api/baseline/agent",
+      "3. Before any consequential action, check the guardrail: POST to /api/guardrail",
+      "4. For complex decisions, use the deliberation chain: POST to /api/score-iterate",
+      "5. Aim for 'progressing' (70+) or 'sage' (95+) alignment tiers"
+    ],
+    "exampleRequest": {
+      "endpoint": "POST https://www.sagereasoning.com/api/guardrail",
+      "body": {
+        "action": "Send automated follow-up emails to users who haven't responded",
+        "context": "Users signed up but didn't explicitly opt in to follow-up communications",
+        "threshold": 60,
+        "agent_id": "your-agent-id"
+      }
+    }
+  }
+}

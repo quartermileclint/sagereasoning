@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { AGENT_SCENARIOS, type AgentBaselineResult } from '@/lib/agent-baseline'
-import { checkRateLimit, RATE_LIMITS, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
+import { checkRateLimit, RATE_LIMITS, validateApiKey, withUsageHeaders, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -71,6 +71,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.publicAgent)
   if (rateLimitError) return rateLimitError
+
+  const keyCheck = await validateApiKey(request, 'agent_baseline')
+  if (!keyCheck.valid) return keyCheck.error
 
   try {
     const body = await request.json()
@@ -205,7 +208,7 @@ Return only the JSON score object.`
     }).then(() => {})
 
     return NextResponse.json(result, {
-      headers: publicCorsHeaders(),
+      headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck),
     })
   } catch (error) {
     console.error('Agent baseline error:', error)

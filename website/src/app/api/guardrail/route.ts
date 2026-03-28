@@ -7,7 +7,7 @@ import {
   type GuardrailResponse,
 } from '@/lib/guardrails'
 import { getAlignmentTier } from '@/lib/document-scorer'
-import { checkRateLimit, RATE_LIMITS, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
+import { checkRateLimit, RATE_LIMITS, validateApiKey, withUsageHeaders, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -17,6 +17,9 @@ const client = new Anthropic({
 export async function POST(request: NextRequest) {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.publicAgent)
   if (rateLimitError) return rateLimitError
+
+  const keyCheck = await validateApiKey(request, 'guardrail')
+  if (!keyCheck.valid) return keyCheck.error
 
   try {
     const { action, context, threshold = 50, agent_id } = await request.json()
@@ -106,9 +109,7 @@ Return the JSON score.`
       .then(() => {})
 
     return NextResponse.json(result, {
-      headers: {
-        ...publicCorsHeaders(),
-      },
+      headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck),
     })
   } catch (error) {
     console.error('Guardrail API error:', error)

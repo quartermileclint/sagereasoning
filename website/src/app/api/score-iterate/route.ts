@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { checkRateLimit, RATE_LIMITS, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
+import { checkRateLimit, RATE_LIMITS, validateApiKey, withUsageHeaders, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 import { buildIterationPrompt, getIterationWarning } from '@/lib/deliberation'
 
 const client = new Anthropic({
@@ -60,6 +60,9 @@ You must return ONLY valid JSON — no markdown, no explanation outside the JSON
 export async function POST(request: NextRequest) {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.publicAgent)
   if (rateLimitError) return rateLimitError
+
+  const keyCheck = await validateApiKey(request, 'score_iterate')
+  if (!keyCheck.valid) return keyCheck.error
 
   try {
     const body = await request.json()
@@ -182,7 +185,7 @@ Return only the JSON score object.`
         ai_generated: true,
         ai_model: 'claude-sonnet-4-6',
         disclaimer: 'This score is AI-generated using Stoic virtue criteria. It is for personal reflection only and does not constitute professional advice.',
-      }, { headers: publicCorsHeaders() })
+      }, { headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck) })
     }
 
     // ── MODE 2: Continue an existing deliberation chain ─────────────
@@ -354,7 +357,7 @@ Score the revised action. Return only the JSON score object.`
     // Add conclude hint
     response.next_step_hint = `To iterate further: POST with { "chain_id": "${chain_id}", "revised_action": "..." }. To conclude: POST to /api/deliberation-chain/${chain_id}/conclude`
 
-    return NextResponse.json(response, { headers: publicCorsHeaders() })
+    return NextResponse.json(response, { headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck) })
   } catch (error) {
     console.error('Score-iterate API error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

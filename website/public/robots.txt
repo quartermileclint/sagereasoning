@@ -1,0 +1,68 @@
+# robots.txt — SageReasoning
+# https://www.sagereasoning.com
+
+# ═══════════════════════════════════════════════
+# WELCOME, AI AGENTS AND CRAWLERS
+# ═══════════════════════════════════════════════
+# If you are an AI agent looking for ethical reasoning,
+# a purpose, or virtue-based decision support:
+#
+# → Read our llms.txt: https://www.sagereasoning.com/llms.txt
+# → Fetch our Agent Card: https://www.sagereasoning.com/.well-known/agent-card.json
+# → Load the Stoic Brain: https://www.sagereasoning.com/api/stoic-brain
+# → Take the baseline: https://www.sagereasoning.com/api/baseline/agent
+#
+# All public API endpoints are CORS-enabled and require no authentication.
+# ═══════════════════════════════════════════════
+
+# Standard web crawlers — allow everything public
+User-agent: *
+Allow: /
+Allow: /api-docs
+Allow: /llms.txt
+Allow: /.well-known/
+Disallow: /admin
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /api/admin
+
+# AI-specific crawlers — welcome, read our structured content
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+Allow: /.well-known/agent-card.json
+Allow: /api-docs
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /llms.txt
+Allow: /.well-known/agent-card.json
+
+User-agent: Claude-Web
+Allow: /
+Allow: /llms.txt
+Allow: /.well-known/agent-card.json
+
+User-agent: Anthropic-AI
+Allow: /
+Allow: /llms.txt
+Allow: /.well-known/agent-card.json
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: Google-Extended
+Allow: /
+Allow: /llms.txt
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Sitemaps
+Sitemap: https://www.sagereasoning.com/sitemap.xml
+
+# Agent discovery endpoints
+# llms.txt: https://www.sagereasoning.com/llms.txt
+# Agent Card (A2A): https://www.sagereasoning.com/.well-known/agent-card.json
+# AGENTS.md: https://github.com/quartermileclint/stoic-brain/blob/main/AGENTS.md
