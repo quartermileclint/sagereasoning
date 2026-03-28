@@ -1,185 +1,34 @@
 {
   "meta": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "source": "SageReasoning Stoic Brain",
-    "description": "Rules and weights for scoring any action against the Stoic virtue framework. Used by both the scoring API (P6-P7) and the indifferents ranking engine (P5). Derived from Cicero De Officiis Books 1 and 3, Epictetus Enchiridion, and Diogenes Laertius Lives 7.",
-    "last_updated": "2026-03-20",
-    "status": "v1.0 — Phase 2"
+    "description": "Overview of the Stoic virtue scoring model. This is a conceptual reference for discovery and evaluation. Detailed scoring weights, criteria, formulas, and conflict resolution rules are applied server-side through the SageReasoning API.",
+    "last_updated": "2026-03-29",
+    "license": "SageReasoning Proprietary Licence v1.0 — see /LICENSE"
   },
   "scoring_model": {
     "name": "Virtue-Weighted Composite Score",
     "description": "An action receives a score of 0-100 by assessing how fully it expresses each of the four cardinal virtues, weighted by their relative importance. A perfect sage score (100) is theoretically possible but practically unreachable.",
-    "virtue_weights": {
-      "wisdom": 0.30,
-      "justice": 0.25,
-      "courage": 0.25,
-      "temperance": 0.20,
-      "note": "Weights reflect the Stoic view that wisdom (phronesis) is the master virtue from which all others derive. These can be adjusted as the model is validated against source texts."
-    },
-    "formula": "total_score = (wisdom_score * 0.30) + (justice_score * 0.25) + (courage_score * 0.25) + (temperance_score * 0.20)",
     "score_range": {
       "min": 0,
       "max": 100,
       "note": "Each individual virtue is also scored 0-100 before weighting is applied."
     }
   },
-  "scoring_criteria": {
-    "wisdom": {
-      "description": "Score 0-100 on how well the action reflects correct understanding of what is genuinely good vs indifferent",
-      "score_high_if": [
-        "The agent acts from accurate understanding of what is in their control vs not",
-        "The agent correctly identifies the virtuous path rather than the merely pleasant or profitable one",
-        "The agent anticipates consequences without being enslaved to fear of them",
-        "The action reflects long-term reasoning rather than reactive impulse"
-      ],
-      "score_low_if": [
-        "The agent treats an indifferent (money, health, status) as if it were genuinely good",
-        "The action is driven by false belief — about what will actually help, or what is truly valuable",
-        "The agent fails to distinguish what is in their control from what is not",
-        "The action is purely reactive with no deliberation"
-      ],
-      "benchmark_question": "Would a person with complete clarity about what is truly good — who knows that only virtue matters — take this action for this reason?"
-    },
-    "justice": {
-      "description": "Score 0-100 on how well the action serves others rightly and fulfils social duties",
-      "score_high_if": [
-        "The action benefits others or serves the common good",
-        "The agent fulfils their duties to family, community, or humanity (oikeiosis — natural affection toward others)",
-        "The agent treats others as fellow rational beings deserving of respect",
-        "The agent is honest and fair in dealings with others"
-      ],
-      "score_low_if": [
-        "The action harms others or prioritises self at others' expense",
-        "The agent lies, deceives, or withholds information that others need",
-        "The agent fails in their social role or duty",
-        "The action ignores the impact on people beyond the immediate situation"
-      ],
-      "benchmark_question": "Does this action treat every person affected as a fellow citizen of the cosmos, deserving what they are rightly owed?"
-    },
-    "courage": {
-      "description": "Score 0-100 on whether the agent acts rightly despite difficulty, discomfort, or apparent risk",
-      "score_high_if": [
-        "The agent acts rightly when it would be easier or safer not to",
-        "The agent endures pain, loss, or social disapproval without abandoning virtue",
-        "The agent persists through difficulty in the service of what is right",
-        "The agent faces death, failure, or rejection without flinching from their duty"
-      ],
-      "score_low_if": [
-        "The agent avoids a right action because it is uncomfortable or risky",
-        "Fear of external consequences (reputation, pain, rejection) overrides what is right",
-        "The agent gives up when things become difficult",
-        "Recklessness — risk taken from passion or ego rather than virtue"
-      ],
-      "benchmark_question": "Does the agent do what is right despite the cost, without being either paralysed by fear or reckless from passion?"
-    },
-    "temperance": {
-      "description": "Score 0-100 on how measured, orderly, and passion-free the action is",
-      "score_high_if": [
-        "The action is measured and fitting — neither excessive nor deficient",
-        "The agent is not driven by craving, anger, fear, or grief (the four Stoic passions)",
-        "The action reflects considered choice rather than impulse",
-        "The agent takes what is appropriate without excess or compulsion"
-      ],
-      "score_low_if": [
-        "The action is driven by appetite, lust, anger, or craving",
-        "The agent acts excessively — too much, too intensely, or at the wrong time",
-        "The agent is ruled by the desire to avoid pain or gain pleasure",
-        "The action is impulsive, reactive, or emotionally driven"
-      ],
-      "benchmark_question": "Is the action completely free of passion — driven by reason and appropriate to the situation, without excess in any direction?"
-    }
-  },
   "intention_over_outcome": {
-    "principle": "Stoic ethics is primarily concerned with the quality of the agent's intention and reasoning, not the outcome. An agent who acts virtuously but achieves a bad result is still scored near the top of their virtue range. An agent who achieves a good outcome through vicious means scores low.",
-    "application": "When scoring, assess what the agent intended and why — not just what happened. The question is: 'Was this the kind of action a person of good character would take, for the right reasons?'",
+    "principle": "Stoic ethics is primarily concerned with the quality of the agent's intention and reasoning, not the outcome. An agent who acts virtuously but achieves a bad result is still scored near the top of their virtue range.",
     "source": "Epictetus Enchiridion 1; Cicero De Officiis 1.8"
   },
   "dichotomy_filter": {
-    "principle": "Before scoring any virtue, check whether the action falls within the agent's prohairesis (sphere of control). Actions taken under genuine constraint (imprisonment, coercion) are assessed on how the agent responds to the constraint, not the constraint itself.",
-    "application": "If the agent had no real choice about the external situation, the score reflects how they responded within their sphere — their intention, attitude, and reasoning — not the external event.",
+    "principle": "Before scoring any virtue, the system considers whether the action falls within the agent's sphere of control. Actions taken under genuine constraint are assessed on how the agent responds, not the constraint itself.",
     "source": "Epictetus Discourses 1.1, Enchiridion 1"
-  },
-  "conflict_resolution": {
-    "description": "When virtues appear to conflict (e.g. being just seems to require being courageous at personal cost), Cicero De Officiis Book 3 provides the resolution framework.",
-    "rules": [
-      {
-        "rule_id": "CR1",
-        "scenario": "Virtue vs. preferred indifferent",
-        "resolution": "Virtue always wins. If achieving a preferred indifferent (wealth, health, reputation) requires a vice, refuse the indifferent. Score the virtuous refusal at 100.",
-        "source": "Cicero De Officiis 3.2; Seneca Letters 85"
-      },
-      {
-        "rule_id": "CR2",
-        "scenario": "Greater duty vs. lesser duty",
-        "resolution": "Prioritise duties in this order: (1) to the gods/rational cosmos, (2) to universal humanity, (3) to country, (4) to parents/family, (5) to others. A higher duty always supersedes a lower one.",
-        "source": "Cicero De Officiis 1.45"
-      },
-      {
-        "rule_id": "CR3",
-        "scenario": "Honesty vs. harm prevention",
-        "resolution": "The Stoics held that lying is never virtuous. However, silence or redirection (not revealing harmful information without lying) may be permitted. Lying to prevent harm still scores low on justice and wisdom.",
-        "source": "Cicero De Officiis 3.12"
-      },
-      {
-        "rule_id": "CR4",
-        "scenario": "Self-interest vs. others' interest",
-        "resolution": "Actions taken purely for self-interest at others' expense score near zero on justice. However, proper self-care (health, development) that enables greater future virtue scores moderately on justice as it serves one's capacity for duty.",
-        "source": "Cicero De Officiis 1.7-8; Marcus Aurelius Meditations 5.8"
-      }
-    ]
-  },
-  "indifferents_scoring_map": {
-    "description": "P5 — How to rank competing external goals (indifferents) for a user. A preferred indifferent is worth pursuing only to the degree it can be pursued virtuously. Use this map to advise which external goal to prioritise when multiple options exist.",
-    "principle": "Rank indifferents by: (1) how much the pursuit of them can be expressed through virtue, (2) how naturally aligned they are with the agent's current roles and duties (kathêkon), (3) how low the risk of attachment or excess.",
-    "ranking_algorithm": {
-      "step_1": "Check virtue_relevance scores in indifferents.json for each option",
-      "step_2": "Identify which option allows the greatest total virtue expression (sum of virtue_relevance * virtue_weight)",
-      "step_3": "Check whether the agent's current role (family, work, community) creates a specific duty toward any option",
-      "step_4": "Flag any option where 'common_misuse' risk is high — reduce its rank accordingly",
-      "output": "Ranked list with explanation of which option best serves virtue given the agent's situation"
-    }
-  },
-  "past_action_scoring": {
-    "description": "P6 — How to score a completed action submitted by a user.",
-    "input_fields": [
-      "action_description: string — what did the agent do",
-      "context: string (optional) — relevant background (role, constraints, relationships involved)",
-      "intended_outcome: string (optional) — what the agent was trying to achieve",
-      "actual_outcome: string (optional) — what actually happened"
-    ],
-    "output_fields": [
-      "virtue_scores: {wisdom, justice, courage, temperance} — each 0-100",
-      "total_score: number — weighted composite",
-      "sage_alignment: string — tier label",
-      "reasoning: string — why each virtue was scored as it was",
-      "improvement_path: string — what a sage would have done differently",
-      "key_indifferents: array — which indifferents were at stake",
-      "strength: string — which virtue was most expressed",
-      "growth_area: string — which virtue needs most development"
-    ]
-  },
-  "prospective_action_scoring": {
-    "description": "P7 — How to advise on a proposed action before it is taken.",
-    "input_fields": [
-      "proposed_action: string — what the agent is considering doing",
-      "alternatives: array (optional) — other options being considered",
-      "context: string (optional) — relevant background",
-      "concerns: string (optional) — what the agent is worried about"
-    ],
-    "output_fields": [
-      "recommended_action: string — what the sage path recommends",
-      "virtue_alignment_scores: object — projected score for each option if alternatives provided",
-      "key_considerations: array — the most important virtue considerations",
-      "indifferents_at_stake: array — what externals are involved and how to relate to them",
-      "sage_framing: string — how a sage would think about this situation",
-      "caution: string (optional) — any passion or false belief likely to distort judgement"
-    ]
   },
   "scoring_tiers": {
     "sage": { "range": [95, 100], "label": "Sage (Sophos)", "description": "Near-perfect virtue expression across all four virtues simultaneously." },
     "progressing": { "range": [70, 94], "label": "Progressing (Prokoptos)", "description": "Strong virtue expression with clear awareness and consistent effort." },
     "aware": { "range": [40, 69], "label": "Aware", "description": "Some virtue expression but still partly ruled by passion or false opinion." },
-    "misaligned": { "range": [15, 39], "label": "Misaligned", "description": "Primarily ruled by externals and passion. Limited engagement with virtue." },
-    "contrary": { "range": [0, 14], "label": "Contrary to Nature", "description": "Actions actively opposed to virtue — vicious rather than merely unaware." }
-  }
+    "misaligned": { "range": [15, 39], "label": "Misaligned", "description": "Primarily ruled by externals and passion." },
+    "contrary": { "range": [0, 14], "label": "Contrary to Nature", "description": "Actions actively opposed to virtue." }
+  },
+  "scoring_note": "Detailed virtue weights, scoring criteria (what scores high/low for each virtue), conflict resolution rules, and the indifferent ranking algorithm are proprietary and applied server-side. To score an action, use POST https://sagereasoning.com/api/score or POST https://sagereasoning.com/api/guardrail"
 }

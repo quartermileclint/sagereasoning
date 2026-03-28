@@ -17,6 +17,11 @@ out/
 dist/
 build/
 
+# Stoic Brain internal data — full scoring weights and formulas (proprietary)
+# These files are used server-side and for enterprise licences only.
+# Never commit to public repository.
+stoic-brain/internal/
+
 # IDE
 .vscode/
 .idea/

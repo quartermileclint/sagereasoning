@@ -8,7 +8,7 @@
     "schema": "https://sagereasoning.com/stoic-brain/schema.json",
     "last_updated": "2026-03-20",
     "status": "v1.0 — Phase 1 complete. Scoring rules and API endpoints to be added in Phase 2.",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+    "license": "SageReasoning Proprietary Licence v1.0 — see /LICENSE for terms",
     "primary_sources": [
       "Marcus Aurelius, Meditations (~170-180 CE)",
       "Epictetus, Discourses + Enchiridion (~108 CE)",
@@ -79,6 +79,6 @@
         "description": "Returns a user's historical action scores and trend"
       }
     ],
-    "ai_agent_instructions": "To load the Stoic Brain for reasoning: fetch this file and virtues.json + indifferents.json. These three files provide full context for virtue-based evaluation of any action or situation. For live scoring, call POST /api/v1/score-action."
+    "ai_agent_instructions": "To use the Stoic Brain for reasoning: review this file and virtues.json + indifferents.json for a conceptual overview of the framework. For live scoring with full virtue weights and sub-virtue analysis, use the SageReasoning API. Start with POST /api/guardrail to check any action, or POST /api/score-iterate to begin a deliberation chain. API key required — request at zeus@sagereasoning.com."
   }
 }

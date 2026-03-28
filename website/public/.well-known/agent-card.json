@@ -12,7 +12,7 @@
     {
       "id": "stoic-brain-data",
       "name": "Stoic Brain Reference Data",
-      "description": "Load the complete Stoic philosophical framework: four cardinal virtues with 16 sub-virtues, preferred/dispreferred indifferents, and scoring rules. MIT-licensed, machine-readable JSON.",
+      "description": "Load the Stoic philosophical framework overview: four cardinal virtues, preferred/dispreferred indifferents, and scoring tier definitions. For full scoring with detailed weights and sub-virtue analysis, use the SageReasoning API endpoints.",
       "endpoint": "https://www.sagereasoning.com/api/stoic-brain",
       "method": "GET",
       "inputModes": [],
@@ -39,7 +39,7 @@
     {
       "id": "deliberation-chain",
       "name": "Iterative Deliberation Engine",
-      "description": "Start a deliberation chain: score an action, receive sage feedback, revise, and re-score with tracked history. The sage scores each revision with full awareness of prior iterations. Supports unlimited iterations with Stoic advisories every 5th step.",
+      "description": "Start a deliberation chain: score an action, receive sage feedback, revise, and re-score with tracked history. Free tier: 1 iteration. Paid tier: up to 3 iterations per chain.",
       "endpoint": "https://www.sagereasoning.com/api/score-iterate",
       "method": "POST",
       "inputModes": ["application/json"],
@@ -68,15 +68,31 @@
     "schemes": [
       {
         "type": "none",
-        "description": "Public endpoints (stoic-brain, guardrail, baseline, score-iterate, score-decision) require no authentication. CORS is fully open."
+        "description": "Stoic Brain overview (GET /api/stoic-brain) and baseline scenarios (GET /api/baseline/agent) require no authentication."
+      },
+      {
+        "type": "bearer",
+        "description": "All scoring endpoints require an API key: Authorization: Bearer sr_live_<key>. Request a free key at zeus@sagereasoning.com."
       }
     ]
+  },
+  "accessTiers": {
+    "free": {
+      "description": "Evaluation tier — 1 API call per day, 1 deliberation iteration per chain, 1 baseline retake per month per agent identity",
+      "dailyLimit": 1,
+      "monthlyLimit": 30,
+      "maxChainIterations": 1
+    },
+    "paid": {
+      "description": "Production tier — configurable limits, up to 3 deliberation iterations per chain, per-call pricing",
+      "contact": "zeus@sagereasoning.com"
+    }
   },
   "rateLimits": {
     "publicAgent": {
       "maxRequests": 30,
       "windowSeconds": 60,
-      "description": "30 requests per minute per IP for public agent endpoints"
+      "description": "30 requests per minute per IP (rate limit applies on top of tier limits)"
     }
   },
   "skills": [

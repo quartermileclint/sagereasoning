@@ -83,6 +83,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'agent_id is required (string identifier for the agent)' }, { status: 400 })
     }
 
+    // Enforce baseline retake limit: 1 initial + 1 retake per calendar month per agent_id
+    const now = new Date()
+    const monthStart = new Date(now.getUTCFullYear(), now.getUTCMonth(), 1).toISOString()
+    const { data: existingBaselines, error: baselineCheckErr } = await supabaseAdmin
+      .from('analytics_events')
+      .select('id')
+      .eq('event_type', 'agent_baseline_assessment')
+      .gte('created_at', monthStart)
+      .filter('metadata->>agent_id', 'eq', agent_id)
+
+    if (!baselineCheckErr && existingBaselines && existingBaselines.length >= 2) {
+      const nextMonth = new Date(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)
+      return NextResponse.json({
+        error: 'Baseline retake limit reached',
+        message: 'Each agent identity is limited to 1 baseline assessment plus 1 retake per calendar month. This aligns with the human baseline retake policy.',
+        agent_id,
+        assessments_this_month: existingBaselines.length,
+        max_per_month: 2,
+        next_eligible: nextMonth.toISOString().split('T')[0],
+      }, { status: 403, headers: publicCorsHeaders() })
+    }
+
     if (!responses || !Array.isArray(responses) || responses.length !== 4) {
       return NextResponse.json({ error: 'Exactly 4 responses required, one per scenario' }, { status: 400 })
     }

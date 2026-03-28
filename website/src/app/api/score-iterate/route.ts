@@ -227,6 +227,24 @@ Return only the JSON score object.`
       return NextResponse.json({ error: 'agent_id does not match this deliberation chain' }, { status: 403 })
     }
 
+    // Enforce max chain iterations based on API key tier
+    if (chain.iteration_count >= keyCheck.max_chain_iterations) {
+      const tierMessage = keyCheck.tier === 'free'
+        ? 'Free tier deliberation chains are limited to 1 iteration. Upgrade to a paid API key for up to 3 iterations per chain.'
+        : `Paid tier deliberation chains are limited to ${keyCheck.max_chain_iterations} iterations per chain.`
+      return NextResponse.json({
+        error: 'Deliberation chain iteration limit reached',
+        message: tierMessage,
+        chain_id: chain_id,
+        iterations_used: chain.iteration_count,
+        max_iterations: keyCheck.max_chain_iterations,
+        current_score: chain.current_score,
+        best_score: chain.best_score,
+        upgrade: keyCheck.tier === 'free' ? 'Contact zeus@sagereasoning.com to upgrade to a paid API key.' : undefined,
+        conclude_hint: `To conclude this chain: POST to /api/deliberation-chain/${chain_id}/conclude`,
+      }, { status: 403, headers: publicCorsHeaders() })
+    }
+
     // Get the latest step for context
     const { data: lastStep, error: stepErr } = await supabaseAdmin
       .from('deliberation_steps')
@@ -398,8 +416,9 @@ export async function GET(request: NextRequest) {
         },
       },
       notes: [
-        'No iteration limit if API access is paid. A Stoic advisory is issued every 5th iteration encouraging decisive action.',
+        'Free tier: 1 iteration per chain (see your score and sage feedback). Paid tier: up to 3 iterations per chain.',
         'The sage scores each revision honestly — scores can go down if the revision drifts from virtue.',
+        'A Stoic advisory is issued every 5th iteration (paid tier) encouraging decisive action.',
         'Full deliberation chains are stored for later reflection via GET /api/deliberation-chain/:id',
       ],
     },

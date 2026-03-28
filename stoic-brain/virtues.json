@@ -1,9 +1,10 @@
 {
   "meta": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "source": "SageReasoning Stoic Brain",
-    "description": "The four cardinal Stoic virtues (aretai) and their sub-virtues, derived from primary texts: Marcus Aurelius, Epictetus, Seneca, Cicero (De Finibus), Diogenes Laertius (Lives of the Eminent Philosophers).",
-    "last_updated": "2026-03-20",
+    "description": "The four cardinal Stoic virtues (aretai) and their sub-virtues. This is a conceptual overview for discovery and evaluation. For full scoring with detailed weights and sub-virtue analysis, use the SageReasoning API at https://sagereasoning.com/api-docs",
+    "last_updated": "2026-03-29",
+    "license": "SageReasoning Proprietary Licence v1.0 — see /LICENSE",
     "note_on_structure": "The Stoics held all four virtues as unified and co-dependent. One cannot possess one without all. Each sub-virtue below is a specific expression of the parent virtue in practice."
   },
   "cardinal_virtues": [
@@ -11,40 +12,13 @@
       "id": "wisdom",
       "name": "Wisdom",
       "greek": "phronesis",
-      "latin": "prudentia / sapientia",
-      "description": "The knowledge of what is genuinely good, bad, and indifferent. The ability to distinguish what is in our control (prohairesis) from what is not. The master virtue from which all others derive.",
-      "sage_definition": "The sage acts from complete clarity about what is truly valuable (virtue alone) versus what merely appears to be. Every action is guided by correct understanding, not opinion or passion.",
+      "description": "The knowledge of what is genuinely good, bad, and indifferent. The ability to distinguish what is in our control from what is not. The master virtue from which all others derive.",
       "opposite_vice": "folly (aphrosyne) — acting from false beliefs about what is good",
-      "scoring_weight": 0.30,
       "sub_virtues": [
-        {
-          "id": "discernment",
-          "name": "Discernment",
-          "greek": "euboulia",
-          "description": "Good deliberation — the ability to reason well about what to do in any given situation. Seeing through appearances to what is actually the case.",
-          "scoring_weight": 0.35
-        },
-        {
-          "id": "circumspection",
-          "name": "Circumspection",
-          "greek": "synesis",
-          "description": "Good understanding of how to act appropriately in specific contexts. Applying general principles correctly to particular situations.",
-          "scoring_weight": 0.25
-        },
-        {
-          "id": "prescience",
-          "name": "Prescience",
-          "greek": "pronoia",
-          "description": "Foresight — anticipating consequences and planning with awareness of the full picture, including what is outside one's control.",
-          "scoring_weight": 0.20
-        },
-        {
-          "id": "resourcefulness",
-          "name": "Resourcefulness",
-          "greek": "anchinoia",
-          "description": "Quick wit and adaptability — finding the virtuous path even in unexpected or difficult circumstances.",
-          "scoring_weight": 0.20
-        }
+        { "id": "discernment", "name": "Discernment" },
+        { "id": "circumspection", "name": "Circumspection" },
+        { "id": "prescience", "name": "Prescience" },
+        { "id": "resourcefulness", "name": "Resourcefulness" }
       ],
       "source_citations": [
         "Diogenes Laertius, Lives 7.92-93",
@@ -57,40 +31,13 @@
       "id": "justice",
       "name": "Justice",
       "greek": "dikaiosyne",
-      "latin": "iustitia",
-      "description": "Giving to each what is deserved. Acting rightly toward others — recognising that humans are by nature social and that reason binds all rational beings into a universal community (cosmopolis).",
-      "sage_definition": "The sage acts with complete fairness and care toward all rational beings. Their actions never harm others and always aim at the common good, treating each person as a fellow citizen of the world.",
+      "description": "Giving to each what is deserved. Acting rightly toward others — recognising that humans are by nature social and that reason binds all rational beings into a universal community.",
       "opposite_vice": "injustice (adikia) — harming others, taking more than one's due, failing in social duties",
-      "scoring_weight": 0.25,
       "sub_virtues": [
-        {
-          "id": "piety",
-          "name": "Piety",
-          "greek": "eusebia",
-          "description": "Proper regard for one's duties to the divine, to nature, and to the rational order of the cosmos. Acting in accord with one's role in the larger whole.",
-          "scoring_weight": 0.25
-        },
-        {
-          "id": "kindness",
-          "name": "Kindness",
-          "greek": "chrestotes",
-          "description": "Benevolence in action — genuine goodwill toward others expressed through helpful and generous behaviour.",
-          "scoring_weight": 0.30
-        },
-        {
-          "id": "social_virtue",
-          "name": "Social Virtue",
-          "greek": "koinonike arete",
-          "description": "The disposition to participate fully and well in community life: fulfilling social roles (family, city, humanity) with excellence.",
-          "scoring_weight": 0.25
-        },
-        {
-          "id": "fair_dealing",
-          "name": "Fair Dealing",
-          "greek": "epieikeia",
-          "description": "Equity and reasonableness in transactions and relationships — not applying rules rigidly when doing so produces injustice.",
-          "scoring_weight": 0.20
-        }
+        { "id": "piety", "name": "Piety" },
+        { "id": "kindness", "name": "Kindness" },
+        { "id": "social_virtue", "name": "Social Virtue" },
+        { "id": "fair_dealing", "name": "Fair Dealing" }
       ],
       "source_citations": [
         "Diogenes Laertius, Lives 7.125-126",
@@ -103,40 +50,13 @@
       "id": "courage",
       "name": "Courage",
       "greek": "andreia",
-      "latin": "fortitudo",
-      "description": "Knowledge of what is and is not truly fearful, and acting rightly in the face of apparent dangers. Not mere boldness, but the rational confidence that comes from knowing that virtue alone is truly good and death, pain, and hardship are merely indifferent.",
-      "sage_definition": "The sage does not shrink from what is right out of fear of external consequences — pain, loss, death, or rejection. They act with full commitment because they are clear that only their own character can be harmed or protected.",
+      "description": "Knowledge of what is and is not truly fearful, and acting rightly in the face of apparent dangers. Not mere boldness, but the rational confidence that comes from knowing that virtue alone is truly good.",
       "opposite_vice": "cowardice (deilia) — being ruled by fear of indifferents; recklessness — being ruled by disdain for genuine risk",
-      "scoring_weight": 0.25,
       "sub_virtues": [
-        {
-          "id": "endurance",
-          "name": "Endurance",
-          "greek": "karteria",
-          "description": "Persisting through difficulty, hardship, or pain without compromising virtue. Not giving up when things are hard.",
-          "scoring_weight": 0.30
-        },
-        {
-          "id": "confidence",
-          "name": "Confidence",
-          "greek": "tharsos",
-          "description": "Rational confidence grounded in clarity about what is truly threatening versus what merely appears threatening. Distinguishable from arrogance.",
-          "scoring_weight": 0.25
-        },
-        {
-          "id": "magnanimity",
-          "name": "Magnanimity",
-          "greek": "megalopsychia",
-          "description": "Greatness of soul — not being diminished by insult, loss, or misfortune. Maintaining full stature regardless of external circumstance.",
-          "scoring_weight": 0.25
-        },
-        {
-          "id": "industriousness",
-          "name": "Industriousness",
-          "greek": "philoponia",
-          "description": "Willingness to work hard and exert effort for what is right, without shrinking from the labour virtue requires.",
-          "scoring_weight": 0.20
-        }
+        { "id": "endurance", "name": "Endurance" },
+        { "id": "confidence", "name": "Confidence" },
+        { "id": "magnanimity", "name": "Magnanimity" },
+        { "id": "industriousness", "name": "Industriousness" }
       ],
       "source_citations": [
         "Diogenes Laertius, Lives 7.92, 7.129",
@@ -149,40 +69,13 @@
       "id": "temperance",
       "name": "Temperance",
       "greek": "sophrosyne",
-      "latin": "temperantia",
       "description": "Orderliness and moderation in all impulses, desires, and actions. The knowledge of what to choose and what to avoid among apparent goods and bads — particularly regarding pleasure and appetite.",
-      "sage_definition": "The sage's desires and actions are never driven by passion or craving. They choose and act with complete calm, taking what is fitting and leaving the rest without regret or longing.",
       "opposite_vice": "intemperance (akolasia) — being ruled by appetite, craving, or passion",
-      "scoring_weight": 0.20,
       "sub_virtues": [
-        {
-          "id": "orderliness",
-          "name": "Orderliness",
-          "greek": "eutaxia",
-          "description": "Knowing the right time and manner for every action — acting in a fitting and measured way that reflects the rational order of nature.",
-          "scoring_weight": 0.25
-        },
-        {
-          "id": "propriety",
-          "name": "Propriety",
-          "greek": "kosmiotetes",
-          "description": "Decency and appropriateness in conduct — acting in accordance with what is becoming for a rational being in their specific role and context.",
-          "scoring_weight": 0.25
-        },
-        {
-          "id": "self_control",
-          "name": "Self-Control",
-          "greek": "enkrateia",
-          "description": "Mastery over one's own impulses and desires. Not being driven by hunger, lust, anger, or craving for pleasure.",
-          "scoring_weight": 0.30
-        },
-        {
-          "id": "modesty",
-          "name": "Modesty",
-          "greek": "aidos",
-          "description": "Appropriate restraint in the face of what is genuinely shameful or unfitting. A natural check on actions that would compromise virtue.",
-          "scoring_weight": 0.20
-        }
+        { "id": "orderliness", "name": "Orderliness" },
+        { "id": "propriety", "name": "Propriety" },
+        { "id": "self_control", "name": "Self-Control" },
+        { "id": "modesty", "name": "Modesty" }
       ],
       "source_citations": [
         "Diogenes Laertius, Lives 7.92",
@@ -195,11 +88,12 @@
   "scoring_alignment_tiers": {
     "description": "Qualitative tiers for overall stoic score, adapted from the Stoic concept of moral progress (prokope)",
     "tiers": [
-      { "id": "sage", "label": "Sage (Sophos)", "score_range": [95, 100], "description": "Perfect alignment with all four virtues. Theoretical ideal — the Stoics acknowledged this was rarely if ever achieved." },
-      { "id": "progressing", "label": "Progressing (Prokoptos)", "score_range": [70, 94], "description": "Actively developing virtue. Clear awareness of the stoic path and consistent effort to walk it." },
-      { "id": "aware", "label": "Aware", "score_range": [40, 69], "description": "Some understanding of virtue but still frequently ruled by passion and false opinion." },
-      { "id": "misaligned", "label": "Misaligned", "score_range": [15, 39], "description": "Mostly ruled by externals and passion. Little active engagement with virtue." },
-      { "id": "contrary", "label": "Contrary to Nature", "score_range": [0, 14], "description": "Actions actively opposed to virtue and the rational order. Vicious rather than merely foolish." }
+      { "id": "sage", "label": "Sage (Sophos)", "score_range": [95, 100], "description": "Perfect alignment with all four virtues. Theoretical ideal." },
+      { "id": "progressing", "label": "Progressing (Prokoptos)", "score_range": [70, 94], "description": "Actively developing virtue with consistent effort." },
+      { "id": "aware", "label": "Aware", "score_range": [40, 69], "description": "Some understanding of virtue but still frequently ruled by passion." },
+      { "id": "misaligned", "label": "Misaligned", "score_range": [15, 39], "description": "Mostly ruled by externals and passion." },
+      { "id": "contrary", "label": "Contrary to Nature", "score_range": [0, 14], "description": "Actions actively opposed to virtue." }
     ]
-  }
+  },
+  "scoring_note": "Detailed virtue weights, sub-virtue scoring breakdowns, and scoring criteria are applied server-side through the SageReasoning API. To score an action, use POST https://sagereasoning.com/api/score or POST https://sagereasoning.com/api/guardrail"
 }

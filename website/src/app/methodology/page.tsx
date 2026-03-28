@@ -50,12 +50,13 @@ export default function MethodologyPage() {
             <li>The alignment tier definitions</li>
           </ul>
           <p className="mt-3">
-            The Stoic Brain is open-source (MIT licence) and freely available at{' '}
+            The Stoic Brain framework overview is available at{' '}
             <a href="/api/stoic-brain" className="text-sage-600 underline hover:text-sage-800">
               /api/stoic-brain
             </a>{' '}
-            or via the{' '}
+            with full scoring provided through the{' '}
             <a href="/api-docs" className="text-sage-600 underline hover:text-sage-800">API</a>.
+            See the <a href="https://github.com/quartermileclint/sagereasoning/blob/main/LICENSE" className="text-sage-600 underline hover:text-sage-800">licence</a> for terms.
           </p>
         </div>
 

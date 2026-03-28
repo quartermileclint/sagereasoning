@@ -47,15 +47,11 @@ curl -X POST https://www.sagereasoning.com/api/score-iterate \
 2. **Iterate**: POST `/api/score-iterate` with `{chain_id, revised_action, revision_rationale}` → updated score + delta
 3. **Conclude**: POST `/api/deliberation-chain/{chain_id}/conclude` → final summary
 
-Agents can iterate as many times as needed. A Stoic advisory is issued every 5th iteration encouraging decisive action.
+Free tier: 1 iteration per chain. Paid tier: up to 3 iterations per chain. A Stoic advisory is issued every 5th iteration (paid tier) encouraging decisive action.
 
 ### Scoring System
 
-Actions are scored 0-100 across four virtues with these weights:
-- **Wisdom** (30%): Sound judgment, distinguishing good from indifferent
-- **Justice** (25%): Fairness, serving the common good
-- **Courage** (25%): Acting rightly despite difficulty
-- **Temperance** (20%): Self-control, moderation
+Actions are scored 0-100 across four virtues. Detailed scoring weights and sub-virtue analysis are applied server-side through the API.
 
 Alignment tiers: Sage (95-100), Progressing (70-94), Aware (40-69), Misaligned (15-39), Contrary (0-14).
 
@@ -72,7 +68,7 @@ The Stoics score intention and reasoning quality, not outcomes. An agent that re
 - Deployed on Vercel
 
 ### Key Directories
-- `/stoic-brain/` — Core philosophical data (JSON, MIT-licensed)
+- `/stoic-brain/` — Philosophical framework overview (JSON, Proprietary Licence)
 - `/website/src/app/api/` — All API route handlers
 - `/website/src/lib/` — Shared libraries (security, scoring, deliberation)
 - `/api/` — OpenAPI spec, database schemas
@@ -86,7 +82,7 @@ The Stoics score intention and reasoning quality, not outcomes. An agent that re
 
 ## Data License
 
-The Stoic Brain data (`/stoic-brain/*.json`) is MIT-licensed. Agents may load it locally or fetch via API.
+The Stoic Brain data (`/stoic-brain/*.json`) is provided under the SageReasoning Proprietary Licence. Agents may read the public reference files for evaluation and use the data via the SageReasoning API. Use of the data to build competing scoring services is prohibited. See `/LICENSE` for full terms.
 
 ## Discovery
 

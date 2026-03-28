@@ -104,10 +104,14 @@ export default function TermsPage() {
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">6. Intellectual Property</h2>
           <p>
-            The Stoic Brain data (virtue definitions, weights, scoring rules) is published under the{' '}
-            <strong>MIT Licence</strong> and is freely available. The website design, code,
-            journal curriculum, and original written content are owned by SageReasoning and may not
-            be reproduced without permission.
+            The Stoic Brain data (virtue definitions, scoring framework, and structured philosophical
+            compilation) is published under the{' '}
+            <strong>SageReasoning Proprietary Licence</strong>. A conceptual overview is freely available
+            for evaluation; detailed scoring weights and formulas are provided through the API.
+            The website design, code, journal curriculum, and original written content are owned by
+            SageReasoning and may not be reproduced without permission. Use of the Stoic Brain data
+            to build competing scoring services is prohibited. See the{' '}
+            <a href="https://github.com/quartermileclint/sagereasoning/blob/main/LICENSE" className="text-sage-600 underline hover:text-sage-800">full licence</a> for terms.
           </p>
           <p className="mt-3">
             AI-generated scores and reasoning produced on your behalf are not protected by copyright

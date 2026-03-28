@@ -2,36 +2,26 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://sagereasoning.com/stoic-brain/schema.json",
   "title": "SageReasoning Stoic Brain Schema",
-  "description": "Defines the structure of all stoic-brain data files. Used for validation by both humans and AI agents.",
-  "version": "1.0.0",
+  "description": "Defines the structure of the public stoic-brain data files. Scoring weight properties are omitted from this public schema — they are applied server-side through the SageReasoning API.",
+  "version": "1.1.0",
   "definitions": {
     "virtue": {
       "type": "object",
-      "required": ["id", "name", "greek", "description", "sub_virtues", "sage_definition"],
+      "required": ["id", "name", "greek", "description", "sub_virtues"],
       "properties": {
         "id": { "type": "string", "description": "Unique slug, e.g. 'wisdom'" },
         "name": { "type": "string" },
         "greek": { "type": "string", "description": "Original Greek term, e.g. 'phronesis'" },
-        "latin": { "type": "string", "description": "Latin equivalent if applicable" },
         "description": { "type": "string" },
-        "sage_definition": { "type": "string", "description": "How a perfect sage expresses this virtue" },
         "opposite_vice": { "type": "string", "description": "The opposing vice/deficiency" },
         "sub_virtues": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["id", "name", "description"],
+            "required": ["id", "name"],
             "properties": {
               "id": { "type": "string" },
-              "name": { "type": "string" },
-              "greek": { "type": "string" },
-              "description": { "type": "string" },
-              "scoring_weight": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1,
-                "description": "Weight of this sub-virtue in scoring calculations (0-1)"
-              }
+              "name": { "type": "string" }
             }
           }
         },
@@ -53,23 +43,12 @@
           "enum": ["preferred", "dispreferred", "neutral"],
           "description": "Stoic classification of this external thing"
         },
-        "description": { "type": "string" },
-        "virtue_relevance": {
-          "type": "object",
-          "description": "How pursuit/avoidance of this indifferent maps to the 4 virtues",
-          "properties": {
-            "wisdom": { "type": "number", "minimum": -1, "maximum": 1 },
-            "justice": { "type": "number", "minimum": -1, "maximum": 1 },
-            "courage": { "type": "number", "minimum": -1, "maximum": 1 },
-            "temperance": { "type": "number", "minimum": -1, "maximum": 1 }
-          }
-        },
-        "sage_stance": { "type": "string", "description": "How a sage relates to this indifferent" },
-        "common_misuse": { "type": "string", "description": "How people wrongly treat this as intrinsically good or bad" }
+        "description": { "type": "string" }
       }
     },
     "action_score": {
       "type": "object",
+      "description": "Returned by the SageReasoning API scoring endpoints",
       "required": ["action_description", "virtue_scores", "total_score", "reasoning"],
       "properties": {
         "action_description": { "type": "string" },

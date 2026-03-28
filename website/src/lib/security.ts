@@ -227,13 +227,19 @@ export function publicCorsPreflightResponse(): NextResponse {
 }
 
 // =============================================================================
-// API KEY VALIDATION — Minimum viable cost protection
+// API KEY VALIDATION — Cost protection and tier enforcement
 // Bridges to Stripe; no payment processing here, just usage gating.
 //
-// Free tier limits (with 50% contingency baked in):
-//   monthly_limit: 667 calls  (enforcement cap; overshooting 50% = ~1,000 = budget)
-//   daily_limit:   50 calls   (burst protection; runaway agent can't burn month in hours)
-//   max_chain_iterations: 20  (each deliberation iteration = 1 Claude API call)
+// FREE TIER (evaluation only):
+//   monthly_limit: 30 calls   (1 per day with slight buffer)
+//   daily_limit:   1 call     (enough to test integration, not run production)
+//   max_chain_iterations: 1   (see the score + feedback, can't iterate without paying)
+//   baseline retakes: 1/month per agent_id (aligned with human baseline policy)
+//
+// PAID TIER (production access — 150% of Anthropic API cost per call):
+//   monthly_limit: configurable per key (default 10,000)
+//   daily_limit:   configurable per key (default 500)
+//   max_chain_iterations: 3   (covers most real-world improvement curves)
 //
 // Key format:  sr_live_<32 hex chars>
 // Stored as:   SHA-256(key) in api_keys.key_hash

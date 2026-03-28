@@ -81,7 +81,7 @@ const tiers = [
     cta: 'View API docs',
     ctaHref: '/api-docs',
     highlight: false,
-    stoicNote: 'The Stoic Brain data is MIT-licensed and always free. You pay only for AI processing.',
+    stoicNote: 'The Stoic Brain framework overview is free to explore. Detailed scoring and virtue analysis are provided through the API.',
   },
 ]
 

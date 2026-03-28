@@ -103,10 +103,15 @@ Built with Next.js (a web framework), hosted on Vercel (free), auto-deploys ever
 | `src/lib/stoic-brain.ts` | The four virtues, alignment tiers, and helper functions used across the website |
 | `src/lib/supabase.ts` | Connection to the database (user-facing) |
 | `src/lib/supabase-server.ts` | Connection to the database (admin-level, bypasses user restrictions) |
+| `src/lib/deliberation.ts` | Deliberation chain logic — iteration-aware prompts, iteration warnings, request validation |
+| `src/lib/security.ts` | Rate limiting, CORS headers, API key validation (`validateApiKey`), usage header injection (`withUsageHeaders`) |
 | `src/components/NavBar.tsx` | The navigation bar at the top of every page |
 | `src/components/PracticeCalendar.tsx` | Monthly calendar showing daily activity — action stamps, reflection stamps, and journal stamps |
 | `src/components/MilestonesDisplay.tsx` | Visual milestone progress display on the dashboard |
-| `public/llms.txt` | A plain-text file that tells AI agents and LLMs what this site does and how to use it |
+| `public/llms.txt` | A plain-text file (v2.0) that tells AI agents and LLMs what this site does and how to use it — includes deliberation chain endpoints and API key guidance |
+| `public/robots.txt` | Explicitly welcomes AI crawlers (GPTBot, Claude-Web, Perplexity, etc.) and points them to llms.txt and the agent card |
+| `public/.well-known/agent-card.json` | A2A (Agent2Agent) protocol discovery file — declares 6 capabilities, rate limits, authentication, and integration quickstart for autonomous agents |
+| `AGENTS.md` | Coding agent integration guide targeting GitHub Copilot, Cursor, Claude Code, and OpenClaw — curl examples, endpoint table, deliberation chain flow |
 
 ---
 
@@ -144,12 +149,23 @@ These are the "doors" that external programs, AI agents, and developers use to i
 | `/api/score-therapy` | GET/POST | GET generates a Stoic therapeutic exercise for a focus area. POST scores a client's journal response with practitioner notes. |
 | `/api/score-scenario` | GET/POST | GET generates age-appropriate ethical dilemmas (child/teen/adult). POST scores the user's response. |
 
-**Internal endpoints (website only):**
+**Deliberation chain endpoints (AI agent iterative scoring):**
+
+| Endpoint | Method | What it does |
+|----------|--------|-------------|
+| `/api/score-iterate` | POST | Start or continue a deliberation chain. Mode 1: send `action` → creates chain_id, scores step 1. Mode 2: send `chain_id` + `revised_action` → scores revision with full prior context. Returns score_delta. |
+| `/api/deliberation-chain/{id}` | GET | Retrieve a chain summary — first step, latest step, score trajectory, net improvement. Add `?full=true` for every step. |
+| `/api/deliberation-chain/{id}/conclude` | POST | Mark a chain as `concluded` or `abandoned`. Returns sage closing reflection. |
+
+**Internal / admin endpoints:**
 
 | Endpoint | What it does |
 |----------|-------------|
 | `/api/analytics` | Logs usage events to the database |
 | `/api/admin/metrics` | Returns usage data for the admin dashboard (Clinton only) |
+| `/api/admin/api-keys` | Issue, list, and manage API keys (Clinton only). GET = list all keys with usage. POST = create new key. PATCH = suspend/activate/change limits. |
+
+**Authentication note:** The three Claude-calling agent endpoints require an API key passed as `Authorization: Bearer sr_live_...`. Keys are issued via `/api/admin/api-keys`. GET endpoints and human-facing endpoints have no key requirement.
 
 ---
 
@@ -169,16 +185,22 @@ Supabase is a free cloud database. Think of it as a spreadsheet in the cloud tha
 | `document_scores` | Scored documents — title, word count, virtue scores, reasoning. Public read (needed for badge lookups). |
 | `reflections` | Daily journal entries — what happened, how responded, virtue scores, sage perspective |
 | `journal_entries` | The Path of the Prokoptos journal — day number, phase, reflection text (or `__local__` flag for local-storage users), word count, completion timestamp |
-| `analytics_events` | Usage tracking — every sign-in, score, page view, API fetch. Used to populate the admin dashboard. |
+| `analytics_events` | Usage tracking — every sign-in, score, page view, API fetch. Used to populate the admin dashboard. Also stores `api_key_id` to link events to the key that triggered them. |
+| `deliberation_chains` | One row per AI agent deliberation chain — agent_id, original action, initial/current/best score, iteration count, status (active/concluded/abandoned) |
+| `deliberation_steps` | Every step within a chain — step number, action text, all 4 virtue scores, score_delta from prior step, sage reasoning, growth action, iteration warning flag |
+| `api_keys` | Issued API keys — stored as SHA-256 hash (never the raw key), label, owner email, tier (free/paid), monthly/daily limits, active status |
+| `api_key_usage` | Monthly usage buckets per key — total calls, per-endpoint call counts, daily tracking. Reset logic handled atomically by `increment_api_usage()` function. |
 
 **SQL migration files** (run these in Supabase SQL Editor to create tables):
 
-| File | Table it creates | Status |
+| File | Table(s) it creates | Status |
 |------|-----------------|--------|
 | `website/supabase-baseline-migration.sql` | `baseline_assessments` | ✅ Done |
 | `website/supabase-document-scores-migration.sql` | `document_scores` | ✅ Done |
 | `website/supabase-reflections-migration.sql` | `reflections` | ✅ Done |
 | `api/migrations/add-journal-entries-table.sql` | `journal_entries` | ✅ Done 26 March 2026 |
+| `api/deliberation-chain-schema.sql` | `deliberation_chains`, `deliberation_steps` | ✅ Done 28 March 2026 |
+| `api/api-keys-schema.sql` | `api_keys`, `api_key_usage`, `api_key_usage_current` view, `increment_api_usage()` function | ✅ Done 28 March 2026 |
 
 ---
 
@@ -189,7 +211,7 @@ Supabase is a free cloud database. Think of it as a spreadsheet in the cloud tha
 | [Vercel](https://vercel.com) | Hosts the website. Auto-deploys on every GitHub push. Free tier. | GitHub login |
 | [Supabase](https://supabase.com) | Database, authentication, and user management. Free tier. | clintonaitkenhead@hotmail.com |
 | [GitHub](https://github.com/quartermileclint/sagereasoning) | Source code storage and version control. | quartermileclint |
-| [GitHub (stoic-brain)](https://github.com/quartermileclint/stoic-brain) | Public repo for the Stoic Brain data files (MIT licence). | quartermileclint |
+| [GitHub (stoic-brain)](https://github.com/quartermileclint/stoic-brain) | Public repo for the Stoic Brain framework overview (Proprietary Licence). | quartermileclint |
 | [Anthropic API](https://console.anthropic.com) | The AI scoring engine — every virtue score is calculated by Claude (claude-sonnet-4-6). | clintonaitkenhead@hotmail.com |
 | sagereasoning.com | The domain name. Managed separately. | ~$1/month |
 
@@ -212,7 +234,10 @@ These files sit in public locations so AI crawlers, search engines, and AI agent
 
 | File / URL | What it is | Where it lives |
 |------------|-----------|----------------|
-| `public/llms.txt` → `sagereasoning.com/llms.txt` | Plain-text guide for LLMs and AI agents — explains all endpoints and how to adopt Stoic reasoning | Website public folder |
+| `public/llms.txt` → `sagereasoning.com/llms.txt` | Plain-text guide (v2.0) for LLMs and AI agents — explains all endpoints, deliberation chain flow, API key instructions, and adoption guidance | Website public folder |
+| `public/robots.txt` → `sagereasoning.com/robots.txt` | Explicitly welcomes AI crawlers (GPTBot, Claude-Web, Anthropic-AI, PerplexityBot, Google-Extended) and directs them to llms.txt and agent card | Website public folder |
+| `public/.well-known/agent-card.json` → `sagereasoning.com/.well-known/agent-card.json` | A2A (Agent2Agent) protocol standard — declares capabilities, endpoints, rate limits, authentication, and a 5-step quickstart for autonomous agents | Website public folder |
+| `AGENTS.md` → root of GitHub repo | Coding agent integration guide (GitHub Copilot, Cursor, Claude Code, OpenClaw) — curl examples, full endpoint table, deliberation chain flow, tech stack | Repo root |
 | Schema.org JSON-LD on homepage | Structured data (Dataset, WebSite, Organization) that tells Google and AI crawlers what this site is | Embedded in homepage HTML |
 | Schema.org JSON-LD on API Docs | Structured data (SoftwareApplication, WebAPI) for the API | Embedded in api-docs page |
 | `_meta` field in `/api/stoic-brain` response | Self-describing JSON — when an AI agent fetches the Stoic Brain, the response explains what it is and how to use it | API response |
@@ -220,7 +245,7 @@ These files sit in public locations so AI crawlers, search engines, and AI agent
 
 ---
 
-## Current Status (as of 26 March 2026)
+## Current Status (as of 28 March 2026)
 
 ### Live Features
 
@@ -240,6 +265,20 @@ These files sit in public locations so AI crawlers, search engines, and AI agent
 | **Stoic Journal** | `/journal` | ✅ Live — deployed 26 March 2026 |
 | API Docs | `/api-docs` | ✅ Live |
 | Admin | `/admin` | ✅ Live (owner only) |
+
+### Agent Infrastructure — Live as of 28 March 2026
+
+| Feature | Detail | Status |
+|---------|--------|--------|
+| Deliberation Chain | `/api/score-iterate` — AI agents can iterate scored actions across multiple steps, tracked in a persistent chain | ✅ Live |
+| Chain Summary | `/api/deliberation-chain/{id}` — retrieve full score trajectory | ✅ Live |
+| A2A Agent Card | `/.well-known/agent-card.json` — A2A protocol discovery | ✅ Live |
+| AGENTS.md | Coding agent integration guide in repo root | ✅ Live |
+| robots.txt | Explicitly welcomes all major AI crawlers | ✅ Live |
+| llms.txt v2.0 | Updated with deliberation chain, API key guidance, adoption steps | ✅ Live |
+| API Key Gating | 3 Claude-calling endpoints require `Authorization: Bearer sr_live_...` | ✅ Live |
+| Admin Key Management | `/api/admin/api-keys` — issue, list, and manage keys | ✅ Live |
+| First API Key Issued | One free-tier key active and tested | ✅ Done 28 March 2026 |
 
 ---
 
@@ -293,29 +332,95 @@ Run `api/migrations/add-journal-entries-table.sql` in Supabase SQL Editor. ✅ D
 
 ---
 
+---
+
+### AI Agent Deliberation Chain (COMPLETE ✅ — deployed 28 March 2026)
+
+AI agents can now iterate their proposed actions through multiple rounds of Stoic scoring, building a tracked deliberation chain. Each revision is scored with the full context of all prior steps.
+
+**How it works:**
+1. Agent sends `action` → receives `chain_id`, score, sage feedback, and a `growth_action` suggestion
+2. Agent revises its action → sends `chain_id` + `revised_action` → receives updated score and `score_delta`
+3. Repeat until the agent reaches a virtuous resolution, then POST to `/conclude`
+4. Full chain retrievable at any time via GET `/api/deliberation-chain/{id}`
+
+**Files built:**
+
+| File | What it does |
+|------|-------------|
+| `website/src/lib/deliberation.ts` | Iteration-aware prompt builder, iteration warning logic, request validator |
+| `website/src/app/api/score-iterate/route.ts` | Two-mode POST: start chain (action) or continue chain (chain_id + revised_action) |
+| `website/src/app/api/deliberation-chain/[id]/route.ts` | GET chain summary or full step history |
+| `website/src/app/api/deliberation-chain/[id]/conclude/route.ts` | POST to conclude or abandon a chain |
+| `api/deliberation-chain-schema.sql` | Database schema — ✅ Done 28 March 2026 |
+
+---
+
+### Billing Protection / API Key Infrastructure (COMPLETE ✅ — deployed 28 March 2026)
+
+The three public endpoints that call the Anthropic API are now gated behind API keys. No key = 401 error. Keys are issued manually via the admin endpoint until full Stripe billing is ready (~1 week).
+
+**Protected endpoints:**
+- `POST /api/guardrail` — virtue-gate for agent actions
+- `POST /api/score-iterate` — deliberation chain scoring
+- `POST /api/baseline/agent` — agent baseline assessment
+
+**Key format:** `sr_live_<32 hex chars>` — passed as `Authorization: Bearer sr_live_...`
+
+**Limits (free tier):** 667 calls/month (enforcement cap with 50% contingency = stays within 1,000 actual calls), 50 calls/day burst cap.
+
+**Files built:**
+
+| File | What it does |
+|------|-------------|
+| `api/api-keys-schema.sql` | Database schema for `api_keys`, `api_key_usage`, view, and atomic `increment_api_usage()` function — ✅ Done 28 March 2026 |
+| `website/src/app/api/admin/api-keys/route.ts` | Admin endpoint: GET (list keys + usage), POST (issue new key), PATCH (suspend/activate/change limits) |
+| `website/src/lib/security.ts` | Added `validateApiKey()`, `withUsageHeaders()`, `GatedEndpoint` type, `ApiKeyValidationResult` type |
+
+**First API key:** Issued 28 March 2026. Tested and operational.
+
+---
+
 ### Remaining Priorities
 
 | Priority | Item | Status |
 |----------|------|--------|
-| P1 | Brainstorm and implement more Stoic Brain use cases | ⏳ Ongoing |
-| P2 | Research gamification that doesn't violate Stoic values | ⏳ Pending |
-| P3 | Design a unique Stoic social platform | ⏳ Pending |
-| P5 | Local storage options for sensitive features (journal: done) | 🔄 Partial |
-| P6 | World map showing user locations with sage logos | ⏳ Pending |
-| P7 | Security review of files and data | ⏳ Pending |
-| P8 | New marketing strategy based on fully featured website | ⏳ Pending |
+| P1 | Brainstorm and implement more Stoic Brain use cases | ✅ Complete — all Phase 8 applications live |
+| P2 | Research gamification that doesn't violate Stoic values | ✅ Complete |
+| P3 | Design a unique Stoic social platform | ✅ Complete — researched |
+| P4 | Import Stoic journal and develop journal system | ✅ Complete — deployed 26 March 2026 |
+| P5 | Local storage option for sensitive features | 🔄 Partial — journal done, other features pending |
+| P6 | World map showing user locations with sage logos | ✅ Complete |
+| P7 | Security review — remove vulnerabilities | ✅ Complete — API key gating deployed 28 March 2026 |
+| P8 | New marketing strategy | ⏳ Next priority |
 | P9 | Legal implications research | ⏳ Pending |
 | P10 | Income model research to cover escalating costs | ⏳ Pending |
+| P12 | Startup business systems and registrations | ⏳ Pending |
 | P13 | Implement marketing strategy | ⏳ Pending |
 
-### Phase 7 — Marketing (items 1–4 complete)
+### Agent Discovery Layer — Complete as of 28 March 2026
+
+| # | Action | Status |
+|---|--------|--------|
+| 1 | `llms.txt` v1 — LLM/agent plain-text guide | ✅ Done |
+| 2 | `_meta` in `/api/stoic-brain` response | ✅ Done |
+| 3 | Schema.org JSON-LD on homepage and API docs | ✅ Done |
+| 4 | Stoic Brain published on GitHub (Proprietary Licence) | ✅ Done |
+| 5 | `robots.txt` — welcoming AI crawlers explicitly | ✅ Done 28 March 2026 |
+| 6 | `/.well-known/agent-card.json` — A2A protocol | ✅ Done 28 March 2026 |
+| 7 | `AGENTS.md` — coding agent integration guide | ✅ Done 28 March 2026 |
+| 8 | `llms.txt` v2.0 — deliberation chain + API key guidance | ✅ Done 28 March 2026 |
+| 9 | MCP server wrapping stoic-brain API | ⏳ Pending — blocked on billing going live first |
+| 10 | Register on Smithery + mcpmarket.com | ⏳ Pending — after MCP server built |
+
+### Marketing (Phase 7 — items 1–4 complete, agent layer added)
 
 | # | Action | Status |
 |---|--------|--------|
 | 1 | Create `/llms.txt` | ✅ Done |
 | 2 | Add `_meta` to `/api/stoic-brain` | ✅ Done |
 | 3 | Schema.org JSON-LD on key pages | ✅ Done |
-| 4 | Publish stoic-brain.json on GitHub (MIT) | ✅ Done — [github.com/quartermileclint/stoic-brain](https://github.com/quartermileclint/stoic-brain) |
+| 4 | Publish stoic-brain.json on GitHub (Proprietary Licence) | ✅ Done — [github.com/quartermileclint/stoic-brain](https://github.com/quartermileclint/stoic-brain) |
 | 5 | Write 3 long-tail SEO articles | ⏳ Pending |
 | 6 | Build MCP server wrapping stoic-brain API | ⏳ Pending |
 | 7 | Register MCP server on Smithery + mcpmarket.com | ⏳ Pending |

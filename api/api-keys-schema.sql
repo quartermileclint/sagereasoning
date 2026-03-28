@@ -29,17 +29,17 @@ CREATE TABLE IF NOT EXISTS public.api_keys (
   -- Tier & limits
   tier TEXT CHECK (tier IN ('free', 'paid')) DEFAULT 'free' NOT NULL,
 
-  -- Monthly call limit (hard enforcement cap with 50% contingency baked in)
-  -- Free tier pricing = 1,000 calls/month
-  -- Enforcement cap = 667 (if counter overshoots by 50%, lands at ~1,000)
-  monthly_limit INTEGER DEFAULT 667 NOT NULL,
+  -- Monthly call limit
+  -- Free tier: 30 (1/day with buffer). Paid tier: configurable (default 10,000).
+  monthly_limit INTEGER DEFAULT 30 NOT NULL,
 
-  -- Daily burst cap (prevents a runaway agent burning the month in hours)
-  daily_limit INTEGER DEFAULT 50 NOT NULL,
+  -- Daily call cap
+  -- Free tier: 1 (evaluation only). Paid tier: configurable (default 500).
+  daily_limit INTEGER DEFAULT 1 NOT NULL,
 
-  -- Deliberation chain max iterations per chain (free tier)
-  -- Each iteration = 1 Claude API call; cap prevents infinite loops
-  max_chain_iterations INTEGER DEFAULT 20 NOT NULL,
+  -- Deliberation chain max iterations per chain
+  -- Free tier: 1 (see score + feedback, can't iterate). Paid tier: 3.
+  max_chain_iterations INTEGER DEFAULT 1 NOT NULL,
 
   -- State
   is_active BOOLEAN DEFAULT TRUE NOT NULL,

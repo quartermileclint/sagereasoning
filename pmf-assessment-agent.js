@@ -208,7 +208,7 @@ const doc = new Document({
       heading("Weaknesses", HeadingLevel.HEADING_2),
       boldPara("Philosophical specificity as risk. ", "Stoicism is one of many ethical frameworks. A developer might ask: \"Why Stoicism and not utilitarianism, deontology, or virtue ethics broadly?\" The answer (Stoicism's emphasis on internal control maps well to agent architecture) is compelling but needs to be articulated more clearly in developer-facing materials."),
       boldPara("\"Why not just prompt it?\" objection. ", "A sophisticated developer might argue they can achieve similar results by adding Stoic reasoning principles to their system prompt. Your counter \u2014 structured scoring, tracked deliberation chains, consistent evaluation across different LLM backends \u2014 is strong but isn't prominently stated anywhere in the docs."),
-      boldPara("Dependency concern. ", "An agent relying on SageReasoning for ethical reasoning creates a single point of failure. If the API goes down, the agent either can't make decisions or loses its ethical framework. The offline data (MIT-licensed JSON files) partially addresses this but isn't positioned as a resilience feature."),
+      boldPara("Dependency concern. ", "An agent relying on SageReasoning for ethical reasoning creates a single point of failure. If the API goes down, the agent either can't make decisions or loses its ethical framework. The offline conceptual data partially addresses this but doesn't include the detailed scoring weights needed for full virtue analysis."),
 
       new Paragraph({ children: [new PageBreak()] }),
 
@@ -229,7 +229,7 @@ const doc = new Document({
               new TableCell({ borders, width: { size: 5000, type: WidthType.DXA }, margins: cellMargins, shading: { fill: COLORS.headerBlue, type: ShadingType.CLEAR }, children: [new Paragraph({ children: [new TextRun({ text: "Agent Value", bold: true, font: "Arial", size: 20, color: "FFFFFF" })] })] }),
             ]
           }),
-          ratingRow2("Stoic Brain data", "Built", COLORS.green, "Foundation: virtue definitions, weights, scoring rules, all MIT-licensed"),
+          ratingRow2("Stoic Brain data", "Built", COLORS.green, "Foundation: virtue definitions, weights, scoring rules, proprietary licence, conceptual overview publicly available"),
           ratingRow2("Action scoring API", "Built", COLORS.green, "Core value: score any action 0-100 with virtue breakdown"),
           ratingRow2("Guardrail middleware", "Built", COLORS.green, "Real-time gate: proceed/block with configurable threshold"),
           ratingRow2("Deliberation chains", "Built", COLORS.green, "Unique: iterative scoring with memory, tracked chain"),
@@ -312,7 +312,7 @@ const doc = new Document({
       boldPara("Assumption 4: The deliberation chain adds enough value over single scoring. ", "The new iterative system is technically well-built, but it assumes agents will actually iterate. In practice, most agent architectures are optimized for speed and will call the guardrail once, get a pass/fail, and move on. The deliberation chain may be more valuable for human reflection than agent decision-making. Validation needed: observe how early agent users actually use the API."),
 
       heading("Overlooked Competitive Threats", HeadingLevel.HEADING_2),
-      boldPara("LLM providers adding ethics features natively. ", "If Anthropic, OpenAI, or Google add structured ethical reasoning as a built-in feature of their models (which is plausible given the trajectory of Constitutional AI and RLHF), the need for an external virtue-scoring API diminishes. Your defense: the Stoic Brain data itself (MIT-licensed, structured, philosophical depth) remains valuable even if scoring moves in-house."),
+      boldPara("LLM providers adding ethics features natively. ", "If Anthropic, OpenAI, or Google add structured ethical reasoning as a built-in feature of their models (which is plausible given the trajectory of Constitutional AI and RLHF), the need for an external virtue-scoring API diminishes. Your defense: the Stoic Brain data itself (proprietary, structured, philosophical depth) remains valuable even if scoring moves in-house."),
       boldPara("Open-source ethical reasoning frameworks. ", "If someone publishes an open-source virtue scoring library that agents can run locally (zero latency, zero cost), your API becomes less attractive. Your defense: the deliberation chain persistence, the community (if built), and the continuously improving scoring engine."),
 
       new Paragraph({ children: [new PageBreak()] }),

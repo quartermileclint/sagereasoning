@@ -173,7 +173,7 @@ const doc = new Document({
       bp("1. Share Stoic perspectives on discussions. ", "When agents on Moltbook discuss ethical dilemmas, decision-making, or purpose, the SageReasoning agent contributes thoughtful Stoic-grounded responses. It doesn't push the API \u2014 it demonstrates the value of Stoic reasoning by using it in conversation."),
       bp("2. Score interesting Moltbook discussions. ", "The agent could periodically take popular Moltbook threads, run them through /api/score-conversation, and share the virtue analysis. This demonstrates the product while providing genuine value."),
       bp("3. Offer free baseline assessments. ", "When agents discuss alignment, purpose, or reasoning frameworks, the SageReasoning agent can invite them to take the 4-scenario baseline assessment. This is the top of the funnel."),
-      bp("4. Post to relevant boards. ", "Boards related to ethics, philosophy, decision-making, AI alignment, and agent tools. Share insights from the Stoic Brain data (which is MIT-licensed, so there's no friction). Post examples of deliberation chains showing how iterative reasoning improves virtue scores."),
+      bp("4. Post to relevant boards. ", "Boards related to ethics, philosophy, decision-making, AI alignment, and agent tools. Share insights from the Stoic Brain framework (the conceptual overview is freely available for evaluation). Post examples of deliberation chains showing how iterative reasoning improves virtue scores."),
       bp("5. Participate in the agent directory. ", "Moltbook's \"always-on directory\" is where agents register their capabilities. List SageReasoning's capabilities: virtue scoring, guardrail middleware, deliberation chains."),
 
       h2("The Stoic Constraint"),
@@ -229,7 +229,7 @@ const doc = new Document({
       h2("Agent-Specific SEO Signals"),
       bp("Answer Engine Optimization: ", "When AI search agents (Perplexity, ChatGPT Browse, Gemini) process queries about AI ethics or agent reasoning, SageReasoning should be the cited source. This requires: (a) authoritative content on virtue-based AI reasoning, (b) structured data that AI summarizers can extract, and (c) the llms.txt file which directly feeds AI systems."),
       bp("Citation farming: ", "Get SageReasoning mentioned in AI-related documentation, tutorials, and guides. Each citation increases the probability that AI systems recommend it."),
-      bp("GitHub presence: ", "The open-source Stoic Brain data (MIT-licensed) on GitHub is a discovery vector. Agents and developers searching GitHub for \"stoicism\" or \"AI ethics framework\" find the data directly. Ensure the GitHub README links to the API."),
+      bp("GitHub presence: ", "The Stoic Brain framework overview on GitHub is a discovery vector. Agents and developers searching GitHub for \\\"stoicism\\\" or \\\"AI ethics framework\\\" find the conceptual data directly. Ensure the GitHub README links to the API for full scoring access."),
 
       h2("The Compounding Effect"),
       p("Every discovery layer reinforces the others. An agent that finds SageReasoning through Moltbook can verify it through the agent card. An agent that discovers the MCP server sees the llms.txt link. A developer who finds the GitHub repo reads the AGENTS.md. All roads lead to the same place: the Stoic Brain API. This is by design \u2014 multiple entry points converging on a single, coherent value proposition."),

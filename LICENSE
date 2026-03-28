@@ -1,0 +1,84 @@
+SageReasoning Proprietary Licence
+Version 1.0, March 2026
+
+Copyright (c) 2026 SageReasoning. All rights reserved.
+
+DEFINITIONS
+
+"Stoic Brain Data" means the structured JSON data files in the /stoic-brain/
+directory of this repository, including but not limited to: stoic-brain.json,
+virtues.json, indifferents.json, scoring-rules.json, and schema.json, together
+with any future additions or modifications to these files.
+
+"SageReasoning API" means the application programming interface hosted at
+sagereasoning.com through which the Stoic Brain scoring engine can be accessed.
+
+"Competing Service" means any product, service, API, or system that uses the
+Stoic Brain Data to provide virtue-based scoring, ethical reasoning evaluation,
+or Stoic alignment measurement to third parties, whether free or paid, where
+such service operates independently of the SageReasoning API.
+
+GRANT OF RIGHTS
+
+1. EVALUATION USE. You may read, download, and review the publicly available
+   Stoic Brain Data files for the purpose of evaluating whether to integrate
+   with the SageReasoning API. This includes testing API integration in
+   development environments.
+
+2. API USE. You may use the Stoic Brain Data as provided through the
+   SageReasoning API (free or paid tiers) in accordance with the API terms
+   of service. Responses received from the API may be stored, displayed, and
+   used within your application.
+
+3. ACADEMIC AND PERSONAL STUDY. You may use the Stoic Brain Data for personal
+   study, academic research, or educational purposes, provided that any
+   publication or public presentation credits SageReasoning as the source.
+
+RESTRICTIONS
+
+4. NO COMPETING SERVICES. You may not use the Stoic Brain Data, in whole or in
+   part, to build, train, operate, or offer a Competing Service. This includes
+   but is not limited to: incorporating the virtue definitions, scoring weights,
+   sub-virtue structures, indifferent rankings, or conflict resolution rules
+   into a separate scoring engine.
+
+5. NO REDISTRIBUTION. You may not redistribute, republish, or make available
+   the Stoic Brain Data files to third parties, except as embedded within
+   responses received from the SageReasoning API.
+
+6. NO DERIVATIVE DATA PRODUCTS. You may not create derivative datasets based
+   on the Stoic Brain Data for the purpose of circumventing this licence.
+
+ENTERPRISE LICENCE
+
+7. Organisations requiring self-hosted access to the complete, unredacted Stoic
+   Brain Data (including all scoring weights, formulas, and sub-virtue
+   structures) may obtain an Enterprise Licence. Contact zeus@sagereasoning.com
+   for terms and pricing.
+
+PUBLIC DOMAIN SOURCES
+
+8. This licence covers only SageReasoning's original compilation, structure,
+   scoring weights, and data organisation. The underlying philosophical texts
+   of Marcus Aurelius, Epictetus, Seneca, Cicero, and Diogenes Laertius are
+   in the public domain. Nothing in this licence restricts anyone from reading
+   the original Stoic sources and developing their own independent framework.
+
+DISCLAIMER
+
+9. THE STOIC BRAIN DATA AND SAGEREASONING API ARE PROVIDED "AS IS" WITHOUT
+   WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. SAGEREASONING DOES NOT PROVIDE
+   PROFESSIONAL ADVICE. SCORES AND RECOMMENDATIONS ARE FOR PERSONAL REFLECTION
+   ONLY AND DO NOT CONSTITUTE ETHICAL, LEGAL, OR PROFESSIONAL GUIDANCE.
+
+TERMINATION
+
+10. This licence terminates automatically if you breach any of its terms.
+    Upon termination, you must destroy all copies of the Stoic Brain Data in
+    your possession.
+
+CONTACT
+
+SageReasoning
+Website: https://sagereasoning.com
+Email: zeus@sagereasoning.com
