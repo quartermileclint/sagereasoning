@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createHash } from 'node:crypto'
 
 // =============================================================================
 // RATE LIMITING — In-memory IP-based rate limiter
@@ -239,9 +240,6 @@ export function publicCorsPreflightResponse(): NextResponse {
 // Sent as:     Authorization: Bearer sr_live_... OR X-Api-Key: sr_live_...
 // =============================================================================
 
-import crypto from 'crypto'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-
 /** Valid endpoints that require API key gating */
 export type GatedEndpoint = 'guardrail' | 'score_iterate' | 'agent_baseline' | 'other'
 
@@ -261,7 +259,7 @@ export interface ApiKeyValidationResult {
 }
 
 function hashKey(rawKey: string): string {
-  return crypto.createHash('sha256').update(rawKey).digest('hex')
+  return createHash('sha256').update(rawKey).digest('hex')
 }
 
 function extractRawKey(request: NextRequest): string | null {
@@ -310,7 +308,7 @@ export async function validateApiKey(
   const keyHash = hashKey(rawKey)
 
   // Use service role to bypass RLS
-  const admin = createSupabaseClient(
+  const admin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )

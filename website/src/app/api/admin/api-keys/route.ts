@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimit, RATE_LIMITS, getAuthenticatedUser, corsHeaders } from '@/lib/security'
-import crypto from 'crypto'
+import { randomBytes, createHash } from 'node:crypto'
 
 // Admin user ID — only this user can manage API keys
 const ADMIN_USER_ID = process.env.ADMIN_USER_ID
@@ -12,12 +12,12 @@ const ADMIN_USER_ID = process.env.ADMIN_USER_ID
 
 /** Generate a new API key in format sr_live_<32 hex chars> */
 function generateApiKey(): string {
-  return `sr_live_${crypto.randomBytes(16).toString('hex')}`
+  return `sr_live_${randomBytes(16).toString('hex')}`
 }
 
 /** SHA-256 hash of the raw key */
 function hashKey(rawKey: string): string {
-  return crypto.createHash('sha256').update(rawKey).digest('hex')
+  return createHash('sha256').update(rawKey).digest('hex')
 }
 
 /** First 14 chars of the raw key for display (e.g. "sr_live_a1b2c3") */
