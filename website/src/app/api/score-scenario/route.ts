@@ -76,7 +76,7 @@ Return the JSON scenario with options.`
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       temperature: 0.7,
-      system: SCENARIO_PROMPT,
+      system: [{ type: 'text', text: SCENARIO_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userMessage }],
     })
 
@@ -174,7 +174,7 @@ Score this response. Return the JSON.`
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       temperature: 0.2,
-      system: SCENARIO_PROMPT,
+      system: [{ type: 'text', text: SCENARIO_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userMessage }],
     })
 

@@ -236,7 +236,7 @@ export function publicCorsPreflightResponse(): NextResponse {
 //   max_chain_iterations: 1   (see the score + feedback, can't iterate without paying)
 //   baseline retakes: 1/month per agent_id (aligned with human baseline policy)
 //
-// PAID TIER (production access — 150% of Anthropic API cost per call):
+// PAID TIER (production access — 200% of Anthropic API cost per call):
 //   monthly_limit: configurable per key (default 10,000)
 //   daily_limit:   configurable per key (default 500)
 //   max_chain_iterations: 3   (covers most real-world improvement curves)

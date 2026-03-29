@@ -102,7 +102,7 @@ Return only the JSON score object.`
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       temperature: 0.2,
-      system: SYSTEM_PROMPT,
+      system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [
         { role: 'user', content: userMessage }
       ],

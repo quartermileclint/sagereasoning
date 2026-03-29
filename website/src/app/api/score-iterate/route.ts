@@ -92,7 +92,7 @@ Return only the JSON score object.`
         model: 'claude-sonnet-4-6',
         max_tokens: 1024,
         temperature: 0.2,
-        system: INITIAL_SYSTEM_PROMPT,
+        system: [{ type: 'text', text: INITIAL_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: userMessage }],
       })
 
@@ -289,7 +289,7 @@ Score the revised action. Return only the JSON score object.`
       model: 'claude-sonnet-4-6',
       max_tokens: 1200,
       temperature: 0.2,
-      system: iterationPrompt,
+      system: [{ type: 'text', text: iterationPrompt, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userMessage }],
     })
 

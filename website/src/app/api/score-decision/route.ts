@@ -96,7 +96,7 @@ Score each option. Return the JSON array.`
       model: 'claude-sonnet-4-6',
       max_tokens: 2048,
       temperature: 0.2,
-      system: DECISION_SCORING_PROMPT,
+      system: [{ type: 'text', text: DECISION_SCORING_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userMessage }],
     })
 

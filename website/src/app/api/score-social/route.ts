@@ -72,7 +72,7 @@ Return the JSON score.`
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       temperature: 0.2,
-      system: SOCIAL_SCORING_PROMPT,
+      system: [{ type: 'text', text: SOCIAL_SCORING_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userMessage }],
     })
 

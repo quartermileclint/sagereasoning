@@ -13,6 +13,10 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
+// Guardrail uses Haiku for faster response and lower cost (simple pass/fail scoring)
+// Switch to 'claude-sonnet-4-6' if quality testing shows scoring drift
+const GUARDRAIL_MODEL = 'claude-haiku-4-5-20251001'
+
 // POST — Check an action against Stoic virtue guardrails before executing
 export async function POST(request: NextRequest) {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.publicAgent)
@@ -50,10 +54,10 @@ ${context?.trim() ? `Context: ${context.trim()}` : ''}
 Return the JSON score.`
 
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: GUARDRAIL_MODEL,
       max_tokens: 512,
       temperature: 0.2,
-      system: GUARDRAIL_SCORING_PROMPT,
+      system: [{ type: 'text', text: GUARDRAIL_SCORING_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userMessage }],
     })
 

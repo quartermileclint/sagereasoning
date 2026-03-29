@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       temperature: 0.2,
-      system: scoringPrompt,
+      system: [{ type: 'text', text: scoringPrompt, cache_control: { type: 'ephemeral' } }],
       messages: [
         {
           role: 'user',

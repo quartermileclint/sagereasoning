@@ -5,7 +5,7 @@
     "description": "Defines which assessments belong to the free tier (fast validation) and paid tier (full assessment). The free tier serves as the onboarding value demonstration; the paid tier is the full assessment unlocked upon payment.",
     "alignment_with_revenue_model": {
       "free_tier_api_constraints": "1 call/day, 1 deliberation iteration, 1 baseline retake/month",
-      "paid_tier_api_constraints": "Configurable limits (start 500/day), 3 iterations, 150% of Anthropic API cost",
+      "paid_tier_api_constraints": "Configurable limits (start 500/day), 3 iterations, 200% of Anthropic API cost",
       "free_assessment_fits_within": "A single API interaction can run Phases 1-2 (11 assessments) as one structured request-response, fitting the 1 call/day free tier limit",
       "paid_assessment_requires": "Full 37-assessment run needs multiple API calls or a batch endpoint, requiring paid tier access"
     },
@@ -114,7 +114,7 @@
         "Specific, evidence-based direction for closing the gap between your current tier and the next"
       ],
       "action": "Run Full Assessment",
-      "action_subtext": "Requires a paid API key. Pricing: 150% of Anthropic API cost per call."
+      "action_subtext": "Requires a paid API key. Pricing: 200% of Anthropic API cost per call."
     },
     "personalisation_rules": {
       "sage_tier": "Score 95+. CTA: 'Verify your Sage-level alignment with full virtue decomposition.'",

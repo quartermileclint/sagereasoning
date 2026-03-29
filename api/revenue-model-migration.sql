@@ -45,7 +45,7 @@ WHERE tier = 'free';
 --   daily_limit: 500      (configurable per customer)
 --   max_chain_iterations: 3
 --
--- Pricing: 150% of Anthropic API cost per call
+-- Pricing: 200% of Anthropic API cost per call
 -- Billing: Monthly invoice based on api_key_usage.total_calls
 -- ============================================================
 
