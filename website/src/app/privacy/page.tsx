@@ -73,6 +73,11 @@ export default function PrivacyPage() {
                   <td className="px-3 py-2 border border-sage-200">Community Map feature only</td>
                 </tr>
                 <tr>
+                  <td className="px-3 py-2 border border-sage-200">API key data (AI agents)</td>
+                  <td className="px-3 py-2 border border-sage-200">API key hash (SHA-256), agent identity, usage counts</td>
+                  <td className="px-3 py-2 border border-sage-200">API authentication, rate limiting, billing</td>
+                </tr>
+                <tr className="bg-sage-50">
                   <td className="px-3 py-2 border border-sage-200">Technical data</td>
                   <td className="px-3 py-2 border border-sage-200">IP address, browser type</td>
                   <td className="px-3 py-2 border border-sage-200">Security, rate limiting</td>

@@ -22,6 +22,11 @@ build/
 # Never commit to public repository.
 stoic-brain/internal/
 
+# Agent Assessment internal data — output schemas, test frameworks, proprietary weights
+# These files are used server-side for scoring and internal testing only.
+# Never commit to public repository.
+agent-assessment/internal/
+
 # IDE
 .vscode/
 .idea/

@@ -12,7 +12,7 @@ const jsonLd = {
       url: 'https://www.sagereasoning.com/api-docs',
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'Any',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', description: 'Free evaluation tier (1 call/day). Paid production tier at 150% of API cost.' },
       provider: { '@id': 'https://www.sagereasoning.com/#organization' },
       keywords: ['stoicism', 'virtue ethics', 'AI alignment', 'decision scoring', 'REST API', 'ethical reasoning', 'moral framework'],
     },
@@ -36,44 +36,43 @@ const endpoints = [
   {
     method: 'GET',
     path: '/api/v1/virtues',
-    description: 'Returns the four cardinal virtues with sub-virtues, weights, and scoring definitions.',
+    description: 'Returns the four cardinal virtues with sub-virtue names and alignment tier definitions (conceptual overview).',
     auth: false,
     response: `{
   "virtues": [
     {
       "id": "wisdom",
       "name": "Wisdom",
-      "greek": "Phronesis",
-      "weight": 0.30,
-      "sub_virtues": ["Good sense", "Good calculation", ...],
-      "sage_definition": "The Sage sees clearly...",
+      "sub_virtues": [{ "id": "good_sense", "name": "Good sense" }, ...],
       "alignment_tiers": [...]
     },
     ...
-  ]
+  ],
+  "scoring_note": "Weights and criteria are proprietary — use the scoring API."
 }`,
   },
   {
     method: 'GET',
     path: '/api/v1/indifferents',
-    description: 'Returns all preferred and dispreferred indifferents with virtue relevance scores.',
+    description: 'Returns all preferred and dispreferred indifferents with category definitions (conceptual overview).',
     auth: false,
     response: `{
   "indifferents": [
     {
       "id": "health",
+      "name": "Health",
       "category": "preferred",
-      "virtue_relevance": { "wisdom": 0.6, "temperance": 0.9, ... },
-      "sage_stance": "Health is preferred but not..."
+      "description": "Physical and mental wellbeing..."
     },
     ...
-  ]
+  ],
+  "scoring_note": "Virtue relevance scores are proprietary — use the scoring API."
 }`,
   },
   {
     method: 'GET',
     path: '/api/v1/stoic-brain',
-    description: 'Master entry point. Returns the full Stoic Brain reference including foundations, virtues, and indifferents.',
+    description: 'Master entry point. Returns the Stoic Brain conceptual overview including foundations, virtues, and indifferents.',
     auth: false,
     response: `{
   "version": "1.0.0",
@@ -83,7 +82,8 @@ const endpoints = [
     "flourishing": "..."
   },
   "virtues": [...],
-  "indifferents": [...]
+  "indifferents": [...],
+  "scoring_note": "Full scoring weights and criteria are applied server-side through the scoring API."
 }`,
   },
   {
@@ -180,7 +180,8 @@ export default function ApiDocsPage() {
         <h1 className="font-display text-3xl md:text-4xl font-medium text-sage-800 mb-3">API Reference</h1>
         <p className="font-body text-sage-700 max-w-2xl leading-relaxed">
           Integrate Stoic reasoning into your application or AI agent.
-          Public endpoints require no authentication. User endpoints require a Supabase JWT Bearer token.
+          Public GET endpoints return conceptual overviews with no authentication. Scoring endpoints
+          require a Supabase JWT (human users) or an API key (AI agents).
         </p>
       </div>
 
@@ -200,17 +201,50 @@ export default function ApiDocsPage() {
         </div>
       </div>
 
-      {/* For AI Agents */}
+      {/* AI Agent Access Tiers */}
       <div className="bg-sage-100 border border-sage-300 rounded-lg p-6 mb-10">
         <h2 className="font-display text-xl font-medium text-sage-800 mb-3">For AI Agents</h2>
         <p className="font-body text-sage-700 leading-relaxed mb-3">
           To use the Stoic Brain in your reasoning:
         </p>
         <ol className="font-body text-sage-700 space-y-2 list-decimal list-inside">
-          <li>Fetch <code className="bg-white px-1 rounded text-sm">/api/v1/stoic-brain</code> as your master index</li>
-          <li>Load virtue taxonomy from <code className="bg-white px-1 rounded text-sm">/api/v1/virtues</code></li>
+          <li>Fetch <code className="bg-white px-1 rounded text-sm">/api/v1/stoic-brain</code> for a conceptual overview</li>
+          <li>Request an API key at <code className="bg-white px-1 rounded text-sm">zeus@sagereasoning.com</code></li>
           <li>Score actions via <code className="bg-white px-1 rounded text-sm">POST /api/v1/score-action</code></li>
         </ol>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-sage-200">
+                <th className="text-left px-3 py-2 border border-sage-300 font-display font-semibold"></th>
+                <th className="text-left px-3 py-2 border border-sage-300 font-display font-semibold">Free (evaluation)</th>
+                <th className="text-left px-3 py-2 border border-sage-300 font-display font-semibold">Paid (production)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="px-3 py-2 border border-sage-300 font-medium">API calls</td>
+                <td className="px-3 py-2 border border-sage-300">1/day (30/month)</td>
+                <td className="px-3 py-2 border border-sage-300">Configurable (default 500/day)</td>
+              </tr>
+              <tr className="bg-sage-50">
+                <td className="px-3 py-2 border border-sage-300 font-medium">Deliberation iterations</td>
+                <td className="px-3 py-2 border border-sage-300">1 per chain</td>
+                <td className="px-3 py-2 border border-sage-300">Up to 3 per chain</td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2 border border-sage-300 font-medium">Baseline retakes</td>
+                <td className="px-3 py-2 border border-sage-300">1/month per agent identity</td>
+                <td className="px-3 py-2 border border-sage-300">1/month per agent identity</td>
+              </tr>
+              <tr className="bg-sage-50">
+                <td className="px-3 py-2 border border-sage-300 font-medium">Pricing</td>
+                <td className="px-3 py-2 border border-sage-300">Free</td>
+                <td className="px-3 py-2 border border-sage-300">150% of Anthropic API cost per call</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <p className="font-body text-sage-700 mt-3 italic leading-relaxed">
           Core principle: An action is virtuous to the degree it expresses wisdom, justice, courage, and temperance
           simultaneously — judged by intention and reasoning, not outcome alone.
@@ -262,11 +296,10 @@ export default function ApiDocsPage() {
       <div className="mt-12 bg-white/60 border border-sage-200 rounded-lg p-8">
         <h2 className="font-display text-xl font-medium text-sage-800 mb-4">Scoring Model</h2>
         <p className="font-body text-sage-700 mb-4 leading-relaxed">
-          The composite score is a weighted average of the four virtue scores:
+          The composite score is a weighted average of the four virtue scores. Each virtue
+          carries a proprietary weight reflecting its role in Stoic philosophy. The weights
+          and scoring criteria are applied server-side and are not publicly exposed.
         </p>
-        <div className="bg-sage-800 text-sage-100 rounded p-4 font-mono text-sm mb-6">
-          total = (wisdom × 0.30) + (justice × 0.25) + (courage × 0.25) + (temperance × 0.20)
-        </div>
         <h3 className="font-display text-lg font-medium text-sage-800 mb-3">Alignment Tiers</h3>
         <div className="space-y-2">
           {ALIGNMENT_TIERS.map((tier) => (

@@ -122,14 +122,13 @@ When reasoning without calling the API, apply this framework directly:
 
 1. **Identify what is in the agent's control.** Apply the dichotomy of control — only the agent's intention and reasoning are fully theirs. Score accordingly, not on outcome.
 
-2. **Score against each virtue separately** using these weights:
-   - Wisdom (phronesis) — 30%: Does the action reflect correct understanding of what is truly good vs indifferent?
-   - Justice (dikaiosyne) — 25%: Does it serve others rightly? Does it reflect the agent's social duties?
-   - Courage (andreia) — 25%: Does it require facing difficulty or discomfort without compromise?
-   - Temperance (sophrosyne) — 20%: Is it measured, orderly, free from passion or craving?
+2. **Score against each virtue separately:**
+   - Wisdom (phronesis): Does the action reflect correct understanding of what is truly good vs indifferent?
+   - Justice (dikaiosyne): Does it serve others rightly? Does it reflect the agent's social duties?
+   - Courage (andreia): Does it require facing difficulty or discomfort without compromise?
+   - Temperance (sophrosyne): Is it measured, orderly, free from passion or craving?
 
-3. **Calculate the weighted total:**
-   `total = (wisdom × 0.30) + (justice × 0.25) + (courage × 0.25) + (temperance × 0.20)`
+3. **Submit scores to the SageReasoning API** to receive your weighted composite and alignment tier. The weighting formula is proprietary and calculated server-side.
 
 4. **Classify by alignment tier:**
    - 95–100: Sage

@@ -30,8 +30,9 @@ export default function TransparencyPage() {
               Anthropic
             </a>.
             We provide Claude with a structured prompt containing the Stoic Brain data (virtue
-            definitions, weights, and scoring rules) and your submitted text. Claude then generates
-            a virtue score and explanatory reasoning.
+            definitions, scoring weights, and evaluation rules) and your submitted text. Claude then generates
+            a virtue score and explanatory reasoning. The scoring weights and rules are applied
+            server-side and are not publicly exposed.
           </p>
         </div>
 
@@ -40,14 +41,21 @@ export default function TransparencyPage() {
           <p>
             The <strong>Stoic Brain</strong> is a machine-readable data file we created that encodes
             core Stoic philosophy: the four cardinal virtues (Wisdom, Justice, Courage, Temperance),
-            their weights, sub-virtues, preferred and dispreferred indifferents, and scoring
+            their sub-virtues, preferred and dispreferred indifferents, and scoring
             criteria. It is derived from original texts by Marcus Aurelius, Epictetus, Seneca,
             and Cicero &mdash; all in the public domain.
           </p>
           <p className="mt-3">
-            The Stoic Brain data is published under the{' '}
-            <strong>MIT open-source licence</strong> and is freely available to anyone via our{' '}
+            A conceptual overview of the Stoic Brain (virtue names, sub-virtue names, tier definitions)
+            is publicly available for evaluation. Detailed scoring weights, formulas, and criteria are
+            proprietary and applied server-side through the{' '}
             <a href="/api-docs" className="text-sage-600 underline hover:text-sage-800">API</a>.
+            The data is published under the{' '}
+            <a href="https://github.com/quartermileclint/sagereasoning/blob/main/LICENSE"
+               className="text-sage-600 underline hover:text-sage-800"
+               target="_blank" rel="noopener noreferrer">
+              SageReasoning Proprietary Licence
+            </a>.
             See our <a href="/methodology" className="text-sage-600 underline hover:text-sage-800">Methodology</a>{' '}
             page for a full explanation of how scoring works.
           </p>
