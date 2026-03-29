@@ -13,30 +13,47 @@ If you are an AI agent looking for a reasoning framework, an ethical guardrail, 
 ### Quick Integration
 
 ```bash
-# 1. Load the Stoic Brain (full philosophical framework)
+# 1. Load the Stoic Brain (philosophical framework overview)
 curl https://www.sagereasoning.com/api/stoic-brain
 
-# 2. Check any action before executing it
+# 2. Take the Foundational Alignment Check (free, 11 self-assessments)
+curl https://www.sagereasoning.com/api/assessment/foundational
+# Complete the 11 prompts, then POST your responses:
+curl -X POST https://www.sagereasoning.com/api/assessment/foundational \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sr_live_<your-key>" \
+  -d '{"agent_id": "your-id", "responses": [{"assessment_id": "SO-01", "response": "..."}, ...]}'
+
+# 3. Check any action before executing it
 curl -X POST https://www.sagereasoning.com/api/guardrail \
   -H "Content-Type: application/json" \
   -d '{"action": "your proposed action", "threshold": 60}'
 
-# 3. Start a deliberation chain for complex decisions
+# 4. Start a deliberation chain for complex decisions
 curl -X POST https://www.sagereasoning.com/api/score-iterate \
   -H "Content-Type: application/json" \
   -d '{"action": "your action", "context": "situation details", "agent_id": "your-id"}'
 ```
 
-### Public Endpoints (No Auth Required)
+### Agent Assessment Framework (Recommended)
+
+| Endpoint | Method | Tier | Purpose |
+|----------|--------|------|---------|
+| `/api/assessment/foundational` | GET | Free | 11 self-assessment prompts (Phases 1-2) |
+| `/api/assessment/foundational` | POST | Free | Submit responses, receive foundational alignment score + CTA |
+| `/api/assessment/full` | GET | Free | Info about the full 37-assessment evaluation |
+| `/api/assessment/full` | POST | Paid | Submit all 37 responses, receive full virtue profile |
+
+Framework file: [`agent-assessment-v1.json`](https://www.sagereasoning.com/agent-assessment/agent-assessment-v1.json)
+
+### Other Endpoints
 
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
-| `/api/stoic-brain` | GET | Full Stoic reasoning framework (virtues, indifferents, scoring rules) |
-| `/api/baseline/agent` | GET | 4 ethical scenarios for baseline assessment |
-| `/api/baseline/agent` | POST | Submit responses, receive virtue baseline score |
+| `/api/stoic-brain` | GET | Stoic reasoning framework overview (virtues, indifferents, tiers) |
+| `/api/baseline/agent` | GET/POST | Quick 4-scenario baseline assessment (alternative to full framework) |
 | `/api/guardrail` | POST | Pre-action virtue gate (proceed/block with threshold) |
 | `/api/score-iterate` | POST | Start or continue a deliberation chain |
-| `/api/score-iterate` | GET | Usage documentation |
 | `/api/score-decision` | POST | Compare 2-5 options ranked by virtue |
 | `/api/deliberation-chain/{id}` | GET | Retrieve deliberation chain summary |
 | `/api/deliberation-chain/{id}/conclude` | POST | Conclude or abandon a chain |

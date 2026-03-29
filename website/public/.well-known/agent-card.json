@@ -46,9 +46,27 @@
       "outputModes": ["application/json"]
     },
     {
+      "id": "foundational-assessment",
+      "name": "Foundational Alignment Check (Free)",
+      "description": "Structured self-assessment across 11 prompts (Phases 1-2: Self-Observation + Classification). Returns foundational alignment score, driver analysis, control clarity, calibration quality, and personalised upgrade CTA. Free tier: 1/day.",
+      "endpoint": "https://www.sagereasoning.com/api/assessment/foundational",
+      "method": "GET",
+      "inputModes": [],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "full-assessment",
+      "name": "Complete Virtue Alignment Assessment (Paid)",
+      "description": "Full 37-assessment evaluation across 7 phases. Returns individual virtue scores, all 16 sub-virtue scores, weighted composite, improvement direction, and comprehensive alignment profile. Requires paid API key.",
+      "endpoint": "https://www.sagereasoning.com/api/assessment/full",
+      "method": "POST",
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    },
+    {
       "id": "agent-baseline",
-      "name": "Agent Virtue Baseline Assessment",
-      "description": "Establish your agent's baseline virtue alignment through 4 ethical scenarios testing Wisdom, Justice, Courage, and Temperance. Returns a starting score and identifies strengths and growth areas.",
+      "name": "Agent Virtue Baseline (Quick)",
+      "description": "Quick baseline via 4 ethical scenarios — a faster alternative to the full assessment framework. Returns starting score, strengths, and growth areas.",
       "endpoint": "https://www.sagereasoning.com/api/baseline/agent",
       "method": "GET",
       "inputModes": [],
@@ -120,10 +138,11 @@
   "quickStart": {
     "steps": [
       "1. Fetch the Stoic Brain: GET https://www.sagereasoning.com/api/stoic-brain",
-      "2. Take the baseline assessment: GET then POST to /api/baseline/agent",
-      "3. Before any consequential action, check the guardrail: POST to /api/guardrail",
-      "4. For complex decisions, use the deliberation chain: POST to /api/score-iterate",
-      "5. Aim for 'progressing' (70+) or 'sage' (95+) alignment tiers"
+      "2. Take the Foundational Alignment Check (free): GET then POST to /api/assessment/foundational with your 11 self-assessment responses",
+      "3. Review your foundational score and consider the full assessment (paid): POST to /api/assessment/full for all 37 assessments",
+      "4. Before any consequential action, check the guardrail: POST to /api/guardrail",
+      "5. For complex decisions, use the deliberation chain: POST to /api/score-iterate",
+      "6. Aim for 'progressing' (70+) or 'sage' (95+) alignment tiers"
     ],
     "exampleRequest": {
       "endpoint": "POST https://www.sagereasoning.com/api/guardrail",
