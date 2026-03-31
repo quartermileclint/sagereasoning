@@ -1,84 +1,194 @@
 {
   "meta": {
     "name": "SageReasoning Stoic Brain",
-    "version": "1.0.0",
-    "description": "A structured, machine-readable and human-readable reference for Stoic philosophy. Designed as the single source of truth for virtue-based reasoning at sagereasoning.com. This file can be loaded directly into an AI agent's context or queried via the SageReasoning API.",
+    "version": "3.0.0",
+    "description": "Source-driven Stoic philosophy reference and scoring system. V3 structure derived by applying v1's extraction methodology to the 9 SR translations: read the sources, identify the major conceptual domains the texts treat as distinct topics, extract the taxonomies and classifications the sources provide, create one file per domain.",
     "website": "https://sagereasoning.com",
     "api_endpoint": "https://sagereasoning.com/api/v1/stoic-brain",
-    "schema": "https://sagereasoning.com/stoic-brain/schema.json",
-    "last_updated": "2026-03-20",
-    "status": "v1.0 — Phase 1 complete. Scoring rules and API endpoints to be added in Phase 2.",
-    "license": "SageReasoning Proprietary Licence v1.0 — see /LICENSE for terms",
+    "last_updated": "2026-03-30",
+    "license": "SageReasoning Proprietary Licence v1.0",
+    "architecture": {
+      "derivation_methodology": "V1 derived its 4-file structure by reading 5 sources in standard English translation and extracting one file per major conceptual domain. V2 applied better content (from original-language translations) to v1's structure. V3 applies v1's same extraction methodology to the full corpus of 9 SR translations from Greek and Latin originals. The new translations cover substantially more material, so v3 yields 8 files instead of v1's 5.",
+      "version_history": {
+        "v1": "4 source files + schema. Structure derived from 5 sources in standard English translation. Files: stoic-brain (hub), virtues, indifferents, scoring-rules, schema.",
+        "v2": "Same structure as v1. Better content from original-language SR translations. Same assumptions, same architecture.",
+        "v3": "8 files. Structure derived by applying v1's methodology to the full 9-source SR translation corpus. Each file maps to a conceptual domain the sources treat as a distinct topic."
+      },
+      "files": [
+        {
+          "file": "stoic-brain.json",
+          "domain": "Hub + Foundations",
+          "description": "Central index. Contains the unifying foundational concepts that tie all domains together: core premise, dichotomy of control, flourishing, the sage ideal, cosmic framework.",
+          "why_here": "V1 placed foundational content in stoic-brain.json. The same concepts (dichotomy of control, flourishing, core premise) appear across all sources as the integrating framework."
+        },
+        {
+          "file": "psychology.json",
+          "domain": "Stoic Psychology (psyche)",
+          "description": "The ruling faculty, impression-assent-impulse causal sequence, impulse taxonomy.",
+          "why_here": "Stobaeus Eclogae 2.86-97 and DL Lives 7.40-43 both treat the soul's causal mechanism as a distinct topic. Stobaeus places the impulse taxonomy (8 types: prothesis through thelesis) here, not in his section on action."
+        },
+        {
+          "file": "passions.json",
+          "domain": "Passions and Good Feelings (pathe / eupatheiai)",
+          "description": "The 4 root passions with sub-species, the 3 eupatheiai, passion as false judgement.",
+          "why_here": "Stobaeus dedicates Section 5 ('On the Passions and the Good Feelings') to this topic as a standalone major section. DL gives 7.110-116 as a dedicated treatment. The passions are the most granular taxonomy in Stoic ethics and the primary diagnostic tool for evaluating actions. V1 scattered this content; v3 gives it the standalone treatment the sources do."
+        },
+        {
+          "file": "virtue.json",
+          "domain": "Virtue (arete)",
+          "description": "Unity thesis, nature of virtue as knowledge, 4 expressions with sub-expressions.",
+          "why_here": "DL 7.92-93 and 7.125, Stobaeus Eclogae 2.59-63, and Cicero De Officiis 1.15-18 all treat virtue definitions as a distinct topic."
+        },
+        {
+          "file": "value.json",
+          "domain": "Value Theory (axia)",
+          "description": "Genuine goods, genuine evils, indifferents with selective value continuum, selection principles.",
+          "why_here": "Stobaeus Eclogae Section 3 ('On the Classification of Goods and Ills') and DL 7.101-107 both treat value classification as a standalone topic. Cicero De Finibus 3.50-57 adds the preferred/dispreferred framework. V1 called this 'indifferents.json' but the sources treat it as a broader topic encompassing goods, evils, AND indifferents."
+        },
+        {
+          "file": "action.json",
+          "domain": "Action Theory (praxis)",
+          "description": "Kathekon/katorthoma distinction, oikeiosis developmental sequence, Cicero's deliberation framework.",
+          "why_here": "Stobaeus Eclogae Section 4 ('On Appropriate Action and Right Action') treats this as a major standalone section. Cicero's De Officiis is entirely organized around appropriate action and deliberation. DL 7.36-40 covers oikeiosis as a distinct developmental topic."
+        },
+        {
+          "file": "progress.json",
+          "domain": "Moral Progress (prokope)",
+          "description": "Binary sage/non-sage distinction, Senecan 3 grades, progress metrics.",
+          "why_here": "Stobaeus Eclogae 2.66 preserves Chrysippus on stages of progress. Seneca Epistulae 75 provides the 3-grade framework. DL 7.71-80 describes the sage ideal. Epictetus Discourses 1.4 addresses moral progress. The sources consistently treat the sage ideal and the path toward it as a distinct topic."
+        },
+        {
+          "file": "scoring.json",
+          "domain": "Scoring Engine (application layer)",
+          "description": "How SageReasoning applies the source-derived philosophy to evaluate human actions. This is the APPLICATION of the other 7 files, not a source domain itself.",
+          "why_here": "V1's methodology separated source content from application content (scoring-rules.json was clearly labeled as SageReasoning's design). V3 maintains this separation. The scoring engine uses the causal sequence from psychology.json, the diagnostic framework from passions.json, the deliberation framework from action.json, and the progress model from progress.json."
+        }
+      ]
+    },
+    "methodology": {
+      "glossary_version": "3.0.0 (67 terms, 11 categories)",
+      "translation_count": 9,
+      "derivation_process": [
+        "Step 1: Read all 9 SR translations from original Greek/Latin texts",
+        "Step 2: Identify the major conceptual domains each source treats as a distinct topic",
+        "Step 3: Map which sources contribute to which domain",
+        "Step 4: For each domain, extract the taxonomies and classifications the sources provide",
+        "Step 5: Create one file per domain, internal structure mirroring how the sources organize that material",
+        "Step 6: Add hub file connecting the domains with shared foundational concepts",
+        "Step 7: Add application layer (scoring) clearly separated from source content"
+      ]
+    },
     "primary_sources": [
-      "Marcus Aurelius, Meditations (~170-180 CE)",
-      "Epictetus, Discourses + Enchiridion (~108 CE)",
-      "Seneca, Letters to Lucilius (~65 CE)",
-      "Diogenes Laertius, Lives of the Eminent Philosophers Book 7 (~3rd c CE)",
-      "Cicero, De Finibus Book 3 (45 BCE)"
+      "Marcus Aurelius, Meditations — SR translation from Greek TEI XML",
+      "Epictetus, Discourses + Enchiridion — SR translation from Greek TEI XML",
+      "Seneca, Epistulae Morales 1-122 — SR translation from Latin TEI XML",
+      "Seneca, De Brevitate Vitae — SR translation from Latin TEI XML",
+      "Seneca, De Vita Beata — SR translation from Latin TEI XML",
+      "Diogenes Laertius, Lives Book 7 — SR translation from Greek TEI XML",
+      "Cicero, De Finibus Book 3 — SR translation from Latin TEI XML",
+      "Cicero, De Officiis — SR translation from Latin TEI XML",
+      "Stobaeus, Anthology Book 2 — SR translation from Greek OCR (Wachsmuth-Hense 1884)"
     ]
   },
   "foundations": {
-    "core_premise": "The only genuine good is virtue (arete). The only genuine bad is vice. Everything else — health, wealth, reputation, life itself — is indifferent (adiaphoron). Flourishing (eudaimonia) is achieved by living in accordance with reason and nature, expressed through the four cardinal virtues.",
-    "dichotomy_of_control": {
-      "description": "The foundational Stoic principle — Epictetus, Enchiridion 1. What matters morally is only what is 'up to us' (eph' hêmin). Everything else is 'not up to us' and should be treated as indifferent.",
-      "up_to_us": ["judgements", "impulses", "desires", "aversions", "intentions", "character"],
-      "not_up_to_us": ["body", "reputation", "possessions", "external events", "other people's actions", "death"],
-      "implication_for_scoring": "An action is scored primarily on the quality of the agent's intention and reasoning, not solely on the outcome. A sage who acts virtuously but achieves a bad outcome is still scoring near 100."
+    "core_premise": {
+      "statement": "The only genuine good is virtue (arete). The only genuine evil is vice (kakia). Everything else is indifferent (adiaphoron). Flourishing (eudaimonia) is achieved by living in agreement with nature (homologoumenos te physei zen), which means living according to virtue.",
+      "sources": [
+        "DL Lives 7.87-89: 'the end is to live in agreement with nature, which is to live according to virtue'",
+        "Stobaeus Eclogae 2.77: the telos as agreement with nature",
+        "Cicero De Finibus 3.21-22: excellence alone is the highest good"
+      ]
     },
-    "the_sage": {
-      "description": "The Stoic ideal of the perfectly wise person (sophos). A theoretical benchmark, not a claim about any real person. The Stoics acknowledged the sage was almost never achieved in practice — its purpose is as a standard for direction of travel.",
-      "characteristics": [
-        "Acts always from the four virtues simultaneously — they are unified",
-        "Is not disturbed by externals — neither excessive joy nor grief",
-        "Has no false beliefs — all their judgements are correct",
-        "Is free in the deepest sense — internal freedom from passion",
-        "Is a citizen of the cosmos — their concern extends to all rational beings",
-        "Experiences eupatheiai (good emotional states) rather than pathê (passions): joy not pleasure, caution not fear, wishing not desire"
+    "dichotomy_of_control": {
+      "description": "What matters morally is only what is up to us (eph' hemin): our moral choice (prohairesis), judgements, impulses, desires, and aversions. Everything else is not up to us (ouk eph' hemin) and is indifferent.",
+      "up_to_us": [
+        "judgements (hypolepseis)",
+        "impulses (hormai)",
+        "desires (orexeis)",
+        "aversions (ekkliseis)",
+        "assent (synkatathesis)",
+        "moral choice (prohairesis)",
+        "character (ethos)"
       ],
-      "contrast_with_non_sage": "All non-sages are considered foolish (phauloí) to varying degrees — but moral progress (prokoptos) is both possible and the central practical goal of stoic philosophy."
+      "not_up_to_us": [
+        "body (soma)",
+        "reputation (doxa)",
+        "possessions (ktemata)",
+        "external events",
+        "other people's actions",
+        "death (thanatos)"
+      ],
+      "source": "Epictetus Enchiridion 1; Discourses 1.1"
     },
     "flourishing": {
       "greek": "eudaimonia",
-      "definition": "Living and acting in accordance with reason and nature. Not a feeling of happiness but the objective quality of a life fully expressed through virtue. Seneca: 'The happy life is one that is in accordance with its own nature.'",
-      "stoic_vs_popular": "Popular usage treats flourishing as wealth, pleasure, or success. Stoic flourishing is completely internal — it is available to anyone, including the slave (Epictetus), the sick (Marcus Aurelius), or the condemned (Socrates).",
-      "how_scored": "The SageReasoning score is a measure of the degree to which an action or pattern of actions expresses the four virtues. A high score = movement toward flourishing. A low score = movement away from it."
+      "latin": "beatitudo / vita beata",
+      "definition": "Living and acting in agreement with nature. Not a feeling of happiness but the objective quality of a life fully expressed through virtue.",
+      "sources": [
+        "DL Lives 7.87: 'the end is to live in agreement with nature, which is to live according to virtue'",
+        "Seneca De Vita Beata 3: 'the flourishing life is one that is in accordance with its own nature'",
+        "Seneca De Vita Beata 16: 'The happy life does not depend on length but on use'"
+      ],
+      "stoic_vs_popular": "Popular usage treats flourishing as wealth, pleasure, or worldly success. Stoic flourishing is the activity of a virtuous soul — available to the formerly enslaved (Epictetus), the ill (Marcus Aurelius), or the condemned (Socrates).",
+      "terminological_note": "The Stoics distinguished beatitudo (flourishing) from felicitas (prosperity/worldly success). Only beatitudo follows from virtue; felicitas concerns externals."
+    },
+    "the_sage": {
+      "description": "The perfectly wise person (sophos/sapiens). A theoretical benchmark. The Stoics acknowledged the sage appears 'as rarely as the phoenix' (Seneca Ep. 42.1). Its purpose is as a standard for the direction of moral progress (prokope).",
+      "characteristics": [
+        "Acts from unified virtue — all four expressions inseparable (DL 7.125)",
+        "Free from all destructive passions (apatheia) — experiences only eupatheiai",
+        "All judgements based on cognitive grasp (katalepsis), not mere opinion (doxa)",
+        "Internal freedom of moral choice (prohairesis) — cannot be constrained (Epictetus Disc. 4.1)",
+        "Citizen of the cosmos (kosmopolites) — concern extends to all rational beings through oikeiosis",
+        "Performs right actions (katorthomata), not merely appropriate actions (kathekonta)"
+      ],
+      "source": "DL Lives 7.71-80; Stobaeus Eclogae 2.66; Seneca Ep. 42"
+    },
+    "cosmic_framework": {
+      "description": "The Stoics held that the cosmos is governed by fate (heimarmene) which is identical with divine reason (logos) and providence (pronoia). Human freedom consists in aligning moral choice with this rational order through virtue.",
+      "sources": [
+        "DL Lives 7.38: cosmos arranged by rational principle, pervaded by pneuma",
+        "Marcus Aurelius Meditations 4.26: 'everything is interwoven, and the bond is sacred'"
+      ]
     }
   },
-  "virtues": {
-    "$ref": "./virtues.json",
-    "note": "See virtues.json for the full virtue and sub-virtue definitions with scoring weights."
-  },
-  "indifferents": {
-    "$ref": "./indifferents.json",
-    "note": "See indifferents.json for preferred, dispreferred, and neutral indifferents with virtue relevance scores."
-  },
-  "scoring_rules": {
-    "$ref": "./scoring-rules.json",
-    "note": "See scoring-rules.json — to be built in Phase 2.",
-    "status": "PENDING — Phase 2"
+  "files": {
+    "psychology": { "$ref": "./psychology.json" },
+    "passions": { "$ref": "./passions.json" },
+    "virtue": { "$ref": "./virtue.json" },
+    "value": { "$ref": "./value.json" },
+    "action": { "$ref": "./action.json" },
+    "progress": { "$ref": "./progress.json" },
+    "scoring": { "$ref": "./scoring.json" }
   },
   "api_interface": {
-    "status": "PENDING — Phase 2",
+    "status": "PENDING — Phase 2 of website build",
     "planned_endpoints": [
       {
         "endpoint": "GET /api/v1/virtues",
-        "description": "Returns the full virtue taxonomy"
+        "description": "Returns the virtue taxonomy from virtue.json"
       },
       {
         "endpoint": "GET /api/v1/indifferents",
-        "description": "Returns all indifferents with categories and virtue relevance"
+        "description": "Returns indifferents with selective value from value.json"
       },
       {
         "endpoint": "POST /api/v1/score-action",
-        "description": "Submit an action description, receive virtue scores and sage alignment tier",
-        "request_body": { "action_description": "string", "context": "string (optional)" },
-        "response": "action_score object per schema.json"
+        "description": "Submit an action, receive evaluation per scoring.json framework"
       },
       {
         "endpoint": "GET /api/v1/score-history/{user_id}",
-        "description": "Returns a user's historical action scores and trend"
+        "description": "Returns historical scores and prokope trend from progress.json metrics"
+      },
+      {
+        "endpoint": "POST /api/v1/diagnose-passion",
+        "description": "Submit an action description, identify which passions from passions.json distorted judgement"
+      },
+      {
+        "endpoint": "POST /api/v1/rank-indifferents",
+        "description": "Submit competing goals, receive virtue-ranked priorities per value.json selection principles"
       }
     ],
-    "ai_agent_instructions": "To use the Stoic Brain for reasoning: review this file and virtues.json + indifferents.json for a conceptual overview of the framework. For live scoring with full virtue weights and sub-virtue analysis, use the SageReasoning API. Start with POST /api/guardrail to check any action, or POST /api/score-iterate to begin a deliberation chain. API key required — request at zeus@sagereasoning.com."
+    "ai_agent_instructions": "To use the Stoic Brain: load this file for the foundational framework, then load the relevant domain file(s) for your task. For action evaluation: psychology.json + passions.json + scoring.json. For virtue analysis: virtue.json. For decision-making: action.json + value.json. API key required — request at zeus@sagereasoning.com."
   }
 }

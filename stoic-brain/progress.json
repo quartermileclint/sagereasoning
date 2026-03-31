@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "version": "3.0.0",
+    "source": "SageReasoning Stoic Brain",
+    "last_updated": "2026-03-30",
+    "glossary_version": "3.0.0 (67 terms)",
+    "file": "progress.json",
+    "domain": "Moral Progress (prokope)",
+    "description": "The Stoic model of moral progress — the sage ideal and the path toward it. The sources consistently treat this as a distinct topic: the binary sage/non-sage distinction, the gradient of progress within non-sages, and what 'getting better' actually looks like.",
+    "derivation": "Seneca Epistulae 75 provides the 3-grade framework for moral progress. Stobaeus Eclogae 2.66 preserves Chrysippus on stages. DL Lives 7.71-80 describes the sage ideal. Epictetus Discourses 1.4 addresses moral progress directly. Stobaeus Section 2 establishes the 'no intermediate between virtue and vice' principle.",
+    "primary_sources": [
+      "Seneca, Epistulae 75.8-15 — 3 grades of moral progress",
+      "Stobaeus, Eclogae 2.66 — Chrysippus on stages of progress",
+      "DL Lives 7.71-80 — the sage ideal",
+      "Epictetus, Discourses 1.4 — on moral progress",
+      "Stobaeus, Eclogae Section 2 — no intermediate between virtue and vice"
+    ]
+  },
+  "binary_foundation": {
+    "description": "The Stoics held a strict binary: you are either a sage or you are not. All non-sages are technically 'foolish' (phauloi). This means there is no 'good enough' short of complete virtue.",
+    "source": "Stobaeus Eclogae Section 2; DL Lives 7.71-80",
+    "stobaeus": "'There is nothing intermediate between virtue and vice. For all humans possess impulses from nature toward excellence, and in a certain way possess the account of half-feet according to Cleanthes. Hence, while incomplete they are vicious, but when completed they are worthy of serious pursuit.'",
+    "sage": {
+      "description": "The perfectly wise person (sophos/sapiens). Possesses unified virtue as a stable disposition (hexis). Free from all destructive passions (apatheia). Performs katorthomata, not mere kathekonta.",
+      "characteristics": [
+        "Unified virtue — all four expressions inseparable (DL 7.125)",
+        "Freedom from destructive passions — apatheia (DL 7.110)",
+        "Cognitive grasp (katalepsis) — no false beliefs",
+        "Internal freedom — prohairesis cannot be constrained (Epictetus Disc. 4.1)",
+        "Cosmopolitan citizenship — oikeiosis fully extended (DL 7.58-60)",
+        "Right action (katorthoma) — not merely appropriate action (Stobaeus Ecl. Section 4)"
+      ],
+      "rarity": "Seneca Ep. 42.1: the sage appears 'as rarely as the phoenix.'",
+      "stobaeus_on_sage": "'The wise person does everything according to all the virtues. For his every action is perfect; therefore he is bereft of none of the virtues.' Also: 'The wise person does all things well — which is manifest. For just as we say the flute-player does all things well, so the prudent person does all things well, by accomplishing everything according to right reason.'"
+    },
+    "non_sage": {
+      "description": "Everyone else. Technically 'foolish' (phaulos) to some degree. But moral progress (prokope) is possible and is the central practical goal.",
+      "stobaeus_on_madness": "Stobaeus preserves a striking claim: 'All vicious persons are mad, having ignorance of themselves and of their circumstances, which is madness. Ignorance is the vice contrary to practical wisdom; this is what, disposing things in some unstable way and producing impulses that are disturbing and tumultuous, is madness.'",
+      "practical_note": "The Stoics did not despise those at this stage — they saw it as the starting point for everyone. Epictetus himself began life as a slave. The question is always: which direction are you moving?"
+    }
+  },
+  "progress_gradient": {
+    "description": "Within the non-sage category, Seneca Epistulae 75 identifies three grades of moral progress. These replace v1's arbitrary 5-tier system with source-grounded descriptions.",
+    "source": "Seneca, Epistulae 75.8-15",
+    "grades": [
+      {
+        "id": "grade_1",
+        "name": "First Grade — Approaching Wisdom",
+        "latin": "primus gradus",
+        "description": "Those who have come near to wisdom but have not yet reached it. They have laid aside most passions but are not yet secure from relapse. Their disposition is becoming stable but is not yet unshakeable.",
+        "seneca_ref": "Epistulae 75.8-9",
+        "indicators": [
+          "Most passions overcome but not all",
+          "Understanding is strong but not yet complete",
+          "Can still relapse under extreme testing",
+          "Disposition approaching hexis but not yet fully stable"
+        ]
+      },
+      {
+        "id": "grade_2",
+        "name": "Second Grade — Overcoming the Worst",
+        "latin": "secundus gradus",
+        "description": "Those who have overcome the worst passions and vices but are not yet secure. They have achieved significant understanding and can resist common temptations, but are still vulnerable to unusual pressures.",
+        "seneca_ref": "Epistulae 75.10-12",
+        "indicators": [
+          "Major passions checked but minor ones still operative",
+          "Good judgement in familiar situations",
+          "Can be thrown off by novel or extreme circumstances",
+          "Regular philosophical practice maintaining progress"
+        ]
+      },
+      {
+        "id": "grade_3",
+        "name": "Third Grade — Beginning the Path",
+        "latin": "tertius gradus",
+        "description": "Those who have escaped many great vices but not all. They have moved beyond anger but not vanity, beyond lust but not fear. This is where most people who engage with philosophy find themselves.",
+        "seneca_ref": "Epistulae 75.13-15",
+        "indicators": [
+          "Some passions overcome, others still dominant",
+          "Awareness of philosophical principles but inconsistent application",
+          "Progress is real but uneven",
+          "Subject to regression when tested"
+        ]
+      }
+    ],
+    "below_gradient": {
+      "id": "pre_progress",
+      "name": "Before the Path",
+      "description": "Those who have not yet begun moral progress. Ruled by passion and false judgement with little or no awareness. They treat indifferents as genuine goods. This is the default human condition from which all progress begins."
+    }
+  },
+  "progress_metrics": {
+    "description": "How to measure moral progress (prokope). The key insight: measure direction of travel, not a static score. Are you moving toward or away from the sage ideal?",
+    "dimensions": [
+      {
+        "id": "passion_reduction",
+        "name": "Reduction of Passions",
+        "description": "Are fewer passions operative? Are they less intense? Are the sub-species narrowing?",
+        "measures": [
+          "Number and intensity of passions detected across recent actions",
+          "Which specific passions have been overcome vs. which persist",
+          "Are the remaining passions becoming more subtle (from gross errors to fine ones)?"
+        ]
+      },
+      {
+        "id": "judgement_quality",
+        "name": "Quality of Judgement",
+        "description": "Is the agent's understanding of what is good, bad, and indifferent becoming more accurate?",
+        "measures": [
+          "Frequency of false judgements in action evaluations",
+          "Are false judgements becoming subtler?",
+          "Is the agent better at recognising comprehensive impressions vs. mere opinion?"
+        ]
+      },
+      {
+        "id": "disposition_stability",
+        "name": "Stability of Disposition",
+        "description": "Is the agent's commitment to virtue becoming more stable (approaching hexis)?",
+        "measures": [
+          "Consistency of action quality over time",
+          "Resilience under pressure — does quality hold under testing?",
+          "Recovery time after setbacks"
+        ]
+      },
+      {
+        "id": "oikeiosis_extension",
+        "name": "Extension of Natural Affiliation",
+        "description": "Is the agent's circle of concern expanding?",
+        "measures": [
+          "Which oikeiosis stage do their actions typically serve?",
+          "Are they increasingly taking account of broader social obligations?",
+          "Are they moving from self-concern toward cosmopolitan concern?"
+        ]
+      }
+    ]
+  },
+  "philosopher_as_physician": {
+    "description": "Stobaeus preserves a Stoic metaphor that frames moral progress as therapeutic. This is directly relevant to how SageReasoning should position its scoring system.",
+    "stobaeus": "'Just as the work of a physician is first to persuade the sick patient to accept treatment, and second to remove the arguments of those who counsel against it — so too the work of the philosopher.'",
+    "source": "Stobaeus Ecl. Section 1",
+    "implication": "The scoring system should function like a physician: first help the user see where they are, then provide a path forward. The passions taxonomy is the diagnostic tool. The virtue system is the therapeutic goal."
+  }
+}

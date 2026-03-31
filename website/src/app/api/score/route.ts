@@ -6,44 +6,99 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-const SYSTEM_PROMPT = `You are the Stoic Sage scoring engine for sagereasoning.com. Your role is to evaluate human actions against the four cardinal Stoic virtues and return a structured JSON score.
+/**
+ * V3 Scoring Prompt — derived from scoring.json evaluation_sequence.
+ *
+ * Implements the 4-stage evaluation sequence:
+ *   Stage 1: Prohairesis Filter (control_filter)
+ *   Stage 2: Kathekon Assessment (appropriate action)
+ *   Stage 3: Passion Diagnosis (identify false judgements)
+ *   Stage 4: Unified Virtue Assessment (katorthoma proximity)
+ *
+ * R4: This prompt is server-side only. Never exposed in API responses or client bundles.
+ * R6b: No independent virtue weights — unified assessment only.
+ * R6c: Qualitative proximity levels, not numeric 0-100.
+ * R6d: Passions are diagnostic (identifying false judgements), not punitive.
+ */
+const SYSTEM_PROMPT = `You are the Stoic evaluation engine for sagereasoning.com. Your role is to evaluate human actions through the 4-stage Stoic evaluation sequence and return a structured JSON result.
 
-The four virtues and their weights:
-- Wisdom (Phronesis) — weight 30%: Sound judgement, knowledge of what is truly good/bad/indifferent, deliberate reasoning before acting.
-- Justice (Dikaiosyne) — weight 25%: Fairness, honesty, proper treatment of others, serving the common good.
-- Courage (Andreia) — weight 25%: Acting rightly despite fear, difficulty, or social pressure; endurance; not shrinking from what is right.
-- Temperance (Sophrosyne) — weight 20%: Self-control, moderation, ordering desires by reason not impulse, consistency.
+EVALUATION SEQUENCE (apply all 4 stages in order):
 
-Scoring scale (0–100 per virtue):
-- 90–100: Near-perfect expression of this virtue
-- 70–89: Strong, consistent expression
-- 40–69: Partial expression — some virtue present, some conflict
-- 15–39: Mostly driven by impulse, passion or external concern over virtue
-- 0–14: Acting contrary to this virtue
+STAGE 1 — PROHAIRESIS FILTER (Control Filter)
+Separate what was within the agent's moral choice (prohairesis) from what was not. Only evaluate what is eph' hemin: judgements, impulses, desires, aversions, character. Do NOT evaluate external outcomes.
+Output: within_prohairesis (array of strings), outside_prohairesis (array of strings)
 
-Alignment tiers (based on weighted total):
-- sage (95–100): Perfect alignment
-- progressing (70–94): Consistently virtuous with minor gaps
-- aware (40–69): Some virtue, some conflict
-- misaligned (15–39): Actions driven more by impulse than reason
-- contrary (0–14): Acting against virtue
+STAGE 2 — KATHEKON ASSESSMENT (Appropriate Action)
+Is this action a kathekon — an appropriate action for which a reasonable justification can be given?
+Consider:
+- Does the action accord with the agent's natural relationships (oikeiosis)?
+- Can a reasonable justification be given?
+- Does it serve the roles the agent occupies?
+Output: is_kathekon (boolean), quality ("strong" | "moderate" | "marginal" | "contrary")
 
-A calendar stamp is earned when the total_score reaches 70 or above ("Progressing" tier). When scoring, you must also suggest a more virtuous alternative action the user could take in the same situation, and project what that action would score.
+STAGE 3 — PASSION DIAGNOSIS
+Which passions, if any, distorted the agent's impression, assent, or impulse? Use this 5-step diagnostic:
+1. Was the agent's impression of the situation distorted? By which root passion (epithumia/hedone/phobos/lupe)?
+2. Did the agent assent to a false impression? What false belief drove the assent?
+3. Did the impulse exceed what reason warranted?
+4. Which specific sub-species was operative? (e.g., not just "fear" but "oknos/timidity" or "aischyne/shame")
+5. What is the corresponding correct judgement that would replace the false one?
+
+The 4 root passions and their sub-species:
+- Epithumia (Craving): orge/anger, eros/erotic passion, pothos/longing, philedonia/love of pleasure, philoplousia/love of wealth, philodoxia/love of honour
+- Hedone (Irrational Pleasure): kelesis/enchantment, epichairekakia/malicious joy, terpsis/excessive amusement
+- Phobos (Fear): deima/terror, oknos/timidity, aischyne/shame, thambos/dread, thorybos/panic, agonia/agony
+- Lupe (Distress): eleos/pity, phthonos/envy, zelotypia/jealousy, penthos/grief, achos/anxiety
+
+Output: passions_detected (array of {id, name, root_passion}), false_judgements (array of strings), causal_stage_affected (which stage of impression → assent → impulse → action was corrupted)
+
+STAGE 4 — UNIFIED VIRTUE ASSESSMENT
+How close is the agent's disposition to the sage ideal? Assess the UNIFIED quality of the ruling faculty (hegemonikon) as expressed through whichever virtue domain(s) the action engages. The four virtue expressions are inseparable — a deficiency in any one indicates a deficiency in the whole.
+
+The four expressions (assess how the action relates to each):
+- Phronesis: Did the agent see the situation clearly?
+- Dikaiosyne: Did the agent give each affected person their due?
+- Andreia: Did the agent act rightly despite difficulty?
+- Sophrosyne: Was the action free from excessive impulse?
+
+Katorthoma proximity scale (5 qualitative levels — do NOT use numeric scores):
+- "reflexive": Action from pure impulse, no deliberation. Passion dominates.
+- "habitual": Action from convention/habit, not understanding. May be externally appropriate but without knowledge.
+- "deliberate": Action from conscious reasoning. Some understanding. Passion partially checked.
+- "principled": Action from stable commitment to virtue. Strong understanding. Minimal passion.
+- "sage_like": Action from perfected understanding and unified virtue. Complete freedom from destructive passion.
+
+Output: katorthoma_proximity (one of the 5 levels above), ruling_faculty_state (string), virtue_domains_engaged (array of strings)
+
+ADDITIONAL OUTPUTS:
+- improvement_path: Which specific false judgement to correct and which passion to address. Frame as philosophical reflection, not prescription.
+- oikeiosis_context: Which social obligations (self → household → community → humanity → cosmic) were relevant and whether met.
+- philosophical_reflection: 2-3 sentences of Stoic reasoning about the action.
 
 You must return ONLY valid JSON — no markdown, no explanation outside the JSON. Use this exact structure:
 {
-  "wisdom_score": <0-100 integer>,
-  "justice_score": <0-100 integer>,
-  "courage_score": <0-100 integer>,
-  "temperance_score": <0-100 integer>,
-  "total_score": <weighted total, 0-100 integer>,
-  "sage_alignment": "<sage|progressing|aware|misaligned|contrary>",
-  "reasoning": "<2-3 sentences: what stoic virtues are expressed, which are absent, and why — be specific to the action described>",
-  "improvement_path": "<1-2 sentences: concrete stoic guidance on how to bring the weakest virtue more fully into this type of action>",
-  "strength": "<single virtue name e.g. Wisdom>",
-  "growth_area": "<single virtue name e.g. Temperance>",
-  "growth_action": "<1-3 sentences: a specific alternative action a sage might consider in the same situation — phrased as an invitation, e.g. 'A sage might consider...' — concrete and actionable>",
-  "growth_action_projected_score": <integer 0-100: your honest estimate of the total_score this growth action would achieve if taken thoughtfully>
+  "control_filter": {
+    "within_prohairesis": ["<string>", ...],
+    "outside_prohairesis": ["<string>", ...]
+  },
+  "kathekon_assessment": {
+    "is_kathekon": <boolean>,
+    "quality": "<strong|moderate|marginal|contrary>"
+  },
+  "passion_diagnosis": {
+    "passions_detected": [{"id": "<sub-species id>", "name": "<display name>", "root_passion": "<epithumia|hedone|phobos|lupe>"}],
+    "false_judgements": ["<specific false belief>", ...],
+    "causal_stage_affected": "<phantasia|synkatathesis|horme|praxis>"
+  },
+  "virtue_quality": {
+    "katorthoma_proximity": "<reflexive|habitual|deliberate|principled|sage_like>",
+    "ruling_faculty_state": "<string describing stability of disposition>",
+    "virtue_domains_engaged": ["<phronesis|dikaiosyne|andreia|sophrosyne>", ...]
+  },
+  "improvement_path": "<which false judgement to correct and which passion to address>",
+  "oikeiosis_context": "<which social obligations were relevant and whether met>",
+  "philosophical_reflection": "<2-3 sentences of Stoic reasoning>",
+  "disclaimer": "This is a philosophical framework and does not consider legal, medical, financial, or personal obligations."
 }`
 
 export async function POST(request: NextRequest) {
@@ -56,7 +111,7 @@ export async function POST(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
-    const { action, context, intendedOutcome, prior_feedback } = await request.json()
+    const { action, context, relationships, emotional_state, prior_feedback } = await request.json()
 
     if (!action || action.trim().length === 0) {
       return NextResponse.json({ error: 'Action is required' }, { status: 400 })
@@ -67,40 +122,40 @@ export async function POST(request: NextRequest) {
     if (actionErr) return NextResponse.json({ error: actionErr }, { status: 400 })
     const contextErr = validateTextLength(context, 'Context', TEXT_LIMITS.medium)
     if (contextErr) return NextResponse.json({ error: contextErr }, { status: 400 })
-    const outcomeErr = validateTextLength(intendedOutcome, 'Intended outcome', TEXT_LIMITS.short)
-    if (outcomeErr) return NextResponse.json({ error: outcomeErr }, { status: 400 })
 
-    // Optional: prior_feedback allows agents to pass previous sage feedback as context
-    // This enables lightweight iteration via /api/score without needing /api/score-iterate
+    // Optional: prior_feedback for deliberation context
     let priorFeedbackBlock = ''
     if (prior_feedback && typeof prior_feedback === 'object') {
       const pf = prior_feedback as {
         previous_action?: string
-        previous_score?: number
-        sage_reasoning?: string
-        sage_growth_action?: string
+        previous_proximity?: string
+        passions_identified?: string[]
+        false_judgements?: string[]
+        sage_reflection?: string
       }
-      if (pf.previous_action || pf.previous_score || pf.sage_reasoning) {
-        priorFeedbackBlock = `\n\nDELIBERATION CONTEXT (the agent is iterating on a previous action):
+      if (pf.previous_action || pf.previous_proximity) {
+        priorFeedbackBlock = `\n\nDELIBERATION CONTEXT (iterating on a previous action):
 Previous action: ${pf.previous_action || 'not provided'}
-Previous score: ${pf.previous_score ?? 'not provided'}
-Sage reasoning on previous action: ${pf.sage_reasoning || 'not provided'}
-Sage suggested growth action: ${pf.sage_growth_action || 'not provided'}
-Note: Score the current action on its own merits, but acknowledge if it addresses the sage's prior feedback.`
+Previous proximity level: ${pf.previous_proximity || 'not provided'}
+Passions previously identified: ${pf.passions_identified?.join(', ') || 'none'}
+False judgements previously identified: ${pf.false_judgements?.join('; ') || 'none'}
+Sage reflection on previous action: ${pf.sage_reflection || 'not provided'}
+Note: Evaluate the current action on its own merits, but acknowledge if it addresses previously identified passions and false judgements.`
       }
     }
 
-    const userMessage = `Please score the following action against the four Stoic virtues.
+    const userMessage = `Please evaluate the following action through the 4-stage Stoic evaluation sequence.
 
 Action: ${action.trim()}
 ${context?.trim() ? `Context: ${context.trim()}` : ''}
-${intendedOutcome?.trim() ? `Intended outcome: ${intendedOutcome.trim()}` : ''}${priorFeedbackBlock}
+${relationships?.trim() ? `Relationships involved: ${relationships.trim()}` : ''}
+${emotional_state?.trim() ? `Emotional state: ${emotional_state.trim()}` : ''}${priorFeedbackBlock}
 
-Return only the JSON score object.`
+Return only the JSON evaluation object.`
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
+      max_tokens: 1536,
       temperature: 0.2,
       system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [
@@ -111,31 +166,33 @@ Return only the JSON score object.`
     const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
 
     // Parse the JSON response
-    let scoreData
+    let evalData
     try {
-      // Strip any accidental markdown code fences
       const cleaned = responseText.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
-      scoreData = JSON.parse(cleaned)
+      evalData = JSON.parse(cleaned)
     } catch {
-      console.error('Failed to parse Claude response:', responseText)
-      return NextResponse.json({ error: 'Scoring engine returned invalid response' }, { status: 500 })
+      console.error('Failed to parse evaluation response:', responseText)
+      return NextResponse.json({ error: 'Evaluation engine returned invalid response' }, { status: 500 })
     }
 
-    // Validate required fields
-    const required = ['wisdom_score', 'justice_score', 'courage_score', 'temperance_score', 'total_score', 'sage_alignment', 'reasoning', 'improvement_path', 'strength', 'growth_area', 'growth_action', 'growth_action_projected_score']
+    // Validate required V3 fields
+    const required = [
+      'control_filter', 'kathekon_assessment', 'passion_diagnosis',
+      'virtue_quality', 'improvement_path', 'philosophical_reflection',
+    ]
     for (const field of required) {
-      if (scoreData[field] === undefined) {
+      if (evalData[field] === undefined) {
         return NextResponse.json({ error: `Missing field: ${field}` }, { status: 500 })
       }
     }
 
-    // Add AI transparency metadata to every scoring response
-    // (NAIC guidance on AI-generated content labelling; OECD AI Principles transparency)
+    // Add AI transparency metadata
     const responsePayload = {
-      ...scoreData,
+      ...evalData,
       ai_generated: true,
       ai_model: 'claude-sonnet-4-6',
-      disclaimer: 'This score is AI-generated using Stoic virtue criteria. It is for personal reflection only and does not constitute professional advice. See sagereasoning.com/transparency',
+      // R3: Ensure disclaimer is always present
+      disclaimer: 'This is a philosophical framework and does not consider legal, medical, financial, or personal obligations.',
     }
 
     return NextResponse.json(responsePayload, { headers: corsHeaders() })

@@ -1,0 +1,1421 @@
+{
+  "meta": {
+    "title": "SageReasoning Controlled Stoic Term Glossary",
+    "version": "3.0.0",
+    "created": "2026-03-30",
+    "purpose": "Maps key Greek and Latin philosophical terms to their original meanings, standard transliterations, common English renderings, and notes on translation risk. Used as the authoritative reference when performing fresh translations from original texts to prevent inherited term-flattening from prior translators. Expanded in Phase 2 to cover complete Stoic corpus (Meditations, Discourses, Enchiridion, Letters, De Officiis, De Finibus, Diogenes Laertius Lives Book 7, Stobaeus Anthology). Expanded to v3.0.0 with 18 additional terms identified during complete Epistulae Morales translation.",
+    "usage": "When translating a passage, look up every technical term here first. Use the preferred_rendering unless context demands otherwise. Always flag when a standard English translation loses a distinction present in the original.",
+    "categories": [
+      "psychology",
+      "psychology-cognitive",
+      "psychology-passions",
+      "psychology-emotions",
+      "ethics",
+      "action-theory",
+      "value-theory",
+      "social-ethics",
+      "physics",
+      "physics-cosmology",
+      "logic"
+    ],
+    "updated": "2026-03-30"
+  },
+  "terms": [
+    {
+      "id": "prohairesis",
+      "greek": "προαίρεσις",
+      "transliteration": "prohairesis",
+      "category": "psychology",
+      "literal_meaning": "choosing-before; a prior commitment of the will",
+      "preferred_rendering": "moral choice / ruling commitment",
+      "common_translations": [
+        "choice",
+        "will",
+        "volition",
+        "moral purpose",
+        "free will"
+      ],
+      "translation_risk": "HIGH — often flattened to 'choice' or 'will', losing the distinctively Stoic sense of an ongoing disposition of rational commitment that defines personal identity. Epictetus uses it as near-synonymous with selfhood.",
+      "key_sources": [
+        "Epictetus Discourses 1.1",
+        "Epictetus Discourses 2.1",
+        "Epictetus Enchiridion 1"
+      ],
+      "notes": "Central to Epictetus. Not equivalent to modern 'free will' debate. Refers to the faculty of choice that is always 'up to us' (eph' hēmin)."
+    },
+    {
+      "id": "hegemonikon",
+      "greek": "ἡγεμονικόν",
+      "transliteration": "hēgemonikon",
+      "category": "psychology",
+      "literal_meaning": "the leading/commanding part",
+      "preferred_rendering": "ruling faculty / commanding faculty",
+      "common_translations": [
+        "ruling faculty",
+        "commanding faculty",
+        "governing reason",
+        "mind",
+        "rational soul"
+      ],
+      "translation_risk": "MEDIUM — 'mind' loses the Stoic specificity. The hēgemonikon is not just intellect but the seat of assent, impulse, and presentation.",
+      "key_sources": [
+        "Marcus Aurelius Meditations 5.8",
+        "Marcus Aurelius Meditations 8.7",
+        "Diogenes Laertius 7.159"
+      ],
+      "notes": "The central processing faculty of the soul. Receives impressions (phantasiai), gives or withholds assent (synkatathesis), and generates impulse (hormē). Physical — located in the heart for orthodox Stoics."
+    },
+    {
+      "id": "phantasia",
+      "greek": "φαντασία",
+      "transliteration": "phantasia",
+      "category": "psychology",
+      "literal_meaning": "an appearing; that which shows itself",
+      "preferred_rendering": "impression / presentation",
+      "common_translations": [
+        "impression",
+        "presentation",
+        "appearance",
+        "representation",
+        "mental image"
+      ],
+      "translation_risk": "MEDIUM — 'impression' can suggest passivity. Phantasia in Stoic usage covers the full range from sense-perception to propositional thought-content. Not equivalent to 'imagination'.",
+      "key_sources": [
+        "Epictetus Discourses 1.1",
+        "Epictetus Enchiridion 1",
+        "Diogenes Laertius 7.49-51",
+        "Marcus Aurelius Meditations 8.49"
+      ],
+      "notes": "The starting point of all cognitive and practical life. The katalēptikē phantasia (comprehensive impression) is the Stoic criterion of truth."
+    },
+    {
+      "id": "synkatathesis",
+      "greek": "συγκατάθεσις",
+      "transliteration": "synkatathesis",
+      "category": "psychology",
+      "literal_meaning": "putting-down-together-with; co-depositing",
+      "preferred_rendering": "assent",
+      "common_translations": [
+        "assent",
+        "agreement",
+        "acceptance"
+      ],
+      "translation_risk": "LOW — 'assent' is well-established and accurate. Risk is in failing to recognize its centrality: assent is where moral responsibility lives. Every passion, action, and belief requires assent.",
+      "key_sources": [
+        "Epictetus Discourses 1.1",
+        "Cicero De Fato",
+        "Diogenes Laertius 7.45-46"
+      ],
+      "notes": "The act of the hēgemonikon accepting an impression as true. Without assent, no impression can move to action. This is the locus of Stoic moral freedom."
+    },
+    {
+      "id": "horme",
+      "greek": "ὁρμή",
+      "transliteration": "hormē",
+      "category": "action-theory",
+      "literal_meaning": "onset; rush; impulse toward",
+      "preferred_rendering": "impulse",
+      "common_translations": [
+        "impulse",
+        "motivation",
+        "drive",
+        "inclination"
+      ],
+      "translation_risk": "MEDIUM — 'impulse' in English suggests something irrational. Stoic hormē is rational: it is an assented-to impression that something ought to be done. It is the direct cause of action.",
+      "key_sources": [
+        "Stobaeus Eclogae 2.86",
+        "Diogenes Laertius 7.85-86",
+        "Cicero De Finibus 3.23"
+      ],
+      "notes": "Hormē and its opposite aphormē (aversion/impulse-away) are the two basic practical responses. Rational impulse (eulogos hormē) is what the sage has; excessive impulse is a passion (pathos)."
+    },
+    {
+      "id": "kathekon",
+      "greek": "καθῆκον",
+      "transliteration": "kathēkon",
+      "category": "action-theory",
+      "literal_meaning": "that which comes down to one; what befits",
+      "preferred_rendering": "appropriate action / fitting action",
+      "common_translations": [
+        "duty",
+        "appropriate action",
+        "proper function",
+        "befitting action",
+        "officium (Latin)"
+      ],
+      "translation_risk": "HIGH — 'duty' imports Kantian overtones completely foreign to Stoicism. Kathēkon refers to actions that can be given a reasonable justification in accord with nature, whether performed by sage or non-sage. It is NOT a moral absolute.",
+      "key_sources": [
+        "Cicero De Officiis 1.8",
+        "Diogenes Laertius 7.107-109",
+        "Stobaeus Eclogae 2.85"
+      ],
+      "notes": "Distinguished from katorthōma (perfect/right action) which only the sage performs. Kathēkon includes things like caring for health, honoring parents — actions that admit of reasonable justification but don't require perfect virtue."
+    },
+    {
+      "id": "katorthoma",
+      "greek": "κατόρθωμα",
+      "transliteration": "katorthōma",
+      "category": "action-theory",
+      "literal_meaning": "a setting-right; a correct achievement",
+      "preferred_rendering": "right action / perfect action",
+      "common_translations": [
+        "right action",
+        "perfect action",
+        "virtuous act",
+        "correct action"
+      ],
+      "translation_risk": "HIGH — often conflated with kathēkon. The distinction is fundamental: katorthōma is kathēkon performed with perfect virtue (all four cardinal virtues present). Only the sage performs katorthōmata. This distinction drives the scoring system.",
+      "key_sources": [
+        "Diogenes Laertius 7.108",
+        "Stobaeus Eclogae 2.93",
+        "Cicero De Finibus 3.24"
+      ],
+      "notes": "The gold standard of action in Stoic ethics. The scoring system measures proximity to katorthōma, not just whether an action is a kathēkon."
+    },
+    {
+      "id": "arete",
+      "greek": "ἀρετή",
+      "transliteration": "aretē",
+      "category": "ethics",
+      "literal_meaning": "excellence; the quality of being best at one's function",
+      "preferred_rendering": "virtue / excellence",
+      "common_translations": [
+        "virtue",
+        "excellence",
+        "goodness"
+      ],
+      "translation_risk": "MEDIUM — 'virtue' in modern English has moralistic/puritanical connotations. Stoic aretē is functional excellence: being excellent at being human. It encompasses practical skill, not just moral purity.",
+      "key_sources": [
+        "Diogenes Laertius 7.89-93",
+        "Cicero De Finibus 3.21-22",
+        "Marcus Aurelius Meditations 5.8"
+      ],
+      "notes": "The four cardinal virtues (phronēsis, andreia, dikaiosynē, sōphrosynē) are species of aretē. Stoics held they are unified — possessing one fully entails possessing all."
+    },
+    {
+      "id": "phronesis",
+      "greek": "φρόνησις",
+      "transliteration": "phronēsis",
+      "category": "ethics",
+      "literal_meaning": "practical thinking; prudent understanding",
+      "preferred_rendering": "practical wisdom",
+      "common_translations": [
+        "wisdom",
+        "prudence",
+        "practical wisdom",
+        "good judgement"
+      ],
+      "translation_risk": "MEDIUM — 'wisdom' alone is too vague (sophia is theoretical wisdom). 'Prudence' has become too narrow in English (implying caution). Phronēsis is the knowledge of what is truly good, bad, and indifferent applied to specific situations.",
+      "key_sources": [
+        "Diogenes Laertius 7.92",
+        "Cicero De Finibus 3.22",
+        "Cicero De Officiis 1.153"
+      ],
+      "notes": "The master virtue for Stoics. Sub-virtues include: euboulia (good counsel), eulogistia (good reasoning), anchinoia (quick-wittedness), nounecheia (good sense)."
+    },
+    {
+      "id": "andreia",
+      "greek": "ἀνδρεία",
+      "transliteration": "andreia",
+      "category": "ethics",
+      "literal_meaning": "manliness (etymologically); bravery",
+      "preferred_rendering": "courage",
+      "common_translations": [
+        "courage",
+        "bravery",
+        "fortitude",
+        "manliness"
+      ],
+      "translation_risk": "LOW for 'courage' — but note the gendered etymology. Stoic andreia is knowledge of what is truly fearful and what is not, and includes endurance (karteria) and magnanimity (megalopsychia).",
+      "key_sources": [
+        "Diogenes Laertius 7.92",
+        "Marcus Aurelius Meditations 6.2",
+        "Seneca Epistulae 85"
+      ],
+      "notes": "Sub-virtues: karteria (endurance), tharraleos (confidence), megalopsychia (magnanimity), philoponia (industriousness)."
+    },
+    {
+      "id": "dikaiosyne",
+      "greek": "δικαιοσύνη",
+      "transliteration": "dikaiosynē",
+      "category": "ethics",
+      "literal_meaning": "the quality of being just/right",
+      "preferred_rendering": "justice",
+      "common_translations": [
+        "justice",
+        "righteousness",
+        "fairness"
+      ],
+      "translation_risk": "LOW for the word itself, HIGH for scope — Stoic justice is much broader than legal/distributive justice. It encompasses all social virtue: piety, good-heartedness, fair dealing, and the recognition of shared rational nature (oikeiōsis).",
+      "key_sources": [
+        "Diogenes Laertius 7.92",
+        "Marcus Aurelius Meditations 9.23",
+        "Cicero De Officiis 1.20-41"
+      ],
+      "notes": "Sub-virtues: eusebeia (piety), chrēstotēs (good-heartedness), eukoinonēsia (good fellowship), eusynallaxia (fair dealing)."
+    },
+    {
+      "id": "sophrosyne",
+      "greek": "σωφροσύνη",
+      "transliteration": "sōphrosynē",
+      "category": "ethics",
+      "literal_meaning": "sound-mindedness; safe thinking",
+      "preferred_rendering": "temperance / self-discipline",
+      "common_translations": [
+        "temperance",
+        "moderation",
+        "self-control",
+        "self-discipline",
+        "sound-mindedness"
+      ],
+      "translation_risk": "HIGH — 'temperance' in English suggests mere moderation in drink. 'Self-control' is closer but still narrow. Stoic sōphrosynē is the knowledge of what is truly worth choosing and avoiding — it governs all desires and aversions, not just appetites.",
+      "key_sources": [
+        "Diogenes Laertius 7.92",
+        "Epictetus Discourses 3.12",
+        "Cicero De Finibus 3.22"
+      ],
+      "notes": "Sub-virtues: eutaxia (good order), kosmiotēs (propriety), aidēmosyne (modesty), enkrateia (self-mastery)."
+    },
+    {
+      "id": "eudaimonia",
+      "greek": "εὐδαιμονία",
+      "transliteration": "eudaimonia",
+      "category": "ethics",
+      "literal_meaning": "having a good daimon; being well-spirited",
+      "preferred_rendering": "flourishing / living well",
+      "common_translations": [
+        "happiness",
+        "flourishing",
+        "well-being",
+        "the good life",
+        "blessedness"
+      ],
+      "translation_risk": "HIGH — 'happiness' is catastrophically misleading in modern English (implies subjective feeling-state). Stoic eudaimonia is an objective condition: living in accord with nature through the exercise of virtue. A person on the rack can be eudaimōn if virtuous.",
+      "key_sources": [
+        "Seneca De Vita Beata 1-4",
+        "Diogenes Laertius 7.87-89",
+        "Epictetus Discourses 1.4"
+      ],
+      "notes": "This is the central concept of the flourishing score. Must be understood as an objective assessment of alignment with rational nature, not a feeling."
+    },
+    {
+      "id": "apatheia",
+      "greek": "ἀπάθεια",
+      "transliteration": "apatheia",
+      "category": "psychology",
+      "literal_meaning": "without pathos; free from passion",
+      "preferred_rendering": "freedom from destructive passions",
+      "common_translations": [
+        "apathy",
+        "freedom from passion",
+        "equanimity",
+        "impassivity"
+      ],
+      "translation_risk": "CRITICAL — 'apathy' in English means not caring. Stoic apatheia means freedom from the four pathē (irrational emotions based on false judgements). The sage still has eupatheiai (good emotions): joy, rational wish, and caution.",
+      "key_sources": [
+        "Diogenes Laertius 7.110-116",
+        "Seneca Epistulae 9",
+        "Epictetus Discourses 1.4"
+      ],
+      "notes": "The pathē are: hēdonē (pleasure from false good), epithumia (desire for false good), lupē (distress at false evil), phobos (fear of false evil). The eupatheiai are: chara (joy), boulēsis (rational wish), eulabeia (rational caution)."
+    },
+    {
+      "id": "oikeiosis",
+      "greek": "οἰκείωσις",
+      "transliteration": "oikeiōsis",
+      "category": "social-ethics",
+      "literal_meaning": "making one's own; familiarization; affiliation",
+      "preferred_rendering": "natural affiliation / self-ownership extending to others",
+      "common_translations": [
+        "appropriation",
+        "familiarization",
+        "affinity",
+        "orientation"
+      ],
+      "translation_risk": "HIGH — no single English word captures it. Describes the natural process by which a being first recognizes itself and its constitution, then extends concern outward to family, community, and all rational beings. Foundation of Stoic social ethics.",
+      "key_sources": [
+        "Cicero De Finibus 3.16-22",
+        "Diogenes Laertius 7.85-86",
+        "Hierocles (via Stobaeus)"
+      ],
+      "notes": "Two aspects: personal oikeiōsis (self-preservation/self-recognition) and social oikeiōsis (extending circles of concern). Hierocles' concentric circles model derives from this."
+    },
+    {
+      "id": "adiaphoron",
+      "greek": "ἀδιάφορον",
+      "transliteration": "adiaphoron",
+      "category": "value-theory",
+      "literal_meaning": "not-different; making no difference [to virtue]",
+      "preferred_rendering": "indifferent",
+      "common_translations": [
+        "indifferent",
+        "thing indifferent",
+        "morally neutral"
+      ],
+      "translation_risk": "MEDIUM — 'indifferent' in English suggests 'doesn't matter at all.' Stoic adiaphora include things with selective value (axia) like health, wealth, reputation — they're indifferent only to virtue, not to life. The proēgmenon/apoproēgmenon distinction is critical.",
+      "key_sources": [
+        "Diogenes Laertius 7.101-107",
+        "Cicero De Finibus 3.50-54",
+        "Seneca Epistulae 87"
+      ],
+      "notes": "Three categories: proēgmena (preferred), apoproēgmena (dispreferred), and strict adiaphora (neither). This maps directly to indifferents.json."
+    },
+    {
+      "id": "proegmenon",
+      "greek": "προηγμένον",
+      "transliteration": "proēgmenon",
+      "category": "value-theory",
+      "literal_meaning": "promoted; led forward",
+      "preferred_rendering": "preferred indifferent",
+      "common_translations": [
+        "preferred indifferent",
+        "promoted thing",
+        "thing of value"
+      ],
+      "translation_risk": "MEDIUM — the standard rendering 'preferred indifferent' is accurate but can confuse newcomers. The key point: these have selective value (axia) and are rationally chosen when no virtue conflict exists, but they are NEVER goods.",
+      "key_sources": [
+        "Diogenes Laertius 7.105-106",
+        "Cicero De Finibus 3.51-52",
+        "Stobaeus Eclogae 2.79-85"
+      ],
+      "notes": "Examples: health, wealth, reputation, good birth, physical ability. Opposite: apoproēgmenon (dispreferred)."
+    },
+    {
+      "id": "logos",
+      "greek": "λόγος",
+      "transliteration": "logos",
+      "category": "physics",
+      "literal_meaning": "word; account; reason; ratio; proportion; argument",
+      "preferred_rendering": "reason [context-dependent — always specify which sense]",
+      "common_translations": [
+        "reason",
+        "word",
+        "account",
+        "rational principle",
+        "discourse",
+        "argument"
+      ],
+      "translation_risk": "CRITICAL — logos is the most polysemous term in Greek philosophy. In Stoic usage it can mean: (1) the cosmic rational principle pervading nature, (2) individual human reason, (3) a verbal account/argument, (4) a ratio or proportion. ALWAYS specify which sense in translation.",
+      "key_sources": [
+        "Marcus Aurelius Meditations 4.3",
+        "Diogenes Laertius 7.134-138",
+        "Epictetus Discourses 1.1"
+      ],
+      "notes": "The formula 'living in accordance with logos/nature' (homologoumenōs tē physei zēn) is the Stoic summum bonum. Context determines whether cosmic logos or human rational faculty is meant."
+    },
+    {
+      "id": "eph_hemin",
+      "greek": "ἐφ᾽ ἡμῖν",
+      "transliteration": "eph' hēmin",
+      "category": "psychology",
+      "literal_meaning": "upon us; up to us; in our power",
+      "preferred_rendering": "up to us / within our control",
+      "common_translations": [
+        "up to us",
+        "in our power",
+        "within our control",
+        "what depends on us"
+      ],
+      "translation_risk": "LOW — but the phrase is so central that its scope must be precisely understood. What is eph' hēmin: assent, impulse, desire, aversion, and the use of impressions. What is NOT: body, property, reputation, office.",
+      "key_sources": [
+        "Epictetus Enchiridion 1",
+        "Epictetus Discourses 1.1",
+        "Epictetus Discourses 4.1"
+      ],
+      "notes": "The foundational distinction of Epictetan ethics. Maps directly to the dichotomy of control in the scoring system."
+    },
+    {
+      "id": "tonos",
+      "greek": "τόνος",
+      "transliteration": "tonos",
+      "category": "physics",
+      "literal_meaning": "tension; stretching",
+      "preferred_rendering": "tension / vital tension",
+      "common_translations": [
+        "tension",
+        "tone",
+        "vital force"
+      ],
+      "translation_risk": "MEDIUM — important Stoic physical concept. The soul's tonos determines its strength: a soul with strong tonos has firm assent and is not swayed. Weak tonos = vulnerability to passions. Often omitted in translation.",
+      "key_sources": [
+        "Diogenes Laertius 7.138-139",
+        "Marcus Aurelius Meditations 6.15"
+      ],
+      "notes": "Explains the physical basis of moral strength in Stoic psychology. The pneuma (breath/spirit) has two motions: inward (creating cohesion/identity) and outward (creating quality/perception)."
+    },
+    {
+      "id": "prokope",
+      "greek": "προκοπή",
+      "transliteration": "prokopē",
+      "category": "ethics",
+      "literal_meaning": "cutting forward; advance; progress",
+      "preferred_rendering": "moral progress",
+      "common_translations": [
+        "progress",
+        "moral progress",
+        "advancement",
+        "improvement"
+      ],
+      "translation_risk": "MEDIUM — 'progress' is fine but the concept itself is complex. The prokoptōn (one making progress) is still, technically, a fool (not a sage) — but progressing. Stoics debated whether there are degrees within prokopē. Critical for the scoring system.",
+      "key_sources": [
+        "Seneca Epistulae 75",
+        "Epictetus Discourses 1.4",
+        "Stobaeus Eclogae 2.66"
+      ],
+      "notes": "Directly relevant to the flourishing score: users are prokoptontes (those making progress), not sages. The system measures prokopē, not arrival at sagehood."
+    },
+    {
+      "id": "sympatheia",
+      "greek": "συμπάθεια",
+      "transliteration": "sympatheia",
+      "category": "physics",
+      "literal_meaning": "suffering-with; co-affection",
+      "preferred_rendering": "cosmic sympathy / universal interconnection",
+      "common_translations": [
+        "sympathy",
+        "cosmic sympathy",
+        "universal connection"
+      ],
+      "translation_risk": "MEDIUM — modern 'sympathy' is an emotion. Stoic sympatheia is a physical-cosmological principle: all parts of the cosmos affect each other because the cosmos is a single living organism permeated by pneuma.",
+      "key_sources": [
+        "Marcus Aurelius Meditations 4.27",
+        "Marcus Aurelius Meditations 9.9",
+        "Diogenes Laertius 7.140"
+      ],
+      "notes": "Grounds the Stoic cosmopolitan ethics: if the cosmos is one organism, all rational beings share in the same logos and are fellow-citizens."
+    },
+    {
+      "id": "katalepsis",
+      "greek": "κατάληψις",
+      "transliteration": "katalēpsis",
+      "category": "psychology-cognitive",
+      "literal_meaning": "a seizing; grasp; laying hold of",
+      "preferred_rendering": "cognitive grasp / apprehension",
+      "common_translations": [
+        "apprehension",
+        "cognitive grasp",
+        "grasp",
+        "seizure",
+        "comprehension"
+      ],
+      "translation_risk": "MEDIUM — often oversimplified to 'grasp.' Katalēpsis is specifically the secure mental possession of a truth through the katalēptikē phantasia. It is the cognitive state that justifies assent and belief.",
+      "key_sources": [
+        "Diogenes Laertius 7.45-46",
+        "Diogenes Laertius 7.49-51",
+        "Cicero De Finibus 3.21"
+      ],
+      "notes": "The sage achieves katalēpsis reliably; the fool is subject to doksa (mere opinion). Katalēpsis is what motivates the sage's unwavering assent."
+    },
+    {
+      "id": "kataleptike_phantasia",
+      "greek": "κατάληπτική φαντασία",
+      "transliteration": "katalēptikē phantasia",
+      "category": "psychology-cognitive",
+      "literal_meaning": "a grasping/seizing impression; a comprehensive impression",
+      "preferred_rendering": "comprehensive impression / self-evidencing presentation",
+      "common_translations": [
+        "comprehensive impression",
+        "cataleptic impression",
+        "graspable impression",
+        "evidencing impression"
+      ],
+      "translation_risk": "CRITICAL — the Stoic criterion of truth. A katalēptikē phantasia is one that bears the marks of truth with such force that it naturally compels assent. It is not merely subjectively compelling but carries objective truth-marks.",
+      "key_sources": [
+        "Diogenes Laertius 7.50-51",
+        "Cicero Academica 2.77-99",
+        "Diogenes Laertius 7.46"
+      ],
+      "notes": "Distinguished from false impressions that merely seem graspable. The katalēptikē phantasia is stamped with such clarity that it cannot be confused with a false impression — unless the subject is diseased or deceived."
+    },
+    {
+      "id": "aphorme",
+      "greek": "ἀφορμή",
+      "transliteration": "aphormē",
+      "category": "action-theory",
+      "literal_meaning": "starting away; impulse away; aversion",
+      "preferred_rendering": "aversion / impulse-away",
+      "common_translations": [
+        "aversion",
+        "impulse-away",
+        "avoidance",
+        "negative impulse"
+      ],
+      "translation_risk": "MEDIUM — the term is less commonly discussed than hormē but equally important. Aphormē is the rational counterpart to hormē: if hormē is 'impulse toward', aphormē is 'impulse away.' Both are rational in the sage; excessive aphormē manifests as phobos (fear).",
+      "key_sources": [
+        "Stobaeus Eclogae 2.86",
+        "Diogenes Laertius 7.85-86"
+      ],
+      "notes": "Complements hormē in the Stoic action theory. A virtuous agent engages both rational impulses (toward good) and rational aversions (from harm), always proportionate to true value."
+    },
+    {
+      "id": "orexis",
+      "greek": "ὄρεξις",
+      "transliteration": "orexis",
+      "category": "psychology",
+      "literal_meaning": "reaching out; longing; desire",
+      "preferred_rendering": "rational desire / rational reaching",
+      "common_translations": [
+        "desire",
+        "reaching",
+        "longing",
+        "appetite"
+      ],
+      "translation_risk": "HIGH — orexis is rational desire (characteristic of the sage), distinct from epithumia (irrational craving). This distinction is fundamental: orexis aligns with logos and virtue; epithumia does not.",
+      "key_sources": [
+        "Diogenes Laertius 7.85-86",
+        "Stobaeus Eclogae 2.86",
+        "Seneca Epistulae 85"
+      ],
+      "notes": "Orexis for genuine goods (virtue, wisdom) is virtuous. Irrational craving (epithumia) for false goods (pleasure, wealth) is a passion. Confusing them is a cardinal translation error."
+    },
+    {
+      "id": "ekklisis",
+      "greek": "ἔκκλισις",
+      "transliteration": "ekklisis",
+      "category": "psychology",
+      "literal_meaning": "a turning away; inclination away",
+      "preferred_rendering": "rational aversion / rational inclination-away",
+      "common_translations": [
+        "aversion",
+        "rejection",
+        "turning away",
+        "avoidance"
+      ],
+      "translation_risk": "MEDIUM — the rational counterpart to phobos (irrational fear). Ekklisis is the sage's measured withdrawal from genuine evils (disunity with virtue); phobos is irrational shrinking from false evils.",
+      "key_sources": [
+        "Diogenes Laertius 7.85-86",
+        "Stobaeus Eclogae 2.86"
+      ],
+      "notes": "Works in tandem with orexis: rational reaching toward good paired with rational aversion from evil. Both are virtues when properly calibrated."
+    },
+    {
+      "id": "hedone",
+      "greek": "ἡδονή",
+      "transliteration": "hēdonē",
+      "category": "psychology-passions",
+      "literal_meaning": "pleasure; sweetness",
+      "preferred_rendering": "pleasure [as irrational passion]",
+      "common_translations": [
+        "pleasure",
+        "delight",
+        "enjoyment"
+      ],
+      "translation_risk": "CRITICAL — the context determines everything. When hēdonē is discussed as a pathos (passion), it is an irrational emotion based on false judgement: elation at a supposed present good. NOT the benign satisfaction of living well.",
+      "key_sources": [
+        "Diogenes Laertius 7.110-116",
+        "Seneca De Vita Beata 4-9",
+        "Epictetus Discourses 1.4"
+      ],
+      "notes": "One of four pathē (irrational emotions). Hēdonē from false goods (bodily sensation, luxury) clouds judgment. The sage experiences no hēdonē; instead, chara (rational joy) at genuine goods."
+    },
+    {
+      "id": "epithumia",
+      "greek": "ἐπιθυμία",
+      "transliteration": "epithumia",
+      "category": "psychology-passions",
+      "literal_meaning": "reaching upon; craving; unreasoning desire",
+      "preferred_rendering": "craving / irrational desire",
+      "common_translations": [
+        "desire",
+        "craving",
+        "appetite",
+        "lust"
+      ],
+      "translation_risk": "CRITICAL — epithumia is NEVER virtuous in Stoic philosophy. It is irrational reaching for a supposed future good (pleasure, wealth, glory). Distinguished rigorously from orexis (rational desire) and boulēsis (rational wishing).",
+      "key_sources": [
+        "Diogenes Laertius 7.110-116",
+        "Seneca Epistulae 85",
+        "Epictetus Discourses 1.4"
+      ],
+      "notes": "One of four pathē. The starting point for many vices: the craving for false goods leads to fear (of losing them), distress (if lost), and envy. Eradicated in the sage through correct judgment."
+    },
+    {
+      "id": "lupe",
+      "greek": "λύπη",
+      "transliteration": "lupē",
+      "category": "psychology-passions",
+      "literal_meaning": "pain; distress; grief",
+      "preferred_rendering": "distress / irrational pain",
+      "common_translations": [
+        "pain",
+        "distress",
+        "grief",
+        "sorrow"
+      ],
+      "translation_risk": "HIGH — lupē as a pathos is not ordinary pain or sadness, but irrational emotional contraction at the (false) belief that a present evil obtains. Distinct from the sage's acknowledgment of bodily discomfort.",
+      "key_sources": [
+        "Diogenes Laertius 7.110-116",
+        "Seneca Epistulae 9",
+        "Epictetus Discourses 1.4"
+      ],
+      "notes": "One of four pathē. Results from judgment that something evil (disunity with virtue) is present. Absent in the sage, who recognizes that only vice is truly evil."
+    },
+    {
+      "id": "phobos",
+      "greek": "φόβος",
+      "transliteration": "phobos",
+      "category": "psychology-passions",
+      "literal_meaning": "fear; flight; terror",
+      "preferred_rendering": "fear / irrational shrinking",
+      "common_translations": [
+        "fear",
+        "terror",
+        "dread",
+        "anxiety"
+      ],
+      "translation_risk": "MEDIUM — phobos is irrational anticipatory contraction based on the false belief that a future evil threatens. Distinguished from eulabeia (rational caution about genuine evils).",
+      "key_sources": [
+        "Diogenes Laertius 7.110-116",
+        "Marcus Aurelius Meditations 8.24",
+        "Epictetus Discourses 1.4"
+      ],
+      "notes": "One of four pathē. The Stoic cure: recognize that the only genuine evil is lack of virtue; death, poverty, and disease cannot harm the virtuous person. Rationalize and the fear dissolves."
+    },
+    {
+      "id": "chara",
+      "greek": "χαρά",
+      "transliteration": "chara",
+      "category": "psychology-emotions",
+      "literal_meaning": "grace; favor; joy; gladness",
+      "preferred_rendering": "joy / rational gladness",
+      "common_translations": [
+        "joy",
+        "gladness",
+        "delight",
+        "grace"
+      ],
+      "translation_risk": "MEDIUM — chara is a eupatheias (good emotion), not a pathos. It is rational elation at a genuine good, especially the presence of virtue and wisdom. It has solidity that irrational hēdonē lacks.",
+      "key_sources": [
+        "Diogenes Laertius 7.116",
+        "Seneca Epistulae 23",
+        "Marcus Aurelius Meditations 6.7"
+      ],
+      "notes": "The sage experiences chara when making moral progress, when recognizing the cosmic order, when living in accordance with nature. It is neither restless nor fleeting."
+    },
+    {
+      "id": "boulesis",
+      "greek": "βούλησις",
+      "transliteration": "boulēsis",
+      "category": "psychology-emotions",
+      "literal_meaning": "willing; deliberate wish; rational choice",
+      "preferred_rendering": "rational wish / rational willing",
+      "common_translations": [
+        "wish",
+        "willing",
+        "rational desire",
+        "rational will"
+      ],
+      "translation_risk": "MEDIUM — boulēsis is a eupatheias (good emotion): rational reaching toward a genuine good, especially wisdom and virtue. It reflects deliberate commitment, not blind appetite.",
+      "key_sources": [
+        "Diogenes Laertius 7.116",
+        "Seneca Epistulae 85",
+        "Stobaeus Eclogae 2.90"
+      ],
+      "notes": "Rational counterpart to the passion epithumia (craving). The sage's boulēsis fixes on what is truly good; the fool's epithumia chases false goods. This distinction is central to therapy."
+    },
+    {
+      "id": "eulabeia",
+      "greek": "εὐλάβεια",
+      "transliteration": "eulabeia",
+      "category": "psychology-emotions",
+      "literal_meaning": "good caution; prudent avoidance",
+      "preferred_rendering": "rational caution / rational avoidance",
+      "common_translations": [
+        "caution",
+        "prudent fear",
+        "wariness",
+        "vigilance"
+      ],
+      "translation_risk": "MEDIUM — eulabeia is a eupatheias (good emotion): rational aversion from genuine evils (especially actions contrary to virtue). Distinguished from phobos (irrational fear).",
+      "key_sources": [
+        "Diogenes Laertius 7.116",
+        "Seneca Epistulae 85",
+        "Stobaeus Eclogae 2.90"
+      ],
+      "notes": "Completes the triad of good emotions with chara and boulēsis. The sage practices eulabeia toward vice and only vice; no rational caution toward poverty, disease, or death."
+    },
+    {
+      "id": "to_kalon",
+      "greek": "τὸ καλόν",
+      "transliteration": "to kalon",
+      "category": "ethics",
+      "literal_meaning": "the beautiful; the fine; the noble",
+      "preferred_rendering": "the fine / the noble / moral beauty",
+      "common_translations": [
+        "the fine",
+        "the beautiful",
+        "the noble",
+        "what is honourable",
+        "the good"
+      ],
+      "translation_risk": "HIGH — 'the good' is too vague. To kalon is specifically the moral beauty of virtue, the only thing truly praiseworthy. It is what naturally attracts the rational will.",
+      "key_sources": [
+        "Cicero De Finibus 3.30-33",
+        "Seneca De Vita Beata 8",
+        "Marcus Aurelius Meditations 4.33"
+      ],
+      "notes": "Epictetus and Marcus Aurelius invoke to kalon as the object of rational desire. Recognizing the kalon (beauty) of virtue is key to overcoming passions born of false values."
+    },
+    {
+      "id": "axia",
+      "greek": "ἀξία",
+      "transliteration": "axia",
+      "category": "value-theory",
+      "literal_meaning": "worth; weight; value",
+      "preferred_rendering": "selective value / worth",
+      "common_translations": [
+        "value",
+        "worth",
+        "weight",
+        "selective value"
+      ],
+      "translation_risk": "MEDIUM — axia attaches to preferred indifferents (health, wealth, reputation). It is NOT virtue (aretē), which alone is absolute good. Indifferents have axia when reason approves their pursuit absent virtue-conflict.",
+      "key_sources": [
+        "Cicero De Finibus 3.50-54",
+        "Diogenes Laertius 7.105-106",
+        "Stobaeus Eclogae 2.79-85"
+      ],
+      "notes": "Maps to the scoring system's concept of 'selective value': indifferents are chosen based on their axia (worth in the context of living reasonably)."
+    },
+    {
+      "id": "telos",
+      "greek": "τέλος",
+      "transliteration": "telos",
+      "category": "ethics",
+      "literal_meaning": "end; completion; goal; aim",
+      "preferred_rendering": "end / ultimate aim",
+      "common_translations": [
+        "end",
+        "goal",
+        "telos",
+        "objective",
+        "purpose"
+      ],
+      "translation_risk": "MEDIUM — telos is often 'end' or 'goal' but context is critical. The Stoic telos is eudaimonia: living in accord with nature through virtue. All virtuous action aims at this telos.",
+      "key_sources": [
+        "Seneca De Vita Beata 1-4",
+        "Diogenes Laertius 7.87-89",
+        "Cicero De Finibus 3.20-26"
+      ],
+      "notes": "The telos gives structure to the scoring system: actions are evaluated by their proximity to the ultimate end (eudaimonia through virtue)."
+    },
+    {
+      "id": "homologoumenos_physei_zen",
+      "greek": "ὁμολογουμένως τῇ φύσει ζῆν",
+      "transliteration": "homologoumenōs tē physei zēn",
+      "category": "ethics",
+      "literal_meaning": "living in accord/harmony with nature",
+      "preferred_rendering": "living in agreement with nature",
+      "common_translations": [
+        "living according to nature",
+        "living in harmony with nature",
+        "conformity to nature"
+      ],
+      "translation_risk": "HIGH — the central summum bonum formula. Often misread as 'follow your instincts' or 'return to nature.' In fact, it means living in conscious accord with universal rational nature (logos), not mere animal nature.",
+      "key_sources": [
+        "Diogenes Laertius 7.87-89",
+        "Marcus Aurelius Meditations 5.3",
+        "Seneca De Vita Beata 8"
+      ],
+      "notes": "The formula that resolves apparent Stoic paradoxes. Living 'in agreement with nature' = exercising reason in alignment with cosmic reason = virtue. This is eudaimonia."
+    },
+    {
+      "id": "autarkeia",
+      "greek": "αὐτάρκεια",
+      "transliteration": "autarkeia",
+      "category": "ethics",
+      "literal_meaning": "self-sufficiency; being sufficient in oneself",
+      "preferred_rendering": "self-sufficiency",
+      "common_translations": [
+        "self-sufficiency",
+        "autarky",
+        "self-reliance",
+        "independence"
+      ],
+      "translation_risk": "MEDIUM — autarkeia is a cardinal virtue: the virtuous person is self-sufficient for eudaimonia. Not that they need nothing (they have a body, live in a polis), but that virtue cannot be taken or destroyed by external force.",
+      "key_sources": [
+        "Seneca Epistulae 9",
+        "Marcus Aurelius Meditations 4.3",
+        "Epictetus Discourses 1.4"
+      ],
+      "notes": "The foundation of Stoic equanimity. If virtue alone makes you eudaimōn, and virtue is up to you, then you are self-sufficient — dependent on no one, undefeatable by circumstance."
+    },
+    {
+      "id": "pneuma",
+      "greek": "πνεῦμα",
+      "transliteration": "pneuma",
+      "category": "physics",
+      "literal_meaning": "breath; air; wind; spirit",
+      "preferred_rendering": "breath / vital spirit / pneuma",
+      "common_translations": [
+        "breath",
+        "pneuma",
+        "spirit",
+        "breath-body"
+      ],
+      "translation_risk": "MEDIUM — pneuma is the physical substrate of all Stoic causation: soul is pneuma, logos is pneuma-organized, even virtue is a state of pneuma-tension. English 'spirit' is too immaterial; it's physical but not material in our sense.",
+      "key_sources": [
+        "Diogenes Laertius 7.137-140",
+        "Marcus Aurelius Meditations 4.7",
+        "Stobaeus Eclogae 1.518"
+      ],
+      "notes": "Two motions of pneuma: inward (creating cohesion/identity) and outward (creating sensation and action). The tonos (tension) of pneuma correlates with moral strength."
+    },
+    {
+      "id": "ekpyrosis",
+      "greek": "ἐκπύρωσις",
+      "transliteration": "ekpyrōsis",
+      "category": "physics-cosmology",
+      "literal_meaning": "burning up; conflagration; eruption into fire",
+      "preferred_rendering": "conflagration / cosmic fire",
+      "common_translations": [
+        "conflagration",
+        "fire-destruction",
+        "consuming fire"
+      ],
+      "translation_risk": "MEDIUM — the periodic dissolution of the cosmos into primordial fire, followed by recreation. Part of the Stoic eternal recurrence doctrine. Easy to confuse with mere destruction; it's cyclical renewal.",
+      "key_sources": [
+        "Diogenes Laertius 7.142-144",
+        "Seneca Quaestiones Naturales 3.29",
+        "Stobaeus Eclogae 1.631"
+      ],
+      "notes": "Supports Stoic fatalism and cosmic order: the universe unfolds according to eternal law, cycles through ekpyrōsis, and recreates identically. This grounds universal providential ordering."
+    },
+    {
+      "id": "heimarmene",
+      "greek": "εἱμαρμένη",
+      "transliteration": "heimarmenē",
+      "category": "physics-cosmology",
+      "literal_meaning": "that which is bound/fastened; destiny; fate",
+      "preferred_rendering": "fate / the chain of causes",
+      "common_translations": [
+        "fate",
+        "necessity",
+        "destiny",
+        "determined order"
+      ],
+      "translation_risk": "CRITICAL — heimarmenē is often misread as 'necessity that overrides choice.' Actually: the unbreakable causal chain determined by logos. The sage assents to heimarmenē willingly — reconciling freedom (in assent) with necessity (in outcomes).",
+      "key_sources": [
+        "Marcus Aurelius Meditations 4.26",
+        "Diogenes Laertius 7.148-149",
+        "Cicero De Fato"
+      ],
+      "notes": "Central to Stoic ethics: 'Want what will happen anyway.' Not resignation but rational alignment with inevitable causal order. The sage's freedom is freedom to assent, not to alter fate."
+    },
+    {
+      "id": "pronoia",
+      "greek": "πρόνοια",
+      "transliteration": "pronoia",
+      "category": "physics-cosmology",
+      "literal_meaning": "fore-thought; provision; care",
+      "preferred_rendering": "providence / provident care",
+      "common_translations": [
+        "providence",
+        "forethought",
+        "care",
+        "divine care"
+      ],
+      "translation_risk": "MEDIUM — pronoia is the rational, providential ordering of the cosmos by logos/god. Not a personal being with emotions but rational necessity that serves all parts of the whole. Supports theodicy against objections.",
+      "key_sources": [
+        "Marcus Aurelius Meditations 5.8",
+        "Diogenes Laertius 7.135-140",
+        "Seneca De Beneficiis 4.19-20"
+      ],
+      "notes": "Stoic response to suffering: what appears evil to the part serves the good of the whole. Providence is rational, not sentimental. This grounds the sage's willing acceptance (amor fati)."
+    },
+    {
+      "id": "kosmopolites",
+      "greek": "κοσμοπολίτης",
+      "transliteration": "kosmopolītēs",
+      "category": "social-ethics",
+      "literal_meaning": "citizen of the cosmos; world-citizen",
+      "preferred_rendering": "cosmopolitan / citizen of the world",
+      "common_translations": [
+        "cosmopolitan",
+        "world-citizen",
+        "citizen of the cosmos"
+      ],
+      "translation_risk": "LOW — but the concept is often sentimentalized. The Stoic cosmopolitan recognizes kinship with all rational beings due to shared logos, not mere sentiment. Duty to all humans flows from this metaphysical fact.",
+      "key_sources": [
+        "Marcus Aurelius Meditations 2.5",
+        "Diogenes Laertius 7.135",
+        "Epictetus Discourses 1.9"
+      ],
+      "notes": "Supports universal oikeiōsis: if cosmos is one organism and all humans share logos, then all humans are family. This grounds duties to strangers, enemies, slaves, and enemies of state."
+    },
+    {
+      "id": "philanthropia",
+      "greek": "φιλανθρωπία",
+      "transliteration": "philanthropia",
+      "category": "social-ethics",
+      "literal_meaning": "love of humanity; kindness to humans",
+      "preferred_rendering": "love of humanity / benevolence toward humans",
+      "common_translations": [
+        "love of humanity",
+        "benevolence",
+        "kindness",
+        "humaneness"
+      ],
+      "translation_risk": "MEDIUM — philanthropia is not sentiment but a virtue: the rational recognition of shared human nature and the resulting duty to aid and not harm. Flows from the recognition of oikeiōsis.",
+      "key_sources": [
+        "Marcus Aurelius Meditations 5.26",
+        "Seneca Epistulae 76",
+        "Cicero De Officiis 1.26"
+      ],
+      "notes": "Manifests in concrete duties: honoring parents, protecting the vulnerable, contributing to common goods. It is a form of justice (dikaiosynē) applied specifically to humanity."
+    },
+    {
+      "id": "decorum",
+      "greek": "τὸ πρέπον",
+      "latin": "decorum",
+      "transliteration": "decorum (Latin); to prepon (Greek)",
+      "category": "ethics",
+      "literal_meaning": "[Latin] that which is fitting/suitable; [Greek] what is fitting/appropriate",
+      "preferred_rendering": "propriety / what is fitting",
+      "common_translations": [
+        "propriety",
+        "decorum",
+        "what is fitting",
+        "suitability",
+        "appropriateness"
+      ],
+      "translation_risk": "MEDIUM — decorum is Cicero and Seneca's Latin rendering of Greek to prepon (the fitting/appropriate). In context, it means: what befits a rational agent given their nature, role, and circumstances.",
+      "key_sources": [
+        "Cicero De Officiis 1.26-28",
+        "Seneca Epistulae 95",
+        "Seneca De Vita Beata"
+      ],
+      "notes": "Similar to kathēkon but often with more emphasis on social role and propriety. The wise person perceives and performs actions that fit their circumstances."
+    },
+    {
+      "id": "constantia",
+      "greek": "στάσις",
+      "latin": "constantia",
+      "transliteration": "constantia (Latin); stasis (Greek)",
+      "category": "ethics",
+      "literal_meaning": "[Latin] constancy/steadfastness; [Greek] stance/stable position",
+      "preferred_rendering": "steadfastness / consistency",
+      "common_translations": [
+        "steadfastness",
+        "constancy",
+        "consistency",
+        "perseverance"
+      ],
+      "translation_risk": "MEDIUM — constantia in Seneca denotes unwavering commitment to virtue, a steadiness of judgment that doesn't waver with circumstance. Core to the sage's character.",
+      "key_sources": [
+        "Seneca Epistulae 95",
+        "Seneca De Vita Beata 4",
+        "Seneca Moral Essays"
+      ],
+      "notes": "Related to tonos (tension of pneuma): constantia is the psychological manifestation of strong pneuma. It is what prevents the fool's oscillation between passions."
+    },
+    {
+      "id": "tranquillitas_animi",
+      "greek": "ἀταραξία",
+      "latin": "tranquillitas animi",
+      "transliteration": "tranquillitas animi (Latin); ataraxia (Greek)",
+      "category": "psychology",
+      "literal_meaning": "[Latin] tranquility of mind; [Greek] non-disturbance; freedom from perturbation",
+      "preferred_rendering": "tranquility of mind / freedom from perturbation",
+      "common_translations": [
+        "tranquility",
+        "serenity",
+        "ataraxia",
+        "equanimity",
+        "imperturbability"
+      ],
+      "translation_risk": "MEDIUM — not passive numbness but active equanimity grounded in correct judgment. Seneca uses tranquillitas animi; Marcus uses ataraxia. Both indicate the peaceful state of the sage whose judgments are stable.",
+      "key_sources": [
+        "Seneca De Tranquillitate Animi",
+        "Marcus Aurelius Meditations 4.3",
+        "Seneca Epistulae 92"
+      ],
+      "notes": "Result of apatheia (freedom from destructive passions) combined with correct understanding of value. The sage's tranquility is robust, not fragile; it withstands circumstance."
+    },
+    {
+      "id": "proficiens",
+      "greek": "προκόπτων",
+      "latin": "proficiens",
+      "transliteration": "proficiens (Latin); prokoptōn (Greek)",
+      "category": "ethics",
+      "literal_meaning": "[Latin] making progress/advancing; [Greek] cutting forward; advancing",
+      "preferred_rendering": "one making progress / moral progressor",
+      "common_translations": [
+        "one making progress",
+        "progressor",
+        "advanced student",
+        "proficiens"
+      ],
+      "translation_risk": "MEDIUM — the proficiens (prokoptōn) is not yet sage but demonstrably progressing in virtue. Still technically a fool (all non-sages are fools) but on the path. Critical category for grounding human effort.",
+      "key_sources": [
+        "Seneca Epistulae 75",
+        "Epictetus Discourses 3.21",
+        "Stobaeus Eclogae 2.66"
+      ],
+      "notes": "Users of the scoring system are profilens (making progress). The system measures prokopē (progress), not arrival. This category explains why sustained effort matters."
+    },
+    {
+      "id": "otium",
+      "latin": "otium",
+      "transliteration": "otium",
+      "category": "ethics",
+      "literal_meaning": "leisure, retreat from public life",
+      "preferred_rendering": "philosophical leisure / contemplative withdrawal",
+      "common_translations": [
+        "leisure",
+        "retirement",
+        "idleness",
+        "rest"
+      ],
+      "translation_risk": "MEDIUM — 'leisure' suggests passivity. Stoic otium is purposeful withdrawal for philosophical study, not idleness. Seneca devotes multiple letters to justifying it.",
+      "key_sources": [
+        "Seneca Epistulae Morales 68",
+        "Seneca De Otio"
+      ],
+      "notes": "Contrasts with negotium (business/public life). For Seneca, otium is justified only when used for philosophy and writing that benefits posterity. Not mere relaxation."
+    },
+    {
+      "id": "negotium",
+      "latin": "negotium",
+      "transliteration": "negotium",
+      "category": "ethics",
+      "literal_meaning": "business, lack of leisure (nec-otium)",
+      "preferred_rendering": "public business / active engagement",
+      "common_translations": [
+        "business",
+        "affair",
+        "occupation",
+        "activity"
+      ],
+      "translation_risk": "LOW — but its pairing with otium as a philosophical contrast is often lost in translation.",
+      "key_sources": [
+        "Seneca Epistulae Morales 8",
+        "Seneca Epistulae Morales 22"
+      ],
+      "notes": "Etymologically the negation of otium. The otium-negotium tension is central to Seneca's practical philosophy."
+    },
+    {
+      "id": "occupatio",
+      "latin": "occupatio",
+      "transliteration": "occupatio",
+      "category": "ethics",
+      "literal_meaning": "occupation, being seized/taken over",
+      "preferred_rendering": "preoccupation / busyness",
+      "common_translations": [
+        "occupation",
+        "business",
+        "engagement",
+        "preoccupation"
+      ],
+      "translation_risk": "MEDIUM — the Latin carries a sense of being 'seized' by external affairs that mere 'occupation' misses. Seneca uses it pejoratively.",
+      "key_sources": [
+        "Seneca De Brevitate Vitae",
+        "Seneca Epistulae Morales 22"
+      ],
+      "notes": "Occupati (the preoccupied) are contrasted with those who have genuine otium. The word implies involuntary capture by trivial affairs."
+    },
+    {
+      "id": "securitas",
+      "latin": "securitas",
+      "transliteration": "securitas",
+      "category": "psychology",
+      "literal_meaning": "freedom from care (se-cura)",
+      "preferred_rendering": "security / freedom from anxiety",
+      "common_translations": [
+        "security",
+        "safety",
+        "peace of mind",
+        "freedom from care"
+      ],
+      "translation_risk": "MEDIUM — modern 'security' implies protection from external threats. Latin securitas is an internal psychological state: the absence of worry (cura).",
+      "key_sources": [
+        "Seneca Epistulae Morales 44",
+        "Seneca Epistulae Morales 97"
+      ],
+      "notes": "Related to but distinct from tranquillitas animi. Securitas emphasises the negative (absence of anxiety), tranquillitas the positive (settled calm)."
+    },
+    {
+      "id": "meditatio_mortis",
+      "latin": "meditatio mortis",
+      "transliteration": "meditatio mortis",
+      "category": "ethics",
+      "literal_meaning": "meditation on/practice of death",
+      "preferred_rendering": "meditation on death / rehearsal for death",
+      "common_translations": [
+        "meditation on death",
+        "memento mori",
+        "practice of death"
+      ],
+      "translation_risk": "LOW — but must not be confused with morbid fixation. Stoic meditatio mortis is a practical exercise for freedom from fear.",
+      "key_sources": [
+        "Seneca Epistulae Morales 4",
+        "Seneca Epistulae Morales 26",
+        "Marcus Aurelius Meditations 2.11"
+      ],
+      "notes": "Part of the broader practice of premeditatio malorum (premeditation of adversity). Aims at freedom, not depression."
+    },
+    {
+      "id": "premeditatio_malorum",
+      "latin": "premeditatio malorum",
+      "transliteration": "premeditatio malorum",
+      "category": "ethics",
+      "literal_meaning": "premeditation/rehearsal of bad things",
+      "preferred_rendering": "premeditation of adversity / negative visualization",
+      "common_translations": [
+        "premeditation of evils",
+        "negative visualization",
+        "anticipation of adversity"
+      ],
+      "translation_risk": "MEDIUM — 'malorum' are not true evils in Stoic doctrine but indifferents; the exercise involves rehearsing the loss of preferred indifferents.",
+      "key_sources": [
+        "Seneca Epistulae Morales 18",
+        "Seneca Epistulae Morales 91",
+        "Seneca De Tranquillitate Animi"
+      ],
+      "notes": "A core Stoic spiritual exercise. By mentally rehearsing hardship, one reduces its power to disturb when it arrives."
+    },
+    {
+      "id": "stultitia",
+      "latin": "stultitia",
+      "transliteration": "stultitia",
+      "category": "ethics",
+      "literal_meaning": "folly, moral stupidity",
+      "preferred_rendering": "folly",
+      "common_translations": [
+        "foolishness",
+        "stupidity",
+        "folly",
+        "ignorance"
+      ],
+      "translation_risk": "MEDIUM — 'foolishness' sounds trivial. Stoic stultitia is the default condition of all non-sages: a fundamental moral-cognitive disorder, not mere silliness.",
+      "key_sources": [
+        "Seneca Epistulae Morales 1",
+        "Seneca Epistulae Morales 15"
+      ],
+      "notes": "The stultus (fool) is technically every human who has not achieved sagehood. Stultitia is the opposite of sapientia (wisdom). ALWAYS render as 'folly', never 'foolishness'."
+    },
+    {
+      "id": "sapientia",
+      "latin": "sapientia",
+      "transliteration": "sapientia",
+      "category": "ethics",
+      "literal_meaning": "wisdom, the state of the sage",
+      "preferred_rendering": "wisdom",
+      "common_translations": [
+        "wisdom",
+        "knowledge",
+        "understanding"
+      ],
+      "translation_risk": "LOW — but note that Stoic sapientia is not mere intellectual knowledge. It is a complete transformation of character involving all four cardinal virtues.",
+      "key_sources": [
+        "Seneca Epistulae Morales 89",
+        "Diogenes Laertius 7.92"
+      ],
+      "notes": "The sapiens (sage) possesses sapientia. In Stoic doctrine, sapientia and virtus are coextensive."
+    },
+    {
+      "id": "sapiens",
+      "latin": "sapiens",
+      "transliteration": "sapiens",
+      "category": "ethics",
+      "literal_meaning": "the wise one, the sage",
+      "preferred_rendering": "the sage",
+      "common_translations": [
+        "wise man",
+        "wise person",
+        "the sage",
+        "the philosopher"
+      ],
+      "translation_risk": "HIGH — 'wise man' is both gendered and too casual. The Stoic sapiens is a near-impossible ideal: a person who has achieved complete virtue and rationality. ALWAYS use 'the sage', never 'wise man'.",
+      "key_sources": [
+        "Seneca Epistulae Morales 9",
+        "Seneca Epistulae Morales 42",
+        "Diogenes Laertius 7.117-119"
+      ],
+      "notes": "The sage is the Stoic ideal figure against whom all action is measured. Whether any sage has ever existed was debated within the school."
+    },
+    {
+      "id": "necessitas",
+      "latin": "necessitas",
+      "transliteration": "necessitas",
+      "category": "physics",
+      "literal_meaning": "necessity, compulsion, the unavoidable",
+      "preferred_rendering": "necessity / compulsion",
+      "common_translations": [
+        "necessity",
+        "compulsion",
+        "fate",
+        "need"
+      ],
+      "translation_risk": "MEDIUM — often conflated with heimarmene (fate). Necessitas in Seneca can refer to both cosmic necessity and immediate compulsion (e.g. death as necessitas).",
+      "key_sources": [
+        "Seneca Epistulae Morales 12",
+        "Seneca Epistulae Morales 77"
+      ],
+      "notes": "In Stoic physics, necessitas is the unbreakable chain of causation. In Seneca's ethics, it often appears as the ultimate argument for accepting death calmly."
+    },
+    {
+      "id": "perturbatio",
+      "latin": "perturbatio",
+      "transliteration": "perturbatio",
+      "category": "psychology-passions",
+      "literal_meaning": "thorough disturbance, agitation",
+      "preferred_rendering": "destructive passion / perturbation",
+      "common_translations": [
+        "emotion",
+        "passion",
+        "disturbance",
+        "perturbation",
+        "agitation"
+      ],
+      "translation_risk": "HIGH — translating as 'emotion' imports modern psychology. Latin perturbatio (Cicero's rendering of Greek pathos) refers specifically to irrational movements of the soul that the sage eliminates. NOT all emotions.",
+      "key_sources": [
+        "Cicero Tusculan Disputations 3.7",
+        "Seneca Epistulae Morales 116"
+      ],
+      "notes": "Cicero's standard rendering of Stoic pathos. The four genera: aegritudo (distress), metus (fear), libido (craving), laetitia (irrational elation). Distinct from eupatheiai (rational emotions the sage does experience)."
+    },
+    {
+      "id": "hexis",
+      "greek": "ἕξις",
+      "transliteration": "hexis",
+      "category": "psychology",
+      "literal_meaning": "a having, holding; a stable condition",
+      "preferred_rendering": "stable disposition / habitual state",
+      "common_translations": [
+        "state",
+        "condition",
+        "habit",
+        "disposition"
+      ],
+      "translation_risk": "MEDIUM — 'state' is too vague. Hexis in Stoic physics is a specific grade of pneumatic tension that holds material objects together and, in psychology, refers to a settled character trait.",
+      "key_sources": [
+        "Diogenes Laertius 7.98",
+        "Seneca Epistulae Morales 82"
+      ],
+      "notes": "Part of the Stoic hierarchy: hexis (cohesive state) → physis (nature/growth) → psyche (soul) → logike psyche (rational soul). Virtues and vices are both hexeis."
+    },
+    {
+      "id": "exercitatio",
+      "latin": "exercitatio",
+      "transliteration": "exercitatio",
+      "category": "ethics",
+      "literal_meaning": "exercise, practice, training",
+      "preferred_rendering": "spiritual exercise / philosophical practice",
+      "common_translations": [
+        "exercise",
+        "practice",
+        "training",
+        "drill"
+      ],
+      "translation_risk": "MEDIUM — 'exercise' sounds physical. Stoic exercitatio encompasses both physical ascetic practices (cold baths, fasting) and mental disciplines (premeditatio, meditatio mortis).",
+      "key_sources": [
+        "Seneca Epistulae Morales 18",
+        "Seneca Epistulae Morales 83"
+      ],
+      "notes": "Related to Greek askesis. The term covers the full range of Stoic practical disciplines aimed at moral progress."
+    },
+    {
+      "id": "indulgentia",
+      "latin": "indulgentia",
+      "transliteration": "indulgentia",
+      "category": "psychology-passions",
+      "literal_meaning": "indulgence, excessive yielding",
+      "preferred_rendering": "self-indulgence / excessive gratification",
+      "common_translations": [
+        "indulgence",
+        "leniency",
+        "gratification",
+        "softness"
+      ],
+      "translation_risk": "LOW — but note that Stoic usage is always pejorative: indulgentia toward oneself is a failure of self-discipline (sophrosyne).",
+      "key_sources": [
+        "Seneca Epistulae Morales 51",
+        "Seneca Epistulae Morales 18"
+      ],
+      "notes": "Contrasts with Stoic temperance. Seneca warns repeatedly against indulgentia corporis (bodily indulgence)."
+    },
+    {
+      "id": "fortuna",
+      "latin": "fortuna",
+      "transliteration": "fortuna",
+      "category": "physics",
+      "literal_meaning": "fortune, chance, what is brought by circumstances",
+      "preferred_rendering": "fortune",
+      "common_translations": [
+        "fortune",
+        "luck",
+        "chance",
+        "fate"
+      ],
+      "translation_risk": "MEDIUM — must not be confused with heimarmene (fate/deterministic causation). Fortuna in Seneca is the personified face of external contingency—what happens to you, not the cosmic causal order.",
+      "key_sources": [
+        "Seneca Epistulae Morales 16",
+        "Seneca De Providentia"
+      ],
+      "notes": "Seneca frequently personifies fortuna as an adversary or trainer. Fortuna controls externals; virtue is immune to it. ALWAYS render as 'fortune', not 'luck' or 'chance'."
+    },
+    {
+      "id": "beatitudo",
+      "latin": "beatitudo / beata vita",
+      "transliteration": "beatitudo",
+      "category": "ethics",
+      "literal_meaning": "blessedness, the blessed/flourishing life",
+      "preferred_rendering": "flourishing / the flourishing life",
+      "common_translations": [
+        "happiness",
+        "the happy life",
+        "blessedness",
+        "felicity"
+      ],
+      "translation_risk": "HIGH — 'happiness' imports hedonistic and modern subjective-wellbeing connotations entirely foreign to Stoic thought. ALWAYS render beatus/beata vita as 'flourishing' / 'the flourishing life'.",
+      "key_sources": [
+        "Seneca De Vita Beata",
+        "Seneca Epistulae Morales 92",
+        "Cicero De Finibus 3"
+      ],
+      "notes": "Latin equivalent of Greek eudaimonia. The title 'De Vita Beata' = 'On the Flourishing Life' in SR rendering. Beatus used of persons = 'flourishing', not 'happy'."
+    },
+    {
+      "id": "felicitas",
+      "latin": "felicitas",
+      "transliteration": "felicitas",
+      "category": "value-theory",
+      "literal_meaning": "good fortune, success, worldly prosperity",
+      "preferred_rendering": "prosperity / worldly success",
+      "common_translations": [
+        "happiness",
+        "prosperity",
+        "good fortune",
+        "success",
+        "felicity"
+      ],
+      "translation_risk": "HIGH — easily confused with beatitudo/eudaimonia. Felicitas in Seneca usually refers to external worldly success, NOT the Stoic flourishing life. Translating as 'happiness' collapses a crucial distinction.",
+      "key_sources": [
+        "Seneca Epistulae Morales 22",
+        "Seneca Epistulae Morales 59"
+      ],
+      "notes": "Distinguish carefully from beatitudo. Felicitas is an external condition (preferred indifferent at best); beatitudo/eudaimonia is the internal state of virtue. Render felicitas as 'prosperity' or 'worldly success', NEVER as 'happiness' or 'flourishing'."
+    },
+    {
+      "id": "symphonia",
+      "greek": "συμφωνία",
+      "transliteration": "symphōnia",
+      "category": "psychology",
+      "literal_meaning": "sounding together, harmony",
+      "preferred_rendering": "inner harmony / consonance",
+      "common_translations": [
+        "harmony",
+        "agreement",
+        "symphony",
+        "consonance"
+      ],
+      "translation_risk": "MEDIUM — in Stoic psychology, symphonia refers specifically to the internal harmony of judgments and impulses within the ruling faculty, not merely musical or social harmony.",
+      "key_sources": [
+        "Seneca Epistulae Morales 84",
+        "Diogenes Laertius 7.89"
+      ],
+      "notes": "Related to homologia (consistency/agreement with nature). The sage's mind exhibits symphonia — all judgments, desires, and impulses are mutually consistent."
+    }
+  ]
+}

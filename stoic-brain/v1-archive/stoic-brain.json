@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "name": "SageReasoning Stoic Brain",
+    "version": "1.0.0",
+    "description": "A structured, machine-readable and human-readable reference for Stoic philosophy. Designed as the single source of truth for virtue-based reasoning at sagereasoning.com. This file can be loaded directly into an AI agent's context or queried via the SageReasoning API.",
+    "website": "https://sagereasoning.com",
+    "api_endpoint": "https://sagereasoning.com/api/v1/stoic-brain",
+    "schema": "https://sagereasoning.com/stoic-brain/schema.json",
+    "last_updated": "2026-03-20",
+    "status": "v1.0 — Phase 1 complete. Scoring rules and API endpoints to be added in Phase 2.",
+    "license": "SageReasoning Proprietary Licence v1.0 — see /LICENSE for terms",
+    "primary_sources": [
+      "Marcus Aurelius, Meditations (~170-180 CE)",
+      "Epictetus, Discourses + Enchiridion (~108 CE)",
+      "Seneca, Letters to Lucilius (~65 CE)",
+      "Diogenes Laertius, Lives of the Eminent Philosophers Book 7 (~3rd c CE)",
+      "Cicero, De Finibus Book 3 (45 BCE)"
+    ]
+  },
+  "foundations": {
+    "core_premise": "The only genuine good is virtue (arete). The only genuine bad is vice. Everything else — health, wealth, reputation, life itself — is indifferent (adiaphoron). Flourishing (eudaimonia) is achieved by living in accordance with reason and nature, expressed through the four cardinal virtues.",
+    "dichotomy_of_control": {
+      "description": "The foundational Stoic principle — Epictetus, Enchiridion 1. What matters morally is only what is 'up to us' (eph' hêmin). Everything else is 'not up to us' and should be treated as indifferent.",
+      "up_to_us": ["judgements", "impulses", "desires", "aversions", "intentions", "character"],
+      "not_up_to_us": ["body", "reputation", "possessions", "external events", "other people's actions", "death"],
+      "implication_for_scoring": "An action is scored primarily on the quality of the agent's intention and reasoning, not solely on the outcome. A sage who acts virtuously but achieves a bad outcome is still scoring near 100."
+    },
+    "the_sage": {
+      "description": "The Stoic ideal of the perfectly wise person (sophos). A theoretical benchmark, not a claim about any real person. The Stoics acknowledged the sage was almost never achieved in practice — its purpose is as a standard for direction of travel.",
+      "characteristics": [
+        "Acts always from the four virtues simultaneously — they are unified",
+        "Is not disturbed by externals — neither excessive joy nor grief",
+        "Has no false beliefs — all their judgements are correct",
+        "Is free in the deepest sense — internal freedom from passion",
+        "Is a citizen of the cosmos — their concern extends to all rational beings",
+        "Experiences eupatheiai (good emotional states) rather than pathê (passions): joy not pleasure, caution not fear, wishing not desire"
+      ],
+      "contrast_with_non_sage": "All non-sages are considered foolish (phauloí) to varying degrees — but moral progress (prokoptos) is both possible and the central practical goal of stoic philosophy."
+    },
+    "flourishing": {
+      "greek": "eudaimonia",
+      "definition": "Living and acting in accordance with reason and nature. Not a feeling of happiness but the objective quality of a life fully expressed through virtue. Seneca: 'The happy life is one that is in accordance with its own nature.'",
+      "stoic_vs_popular": "Popular usage treats flourishing as wealth, pleasure, or success. Stoic flourishing is completely internal — it is available to anyone, including the slave (Epictetus), the sick (Marcus Aurelius), or the condemned (Socrates).",
+      "how_scored": "The SageReasoning score is a measure of the degree to which an action or pattern of actions expresses the four virtues. A high score = movement toward flourishing. A low score = movement away from it."
+    }
+  },
+  "virtues": {
+    "$ref": "./virtues.json",
+    "note": "See virtues.json for the full virtue and sub-virtue definitions with scoring weights."
+  },
+  "indifferents": {
+    "$ref": "./indifferents.json",
+    "note": "See indifferents.json for preferred, dispreferred, and neutral indifferents with virtue relevance scores."
+  },
+  "scoring_rules": {
+    "$ref": "./scoring-rules.json",
+    "note": "See scoring-rules.json — to be built in Phase 2.",
+    "status": "PENDING — Phase 2"
+  },
+  "api_interface": {
+    "status": "PENDING — Phase 2",
+    "planned_endpoints": [
+      {
+        "endpoint": "GET /api/v1/virtues",
+        "description": "Returns the full virtue taxonomy"
+      },
+      {
+        "endpoint": "GET /api/v1/indifferents",
+        "description": "Returns all indifferents with categories and virtue relevance"
+      },
+      {
+        "endpoint": "POST /api/v1/score-action",
+        "description": "Submit an action description, receive virtue scores and sage alignment tier",
+        "request_body": { "action_description": "string", "context": "string (optional)" },
+        "response": "action_score object per schema.json"
+      },
+      {
+        "endpoint": "GET /api/v1/score-history/{user_id}",
+        "description": "Returns a user's historical action scores and trend"
+      }
+    ],
+    "ai_agent_instructions": "To use the Stoic Brain for reasoning: review this file and virtues.json + indifferents.json for a conceptual overview of the framework. For live scoring with full virtue weights and sub-virtue analysis, use the SageReasoning API. Start with POST /api/guardrail to check any action, or POST /api/score-iterate to begin a deliberation chain. API key required — request at zeus@sagereasoning.com."
+  }
+}

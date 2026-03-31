@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "version": "3.0.0",
+    "source": "SageReasoning Stoic Brain",
+    "last_updated": "2026-03-31",
+    "glossary_version": "3.0.0 (67 terms)",
+    "file": "value.json",
+    "domain": "Value Theory (axia)",
+    "description": "The Stoic theory of value: genuine goods, genuine evils, and indifferents with varying degrees of selective value. V1 called this 'indifferents.json' and used 3 flat categories. The sources describe a richer hierarchy: genuine goods (only virtue), genuine evils (only vice), and a continuum of selective value among indifferents.",
+    "derivation": "Stobaeus Eclogae Section 3 ('On the Classification of Goods and Ills') treats value classification as a standalone major section, including the 3-location model of goods. DL Lives 7.101-107 provides the formal indifferents taxonomy. Stobaeus 2.79-85 preserves Chrysippus on selective value (axia). Cicero De Finibus 3.50-57 covers preferred/dispreferred. Seneca De Vita Beata 22-24 treats wealth as material for virtue.",
+    "primary_sources": [
+      "Stobaeus, Eclogae Section 3 — classification of goods and ills, 3-location model",
+      "DL Lives 7.101-107 — indifferents classification",
+      "Stobaeus, Eclogae 2.79-85 — Chrysippus on selective value (axia)",
+      "Cicero, De Finibus 3.50-57 — preferred and dispreferred indifferents",
+      "Seneca, De Vita Beata 22-24 — wealth as material for virtue"
+    ]
+  },
+  "hierarchy": {
+    "description": "The fundamental Stoic value hierarchy. Only virtue is genuinely good. Only vice is genuinely evil. Everything else is indifferent — but indifferents possess varying degrees of selective value (axia)."
+  },
+  "genuine_goods": {
+    "description": "Only virtue (arete) and what participates in virtue. These alone make the possessor better and constitute the basis for eudaimonia.",
+    "stobaeus_three_locations": {
+      "description": "Stobaeus Section 3 classifies goods by three locations. This is the Stoic taxonomy of goods.",
+      "source": "Stobaeus Ecl. Section 3: 'Some goods are about the soul, some external, some neither about the soul nor external.'",
+      "locations": [
+        {
+          "id": "soul_goods",
+          "name": "Goods of the Soul",
+          "description": "The virtues themselves and the right activities that flow from them. The primary goods.",
+          "stobaeus": "'About the soul are the virtues and the worthy pursuits and in general the praiseworthy activities.'",
+          "examples": ["The four cardinal virtues", "Right actions (katorthomata)", "Correct impulses", "Good feelings (eupatheiai)"]
+        },
+        {
+          "id": "external_goods",
+          "name": "External Goods",
+          "description": "Things outside the soul that participate in virtue.",
+          "stobaeus": "'External are friends and acquaintances and similar things.'",
+          "examples": ["Friends of shared virtue", "A just political order"],
+          "note": "These are genuinely good because they participate in virtue, not because they are pleasant or useful."
+        },
+        {
+          "id": "neither_goods",
+          "name": "Neither Soul Nor External",
+          "description": "The virtuous person themselves — considered as a whole.",
+          "stobaeus": "'Neither about the soul nor external are the worthy pursuers and in general those possessing the virtues.'",
+          "examples": ["The sage (sophos/sapiens)", "The person making moral progress (prokoptov)"]
+        }
+      ]
+    },
+    "all_goods_are_beneficial": {
+      "source": "Stobaeus Ecl. Section 3",
+      "stobaeus": "'All goods are beneficial and useful and advantageous and profitable and worthy of serious pursuit and becoming and beautiful and familiar.'"
+    },
+    "multiple_meanings_of_good": {
+      "source": "Stobaeus Ecl. Section 3",
+      "stobaeus": "'They say \"good\" is spoken in multiple ways: the primary, as it were occupying the place of a source — which is thus defined: that from which it happens to be benefited, or by which benefit occurs.'"
+    }
+  },
+  "genuine_evils": {
+    "description": "Only vice (kakia) and what participates in vice. These alone make the possessor worse.",
+    "stobaeus_parallel": "Stobaeus mirrors the goods structure: 'Of ills, some are about the soul, some external, some neither. About the soul are the vices with the depraved dispositions and in general the blameworthy activities.'",
+    "examples": ["The four root passions", "Wrong actions (hamartemata)", "Vicious dispositions", "Folly (aphrosyne) and its species"]
+  },
+  "indifferents": {
+    "description": "Everything that is neither genuinely good nor genuinely evil. These possess selective value (axia) but not genuine goodness (agathon).",
+    "source": "DL Lives 7.101-107; Stobaeus Eclogae 2.79-85",
+    "selective_value": {
+      "description": "The Stoic concept of axia — selective value. NOT the same as genuine goodness. It is the degree to which something naturally promotes or hinders the functioning of a rational being.",
+      "source": "Stobaeus Ecl. 2.83: 'preferred indifferents have selective value (eklektike axia) but not genuine goodness'",
+      "continuum": "Selective value operates on a continuum from strongly preferred to strongly dispreferred, with neutral at zero. V1's three flat categories (preferred/dispreferred/neutral) are simplified labels for regions of this continuum."
+    },
+    "preferred": {
+      "label": "Preferred (proegmenon)",
+      "greek": "proegmenon",
+      "description": "According to nature (kata physin). Possesses positive selective value. The sage will select these over their opposites, all else being equal.",
+      "items": [
+        { "id": "life", "name": "Life", "axia": "high", "domain": "body", "note": "Foundational — the condition for all virtuous activity", "source": "DL 7.102; Stobaeus Ecl. 2.79-80" },
+        { "id": "health", "name": "Health", "axia": "high", "domain": "body", "note": "Natural condition for effective action", "source": "DL 7.102; Stobaeus Ecl. 2.80" },
+        { "id": "strength", "name": "Strength", "axia": "moderate", "domain": "body", "source": "DL 7.102; Stobaeus Ecl. 2.80" },
+        { "id": "beauty", "name": "Beauty", "axia": "low", "domain": "body", "source": "DL 7.102; Stobaeus Ecl. 2.80" },
+        { "id": "intact_senses", "name": "Intact Senses", "axia": "high", "domain": "body", "source": "DL 7.102; Stobaeus Ecl. 2.80" },
+        { "id": "wealth", "name": "Wealth", "axia": "moderate", "domain": "external", "note": "Material for just action (Seneca De Vita Beata 22-24)", "source": "DL 7.102; Stobaeus Ecl. 2.80; Seneca De Vita Beata 22-24" },
+        { "id": "reputation", "name": "Good Reputation", "axia": "moderate", "domain": "external", "source": "DL 7.102; Stobaeus Ecl. 2.80" },
+        { "id": "noble_birth", "name": "Noble Birth", "axia": "low", "domain": "external", "source": "DL 7.102; Stobaeus Ecl. 2.80" },
+        { "id": "freedom", "name": "Freedom", "axia": "high", "domain": "external", "source": "DL 7.102; Epictetus Discourses 4.1" },
+        { "id": "friendship", "name": "Friendship", "axia": "high", "domain": "external", "note": "Natural expression of oikeiosis", "source": "DL 7.102; Cicero De Finibus 3.62-68" },
+        { "id": "knowledge", "name": "Knowledge", "axia": "high", "domain": "soul-adjacent", "note": "Material for phronesis", "source": "DL 7.102; Stobaeus Ecl. 2.80" },
+        { "id": "natural_ability", "name": "Natural Ability", "axia": "moderate", "domain": "soul-adjacent", "source": "DL 7.102; Stobaeus Ecl. 2.80" }
+      ]
+    },
+    "dispreferred": {
+      "label": "Dispreferred (apoproegmenon)",
+      "greek": "apoproegmenon",
+      "description": "Against nature (para physin). Possesses negative selective value. The sage will avoid these when possible.",
+      "items": [
+        { "id": "death", "name": "Death", "axia": "high-negative", "domain": "body", "source": "DL 7.102; Stobaeus Ecl. 2.80; Seneca Ep. 77" },
+        { "id": "disease", "name": "Disease", "axia": "high-negative", "domain": "body", "source": "DL 7.102; Stobaeus Ecl. 2.80" },
+        { "id": "pain", "name": "Pain", "axia": "moderate-negative", "domain": "body", "source": "DL 7.102; Stobaeus Ecl. 2.80" },
+        { "id": "disability", "name": "Disability", "axia": "moderate-negative", "domain": "body", "source": "DL 7.102; Stobaeus Ecl. 2.80" },
+        { "id": "ugliness", "name": "Ugliness", "axia": "low-negative", "domain": "body", "source": "DL 7.102; Stobaeus Ecl. 2.80" },
+        { "id": "poverty", "name": "Poverty", "axia": "moderate-negative", "domain": "external", "source": "DL 7.102; Stobaeus Ecl. 2.80; Seneca De Vita Beata 22" },
+        { "id": "dishonour", "name": "Dishonour", "axia": "moderate-negative", "domain": "external", "source": "DL 7.102; Stobaeus Ecl. 2.80" },
+        { "id": "exile", "name": "Exile", "axia": "moderate-negative", "domain": "external", "source": "DL 7.102; Seneca Ep. 24" },
+        { "id": "low_birth", "name": "Low Birth", "axia": "low-negative", "domain": "external", "source": "DL 7.102; Stobaeus Ecl. 2.80" },
+        { "id": "loneliness", "name": "Isolation / Friendlessness", "axia": "moderate-negative", "domain": "external", "source": "DL 7.102; Stobaeus Ecl. 2.80" }
+      ]
+    },
+    "neutral": {
+      "label": "Neutral (meson)",
+      "greek": "meson",
+      "description": "Zero selective value — genuinely neither preferred nor dispreferred.",
+      "examples": ["Whether one has an odd or even number of hairs (DL Lives 7.104)", "Whether one extends or contracts a finger"]
+    }
+  },
+  "selection_principles": {
+    "description": "How to choose among indifferents. These are source-grounded principles, not SageReasoning design.",
+    "source": "Stobaeus Eclogae 2.83-84; Cicero De Finibus 3.50-57; Cicero De Officiis 3.7-19",
+    "rules": [
+      {
+        "rule": "Select what is kata physin (according to nature) over what is para physin (against nature)",
+        "source": "DL 7.101-107"
+      },
+      {
+        "rule": "Among preferred indifferents, select based on degree of selective value (axia)",
+        "source": "Stobaeus Ecl. 2.83-84"
+      },
+      {
+        "rule": "Select what serves one's kathekonta (appropriate actions) in current roles",
+        "source": "Stobaeus: the preferred indifferents are 'selected because they are contrary to nature and according to nature, offering such a state of affairs that unless we obtain them or are deprived of them without complication, we would not flourish.'"
+      },
+      {
+        "rule": "NEVER select an indifferent at the cost of virtue — the honourable always prevails",
+        "source": "Cicero De Officiis 3.7-19: 'Nothing that is morally base can be truly advantageous'"
+      },
+      {
+        "rule": "The sage selects (eklegetai) preferred indifferents — they do not desire (oregetai) them. Selection is rational; desire is passion.",
+        "source": "Stobaeus Ecl. 2.83"
+      }
+    ]
+  }
+}

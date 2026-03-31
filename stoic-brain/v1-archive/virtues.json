@@ -1,0 +1,99 @@
+{
+  "meta": {
+    "version": "1.1.0",
+    "source": "SageReasoning Stoic Brain",
+    "description": "The four cardinal Stoic virtues (aretai) and their sub-virtues. This is a conceptual overview for discovery and evaluation. For full scoring with detailed weights and sub-virtue analysis, use the SageReasoning API at https://sagereasoning.com/api-docs",
+    "last_updated": "2026-03-29",
+    "license": "SageReasoning Proprietary Licence v1.0 — see /LICENSE",
+    "note_on_structure": "The Stoics held all four virtues as unified and co-dependent. One cannot possess one without all. Each sub-virtue below is a specific expression of the parent virtue in practice."
+  },
+  "cardinal_virtues": [
+    {
+      "id": "wisdom",
+      "name": "Wisdom",
+      "greek": "phronesis",
+      "description": "The knowledge of what is genuinely good, bad, and indifferent. The ability to distinguish what is in our control from what is not. The master virtue from which all others derive.",
+      "opposite_vice": "folly (aphrosyne) — acting from false beliefs about what is good",
+      "sub_virtues": [
+        { "id": "discernment", "name": "Discernment" },
+        { "id": "circumspection", "name": "Circumspection" },
+        { "id": "prescience", "name": "Prescience" },
+        { "id": "resourcefulness", "name": "Resourcefulness" }
+      ],
+      "source_citations": [
+        "Diogenes Laertius, Lives 7.92-93",
+        "Cicero, De Finibus 3.22-25",
+        "Epictetus, Discourses 1.1",
+        "Marcus Aurelius, Meditations 4.3, 8.7"
+      ]
+    },
+    {
+      "id": "justice",
+      "name": "Justice",
+      "greek": "dikaiosyne",
+      "description": "Giving to each what is deserved. Acting rightly toward others — recognising that humans are by nature social and that reason binds all rational beings into a universal community.",
+      "opposite_vice": "injustice (adikia) — harming others, taking more than one's due, failing in social duties",
+      "sub_virtues": [
+        { "id": "piety", "name": "Piety" },
+        { "id": "kindness", "name": "Kindness" },
+        { "id": "social_virtue", "name": "Social Virtue" },
+        { "id": "fair_dealing", "name": "Fair Dealing" }
+      ],
+      "source_citations": [
+        "Diogenes Laertius, Lives 7.125-126",
+        "Cicero, De Finibus 3.62-68",
+        "Marcus Aurelius, Meditations 5.16, 9.23",
+        "Epictetus, Discourses 2.22"
+      ]
+    },
+    {
+      "id": "courage",
+      "name": "Courage",
+      "greek": "andreia",
+      "description": "Knowledge of what is and is not truly fearful, and acting rightly in the face of apparent dangers. Not mere boldness, but the rational confidence that comes from knowing that virtue alone is truly good.",
+      "opposite_vice": "cowardice (deilia) — being ruled by fear of indifferents; recklessness — being ruled by disdain for genuine risk",
+      "sub_virtues": [
+        { "id": "endurance", "name": "Endurance" },
+        { "id": "confidence", "name": "Confidence" },
+        { "id": "magnanimity", "name": "Magnanimity" },
+        { "id": "industriousness", "name": "Industriousness" }
+      ],
+      "source_citations": [
+        "Diogenes Laertius, Lives 7.92, 7.129",
+        "Seneca, Letters 85",
+        "Epictetus, Discourses 1.2, 3.20",
+        "Marcus Aurelius, Meditations 6.2, 11.9"
+      ]
+    },
+    {
+      "id": "temperance",
+      "name": "Temperance",
+      "greek": "sophrosyne",
+      "description": "Orderliness and moderation in all impulses, desires, and actions. The knowledge of what to choose and what to avoid among apparent goods and bads — particularly regarding pleasure and appetite.",
+      "opposite_vice": "intemperance (akolasia) — being ruled by appetite, craving, or passion",
+      "sub_virtues": [
+        { "id": "orderliness", "name": "Orderliness" },
+        { "id": "propriety", "name": "Propriety" },
+        { "id": "self_control", "name": "Self-Control" },
+        { "id": "modesty", "name": "Modesty" }
+      ],
+      "source_citations": [
+        "Diogenes Laertius, Lives 7.92",
+        "Cicero, De Finibus 3.21",
+        "Epictetus, Discourses 2.1, 3.12",
+        "Marcus Aurelius, Meditations 3.16, 5.8"
+      ]
+    }
+  ],
+  "scoring_alignment_tiers": {
+    "description": "Qualitative tiers for overall stoic score, adapted from the Stoic concept of moral progress (prokope)",
+    "tiers": [
+      { "id": "sage", "label": "Sage (Sophos)", "score_range": [95, 100], "description": "Perfect alignment with all four virtues. Theoretical ideal." },
+      { "id": "progressing", "label": "Progressing (Prokoptos)", "score_range": [70, 94], "description": "Actively developing virtue with consistent effort." },
+      { "id": "aware", "label": "Aware", "score_range": [40, 69], "description": "Some understanding of virtue but still frequently ruled by passion." },
+      { "id": "misaligned", "label": "Misaligned", "score_range": [15, 39], "description": "Mostly ruled by externals and passion." },
+      { "id": "contrary", "label": "Contrary to Nature", "score_range": [0, 14], "description": "Actions actively opposed to virtue." }
+    ]
+  },
+  "scoring_note": "Detailed virtue weights, sub-virtue scoring breakdowns, and scoring criteria are applied server-side through the SageReasoning API. To score an action, use POST https://sagereasoning.com/api/score or POST https://sagereasoning.com/api/guardrail"
+}

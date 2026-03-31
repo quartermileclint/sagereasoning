@@ -1,0 +1,136 @@
+{
+  "meta": {
+    "version": "3.0.0",
+    "source": "SageReasoning Stoic Brain",
+    "last_updated": "2026-03-30",
+    "glossary_version": "3.0.0 (67 terms)",
+    "file": "psychology.json",
+    "domain": "Stoic Psychology (psyche)",
+    "description": "The Stoic model of the soul and its operations — the causal mechanism through which all moral action arises. Every action passes through the ruling faculty via the impression-assent-impulse sequence. This file covers the mechanism. The passions (what goes wrong in the mechanism) and the eupatheiai (what goes right) are in passions.json.",
+    "derivation": "Stobaeus Eclogae 2.86-97 treats the soul's operations as a distinct section, including the impulse taxonomy. DL Lives 7.40-43 covers the ruling faculty and assent. Epictetus Discourses 1.1 establishes what is 'up to us' as operations of the ruling faculty. Seneca Ep. 113 discusses the soul as a unity.",
+    "primary_sources": [
+      "Stobaeus, Eclogae 2.86-97 — Chrysippus on the soul's operations and impulse taxonomy",
+      "DL Lives 7.40-43 — ruling faculty, impressions, assent",
+      "DL Lives 7.39 — comprehensive impressions",
+      "Epictetus, Discourses 1.1 — what is up to us",
+      "Seneca, Epistulae Morales 113 — the soul as a unity"
+    ]
+  },
+  "ruling_faculty": {
+    "id": "hegemonikon",
+    "greek": "hegemonikon",
+    "description": "The rational, commanding part of the soul. It receives all impressions, decides whether to grant or withhold assent, and generates the impulses that lead to action. All moral evaluation ultimately concerns the state of the ruling faculty.",
+    "source": "DL Lives 7.40; Stobaeus Eclogae 2.86",
+    "functions": [
+      "Receives impressions (phantasiai)",
+      "Grants or withholds assent (synkatathesis)",
+      "Generates impulses (hormai)",
+      "Houses the dispositions (hexeis) that constitute character"
+    ],
+    "stoic_psychology_note": "Stobaeus reports that the Stoics considered the soul a living thing (Section 2): 'They wish the soul within us to be a living thing, for it lives and perceives. And especially its ruling part, which is called reasoning faculty.' They further held that 'all virtue is a living thing, inasmuch as virtue is constituted by reasoning faculty according to its essence.'"
+  },
+  "causal_sequence": {
+    "description": "Every moral action arises through this sequence in the ruling faculty. This is the Stoic 'engine' of action — the mechanism that must be understood to diagnose what goes right or wrong.",
+    "source": "Stobaeus Eclogae 2.86-88; DL Lives 7.40",
+    "stages": [
+      {
+        "stage": 1,
+        "id": "phantasia",
+        "name": "Impression / Presentation",
+        "greek": "phantasia",
+        "description": "An impression presents itself to the ruling faculty — a representation of how things appear. The critical distinction is between ordinary impressions and the comprehensive impression (kataleptike phantasia), which grasps its object so clearly and accurately that it compels rational assent.",
+        "source": "DL 7.39: the comprehensive impression bears 'the mark of truth upon it'; Stobaeus: 'What moves impulse they say is nothing other than an impression that triggers the appropriate action directly.'",
+        "failure_mode": "Distorted impression — seeing danger where there is none, or seeing good where there is none. Passion corrupts impression."
+      },
+      {
+        "stage": 2,
+        "id": "synkatathesis",
+        "name": "Assent",
+        "greek": "synkatathesis",
+        "description": "The ruling faculty either assents to the impression (affirming it as true) or withholds assent. The sage assents only to comprehensive impressions. The fool assents hastily to mere opinion.",
+        "source": "DL 7.40; Stobaeus Eclogae 2.88: 'All impulses are forms of assent; practical impulses moreover contain the moving element.'",
+        "failure_mode": "Hasty assent — accepting a false impression as true without examination. This is the root of all error. Stobaeus: 'assent occurs in relation to certain propositions.'"
+      },
+      {
+        "stage": 3,
+        "id": "horme",
+        "name": "Impulse",
+        "greek": "horme",
+        "description": "If assent is given to a practical impression, an impulse toward or away from something arises. Correct impulse follows correct assent. Excessive impulse — impulse that overshoots reason — is the definition of passion.",
+        "source": "Stobaeus Eclogae 2.87-88: 'Impulse itself is a movement of the soul toward something according to its kind.' Zeno: 'Passion is an impulse that exceeds due measure.'",
+        "failure_mode": "Excessive impulse (pathos). Stobaeus preserves Zeno's definition: 'Passion is an impulse that exceeds due measure and disobeys the choosing reason, or a motion of the soul contrary to nature.'"
+      },
+      {
+        "stage": 4,
+        "id": "praxis",
+        "name": "Action",
+        "greek": "praxis",
+        "description": "The external action resulting from the impulse. The same external action can be a right action (katorthoma) or merely an appropriate action (kathekon) depending on the quality of the preceding stages.",
+        "source": "Stobaeus Eclogae 2.85-86",
+        "failure_mode": "Action from passion — externally correct behaviour driven by wrong reasons."
+      }
+    ]
+  },
+  "impulse_taxonomy": {
+    "description": "Stobaeus preserves the Chrysippan taxonomy of practical impulse types. These are the specific forms that impulse takes within the ruling faculty. This taxonomy belongs in psychology (the soul's operations) because Stobaeus places it in his discussion of how the soul generates action, not in his discussion of what makes an action appropriate.",
+    "source": "Stobaeus Eclogae 2.87: 'There are several forms of practical impulse, among which are these: intention, grasping, preparation, undertaking, choice, moral choice, wish, and willing.'",
+    "types": [
+      {
+        "id": "prothesis",
+        "name": "Intention",
+        "description": "Marking out what is to be accomplished",
+        "stobaeus": "'Intention they say is a marking out of what is to be accomplished.'"
+      },
+      {
+        "id": "epibole",
+        "name": "Grasping",
+        "description": "Impulse before impulse — initial engagement with a practical situation",
+        "stobaeus": "'Grasping is an impulse before impulse.'"
+      },
+      {
+        "id": "paraskue",
+        "name": "Preparation",
+        "description": "Action before action — readying oneself",
+        "stobaeus": "'Preparation is an action before action.'"
+      },
+      {
+        "id": "engeiresis",
+        "name": "Undertaking",
+        "description": "Impulse applied to something already in hand",
+        "stobaeus": "'Undertaking is an impulse over something already in hand.'"
+      },
+      {
+        "id": "hairesis",
+        "name": "Choice",
+        "description": "Selection from alternatives on the basis of reasoning",
+        "stobaeus": "'Choice is wish from reasoning.'"
+      },
+      {
+        "id": "prohairesis",
+        "name": "Moral Choice",
+        "description": "Choice before choice — the ruling commitment of the self. The deepest level of voluntary engagement.",
+        "stobaeus": "'Moral choice is choice before choice.'"
+      },
+      {
+        "id": "boulesis",
+        "name": "Rational Wish",
+        "description": "Reasonable desire directed at the genuinely good",
+        "stobaeus": "'Wish is a reasonable appetite.'"
+      },
+      {
+        "id": "thelesis",
+        "name": "Willing",
+        "description": "Voluntary rational wish",
+        "stobaeus": "'Willing is voluntary wish.'"
+      }
+    ],
+    "note": "Stobaeus also distinguishes rational impulse from irrational: 'Appetite (orexis) is not a rational impulse, but a form of rational impulse. One might properly define rational impulse as a movement of reasoning toward something in action. Opposed to this is aversion (aphorme) — a movement of reasoning away from something.'"
+  },
+  "comprehensive_impression": {
+    "id": "kataleptike_phantasia",
+    "greek": "kataleptike phantasia",
+    "description": "The self-evidencing presentation — an impression that grasps its object so clearly and accurately that it could not arise from anything other than what is real. This is the epistemological foundation: the sage assents only to comprehensive impressions, and this is what distinguishes knowledge (episteme) from mere opinion (doxa).",
+    "source": "DL 7.39; DL 7.46: 'arising from a real object, stamped and impressed in exact correspondence with the object'",
+    "role_in_virtue": "Virtue is defined as a stable disposition to judge correctly. Correct judgement depends on recognising and assenting only to comprehensive impressions. The fool assents to non-comprehensive impressions, producing false beliefs that generate passion."
+  }
+}

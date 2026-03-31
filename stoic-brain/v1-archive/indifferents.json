@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "version": "1.1.0",
+    "source": "SageReasoning Stoic Brain",
+    "description": "Stoic classification of external things (adiaphora — indifferents). This is a conceptual overview for discovery and evaluation. For full scoring with virtue-relevance weights, use the SageReasoning API.",
+    "last_updated": "2026-03-29",
+    "license": "SageReasoning Proprietary Licence v1.0 — see /LICENSE",
+    "key_principle": "An indifferent has no moral value in itself. Its value depends entirely on whether it is pursued or avoided through virtue.",
+    "source_texts": [
+      "Diogenes Laertius, Lives 7.101-107",
+      "Cicero, De Finibus 3.50-57",
+      "Seneca, Letters 92, 87",
+      "Epictetus, Enchiridion 1-2",
+      "Marcus Aurelius, Meditations 4.39, 6.32"
+    ]
+  },
+  "categories": {
+    "preferred": {
+      "description": "Things that are 'according to nature' — generally conducive to functioning well as a human being. A sage will choose these over their opposites, all else being equal, but will not sacrifice virtue to obtain them.",
+      "label": "Preferred Indifferent (proegmenon adiaphoron)"
+    },
+    "dispreferred": {
+      "description": "Things that are 'against nature' — generally not conducive to functioning well. A sage will avoid these when possible but will not compromise virtue to escape them.",
+      "label": "Dispreferred Indifferent (apoproegmenon adiaphoron)"
+    },
+    "neutral": {
+      "description": "Things that are genuinely neither preferred nor dispreferred — completely without value in any direction.",
+      "label": "Neutral Indifferent"
+    }
+  },
+  "indifferents": [
+    { "id": "health", "name": "Health", "category": "preferred", "description": "Physical wellbeing and functioning of the body." },
+    { "id": "life", "name": "Life / Continued Existence", "category": "preferred", "description": "Remaining alive as a rational being capable of virtue." },
+    { "id": "wealth", "name": "Wealth / Material Resources", "category": "preferred", "description": "Financial resources and material possessions beyond basic needs." },
+    { "id": "reputation", "name": "Reputation / Social Standing", "category": "preferred", "description": "Being held in good regard by others." },
+    { "id": "pleasure", "name": "Pleasure", "category": "preferred", "description": "Sensory and psychological enjoyment — a natural by-product of virtuous activity, not a goal in itself." },
+    { "id": "knowledge", "name": "Knowledge / Education", "category": "preferred", "description": "Understanding of how the world works; learning and intellectual development." },
+    { "id": "freedom", "name": "Freedom / Autonomy", "category": "preferred", "description": "External freedom from constraint — physical, political, or social." },
+    { "id": "friendship", "name": "Friendship / Close Relationships", "category": "preferred", "description": "Bonds of affection and mutual care with others." },
+    { "id": "pain", "name": "Pain / Physical Suffering", "category": "dispreferred", "description": "Physical discomfort, illness, injury." },
+    { "id": "death", "name": "Death", "category": "dispreferred", "description": "The cessation of one's life." },
+    { "id": "poverty", "name": "Poverty / Lack of Resources", "category": "dispreferred", "description": "Lack of material resources, financial insecurity." },
+    { "id": "dishonour", "name": "Dishonour / Bad Reputation", "category": "dispreferred", "description": "Being poorly regarded or disrespected by others." }
+  ],
+  "scoring_note": "Detailed virtue-relevance scores, sage stances, and common misuse patterns for each indifferent are applied server-side through the SageReasoning API. To see how indifferents factor into a specific action's score, use POST https://sagereasoning.com/api/score"
+}

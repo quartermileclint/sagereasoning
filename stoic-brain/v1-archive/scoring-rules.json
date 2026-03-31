@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "version": "1.1.0",
+    "source": "SageReasoning Stoic Brain",
+    "description": "Overview of the Stoic virtue scoring model. This is a conceptual reference for discovery and evaluation. Detailed scoring weights, criteria, formulas, and conflict resolution rules are applied server-side through the SageReasoning API.",
+    "last_updated": "2026-03-29",
+    "license": "SageReasoning Proprietary Licence v1.0 — see /LICENSE"
+  },
+  "scoring_model": {
+    "name": "Virtue-Weighted Composite Score",
+    "description": "An action receives a score of 0-100 by assessing how fully it expresses each of the four cardinal virtues, weighted by their relative importance. A perfect sage score (100) is theoretically possible but practically unreachable.",
+    "score_range": {
+      "min": 0,
+      "max": 100,
+      "note": "Each individual virtue is also scored 0-100 before weighting is applied."
+    }
+  },
+  "intention_over_outcome": {
+    "principle": "Stoic ethics is primarily concerned with the quality of the agent's intention and reasoning, not the outcome. An agent who acts virtuously but achieves a bad result is still scored near the top of their virtue range.",
+    "source": "Epictetus Enchiridion 1; Cicero De Officiis 1.8"
+  },
+  "dichotomy_filter": {
+    "principle": "Before scoring any virtue, the system considers whether the action falls within the agent's sphere of control. Actions taken under genuine constraint are assessed on how the agent responds, not the constraint itself.",
+    "source": "Epictetus Discourses 1.1, Enchiridion 1"
+  },
+  "scoring_tiers": {
+    "sage": { "range": [95, 100], "label": "Sage (Sophos)", "description": "Near-perfect virtue expression across all four virtues simultaneously." },
+    "progressing": { "range": [70, 94], "label": "Progressing (Prokoptos)", "description": "Strong virtue expression with clear awareness and consistent effort." },
+    "aware": { "range": [40, 69], "label": "Aware", "description": "Some virtue expression but still partly ruled by passion or false opinion." },
+    "misaligned": { "range": [15, 39], "label": "Misaligned", "description": "Primarily ruled by externals and passion." },
+    "contrary": { "range": [0, 14], "label": "Contrary to Nature", "description": "Actions actively opposed to virtue." }
+  },
+  "scoring_note": "Detailed virtue weights, scoring criteria (what scores high/low for each virtue), conflict resolution rules, and the indifferent ranking algorithm are proprietary and applied server-side. To score an action, use POST https://sagereasoning.com/api/score or POST https://sagereasoning.com/api/guardrail"
+}

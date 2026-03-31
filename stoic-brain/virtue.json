@@ -1,0 +1,217 @@
+{
+  "meta": {
+    "version": "3.0.0",
+    "source": "SageReasoning Stoic Brain",
+    "last_updated": "2026-03-31",
+    "glossary_version": "3.0.0 (67 terms)",
+    "file": "virtue.json",
+    "domain": "Virtue (arete)",
+    "description": "The Stoic virtue system: the unity of virtue thesis, the nature of virtue as knowledge, and the four expressions with their sub-expressions. V1 weighted virtues independently (30/25/25/20). The sources teach that all four are expressions of a single unified excellence of the ruling faculty — you cannot possess one without all.",
+    "derivation": "DL 7.92-93 and 7.125 define the four virtues and state the unity thesis. Stobaeus Eclogae 2.59-63 preserves Chrysippus's definition of virtue as episteme (secure knowledge). Cicero De Officiis 1.15-18 identifies the four 'sources of the honourable.' Cicero De Finibus 3.22-25 provides formal virtue definitions.",
+    "primary_sources": [
+      "DL Lives 7.92-93, 7.125 — virtue definitions and unity thesis",
+      "Stobaeus, Eclogae 2.59-63 — Chrysippus on virtue as episteme",
+      "Cicero, De Officiis 1.15-18 — four sources of the honourable",
+      "Cicero, De Finibus 3.22-25 — formal virtue definitions"
+    ]
+  },
+  "unity_thesis": {
+    "description": "The Stoics held that all four virtues are unified and co-dependent. They are not independent skills that can be developed separately — they are four expressions of a single unified excellence of the ruling faculty.",
+    "source": "DL Lives 7.125: 'whoever has one virtue has all, for they are inseparable'; Stobaeus Eclogae 2.63 (citing Chrysippus)",
+    "stobaeus_on_sage": "'They say that the wise person does everything according to all the virtues. For his every action is perfect; therefore he is bereft of none of the virtues.'",
+    "implication_for_scoring": "A deficiency in any one domain indicates a deficiency in the whole. The score reflects the quality of the unified disposition, not a weighted average of independent parts."
+  },
+  "nature_of_virtue": {
+    "description": "Virtue is not a habit or skill. It is episteme — secure knowledge — applied to the domain of human action. Specifically, it is a stable disposition (hexis) of the ruling faculty to judge correctly about what is good, bad, and indifferent.",
+    "source": "Stobaeus Eclogae 2.59; DL Lives 7.92",
+    "key_properties": [
+      {
+        "property": "Virtue is knowledge (episteme)",
+        "description": "Not opinion (doxa). It cannot be lost once fully acquired.",
+        "source": "Stobaeus Ecl. 2.59"
+      },
+      {
+        "property": "Virtue is a stable disposition (hexis)",
+        "description": "Not a temporary state but a settled condition of the soul.",
+        "source": "Stobaeus Ecl. 2.59; DL 7.92"
+      },
+      {
+        "property": "Virtue is self-sufficient (autarkes) for flourishing",
+        "description": "Nothing external can be added to make it better.",
+        "source": "Cicero De Finibus 3.4: 'Nothing can be added to excellence to make it better'"
+      },
+      {
+        "property": "Virtue is unified",
+        "description": "The four expressions are inseparable. Whoever has one has all.",
+        "source": "DL 7.125"
+      }
+    ],
+    "no_intermediate": {
+      "description": "The Stoics held there is nothing intermediate between virtue and vice.",
+      "stobaeus": "'There is nothing intermediate between virtue and vice. For all humans possess impulses from nature toward excellence, and in a certain way possess the account of half-feet according to Cleanthes. Hence, while incomplete they are vicious, but when completed they are worthy of serious pursuit.'",
+      "source": "Stobaeus Ecl. Section 2"
+    }
+  },
+  "four_expressions": [
+    {
+      "id": "phronesis",
+      "name": "Practical Wisdom",
+      "greek": "phronesis",
+      "latin": "prudentia",
+      "domain": "What is genuinely good, bad, and indifferent",
+      "definitions": {
+        "DL": "Knowledge of what things are to be done, what are not to be done, and what are neither (DL Lives 7.92)",
+        "Stobaeus": "Knowledge of what is good, what is bad, and what is neither, belonging to a social creature (Ecl. 2.59)",
+        "Cicero_Off": "The virtue concerned with the investigation and discovery of truth (De Officiis 1.15)",
+        "Cicero_Fin": "The understanding of what is good and evil (De Finibus 3.22)"
+      },
+      "opposite_vice": "Folly (aphrosyne) — false beliefs about what is good",
+      "sub_expressions": [
+        {
+          "id": "euboulia",
+          "name": "Good Deliberation",
+          "description": "Knowledge of when to act, how to act, and when not to",
+          "source": "DL 7.92; Stobaeus Ecl. 2.59"
+        },
+        {
+          "id": "synesis",
+          "name": "Good Understanding",
+          "description": "Applying general principles to particular situations",
+          "source": "DL 7.92; Stobaeus Ecl. 2.59"
+        },
+        {
+          "id": "anchinoia",
+          "name": "Quick-Wittedness",
+          "description": "Finding the virtuous path in novel circumstances",
+          "source": "DL 7.92; Stobaeus Ecl. 2.59"
+        },
+        {
+          "id": "pronoia",
+          "name": "Foresight",
+          "description": "Anticipating consequences within the limits of what is up to us",
+          "source": "DL 7.92; Stobaeus Ecl. 2.59"
+        }
+      ],
+      "cicero_elaboration": "Cicero De Officiis 1.15-17 treats this as the virtue most natural to humans: 'All are drawn and led to desire for knowledge and learning.' Two vices to avoid: (1) treating unknown things as known and assenting rashly, (2) giving too much effort to obscure matters while neglecting practical action."
+    },
+    {
+      "id": "dikaiosyne",
+      "name": "Justice",
+      "greek": "dikaiosyne",
+      "latin": "iustitia",
+      "domain": "What is owed to others — distributing to each their due",
+      "definitions": {
+        "DL": "Knowledge that distributes to each their worth (DL Lives 7.126)",
+        "Stobaeus": "Knowledge of distributions — knowing what to give to whom (Ecl. 2.59)",
+        "Cicero_Off": "The virtue by which the common bond of humanity is preserved (De Officiis 1.20)",
+        "Cicero_Fin": "The fair treatment of others and the proper ordering of human relationships (De Finibus 3.62-68)"
+      },
+      "opposite_vice": "Injustice (adikia) — failing to give others their due",
+      "sub_expressions": [
+        {
+          "id": "eusebeia",
+          "name": "Piety",
+          "description": "Right relation to the cosmic rational order",
+          "source": "DL 7.119; Stobaeus Ecl. 2.59"
+        },
+        {
+          "id": "chrestotes",
+          "name": "Benevolence",
+          "description": "Active goodwill and love of humanity (philanthropia)",
+          "source": "DL 7.126; Stobaeus Ecl. 2.59"
+        },
+        {
+          "id": "koinonike",
+          "name": "Social Participation",
+          "description": "Fulfilling roles in community life through oikeiosis",
+          "source": "Stobaeus Ecl. 2.59; Cicero De Officiis 1.20-22"
+        },
+        {
+          "id": "epieikeia",
+          "name": "Fair Dealing",
+          "description": "Equity — not applying rules when doing so produces injustice",
+          "source": "DL 7.126; Stobaeus Ecl. 2.59"
+        }
+      ],
+      "cicero_elaboration": "Cicero De Officiis 1.18-20 treats justice as the virtue with widest scope: 'Not for ourselves alone have we been born, and our birth claims a part for our country, a part for our friends.' Foundation of justice is good faith (fides). Two kinds of injustice: inflicting harm, and failing to prevent harm when you could."
+    },
+    {
+      "id": "andreia",
+      "name": "Courage",
+      "greek": "andreia",
+      "latin": "fortitudo",
+      "domain": "What is genuinely fearful and what is not",
+      "definitions": {
+        "DL": "Knowledge of what is to be endured, what is to be dared, and what is neither (DL Lives 7.92)",
+        "Stobaeus": "The virtue that disposes us to endure what we ought (Ecl. 2.60)",
+        "Cicero_Off": "The excellence and unconquerable strength of a lofty soul (De Officiis 1.15)"
+      },
+      "opposite_vice": "Cowardice (deilia) — false beliefs about what is dangerous; or recklessness (thrasytes) — acting from passion rather than knowledge",
+      "sub_expressions": [
+        {
+          "id": "karteria",
+          "name": "Endurance",
+          "description": "Standing firm against what must be borne",
+          "source": "DL 7.92; Stobaeus Ecl. 2.60"
+        },
+        {
+          "id": "tharsos",
+          "name": "Confidence",
+          "description": "Rational assurance grounded in correct knowledge of what is truly threatening",
+          "source": "DL 7.92; Stobaeus Ecl. 2.60"
+        },
+        {
+          "id": "megalopsychia",
+          "name": "Magnanimity",
+          "description": "Not being diminished by external circumstance",
+          "source": "DL 7.92-93; Stobaeus Ecl. 2.60; Seneca Ep. 88.2"
+        },
+        {
+          "id": "philoponia",
+          "name": "Industriousness",
+          "description": "Willing effort in service of virtue",
+          "source": "DL 7.92; Stobaeus Ecl. 2.60"
+        }
+      ]
+    },
+    {
+      "id": "sophrosyne",
+      "name": "Temperance / Self-Mastery",
+      "greek": "sophrosyne",
+      "latin": "temperantia",
+      "domain": "What to choose and what to avoid — ordering impulse and desire",
+      "definitions": {
+        "DL": "Knowledge that makes impulses steadfast (episteme ametaptotos) (DL Lives 7.92)",
+        "Stobaeus": "The virtue that produces orderliness (eutaxia) in the movements of the soul (Ecl. 2.60)",
+        "Cicero_Off": "Order and measure in all things done and said, in which propriety (decorum) and self-control are contained (De Officiis 1.15)"
+      },
+      "opposite_vice": "Intemperance (akolasia) — being ruled by passion, craving, or appetite",
+      "sub_expressions": [
+        {
+          "id": "eutaxia",
+          "name": "Orderliness",
+          "description": "Right timing and measure in action",
+          "source": "DL 7.92; Stobaeus Ecl. 2.60"
+        },
+        {
+          "id": "kosmiotetes",
+          "name": "Propriety",
+          "description": "Acting as befits a rational being in context (decorum / to prepon)",
+          "source": "DL 7.92; Stobaeus Ecl. 2.60; Cicero De Officiis 1.93-99"
+        },
+        {
+          "id": "enkrateia",
+          "name": "Self-Mastery",
+          "description": "Command over impulse and desire — not being driven by the four passions",
+          "source": "DL 7.92; Stobaeus Ecl. 2.60"
+        },
+        {
+          "id": "aidos",
+          "name": "Modesty / Reverence",
+          "description": "The inner check that prevents base action",
+          "source": "DL 7.92; Stobaeus Ecl. 2.60; also listed as sub-species of eulabeia in DL 7.116"
+        }
+      ]
+    }
+  ]
+}

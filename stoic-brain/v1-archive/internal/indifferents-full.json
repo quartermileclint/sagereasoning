@@ -1,0 +1,201 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "source": "SageReasoning Stoic Brain",
+    "description": "Stoic classification of external things (adiaphora — indifferents). These are things outside our complete control. The Stoics held that only virtue is truly good and only vice truly bad. Everything else is indifferent — though some indifferents are 'preferred' (kata phusin — according to nature) and others 'dispreferred' (para phusin — against nature).",
+    "last_updated": "2026-03-20",
+    "key_principle": "An indifferent has no moral value in itself. Its value depends entirely on whether it is pursued or avoided through virtue. The same wealth can be virtuous or vicious depending on the agent's reasoning and intention.",
+    "source_texts": [
+      "Diogenes Laertius, Lives 7.101-107",
+      "Cicero, De Finibus 3.50-57",
+      "Seneca, Letters 92, 87",
+      "Epictetus, Enchiridion 1-2",
+      "Marcus Aurelius, Meditations 4.39, 6.32"
+    ]
+  },
+  "categories": {
+    "preferred": {
+      "description": "Things that are 'according to nature' — generally conducive to functioning well as a human being. A sage will choose these over their opposites, all else being equal, but will not sacrifice virtue to obtain them.",
+      "label": "Preferred Indifferent (proegmenon adiaphoron)"
+    },
+    "dispreferred": {
+      "description": "Things that are 'against nature' — generally not conducive to functioning well. A sage will avoid these when possible but will not compromise virtue to escape them.",
+      "label": "Dispreferred Indifferent (apoproegmenon adiaphoron)"
+    },
+    "neutral": {
+      "description": "Things that are genuinely neither preferred nor dispreferred — e.g. whether one has an odd or even number of hairs. Completely without value in any direction.",
+      "label": "Neutral Indifferent"
+    }
+  },
+  "indifferents": [
+    {
+      "id": "health",
+      "name": "Health",
+      "category": "preferred",
+      "description": "Physical wellbeing and functioning of the body.",
+      "virtue_relevance": {
+        "wisdom": 0.2,
+        "justice": 0.1,
+        "courage": 0.3,
+        "temperance": 0.4
+      },
+      "sage_stance": "The sage prefers health as a natural condition for effective action, but does not fear illness or death. They maintain health through moderation (temperance) without becoming a slave to bodily comfort.",
+      "common_misuse": "Treating health as the highest good — avoiding all risk of illness to the point of cowardice or failing duties to others.",
+      "scoring_notes": "Pursuing health through temperance and wisdom is virtuous. Obsessing over health at the expense of virtue or others is not."
+    },
+    {
+      "id": "life",
+      "name": "Life / Continued Existence",
+      "category": "preferred",
+      "description": "Remaining alive. Continued existence as a rational being capable of virtue.",
+      "virtue_relevance": {
+        "wisdom": 0.3,
+        "justice": 0.2,
+        "courage": 0.4,
+        "temperance": 0.1
+      },
+      "sage_stance": "Life is preferred as the condition for all virtuous activity. But the sage does not cling to life at the cost of virtue. Epictetus: 'He is a wise man who does not grieve for the things which he has not, but rejoices for those which he has.'",
+      "common_misuse": "Treating survival as the supreme value — avoiding all danger regardless of what virtue demands; or conversely, recklessly risking life from passion rather than reasoned duty."
+    },
+    {
+      "id": "wealth",
+      "name": "Wealth / Material Resources",
+      "category": "preferred",
+      "description": "Financial resources and material possessions beyond basic needs.",
+      "virtue_relevance": {
+        "wisdom": 0.3,
+        "justice": 0.4,
+        "courage": 0.1,
+        "temperance": 0.3
+      },
+      "sage_stance": "Wealth enables broader action for the common good. A sage uses wealth as a tool for virtue — for justice and beneficence — without being attached to it. Seneca: 'It is not the man who has too little but the man who craves more who is poor.'",
+      "common_misuse": "Treating wealth as intrinsically good and poverty as intrinsically bad. Pursuing wealth at the expense of justice or temperance."
+    },
+    {
+      "id": "reputation",
+      "name": "Reputation / Social Standing",
+      "category": "preferred",
+      "description": "Being held in good regard by others; one's standing in the community.",
+      "virtue_relevance": {
+        "wisdom": 0.2,
+        "justice": 0.5,
+        "courage": 0.2,
+        "temperance": 0.1
+      },
+      "sage_stance": "A good reputation is a natural consequence of just action and may enable further virtuous activity. The sage seeks to deserve it but does not pursue it for its own sake, and does not compromise virtue to obtain or maintain it.",
+      "common_misuse": "Performing virtue for social approval rather than from genuine character. Fearing public opinion to the point of cowardice. Sacrificing honesty for likability."
+    },
+    {
+      "id": "pleasure",
+      "name": "Pleasure",
+      "category": "preferred",
+      "description": "Sensory and psychological enjoyment — a natural by-product of virtuous activity, not a goal in itself.",
+      "virtue_relevance": {
+        "wisdom": 0.2,
+        "justice": 0.1,
+        "courage": 0.1,
+        "temperance": 0.6
+      },
+      "sage_stance": "Pleasure that arises naturally from virtuous action is acceptable. Chasing pleasure as a goal is the Epicurean error. Epictetus: 'Seek not that the things which happen should happen as you wish; but wish the things which happen to be as they are, and you will have a tranquil flow of life.'",
+      "common_misuse": "Making pleasure the aim of action (hedonism). Avoiding pain at all costs. Confusing the pleasure of virtuous action with justification for vicious actions that produce pleasure."
+    },
+    {
+      "id": "knowledge",
+      "name": "Knowledge / Education",
+      "category": "preferred",
+      "description": "Understanding of how the world works; learning and intellectual development.",
+      "virtue_relevance": {
+        "wisdom": 0.6,
+        "justice": 0.1,
+        "courage": 0.1,
+        "temperance": 0.2
+      },
+      "sage_stance": "Knowledge is necessary for wisdom — the master virtue. However, mere factual knowledge without application to virtue is worthless. Marcus Aurelius: 'Confine yourself to the present.' Study for the purpose of living better, not for display.",
+      "common_misuse": "Intellectual vanity — acquiring knowledge to seem impressive rather than to act rightly. Analysis paralysis — endless study used to avoid action."
+    },
+    {
+      "id": "freedom",
+      "name": "Freedom / Autonomy",
+      "category": "preferred",
+      "description": "External freedom from constraint — physical, political, or social.",
+      "virtue_relevance": {
+        "wisdom": 0.3,
+        "justice": 0.3,
+        "courage": 0.3,
+        "temperance": 0.1
+      },
+      "sage_stance": "External freedom is preferred as it enables greater virtuous activity. But the sage knows that true freedom is internal — freedom from passion and false opinion — and this cannot be taken away. Epictetus, himself a slave: 'No man who is a lover of money, or of pleasure, or of glory, is likewise a lover of men; but only he who is a lover of virtue.'",
+      "common_misuse": "Treating political or physical freedom as the highest good. Being enslaved to the desire for freedom while ignoring internal slavery to passion."
+    },
+    {
+      "id": "friendship",
+      "name": "Friendship / Close Relationships",
+      "category": "preferred",
+      "description": "Bonds of affection and mutual care with others, particularly those of shared virtue.",
+      "virtue_relevance": {
+        "wisdom": 0.1,
+        "justice": 0.5,
+        "courage": 0.1,
+        "temperance": 0.3
+      },
+      "sage_stance": "Genuine friendship — between people of shared virtue — is among the highest preferred indifferents. The sage cultivates it and grieves its loss as a natural response. Marcus Aurelius deeply valued his philosophical friends. However, the sage does not sacrifice justice for friendship, nor cling to relationships out of fear of loneliness.",
+      "common_misuse": "Choosing friendship over honesty. Maintaining friendships with vicious people out of habit or comfort. Treating the loss of friendship as catastrophic."
+    },
+    {
+      "id": "pain",
+      "name": "Pain / Physical Suffering",
+      "category": "dispreferred",
+      "description": "Physical discomfort, illness, injury.",
+      "virtue_relevance": {
+        "wisdom": 0.1,
+        "justice": 0.0,
+        "courage": 0.6,
+        "temperance": 0.3
+      },
+      "sage_stance": "Pain is dispreferred but not evil. It cannot harm the soul. The sage endures it without complaint when virtue requires it. Epictetus (himself physically disabled): 'Seek not that the things which happen should happen as you wish.'",
+      "common_misuse": "Treating pain as the greatest harm and its avoidance as the highest priority. Compromising virtue to escape discomfort."
+    },
+    {
+      "id": "death",
+      "name": "Death",
+      "category": "dispreferred",
+      "description": "The cessation of one's life.",
+      "virtue_relevance": {
+        "wisdom": 0.2,
+        "justice": 0.1,
+        "courage": 0.6,
+        "temperance": 0.1
+      },
+      "sage_stance": "Death is dispreferred as it ends the opportunity for virtuous action, but it is not evil. Fearing death wrongly is a failure of wisdom and courage. Marcus Aurelius: 'Death is such as generation is, a mystery of nature.' Seneca: 'It is not death that a man should fear, but he should fear never beginning to live.'",
+      "common_misuse": "Allowing fear of death to prevent courageous or just action. Conversely — seeking death to escape difficulty rather than from rational duty."
+    },
+    {
+      "id": "poverty",
+      "name": "Poverty / Lack of Resources",
+      "category": "dispreferred",
+      "description": "Lack of material resources, financial insecurity.",
+      "virtue_relevance": {
+        "wisdom": 0.2,
+        "justice": 0.2,
+        "courage": 0.3,
+        "temperance": 0.3
+      },
+      "sage_stance": "Poverty is dispreferred as it limits the scope of virtuous action. But it is not evil and cannot corrupt the soul. Many sages lived simply. Diogenes of Sinope chose poverty as most natural. Seneca: 'Poverty with joy is not poverty at all.'",
+      "common_misuse": "Treating poverty as shameful or degrading in itself. Using fear of poverty to justify unjust actions."
+    },
+    {
+      "id": "dishonour",
+      "name": "Dishonour / Bad Reputation",
+      "category": "dispreferred",
+      "description": "Being poorly regarded or disrespected by others.",
+      "virtue_relevance": {
+        "wisdom": 0.2,
+        "justice": 0.3,
+        "courage": 0.3,
+        "temperance": 0.2
+      },
+      "sage_stance": "Bad reputation is dispreferred when it results from genuine wrongdoing. But when it results from doing what is right, it is to be accepted with equanimity. Marcus Aurelius frequently faced criticism and hostility. 'The best revenge is not to be like your enemy.'",
+      "common_misuse": "Prioritising reputation over honest action. Compromising virtue to avoid social disapproval."
+    }
+  ]
+}

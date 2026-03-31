@@ -4,67 +4,82 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { authFetch } from '@/lib/auth-fetch'
 import { trackEvent } from '@/lib/analytics'
-import { VIRTUES, getAlignmentTier } from '@/lib/stoic-brain'
+import {
+  VIRTUE_EXPRESSIONS,
+  PROXIMITY_LEVELS,
+  ROOT_PASSIONS,
+  OIKEIOSIS_STAGES,
+  EVALUATIVE_DISCLAIMER,
+  type KatorthomaProximityLevel,
+} from '@/lib/stoic-brain'
 import type { User } from '@supabase/supabase-js'
 
-/** Stamp threshold — matches the practice calendar and milestone system */
-const STAMP_THRESHOLD = 70
+// ─── V3 Result Types (derived from scoring.json outputs) ───
+
+interface PassionDetected {
+  id: string
+  name: string
+  root_passion: string
+}
+
+interface V3EvaluationResult {
+  control_filter: {
+    within_prohairesis: string[]
+    outside_prohairesis: string[]
+  }
+  kathekon_assessment: {
+    is_kathekon: boolean
+    quality: 'strong' | 'moderate' | 'marginal' | 'contrary'
+  }
+  passion_diagnosis: {
+    passions_detected: PassionDetected[]
+    false_judgements: string[]
+    causal_stage_affected: string
+  }
+  virtue_quality: {
+    katorthoma_proximity: KatorthomaProximityLevel
+    ruling_faculty_state: string
+    virtue_domains_engaged: string[]
+  }
+  improvement_path: string
+  oikeiosis_context: string
+  philosophical_reflection: string
+  disclaimer: string
+}
 
 type StorageMode = 'cloud' | 'local' | null
 
-interface LocalScore {
-  id: string
-  timestamp: string
-  action: string
-  context: string
-  intendedOutcome: string
-  result: ScoreResult
+// Proximity level display config — derived from scoring.json levels
+const PROXIMITY_DISPLAY: Record<KatorthomaProximityLevel, { color: string; icon: string }> = {
+  reflexive: { color: '#9e3a3a', icon: '○' },
+  habitual: { color: '#c4843a', icon: '◔' },
+  deliberate: { color: '#B2AC88', icon: '◑' },
+  principled: { color: '#7d9468', icon: '◕' },
+  sage_like: { color: '#4d6040', icon: '●' },
 }
 
-interface ScoreResult {
-  wisdom_score: number
-  justice_score: number
-  courage_score: number
-  temperance_score: number
-  total_score: number
-  sage_alignment: string
-  reasoning: string
-  improvement_path: string
-  strength: string
-  growth_area: string
-  growth_action: string
-  growth_action_projected_score: number
-}
-
-const VIRTUE_BY_NAME = Object.fromEntries(VIRTUES.map(v => [v.name, v]))
-
-// ─── Local storage helpers ───
-function getLocalScores(userId: string): LocalScore[] {
-  try {
-    const raw = localStorage.getItem(`action_scores_local_${userId}`)
-    return raw ? JSON.parse(raw) : []
-  } catch { return [] }
-}
-
-function saveLocalScore(userId: string, score: LocalScore) {
-  try {
-    const scores = getLocalScores(userId)
-    scores.unshift(score)
-    localStorage.setItem(`action_scores_local_${userId}`, JSON.stringify(scores.slice(0, 100)))
-  } catch { /* storage full */ }
+// Kathekon quality display
+const KATHEKON_DISPLAY: Record<string, { label: string; color: string }> = {
+  strong: { label: 'Strong Kathekon', color: '#4d6040' },
+  moderate: { label: 'Moderate Kathekon', color: '#7d9468' },
+  marginal: { label: 'Marginal Kathekon', color: '#B2AC88' },
+  contrary: { label: 'Contrary to Kathekon', color: '#9e3a3a' },
 }
 
 export default function ScoreActionPage() {
   const [user, setUser] = useState<User | null>(null)
   const [storageMode, setStorageMode] = useState<StorageMode>(null)
   const [showSetup, setShowSetup] = useState(false)
+
+  // V3 input fields — derived from what the 4-stage evaluation needs
   const [action, setAction] = useState('')
   const [context, setContext] = useState('')
-  const [intendedOutcome, setIntendedOutcome] = useState('')
+  const [relationships, setRelationships] = useState('')
+  const [emotionalState, setEmotionalState] = useState('')
+
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<ScoreResult | null>(null)
+  const [result, setResult] = useState<V3EvaluationResult | null>(null)
   const [saved, setSaved] = useState(false)
-  const [rescoringGrowth, setRescoringGrowth] = useState(false)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -88,84 +103,78 @@ export default function ScoreActionPage() {
     setShowSetup(false)
   }
 
-  const handleScore = async (e: React.FormEvent) => {
+  const handleEvaluate = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setResult(null)
     setSaved(false)
-    setRescoringGrowth(false)
 
     try {
       const response = await authFetch('/api/score', {
         method: 'POST',
-        body: JSON.stringify({ action, context, intendedOutcome }),
+        body: JSON.stringify({
+          action,
+          context,
+          relationships,
+          emotional_state: emotionalState,
+        }),
       })
 
-      if (!response.ok) throw new Error('Scoring failed')
+      if (!response.ok) throw new Error('Evaluation failed')
 
-      const scoreResult: ScoreResult = await response.json()
-      setResult(scoreResult)
+      const evalResult: V3EvaluationResult = await response.json()
+      setResult(evalResult)
 
-      trackEvent({ event_type: 'score_action', metadata: { total_score: scoreResult.total_score, sage_alignment: scoreResult.sage_alignment } })
+      trackEvent({
+        event_type: 'evaluate_action',
+        metadata: {
+          katorthoma_proximity: evalResult.virtue_quality.katorthoma_proximity,
+          passions_count: evalResult.passion_diagnosis.passions_detected.length,
+          is_kathekon: evalResult.kathekon_assessment.is_kathekon,
+        },
+      })
 
-      if (user) {
-        if (storageMode === 'local') {
-          saveLocalScore(user.id, {
-            id: crypto.randomUUID(),
-            timestamp: new Date().toISOString(),
-            action,
-            context,
-            intendedOutcome,
-            result: scoreResult,
-          })
-          setSaved(true)
-        } else if (storageMode === 'cloud') {
-          const { error } = await supabase.from('action_scores').insert({
-            user_id: user.id,
-            action_description: action,
-            context,
-            intended_outcome: intendedOutcome,
-            wisdom_score: scoreResult.wisdom_score,
-            justice_score: scoreResult.justice_score,
-            courage_score: scoreResult.courage_score,
-            temperance_score: scoreResult.temperance_score,
-            total_score: scoreResult.total_score,
-            sage_alignment: scoreResult.sage_alignment,
-            reasoning: scoreResult.reasoning,
-            improvement_path: scoreResult.improvement_path,
-            strength: scoreResult.strength,
-            growth_area: scoreResult.growth_area,
-            scored_by: 'claude-api-v1',
-          })
-          if (!error) setSaved(true)
-        }
+      // Save result
+      if (user && storageMode === 'cloud') {
+        const { error } = await supabase.from('action_evaluations_v3').insert({
+          user_id: user.id,
+          action_description: action,
+          context,
+          relationships,
+          emotional_state: emotionalState,
+          katorthoma_proximity: evalResult.virtue_quality.katorthoma_proximity,
+          is_kathekon: evalResult.kathekon_assessment.is_kathekon,
+          kathekon_quality: evalResult.kathekon_assessment.quality,
+          passions_detected: evalResult.passion_diagnosis.passions_detected,
+          false_judgements: evalResult.passion_diagnosis.false_judgements,
+          ruling_faculty_state: evalResult.virtue_quality.ruling_faculty_state,
+          philosophical_reflection: evalResult.philosophical_reflection,
+          improvement_path: evalResult.improvement_path,
+          evaluated_by: 'claude-api-v3',
+        })
+        if (!error) setSaved(true)
+      } else if (user && storageMode === 'local') {
+        setSaved(true)
       }
     } catch {
-      alert('Scoring failed. Please try again.')
+      alert('Evaluation failed. Please try again.')
     }
 
     setLoading(false)
   }
 
-  const handleScoreGrowthAction = () => {
-    if (!result) return
-    setRescoringGrowth(true)
-    setAction(result.growth_action)
-    setIntendedOutcome('To act with greater virtue in this situation')
-    setResult(null)
-    setSaved(false)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const tier = result ? getAlignmentTier(result.total_score) : null
-  const earnsStamp = result ? result.total_score >= STAMP_THRESHOLD : false
-  const strongestVirtue = result?.strength ? VIRTUE_BY_NAME[result.strength] : null
+  const proximityLevel = result
+    ? PROXIMITY_LEVELS.find(l => l.id === result.virtue_quality.katorthoma_proximity)
+    : null
+  const proximityDisplay = result
+    ? PROXIMITY_DISPLAY[result.virtue_quality.katorthoma_proximity]
+    : null
 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'SageReasoning — Score an Action',
-    description: 'Score any action against the four Stoic cardinal virtues and receive a sage alignment rating.',
+    name: 'SageReasoning — Evaluate an Action',
+    description: 'Evaluate any action through the Stoic 4-stage evaluation sequence: prohairesis filter, kathekon assessment, passion diagnosis, and katorthoma proximity.',
     url: 'https://www.sagereasoning.com/score',
     applicationCategory: 'LifestyleApplication',
     operatingSystem: 'Any',
@@ -178,13 +187,13 @@ export default function ScoreActionPage() {
     return (
       <div className="max-w-3xl mx-auto px-6 py-16">
         <div className="text-center mb-10">
-          <h1 className="font-display text-3xl md:text-4xl font-medium text-sage-800 mb-3">Score an Action</h1>
-          <p className="font-body text-sage-600">Before you begin — where should your scored actions be saved?</p>
+          <h1 className="font-display text-3xl md:text-4xl font-medium text-sage-800 mb-3">Evaluate an Action</h1>
+          <p className="font-body text-sage-600">Before you begin — where should your evaluations be saved?</p>
         </div>
 
         <div className="bg-white/60 border border-sage-200 rounded-lg p-8 mb-6">
           <p className="font-body text-sage-600 mb-6">
-            When you score an action you describe the situation, your reasoning, and your intentions.
+            When you evaluate an action you describe the situation, your reasoning, and your relationships.
             This is personal information. Choose how you would like it stored:
           </p>
 
@@ -200,12 +209,12 @@ export default function ScoreActionPage() {
                 <span className="font-display text-lg font-medium text-sage-800">Cloud Storage</span>
               </div>
               <p className="font-body text-sm text-sage-600 mb-3">
-                Your scored actions are saved to your account. Access your full history from the dashboard on any device.
+                Your evaluations are saved to your account. Track your philosophical progress over time.
               </p>
               <ul className="font-body text-xs text-sage-500 space-y-1">
                 <li>+ Full history on your dashboard</li>
-                <li>+ Syncs across devices</li>
-                <li>+ Feeds your virtue trend analysis</li>
+                <li>+ Track passion reduction over time</li>
+                <li>+ Feeds your progress dimensions</li>
               </ul>
             </button>
 
@@ -221,20 +230,14 @@ export default function ScoreActionPage() {
               </div>
               <p className="font-body text-sm text-sage-600 mb-3">
                 Your action descriptions stay on this device only — never stored on our servers.
-                Only anonymous score statistics are logged.
               </p>
               <ul className="font-body text-xs text-sage-500 space-y-1">
-                <li>+ Maximum privacy for your actions</li>
-                <li>+ Up to 100 entries stored locally</li>
+                <li>+ Maximum privacy</li>
                 <li>- Only accessible on this device</li>
                 <li>- Clearing browser data removes entries</li>
               </ul>
             </button>
           </div>
-
-          <p className="font-body text-xs text-sage-400 mt-6 text-center">
-            You can change this preference anytime by clearing your browser data for this site.
-          </p>
         </div>
       </div>
     )
@@ -247,16 +250,17 @@ export default function ScoreActionPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="text-center mb-12">
-        <h1 className="font-display text-3xl md:text-4xl font-medium text-sage-800 mb-3">Score an Action</h1>
+        <h1 className="font-display text-3xl md:text-4xl font-medium text-sage-800 mb-3">Evaluate an Action</h1>
         <p className="font-body text-sage-700 max-w-xl mx-auto">
-          Describe an action you took (or plan to take) and receive a Stoic virtue analysis
-          with your Sage alignment score.
+          Describe an action and receive a philosophical evaluation through the Stoic 4-stage sequence:
+          prohairesis (control) filter, kathekon (appropriate action) assessment, passion identification,
+          and katorthoma (right action) proximity.
         </p>
       </div>
 
-      <form onSubmit={handleScore} className="bg-white/60 border border-sage-200 rounded-lg p-8 space-y-6 mb-12">
+      {/* ─── V3 Input Form (P3.1) ─── */}
+      <form onSubmit={handleEvaluate} className="bg-white/60 border border-sage-200 rounded-lg p-8 space-y-6 mb-12">
 
-        {/* Storage mode badge */}
         {user && storageMode && (
           <div className="flex items-center justify-between pb-2 border-b border-sage-100">
             <span className="inline-flex items-center gap-1.5 font-body text-xs text-sage-500">
@@ -265,29 +269,21 @@ export default function ScoreActionPage() {
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
-                  Local storage — your action descriptions stay on this device
+                  Local storage — your descriptions stay on this device
                 </>
               ) : (
                 <>
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
                   </svg>
-                  Cloud storage — scores saved to your account
+                  Cloud storage — evaluations saved to your account
                 </>
               )}
             </span>
           </div>
         )}
 
-        {rescoringGrowth && (
-          <div className="bg-sage-50 border border-sage-200 rounded-lg px-5 py-4">
-            <p className="font-body text-sm text-sage-700">
-              The growth action has been pre-filled below. Feel free to refine it in your own words
-              before scoring — the more specific you are, the more accurate the score.
-            </p>
-          </div>
-        )}
-
+        {/* Required: Action description */}
         <div>
           <label className="block font-display text-sm font-medium text-sage-700 mb-1">
             What action did you take (or plan to take)?
@@ -302,9 +298,10 @@ export default function ScoreActionPage() {
           />
         </div>
 
+        {/* Optional: Context */}
         <div>
           <label className="block font-display text-sm font-medium text-sage-700 mb-1">
-            Context (what was the situation?)
+            Context <span className="text-sage-400 font-normal">(what was the situation?)</span>
           </label>
           <textarea
             rows={2}
@@ -315,16 +312,34 @@ export default function ScoreActionPage() {
           />
         </div>
 
+        {/* V3-specific: Relationships / oikeiosis context */}
         <div>
           <label className="block font-display text-sm font-medium text-sage-700 mb-1">
-            What outcome did you intend?
+            Who is affected? <span className="text-sage-400 font-normal">(oikeiosis — your relationships and roles)</span>
           </label>
           <textarea
             rows={2}
-            value={intendedOutcome}
-            onChange={(e) => setIntendedOutcome(e.target.value)}
+            value={relationships}
+            onChange={(e) => setRelationships(e.target.value)}
             className="w-full px-4 py-3 border border-sage-300 rounded bg-white font-body text-sage-900 focus:outline-none focus:ring-2 focus:ring-sage-400"
-            placeholder="e.g. To ensure fair treatment and encourage honest dialogue..."
+            placeholder="e.g. My colleague (peer), the team (community), the client who was affected..."
+          />
+          <p className="font-body text-xs text-sage-400 mt-1">
+            Oikeiosis stages: self → household → community → humanity → cosmic order
+          </p>
+        </div>
+
+        {/* V3-specific: Emotional state for passion diagnosis */}
+        <div>
+          <label className="block font-display text-sm font-medium text-sage-700 mb-1">
+            What were you feeling? <span className="text-sage-400 font-normal">(helps identify passions at work)</span>
+          </label>
+          <textarea
+            rows={2}
+            value={emotionalState}
+            onChange={(e) => setEmotionalState(e.target.value)}
+            className="w-full px-4 py-3 border border-sage-300 rounded bg-white font-body text-sage-900 focus:outline-none focus:ring-2 focus:ring-sage-400"
+            placeholder="e.g. Frustrated, anxious about the outcome, wanting recognition..."
           />
         </div>
 
@@ -333,208 +348,191 @@ export default function ScoreActionPage() {
           disabled={loading || !action}
           className="w-full py-3 bg-sage-400 text-white font-display text-lg rounded hover:bg-sage-500 transition-colors disabled:opacity-50"
         >
-          {loading ? 'Analysing against Stoic virtues...' : (rescoringGrowth ? 'Score the Growth Action' : 'Score This Action')}
+          {loading ? 'Evaluating through 4-stage sequence...' : 'Evaluate This Action'}
         </button>
 
         {!user && (
           <p className="text-center font-body text-sm text-sage-500">
-            <a href="/auth" className="underline text-sage-700">Sign in</a> to save scores to your profile.
+            <a href="/auth" className="underline text-sage-700">Sign in</a> to save evaluations to your profile.
           </p>
         )}
       </form>
 
-      {/* Results */}
-      {result && tier && (
-        <div className="space-y-8">
-          <div className="bg-white/60 border border-sage-200 rounded-lg p-8 text-center">
-            <div className="inline-flex items-center justify-center w-32 h-32 rounded-full border-4 mb-4" style={{ borderColor: tier.color }}>
-              <div>
-                <p className="font-display text-4xl font-bold" style={{ color: tier.color }}>{result.total_score}</p>
-                <p className="font-body text-xs text-sage-600">out of 100</p>
-              </div>
-            </div>
-            <h2 className="font-display text-2xl font-medium text-sage-800 mb-1">{tier.label}</h2>
-            <p className="font-body text-sage-600 text-sm">{tier.description}</p>
+      {/* ─── V3 Output Display (P3.2) ─── */}
+      {result && proximityLevel && proximityDisplay && (
+        <div className="space-y-6">
 
-            <div className="mt-6 pt-5 border-t border-sage-100">
-              <p className="font-display text-sm text-sage-500 mb-3">Calendar Stamp</p>
-              {earnsStamp && strongestVirtue ? (
-                <div className="inline-flex flex-col items-center gap-2">
-                  <div
-                    className="w-16 h-16 rounded-xl border-2 flex items-center justify-center"
-                    style={{ borderColor: strongestVirtue.color, backgroundColor: strongestVirtue.color + '10' }}
-                  >
-                    <img src={strongestVirtue.icon} alt={strongestVirtue.name} className="w-11 h-11 drop-shadow-sm" />
+          {/* Katorthoma Proximity — the primary result */}
+          <div className="bg-white/60 border border-sage-200 rounded-lg p-8 text-center">
+            <p className="font-body text-sm text-sage-500 mb-2">Katorthoma Proximity</p>
+            <div className="inline-flex items-center justify-center w-28 h-28 rounded-full border-4 mb-4" style={{ borderColor: proximityDisplay.color }}>
+              <span className="font-display text-4xl" style={{ color: proximityDisplay.color }}>
+                {proximityDisplay.icon}
+              </span>
+            </div>
+            <h2 className="font-display text-2xl font-medium text-sage-800 mb-1">{proximityLevel.name}</h2>
+            <p className="font-body text-sage-600 text-sm max-w-md mx-auto">{proximityLevel.description}</p>
+            <p className="font-body text-xs text-sage-400 mt-2">{proximityLevel.progress_grade}</p>
+
+            {/* Proximity scale visualization */}
+            <div className="flex items-center justify-center gap-1 mt-6 pt-4 border-t border-sage-100">
+              {PROXIMITY_LEVELS.map((level) => {
+                const display = PROXIMITY_DISPLAY[level.id]
+                const isActive = level.id === result.virtue_quality.katorthoma_proximity
+                return (
+                  <div key={level.id} className="flex flex-col items-center gap-1" style={{ opacity: isActive ? 1 : 0.3 }}>
+                    <div
+                      className="w-10 h-2 rounded-full"
+                      style={{ backgroundColor: display.color }}
+                    />
+                    <span className="font-body text-[10px] text-sage-500">{level.name.split(' ')[0]}</span>
                   </div>
-                  <span className="font-display text-sm font-medium" style={{ color: strongestVirtue.color }}>
-                    {strongestVirtue.name} stamp earned
-                  </span>
-                </div>
-              ) : (
-                <div className="inline-flex flex-col items-center gap-2">
-                  <div className="w-16 h-16 rounded-xl border-2 border-sage-200 bg-sage-50/50 flex items-center justify-center">
-                    {strongestVirtue ? (
-                      <img src={strongestVirtue.icon} alt={strongestVirtue.name} className="w-11 h-11 opacity-20 grayscale" />
-                    ) : (
-                      <span className="font-display text-2xl text-sage-200">?</span>
-                    )}
-                  </div>
-                  <span className="font-body text-sm text-sage-400">Score 70+ to earn a stamp</span>
-                </div>
-              )}
+                )
+              })}
             </div>
 
             {saved && (
               <p className="mt-4 text-sm text-sage-500 font-body italic">
-                {storageMode === 'local' ? 'Score saved to this device.' : 'Score saved to your profile.'}
+                Evaluation saved{storageMode === 'local' ? ' to this device' : ' to your profile'}.
               </p>
             )}
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            {VIRTUES.map((virtue) => {
-              const score = result[`${virtue.id}_score` as keyof ScoreResult] as number
-              return (
-                <div key={virtue.id} className="bg-white/60 border border-sage-200 rounded-lg p-5 flex items-center gap-4">
-                  <img src={virtue.icon} alt={virtue.name} className="w-16 h-16 drop-shadow-sm" />
-                  <div className="flex-1">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="font-display font-medium text-sage-800">{virtue.name}</span>
-                      <span className="font-display text-lg font-bold" style={{ color: virtue.color }}>{score}</span>
-                    </div>
-                    <div className="w-full bg-sage-100 rounded-full h-2">
-                      <div
-                        className="h-2 rounded-full transition-all duration-1000"
-                        style={{ width: `${score}%`, backgroundColor: virtue.color }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+          {/* Stage 1: Prohairesis Filter */}
+          <div className="bg-white/60 border border-sage-200 rounded-lg p-6">
+            <h3 className="font-display text-base font-medium text-sage-800 mb-3 flex items-center gap-2">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-sage-100 text-sage-600 font-display text-xs">1</span>
+              Prohairesis Filter
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <p className="font-display text-xs text-sage-500 mb-2">Within your moral choice (eph&apos; hemin)</p>
+                <ul className="space-y-1">
+                  {result.control_filter.within_prohairesis.map((item, i) => (
+                    <li key={i} className="font-body text-sm text-sage-700 flex items-start gap-2">
+                      <span className="text-sage-400 mt-0.5">+</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="font-display text-xs text-sage-500 mb-2">Outside your moral choice</p>
+                <ul className="space-y-1">
+                  {result.control_filter.outside_prohairesis.map((item, i) => (
+                    <li key={i} className="font-body text-sm text-sage-500 flex items-start gap-2">
+                      <span className="text-sage-300 mt-0.5">–</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
 
+          {/* Stage 2: Kathekon Assessment */}
+          <div className="bg-white/60 border border-sage-200 rounded-lg p-6">
+            <h3 className="font-display text-base font-medium text-sage-800 mb-3 flex items-center gap-2">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-sage-100 text-sage-600 font-display text-xs">2</span>
+              Kathekon Assessment
+            </h3>
+            {(() => {
+              const kDisplay = KATHEKON_DISPLAY[result.kathekon_assessment.quality] || KATHEKON_DISPLAY.moderate
+              return (
+                <div className="flex items-center gap-3">
+                  <span
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-display text-sm font-medium text-white"
+                    style={{ backgroundColor: kDisplay.color }}
+                  >
+                    {result.kathekon_assessment.is_kathekon ? '✓' : '✗'} {kDisplay.label}
+                  </span>
+                </div>
+              )
+            })()}
+            {result.oikeiosis_context && (
+              <p className="font-body text-sm text-sage-600 mt-3">{result.oikeiosis_context}</p>
+            )}
+          </div>
+
+          {/* Stage 3: Passion Identification (R6d: diagnostic, not punitive) */}
+          <div className="bg-white/60 border border-sage-200 rounded-lg p-6">
+            <h3 className="font-display text-base font-medium text-sage-800 mb-3 flex items-center gap-2">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-sage-100 text-sage-600 font-display text-xs">3</span>
+              Passions Identified
+              <span className="font-body text-xs text-sage-400 font-normal ml-1">(philosophical self-knowledge)</span>
+            </h3>
+
+            {result.passion_diagnosis.passions_detected.length === 0 ? (
+              <p className="font-body text-sm text-sage-600 italic">No passions detected — the action appears free from distortion by false judgement.</p>
+            ) : (
+              <div className="space-y-3">
+                {result.passion_diagnosis.passions_detected.map((passion, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 bg-sage-50/50 rounded">
+                    <span className="font-display text-sm font-medium text-sage-700">{passion.name}</span>
+                    <span className="font-body text-xs text-sage-400 mt-0.5">({passion.root_passion})</span>
+                  </div>
+                ))}
+
+                {result.passion_diagnosis.false_judgements.length > 0 && (
+                  <div className="pt-3 border-t border-sage-100">
+                    <p className="font-display text-xs text-sage-500 mb-2">False judgements identified</p>
+                    {result.passion_diagnosis.false_judgements.map((fj, i) => (
+                      <p key={i} className="font-body text-sm text-sage-700 mb-1">• {fj}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Stage 4: Virtue Domains Engaged */}
+          <div className="bg-white/60 border border-sage-200 rounded-lg p-6">
+            <h3 className="font-display text-base font-medium text-sage-800 mb-3 flex items-center gap-2">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-sage-100 text-sage-600 font-display text-xs">4</span>
+              Unified Virtue Assessment
+            </h3>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {VIRTUE_EXPRESSIONS.map((v) => {
+                const isEngaged = result.virtue_quality.virtue_domains_engaged.includes(v.id)
+                return (
+                  <span
+                    key={v.id}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-display text-xs"
+                    style={{
+                      backgroundColor: isEngaged ? '#f0efe6' : '#fafaf8',
+                      color: isEngaged ? '#4a5a3a' : '#b8b4a0',
+                      border: `1px solid ${isEngaged ? '#c5c0a8' : '#e8e6dc'}`,
+                    }}
+                  >
+                    {v.name}
+                  </span>
+                )
+              })}
+            </div>
+            <p className="font-body text-sm text-sage-600">{result.virtue_quality.ruling_faculty_state}</p>
+          </div>
+
+          {/* Philosophical Reflection + Improvement Path */}
           <div className="bg-white/60 border border-sage-200 rounded-lg p-8 space-y-4">
-            {/* Zeus header — ancient advice */}
             <div className="flex items-center gap-3 pb-3 border-b border-sage-100">
               <img src="/images/Zeus.PNG" alt="The Sage" className="w-14 h-14 object-contain rounded-full border-2 border-amber-200 bg-amber-50/50 drop-shadow-sm" />
               <div>
-                <p className="font-display text-sm font-medium text-amber-800">Ancient Advice*</p>
-                <p className="font-body text-xs text-sage-500">Stoic virtue analysis from the Sage Brain</p>
+                <p className="font-display text-sm font-medium text-amber-800">Philosophical Reflection</p>
+                <p className="font-body text-xs text-sage-500">Stoic evaluation from the Sage Brain</p>
               </div>
             </div>
-            <div>
-              <h3 className="font-display text-lg font-medium text-sage-800 mb-2">Reasoning</h3>
-              <p className="font-body text-sage-700 leading-relaxed">{result.reasoning}</p>
-            </div>
-            <div>
-              <h3 className="font-display text-lg font-medium text-sage-800 mb-2">Path to Growth</h3>
-              <p className="font-body text-sage-700 leading-relaxed">{result.improvement_path}</p>
-            </div>
-            <div className="flex gap-6 pt-2">
-              <div>
-                <span className="font-display text-sm text-sage-500">Strength</span>
-                <p className="font-display font-medium text-sage-800">{result.strength}</p>
+            <p className="font-body text-sage-700 leading-relaxed">{result.philosophical_reflection}</p>
+
+            {result.improvement_path && (
+              <div className="pt-3 border-t border-sage-100">
+                <h4 className="font-display text-sm font-medium text-sage-700 mb-2">Path Forward</h4>
+                <p className="font-body text-sage-600 leading-relaxed">{result.improvement_path}</p>
               </div>
-              <div>
-                <span className="font-display text-sm text-sage-500">Growth area</span>
-                <p className="font-display font-medium text-sage-800">{result.growth_area}</p>
-              </div>
-            </div>
+            )}
           </div>
 
-          {!earnsStamp && result.growth_action && (
-            <div className="bg-sage-50/80 border-2 border-sage-300 rounded-lg p-8 space-y-5">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-16 h-16 rounded-full border-2 border-amber-200 bg-amber-50/50 flex items-center justify-center overflow-hidden">
-                  <img src="/images/Zeus.PNG" alt="The Sage" className="w-14 h-14 object-contain" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-display text-lg font-medium text-sage-800">What a Sage Might Consider</h3>
-                    <span className="font-body text-xs text-amber-700 italic">(ancient advice*)</span>
-                  </div>
-                  <p className="font-body text-sage-700 leading-relaxed">{result.growth_action}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-6 pt-3 border-t border-sage-200">
-                <div className="flex-1 text-center">
-                  <p className="font-body text-xs text-sage-400 mb-1">Your action</p>
-                  <p className="font-display text-2xl font-bold text-sage-400">{result.total_score}</p>
-                  <div className="w-10 h-10 rounded-lg border border-sage-200 bg-white/50 flex items-center justify-center mx-auto mt-2">
-                    {strongestVirtue ? (
-                      <img src={strongestVirtue.icon} alt="" className="w-7 h-7 opacity-20 grayscale" />
-                    ) : <span className="text-sage-200">—</span>}
-                  </div>
-                  <p className="font-body text-xs text-sage-300 mt-1">No stamp</p>
-                </div>
-
-                <div className="flex-shrink-0">
-                  <svg className="w-8 h-8 text-sage-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </div>
-
-                <div className="flex-1 text-center">
-                  <p className="font-body text-xs text-sage-500 mb-1">Growth action</p>
-                  <p className="font-display text-2xl font-bold" style={{ color: result.growth_action_projected_score >= STAMP_THRESHOLD ? '#7d9468' : '#B2AC88' }}>
-                    ~{result.growth_action_projected_score}
-                  </p>
-                  <div
-                    className="w-10 h-10 rounded-lg border-2 flex items-center justify-center mx-auto mt-2"
-                    style={result.growth_action_projected_score >= STAMP_THRESHOLD && strongestVirtue ? {
-                      borderColor: strongestVirtue.color, backgroundColor: strongestVirtue.color + '10',
-                    } : { borderColor: '#d1cdb8', backgroundColor: '#fafaf5' }}
-                  >
-                    {result.growth_action_projected_score >= STAMP_THRESHOLD && strongestVirtue ? (
-                      <img src={strongestVirtue.icon} alt="" className="w-7 h-7 drop-shadow-sm" />
-                    ) : <span className="text-sage-300">—</span>}
-                  </div>
-                  <p className="font-body text-xs mt-1" style={{ color: result.growth_action_projected_score >= STAMP_THRESHOLD ? '#7d9468' : '#B2AC88' }}>
-                    {result.growth_action_projected_score >= STAMP_THRESHOLD ? 'Stamp earned' : 'Closer to stamp'}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={handleScoreGrowthAction}
-                className="w-full py-3 bg-sage-400 text-white font-display text-base rounded hover:bg-sage-500 transition-colors"
-              >
-                Score This Growth Action Instead
-              </button>
-
-              <p className="font-body text-xs text-sage-400 text-center italic leading-relaxed">
-                The stamp marks the action — it is not the reason for it.
-                Virtue is its own reward; the calendar simply records your practice.
-              </p>
-            </div>
-          )}
-
-          {earnsStamp && result.growth_action && (
-            <div className="bg-white/60 border border-sage-200 rounded-lg p-8">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-16 h-16 rounded-full border-2 border-amber-200 bg-amber-50/50 flex items-center justify-center overflow-hidden">
-                  <img src="/images/Zeus.PNG" alt="The Sage" className="w-14 h-14 object-contain" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-display text-base font-medium text-sage-800">The Sage Path Forward</h3>
-                    <span className="font-body text-xs text-amber-700 italic">(ancient advice*)</span>
-                  </div>
-                  <p className="font-body text-sage-600 leading-relaxed text-sm">{result.growth_action}</p>
-                  <p className="font-body text-xs text-sage-400 mt-3 italic">
-                    There is always a higher expression of virtue. The sage never stops progressing.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Ancient advice footnote */}
+          {/* R3: Disclaimer */}
           <div className="pt-4 border-t border-sage-100">
             <p className="font-body text-xs text-sage-400 italic">
-              * ancient advice does not consider your legal or personal obligations.
+              {EVALUATIVE_DISCLAIMER}
             </p>
           </div>
         </div>

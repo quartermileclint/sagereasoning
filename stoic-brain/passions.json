@@ -1,0 +1,147 @@
+{
+  "meta": {
+    "version": "3.0.0",
+    "source": "SageReasoning Stoic Brain",
+    "last_updated": "2026-03-31",
+    "glossary_version": "3.0.0 (67 terms)",
+    "file": "passions.json",
+    "domain": "Passions and Good Feelings (pathe / eupatheiai)",
+    "description": "The 4 root destructive passions with their sub-species, the 3 rational good feelings, and the diagnostic framework for identifying which false judgement corrupted an action. This is the primary diagnostic tool for evaluating actions.",
+    "derivation": "Stobaeus dedicates a standalone major section (Section 5: 'On the Passions and the Good Feelings') to this topic. DL gives 7.110-116 as a dedicated treatment. Both sources treat passions as a distinct domain worthy of its own sustained analysis, not merely a subsection of soul or virtue. The passions contain the most granular taxonomy in all of Stoic ethics — 4 root genera, 25+ sub-species — making them the most powerful diagnostic tool available.",
+    "primary_sources": [
+      "Stobaeus, Eclogae 2.88-90 (Section 5) — passions, sub-species, eupatheiai",
+      "DL Lives 7.110-116 — passions and good feelings",
+      "Cicero, De Finibus — perturbatio as the Latin rendering of pathos"
+    ]
+  },
+  "definition_of_passion": {
+    "description": "A passion is not a mere emotion to be suppressed. It is a cognitive error — a false judgement that corrupts the impulse mechanism. The Stoics gave multiple equivalent definitions.",
+    "definitions": [
+      {
+        "source": "Zeno (via Stobaeus Ecl. 2.88)",
+        "text": "An impulse that exceeds due measure"
+      },
+      {
+        "source": "Stobaeus Ecl. 2.88",
+        "text": "An impulse that exceeds due measure and disobeys the choosing reason, or a motion of the soul contrary to nature"
+      },
+      {
+        "source": "Stobaeus Ecl. 2.88",
+        "text": "All passions are of the ruling faculty of the soul"
+      }
+    ],
+    "key_clarification": {
+      "source": "Stobaeus Ecl. Section 5",
+      "text": "'Irrational' and 'contrary to nature' are not to be taken commonly. 'Irrational' means 'disobeying reason.' For all passion is coercive, as we often see those in the grip of passions knowing that it would be advantageous not to do something, yet driven by intensity they are carried away to do it.",
+      "euripides_quote_ref": "Stobaeus records: 'Hence it is common for people to confess the oft-quoted saying: Though my reasoning knows what is right, nature compels me.'"
+    },
+    "passions_as_opinions": "Stobaeus: 'Regarding all the passions of the soul, since they say these are opinions, one should take the opinion in place of weak supposition, and \"recent\" in place of the moving force of irrational tension or expansion.'"
+  },
+  "four_root_passions": {
+    "description": "The 2x2 matrix: temporal (present/future) by evaluative (apparent good/apparent evil). These are the four genera from which all specific passions derive.",
+    "source": "Stobaeus Ecl. 2.88-89: 'Primary by genus are these four: craving, fear, distress, and pleasure. Craving and fear lead the way — craving toward the apparent good, fear toward the apparent ill. Following upon these come distress and pleasure.'",
+    "matrix": {
+      "future_apparent_good": {
+        "id": "epithumia",
+        "name": "Craving / Irrational Desire",
+        "greek": "epithumia",
+        "definition": "Irrational reaching toward an apparent future good that is not genuinely good.",
+        "stobaeus": "'Craving and fear lead the way — craving toward the apparent good.'",
+        "sub_species": [
+          { "id": "orge", "name": "Anger (orge)", "description": "Craving for revenge on one who seems to have wronged you", "source": "Stobaeus Ecl. 2.91; DL 7.113" },
+          { "id": "eros", "name": "Erotic Passion (eros)", "description": "Craving for sexual union not based in virtue", "source": "Stobaeus Ecl. 2.91; DL 7.113" },
+          { "id": "pothos", "name": "Longing (pothos)", "description": "Craving for something absent", "source": "Stobaeus Ecl. 2.91; DL 7.113" },
+          { "id": "philedonia", "name": "Love of Pleasure (philedonia)", "description": "Craving for bodily pleasure as an end", "source": "Stobaeus Ecl. 2.91; DL 7.113" },
+          { "id": "philoplousia", "name": "Love of Wealth (philoplousia)", "description": "Craving for wealth as an end", "source": "Stobaeus Ecl. 2.91; DL 7.113" },
+          { "id": "philodoxia", "name": "Love of Honour (philodoxia)", "description": "Craving for reputation as an end", "source": "Stobaeus Ecl. 2.91; DL 7.113" }
+        ]
+      },
+      "present_apparent_good": {
+        "id": "hedone",
+        "name": "Irrational Pleasure",
+        "greek": "hedone",
+        "definition": "Irrational elation at an apparent present good that is not genuinely good.",
+        "stobaeus": "'Pleasure occurs when we attain what we crave or escape what we fear.'",
+        "sub_species": [
+          { "id": "kelesis", "name": "Enchantment (kelesis)", "description": "Pleasure that captivates through the senses", "source": "Stobaeus Ecl. 2.91; DL 7.114" },
+          { "id": "epichairekakia", "name": "Malicious Joy (epichairekakia)", "description": "Pleasure at another's misfortune", "source": "Stobaeus Ecl. 2.91; DL 7.114" },
+          { "id": "terpsis", "name": "Excessive Amusement (terpsis)", "description": "Pleasure that dissolves seriousness", "source": "Stobaeus Ecl. 2.91; DL 7.114" }
+        ]
+      },
+      "future_apparent_evil": {
+        "id": "phobos",
+        "name": "Fear / Irrational Shrinking",
+        "greek": "phobos",
+        "definition": "Irrational avoidance of an apparent future evil that is not genuinely evil.",
+        "stobaeus": "'Craving and fear lead the way... fear toward the apparent ill.'",
+        "sub_species": [
+          { "id": "deima", "name": "Terror (deima)", "description": "Fear that produces paralysis", "source": "Stobaeus Ecl. 2.90; DL 7.112" },
+          { "id": "oknos", "name": "Timidity (oknos)", "description": "Fear of future effort or exertion", "source": "Stobaeus Ecl. 2.90; DL 7.112" },
+          { "id": "aischyne", "name": "Shame (aischyne)", "description": "Fear of ill-repute", "source": "Stobaeus Ecl. 2.90; DL 7.112" },
+          { "id": "thambos", "name": "Dread (thambos)", "description": "Fear produced by the representation of an unfamiliar thing", "source": "Stobaeus Ecl. 2.90; DL 7.112" },
+          { "id": "thorybos", "name": "Panic (thorybos)", "description": "Fear accompanied by vocal disturbance", "source": "Stobaeus Ecl. 2.90; DL 7.112" },
+          { "id": "agonia", "name": "Agony (agonia)", "description": "Fear of an uncertain outcome", "source": "Stobaeus Ecl. 2.90; DL 7.112" }
+        ]
+      },
+      "present_apparent_evil": {
+        "id": "lupe",
+        "name": "Distress / Irrational Pain",
+        "greek": "lupe",
+        "definition": "Irrational contraction at an apparent present evil that is not genuinely evil.",
+        "stobaeus": "'Distress occurs when we fail to attain what we crave or fall into what we fear.'",
+        "sub_species": [
+          { "id": "eleos", "name": "Pity (eleos)", "description": "Distress at another's undeserved suffering — misidentifies an indifferent as evil", "source": "Stobaeus Ecl. 2.90; DL 7.111" },
+          { "id": "phthonos", "name": "Envy (phthonos)", "description": "Distress at another's good fortune", "source": "Stobaeus Ecl. 2.90; DL 7.111" },
+          { "id": "zelotypia", "name": "Jealousy (zelotypia)", "description": "Distress that another possesses what one desires", "source": "Stobaeus Ecl. 2.90; DL 7.111" },
+          { "id": "penthos", "name": "Grief (penthos)", "description": "Distress at loss, especially of a person", "source": "Stobaeus Ecl. 2.90; DL 7.111" },
+          { "id": "achos", "name": "Anxiety (achos)", "description": "Distress that weighs on the mind without clear object", "source": "Stobaeus Ecl. 2.90; DL 7.111" }
+        ]
+      }
+    }
+  },
+  "three_good_feelings": {
+    "description": "The eupatheiai — rational emotional states that arise from correct judgement. These are what the sage experiences INSTEAD of passions. They are not suppressions of feeling but positive rational states.",
+    "source": "DL Lives 7.116; Stobaeus Eclogae 2.90",
+    "eupatheiai": [
+      {
+        "id": "chara",
+        "name": "Joy / Rational Gladness",
+        "greek": "chara",
+        "replaces": "hedone (irrational pleasure)",
+        "definition": "Rational gladness at what is genuinely good — virtue and right action.",
+        "sub_species": ["delight (terpsis)", "good spirits (euphrosyne)", "cheerfulness (euthymia)"]
+      },
+      {
+        "id": "boulesis",
+        "name": "Rational Wish",
+        "greek": "boulesis",
+        "replaces": "epithumia (craving)",
+        "definition": "Rational desire directed at what is genuinely good — wanting virtue and the welfare of others from correct understanding.",
+        "sub_species": ["goodwill (eunoia)", "benevolence (eumeneia)", "love (agapesis)", "affection (aspasmos)"]
+      },
+      {
+        "id": "eulabeia",
+        "name": "Rational Caution",
+        "greek": "eulabeia",
+        "replaces": "phobos (fear)",
+        "definition": "Rational avoidance of what is genuinely evil — vice. Not fear, but principled refusal to participate in what is truly harmful.",
+        "sub_species": ["reverence (aidos)", "sanctity (hagneia)"]
+      }
+    ],
+    "no_counterpart_to_distress": {
+      "explanation": "There is no eupatheia corresponding to distress (lupe). The sage has no reason for irrational contraction because nothing genuinely evil can befall the person of virtue. This asymmetry is philosophically deliberate.",
+      "source": "DL Lives 7.116"
+    }
+  },
+  "diagnostic_use": {
+    "description": "When evaluating an action, the passions taxonomy is the primary diagnostic tool. Identify which passion(s) distorted the agent's impression, assent, or impulse. The specific sub-species tells you precisely what went wrong.",
+    "diagnostic_sequence": [
+      "1. Was the agent's impression of the situation distorted? If so, by which of the 4 root passions?",
+      "2. Did the agent assent to a false impression? Which false belief drove the assent?",
+      "3. Did the impulse exceed what reason warranted? (Zeno's definition: impulse exceeding due measure)",
+      "4. Which specific sub-species was operative? (Not just 'fear' but 'timidity' or 'shame')",
+      "5. What is the corresponding correct judgement that would replace the false one?"
+    ],
+    "connection_to_improvement": "Each passion identified points to a specific false judgement. Correcting that false judgement is the path to moral progress. The sub-species narrows the diagnosis from 'something went wrong' to 'this specific false belief about this specific situation caused this specific excess of impulse.'"
+  }
+}

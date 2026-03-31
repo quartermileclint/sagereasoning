@@ -1,8 +1,34 @@
 # SageReasoning — Stoic Source Texts Index
 
-**Status:** P1 Research in progress
-**Last updated:** March 2026
+**Status:** V3 Adoption in progress — V3 data files promoted to production (31 March 2026)
+**Last updated:** 31 March 2026
 **Purpose:** Catalogues all primary stoic sources used to build the Stoic Brain data files.
+
+---
+
+## PARALLEL PIPELINE STATUS
+
+A parallel source overhaul is underway to work directly from original Greek/Latin texts rather than relying solely on existing English translations. This addresses the risk of inherited translation errors propagating into the Stoic Brain data files.
+
+**Original text repository:** `/research/originals/{greek,latin}/`
+**Controlled term glossary:** `/research/originals/glossary/stoic-term-glossary.json`
+**Overhaul plan:** `/SageReasoning_Original_Source_Overhaul_Plan.docx`
+
+| Text | Language | Perseus ID | File | Status |
+|------|----------|------------|------|--------|
+| Marcus Aurelius — Meditations | Greek | 2008.01.0641 | `greek/marcus-aurelius-meditations.xml` (287KB) | Acquired |
+| Epictetus — Discourses + Enchiridion | Greek | 1999.01.0235 | `greek/epictetus-discourses-enchiridion.xml` (811KB) | Acquired |
+| Diogenes Laertius — Lives, Book 7 | Greek | 1999.01.0257 | `greek/diogenes-laertius-lives.xml` (1.07MB) | Acquired |
+| Seneca — Epistulae Morales | Latin | 2007.01.0080 | `latin/seneca-epistulae-morales.xml` (1.08MB) | Acquired |
+| Seneca — De Brevitate Vitae | Latin | 2007.01.0016 | `latin/seneca-de-brevitate-vitae.xml` (55KB) | Acquired |
+| Seneca — De Vita Beata | Latin | 2007.01.0022 | `latin/seneca-de-vita-beata.xml` (63KB) | Acquired |
+| Cicero — De Officiis | Latin | 2007.01.0047 | `latin/cicero-de-officiis.xml` (269KB) | Acquired |
+| Cicero — De Finibus, Book 3 | Latin | 2007.01.0036 | `latin/cicero-de-finibus.xml` (633KB) | Acquired |
+| Stobaeus — Anthology, Book 2 (Eclogae Ethicae) | Greek | N/A (OCR from scan) | `greek/stobaeus-anthology-book2.xml` (1.3MB) | Acquired — OCR'd from Wachsmuth & Hense 1884 edition via Internet Archive |
+
+**Total original texts acquired:** 9 of 9 (all sources now covered)
+**Format:** TEI XML from Perseus Digital Library (8 texts) + Tesseract OCR from Internet Archive scan (Stobaeus)
+**License:** CC-BY-SA-4.0 (Perseus texts); Public domain (Stobaeus — 1884 edition)
 
 ---
 
@@ -155,8 +181,30 @@ Each entry lists:
 
 ## Next Steps
 
+### Translation-based pipeline (existing)
 - [ ] Extract Cicero *De Officiis* Book 1 & 3 into scoring-rules.json (P5)
 - [ ] Extract Seneca *On the Happy Life* into stoic-brain.json eudaimonia section (P3)
 - [ ] Create meditations-marcus-aurelius.md — passage-level reference file
 - [ ] Create discourses-epictetus.md — passage-level reference file
 - [ ] Create letters-seneca.md — passage-level reference file
+
+### Original-source parallel pipeline (overhaul)
+- [x] Acquire all available TEI XML original texts from Perseus (8 of 9)
+- [x] OCR Stobaeus Anthology Book 2 from Internet Archive scan (Tesseract grc model, 475K Greek characters)
+- [x] Initialize controlled technical term glossary (22 terms, stoic-term-glossary.json)
+- [x] Phase 2: Full English translations of all 9 original-language source texts (COMPLETED 30 March 2026)
+  - [x] Seneca — On the Shortness of Life (De Brevitate Vitae) — full translation from Latin
+  - [x] Seneca — On the Flourishing Life (De Vita Beata) — full translation from Latin
+  - [x] Marcus Aurelius — Meditations (Ta Eis Heauton) — full translation from Greek
+  - [x] Cicero — On Appropriate Actions (De Officiis) — full translation from Latin
+  - [x] Cicero — On the Ends of Good and Evil (De Finibus) — full translation from Latin
+  - [x] Epictetus — Discourses and Enchiridion — full translation from Greek
+  - [x] Diogenes Laertius — Lives, Book 7 — full translation from Greek
+  - [x] Seneca — Moral Letters to Lucilius (Epistulae Morales) — full translation from Latin (122 letters complete, 129KB .docx)
+  - [x] Stobaeus — Anthology, Book 2 (Eclogae Ethicae) — full translation from Greek (OCR source)
+  - [x] Expanded controlled glossary from 22 to 49 terms (v2.0.0), with 29+ additional terms identified from Epistulae translation
+  - All translations use SageReasoning Controlled Glossary terms
+  - All translations saved as .docx in `/research/originals/translations/`
+- [x] Phase 3: Build V3 data files — 8 files derived from original sources (action.json, passions.json, progress.json, psychology.json, scoring.json, stoic-brain.json, value.json, virtue.json) — COMPLETED
+- [x] Phase 4: V1 vs V3 comparison — Comparison report produced (Phase4_V1_vs_V3_Comparison_Report.docx) — COMPLETED
+- [x] Phase 5: Decision — V3 adopted as production dataset. V1 archived to stoic-brain/v1-archive/. V3 files promoted to stoic-brain/ root (31 March 2026) — COMPLETED

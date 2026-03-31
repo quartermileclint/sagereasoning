@@ -1,0 +1,156 @@
+{
+  "meta": {
+    "version": "3.0.0",
+    "source": "SageReasoning Stoic Brain",
+    "last_updated": "2026-03-30",
+    "glossary_version": "3.0.0 (67 terms)",
+    "file": "action.json",
+    "domain": "Action Theory (praxis)",
+    "description": "The Stoic theory of action: the formal distinction between appropriate actions (kathekonta) and right actions (katorthomata), the oikeiosis sequence that determines social obligations, and the deliberation framework for resolving apparent conflicts. This file covers WHAT makes an action good or bad. The mechanism of HOW action arises (impulse sequence) is in psychology.json. The diagnostic tool for WHAT WENT WRONG is in passions.json.",
+    "derivation": "Stobaeus Eclogae Section 4 ('On Appropriate Action and Right Action') treats this as a standalone major section. Cicero's De Officiis is entirely organized around appropriate action and deliberation. DL Lives 7.36-40 and 7.51-60 cover oikeiosis and appropriate action as distinct topics.",
+    "primary_sources": [
+      "Stobaeus, Eclogae Section 4 (2.85-86) — kathekon vs. katorthoma definitions",
+      "Cicero, De Officiis 1.7-10 — deliberation framework",
+      "Cicero, De Officiis 1.20-41 — justice and social appropriate actions",
+      "Cicero, De Finibus 3.62-68 — oikeiosis and natural affiliation",
+      "DL Lives 7.36-40, 7.51-60 — oikeiosis developmental sequence"
+    ]
+  },
+  "two_layers": {
+    "description": "The sources draw a categorical distinction between two types of action quality. V1 collapsed these into a single 0-100 scale. The same external action can be appropriate (kathekon) without being right (katorthoma).",
+    "kathekon": {
+      "id": "kathekon",
+      "name": "Appropriate Action",
+      "greek": "kathekon",
+      "latin": "officium",
+      "definitions": {
+        "Stobaeus": "'That which accords with life, which when done has a reasonable justification. Contrary to appropriate action is what has the opposite character.' (Ecl. Section 4)",
+        "Cicero": "'The middle appropriate action is that for which a probable reason can be given for why it was done.' (De Officiis 1.8)"
+      },
+      "characteristics": [
+        "Performable by anyone — sage or fool",
+        "Extends even to non-rational animals ('they too act in some way consistently with their own nature' — Stobaeus)",
+        "For rational beings: 'that which accords with life in the way of a rational being' (Stobaeus)"
+      ],
+      "examples": "Honouring parents, contributing to community, pursuing education, caring for health, entering into marriage",
+      "stobaeus_on_intermediate": "'The intermediate appropriate action is measured by certain indifferents, selected because they are contrary to nature and according to nature.'"
+    },
+    "katorthoma": {
+      "id": "katorthoma",
+      "name": "Right Action / Perfect Action",
+      "greek": "katorthoma",
+      "definitions": {
+        "Stobaeus": "'Right actions are activities according to excellence — for instance, being prudent, being self-controlled. But actions not possessing this quality are not right actions.' (Ecl. Section 4)",
+        "Cicero": "'The perfect action we may rightfully call a right action, since the Greeks call the perfect action katorthoma.' (De Officiis 1.8)"
+      },
+      "characteristics": [
+        "The SAME external action as a kathekon, but performed from complete understanding",
+        "Only the sage performs katorthomata",
+        "Motivated by full knowledge of WHY the action is right",
+        "Integrated into a unified commitment to virtue"
+      ],
+      "stobaeus_on_completion": "'Appropriate action, when perfected, becomes right action. Everything contrary to appropriate action performed in a rational creature is an error (hamartema).'"
+    },
+    "scoring_implication": "Actions must be evaluated on BOTH layers. Layer 1: Is this a kathekon? (Does the action itself make sense?) Layer 2: How close is the agent's understanding to katorthoma-level? (Is it performed from virtue or from something less?)"
+  },
+  "oikeiosis_sequence": {
+    "description": "Natural affiliation (oikeiosis) develops in stages from self-concern outward to concern for all rational beings. This sequence determines WHICH social obligations take priority and HOW justice manifests at each level.",
+    "source": "DL Lives 7.51-60; Cicero De Finibus 3.62-68; Cicero De Officiis 1.11-12",
+    "cicero_on_nature": "'From the beginning, to every living creature nature has granted the capacity to protect itself and its body. But between man and beast the greatest difference is this: the latter adapts itself only to what is present, whereas man, being a participant in reason, perceives consequences and sees the entire course of his life.' (De Officiis 1.11)",
+    "cicero_on_social_bond": "'By the same nature, nature unites man with man and engenders in him a particular love for those who are brought forth.' (De Officiis 1.12)",
+    "stages": [
+      {
+        "stage": 1,
+        "id": "self",
+        "name": "Self-Preservation",
+        "description": "The newborn's instinctive drive toward self-preservation and preference for its own constitution.",
+        "source": "Cicero De Finibus 3.62; DL 7.51",
+        "appropriate_actions": ["Care for one's own body and mind", "Develop one's rational faculty", "Pursue philosophical exercise"]
+      },
+      {
+        "stage": 2,
+        "id": "family",
+        "name": "Family and Intimates",
+        "description": "Affiliation extends to parents, children, spouse, siblings, and close friends.",
+        "source": "Cicero De Officiis 1.12; DL 7.52-54",
+        "appropriate_actions": ["Honour parents", "Educate children", "Support spouse", "Maintain friendships of virtue"]
+      },
+      {
+        "stage": 3,
+        "id": "community",
+        "name": "City and Political Community",
+        "description": "Affiliation extends to fellow citizens and the political order.",
+        "source": "Cicero De Officiis 1.20; DL 7.55-57",
+        "appropriate_actions": ["Serve the common good", "Hold office when qualified", "Defend the community", "Obey just laws"]
+      },
+      {
+        "stage": 4,
+        "id": "humanity",
+        "name": "All Rational Beings",
+        "description": "Recognising all humans as fellow citizens of the cosmos sharing divine reason.",
+        "source": "Cicero De Officiis 1.20; Cicero De Finibus 3.67-68",
+        "cicero": "'Not for ourselves alone have we been born, and our birth claims a part for our country, a part for our friends, and as the Stoics think, all things that are generated on earth are created for the use of men, and men are generated for the sake of men.' (De Officiis 1.20)",
+        "appropriate_actions": ["Treat all humans as deserving justice", "Love of humanity (philanthropia)", "Never harm any rational being"]
+      },
+      {
+        "stage": 5,
+        "id": "cosmos",
+        "name": "The Rational Cosmos",
+        "description": "The sage's affiliation extends to the cosmos itself — aligning one's will with the rational order of nature.",
+        "source": "Marcus Aurelius Meditations 4.26; DL 7.58-60",
+        "appropriate_actions": ["Accept fate with equanimity", "Recognise divine providence", "Live in agreement with nature"]
+      }
+    ],
+    "priority_rule": "When obligations at different stages conflict, the higher stage generally takes priority. But self-care that enables future virtue is justified (Cicero De Officiis 1.7-8)."
+  },
+  "deliberation_framework": {
+    "description": "Cicero's deliberation framework from De Officiis 1.9-10. This is how the source text actually structures practical moral reasoning.",
+    "source": "Cicero, De Officiis 1.9-10",
+    "cicero_introduction": "'With this division, since omitting something is a great vice in dividing, two things have been omitted; for not only is it customary to deliberate whether something is honourable or base, but also when two honourable things are proposed, which is more honourable, and likewise when two advantageous things are proposed, which is more advantageous. Thus, what that man thought was threefold, we find ought to be distributed into five parts.' (De Officiis 1.10)",
+    "five_questions": [
+      {
+        "id": "Q1",
+        "question": "Is the action honourable (honestum / to kalon)?",
+        "description": "Does the action express moral beauty — the kind of action a person of virtue would perform?",
+        "source": "De Officiis 1.9"
+      },
+      {
+        "id": "Q2",
+        "question": "Between two honourable options, which is MORE honourable?",
+        "description": "When two courses of action are both virtuous, which better expresses the four virtues? Which serves a higher obligation in the oikeiosis sequence?",
+        "source": "De Officiis 1.10"
+      },
+      {
+        "id": "Q3",
+        "question": "Is the action advantageous (utile)?",
+        "description": "Does the action serve the agent's natural needs and preferred indifferents? Secondary to Q1.",
+        "source": "De Officiis 1.9"
+      },
+      {
+        "id": "Q4",
+        "question": "Between two advantageous options, which is MORE advantageous?",
+        "description": "When both options serve natural needs, which better promotes flourishing for the agent and those they serve?",
+        "source": "De Officiis 1.10"
+      },
+      {
+        "id": "Q5",
+        "question": "When the honourable conflicts with the advantageous, which prevails?",
+        "description": "The Stoic answer: the honourable ALWAYS prevails. There is no genuine conflict because nothing truly advantageous can conflict with virtue.",
+        "source": "De Officiis 3.7-19",
+        "cicero": "'Nothing that is morally base can be truly advantageous.'",
+        "resolution": "What merely appears advantageous but conflicts with virtue is not genuinely advantageous. Apparent conflicts arise from mistaking an indifferent for a genuine good."
+      }
+    ]
+  },
+  "four_sources_of_honourable": {
+    "description": "Cicero's taxonomy of where appropriate actions come from. This maps to the four virtue expressions but is presented as the practical structure of the honourable.",
+    "source": "Cicero De Officiis 1.15",
+    "cicero": "'Everything that is honourable arises from some one of four parts: for it either lies in the discernment of truth and skill, or in maintaining the fellowship of man and rendering to each his due and the good faith in contracts, or in the excellence and unconquerable strength of a lofty soul, or in order and measure in all things done and said.'",
+    "parts": [
+      { "part": 1, "domain": "Investigation and discovery of truth", "virtue": "phronesis (practical wisdom)" },
+      { "part": 2, "domain": "Fellowship of humanity and rendering to each their due", "virtue": "dikaiosyne (justice)" },
+      { "part": 3, "domain": "Greatness and unconquerable strength of soul", "virtue": "andreia (courage)" },
+      { "part": 4, "domain": "Order and measure in all things done and said", "virtue": "sophrosyne (temperance)" }
+    ]
+  }
+}

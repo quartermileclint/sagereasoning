@@ -1,0 +1,148 @@
+{
+  "meta": {
+    "version": "3.0.0",
+    "source": "SageReasoning Stoic Brain",
+    "last_updated": "2026-03-30",
+    "glossary_version": "3.0.0 (67 terms)",
+    "file": "scoring.json",
+    "domain": "Scoring Engine (application layer)",
+    "description": "How SageReasoning applies the source-derived philosophy to evaluate human actions. This is the APPLICATION of the other 7 files, not a source domain itself. V1's methodology separated source content from application content — scoring-rules.json was clearly SageReasoning's design applied to the source material. V3 maintains this separation.",
+    "derivation": "This file is DERIVED, not directly extracted from a source section. It integrates: the causal sequence from psychology.json, the diagnostic framework from passions.json, the kathekon/katorthoma distinction from action.json, the deliberation framework from action.json, the virtue assessment from virtue.json, and the progress model from progress.json.",
+    "note": "Unlike the other 7 files, this file represents SageReasoning's practical implementation. The source grounding for each component is documented in the file it references."
+  },
+  "evaluation_sequence": {
+    "description": "Every action is evaluated through 4 stages. This sequence mirrors the Stoic causal sequence (psychology.json) and the two-layer action model (action.json) but is specifically designed as a practical evaluation tool.",
+    "stages": [
+      {
+        "stage": 1,
+        "id": "control_filter",
+        "name": "Prohairesis Filter",
+        "question": "What was and was not within the agent's moral choice (prohairesis)?",
+        "description": "Before any evaluation, separate what was up to the agent from what was not. Score only what is eph' hemin: judgements, impulses, desires, aversions, character. Do NOT score external outcomes.",
+        "references": "stoic-brain.json > foundations > dichotomy_of_control; psychology.json > ruling_faculty"
+      },
+      {
+        "stage": 2,
+        "id": "kathekon_evaluation",
+        "name": "Appropriate Action Assessment",
+        "question": "Is this action a kathekon — an appropriate action for which a reasonable justification can be given?",
+        "description": "Evaluate whether the external action itself makes sense given the agent's nature, relationships (oikeiosis stage), and circumstances. This is the first layer from action.json.",
+        "criteria": [
+          "Does the action accord with the agent's natural relationships? (action.json > oikeiosis_sequence)",
+          "Can a reasonable justification be given? (Stobaeus definition in action.json)",
+          "Does it serve the roles the agent occupies?",
+          "Is it the kind of action nature and reason prescribe?"
+        ],
+        "output": {
+          "is_kathekon": "boolean — yes/no",
+          "quality": "strong / moderate / marginal / contrary"
+        }
+      },
+      {
+        "stage": 3,
+        "id": "passion_diagnosis",
+        "name": "Passion Diagnosis",
+        "question": "Which passions, if any, distorted the agent's impression, assent, or impulse?",
+        "description": "The diagnostic core. Instead of scoring 4 virtues independently, diagnose which specific passion(s) corrupted the causal sequence. Each passion detected represents a specific false judgement that can be named and corrected.",
+        "diagnostic_sequence": "Use the 5-step diagnostic from passions.json > diagnostic_use",
+        "output": {
+          "passions_detected": "array of passion IDs with sub-species from passions.json",
+          "false_judgements": "array of the specific false beliefs identified",
+          "causal_stage_affected": "which stage of the causal sequence (psychology.json) was corrupted"
+        }
+      },
+      {
+        "stage": 4,
+        "id": "virtue_quality",
+        "name": "Unified Virtue Assessment",
+        "question": "How close is the agent's disposition to the sage ideal?",
+        "description": "Assess the UNIFIED quality of the ruling faculty as expressed through whichever virtue-domain(s) the action engages. Reference virtue.json unity thesis: a deficiency in any one domain indicates a deficiency in the whole.",
+        "evaluation_by_domain": {
+          "phronesis": "Did the agent see the situation clearly? Did they distinguish genuine good from apparent good?",
+          "dikaiosyne": "Did the agent give each affected person their due? Did they honour their oikeiosis obligations?",
+          "andreia": "Did the agent act rightly despite difficulty or apparent risk?",
+          "sophrosyne": "Was the action free from excessive impulse? Was it measured and fitting?"
+        },
+        "output": {
+          "katorthoma_proximity": "Where on the 5-level scale (see below)",
+          "ruling_faculty_state": "Stable disposition (hexis) or temporary state? Consistent with general character or an exception?"
+        }
+      }
+    ]
+  },
+  "katorthoma_proximity_scale": {
+    "description": "A qualitative scale for how close an action is to the sage's right action (katorthoma). The sources describe a BINARY distinction (sage vs. non-sage) with a GRADIENT of progress within the non-sage category. This scale captures that gradient.",
+    "levels": [
+      {
+        "id": "reflexive",
+        "name": "Reflexive",
+        "description": "Action from pure impulse with no deliberation. Passion dominates completely. Multiple false judgements operative.",
+        "progress_grade": "Below the gradient (pre-progress)"
+      },
+      {
+        "id": "habitual",
+        "name": "Habitual",
+        "description": "Action from social convention or habit, not from understanding. May be a kathekon externally but performed without knowledge of why it is right.",
+        "progress_grade": "Third grade (tertius gradus) — beginning the path",
+        "stobaeus_grounding": "'the fool can perform appropriate actions but not right actions' (Ecl. 2.85)"
+      },
+      {
+        "id": "deliberate",
+        "name": "Deliberate",
+        "description": "Action from conscious reasoning, with some understanding of the rational foundation. Passion partially checked but still operative.",
+        "progress_grade": "Second grade (secundus gradus) — overcoming the worst"
+      },
+      {
+        "id": "principled",
+        "name": "Principled",
+        "description": "Action from stable commitment to virtue, with strong understanding and minimal passion. Approaching sage-like quality but not yet perfect.",
+        "progress_grade": "First grade (primus gradus) — approaching wisdom"
+      },
+      {
+        "id": "sage_like",
+        "name": "Sage-Like (Katorthoma)",
+        "description": "Action from perfected understanding and unified virtue. Complete freedom from destructive passion. The action is not merely appropriate but right.",
+        "progress_grade": "Sage (sophos/sapiens)",
+        "note": "The gap between 'principled' and 'sage-like' is enormous. The Stoics acknowledged the sage was 'as rare as the phoenix.' This scale preserves that emphasis."
+      }
+    ]
+  },
+  "scoring_outputs": {
+    "description": "What the scoring engine produces for different types of evaluation. These correspond to SageReasoning's P5/P6/P7 workflows.",
+    "past_action": {
+      "label": "P6 — Scoring a completed action",
+      "outputs": [
+        "control_filter: What was and was not within the agent's prohairesis",
+        "kathekon_assessment: Was this an appropriate action? (yes/no + quality)",
+        "passions_detected: Which specific passions distorted the causal sequence, with sub-species",
+        "false_judgements: The specific false beliefs that drove any passion",
+        "virtue_domains_engaged: Which of the four virtue expressions were relevant",
+        "katorthoma_proximity: Where on the 5-level scale",
+        "ruling_faculty_state: Stable disposition or temporary state",
+        "improvement_path: Which false judgement to correct, which passion to address",
+        "oikeiosis_obligations: Which social obligations were relevant and whether met"
+      ]
+    },
+    "prospective_action": {
+      "label": "P7 — Advising on a proposed action",
+      "outputs": [
+        "deliberation_framework: Applying Cicero's 5 questions from action.json",
+        "kathekon_assessment: Is the proposed action appropriate?",
+        "passion_risks: Which passions are likely to distort judgement in this situation",
+        "oikeiosis_check: Which social obligations are at stake",
+        "sage_framing: How a sage would see this situation (correct impression, correct assent, proportionate impulse)",
+        "recommended_action: The action that best expresses unified virtue"
+      ]
+    },
+    "indifferents_ranking": {
+      "label": "P5 — Ranking competing external goals",
+      "outputs": [
+        "selective_value_ranking: Ordered by axia from value.json",
+        "oikeiosis_alignment: Which option best serves current social obligations",
+        "passion_risk_assessment: Which option most likely to generate attachment",
+        "virtue_opportunity: Which option provides best material for virtuous action",
+        "sage_selection: What a sage would select (eklegetai) vs. desire (oregetai)"
+      ]
+    }
+  }
+}
