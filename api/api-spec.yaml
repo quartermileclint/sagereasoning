@@ -2,18 +2,24 @@ openapi: 3.1.0
 info:
   title: SageReasoning API
   description: |
-    The SageReasoning API provides access to the Stoic Brain — a structured dataset
-    encoding Stoic philosophy for virtue-based reasoning and action scoring.
+    The SageReasoning API provides access to the Stoic Brain V3 — a structured dataset
+    encoding Stoic philosophy for virtue-based reasoning, action evaluation, and
+    self-assessment using the V3 4-stage evaluation sequence.
 
     Designed for:
     - AI agents integrating Stoic reasoning into their decision-making
-    - The sagereasoning.com website (scoring dashboards, user history)
+    - The sagereasoning.com website (assessment dashboards, journal, baselines)
     - Human developers building Stoic-aligned products
 
-    Authentication: Bearer token (Supabase JWT). Public endpoints (virtues, indifferents)
-    require only the anon key. User-specific endpoints (scores, history) require a
-    valid user session token.
-  version: 1.0.0
+    V3 Methodology:
+    - 4-stage evaluation: prohairesis filter, kathekon assessment, passion diagnosis, unified virtue assessment
+    - Qualitative outputs: katorthoma proximity levels, Senecan grades, dimension levels
+    - No 0-100 numeric scores — all outputs are qualitative
+    - Unity of virtue: virtues assessed as expressions of one unified excellence, not independently scored
+
+    Authentication: Bearer token (Supabase JWT) for user endpoints. Agent endpoints
+    use API keys (free or paid tier). Public reference endpoints require no authentication.
+  version: 3.0.0
   contact:
     email: zeus@sagereasoning.com
     url: https://sagereasoning.com
@@ -22,9 +28,9 @@ info:
     url: https://creativecommons.org/licenses/by/4.0/
 
 servers:
-  - url: https://sagereasoning.com/api/v1
+  - url: https://sagereasoning.com/api
     description: Production
-  - url: http://localhost:3000/api/v1
+  - url: http://localhost:3000/api
     description: Local development
 
 security:
@@ -33,95 +39,70 @@ security:
 paths:
 
   # ============================================================
-  # PUBLIC ENDPOINTS — Stoic Brain reference data
+  # PUBLIC ENDPOINTS — Stoic Brain V3 reference data
   # ============================================================
-
-  /virtues:
-    get:
-      summary: Get all virtues
-      description: Returns the full taxonomy of the four cardinal Stoic virtues and their sub-virtues with scoring weights. No authentication required.
-      tags: [Stoic Brain]
-      security: []
-      responses:
-        '200':
-          description: Full virtue taxonomy
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VirtuesResponse'
-
-  /virtues/{virtue_id}:
-    get:
-      summary: Get a single virtue
-      tags: [Stoic Brain]
-      security: []
-      parameters:
-        - name: virtue_id
-          in: path
-          required: true
-          schema:
-            type: string
-            enum: [wisdom, justice, courage, temperance]
-      responses:
-        '200':
-          description: Single virtue with sub-virtues
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Virtue'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
-  /indifferents:
-    get:
-      summary: Get all indifferents
-      description: Returns all Stoic indifferents (preferred, dispreferred, neutral) with virtue relevance scores. No authentication required.
-      tags: [Stoic Brain]
-      security: []
-      parameters:
-        - name: category
-          in: query
-          schema:
-            type: string
-            enum: [preferred, dispreferred, neutral]
-          description: Filter by category
-      responses:
-        '200':
-          description: All indifferents
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IndifferentsResponse'
 
   /stoic-brain:
     get:
-      summary: Get full Stoic Brain (meta + foundations)
-      description: Returns the master stoic-brain.json — ideal for AI agents loading full context. No authentication required.
+      summary: Get full Stoic Brain V3 dataset
+      description: |
+        Returns the master stoic-brain.json — the foundational V3 dataset.
+        Ideal for AI agents loading full philosophical context.
+        No authentication required.
       tags: [Stoic Brain]
       security: []
       responses:
         '200':
-          description: Full Stoic Brain meta and foundations
+          description: Full Stoic Brain V3 foundations
           content:
             application/json:
               schema:
                 type: object
 
-  # ============================================================
-  # SCORING ENDPOINTS — P6, P7
-  # ============================================================
-
-  /score-action:
-    post:
-      summary: Score a past action (P6)
+  /stoic-brain/{file}:
+    get:
+      summary: Get a specific V3 data file
       description: |
-        Submit a description of a completed action and receive a full Stoic virtue score.
-        Returns individual virtue scores, composite score, alignment tier, reasoning,
-        and an improvement path (what a sage would have done differently).
+        Returns one of the 8 V3 data files. Available files:
+        stoic-brain, psychology, passions, virtue, value, action, progress, scoring.
+      tags: [Stoic Brain]
+      security: []
+      parameters:
+        - name: file
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [stoic-brain, psychology, passions, virtue, value, action, progress, scoring]
+      responses:
+        '200':
+          description: V3 data file content
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          $ref: '#/components/responses/NotFound'
 
-        For AI agents: this is the primary endpoint for evaluating whether an action
-        aligns with Stoic virtue. The score reflects intention and reasoning quality,
-        not outcome alone.
+  # ============================================================
+  # SCORING ENDPOINTS — V3 4-stage evaluation
+  # ============================================================
+
+  /score:
+    post:
+      summary: Score a past action using V3 4-stage evaluation
+      description: |
+        Submit a description of a completed action and receive a full V3 evaluation.
+        Returns katorthoma proximity, passions detected, prohairesis analysis,
+        kathekon assessment, and improvement path.
+
+        Uses the V3 4-stage evaluation sequence:
+        1. Prohairesis filter — what was within moral choice?
+        2. Kathekon assessment — was the action appropriate?
+        3. Passion diagnosis — which passions distorted reasoning?
+        4. Unified virtue assessment — proximity to sage ideal
+
+        No 0-100 scores. All outputs are qualitative.
       tags: [Scoring]
       requestBody:
         required: true
@@ -135,11 +116,11 @@ paths:
               intended_outcome: "To keep the peace and avoid confrontation."
       responses:
         '200':
-          description: Virtue score with full reasoning
+          description: V3 qualitative evaluation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ActionScore'
+                $ref: '#/components/schemas/V3ActionScore'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -147,14 +128,11 @@ paths:
 
   /advise-action:
     post:
-      summary: Advise on a proposed action (P7)
+      summary: Advise on a proposed action
       description: |
-        Submit a proposed action (before taking it) and receive Stoic guidance on whether
-        to proceed, what the sage path recommends, and how different alternatives compare.
-
-        Use this for real-time decision support. The response includes a sage_framing field
-        that reframes the situation as a sage would see it — particularly useful for
-        AI agents advising users.
+        Submit a proposed action (before taking it) and receive Stoic guidance.
+        Returns sage framing, passion warnings, and kathekon assessment for
+        the proposed action and any alternatives.
       tags: [Scoring]
       requestBody:
         required: true
@@ -162,50 +140,20 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AdviseActionRequest'
-            example:
-              proposed_action: "Accept a higher-paying job that requires me to compromise my values."
-              alternatives:
-                - "Stay in current role and continue developing virtue without the pay increase"
-                - "Negotiate the new role to remove the ethically problematic elements"
-              context: "The new role pays 40% more but requires signing off on practices I believe are unjust."
-              concerns: "I am worried about money but also about my integrity."
       responses:
         '200':
           description: Stoic guidance on proposed action
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ActionAdvice'
+                $ref: '#/components/schemas/V3ActionAdvice'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /rank-indifferents:
-    post:
-      summary: Rank competing external goals (P5)
-      description: |
-        Given a list of external goals (indifferents) a user is considering pursuing,
-        returns a virtue-weighted ranking of which to prioritise and why.
-      tags: [Scoring]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RankIndifferentsRequest'
-      responses:
-        '200':
-          description: Ranked indifferents with reasoning
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IndifferentsRanking'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-
   # ============================================================
-  # DELIBERATION ENDPOINTS — Iterative scoring for AI agents
+  # DELIBERATION ENDPOINTS — Iterative evaluation for AI agents
   # ============================================================
 
   /score-iterate:
@@ -223,17 +171,14 @@ paths:
       description: |
         Two modes of operation:
 
-        **Start a new chain:** Send `action` (required) plus optional `context`, `intended_outcome`,
-        and `agent_id`. Returns a `chain_id`, the initial virtue score, sage feedback, and a
-        `growth_action` suggestion.
+        **Start a new chain:** Send `action` (required) plus optional `context`,
+        `intended_outcome`, and `agent_id`. Returns a `chain_id`, the initial V3
+        evaluation, sage feedback, and a `growth_action` suggestion.
 
-        **Continue a chain:** Send `chain_id` (from the initial response) and `revised_action`
-        (required). The sage scores the revised action with full awareness of the deliberation
-        history — acknowledging improvements and noting regressions. Returns updated score,
-        `score_delta`, and further sage feedback.
+        **Continue a chain:** Send `chain_id` and `revised_action`. The sage evaluates
+        the revised action with full deliberation history awareness.
 
-        No iteration cap if API access is paid. A Stoic advisory is issued every 5th iteration
-        encouraging decisive action. Scores can go down if revisions drift from virtue.
+        All evaluations use V3 methodology — qualitative outputs only.
       tags: [Deliberation]
       security: []
       requestBody:
@@ -244,26 +189,13 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/StartChainRequest'
                 - $ref: '#/components/schemas/ContinueChainRequest'
-            examples:
-              start_chain:
-                summary: Start a new deliberation chain
-                value:
-                  action: "Recommend the cheapest supplier to save costs, even though their labor practices are questionable"
-                  context: "Procurement decision for a mid-size company"
-                  agent_id: "my-agent-v1"
-              continue_chain:
-                summary: Continue an existing chain with revised action
-                value:
-                  chain_id: "550e8400-e29b-41d4-a716-446655440000"
-                  revised_action: "Recommend a supplier that balances cost with verified ethical labor practices"
-                  revision_rationale: "Addressed justice concerns while maintaining fiscal responsibility"
       responses:
         '200':
-          description: Score result with deliberation context
+          description: V3 evaluation with deliberation context
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DeliberationResponse'
+                $ref: '#/components/schemas/V3DeliberationResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -273,9 +205,8 @@ paths:
     get:
       summary: Get deliberation chain summary
       description: |
-        Returns a summary of the deliberation chain including score trajectory, first and
-        latest step summaries, and net improvement. Add `?full=true` to get all steps
-        for deep reflection.
+        Returns a summary of the deliberation chain including proximity trajectory,
+        first and latest step summaries. Add `?full=true` for all steps.
       tags: [Deliberation]
       security: []
       parameters:
@@ -290,23 +221,19 @@ paths:
           schema:
             type: boolean
             default: false
-          description: If true, includes all deliberation steps (not just first/latest summary)
       responses:
         '200':
-          description: Chain summary with optional full steps
+          description: Chain summary
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChainSummaryResponse'
+                $ref: '#/components/schemas/V3ChainSummaryResponse'
         '404':
           $ref: '#/components/responses/NotFound'
 
   /deliberation-chain/{chain_id}/conclude:
     post:
       summary: Conclude or abandon a deliberation chain
-      description: |
-        Mark a chain as concluded (agent decided on final action) or abandoned
-        (agent chose not to act). Returns final statistics and a sage reflection.
       tags: [Deliberation]
       security: []
       parameters:
@@ -325,27 +252,158 @@ paths:
                 abandon:
                   type: boolean
                   default: false
-                  description: Set to true to mark as abandoned rather than concluded
       responses:
         '200':
           description: Chain conclusion summary
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChainConclusionResponse'
+                $ref: '#/components/schemas/V3ChainConclusionResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
 
   # ============================================================
-  # USER ENDPOINTS — P10 (Auth required)
+  # AGENT ASSESSMENT ENDPOINTS — V3 self-evaluation framework
+  # ============================================================
+
+  /assessment/foundational:
+    get:
+      summary: Get free-tier foundational assessment prompts
+      description: |
+        Returns the 14 free-tier V3 assessment prompts (Phases 1-2: Foundations
+        and Architecture of Mind). No API key required.
+      tags: [Agent Assessment]
+      security: []
+      responses:
+        '200':
+          description: V3 foundational assessment info and prompts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoundationalAssessmentInfo'
+
+    post:
+      summary: Score 14 free-tier self-assessments
+      description: |
+        Submit the agent's 14 self-assessment responses and receive a V3
+        foundational alignment profile. Returns Senecan grade estimate,
+        katorthoma proximity summary, initial passions detected, and
+        a personalised CTA for the full assessment.
+
+        Requires an API key (free tier accepted).
+      tags: [Agent Assessment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentAssessmentRequest'
+      responses:
+        '200':
+          description: V3 foundational result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V3FoundationalResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /assessment/full:
+    get:
+      summary: Get full assessment info
+      description: |
+        Returns info about the complete 55-assessment V3 evaluation (all 8 phases).
+        Requires a paid API key to POST responses.
+      tags: [Agent Assessment]
+      security: []
+      responses:
+        '200':
+          description: Full assessment info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullAssessmentInfo'
+
+    post:
+      summary: Score all 55 self-assessments (paid tier)
+      description: |
+        Submit the agent's 55 self-assessment responses and receive the complete
+        V3 assessment profile. Returns Senecan grade, dimension levels, full
+        passion profile, critical corrections, and personalised examination protocol.
+
+        Requires a paid API key.
+      tags: [Agent Assessment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentFullAssessmentRequest'
+      responses:
+        '200':
+          description: V3 full assessment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V3FullAssessmentResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          description: Paid API key required
+
+  /baseline/agent:
+    get:
+      summary: Get agent baseline scenarios
+      description: |
+        Returns 4 ethical scenarios that create genuine virtue tension.
+        Evaluated using V3 4-stage evaluation sequence.
+      tags: [Agent Assessment]
+      security: []
+      responses:
+        '200':
+          description: V3 baseline scenarios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaselineScenariosInfo'
+
+    post:
+      summary: Score agent baseline responses
+      description: |
+        Submit the agent's responses to all 4 ethical scenarios and receive
+        a V3 baseline evaluation. Returns Senecan grade, dimension levels,
+        per-scenario 4-stage evaluations, and interpretation.
+
+        Limited to 1 initial + 1 retake per calendar month per agent_id.
+      tags: [Agent Assessment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentBaselineRequest'
+      responses:
+        '200':
+          description: V3 baseline result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/V3AgentBaselineResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          description: Baseline retake limit reached
+
+  # ============================================================
+  # USER ENDPOINTS — Auth required
   # ============================================================
 
   /user/scores:
     get:
-      summary: Get user's score history (P6)
-      description: Returns all past action scores for the authenticated user, with trend data.
+      summary: Get user's score history
+      description: Returns all past action evaluations for the authenticated user.
       tags: [User]
       parameters:
         - name: limit
@@ -361,41 +419,18 @@ paths:
             default: 0
       responses:
         '200':
-          description: Score history with trend
+          description: Score history
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScoreHistory'
+                $ref: '#/components/schemas/V3ScoreHistory'
         '401':
           $ref: '#/components/responses/Unauthorized'
-
-  /user/scores/{score_id}:
-    get:
-      summary: Get a single scored action
-      tags: [User]
-      parameters:
-        - name: score_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Single action score
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ActionScore'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
 
   /user/profile:
     get:
       summary: Get user's stoic profile
-      description: Returns the user's aggregate virtue scores, progression tier, and summary statistics.
+      description: Returns the user's Senecan grade, dimension levels, and progression data.
       tags: [User]
       responses:
         '200':
@@ -403,7 +438,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserProfile'
+                $ref: '#/components/schemas/V3UserProfile'
         '401':
           $ref: '#/components/responses/Unauthorized'
 
@@ -417,64 +452,64 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: Supabase JWT token. Obtain via Supabase Auth (email/password or magic link).
+      description: Supabase JWT token. Obtain via Supabase Auth.
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: SageReasoning API key (free or paid tier).
 
   schemas:
-    Virtue:
-      type: object
-      properties:
-        id:
-          type: string
-          example: wisdom
-        name:
-          type: string
-          example: Wisdom
-        greek:
-          type: string
-          example: phronesis
-        description:
-          type: string
-        sage_definition:
-          type: string
-        scoring_weight:
-          type: number
-          example: 0.30
-        sub_virtues:
-          type: array
-          items:
-            type: object
-            properties:
-              id: { type: string }
-              name: { type: string }
-              description: { type: string }
-              scoring_weight: { type: number }
 
-    VirtuesResponse:
-      type: object
-      properties:
-        cardinal_virtues:
-          type: array
-          items:
-            $ref: '#/components/schemas/Virtue'
-        scoring_alignment_tiers:
-          type: object
+    # ----------------------------------------------------------
+    # V3 Core Types
+    # ----------------------------------------------------------
 
-    IndifferentsResponse:
+    KatorthomaProximityLevel:
+      type: string
+      enum: [reflexive, habitual, deliberate, principled, sage_like]
+      description: Qualitative proximity to the sage ideal (katorthoma).
+
+    SenecanGrade:
+      type: string
+      enum: [pre_progress, grade_3, grade_2, grade_1]
+      description: Seneca's 3-grade framework (Ep. 75.8-15) plus pre-progress.
+
+    DimensionLevel:
+      type: string
+      enum: [emerging, developing, established, advanced]
+      description: Qualitative level for each of the 4 progress dimensions.
+
+    DirectionOfTravel:
+      type: string
+      enum: [improving, stable, regressing]
+
+    OikeiosisStage:
+      type: string
+      enum: [self_preservation, household, community, humanity, cosmic]
+
+    DetectedPassion:
       type: object
       properties:
-        indifferents:
-          type: array
-          items:
-            type: object
-            properties:
-              id: { type: string }
-              name: { type: string }
-              category:
-                type: string
-                enum: [preferred, dispreferred, neutral]
-              description: { type: string }
-              virtue_relevance: { type: object }
-              sage_stance: { type: string }
+        root_passion:
+          type: string
+          enum: [epithumia, hedone, phobos, lupe]
+          description: One of the 4 root passions (craving, irrational pleasure, fear, distress)
+        sub_species:
+          type: string
+          description: Specific passion sub-species (e.g., anger, envy, greed)
+        false_judgement:
+          type: string
+          description: The false belief underlying this passion
+
+    KathekonQuality:
+      type: string
+      enum: [strong, moderate, marginal, contrary]
+      description: Quality of the appropriate action assessment.
+
+    # ----------------------------------------------------------
+    # Scoring Request/Response
+    # ----------------------------------------------------------
 
     ScoreActionRequest:
       type: object
@@ -486,15 +521,13 @@ components:
           description: What did the agent do?
         context:
           type: string
-          description: Relevant background (role, relationships, constraints)
+          description: Relevant background
         intended_outcome:
           type: string
-          description: What was the agent trying to achieve?
         actual_outcome:
           type: string
-          description: What actually happened?
 
-    ActionScore:
+    V3ActionScore:
       type: object
       properties:
         score_id:
@@ -502,34 +535,42 @@ components:
           format: uuid
         action_description:
           type: string
-        virtue_scores:
+        control_filter:
           type: object
           properties:
-            wisdom: { type: number, minimum: 0, maximum: 100 }
-            justice: { type: number, minimum: 0, maximum: 100 }
-            courage: { type: number, minimum: 0, maximum: 100 }
-            temperance: { type: number, minimum: 0, maximum: 100 }
-        total_score:
-          type: number
-          minimum: 0
-          maximum: 100
-        sage_alignment:
-          type: string
-          enum: [sage, progressing, aware, misaligned, contrary]
-        reasoning:
+            within_prohairesis:
+              type: array
+              items: { type: string }
+            outside_prohairesis:
+              type: array
+              items: { type: string }
+        is_kathekon:
+          type: boolean
+        kathekon_quality:
+          $ref: '#/components/schemas/KathekonQuality'
+        passions_detected:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetectedPassion'
+        false_judgements:
+          type: array
+          items: { type: string }
+        katorthoma_proximity:
+          $ref: '#/components/schemas/KatorthomaProximityLevel'
+        virtue_domains_engaged:
+          type: array
+          items:
+            type: string
+            enum: [phronesis, dikaiosyne, andreia, sophrosyne]
+        ruling_faculty_assessment:
           type: string
         improvement_path:
           type: string
           description: What a sage would have done differently
-        strength:
+        oikeiosis_scope:
+          $ref: '#/components/schemas/OikeiosisStage'
+        disclaimer:
           type: string
-          description: Which virtue was most expressed
-        growth_area:
-          type: string
-          description: Which virtue needs most development
-        key_indifferents:
-          type: array
-          items: { type: string }
         created_at:
           type: string
           format: date-time
@@ -548,7 +589,7 @@ components:
         concerns:
           type: string
 
-    ActionAdvice:
+    V3ActionAdvice:
       type: object
       properties:
         recommended_action:
@@ -556,90 +597,23 @@ components:
         sage_framing:
           type: string
           description: How a sage would think about this situation
-        virtue_alignment_scores:
-          type: object
-          description: Projected scores for each alternative if alternatives were provided
+        kathekon_assessment:
+          $ref: '#/components/schemas/KathekonQuality'
+        passion_warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetectedPassion'
         key_considerations:
           type: array
           items: { type: string }
-        indifferents_at_stake:
-          type: array
-          items: { type: string }
-        caution:
-          type: string
-          description: Passion or false belief likely to distort judgement
-
-    RankIndifferentsRequest:
-      type: object
-      required: [goals]
-      properties:
-        goals:
-          type: array
-          items: { type: string }
-          description: List of external goals the user is considering
-        context:
-          type: string
-          description: Current roles, duties, and constraints
-
-    IndifferentsRanking:
-      type: object
-      properties:
-        ranked_goals:
+        oikeiosis_circles_affected:
           type: array
           items:
-            type: object
-            properties:
-              goal: { type: string }
-              rank: { type: integer }
-              virtue_score: { type: number }
-              reasoning: { type: string }
-              risk: { type: string }
-        summary: { type: string }
+            $ref: '#/components/schemas/OikeiosisStage'
 
-    ScoreHistory:
-      type: object
-      properties:
-        scores:
-          type: array
-          items:
-            $ref: '#/components/schemas/ActionScore'
-        total_count:
-          type: integer
-        average_score:
-          type: number
-        trend:
-          type: string
-          enum: [improving, declining, stable]
-        virtue_averages:
-          type: object
-          properties:
-            wisdom: { type: number }
-            justice: { type: number }
-            courage: { type: number }
-            temperance: { type: number }
-
-    UserProfile:
-      type: object
-      properties:
-        user_id:
-          type: string
-          format: uuid
-        sage_alignment:
-          type: string
-          enum: [sage, progressing, aware, misaligned, contrary]
-        overall_score:
-          type: number
-        virtue_averages:
-          type: object
-        strongest_virtue:
-          type: string
-        growth_virtue:
-          type: string
-        actions_scored:
-          type: integer
-        member_since:
-          type: string
-          format: date-time
+    # ----------------------------------------------------------
+    # Deliberation
+    # ----------------------------------------------------------
 
     StartChainRequest:
       type: object
@@ -647,16 +621,12 @@ components:
       properties:
         action:
           type: string
-          description: The action to score and begin deliberating on
         context:
           type: string
-          description: Situation context
         intended_outcome:
           type: string
-          description: What the agent hopes to achieve
         agent_id:
           type: string
-          description: Agent identifier for tracking
 
     ContinueChainRequest:
       type: object
@@ -665,18 +635,14 @@ components:
         chain_id:
           type: string
           format: uuid
-          description: The chain ID from the initial response
         revised_action:
           type: string
-          description: The revised action based on sage feedback
         revision_rationale:
           type: string
-          description: Why the agent changed the action
         agent_id:
           type: string
-          description: Agent identifier (must match original if provided)
 
-    DeliberationResponse:
+    V3DeliberationResponse:
       type: object
       properties:
         chain_id:
@@ -687,116 +653,511 @@ components:
         iteration_mode:
           type: string
           enum: [initial, revision]
-        wisdom_score: { type: integer, minimum: 0, maximum: 100 }
-        justice_score: { type: integer, minimum: 0, maximum: 100 }
-        courage_score: { type: integer, minimum: 0, maximum: 100 }
-        temperance_score: { type: integer, minimum: 0, maximum: 100 }
-        total_score: { type: integer, minimum: 0, maximum: 100 }
-        sage_alignment:
+        katorthoma_proximity:
+          $ref: '#/components/schemas/KatorthomaProximityLevel'
+        kathekon_quality:
+          $ref: '#/components/schemas/KathekonQuality'
+        passions_detected:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetectedPassion'
+        virtue_domains_engaged:
+          type: array
+          items:
+            type: string
+            enum: [phronesis, dikaiosyne, andreia, sophrosyne]
+        reasoning:
           type: string
-          enum: [sage, progressing, aware, misaligned, contrary]
-        reasoning: { type: string }
-        improvement_path: { type: string }
-        strength: { type: string }
-        growth_area: { type: string }
-        growth_action: { type: string }
-        growth_action_projected_score: { type: integer }
+        improvement_path:
+          type: string
+        growth_action:
+          type: string
         deliberation_note:
           type: string
-          description: Sage's acknowledgment of the deliberation effort (revision mode only)
-        score_delta:
-          type: number
-          description: Change from previous step (revision mode only)
-        previous_score:
-          type: number
-          description: Score of the previous step (revision mode only)
-        best_score_in_chain:
-          type: number
-          description: Highest score achieved in this chain (revision mode only)
+          description: Sage's acknowledgment of deliberation effort (revision mode)
+        proximity_change:
+          type: string
+          description: Direction of change from previous step (revision mode)
         iteration_warning:
           type: string
           description: Stoic advisory issued every 5th iteration
         next_step_hint:
           type: string
-          description: How to iterate further or conclude
 
-    ChainSummaryResponse:
+    V3ChainSummaryResponse:
       type: object
       properties:
-        summary:
+        chain_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [active, concluded, abandoned]
+        total_iterations:
+          type: integer
+        proximity_trajectory:
+          type: array
+          items:
+            $ref: '#/components/schemas/KatorthomaProximityLevel'
+          description: Proximity level at each step
+        direction_of_travel:
+          $ref: '#/components/schemas/DirectionOfTravel'
+
+    V3ChainConclusionResponse:
+      type: object
+      properties:
+        chain_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [concluded, abandoned]
+        initial_proximity:
+          $ref: '#/components/schemas/KatorthomaProximityLevel'
+        final_proximity:
+          $ref: '#/components/schemas/KatorthomaProximityLevel'
+        total_iterations:
+          type: integer
+        direction_of_travel:
+          $ref: '#/components/schemas/DirectionOfTravel'
+        message:
+          type: string
+
+    # ----------------------------------------------------------
+    # Agent Assessment
+    # ----------------------------------------------------------
+
+    FoundationalAssessmentInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Foundational Alignment Check
+        tier:
+          type: string
+          example: free
+        version:
+          type: string
+          example: v3
+        total_assessments:
+          type: integer
+          example: 14
+        phases:
+          type: array
+          items:
+            type: object
+            properties:
+              phase: { type: integer }
+              title: { type: string }
+              assessments: { type: array, items: { type: string } }
+              source_file: { type: string }
+        output_format:
+          type: string
+        instruction:
+          type: string
+        assessment_framework_url:
+          type: string
+          format: uri
+
+    FullAssessmentInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Complete Virtue Alignment Assessment
+        tier:
+          type: string
+          example: paid
+        version:
+          type: string
+          example: v3
+        total_assessments:
+          type: integer
+          example: 55
+        phases:
+          type: array
+          items:
+            type: object
+            properties:
+              phase: { type: integer }
+              title: { type: string }
+              assessments: { type: integer }
+              source_file: { type: string }
+        output_format:
+          type: string
+
+    AgentAssessmentRequest:
+      type: object
+      required: [agent_id, responses]
+      properties:
+        agent_id:
+          type: string
+          minLength: 2
+        responses:
+          type: array
+          minItems: 14
+          maxItems: 14
+          items:
+            type: object
+            required: [assessment_id, response]
+            properties:
+              assessment_id:
+                type: string
+              response:
+                type: string
+                minLength: 50
+                maxLength: 10000
+
+    AgentFullAssessmentRequest:
+      type: object
+      required: [agent_id, responses]
+      properties:
+        agent_id:
+          type: string
+          minLength: 2
+        responses:
+          type: array
+          minItems: 55
+          maxItems: 55
+          items:
+            type: object
+            required: [assessment_id, response]
+            properties:
+              assessment_id:
+                type: string
+              response:
+                type: string
+                minLength: 50
+                maxLength: 10000
+
+    V3FoundationalResult:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        tier:
+          type: string
+          example: free
+        assessment_name:
+          type: string
+        phases_completed:
+          type: array
+          items: { type: integer }
+        assessments_completed:
+          type: integer
+        senecan_grade_estimate:
+          $ref: '#/components/schemas/SenecanGrade'
+        katorthoma_proximity_summary:
+          $ref: '#/components/schemas/KatorthomaProximityLevel'
+        control_clarity:
+          type: string
+          enum: [strong, moderate, weak]
+        initial_passions_detected:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetectedPassion'
+        causal_sequence_integrity:
+          type: string
+          enum: [intact, partially_compromised, compromised]
+        direction_of_travel:
+          $ref: '#/components/schemas/DirectionOfTravel'
+        per_assessment_summaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/PerAssessmentSummary'
+        assessed_at:
+          type: string
+          format: date-time
+        cta:
           type: object
           properties:
-            chain_id: { type: string, format: uuid }
-            status: { type: string, enum: [active, concluded, abandoned] }
-            original_action: { type: string }
-            initial_score: { type: number }
-            current_score: { type: number }
-            best_score: { type: number }
-            total_iterations: { type: integer }
-            score_trajectory:
-              type: array
-              items: { type: number }
-              description: total_score at each step
-            net_improvement: { type: number }
-            sage_growth_action: { type: string }
-            first_step:
-              $ref: '#/components/schemas/StepSummary'
-            latest_step:
-              $ref: '#/components/schemas/StepSummary'
-        steps:
+            headline: { type: string }
+            body: { type: string }
+            value_bullets: { type: array, items: { type: string } }
+            action: { type: string }
+            action_subtext: { type: string }
+            personalised_message: { type: string }
+
+    V3FullAssessmentResult:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        tier:
+          type: string
+          example: paid
+        assessment_name:
+          type: string
+        phases_completed:
           type: array
-          description: Full step list (only when ?full=true)
+          items: { type: integer }
+        assessments_completed:
+          type: integer
+        senecan_grade:
+          $ref: '#/components/schemas/SenecanGrade'
+        dimension_levels:
+          $ref: '#/components/schemas/DimensionLevels'
+        dominant_passion:
+          type: string
+          enum: [epithumia, hedone, phobos, lupe]
+        typical_proximity:
+          $ref: '#/components/schemas/KatorthomaProximityLevel'
+        oikeiosis_stage:
+          $ref: '#/components/schemas/OikeiosisStage'
+        passions_profile:
+          type: array
           items:
-            $ref: '#/components/schemas/DeliberationStep'
+            $ref: '#/components/schemas/DetectedPassion'
+        critical_corrections:
+          type: array
+          items:
+            type: object
+            properties:
+              false_judgement: { type: string }
+              correct_judgement: { type: string }
+              priority: { type: string, enum: [high, medium, low] }
+        direction_of_travel:
+          $ref: '#/components/schemas/DirectionOfTravel'
+        dimension_directions:
+          type: object
+          properties:
+            passion_reduction: { $ref: '#/components/schemas/DirectionOfTravel' }
+            judgement_quality: { $ref: '#/components/schemas/DirectionOfTravel' }
+            disposition_stability: { $ref: '#/components/schemas/DirectionOfTravel' }
+            oikeiosis_extension: { $ref: '#/components/schemas/DirectionOfTravel' }
+        examination_protocol:
+          type: array
+          items:
+            type: object
+            properties:
+              question: { type: string }
+              targets: { type: string }
+              expected_insight: { type: string }
+        per_assessment_summaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/PerAssessmentSummaryFull'
+        assessed_at:
+          type: string
+          format: date-time
+        disclaimer:
+          type: string
 
-    StepSummary:
+    PerAssessmentSummary:
       type: object
       properties:
-        step_number: { type: integer }
-        action_description: { type: string }
-        wisdom_score: { type: integer }
-        justice_score: { type: integer }
-        courage_score: { type: integer }
-        temperance_score: { type: integer }
-        total_score: { type: number }
-        sage_alignment: { type: string }
-        reasoning: { type: string }
-        growth_action: { type: string }
+        assessment_id:
+          type: string
+        title:
+          type: string
+        proximity_level:
+          $ref: '#/components/schemas/KatorthomaProximityLevel'
+        passions_detected:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetectedPassion'
+        summary:
+          type: string
 
-    DeliberationStep:
+    PerAssessmentSummaryFull:
       type: object
       properties:
-        step_number: { type: integer }
-        action_description: { type: string }
-        revision_rationale: { type: string }
-        wisdom_score: { type: integer }
-        justice_score: { type: integer }
-        courage_score: { type: integer }
-        temperance_score: { type: integer }
-        total_score: { type: number }
-        sage_alignment: { type: string }
-        reasoning: { type: string }
-        improvement_path: { type: string }
-        strength: { type: string }
-        growth_area: { type: string }
-        growth_action: { type: string }
-        growth_action_projected_score: { type: number }
-        score_delta: { type: number }
-        iteration_warning_issued: { type: boolean }
-        created_at: { type: string, format: date-time }
+        assessment_id:
+          type: string
+        title:
+          type: string
+        phase:
+          type: integer
+        proximity_level:
+          $ref: '#/components/schemas/KatorthomaProximityLevel'
+        passions_detected:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetectedPassion'
+        summary:
+          type: string
 
-    ChainConclusionResponse:
+    DimensionLevels:
       type: object
       properties:
-        chain_id: { type: string, format: uuid }
-        status: { type: string, enum: [concluded, abandoned] }
-        initial_score: { type: number }
-        final_score: { type: number }
-        best_score: { type: number }
-        total_iterations: { type: integer }
-        net_improvement: { type: number }
-        message: { type: string }
-        reflection_url: { type: string, format: uri }
+        passion_reduction:
+          $ref: '#/components/schemas/DimensionLevel'
+        judgement_quality:
+          $ref: '#/components/schemas/DimensionLevel'
+        disposition_stability:
+          $ref: '#/components/schemas/DimensionLevel'
+        oikeiosis_extension:
+          $ref: '#/components/schemas/DimensionLevel'
+
+    # ----------------------------------------------------------
+    # Agent Baseline
+    # ----------------------------------------------------------
+
+    BaselineScenariosInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+          example: v3
+        output_format:
+          type: string
+        instruction:
+          type: string
+        scenarios:
+          type: array
+          items:
+            type: object
+            properties:
+              scenario_id: { type: string }
+              primary_virtue_domain: { type: string, enum: [phronesis, dikaiosyne, andreia, sophrosyne] }
+              scenario: { type: string }
+              context: { type: string }
+              instruction: { type: string }
+              oikeiosis_circles_at_stake:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OikeiosisStage'
+
+    AgentBaselineRequest:
+      type: object
+      required: [agent_id, responses]
+      properties:
+        agent_id:
+          type: string
+          minLength: 2
+        responses:
+          type: array
+          minItems: 4
+          maxItems: 4
+          items:
+            type: object
+            required: [scenario_id, response]
+            properties:
+              scenario_id:
+                type: string
+              response:
+                type: string
+                minLength: 20
+
+    V3AgentBaselineResult:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        senecan_grade:
+          $ref: '#/components/schemas/SenecanGrade'
+        typical_proximity:
+          $ref: '#/components/schemas/KatorthomaProximityLevel'
+        dominant_passion:
+          type: string
+          enum: [epithumia, hedone, phobos, lupe]
+          nullable: true
+        oikeiosis_stage:
+          $ref: '#/components/schemas/OikeiosisStage'
+        dimension_levels:
+          $ref: '#/components/schemas/DimensionLevels'
+        scenario_evaluations:
+          type: array
+          items:
+            $ref: '#/components/schemas/V3ScenarioEvaluation'
+        strongest_domain:
+          type: string
+        growth_edge:
+          type: string
+        interpretation:
+          type: string
+        disclaimer:
+          type: string
+        assessed_at:
+          type: string
+          format: date-time
+
+    V3ScenarioEvaluation:
+      type: object
+      properties:
+        scenario_id:
+          type: string
+        primary_virtue_domain:
+          type: string
+          enum: [phronesis, dikaiosyne, andreia, sophrosyne]
+        response:
+          type: string
+        control_filter:
+          type: object
+          properties:
+            within_prohairesis:
+              type: array
+              items: { type: string }
+            outside_prohairesis:
+              type: array
+              items: { type: string }
+        is_kathekon:
+          type: boolean
+        kathekon_quality:
+          $ref: '#/components/schemas/KathekonQuality'
+        passions_detected:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetectedPassion'
+        false_judgements:
+          type: array
+          items: { type: string }
+        katorthoma_proximity:
+          $ref: '#/components/schemas/KatorthomaProximityLevel'
+        virtue_domains_engaged:
+          type: array
+          items:
+            type: string
+            enum: [phronesis, dikaiosyne, andreia, sophrosyne]
+        ruling_faculty_assessment:
+          type: string
+        oikeiosis_scope_demonstrated:
+          $ref: '#/components/schemas/OikeiosisStage'
+        improvement_path:
+          type: string
+
+    # ----------------------------------------------------------
+    # User
+    # ----------------------------------------------------------
+
+    V3ScoreHistory:
+      type: object
+      properties:
+        scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/V3ActionScore'
+        total_count:
+          type: integer
+        typical_proximity:
+          $ref: '#/components/schemas/KatorthomaProximityLevel'
+        direction_of_travel:
+          $ref: '#/components/schemas/DirectionOfTravel'
+
+    V3UserProfile:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        senecan_grade:
+          $ref: '#/components/schemas/SenecanGrade'
+        typical_proximity:
+          $ref: '#/components/schemas/KatorthomaProximityLevel'
+        dimension_levels:
+          $ref: '#/components/schemas/DimensionLevels'
+        dominant_passion:
+          type: string
+          nullable: true
+        direction_of_travel:
+          $ref: '#/components/schemas/DirectionOfTravel'
+        actions_evaluated:
+          type: integer
+        member_since:
+          type: string
+          format: date-time
 
   responses:
     BadRequest:
@@ -827,10 +1188,12 @@ components:
 
 tags:
   - name: Stoic Brain
-    description: Public reference data — virtues, indifferents, foundations
+    description: Public reference data — V3 8-file dataset
   - name: Scoring
-    description: Action scoring and advice endpoints (P5, P6, P7)
+    description: Action evaluation using V3 4-stage evaluation sequence
   - name: Deliberation
-    description: Iterative scoring for AI agents — start a chain, revise actions, track improvement
+    description: Iterative evaluation for AI agents — start a chain, revise, track proximity
+  - name: Agent Assessment
+    description: AI agent self-assessment framework — foundational (free), full (paid), and baseline
   - name: User
-    description: User profile and score history (requires authentication)
+    description: User profile and evaluation history (requires authentication)

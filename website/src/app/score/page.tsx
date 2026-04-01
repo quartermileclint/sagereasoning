@@ -59,11 +59,29 @@ const PROXIMITY_DISPLAY: Record<KatorthomaProximityLevel, { color: string; icon:
 }
 
 // Kathekon quality display
+// R8c: English-only labels for user-facing display
 const KATHEKON_DISPLAY: Record<string, { label: string; color: string }> = {
-  strong: { label: 'Strong Kathekon', color: '#4d6040' },
-  moderate: { label: 'Moderate Kathekon', color: '#7d9468' },
-  marginal: { label: 'Marginal Kathekon', color: '#B2AC88' },
-  contrary: { label: 'Contrary to Kathekon', color: '#9e3a3a' },
+  strong: { label: 'Strong Appropriate Action', color: '#4d6040' },
+  moderate: { label: 'Moderate Appropriate Action', color: '#7d9468' },
+  marginal: { label: 'Marginal Appropriate Action', color: '#B2AC88' },
+  contrary: { label: 'Contrary to Appropriate Action', color: '#9e3a3a' },
+}
+
+// R8c: Map root passion IDs (Greek, R8a data layer) to English display names
+const ROOT_PASSION_ENGLISH: Record<string, string> = {
+  epithumia: 'Craving',
+  hedone: 'Irrational Pleasure',
+  phobos: 'Fear',
+  lupe: 'Distress',
+}
+
+// R8c: English-only proximity level names (data layer uses Greek/technical)
+const PROXIMITY_ENGLISH: Record<KatorthomaProximityLevel, string> = {
+  reflexive: 'Reflexive',
+  habitual: 'Habitual',
+  deliberate: 'Deliberate',
+  principled: 'Principled',
+  sage_like: 'Sage-Like',
 }
 
 export default function ScoreActionPage() {
@@ -174,7 +192,7 @@ export default function ScoreActionPage() {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: 'SageReasoning — Evaluate an Action',
-    description: 'Evaluate any action through the Stoic 4-stage evaluation sequence: prohairesis filter, kathekon assessment, passion diagnosis, and katorthoma proximity.',
+    description: 'Evaluate any action through the Stoic 4-stage evaluation sequence: control filter, appropriate action assessment, passion identification, and right action proximity.',
     url: 'https://www.sagereasoning.com/score',
     applicationCategory: 'LifestyleApplication',
     operatingSystem: 'Any',
@@ -253,8 +271,8 @@ export default function ScoreActionPage() {
         <h1 className="font-display text-3xl md:text-4xl font-medium text-sage-800 mb-3">Evaluate an Action</h1>
         <p className="font-body text-sage-700 max-w-xl mx-auto">
           Describe an action and receive a philosophical evaluation through the Stoic 4-stage sequence:
-          prohairesis (control) filter, kathekon (appropriate action) assessment, passion identification,
-          and katorthoma (right action) proximity.
+          control filter, appropriate action assessment, passion identification,
+          and right action proximity.
         </p>
       </div>
 
@@ -315,7 +333,7 @@ export default function ScoreActionPage() {
         {/* V3-specific: Relationships / oikeiosis context */}
         <div>
           <label className="block font-display text-sm font-medium text-sage-700 mb-1">
-            Who is affected? <span className="text-sage-400 font-normal">(oikeiosis — your relationships and roles)</span>
+            Who is affected? <span className="text-sage-400 font-normal">(your relationships and roles)</span>
           </label>
           <textarea
             rows={2}
@@ -325,7 +343,7 @@ export default function ScoreActionPage() {
             placeholder="e.g. My colleague (peer), the team (community), the client who was affected..."
           />
           <p className="font-body text-xs text-sage-400 mt-1">
-            Oikeiosis stages: self → household → community → humanity → cosmic order
+            Circles of concern: self → household → community → humanity → cosmic order
           </p>
         </div>
 
@@ -364,15 +382,16 @@ export default function ScoreActionPage() {
 
           {/* Katorthoma Proximity — the primary result */}
           <div className="bg-white/60 border border-sage-200 rounded-lg p-8 text-center">
-            <p className="font-body text-sm text-sage-500 mb-2">Katorthoma Proximity</p>
+            <p className="font-body text-sm text-sage-500 mb-2">Right Action Proximity</p>
             <div className="inline-flex items-center justify-center w-28 h-28 rounded-full border-4 mb-4" style={{ borderColor: proximityDisplay.color }}>
               <span className="font-display text-4xl" style={{ color: proximityDisplay.color }}>
                 {proximityDisplay.icon}
               </span>
             </div>
-            <h2 className="font-display text-2xl font-medium text-sage-800 mb-1">{proximityLevel.name}</h2>
+            <h2 className="font-display text-2xl font-medium text-sage-800 mb-1">
+              {PROXIMITY_ENGLISH[result.virtue_quality.katorthoma_proximity]}
+            </h2>
             <p className="font-body text-sage-600 text-sm max-w-md mx-auto">{proximityLevel.description}</p>
-            <p className="font-body text-xs text-sage-400 mt-2">{proximityLevel.progress_grade}</p>
 
             {/* Proximity scale visualization */}
             <div className="flex items-center justify-center gap-1 mt-6 pt-4 border-t border-sage-100">
@@ -385,7 +404,7 @@ export default function ScoreActionPage() {
                       className="w-10 h-2 rounded-full"
                       style={{ backgroundColor: display.color }}
                     />
-                    <span className="font-body text-[10px] text-sage-500">{level.name.split(' ')[0]}</span>
+                    <span className="font-body text-[10px] text-sage-500">{PROXIMITY_ENGLISH[level.id]}</span>
                   </div>
                 )
               })}
@@ -402,11 +421,11 @@ export default function ScoreActionPage() {
           <div className="bg-white/60 border border-sage-200 rounded-lg p-6">
             <h3 className="font-display text-base font-medium text-sage-800 mb-3 flex items-center gap-2">
               <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-sage-100 text-sage-600 font-display text-xs">1</span>
-              Prohairesis Filter
+              Control Filter
             </h3>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <p className="font-display text-xs text-sage-500 mb-2">Within your moral choice (eph&apos; hemin)</p>
+                <p className="font-display text-xs text-sage-500 mb-2">Within your moral choice</p>
                 <ul className="space-y-1">
                   {result.control_filter.within_prohairesis.map((item, i) => (
                     <li key={i} className="font-body text-sm text-sage-700 flex items-start gap-2">
@@ -432,7 +451,7 @@ export default function ScoreActionPage() {
           <div className="bg-white/60 border border-sage-200 rounded-lg p-6">
             <h3 className="font-display text-base font-medium text-sage-800 mb-3 flex items-center gap-2">
               <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-sage-100 text-sage-600 font-display text-xs">2</span>
-              Kathekon Assessment
+              Appropriate Action
             </h3>
             {(() => {
               const kDisplay = KATHEKON_DISPLAY[result.kathekon_assessment.quality] || KATHEKON_DISPLAY.moderate
@@ -467,7 +486,7 @@ export default function ScoreActionPage() {
                 {result.passion_diagnosis.passions_detected.map((passion, i) => (
                   <div key={i} className="flex items-start gap-3 p-3 bg-sage-50/50 rounded">
                     <span className="font-display text-sm font-medium text-sage-700">{passion.name}</span>
-                    <span className="font-body text-xs text-sage-400 mt-0.5">({passion.root_passion})</span>
+                    <span className="font-body text-xs text-sage-400 mt-0.5">({ROOT_PASSION_ENGLISH[passion.root_passion] || passion.root_passion})</span>
                   </div>
                 ))}
 

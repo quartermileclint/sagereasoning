@@ -238,8 +238,8 @@ export default function JournalPage() {
     return (
       <div className="max-w-3xl mx-auto px-6 py-16">
         <div className="text-center mb-12">
-          <h1 className="font-display text-3xl font-semibold text-sage-900 mb-3">The Path of the Prokoptos</h1>
-          <p className="font-body text-sage-600 text-lg">A 56-day Stoic journal for self-examination and growth</p>
+          <h1 className="font-display text-3xl font-semibold text-sage-900 mb-3">The Path of Progress</h1>
+          <p className="font-body text-sage-600 text-lg">A 55-day Stoic journal for self-examination and growth</p>
         </div>
 
         <div className="bg-white border border-sage-200 rounded-lg p-8 mb-8">
@@ -318,7 +318,7 @@ export default function JournalPage() {
             ))}
           </div>
           <p className="font-body text-sm text-sage-500 mt-4">
-            56 days. One entry per day. Each day: read a teaching, reflect in writing.
+            55 days. One entry per day. Each day: read a teaching, reflect in writing.
           </p>
         </div>
       </div>
@@ -343,7 +343,7 @@ export default function JournalPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-sage-900 mb-1">The Path of the Prokoptos</h1>
+          <h1 className="font-display text-2xl font-semibold text-sage-900 mb-1">The Path of Progress</h1>
           <p className="font-body text-sage-500">
             {storageMode === 'local' ? (
               <span className="inline-flex items-center gap-1">
@@ -437,9 +437,36 @@ export default function JournalPage() {
           <div className="text-4xl mb-4">&#x1F33F;</div>
           <h2 className="font-display text-2xl font-medium text-sage-800 mb-3">The Path Continues</h2>
           <p className="font-body text-sage-600 max-w-lg mx-auto mb-6">
-            You have completed all 56 days of The Path of the Prokoptos. The Prokoptos never arrives — they continue.
+            You have completed all 55 days of The Path of Progress. The person making progress never arrives — they continue.
             Review your past entries anytime by opening the curriculum map above.
           </p>
+
+          {/* V3 Completion Assessment: Progress Dimensions */}
+          <div className="bg-sage-50 border border-sage-200 rounded-lg p-6 max-w-lg mx-auto mb-6 text-left">
+            <h3 className="font-display text-sm font-medium text-sage-700 mb-3">Self-Assessment: Four Dimensions of Progress</h3>
+            <p className="font-body text-xs text-sage-500 mb-4">
+              Reflect on where you stand across the four dimensions the Stoics used to measure moral progress.
+            </p>
+            <div className="space-y-3">
+              <div>
+                <span className="font-display text-xs font-medium text-sage-600">1. Reduction of Passions</span>
+                <p className="font-body text-xs text-sage-500">Are fewer passions operative? Are they less intense than when you started?</p>
+              </div>
+              <div>
+                <span className="font-display text-xs font-medium text-sage-600">2. Quality of Judgement</span>
+                <p className="font-body text-xs text-sage-500">Is your understanding of what is genuinely good, bad, and indifferent more accurate?</p>
+              </div>
+              <div>
+                <span className="font-display text-xs font-medium text-sage-600">3. Stability of Disposition</span>
+                <p className="font-body text-xs text-sage-500">Does your commitment to virtue hold under pressure? How quickly do you recover after setbacks?</p>
+              </div>
+              <div>
+                <span className="font-display text-xs font-medium text-sage-600">4. Expanding Circles of Concern</span>
+                <p className="font-body text-xs text-sage-500">Are you increasingly taking account of obligations beyond yourself?</p>
+              </div>
+            </div>
+          </div>
+
           <p className="font-body text-sm text-sage-500 italic">
             &ldquo;Waste no more time arguing about what a good man should be. Be one.&rdquo; — Marcus Aurelius
           </p>

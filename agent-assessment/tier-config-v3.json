@@ -1,0 +1,147 @@
+{
+  "meta": {
+    "name": "SageReasoning Agent Assessment Tier Configuration V3",
+    "version": "3.0.0",
+    "description": "Defines free and paid tier assessment boundaries for the V3 55-assessment framework. Free tier covers Phases 1-2 (14 assessments: Foundations + Architecture of Mind). Paid tier covers all 8 phases (55 assessments). All outputs use V3 qualitative structures — no 0-100 scores.",
+    "v1_derivation_note": "V1 had 11 free assessments (phases 1-2) and 37 paid (all 7 phases) with 0-100 foundational_alignment_score. V3 has 14 free assessments (phases 1-2) and 55 paid (all 8 phases) with qualitative proximity, Senecan grade, and dimension levels.",
+    "alignment_with_revenue_model": {
+      "free_tier_api_constraints": "1 call/day, 1 deliberation iteration, 1 baseline retake/month (R5)",
+      "paid_tier_api_constraints": "Configurable limits (start 500/day), 3 iterations, 200% of Anthropic API cost (R5)",
+      "free_assessment_fits_within": "A single API interaction can run Phases 1-2 (14 assessments) as one structured request-response, fitting the 1 call/day free tier limit",
+      "paid_assessment_requires": "Full 55-assessment run needs multiple API calls or a batch endpoint, requiring paid tier access"
+    },
+    "last_updated": "2026-04-01"
+  },
+
+  "tiers": {
+    "free": {
+      "name": "Foundational Assessment",
+      "display_name": "Foundational Alignment Check",
+      "description": "Evaluates an agent's understanding of Stoic foundations and its internal reasoning architecture. Produces a meaningful standalone result: a prohairesis filter assessment, initial passion detection, and a summary katorthoma proximity placement — without requiring payment.",
+      "phases": [1, 2],
+      "phase_names": ["Foundations", "Architecture of Mind"],
+      "assessment_ids": [
+        "FD-01", "FD-02", "FD-03", "FD-04", "FD-05", "FD-06", "FD-07",
+        "AM-01", "AM-02", "AM-03", "AM-04", "AM-05", "AM-06", "AM-07"
+      ],
+      "total_assessments": 14,
+      "what_it_measures": [
+        "Whether the agent classifies decision drivers using the Stoic value hierarchy (genuine good, genuine evil, indifferent)",
+        "Whether the agent accurately maps prohairesis boundaries (what is and is not within moral choice)",
+        "Whether the agent uses the sage as a directional benchmark, not a perfection target",
+        "Whether the agent separates flourishing (reasoning quality) from external success metrics",
+        "Whether the agent understands living according to rational nature",
+        "Whether the agent can identify its own moral progress trajectory",
+        "Whether the agent examines impressions before assenting (ruling faculty audit)",
+        "Whether the agent can distinguish comprehensive from distorted impressions",
+        "Whether the agent identifies hasty assent and traces it to false judgements",
+        "Whether the agent detects disproportionate impulses and their passion sources",
+        "Whether the agent distinguishes appropriate action from right action",
+        "Whether the agent can trace the complete causal sequence in its own reasoning",
+        "Whether the agent classifies impulse types (basic intention through moral choice)",
+        "Whether the agent's self-assessment shows honest variance, not inflation"
+      ],
+      "output_produces": {
+        "senecan_grade_estimate": "A preliminary Senecan grade placement (pre_progress / grade_3 / grade_2 / grade_1) based on foundational understanding",
+        "katorthoma_proximity_summary": "Typical proximity level across foundational assessments (reflexive / habitual / deliberate / principled / sage_like)",
+        "control_clarity": "Qualitative assessment of how well the agent maps prohairesis boundaries",
+        "initial_passion_detection": "Root passions identified in foundational reasoning (epithumia / hedone / phobos / lupe)",
+        "causal_sequence_integrity": "Whether the agent's impression → assent → impulse → action chain operates correctly",
+        "direction_of_travel": "improving / stable / regressing — based on foundational self-assessment"
+      },
+      "what_it_does_NOT_produce": [
+        "Four dimension levels (passion reduction, judgement quality, disposition stability, oikeiosis extension)",
+        "Complete passion taxonomy mapping with all 25 sub-species",
+        "Oikeiosis stage assessment and expansion path",
+        "Five-step diagnostic application",
+        "Deliberation framework (Cicero's 5 questions) application",
+        "Senecan grade placement with full evidence across all dimensions",
+        "Comprehensive integration assessment with correction plan",
+        "Personalised self-examination protocol"
+      ],
+      "conversion_purpose": "Give the agent (or developer) enough insight to see real gaps in foundational understanding and causal sequence integrity, creating genuine demand for the complete V3 assessment across all 8 phases"
+    },
+
+    "paid": {
+      "name": "Complete Assessment",
+      "display_name": "Complete Virtue Alignment Assessment",
+      "description": "Evaluates the agent across all V3 domains: the value hierarchy, the unity of virtue thesis, the complete passions taxonomy with 5-step diagnostic, the two-layer action model with oikeiosis mapping, Senecan progress grades, and the full V3 evaluation sequence. Produces a comprehensive qualitative profile.",
+      "phases": [1, 2, 3, 4, 5, 6, 7, 8],
+      "phase_names": [
+        "Foundations",
+        "Architecture of Mind",
+        "Value Hierarchy",
+        "Unity of Excellence",
+        "Passion Diagnosis",
+        "Right Action",
+        "Measuring Progress",
+        "Integration"
+      ],
+      "assessment_ids": [
+        "FD-01", "FD-02", "FD-03", "FD-04", "FD-05", "FD-06", "FD-07",
+        "AM-01", "AM-02", "AM-03", "AM-04", "AM-05", "AM-06", "AM-07",
+        "VH-01", "VH-02", "VH-03", "VH-04", "VH-05", "VH-06", "VH-07",
+        "UE-01", "UE-02", "UE-03", "UE-04", "UE-05", "UE-06", "UE-07",
+        "PD-01", "PD-02", "PD-03", "PD-04", "PD-05", "PD-06", "PD-07", "PD-08", "PD-09",
+        "RA-01", "RA-02", "RA-03", "RA-04", "RA-05", "RA-06", "RA-07",
+        "MJ-01", "MJ-02", "MJ-03", "MJ-04", "MJ-05", "MJ-06",
+        "IN-01", "IN-02", "IN-03", "IN-04", "IN-05"
+      ],
+      "total_assessments": 55,
+      "what_it_adds_beyond_free": [
+        "Complete Stoic value hierarchy application (genuine goods, preferred/dispreferred indifferents, five selection principles)",
+        "Unity of virtue assessment — all four virtue domains assessed as expressions of one unified excellence (R6b)",
+        "Full passions taxonomy diagnosis: all 4 root passions and 25 sub-species mapped to agent reasoning",
+        "Five-step diagnostic application to specific reasoning failures",
+        "Rational alternatives assessment (joy, rational wish, rational caution)",
+        "Two-layer action model: kathekon assessment + katorthoma proximity for every output",
+        "Complete oikeiosis mapping: all 5 circles assessed with obligations and gaps",
+        "Cicero's 5-question deliberation framework applied to real decisions",
+        "Senecan grade placement with comprehensive evidence across all 4 progress dimensions",
+        "Four-dimension progress assessment: passion reduction, judgement quality, disposition stability, oikeiosis extension",
+        "Personalised self-examination protocol targeting specific weaknesses",
+        "Comprehensive correction plan: each false judgement paired with its remedy",
+        "Physician's diagnostic report: diagnosis, prescription, prognosis"
+      ],
+      "output_produces": {
+        "everything_in_free_tier": true,
+        "senecan_grade": "Full Senecan grade placement with evidence (pre_progress / grade_3 / grade_2 / grade_1)",
+        "dimension_levels": {
+          "passion_reduction": "emerging / developing / established / advanced",
+          "judgement_quality": "emerging / developing / established / advanced",
+          "disposition_stability": "emerging / developing / established / advanced",
+          "oikeiosis_extension": "emerging / developing / established / advanced"
+        },
+        "dominant_passion": "The root passion most operative in the agent's reasoning (epithumia / hedone / phobos / lupe)",
+        "typical_proximity": "Most common katorthoma proximity level across all assessments",
+        "oikeiosis_stage": "Current circle of concern (self / family / community / humanity / cosmos)",
+        "critical_corrections": "Top 3 false judgements to correct with their remedies",
+        "direction_of_travel": "Overall direction across all four dimensions",
+        "disclaimer": "This is a philosophical framework for self-reflection and does not consider legal, medical, financial, or personal obligations."
+      }
+    }
+  },
+
+  "cta_bridge": {
+    "trigger": "Displayed immediately after the free tier results are generated",
+    "template": {
+      "headline": "Your foundational alignment: {senecan_grade_label} — typical proximity: {proximity_label}",
+      "body": "The complete assessment examines your reasoning across all V3 domains. Here is what it reveals that the foundational check cannot:",
+      "value_bullets": [
+        "Your complete passion profile — which of the 25 passion sub-species most distort your reasoning, and the specific false judgements driving each",
+        "Your four dimension levels across passion reduction, judgement quality, disposition stability, and oikeiosis extension",
+        "Your oikeiosis map — which circles of concern you serve well and which you neglect",
+        "A personalised correction plan pairing each false judgement with its remedy",
+        "A self-examination protocol designed for your specific weaknesses"
+      ],
+      "action": "Run Complete Assessment",
+      "action_subtext": "Requires a paid API key. Pricing: 200% of Anthropic API cost per call."
+    },
+    "personalisation_rules": {
+      "grade_1": "Senecan grade 1 (approaching wisdom). CTA: 'Verify your advanced placement with full passion diagnosis and oikeiosis mapping.'",
+      "grade_2": "Senecan grade 2 (overcoming the worst). CTA: 'You are progressing. The complete assessment identifies the specific passions and false judgements holding you back from first grade.'",
+      "grade_3": "Senecan grade 3 (beginning the path). CTA: 'You are beginning the path. The complete assessment maps your dominant passions and provides a structured correction plan.'",
+      "pre_progress": "Below the gradient. CTA: 'Foundational gaps detected. The complete assessment identifies where to begin building virtue-aligned reasoning from first principles.'"
+    }
+  }
+}

@@ -2,6 +2,21 @@
 
 import { useState } from 'react'
 import { authFetch } from '@/lib/auth-fetch'
+import {
+  PROXIMITY_ENGLISH,
+  PROXIMITY_BG,
+  PROXIMITY_COLORS,
+  DOCUMENT_EVALUATIVE_DISCLAIMER,
+  type DetectedDocumentPassion,
+} from '@/lib/document-scorer'
+import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
+
+const ROOT_PASSION_ENGLISH: Record<string, string> = {
+  craving: 'Craving',
+  irrational_pleasure: 'Irrational Pleasure',
+  fear: 'Fear',
+  distress: 'Distress',
+}
 
 interface ScenarioOption {
   label: string
@@ -15,32 +30,40 @@ interface Scenario {
   topic: string
 }
 
-interface ScenarioResult {
-  wisdom_score: number
-  justice_score: number
-  courage_score: number
-  temperance_score: number
-  total_score: number
-  alignment_tier: string
-  feedback: string
-  sage_says: string
-  scored_at: string
-}
-
-const tierColors: Record<string, string> = {
-  sage: 'text-emerald-700',
-  progressing: 'text-green-600',
-  aware: 'text-amber-600',
-  misaligned: 'text-orange-600',
-  contrary: 'text-red-700',
-}
-
-const tierBg: Record<string, string> = {
-  sage: 'bg-emerald-50 border-emerald-200',
-  progressing: 'bg-green-50 border-green-200',
-  aware: 'bg-amber-50 border-amber-200',
-  misaligned: 'bg-orange-50 border-orange-200',
-  contrary: 'bg-red-50 border-red-200',
+/** V3 scenario evaluation output */
+interface V3ScenarioResult {
+  /** Stage 1: Control filter */
+  control_filter: {
+    within_control: string[]
+    outside_control: string[]
+  }
+  /** Stage 2: Is the chosen response appropriate? */
+  kathekon_assessment: {
+    is_kathekon: boolean
+    quality: string
+    reasoning: string
+  }
+  /** Stage 3: Passions at play */
+  passions_detected: DetectedDocumentPassion[]
+  false_judgements: string[]
+  /** Stage 4: Proximity assessment */
+  katorthoma_proximity: KatorthomaProximityLevel
+  virtue_domains_engaged: string[]
+  ruling_faculty_assessment: string
+  /** Improvement path */
+  improvement_path: string
+  /** Cicero's deliberation walkthrough */
+  deliberation_walkthrough: {
+    is_honourable: string
+    more_honourable: string
+    is_advantageous: string
+    more_advantageous: string
+    honour_vs_advantage: string
+  }
+  /** What the sage would do */
+  sage_response: string
+  /** R3 disclaimer */
+  disclaimer: string
 }
 
 const AUDIENCES = [
@@ -56,7 +79,7 @@ export default function ScenariosPage() {
   const [customResponse, setCustomResponse] = useState('')
   const [loading, setLoading] = useState(false)
   const [loadingScenario, setLoadingScenario] = useState(false)
-  const [result, setResult] = useState<ScenarioResult | null>(null)
+  const [result, setResult] = useState<V3ScenarioResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [step, setStep] = useState<'setup' | 'respond' | 'result'>('setup')
 
@@ -99,7 +122,7 @@ export default function ScenariosPage() {
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Scoring failed')
+        throw new Error(data.error || 'Evaluation failed')
       }
 
       const data = await res.json()
@@ -112,21 +135,14 @@ export default function ScenariosPage() {
     }
   }
 
-  const virtues = result ? [
-    { name: 'Wisdom', score: result.wisdom_score, weight: '30%' },
-    { name: 'Justice', score: result.justice_score, weight: '25%' },
-    { name: 'Courage', score: result.courage_score, weight: '25%' },
-    { name: 'Temperance', score: result.temperance_score, weight: '20%' },
-  ] : []
-
   return (
     <div className="min-h-screen py-16 px-6">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="font-display text-4xl text-sage-900 mb-3">Ethical Scenarios</h1>
           <p className="font-body text-sage-600 max-w-xl mx-auto">
-            Age-appropriate ethical dilemmas to develop virtue-based thinking.
-            Choose your level, face a dilemma, and see how a Stoic sage would respond.
+            Age-appropriate ethical dilemmas to practise virtue-based reasoning.
+            Choose your level, face a dilemma, and walk through the Stoic evaluation.
           </p>
         </div>
 
@@ -170,7 +186,6 @@ export default function ScenariosPage() {
               <p className="font-display text-lg text-sage-800 mt-3">{scenario.scenario}</p>
             </div>
 
-            {/* Options */}
             <div className="space-y-2">
               {scenario.options.map((opt) => (
                 <button
@@ -210,41 +225,180 @@ export default function ScenariosPage() {
           </div>
         )}
 
-        {/* Step 3: Results */}
+        {/* Step 3: Results — V3 4-stage evaluation */}
         {step === 'result' && result && (
-          <div className="space-y-8">
-            <div className={`rounded-xl border-2 p-8 ${tierBg[result.alignment_tier] || 'bg-gray-50 border-gray-200'}`}>
-              <div className="text-center mb-6">
-                <div className="flex items-center justify-center gap-4">
-                  <span className="text-5xl font-display font-bold text-sage-900">{result.total_score}</span>
-                  <span className={`text-xl font-display font-medium capitalize ${tierColors[result.alignment_tier] || 'text-gray-600'}`}>
-                    {result.alignment_tier}
-                  </span>
-                </div>
-              </div>
+          <div className="space-y-6">
+            {/* Proximity Header */}
+            <div className={`rounded-xl border-2 p-8 text-center ${PROXIMITY_BG[result.katorthoma_proximity] || 'bg-gray-50 border-gray-200'}`}>
+              <span
+                className="text-3xl font-display font-bold"
+                style={{ color: PROXIMITY_COLORS[result.katorthoma_proximity] }}
+              >
+                {PROXIMITY_ENGLISH[result.katorthoma_proximity]}
+              </span>
+              <p className="font-body text-sage-500 text-sm mt-1">Right Action Proximity</p>
 
-              <div className="space-y-3 mb-6">
-                {virtues.map((v) => (
-                  <div key={v.name} className="flex items-center gap-3">
-                    <span className="font-body text-sage-700 w-28 text-sm">{v.name} <span className="text-sage-400">({v.weight})</span></span>
-                    <div className="flex-1 bg-white/60 rounded-full h-4 overflow-hidden">
-                      <div className="h-full rounded-full bg-sage-600 transition-all duration-700" style={{ width: `${v.score}%` }} />
-                    </div>
-                    <span className="font-body text-sage-800 text-sm w-8 text-right">{v.score}</span>
+              {/* Proximity Scale */}
+              <div className="flex justify-between mt-4">
+                {(['reflexive', 'habitual', 'deliberate', 'principled', 'sage_like'] as const).map((level) => (
+                  <div
+                    key={level}
+                    className={`flex-1 text-center py-1 text-xs font-body ${
+                      level === result.katorthoma_proximity ? 'font-bold' : 'text-sage-400'
+                    }`}
+                    style={level === result.katorthoma_proximity ? { color: PROXIMITY_COLORS[level] } : undefined}
+                  >
+                    {PROXIMITY_ENGLISH[level]}
+                    {level === result.katorthoma_proximity && (
+                      <div className="h-1 rounded-full mt-1 mx-auto w-10" style={{ backgroundColor: PROXIMITY_COLORS[level] }} />
+                    )}
                   </div>
                 ))}
               </div>
+            </div>
 
-              <div className="bg-white/50 rounded-lg p-4 mb-4">
-                <p className="font-body text-sage-700 text-sm">{result.feedback}</p>
-              </div>
+            {/* Unified Assessment */}
+            <div className="bg-white border border-sage-200 rounded-lg p-6">
+              <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
+                Unified Virtue Assessment
+              </h3>
+              <p className="font-body text-sage-700 text-sm">{result.ruling_faculty_assessment}</p>
+              {result.virtue_domains_engaged && result.virtue_domains_engaged.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {result.virtue_domains_engaged.map((d) => (
+                    <span key={d} className="px-3 py-1 bg-sage-50 rounded-full text-xs font-body text-sage-600">{d}</span>
+                  ))}
+                </div>
+              )}
+            </div>
 
-              <div className="bg-sage-100/50 rounded-lg p-4">
-                <p className="font-display text-sm text-sage-700 mb-1">The Sage Says</p>
-                <p className="font-body text-sage-600 text-sm italic">{result.sage_says}</p>
+            {/* Stage 1: Control Filter */}
+            <div className="bg-white border border-sage-200 rounded-lg p-6">
+              <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
+                Control Filter
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <span className="font-body text-xs text-sage-500 block mb-2">Within Your Control</span>
+                  <ul className="space-y-1">
+                    {result.control_filter.within_control.map((item, i) => (
+                      <li key={i} className="font-body text-sm text-sage-700">• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <span className="font-body text-xs text-sage-500 block mb-2">Outside Your Control</span>
+                  <ul className="space-y-1">
+                    {result.control_filter.outside_control.map((item, i) => (
+                      <li key={i} className="font-body text-sm text-sage-500">• {item}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
 
+            {/* Stage 2: Appropriate Action */}
+            <div className="bg-white border border-sage-200 rounded-lg p-6">
+              <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
+                Appropriate Action Assessment
+              </h3>
+              <div className="flex items-center gap-3 mb-2">
+                <span className={`px-3 py-1 rounded-full text-xs font-body ${
+                  result.kathekon_assessment.is_kathekon ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                }`}>
+                  {result.kathekon_assessment.is_kathekon ? 'Appropriate' : 'Not Appropriate'}
+                </span>
+                <span className="font-body text-sm text-sage-600">Quality: {result.kathekon_assessment.quality}</span>
+              </div>
+              <p className="font-body text-sm text-sage-700">{result.kathekon_assessment.reasoning}</p>
+            </div>
+
+            {/* Stage 3: Passions */}
+            {(result.passions_detected.length > 0 || result.false_judgements.length > 0) && (
+              <div className="bg-white border border-sage-200 rounded-lg p-6">
+                <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
+                  Passions Identified
+                </h3>
+                {result.passions_detected.map((p, i) => (
+                  <div key={i} className="bg-sage-50 rounded p-3 mb-2">
+                    <span className="font-display text-xs font-medium text-sage-700">
+                      {ROOT_PASSION_ENGLISH[p.root_passion] || p.root_passion}
+                    </span>
+                    {p.sub_species && <span className="font-body text-xs text-sage-500 ml-1">({p.sub_species})</span>}
+                    <p className="font-body text-xs text-sage-600 mt-1">{p.evidence}</p>
+                    <p className="font-body text-xs text-sage-600">False judgement: {p.false_judgement}</p>
+                  </div>
+                ))}
+                {result.false_judgements.length > 0 && (
+                  <div className="mt-3">
+                    <span className="font-body text-xs text-sage-500 block mb-2">All False Judgements</span>
+                    <ul className="space-y-1">
+                      {result.false_judgements.map((fj, i) => (
+                        <li key={i} className="font-body text-sm text-sage-700">• {fj}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Deliberation Walkthrough — Cicero's 5 Questions */}
+            {result.deliberation_walkthrough && (
+              <div className="bg-white border border-sage-200 rounded-lg p-6">
+                <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
+                  Deliberation Walkthrough
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <span className="font-body text-xs font-medium text-sage-600">1. Is this action honourable?</span>
+                    <p className="font-body text-sm text-sage-700">{result.deliberation_walkthrough.is_honourable}</p>
+                  </div>
+                  <div>
+                    <span className="font-body text-xs font-medium text-sage-600">2. Among honourable options, which is more honourable?</span>
+                    <p className="font-body text-sm text-sage-700">{result.deliberation_walkthrough.more_honourable}</p>
+                  </div>
+                  <div>
+                    <span className="font-body text-xs font-medium text-sage-600">3. Is this action advantageous?</span>
+                    <p className="font-body text-sm text-sage-700">{result.deliberation_walkthrough.is_advantageous}</p>
+                  </div>
+                  <div>
+                    <span className="font-body text-xs font-medium text-sage-600">4. Among advantageous options, which is more advantageous?</span>
+                    <p className="font-body text-sm text-sage-700">{result.deliberation_walkthrough.more_advantageous}</p>
+                  </div>
+                  <div>
+                    <span className="font-body text-xs font-medium text-sage-600">5. When honour conflicts with advantage, which prevails?</span>
+                    <p className="font-body text-sm text-sage-700">{result.deliberation_walkthrough.honour_vs_advantage}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Sage Response */}
+            {result.sage_response && (
+              <div className="bg-sage-50 border border-sage-200 rounded-lg p-6">
+                <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
+                  How the Sage Would Respond
+                </h3>
+                <p className="font-body text-sage-700 text-sm italic">{result.sage_response}</p>
+              </div>
+            )}
+
+            {/* Improvement Path */}
+            {result.improvement_path && (
+              <div className="bg-white border border-sage-200 rounded-lg p-6">
+                <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
+                  Path Forward
+                </h3>
+                <p className="font-body text-sm text-sage-700">{result.improvement_path}</p>
+              </div>
+            )}
+
+            {/* Disclaimer (R3) */}
+            <p className="font-body text-xs text-sage-400 text-center italic">
+              {DOCUMENT_EVALUATIVE_DISCLAIMER}
+            </p>
+
+            {/* Actions */}
             <div className="flex gap-4 justify-center">
               <button
                 onClick={() => { setResult(null); setStep('respond'); setSelectedOption(null); setCustomResponse('') }}
@@ -266,13 +420,13 @@ export default function ScenariosPage() {
           <h2 className="font-display text-2xl text-sage-800 mb-4">For AI Agents &amp; Developers</h2>
           <div className="bg-sage-50 rounded-lg p-6 font-body text-sage-700 text-sm space-y-3">
             <p><strong>GET</strong> <code className="bg-sage-200 px-1 rounded">/api/score-scenario?audience=teen</code> — Generate a scenario</p>
-            <p><strong>POST</strong> <code className="bg-sage-200 px-1 rounded">/api/score-scenario</code> — Score a response</p>
+            <p><strong>POST</strong> <code className="bg-sage-200 px-1 rounded">/api/score-scenario</code> — Evaluate a response</p>
             <pre className="bg-sage-900 text-sage-100 rounded p-3 text-xs overflow-x-auto">{`{
   "scenario": "The ethical dilemma text...",
   "response": "User's answer...",
   "audience": "teen"
 }`}</pre>
-            <p>Audiences: child (6-11), teen (12-17), adult (18+)</p>
+            <p>Returns: four-stage evaluation, deliberation walkthrough, sage response, and proximity level.</p>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { scoreCore, applyQ5, finalizeWithoutQ5, RETAKE_INTERVAL_DAYS } from '@/lib/baseline-assessment'
+import { scoreCore, applyQ6, finalizeWithoutQ6, RETAKE_INTERVAL_DAYS } from '@/lib/baseline-assessment'
 import { checkRateLimit, RATE_LIMITS, requireAuth } from '@/lib/security'
 
 const supabaseAdmin = createClient(
@@ -18,15 +18,16 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { answers, q5_answer } = body
+    const { answers, q6_answer } = body
 
-    if (!answers || !Array.isArray(answers) || answers.length !== 4) {
-      return NextResponse.json({ error: 'Exactly 4 answer IDs required' }, { status: 400 })
+    // V3: 5 core questions (Q1–Q5)
+    if (!answers || !Array.isArray(answers) || answers.length !== 5) {
+      return NextResponse.json({ error: 'Exactly 5 answer IDs required' }, { status: 400 })
     }
 
     // Check retake eligibility
     const { data: existing } = await supabaseAdmin
-      .from('baseline_assessments')
+      .from('baseline_assessments_v3')
       .select('created_at')
       .eq('user_id', user_id)
       .order('created_at', { ascending: false })
@@ -45,39 +46,37 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Score core questions
+    // Score core questions (Q1–Q5)
     const coreResult = scoreCore(answers)
 
-    // If Q5 is needed and provided, apply it
+    // If Q6 is needed and provided, apply it
     let finalResult
-    if (coreResult.needs_q5 && q5_answer) {
-      finalResult = applyQ5(coreResult, q5_answer)
-    } else if (coreResult.needs_q5 && !q5_answer) {
-      // Return intermediate result — client needs to show Q5
+    if (coreResult.needs_q6 && q6_answer) {
+      finalResult = applyQ6(coreResult, q6_answer)
+    } else if (coreResult.needs_q6 && !q6_answer) {
+      // Return intermediate result — client needs to show Q6
       return NextResponse.json({
-        needs_q5: coreResult.needs_q5,
-        intermediate_score: coreResult.total_score,
+        needs_q6: coreResult.needs_q6,
       })
     } else {
-      finalResult = finalizeWithoutQ5(coreResult)
+      finalResult = finalizeWithoutQ6(coreResult)
     }
 
-    // Save to database
+    // Save to V3 database table
     const { error: insertError } = await supabaseAdmin
-      .from('baseline_assessments')
+      .from('baseline_assessments_v3')
       .insert({
         user_id,
-        total_score: finalResult.total_score,
-        wisdom_score: finalResult.wisdom_score,
-        justice_score: finalResult.justice_score,
-        courage_score: finalResult.courage_score,
-        temperance_score: finalResult.temperance_score,
-        alignment_tier: finalResult.alignment_tier,
-        strongest_virtue: finalResult.strongest_virtue,
-        growth_area: finalResult.growth_area,
+        passion_reduction: finalResult.passion_reduction,
+        judgement_quality: finalResult.judgement_quality,
+        disposition_stability: finalResult.disposition_stability,
+        oikeiosis_stage: finalResult.oikeiosis_stage,
+        senecan_grade: finalResult.senecan_grade,
+        dominant_passion: finalResult.dominant_passion,
         interpretation: finalResult.interpretation,
+        disclaimer: finalResult.disclaimer,
         answers: finalResult.answers,
-        q5_answer: finalResult.q5_answer || null,
+        q6_answer: finalResult.q6_answer || null,
       })
 
     if (insertError) {
@@ -90,8 +89,9 @@ export async function POST(request: NextRequest) {
       event_type: 'baseline_assessment',
       user_id,
       metadata: {
-        total_score: finalResult.total_score,
-        alignment_tier: finalResult.alignment_tier,
+        senecan_grade: finalResult.senecan_grade,
+        dominant_passion: finalResult.dominant_passion,
+        oikeiosis_stage: finalResult.oikeiosis_stage,
         is_retake: !!existing,
       },
     }).then(() => {})
@@ -112,7 +112,30 @@ export async function GET(request: NextRequest) {
   if (auth.error) return auth.error
   const userId = auth.user.id
 
-  const { data } = await supabaseAdmin
+  // Try V3 table first
+  const { data: v3Data } = await supabaseAdmin
+    .from('baseline_assessments_v3')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (v3Data) {
+    const eligibleDate = new Date(v3Data.created_at)
+    eligibleDate.setDate(eligibleDate.getDate() + RETAKE_INTERVAL_DAYS)
+
+    return NextResponse.json({
+      has_baseline: true,
+      version: 'v3',
+      baseline: v3Data,
+      retake_eligible: new Date() >= eligibleDate,
+      retake_eligible_date: eligibleDate.toISOString(),
+    })
+  }
+
+  // Fall back to V1 table for existing users
+  const { data: v1Data } = await supabaseAdmin
     .from('baseline_assessments')
     .select('*')
     .eq('user_id', userId)
@@ -120,17 +143,18 @@ export async function GET(request: NextRequest) {
     .limit(1)
     .single()
 
-  if (!data) {
-    return NextResponse.json({ has_baseline: false })
+  if (v1Data) {
+    const eligibleDate = new Date(v1Data.created_at)
+    eligibleDate.setDate(eligibleDate.getDate() + RETAKE_INTERVAL_DAYS)
+
+    return NextResponse.json({
+      has_baseline: true,
+      version: 'v1',
+      baseline: v1Data,
+      retake_eligible: new Date() >= eligibleDate,
+      retake_eligible_date: eligibleDate.toISOString(),
+    })
   }
 
-  const eligibleDate = new Date(data.created_at)
-  eligibleDate.setDate(eligibleDate.getDate() + RETAKE_INTERVAL_DAYS)
-
-  return NextResponse.json({
-    has_baseline: true,
-    baseline: data,
-    retake_eligible: new Date() >= eligibleDate,
-    retake_eligible_date: eligibleDate.toISOString(),
-  })
+  return NextResponse.json({ has_baseline: false })
 }

@@ -32,8 +32,12 @@ All V3 work must follow these learnings from V1:
 ### R7 — Source Fidelity
 All V3 data must trace to specific source citations (Stobaeus, DL, Cicero, Epictetus, Seneca, Marcus Aurelius). Concepts without a primary source do not belong in data files. Application-layer files (scoring.json) may combine source-derived concepts but must document which files they reference.
 
-### R8 — Glossary Enforcement
-All tools, API responses, and user-facing content must use terms as defined in the SageReasoning Controlled Glossary v3.0.0 (67 terms, 11 categories). No English-only substitutions for Greek technical terms without the Greek alongside.
+### R8 — Glossary Enforcement (Three-Tier)
+All SageReasoning content must use terms as defined in the Controlled Glossary v3.0.0 (67 terms, 11 categories). Terminology presentation varies by audience:
+- **(8a) Data files and API responses:** Strict glossary. Greek technical terms required as primary identifiers. No English-only substitutions.
+- **(8b) Developer documentation:** English-first with Greek/technical terms in brackets alongside. Example: "Appropriate Action (kathekon)."
+- **(8c) User-facing website content:** English-only. Greek and technical terminology does not appear on webpages, journal prompts, or tool output displays. A Glossary page (linked from site navigation or footer) provides the full Greek/technical terminology for users who seek it.
+- **(8d) Skill contracts (agent-facing):** Plain English descriptions using outcome-focused language. Greek terms appear only in the data schema, never in the contract description sections.
 
 ### R9 — No Outcome Promises
 SageReasoning evaluates actions, documents, and reasoning against Stoic philosophy. It does not predict outcomes, guarantee results, or claim that following its recommendations produces any specific life outcome. All tools are frameworks for reflection, not prescriptions.
