@@ -131,8 +131,10 @@ export default function PrivacyPage() {
             In compliance with the amended <em>Privacy Act 1988</em> (effective December 2026), we
             disclose that our automated processes use the following categories of personal information:
             text you submit describing actions, decisions, or situations. The kinds of automated outputs
-            produced include: virtue scores (0&ndash;100 per virtue), composite Sage alignment scores,
-            alignment tier classifications, and AI-generated reasoning.
+            produced include: qualitative reasoning proximity assessments (reflexive, habitual, deliberate,
+            principled, sage-like), passion diagnostic results identifying specific false judgements,
+            unified virtue domain engagement indicators, and AI-generated philosophical reflection.
+            No numeric scores are produced.
           </p>
           <p className="mt-3">
             These outputs are for personal reflection only. They do not constitute formal assessments
@@ -143,7 +145,42 @@ export default function PrivacyPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">6. Your Rights</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">6. Marketplace Data</h2>
+          <p>
+            When you use the SageReasoning marketplace (via the website or agent-facing API),
+            we collect the following additional data:
+          </p>
+          <ul className="list-disc pl-6 mt-2 space-y-1 text-sage-700">
+            <li>
+              <strong>Browsing patterns:</strong> Skills viewed and preview requests, collected in
+              anonymised form to improve skill recommendations.
+            </li>
+            <li>
+              <strong>Skill acquisition records:</strong> Which skills you acquire, usage frequency,
+              and billing data to manage your subscription and improve the marketplace.
+            </li>
+            <li>
+              <strong>Agent API usage:</strong> API calls from agents to marketplace endpoints are
+              logged with the same data retention policy as standard API calls.
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">7. Sage Wrapper Data</h2>
+          <p>
+            When sage-wrapped skills invoke SageReasoning API endpoints (sage-guard, sage-score),
+            the input context and evaluation results are processed and stored under the same data
+            handling policies as direct API calls.
+          </p>
+          <p className="mt-3">
+            SageReasoning processes only the reasoning evaluation. We do not access, store, or
+            process the full output of the underlying wrapped skill.
+          </p>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">8. Your Rights</h2>
           <p>Under the Australian Privacy Principles you have the right to:</p>
           <ul className="list-disc pl-6 mt-2 space-y-1 text-sage-700">
             <li><strong>Access</strong> the personal information we hold about you</li>
@@ -162,17 +199,24 @@ export default function PrivacyPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">7. Data Retention</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">9. Data Retention</h2>
           <p>
             We retain your account and score history for as long as your account is active.
             If you delete your account, your personal data will be removed within{' '}
             {/* TODO: Confirm retention period with your developer/Supabase implementation */}
             <strong>30 days</strong>, except where we are required to retain it by law.
           </p>
+          <p className="mt-3">
+            Marketplace transaction records (skill acquisitions, billing) are retained for the
+            duration of your account plus 7 years to meet Australian tax record-keeping
+            requirements. Anonymised marketplace browsing data is retained for up to 12 months.
+            Sage wrapper checkpoint data (reasoning evaluations from sage-guard and sage-score
+            calls) follows the same retention policy as standard API call data.
+          </p>
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">8. Cookies and Analytics</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">10. Cookies and Analytics</h2>
           <p>
             We use minimal session cookies required for authentication. We do not use third-party
             advertising cookies. Our analytics are handled internally and do not share your data
@@ -182,7 +226,7 @@ export default function PrivacyPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">9. Children</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">11. Children</h2>
           <p>
             The Ethical Scenarios feature includes content appropriate for different age groups.
             If you are under 16, please obtain parental consent before creating an account.
@@ -191,7 +235,7 @@ export default function PrivacyPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">10. Complaints</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">12. Complaints</h2>
           <p>
             If you have a complaint about how we handle your personal information, please contact
             us first at{' '}
@@ -206,7 +250,7 @@ export default function PrivacyPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">11. Updates to This Policy</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">13. Updates to This Policy</h2>
           <p>
             We will update this policy as our practices evolve and as Australian privacy law is
             amended (particularly the December 2026 changes to the Privacy Act). We will notify

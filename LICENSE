@@ -7,16 +7,32 @@ DEFINITIONS
 
 "Stoic Brain Data" means the structured JSON data files in the /stoic-brain/
 directory of this repository, including but not limited to: stoic-brain.json,
-virtues.json, indifferents.json, scoring-rules.json, and schema.json, together
-with any future additions or modifications to these files.
+psychology.json, passions.json, virtue.json, value.json, action.json,
+progress.json, and scoring.json, together with any future additions or
+modifications to these files.
 
 "SageReasoning API" means the application programming interface hosted at
 sagereasoning.com through which the Stoic Brain scoring engine can be accessed.
 
 "Competing Service" means any product, service, API, or system that uses the
-Stoic Brain Data to provide virtue-based scoring, ethical reasoning evaluation,
-or Stoic alignment measurement to third parties, whether free or paid, where
-such service operates independently of the SageReasoning API.
+Stoic Brain Data to provide reasoning quality evaluation, ethical reasoning
+assessment, Stoic-based decision support, reasoning checkpoint wrappers around
+existing skills, or a marketplace distributing reasoning evaluation skills to
+third parties, whether free or paid, where such service operates independently
+of the SageReasoning API.
+
+"Sage Skill Wrappers" means the open-source checkpoint code (SKILL.md files
+and invocation logic) that calls SageReasoning API endpoints (sage-guard,
+sage-score, sage-iterate) before and after existing skills execute. Wrapper
+code is distributed under a permissive open-source licence; the API endpoints
+they invoke remain proprietary.
+
+"Original Sage Skills" means proprietary skills developed by SageReasoning
+that derive from two or more Stoic Brain mechanisms (Control Filter, Passion
+Diagnosis, Appropriate Action, Social Obligation, Iterative Refinement, Value
+Assessment). Original Sage Skills are proprietary in their entirety, including
+the skill contract (SKILL.md), the server-side implementation, and the
+evaluation prompts.
 
 GRANT OF RIGHTS
 

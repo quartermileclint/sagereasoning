@@ -12,6 +12,7 @@ import {
 } from '@/lib/document-scorer'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
+import { buildEnvelope } from '@/lib/response-envelope'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -27,6 +28,7 @@ export async function POST(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
+    const startTime = Date.now()
     const { text, title, mode } = await request.json()
     const isPolicy = mode === 'policy'
     const scoringPrompt = isPolicy ? V3_POLICY_SCORING_PROMPT : V3_DOCUMENT_SCORING_PROMPT
@@ -199,16 +201,20 @@ export async function POST(request: NextRequest) {
       })
       .then(() => {})
 
-    // Add AI transparency metadata (NAIC guidance; OECD principles) + R3 disclaimer
-    return NextResponse.json(
-      {
-        ...result,
-        ai_generated: true,
-        ai_model: 'claude-sonnet-4-6',
-        disclaimer: DOCUMENT_EVALUATIVE_DISCLAIMER,
+    // Build response with metadata envelope
+    const envelope = buildEnvelope({
+      result,
+      endpoint: '/api/score-document',
+      model: 'claude-sonnet-4-6',
+      startTime,
+      maxTokens: 2048,
+      composability: {
+        next_steps: ['/api/score-iterate'],
+        recommended_action: 'Review the evaluation results and consider iterative refinement with /api/score-iterate.',
       },
-      { headers: corsHeaders() }
-    )
+    })
+
+    return NextResponse.json(envelope, { headers: corsHeaders() })
   } catch (error) {
     console.error('Document evaluation API error:', error)
     return NextResponse.json(

@@ -750,7 +750,7 @@ export function getOikeiosisStage(
  * include this visible disclaimer.
  */
 export const EVALUATIVE_DISCLAIMER =
-  'This is a philosophical framework and does not consider legal, medical, financial, or personal obligations.' as const
+  'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.' as const
 
 // ============================================================================
 // TEMPORARY V1 COMPATIBILITY SHIMS

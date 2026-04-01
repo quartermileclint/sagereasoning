@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { buildEnvelope } from '@/lib/response-envelope'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -72,6 +73,7 @@ export async function POST(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
+    const startTime = Date.now()
     const { decision, options, context } = await request.json()
 
     if (!decision || typeof decision !== 'string' || decision.trim().length === 0) {
@@ -167,7 +169,19 @@ Score each option. Return the JSON array.`
       })
       .then(() => {})
 
-    return NextResponse.json(result, {
+    const envelope = buildEnvelope({
+      result,
+      endpoint: '/api/score-decision',
+      model: 'claude-sonnet-4-6',
+      startTime,
+      maxTokens: 2048,
+      composability: {
+        next_steps: ['/api/score-iterate'],
+        recommended_action: 'Review decision options and consider deeper analysis with /api/score-iterate.',
+      },
+    })
+
+    return NextResponse.json(envelope, {
       headers: corsHeaders(),
     })
   } catch (error) {

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sage-Wrapped Skill — Demo Output</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; line-height: 1.6; padding: 40px 20px; }
+  .container { max-width: 900px; margin: 0 auto; }
+
+  .header { text-align: center; margin-bottom: 60px; }
+  .header h1 { font-size: 28px; color: #f0f6fc; margin-bottom: 8px; }
+  .header p { color: #8b949e; font-size: 15px; }
+
+  .comparison { display: flex; gap: 24px; margin-bottom: 60px; }
+  .comparison-col { flex: 1; }
+  .comparison-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; padding: 8px 16px; border-radius: 6px; text-align: center; }
+  .label-before { background: #1c1c1c; color: #8b949e; }
+  .label-after { background: #0d2818; color: #3fb950; }
+
+  .output-box { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .output-box .line { padding: 2px 0; }
+  .output-box .dim { color: #484f58; }
+  .output-box .tool-name { color: #79c0ff; }
+  .output-box .result { color: #c9d1d9; }
+  .output-box .pass { color: #3fb950; }
+  .output-box .warn { color: #d29922; }
+  .output-box .fail { color: #f85149; }
+  .output-box .separator { border-top: 1px solid #21262d; margin: 10px 0; }
+
+  .section { margin-bottom: 48px; }
+  .section-title { font-size: 20px; color: #f0f6fc; margin-bottom: 6px; }
+  .section-subtitle { font-size: 14px; color: #8b949e; margin-bottom: 24px; }
+
+  .phase { margin-bottom: 36px; }
+  .phase-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .phase-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-green { background: #3fb950; }
+  .dot-blue { background: #58a6ff; }
+  .dot-amber { background: #d29922; }
+  .phase-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: #8b949e; }
+  .phase-name { font-size: 16px; font-weight: 600; color: #f0f6fc; }
+
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+  .card-header { padding: 14px 20px; border-bottom: 1px solid #21262d; display: flex; justify-content: space-between; align-items: center; }
+  .card-title { font-size: 13px; font-weight: 600; color: #c9d1d9; }
+  .card-badge { font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 12px; }
+  .badge-pass { background: #0d2818; color: #3fb950; }
+  .badge-note { background: #2a1f00; color: #d29922; }
+  .badge-flag { background: #2d0a0a; color: #f85149; }
+  .badge-cost { background: #0d1d30; color: #58a6ff; }
+  .card-body { padding: 16px 20px; font-size: 13px; }
+  .card-body p { margin-bottom: 8px; }
+  .card-body .field-label { color: #8b949e; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 2px; }
+  .card-body .field-value { color: #c9d1d9; margin-bottom: 12px; }
+  .card-body .improvement { color: #79c0ff; font-style: italic; }
+
+  .rule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .rule-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #0d1117; border-radius: 6px; font-size: 12px; }
+  .rule-icon { font-size: 14px; }
+
+  .meta-bar { display: flex; gap: 20px; padding: 12px 20px; background: #0d1117; border-top: 1px solid #21262d; font-size: 11px; color: #8b949e; }
+  .meta-item { display: flex; align-items: center; gap: 4px; }
+
+  .flow-diagram { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 30px 0; flex-wrap: wrap; }
+  .flow-step { padding: 10px 18px; border-radius: 8px; font-size: 12px; font-weight: 600; text-align: center; min-width: 120px; }
+  .flow-pre { background: #0d2818; color: #3fb950; border: 1px solid #1a3a2a; }
+  .flow-exec { background: #0d1d30; color: #58a6ff; border: 1px solid #1a2d40; }
+  .flow-post { background: #2a1f00; color: #d29922; border: 1px solid #3a2f10; }
+  .flow-iter { background: #1c0d2e; color: #bc8cff; border: 1px solid #2c1d3e; }
+  .flow-arrow { color: #484f58; font-size: 18px; }
+
+  .example-label { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; padding: 4px 10px; border-radius: 4px; margin-bottom: 16px; }
+  .ex-real { background: #0d2818; color: #3fb950; }
+  .ex-generic { background: #0d1d30; color: #58a6ff; }
+
+  @media (max-width: 700px) {
+    .comparison { flex-direction: column; }
+    .rule-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>What a Sage-Wrapped Skill Looks Like</h1>
+    <p>Developer-facing output from a sage-wrapped code-review skill<br>Based on real validation reports from the SageReasoning build process</p>
+  </div>
+
+  <!-- FLOW DIAGRAM -->
+  <div class="section">
+    <div class="section-title">The Wrapper Flow</div>
+    <div class="section-subtitle">Three checkpoints around one skill execution. Each checkpoint is a single API call.</div>
+    <div class="flow-diagram">
+      <div class="flow-step flow-pre">PRE-ACTION<br><span style="font-weight:400;font-size:11px">sage-guard</span><br><span style="font-weight:400;font-size:10px;opacity:0.7">$0.001 · &lt;100ms</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step flow-exec">EXECUTE<br><span style="font-weight:400;font-size:11px">code-review</span><br><span style="font-weight:400;font-size:10px;opacity:0.7">runs normally</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step flow-post">POST-ACTION<br><span style="font-weight:400;font-size:11px">sage-score</span><br><span style="font-weight:400;font-size:10px;opacity:0.7">~$0.01 · ~500ms</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step flow-iter">IF NEEDED<br><span style="font-weight:400;font-size:11px">sage-iterate</span><br><span style="font-weight:400;font-size:10px;opacity:0.7">~$0.01 · optional</span></div>
+    </div>
+  </div>
+
+  <!-- COMPARISON: BEFORE/AFTER -->
+  <div class="section">
+    <div class="section-title">Context Window: Before vs. After</div>
+    <div class="section-subtitle">What the developer sees in their agent's tool list</div>
+    <div class="comparison">
+      <div class="comparison-col">
+        <div class="comparison-label label-before">Without Wrapper</div>
+        <div class="output-box">
+          <div class="line"><span class="tool-name">code-review</span></div>
+          <div class="line"><span class="dim">Review code changes for security,</span></div>
+          <div class="line"><span class="dim">performance, and correctness.</span></div>
+        </div>
+      </div>
+      <div class="comparison-col">
+        <div class="comparison-label label-after">With Sage Wrapper</div>
+        <div class="output-box">
+          <div class="line"><span class="tool-name">sage-review</span></div>
+          <div class="line"><span class="dim">Code review with reasoning quality</span></div>
+          <div class="line"><span class="dim">checkpoints. Pre-action guard catches</span></div>
+          <div class="line"><span class="dim">scope issues. Post-action score evaluates</span></div>
+          <div class="line"><span class="dim">whether feedback is constructive vs.</span></div>
+          <div class="line"><span class="dim">reactive. $0.011/review.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 1: PRE-ACTION -->
+  <div class="section">
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-dot dot-green"></div>
+        <div>
+          <div class="phase-label">Phase 1 — Pre-Action</div>
+          <div class="phase-name">sage-guard output</div>
+        </div>
+      </div>
+
+      <span class="example-label ex-generic">Developer sees this before the review starts</span>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Pre-Action Decision Gate</div>
+          <div class="card-badge badge-pass">PROCEED</div>
+        </div>
+        <div class="card-body">
+          <div class="field-label">Task</div>
+          <div class="field-value">Review PR #247: Refactor auth middleware to support OAuth2 flow</div>
+
+          <div class="field-label">Control Check</div>
+          <div class="field-value">Within scope. The review covers code you have authority to evaluate. No external dependencies outside your control.</div>
+
+          <div class="field-label">Reasoning Quality Flag</div>
+          <div class="field-value" style="color:#3fb950">No flags. Review scope is well-defined, PR description is clear, and the changeset is focused on a single concern.</div>
+        </div>
+        <div class="meta-bar">
+          <div class="meta-item">Cost: $0.001</div>
+          <div class="meta-item">Latency: 47ms</div>
+          <div class="meta-item">Deterministic: Yes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 2: THE SKILL RUNS -->
+  <div class="section">
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-dot dot-blue"></div>
+        <div>
+          <div class="phase-label">Phase 2 — Execute</div>
+          <div class="phase-name">code-review runs normally</div>
+        </div>
+      </div>
+
+      <span class="example-label ex-generic">The original skill does its job — unchanged</span>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Code Review Output (standard skill)</div>
+          <div class="card-badge badge-cost">SKILL OUTPUT</div>
+        </div>
+        <div class="card-body" style="color:#8b949e">
+          <p>[The regular code-review skill produces its normal output here — security findings, performance notes, correctness checks, suggested changes. This is untouched by the wrapper.]</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 3: POST-ACTION -->
+  <div class="section">
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-dot dot-amber"></div>
+        <div>
+          <div class="phase-label">Phase 3 — Post-Action</div>
+          <div class="phase-name">sage-score output</div>
+        </div>
+      </div>
+
+      <span class="example-label ex-real">Based on real SageReasoning validation report (P3.7)</span>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Reasoning Quality Evaluation</div>
+          <div class="card-badge badge-pass">PRINCIPLED</div>
+        </div>
+        <div class="card-body">
+          <div class="field-label">Right Action Proximity</div>
+          <div class="field-value"><strong style="color:#3fb950">Principled</strong> — Review demonstrates structured, evidence-based reasoning across all evaluation criteria.</div>
+
+          <div class="field-label">Reasoning Strengths</div>
+          <div class="field-value">Review addresses security, performance, and correctness systematically. Each finding cites specific code locations. Suggestions are constructive with clear rationale.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Check-by-Check Assessment</div>
+          <div class="card-badge badge-pass">11 of 12 clear</div>
+        </div>
+        <div class="card-body">
+          <div class="rule-grid">
+            <div class="rule-item"><span class="rule-icon" style="color:#3fb950">✓</span> Scope bounded correctly</div>
+            <div class="rule-item"><span class="rule-icon" style="color:#3fb950">✓</span> Findings cite evidence</div>
+            <div class="rule-item"><span class="rule-icon" style="color:#3fb950">✓</span> Feedback is constructive</div>
+            <div class="rule-item"><span class="rule-icon" style="color:#3fb950">✓</span> No assumptions without basis</div>
+            <div class="rule-item"><span class="rule-icon" style="color:#3fb950">✓</span> Security concerns addressed</div>
+            <div class="rule-item"><span class="rule-icon" style="color:#3fb950">✓</span> Edge cases considered</div>
+            <div class="rule-item"><span class="rule-icon" style="color:#3fb950">✓</span> Proportionate to risk level</div>
+            <div class="rule-item"><span class="rule-icon" style="color:#3fb950">✓</span> No reactive/emotional tone</div>
+            <div class="rule-item"><span class="rule-icon" style="color:#3fb950">✓</span> Improvement path given</div>
+            <div class="rule-item"><span class="rule-icon" style="color:#3fb950">✓</span> Trade-offs acknowledged</div>
+            <div class="rule-item"><span class="rule-icon" style="color:#d29922">⚠</span> Deferred: load testing impact</div>
+            <div class="rule-item"><span class="rule-icon" style="color:#3fb950">✓</span> No outcome promises</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Passion Diagnostic</div>
+          <div class="card-badge badge-note">1 detected</div>
+        </div>
+        <div class="card-body">
+          <div class="field-label">Detected</div>
+          <div class="field-value" style="color:#d29922">Mild impatience (sub-species: hastiness) — The review's performance section recommends "just add caching" without evaluating whether the bottleneck warrants it. This may reflect rushing to close rather than fully diagnosing.</div>
+
+          <div class="field-label">False Judgement Identified</div>
+          <div class="field-value">"This PR is taking too long to review, so let me shortcut the performance analysis." The shortcut assumes caching is the right fix before confirming the problem.</div>
+
+          <div class="field-label">Correction</div>
+          <div class="field-value improvement">Replace the caching recommendation with a diagnostic step: "Profile the auth middleware under load to confirm whether latency is in the OAuth handshake or token validation before choosing a mitigation."</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Summary</div>
+          <div class="card-badge badge-pass">PRINCIPLED</div>
+        </div>
+        <div class="card-body">
+          <div class="field-label">Overall</div>
+          <div class="field-value">11 of 12 checks clear. 1 area deferred (load testing impact — appropriate to defer). 1 mild passion detected (hastiness in performance section). Review quality is principled with one specific improvement opportunity.</div>
+
+          <div class="field-label">Recommended Action</div>
+          <div class="field-value improvement">Revise the performance section to replace the caching shortcut with a diagnostic recommendation. Estimated improvement: principled → principled (stronger). Use sage-iterate if you want guided refinement.</div>
+        </div>
+        <div class="meta-bar">
+          <div class="meta-item">Cost: $0.009</div>
+          <div class="meta-item">Latency: 480ms</div>
+          <div class="meta-item">Model: claude-haiku-4-5</div>
+          <div class="meta-item">Deterministic checks: 4 of 12</div>
+          <div class="meta-item">LLM checks: 8 of 12</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOTAL COST -->
+  <div class="section" style="text-align:center; padding: 30px 0; border-top: 1px solid #21262d;">
+    <div style="font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Total wrapper cost for this review</div>
+    <div style="font-size: 32px; font-weight: 700; color: #f0f6fc;">$0.010</div>
+    <div style="font-size: 13px; color: #8b949e; margin-top: 6px;">sage-guard: $0.001 + sage-score: $0.009 · Total latency: 527ms</div>
+    <div style="font-size: 12px; color: #58a6ff; margin-top: 16px;">The code-review skill ran exactly as it would without the wrapper.<br>The wrapper added reasoning quality evaluation for one cent.</div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div style="text-align:center; padding: 20px; font-size: 11px; color: #484f58;">
+    This is a philosophical framework and does not consider legal, medical, financial, or personal obligations.<br>
+    Demo output based on real SageReasoning validation reports. Sanitised for developer audience.
+  </div>
+
+</div>
+</body>
+</html>

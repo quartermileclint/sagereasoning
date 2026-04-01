@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { buildEnvelope } from '@/lib/response-envelope'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -98,7 +99,7 @@ You must return ONLY valid JSON — no markdown, no explanation outside the JSON
   "improvement_path": "<which false judgement to correct and which passion to address>",
   "oikeiosis_context": "<which social obligations were relevant and whether met>",
   "philosophical_reflection": "<2-3 sentences of Stoic reasoning>",
-  "disclaimer": "This is a philosophical framework and does not consider legal, medical, financial, or personal obligations."
+  "disclaimer": "Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations."
 }`
 
 export async function POST(request: NextRequest) {
@@ -111,6 +112,7 @@ export async function POST(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
+    const startTime = Date.now()
     const { action, context, relationships, emotional_state, prior_feedback } = await request.json()
 
     if (!action || action.trim().length === 0) {
@@ -186,16 +188,25 @@ Return only the JSON evaluation object.`
       }
     }
 
-    // Add AI transparency metadata
-    const responsePayload = {
-      ...evalData,
-      ai_generated: true,
-      ai_model: 'claude-sonnet-4-6',
-      // R3: Ensure disclaimer is always present
-      disclaimer: 'This is a philosophical framework and does not consider legal, medical, financial, or personal obligations.',
-    }
+    // R3: Ensure disclaimer is always present
+    evalData.disclaimer = 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.'
 
-    return NextResponse.json(responsePayload, { headers: corsHeaders() })
+    // Build response with metadata envelope (Task 2.2)
+    const envelope = buildEnvelope({
+      result: evalData,
+      endpoint: '/api/score',
+      model: 'claude-sonnet-4-6',
+      startTime,
+      maxTokens: 1536,
+      composability: {
+        next_steps: ['/api/score-iterate', '/api/reason'],
+        recommended_action: evalData.virtue_quality?.katorthoma_proximity === 'reflexive' || evalData.virtue_quality?.katorthoma_proximity === 'habitual'
+          ? 'Address the false judgements identified in passion_diagnosis, then re-evaluate with /api/score-iterate.'
+          : 'Consider a deeper analysis with /api/reason?depth=deep for iterative refinement tracking.',
+      },
+    })
+
+    return NextResponse.json(envelope, { headers: corsHeaders() })
   } catch (error) {
     console.error('Score API error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

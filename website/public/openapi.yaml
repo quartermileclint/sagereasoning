@@ -1,0 +1,651 @@
+openapi: 3.1.0
+info:
+  title: SageReasoning API
+  version: 3.0.0
+  description: |
+    Structured reasoning evaluation API based on Stoic philosophy.
+
+    At its core is **sage-reason** — a universal reasoning layer that applies
+    the Stoic core triad (Control Filter, Passion Diagnosis, Oikeiosis) to any
+    decision input. All skills and wrappers call sage-reason internally.
+
+    All responses use a standard envelope: `{ result, meta }`.
+
+    Ancient reasoning, modern application. Does not consider legal, medical,
+    financial, or personal obligations.
+  contact:
+    name: SageReasoning
+    url: https://sagereasoning.com
+  license:
+    name: SageReasoning Proprietary Licence
+    url: https://github.com/quartermileclint/stoic-brain/blob/main/LICENSE
+
+servers:
+  - url: https://www.sagereasoning.com
+    description: Production
+
+tags:
+  - name: sage-reason
+    description: Universal reasoning layer — the foundational endpoint
+  - name: evaluation
+    description: Specialized evaluation endpoints (call sage-reason internally)
+  - name: deliberation
+    description: Iterative deliberation chains
+  - name: assessment
+    description: Agent assessment framework
+  - name: discovery
+    description: Discovery and skill catalogue endpoints
+  - name: demo
+    description: No-auth demo endpoints
+
+paths:
+  /api/reason:
+    post:
+      tags: [sage-reason]
+      summary: Universal reasoning check
+      description: |
+        **Outcome:** Run the Stoic core triad (or more) against any decision input.
+        **Cost + Speed:** ~$0.025-$0.055 depending on depth, ~2-4s.
+        **Chains To:** Any sage skill, sage-iterate, sage-guard.
+
+        The depth parameter controls how many mechanisms are applied:
+        - `quick` (3): Control Filter + Passion Diagnosis + Oikeiosis
+        - `standard` (5): + Value Assessment + Appropriate Action
+        - `deep` (6): + Iterative Refinement (Senecan progress tracking)
+      operationId: reason
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [input]
+              properties:
+                input:
+                  type: string
+                  maxLength: 5000
+                  description: The decision, action, or situation to reason about.
+                  example: "I'm considering leaving my stable job to start a business, motivated by the potential for wealth and the fear of regret."
+                context:
+                  type: string
+                  maxLength: 5000
+                  description: Additional context for the reasoning.
+                depth:
+                  type: string
+                  enum: [quick, standard, deep]
+                  default: standard
+                  description: How many Stoic mechanisms to apply.
+                domain_context:
+                  type: string
+                  maxLength: 5000
+                  description: Domain-specific context (used by skill templates).
+      responses:
+        '200':
+          description: Reasoning evaluation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReasonResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /api/evaluate:
+    post:
+      tags: [demo]
+      summary: Instant demo — no auth required
+      description: |
+        **Outcome:** Try sage-reason instantly — no signup, no API key.
+        **Cost + Speed:** Free, ~2s. Quick depth only.
+        **Chains To:** /api/reason (with auth for deeper analysis).
+
+        500 character input limit. 5 requests/minute rate limit.
+      operationId: evaluate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [input]
+              properties:
+                input:
+                  type: string
+                  maxLength: 500
+                  description: The decision to evaluate.
+      responses:
+        '200':
+          description: Quick evaluation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeResponse'
+
+  /api/score:
+    post:
+      tags: [evaluation]
+      summary: 4-stage action evaluation
+      description: |
+        **Outcome:** Pre-action decision audit with structured reasoning + improvement path.
+        **Cost + Speed:** ~$0.033, ~2s.
+        **Chains To:** sage-iterate, sage-reason.
+      operationId: score
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action:
+                  type: string
+                  maxLength: 2000
+                context:
+                  type: string
+                  maxLength: 5000
+                relationships:
+                  type: string
+                  maxLength: 5000
+                emotional_state:
+                  type: string
+                  maxLength: 5000
+                prior_feedback:
+                  type: object
+                  properties:
+                    previous_action:
+                      type: string
+                    previous_proximity:
+                      type: string
+                    passions_identified:
+                      type: array
+                      items:
+                        type: string
+                    false_judgements:
+                      type: array
+                      items:
+                        type: string
+                    sage_reflection:
+                      type: string
+      responses:
+        '200':
+          description: Evaluation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeResponse'
+
+  /api/guardrail:
+    post:
+      tags: [evaluation]
+      summary: Pre-action decision gate
+      description: |
+        **Outcome:** Sub-100ms binary go/no-go check before acting.
+        **Cost + Speed:** ~$0.001, <100ms.
+        **Chains To:** sage-iterate.
+      operationId: guardrail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action:
+                  type: string
+                  maxLength: 2000
+                context:
+                  type: string
+                  maxLength: 5000
+                threshold:
+                  type: string
+                  enum: [reflexive, habitual, deliberate, principled, sage_like]
+                  default: deliberate
+                agent_id:
+                  type: string
+      responses:
+        '200':
+          description: Guardrail decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeResponse'
+
+  /api/score-iterate:
+    post:
+      tags: [deliberation]
+      summary: Start or continue a deliberation chain
+      description: |
+        **Outcome:** Iterative decision refinement — submit, get feedback, revise, track improvement.
+        **Cost + Speed:** ~$0.033, ~2s per iteration.
+        **Chains To:** sage-score.
+      operationId: scoreIterate
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                context:
+                  type: string
+                agent_id:
+                  type: string
+                chain_id:
+                  type: string
+                revised_action:
+                  type: string
+                revision_rationale:
+                  type: string
+      responses:
+        '200':
+          description: Chain step result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeResponse'
+
+  /api/score-decision:
+    post:
+      tags: [evaluation]
+      summary: Compare 2-5 options by reasoning quality
+      description: |
+        **Outcome:** Option ranker — submit choices, get them ranked by reasoning quality.
+        **Cost + Speed:** ~$0.033, ~2s.
+        **Chains To:** sage-guard.
+      operationId: scoreDecision
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision, options]
+              properties:
+                decision:
+                  type: string
+                options:
+                  type: array
+                  minItems: 2
+                  maxItems: 5
+                  items:
+                    type: string
+                context:
+                  type: string
+      responses:
+        '200':
+          description: Ranked options
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeResponse'
+
+  /api/score-document:
+    post:
+      tags: [evaluation]
+      summary: Document quality audit + trust badge
+      description: |
+        **Outcome:** Evaluate reasoning quality in a document or text, with shareable trust badge.
+        **Cost + Speed:** ~$0.033, ~3s.
+        **Chains To:** sage-iterate.
+      operationId: scoreDocument
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                  maxLength: 30000
+                title:
+                  type: string
+                mode:
+                  type: string
+                  enum: [document, policy]
+      responses:
+        '200':
+          description: Document evaluation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeResponse'
+
+  /api/score-conversation:
+    post:
+      tags: [evaluation]
+      summary: Conversation quality breakdown
+      description: |
+        **Outcome:** Per-participant reasoning analysis of a conversation.
+        **Cost + Speed:** ~$0.033, ~3s.
+        **Chains To:** —
+      operationId: scoreConversation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [messages]
+              properties:
+                messages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      speaker:
+                        type: string
+                      text:
+                        type: string
+      responses:
+        '200':
+          description: Conversation evaluation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeResponse'
+
+  /api/reflect:
+    post:
+      tags: [evaluation]
+      summary: End-of-day decision review
+      description: |
+        **Outcome:** Identifies patterns in daily decisions + structured Stoic examination.
+        **Cost + Speed:** ~$0.033, ~2s.
+        **Chains To:** —
+      operationId: reflect
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [actions]
+              properties:
+                actions:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Reflection result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeResponse'
+
+  /api/stoic-brain:
+    get:
+      tags: [discovery]
+      summary: Reasoning framework context
+      description: |
+        **Outcome:** Load the Stoic Brain reference data — public, no auth.
+        **Cost + Speed:** Free, <50ms (deterministic).
+        **Chains To:** —
+      operationId: stoicBrain
+      responses:
+        '200':
+          description: Stoic Brain framework data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/skills:
+    get:
+      tags: [discovery]
+      summary: List all capabilities as skill contracts
+      description: |
+        **Outcome:** Agent-readable catalogue of all sage skills with Outcome/Cost/Chains To contracts.
+        **Cost + Speed:** Free, <50ms (deterministic).
+        **Chains To:** /api/skills/{id}
+      operationId: listSkills
+      responses:
+        '200':
+          description: Skill catalogue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeResponse'
+
+  /api/skills/{id}:
+    get:
+      tags: [discovery]
+      summary: Full skill contract with example I/O
+      description: |
+        **Outcome:** Complete contract for a specific skill including example_input and example_output.
+        **Cost + Speed:** Free, <50ms (deterministic).
+        **Chains To:** /api/execute
+      operationId: getSkill
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Skill detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Supabase JWT or API key (sr_live_...)
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: API key (sr_live_...)
+
+  schemas:
+    KatorthomaProximity:
+      type: string
+      enum: [reflexive, habitual, deliberate, principled, sage_like]
+      description: Qualitative proximity to sage-like reasoning (no numeric scores).
+
+    ControlFilter:
+      type: object
+      properties:
+        within_prohairesis:
+          type: array
+          items:
+            type: string
+        outside_prohairesis:
+          type: array
+          items:
+            type: string
+
+    PassionDiagnosis:
+      type: object
+      properties:
+        passions_detected:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              root_passion:
+                type: string
+                enum: [epithumia, hedone, phobos, lupe]
+        false_judgements:
+          type: array
+          items:
+            type: string
+        correct_judgements:
+          type: array
+          items:
+            type: string
+        causal_stage_affected:
+          type: string
+          enum: [phantasia, synkatathesis, horme, praxis]
+
+    Oikeiosis:
+      type: object
+      properties:
+        relevant_circles:
+          type: array
+          items:
+            type: object
+            properties:
+              stage:
+                type: integer
+                minimum: 1
+                maximum: 5
+              description:
+                type: string
+              obligation_met:
+                type: boolean
+                nullable: true
+              tension:
+                type: string
+                nullable: true
+        deliberation_notes:
+          type: string
+
+    ResponseMeta:
+      type: object
+      properties:
+        endpoint:
+          type: string
+        ai_model:
+          type: string
+        ai_generated:
+          type: boolean
+        latency_ms:
+          type: integer
+        cost_usd:
+          type: number
+          nullable: true
+        is_deterministic:
+          type: boolean
+        evaluated_at:
+          type: string
+          format: date-time
+        composability:
+          type: object
+          properties:
+            next_steps:
+              type: array
+              items:
+                type: string
+            recommended_action:
+              type: string
+        usage:
+          type: object
+          properties:
+            monthly_calls_used:
+              type: integer
+            monthly_limit:
+              type: integer
+            monthly_remaining:
+              type: integer
+            usage_trigger:
+              type: string
+              enum: [pre_limit, at_limit]
+              nullable: true
+            value_summary:
+              type: string
+
+    ReasonResponse:
+      type: object
+      properties:
+        result:
+          type: object
+          properties:
+            control_filter:
+              $ref: '#/components/schemas/ControlFilter'
+            passion_diagnosis:
+              $ref: '#/components/schemas/PassionDiagnosis'
+            oikeiosis:
+              $ref: '#/components/schemas/Oikeiosis'
+            value_assessment:
+              type: object
+              description: Present at standard and deep depth.
+            kathekon_assessment:
+              type: object
+              description: Present at standard and deep depth.
+            iterative_refinement:
+              type: object
+              description: Present at deep depth only.
+            katorthoma_proximity:
+              $ref: '#/components/schemas/KatorthomaProximity'
+            philosophical_reflection:
+              type: string
+            improvement_path:
+              type: string
+            disclaimer:
+              type: string
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    EnvelopeResponse:
+      type: object
+      description: Standard response envelope used by all endpoints.
+      properties:
+        result:
+          type: object
+          description: Evaluation-specific result data.
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    RateLimited:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string

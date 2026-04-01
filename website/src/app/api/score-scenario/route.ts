@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { buildEnvelope } from '@/lib/response-envelope'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -80,6 +81,7 @@ export async function GET(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
+    const startTime = Date.now()
     const { searchParams } = new URL(request.url)
     const audience = (searchParams.get('audience') || 'teen') as Audience
     const topic = searchParams.get('topic') || null
@@ -135,7 +137,19 @@ Return the JSON scenario with options.`
       })
       .then(() => {})
 
-    return NextResponse.json(result, {
+    const envelope = buildEnvelope({
+      result,
+      endpoint: '/api/score-scenario',
+      model: 'claude-sonnet-4-6',
+      startTime,
+      maxTokens: 1536,
+      composability: {
+        next_steps: ['POST /api/score-scenario'],
+        recommended_action: 'User should respond to the scenario, then POST their response back to this endpoint for scoring.',
+      },
+    })
+
+    return NextResponse.json(envelope, {
       headers: corsHeaders(),
     })
   } catch (error) {
@@ -155,6 +169,7 @@ export async function POST(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
+    const startTime = Date.now()
     const { scenario, response, audience, user_id } = await request.json()
 
     if (!scenario || typeof scenario !== 'string') {
@@ -262,7 +277,19 @@ Score this response. Return the JSON.`
       })
       .then(() => {})
 
-    return NextResponse.json(result, {
+    const envelope = buildEnvelope({
+      result,
+      endpoint: '/api/score-scenario',
+      model: 'claude-sonnet-4-6',
+      startTime,
+      maxTokens: 1536,
+      composability: {
+        next_steps: ['/api/score-iterate'],
+        recommended_action: 'Review feedback and sage guidance. Consider deeper reflection with /api/reflect or iterate with /api/score-iterate.',
+      },
+    })
+
+    return NextResponse.json(envelope, {
       headers: corsHeaders(),
     })
   } catch (error) {

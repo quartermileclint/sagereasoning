@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { buildEnvelope } from '@/lib/response-envelope'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
+    const startTime = Date.now()
     const { what_happened, how_i_responded, user_id } = await request.json()
 
     const textLengthError = validateTextLength(what_happened, 'what_happened', TEXT_LIMITS.medium)
@@ -160,7 +162,19 @@ Score my actions and give me the sage perspective.`
       })
       .then(() => {})
 
-    return NextResponse.json(result, {
+    const envelope = buildEnvelope({
+      result,
+      endpoint: '/api/reflect',
+      model: 'claude-sonnet-4-6',
+      startTime,
+      maxTokens: 1024,
+      composability: {
+        next_steps: ['/api/reflect', '/api/score'],
+        recommended_action: 'Reflect on the sage perspective and evening prompt. Future reflections can be compared or deeper analysis can be done with /api/score.',
+      },
+    })
+
+    return NextResponse.json(envelope, {
       headers: corsHeaders(),
     })
   } catch (error) {

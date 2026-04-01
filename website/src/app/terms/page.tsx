@@ -104,24 +104,96 @@ export default function TermsPage() {
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">6. Intellectual Property</h2>
           <p>
-            The Stoic Brain data (virtue definitions, scoring framework, and structured philosophical
-            compilation) is published under the{' '}
+            The Stoic Brain data (reasoning framework, evaluation sequence design, passions diagnostic,
+            proximity scale, and structured philosophical compilation) is published under the{' '}
             <strong>SageReasoning Proprietary Licence</strong>. A conceptual overview is freely available
-            for evaluation; detailed scoring weights and formulas are provided through the API.
-            The website design, code, journal curriculum, and original written content are owned by
-            SageReasoning and may not be reproduced without permission. Use of the Stoic Brain data
-            to build competing scoring services is prohibited. See the{' '}
+            for evaluation; detailed evaluation logic is provided through the API.
+          </p>
+          <p className="mt-3">
+            The website design, code, journal curriculum, original written content, and all{' '}
+            <strong>original sage skills</strong> (sage-premortem, sage-negotiate, sage-invest,
+            sage-hire, sage-pivot, sage-retro, sage-align, sage-prioritise, sage-resolve,
+            sage-identity, sage-coach, sage-govern, sage-clinical, sage-compliance, sage-moderate,
+            sage-educate) are owned by SageReasoning and may not be reproduced without permission.
+          </p>
+          <p className="mt-3">
+            <strong>Sage skill wrapper</strong> code (the open-source checkpoint logic that calls
+            sage-guard and sage-score around existing skills) is distributed under a permissive
+            licence. However, the SageReasoning API endpoints that wrappers invoke remain proprietary.
+            The <strong>sage-</strong> naming convention and associated skill descriptions are
+            trademarks of SageReasoning.
+          </p>
+          <p className="mt-3">
+            Use of the Stoic Brain data to build competing reasoning evaluation services is
+            prohibited. See the{' '}
             <a href="https://github.com/quartermileclint/sagereasoning/blob/main/LICENSE" className="text-sage-600 underline hover:text-sage-800">full licence</a> for terms.
           </p>
           <p className="mt-3">
-            AI-generated scores and reasoning produced on your behalf are not protected by copyright
+            AI-generated reasoning evaluations produced on your behalf are not protected by copyright
             (as AI-generated content has no human author under Australian law) and may be used freely
             by you.
           </p>
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">7. Limitation of Liability</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">7. Marketplace</h2>
+          <p>
+            SageReasoning operates a marketplace where original sage skills are available for
+            purchase. By using the marketplace (via the website or agent-facing API endpoints)
+            you agree to the following:
+          </p>
+          <ul className="list-disc pl-6 mt-2 space-y-1 text-sage-700">
+            <li>
+              <strong>Skill acquisition</strong> grants a non-exclusive, non-transferable licence
+              to invoke that skill via the SageReasoning API. Skills are not downloaded; they
+              execute server-side.
+            </li>
+            <li>
+              <strong>Pricing</strong> is displayed per-call on the marketplace. SageReasoning
+              reserves the right to adjust pricing with 30 days notice to active subscribers.
+            </li>
+            <li>
+              <strong>Availability:</strong> SageReasoning may add, modify, or retire skills
+              from the marketplace. Acquired skills remain accessible for the duration of your
+              active subscription.
+            </li>
+            <li>
+              <strong>Agent-facing API:</strong> The <code>/api/marketplace</code> endpoints are
+              subject to the same terms as human marketplace access.
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">8. Sage Skill Wrappers</h2>
+          <p>
+            Sage skill wrappers are open-source code that adds pre-action and post-action
+            reasoning checkpoints around existing skills. The wrapper code is free; the API
+            calls within the wrapper (sage-guard, sage-score, sage-iterate) are metered services
+            counted against your monthly API allowance.
+          </p>
+          <p className="mt-3">
+            A single sage-wrapped skill invocation may consume 2&ndash;3 API calls. Usage through
+            wrappers is subject to the same rate limits, pricing, and terms as direct API access.
+          </p>
+          <p className="mt-3">
+            SageReasoning evaluates reasoning quality only. The output of the underlying wrapped
+            skill is outside SageReasoning&rsquo;s control and responsibility.
+          </p>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">9. Free Tier</h2>
+          <p>
+            Free API access provides 100 calls per month with rate limiting. The free tier
+            provides full evaluation output on all endpoints &mdash; the distinction between
+            free and paid is volume, not capability. Free tier access may be modified or
+            discontinued with 30 days notice.
+          </p>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">10. Limitation of Liability</h2>
           <p>
             To the maximum extent permitted by Australian Consumer Law, SageReasoning&rsquo;s liability
             for any loss or damage arising from your use of the Site is limited to the amount you
@@ -137,7 +209,7 @@ export default function TermsPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">8. Privacy</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">11. Privacy</h2>
           <p>
             Our collection and use of your personal information is governed by our{' '}
             <a href="/privacy" className="text-sage-600 underline hover:text-sage-800">Privacy Policy</a>,
@@ -146,7 +218,7 @@ export default function TermsPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">9. Changes to These Terms</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">12. Changes to These Terms</h2>
           <p>
             We may update these Terms from time to time. We will notify registered users of material
             changes by email. Continued use of the Site after notification constitutes acceptance
@@ -155,7 +227,7 @@ export default function TermsPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">10. Governing Law</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">13. Governing Law</h2>
           <p>
             These Terms are governed by the laws of Queensland, Australia. Any disputes will be
             subject to the non-exclusive jurisdiction of the courts of Queensland.
@@ -164,7 +236,7 @@ export default function TermsPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">11. Contact</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">14. Contact</h2>
           <p>
             Questions about these Terms may be directed to:{' '}
             {/* TODO: Add dedicated legal/support email address */}

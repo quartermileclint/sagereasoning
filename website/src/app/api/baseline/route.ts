@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { scoreCore, applyQ6, finalizeWithoutQ6, RETAKE_INTERVAL_DAYS } from '@/lib/baseline-assessment'
 import { checkRateLimit, RATE_LIMITS, requireAuth } from '@/lib/security'
+import { buildEnvelope } from '@/lib/response-envelope'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,6 +18,7 @@ export async function POST(request: NextRequest) {
   const user_id = auth.user.id
 
   try {
+    const startTime = Date.now()
     const body = await request.json()
     const { answers, q6_answer } = body
 
@@ -96,7 +98,20 @@ export async function POST(request: NextRequest) {
       },
     }).then(() => {})
 
-    return NextResponse.json(finalResult)
+    const envelope = buildEnvelope({
+      result: finalResult,
+      endpoint: '/api/baseline',
+      model: 'claude-sonnet-4-6',
+      startTime,
+      maxTokens: 1024,
+      isDeterministic: true,
+      composability: {
+        next_steps: ['/api/score', '/api/reflect'],
+        recommended_action: 'Review your baseline assessment. Consider exploring deeper evaluations with /api/score or daily reflections with /api/reflect.',
+      },
+    })
+
+    return NextResponse.json(envelope)
   } catch (error: unknown) {
     console.error('Baseline assessment error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

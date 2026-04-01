@@ -268,7 +268,7 @@ Return ONLY valid JSON:
   "oikeiosis_context": "<which social obligations were relevant and whether met>",
   "philosophical_reflection": "<2-3 sentences of Stoic reasoning about this revision>",
   "deliberation_note": "<1 sentence acknowledging the agent's deliberation effort>",
-  "disclaimer": "This is a philosophical framework and does not consider legal, medical, financial, or personal obligations."
+  "disclaimer": "Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations."
 }`
 }
 

@@ -9,6 +9,7 @@ import {
 } from '@/lib/guardrails'
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, validateApiKey, withUsageHeaders, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
+import { buildEnvelope } from '@/lib/response-envelope'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
   if (!keyCheck.valid) return keyCheck.error
 
   try {
+    const startTime = Date.now()
     const { action, context, threshold = 'deliberate', agent_id } = await request.json()
 
     if (!action || typeof action !== 'string' || action.trim().length === 0) {
@@ -126,7 +128,24 @@ Return the JSON assessment.`
       })
       .then(() => {})
 
-    return NextResponse.json(result, {
+    const envelope = buildEnvelope({
+      result,
+      endpoint: '/api/guardrail',
+      model: 'claude-haiku-4-5-20251001',
+      startTime,
+      maxTokens: 512,
+      usage: keyCheck.valid ? {
+        monthly_calls_after: keyCheck.monthly_calls_after,
+        monthly_limit: keyCheck.monthly_calls_after + keyCheck.monthly_remaining,
+        monthly_remaining: keyCheck.monthly_remaining,
+      } : undefined,
+      composability: {
+        next_steps: result.proceed ? ['execute_action'] : ['/api/guardrail'],
+        recommended_action: result.recommendation,
+      },
+    })
+
+    return NextResponse.json(envelope, {
       headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck),
     })
   } catch (error) {

@@ -137,7 +137,7 @@ export const KATHEKON_QUALITY_ENGLISH: Record<string, string> = {
 // ─── Evaluative Disclaimer (R3) ───
 
 export const DOCUMENT_EVALUATIVE_DISCLAIMER =
-  'This is a philosophical framework and does not consider legal, medical, financial, or personal obligations.'
+  'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.'
 
 // ─── V3 Document Scoring Prompt (R4: server-side only) ───
 
@@ -225,7 +225,7 @@ Return ONLY valid JSON — no markdown, no explanation outside the JSON:
   "virtue_domains_engaged": ["which virtue domains the document primarily engages"],
   "ruling_faculty_assessment": "2-3 sentences on the unified quality of the document's ethical posture",
   "improvement_path": "1-2 sentences: which false judgement to correct and which passion to address to improve the document",
-  "disclaimer": "This is a philosophical framework and does not consider legal, medical, financial, or personal obligations."
+  "disclaimer": "Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations."
 }`
 
 // R4: This prompt is server-side only.
@@ -317,7 +317,7 @@ Return ONLY valid JSON:
       "severity": "high|medium|low"
     }
   ],
-  "disclaimer": "This is a philosophical framework and does not consider legal, medical, financial, or personal obligations."
+  "disclaimer": "Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations."
 }`
 
 // R4: This prompt is server-side only.
@@ -372,7 +372,7 @@ Return ONLY valid JSON:
   "false_judgements": ["list of all false judgements identified"],
   "corrections": ["for each false judgement, the correct Stoic judgement"],
   "katorthoma_proximity": "reflexive|habitual|deliberate|principled|sage_like",
-  "disclaimer": "This is a philosophical framework and does not consider legal, medical, financial, or personal obligations."
+  "disclaimer": "Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations."
 }`
 
 // ─── V1 Deprecated Shims ───

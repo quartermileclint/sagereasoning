@@ -230,11 +230,16 @@ export function publicCorsPreflightResponse(): NextResponse {
 // API KEY VALIDATION — Cost protection and tier enforcement
 // Bridges to Stripe; no payment processing here, just usage gating.
 //
-// FREE TIER (evaluation only):
-//   monthly_limit: 30 calls   (1 per day with slight buffer)
-//   daily_limit:   1 call     (enough to test integration, not run production)
+// FREE TIER (evaluation and integration):
+//   monthly_limit: 100 calls  (enough to build and test a real integration)
+//   daily_limit:   none       (no daily cap — rate limiting handles burst protection)
 //   max_chain_iterations: 1   (see the score + feedback, can't iterate without paying)
 //   baseline retakes: 1/month per agent_id (aligned with human baseline policy)
+//
+// NOTE: Sage skill wrappers consume 2-3 API calls per invocation (guard + score
+// + optional iterate). A developer using wrapped skills will consume their
+// monthly allowance faster. Pre-limit (80/100) and at-limit (100/100)
+// recommendation triggers are implemented in API response metadata.
 //
 // PAID TIER (production access — 200% of Anthropic API cost per call):
 //   monthly_limit: configurable per key (default 10,000)
