@@ -90,26 +90,28 @@ export default function MethodologyPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">The scoring scale</h2>
-          <p className="mb-4">Each virtue is scored 0–100. The scale means:</p>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">Proximity levels</h2>
+          <p className="mb-4">
+            V3 evaluates your reasoning through a four-stage philosophical sequence and assigns a proximity level, measuring how close your thinking aligns with the Stoic sage ideal:
+          </p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr className="bg-sage-100">
-                  <th className="text-left px-3 py-2 border border-sage-200 font-display font-semibold">Score range</th>
-                  <th className="text-left px-3 py-2 border border-sage-200 font-display font-semibold">Meaning</th>
+                  <th className="text-left px-3 py-2 border border-sage-200 font-display font-semibold">Proximity level</th>
+                  <th className="text-left px-3 py-2 border border-sage-200 font-display font-semibold">What it means</th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  ['90–100', 'Near-perfect expression of this virtue in this action'],
-                  ['70–89', 'Strong, consistent expression with minor gaps'],
-                  ['40–69', 'Partial expression — some virtue present, some conflict'],
-                  ['15–39', 'Mostly driven by impulse, passion, or external concern over virtue'],
-                  ['0–14',  'Acting contrary to this virtue'],
-                ].map(([range, meaning], i) => (
-                  <tr key={range} className={i % 2 === 1 ? 'bg-sage-50' : ''}>
-                    <td className="px-3 py-2 border border-sage-200 font-mono text-sage-600">{range}</td>
+                  ['sage_like', 'Self-assessment demonstrates extraordinary philosophical depth — identifies all relevant passions, false judgements, and virtue domains with precision'],
+                  ['principled', 'Strong philosophical reasoning — correctly identifies most passions and applies the 4-stage evaluation with only minor gaps'],
+                  ['deliberate', 'Adequate self-awareness — recognises some passions and applies basic Stoic framework, but misses subtleties'],
+                  ['habitual', 'Minimal philosophical engagement — relies on surface-level reflection without genuine passion diagnosis'],
+                  ['reflexive', 'No meaningful self-examination — responses show no awareness of passions, false judgements, or prohairesis'],
+                ].map(([level, meaning], i) => (
+                  <tr key={level} className={i % 2 === 1 ? 'bg-sage-50' : ''}>
+                    <td className="px-3 py-2 border border-sage-200 font-mono text-sage-600">{level}</td>
                     <td className="px-3 py-2 border border-sage-200">{meaning}</td>
                   </tr>
                 ))}
@@ -117,10 +119,7 @@ export default function MethodologyPage() {
             </table>
           </div>
           <p className="mt-3 text-sage-600 text-sm">
-            The composite score is calculated as:{' '}
-            <span className="font-mono">
-              (Wisdom × 0.30) + (Justice × 0.25) + (Courage × 0.25) + (Temperance × 0.20)
-            </span>
+            The V3 evaluation applies a unified philosophical framework: <span className="font-mono">prohairesis filter → kathekon assessment → passion diagnosis → unified virtue assessment</span>
           </p>
         </div>
 
@@ -145,15 +144,27 @@ export default function MethodologyPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">How AI applies the criteria</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">The V3 four-stage evaluation sequence</h2>
+          <p className="mb-3">
+            V3 evaluates actions through a structured philosophical framework with four stages:
+          </p>
+          <ol className="list-decimal pl-6 space-y-2 text-sage-700 mb-4">
+            <li><strong>Prohairesis filter:</strong> What is within your moral choice? What lies outside it?</li>
+            <li><strong>Kathekon assessment:</strong> Is this action appropriate to your role and station?</li>
+            <li><strong>Passion diagnosis:</strong> Which passions, false judgements, or preferred indifferents distorted your reasoning?</li>
+            <li><strong>Unified virtue assessment:</strong> How close does this thinking come to the sage ideal?</li>
+          </ol>
+          <p className="mb-3">
+            The four virtues — practical wisdom, justice, courage, and temperance — are assessed as expressions of one unified excellence, not scored independently. This reflects the Stoic doctrine of the unity of virtue.
+          </p>
+          <h3 className="font-display font-medium text-sage-800 mb-2 mt-4">Evaluation workflow</h3>
           <p>
             When you submit an action, document, or post for scoring, the following happens:
           </p>
           <ol className="list-decimal pl-6 mt-2 space-y-2 text-sage-700">
-            <li>Your text is sent to Claude (Anthropic&rsquo;s AI) along with the Stoic Brain scoring criteria.</li>
-            <li>Claude evaluates your text against each virtue&rsquo;s criteria and assigns a 0–100 score.</li>
-            <li>Claude generates explanatory reasoning for each score.</li>
-            <li>The weighted composite score and alignment tier are calculated.</li>
+            <li>Your text is sent to Claude (Anthropic&rsquo;s AI) along with the V3 evaluation criteria.</li>
+            <li>Claude evaluates your text through the 4-stage sequence and assigns a proximity level from reflexive to sage_like.</li>
+            <li>Claude generates explanatory reasoning for the assessment, identifying passions and false judgements where present.</li>
             <li>Results are returned and stored in your history.</li>
           </ol>
           <p className="mt-3 text-sage-600 text-sm italic">

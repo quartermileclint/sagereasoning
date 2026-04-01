@@ -1,4 +1,3 @@
-import { VIRTUES, ALIGNMENT_TIERS } from '@/lib/stoic-brain'
 import PageTracker from '@/components/PageTracker'
 
 const jsonLd = {
@@ -35,8 +34,8 @@ const jsonLd = {
 const endpoints = [
   {
     method: 'GET',
-    path: '/api/v1/virtues',
-    description: 'Returns the four cardinal virtues with sub-virtue names and alignment tier definitions (conceptual overview).',
+    path: '/api/virtues',
+    description: 'Returns the four cardinal virtues with sub-virtue names and philosophical definitions (conceptual overview).',
     auth: false,
     response: `{
   "virtues": [
@@ -44,16 +43,16 @@ const endpoints = [
       "id": "wisdom",
       "name": "Wisdom",
       "sub_virtues": [{ "id": "good_sense", "name": "Good sense" }, ...],
-      "alignment_tiers": [...]
+      "definition": "Practical discernment in evaluating what is in one's control..."
     },
     ...
   ],
-  "scoring_note": "Weights and criteria are proprietary — use the scoring API."
+  "note": "Use the scoring API for action assessment against virtue principles."
 }`,
   },
   {
     method: 'GET',
-    path: '/api/v1/indifferents',
+    path: '/api/indifferents',
     description: 'Returns all preferred and dispreferred indifferents with category definitions (conceptual overview).',
     auth: false,
     response: `{
@@ -66,16 +65,16 @@ const endpoints = [
     },
     ...
   ],
-  "scoring_note": "Virtue relevance scores are proprietary — use the scoring API."
+  "note": "Virtue relevance is assessed server-side through the scoring API."
 }`,
   },
   {
     method: 'GET',
-    path: '/api/v1/stoic-brain',
+    path: '/api/stoic-brain',
     description: 'Master entry point. Returns the Stoic Brain conceptual overview including foundations, virtues, and indifferents.',
     auth: false,
     response: `{
-  "version": "1.0.0",
+  "version": "3.0.0",
   "foundations": {
     "dichotomy_of_control": "...",
     "sage_definition": "...",
@@ -83,65 +82,77 @@ const endpoints = [
   },
   "virtues": [...],
   "indifferents": [...],
-  "scoring_note": "Full scoring weights and criteria are applied server-side through the scoring API."
+  "note": "Assessment endpoints provide detailed virtue analysis with kathekon evaluation."
 }`,
   },
   {
     method: 'POST',
-    path: '/api/v1/score-action',
-    description: 'Score a past action against Stoic virtues. Returns individual virtue scores, composite score, alignment tier, reasoning, and growth path.',
+    path: '/api/score-action',
+    description: 'Score a past action against Stoic virtues. Returns kathekon proximity, passions detected, virtue domains engaged, and growth path.',
     auth: true,
     body: `{
-  "action": "I confronted my colleague about...",
-  "context": "In a team meeting where...",
-  "intended_outcome": "To ensure fair treatment..."
+  "action": "I confronted my colleague about unfair treatment...",
+  "context": "In a team meeting where decisions were being made...",
+  "intended_outcome": "To ensure fair treatment of the team"
 }`,
     response: `{
-  "wisdom_score": 72,
-  "justice_score": 85,
-  "courage_score": 78,
-  "temperance_score": 65,
-  "total_score": 76,
-  "sage_alignment": "progressing",
-  "reasoning": "This action shows...",
-  "improvement_path": "Consider how...",
-  "strength": "Justice",
-  "growth_area": "Temperance"
+  "katorthoma_proximity": "deliberate",
+  "is_kathekon": true,
+  "kathekon_quality": "moderate",
+  "passions_detected": [
+    {
+      "root_passion": "thumos",
+      "sub_species": "righteous_anger",
+      "false_judgement": "Others' mistakes are personal slights"
+    }
+  ],
+  "virtue_domains_engaged": ["andreia", "dikaiosyne"],
+  "improvement_path": "A sage would have spoken with even greater clarity...",
+  "disclaimer": "This is a philosophical framework for reflection, not prescriptive judgment."
 }`,
   },
   {
     method: 'POST',
-    path: '/api/v1/advise-action',
-    description: 'Get Stoic guidance before taking an action. Returns virtue-aligned advice and potential scoring.',
+    path: '/api/advise-action',
+    description: 'Get Stoic guidance before taking an action. Returns wisdom-based advice and kathekon evaluation of proposed action.',
     auth: true,
     body: `{
-  "proposed_action": "I plan to quit my job...",
-  "context": "My manager is unreasonable...",
-  "goal": "Find more fulfilling work"
+  "proposed_action": "I plan to quit my job to pursue freelance work...",
+  "context": "My manager is unsupportive and growth is limited...",
+  "goal": "Find more fulfilling and autonomous work"
 }`,
     response: `{
-  "advice": "A Sage would distinguish between...",
-  "projected_score": 62,
+  "wisdom_guidance": "A Sage would distinguish between what is in your control...",
+  "is_kathekon": false,
+  "kathekon_quality": null,
+  "passions_to_examine": [
+    {
+      "root_passion": "phobos",
+      "sub_species": "fear_of_insignificance",
+      "false_judgement": "Staying in this role means personal failure"
+    }
+  ],
   "virtue_considerations": {
-    "wisdom": "Consider whether...",
-    "courage": "Quitting requires...",
-    ...
+    "sophrosyne": "What is truly prudent given your responsibilities?",
+    "andreia": "Does this action face difficulty with courage or flee from it?",
+    "dikaiosyne": "What obligations do you have to stakeholders?"
   },
-  "alternative_actions": [...]
+  "alternative_perspectives": ["Consider a difficult conversation first", "Explore internal transfer options"]
 }`,
   },
   {
     method: 'GET',
-    path: '/api/v1/user/scores',
+    path: '/api/user/scores',
     description: 'Retrieve authenticated user\'s past action scores, ordered by most recent.',
     auth: true,
     response: `{
   "scores": [
     {
       "id": "uuid",
-      "action_description": "...",
-      "total_score": 76,
-      "sage_alignment": "progressing",
+      "action_description": "Confronted colleague about unfair treatment...",
+      "katorthoma_proximity": "deliberate",
+      "is_kathekon": true,
+      "kathekon_quality": "moderate",
       "created_at": "2026-03-21T..."
     },
     ...
@@ -150,20 +161,126 @@ const endpoints = [
   },
   {
     method: 'GET',
-    path: '/api/v1/user/profile',
-    description: 'Retrieve authenticated user\'s aggregated Stoic profile with averages, strongest virtue, and trend.',
+    path: '/api/user/profile',
+    description: 'Retrieve authenticated user\'s aggregated Stoic profile with virtue engagement patterns and growth trajectory.',
     auth: true,
     response: `{
-  "avg_wisdom": 68.5,
-  "avg_justice": 72.3,
-  "avg_courage": 65.1,
-  "avg_temperance": 60.8,
-  "avg_total": 67.2,
-  "sage_alignment": "aware",
-  "strongest_virtue": "justice",
-  "growth_virtue": "temperance",
+  "primary_virtue_domains": ["dikaiosyne", "phronesis"],
+  "secondary_virtue_domains": ["andreia", "sophrosyne"],
+  "most_frequent_passions": [
+    {
+      "root_passion": "thumos",
+      "frequency": "high",
+      "interpretation": "High engagement with justice and responsibility"
+    }
+  ],
+  "kathekon_alignment": "progressing",
   "actions_scored": 14,
-  "trend": "improving"
+  "last_assessment": "2026-03-21T14:30:00Z",
+  "growth_pattern": "increasing_reflection"
+}`,
+  },
+  {
+    method: 'POST',
+    path: '/api/assessment/foundational',
+    description: 'Run a foundational virtue assessment for an AI agent or human. Single-pass evaluation with core virtue domains and passion analysis.',
+    auth: true,
+    body: `{
+  "agent_id": "agent-uuid-or-human-identifier",
+  "scenario": "You encounter a decision where honesty might cost you resources...",
+  "context": "In a competitive market environment"
+}`,
+    response: `{
+  "assessment_id": "uuid",
+  "agent_id": "agent-uuid",
+  "assessment_type": "foundational",
+  "virtue_domains_engaged": ["dikaiosyne", "sophrosyne"],
+  "primary_passions": [
+    {
+      "root_passion": "pleonexia",
+      "sub_species": "greed",
+      "false_judgement": "Gaining advantage justifies deception"
+    }
+  ],
+  "kathekon_analysis": {
+    "is_kathekon": false,
+    "proximity": "contrary",
+    "reasoning": "Decision prioritizes external goods over virtue"
+  },
+  "recommendations": ["Examine the false judgment about gain", "Reflect on long-term character impact"]
+}`,
+  },
+  {
+    method: 'POST',
+    path: '/api/assessment/full',
+    description: 'Run a comprehensive multi-deliberation virtue assessment for an AI agent. Allows up to 3 deliberation iterations for deeper analysis.',
+    auth: true,
+    body: `{
+  "agent_id": "agent-uuid",
+  "scenario": "A user asks you to misrepresent capabilities to secure a contract...",
+  "context": "High competitive pressure and financial constraints",
+  "deliberation_iterations": 3
+}`,
+    response: `{
+  "assessment_id": "uuid",
+  "agent_id": "agent-uuid",
+  "assessment_type": "full",
+  "deliberation_count": 3,
+  "primary_virtue_analysis": {
+    "sophrosyne": {
+      "engagement": "high",
+      "reasoning": "Careful self-examination across multiple perspectives"
+    },
+    "dikaiosyne": {
+      "engagement": "high",
+      "reasoning": "Justice to client and self-integrity examined"
+    },
+    "phronesis": {
+      "engagement": "high",
+      "reasoning": "Wisdom to discern lasting vs. temporary good"
+    }
+  },
+  "consolidated_passions": [
+    {
+      "root_passion": "phobos",
+      "sub_species": "fear_of_loss",
+      "deliberation_insights": ["Initially dominant", "Revealed as false judgment after iteration 2"]
+    }
+  ],
+  "final_kathekon": {
+    "is_kathekon": true,
+    "proximity": "deliberate",
+    "quality": "strong"
+  },
+  "growth_insights": "Agent demonstrates capacity for iterative virtue reasoning"
+}`,
+  },
+  {
+    method: 'POST',
+    path: '/api/baseline/agent',
+    description: 'Establish or update a baseline virtue profile for an AI agent. Used for tracking virtue development over time.',
+    auth: true,
+    body: `{
+  "agent_id": "agent-uuid",
+  "agent_name": "My Stoic Reasoner v1",
+  "domain": "financial_decision_making"
+}`,
+    response: `{
+  "baseline_id": "uuid",
+  "agent_id": "agent-uuid",
+  "created_at": "2026-03-21T14:30:00Z",
+  "baseline_virtue_profile": {
+    "primary_domains": ["dikaiosyne"],
+    "secondary_domains": ["sophrosyne"],
+    "passion_baseline": {
+      "phobos": "moderate",
+      "thumos": "moderate",
+      "pleonexia": "low"
+    }
+  },
+  "assessment_count_allowed_this_month": 30,
+  "last_full_assessment": null,
+  "next_baseline_available": "2026-04-21T00:00:00Z"
 }`,
   },
 ]
@@ -208,9 +325,9 @@ export default function ApiDocsPage() {
           To use the Stoic Brain in your reasoning:
         </p>
         <ol className="font-body text-sage-700 space-y-2 list-decimal list-inside">
-          <li>Fetch <code className="bg-white px-1 rounded text-sm">/api/v1/stoic-brain</code> for a conceptual overview</li>
+          <li>Fetch <code className="bg-white px-1 rounded text-sm">/api/stoic-brain</code> for a conceptual overview</li>
           <li>Request an API key at <code className="bg-white px-1 rounded text-sm">zeus@sagereasoning.com</code></li>
-          <li>Score actions via <code className="bg-white px-1 rounded text-sm">POST /api/v1/score-action</code></li>
+          <li>Run assessments via <code className="bg-white px-1 rounded text-sm">POST /api/assessment/foundational</code> or <code className="bg-white px-1 rounded text-sm">/api/assessment/full</code></li>
         </ol>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm border-collapse">
@@ -292,24 +409,37 @@ export default function ApiDocsPage() {
         ))}
       </div>
 
-      {/* Scoring model reference */}
+      {/* Assessment model reference */}
       <div className="mt-12 bg-white/60 border border-sage-200 rounded-lg p-8">
-        <h2 className="font-display text-xl font-medium text-sage-800 mb-4">Scoring Model</h2>
+        <h2 className="font-display text-xl font-medium text-sage-800 mb-4">Assessment Framework</h2>
         <p className="font-body text-sage-700 mb-4 leading-relaxed">
-          The composite score is a weighted average of the four virtue scores. Each virtue
-          carries a proprietary weight reflecting its role in Stoic philosophy. The weights
-          and scoring criteria are applied server-side and are not publicly exposed.
+          V3 assessments move beyond numeric scores to philosophical analysis. Each assessment
+          identifies which virtue domains are engaged, detects the underlying passions (pathe)
+          driving decision-making, and evaluates proximity to the kathekon (appropriate action).
+          Assessments are designed to support reflection and virtue development, not to judge.
         </p>
-        <h3 className="font-display text-lg font-medium text-sage-800 mb-3">Alignment Tiers</h3>
-        <div className="space-y-2">
-          {ALIGNMENT_TIERS.map((tier) => (
-            <div key={tier.id} className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tier.color }} />
-              <span className="font-display w-28 font-medium text-sage-800">{tier.label}</span>
-              <span className="font-mono text-sm text-sage-600 w-16">{tier.range}</span>
-              <span className="font-body text-sm text-sage-700">{tier.description}</span>
-            </div>
-          ))}
+        <h3 className="font-display text-lg font-medium text-sage-800 mb-3">Core Assessment Concepts</h3>
+        <div className="space-y-4">
+          <div>
+            <span className="font-display font-medium text-sage-800">Katorthoma Proximity</span>
+            <p className="font-body text-sm text-sage-700">Proximity to the ideal action: &ldquo;contrary&rdquo; (moving away from kathekon), &ldquo;progressing&rdquo; (moving toward), or &ldquo;deliberate&rdquo; (expressing kathekon).</p>
+          </div>
+          <div>
+            <span className="font-display font-medium text-sage-800">Is Kathekon</span>
+            <p className="font-body text-sm text-sage-700">Boolean indicator of whether the action expresses the appropriate action given the context, virtue principles, and one's rational nature.</p>
+          </div>
+          <div>
+            <span className="font-display font-medium text-sage-800">Kathekon Quality</span>
+            <p className="font-body text-sm text-sage-700">For kathekon actions, the quality of virtue expression: &ldquo;weak&rdquo;, &ldquo;moderate&rdquo;, or &ldquo;strong&rdquo;.</p>
+          </div>
+          <div>
+            <span className="font-display font-medium text-sage-800">Passions Detected</span>
+            <p className="font-body text-sm text-sage-700">Root passions (phobos, thumos, pleonexia, thumos) and their sub-species, along with the false judgments underlying them.</p>
+          </div>
+          <div>
+            <span className="font-display font-medium text-sage-800">Virtue Domains</span>
+            <p className="font-body text-sm text-sage-700">Which of the four cardinal virtues (phronesis, dikaiosyne, andreia, sophrosyne) are engaged or need engagement in the assessed action.</p>
+          </div>
         </div>
       </div>
     </div>

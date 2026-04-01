@@ -1,33 +1,52 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { getAlignmentTier } from '@/lib/document-scorer'
+import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-const REFLECTION_PROMPT = `You are the Stoic Sage reflection companion for sagereasoning.com. A user is reflecting on their day — what happened and how they responded. Your role is to score their actions, acknowledge what they did well, and show what a Stoic sage would have done differently.
+const REFLECTION_PROMPT = `You are the Stoic Sage reflection companion for sagereasoning.com. A user is reflecting on their day — what happened and how they responded. Your role is to evaluate their alignment with right reason (katorthoma), identify what they did well, and show what a Stoic sage would have done differently.
 
-Score the user's described actions against the four virtues:
-- Wisdom (Phronesis) — 30%: Did they reason well? Did they distinguish what matters from what doesn't?
-- Justice (Dikaiosyne) — 25%: Did they treat others fairly? Did they serve the common good?
-- Courage (Andreia) — 25%: Did they face difficulty head-on? Did they do what was right despite discomfort?
-- Temperance (Sophrosyne) — 20%: Were they measured? Did they avoid excess in reaction or emotion?
+Use 4-stage evaluation to assess their reflection:
+
+STAGE 1: Is the action aligned with right reason at all?
+- Reflexive (reactive, unconsidered): Acts from habit or impulse without examination
+- Habitual (customary): Follows patterns, social norms, or established practices
+- Deliberate (considered): Thinks through the action, questions assumptions, chooses consciously
+- Principled (reasoned): Acts from explicit understanding of virtue and alignment with nature
+- Sage-like (exemplary): Demonstrates wisdom, justice, courage, and temperance integrated
+
+STAGE 2: Identify any passions detected
+For each significant emotional response in their reflection, extract:
+- root_passion: The primary emotion (e.g., anger, fear, desire, aversion, shame)
+- sub_species: The specific manifestation (e.g., indignation, anxiety, ambition, revulsion, embarrassment)
+- false_judgement: The underlying false belief (what false impression about good/bad did they hold?)
+
+STAGE 3: What did they do well?
+Identify specific actions or virtues they expressed.
+
+STAGE 4: Sage perspective
+What would right reason (katorthoma) suggest differently, if anything? Be specific to their situation.
 
 Be warm but honest. The user is here to grow, not to be flattered.
 
 Return ONLY valid JSON:
 {
-  "wisdom_score": <0-100>,
-  "justice_score": <0-100>,
-  "courage_score": <0-100>,
-  "temperance_score": <0-100>,
-  "total_score": <weighted total>,
-  "what_you_did_well": "<1-2 sentences: specific virtues the user expressed today>",
-  "sage_perspective": "<2-3 sentences: what a Stoic sage would have done differently, if anything. Be specific to their situation. If they acted well, affirm it.>",
-  "evening_prompt": "<1 sentence: a reflective question for the user to sit with tonight, drawn from their specific situation>"
+  "katorthoma_proximity": "<reflexive|habitual|deliberate|principled|sage_like>",
+  "passions_detected": [
+    {
+      "root_passion": "<anger|fear|desire|aversion|shame|other>",
+      "sub_species": "<specific manifestation>",
+      "false_judgement": "<the false belief underlying this passion>"
+    }
+  ],
+  "what_you_did_well": "<1-2 sentences: specific virtues or actions the user expressed today>",
+  "sage_perspective": "<2-3 sentences: what right reason (katorthoma) would suggest, if anything. Be specific to their situation. If they acted well, affirm it.>",
+  "evening_prompt": "<1 sentence: a reflective question for the user to sit with tonight, drawn from their specific situation>",
+  "disclaimer": "This reflection is guidance, not judgment. Only you know the full context of your choices. Stoic practice is about sustained effort toward virtue, not perfection."
 }`
 
 // POST — Submit a daily reflection
@@ -77,22 +96,30 @@ Score my actions and give me the sage perspective.`
     const responseText =
       message.content[0].type === 'text' ? message.content[0].text : ''
 
-    let scoreData
+    let reflectionData
     try {
       const cleaned = responseText
         .replace(/```json?\n?/g, '')
         .replace(/```\n?/g, '')
         .trim()
-      scoreData = JSON.parse(cleaned)
+      reflectionData = JSON.parse(cleaned)
     } catch {
       console.error('Reflection scorer parse error:', responseText)
       return NextResponse.json(
-        { error: 'Scoring engine returned invalid response' },
+        { error: 'Reflection engine returned invalid response' },
         { status: 500 }
       )
     }
 
-    const tier = getAlignmentTier(scoreData.total_score)
+    // Validate katorthoma_proximity is a valid level
+    const validLevels: KatorthomaProximityLevel[] = ['reflexive', 'habitual', 'deliberate', 'principled', 'sage_like']
+    if (!validLevels.includes(reflectionData.katorthoma_proximity)) {
+      console.error('Invalid katorthoma_proximity:', reflectionData.katorthoma_proximity)
+      return NextResponse.json(
+        { error: 'Reflection engine returned invalid proximity level' },
+        { status: 500 }
+      )
+    }
 
     // Save reflection if user_id provided
     if (user_id) {
@@ -102,21 +129,21 @@ Score my actions and give me the sage perspective.`
           user_id,
           what_happened: what_happened.trim(),
           how_responded: how_i_responded?.trim() || null,
-          total_score: scoreData.total_score,
-          wisdom_score: scoreData.wisdom_score,
-          justice_score: scoreData.justice_score,
-          courage_score: scoreData.courage_score,
-          temperance_score: scoreData.temperance_score,
-          alignment_tier: tier,
-          sage_perspective: scoreData.sage_perspective,
-          evening_prompt: scoreData.evening_prompt,
+          katorthoma_proximity: reflectionData.katorthoma_proximity,
+          passions_detected: reflectionData.passions_detected || [],
+          sage_perspective: reflectionData.sage_perspective,
+          evening_prompt: reflectionData.evening_prompt,
         })
         .then(() => {})
     }
 
     const result = {
-      ...scoreData,
-      alignment_tier: tier,
+      katorthoma_proximity: reflectionData.katorthoma_proximity,
+      passions_detected: reflectionData.passions_detected || [],
+      what_you_did_well: reflectionData.what_you_did_well,
+      sage_perspective: reflectionData.sage_perspective,
+      evening_prompt: reflectionData.evening_prompt,
+      disclaimer: reflectionData.disclaimer,
       reflected_at: new Date().toISOString(),
     }
 
@@ -127,8 +154,8 @@ Score my actions and give me the sage perspective.`
         event_type: 'daily_reflection',
         user_id: user_id || null,
         metadata: {
-          total_score: scoreData.total_score,
-          tier,
+          katorthoma_proximity: reflectionData.katorthoma_proximity,
+          passions_count: (reflectionData.passions_detected || []).length,
         },
       })
       .then(() => {})

@@ -1,41 +1,45 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { getAlignmentTier } from '@/lib/document-scorer'
+import { V3_SOCIAL_MEDIA_PROMPT, PROXIMITY_ENGLISH } from '@/lib/document-scorer'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-const SOCIAL_SCORING_PROMPT = `You are the Stoic Sage social media filter for sagereasoning.com. You score short-form text (social media posts, tweets, comments) against Stoic virtue BEFORE the user publishes.
+// V3 Social Media Evaluation Response Type
+interface V3SocialMediaScore {
+  poster_passions: Array<{
+    root_passion: string
+    sub_species: string
+    evidence: string
+    false_judgement: string
+  }>
+  reader_triggered_passions: Array<{
+    root_passion: string
+    sub_species: string
+    evidence: string
+    false_judgement: string
+  }>
+  false_judgements: string[]
+  corrections: string[]
+  katorthoma_proximity: KatorthomaProximityLevel
+  disclaimer: string
+}
 
-This is a pre-publish check. Be practical and direct — the user wants to know if they should post this or revise it.
-
-Score against the four cardinal virtues:
-- Wisdom (Phronesis) — 30%: Is this well-reasoned? Does it add genuine insight or is it reactive/impulsive?
-- Justice (Dikaiosyne) — 25%: Is this fair to all mentioned or implied parties? Would a reasonable person feel treated fairly?
-- Courage (Andreia) — 25%: Does this express genuine conviction, or is it performative outrage, virtue signalling, or crowd-pleasing?
-- Temperance (Sophrosyne) — 20%: Is the tone measured? Does it avoid sarcasm, contempt, or emotional excess?
-
-Be especially alert to:
-- Reactive anger disguised as "truth-telling"
-- Passive-aggressive phrasing
-- Public shaming or dog-piling tendencies
-- Humble-bragging or status signalling
-- Catastrophising or fear-mongering
-
-Return ONLY valid JSON:
-{
-  "wisdom_score": <0-100>,
-  "justice_score": <0-100>,
-  "courage_score": <0-100>,
-  "temperance_score": <0-100>,
-  "total_score": <weighted total>,
-  "publish_recommendation": "<publish | revise | reconsider>",
-  "reasoning": "<1-2 sentences: what a sage would think about this post>",
-  "revision_suggestion": "<1 sentence: if score < 70, suggest a more virtuous way to express the same idea. If score >= 70, say 'No revision needed.'>"
-}`
+// Determine publish recommendation based on proximity level
+function getPublishRecommendation(proximity: KatorthomaProximityLevel): 'publish' | 'revise' | 'reconsider' {
+  if (proximity === 'sage_like' || proximity === 'principled') {
+    return 'publish'
+  } else if (proximity === 'deliberate') {
+    return 'revise'
+  } else {
+    // habitual or reflexive
+    return 'reconsider'
+  }
+}
 
 // POST — Score a social media post before publishing
 export async function POST(request: NextRequest) {
@@ -72,14 +76,14 @@ Return the JSON score.`
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       temperature: 0.2,
-      system: [{ type: 'text', text: SOCIAL_SCORING_PROMPT, cache_control: { type: 'ephemeral' } }],
+      system: [{ type: 'text', text: V3_SOCIAL_MEDIA_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userMessage }],
     })
 
     const responseText =
       message.content[0].type === 'text' ? message.content[0].text : ''
 
-    let scoreData
+    let scoreData: V3SocialMediaScore
     try {
       const cleaned = responseText
         .replace(/```json?\n?/g, '')
@@ -94,26 +98,38 @@ Return the JSON score.`
       )
     }
 
-    const tier = getAlignmentTier(scoreData.total_score)
+    // Derive publish recommendation from proximity level
+    const publish_recommendation = getPublishRecommendation(scoreData.katorthoma_proximity)
+
+    // Format proximity level for display
+    const proximity_label = PROXIMITY_ENGLISH[scoreData.katorthoma_proximity]
 
     const result = {
-      ...scoreData,
-      alignment_tier: tier,
+      poster_passions: scoreData.poster_passions,
+      reader_triggered_passions: scoreData.reader_triggered_passions,
+      false_judgements: scoreData.false_judgements,
+      corrections: scoreData.corrections,
+      katorthoma_proximity: scoreData.katorthoma_proximity,
+      proximity_label,
+      publish_recommendation,
       character_count: trimmed.length,
       platform: platform || null,
       scored_at: new Date().toISOString(),
+      disclaimer: scoreData.disclaimer,
     }
 
-    // Analytics
+    // Analytics — event_type is now 'social_score_v3'
     await supabaseAdmin
       .from('analytics_events')
       .insert({
-        event_type: 'social_score',
+        event_type: 'social_score_v3',
         metadata: {
-          total_score: scoreData.total_score,
-          tier,
+          katorthoma_proximity: scoreData.katorthoma_proximity,
+          proximity_label,
           platform: platform || 'unknown',
-          recommendation: scoreData.publish_recommendation,
+          recommendation: publish_recommendation,
+          poster_passions_count: scoreData.poster_passions.length,
+          reader_passions_count: scoreData.reader_triggered_passions.length,
         },
       })
       .then(() => {})
@@ -124,7 +140,6 @@ Return the JSON score.`
         ...result,
         ai_generated: true,
         ai_model: 'claude-sonnet-4-6',
-        disclaimer: 'This score is AI-generated using Stoic virtue criteria. It is for personal reflection only. See sagereasoning.com/transparency',
       },
       { headers: corsHeaders() }
     )

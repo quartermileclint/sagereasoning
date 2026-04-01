@@ -7,7 +7,8 @@ import { VIRTUES } from '@/lib/stoic-brain'
 interface DayActivity {
   type: 'action' | 'reflection'
   description?: string
-  total_score: number
+  katorthoma_proximity: 'reflexive' | 'habitual' | 'deliberate' | 'principled' | 'sage_like'
+  virtue_domains_engaged?: string[]
   virtues_demonstrated: string[]
 }
 
@@ -15,7 +16,7 @@ interface DayData {
   virtues: string[]
   strongest_virtue: string | null
   stamp_earned: boolean
-  best_total_score: number
+  best_proximity: 'reflexive' | 'habitual' | 'deliberate' | 'principled' | 'sage_like'
   activities: DayActivity[]
 }
 
@@ -26,6 +27,33 @@ interface CalendarData {
 
 interface PracticeCalendarProps {
   userId: string
+}
+
+// Proximity rank mapping for stamp logic
+const PROXIMITY_RANK = {
+  reflexive: 0,
+  habitual: 1,
+  deliberate: 2,
+  principled: 3,
+  sage_like: 4,
+}
+
+// Proximity label mapping for display
+const PROXIMITY_LABELS: Record<string, string> = {
+  reflexive: 'Reflexive',
+  habitual: 'Habitual',
+  deliberate: 'Deliberate',
+  principled: 'Principled',
+  sage_like: 'Sage-Like',
+}
+
+// Proximity color coding
+const PROXIMITY_COLORS: Record<string, string> = {
+  reflexive: '#9CA3AF',
+  habitual: '#78716C',
+  deliberate: '#92400E',
+  principled: '#92400E',
+  sage_like: '#D97706',
 }
 
 // Virtue metadata for quick lookup
@@ -185,6 +213,9 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
             const isFuture = new Date(year, month, day) > today
             const strongestVirtue = dayData?.strongest_virtue ? VIRTUE_MAP[dayData.strongest_virtue] : null
             const hasStamp = dayData?.stamp_earned ?? false
+            const proximityRank = dayData ? PROXIMITY_RANK[dayData.best_proximity] : -1
+            const proximityLabel = dayData ? PROXIMITY_LABELS[dayData.best_proximity] : ''
+            const proximityColor = dayData ? PROXIMITY_COLORS[dayData.best_proximity] : ''
 
             return (
               <button
@@ -204,7 +235,7 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
                   backgroundColor: hasStamp ? (strongestVirtue.color + '10') : (strongestVirtue.color + '06'),
                 } : undefined}
                 disabled={!dayData}
-                aria-label={`${monthNames[month]} ${day}${strongestVirtue ? ` - ${strongestVirtue.name}${hasStamp ? ' (stamp earned)' : ''}` : ''}`}
+                aria-label={`${monthNames[month]} ${day}${strongestVirtue ? ` - ${strongestVirtue.name}${hasStamp ? ` (stamp earned - ${proximityLabel})` : ''}` : ''}`}
               >
                 {/* Stamped day: full-colour virtue logo */}
                 {dayData && strongestVirtue && hasStamp ? (
@@ -212,7 +243,7 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
                     <img
                       src={strongestVirtue.icon}
                       alt={strongestVirtue.name}
-                      title={`${strongestVirtue.name} stamp — scored ${dayData.best_total_score}`}
+                      title={`${strongestVirtue.name} stamp — ${proximityLabel}`}
                       className="w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 drop-shadow-sm"
                     />
                     <span className="absolute top-0 left-0.5 font-display text-[10px] leading-none font-bold" style={{ color: strongestVirtue.color }}>
@@ -220,12 +251,12 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
                     </span>
                   </div>
                 ) : dayData && strongestVirtue && !hasStamp ? (
-                  /* Active day without stamp: muted icon + score hint */
+                  /* Active day without stamp: muted icon + proximity hint */
                   <div className="relative w-full h-full flex items-center justify-center">
                     <img
                       src={strongestVirtue.icon}
                       alt={strongestVirtue.name}
-                      title={`Practiced but below stamp threshold (scored ${dayData.best_total_score}/70)`}
+                      title={`Practiced but below stamp threshold (${proximityLabel})`}
                       className="w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 opacity-30 grayscale"
                     />
                     <span className="absolute top-0 left-0.5 font-display text-[10px] leading-none font-medium text-sage-400">
@@ -307,10 +338,16 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
                   </div>
                 </div>
 
-                {/* Score */}
-                <span className="font-display text-base font-bold text-sage-700 flex-shrink-0">
-                  {activity.total_score}
-                </span>
+                {/* Proximity label with color coding */}
+                <div className="flex-shrink-0 flex flex-col items-center gap-1">
+                  <span className="font-display text-xs font-bold text-sage-600">
+                    {PROXIMITY_LABELS[activity.katorthoma_proximity]}
+                  </span>
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: PROXIMITY_COLORS[activity.katorthoma_proximity] }}
+                  />
+                </div>
               </div>
             ))}
           </div>

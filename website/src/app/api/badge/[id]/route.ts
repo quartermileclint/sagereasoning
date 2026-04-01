@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { PROXIMITY_COLORS, PROXIMITY_ENGLISH } from '@/lib/document-scorer'
-// V1 shims — kept for backward compatibility with existing badges
-import { getTierColor, getTierLabel, getAlignmentTier } from '@/lib/document-scorer'
 import { checkRateLimit, RATE_LIMITS, publicCorsHeaders } from '@/lib/security'
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 
@@ -46,42 +44,20 @@ function generateV3BadgeSvg(proximity: KatorthomaProximityLevel): string {
 }
 
 /**
- * @deprecated V1 badge generator — kept for backward compatibility with existing document_scores records.
+ * Map V1 alignment_tier to V3 proximity level.
+ * Ensures backward compatibility: old document_scores records render as V3-style badges.
  */
-function generateV1BadgeSvg(
-  score: number,
+function mapAlignmentTierToProximity(
   tier: 'sage' | 'progressing' | 'aware' | 'misaligned' | 'contrary'
-): string {
-  const tierColor = getTierColor(tier)
-  const tierLabel = getTierLabel(tier)
-  const leftText = 'Stoic Score'
-  const rightText = `${score} · ${tierLabel}`
-
-  const leftWidth = leftText.length * 6.5 + 20
-  const rightWidth = rightText.length * 6.8 + 20
-  const totalWidth = leftWidth + rightWidth
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${totalWidth}" height="28" role="img" aria-label="${leftText}: ${rightText}">
-  <title>${leftText}: ${rightText}</title>
-  <linearGradient id="s" x2="0" y2="100%">
-    <stop offset="0" stop-color="#fff" stop-opacity=".15"/>
-    <stop offset="1" stop-opacity=".15"/>
-  </linearGradient>
-  <clipPath id="r">
-    <rect width="${totalWidth}" height="28" rx="5" fill="#fff"/>
-  </clipPath>
-  <g clip-path="url(#r)">
-    <rect width="${leftWidth}" height="28" fill="#3d3d3d"/>
-    <rect x="${leftWidth}" width="${rightWidth}" height="28" fill="${tierColor}"/>
-    <rect width="${totalWidth}" height="28" fill="url(#s)"/>
-  </g>
-  <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="11">
-    <text x="${leftWidth / 2}" y="19.5" fill="#010101" fill-opacity=".3">${leftText}</text>
-    <text x="${leftWidth / 2}" y="18.5">${leftText}</text>
-    <text x="${leftWidth + rightWidth / 2}" y="19.5" fill="#010101" fill-opacity=".3" font-weight="bold">${rightText}</text>
-    <text x="${leftWidth + rightWidth / 2}" y="18.5" font-weight="bold">${rightText}</text>
-  </g>
-</svg>`
+): KatorthomaProximityLevel {
+  const tierMap: Record<string, KatorthomaProximityLevel> = {
+    sage: 'sage_like',
+    progressing: 'principled',
+    aware: 'deliberate',
+    misaligned: 'habitual',
+    contrary: 'reflexive',
+  }
+  return tierMap[tier] || 'reflexive'
 }
 
 export async function GET(
@@ -124,10 +100,10 @@ export async function GET(
       })
     }
 
-    // V1 fallback
+    // V1 fallback — map alignment_tier to proximity and render V3-style badge
     const { data, error } = await supabaseAdmin
       .from('document_scores')
-      .select('total_score, alignment_tier')
+      .select('alignment_tier')
       .eq('id', id)
       .single()
 
@@ -142,8 +118,10 @@ export async function GET(
       })
     }
 
-    const tier = getAlignmentTier(data.total_score)
-    const svg = generateV1BadgeSvg(data.total_score, tier)
+    const proximity = mapAlignmentTierToProximity(
+      data.alignment_tier as 'sage' | 'progressing' | 'aware' | 'misaligned' | 'contrary'
+    )
+    const svg = generateV3BadgeSvg(proximity)
 
     return new NextResponse(svg, {
       headers: {

@@ -1,48 +1,65 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { getAlignmentTier } from '@/lib/document-scorer'
+import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-const DECISION_SCORING_PROMPT = `You are the Stoic Sage decision advisor for sagereasoning.com. A user is weighing a decision and wants to see each option scored against Stoic virtue.
+const DECISION_SCORING_PROMPT = `You are the Stoic Sage decision advisor for sagereasoning.com. A user is weighing a decision and wants to see each option evaluated against Stoic virtue.
 
-For EACH option provided, score it independently on the four cardinal virtues:
-- Wisdom (Phronesis) — 30%: Is this option well-reasoned? Does it reflect understanding of what is truly good vs merely preferred?
-- Justice (Dikaiosyne) — 25%: Is this option fair to all affected? Does it serve the common good?
-- Courage (Andreia) — 25%: Does this option require the person to act rightly despite difficulty or fear?
-- Temperance (Sophrosyne) — 20%: Is this option measured and moderate? Does it avoid excess?
+For EACH option, evaluate whether it aligns with KATORTHOMA (right action in accordance with nature and virtue):
 
-Scoring scale: 0–100 per virtue.
+1. KATORTHOMA PROXIMITY: How close is this option to Stoic excellence?
+   - reflexive: Action contradicts Stoic virtue; driven by base impulse
+   - habitual: Action shows some virtue alignment but lacks conscious discipline
+   - deliberate: Action reflects conscious virtue; intentional Stoic practice
+   - principled: Action exemplifies virtue integration; reason governs all aspects
+   - sage_like: Action embodies the integrated wisdom of a Stoic sage
+
+2. PASSIONS DETECTED: Identify irrational passions that might distort judgment:
+   - root_passion: one of epithumia (base desire), hedone (pleasure-seeking), phobos (fear), lupe (distress)
+   - sub_species: the specific form (e.g., "honor-seeking", "shame-avoidance", "financial anxiety")
+   - false_judgement: what false belief fuels this passion?
+
+3. KATHEKON QUALITY: Is this the right action given circumstances?
+   - is_kathekon: boolean — whether this option constitutes proper duty
+   - kathekon_quality: strong/moderate/marginal/contrary — the strength of duty alignment
 
 Return ONLY valid JSON — an array with one object per option:
 [
   {
     "option": "<the option text>",
-    "wisdom_score": <0-100>,
-    "justice_score": <0-100>,
-    "courage_score": <0-100>,
-    "temperance_score": <0-100>,
-    "total_score": <weighted total>,
-    "reasoning": "<2-3 sentences: virtue analysis specific to this option>",
-    "stoic_insight": "<1 sentence: what would a Stoic sage say about this choice?>"
+    "katorthoma_proximity": "reflexive" | "habitual" | "deliberate" | "principled" | "sage_like",
+    "passions_detected": [
+      {
+        "root_passion": "epithumia" | "hedone" | "phobos" | "lupe",
+        "sub_species": "<specific form>",
+        "false_judgement": "<the false belief behind it>"
+      }
+    ],
+    "is_kathekon": boolean,
+    "kathekon_quality": "strong" | "moderate" | "marginal" | "contrary",
+    "stoic_insight": "<1 sentence: what does a Stoic sage notice about this choice?>"
   }
 ]
 
 After the options array, do NOT add any other text. The array is the complete response.`
 
+interface PassionDetected {
+  root_passion: 'epithumia' | 'hedone' | 'phobos' | 'lupe'
+  sub_species: string
+  false_judgement: string
+}
+
 interface OptionScore {
   option: string
-  wisdom_score: number
-  justice_score: number
-  courage_score: number
-  temperance_score: number
-  total_score: number
-  alignment_tier: string
-  reasoning: string
+  katorthoma_proximity: KatorthomaProximityLevel
+  passions_detected: PassionDetected[]
+  is_kathekon: boolean
+  kathekon_quality: 'strong' | 'moderate' | 'marginal' | 'contrary'
   stoic_insight: string
 }
 
@@ -118,31 +135,34 @@ Score each option. Return the JSON array.`
       )
     }
 
-    // Add alignment tiers
-    const enriched = scoreData.map((opt) => ({
-      ...opt,
-      alignment_tier: getAlignmentTier(opt.total_score),
-    }))
+    // Sort by katorthoma_proximity level (sage_like > principled > deliberate > habitual > reflexive)
+    const proximityRank: Record<KatorthomaProximityLevel, number> = {
+      sage_like: 5,
+      principled: 4,
+      deliberate: 3,
+      habitual: 2,
+      reflexive: 1,
+    }
 
-    // Sort by total_score descending
-    enriched.sort((a, b) => b.total_score - a.total_score)
+    scoreData.sort((a, b) => proximityRank[b.katorthoma_proximity] - proximityRank[a.katorthoma_proximity])
 
     const result = {
       decision: decision.trim(),
-      options_scored: enriched,
-      recommended: enriched[0]?.option || null,
+      options_scored: scoreData,
+      recommended: scoreData[0]?.option || null,
       scored_at: new Date().toISOString(),
+      disclaimer: 'Stoic decision evaluation is a reflective tool, not a directive. The sage recognizes that only virtue is truly good; external outcomes remain indifferent. Use this to examine your reasoning, not to escape responsibility for your choice.',
     }
 
     // Analytics
     await supabaseAdmin
       .from('analytics_events')
       .insert({
-        event_type: 'decision_score',
+        event_type: 'decision_score_v3',
         metadata: {
           num_options: options.length,
-          top_score: enriched[0]?.total_score,
-          top_tier: enriched[0]?.alignment_tier,
+          top_proximity: scoreData[0]?.katorthoma_proximity,
+          top_kathekon: scoreData[0]?.is_kathekon,
         },
       })
       .then(() => {})

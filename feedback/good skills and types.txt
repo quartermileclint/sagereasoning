@@ -1,0 +1,45 @@
+Good skill.md file
+
+A good skill compounds. It is a learned representation of a successful workflow that an agent or human can use. 
+
+Description field
+A good description describes the document type or artifact types it produces, includes triggers phrases "analyse our competitors", it states what the output should look like. 
+Anthropics guidance is clear. 
+Description must stay on a single line. 
+
+For agents- the description becomes a routing signal so description must contain the outcome the agent has been searching for in its goal. Frame the output of the skill as a contract. What there going to get and don't get, what will be accomplished, where to progress towards a goal with this skill. A declarative agreement that agents can easily discover about the skill that allows an agent to make a correct choice confidently. 
+Composability - the skill produce something that is a handoff to the next step in the chain. The output has to be correct to hand to the next agent or down to the next step in the process for the agent to bring in another skill. It has to fit into the end to end experience for where its use is positioned in the chain. 
+Humans have to also be able to read it. 
+
+Use scripts instead of skills for hard wired behaviour skills for reasoning. Agents respect and follow skills but if you want to hardwire then go deterministic and use scripting. Invoke deterministic tools along the way. 
+
+Methodology field needs 5 things. 
+Reasoning not linear procedure
+- give frameworks 
+- quality criteria 
+- reasons behind decisions 
+
+Output format 
+- be specific about the file type and what is in it
+
+Edge cases
+- be explicit and write down the common sense, nothing assumed 
+
+Example
+- something to pattern match against so it knows what's good
+- Is why you can have more than one file in the skills folders 
+
+Lean
+- keep the skill lean. 
+- a short skill that fires reliably will outperform a long skill with competing instructions
+- No more than 100 to 150 lines
+
+Quantitative testing of your skills file to ensure it performs for agents that don't have a feedback loop if it goes wrong. Run a basket of tests, quantify the results and change the version number and test again. 
+
+Skills are immediately actionable context. The encode expertise. 
+
+Standard skills - brand voice, formatting rules, approved templates, stuff that's the same every time 
+
+Methodology skills - what the team that does high value work follows to do it productively. How to structure client deliverables. How the experienced people get things done that others follow. 
+
+Personal Skills - personal workflow 

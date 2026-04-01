@@ -1,43 +1,65 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { getAlignmentTier } from '@/lib/document-scorer'
+import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-const CONVERSATION_SCORING_PROMPT = `You are the Stoic Sage conversation auditor for sagereasoning.com. You score the overall ethical tone and quality of conversations, and optionally score individual participants.
+const CONVERSATION_SCORING_PROMPT = `You are the Stoic Sage conversation auditor for sagereasoning.com. You score the overall ethical tone and quality of conversations using V3 qualitative evaluation, and optionally score individual participants.
 
-Score against the four cardinal virtues:
-- Wisdom (Phronesis) — 30%: Is the conversation well-reasoned? Do participants seek truth over being right?
-- Justice (Dikaiosyne) — 25%: Is the conversation fair? Do participants treat each other with respect? Are all perspectives heard?
-- Courage (Andreia) — 25%: Do participants address hard truths? Do they avoid avoidance, deflection, or passive aggression?
-- Temperance (Sophrosyne) — 20%: Is the tone measured? Do participants avoid escalation, sarcasm, or emotional manipulation?
+Evaluate the four cardinal virtues through their embodiment:
+- Phronesis (Wisdom): Right deliberation and practical judgment. Does the conversation show careful reasoning, truth-seeking?
+- Dikaiosyne (Justice): Fair treatment and respect for others. Are perspectives heard? Is there reciprocal regard?
+- Andreia (Courage): Honest address of difficult truths. Do participants avoid deflection, passive aggression, avoidance?
+- Sophrosyne (Temperance): Measured tone and emotional restraint. Does the conversation avoid escalation, sarcasm, manipulation?
+
+CRITICAL V3 RULES:
+- NO numeric scores (0-100, weighted totals, etc.)
+- Use ONLY katorthoma_proximity levels: reflexive, habitual, deliberate, principled, sage_like
+- Return passions_detected array with root_passion types (epithumia, hedone, phobos, lupe)
+- Use is_kathekon (boolean) and kathekon_quality (strong, moderate, marginal, contrary)
+- Use virtue_domains_engaged array listing engaged virtues: phronesis, dikaiosyne, andreia, sophrosyne
+- NO per-virtue independent scores
+- NO alignment_tier or numeric composites
 
 Return ONLY valid JSON:
 {
   "overall": {
-    "wisdom_score": <0-100>,
-    "justice_score": <0-100>,
-    "courage_score": <0-100>,
-    "temperance_score": <0-100>,
-    "total_score": <weighted total>,
+    "katorthoma_proximity": "reflexive" | "habitual" | "deliberate" | "principled" | "sage_like",
+    "passions_detected": [
+      {
+        "root_passion": "epithumia" | "hedone" | "phobos" | "lupe",
+        "sub_species": "<specific passion type>",
+        "false_judgement": "<underlying false belief>"
+      }
+    ],
+    "is_kathekon": true | false,
+    "kathekon_quality": "strong" | "moderate" | "marginal" | "contrary",
+    "virtue_domains_engaged": ["phronesis" | "dikaiosyne" | "andreia" | "sophrosyne"],
     "reasoning": "<2-3 sentences: overall tone and virtue assessment>",
-    "notable_patterns": "<1-2 sentences: any recurring patterns — positive or negative>"
+    "notable_patterns": "<1-2 sentences: recurring patterns or dynamics>"
   },
   "participants": [
     {
       "name": "<participant name or identifier>",
-      "wisdom_score": <0-100>,
-      "justice_score": <0-100>,
-      "courage_score": <0-100>,
-      "temperance_score": <0-100>,
-      "total_score": <weighted total>,
-      "summary": "<1 sentence: this participant's virtue profile in the conversation>"
+      "katorthoma_proximity": "reflexive" | "habitual" | "deliberate" | "principled" | "sage_like",
+      "passions_detected": [
+        {
+          "root_passion": "epithumia" | "hedone" | "phobos" | "lupe",
+          "sub_species": "<specific passion type>",
+          "false_judgement": "<underlying false belief>"
+        }
+      ],
+      "is_kathekon": true | false,
+      "kathekon_quality": "strong" | "moderate" | "marginal" | "contrary",
+      "virtue_domains_engaged": ["phronesis" | "dikaiosyne" | "andreia" | "sophrosyne"],
+      "summary": "<1 sentence: this participant's character in the conversation>"
     }
-  ]
+  ],
+  "disclaimer": "This assessment reflects qualitative evaluation of proximal alignment with Stoic virtue, not diagnostic judgment."
 }
 
 If participant names cannot be identified, return an empty participants array.`
@@ -110,18 +132,8 @@ Return the JSON score.`
       )
     }
 
-    // Enrich with tiers
-    if (scoreData.overall) {
-      scoreData.overall.alignment_tier = getAlignmentTier(scoreData.overall.total_score)
-    }
-    if (scoreData.participants) {
-      scoreData.participants = scoreData.participants.map(
-        (p: { total_score: number; [key: string]: unknown }) => ({
-          ...p,
-          alignment_tier: getAlignmentTier(p.total_score),
-        })
-      )
-    }
+    // V3 validation: ensure no numeric scores are present
+    // This is implicit in the scoreData structure which uses qualitative levels only
 
     const result = {
       ...scoreData,
@@ -132,10 +144,10 @@ Return the JSON score.`
     await supabaseAdmin
       .from('analytics_events')
       .insert({
-        event_type: 'conversation_score',
+        event_type: 'conversation_score_v3',
         metadata: {
-          overall_score: scoreData.overall?.total_score,
-          overall_tier: scoreData.overall?.alignment_tier,
+          overall_proximity: scoreData.overall?.katorthoma_proximity,
+          overall_is_kathekon: scoreData.overall?.is_kathekon,
           num_participants: scoreData.participants?.length || 0,
         },
       })

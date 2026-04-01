@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { getAlignmentTier } from '@/lib/document-scorer'
+import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 
 const client = new Anthropic({
@@ -26,22 +26,43 @@ Return ONLY valid JSON:
     { "label": "B", "text": "<option text>" },
     { "label": "C", "text": "<option text>" }
   ],
-  "topic": "<1-2 words: the core ethical theme — e.g. honesty, loyalty, fairness>"
+  "topic": "<1-2 words: the core ethical theme — e.g. honesty, loyalty, fairness>",
+  "oikeiosis_circles_at_stake": "<which concentric circles of relationship are affected: self, family, community, humanity, nature, or cosmos>"
 }
 
-WHEN SCORING A RESPONSE:
-Score the user's chosen or written response against the four virtues, adjusted for their audience level. Be encouraging but honest.
+WHEN SCORING A RESPONSE (V3 FORMAT):
+Analyze the user's response against Stoic principles. Do NOT assign numeric scores.
+
+Instead, evaluate:
+1. katorthoma_proximity: How closely aligned is this response to right action? Use one of: "reflexive" (habitual reaction), "habitual" (trained response), "deliberate" (consciously chosen), "principled" (virtue-grounded), "sage_like" (exemplary Stoic wisdom)
+
+2. passions_detected: Array of detected emotional impulses, formatted as:
+[{
+  "root_passion": "epithumia" (appetite/desire), "hedone" (pleasure-seeking), "phobos" (fear), or "lupe" (distress),
+  "sub_species": "<specific passion, e.g., 'fear of social rejection', 'appetite for status'>",
+  "false_judgement": "<the underlying false belief driving this passion>"
+}]
+
+3. kathekon_quality: The degree to which the response embodies duty and appropriate action:
+- "strong": Response demonstrates clear duty-consciousness and virtue alignment
+- "moderate": Response shows some duty-awareness with minor misalignments
+- "marginal": Response minimally addresses duty; mostly driven by passions or external pressures
+- "contrary": Response actively violates duty or virtue principles
+
+4. feedback: 2-3 sentences age-appropriate commentary. Acknowledge what the person understood, highlight the virtue they touched or missed, invite reflection.
+
+5. sage_says: 1 sentence from a Stoic sage — warm, direct, wise. Focus on what is within the person's control (prohairesis).
 
 Return ONLY valid JSON:
 {
-  "wisdom_score": <0-100>,
-  "justice_score": <0-100>,
-  "courage_score": <0-100>,
-  "temperance_score": <0-100>,
-  "total_score": <weighted total>,
-  "feedback": "<2-3 sentences: age-appropriate feedback. What virtue did they show? What could they consider next time?>",
-  "sage_says": "<1 sentence: what a Stoic sage would say to this young person — warm, wise, direct>"
-}`
+  "katorthoma_proximity": "reflexive|habitual|deliberate|principled|sage_like",
+  "passions_detected": [{"root_passion": "epithumia|hedone|phobos|lupe", "sub_species": "string", "false_judgement": "string"}],
+  "kathekon_quality": "strong|moderate|marginal|contrary",
+  "feedback": "<2-3 sentences>",
+  "sage_says": "<1 sentence>"
+}
+
+DISCLAIMER: This V3 scoring reflects Stoic principles of duty (kathekon), right action (katorthoma), and the pathology of passions (pathos). It is meant for reflection and education, not judgment.`
 
 type Audience = 'child' | 'teen' | 'adult'
 
@@ -101,6 +122,7 @@ Return the JSON scenario with options.`
     const result = {
       audience: validAudience,
       ...scenarioData,
+      oikeiosis_circles_at_stake: scenarioData.oikeiosis_circles_at_stake || 'community',
       instructions: 'Choose one of the options above, or write your own response. Then POST it back to this endpoint for scoring.',
     }
 
@@ -196,25 +218,46 @@ Score this response. Return the JSON.`
       )
     }
 
-    const tier = getAlignmentTier(scoreData.total_score)
+    // Validate V3 structure
+    const validProximities: KatorthomaProximityLevel[] = ['reflexive', 'habitual', 'deliberate', 'principled', 'sage_like']
+    const validKathekonQualities = ['strong', 'moderate', 'marginal', 'contrary']
+
+    const proximityLevel = validProximities.includes(scoreData.katorthoma_proximity)
+      ? scoreData.katorthoma_proximity
+      : 'deliberate'
+
+    const kathekonQuality = validKathekonQualities.includes(scoreData.kathekon_quality)
+      ? scoreData.kathekon_quality
+      : 'moderate'
+
+    const passionsDetected = Array.isArray(scoreData.passions_detected)
+      ? scoreData.passions_detected.filter((p: any) =>
+          ['epithumia', 'hedone', 'phobos', 'lupe'].includes(p.root_passion)
+        )
+      : []
 
     const result = {
       audience: validAudience,
-      ...scoreData,
-      alignment_tier: tier,
+      katorthoma_proximity: proximityLevel,
+      passions_detected: passionsDetected,
+      kathekon_quality: kathekonQuality,
+      feedback: scoreData.feedback || 'Consider how your choice reflects your duty to yourself and others.',
+      sage_says: scoreData.sage_says || 'What you control is your effort and intention — focus there.',
       scored_at: new Date().toISOString(),
+      disclaimer: 'This V3 scoring reflects Stoic principles of duty (kathekon) and right action (katorthoma). It is meant for reflection and education, not judgment.',
     }
 
     // Analytics
     await supabaseAdmin
       .from('analytics_events')
       .insert({
-        event_type: 'scenario_scored',
+        event_type: 'scenario_scored_v3',
         user_id: user_id || null,
         metadata: {
           audience: validAudience,
-          total_score: scoreData.total_score,
-          tier,
+          katorthoma_proximity: proximityLevel,
+          kathekon_quality: kathekonQuality,
+          passions_count: passionsDetected.length,
         },
       })
       .then(() => {})

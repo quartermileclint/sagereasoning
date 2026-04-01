@@ -2,12 +2,16 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import {
-  getAlignmentTier,
-  DOCUMENT_SCORING_PROMPT,
-  POLICY_SCORING_PROMPT,
-  type DocumentScore,
+  V3_DOCUMENT_SCORING_PROMPT,
+  V3_POLICY_SCORING_PROMPT,
+  PROXIMITY_COLORS,
+  PROXIMITY_ENGLISH,
+  DOCUMENT_EVALUATIVE_DISCLAIMER,
+  type V3DocumentEvaluation,
+  type V3PolicyEvaluation,
 } from '@/lib/document-scorer'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -25,7 +29,7 @@ export async function POST(request: NextRequest) {
   try {
     const { text, title, mode } = await request.json()
     const isPolicy = mode === 'policy'
-    const scoringPrompt = isPolicy ? POLICY_SCORING_PROMPT : DOCUMENT_SCORING_PROMPT
+    const scoringPrompt = isPolicy ? V3_POLICY_SCORING_PROMPT : V3_DOCUMENT_SCORING_PROMPT
 
     if (!text || typeof text !== 'string' || text.trim().length === 0) {
       return NextResponse.json({ error: 'text is required' }, { status: 400 })
@@ -41,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     if (wordCount < 20) {
       return NextResponse.json(
-        { error: 'Document must be at least 20 words for a meaningful score' },
+        { error: 'Document must be at least 20 words for a meaningful evaluation' },
         { status: 400 }
       )
     }
@@ -51,13 +55,13 @@ export async function POST(request: NextRequest) {
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
+      max_tokens: 2048,
       temperature: 0.2,
       system: [{ type: 'text', text: scoringPrompt, cache_control: { type: 'ephemeral' } }],
       messages: [
         {
           role: 'user',
-          content: `Score this document:\n\n${title ? `Title: ${title}\n\n` : ''}${truncated}`,
+          content: `Evaluate this document:\n\n${title ? `Title: ${title}\n\n` : ''}${truncated}`,
         },
       ],
     })
@@ -65,108 +69,148 @@ export async function POST(request: NextRequest) {
     const responseText =
       message.content[0].type === 'text' ? message.content[0].text : ''
 
-    let scoreData
+    let evaluationData: any
     try {
       const cleaned = responseText
         .replace(/```json?\n?/g, '')
         .replace(/```\n?/g, '')
         .trim()
-      scoreData = JSON.parse(cleaned)
+      evaluationData = JSON.parse(cleaned)
     } catch {
-      console.error('Failed to parse scoring response:', responseText)
+      console.error('Failed to parse V3 evaluation response:', responseText)
       return NextResponse.json(
-        { error: 'Scoring engine returned invalid response' },
+        { error: 'Evaluation engine returned invalid response' },
         { status: 500 }
       )
     }
 
-    // Validate
-    for (const field of [
-      'wisdom_score',
-      'justice_score',
-      'courage_score',
-      'temperance_score',
-      'total_score',
-      'reasoning',
-    ]) {
-      if (scoreData[field] === undefined) {
+    // Validate V3 required fields
+    const requiredFields = [
+      'authorial_control',
+      'kathekon_assessment',
+      'passions_detected',
+      'katorthoma_proximity',
+      'virtue_domains_engaged',
+      'ruling_faculty_assessment',
+      'improvement_path',
+    ]
+    for (const field of requiredFields) {
+      if (evaluationData[field] === undefined) {
         return NextResponse.json(
-          { error: `Missing field: ${field}` },
+          { error: `Missing V3 field: ${field}` },
           { status: 500 }
         )
       }
     }
 
-    const tier = getAlignmentTier(scoreData.total_score)
+    // Validate proximity level
+    const validProximityLevels: KatorthomaProximityLevel[] = [
+      'reflexive',
+      'habitual',
+      'deliberate',
+      'principled',
+      'sage_like',
+    ]
+    if (!validProximityLevels.includes(evaluationData.katorthoma_proximity)) {
+      return NextResponse.json(
+        { error: `Invalid katorthoma_proximity level: ${evaluationData.katorthoma_proximity}` },
+        { status: 500 }
+      )
+    }
+
+    const proximity = evaluationData.katorthoma_proximity as KatorthomaProximityLevel
 
     // Save to DB and get an ID for the badge URL
+    const dbPayload = {
+      mode: isPolicy ? 'policy' : 'document',
+      content_title: title || null,
+      content_text: truncated,
+      word_count: wordCount,
+      katorthoma_proximity: proximity,
+      virtue_domains_engaged: evaluationData.virtue_domains_engaged,
+      ruling_faculty_assessment: evaluationData.ruling_faculty_assessment,
+      improvement_path: evaluationData.improvement_path,
+      authorial_passions: evaluationData.passions_detected?.authorial_passions || [],
+      reader_triggered_passions: evaluationData.passions_detected?.reader_triggered_passions || [],
+      false_judgements: evaluationData.passions_detected?.false_judgements || [],
+      within_control: evaluationData.authorial_control?.within_control || [],
+      outside_control: evaluationData.authorial_control?.outside_control || [],
+      is_kathekon: evaluationData.kathekon_assessment?.is_kathekon ?? false,
+      kathekon_quality: evaluationData.kathekon_assessment?.quality || null,
+      ...(isPolicy && {
+        deliberation_assessment: evaluationData.deliberation_assessment || null,
+        oikeiosis_impact: evaluationData.oikeiosis_impact || null,
+        flagged_clauses: evaluationData.flagged_clauses || [],
+      }),
+      disclaimer: DOCUMENT_EVALUATIVE_DISCLAIMER,
+    }
+
     const { data: record, error: dbError } = await supabaseAdmin
-      .from('document_scores')
-      .insert({
-        title: title || null,
-        word_count: wordCount,
-        total_score: scoreData.total_score,
-        wisdom_score: scoreData.wisdom_score,
-        justice_score: scoreData.justice_score,
-        courage_score: scoreData.courage_score,
-        temperance_score: scoreData.temperance_score,
-        alignment_tier: tier,
-        reasoning: scoreData.reasoning,
-      })
+      .from('document_evaluations_v3')
+      .insert(dbPayload)
       .select('id')
       .single()
 
     if (dbError) {
-      console.error('DB error saving document score:', dbError)
+      console.error('DB error saving V3 evaluation:', dbError)
       // Still return the score even if DB fails — just without persistent badge
     }
 
     const scoreId = record?.id || 'preview'
     const badgeUrl = `${BASE_URL}/api/badge/${scoreId}`
-    const embedHtml = `<a href="${BASE_URL}/score/${scoreId}" target="_blank" rel="noopener"><img src="${badgeUrl}" alt="Stoic Score: ${scoreData.total_score} — ${tier}" height="40" /></a>`
+    const proximityLabel = PROXIMITY_ENGLISH[proximity]
+    const proximityColor = PROXIMITY_COLORS[proximity]
+    const embedHtml = `<a href="${BASE_URL}/score/${scoreId}" target="_blank" rel="noopener"><img src="${badgeUrl}" alt="Stoic Evaluation: ${proximityLabel}" height="40" /></a>`
 
-    const result: DocumentScore & { mode?: string; flagged_clauses?: unknown[] } = {
-      total_score: scoreData.total_score,
-      wisdom_score: scoreData.wisdom_score,
-      justice_score: scoreData.justice_score,
-      courage_score: scoreData.courage_score,
-      temperance_score: scoreData.temperance_score,
-      alignment_tier: tier,
-      reasoning: scoreData.reasoning,
+    // Build response object
+    const result = {
+      katorthoma_proximity: proximity,
+      proximity_label: proximityLabel,
+      virtue_domains_engaged: evaluationData.virtue_domains_engaged,
+      ruling_faculty_assessment: evaluationData.ruling_faculty_assessment,
+      improvement_path: evaluationData.improvement_path,
+      authorial_control: evaluationData.authorial_control,
+      kathekon_assessment: evaluationData.kathekon_assessment,
+      passions_detected: evaluationData.passions_detected,
       document_title: title || undefined,
       word_count: wordCount,
-      scored_at: new Date().toISOString(),
+      evaluated_at: new Date().toISOString(),
       badge_url: badgeUrl,
       embed_html: embedHtml,
-      ...(isPolicy && { mode: 'policy', flagged_clauses: scoreData.flagged_clauses || [] }),
+      mode: isPolicy ? 'policy' : 'document',
+      ...(isPolicy && {
+        deliberation_assessment: evaluationData.deliberation_assessment,
+        oikeiosis_impact: evaluationData.oikeiosis_impact,
+        flagged_clauses: evaluationData.flagged_clauses || [],
+      }),
     }
 
     // Analytics
     await supabaseAdmin
       .from('analytics_events')
       .insert({
-        event_type: 'document_score',
+        event_type: 'document_evaluation_v3',
         metadata: {
-          score_id: scoreId,
-          total_score: scoreData.total_score,
-          tier,
+          evaluation_id: scoreId,
+          proximity: proximity,
+          mode: isPolicy ? 'policy' : 'document',
           word_count: wordCount,
         },
       })
       .then(() => {})
 
-    // Add AI transparency metadata (NAIC guidance; OECD principles)
+    // Add AI transparency metadata (NAIC guidance; OECD principles) + R3 disclaimer
     return NextResponse.json(
       {
         ...result,
         ai_generated: true,
         ai_model: 'claude-sonnet-4-6',
-        disclaimer: 'This score is AI-generated using Stoic virtue criteria. The badge reflects an AI assessment, not a certified evaluation. See sagereasoning.com/transparency',
+        disclaimer: DOCUMENT_EVALUATIVE_DISCLAIMER,
       },
       { headers: corsHeaders() }
     )
   } catch (error) {
-    console.error('Document score API error:', error)
+    console.error('Document evaluation API error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

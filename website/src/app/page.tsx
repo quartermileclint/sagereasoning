@@ -169,7 +169,7 @@ export default function HomePage() {
             {
               step: '3',
               title: 'Receive your Sage alignment',
-              desc: 'Get a 0–100 composite score, your alignment tier, reasoning, and a path for growth.',
+              desc: 'Get a qualitative proximity assessment, passion diagnosis, reasoning, and a path for growth.',
             },
           ].map((item) => (
             <div key={item.step} className="text-center">
