@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { answers, q6_answer } = body
 
-    // V3: 5 core questions (Q1–Q5)
+    // V3: 5 core questions (Q1-Q5)
     if (!answers || !Array.isArray(answers) || answers.length !== 5) {
       return NextResponse.json({ error: 'Exactly 5 answer IDs required' }, { status: 400 })
     }
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Score core questions (Q1–Q5)
+    // Score core questions (Q1-Q5)
     const coreResult = scoreCore(answers)
 
     // If Q6 is needed and provided, apply it
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     if (coreResult.needs_q6 && q6_answer) {
       finalResult = applyQ6(coreResult, q6_answer)
     } else if (coreResult.needs_q6 && !q6_answer) {
-      // Return intermediate result — client needs to show Q6
+      // Return intermediate result - client needs to show Q6
       return NextResponse.json({
         needs_q6: coreResult.needs_q6,
       })
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET — check if user has a baseline and when retake is eligible
+// GET - check if user has a baseline and when retake is eligible
 export async function GET(request: NextRequest) {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
   if (rateLimitError) return rateLimitError
