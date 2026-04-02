@@ -55,9 +55,12 @@ export async function POST(request: NextRequest) {
     // Truncate to ~8000 words to stay within token limits
     const truncated = trimmed.split(/\s+/).slice(0, 8000).join(' ')
 
+    // Policy mode needs more tokens — its JSON schema is significantly larger
+    const maxTokens = isPolicy ? 4096 : 2048
+
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 2048,
+      max_tokens: maxTokens,
       temperature: 0.2,
       system: [{ type: 'text', text: scoringPrompt, cache_control: { type: 'ephemeral' } }],
       messages: [
@@ -73,17 +76,32 @@ export async function POST(request: NextRequest) {
 
     let evaluationData: any
     try {
-      const cleaned = responseText
+      // Step 1: Strip markdown code fences
+      let cleaned = responseText
         .replace(/```json?\n?/g, '')
         .replace(/```\n?/g, '')
         .trim()
+
+      // Step 2: Try direct parse first
       evaluationData = JSON.parse(cleaned)
     } catch {
-      console.error('Failed to parse V3 evaluation response:', responseText)
-      return NextResponse.json(
-        { error: 'Evaluation engine returned invalid response' },
-        { status: 500 }
-      )
+      // Step 3: Fallback — extract JSON object from response text
+      // The AI sometimes wraps JSON in explanatory text
+      try {
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          evaluationData = JSON.parse(jsonMatch[0])
+        } else {
+          throw new Error('No JSON object found in response')
+        }
+      } catch (fallbackError) {
+        console.error('Failed to parse V3 evaluation response:', responseText.slice(0, 500))
+        console.error('Fallback parse also failed:', fallbackError)
+        return NextResponse.json(
+          { error: 'Evaluation engine returned invalid response' },
+          { status: 500 }
+        )
+      }
     }
 
     // Validate V3 required fields
@@ -207,7 +225,7 @@ export async function POST(request: NextRequest) {
       endpoint: '/api/score-document',
       model: 'claude-sonnet-4-6',
       startTime,
-      maxTokens: 2048,
+      maxTokens: maxTokens,
       composability: {
         next_steps: ['/api/score-iterate'],
         recommended_action: 'Review the evaluation results and consider iterative refinement with /api/score-iterate.',

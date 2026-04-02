@@ -82,8 +82,24 @@ export async function POST(request: NextRequest) {
       })
 
     if (insertError) {
-      console.error('Insert error:', insertError)
-      return NextResponse.json({ error: 'Failed to save assessment' }, { status: 500 })
+      console.error('Baseline insert error:', JSON.stringify(insertError, null, 2))
+      console.error('Insert payload was:', JSON.stringify({
+        user_id,
+        passion_reduction: finalResult.passion_reduction,
+        judgement_quality: finalResult.judgement_quality,
+        disposition_stability: finalResult.disposition_stability,
+        oikeiosis_stage: finalResult.oikeiosis_stage,
+        senecan_grade: finalResult.senecan_grade,
+        dominant_passion: finalResult.dominant_passion,
+        interpretation: finalResult.interpretation?.slice(0, 100),
+        answers: finalResult.answers,
+        q6_answer: finalResult.q6_answer || null,
+      }, null, 2))
+      return NextResponse.json({
+        error: 'Failed to save assessment',
+        detail: insertError.message || insertError.code || 'Unknown database error',
+        hint: insertError.hint || null,
+      }, { status: 500 })
     }
 
     // Log analytics event
