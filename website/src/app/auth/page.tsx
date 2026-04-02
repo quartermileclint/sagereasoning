@@ -112,7 +112,7 @@ export default function AuthPage() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               className="w-full px-4 py-3 border border-sage-300 rounded bg-white font-body text-sage-900 focus:outline-none focus:ring-2 focus:ring-sage-400"
-              placeholder="Marcus Aurelius"
+              placeholder="Your display name"
             />
           </div>
         )}

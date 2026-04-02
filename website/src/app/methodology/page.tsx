@@ -23,16 +23,12 @@ export default function MethodologyPage() {
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">The philosophical foundation</h2>
           <p>
-            SageReasoning is based on <strong>Stoic virtue ethics</strong>, one of the oldest and
-            most coherent frameworks for practical morality. The Stoics held that the only true good
-            is virtue &mdash; that flourishing (<em>eudaimonia</em>) comes from living in accordance
+            SageReasoning is based on <strong>Stoic virtue ethics</strong> &mdash; the idea that
+            the only true good is virtue, and that flourishing comes from living in accordance
             with reason and nature, guided by the four cardinal virtues.
           </p>
           <p className="mt-3">
-            Our scoring criteria are derived from primary Stoic texts: Marcus Aurelius&rsquo;{' '}
-            <em>Meditations</em>, Epictetus&rsquo; <em>Discourses</em> and <em>Enchiridion</em>,
-            Seneca&rsquo;s <em>Letters</em>, and Cicero&rsquo;s <em>De Officiis</em>. All source
-            texts are in the public domain.
+            Our scoring criteria are derived from primary Stoic texts, all in the public domain.
           </p>
         </div>
 
@@ -174,10 +170,7 @@ export default function MethodologyPage() {
       </section>
 
       <div className="mt-12 pt-6 border-t border-sage-200 text-center">
-        <p className="text-sage-600 text-sm italic">
-          &ldquo;He who has a why to live can bear almost any how.&rdquo;
-        </p>
-        <p className="text-sage-500 text-xs mt-1">
+        <p className="text-sage-500 text-xs">
           Questions about methodology?{' '}
           <a href="mailto:support@sagereasoning.com" className="underline hover:text-sage-700">
             Contact us

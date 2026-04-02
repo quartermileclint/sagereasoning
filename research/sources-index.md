@@ -28,7 +28,7 @@ A parallel source overhaul is underway to work directly from original Greek/Lati
 
 **Total original texts acquired:** 9 of 9 (all sources now covered)
 **Format:** TEI XML from Perseus Digital Library (8 texts) + Tesseract OCR from Internet Archive scan (Stobaeus)
-**License:** CC-BY-SA-4.0 (Perseus texts); Public domain (Stobaeus — 1884 edition)
+**License:** Perseus custom non-commercial license (see XML headers — requires attribution, non-commercial use only, availability statement preserved, modifications offered back to Perseus); Public domain (Stobaeus — 1884 edition)
 
 ---
 

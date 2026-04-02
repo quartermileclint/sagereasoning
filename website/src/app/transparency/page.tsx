@@ -42,8 +42,7 @@ export default function TransparencyPage() {
             The <strong>Stoic Brain</strong> is a machine-readable data file we created that encodes
             core Stoic philosophy: the four cardinal virtues (Wisdom, Justice, Courage, Temperance),
             their sub-virtues, preferred and dispreferred indifferents, and scoring
-            criteria. It is derived from original texts by Marcus Aurelius, Epictetus, Seneca,
-            and Cicero &mdash; all in the public domain.
+            criteria. It is derived from original Stoic texts, all in the public domain.
           </p>
           <p className="mt-3">
             A conceptual overview of the Stoic Brain (virtue names, sub-virtue names, tier definitions)

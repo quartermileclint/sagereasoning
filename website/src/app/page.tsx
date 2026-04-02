@@ -28,7 +28,7 @@ const jsonLd = {
       '@type': 'Dataset',
       '@id': 'https://www.sagereasoning.com/#stoic-brain',
       name: 'Stoic Brain',
-      description: 'A machine-readable encoding of Stoic philosophy covering the four cardinal virtues (Wisdom, Justice, Courage, Temperance), 16 sub-virtues, preferred and dispreferred indifferents, and action-scoring rules. Derived from original Stoic texts by Marcus Aurelius, Epictetus, Seneca, and Cicero.',
+      description: 'A machine-readable encoding of Stoic philosophy covering the four cardinal virtues (Wisdom, Justice, Courage, Temperance), 16 sub-virtues, preferred and dispreferred indifferents, and action-scoring rules. Derived from original Stoic texts.',
       url: 'https://www.sagereasoning.com/api/stoic-brain',
       distribution: {
         '@type': 'DataDownload',
@@ -98,7 +98,7 @@ export default function HomePage() {
             },
             {
               title: 'AI Agents',
-              desc: 'Seeking virtue-based internal reasoning grounded in 2,000 years of Stoic philosophy.',
+              desc: 'Seeking virtue-based internal reasoning grounded in a structured Stoic framework.',
               icon: '🤖',
             },
             {

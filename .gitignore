@@ -27,6 +27,12 @@ stoic-brain/internal/
 # Never commit to public repository.
 agent-assessment/internal/
 
+# Perseus Digital Library source files — non-commercial license, not for redistribution
+# SR translations in /research/originals/translations/ are SageReasoning original work and ARE safe to commit.
+research/originals/greek/
+research/originals/latin/
+research/originals/manuscripts/
+
 # IDE
 .vscode/
 .idea/

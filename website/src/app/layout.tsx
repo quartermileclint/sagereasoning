@@ -32,8 +32,7 @@ export default function RootLayout({
             <div className="flex flex-col md:flex-row justify-between gap-6">
               <div>
                 <p className="font-display text-lg text-sage-800 mb-1">sagereasoning</p>
-                <p className="italic">&ldquo;Make the best use of what is in your power, and take the rest as it happens.&rdquo;</p>
-                <p className="mt-1">&mdash; Epictetus</p>
+                <p className="italic">Make the best use of what is in your power, and take the rest as it happens.</p>
               </div>
               <div className="flex gap-8 text-sage-700">
                 <div>

@@ -468,7 +468,7 @@ export default function JournalPage() {
           </div>
 
           <p className="font-body text-sm text-sage-500 italic">
-            &ldquo;Waste no more time arguing about what a good man should be. Be one.&rdquo; — Marcus Aurelius
+            Stop arguing about what a good person should be. Be one.
           </p>
         </div>
       ) : entry ? (

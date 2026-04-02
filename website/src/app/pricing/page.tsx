@@ -37,7 +37,7 @@ const tiers = [
     cta: 'Get started free',
     ctaHref: '/auth',
     highlight: false,
-    stoicNote: '"No man is free who is not master of himself." — Epictetus. Wisdom needs no paywall.',
+    stoicNote: 'Wisdom needs no paywall.',
   },
   {
     id: 'prokoptos',
@@ -190,10 +190,9 @@ export default function PricingPage() {
           <div>
             <p className="font-display font-medium text-sage-800 mb-1">Why is the free tier so generous?</p>
             <p>
-              The Stoics believed that wisdom should be shared freely. Marcus Aurelius wrote his
-              Meditations as a personal practice, not a commercial product. The journal, baseline
-              assessment, and daily scoring are the core of what SageReasoning offers — keeping
-              them free is a deliberate value alignment, not a marketing tactic.
+              Wisdom should be shared freely. The journal, baseline assessment, and daily
+              scoring are the core of what SageReasoning offers — keeping them free is a
+              deliberate value alignment, not a marketing tactic.
             </p>
           </div>
           <div>
@@ -206,10 +205,9 @@ export default function PricingPage() {
           <div>
             <p className="font-display font-medium text-sage-800 mb-1">What does &ldquo;Prokoptos&rdquo; mean?</p>
             <p>
-              <em>Prokoptos</em> is a Greek term used by the Stoics to describe the one who is
-              making progress toward virtue — not yet a sage, but genuinely advancing. Epictetus
-              used it to describe serious students of philosophy. It is the highest aspiration for
-              a living person on the Stoic path.
+              <em>Prokoptos</em> means &ldquo;the one making progress&rdquo; — not yet a sage,
+              but genuinely advancing toward virtue. It is the highest aspiration for a living
+              person on the Stoic path.
             </p>
           </div>
           <div>
