@@ -140,7 +140,9 @@ export default function ScoreActionPage() {
 
       if (!response.ok) throw new Error('Evaluation failed')
 
-      const evalResult: V3EvaluationResult = await response.json()
+      const envelope = await response.json()
+      // API returns { result, meta } envelope — unwrap to get the evaluation data
+      const evalResult: V3EvaluationResult = envelope.result ?? envelope
       setResult(evalResult)
 
       trackEvent({
