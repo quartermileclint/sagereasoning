@@ -51,6 +51,9 @@ Sage skill wrappers distributed as open source must not embed API keys, system p
 ### R12 — Original Skill Development
 All original sage skills must derive from at least two of the six Stoic Brain mechanisms (Control Filter, Passion Diagnosis, Appropriate Action, Social Obligation, Iterative Refinement, Value Assessment). Skills using fewer than two mechanisms are wrappers, not originals. Each original skill must document which mechanisms it uses and cite the source data files per R7.
 
+### R13 — Embedding Platform Obligations
+Platforms that embed sage-reason as an internal component must comply with R1 (no therapeutic implication), R2 (no employment evaluation), R3 (disclaimer on evaluative output), and R9 (no outcome promises). Embedding platforms must not frame sage-reason output as assessment of the subject matter itself — sage-reason evaluates reasoning quality only. SageReasoning reserves the right to revoke API access for platforms that violate these obligations.
+
 ---
 
 ## Task Protocol

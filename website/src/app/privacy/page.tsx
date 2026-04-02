@@ -82,6 +82,16 @@ export default function PrivacyPage() {
                   <td className="px-3 py-2 border border-sage-200">IP address, browser type</td>
                   <td className="px-3 py-2 border border-sage-200">Security, rate limiting</td>
                 </tr>
+                <tr>
+                  <td className="px-3 py-2 border border-sage-200">Engine API data (sage-reason)</td>
+                  <td className="px-3 py-2 border border-sage-200">Input text, requested depth, domain context (if provided), structured evaluation output</td>
+                  <td className="px-3 py-2 border border-sage-200">Generating reasoning evaluations via the sage-reason engine. Input text is not stored beyond the API call unless the caller explicitly uses a deliberation chain.</td>
+                </tr>
+                <tr className="bg-sage-50">
+                  <td className="px-3 py-2 border border-sage-200">Embedding platform data</td>
+                  <td className="px-3 py-2 border border-sage-200">Platform API key, integration call volumes, depth usage patterns</td>
+                  <td className="px-3 py-2 border border-sage-200">Billing, rate limiting, and monitoring compliance with embedding platform obligations</td>
+                </tr>
               </tbody>
             </table>
           </div>

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimit, RATE_LIMITS, validateApiKey, withUsageHeaders, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 import { buildV3IterationPrompt, getV3IterationWarning, compareProximity, higherProximity, validateV3IterateRequest } from '@/lib/deliberation'
+import { buildEnvelope } from '@/lib/response-envelope'
 import type { V3DeliberationChain, V3DeliberationStep, DetectedPassion } from '@/lib/deliberation'
 
 const client = new Anthropic({
@@ -227,7 +228,8 @@ Return only the JSON evaluation object.`
         })
         .then(() => {})
 
-      return NextResponse.json({
+      const startTime = Date.now()
+      const initialResult = {
         chain_id: chain.id,
         step_number: 1,
         iteration_mode: 'initial',
@@ -244,11 +246,32 @@ Return only the JSON evaluation object.`
         oikeiosis_context: evalData.oikeiosis_context,
         cicero_assessment: evalData.cicero_assessment,
         deliberation_note: evalData.deliberation_note || 'Chain started. The sage has provided evaluation and guidance. To iterate, call this endpoint again with chain_id and your revised_action.',
-        next_step_hint: `POST /api/score-iterate with { "chain_id": "${chain.id}", "revised_action": "your revised action", "revision_rationale": "why you changed it" }`,
-        ai_generated: true,
-        ai_model: 'claude-sonnet-4-6',
-        disclaimer: 'This evaluation is AI-generated using a Stoic virtue framework. It is for personal philosophical reflection only and does not constitute professional, legal, medical, or financial advice.',
-      }, { headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck) })
+        disclaimer: 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.',
+      }
+
+      const envelope = buildEnvelope({
+        result: initialResult,
+        endpoint: '/api/score-iterate',
+        model: 'claude-sonnet-4-6',
+        startTime,
+        maxTokens: 2000,
+        usage: {
+          monthly_calls_after: keyCheck.monthly_calls_after,
+          monthly_limit: keyCheck.monthly_calls_after + keyCheck.monthly_remaining,
+          monthly_remaining: keyCheck.monthly_remaining,
+        },
+        composability: {
+          next_steps: ['/api/score-iterate'],
+          recommended_action: `Chain started at ${proximity}. Submit revised action to continue deliberation.`,
+          chain_start: {
+            chain_id: chain.id,
+            revised_action: '(your revised action)',
+            revision_rationale: '(why you changed it)',
+          },
+        },
+      })
+
+      return NextResponse.json(envelope, { headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck) })
     }
 
     // ── MODE 2: Continue an existing deliberation chain ─────────────
@@ -444,7 +467,8 @@ Evaluate the revised action. Return only the JSON evaluation object.`
       })
       .then(() => {})
 
-    const response: Record<string, unknown> = {
+    const startTime = Date.now()
+    const iterationResult: Record<string, unknown> = {
       chain_id: chain_id,
       step_number: nextStepNumber,
       iteration_mode: 'revision',
@@ -464,20 +488,40 @@ Evaluate the revised action. Return only the JSON evaluation object.`
       cicero_assessment: evalData.cicero_assessment,
       previous_proximity: lastStep.katorthoma_proximity,
       best_proximity_in_chain: bestProximity,
-      ai_generated: true,
-      ai_model: 'claude-sonnet-4-6',
-      disclaimer: 'This evaluation is AI-generated using a Stoic virtue framework. It is for personal philosophical reflection only and does not constitute professional, legal, medical, or financial advice.',
+      disclaimer: 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.',
     }
 
     // Add iteration warning if applicable
     if (iterationWarning) {
-      response.iteration_warning = iterationWarning
+      iterationResult.iteration_warning = iterationWarning
     }
 
-    // Add next step hint
-    response.next_step_hint = `To iterate further: POST with { "chain_id": "${chain_id}", "revised_action": "..." }. To conclude: POST to /api/deliberation-chain/${chain_id}/conclude`
+    const canContinueChain = chain.iteration_count + 1 < keyCheck.max_chain_iterations
+    const envelope = buildEnvelope({
+      result: iterationResult,
+      endpoint: '/api/score-iterate',
+      model: 'claude-sonnet-4-6',
+      startTime,
+      maxTokens: 2000,
+      usage: {
+        monthly_calls_after: keyCheck.monthly_calls_after,
+        monthly_limit: keyCheck.monthly_calls_after + keyCheck.monthly_remaining,
+        monthly_remaining: keyCheck.monthly_remaining,
+      },
+      composability: {
+        next_steps: canContinueChain ? ['/api/score-iterate'] : ['/api/reason'],
+        recommended_action: canContinueChain
+          ? `Iteration ${nextStepNumber} complete (${proximityDirection}). Submit another revised action to continue.`
+          : `Iteration limit reached for ${keyCheck.tier} tier. Apply insights from the deliberation chain.`,
+        chain_start: canContinueChain ? {
+          chain_id: chain_id,
+          revised_action: '(your next revision)',
+          revision_rationale: '(why you changed it)',
+        } : undefined,
+      },
+    })
 
-    return NextResponse.json(response, { headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck) })
+    return NextResponse.json(envelope, { headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck) })
   } catch (error) {
     console.error('Score-iterate API error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

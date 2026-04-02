@@ -17,8 +17,10 @@ sagereasoning.com through which the Stoic Brain scoring engine can be accessed.
 "Competing Service" means any product, service, API, or system that uses the
 Stoic Brain Data to provide reasoning quality evaluation, ethical reasoning
 assessment, Stoic-based decision support, reasoning checkpoint wrappers around
-existing skills, or a marketplace distributing reasoning evaluation skills to
-third parties, whether free or paid, where such service operates independently
+existing skills, a marketplace distributing reasoning evaluation skills to
+third parties, or an API service that accepts decision-related text input and
+returns structured reasoning quality evaluation using Stoic philosophical
+mechanisms, whether free or paid, where such service operates independently
 of the SageReasoning API.
 
 "Sage Skill Wrappers" means the open-source checkpoint code (SKILL.md files

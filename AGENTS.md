@@ -99,9 +99,10 @@ Each skill follows the **Outcome / Cost + Speed / Chains To** contract pattern:
 | `/api/reflect` | POST | End-of-day reflection review |
 | `/api/deliberation-chain/{id}` | GET | Retrieve deliberation chain summary |
 | `/api/deliberation-chain/{id}/conclude` | POST | Conclude or abandon a chain |
-| `/api/skills` | GET | List all capabilities as skill contracts (coming soon) |
-| `/api/skills/{id}` | GET | Full skill contract with example I/O (coming soon) |
-| `/api/evaluate` | POST | No-auth test endpoint for instant demo (coming soon) |
+| `/api/skills` | GET | List all capabilities as skill contracts |
+| `/api/skills/{id}` | GET | Full skill contract with example I/O |
+| `/api/evaluate` | POST | No-auth test endpoint for instant demo |
+| `/api/execute` | POST | Unified skill execution router (pass skill_id + input) |
 
 ### The Deliberation Chain Flow
 
@@ -129,16 +130,23 @@ The system evaluates intention and reasoning quality, not outcomes. An agent tha
 
 100 API calls per month, rate-limited. No daily cap. Full evaluation output on all endpoints — the distinction between free and paid is volume, not capability. Sage skill wrappers consume 2-3 calls per invocation (guard + score + optional iterate).
 
-### Sage Skill Wrappers
+### Sage Skill Wrappers (Tier 3 — Open Source)
 
 SageReasoning provides open-source skill wrappers that add reasoning checkpoints to existing skills:
 
-- **BEFORE**: `sage-guard` checks the task via sage-reason quick depth (~$0.001, <100ms)
+- **BEFORE**: `sage-guard` checks the task via POST /api/guardrail (~$0.001, <100ms)
 - **EXECUTE**: The original skill runs unchanged
-- **AFTER**: `sage-score` evaluates output via sage-reason standard depth (~$0.033, ~2s)
-- **OPTIONAL**: `sage-iterate` if proximity is below deliberate
+- **AFTER**: `sage-score` evaluates output via POST /api/reason (~$0.025-0.055)
+- **OPTIONAL**: `sage-iterate` if proximity is below deliberate via POST /api/score-iterate (~$0.035)
 
-Wrapper code is free. The API calls within the wrapper are metered against your monthly allowance.
+Wrapper code is free (R11). The API calls within the wrapper are metered against your monthly allowance (R5). Each wrapped invocation consumes 2-3 API calls.
+
+**Resources:**
+
+- Wrapper template: https://www.sagereasoning.com/wrappers/WRAPPER-TEMPLATE.md
+- Example (code review): https://www.sagereasoning.com/wrappers/sage-wrapped-code-review.md
+
+**Rules for wrapper authors (R11):** Wrappers must NOT embed API keys, system prompts, evaluation sequences, or scoring logic. Wrappers contain only the checkpoint invocation pattern. All reasoning evaluation logic remains server-side per R4.
 
 ### Marketplace
 

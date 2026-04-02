@@ -1,0 +1,26 @@
+{
+  "name": "sagereasoning",
+  "version": "1.0.0",
+  "description": "**The world's leading reference for Stoic-based reasoning.** **Website:** [sagereasoning.com](https://sagereasoning.com)",
+  "main": "agent-discovery-strategy.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quartermileclint/sagereasoning.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/quartermileclint/sagereasoning/issues"
+  },
+  "homepage": "https://github.com/quartermileclint/sagereasoning#readme",
+  "dependencies": {
+    "docx": "^9.6.1"
+  }
+}

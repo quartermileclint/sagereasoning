@@ -32,9 +32,10 @@ export default function TermsPage() {
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">1. About SageReasoning</h2>
           <p>
-            SageReasoning (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) is an online platform that provides Stoic
-            philosophy-based reasoning tools for individuals and AI agents. The service is operated
-            from Australia and is governed by Australian law.
+            SageReasoning (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) is an online platform that provides a Stoic
+            philosophy-based reasoning engine (sage-reason) and derived evaluation tools for individuals,
+            AI agents, and embedding platforms. The service is operated from Australia and is governed
+            by Australian law.
           </p>
           <p className="mt-3">
             By accessing or using sagereasoning.com (&ldquo;the Site&rdquo;) you agree to be bound by these Terms.
@@ -98,6 +99,9 @@ export default function TermsPage() {
             <li>Scrape or systematically extract content or data in bulk without permission</li>
             <li>Use our outputs as the sole basis for decisions that significantly affect other people</li>
             <li>Misrepresent AI-generated scores as certified or authoritative assessments</li>
+            <li>Present sage-reason output as mental health advice, therapeutic insight, mood assessment, or clinical feedback</li>
+            <li>Use sage-reason within hiring, employment screening, promotion, or any HR assessment process</li>
+            <li>Claim that sage-reason output constitutes legal, regulatory, or financial compliance certification</li>
           </ul>
         </div>
 
@@ -193,7 +197,31 @@ export default function TermsPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">10. Limitation of Liability</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">10. Embedding Platforms</h2>
+          <p>
+            If you embed sage-reason within your own product (as an API integration), you are
+            responsible for ensuring that your product&rsquo;s use of sage-reason complies with
+            these Terms, including the Acceptable Use restrictions in Section 5.
+          </p>
+          <p className="mt-3">
+            You must not represent sage-reason output as your own proprietary analysis without
+            attribution to SageReasoning. You must pass through the standard disclaimer
+            (&ldquo;Ancient reasoning, modern application. Does not consider legal, medical,
+            financial, or personal obligations.&rdquo;) to your end users in a visible location.
+          </p>
+          <p className="mt-3">
+            sage-reason evaluates the quality of decision-making reasoning, not the subject matter
+            of the decisions being made. Embedding platforms must not frame sage-reason output in a
+            way that implies assessment of the subject matter itself.
+          </p>
+          <p className="mt-3">
+            sage-reason calls made by wrappers, skills, or embedding platform integrations are all
+            counted against the same monthly API allowance and subject to the same rate limits.
+          </p>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">11. Limitation of Liability</h2>
           <p>
             To the maximum extent permitted by Australian Consumer Law, SageReasoning&rsquo;s liability
             for any loss or damage arising from your use of the Site is limited to the amount you
@@ -209,7 +237,7 @@ export default function TermsPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">11. Privacy</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">12. Privacy</h2>
           <p>
             Our collection and use of your personal information is governed by our{' '}
             <a href="/privacy" className="text-sage-600 underline hover:text-sage-800">Privacy Policy</a>,
@@ -218,7 +246,7 @@ export default function TermsPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">12. Changes to These Terms</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">13. Changes to These Terms</h2>
           <p>
             We may update these Terms from time to time. We will notify registered users of material
             changes by email. Continued use of the Site after notification constitutes acceptance
@@ -227,7 +255,7 @@ export default function TermsPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">13. Governing Law</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">14. Governing Law</h2>
           <p>
             These Terms are governed by the laws of Queensland, Australia. Any disputes will be
             subject to the non-exclusive jurisdiction of the courts of Queensland.
@@ -236,7 +264,7 @@ export default function TermsPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">14. Contact</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">15. Contact</h2>
           <p>
             Questions about these Terms may be directed to:{' '}
             {/* TODO: Add dedicated legal/support email address */}
