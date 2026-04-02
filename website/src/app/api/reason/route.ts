@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { MODEL_FAST, MODEL_DEEP, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
+import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -456,6 +457,17 @@ Input: ${input.trim()}`
         )
       }
     }
+
+    // Generate reasoning receipt
+    const receipt = extractReceipt({
+      skillId: `sage-reason-${depth}`,
+      input: input.trim(),
+      evalData,
+      mechanisms: DEPTH_MECHANISMS[depth] as MechanismId[],
+    })
+
+    // Add receipt to evaluation data
+    evalData.reasoning_receipt = receipt
 
     // Cache the result
     cacheSet(ck, evalData)

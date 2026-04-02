@@ -112,6 +112,72 @@ Headers:
 Get a free API key (100 calls/month) at sagereasoning.com or contact
 zeus@sagereasoning.com.
 
+## OpenBrain Integration Pattern
+
+If you're using an OpenBrain-style architecture (persistent memory + AI sorter +
+agents), sage wrappers integrate at three points in the pipeline:
+
+### 1. AI Sorter (Step 4) — sage-classify
+
+Replace your raw LLM classification with reasoned classification:
+
+```
+function openbrain_sort(input, categories, api_key):
+
+    result = POST /api/skill/sage-classify {
+        input: input,
+        categories: categories,       # your OpenBrain table definitions
+        confidence_threshold: 0.7      # below this → stays in inbox
+    }
+
+    if result.action == "hold_for_review":
+        route_to_inbox(input, result.reasoning_receipt)
+    elif result.action == "flag_urgent":
+        route_to_table(result.category, input)
+        alert_owner("Passion-driven input detected", result)
+    else:
+        route_to_table(result.category, input)
+
+    # Store the reasoning receipt in your immutable log
+    store_receipt(result.reasoning_receipt)
+```
+
+### 2. Proactive Agent Loop (Step 9) — sage-prioritise
+
+When your agent revisits data and decides what to work on:
+
+```
+function agent_priority_loop(tasks, objective, api_key):
+
+    result = POST /api/skill/sage-prioritise {
+        items: tasks,            # array of {id, description, source, urgency_signal}
+        objective: objective,
+        horizon: "today"
+    }
+
+    for item in result.ranked_items:
+        if item.action == "do_now":
+            execute_task(item.id)
+        elif item.action == "reconsider":
+            deeper = POST /api/reason { input: item.reasoning, depth: "standard" }
+            review_with_owner(item.id, deeper)
+```
+
+### 3. Pre/Post Action Gates — sage-guard + sage-score
+
+Use the standard wrapper pattern (above) around any agent action to ensure
+reasoning quality before and after execution.
+
+### Discovery
+
+All sage skills are available as MCP-compatible tools:
+
+```
+GET /api/mcp/tools                    # all tools
+GET /api/mcp/tools?preset=openbrain   # curated OpenBrain toolset (6 skills)
+GET /api/mcp/tools?full=true          # full MCP server capabilities
+```
+
 ## Disclaimer
 
 Ancient reasoning, modern application. Does not consider legal, medical,

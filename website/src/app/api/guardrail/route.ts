@@ -10,6 +10,7 @@ import {
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, validateApiKey, withUsageHeaders, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
+import { extractReceipt } from '@/lib/reasoning-receipt'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -98,7 +99,15 @@ Return the JSON assessment.`
     const recommendation = getV3Recommendation(proximity, thresholdLevel)
     const proceed = meetsThreshold(proximity, thresholdLevel)
 
-    const result: V3GuardrailResponse = {
+    // Generate reasoning receipt
+    const receipt = extractReceipt({
+      skillId: 'sage-guard',
+      input: action.trim(),
+      evalData: assessmentData,
+      mechanisms: ['control_filter', 'passion_diagnosis'],
+    })
+
+    const result: V3GuardrailResponse & { reasoning_receipt?: typeof receipt } = {
       proceed,
       katorthoma_proximity: proximity,
       threshold: thresholdLevel,
@@ -109,6 +118,7 @@ Return the JSON assessment.`
       reasoning: assessmentData.reasoning,
       improvement_hint: assessmentData.improvement_hint || undefined,
       disclaimer: V3_DISCLAIMER,
+      reasoning_receipt: receipt,
     }
 
     // Analytics (fire and forget)

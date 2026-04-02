@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
+import { extractReceipt } from '@/lib/reasoning-receipt'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -137,8 +138,38 @@ Return the JSON score.`
     // V3 validation: ensure no numeric scores are present
     // This is implicit in the scoreData structure which uses qualitative levels only
 
+    // Generate overall receipt
+    const overallReceipt = extractReceipt({
+      skillId: 'sage-converse',
+      input: conversation.trim().slice(0, 500),
+      evalData: {
+        katorthoma_proximity: scoreData.overall?.katorthoma_proximity,
+        passions_detected: scoreData.overall?.passions_detected,
+        is_kathekon: scoreData.overall?.is_kathekon,
+        kathekon_quality: scoreData.overall?.kathekon_quality,
+      },
+      mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis'],
+    })
+
+    // Generate per-participant receipts
+    const participantReceipts = (scoreData.participants || []).map((p: any) =>
+      extractReceipt({
+        skillId: 'sage-converse',
+        input: `Participant: ${p.name}`,
+        evalData: {
+          katorthoma_proximity: p.katorthoma_proximity,
+          passions_detected: p.passions_detected,
+          is_kathekon: p.is_kathekon,
+          kathekon_quality: p.kathekon_quality,
+        },
+        mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis'],
+      })
+    )
+
     const result = {
       ...scoreData,
+      reasoning_receipt: overallReceipt,
+      participant_receipts: participantReceipts,
       scored_at: new Date().toISOString(),
     }
 

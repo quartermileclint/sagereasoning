@@ -5,6 +5,7 @@ import { checkRateLimit, RATE_LIMITS, validateApiKey, withUsageHeaders, validate
 import { buildV3IterationPrompt, getV3IterationWarning, compareProximity, higherProximity, validateV3IterateRequest } from '@/lib/deliberation'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_DEEP, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
+import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import type { V3DeliberationChain, V3DeliberationStep, DetectedPassion } from '@/lib/deliberation'
 
 const client = new Anthropic({
@@ -241,6 +242,16 @@ Return only the JSON evaluation object.`
         })
         .then(() => {})
 
+      // Generate reasoning receipt for the initial evaluation
+      const initialReceipt = extractReceipt({
+        skillId: 'sage-iterate',
+        input: action.trim(),
+        evalData: initialEval,
+        mechanisms: ['control_filter', 'kathekon_assessment', 'passion_diagnosis', 'virtue_assessment', 'oikeiosis'] as MechanismId[],
+        chainId: chain.id,
+        chainStep: 1,
+      })
+
       const startTime = Date.now()
       const initialResult = {
         chain_id: chain.id,
@@ -258,6 +269,7 @@ Return only the JSON evaluation object.`
         improvement_path: initialEval.improvement_path,
         oikeiosis_context: initialEval.oikeiosis_context,
         cicero_assessment: initialEval.cicero_assessment,
+        reasoning_receipt: initialReceipt,
         deliberation_note: initialEval.deliberation_note || 'Chain started. The sage has provided evaluation and guidance. To iterate, call this endpoint again with chain_id and your revised_action.',
         disclaimer: 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.',
       }
@@ -491,6 +503,19 @@ Evaluate the revised action. Return only the JSON evaluation object.`
       })
       .then(() => {})
 
+    // Generate reasoning receipt for the iteration
+    const iterReceipt = extractReceipt({
+      skillId: 'sage-iterate',
+      input: revised_action.trim(),
+      evalData: iterEval,
+      mechanisms: ['control_filter', 'kathekon_assessment', 'passion_diagnosis', 'virtue_assessment', 'oikeiosis'] as MechanismId[],
+      chainId: chain_id,
+      chainStep: nextStepNumber,
+      recommendedNext: proximityDirection === 'improving'
+        ? 'Continue iterating or apply insights'
+        : 'Review improvement_path and address false judgements before next iteration',
+    })
+
     const startTime = Date.now()
     const iterationResult: Record<string, unknown> = {
       chain_id: chain_id,
@@ -510,6 +535,7 @@ Evaluate the revised action. Return only the JSON evaluation object.`
       improvement_path: iterEval.improvement_path,
       oikeiosis_context: iterEval.oikeiosis_context,
       cicero_assessment: iterEval.cicero_assessment,
+      reasoning_receipt: iterReceipt,
       previous_proximity: lastStep.katorthoma_proximity,
       best_proximity_in_chain: bestProximity,
       disclaimer: 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.',

@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
+import { extractReceipt } from '@/lib/reasoning-receipt'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -139,12 +140,25 @@ Score my actions and give me the sage perspective.`
         .then(() => {})
     }
 
+    // Generate reasoning receipt
+    const receipt = extractReceipt({
+      skillId: 'sage-reflect',
+      input: what_happened.trim(),
+      evalData: {
+        katorthoma_proximity: reflectionData.katorthoma_proximity,
+        passions_detected: reflectionData.passions_detected,
+        sage_perspective: reflectionData.sage_perspective,
+      },
+      mechanisms: ['passion_diagnosis', 'oikeiosis'],
+    })
+
     const result = {
       katorthoma_proximity: reflectionData.katorthoma_proximity,
       passions_detected: reflectionData.passions_detected || [],
       what_you_did_well: reflectionData.what_you_did_well,
       sage_perspective: reflectionData.sage_perspective,
       evening_prompt: reflectionData.evening_prompt,
+      reasoning_receipt: receipt,
       disclaimer: reflectionData.disclaimer,
       reflected_at: new Date().toISOString(),
     }

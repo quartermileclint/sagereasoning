@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
+import { extractReceipt } from '@/lib/reasoning-receipt'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -211,6 +212,15 @@ Return only the JSON evaluation object.`
 
     // R3: Ensure disclaimer is always present
     evalData.disclaimer = 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.'
+
+    // Generate reasoning receipt
+    const receipt = extractReceipt({
+      skillId: 'sage-score',
+      input: action.trim(),
+      evalData,
+      mechanisms: ['control_filter', 'kathekon_assessment', 'passion_diagnosis', 'oikeiosis'],
+    })
+    evalData.reasoning_receipt = receipt
 
     // Cache the result
     cacheSet(ck, evalData)

@@ -15,6 +15,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
+import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
+import { getSkillById } from '@/lib/skill-registry'
 
 const SAGE_REASON_URL = process.env.NEXT_PUBLIC_SITE_URL
   ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/reason`
@@ -103,11 +105,22 @@ export function createContextTemplateHandler(config: ContextTemplateConfig) {
         ? config.frameResult(reasonResult)
         : reasonResult
 
+      // Generate reasoning receipt from sage-reason result
+      const skillDef = getSkillById(config.skillId)
+      const mechanisms = (skillDef?.mechanisms || ['control_filter', 'passion_diagnosis', 'oikeiosis']) as MechanismId[]
+      const receipt = extractReceipt({
+        skillId: config.skillId,
+        input: formatted.input,
+        evalData: framedResult as any,
+        mechanisms,
+      })
+
       // Add skill metadata
       const skillResult = {
         skill_id: config.skillId,
         skill_name: config.name,
         ...framedResult,
+        reasoning_receipt: receipt,
         disclaimer: 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.',
       }
 

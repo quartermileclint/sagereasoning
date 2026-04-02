@@ -5,6 +5,7 @@ import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
+import { extractReceipt } from '@/lib/reasoning-receipt'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -177,11 +178,42 @@ Score each option. Return the JSON array.`
     // Cache sorted results
     cacheSet(ck, scoreData)
 
+    // Generate per-option receipts and an overall receipt
+    const optionReceipts = scoreData.map((opt: OptionScore) =>
+      extractReceipt({
+        skillId: 'sage-decide',
+        input: `${decision.trim()} — Option: ${opt.option}`,
+        evalData: {
+          katorthoma_proximity: opt.katorthoma_proximity,
+          passions_detected: opt.passions_detected,
+          is_kathekon: opt.is_kathekon,
+          kathekon_quality: opt.kathekon_quality,
+        },
+        mechanisms: ['control_filter', 'passion_diagnosis', 'kathekon_assessment'],
+      })
+    )
+
+    // Overall receipt from the top-ranked option
+    const overallReceipt = extractReceipt({
+      skillId: 'sage-decide',
+      input: decision.trim(),
+      evalData: {
+        katorthoma_proximity: scoreData[0]?.katorthoma_proximity,
+        passions_detected: scoreData.flatMap((o: OptionScore) => o.passions_detected),
+        is_kathekon: scoreData[0]?.is_kathekon,
+        kathekon_quality: scoreData[0]?.kathekon_quality,
+      },
+      mechanisms: ['control_filter', 'passion_diagnosis', 'kathekon_assessment'],
+      recommendedNext: `Recommended option: ${scoreData[0]?.option || 'none'}`,
+    })
+
     const result = {
       decision: decision.trim(),
       options_scored: scoreData,
       recommended: scoreData[0]?.option || null,
       scored_at: new Date().toISOString(),
+      reasoning_receipt: overallReceipt,
+      option_receipts: optionReceipts,
       disclaimer: 'Stoic decision evaluation is a reflective tool, not a directive. The sage recognizes that only virtue is truly good; external outcomes remain indifferent. Use this to examine your reasoning, not to escape responsibility for your choice.',
     }
 
