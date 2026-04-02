@@ -30,40 +30,38 @@ interface Scenario {
   topic: string
 }
 
-/** V3 scenario evaluation output */
+/** V3 scenario evaluation output — matches actual API response shape */
 interface V3ScenarioResult {
-  /** Stage 1: Control filter */
-  control_filter: {
+  audience: string
+  katorthoma_proximity: KatorthomaProximityLevel
+  passions_detected: DetectedDocumentPassion[]
+  kathekon_quality: string
+  feedback: string
+  sage_says: string
+  scored_at: string
+  disclaimer: string
+  /** Optional V3-extended fields (may not always be present) */
+  control_filter?: {
     within_control: string[]
     outside_control: string[]
   }
-  /** Stage 2: Is the chosen response appropriate? */
-  kathekon_assessment: {
+  kathekon_assessment?: {
     is_kathekon: boolean
     quality: string
     reasoning: string
   }
-  /** Stage 3: Passions at play */
-  passions_detected: DetectedDocumentPassion[]
-  false_judgements: string[]
-  /** Stage 4: Proximity assessment */
-  katorthoma_proximity: KatorthomaProximityLevel
-  virtue_domains_engaged: string[]
-  ruling_faculty_assessment: string
-  /** Improvement path */
-  improvement_path: string
-  /** Cicero's deliberation walkthrough */
-  deliberation_walkthrough: {
+  false_judgements?: string[]
+  virtue_domains_engaged?: string[]
+  ruling_faculty_assessment?: string
+  improvement_path?: string
+  deliberation_walkthrough?: {
     is_honourable: string
     more_honourable: string
     is_advantageous: string
     more_advantageous: string
     honour_vs_advantage: string
   }
-  /** What the sage would do */
-  sage_response: string
-  /** R3 disclaimer */
-  disclaimer: string
+  sage_response?: string
 }
 
 const AUDIENCES = [
