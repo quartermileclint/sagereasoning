@@ -123,8 +123,8 @@ export default function HomePage() {
             The Four Cardinal Virtues
           </h2>
           <p className="font-body text-sage-700 text-center max-w-2xl mx-auto mb-12">
-            Every action is scored against these four pillars of Stoic philosophy,
-            weighted by their relative importance to living well.
+            Every evaluation considers the unified expression of these four pillars of Stoic philosophy.
+            They are inseparable aspects of a single good character &mdash; not scored independently, but assessed as one whole.
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {VIRTUES.map((virtue) => (
@@ -140,8 +140,8 @@ export default function HomePage() {
                 <h3 className="font-display text-lg font-semibold text-sage-800">{virtue.name}</h3>
                 <p className="font-display text-sm italic text-sage-600 mb-2">{virtue.greek}</p>
                 <p className="font-body text-sm text-sage-700 leading-relaxed mb-3">{virtue.description}</p>
-                <div className="inline-block px-3 py-1 bg-sage-100 rounded text-sm font-display">
-                  Weight: {(virtue.weight * 100)}%
+                <div className="inline-block px-3 py-1 bg-sage-100 rounded text-sm font-display text-sage-600">
+                  Unified Assessment
                 </div>
               </div>
             ))}

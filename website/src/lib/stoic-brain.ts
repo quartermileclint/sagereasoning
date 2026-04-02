@@ -760,12 +760,20 @@ export const EVALUATIVE_DISCLAIMER =
 // ============================================================================
 
 /** @deprecated V1 compat — remove when consuming pages are derived in Phases 3-9. */
+/** Virtue icon paths — maps each virtue to its animal symbol image */
+const VIRTUE_ICONS: Record<string, string> = {
+  phronesis: '/images/owllogo.PNG',
+  dikaiosyne: '/images/scaleslogo.PNG',
+  andreia: '/images/lionlogo.PNG',
+  sophrosyne: '/images/lotuslogo.PNG.png',
+}
+
 export const VIRTUES = VIRTUE_EXPRESSIONS.map(v => ({
   id: v.id,
   name: v.name,
   greek: v.greek,
   weight: 0.25, // R6b: placeholder only — V3 does not weight virtues independently
-  icon: '',
+  icon: VIRTUE_ICONS[v.id] || '',
   color: v.id === 'phronesis' ? '#7d9468' : v.id === 'dikaiosyne' ? '#B2AC88' : v.id === 'andreia' ? '#9e6b3a' : '#c45a7a',
   description: v.domain,
   subVirtues: v.sub_expressions.map(se => se.name),
