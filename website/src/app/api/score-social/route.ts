@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { V3_SOCIAL_MEDIA_PROMPT, PROXIMITY_ENGLISH } from '@/lib/document-scorer'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
+import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -72,9 +73,32 @@ ${platform ? `Platform: ${platform}\n` : ''}${context ? `Context: ${context}\n` 
 
 Return the JSON score.`
 
+    // Check cache first
+    const ck = cacheKey('/api/score-social', { text: trimmed, platform, context })
+    const cached = cacheGet(ck) as V3SocialMediaScore | undefined
+    if (cached) {
+      const publish_recommendation = getPublishRecommendation(cached.katorthoma_proximity)
+      const proximity_label = PROXIMITY_ENGLISH[cached.katorthoma_proximity]
+      return NextResponse.json({
+        poster_passions: cached.poster_passions,
+        reader_triggered_passions: cached.reader_triggered_passions,
+        false_judgements: cached.false_judgements,
+        corrections: cached.corrections,
+        katorthoma_proximity: cached.katorthoma_proximity,
+        proximity_label,
+        publish_recommendation,
+        character_count: trimmed.length,
+        platform: platform || null,
+        scored_at: new Date().toISOString(),
+        disclaimer: cached.disclaimer,
+        ai_generated: true,
+        ai_model: MODEL_FAST,
+      }, { headers: corsHeaders() })
+    }
+
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
+      model: MODEL_FAST,
+      max_tokens: 768,
       temperature: 0.2,
       system: [{ type: 'text', text: V3_SOCIAL_MEDIA_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userMessage }],
@@ -118,6 +142,9 @@ Return the JSON score.`
       disclaimer: scoreData.disclaimer,
     }
 
+    // Cache the result
+    cacheSet(ck, scoreData)
+
     // Analytics — event_type is now 'social_score_v3'
     await supabaseAdmin
       .from('analytics_events')
@@ -139,7 +166,7 @@ Return the JSON score.`
       {
         ...result,
         ai_generated: true,
-        ai_model: 'claude-sonnet-4-6',
+        ai_model: MODEL_FAST,
       },
       { headers: corsHeaders() }
     )

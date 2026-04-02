@@ -13,6 +13,7 @@ import {
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { buildEnvelope } from '@/lib/response-envelope'
+import { MODEL_DEEP } from '@/lib/model-config'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -56,10 +57,10 @@ export async function POST(request: NextRequest) {
     const truncated = trimmed.split(/\s+/).slice(0, 8000).join(' ')
 
     // Policy mode needs more tokens — its JSON schema is significantly larger
-    const maxTokens = isPolicy ? 4096 : 2048
+    const maxTokens = isPolicy ? 3072 : 2048
 
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: MODEL_DEEP,
       max_tokens: maxTokens,
       temperature: 0.2,
       system: [{ type: 'text', text: scoringPrompt, cache_control: { type: 'ephemeral' } }],
@@ -223,7 +224,7 @@ export async function POST(request: NextRequest) {
     const envelope = buildEnvelope({
       result,
       endpoint: '/api/score-document',
-      model: 'claude-sonnet-4-6',
+      model: MODEL_DEEP,
       startTime,
       maxTokens: maxTokens,
       composability: {

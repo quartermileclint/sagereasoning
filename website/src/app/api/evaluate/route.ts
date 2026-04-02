@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
+import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -98,9 +99,27 @@ Input: ${input.trim()}
 
 Return only the JSON evaluation object.`
 
+    // Check cache first
+    const ck = cacheKey('/api/evaluate', { input: input.trim() })
+    const cached = cacheGet(ck)
+    if (cached) {
+      const envelope = buildEnvelope({
+        result: cached,
+        endpoint: '/api/evaluate',
+        model: MODEL_FAST,
+        startTime,
+        maxTokens: 512,
+        composability: {
+          next_steps: ['/api/reason'],
+          recommended_action: 'Sign up for an API key to access deeper analysis (standard: 5 mechanisms, deep: 6 mechanisms) and iterative deliberation chains.',
+        },
+      })
+      return NextResponse.json(envelope, { headers: publicCorsHeaders() })
+    }
+
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 768,
+      model: MODEL_FAST,
+      max_tokens: 512,
       temperature: 0.2,
       system: [{ type: 'text', text: DEMO_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [
@@ -137,13 +156,16 @@ Return only the JSON evaluation object.`
     // Ensure disclaimer
     evalData.disclaimer = 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.'
 
+    // Cache the result
+    cacheSet(ck, evalData)
+
     // Build envelope
     const envelope = buildEnvelope({
       result: evalData,
       endpoint: '/api/evaluate',
-      model: 'claude-sonnet-4-6',
+      model: MODEL_FAST,
       startTime,
-      maxTokens: 768,
+      maxTokens: 512,
       composability: {
         next_steps: ['/api/reason'],
         recommended_action: 'Sign up for an API key to access deeper analysis (standard: 5 mechanisms, deep: 6 mechanisms) and iterative deliberation chains.',

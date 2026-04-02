@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { MODEL_FAST, MODEL_DEEP, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -313,11 +314,12 @@ Return ONLY valid JSON:
   "disclaimer": "Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations."
 }`
 
-// Map depth to system prompt and max tokens
+// Map depth to system prompt, max tokens, and model
+// Quick/standard use Haiku for speed; deep uses Sonnet for philosophical depth
 const DEPTH_CONFIG: Record<ReasonDepth, { prompt: string; maxTokens: number; model: string }> = {
-  quick: { prompt: QUICK_SYSTEM_PROMPT, maxTokens: 1024, model: 'claude-sonnet-4-6' },
-  standard: { prompt: STANDARD_SYSTEM_PROMPT, maxTokens: 1536, model: 'claude-sonnet-4-6' },
-  deep: { prompt: DEEP_SYSTEM_PROMPT, maxTokens: 2048, model: 'claude-sonnet-4-6' },
+  quick: { prompt: QUICK_SYSTEM_PROMPT, maxTokens: 768, model: MODEL_FAST },
+  standard: { prompt: STANDARD_SYSTEM_PROMPT, maxTokens: 1024, model: MODEL_FAST },
+  deep: { prompt: DEEP_SYSTEM_PROMPT, maxTokens: 1536, model: MODEL_DEEP },
 }
 
 // Required fields per depth level (for response validation)
@@ -392,9 +394,30 @@ Input: ${input.trim()}`
 
     userMessage += '\n\nReturn only the JSON evaluation object.'
 
-    // Call the reasoning engine
+    // Check cache first
     const startTime = Date.now()
+    const ck = cacheKey('/api/reason', { input: input.trim(), context: context?.trim(), domain_context: domain_context?.trim(), depth })
+    const cached = cacheGet(ck)
+    if (cached) {
+      const responsePayload = {
+        result: {
+          ...(cached as Record<string, unknown>),
+          disclaimer: EVALUATIVE_DISCLAIMER,
+        },
+        meta: {
+          endpoint: '/api/reason',
+          depth,
+          mechanisms_applied: DEPTH_MECHANISMS[depth],
+          mechanism_count: DEPTH_MECHANISMS[depth].length,
+          ai_generated: true,
+          ai_model: config.model,
+          latency_ms: Date.now() - startTime,
+        },
+      }
+      return NextResponse.json(responsePayload, { headers: corsHeaders() })
+    }
 
+    // Call the reasoning engine
     const message = await client.messages.create({
       model: config.model,
       max_tokens: config.maxTokens,
@@ -433,6 +456,9 @@ Input: ${input.trim()}`
         )
       }
     }
+
+    // Cache the result
+    cacheSet(ck, evalData)
 
     // Build response with metadata envelope (Task 2.2 compatible)
     const responsePayload = {

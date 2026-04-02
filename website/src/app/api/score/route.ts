@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
+import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -155,9 +156,29 @@ ${emotional_state?.trim() ? `Emotional state: ${emotional_state.trim()}` : ''}${
 
 Return only the JSON evaluation object.`
 
+    // Check cache first
+    const ck = cacheKey('/api/score', { action: action.trim(), context: context?.trim(), relationships: relationships?.trim(), emotional_state: emotional_state?.trim(), prior_feedback })
+    const cached = cacheGet(ck)
+    if (cached) {
+      const envelope = buildEnvelope({
+        result: cached,
+        endpoint: '/api/score',
+        model: MODEL_FAST,
+        startTime,
+        maxTokens: 1024,
+        composability: {
+          next_steps: ['/api/score-iterate', '/api/reason'],
+          recommended_action: (cached as any).virtue_quality?.katorthoma_proximity === 'reflexive' || (cached as any).virtue_quality?.katorthoma_proximity === 'habitual'
+            ? 'Address the false judgements identified in passion_diagnosis, then re-evaluate with /api/score-iterate.'
+            : 'Consider a deeper analysis with /api/reason?depth=deep for iterative refinement tracking.',
+        },
+      })
+      return NextResponse.json(envelope, { headers: corsHeaders() })
+    }
+
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1536,
+      model: MODEL_FAST,
+      max_tokens: 1024,
       temperature: 0.2,
       system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [
@@ -191,13 +212,16 @@ Return only the JSON evaluation object.`
     // R3: Ensure disclaimer is always present
     evalData.disclaimer = 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.'
 
+    // Cache the result
+    cacheSet(ck, evalData)
+
     // Build response with metadata envelope (Task 2.2)
     const envelope = buildEnvelope({
       result: evalData,
       endpoint: '/api/score',
-      model: 'claude-sonnet-4-6',
+      model: MODEL_FAST,
       startTime,
-      maxTokens: 1536,
+      maxTokens: 1024,
       composability: {
         next_steps: ['/api/score-iterate', '/api/reason'],
         recommended_action: evalData.virtue_quality?.katorthoma_proximity === 'reflexive' || evalData.virtue_quality?.katorthoma_proximity === 'habitual'

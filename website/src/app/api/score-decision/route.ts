@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
+import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -111,9 +112,34 @@ ${optionsList}
 
 Score each option. Return the JSON array.`
 
+    // Check cache first
+    const ck = cacheKey('/api/score-decision', { decision: decision.trim(), options, context: context?.trim() })
+    const cachedData = cacheGet(ck) as OptionScore[] | undefined
+    if (cachedData) {
+      const result = {
+        decision: decision.trim(),
+        options_scored: cachedData,
+        recommended: cachedData[0]?.option || null,
+        scored_at: new Date().toISOString(),
+        disclaimer: 'Stoic decision evaluation is a reflective tool, not a directive. The sage recognizes that only virtue is truly good; external outcomes remain indifferent. Use this to examine your reasoning, not to escape responsibility for your choice.',
+      }
+      const envelope = buildEnvelope({
+        result,
+        endpoint: '/api/score-decision',
+        model: MODEL_FAST,
+        startTime,
+        maxTokens: 1536,
+        composability: {
+          next_steps: ['/api/score-iterate'],
+          recommended_action: 'Review decision options and consider deeper analysis with /api/score-iterate.',
+        },
+      })
+      return NextResponse.json(envelope, { headers: corsHeaders() })
+    }
+
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 2048,
+      model: MODEL_FAST,
+      max_tokens: 1536,
       temperature: 0.2,
       system: [{ type: 'text', text: DECISION_SCORING_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userMessage }],
@@ -148,6 +174,9 @@ Score each option. Return the JSON array.`
 
     scoreData.sort((a, b) => proximityRank[b.katorthoma_proximity] - proximityRank[a.katorthoma_proximity])
 
+    // Cache sorted results
+    cacheSet(ck, scoreData)
+
     const result = {
       decision: decision.trim(),
       options_scored: scoreData,
@@ -172,9 +201,9 @@ Score each option. Return the JSON array.`
     const envelope = buildEnvelope({
       result,
       endpoint: '/api/score-decision',
-      model: 'claude-sonnet-4-6',
+      model: MODEL_FAST,
       startTime,
-      maxTokens: 2048,
+      maxTokens: 1536,
       composability: {
         next_steps: ['/api/score-iterate'],
         recommended_action: 'Review decision options and consider deeper analysis with /api/score-iterate.',

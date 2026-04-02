@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
+import { MODEL_FAST } from '@/lib/model-config'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -96,8 +97,8 @@ Topic hint: ${selectedTopic}
 Return the JSON scenario with options.`
 
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
+      model: MODEL_FAST,
+      max_tokens: 512,
       temperature: 0.7,
       system: [{ type: 'text', text: SCENARIO_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userMessage }],
@@ -140,9 +141,9 @@ Return the JSON scenario with options.`
     const envelope = buildEnvelope({
       result,
       endpoint: '/api/score-scenario',
-      model: 'claude-sonnet-4-6',
+      model: MODEL_FAST,
       startTime,
-      maxTokens: 1536,
+      maxTokens: 512,
       composability: {
         next_steps: ['POST /api/score-scenario'],
         recommended_action: 'User should respond to the scenario, then POST their response back to this endpoint for scoring.',
@@ -208,8 +209,8 @@ User's response: ${response.trim()}
 Score this response. Return the JSON.`
 
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
+      model: MODEL_FAST,
+      max_tokens: 512,
       temperature: 0.2,
       system: [{ type: 'text', text: SCENARIO_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userMessage }],
@@ -280,9 +281,9 @@ Score this response. Return the JSON.`
     const envelope = buildEnvelope({
       result,
       endpoint: '/api/score-scenario',
-      model: 'claude-sonnet-4-6',
+      model: MODEL_FAST,
       startTime,
-      maxTokens: 1536,
+      maxTokens: 512,
       composability: {
         next_steps: ['/api/score-iterate'],
         recommended_action: 'Review feedback and sage guidance. Consider deeper reflection with /api/reflect or iterate with /api/score-iterate.',

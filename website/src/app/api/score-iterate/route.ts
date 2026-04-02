@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimit, RATE_LIMITS, validateApiKey, withUsageHeaders, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 import { buildV3IterationPrompt, getV3IterationWarning, compareProximity, higherProximity, validateV3IterateRequest } from '@/lib/deliberation'
 import { buildEnvelope } from '@/lib/response-envelope'
+import { MODEL_DEEP, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import type { V3DeliberationChain, V3DeliberationStep, DetectedPassion } from '@/lib/deliberation'
 
 const client = new Anthropic({
@@ -136,33 +137,45 @@ ${emotional_state?.trim() ? `Emotional state: ${emotional_state.trim()}` : ''}
 
 Return only the JSON evaluation object.`
 
-      const message = await client.messages.create({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 2000,
-        temperature: 0.2,
-        system: [{ type: 'text', text: INITIAL_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-        messages: [{ role: 'user', content: userMessage }],
-      })
+      // Check cache for identical initial actions
+      const ck = cacheKey('/api/score-iterate/initial', { action: action.trim(), context: context?.trim(), relationships: relationships?.trim(), emotional_state: emotional_state?.trim() })
+      let evalData = cacheGet(ck) as Record<string, any> | undefined
+      let fromCache = !!evalData
 
-      const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
-      let evalData
-      try {
-        const cleaned = responseText.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
-        evalData = JSON.parse(cleaned)
-      } catch {
-        console.error('Failed to parse Claude response:', responseText)
-        return NextResponse.json({ error: 'Evaluation engine returned invalid response' }, { status: 500 })
-      }
+      if (!evalData) {
+        const message = await client.messages.create({
+          model: MODEL_DEEP,
+          max_tokens: 1536,
+          temperature: 0.2,
+          system: [{ type: 'text', text: INITIAL_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+          messages: [{ role: 'user', content: userMessage }],
+        })
 
-      // Validate required V3 fields
-      const required = ['control_filter', 'kathekon_assessment', 'passion_diagnosis', 'virtue_quality', 'cicero_assessment', 'improvement_path', 'oikeiosis_context', 'philosophical_reflection']
-      for (const field of required) {
-        if (evalData[field] === undefined) {
-          return NextResponse.json({ error: `Missing field: ${field}` }, { status: 500 })
+        const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+        try {
+          const cleaned = responseText.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
+          evalData = JSON.parse(cleaned)
+        } catch {
+          console.error('Failed to parse Claude response:', responseText)
+          return NextResponse.json({ error: 'Evaluation engine returned invalid response' }, { status: 500 })
         }
+
+        // Validate required V3 fields
+        const required = ['control_filter', 'kathekon_assessment', 'passion_diagnosis', 'virtue_quality', 'cicero_assessment', 'improvement_path', 'oikeiosis_context', 'philosophical_reflection']
+        for (const field of required) {
+          if (evalData![field] === undefined) {
+            return NextResponse.json({ error: `Missing field: ${field}` }, { status: 500 })
+          }
+        }
+
+        // Cache the parsed result for identical future inputs
+        cacheSet(ck, evalData!)
       }
 
-      const proximity = evalData.virtue_quality?.katorthoma_proximity
+      // At this point evalData is guaranteed non-undefined (either from cache or parsed API response)
+      const initialEval = evalData as Record<string, any>
+
+      const proximity = initialEval.virtue_quality?.katorthoma_proximity
       if (!proximity || !['reflexive', 'habitual', 'deliberate', 'principled', 'sage_like'].includes(proximity)) {
         return NextResponse.json({ error: 'Invalid katorthoma_proximity value' }, { status: 500 })
       }
@@ -197,20 +210,20 @@ Return only the JSON evaluation object.`
           chain_id: chain.id,
           step_number: 1,
           action_description: action.trim(),
-          is_kathekon: evalData.kathekon_assessment.is_kathekon,
-          kathekon_quality: evalData.kathekon_assessment.quality,
-          passions_detected: evalData.passion_diagnosis.passions_detected || [],
-          false_judgements: evalData.passion_diagnosis.false_judgements || [],
-          causal_stage_affected: evalData.passion_diagnosis.causal_stage_affected || null,
+          is_kathekon: initialEval.kathekon_assessment.is_kathekon,
+          kathekon_quality: initialEval.kathekon_assessment.quality,
+          passions_detected: initialEval.passion_diagnosis.passions_detected || [],
+          false_judgements: initialEval.passion_diagnosis.false_judgements || [],
+          causal_stage_affected: initialEval.passion_diagnosis.causal_stage_affected || null,
           katorthoma_proximity: proximity,
-          ruling_faculty_state: evalData.virtue_quality.ruling_faculty_state,
-          virtue_domains_engaged: evalData.virtue_quality.virtue_domains_engaged || [],
-          philosophical_reflection: evalData.philosophical_reflection,
-          improvement_path: evalData.improvement_path,
-          oikeiosis_context: evalData.oikeiosis_context,
+          ruling_faculty_state: initialEval.virtue_quality.ruling_faculty_state,
+          virtue_domains_engaged: initialEval.virtue_quality.virtue_domains_engaged || [],
+          philosophical_reflection: initialEval.philosophical_reflection,
+          improvement_path: initialEval.improvement_path,
+          oikeiosis_context: initialEval.oikeiosis_context,
           proximity_direction: null,
           passions_direction: null,
-          cicero_assessment: evalData.cicero_assessment,
+          cicero_assessment: initialEval.cicero_assessment,
           iteration_warning_issued: false,
         })
 
@@ -223,7 +236,7 @@ Return only the JSON evaluation object.`
             chain_id: chain.id,
             agent_id: agent_id || null,
             initial_proximity: proximity,
-            is_kathekon: evalData.kathekon_assessment.is_kathekon,
+            is_kathekon: initialEval.kathekon_assessment.is_kathekon,
           },
         })
         .then(() => {})
@@ -234,27 +247,27 @@ Return only the JSON evaluation object.`
         step_number: 1,
         iteration_mode: 'initial',
         katorthoma_proximity: proximity,
-        is_kathekon: evalData.kathekon_assessment.is_kathekon,
-        kathekon_quality: evalData.kathekon_assessment.quality,
-        passions_detected: evalData.passion_diagnosis.passions_detected,
-        false_judgements: evalData.passion_diagnosis.false_judgements,
-        causal_stage_affected: evalData.passion_diagnosis.causal_stage_affected,
-        virtue_domains_engaged: evalData.virtue_quality.virtue_domains_engaged,
-        ruling_faculty_state: evalData.virtue_quality.ruling_faculty_state,
-        philosophical_reflection: evalData.philosophical_reflection,
-        improvement_path: evalData.improvement_path,
-        oikeiosis_context: evalData.oikeiosis_context,
-        cicero_assessment: evalData.cicero_assessment,
-        deliberation_note: evalData.deliberation_note || 'Chain started. The sage has provided evaluation and guidance. To iterate, call this endpoint again with chain_id and your revised_action.',
+        is_kathekon: initialEval.kathekon_assessment.is_kathekon,
+        kathekon_quality: initialEval.kathekon_assessment.quality,
+        passions_detected: initialEval.passion_diagnosis.passions_detected,
+        false_judgements: initialEval.passion_diagnosis.false_judgements,
+        causal_stage_affected: initialEval.passion_diagnosis.causal_stage_affected,
+        virtue_domains_engaged: initialEval.virtue_quality.virtue_domains_engaged,
+        ruling_faculty_state: initialEval.virtue_quality.ruling_faculty_state,
+        philosophical_reflection: initialEval.philosophical_reflection,
+        improvement_path: initialEval.improvement_path,
+        oikeiosis_context: initialEval.oikeiosis_context,
+        cicero_assessment: initialEval.cicero_assessment,
+        deliberation_note: initialEval.deliberation_note || 'Chain started. The sage has provided evaluation and guidance. To iterate, call this endpoint again with chain_id and your revised_action.',
         disclaimer: 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.',
       }
 
       const envelope = buildEnvelope({
         result: initialResult,
         endpoint: '/api/score-iterate',
-        model: 'claude-sonnet-4-6',
+        model: MODEL_DEEP,
         startTime,
-        maxTokens: 2000,
+        maxTokens: 1536,
         usage: {
           monthly_calls_after: keyCheck.monthly_calls_after,
           monthly_limit: keyCheck.monthly_calls_after + keyCheck.monthly_remaining,
@@ -368,33 +381,44 @@ ${chain.context?.trim() ? `Original context: ${chain.context.trim()}` : ''}
 
 Evaluate the revised action. Return only the JSON evaluation object.`
 
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 2000,
-      temperature: 0.2,
-      system: [{ type: 'text', text: iterationPrompt, cache_control: { type: 'ephemeral' } }],
-      messages: [{ role: 'user', content: userMessage }],
-    })
+    // Check cache for identical iteration inputs
+    const iterCk = cacheKey('/api/score-iterate/continue', { chain_id, revised_action: revised_action.trim(), revision_rationale: revision_rationale?.trim(), step: nextStepNumber })
+    let evalData = cacheGet(iterCk) as Record<string, any> | undefined
 
-    const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
-    let evalData
-    try {
-      const cleaned = responseText.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
-      evalData = JSON.parse(cleaned)
-    } catch {
-      console.error('Failed to parse iteration response:', responseText)
-      return NextResponse.json({ error: 'Evaluation engine returned invalid response' }, { status: 500 })
-    }
+    if (!evalData) {
+      const message = await client.messages.create({
+        model: MODEL_DEEP,
+        max_tokens: 1536,
+        temperature: 0.2,
+        system: [{ type: 'text', text: iterationPrompt, cache_control: { type: 'ephemeral' } }],
+        messages: [{ role: 'user', content: userMessage }],
+      })
 
-    // Validate V3 fields
-    const required = ['control_filter', 'kathekon_assessment', 'passion_diagnosis', 'virtue_quality', 'cicero_assessment', 'improvement_path', 'oikeiosis_context', 'philosophical_reflection']
-    for (const field of required) {
-      if (evalData[field] === undefined) {
-        return NextResponse.json({ error: `Missing field: ${field}` }, { status: 500 })
+      const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+      try {
+        const cleaned = responseText.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
+        evalData = JSON.parse(cleaned)
+      } catch {
+        console.error('Failed to parse iteration response:', responseText)
+        return NextResponse.json({ error: 'Evaluation engine returned invalid response' }, { status: 500 })
       }
+
+      // Validate V3 fields
+      const required = ['control_filter', 'kathekon_assessment', 'passion_diagnosis', 'virtue_quality', 'cicero_assessment', 'improvement_path', 'oikeiosis_context', 'philosophical_reflection']
+      for (const field of required) {
+        if (evalData![field] === undefined) {
+          return NextResponse.json({ error: `Missing field: ${field}` }, { status: 500 })
+        }
+      }
+
+      // Cache for identical future requests
+      cacheSet(iterCk, evalData!)
     }
 
-    const newProximity = evalData.virtue_quality?.katorthoma_proximity
+    // At this point evalData is guaranteed non-undefined
+    const iterEval = evalData as Record<string, any>
+
+    const newProximity = iterEval.virtue_quality?.katorthoma_proximity
     if (!newProximity || !['reflexive', 'habitual', 'deliberate', 'principled', 'sage_like'].includes(newProximity)) {
       return NextResponse.json({ error: 'Invalid katorthoma_proximity value' }, { status: 500 })
     }
@@ -404,7 +428,7 @@ Evaluate the revised action. Return only the JSON evaluation object.`
 
     // Determine passions direction (fewer, same, or more detected)
     const lastPassionCount = (lastStep.passions_detected as DetectedPassion[]).length
-    const newPassionCount = (evalData.passion_diagnosis.passions_detected || []).length
+    const newPassionCount = (iterEval.passion_diagnosis.passions_detected || []).length
     const passionsDirection: 'fewer' | 'same' | 'more' =
       newPassionCount < lastPassionCount ? 'fewer' :
       newPassionCount > lastPassionCount ? 'more' :
@@ -421,20 +445,20 @@ Evaluate the revised action. Return only the JSON evaluation object.`
         step_number: nextStepNumber,
         action_description: revised_action.trim(),
         revision_rationale: revision_rationale?.trim() || null,
-        is_kathekon: evalData.kathekon_assessment.is_kathekon,
-        kathekon_quality: evalData.kathekon_assessment.quality,
-        passions_detected: evalData.passion_diagnosis.passions_detected || [],
-        false_judgements: evalData.passion_diagnosis.false_judgements || [],
-        causal_stage_affected: evalData.passion_diagnosis.causal_stage_affected || null,
+        is_kathekon: iterEval.kathekon_assessment.is_kathekon,
+        kathekon_quality: iterEval.kathekon_assessment.quality,
+        passions_detected: iterEval.passion_diagnosis.passions_detected || [],
+        false_judgements: iterEval.passion_diagnosis.false_judgements || [],
+        causal_stage_affected: iterEval.passion_diagnosis.causal_stage_affected || null,
         katorthoma_proximity: newProximity,
-        ruling_faculty_state: evalData.virtue_quality.ruling_faculty_state,
-        virtue_domains_engaged: evalData.virtue_quality.virtue_domains_engaged || [],
-        philosophical_reflection: evalData.philosophical_reflection,
-        improvement_path: evalData.improvement_path,
-        oikeiosis_context: evalData.oikeiosis_context,
+        ruling_faculty_state: iterEval.virtue_quality.ruling_faculty_state,
+        virtue_domains_engaged: iterEval.virtue_quality.virtue_domains_engaged || [],
+        philosophical_reflection: iterEval.philosophical_reflection,
+        improvement_path: iterEval.improvement_path,
+        oikeiosis_context: iterEval.oikeiosis_context,
         proximity_direction: proximityDirection,
         passions_direction: passionsDirection,
-        cicero_assessment: evalData.cicero_assessment,
+        cicero_assessment: iterEval.cicero_assessment,
         iteration_warning_issued: !!iterationWarning,
       })
 
@@ -474,18 +498,18 @@ Evaluate the revised action. Return only the JSON evaluation object.`
       iteration_mode: 'revision',
       katorthoma_proximity: newProximity,
       proximity_direction: proximityDirection,
-      is_kathekon: evalData.kathekon_assessment.is_kathekon,
-      kathekon_quality: evalData.kathekon_assessment.quality,
-      passions_detected: evalData.passion_diagnosis.passions_detected,
-      false_judgements: evalData.passion_diagnosis.false_judgements,
-      causal_stage_affected: evalData.passion_diagnosis.causal_stage_affected,
+      is_kathekon: iterEval.kathekon_assessment.is_kathekon,
+      kathekon_quality: iterEval.kathekon_assessment.quality,
+      passions_detected: iterEval.passion_diagnosis.passions_detected,
+      false_judgements: iterEval.passion_diagnosis.false_judgements,
+      causal_stage_affected: iterEval.passion_diagnosis.causal_stage_affected,
       passions_direction: passionsDirection,
-      virtue_domains_engaged: evalData.virtue_quality.virtue_domains_engaged,
-      ruling_faculty_state: evalData.virtue_quality.ruling_faculty_state,
-      philosophical_reflection: evalData.philosophical_reflection,
-      improvement_path: evalData.improvement_path,
-      oikeiosis_context: evalData.oikeiosis_context,
-      cicero_assessment: evalData.cicero_assessment,
+      virtue_domains_engaged: iterEval.virtue_quality.virtue_domains_engaged,
+      ruling_faculty_state: iterEval.virtue_quality.ruling_faculty_state,
+      philosophical_reflection: iterEval.philosophical_reflection,
+      improvement_path: iterEval.improvement_path,
+      oikeiosis_context: iterEval.oikeiosis_context,
+      cicero_assessment: iterEval.cicero_assessment,
       previous_proximity: lastStep.katorthoma_proximity,
       best_proximity_in_chain: bestProximity,
       disclaimer: 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.',
@@ -500,9 +524,9 @@ Evaluate the revised action. Return only the JSON evaluation object.`
     const envelope = buildEnvelope({
       result: iterationResult,
       endpoint: '/api/score-iterate',
-      model: 'claude-sonnet-4-6',
+      model: MODEL_DEEP,
       startTime,
-      maxTokens: 2000,
+      maxTokens: 1536,
       usage: {
         monthly_calls_after: keyCheck.monthly_calls_after,
         monthly_limit: keyCheck.monthly_calls_after + keyCheck.monthly_remaining,
