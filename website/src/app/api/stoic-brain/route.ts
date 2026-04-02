@@ -81,11 +81,7 @@ export async function GET(request: NextRequest) {
         ],
         core_principle: 'An action is virtuous to the degree it expresses Wisdom, Justice, Courage, and Temperance simultaneously — judged by intention and reasoning, not outcome alone. The goal is flourishing (eudaimonia) for the agent and all those affected.',
         primary_sources: [
-          'Marcus Aurelius, Meditations (~170-180 CE)',
-          'Epictetus, Discourses and Enchiridion (~108 CE)',
-          'Seneca, Letters to Lucilius (~65 CE)',
-          'Diogenes Laertius, Lives of the Eminent Philosophers Book 7 (~3rd c CE)',
-          'Cicero, De Finibus Book 3 (45 BCE)',
+          'Derived from foundational texts of Stoic philosophy across multiple historical periods.',
         ],
       },
       ...stoicBrain,

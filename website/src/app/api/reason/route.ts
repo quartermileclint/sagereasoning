@@ -87,7 +87,7 @@ Map the expanding circles of concern relevant to this decision. The 5 stages:
 5. Humanity and cosmic fellowship (cosmopolis)
 
 For each relevant circle, assess whether the obligation was met, neglected, or in tension with other circles.
-Apply Cicero's 5 deliberation questions where relevant:
+Apply the 5 deliberation questions where relevant:
 - Is the action honourable (honestum)?
 - Is it advantageous (utile)?
 - If honourable and advantageous conflict, which prevails? (Honourable always prevails.)
@@ -159,7 +159,7 @@ Map the 5 expanding circles of concern:
 4. Political community and fellow citizens
 5. Humanity and cosmic fellowship (cosmopolis)
 
-Apply Cicero's 5 deliberation questions where relevant.
+Apply the 5 deliberation questions where relevant.
 Output: relevant_circles (array of {stage, description, obligation_met, tension}), deliberation_notes
 
 MECHANISM 4 — VALUE ASSESSMENT (Preferred Indifferents)
@@ -234,7 +234,7 @@ MECHANISM 2 — PASSION DIAGNOSIS
 Output: passions_detected (array of {id, name, root_passion}), false_judgements (array), correct_judgements (array), causal_stage_affected
 
 MECHANISM 3 — OIKEIOSIS (Social Obligation Mapping)
-5 expanding circles + Cicero's 5 deliberation questions.
+5 expanding circles + the 5 deliberation questions.
 Output: relevant_circles (array of {stage, description, obligation_met, tension}), deliberation_notes
 
 MECHANISM 4 — VALUE ASSESSMENT (Preferred Indifferents)
@@ -246,10 +246,10 @@ MECHANISM 5 — KATHEKON ASSESSMENT (Appropriate Action)
 Is this a kathekon? Accord with natural relationships, reasonable justification, role fulfillment.
 Output: is_kathekon (boolean), quality (strong|moderate|marginal|contrary), justification (string)
 
-MECHANISM 6 — ITERATIVE REFINEMENT (Senecan Progress Tracking)
-Where does the agent sit on the Senecan progress scale? This mechanism tracks direction-of-travel across 4 dimensions.
+MECHANISM 6 — ITERATIVE REFINEMENT (Progress Tracking)
+Where does the agent sit on the progress scale? This mechanism tracks direction-of-travel across 4 dimensions.
 
-Senecan grades:
+Progress grades:
 - Pre-progress: Not yet begun. Still fully in grip of passions.
 - Grade 1 (proficiens): Has begun to move away from passions but still lapses frequently.
 - Grade 2 (proficiens): Consistent reasoning, occasional lapse under pressure. False judgements identified but not always corrected.
@@ -261,7 +261,7 @@ Progress dimensions:
 - Disposition stability: Does the agent maintain virtue under pressure?
 - Oikeiosis extension: Is concern expanding beyond self to wider circles?
 
-Output: senecan_grade (pre_progress|grade_1|grade_2|grade_3), progress_dimensions ({passion_reduction, judgement_quality, disposition_stability, oikeiosis_extension} — each a brief assessment), direction_of_travel (improving|stable|declining)
+Output: progress_grade (pre_progress|grade_1|grade_2|grade_3), progress_dimensions ({passion_reduction, judgement_quality, disposition_stability, oikeiosis_extension} — each a brief assessment), direction_of_travel (improving|stable|declining)
 
 OVERALL ASSESSMENT:
 Based on all 6 mechanisms:
@@ -297,7 +297,7 @@ Return ONLY valid JSON:
     "justification": "..."
   },
   "iterative_refinement": {
-    "senecan_grade": "pre_progress|grade_1|grade_2|grade_3",
+    "progress_grade": "pre_progress|grade_1|grade_2|grade_3",
     "progress_dimensions": {
       "passion_reduction": "...",
       "judgement_quality": "...",

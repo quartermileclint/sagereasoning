@@ -55,7 +55,7 @@ Katorthoma proximity levels (in order of approaching the sage):
 
 Output: katorthoma_proximity, ruling_faculty_state, virtue_domains_engaged (array)
 
-CICERO'S DELIBERATION FRAMEWORK (apply after analysis):
+DELIBERATION FRAMEWORK (apply after analysis):
 Q1: Is the action honourable (to kalon)?
 Q2: If comparing honourable options, which is MORE honourable?
 Q3: Is it advantageous (utile)?
@@ -591,7 +591,7 @@ export async function GET(request: NextRequest) {
         'Free tier: 1 iteration per chain. Paid tier: up to 3 iterations per chain (or unlimited).',
         'Evaluation uses the 4-stage sequence: Prohairesis Filter, Kathekon Assessment, Passion Diagnosis, Unified Virtue Assessment.',
         'Proximity levels: reflexive, habitual, deliberate, principled, sage_like (no numeric 0-100 scores).',
-        'A Stoic advisory about decisive action is issued every 5th iteration (Epictetus Discourses 1.4).',
+        'A Stoic advisory about decisive action is issued every 5th iteration.',
         'Full deliberation chains are stored for later reflection via GET /api/deliberation-chain/:id',
       ],
     },

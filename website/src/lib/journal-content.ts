@@ -114,7 +114,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Foundations',
     title: 'What Is Truly Good?',
     teaching:
-      'The Stoics held that the only genuine good is virtue — the excellence of your character. Everything else — health, wealth, reputation, pleasure — they called "indifferents." Not because these things do not matter, but because they cannot make you a good person or a bad one. Only how you use them can do that. A wealthy person who hoards is worse off in character than a poor person who gives generously. The external changed nothing; the character changed everything. Flourishing, for the Stoics, is not a feeling. It is the objective quality of a life expressed through virtue.',
+      'The only genuine good is virtue — the excellence of your character. Everything else — health, wealth, reputation, pleasure — are "indifferents." Not because these things do not matter, but because they cannot make you a good person or a bad one. Only how you use them can do that. A wealthy person who hoards is worse off in character than a poor person who gives generously. The external changed nothing; the character changed everything. Flourishing is not a feeling. It is the objective quality of a life expressed through virtue.',
     question:
       'Think of something you currently believe is essential to your happiness — a possession, a relationship, a status. Now imagine it was taken from you tomorrow. Would you still be able to act with kindness, honesty, and courage? Write about what truly makes you "you" versus what simply surrounds you.',
     sourceFile: 'stoic-brain.json',
@@ -126,7 +126,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Foundations',
     title: 'The Dichotomy of Control',
     teaching:
-      'Epictetus opened his handbook with the most important distinction in Stoic philosophy: some things are "up to us" and some things are not. What is up to us? Our judgements, our impulses, our desires, our aversions, our choices, and our character. What is not? Our body, our reputation, what others think, what happens in the world, and death itself. Most suffering comes from confusing the two — pouring energy into controlling what we cannot, while neglecting what we can.',
+      'The most important distinction in Stoic philosophy: some things are "up to us" and some things are not. What is up to us? Our judgements, our impulses, our desires, our aversions, our choices, and our character. What is not? Our body, our reputation, what others think, what happens in the world, and death itself. Most suffering comes from confusing the two — pouring energy into controlling what we cannot, while neglecting what we can.',
     question:
       'Write about a situation that is currently causing you stress or frustration. Divide it into two columns in your mind: what is genuinely within your control (your response, your effort, your attitude) and what is not (other people\'s reactions, the outcome, timing). Where have you been spending most of your energy?',
     sourceFile: 'stoic-brain.json',
@@ -138,7 +138,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Foundations',
     title: 'What Is Up to Us',
     teaching:
-      'Yesterday we drew the line between what is and is not within our control. Today, look more closely at what IS up to you. The Stoics identified six things squarely within your power: your judgements about events, your impulses toward or away from things, your desires and aversions, your capacity to grant or withhold belief, your moral choices, and the character you build through those choices. Notice that these are all internal. No one can force you to believe something, desire something, or choose something. Others can constrain your body, your possessions, your freedom of movement — but your inner life remains yours.',
+      'Yesterday we drew the line between what is and is not within our control. Today, look more closely at what IS up to you. Six things are squarely within your power: your judgements about events, your impulses toward or away from things, your desires and aversions, your capacity to grant or withhold belief, your moral choices, and the character you build through those choices. Notice that these are all internal. No one can force you to believe something, desire something, or choose something. Others can constrain your body, your possessions, your freedom of movement — but your inner life remains yours.',
     question:
       'Pick one of the six things within your control — judgements, impulses, desires, aversions, assent, or moral choice. Recall a recent situation where you exercised this power well, and one where you gave it away. What was different between the two moments?',
     sourceFile: 'stoic-brain.json',
@@ -150,7 +150,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Foundations',
     title: 'Flourishing Is Not Feeling Good',
     teaching:
-      'The Stoic concept of flourishing is often translated as "happiness," but it means something closer to "living well." It is not a feeling. It is a condition of character. A person who acts with consistent virtue is flourishing even in the middle of hardship, grief, or loss. A person who has every external comfort but acts from selfishness and cowardice is not flourishing, no matter how pleasant their life feels. Flourishing is living and acting in agreement with nature — which for a rational being means acting in agreement with reason and virtue.',
+      'Flourishing means something closer to "living well" than to happiness. It is not a feeling. It is a condition of character. A person who acts with consistent virtue is flourishing even in the middle of hardship, grief, or loss. A person who has every external comfort but acts from selfishness and cowardice is not flourishing, no matter how pleasant their life feels. Flourishing is living and acting in agreement with nature — which for a rational being means acting in agreement with reason and virtue.',
     question:
       'Write about a time when you were externally comfortable but internally knew something was off — perhaps you had avoided a hard conversation, compromised your integrity, or chosen ease over what was right. What did that discomfort tell you about what flourishing actually requires of you?',
     sourceFile: 'stoic-brain.json',
@@ -162,7 +162,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Foundations',
     title: 'The Sage — A Direction, Not a Destination',
     teaching:
-      'In Stoic philosophy, the Sage is the theoretical ideal — a person who acts from perfect virtue in every situation, free from all false beliefs and destructive passions. The Stoics themselves admitted that a true Sage may appear "as rarely as the phoenix." The point is not to become the Sage but to use the concept as a compass. Every decision can be measured against the question: what would perfect wisdom, justice, courage, and self-control look like here? The Sage is not someone you need to become. The Sage is the direction you face.',
+      'The Sage is the theoretical ideal — a person who acts from perfect virtue in every situation, free from all false beliefs and destructive passions. It was said that a true Sage may appear "as rarely as the phoenix." The point is not to become the Sage but to use the concept as a compass. Every decision can be measured against the question: what would perfect wisdom, justice, courage, and self-control look like here? The Sage is not someone you need to become. The Sage is the direction you face.',
     question:
       'Think of someone you deeply admire — not for their success, but for their character. What qualities do they embody that you wish you had more of? Now consider: is there anything actually stopping you from practising those qualities today, even imperfectly?',
     sourceFile: 'stoic-brain.json',
@@ -174,7 +174,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Foundations',
     title: 'Living According to Nature',
     teaching:
-      'The Stoics taught that the cosmos is governed by rational order — a divine reason that pervades everything. Human freedom does not mean escaping this order but aligning your moral choices with it through virtue. For a rational being, "living according to nature" means living according to reason. It means recognising that you are part of something larger than yourself, and that your capacity for rational choice is what makes you distinctly human. When you act from virtue, you are not fighting against the natural order. You are participating in it.',
+      'The cosmos is governed by rational order — a divine reason that pervades everything. Human freedom does not mean escaping this order but aligning your moral choices with it through virtue. For a rational being, "living according to nature" means living according to reason. It means recognising that you are part of something larger than yourself, and that your capacity for rational choice is what makes you distinctly human. When you act from virtue, you are not fighting against the natural order. You are participating in it.',
     question:
       'Consider a situation where you felt at odds with how things were going — a plan that fell apart, a relationship that changed, a circumstance beyond your control. What would it look like to accept the situation without surrendering your agency? How might you align your choices with what is, rather than fighting against what you cannot change?',
     sourceFile: 'stoic-brain.json',
@@ -186,7 +186,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Foundations',
     title: 'The One Making Progress',
     teaching:
-      'Between the ordinary person ruled by impulse and the perfect Sage, the Stoics recognised a third figure: the one making progress. This is the realistic aspiration. The person making progress does not claim to be wise but practises wisdom daily. They stumble, recognise their errors, and adjust. Progress is not perfection. It is the consistent effort to bring your actions closer to virtue, to notice when you have fallen short, and to begin again without self-punishment. Every journal entry you complete is an act of the person making progress.',
+      'Between the ordinary person ruled by impulse and the perfect Sage stands a third figure: the one making progress. This is the realistic aspiration. The person making progress does not claim to be wise but practises wisdom daily. They stumble, recognise their errors, and adjust. Progress is not perfection. It is the consistent effort to bring your actions closer to virtue, to notice when you have fallen short, and to begin again without self-punishment. Every journal entry you complete is an act of the person making progress.',
     question:
       'Where are you right now on the path between reacting on impulse and acting from considered virtue? Do not judge yourself harshly — simply observe. Write about one specific area where you have noticed genuine progress in your character over the past year, however small.',
     sourceFile: 'stoic-brain.json',
@@ -204,7 +204,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'The Architecture of Mind',
     title: 'The Ruling Faculty',
     teaching:
-      'The Stoics located the seat of character in what they called the ruling faculty — the rational, commanding part of the soul. It is the part of you that receives impressions of the world, decides what to believe, generates impulses toward action, and houses the dispositions that constitute your character. Every virtue and every vice lives here. When the Stoics said "all virtue is constituted by the reasoning faculty according to its essence," they meant that your character is not something that happens to you. It is something your ruling faculty constructs through its responses.',
+      'The seat of character is what we call the ruling faculty — the rational, commanding part of the soul. It is the part of you that receives impressions of the world, decides what to believe, generates impulses toward action, and houses the dispositions that constitute your character. Every virtue and every vice lives here. All virtue is constituted by the reasoning faculty according to its essence. Your character is not something that happens to you. It is something your ruling faculty constructs through its responses.',
     question:
       'Imagine your ruling faculty as the captain of a ship. The sea and the weather are not up to the captain, but the response to them is. Recall a recent event where your "captain" responded well — with clear judgement and measured action. Now recall one where the captain was asleep at the wheel. What was different?',
     virtue: 'wisdom',
@@ -217,7 +217,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'The Architecture of Mind',
     title: 'Impressions — How Things Appear',
     teaching:
-      'The first thing that happens when you encounter any situation is that you receive an impression — a representation of how things appear to you. "I have been insulted." "This is dangerous." "That person is wrong." These impressions arrive automatically. You did not choose them. The Stoics made a critical distinction: there are ordinary impressions, which may be distorted by expectation, desire, or fear, and there are comprehensive impressions — those that grasp reality so clearly they carry the mark of truth. Most of our trouble begins with mistaking distorted impressions for comprehensive ones.',
+      'The first thing that happens when you encounter any situation is that you receive an impression — a representation of how things appear to you. "I have been insulted." "This is dangerous." "That person is wrong." These impressions arrive automatically. You did not choose them. A critical distinction exists: there are ordinary impressions, which may be distorted by expectation, desire, or fear, and there are comprehensive impressions — those that grasp reality so clearly they carry the mark of truth. Most of our trouble begins with mistaking distorted impressions for comprehensive ones.',
     question:
       'Think of a moment today when you received a strong impression — perhaps a flash of annoyance, a surge of anxiety, or a burst of excitement. Write it down as a statement: "It appeared to me that..." Now examine it: was this impression showing you reality clearly, or was it coloured by something you feared, desired, or assumed?',
     virtue: 'wisdom',
@@ -243,7 +243,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'The Architecture of Mind',
     title: 'Impulse — The Drive to Act',
     teaching:
-      'When you give assent to a practical impression — one that concerns what to do — an impulse arises. This is the drive to act, the movement toward or away from something. If your assent was correct, the impulse will be proportionate and rational. If your assent was hasty or based on a false impression, the impulse will exceed what reason warrants. This is what the founder of Stoicism defined as passion: an impulse exceeding due measure. The problem is not that you feel a drive to act. The problem is when that drive is disproportionate to reality because it was built on a false foundation.',
+      'When you give assent to a practical impression — one that concerns what to do — an impulse arises. This is the drive to act, the movement toward or away from something. If your assent was correct, the impulse will be proportionate and rational. If your assent was hasty or based on a false impression, the impulse will exceed what reason warrants. Passion is defined as an impulse exceeding due measure. The problem is not that you feel a drive to act. The problem is when that drive is disproportionate to reality because it was built on a false foundation.',
     question:
       'Recall a time when you felt an overwhelming urge to act — to send an angry message, to make an impulsive purchase, to avoid something frightening. Trace the impulse backward: what impression triggered it? What belief did you assent to? If the belief had been different, would the impulse have been different too?',
     sourceFile: 'psychology.json',
@@ -430,7 +430,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'The Unity of Excellence',
     title: 'Justice — Giving Each Their Due',
     teaching:
-      'Justice is knowledge of what is owed to others — distributing to each their worth. Its sub-expressions are piety (right relation to the rational order of things), benevolence (active goodwill and love of humanity), social participation (fulfilling your roles in community life), and fair dealing (equity — knowing when applying rules rigidly would itself produce injustice). Cicero called justice the widest in scope of all the virtues and said its foundation is good faith. He identified two kinds of injustice: inflicting harm, and failing to prevent harm when you could.',
+      'Justice is knowledge of what is owed to others — distributing to each their worth. Its sub-expressions are piety (right relation to the rational order of things), benevolence (active goodwill and love of humanity), social participation (fulfilling your roles in community life), and fair dealing (equity — knowing when applying rules rigidly would itself produce injustice). Justice is the widest in scope of all the virtues and its foundation is good faith. Two kinds of injustice exist: inflicting harm, and failing to prevent harm when you could.',
     question:
       'Consider the people affected by your actions today — family, colleagues, strangers, your community. Did you give each what they were owed? Was there someone whose needs you overlooked, someone you could have helped but chose not to, or someone you treated unfairly? Write about one specific relationship where you could practise justice more fully.',
     virtue: 'justice',
@@ -469,7 +469,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'The Unity of Excellence',
     title: 'The Four Sources of the Honourable',
     teaching:
-      'Cicero taught that everything honourable arises from one of four sources: the investigation and discovery of truth (connected to practical wisdom), the fellowship of humanity and giving each their due (connected to justice), the greatness and unconquerable strength of a lofty soul (connected to courage), and order and measure in all things done and said (connected to temperance). These four sources map directly to the four virtue expressions. When you see an action that strikes you as genuinely admirable, it draws its beauty from one or more of these sources.',
+      'Everything honourable arises from one of four sources: the investigation and discovery of truth (connected to practical wisdom), the fellowship of humanity and giving each their due (connected to justice), the greatness and unconquerable strength of a lofty soul (connected to courage), and order and measure in all things done and said (connected to temperance). These four sources map directly to the four virtue expressions. When you see an action that strikes you as genuinely admirable, it draws its beauty from one or more of these sources.',
     question:
       'Recall the most admirable action you have witnessed someone perform — something that struck you as genuinely honourable, not just impressive or successful. Which of the four sources does it draw from? Does it draw from more than one? Now apply the same analysis to your own best action this week. What does the comparison reveal?',
     sourceFile: 'virtue.json',
@@ -487,7 +487,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'When Judgement Goes Wrong',
     title: 'What Passions Really Are',
     teaching:
-      'When the Stoics warned against "passion," they did not mean emotion. They meant irrational impulses rooted in false judgements — movements of the soul that exceed what reason warrants. The founder of Stoicism defined passion as "an impulse exceeding due measure." Every passion is a cognitive error: you perceive something as genuinely good or genuinely evil when it is actually indifferent, and your impulse responds to that false perception. Passion is not something that happens to you. It is something your ruling faculty produces when it assents to a distorted impression.',
+      'When the Stoics warned against "passion," they did not mean emotion. They meant irrational impulses rooted in false judgements — movements of the soul that exceed what reason warrants. Passion is defined as "an impulse exceeding due measure." Every passion is a cognitive error: you perceive something as genuinely good or genuinely evil when it is actually indifferent, and your impulse responds to that false perception. Passion is not something that happens to you. It is something your ruling faculty produces when it assents to a distorted impression.',
     question:
       'Recall a moment this week when you experienced a strong emotional reaction — anger, anxiety, craving, or dejection. Try to identify the judgement underneath it. What did you believe was genuinely good or genuinely evil in that moment? Was that belief accurate, or were you treating an indifferent as though your well-being depended on it?',
     sourceFile: 'passions.json',
@@ -603,7 +603,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Right Action in the World',
     title: 'Two Layers — Appropriate Action and Right Action',
     teaching:
-      'The Stoics distinguished between two layers of action. An appropriate action is one that accords with life — it makes sense given your nature, relationships, and circumstances, and a reasonable justification can be given for it. Anyone can perform appropriate actions, whether wise or foolish. A right action is an appropriate action performed from complete understanding — the person doing it knows why it is right, not just that it is right, and their action flows from a stable commitment to virtue. The same external deed — helping a stranger, telling the truth, keeping a promise — can be either one depending on what drives it.',
+      'Two layers of action are distinguished. An appropriate action is one that accords with life — it makes sense given your nature, relationships, and circumstances, and a reasonable justification can be given for it. Anyone can perform appropriate actions, whether wise or foolish. A right action is an appropriate action performed from complete understanding — the person doing it knows why it is right, not just that it is right, and their action flows from a stable commitment to virtue. The same external deed — helping a stranger, telling the truth, keeping a promise — can be either one depending on what drives it.',
     question:
       'Think of a good action you performed recently. Was it an appropriate action (right in its external form, done from habit, duty, or social expectation) or was it closer to right action (done from genuine understanding of why it was right, flowing from your character)? What would it take to move more of your appropriate actions toward right action?',
     sourceFile: 'action.json',
@@ -615,7 +615,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Right Action in the World',
     title: 'The Expanding Circles — Self',
     teaching:
-      'The Stoics observed that natural affiliation develops outward from the self. The first circle is self-preservation — the instinctive drive to maintain your own existence and develop your natural capacities. This is not selfishness. It is the necessary foundation. A person who neglects their own physical and rational development cannot effectively serve others. The appropriate actions at this level include caring for your body and mind, developing your rational faculty, and pursuing philosophical exercise. Self-care in service of virtue is not indulgent. It is the first obligation.',
+      'Natural affiliation develops outward from the self. The first circle is self-preservation — the instinctive drive to maintain your own existence and develop your natural capacities. This is not selfishness. It is the necessary foundation. A person who neglects their own physical and rational development cannot effectively serve others. The appropriate actions at this level include caring for your body and mind, developing your rational faculty, and pursuing philosophical exercise. Self-care in service of virtue is not indulgent. It is the first obligation.',
     question:
       'How do you care for yourself — not in terms of comfort or pleasure, but in terms of maintaining the foundation you need to act virtuously? Are there areas where you neglect self-care in ways that reduce your capacity to serve others? Write about the relationship between taking care of yourself and taking care of your responsibilities.',
     sourceFile: 'action.json',
@@ -627,7 +627,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Right Action in the World',
     title: 'The Expanding Circles — Family and Community',
     teaching:
-      'The second circle of natural affiliation extends to family and close friends: parents, children, spouse, siblings, and those with whom you share deep bonds. The appropriate actions here include honouring parents, educating children, supporting your partner, and maintaining friendships grounded in virtue. The third circle extends to your city, your workplace, your political community. Here justice calls you to serve the common good, contribute your abilities, defend what is right, and obey just laws. Cicero wrote that we are not born for ourselves alone — our birth claims a part for our country and a part for our friends.',
+      'The second circle of natural affiliation extends to family and close friends: parents, children, spouse, siblings, and those with whom you share deep bonds. The appropriate actions here include honouring parents, educating children, supporting your partner, and maintaining friendships grounded in virtue. The third circle extends to your city, your workplace, your political community. Here justice calls you to serve the common good, contribute your abilities, defend what is right, and obey just laws. We are not born for ourselves alone — our birth claims a part for our country and a part for our friends.',
     question:
       'Map out your second and third circles. Who are the specific people you have obligations to as family and intimates? What are your roles in the broader community — professional, civic, social? Are there obligations in these circles you are currently neglecting? Write about one specific obligation you could fulfil more fully this week.',
     virtue: 'justice',
@@ -640,7 +640,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Right Action in the World',
     title: 'The Expanding Circles — Humanity and the Cosmos',
     teaching:
-      'The fourth circle extends to all rational beings — every human, regardless of origin, status, or relationship to you. The Stoics called this cosmopolitan citizenship. All humans share divine reason; all deserve justice, honesty, and goodwill. The fifth and final circle extends to the cosmos itself: aligning your will with the rational order of nature, accepting what is beyond your control with equanimity, and recognising that your capacity for moral choice connects you to something larger than any individual life. The fully expanded person holds all five circles simultaneously.',
+      'The fourth circle extends to all rational beings — every human, regardless of origin, status, or relationship to you. This is cosmopolitan citizenship. All humans share divine reason; all deserve justice, honesty, and goodwill. The fifth and final circle extends to the cosmos itself: aligning your will with the rational order of nature, accepting what is beyond your control with equanimity, and recognising that your capacity for moral choice connects you to something larger than any individual life. The fully expanded person holds all five circles simultaneously.',
     question:
       'How far do your circles of concern typically extend in daily life? Do they stop at family? At community? Do they routinely reach strangers, or people very different from you? Write about a specific situation where you could expand your concern one circle outward — and what that would require of you in practice.',
     virtue: 'justice',
@@ -653,9 +653,9 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Right Action in the World',
     title: 'Is This Action Honourable?',
     teaching:
-      'Cicero provided a structured framework for practical moral reasoning, built around five questions. The first two concern honour: Is this action honourable? Does it express the kind of moral beauty a virtuous person would embody? And when two honourable options are both available, which is more honourable — which better expresses the four virtues, which serves the higher obligation in your expanding circles? These questions come first because what is honourable always takes priority. No amount of advantage can outweigh what is right.',
+      'A structured framework for practical moral reasoning builds around five questions. The first two concern honour: Is this action honourable? Does it express the kind of moral beauty a virtuous person would embody? And when two honourable options are both available, which is more honourable — which better expresses the four virtues, which serves the higher obligation in your expanding circles? These questions come first because what is honourable always takes priority. No amount of advantage can outweigh what is right.',
     question:
-      'Take a decision you are currently facing. Ask Cicero\'s first two questions: Is the action I am considering honourable? If there are multiple honourable options, which one better expresses wisdom, justice, courage, and self-control? Which one serves the higher circle of obligation? Write out your reasoning step by step.',
+      'Take a decision you are currently facing. Ask the first two questions of practical moral reasoning: Is the action I am considering honourable? If there are multiple honourable options, which one better expresses wisdom, justice, courage, and self-control? Which one serves the higher circle of obligation? Write out your reasoning step by step.',
     virtue: 'wisdom',
     sourceFile: 'action.json',
     sourceCitation: 'Cicero De Officiis 1.9-10',
@@ -666,9 +666,9 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Right Action in the World',
     title: 'When Honour Conflicts with Advantage',
     teaching:
-      'Cicero\'s final three questions address advantage and its relationship to honour. Is the action advantageous — does it serve your natural needs and preferred indifferents? Between two advantageous options, which is more advantageous? And the decisive question: when the honourable conflicts with the advantageous, which prevails? Cicero\'s answer was absolute: the honourable always prevails. What merely appears advantageous but conflicts with virtue is not genuinely advantageous. Apparent conflicts arise from mistaking an indifferent for a genuine good. Nothing that is morally base can be truly beneficial.',
+      'The final three questions address advantage and its relationship to honour. Is the action advantageous — does it serve your natural needs and preferred indifferents? Between two advantageous options, which is more advantageous? And the decisive question: when the honourable conflicts with the advantageous, which prevails? The answer is absolute: the honourable always prevails. What merely appears advantageous but conflicts with virtue is not genuinely advantageous. Apparent conflicts arise from mistaking an indifferent for a genuine good. Nothing that is morally base can be truly beneficial.',
     question:
-      'Recall a time when what seemed advantageous conflicted with what you knew was right. What did you choose? If you chose advantage over honour, what false judgement made that choice feel justified? If you chose honour, what gave you the strength to accept the cost? Write about what Cicero\'s principle — "nothing base can be truly beneficial" — means in your life.',
+      'Recall a time when what seemed advantageous conflicted with what you knew was right. What did you choose? If you chose advantage over honour, what false judgement made that choice feel justified? If you chose honour, what gave you the strength to accept the cost? Write about what the principle means in your life — "nothing base can be truly beneficial."',
     sourceFile: 'action.json',
     sourceCitation: 'Cicero De Officiis 3.7-19',
   },
@@ -697,7 +697,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Measuring the Journey',
     title: 'The Strict Binary',
     teaching:
-      'The Stoics held a strict binary: you are either a sage or you are not. All non-sages are, technically, in a state of imperfect understanding. There is no "good enough" short of complete virtue. This sounds harsh, but its purpose is not to discourage. It is to prevent complacency. The moment you think "I am wise enough" or "I am virtuous enough," you have stopped making progress. The binary keeps the aspiration alive. It says: there is always further to go, always a deeper understanding to reach, always a more complete expression of virtue to aim for.',
+      'A strict binary exists: you are either a sage or you are not. All non-sages are, technically, in a state of imperfect understanding. There is no "good enough" short of complete virtue. This sounds harsh, but its purpose is not to discourage. It is to prevent complacency. The moment you think "I am wise enough" or "I am virtuous enough," you have stopped making progress. The binary keeps the aspiration alive. It says: there is always further to go, always a deeper understanding to reach, always a more complete expression of virtue to aim for.',
     question:
       'How do you react to the idea that complete virtue is the only true standard? Does it motivate you or discourage you? Write about the tension between this uncompromising standard and the practical reality that you are making progress — imperfect, uneven progress — every day. How might you hold both truths simultaneously?',
     sourceFile: 'progress.json',
@@ -709,9 +709,9 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Measuring the Journey',
     title: 'Beginning the Path',
     teaching:
-      'Seneca described three grades of moral progress within the non-sage category. The third grade — beginning the path — is where most philosophical students find themselves. At this stage, you have escaped many great vices but not all. You may have overcome anger but not vanity, moved beyond impulsive craving but not subtle fear. Your awareness of philosophical principles is genuine but your application is inconsistent. Progress is real but uneven. You are subject to regression when tested by difficult circumstances. This is not failure. This is where the work begins.',
+      'Three grades of moral progress exist within the non-sage category. The third grade — beginning the path — is where most philosophical students find themselves. At this stage, you have escaped many great vices but not all. You may have overcome anger but not vanity, moved beyond impulsive craving but not subtle fear. Your awareness of philosophical principles is genuine but your application is inconsistent. Progress is real but uneven. You are subject to regression when tested by difficult circumstances. This is not failure. This is where the work begins.',
     question:
-      'Place yourself honestly at Seneca\'s third grade. Which passions have you made real progress against — where do you notice genuine improvement? And which passions still operate freely, especially when you are tired, stressed, or caught off guard? Write about the pattern of your progress: where is it strong and where is it fragile?',
+      'Place yourself honestly at the third grade of moral progress. Which passions have you made real progress against — where do you notice genuine improvement? And which passions still operate freely, especially when you are tired, stressed, or caught off guard? Write about the pattern of your progress: where is it strong and where is it fragile?',
     sourceFile: 'progress.json',
     sourceCitation: 'Seneca Epistulae 75.13-15',
   },
@@ -721,7 +721,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Measuring the Journey',
     title: 'Overcoming the Worst',
     teaching:
-      'Seneca\'s second grade of progress is overcoming the worst. At this stage, the major passions are checked. Good judgement operates reliably in familiar situations. You can resist common temptations and maintain your commitments under ordinary pressure. But you are still vulnerable to unusual pressures — novel situations, extreme stress, unexpected losses. The distinction between second and third grade is consistency: the person at the second grade has moved from occasional virtuous action to a more stable pattern, but that pattern has not yet become an unshakeable disposition.',
+      'The second grade of progress is overcoming the worst. At this stage, the major passions are checked. Good judgement operates reliably in familiar situations. You can resist common temptations and maintain your commitments under ordinary pressure. But you are still vulnerable to unusual pressures — novel situations, extreme stress, unexpected losses. The distinction between second and third grade is consistency: the person at the second grade has moved from occasional virtuous action to a more stable pattern, but that pattern has not yet become an unshakeable disposition.',
     question:
       'Think about the difference between your behaviour in familiar, comfortable situations and your behaviour under unexpected pressure. How much does the quality of your character change when circumstances become difficult? Write about a time when pressure revealed a weakness you did not know you had — and what that taught you about where you stand.',
     virtue: 'courage',
@@ -734,7 +734,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Measuring the Journey',
     title: 'Approaching Wisdom',
     teaching:
-      'Seneca\'s first grade of progress is approaching wisdom. At this stage, most passions have been overcome. Understanding is strong and well-tested. The person can maintain virtue under significant pressure and their disposition is approaching the stability of genuine knowledge. But they are not yet secure from relapse. Under extreme testing, they can still fall back. The gap between "approaching wisdom" and the sage is enormous — the Stoics acknowledged the sage was "as rare as the phoenix." But the person at the first grade has transformed their character to the point where virtuous action is their default, not their aspiration.',
+      'The first grade of progress is approaching wisdom. At this stage, most passions have been overcome. Understanding is strong and well-tested. The person can maintain virtue under significant pressure and their disposition is approaching the stability of genuine knowledge. But they are not yet secure from relapse. Under extreme testing, they can still fall back. The gap between "approaching wisdom" and the sage is enormous — the sage is "as rare as the phoenix." But the person at the first grade has transformed their character to the point where virtuous action is their default, not their aspiration.',
     question:
       'Without claiming to be at any particular grade, write about what "approaching wisdom" would look like for you specifically. What passions would need to be overcome? What false judgements would need to be corrected? What areas of your character would need to stabilise? Describe the version of yourself that has done this work — not perfectly, but substantially.',
     virtue: 'wisdom',
@@ -759,7 +759,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Measuring the Journey',
     title: 'The Philosopher as Physician',
     teaching:
-      'The Stoics compared the philosopher to a physician of the soul. Just as a physician first persuades the patient to accept treatment and then removes arguments against it, so too the work of philosophy is to help you see where your judgement has gone wrong and to provide the tools for correction. The passions taxonomy is the diagnostic tool. The virtue system is the goal of health. The evaluation sequence is the examination. And each false judgement identified is a specific condition that can be treated through the steady practice of correct understanding. This journal is part of that practice.',
+      'The philosopher is like a physician of the soul. Just as a physician first persuades the patient to accept treatment and then removes arguments against it, so too the work of philosophy is to help you see where your judgement has gone wrong and to provide the tools for correction. The passions taxonomy is the diagnostic tool. The virtue system is the goal of health. The evaluation sequence is the examination. And each false judgement identified is a specific condition that can be treated through the steady practice of correct understanding. This journal is part of that practice.',
     question:
       'If a physician of the soul examined your life this week, what would they diagnose? Which false judgements are producing which passions? Which dimensions of progress need the most attention? Write a brief "diagnosis" of your current state — not as self-criticism, but as a clear-eyed assessment, the way a good physician would describe a patient\'s condition with care and precision.',
     sourceFile: 'progress.json',
@@ -801,7 +801,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'Integration — Living the Practice',
     title: 'Daily Self-Examination',
     teaching:
-      'The Stoics practised daily self-examination — reviewing the day\'s actions not to punish themselves but to learn. Seneca described reviewing three questions each evening: what did I do poorly? What did I do well? What could I improve? Epictetus taught his students to examine every impression before assenting to it. Marcus Aurelius wrote his private reflections every day. The journal you have been keeping for the past seven weeks is this practice in structured form. But the practice does not end when the journal does. It continues every day, for the rest of your life, because the person making progress never stops examining.',
+      'Daily self-examination is practiced — reviewing the day\'s actions not to punish yourself but to learn. Three questions guide this practice each evening: what did I do poorly? What did I do well? What could I improve? Every impression should be examined before assenting to it. This practice of reflection continues every day, for the rest of your life. The journal you have been keeping for the past seven weeks is this practice in structured form. But the practice does not end when the journal does. It continues every day, for the rest of your life, because the person making progress never stops examining.',
     question:
       'Review today — just today. Walk through the key moments. Where did you act from clear understanding? Where did passion drive your behaviour? Where did you give hasty assent to a distorted impression? Apply the framework you have learned: control filter, appropriate action assessment, passion diagnosis, unified assessment. Make this the template for your daily practice going forward.',
     sourceFile: 'scoring.json',

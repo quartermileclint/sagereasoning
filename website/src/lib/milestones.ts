@@ -38,7 +38,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Completed baseline assessment',
     icon: '/images/sagelogosmall.PNG',
     category: 'baseline',
-    quote: '"The beginning of philosophy is self-awareness." — Epictetus',
+    quote: 'Self-awareness is where the work begins.',
   },
 
   // ─── Proximity milestones ───
@@ -48,7 +48,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Achieved a Deliberate proximity evaluation',
     icon: '/images/sagelogo.PNG',
     category: 'proximity',
-    quote: '"First say to yourself what you would be; and then do what you have to do." — Epictetus',
+    quote: 'Decide who you want to be, then do what that requires.',
   },
   {
     id: 'first_principled',
@@ -56,7 +56,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Achieved a Principled proximity evaluation',
     icon: '/images/sagelogo.PNG',
     category: 'proximity',
-    quote: '"No man is free who is not master of himself." — Epictetus',
+    quote: 'True freedom comes from mastering yourself.',
   },
   {
     id: 'consistent_deliberate',
@@ -64,7 +64,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Achieved Deliberate or higher on 5 consecutive evaluations',
     icon: '/images/sagelogo.PNG',
     category: 'proximity',
-    quote: '"Progress is not achieved by luck or accident, but by working on yourself daily." — Epictetus',
+    quote: 'Progress comes from working on yourself daily.',
   },
 
   // ─── Passion milestones ───
@@ -74,7 +74,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Had passions identified in 3 evaluations — recognising them is the first step',
     icon: '/images/owllogo.PNG',
     category: 'passion',
-    quote: '"It is not things that disturb us, but our judgements about things." — Epictetus',
+    quote: 'It is not events that disturb us, but our judgements about them.',
   },
   {
     id: 'first_zero_passions',
@@ -82,7 +82,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Completed an evaluation with zero passions identified',
     icon: '/images/lotuslogo.PNG.png',
     category: 'passion',
-    quote: '"He is most powerful who has power over himself." — Seneca',
+    quote: 'The most powerful person is the one who has power over themselves.',
   },
   {
     id: 'passion_reduction',
@@ -90,7 +90,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Average passions per evaluation decreased over your last 10 actions',
     icon: '/images/lotuslogo.PNG.png',
     category: 'passion',
-    quote: '"The soul becomes dyed with the colour of its thoughts." — Marcus Aurelius',
+    quote: 'Your thoughts shape who you become.',
   },
 
   // ─── Oikeiosis milestones ───
@@ -100,7 +100,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Engaged community-level concern in an evaluation',
     icon: '/images/scaleslogo.PNG',
     category: 'oikeiosis',
-    quote: '"Justice is the crowning glory of the virtues." — Cicero',
+    quote: 'Justice is the highest expression of virtue.',
   },
   {
     id: 'oikeiosis_humanity',
@@ -108,7 +108,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Engaged humanity-level concern in an evaluation',
     icon: '/images/scaleslogo.PNG',
     category: 'oikeiosis',
-    quote: '"I am a citizen of the world." — Diogenes (quoted by DL)',
+    quote: 'Your concern now extends to all of humanity.',
   },
 
   // ─── Senecan grade milestones ───
@@ -118,7 +118,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Baseline placed at Third Grade or higher',
     icon: '/images/sagelogo.PNG',
     category: 'grade',
-    quote: '"Waste no more time arguing about what a good man should be. Be one." — Marcus Aurelius',
+    quote: 'Stop arguing about what a good person should be. Be one.',
   },
   {
     id: 'grade_2_reached',
@@ -126,7 +126,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Baseline placed at Second Grade or higher',
     icon: '/images/sagelogo.PNG',
     category: 'grade',
-    quote: '"Sometimes even to live is an act of courage." — Seneca',
+    quote: 'Sometimes even to live is an act of courage.',
   },
   {
     id: 'grade_1_reached',
@@ -134,7 +134,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Baseline placed at First Grade',
     icon: '/images/sagelogo.PNG',
     category: 'grade',
-    quote: '"The wise person does everything according to all the virtues." — Stobaeus',
+    quote: 'The wise person acts according to all the virtues.',
   },
 
   // ─── Journal milestones (updated for V3's 55-day / 8-phase structure) ───
@@ -144,7 +144,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Completed the first journal entry',
     icon: '/images/sagelogosmall.PNG',
     category: 'journal',
-    quote: '"The beginning of philosophy is self-awareness." — Epictetus',
+    quote: 'Self-awareness is where the work begins.',
   },
   {
     id: 'examined_week',
@@ -152,7 +152,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Completed 7 journal entries',
     icon: '/images/sagelogo.PNG',
     category: 'journal',
-    quote: '"An unexamined life is not worth living." — Socrates',
+    quote: 'An examined life is the foundation of growth.',
   },
   {
     id: 'foundation_layer',
@@ -160,7 +160,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Completed Phase 1 of the journal (Days 1–7)',
     icon: '/images/sagelogo.PNG',
     category: 'journal',
-    quote: '"First say to yourself what you would be; and then do what you have to do." — Epictetus',
+    quote: 'Decide who you want to be, then do what that requires.',
   },
   {
     id: 'halfway_mark',
@@ -168,7 +168,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Completed 28 journal entries',
     icon: '/images/sagelogo.PNG',
     category: 'journal',
-    quote: '"Progress is not achieved by luck or accident, but by working on yourself daily." — Epictetus',
+    quote: 'Progress comes from working on yourself daily.',
   },
   {
     id: 'journal_complete',
@@ -176,7 +176,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Completed all 55 journal entries',
     icon: '/images/sagelogo.PNG',
     category: 'journal',
-    quote: '"Waste no more time arguing about what a good man should be. Be one." — Marcus Aurelius',
+    quote: 'Stop arguing about what a good person should be. Be one.',
   },
 
   // ─── Practice milestones ───
@@ -186,7 +186,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Completed 7 daily reflections',
     icon: '/images/sagelogo.PNG',
     category: 'practice',
-    quote: '"An unexamined life is not worth living." — Socrates',
+    quote: 'An examined life is the foundation of growth.',
   },
   {
     id: 'returning_practitioner',
@@ -194,7 +194,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Returned after 7+ days away and evaluated an action',
     icon: '/images/sagelogosmall.PNG',
     category: 'practice',
-    quote: '"Begin at once to live, and count each separate day as a separate life." — Seneca',
+    quote: 'Every day is a fresh start. Begin now.',
   },
   {
     id: 'journal_return',
@@ -202,7 +202,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     description: 'Resumed journaling after a 7+ day gap',
     icon: '/images/sagelogosmall.PNG',
     category: 'practice',
-    quote: '"Begin at once to live, and count each separate day as a separate life." — Seneca',
+    quote: 'Every day is a fresh start. Begin now.',
   },
 ]
 
