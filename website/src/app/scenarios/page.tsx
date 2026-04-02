@@ -259,64 +259,94 @@ export default function ScenariosPage() {
               </div>
             </div>
 
-            {/* Unified Assessment */}
-            <div className="bg-white border border-sage-200 rounded-lg p-6">
-              <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
-                Unified Virtue Assessment
-              </h3>
-              <p className="font-body text-sage-700 text-sm">{result.ruling_faculty_assessment}</p>
-              {result.virtue_domains_engaged && result.virtue_domains_engaged.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {result.virtue_domains_engaged.map((d) => (
-                    <span key={d} className="px-3 py-1 bg-sage-50 rounded-full text-xs font-body text-sage-600">{d}</span>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Feedback — primary assessment from API */}
+            {result.feedback && (
+              <div className="bg-white border border-sage-200 rounded-lg p-6">
+                <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
+                  Evaluation
+                </h3>
+                <p className="font-body text-sage-700 text-sm">{result.feedback}</p>
+                {result.virtue_domains_engaged && result.virtue_domains_engaged.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {result.virtue_domains_engaged.map((d) => (
+                      <span key={d} className="px-3 py-1 bg-sage-50 rounded-full text-xs font-body text-sage-600">{d}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
-            {/* Stage 1: Control Filter */}
-            <div className="bg-white border border-sage-200 rounded-lg p-6">
-              <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
-                Control Filter
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <span className="font-body text-xs text-sage-500 block mb-2">Within Your Control</span>
-                  <ul className="space-y-1">
-                    {result.control_filter.within_control.map((item, i) => (
-                      <li key={i} className="font-body text-sm text-sage-700">• {item}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <span className="font-body text-xs text-sage-500 block mb-2">Outside Your Control</span>
-                  <ul className="space-y-1">
-                    {result.control_filter.outside_control.map((item, i) => (
-                      <li key={i} className="font-body text-sm text-sage-500">• {item}</li>
-                    ))}
-                  </ul>
+            {/* Unified Assessment (if extended V3 fields present) */}
+            {result.ruling_faculty_assessment && (
+              <div className="bg-white border border-sage-200 rounded-lg p-6">
+                <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
+                  Unified Virtue Assessment
+                </h3>
+                <p className="font-body text-sage-700 text-sm">{result.ruling_faculty_assessment}</p>
+              </div>
+            )}
+
+            {/* Appropriate Action — kathekon quality */}
+            {result.kathekon_quality && (
+              <div className="bg-white border border-sage-200 rounded-lg p-6">
+                <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
+                  Appropriate Action Assessment
+                </h3>
+                {result.kathekon_assessment ? (
+                  <>
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-body ${
+                        result.kathekon_assessment.is_kathekon ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      }`}>
+                        {result.kathekon_assessment.is_kathekon ? 'Appropriate' : 'Not Appropriate'}
+                      </span>
+                      <span className="font-body text-sm text-sage-600">Quality: {result.kathekon_assessment.quality}</span>
+                    </div>
+                    <p className="font-body text-sm text-sage-700">{result.kathekon_assessment.reasoning}</p>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <span className={`px-3 py-1 rounded-full text-xs font-body ${
+                      result.kathekon_quality === 'strong' || result.kathekon_quality === 'moderate'
+                        ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      {result.kathekon_quality.charAt(0).toUpperCase() + result.kathekon_quality.slice(1)}
+                    </span>
+                    <span className="font-body text-sm text-sage-600">Kathekon Quality</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Control Filter (if extended V3 fields present) */}
+            {result.control_filter && (
+              <div className="bg-white border border-sage-200 rounded-lg p-6">
+                <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
+                  Control Filter
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <span className="font-body text-xs text-sage-500 block mb-2">Within Your Control</span>
+                    <ul className="space-y-1">
+                      {result.control_filter.within_control.map((item, i) => (
+                        <li key={i} className="font-body text-sm text-sage-700">• {item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <span className="font-body text-xs text-sage-500 block mb-2">Outside Your Control</span>
+                    <ul className="space-y-1">
+                      {result.control_filter.outside_control.map((item, i) => (
+                        <li key={i} className="font-body text-sm text-sage-500">• {item}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Stage 2: Appropriate Action */}
-            <div className="bg-white border border-sage-200 rounded-lg p-6">
-              <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
-                Appropriate Action Assessment
-              </h3>
-              <div className="flex items-center gap-3 mb-2">
-                <span className={`px-3 py-1 rounded-full text-xs font-body ${
-                  result.kathekon_assessment.is_kathekon ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                }`}>
-                  {result.kathekon_assessment.is_kathekon ? 'Appropriate' : 'Not Appropriate'}
-                </span>
-                <span className="font-body text-sm text-sage-600">Quality: {result.kathekon_assessment.quality}</span>
-              </div>
-              <p className="font-body text-sm text-sage-700">{result.kathekon_assessment.reasoning}</p>
-            </div>
+            )}
 
             {/* Stage 3: Passions */}
-            {(result.passions_detected.length > 0 || result.false_judgements.length > 0) && (
+            {result.passions_detected && result.passions_detected.length > 0 && (
               <div className="bg-white border border-sage-200 rounded-lg p-6">
                 <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
                   Passions Identified
@@ -327,11 +357,11 @@ export default function ScenariosPage() {
                       {ROOT_PASSION_ENGLISH[p.root_passion] || p.root_passion}
                     </span>
                     {p.sub_species && <span className="font-body text-xs text-sage-500 ml-1">({p.sub_species})</span>}
-                    <p className="font-body text-xs text-sage-600 mt-1">{p.evidence}</p>
+                    {p.evidence && <p className="font-body text-xs text-sage-600 mt-1">{p.evidence}</p>}
                     <p className="font-body text-xs text-sage-600">False judgement: {p.false_judgement}</p>
                   </div>
                 ))}
-                {result.false_judgements.length > 0 && (
+                {result.false_judgements && result.false_judgements.length > 0 && (
                   <div className="mt-3">
                     <span className="font-body text-xs text-sage-500 block mb-2">All False Judgements</span>
                     <ul className="space-y-1">
@@ -344,7 +374,7 @@ export default function ScenariosPage() {
               </div>
             )}
 
-            {/* Deliberation Walkthrough — Cicero's 5 Questions */}
+            {/* Deliberation Walkthrough — Cicero's 5 Questions (if present) */}
             {result.deliberation_walkthrough && (
               <div className="bg-white border border-sage-200 rounded-lg p-6">
                 <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
@@ -375,13 +405,13 @@ export default function ScenariosPage() {
               </div>
             )}
 
-            {/* Sage Response */}
-            {result.sage_response && (
+            {/* Sage Says */}
+            {(result.sage_says || result.sage_response) && (
               <div className="bg-sage-50 border border-sage-200 rounded-lg p-6">
                 <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
-                  How the Sage Would Respond
+                  The Sage Says
                 </h3>
-                <p className="font-body text-sage-700 text-sm italic">{result.sage_response}</p>
+                <p className="font-body text-sage-700 text-sm italic">{result.sage_says || result.sage_response}</p>
               </div>
             )}
 
