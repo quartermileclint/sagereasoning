@@ -1,4 +1,4 @@
-import { VIRTUES, ALIGNMENT_TIERS } from '@/lib/stoic-brain'
+import { VIRTUES } from '@/lib/stoic-brain'
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -164,7 +164,7 @@ export default function HomePage() {
             {
               step: '2',
               title: 'Virtue analysis',
-              desc: 'Each action is evaluated against Wisdom, Justice, Courage, and Temperance using weighted scoring.',
+              desc: 'Each action is evaluated through a four-stage philosophical sequence: prohairesis, kathekon, passion diagnosis, and unified virtue assessment.',
             },
             {
               step: '3',
@@ -183,14 +183,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Alignment Tiers */}
+      {/* Katorthoma Proximity Levels */}
       <section className="bg-sage-300/20 py-20">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="font-display text-2xl md:text-3xl italic text-sage-800 text-center mb-4">
-            Alignment Tiers
+            Katorthoma Proximity Levels
           </h2>
           <p className="font-body text-sage-700 text-center max-w-2xl mx-auto mb-10">
-            Your actions are measured against the standard of the perfect Stoic Sage.
+            Your reasoning is assessed for how closely it approaches the ideal of the perfect Stoic Sage.
           </p>
 
           {/* Zeus — the ideal of the perfect Sage */}
@@ -202,23 +202,29 @@ export default function HomePage() {
                 className="w-40 h-40 object-contain drop-shadow-xl rounded-full border-4 border-amber-200 bg-amber-50/60"
               />
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-amber-100 border border-amber-300 rounded-full px-3 py-0.5">
-                <span className="font-display text-xs text-amber-800 whitespace-nowrap">The Perfect Sage (100)</span>
+                <span className="font-display text-xs text-amber-800 whitespace-nowrap">The Perfect Sage</span>
               </div>
             </div>
           </div>
 
           <div className="space-y-3">
-            {ALIGNMENT_TIERS.map((tier) => (
-              <div key={tier.id} className="flex items-center gap-4 bg-white/60 border border-sage-200 rounded-lg p-4">
+            {[
+              { id: 'sage_like', label: 'Sage-like', color: '#4d6040', description: 'Extraordinary philosophical depth — identifies all relevant passions, false judgements, and virtue domains with precision' },
+              { id: 'principled', label: 'Principled', color: '#7d9468', description: 'Strong philosophical reasoning — correctly identifies most passions and applies the 4-stage evaluation with only minor gaps' },
+              { id: 'deliberate', label: 'Deliberate', color: '#B2AC88', description: 'Adequate self-awareness — recognises some passions and applies basic Stoic framework, but misses subtleties' },
+              { id: 'habitual', label: 'Habitual', color: '#c4843a', description: 'Minimal philosophical engagement — relies on surface-level reflection without genuine passion diagnosis' },
+              { id: 'reflexive', label: 'Reflexive', color: '#9e3a3a', description: 'No meaningful self-examination — no awareness of passions, false judgements, or prohairesis' },
+            ].map((level) => (
+              <div key={level.id} className="flex items-center gap-4 bg-white/60 border border-sage-200 rounded-lg p-4">
                 <div
                   className="w-4 h-4 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: tier.color }}
+                  style={{ backgroundColor: level.color }}
                 />
                 <div className="flex-1">
-                  <span className="font-display font-medium text-sage-800">{tier.label}</span>
-                  <span className="font-body text-sage-600 ml-2 text-sm">({tier.range})</span>
+                  <span className="font-display font-medium text-sage-800">{level.label}</span>
+                  <span className="font-body text-sage-600 ml-2 text-sm font-mono">({level.id})</span>
                 </div>
-                <p className="font-body text-sm text-sage-700 hidden md:block">{tier.description}</p>
+                <p className="font-body text-sm text-sage-700 hidden md:block">{level.description}</p>
               </div>
             ))}
           </div>

@@ -134,6 +134,12 @@ export default function CommunityPage() {
 
   const tierColor = (alignment: string) => {
     switch (alignment) {
+      case 'sage_like': return '#4d6040'
+      case 'principled': return '#7d9468'
+      case 'deliberate': return '#B2AC88'
+      case 'habitual': return '#c4843a'
+      case 'reflexive': return '#9e3a3a'
+      // V1 fallbacks for legacy data
       case 'Sage': return '#4d6040'
       case 'Progressing': return '#7d9468'
       case 'Aware': return '#B2AC88'
@@ -161,8 +167,8 @@ export default function CommunityPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         {[
           { label: 'Sages on map', value: pins.length },
-          { label: 'Sage tier', value: pins.filter(p => p.sage_alignment === 'Sage').length },
-          { label: 'Progressing', value: pins.filter(p => p.sage_alignment === 'Progressing').length },
+          { label: 'Sage-like', value: pins.filter(p => p.sage_alignment === 'sage_like' || p.sage_alignment === 'Sage').length },
+          { label: 'Principled', value: pins.filter(p => p.sage_alignment === 'principled' || p.sage_alignment === 'Progressing').length },
           { label: 'Countries', value: new Set(pins.map(p => p.country).filter(Boolean)).size },
         ].map(stat => (
           <div key={stat.label} className="bg-white/60 border border-sage-200 rounded-lg p-5 text-center">
@@ -279,11 +285,11 @@ export default function CommunityPage() {
 
             {/* Tier legend */}
             <div className="absolute bottom-4 left-4 bg-white/90 border border-sage-200 rounded-lg px-3 py-2 text-xs">
-              <p className="font-display text-sage-500 mb-1.5 text-xs">Alignment tiers</p>
-              {['Sage', 'Progressing', 'Aware', 'Misaligned', 'Contrary'].map(t => (
+              <p className="font-display text-sage-500 mb-1.5 text-xs">Proximity levels</p>
+              {['sage_like', 'principled', 'deliberate', 'habitual', 'reflexive'].map(t => (
                 <div key={t} className="flex items-center gap-1.5 mb-1">
                   <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: tierColor(t) }} />
-                  <span className="font-body text-sage-600">{t}</span>
+                  <span className="font-body text-sage-600">{t === 'sage_like' ? 'Sage-like' : t.charAt(0).toUpperCase() + t.slice(1)}</span>
                 </div>
               ))}
             </div>

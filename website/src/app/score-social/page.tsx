@@ -48,7 +48,8 @@ export default function ScoreSocialPage() {
         throw new Error(data.error || 'Evaluation failed')
       }
 
-      const data = await res.json()
+      const envelope = await res.json()
+      const data = envelope.result ?? envelope
       setResult(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')

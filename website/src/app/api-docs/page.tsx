@@ -434,7 +434,7 @@ export default function ApiDocsPage() {
           </div>
           <div>
             <span className="font-display font-medium text-sage-800">Passions Detected</span>
-            <p className="font-body text-sm text-sage-700">Root passions (phobos, thumos, pleonexia, thumos) and their sub-species, along with the false judgments underlying them.</p>
+            <p className="font-body text-sm text-sage-700">Root passions (epithumia, hedone, phobos, lupe) and their sub-species, along with the false judgments underlying them.</p>
           </div>
           <div>
             <span className="font-display font-medium text-sage-800">Virtue Domains</span>

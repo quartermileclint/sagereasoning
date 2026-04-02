@@ -772,7 +772,7 @@ export const VIRTUES = VIRTUE_EXPRESSIONS.map(v => ({
   id: v.id,
   name: v.name,
   greek: v.greek,
-  weight: 0.25, // R6b: placeholder only — V3 does not weight virtues independently
+  // weight removed — V3 rule R6b: no independent virtue weights (unified assessment)
   icon: VIRTUE_ICONS[v.id] || '',
   color: v.id === 'phronesis' ? '#7d9468' : v.id === 'dikaiosyne' ? '#B2AC88' : v.id === 'andreia' ? '#9e6b3a' : '#c45a7a',
   description: v.domain,

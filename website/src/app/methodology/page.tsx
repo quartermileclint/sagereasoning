@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { VIRTUES, ALIGNMENT_TIERS } from '@/lib/stoic-brain'
+import { VIRTUES } from '@/lib/stoic-brain'
 
 export const metadata: Metadata = {
   title: 'Methodology — SageReasoning',
@@ -43,11 +43,11 @@ export default function MethodologyPage() {
             <strong>Stoic Brain</strong>. It defines:
           </p>
           <ul className="list-disc pl-6 mt-2 space-y-1 text-sage-700">
-            <li>The four cardinal virtues and their relative weights</li>
+            <li>The four cardinal virtues and their unified assessment criteria</li>
             <li>16 sub-virtues (four per cardinal virtue)</li>
             <li>Preferred and dispreferred indifferents (health, wealth, reputation, etc.)</li>
             <li>Scoring criteria for each virtue at each level</li>
-            <li>The alignment tier definitions</li>
+            <li>The katorthoma proximity level definitions</li>
           </ul>
           <p className="mt-3">
             The Stoic Brain framework overview is available at{' '}
@@ -61,10 +61,10 @@ export default function MethodologyPage() {
         </div>
 
         <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">The four virtues and their weights</h2>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">The four cardinal virtues</h2>
           <p className="mb-4">
-            Each action is scored on all four virtues. The weights reflect the relative emphasis
-            the Stoics placed on each virtue in practical reasoning:
+            Each action is assessed against all four virtues as expressions of one unified excellence,
+            not scored independently. This reflects the Stoic doctrine of the unity of virtue:
           </p>
           <div className="space-y-3">
             {VIRTUES.map((virtue) => (
@@ -79,7 +79,7 @@ export default function MethodologyPage() {
                     <span className="font-display font-semibold text-sage-800">{virtue.name}</span>
                     <span className="font-body text-sage-500 text-sm italic">({virtue.greek})</span>
                     <span className="ml-auto text-xs font-display font-medium px-2 py-0.5 bg-sage-100 rounded">
-                      {(virtue.weight * 100)}% weight
+                      Unified Assessment
                     </span>
                   </div>
                   <p className="text-sm text-sage-700">{virtue.description}</p>
@@ -123,25 +123,7 @@ export default function MethodologyPage() {
           </p>
         </div>
 
-        <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">Alignment tiers</h2>
-          <p className="mb-4">
-            Your composite score places you in one of five alignment tiers, measured against
-            the ideal of the perfect Stoic Sage:
-          </p>
-          <div className="space-y-2">
-            {ALIGNMENT_TIERS.map((tier) => (
-              <div key={tier.id}
-                   className="flex items-center gap-3 bg-white/60 border border-sage-200 rounded-lg p-3">
-                <div className="w-3 h-3 rounded-full flex-shrink-0"
-                     style={{ backgroundColor: tier.color }} />
-                <span className="font-display font-medium text-sage-800 w-28">{tier.label}</span>
-                <span className="font-mono text-sage-500 text-sm w-20">{tier.range}</span>
-                <p className="text-sm text-sage-700 hidden md:block">{tier.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Alignment tiers section removed — V3 uses katorthoma proximity levels (see table above) */}
 
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">The V3 four-stage evaluation sequence</h2>
@@ -184,7 +166,7 @@ export default function MethodologyPage() {
           </ul>
           <p className="mt-3">
             The Stoics held that virtue is entirely within our control, and that outcomes are not.
-            A score of 40 on one action does not mean you are a bad person &mdash; it means there
+            A proximity level of &ldquo;habitual&rdquo; on one action does not mean you are a bad person &mdash; it means there
             may be room to reflect on how virtue could guide that type of action more fully.
           </p>
         </div>
