@@ -79,20 +79,22 @@ export default function BaselineAssessmentPage() {
         }),
       })
 
-      const data = await res.json()
+      const raw = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Something went wrong')
+        setError(raw.error || 'Something went wrong')
         setPhase('questions')
         return
       }
 
-      if (data.needs_q6) {
-        setQ6Branch(data.needs_q6)
+      if (raw.needs_q6) {
+        setQ6Branch(raw.needs_q6)
         setPhase('q6')
         return
       }
 
+      // API returns { result, meta } envelope — unwrap to get assessment data
+      const data = raw.result ?? raw
       setResult(data)
       setPhase('result')
 

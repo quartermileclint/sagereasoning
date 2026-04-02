@@ -88,7 +88,9 @@ export default function ScenariosPage() {
     setError(null)
     try {
       const res = await authFetch(`/api/score-scenario?audience=${audience}`)
-      const data = await res.json()
+      const envelope = await res.json()
+      // API returns { result, meta } envelope — unwrap to get scenario data
+      const data = envelope.result ?? envelope
       setScenario(data)
       setSelectedOption(null)
       setCustomResponse('')
@@ -125,7 +127,9 @@ export default function ScenariosPage() {
         throw new Error(data.error || 'Evaluation failed')
       }
 
-      const data = await res.json()
+      const envelope = await res.json()
+      // API returns { result, meta } envelope — unwrap to get evaluation data
+      const data = envelope.result ?? envelope
       setResult(data)
       setStep('result')
     } catch (err) {
