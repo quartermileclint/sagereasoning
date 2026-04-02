@@ -141,7 +141,7 @@ export default function ScorePolicyPage() {
               </div>
             </div>
 
-            {/* Cicero's Deliberation Framework */}
+            {/* Deliberation Framework */}
             {result.deliberation_assessment && (
               <div className="bg-white border border-sage-200 rounded-lg p-6">
                 <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">

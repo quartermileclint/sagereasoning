@@ -174,7 +174,7 @@ export default function TransparencyPage() {
 
       <div className="mt-12 pt-6 border-t border-sage-200 text-center">
         <p className="text-sage-600 text-sm italic">
-          &ldquo;The first step is to know what you do not know.&rdquo; &mdash; Socrates (as recorded by the Stoics)
+          The first step is to know what you do not know.
         </p>
       </div>
     </div>

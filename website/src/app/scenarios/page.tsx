@@ -374,7 +374,7 @@ export default function ScenariosPage() {
               </div>
             )}
 
-            {/* Deliberation Walkthrough — Cicero's 5 Questions (if present) */}
+            {/* Deliberation Walkthrough — 5 Questions (if present) */}
             {result.deliberation_walkthrough && (
               <div className="bg-white border border-sage-200 rounded-lg p-6">
                 <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">

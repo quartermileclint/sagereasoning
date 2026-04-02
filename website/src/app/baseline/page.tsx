@@ -248,7 +248,7 @@ export default function BaselineAssessmentPage() {
             {gradeLabel}
           </p>
           <p className="font-body text-sage-500 text-sm mt-1">
-            Based on Seneca&apos;s three grades of moral progress
+            Based on three grades of moral progress
           </p>
         </div>
 
