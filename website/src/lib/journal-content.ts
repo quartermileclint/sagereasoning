@@ -280,7 +280,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'The Architecture of Mind',
     title: 'Types of Impulse',
     teaching:
-      'Not all impulses are the same. The ancient Stoics catalogued at least eight types, ranging from basic intention (marking out what is to be accomplished) through preparation (readying yourself) and choice (selecting among alternatives on the basis of reasoning) to moral choice — the deepest kind, where you commit your whole self to a course of action. There is also rational desire — wanting what is genuinely good — and willing, which is desire freely and voluntarily exercised. The distinction matters because it shows that impulse is not a single crude force. It is a spectrum from shallow to deep, from automatic to fully considered.',
+      'Not all impulses are the same. Eight types of impulse exist, ranging from basic intention (marking out what is to be accomplished) through preparation (readying yourself) and choice (selecting among alternatives on the basis of reasoning) to moral choice — the deepest kind, where you commit your whole self to a course of action. There is also rational desire — wanting what is genuinely good — and willing, which is desire freely and voluntarily exercised. The distinction matters because it shows that impulse is not a single crude force. It is a spectrum from shallow to deep, from automatic to fully considered.',
     question:
       'Think about the different kinds of decisions you make in a typical day. Some are barely conscious (what to eat, which route to take). Some require deliberation (how to respond to a difficult email). Some involve your deepest commitments (how to raise your children, what kind of person to be). Write about one decision from each level. How does the depth of your engagement change the quality of the action?',
     sourceFile: 'psychology.json',
@@ -298,7 +298,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'What We Value and Why',
     title: 'The Value Hierarchy',
     teaching:
-      'The Stoics divided everything into three categories: genuinely good, genuinely evil, and indifferent. Genuinely good is virtue and what participates in virtue. Genuinely evil is vice and what participates in vice. Everything else — health, wealth, reputation, pleasure, pain, death — is indifferent. This does not mean these things are unimportant. It means they cannot, by themselves, make you a better or worse person. Only your character can do that. This hierarchy is not abstract theory. It is a practical tool for deciding what deserves your energy and what does not.',
+      'Everything divides into three categories: genuinely good, genuinely evil, and indifferent. Genuinely good is virtue and what participates in virtue. Genuinely evil is vice and what participates in vice. Everything else — health, wealth, reputation, pleasure, pain, death — is indifferent. This does not mean these things are unimportant. It means they cannot, by themselves, make you a better or worse person. Only your character can do that. This hierarchy is not abstract theory. It is a practical tool for deciding what deserves your energy and what does not.',
     question:
       'List three things you spent significant energy pursuing this past week. For each, ask: is this genuinely good (does it improve my character?), genuinely evil (does it damage my character?), or indifferent (it may matter, but it does not determine who I am)? Did your energy allocation match the hierarchy, or was it inverted?',
     sourceFile: 'value.json',
@@ -310,7 +310,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'What We Value and Why',
     title: 'Genuine Goods — Where Virtue Lives',
     teaching:
-      'The Stoics taught that genuine goods exist in three places. First, goods of the soul: the virtues themselves, right actions, correct impulses, and the rational good feelings that come from acting well. Second, external goods that participate in virtue: a friend whose friendship is grounded in shared commitment to excellence, or a community ordered by justice. Third, the virtuous person themselves — considered as a whole, they are a good. Notice that all genuine goods either are virtue, flow from virtue, or participate in virtue. Nothing outside this circle qualifies.',
+      'Genuine goods exist in three places. First, goods of the soul: the virtues themselves, right actions, correct impulses, and the rational good feelings that come from acting well. Second, external goods that participate in virtue: a friend whose friendship is grounded in shared commitment to excellence, or a community ordered by justice. Third, the virtuous person themselves — considered as a whole, they are a good. Notice that all genuine goods either are virtue, flow from virtue, or participate in virtue. Nothing outside this circle qualifies.',
     question:
       'Think of the relationships and communities in your life. Which ones make you a better person — not more comfortable or successful, but genuinely better in character? Which ones, honestly, pull you away from the person you want to be? Write about one relationship that participates in virtue, and what makes it different from the others.',
     virtue: 'justice',
@@ -323,7 +323,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'What We Value and Why',
     title: 'Preferred Indifferents — Holding Lightly',
     teaching:
-      'Among the indifferents, the Stoics distinguished between those that are preferred and those that are dispreferred. Preferred indifferents include life, health, strength, freedom, friendship, knowledge, and wealth. These are natural to pursue and rational to select. But the key word is "select" — the wise person selects these things; they do not desire them as if they were genuine goods. The moment you pursue any preferred indifferent at the cost of virtue — lying to keep your wealth, betraying a friend to preserve your reputation — you have confused an indifferent with a genuine good.',
+      'Among the indifferents, a distinction exists between those that are preferred and those that are dispreferred. Preferred indifferents include life, health, strength, freedom, friendship, knowledge, and wealth. These are natural to pursue and rational to select. But the key word is "select" — the wise person selects these things; they do not desire them as if they were genuine goods. The moment you pursue any preferred indifferent at the cost of virtue — lying to keep your wealth, betraying a friend to preserve your reputation — you have confused an indifferent with a genuine good.',
     question:
       'Choose one preferred indifferent you value highly — perhaps your financial security, your health, or a particular relationship. When has the fear of losing this thing tempted you to act in a way that compromised your integrity, even slightly? What would it look like to value it fully while holding it lightly?',
     sourceFile: 'value.json',
@@ -335,7 +335,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'What We Value and Why',
     title: 'Dispreferred Indifferents — What We Naturally Avoid',
     teaching:
-      'On the other side are the dispreferred indifferents: death, disease, pain, disability, poverty, dishonour, exile, and isolation. The Stoics said it is rational to avoid these — they are contrary to our nature as living beings. But they are not genuinely evil. They cannot damage your character unless you let them. A person in poverty who maintains their integrity is not harmed in any way that matters. A person who avoids poverty by betraying their principles has suffered a genuine evil — the corruption of their character — while gaining only an indifferent.',
+      'On the other side are the dispreferred indifferents: death, disease, pain, disability, poverty, dishonour, exile, and isolation. It is rational to avoid these — they are contrary to our nature as living beings. But they are not genuinely evil. They cannot damage your character unless you let them. A person in poverty who maintains their integrity is not harmed in any way that matters. A person who avoids poverty by betraying their principles has suffered a genuine evil — the corruption of their character — while gaining only an indifferent.',
     question:
       'What dispreferred indifferent do you fear most — pain, poverty, loneliness, loss of reputation, death? Write honestly about this fear. Then ask: has this fear ever led you to compromise something more important? What would courage look like in the face of this specific fear?',
     virtue: 'courage',
@@ -361,7 +361,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'What We Value and Why',
     title: 'The Five Selection Principles',
     teaching:
-      'The Stoics gave five practical rules for choosing among indifferents. First: choose what accords with nature over what goes against it. Second: among natural options, choose what has greater selective value. Third: choose what serves your current roles and responsibilities. Fourth — and this overrides everything — never choose an indifferent at the cost of virtue. What is morally right always prevails. Fifth: select, do not desire. Keep the quality of your engagement rational, not passionate. These five rules turn an abstract value hierarchy into a practical decision-making tool.',
+      'Five practical rules guide choosing among indifferents. First: choose what accords with nature over what goes against it. Second: among natural options, choose what has greater selective value. Third: choose what serves your current roles and responsibilities. Fourth — and this overrides everything — never choose an indifferent at the cost of virtue. What is morally right always prevails. Fifth: select, do not desire. Keep the quality of your engagement rational, not passionate. These five rules turn an abstract value hierarchy into a practical decision-making tool.',
     question:
       'Recall a decision you struggled with recently — one where you were torn between options. Apply the five selection principles to it in order. Does the framework clarify which option better serves your character? Write about which principle was hardest to apply honestly.',
     virtue: 'wisdom',
@@ -374,7 +374,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'What We Value and Why',
     title: 'Genuine Evils — Vice and Its Consequences',
     teaching:
-      'Just as only virtue is genuinely good, only vice is genuinely evil. Vice includes the four root passions and the wrong actions that flow from them — actions driven by false judgements about what is good and bad. The Stoics held that all vicious persons are, in a sense, out of touch with reality — they mistake indifferents for genuine goods, they give hasty assent to distorted impressions, and their impulses exceed what reason warrants. This is not a moral condemnation. It is a diagnosis. And like any diagnosis, it points toward a correction.',
+      'Just as only virtue is genuinely good, only vice is genuinely evil. Vice includes the four root passions and the wrong actions that flow from them — actions driven by false judgements about what is good and bad. All vicious persons are, in a sense, out of touch with reality — they mistake indifferents for genuine goods, they give hasty assent to distorted impressions, and their impulses exceed what reason warrants. This is not a moral condemnation. It is a diagnosis. And like any diagnosis, it points toward a correction.',
     question:
       'Consider a pattern in your own life that you know is not serving you well — a recurring reaction, a habitual avoidance, a default behaviour you fall into under pressure. Without judging yourself, try to identify the false belief underneath it. What do you treat as genuinely good or genuinely evil that is actually an indifferent?',
     sourceFile: 'value.json',
@@ -392,7 +392,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'The Unity of Excellence',
     title: 'Whoever Has One Has All',
     teaching:
-      'The Stoics made a startling claim: whoever has one virtue has all of them, because the virtues are inseparable. You cannot be truly wise without being just, because wisdom includes knowing what is owed to others. You cannot be truly courageous without being temperate, because recklessness without self-control is not courage — it is a passion. You cannot be truly just without being wise, because justice without understanding is rigid rule-following. The four virtues are not four separate skills. They are four expressions of one unified excellence of character.',
+      'A startling claim: whoever has one virtue has all of them, because the virtues are inseparable. You cannot be truly wise without being just, because wisdom includes knowing what is owed to others. You cannot be truly courageous without being temperate, because recklessness without self-control is not courage — it is a passion. You cannot be truly just without being wise, because justice without understanding is rigid rule-following. The four virtues are not four separate skills. They are four expressions of one unified excellence of character.',
     question:
       'Think of a time when you displayed one virtue strongly but another was clearly absent — perhaps you were courageous but unkind, or wise but lacked the courage to act on your wisdom. What does this tell you about the unity thesis? How might strengthening the weaker virtue have changed the outcome?',
     sourceFile: 'virtue.json',
@@ -404,7 +404,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'The Unity of Excellence',
     title: 'Virtue as Secure Knowledge',
     teaching:
-      'The Stoics defined virtue not as a habit or a feeling but as secure knowledge — knowledge so deeply understood that it becomes a stable disposition of the soul. This is why they said virtue, once fully acquired, cannot be lost. It is not a mood that comes and goes. It is not willpower that can be exhausted. It is understanding so complete that it has become part of who you are. Most of us have opinions about what is right. The Stoic challenge is to transform those opinions into knowledge — tested, examined, and made unshakeable through practice.',
+      'Virtue is defined not as a habit or a feeling but as secure knowledge — knowledge so deeply understood that it becomes a stable disposition of the soul. This means virtue, once fully acquired, cannot be lost. It is not a mood that comes and goes. It is not willpower that can be exhausted. It is understanding so complete that it has become part of who you are. Most of us have opinions about what is right. The challenge is to transform those opinions into knowledge — tested, examined, and made unshakeable through practice.',
     question:
       'Think about something you believe is right — a moral principle you hold. Now test it: is this genuine knowledge (you understand why it is right and could defend it under pressure) or opinion (you believe it because you were taught it, because it feels right, or because everyone around you agrees)? What would it take to turn your moral opinions into moral knowledge?',
     virtue: 'wisdom',
@@ -487,7 +487,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'When Judgement Goes Wrong',
     title: 'What Passions Really Are',
     teaching:
-      'When the Stoics warned against "passion," they did not mean emotion. They meant irrational impulses rooted in false judgements — movements of the soul that exceed what reason warrants. Passion is defined as "an impulse exceeding due measure." Every passion is a cognitive error: you perceive something as genuinely good or genuinely evil when it is actually indifferent, and your impulse responds to that false perception. Passion is not something that happens to you. It is something your ruling faculty produces when it assents to a distorted impression.',
+      'When we speak of "passion," we do not mean emotion. We mean irrational impulses rooted in false judgements — movements of the soul that exceed what reason warrants. Passion is defined as "an impulse exceeding due measure." Every passion is a cognitive error: you perceive something as genuinely good or genuinely evil when it is actually indifferent, and your impulse responds to that false perception. Passion is not something that happens to you. It is something your ruling faculty produces when it assents to a distorted impression.',
     question:
       'Recall a moment this week when you experienced a strong emotional reaction — anger, anxiety, craving, or dejection. Try to identify the judgement underneath it. What did you believe was genuinely good or genuinely evil in that moment? Was that belief accurate, or were you treating an indifferent as though your well-being depended on it?',
     sourceFile: 'passions.json',
@@ -536,7 +536,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'When Judgement Goes Wrong',
     title: 'Distress — Contraction at Apparent Evil',
     teaching:
-      'The fourth root passion is distress: an irrational contraction of the soul at something present that appears evil but is not genuinely evil. It has five recognised forms: pity (distress at another\'s suffering — the Stoics noted this misidentifies an indifferent as evil, which is not the same as genuine compassion), envy (distress that another has what you want), jealousy (distress that someone possesses what you believe should be yours), grief (distress at loss), and anxiety (a weighing-down of the mind without a clear object). Distress is often the hardest passion to examine because it feels justified by the situation.',
+      'The fourth root passion is distress: an irrational contraction of the soul at something present that appears evil but is not genuinely evil. It has five recognised forms: pity (distress at another\'s suffering — note that this misidentifies an indifferent as evil, which is not the same as genuine compassion), envy (distress that another has what you want), jealousy (distress that someone possesses what you believe should be yours), grief (distress at loss), and anxiety (a weighing-down of the mind without a clear object). Distress is often the hardest passion to examine because it feels justified by the situation.',
     question:
       'Identify a form of distress you experienced recently: pity, envy, jealousy, grief, or anxiety. Now examine the judgement underneath it. What did you believe was genuinely evil — what felt like a real loss or real harm? Was it a genuine evil (damage to character) or a dispreferred indifferent (something painful but not actually destructive of who you are)? Write about the distinction.',
     sourceFile: 'passions.json',
@@ -561,7 +561,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'When Judgement Goes Wrong',
     title: 'The Rational Alternatives — Joy, Rational Wish, and Caution',
     teaching:
-      'The Stoics did not teach the elimination of all feeling. They taught that the passions should be replaced by three rational good feelings. Joy replaces irrational pleasure — it is gladness at what is genuinely good, at virtue and right action. Rational wish replaces craving — it is desire directed at what is genuinely good, wanting the welfare of others from correct understanding. Rational caution replaces fear — it is principled avoidance of what is genuinely evil (vice), not anxious shrinking from indifferents. These are what the wise person experiences instead of passions.',
+      'The path is not the elimination of all feeling. Rather, the passions should be replaced by three rational good feelings. Joy replaces irrational pleasure — it is gladness at what is genuinely good, at virtue and right action. Rational wish replaces craving — it is desire directed at what is genuinely good, wanting the welfare of others from correct understanding. Rational caution replaces fear — it is principled avoidance of what is genuinely evil (vice), not anxious shrinking from indifferents. These are what the wise person experiences instead of passions.',
     question:
       'Think about a moment of genuine joy — not pleasure at gaining an indifferent, but gladness that came from doing something right. How did it feel different from the pleasure of getting something you wanted? Now think about a time when caution (a principled refusal) served you better than fear (anxious avoidance). Write about the quality of these rational feelings versus their passionate counterparts.',
     sourceFile: 'passions.json',
@@ -573,9 +573,9 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     phaseTitle: 'When Judgement Goes Wrong',
     title: 'The Missing Fourth — Why No Good Feeling Replaces Distress',
     teaching:
-      'There is a deliberate asymmetry in the Stoic system: joy replaces irrational pleasure, rational wish replaces craving, rational caution replaces fear — but nothing replaces distress. This is not an oversight. The Stoics reasoned that the wise person has no cause for distress because nothing genuinely evil can befall a virtuous person. External losses — even severe ones — are dispreferred indifferents, not genuine evils. The sage may feel preference for health and life, and may rationally select them, but does not experience the contraction of distress because their fundamental well-being (their character) remains intact.',
+      'There is a deliberate asymmetry in the Stoic system: joy replaces irrational pleasure, rational wish replaces craving, rational caution replaces fear — but nothing replaces distress. This is not an oversight. The wise person has no cause for distress because nothing genuinely evil can befall a virtuous person. External losses — even severe ones — are dispreferred indifferents, not genuine evils. The sage may feel preference for health and life, and may rationally select them, but does not experience the contraction of distress because their fundamental well-being (their character) remains intact.',
     question:
-      'This is perhaps the most challenging Stoic teaching. Think about something that causes you genuine distress — a loss, a fear realised, a persistent source of pain. The Stoics would ask: is what you lost genuinely evil (did it damage your character?), or is it a dispreferred indifferent that feels devastating because you have assigned it more value than it holds? Write about the tension between these two perspectives honestly.',
+      'This is perhaps the most challenging teaching. Think about something that causes you genuine distress — a loss, a fear realised, a persistent source of pain. Ask yourself: is what you lost genuinely evil (did it damage your character?), or is it a dispreferred indifferent that feels devastating because you have assigned it more value than it holds? Write about the tension between these two perspectives honestly.',
     sourceFile: 'passions.json',
     sourceCitation: 'DL Lives 7.116; Stobaeus Eclogae 2.90',
   },
