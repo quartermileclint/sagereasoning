@@ -1,4 +1,5 @@
 import { VIRTUE_DISPLAY } from '@/lib/stoic-brain'
+import AuthRedirect from '@/components/AuthRedirect'
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -45,6 +46,7 @@ const jsonLd = {
 export default function HomePage() {
   return (
     <div>
+      <AuthRedirect />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
