@@ -179,7 +179,7 @@ export default function AuthPage() {
             <label htmlFor="privacy-consent" className="font-body text-sm text-sage-700 leading-snug cursor-pointer">
               I understand that text I submit for scoring will be processed by{' '}
               <strong>Anthropic&rsquo;s Claude AI</strong> (US-based), and that my account data
-              is stored on <strong>Supabase</strong> (Singapore region). I have read and accept the{' '}
+              is stored on <strong>Supabase</strong> (US East region). I have read and accept the{' '}
               <a href="/privacy" target="_blank" className="text-sage-600 underline hover:text-sage-800">Privacy Policy</a>{' '}
               and{' '}
               <a href="/terms" target="_blank" className="text-sage-600 underline hover:text-sage-800">Terms of Service</a>.
