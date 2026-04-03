@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/analytics'
 
@@ -15,6 +15,25 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+
+  // Handle email confirmation redirect — when user clicks the link in their
+  // confirmation email, Supabase redirects here with tokens in the URL hash.
+  // This detects that and redirects the user to the right page.
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        // Check if user has completed baseline assessment
+        const res = await fetch(`/api/baseline?user_id=${session.user.id}`)
+        const baseline = await res.json()
+        if (!baseline.has_baseline) {
+          window.location.href = '/baseline'
+        } else {
+          window.location.href = '/dashboard'
+        }
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,7 +70,10 @@ export default function AuthPage() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { display_name: displayName } },
+      options: {
+        data: { display_name: displayName },
+        emailRedirectTo: `${window.location.origin}/auth`,
+      },
     })
     if (error) {
       setError(error.message)
