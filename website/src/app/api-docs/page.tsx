@@ -304,7 +304,7 @@ export default function ApiDocsPage() {
 
       {/* Base URL */}
       <div className="bg-sage-800 text-sage-100 rounded-lg p-5 mb-10 font-mono text-sm">
-        <span className="text-sage-400">Base URL:</span> https://raqorxgrxdyezuntnojw.supabase.co/functions/v1
+        <span className="text-sage-400">Base URL:</span> https://jdbefwkonfbhjquozgxr.supabase.co/functions/v1
       </div>
 
       {/* Auth info */}

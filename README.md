@@ -171,7 +171,7 @@ These are the "doors" that external programs, AI agents, and developers use to i
 ---
 
 ### 4. The Database
-*Hosted on [Supabase](https://supabase.com) — project ref: `raqorxgrxdyezuntnojw` (Singapore region)*
+*Hosted on [Supabase](https://supabase.com) — project ref: `jdbefwkonfbhjquozgxr` (US East / North Virginia region)*
 
 Supabase is a free cloud database. Think of it as a spreadsheet in the cloud that the website reads from and writes to. Each row is locked to the user who created it (Row Level Security).
 
