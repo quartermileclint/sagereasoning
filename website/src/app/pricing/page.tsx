@@ -2,197 +2,283 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Pricing — SageReasoning',
-  description: 'Simple, Stoic-aligned pricing. Core wisdom stays free. Premium features for those who go deeper.',
+  description: 'Free for humans — every feature, no limits. Developers get generous free tiers with transparent per-call pricing.',
 }
 
-// ── PRICING PLACEHOLDER ───────────────────────────────────────────────────────
-// TODO (Priority 10 — Phase 2): This page displays planned pricing tiers.
-// Before going live:
-//   1. Integrate Stripe (stripe.com) for payment processing
-//   2. Add subscription management (upgrade, downgrade, cancel) to /dashboard
-//   3. Implement API key management with usage-based billing
-//   4. Wire up /api/subscribe endpoint
-//   5. Update Supabase user profiles with tier field
-// All buttons below are static placeholders — they do not process payments yet.
-// ─────────────────────────────────────────────────────────────────────────────
-
-const tiers = [
+/* ── Free-tier limits by skill type (developer pricing) ─────────────── */
+const developerTiers = [
   {
-    id: 'agora',
-    name: 'The Agora',
-    tagline: 'Free — always',
-    price: '$0',
-    period: '',
-    description: 'Core Stoic wisdom should be accessible to everyone. The Agora gives you everything you need to begin the path.',
-    features: [
-      'Score up to 5 actions per day',
-      'Baseline Stoic assessment (annual retake)',
-      'Personal dashboard with score history',
-      'Ethical Scenarios (all age groups)',
-      'Social Media Filter (5 per day)',
-      'The Path of the Prokoptos journal (all 56 days)',
-      'Stoic Brain framework overview',
-      'AI Agent API (1 free evaluation call/day)',
-    ],
-    cta: 'Get started free',
-    ctaHref: '/auth',
-    highlight: false,
-    stoicNote: 'Wisdom needs no paywall.',
+    skill: 'sage-guard',
+    label: 'sage-guard',
+    description: 'Sub-100ms decision gate',
+    price: '~$0.0025/call',
+    freeTier: '500 calls/month',
+    speed: '<100ms',
   },
   {
-    id: 'prokoptos',
-    name: 'Prokoptos',
-    tagline: 'The progressing one',
-    price: '$7',
-    period: '/month',
-    annualNote: 'or $60/year (save $24)',
-    description: 'For those committed to daily Stoic practice. Prokoptos — the one making progress — is the highest aspiration in living Stoicism.',
-    features: [
-      'Everything in The Agora',
-      'Unlimited action scoring',
-      'Document scoring and badges (unlimited)',
-      'Policy review (unlimited)',
-      'Social Media Filter (unlimited)',
-      'Daily journal with AI sage perspective',
-      'Score history export (CSV)',
-      'Priority API access',
-    ],
-    cta: 'Coming soon',
-    ctaHref: '#pricing-placeholder',
-    highlight: true,
-    stoicNote: 'Less than a single coffee per week. Temperance in pricing is a virtue too.',
+    skill: 'sage-reason',
+    label: 'sage-reason (quick / standard / deep)',
+    description: 'Core reasoning engine — 3, 5, or 6 mechanisms',
+    price: '~$0.18/call',
+    freeTier: '100 calls/month',
+    speed: '~2–4s',
   },
   {
-    id: 'api',
-    name: 'API Access',
-    tagline: 'For developers and AI agents',
-    price: 'Usage-based',
-    period: '',
-    annualNote: 'Free evaluation tier included',
-    description: 'Integrate the Stoic Brain into your AI systems. Free tier for evaluation, paid tier for production — per-call pricing from $0.0025 (cheapest in market).',
-    features: [
-      'Free tier: 1 API call/day for evaluation',
-      'Paid tier: configurable limits (default 500/day)',
-      'Deliberation chains: 1 iteration (free) / 3 (paid)',
-      'Stoic Brain conceptual overview always free',
-      'Full API documentation',
-      'Usage dashboard',
-    ],
-    cta: 'View API docs',
-    ctaHref: '/api-docs',
-    highlight: false,
-    stoicNote: 'The Stoic Brain framework overview is free to explore. Detailed scoring and virtue analysis are provided through the API.',
+    skill: 'sage-score',
+    label: 'sage-score',
+    description: 'Pre-action decision audit with structured reasoning',
+    price: '~$0.18/call',
+    freeTier: '100 calls/month',
+    speed: '~2s',
+  },
+  {
+    skill: 'sage-iterate',
+    label: 'sage-iterate',
+    description: 'Iterative decision refinement chains',
+    price: '~$0.18/iteration',
+    freeTier: '50 chains/month',
+    speed: '~2s per iteration',
+  },
+  {
+    skill: 'evaluation-skills',
+    label: 'Evaluation skills',
+    description: 'sage-decide, sage-audit, sage-converse, sage-scenario, sage-reflect, sage-classify, sage-prioritise, sage-moderate',
+    price: '~$0.18/call',
+    freeTier: '100 calls/month',
+    speed: '~2–3s',
+  },
+  {
+    skill: 'marketplace-skills',
+    label: 'Marketplace skills',
+    description: 'sage-premortem, sage-negotiate, sage-invest, sage-pivot, sage-retro, sage-align, sage-resolve, sage-coach, sage-govern, sage-compliance, sage-educate, sage-identity',
+    price: '~$0.18/call',
+    freeTier: '50 calls/month',
+    speed: '~3–4s',
+  },
+  {
+    skill: 'premium-skills',
+    label: 'Premium skills',
+    description: 'sage-diagnose (14 or 55 assessments), sage-profile (agent baseline)',
+    price: '~$0.50/call',
+    freeTier: '25 calls/month',
+    speed: '~2–3s',
+  },
+  {
+    skill: 'sage-context',
+    label: 'sage-context',
+    description: 'Stoic Brain conceptual overview — no auth needed',
+    price: 'Free',
+    freeTier: 'Unlimited',
+    speed: '<50ms',
   },
 ]
 
 export default function PricingPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-16">
+      {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="text-center mb-14">
         <h1 className="font-display text-3xl md:text-4xl font-medium text-sage-900 mb-3">
           Simple, honest pricing
         </h1>
         <p className="font-body text-lg text-sage-700 max-w-xl mx-auto leading-relaxed">
-          Core Stoic wisdom stays free. We charge only where we provide substantial additional
-          value, and never through manipulation or artificial scarcity.
+          Every feature is free for humans — no limits, no tiers, no catch. Developers
+          get generous free allowances with transparent per-call pricing beyond that.
         </p>
-        <div className="mt-4 inline-block px-4 py-2 bg-amber-50 border border-amber-200 rounded text-amber-800 text-sm font-body">
-          <strong>Note:</strong> Paid tiers are coming soon. All features are currently free while
-          the payment system is being set up.
-          {/* TODO (Phase 2): Remove this notice once Stripe integration is complete */}
+      </div>
+
+      {/* ── Human pricing: everything free ─────────────────────────────── */}
+      <div className="rounded-xl border border-sage-300 bg-sage-50 shadow-lg p-8 mb-10">
+        <div className="text-center mb-6">
+          <h2 className="font-display text-2xl font-semibold text-sage-900 mb-1">
+            For Humans
+          </h2>
+          <p className="font-body text-sage-600">
+            Wisdom should be shared freely. Every feature is yours — no restrictions.
+          </p>
+        </div>
+
+        <div className="text-center mb-6">
+          <span className="font-display text-5xl font-bold text-sage-900">Free</span>
+          <p className="font-body text-sm text-sage-500 mt-1">forever — no credit card required</p>
+        </div>
+
+        <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-2 max-w-2xl mx-auto mb-8">
+          {[
+            'Unlimited action scoring',
+            'Baseline Stoic assessment (retake anytime)',
+            'Personal dashboard with full score history',
+            'Document scoring and trust badges',
+            'Policy and contract review',
+            'Social Media Filter (unlimited)',
+            'The Path of the Prokoptos journal (all 56 days)',
+            'Ethical Scenarios (all age groups)',
+            'Daily journal with AI sage perspective',
+            'Score history export (CSV)',
+            'Stoic Brain framework overview',
+            'sage-guard decision gate (unlimited)',
+            'sage-reason analysis (10 per day)',
+          ].map((f) => (
+            <li key={f} className="flex items-start gap-2 font-body text-sm text-sage-700">
+              <svg className="w-4 h-4 text-sage-400 mt-0.5 flex-shrink-0" fill="none"
+                   stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M5 13l4 4L19 7" />
+              </svg>
+              {f}
+            </li>
+          ))}
+        </ul>
+
+        <div className="text-center">
+          <a
+            href="/auth"
+            className="inline-block px-8 py-3 bg-sage-400 text-white font-display rounded hover:bg-sage-500 transition-colors"
+          >
+            Get started free
+          </a>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6 mb-16">
-        {tiers.map((tier) => (
-          <div
-            key={tier.id}
-            className={`rounded-xl border p-6 flex flex-col ${
-              tier.highlight
-                ? 'border-sage-400 bg-sage-50 shadow-lg ring-2 ring-sage-300'
-                : 'border-sage-200 bg-white/70'
-            }`}
-          >
-            {tier.highlight && (
-              <div className="text-center mb-3">
-                <span className="inline-block px-3 py-0.5 bg-sage-400 text-white text-xs font-display rounded-full">
-                  Most popular
-                </span>
-              </div>
-            )}
-            <div className="mb-4">
-              <h2 className="font-display text-xl font-semibold text-sage-800">{tier.name}</h2>
-              <p className="font-body text-sm italic text-sage-500 mb-3">{tier.tagline}</p>
-              <div className="flex items-baseline gap-1">
-                <span className="font-display text-3xl font-bold text-sage-900">{tier.price}</span>
-                {tier.period && (
-                  <span className="font-body text-sage-500 text-sm">{tier.period}</span>
-                )}
-              </div>
-              {tier.annualNote && (
-                <p className="font-body text-xs text-sage-500 mt-1">{tier.annualNote}</p>
-              )}
-              <p className="font-body text-sm text-sage-700 mt-3 leading-relaxed">{tier.description}</p>
-            </div>
-
-            <ul className="space-y-2 mb-6 flex-1">
-              {tier.features.map((f) => (
-                <li key={f} className="flex items-start gap-2 font-body text-sm text-sage-700">
-                  <svg className="w-4 h-4 text-sage-400 mt-0.5 flex-shrink-0" fill="none"
-                       stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M5 13l4 4L19 7" />
-                  </svg>
-                  {f}
-                </li>
-              ))}
-            </ul>
-
-            <a
-              href={tier.ctaHref}
-              className={`block text-center px-4 py-2.5 rounded font-display transition-colors ${
-                tier.highlight
-                  ? 'bg-sage-400 text-white hover:bg-sage-500'
-                  : 'border border-sage-300 text-sage-700 hover:bg-sage-100'
-              }`}
-            >
-              {tier.cta}
-            </a>
-
-            <p className="mt-4 text-xs text-sage-400 italic text-center leading-snug">
-              {tier.stoicNote}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* Voluntary contributions */}
-      <div className="bg-white/60 border border-sage-200 rounded-xl p-8 text-center mb-12">
-        <h2 className="font-display text-xl font-semibold text-sage-800 mb-2">Support the Agora</h2>
-        <p className="font-body text-sage-700 max-w-xl mx-auto leading-relaxed mb-4">
-          If SageReasoning has added value to your life and you use the free tier, you can
-          support the platform through a voluntary contribution. In Stoic tradition, sharing
-          freely while accepting support gratefully.
+      {/* ── Voluntary tidings ──────────────────────────────────────────── */}
+      <div className="bg-white/60 border border-sage-200 rounded-xl p-8 text-center mb-16">
+        <h2 className="font-display text-xl font-semibold text-sage-800 mb-2">
+          Support the Platform
+        </h2>
+        <p className="font-body text-sage-700 max-w-xl mx-auto leading-relaxed mb-6">
+          If SageReasoning adds value to your life, you can support us through a voluntary
+          tiding. In the Stoic tradition — sharing freely while accepting support gratefully.
         </p>
-        <button
-          disabled
-          className="px-6 py-2.5 border border-sage-300 text-sage-500 font-display rounded cursor-not-allowed opacity-60"
-        >
-          Contribute (coming soon)
-          {/* TODO (Phase 2): Connect to Stripe one-time payment or Buy Me a Coffee */}
-        </button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          {/* One-off tiding */}
+          <div className="flex items-center gap-2 border border-sage-300 rounded-lg px-4 py-3 bg-white">
+            <span className="font-body text-sage-600 text-sm">One-off:</span>
+            <span className="font-display font-semibold text-sage-800">$</span>
+            <input
+              type="number"
+              defaultValue={20}
+              min={1}
+              className="w-16 font-display font-semibold text-sage-800 text-center border-b border-sage-300 bg-transparent focus:outline-none focus:border-sage-500"
+              aria-label="One-off tiding amount"
+            />
+            <button
+              disabled
+              className="ml-2 px-4 py-1.5 bg-sage-400 text-white font-display text-sm rounded hover:bg-sage-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Give once
+              {/* TODO (Phase 2): Connect to Stripe one-time payment */}
+            </button>
+          </div>
+
+          {/* Monthly tiding */}
+          <div className="flex items-center gap-2 border border-sage-300 rounded-lg px-4 py-3 bg-white">
+            <span className="font-body text-sage-600 text-sm">Monthly:</span>
+            <span className="font-display font-semibold text-sage-800">$</span>
+            <input
+              type="number"
+              defaultValue={10}
+              min={1}
+              className="w-16 font-display font-semibold text-sage-800 text-center border-b border-sage-300 bg-transparent focus:outline-none focus:border-sage-500"
+              aria-label="Monthly tiding amount"
+            />
+            <span className="font-body text-sage-500 text-sm">/mo</span>
+            <button
+              disabled
+              className="ml-2 px-4 py-1.5 bg-sage-400 text-white font-display text-sm rounded hover:bg-sage-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Give monthly
+              {/* TODO (Phase 2): Connect to Stripe recurring payment */}
+            </button>
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-sage-400 italic">
+          Payment processing coming soon. Tidings are entirely voluntary and do not unlock additional features.
+        </p>
       </div>
 
-      {/* FAQ */}
+      {/* ── Developer pricing ──────────────────────────────────────────── */}
+      <div className="mb-16">
+        <div className="text-center mb-8">
+          <h2 className="font-display text-2xl font-semibold text-sage-900 mb-1">
+            For Developers &amp; AI Agents
+          </h2>
+          <p className="font-body text-sage-600 max-w-2xl mx-auto">
+            Every skill comes with a generous free tier. Beyond that, transparent per-call
+            pricing — anchored at half the lowest competitor or less.
+          </p>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-sage-200">
+                <th className="text-left px-4 py-3 border border-sage-300 font-display font-semibold">Skill</th>
+                <th className="text-left px-4 py-3 border border-sage-300 font-display font-semibold">Free tier</th>
+                <th className="text-left px-4 py-3 border border-sage-300 font-display font-semibold">Paid price</th>
+                <th className="text-left px-4 py-3 border border-sage-300 font-display font-semibold hidden sm:table-cell">Speed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {developerTiers.map((tier, i) => (
+                <tr key={tier.skill} className={i % 2 === 1 ? 'bg-sage-50' : ''}>
+                  <td className="px-4 py-3 border border-sage-300">
+                    <span className="font-display font-medium text-sage-800">{tier.label}</span>
+                    <p className="text-xs text-sage-500 mt-0.5">{tier.description}</p>
+                  </td>
+                  <td className="px-4 py-3 border border-sage-300 font-medium text-sage-700">
+                    {tier.freeTier}
+                  </td>
+                  <td className="px-4 py-3 border border-sage-300 text-sage-700">
+                    {tier.price}
+                  </td>
+                  <td className="px-4 py-3 border border-sage-300 text-sage-500 hidden sm:table-cell">
+                    {tier.speed}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-4 flex flex-col sm:flex-row gap-4 text-sm text-sage-600">
+          <p className="flex-1">
+            All paid tiers include configurable rate limits (default 500 calls/day), up to 3
+            deliberation iterations per chain, and full access to every skill.
+          </p>
+          <a
+            href="/api-docs"
+            className="inline-block self-start px-6 py-2.5 border border-sage-300 text-sage-700 font-display rounded hover:bg-sage-100 transition-colors"
+          >
+            View API docs
+          </a>
+        </div>
+
+        <p className="mt-3 text-xs text-sage-500 italic">
+          No long-term contracts. Pay only for what you use beyond the free tier.
+          Contact <a href="mailto:zeus@sagereasoning.com" className="underline">zeus@sagereasoning.com</a> for
+          volume pricing or custom limits.
+        </p>
+      </div>
+
+      {/* ── FAQ ────────────────────────────────────────────────────────── */}
       <div className="max-w-2xl mx-auto">
         <h2 className="font-display text-xl font-semibold text-sage-800 mb-6 text-center">Pricing FAQ</h2>
         <div className="space-y-6 font-body text-sage-700 leading-relaxed">
           <div>
-            <p className="font-display font-medium text-sage-800 mb-1">Why is the free tier so generous?</p>
+            <p className="font-display font-medium text-sage-800 mb-1">Why is everything free for humans?</p>
             <p>
-              Wisdom should be shared freely. The journal, baseline assessment, and daily
-              scoring are the core of what SageReasoning offers — keeping them free is a
-              deliberate value alignment, not a marketing tactic.
+              Wisdom should be shared freely. Stoic philosophy belongs to everyone, not just
+              those who can afford a subscription. We believe keeping every human feature free
+              and unrestricted is the right thing to do — not a marketing tactic.
+            </p>
+          </div>
+          <div>
+            <p className="font-display font-medium text-sage-800 mb-1">What are tidings?</p>
+            <p>
+              Tidings are entirely voluntary contributions from people who find value in
+              SageReasoning. They do not unlock any additional features — everything is
+              already free. Think of them as a way to say &ldquo;this helped me&rdquo; and
+              support the platform&apos;s continued development.
             </p>
           </div>
           <div>
@@ -203,19 +289,20 @@ export default function PricingPage() {
             </p>
           </div>
           <div>
+            <p className="font-display font-medium text-sage-800 mb-1">How does developer pricing work?</p>
+            <p>
+              Every API skill comes with a generous free tier so you can evaluate without
+              commitment. Beyond the free allowance, you pay per call at transparent,
+              competitor-anchored rates — typically half or less than the nearest alternative.
+              No subscriptions, no lock-in.
+            </p>
+          </div>
+          <div>
             <p className="font-display font-medium text-sage-800 mb-1">What does &ldquo;Prokoptos&rdquo; mean?</p>
             <p>
               <em>Prokoptos</em> means &ldquo;the one making progress&rdquo; — not yet a sage,
               but genuinely advancing toward virtue. It is the highest aspiration for a living
               person on the Stoic path.
-            </p>
-          </div>
-          <div>
-            <p className="font-display font-medium text-sage-800 mb-1">Can I cancel at any time?</p>
-            <p>
-              Yes. There are no lock-in contracts. You can downgrade to the free tier at any time
-              and keep all your score history.
-              {/* TODO (Phase 2): Confirm cancellation policy once Stripe is integrated */}
             </p>
           </div>
         </div>

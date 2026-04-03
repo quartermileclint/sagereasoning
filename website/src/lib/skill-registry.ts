@@ -39,6 +39,10 @@ export type SkillContract = {
   mechanism_count: number
   /** Depth parameter if applicable */
   depth?: string
+  /** Free tier monthly allowance (0 = no free tier, -1 = unlimited) */
+  free_tier_monthly: number
+  /** Unit for free tier (e.g. 'calls', 'chains') */
+  free_tier_unit: string
   /** Example input for agent integration */
   example_input: Record<string, unknown>
   /** Example output structure (abbreviated) */
@@ -68,6 +72,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis'],
     mechanism_count: 3,
     depth: 'quick',
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'Fastest reasoning check. Applies the 3 mechanisms that appear in 67% of all sage skills.',
     example_input: {
       input: 'I want to cancel a meeting with a client because I feel anxious about the presentation.',
@@ -96,6 +102,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
     mechanism_count: 5,
     depth: 'standard',
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'Standard analysis. Evaluates whether preferred indifferents are being treated correctly and whether the action is a kathekon.',
     example_input: {
       input: 'I want to cancel a meeting with a client because I feel anxious about the presentation.',
@@ -126,6 +134,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment', 'iterative_refinement'],
     mechanism_count: 6,
     depth: 'deep',
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'Deepest analysis. Includes Senecan grade assessment and tracks whether reasoning is improving, stable, or declining.',
     example_input: {
       input: 'I want to cancel a meeting with a client because I feel anxious about the presentation.',
@@ -160,6 +170,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'kathekon_assessment', 'passion_diagnosis', 'virtue_quality'],
     mechanism_count: 4,
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'The original 4-stage evaluation. Returns control filter, kathekon assessment, passion diagnosis, and unified virtue quality.',
     example_input: {
       action: 'I decided to work through the weekend to meet a deadline, skipping my family dinner.',
@@ -188,6 +200,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: false,
     mechanisms: ['control_filter', 'passion_diagnosis'],
     mechanism_count: 2,
+    free_tier_monthly: 500,
+    free_tier_unit: 'calls',
     description: 'Fast pre-action gate using haiku model. Returns proceed/caution/pause/deny with a threshold comparison.',
     example_input: {
       action: 'Send an angry email to my manager about the unfair workload.',
@@ -216,6 +230,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'kathekon_assessment', 'passion_diagnosis', 'virtue_quality'],
     mechanism_count: 4,
+    free_tier_monthly: 50,
+    free_tier_unit: 'chains',
     description: 'Deliberation chain. Submit an action, get sage feedback, revise, re-submit. Tracks proximity improvement across iterations.',
     example_input: {
       action: 'I want to quit my job today.',
@@ -244,6 +260,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'virtue_quality'],
     mechanism_count: 3,
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'Compare multiple options. Returns each option scored and ranked by reasoning quality.',
     example_input: {
       decision: 'How to respond to a critical review of my work.',
@@ -274,6 +292,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'kathekon_assessment', 'passion_diagnosis', 'virtue_quality'],
     mechanism_count: 4,
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'Evaluate the reasoning quality of written content. Returns proximity level and a shareable badge URL.',
     example_input: {
       text: 'Our company should pivot immediately because competitors are ahead...',
@@ -299,6 +319,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'virtue_quality'],
     mechanism_count: 3,
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'Analyse a multi-party conversation. Returns overall quality and per-participant reasoning assessment.',
     example_input: {
       messages: [
@@ -326,6 +348,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis'],
     mechanism_count: 3,
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'Generate a decision scenario with options, then score the chosen response.',
     example_input: {
       mode: 'generate',
@@ -351,6 +375,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['passion_diagnosis', 'virtue_quality'],
     mechanism_count: 2,
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'Daily reflection tool. Reviews actions taken and identifies recurring passion patterns.',
     example_input: {
       actions: ['Skipped breakfast to answer emails', 'Agreed to extra work despite being overwhelmed'],
@@ -376,6 +402,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: false,
     mechanisms: [],
     mechanism_count: 0,
+    free_tier_monthly: -1,
+    free_tier_unit: 'calls',
     description: 'Load the Stoic Brain reference data for context injection. Deterministic, no AI call.',
     example_input: {},
     example_output: {
@@ -394,6 +422,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['passion_diagnosis', 'virtue_quality', 'oikeiosis'],
     mechanism_count: 3,
+    free_tier_monthly: 25,
+    free_tier_unit: 'calls',
     description: 'Agent assessment framework. 14 self-assessments (foundational) or 55 (full profile).',
     example_input: {
       agent_id: 'my-agent',
@@ -419,6 +449,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'virtue_quality', 'oikeiosis'],
     mechanism_count: 4,
+    free_tier_monthly: 25,
+    free_tier_unit: 'calls',
     description: 'Quick baseline assessment. Run 4 scenarios and get back an agent reasoning profile.',
     example_input: {
       agent_id: 'my-agent',
@@ -449,6 +481,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
     mechanism_count: 5,
+    free_tier_monthly: 50,
+    free_tier_unit: 'calls',
     description: 'Pre-mortem decision analysis. Evaluates a planned decision by identifying which passions and false judgements could lead to failure.',
     example_input: { decision: 'Launch the product next month despite incomplete testing', stakeholders: 'Engineering team, customers, investors', timeline: '30 days' },
     example_output: { result: { skill_id: 'sage-premortem', katorthoma_proximity: 'deliberate', passions_detected: [{ id: 'agonia', name: 'Anxiety', root_passion: 'phobos' }] } },
@@ -465,6 +499,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
     mechanism_count: 5,
+    free_tier_monthly: 50,
+    free_tier_unit: 'calls',
     description: 'Evaluates negotiation reasoning. Checks for justice, oikeiosis between parties, and passions like greed or fear of loss.',
     example_input: { position: 'Demand 40% discount or walk away', counterparty: 'Long-term supplier', interests: 'Cost reduction without damaging relationship' },
     example_output: { result: { skill_id: 'sage-negotiate', katorthoma_proximity: 'habitual' } },
@@ -481,6 +517,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
     mechanism_count: 5,
+    free_tier_monthly: 50,
+    free_tier_unit: 'calls',
     description: 'Evaluates investment decision reasoning. Not financial advice — assesses reasoning quality only.',
     example_input: { decision: 'Put 80% of savings into a single tech stock', rationale: 'Everyone is making money on it', risk_factors: 'No diversification' },
     example_output: { result: { skill_id: 'sage-invest', katorthoma_proximity: 'reflexive', passions_detected: [{ id: 'philoplousia', name: 'Love of wealth', root_passion: 'epithumia' }] } },
@@ -497,6 +535,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
     mechanism_count: 5,
+    free_tier_monthly: 50,
+    free_tier_unit: 'calls',
     description: 'Evaluates strategic pivot reasoning. Checks if the change is driven by principled reassessment or passions.',
     example_input: { current_direction: 'B2B SaaS platform', proposed_pivot: 'Pivot to B2C mobile app', reason_for_change: 'B2C seems more exciting and competitors are doing it' },
     example_output: { result: { skill_id: 'sage-pivot', katorthoma_proximity: 'habitual' } },
@@ -513,6 +553,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
     mechanism_count: 5,
+    free_tier_monthly: 50,
+    free_tier_unit: 'calls',
     description: 'Retrospective analysis for learning. Identifies reasoning patterns from completed projects.',
     example_input: { what_happened: 'Project delivered 2 months late with scope creep', decisions_made: 'Agreed to every client change request', outcomes: 'Client happy but team burned out' },
     example_output: { result: { skill_id: 'sage-retro', katorthoma_proximity: 'deliberate' } },
@@ -529,6 +571,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
     mechanism_count: 5,
+    free_tier_monthly: 50,
+    free_tier_unit: 'calls',
     description: 'Evaluates team alignment reasoning. Checks for justice, oikeiosis, and conflict avoidance passions.',
     example_input: { situation: 'Team disagrees on product direction', team_context: '5-person startup, 2 co-founders with strong opinions', proposed_alignment: 'CEO makes final call' },
     example_output: { result: { skill_id: 'sage-align', katorthoma_proximity: 'deliberate' } },
@@ -545,6 +589,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis'],
     mechanism_count: 3,
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'Classifies input into user-defined categories while evaluating reasoning quality. Returns category assignment, confidence, passion detection, and oikeiosis stage. Below-confidence inputs stay in inbox for human review.',
     example_input: { input: 'I should quit my job today — my boss is impossible.', categories: [{ id: 'task', label: 'Task', description: 'Actionable item' }, { id: 'thought', label: 'Thought', description: 'Reflection or idea' }, { id: 'decision', label: 'Decision', description: 'Choice to be made' }] },
     example_output: { result: { category: 'decision', confidence: 0.85, input_proximity: 'reflexive', passions_detected: [{ root_passion: 'lupe', sub_species: 'Anger', false_judgement: 'My boss being difficult is a genuine evil that justifies impulsive action' }], action: 'flag_urgent' } },
@@ -561,6 +607,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis'],
     mechanism_count: 3,
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'Quick evaluation of prioritisation reasoning. Checks for urgency addiction and FOMO.',
     example_input: { items: ['Fix critical bug', 'Respond to investor email', 'Update LinkedIn'], criteria: 'Most impactful for the business today' },
     example_output: { result: { skill_id: 'sage-prioritise', katorthoma_proximity: 'deliberate' } },
@@ -577,6 +625,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
     mechanism_count: 5,
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'Evaluates conflict resolution reasoning. Focuses on justice, courage, and temperance.',
     example_input: { conflict: 'Two team leads both want to own the new project', parties: 'Lead A (senior), Lead B (high performer)', proposed_resolution: 'Split the project in half' },
     example_output: { result: { skill_id: 'sage-resolve', katorthoma_proximity: 'deliberate' } },
@@ -593,6 +643,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment', 'iterative_refinement'],
     mechanism_count: 6,
+    free_tier_monthly: 50,
+    free_tier_unit: 'calls',
     description: 'Deep identity reasoning evaluation. Full 6-mechanism analysis with Senecan progress tracking.',
     example_input: { situation: 'Considering leaving a stable career to pursue creative work', values_at_stake: 'Security vs authenticity', identity_question: 'Am I the kind of person who takes this risk?' },
     example_output: { result: { skill_id: 'sage-identity', katorthoma_proximity: 'deliberate' } },
@@ -609,6 +661,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
     mechanism_count: 5,
+    free_tier_monthly: 50,
+    free_tier_unit: 'calls',
     description: 'Evaluates coaching interaction reasoning. Checks for control passions and oikeiosis between coach and coachee.',
     example_input: { coaching_situation: 'Mentoring a junior developer struggling with imposter syndrome', coachee_context: '2 years experience, high potential', approach: 'Tell them to just be more confident' },
     example_output: { result: { skill_id: 'sage-coach', katorthoma_proximity: 'habitual' } },
@@ -625,6 +679,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment', 'iterative_refinement'],
     mechanism_count: 6,
+    free_tier_monthly: 50,
+    free_tier_unit: 'calls',
     description: 'Deep governance reasoning evaluation. Full 6-mechanism analysis with Senecan progress tracking.',
     example_input: { decision: 'Implement mandatory return-to-office policy', stakeholders_affected: 'All 500 employees, their families', governance_context: 'Board pressure to improve collaboration metrics' },
     example_output: { result: { skill_id: 'sage-govern', katorthoma_proximity: 'habitual' } },
@@ -641,6 +697,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
     mechanism_count: 5,
+    free_tier_monthly: 50,
+    free_tier_unit: 'calls',
     description: 'Evaluates compliance reasoning quality. Not legal or regulatory advice. Conditional: requires R1/R9 disclaimers.',
     example_input: { situation: 'Updating privacy policy to meet new regulation', regulation_context: 'GDPR Article 17 right to erasure', proposed_action: 'Add checkbox and delete on request' },
     example_output: { result: { skill_id: 'sage-compliance', katorthoma_proximity: 'deliberate', compliance_notice: 'This evaluation assesses reasoning quality only.' } },
@@ -657,6 +715,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis'],
     mechanism_count: 3,
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'Quick evaluation of content moderation reasoning. Checks for justice, proportionality, and courage.',
     example_input: { content: 'User posted a heated but factual criticism of company policy', moderation_decision: 'Remove for violating community guidelines', policy_context: 'No personal attacks policy' },
     example_output: { result: { skill_id: 'sage-moderate', katorthoma_proximity: 'habitual' } },
@@ -673,6 +733,8 @@ export const SKILL_REGISTRY: SkillContract[] = [
     auth_required: true,
     mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
     mechanism_count: 5,
+    free_tier_monthly: 100,
+    free_tier_unit: 'calls',
     description: 'Evaluates educational reasoning. Conditional: requires age-appropriate framing. Not professional teaching advice.',
     example_input: { situation: 'Teaching a class about critical thinking', learner_context: 'University students, mixed backgrounds', educational_approach: 'Socratic questioning with real-world examples' },
     example_output: { result: { skill_id: 'sage-educate', katorthoma_proximity: 'principled', education_notice: 'Ensure content is age-appropriate.' } },

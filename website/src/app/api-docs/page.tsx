@@ -11,7 +11,7 @@ const jsonLd = {
       url: 'https://www.sagereasoning.com/api-docs',
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'Any',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', description: 'Free evaluation tier (100 calls/month). Paid production tier with competitor-anchored per-call pricing from $0.0025.' },
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', description: 'Generous per-skill free tiers (up to 500 calls/month). Paid production pricing from $0.0025/call — half the lowest competitor.' },
       provider: { '@id': 'https://www.sagereasoning.com/#organization' },
       keywords: ['stoicism', 'virtue ethics', 'AI alignment', 'decision scoring', 'REST API', 'ethical reasoning', 'moral framework'],
     },
@@ -318,30 +318,96 @@ export default function ApiDocsPage() {
         </div>
       </div>
 
-      {/* AI Agent Access Tiers */}
+      {/* AI Agent Access — Per-Skill Free Tiers */}
       <div className="bg-sage-100 border border-sage-300 rounded-lg p-6 mb-10">
         <h2 className="font-display text-xl font-medium text-sage-800 mb-3">For AI Agents</h2>
         <p className="font-body text-sage-700 leading-relaxed mb-3">
-          To use the Stoic Brain in your reasoning:
+          Every skill comes with a generous free tier — no credit card required. To get started:
         </p>
         <ol className="font-body text-sage-700 space-y-2 list-decimal list-inside">
-          <li>Fetch <code className="bg-white px-1 rounded text-sm">/api/stoic-brain</code> for a conceptual overview</li>
+          <li>Fetch <code className="bg-white px-1 rounded text-sm">/api/stoic-brain</code> for the conceptual overview (free, no auth)</li>
           <li>Request an API key at <code className="bg-white px-1 rounded text-sm">zeus@sagereasoning.com</code></li>
-          <li>Run assessments via <code className="bg-white px-1 rounded text-sm">POST /api/assessment/foundational</code> or <code className="bg-white px-1 rounded text-sm">/api/assessment/full</code></li>
+          <li>Start calling skills within your free allowance — upgrade to paid only when you need more</li>
         </ol>
-        <div className="mt-4 overflow-x-auto">
+
+        <h3 className="font-display text-lg font-medium text-sage-800 mt-6 mb-3">Free Tier Allowances</h3>
+        <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="bg-sage-200">
-                <th className="text-left px-3 py-2 border border-sage-300 font-display font-semibold"></th>
-                <th className="text-left px-3 py-2 border border-sage-300 font-display font-semibold">Free (evaluation)</th>
-                <th className="text-left px-3 py-2 border border-sage-300 font-display font-semibold">Paid (production)</th>
+                <th className="text-left px-3 py-2 border border-sage-300 font-display font-semibold">Skill</th>
+                <th className="text-left px-3 py-2 border border-sage-300 font-display font-semibold">Free allowance</th>
+                <th className="text-left px-3 py-2 border border-sage-300 font-display font-semibold">Paid price</th>
+                <th className="text-left px-3 py-2 border border-sage-300 font-display font-semibold">Speed</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="px-3 py-2 border border-sage-300 font-medium">API calls</td>
-                <td className="px-3 py-2 border border-sage-300">1/day (30/month)</td>
+                <td className="px-3 py-2 border border-sage-300 font-medium">sage-guard</td>
+                <td className="px-3 py-2 border border-sage-300">500/month</td>
+                <td className="px-3 py-2 border border-sage-300">~$0.0025/call</td>
+                <td className="px-3 py-2 border border-sage-300">&lt;100ms</td>
+              </tr>
+              <tr className="bg-sage-50">
+                <td className="px-3 py-2 border border-sage-300 font-medium">sage-reason (quick/standard/deep)</td>
+                <td className="px-3 py-2 border border-sage-300">100/month</td>
+                <td className="px-3 py-2 border border-sage-300">~$0.18/call</td>
+                <td className="px-3 py-2 border border-sage-300">~2–4s</td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2 border border-sage-300 font-medium">sage-score</td>
+                <td className="px-3 py-2 border border-sage-300">100/month</td>
+                <td className="px-3 py-2 border border-sage-300">~$0.18/call</td>
+                <td className="px-3 py-2 border border-sage-300">~2s</td>
+              </tr>
+              <tr className="bg-sage-50">
+                <td className="px-3 py-2 border border-sage-300 font-medium">sage-iterate</td>
+                <td className="px-3 py-2 border border-sage-300">50 chains/month</td>
+                <td className="px-3 py-2 border border-sage-300">~$0.18/iteration</td>
+                <td className="px-3 py-2 border border-sage-300">~2s</td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2 border border-sage-300 font-medium">Evaluation skills<br /><span className="text-xs text-sage-500">sage-decide, sage-audit, sage-converse, sage-scenario, sage-reflect, sage-classify, sage-prioritise, sage-moderate</span></td>
+                <td className="px-3 py-2 border border-sage-300">100/month</td>
+                <td className="px-3 py-2 border border-sage-300">~$0.18/call</td>
+                <td className="px-3 py-2 border border-sage-300">~2–3s</td>
+              </tr>
+              <tr className="bg-sage-50">
+                <td className="px-3 py-2 border border-sage-300 font-medium">Marketplace skills<br /><span className="text-xs text-sage-500">sage-premortem, sage-negotiate, sage-invest, sage-pivot, sage-retro, sage-align, sage-resolve, sage-coach, sage-govern, sage-compliance, sage-educate, sage-identity</span></td>
+                <td className="px-3 py-2 border border-sage-300">50/month</td>
+                <td className="px-3 py-2 border border-sage-300">~$0.18/call</td>
+                <td className="px-3 py-2 border border-sage-300">~3–4s</td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2 border border-sage-300 font-medium">Premium skills<br /><span className="text-xs text-sage-500">sage-diagnose, sage-profile</span></td>
+                <td className="px-3 py-2 border border-sage-300">25/month</td>
+                <td className="px-3 py-2 border border-sage-300">~$0.50/call</td>
+                <td className="px-3 py-2 border border-sage-300">~2–3s</td>
+              </tr>
+              <tr className="bg-sage-50">
+                <td className="px-3 py-2 border border-sage-300 font-medium">sage-context</td>
+                <td className="px-3 py-2 border border-sage-300">Unlimited</td>
+                <td className="px-3 py-2 border border-sage-300">Free</td>
+                <td className="px-3 py-2 border border-sage-300">&lt;50ms</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 className="font-display text-lg font-medium text-sage-800 mt-6 mb-3">Paid Tier Features</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-sage-200">
+                <th className="text-left px-3 py-2 border border-sage-300 font-display font-semibold"></th>
+                <th className="text-left px-3 py-2 border border-sage-300 font-display font-semibold">Free</th>
+                <th className="text-left px-3 py-2 border border-sage-300 font-display font-semibold">Paid</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="px-3 py-2 border border-sage-300 font-medium">Rate limits</td>
+                <td className="px-3 py-2 border border-sage-300">Per-skill (see above)</td>
                 <td className="px-3 py-2 border border-sage-300">Configurable (default 500/day)</td>
               </tr>
               <tr className="bg-sage-50">
@@ -351,20 +417,16 @@ export default function ApiDocsPage() {
               </tr>
               <tr>
                 <td className="px-3 py-2 border border-sage-300 font-medium">Baseline retakes</td>
-                <td className="px-3 py-2 border border-sage-300">1/month per agent identity</td>
-                <td className="px-3 py-2 border border-sage-300">1/month per agent identity</td>
-              </tr>
-              <tr className="bg-sage-50">
-                <td className="px-3 py-2 border border-sage-300 font-medium">Pricing</td>
-                <td className="px-3 py-2 border border-sage-300">Free</td>
-                <td className="px-3 py-2 border border-sage-300">Per-call pricing from $0.0025 — half the lowest competitor</td>
+                <td className="px-3 py-2 border border-sage-300">1/month per agent</td>
+                <td className="px-3 py-2 border border-sage-300">1/month per agent</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <p className="font-body text-sage-700 mt-3 italic leading-relaxed">
-          Core principle: An action is virtuous to the degree it expresses wisdom, justice, courage, and temperance
-          simultaneously — judged by intention and reasoning, not outcome alone.
+
+        <p className="font-body text-sage-700 mt-4 text-sm leading-relaxed">
+          No subscriptions or lock-in. Pay only for calls beyond your free allowance.
+          Contact <a href="mailto:zeus@sagereasoning.com" className="underline hover:text-sage-900">zeus@sagereasoning.com</a> for volume pricing or custom limits.
         </p>
       </div>
 

@@ -88,13 +88,41 @@ export default function MarketplacePage() {
           Each skill applies Stoic philosophical mechanisms to a specific context — from
           investment decisions to team alignment to governance.
         </p>
-        <div className="mt-4 flex gap-4 text-sm text-sage-500">
+        <div className="mt-4 flex flex-wrap gap-4 text-sm text-sage-500">
           <span>{tier2Skills.length} skills available</span>
           <span>|</span>
-          <span>Free tier: 100 calls/month</span>
+          <span>Free tiers per skill (25–500 calls/month)</span>
           <span>|</span>
-          <span>All skills included in your API allowance</span>
+          <span>No credit card required</span>
         </div>
+      </div>
+
+      {/* Free tier summary */}
+      <div className="mb-10 p-5 bg-white/60 border border-sage-200 rounded-lg">
+        <h2 className="font-display text-lg font-semibold text-sage-900 mb-3">
+          Free Tier Allowances
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="text-center p-3 bg-sage-50 rounded border border-sage-200">
+            <div className="font-display font-bold text-sage-800 text-lg">500/mo</div>
+            <div className="text-xs text-sage-500">sage-guard</div>
+          </div>
+          <div className="text-center p-3 bg-sage-50 rounded border border-sage-200">
+            <div className="font-display font-bold text-sage-800 text-lg">100/mo</div>
+            <div className="text-xs text-sage-500">Evaluation skills</div>
+          </div>
+          <div className="text-center p-3 bg-sage-50 rounded border border-sage-200">
+            <div className="font-display font-bold text-sage-800 text-lg">50/mo</div>
+            <div className="text-xs text-sage-500">Marketplace skills</div>
+          </div>
+          <div className="text-center p-3 bg-sage-50 rounded border border-sage-200">
+            <div className="font-display font-bold text-sage-800 text-lg">25/mo</div>
+            <div className="text-xs text-sage-500">Premium skills</div>
+          </div>
+        </div>
+        <p className="text-xs text-sage-500 mt-3">
+          sage-context is always free and unlimited. See <a href="/pricing" className="underline hover:text-sage-700">full pricing</a> for details.
+        </p>
       </div>
 
       {/* Engine callout */}
