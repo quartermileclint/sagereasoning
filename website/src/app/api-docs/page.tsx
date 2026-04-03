@@ -11,7 +11,7 @@ const jsonLd = {
       url: 'https://www.sagereasoning.com/api-docs',
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'Any',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', description: 'Free evaluation tier (1 call/day). Paid production tier at 200% of API cost.' },
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', description: 'Free evaluation tier (100 calls/month). Paid production tier with competitor-anchored per-call pricing from $0.0025.' },
       provider: { '@id': 'https://www.sagereasoning.com/#organization' },
       keywords: ['stoicism', 'virtue ethics', 'AI alignment', 'decision scoring', 'REST API', 'ethical reasoning', 'moral framework'],
     },
@@ -357,7 +357,7 @@ export default function ApiDocsPage() {
               <tr className="bg-sage-50">
                 <td className="px-3 py-2 border border-sage-300 font-medium">Pricing</td>
                 <td className="px-3 py-2 border border-sage-300">Free</td>
-                <td className="px-3 py-2 border border-sage-300">200% of Anthropic API cost per call</td>
+                <td className="px-3 py-2 border border-sage-300">Per-call pricing from $0.0025 — half the lowest competitor</td>
               </tr>
             </tbody>
           </table>

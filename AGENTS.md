@@ -61,25 +61,25 @@ Each skill follows the **Outcome / Cost + Speed / Chains To** contract pattern:
 
 | Skill | Outcome | Cost + Speed | Chains To |
 |-------|---------|-------------|-----------|
-| `sage-reason` (quick) | Core triad check — control filter + passion diagnosis + oikeiosis mapping against any input | ~$0.025, ~2s | sage-reason (standard), any sage skill |
-| `sage-reason` (standard) | 5-mechanism analysis — adds value assessment + kathekon evaluation to the core triad | ~$0.041, ~3s | sage-reason (deep), sage-iterate |
-| `sage-reason` (deep) | Full 6-mechanism analysis — adds Senecan progress tracking and direction-of-travel | ~$0.055, ~4s | sage-iterate |
+| `sage-reason` (quick) | Core triad check — control filter + passion diagnosis + oikeiosis mapping against any input | ~$0.18, ~2s | sage-reason (standard), any sage skill |
+| `sage-reason` (standard) | 5-mechanism analysis — adds value assessment + kathekon evaluation to the core triad | ~$0.18, ~3s | sage-reason (deep), sage-iterate |
+| `sage-reason` (deep) | Full 6-mechanism analysis — adds Senecan progress tracking and direction-of-travel | ~$0.18, ~4s | sage-iterate |
 
 #### Tier 2: Evaluation Skills (call sage-reason internally)
 
 | Skill | Outcome | Cost + Speed | Chains To |
 |-------|---------|-------------|-----------|
-| `sage-score` | Pre-action decision audit with structured reasoning + improvement path | ~$0.033, ~2s | sage-iterate, sage-reason |
-| `sage-decide` | Option ranker — submit 2-5 choices, ranked by reasoning quality | ~$0.033, ~2s | sage-guard |
-| `sage-guard` | Sub-100ms decision gate — binary go/no-go check before acting | ~$0.001, <100ms | sage-iterate |
-| `sage-iterate` | Iterative decision refinement — submit, get feedback, revise, track improvement | ~$0.033, ~2s | sage-score |
-| `sage-filter` | Pre-publish content filter — catches tone and judgement issues | ~$0.033, ~2s | sage-iterate |
-| `sage-audit` | Document quality audit + shareable trust badge | ~$0.033, ~3s | sage-iterate |
-| `sage-converse` | Conversation quality breakdown — per-participant reasoning analysis | ~$0.033, ~3s | — |
-| `sage-scenario` | Decision scenario generator + scorer | ~$0.066, ~4s | sage-score |
-| `sage-reflect` | End-of-day decision review — identifies patterns + structured examination | ~$0.033, ~2s | — |
-| `sage-profile` | Agent decision profile — 4 scenarios, returns tendencies and blind spots | ~$0.033, ~3s | sage-diagnose |
-| `sage-diagnose` | Decision-making diagnostic — 14-question quick or 55-assessment deep evaluation | ~$0.033, ~2s | sage-iterate |
+| `sage-score` | Pre-action decision audit with structured reasoning + improvement path | ~$0.18, ~2s | sage-iterate, sage-reason |
+| `sage-decide` | Option ranker — submit 2-5 choices, ranked by reasoning quality | ~$0.18, ~2s | sage-guard |
+| `sage-guard` | Sub-100ms decision gate — binary go/no-go check before acting | ~$0.0025, <100ms | sage-iterate |
+| `sage-iterate` | Iterative decision refinement — submit, get feedback, revise, track improvement | ~$0.18 per iteration, ~2s | sage-score |
+| `sage-filter` | Pre-publish content filter — catches tone and judgement issues | ~$0.18, ~2s | sage-iterate |
+| `sage-audit` | Document quality audit + shareable trust badge | ~$0.18, ~3s | sage-iterate |
+| `sage-converse` | Conversation quality breakdown — per-participant reasoning analysis | ~$0.18, ~3s | — |
+| `sage-scenario` | Decision scenario generator + scorer | ~$0.18, ~4s | sage-score |
+| `sage-reflect` | End-of-day decision review — identifies patterns + structured examination | ~$0.18, ~2s | — |
+| `sage-profile` | Agent decision profile — 4 scenarios, returns tendencies and blind spots | ~$0.50, ~2s | sage-diagnose |
+| `sage-diagnose` | Decision-making diagnostic — 14-question quick or 55-assessment deep evaluation | ~$0.50, ~3s | sage-iterate |
 | `sage-context` | Reasoning framework context loader — public, no auth | Free, <50ms | — |
 
 ### All Endpoints
@@ -134,10 +134,10 @@ The system evaluates intention and reasoning quality, not outcomes. An agent tha
 
 SageReasoning provides open-source skill wrappers that add reasoning checkpoints to existing skills:
 
-- **BEFORE**: `sage-guard` checks the task via POST /api/guardrail (~$0.001, <100ms)
+- **BEFORE**: `sage-guard` checks the task via POST /api/guardrail (~$0.0025, <100ms)
 - **EXECUTE**: The original skill runs unchanged
-- **AFTER**: `sage-score` evaluates output via POST /api/reason (~$0.025-0.055)
-- **OPTIONAL**: `sage-iterate` if proximity is below deliberate via POST /api/score-iterate (~$0.035)
+- **AFTER**: `sage-score` evaluates output via POST /api/reason (~$0.18)
+- **OPTIONAL**: `sage-iterate` if proximity is below deliberate via POST /api/score-iterate (~$0.18)
 
 Wrapper code is free (R11). The API calls within the wrapper are metered against your monthly allowance (R5). Each wrapped invocation consumes 2-3 API calls.
 

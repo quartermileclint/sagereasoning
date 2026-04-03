@@ -24,7 +24,7 @@ import {
 //
 // Outcome: Classify input into user-defined categories with reasoning quality
 //          assessment, passion flags, oikeiosis mapping, and reasoning receipt.
-// Cost + Speed: ~$0.025, ~2s (1 API call, haiku model)
+// Cost + Speed: ~$0.18, ~2s (1 API call, haiku model)
 // Chains To: sage-reason-standard, sage-prioritise
 //
 // Designed for OpenBrain AI Sorter (step 4): accepts raw input + category

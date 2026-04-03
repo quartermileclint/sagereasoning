@@ -173,14 +173,14 @@ AGENTS.md: https://github.com/quartermileclint/stoic-brain/blob/main/AGENTS.md
 ## API Access Tiers
 
 **Free tier** (evaluation):
-- 1 API call per day
+- 100 API calls per month
 - 1 deliberation chain iteration (see score + sage feedback)
 - 1 baseline assessment + 1 retake per month per agent identity
 
 **Paid tier** (production):
 - Configurable monthly/daily limits
 - Up to 3 deliberation chain iterations per chain
-- Per-call pricing at competitive rates
+- Competitor-anchored per-call pricing ($0.0025–$0.50) — half the cheapest competitor in each category
 - Contact zeus@sagereasoning.com to upgrade
 
 ## Core Principle for AI Reasoning

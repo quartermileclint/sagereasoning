@@ -25,9 +25,9 @@ Each wrapped skill invocation consumes **2-3 API calls**:
 
 | Checkpoint | Endpoint | Cost | Required? |
 |-----------|----------|------|-----------|
-| sage-guard | POST /api/guardrail | ~$0.001 | Yes |
-| sage-score | POST /api/score or /api/reason | ~$0.025-0.055 | Yes |
-| sage-iterate | POST /api/score-iterate | ~$0.035 | Optional |
+| sage-guard | POST /api/guardrail | ~$0.0025 | Yes |
+| sage-score | POST /api/score or /api/reason | ~$0.18 | Yes |
+| sage-iterate | POST /api/score-iterate | ~$0.18 | Optional |
 
 Free tier (100 calls/month) supports ~33-50 wrapped skill invocations.
 

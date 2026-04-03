@@ -122,10 +122,10 @@ Implement revenue model for AI agent API access, protect intellectual property, 
 | monthly_limit | Configurable per key (start with 10,000) |
 | daily_limit | Configurable per key (start with 500) |
 | max_chain_iterations | 3 |
-| pricing | 200% of Anthropic API cost per call |
+| pricing | Competitor-anchored per-call pricing ($0.0025–$0.50) |
 
 **Pricing model (to implement with Stripe):**
-- Per-call pricing at 200% of the Anthropic API cost for the model used (claude-sonnet-4-6)
+- Per-call competitor-anchored pricing (half the cheapest competitor in each category — see skill-registry.ts)
 - Monthly invoice based on actual usage tracked in api_key_usage table
 - Pre-paid credit balance option for predictable costs
 - The api_key_usage table already tracks per-endpoint breakdown (guardrail, score_iterate, agent_baseline, other) for granular billing
@@ -207,7 +207,7 @@ Implement revenue model for AI agent API access, protect intellectual property, 
 
 **Core insight:** The current free tier (667 calls/month, 50/day, 20 iterations) is far too generous. An agent developer can fully evaluate AND run light production workloads without paying. The new model gives enough to evaluate (1 call/day, 1 iteration) but not enough to build on.
 
-**Pricing rationale:** 200% of Anthropic API cost gives 100% gross margin before hosting/infrastructure. This covers Vercel hosting, Supabase, monitoring, and gives headroom for prompt caching savings to flow to the bottom line. As volume grows, Anthropic volume pricing may widen this margin further.
+**Pricing rationale:** Competitor-anchored pricing at half the cheapest competitor gives ~90% weighted average margin (60-97% per skill). This covers Vercel hosting, Supabase, monitoring, and gives headroom for prompt caching savings to flow to the bottom line. As volume grows, Anthropic volume pricing may widen this margin further.
 
 **Deliberation chain logic:** 1 iteration (free) lets agents see "here's your score, here's how to improve" — that's the hook. 3 iterations (paid) covers most real-world improvement curves. The system already issues a Stoic advisory every 5th iteration encouraging decisive action.
 

@@ -45,7 +45,7 @@ paths:
       summary: Universal reasoning check
       description: |
         **Outcome:** Run the Stoic core triad (or more) against any decision input.
-        **Cost + Speed:** ~$0.025-$0.055 depending on depth, ~2-4s.
+        **Cost + Speed:** ~$0.18 per call, ~2-4s depending on depth.
         **Chains To:** Any sage skill, sage-iterate, sage-guard.
 
         The depth parameter controls how many mechanisms are applied:
@@ -133,7 +133,7 @@ paths:
       summary: 4-stage action evaluation
       description: |
         **Outcome:** Pre-action decision audit with structured reasoning + improvement path.
-        **Cost + Speed:** ~$0.033, ~2s.
+        **Cost + Speed:** ~$0.18, ~2s.
         **Chains To:** sage-iterate, sage-reason.
       operationId: score
       security:
@@ -190,7 +190,7 @@ paths:
       summary: Pre-action decision gate
       description: |
         **Outcome:** Sub-100ms binary go/no-go check before acting.
-        **Cost + Speed:** ~$0.001, <100ms.
+        **Cost + Speed:** ~$0.0025, <100ms.
         **Chains To:** sage-iterate.
       operationId: guardrail
       requestBody:
@@ -227,7 +227,7 @@ paths:
       summary: Start or continue a deliberation chain
       description: |
         **Outcome:** Iterative decision refinement — submit, get feedback, revise, track improvement.
-        **Cost + Speed:** ~$0.033, ~2s per iteration.
+        **Cost + Speed:** ~$0.18, ~2s per iteration.
         **Chains To:** sage-score.
       operationId: scoreIterate
       security:
@@ -265,7 +265,7 @@ paths:
       summary: Compare 2-5 options by reasoning quality
       description: |
         **Outcome:** Option ranker — submit choices, get them ranked by reasoning quality.
-        **Cost + Speed:** ~$0.033, ~2s.
+        **Cost + Speed:** ~$0.18, ~2s.
         **Chains To:** sage-guard.
       operationId: scoreDecision
       security:
@@ -302,7 +302,7 @@ paths:
       summary: Document quality audit + trust badge
       description: |
         **Outcome:** Evaluate reasoning quality in a document or text, with shareable trust badge.
-        **Cost + Speed:** ~$0.033, ~3s.
+        **Cost + Speed:** ~$0.18, ~3s.
         **Chains To:** sage-iterate.
       operationId: scoreDocument
       security:
@@ -337,7 +337,7 @@ paths:
       summary: Conversation quality breakdown
       description: |
         **Outcome:** Per-participant reasoning analysis of a conversation.
-        **Cost + Speed:** ~$0.033, ~3s.
+        **Cost + Speed:** ~$0.18, ~3s.
         **Chains To:** —
       operationId: scoreConversation
       security:
@@ -373,7 +373,7 @@ paths:
       summary: End-of-day decision review
       description: |
         **Outcome:** Identifies patterns in daily decisions + structured Stoic examination.
-        **Cost + Speed:** ~$0.033, ~2s.
+        **Cost + Speed:** ~$0.18, ~2s.
         **Chains To:** —
       operationId: reflect
       security:

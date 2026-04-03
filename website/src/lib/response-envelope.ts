@@ -71,28 +71,29 @@ export type ApiResponseEnvelope<T = unknown> = {
 
 /**
  * Rough cost estimation per API call based on model and tokens.
- * Uses 200% of estimated Anthropic API cost (per manifest/pricing).
+ * Customer-facing prices are competitor-anchored (see skill-registry.ts).
  *
- * Sonnet input: ~$3/MTok, output: ~$15/MTok
- * Haiku input: ~$0.25/MTok, output: ~$1.25/MTok
+ * LLM costs (Anthropic API — our cost, not customer price):
+ *   Sonnet input: ~$3/MTok, output: ~$15/MTok
+ *   Haiku input: ~$0.25/MTok, output: ~$1.25/MTok
  *
- * At 200% markup:
- * Sonnet: ~$6/MTok input, ~$30/MTok output
- * Haiku: ~$0.50/MTok input, ~$2.50/MTok output
+ * Customer-facing prices (competitor-anchored, from skill-registry.ts):
+ *   sage-guard (haiku): ~$0.0025/call  (half of Guardrails AI $0.005)
+ *   Most sage skills (sonnet): ~$0.18/call  (half of Clearbit $0.36)
+ *   sage-diagnose, sage-profile: ~$0.50/call  (half of Crystal Knows est. $1.00)
+ *   sage-context: Free (deterministic, no AI call)
  *
- * Quick estimate based on typical token counts:
- * - Scoring call (sonnet, ~1500 input, ~800 output): ~$0.033
- * - Guardrail call (haiku, ~800 input, ~300 output): ~$0.001
- * - Reason quick (sonnet, ~1200 input, ~600 output): ~$0.025
- * - Reason standard (sonnet, ~1800 input, ~1000 output): ~$0.041
- * - Reason deep (sonnet, ~2200 input, ~1400 output): ~$0.055
+ * This function estimates the customer-facing price for response metadata.
+ * Actual billing should reference skill-registry.ts prices directly.
  */
 export function estimateCostUsd(model: string, maxTokens: number): number {
   if (model.includes('haiku')) {
-    return Math.round(0.001 * (maxTokens / 300) * 1000) / 1000
+    // sage-guard: $0.0025 per call (competitor-anchored)
+    return 0.0025
   }
-  // Default to sonnet pricing
-  return Math.round(0.033 * (maxTokens / 1536) * 1000) / 1000
+  // Default to sonnet pricing: $0.18 per call (competitor-anchored)
+  // Note: sage-diagnose and sage-profile are $0.50 — handle at endpoint level
+  return 0.18
 }
 
 // =============================================================================

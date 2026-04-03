@@ -111,17 +111,17 @@ export default function MarketplacePage() {
           <div className="text-center p-2 bg-white rounded border border-sage-200">
             <div className="text-xs text-sage-500">Quick</div>
             <div className="font-display font-semibold text-sage-800">3 mechanisms</div>
-            <div className="text-xs text-sage-500">~$0.025, ~2s</div>
+            <div className="text-xs text-sage-500">~$0.18, ~2s</div>
           </div>
           <div className="text-center p-2 bg-white rounded border border-sage-200">
             <div className="text-xs text-sage-500">Standard</div>
             <div className="font-display font-semibold text-sage-800">5 mechanisms</div>
-            <div className="text-xs text-sage-500">~$0.041, ~3s</div>
+            <div className="text-xs text-sage-500">~$0.18, ~3s</div>
           </div>
           <div className="text-center p-2 bg-white rounded border border-sage-200">
             <div className="text-xs text-sage-500">Deep</div>
             <div className="font-display font-semibold text-sage-800">6 mechanisms</div>
-            <div className="text-xs text-sage-500">~$0.055, ~4s</div>
+            <div className="text-xs text-sage-500">~$0.18, ~4s</div>
           </div>
         </div>
       </div>

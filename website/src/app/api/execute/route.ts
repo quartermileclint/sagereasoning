@@ -7,7 +7,7 @@ import { getSkillById, SKILL_REGISTRY } from '@/lib/skill-registry'
  * POST /api/execute — Unified Skill Execution Router
  *
  * Outcome: Execute any sage skill by ID with a single endpoint.
- * Cost + Speed: Depends on skill (~$0.001-$0.055, ~100ms-4s).
+ * Cost + Speed: Depends on skill (~$0.0025-$0.50, ~100ms-4s).
  * Chains To: Determined by the executed skill's chains_to.
  *
  * This endpoint lets agents execute any skill by passing the skill_id

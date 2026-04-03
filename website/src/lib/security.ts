@@ -241,7 +241,7 @@ export function publicCorsPreflightResponse(): NextResponse {
 // monthly allowance faster. Pre-limit (80/100) and at-limit (100/100)
 // recommendation triggers are implemented in API response metadata.
 //
-// PAID TIER (production access — 200% of Anthropic API cost per call):
+// PAID TIER (production access — competitor-anchored per-call pricing):
 //   monthly_limit: configurable per key (default 10,000)
 //   daily_limit:   configurable per key (default 500)
 //   max_chain_iterations: 3   (covers most real-world improvement curves)

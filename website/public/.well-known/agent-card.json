@@ -102,7 +102,7 @@
       "maxChainIterations": 1
     },
     "paid": {
-      "description": "Production tier — configurable limits, up to 3 deliberation iterations per chain, per-call pricing",
+      "description": "Production tier — configurable limits, up to 3 deliberation iterations per chain, competitor-anchored per-call pricing ($0.0025–$0.50)",
       "contact": "zeus@sagereasoning.com"
     }
   },

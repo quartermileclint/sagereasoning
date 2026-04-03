@@ -69,7 +69,7 @@ const tiers = [
     price: 'Usage-based',
     period: '',
     annualNote: 'Free evaluation tier included',
-    description: 'Integrate the Stoic Brain into your AI systems. Free tier for evaluation, paid tier for production at 200% of Anthropic API cost.',
+    description: 'Integrate the Stoic Brain into your AI systems. Free tier for evaluation, paid tier for production — per-call pricing from $0.0025 (cheapest in market).',
     features: [
       'Free tier: 1 API call/day for evaluation',
       'Paid tier: configurable limits (default 500/day)',

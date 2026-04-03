@@ -6,7 +6,7 @@
     "v1_derivation_note": "V1 had 11 free assessments (phases 1-2) and 37 paid (all 7 phases) with 0-100 foundational_alignment_score. V3 has 14 free assessments (phases 1-2) and 55 paid (all 8 phases) with qualitative proximity, Senecan grade, and dimension levels.",
     "alignment_with_revenue_model": {
       "free_tier_api_constraints": "1 call/day, 1 deliberation iteration, 1 baseline retake/month (R5)",
-      "paid_tier_api_constraints": "Configurable limits (start 500/day), 3 iterations, 200% of Anthropic API cost (R5)",
+      "paid_tier_api_constraints": "Configurable limits (start 500/day), 3 iterations, competitor-anchored per-call pricing (R5)",
       "free_assessment_fits_within": "A single API interaction can run Phases 1-2 (14 assessments) as one structured request-response, fitting the 1 call/day free tier limit",
       "paid_assessment_requires": "Full 55-assessment run needs multiple API calls or a batch endpoint, requiring paid tier access"
     },
@@ -135,7 +135,7 @@
         "A self-examination protocol designed for your specific weaknesses"
       ],
       "action": "Run Complete Assessment",
-      "action_subtext": "Requires a paid API key. Pricing: 200% of Anthropic API cost per call."
+      "action_subtext": "Requires a paid API key. Competitor-anchored per-call pricing."
     },
     "personalisation_rules": {
       "grade_1": "Senecan grade 1 (approaching wisdom). CTA: 'Verify your advanced placement with full passion diagnosis and oikeiosis mapping.'",

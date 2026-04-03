@@ -29,7 +29,7 @@ import {
 //
 // Outcome: Rank 2-20 items by principled reasoning, not urgency or fear.
 //          Returns per-item reasoning, action recommendations, and patterns.
-// Cost + Speed: ~$0.025, ~2s (1 API call, haiku model)
+// Cost + Speed: ~$0.18, ~2s (1 API call, haiku model)
 // Chains To: sage-reason-standard
 //
 // Use cases:

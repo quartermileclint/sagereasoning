@@ -44,7 +44,7 @@ Each MCP skill contract follows the MCP tool schema:
         "type": "string",
         "enum": ["quick", "standard", "deep"],
         "default": "quick",
-        "description": "Analysis depth: quick (3 mechanisms, ~$0.025, ~2s), standard (5 mechanisms, ~$0.041, ~3s), deep (6 mechanisms, ~$0.055, ~4s)"
+        "description": "Analysis depth: quick (3 mechanisms, ~$0.18, ~2s), standard (5 mechanisms, ~$0.18, ~3s), deep (6 mechanisms, ~$0.18, ~4s)"
       }
     },
     "required": ["input"]
@@ -203,7 +203,7 @@ A raw LLM classifying "I should quit my job" might route it to a "career" table.
   "name": "sage-classify",
   "tier": "tier2_evaluation",
   "outcome": "Reasoned classification — routes input to a category with reasoning quality assessment and passion flags.",
-  "cost_speed": "~$0.025, ~2s",
+  "cost_speed": "~$0.18, ~2s",
   "chains_to": ["sage-reason-standard", "sage-prioritise"],
   "endpoint": "/api/skill/sage-classify",
   "method": "POST",

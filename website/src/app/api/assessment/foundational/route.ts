@@ -247,7 +247,7 @@ Return ONLY valid JSON with this exact structure:
         'A self-examination protocol designed for your specific weaknesses',
       ],
       action: 'Run Complete Assessment',
-      action_subtext: 'Requires a paid API key. Pricing: 200% of Anthropic API cost per call.',
+      action_subtext: 'Requires a paid API key. Competitor-anchored per-call pricing.',
       personalised_message: ctaMessage,
     }
 

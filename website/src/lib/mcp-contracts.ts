@@ -100,7 +100,7 @@ const INPUT_SCHEMAS: Record<string, McpToolSchema['inputSchema']> = {
         enum: ['quick', 'standard', 'deep'],
         default: 'quick',
         description:
-          'Analysis depth. quick: 3 mechanisms (~$0.025, ~2s). standard: 5 mechanisms (~$0.041, ~3s). deep: 6 mechanisms with progress tracking (~$0.055, ~4s).',
+          'Analysis depth. quick: 3 mechanisms (~$0.18, ~2s). standard: 5 mechanisms (~$0.18, ~3s). deep: 6 mechanisms with progress tracking (~$0.18, ~4s).',
       },
     },
     required: ['input'],

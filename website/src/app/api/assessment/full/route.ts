@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
     description: 'Full 55-assessment evaluation across all 8 phases using V3 qualitative methodology. Returns Senecan grade, dimension levels, passion profile, critical corrections, and personalised examination protocol.',
     tier: 'paid',
     version: 'v3',
-    requires: 'Paid API key (200% of Anthropic API cost per call)',
+    requires: 'Paid API key (competitor-anchored per-call pricing)',
     phases: V3_ASSESSMENT_PHASES.map(p => ({
       phase: p.phase,
       title: p.name,
