@@ -48,7 +48,6 @@ export async function POST(request: NextRequest) {
     evalsRes,
     reflectionsRes,
     baselineV3Res,
-    baselineV1Res,
   ] = await Promise.all([
     supabaseAdmin.from('milestones').select('milestone_id').eq('user_id', userId),
     // V3 evaluations
@@ -66,17 +65,12 @@ export async function POST(request: NextRequest) {
       .order('created_at', { ascending: false })
       .limit(1)
       .single(),
-    // V1 baseline fallback
-    supabaseAdmin.from('baseline_assessments')
-      .select('id')
-      .eq('user_id', userId)
-      .limit(1),
   ])
 
   const earnedMilestoneIds = (earnedRes.data || []).map(m => m.milestone_id)
   const evaluations = evalsRes.data || []
   const reflectionCount = (reflectionsRes.data || []).length
-  const hasBaseline = !!baselineV3Res.data || (baselineV1Res.data || []).length > 0
+  const hasBaseline = !!baselineV3Res.data
   const senecanGrade = baselineV3Res.data?.senecan_grade
 
   // Calculate days since last action

@@ -207,35 +207,19 @@ False judgements identified: ${judgementsList}
 Sage reflection: "${previousStep.philosophical_reflection}"
 Improvement path given: "${previousStep.improvement_path}"
 
-The agent has now revised their action based on this feedback and their own real-world constraints. Evaluate the REVISED action through the full 4-stage evaluation sequence on its own merits, but acknowledge the deliberation — if the revision genuinely addresses the previously identified passions and false judgements, reflect that in the proximity assessment. If the revision misunderstands or ignores the feedback, note that too.
+The agent has now revised their action based on this feedback and their own real-world constraints. Evaluate the REVISED action on its own merits, but acknowledge if the revision genuinely addresses the previously identified passions and false judgements. Evaluate honestly without inflating proximity merely because the agent iterated.
 
-IMPORTANT: Evaluate honestly. Do not inflate proximity merely because the agent iterated. A revision that introduces new passions or false judgements should be assessed at the appropriate level, even if the agent claims it addresses feedback.
+EVALUATION MECHANISMS:
 
-EVALUATION SEQUENCE (apply all 4 stages in order):
+PROHAIRESIS FILTER — Identify what is within the agent's moral choice (eph' hemin) and what is not.
 
-STAGE 1 — PROHAIRESIS FILTER (Control Filter)
-Separate what was within the agent's moral choice (prohairesis) from what was not. Only evaluate what is eph' hemin.
-Output: within_prohairesis (array), outside_prohairesis (array)
+KATHEKON ASSESSMENT — Is this action appropriate given natural relationships (oikeiosis), reasonable justification, and role obligations?
 
-STAGE 2 — KATHEKON ASSESSMENT (Appropriate Action)
-Is this action a kathekon? Consider natural relationships (oikeiosis), reasonable justification, and role obligations.
-Output: is_kathekon (boolean), quality ("strong" | "moderate" | "marginal" | "contrary")
+PASSION DIAGNOSIS — Which of the 4 root passions (epithumia/craving, hedone/irrational pleasure, phobos/fear, lupe/distress) distort impression, assent, or impulse? Map to causal stage: phantasia → synkatathesis → horme → praxis.
 
-STAGE 3 — PASSION DIAGNOSIS
-Which passions distorted impression, assent, or impulse? Use the 5-step diagnostic. Reference the 4 root passions: epithumia (craving), hedone (irrational pleasure), phobos (fear), lupe (distress) and their sub-species.
-Output: passions_detected (array of {id, name, root_passion}), false_judgements (array), causal_stage_affected (phantasia|synkatathesis|horme|praxis)
+UNIFIED VIRTUE ASSESSMENT — How close is the ruling faculty to the sage ideal? The four virtue expressions are inseparable. Proximity levels: reflexive | habitual | deliberate | principled | sage_like.
 
-STAGE 4 — UNIFIED VIRTUE ASSESSMENT
-How close is the ruling faculty to the sage ideal? The four virtue expressions are inseparable.
-Katorthoma proximity: "reflexive" | "habitual" | "deliberate" | "principled" | "sage_like"
-Output: katorthoma_proximity, ruling_faculty_state, virtue_domains_engaged (array)
-
-CICERO'S DELIBERATION FRAMEWORK (apply to the revision):
-Q1: Is the revised action honourable (to kalon)?
-Q2: If comparing honourable options, which is more honourable?
-Q3: Is it advantageous (utile)?
-Q4: If comparing advantageous options, which is more advantageous?
-Q5: If honourable conflicts with advantageous, the honourable always prevails.
+CICERO'S DELIBERATION FRAMEWORK — Apply to the revision: Is it honourable? More honourable? Advantageous? More advantageous? (Honourable always prevails.)
 
 Return ONLY valid JSON:
 {

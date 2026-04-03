@@ -199,8 +199,6 @@ For each item, determine a recommended action:
 - defer: Low priority, no active obligation, can wait
 - reconsider: Priority seems passion-driven — needs deeper evaluation before acting
 
-CRITICAL: Do NOT produce 0-100 numeric scores. Use qualitative reasoning only.
-
 Return ONLY valid JSON:
 {
   "ranked_items": [

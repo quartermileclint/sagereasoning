@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { VIRTUES } from '@/lib/stoic-brain'
+import { VIRTUE_DISPLAY } from '@/lib/stoic-brain'
 
 export const metadata: Metadata = {
   title: 'Methodology — SageReasoning',
@@ -63,7 +63,7 @@ export default function MethodologyPage() {
             not scored independently. This reflects the Stoic doctrine of the unity of virtue:
           </p>
           <div className="space-y-3">
-            {VIRTUES.map((virtue) => (
+            {VIRTUE_DISPLAY.map((virtue) => (
               <div key={virtue.id}
                    className="flex items-start gap-4 bg-white/60 border border-sage-200 rounded-lg p-4">
                 <div className="flex-shrink-0 w-12 h-12">

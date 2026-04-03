@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } = require('react-simple-maps')
 import { supabase } from '@/lib/supabase'
-import { getAlignmentTier } from '@/lib/stoic-brain'
 import type { User } from '@supabase/supabase-js'
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'

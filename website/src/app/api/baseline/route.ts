@@ -165,27 +165,7 @@ export async function GET(request: NextRequest) {
     })
   }
 
-  // Fall back to V1 table for existing users
-  const { data: v1Data } = await supabaseAdmin
-    .from('baseline_assessments')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()
-
-  if (v1Data) {
-    const eligibleDate = new Date(v1Data.created_at)
-    eligibleDate.setDate(eligibleDate.getDate() + RETAKE_INTERVAL_DAYS)
-
-    return NextResponse.json({
-      has_baseline: true,
-      version: 'v1',
-      baseline: v1Data,
-      retake_eligible: new Date() >= eligibleDate,
-      retake_eligible_date: eligibleDate.toISOString(),
-    })
-  }
-
+  // V1 baseline table no longer checked — users with only V1 data
+  // are treated as having no baseline and prompted to take the V3 assessment.
   return NextResponse.json({ has_baseline: false })
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { VIRTUES } from '@/lib/stoic-brain'
+import { VIRTUE_DISPLAY } from '@/lib/stoic-brain'
 
 interface DayActivity {
   type: 'action' | 'reflection'
@@ -57,7 +57,7 @@ const PROXIMITY_COLORS: Record<string, string> = {
 }
 
 // Virtue metadata for quick lookup
-const VIRTUE_MAP = Object.fromEntries(VIRTUES.map(v => [v.id, v]))
+const VIRTUE_MAP = Object.fromEntries(VIRTUE_DISPLAY.map(v => [v.id, v]))
 
 export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
   const [currentDate, setCurrentDate] = useState(() => new Date())
@@ -185,7 +185,7 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
       {loading ? (
         <div className="flex items-center justify-center py-16">
           <div className="flex gap-3">
-            {VIRTUES.map((v, i) => (
+            {VIRTUE_DISPLAY.map((v, i) => (
               <img
                 key={v.id}
                 src={v.icon}
@@ -277,7 +277,7 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
 
       {/* Virtue legend */}
       <div className="flex items-center justify-center gap-6 mt-5 pt-4 border-t border-sage-100">
-        {VIRTUES.map(v => (
+        {VIRTUE_DISPLAY.map(v => (
           <div key={v.id} className="flex items-center gap-2">
             <img src={v.icon} alt={v.name} className="w-6 h-6" />
             <span className="font-body text-sm" style={{ color: v.color }}>{v.name}</span>

@@ -195,8 +195,6 @@ For EACH assessment, evaluate using V3 4-stage evaluation criteria:
 3. false_judgements: Any false beliefs revealed by the self-assessment
 4. summary: 1-2 sentence qualitative evaluation
 
-CRITICAL: Do NOT use 0-100 numeric scores. All outputs must be qualitative.
-
 ${blocks}
 
 Return ONLY valid JSON:

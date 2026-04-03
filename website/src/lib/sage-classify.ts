@@ -145,8 +145,6 @@ Based on these mechanisms:
 - Assess the reasoning quality of the input content (proximity level)
 - Determine the recommended action
 
-CRITICAL: Do NOT produce 0-100 numeric scores. Use qualitative proximity levels only.
-
 Return ONLY valid JSON:
 {
   "category": "<category_id or null if uncertain>",

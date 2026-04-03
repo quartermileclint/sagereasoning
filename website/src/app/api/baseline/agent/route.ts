@@ -159,8 +159,6 @@ After all 4 scenarios, produce aggregate:
 - growth_edge: which dimension needs most development
 - interpretation: 2-3 sentence philosophical assessment (R1: not therapeutic, R9: no outcome promises)
 
-CRITICAL: Do NOT produce 0-100 numeric scores. Do NOT produce independent per-virtue scores.
-
 ${scenarioParts}
 
 Return ONLY valid JSON:

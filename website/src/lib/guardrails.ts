@@ -88,8 +88,6 @@ Stage 2 — Kathekon Assessment: Is this action appropriate (kathekon)? Rate qua
 Stage 3 — Passion Diagnosis: Which passions (if any) may be distorting the agent's reasoning? Identify root_passion (epithumia/hedone/phobos/lupe), sub_species, and false_judgement.
 Stage 4 — Unified Virtue Assessment: Rate katorthoma proximity: reflexive / habitual / deliberate / principled / sage_like.
 
-CRITICAL: Do NOT produce 0-100 numeric scores. Do NOT produce independent per-virtue scores. Evaluate as a unified whole.
-
 Return ONLY valid JSON:
 {
   "katorthoma_proximity": "<reflexive|habitual|deliberate|principled|sage_like>",

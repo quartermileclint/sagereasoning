@@ -1,4 +1,4 @@
-import { VIRTUES } from '@/lib/stoic-brain'
+import { VIRTUE_DISPLAY } from '@/lib/stoic-brain'
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -127,7 +127,7 @@ export default function HomePage() {
             They are inseparable aspects of a single good character &mdash; not scored independently, but assessed as one whole.
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {VIRTUES.map((virtue) => (
+            {VIRTUE_DISPLAY.map((virtue) => (
               <div key={virtue.id} className="bg-white/80 border border-sage-200 rounded-lg p-6 text-center">
                 {/* Fixed-size container ensures all logos appear the same size regardless of source dimensions */}
                 <div className="w-40 h-40 mx-auto mb-4 flex items-center justify-center">

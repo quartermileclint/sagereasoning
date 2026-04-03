@@ -753,46 +753,23 @@ export const EVALUATIVE_DISCLAIMER =
   'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.' as const
 
 // ============================================================================
-// TEMPORARY V1 COMPATIBILITY SHIMS
-// These exist ONLY so that unrewritten V1 tool pages still compile.
-// Each shim will be removed when its consuming page is derived in Phases 3-9.
-// DO NOT use these in any new V3 code.
+// VIRTUE DISPLAY — UI metadata for rendering virtue cards on user-facing pages.
+// Derived from VIRTUE_EXPRESSIONS (V3) with added icon paths and brand colours.
+// R6b: No weights. R8c: English-only user-facing labels.
 // ============================================================================
 
-/** @deprecated V1 compat — remove when consuming pages are derived in Phases 3-9. */
-/** Virtue icon paths — maps each virtue to its animal symbol image */
-const VIRTUE_ICONS: Record<string, string> = {
-  phronesis: '/images/owllogo.PNG',
-  dikaiosyne: '/images/scaleslogo.PNG',
-  andreia: '/images/lionlogo.PNG',
-  sophrosyne: '/images/lotuslogo.PNG.png',
-}
-
-export const VIRTUES = VIRTUE_EXPRESSIONS.map(v => ({
+export const VIRTUE_DISPLAY = VIRTUE_EXPRESSIONS.map(v => ({
   id: v.id,
   name: v.name,
   greek: v.greek,
-  // weight removed — V3 rule R6b: no independent virtue weights (unified assessment)
-  icon: VIRTUE_ICONS[v.id] || '',
-  color: v.id === 'phronesis' ? '#7d9468' : v.id === 'dikaiosyne' ? '#B2AC88' : v.id === 'andreia' ? '#9e6b3a' : '#c45a7a',
+  icon: v.id === 'phronesis' ? '/images/owllogo.PNG'
+    : v.id === 'dikaiosyne' ? '/images/scaleslogo.PNG'
+    : v.id === 'andreia' ? '/images/lionlogo.PNG'
+    : '/images/lotuslogo.PNG.png',
+  color: v.id === 'phronesis' ? '#7d9468'
+    : v.id === 'dikaiosyne' ? '#B2AC88'
+    : v.id === 'andreia' ? '#9e6b3a'
+    : '#c45a7a',
   description: v.domain,
   subVirtues: v.sub_expressions.map(se => se.name),
 }))
-
-/** @deprecated V1 compat — remove when consuming pages are derived in Phases 3-9. */
-export const ALIGNMENT_TIERS = PROXIMITY_LEVELS.map((level, i) => ({
-  id: level.id,
-  label: level.name,
-  range: ['0-19', '20-39', '40-59', '60-79', '80-100'][i] ?? '',
-  color: ['#9e3a3a', '#c4843a', '#B2AC88', '#7d9468', '#4d6040'][i] ?? '#999',
-  description: level.description,
-}))
-
-/** @deprecated V1 compat — remove when consuming pages are derived in Phases 3-9. */
-export function getAlignmentTier(score: number) {
-  if (score >= 80) return ALIGNMENT_TIERS[4]
-  if (score >= 60) return ALIGNMENT_TIERS[3]
-  if (score >= 40) return ALIGNMENT_TIERS[2]
-  if (score >= 20) return ALIGNMENT_TIERS[1]
-  return ALIGNMENT_TIERS[0]
-}

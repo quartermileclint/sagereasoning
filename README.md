@@ -20,24 +20,24 @@ The core idea: give any action, document, conversation, or decision to the Stoic
 
 ## The Four Virtues (Core of Everything)
 
-All scoring, reasoning, and advice flows from these four virtues with these weights:
+All evaluation flows from these four virtues, assessed as expressions of one unified excellence (not scored independently):
 
-| Virtue | Greek | Weight | What it means |
-|--------|-------|--------|---------------|
-| Wisdom | Phronesis | 30% | Sound judgement; knowing what is truly good vs merely preferred; reasoning before acting |
-| Justice | Dikaiosyne | 25% | Fairness; honesty; proper treatment of others; serving the common good |
-| Courage | Andreia | 25% | Acting rightly despite fear or difficulty; not shrinking from what is right |
-| Temperance | Sophrosyne | 20% | Self-control; moderation; ordering desires by reason, not impulse |
+| Virtue | Greek | What it means |
+|--------|-------|---------------|
+| Wisdom | Phronesis | Sound judgement; knowing what is truly good vs merely preferred; reasoning before acting |
+| Justice | Dikaiosyne | Fairness; honesty; proper treatment of others; serving the common good |
+| Courage | Andreia | Acting rightly despite fear or difficulty; not shrinking from what is right |
+| Temperance | Sophrosyne | Self-control; moderation; ordering desires by reason, not impulse |
 
-**Alignment tiers** (what a score means):
+**Proximity levels** (qualitative assessment of reasoning quality):
 
-| Score | Tier | Meaning |
-|-------|------|---------|
-| 95–100 | Sage | Near-perfect Stoic alignment |
-| 70–94 | Progressing | Consistently virtuous with minor gaps |
-| 40–69 | Aware | Some virtue, some conflict |
-| 15–39 | Misaligned | Actions driven more by impulse than reason |
-| 0–14 | Contrary | Acting against virtue |
+| Level | Meaning |
+|-------|---------|
+| Sage-Like | Near-perfect alignment with Stoic reasoning |
+| Principled | Consistently virtuous with deliberate reasoning |
+| Deliberate | Active engagement with Stoic principles |
+| Habitual | Some awareness, actions still driven by impulse |
+| Reflexive | Unreflective response without Stoic reasoning |
 
 ---
 
@@ -50,13 +50,14 @@ These are the foundational data files — the "knowledge base" that every scorin
 
 | File | What it contains | Human-readable? |
 |------|-----------------|-----------------|
-| `stoic-brain.json` | Master entry point — links to all other files. This is what AI agents fetch first. | Yes |
-| `virtues.json` | The 4 cardinal virtues + 16 sub-virtues (e.g. prudence, honesty, endurance), each with definitions and scoring weights | Yes |
-| `indifferents.json` | External things ranked by virtue-alignment — health, wealth, reputation (preferred) vs poverty, illness (dispreferred). Neither is truly good or bad, only virtue matters. | Yes |
-| `scoring-rules.json` | The algorithm: how to weight virtue scores, how to calculate totals, what defines each alignment tier | Yes |
-| `schema.json` | Technical definition of the data structure (for developers) | Technical |
-| `README.md` | Documentation for anyone using the public GitHub repo | Yes |
-| `LICENSE` | MIT — free to use, modify, and distribute | Yes |
+| `stoic-brain.json` | Hub file — core premise, dichotomy of control, flourishing, sage ideal, cosmic framework | Yes |
+| `virtue.json` | The 4 cardinal virtues + 16 sub-virtues with unity thesis — virtues assessed as one whole, not independently | Yes |
+| `value.json` | Genuine goods, genuine evils, indifferents with selective value continuum | Yes |
+| `action.json` | Appropriate action (kathekon), right action (katorthoma), oikeiosis sequence, Cicero's deliberation framework | Yes |
+| `psychology.json` | Ruling faculty, impression-assent-impulse causal sequence | Yes |
+| `passions.json` | 4 root passions + 25 sub-species, false judgements, diagnostic tool | Yes |
+| `progress.json` | Senecan 3 grades, 4 progress dimensions, direction of travel | Yes |
+| `scoring.json` | 4-stage evaluation sequence — application layer combining all source files | Yes |
 
 **Where to find it:**
 - Local: `stoic-brain/` folder in this project
@@ -100,7 +101,7 @@ Built with Next.js (a web framework), hosted on Vercel (free), auto-deploys ever
 | `src/lib/analytics.ts` | Tracks usage events (sign-ins, scores, page views) for the admin dashboard |
 | `src/lib/milestones.ts` | All milestone definitions and the logic that checks when they are earned (includes journal milestones) |
 | `src/lib/journal-content.ts` | All 56 Stoic journal entries — teachings, reflective questions, phase structure |
-| `src/lib/stoic-brain.ts` | The four virtues, alignment tiers, and helper functions used across the website |
+| `src/lib/stoic-brain.ts` | V3 types, constants, and helper functions — virtue expressions, proximity levels, passions taxonomy, oikeiosis stages, Senecan grades |
 | `src/lib/supabase.ts` | Connection to the database (user-facing) |
 | `src/lib/supabase-server.ts` | Connection to the database (admin-level, bypasses user restrictions) |
 | `src/lib/deliberation.ts` | Deliberation chain logic — iteration-aware prompts, iteration warnings, request validation |

@@ -179,8 +179,6 @@ Identify: root passion (epithumia/hedone/phobos/lupe), sub-species, and false ju
 
 Stage 4 — Unified Virtue Assessment: How close is the agent's response to the sage ideal? Place on the katorthoma proximity scale: reflexive / habitual / deliberate / principled / sage_like. Assess which virtue DOMAINS were engaged (phronesis, dikaiosyne, andreia, sophrosyne) — NOT independent scores for each.
 
-CRITICAL: Do NOT produce 0-100 numeric scores. Do NOT produce independent per-virtue scores. The virtues are expressions of one unified excellence (R6b). Assess them as a whole.
-
 After all 4 scenarios, produce an aggregate assessment:
 - senecan_grade: pre_progress / grade_3 / grade_2 / grade_1
 - typical_proximity: the most common proximity across scenarios
