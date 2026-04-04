@@ -218,9 +218,9 @@ The mentor IS the ring. It is permanently sage-like (full_authority). The inner 
 - BEFORE checks: value alignment, passion early-warning, oikeiosis context, journal memory lookup
 - AFTER evaluates: reasoning quality, passion patterns, profile update, journal insight, next-step prescription
 
-### Module Structure (17 files, barrel-exported)
+### Module Structure (17 TypeScript files barrel-exported, plus 2 Cowork skills)
 
-**Core Mentor Modules (8 files):**
+**Core Mentor Modules (9 files):**
 
 | File | Purpose |
 |------|---------|
@@ -232,6 +232,7 @@ The mentor IS the ring. It is permanently sage-like (full_authority). The inner 
 | `profile-store.ts` | Supabase persistence layer, rolling window aggregation, profile caching |
 | `proactive-scheduler.ts` | Scheduled proactive outputs (morning check-in, evening reflection, weekly pattern mirror) |
 | `pattern-engine.ts` | Temporal pattern recognition engine (batch, deterministic) |
+| `session-bridge.ts` | Bridge between Claude Cowork sessions and the ring (observer/consultant/companion modes) |
 
 **Support Agent Modules (8 files):**
 
@@ -246,11 +247,12 @@ The mentor IS the ring. It is permanently sage-like (full_authority). The inner 
 | `support-proactive.ts` | Wires proactive scheduler to support operational context |
 | `support-patterns.ts` | Pattern engine for support data analysis (topic recurrence, escalation trends, KB gaps) |
 
-**Cowork Skill:**
+**Cowork Skills (2 files):**
 
 | File | Purpose |
 |------|---------|
 | `.claude/skills/sage-interpret/SKILL.md` | Guides Cowork sessions through external journal transcription and interpretation |
+| `.claude/skills/sage-consult/SKILL.md` | Invokes Sage Mentor consultation mid-Cowork session (consultant mode) |
 
 ### The Mentor Persona (Tiered)
 
@@ -389,6 +391,45 @@ The first inner agent to slot into the ring's gap. Handles customer support for 
 - Severity levels: INFO, ATTENTION, ACTION REQUIRED
 - Recommends specific KB articles to write
 
+### Session Bridge — Cowork ↔ Sage Mentor (Built — 4 April 2026)
+
+The core gap identified: the founder's most consequential decisions happen in Claude Cowork sessions that the mentor cannot see. A support ticket gets a two-pass ring evaluation; the founder restructuring the entire revenue model gets nothing.
+
+The session bridge (`session-bridge.ts`, 1,093 lines) closes this gap with three operating modes:
+
+**Mode 1: Observer (Default)** — Batch evaluation after session ends. Exchanges classified locally (zero LLM cost), only strategic/emotional/value-conflict items trigger a single batch Haiku call. Near-zero cost per session.
+
+**Mode 2: Consultant** — On-demand ring check mid-session via the `sage-consult` Cowork skill. Founder invokes it explicitly ("consult the mentor on this"). Captures current conversation context, runs it through the ring's 4-stage evaluation, returns inline. Cost: one Haiku or Sonnet call per consultation.
+
+**Mode 3: Live Companion** — Parallel evaluation stream throughout the session. Evaluates each substantive exchange and streams observations to the Mentor Hub's opinion window. Auto-activates when 3+ strategic exchanges are detected within 10 minutes. Cost: ~$0.01–$0.04 per session (Haiku per classified exchange).
+
+**Classification Gate (Zero LLM Cost):** Every exchange is classified locally before any evaluation call. Six classifications: routine (skip), informational (skip), strategic (evaluate), document production (evaluate), emotional inflection (evaluate), value conflict (evaluate). Uses keyword matching across 9 decision domains: architecture, pricing, positioning, partnership, scope, compliance, risk, document review, other. Filters 60–80% of exchanges as routine/informational.
+
+**Supabase Persistence (2 new tables):**
+
+- `session_decisions` — Strategic decision log with ring evaluation results (proximity assessed, passions detected, false judgements, mechanisms applied, mentor observation, journal reference). RLS enabled. Outcome tracking columns for later follow-up.
+- `session_context_snapshots` — Project context snapshot at time of decision (knowledge context, V3 scope status, business plan, custom). Content hash for deduplication. Linked to session_decisions via foreign key.
+
+Migration SQL at `supabase/migrations/20260404_session_bridge_tables.sql`.
+
+**Multi-Agent Proximity Tracking:** Separate proximity journey lines per inner agent type (founder-personal, claude-cowork, sage-support, content-agent, research-agent). All share the same 5-level scale and 4 progress dimensions. Enables the mentor to track how the founder's reasoning quality varies across different interaction contexts.
+
+**Knowledge Context Auto-Update:** `buildKnowledgeContextUpdate()` generates a structured update for the Knowledge Context Summary after sessions with strategic decisions, ensuring persistent project memory across sessions.
+
+**Cross-Session Pattern Detection (5 new detectors):**
+
+1. Decision domain clustering — identifies recurring strategic focus areas
+2. Passion recurrence in strategic contexts — flags passions that appear specifically during architecture/pricing/scope decisions
+3. Proximity trajectory per inner agent — tracks reasoning quality trends across interaction contexts
+4. Value-action consistency — compares declared values against observed decision patterns
+5. Strategic blind spots — detects decision domains where reasoning quality consistently drops
+
+Weekly strategic mirror (Sonnet) synthesises cross-session patterns into narrative insight.
+
+**Design Document:** Full architecture at `Sage_Mentor_Claude_Integration_Architecture.md` (17 sections covering problem statement, interaction landscape, integration architecture, Supabase schema, data flows, cost model, token efficiency, latency budget, live opinion window, governance compliance, multi-agent tracking).
+
+**Mentor Communication Hub:** Interactive HTML interface (`SageReasoning_Mentor_Hub.html`) with four-panel layout: contacts/reference panel, threaded chat with category tagging, session mode selector with live opinion feed, and multi-agent proximity journey graph with separate coloured lines per agent type. Includes embedded searchable Support Agent Manual and V3 scope phase tracker.
+
 ---
 
 ## 11. Security Hardening (Built — 4 April 2026)
@@ -478,7 +519,7 @@ A machine-readable compliance system that tracks external regulatory obligations
 
 Obligations are tracked using 9 statuses: COMPLIANT, ALIGNED, MONITORING, PARTIAL, DEFERRED, PLANNED, DESIGNED, DRAFTED, NOT_APPLICABLE.
 
-### Obligations Tracked (15 total)
+### Obligations Tracked (20 total)
 
 | ID | Obligation | Mapped Rules | Status | Key Deadline |
 |----|-----------|-------------|--------|-------------|
@@ -497,6 +538,11 @@ Obligations are tracked using 9 statuses: COMPLIANT, ALIGNED, MONITORING, PARTIA
 | CR-013 | IP Protection — Patent Filing | R4 | PLANNED | Q2 2026 |
 | CR-014 | Embedding Platform Compliance | R13 | DRAFTED | Pre-launch |
 | CR-015 | Marketplace Skill Certification | R10, R12 | DESIGNED | Per-release |
+| CR-020 | Session Bridge — Cowork Decision Capture | R1, R3, R6c, R6d, R9, R12 | DESIGNED | Pre-launch |
+| CR-021 | Session Bridge — Data Persistence & RLS | R4, R2 | DESIGNED | Pre-launch |
+| CR-022 | Session Bridge — Companion Mode Cost Controls | R9, R12 | DESIGNED | Pre-launch |
+| CR-023 | Session Bridge — Sage-Consult Skill Governance | R3, R10, R12 | DESIGNED | Pre-launch |
+| CR-024 | Session Bridge — Cross-Session Pattern Detection | R6c, R6d, R7 | DESIGNED | Pre-launch |
 
 ### Q2 2026 Pipeline Run (4 April 2026) — Key Findings
 
@@ -530,6 +576,7 @@ The first pipeline run detected 10 regulatory changes across 3 jurisdictions:
 - Codebase compliance status: **PASS**
 - Mandate revisions proposed: **None**
 - Files reviewed: 12 (security, terms, privacy, all 8 sage-mentor modules)
+- Register version: **CR-2026-Q2-v3** (updated from v1 with 5 session bridge entries)
 - Next scheduled run: **6 July 2026**
 
 ---
@@ -538,7 +585,7 @@ The first pipeline run detected 10 regulatory changes across 3 jurisdictions:
 
 - **V3 Adoption:** All 16 phases complete. V1 fully retired. V3 is production.
 - **Agent Trust Layer:** Framework designed, 5 build priorities coded as TypeScript (offline). Schema drafted. Pending: Supabase integration, batch assessment endpoint, event stream, LLM wiring, website integration.
-- **Sage Mentor Module:** 17 files built across core mentor (8) and support agent (8) modules, plus 1 Cowork skill. Barrel-exported via index.ts. All prompt builders sanitised. Model routing and token instrumentation in place. Profile caching implemented.
+- **Sage Mentor Module:** 17 TypeScript files built across core mentor (9) and support agent (8) modules, plus 2 Cowork skills (sage-interpret, sage-consult). Barrel-exported via index.ts. All prompt builders sanitised. Model routing and token instrumentation in place. Profile caching implemented.
 - **Support Agent:** Fully implemented and deployed (Vercel green). 10 operational tools, 10 knowledge base articles, 6 workflow playbooks, 10 test inbox items. LLM bridge live with Anthropic API. Supabase sync operational (3 tables with RLS). Semantic memory via pgvector embeddings. Proactive scheduler enriched with support context. Pattern engine detecting topic recurrence, escalation trends, and KB gaps.
 - **External Journal Interpreter:** Built. Maps 12-section handwritten journal to Stoic Brain extraction targets. Transcription workflow ready (photo upload → vision transcription → founder review → interpretation). Produces same MentorProfile as standard ingestion pipeline. Cowork skill (`sage-interpret`) guides the workflow.
 - **Proactive Scheduling:** Built. Morning check-in, evening reflection, weekly pattern mirror — all enriched with support operational context. Model routing: Haiku for daily, Sonnet for weekly.
@@ -546,7 +593,9 @@ The first pipeline run detected 10 regulatory changes across 3 jurisdictions:
 - **Authority Manager:** Built. Full lifecycle: registration, monitoring, promotion/demotion, suspension, reinstatement. Deterministic thresholds (zero LLM). Audit trail for all authority changes.
 - **Security:** Audit complete. 11 critical fixes applied (prompt injection defence, API hardening, CORS, error masking, privacy filtering). 15 deferred items documented.
 - **Token Efficiency:** 10 recommendations implemented (model routing, persona tiering, phase-scoped extraction, profile caching, token instrumentation, routing constants for remaining priorities).
-- **Compliance Pipeline:** R14 operational. Register tracks 15 obligations (CR-001–CR-015) across EU AI Act, Australian Privacy/Consumer/Financial law, ISO/IEC 42001, NIST AI RMF, GDPR. First quarterly audit complete — 10 regulatory changes detected, 2 major impact items requiring founder action (EU Art. 6 classification, AU Privacy Act automated decision-making). Next run: 6 July 2026.
+- **Session Bridge (Cowork ↔ Sage Mentor):** Built. `session-bridge.ts` (1,093 lines) with three operating modes (observer/consultant/companion). Classification gate filters 60–80% of exchanges at zero LLM cost. Supabase migration created for `session_decisions` and `session_context_snapshots` tables (RLS on both). `sage-consult` Cowork skill created for mid-session mentor consultation. Multi-agent proximity tracking designed (separate journey lines per inner agent type). Cross-session pattern detection designed (5 new detectors + weekly strategic mirror). Design document at `Sage_Mentor_Claude_Integration_Architecture.md`.
+- **Mentor Communication Hub:** Built. Interactive HTML interface (`SageReasoning_Mentor_Hub.html`) with four-panel layout: contacts/reference, threaded chat, session mode selector with live opinion feed, and multi-agent proximity journey graph. Embedded searchable Support Agent Manual. V3 scope tracker. All state persisted to localStorage.
+- **Compliance Pipeline:** R14 operational. Register tracks 20 obligations (CR-001–CR-015, CR-020–CR-024) across EU AI Act, Australian Privacy/Consumer/Financial law, ISO/IEC 42001, NIST AI RMF, GDPR, and session bridge governance. Register version CR-2026-Q2-v3. First quarterly audit complete — 10 regulatory changes detected, 2 major impact items requiring founder action (EU Art. 6 classification, AU Privacy Act automated decision-making). Next run: 6 July 2026.
 - **Revenue Model:** Licence changed to proprietary. Free tier tightened (1 call/day). Paid tier defined. Stripe integration pending.
 - **Prompt Architecture:** Audited, simplified for model-agnostic operation, documented.
 - **API Consolidation:** Option 1 approved (keep sage-reason as universal layer, consolidate candidates).
@@ -554,8 +603,10 @@ The first pipeline run detected 10 regulatory changes across 3 jurisdictions:
 
 ### Remaining Build Priorities
 
-1. **Run 10 Test Interactions** through the support agent pipeline (deferred — founder reviewing manual first).
-2. **Transcribe and Interpret Founder's External Journal** — Upload handwritten photos, transcribe via vision AI, interpret against Stoic Brain, build starting MentorProfile.
-3. **Deferred Security Items:** .env.local in .gitignore verification, deliberation-chain auth, reasoning_receipts/patterns RLS policies.
-4. **Business Plan Review:** Critical review to justify investment case before proceeding to Agent Trust Layer integration.
-5. **Agent Trust Layer Integration:** Supabase tables, batch assessment endpoint, event stream, LLM wiring, website integration.
+1. **Run Session Bridge Migration** — Execute `supabase/migrations/20260404_session_bridge_tables.sql` against Supabase staging. Verify RLS policies. Test cascade deletes.
+2. **Wire Session Bridge to Live Environment** — Connect `session-bridge.ts` to Anthropic API via `llm-bridge.ts`. Test `sage-consult` skill end-to-end in a Cowork session. Validate classification gate against 50 sample exchanges.
+3. **Run 10 Test Interactions** through the support agent pipeline (deferred — founder reviewing manual first).
+4. **Transcribe and Interpret Founder's External Journal** — Upload handwritten photos, transcribe via vision AI, interpret against Stoic Brain, build starting MentorProfile.
+5. **Deferred Security Items:** .env.local in .gitignore verification, deliberation-chain auth, reasoning_receipts/patterns RLS policies.
+6. **Business Plan Review:** Critical review to justify investment case before proceeding to Agent Trust Layer integration.
+7. **Agent Trust Layer Integration:** Supabase tables, batch assessment endpoint, event stream, LLM wiring, website integration.

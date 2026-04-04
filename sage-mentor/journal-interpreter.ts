@@ -102,16 +102,322 @@ export type TranscribedJournal = {
   readonly notes?: string
 }
 
+// ============================================================================
+// LAYER 2 — REASONING ARCHITECTURE (COGNITIVE STYLE PROFILE)
+// ============================================================================
+
 /**
- * Result of the full interpretation pipeline.
+ * Layer 2: How the person thinks, not just what they think.
+ * Meta-cognitive style profile extracted from journal structure patterns.
+ * R4: Server-side IP, R6d: Diagnostic not punitive, R7: Source-cited, R8a: Greek identifiers
  */
-export type InterpretationResult = {
+export type CognitiveStyleProfile = {
+  /** Reasoning direction: principle-first (1.0) to concrete-first (0.0) */
+  readonly reasoning_direction: number
+  /** Processing mode: categoriser (1.0) to narrator (0.0) */
+  readonly processing_mode: number
+  /** Emotional register: analytical (0.0) to emotional (1.0) */
+  readonly emotional_register: number
+  /** Comfort with abstraction levels */
+  readonly abstraction_comfort: 'low' | 'medium' | 'high'
+  /** Natural thinking pattern classification */
+  readonly dominant_pattern: 'principle_first' | 'concrete_first' | 'narrative' | 'categorical' | 'hybrid'
+  /** Evidence from journal structure */
+  readonly evidence: string[]
+  /** Brain mechanism citations */
+  readonly mechanisms: string[]
+}
+
+// ============================================================================
+// LAYER 3 — ENGAGEMENT GRADIENT
+// ============================================================================
+
+/**
+ * Layer 3: Emotional texture and engagement level per entry.
+ * Distinguishes performative writing from genuine wrestling with ideas.
+ * R6d: Diagnostic (identifies opening to change), not punitive
+ */
+export type EngagementGradient = {
+  readonly entries: EngagementEntry[]
+  readonly overall_engagement_profile: 'predominantly_performative' | 'mixed_performative_searching' | 'predominantly_searching' | 'consistently_transformative'
+  /** Entries with highest engagement scored as breakthrough opportunities */
+  readonly breakthrough_indicators: string[]
+}
+
+export type EngagementEntry = {
+  readonly day_or_entry_ref: number | string
+  readonly engagement_score: number // 0-1 scale
+  readonly engagement_category: 'performative' | 'moderate' | 'searching' | 'transformative'
+  readonly deterministic_factors: {
+    readonly word_count_score: number
+    readonly specificity_score: number
+  }
+  readonly llm_assessment: {
+    readonly uncertainty_markers: boolean
+    readonly struggle_indicators: boolean
+    readonly emotional_honesty: boolean
+    readonly genuine_wrestling: boolean
+  }
+}
+
+// ============================================================================
+// LAYER 4 — CONTRADICTION DETECTION
+// ============================================================================
+
+/**
+ * Layer 4: Declared vs. observed values — the growth edge.
+ * Reveals gap between intellectual assent and dispositional change (hexis).
+ * R6d: Diagnostic discovery of development opportunity, not failure
+ */
+export type ContradictionMap = {
+  readonly contradictions: ValueContradiction[]
+  readonly primary_value_gap: string | null
+  readonly significance_summary: string
+}
+
+export type ValueContradiction = {
+  readonly declared_belief: string
+  readonly observed_behaviour: string
+  readonly journal_sections_involved: string[]
+  readonly significance: 'minor' | 'moderate' | 'major'
+  /** Which passion(s) drive the gap */
+  readonly connecting_passions: string[]
+  /** Direction: is the person moving toward integrity or away */
+  readonly direction_of_integrity: 'toward' | 'away' | 'oscillating'
+}
+
+// ============================================================================
+// LAYER 5 — RELATIONAL TEXTURE MAP
+// ============================================================================
+
+/**
+ * Layer 5: How different relationships are written about.
+ * Reveals oikeiosis stage, reasoning quality variations, and relational triggers.
+ * R8a: Uses person roles (household, community, etc.) as identifiers
+ */
+export type RelationalTextureMap = {
+  readonly relational_contexts: RelationalContext[]
+  readonly primary_relationship_patterns: string[]
+  readonly reasoning_quality_by_context: {
+    readonly context: string
+    readonly typical_quality: 'reflexive' | 'habitual' | 'deliberate' | 'principled'
+  }[]
+}
+
+export type RelationalContext = {
+  readonly person_or_role: string
+  readonly oikeiosis_stage: 'self_preservation' | 'household' | 'community' | 'humanity' | 'cosmic'
+  readonly language_tone: string
+  /** Which passions are associated with this relationship */
+  readonly associated_passions: string[]
+  /** Reasoning quality marker in entries mentioning this person */
+  readonly reasoning_quality_indicator: 'reflexive' | 'habitual' | 'deliberate' | 'principled'
+  /** Engagement level when this person/role appears */
+  readonly entry_engagement_when_mentioned: number
+  /** Journal sections where mentioned */
+  readonly sections_mentioned: string[]
+}
+
+// ============================================================================
+// LAYER 6 — DEVELOPMENTAL TIMELINE
+// ============================================================================
+
+/**
+ * Layer 6: Chronological progression and plateau patterns.
+ * Predicts rhythm of change, plateau windows, and optimal intervention timing.
+ * Derived from progress.json disposition stability and direction of travel
+ */
+export type DevelopmentalTimeline = {
+  /** Overall trend of writing quality over the journal period */
+  readonly quality_arc: 'ascending' | 'plateauing' | 'descending' | 'volatile'
+  /** Identified plateau periods and their characteristics */
+  readonly plateau_windows: PlateauWindow[]
+  /** Identified breakthrough points (reasoning suddenly shifts) */
+  readonly breakthrough_points: BreakthroughPoint[]
+  /** Typical interval between plateaus (in days) */
+  readonly typical_plateau_interval_days: number | null
+  /** Optimal timing for new challenges based on pattern */
+  readonly optimal_challenge_timing: string
+}
+
+export type PlateauWindow = {
+  readonly start_entry: number
+  readonly end_entry: number
+  readonly duration_days: number
+  readonly characteristics: string
+  readonly reasoning_quality: 'reflexive' | 'habitual' | 'deliberate' | 'principled'
+}
+
+export type BreakthroughPoint = {
+  readonly entry_number: number
+  readonly date_approximate: string
+  readonly what_shifted: string
+  readonly evidence: string[]
+}
+
+// ============================================================================
+// LAYER 7 — LANGUAGE FINGERPRINT
+// ============================================================================
+
+/**
+ * Layer 7: Voice calibration data — the user's internal vocabulary.
+ * Guides mentor's communication style to match user's natural register.
+ * R7: Traces to psychology.json (ruling faculty patterns) and virtue.json
+ */
+export type LanguageFingerprint = {
+  /** Primary metaphor family in self-reflection */
+  readonly metaphor_family: 'battle' | 'journey' | 'construction' | 'organic_growth' | 'mixed' | 'none'
+  /** Emotional register when reflecting on self */
+  readonly emotional_register: 'gentle' | 'demanding' | 'analytical' | 'poetic' | 'pragmatic'
+  /** Comfort level with abstraction */
+  readonly abstraction_level: 'concrete_only' | 'concrete_with_principles' | 'principle_forward' | 'abstract_heavy'
+  /** Recurring phrases or patterns that signal specific states */
+  readonly recurring_phrases: {
+    readonly phrase: string
+    readonly appears_in_context: string
+    readonly implies_state: string
+  }[]
+  /** Voice calibration notes for mentor communication */
+  readonly voice_calibration_notes: string
+  /** Brain mechanisms supporting this analysis */
+  readonly mechanisms: string[]
+}
+
+// ============================================================================
+// LAYER 8 — SITUATIONAL TRIGGER MAP
+// ============================================================================
+
+/**
+ * Layer 8: Passion activation conditions — predictive intervention.
+ * Maps specific situational triggers to passion emergence.
+ * R6d: Diagnostic mapping for mentor to anticipate, not judge
+ */
+export type SituationalTriggerMap = {
+  readonly passion_triggers: PassionTrigger[]
+  readonly context_specificity_notes: string
+}
+
+export type PassionTrigger = {
+  readonly passion_id: string
+  readonly passion_name: string
+  /** Specific conditions that activate this passion */
+  readonly trigger_conditions: string[]
+  /** Journal evidence for this trigger pattern */
+  readonly journal_evidence: string[]
+  /** False judgement at the heart of this trigger */
+  readonly false_judgement: string
+  /** Which causal stage is affected (phantasia, synkatathesis, horme, praxis) */
+  readonly causal_stage_affected: 'phantasia' | 'synkatathesis' | 'horme' | 'praxis'
+  /** Has the person achieved any historical resolution of this trigger? */
+  readonly historical_resolution: string | null
+  /** Mentor intervention suggestion */
+  readonly intervention_opportunity: string
+}
+
+// ============================================================================
+// LAYER 9 — PRODUCT DEVELOPMENT SIGNAL (TYPE ONLY — TODO EXTRACTION)
+// ============================================================================
+
+/**
+ * Layer 9: UX feedback on the SageReasoning journaling framework itself.
+ * Which prompts worked, where framework felt abstract, what needs scaffolding.
+ * This is the founder's journey as a user experience test.
+ */
+export type ProductDevelopmentSignal = {
+  readonly prompt_effectiveness: PromptSignal[]
+  readonly framework_accessibility_gaps: AccessibilityGap[]
+  readonly section_transition_smoothness: TransitionAssessment[]
+  readonly concept_scaffolding_needs: ScaffoldingNeed[]
+  readonly overall_ux_assessment: string
+  // TODO: Extract from entries — requires LLM analysis comparing entry quality to prompt design
+}
+
+export type PromptSignal = {
+  readonly prompt_text: string
+  readonly section: string
+  readonly entry_count: number
+  readonly avg_entry_length: number
+  readonly avg_engagement: number
+  readonly assessment: 'highly_generative' | 'moderately_generative' | 'low_engagement' | 'too_abstract'
+}
+
+export type AccessibilityGap = {
+  readonly concept: string
+  readonly evidence: string
+  readonly difficulty_level: 'abstract' | 'application_gap' | 'jargon_barrier'
+  readonly suggestion: string
+}
+
+export type TransitionAssessment = {
+  readonly from_section: string
+  readonly to_section: string
+  readonly smoothness: 'natural' | 'requires_bridge' | 'jarring'
+  readonly evidence: string
+}
+
+export type ScaffoldingNeed = {
+  readonly concept: string
+  readonly barrier: string
+  readonly suggested_scaffolding: string
+}
+
+// ============================================================================
+// LAYER 10 — PROOF OF CONCEPT FOR AGENT TRUST LAYER (TYPE ONLY — TODO EXTRACTION)
+// ============================================================================
+
+/**
+ * Layer 10: Case study validation — documenting the full developmental model.
+ * Evidence that the Stoic framework, proximity scale, and progression toolkit work.
+ * This is the proof that accreditation means something real.
+ */
+export type ProofOfConceptSynthesis = {
+  readonly case_study_title: string
+  readonly timespan: string
+  readonly starting_proximity_level: string
+  readonly ending_proximity_level: string
+  readonly proximity_progression: string[] // Path through levels
+  readonly dimension_improvements: {
+    readonly dimension: string
+    readonly starting_state: string
+    readonly ending_state: string
+    readonly evidence: string[]
+  }[]
+  readonly persisting_passion_reduction: string[]
+  readonly value_integrity_movement: string
+  readonly oikeiosis_extension_evidence: string[]
+  readonly mentor_relationship_arc: string
+  readonly key_breakthrough_moments: BreakthroughPoint[]
+  readonly synthesis_narrative: string
+  // TODO: Synthesise across all 10 layers into a narrative case study
+}
+
+// ============================================================================
+// FULL INTERPRETATION RESULT (All 10 Layers)
+// ============================================================================
+
+/**
+ * Complete result of journal interpretation including all 10 layers.
+ * Supersedes the original InterpretationResult.
+ */
+export type FullInterpretationResult = {
   readonly user_id: string
   readonly display_name: string
   readonly journal_name: string
   readonly sections_processed: number
   readonly entries_processed: number
   readonly profile: MentorProfile
+
+  // Layer 1 (implicit in profile): Baseline Extraction (already in MentorProfile)
+  readonly layer_2_cognitive_style: CognitiveStyleProfile
+  readonly layer_3_engagement_gradient: EngagementGradient
+  readonly layer_4_contradictions: ContradictionMap
+  readonly layer_5_relational_texture: RelationalTextureMap
+  readonly layer_6_developmental_timeline: DevelopmentalTimeline
+  readonly layer_7_language_fingerprint: LanguageFingerprint
+  readonly layer_8_triggers: SituationalTriggerMap
+  readonly layer_9_product_signals: ProductDevelopmentSignal | null // TODO extraction
+  readonly layer_10_proof_of_concept: ProofOfConceptSynthesis | null // TODO extraction
+
   readonly interpretation_timestamp: string
   readonly section_summaries: {
     readonly section: string
@@ -119,7 +425,17 @@ export type InterpretationResult = {
     readonly entries_count: number
     readonly word_count: number
   }[]
+  readonly completeness: {
+    readonly layers_extracted: number[]
+    readonly layers_todo: number[]
+  }
 }
+
+/**
+ * Legacy type alias for backward compatibility.
+ * New code should use FullInterpretationResult.
+ */
+export type InterpretationResult = FullInterpretationResult
 
 // ============================================================================
 // SECTION → STOIC BRAIN MAPPING
@@ -535,6 +851,279 @@ Return ONLY valid JSON matching this schema:
 }
 
 // ============================================================================
+// LAYER 2-8 EXTRACTION PROMPT BUILDERS (Server-side IP per R4)
+// ============================================================================
+
+/**
+ * Build extraction prompt for Layer 2: Cognitive Style Profile.
+ * Analyses journal structure patterns to reveal how the person thinks.
+ * R4: Server-side extraction logic — comments note IP ownership
+ */
+export function buildLayer2Prompt(chunk: InterpreterChunk): string {
+  const entriesText = chunk.entries
+    .map((e, idx) => {
+      const ref = e.page_or_entry ? `${e.page_or_entry}` : `${idx + 1}`
+      return `[${ref}] ${e.response.substring(0, 200)}...`
+    })
+    .join('\n')
+
+  return `You are analyzing the META-COGNITIVE STYLE (how the person thinks, not what they think).
+
+SECTION: "${chunk.original_section}"
+ENTRIES: ${chunk.entries.length}
+
+TASK: Assess:
+1. Reasoning direction: Does the person START with principles and apply them? Or start with concrete situations and extract principles?
+2. Processing mode: Natural categoriser (sorts by domain) or natural narrator (tells stories sequentially)?
+3. Emotional register: When reflecting, are they analytical or emotionally engaged?
+4. Abstraction comfort: Do they stay concrete? Mix concrete+principle? Work entirely abstractly?
+
+STRUCTURE PATTERNS TO ANALYSE:
+- Entry organization (chronological sequence vs. categorical grouping)
+- Presence of causal tracing (does the person naturally trace cause chains?)
+- Principle-to-example vs. example-to-principle flow
+- Language formality (abstract philosophical vs. concrete personal)
+
+Return JSON:
+{
+  "reasoning_direction": <0-1 scale: 0=concrete-first, 1=principle-first>,
+  "processing_mode": <0-1 scale: 0=narrator, 1=categoriser>,
+  "emotional_register": <0-1 scale: 0=analytical, 1=emotional>,
+  "abstraction_comfort": "<low|medium|high>",
+  "dominant_pattern": "<principle_first|concrete_first|narrative|categorical|hybrid>",
+  "evidence": ["<specific examples from entries>"]
+}`
+}
+
+/**
+ * Build extraction prompt for Layer 3: Engagement Gradient.
+ * Distinguishes performative writing from genuine wrestling with ideas.
+ * Combines deterministic analysis (word count, structure) with LLM assessment.
+ * R4: Server-side IP, R6d: Diagnostic (identifies opening to change)
+ */
+export function buildLayer3Prompt(chunk: InterpreterChunk): string {
+  return `You are assessing EMOTIONAL ENGAGEMENT TEXTURE.
+
+SECTION: "${chunk.original_section}"
+
+TASK: For each entry, score engagement on 0-1 scale:
+- 0.0-0.2: Performative (going through motions, formulaic)
+- 0.3-0.5: Moderate (completing the exercise, some reflection)
+- 0.6-0.8: Searching (genuine wrestling, uncertainty, questioning)
+- 0.9-1.0: Transformative (breakthrough moment, real openness)
+
+ASSESSMENT MARKERS:
+Performative: Short generic responses, repetition of known truths, no specifics
+Searching: Specific examples, admission of struggle, genuine questions, emotional honesty
+
+Return JSON array:
+[
+  {
+    "entry_number": <int>,
+    "word_count": <int>,
+    "engagement_score": <0-1>,
+    "category": "<performative|moderate|searching|transformative>",
+    "specificity_score": <0-1 based on concrete examples vs abstractions>,
+    "uncertainty_markers": <boolean: has "I don't know", "struggling", questions?>,
+    "struggle_indicators": <boolean: tension, difficulty acknowledged?>,
+    "emotional_honesty": <boolean: admits failure, confusion, doubt?>,
+    "genuine_wrestling": <boolean: overall sense of real engagement>
+  }
+]`
+}
+
+/**
+ * Build extraction prompt for Layer 4: Contradiction Detection.
+ * Identifies gaps between declared beliefs and emotional engagement patterns.
+ * R6d: Diagnostic discovery of development opportunity
+ */
+export function buildLayer4Prompt(allChunks: InterpreterChunk[]): string {
+  const sectionNames = allChunks.map(c => c.original_section).join(', ')
+
+  return `You are detecting VALUE CONTRADICTIONS — declared beliefs contradicted by emotional responses.
+
+SECTIONS INCLUDED: ${sectionNames}
+
+TASK: Cross-reference entries across sections. Find contradictions like:
+- "Reputation is indifferent" (declared) but anxious about market perception (observed)
+- "I should focus on control" but detailed plans to influence others
+- "External achievements don't matter" but frustration about business growth
+
+For each contradiction:
+- State the declared belief
+- State the observed behaviour (emotional response or action)
+- Which sections show each side
+- Significance: how big is the gap?
+- Which passions drive the contradiction (epithumia, phobos, etc.)?
+- Direction: moving toward integrity or away?
+
+Return JSON:
+{
+  "contradictions": [
+    {
+      "declared_belief": "<string>",
+      "observed_behaviour": "<string>",
+      "journal_sections_involved": ["<section>"],
+      "significance": "<minor|moderate|major>",
+      "connecting_passions": ["<passion_id>"],
+      "direction_of_integrity": "<toward|away|oscillating>"
+    }
+  ],
+  "primary_value_gap": "<if one contradiction stands out>",
+  "significance_summary": "<overall assessment>"
+}`
+}
+
+/**
+ * Build extraction prompt for Layer 5: Relational Texture Map.
+ * Analyzes how different relationships are written about.
+ * R8a: Uses person roles (household, community, etc.)
+ */
+export function buildLayer5Prompt(chunk: InterpreterChunk): string {
+  return `You are analyzing RELATIONAL TEXTURE — how different relationships appear in writing.
+
+SECTION: "${chunk.original_section}"
+
+FOR EACH PERSON/ROLE MENTIONED:
+- Person/role identifier (e.g., "family", "business partner", "competitor")
+- Oikeiosis stage: self_preservation | household | community | humanity | cosmic
+- Language tone: guarded, open, analytical, emotional, formal, informal, etc.
+- Associated passions (which emotions surface with this person?)
+- Reasoning quality: Does the person reason better or worse when writing about this relationship?
+- Entry engagement when mentioned: 0-1 scale
+- Sections where mentioned
+
+Return JSON:
+{
+  "relational_contexts": [
+    {
+      "person_or_role": "<string>",
+      "oikeiosis_stage": "<self_preservation|household|community|humanity|cosmic>",
+      "language_tone": "<string>",
+      "associated_passions": ["<passion_id>"],
+      "reasoning_quality_indicator": "<reflexive|habitual|deliberate|principled>",
+      "entry_engagement_when_mentioned": <0-1>,
+      "sections_mentioned": ["<section>"]
+    }
+  ],
+  "primary_relationship_patterns": ["<string>"]
+}`
+}
+
+/**
+ * Build extraction prompt for Layer 6: Developmental Timeline.
+ * Analyzes chronological progression and plateau patterns.
+ * Requires entries to be ordered sequentially.
+ */
+export function buildLayer6Prompt(allChunks: InterpreterChunk[]): string {
+  const totalEntries = allChunks.reduce((sum, c) => sum + c.entries.length, 0)
+
+  return `You are analyzing DEVELOPMENTAL TIMELINE — how reasoning and writing quality progress over ${totalEntries} entries.
+
+TASK: Identify:
+1. Overall quality arc: ascending | plateauing | descending | volatile
+2. Plateau windows: 5+ consecutive entries at same level
+3. Breakthrough points: sudden shift in reasoning quality
+4. Typical plateau interval: how many entries between plateaus?
+5. Optimal challenge timing: when should the mentor introduce new challenges?
+
+Return JSON:
+{
+  "quality_arc": "<ascending|plateauing|descending|volatile>",
+  "plateau_windows": [
+    {
+      "start_entry": <int>,
+      "end_entry": <int>,
+      "duration_days": <int>,
+      "characteristics": "<string>",
+      "reasoning_quality": "<reflexive|habitual|deliberate|principled>"
+    }
+  ],
+  "breakthrough_points": [
+    {
+      "entry_number": <int>,
+      "date_approximate": "<string>",
+      "what_shifted": "<string>",
+      "evidence": ["<excerpt>"]
+    }
+  ],
+  "typical_plateau_interval_days": <int or null>,
+  "optimal_challenge_timing": "<string: when to introduce new material>"
+}`
+}
+
+/**
+ * Build extraction prompt for Layer 7: Language Fingerprint.
+ * Identifies voice calibration data for mentor communication style.
+ * R7: Traces to psychology.json (ruling faculty) and virtue.json
+ */
+export function buildLayer7Prompt(allChunks: InterpreterChunk[]): string {
+  return `You are identifying LANGUAGE FINGERPRINT — the user's internal vocabulary.
+
+ACROSS ALL SECTIONS:
+1. Metaphor families: Does the person use battle language? Journey? Construction? Growth/organic?
+2. Emotional register: Gentle self-talk, demanding, analytical, poetic, pragmatic?
+3. Abstraction level: Concrete only? Mix of concrete+principle? Pure abstraction?
+4. Recurring phrases: What phrases appear? What states do they signal?
+5. Voice calibration: How should the mentor speak to resonate with this person?
+
+Return JSON:
+{
+  "metaphor_family": "<battle|journey|construction|organic_growth|mixed|none>",
+  "emotional_register": "<gentle|demanding|analytical|poetic|pragmatic>",
+  "abstraction_level": "<concrete_only|concrete_with_principles|principle_forward|abstract_heavy>",
+  "recurring_phrases": [
+    {
+      "phrase": "<string>",
+      "appears_in_context": "<string>",
+      "implies_state": "<string>"
+    }
+  ],
+  "voice_calibration_notes": "<specific mentor communication style recommendations>"
+}`
+}
+
+/**
+ * Build extraction prompt for Layer 8: Situational Trigger Map.
+ * Maps specific conditions that activate passions.
+ * R6d: Diagnostic mapping for mentor to anticipate patterns
+ */
+export function buildLayer8Prompt(allChunks: InterpreterChunk[]): string {
+  return `You are building SITUATIONAL TRIGGER MAP — the specific conditions that activate passions.
+
+ACROSS ALL SECTIONS, IDENTIFY:
+- What situations reliably trigger specific passions?
+- Example: "Agonia (anxiety) appears when outcomes depend on others' decisions"
+- Example: "Orge (anger) surfaces in contexts about perceived unfairness"
+
+FOR EACH PASSION DETECTED IN THE JOURNAL:
+- Passion name and ID
+- Trigger conditions (specific situations that activate it)
+- Journal evidence (where did you see this?)
+- The false judgement at the heart of this trigger
+- Which causal stage is affected: phantasia | synkatathesis | horme | praxis
+- Has this passion been resolved historically in the journal?
+- What mentor intervention opportunity exists?
+
+Return JSON:
+{
+  "passion_triggers": [
+    {
+      "passion_id": "<string>",
+      "passion_name": "<string>",
+      "trigger_conditions": ["<string>"],
+      "journal_evidence": ["<excerpt or section reference>"],
+      "false_judgement": "<string>",
+      "causal_stage_affected": "<phantasia|synkatathesis|horme|praxis>",
+      "historical_resolution": "<null or string describing resolution if found>",
+      "intervention_opportunity": "<string: mentor action>"
+    }
+  ],
+  "context_specificity_notes": "<notes about which contexts matter>"
+}`
+}
+
+// ============================================================================
 // TRANSCRIPTION PROMPT BUILDER
 // ============================================================================
 
@@ -582,20 +1171,153 @@ NOTES:
 // ============================================================================
 
 /**
- * Convert interpreter chunks' extractions into a MentorProfile by delegating
- * to the existing aggregateExtractions() from journal-ingestion.ts.
+ * Create a stub CognitiveStyleProfile with reasonable defaults.
+ * Called when Layer 2 extraction hasn't been performed yet.
+ * TODO: Replace with actual extraction when LLM results are available.
+ */
+function createCognitiveStyleStub(): CognitiveStyleProfile {
+  return {
+    reasoning_direction: 0.5,
+    processing_mode: 0.5,
+    emotional_register: 0.5,
+    abstraction_comfort: 'medium',
+    dominant_pattern: 'hybrid',
+    evidence: ['Layer 2 extraction not yet performed'],
+    mechanisms: ['psychology.json'],
+  }
+}
+
+/**
+ * Create stub EngagementGradient with minimal data.
+ * Called when Layer 3 extraction hasn't been performed yet.
+ * TODO: Replace with actual extraction when LLM results are available.
+ */
+function createEngagementStub(entryCount: number): EngagementGradient {
+  return {
+    entries: Array.from({ length: entryCount }, (_, i) => ({
+      day_or_entry_ref: i + 1,
+      engagement_score: 0.5,
+      engagement_category: 'moderate',
+      deterministic_factors: {
+        word_count_score: 0.5,
+        specificity_score: 0.5,
+      },
+      llm_assessment: {
+        uncertainty_markers: false,
+        struggle_indicators: false,
+        emotional_honesty: false,
+        genuine_wrestling: false,
+      },
+    })),
+    overall_engagement_profile: 'mixed_performative_searching',
+    breakthrough_indicators: [],
+  }
+}
+
+/**
+ * Create stub ContradictionMap.
+ * Called when Layer 4 extraction hasn't been performed yet.
+ * TODO: Replace with actual extraction when LLM results are available.
+ */
+function createContradictionStub(): ContradictionMap {
+  return {
+    contradictions: [],
+    primary_value_gap: null,
+    significance_summary: 'Layer 4 extraction not yet performed',
+  }
+}
+
+/**
+ * Create stub RelationalTextureMap.
+ * Called when Layer 5 extraction hasn't been performed yet.
+ * TODO: Replace with actual extraction when LLM results are available.
+ */
+function createRelationalTextureStub(): RelationalTextureMap {
+  return {
+    relational_contexts: [],
+    primary_relationship_patterns: ['Layer 5 extraction not yet performed'],
+    reasoning_quality_by_context: [],
+  }
+}
+
+/**
+ * Create stub DevelopmentalTimeline.
+ * Called when Layer 6 extraction hasn't been performed yet.
+ * TODO: Replace with actual extraction when LLM results are available.
+ */
+function createDevelopmentalTimelineStub(): DevelopmentalTimeline {
+  return {
+    quality_arc: 'stable',
+    plateau_windows: [],
+    breakthrough_points: [],
+    typical_plateau_interval_days: null,
+    optimal_challenge_timing: 'Layer 6 extraction not yet performed',
+  }
+}
+
+/**
+ * Create stub LanguageFingerprint.
+ * Called when Layer 7 extraction hasn't been performed yet.
+ * TODO: Replace with actual extraction when LLM results are available.
+ */
+function createLanguageFingerprintStub(): LanguageFingerprint {
+  return {
+    metaphor_family: 'mixed',
+    emotional_register: 'analytical',
+    abstraction_level: 'concrete_with_principles',
+    recurring_phrases: [],
+    voice_calibration_notes: 'Layer 7 extraction not yet performed',
+    mechanisms: ['psychology.json'],
+  }
+}
+
+/**
+ * Create stub SituationalTriggerMap.
+ * Called when Layer 8 extraction hasn't been performed yet.
+ * TODO: Replace with actual extraction when LLM results are available.
+ */
+function createSituationalTriggerStub(): SituationalTriggerMap {
+  return {
+    passion_triggers: [],
+    context_specificity_notes: 'Layer 8 extraction not yet performed',
+  }
+}
+
+/**
+ * Create stub ProductDevelopmentSignal (Layer 9).
+ * TODO: Extract from entries — requires LLM analysis comparing entry quality to prompt design
+ */
+function createProductDevelopmentStub(): ProductDevelopmentSignal {
+  return {
+    prompt_effectiveness: [],
+    framework_accessibility_gaps: [],
+    section_transition_smoothness: [],
+    concept_scaffolding_needs: [],
+    overall_ux_assessment: 'Layer 9 extraction not yet performed (TODO)',
+  }
+}
+
+/**
+ * Convert interpreter chunks' extractions into a full FullInterpretationResult.
+ * Includes Layer 1 (MentorProfile) plus stubs for Layers 2-8.
+ * Layers 9-10 are marked as TODO.
  *
  * The ChunkExtraction type is shared — the interpreter produces the same
  * extraction format as the standard ingestion pipeline, so the aggregation
  * logic is fully reusable.
+ *
+ * R4: Server-side IP — extraction logic is proprietary
+ * R6d: Diagnostic not punitive — all layer outputs designed for growth discovery
  */
 export function buildProfileFromExternalJournal(
   userId: string,
   displayName: string,
   journalName: string,
-  extractions: ChunkExtraction[]
-): InterpretationResult {
+  extractions: ChunkExtraction[],
+  chunks?: InterpreterChunk[]
+): FullInterpretationResult {
   const profile = aggregateExtractions(userId, displayName, extractions)
+  const totalEntries = chunks ? chunks.reduce((sum, c) => sum + c.entries.length, 0) : extractions.length
 
   const sectionSummaries = extractions.map(e => ({
     section: e.phase,
@@ -609,11 +1331,39 @@ export function buildProfileFromExternalJournal(
     display_name: displayName,
     journal_name: journalName,
     sections_processed: extractions.length,
-    entries_processed: 0, // Set by caller
+    entries_processed: totalEntries,
     profile,
+
+    layer_2_cognitive_style: createCognitiveStyleStub(),
+    layer_3_engagement_gradient: createEngagementStub(totalEntries),
+    layer_4_contradictions: createContradictionStub(),
+    layer_5_relational_texture: createRelationalTextureStub(),
+    layer_6_developmental_timeline: createDevelopmentalTimelineStub(),
+    layer_7_language_fingerprint: createLanguageFingerprintStub(),
+    layer_8_triggers: createSituationalTriggerStub(),
+    layer_9_product_signals: createProductDevelopmentStub(),
+    layer_10_proof_of_concept: null,
+
     interpretation_timestamp: new Date().toISOString(),
     section_summaries: sectionSummaries,
+    completeness: {
+      layers_extracted: [1],
+      layers_todo: [2, 3, 4, 5, 6, 7, 8, 9, 10],
+    },
   }
+}
+
+/**
+ * Legacy wrapper for backward compatibility.
+ * Delegates to buildProfileFromExternalJournal.
+ */
+export function buildInterpretationResult(
+  userId: string,
+  displayName: string,
+  journalName: string,
+  extractions: ChunkExtraction[]
+): InterpretationResult {
+  return buildProfileFromExternalJournal(userId, displayName, journalName, extractions)
 }
 
 /**
