@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SageReasoning — Mentor Hub v2</title>
+<style>
+:root {
+  --dark: #121520;
+  --darker: #0d0f18;
+  --card: #1a1e30;
+  --border: #262b42;
+  --accent: #6c8cff;
+  --accent-dim: #4a64cc;
+  --gold: #d4a853;
+  --green: #4caf6a;
+  --orange: #e8953a;
+  --red: #d9534f;
+  --purple: #a374db;
+  --teal: #4db6ac;
+  --text: #d8dce8;
+  --dim: #6e7794;
+  --bright: #f0f2ff;
+  --radius: 8px;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: var(--font); background: var(--darker); color: var(--text); min-height:100vh; overflow:hidden; }
+
+/* === TOP BAR === */
+.topbar {
+  background: var(--dark); border-bottom:1px solid var(--border);
+  padding: 10px 20px; display:flex; align-items:center; justify-content:space-between;
+  height: 48px; z-index:100; position:relative;
+}
+.topbar-left { display:flex; align-items:center; gap:14px; }
+.topbar h1 { font-size:16px; font-weight:600; color:var(--gold); letter-spacing:.4px; }
+.topbar h1 span { color:var(--dim); font-weight:400; font-size:13px; margin-left:6px; }
+.topbar-right { display:flex; align-items:center; gap:14px; }
+.pill { display:inline-flex; align-items:center; gap:5px; padding:3px 12px; border-radius:16px; font-size:11px; }
+.pill-green { background:rgba(76,175,106,.12); border:1px solid rgba(76,175,106,.25); color:var(--green); }
+.pill-blue { background:rgba(108,140,255,.12); border:1px solid rgba(108,140,255,.25); color:var(--accent); }
+.dot { width:6px; height:6px; border-radius:50%; }
+.dot-green { background:var(--green); }
+.dot-blue { background:var(--accent); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.date-label { font-size:11px; color:var(--dim); }
+
+/* === FOUR-PANEL LAYOUT === */
+.layout {
+  display: grid;
+  grid-template-columns: 240px 1fr 300px 280px;
+  height: calc(100vh - 48px);
+}
+
+/* === LEFT: NAV + CONTACTS === */
+.left-panel {
+  background: var(--dark); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; overflow-y:auto;
+}
+.section { padding:14px; border-bottom:1px solid var(--border); }
+.section-title {
+  font-size:10px; text-transform:uppercase; letter-spacing:1.1px;
+  color:var(--dim); margin-bottom:10px;
+}
+.contact {
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:10px; margin-bottom:6px; cursor:pointer; transition:border-color .15s;
+}
+.contact:hover { border-color:var(--accent); }
+.contact.active { border-color:var(--accent); background:rgba(108,140,255,.06); }
+.contact-role { font-size:10px; text-transform:uppercase; letter-spacing:.7px; color:var(--accent); margin-bottom:3px; }
+.contact-name { font-size:13px; font-weight:500; color:var(--bright); }
+.contact-email { font-size:11px; color:var(--dim); word-break:break-all; }
+.edit-btn { font-size:10px; color:var(--accent); cursor:pointer; border:none; background:none; margin-top:4px; }
+.edit-btn:hover { text-decoration:underline; }
+.edit-form { display:none; margin-top:6px; }
+.edit-form.open { display:block; }
+.edit-form input {
+  width:100%; padding:5px 8px; margin-bottom:4px; background:var(--darker);
+  border:1px solid var(--border); border-radius:5px; color:var(--text); font-size:12px; outline:none;
+}
+.edit-form input:focus { border-color:var(--accent); }
+.edit-btns { display:flex; gap:4px; }
+.edit-btns button { flex:1; padding:4px; border-radius:5px; border:1px solid var(--border); font-size:11px; cursor:pointer; background:var(--card); color:var(--text); }
+.edit-btns .save { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+/* Nav links */
+.nav-link {
+  display:flex; align-items:center; gap:7px; padding:7px 8px; border-radius:5px;
+  font-size:12px; color:var(--text); cursor:pointer; transition:background .1s; text-decoration:none;
+}
+.nav-link:hover { background:rgba(108,140,255,.08); }
+.nav-icon { width:22px; height:22px; display:flex; align-items:center; justify-content:center; border-radius:5px; background:rgba(108,140,255,.1); font-size:11px; color:var(--accent); flex-shrink:0; }
+
+/* === CENTER: CHAT === */
+.center-panel { display:flex; flex-direction:column; background:var(--darker); }
+.chat-head {
+  padding:10px 16px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.chat-head-left { display:flex; align-items:center; gap:8px; }
+.chat-name { font-weight:600; font-size:14px; color:var(--bright); }
+.chat-role { font-size:11px; color:var(--dim); }
+.chat-btns { display:flex; gap:6px; }
+.chat-btns button {
+  padding:5px 12px; border-radius:5px; border:1px solid var(--border);
+  background:var(--card); color:var(--text); font-size:11px; cursor:pointer; transition:all .1s;
+}
+.chat-btns button:hover { border-color:var(--accent); color:var(--accent); }
+
+.chat-msgs { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+.msg { max-width:72%; padding:10px 14px; border-radius:10px; font-size:13px; line-height:1.5; }
+.msg-sent { align-self:flex-end; background:var(--accent); color:#fff; border-bottom-right-radius:3px; }
+.msg-recv { align-self:flex-start; background:var(--card); border:1px solid var(--border); border-bottom-left-radius:3px; }
+.msg-sys { align-self:center; max-width:88%; background:rgba(212,168,83,.08); border:1px solid rgba(212,168,83,.2); color:var(--gold); font-size:12px; text-align:center; border-radius:6px; padding:8px 14px; }
+.msg-cat { display:inline-block; font-size:9px; text-transform:uppercase; letter-spacing:.5px; padding:2px 7px; border-radius:3px; margin-bottom:5px; }
+.cat-q { background:rgba(108,140,255,.15); color:var(--accent); }
+.cat-u { background:rgba(76,175,106,.15); color:var(--green); }
+.cat-e { background:rgba(217,83,79,.15); color:var(--red); }
+.cat-f { background:rgba(232,149,58,.15); color:var(--orange); }
+.msg-time { font-size:9px; color:var(--dim); margin-top:3px; text-align:right; }
+.msg-sent .msg-time { color:rgba(255,255,255,.45); }
+
+/* Compose */
+.compose { padding:12px 16px; border-top:1px solid var(--border); background:var(--dark); }
+.compose-cats { display:flex; gap:6px; margin-bottom:6px; }
+.compose-cat {
+  padding:3px 10px; border-radius:14px; border:1px solid var(--border);
+  background:var(--card); font-size:11px; color:var(--dim); cursor:pointer; transition:all .1s;
+}
+.compose-cat.active { border-color:var(--accent); color:var(--accent); background:rgba(108,140,255,.08); }
+.compose-row { display:flex; gap:8px; }
+.compose-row textarea {
+  flex:1; resize:none; padding:10px 14px; background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); color:var(--text); font-size:13px; font-family:var(--font);
+  line-height:1.4; outline:none; min-height:48px; max-height:140px;
+}
+.compose-row textarea:focus { border-color:var(--accent); }
+.send-btn {
+  width:48px; border-radius:var(--radius); border:none; background:var(--accent);
+  color:#fff; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.send-btn:hover { background:var(--accent-dim); }
+
+/* === RIGHT: COMPANION OPINION + GRAPHS === */
+.right-panel {
+  background:var(--dark); border-left:1px solid var(--border);
+  display:flex; flex-direction:column; overflow-y:auto;
+}
+
+/* Session mode selector */
+.mode-bar {
+  padding:10px 12px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:6px;
+}
+.mode-btn {
+  flex:1; padding:5px 4px; border-radius:5px; border:1px solid var(--border);
+  background:var(--card); color:var(--dim); font-size:10px; text-align:center;
+  cursor:pointer; transition:all .15s; text-transform:uppercase; letter-spacing:.5px;
+}
+.mode-btn.active { border-color:var(--accent); color:var(--accent); background:rgba(108,140,255,.1); }
+.mode-btn:hover { border-color:var(--accent); }
+
+/* Companion opinion feed */
+.opinion-feed { flex:0 0 auto; max-height:260px; overflow-y:auto; border-bottom:1px solid var(--border); }
+.opinion-header {
+  padding:8px 12px; font-size:10px; text-transform:uppercase; letter-spacing:1px;
+  color:var(--dim); background:var(--card); border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:2;
+}
+.opinion-disclaimer {
+  padding:6px 12px; font-size:10px; color:var(--gold); background:rgba(212,168,83,.06);
+  border-bottom:1px solid rgba(212,168,83,.15);
+}
+.opinion-item {
+  padding:8px 12px; border-bottom:1px solid rgba(255,255,255,.03);
+  font-size:12px; line-height:1.45; display:flex; gap:8px; align-items:flex-start;
+}
+.opinion-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.opinion-text { flex:1; }
+.opinion-time { font-size:9px; color:var(--dim); flex-shrink:0; }
+.od-blue { background:var(--accent); }
+.od-gold { background:var(--gold); }
+.od-orange { background:var(--orange); }
+.od-green { background:var(--green); }
+.od-red { background:var(--red); }
+
+/* Graph cards */
+.gcard { margin:10px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:12px; }
+.gcard h4 { font-size:10px; text-transform:uppercase; letter-spacing:.7px; color:var(--dim); margin-bottom:10px; }
+.gcard canvas { width:100% !important; }
+
+/* Proximity badge */
+.prox-badge {
+  display:flex; align-items:center; gap:8px; padding:8px 10px;
+  background:rgba(212,168,83,.06); border:1px solid rgba(212,168,83,.15);
+  border-radius:6px; margin-bottom:10px;
+}
+.prox-dot-big { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#fff; flex-shrink:0; }
+.prox-lbl { font-size:13px; font-weight:600; color:var(--gold); }
+.prox-sub { font-size:10px; color:var(--dim); margin-top:1px; }
+
+/* Dimension bars */
+.dim-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+.dim-lbl { font-size:10px; color:var(--dim); width:88px; flex-shrink:0; }
+.dim-track { flex:1; height:6px; background:rgba(255,255,255,.05); border-radius:3px; overflow:hidden; }
+.dim-fill { height:100%; border-radius:3px; transition:width .5s ease; }
+.dim-val { font-size:10px; color:var(--text); width:28px; text-align:right; }
+
+/* === FAR RIGHT: V3 SCOPE + AGENTS === */
+.far-right {
+  background:var(--dark); border-left:1px solid var(--border);
+  display:flex; flex-direction:column; overflow-y:auto;
+}
+.phase-list { list-style:none; }
+.phase-item { display:flex; align-items:center; gap:6px; padding:5px 0; font-size:12px; border-bottom:1px solid rgba(255,255,255,.03); }
+.phase-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.phase-dot.done { background:var(--green); }
+.phase-dot.active { background:var(--orange); }
+.phase-dot.pending { background:var(--border); }
+.phase-lbl { flex:1; color:var(--text); }
+.phase-lbl.struck { color:var(--dim); text-decoration:line-through; }
+.phase-tag { font-size:9px; text-transform:uppercase; letter-spacing:.5px; padding:2px 6px; border-radius:3px; }
+.tag-done { background:rgba(76,175,106,.12); color:var(--green); }
+.tag-active { background:rgba(232,149,58,.12); color:var(--orange); }
+.tag-todo { background:rgba(255,255,255,.04); color:var(--dim); }
+
+/* Agent status cards */
+.agent-card {
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:10px; margin-bottom:6px;
+}
+.agent-head { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+.agent-color { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.agent-name { font-size:12px; font-weight:500; color:var(--bright); }
+.agent-auth { font-size:10px; color:var(--dim); }
+.agent-stat { display:flex; justify-content:space-between; font-size:10px; color:var(--dim); margin-top:2px; }
+
+/* Context link */
+.ctx-link {
+  display:flex; align-items:center; gap:6px; padding:8px 10px; margin:10px;
+  background:rgba(108,140,255,.06); border:1px solid rgba(108,140,255,.15);
+  border-radius:6px; color:var(--accent); font-size:12px; cursor:pointer; text-decoration:none; transition:background .1s;
+}
+.ctx-link:hover { background:rgba(108,140,255,.12); }
+
+/* Multi-agent legend */
+.legend { display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; }
+.legend-item { display:flex; align-items:center; gap:4px; font-size:10px; color:var(--dim); }
+.legend-dot { width:8px; height:8px; border-radius:50%; }
+
+/* Manual drawer */
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:199; display:none; }
+.overlay.vis { display:block; }
+.drawer {
+  position:fixed; top:0; right:-500px; width:500px; height:100vh;
+  background:var(--dark); border-left:1px solid var(--border); z-index:200;
+  transition:right .3s ease; display:flex; flex-direction:column;
+}
+.drawer.open { right:0; }
+.drawer-head { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.drawer-head h3 { font-size:14px; color:var(--gold); }
+.drawer-close { background:none; border:none; color:var(--dim); font-size:20px; cursor:pointer; padding:2px 6px; }
+.drawer-search { margin:10px 14px; padding:7px 12px; background:var(--card); border:1px solid var(--border); border-radius:6px; color:var(--text); font-size:12px; outline:none; width:calc(100% - 28px); }
+.drawer-search:focus { border-color:var(--accent); }
+.drawer-body { flex:1; overflow-y:auto; padding:14px 16px; }
+.man-sec { margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+.man-sec h4 { font-size:13px; font-weight:600; color:var(--accent); margin-bottom:6px; cursor:pointer; }
+.man-sec h4:hover { text-decoration:underline; }
+.man-sec p, .man-sec li { font-size:12px; line-height:1.55; color:var(--text); }
+.man-sec ul { padding-left:16px; }
+.man-sec li { margin-bottom:3px; }
+.man-sec .tip { background:rgba(212,168,83,.06); border-left:3px solid var(--gold); padding:6px 10px; margin-top:6px; font-size:11px; color:var(--gold); border-radius:0 5px 5px 0; }
+.man-sec table { width:100%; border-collapse:collapse; margin-top:6px; font-size:11px; }
+.man-sec th, .man-sec td { text-align:left; padding:5px 8px; border:1px solid var(--border); }
+.man-sec th { background:var(--card); color:var(--accent); }
+.collapsed { display:none; }
+
+/* Toast */
+.toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(70px); background:var(--green); color:#fff; padding:8px 20px; border-radius:6px; font-size:12px; font-weight:500; z-index:300; opacity:0; transition:all .3s ease; }
+.toast.vis { transform:translateX(-50%) translateY(0); opacity:1; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--accent-dim); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <h1>SageReasoning <span>Mentor Hub</span></h1>
+  </div>
+  <div class="topbar-right">
+    <div class="pill pill-green"><span class="dot dot-green"></span> System Active</div>
+    <div class="pill pill-blue" id="companionPill" style="display:none"><span class="dot dot-blue"></span> Companion Mode</div>
+    <span class="date-label" id="dateDisplay"></span>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="section">
+      <div class="section-title">Contacts</div>
+      <div class="contact active" id="card-founder" onclick="selectContact('founder')">
+        <div class="contact-role">Founder (You)</div>
+        <div class="contact-name" id="name-founder">Clinton Aitkenhead</div>
+        <div class="contact-email" id="email-founder">clintonaitkenhead@hotmail.com</div>
+        <button class="edit-btn" onclick="event.stopPropagation();toggleEdit('founder')">Edit</button>
+        <div class="edit-form" id="edit-founder">
+          <input type="text" id="in-name-founder" placeholder="Name">
+          <input type="email" id="in-email-founder" placeholder="Email">
+          <div class="edit-btns">
+            <button onclick="event.stopPropagation();toggleEdit('founder')">Cancel</button>
+            <button class="save" onclick="event.stopPropagation();saveContact('founder')">Save</button>
+          </div>
+        </div>
+      </div>
+      <div class="contact" id="card-mentor" onclick="selectContact('mentor')">
+        <div class="contact-role">Sage Mentor</div>
+        <div class="contact-name" id="name-mentor">Sage Mentor Agent</div>
+        <div class="contact-email" id="email-mentor">Click Edit to assign</div>
+        <button class="edit-btn" onclick="event.stopPropagation();toggleEdit('mentor')">Edit</button>
+        <div class="edit-form" id="edit-mentor">
+          <input type="text" id="in-name-mentor" placeholder="Mentor name">
+          <input type="email" id="in-email-mentor" placeholder="Mentor email">
+          <div class="edit-btns">
+            <button onclick="event.stopPropagation();toggleEdit('mentor')">Cancel</button>
+            <button class="save" onclick="event.stopPropagation();saveContact('mentor')">Save</button>
+          </div>
+        </div>
+      </div>
+      <div class="contact" id="card-support" onclick="selectContact('support')">
+        <div class="contact-role">Support Agent</div>
+        <div class="contact-name" id="name-support">Sage Support Agent</div>
+        <div class="contact-email" id="email-support">support@sagereasoning.com</div>
+        <button class="edit-btn" onclick="event.stopPropagation();toggleEdit('support')">Edit</button>
+        <div class="edit-form" id="edit-support">
+          <input type="text" id="in-name-support" placeholder="Agent name">
+          <input type="email" id="in-email-support" placeholder="Agent email">
+          <div class="edit-btns">
+            <button onclick="event.stopPropagation();toggleEdit('support')">Cancel</button>
+            <button class="save" onclick="event.stopPropagation();saveContact('support')">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Quick Reference</div>
+      <a class="nav-link" onclick="openManual()"><span class="nav-icon">&#128214;</span> Support Agent Manual</a>
+      <a class="nav-link" onclick="openManualSec('gov')"><span class="nav-icon">&#9878;</span> Governance Rules</a>
+      <a class="nav-link" onclick="openManualSec('tix')"><span class="nav-icon">&#128233;</span> Ticket Lifecycle</a>
+      <a class="nav-link" onclick="openManualSec('auth')"><span class="nav-icon">&#128274;</span> Authority Levels</a>
+      <a class="nav-link" onclick="openManualSec('play')"><span class="nav-icon">&#128221;</span> Playbooks</a>
+      <a class="nav-link" onclick="openManualSec('jour')"><span class="nav-icon">&#128218;</span> Journal Guide</a>
+    </div>
+
+    <div class="section" style="border-bottom:none;">
+      <div class="section-title">Threads</div>
+      <div id="threadList"><span style="font-size:11px;color:var(--dim)">No conversations yet</span></div>
+    </div>
+  </div>
+
+  <!-- CENTER: CHAT -->
+  <div class="center-panel">
+    <div class="chat-head">
+      <div class="chat-head-left">
+        <div>
+          <div class="chat-name" id="chatName">Sage Mentor Agent</div>
+          <div class="chat-role" id="chatRole">Mentor</div>
+        </div>
+      </div>
+      <div class="chat-btns">
+        <button onclick="exportThread()">Export</button>
+        <button onclick="clearThread()">New Thread</button>
+      </div>
+    </div>
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="msg msg-sys">Welcome to the Mentor Hub. Select a contact and start a conversation. All messages are saved locally.</div>
+    </div>
+    <div class="compose">
+      <div class="compose-cats">
+        <span class="compose-cat active" data-cat="question" onclick="setCat(this)">Question</span>
+        <span class="compose-cat" data-cat="update" onclick="setCat(this)">Update</span>
+        <span class="compose-cat" data-cat="escalation" onclick="setCat(this)">Escalation</span>
+        <span class="compose-cat" data-cat="feedback" onclick="setCat(this)">Feedback</span>
+      </div>
+      <div class="compose-row">
+        <textarea id="composeIn" placeholder="Type your message..." rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea>
+        <button class="send-btn" onclick="sendMsg()" title="Send">&#10148;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: COMPANION + GRAPHS -->
+  <div class="right-panel">
+
+    <!-- Session Mode -->
+    <div class="mode-bar">
+      <button class="mode-btn" data-mode="observer" onclick="setMode(this)">Observer</button>
+      <button class="mode-btn active" data-mode="companion" onclick="setMode(this)">Companion</button>
+      <button class="mode-btn" data-mode="consultant" onclick="setMode(this)">Consultant</button>
+    </div>
+
+    <!-- Companion Opinion Feed -->
+    <div class="opinion-feed" id="opinionFeed">
+      <div class="opinion-header">Live Mentor Observations</div>
+      <div class="opinion-disclaimer">Educational Stoic reasoning frameworks, not professional advice. Observations reflect philosophical evaluation only.</div>
+      <div id="opinionItems">
+        <div class="opinion-item"><span class="opinion-dot od-blue"></span><span class="opinion-text">Session bridge active. Monitoring for strategic decisions, passion patterns, and value alignment.</span><span class="opinion-time">Now</span></div>
+        <div class="opinion-item"><span class="opinion-dot od-gold"></span><span class="opinion-text">Journal pattern: your profile shows recurring <em>agonia</em> around scope decisions. Noting for this session.</span><span class="opinion-time">Now</span></div>
+      </div>
+    </div>
+
+    <!-- Current Proximity -->
+    <div class="gcard">
+      <h4>Current Proximity — Founder (Personal)</h4>
+      <div class="prox-badge">
+        <div class="prox-dot-big" style="background:var(--orange)">D</div>
+        <div>
+          <div class="prox-lbl">Deliberate</div>
+          <div class="prox-sub">Active reasoning, some false judgements remaining</div>
+        </div>
+      </div>
+      <div class="dim-row"><span class="dim-lbl">Passion Reduction</span><div class="dim-track"><div class="dim-fill" style="width:45%;background:var(--accent)"></div></div><span class="dim-val">45%</span></div>
+      <div class="dim-row"><span class="dim-lbl">Judgement Quality</span><div class="dim-track"><div class="dim-fill" style="width:62%;background:var(--green)"></div></div><span class="dim-val">62%</span></div>
+      <div class="dim-row"><span class="dim-lbl">Disposition Stability</span><div class="dim-track"><div class="dim-fill" style="width:38%;background:var(--orange)"></div></div><span class="dim-val">38%</span></div>
+      <div class="dim-row"><span class="dim-lbl">Oikeiosis Extension</span><div class="dim-track"><div class="dim-fill" style="width:55%;background:var(--gold)"></div></div><span class="dim-val">55%</span></div>
+      <div style="margin-top:6px;font-size:10px;color:var(--dim);">Direction: <span style="color:var(--green)">&#9650; Improving</span></div>
+    </div>
+
+    <!-- Multi-Agent Proximity Journey -->
+    <div class="gcard">
+      <h4>Proximity Journey — All Agents</h4>
+      <canvas id="journeyChart" height="200"></canvas>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:var(--gold)"></span> Founder</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--accent)"></span> Cowork (Project)</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--green)"></span> Support Agent</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--purple)"></span> Content Agent</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--teal)"></span> Research Agent</span>
+      </div>
+    </div>
+
+    <!-- Mentorship Milestones -->
+    <div class="gcard">
+      <h4>Mentorship Milestones</h4>
+      <canvas id="milestoneChart" height="170"></canvas>
+    </div>
+  </div>
+
+  <!-- FAR RIGHT: SCOPE + AGENTS -->
+  <div class="far-right">
+    <div class="section">
+      <div class="section-title">V3 Adoption Scope</div>
+      <ul class="phase-list">
+        <li class="phase-item"><span class="phase-dot done"></span><span class="phase-lbl struck">P1-P11: Core V3</span><span class="phase-tag tag-done">Done</span></li>
+        <li class="phase-item"><span class="phase-dot done"></span><span class="phase-lbl struck">P12: V1 Cleanup</span><span class="phase-tag tag-done">Done</span></li>
+        <li class="phase-item"><span class="phase-dot done"></span><span class="phase-lbl struck">P13: Prompt Audit</span><span class="phase-tag tag-done">Done</span></li>
+        <li class="phase-item"><span class="phase-dot done"></span><span class="phase-lbl struck">P14: Discovery</span><span class="phase-tag tag-done">Done</span></li>
+        <li class="phase-item"><span class="phase-dot done"></span><span class="phase-lbl struck">P15: Integration Test</span><span class="phase-tag tag-done">Done</span></li>
+        <li class="phase-item"><span class="phase-dot done"></span><span class="phase-lbl struck">P16: Final Verify</span><span class="phase-tag tag-done">Done</span></li>
+        <li class="phase-item"><span class="phase-dot active"></span><span class="phase-lbl">Sage Mentor System</span><span class="phase-tag tag-active">Active</span></li>
+        <li class="phase-item"><span class="phase-dot active"></span><span class="phase-lbl">Agent Trust Layer</span><span class="phase-tag tag-active">Active</span></li>
+        <li class="phase-item"><span class="phase-dot active"></span><span class="phase-lbl">Session Bridge</span><span class="phase-tag tag-active">New</span></li>
+        <li class="phase-item"><span class="phase-dot pending"></span><span class="phase-lbl">Business Plan Review</span><span class="phase-tag tag-todo">Next</span></li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Inner Agents</div>
+      <div class="agent-card">
+        <div class="agent-head"><span class="agent-color" style="background:var(--gold)"></span><span class="agent-name">Founder (Personal)</span></div>
+        <div class="agent-auth">Proximity: Deliberate &middot; Direction: Improving</div>
+        <div class="agent-stat"><span>Journal: Seeded</span><span>Interactions: 34</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-head"><span class="agent-color" style="background:var(--accent)"></span><span class="agent-name">Claude Cowork (Project)</span></div>
+        <div class="agent-auth">Authority: Supervised &middot; Baseline: Pending</div>
+        <div class="agent-stat"><span>Actions: 0</span><span>Needs: Stoic baseline check</span></div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-head"><span class="agent-color" style="background:var(--green)"></span><span class="agent-name">Support Agent</span></div>
+        <div class="agent-auth">Authority: Supervised &middot; 100% check rate</div>
+        <div class="agent-stat"><span>Actions: 0</span><span>Promotion: 20 needed</span></div>
+      </div>
+      <div class="agent-card" style="opacity:.5">
+        <div class="agent-head"><span class="agent-color" style="background:var(--purple)"></span><span class="agent-name">Content Agent</span></div>
+        <div class="agent-auth">Not yet registered</div>
+      </div>
+      <div class="agent-card" style="opacity:.5">
+        <div class="agent-head"><span class="agent-color" style="background:var(--teal)"></span><span class="agent-name">Research Agent</span></div>
+        <div class="agent-auth">Not yet registered</div>
+      </div>
+    </div>
+
+    <a class="ctx-link" onclick="showToast('Open SageReasoning_Knowledge_Context_Summary.md in your project folder')">&#128279; Knowledge Context Summary</a>
+    <a class="ctx-link" onclick="showToast('Open Sage_Mentor_Claude_Integration_Architecture.md')">&#128279; Session Bridge Architecture</a>
+  </div>
+</div>
+
+<!-- MANUAL DRAWER -->
+<div class="overlay" id="overlay" onclick="closeManual()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head"><h3>Support Agent Manual</h3><button class="drawer-close" onclick="closeManual()">&times;</button></div>
+  <input type="text" class="drawer-search" id="manSearch" placeholder="Search the manual..." oninput="filterMan()">
+  <div class="drawer-body" id="manBody">
+    <div class="man-sec" data-sec="arch" data-kw="ring architecture before after check draft governance">
+      <h4 onclick="togSec(this)">1. The Ring Architecture</h4>
+      <div class="sec-body"><p>Every action passes through the Sage Mentor ring: <strong>BEFORE</strong> (pre-check) then <strong>DRAFT</strong> then <strong>AFTER</strong> (post-evaluation). You get a vetted draft to review and approve.</p><div class="tip">The ring now also wraps Cowork sessions via the Session Bridge (Observer, Consultant, or Companion mode).</div></div>
+    </div>
+    <div class="man-sec" data-sec="gov" data-kw="governance rules R1 R2 R3 R9 R14 therapy employment disclaimer">
+      <h4 onclick="togSec(this)">2. Governance Rules (R1-R14)</h4>
+      <div class="sec-body"><table><tr><th>Rule</th><th>Summary</th></tr><tr><td>R1</td><td>No therapy — philosophical practice only</td></tr><tr><td>R2</td><td>No employment evaluation</td></tr><tr><td>R3</td><td>Disclaimer on all evaluative output</td></tr><tr><td>R4</td><td>IP protection — results, not frameworks</td></tr><tr><td>R5</td><td>Cost guardrail — paid covers 2x LLM costs</td></tr><tr><td>R6</td><td>Methodology — qualitative, no numeric scoring</td></tr><tr><td>R7</td><td>Source fidelity — trace to primary citations</td></tr><tr><td>R8</td><td>Glossary enforcement — 3-tier terminology</td></tr><tr><td>R9</td><td>No outcome promises</td></tr><tr><td>R10-R14</td><td>Marketplace, wrappers, skills, embedding, compliance pipeline</td></tr></table><div class="tip">Enforced automatically by the ring. Governance flags appear in ticket frontmatter.</div></div>
+    </div>
+    <div class="man-sec" data-sec="tix" data-kw="ticket inbox lifecycle open drafting review resolved escalated">
+      <h4 onclick="togSec(this)">3. Ticket Lifecycle</h4>
+      <div class="sec-body"><p>Open &rarr; Drafting &rarr; BEFORE check &rarr; Review &rarr; Resolved (or Escalated). Ticket files are markdown in <code>support/inbox/</code> with YAML frontmatter.</p><div class="tip">Escalated tickets are assigned to you. The agent does not draft for governance-flagged items.</div></div>
+    </div>
+    <div class="man-sec" data-sec="auth" data-kw="authority levels supervised guided autonomous promotion demotion">
+      <h4 onclick="togSec(this)">4. Authority Levels</h4>
+      <div class="sec-body"><table><tr><th>Level</th><th>Check Rate</th><th>Threshold</th></tr><tr><td>Supervised</td><td>100%</td><td>Starting level</td></tr><tr><td>Guided</td><td>50%</td><td>20+ actions, 70%+ deliberate</td></tr><tr><td>Spot-Checked</td><td>15%</td><td>50+ actions, stricter</td></tr><tr><td>Autonomous</td><td>Novel only</td><td>100+ actions</td></tr><tr><td>Full Authority</td><td>5% audit</td><td>200+ actions</td></tr></table><div class="tip">Promotion is automatic and deterministic. Demotion is protective, not punitive.</div></div>
+    </div>
+    <div class="man-sec" data-sec="play" data-kw="playbook workflow enterprise api payment governance weekly">
+      <h4 onclick="togSec(this)">5. Workflow Playbooks</h4>
+      <div class="sec-body"><p>Six pre-built playbooks in <code>workflows/</code>: new-customer, enterprise, api-support, stripe-payment-failed, governance-flagged, weekly-pattern-summary. Create custom playbooks with trigger conditions and escalation rules.</p></div>
+    </div>
+    <div class="man-sec" data-sec="jour" data-kw="journal 55-day upload profile passion virtue oikeiosis ingestion">
+      <h4 onclick="togSec(this)">6. Journal Upload & Mentor Profile</h4>
+      <div class="sec-body"><p>Three-stage pipeline: Chunking (by phase) &rarr; Extraction (AI analysis) &rarr; Aggregation (unified MentorProfile). Profile includes: passion map, causal tendencies, value hierarchy, oikeiosis map, virtue profile, key passages.</p><div class="tip">Profile is diagnostic, not punitive. Strong passions are mapped to focus guidance.</div></div>
+    </div>
+    <div class="man-sec" data-sec="bridge" data-kw="session bridge cowork companion observer consultant strategic">
+      <h4 onclick="togSec(this)">7. Session Bridge (New)</h4>
+      <div class="sec-body"><p>Connects Cowork sessions to the ring. Three modes:</p><ul><li><strong>Observer:</strong> Batch evaluation after session ends. Near-zero cost.</li><li><strong>Consultant:</strong> On-demand ring check mid-session.</li><li><strong>Companion:</strong> Live parallel evaluation with scrolling opinion feed.</li></ul><p>Companion mode auto-activates for sessions matching strategic keywords. All classified exchanges persist to Supabase and the semantic memory layer.</p><div class="tip">Knowledge Context Summary auto-updates at end of sessions with strategic decisions.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// === STATE ===
+const S = {
+  contacts: {
+    founder: { name:'Clinton Aitkenhead', email:'clintonaitkenhead@hotmail.com', role:'Founder' },
+    mentor: { name:'Sage Mentor Agent', email:'', role:'Mentor' },
+    support: { name:'Sage Support Agent', email:'support@sagereasoning.com', role:'Support Agent' }
+  },
+  active: 'mentor',
+  cat: 'question',
+  mode: 'companion',
+  threads: { founder:[], mentor:[], support:[] }
+};
+try { const sv=JSON.parse(localStorage.getItem('sageHub2')||'{}'); if(sv.contacts) Object.assign(S.contacts,sv.contacts); if(sv.threads) Object.assign(S.threads,sv.threads); } catch(e){}
+function save(){ try{localStorage.setItem('sageHub2',JSON.stringify({contacts:S.contacts,threads:S.threads}))}catch(e){} }
+
+document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-AU',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+// === CONTACTS ===
+function updateCards(){ for(const k of ['founder','mentor','support']){ document.getElementById('name-'+k).textContent=S.contacts[k].name; document.getElementById('email-'+k).textContent=S.contacts[k].email||'Click Edit to assign'; }}
+function toggleEdit(w){ const f=document.getElementById('edit-'+w); const o=f.classList.contains('open'); document.querySelectorAll('.edit-form').forEach(x=>x.classList.remove('open')); if(!o){ f.classList.add('open'); document.getElementById('in-name-'+w).value=S.contacts[w].name; document.getElementById('in-email-'+w).value=S.contacts[w].email; document.getElementById('in-name-'+w).focus(); }}
+function saveContact(w){ const n=document.getElementById('in-name-'+w).value.trim(); const e=document.getElementById('in-email-'+w).value.trim(); if(n) S.contacts[w].name=n; S.contacts[w].email=e; updateCards(); toggleEdit(w); save(); if(w===S.active) updChatHead(); showToast('Contact updated'); }
+function selectContact(w){ S.active=w; document.querySelectorAll('.contact').forEach(c=>c.classList.remove('active')); document.getElementById('card-'+w).classList.add('active'); updChatHead(); renderMsgs(); }
+function updChatHead(){ document.getElementById('chatName').textContent=S.contacts[S.active].name; document.getElementById('chatRole').textContent=S.contacts[S.active].role; }
+
+// === MESSAGES ===
+function ts(){ return new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}); }
+function dt(){ return new Date().toLocaleDateString('en-AU'); }
+function esc(t){ const d=document.createElement('div'); d.textContent=t; return d.innerHTML.replace(/\n/g,'<br>'); }
+function sendMsg(){ const inp=document.getElementById('composeIn'); const t=inp.value.trim(); if(!t) return; S.threads[S.active].push({text:t,cat:S.cat,dir:'sent',time:ts(),date:dt()}); inp.value=''; save(); renderMsgs(); updThreads(); }
+function renderMsgs(){ const c=document.getElementById('chatMsgs'); const msgs=S.threads[S.active]; if(!msgs.length){ c.innerHTML='<div class="msg msg-sys">No messages yet with '+S.contacts[S.active].name+'. Start below.</div>'; return; }
+  let h='',ld=''; for(const m of msgs){ if(m.date!==ld){h+='<div class="msg msg-sys" style="font-size:10px;padding:5px 12px;">'+m.date+'</div>';ld=m.date;} const cc=m.cat==='question'?'cat-q':m.cat==='update'?'cat-u':m.cat==='escalation'?'cat-e':'cat-f'; h+='<div class="msg msg-'+(m.dir==='sent'?'sent':'recv')+'"><div class="msg-cat '+cc+'">'+m.cat+'</div><div>'+esc(m.text)+'</div><div class="msg-time">'+m.time+'</div></div>'; }
+  c.innerHTML=h; c.scrollTop=c.scrollHeight; }
+function setCat(el){ document.querySelectorAll('.compose-cat').forEach(c=>c.classList.remove('active')); el.classList.add('active'); S.cat=el.dataset.cat; }
+function updThreads(){ const c=document.getElementById('threadList'); let h=''; for(const k of ['mentor','support','founder']){ const msgs=S.threads[k]; if(!msgs.length) continue; const l=msgs[msgs.length-1]; const pr=l.text.length>35?l.text.substring(0,35)+'...':l.text; h+='<div class="contact'+(k===S.active?' active':'')+'" onclick="selectContact(\''+k+'\')" style="padding:8px;"><div style="display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:500;color:var(--bright)">'+S.contacts[k].name+'</span><span style="font-size:9px;color:var(--dim)">'+l.time+'</span></div><div style="font-size:11px;color:var(--dim);margin-top:1px">'+esc(pr)+'</div></div>'; }
+  c.innerHTML=h||'<span style="font-size:11px;color:var(--dim)">No conversations yet</span>'; }
+function exportThread(){ const msgs=S.threads[S.active]; if(!msgs.length){showToast('No messages');return;} let t='SageReasoning Mentor Hub — Thread with '+S.contacts[S.active].name+'\nExported: '+new Date().toLocaleString('en-AU')+'\n'+'='.repeat(50)+'\n\n'; for(const m of msgs){t+='['+m.date+' '+m.time+'] ['+m.cat.toUpperCase()+'] '+(m.dir==='sent'?S.contacts.founder.name:S.contacts[S.active].name)+':\n'+m.text+'\n\n';} const b=new Blob([t],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='sage-thread-'+S.active+'-'+new Date().toISOString().split('T')[0]+'.txt'; a.click(); showToast('Exported'); }
+function clearThread(){ if(S.threads[S.active].length&&!confirm('Start new thread?'))return; S.threads[S.active]=[]; save(); renderMsgs(); updThreads(); showToast('New thread'); }
+
+// === SESSION MODE ===
+function setMode(el){ document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active'); S.mode=el.dataset.mode; document.getElementById('companionPill').style.display=S.mode==='companion'?'':'none'; document.getElementById('opinionFeed').style.display=S.mode==='companion'?'':'none'; showToast(S.mode.charAt(0).toUpperCase()+S.mode.slice(1)+' mode'); }
+
+// === COMPANION OPINION ===
+function addOpinion(color, text){
+  const c=document.getElementById('opinionItems');
+  const d=document.createElement('div'); d.className='opinion-item';
+  d.innerHTML='<span class="opinion-dot od-'+color+'"></span><span class="opinion-text">'+text+'</span><span class="opinion-time">'+ts()+'</span>';
+  c.appendChild(d); d.scrollIntoView({behavior:'smooth'});
+}
+
+// === MANUAL ===
+function openManual(){ document.getElementById('drawer').classList.add('open'); document.getElementById('overlay').classList.add('vis'); }
+function closeManual(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('vis'); }
+function openManualSec(s){ openManual(); const el=document.querySelector('[data-sec="'+s+'"]'); if(el){el.querySelectorAll('.sec-body').forEach(b=>b.classList.remove('collapsed'));setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),200);}}
+function togSec(h4){ h4.nextElementSibling.classList.toggle('collapsed'); }
+function filterMan(){ const q=document.getElementById('manSearch').value.toLowerCase(); document.querySelectorAll('.man-sec').forEach(s=>{const kw=s.dataset.kw||'';const t=s.textContent.toLowerCase();s.style.display=(!q||t.includes(q)||kw.includes(q))?'':'none';if(q)s.querySelectorAll('.sec-body').forEach(b=>b.classList.remove('collapsed'));}); }
+
+// === TOAST ===
+function showToast(m){ const e=document.getElementById('toast'); e.textContent=m; e.classList.add('vis'); setTimeout(()=>e.classList.remove('vis'),2200); }
+
+// === MULTI-AGENT PROXIMITY JOURNEY GRAPH ===
+function drawJourney(){
+  const cv=document.getElementById('journeyChart');
+  const ctx=cv.getContext('2d');
+  const W=cv.width=cv.offsetWidth*2; const H=cv.height=400;
+  const levels=['Reflexive','Habitual','Deliberate','Principled','Sage-like'];
+  const lvlColors=['#d9534f','#e8953a','#d4a853','#4caf6a','#6c8cff'];
+  const padL=76,padR=16,padT=16,padB=28;
+  const pW=W-padL-padR,pH=H-padT-padB;
+
+  // Grid
+  ctx.textAlign='right'; ctx.font='16px system-ui';
+  for(let i=0;i<5;i++){
+    const y=padT+pH-(i/4)*pH;
+    ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.fillStyle=lvlColors[i]; ctx.fillText(levels[i],padL-6,y+5);
+  }
+
+  // Time labels
+  const months=['Feb','Mar','Apr','May','Jun'];
+  ctx.font='14px system-ui'; ctx.textAlign='center'; ctx.fillStyle='#6e7794';
+  for(let i=0;i<months.length;i++) ctx.fillText(months[i],padL+(i/(months.length-1))*pW,H-4);
+
+  // Agent data lines
+  const agents=[
+    { color:'#d4a853', width:3, data:[1.0,1.3,1.7,2.0,2.4] },         // Founder
+    { color:'#6c8cff', width:3, data:[null,null,1.5,1.8,2.1] },        // Cowork (Project)
+    { color:'#4caf6a', width:2, data:[null,null,null,1.0,1.2] },        // Support
+    { color:'#a374db', width:1.5, data:[null,null,null,null,null] },     // Content (future)
+    { color:'#4db6ac', width:1.5, data:[null,null,null,null,null] },     // Research (future)
+  ];
+
+  for(const ag of agents){
+    const pts=ag.data.map((v,i)=>v!==null?{x:padL+(i/(ag.data.length-1))*pW, y:padT+pH-(v/4)*pH}:null).filter(Boolean);
+    if(pts.length<2) continue;
+
+    // Line
+    ctx.beginPath(); ctx.strokeStyle=ag.color; ctx.lineWidth=ag.width; ctx.lineJoin='round';
+    pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y)); ctx.stroke();
+
+    // Gradient fill
+    const grad=ctx.createLinearGradient(0,padT,0,H);
+    grad.addColorStop(0,ag.color+'30'); grad.addColorStop(1,ag.color+'00');
+    ctx.lineTo(pts[pts.length-1].x,padT+pH); ctx.lineTo(pts[0].x,padT+pH); ctx.closePath();
+    ctx.fillStyle=grad; ctx.fill();
+
+    // Dots
+    pts.forEach((p,i)=>{
+      ctx.beginPath(); ctx.arc(p.x,p.y,i===pts.length-1?6:3,0,Math.PI*2);
+      ctx.fillStyle=ag.color; ctx.fill();
+      if(i===pts.length-1){ ctx.strokeStyle=ag.color+'60'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(p.x,p.y,10,0,Math.PI*2); ctx.stroke(); }
+    });
+  }
+
+  // Baseline marker for Cowork agent
+  const bx=padL+(2/4)*pW, by=padT+pH-(1.5/4)*pH;
+  ctx.font='12px system-ui'; ctx.fillStyle='#6c8cff'; ctx.textAlign='left';
+  ctx.fillText('Project baseline',bx+14,by-4);
+  ctx.beginPath(); ctx.setLineDash([4,4]); ctx.strokeStyle='#6c8cff40'; ctx.lineWidth=1;
+  ctx.moveTo(bx,padT); ctx.lineTo(bx,padT+pH); ctx.stroke(); ctx.setLineDash([]);
+}
+
+// === MILESTONES ===
+function drawMilestones(){
+  const cv=document.getElementById('milestoneChart');
+  const ctx=cv.getContext('2d');
+  const W=cv.width=cv.offsetWidth*2; const H=cv.height=340;
+  const ms=[
+    {name:'Baseline Done',pct:100,color:'#4caf6a'},
+    {name:'Journal Started',pct:100,color:'#4caf6a'},
+    {name:'Profile Seeded',pct:85,color:'#6c8cff'},
+    {name:'Support Live',pct:70,color:'#6c8cff'},
+    {name:'Session Bridge',pct:15,color:'#e8953a'},
+    {name:'Trust Layer',pct:40,color:'#e8953a'},
+    {name:'Accreditation',pct:10,color:'#d4a853'},
+  ];
+  const padL=110,padR=44,padT=8,padB=8,barH=24,gap=14;
+  ctx.font='16px system-ui'; ctx.textAlign='right';
+  for(let i=0;i<ms.length;i++){
+    const y=padT+i*(barH+gap); const maxW=W-padL-padR;
+    ctx.fillStyle='#d8dce8'; ctx.fillText(ms[i].name,padL-10,y+barH/2+5);
+    ctx.fillStyle='rgba(255,255,255,.05)'; ctx.beginPath(); ctx.roundRect(padL,y,maxW,barH,5); ctx.fill();
+    const fw=(ms[i].pct/100)*maxW;
+    if(fw>0){ ctx.fillStyle=ms[i].color; ctx.globalAlpha=.8; ctx.beginPath(); ctx.roundRect(padL,y,fw,barH,5); ctx.fill(); ctx.globalAlpha=1; }
+    ctx.fillStyle='#d8dce8'; ctx.textAlign='left'; ctx.fillText(ms[i].pct+'%',padL+fw+6,y+barH/2+5); ctx.textAlign='right';
+  }
+}
+
+// === INIT ===
+updateCards(); updChatHead(); renderMsgs(); updThreads();
+requestAnimationFrame(()=>{ drawJourney(); drawMilestones(); });
+let rt; window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{drawJourney();drawMilestones();},200);});
+</script>
+</body>
+</html>

@@ -15,12 +15,13 @@
  *   proactive-scheduler.ts — Scheduled proactive outputs (morning, evening, weekly)
  *   pattern-engine.ts      — Temporal pattern recognition engine (batch, deterministic)
  *   authority-manager.ts   — Inner agent authority lifecycle (promotion, demotion, suspension)
+ *   session-bridge.ts      — Bridge between Claude Cowork sessions and the ring
  *
  * SageReasoning Proprietary Licence
  */
 /**
  * @compliance
- * compliance_version: CR-2026-Q2-v1
+ * compliance_version: CR-2026-Q2-v3
  * last_regulatory_review: 2026-04-04
  * applicable_jurisdictions: [AU, EU, US]
  * regulatory_references: [CR-001, CR-002, CR-004, CR-005, CR-009]
@@ -200,6 +201,25 @@ export {
   MAX_LENGTHS,
 } from './sanitise'
 
+// ── Journal Interpreter (External Journals) ────────────────────────────────
+export type {
+  TranscribedEntry,
+  InterpreterChunk,
+  TranscribedJournal,
+  InterpretationResult,
+} from './journal-interpreter'
+
+export {
+  EXTERNAL_SECTION_MAPPING,
+  matchSection,
+  chunkBySection,
+  buildInterpreterPrompt,
+  buildTranscriptionPrompt,
+  buildProfileFromExternalJournal,
+  prepareInterpretation,
+  buildJournalFromSections,
+} from './journal-interpreter'
+
 // ── Support Agent ───────────────────────────────────────────────────────────
 export type {
   SupportChannel,
@@ -325,3 +345,36 @@ export {
   syncPatternAnalysis,
   formatPatternReport,
 } from './support-patterns'
+
+// ── Session Bridge (Cowork ↔ Sage Mentor) ──────────────────────────────
+export type {
+  SessionMode,
+  ExchangeClassification,
+  DecisionDomain,
+  SessionExchange,
+  SessionDecisionRecord,
+  LiveCompanionEvent,
+  ConsultResult,
+  ConsultOutcomeResult,
+  BatchEvaluationResult,
+  SessionBridgeConfig,
+} from './session-bridge'
+
+export {
+  DEFAULT_SESSION_BRIDGE_CONFIG,
+  classifyExchange,
+  buildSessionExchange,
+  shouldAutoActivateCompanion,
+  initialiseCoworkAgent,
+  captureSessionSummary,
+  buildBatchEvaluationPrompt,
+  parseBatchEvaluationResponse,
+  prepareConsultation,
+  prepareConsultOutcome,
+  buildCompanionEvaluationPrompt,
+  parseCompanionResponse,
+  persistSessionDecisions,
+  persistContextSnapshot,
+  buildKnowledgeContextUpdate,
+  buildOutcomeLookupQuery,
+} from './session-bridge'

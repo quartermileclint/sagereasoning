@@ -1,7 +1,7 @@
 {
   "_meta": {
     "description": "SageReasoning Compliance Register — maps external regulatory obligations to mandate rules",
-    "version": "CR-2026-Q2-v2",
+    "version": "CR-2026-Q2-v3",
     "created": "2026-04-04",
     "last_pipeline_run": "2026-04-04",
     "next_scheduled_review": "2026-07-06",
@@ -288,6 +288,101 @@
         "Run compliance matrix for each new skill before marketplace listing",
         "Resolve 4 edge case skills (sage-invest, sage-compliance, sage-negotiate, sage-coach)",
         "Implement automated R10/R12 checks in skill submission pipeline"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-020",
+      "obligation": "Session Bridge — Cowork Decision Capture",
+      "mandate_rules": ["R1", "R3", "R6c", "R6d", "R9", "R12"],
+      "external_reference": "Sage_Mentor_Claude_Integration_Architecture.md §3–5",
+      "effective_date": "Pre-launch",
+      "status": "DESIGNED",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "Session bridge module (session-bridge.ts) captures strategic decisions from Claude Cowork sessions and routes them through the Sage Mentor ring. Three modes: observer, consultant, companion. Classification gate ensures zero LLM cost for routine exchanges. R12 minimum-2-mechanism enforcement on every evaluation.",
+      "actions": [
+        "Integration test: verify R12 minimum 2 mechanisms per evaluation",
+        "Integration test: verify R3 disclaimer present on all evaluative output",
+        "Validate classification gate accuracy against 50 sample exchanges",
+        "Confirm R1 no-therapeutic-implication language in all prompt builders"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-021",
+      "obligation": "Session Bridge — Data Persistence & RLS",
+      "mandate_rules": ["R4", "R2"],
+      "external_reference": "Sage_Mentor_Claude_Integration_Architecture.md §4",
+      "effective_date": "Pre-launch",
+      "status": "DESIGNED",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "Two new Supabase tables (session_decisions, session_context_snapshots) store Cowork session evaluation results. RLS enabled on both tables. Migration SQL created at supabase/migrations/20260404_session_bridge_tables.sql. R4 IP protection via RLS ensures users access only their own records.",
+      "actions": [
+        "Run migration against Supabase staging environment",
+        "Verify RLS policies block cross-user access",
+        "Test cascade delete from session_decisions to session_context_snapshots",
+        "Add session_decisions to GDPR delete/export endpoints (CR-009 D8)"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-022",
+      "obligation": "Session Bridge — Live Companion Mode Cost Controls",
+      "mandate_rules": ["R9", "R12"],
+      "external_reference": "Sage_Mentor_Claude_Integration_Architecture.md §3.3, §6",
+      "effective_date": "Pre-launch",
+      "status": "DESIGNED",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "Companion mode runs Haiku calls per classified exchange (~$0.01–$0.04/session). Classification gate filters 60–80% of exchanges as routine/informational (zero cost). Progressive depth routes complex evaluations to Sonnet only when concerns are detected. Token budget cap prevents runaway costs.",
+      "actions": [
+        "Implement token budget cap per session (configurable, default in SessionBridgeConfig)",
+        "Monitor actual cost per session during beta",
+        "Alert if companion mode cost exceeds $0.10 per session",
+        "Verify classification gate filters routine exchanges correctly"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-023",
+      "obligation": "Session Bridge — Sage-Consult Skill Governance",
+      "mandate_rules": ["R3", "R10", "R12"],
+      "external_reference": ".claude/skills/sage-consult/SKILL.md",
+      "effective_date": "Pre-launch",
+      "status": "DESIGNED",
+      "review_cycle": "per-release",
+      "next_review_due": "2026-07-06",
+      "notes": "Sage-consult Cowork skill allows founder to invoke mentor consultation mid-session. Skill file documents governance rules enforced (R1, R3, R6c, R6d, R9, R12). Output format includes mandatory R3 disclaimer. R10 marketplace certification required if skill is ever published externally.",
+      "actions": [
+        "Test skill invocation end-to-end in Cowork session",
+        "Verify R3 disclaimer appears in all output paths",
+        "Run R10/R12 compliance matrix before any external listing",
+        "Document skill in Support Agent Manual §8 (Session Bridge)"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-024",
+      "obligation": "Session Bridge — Cross-Session Pattern Detection",
+      "mandate_rules": ["R6c", "R6d", "R7"],
+      "external_reference": "Sage_Mentor_Claude_Integration_Architecture.md §13",
+      "effective_date": "Pre-launch",
+      "status": "DESIGNED",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "Pattern engine extended to detect longitudinal patterns across Cowork sessions: decision domain clustering, passion recurrence in strategic contexts, proximity trajectory per inner agent, value-action consistency, and strategic blind spots. Weekly strategic mirror (Sonnet) synthesises cross-session patterns. R6c qualitative levels only. R6d diagnostic not punitive. R7 source fidelity maintained via ring prompt builders.",
+      "actions": [
+        "Validate pattern detectors produce qualitative (not numeric) outputs",
+        "Test weekly strategic mirror prompt for R6d non-punitive language",
+        "Verify R7 source fidelity — all journal references traceable to original entries",
+        "Monitor false positive rate on strategic blind spot detection"
       ],
       "last_reviewed": "2026-04-04",
       "reviewed_by": "compliance-pipeline-Q2"

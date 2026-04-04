@@ -218,15 +218,39 @@ The mentor IS the ring. It is permanently sage-like (full_authority). The inner 
 - BEFORE checks: value alignment, passion early-warning, oikeiosis context, journal memory lookup
 - AFTER evaluates: reasoning quality, passion patterns, profile update, journal insight, next-step prescription
 
-### Module Structure (5 files, barrel-exported)
+### Module Structure (17 files, barrel-exported)
+
+**Core Mentor Modules (8 files):**
 
 | File | Purpose |
 |------|---------|
 | `sanitise.ts` | Prompt injection defence layer (used by all other modules) |
 | `persona.ts` | Mentor identity, system prompt builder, proactive prompt builders |
 | `journal-ingestion.ts` | Pipeline for extracting MentorProfile from the 55-Day Journal |
+| `journal-interpreter.ts` | External journal interpreter — maps arbitrary journal formats to the Stoic Brain |
 | `ring-wrapper.ts` | The ring: before/after orchestrator, authority management, model routing, token instrumentation |
 | `profile-store.ts` | Supabase persistence layer, rolling window aggregation, profile caching |
+| `proactive-scheduler.ts` | Scheduled proactive outputs (morning check-in, evening reflection, weekly pattern mirror) |
+| `pattern-engine.ts` | Temporal pattern recognition engine (batch, deterministic) |
+
+**Support Agent Modules (8 files):**
+
+| File | Purpose |
+|------|---------|
+| `support-agent.ts` | Core support agent: tool registry, inbox parsing, KB search, governance detection, draft building, run loop |
+| `authority-manager.ts` | Inner agent authority lifecycle: promotion, demotion, suspension, audit trail |
+| `llm-bridge.ts` | Anthropic API bridge: BEFORE/AFTER live checks, draft generation, proactive execution |
+| `sync-to-supabase.ts` | Bridges local markdown files to Supabase persistent memory |
+| `embedding-pipeline.ts` | Semantic memory via OpenAI text-embedding-3-small (1536 dimensions, pgvector) |
+| `send-notification.ts` | Resend API email sender with CLI entry point |
+| `support-proactive.ts` | Wires proactive scheduler to support operational context |
+| `support-patterns.ts` | Pattern engine for support data analysis (topic recurrence, escalation trends, KB gaps) |
+
+**Cowork Skill:**
+
+| File | Purpose |
+|------|---------|
+| `.claude/skills/sage-interpret/SKILL.md` | Guides Cowork sessions through external journal transcription and interpretation |
 
 ### The Mentor Persona (Tiered)
 
@@ -277,6 +301,31 @@ Processes the 55-Day Stoic Journal into a MentorProfile:
 4. Aggregate chunk extractions into a complete MentorProfile
 5. Seed the profile store
 
+### External Journal Interpreter (Built — 4 April 2026)
+
+Handles journals NOT created on the SageReasoning website — handwritten, third-party, or free-form. The founder's personal journal has 12 themed sections (over 100 handwritten pages, photographed) that map to the Stoic Brain differently from the website's 7-phase structure.
+
+**Section → Brain Mapping (12 sections):**
+
+| Journal Section | Brain Files | Primary Extraction |
+|----------------|-------------|-------------------|
+| Live in the Present | stoic-brain.json, psychology.json | Causal tendencies, value hierarchy |
+| Embrace Difficulty | virtue.json, progress.json | Virtue (andreia), causal tendencies |
+| Practice Acceptance | stoic-brain.json, progress.json | Causal tendencies, virtue observations |
+| A Virtuous Life | virtue.json, scoring.json | Virtue observations, value hierarchy |
+| Master Your Thoughts | psychology.json, passions.json | Causal tendencies, passions detected |
+| Master Your Feelings | passions.json, value.json | Passions detected (full 25-species), preferred indifferents |
+| Live in Gratitude | action.json, value.json | Oikeiosis map, value hierarchy |
+| Accept Your Fate | stoic-brain.json, progress.json | Causal tendencies, virtue observations |
+| Choose Serenity | psychology.json, virtue.json | Causal tendencies, passions detected |
+| Cultivate Wisdom | virtue.json, value.json | Virtue observations (phronesis), value hierarchy |
+| Be Content | value.json, progress.json | Value hierarchy, preferred indifferents |
+| Be Responsible for Others | action.json, virtue.json | Oikeiosis map, virtue observations (dikaiosyne) |
+
+**Workflow:** Upload handwritten photos → Claude vision transcribes → Founder reviews/edits → Interpreter maps sections to Brain → LLM extracts patterns → Aggregates into MentorProfile (same output format as journal-ingestion.ts).
+
+**Data directories:** `sage-mentor/journal-data/transcribed/` (section JSON files), `sage-mentor/journal-data/extractions/` (raw LLM results).
+
 ### Inner Agent Authority Management
 
 Authority levels: supervised → guided → spot_checked → autonomous → full_authority
@@ -287,7 +336,58 @@ Authority levels: supervised → guided → spot_checked → autonomous → full
 - Autonomous: 15% check rate
 - Full authority: 5% check rate (random audit)
 
-Promotion thresholds: 10+ actions, ≥80% at deliberate or above, no persisting passions.
+Promotion thresholds (supervised → guided): 20+ actions, ≥70% at deliberate or above, ≤30% passion rate, ≤20% concern rate. Each subsequent level has stricter thresholds.
+
+Demotion is protective (R6d), not punitive. Triggered by regression in performance metrics. Suspension for persistent safety concerns (consecutive concerns or emergency passion rate). Reinstatement resets to supervised.
+
+Full audit trail: every authority change logged with evidence (total actions, principled rate, passion rate, concern rate, recent trend, thresholds met).
+
+### Support Agent (Built — 4 April 2026)
+
+The first inner agent to slot into the ring's gap. Handles customer support for SageReasoning using a markdown-first architecture.
+
+**10 Operational Tools (markdown-based):**
+
+- 5 folder-based: inbox, knowledge base, workflows, notifications, leads
+- 5 built-in: ticketing, drafting, escalation, omnichannel routing, QA
+
+**Architecture:**
+
+- Tickets arrive as markdown files in `support/inbox/` with YAML frontmatter
+- Agent searches knowledge base (`knowledge-base/` — 10 articles across 5 categories) and workflow playbooks (`workflows/` — 6 playbooks)
+- Ring runs BEFORE/AFTER checks on every draft
+- Governance rules R1, R2, R9 auto-detected via keyword matching → auto-escalation
+- All responses include R3 disclaimer
+
+**LLM Bridge (`llm-bridge.ts`):**
+
+- Connects ring prompts to live Anthropic API calls
+- `runLiveRingCycle()`: orchestrates full BEFORE → Draft → AFTER in one call
+- Model routing: Haiku for routine checks, Sonnet for complex evaluations
+- Scoring temperature: 0.2, Drafting temperature: 0.4
+
+**Data Persistence:**
+
+- `sync-to-supabase.ts`: Per-interaction sync after resolution + end-of-day batch sync
+- 3 Supabase tables: `support_interactions`, `support_token_usage`, `support_pattern_summaries` (all with RLS)
+
+**Semantic Memory (OpenBrain):**
+
+- `embedding-pipeline.ts`: OpenAI text-embedding-3-small (1536 dimensions)
+- Every resolved interaction embedded and stored in `mentor_raw_inputs` table (pgvector)
+- `search_mentor_memory()` RPC function for semantic search across all past interactions
+
+**Proactive Support Context:**
+
+- Morning check-in enriched with open ticket count, escalation status
+- Evening reflection includes daily resolution stats, top topics
+- Weekly pattern mirror includes full support trend analysis
+
+**Support Pattern Engine:**
+
+- Topic recurrence, escalation trends, KB gaps, governance flag frequency
+- Severity levels: INFO, ATTENTION, ACTION REQUIRED
+- Recommends specific KB articles to write
 
 ---
 
@@ -438,19 +538,24 @@ The first pipeline run detected 10 regulatory changes across 3 jurisdictions:
 
 - **V3 Adoption:** All 16 phases complete. V1 fully retired. V3 is production.
 - **Agent Trust Layer:** Framework designed, 5 build priorities coded as TypeScript (offline). Schema drafted. Pending: Supabase integration, batch assessment endpoint, event stream, LLM wiring, website integration.
-- **Sage Mentor Module:** 5 files built (persona, ring-wrapper, journal-ingestion, profile-store, sanitise). Barrel-exported via index.ts. All prompt builders sanitised. Model routing and token instrumentation in place. Profile caching implemented.
+- **Sage Mentor Module:** 17 files built across core mentor (8) and support agent (8) modules, plus 1 Cowork skill. Barrel-exported via index.ts. All prompt builders sanitised. Model routing and token instrumentation in place. Profile caching implemented.
+- **Support Agent:** Fully implemented and deployed (Vercel green). 10 operational tools, 10 knowledge base articles, 6 workflow playbooks, 10 test inbox items. LLM bridge live with Anthropic API. Supabase sync operational (3 tables with RLS). Semantic memory via pgvector embeddings. Proactive scheduler enriched with support context. Pattern engine detecting topic recurrence, escalation trends, and KB gaps.
+- **External Journal Interpreter:** Built. Maps 12-section handwritten journal to Stoic Brain extraction targets. Transcription workflow ready (photo upload → vision transcription → founder review → interpretation). Produces same MentorProfile as standard ingestion pipeline. Cowork skill (`sage-interpret`) guides the workflow.
+- **Proactive Scheduling:** Built. Morning check-in, evening reflection, weekly pattern mirror — all enriched with support operational context. Model routing: Haiku for daily, Sonnet for weekly.
+- **Pattern Recognition Engine:** Built. Batch passion/value/virtue pattern analysis. Support-specific patterns: topic recurrence, escalation trends, KB gaps, governance flag frequency.
+- **Authority Manager:** Built. Full lifecycle: registration, monitoring, promotion/demotion, suspension, reinstatement. Deterministic thresholds (zero LLM). Audit trail for all authority changes.
 - **Security:** Audit complete. 11 critical fixes applied (prompt injection defence, API hardening, CORS, error masking, privacy filtering). 15 deferred items documented.
 - **Token Efficiency:** 10 recommendations implemented (model routing, persona tiering, phase-scoped extraction, profile caching, token instrumentation, routing constants for remaining priorities).
 - **Compliance Pipeline:** R14 operational. Register tracks 15 obligations (CR-001–CR-015) across EU AI Act, Australian Privacy/Consumer/Financial law, ISO/IEC 42001, NIST AI RMF, GDPR. First quarterly audit complete — 10 regulatory changes detected, 2 major impact items requiring founder action (EU Art. 6 classification, AU Privacy Act automated decision-making). Next run: 6 July 2026.
 - **Revenue Model:** Licence changed to proprietary. Free tier tightened (1 call/day). Paid tier defined. Stripe integration pending.
 - **Prompt Architecture:** Audited, simplified for model-agnostic operation, documented.
 - **API Consolidation:** Option 1 approved (keep sage-reason as universal layer, consolidate candidates).
+- **Documentation:** Instruction manual created (SageReasoning_Support_Agent_Manual.docx) covering all support features, journal upload process, ring architecture, authority system, and data storage.
 
 ### Remaining Build Priorities
 
-1. **Priority 5 — Proactive Scheduling:** Morning check-ins, evening reflections, weekly pattern mirrors triggered on schedule. Model routing constants already defined (Haiku for daily, Sonnet for weekly).
-2. **Priority 6 — Pattern Recognition Engine:** Batch passion/value/virtue pattern analysis. Run every 5th interaction or daily, not per-call. Pre-compute pattern summaries into profile.
-3. **Priority 7 — Inner Agent Authority Manager:** Full lifecycle (registration, monitoring, promotion/demotion, sampling). Authority logic is deterministic (no LLM needed).
-4. **Deferred Security Items:** .env.local in .gitignore verification, deliberation-chain auth, reasoning_receipts/patterns RLS policies.
-5. **Business Plan Review:** Critical review to justify investment case before proceeding to Agent Trust Layer integration.
-6. **Agent Trust Layer Integration:** Supabase tables, batch assessment endpoint, event stream, LLM wiring, website integration.
+1. **Run 10 Test Interactions** through the support agent pipeline (deferred — founder reviewing manual first).
+2. **Transcribe and Interpret Founder's External Journal** — Upload handwritten photos, transcribe via vision AI, interpret against Stoic Brain, build starting MentorProfile.
+3. **Deferred Security Items:** .env.local in .gitignore verification, deliberation-chain auth, reasoning_receipts/patterns RLS policies.
+4. **Business Plan Review:** Critical review to justify investment case before proceeding to Agent Trust Layer integration.
+5. **Agent Trust Layer Integration:** Supabase tables, batch assessment endpoint, event stream, LLM wiring, website integration.
