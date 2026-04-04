@@ -199,3 +199,129 @@ export {
   hasInjectionSignatures,
   MAX_LENGTHS,
 } from './sanitise'
+
+// ── Support Agent ───────────────────────────────────────────────────────────
+export type {
+  SupportChannel,
+  SupportStatus,
+  SupportPriority,
+  InboxFrontmatter,
+  InboxItem,
+  ProcessingResult,
+  KBArticle,
+  RunLoopConfig,
+} from './support-agent'
+
+export {
+  SUPPORT_AGENT_ID,
+  SUPPORT_AGENT_NAME,
+  SUPPORT_AGENT_TYPE,
+  RUN_LOOP_INTERVAL_MS,
+  SUPPORT_DISCLAIMER,
+  TOOL_REGISTRY,
+  DEFAULT_RUN_LOOP_CONFIG,
+  parseFrontmatter,
+  serialiseFrontmatter,
+  parseInboxFile,
+  searchKnowledgeBase,
+  detectGovernanceFlags,
+  buildDraftPrompt,
+  assembleInboxFile,
+  formatRingReview,
+  initialiseSupportAgent,
+  processInboxItem,
+  completeProcessing,
+  generateDailySummary,
+  buildNotification,
+  buildLeadFile,
+} from './support-agent'
+
+// ── Sync to Supabase ────────────────────────────────────────────────────────
+export type {
+  SupabaseClient,
+  SupportInteractionRecord,
+  SupportTokenUsageRecord,
+  PatternSummaryRecord,
+  SyncResult,
+  BatchSyncResult,
+} from './sync-to-supabase'
+
+export {
+  syncInteraction,
+  batchSync,
+  markAsSynced,
+} from './sync-to-supabase'
+
+// ── Embedding Pipeline ──────────────────────────────────────────────────────
+export type {
+  EmbeddingProvider,
+  EmbeddingConfig,
+  MemorySource,
+  EmbeddingResult,
+  BatchEmbeddingResult,
+} from './embedding-pipeline'
+
+export {
+  DEFAULT_EMBEDDING_CONFIG,
+  generateEmbedding,
+  storeMemory,
+  embedAndStore,
+  embedSupportInteraction,
+  batchEmbed,
+  searchMemory,
+} from './embedding-pipeline'
+
+// ── Send Notification ───────────────────────────────────────────────────────
+export type {
+  ResendConfig,
+  NotificationFile,
+  SendResult,
+} from './send-notification'
+
+export {
+  DEFAULT_RESEND_CONFIG,
+  parseNotificationFile,
+  sendViaResend,
+  sendNotification,
+} from './send-notification'
+
+// ── LLM Bridge (Anthropic API) ──────────────────────────────────────────────
+export type {
+  LLMBridgeConfig,
+  LLMCallResult,
+  LiveRingResult,
+} from './llm-bridge'
+
+export {
+  DEFAULT_LLM_CONFIG,
+  callAnthropic,
+  liveBeforeCheck,
+  liveAfterCheck,
+  generateDraft,
+  executeProactiveWithLLM,
+  runLiveRingCycle,
+} from './llm-bridge'
+
+// ── Support Proactive (Scheduler + Support Context) ─────────────────────────
+export type {
+  SupportContext,
+  SupportProactiveResult,
+} from './support-proactive'
+
+export {
+  buildSupportContext,
+  buildSupportAddendum,
+  executeSupportProactive,
+} from './support-proactive'
+
+// ── Support Patterns (Pattern Engine + Support Data) ────────────────────────
+export type {
+  SupportPattern,
+  SupportPatternAnalysis,
+} from './support-patterns'
+
+export {
+  analyseSupportPatterns,
+  syncPatternAnalysis,
+  formatPatternReport,
+} from './support-patterns'
