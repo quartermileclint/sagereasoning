@@ -1,0 +1,180 @@
+{
+  "_meta": {
+    "description": "SageReasoning Compliance Pipeline Audit Log — append-only record of every pipeline run",
+    "schema_version": "1.0.0",
+    "created": "2026-04-04"
+  },
+  "runs": [
+    {
+      "run_date": "2026-04-04",
+      "run_type": "quarterly",
+      "trigger": "scheduled quarterly review",
+      "regulatory_changes_found": [
+        {
+          "regulation": "EU AI Act — Art. 6 Classification Guidelines",
+          "change_summary": "EU AI Office published Art. 6 classification guidelines in February 2026, specifying practical implementation of high-risk classification rules with examples of high-risk and non-high-risk AI systems.",
+          "date": "2026-02-02",
+          "source_url": "https://artificialintelligenceact.eu/article/6/"
+        },
+        {
+          "regulation": "EU AI Act — Digital Omnibus High-Risk Deadline Postponement",
+          "change_summary": "European Commission proposed via Digital Omnibus Act to postpone high-risk AI system obligations (originally Aug 2026) by up to 16 months. Backstop dates: Dec 2027 for Annex III, Aug 2028 for Annex I. Must be adopted before Aug 2, 2026 to take effect.",
+          "date": "2025-11-19",
+          "source_url": "https://www.euronews.com/my-europe/2025/11/19/european-commission-delays-full-implementation-of-ai-act-to-2027"
+        },
+        {
+          "regulation": "EU AI Act — Art. 50 Code of Practice v2",
+          "change_summary": "Second Draft Code of Practice for marking and labelling AI-generated content published March 2026, establishing technical standards for watermarking and synthetic media detection.",
+          "date": "2026-03-03",
+          "source_url": "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai"
+        },
+        {
+          "regulation": "EU Digital Omnibus — GDPR Amendments for AI",
+          "change_summary": "Proposed GDPR amendments would allow legitimate interest basis for AI development/operation with enhanced safeguards, and new exemption for residual special-category data processing during AI training/testing.",
+          "date": "2025-11-19",
+          "source_url": "https://www.lw.com/en/insights/digital-omnibus-eu-commission-proposes-to-streamline-gdpr-and-eu-ai-act"
+        },
+        {
+          "regulation": "Australian Privacy Act — Automated Decision-Making Transparency",
+          "change_summary": "Privacy and Other Legislation Amendment Act 2024 (passed Dec 2024) introduces automated decision-making transparency obligations effective 10 December 2026. Businesses using AI to make decisions significantly affecting individuals must disclose in privacy policies.",
+          "date": "2024-12-10",
+          "source_url": "https://www.lexology.com/library/detail.aspx?g=0f14cd7b-42a0-4def-ae8c-a1675e2f6c11"
+        },
+        {
+          "regulation": "Australian Privacy Act — Children's Online Privacy Code",
+          "change_summary": "OAIC developing Children's Online Privacy Code under the 2024 amendments, to be registered by 10 December 2026. Sets obligations for digital services serving children under 18.",
+          "date": "2024-12-10",
+          "source_url": "https://www.landers.com.au/legal-insights-news/australian-privacy-law-update-what-app-entities-need-to-know-in-2026"
+        },
+        {
+          "regulation": "Australia VAISS — Status Unchanged",
+          "change_summary": "National AI Plan (Dec 2025) confirmed VAISS remains voluntary. No mandatory conversion. Australian AI Safety Institute (AISI) becoming operational early 2026.",
+          "date": "2025-12-01",
+          "source_url": "https://www.industry.gov.au/publications/voluntary-ai-safety-standard"
+        },
+        {
+          "regulation": "ACCC — 2026-27 Enforcement Priorities",
+          "change_summary": "AI-related digital market conduct included in broader enforcement priorities. No direct enforcement actions against AI evaluation services. Monitoring AI-enabled harms including ghost websites and false representations.",
+          "date": "2026-02-01",
+          "source_url": "https://www.accc.gov.au/about-us/publications/compliance-and-enforcement-priorities-2026-27"
+        },
+        {
+          "regulation": "ASIC — Moneysmart AI Financial Guidance",
+          "change_summary": "ASIC Moneysmart published consumer guidance on using AI for financial information (March 2026). Research shows 18% of Gen Z Australians using AI for financial guidance. ASIC emphasises existing AFSL obligations apply fully to AI-powered tools.",
+          "date": "2026-03-24",
+          "source_url": "https://www.asic.gov.au/about-asic/news-centre/news-items/moneysmart-publishes-tips-on-using-ai-for-financial-issues/"
+        },
+        {
+          "regulation": "NIST AI RMF — Cyber AI Profile",
+          "change_summary": "NIST developing Cyber AI Profile (initial public draft expected 2026). AI RMF 1.1 addenda and expanded profiles expected through 2026. Core RMF 1.0 unchanged.",
+          "date": "2025-12-01",
+          "source_url": "https://www.nist.gov/itl/ai-risk-management-framework"
+        },
+        {
+          "regulation": "ISO/IEC 42001 — Implementation Guide",
+          "change_summary": "New practitioner-oriented implementation guide published February 2026. No updates to the standard itself. Useful for gap analysis toward future certification.",
+          "date": "2026-02-01",
+          "source_url": "https://www.iso.org/standard/42001"
+        }
+      ],
+      "impact_assessments": [
+        {
+          "change": "EU Art. 6 Classification Guidelines",
+          "affected_cr_ids": ["CR-001"],
+          "affected_rules": ["R1", "R2", "R3"],
+          "impact": "Major",
+          "rationale": "Must assess whether agent trust layer/evaluation constitutes high-risk under Annex III. Classification guidelines now available for review."
+        },
+        {
+          "change": "EU Digital Omnibus High-Risk Postponement",
+          "affected_cr_ids": ["CR-001"],
+          "affected_rules": ["R1", "R2", "R3"],
+          "impact": "Minor",
+          "rationale": "If adopted, extends compliance window by up to 16 months. Reduces urgency but does not remove obligation."
+        },
+        {
+          "change": "EU Art. 50 Code of Practice v2",
+          "affected_cr_ids": ["CR-002"],
+          "affected_rules": ["R3", "R4"],
+          "impact": "Minor",
+          "rationale": "R3 disclaimer already satisfies transparency. Confirm alignment when final Code published."
+        },
+        {
+          "change": "EU Digital Omnibus GDPR Amendments",
+          "affected_cr_ids": ["CR-009"],
+          "affected_rules": ["R1", "R2"],
+          "impact": "Minor",
+          "rationale": "Legitimate interest basis for AI may simplify GDPR compliance. Proposal stage only."
+        },
+        {
+          "change": "AU Privacy Act Automated Decision-Making",
+          "affected_cr_ids": ["CR-005"],
+          "affected_rules": ["R1", "R2"],
+          "impact": "Major",
+          "rationale": "Privacy policy must be updated before 10 Dec 2026 to disclose automated decision-making. Deadline is firm."
+        },
+        {
+          "change": "AU Children's Online Privacy Code",
+          "affected_cr_ids": ["CR-005"],
+          "affected_rules": ["R1"],
+          "impact": "Minor",
+          "rationale": "Age verification mechanisms may need strengthening. Code not yet finalised."
+        },
+        {
+          "change": "ACCC 2026-27 Priorities",
+          "affected_cr_ids": ["CR-006"],
+          "affected_rules": ["R3", "R9"],
+          "impact": "None",
+          "rationale": "No direct enforcement actions against AI evaluation services. Continue monitoring."
+        },
+        {
+          "change": "ASIC Moneysmart AI Guidance",
+          "affected_cr_ids": ["CR-010"],
+          "affected_rules": ["R3", "R9"],
+          "impact": "Minor",
+          "rationale": "Reinforces need for sage-invest lawyer review. No new regulatory requirements."
+        },
+        {
+          "change": "NIST Cyber AI Profile",
+          "affected_cr_ids": ["CR-008"],
+          "affected_rules": ["R1", "R2", "R3", "R9"],
+          "impact": "None",
+          "rationale": "Voluntary framework, draft stage. No action required."
+        },
+        {
+          "change": "ISO/IEC 42001 Implementation Guide",
+          "affected_cr_ids": ["CR-007"],
+          "affected_rules": [],
+          "impact": "None",
+          "rationale": "Useful reference only. Standard unchanged."
+        }
+      ],
+      "register_updates": ["CR-001", "CR-002", "CR-003", "CR-004", "CR-005", "CR-008", "CR-009", "CR-010"],
+      "files_reviewed": [
+        "website/src/lib/security.ts",
+        "website/src/app/terms/page.tsx",
+        "website/src/app/privacy/page.tsx",
+        "sage-mentor/index.ts",
+        "sage-mentor/persona.ts",
+        "sage-mentor/ring-wrapper.ts",
+        "sage-mentor/pattern-engine.ts",
+        "sage-mentor/profile-store.ts",
+        "sage-mentor/journal-ingestion.ts",
+        "sage-mentor/proactive-scheduler.ts",
+        "sage-mentor/authority-manager.ts",
+        "sage-mentor/sanitise.ts"
+      ],
+      "mandate_revisions_proposed": "none",
+      "codebase_compliance_status": "pass",
+      "actions_for_founder": [
+        "PRIORITY: Review EU Art. 6 classification guidelines (Feb 2026) to confirm agent trust layer is NOT classified high-risk under Annex III",
+        "PRIORITY: Update privacy policy (privacy/page.tsx) to fully comply with APP 1.7 automated decision-making transparency before 10 Dec 2026",
+        "Obtain lawyer review of privacy policy before Dec 2026 deadline",
+        "Monitor Children's Online Privacy Code draft from OAIC — assess age verification requirements",
+        "Monitor EU Digital Omnibus legislative progress for high-risk postponement and GDPR amendments",
+        "Continue sage-invest AFSL lawyer review before marketplace listing (reinforced by ASIC March 2026 guidance)"
+      ],
+      "next_scheduled_run": "2026-07-06"
+    }
+  ]
+}

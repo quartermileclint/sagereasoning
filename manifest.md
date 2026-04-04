@@ -1,3 +1,32 @@
+---
+compliance_version: "CR-2026-Q2-v1"
+last_regulatory_review: "2026-04-04"
+applicable_jurisdictions: ["AU", "EU", "US"]
+regulatory_references:
+  - id: "CR-001"
+    status: "MONITORING"
+  - id: "CR-002"
+    status: "COMPLIANT"
+  - id: "CR-004"
+    status: "ALIGNED"
+  - id: "CR-005"
+    status: "COMPLIANT"
+  - id: "CR-006"
+    status: "COMPLIANT"
+  - id: "CR-007"
+    status: "PARTIAL"
+  - id: "CR-008"
+    status: "ALIGNED"
+review_cycle: "quarterly"
+owner: "founder"
+next_review_due: "2026-07-06"
+change_trigger:
+  - "EU AI Act classification guidance publication"
+  - "Australia mandatory guardrails announcement"
+  - "Australian Privacy Act reform bill passage"
+deprecation_flag: false
+---
+
 # SageReasoning Manifest
 
 **Read this file in full before any task. Quote applicable rules by number in your plan. Wait for "OK" before executing.**
@@ -54,6 +83,9 @@ All original sage skills must derive from at least two of the six Stoic Brain me
 ### R13 — Embedding Platform Obligations
 Platforms that embed sage-reason as an internal component must comply with R1 (no therapeutic implication), R2 (no employment evaluation), R3 (disclaimer on evaluative output), and R9 (no outcome promises). Embedding platforms must not frame sage-reason output as assessment of the subject matter itself — sage-reason evaluates reasoning quality only. SageReasoning reserves the right to revoke API access for platforms that violate these obligations.
 
+### R14 — Regulatory Compliance Pipeline
+SageReasoning maintains a machine-readable compliance register (`compliance_register.json`) mapping all external regulatory obligations to the mandate rules they affect. A scheduled compliance pipeline reviews the register quarterly, scanning for regulatory changes in all applicable jurisdictions, assessing their impact on R1–R13, updating the register, and flagging files requiring amendment. Out-of-cycle reviews are triggered by significant regulatory events. All pipeline runs are logged in `compliance_audit_log.json`. No compliance-bearing file may be modified without updating its place-marker fields. The compliance register is the authoritative source for the current regulatory status of every obligation SageReasoning operates under.
+
 ---
 
 ## Task Protocol
@@ -61,7 +93,7 @@ Platforms that embed sage-reason as an internal component must comply with R1 (n
 For every task:
 
 1. **Read** this manifest fully.
-2. **Quote** all applicable rules by number (e.g., "R1, R4, R6a").
+2. **Quote** all applicable rules by number (e.g., "R1, R4, R6a, R14").
 3. **Flag** any conflicts between rules before proposing a plan.
 4. **Propose** a plan citing rules explicitly.
 5. **Wait** for "OK" approval.

@@ -1,3 +1,15 @@
+/**
+ * @compliance
+ * compliance_version: CR-2026-Q2-v1
+ * last_regulatory_review: 2026-04-04
+ * applicable_jurisdictions: [AU, EU, US]
+ * regulatory_references: [CR-001, CR-004, CR-005, CR-009, CR-012]
+ * review_cycle: quarterly
+ * owner: founder
+ * next_review_due: 2026-07-06
+ * change_trigger: [EU AI Act classification guidance, GDPR amendment, AU Privacy Act reform]
+ * deprecation_flag: false
+ */
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createHash } from 'node:crypto'
@@ -201,12 +213,27 @@ export function corsHeaders(): Record<string, string> {
   }
 }
 
-/** CORS headers for public agent endpoints (open to all) */
+/**
+ * CORS headers for public agent endpoints.
+ *
+ * These endpoints are API-key gated, so open CORS is acceptable —
+ * but we restrict to specific known origins where possible, and
+ * include the API key header in allowed headers.
+ *
+ * Agents calling from server-side (no browser) are unaffected by CORS.
+ * Browser-based integrators must be on an allowed origin.
+ */
 export function publicCorsHeaders(): Record<string, string> {
+  const allowedOrigins = [
+    'https://sagereasoning.com',
+    'https://www.sagereasoning.com',
+    process.env.NEXT_PUBLIC_SITE_URL,
+  ].filter(Boolean) as string[]
+
   return {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': allowedOrigins.join(', ') || 'https://sagereasoning.com',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Api-Key',
   }
 }
 
@@ -369,19 +396,18 @@ export async function validateApiKey(
   })
 
   if (usageErr || !usageRows || usageRows.length === 0) {
-    console.error('Usage increment error:', usageErr)
-    // Fail open with a warning rather than blocking valid keys due to DB issues
-    // Log it — this should be investigated
+    console.error('Usage increment error:', usageErr?.code || 'unknown')
+    // Fail SECURE — deny access when rate-limit tracking is unavailable.
+    // This prevents unlimited API calls during database outages.
     return {
-      valid: true,
-      api_key_id: keyRecord.id,
-      label: keyRecord.label,
-      tier: keyRecord.tier,
-      monthly_remaining: keyRecord.monthly_limit,
-      daily_remaining: keyRecord.daily_limit,
-      max_chain_iterations: keyRecord.max_chain_iterations,
-      monthly_calls_after: 0,
-      daily_calls_after: 0,
+      valid: false,
+      error: NextResponse.json(
+        {
+          error: 'Service temporarily unavailable',
+          message: 'Rate limit system offline. Please retry shortly.',
+        },
+        { status: 503, headers: publicCorsHeaders() }
+      ),
     }
   }
 

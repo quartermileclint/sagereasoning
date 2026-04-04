@@ -1,0 +1,296 @@
+{
+  "_meta": {
+    "description": "SageReasoning Compliance Register — maps external regulatory obligations to mandate rules",
+    "version": "CR-2026-Q2-v2",
+    "created": "2026-04-04",
+    "last_pipeline_run": "2026-04-04",
+    "next_scheduled_review": "2026-07-06",
+    "schema_version": "1.0.0",
+    "status_vocabulary": [
+      "COMPLIANT",
+      "ALIGNED",
+      "MONITORING",
+      "PARTIAL",
+      "DEFERRED",
+      "PLANNED",
+      "DESIGNED",
+      "DRAFTED",
+      "NOT_APPLICABLE"
+    ]
+  },
+  "obligations": [
+    {
+      "id": "CR-001",
+      "obligation": "EU AI Act — High-Risk Classification",
+      "mandate_rules": ["R1", "R2", "R3"],
+      "external_reference": "Regulation 2024/1689, Art. 6, Annex III",
+      "effective_date": "2026-08-02",
+      "status": "MONITORING",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "EU AI Office published Art. 6 classification guidelines in Feb 2026. EU Digital Omnibus proposes postponing high-risk obligations by up to 16 months (backstop Dec 2027 for Annex III). SageReasoning evaluates reasoning quality, not persons — profiling exemption likely applies. FOUNDER ACTION REQUIRED: Review Art. 6 guidelines to confirm SageReasoning's agent trust layer is not classified as high-risk under Annex III (particularly biometric/profiling categories).",
+      "actions": [
+        "PRIORITY: Review Feb 2026 Art. 6 classification guidelines against agent trust layer",
+        "Monitor Digital Omnibus legislative progress — if adopted before Aug 2026, high-risk deadline extends",
+        "Assess whether agent trust layer constitutes profiling under Art. 6",
+        "Review R3 disclaimer adequacy against Art. 50 Code of Practice v2 (March 2026)"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-002",
+      "obligation": "EU AI Act — Transparency Obligations",
+      "mandate_rules": ["R3", "R4"],
+      "external_reference": "Regulation 2024/1689, Art. 50",
+      "effective_date": "2025-08-02",
+      "status": "COMPLIANT",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "Second Draft Code of Practice for Art. 50 (marking/labelling AI-generated content) published March 2026. R3 disclaimer satisfies Art. 50 transparency. API responses identify AI-generated content. No action required at this time — confirm alignment at next review when final Code of Practice is published.",
+      "actions": [
+        "Confirm R3 disclaimer text meets final Art. 50 Code of Practice when published",
+        "Monitor whether watermarking/labelling requirements extend to text-based evaluation outputs"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-003",
+      "obligation": "EU AI Act — GPAI Model Obligations",
+      "mandate_rules": ["R4", "R7"],
+      "external_reference": "Regulation 2024/1689, Art. 51–53",
+      "effective_date": "2025-08-02",
+      "status": "NOT_APPLICABLE",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "SageReasoning uses third-party GPAI (Claude); does not train or distribute its own foundation model. Digital Omnibus may clarify downstream deployer obligations. Monitor.",
+      "actions": [
+        "Monitor for downstream deployer obligation guidance from EU AI Office",
+        "Monitor Digital Omnibus for deployer-specific GPAI obligations"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-004",
+      "obligation": "Australia VAISS — 10 Guardrails",
+      "mandate_rules": ["R1", "R3", "R9"],
+      "external_reference": "Voluntary AI Safety Standard, Guardrails 1–10",
+      "effective_date": "2024-09-01",
+      "status": "ALIGNED",
+      "review_cycle": "semi-annual",
+      "next_review_due": "2026-10-01",
+      "notes": "VAISS remains voluntary. Dec 2025 National AI Plan confirmed no mandatory conversion at this time. Australian AI Safety Institute (AISI) becoming operational in early 2026 — monitoring for enforcement signals. No status change required.",
+      "actions": [
+        "Monitor AISI publications once operational for enforcement signals",
+        "Track outcome of mandatory guardrails consultation for high-risk settings",
+        "Review VAISS × Guidance for AI Adoption crosswalk alignment"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-005",
+      "obligation": "Australia — Existing Law (Privacy Act 1988)",
+      "mandate_rules": ["R1", "R2"],
+      "external_reference": "Privacy Act 1988, APPs 1–13; Privacy and Other Legislation Amendment Act 2024",
+      "effective_date": "1988-01-01",
+      "status": "MONITORING",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "MAJOR CHANGE: Privacy and Other Legislation Amendment Act 2024 passed Dec 2024. Automated decision-making transparency obligations take effect 10 Dec 2026. Businesses using AI to make decisions that could significantly affect individuals must disclose this in privacy policies. Children's Online Privacy Code also due by Dec 2026. FOUNDER ACTION REQUIRED: Privacy policy must be updated before Dec 2026 to comply with APP 1.7 automated decision-making transparency. Age verification for under-16 users needs review against Children's Online Privacy Code.",
+      "actions": [
+        "PRIORITY: Update privacy policy for APP 1.7 automated decision-making transparency before Dec 2026",
+        "Review Children's Online Privacy Code requirements when OAIC publishes draft",
+        "Assess whether age verification gate (currently under-16 parental consent) meets Code requirements",
+        "Implement /api/user/export and /api/user/delete endpoints (existing deferred item)",
+        "Obtain lawyer review of privacy policy before Dec 2026 deadline"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-006",
+      "obligation": "Australia — Consumer Law (ACL)",
+      "mandate_rules": ["R3", "R9"],
+      "external_reference": "Competition and Consumer Act 2010, Sch 2, Part 2-1",
+      "effective_date": "2011-01-01",
+      "status": "COMPLIANT",
+      "review_cycle": "annual",
+      "next_review_due": "2027-04-01",
+      "notes": "ACCC 2026-27 enforcement priorities include AI-related digital market conduct and ghost websites using generative AI. No direct enforcement actions against AI evaluation services found. R3 disclaimer continues to prevent misleading conduct (s18) and R9 prevents false representations (s29). No status change required.",
+      "actions": [
+        "Monitor ACCC enforcement actions against AI evaluation services",
+        "Review marketing materials against s18/s29 at each review cycle"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-007",
+      "obligation": "ISO/IEC 42001 — AI Management System",
+      "mandate_rules": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13"],
+      "external_reference": "ISO/IEC 42001:2023, Annex A controls",
+      "effective_date": "2023-12-01",
+      "status": "PARTIAL",
+      "review_cycle": "annual",
+      "next_review_due": "2027-04-01",
+      "notes": "No updates to the standard itself in Q1 2026. New implementation guide published Feb 2026 — useful for gap analysis when pursuing certification. Manifest rules map to several Annex A controls. Full certification not pursued at launch.",
+      "actions": [
+        "Map R1–R14 to specific Annex A control objectives using Feb 2026 implementation guide",
+        "Identify gaps between current controls and ISO 42001 requirements",
+        "Reassess certification value when revenue exceeds $50K/year"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-008",
+      "obligation": "NIST AI RMF — Risk Management",
+      "mandate_rules": ["R1", "R2", "R3", "R9"],
+      "external_reference": "NIST AI 100-1, Map/Measure/Manage/Govern functions",
+      "effective_date": "2023-01-26",
+      "status": "ALIGNED",
+      "review_cycle": "annual",
+      "next_review_due": "2027-04-01",
+      "notes": "NIST Cyber AI Profile under development (comment period closed, initial public draft expected 2026). AI RMF 1.1 addenda and expanded profiles expected through 2026. No material change to RMF 1.0 core. No status change required.",
+      "actions": [
+        "Monitor NIST Cyber AI Profile publication",
+        "Adopt NIST AI RMF vocabulary in compliance documentation",
+        "Review AI RMF 1.1 addenda when published"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-009",
+      "obligation": "GDPR — Data Protection (EU users)",
+      "mandate_rules": ["R1", "R2"],
+      "external_reference": "Regulation 2016/679, Art. 5, 6, 9, 22, 35; proposed Digital Omnibus amendments",
+      "effective_date": "2018-05-25",
+      "status": "DEFERRED",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "EU Digital Omnibus proposes legitimate interest basis for AI development/operation and new exemption for residual special-category data. If adopted, this may simplify GDPR compliance for SageReasoning's AI processing. GDPR delete/export endpoints remain a deferred item (Security Audit D8). No EU marketing at launch. Status unchanged — implement before EU expansion.",
+      "actions": [
+        "Monitor Digital Omnibus GDPR amendments progress through EU Parliament",
+        "Implement GDPR delete/export endpoints (Security Audit D8)",
+        "Conduct Data Protection Impact Assessment before EU marketing",
+        "Assess Art. 22 applicability to agent evaluation outputs",
+        "Evaluate whether legitimate interest basis (if adopted) applies to sage-reason processing"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-010",
+      "obligation": "Financial Services — AFSL Risk",
+      "mandate_rules": ["R3", "R9"],
+      "external_reference": "Corporations Act 2001, s911A",
+      "effective_date": "2001-07-01",
+      "status": "MONITORING",
+      "review_cycle": "semi-annual",
+      "next_review_due": "2026-10-01",
+      "notes": "ASIC Moneysmart published AI financial guidance March 2026 — warns consumers about trusting AI for financial decisions. ASIC emphasises existing AFSL obligations apply fully to AI-powered tools. Reinforces need for lawyer review before sage-invest marketplace listing. No status change.",
+      "actions": [
+        "Obtain Australian financial services lawyer opinion on sage-invest",
+        "Do not list sage-invest on marketplace until lawyer review complete",
+        "Monitor ASIC guidance on AI-generated financial product advice",
+        "Review sage-invest disclaimers against ASIC Moneysmart guidance"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-011",
+      "obligation": "Professional Indemnity — AI Evaluation Errors",
+      "mandate_rules": ["R1", "R3", "R9"],
+      "external_reference": "Insurance contract (to be obtained)",
+      "effective_date": "Pre-launch",
+      "status": "PLANNED",
+      "review_cycle": "annual",
+      "next_review_due": "2026-07-06",
+      "notes": "Business plan allocates ~$1,200/yr. Not yet purchased. Must be in place before public launch.",
+      "actions": [
+        "Obtain professional indemnity insurance quotes",
+        "Ensure policy covers AI-generated philosophical evaluation errors",
+        "Purchase before public launch"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-012",
+      "obligation": "Cyber Insurance — Data Breach",
+      "mandate_rules": ["R4"],
+      "external_reference": "Insurance contract (to be obtained)",
+      "effective_date": "Pre-launch",
+      "status": "PLANNED",
+      "review_cycle": "annual",
+      "next_review_due": "2026-07-06",
+      "notes": "Business plan allocates ~$600/yr. Not yet purchased. Must be in place before public launch.",
+      "actions": [
+        "Obtain cyber insurance quotes",
+        "Ensure policy covers Supabase-hosted data and API breach scenarios",
+        "Purchase before public launch"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-013",
+      "obligation": "IP Protection — Patent Filing",
+      "mandate_rules": ["R4"],
+      "external_reference": "Patent application (to be filed)",
+      "effective_date": "2026-06-30",
+      "status": "PLANNED",
+      "review_cycle": "semi-annual",
+      "next_review_due": "2026-07-06",
+      "notes": "Patent pending on philosophical evaluation framework architecture. File before public API launch.",
+      "actions": [
+        "Prepare patent application for philosophical evaluation framework",
+        "File Q2 2026",
+        "Monitor competitor 'Stoic AI' claims quarterly"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-014",
+      "obligation": "Embedding Platform Compliance",
+      "mandate_rules": ["R13"],
+      "external_reference": "Terms of Service, new Embedding section",
+      "effective_date": "Pre-launch",
+      "status": "DRAFTED",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "R13 created. ToS embedding section drafted in Policy Amendments doc. Not yet implemented in code.",
+      "actions": [
+        "Implement embedding platform ToS section in website/src/app/terms/page.tsx",
+        "Add R13 compliance check to API onboarding flow",
+        "Create embedding platform agreement template"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-015",
+      "obligation": "Marketplace Skill Certification",
+      "mandate_rules": ["R10", "R12"],
+      "external_reference": "Internal certification process",
+      "effective_date": "Pre-launch",
+      "status": "DESIGNED",
+      "review_cycle": "per-release",
+      "next_review_due": "2026-07-06",
+      "notes": "Compliance matrix created (6A in Marketplace Compliance Amendment). 9/16 skills pass. 3 fail, 4 edge cases documented.",
+      "actions": [
+        "Run compliance matrix for each new skill before marketplace listing",
+        "Resolve 4 edge case skills (sage-invest, sage-compliance, sage-negotiate, sage-coach)",
+        "Implement automated R10/R12 checks in skill submission pipeline"
+      ],
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
+    }
+  ]
+}

@@ -11,6 +11,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('community_map_pins')
       .select('id, display_name, city, country, latitude, longitude, sage_alignment, avg_total')
+      .eq('show_on_map', true)
       .limit(2000)
 
     if (error) {

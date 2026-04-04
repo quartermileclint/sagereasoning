@@ -1,3 +1,15 @@
+{/*
+ * @compliance
+ * compliance_version: CR-2026-Q2-v1
+ * last_regulatory_review: 2026-04-04
+ * applicable_jurisdictions: [AU, EU, US]
+ * regulatory_references: [CR-001, CR-002, CR-005, CR-006, CR-009, CR-010, CR-014]
+ * review_cycle: quarterly
+ * owner: legal-counsel
+ * next_review_due: 2026-07-06
+ * change_trigger: [EU AI Act classification guidance, AU Privacy Act reform, ACCC AI enforcement action]
+ * deprecation_flag: false
+ */}
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {

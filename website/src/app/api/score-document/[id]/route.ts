@@ -12,10 +12,17 @@ export async function GET(
 
   const { id } = await params
 
+  // Validate UUID format to prevent information leakage from malformed queries
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!uuidRegex.test(id)) {
+    return NextResponse.json({ error: 'Invalid score ID format' }, { status: 400 })
+  }
+
   try {
+    // R4: Only return public-safe fields — exclude internal evaluation mechanisms
     const { data, error } = await supabaseAdmin
       .from('document_scores')
-      .select('*')
+      .select('id, document_type, katorthoma_proximity, virtue_domains_engaged, philosophical_reflection, improvement_path, created_at')
       .eq('id', id)
       .single()
 
@@ -25,12 +32,11 @@ export async function GET(
 
     return NextResponse.json(data, {
       headers: {
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': 'private, max-age=300',
         ...publicCorsHeaders(),
       },
     })
-  } catch (error) {
-    console.error('Score detail error:', error)
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

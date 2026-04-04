@@ -1,3 +1,14 @@
+// @compliance
+// compliance_version: CR-2026-Q2-v1
+// last_regulatory_review: 2026-04-04
+// applicable_jurisdictions: [AU, EU, US]
+// regulatory_references: [CR-004, CR-013]
+// review_cycle: semi-annual
+// owner: founder
+// next_review_due: 2026-10-01
+// change_trigger: [Patent filing outcome, competitor IP challenge]
+// deprecation_flag: false
+
 SageReasoning Proprietary Licence
 Version 1.0, March 2026
 
