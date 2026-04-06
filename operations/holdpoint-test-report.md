@@ -1,7 +1,7 @@
 # Hold Point Test Report
 
 **Assessment 1: What works?**
-Generated: 2026-04-06 04:00:11
+Generated: 2026-04-06 19:34:05
 
 ---
 
@@ -9,11 +9,24 @@ Generated: 2026-04-06 04:00:11
 
 | Result | Count |
 |--------|-------|
-| PASS | 160 |
+| PASS | 155 |
 | FAIL | 0 |
-| WARN | 0 |
+| WARN | 5 |
 | SKIP | 0 |
 | **Total** | **160** |
+
+### Warnings (WARN)
+
+- **15. P0 Protocols > Handoff: Decisions Made**: Section missing from latest handoff
+  - Fix: Add Decisions Made section
+- **15. P0 Protocols > Handoff: Status Changes**: Section missing from latest handoff
+  - Fix: Add Status Changes section
+- **15. P0 Protocols > Handoff: Next Session Should**: Section missing from latest handoff
+  - Fix: Add Next Session Should section
+- **15. P0 Protocols > Handoff: Blocked On**: Section missing from latest handoff
+  - Fix: Add Blocked On section
+- **15. P0 Protocols > Handoff: Open Questions**: Section missing from latest handoff
+  - Fix: Add Open Questions section
 
 ---
 
@@ -143,8 +156,8 @@ Generated: 2026-04-06 04:00:11
 
 | Status | Component | Detail | Fix Action |
 |--------|-----------|--------|------------|
-| PASS | Module count | 20 TypeScript modules found | — |
-| PASS | Total LOC | 12,868 lines across 20 modules | — |
+| PASS | Module count | 21 TypeScript modules found | — |
+| PASS | Total LOC | 13,831 lines across 21 modules | — |
 | PASS | TODO count | 2 TODOs (acceptable) | — |
 | PASS | Website integration | Found imports in website/src | — |
 | PASS | ring-wrapper.ts | 827 LOC | — |
@@ -190,7 +203,7 @@ Generated: 2026-04-06 04:00:11
 | PASS | NEXT_PUBLIC_SUPABASE_URL | Set | — |
 | PASS | NEXT_PUBLIC_SUPABASE_ANON_KEY | Set | — |
 | PASS | SUPABASE_SERVICE_ROLE_KEY | Set | — |
-| PASS | ANTHROPIC_API_KEY | Not yet configured (founder action needed before LLM tools work). This is expected during P0. | — |
+| PASS | ANTHROPIC_API_KEY | Set | — |
 | PASS | NEXT_PUBLIC_SITE_URL | Set | — |
 ## 11. Wrapped Skills
 
@@ -231,12 +244,12 @@ Generated: 2026-04-06 04:00:11
 
 | Status | Component | Detail | Fix Action |
 |--------|-----------|--------|------------|
-| PASS | Handoff notes | 2 handoff note(s) found | — |
-| PASS | Handoff: Decisions Made | Section present | — |
-| PASS | Handoff: Status Changes | Section present | — |
-| PASS | Handoff: Next Session Should | Section present | — |
-| PASS | Handoff: Blocked On | Section present | — |
-| PASS | Handoff: Open Questions | Section present | — |
+| PASS | Handoff notes | 5 handoff note(s) found | — |
+| WARN | Handoff: Decisions Made | Section missing from latest handoff | Add Decisions Made section |
+| WARN | Handoff: Status Changes | Section missing from latest handoff | Add Status Changes section |
+| WARN | Handoff: Next Session Should | Section missing from latest handoff | Add Next Session Should section |
+| WARN | Handoff: Blocked On | Section missing from latest handoff | Add Blocked On section |
+| WARN | Handoff: Open Questions | Section missing from latest handoff | Add Open Questions section |
 
 ---
 
