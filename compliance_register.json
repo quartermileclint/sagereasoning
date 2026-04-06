@@ -1,9 +1,9 @@
 {
   "_meta": {
     "description": "SageReasoning Compliance Register — maps external regulatory obligations to mandate rules",
-    "version": "CR-2026-Q2-v3",
+    "version": "CR-2026-Q2-v4",
     "created": "2026-04-04",
-    "last_pipeline_run": "2026-04-04",
+    "last_pipeline_run": "2026-04-05",
     "next_scheduled_review": "2026-07-06",
     "schema_version": "1.0.0",
     "status_vocabulary": [
@@ -138,7 +138,7 @@
       "next_review_due": "2027-04-01",
       "notes": "No updates to the standard itself in Q1 2026. New implementation guide published Feb 2026 — useful for gap analysis when pursuing certification. Manifest rules map to several Annex A controls. Full certification not pursued at launch.",
       "actions": [
-        "Map R1–R14 to specific Annex A control objectives using Feb 2026 implementation guide",
+        "Map R0–R20 to specific Annex A control objectives using Feb 2026 implementation guide",
         "Identify gaps between current controls and ISO 42001 requirements",
         "Reassess certification value when revenue exceeds $50K/year"
       ],
@@ -386,6 +386,93 @@
       ],
       "last_reviewed": "2026-04-04",
       "reviewed_by": "compliance-pipeline-Q2"
+    },
+    {
+      "id": "CR-025",
+      "obligation": "Intimate Data Protection — Passion Profiling Safeguards",
+      "mandate_rules": ["R17", "R4", "R5"],
+      "external_reference": "Ethical_Analysis_Reasoning_Deployment.md §2.1, §3.1; manifest.md R17",
+      "effective_date": "Pre-launch",
+      "status": "DESIGNED",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "R17 requires protections beyond standard database security for journal interpretation data (passion maps, trigger maps, contradiction maps, developmental timelines). The ethical analysis identified that this data is qualitatively different from identity or financial data — a breach enables psychological manipulation. Five sub-requirements: (a) bulk profiling prevention via technical measures, (b) application-level encryption for intimate fields, (c) defined retention periods with genuine deletion, (d) local-first storage consideration for highest-sensitivity data, (e) passion profiling results never exposed via API.",
+      "actions": [
+        "PRIORITY: Implement API-level rate limiting that distinguishes self-evaluation from third-party evaluation (R17a)",
+        "Design application-level encryption for passion_map, trigger_map, contradiction_map fields in Supabase (R17b)",
+        "Define and document retention periods for all profile data categories (R17c)",
+        "Implement genuine deletion (not soft-delete) for intimate profile fields via /api/user/delete (R17c)",
+        "Evaluate local-first architecture for trigger maps and contradiction maps — produce architecture decision record (R17d)",
+        "Audit all API endpoints to confirm passion profiling results are never returned (R17e)",
+        "Update privacy policy to describe intimate data protections before launch (links to CR-005)"
+      ],
+      "last_reviewed": "2026-04-05",
+      "reviewed_by": "ethical-analysis-review"
+    },
+    {
+      "id": "CR-026",
+      "obligation": "Honest Certification — Agent Trust Layer Transparency",
+      "mandate_rules": ["R18", "R4"],
+      "external_reference": "Ethical_Analysis_Reasoning_Deployment.md §1.2, §1.3, §2.2; manifest.md R18",
+      "effective_date": "Pre-launch",
+      "status": "DESIGNED",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "R18 addresses the certifier problem: SageReasoning positions itself as a certification authority, which concentrates power and creates obligations of honesty. Four sub-requirements: (a) certification scope language must state it certifies 'observable reasoning patterns as measured against the Stoic philosophical framework', (b) trust badge must link to methodology documentation, (c) architecture must support interoperability with other ethical reasoning traditions, (d) adversarial evaluation must be conducted before broad deployment.",
+      "actions": [
+        "PRIORITY: Draft certification scope language for trust badge, accreditation card, and all public-facing documentation (R18a)",
+        "Create methodology documentation page that badge links to — covering evaluation process, limitations, what it does not certify (R18b)",
+        "Review Agent Trust Layer schema for interoperability hooks — ensure accreditation schema can accommodate non-Stoic certification providers (R18c)",
+        "Design adversarial evaluation protocol — identify gaming strategies for the 4-stage evaluation sequence (R18d)",
+        "Conduct adversarial testing before any external agent accreditation is issued (R18d)",
+        "Update agent-card.json and llms.txt with honest certification scope language (R18a)"
+      ],
+      "last_reviewed": "2026-04-05",
+      "reviewed_by": "ethical-analysis-review"
+    },
+    {
+      "id": "CR-027",
+      "obligation": "Honest Positioning — Cultural and Philosophical Transparency",
+      "mandate_rules": ["R19", "R8c"],
+      "external_reference": "Ethical_Analysis_Reasoning_Deployment.md §1.1, §2.4; manifest.md R19",
+      "effective_date": "Pre-launch",
+      "status": "DESIGNED",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "R19 addresses the reasoning monoculture and cultural imperialism risks. SageReasoning encodes one philosophical tradition among many. Four sub-requirements: (a) cultural honesty — all content must acknowledge Stoic origin, (b) no universality claims — avoid positioning as 'the' standard, (c) limitations documented and accessible, (d) mirror principle — framework is for self-examination not judging others. The ethical analysis identified that honest positioning is itself a Stoic virtue — the framework's integrity depends on not overclaiming.",
+      "actions": [
+        "PRIORITY: Audit all user-facing website content for universality claims — revise to honest positioning (R19a, R19b)",
+        "Audit API documentation and developer docs for positioning language (R19a, R19b)",
+        "Create limitations documentation page — covering Stoic tradition's blind spots (systemic critique, collective action, structural injustice) (R19c)",
+        "Implement mirror principle guidance in mentor persona prompts and all human-facing tools (R19d)",
+        "Review marketing materials, pitch deck, and growth strategy for language that positions SageReasoning as universal (R19b)",
+        "Update project instructions to replace 'the world's leading reference' with honest positioning language"
+      ],
+      "last_reviewed": "2026-04-05",
+      "reviewed_by": "ethical-analysis-review"
+    },
+    {
+      "id": "CR-028",
+      "obligation": "Active Protection — Vulnerable Users, Independence, Human Override",
+      "mandate_rules": ["R20", "R1", "R9"],
+      "external_reference": "Ethical_Analysis_Reasoning_Deployment.md §1.4, §3.2, §3.3, §3.4; manifest.md R20",
+      "effective_date": "Pre-launch",
+      "status": "DESIGNED",
+      "review_cycle": "quarterly",
+      "next_review_due": "2026-07-06",
+      "notes": "R20 addresses four active protection requirements that go beyond passive disclaimers. (a) Vulnerable user detection — active detection of acute psychological distress with redirection to professional support. (b) Independence not dependence — system designed to encourage internalisation, with dependence-pattern detection. (c) Human override supremacy — no accreditation level may make it harder for a human to override an agent. (d) Relationship asymmetry awareness — guidance that the framework is for self-examination, discouraging interpersonal application of passion taxonomy.",
+      "actions": [
+        "PRIORITY: Design vulnerable user detection for mentor and all human-facing tools — define language patterns indicating acute distress (R20a)",
+        "Implement redirection protocol — when distress detected, redirect to professional support resources with appropriate language (R20a)",
+        "Design dependence-detection heuristics for usage patterns (e.g., trivial decisions evaluated, inability to reason without framework) (R20b)",
+        "Implement mentor response for dependence detection: 'You're ready to reason through this yourself' (R20b)",
+        "Review authority-manager.ts to confirm no authority level prevents human override — add explicit check if needed (R20c)",
+        "Add relationship asymmetry guidance to all human-facing tool output and mentor persona (R20d)",
+        "Update persona.ts morning/evening prompts to include mirror principle language (R20d)",
+        "Test vulnerable user detection against sample inputs before launch"
+      ],
+      "last_reviewed": "2026-04-05",
+      "reviewed_by": "ethical-analysis-review"
     }
   ]
 }

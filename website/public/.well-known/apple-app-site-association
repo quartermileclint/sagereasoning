@@ -1,0 +1,33 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAMID.com.sagereasoning.app",
+        "paths": [
+          "/journal",
+          "/journal/*",
+          "/score",
+          "/score/*",
+          "/score-document",
+          "/score-social",
+          "/reflect",
+          "/dashboard",
+          "/scenarios",
+          "/scenarios/*",
+          "/baseline",
+          "/community",
+          "/marketplace",
+          "/marketplace/*"
+        ],
+        "comment": "Replace TEAMID with your Apple Developer Team ID when enrolled. Until then this file is inert — browsers and crawlers ignore it."
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "TEAMID.com.sagereasoning.app"
+    ],
+    "comment": "Enables AutoFill credential sharing between web and native app (Supabase auth)."
+  }
+}

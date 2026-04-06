@@ -46,6 +46,7 @@ import type { ChunkExtraction } from './journal-ingestion'
 import type { KatorthomaProximityLevel } from '../trust-layer/types/accreditation'
 import { aggregateExtractions } from './journal-ingestion'
 import { sanitise } from './sanitise'
+import type { MentorLedger } from './mentor-ledger'
 
 // ============================================================================
 // TYPES
@@ -417,6 +418,15 @@ export type FullInterpretationResult = {
   readonly layer_8_triggers: SituationalTriggerMap
   readonly layer_9_product_signals: ProductDevelopmentSignal | null // TODO extraction
   readonly layer_10_proof_of_concept: ProofOfConceptSynthesis | null // TODO extraction
+
+  /**
+   * Cross-cutting extraction: the Mentor Ledger.
+   * Commitments, realisations, questions, tensions, and intentions
+   * extracted from every section in parallel with the 10-layer analysis.
+   * Feeds the Private Mentor Hub's accountability view and the
+   * proactive scheduler's morning/evening/weekly outputs.
+   */
+  readonly mentor_ledger: MentorLedger
 
   readonly interpretation_timestamp: string
   readonly section_summaries: {

@@ -1,0 +1,87 @@
+App intents
+
+App Intents turn apps into tools.
+Shortcuts turn tools into workflows.
+Siri turns workflows into autonomous behaviour.
+
+Now they power:
+	•	Siri (voice + upcoming AI agent)
+	•	Spotlight (run actions directly from search)
+	•	Shortcuts automation
+	•	Widgets / Action Button / system UI
+	•	Apple Intelligence workflows
+
+The “API layer” for Apple Intelligence
+	•	App Intents are how AI understands your app
+	•	They define what actions the AI can take on your behalf
+	•	Apple explicitly links them to enabling “enhanced action capabilities of Siri and Apple Intelligence” 
+
+Apple is rebuilding Siri into a system-wide agent that can:
+	•	Read context (email, calendar, apps)
+	•	Take actions across apps
+	•	Chain workflows automatically
+
+This only works because:
+➡️ Apps expose structured actions via App Intents
+
+Example:
+	•	“Send the doc John sent me yesterday to Slack”
+	•	Siri maps:
+	•	Mail → find doc
+	•	Files → retrieve
+	•	Slack → send
+(all via App Intents)
+
+⸻
+
+3. Turning apps into composable building blocks
+
+With App Intents:
+	•	Apps are no longer isolated UIs
+	•	They become modular capabilities
+
+Apple literally wants:
+
+Apps = APIs for the OS + AI
+
+Apple has been expanding App Intents with:
+
+• Interactive snippets
+	•	Mini UI responses shown in system surfaces
+	•	Users can interact without opening the app  ￼
+
+• Spotlight execution
+	•	Run app actions directly from search
+
+• AI integration (“Use Model” in Shortcuts)
+	•	Combine your app’s actions with LLM reasoning  ￼
+
+• Visual intelligence hooks
+	•	Apps can participate in visual AI features
+
+
+New Apple world
+App = capabilities the system calls
+AI orchestrates apps
+App Intents for the OS
+
+A closed, on-device “tool ecosystem” where every app exposes safe, structured actions.
+
+App Intents are basically:
+	•	Apple’s version of tool schemas
+	•	The interface layer for agent-driven workflows on-device
+
+If you were building for this ecosystem:
+	•	You don’t just build an app
+	•	You build:
+	•	Intents (actions)
+	•	Entities (data models)
+	•	Queries (retrieval logic)
+
+⸻
+
+One-line summary
+
+App Intents are how apps become “callable tools” for Siri, Spotlight, and Apple’s AI—turning the OS into an agent that can use apps instead of just open them.
+
+

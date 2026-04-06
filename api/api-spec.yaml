@@ -19,6 +19,30 @@ info:
 
     Authentication: Bearer token (Supabase JWT) for user endpoints. Agent endpoints
     use API keys (free or paid tier). Public reference endpoints require no authentication.
+
+    ## Apple App Intents Mapping (Phase 0.2)
+
+    This spec includes `x-intent-*` custom fields on endpoints that will map to
+    Apple App Intents when a native iOS app is built. These fields document:
+    - `x-intent-name`: Swift struct name for the AppIntent
+    - `x-intent-siri-phrases`: Trigger phrases for AppShortcutsProvider
+    - `x-intent-entity`: Associated AppEntity type (if any)
+    - `x-intent-result-type`: dialog (Siri speaks result) or open-app (deep-links)
+    - `x-intent-result-summary`: Which API response fields to show in Siri
+    - `x-intent-parameters`: Mapping from Swift @Parameter to API request fields
+    - `x-intent-priority`: P1-Core, P2-Expansion, or P3-Intelligence
+
+    The following endpoints are NOT YET in the spec but exist in the web app
+    and will need x-intent-* metadata added:
+    - POST /api/reflect (DailyReflectionIntent — P1-Core)
+    - POST /api/score-document (ScoreDocumentIntent — P2-Expansion)
+    - POST /api/score-decision (RankDecisionsIntent — P2-Expansion)
+    - POST /api/score-social (FilterSocialPostIntent — P3-Intelligence)
+    - POST /api/guardrail (CheckGuardrailIntent — P1-Core)
+    - POST /api/reason (SageReasonIntent — P2-Expansion)
+    - POST /api/execute (ExecuteSkillIntent — P2-Expansion)
+    - GET /api/marketplace (SageSkillEntity query — P2-Expansion)
+    - Journal pages (OpenJournalIntent — P1-Core)
   version: 3.0.0
   contact:
     email: zeus@sagereasoning.com
@@ -104,6 +128,27 @@ paths:
 
         No 0-100 scores. All outputs are qualitative.
       tags: [Scoring]
+      # --- App Intents metadata (Phase 0.2) ---
+      x-intent-name: ScoreActionIntent
+      x-intent-siri-phrases:
+        - "Sage score this action"
+        - "Score this action with SageReasoning"
+        - "SageReasoning evaluate what I did"
+      x-intent-entity: ActionScoreEntity
+      x-intent-result-type: dialog
+      x-intent-result-summary: "katorthoma_proximity + improvement_path (first sentence)"
+      x-intent-parameters:
+        - name: actionText
+          maps_to: action_description
+          type: String
+          required: true
+          siri_prompt: "What did you do?"
+        - name: context
+          maps_to: context
+          type: String
+          required: false
+          siri_prompt: "Any context? (optional)"
+      x-intent-priority: P1-Core
       requestBody:
         required: true
         content:
@@ -134,6 +179,21 @@ paths:
         Returns sage framing, passion warnings, and kathekon assessment for
         the proposed action and any alternatives.
       tags: [Scoring]
+      # --- App Intents metadata (Phase 0.2) ---
+      x-intent-name: AdviseActionIntent
+      x-intent-siri-phrases:
+        - "Sage advise me on this"
+        - "SageReasoning what should I do"
+      x-intent-entity: null
+      x-intent-result-type: dialog
+      x-intent-result-summary: "recommended_action + sage_framing (first sentence)"
+      x-intent-parameters:
+        - name: proposedAction
+          maps_to: proposed_action
+          type: String
+          required: true
+          siri_prompt: "What are you thinking of doing?"
+      x-intent-priority: P2-Expansion
       requestBody:
         required: true
         content:
@@ -180,6 +240,21 @@ paths:
 
         All evaluations use V3 methodology — qualitative outputs only.
       tags: [Deliberation]
+      # --- App Intents metadata (Phase 0.2) ---
+      x-intent-name: DeliberateIntent
+      x-intent-siri-phrases:
+        - "Sage help me deliberate"
+        - "SageReasoning start a deliberation"
+      x-intent-entity: DeliberationChainEntity
+      x-intent-result-type: dialog
+      x-intent-result-summary: "katorthoma_proximity + growth_action"
+      x-intent-parameters:
+        - name: actionText
+          maps_to: action
+          type: String
+          required: true
+          siri_prompt: "What action are you considering?"
+      x-intent-priority: P2-Expansion
       security: []
       requestBody:
         required: true
@@ -275,6 +350,15 @@ paths:
         Returns the 14 free-tier V3 assessment prompts (Phases 1-2: Foundations
         and Architecture of Mind). No API key required.
       tags: [Agent Assessment]
+      # --- App Intents metadata (Phase 0.2) ---
+      x-intent-name: FoundationalAssessmentIntent
+      x-intent-siri-phrases:
+        - "SageReasoning foundational assessment"
+        - "Start my Sage alignment check"
+      x-intent-entity: AssessmentEntity
+      x-intent-result-type: open-app
+      x-intent-result-summary: "Opens assessment flow in app"
+      x-intent-priority: P3-Intelligence
       security: []
       responses:
         '200':
@@ -360,6 +444,14 @@ paths:
         Returns 4 ethical scenarios that create genuine virtue tension.
         Evaluated using V3 4-stage evaluation sequence.
       tags: [Agent Assessment]
+      # --- App Intents metadata (Phase 0.2) ---
+      x-intent-name: AgentBaselineIntent
+      x-intent-siri-phrases:
+        - "SageReasoning agent baseline"
+      x-intent-entity: null
+      x-intent-result-type: dialog
+      x-intent-result-summary: "senecan_grade + typical_proximity + interpretation"
+      x-intent-priority: P3-Intelligence
       security: []
       responses:
         '200':
@@ -405,6 +497,16 @@ paths:
       summary: Get user's score history
       description: Returns all past action evaluations for the authenticated user.
       tags: [User]
+      # --- App Intents metadata (Phase 0.2) ---
+      x-intent-name: ViewScoreHistoryIntent
+      x-intent-siri-phrases:
+        - "Show my Sage scores"
+        - "SageReasoning score history"
+      x-intent-entity: ActionScoreEntity
+      x-intent-query-type: EntityPropertyQuery
+      x-intent-result-type: open-app
+      x-intent-result-summary: "Opens dashboard with score history"
+      x-intent-priority: P2-Expansion
       parameters:
         - name: limit
           in: query
@@ -432,6 +534,16 @@ paths:
       summary: Get user's stoic profile
       description: Returns the user's Senecan grade, dimension levels, and progression data.
       tags: [User]
+      # --- App Intents metadata (Phase 0.2) ---
+      x-intent-name: ViewProfileIntent
+      x-intent-siri-phrases:
+        - "How am I doing on Sage"
+        - "SageReasoning show my progress"
+        - "My Stoic profile"
+      x-intent-entity: null
+      x-intent-result-type: dialog
+      x-intent-result-summary: "senecan_grade + typical_proximity + direction_of_travel"
+      x-intent-priority: P2-Expansion
       responses:
         '200':
           description: User stoic profile

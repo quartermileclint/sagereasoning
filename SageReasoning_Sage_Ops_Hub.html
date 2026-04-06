@@ -1,0 +1,2557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sage Ops Hub - SageReasoning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #0f1117;
+            color: #d0d4e2;
+            line-height: 1.5;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background-color: #171b26;
+            border-right: 1px solid #282e44;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #282e44;
+        }
+
+        .brand {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6a7192;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .sage-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #c9a24d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sage-icon {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #c9a24d 0%, #d9903a 100%);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: #0f1117;
+        }
+
+        /* Context Freshness Card */
+        .context-card {
+            background-color: #1d2233;
+            border: 1px solid #282e44;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        .context-card-title {
+            color: #eef0f8;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .context-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #4daa6a;
+        }
+
+        .context-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #6a7192;
+        }
+
+        .context-stat-value {
+            color: #eef0f8;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #282e44;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4daa6a 0%, #c9a24d 100%);
+            width: 87%;
+            border-radius: 2px;
+        }
+
+        /* Sidebar Navigation */
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #4a5070;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            padding: 0 8px;
+        }
+
+        .nav-item {
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            color: #6a7192;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: #282e44;
+            color: #d0d4e2;
+        }
+
+        .nav-item.active {
+            background-color: #282e44;
+            color: #c9a24d;
+            border-color: #c9a24d;
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            width: 16px;
+            height: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .domains-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .domain-tag {
+            padding: 6px 8px;
+            background-color: #1d2233;
+            border: 1px solid #282e44;
+            border-radius: 6px;
+            font-size: 11px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #6a7192;
+        }
+
+        .domain-tag:hover {
+            background-color: #282e44;
+            color: #d0d4e2;
+            border-color: #282e44;
+        }
+
+        .domain-tag.active {
+            background-color: #c9a24d;
+            color: #0f1117;
+            border-color: #c9a24d;
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid #282e44;
+            font-size: 11px;
+            color: #4a5070;
+            text-align: center;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background-color: #0f1117;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #eef0f8;
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: #6a7192;
+            margin-top: 4px;
+        }
+
+        .page-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            background-color: #282e44;
+            color: #d0d4e2;
+            border: 1px solid #282e44;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #343d54;
+            border-color: #3a4558;
+        }
+
+        .btn-primary {
+            background-color: #c9a24d;
+            color: #0f1117;
+            border-color: #c9a24d;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background-color: #d9b35e;
+            border-color: #d9b35e;
+        }
+
+        .btn-small {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            flex: 1;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+            grid-auto-rows: max-content;
+        }
+
+        .card {
+            background-color: #1d2233;
+            border: 1px solid #282e44;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .card-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #6a7192;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-title-bold {
+            font-size: 13px;
+            font-weight: 600;
+            color: #eef0f8;
+            text-transform: none;
+            margin-bottom: 12px;
+        }
+
+        /* KPI Cards */
+        .kpi-card {
+            grid-column: span 1;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #c9a24d;
+            margin-bottom: 4px;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            color: #6a7192;
+        }
+
+        .kpi-change {
+            font-size: 11px;
+            color: #4daa6a;
+            margin-top: 8px;
+        }
+
+        /* Stoic Check Card */
+        .stoic-check {
+            grid-column: span 4;
+            border: 2px solid #c9a24d;
+            background: linear-gradient(135deg, rgba(201, 162, 77, 0.1) 0%, rgba(201, 162, 77, 0.05) 100%);
+        }
+
+        .stoic-check-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-color: #c9a24d;
+            border-radius: 4px;
+            margin-right: 8px;
+            line-height: 20px;
+            text-align: center;
+            color: #0f1117;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .stoic-check-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #c9a24d;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .stoic-check-content {
+            font-size: 13px;
+            color: #eef0f8;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .stoic-check-passion {
+            font-size: 11px;
+            color: #d9903a;
+            font-weight: 600;
+        }
+
+        /* Briefing Card */
+        .briefing-card {
+            grid-column: span 4;
+        }
+
+        .briefing-time {
+            font-size: 11px;
+            color: #6a7192;
+            margin-bottom: 12px;
+        }
+
+        .briefing-section {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #282e44;
+        }
+
+        .briefing-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .briefing-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b8aef;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .briefing-item {
+            font-size: 13px;
+            color: #d0d4e2;
+            margin-bottom: 6px;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .briefing-item::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #6a7192;
+        }
+
+        .briefing-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #d0d4e2;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox {
+            width: 16px;
+            height: 16px;
+            border: 1px solid #282e44;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox:hover {
+            border-color: #c9a24d;
+        }
+
+        .checkbox.checked {
+            background-color: #c9a24d;
+            border-color: #c9a24d;
+        }
+
+        .checkbox-check {
+            color: #0f1117;
+            font-weight: bold;
+            font-size: 10px;
+        }
+
+        /* Status Cards Row */
+        .status-row {
+            grid-column: span 4;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .status-card {
+            background-color: #1d2233;
+            border: 1px solid #282e44;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .status-label {
+            font-size: 12px;
+            color: #6a7192;
+            margin-bottom: 12px;
+        }
+
+        .status-item {
+            font-size: 13px;
+            color: #d0d4e2;
+            margin-bottom: 8px;
+            padding-left: 12px;
+            position: relative;
+        }
+
+        .status-item::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #c9a24d;
+        }
+
+        /* Alert Cards */
+        .alert-card {
+            grid-column: span 4;
+        }
+
+        .alert-filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            background-color: #282e44;
+            color: #6a7192;
+            border: 1px solid #282e44;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background-color: #282e44;
+            color: #c9a24d;
+            border-color: #c9a24d;
+        }
+
+        .alert-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background-color: #282e44;
+            border-radius: 6px;
+            align-items: flex-start;
+        }
+
+        .alert-severity {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+
+        .alert-severity.critical {
+            background-color: #c95050;
+        }
+
+        .alert-severity.warning {
+            background-color: #d9903a;
+        }
+
+        .alert-severity.info {
+            background-color: #6b8aef;
+        }
+
+        .alert-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .alert-domain {
+            display: inline-block;
+            padding: 2px 6px;
+            background-color: #1d2233;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #6a7192;
+            text-transform: uppercase;
+        }
+
+        .alert-time {
+            font-size: 11px;
+            color: #6a7192;
+        }
+
+        .alert-message {
+            font-size: 13px;
+            color: #d0d4e2;
+            margin-bottom: 8px;
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .alert-btn {
+            padding: 4px 8px;
+            background-color: #1d2233;
+            color: #6a7192;
+            border: 1px solid #282e44;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s ease;
+        }
+
+        .alert-btn:hover {
+            background-color: #282e44;
+            color: #d0d4e2;
+        }
+
+        /* Pipeline Status */
+        .pipeline-grid {
+            grid-column: span 4;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .pipeline-main {
+            background-color: #1d2233;
+            border: 1px solid #282e44;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .pipeline-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background-color: #282e44;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .pipeline-stat-label {
+            font-size: 12px;
+            color: #6a7192;
+        }
+
+        .pipeline-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #c9a24d;
+        }
+
+        .pie-chart {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #4daa6a 0deg 144deg,
+                #6b8aef 144deg 216deg,
+                #d9903a 216deg 288deg,
+                #9b72cf 288deg 360deg
+            );
+            margin: 12px auto;
+        }
+
+        .chart-legend {
+            font-size: 11px;
+            color: #6a7192;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        .source-list {
+            background-color: #1d2233;
+            border: 1px solid #282e44;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .source-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #282e44;
+            font-size: 12px;
+        }
+
+        .source-item:last-child {
+            border-bottom: none;
+        }
+
+        .source-name {
+            color: #d0d4e2;
+            font-weight: 500;
+        }
+
+        .source-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-indicator.active {
+            background-color: #4daa6a;
+        }
+
+        .status-indicator.paused {
+            background-color: #d9903a;
+        }
+
+        .status-indicator.error {
+            background-color: #c95050;
+        }
+
+        .source-time {
+            font-size: 10px;
+            color: #6a7192;
+        }
+
+        /* Competitor Cards */
+        .competitors-grid {
+            grid-column: span 4;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .competitor-card {
+            background-color: #1d2233;
+            border: 1px solid #282e44;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .competitor-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #eef0f8;
+            margin-bottom: 12px;
+        }
+
+        .competitor-stat {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 8px;
+            color: #6a7192;
+        }
+
+        .competitor-stat-value {
+            color: #d0d4e2;
+        }
+
+        .threat-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #282e44;
+        }
+
+        .threat-level {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .threat-level.high {
+            background-color: #c95050;
+        }
+
+        .threat-level.medium {
+            background-color: #d9903a;
+        }
+
+        .threat-level.low {
+            background-color: #4daa6a;
+        }
+
+        .threat-text {
+            font-size: 11px;
+            color: #6a7192;
+        }
+
+        /* Timeline */
+        .timeline {
+            background-color: #1d2233;
+            border: 1px solid #282e44;
+            border-radius: 10px;
+            padding: 18px;
+            grid-column: span 4;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #282e44;
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .timeline-marker {
+            width: 8px;
+            height: 8px;
+            background-color: #c9a24d;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-date {
+            font-size: 12px;
+            color: #6a7192;
+            margin-bottom: 2px;
+        }
+
+        .timeline-title {
+            font-size: 13px;
+            color: #eef0f8;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .timeline-obligation {
+            font-size: 11px;
+            color: #6b8aef;
+            margin-bottom: 6px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-compliant {
+            background-color: rgba(77, 170, 106, 0.2);
+            color: #4daa6a;
+        }
+
+        .badge-monitoring {
+            background-color: rgba(217, 144, 58, 0.2);
+            color: #d9903a;
+        }
+
+        .badge-action {
+            background-color: rgba(201, 80, 80, 0.2);
+            color: #c95050;
+        }
+
+        /* Domain View */
+        .domain-content {
+            grid-column: span 4;
+        }
+
+        .domain-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #282e44;
+        }
+
+        .domain-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #eef0f8;
+            margin-bottom: 4px;
+        }
+
+        .domain-description {
+            font-size: 13px;
+            color: #6a7192;
+        }
+
+        .domain-section {
+            background-color: #1d2233;
+            border: 1px solid #282e44;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .domain-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #6b8aef;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .domain-item {
+            font-size: 13px;
+            color: #d0d4e2;
+            margin-bottom: 8px;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .domain-item::before {
+            content: '↳';
+            position: absolute;
+            left: 0;
+            color: #6a7192;
+        }
+
+        /* Settings */
+        .settings-grid {
+            grid-column: span 4;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .setting-card {
+            background-color: #1d2233;
+            border: 1px solid #282e44;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .setting-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #eef0f8;
+            margin-bottom: 14px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #282e44;
+            font-size: 12px;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            color: #d0d4e2;
+        }
+
+        .toggle {
+            width: 32px;
+            height: 18px;
+            background-color: #282e44;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            border: 1px solid #282e44;
+        }
+
+        .toggle.on {
+            background-color: #4daa6a;
+            border-color: #4daa6a;
+        }
+
+        .toggle-knob {
+            width: 14px;
+            height: 14px;
+            background-color: #eef0f8;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: all 0.2s ease;
+        }
+
+        .toggle.on .toggle-knob {
+            left: 16px;
+        }
+
+        .time-input {
+            padding: 6px 10px;
+            background-color: #282e44;
+            border: 1px solid #282e44;
+            border-radius: 6px;
+            color: #d0d4e2;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .time-input:hover {
+            border-color: #3a4558;
+        }
+
+        .number-input {
+            padding: 6px 10px;
+            background-color: #282e44;
+            border: 1px solid #282e44;
+            border-radius: 6px;
+            color: #d0d4e2;
+            font-size: 12px;
+            width: 80px;
+        }
+
+        .number-input:hover {
+            border-color: #3a4558;
+        }
+
+        /* Layer 0 Sync */
+        .layer0-grid {
+            grid-column: span 4;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .layer0-card {
+            background-color: #1d2233;
+            border: 1px solid #282e44;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .doc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #282e44;
+            font-size: 12px;
+        }
+
+        .doc-item:last-child {
+            border-bottom: none;
+        }
+
+        .doc-name {
+            color: #d0d4e2;
+            font-weight: 500;
+        }
+
+        .doc-date {
+            color: #6a7192;
+            font-size: 11px;
+        }
+
+        .change-item {
+            padding: 10px;
+            background-color: #282e44;
+            border-left: 3px solid #6b8aef;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .change-item-title {
+            color: #d0d4e2;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .change-item-detail {
+            color: #6a7192;
+            font-size: 11px;
+        }
+
+        .btn-full-width {
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        /* Hidden View */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #282e44;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #343d54;
+        }
+
+        /* Footer */
+        .footer {
+            padding-top: 20px;
+            border-top: 1px solid #282e44;
+            font-size: 10px;
+            color: #4a5070;
+            line-height: 1.4;
+            margin-top: 20px;
+        }
+
+        .footer-disclaimer {
+            background-color: rgba(201, 162, 77, 0.05);
+            border: 1px solid rgba(201, 162, 77, 0.2);
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .content-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .kpi-card {
+                grid-column: span 1;
+            }
+
+            .stoic-check,
+            .briefing-card,
+            .alert-card,
+            .pipeline-grid,
+            .competitors-grid,
+            .timeline,
+            .domain-content,
+            .settings-grid,
+            .layer0-grid {
+                grid-column: span 3;
+            }
+
+            .status-row {
+                grid-column: span 3;
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .competitors-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .settings-grid,
+            .layer0-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+                padding: 16px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .content-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+
+            .kpi-card {
+                grid-column: span 1;
+            }
+
+            .stoic-check,
+            .briefing-card,
+            .alert-card,
+            .pipeline-grid,
+            .competitors-grid,
+            .timeline,
+            .domain-content,
+            .status-row {
+                grid-column: span 2;
+            }
+
+            .status-row {
+                grid-template-columns: 1fr;
+            }
+
+            .competitors-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pipeline-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 200px;
+                flex-direction: row;
+                overflow-x: auto;
+                overflow-y: hidden;
+                padding: 12px;
+                border-right: none;
+                border-bottom: 1px solid #282e44;
+            }
+
+            .sidebar-header {
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: none;
+                min-width: 150px;
+            }
+
+            .nav-section {
+                margin-bottom: 0;
+                margin-right: 20px;
+                min-width: 150px;
+            }
+
+            .main-content {
+                padding: 16px;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .kpi-card,
+            .stoic-check,
+            .briefing-card,
+            .alert-card,
+            .pipeline-grid,
+            .competitors-grid,
+            .timeline,
+            .domain-content,
+            .status-row,
+            .settings-grid,
+            .layer0-grid {
+                grid-column: span 1;
+            }
+
+            .status-row {
+                grid-template-columns: 1fr;
+            }
+
+            .page-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">SageReasoning</div>
+                <div class="sage-title">
+                    <div class="sage-icon">⚙</div>
+                    Sage Ops
+                </div>
+            </div>
+
+            <div class="context-card">
+                <div class="context-card-title">
+                    <div class="context-status-dot"></div>
+                    Layer 0 Status
+                </div>
+                <div class="context-stat">
+                    <span>Freshness:</span>
+                    <span class="context-stat-value">87%</span>
+                </div>
+                <div class="context-stat">
+                    <span>Last Sync:</span>
+                    <span class="context-stat-value">Today 6:15 AM</span>
+                </div>
+                <div class="context-stat">
+                    <span>Changes:</span>
+                    <span class="context-stat-value">12 docs</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Operations</div>
+                <div class="nav-item active" onclick="switchView('dashboard')">
+                    <span class="nav-icon">📊</span> Dashboard
+                </div>
+                <div class="nav-item" onclick="switchView('briefing')">
+                    <span class="nav-icon">📋</span> Morning Briefing
+                </div>
+                <div class="nav-item" onclick="switchView('alerts')">
+                    <span class="nav-icon">🔔</span> Alerts
+                </div>
+                <div class="nav-item" onclick="switchView('weekly')">
+                    <span class="nav-icon">📈</span> Weekly Review
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Intelligence</div>
+                <div class="nav-item" onclick="switchView('pipeline')">
+                    <span class="nav-icon">📥</span> Pipeline Status
+                </div>
+                <div class="nav-item" onclick="switchView('competitive')">
+                    <span class="nav-icon">🎯</span> Competitive Intel
+                </div>
+                <div class="nav-item" onclick="switchView('ailandscape')">
+                    <span class="nav-icon">🤖</span> AI Landscape
+                </div>
+                <div class="nav-item" onclick="switchView('regulatory')">
+                    <span class="nav-icon">⚖️</span> Regulatory Tracker
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Domains</div>
+                <div class="domains-list">
+                    <div class="domain-tag" onclick="switchToDomain('Product')">Product</div>
+                    <div class="domain-tag" onclick="switchToDomain('GTM')">GTM</div>
+                    <div class="domain-tag" onclick="switchToDomain('Marketing')">Marketing</div>
+                    <div class="domain-tag" onclick="switchToDomain('Sales')">Sales</div>
+                    <div class="domain-tag" onclick="switchToDomain('Finance')">Finance</div>
+                    <div class="domain-tag" onclick="switchToDomain('Legal')">Legal</div>
+                    <div class="domain-tag" onclick="switchToDomain('HR')">HR</div>
+                    <div class="domain-tag" onclick="switchToDomain('Customer')">Customer</div>
+                    <div class="domain-tag" onclick="switchToDomain('Fundraising')">Fundraising</div>
+                    <div class="domain-tag" onclick="switchToDomain('Competitive')">Competitive</div>
+                    <div class="domain-tag" onclick="switchToDomain('Infrastructure')">Infrastructure</div>
+                    <div class="domain-tag" onclick="switchToDomain('AI Intel')">AI Intel</div>
+                    <div class="domain-tag" onclick="switchToDomain('Community')">Community</div>
+                    <div class="domain-tag" onclick="switchToDomain('Partnerships')">Partnerships</div>
+                    <div class="domain-tag" onclick="switchToDomain('Operations')">Operations</div>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">System</div>
+                <div class="nav-item" onclick="switchView('layer0')">
+                    <span class="nav-icon">🔗</span> Layer 0 Sync
+                </div>
+                <div class="nav-item" onclick="switchView('settings')">
+                    <span class="nav-icon">⚙️</span> Settings
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                Last updated: 07:42 AM
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- DASHBOARD VIEW -->
+            <div id="dashboard" class="view active">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">Dashboard</div>
+                        <div class="page-subtitle">Saturday, April 5, 2026 — Real-time operations overview</div>
+                    </div>
+                    <div class="page-controls">
+                        <button class="btn">Refresh</button>
+                        <button class="btn btn-primary">Generate Report</button>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <!-- KPI Cards -->
+                    <div class="card kpi-card">
+                        <div class="card-title">Runway</div>
+                        <div class="kpi-value">14.2</div>
+                        <div class="kpi-label">months cash remaining</div>
+                        <div class="kpi-change">▼ -0.3 from last month</div>
+                    </div>
+
+                    <div class="card kpi-card">
+                        <div class="card-title">Monthly Recurring</div>
+                        <div class="kpi-value">$47.8K</div>
+                        <div class="kpi-label">MRR this month</div>
+                        <div class="kpi-change">▲ +$3.2K vs last month</div>
+                    </div>
+
+                    <div class="card kpi-card">
+                        <div class="card-title">Pipeline</div>
+                        <div class="kpi-value">23</div>
+                        <div class="kpi-label">active opportunities</div>
+                        <div class="kpi-change">▲ +5 new this week</div>
+                    </div>
+
+                    <div class="card kpi-card">
+                        <div class="card-title">Alerts</div>
+                        <div class="kpi-value">3</div>
+                        <div class="kpi-label">active alerts</div>
+                        <div class="kpi-change">1 critical, 2 warnings</div>
+                    </div>
+
+                    <!-- Stoic Check -->
+                    <div class="card stoic-check">
+                        <div class="stoic-check-title">
+                            <span class="stoic-check-icon">φ</span>
+                            Today's Stoic Check
+                        </div>
+                        <div class="stoic-check-content">
+                            Your agenda includes investor outreach and competitive assessment. These could trigger the "Passion for External Validation" (wanting investors to see you favorably) and "Passion for Competitive Dominance" (wanting to outpace rivals). <strong>Reminder:</strong> Your role is to execute excellent strategy, not to control external opinions. The competitive landscape exists regardless of your preferences.
+                        </div>
+                        <div class="stoic-check-passion">
+                            Passions at risk: Validation, Dominance
+                        </div>
+                    </div>
+
+                    <!-- Morning Briefing -->
+                    <div class="card briefing-card">
+                        <div class="card-title-bold">Morning Briefing</div>
+                        <div class="briefing-time">Generated: Saturday, April 5 at 7:00 AM</div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Overnight Changes</div>
+                            <div class="briefing-item">3 new inbound leads from ProductHunt launch</div>
+                            <div class="briefing-item">Competitor raised Series B at $18M valuation</div>
+                            <div class="briefing-item">Server uptime: 99.97% (0 incidents)</div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Today's Priorities</div>
+                            <div class="briefing-checkbox">
+                                <div class="checkbox" onclick="toggleCheckbox(this)"></div>
+                                <span>Investor call with Sequoia at 10:00 AM</span>
+                            </div>
+                            <div class="briefing-checkbox">
+                                <div class="checkbox" onclick="toggleCheckbox(this)"></div>
+                                <span>Product roadmap review with engineering</span>
+                            </div>
+                            <div class="briefing-checkbox">
+                                <div class="checkbox" onclick="toggleCheckbox(this)"></div>
+                                <span>Prepare Q1 metrics for board deck</span>
+                            </div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Active Risks</div>
+                            <div class="briefing-item">API rate limit issue detected (non-blocking)</div>
+                            <div class="briefing-item">Legal review pending for Terms update (due Monday)</div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Opportunities</div>
+                            <div class="briefing-item">TechCrunch outreach window (editor available)</div>
+                            <div class="briefing-item">3 customer expansion opportunities ready to close</div>
+                        </div>
+                    </div>
+
+                    <!-- Status Row -->
+                    <div class="status-row">
+                        <div class="status-card">
+                            <div class="card-title">Latest Competitive Alert</div>
+                            <div class="status-label">RivalAI announced new pricing tier</div>
+                            <div class="status-item">Position: Lower than us on entry price</div>
+                            <div class="status-item">Threat: Medium — targeting SMBs</div>
+                            <div class="status-item">Our response: Bundled tier launching next week</div>
+                        </div>
+
+                        <div class="status-card">
+                            <div class="card-title">Regulatory Deadlines</div>
+                            <div class="status-label">Next item: GDPR audit</div>
+                            <div class="status-item">Days remaining: 8 days</div>
+                            <div class="status-item">Status: On track, audit scheduled</div>
+                            <div class="status-item">Owner: Legal & Compliance</div>
+                        </div>
+
+                        <div class="status-card">
+                            <div class="card-title">Pipeline Health</div>
+                            <div class="status-label">Quarterly forecast: $180K</div>
+                            <div class="status-item">Deals in final stage: 5</div>
+                            <div class="status-item">Win rate this month: 68%</div>
+                            <div class="status-item">Avg deal cycle: 22 days</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-disclaimer">
+                        ⚠️ <strong>Philosophical Practice Tool Notice (R1, R3, R9):</strong> This is not therapy or professional advice. Sage Ops recommendations pass through the Stoic Brain's 4-stage evaluation but do not constitute financial, legal, or professional advice. Consult qualified professionals for legal, financial, and healthcare decisions.
+                    </div>
+                </div>
+            </div>
+
+            <!-- MORNING BRIEFING VIEW -->
+            <div id="briefing" class="view">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">Morning Briefing</div>
+                        <div class="page-subtitle">Saturday, April 5, 2026 — 7:00 AM</div>
+                    </div>
+                    <div class="page-controls">
+                        <button class="btn">Email Briefing</button>
+                        <button class="btn btn-primary">Regenerate</button>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="card briefing-card" style="grid-column: span 4;">
+                        <div class="briefing-time">Generated: Saturday, April 5 at 7:00 AM • Next: Sunday 7:00 AM</div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Overnight Changes</div>
+                            <div class="briefing-item">ProductHunt launch generated 247 upvotes, 28 page views signed up</div>
+                            <div class="briefing-item">RivalAI publicly announced Series B funding ($18M at $90M valuation)</div>
+                            <div class="briefing-item">Platform uptime: 99.97%, zero critical incidents</div>
+                            <div class="briefing-item">3 customer support tickets marked URGENT (all resolved within 2 hours)</div>
+                            <div class="briefing-item">Two employees from competing company viewed our careers page</div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Today's Priorities</div>
+                            <div class="briefing-checkbox">
+                                <div class="checkbox" onclick="toggleCheckbox(this)"></div>
+                                <span><strong>10:00 AM:</strong> Sequoia Capital partner call (Series A discussion)</span>
+                            </div>
+                            <div class="briefing-checkbox">
+                                <div class="checkbox" onclick="toggleCheckbox(this)"></div>
+                                <span><strong>2:00 PM:</strong> Engineering roadmap review for H2 planning</span>
+                            </div>
+                            <div class="briefing-checkbox">
+                                <div class="checkbox" onclick="toggleCheckbox(this)"></div>
+                                <span><strong>3:30 PM:</strong> Board metrics preparation (Q1 close, preliminary Q2)</span>
+                            </div>
+                            <div class="briefing-checkbox">
+                                <div class="checkbox" onclick="toggleCheckbox(this)"></div>
+                                <span><strong>4:30 PM:</strong> Customer success call with Enterprise prospect</span>
+                            </div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Active Risks</div>
+                            <div class="briefing-item">⚠️ API rate limiting triggered 2x in past 24h (internal optimization needed)</div>
+                            <div class="briefing-item">⚠️ Legal: ToS update pending founder review (deadline: Monday EOD)</div>
+                            <div class="briefing-item">⚠️ Infrastructure: Database replication lag detected (monitoring, non-critical)</div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Opportunities</div>
+                            <div class="briefing-item">✨ TechCrunch reporter available for interview this week (launch window)</div>
+                            <div class="briefing-item">✨ 3 customers ready to expand TAC by $8K-15K each (close by month-end)</div>
+                            <div class="briefing-item">✨ AI Landscape report trending on HN (organic reach +32K)</div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Stoic Check: Passions at Risk Today</div>
+                            <div class="briefing-item">Your agenda includes investor engagement and competitive response. The "Passion for External Validation" and "Passion for Dominance" may be triggered. Your focus: execute your strategy with excellence, not control external perceptions. Investor decisions rest on fundamentals, not persuasion.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-disclaimer">
+                        ⚠️ <strong>Philosophical Practice Tool Notice (R1, R3, R9):</strong> This briefing is informational only and does not constitute professional advice. The Stoic Check is a reflective practice, not psychological guidance.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ALERTS VIEW -->
+            <div id="alerts" class="view">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">Alerts & Issues</div>
+                        <div class="page-subtitle">3 active alerts across operations</div>
+                    </div>
+                    <div class="page-controls">
+                        <button class="btn">Clear All</button>
+                        <button class="btn btn-primary">Configure</button>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="card alert-card" style="grid-column: span 4;">
+                        <div class="alert-filter-bar">
+                            <div class="filter-btn active" onclick="filterAlerts('all')">All (3)</div>
+                            <div class="filter-btn" onclick="filterAlerts('critical')">Critical (1)</div>
+                            <div class="filter-btn" onclick="filterAlerts('warning')">Warning (2)</div>
+                            <div class="filter-btn" onclick="filterAlerts('info')">Info</div>
+                        </div>
+
+                        <div class="alert-item" data-severity="critical">
+                            <div class="alert-severity critical"></div>
+                            <div class="alert-content">
+                                <div class="alert-header">
+                                    <span class="alert-domain">Competitive</span>
+                                    <span class="alert-time">52 minutes ago</span>
+                                </div>
+                                <div class="alert-message">RivalAI announced Series B funding. $18M raised at $90M post-money valuation. Positioning against our enterprise segment.</div>
+                                <div class="alert-actions">
+                                    <button class="alert-btn" onclick="handleAlert('acknowledge')">Acknowledge</button>
+                                    <button class="alert-btn" onclick="handleAlert('escalate')">Escalate</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert-item" data-severity="warning">
+                            <div class="alert-severity warning"></div>
+                            <div class="alert-content">
+                                <div class="alert-header">
+                                    <span class="alert-domain">Infrastructure</span>
+                                    <span class="alert-time">3 hours ago</span>
+                                </div>
+                                <div class="alert-message">API rate limiting threshold exceeded 2x in past 24 hours. Likely cause: spike in free-tier user adoption. No customer impact yet.</div>
+                                <div class="alert-actions">
+                                    <button class="alert-btn" onclick="handleAlert('acknowledge')">Acknowledge</button>
+                                    <button class="alert-btn" onclick="handleAlert('dismiss')">Dismiss</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert-item" data-severity="warning">
+                            <div class="alert-severity warning"></div>
+                            <div class="alert-content">
+                                <div class="alert-header">
+                                    <span class="alert-domain">Legal</span>
+                                    <span class="alert-time">8 hours ago</span>
+                                </div>
+                                <div class="alert-message">Terms of Service update pending founder review. Compliance deadline: Monday 5:00 PM. GDPR audit references included.</div>
+                                <div class="alert-actions">
+                                    <button class="alert-btn" onclick="handleAlert('acknowledge')">Acknowledge</button>
+                                    <button class="alert-btn" onclick="handleAlert('dismiss')">Dismiss</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-disclaimer">
+                        All alerts are monitored by Sage Ops and escalated to appropriate domain owners. Critical alerts require acknowledgment within 2 hours.
+                    </div>
+                </div>
+            </div>
+
+            <!-- PIPELINE STATUS VIEW -->
+            <div id="pipeline" class="view">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">Pipeline Status</div>
+                        <div class="page-subtitle">Real-time intelligence pipeline health</div>
+                    </div>
+                    <div class="page-controls">
+                        <button class="btn">View Logs</button>
+                        <button class="btn btn-primary">Run Sync</button>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="pipeline-grid" style="grid-column: span 4;">
+                        <div class="pipeline-main">
+                            <div class="card-title-bold">Pipeline Overview</div>
+
+                            <div class="pipeline-stat">
+                                <span class="pipeline-stat-label">Sources Monitored</span>
+                                <span class="pipeline-stat-value">12</span>
+                            </div>
+
+                            <div class="pipeline-stat">
+                                <span class="pipeline-stat-label">Items Processed Today</span>
+                                <span class="pipeline-stat-value">847</span>
+                            </div>
+
+                            <div class="pipeline-stat">
+                                <span class="pipeline-stat-label">Verified Items</span>
+                                <span class="pipeline-stat-value">723</span>
+                            </div>
+
+                            <div class="pipeline-stat">
+                                <span class="pipeline-stat-label">Pending Review</span>
+                                <span class="pipeline-stat-value">124</span>
+                            </div>
+
+                            <div style="margin-top: 16px;">
+                                <div class="card-title">Classification Breakdown</div>
+                                <div class="pie-chart"></div>
+                                <div class="chart-legend">
+                                    <div class="legend-item">
+                                        <div class="legend-color" style="background-color: #4daa6a;"></div>
+                                        <span>Competitive (38%)</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-color" style="background-color: #6b8aef;"></div>
+                                        <span>Market (28%)</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-color" style="background-color: #d9903a;"></div>
+                                        <span>Regulatory (22%)</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-color" style="background-color: #9b72cf;"></div>
+                                        <span>Internal (12%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="source-list">
+                            <div class="card-title-bold">Connected Sources</div>
+
+                            <div class="source-item">
+                                <span class="source-name">TechCrunch</span>
+                                <div class="source-status">
+                                    <div class="status-indicator active"></div>
+                                    <span class="source-time">2:14 AM</span>
+                                </div>
+                            </div>
+
+                            <div class="source-item">
+                                <span class="source-name">ProductHunt</span>
+                                <div class="source-status">
+                                    <div class="status-indicator active"></div>
+                                    <span class="source-time">8:42 AM</span>
+                                </div>
+                            </div>
+
+                            <div class="source-item">
+                                <span class="source-name">HackerNews</span>
+                                <div class="source-status">
+                                    <div class="status-indicator active"></div>
+                                    <span class="source-time">7:39 AM</span>
+                                </div>
+                            </div>
+
+                            <div class="source-item">
+                                <span class="source-name">SEC Filings</span>
+                                <div class="source-status">
+                                    <div class="status-indicator active"></div>
+                                    <span class="source-time">6:00 AM</span>
+                                </div>
+                            </div>
+
+                            <div class="source-item">
+                                <span class="source-name">Patent Database</span>
+                                <div class="source-status">
+                                    <div class="status-indicator active"></div>
+                                    <span class="source-time">5:30 AM</span>
+                                </div>
+                            </div>
+
+                            <div class="source-item">
+                                <span class="source-name">Crunchbase</span>
+                                <div class="source-status">
+                                    <div class="status-indicator active"></div>
+                                    <span class="source-time">4:12 AM</span>
+                                </div>
+                            </div>
+
+                            <div class="source-item">
+                                <span class="source-name">LinkedIn Updates</span>
+                                <div class="source-status">
+                                    <div class="status-indicator paused"></div>
+                                    <span class="source-time">Yesterday</span>
+                                </div>
+                            </div>
+
+                            <div class="source-item">
+                                <span class="source-name">GitHub Trends</span>
+                                <div class="source-status">
+                                    <div class="status-indicator active"></div>
+                                    <span class="source-time">8:01 AM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-disclaimer">
+                        Pipeline processing is automated. Items flagged for manual review are queued in the verification queue above.
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPETITIVE INTEL VIEW -->
+            <div id="competitive" class="view">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">Competitive Intelligence</div>
+                        <div class="page-subtitle">Top 3 competitor monitoring + weekly brief</div>
+                    </div>
+                    <div class="page-controls">
+                        <button class="btn">Add Competitor</button>
+                        <button class="btn btn-primary">Weekly Brief</button>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="competitors-grid" style="grid-column: span 4;">
+                        <div class="competitor-card">
+                            <div class="competitor-name">RivalAI</div>
+                            <div class="competitor-stat">
+                                <span>Last Change:</span>
+                                <span class="competitor-stat-value">52 minutes ago</span>
+                            </div>
+                            <div class="competitor-stat">
+                                <span>Recent Event:</span>
+                                <span class="competitor-stat-value">Series B: $18M</span>
+                            </div>
+                            <div class="competitor-stat">
+                                <span>Pricing:</span>
+                                <span class="competitor-stat-value">$49/mo starter</span>
+                            </div>
+                            <div class="competitor-stat">
+                                <span>Feature Changes:</span>
+                                <span class="competitor-stat-value">2 in past week</span>
+                            </div>
+                            <div class="threat-indicator">
+                                <div class="threat-level high"></div>
+                                <span class="threat-text">High threat — direct competitor</span>
+                            </div>
+                        </div>
+
+                        <div class="competitor-card">
+                            <div class="competitor-name">InnovateAI</div>
+                            <div class="competitor-stat">
+                                <span>Last Change:</span>
+                                <span class="competitor-stat-value">3 days ago</span>
+                            </div>
+                            <div class="competitor-stat">
+                                <span>Recent Event:</span>
+                                <span class="competitor-stat-value">Pricing update</span>
+                            </div>
+                            <div class="competitor-stat">
+                                <span>Pricing:</span>
+                                <span class="competitor-stat-value">$99/mo pro</span>
+                            </div>
+                            <div class="competitor-stat">
+                                <span>Feature Changes:</span>
+                                <span class="competitor-stat-value">0 in past week</span>
+                            </div>
+                            <div class="threat-indicator">
+                                <div class="threat-level medium"></div>
+                                <span class="threat-text">Medium threat — adjacent market</span>
+                            </div>
+                        </div>
+
+                        <div class="competitor-card">
+                            <div class="competitor-name">TechVentures</div>
+                            <div class="competitor-stat">
+                                <span>Last Change:</span>
+                                <span class="competitor-stat-value">1 week ago</span>
+                            </div>
+                            <div class="competitor-stat">
+                                <span>Recent Event:</span>
+                                <span class="competitor-stat-value">Expansion announcement</span>
+                            </div>
+                            <div class="competitor-stat">
+                                <span>Pricing:</span>
+                                <span class="competitor-stat-value">$149/mo enterprise</span>
+                            </div>
+                            <div class="competitor-stat">
+                                <span>Feature Changes:</span>
+                                <span class="competitor-stat-value">1 in past week</span>
+                            </div>
+                            <div class="threat-indicator">
+                                <div class="threat-level low"></div>
+                                <span class="threat-text">Low threat — different segment</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="grid-column: span 4;">
+                        <div class="card-title-bold">Weekly Competitive Brief</div>
+                        <div class="briefing-time">Last updated: Friday, April 4 at 5:00 PM</div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Funding Activity</div>
+                            <div class="briefing-item">RivalAI Series B ($18M) accelerates their enterprise push</div>
+                            <div class="briefing-item">2 new entrants in SMB segment detected</div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Pricing Moves</div>
+                            <div class="briefing-item">RivalAI still underprices us on entry tier</div>
+                            <div class="briefing-item">Our bundled offering launching next week = competitive response ready</div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Feature Roadmaps</div>
+                            <div class="briefing-item">No major feature announcements from competitors this week</div>
+                            <div class="briefing-item">Our AI improvements put us ahead on core capability</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-disclaimer">
+                        Competitive intelligence is gathered from public sources only and analyzed by Sage Ops. All data passes through the Stoic Brain's evaluation framework.
+                    </div>
+                </div>
+            </div>
+
+            <!-- REGULATORY TRACKER VIEW -->
+            <div id="regulatory" class="view">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">Regulatory Tracker</div>
+                        <div class="page-subtitle">24 compliance obligations monitored</div>
+                    </div>
+                    <div class="page-controls">
+                        <button class="btn">View Register</button>
+                        <button class="btn btn-primary">Export Timeline</button>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="timeline" style="grid-column: span 4;">
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">8 days remaining</div>
+                                <div class="timeline-title">GDPR Compliance Audit</div>
+                                <div class="timeline-obligation">Obligation CR-012 • GDPR Article 32</div>
+                                <div><span class="status-badge badge-monitoring">MONITORING</span></div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">12 days remaining</div>
+                                <div class="timeline-title">SOC 2 Type II Report Update</div>
+                                <div class="timeline-obligation">Obligation CR-008 • SOC 2 Standard</div>
+                                <div><span class="status-badge badge-monitoring">MONITORING</span></div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">21 days remaining</div>
+                                <div class="timeline-title">CCPA Data Request Procedures Review</div>
+                                <div class="timeline-obligation">Obligation CR-015 • CCPA Compliance</div>
+                                <div><span class="status-badge badge-monitoring">MONITORING</span></div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">Completed on April 2</div>
+                                <div class="timeline-title">Q1 Financial Reporting</div>
+                                <div class="timeline-obligation">Obligation CR-003 • Financial Reporting</div>
+                                <div><span class="status-badge badge-compliant">COMPLIANT</span></div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">Completed on March 28</div>
+                                <div class="timeline-title">Annual Cybersecurity Assessment</div>
+                                <div class="timeline-obligation">Obligation CR-018 • Information Security</div>
+                                <div><span class="status-badge badge-compliant">COMPLIANT</span></div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">Overdue: Action Required</div>
+                                <div class="timeline-title">Privacy Policy Update Review</div>
+                                <div class="timeline-obligation">Obligation CR-024 • Data Privacy</div>
+                                <div><span class="status-badge badge-action">ACTION REQUIRED</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-disclaimer">
+                        All compliance deadlines are monitored by Sage Ops. The full compliance register (CR-001 through CR-024) is maintained separately and updated quarterly.
+                    </div>
+                </div>
+            </div>
+
+            <!-- DOMAIN VIEW -->
+            <div id="domain" class="view">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title" id="domainTitle">Product</div>
+                        <div class="page-subtitle" id="domainSubtitle">Core product development and innovation</div>
+                    </div>
+                    <div class="page-controls">
+                        <button class="btn">View Data Sources</button>
+                        <button class="btn btn-primary">Request Update</button>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="domain-content" style="grid-column: span 4;">
+                        <div class="domain-header">
+                            <div class="domain-name" id="domainHeaderName">Product</div>
+                            <div class="domain-description" id="domainHeaderDesc">Core product development and innovation</div>
+                        </div>
+
+                        <div class="domain-section">
+                            <div class="domain-section-title">What Sage Ops Automates</div>
+                            <div class="domain-item">Monitors competitive feature releases and benchmarks against our roadmap</div>
+                            <div class="domain-item">Tracks user feedback across all channels (support, reviews, social)</div>
+                            <div class="domain-item">Flags infrastructure bottlenecks and scaling concerns from logs</div>
+                            <div class="domain-item">Aggregates market trends and emerging technologies in our space</div>
+                            <div class="domain-item">Provides daily product health metrics (uptime, performance, defect rates)</div>
+                        </div>
+
+                        <div class="domain-section">
+                            <div class="domain-section-title">What Requires Human Judgment</div>
+                            <div class="domain-item">Prioritization decisions: which features to build vs. maintain</div>
+                            <div class="domain-item">Technical architecture decisions with long-term implications</div>
+                            <div class="domain-item">Product strategy pivots based on market feedback</div>
+                            <div class="domain-item">Trade-offs between speed and quality in releases</div>
+                            <div class="domain-item">Customer communication on breaking changes or deprecations</div>
+                        </div>
+
+                        <div class="domain-section">
+                            <div class="domain-section-title">Active Data Sources</div>
+                            <div class="domain-item">Internal: GitHub repos, Jira board, engineering logs, monitoring dashboards</div>
+                            <div class="domain-item">External: ProductHunt, user review sites, competitor tracking, HackerNews</div>
+                            <div class="domain-item">Customer: Support ticket analysis, NPS surveys, feature request backlog</div>
+                        </div>
+
+                        <div class="domain-section">
+                            <div class="domain-section-title">Recent Intelligence</div>
+                            <div class="domain-item">User adoption of new AI features is 34% higher than projected</div>
+                            <div class="domain-item">Database performance improvement implemented; query times down 22%</div>
+                            <div class="domain-item">Competitor feature parity in core module achieved; differentiation now in UX</div>
+                            <div class="domain-item">3 major customers requesting API customization (revenue opportunity)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-disclaimer">
+                        Domain views are updated in real-time as Sage Ops processes new intelligence. Each domain maintains its own automation/judgment boundary.
+                    </div>
+                </div>
+            </div>
+
+            <!-- LAYER 0 SYNC VIEW -->
+            <div id="layer0" class="view">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">Layer 0 Sync</div>
+                        <div class="page-subtitle">Business context model — foundation of all Sage Ops operations</div>
+                    </div>
+                    <div class="page-controls">
+                        <button class="btn">View History</button>
+                        <button class="btn btn-primary">Run Full Sync</button>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="layer0-grid" style="grid-column: span 4;">
+                        <div class="layer0-card">
+                            <div class="card-title-bold">Documents Analyzed</div>
+
+                            <div class="doc-item">
+                                <span class="doc-name">Business Plan 2025-2026</span>
+                                <span class="doc-date">Read: Today 6:15 AM</span>
+                            </div>
+
+                            <div class="doc-item">
+                                <span class="doc-name">Financial Model (3-year)</span>
+                                <span class="doc-date">Read: Today 5:40 AM</span>
+                            </div>
+
+                            <div class="doc-item">
+                                <span class="doc-name">Product Roadmap H1-H2</span>
+                                <span class="doc-date">Read: Yesterday 7:20 PM</span>
+                            </div>
+
+                            <div class="doc-item">
+                                <span class="doc-name">Competitive Analysis 2026</span>
+                                <span class="doc-date">Read: April 2</span>
+                            </div>
+
+                            <div class="doc-item">
+                                <span class="doc-name">Team Structure & Roles</span>
+                                <span class="doc-date">Read: March 28</span>
+                            </div>
+
+                            <div class="doc-item">
+                                <span class="doc-name">Series A Investor Deck</span>
+                                <span class="doc-date">Read: March 25</span>
+                            </div>
+
+                            <div class="doc-item">
+                                <span class="doc-name">Compliance & Legal Register</span>
+                                <span class="doc-date">Read: March 20</span>
+                            </div>
+
+                            <div class="doc-item">
+                                <span class="doc-name">Customer Success Metrics</span>
+                                <span class="doc-date">Read: March 15</span>
+                            </div>
+                        </div>
+
+                        <div class="layer0-card">
+                            <div class="card-title-bold">Recommended Changes Queue</div>
+
+                            <div class="change-item">
+                                <div class="change-item-title">Update Competitive Assumptions</div>
+                                <div class="change-item-detail">RivalAI Series B changes market positioning assumptions (CR-COMP-342)</div>
+                            </div>
+
+                            <div class="change-item">
+                                <div class="change-item-title">Revise Runway Calculation</div>
+                                <div class="change-item-detail">New burn rate data suggests 14.2-month runway vs 14.8 months projected (FIN-runway-v4)</div>
+                            </div>
+
+                            <div class="change-item">
+                                <div class="change-item-title">Add Q2 Hiring Plan</div>
+                                <div class="change-item-detail">Engineering expansion approved; 2 new hires budgeted for May (HR-hiring-q2)</div>
+                            </div>
+
+                            <div class="change-item">
+                                <div class="change-item-title">Platform Roadmap Reorder</div>
+                                <div class="change-item-detail">User feedback + competitive intelligence suggest reordering Q2 priorities (PRODUCT-roadmap-v5)</div>
+                            </div>
+
+                            <div class="change-item">
+                                <div class="change-item-title">Update Compliance Timeline</div>
+                                <div class="change-item-detail">GDPR audit scheduled for April 13; Legal review needed on ToS by Monday (LEGAL-compliance-cr-024)</div>
+                            </div>
+
+                            <button class="btn btn-primary btn-full-width" onclick="reviewChanges()">Review & Approve</button>
+                        </div>
+                    </div>
+
+                    <div class="card" style="grid-column: span 4;">
+                        <div class="card-title-bold">Context Freshness Timeline</div>
+                        <div style="margin-top: 16px; font-size: 13px; color: #d0d4e2;">
+                            <div style="margin-bottom: 12px;">
+                                <strong style="color: #c9a24d;">Current Freshness: 87%</strong>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div>
+                                    <div style="font-size: 11px; color: #6a7192; margin-bottom: 4px;">Last Full Sync</div>
+                                    <div style="color: #eef0f8;">Today, 6:15 AM</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; color: #6a7192; margin-bottom: 4px;">Last Change Detection</div>
+                                    <div style="color: #eef0f8;">Today, 7:47 AM</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; color: #6a7192; margin-bottom: 4px;">Documents Updated</div>
+                                    <div style="color: #eef0f8;">12 in past 24h</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; color: #6a7192; margin-bottom: 4px;">Next Auto Sync</div>
+                                    <div style="color: #eef0f8;">Tomorrow, 7:00 AM</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-disclaimer">
+                        Layer 0 is the persistent business context model that enables all Sage Ops intelligence. Manual syncs override the automatic daily cycle. All recommended changes are queued for founder review before applying.
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS VIEW -->
+            <div id="settings" class="view">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">Settings</div>
+                        <div class="page-subtitle">Configure Sage Ops behavior and preferences</div>
+                    </div>
+                    <div class="page-controls">
+                        <button class="btn">Save Changes</button>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="settings-grid" style="grid-column: span 4;">
+                        <div class="setting-card">
+                            <div class="setting-title">Alert Notifications</div>
+
+                            <div class="setting-item">
+                                <span class="setting-label">Critical alerts</span>
+                                <div class="toggle on" onclick="toggleSetting(this)">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+
+                            <div class="setting-item">
+                                <span class="setting-label">Warning alerts</span>
+                                <div class="toggle on" onclick="toggleSetting(this)">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+
+                            <div class="setting-item">
+                                <span class="setting-label">Info alerts</span>
+                                <div class="toggle" onclick="toggleSetting(this)">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+
+                            <div class="setting-item">
+                                <span class="setting-label">Email notifications</span>
+                                <div class="toggle on" onclick="toggleSetting(this)">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <div class="setting-title">Briefing Schedule</div>
+
+                            <div class="setting-item">
+                                <span class="setting-label">Morning briefing time</span>
+                                <input type="time" class="time-input" value="07:00">
+                            </div>
+
+                            <div class="setting-item">
+                                <span class="setting-label">Weekend briefings</span>
+                                <div class="toggle on" onclick="toggleSetting(this)">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+
+                            <div class="setting-item">
+                                <span class="setting-label">Include Stoic Check</span>
+                                <div class="toggle on" onclick="toggleSetting(this)">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <div class="setting-title">Pipeline Configuration</div>
+
+                            <div class="setting-item">
+                                <span class="setting-label">Auto-process items</span>
+                                <div class="toggle on" onclick="toggleSetting(this)">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+
+                            <div class="setting-item">
+                                <span class="setting-label">Manual review threshold</span>
+                                <input type="number" class="number-input" value="500">
+                            </div>
+
+                            <div class="setting-item">
+                                <span class="setting-label">Daily processing limit</span>
+                                <input type="number" class="number-input" value="2000">
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <div class="setting-title">Cost Controls</div>
+
+                            <div class="setting-item">
+                                <span class="setting-label">Daily spend cap</span>
+                                <input type="number" class="number-input" value="50">
+                            </div>
+
+                            <div class="setting-item">
+                                <span class="setting-label">Loop detection enabled</span>
+                                <div class="toggle on" onclick="toggleSetting(this)">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+
+                            <div class="setting-item">
+                                <span class="setting-label">Error alerts</span>
+                                <div class="toggle on" onclick="toggleSetting(this)">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-disclaimer">
+                        All settings are saved immediately. Changes to pipeline configuration and cost controls take effect on next processing cycle.
+                    </div>
+                </div>
+            </div>
+
+            <!-- WEEKLY REVIEW VIEW -->
+            <div id="weekly" class="view">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">Weekly Review</div>
+                        <div class="page-subtitle">Week of March 31 – April 6, 2026</div>
+                    </div>
+                    <div class="page-controls">
+                        <button class="btn">Download PDF</button>
+                        <button class="btn btn-primary">Email Team</button>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="card" style="grid-column: span 4;">
+                        <div class="card-title-bold">This Week's Highlights</div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Key Wins</div>
+                            <div class="briefing-item">ProductHunt launch reached #3 overall (247 upvotes)</div>
+                            <div class="briefing-item">Closed 3 enterprise deals totaling $42K ARR</div>
+                            <div class="briefing-item">Engineering completed core AI improvements (+22% performance)</div>
+                            <div class="briefing-item">Team onboarded 2 new engineers (ramping well)</div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Challenges & Risks</div>
+                            <div class="briefing-item">RivalAI Series B announcement accelerates competitive pressure</div>
+                            <div class="briefing-item">API scaling issues detected (non-blocking, addressed)</div>
+                            <div class="briefing-item">Legal compliance review flagged ToS update deadline (Monday)</div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Metrics Summary</div>
+                            <div class="briefing-item"><strong>MRR:</strong> $47.8K (+$3.2K week-over-week)</div>
+                            <div class="briefing-item"><strong>Churn:</strong> 2.1% (target: <3%)</div>
+                            <div class="briefing-item"><strong>Pipeline:</strong> 23 active opportunities (+5 this week)</div>
+                            <div class="briefing-item"><strong>Runway:</strong> 14.2 months (-0.3 from last month)</div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Next Week's Focus</div>
+                            <div class="briefing-item">Sequoia Series A discussion (investor follow-up)</div>
+                            <div class="briefing-item">H2 product roadmap finalization</div>
+                            <div class="briefing-item">Complete Legal ToS review and implement updates</div>
+                            <div class="briefing-item">Close 2 pending enterprise deals ($30K projected)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-disclaimer">
+                        Weekly reviews are generated every Friday at 5:00 PM. This report is generated from actual operational data and Sage Ops analytics.
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI LANDSCAPE VIEW -->
+            <div id="ailandscape" class="view">
+                <div class="page-header">
+                    <div>
+                        <div class="page-title">AI Landscape Monitor</div>
+                        <div class="page-subtitle">Emerging technologies, models, and research</div>
+                    </div>
+                    <div class="page-controls">
+                        <button class="btn">View Report</button>
+                        <button class="btn btn-primary">Subscribe Feed</button>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="card" style="grid-column: span 4;">
+                        <div class="card-title-bold">This Week's Key Developments</div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Model Releases</div>
+                            <div class="briefing-item">OpenAI GPT-4.5 announced with 40% improved reasoning</div>
+                            <div class="briefing-item">Anthropic releases Claude API improvements (context window +200K)</div>
+                            <div class="briefing-item">Meta releases Llama 3.2 with competitive performance metrics</div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Regulatory Changes</div>
+                            <div class="briefing-item">EU AI Act enforcement begins Phase 2 (impact: medium)</div>
+                            <div class="briefing-item">US considering AI transparency requirements (draft bill circulating)</div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Research & Trends</div>
+                            <div class="briefing-item">Multimodal AI benchmarks improving faster than expected</div>
+                            <div class="briefing-item">Cost per inference dropping ~30% quarter-over-quarter</div>
+                            <div class="briefing-item">Fine-tuning becoming standard practice (3x growth in adoption)</div>
+                        </div>
+
+                        <div class="briefing-section">
+                            <div class="briefing-section-title">Competitive Opportunities</div>
+                            <div class="briefing-item">Longer context windows enable new use cases in document analysis</div>
+                            <div class="briefing-item">Improved reasoning opens door to higher-value automation</div>
+                            <div class="briefing-item">Cost reductions make enterprise adoption more feasible</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-disclaimer">
+                        AI Landscape monitoring is updated daily. Sage Ops tracks 40+ research publications, 12 model releases, and regulatory updates across jurisdictions.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // STATE MANAGEMENT
+        const state = {
+            currentView: 'dashboard',
+            currentDomain: null,
+            alerts: {
+                severity: 'all'
+            }
+        };
+
+        // VIEW SWITCHING
+        function switchView(viewName) {
+            // Hide all views
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+
+            // Show selected view
+            const view = document.getElementById(viewName);
+            if (view) {
+                view.classList.add('active');
+                state.currentView = viewName;
+            }
+
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item')?.classList.add('active');
+        }
+
+        // DOMAIN SWITCHING
+        function switchToDomain(domainName) {
+            const domains = {
+                'Product': 'Core product development and innovation',
+                'GTM': 'Go-to-market strategy and execution',
+                'Marketing': 'Brand, content, and demand generation',
+                'Sales': 'Enterprise and SMB sales pipeline',
+                'Finance': 'Financial planning and metrics',
+                'Legal': 'Legal compliance and contracts',
+                'HR': 'Team hiring and culture',
+                'Customer': 'Customer success and support',
+                'Fundraising': 'Investor relations and capital',
+                'Competitive': 'Competitive intelligence',
+                'Infrastructure': 'Platform and systems operations',
+                'AI Intel': 'AI landscape and research',
+                'Community': 'Community building and engagement',
+                'Partnerships': 'Strategic partnerships',
+                'Operations': 'Business operations and strategy'
+            };
+
+            state.currentDomain = domainName;
+
+            // Update domain view content
+            document.getElementById('domainTitle').textContent = domainName;
+            document.getElementById('domainSubtitle').textContent = domains[domainName] || 'Domain overview';
+            document.getElementById('domainHeaderName').textContent = domainName;
+            document.getElementById('domainHeaderDesc').textContent = domains[domainName] || 'Domain overview';
+
+            // Switch to domain view
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('domain').classList.add('active');
+
+            // Update domain tag highlighting
+            document.querySelectorAll('.domain-tag').forEach(tag => {
+                tag.classList.remove('active');
+                if (tag.textContent === domainName) {
+                    tag.classList.add('active');
+                }
+            });
+        }
+
+        // CHECKBOX TOGGLE
+        function toggleCheckbox(element) {
+            element.classList.toggle('checked');
+            if (element.classList.contains('checked')) {
+                element.innerHTML = '<div class="checkbox-check">✓</div>';
+            } else {
+                element.innerHTML = '';
+            }
+        }
+
+        // ALERT FILTERING
+        function filterAlerts(severity) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.alert-item').forEach(item => {
+                if (severity === 'all' || item.dataset.severity === severity) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // ALERT ACTIONS
+        function handleAlert(action) {
+            alert(`Alert action: ${action}`);
+        }
+
+        // TOGGLE SETTINGS
+        function toggleSetting(element) {
+            element.classList.toggle('on');
+        }
+
+        // REVIEW CHANGES
+        function reviewChanges() {
+            alert('Opening Layer 0 change review interface...');
+        }
+    </script>
+</body>
+</html>

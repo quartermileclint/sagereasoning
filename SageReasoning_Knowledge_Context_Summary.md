@@ -13,6 +13,8 @@ The core proposition: submit any action, document, conversation, or decision to 
 
 **Tagline:** Where agents and humans flourish together.
 
+**Honest positioning (R19):** SageReasoning makes one philosophical tradition — Stoicism — accessible as structured infrastructure. It is not a universal ethical reasoning framework, and does not claim to be. Other traditions (utilitarian, deontological, care ethics, Confucian, Buddhist, Ubuntu, indigenous wisdom) offer equally valid approaches to ethical reasoning. SageReasoning's value is depth and fidelity within the Stoic tradition, not breadth across all ethical reasoning. The framework is a mirror for examining one's own reasoning (R19d), not a lens for judging others.
+
 ---
 
 ## 2. The Stoic Brain (8 Data Files)
@@ -118,17 +120,19 @@ Browse, preview, and acquire original sage skills. Free preview invocations avai
 
 ## 6. The Agent Trust Layer (New — 4 April 2026)
 
-The strategic leap: SageReasoning isn't just a reasoning framework — it's the **trust layer for autonomous agents**.
+The strategic leap: SageReasoning isn't just a reasoning framework — it's a **trust layer for autonomous agents**, grounded in the Stoic philosophical tradition.
 
 ### Core Concept
 
 Just as humans earn certifications (first aid, driving, professional qualifications) by demonstrating habitual competence, agents can earn accreditation by demonstrating principled reasoning over time. Not a one-time test — a living score that tracks whether the agent's reasoning operates at a principled level continuously. If it drops, the accreditation drops. Visibly.
 
+**Certification scope (R18):** Accreditation certifies "observable reasoning patterns as measured against the Stoic philosophical framework." It does not certify safety, ethics, or trustworthiness in any absolute sense. The trust badge must link to documentation explaining what it measures, how the evaluation works, and its limitations. The architecture is designed so that SageReasoning is one certification provider among potential others — the accreditation schema accommodates future interoperability with certifications grounded in other ethical reasoning traditions.
+
 ### Three Simultaneous Positions
 
 1. **The Reasoning Brain** — gives agents the capacity for principled judgement in novel situations (beyond "if X then Y" rules)
-2. **The Certifying Authority** — defines what principled reasoning is, evaluates whether agents are doing it, and issues the credential
-3. **The Trust Infrastructure** — the portable signal that platforms, users, and other agents check before granting permissions
+2. **The Certifying Authority** — defines what principled reasoning is within the Stoic tradition, evaluates whether agents demonstrate it, and issues the credential (R18: one provider among potential others, not a monopoly by design)
+3. **The Trust Infrastructure** — the portable signal that platforms, users, and other agents check before granting permissions (R18: badge must be transparent about what it certifies and what it does not)
 
 ### Architecture (Built)
 
@@ -156,10 +160,11 @@ Inward-facing tools that help agents progress between proximity levels. Each der
 
 ---
 
-## 7. Governance Rules (Manifest — R1 to R14)
+## 7. Governance Rules (Manifest — R0 to R20)
 
 | Rule | Summary |
 |------|---------|
+| R0 | The Oikeiosis Principle — all decisions evaluated against the 4 circles of concern |
 | R1 | No therapeutic implication — philosophical practice, not treatment |
 | R2 | No employment evaluation |
 | R3 | Disclaimer on all evaluative output |
@@ -174,6 +179,12 @@ Inward-facing tools that help agents progress between proximity levels. Each der
 | R12 | Original skills must derive from 2+ of 6 mechanisms |
 | R13 | Embedding platform obligations |
 | R14 | Regulatory Compliance Pipeline — enforces compliance register, audit log, and quarterly reviews |
+| R15 | Sage Ops operational boundaries — authority level progression for AI cofounder |
+| R16 | Intelligence pipeline data governance — provenance, consent, cost controls |
+| R17 | Intimate data protection — bulk profiling prevention, encryption, retention limits, local-first for highest sensitivity (Ethical Analysis) |
+| R18 | Honest certification limits — scope language, badge transparency, interoperability by design, adversarial evaluation (Ethical Analysis) |
+| R19 | Honest positioning — one tradition among many, no universality claims, limitations acknowledged, mirror not lens (Ethical Analysis) |
+| R20 | Active protection — vulnerable user detection, independence not dependence, human override supremacy, relationship asymmetry awareness (Ethical Analysis) |
 
 ---
 
@@ -197,6 +208,8 @@ The moat is philosophical, not technical. No competitor has:
 - 8 JSON data files with 67-term controlled glossary
 - 25-species passion taxonomy as diagnostic tool
 - 5-level proximity scale grounded in Chrysippus, Seneca, and Stobaeus
+
+**Important (R19 — Honest Positioning):** SageReasoning's moat is within the Stoic tradition specifically. The competitive advantage is depth, fidelity, and infrastructure within one philosophical tradition — not a claim to universal ethical reasoning. The framework has genuine strengths (rational self-examination, dichotomy of control, virtue as the sole good) and identifiable limitations (less to say about collective action, structural injustice, value of dissent than other traditions). Honest acknowledgement of these limitations strengthens rather than weakens the competitive position — it signals intellectual integrity to the developer and practitioner communities most likely to adopt.
 - 55-assessment progression framework
 - 15+ operational sage skills already validated across human and agent use cases
 - Agent Trust Layer infrastructure — the only certification authority for principled agent reasoning

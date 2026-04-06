@@ -4,6 +4,17 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Apple App Site Association — must be served as application/json
+        // Phase 0.1: Universal links preparation for future native iOS app
+        source: '/.well-known/apple-app-site-association',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/json',
+          },
+        ],
+      },
+      {
         // Apply to all routes
         source: '/:path*',
         headers: [

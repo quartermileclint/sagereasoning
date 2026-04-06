@@ -63,6 +63,7 @@ import type {
 import type { FullInterpretationResult } from './journal-interpreter'
 import type { KatorthomaProximityLevel } from '../trust-layer/types/accreditation'
 import type { ProgressionPrescription } from '../trust-layer/types/progression'
+import type { MentorLedger, LedgerEntry, LedgerEntryKind } from './mentor-ledger'
 
 // ============================================================================
 // HUB STATE & NAVIGATION
@@ -77,7 +78,7 @@ export type PrivateHubState = {
   readonly display_name: string
 
   /** Current view: which section is the user looking at */
-  readonly current_view: 'dashboard' | 'conversation' | 'profile' | 'patterns' | 'rituals' | 'settings'
+  readonly current_view: 'dashboard' | 'conversation' | 'profile' | 'patterns' | 'rituals' | 'ledger' | 'settings'
 
   /** Current proximity display (from rolling window + mentor profile) */
   readonly current_proximity: KatorthomaProximityLevel
@@ -98,6 +99,16 @@ export type PrivateHubState = {
 
   /** Weekly pattern mirror (generated weekly) */
   readonly weekly_pattern: PatternMirrorReport | null
+
+  /** The Mentor Ledger — commitments, realisations, questions, tensions, intentions */
+  readonly mentor_ledger: MentorLedger
+
+  /** Current ledger filter in the Hub UI */
+  readonly ledger_filter: {
+    readonly kind_filter: LedgerEntryKind | 'all'
+    readonly status_filter: 'active' | 'all' | 'completed'
+    readonly sort_by: 'priority' | 'extracted_at' | 'last_engaged_at'
+  }
 
   /** Which layers are currently being refined (user is editing) */
   readonly layers_in_edit: number[]

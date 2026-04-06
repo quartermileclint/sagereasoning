@@ -196,9 +196,39 @@ This is the Seneca principle executed at a deeper level — Seneca's letters to 
 
 ---
 
+## Cross-Cutting Extraction: The Mentor Ledger
+
+In addition to the ten numbered layers, the interpreter performs a **cross-cutting extraction** that runs alongside every section's analysis pass. This is the **Mentor Ledger** — a structured capture of everything the practitioner wrote that the mentor should remember, track, or hold accountable.
+
+The Ledger extracts five kinds of entry:
+
+1. **Commitments** — Specific actions the practitioner says they will take ("I will apply the prohairesis filter before pricing meetings")
+2. **Realisations** — Insights noted as significant ("I notice my urgency isn't strategic — it's fear-driven")
+3. **Self-posed questions** — Unanswered questions posed to themselves ("How do I tell genuine urgency from passion-driven reactivity?")
+4. **Tensions** — Acknowledged gaps between knowledge and disposition ("I know reputation is an indifferent but I can't stop caring")
+5. **Intentions** — Practice directions softer than commitments ("I need to get better at pausing before I react")
+
+**Why it's cross-cutting, not a layer:** Ledger entries can appear in any journal section. A commitment might appear in "Mastering Feelings" (Layer 1/8 territory) or in "Being Content" (Layer 4 territory). The extraction runs in parallel with whatever layer-specific extraction is happening — it's an addendum to every prompt, not a separate pass.
+
+**Lifecycle:** Each entry moves through EXTRACTED → ACTIVE → COMPLETED / DEFERRED / ABANDONED / SUPERSEDED. The practitioner manages the lifecycle through conversation with the mentor.
+
+**Consumers:**
+
+| Consumer | What it uses |
+|----------|-------------|
+| Private Mentor Hub | Displays the Ledger view with filters by kind, status, and priority |
+| Morning Check-In | References active commitments and intentions — "You committed to X. Today might present an opportunity." |
+| Evening Reflection | Asks about follow-through — "You intended to pause before reacting. Did that come up today?" |
+| Weekly Pattern Mirror | Reports on completion rates, persistent tensions, and open questions |
+| Pattern Engine | Detects accountability patterns — resistance kinds, resistance passions, unengaged entries |
+
+**Implementation:** `sage-mentor/mentor-ledger.ts` — types, extraction addendum, aggregation, status management, and consumer integration functions.
+
+---
+
 ## Architectural Implication
 
-The current interpreter has one output: MentorProfile. The ten layers require the interpreter to become a **multi-pass analysis engine** that extracts all layers and makes them available to different parts of the system:
+The current interpreter has one output: MentorProfile. The ten layers plus the Mentor Ledger require the interpreter to become a **multi-pass analysis engine** that extracts all layers and the cross-cutting ledger, making them available to different parts of the system:
 
 | Layer | Consumer | Current Status |
 |-------|----------|---------------|
@@ -212,10 +242,11 @@ The current interpreter has one output: MentorProfile. The ten layers require th
 | 8. Situational Triggers | Mentor + Session Bridge (predictive intervention) | Not built |
 | 9. Product Signal | Product development | Not built |
 | 10. Proof of Concept | Business case | Not built |
+| **Cross-cutting: Mentor Ledger** | **Hub + Proactive Scheduler + Pattern Engine** | **Built (types + logic)** |
 
 ## Connection to the Private Mentor Hub
 
-Layers 2-8 all produce outputs that need to be communicated to the human and refined through human input. This creates the requirement for a **private mentor hub** — an interface where the mentor can present its interpretations, the human can respond, correct, and deepen the analysis, and the relationship develops through ongoing dialogue rather than one-directional extraction.
+Layers 2-8 all produce outputs that need to be communicated to the human and refined through human input. The Mentor Ledger adds a sixth Hub view ("Ledger") alongside Dashboard, Conversation, Profile, Patterns, and Rituals. This creates the requirement for a **private mentor hub** — an interface where the mentor can present its interpretations, the human can respond, correct, and deepen the analysis, and the relationship develops through ongoing dialogue rather than one-directional extraction.
 
 ---
 
@@ -223,5 +254,6 @@ Layers 2-8 all produce outputs that need to be communicated to the human and ref
 
 1. This is the reference for what the journal interpretation pipeline should become
 2. Each layer has clear extraction targets, output types, and practical applications
-3. Implementation priority should follow the layers in order (1 is built; 2-4 are highest value; 5-8 are enrichments; 9-10 are outward-facing)
-4. The Private Mentor Hub is the interface through which layers 2-8 are communicated and refined
+3. The Mentor Ledger is a cross-cutting extraction that runs alongside all layers — not a separate pass
+4. Implementation priority should follow the layers in order (1 is built; 2-4 are highest value; 5-8 are enrichments; 9-10 are outward-facing)
+5. The Private Mentor Hub is the interface through which layers 2-8 and the Ledger are communicated and refined
