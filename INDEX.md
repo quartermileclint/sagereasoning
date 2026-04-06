@@ -61,6 +61,7 @@ Every strategic folder (adopted, drafts, business, compliance, legal, operations
 | Folder | Purpose | Key Contents |
 |--------|---------|-------------|
 | /operations/ | Ops blueprints, manuals, assessments | Sage Cofounder Blueprint, Support Agent Manual, Founder Profile, Sage Ops Assessments (v1, v2) |
+| /operations/session-handoffs/ | Session continuity notes (P0 item 0b) | 2026-04-06 session close (first handoff note) |
 | /compliance/ | Regulatory register, audit logs, security reviews | compliance_register.json (28 obligations), audit_log.json, Security Audits, Art6 Classification |
 | /reference/ | Knowledge context, ethical analysis, research | Ethical Analysis (R17-R20 source), Knowledge Context (45KB), Human-AI Development KB (53KB), Journal 10 Layers |
 
