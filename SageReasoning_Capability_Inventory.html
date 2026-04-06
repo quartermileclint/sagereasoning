@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SageReasoning Capability Inventory — Hold Point Assessment 4</title>
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #131a2b;
+    --surface2: #1a2340;
+    --border: #2a3555;
+    --border-light: #3a4570;
+    --text: #e0e6f0;
+    --text-dim: #8892a8;
+    --text-muted: #5a6480;
+    --gold: #d4a843;
+    --gold-dim: #a07a20;
+
+    --live: #22c55e;
+    --verified: #3b82f6;
+    --wired: #a855f7;
+    --scaffolded: #f59e0b;
+    --designed: #f97316;
+    --scoped: #ef4444;
+
+    --product: #60a5fa;
+    --tool: #f472b6;
+    --agent: #f59e0b;
+    --engine: #ef4444;
+    --reasoning: #a78bfa;
+    --data: #34d399;
+    --infra: #22d3ee;
+    --governance: #ec4899;
+    --document: #94a3b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5; }
+
+  .header { background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%); border-bottom: 1px solid var(--border); padding: 20px 28px; position: sticky; top: 0; z-index: 100; }
+  .header h1 { font-size: 22px; font-weight: 700; color: var(--gold); margin-bottom: 2px; }
+  .header .subtitle { font-size: 13px; color: var(--text-dim); margin-bottom: 4px; }
+  .header .date { font-size: 11px; color: var(--text-muted); }
+
+  .summary-bar { display: flex; gap: 16px; padding: 14px 28px; background: var(--surface); border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center; }
+  .summary-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 10px 16px; min-width: 120px; text-align: center; }
+  .summary-card .num { font-size: 28px; font-weight: 700; }
+  .summary-card .label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; }
+
+  .controls { display: flex; gap: 8px; padding: 10px 28px; background: var(--surface); border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center; }
+  .controls label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-right: 4px; }
+  .filter-btn { padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface2); color: var(--text-dim); font-size: 11px; cursor: pointer; transition: all 0.15s; }
+  .filter-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+  .filter-btn.active { background: var(--gold-dim); color: #fff; border-color: var(--gold); }
+  .search-box { padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 12px; width: 220px; outline: none; }
+  .search-box:focus { border-color: var(--gold); }
+  .divider { width: 1px; height: 24px; background: var(--border); margin: 0 8px; }
+
+  .honesty-banner { background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(212,168,67,0.1)); border: 1px solid rgba(212,168,67,0.3); border-radius: 6px; padding: 12px 20px; margin: 16px 28px; font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+  .honesty-banner strong { color: var(--gold); }
+
+  .table-wrap { padding: 0 28px 40px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+  thead { position: sticky; top: 0; z-index: 10; }
+  th { background: var(--surface2); border: 1px solid var(--border); padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-dim); cursor: pointer; user-select: none; white-space: nowrap; }
+  th:hover { color: var(--gold); }
+  th .sort-arrow { margin-left: 4px; font-size: 9px; }
+  td { border: 1px solid var(--border); padding: 6px 10px; vertical-align: top; }
+  tr:hover td { background: var(--surface2); }
+
+  .badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+  .badge-live { background: var(--live); color: #fff; }
+  .badge-verified { background: var(--verified); color: #fff; }
+  .badge-wired { background: var(--wired); color: #fff; }
+  .badge-scaffolded { background: var(--scaffolded); color: #000; }
+  .badge-designed { background: var(--designed); color: #fff; }
+  .badge-scoped { background: var(--scoped); color: #fff; }
+
+  .badge-type { display: inline-block; padding: 1px 5px; border-radius: 2px; font-size: 8px; font-weight: 600; border: 1px solid currentColor; }
+  .badge-type-product { color: var(--product); }
+  .badge-type-tool { color: var(--tool); }
+  .badge-type-agent { color: var(--agent); }
+  .badge-type-engine { color: var(--engine); }
+  .badge-type-reasoning { color: var(--reasoning); }
+  .badge-type-data { color: var(--data); }
+  .badge-type-infra { color: var(--infra); }
+  .badge-type-governance { color: var(--governance); }
+  .badge-type-document { color: var(--document); }
+
+  .change-indicator { font-size: 9px; margin-left: 4px; }
+  .upgraded { color: var(--live); }
+  .downgraded { color: var(--scoped); }
+  .unchanged { color: var(--text-muted); }
+
+  .desc-cell { max-width: 360px; font-size: 11px; color: var(--text-dim); line-height: 1.4; }
+  .notes-cell { max-width: 280px; font-size: 11px; color: var(--gold); line-height: 1.4; font-style: italic; }
+  .name-cell { font-weight: 600; white-space: nowrap; }
+  .origin-badge { font-size: 8px; padding: 1px 4px; border-radius: 2px; background: rgba(167,139,250,0.15); color: #a78bfa; border: 1px solid rgba(167,139,250,0.3); }
+  .origin-badge.wrapped { background: rgba(52,211,153,0.15); color: #34d399; border-color: rgba(52,211,153,0.3); }
+
+  .readiness-cell { font-size: 10px; }
+  .ready { color: var(--live); }
+  .partial { color: var(--scaffolded); }
+  .not-ready { color: var(--scoped); }
+
+  .footer { padding: 20px 28px; border-top: 1px solid var(--border); background: var(--surface); font-size: 11px; color: var(--text-muted); }
+  .footer strong { color: var(--text-dim); }
+
+  .count-display { font-size: 12px; color: var(--text-dim); padding: 8px 28px; }
+  .count-display strong { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Capability Inventory</h1>
+  <div class="subtitle">Hold Point Assessment 4 — Honest status of every component using 0a vocabulary</div>
+  <div class="date">6 April 2026 | 148 components | Statuses re-assessed against actual code</div>
+</div>
+
+<div id="summaryBar" class="summary-bar"></div>
+
+<div class="honesty-banner">
+  <strong>Honesty note:</strong> Statuses have been re-assessed by inspecting actual code, not just file existence. Many components previously labelled "scaffolded" contain complete, functional code that connects to live systems (Anthropic API, Supabase) — these are upgraded to "wired." Two major subsystems (Sage Mentor, Trust Layer) contain ~17K LOC of internally complete code but are <strong>not integrated</strong> into the website — their status reflects this architectural isolation. Nothing is deployed to production, so nothing is "live."
+</div>
+
+<div class="controls">
+  <label>Status:</label>
+  <div id="statusFilters" class="control-group"></div>
+  <div class="divider"></div>
+  <label>Type:</label>
+  <div id="typeFilters" class="control-group"></div>
+  <div class="divider"></div>
+  <label>Readiness:</label>
+  <div id="readinessFilters" class="control-group"></div>
+  <div class="divider"></div>
+  <input type="text" class="search-box" id="search" placeholder="Search name, description, notes...">
+</div>
+
+<div id="countDisplay" class="count-display"></div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th data-sort="name">Name <span class="sort-arrow"></span></th>
+        <th data-sort="type">Type <span class="sort-arrow"></span></th>
+        <th data-sort="oldStatus">Map Status <span class="sort-arrow"></span></th>
+        <th data-sort="newStatus">Honest Status <span class="sort-arrow"></span></th>
+        <th data-sort="change">Change <span class="sort-arrow"></span></th>
+        <th>Description</th>
+        <th>Assessment Notes</th>
+        <th data-sort="humanReady">Human Ready <span class="sort-arrow"></span></th>
+        <th data-sort="agentReady">Agent Ready <span class="sort-arrow"></span></th>
+        <th data-sort="origin">Origin <span class="sort-arrow"></span></th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="footer">
+  <strong>Status vocabulary (P0 item 0a):</strong> Scoped (requirements only) → Designed (architecture decided) → Scaffolded (code exists, doesn't function) → Wired (connects to live systems, functions end-to-end) → Verified (tested and confirmed by both parties) → Live (deployed, serving real users)
+  <br><br>
+  <strong>Assessment methodology:</strong> Each component's code was inspected for: file existence, line count, real logic vs. placeholders, imports of external services (Anthropic, Supabase, Stripe), TODO markers, and integration with the rest of the system. Statuses upgraded or downgraded where the code contradicts the ecosystem map label.
+</div>
+
+<script>
+// ============================================================
+// CAPABILITY INVENTORY DATA — Honest re-assessment
+// ============================================================
+const INV = [
+  // === PRODUCTS (17) ===
+  {name:"Action Scorer",type:"product",oldStatus:"scaffolded",newStatus:"wired",desc:"Complete React UI (563 LOC). Auth, storage mode selector, form fields, API calls to /api/score, 4-stage result display, passion identification, virtue domains.",notes:"Fully functional UI connected to working API. Upgrade justified: real end-to-end flow.",humanReady:"partial",agentReady:"na",origin:""},
+  {name:"55-Day Stoic Journal",type:"product",oldStatus:"scaffolded",newStatus:"wired",desc:"Complete journal app (612 LOC). 8-phase curriculum, day-by-day navigation, local/cloud storage, AES-256 encryption, progress tracking.",notes:"Most complete product. Upgrade justified: connects to Supabase, encryption, curriculum engine.",humanReady:"partial",agentReady:"na",origin:""},
+  {name:"Baseline Assessment",type:"product",oldStatus:"scaffolded",newStatus:"wired",desc:"5-6 question assessment with branching Q6. Produces Senecan grade + 4 dimension levels.",notes:"Functional UI with API connection. Needs real-user testing.",humanReady:"partial",agentReady:"na",origin:""},
+  {name:"User Dashboard",type:"product",oldStatus:"scaffolded",newStatus:"wired",desc:"Progress profile: baseline results, evaluation history, practice calendar with virtue stamps.",notes:"UI complete, connected to Supabase evaluation data.",humanReady:"partial",agentReady:"na",origin:""},
+  {name:"Document Scorer",type:"product",oldStatus:"scaffolded",newStatus:"wired",desc:"Human interface for scoring documents against Stoic principles.",notes:"Functional, connects to sage-audit API.",humanReady:"partial",agentReady:"na",origin:""},
+  {name:"Social Media Filter",type:"product",oldStatus:"scaffolded",newStatus:"wired",desc:"Human interface for filtering social content through Stoic reasoning.",notes:"Functional, connects to sage-filter API.",humanReady:"partial",agentReady:"na",origin:""},
+  {name:"Community Map",type:"product",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"World map of opted-in users using react-simple-maps.",notes:"UI exists but depends on community data that doesn't exist yet. True scaffolding.",humanReady:"not-ready",agentReady:"na",origin:""},
+  {name:"API Documentation",type:"product",oldStatus:"scaffolded",newStatus:"wired",desc:"Interactive OpenAPI documentation with live examples.",notes:"Connected to OpenAPI spec. Functional for developers.",humanReady:"partial",agentReady:"partial",origin:""},
+  {name:"Admin Dashboard",type:"product",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Internal metrics, analytics events, real-time activity feed.",notes:"UI structure exists but analytics pipeline not wired to real data.",humanReady:"not-ready",agentReady:"na",origin:""},
+  {name:"Landing Page",type:"product",oldStatus:"scaffolded",newStatus:"wired",desc:"Hero, virtue cards, how-it-works section. Public entry point.",notes:"Complete static page. Functions as intended (no backend needed).",humanReady:"partial",agentReady:"na",origin:""},
+  {name:"Skills Marketplace",type:"product",oldStatus:"designed",newStatus:"designed",desc:"Skill discovery marketplace. Page exists as placeholder.",notes:"Placeholder only. Correct status.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Ethical Scenarios",type:"product",oldStatus:"designed",newStatus:"designed",desc:"Scenario repository and evaluation. Placeholder page.",notes:"Placeholder only. Correct status.",humanReady:"not-ready",agentReady:"na",origin:""},
+  {name:"Pricing Page",type:"product",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Pricing plans display. Static content, Stripe not connected.",notes:"Shows pricing but can't process payments. True scaffolding.",humanReady:"not-ready",agentReady:"na",origin:""},
+  {name:"Auth (Sign In / Sign Up)",type:"product",oldStatus:"scaffolded",newStatus:"wired",desc:"Email/password, magic link, privacy consent via Supabase Auth.",notes:"Connected to Supabase Auth. JWT tokens functional.",humanReady:"partial",agentReady:"na",origin:""},
+  {name:"Mentor Hub (Prototype)",type:"product",oldStatus:"designed",newStatus:"designed",desc:"Chat interface prototype. Three-panel layout. Display-only HTML, no backend.",notes:"Static HTML prototype. Correct status.",humanReady:"not-ready",agentReady:"na",origin:""},
+  {name:"Private Mentor Hub (Prototype)",type:"product",oldStatus:"designed",newStatus:"designed",desc:"Founder's personal dashboard prototype. Display-only HTML.",notes:"Static HTML prototype. Correct status.",humanReady:"not-ready",agentReady:"na",origin:""},
+  {name:"Sage Ops Hub (Prototype)",type:"product",oldStatus:"designed",newStatus:"designed",desc:"Operational admin panel prototype. Display-only HTML.",notes:"Static HTML prototype. Correct status.",humanReady:"not-ready",agentReady:"na",origin:""},
+
+  // === TOOLS — Brain-derived (13) ===
+  {name:"sage-reason",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Universal reasoning layer (89 LOC route). Quick/Standard/Deep modes. Calls sage-reason-engine.",notes:"Core tool. Fully functional with Anthropic API. Upgrade justified.",humanReady:"partial",agentReady:"partial",origin:"brain-derived"},
+  {name:"sage-score",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Pre-action audit (104 LOC). Wraps sage-reason-engine with action-specific context.",notes:"Refactored, functional. Connected to Anthropic via shared engine.",humanReady:"partial",agentReady:"partial",origin:"brain-derived"},
+  {name:"sage-guard",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Binary go/no-go gate (219 LOC). Wraps sage-reason-engine quick mode via Haiku.",notes:"Functional guardrail. Uses fast Haiku model for speed.",humanReady:"na",agentReady:"partial",origin:"brain-derived"},
+  {name:"sage-decide",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Option ranker (192 LOC). Loops sage-reason per option with katorthoma ranking.",notes:"Functional. Loops reasoning for multi-option comparison.",humanReady:"partial",agentReady:"partial",origin:"brain-derived"},
+  {name:"sage-filter",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Pre-publish content filter (173 LOC). Social context + poster/reader passion analysis. Now generates receipts.",notes:"Functional with receipt generation added during refactoring.",humanReady:"partial",agentReady:"partial",origin:"brain-derived"},
+  {name:"sage-audit",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Document quality audit + reasoning assessment. Independent — domain-specific persistence + badge generation.",notes:"Independent of shared engine (by design). Functional.",humanReady:"partial",agentReady:"partial",origin:"brain-derived"},
+  {name:"sage-converse",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Conversation analysis (149 LOC). Deep reasoning for overall + per-participant breakdown.",notes:"Functional. Uses deep reasoning mode.",humanReady:"partial",agentReady:"partial",origin:"brain-derived"},
+  {name:"sage-scenario",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Decision scenario generator + scorer. Simulates ethical situations.",notes:"Functional with Anthropic API. Generates and evaluates scenarios.",humanReady:"partial",agentReady:"partial",origin:"brain-derived"},
+  {name:"sage-iterate",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Iterative refinement: submit > feedback > revise > track. Multi-turn transformation with chain persistence.",notes:"Independent by necessity (chain state). Functional with Supabase.",humanReady:"partial",agentReady:"partial",origin:"brain-derived"},
+  {name:"sage-reflect",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"End-of-day decision review. Transforms daily actions into patterns + examination prompts.",notes:"Functional with Anthropic API. Narrative reflection output.",humanReady:"partial",agentReady:"partial",origin:"brain-derived"},
+  {name:"sage-profile",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Agent decision profile: 4 scenarios, tendencies, blind spots. Writes to DB.",notes:"Functional. Connects Anthropic + Supabase for full assessment.",humanReady:"partial",agentReady:"partial",origin:"brain-derived"},
+  {name:"sage-diagnose",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Decision diagnostic: 14-question quick or 55-question deep assessment.",notes:"Functional. Maps to assessment framework.",humanReady:"partial",agentReady:"partial",origin:"brain-derived"},
+  {name:"sage-context",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Framework context loader. Returns Stoic Brain reference data. Free, no auth, <50ms.",notes:"Deterministic retrieval. Functions immediately.",humanReady:"na",agentReady:"ready",origin:"brain-derived"},
+
+  // === TOOLS — Wrapped skills (15) ===
+  {name:"sage-align",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Value alignment checker. Thin factory wrapper (~30 LOC) around sage-reason.",notes:"All wrapped skills use consistent factory pattern. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-classify",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Decision classifier by type, domain, and virtue relevance.",notes:"Factory wrapper. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-coach",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Coaching conversation for guided Stoic coaching dialogue.",notes:"Factory wrapper. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-compliance",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Compliance evaluation for regulatory and policy compliance.",notes:"Factory wrapper. Functional. First revenue candidate.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-educate",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Educational content for Stoic teaching and curriculum delivery.",notes:"Factory wrapper. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-govern",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Governance evaluation for policy and governance assessment.",notes:"Factory wrapper. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-identity",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Identity and role analysis for examining role-based reasoning.",notes:"Factory wrapper. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-invest",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Investment reasoning for evaluating decisions against Stoic principles.",notes:"Factory wrapper. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-moderate",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Content moderation for community content evaluation.",notes:"Factory wrapper. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-negotiate",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Negotiation reasoning for principled negotiation analysis.",notes:"Factory wrapper. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-pivot",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Strategic pivot analysis for evaluating business direction changes.",notes:"Factory wrapper. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-premortem",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Pre-mortem analysis for anticipating failure modes.",notes:"Factory wrapper. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-prioritise",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Priority evaluation for principled task and goal prioritisation.",notes:"Factory wrapper. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-resolve",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Conflict resolution for principled dispute and conflict analysis.",notes:"Factory wrapper. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+  {name:"sage-retro",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Retrospective analysis for team/project retrospective evaluation.",notes:"Factory wrapper. Functional.",humanReady:"partial",agentReady:"partial",origin:"wrapped"},
+
+  // === TOOLS — Other (8) ===
+  {name:"skill-compose",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Prompt composition and tool chaining. Deterministic orchestration.",notes:"Functional orchestrator.",humanReady:"na",agentReady:"partial",origin:""},
+  {name:"skills-list",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Returns all sage skills with metadata, contracts, chaining rules.",notes:"Deterministic retrieval. Functions immediately.",humanReady:"na",agentReady:"ready",origin:""},
+  {name:"usage-tracker",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Returns API usage stats for authenticated user.",notes:"Connected to Supabase. Functional.",humanReady:"partial",agentReady:"partial",origin:""},
+  {name:"receipts",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Reasoning receipt archive. Stores audit trail of all evaluations.",notes:"Connected to Supabase. Audit trail functional.",humanReady:"na",agentReady:"partial",origin:""},
+  {name:"user-export",type:"tool",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"GDPR/Privacy Act data export. Returns 503 'coming_soon'.",notes:"PLACEHOLDER. TODO checklist exists but no functional code. Critical for P2.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"user-delete",type:"tool",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Account deletion. Returns 503 'coming_soon'. Must be genuine deletion per R17c.",notes:"PLACEHOLDER. 7-step TODO checklist exists. Critical for P2.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"mcp-tools",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"MCP tool registry endpoint for agent integration via Model Context Protocol.",notes:"Functional endpoint. Serves MCP contracts.",humanReady:"na",agentReady:"partial",origin:""},
+  {name:"skill-execute",type:"tool",oldStatus:"scaffolded",newStatus:"wired",desc:"Execute any skill by ID with input. Marketplace runtime dispatcher.",notes:"Functional dispatcher. Connects to skill registry.",humanReady:"na",agentReady:"partial",origin:""},
+
+  // === AGENTS (5) ===
+  {name:"Sage Mentor (Ring Orchestrator)",type:"agent",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"General ring orchestrator (~12,800 LOC across 20 modules). BEFORE/AFTER pattern. Delegates to Private Mentor for intimate data.",notes:"ARCHITECTURALLY ISOLATED. 12.8K LOC internally complete but zero imports from website/src. Cannot function end-to-end without integration layer. True scaffolding.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Private Mentor (Intimate Data)",type:"agent",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Security boundary for intimate data: journal interpretation, profile building, mentor ledger. 10 modules.",notes:"Part of isolated Sage Mentor subsystem. Journal interpreter has 25 TODOs (layers 9-10 incomplete). Not integrated.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Support Agent",type:"agent",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Inner agent with 10 markdown tools. Stimulus-response pattern.",notes:"Part of isolated Sage Mentor subsystem. Not integrated.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Sage Ops (AI Cofounder)",type:"agent",oldStatus:"designed",newStatus:"designed",desc:"AI cofounder operating as Prokoptos. Layer 0 context sync, 4 capability tiers.",notes:"Blueprint document only (52KB). No functional code. Correct status.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Session Bridge (Cowork Link)",type:"agent",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Bridges Claude Cowork sessions to the ring. Decision classification, context persistence.",notes:"Part of isolated Sage Mentor subsystem. Not integrated.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+
+  // === ENGINES — Inference (6) ===
+  {name:"Stoic Brain v3 (8-File Dataset)",type:"engine",oldStatus:"verified",newStatus:"verified",desc:"Master reference dataset. 8 JSON files from 9 primary Stoic texts. 2,319 LOC total.",notes:"Confirmed verified. Foundation everything builds on. Complete.",humanReady:"na",agentReady:"ready",origin:""},
+  {name:"Baseline Assessment Engine",type:"engine",oldStatus:"scaffolded",newStatus:"wired",desc:"Scores baseline questions, applies Senecan grading, computes 4 dimension levels.",notes:"Functional logic connected to baseline product and API.",humanReady:"partial",agentReady:"partial",origin:""},
+  {name:"Model Selection + LRU Cache",type:"engine",oldStatus:"scaffolded",newStatus:"wired",desc:"Routes to Haiku (fast) or Sonnet (deep). LRU cache: 1hr TTL, 500 entries.",notes:"Functional. Used by sage-reason-engine.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"sage-reason-engine (Shared Module)",type:"engine",oldStatus:"scaffolded",newStatus:"wired",desc:"Single source of truth for Stoic reasoning (395 LOC). Exports runSageReason(). 3 system prompts, depth configs, caching, receipts.",notes:"CORE ENGINE. Fully functional. All refactored tools import from here. Major upgrade.",humanReady:"na",agentReady:"partial",origin:"brain-derived"},
+  {name:"Document Scoring Engine",type:"engine",oldStatus:"scaffolded",newStatus:"wired",desc:"Document-specific scoring and principle analysis.",notes:"Functional. Connected to sage-audit tool.",humanReady:"partial",agentReady:"partial",origin:""},
+  {name:"Agent Assessment Framework (55)",type:"engine",oldStatus:"verified",newStatus:"verified",desc:"55 assessments across 8 phases. Maps 1:1 to 55-day journal. Qualitative proximity levels.",notes:"Confirmed verified. Complete framework.",humanReady:"na",agentReady:"ready",origin:""},
+
+  // === ENGINES — Workflow (4) ===
+  {name:"Ring Wrapper (BEFORE/AFTER)",type:"engine",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Core orchestrator (827 LOC). Model routing, token instrumentation, authority promotion, passion matching.",notes:"Internally complete and sophisticated but part of isolated Sage Mentor. Not integrated into website.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Proactive Scheduler",type:"engine",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Scheduled outputs: morning check-in, evening reflection, weekly mirror.",notes:"Part of isolated Sage Mentor. Not integrated.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Skill Registry (40+ Skills)",type:"engine",oldStatus:"scaffolded",newStatus:"wired",desc:"Centralised catalogue with contracts: outcome, cost estimate, chaining rules.",notes:"Functional. Connected to compose/execute/marketplace tools.",humanReady:"na",agentReady:"partial",origin:""},
+  {name:"Deliberation Chain Engine",type:"engine",oldStatus:"scaffolded",newStatus:"wired",desc:"Multi-turn deliberation: create chain > add steps > evaluate progress > conclude.",notes:"Connected to Supabase and sage-iterate.",humanReady:"partial",agentReady:"partial",origin:""},
+
+  // === ENGINES — Memory (4) ===
+  {name:"Pattern Recognition Engine",type:"engine",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Temporal pattern recognition: passion clusters, regression warnings, trend analysis.",notes:"Part of isolated Sage Mentor. Not integrated.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Embedding Pipeline (pgvector)",type:"engine",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Vector storage and retrieval. Generates embeddings, batch insert, similarity search.",notes:"Part of isolated Sage Mentor. Depends on embedding API not yet configured.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Mentor Ledger",type:"engine",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Cross-cutting accountability: commitments, realisations, questions, tensions, intentions.",notes:"Part of isolated Sage Mentor. Not integrated.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Profile Store",type:"engine",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"User passion map, causal tendencies, value hierarchy, oikeiosis scope. Rolling 100-action window.",notes:"Part of isolated Sage Mentor. Not integrated.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+
+  // === ENGINES — Execution (3) ===
+  {name:"LLM Bridge (Claude Wrapper)",type:"engine",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Anthropic Claude API wrapper with before/after checks, draft generation, token tracking.",notes:"Part of isolated Sage Mentor. Website uses sage-reason-engine instead.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Reasoning Receipt Generator",type:"engine",oldStatus:"scaffolded",newStatus:"wired",desc:"Extracts and formats reasoning receipts from Claude responses. Audit trail.",notes:"Functional. Used by sage-reason-engine and receipt tool.",humanReady:"na",agentReady:"partial",origin:""},
+  {name:"Journal Curriculum Engine",type:"engine",oldStatus:"scaffolded",newStatus:"wired",desc:"55-day curriculum: 8 phases, daily teachings with source citations.",notes:"Functional. Drives the journal product content.",humanReady:"partial",agentReady:"na",origin:""},
+
+  // === ENGINES — Trust Layer (4) ===
+  {name:"Agent Trust Layer",type:"engine",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Full accreditation system. 14 TypeScript modules (~3,774 LOC). Grades, proximity, authority, progression.",notes:"ARCHITECTURALLY ISOLATED. Internally complete (all 14 modules wired to each other) but zero imports from website/src. Cannot function end-to-end.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Authority Manager",type:"engine",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Inner agent authority lifecycle: track performance, promote, demote, suspend.",notes:"Part of isolated Sage Mentor / Trust Layer. Not integrated.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Accreditation Card Builder",type:"engine",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Visual credential builder (319 LOC). Complete domain model with serialisation.",notes:"Internally complete but isolated. Cannot produce real cards without integration.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Progression Toolkit (8 Pathways)",type:"engine",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"8 progression pathways. R12-compliant prescriptions using 9 sage tools.",notes:"Internally complete but isolated within Trust Layer.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+
+  // === REASONING (11) ===
+  {name:"4-Stage Evaluation Sequence",type:"reasoning",oldStatus:"scaffolded",newStatus:"wired",desc:"Prohairesis > Kathekon > Passion diagnosis > Unified virtue. The master reasoning chain.",notes:"Embedded in sage-reason-engine system prompts. Functions in every evaluation.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Prohairesis Filter",type:"reasoning",oldStatus:"verified",newStatus:"verified",desc:"Stage 1: Binary control check. Logical deduction from dichotomy of control.",notes:"Verified in Stoic Brain v3 data. Confirmed.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Kathekon Assessment",type:"reasoning",oldStatus:"verified",newStatus:"verified",desc:"Stage 2: Appropriate action evaluation. Role-based duties, situational propriety.",notes:"Verified in Stoic Brain v3 data. Confirmed.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Passion Diagnosis",type:"reasoning",oldStatus:"verified",newStatus:"verified",desc:"Stage 3: Identifies false judgement causing the passion. 4 root passions, 25 sub-species, 3 eupatheiai.",notes:"Verified in Stoic Brain v3 data. Confirmed.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Unified Virtue Assessment",type:"reasoning",oldStatus:"verified",newStatus:"verified",desc:"Stage 4: Holistic character assessment. Unity of virtue thesis.",notes:"Verified in Stoic Brain v3 data. Confirmed.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Oikeiosis Developmental Sequence",type:"reasoning",oldStatus:"verified",newStatus:"verified",desc:"Self > Household > Community > Cosmos. Expanding circles. Governs all R0 decisions.",notes:"Verified in Stoic Brain v3 data. Confirmed.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Senecan Progress Tracking",type:"reasoning",oldStatus:"verified",newStatus:"verified",desc:"3 grades of progress. 4 dimensions. Reflective self-assessment over time.",notes:"Verified in Stoic Brain v3 data. Confirmed.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Katorthoma Proximity Scale",type:"reasoning",oldStatus:"verified",newStatus:"verified",desc:"5-level proximity: reflexive > habitual > deliberate > principled > sage-like. Qualitative.",notes:"Verified in Stoic Brain v3 data. Confirmed.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Journal Interpretation (10 Layers)",type:"reasoning",oldStatus:"designed",newStatus:"designed",desc:"Multi-layer cognitive profiling. 8+ analysis layers. Causal inference from written reflection.",notes:"Spec exists (19KB doc). Code has 25 TODOs, layers 9-10 stub only. Correct status.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"AI Safety Guardrails",type:"reasoning",oldStatus:"scaffolded",newStatus:"wired",desc:"Safety checks: R1 (therapeutic), R2 (employment), R20 (distress detection). Pattern matching.",notes:"Functional guardrail logic connected to sage-guard and other tools.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Prompt Injection Defence",type:"reasoning",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Content validation, injection signature detection. Deterministic pattern matching.",notes:"Part of isolated Sage Mentor. Not integrated into website API layer.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+
+  // === DATA (14) ===
+  {name:"Supabase Core Schema",type:"data",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Master schema: profiles, evaluations, analytics.",notes:"SQL exists but not confirmed running against live Supabase instance. Migration status unknown.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Evaluations Table (V3)",type:"data",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"action_evaluations_v3: scores, passions, virtue domains, improvement paths.",notes:"Migration SQL exists. Assumed applied but not verified by founder.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Baseline Assessments Table",type:"data",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"baseline_assessments_v3: dimensions, Senecan grade, oikeiosis stage.",notes:"Migration SQL exists. Not verified against live DB.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Journal Entries Table",type:"data",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Cloud storage for encrypted journal entries.",notes:"Migration SQL exists. Not verified against live DB.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"API Keys Schema",type:"data",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Key management, usage metering, tier enforcement, monthly quotas.",notes:"SQL exists. Not verified against live DB.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Deliberation Chains Table",type:"data",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Iterative action scoring persistence (chains + steps).",notes:"SQL exists. Not verified.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Analytics Events",type:"data",oldStatus:"scaffolded",newStatus:"wired",desc:"Event tracking: page views, scores, signups, API calls.",notes:"TypeScript module. Functional event tracking code.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Trust Layer Schema (DRAFT)",type:"data",oldStatus:"designed",newStatus:"designed",desc:"Accreditation records and evaluation windows. Marked REVIEW.",notes:"326 LOC SQL. Needs review before deployment. Correct status.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Profile Store Tables",type:"data",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Rolling 100-action window, profile cache, passion observations.",notes:"Part of isolated Sage Mentor. TypeScript types + Supabase calls, not verified.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Session Decisions Table",type:"data",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Strategic decision log from Cowork sessions + context snapshots.",notes:"Migration SQL exists. Part of Sage Mentor integration.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Support Inbox (10 Tickets)",type:"data",oldStatus:"wired",newStatus:"wired",desc:"YAML frontmatter + message format. 10 sample tickets ready.",notes:"Confirmed wired. Markdown files with structured data.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Community Locations",type:"data",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Opt-in user locations for community map.",notes:"SQL migration exists. No real community data.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Revenue/Billing Schema",type:"data",oldStatus:"designed",newStatus:"designed",desc:"Payment and billing tables. Stripe not connected.",notes:"SQL exists but Stripe integration is scoped only. Correct status.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Agent Assessment Migration",type:"data",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"V3 agent assessment storage tables.",notes:"SQL migration exists. Not verified against live DB.",humanReady:"na",agentReady:"na",origin:""},
+
+  // === INFRASTRUCTURE (12) ===
+  {name:"Next.js 14 Application",type:"infra",oldStatus:"scaffolded",newStatus:"wired",desc:"React 18 + TypeScript + Tailwind. Anthropic SDK + Supabase. Build artifacts exist.",notes:"Application framework. All API routes and pages run on this. Functional.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Supabase Auth (JWT)",type:"infra",oldStatus:"scaffolded",newStatus:"wired",desc:"Client + server-side auth. JWT bearer tokens. Email/password + magic links.",notes:"Connected to Supabase. Auth flows functional.",humanReady:"partial",agentReady:"partial",origin:""},
+  {name:"Rate Limiting + Security",type:"infra",oldStatus:"scaffolded",newStatus:"wired",desc:"IP-based rate limiting, auth validation, text length validation, CORS.",notes:"Functional security middleware.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Client-Side Encryption (AES-256)",type:"infra",oldStatus:"scaffolded",newStatus:"wired",desc:"AES-256-GCM, PBKDF2 key derivation. 217 LOC. Production-ready crypto.",notes:"Functional encryption module. Used by journal.",humanReady:"partial",agentReady:"na",origin:""},
+  {name:"OpenAPI 3.1.0 Spec",type:"infra",oldStatus:"wired",newStatus:"wired",desc:"Full API specification. 41KB. All endpoints, schemas, auth.",notes:"Confirmed wired. Comprehensive spec.",humanReady:"partial",agentReady:"ready",origin:""},
+  {name:"API Response Envelope",type:"infra",oldStatus:"scaffolded",newStatus:"wired",desc:"Standard { result, meta } wrapper with latency, cost, model metadata.",notes:"Functional. Used by API routes.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Stripe Integration",type:"infra",oldStatus:"scoped",newStatus:"scoped",desc:"Payment processing. Revenue model designed, Stripe not connected.",notes:"Correctly scoped. No code exists. P4 priority.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Vercel Hosting",type:"infra",oldStatus:"scoped",newStatus:"scoped",desc:"Not yet deployed to production.",notes:"Correctly scoped. No deployment config. Nothing is live.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Email (Resend)",type:"infra",oldStatus:"scaffolded",newStatus:"scaffolded",desc:"Email notification dispatch via Resend API.",notes:"Part of isolated Sage Mentor. Not integrated into website.",humanReady:"not-ready",agentReady:"not-ready",origin:""},
+  {name:"Agent Discovery Files",type:"infra",oldStatus:"wired",newStatus:"wired",desc:"llms.txt, agent-card.json, robots.txt, openapi.yaml for agent crawlers.",notes:"Confirmed wired. Static files serve agent discovery.",humanReady:"na",agentReady:"ready",origin:""},
+  {name:"PWA Service Worker",type:"infra",oldStatus:"scaffolded",newStatus:"wired",desc:"Service worker for journal offline + registration component.",notes:"Functional for journal offline capability.",humanReady:"partial",agentReady:"na",origin:""},
+  {name:"MCP Tool Contracts",type:"infra",oldStatus:"scaffolded",newStatus:"wired",desc:"Model Context Protocol tool definitions for agent integration.",notes:"Functional. Serves MCP contracts to agents.",humanReady:"na",agentReady:"partial",origin:""},
+
+  // === GOVERNANCE (11) ===
+  {name:"Manifest (R0-R20)",type:"governance",oldStatus:"wired",newStatus:"wired",desc:"Master governance. 20+ rules. CR-2026-Q2-v4. Read before every task.",notes:"Confirmed wired. Governs all decisions.",humanReady:"ready",agentReady:"ready",origin:""},
+  {name:"AGENTS.md (Integration Guide)",type:"governance",oldStatus:"wired",newStatus:"wired",desc:"Complete API spec for external agents. Skill contracts, response envelopes.",notes:"Confirmed wired. Agent-facing documentation.",humanReady:"na",agentReady:"ready",origin:""},
+  {name:"Compliance Register (28 Obligations)",type:"governance",oldStatus:"wired",newStatus:"wired",desc:"EU AI Act, GDPR, AU Privacy Act, ISO 42001, NIST AI RMF.",notes:"Confirmed wired. 28 regulatory obligations mapped.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Compliance Audit Log",type:"governance",oldStatus:"wired",newStatus:"wired",desc:"Append-only quarterly audit trail. Latest: 2026-04-04.",notes:"Confirmed wired. 11 regulatory updates tracked.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Ethical Analysis (R17-R20 Source)",type:"governance",oldStatus:"verified",newStatus:"verified",desc:"Critical examination: monoculture risk, certifier problem, weaponisation, distress detection.",notes:"Confirmed verified. Source document for R17-R20.",humanReady:"ready",agentReady:"na",origin:""},
+  {name:"DRAFT Manifest Amendments",type:"governance",oldStatus:"verified",newStatus:"verified",desc:"Adopted R15-R20 + amendments. Now in project instructions. Archived.",notes:"Confirmed verified. Adopted and archived.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"DRAFT Revised Build Priorities",type:"governance",oldStatus:"verified",newStatus:"verified",desc:"Adopted P0-P7 priority sequence. Now in project instructions. Archived.",notes:"Confirmed verified. Adopted and archived.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"DRAFT Project Instructions",type:"governance",oldStatus:"verified",newStatus:"verified",desc:"Adopted project instructions. Now live in Cowork config. Archived.",notes:"Confirmed verified. Adopted and archived.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Knowledge Base (10 Articles)",type:"governance",oldStatus:"wired",newStatus:"wired",desc:"Getting Started (3), API Docs (2), Glossary (2), Governance (2), FAQ (1).",notes:"Confirmed wired. Used by support agent.",humanReady:"ready",agentReady:"na",origin:""},
+  {name:"Operational Workflows (6)",type:"governance",oldStatus:"wired",newStatus:"wired",desc:"API support, enterprise inquiry, governance-flagged, new customer, payment failed, weekly patterns.",notes:"Confirmed wired. Playbook format.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Operations Templates (6)",type:"governance",oldStatus:"wired",newStatus:"wired",desc:"Lead, workflow-playbook, inbox-item, KB article, notification templates.",notes:"Confirmed wired. Standard templates.",humanReady:"na",agentReady:"na",origin:""},
+
+  // === DOCUMENTS (21) ===
+  {name:"Knowledge Context Summary",type:"document",oldStatus:"wired",newStatus:"wired",desc:"45KB. Layer 0 onboarding context. Business model, V3 learnings.",notes:"Confirmed wired. Comprehensive onboarding doc.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Sage Cofounder Blueprint",type:"document",oldStatus:"verified",newStatus:"verified",desc:"52KB. Complete Sage Ops vision: Layer 0, Tiers 1-4, operational structure.",notes:"Confirmed verified. Approved by founder.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Mentor Claude Integration Architecture",type:"document",oldStatus:"verified",newStatus:"verified",desc:"46KB. Claude API integration spec. Prompt architecture, token budgeting.",notes:"Confirmed verified. Architecture reference.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Human-AI Development Knowledge Base",type:"document",oldStatus:"wired",newStatus:"wired",desc:"53KB. Developmental psychology mapped to proximity scale.",notes:"Confirmed wired. Research reference.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Journal Interpretation (10 Layers)",type:"document",oldStatus:"verified",newStatus:"verified",desc:"19KB. Multi-layer interpretation pipeline spec.",notes:"Confirmed verified as spec. Implementation partially complete.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Gap-Filling Tool Map",type:"document",oldStatus:"wired",newStatus:"wired",desc:"18KB. Catalogue of tools/capabilities needed to fill current gaps.",notes:"Confirmed wired. Reference document.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Legal Revenue Business Plan",type:"document",oldStatus:"wired",newStatus:"wired",desc:"Full business plan with revenue model.",notes:"Confirmed wired. Pending P1 review.",humanReady:"ready",agentReady:"na",origin:""},
+  {name:"Break-Even Analysis",type:"document",oldStatus:"wired",newStatus:"wired",desc:"Financial modelling spreadsheet.",notes:"Confirmed wired. Pending P1 review with real cost data.",humanReady:"ready",agentReady:"na",origin:""},
+  {name:"Market Research + Pricing",type:"document",oldStatus:"wired",newStatus:"wired",desc:"Comprehensive market research, pricing analysis, competitive landscape.",notes:"Confirmed wired. Thorough research.",humanReady:"ready",agentReady:"na",origin:""},
+  {name:"Growth Strategy",type:"document",oldStatus:"designed",newStatus:"designed",desc:"Needs revision per R19 (honest positioning, no universality claims).",notes:"Needs R19 compliance review. Correct status.",humanReady:"not-ready",agentReady:"na",origin:""},
+  {name:"Support Agent Manual",type:"document",oldStatus:"wired",newStatus:"wired",desc:"Operational guide for support agent.",notes:"Confirmed wired. Complete manual.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Agent Trust Layer Framework",type:"document",oldStatus:"verified",newStatus:"verified",desc:"Trust layer design document. V2.0.",notes:"Confirmed verified. Design reference.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Evolving Compliance Pipeline",type:"document",oldStatus:"wired",newStatus:"wired",desc:"R14 implementation. May need R19/R20 update.",notes:"May need update for new rules. Flagged.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Founder Operational Profile",type:"document",oldStatus:"wired",newStatus:"wired",desc:"Founder's decision-making profile for mentor + Layer 0.",notes:"Confirmed wired. Personal reference.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Security Audit (April 2026)",type:"document",oldStatus:"wired",newStatus:"wired",desc:"Security posture, vulnerabilities, mitigations.",notes:"Confirmed wired. Recent audit.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"V3 Adoption Scope (Complete)",type:"document",oldStatus:"verified",newStatus:"verified",desc:"All 16 migration phases complete. V1 archived, V3 in production.",notes:"Confirmed verified. Complete.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Sources Index (9 Texts)",type:"document",oldStatus:"verified",newStatus:"verified",desc:"9 primary Stoic source texts with Perseus Digital Library IDs.",notes:"Confirmed verified. Complete.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"iOS App Intents Roadmap",type:"document",oldStatus:"designed",newStatus:"designed",desc:"3-phase native iOS rollout. 13 weeks, 196-228 hours.",notes:"Future planning doc. Correct status.",humanReady:"na",agentReady:"na",origin:""},
+  {name:"Proprietary License",type:"document",oldStatus:"verified",newStatus:"verified",desc:"Changed from MIT to Proprietary Evaluation-Only. Protects scoring IP.",notes:"Confirmed verified. Legal protection in place.",humanReady:"ready",agentReady:"ready",origin:""},
+  {name:"README.md",type:"document",oldStatus:"wired",newStatus:"wired",desc:"Project overview. Some deprecated V1 references remain.",notes:"Needs cleanup of V1 references. Minor issue.",humanReady:"partial",agentReady:"na",origin:""},
+  {name:"Setup Plan (Original)",type:"document",oldStatus:"verified",newStatus:"verified",desc:"Original architecture, tech stack, folder structure, phased plan.",notes:"Historical reference. Complete.",humanReady:"na",agentReady:"na",origin:""},
+];
+
+// ============================================================
+// RENDERING
+// ============================================================
+const STATUS_ORDER = ['live','verified','wired','scaffolded','designed','scoped'];
+const STATUS_COLORS = {live:'var(--live)',verified:'var(--verified)',wired:'var(--wired)',scaffolded:'var(--scaffolded)',designed:'var(--designed)',scoped:'var(--scoped)'};
+const TYPE_COLORS = {product:'var(--product)',tool:'var(--tool)',agent:'var(--agent)',engine:'var(--engine)',reasoning:'var(--reasoning)',data:'var(--data)',infra:'var(--infra)',governance:'var(--governance)',document:'var(--document)'};
+const READINESS_LABELS = {ready:'Ready',partial:'Partial','not-ready':'Not Ready',na:'N/A'};
+const READINESS_CLASS = {ready:'ready',partial:'partial','not-ready':'not-ready',na:'unchanged'};
+
+let sortCol = 'type';
+let sortDir = 1;
+let statusFilter = 'all';
+let typeFilter = 'all';
+let readinessFilter = 'all';
+let searchTerm = '';
+
+function getChange(o, n) {
+  const oi = STATUS_ORDER.indexOf(o);
+  const ni = STATUS_ORDER.indexOf(n);
+  if (ni < oi) return {label:'Upgraded', cls:'upgraded', val:1};
+  if (ni > oi) return {label:'Downgraded', cls:'downgraded', val:-1};
+  return {label:'Unchanged', cls:'unchanged', val:0};
+}
+
+function getFiltered() {
+  return INV.filter(item => {
+    if (statusFilter !== 'all' && item.newStatus !== statusFilter) return false;
+    if (typeFilter !== 'all' && item.type !== typeFilter) return false;
+    if (readinessFilter !== 'all') {
+      if (readinessFilter === 'human-ready' && item.humanReady !== 'ready' && item.humanReady !== 'partial') return false;
+      if (readinessFilter === 'agent-ready' && item.agentReady !== 'ready' && item.agentReady !== 'partial') return false;
+      if (readinessFilter === 'not-ready' && (item.humanReady !== 'not-ready' || item.agentReady !== 'not-ready')) return false;
+    }
+    if (searchTerm) {
+      const s = searchTerm.toLowerCase();
+      return item.name.toLowerCase().includes(s) || item.desc.toLowerCase().includes(s) || item.notes.toLowerCase().includes(s) || item.type.includes(s) || item.origin.includes(s);
+    }
+    return true;
+  });
+}
+
+function getSorted(items) {
+  return [...items].sort((a, b) => {
+    let va, vb;
+    switch(sortCol) {
+      case 'name': va = a.name; vb = b.name; break;
+      case 'type': va = a.type; vb = b.type; break;
+      case 'oldStatus': va = STATUS_ORDER.indexOf(a.oldStatus); vb = STATUS_ORDER.indexOf(b.oldStatus); return (va - vb) * sortDir;
+      case 'newStatus': va = STATUS_ORDER.indexOf(a.newStatus); vb = STATUS_ORDER.indexOf(b.newStatus); return (va - vb) * sortDir;
+      case 'change': va = getChange(a.oldStatus,a.newStatus).val; vb = getChange(b.oldStatus,b.newStatus).val; return (vb - va) * sortDir;
+      case 'humanReady': va = a.humanReady; vb = b.humanReady; break;
+      case 'agentReady': va = a.agentReady; vb = b.agentReady; break;
+      case 'origin': va = a.origin||'zzz'; vb = b.origin||'zzz'; break;
+      default: va = a.name; vb = b.name;
+    }
+    if (typeof va === 'string') return va.localeCompare(vb) * sortDir;
+    return (va - vb) * sortDir;
+  });
+}
+
+function renderSummary() {
+  const byNew = {};
+  INV.forEach(i => { byNew[i.newStatus] = (byNew[i.newStatus]||0)+1; });
+  const upgraded = INV.filter(i => getChange(i.oldStatus, i.newStatus).val === 1).length;
+  const downgraded = INV.filter(i => getChange(i.oldStatus, i.newStatus).val === -1).length;
+
+  let html = '';
+  STATUS_ORDER.forEach(s => {
+    if (byNew[s]) {
+      html += `<div class="summary-card"><div class="num" style="color:${STATUS_COLORS[s]}">${byNew[s]}</div><div class="label">${s}</div></div>`;
+    }
+  });
+  html += `<div class="summary-card"><div class="num" style="color:var(--live)">${upgraded}</div><div class="label">Upgraded</div></div>`;
+  html += `<div class="summary-card"><div class="num" style="color:var(--text-muted)">0</div><div class="label">Live</div></div>`;
+  html += `<div class="summary-card"><div class="num" style="color:var(--gold)">${INV.length}</div><div class="label">Total</div></div>`;
+  document.getElementById('summaryBar').innerHTML = html;
+}
+
+function renderFilters() {
+  let html = '<button class="filter-btn active" data-val="all">All</button>';
+  STATUS_ORDER.forEach(s => {
+    html += `<button class="filter-btn" data-val="${s}">${s}</button>`;
+  });
+  document.getElementById('statusFilters').innerHTML = html;
+  document.getElementById('statusFilters').querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      statusFilter = btn.dataset.val;
+      document.getElementById('statusFilters').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    };
+  });
+
+  const types = [...new Set(INV.map(i => i.type))];
+  let thtml = '<button class="filter-btn active" data-val="all">All</button>';
+  types.forEach(t => { thtml += `<button class="filter-btn" data-val="${t}">${t}</button>`; });
+  document.getElementById('typeFilters').innerHTML = thtml;
+  document.getElementById('typeFilters').querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      typeFilter = btn.dataset.val;
+      document.getElementById('typeFilters').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    };
+  });
+
+  let rhtml = '<button class="filter-btn active" data-val="all">All</button>';
+  rhtml += '<button class="filter-btn" data-val="human-ready">Human-ready</button>';
+  rhtml += '<button class="filter-btn" data-val="agent-ready">Agent-ready</button>';
+  rhtml += '<button class="filter-btn" data-val="not-ready">Not ready</button>';
+  document.getElementById('readinessFilters').innerHTML = rhtml;
+  document.getElementById('readinessFilters').querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      readinessFilter = btn.dataset.val;
+      document.getElementById('readinessFilters').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    };
+  });
+}
+
+function render() {
+  const filtered = getFiltered();
+  const sorted = getSorted(filtered);
+
+  document.getElementById('countDisplay').innerHTML = `Showing <strong>${sorted.length}</strong> of ${INV.length} components`;
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = sorted.map(item => {
+    const change = getChange(item.oldStatus, item.newStatus);
+    const originHtml = item.origin === 'brain-derived' ? '<span class="origin-badge">BRAIN</span>' :
+                       item.origin === 'wrapped' ? '<span class="origin-badge wrapped">WRAPPED</span>' : '—';
+    return `<tr>
+      <td class="name-cell">${item.name}</td>
+      <td><span class="badge-type badge-type-${item.type}">${item.type}</span></td>
+      <td><span class="badge badge-${item.oldStatus}">${item.oldStatus}</span></td>
+      <td><span class="badge badge-${item.newStatus}">${item.newStatus}</span></td>
+      <td><span class="change-indicator ${change.cls}">${change.label === 'Upgraded' ? '&#9650; ' : change.label === 'Downgraded' ? '&#9660; ' : ''}${change.label}</span></td>
+      <td class="desc-cell">${item.desc}</td>
+      <td class="notes-cell">${item.notes}</td>
+      <td class="readiness-cell"><span class="${READINESS_CLASS[item.humanReady]}">${READINESS_LABELS[item.humanReady]}</span></td>
+      <td class="readiness-cell"><span class="${READINESS_CLASS[item.agentReady]}">${READINESS_LABELS[item.agentReady]}</span></td>
+      <td>${originHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+// Sort handlers
+document.querySelectorAll('th[data-sort]').forEach(th => {
+  th.onclick = () => {
+    const col = th.dataset.sort;
+    if (sortCol === col) sortDir *= -1;
+    else { sortCol = col; sortDir = 1; }
+    render();
+  };
+});
+
+// Search
+document.getElementById('search').oninput = (e) => {
+  searchTerm = e.target.value;
+  render();
+};
+
+// Init
+renderSummary();
+renderFilters();
+render();
+</script>
+</body>
+</html>

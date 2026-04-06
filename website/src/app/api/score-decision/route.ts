@@ -1,55 +1,24 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
-import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
+import { MODEL_FAST } from '@/lib/model-config'
 import { extractReceipt } from '@/lib/reasoning-receipt'
+import { runSageReason } from '@/lib/sage-reason-engine'
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
-
-const DECISION_SCORING_PROMPT = `You are the Stoic Sage decision advisor for sagereasoning.com. A user is weighing a decision and wants to see each option evaluated against Stoic virtue.
-
-For EACH option, evaluate whether it aligns with KATORTHOMA (right action in accordance with nature and virtue):
-
-1. KATORTHOMA PROXIMITY: How close is this option to Stoic excellence?
-   - reflexive: Action contradicts Stoic virtue; driven by base impulse
-   - habitual: Action shows some virtue alignment but lacks conscious discipline
-   - deliberate: Action reflects conscious virtue; intentional Stoic practice
-   - principled: Action exemplifies virtue integration; reason governs all aspects
-   - sage_like: Action embodies the integrated wisdom of a Stoic sage
-
-2. PASSIONS DETECTED: Identify irrational passions that might distort judgment:
-   - root_passion: one of epithumia (base desire), hedone (pleasure-seeking), phobos (fear), lupe (distress)
-   - sub_species: the specific form (e.g., "honor-seeking", "shame-avoidance", "financial anxiety")
-   - false_judgement: what false belief fuels this passion?
-
-3. KATHEKON QUALITY: Is this the right action given circumstances?
-   - is_kathekon: boolean — whether this option constitutes proper duty
-   - kathekon_quality: strong/moderate/marginal/contrary — the strength of duty alignment
-
-Return ONLY valid JSON — an array with one object per option:
-[
-  {
-    "option": "<the option text>",
-    "katorthoma_proximity": "reflexive" | "habitual" | "deliberate" | "principled" | "sage_like",
-    "passions_detected": [
-      {
-        "root_passion": "epithumia" | "hedone" | "phobos" | "lupe",
-        "sub_species": "<specific form>",
-        "false_judgement": "<the false belief behind it>"
-      }
-    ],
-    "is_kathekon": boolean,
-    "kathekon_quality": "strong" | "moderate" | "marginal" | "contrary",
-    "stoic_insight": "<1 sentence: what does a Stoic sage notice about this choice?>"
-  }
-]
-
-After the options array, do NOT add any other text. The array is the complete response.`
+/**
+ * sage-decide — Compare multiple decision options through Stoic virtue.
+ *
+ * Calls the shared sage-reason engine for each option, then ranks results
+ * by katorthoma_proximity level.
+ *
+ * Unique to this endpoint:
+ *   - Takes array of 2-5 decision options
+ *   - Evaluates each option via sage-reason (standard depth)
+ *   - Ranks results by proximity level
+ *   - Generates per-option and overall receipts
+ */
 
 interface PassionDetected {
   root_passion: 'epithumia' | 'hedone' | 'phobos' | 'lupe'
@@ -101,67 +70,33 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const optionsList = options
-      .map((o: string, i: number) => `Option ${i + 1}: ${o.trim()}`)
-      .join('\n')
+    // Domain context for decision evaluation
+    const domainContext = `This is a multi-option decision evaluation. Assess each option separately for its Stoic virtue alignment, then the results will be ranked by proximity level.`
 
-    const userMessage = `Decision: ${decision.trim()}
-${context?.trim() ? `Context: ${context.trim()}` : ''}
-
-Options to evaluate:
-${optionsList}
-
-Score each option. Return the JSON array.`
-
-    // Check cache first
-    const ck = cacheKey('/api/score-decision', { decision: decision.trim(), options, context: context?.trim() })
-    const cachedData = cacheGet(ck) as OptionScore[] | undefined
-    if (cachedData) {
-      const result = {
-        decision: decision.trim(),
-        options_scored: cachedData,
-        recommended: cachedData[0]?.option || null,
-        scored_at: new Date().toISOString(),
-        disclaimer: 'Stoic decision evaluation is a reflective tool, not a directive. The sage recognizes that only virtue is truly good; external outcomes remain indifferent. Use this to examine your reasoning, not to escape responsibility for your choice.',
-      }
-      const envelope = buildEnvelope({
-        result,
-        endpoint: '/api/score-decision',
-        model: MODEL_FAST,
-        startTime,
-        maxTokens: 1536,
-        composability: {
-          next_steps: ['/api/score-iterate'],
-          recommended_action: 'Review decision options and consider deeper analysis with /api/score-iterate.',
-        },
+    // Evaluate each option via sage-reason
+    const scoreData: OptionScore[] = []
+    for (let i = 0; i < options.length; i++) {
+      const option = options[i].trim()
+      const reasoningResult = await runSageReason({
+        input: option,
+        context,
+        depth: 'standard',
+        domain_context: domainContext,
       })
-      return NextResponse.json(envelope, { headers: corsHeaders() })
-    }
 
-    const message = await client.messages.create({
-      model: MODEL_FAST,
-      max_tokens: 1536,
-      temperature: 0.2,
-      system: [{ type: 'text', text: DECISION_SCORING_PROMPT, cache_control: { type: 'ephemeral' } }],
-      messages: [{ role: 'user', content: userMessage }],
-    })
-
-    const responseText =
-      message.content[0].type === 'text' ? message.content[0].text : ''
-
-    let scoreData: OptionScore[]
-    try {
-      const cleaned = responseText
-        .replace(/```json?\n?/g, '')
-        .replace(/```\n?/g, '')
-        .trim()
-      scoreData = JSON.parse(cleaned)
-    } catch {
-      console.error('Decision scorer parse error:', responseText)
-      return NextResponse.json(
-        { error: 'Scoring engine returned invalid response' },
-        { status: 500 }
-      )
+      const evalData = reasoningResult.result as any
+      scoreData.push({
+        option,
+        katorthoma_proximity: evalData.katorthoma_proximity,
+        passions_detected: (evalData.passion_diagnosis?.passions_detected || []).map((p: any) => ({
+          root_passion: p.root_passion || 'epithumia',
+          sub_species: p.sub_species || p.name || p.id || 'unspecified',
+          false_judgement: p.false_judgement || 'Unspecified',
+        })),
+        is_kathekon: evalData.kathekon_assessment?.is_kathekon ?? evalData.is_kathekon ?? false,
+        kathekon_quality: evalData.kathekon_assessment?.quality || evalData.kathekon_quality || 'marginal',
+        stoic_insight: evalData.philosophical_reflection || 'See detailed evaluation above.',
+      })
     }
 
     // Sort by katorthoma_proximity level (sage_like > principled > deliberate > habitual > reflexive)
@@ -174,9 +109,6 @@ Score each option. Return the JSON array.`
     }
 
     scoreData.sort((a, b) => proximityRank[b.katorthoma_proximity] - proximityRank[a.katorthoma_proximity])
-
-    // Cache sorted results
-    cacheSet(ck, scoreData)
 
     // Generate per-option receipts and an overall receipt
     const optionReceipts = scoreData.map((opt: OptionScore) =>

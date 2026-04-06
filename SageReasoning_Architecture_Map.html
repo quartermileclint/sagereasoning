@@ -357,8 +357,9 @@
                     <option value="sage-reason">sage-reason (Standard depth)</option>
                     <option value="sage-score">sage-score</option>
                     <option value="sage-guard">sage-guard</option>
-                    <option value="sage-decide">sage-decide</option>
-                    <option value="sage-filter">sage-filter</option>
+                    <option value="sage-decide">sage-decide (now wraps sage-reason)</option>
+                    <option value="sage-filter">sage-filter (now wraps sage-reason)</option>
+                    <option value="sage-converse">sage-converse (now wraps sage-reason deep)</option>
                     <option value="sage-audit">sage-audit</option>
                     <option value="sage-iterate">sage-iterate</option>
                     <option value="sage-reflect">sage-reflect</option>
@@ -368,8 +369,22 @@
                     <option value="sage-diagnose">sage-diagnose</option>
                     <option value="baseline-assessment">Baseline Assessment</option>
                 </optgroup>
-                <optgroup label="Wrapped Skills">
-                    <option value="wrapped-skill">Wrapped skill (sage-coach)</option>
+                <optgroup label="Wrapped Skills (Revenue)">
+                    <option value="wrapped-align">sage-align (Value Alignment)</option>
+                    <option value="wrapped-classify">sage-classify (Decision Classifier)</option>
+                    <option value="wrapped-coach">sage-coach (Coaching)</option>
+                    <option value="wrapped-comply">sage-compliance (Compliance)</option>
+                    <option value="wrapped-educate">sage-educate (Education)</option>
+                    <option value="wrapped-govern">sage-govern (Governance)</option>
+                    <option value="wrapped-identity">sage-identity (Role Analysis)</option>
+                    <option value="wrapped-invest">sage-invest (Investment)</option>
+                    <option value="wrapped-moderate">sage-moderate (Moderation)</option>
+                    <option value="wrapped-negotiate">sage-negotiate (Negotiation)</option>
+                    <option value="wrapped-pivot">sage-pivot (Strategic Pivot)</option>
+                    <option value="wrapped-premortem">sage-premortem (Pre-Mortem)</option>
+                    <option value="wrapped-prioritise">sage-prioritise (Prioritisation)</option>
+                    <option value="wrapped-resolve">sage-resolve (Conflict Resolution)</option>
+                    <option value="wrapped-retro">sage-retro (Retrospective)</option>
                 </optgroup>
                 <optgroup label="Agent Flows">
                     <option value="mentor-ring">Mentor Ring (BEFORE/AFTER)</option>
@@ -472,7 +487,21 @@
             'api-reflect': { x: 500, y: 160, label: '/reflect', category: 'tool', layer: 2, brainDerived: true },
             'api-assessment-full': { x: 500, y: 220, label: '/assessment/full', category: 'tool', layer: 2, brainDerived: true },
             'api-assessment-foundational': { x: 500, y: 280, label: '/assessment/foundational', category: 'tool', layer: 2, brainDerived: true },
-            'api-skill-coach': { x: 500, y: 340, label: '/skill/sage-coach', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-align': { x: 500, y: 340, label: '/skill/sage-align', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-classify': { x: 500, y: 370, label: '/skill/sage-classify', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-coach': { x: 500, y: 400, label: '/skill/sage-coach', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-comply': { x: 500, y: 430, label: '/skill/sage-compliance', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-educate': { x: 500, y: 460, label: '/skill/sage-educate', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-govern': { x: 500, y: 490, label: '/skill/sage-govern', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-identity': { x: 500, y: 520, label: '/skill/sage-identity', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-invest': { x: 500, y: 550, label: '/skill/sage-invest', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-moderate': { x: 500, y: 580, label: '/skill/sage-moderate', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-negotiate': { x: 500, y: 610, label: '/skill/sage-negotiate', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-pivot': { x: 500, y: 640, label: '/skill/sage-pivot', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-premortem': { x: 500, y: 670, label: '/skill/sage-premortem', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-prioritise': { x: 500, y: 700, label: '/skill/sage-prioritise', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-resolve': { x: 500, y: 730, label: '/skill/sage-resolve', category: 'tool', layer: 2, wrapped: true },
+            'api-skill-retro': { x: 500, y: 760, label: '/skill/sage-retro', category: 'tool', layer: 2, wrapped: true },
 
             // Stoic Brain & 4-Stage Sequence (Layer 3)
             'model-config': { x: 680, y: 60, label: 'Model Config', category: 'reasoning', layer: 3 },
@@ -523,6 +552,8 @@
             'support-agent': { x: 500, y: 550, label: 'Support Agent', category: 'agent', layer: 3 },
             'support-patterns': { x: 880, y: 520, label: 'Support Patterns', category: 'reasoning', layer: 4 },
             'support-proactive': { x: 880, y: 560, label: 'Support Proactive', category: 'infra', layer: 4 },
+            'api-score-conversation': { x: 320, y: 460, label: '/score-conversation', category: 'tool', layer: 2, brainDerived: true },
+            'sage-reason-engine': { x: 600, y: 60, label: 'sage-reason-engine', category: 'engine', layer: 2, brainDerived: true },
             'response-envelope': { x: 1350, y: 100, label: 'Response Envelope', category: 'tool', layer: 6 },
             'reasoning-receipt': { x: 1350, y: 160, label: 'Reasoning Receipt', category: 'data', layer: 6 },
             'accreditation-card': { x: 1350, y: 220, label: 'Accreditation Card', category: 'product', layer: 6 },
@@ -541,79 +572,101 @@
                 category: 'Brain-Derived Tools',
                 path: [
                     { id: 'human-user', description: 'User initiates reasoning request' },
-                    { id: 'api-reason', description: 'Route: /reason endpoint receives request' },
-                    { id: 'model-config', description: 'Model configuration selected (default or specified)' },
-                    { id: 'stoic-brain', description: 'Load Stoic Brain v3 with context' },
-                    { id: 'four-stage', description: 'Execute 4-Stage Reasoning Sequence' },
-                    { id: 'prohairesis', description: 'Stage 1: Assess purpose and intention' },
-                    { id: 'kathekon', description: 'Stage 2: Define duty and responsibility' },
-                    { id: 'passion-diagnosis', description: 'Stage 3: Diagnose emotional patterns' },
-                    { id: 'unified-virtue', description: 'Stage 4: Unify virtue and wisdom' },
-                    { id: 'response-envelope', description: 'Envelope response with metadata' },
-                    { id: 'reasoning-receipt', description: 'Generate reasoning receipt' },
-                    { id: 'response', description: 'Return reasoning response to user' }
+                    { id: 'api-reason', description: 'Route: /reason — thin validation wrapper' },
+                    { id: 'sage-reason-engine', description: 'Shared engine: runSageReason(standard)' },
+                    { id: 'model-config', description: 'Model selected (Haiku standard, Sonnet deep)' },
+                    { id: 'stoic-brain', description: 'Load Stoic Brain v3 system prompt' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms at standard)' },
+                    { id: 'prohairesis', description: 'Stage 1: Control filter' },
+                    { id: 'kathekon', description: 'Stage 2: Appropriate action' },
+                    { id: 'passion-diagnosis', description: 'Stage 3: Passion diagnosis' },
+                    { id: 'unified-virtue', description: 'Stage 4: Unified virtue assessment' },
+                    { id: 'reasoning-receipt', description: 'Generate reasoning receipt (R14)' },
+                    { id: 'response-envelope', description: 'Envelope with meta + disclaimer' },
+                    { id: 'response', description: 'Return structured reasoning' }
                 ],
                 color: '#a78bfa'
             },
             'sage-score': {
-                name: 'sage-score',
+                name: 'sage-score (now wraps sage-reason)',
                 category: 'Brain-Derived Tools',
                 path: [
                     { id: 'human-user', description: 'User navigates to Action Scorer' },
-                    { id: 'action-scorer-page', description: 'Action Scorer page loaded' },
-                    { id: 'api-score', description: 'Route: /score endpoint' },
-                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
-                    { id: 'four-stage', description: 'Execute 4-Stage Sequence for action' },
-                    { id: 'prohairesis', description: 'Stage 1: Assess action purpose' },
-                    { id: 'kathekon', description: 'Stage 2: Check duty alignment' },
-                    { id: 'passion-diagnosis', description: 'Stage 3: Diagnose emotional roots' },
-                    { id: 'unified-virtue', description: 'Stage 4: Score virtue alignment' },
-                    { id: 'response-envelope', description: 'Prepare scored response' },
+                    { id: 'action-scorer-page', description: 'Action Scorer page: captures action, context, relationships, emotional state' },
+                    { id: 'api-score', description: 'Route: /score — builds domain_context from action fields' },
+                    { id: 'sage-reason-engine', description: 'Calls runSageReason(standard) with action domain context' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (same as sage-reason)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Envelope with score metadata' },
                     { id: 'evaluations-table', description: 'Store evaluation results' },
-                    { id: 'reasoning-receipt', description: 'Create reasoning receipt' },
                     { id: 'response', description: 'Return score to user' }
                 ],
                 color: '#f472b6'
             },
             'sage-guard': {
-                name: 'sage-guard',
+                name: 'sage-guard (now wraps sage-reason quick)',
                 category: 'Brain-Derived Tools',
                 path: [
-                    { id: 'external-agent', description: 'External agent submits content' },
-                    { id: 'api-guardrail', description: 'Route: /guardrail endpoint' },
-                    { id: 'model-config', description: 'Load Haiku model (fast)' },
-                    { id: 'guardrails-check', description: 'Execute guardrail checks' },
-                    { id: 'binary-go-nogo', description: 'Compute go/no-go decision' },
-                    { id: 'response', description: 'Return binary approval response' }
+                    { id: 'external-agent', description: 'External agent submits content for safety check' },
+                    { id: 'api-guardrail', description: 'Route: /guardrail — API-key auth' },
+                    { id: 'sage-reason-engine', description: 'Calls runSageReason(quick) — 3 mechanisms, Haiku' },
+                    { id: 'stoic-brain', description: 'Quick prompt loaded by shared engine' },
+                    { id: 'four-stage', description: 'Quick: Control + Passion + Oikeiosis only' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'binary-go-nogo', description: 'Post-process: threshold comparison → proceed boolean' },
+                    { id: 'response', description: 'Return go/no-go decision' }
                 ],
                 color: '#ef4444'
             },
             'sage-decide': {
-                name: 'sage-decide',
+                name: 'sage-decide (now wraps sage-reason)',
                 category: 'Brain-Derived Tools',
                 path: [
-                    { id: 'human-user', description: 'User submits multiple options' },
-                    { id: 'api-score-decision', description: 'Route: /score-decision endpoint' },
-                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
-                    { id: 'four-stage', description: 'Execute 4-Stage for each option' },
-                    { id: 'ranked-options', description: 'Rank options by virtue score' },
+                    { id: 'human-user', description: 'User submits 2-5 decision options' },
+                    { id: 'api-score-decision', description: 'Route: /score-decision — loops over each option' },
+                    { id: 'sage-reason-engine', description: 'Calls runSageReason(standard) per option' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence per option (same as sage-reason)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated per option by shared engine' },
+                    { id: 'ranked-options', description: 'Post-process: rank by katorthoma_proximity level' },
+                    { id: 'response-envelope', description: 'Envelope with ranked options metadata' },
                     { id: 'response', description: 'Return ranked decision options' }
                 ],
                 color: '#60a5fa'
             },
             'sage-filter': {
-                name: 'sage-filter',
+                name: 'sage-filter (now wraps sage-reason)',
                 category: 'Brain-Derived Tools',
                 path: [
                     { id: 'human-user', description: 'User navigates to Social Filter' },
                     { id: 'social-filter-page', description: 'Social Filter page loaded' },
-                    { id: 'api-score-social', description: 'Route: /score-social endpoint' },
-                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
-                    { id: 'four-stage', description: 'Execute 4-Stage Sequence' },
-                    { id: 'tone-analysis', description: 'Analyze social tone and appropriateness' },
-                    { id: 'response', description: 'Return filtered tone analysis' }
+                    { id: 'api-score-social', description: 'Route: /score-social — builds social media domain context' },
+                    { id: 'sage-reason-engine', description: 'Calls runSageReason(standard) with social domain context' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (same as sage-reason)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine (was missing before)' },
+                    { id: 'tone-analysis', description: 'Post-process: split passions into poster vs reader triggered' },
+                    { id: 'response-envelope', description: 'Envelope with social filter metadata' },
+                    { id: 'response', description: 'Return filtered social analysis' }
                 ],
                 color: '#34d399'
+            },
+            'sage-converse': {
+                name: 'sage-converse (now wraps sage-reason deep)',
+                category: 'Brain-Derived Tools',
+                path: [
+                    { id: 'human-user', description: 'User submits conversation for analysis' },
+                    { id: 'api-score-conversation', description: 'Route: /score-conversation — extracts overall + per-participant' },
+                    { id: 'sage-reason-engine', description: 'Calls runSageReason(deep) for overall conversation — 6 mechanisms, Sonnet' },
+                    { id: 'stoic-brain', description: 'Deep prompt loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (6 mechanisms at deep depth)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'tone-analysis', description: 'Post-process: per-participant scoring breakdown (custom)' },
+                    { id: 'response-envelope', description: 'Envelope with conversation analysis metadata' },
+                    { id: 'response', description: 'Return conversation analysis with participant breakdown' }
+                ],
+                color: '#22d3ee'
             },
             'sage-audit': {
                 name: 'sage-audit',
@@ -704,18 +757,243 @@
                 ],
                 color: '#34d399'
             },
-            'wrapped-skill': {
-                name: 'Wrapped skill (sage-coach)',
+            'wrapped-align': {
+                name: 'sage-align (Value Alignment)',
                 category: 'Wrapped Skills',
                 path: [
-                    { id: 'human-user', description: 'User calls wrapped skill' },
-                    { id: 'external-agent', description: 'Or agent calls wrapped skill' },
-                    { id: 'api-skill-coach', description: 'Route: /skill/sage-coach endpoint' },
-                    { id: 'api-reason', description: 'Wraps sage-reason (standard)' },
-                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
-                    { id: 'four-stage', description: 'Execute 4-Stage Sequence' },
-                    { id: 'response-envelope', description: 'Wrap response with skill metadata' },
-                    { id: 'response', description: 'Return wrapped response' }
+                    { id: 'human-user', description: 'User or agent calls sage-align' },
+                    { id: 'api-skill-align', description: 'Route: /skill/sage-align — adds alignment domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with alignment metadata' },
+                    { id: 'response', description: 'Return value alignment assessment' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-classify': {
+                name: 'sage-classify (Decision Classifier)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-classify' },
+                    { id: 'api-skill-classify', description: 'Route: /skill/sage-classify — adds classification domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with classification metadata' },
+                    { id: 'response', description: 'Return decision classification' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-coach': {
+                name: 'sage-coach (Coaching)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-coach' },
+                    { id: 'api-skill-coach', description: 'Route: /skill/sage-coach — adds coaching domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with coaching guidance' },
+                    { id: 'response', description: 'Return coaching response' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-comply': {
+                name: 'sage-compliance (Compliance)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-compliance' },
+                    { id: 'api-skill-comply', description: 'Route: /skill/sage-compliance — adds compliance domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with compliance assessment' },
+                    { id: 'response', description: 'Return compliance evaluation' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-educate': {
+                name: 'sage-educate (Education)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-educate' },
+                    { id: 'api-skill-educate', description: 'Route: /skill/sage-educate — adds educational domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with teaching content' },
+                    { id: 'response', description: 'Return educational response' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-govern': {
+                name: 'sage-govern (Governance)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-govern' },
+                    { id: 'api-skill-govern', description: 'Route: /skill/sage-govern — adds governance domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with governance assessment' },
+                    { id: 'response', description: 'Return governance evaluation' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-identity': {
+                name: 'sage-identity (Role Analysis)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-identity' },
+                    { id: 'api-skill-identity', description: 'Route: /skill/sage-identity — adds role analysis domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with role analysis' },
+                    { id: 'response', description: 'Return identity/role assessment' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-invest': {
+                name: 'sage-invest (Investment)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-invest' },
+                    { id: 'api-skill-invest', description: 'Route: /skill/sage-invest — adds investment domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with investment reasoning' },
+                    { id: 'response', description: 'Return investment evaluation' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-moderate': {
+                name: 'sage-moderate (Moderation)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-moderate' },
+                    { id: 'api-skill-moderate', description: 'Route: /skill/sage-moderate — adds moderation domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with moderation assessment' },
+                    { id: 'response', description: 'Return moderation evaluation' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-negotiate': {
+                name: 'sage-negotiate (Negotiation)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-negotiate' },
+                    { id: 'api-skill-negotiate', description: 'Route: /skill/sage-negotiate — adds negotiation domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with negotiation reasoning' },
+                    { id: 'response', description: 'Return negotiation analysis' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-pivot': {
+                name: 'sage-pivot (Strategic Pivot)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-pivot' },
+                    { id: 'api-skill-pivot', description: 'Route: /skill/sage-pivot — adds pivot domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with pivot analysis' },
+                    { id: 'response', description: 'Return strategic pivot evaluation' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-premortem': {
+                name: 'sage-premortem (Pre-Mortem)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-premortem' },
+                    { id: 'api-skill-premortem', description: 'Route: /skill/sage-premortem — adds pre-mortem domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with failure mode analysis' },
+                    { id: 'response', description: 'Return pre-mortem assessment' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-prioritise': {
+                name: 'sage-prioritise (Prioritisation)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-prioritise' },
+                    { id: 'api-skill-prioritise', description: 'Route: /skill/sage-prioritise — adds prioritisation domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with priority assessment' },
+                    { id: 'response', description: 'Return prioritisation evaluation' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-resolve': {
+                name: 'sage-resolve (Conflict Resolution)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-resolve' },
+                    { id: 'api-skill-resolve', description: 'Route: /skill/sage-resolve — adds resolution domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with resolution reasoning' },
+                    { id: 'response', description: 'Return conflict resolution assessment' }
+                ],
+                color: '#f472b6'
+            },
+            'wrapped-retro': {
+                name: 'sage-retro (Retrospective)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User or agent calls sage-retro' },
+                    { id: 'api-skill-retro', description: 'Route: /skill/sage-retro — adds retrospective domain context' },
+                    { id: 'api-reason', description: 'Calls /reason with domain_context' },
+                    { id: 'sage-reason-engine', description: 'runSageReason(standard) via shared engine' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
+                    { id: 'four-stage', description: '4-Stage Sequence (5 mechanisms)' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated by shared engine' },
+                    { id: 'response-envelope', description: 'Wrap with retrospective analysis' },
+                    { id: 'response', description: 'Return retrospective evaluation' }
                 ],
                 color: '#f472b6'
             },
@@ -984,6 +1262,8 @@
             panX = 0;
             panY = 0;
             updateTransform();
+            flowSelector.value = '';
+            showFlow(null);
         });
 
         function updateTransform() {

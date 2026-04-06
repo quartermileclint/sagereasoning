@@ -24,7 +24,7 @@ Every strategic folder (adopted, drafts, business, compliance, legal, operations
 | manifest.md | Master governance (R0-R20). Read before every task. | Current (CR-2026-Q2-v4) |
 | README.md | Project overview and documentation | Current (needs V1 ref cleanup) |
 | INDEX.md | This file. One-line-per-document navigation. | Current |
-| SageReasoning_Ecosystem_Map.html | Interactive visual map of all 132 components | Current (v2, 6 Apr 2026) |
+| SageReasoning_Ecosystem_Map.html | Interactive visual map of all 148 components | Current (v3, 6 Apr 2026) |
 | package.json | Root NPM config (docx generation scripts) | Current |
 | LICENSE | Proprietary Evaluation-Only licence | Current |
 
@@ -62,7 +62,7 @@ Every strategic folder (adopted, drafts, business, compliance, legal, operations
 |--------|---------|-------------|
 | /operations/ | Ops blueprints, manuals, assessments | Sage Cofounder Blueprint, Support Agent Manual, Founder Profile, Sage Ops Assessments (v1, v2) |
 | /operations/session-handoffs/ | Session continuity notes (P0 item 0b) | 2026-04-06 session close (first handoff note) |
-| /operations/decision-log.md | Append-only decision record (P0 item 0f) | 10 decisions backdated to 21 March 2026 |
+| /operations/decision-log.md | Append-only decision record (P0 item 0f) | 11 decisions, 21 March – 6 April 2026 |
 | /operations/verification-framework.md | How both parties verify work (P0 item 0c) | Verification methods by work type, session-start protocol |
 | /compliance/ | Regulatory register, audit logs, security reviews | compliance_register.json (28 obligations), audit_log.json, Security Audits, Art6 Classification |
 | /reference/ | Knowledge context, ethical analysis, research | Ethical Analysis (R17-R20 source), Knowledge Context (45KB), Human-AI Development KB (53KB), Journal 10 Layers |

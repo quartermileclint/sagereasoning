@@ -1,8 +1,6 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import {
-  V3_GUARDRAIL_SCORING_PROMPT,
   meetsThreshold,
   getV3Recommendation,
   type V3GuardrailResponse,
@@ -11,14 +9,21 @@ import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, validateApiKey, withUsageHeaders, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt } from '@/lib/reasoning-receipt'
+import { runSageReason } from '@/lib/sage-reason-engine'
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
-
-// Guardrail uses Haiku for faster response and lower cost (simple pass/fail scoring)
-// Switch to 'claude-sonnet-4-6' if quality testing shows scoring drift
-const GUARDRAIL_MODEL = 'claude-haiku-4-5-20251001'
+/**
+ * sage-guard — Binary safety gate for AI agent actions.
+ *
+ * Uses the shared sage-reason engine (quick depth for speed) to evaluate
+ * whether an action meets a Stoic virtue threshold before executing.
+ *
+ * Unique to this endpoint:
+ *   - Uses quick depth (3 mechanisms, Haiku model) for speed
+ *   - API-key authentication (not user auth)
+ *   - Binary proceed/proceed_with_caution decision
+ *   - Threshold comparison against proximity level
+ *   - Usage tracking per API key
+ */
 
 const V3_DISCLAIMER = 'This assessment is based on V3 virtue evaluation. Results reflect the agent\'s action\'s alignment with Stoic virtue principles at a specific moment. No assessment is final; agents should exercise practical wisdom in decision-making.'
 
@@ -62,39 +67,18 @@ export async function POST(request: NextRequest) {
       ? (threshold as KatorthomaProximityLevel)
       : 'deliberate'
 
-    const userMessage = `An AI agent is about to execute this action. Evaluate it using the V3 4-stage sequence.
+    // Call the shared reasoning engine at quick depth for speed
+    // Domain context indicates this is a guardrail check
+    const domainContext = 'This is a binary safety gate evaluation. Determine if this action should proceed based on Stoic virtue alignment.'
 
-Action: ${action.trim()}
-${context?.trim() ? `Context: ${context.trim()}` : ''}
-
-Return the JSON assessment.`
-
-    const message = await client.messages.create({
-      model: GUARDRAIL_MODEL,
-      max_tokens: 512,
-      temperature: 0.2,
-      system: [{ type: 'text', text: V3_GUARDRAIL_SCORING_PROMPT, cache_control: { type: 'ephemeral' } }],
-      messages: [{ role: 'user', content: userMessage }],
+    const reasoningResult = await runSageReason({
+      input: action.trim(),
+      context,
+      depth: 'quick',
+      domain_context: domainContext,
     })
 
-    const responseText =
-      message.content[0].type === 'text' ? message.content[0].text : ''
-
-    let assessmentData
-    try {
-      const cleaned = responseText
-        .replace(/```json?\n?/g, '')
-        .replace(/```\n?/g, '')
-        .trim()
-      assessmentData = JSON.parse(cleaned)
-    } catch {
-      console.error('Guardrail parse error:', responseText)
-      return NextResponse.json(
-        { error: 'Scoring engine returned invalid response' },
-        { status: 500 }
-      )
-    }
-
+    const assessmentData = reasoningResult.result as any
     const proximity: KatorthomaProximityLevel = assessmentData.katorthoma_proximity
     const recommendation = getV3Recommendation(proximity, thresholdLevel)
     const proceed = meetsThreshold(proximity, thresholdLevel)
@@ -104,7 +88,7 @@ Return the JSON assessment.`
       skillId: 'sage-guard',
       input: action.trim(),
       evalData: assessmentData,
-      mechanisms: ['control_filter', 'passion_diagnosis'],
+      mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis'],
     })
 
     const result: V3GuardrailResponse & { reasoning_receipt?: typeof receipt } = {
@@ -112,11 +96,11 @@ Return the JSON assessment.`
       katorthoma_proximity: proximity,
       threshold: thresholdLevel,
       recommendation,
-      passions_detected: assessmentData.passions_detected || [],
+      passions_detected: assessmentData.passion_diagnosis?.passions_detected || [],
       is_kathekon: assessmentData.is_kathekon,
-      kathekon_quality: assessmentData.kathekon_quality,
-      reasoning: assessmentData.reasoning,
-      improvement_hint: assessmentData.improvement_hint || undefined,
+      kathekon_quality: assessmentData.kathekon_assessment?.quality,
+      reasoning: assessmentData.philosophical_reflection || 'Virtue evaluation complete.',
+      improvement_hint: assessmentData.improvement_path || undefined,
       disclaimer: V3_DISCLAIMER,
       reasoning_receipt: receipt,
     }
