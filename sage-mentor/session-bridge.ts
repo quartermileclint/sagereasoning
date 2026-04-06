@@ -524,11 +524,11 @@ export function initialiseCoworkAgent(): InnerAgent {
   const existing = getInnerAgent(COWORK_AGENT_ID)
   if (existing) return existing
 
-  return registerInnerAgent({
-    id: COWORK_AGENT_ID,
-    name: COWORK_AGENT_NAME,
-    type: 'assistant',
-  })
+  return registerInnerAgent(
+    COWORK_AGENT_ID,
+    COWORK_AGENT_NAME,
+    'assistant',
+  )
 }
 
 

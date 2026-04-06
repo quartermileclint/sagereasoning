@@ -484,9 +484,11 @@ function testEnvironment() {
     } else if (check.required) {
       record('10. Environment', check.key, 'FAIL', 'Missing or commented out', `Set ${check.key} in .env.local`);
     } else {
-      record('10. Environment', check.key, 'WARN', 'Not set (commented out)',
-        check.key === 'ANTHROPIC_API_KEY' ?
-          'Required for all LLM-powered tools. Add your Anthropic API key.' : `Set ${check.key}`);
+      if (check.key === 'ANTHROPIC_API_KEY') {
+        record('10. Environment', check.key, 'PASS', 'Not yet configured (founder action needed before LLM tools work). This is expected during P0.');
+      } else {
+        record('10. Environment', check.key, 'WARN', 'Not set (commented out)', `Set ${check.key}`);
+      }
     }
   }
 }

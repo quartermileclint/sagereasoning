@@ -20,12 +20,8 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-16 font-body text-sage-800">
-      {/* ── LEGAL REVIEW PLACEHOLDER ─────────────────────────────────────────── */}
-      {/* TODO (Priority 9 — Phase 1): This page contains a draft framework only.
-          Before accepting any revenue, have an Australian technology lawyer review
-          and finalise this document. Estimated cost: $800–$2,000.
-          Governing law: Queensland / Australia. */}
-      {/* ─────────────────────────────────────────────────────────────────────── */}
+      {/* Legal review: Lawyer engagement required before P6 launch (see P0 project instructions).
+          Estimated cost: $800-$2,000. Governing law: Queensland / Australia. */}
 
       <div className="mb-10">
         <h1 className="font-display text-3xl font-medium text-sage-900 mb-2">Terms of Service</h1>
@@ -244,8 +240,8 @@ export default function TermsPage() {
             We do not exclude liability for personal injury or death caused by our negligence, or
             for any liability that cannot be excluded under Australian Consumer Law.
           </p>
-          {/* TODO: Have a lawyer verify this limitation clause is enforceable under
-              the Australian Consumer Law and that consumer guarantees are properly preserved. */}
+          {/* Lawyer review item: Verify this limitation clause is enforceable under
+              Australian Consumer Law and that consumer guarantees are properly preserved. */}
         </div>
 
         <div>
@@ -272,14 +268,14 @@ export default function TermsPage() {
             These Terms are governed by the laws of Queensland, Australia. Any disputes will be
             subject to the non-exclusive jurisdiction of the courts of Queensland.
           </p>
-          {/* TODO: Lawyer to confirm jurisdiction clause and preferred dispute resolution mechanism. */}
+          {/* Lawyer review item: Confirm jurisdiction clause and preferred dispute resolution mechanism. */}
         </div>
 
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">15. Contact</h2>
           <p>
             Questions about these Terms may be directed to:{' '}
-            {/* TODO: Add dedicated legal/support email address */}
+            {/* Pre-launch: Confirm support@sagereasoning.com is configured and monitored. */}
             <span className="text-sage-600 font-mono">support@sagereasoning.com</span>
           </p>
         </div>

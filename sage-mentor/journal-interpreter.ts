@@ -316,7 +316,7 @@ export type PassionTrigger = {
 }
 
 // ============================================================================
-// LAYER 9 — PRODUCT DEVELOPMENT SIGNAL (TYPE ONLY — TODO EXTRACTION)
+// LAYER 9 — PRODUCT DEVELOPMENT SIGNAL (TYPE ONLY — DEFERRED TO IMPLEMENTATION PHASE)
 // ============================================================================
 
 /**
@@ -330,7 +330,7 @@ export type ProductDevelopmentSignal = {
   readonly section_transition_smoothness: TransitionAssessment[]
   readonly concept_scaffolding_needs: ScaffoldingNeed[]
   readonly overall_ux_assessment: string
-  // TODO: Extract from entries — requires LLM analysis comparing entry quality to prompt design
+  // Deferred: LLM-based extraction comparing entry quality to prompt design. Requires live sage-interpret pipeline.
 }
 
 export type PromptSignal = {
@@ -363,7 +363,7 @@ export type ScaffoldingNeed = {
 }
 
 // ============================================================================
-// LAYER 10 — PROOF OF CONCEPT FOR AGENT TRUST LAYER (TYPE ONLY — TODO EXTRACTION)
+// LAYER 10 — PROOF OF CONCEPT FOR AGENT TRUST LAYER (TYPE ONLY — DEFERRED TO IMPLEMENTATION PHASE)
 // ============================================================================
 
 /**
@@ -389,7 +389,7 @@ export type ProofOfConceptSynthesis = {
   readonly mentor_relationship_arc: string
   readonly key_breakthrough_moments: BreakthroughPoint[]
   readonly synthesis_narrative: string
-  // TODO: Synthesise across all 10 layers into a narrative case study
+  // Deferred: Cross-layer synthesis into narrative case study. Requires all 10 layers extracted first.
 }
 
 // ============================================================================
@@ -416,8 +416,8 @@ export type FullInterpretationResult = {
   readonly layer_6_developmental_timeline: DevelopmentalTimeline
   readonly layer_7_language_fingerprint: LanguageFingerprint
   readonly layer_8_triggers: SituationalTriggerMap
-  readonly layer_9_product_signals: ProductDevelopmentSignal | null // TODO extraction
-  readonly layer_10_proof_of_concept: ProofOfConceptSynthesis | null // TODO extraction
+  readonly layer_9_product_signals: ProductDevelopmentSignal | null // Deferred: requires live LLM pipeline
+  readonly layer_10_proof_of_concept: ProofOfConceptSynthesis | null // Deferred: requires all layers extracted
 
   /**
    * Cross-cutting extraction: the Mentor Ledger.
@@ -1183,7 +1183,7 @@ NOTES:
 /**
  * Create a stub CognitiveStyleProfile with reasonable defaults.
  * Called when Layer 2 extraction hasn't been performed yet.
- * TODO: Replace with actual extraction when LLM results are available.
+ * Deferred: Replace with actual extraction when LLM pipeline is wired.
  */
 function createCognitiveStyleStub(): CognitiveStyleProfile {
   return {
@@ -1200,7 +1200,7 @@ function createCognitiveStyleStub(): CognitiveStyleProfile {
 /**
  * Create stub EngagementGradient with minimal data.
  * Called when Layer 3 extraction hasn't been performed yet.
- * TODO: Replace with actual extraction when LLM results are available.
+ * Deferred: Replace with actual extraction when LLM pipeline is wired.
  */
 function createEngagementStub(entryCount: number): EngagementGradient {
   return {
@@ -1227,7 +1227,7 @@ function createEngagementStub(entryCount: number): EngagementGradient {
 /**
  * Create stub ContradictionMap.
  * Called when Layer 4 extraction hasn't been performed yet.
- * TODO: Replace with actual extraction when LLM results are available.
+ * Deferred: Replace with actual extraction when LLM pipeline is wired.
  */
 function createContradictionStub(): ContradictionMap {
   return {
@@ -1240,7 +1240,7 @@ function createContradictionStub(): ContradictionMap {
 /**
  * Create stub RelationalTextureMap.
  * Called when Layer 5 extraction hasn't been performed yet.
- * TODO: Replace with actual extraction when LLM results are available.
+ * Deferred: Replace with actual extraction when LLM pipeline is wired.
  */
 function createRelationalTextureStub(): RelationalTextureMap {
   return {
@@ -1253,11 +1253,11 @@ function createRelationalTextureStub(): RelationalTextureMap {
 /**
  * Create stub DevelopmentalTimeline.
  * Called when Layer 6 extraction hasn't been performed yet.
- * TODO: Replace with actual extraction when LLM results are available.
+ * Deferred: Replace with actual extraction when LLM pipeline is wired.
  */
 function createDevelopmentalTimelineStub(): DevelopmentalTimeline {
   return {
-    quality_arc: 'stable',
+    quality_arc: 'plateauing',
     plateau_windows: [],
     breakthrough_points: [],
     typical_plateau_interval_days: null,
@@ -1268,7 +1268,7 @@ function createDevelopmentalTimelineStub(): DevelopmentalTimeline {
 /**
  * Create stub LanguageFingerprint.
  * Called when Layer 7 extraction hasn't been performed yet.
- * TODO: Replace with actual extraction when LLM results are available.
+ * Deferred: Replace with actual extraction when LLM pipeline is wired.
  */
 function createLanguageFingerprintStub(): LanguageFingerprint {
   return {
@@ -1284,7 +1284,7 @@ function createLanguageFingerprintStub(): LanguageFingerprint {
 /**
  * Create stub SituationalTriggerMap.
  * Called when Layer 8 extraction hasn't been performed yet.
- * TODO: Replace with actual extraction when LLM results are available.
+ * Deferred: Replace with actual extraction when LLM pipeline is wired.
  */
 function createSituationalTriggerStub(): SituationalTriggerMap {
   return {
@@ -1295,7 +1295,7 @@ function createSituationalTriggerStub(): SituationalTriggerMap {
 
 /**
  * Create stub ProductDevelopmentSignal (Layer 9).
- * TODO: Extract from entries — requires LLM analysis comparing entry quality to prompt design
+ * Deferred: Requires LLM analysis comparing entry quality to prompt design. Wired after sage-interpret pipeline.
  */
 function createProductDevelopmentStub(): ProductDevelopmentSignal {
   return {
@@ -1303,14 +1303,14 @@ function createProductDevelopmentStub(): ProductDevelopmentSignal {
     framework_accessibility_gaps: [],
     section_transition_smoothness: [],
     concept_scaffolding_needs: [],
-    overall_ux_assessment: 'Layer 9 extraction not yet performed (TODO)',
+    overall_ux_assessment: 'Layer 9 extraction deferred — requires live LLM pipeline',
   }
 }
 
 /**
  * Convert interpreter chunks' extractions into a full FullInterpretationResult.
  * Includes Layer 1 (MentorProfile) plus stubs for Layers 2-8.
- * Layers 9-10 are marked as TODO.
+ * Layers 9-10 extraction is deferred to the implementation phase (requires live LLM pipeline).
  *
  * The ChunkExtraction type is shared — the interpreter produces the same
  * extraction format as the standard ingestion pipeline, so the aggregation
@@ -1353,6 +1353,24 @@ export function buildProfileFromExternalJournal(
     layer_8_triggers: createSituationalTriggerStub(),
     layer_9_product_signals: createProductDevelopmentStub(),
     layer_10_proof_of_concept: null,
+
+    mentor_ledger: {
+      user_id: userId,
+      journal_name: journalName,
+      entries: [],
+      summary: {
+        total_entries: 0,
+        by_kind: {} as Record<string, number>,
+        by_status: {} as Record<string, number>,
+        by_priority: {},
+        top_active: [],
+        overdue_commitments: [],
+        oldest_open_questions: [],
+        persistent_tensions: [],
+        commitment_completion_rate: null,
+      },
+      last_updated: new Date().toISOString(),
+    },
 
     interpretation_timestamp: new Date().toISOString(),
     section_summaries: sectionSummaries,

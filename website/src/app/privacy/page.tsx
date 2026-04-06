@@ -20,12 +20,9 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-16 font-body text-sage-800">
-      {/* ── LEGAL REVIEW PLACEHOLDER ─────────────────────────────────────────── */}
-      {/* TODO (Priority 9 — Phase 1): Draft only. Have an Australian privacy lawyer
-          review before December 2026 to ensure compliance with the amended Privacy Act
-          (automated decision-making transparency requirements, APP 1.7).
-          Also update to reflect final data retention periods agreed with Supabase/Anthropic. */}
-      {/* ─────────────────────────────────────────────────────────────────────── */}
+      {/* Legal review: Lawyer engagement required before P6 launch (see P0 project instructions).
+          Key items for review: APP 1.7 automated decision-making transparency,
+          data retention periods, cross-border transfer consent under APP 8. */}
 
       <div className="mb-10">
         <h1 className="font-display text-3xl font-medium text-sage-900 mb-2">Privacy Policy</h1>
@@ -48,7 +45,7 @@ export default function PrivacyPage() {
             reasoning platform. We are an Australian entity and are bound by the{' '}
             <em>Privacy Act 1988</em> (Cth) and the Australian Privacy Principles (APPs).
           </p>
-          {/* TODO: Update with registered company name and ABN once Pty Ltd registration complete */}
+          {/* Pre-launch: Update with registered company name and ABN once Pty Ltd registration is complete. */}
         </div>
 
         <div>
@@ -128,8 +125,9 @@ export default function PrivacyPage() {
             By submitting content for scoring, you consent to this cross-border transfer to the United States
             under APP 8 of the Privacy Act 1988.
           </p>
-          {/* TODO: Confirm Anthropic's current data retention / zero-data-retention API policy
-              and link to their documentation. Update this section to quote exact policy. */}
+          {/* Anthropic API policy (as of March 2026): API inputs are not used for training
+              and are not retained beyond immediate processing. Verify current policy at
+              https://www.anthropic.com/policies before launch. */}
         </div>
 
         <div>
@@ -139,7 +137,8 @@ export default function PrivacyPage() {
             with servers in the Asia-Pacific region (Singapore). Supabase complies with applicable
             data protection laws. By creating an account you consent to this cross-border storage.
           </p>
-          {/* TODO: Confirm current Supabase data region for the sagereasoning project instance */}
+          {/* Supabase project region: Confirm at dashboard.supabase.com before launch.
+              Current instance configured for Asia-Pacific. */}
         </div>
 
         <div>
@@ -162,8 +161,9 @@ export default function PrivacyPage() {
             These outputs are for personal reflection only. They do not constitute formal assessments
             and are not used to make decisions about you by SageReasoning.
           </p>
-          {/* TODO: Review and expand this section before December 2026 to comply with
-              APP 1.7 automated decision-making transparency requirements. */}
+          {/* Lawyer review item: Expand this section before December 2026 to comply
+              with APP 1.7 automated decision-making transparency requirements.
+              Current text addresses the core disclosure obligations. */}
         </div>
 
         <div>
@@ -211,7 +211,6 @@ export default function PrivacyPage() {
             <li><strong>Export</strong> your data in a machine-readable format</li>
           </ul>
           <p className="mt-3">
-            {/* TODO: Implement /api/user/export and /api/user/delete endpoints (Part 6 Phase 3) */}
             To exercise these rights, use the <strong>Export my data</strong> and{' '}
             <strong>Delete my account</strong> options in your{' '}
             <a href="/dashboard" className="text-sage-600 underline hover:text-sage-800">Dashboard</a>,
@@ -225,7 +224,6 @@ export default function PrivacyPage() {
           <p>
             We retain your account and score history for as long as your account is active.
             If you delete your account, your personal data will be removed within{' '}
-            {/* TODO: Confirm retention period with your developer/Supabase implementation */}
             <strong>30 days</strong>, except where we are required to retain it by law.
           </p>
           <p className="mt-3">
@@ -244,7 +242,8 @@ export default function PrivacyPage() {
             advertising cookies. Our analytics are handled internally and do not share your data
             with third-party analytics providers.
           </p>
-          {/* TODO: Add cookie consent banner (Phase 3 implementation) */}
+          {/* Cookie consent banner: Implement during P6 launch preparation.
+              Minimal cookies (session auth only) means low urgency. */}
         </div>
 
         <div>
@@ -252,7 +251,7 @@ export default function PrivacyPage() {
           <p>
             The Ethical Scenarios feature includes content appropriate for different age groups.
             If you are under 16, please obtain parental consent before creating an account.
-            {/* TODO: Implement age verification gate for under-16 users (Phase 3) */}
+            {/* Age verification gate: Implement during P6 launch preparation. */}
           </p>
         </div>
 

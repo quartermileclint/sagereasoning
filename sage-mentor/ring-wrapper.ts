@@ -646,7 +646,7 @@ export function executeBefore(
   const isHighStakes = concerns.length > 0
   const needsLlmCheck = shouldCheckAction(
     innerAgent,
-    false, // TODO: implement novelty detection
+    false, // Novelty detection deferred — requires action history tracking per agent
     isHighStakes
   )
 

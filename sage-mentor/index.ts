@@ -16,7 +16,9 @@
  *   pattern-engine.ts      — Temporal pattern recognition engine (batch, deterministic)
  *   authority-manager.ts   — Inner agent authority lifecycle (promotion, demotion, suspension)
  *   session-bridge.ts      — Bridge between Claude Cowork sessions and the ring
- *   mentor-ledger.ts       — Cross-cutting accountability extraction (commitments, realisations, questions, tensions, intentions)
+ *   mentor-ledger.ts       — Cross-cutting accountability extraction (aims, commitments, realisations, questions, tensions, intentions),
+ *                            resurfacing engine (scheduled + contextual), sage-path weighting,
+ *                            and one-off import enrichments (maxims, emotional anchors, growth evidence, unfinished threads)
  *
  * SageReasoning Proprietary Licence
  */
@@ -418,18 +420,43 @@ export type {
   LedgerSummary,
   RawLedgerExtraction,
   LedgerPatternData,
+  ResurfacingConfig,
+  ResurfacingSelection,
+  PractitionerMaxim,
+  EmotionalAnchor,
+  GrowthEvidence,
+  UnfinishedThread,
+  ImportEnrichment,
 } from './mentor-ledger'
 
 export {
   LEDGER_EXTRACTION_ADDENDUM,
+  IMPORT_ENRICHMENT_ADDENDUM,
+  DEFAULT_RESURFACING_CONFIG,
   aggregateLedgerExtractions,
   transitionLedgerEntry,
   recordLedgerSurfacing,
   selectForMorningCheckIn,
   selectForEveningReflection,
   selectForWeeklyMirror,
+  selectForScheduledReflection,
+  selectForContextualResurfacing,
   computeLedgerPatterns,
 } from './mentor-ledger'
+
+// ── Reflection Generator (Scheduled + Contextual Reflections) ───────────────
+export type {
+  GeneratedReflection,
+  ContextualReflectionRequest,
+} from './reflection-generator'
+
+export {
+  buildMorningReflectionPrompt,
+  buildContextualReflectionPrompt,
+  buildWeeklyReflectionPrompt,
+  prepareMorningReflection,
+  prepareContextualReflection,
+} from './reflection-generator'
 
 // ── Private Mentor Hub Types (Frontend Data Structures) ────────────────────
 export type {

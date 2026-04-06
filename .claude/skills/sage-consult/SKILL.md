@@ -14,6 +14,7 @@ The mentor evaluates:
 2. **Kathekon assessment** — Is this action appropriate given role, nature, and stakeholders?
 3. **Passion diagnosis** — Which passions might be distorting the reasoning?
 4. **Virtue assessment** — How close is the reasoning to principled?
+5. **Journal resurfacing** — Are there relevant journal insights the practitioner should be reminded of?
 
 ---
 
@@ -31,9 +32,14 @@ The mentor evaluates:
 1. The skill calls `prepareConsultation()` from `sage-mentor/session-bridge.ts`
 2. This builds a `RingTask` from the current conversation state
 3. The ring's `executeBefore()` runs with the founder's profile context
-4. The mentor returns: concerns, journal references, enrichment notes, a proceed/pause recommendation, and a mentor note
-5. The result displays inline in the Cowork session
-6. After the founder makes their decision, `prepareConsultOutcome()` captures the outcome for persistence
+4. **NEW: Contextual resurfacing** — The skill calls `prepareContextualReflection()` from
+   `sage-mentor/reflection-generator.ts`, passing the current session's detected passions,
+   relevant virtues, and topic. If relevant journal entries exist, a brief contextual
+   reflection is generated and included in the consultation output.
+5. The mentor returns: concerns, journal references, enrichment notes, a proceed/pause recommendation, a mentor note, **and any contextual journal reflection**
+6. The result displays inline in the Cowork session
+7. After the founder makes their decision, `prepareConsultOutcome()` captures the outcome for persistence
+8. Any ledger entries surfaced during the consultation are marked via `recordLedgerSurfacing()`
 
 ---
 
@@ -63,6 +69,12 @@ The mentor's response appears in this format:
 📖 Journal Reference:
    [Relevant passage from the 55-Day Journal, if found]
 
+🪞 From Your Journal:
+   [Contextual reflection — 1-3 sentences connecting a relevant journal insight
+   to the current decision. Uses the practitioner's own words. Only appears if
+   the resurfacing engine finds a relevant ledger entry. Omitted if nothing
+   contextually relevant exists — silence is better than forcing a connection.]
+
 💡 Mentor Note:
    [The "friend further along the path" observation]
 
@@ -89,4 +101,6 @@ One Haiku or Sonnet call per consultation (model tier selected by `selectModelTi
 - `sage-mentor/persona.ts` — `MentorProfile`, prompt builders
 - `sage-mentor/profile-store.ts` — `loadProfile()`
 - `sage-mentor/llm-bridge.ts` — `callAnthropic()`
+- `sage-mentor/reflection-generator.ts` — `prepareContextualReflection()` for journal resurfacing
+- `sage-mentor/mentor-ledger.ts` — `selectForContextualResurfacing()`, `recordLedgerSurfacing()`
 - Supabase — `session_decisions` table for persistence
