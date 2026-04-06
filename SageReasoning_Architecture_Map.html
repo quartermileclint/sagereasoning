@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SageReasoning Flow Tracer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            background: #0a0e17;
+            color: #e4e9f1;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .header {
+            background: #131a2b;
+            border-bottom: 1px solid #1a2340;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .title-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .title-section h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #d4a843;
+            margin-bottom: 4px;
+        }
+
+        .title-section p {
+            font-size: 13px;
+            color: #8b92a0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select, button {
+            padding: 8px 12px;
+            background: #1a2340;
+            border: 1px solid #2d3a52;
+            color: #e4e9f1;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        select:hover, button:hover {
+            background: #252e42;
+            border-color: #3d4a62;
+        }
+
+        select:focus, button:focus {
+            outline: none;
+            border-color: #d4a843;
+            box-shadow: 0 0 0 2px rgba(212, 168, 67, 0.1);
+        }
+
+        .control-label {
+            font-size: 13px;
+            color: #8b92a0;
+        }
+
+        .toggle-btn {
+            padding: 8px 12px;
+            background: #1a2340;
+            border: 1px solid #2d3a52;
+            color: #e4e9f1;
+        }
+
+        .toggle-btn.active {
+            background: #d4a843;
+            color: #0a0e17;
+            border-color: #d4a843;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 80px);
+            gap: 16px;
+            padding: 16px;
+        }
+
+        .canvas-wrapper {
+            flex: 1;
+            background: #0a0e17;
+            border: 1px solid #1a2340;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #canvas {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            position: relative;
+        }
+
+        #canvas.dragging {
+            cursor: grabbing;
+        }
+
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .nodes-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .node {
+            position: absolute;
+            padding: 8px 10px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 80px;
+        }
+
+        .node.brain-derived {
+            border: 2px solid #a78bfa;
+        }
+
+        .node.wrapped {
+            border: 2px solid #f472b6;
+        }
+
+        .node.dimmed {
+            opacity: 0.2;
+        }
+
+        .node.active {
+            opacity: 1;
+            box-shadow: 0 0 15px rgba(212, 168, 67, 0.6), 0 0 0 2px rgba(212, 168, 67, 0.3);
+        }
+
+        .node-step {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            width: 24px;
+            height: 24px;
+            background: #d4a843;
+            color: #0a0e17;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .node.active .node-step {
+            opacity: 1;
+        }
+
+        /* Category colors */
+        .category-product { background: #60a5fa; color: #0a0e17; }
+        .category-tool { background: #f472b6; color: #0a0e17; }
+        .category-agent { background: #f59e0b; color: #0a0e17; }
+        .category-engine { background: #ef4444; color: #fff; }
+        .category-reasoning { background: #a78bfa; color: #0a0e17; }
+        .category-data { background: #34d399; color: #0a0e17; }
+        .category-infra { background: #22d3ee; color: #0a0e17; }
+        .category-governance { background: #ec4899; color: #fff; }
+
+        .line-default {
+            stroke: #4a5568;
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 5,5;
+            opacity: 0.3;
+        }
+
+        .line-active {
+            stroke-width: 3;
+            opacity: 1;
+            transition: all 0.3s;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #131a2b;
+            border: 1px solid #1a2340;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-title {
+            padding: 12px;
+            border-bottom: 1px solid #1a2340;
+            font-size: 12px;
+            font-weight: 600;
+            color: #d4a843;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .step-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .step-item {
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #1a2340;
+            border-left: 3px solid #2d3a52;
+            border-radius: 2px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .step-item.active {
+            background: rgba(212, 168, 67, 0.1);
+            border-left-color: #d4a843;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background: #d4a843;
+            color: #0a0e17;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 10px;
+            font-weight: bold;
+            margin-right: 6px;
+            line-height: 1.8;
+        }
+
+        .legend {
+            padding: 12px;
+            border-top: 1px solid #1a2340;
+            max-height: 180px;
+            overflow-y: auto;
+            font-size: 11px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .zoom-btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #131a2b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2d3a52;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3d4a62;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .canvas-wrapper {
+                flex: 2;
+            }
+
+            .sidebar {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title-section">
+            <h1>SageReasoning Flow Tracer</h1>
+            <p>Select a function to trace its path through the system</p>
+        </div>
+        <div class="controls">
+            <label class="control-label">Flow:</label>
+            <select id="flowSelector">
+                <option value="">-- Select a flow --</option>
+                <optgroup label="Brain-Derived Tools">
+                    <option value="sage-reason">sage-reason (Standard depth)</option>
+                    <option value="sage-score">sage-score</option>
+                    <option value="sage-guard">sage-guard</option>
+                    <option value="sage-decide">sage-decide</option>
+                    <option value="sage-filter">sage-filter</option>
+                    <option value="sage-audit">sage-audit</option>
+                    <option value="sage-iterate">sage-iterate</option>
+                    <option value="sage-reflect">sage-reflect</option>
+                </optgroup>
+                <optgroup label="Assessment Flows">
+                    <option value="sage-profile">sage-profile (Full agent assessment)</option>
+                    <option value="sage-diagnose">sage-diagnose</option>
+                    <option value="baseline-assessment">Baseline Assessment</option>
+                </optgroup>
+                <optgroup label="Wrapped Skills">
+                    <option value="wrapped-skill">Wrapped skill (sage-coach)</option>
+                </optgroup>
+                <optgroup label="Agent Flows">
+                    <option value="mentor-ring">Mentor Ring (BEFORE/AFTER)</option>
+                    <option value="private-mentor">Private Mentor: Journal Interpretation</option>
+                    <option value="trust-layer">Trust Layer: Agent Accreditation</option>
+                    <option value="support-agent">Support Agent Pipeline</option>
+                </optgroup>
+                <optgroup label="Product Flows">
+                    <option value="journal-flow">55-Day Journal</option>
+                </optgroup>
+            </select>
+            <label class="control-label">
+                <button id="toggleAllConnections" class="toggle-btn">All Lines</button>
+            </label>
+            <button id="resetView">Reset View</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="canvas-wrapper">
+            <svg id="connectionsSvg"></svg>
+            <div id="canvas" class="nodes-container"></div>
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="zoomIn">+</button>
+                <button class="zoom-btn" id="zoomOut">−</button>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-title">Flow Steps</div>
+            <div class="step-list" id="stepList"></div>
+            <div class="sidebar-title">Legend</div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #60a5fa;"></div>
+                    <span>Product</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f472b6;"></div>
+                    <span>Tool</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f59e0b;"></div>
+                    <span>Agent</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ef4444;"></div>
+                    <span>Engine</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #a78bfa;"></div>
+                    <span>Reasoning</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #34d399;"></div>
+                    <span>Data</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #22d3ee;"></div>
+                    <span>Infrastructure</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ec4899;"></div>
+                    <span>Governance</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="border: 2px solid #a78bfa; background: transparent;"></div>
+                    <span>Brain-Derived</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="border: 2px solid #f472b6; background: transparent;"></div>
+                    <span>Wrapped</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Node definitions with positions (arranged in logical layers)
+        const nodes = {
+            // Entry points
+            'human-user': { x: 40, y: 200, label: 'Human User', category: 'product', layer: 'entry' },
+            'external-agent': { x: 40, y: 350, label: 'External Agent', category: 'agent', layer: 'entry' },
+
+            // Products (Layer 1)
+            'action-scorer-page': { x: 180, y: 80, label: 'Action Scorer', category: 'product', layer: 1 },
+            'social-filter-page': { x: 180, y: 150, label: 'Social Filter', category: 'product', layer: 1 },
+            'document-scorer-page': { x: 180, y: 220, label: 'Document Scorer', category: 'product', layer: 1 },
+            'baseline-page': { x: 180, y: 290, label: 'Baseline Page', category: 'product', layer: 1 },
+            'journal-page': { x: 180, y: 360, label: 'Journal Page', category: 'product', layer: 1 },
+
+            // API Routes (Layer 2)
+            'api-reason': { x: 320, y: 100, label: '/reason', category: 'tool', layer: 2, brainDerived: true },
+            'api-score': { x: 320, y: 160, label: '/score', category: 'tool', layer: 2, brainDerived: true },
+            'api-guardrail': { x: 320, y: 220, label: '/guardrail', category: 'tool', layer: 2, brainDerived: true },
+            'api-score-decision': { x: 320, y: 280, label: '/score-decision', category: 'tool', layer: 2, brainDerived: true },
+            'api-score-social': { x: 320, y: 340, label: '/score-social', category: 'tool', layer: 2, brainDerived: true },
+            'api-score-document': { x: 320, y: 400, label: '/score-document', category: 'tool', layer: 2, brainDerived: true },
+            'api-score-iterate': { x: 500, y: 100, label: '/score-iterate', category: 'tool', layer: 2, brainDerived: true },
+            'api-reflect': { x: 500, y: 160, label: '/reflect', category: 'tool', layer: 2, brainDerived: true },
+            'api-assessment-full': { x: 500, y: 220, label: '/assessment/full', category: 'tool', layer: 2, brainDerived: true },
+            'api-assessment-foundational': { x: 500, y: 280, label: '/assessment/foundational', category: 'tool', layer: 2, brainDerived: true },
+            'api-skill-coach': { x: 500, y: 340, label: '/skill/sage-coach', category: 'tool', layer: 2, wrapped: true },
+
+            // Stoic Brain & 4-Stage Sequence (Layer 3)
+            'model-config': { x: 680, y: 60, label: 'Model Config', category: 'reasoning', layer: 3 },
+            'stoic-brain': { x: 680, y: 130, label: 'Stoic Brain v3', category: 'reasoning', layer: 3, brainDerived: true },
+            'four-stage': { x: 680, y: 200, label: '4-Stage Sequence', category: 'reasoning', layer: 3, brainDerived: true },
+            'prohairesis': { x: 760, y: 140, label: 'Prohairesis', category: 'reasoning', layer: 3, brainDerived: true },
+            'kathekon': { x: 760, y: 180, label: 'Kathekon', category: 'reasoning', layer: 3, brainDerived: true },
+            'passion-diagnosis': { x: 760, y: 220, label: 'Passion Diagnosis', category: 'reasoning', layer: 3, brainDerived: true },
+            'unified-virtue': { x: 760, y: 260, label: 'Unified Virtue', category: 'reasoning', layer: 3, brainDerived: true },
+            'reflective-reasoning': { x: 680, y: 270, label: 'Reflective Reasoning', category: 'reasoning', layer: 3, brainDerived: true },
+            'baseline-engine': { x: 680, y: 330, label: 'Baseline Engine', category: 'engine', layer: 3 },
+            'senecan-grading': { x: 680, y: 390, label: 'Senecan Grading', category: 'reasoning', layer: 3, brainDerived: true },
+            'document-scorer-engine': { x: 680, y: 450, label: 'Document Scorer', category: 'engine', layer: 3 },
+
+            // Agents & Engines (Layer 4)
+            'ring-wrapper-before': { x: 880, y: 80, label: 'Ring Wrapper BEFORE', category: 'agent', layer: 4 },
+            'profile-store-load': { x: 940, y: 40, label: 'Profile Store', category: 'data', layer: 4 },
+            'pattern-engine': { x: 940, y: 80, label: 'Pattern Engine', category: 'engine', layer: 4 },
+            'persona-context': { x: 940, y: 120, label: 'Persona Context', category: 'reasoning', layer: 4 },
+            'guardrails-check': { x: 880, y: 220, label: 'Guardrails Check', category: 'governance', layer: 4 },
+            'binary-go-nogo': { x: 880, y: 280, label: 'Binary Go/No-Go', category: 'tool', layer: 4, brainDerived: true },
+            'tone-analysis': { x: 880, y: 340, label: 'Tone Analysis', category: 'reasoning', layer: 4 },
+            'ranked-options': { x: 880, y: 400, label: 'Ranked Options', category: 'reasoning', layer: 4 },
+            'ring-wrapper-after': { x: 880, y: 460, label: 'Ring Wrapper AFTER', category: 'agent', layer: 4 },
+            'llm-bridge': { x: 940, y: 420, label: 'LLM Bridge', category: 'tool', layer: 4 },
+            'proactive-scheduler': { x: 940, y: 460, label: 'Proactive Scheduler', category: 'infra', layer: 4 },
+            'mentor-ring': { x: 1060, y: 200, label: 'Mentor Ring', category: 'agent', layer: 4 },
+            'private-mentor-hub': { x: 1060, y: 280, label: 'Private Mentor Hub', category: 'product', layer: 4 },
+            'agent-trust-layer': { x: 1060, y: 360, label: 'Agent Trust Layer', category: 'governance', layer: 4 },
+            'proximity-grade': { x: 1060, y: 400, label: 'Proximity Grade', category: 'reasoning', layer: 4 },
+            'authority-manager': { x: 1060, y: 440, label: 'Authority Manager', category: 'governance', layer: 4 },
+            'assessment-framework': { x: 1060, y: 480, label: 'Assessment Framework', category: 'reasoning', layer: 4 },
+
+            // Data Stores (Layer 5)
+            'evaluations-table': { x: 1200, y: 120, label: 'Evaluations Table', category: 'data', layer: 5 },
+            'deliberation-chain': { x: 1200, y: 180, label: 'Deliberation Chain', category: 'data', layer: 5 },
+            'baseline-assessments': { x: 1200, y: 240, label: 'Baseline Assessments', category: 'data', layer: 5 },
+            'journal-entries': { x: 1200, y: 300, label: 'Journal Entries', category: 'data', layer: 5 },
+            'mentor-ledger': { x: 1200, y: 360, label: 'Mentor Ledger', category: 'data', layer: 5 },
+            'embedding-pipeline': { x: 1200, y: 420, label: 'Embedding Pipeline', category: 'infra', layer: 5 },
+            'journal-content-engine': { x: 1200, y: 480, label: 'Journal Content Engine', category: 'engine', layer: 5 },
+
+            // Special components
+            'journal-ingestion': { x: 300, y: 480, label: 'Journal Ingestion', category: 'infra', layer: 2 },
+            'journal-interpreter': { x: 500, y: 480, label: 'Journal Interpreter', category: 'reasoning', layer: 3 },
+            'persona': { x: 680, y: 510, label: 'Persona', category: 'reasoning', layer: 3 },
+            'support-inbox': { x: 300, y: 550, label: 'Support Inbox', category: 'infra', layer: 2 },
+            'support-agent': { x: 500, y: 550, label: 'Support Agent', category: 'agent', layer: 3 },
+            'support-patterns': { x: 880, y: 520, label: 'Support Patterns', category: 'reasoning', layer: 4 },
+            'support-proactive': { x: 880, y: 560, label: 'Support Proactive', category: 'infra', layer: 4 },
+            'response-envelope': { x: 1350, y: 100, label: 'Response Envelope', category: 'tool', layer: 6 },
+            'reasoning-receipt': { x: 1350, y: 160, label: 'Reasoning Receipt', category: 'data', layer: 6 },
+            'accreditation-card': { x: 1350, y: 220, label: 'Accreditation Card', category: 'product', layer: 6 },
+            'notification': { x: 1350, y: 280, label: 'Notification', category: 'infra', layer: 6 },
+            'response': { x: 1480, y: 190, label: 'Response', category: 'product', layer: 'exit' },
+            'encryption': { x: 300, y: 380, label: 'Encryption (AES-256)', category: 'infra', layer: 2 },
+            'pwa-service-worker': { x: 880, y: 600, label: 'PWA Service Worker', category: 'infra', layer: 4 },
+            'progression-toolkit': { x: 1060, y: 520, label: 'Progression Toolkit', category: 'tool', layer: 4 },
+            'badge-issued': { x: 1350, y: 340, label: 'Badge Issued', category: 'product', layer: 6 },
+        };
+
+        // Flow definitions
+        const flows = {
+            'sage-reason': {
+                name: 'sage-reason (Standard depth)',
+                category: 'Brain-Derived Tools',
+                path: [
+                    { id: 'human-user', description: 'User initiates reasoning request' },
+                    { id: 'api-reason', description: 'Route: /reason endpoint receives request' },
+                    { id: 'model-config', description: 'Model configuration selected (default or specified)' },
+                    { id: 'stoic-brain', description: 'Load Stoic Brain v3 with context' },
+                    { id: 'four-stage', description: 'Execute 4-Stage Reasoning Sequence' },
+                    { id: 'prohairesis', description: 'Stage 1: Assess purpose and intention' },
+                    { id: 'kathekon', description: 'Stage 2: Define duty and responsibility' },
+                    { id: 'passion-diagnosis', description: 'Stage 3: Diagnose emotional patterns' },
+                    { id: 'unified-virtue', description: 'Stage 4: Unify virtue and wisdom' },
+                    { id: 'response-envelope', description: 'Envelope response with metadata' },
+                    { id: 'reasoning-receipt', description: 'Generate reasoning receipt' },
+                    { id: 'response', description: 'Return reasoning response to user' }
+                ],
+                color: '#a78bfa'
+            },
+            'sage-score': {
+                name: 'sage-score',
+                category: 'Brain-Derived Tools',
+                path: [
+                    { id: 'human-user', description: 'User navigates to Action Scorer' },
+                    { id: 'action-scorer-page', description: 'Action Scorer page loaded' },
+                    { id: 'api-score', description: 'Route: /score endpoint' },
+                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
+                    { id: 'four-stage', description: 'Execute 4-Stage Sequence for action' },
+                    { id: 'prohairesis', description: 'Stage 1: Assess action purpose' },
+                    { id: 'kathekon', description: 'Stage 2: Check duty alignment' },
+                    { id: 'passion-diagnosis', description: 'Stage 3: Diagnose emotional roots' },
+                    { id: 'unified-virtue', description: 'Stage 4: Score virtue alignment' },
+                    { id: 'response-envelope', description: 'Prepare scored response' },
+                    { id: 'evaluations-table', description: 'Store evaluation results' },
+                    { id: 'reasoning-receipt', description: 'Create reasoning receipt' },
+                    { id: 'response', description: 'Return score to user' }
+                ],
+                color: '#f472b6'
+            },
+            'sage-guard': {
+                name: 'sage-guard',
+                category: 'Brain-Derived Tools',
+                path: [
+                    { id: 'external-agent', description: 'External agent submits content' },
+                    { id: 'api-guardrail', description: 'Route: /guardrail endpoint' },
+                    { id: 'model-config', description: 'Load Haiku model (fast)' },
+                    { id: 'guardrails-check', description: 'Execute guardrail checks' },
+                    { id: 'binary-go-nogo', description: 'Compute go/no-go decision' },
+                    { id: 'response', description: 'Return binary approval response' }
+                ],
+                color: '#ef4444'
+            },
+            'sage-decide': {
+                name: 'sage-decide',
+                category: 'Brain-Derived Tools',
+                path: [
+                    { id: 'human-user', description: 'User submits multiple options' },
+                    { id: 'api-score-decision', description: 'Route: /score-decision endpoint' },
+                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
+                    { id: 'four-stage', description: 'Execute 4-Stage for each option' },
+                    { id: 'ranked-options', description: 'Rank options by virtue score' },
+                    { id: 'response', description: 'Return ranked decision options' }
+                ],
+                color: '#60a5fa'
+            },
+            'sage-filter': {
+                name: 'sage-filter',
+                category: 'Brain-Derived Tools',
+                path: [
+                    { id: 'human-user', description: 'User navigates to Social Filter' },
+                    { id: 'social-filter-page', description: 'Social Filter page loaded' },
+                    { id: 'api-score-social', description: 'Route: /score-social endpoint' },
+                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
+                    { id: 'four-stage', description: 'Execute 4-Stage Sequence' },
+                    { id: 'tone-analysis', description: 'Analyze social tone and appropriateness' },
+                    { id: 'response', description: 'Return filtered tone analysis' }
+                ],
+                color: '#34d399'
+            },
+            'sage-audit': {
+                name: 'sage-audit',
+                category: 'Brain-Derived Tools',
+                path: [
+                    { id: 'human-user', description: 'User navigates to Document Scorer' },
+                    { id: 'document-scorer-page', description: 'Document Scorer page loaded' },
+                    { id: 'api-score-document', description: 'Route: /score-document endpoint' },
+                    { id: 'document-scorer-engine', description: 'Document Scorer engine processes document' },
+                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
+                    { id: 'four-stage', description: 'Execute 4-Stage Sequence' },
+                    { id: 'response', description: 'Return document audit response' }
+                ],
+                color: '#f59e0b'
+            },
+            'sage-iterate': {
+                name: 'sage-iterate',
+                category: 'Brain-Derived Tools',
+                path: [
+                    { id: 'human-user', description: 'User initiates iterative reasoning' },
+                    { id: 'external-agent', description: 'Or external agent submits' },
+                    { id: 'api-score-iterate', description: 'Route: /score-iterate endpoint' },
+                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
+                    { id: 'four-stage', description: 'Execute 4-Stage per iteration' },
+                    { id: 'deliberation-chain', description: 'Store deliberation chain' },
+                    { id: 'senecan-grading', description: 'Track Senecan progression' },
+                    { id: 'response', description: 'Return iterated reasoning (loops back for refinement)' }
+                ],
+                color: '#d4a843'
+            },
+            'sage-reflect': {
+                name: 'sage-reflect',
+                category: 'Brain-Derived Tools',
+                path: [
+                    { id: 'human-user', description: 'User initiates reflective practice' },
+                    { id: 'api-reflect', description: 'Route: /reflect endpoint' },
+                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
+                    { id: 'reflective-reasoning', description: 'Execute reflective practice reasoning' },
+                    { id: 'response', description: 'Return examination prompts and reflections' }
+                ],
+                color: '#a78bfa'
+            },
+            'sage-profile': {
+                name: 'sage-profile (Full agent assessment)',
+                category: 'Assessment Flows',
+                path: [
+                    { id: 'external-agent', description: 'Agent applies for assessment' },
+                    { id: 'api-assessment-full', description: 'Route: /assessment/full endpoint' },
+                    { id: 'assessment-framework', description: 'Load 55-assessment framework' },
+                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
+                    { id: 'four-stage', description: 'Execute 4-Stage (x4 scenarios)' },
+                    { id: 'evaluations-table', description: 'Store all evaluation results' },
+                    { id: 'agent-trust-layer', description: 'Evaluate agent trust layer' },
+                    { id: 'proximity-grade', description: 'Compute proximity grade' },
+                    { id: 'accreditation-card', description: 'Build accreditation card' },
+                    { id: 'badge-issued', description: 'Issue agent badge' },
+                    { id: 'response', description: 'Return accreditation card to agent' }
+                ],
+                color: '#ec4899'
+            },
+            'sage-diagnose': {
+                name: 'sage-diagnose',
+                category: 'Assessment Flows',
+                path: [
+                    { id: 'human-user', description: 'User submits baseline assessment' },
+                    { id: 'external-agent', description: 'Or agent submits assessment' },
+                    { id: 'api-assessment-foundational', description: 'Route: /assessment/foundational' },
+                    { id: 'baseline-engine', description: 'Baseline engine processes assessment' },
+                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
+                    { id: 'senecan-grading', description: 'Apply Senecan grading' },
+                    { id: 'baseline-assessments', description: 'Store baseline assessment results' },
+                    { id: 'response', description: 'Return diagnostic baseline' }
+                ],
+                color: '#60a5fa'
+            },
+            'baseline-assessment': {
+                name: 'Baseline Assessment',
+                category: 'Assessment Flows',
+                path: [
+                    { id: 'human-user', description: 'User navigates to Baseline page' },
+                    { id: 'baseline-page', description: 'Baseline page loaded with 4-5 questions' },
+                    { id: 'api-assessment-foundational', description: 'Route: /assessment/foundational' },
+                    { id: 'baseline-engine', description: 'Baseline engine processes responses' },
+                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
+                    { id: 'senecan-grading', description: 'Senecan grading applied' },
+                    { id: 'baseline-assessments', description: 'Results stored in baseline table' },
+                    { id: 'response', description: 'Dashboard display with baseline score' }
+                ],
+                color: '#34d399'
+            },
+            'wrapped-skill': {
+                name: 'Wrapped skill (sage-coach)',
+                category: 'Wrapped Skills',
+                path: [
+                    { id: 'human-user', description: 'User calls wrapped skill' },
+                    { id: 'external-agent', description: 'Or agent calls wrapped skill' },
+                    { id: 'api-skill-coach', description: 'Route: /skill/sage-coach endpoint' },
+                    { id: 'api-reason', description: 'Wraps sage-reason (standard)' },
+                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
+                    { id: 'four-stage', description: 'Execute 4-Stage Sequence' },
+                    { id: 'response-envelope', description: 'Wrap response with skill metadata' },
+                    { id: 'response', description: 'Return wrapped response' }
+                ],
+                color: '#f472b6'
+            },
+            'mentor-ring': {
+                name: 'Mentor Ring (BEFORE/AFTER pattern)',
+                category: 'Agent Flows',
+                path: [
+                    { id: 'external-agent', description: 'Event triggers mentor ring' },
+                    { id: 'ring-wrapper-before', description: 'Ring Wrapper BEFORE pattern' },
+                    { id: 'profile-store-load', description: 'Load profile from store' },
+                    { id: 'pattern-engine', description: 'Pattern engine checks context' },
+                    { id: 'persona-context', description: 'Sanitize input with persona context' },
+                    { id: 'mentor-ring', description: 'Inner agent executes' },
+                    { id: 'ring-wrapper-after', description: 'Ring Wrapper AFTER pattern' },
+                    { id: 'llm-bridge', description: 'LLM-bridge evaluates output' },
+                    { id: 'profile-store-load', description: 'Update profile in store' },
+                    { id: 'pattern-engine', description: 'Pattern engine updates patterns' },
+                    { id: 'proactive-scheduler', description: 'Proactive scheduler checks triggers' },
+                    { id: 'notification', description: 'Notification sent if triggered' },
+                    { id: 'response', description: 'Return response to event source' }
+                ],
+                color: '#f59e0b'
+            },
+            'private-mentor': {
+                name: 'Private Mentor: Journal Interpretation',
+                category: 'Agent Flows',
+                path: [
+                    { id: 'human-user', description: 'Founder writes journal entry' },
+                    { id: 'journal-ingestion', description: 'Journal ingestion: chunk by phase' },
+                    { id: 'journal-interpreter', description: 'Journal interpreter (10 layers deep)' },
+                    { id: 'persona', description: 'Build/update MentorProfile' },
+                    { id: 'profile-store-load', description: 'Persist persona to profile store' },
+                    { id: 'mentor-ledger', description: 'Extract commitments to ledger' },
+                    { id: 'embedding-pipeline', description: 'Store vectors in embedding pipeline' },
+                    { id: 'pattern-engine', description: 'Pattern engine detects patterns' },
+                    { id: 'proactive-scheduler', description: 'Proactive scheduler generates rituals' },
+                    { id: 'private-mentor-hub', description: 'Private Mentor Hub displays insights' },
+                    { id: 'response', description: 'Return personalized mentor response' }
+                ],
+                color: '#a78bfa'
+            },
+            'trust-layer': {
+                name: 'Trust Layer: Agent Accreditation',
+                category: 'Agent Flows',
+                path: [
+                    { id: 'external-agent', description: 'Agent applies for accreditation' },
+                    { id: 'assessment-framework', description: 'Evaluation window opens' },
+                    { id: 'stoic-brain', description: 'Load Stoic Brain v3' },
+                    { id: 'four-stage', description: 'Execute 4-Stage (55 assessments)' },
+                    { id: 'proximity-grade', description: 'Proximity grade computed' },
+                    { id: 'authority-manager', description: 'Authority manager sets trust level' },
+                    { id: 'progression-toolkit', description: 'Progression toolkit recommends pathway' },
+                    { id: 'accreditation-card', description: 'Build accreditation card' },
+                    { id: 'badge-issued', description: 'Badge issued' },
+                    { id: 'response', description: 'Return accreditation to agent' }
+                ],
+                color: '#ec4899'
+            },
+            'journal-flow': {
+                name: '55-Day Journal',
+                category: 'Product Flows',
+                path: [
+                    { id: 'human-user', description: 'User navigates to Journal page' },
+                    { id: 'journal-page', description: 'Journal page loaded' },
+                    { id: 'encryption', description: 'Client-side AES-256 encryption applied' },
+                    { id: 'journal-entries', description: 'Journal entries stored in database' },
+                    { id: 'journal-content-engine', description: 'Journal content engine: daily curriculum' },
+                    { id: 'pwa-service-worker', description: 'PWA service worker enables offline access' },
+                    { id: 'response', description: 'Journal UI with source citations' }
+                ],
+                color: '#22d3ee'
+            },
+            'support-agent': {
+                name: 'Support Agent Pipeline',
+                category: 'Agent Flows',
+                path: [
+                    { id: 'external-agent', description: 'Support ticket arrives' },
+                    { id: 'support-inbox', description: 'Support inbox processes ticket' },
+                    { id: 'ring-wrapper-before', description: 'Ring Wrapper BEFORE loads context' },
+                    { id: 'support-agent', description: 'Support agent drafts response' },
+                    { id: 'ring-wrapper-after', description: 'Ring Wrapper AFTER evaluates' },
+                    { id: 'support-patterns', description: 'Support patterns analyzes response' },
+                    { id: 'support-proactive', description: 'Support proactive checks escalation' },
+                    { id: 'notification', description: 'Notification sent if escalation needed' },
+                    { id: 'response', description: 'Response sent to user' }
+                ],
+                color: '#f59e0b'
+            }
+        };
+
+        let currentFlow = null;
+        let zoomLevel = 1;
+        let panX = 0;
+        let panY = 0;
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let showAllConnections = false;
+
+        const canvas = document.getElementById('canvas');
+        const svg = document.getElementById('connectionsSvg');
+        const flowSelector = document.getElementById('flowSelector');
+        const stepList = document.getElementById('stepList');
+        const toggleAllBtn = document.getElementById('toggleAllConnections');
+        const resetBtn = document.getElementById('resetView');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+
+        // Initialize nodes
+        function initializeNodes() {
+            Object.entries(nodes).forEach(([id, node]) => {
+                const el = document.createElement('div');
+                el.className = `node category-${node.category}`;
+                if (node.brainDerived) el.classList.add('brain-derived');
+                if (node.wrapped) el.classList.add('wrapped');
+                el.innerHTML = `
+                    <div>${node.label}</div>
+                    <div class="node-step"></div>
+                `;
+                el.style.left = node.x + 'px';
+                el.style.top = node.y + 'px';
+                el.dataset.nodeId = id;
+                canvas.appendChild(el);
+            });
+        }
+
+        // Draw connection lines
+        function drawConnections() {
+            svg.innerHTML = '';
+
+            if (showAllConnections) {
+                // Draw all possible connections (faintly)
+                Object.entries(flows).forEach(([, flow]) => {
+                    for (let i = 0; i < flow.path.length - 1; i++) {
+                        const fromId = flow.path[i].id;
+                        const toId = flow.path[i + 1].id;
+                        drawLine(fromId, toId, '#4a5568', 2, true);
+                    }
+                });
+            }
+
+            // Draw active flow
+            if (currentFlow) {
+                const flow = flows[currentFlow];
+                for (let i = 0; i < flow.path.length - 1; i++) {
+                    const fromId = flow.path[i].id;
+                    const toId = flow.path[i + 1].id;
+                    drawLine(fromId, toId, flow.color, 3, false);
+                }
+            }
+        }
+
+        function drawLine(fromId, toId, color, width, dashed) {
+            const fromNode = nodes[fromId];
+            const toNode = nodes[toId];
+            if (!fromNode || !toNode) return;
+
+            const x1 = fromNode.x + 45;
+            const y1 = fromNode.y + 20;
+            const x2 = toNode.x + 45;
+            const y2 = toNode.y + 20;
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('stroke', color);
+            line.setAttribute('stroke-width', width);
+            if (dashed) line.setAttribute('stroke-dasharray', '5,5');
+            line.setAttribute('opacity', dashed ? '0.3' : '1');
+            svg.appendChild(line);
+
+            // Draw arrowhead
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            const arrowSize = 8;
+            const arrowPoints = [
+                [x2, y2],
+                [x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6)],
+                [x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6)]
+            ];
+
+            const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            arrow.setAttribute('points', arrowPoints.map(p => p.join(',')).join(' '));
+            arrow.setAttribute('fill', color);
+            arrow.setAttribute('opacity', dashed ? '0.3' : '1');
+            svg.appendChild(arrow);
+        }
+
+        // Show flow
+        function showFlow(flowId) {
+            currentFlow = flowId;
+
+            // Dim all nodes
+            document.querySelectorAll('.node').forEach(el => {
+                el.classList.add('dimmed');
+                el.querySelector('.node-step').textContent = '';
+            });
+
+            stepList.innerHTML = '';
+
+            if (!flowId) {
+                // Reset view
+                document.querySelectorAll('.node').forEach(el => el.classList.remove('dimmed'));
+                drawConnections();
+                return;
+            }
+
+            const flow = flows[flowId];
+            if (!flow) return;
+
+            // Highlight nodes in path
+            flow.path.forEach((step, index) => {
+                const nodeEl = document.querySelector(`[data-node-id="${step.id}"]`);
+                if (nodeEl) {
+                    nodeEl.classList.remove('dimmed');
+                    nodeEl.classList.add('active');
+                    nodeEl.querySelector('.node-step').textContent = index + 1;
+                }
+            });
+
+            // Update step list
+            flow.path.forEach((step, index) => {
+                const stepEl = document.createElement('div');
+                stepEl.className = 'step-item';
+                stepEl.innerHTML = `<span class="step-number">${index + 1}</span><strong>${nodes[step.id].label}</strong><br><span style="color: #8b92a0; font-size: 11px;">${step.description}</span>`;
+                stepList.appendChild(stepEl);
+            });
+
+            drawConnections();
+        }
+
+        // Pan and zoom
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            dragStart = { x: e.clientX, y: e.clientY };
+            canvas.classList.add('dragging');
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - dragStart.x;
+            const dy = e.clientY - dragStart.y;
+            panX += dx;
+            panY += dy;
+            dragStart = { x: e.clientX, y: e.clientY };
+            updateTransform();
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+            canvas.classList.remove('dragging');
+        });
+
+        zoomInBtn.addEventListener('click', () => {
+            zoomLevel = Math.min(zoomLevel + 0.2, 3);
+            updateTransform();
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+            zoomLevel = Math.max(zoomLevel - 0.2, 0.5);
+            updateTransform();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            zoomLevel = 1;
+            panX = 0;
+            panY = 0;
+            updateTransform();
+        });
+
+        function updateTransform() {
+            canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+            svg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+            canvas.style.transformOrigin = '0 0';
+            svg.style.transformOrigin = '0 0';
+        }
+
+        flowSelector.addEventListener('change', (e) => {
+            showFlow(e.target.value);
+        });
+
+        toggleAllBtn.addEventListener('click', () => {
+            showAllConnections = !showAllConnections;
+            toggleAllBtn.classList.toggle('active');
+            drawConnections();
+        });
+
+        // Initialize
+        initializeNodes();
+        drawConnections();
+    </script>
+</body>
+</html>

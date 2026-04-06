@@ -37,8 +37,8 @@ Every strategic folder (adopted, drafts, business, compliance, legal, operations
 | Folder | Purpose | Key Contents |
 |--------|---------|-------------|
 | /adopted/ | Current governing documents beyond the manifest | V3 Adoption Scope (complete), Addendum P12-P19 |
-| /drafts/ | Documents under review, pending founder approval | Manifest Amendments (R15-R20), Revised Build Priorities, Project Instructions |
-| /archive/ | Superseded versions (moved here, not deleted) | Pre-R17-R20 versions of compliance and growth docs |
+| /drafts/ | Documents under review, pending founder approval | Empty — previous drafts adopted and archived |
+| /archive/ | Superseded versions (moved here, not deleted) | Pre-R17-R20 versions, adopted drafts (Manifest Amendments, Build Priorities, Project Instructions), early marketing strategy, baseline assessment spec |
 
 ### Business and Finance
 
@@ -46,13 +46,13 @@ Every strategic folder (adopted, drafts, business, compliance, legal, operations
 |--------|---------|-------------|
 | /business/ | Business plan, financials, pricing, revenue | Break-Even Analysis (.xlsx), Investment Analysis, Revenue Strategy, Pricing Research |
 | /legal/ | Licences, terms, privacy, IP protection | Source License Audit, Policy Amendments |
-| /marketing/ | Market research, competitive analysis, UX research | Deep Market Research v2, Mythos Competitive Analysis, Market Opportunity, Onboarding AX Research (879KB) |
+| /marketing/ | Market research, competitive analysis, UX research | Deep Market Research v2, Mythos Competitive Analysis, Market Opportunity, Onboarding AX Research (879KB), Marketing Strategy (early, from inbox) |
 
 ### Product and Engineering
 
 | Folder | Purpose | Key Contents |
 |--------|---------|-------------|
-| /product/ | Product specs, brainstorms, architecture docs | AGENTS.md (API guide), Trust Layer Framework, Mentor Architecture, Path of the Prokoptos, 18 files total |
+| /product/ | Product specs, brainstorms, architecture docs | AGENTS.md (API guide), Trust Layer Framework, Mentor Architecture, Path of the Prokoptos, Baseline Assessment Spec, 19 files total |
 | /engineering/ | Technical docs, scripts, audits, deployment | Deployment Checklist, Token Efficiency, Website Audit, JS build scripts, SQL scripts |
 | /prototypes/ | HTML hub mockups, demo outputs | Mentor Hub, Private Hub, Sage Ops Hub, Setup Plan, Wrapper Demo |
 
@@ -62,6 +62,8 @@ Every strategic folder (adopted, drafts, business, compliance, legal, operations
 |--------|---------|-------------|
 | /operations/ | Ops blueprints, manuals, assessments | Sage Cofounder Blueprint, Support Agent Manual, Founder Profile, Sage Ops Assessments (v1, v2) |
 | /operations/session-handoffs/ | Session continuity notes (P0 item 0b) | 2026-04-06 session close (first handoff note) |
+| /operations/decision-log.md | Append-only decision record (P0 item 0f) | 10 decisions backdated to 21 March 2026 |
+| /operations/verification-framework.md | How both parties verify work (P0 item 0c) | Verification methods by work type, session-start protocol |
 | /compliance/ | Regulatory register, audit logs, security reviews | compliance_register.json (28 obligations), audit_log.json, Security Audits, Art6 Classification |
 | /reference/ | Knowledge context, ethical analysis, research | Ethical Analysis (R17-R20 source), Knowledge Context (45KB), Human-AI Development KB (53KB), Journal 10 Layers |
 
