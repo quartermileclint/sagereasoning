@@ -1,0 +1,562 @@
+{
+  "user_id": "clinton",
+  "journal_name": "Clinton's Stoic Journal",
+  "import_date": "2026-04-06",
+  "entries": {
+    "aims": [
+      {
+        "content": "Handle reactions with measured action not impulse",
+        "intensity": 0.7,
+        "source_section": "Live in the Present"
+      },
+      {
+        "content": "Achieve contentment through learning and completion",
+        "intensity": 0.8,
+        "source_section": "Live in the Present"
+      },
+      {
+        "content": "Shift from threat-focused to balanced perspective",
+        "intensity": 0.75,
+        "source_section": "Embrace Difficulty"
+      },
+      {
+        "content": "Build inner citadel accessible in adversity",
+        "intensity": 0.8,
+        "source_section": "Embrace Difficulty"
+      },
+      {
+        "content": "Stop overreacting; respond with detachment and curiosity",
+        "intensity": 0.8,
+        "source_section": "Practice Acceptance"
+      },
+      {
+        "content": "Relinquish perfectionism and control",
+        "intensity": 0.85,
+        "source_section": "Practice Acceptance"
+      },
+      {
+        "content": "Achieve eudaimonia: flourishing with continual improvement, positive outlook, strength, health, unburdened peace",
+        "intensity": 0.85,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "Embody all four virtues equally",
+        "intensity": 0.8,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "Act virtuously silently, not for social credit",
+        "intensity": 0.8,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "To achieve inner peace and serenity through consistent reflection and virtue alignment",
+        "engagement_intensity": 0.9,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Break the pattern of external expectation dependency and emotional reactivity",
+        "engagement_intensity": 0.8,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Develop courage to sit with discomfort rather than escape via humor or distraction",
+        "engagement_intensity": 0.7,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Achieve true wisdom (internal alignment) rather than appearance of wisdom (external validation)",
+        "engagement_intensity": 0.9,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Develop beginner's mindset: release all assumptions of mastery and prior knowledge sufficiency",
+        "engagement_intensity": 0.8,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Master the dichotomy between listening genuinely and preparing next argument",
+        "engagement_intensity": 0.75,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Achieve contentment through presence and attention rather than acquisition and fantasy",
+        "engagement_intensity": 0.85,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "Release reliance on external validation (impression, respect, love-proof) while still valuing connection",
+        "engagement_intensity": 0.7,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "Reframe physical limitation (back pain) as defining constraint rather than identity-destroyer",
+        "engagement_intensity": 0.75,
+        "source_section": "Be Content"
+      }
+    ],
+    "commitments": [
+      {
+        "content": "Call out intrusive thoughts, write later, accept imperfection",
+        "timeframe": "daily",
+        "intensity": 0.75,
+        "source_section": "Live in the Present"
+      },
+      {
+        "content": "Daily 5-from-5 activity survey",
+        "timeframe": "daily",
+        "intensity": 0.6,
+        "source_section": "Live in the Present"
+      },
+      {
+        "content": "Recognize moment to pause; use breath/mantra for inner strength",
+        "timeframe": "daily",
+        "intensity": 0.7,
+        "source_section": "Embrace Difficulty"
+      },
+      {
+        "content": "Breathing exercises and time-out before responding",
+        "timeframe": "daily",
+        "intensity": 0.7,
+        "source_section": "Practice Acceptance"
+      },
+      {
+        "content": "Address 16 challenges with inside/outside control lens",
+        "timeframe": "varied",
+        "intensity": 0.75,
+        "source_section": "Practice Acceptance"
+      },
+      {
+        "content": "Measure every action against four cardinal virtues; disassociate from feelings before responding",
+        "timeframe": "daily",
+        "intensity": 0.7,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "Set internal benchmarks per virtue; reflection as reward",
+        "timeframe": "daily",
+        "intensity": 0.75,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "11 daily eudaimonia practices: review, walk, journal, catch cynicism, catch temptations, listen, pause for beauty, refrain opinions, face difficulties positively",
+        "timeframe": "daily",
+        "intensity": 0.6,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "Implement daily reflective practice to appreciate achievements and maintain purpose clarity",
+        "timeframe": "ongoing",
+        "engagement_intensity": 0.7,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Eliminate lotto tickets and gambling as concrete rejection of wealth fantasy",
+        "timeframe": "immediate",
+        "engagement_intensity": 0.6,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Practice complete attention in conversation, replacing humor-diffusion with authentic presence",
+        "timeframe": "ongoing",
+        "engagement_intensity": 0.7,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Implement pass/fail rules for speech: (1) emotion separable from opinion? (2) motivated by virtue? (3) adds wisdom to discourse?",
+        "timeframe": "ongoing, before speaking",
+        "engagement_intensity": 0.7,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Diversify information sources across media types and tribal perspectives to combat algorithm bias",
+        "timeframe": "ongoing practice",
+        "engagement_intensity": 0.65,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Practice blame-assignment proportionality: differentiate between ownership and shame-spiraling",
+        "timeframe": "ongoing in reflection",
+        "engagement_intensity": 0.6,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Reduce social media consumption; use nature as primary information source and grounding practice",
+        "timeframe": "ongoing",
+        "engagement_intensity": 0.6,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "Address back limitation through weight loss, targeted exercise, and physical reconstruction of capacity",
+        "timeframe": "long-term project",
+        "engagement_intensity": 0.7,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "Practice full attention to pleasures (sunbaking) and stop at the point of satisfaction rather than indulgence",
+        "timeframe": "ongoing, daily",
+        "engagement_intensity": 0.6,
+        "source_section": "Be Content"
+      }
+    ],
+    "realisations": [
+      {
+        "content": "Measured action yields positive reflection for all",
+        "intensity": 0.8,
+        "source_section": "Live in the Present"
+      },
+      {
+        "content": "Future fears are unproductive without tangible action",
+        "intensity": 0.75,
+        "source_section": "Live in the Present"
+      },
+      {
+        "content": "Obstacles force learning creating applicable capabilities",
+        "intensity": 0.85,
+        "source_section": "Embrace Difficulty"
+      },
+      {
+        "content": "Past avoidances cost significantly in competition, sociability, connection",
+        "intensity": 0.8,
+        "source_section": "Embrace Difficulty"
+      },
+      {
+        "content": "Overreactions cost in multiple domains",
+        "intensity": 0.85,
+        "source_section": "Practice Acceptance"
+      },
+      {
+        "content": "Haven't walked the walk of can-do attitude promoted",
+        "intensity": 0.9,
+        "source_section": "Practice Acceptance"
+      },
+      {
+        "content": "Craving is controllable perception",
+        "intensity": 0.8,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "Dependent on external feedback for art - major blocker",
+        "intensity": 0.85,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "Nothing stopping start except habit patterns",
+        "intensity": 0.85,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "Without reflection, achievements feel nonexistent and gratitude collapses into escapism",
+        "engagement_intensity": 0.8,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "External expectations (reputation, approval) are irrational judgments about uncontrollable futures",
+        "engagement_intensity": 0.85,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Catastrophizing is indulgent fantasy-thinking that uses energy without benefit; mindfulness breaks the cycle",
+        "engagement_intensity": 0.8,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Inner resources (restraint, observation, endurance) already exist; the task is deployment, not acquisition",
+        "engagement_intensity": 0.75,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Not admitting ignorance doesn't retain power; it forfeits credibility and learning opportunity",
+        "engagement_intensity": 0.85,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Intellectual humor used to dominate discourse is barrier to genuine connection and wisdom-exchange",
+        "engagement_intensity": 0.8,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Blame is often explanation that avoids the harder work of proportional root-cause analysis",
+        "engagement_intensity": 0.75,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Disciplined mind correlates with mood improvement and reduction in shame-spirals",
+        "engagement_intensity": 0.85,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Others' mistakes present opportunities never otherwise available; this is a profound gift",
+        "engagement_intensity": 0.7,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Social media and algorithm feeds are designed to trigger FOMO and appetite; nature provides direct truthful information",
+        "engagement_intensity": 0.8,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "Envy is a form of imagination about others' experience, not reality; pivoting to curiosity about effort is more accurate",
+        "engagement_intensity": 0.8,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "What I once craved (love, respect, validation) cannot be obtained in the quantity/manner/timing desired because it's not controllable",
+        "engagement_intensity": 0.85,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "Fantasy-motivation (cars, rockstar status) and virtuous motivation can coexist; need is to prioritize internal driver",
+        "engagement_intensity": 0.7,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "Others' apparent ease and advantage is sustained by sacrifice invisible to observer (case studies of 'grass is greener')",
+        "engagement_intensity": 0.75,
+        "source_section": "Be Content"
+      }
+    ],
+    "questions": [
+      {
+        "content": "Have I done my job as parent?",
+        "intensity": 0.9,
+        "source_section": "Live in the Present"
+      },
+      {
+        "content": "How do I build an inner citadel?",
+        "intensity": 0.8,
+        "source_section": "Embrace Difficulty"
+      },
+      {
+        "content": "Do stress and emotions lead to poor decisions?",
+        "intensity": 0.85,
+        "source_section": "Practice Acceptance"
+      },
+      {
+        "content": "How do I currently embody the four virtues?",
+        "intensity": 0.8,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "What opportunities for character-building have I passed on?",
+        "intensity": 0.75,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "How much of my resentment about external control is actually resistance to accepting what I cannot change?",
+        "engagement_intensity": 0.7,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Can I truly let go of external expectations if I haven't tested that belief in high-stakes situations?",
+        "engagement_intensity": 0.65,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "What would it mean to 'flow with fate' when my default is to resist or escape?",
+        "engagement_intensity": 0.6,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "How do I distinguish between healthy self-accountability and excessive self-blame?",
+        "engagement_intensity": 0.75,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Can intellectual humility be sustained in high-stakes conversations or only in reflective safety?",
+        "engagement_intensity": 0.65,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "What is the minimum viable bias-check before accepting information, and when am I over-processing?",
+        "engagement_intensity": 0.55,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Can I accept physical limitation without losing sense of masculinity or possibility?",
+        "engagement_intensity": 0.8,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "How do I distinguish between rightful ambition (improve back health) and unrealistic fantasy (return to youth)?",
+        "engagement_intensity": 0.75,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "What would it look like to genuinely release the need for love-proof while still valuing love?",
+        "engagement_intensity": 0.7,
+        "source_section": "Be Content"
+      }
+    ],
+    "tensions": [
+      {
+        "content": "Knows measured responses work but can't execute in moment",
+        "intensity": 0.8,
+        "source_section": "Live in the Present"
+      },
+      {
+        "content": "Knows worse-case irrelevant yet daydreams catastrophes",
+        "intensity": 0.85,
+        "source_section": "Embrace Difficulty"
+      },
+      {
+        "content": "Promotes can-do but hasn't walked it",
+        "intensity": 0.9,
+        "source_section": "Practice Acceptance"
+      },
+      {
+        "content": "Comprehensive eudaimonia vision but admits 'nothing stopping start' - inaction",
+        "intensity": 0.9,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "Values virtue but carries self-image as delusional, fraud, lazy blocking action",
+        "intensity": 0.9,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "Advocates silent action but dependent on external feedback for art",
+        "intensity": 0.85,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "Wants moment-catching but practices are all post-hoc reflection",
+        "intensity": 0.8,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "Intellectual commitment to dichotomy of control vs. emotional investment in reputation/outcomes",
+        "engagement_intensity": 0.85,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Desire for inner peace vs. inability to sustain reflection practice without external structure",
+        "engagement_intensity": 0.7,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Understanding that virtuous action doesn't guarantee happiness vs. expecting peace from virtue",
+        "engagement_intensity": 0.65,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Desire to admit ignorance vs. lifelong habit of demonstrating mastery",
+        "engagement_intensity": 0.8,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Knowledge that wisdom doesn't need acknowledgment vs. pleasure-seeking from being right",
+        "engagement_intensity": 0.75,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Accepting that every moment is contingent vs. relying on past experience as guide",
+        "engagement_intensity": 0.65,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Intellectual acceptance of contentment as virtue vs. continued attachment to fantasy-improvement narratives",
+        "engagement_intensity": 0.8,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "Desire for relational restoration (loved ones' regard) vs. intellectual commitment to not needing external validation",
+        "engagement_intensity": 0.85,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "Value placed on creative self-expression (rockstar fantasy) vs. dismissal of it as illegitimate 'impression-seeking'",
+        "engagement_intensity": 0.7,
+        "source_section": "Be Content"
+      }
+    ],
+    "intentions": [
+      {
+        "content": "Use transit and work-from-home time for creativity",
+        "intensity": 0.65,
+        "source_section": "Live in the Present"
+      },
+      {
+        "content": "Recognize and stop daydreaming about future",
+        "intensity": 0.7,
+        "source_section": "Embrace Difficulty"
+      },
+      {
+        "content": "Let others finish arguments; take calm posture",
+        "intensity": 0.65,
+        "source_section": "Practice Acceptance"
+      },
+      {
+        "content": "View others' opinions as learning opportunity test",
+        "intensity": 0.7,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "After disassociating from feelings, respond with curiosity",
+        "intensity": 0.65,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "Strategically hide disagreement until planning opportunity",
+        "intensity": 0.6,
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "content": "Shift from shame-based reflection to correction-focused reflection",
+        "engagement_intensity": 0.7,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Develop curiosity about root causes of others' perspectives instead of defensive reaction",
+        "engagement_intensity": 0.7,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "View discomfort as evidence of worthwhile effort rather than signal to escape",
+        "engagement_intensity": 0.65,
+        "source_section": "Choose Serenity"
+      },
+      {
+        "content": "Let intellectual discernment stay internal; use wit to clarify, not to dominate",
+        "engagement_intensity": 0.7,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Treat each conversation as first encounter despite prior knowledge",
+        "engagement_intensity": 0.6,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Reframe mistakes (others' and own) as curriculum rather than as judgment-material",
+        "engagement_intensity": 0.7,
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "content": "Appreciate others' success by understanding their effort and virtue, not by imagining their pleasure",
+        "engagement_intensity": 0.7,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "Shift from curating everything to accepting curation (music as sparse composition, not cluttered mix)",
+        "engagement_intensity": 0.65,
+        "source_section": "Be Content"
+      },
+      {
+        "content": "Allow physical improvement efforts without tying them to identity restoration or youth-recovery",
+        "engagement_intensity": 0.6,
+        "source_section": "Be Content"
+      }
+    ]
+  },
+  "summary": {
+    "total_entries": 103,
+    "by_kind": {
+      "aims": 18,
+      "commitments": 17,
+      "realisations": 23,
+      "questions": 14,
+      "tensions": 16,
+      "intentions": 15
+    }
+  }
+}

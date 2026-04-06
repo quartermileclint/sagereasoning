@@ -1,0 +1,217 @@
+{
+  "user_id": "clinton",
+  "journal_name": "Clinton's Stoic Journal",
+  "import_date": "2026-04-06",
+  "one_off_import": true,
+  "note": "Temporal-arc-dependent data from original journal import. Cannot be reconstructed from re-interpretation.",
+  "enrichments": {
+    "maxims": [
+      "Measured action provides positive reflection for all parties",
+      "Accept imperfection",
+      "Embrace tasks and the learning to complete them",
+      "The impediment to action advances action",
+      "Every learning before task creates new applicable capability",
+      "Recognize in moment to pause",
+      "Default to patience and curiosity in adversity",
+      "Embrace imperfection",
+      "Give up zero contradictions and pride in it",
+      "Give up 'my way is the right way'",
+      "Treat perfection as moment in time",
+      "Curiosity demands patience",
+      "Do it for the act; outcome doesn't matter",
+      "Nothing stopping me from doing so. Nothing stopping from starting now.",
+      "If through action without verbalizing to others, then not signalling - done for own growth",
+      "Ensure everything measured against courage, justice, temperance, wisdom",
+      "Disassociate from feelings to avoid passionate reaction",
+      "Set internal benchmarks of success for each virtue",
+      "Reflection becomes the reward",
+      "Marathon not a race. Finish this book first.",
+      "Never missing the wonder of the moment",
+      "Create less turbulence (noise/opinions)",
+      "If I don't reflect I don't appreciate my own achievements... like leaving a light on",
+      "Success is the effort trying sincerely, with integrity, didn't avoid effort from fear or laziness",
+      "Act not on what will make me happy act thinking what kind of person does this make me",
+      "How is that relevant in the moment [reframe for catastrophizing]",
+      "Returning to the moment, real action to address or support the 4 virtues will be a positive distraction",
+      "Can the emotion be separated from the opinion and stripped down to just what you believe to be true",
+      "You can never cross the same river twice [flux principle applied to wisdom]",
+      "Blame is a way of explaining things that require more consideration and effort to properly determine root cause",
+      "Every new moment is a chance to use your experience as a starting point to be prepared but then do not drop your attention from the specifics",
+      "If you are fully appreciating the pleasure with all your attention in the moment then you can savour it quickly without over indulging",
+      "Coveting is imagining the pleasure they must feel... It is a sign that not enough attention has been paid to the root cause of the success",
+      "Nothing is ever locked in, it is all a starting point to relate to when applying it to suit that instant",
+      "Instead of the search for more, the attention to resourcefulness of what is present is what will bring contentment"
+    ],
+    "emotional_anchors": [
+      {
+        "experience": "Lazy Sunday family market exploration",
+        "significance": "Contentment anchor; sensory grounding",
+        "source_section": "Live in the Present"
+      },
+      {
+        "experience": "Uncooperative new boss leading to eventual satisfaction",
+        "significance": "Obstacles become transformative",
+        "source_section": "Embrace Difficulty"
+      },
+      {
+        "experience": "Friend dying catalyzing appreciation",
+        "significance": "Mortality teacher",
+        "source_section": "Embrace Difficulty"
+      },
+      {
+        "experience": "Drug addict friend betrayal; group turned against him",
+        "significance": "NOW sees addict afflicted, not personal. Achieved: 'This has passed, I can move on'",
+        "source_section": "Practice Acceptance"
+      },
+      {
+        "experience": "Art pursuits (sketches, poetry, screenplay, filmmaking, music) abandoned for positive feedback dependency",
+        "significance": "Deep identity wound; courage failure; blocks eudaimonia",
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "experience": "Years of habit avoiding/ignoring/dishonoring self",
+        "significance": "Entrenched avoidance identity; reversal requires deliberate counteraction",
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "experience": "Self-concept: Delusional, fraud, lazy, incompetent, frail",
+        "significance": "Core shame beneath virtue efforts; must examine to progress",
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "experience": "Resentment from feeling controlled by compulsory mundane tasks",
+        "personal_significance": "Marks the collapse of motivation when purpose connection breaks",
+        "source_section": "Choose Serenity"
+      },
+      {
+        "experience": "Fear of reputation collapse impacting generations of family",
+        "personal_significance": "Deep intergenerational anxiety; suggests family loyalty operates powerfully in judgment",
+        "source_section": "Choose Serenity"
+      },
+      {
+        "experience": "Recognition that daydreaming about outcomes (winning lotto, perfect boss) wastes energy",
+        "personal_significance": "Visceral insight that fantasy is form of theft from present moment",
+        "source_section": "Choose Serenity"
+      },
+      {
+        "experience": "Multiple instances of self-blame (not reaching out, being selfish, bringing dishonor, missing warning signs, not following through)",
+        "personal_significance": "Deep family-honor sensitivity; guilt is motivator for change but also risk of over-correction",
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "experience": "Recognition that journaling has reduced intrusive thoughts and shame spirals",
+        "personal_significance": "Concrete evidence that disciplined mind improves emotional baseline; builds confidence in method",
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "experience": "Cool heads prevailing in crisis moments creating camaraderie and character-building",
+        "personal_significance": "Positive emotional anchor showing others' example as high-value learning opportunity",
+        "source_section": "Cultivate Wisdom"
+      },
+      {
+        "experience": "Chronic back pain as loss of freedom, sports, masculinity, youth",
+        "personal_significance": "Central trauma; identity-threatening; symbolizes all losses and constraints; deep grief present",
+        "source_section": "Be Content"
+      },
+      {
+        "experience": "New boss as difficult-to-accept circumstance, reframed through wise brother's counsel",
+        "personal_significance": "Model of successful reframing; shows that external circumstances can shift meaning through internal work",
+        "source_section": "Be Content"
+      },
+      {
+        "experience": "Relational alienation and fantasy of future repair (loved one 'one day will not resent me')",
+        "personal_significance": "Avoidant coping; relies on time/change rather than active reconciliation; unresolved guilt",
+        "source_section": "Be Content"
+      },
+      {
+        "experience": "Observation of others who pursued 'grass is greener' paths (own business, inherited wealth, hedonism) and regretted them",
+        "personal_significance": "Powerful negative exemplars; intellectual protection against FOMO via reality-testing",
+        "source_section": "Be Content"
+      }
+    ],
+    "growth_evidence": [
+      "Moving from passive to active intervention with intrusive thoughts",
+      "Developing structured emotion processing",
+      "Naming specific fears and their effects",
+      "Shift from complete avoidance to examining costs",
+      "Developing Stoic vocabulary (inner citadel, pause)",
+      "Tracing catastrophic thinking chains",
+      "Shift from blame to compassionate understanding",
+      "Trace that resistance causes disrespect and morale loss",
+      "Separate normal behavior from catastrophic interpretation",
+      "Honest assessment of ethos-behavior gap",
+      "Move from 'do right thing' ethos to four cardinal virtues integration",
+      "Shift from general shame to specific action-gap identification",
+      "Developing multi-dimensional eudaimonia vision",
+      "Recognition that silent action preserves integrity",
+      "Detailed duty inventory across 9 domains (community, boss, team, friends, wife, kids, parents, family, nature, stoicism)",
+      "From individual virtue to systemic life design",
+      "Shift from 'Fate is pushing me' to commitment to 'flow with it' via virtue-alignment",
+      "Recognition that inner resources exist and only need deployment, not building",
+      "Movement from shame-spiral about failures to reframe-and-correct approach",
+      "Evolution from fear-based external compliance to internally-motivated virtue practice",
+      "Movement from 'I know this' defensiveness to 'What can I learn from this mistake' openness",
+      "Shift from shame-based blame to proportional root-cause analysis",
+      "Development of systematic approach to evaluating information quality (bias checking, source questioning)",
+      "Recognition that disciplined thinking causally reduces emotional volatility",
+      "Shift from unexamined FOMO to conscious evaluation of social media's manipulative design",
+      "Evolution from shame about back limitation to acceptance of it as reality to work within",
+      "Movement from envy-imagination to curiosity-based learning from others' success",
+      "Recognition that creative/status impulses (cars, rockstar fantasy) can be reframed as virtuous contribution rather than suppressed"
+    ],
+    "unfinished_threads": [
+      {
+        "thread": "Creative music return after fear abandonment",
+        "status": "unresolved",
+        "source_section": "Live in the Present"
+      },
+      {
+        "thread": "Art pursuits need courage for rejection-facing and grinding through less-fun work",
+        "status": "unresolved/unstarted",
+        "implication": "Creative self dormant",
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "thread": "Hoarding/unburdened state acknowledged but unactioned",
+        "status": "unresolved",
+        "implication": "Physical clutter mirrors internal",
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "thread": "Sardonic skepticism as lifelong reversal need",
+        "status": "nascent",
+        "implication": "Deep pattern needs sustained practice",
+        "source_section": "A Virtuous Life"
+      },
+      {
+        "thread": "Daily eudaimonia practices (11 items) - not yet evidenced as consistent",
+        "status": "intention-set/untested",
+        "implication": "New regime; sustainability unclear",
+        "source_section": "A Virtuous Life"
+      },
+      "How to sustain reflection practice without relying on structured journal prompts",
+      "Integration of rejected 'rockstar' and 'impressive cars' identities into productive creative channels",
+      "Translation of intellectual understanding of externals-as-uncontrollable into automatic emotional response",
+      "Development of practice for 'letting go of outcomes' that moves beyond intellectual assent",
+      "How to maintain humility when past performance was genuinely skilled (not mere ego-protection)",
+      "Integration of intellectual humor/creativity into wisdom-contribution without domination",
+      "Building proportional responsibility-taking that's neither self-blame nor blame-shifting",
+      "Sustainable practice for bias-checking without cognitive paralysis",
+      "Translation of crisis-competence (cool heads) into daily virtue practice",
+      "Integration of masculine identity with physical limitation and vulnerability",
+      "Reconciliation of relational alienation; moving from fantasy of repair to active restoration",
+      "Clarification of which ambitions are realistic growth vs. impossible fantasy (e.g., recovery of youth vs. optimization of current body)",
+      "Genuine release of external validation need while maintaining relational openness (currently some avoidance present)",
+      "Finding virtuous outlet for creative/impressive impulses without dismissing them as illegitimate impression-seeking"
+    ]
+  },
+  "summary": {
+    "total_items": 99,
+    "by_kind": {
+      "maxims": 35,
+      "emotional_anchors": 17,
+      "growth_evidence": 28,
+      "unfinished_threads": 19
+    }
+  }
+}

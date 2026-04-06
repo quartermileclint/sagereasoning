@@ -1,0 +1,703 @@
+{
+  "user_id": "clinton",
+  "display_name": "Clinton",
+  "journal_name": "Clinton's Stoic Journal",
+  "source": "external_journal_import",
+  "import_date": "2026-04-06",
+  "journal_period": "October 2025 - December 2025",
+  "sections_processed": 7,
+  "total_sections": 12,
+  "notes": "7 of 12 sections fully extracted (JSON). Remaining 5 sections (Master Your Thoughts, Master Your Feelings, Live in Gratitude, Accept Your Fate, Be Responsible for Others) were analysed but their structured data needs re-extraction in a future session with live pipeline.",
+  "passion_map": [
+    {
+      "passion": "Fear",
+      "subcategory": "future-catastrophe",
+      "evidence": "Doom scrolling and youtube financial meltdown videos do not lead to tangible actions. Fear of messy accident at work prevented work attendance. Fear of creative failure prevented music return.",
+      "frequency": "frequent",
+      "intensity": "strong",
+      "source_section": "Live in the Present"
+    },
+    {
+      "passion": "Appetite",
+      "subcategory": "reputation-seeking",
+      "evidence": "Wanting everyone to like me. Not wanting any enemies. Not being respected/listened to.",
+      "frequency": "frequent",
+      "intensity": "strong",
+      "source_section": "Live in the Present"
+    },
+    {
+      "passion": "Distress",
+      "subcategory": "regret-dwelling",
+      "evidence": "Things and reactions I had to them that could've been handled with measured actions. Dwelling on the lack of impact my art has had.",
+      "frequency": "frequent",
+      "intensity": "moderate",
+      "source_section": "Live in the Present"
+    },
+    {
+      "passion": "Distress",
+      "subcategory": "parental-adequacy-doubt",
+      "evidence": "Have I done my job as a parent, failed to prepare them for resilience required, failed to provide opportunities",
+      "frequency": "occasional",
+      "intensity": "strong",
+      "source_section": "Live in the Present"
+    },
+    {
+      "passion": "Fear",
+      "subcategory": "reputation-damage",
+      "evidence": "Reputation at stake. Scrutiny places work in question. What people think will have no impact on my values (attempted reframe).",
+      "frequency": "pervasive",
+      "intensity": "overwhelming",
+      "source_section": "Embrace Difficulty"
+    },
+    {
+      "passion": "Distress",
+      "subcategory": "anticipatory-catastrophe",
+      "evidence": "Daydreaming horrible events or accidents of loved ones causes stress, fear, questioning of myself.",
+      "frequency": "frequent",
+      "intensity": "strong",
+      "source_section": "Embrace Difficulty"
+    },
+    {
+      "passion": "Appetite",
+      "subcategory": "validation-seeking",
+      "evidence": "Not rely on validation. Avoid sharing opinions in case ignored or rejected.",
+      "frequency": "pervasive",
+      "intensity": "strong",
+      "source_section": "Embrace Difficulty"
+    },
+    {
+      "passion": "Distress",
+      "subcategory": "shame-from-disrespect",
+      "evidence": "Thoughts of perceived disrespect make me feel worthless for several days.",
+      "frequency": "frequent",
+      "intensity": "overwhelming",
+      "source_section": "Embrace Difficulty"
+    },
+    {
+      "passion": "Distress",
+      "subcategory": "yelling-overreaction",
+      "evidence": "Could have snapped son without yelling. Could have been positive about Christmas party, kept bias thoughts unexpressed.",
+      "frequency": "occasional",
+      "intensity": "strong",
+      "source_section": "Practice Acceptance"
+    },
+    {
+      "passion": "Fear",
+      "subcategory": "catastrophic-extrapolation",
+      "evidence": "Disappointment in kids' behavior assumes exponential worsening. Reaction measured against estimate of worst outcome.",
+      "frequency": "frequent",
+      "intensity": "strong",
+      "source_section": "Practice Acceptance"
+    },
+    {
+      "passion": "Appetite",
+      "subcategory": "perfectionism-and-pride",
+      "evidence": "Give up zero contradictions and pride in that. Give up 'my way is right way'. Give up efficiency as best.",
+      "frequency": "pervasive",
+      "intensity": "strong",
+      "source_section": "Practice Acceptance"
+    },
+    {
+      "passion": "Distress",
+      "subcategory": "betrayal-shame",
+      "evidence": "Drug addict friend betrayed for thousands. Felt heartbroken, worthless. Whole group turned against him.",
+      "frequency": "occasional-persistent",
+      "intensity": "overwhelming",
+      "source_section": "Practice Acceptance"
+    },
+    {
+      "passion": "Appetite",
+      "subcategory": "temptation-and-craving",
+      "evidence": "Temptation for flavour is my perception of rush. I can control cravings by recognizing them as perception.",
+      "frequency": "frequent",
+      "intensity": "moderate",
+      "source_section": "A Virtuous Life"
+    },
+    {
+      "passion": "Distress",
+      "subcategory": "shame-about-art",
+      "evidence": "Dependent on positive feedback. Not brave enough to display for judgment and rejection. Not committing to less-fun follow-through.",
+      "frequency": "frequent",
+      "intensity": "strong",
+      "source_section": "A Virtuous Life"
+    },
+    {
+      "passion": "Fear",
+      "subcategory": "fear-of-inadequacy",
+      "evidence": "Opinion of myself: Delusional, fraud, lazy, incompetent, frail.",
+      "frequency": "pervasive",
+      "intensity": "strong",
+      "source_section": "A Virtuous Life"
+    },
+    {
+      "passion": "Appetite",
+      "subcategory": "hoarding-control",
+      "evidence": "Culling hoarded possessions. Belongings lessened (Unburdened).",
+      "frequency": "pervasive",
+      "intensity": "moderate",
+      "source_section": "A Virtuous Life"
+    },
+    {
+      "name": "Distress (from lack of reflection)",
+      "evidence": "If I don't reflect I don't appreciate my own achievements, it is like they never existed and put out of my mind... am a waste with no direction",
+      "frequency": "frequent",
+      "intensity": "moderate",
+      "source_section": "Choose Serenity"
+    },
+    {
+      "name": "Fear (loss of control, external compulsion)",
+      "evidence": "Focus on the mundane compulsory tasks makes me feel resentful for being controlled by what is out of my control. Fate is pushing me, I am not flowing with it",
+      "frequency": "frequent",
+      "intensity": "moderate",
+      "source_section": "Choose Serenity"
+    },
+    {
+      "name": "Appetite (excessive gratification-seeking)",
+      "evidence": "No gratitude leads to seeking gratification and indulging in excess, as a friendly distraction from the pointlessness",
+      "frequency": "occasional",
+      "intensity": "moderate",
+      "source_section": "Choose Serenity"
+    },
+    {
+      "name": "Fear (social judgment, reputation collapse)",
+      "evidence": "Afraid I will be irredeemably tarnished with a reputation that will impact loved ones now and for generations",
+      "frequency": "occasional",
+      "intensity": "strong",
+      "source_section": "Choose Serenity"
+    },
+    {
+      "name": "Fear (catastrophizing)",
+      "evidence": "Identify any daydreams and shut them down (either good or bad ones) as they are envy of a passion or fear of victimhood",
+      "frequency": "frequent",
+      "intensity": "moderate",
+      "source_section": "Choose Serenity"
+    },
+    {
+      "name": "Fear (intellectual inadequacy, losing respect through admission of ignorance)",
+      "evidence": "that I will owe them somehow if they aren't told that I already know this, that not admitting that I learned something retains power",
+      "frequency": "frequent",
+      "intensity": "moderate",
+      "source_section": "Cultivate Wisdom"
+    },
+    {
+      "name": "Pleasure (intellectual superiority, 'winning' discussion)",
+      "evidence": "Quick-wittedness should be internal to discern a response not to be a smartarse or derail to 'win' the discussion",
+      "frequency": "frequent",
+      "intensity": "moderate",
+      "source_section": "Cultivate Wisdom"
+    },
+    {
+      "name": "Distress (shame about past failures and blame)",
+      "evidence": "Blamed myself for not reaching out... Blamed myself for bringing dishonour to the family name & being lazy... Blamed myself when in denial",
+      "frequency": "pervasive",
+      "intensity": "moderate",
+      "source_section": "Cultivate Wisdom"
+    },
+    {
+      "name": "Fear (contradiction, disagreement challenge)",
+      "evidence": "The need to be contradictory... The need to impress or demonstrate that I don't need them to like me",
+      "frequency": "occasional",
+      "intensity": "mild",
+      "source_section": "Cultivate Wisdom"
+    },
+    {
+      "name": "Pleasure (agreement validation, shared spite)",
+      "evidence": "Pause to see if I am just taking pleasure in being agreed with or pleasure in shared spitefulness/distain",
+      "frequency": "occasional",
+      "intensity": "mild",
+      "source_section": "Cultivate Wisdom"
+    },
+    {
+      "name": "Fear (missing out, FOMO, algorithm-driven anxiety)",
+      "evidence": "Does your use of social media contribute to fear of missing out?",
+      "frequency": "occasional",
+      "intensity": "mild",
+      "source_section": "Be Content"
+    },
+    {
+      "name": "Distress (chronic physical limitation - back pain)",
+      "evidence": "my bad back and that it cost me freedom, sports, masculinity, youth",
+      "frequency": "pervasive",
+      "intensity": "strong",
+      "source_section": "Be Content"
+    },
+    {
+      "name": "Envy and coveting (others' ease and advantages)",
+      "evidence": "Coveting is imagining the pleasure they must feel from what they have, the attention they must get, the opportunities, the adoration",
+      "frequency": "occasional",
+      "intensity": "moderate",
+      "source_section": "Be Content"
+    },
+    {
+      "name": "Appetite (fantasy-seeking about cars, wealth, status)",
+      "evidence": "My desire to 'impress' has come from cars and rockstar fantasy... Both are an fantasy motivation",
+      "frequency": "occasional",
+      "intensity": "moderate",
+      "source_section": "Be Content"
+    },
+    {
+      "name": "Distress (relational alienation - loved ones' resentment)",
+      "evidence": "Difficult to accept that a loved one may not like me anymore, resents that I am not there for them",
+      "frequency": "occasional",
+      "intensity": "strong",
+      "source_section": "Be Content"
+    }
+  ],
+  "virtue_profile": [
+    {
+      "courage": {
+        "strength": "Self-examination willingness",
+        "weakness": "Fear prevents action (work, music)"
+      },
+      "wisdom": {
+        "strength": "Reflection capacity",
+        "weakness": "Knowledge disconnected from application"
+      },
+      "justice": {
+        "strength": "Family fairness concern",
+        "weakness": "Overwhelmed by role adequacy"
+      },
+      "temperance": {
+        "strength": "Dietary restraint attempts",
+        "weakness": "Physical discipline struggles"
+      },
+      "source_section": "Live in the Present"
+    },
+    {
+      "courage": {
+        "strength": "Recognizing courage in obstacles",
+        "weakness": "Avoidance behaviors rooted in fear"
+      },
+      "wisdom": {
+        "strength": "Reframe difficulties as learning",
+        "weakness": "Wisdom doesn't prevent catastrophic thinking"
+      },
+      "justice": {
+        "strength": "Attempts fairness recognition",
+        "weakness": "Pre-judges people; unnecessarily defensive"
+      },
+      "temperance": {
+        "strength": "Diet rule consistency",
+        "weakness": "Procrastination chores signals will failure"
+      },
+      "source_section": "Embrace Difficulty"
+    },
+    {
+      "courage": {
+        "strength": "Face hard self-truths",
+        "weakness": "Hesitation and anti-social avoidance"
+      },
+      "wisdom": {
+        "strength": "Clear sight of needed changes",
+        "weakness": "Knowledge doesn't prevent poor decisions"
+      },
+      "justice": {
+        "strength": "Recognize unfairness",
+        "weakness": "Carries unexamined bias"
+      },
+      "temperance": {
+        "strength": "Health discipline attempts",
+        "weakness": "Procrastination significant"
+      },
+      "source_section": "Practice Acceptance"
+    },
+    {
+      "courage": {
+        "strength": "Seeks discomfort; say-yes-to-everything",
+        "weakness": "Art blocked by feedback need; courage untested"
+      },
+      "wisdom": {
+        "strength": "Practicing critical thought; studying Stoicism",
+        "weakness": "Intellectual, not integrated"
+      },
+      "justice": {
+        "strength": "Recognizing when could be nicer",
+        "weakness": "Hasn't walked walk"
+      },
+      "temperance": {
+        "strength": "Setting rules; attempting regimes",
+        "weakness": "Not yet embedded daily"
+      },
+      "source_section": "A Virtuous Life"
+    },
+    {
+      "courage": {
+        "assessment": "moderate strength with growing commitment",
+        "evidence": "Instead of relying on humour to diffuse a situation, have the courage to sit in the awkwardness and listen... Treat it as a challenge = Courage",
+        "weakness_noted": "Uses humor as shield, avoids discomfort initially, but shows commitment to change"
+      },
+      "justice": {
+        "assessment": "developing, intellectually strong",
+        "evidence": "Do the right thing = Justice. If I am truly seeking justice then it is whenever the truth is not justice/fairness for myself so if the truth hurts it is a success",
+        "weakness_noted": "Struggles to prioritize justice over reputation protection"
+      },
+      "temperance": {
+        "assessment": "weak to moderate, requires discipline",
+        "evidence": "No gratification leads to seeking gratification and indulging in excess... Ability to restrain from: being funny, jumping in, smartarse comeback",
+        "weakness_noted": "Recognizes need to restrain but identifies this as ongoing struggle; gambling/lotto tickets identified as weakness"
+      },
+      "wisdom": {
+        "assessment": "strong in reflection, moderate in application",
+        "evidence": "Into something new look it up = Wisdom... Develop more curiosity... If everything becomes a learning opportunity that creates wisdom & more opportunity",
+        "weakness_noted": "Wisdom knowledge not fully integrated into automatic behavior; requires conscious effort"
+      },
+      "source_section": "Choose Serenity"
+    },
+    {
+      "courage": {
+        "assessment": "moderate strength, showing growth",
+        "evidence": "Courage — To take action and pivot to a new way of life that is at odds to previous ethos... Challenge myself to something now",
+        "weakness_noted": "Intellectual courage (admitting ignorance) still requires effort; physical courage evident but less emphasized"
+      },
+      "justice": {
+        "assessment": "developing, intellectually aligned",
+        "evidence": "Note the reporters bias when learning their opinion. Note and check my own bias... Imagine being in their shoes even if I disagree",
+        "weakness_noted": "Fair-mindedness toward others' views present; fairness to self in blame-assignment still excessive"
+      },
+      "temperance": {
+        "assessment": "moderate, with clear targets",
+        "evidence": "Let go of the need to be intellectually funny. Let go of unnecessary terminology... Let go of questions I already know the answer to",
+        "weakness_noted": "Over-planning and talking about goals drains motivation; struggles with restraint of speech in discourse"
+      },
+      "wisdom": {
+        "assessment": "strong in theory, moderate in practice",
+        "evidence": "You can never cross the same river twice... Every new moment is a chance to use your experience as starting point... Focus on data/facts not interpretation",
+        "weakness_noted": "Wisdom-seeking strong; integration into automatic judgment still developing; bias-checking requires conscious effort"
+      },
+      "source_section": "Cultivate Wisdom"
+    },
+    {
+      "courage": {
+        "assessment": "moderate, tested by limitation",
+        "evidence": "Contentment with my back will come once i have done all i can to improve the situation. Lose weight, exercise, become a man I have never been.",
+        "weakness_noted": "Courageous action to address limitation present; but vulnerability (non-traditional masculinity) still frames as challenge rather than acceptance"
+      },
+      "justice": {
+        "assessment": "moderate, focused on self-fairness",
+        "evidence": "Act not on the perceptions but on the true/false that is the root cause contributing to their perception",
+        "weakness_noted": "Internal justice present; fairness to self in releasing impossible standards (perfect health, perfect love) still incomplete"
+      },
+      "temperance": {
+        "assessment": "strong in theory, developing in practice",
+        "evidence": "If you are fully appreciating the pleasure with all your attention in the moment then you can savour it quickly without over indulging. Find that sweet spot...",
+        "weakness_noted": "Principle articulated clearly; embodied practice (actually stopping at the sweet spot) requires ongoing work"
+      },
+      "wisdom": {
+        "assessment": "strong in analysis, moderate in life-integration",
+        "evidence": "Breaking down the virtues they employed to achieve what they have is the real gift of their success... Pivot envy to curiosity",
+        "weakness_noted": "Wisdom to reframe envy as curriculum present; automatic practice of this still developing"
+      },
+      "source_section": "Be Content"
+    }
+  ],
+  "causal_tendencies": [
+    {
+      "primary_breakdown": "hasty_assent_and_unexamined_impulse",
+      "description": "Clinton moves from impression to regret-laden reflection. Reasoning breaks down at: (1) hasty assent to negative interpretations of social situations, and (2) failure to examine impulses before action. Gap evident in awareness that measured action exists but inability to execute in moment.",
+      "source_section": "Live in the Present"
+    },
+    {
+      "primary_breakdown": "unexamined_impulse_to_catastrophic_framing",
+      "description": "Clinton moves from impression to exaggerated threat appraisal without sufficient intermediate examination. From single work situation creates cascade: failure, scrutiny, reputation damage, roadblocks.",
+      "source_section": "Embrace Difficulty"
+    },
+    {
+      "primary_breakdown": "impulse_to_action_without_moment_awareness",
+      "description": "Pattern: emotional reaction occurs → responds/acts from reaction → later realizes counterproductive. Lacks moment-to-moment awareness despite articulating what detachment would do.",
+      "source_section": "Practice Acceptance"
+    },
+    {
+      "primary_breakdown": "intention_action_gap_across_stages",
+      "description": "Correctly identifies virtuous action but struggles converting impulse to habitual action. Core issue: 'Would need to reverse years of habit that avoided/ignored/dishonoured myself.' Aspiration listed but embodied practice absent.",
+      "source_section": "A Virtuous Life"
+    },
+    {
+      "analysis": "Clinton's causal breakdown occurs primarily at hasty assent and unexamined impulse. He identifies the impression (lack of reflection, external control) correctly but struggles with assenting to virtuous action rather than distraction-seeking. The sequence shows: (1) correct impression recognition (e.g., 'I am not flowing with fate'), (2) weak assent (choosing gratification over virtue to avoid the discomfort), (3) impulse to indulge, (4) action of escapism. Secondary breakdown: failure to consistently maintain the dichotomy of control. He intellectually understands what's within control but emotionally over-invests in externals (reputation, others' opinions).",
+      "specific_breakdowns": [
+        "Assent to avoidance when facing discomfort (indulgence as escape)",
+        "Over-weighting external outcomes despite intellectual understanding",
+        "Catastrophizing before impulse-checking (future-projection disrupts present action)"
+      ],
+      "source_section": "Choose Serenity"
+    },
+    {
+      "analysis": "Clinton's reasoning breaks down primarily at the assent stage and secondarily at unexamined impulse formation. He has strong impression-detection (recognizes when he's being intellectually defensive, notices bias patterns) but weak assent-discipline (knows he should admit ignorance but assents to ego-protection instead). The causal sequence shows: (1) correct impression of moment's requirement ('listen genuinely'), (2) hasty assent to ego-save behavior ('prove I know this'), (3) impulse to dominate discourse, (4) actions that undermine true learning. Secondary pattern: overcorrection. When he catches himself in error, he sometimes over-assigns blame rather than proportional responsibility-taking.",
+      "specific_breakdowns": [
+        "Assent to ego-protection over truth-seeking in discourse",
+        "Knowing the 'garbage in, garbage out' principle but still emotionally reactive to media feeds",
+        "Over-blame of self as counterweight to avoidance of blame-shifting"
+      ],
+      "source_section": "Cultivate Wisdom"
+    },
+    {
+      "analysis": "Clinton's causal breakdown in contentment operates at multiple stages. Primary failure: assent to fantasy-thinking (coveting others' advantages rather than examining root-cause effort). Secondary failure: unexamined impulses toward consumption/status-seeking (cars, performance goals) as proxy for internal validation. Tertiary failure: partial action on virtuous insight (understands contentment principle but struggles to release specific fantasies). The pattern shows: (1) correct impressions ('social media drives FOMO', 'envy is fantasy-imagination'), (2) intellectual assent to reframe ('pivot to curiosity about their effort'), (3) weaker assent to release the emotional investment ('it would be nice to have...'), (4) minimal action (awareness without habit-breaking). Key blockage: difficulty tolerating the physical limitation (back) symbolizes larger struggle with accepting constraints on his identity and possibilities.",
+      "specific_breakdowns": [
+        "Assent to fantasy-imagination despite knowing it's energy-theft from present",
+        "Partial reframe of envy (intellectual pivot to curiosity) without full emotional release",
+        "Continued attachment to status-symbols (cars) reframed as 'resourcefulness' rather than truly released"
+      ],
+      "source_section": "Be Content"
+    }
+  ],
+  "value_hierarchy": [
+    {
+      "explicit_top_values": [
+        "Family security",
+        "Family connection",
+        "Wisdom",
+        "Humor",
+        "Creative expression"
+      ],
+      "primary_conflict": "Family security vs creative expression for time/energy allocation",
+      "hierarchy_order": "Practical provision > Relational presence > Intellectual growth > Creative expression > Humor",
+      "source_section": "Live in the Present"
+    },
+    {
+      "explicit_top_values": [
+        "Competence",
+        "Reputation/respect",
+        "Control",
+        "Validation",
+        "Health"
+      ],
+      "primary_conflict": "Reputation valuation + disrespect sensitivity = shame vulnerability",
+      "pattern": "Values health but avoids activities; avoids inviting people; avoids sharing opinions",
+      "source_section": "Embrace Difficulty"
+    },
+    {
+      "explicit_top_values": [
+        "Health",
+        "Family harmony",
+        "Competence/doing right",
+        "Self-respect",
+        "Fairness"
+      ],
+      "primary_conflict": "Perfectionism valued over harmony; control valued over acceptance",
+      "source_section": "Practice Acceptance"
+    },
+    {
+      "explicit_top_values": [
+        "Eudaimonia (flourishing)",
+        "Virtue",
+        "Growth",
+        "Health",
+        "Freedom from burden"
+      ],
+      "primary_gap": "Eudaimonia valued theoretically but hasn't tested resilience. Virtue valued intellectually but self-image as inadequate blocks action.",
+      "hierarchy_pattern": "Eudaimonia (ideal) > Virtue (intellectual) >> Action-based integrity (major gap)",
+      "source_section": "A Virtuous Life"
+    },
+    {
+      "most_valued": [
+        "Virtue alignment (justice, courage, temperance, wisdom cited explicitly)",
+        "Internal peace and serenity",
+        "Authenticity and integrity in action",
+        "Freedom from external expectation dependency"
+      ],
+      "classification_gaps": [
+        "Love/relational connection underexplored vs. duty emphasis",
+        "Achievement/competence values present but subordinated to virtue",
+        "Creativity/expression mentioned only in 'rejecting rockstar fantasy' (suppressed rather than integrated)"
+      ],
+      "evidence": "Inner ethos which I haven't followed 100% until now is aligned with Stoic values. Do the right thing = Justice. Do it / Do it properly = Temperance. Into something new look it up = Wisdom. Treat it as a challenge = Courage.",
+      "source_section": "Choose Serenity"
+    },
+    {
+      "most_valued": [
+        "Truth above all other outcomes (data/facts over interpretation)",
+        "Genuine learning and wisdom, not appearance of wisdom",
+        "Intellectual humility as prerequisite for development",
+        "Integrity in discourse (saying what you believe vs. what wins)"
+      ],
+      "classification_gaps": [
+        "Creative intelligence values present but framed only negatively (stop being intellectually funny)",
+        "Relational wisdom (understanding others' reasoning) underdeveloped vs. technical epistemology",
+        "Practical wisdom (acting on truth) less developed than theoretical wisdom (knowing truth)"
+      ],
+      "evidence": "Sometimes we can get caught up in projecting the appearance of wisdom rather than focussing on true wisdom which doesn't need to be acknowledged.",
+      "source_section": "Cultivate Wisdom"
+    },
+    {
+      "most_valued": [
+        "Contentment through presence and mindfulness (not acquisition)",
+        "Internal motivation over external validation and impression",
+        "Freedom from others' expectations (paradoxically pursued but not yet achieved)",
+        "Nature as primary source of truth vs. digital/social sources"
+      ],
+      "classification_gaps": [
+        "Physical health and embodied experience valued but constrained by chronic limitation; identity threat from back pain",
+        "Relational connection (love, respect, validation) deeply craved but intellectually downplayed as 'externals'",
+        "Creative expression (rockstar fantasy, cars as resourcefulness) reframed away rather than integrated",
+        "Masculine identity threatened by physical limitation; vulnerability not yet integrated"
+      ],
+      "evidence": "What do you need to be happy and content? The right mindset, focused on virtues: Courage, Justice, Temperance, Wisdom",
+      "source_section": "Be Content"
+    }
+  ],
+  "oikeiosis": [
+    {
+      "self": {
+        "level": "moderate",
+        "note": "Concern often framed as failure"
+      },
+      "family": {
+        "level": "strong",
+        "note": "Prioritized, anxious about adequacy"
+      },
+      "community": {
+        "level": "weak"
+      },
+      "humanity": {
+        "level": "minimal"
+      },
+      "nature": {
+        "level": "emergent",
+        "note": "Meditative/passive engagement"
+      },
+      "source_section": "Live in the Present"
+    },
+    {
+      "self": {
+        "level": "moderate-strong",
+        "note": "Deep examination; traces fear patterns"
+      },
+      "family": {
+        "level": "moderate",
+        "note": "Fear prevents connection"
+      },
+      "community": {
+        "level": "weak",
+        "note": "Avoidance extends to community"
+      },
+      "source_section": "Embrace Difficulty"
+    },
+    {
+      "self": {
+        "level": "strong",
+        "note": "Extensive examination; honest about gaps"
+      },
+      "family": {
+        "level": "moderate-strong",
+        "note": "Control behaviors may undermine connection"
+      },
+      "source_section": "Practice Acceptance"
+    },
+    {
+      "self": {
+        "level": "strong-fragile",
+        "note": "Shame-based self-image undermines virtue development"
+      },
+      "family": {
+        "level": "strong-intention",
+        "note": "Wife, kids, parents named; hoarding suggests action-intention gap"
+      },
+      "community": {
+        "level": "moderate-intention",
+        "note": "Boss, team named; pattern unclear"
+      },
+      "nature": {
+        "level": "emerging-intention",
+        "note": "Intentions stated; embodiment unclear"
+      },
+      "source_section": "A Virtuous Life"
+    },
+    {
+      "self": {
+        "development": "strong, perhaps over-focused",
+        "evidence": "Building of my character is for my own internal benefit. Demonstrating to myself...",
+        "note": "Heavy introspective practice but some risk of self-absorption"
+      },
+      "family": {
+        "development": "moderate concern, guilt present",
+        "evidence": "Afraid that my actions or lack of them will bring harm to people... afraid workmates will think I have given up on them",
+        "note": "Care present but more as obligation/fear than organic connection"
+      },
+      "community": {
+        "development": "developing",
+        "evidence": "I feel responsible to the environment to the skin club, to the people of Brisbane for my job",
+        "note": "Emerging awareness but still nascent"
+      },
+      "humanity": {
+        "development": "weak",
+        "evidence": "Not explicitly addressed in this section; values focus inward and immediate circles",
+        "note": "Universal human concern not yet articulated"
+      },
+      "nature": {
+        "development": "moderate to strong",
+        "evidence": "When nature is an alternative use it as your device... By being in the moment giving complete attention to the person & nature",
+        "note": "Nature as source of truth and grounding; valued as corrective to digital life"
+      },
+      "source_section": "Choose Serenity"
+    },
+    {
+      "self": {
+        "development": "strong, self-examining",
+        "evidence": "Note and check my own bias when taking in the info. Check my mood before receiving message.",
+        "note": "Sophisticated self-awareness; risk of self-focus in blame-assignment"
+      },
+      "family": {
+        "development": "significant guilt and responsibility felt",
+        "evidence": "Blamed myself for bringing dishonour to the family name & being lazy",
+        "note": "Family reputation matters deeply; suggests collectivist values"
+      },
+      "community": {
+        "development": "emerging responsibility",
+        "evidence": "Seek for the service to others/community by observing the moment",
+        "note": "Conscious intention to develop; not yet automatic"
+      },
+      "humanity": {
+        "development": "moderate via epistemology",
+        "evidence": "Get info from a variety of sources, media types, tribes. Imagine being in their shoes even if I disagree",
+        "note": "Empathetic epistemology; universal values via understanding, not sentiment"
+      },
+      "nature": {
+        "development": "present as metaphor",
+        "evidence": "You can never cross the same river twice [accepting flux and contingency]",
+        "note": "Nature used as teaching principle; less personal connection than in Serenity section"
+      },
+      "source_section": "Cultivate Wisdom"
+    },
+    {
+      "self": {
+        "development": "strong, identity-threatened",
+        "evidence": "Examining internal motivation vs. fantasy motivation; distinguishing true needs from culturally-imposed desires",
+        "note": "Intense self-focus; back pain as ongoing identity crisis (masculinity, freedom, youth lost)"
+      },
+      "family": {
+        "development": "guilt-driven, somewhat avoidant",
+        "evidence": "Difficult to accept that a loved one may not like me anymore, resents that I am not there... I can block this out with belief that they one day will not resent me",
+        "note": "Wishful thinking about relational repair; not yet engaged in active reconciliation"
+      },
+      "community": {
+        "development": "minimal explicit concern",
+        "evidence": "Not prominent in this section; focus remains on personal/familial sphere",
+        "note": "Concentric circles not yet extended outward significantly"
+      },
+      "humanity": {
+        "development": "weak, except through nature",
+        "evidence": "Nature as ultimate source of truth; humans as sources of fantasy and distortion",
+        "note": "Somewhat misanthropic orientation; preference for direct nature experience over human connection"
+      },
+      "nature": {
+        "assessment": "strong and primary",
+        "evidence": "When nature is an alternative use it as your device and 'eat' the raw whole food of information directly from the only truthful source... A tree is constant swaying...",
+        "note": "Nature as counterweight to digital culture; highly valued as grounding and authentic"
+      },
+      "source_section": "Be Content"
+    }
+  ],
+  "proximity_estimate": {
+    "grade": "Prokoptōn (Progressor)",
+    "stage": "Early-to-Mid",
+    "senecan_grade": "B-minus",
+    "evidence": "Strong intellectual grasp of Stoic principles, genuine self-examination, emerging but inconsistent practice, honest about gaps between knowledge and disposition. Shows the hallmarks of a genuine progressor: honest self-assessment, willingness to confront uncomfortable truths, real behavioral experiments.",
+    "primary_tension": "Intellectual understanding far outpaces embodied practice, especially under social/emotional pressure",
+    "strongest_virtue": "Justice (fairness-seeking is core identity)",
+    "weakest_domain": "Courage in real-time application (vs theoretical)",
+    "dominant_passions": [
+      "Fear (reputation, judgment, inadequacy)",
+      "Appetite (validation, control, perfectionism)",
+      "Distress (shame spirals from perceived failure)"
+    ]
+  }
+}

@@ -33,6 +33,9 @@ research/originals/greek/
 research/originals/latin/
 research/originals/manuscripts/
 
+# Private journal data — founder's personal practice, NEVER commit
+journal/private/
+
 # IDE
 .vscode/
 .idea/
