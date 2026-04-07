@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SageReasoning — Outputs &amp; Pages Guide</title>
+<style>
+:root {
+  --bg: #0f1117;
+  --surface: #171b26;
+  --card: #1d2233;
+  --border: #282e44;
+  --gold: #c9a24d;
+  --accent: #6b8aef;
+  --green: #4daa6a;
+  --orange: #d9903a;
+  --red: #c95050;
+  --purple: #9b72cf;
+  --teal: #4aaa9e;
+  --text: #d0d4e2;
+  --text-bright: #eef0f8;
+  --text-dim: #6a7192;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px; max-width: 960px; margin: 0 auto; line-height: 1.7; }
+
+h1 { color: var(--gold); font-size: 28px; margin-bottom: 8px; }
+.subtitle { color: var(--text-dim); font-size: 14px; margin-bottom: 32px; }
+h2 { color: var(--text-bright); font-size: 20px; margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+h3 { color: var(--gold); font-size: 15px; margin: 20px 0 8px; }
+
+.toc { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 32px; }
+.toc-title { color: var(--gold); font-size: 14px; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.toc a { display: block; color: var(--accent); text-decoration: none; padding: 4px 0; font-size: 14px; }
+.toc a:hover { color: var(--gold); }
+.toc .toc-sub { padding-left: 20px; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+.card-title { color: var(--text-bright); font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+.card-desc { color: var(--text-dim); font-size: 13px; margin-bottom: 8px; }
+.card-link { display: inline-block; color: var(--accent); text-decoration: none; font-size: 13px; padding: 4px 12px; border: 1px solid var(--accent); border-radius: 6px; }
+.card-link:hover { background: rgba(107,138,239,.1); }
+.card-meta { color: var(--text-dim); font-size: 11px; margin-top: 6px; }
+
+.stat-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; flex: 1; min-width: 140px; }
+.stat-val { color: var(--gold); font-size: 24px; font-weight: 700; }
+.stat-label { color: var(--text-dim); font-size: 11px; margin-top: 2px; }
+
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+.badge-green { background: rgba(77,170,106,.15); color: var(--green); border: 1px solid rgba(77,170,106,.25); }
+.badge-orange { background: rgba(217,144,58,.15); color: var(--orange); border: 1px solid rgba(217,144,58,.25); }
+.badge-blue { background: rgba(107,138,239,.15); color: var(--accent); border: 1px solid rgba(107,138,239,.25); }
+.badge-gold { background: rgba(201,162,77,.15); color: var(--gold); border: 1px solid rgba(201,162,77,.25); }
+
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+th { text-align: left; padding: 8px 12px; background: var(--surface); color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); }
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+td a { color: var(--accent); text-decoration: none; }
+td a:hover { color: var(--gold); }
+
+.note { background: rgba(201,162,77,.06); border: 1px solid rgba(201,162,77,.2); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--gold); margin: 16px 0; }
+</style>
+</head>
+<body>
+
+<h1>SageReasoning — Outputs &amp; Pages Guide</h1>
+<div class="subtitle">Everything produced by sage-interpret and all interactive pages — what they are, what they show, and where to find them. Generated 7 April 2026.</div>
+
+<!-- SUMMARY STATS -->
+<div class="stat-row">
+  <div class="stat"><div class="stat-val">12</div><div class="stat-label">Journal sections processed</div></div>
+  <div class="stat"><div class="stat-val">119</div><div class="stat-label">Entries extracted</div></div>
+  <div class="stat"><div class="stat-val">13,834</div><div class="stat-label">Words analysed</div></div>
+  <div class="stat"><div class="stat-val">46</div><div class="stat-label">Ledger entries</div></div>
+  <div class="stat"><div class="stat-val">27</div><div class="stat-label">Import enrichments</div></div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <a href="#hub-pages">1. Interactive Hub Pages</a>
+  <a href="#interpretation-outputs" class="toc-sub">2. Interpretation Outputs</a>
+  <a href="#aggregate-files" class="toc-sub">3. Aggregate Data Files</a>
+  <a href="#transcription-files" class="toc-sub">4. Transcription Files (12)</a>
+  <a href="#extraction-files" class="toc-sub">5. Extraction Files (12)</a>
+  <a href="#reference-pages">6. Reference &amp; Architecture Pages</a>
+  <a href="#key-findings">7. Key Findings Summary</a>
+</div>
+
+<!-- 1. HUB PAGES -->
+<h2 id="hub-pages">1. Interactive Hub Pages</h2>
+<p style="color:var(--text-dim);font-size:13px;margin-bottom:16px">These are the live hub pages deployed on <a href="https://www.sagereasoning.com" style="color:var(--gold)">sagereasoning.com</a>. All three display real interpretation data from your October–December 2025 journal.</p>
+
+<div class="card">
+  <div class="card-title">Private Mentor <span class="badge badge-green">Live</span></div>
+  <div class="card-desc">Your personal mentor interface at <strong>/private-mentor</strong>. Shows real passion map, virtue profile (Deliberate / proficiens medius), contradictions, trigger map, journal layers, developmental timeline, and conversation space. All data sourced from your journal.</div>
+  <div class="card-meta">Sections: Conversation, Morning Check-In, Evening Reflection, My Profile, Journal Layers, Contradictions, Trigger Map, Timeline, Pattern Mirror, Settings</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Mentor Hub <span class="badge badge-green">Live</span></div>
+  <div class="card-desc">Multi-agent mentor management at <strong>/mentor-hub</strong>. Shows founder proximity (Deliberate), agent development cards, proximity journey chart, development milestones, session modes (Observer/Companion/Consultant), and contact management.</div>
+  <div class="card-meta">Panels: Contacts &amp; Navigation, Chat, Development Panel (proximity, agent cards, journey chart, milestones)</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Sage Ops Hub <span class="badge badge-green">Live</span></div>
+  <div class="card-desc">Operational intelligence dashboard at <strong>/ops-hub</strong>. Stoic Check references your real primary passion (philodoxia) and your own maxim about praise/criticism. Covers morning briefing, alerts, competitive monitoring, and decision scoring.</div>
+  <div class="card-meta">Sections: Dashboard, Morning Briefing, Alerts, Weekly Review, Pipeline Status, Competitive Intel, Layer 0 Sync, Settings</div>
+</div>
+
+<!-- 2. INTERPRETATION OUTPUTS -->
+<h2 id="interpretation-outputs">2. Interpretation Summary</h2>
+
+<div class="card">
+  <div class="card-title">INTERPRETATION_SUMMARY.md <span class="badge badge-gold">Human-readable</span></div>
+  <div class="card-desc">The complete human-readable summary of the sage-interpret run. Contains proximity estimate, passion map with frequencies and false judgements, causal tendencies, virtue profile, oikeiosis map, mentor ledger summary, import enrichments (maxims, anchors, growth evidence, unfinished threads), and value hierarchy.</div>
+</div>
+
+<!-- 3. AGGREGATE DATA FILES -->
+<h2 id="aggregate-files">3. Aggregate Data Files</h2>
+
+<table>
+  <tr><th>File</th><th>What It Contains</th><th>Size</th></tr>
+  <tr>
+    <td><strong>mentor-profile.json</strong></td>
+    <td>Aggregate MentorProfile — passion map (13 passions with frequencies, false judgements, sections present), virtue profile (4 domains with strengths), causal tendencies (primary: synkatathesis), value hierarchy, oikeiosis map (5 stages), proximity estimate (Deliberate / proficiens medius), preferred indifferents</td>
+    <td>13.6 KB</td>
+  </tr>
+  <tr>
+    <td><strong>mentor-ledger.json</strong></td>
+    <td>46 ledger entries: 5 aims, 8 commitments, 13 realisations, 5 questions, 7 tensions, 8 intentions. Each has engagement intensity, sage-path weight, developmental priority, connected passions/virtues, and tags.</td>
+    <td>32.5 KB</td>
+  </tr>
+  <tr>
+    <td><strong>import-enrichment.json</strong></td>
+    <td>One-off import data: 10 self-authored maxims (with Stoic concept mappings), 7 emotional anchors (with mentor use instructions), 5 growth evidence pairs (early vs late), 5 unfinished threads (with return-when triggers).</td>
+    <td>15.9 KB</td>
+  </tr>
+</table>
+
+<!-- 4. TRANSCRIPTION FILES -->
+<h2 id="transcription-files">4. Transcription Files (12)</h2>
+<p style="color:var(--text-dim);font-size:13px;margin-bottom:12px">Clean JSON transcriptions of each journal section. Each contains structured prompt/response pairs extracted from the RTF originals.</p>
+
+<table>
+  <tr><th>#</th><th>Section</th><th>Entries</th><th>File</th></tr>
+  <tr><td>1</td><td>Live in the Present</td><td>10</td><td>transcribed/01-live-in-the-present.json</td></tr>
+  <tr><td>2</td><td>Embrace Difficulty</td><td>10</td><td>transcribed/02-embrace-difficulty.json</td></tr>
+  <tr><td>3</td><td>Practice Acceptance</td><td>9</td><td>transcribed/03-practice-acceptance.json</td></tr>
+  <tr><td>4</td><td>A Virtuous Life</td><td>10</td><td>transcribed/04-a-virtuous-life.json</td></tr>
+  <tr><td>5</td><td>Master Your Thoughts</td><td>13</td><td>transcribed/05-master-your-thoughts.json</td></tr>
+  <tr><td>6</td><td>Master Your Feelings</td><td>10</td><td>transcribed/06-master-your-feelings.json</td></tr>
+  <tr><td>7</td><td>Live in Gratitude</td><td>9</td><td>transcribed/07-live-in-gratitude.json</td></tr>
+  <tr><td>8</td><td>Accept Your Fate</td><td>9</td><td>transcribed/08-accept-your-fate.json</td></tr>
+  <tr><td>9</td><td>Choose Serenity</td><td>10</td><td>transcribed/09-choose-serenity.json</td></tr>
+  <tr><td>10</td><td>Cultivate Wisdom</td><td>10</td><td>transcribed/10-cultivate-wisdom.json</td></tr>
+  <tr><td>11</td><td>Be Content</td><td>10</td><td>transcribed/11-be-content.json</td></tr>
+  <tr><td>12</td><td>Be Responsible to Others</td><td>9</td><td>transcribed/12-be-responsible-to-others.json</td></tr>
+</table>
+
+<!-- 5. EXTRACTION FILES -->
+<h2 id="extraction-files">5. Extraction Files (12)</h2>
+<p style="color:var(--text-dim);font-size:13px;margin-bottom:12px">Layer 1 baseline extractions for each section. Each contains passions detected, causal observations, value observations, virtue observations, preferred indifferents, key passages, and proximity estimate.</p>
+
+<table>
+  <tr><th>#</th><th>Section</th><th>File</th></tr>
+  <tr><td>1</td><td>Live in the Present</td><td>extractions/01-live-in-the-present.json</td></tr>
+  <tr><td>2</td><td>Embrace Difficulty</td><td>extractions/02-embrace-difficulty.json</td></tr>
+  <tr><td>3</td><td>Practice Acceptance</td><td>extractions/03-practice-acceptance.json</td></tr>
+  <tr><td>4</td><td>A Virtuous Life</td><td>extractions/04-a-virtuous-life.json</td></tr>
+  <tr><td>5</td><td>Master Your Thoughts</td><td>extractions/05-master-your-thoughts.json</td></tr>
+  <tr><td>6</td><td>Master Your Feelings</td><td>extractions/06-master-your-feelings.json</td></tr>
+  <tr><td>7</td><td>Live in Gratitude</td><td>extractions/07-live-in-gratitude.json</td></tr>
+  <tr><td>8</td><td>Accept Your Fate</td><td>extractions/08-accept-your-fate.json</td></tr>
+  <tr><td>9</td><td>Choose Serenity</td><td>extractions/09-choose-serenity.json</td></tr>
+  <tr><td>10</td><td>Cultivate Wisdom</td><td>extractions/10-cultivate-wisdom.json</td></tr>
+  <tr><td>11</td><td>Be Content</td><td>extractions/11-be-content.json</td></tr>
+  <tr><td>12</td><td>Be Responsible to Others</td><td>extractions/12-be-responsible-to-others.json</td></tr>
+</table>
+
+<!-- 6. REFERENCE PAGES -->
+<h2 id="reference-pages">6. Reference &amp; Architecture Pages</h2>
+
+<div class="card">
+  <div class="card-title">Ecosystem Map <span class="badge badge-blue">Reference</span></div>
+  <div class="card-desc">Interactive system map showing how all SageReasoning components connect — Stoic Brain, API endpoints, website tools, mentor pipeline, agent trust layer, and operational intelligence.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Architecture Map <span class="badge badge-blue">Reference</span></div>
+  <div class="card-desc">Technical architecture reference showing database schemas, API routes, LLM pipeline, and component dependencies.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Capability Inventory <span class="badge badge-blue">Reference</span></div>
+  <div class="card-desc">Catalogue of every component with its true status — what's built, what's designed, what's planned. Essential reference for the P0 hold point assessment.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Setup Plan <span class="badge badge-blue">Reference</span></div>
+  <div class="card-desc">Initial project setup and configuration plan.</div>
+</div>
+
+<!-- 7. KEY FINDINGS -->
+<h2 id="key-findings">7. Key Findings Summary</h2>
+
+<div class="note">
+  These findings come from interpreting 119 journal entries across 12 sections of Clinton's handwritten Stoic journal (October–December 2025).
+</div>
+
+<h3>Proximity Estimate</h3>
+<div class="card">
+  <div class="card-title">Deliberate <span class="badge badge-gold">Proficiens Medius</span></div>
+  <div class="card-desc">Between habitual and deliberate, trending firmly toward deliberate by journal's end. Can articulate Stoic principles accurately, identifies own passions and false judgements, and shows genuine developmental change across the 55+ day arc. The gap is between intellectual understanding and dispositional stability.</div>
+</div>
+
+<h3>Primary Passion</h3>
+<div class="card">
+  <div class="card-title">Philodoxia (love of honour) — 9 of 12 sections</div>
+  <div class="card-desc">The false judgement that external recognition is necessary for self-worth is the single most persistent passion across the entire journal. Root: epithumia (craving). Core false judgement appears in every form — work reputation, family honour, creative recognition, social belonging.</div>
+</div>
+
+<h3>Primary Causal Breakdown</h3>
+<div class="card">
+  <div class="card-title">Synkatathesis (Assent)</div>
+  <div class="card-desc">The most frequent failure point is giving assent to false impressions — particularly that reputation, respect, and acknowledgement constitute genuine goods. Secondary: horme (impulse) — anger bypasses deliberation. Tertiary: phantasia (impression) — catastrophising imagination.</div>
+</div>
+
+<h3>Strongest Virtue</h3>
+<div class="card">
+  <div class="card-title">Phronesis (Wisdom) — Strong</div>
+  <div class="card-desc">Best philosophical articulation across the journal. Self-authored maxim: "There is no good or bad in nature just true or false." Pass/fail rules for speech. Mean value concept. Comprehensive bias checklist.</div>
+</div>
+
+<h3>Weakest Virtue</h3>
+<div class="card">
+  <div class="card-title">Andreia (Courage) — Developing</div>
+  <div class="card-desc">The gap between knowing the right action and taking it. Over-planning as avoidance. Fear of creative failure. Social withdrawal patterns. But: clear trend of improvement — reaching out to family, shouting replaced with encouragement.</div>
+</div>
+
+<h3>Self-Authored Maxim (Highest Engagement)</h3>
+<div class="card">
+  <div class="card-title" style="color:var(--gold);font-style:italic">"There is no good or bad in nature, just true or false — everything else is just my or their perspective of things which cannot be trusted."</div>
+  <div class="card-desc">Engagement intensity: 0.95 — the highest across all 119 entries. Maps to Stoic concept: axioma (value proposition). Source: Be Content, Entry 6.</div>
+</div>
+
+<div style="margin-top:40px;padding-top:20px;border-top:1px solid var(--border);color:var(--text-dim);font-size:11px">
+  SageReasoning Outputs Guide — Generated 7 April 2026 from sage-interpret run on Clinton's Stoic Journal (October–December 2025).
+</div>
+
+</body>
+</html>

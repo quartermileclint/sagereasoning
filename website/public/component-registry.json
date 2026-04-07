@@ -1,0 +1,4138 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-04-07",
+  "totalComponents": 150,
+  "statusSummary": {
+    "wired": 121,
+    "designed": 5,
+    "verified": 22,
+    "live": 1,
+    "scoped": 1
+  },
+  "components": [
+    {
+      "id": "agent-private-mentor",
+      "name": "Private Mentor (Intimate Data Boundary)",
+      "type": "agent",
+      "subtype": [
+        "planning"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/",
+      "desc": "Security boundary for intimate data: journal interpretation, profile building, mentor ledger, private Q&A. Handles R17 obligations. 10 modules (journal-ingestion, journal-interpreter, persona, profile-store, mentor-ledger, embedding-pipeline, private-hub-types, sync-to-supabase, pattern-engine [personal patterns], proactive-scheduler [personal rituals]). Architecturally distinct from the general mentor ring.",
+      "notes": "Part of isolated Sage Mentor subsystem. Journal interpreter has 25 TODOs (layers 9-10 incomplete). Not integrated.",
+      "deps": [
+        "claude-api",
+        "supabase"
+      ],
+      "rules": [
+        "R17",
+        "R19",
+        "R20"
+      ],
+      "priority": "P2",
+      "proximity": "sage-like",
+      "connects": [
+        "agent-mentor",
+        "data-profile-store",
+        "reasoning-journal-interp",
+        "engine-pattern-engine",
+        "engine-mentor-ledger",
+        "engine-embedding",
+        "engine-profile-store"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "agent-mentor",
+      "name": "Sage Mentor (Ring Orchestrator)",
+      "type": "agent",
+      "subtype": [
+        "planning",
+        "multi-agent"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/",
+      "desc": "General ring orchestrator: BEFORE (context enrichment, safety checks) > inner agent > AFTER (reasoning evaluation, window update). 14K+ LOC TypeScript across 20 modules. Integrated with website via 2 API routes. Delegates intimate data operations to Private Mentor boundary.",
+      "notes": "Fully integrated with website. API routes connect Ring Wrapper to live mentor hubs. Serves real mentoring data.",
+      "deps": [
+        "claude-api",
+        "supabase",
+        "stoic-brain-v3",
+        "resend"
+      ],
+      "rules": [
+        "R1",
+        "R6",
+        "R17",
+        "R19",
+        "R20"
+      ],
+      "priority": "P5",
+      "proximity": "sage-like",
+      "connects": [
+        "agent-support",
+        "agent-private-mentor",
+        "reasoning-4stage",
+        "engine-ring-wrapper",
+        "engine-pattern-engine",
+        "data-profile-store"
+      ],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "partial"
+    },
+    {
+      "id": "agent-sage-ops",
+      "name": "Sage Ops (AI Cofounder)",
+      "type": "agent",
+      "subtype": [
+        "planning",
+        "autonomous",
+        "economic"
+      ],
+      "status": "wired",
+      "oldStatus": "designed",
+      "ext": ".md",
+      "path": "/operations/Sage_Cofounder_Blueprint.md",
+      "desc": "AI cofounder operating as Deliberate agent. Layer 0 context sync, 4 capability tiers. Plans, allocates resources, self-directs at higher authority levels.",
+      "notes": "Blueprint document only (52KB). No functional code. Correct status.",
+      "deps": [
+        "claude-api",
+        "supabase"
+      ],
+      "rules": [
+        "R0",
+        "R5",
+        "R15",
+        "R16"
+      ],
+      "priority": "P7",
+      "proximity": "sage-like",
+      "connects": [
+        "agent-mentor",
+        "gov-manifest",
+        "gov-compliance"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "agent-session-bridge",
+      "name": "Session Bridge (Cowork Link)",
+      "type": "agent",
+      "subtype": [
+        "reactive"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/session-bridge.ts",
+      "desc": "Bridges Claude Cowork sessions to the ring. Classifies decisions, persists context, enables consultation. Reactive to session events.",
+      "notes": "Part of isolated Sage Mentor subsystem. Not integrated.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R15"
+      ],
+      "priority": "P7",
+      "proximity": "sage-like",
+      "connects": [
+        "agent-mentor",
+        "data-session-decisions"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "agent-support",
+      "name": "Support Agent",
+      "type": "agent",
+      "subtype": [
+        "reactive"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/support-agent.ts",
+      "desc": "Inner agent with 10 markdown tools. Stimulus-response: receives ticket, drafts response, submits to ring. Starts supervised.",
+      "notes": "Part of isolated Sage Mentor subsystem. Not integrated.",
+      "deps": [
+        "claude-api",
+        "supabase"
+      ],
+      "rules": [
+        "R1",
+        "R15"
+      ],
+      "priority": "P7",
+      "proximity": "sage-like",
+      "connects": [
+        "agent-mentor",
+        "data-support-inbox",
+        "gov-workflows"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "data-agent-assess-v3",
+      "name": "Agent Assessment Migration",
+      "type": "data",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".sql",
+      "path": "/website/supabase-v3-agent-assessment-migration.sql",
+      "desc": "V3 agent assessment storage tables.",
+      "notes": "SQL migration exists. Not verified against live DB.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R6"
+      ],
+      "priority": "P3",
+      "proximity": "",
+      "connects": [
+        "engine-agent-assessment"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "data-analytics",
+      "name": "Analytics Events",
+      "type": "data",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/analytics.ts",
+      "desc": "Event tracking: page views, scores, signups, API calls.",
+      "notes": "TypeScript module. Functional event tracking code.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "prod-admin"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "data-api-keys",
+      "name": "API Keys Schema",
+      "type": "data",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".sql",
+      "path": "/api/api-keys-schema.sql",
+      "desc": "Key management, usage metering, tier enforcement, monthly quotas.",
+      "notes": "SQL exists. Not verified against live DB.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R5"
+      ],
+      "priority": "P4",
+      "proximity": "",
+      "connects": [
+        "infra-rate-limit"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "data-baseline-table",
+      "name": "Baseline Assessments Table",
+      "type": "data",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".sql",
+      "path": "/website/supabase-v3-baseline-progress-migration.sql",
+      "desc": "baseline_assessments_v3: dimensions, Senecan grade, oikeiosis stage.",
+      "notes": "Migration SQL exists. Not verified against live DB.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R6c"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "prod-baseline",
+        "engine-baseline"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "data-community",
+      "name": "Community Locations",
+      "type": "data",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".sql",
+      "path": "/website/supabase-location-migration.sql",
+      "desc": "Opt-in user locations for community map.",
+      "notes": "SQL migration exists. No real community data.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "prod-community-map"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "data-deliberation-chain",
+      "name": "Deliberation Chains Table",
+      "type": "data",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".sql",
+      "path": "/api/deliberation-chain-schema.sql",
+      "desc": "Iterative action scoring persistence (chains + steps).",
+      "notes": "SQL exists. Not verified.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "tool-sage-iterate",
+        "engine-deliberation"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "data-evaluations",
+      "name": "Evaluations Table (V3)",
+      "type": "data",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".sql",
+      "path": "/website/supabase-v3-migration.sql",
+      "desc": "action_evaluations_v3: scores, passions, virtue domains, improvement paths.",
+      "notes": "Migration SQL exists. Assumed applied but not verified by founder.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R6c"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "prod-dashboard",
+        "tool-sage-score"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "data-journal-entries",
+      "name": "Journal Entries Table",
+      "type": "data",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".sql",
+      "path": "/api/migrations/add-journal-entries-table.sql",
+      "desc": "Cloud storage for encrypted journal entries.",
+      "notes": "Migration SQL exists. Not verified against live DB.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R17"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "prod-journal",
+        "infra-encryption"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "data-profile-store",
+      "name": "Profile Store Tables",
+      "type": "data",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/profile-store.ts",
+      "desc": "Rolling 100-action window, profile cache, passion observations.",
+      "notes": "Part of isolated Sage Mentor. TypeScript types + Supabase calls, not verified.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R17"
+      ],
+      "priority": "P5",
+      "proximity": "",
+      "connects": [
+        "engine-profile-store"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "data-revenue-model",
+      "name": "Revenue/Billing Schema",
+      "type": "data",
+      "subtype": [],
+      "status": "designed",
+      "oldStatus": "designed",
+      "ext": ".sql",
+      "path": "/api/revenue-model-migration.sql",
+      "desc": "Payment and billing tables. Incomplete — Stripe not wired.",
+      "notes": "SQL exists but Stripe integration is scoped only. Correct status.",
+      "deps": [
+        "supabase",
+        "stripe"
+      ],
+      "rules": [
+        "R5"
+      ],
+      "priority": "P4",
+      "proximity": "",
+      "connects": [
+        "infra-stripe"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "data-session-decisions",
+      "name": "Session Decisions Table",
+      "type": "data",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".sql",
+      "path": "/supabase/migrations/20260404_session_bridge_tables.sql",
+      "desc": "Strategic decision log from Cowork sessions + context snapshots.",
+      "notes": "Migration SQL exists. Part of Sage Mentor integration.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R15"
+      ],
+      "priority": "P7",
+      "proximity": "",
+      "connects": [
+        "agent-session-bridge"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "data-supabase-core",
+      "name": "Supabase Core Schema",
+      "type": "data",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".sql",
+      "path": "/api/supabase-schema.sql",
+      "desc": "Master schema: profiles, evaluations, analytics.",
+      "notes": "SQL exists but not confirmed running against live Supabase instance. Migration status unknown.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "infra-supabase-auth"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "data-support-inbox",
+      "name": "Support Inbox (10 Tickets)",
+      "type": "data",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".md",
+      "path": "/support/inbox/",
+      "desc": "YAML frontmatter + message format. Ready for processing.",
+      "notes": "Confirmed wired. Markdown files with structured data.",
+      "deps": [],
+      "rules": [
+        "R1"
+      ],
+      "priority": "P7",
+      "proximity": "",
+      "connects": [
+        "agent-support"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "data-trust-schema",
+      "name": "Trust Layer Schema (DRAFT)",
+      "type": "data",
+      "subtype": [],
+      "status": "designed",
+      "oldStatus": "designed",
+      "ext": ".sql",
+      "path": "/trust-layer/schema/trust-layer-schema-REVIEW.sql",
+      "desc": "Accreditation records and evaluation windows. Marked REVIEW.",
+      "notes": "326 LOC SQL. Needs review before deployment. Correct status.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R18"
+      ],
+      "priority": "P3",
+      "proximity": "",
+      "connects": [
+        "engine-trust-layer"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-trust-framework",
+      "name": "Agent Trust Layer Framework",
+      "type": "document",
+      "subtype": [],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".docx",
+      "path": "/product/SageReasoning_Agent_Trust_Layer_Framework.docx",
+      "desc": "Trust layer design document. V2.0.",
+      "notes": "Confirmed verified. Design reference.",
+      "deps": [],
+      "rules": [
+        "R18"
+      ],
+      "priority": "P3",
+      "proximity": "",
+      "connects": [
+        "engine-trust-layer"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-breakeven",
+      "name": "Break-Even Analysis",
+      "type": "document",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".xlsx",
+      "path": "/business/SageReasoning_BreakEven_Analysis.xlsx",
+      "desc": "Financial modelling spreadsheet.",
+      "notes": "Confirmed wired. Pending P1 review with real cost data.",
+      "deps": [],
+      "rules": [
+        "R0",
+        "R5"
+      ],
+      "priority": "P1",
+      "proximity": "",
+      "connects": [
+        "doc-business-plan"
+      ],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-compliance-pipeline",
+      "name": "Evolving Compliance Pipeline",
+      "type": "document",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".docx",
+      "path": "/compliance/SageReasoning_Evolving_Compliance_Pipeline.docx",
+      "desc": "R14 implementation. May need R19/R20 update.",
+      "notes": "May need update for new rules. Flagged.",
+      "deps": [],
+      "rules": [
+        "R14"
+      ],
+      "priority": "P2",
+      "proximity": "",
+      "connects": [
+        "gov-compliance"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-founder-profile",
+      "name": "Founder Operational Profile",
+      "type": "document",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".docx",
+      "path": "/operations/SageReasoning_Founder_Operational_Profile.docx",
+      "desc": "Founder's decision-making profile for mentor + Layer 0.",
+      "notes": "Confirmed wired. Personal reference.",
+      "deps": [],
+      "rules": [
+        "R0"
+      ],
+      "priority": "P5",
+      "proximity": "",
+      "connects": [
+        "agent-mentor",
+        "agent-sage-ops"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-gap-map",
+      "name": "Gap-Filling Tool Map",
+      "type": "document",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".md",
+      "path": "/product/Gap_Filling_Tool_Map.md",
+      "desc": "18KB. Catalogue of tools/capabilities needed to fill current gaps.",
+      "notes": "Confirmed wired. Reference document.",
+      "deps": [],
+      "rules": [],
+      "priority": "P0",
+      "proximity": "",
+      "connects": [],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-growth-strategy",
+      "name": "Growth Strategy",
+      "type": "document",
+      "subtype": [],
+      "status": "designed",
+      "oldStatus": "designed",
+      "ext": ".docx",
+      "path": "/business/SageReasoning_Growth_Strategy.docx",
+      "desc": "Needs revision per R19 (honest positioning, no universality claims).",
+      "notes": "Needs R19 compliance review. Correct status.",
+      "deps": [],
+      "rules": [
+        "R19"
+      ],
+      "priority": "P1",
+      "proximity": "",
+      "connects": [
+        "doc-business-plan"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-human-ai-kb",
+      "name": "Human-AI Development Knowledge Base",
+      "type": "document",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".md",
+      "path": "/reference/Human_AI_Development_Knowledge_Base.md",
+      "desc": "53KB. Piaget, Kegan, Kohlberg, Erikson mapped to proximity scale. Developmental psychology research.",
+      "notes": "Confirmed wired. Research reference.",
+      "deps": [],
+      "rules": [
+        "R6"
+      ],
+      "priority": "P5",
+      "proximity": "",
+      "connects": [
+        "engine-agent-assessment",
+        "engine-progression"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-ios-roadmap",
+      "name": "iOS App Intents Roadmap",
+      "type": "document",
+      "subtype": [],
+      "status": "designed",
+      "oldStatus": "designed",
+      "ext": ".md",
+      "path": "/out/roadmap.md",
+      "desc": "3-phase native iOS rollout. 13 weeks, 196-228 hours.",
+      "notes": "Future planning doc. Correct status.",
+      "deps": [],
+      "rules": [],
+      "priority": "Post-P6",
+      "proximity": "",
+      "connects": [
+        "infra-nextjs"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-journal-layers",
+      "name": "Journal Interpretation (10 Layers)",
+      "type": "document",
+      "subtype": [],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".md",
+      "path": "/reference/Journal_Interpretation_10_Layers.md",
+      "desc": "19KB. Multi-layer interpretation pipeline spec. Cognitive profiling for mentorship.",
+      "notes": "Confirmed verified as spec. Implementation partially complete.",
+      "deps": [],
+      "rules": [
+        "R1",
+        "R17",
+        "R19"
+      ],
+      "priority": "P5",
+      "proximity": "",
+      "connects": [
+        "reasoning-journal-interp"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-knowledge-context",
+      "name": "Knowledge Context Summary",
+      "type": "document",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".md",
+      "path": "/reference/SageReasoning_Knowledge_Context_Summary.md",
+      "desc": "45KB. Layer 0 onboarding context. Business model, V3 learnings, market, competitive landscape.",
+      "notes": "Confirmed wired. Comprehensive onboarding doc.",
+      "deps": [],
+      "rules": [
+        "R14"
+      ],
+      "priority": "P7",
+      "proximity": "",
+      "connects": [
+        "agent-sage-ops"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-business-plan",
+      "name": "Legal Revenue Business Plan",
+      "type": "document",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".docx",
+      "path": "/business/SageReasoning_Legal_Revenue_Business_Plan.docx",
+      "desc": "Full business plan with revenue model.",
+      "notes": "Confirmed wired. Pending P1 review.",
+      "deps": [],
+      "rules": [
+        "R0",
+        "R5"
+      ],
+      "priority": "P1",
+      "proximity": "",
+      "connects": [
+        "infra-stripe",
+        "data-revenue-model"
+      ],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-market-research",
+      "name": "Market Research + Pricing",
+      "type": "document",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".docx/.xlsx",
+      "path": "/marketing/SageReasoning_Deep_Market_Research_v2.docx",
+      "desc": "Comprehensive market research, pricing analysis, competitive landscape.",
+      "notes": "Confirmed wired. Thorough research.",
+      "deps": [],
+      "rules": [
+        "R5"
+      ],
+      "priority": "P1",
+      "proximity": "",
+      "connects": [
+        "doc-business-plan"
+      ],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-mentor-arch",
+      "name": "Mentor Claude Integration Architecture",
+      "type": "document",
+      "subtype": [],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".md",
+      "path": "/product/Sage_Mentor_Claude_Integration_Architecture.md",
+      "desc": "46KB. Claude API integration spec. Prompt architecture, token budgeting, streaming.",
+      "notes": "Confirmed verified. Architecture reference.",
+      "deps": [],
+      "rules": [
+        "R5",
+        "R17"
+      ],
+      "priority": "P5",
+      "proximity": "",
+      "connects": [
+        "agent-mentor",
+        "engine-llm-bridge"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-license",
+      "name": "Proprietary License",
+      "type": "document",
+      "subtype": [],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": "",
+      "path": "/LICENSE",
+      "desc": "Changed from MIT to Proprietary Evaluation-Only. Protects scoring IP.",
+      "notes": "Confirmed verified. Legal protection in place.",
+      "deps": [],
+      "rules": [
+        "R4"
+      ],
+      "priority": "Complete",
+      "proximity": "",
+      "connects": [
+        "engine-stoic-brain-v3"
+      ],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "ready"
+    },
+    {
+      "id": "doc-readme",
+      "name": "README.md",
+      "type": "document",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".md",
+      "path": "/README.md",
+      "desc": "Project overview. Some deprecated V1 references remain.",
+      "notes": "Needs cleanup of V1 references. Minor issue.",
+      "deps": [],
+      "rules": [],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-cofounder-blueprint",
+      "name": "Sage Cofounder Blueprint",
+      "type": "document",
+      "subtype": [],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".md",
+      "path": "/operations/Sage_Cofounder_Blueprint.md",
+      "desc": "52KB. Complete Sage Ops vision: Layer 0, Tiers 1-4, operational structure. Approved.",
+      "notes": "Confirmed verified. Approved by founder.",
+      "deps": [],
+      "rules": [
+        "R0",
+        "R15",
+        "R16"
+      ],
+      "priority": "P7",
+      "proximity": "",
+      "connects": [
+        "agent-sage-ops"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-security-audit",
+      "name": "Security Audit (April 2026)",
+      "type": "document",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".md",
+      "path": "/compliance/Security_Audit_Report_4Apr2026.md",
+      "desc": "Security posture, vulnerabilities, mitigations.",
+      "notes": "Confirmed wired. Recent audit.",
+      "deps": [],
+      "rules": [
+        "R14"
+      ],
+      "priority": "P2",
+      "proximity": "",
+      "connects": [
+        "gov-compliance"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-setup-plan",
+      "name": "Setup Plan (Original)",
+      "type": "document",
+      "subtype": [],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".html",
+      "path": "/prototypes/SageReasoning_Setup_Plan.html",
+      "desc": "Original architecture, tech stack, folder structure, phased plan.",
+      "notes": "Historical reference. Complete.",
+      "deps": [],
+      "rules": [],
+      "priority": "Complete",
+      "proximity": "",
+      "connects": [],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-sources-index",
+      "name": "Sources Index (9 Texts)",
+      "type": "document",
+      "subtype": [],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".md",
+      "path": "/research/sources-index.md",
+      "desc": "9 primary Stoic source texts with Perseus Digital Library IDs.",
+      "notes": "Confirmed verified. Complete.",
+      "deps": [],
+      "rules": [
+        "R7"
+      ],
+      "priority": "Complete",
+      "proximity": "",
+      "connects": [
+        "engine-stoic-brain-v3"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-support-manual",
+      "name": "Support Agent Manual",
+      "type": "document",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".docx",
+      "path": "/operations/SageReasoning_Support_Agent_Manual.docx",
+      "desc": "Operational guide for support agent.",
+      "notes": "Confirmed wired. Complete manual.",
+      "deps": [],
+      "rules": [
+        "R1",
+        "R15"
+      ],
+      "priority": "P7",
+      "proximity": "",
+      "connects": [
+        "agent-support"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-v3-adoption",
+      "name": "V3 Adoption Scope (Complete)",
+      "type": "document",
+      "subtype": [],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".md",
+      "path": "/adopted/V3_Adoption_Scope_Revised_April.md",
+      "desc": "All 16 migration phases complete. V1 archived, V3 in production.",
+      "notes": "Confirmed verified. Complete.",
+      "deps": [],
+      "rules": [
+        "R6"
+      ],
+      "priority": "Complete",
+      "proximity": "",
+      "connects": [
+        "engine-stoic-brain-v3"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "engine-accred-card",
+      "name": "Accreditation Card Builder",
+      "type": "engine",
+      "subtype": [
+        "execution"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/trust-layer/card/accreditation-card.ts",
+      "desc": "Visual credential builder and serialiser. The badge agents earn.",
+      "notes": "Internally complete but isolated. Cannot produce real cards without integration.",
+      "deps": [],
+      "rules": [
+        "R18a",
+        "R18b"
+      ],
+      "priority": "P3",
+      "proximity": "",
+      "connects": [
+        "engine-trust-layer"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "engine-agent-assessment",
+      "name": "Agent Assessment Framework (55)",
+      "type": "engine",
+      "subtype": [
+        "inference",
+        "simulation"
+      ],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".json",
+      "path": "/agent-assessment/agent-assessment-framework-v3.json",
+      "desc": "55 assessments across 8 phases. Maps 1:1 to 55-day journal. Qualitative proximity levels only.",
+      "notes": "Confirmed verified. Complete framework.",
+      "deps": [],
+      "rules": [
+        "R6",
+        "R7"
+      ],
+      "priority": "P3",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-profile",
+        "tool-sage-diagnose"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "ready"
+    },
+    {
+      "id": "engine-trust-layer",
+      "name": "Agent Trust Layer",
+      "type": "engine",
+      "subtype": [
+        "inference",
+        "workflow"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/trust-layer/",
+      "desc": "Full accreditation system. 14 TypeScript modules. Grades, proximity, authority, evaluation windows, progression, 9 sage tools.",
+      "notes": "ARCHITECTURALLY ISOLATED. Internally complete (all 14 modules wired to each other) but zero imports from website/src. Cannot function end-to-end.",
+      "deps": [
+        "claude-api",
+        "supabase"
+      ],
+      "rules": [
+        "R18"
+      ],
+      "priority": "P3",
+      "proximity": "sage-like",
+      "connects": [
+        "engine-authority-mgr",
+        "agent-mentor",
+        "data-trust-schema"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "engine-authority-mgr",
+      "name": "Authority Manager",
+      "type": "engine",
+      "subtype": [
+        "workflow"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/authority-manager.ts",
+      "desc": "Inner agent authority lifecycle: track performance, promote, demote, suspend. Governs agent autonomy.",
+      "notes": "Part of isolated Sage Mentor / Trust Layer. Not integrated.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R15",
+        "R18"
+      ],
+      "priority": "P3",
+      "proximity": "",
+      "connects": [
+        "agent-mentor",
+        "engine-trust-layer"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "engine-baseline",
+      "name": "Baseline Assessment Engine",
+      "type": "engine",
+      "subtype": [
+        "inference"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/baseline-assessment.ts",
+      "desc": "Scores baseline questions, applies Senecan grading, computes 4 dimension levels.",
+      "notes": "Functional logic connected to baseline product and API.",
+      "deps": [],
+      "rules": [
+        "R6c"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "prod-baseline",
+        "tool-sage-diagnose"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "engine-deliberation",
+      "name": "Deliberation Chain Engine",
+      "type": "engine",
+      "subtype": [
+        "workflow"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/deliberation.ts",
+      "desc": "Multi-turn deliberation: create chain > add steps > evaluate progress > conclude.",
+      "notes": "Connected to Supabase and sage-iterate.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R4"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-iterate"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "engine-doc-scorer",
+      "name": "Document Scoring Engine",
+      "type": "engine",
+      "subtype": [
+        "inference"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/document-scorer.ts",
+      "desc": "Document-specific scoring and principle analysis.",
+      "notes": "Functional. Connected to sage-audit tool.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R3"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-audit"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "engine-embedding",
+      "name": "Embedding Pipeline (pgvector)",
+      "type": "engine",
+      "subtype": [
+        "memory",
+        "search"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/embedding-pipeline.ts",
+      "desc": "Vector storage and retrieval. Generates embeddings, batch insert, similarity search.",
+      "notes": "Part of isolated Sage Mentor. Depends on embedding API not yet configured.",
+      "deps": [
+        "supabase",
+        "embedding-api"
+      ],
+      "rules": [
+        "R16"
+      ],
+      "priority": "P7",
+      "proximity": "",
+      "connects": [
+        "agent-mentor"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "engine-journal-content",
+      "name": "Journal Curriculum Engine",
+      "type": "engine",
+      "subtype": [
+        "inference"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/journal-content.ts",
+      "desc": "55-day curriculum: 8 phases, daily teachings with source citations.",
+      "notes": "Functional. Drives the journal product content.",
+      "deps": [],
+      "rules": [
+        "R7"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "prod-journal",
+        "engine-agent-assessment"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "na"
+    },
+    {
+      "id": "engine-llm-bridge",
+      "name": "LLM Bridge (Claude Wrapper)",
+      "type": "engine",
+      "subtype": [
+        "execution"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/llm-bridge.ts",
+      "desc": "Anthropic Claude API wrapper: before/after checks, draft generation, token tracking.",
+      "notes": "Part of isolated Sage Mentor. Website uses sage-reason-engine instead.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R5"
+      ],
+      "priority": "P5",
+      "proximity": "",
+      "connects": [
+        "agent-mentor",
+        "reasoning-4stage"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "engine-mentor-ledger",
+      "name": "Mentor Ledger",
+      "type": "engine",
+      "subtype": [
+        "memory"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/mentor-ledger.ts",
+      "desc": "Cross-cutting accountability: commitments, realisations, questions, tensions, intentions.",
+      "notes": "Part of isolated Sage Mentor. Not integrated.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [],
+      "priority": "P5",
+      "proximity": "sage-like",
+      "connects": [
+        "agent-mentor",
+        "engine-pattern-engine"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "engine-model-config",
+      "name": "Model Selection + LRU Cache",
+      "type": "engine",
+      "subtype": [
+        "inference",
+        "execution"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/model-config.ts",
+      "desc": "Routes to Haiku (fast) or Sonnet (deep). LRU response cache: 1hr TTL, 500 entries.",
+      "notes": "Functional. Used by sage-reason-engine.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R5"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "engine-sage-reason-engine",
+        "tool-sage-reason"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "engine-pattern-engine",
+      "name": "Pattern Recognition Engine",
+      "type": "engine",
+      "subtype": [
+        "memory",
+        "inference"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/pattern-engine.ts",
+      "desc": "Temporal pattern recognition: passion clusters, regression warnings, trend analysis.",
+      "notes": "Part of isolated Sage Mentor. Not integrated.",
+      "deps": [
+        "supabase",
+        "claude-api"
+      ],
+      "rules": [],
+      "priority": "P5",
+      "proximity": "sage-like",
+      "connects": [
+        "agent-mentor",
+        "agent-support"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "engine-proactive",
+      "name": "Proactive Scheduler",
+      "type": "engine",
+      "subtype": [
+        "workflow"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/proactive-scheduler.ts",
+      "desc": "Scheduled outputs: morning checkIn, evening reflection, weekly mirror. Time-triggered workflow.",
+      "notes": "Part of isolated Sage Mentor. Not integrated.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [],
+      "priority": "P5",
+      "proximity": "",
+      "connects": [
+        "agent-mentor"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "engine-profile-store",
+      "name": "Profile Store",
+      "type": "engine",
+      "subtype": [
+        "memory"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/profile-store.ts",
+      "desc": "User passion map, causal tendencies, value hierarchy, oikeiosis scope. Rolling 100-action window.",
+      "notes": "Part of isolated Sage Mentor. Not integrated.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R17"
+      ],
+      "priority": "P5",
+      "proximity": "",
+      "connects": [
+        "agent-mentor",
+        "engine-ring-wrapper"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "engine-progression",
+      "name": "Progression Toolkit (8 Pathways)",
+      "type": "engine",
+      "subtype": [
+        "inference",
+        "workflow"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/trust-layer/progression-toolkit/pathways.ts",
+      "desc": "8 progression pathways. R12-compliant prescriptions using 9 sage tools. How agents develop.",
+      "notes": "Internally complete but isolated within Trust Layer.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R12",
+        "R18"
+      ],
+      "priority": "P3",
+      "proximity": "sage-like",
+      "connects": [
+        "engine-trust-layer"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "engine-receipt",
+      "name": "Reasoning Receipt Generator",
+      "type": "engine",
+      "subtype": [
+        "execution"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/reasoning-receipt.ts",
+      "desc": "Extracts and formats reasoning receipts from Claude responses. Audit trail.",
+      "notes": "Functional. Used by sage-reason-engine and receipt tool.",
+      "deps": [],
+      "rules": [
+        "R14"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "tool-receipts"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "partial"
+    },
+    {
+      "id": "engine-ring-wrapper",
+      "name": "Ring Wrapper (BEFORE/AFTER)",
+      "type": "engine",
+      "subtype": [
+        "workflow"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/ring-wrapper.ts",
+      "desc": "The core orchestrator: BEFORE (profile, passion, context) > inner agent > AFTER (evaluate, update, surface). Central workflow.",
+      "notes": "Internally complete and sophisticated but part of isolated Sage Mentor. Not integrated into website.",
+      "deps": [
+        "supabase",
+        "claude-api"
+      ],
+      "rules": [
+        "R4",
+        "R12"
+      ],
+      "priority": "P5",
+      "proximity": "sage-like",
+      "connects": [
+        "agent-mentor",
+        "reasoning-4stage",
+        "data-profile-store"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "engine-sage-reason-engine",
+      "name": "sage-reason-engine (Shared Module)",
+      "type": "engine",
+      "subtype": [
+        "inference",
+        "execution"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/sage-reason-engine.ts",
+      "desc": "Single source of truth for all Stoic reasoning. Exports runSageReason(). Contains: Anthropic singleton (getClient()), 3 system prompts (QUICK/STANDARD/DEEP), depth configs, validation, caching, receipt generation. All refactored tools import from here. 395 LOC.",
+      "notes": "CORE ENGINE. Fully functional. All refactored tools import from here. Major upgrade.",
+      "deps": [
+        "claude-api",
+        "stoic-brain-v3"
+      ],
+      "rules": [
+        "R4",
+        "R5",
+        "R12",
+        "R14"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "engine-model-config",
+        "reasoning-4stage",
+        "engine-stoic-brain-v3",
+        "engine-receipt"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "na",
+      "agentReady": "partial"
+    },
+    {
+      "id": "engine-skill-registry",
+      "name": "Skill Registry (40+ Skills)",
+      "type": "engine",
+      "subtype": [
+        "execution"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/skill-registry.ts",
+      "desc": "Centralised catalogue with contracts: outcome, cost estimate, chaining rules. Dispatches skill execution.",
+      "notes": "Functional. Connected to compose/execute/marketplace tools.",
+      "deps": [],
+      "rules": [
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "tool-compose",
+        "tool-execute",
+        "prod-marketplace"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "partial"
+    },
+    {
+      "id": "engine-stoic-brain-v3",
+      "name": "Stoic Brain v3 (8-File Dataset)",
+      "type": "engine",
+      "subtype": [
+        "inference"
+      ],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".json",
+      "path": "/stoic-brain/",
+      "desc": "Master reference dataset. 8 files derived from 9 primary Stoic texts. Foundation everything else builds on.",
+      "notes": "Confirmed verified. Foundation everything builds on. Complete.",
+      "deps": [],
+      "rules": [
+        "R6",
+        "R7"
+      ],
+      "priority": "Complete",
+      "proximity": "sage-like",
+      "connects": [
+        "reasoning-4stage",
+        "engine-baseline",
+        "agent-mentor"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "ready"
+    },
+    {
+      "id": "gov-agents-md",
+      "name": "AGENTS.md (Integration Guide)",
+      "type": "governance",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".md",
+      "path": "/product/AGENTS.md",
+      "desc": "Complete API spec for external agents. Skill contracts, response envelopes, tech stack.",
+      "notes": "Confirmed wired. Agent-facing documentation.",
+      "deps": [],
+      "rules": [
+        "R4",
+        "R5",
+        "R8",
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "tool-sage-reason",
+        "infra-openapi"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "ready"
+    },
+    {
+      "id": "gov-audit-log",
+      "name": "Compliance Audit Log",
+      "type": "governance",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".json",
+      "path": "/compliance/compliance_audit_log.json",
+      "desc": "Append-only quarterly audit trail. Latest: 2026-04-04. 11 regulatory updates tracked.",
+      "notes": "Confirmed wired. 11 regulatory updates tracked.",
+      "deps": [],
+      "rules": [
+        "R14"
+      ],
+      "priority": "P2",
+      "proximity": "",
+      "connects": [
+        "gov-compliance"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "gov-compliance",
+      "name": "Compliance Register (28 Obligations)",
+      "type": "governance",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".json",
+      "path": "/compliance/compliance_register.json",
+      "desc": "EU AI Act, GDPR, AU Privacy Act, ISO 42001, NIST AI RMF. Maps to manifest rules.",
+      "notes": "Confirmed wired. 28 regulatory obligations mapped.",
+      "deps": [],
+      "rules": [
+        "R14"
+      ],
+      "priority": "P2",
+      "proximity": "",
+      "connects": [
+        "gov-manifest",
+        "gov-audit-log"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "gov-draft-amendments",
+      "name": "DRAFT Manifest Amendments",
+      "type": "governance",
+      "subtype": [],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".md",
+      "path": "/archive/2026-04-05_DRAFT_Manifest_Amendments.md",
+      "desc": "Adopted R15-R20 + amendments to R0, R5, R14. Now in project instructions. Archived.",
+      "notes": "Confirmed verified. Adopted and archived.",
+      "deps": [],
+      "rules": [
+        "R15",
+        "R16",
+        "R17",
+        "R18",
+        "R19",
+        "R20"
+      ],
+      "priority": "P2",
+      "proximity": "",
+      "connects": [
+        "gov-manifest"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "gov-draft-instructions",
+      "name": "DRAFT Project Instructions",
+      "type": "governance",
+      "subtype": [],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".md",
+      "path": "/archive/2026-04-05_DRAFT_Project_Instructions.md",
+      "desc": "Adopted project instructions. Now live in Cowork config. Archived.",
+      "notes": "Confirmed verified. Adopted and archived.",
+      "deps": [],
+      "rules": [],
+      "priority": "P0",
+      "proximity": "",
+      "connects": [
+        "gov-manifest"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "gov-draft-priorities",
+      "name": "DRAFT Revised Build Priorities",
+      "type": "governance",
+      "subtype": [],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".md",
+      "path": "/archive/2026-04-06_DRAFT_Revised_Build_Priority_Sequence.md",
+      "desc": "Adopted P0-P7 priority sequence. Now in project instructions. Archived.",
+      "notes": "Confirmed verified. Adopted and archived.",
+      "deps": [],
+      "rules": [
+        "R0"
+      ],
+      "priority": "P0",
+      "proximity": "",
+      "connects": [
+        "gov-manifest"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "gov-ethical-analysis",
+      "name": "Ethical Analysis (R17-R20 Source)",
+      "type": "governance",
+      "subtype": [],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".md",
+      "path": "/reference/Ethical_Analysis_Reasoning_Deployment.md",
+      "desc": "Critical examination: monoculture risk, certifier problem, weaponisation, distress detection. Source of R17-R20.",
+      "notes": "Confirmed verified. Source document for R17-R20.",
+      "deps": [],
+      "rules": [
+        "R17",
+        "R18",
+        "R19",
+        "R20"
+      ],
+      "priority": "P2",
+      "proximity": "",
+      "connects": [
+        "gov-manifest",
+        "gov-draft-amendments"
+      ],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "na"
+    },
+    {
+      "id": "gov-knowledge-base",
+      "name": "Knowledge Base (10 Articles)",
+      "type": "governance",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".md",
+      "path": "/knowledge-base/",
+      "desc": "Getting Started (3), API Docs (2), Glossary (2), Governance (2), FAQ (1). Used by support agent.",
+      "notes": "Confirmed wired. Used by support agent.",
+      "deps": [],
+      "rules": [
+        "R1",
+        "R3",
+        "R8"
+      ],
+      "priority": "P7",
+      "proximity": "",
+      "connects": [
+        "agent-support"
+      ],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "na"
+    },
+    {
+      "id": "gov-manifest",
+      "name": "Manifest (R0-R20)",
+      "type": "governance",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".md",
+      "path": "/manifest.md",
+      "desc": "Master governance. 20+ rules. CR-2026-Q2-v4. Read before every task. Governs all decisions.",
+      "notes": "Confirmed wired. Governs all decisions.",
+      "deps": [],
+      "rules": [
+        "ALL"
+      ],
+      "priority": "ALL",
+      "proximity": "",
+      "connects": [
+        "gov-compliance",
+        "gov-ethical-analysis"
+      ],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "ready"
+    },
+    {
+      "id": "gov-workflows",
+      "name": "Operational Workflows (6)",
+      "type": "governance",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".md",
+      "path": "/workflows/",
+      "desc": "API support, enterprise inquiry, governance-flagged, new customer, payment failed, weekly patterns.",
+      "notes": "Confirmed wired. Playbook format.",
+      "deps": [],
+      "rules": [
+        "R1",
+        "R15"
+      ],
+      "priority": "P7",
+      "proximity": "",
+      "connects": [
+        "agent-support",
+        "agent-sage-ops"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "gov-templates",
+      "name": "Operations Templates (6)",
+      "type": "governance",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".md",
+      "path": "/_templates/",
+      "desc": "Lead, workflow-playbook, inbox-item, KB article, notification templates.",
+      "notes": "Confirmed wired. Standard templates.",
+      "deps": [],
+      "rules": [
+        "R8"
+      ],
+      "priority": "P7",
+      "proximity": "",
+      "connects": [
+        "agent-support",
+        "agent-sage-ops"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "infra-agent-discovery",
+      "name": "Agent Discovery Files",
+      "type": "infra",
+      "subtype": [],
+      "status": "live",
+      "oldStatus": "wired",
+      "ext": ".json/.txt",
+      "path": "/website/public/",
+      "desc": "llms.txt, agent-card.json, robots.txt, openapi.yaml for agent crawlers. Deployed and actively serving.",
+      "notes": "Live and deployed. Static files actively serving agent crawlers.",
+      "deps": [],
+      "rules": [],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "infra-openapi"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "ready"
+    },
+    {
+      "id": "infra-response-envelope",
+      "name": "API Response Envelope",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/response-envelope.ts",
+      "desc": "Standard { result, meta } wrapper with latency, cost, model metadata.",
+      "notes": "Functional. Used by API routes.",
+      "deps": [],
+      "rules": [
+        "R3"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "infra-encryption",
+      "name": "Client-Side Encryption (AES-256)",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/encryption.ts",
+      "desc": "AES-256-GCM, PBKDF2 key derivation. Client-side only.",
+      "notes": "Functional encryption module. Used by journal.",
+      "deps": [],
+      "rules": [
+        "R17b"
+      ],
+      "priority": "P2",
+      "proximity": "",
+      "connects": [
+        "prod-journal",
+        "data-journal-entries"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "na"
+    },
+    {
+      "id": "infra-resend",
+      "name": "Email (Resend)",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/send-notification.ts",
+      "desc": "Email notification dispatch via Resend API.",
+      "notes": "Part of isolated Sage Mentor. Not integrated into website.",
+      "deps": [
+        "resend"
+      ],
+      "rules": [],
+      "priority": "P7",
+      "proximity": "",
+      "connects": [
+        "agent-mentor"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "infra-mcp-contracts",
+      "name": "MCP Tool Contracts",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/mcp-contracts.ts",
+      "desc": "Model Context Protocol tool definitions for agent integration.",
+      "notes": "Functional. Serves MCP contracts to agents.",
+      "deps": [],
+      "rules": [],
+      "priority": "P3",
+      "proximity": "",
+      "connects": [
+        "tool-mcp"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "partial"
+    },
+    {
+      "id": "infra-nextjs",
+      "name": "Next.js 14 Application",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".json",
+      "path": "/website/package.json",
+      "desc": "React 18 + TypeScript + Tailwind. Build artifacts exist. Anthropic SDK + Supabase.",
+      "notes": "Application framework. All API routes and pages run on this. Functional.",
+      "deps": [
+        "vercel"
+      ],
+      "rules": [],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "prod-landing"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "infra-openapi",
+      "name": "OpenAPI 3.1.0 Spec",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "wired",
+      "ext": ".yaml",
+      "path": "/api/api-spec.yaml",
+      "desc": "Full API specification. 41KB. All endpoints, schemas, auth.",
+      "notes": "Confirmed wired. Comprehensive spec.",
+      "deps": [],
+      "rules": [
+        "R8"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "prod-api-docs"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "ready"
+    },
+    {
+      "id": "infra-pwa",
+      "name": "PWA Service Worker",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".js",
+      "path": "/website/public/sw-journal.js",
+      "desc": "Service worker for journal offline + registration component.",
+      "notes": "Functional for journal offline capability.",
+      "deps": [],
+      "rules": [],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "prod-journal"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "na"
+    },
+    {
+      "id": "infra-rate-limit",
+      "name": "Rate Limiting + Security",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/security.ts",
+      "desc": "IP-based rate limiting, auth validation, text length validation, CORS.",
+      "notes": "Functional security middleware.",
+      "deps": [],
+      "rules": [
+        "R5"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "tool-sage-reason",
+        "data-api-keys"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "stripe-checkout",
+      "name": "Stripe Checkout Route",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "",
+      "ext": ".ts",
+      "path": "/website/src/app/api/stripe/checkout/route.ts",
+      "desc": "Handles checkout session creation. Processes payment requests.",
+      "notes": "",
+      "deps": [
+        "stripe"
+      ],
+      "rules": [
+        "R5"
+      ],
+      "priority": "P4",
+      "proximity": "",
+      "connects": [
+        "infra-stripe"
+      ],
+      "origin": "",
+      "humanReady": "",
+      "agentReady": ""
+    },
+    {
+      "id": "infra-stripe",
+      "name": "Stripe Integration",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scoped",
+      "ext": ".ts",
+      "path": "/website/src/app/api/stripe/",
+      "desc": "Payment processing with 4 route handlers: checkout, portal, tidings, webhook. Full Stripe integration.",
+      "notes": "Correctly scoped. No code exists. P4 priority.",
+      "deps": [
+        "stripe"
+      ],
+      "rules": [
+        "R5"
+      ],
+      "priority": "P4",
+      "proximity": "",
+      "connects": [
+        "data-revenue-model",
+        "prod-pricing",
+        "stripe-checkout",
+        "stripe-portal",
+        "stripe-tidings",
+        "stripe-webhook"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "stripe-portal",
+      "name": "Stripe Portal Route",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "",
+      "ext": ".ts",
+      "path": "/website/src/app/api/stripe/portal/route.ts",
+      "desc": "Handles customer portal link generation. Enables subscription management.",
+      "notes": "",
+      "deps": [
+        "stripe"
+      ],
+      "rules": [
+        "R5"
+      ],
+      "priority": "P4",
+      "proximity": "",
+      "connects": [
+        "infra-stripe"
+      ],
+      "origin": "",
+      "humanReady": "",
+      "agentReady": ""
+    },
+    {
+      "id": "stripe-tidings",
+      "name": "Stripe Tidings Route",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "",
+      "ext": ".ts",
+      "path": "/website/src/app/api/stripe/tidings/route.ts",
+      "desc": "Handles billing notifications and status updates.",
+      "notes": "",
+      "deps": [
+        "stripe"
+      ],
+      "rules": [
+        "R5"
+      ],
+      "priority": "P4",
+      "proximity": "",
+      "connects": [
+        "infra-stripe"
+      ],
+      "origin": "",
+      "humanReady": "",
+      "agentReady": ""
+    },
+    {
+      "id": "stripe-webhook",
+      "name": "Stripe Webhook Handler",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "",
+      "ext": ".ts",
+      "path": "/website/src/app/api/stripe/webhook/route.ts",
+      "desc": "Handles Stripe webhook events. Processes payment confirmations and updates.",
+      "notes": "",
+      "deps": [
+        "stripe"
+      ],
+      "rules": [
+        "R5"
+      ],
+      "priority": "P4",
+      "proximity": "",
+      "connects": [
+        "infra-stripe"
+      ],
+      "origin": "",
+      "humanReady": "",
+      "agentReady": ""
+    },
+    {
+      "id": "infra-supabase-auth",
+      "name": "Supabase Auth (JWT)",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/supabase.ts",
+      "desc": "Client + server-side auth. JWT bearer tokens. Email/password + magic links.",
+      "notes": "Connected to Supabase. Auth flows functional.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R17"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "prod-auth",
+        "data-supabase-core"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "infra-vercel",
+      "name": "Vercel Hosting",
+      "type": "infra",
+      "subtype": [],
+      "status": "scoped",
+      "oldStatus": "scoped",
+      "ext": "--",
+      "path": "(deployment config needed)",
+      "desc": "Not yet deployed to production.",
+      "notes": "Correctly scoped. No deployment config. Nothing is live.",
+      "deps": [
+        "vercel"
+      ],
+      "rules": [],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "infra-nextjs"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "prod-journal",
+      "name": "55-Day Stoic Journal",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".tsx",
+      "path": "/website/src/app/journal/page.tsx",
+      "desc": "8-phase journal with daily teachings, source citations, cloud/local storage, client-side AES-256-GCM encryption.",
+      "notes": "Most complete product. Upgrade justified: connects to Supabase, encryption, curriculum engine.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R7",
+        "R17"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "engine-journal-content",
+        "data-journal-entries",
+        "infra-encryption"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "na"
+    },
+    {
+      "id": "prod-action-scorer",
+      "name": "Action Scorer",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".tsx",
+      "path": "/website/src/app/score/page.tsx",
+      "desc": "Human interface for scoring an action. Captures action text, context, relationships, emotional state. Calls sage-score tool.",
+      "notes": "Fully functional UI connected to working API. Upgrade justified: real end-to-end flow.",
+      "deps": [
+        "supabase",
+        "claude-api"
+      ],
+      "rules": [
+        "R3",
+        "R6",
+        "R9"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "tool-sage-score",
+        "engine-4stage"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "na"
+    },
+    {
+      "id": "prod-admin",
+      "name": "Admin Dashboard",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".tsx",
+      "path": "/website/src/app/admin/page.tsx",
+      "desc": "Internal metrics, analytics events, real-time activity feed.",
+      "notes": "UI structure exists but analytics pipeline not wired to real data.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "data-analytics"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "na"
+    },
+    {
+      "id": "prod-api-docs",
+      "name": "API Documentation",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".tsx",
+      "path": "/website/src/app/api-docs/page.tsx",
+      "desc": "Interactive OpenAPI documentation with live examples for developers.",
+      "notes": "Connected to OpenAPI spec. Functional for developers.",
+      "deps": [],
+      "rules": [
+        "R8"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "infra-openapi"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "prod-auth",
+      "name": "Auth (Sign In / Sign Up)",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".tsx",
+      "path": "/website/src/app/auth/page.tsx",
+      "desc": "Email/password, magic link, privacy consent.",
+      "notes": "Connected to Supabase Auth. JWT tokens functional.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R17"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "infra-supabase-auth"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "na"
+    },
+    {
+      "id": "prod-baseline",
+      "name": "Baseline Assessment",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".tsx",
+      "path": "/website/src/app/baseline/page.tsx",
+      "desc": "5-6 question Stoic baseline assessment with branching Q6. Produces Senecan grade + 4 dimension levels.",
+      "notes": "Functional UI with API connection. Needs real-user testing.",
+      "deps": [
+        "supabase",
+        "claude-api"
+      ],
+      "rules": [
+        "R6c",
+        "R3"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "engine-baseline",
+        "data-baseline-table"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "na"
+    },
+    {
+      "id": "prod-community-map",
+      "name": "Community Map",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".tsx",
+      "path": "/website/src/app/community/page.tsx",
+      "desc": "World map of opted-in users. react-simple-maps.",
+      "notes": "UI exists but depends on community data that doesn't exist yet. True scaffolding.",
+      "deps": [
+        "supabase",
+        "react-simple-maps"
+      ],
+      "rules": [],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "data-community"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "na"
+    },
+    {
+      "id": "prod-doc-scorer",
+      "name": "Document Scorer",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".tsx",
+      "path": "/website/src/app/score-document/page.tsx",
+      "desc": "Human interface for scoring documents/policies against Stoic principles.",
+      "notes": "Functional, connects to sage-audit API.",
+      "deps": [
+        "claude-api",
+        "supabase"
+      ],
+      "rules": [
+        "R3",
+        "R9"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "tool-sage-audit"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "na"
+    },
+    {
+      "id": "prod-scenarios",
+      "name": "Ethical Scenarios",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "designed",
+      "ext": ".tsx",
+      "path": "/website/src/app/scenarios/page.tsx",
+      "desc": "Three-step flow with live LLM evaluation. Load scenarios, evaluate decisions, receive real-time feedback from Claude.",
+      "notes": "Complete React interface with scenario generator integration. Live LLM reasoning via sage-reason, receipt storage.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R3",
+        "R9"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "tool-sage-scenario"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "prod-landing",
+      "name": "Landing Page",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".tsx",
+      "path": "/website/src/app/page.tsx",
+      "desc": "Hero, virtue cards, how-it-works, community link. Public entry point.",
+      "notes": "Complete static page. Functions as intended (no backend needed).",
+      "deps": [],
+      "rules": [],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "na"
+    },
+    {
+      "id": "prod-pricing",
+      "name": "Pricing Page",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".tsx",
+      "path": "/website/src/app/pricing/page.tsx",
+      "desc": "Pricing plans display for humans.",
+      "notes": "Shows pricing but can't process payments. True scaffolding.",
+      "deps": [],
+      "rules": [
+        "R5"
+      ],
+      "priority": "P4",
+      "proximity": "",
+      "connects": [
+        "infra-stripe"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "na"
+    },
+    {
+      "id": "prod-marketplace",
+      "name": "Skills Marketplace",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "designed",
+      "ext": ".tsx",
+      "path": "/website/src/app/marketplace/page.tsx",
+      "desc": "Full React component with SKILL_REGISTRY integration. 16+ skills. Live marketplace for skill discovery and execution.",
+      "notes": "Complete UI with live skill loading, filtering by category, skill details, chaining rules. Connected to marketplace dispatch.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R10",
+        "R11"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "engine-skill-registry"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "prod-social-filter",
+      "name": "Social Media Filter",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".tsx",
+      "path": "/website/src/app/score-social/page.tsx",
+      "desc": "Human interface for filtering social content through Stoic reasoning.",
+      "notes": "Functional, connects to sage-filter API.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R3",
+        "R9"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "tool-sage-filter"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "na"
+    },
+    {
+      "id": "prod-dashboard",
+      "name": "User Dashboard",
+      "type": "product",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".tsx",
+      "path": "/website/src/app/dashboard/page.tsx",
+      "desc": "Progress profile: baseline results, evaluation history, practice calendar with virtue stamps, milestones.",
+      "notes": "UI complete, connected to Supabase evaluation data.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R3"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "data-evaluations"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "na"
+    },
+    {
+      "id": "reasoning-4stage",
+      "name": "4-Stage Evaluation Sequence",
+      "type": "reasoning",
+      "subtype": [
+        "multi-step",
+        "logical"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".json",
+      "path": "/stoic-brain/scoring.json",
+      "desc": "Prohairesis filter (logical: in my control?) > Kathekon (heuristic: appropriate?) > Passion diagnosis (causal: what false judgement?) > Unified virtue (reflective: whole character?). The master reasoning chain.",
+      "notes": "Embedded in sage-reason-engine system prompts. Functions in every evaluation.",
+      "deps": [
+        "engine-stoic-brain-v3"
+      ],
+      "rules": [
+        "R4",
+        "R6b",
+        "R6c"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason",
+        "tool-sage-score",
+        "agent-mentor"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "reasoning-guardrails",
+      "name": "AI Safety Guardrails",
+      "type": "reasoning",
+      "subtype": [
+        "logical",
+        "heuristic"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/lib/guardrails.ts",
+      "desc": "Safety checks: R1 (therapeutic), R2 (employment), R20 (distress detection). Logical rules + heuristic pattern matching.",
+      "notes": "Functional guardrail logic connected to sage-guard and other tools.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R1",
+        "R2",
+        "R20"
+      ],
+      "priority": "P2",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-guard",
+        "agent-mentor"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "doc-journal-layers",
+      "name": "Journal Interpretation (10 Layers)",
+      "type": "reasoning",
+      "subtype": [],
+      "status": "verified",
+      "oldStatus": "designed",
+      "ext": ".md",
+      "path": "/reference/Journal_Interpretation_10_Layers.md",
+      "desc": "19KB. Multi-layer interpretation pipeline spec. Cognitive profiling for mentorship.",
+      "notes": "Spec exists (19KB doc). Code has 25 TODOs, layers 9-10 stub only. Correct status.",
+      "deps": [],
+      "rules": [
+        "R1",
+        "R17",
+        "R19"
+      ],
+      "priority": "P5",
+      "proximity": "",
+      "connects": [
+        "reasoning-journal-interp"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "reasoning-journal-interp",
+      "name": "Journal Interpretation (10 Layers)",
+      "type": "reasoning",
+      "subtype": [
+        "multi-step",
+        "causal",
+        "reflective"
+      ],
+      "status": "designed",
+      "oldStatus": "",
+      "ext": ".ts/.md",
+      "path": "/sage-mentor/journal-interpreter.ts",
+      "desc": "Multi-layer cognitive profiling from external journals. 8+ analysis layers. Causal inference of belief patterns from written reflection.",
+      "notes": "",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R1",
+        "R17",
+        "R19"
+      ],
+      "priority": "P5",
+      "proximity": "sage-like",
+      "connects": [
+        "agent-mentor",
+        "engine-pattern-engine"
+      ],
+      "origin": "",
+      "humanReady": "",
+      "agentReady": ""
+    },
+    {
+      "id": "reasoning-kathekon",
+      "name": "Kathekon Assessment",
+      "type": "reasoning",
+      "subtype": [
+        "heuristic"
+      ],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".json",
+      "path": "/stoic-brain/action.json",
+      "desc": "Stage 2: Appropriate action evaluation. Role-based duties, social obligations, situational propriety. Rule-of-thumb reasoning from oikeiosis.",
+      "notes": "Verified in Stoic Brain v3 data. Confirmed.",
+      "deps": [
+        "engine-stoic-brain-v3"
+      ],
+      "rules": [
+        "R6"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "reasoning-4stage",
+        "reasoning-oikeiosis"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "reasoning-katorthoma",
+      "name": "Katorthoma Proximity Scale",
+      "type": "reasoning",
+      "subtype": [
+        "heuristic"
+      ],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".json",
+      "path": "/stoic-brain/scoring.json",
+      "desc": "5-level proximity: reflexive > habitual > deliberate > principled > sage-like. Qualitative, not numeric. The output language of all evaluations.",
+      "notes": "Verified in Stoic Brain v3 data. Confirmed.",
+      "deps": [
+        "engine-stoic-brain-v3"
+      ],
+      "rules": [
+        "R6c"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "reasoning-4stage",
+        "engine-trust-layer"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "reasoning-oikeiosis",
+      "name": "Oikeiosis Developmental Sequence",
+      "type": "reasoning",
+      "subtype": [
+        "analogical",
+        "multi-step"
+      ],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".json",
+      "path": "/stoic-brain/action.json",
+      "desc": "Self > Household > Community > Cosmos. Expanding circles of concern. Analogical mapping from individual to universal. Governs all R0 decisions.",
+      "notes": "Verified in Stoic Brain v3 data. Confirmed.",
+      "deps": [
+        "engine-stoic-brain-v3"
+      ],
+      "rules": [
+        "R0"
+      ],
+      "priority": "ALL",
+      "proximity": "sage-like",
+      "connects": [
+        "reasoning-kathekon",
+        "gov-manifest"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "reasoning-passion-diagnosis",
+      "name": "Passion Diagnosis",
+      "type": "reasoning",
+      "subtype": [
+        "causal"
+      ],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".json",
+      "path": "/stoic-brain/passions.json",
+      "desc": "Stage 3: Identifies the specific false judgement causing the passion. Diagnostic, not punitive (R6d). 4 root passions, 25 sub-species, 3 eupatheiai.",
+      "notes": "Verified in Stoic Brain v3 data. Confirmed.",
+      "deps": [
+        "engine-stoic-brain-v3"
+      ],
+      "rules": [
+        "R6d",
+        "R17"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "reasoning-4stage"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "reasoning-prohairesis",
+      "name": "Prohairesis Filter",
+      "type": "reasoning",
+      "subtype": [
+        "logical"
+      ],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".json",
+      "path": "/stoic-brain/psychology.json",
+      "desc": "Stage 1: Binary control check. Is this within the agent's sphere of choice? Logical deduction from dichotomy of control.",
+      "notes": "Verified in Stoic Brain v3 data. Confirmed.",
+      "deps": [
+        "engine-stoic-brain-v3"
+      ],
+      "rules": [
+        "R6"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "reasoning-4stage"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "reasoning-sanitise",
+      "name": "Prompt Injection Defence",
+      "type": "reasoning",
+      "subtype": [
+        "logical",
+        "deterministic"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/sage-mentor/sanitise.ts",
+      "desc": "Content validation, injection signature detection. Deterministic pattern matching to protect reasoning integrity.",
+      "notes": "Part of isolated Sage Mentor. Not integrated into website API layer.",
+      "deps": [],
+      "rules": [],
+      "priority": "P2",
+      "proximity": "sage-like",
+      "connects": [
+        "agent-mentor"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready"
+    },
+    {
+      "id": "reasoning-senecan",
+      "name": "Senecan Progress Tracking",
+      "type": "reasoning",
+      "subtype": [
+        "multi-step",
+        "reflective"
+      ],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".json",
+      "path": "/stoic-brain/progress.json",
+      "desc": "3 grades of progress. 4 dimensions: passion reduction, judgement quality, disposition stability, oikeiosis extension. Reflective self-assessment over time.",
+      "notes": "Verified in Stoic Brain v3 data. Confirmed.",
+      "deps": [
+        "engine-stoic-brain-v3"
+      ],
+      "rules": [
+        "R6c"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-iterate",
+        "engine-baseline"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "reasoning-virtue-unity",
+      "name": "Unified Virtue Assessment",
+      "type": "reasoning",
+      "subtype": [
+        "reflective"
+      ],
+      "status": "verified",
+      "oldStatus": "verified",
+      "ext": ".json",
+      "path": "/stoic-brain/virtue.json",
+      "desc": "Stage 4: Holistic character assessment. Unity of virtue thesis — virtues cannot be scored independently (R6b). Self-examining reflection on whole disposition.",
+      "notes": "Verified in Stoic Brain v3 data. Confirmed.",
+      "deps": [
+        "engine-stoic-brain-v3"
+      ],
+      "rules": [
+        "R6b"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "reasoning-4stage"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "tool-mcp",
+      "name": "mcp-tools",
+      "type": "tool",
+      "subtype": [
+        "retrieval",
+        "deterministic"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/mcp/tools/route.ts",
+      "desc": "MCP tool registry endpoint for agent integration via Model Context Protocol.",
+      "notes": "Functional endpoint. Serves MCP contracts.",
+      "deps": [],
+      "rules": [],
+      "priority": "P3",
+      "proximity": "",
+      "connects": [
+        "infra-mcp-contracts"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-receipts",
+      "name": "receipts",
+      "type": "tool",
+      "subtype": [
+        "action",
+        "deterministic"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/receipts/route.ts",
+      "desc": "Reasoning receipt archive. Stores audit trail of all evaluations.",
+      "notes": "Connected to Supabase. Audit trail functional.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R14"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "engine-receipt"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-align",
+      "name": "sage-align",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-align/route.ts",
+      "desc": "Value alignment checker. Wraps sage-reason to evaluate whether actions align with declared values.",
+      "notes": "All wrapped skills use consistent factory pattern. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-audit",
+      "name": "sage-audit",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/score-document/route.ts",
+      "desc": "Document quality audit + reasoning assessment. Independent — domain-specific persistence + badge generation.",
+      "notes": "Independent of shared engine (by design). Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R3",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "engine-doc-scorer"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-classify",
+      "name": "sage-classify",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-classify/route.ts",
+      "desc": "Decision classifier. Wraps sage-reason to categorise decisions by type, domain, and virtue relevance.",
+      "notes": "Factory wrapper. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-coach",
+      "name": "sage-coach",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-coach/route.ts",
+      "desc": "Coaching conversation wrapper. Wraps sage-reason for guided Stoic coaching dialogue.",
+      "notes": "Factory wrapper. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R1",
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-comply",
+      "name": "sage-compliance",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-compliance/route.ts",
+      "desc": "Compliance evaluation wrapper. Wraps sage-reason to assess regulatory and policy compliance.",
+      "notes": "Factory wrapper. Functional. First revenue candidate.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R10",
+        "R12",
+        "R14"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-context",
+      "name": "sage-context",
+      "type": "tool",
+      "subtype": [
+        "retrieval",
+        "deterministic"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/stoic-brain/route.ts",
+      "desc": "Framework context loader. Returns Stoic Brain reference data. Free, no auth, <50ms.",
+      "notes": "Deterministic retrieval. Functions immediately.",
+      "deps": [],
+      "rules": [],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "engine-stoic-brain-v3"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "na",
+      "agentReady": "ready"
+    },
+    {
+      "id": "tool-sage-converse",
+      "name": "sage-converse",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/score-conversation/route.ts",
+      "desc": "Conversation analysis. Now wraps sage-reason-engine: calls runSageReason(deep) for overall, keeps custom per-participant breakdown. 216→149 LOC.",
+      "notes": "Functional. Uses deep reasoning mode.",
+      "deps": [
+        "sage-reason-engine"
+      ],
+      "rules": [
+        "R3"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "engine-sage-reason-engine",
+        "reasoning-4stage"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-decide",
+      "name": "sage-decide",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/score-decision/route.ts",
+      "desc": "Option ranker. Now wraps sage-reason-engine: loops runSageReason(standard) per option, keeps custom katorthoma ranking. 260→192 LOC.",
+      "notes": "Functional. Loops reasoning for multi-option comparison.",
+      "deps": [
+        "sage-reason-engine"
+      ],
+      "rules": [
+        "R3",
+        "R9"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "engine-sage-reason-engine",
+        "reasoning-4stage"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-diagnose",
+      "name": "sage-diagnose",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/assessment/foundational/route.ts",
+      "desc": "Decision diagnostic: 14-question quick or 55-question deep assessment.",
+      "notes": "Functional. Maps to assessment framework.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R3",
+        "R6d"
+      ],
+      "priority": "P3",
+      "proximity": "sage-like",
+      "connects": [
+        "engine-baseline"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-educate",
+      "name": "sage-educate",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-educate/route.ts",
+      "desc": "Educational content wrapper. Wraps sage-reason for Stoic teaching and curriculum delivery.",
+      "notes": "Factory wrapper. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R7",
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-filter",
+      "name": "sage-filter",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/score-social/route.ts",
+      "desc": "Pre-publish content filter. Now wraps sage-reason-engine: calls runSageReason(standard) with social context, post-processes poster vs reader passions. Now generates receipts. 186→173 LOC.",
+      "notes": "Functional with receipt generation added during refactoring.",
+      "deps": [
+        "sage-reason-engine"
+      ],
+      "rules": [
+        "R3"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "engine-sage-reason-engine",
+        "reasoning-4stage"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-govern",
+      "name": "sage-govern",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-govern/route.ts",
+      "desc": "Governance evaluation wrapper. Wraps sage-reason for policy and governance assessment.",
+      "notes": "Factory wrapper. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-guard",
+      "name": "sage-guard",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "deterministic"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/guardrail/route.ts",
+      "desc": "Binary go/no-go gate. Now wraps sage-reason-engine: calls runSageReason(quick) with 3 mechanisms via Haiku, post-processes threshold. 231→219 LOC.",
+      "notes": "Functional guardrail. Uses fast Haiku model for speed.",
+      "deps": [
+        "sage-reason-engine"
+      ],
+      "rules": [
+        "R4"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "engine-sage-reason-engine",
+        "engine-model-config"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "na",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-identity",
+      "name": "sage-identity",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-identity/route.ts",
+      "desc": "Identity and role analysis wrapper. Wraps sage-reason for examining role-based reasoning.",
+      "notes": "Factory wrapper. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-invest",
+      "name": "sage-invest",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-invest/route.ts",
+      "desc": "Investment reasoning wrapper. Wraps sage-reason for evaluating investment decisions against Stoic principles.",
+      "notes": "Factory wrapper. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R9",
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-iterate",
+      "name": "sage-iterate",
+      "type": "tool",
+      "subtype": [
+        "transformation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/score-iterate/route.ts",
+      "desc": "Iterative refinement: submit > feedback > revise > track. Multi-turn transformation.",
+      "notes": "Independent by necessity (chain state). Functional with Supabase.",
+      "deps": [
+        "claude-api",
+        "supabase"
+      ],
+      "rules": [
+        "R4",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "data-deliberation-chain",
+        "reasoning-senecan"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-moderate",
+      "name": "sage-moderate",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-moderate/route.ts",
+      "desc": "Content moderation wrapper. Wraps sage-reason for community content evaluation.",
+      "notes": "Factory wrapper. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-negotiate",
+      "name": "sage-negotiate",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-negotiate/route.ts",
+      "desc": "Negotiation reasoning wrapper. Wraps sage-reason for principled negotiation analysis.",
+      "notes": "Factory wrapper. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-pivot",
+      "name": "sage-pivot",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-pivot/route.ts",
+      "desc": "Strategic pivot analysis wrapper. Wraps sage-reason for evaluating business direction changes.",
+      "notes": "Factory wrapper. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-premortem",
+      "name": "sage-premortem",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-premortem/route.ts",
+      "desc": "Pre-mortem analysis wrapper. Wraps sage-reason for anticipating failure modes through Stoic reasoning.",
+      "notes": "Factory wrapper. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-prioritise",
+      "name": "sage-prioritise",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-prioritise/route.ts",
+      "desc": "Priority evaluation wrapper. Wraps sage-reason for principled task and goal prioritisation.",
+      "notes": "Factory wrapper. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-profile",
+      "name": "sage-profile",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered",
+        "action"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/assessment/full/route.ts",
+      "desc": "Agent decision profile: 4 scenarios, tendencies, blind spots. Writes results to DB.",
+      "notes": "Functional. Connects Anthropic + Supabase for full assessment.",
+      "deps": [
+        "claude-api",
+        "supabase"
+      ],
+      "rules": [
+        "R3",
+        "R17"
+      ],
+      "priority": "P3",
+      "proximity": "sage-like",
+      "connects": [
+        "reasoning-4stage",
+        "data-evaluations"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-reason",
+      "name": "sage-reason",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/reason/route.ts",
+      "desc": "Universal reasoning layer. Quick (3 mechanisms), Standard (5), Deep (6 + Senecan tracking). Core tool all agents use.",
+      "notes": "Core tool. Fully functional with Anthropic API. Upgrade justified.",
+      "deps": [
+        "claude-api",
+        "stoic-brain-v3"
+      ],
+      "rules": [
+        "R4",
+        "R5",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "reasoning-4stage",
+        "engine-model-config",
+        "infra-rate-limit"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-reflect",
+      "name": "sage-reflect",
+      "type": "tool",
+      "subtype": [
+        "transformation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/reflect/route.ts",
+      "desc": "End-of-day decision review. Transforms daily actions into patterns + examination prompts.",
+      "notes": "Functional with Anthropic API. Narrative reflection output.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R3"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "reasoning-reflective-practice"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-resolve",
+      "name": "sage-resolve",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-resolve/route.ts",
+      "desc": "Conflict resolution wrapper. Wraps sage-reason for principled dispute and conflict analysis.",
+      "notes": "Factory wrapper. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-retro",
+      "name": "sage-retro",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skill/sage-retro/route.ts",
+      "desc": "Retrospective analysis wrapper. Wraps sage-reason for team/project retrospective evaluation.",
+      "notes": "Factory wrapper. Functional.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R10",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "tool-sage-reason"
+      ],
+      "origin": "wrapped",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-scenario",
+      "name": "sage-scenario",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered",
+        "simulation"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/score-scenario/route.ts",
+      "desc": "Decision scenario generator + scorer. Simulates ethical situations.",
+      "notes": "Functional with Anthropic API. Generates and evaluates scenarios.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R3",
+        "R9"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "reasoning-4stage"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-sage-score",
+      "name": "sage-score",
+      "type": "tool",
+      "subtype": [
+        "evaluation",
+        "llm-powered"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/score/route.ts",
+      "desc": "Pre-action audit. Now wraps sage-reason-engine: builds domain_context from action fields, calls runSageReason(standard). 238→104 LOC.",
+      "notes": "Refactored, functional. Connected to Anthropic via shared engine.",
+      "deps": [
+        "sage-reason-engine",
+        "stoic-brain-v3"
+      ],
+      "rules": [
+        "R3",
+        "R4",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "sage-like",
+      "connects": [
+        "engine-sage-reason-engine",
+        "reasoning-4stage"
+      ],
+      "origin": "brain-derived",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-compose",
+      "name": "skill-compose",
+      "type": "tool",
+      "subtype": [
+        "transformation",
+        "deterministic"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/compose/route.ts",
+      "desc": "Prompt composition and tool chaining. Deterministic orchestration of multiple tool calls.",
+      "notes": "Functional orchestrator.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R4",
+        "R12"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "engine-skill-registry"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-execute",
+      "name": "skill-execute",
+      "type": "tool",
+      "subtype": [
+        "action",
+        "deterministic"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/execute/route.ts",
+      "desc": "Execute any skill by ID with input. Marketplace runtime dispatcher.",
+      "notes": "Functional dispatcher. Connects to skill registry.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R10",
+        "R4"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "engine-skill-registry"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-skills-list",
+      "name": "skills-list",
+      "type": "tool",
+      "subtype": [
+        "retrieval",
+        "deterministic"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/skills/route.ts",
+      "desc": "Returns all sage skills with metadata, contracts, chaining rules.",
+      "notes": "Deterministic retrieval. Functions immediately.",
+      "deps": [],
+      "rules": [
+        "R10"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "engine-skill-registry"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "ready"
+    },
+    {
+      "id": "tool-usage",
+      "name": "usage-tracker",
+      "type": "tool",
+      "subtype": [
+        "retrieval",
+        "deterministic"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/usage/route.ts",
+      "desc": "Returns API usage stats for the authenticated user.",
+      "notes": "Connected to Supabase. Functional.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R5"
+      ],
+      "priority": "P6",
+      "proximity": "",
+      "connects": [
+        "data-api-keys"
+      ],
+      "origin": "",
+      "humanReady": "partial",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-delete",
+      "name": "user-delete",
+      "type": "tool",
+      "subtype": [
+        "action"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/user/delete/route.ts",
+      "desc": "Account deletion with cascading deletion and compliance logging. Fully functional per R17c, permanent deletion guaranteed.",
+      "notes": "Complete deletion implementation with compliance audit trail. Confirmation token required. Verified against R17c deletion requirements.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R17c"
+      ],
+      "priority": "P2",
+      "proximity": "",
+      "connects": [
+        "data-supabase-core"
+      ],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "partial"
+    },
+    {
+      "id": "tool-export",
+      "name": "user-export",
+      "type": "tool",
+      "subtype": [
+        "action",
+        "retrieval"
+      ],
+      "status": "wired",
+      "oldStatus": "scaffolded",
+      "ext": ".ts",
+      "path": "/website/src/app/api/user/export/route.ts",
+      "desc": "GDPR/Privacy Act data export. Queries 8 Supabase tables, returns JSON download. Fully functional.",
+      "notes": "Complete data export implementation. Handles all user data across profiles, evaluations, journal, assessments, chains, analytics. Full compliance.",
+      "deps": [
+        "supabase"
+      ],
+      "rules": [
+        "R17"
+      ],
+      "priority": "P2",
+      "proximity": "",
+      "connects": [
+        "data-supabase-core"
+      ],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "partial"
+    }
+  ]
+}
