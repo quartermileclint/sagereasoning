@@ -54,7 +54,7 @@ Every strategic folder (adopted, drafts, business, compliance, legal, operations
 |--------|---------|-------------|
 | /product/ | Product specs, brainstorms, architecture docs | AGENTS.md (API guide), Trust Layer Framework, Mentor Architecture, Path of the Prokoptos, Baseline Assessment Spec, 19 files total |
 | /engineering/ | Technical docs, scripts, audits, deployment | Deployment Checklist, Token Efficiency, Website Audit, JS build scripts, SQL scripts |
-| /prototypes/ | HTML hub mockups, demo outputs | Mentor Hub, Private Hub, Sage Ops Hub, Setup Plan, Wrapper Demo |
+| /prototypes/ | Legacy HTML mockups, demo outputs | Setup Plan, Wrapper Demo (hub prototypes superseded by live pages at /mentor-hub, /private-mentor, /ops-hub) |
 
 ### Operations
 
