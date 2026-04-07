@@ -487,7 +487,7 @@ function renderStats() {
     ).join('') + (Object.keys(origins).length > 0 ? '<div style="width:1px;height:16px;background:var(--border);margin:0 6px"></div>' : '') +
     Object.entries(origins).map(([o,n]) =>
       `<div class="stat"><span style="color:var(--text-dim);font-size:9px">${o ? (o==='brain-derived' ? 'Brain' : 'Wrapped') : 'Wrap'} <span class="stat-count">${n}</span></span></div>`
-    ).join('') : '');
+    ).join('');
 
   let sidebarHtml = SECTIONS.map(sec => {
     const n = C.filter(c=>c.type===sec.key).length;
