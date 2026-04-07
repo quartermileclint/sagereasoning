@@ -66,7 +66,8 @@ function getStripe(): Stripe {
 /** @deprecated Access via getStripe() — kept for backward compatibility */
 export const stripe = new Proxy({} as Stripe, {
   get(_target, prop) {
-    return (getStripe() as Record<string | symbol, unknown>)[prop]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (getStripe() as any)[prop]
   },
 })
 
