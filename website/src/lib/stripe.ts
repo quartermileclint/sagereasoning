@@ -31,18 +31,42 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 /**
- * The Stripe client instance.
+ * The Stripe client instance — lazy-initialised.
  * Uses API version 2025-12-18 (latest stable as of build date).
  * All Stripe calls must go through this client.
+ *
+ * Lazy initialisation prevents the Stripe constructor from throwing
+ * during the Next.js build phase when STRIPE_SECRET_KEY is not yet
+ * available as an environment variable.
  */
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  apiVersion: '2025-12-18.acacia' as any,
-  typescript: true,
-  appInfo: {
-    name: 'SageReasoning',
-    url: 'https://sagereasoning.com',
-    version: '0.1.0',
+let _stripe: Stripe | null = null
+
+function getStripe(): Stripe {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY
+    if (!key) {
+      throw new Error(
+        '[stripe.ts] STRIPE_SECRET_KEY is not set. Cannot create Stripe client.'
+      )
+    }
+    _stripe = new Stripe(key, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      apiVersion: '2025-12-18.acacia' as any,
+      typescript: true,
+      appInfo: {
+        name: 'SageReasoning',
+        url: 'https://sagereasoning.com',
+        version: '0.1.0',
+      },
+    })
+  }
+  return _stripe
+}
+
+/** @deprecated Access via getStripe() — kept for backward compatibility */
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    return (getStripe() as Record<string | symbol, unknown>)[prop]
   },
 })
 
