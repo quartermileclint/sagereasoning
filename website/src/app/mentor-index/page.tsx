@@ -104,7 +104,7 @@ const DEMO_CARDS: DemoCard[] = [
     category: 'proactive',
     status: 'wired',
     payload: {
-      input: 'Generate a weekly pattern mirror for a practitioner at Early-to-Mid Progressor stage (Senecan B-minus). This week: 3 morning check-ins completed, 2 evening reflections, 1 deep reasoning session. Patterns observed: courage tested twice (held once, avoided once), reputation-fear triggered 4 times (down from 6 last week), new awareness of catastrophic extrapolation pattern. Their strongest virtue is Justice, weakest is Courage. Synthesise the week.',
+      input: 'Generate a weekly pattern mirror for a practitioner at Deliberate stage (Proficiens Medius). This week: 3 morning check-ins completed, 2 evening reflections, 1 deep reasoning session. Patterns observed: courage tested twice (held once, avoided once), philodoxia triggered 4 times (down from 6 last week), new awareness of synkatathesis breakdown — assenting to false judgement that recognition is a genuine good. Their strongest virtue is Wisdom (phronesis), weakest is Courage (andreia). Synthesise the week.',
       depth: 'deep',
       domain_context: 'weekly_pattern_mirror',
     },
@@ -120,13 +120,13 @@ const DEMO_CARDS: DemoCard[] = [
     category: 'assessment',
     status: 'new',
     payload: {
-      profile_summary: `Practitioner: Clinton. Grade: Prokoptōn (Progressor), Early-to-Mid, Senecan B-minus.
-Strongest virtue: Justice (fairness-seeking is core identity). Weakest: Courage in real-time application.
-Dominant passions: Fear (reputation, judgment, inadequacy), Appetite (validation, control, perfectionism), Distress (shame spirals from perceived failure).
-Primary causal breakdown: hasty assent and unexamined impulse — moves from impression to regret without pausing.
-Key tensions: Intellectual understanding far outpaces embodied practice. Promotes can-do but hasn't walked it. Values virtue but carries self-image as delusional/fraud blocking action.
-Oikeiosis: Strong self-examination, strong family concern (guilt-driven), emerging community, weak humanity, moderate-strong nature connection.
-7 of 12 journal sections processed (Oct-Dec 2025). Gaps in: Master Your Thoughts, Master Your Feelings, Live in Gratitude, Accept Your Fate, Be Responsible for Others.`,
+      profile_summary: `Practitioner: Clinton. Grade: Deliberate (Proficiens Medius — Middle Progressor).
+Strongest virtue: Wisdom (phronesis) — strong post-hoc analysis, can articulate principles accurately. Weakest: Courage (andreia) — developing, fear still prevents action in real-time.
+Dominant passions: Philodoxia (love of reputation, 9 sections, strong), Agonia (anxiety about future, 5 sections, strong), Pothos (yearning for lost identity, 4 sections, mild), Penthos (grief over perceived failures, 4 sections, strong).
+Primary causal breakdown: synkatathesis (assent) — assents to false judgement that external recognition constitutes a genuine good. Secondary: horme (anger impulse bypasses deliberation with children), phantasia (catastrophizing).
+Key tensions: Reputation/validation treated as genuine good despite intellectual understanding it is a preferred indifferent. Wife and self celebrate wealth/status as shared value system.
+Oikeiosis: Strong self-preservation, strong household, developing community, nascent humanity, emerging cosmic.
+12 of 12 journal sections processed (Oct-Dec 2025). 119 entries. 13,834 words.`,
     },
   },
 
@@ -140,13 +140,13 @@ Oikeiosis: Strong self-examination, strong family concern (guilt-driven), emergi
     category: 'journal',
     status: 'new',
     payload: {
-      profile_summary: `Practitioner: Clinton. Grade: Prokoptōn (Progressor), Early-to-Mid.
-Weakest virtue: Courage (real-time application, not theoretical). Strongest: Justice.
-Dominant passion: Fear — specifically reputation-damage (pervasive, overwhelming), future-catastrophe (frequent, strong), fear-of-inadequacy (pervasive, strong).
-Causal breakdown: hasty assent stage — gives assent to negative interpretations too quickly.
-Top tension: "Comprehensive eudaimonia vision but admits nothing stopping start — inaction."
-Top aim: "Achieve eudaimonia: flourishing with continual improvement, positive outlook, strength, health, unburdened peace."
-Recent insight: "Nothing stopping start except habit patterns."
+      profile_summary: `Practitioner: Clinton. Grade: Deliberate (Proficiens Medius).
+Weakest virtue: Courage (andreia — developing, fear prevents action). Strongest: Wisdom (phronesis — strong analytical capacity).
+Dominant passion: Philodoxia (love of reputation) — 9 of 12 sections, root passion epithumia. Secondary: Agonia (anxiety) — 5 sections, catastrophizing future disasters.
+Causal breakdown: synkatathesis — assents to false judgement that external recognition is a genuine good.
+Top tension: "Reputation/validation treated as genuine good despite intellectual understanding it is a preferred indifferent."
+Top aim: "Principled reasoning as daily practice — gap between knowing and applying under pressure."
+Recent insight: "From shame to fulfilment — outlook is more positive, found fulfilment and patience, can-do outlook."
 Language style: pragmatic, concrete-with-principles, battle/journey metaphors.`,
       week_number: 1,
     },

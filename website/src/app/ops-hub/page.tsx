@@ -430,27 +430,27 @@ export default function OpsHub() {
               {/* Status Row */}
               <div style={styles.statusRow}>
                 <div style={styles.statusCard}>
-                  <div style={styles.cardTitle}>Latest Competitive Alert</div>
-                  <div style={styles.statusLabel}>RivalAI announced new pricing tier</div>
-                  <div style={styles.statusItem}>Position: Lower than us on entry price</div>
-                  <div style={styles.statusItem}>Threat: Medium — targeting SMBs</div>
-                  <div style={styles.statusItem}>Our response: Bundled tier launching next week</div>
+                  <div style={styles.cardTitle}>Competitive Positioning</div>
+                  <div style={styles.statusLabel}>No direct competitors in Stoic reasoning for AI agents</div>
+                  <div style={styles.statusItem}>Adjacent spaces: Meditation apps, AI ethics frameworks</div>
+                  <div style={styles.statusItem}>Moat: Proprietary journal interpretation + stoic reasoning layer</div>
+                  <div style={styles.statusItem}>Status: Unique market position — focus on differentiation</div>
                 </div>
 
                 <div style={styles.statusCard}>
-                  <div style={styles.cardTitle}>Regulatory Deadlines</div>
-                  <div style={styles.statusLabel}>Next item: GDPR audit</div>
-                  <div style={styles.statusItem}>Days remaining: 8 days</div>
-                  <div style={styles.statusItem}>Status: On track, audit scheduled</div>
-                  <div style={styles.statusItem}>Owner: Legal & Compliance</div>
+                  <div style={styles.cardTitle}>Pre-Launch Requirements</div>
+                  <div style={styles.statusLabel}>Privacy policy and Terms of Service</div>
+                  <div style={styles.statusItem}>Status: Not yet started</div>
+                  <div style={styles.statusItem}>Owner: Founder (legal review needed)</div>
+                  <div style={styles.statusItem}>Priority: P6 criterion 5 — must complete before MVP launch</div>
                 </div>
 
                 <div style={styles.statusCard}>
-                  <div style={styles.cardTitle}>Pipeline Health</div>
-                  <div style={styles.statusLabel}>Quarterly forecast: $180K</div>
-                  <div style={styles.statusItem}>Deals in final stage: 5</div>
-                  <div style={styles.statusItem}>Win rate this month: 68%</div>
-                  <div style={styles.statusItem}>Avg deal cycle: 22 days</div>
+                  <div style={styles.cardTitle}>Project Status</div>
+                  <div style={styles.statusLabel}>Pre-launch — R&D phase</div>
+                  <div style={styles.statusItem}>Exit criteria met: 6 of 7</div>
+                  <div style={styles.statusItem}>Next: P1 Business plan review (after P0 hold point confirmation)</div>
+                  <div style={styles.statusItem}>Priority: Complete P0 hold point criterion 7</div>
                 </div>
               </div>
             </div>
@@ -654,9 +654,9 @@ export default function OpsHub() {
                 <div style={styles.cardTitleBold}>Key Events This Week</div>
 
                 {[
-                  { date: 'Monday, Apr 7', title: 'Series A Investor Meeting', status: 'Scheduled' },
-                  { date: 'Wednesday, Apr 9', title: 'Product Launch', status: 'In Progress' },
-                  { date: 'Friday, Apr 11', title: 'Board Review', status: 'Upcoming' },
+                  { date: 'Monday, Apr 7', title: 'Hub Pages Testing with Real Journal Data', status: 'In Progress' },
+                  { date: 'Wednesday, Apr 9', title: 'P0 Hold Point Assessment — Criterion 7', status: 'In Progress' },
+                  { date: 'Friday, Apr 11', title: 'Session Handoff Protocol Review', status: 'Scheduled' },
                 ].map((event, idx) => (
                   <div key={idx} style={styles.timelineItem}>
                     <div style={styles.timelineMarker}></div>
@@ -759,9 +759,9 @@ export default function OpsHub() {
             <div style={styles.contentGrid}>
               <div style={styles.competitorsGrid}>
                 {[
-                  { name: 'RivalAI', threat: 'high', change: '52 minutes ago', event: 'Series B: $18M' },
-                  { name: 'InnovateAI', threat: 'medium', change: '3 days ago', event: 'Pricing update' },
-                  { name: 'TechVentures', threat: 'low', change: '1 week ago', event: 'Expansion' },
+                  { name: 'Meditation Apps', threat: 'low', change: '2 weeks ago', event: 'Market expansion' },
+                  { name: 'AI Ethics Frameworks', threat: 'low', change: '1 month ago', event: 'Academic focus' },
+                  { name: 'Stoic Philosophy Platforms', threat: 'low', change: '3 weeks ago', event: 'Community growth' },
                 ].map((competitor, idx) => (
                   <div key={idx} style={{ ...styles.card, ...styles.competitorCard }}>
                     <div style={styles.competitorName}>{competitor.name}</div>
@@ -882,7 +882,7 @@ export default function OpsHub() {
               <div style={{ ...styles.card, ...styles.layer0Card }}>
                 <div style={styles.cardTitleBold}>Recently Synced Documents</div>
 
-                {['Compliance Framework v2.3', 'Risk Assessment 2026', 'Security Policy Update'].map((doc, idx) => (
+                {['P0 Hold Point Assessment', 'Journal Extraction Schema', 'API Integration Status'].map((doc, idx) => (
                   <div key={idx} style={styles.docItem}>
                     <span style={styles.docName}>{doc}</span>
                     <span style={styles.docDate}>Today at {9 + idx}:30 AM</span>
@@ -894,9 +894,9 @@ export default function OpsHub() {
                 <div style={styles.cardTitleBold}>Recent Changes</div>
 
                 {[
-                  { title: 'Compliance rules updated', detail: '3 new obligations added' },
-                  { title: 'Security policies modified', detail: 'MFA requirement expanded' },
-                  { title: 'Financial procedures revised', detail: 'Approval thresholds changed' },
+                  { title: 'Test harness updated', detail: '158 passing, all P0 criteria met' },
+                  { title: 'Mentor Ledger expanded', detail: '103 entries with prioritization logic pending' },
+                  { title: 'Hub pages live', detail: 'Testing with real journal data in progress' },
                 ].map((change, idx) => (
                   <div key={idx} style={styles.changeItem}>
                     <div style={styles.changeItemTitle}>{change.title}</div>

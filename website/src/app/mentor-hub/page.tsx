@@ -46,17 +46,17 @@ export default function MentorHub() {
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [opinions, setOpinions] = useState<OpinionItem[]>([
-    { color: 'blue', text: 'Pattern detected: hasty assent to negative interpretation. This matches the primary causal breakdown from your journal analysis.', time: 'Now' },
-    { color: 'gold', text: 'Your judgement quality has been strongest in self-examination contexts. Under social/emotional pressure, disposition stability drops.', time: 'Now' },
-    { color: 'green', text: 'Oikeiosis note: community and humanity circles remain underdeveloped relative to self and family.', time: 'Now' },
+    { color: 'blue', text: 'Journal analysis: Philodoxia (love of honour) detected in 9 of 12 sections — primary passion. False judgement: external recognition = self-worth.', time: 'Now' },
+    { color: 'gold', text: 'Causal tendency: primary breakdown at synkatathesis (assent). Treats preferred indifferents as genuine goods, especially reputation and creative recognition.', time: 'Now' },
+    { color: 'green', text: 'Growth evidence: parenting approach shifted from shouting to encouragement. Doom scrolling replaced with intentional learning. Shame giving way to fulfilment.', time: 'Now' },
   ]);
   const [proximityData, setProximityData] = useState({
-    level: 'Prokoptōn',
-    subLabel: 'Early-to-Mid · B-minus',
-    passion: 30,
-    judgement: 55,
-    disposition: 25,
-    oikeiosis: 35,
+    level: 'Deliberate',
+    subLabel: 'Proficiens medius — can articulate principles but gap between knowing and applying under pressure',
+    passion: 42,
+    judgement: 72,
+    disposition: 48,
+    oikeiosis: 58,
   });
   const [loading, setLoading] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
@@ -356,7 +356,7 @@ export default function MentorHub() {
     const ms = [
       { name: 'Personal Baseline', pct: 100, color: '#4caf6a' },
       { name: 'Journal Analysis', pct: 100, color: '#4caf6a' },
-      { name: 'Mentor Profile', pct: 85, color: '#6c8cff' },
+      { name: 'Mentor Profile', pct: 100, color: '#4caf6a' },
       { name: 'Cowork Baseline', pct: 0, color: '#e8953a' },
       { name: 'Support Progression', pct: 60, color: '#6c8cff' },
       { name: 'Agent Development', pct: 35, color: '#e8953a' },
@@ -523,10 +523,10 @@ export default function MentorHub() {
               <div style={styles.devCardTitle}>Journal Interpretation</div>
               <div style={styles.devCardStat}>
                 <span>Layers completed</span>
-                <span>7 of 10</span>
+                <span>1 of 10</span>
               </div>
               <div style={styles.devProgressBar}>
-                <div style={{ ...styles.devProgressFill, width: '70%' }}></div>
+                <div style={{ ...styles.devProgressFill, width: '10%' }}></div>
               </div>
             </div>
             <div style={styles.devCard}>
@@ -543,7 +543,7 @@ export default function MentorHub() {
               <div style={styles.devCardTitle}>Profile Freshness</div>
               <div style={styles.devCardStat}>
                 <span>Last updated</span>
-                <span>3 days ago</span>
+                <span>Today</span>
               </div>
               <div style={{ fontSize: '9px', color: 'var(--green)', marginTop: '4px' }}>✓ Current</div>
             </div>
@@ -644,7 +644,7 @@ export default function MentorHub() {
                     sendMessage();
                   }
                 }}
-                placeholder="Reference your October-December 2025 journal, or ask about your Prokoptōn development..."
+                placeholder="Reference your October-December 2025 journal, or ask about your Deliberate development..."
                 style={styles.composeTextarea}
               />
               <button style={styles.sendBtn} onClick={sendMessage} disabled={loading}>
@@ -693,7 +693,7 @@ export default function MentorHub() {
           <div style={styles.gcard}>
             <h4 style={styles.gcardTitle}>Current Proximity — Founder (Personal)</h4>
             <div style={styles.proxBadge}>
-              <div style={{ ...styles.proxDotBig, background: '#d4a853' }}>P</div>
+              <div style={{ ...styles.proxDotBig, background: '#d4a853' }}>D</div>
               <div>
                 <div style={styles.proxLbl}>{proximityData.level}</div>
                 <div style={styles.proxSub}>{proximityData.subLabel}</div>
@@ -725,7 +725,7 @@ export default function MentorHub() {
             <h4 style={styles.gcardTitle}>Agent Development</h4>
 
             {[
-              { name: 'Founder (Personal)', color: '#d4a853', proximity: 'Prokoptōn (Progressor)', authority: 'Self-Directed', strongest: 'Justice — fairness-seeking', weakest: 'Real-time Courage', stats: ['Journal: October-December 2025', 'Interactions: 34'], progress: 70 },
+              { name: 'Founder (Personal)', color: '#d4a853', proximity: 'Deliberate (Proficiens Medius)', authority: 'Self-Directed', strongest: 'Wisdom — strong post-hoc analysis', weakest: 'Real-time Courage under pressure', stats: ['Journal: October-December 2025', 'Sections: 12 · Entries: 119'], progress: 42 },
               { name: 'Claude Cowork (Project)', color: '#6c8cff', proximity: 'Pending Baseline', authority: 'Supervised • Needs: Baseline check', pathway: 'Reflexive → Habitual: sage-examine, sage-distinguish', stats: ['Actions: 0', 'Progress: 0%'], progress: 0 },
               { name: 'Support Agent', color: '#4caf6a', proximity: 'Habitual', authority: 'Supervised • Check rate: 100%', pathway: 'Habitual → Deliberate: sage-evaluate, sage-critique', stats: ['Actions: 12', 'Promotion: 8 needed'], progress: 60 },
             ].map((agent, i) => (

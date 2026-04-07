@@ -43,7 +43,7 @@ export default function PrivateMentorPage() {
         id: '0',
         type: 'insight',
         content:
-          "Welcome back, Clinton. I've completed the analysis of your October-December 2025 journal reflections. You're in early progression—a Prokoptōn working with strong intellectual grasp but where application lags significantly. Your passions remain dominant: fear about reputation and future, appetite for validation. The good news: your reasoning architecture is sound. The work is to translate understanding into automatic disposition. I'm seeing the early signs of that shift.",
+          "Welcome back, Clinton. I've completed the analysis of your October–December 2025 journal — 12 sections, 119 entries. Your primary passion is philodoxia (love of honour), appearing in 9 of 12 sections. The false judgement: external recognition is necessary for self-worth. You're at Deliberate level — proficiens medius. You can articulate Stoic principles accurately and identify your own false judgements, but the gap is between knowing and applying under pressure. The good news: concrete growth evidence — shouting replaced with encouragement, doom scrolling replaced with intentional learning, shame giving way to fulfilment.",
         timestamp: 'Today, 8:12 AM',
       },
     ]);
@@ -72,14 +72,14 @@ export default function PrivateMentorPage() {
 
       // Parse the result to extract proximity metrics
       setProximityData({
-        level: 'Prokoptōn (Progressor)',
-        grade: 'Early-to-Mid · Senecan B-minus',
-        passionReduction: 30,
-        judgementQuality: 55,
-        dispositionStability: 25,
-        oikeiosisExtension: 35,
+        level: 'Deliberate',
+        grade: 'Proficiens Medius (Middle Progressor)',
+        passionReduction: 42,
+        judgementQuality: 72,
+        dispositionStability: 48,
+        oikeiosisExtension: 58,
         direction: 'up',
-        ring: { bg: 'linear-gradient(135deg,#ff9a3d,#ffb366)', color: 'P' },
+        ring: { bg: 'linear-gradient(135deg,#b08930,#d4a853)', color: 'D' },
       });
     } catch (error) {
       console.error('Failed to fetch proximity score:', error);
@@ -538,13 +538,19 @@ function ConversationView({
             <div style={styles.ctxSectionHead}>Active Passions</div>
             <div style={styles.ctxSectionBody}>
               <div style={styles.passionPill}>
-                <span style={styles.passionFreq}>3x</span> Agonia (anxiety)
+                <span style={styles.passionFreq}>9x</span> Philodoxia (love of honour)
               </div>
               <div style={styles.passionPill}>
-                <span style={styles.passionFreq}>2x</span> Propeteia (rashness)
+                <span style={styles.passionFreq}>5x</span> Agonia (anxiety)
               </div>
-              <div style={{ ...styles.passionPill, ...styles.passionDeclining }}>
-                <span style={styles.passionFreq}>1x</span> Philodoxia (honour) ↘
+              <div style={styles.passionPill}>
+                <span style={styles.passionFreq}>4x</span> Pothos (longing)
+              </div>
+              <div style={styles.passionPill}>
+                <span style={styles.passionFreq}>4x</span> Penthos (grief)
+              </div>
+              <div style={styles.passionPill}>
+                <span style={styles.passionFreq}>3x</span> Oknos (timidity)
               </div>
             </div>
           </div>
@@ -648,20 +654,23 @@ function ProfileView() {
         <div style={styles.profileCard}>
           <div style={styles.pcardTitle}>⚠ Passion Map (Layer 1 + 8)</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <PassionPill frequency="pervasive" passion="Fear: reputation-damage — Reputation at stake. Scrutiny places work in question." />
-            <PassionPill frequency="frequent" passion="Appetite: reputation-seeking — Wanting everyone to like me. Not wanting any enemies." />
-            <PassionPill frequency="frequent" passion="Distress: regret-dwelling — Things and reactions I had to them that could've been handled with measured actions." />
-            <PassionPill frequency="frequent" passion="Fear: future-catastrophe — Doom scrolling and youtube financial meltdown videos do not lead to tangible actions." />
-            <PassionPill frequency="frequent" passion="Appetite: validation-seeking — from Cultivate Wisdom section" />
+            <PassionPill frequency="9x" passion="Philodoxia (love of honour) — external recognition treated as genuine good" />
+            <PassionPill frequency="5x" passion="Agonia (anxiety) — future catastrophes treated as present realities" />
+            <PassionPill frequency="4x" passion="Pothos (longing) — past hobbies/eras as lost identity" />
+            <PassionPill frequency="4x" passion="Penthos (grief) — lack of creative impact as genuine failure" />
+            <PassionPill frequency="3x" passion="Oknos (timidity) — creative failure worth fearing" />
+            <PassionPill frequency="3x" passion="Aischyne (shame) — others' judgement reveals personal failure" />
+            <PassionPill frequency="3x" passion="Orge (anger) — children's disobedience as genuine evil" declining={true} />
+            <PassionPill frequency="2x" passion="Phthonos (envy) — others' spending validates comparison" />
           </div>
         </div>
 
         <div style={styles.profileCard}>
           <div style={styles.pcardTitle}>✦ Virtue Observations (Layer 1)</div>
-          <ProximityDimension label="Justice: fairness-seeking is core identity" value={65} color="var(--green)" />
-          <ProximityDimension label="Wisdom: strong in reflection, moderate in application" value={50} color="var(--orange)" />
-          <ProximityDimension label="Courage: Fear prevents action in work, music" value={30} color="var(--red)" />
-          <ProximityDimension label="Temperance: weak to moderate, requires discipline" value={40} color="var(--orange)" />
+          <ProximityDimension label="Phronesis (wisdom)" value={75} color="var(--green)" />
+          <ProximityDimension label="Dikaiosyne (justice)" value={62} color="var(--accent)" />
+          <ProximityDimension label="Andreia (courage)" value={45} color="var(--orange)" />
+          <ProximityDimension label="Sophrosyne (temperance)" value={50} color="var(--orange)" />
         </div>
 
         <div style={{ ...styles.profileCard, gridColumn: '1 / -1' }}>
@@ -669,11 +678,11 @@ function ProfileView() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', fontSize: '12px' }}>
             <div>
               <div style={{ color: 'var(--text-muted)', fontSize: '10px', marginBottom: '6px' }}>METAPHOR FAMILY</div>
-              <div style={{ color: 'var(--text)' }}>Construction / building language dominant</div>
+              <div style={{ color: 'var(--text)' }}>Nature, music, and food metaphors dominant</div>
             </div>
             <div>
               <div style={{ color: 'var(--text-muted)', fontSize: '10px', marginBottom: '6px' }}>EMOTIONAL REGISTER</div>
-              <div style={{ color: 'var(--text)' }}>Controlled analytical with honest vulnerability</div>
+              <div style={{ color: 'var(--text)' }}>Honest vulnerability with growing self-awareness — deepest entries are confessional</div>
             </div>
             <div>
               <div style={{ color: 'var(--text-muted)', fontSize: '10px', marginBottom: '6px' }}>ABSTRACTION LEVEL</div>
@@ -783,7 +792,7 @@ function LayersView() {
   return (
     <div>
       <div style={styles.disclaimer}>
-        Seven of twelve journal analysis sections have been extracted and built into your profile. The remaining five are pending deeper synthesis. Each layer serves a different function in the mentor relationship.
+        Layer 1 (Baseline Extraction) is complete from all 12 journal sections. Layers 2–7 are designed. Layers 8–10 are planned. Each layer serves a different function in the mentor relationship.
       </div>
       <div style={styles.layersGrid}>
         {layers.map((layer) => (
@@ -822,22 +831,28 @@ function ContradictionsView() {
       <div>
         {[
           {
-            declared: 'Family security is top priority',
-            observed: 'Fear and control behaviors may undermine family connection',
-            section: 'Family Relationships & Values',
+            declared: '"What people think of me will have no impact on my things I value"',
+            observed: 'Philodoxia (love of honour) appears in 9 of 12 journal sections. Reputation treated as genuine good despite knowing it is a preferred indifferent.',
+            section: 'Embrace Difficulty (declared) vs. 9 sections (observed)',
             sig: 'high',
           },
           {
-            declared: 'Wisdom and self-knowledge matter most',
-            observed: 'Knowledge disconnected from automatic behavior; intellectual understanding outpaces embodied practice',
-            section: 'Master Your Thoughts vs. Embodied Practice',
+            declared: '"Appreciation from others will neither motivate nor discourage me"',
+            observed: 'Creative expression blocked by fear of failure/lack of recognition. Vision of "best self" still includes being "part of the rest."',
+            section: 'Be Content (declared) vs. Be Responsible to Others (observed)',
             sig: 'high',
           },
           {
-            declared: 'I value measured, deliberate action',
-            observed: 'Pattern of hasty assent to negative interpretations followed by regret-laden reflection',
-            section: 'Reasoning Architecture',
-            sig: 'high',
+            declared: '"Fear is a destructive passion — an irrational judgement about future things not yet present"',
+            observed: 'Catastrophising daydreams persist. Avoidance of calling relatives, creative first steps, and new challenges.',
+            section: 'Choose Serenity (declared) vs. Embrace Difficulty + Be Responsible (observed)',
+            sig: 'med',
+          },
+          {
+            declared: '"I will stay alert to opportunities for meaningful community contribution"',
+            observed: 'Wife and self celebrate wealth/status as shared value system. Household-level tension with Stoic indifference.',
+            section: 'Be Responsible to Others (declared) vs. Accept Your Fate (observed)',
+            sig: 'med',
           },
         ].map((c, i) => (
           <div key={i} style={styles.contradiction}>
@@ -864,35 +879,35 @@ function TriggersView() {
         {[
           {
             icon: '⚠',
+            color: 'var(--purple)',
+            title: 'Philodoxia (love of honour) — 9 of 12 sections',
+            triggers: 'External recognition or respect is at stake. Perceived disrespect. Creative work being evaluated.',
+            evidence: 'Live in the Present, Embrace Difficulty, Practice Acceptance, A Virtuous Life, Master Your Thoughts/Feelings, Choose Serenity, Cultivate Wisdom, Be Responsible',
+            falseJudgement: '"External recognition is necessary for self-worth" — primary breakdown at synkatathesis (assent)',
+          },
+          {
+            icon: '⚠',
             color: 'var(--red)',
-            title: 'Fear: reputation-damage (pervasive, overwhelming)',
-            triggers: 'Reputation at stake. Scrutiny places work in question.',
-            evidence: 'Market reviews, public feedback, competitive positioning discussions',
-            falseJudgement: '"My reputation defines the quality of the work" (reputation is a preferred indifferent)',
+            title: 'Agonia (anxiety) — 5 sections',
+            triggers: 'Future outcomes feel uncertain. Imagining catastrophic scenarios. Accumulated circumstances pile up.',
+            evidence: 'Live in the Present, Embrace Difficulty, Master Your Thoughts, Accept Your Fate, Choose Serenity',
+            falseJudgement: '"Future catastrophes are present realities requiring worry now" — breakdown at phantasia (impression)',
           },
           {
             icon: '⚠',
             color: 'var(--orange)',
-            title: 'Appetite: reputation-seeking (frequent, strong)',
-            triggers: 'Wanting everyone to like me. Not wanting any enemies.',
-            evidence: 'Approval-seeking behaviors in decision-making, partnership contexts',
-            falseJudgement: '"Universal approval is achievable and necessary" (it is not in my control)',
+            title: 'Orge (anger) — 3 sections (declining)',
+            triggers: "Children disobey or refuse to cooperate. Perceived disrespect from others.",
+            evidence: 'Practice Acceptance, Master Your Thoughts, Master Your Feelings. Growth: shouting replaced with encouragement.',
+            falseJudgement: '"Disobedience is a genuine evil requiring forceful correction" — breakdown at horme (impulse)',
           },
           {
             icon: '⚠',
-            color: 'var(--purple)',
-            title: 'Distress: regret-dwelling (frequent, moderate)',
-            triggers: 'Things and reactions I had to them that could\'ve been handled with measured actions.',
-            evidence: 'Reflection entries on past decisions, conversations replayed',
-            falseJudgement: '"The past can be changed through rumination" (only the future is in my control)',
-          },
-          {
-            icon: '⚠',
-            color: 'var(--red)',
-            title: 'Fear: future-catastrophe (frequent, strong)',
-            triggers: 'Doom scrolling and youtube financial meltdown videos do not lead to tangible actions.',
-            evidence: 'Anxiety about market downturns, business viability concerns',
-            falseJudgement: '"Catastrophe is inevitable and requires constant vigilance" (preparation is appropriate, catastrophizing is not)',
+            color: 'var(--accent)',
+            title: 'Oknos (timidity) — 3 sections',
+            triggers: 'Creative first steps needed. Calling relatives who may be upset. New challenges outside comfort zone.',
+            evidence: 'Live in the Present, Embrace Difficulty, Be Responsible to Others',
+            falseJudgement: '"Discomfort from social situations is a genuine threat" — breakdown at praxis (action)',
           },
         ].map((t, i) => (
           <div key={i} style={styles.profileCard}>
@@ -967,16 +982,16 @@ function PatternsView() {
       <div style={{ fontSize: '13px', lineHeight: '1.7', color: 'var(--text)', marginTop: '16px' }}>
         <p style={{ marginBottom: '14px' }}>Clinton, three patterns stand out this week.</p>
         <p style={{ marginBottom: '14px' }}>
-          <strong style={{ color: 'var(--gold)' }}>First,</strong> your judgement quality on product decisions has been consistently principled — when you&apos;re building, your reasoning operates at its best.
+          <strong style={{ color: 'var(--gold)' }}>First,</strong> parenting breakthrough. You&apos;ve replaced shouting with encouragement in three conflict moments. That&apos;s synkatathesis becoming faster — you&apos;re catching the false impression before the impulse hardens.
         </p>
         <p style={{ marginBottom: '14px' }}>
-          <strong style={{ color: 'var(--gold)' }}>Second,</strong> the competitive positioning discussion on Wednesday triggered the pattern we&apos;ve been tracking. You moved from principled analysis to reactive comparison within about ten minutes.
+          <strong style={{ color: 'var(--gold)' }}>Second,</strong> philodoxia trigger. A recognition situation — someone mentioned they found your work impressive — activated the false judgement immediately. You shifted from contentment to internal calculation about whether you should lean into it.
         </p>
         <p style={{ marginBottom: '14px' }}>
-          <strong style={{ color: 'var(--gold)' }}>Third,</strong> you caught yourself on Friday. During the partnership evaluation, you paused, named the urgency as agonia, and explicitly applied the prohairesis filter. That&apos;s the first time I&apos;ve seen you do that unprompted.
+          <strong style={{ color: 'var(--gold)' }}>Third,</strong> self-correction. You returned someone else&apos;s trolley to the cart rack without being asked. Small act, but your reasoning was explicit: kathekon instinct operating before the convenience impulse could settle in. That&apos;s the direction.
         </p>
         <p style={{ color: 'var(--text-dim)' }}>
-          <em>Direction of travel: upward. The Friday self-correction is more significant than the Wednesday regression.</em>
+          <em>Direction of travel: upward. The trolley moment shows the shift is becoming embodied, not just intellectual.</em>
         </p>
       </div>
     </div>
