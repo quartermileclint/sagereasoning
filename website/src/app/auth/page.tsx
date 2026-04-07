@@ -16,6 +16,14 @@ export default function AuthPage() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
+  // Get the redirect destination if the user was sent here by middleware
+  // (e.g. they tried to visit /private-mentor without being signed in)
+  const getRedirectTarget = (): string => {
+    if (typeof window === 'undefined') return '/dashboard'
+    const params = new URLSearchParams(window.location.search)
+    return params.get('redirect') || '/dashboard'
+  }
+
   // Handle email confirmation redirect — when user clicks the link in their
   // confirmation email, Supabase redirects here with tokens in the URL hash.
   // This detects that and redirects the user to the right page.
@@ -28,7 +36,7 @@ export default function AuthPage() {
         if (!baseline.has_baseline) {
           window.location.href = '/baseline'
         } else {
-          window.location.href = '/dashboard'
+          window.location.href = getRedirectTarget()
         }
       }
     })
@@ -54,7 +62,7 @@ export default function AuthPage() {
           return
         }
       }
-      window.location.href = '/dashboard'
+      window.location.href = getRedirectTarget()
     }
     setLoading(false)
   }
