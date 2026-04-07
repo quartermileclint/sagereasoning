@@ -16,6 +16,8 @@ export default function AuthPage() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
+  const [checkingSession, setCheckingSession] = useState(true)
+
   // Get the redirect destination if the user was sent here by middleware
   // (e.g. they tried to visit /private-mentor without being signed in)
   const getRedirectTarget = (): string => {
@@ -24,12 +26,34 @@ export default function AuthPage() {
     return params.get('redirect') || '/dashboard'
   }
 
+  // Check for an existing valid session on page load.
+  // This handles the case where the user is already signed in (session in
+  // localStorage) but the middleware redirected them here because it couldn't
+  // see the cookie. We set the cookie and redirect them straight through.
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.access_token) {
+        // Session exists — set the cookie so middleware recognises it next time
+        document.cookie = `sb-access-token=${session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax; Secure`
+        // Redirect to where they were trying to go
+        window.location.href = getRedirectTarget()
+        return
+      }
+      // No existing session — show the sign-in form
+      setCheckingSession(false)
+    }
+    checkExistingSession()
+  }, [])
+
   // Handle email confirmation redirect — when user clicks the link in their
   // confirmation email, Supabase redirects here with tokens in the URL hash.
   // This detects that and redirects the user to the right page.
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
+        // Set the cookie so middleware recognises this session
+        document.cookie = `sb-access-token=${session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax; Secure`
         // Check if user has completed baseline assessment
         const res = await fetch(`/api/baseline?user_id=${session.user.id}`)
         const baseline = await res.json()
@@ -106,6 +130,16 @@ export default function AuthPage() {
   }
 
   const handleSubmit = mode === 'signin' ? handleSignIn : mode === 'signup' ? handleSignUp : handleMagicLink
+
+  // While checking for existing session, show a brief loading state
+  if (checkingSession) {
+    return (
+      <div className="max-w-md mx-auto px-6 py-20 text-center">
+        <img src="/images/sagelogosmall.PNG" alt="SageReasoning" className="w-16 h-16 mx-auto mb-4 rounded-full" />
+        <p className="font-body text-sage-600">Checking your session...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-md mx-auto px-6 py-20">
