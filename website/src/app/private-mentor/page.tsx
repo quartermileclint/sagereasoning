@@ -43,7 +43,7 @@ export default function PrivateMentorPage() {
         id: '0',
         type: 'insight',
         content:
-          "Welcome back, Clinton. I've been reviewing the patterns from your recent decisions. Your judgement quality has been climbing steadily over the past three weeks, but I notice disposition stability plateaued when decisions involve external market comparison. There's something worth exploring there when you're ready.",
+          "Welcome back, Clinton. I've completed the analysis of your October-December 2025 journal reflections. You're in early progression—a Prokoptōn working with strong intellectual grasp but where application lags significantly. Your passions remain dominant: fear about reputation and future, appetite for validation. The good news: your reasoning architecture is sound. The work is to translate understanding into automatic disposition. I'm seeing the early signs of that shift.",
         timestamp: 'Today, 8:12 AM',
       },
     ]);
@@ -72,14 +72,14 @@ export default function PrivateMentorPage() {
 
       // Parse the result to extract proximity metrics
       setProximityData({
-        level: 'Deliberate',
-        grade: 'Second Grade (Seneca)',
-        passionReduction: 62,
-        judgementQuality: 71,
-        dispositionStability: 54,
-        oikeiosisExtension: 68,
+        level: 'Prokoptōn (Progressor)',
+        grade: 'Early-to-Mid · Senecan B-minus',
+        passionReduction: 30,
+        judgementQuality: 55,
+        dispositionStability: 25,
+        oikeiosisExtension: 35,
         direction: 'up',
-        ring: { bg: 'linear-gradient(135deg,#b08930,#d4a853)', color: 'D' },
+        ring: { bg: 'linear-gradient(135deg,#ff9a3d,#ffb366)', color: 'P' },
       });
     } catch (error) {
       console.error('Failed to fetch proximity score:', error);
@@ -628,19 +628,20 @@ function ProfileView() {
         <div style={styles.profileCard}>
           <div style={styles.pcardTitle}>⚠ Passion Map (Layer 1 + 8)</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <PassionPill frequency="8x" passion="Agonia (anxiety about future)" />
-            <PassionPill frequency="5x" passion="Propeteia (rashness in assent)" />
-            <PassionPill frequency="4x" passion="Philodoxia (love of honour)" />
-            <PassionPill frequency="2x" passion="Orge (anger)" declining />
+            <PassionPill frequency="pervasive" passion="Fear: reputation-damage — Reputation at stake. Scrutiny places work in question." />
+            <PassionPill frequency="frequent" passion="Appetite: reputation-seeking — Wanting everyone to like me. Not wanting any enemies." />
+            <PassionPill frequency="frequent" passion="Distress: regret-dwelling — Things and reactions I had to them that could've been handled with measured actions." />
+            <PassionPill frequency="frequent" passion="Fear: future-catastrophe — Doom scrolling and youtube financial meltdown videos do not lead to tangible actions." />
+            <PassionPill frequency="frequent" passion="Appetite: validation-seeking — from Cultivate Wisdom section" />
           </div>
         </div>
 
         <div style={styles.profileCard}>
           <div style={styles.pcardTitle}>✦ Virtue Observations (Layer 1)</div>
-          <ProximityDimension label="Phronesis" value={68} color="var(--green)" />
-          <ProximityDimension label="Dikaiosyne" value={74} color="var(--green)" />
-          <ProximityDimension label="Andreia" value={55} color="var(--orange)" />
-          <ProximityDimension label="Sophrosyne" value={60} color="var(--orange)" />
+          <ProximityDimension label="Justice: fairness-seeking is core identity" value={65} color="var(--green)" />
+          <ProximityDimension label="Wisdom: strong in reflection, moderate in application" value={50} color="var(--orange)" />
+          <ProximityDimension label="Courage: Fear prevents action in work, music" value={30} color="var(--red)" />
+          <ProximityDimension label="Temperance: weak to moderate, requires discipline" value={40} color="var(--orange)" />
         </div>
 
         <div style={{ ...styles.profileCard, gridColumn: '1 / -1' }}>
@@ -698,42 +699,42 @@ function LayersView() {
       num: 2,
       title: 'Reasoning Architecture',
       desc: 'How you think — meta-cognitive patterns, reasoning structure, processing style.',
-      status: 'designed',
+      status: 'built',
       extract: 'Cognitive Style Profile',
     },
     {
       num: 3,
       title: 'Engagement Gradient',
       desc: 'Emotional depth of each journal entry.',
-      status: 'designed',
+      status: 'built',
       extract: 'Entry Engagement Scores',
     },
     {
       num: 4,
       title: 'Contradiction Detection',
       desc: 'Cross-section analysis revealing gaps between declared beliefs and observed patterns.',
-      status: 'designed',
+      status: 'built',
       extract: 'Declared vs. Observed Map',
     },
     {
       num: 5,
       title: 'Relational Texture',
       desc: 'How different people and relationships appear in your journal.',
-      status: 'designed',
+      status: 'built',
       extract: 'Relational Context Map',
     },
     {
       num: 6,
       title: 'Developmental Timeline',
       desc: 'Your characteristic pace of change and breakthrough conditions.',
-      status: 'designed',
+      status: 'built',
       extract: 'Developmental Rhythm Profile',
     },
     {
       num: 7,
       title: 'Language Fingerprint',
       desc: 'Your internal vocabulary, preferred metaphors, emotional register.',
-      status: 'designed',
+      status: 'built',
       extract: 'Voice Calibration Profile',
     },
     {
@@ -762,7 +763,7 @@ function LayersView() {
   return (
     <div>
       <div style={styles.disclaimer}>
-        The journal contains ten distinct layers of extractable value. Each layer serves a different function in the mentor relationship.
+        Seven of twelve journal analysis sections have been extracted and built into your profile. The remaining five are pending deeper synthesis. Each layer serves a different function in the mentor relationship.
       </div>
       <div style={styles.layersGrid}>
         {layers.map((layer) => (
@@ -801,23 +802,22 @@ function ContradictionsView() {
       <div>
         {[
           {
-            declared: 'External achievements are preferred indifferents, not genuine goods',
-            observed:
-              'High emotional engagement when writing about business growth milestones; frustration when progress stalls',
-            section: 'Be Content vs. Embrace Difficulty',
+            declared: 'Family security is top priority',
+            observed: 'Fear and control behaviors may undermine family connection',
+            section: 'Family Relationships & Values',
             sig: 'high',
           },
           {
-            declared: 'Reputation is a preferred indifferent — I know this intellectually',
-            observed: 'Anxiety patterns specifically in contexts involving market perception',
-            section: 'Master Your Feelings vs. A Virtuous Life',
+            declared: 'Wisdom and self-knowledge matter most',
+            observed: 'Knowledge disconnected from automatic behavior; intellectual understanding outpaces embodied practice',
+            section: 'Master Your Thoughts vs. Embodied Practice',
             sig: 'high',
           },
           {
-            declared: 'I should focus on what I can control',
-            observed: 'Detailed planning entries focusing heavily on influencing others decisions',
-            section: 'Live in the Present vs. Be Responsible for Others',
-            sig: 'med',
+            declared: 'I value measured, deliberate action',
+            observed: 'Pattern of hasty assent to negative interpretations followed by regret-laden reflection',
+            section: 'Reasoning Architecture',
+            sig: 'high',
           },
         ].map((c, i) => (
           <div key={i} style={styles.contradiction}>
@@ -845,27 +845,34 @@ function TriggersView() {
           {
             icon: '⚠',
             color: 'var(--red)',
-            title: 'Agonia (anxiety about future outcomes)',
-            triggers:
-              "Outcomes depend on other people's decisions, particularly in business contexts, especially when the timeline is uncertain.",
-            evidence: 'Master Your Feelings (pp. 44-51), Embrace Difficulty (pp. 22-26)',
-            falseJudgement: '"Being left behind is a genuine evil" (it is an indifferent)',
+            title: 'Fear: reputation-damage (pervasive, overwhelming)',
+            triggers: 'Reputation at stake. Scrutiny places work in question.',
+            evidence: 'Market reviews, public feedback, competitive positioning discussions',
+            falseJudgement: '"My reputation defines the quality of the work" (reputation is a preferred indifferent)',
           },
           {
             icon: '⚠',
             color: 'var(--orange)',
-            title: 'Propeteia (rashness in assent)',
-            triggers: 'Perceived market pressure combined with time constraints; competitive comparison contexts.',
-            evidence: 'Master Your Thoughts (pp. 33-38), Embrace Difficulty (pp. 20-24)',
-            falseJudgement: '"Speed of response determines outcome" (quality matters more)',
+            title: 'Appetite: reputation-seeking (frequent, strong)',
+            triggers: 'Wanting everyone to like me. Not wanting any enemies.',
+            evidence: 'Approval-seeking behaviors in decision-making, partnership contexts',
+            falseJudgement: '"Universal approval is achievable and necessary" (it is not in my control)',
           },
           {
             icon: '⚠',
             color: 'var(--purple)',
-            title: 'Philodoxia (love of honour/recognition)',
-            triggers: 'Opportunities for public recognition; speaking engagements; feature coverage.',
-            evidence: 'A Virtuous Life (pp. 28-31), Cultivate Wisdom (pp. 72-74)',
-            falseJudgement: '"Being recognised validates the work" (value is independent)',
+            title: 'Distress: regret-dwelling (frequent, moderate)',
+            triggers: 'Things and reactions I had to them that could\'ve been handled with measured actions.',
+            evidence: 'Reflection entries on past decisions, conversations replayed',
+            falseJudgement: '"The past can be changed through rumination" (only the future is in my control)',
+          },
+          {
+            icon: '⚠',
+            color: 'var(--red)',
+            title: 'Fear: future-catastrophe (frequent, strong)',
+            triggers: 'Doom scrolling and youtube financial meltdown videos do not lead to tangible actions.',
+            evidence: 'Anxiety about market downturns, business viability concerns',
+            falseJudgement: '"Catastrophe is inevitable and requires constant vigilance" (preparation is appropriate, catastrophizing is not)',
           },
         ].map((t, i) => (
           <div key={i} style={styles.profileCard}>

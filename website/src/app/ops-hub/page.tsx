@@ -132,21 +132,21 @@ export default function OpsHub() {
   const alerts = [
     {
       severity: 'critical',
-      domain: 'Competitive',
-      time: '52 minutes ago',
-      message: 'RivalAI announced Series B funding. $18M raised at $90M post-money valuation. Positioning against our enterprise segment.',
+      domain: 'Data Extraction',
+      time: '2 hours ago',
+      message: '5 of 12 journal sections still need structured data extraction (42% gap). Blocking final synthesis for P1 review.',
     },
     {
       severity: 'warning',
-      domain: 'Infrastructure',
-      time: '3 hours ago',
-      message: 'API rate limiting threshold exceeded 2x in past 24 hours. Likely cause: spike in free-tier user adoption. No customer impact yet.',
+      domain: 'Schema',
+      time: '5 hours ago',
+      message: 'Schema inconsistency across extracted sections — field names shift between sections. Requires normalization pass.',
     },
     {
-      severity: 'warning',
-      domain: 'Legal',
+      severity: 'low',
+      domain: 'Mentor Ledger',
       time: '8 hours ago',
-      message: 'Terms of Service update pending founder review. Compliance deadline: Monday 5:00 PM. GDPR audit references included.',
+      message: 'Mentor Ledger has 103 entries with no prioritization logic. Non-blocking but should implement ranking.',
     },
   ]
 
@@ -320,31 +320,31 @@ export default function OpsHub() {
             <div style={styles.contentGrid}>
               {/* KPI Cards */}
               <div style={{ ...styles.card, ...styles.kpiCard }}>
-                <div style={styles.cardTitle}>Runway</div>
-                <div style={styles.kpiValue}>14.2</div>
-                <div style={styles.kpiLabel}>months cash remaining</div>
-                <div style={styles.kpiChange}>▼ -0.3 from last month</div>
+                <div style={styles.cardTitle}>P0 Items</div>
+                <div style={styles.kpiValue}>7</div>
+                <div style={styles.kpiLabel}>0a through 0g</div>
+                <div style={styles.kpiChange}>▼ Exit criteria focused</div>
               </div>
 
               <div style={{ ...styles.card, ...styles.kpiCard }}>
-                <div style={styles.cardTitle}>Monthly Recurring</div>
-                <div style={styles.kpiValue}>$47.8K</div>
-                <div style={styles.kpiLabel}>MRR this month</div>
-                <div style={styles.kpiChange}>▲ +$3.2K vs last month</div>
+                <div style={styles.cardTitle}>Hold Point</div>
+                <div style={styles.kpiValue}>86%</div>
+                <div style={styles.kpiLabel}>6 of 7 exit criteria complete</div>
+                <div style={styles.kpiChange}>▲ Criterion 7 pending</div>
               </div>
 
               <div style={{ ...styles.card, ...styles.kpiCard }}>
-                <div style={styles.cardTitle}>Pipeline</div>
-                <div style={styles.kpiValue}>23</div>
-                <div style={styles.kpiLabel}>active opportunities</div>
-                <div style={styles.kpiChange}>▲ +5 new this week</div>
+                <div style={styles.cardTitle}>Tests Passing</div>
+                <div style={styles.kpiValue}>158</div>
+                <div style={styles.kpiLabel}>test suite status</div>
+                <div style={styles.kpiChange}>▲ All passing</div>
               </div>
 
               <div style={{ ...styles.card, ...styles.kpiCard }}>
-                <div style={styles.cardTitle}>Alerts</div>
-                <div style={styles.kpiValue}>3</div>
-                <div style={styles.kpiLabel}>active alerts</div>
-                <div style={styles.kpiChange}>1 critical, 2 warnings</div>
+                <div style={styles.cardTitle}>Remaining</div>
+                <div style={styles.kpiValue}>1</div>
+                <div style={styles.kpiLabel}>Criterion 7</div>
+                <div style={styles.kpiChange}>Founder confirmation</div>
               </div>
 
               {/* Stoic Check */}
@@ -392,18 +392,18 @@ export default function OpsHub() {
                 <div style={styles.briefingTime}>Generated: {new Date().toLocaleDateString()} at 7:00 AM</div>
 
                 <div style={styles.briefingSection}>
-                  <div style={styles.briefingSectionTitle}>Overnight Changes</div>
-                  <div style={styles.briefingItem}>3 new inbound leads from ProductHunt launch</div>
-                  <div style={styles.briefingItem}>Competitor raised Series B at $18M valuation</div>
-                  <div style={styles.briefingItem}>Server uptime: 99.97% (0 incidents)</div>
+                  <div style={styles.briefingSectionTitle}>SageReasoning Status</div>
+                  <div style={styles.briefingItem}>API key connected and tested — 24/24 live API tests passing</div>
+                  <div style={styles.briefingItem}>Hold point: 6 of 7 exit criteria complete. Criterion 7 (founder confirms clear view of P1) still open</div>
+                  <div style={styles.briefingItem}>Test harness: 158 PASS, 0 FAIL, 5 WARN</div>
                 </div>
 
                 <div style={styles.briefingSection}>
-                  <div style={styles.briefingSectionTitle}>Today&apos;s Priorities</div>
+                  <div style={styles.briefingSectionTitle}>Deployed Resources</div>
                   {[
-                    'Investor call with Sequoia at 10:00 AM',
-                    'Product roadmap review with engineering',
-                    'Prepare Q1 metrics for board deck',
+                    'Three live hub pages: /private-mentor, /mentor-hub, /ops-hub',
+                    'Schema and data extraction pipeline active',
+                    'Monitoring journal sections for completeness',
                   ].map((item, idx) => (
                     <div key={idx} style={styles.briefingCheckbox}>
                       <div
@@ -421,9 +421,9 @@ export default function OpsHub() {
                 </div>
 
                 <div style={styles.briefingSection}>
-                  <div style={styles.briefingSectionTitle}>Active Risks</div>
-                  <div style={styles.briefingItem}>API rate limit issue detected (non-blocking)</div>
-                  <div style={styles.briefingItem}>Legal review pending for Terms update (due Monday)</div>
+                  <div style={styles.briefingSectionTitle}>Data Extraction Gaps</div>
+                  <div style={styles.briefingItem}>5 of 12 journal sections need structured data extraction (42% gap)</div>
+                  <div style={styles.briefingItem}>Schema inconsistency across extracted sections — field names shift between sections</div>
                 </div>
               </div>
 
@@ -694,39 +694,39 @@ export default function OpsHub() {
 
             <div style={styles.contentGrid}>
               <div style={{ ...styles.card, ...styles.pipelineCard }}>
-                <div style={styles.cardTitleBold}>Pipeline Overview</div>
+                <div style={styles.cardTitleBold}>Priority Roadmap</div>
 
                 <div style={styles.pipelineStat}>
-                  <span style={styles.pipelineStatLabel}>Sources Monitored</span>
-                  <span style={styles.pipelineStatValue}>12</span>
+                  <span style={styles.pipelineStatLabel}>P0: Foundations</span>
+                  <span style={styles.pipelineStatValue}>6/7 criteria met</span>
                 </div>
 
                 <div style={styles.pipelineStat}>
-                  <span style={styles.pipelineStatLabel}>Items Processed Today</span>
-                  <span style={styles.pipelineStatValue}>847</span>
+                  <span style={styles.pipelineStatLabel}>P1: Business Plan Review</span>
+                  <span style={styles.pipelineStatValue}>Waiting on P0</span>
                 </div>
 
                 <div style={styles.pipelineStat}>
-                  <span style={styles.pipelineStatLabel}>Verified Items</span>
-                  <span style={styles.pipelineStatValue}>723</span>
+                  <span style={styles.pipelineStatLabel}>P2: Ethical Safeguards</span>
+                  <span style={styles.pipelineStatValue}>Scoped</span>
                 </div>
 
                 <div style={styles.pipelineStat}>
-                  <span style={styles.pipelineStatLabel}>Pending Review</span>
-                  <span style={styles.pipelineStatValue}>124</span>
+                  <span style={styles.pipelineStatLabel}>P3: Agent Trust Layer</span>
+                  <span style={styles.pipelineStatValue}>Scaffolded</span>
                 </div>
               </div>
 
               <div style={{ ...styles.card, ...styles.sourceListCard }}>
-                <div style={styles.cardTitleBold}>Connected Sources</div>
+                <div style={styles.cardTitleBold}>Exit Criteria Status</div>
 
-                {['TechCrunch', 'ProductHunt', 'HackerNews', 'SEC Filings', 'Patent Database'].map(
-                  (source, idx) => (
+                {['0a: Core reasoning engine', '0b: API integration', '0c: Test harness', '0d: Hub pages', '0e: Schema extraction', '0f: Mentor index', '0g: Criterion 7 (pending)'].map(
+                  (criterion, idx) => (
                     <div key={idx} style={styles.sourceItem}>
-                      <span style={styles.sourceName}>{source}</span>
+                      <span style={styles.sourceName}>{criterion}</span>
                       <div style={styles.sourceStatus}>
-                        <div style={{ ...styles.statusIndicator, ...styles.statusIndicatorActive }}></div>
-                        <span style={styles.sourceTime}>{Math.floor(Math.random() * 8) + 1}:00 AM</span>
+                        <div style={{ ...styles.statusIndicator, ...(idx < 6 ? styles.statusIndicatorActive : styles.statusIndicatorInactive) }}></div>
+                        <span style={styles.sourceTime}>{idx < 6 ? 'Complete' : 'Pending'}</span>
                       </div>
                     </div>
                   )
@@ -1630,6 +1630,10 @@ const styles = {
 
   statusIndicatorActive: {
     backgroundColor: '#4daa6a',
+  },
+
+  statusIndicatorInactive: {
+    backgroundColor: '#6a7192',
   },
 
   sourceTime: {

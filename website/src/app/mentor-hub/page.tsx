@@ -46,15 +46,17 @@ export default function MentorHub() {
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [opinions, setOpinions] = useState<OpinionItem[]>([
-    { color: 'blue', text: 'Session bridge active. Monitoring for strategic decisions and agent development patterns.', time: 'Now' },
-    { color: 'gold', text: 'Journal analysis: Recurring agonia around scope decisions. Noting for progression pathway.', time: 'Now' },
+    { color: 'blue', text: 'Pattern detected: hasty assent to negative interpretation. This matches the primary causal breakdown from your journal analysis.', time: 'Now' },
+    { color: 'gold', text: 'Your judgement quality has been strongest in self-examination contexts. Under social/emotional pressure, disposition stability drops.', time: 'Now' },
+    { color: 'green', text: 'Oikeiosis note: community and humanity circles remain underdeveloped relative to self and family.', time: 'Now' },
   ]);
   const [proximityData, setProximityData] = useState({
-    level: 'Deliberate',
-    passion: 45,
-    judgement: 62,
-    disposition: 38,
-    oikeiosis: 55,
+    level: 'Prokoptōn',
+    subLabel: 'Early-to-Mid · B-minus',
+    passion: 30,
+    judgement: 55,
+    disposition: 25,
+    oikeiosis: 35,
   });
   const [loading, setLoading] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
@@ -642,7 +644,7 @@ export default function MentorHub() {
                     sendMessage();
                   }
                 }}
-                placeholder="Type your message..."
+                placeholder="Reference your October-December 2025 journal, or ask about your Prokoptōn development..."
                 style={styles.composeTextarea}
               />
               <button style={styles.sendBtn} onClick={sendMessage} disabled={loading}>
@@ -691,10 +693,10 @@ export default function MentorHub() {
           <div style={styles.gcard}>
             <h4 style={styles.gcardTitle}>Current Proximity — Founder (Personal)</h4>
             <div style={styles.proxBadge}>
-              <div style={{ ...styles.proxDotBig, background: '#e8953a' }}>D</div>
+              <div style={{ ...styles.proxDotBig, background: '#d4a853' }}>P</div>
               <div>
                 <div style={styles.proxLbl}>{proximityData.level}</div>
-                <div style={styles.proxSub}>Active reasoning, some false judgements remaining</div>
+                <div style={styles.proxSub}>{proximityData.subLabel}</div>
               </div>
             </div>
 
@@ -723,7 +725,7 @@ export default function MentorHub() {
             <h4 style={styles.gcardTitle}>Agent Development</h4>
 
             {[
-              { name: 'Founder (Personal)', color: '#d4a853', proximity: 'Deliberate', authority: 'Personal • Direction: Improving', pathway: 'Deliberate → Principled: sage-examine, sage-reason', stats: ['Journal: Seeded', 'Interactions: 34'], progress: 70 },
+              { name: 'Founder (Personal)', color: '#d4a853', proximity: 'Prokoptōn (Progressor)', authority: 'Self-Directed', strongest: 'Justice — fairness-seeking', weakest: 'Real-time Courage', stats: ['Journal: October-December 2025', 'Interactions: 34'], progress: 70 },
               { name: 'Claude Cowork (Project)', color: '#6c8cff', proximity: 'Pending Baseline', authority: 'Supervised • Needs: Baseline check', pathway: 'Reflexive → Habitual: sage-examine, sage-distinguish', stats: ['Actions: 0', 'Progress: 0%'], progress: 0 },
               { name: 'Support Agent', color: '#4caf6a', proximity: 'Habitual', authority: 'Supervised • Check rate: 100%', pathway: 'Habitual → Deliberate: sage-evaluate, sage-critique', stats: ['Actions: 12', 'Promotion: 8 needed'], progress: 60 },
             ].map((agent, i) => (
@@ -732,9 +734,16 @@ export default function MentorHub() {
                   <span style={{ ...styles.agentColor, background: agent.color }}></span>
                   <span style={styles.agentName}>{agent.name}</span>
                 </div>
-                <div style={styles.agentProxBadge}>Proximity: {agent.proximity}</div>
+                <div style={styles.agentProxBadge}>Stage: {agent.proximity}</div>
                 <div style={styles.agentAuthority}>{agent.authority}</div>
-                <div style={styles.agentDevPathway}>{agent.pathway}</div>
+                {agent.pathway ? (
+                  <div style={styles.agentDevPathway}>{agent.pathway}</div>
+                ) : (
+                  <>
+                    <div style={{ fontSize: '9px', color: 'var(--green)', marginTop: '4px' }}>Strongest: {agent.strongest}</div>
+                    <div style={{ fontSize: '9px', color: 'var(--orange)', marginTop: '2px' }}>Weakest: {agent.weakest}</div>
+                  </>
+                )}
                 <div style={styles.agentDevStat}>
                   <span>{agent.stats[0]}</span>
                   <span>{agent.stats[1]}</span>
