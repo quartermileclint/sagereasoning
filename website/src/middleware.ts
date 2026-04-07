@@ -4,14 +4,14 @@
  * Intercepts requests BEFORE pages load. If a user is not authenticated
  * and tries to access a protected route, they are redirected to /auth.
  *
- * This is the server-side enforcement layer. It works because the Supabase
- * client now stores auth tokens in cookies (via @supabase/ssr), which
- * middleware can read — unlike localStorage, which is browser-only.
+ * The client-side Supabase client (createClient) stores tokens in localStorage
+ * and syncs the access token to a cookie (sb-access-token). This middleware
+ * reads that cookie and verifies the token with Supabase before allowing access.
  *
  * @compliance R17 — Intimate data protection. Journal data, mentor profiles,
  * and progression assessments must not be accessible without authentication.
  */
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 
 // Routes that require authentication — these contain personal/intimate data
@@ -29,21 +29,6 @@ const PROTECTED_ROUTES = [
   '/score-document',
   '/score-policy',
   '/score-social',
-]
-
-// Routes that should never be blocked (public pages, auth itself, API, static)
-const PUBLIC_ROUTES = [
-  '/',
-  '/auth',
-  '/api-docs',
-  '/community',
-  '/limitations',
-  '/marketplace',
-  '/methodology',
-  '/pricing',
-  '/privacy',
-  '/terms',
-  '/transparency',
 ]
 
 function isProtectedRoute(pathname: string): boolean {
@@ -70,56 +55,48 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Create a Supabase server client that reads cookies from the request
-  let supabaseResponse = NextResponse.next({ request })
+  // Read the access token cookie set by the client-side auth sync
+  const token = request.cookies.get('sb-access-token')?.value
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-          // Update cookies on the request (for downstream handlers)
-          cookiesToSet.forEach(({ name, value }: { name: string; value: string }) =>
-            request.cookies.set(name, value)
-          )
-          // Create a new response with updated cookies
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }: { name: string; value: string; options: CookieOptions }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
-
-  // IMPORTANT: Do not use getSession() here — it reads from cookies without
-  // verification. getUser() sends the token to Supabase for verification,
-  // which is the secure approach for middleware.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    // Not authenticated — redirect to sign-in page
+  if (!token) {
+    // No token at all — redirect to sign-in
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/auth'
-    // Preserve the intended destination so we can redirect back after login
     redirectUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(redirectUrl)
   }
 
+  // Verify the token with Supabase (prevents forged cookies)
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    }
+  )
+
+  const { data: { user }, error } = await supabase.auth.getUser(token)
+
+  if (error || !user) {
+    // Token is invalid or expired — redirect to sign-in
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = '/auth'
+    redirectUrl.searchParams.set('redirect', pathname)
+    // Clear the bad cookie
+    const response = NextResponse.redirect(redirectUrl)
+    response.cookies.set('sb-access-token', '', { path: '/', maxAge: 0 })
+    return response
+  }
+
   // User is authenticated — allow the request through
-  return supabaseResponse
+  return NextResponse.next()
 }
 
 // Tell Next.js which routes this middleware applies to
 export const config = {
   matcher: [
-    // Match all routes except static files and Next.js internals
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)',
   ],
 }
