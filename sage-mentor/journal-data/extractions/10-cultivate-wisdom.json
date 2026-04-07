@@ -1,0 +1,164 @@
+{
+  "section": "Cultivate Wisdom",
+  "section_number": 10,
+  "mapped_group": "Cultivating Wisdom",
+  "entries_count": 10,
+  "word_count": 1350,
+  "passions_detected": [
+    {
+      "passion_id": "philodoxia",
+      "sub_species": "philodoxia",
+      "root_passion": "epithumia",
+      "false_judgement": "That being seen as knowledgeable/witty is necessary for respect",
+      "entry_days": [
+        4
+      ],
+      "intensity": "moderate"
+    },
+    {
+      "passion_id": "penthos",
+      "sub_species": "penthos",
+      "root_passion": "lupe",
+      "false_judgement": "That not following through on commitments means irredeemable failure",
+      "entry_days": [
+        6
+      ],
+      "intensity": "moderate"
+    }
+  ],
+  "causal_observations": [
+    {
+      "failure_point": "horme",
+      "description": "Over-planning and over-preparing as avoidance — 'overusing the preparation stage of a goal which drains the energy/motivation from taking the first step'",
+      "entry_days": [
+        7
+      ]
+    },
+    {
+      "failure_point": "synkatathesis",
+      "description": "Self-blame as false assent — 'Blame is a way of explaining things that require more consideration and effort to properly determine root cause'",
+      "entry_days": [
+        6
+      ]
+    }
+  ],
+  "value_observations": [
+    {
+      "item": "Wisdom vs appearance of wisdom",
+      "declared_as": "true wisdom doesn't need acknowledgement",
+      "observed_as": "lists specific egoistic needs to release: fitting in, shocking, being contradictory, impressing, intellectual humour",
+      "gap": false,
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "item": "Beginner's mindset",
+      "declared_as": "essential for learning",
+      "observed_as": "detailed list of biases to surrender: my way, know-it-all, scoffing, past experience always relevant",
+      "gap": false,
+      "entry_days": [
+        2
+      ]
+    }
+  ],
+  "people_mentioned": [
+    {
+      "person_or_role": "Team at work",
+      "relationship": "colleagues",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        3
+      ]
+    },
+    {
+      "person_or_role": "Loved ones",
+      "relationship": "family",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        6
+      ]
+    }
+  ],
+  "virtue_observations": [
+    {
+      "domain": "phronesis",
+      "strength": "moderate",
+      "evidence": "Deep engagement with wisdom vs its appearance. Pass/fail rules for speech formulation. 'You can never cross the same river twice' applied to staying present.",
+      "entry_days": [
+        1,
+        2,
+        5
+      ]
+    },
+    {
+      "domain": "sophrosyne",
+      "strength": "moderate",
+      "evidence": "Noticed connection between disciplined mind and mood — 'Journalling has used up some inquisitive self examination in a meaningful way which has meant less often intrusive thoughts'",
+      "entry_days": [
+        8
+      ]
+    },
+    {
+      "domain": "andreia",
+      "strength": "developing",
+      "evidence": "'Talking to myself about something to get the feel-good hit despite not having actually doing the action yet' — recognises courage gap between talk and action",
+      "entry_days": [
+        7
+      ]
+    }
+  ],
+  "preferred_indifferents": [
+    "intellectual reputation",
+    "being well-read",
+    "quick-wittedness"
+  ],
+  "key_passages": [
+    {
+      "day": 1,
+      "summary": "Speech discipline framework — pass/fail rules: can emotion be separated? What's the motivation? If by a virtue then express it, if by fantasy of outcome then don't.",
+      "topic_tags": [
+        "speech",
+        "discipline",
+        "wisdom",
+        "filter"
+      ],
+      "relevance_triggers": [
+        "speaking_before_thinking",
+        "verbal_impulse",
+        "communication"
+      ]
+    },
+    {
+      "day": 6,
+      "summary": "Self-forgiveness: blamed himself for not reaching out, for ignorance, for dishonour, for not seeing the obvious. 'I forgive myself for taking the less painful, less real opinion in the past.'",
+      "topic_tags": [
+        "forgiveness",
+        "self_blame",
+        "acceptance",
+        "growth"
+      ],
+      "relevance_triggers": [
+        "self_blame",
+        "guilt",
+        "forgiveness"
+      ]
+    },
+    {
+      "day": 8,
+      "summary": "Progress evidence: 'Don't feel the same shame. Outlook is more positive as I have found a fulfilment & patience. Outlook is can-do.'",
+      "topic_tags": [
+        "progress",
+        "mood",
+        "fulfilment",
+        "transformation"
+      ],
+      "relevance_triggers": [
+        "progress_review",
+        "mood_improvement",
+        "evidence_of_change"
+      ]
+    }
+  ],
+  "proximity_estimate": "deliberate"
+}

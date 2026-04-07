@@ -459,6 +459,57 @@ export async function validateApiKey(
   }
 }
 
+// =============================================================================
+// STRIPE SUBSCRIPTION CHECK — Verify paid tier status via Stripe
+// Used by admin dashboards and billing status endpoints.
+// The primary tier enforcement is via api_keys.tier (set by webhook).
+// This function is for secondary verification when needed.
+// =============================================================================
+
+/**
+ * Check if a user has an active paid subscription in Stripe.
+ * Returns the subscription status or null if no subscription found.
+ *
+ * NOTE: For normal API key validation, use validateApiKey() above.
+ * This function is for billing UI and admin checks, not request gating.
+ */
+export async function checkStripeSubscriptionStatus(
+  userId: string
+): Promise<{ active: boolean; status: string; type: string } | null> {
+  const admin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  // Look up user's Stripe customer link
+  const { data: customerLink } = await admin
+    .from('stripe_customers')
+    .select('stripe_customer_id')
+    .eq('user_id', userId)
+    .single()
+
+  if (!customerLink?.stripe_customer_id) return null
+
+  // Check for active subscriptions
+  const { data: subscriptions } = await admin
+    .from('stripe_subscriptions')
+    .select('status, subscription_type')
+    .eq('stripe_customer_id', customerLink.stripe_customer_id)
+    .in('status', ['active', 'trialing', 'past_due'])
+    .limit(1)
+
+  if (!subscriptions || subscriptions.length === 0) {
+    return { active: false, status: 'none', type: 'none' }
+  }
+
+  const sub = subscriptions[0]
+  return {
+    active: sub.status === 'active' || sub.status === 'trialing',
+    status: sub.status,
+    type: sub.subscription_type,
+  }
+}
+
 /** Add usage headers to a response for agent transparency */
 export function withUsageHeaders(
   headers: Record<string, string>,

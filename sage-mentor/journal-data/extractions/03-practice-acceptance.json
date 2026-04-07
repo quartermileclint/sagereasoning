@@ -1,0 +1,189 @@
+{
+  "section": "Practice Acceptance",
+  "section_number": 3,
+  "mapped_group": "Practising Acceptance",
+  "entries_count": 8,
+  "word_count": 900,
+  "passions_detected": [
+    {
+      "passion_id": "orge",
+      "sub_species": "orge",
+      "root_passion": "epithumia",
+      "false_judgement": "That children's disobedience is a genuine evil requiring forceful correction",
+      "entry_days": [
+        1
+      ],
+      "intensity": "moderate"
+    },
+    {
+      "passion_id": "achthos",
+      "sub_species": "achthos",
+      "root_passion": "lupe",
+      "false_judgement": "That being instructed differently is an insult to competence",
+      "entry_days": [
+        3
+      ],
+      "intensity": "moderate"
+    },
+    {
+      "passion_id": "penthos",
+      "sub_species": "penthos",
+      "root_passion": "lupe",
+      "false_judgement": "That betrayal by a friend is evidence of personal worthlessness",
+      "entry_days": [
+        5
+      ],
+      "intensity": "strong"
+    },
+    {
+      "passion_id": "philodoxia",
+      "sub_species": "philodoxia",
+      "root_passion": "epithumia",
+      "false_judgement": "That reputation in friend group defines self-worth",
+      "entry_days": [
+        5
+      ],
+      "intensity": "moderate"
+    }
+  ],
+  "causal_observations": [
+    {
+      "failure_point": "synkatathesis",
+      "description": "Disappointment in kids' current behaviour leads to assent that it will become exponentially worse — catastrophic extrapolation from impression.",
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "failure_point": "horme",
+      "description": "Push-back against instructions leads to expressed dissatisfaction, damaging team morale — impulse not governed by reason.",
+      "entry_days": [
+        3
+      ]
+    },
+    {
+      "failure_point": "synkatathesis",
+      "description": "Betrayal experience: assented to the impression that being sold out means personal worthlessness rather than recognising addiction's role.",
+      "entry_days": [
+        5
+      ]
+    }
+  ],
+  "value_observations": [
+    {
+      "item": "Perfection",
+      "declared_as": "something to let go of",
+      "observed_as": "still clung to — 'zero contradictions' and 'my way is the right way'",
+      "gap": true,
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "item": "Acceptance of self",
+      "declared_as": "path to virtue",
+      "observed_as": "genuine wrestling — lists concrete areas needing acceptance",
+      "gap": false,
+      "entry_days": [
+        6
+      ]
+    }
+  ],
+  "people_mentioned": [
+    {
+      "person_or_role": "Son",
+      "relationship": "child",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "person_or_role": "Kids (teenagers)",
+      "relationship": "children",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "person_or_role": "Friend (betrayer/addict)",
+      "relationship": "former close friend",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "person_or_role": "Innocent friend",
+      "relationship": "friend affected by betrayal",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        5
+      ]
+    }
+  ],
+  "virtue_observations": [
+    {
+      "domain": "sophrosyne",
+      "strength": "developing",
+      "evidence": "Recognises overreaction patterns. Beginning to practice acceptance of imperfection.",
+      "entry_days": [
+        1,
+        4
+      ]
+    },
+    {
+      "domain": "phronesis",
+      "strength": "developing",
+      "evidence": "Can rationally analyse the betrayal situation — 'addictions override decency, it was not personal' — but emotional residue persists.",
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "domain": "andreia",
+      "strength": "developing",
+      "evidence": "Lists 18 things to change about self — honest self-examination including dark thoughts, temper, cynicism.",
+      "entry_days": [
+        6
+      ]
+    }
+  ],
+  "preferred_indifferents": [
+    "perfection",
+    "reputation in friend group",
+    "being right"
+  ],
+  "key_passages": [
+    {
+      "day": 5,
+      "summary": "Betrayal by drug-addicted friend — heartbroken, worthless, sold out for a few thousand dollars. Rationally understands addiction but emotionally unresolved.",
+      "topic_tags": [
+        "betrayal",
+        "grief",
+        "trust",
+        "friendship"
+      ],
+      "relevance_triggers": [
+        "trust_issues",
+        "relationship_pain",
+        "forgiveness"
+      ]
+    },
+    {
+      "day": 6,
+      "summary": "Lists 18 character traits to change with control assessment — remarkable self-awareness including cynicism, negativity, dark thoughts, oppositional tendency",
+      "topic_tags": [
+        "self_awareness",
+        "character_development",
+        "acceptance"
+      ],
+      "relevance_triggers": [
+        "self_improvement",
+        "character_building"
+      ]
+    }
+  ],
+  "proximity_estimate": "deliberate"
+}

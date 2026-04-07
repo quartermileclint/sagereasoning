@@ -363,6 +363,26 @@ export default function PrivateMentorPage() {
             active={currentView === 'settings'}
             onClick={() => switchView('settings')}
           />
+          <a
+            href="/mentor-index"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '10px 16px',
+              borderRadius: '8px',
+              color: '#8b8fa3',
+              fontSize: '13px',
+              textDecoration: 'none',
+              marginTop: '8px',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          >
+            <span style={{ fontSize: '16px', width: '20px', textAlign: 'center' as const }}>&#x1F4CB;</span>
+            Output Index
+          </a>
         </nav>
 
         <div style={styles.sidebarFooter}>

@@ -1,0 +1,192 @@
+{
+  "section": "Choose Serenity",
+  "section_number": 9,
+  "mapped_group": "Choosing Serenity",
+  "entries_count": 8,
+  "word_count": 1279,
+  "passions_detected": [
+    {
+      "passion_id": "agonia",
+      "sub_species": "agonia",
+      "root_passion": "phobos",
+      "false_judgement": "That disappointing people or bringing harm through inaction is an imminent genuine evil",
+      "entry_days": [
+        7
+      ],
+      "intensity": "strong"
+    },
+    {
+      "passion_id": "philodoxia",
+      "sub_species": "philodoxia",
+      "root_passion": "epithumia",
+      "false_judgement": "That creating for fame and impressing people are valid motivations",
+      "entry_days": [
+        6
+      ],
+      "intensity": "moderate"
+    },
+    {
+      "passion_id": "kelesis",
+      "sub_species": "kelesis",
+      "root_passion": "hedone",
+      "false_judgement": "That gambling/lotto provides a legitimate pleasure worth pursuing",
+      "entry_days": [
+        5
+      ],
+      "intensity": "mild"
+    },
+    {
+      "passion_id": "pothos",
+      "sub_species": "pothos",
+      "root_passion": "epithumia",
+      "false_judgement": "That V8 car racing career represents a genuine loss",
+      "entry_days": [
+        6
+      ],
+      "intensity": "mild"
+    }
+  ],
+  "causal_observations": [
+    {
+      "failure_point": "phantasia",
+      "description": "Without reflection, 'no gratitude leads to seeking gratification and indulging in excess, as a friendly distraction from the pointlessness' — absence of mindful impression management leads to passion-driven impressions filling the void.",
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "failure_point": "synkatathesis",
+      "description": "Comprehensive bias check list reveals awareness of dozens of ways external influence corrupts assent — mood, pride, entitlement, fear of missing out, identity, conformity, tradition.",
+      "entry_days": [
+        2
+      ]
+    },
+    {
+      "failure_point": "phantasia",
+      "description": "Daydreams identified as paying for passions — 'buying lotto tickets and gambling in general is paying for a daydream about passion of wealth'",
+      "entry_days": [
+        5
+      ]
+    }
+  ],
+  "value_observations": [
+    {
+      "item": "Desired outcomes to let go of",
+      "declared_as": "ten specific attachments listed for release",
+      "observed_as": "powerful self-examination — lotto, perfect boss, being awarded, fancy cars, acceptance speech daydream",
+      "gap": false,
+      "entry_days": [
+        6
+      ]
+    },
+    {
+      "item": "Fear of external expectations",
+      "declared_as": "irrational — 'fear is a destructive passion making it an irrational judgement'",
+      "observed_as": "strong philosophical reasoning applied to personal fears",
+      "gap": false,
+      "entry_days": [
+        7
+      ]
+    }
+  ],
+  "people_mentioned": [
+    {
+      "person_or_role": "Workmates",
+      "relationship": "colleagues",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        7
+      ]
+    },
+    {
+      "person_or_role": "Loved ones",
+      "relationship": "family",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        7
+      ]
+    }
+  ],
+  "virtue_observations": [
+    {
+      "domain": "phronesis",
+      "strength": "moderate",
+      "evidence": "Extraordinary self-awareness in the comprehensive bias check list — 20+ potential biases catalogued. Strong philosophical reasoning on fear as irrational judgement.",
+      "entry_days": [
+        2,
+        7
+      ]
+    },
+    {
+      "domain": "andreia",
+      "strength": "moderate",
+      "evidence": "Confronting difficulties directly: 'What's the right thing to do right now. Then: What would my best self do here. Then do the smallest, honest version of that.'",
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "domain": "sophrosyne",
+      "strength": "moderate",
+      "evidence": "Snap out of catastrophizing daydreams. Eliminate gambling. Develop endurance and discretion.",
+      "entry_days": [
+        5
+      ]
+    }
+  ],
+  "preferred_indifferents": [
+    "winning lotto",
+    "perfect boss",
+    "being awarded",
+    "impressing people",
+    "perfect health"
+  ],
+  "key_passages": [
+    {
+      "day": 1,
+      "summary": "Without reflection, no gratitude → seeking gratification → indulging in excess → feeling pointless and sick. 'I have no sense of duty or nobility for effort tied to a greater purpose. Fate is pushing me, I am not flowing with it.'",
+      "topic_tags": [
+        "reflection",
+        "gratification",
+        "purpose",
+        "fate"
+      ],
+      "relevance_triggers": [
+        "loss_of_purpose",
+        "indulgence",
+        "motivation_crisis"
+      ]
+    },
+    {
+      "day": 2,
+      "summary": "Comprehensive bias/influence checklist — 20+ checks including mood, pride, entitlement, identity, conformist, nationalist, racist, ageist, sexist, ableist",
+      "topic_tags": [
+        "bias",
+        "self_examination",
+        "influences",
+        "inertia"
+      ],
+      "relevance_triggers": [
+        "decision_making",
+        "bias_check",
+        "self_examination"
+      ]
+    },
+    {
+      "day": 6,
+      "summary": "Ten desired outcomes to release: lotto, bureaucracy, perfect boss, value for money, being perfect son, respected by peers, reaching masses, perfect health, car racing, impressing people, being awarded",
+      "topic_tags": [
+        "letting_go",
+        "attachments",
+        "indifferents",
+        "freedom"
+      ],
+      "relevance_triggers": [
+        "attachment",
+        "letting_go",
+        "desires"
+      ]
+    }
+  ],
+  "proximity_estimate": "deliberate"
+}

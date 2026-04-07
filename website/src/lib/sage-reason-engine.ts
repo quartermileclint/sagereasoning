@@ -44,6 +44,8 @@ export interface ReasonInput {
   context?: string
   depth?: ReasonDepth
   domain_context?: string
+  /** Override the system prompt entirely (used by mentor-baseline, mentor-journal-week, etc.) */
+  systemPromptOverride?: string
 }
 
 export interface ReasonResult {
@@ -340,7 +342,7 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
     model: config.model,
     max_tokens: config.maxTokens,
     temperature: 0.2,
-    system: [{ type: 'text', text: config.prompt, cache_control: { type: 'ephemeral' } }],
+    system: [{ type: 'text', text: params.systemPromptOverride || config.prompt, cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: userMessage }],
   })
 
@@ -357,12 +359,14 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
     throw new Error('Reasoning engine returned invalid JSON response')
   }
 
-  // Validate required fields for this depth
-  const requiredFields = REQUIRED_FIELDS[depth]
-  for (const field of requiredFields) {
-    if (evalData[field] === undefined) {
-      console.error(`sage-reason-engine: Missing field '${field}' at depth '${depth}'`)
-      throw new Error(`Reasoning engine missing field: ${field}`)
+  // Validate required fields for this depth (skip when using custom system prompt)
+  if (!params.systemPromptOverride) {
+    const requiredFields = REQUIRED_FIELDS[depth]
+    for (const field of requiredFields) {
+      if (evalData[field] === undefined) {
+        console.error(`sage-reason-engine: Missing field '${field}' at depth '${depth}'`)
+        throw new Error(`Reasoning engine missing field: ${field}`)
+      }
     }
   }
 

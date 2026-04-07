@@ -861,6 +861,264 @@ Return ONLY valid JSON matching this schema:
 }
 
 // ============================================================================
+// SCHEMA NORMALISATION — Canonical field names for all extraction output
+// ============================================================================
+
+/**
+ * Normalise a raw Layer 1 extraction to the canonical schema.
+ *
+ * Problem: When extractions are performed across sessions (or manually assembled),
+ * field names can drift between sections. The LLM may return slightly different
+ * keys depending on the section context. This function forces all output into a
+ * single canonical form so downstream consumers never encounter variant field names.
+ *
+ * Canonical passion_map entry:
+ *   { passion, subcategory, evidence, frequency, intensity, source_section }
+ *
+ * Canonical virtue_profile entry:
+ *   { courage: { strength, weakness }, wisdom: { strength, weakness },
+ *     justice: { strength, weakness }, temperance: { strength, weakness },
+ *     source_section }
+ *
+ * Canonical causal_tendencies entry:
+ *   { primary_breakdown, description, specific_breakdowns?, source_section }
+ *
+ * Canonical value_hierarchy entry:
+ *   { explicit_top_values, primary_conflict, classification_gaps?,
+ *     evidence?, hierarchy_order?, source_section }
+ *
+ * Canonical oikeiosis entry:
+ *   { self: { level, note? }, family: { level, note? },
+ *     community?: { level, note? }, humanity?: { level, note? },
+ *     nature?: { level, note? }, source_section }
+ *
+ * R4: Server-side IP, R7: Source-cited
+ */
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RawRecord = Record<string, any>
+
+/**
+ * Normalise a passion_map entry to canonical { passion, subcategory, evidence, frequency, intensity, source_section }.
+ * Handles variant: { name } (combined "Passion (subcategory)" string used by some sections).
+ */
+export function normalisePassionEntry(raw: RawRecord, fallbackSection: string): RawRecord {
+  // Variant: "name" field contains combined passion+subcategory like "Fear (catastrophizing)"
+  if (raw.name && !raw.passion) {
+    const nameStr = String(raw.name)
+    const match = nameStr.match(/^(\w+)\s*\((.+)\)$/)
+    if (match) {
+      return {
+        passion: match[1].trim(),
+        subcategory: match[2].trim().toLowerCase().replace(/\s+/g, '-'),
+        evidence: raw.evidence ?? '',
+        frequency: raw.frequency ?? 'unknown',
+        intensity: raw.intensity ?? 'unknown',
+        source_section: raw.source_section ?? fallbackSection,
+      }
+    }
+    // No parenthetical — use the whole name as passion, subcategory as 'general'
+    return {
+      passion: nameStr.trim(),
+      subcategory: 'general',
+      evidence: raw.evidence ?? '',
+      frequency: raw.frequency ?? 'unknown',
+      intensity: raw.intensity ?? 'unknown',
+      source_section: raw.source_section ?? fallbackSection,
+    }
+  }
+
+  // Already canonical or close to it
+  return {
+    passion: raw.passion ?? 'Unknown',
+    subcategory: raw.subcategory ?? raw.sub_species ?? 'general',
+    evidence: raw.evidence ?? '',
+    frequency: raw.frequency ?? 'unknown',
+    intensity: raw.intensity ?? 'unknown',
+    source_section: raw.source_section ?? fallbackSection,
+  }
+}
+
+/**
+ * Normalise a virtue_profile entry to canonical { courage, wisdom, justice, temperance, source_section }.
+ * Each virtue is { strength, weakness }.
+ * Handles variants: { assessment, evidence, weakness_noted } used by some sections.
+ */
+export function normaliseVirtueEntry(raw: RawRecord, fallbackSection: string): RawRecord {
+  const virtues = ['courage', 'wisdom', 'justice', 'temperance'] as const
+  const result: RawRecord = { source_section: raw.source_section ?? fallbackSection }
+
+  for (const v of virtues) {
+    const virtueData = raw[v]
+    if (!virtueData) {
+      result[v] = { strength: 'Not assessed', weakness: 'Not assessed' }
+      continue
+    }
+
+    // Already canonical: { strength, weakness }
+    if (typeof virtueData.strength === 'string' && typeof virtueData.weakness === 'string') {
+      result[v] = { strength: virtueData.strength, weakness: virtueData.weakness }
+      continue
+    }
+
+    // Variant: { assessment, evidence, weakness_noted }
+    if (virtueData.assessment !== undefined || virtueData.weakness_noted !== undefined) {
+      const strength = virtueData.assessment
+        ? `${virtueData.assessment}${virtueData.evidence ? ': ' + virtueData.evidence : ''}`
+        : virtueData.evidence ?? 'Not assessed'
+      result[v] = {
+        strength: strength,
+        weakness: virtueData.weakness_noted ?? virtueData.weakness ?? 'Not assessed',
+      }
+      continue
+    }
+
+    // Fallback: try to extract whatever is there
+    result[v] = {
+      strength: virtueData.strength ?? virtueData.evidence ?? String(virtueData),
+      weakness: virtueData.weakness ?? virtueData.weakness_noted ?? 'Not assessed',
+    }
+  }
+
+  return result
+}
+
+/**
+ * Normalise a causal_tendencies entry to canonical { primary_breakdown, description, specific_breakdowns?, source_section }.
+ * Handles variant: { analysis, specific_breakdowns } used by some sections.
+ */
+export function normaliseCausalEntry(raw: RawRecord, fallbackSection: string): RawRecord {
+  // Variant: { analysis, specific_breakdowns }
+  if (raw.analysis && !raw.primary_breakdown) {
+    // Extract a primary_breakdown label from the analysis text
+    const analysisText = String(raw.analysis)
+    let primaryBreakdown = 'complex_multi_stage'
+
+    // Try to identify the primary breakdown from common patterns in the text
+    if (analysisText.includes('assent') && analysisText.includes('hasty')) primaryBreakdown = 'hasty_assent'
+    else if (analysisText.includes('assent stage')) primaryBreakdown = 'assent_stage_failure'
+    else if (analysisText.includes('impulse')) primaryBreakdown = 'unexamined_impulse'
+    else if (analysisText.includes('multiple stages')) primaryBreakdown = 'multi_stage_breakdown'
+
+    return {
+      primary_breakdown: primaryBreakdown,
+      description: analysisText,
+      specific_breakdowns: raw.specific_breakdowns ?? [],
+      source_section: raw.source_section ?? fallbackSection,
+    }
+  }
+
+  // Already canonical
+  return {
+    primary_breakdown: raw.primary_breakdown ?? 'unknown',
+    description: raw.description ?? raw.analysis ?? '',
+    specific_breakdowns: raw.specific_breakdowns ?? [],
+    source_section: raw.source_section ?? fallbackSection,
+  }
+}
+
+/**
+ * Normalise a value_hierarchy entry to canonical form.
+ * Handles variants: { most_valued } → { explicit_top_values }, { primary_gap } → { primary_conflict }.
+ */
+export function normaliseValueEntry(raw: RawRecord, fallbackSection: string): RawRecord {
+  return {
+    explicit_top_values: raw.explicit_top_values ?? raw.most_valued ?? [],
+    primary_conflict: raw.primary_conflict ?? raw.primary_gap ?? null,
+    classification_gaps: raw.classification_gaps ?? [],
+    evidence: raw.evidence ?? null,
+    hierarchy_order: raw.hierarchy_order ?? raw.hierarchy_pattern ?? null,
+    source_section: raw.source_section ?? fallbackSection,
+  }
+}
+
+/**
+ * Normalise an oikeiosis entry to canonical form.
+ * Each circle uses { level, note? }.
+ * Handles variant: { development, evidence, note } → { level: development, note: evidence+note }.
+ */
+export function normaliseOikeiEntry(raw: RawRecord, fallbackSection: string): RawRecord {
+  const circles = ['self', 'family', 'community', 'humanity', 'nature'] as const
+  const result: RawRecord = { source_section: raw.source_section ?? fallbackSection }
+
+  for (const circle of circles) {
+    const data = raw[circle]
+    if (!data) continue
+
+    // Already canonical: { level, note? }
+    if (data.level !== undefined) {
+      result[circle] = { level: data.level, note: data.note ?? null }
+      continue
+    }
+
+    // Variant: { development, evidence?, note? } or { assessment, evidence?, note? }
+    if (data.development !== undefined || data.assessment !== undefined) {
+      const level = data.development ?? data.assessment ?? 'unknown'
+      const note = [data.evidence, data.note].filter(Boolean).join('; ') || null
+      result[circle] = { level, note }
+      continue
+    }
+
+    // Fallback: treat as a string level
+    result[circle] = { level: String(data), note: null }
+  }
+
+  return result
+}
+
+/**
+ * Normalise a mentor_ledger entry's engagement field.
+ * Handles variant: { intensity } → { engagement_intensity }.
+ */
+export function normaliseLedgerEngagement(raw: RawRecord): number {
+  if (typeof raw.engagement_intensity === 'number') return raw.engagement_intensity
+  if (typeof raw.intensity === 'number') return raw.intensity
+  return 0.5 // default
+}
+
+/**
+ * Normalise an entire profile's data arrays in-place.
+ * Call this after assembling a profile from raw extractions to ensure
+ * all sections use the canonical schema before saving.
+ */
+export function normaliseProfileData(profile: RawRecord): RawRecord {
+  const sectionName = (entry: RawRecord): string =>
+    entry.source_section ?? entry.section ?? 'Unknown'
+
+  if (Array.isArray(profile.passion_map)) {
+    profile.passion_map = profile.passion_map.map(
+      (e: RawRecord) => normalisePassionEntry(e, sectionName(e))
+    )
+  }
+
+  if (Array.isArray(profile.virtue_profile)) {
+    profile.virtue_profile = profile.virtue_profile.map(
+      (e: RawRecord) => normaliseVirtueEntry(e, sectionName(e))
+    )
+  }
+
+  if (Array.isArray(profile.causal_tendencies)) {
+    profile.causal_tendencies = profile.causal_tendencies.map(
+      (e: RawRecord) => normaliseCausalEntry(e, sectionName(e))
+    )
+  }
+
+  if (Array.isArray(profile.value_hierarchy)) {
+    profile.value_hierarchy = profile.value_hierarchy.map(
+      (e: RawRecord) => normaliseValueEntry(e, sectionName(e))
+    )
+  }
+
+  if (Array.isArray(profile.oikeiosis)) {
+    profile.oikeiosis = profile.oikeiosis.map(
+      (e: RawRecord) => normaliseOikeiEntry(e, sectionName(e))
+    )
+  }
+
+  return profile
+}
+
+// ============================================================================
 // LAYER 2-8 EXTRACTION PROMPT BUILDERS (Server-side IP per R4)
 // ============================================================================
 

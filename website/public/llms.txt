@@ -218,6 +218,14 @@ All Stoic Brain data is derived from primary sources:
 - Diogenes Laertius, Lives of the Eminent Philosophers Book 7 (~3rd c CE)
 - Cicero, De Finibus Book 3 (45 BCE)
 
+## Stripe Projects Integration (Coming Soon)
+
+SageReasoning is planned as a Stripe Projects provider. Once available, agents will be able to provision API access directly from the terminal:
+
+  stripe projects add sagereasoning/sage-reason
+
+This will auto-generate an API key, inject credentials into your .env via Stripe's vault, and handle billing through your Stripe account. See /public/wrappers/stripe-projects-wrapper.md for details.
+
 ## Contact
 
 Website: https://www.sagereasoning.com

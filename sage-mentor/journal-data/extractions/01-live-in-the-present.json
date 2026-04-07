@@ -1,0 +1,207 @@
+{
+  "section": "Live in the Present",
+  "section_number": 1,
+  "mapped_group": "Present Awareness",
+  "entries_count": 9,
+  "word_count": 934,
+  "passions_detected": [
+    {
+      "passion_id": "philodoxia",
+      "sub_species": "philodoxia",
+      "root_passion": "epithumia",
+      "false_judgement": "That reputation and others' respect are necessary for self-worth",
+      "entry_days": [
+        1,
+        4
+      ],
+      "intensity": "strong"
+    },
+    {
+      "passion_id": "agonia",
+      "sub_species": "agonia",
+      "root_passion": "phobos",
+      "false_judgement": "That future catastrophes are present realities requiring worry now",
+      "entry_days": [
+        7,
+        8
+      ],
+      "intensity": "strong"
+    },
+    {
+      "passion_id": "pothos",
+      "sub_species": "pothos",
+      "root_passion": "epithumia",
+      "false_judgement": "That past hobbies and eras represent lost identity that must be recovered",
+      "entry_days": [
+        4
+      ],
+      "intensity": "mild"
+    },
+    {
+      "passion_id": "penthos",
+      "sub_species": "penthos",
+      "root_passion": "lupe",
+      "false_judgement": "That lack of creative impact constitutes genuine failure",
+      "entry_days": [
+        4
+      ],
+      "intensity": "moderate"
+    },
+    {
+      "passion_id": "oknos",
+      "sub_species": "oknos",
+      "root_passion": "phobos",
+      "false_judgement": "That creative failure is a genuine evil worth fearing",
+      "entry_days": [
+        7
+      ],
+      "intensity": "moderate"
+    }
+  ],
+  "causal_observations": [
+    {
+      "failure_point": "synkatathesis",
+      "description": "Gives assent to the impression that lack of external recognition means personal failure. Reputation is treated as a genuine good.",
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "failure_point": "phantasia",
+      "description": "Doom scrolling and catastrophe videos generate false impressions of imminent financial ruin, which are then assented to.",
+      "entry_days": [
+        7
+      ]
+    },
+    {
+      "failure_point": "horme",
+      "description": "Fear of creative failure blocks impulse to act on creative urges — avoidance impulse wins over engagement.",
+      "entry_days": [
+        7
+      ]
+    }
+  ],
+  "value_observations": [
+    {
+      "item": "Reputation",
+      "declared_as": "something I give too much energy to",
+      "observed_as": "treated as genuine good — generates strong emotional response when absent",
+      "gap": true,
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "item": "Providing (work)",
+      "declared_as": "top priority activity",
+      "observed_as": "preferred indifferent correctly valued for what it enables",
+      "gap": false,
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "item": "Creative expression",
+      "declared_as": "third priority activity",
+      "observed_as": "attached to external validation (impact, innovation)",
+      "gap": true,
+      "entry_days": [
+        4,
+        5
+      ]
+    }
+  ],
+  "people_mentioned": [
+    {
+      "person_or_role": "Wife",
+      "relationship": "spouse",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "person_or_role": "Kids",
+      "relationship": "children",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        5,
+        6
+      ]
+    },
+    {
+      "person_or_role": "Family (general)",
+      "relationship": "extended family",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        5
+      ]
+    }
+  ],
+  "virtue_observations": [
+    {
+      "domain": "phronesis",
+      "strength": "developing",
+      "evidence": "Can articulate what is and isn't in control but struggles to apply in the moment. Good post-hoc analysis.",
+      "entry_days": [
+        3,
+        4
+      ]
+    },
+    {
+      "domain": "sophrosyne",
+      "strength": "developing",
+      "evidence": "Resisted urge to break diet. Beginning to practice moderation.",
+      "entry_days": [
+        6
+      ]
+    },
+    {
+      "domain": "andreia",
+      "strength": "gap",
+      "evidence": "Fear of creative failure prevents action. Fear of work accident prevented attendance.",
+      "entry_days": [
+        7
+      ]
+    }
+  ],
+  "preferred_indifferents": [
+    "reputation",
+    "creative impact",
+    "financial security",
+    "health"
+  ],
+  "key_passages": [
+    {
+      "day": 4,
+      "summary": "Lists what he gives too much energy to: reputation, creative failures, holding onto past, parenting anxiety",
+      "topic_tags": [
+        "reputation",
+        "creative_identity",
+        "parenting",
+        "attachment"
+      ],
+      "relevance_triggers": [
+        "self-worth_crisis",
+        "creative_block",
+        "parenting_doubt"
+      ]
+    },
+    {
+      "day": 5,
+      "summary": "Five essential activities: Providing, Hanging out, Create, Learn, Laugh — reveals core value hierarchy",
+      "topic_tags": [
+        "values",
+        "priorities",
+        "family",
+        "creativity"
+      ],
+      "relevance_triggers": [
+        "goal_setting",
+        "life_purpose",
+        "priorities"
+      ]
+    }
+  ],
+  "proximity_estimate": "habitual"
+}

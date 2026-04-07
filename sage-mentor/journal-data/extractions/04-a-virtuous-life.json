@@ -1,0 +1,209 @@
+{
+  "section": "A Virtuous Life",
+  "section_number": 4,
+  "mapped_group": "The Virtuous Life",
+  "entries_count": 9,
+  "word_count": 1035,
+  "passions_detected": [
+    {
+      "passion_id": "philodoxia",
+      "sub_species": "philodoxia",
+      "root_passion": "epithumia",
+      "false_judgement": "That virtue pursued without external recognition has less value",
+      "entry_days": [
+        5
+      ],
+      "intensity": "moderate"
+    },
+    {
+      "passion_id": "aischyne",
+      "sub_species": "aischyne",
+      "root_passion": "phobos",
+      "false_judgement": "That self-perceived labels (delusional, fraud, lazy) represent truth about character",
+      "entry_days": [
+        6
+      ],
+      "intensity": "strong"
+    },
+    {
+      "passion_id": "epithumia",
+      "sub_species": "philedonia",
+      "root_passion": "epithumia",
+      "false_judgement": "That flavour/taste pleasures provide genuine satisfaction",
+      "entry_days": [
+        4
+      ],
+      "intensity": "mild"
+    }
+  ],
+  "causal_observations": [
+    {
+      "failure_point": "synkatathesis",
+      "description": "Assents to self-judgment labels (delusional, fraud, lazy, incompetent, frail) as accurate assessments rather than recognising them as passion-driven distortions.",
+      "entry_days": [
+        6
+      ]
+    },
+    {
+      "failure_point": "horme",
+      "description": "Art pursuits abandoned because impulse depends on positive feedback — when feedback absent, impulse to create collapses.",
+      "entry_days": [
+        6
+      ]
+    }
+  ],
+  "value_observations": [
+    {
+      "item": "Virtue through action not signalling",
+      "declared_as": "if done through action, not verbalised, it is genuine growth",
+      "observed_as": "genuinely held principle — one of the strongest value insights in the journal",
+      "gap": false,
+      "entry_days": [
+        3
+      ]
+    },
+    {
+      "item": "External reward for virtue",
+      "declared_as": "unnecessary",
+      "observed_as": "still seeking it unconsciously through desire for respect and acknowledgement",
+      "gap": true,
+      "entry_days": [
+        5
+      ]
+    }
+  ],
+  "people_mentioned": [
+    {
+      "person_or_role": "Boss",
+      "relationship": "supervisor",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        7
+      ]
+    },
+    {
+      "person_or_role": "Team",
+      "relationship": "colleagues",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        7
+      ]
+    },
+    {
+      "person_or_role": "Friends",
+      "relationship": "social circle",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        7
+      ]
+    },
+    {
+      "person_or_role": "Wife",
+      "relationship": "spouse",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        7
+      ]
+    },
+    {
+      "person_or_role": "Kids",
+      "relationship": "children",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        7
+      ]
+    },
+    {
+      "person_or_role": "Parents",
+      "relationship": "parents",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        7
+      ]
+    }
+  ],
+  "virtue_observations": [
+    {
+      "domain": "andreia",
+      "strength": "developing",
+      "evidence": "Frank reflection that could challenge himself more. Recognises need to seek discomfort and adventure.",
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "domain": "phronesis",
+      "strength": "moderate",
+      "evidence": "Practising critical thought with less cynicism. Beginning to hear both sides rather than just expose himself to them.",
+      "entry_days": [
+        2
+      ]
+    },
+    {
+      "domain": "dikaiosyne",
+      "strength": "developing",
+      "evidence": "Acknowledging when could have been nicer. Seeking to catch injustice in the moment, not just reflect later.",
+      "entry_days": [
+        2
+      ]
+    },
+    {
+      "domain": "sophrosyne",
+      "strength": "developing",
+      "evidence": "Setting absolute rules to break bad habits. Starting a regime for consistency.",
+      "entry_days": [
+        3
+      ]
+    }
+  ],
+  "preferred_indifferents": [
+    "external validation for art",
+    "physical health",
+    "social recognition"
+  ],
+  "key_passages": [
+    {
+      "day": 3,
+      "summary": "Vision of virtue through action not signalling — 'IF I do it through action, not verbalise it, then it is not signalling, it is done for my own growth, to seek happiness with nature'",
+      "topic_tags": [
+        "virtue_practice",
+        "authenticity",
+        "growth"
+      ],
+      "relevance_triggers": [
+        "virtue_signalling_concern",
+        "authentic_practice"
+      ]
+    },
+    {
+      "day": 6,
+      "summary": "Self-assessment: 'Delusional, fraud, lazy, incompetent, frail' — deep shame about creative pursuits and dependence on positive feedback",
+      "topic_tags": [
+        "self_criticism",
+        "shame",
+        "creative_identity",
+        "feedback_dependence"
+      ],
+      "relevance_triggers": [
+        "self_worth_crisis",
+        "creative_block",
+        "imposter_syndrome"
+      ]
+    },
+    {
+      "day": 8,
+      "summary": "Eudaimonia vision: continual improvement, positive outlook, strong health, controlled emotions, released baggage, never missing the wonder of the moment",
+      "topic_tags": [
+        "eudaimonia",
+        "flourishing",
+        "life_vision"
+      ],
+      "relevance_triggers": [
+        "goal_setting",
+        "vision_review",
+        "motivation"
+      ]
+    }
+  ],
+  "proximity_estimate": "deliberate"
+}

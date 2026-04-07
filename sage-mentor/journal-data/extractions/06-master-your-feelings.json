@@ -1,0 +1,204 @@
+{
+  "section": "Master Your Feelings",
+  "section_number": 6,
+  "mapped_group": "Mastering Feelings",
+  "entries_count": 7,
+  "word_count": 1209,
+  "passions_detected": [
+    {
+      "passion_id": "orge",
+      "sub_species": "orge",
+      "root_passion": "epithumia",
+      "false_judgement": "That children's non-cooperation is a genuine evil requiring anger to correct",
+      "entry_days": [
+        4
+      ],
+      "intensity": "strong"
+    },
+    {
+      "passion_id": "philodoxia",
+      "sub_species": "philodoxia",
+      "root_passion": "epithumia",
+      "false_judgement": "That being the 'good guy' responsible for cousins is necessary for identity",
+      "entry_days": [
+        5
+      ],
+      "intensity": "moderate"
+    },
+    {
+      "passion_id": "penthos",
+      "sub_species": "penthos",
+      "root_passion": "lupe",
+      "false_judgement": "That not being there for cousin constitutes personal failure",
+      "entry_days": [
+        5
+      ],
+      "intensity": "moderate"
+    },
+    {
+      "passion_id": "aischyne",
+      "sub_species": "aischyne",
+      "root_passion": "phobos",
+      "false_judgement": "That anger reveals cowardice unless willing to escalate to violence",
+      "entry_days": [
+        2
+      ],
+      "intensity": "mild"
+    }
+  ],
+  "causal_observations": [
+    {
+      "failure_point": "horme",
+      "description": "Shouting at kids: the impression of disrespect triggers immediate impulse to anger before reasoning can intervene. This is the primary horme failure.",
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "failure_point": "synkatathesis",
+      "description": "Cousin situation: assented to the false judgement that not reaching out = personal failure, rather than recognising the complexity of the situation.",
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "failure_point": "praxis",
+      "description": "Key growth: 'vitriolic intent is just as strong' even when shouting is reduced — delivery changed but underlying passion persists.",
+      "entry_days": [
+        6
+      ]
+    }
+  ],
+  "value_observations": [
+    {
+      "item": "Being the good guy",
+      "declared_as": "a passion to recognise",
+      "observed_as": "deeply held identity marker driving behaviour",
+      "gap": true,
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "item": "Peacefulness",
+      "declared_as": "a strategic strength",
+      "observed_as": "understood intellectually — lower heart rate, element of surprise, professional perception",
+      "gap": false,
+      "entry_days": [
+        2
+      ]
+    }
+  ],
+  "people_mentioned": [
+    {
+      "person_or_role": "Kids",
+      "relationship": "children",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "person_or_role": "Cousin",
+      "relationship": "extended family",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "person_or_role": "Close friend (betrayer)",
+      "relationship": "former friend",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "person_or_role": "Teammates",
+      "relationship": "colleagues",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        3
+      ]
+    }
+  ],
+  "virtue_observations": [
+    {
+      "domain": "andreia",
+      "strength": "developing",
+      "evidence": "Recognises anger as false strength. Understands peacefulness as the genuinely courageous position.",
+      "entry_days": [
+        2
+      ]
+    },
+    {
+      "domain": "sophrosyne",
+      "strength": "developing",
+      "evidence": "Morning journalling as daily practice. Still needs testing and reflection to reverse ingrained impulses.",
+      "entry_days": [
+        3
+      ]
+    },
+    {
+      "domain": "phronesis",
+      "strength": "moderate",
+      "evidence": "Root cause analysis of cousin situation — identifies multiple false judgements. Can separate passion from source.",
+      "entry_days": [
+        5,
+        6
+      ]
+    }
+  ],
+  "preferred_indifferents": [
+    "being the good guy",
+    "family harmony",
+    "team respect"
+  ],
+  "key_passages": [
+    {
+      "day": 4,
+      "summary": "Shouting at kids — 'they will always remember how I made them feel' — then the breakthrough of coaxing with encouragement getting the job done",
+      "topic_tags": [
+        "parenting",
+        "anger",
+        "growth",
+        "breakthrough"
+      ],
+      "relevance_triggers": [
+        "parenting_frustration",
+        "anger_management",
+        "behaviour_change"
+      ]
+    },
+    {
+      "day": 5,
+      "summary": "Cousin crisis and betrayal source — passion of needing to be the good guy, source in being robbed by close friend",
+      "topic_tags": [
+        "betrayal",
+        "identity",
+        "responsibility",
+        "grief"
+      ],
+      "relevance_triggers": [
+        "family_obligation",
+        "guilt",
+        "trust_issues"
+      ]
+    },
+    {
+      "day": 6,
+      "summary": "Key insight on delivery vs intent — 'shouting may be less but the vitriolic intent is just as strong' — recognises the praxis change hasn't reached synkatathesis",
+      "topic_tags": [
+        "self_awareness",
+        "passion_persistence",
+        "progress"
+      ],
+      "relevance_triggers": [
+        "anger_management",
+        "genuine_vs_surface_change"
+      ]
+    }
+  ],
+  "proximity_estimate": "deliberate"
+}

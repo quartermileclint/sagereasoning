@@ -739,6 +739,39 @@ export const SKILL_REGISTRY: SkillContract[] = [
     example_input: { situation: 'Teaching a class about critical thinking', learner_context: 'University students, mixed backgrounds', educational_approach: 'Socratic questioning with real-world examples' },
     example_output: { result: { skill_id: 'sage-educate', katorthoma_proximity: 'principled', education_notice: 'Ensure content is age-appropriate.' } },
   },
+
+  // =========================================================================
+  // FUTURE: Stripe Projects Provisioning Skill (Category B placeholder)
+  //
+  // sage-provision will let agents provision SageReasoning API access via
+  // `stripe projects add sagereasoning/sage-reason`. This skill is planned
+  // for after Stripe Projects reaches GA (expected late April 2026) and
+  // after P4 (Stripe payment processing) is wired and verified.
+  //
+  // See: /website/src/lib/stripe-projects.ts for architecture details.
+  // See: /inbox/stripe projects.txt and /inbox/native recommendations.txt
+  //
+  // Uncomment and implement when ready:
+  //
+  // {
+  //   id: 'sage-provision',
+  //   name: 'sage-provision',
+  //   tier: 'tier1_infrastructure',
+  //   outcome: 'Provision or manage SageReasoning API access via Stripe Projects CLI.',
+  //   cost_speed: 'Free (provisioning), ~1s',
+  //   chains_to: ['sage-reason-quick'],
+  //   endpoint: '/api/billing/provision',
+  //   method: 'POST',
+  //   auth_required: true,
+  //   mechanisms: [],
+  //   mechanism_count: 0,
+  //   free_tier_monthly: -1,
+  //   free_tier_unit: 'calls',
+  //   description: 'Stripe Projects integration. Provision API keys, upgrade plans, rotate credentials, and generate llm-context — all via terminal.',
+  //   example_input: { action: 'provision', plan: 'sagereasoning/sage-reason-paid' },
+  //   example_output: { result: { api_key: 'sr_live_***', base_url: 'https://api.sagereasoning.com', tier: 'paid' } },
+  // },
+  // =========================================================================
 ]
 
 /**

@@ -1,562 +1,1088 @@
-{
-  "user_id": "clinton",
-  "journal_name": "Clinton's Stoic Journal",
-  "import_date": "2026-04-06",
-  "entries": {
-    "aims": [
-      {
-        "content": "Handle reactions with measured action not impulse",
-        "intensity": 0.7,
-        "source_section": "Live in the Present"
-      },
-      {
-        "content": "Achieve contentment through learning and completion",
-        "intensity": 0.8,
-        "source_section": "Live in the Present"
-      },
-      {
-        "content": "Shift from threat-focused to balanced perspective",
-        "intensity": 0.75,
-        "source_section": "Embrace Difficulty"
-      },
-      {
-        "content": "Build inner citadel accessible in adversity",
-        "intensity": 0.8,
-        "source_section": "Embrace Difficulty"
-      },
-      {
-        "content": "Stop overreacting; respond with detachment and curiosity",
-        "intensity": 0.8,
-        "source_section": "Practice Acceptance"
-      },
-      {
-        "content": "Relinquish perfectionism and control",
-        "intensity": 0.85,
-        "source_section": "Practice Acceptance"
-      },
-      {
-        "content": "Achieve eudaimonia: flourishing with continual improvement, positive outlook, strength, health, unburdened peace",
-        "intensity": 0.85,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "Embody all four virtues equally",
-        "intensity": 0.8,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "Act virtuously silently, not for social credit",
-        "intensity": 0.8,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "To achieve inner peace and serenity through consistent reflection and virtue alignment",
-        "engagement_intensity": 0.9,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Break the pattern of external expectation dependency and emotional reactivity",
-        "engagement_intensity": 0.8,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Develop courage to sit with discomfort rather than escape via humor or distraction",
-        "engagement_intensity": 0.7,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Achieve true wisdom (internal alignment) rather than appearance of wisdom (external validation)",
-        "engagement_intensity": 0.9,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Develop beginner's mindset: release all assumptions of mastery and prior knowledge sufficiency",
-        "engagement_intensity": 0.8,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Master the dichotomy between listening genuinely and preparing next argument",
-        "engagement_intensity": 0.75,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Achieve contentment through presence and attention rather than acquisition and fantasy",
-        "engagement_intensity": 0.85,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "Release reliance on external validation (impression, respect, love-proof) while still valuing connection",
-        "engagement_intensity": 0.7,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "Reframe physical limitation (back pain) as defining constraint rather than identity-destroyer",
-        "engagement_intensity": 0.75,
-        "source_section": "Be Content"
-      }
+[
+  {
+    "kind": "aim",
+    "content": "My purpose is to break a lifetime habit of procrastination and overthinking by evolving Stoic principles and be of service to those around me.",
+    "source_section": "Be Responsible to Others",
+    "source_entry": 6,
+    "engagement_intensity": 0.95,
+    "sage_path_weight": 0.92,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "oknos"
     ],
-    "commitments": [
-      {
-        "content": "Call out intrusive thoughts, write later, accept imperfection",
-        "timeframe": "daily",
-        "intensity": 0.75,
-        "source_section": "Live in the Present"
-      },
-      {
-        "content": "Daily 5-from-5 activity survey",
-        "timeframe": "daily",
-        "intensity": 0.6,
-        "source_section": "Live in the Present"
-      },
-      {
-        "content": "Recognize moment to pause; use breath/mantra for inner strength",
-        "timeframe": "daily",
-        "intensity": 0.7,
-        "source_section": "Embrace Difficulty"
-      },
-      {
-        "content": "Breathing exercises and time-out before responding",
-        "timeframe": "daily",
-        "intensity": 0.7,
-        "source_section": "Practice Acceptance"
-      },
-      {
-        "content": "Address 16 challenges with inside/outside control lens",
-        "timeframe": "varied",
-        "intensity": 0.75,
-        "source_section": "Practice Acceptance"
-      },
-      {
-        "content": "Measure every action against four cardinal virtues; disassociate from feelings before responding",
-        "timeframe": "daily",
-        "intensity": 0.7,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "Set internal benchmarks per virtue; reflection as reward",
-        "timeframe": "daily",
-        "intensity": 0.75,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "11 daily eudaimonia practices: review, walk, journal, catch cynicism, catch temptations, listen, pause for beauty, refrain opinions, face difficulties positively",
-        "timeframe": "daily",
-        "intensity": 0.6,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "Implement daily reflective practice to appreciate achievements and maintain purpose clarity",
-        "timeframe": "ongoing",
-        "engagement_intensity": 0.7,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Eliminate lotto tickets and gambling as concrete rejection of wealth fantasy",
-        "timeframe": "immediate",
-        "engagement_intensity": 0.6,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Practice complete attention in conversation, replacing humor-diffusion with authentic presence",
-        "timeframe": "ongoing",
-        "engagement_intensity": 0.7,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Implement pass/fail rules for speech: (1) emotion separable from opinion? (2) motivated by virtue? (3) adds wisdom to discourse?",
-        "timeframe": "ongoing, before speaking",
-        "engagement_intensity": 0.7,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Diversify information sources across media types and tribal perspectives to combat algorithm bias",
-        "timeframe": "ongoing practice",
-        "engagement_intensity": 0.65,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Practice blame-assignment proportionality: differentiate between ownership and shame-spiraling",
-        "timeframe": "ongoing in reflection",
-        "engagement_intensity": 0.6,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Reduce social media consumption; use nature as primary information source and grounding practice",
-        "timeframe": "ongoing",
-        "engagement_intensity": 0.6,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "Address back limitation through weight loss, targeted exercise, and physical reconstruction of capacity",
-        "timeframe": "long-term project",
-        "engagement_intensity": 0.7,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "Practice full attention to pleasures (sunbaking) and stop at the point of satisfaction rather than indulgence",
-        "timeframe": "ongoing, daily",
-        "engagement_intensity": 0.6,
-        "source_section": "Be Content"
-      }
+    "connected_virtues": [
+      "andreia",
+      "sophrosyne"
     ],
-    "realisations": [
-      {
-        "content": "Measured action yields positive reflection for all",
-        "intensity": 0.8,
-        "source_section": "Live in the Present"
-      },
-      {
-        "content": "Future fears are unproductive without tangible action",
-        "intensity": 0.75,
-        "source_section": "Live in the Present"
-      },
-      {
-        "content": "Obstacles force learning creating applicable capabilities",
-        "intensity": 0.85,
-        "source_section": "Embrace Difficulty"
-      },
-      {
-        "content": "Past avoidances cost significantly in competition, sociability, connection",
-        "intensity": 0.8,
-        "source_section": "Embrace Difficulty"
-      },
-      {
-        "content": "Overreactions cost in multiple domains",
-        "intensity": 0.85,
-        "source_section": "Practice Acceptance"
-      },
-      {
-        "content": "Haven't walked the walk of can-do attitude promoted",
-        "intensity": 0.9,
-        "source_section": "Practice Acceptance"
-      },
-      {
-        "content": "Craving is controllable perception",
-        "intensity": 0.8,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "Dependent on external feedback for art - major blocker",
-        "intensity": 0.85,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "Nothing stopping start except habit patterns",
-        "intensity": 0.85,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "Without reflection, achievements feel nonexistent and gratitude collapses into escapism",
-        "engagement_intensity": 0.8,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "External expectations (reputation, approval) are irrational judgments about uncontrollable futures",
-        "engagement_intensity": 0.85,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Catastrophizing is indulgent fantasy-thinking that uses energy without benefit; mindfulness breaks the cycle",
-        "engagement_intensity": 0.8,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Inner resources (restraint, observation, endurance) already exist; the task is deployment, not acquisition",
-        "engagement_intensity": 0.75,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Not admitting ignorance doesn't retain power; it forfeits credibility and learning opportunity",
-        "engagement_intensity": 0.85,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Intellectual humor used to dominate discourse is barrier to genuine connection and wisdom-exchange",
-        "engagement_intensity": 0.8,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Blame is often explanation that avoids the harder work of proportional root-cause analysis",
-        "engagement_intensity": 0.75,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Disciplined mind correlates with mood improvement and reduction in shame-spirals",
-        "engagement_intensity": 0.85,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Others' mistakes present opportunities never otherwise available; this is a profound gift",
-        "engagement_intensity": 0.7,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Social media and algorithm feeds are designed to trigger FOMO and appetite; nature provides direct truthful information",
-        "engagement_intensity": 0.8,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "Envy is a form of imagination about others' experience, not reality; pivoting to curiosity about effort is more accurate",
-        "engagement_intensity": 0.8,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "What I once craved (love, respect, validation) cannot be obtained in the quantity/manner/timing desired because it's not controllable",
-        "engagement_intensity": 0.85,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "Fantasy-motivation (cars, rockstar status) and virtuous motivation can coexist; need is to prioritize internal driver",
-        "engagement_intensity": 0.7,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "Others' apparent ease and advantage is sustained by sacrifice invisible to observer (case studies of 'grass is greener')",
-        "engagement_intensity": 0.75,
-        "source_section": "Be Content"
-      }
+    "tags": [
+      "life_purpose",
+      "procrastination",
+      "service"
     ],
-    "questions": [
-      {
-        "content": "Have I done my job as parent?",
-        "intensity": 0.9,
-        "source_section": "Live in the Present"
-      },
-      {
-        "content": "How do I build an inner citadel?",
-        "intensity": 0.8,
-        "source_section": "Embrace Difficulty"
-      },
-      {
-        "content": "Do stress and emotions lead to poor decisions?",
-        "intensity": 0.85,
-        "source_section": "Practice Acceptance"
-      },
-      {
-        "content": "How do I currently embody the four virtues?",
-        "intensity": 0.8,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "What opportunities for character-building have I passed on?",
-        "intensity": 0.75,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "How much of my resentment about external control is actually resistance to accepting what I cannot change?",
-        "engagement_intensity": 0.7,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Can I truly let go of external expectations if I haven't tested that belief in high-stakes situations?",
-        "engagement_intensity": 0.65,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "What would it mean to 'flow with fate' when my default is to resist or escape?",
-        "engagement_intensity": 0.6,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "How do I distinguish between healthy self-accountability and excessive self-blame?",
-        "engagement_intensity": 0.75,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Can intellectual humility be sustained in high-stakes conversations or only in reflective safety?",
-        "engagement_intensity": 0.65,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "What is the minimum viable bias-check before accepting information, and when am I over-processing?",
-        "engagement_intensity": 0.55,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Can I accept physical limitation without losing sense of masculinity or possibility?",
-        "engagement_intensity": 0.8,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "How do I distinguish between rightful ambition (improve back health) and unrealistic fantasy (return to youth)?",
-        "engagement_intensity": 0.75,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "What would it look like to genuinely release the need for love-proof while still valuing love?",
-        "engagement_intensity": 0.7,
-        "source_section": "Be Content"
-      }
-    ],
-    "tensions": [
-      {
-        "content": "Knows measured responses work but can't execute in moment",
-        "intensity": 0.8,
-        "source_section": "Live in the Present"
-      },
-      {
-        "content": "Knows worse-case irrelevant yet daydreams catastrophes",
-        "intensity": 0.85,
-        "source_section": "Embrace Difficulty"
-      },
-      {
-        "content": "Promotes can-do but hasn't walked it",
-        "intensity": 0.9,
-        "source_section": "Practice Acceptance"
-      },
-      {
-        "content": "Comprehensive eudaimonia vision but admits 'nothing stopping start' - inaction",
-        "intensity": 0.9,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "Values virtue but carries self-image as delusional, fraud, lazy blocking action",
-        "intensity": 0.9,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "Advocates silent action but dependent on external feedback for art",
-        "intensity": 0.85,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "Wants moment-catching but practices are all post-hoc reflection",
-        "intensity": 0.8,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "Intellectual commitment to dichotomy of control vs. emotional investment in reputation/outcomes",
-        "engagement_intensity": 0.85,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Desire for inner peace vs. inability to sustain reflection practice without external structure",
-        "engagement_intensity": 0.7,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Understanding that virtuous action doesn't guarantee happiness vs. expecting peace from virtue",
-        "engagement_intensity": 0.65,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Desire to admit ignorance vs. lifelong habit of demonstrating mastery",
-        "engagement_intensity": 0.8,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Knowledge that wisdom doesn't need acknowledgment vs. pleasure-seeking from being right",
-        "engagement_intensity": 0.75,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Accepting that every moment is contingent vs. relying on past experience as guide",
-        "engagement_intensity": 0.65,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Intellectual acceptance of contentment as virtue vs. continued attachment to fantasy-improvement narratives",
-        "engagement_intensity": 0.8,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "Desire for relational restoration (loved ones' regard) vs. intellectual commitment to not needing external validation",
-        "engagement_intensity": 0.85,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "Value placed on creative self-expression (rockstar fantasy) vs. dismissal of it as illegitimate 'impression-seeking'",
-        "engagement_intensity": 0.7,
-        "source_section": "Be Content"
-      }
-    ],
-    "intentions": [
-      {
-        "content": "Use transit and work-from-home time for creativity",
-        "intensity": 0.65,
-        "source_section": "Live in the Present"
-      },
-      {
-        "content": "Recognize and stop daydreaming about future",
-        "intensity": 0.7,
-        "source_section": "Embrace Difficulty"
-      },
-      {
-        "content": "Let others finish arguments; take calm posture",
-        "intensity": 0.65,
-        "source_section": "Practice Acceptance"
-      },
-      {
-        "content": "View others' opinions as learning opportunity test",
-        "intensity": 0.7,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "After disassociating from feelings, respond with curiosity",
-        "intensity": 0.65,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "Strategically hide disagreement until planning opportunity",
-        "intensity": 0.6,
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "content": "Shift from shame-based reflection to correction-focused reflection",
-        "engagement_intensity": 0.7,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Develop curiosity about root causes of others' perspectives instead of defensive reaction",
-        "engagement_intensity": 0.7,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "View discomfort as evidence of worthwhile effort rather than signal to escape",
-        "engagement_intensity": 0.65,
-        "source_section": "Choose Serenity"
-      },
-      {
-        "content": "Let intellectual discernment stay internal; use wit to clarify, not to dominate",
-        "engagement_intensity": 0.7,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Treat each conversation as first encounter despite prior knowledge",
-        "engagement_intensity": 0.6,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Reframe mistakes (others' and own) as curriculum rather than as judgment-material",
-        "engagement_intensity": 0.7,
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "content": "Appreciate others' success by understanding their effort and virtue, not by imagining their pleasure",
-        "engagement_intensity": 0.7,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "Shift from curating everything to accepting curation (music as sparse composition, not cluttered mix)",
-        "engagement_intensity": 0.65,
-        "source_section": "Be Content"
-      },
-      {
-        "content": "Allow physical improvement efforts without tying them to identity restoration or youth-recovery",
-        "engagement_intensity": 0.6,
-        "source_section": "Be Content"
-      }
-    ]
+    "id": "ledger_001",
+    "extraction_timestamp": "2026-04-07T18:17:02.710930",
+    "journal_period": "October–December 2025"
   },
-  "summary": {
-    "total_entries": 103,
-    "by_kind": {
-      "aims": 18,
-      "commitments": 17,
-      "realisations": 23,
-      "questions": 14,
-      "tensions": 16,
-      "intentions": 15
-    }
+  {
+    "kind": "aim",
+    "content": "Best version of myself — 'Energised': lean, capable, physically well pain-free, mentally resilient, positive, flexible, curious and consistent search for truth, passions restrained, appreciation of nature and others, reaches out, social, ready for retirement and new experiences.",
+    "source_section": "Be Responsible to Others",
+    "source_entry": 7,
+    "engagement_intensity": 0.9,
+    "sage_path_weight": 0.88,
+    "developmental_priority": "aspirational",
+    "connected_passions": [],
+    "connected_virtues": [
+      "phronesis",
+      "andreia",
+      "sophrosyne",
+      "dikaiosyne"
+    ],
+    "tags": [
+      "best_self",
+      "vision",
+      "wholeness"
+    ],
+    "id": "ledger_002",
+    "extraction_timestamp": "2026-04-07T18:17:02.710940",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "aim",
+    "content": "To believe, when forever I wouldn't, in myself and my inner approach to life. I stumbled upon Stoic principles from my own (upon examination) and from others, but lacked the practice or consistency.",
+    "source_section": "Be Responsible to Others",
+    "source_entry": 6,
+    "engagement_intensity": 0.92,
+    "sage_path_weight": 0.9,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "aischyne"
+    ],
+    "connected_virtues": [
+      "andreia"
+    ],
+    "tags": [
+      "self_belief",
+      "consistency",
+      "practice"
+    ],
+    "id": "ledger_003",
+    "extraction_timestamp": "2026-04-07T18:17:02.710942",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "aim",
+    "content": "Pursue eudaimonia through continual improvement in not necessarily large steps but actively working toward betterment. Positive outlook. Strong health. Things done and available for duty. Belongings lessened. Position to be generous.",
+    "source_section": "A Virtuous Life",
+    "source_entry": 8,
+    "engagement_intensity": 0.85,
+    "sage_path_weight": 0.82,
+    "developmental_priority": "aspirational",
+    "connected_passions": [],
+    "connected_virtues": [
+      "phronesis",
+      "sophrosyne"
+    ],
+    "tags": [
+      "eudaimonia",
+      "flourishing",
+      "simplicity"
+    ],
+    "id": "ledger_004",
+    "extraction_timestamp": "2026-04-07T18:17:02.710943",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "aim",
+    "content": "Be of service — to boss and team at work, to family, to community. Long term may be able to help with housing crisis through subdivision work.",
+    "source_section": "Live in Gratitude",
+    "source_entry": 5,
+    "engagement_intensity": 0.75,
+    "sage_path_weight": 0.78,
+    "developmental_priority": "active_edge",
+    "connected_passions": [],
+    "connected_virtues": [
+      "dikaiosyne"
+    ],
+    "tags": [
+      "service",
+      "community",
+      "duty"
+    ],
+    "id": "ledger_005",
+    "extraction_timestamp": "2026-04-07T18:17:02.710945",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "commitment",
+    "content": "Commit to journaling, practice, self-examination. Marathon not a race. Finish this book first.",
+    "source_section": "A Virtuous Life",
+    "source_entry": 7,
+    "engagement_intensity": 0.85,
+    "sage_path_weight": 0.82,
+    "developmental_priority": "foundational",
+    "connected_passions": [],
+    "connected_virtues": [
+      "sophrosyne",
+      "phronesis"
+    ],
+    "tags": [
+      "journaling",
+      "practice",
+      "discipline"
+    ],
+    "id": "ledger_006",
+    "extraction_timestamp": "2026-04-07T18:17:02.710946",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "commitment",
+    "content": "Morning mood check + how it may impact day. Journal — how was I wise, brave, tenacious, just. End of day survey. Nightly mood reflection.",
+    "source_section": "Live in Gratitude",
+    "source_entry": 7,
+    "engagement_intensity": 0.8,
+    "sage_path_weight": 0.78,
+    "developmental_priority": "foundational",
+    "connected_passions": [],
+    "connected_virtues": [
+      "phronesis",
+      "sophrosyne"
+    ],
+    "tags": [
+      "daily_practice",
+      "reflection",
+      "routine"
+    ],
+    "id": "ledger_007",
+    "extraction_timestamp": "2026-04-07T18:17:02.710947",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "commitment",
+    "content": "Check in with friends and family more often, take greater interest in wellbeing of others.",
+    "source_section": "Live in Gratitude",
+    "source_entry": 5,
+    "engagement_intensity": 0.7,
+    "sage_path_weight": 0.72,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "oknos"
+    ],
+    "connected_virtues": [
+      "dikaiosyne",
+      "andreia"
+    ],
+    "tags": [
+      "relationships",
+      "connection",
+      "reaching_out"
+    ],
+    "id": "ledger_008",
+    "extraction_timestamp": "2026-04-07T18:17:02.710948",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "commitment",
+    "content": "Stop buying lotto tickets. Eliminate gambling — it is paying for a daydream about the passion of wealth.",
+    "source_section": "Choose Serenity",
+    "source_entry": 5,
+    "engagement_intensity": 0.82,
+    "sage_path_weight": 0.8,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "kelesis",
+      "philoplousia"
+    ],
+    "connected_virtues": [
+      "sophrosyne"
+    ],
+    "tags": [
+      "gambling",
+      "letting_go",
+      "desire"
+    ],
+    "id": "ledger_009",
+    "extraction_timestamp": "2026-04-07T18:17:02.710949",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "commitment",
+    "content": "Schedule nature, art and lessons into week along with chores/culling/selling to relieve burden.",
+    "source_section": "Live in Gratitude",
+    "source_entry": 4,
+    "engagement_intensity": 0.72,
+    "sage_path_weight": 0.7,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "oknos"
+    ],
+    "connected_virtues": [
+      "andreia",
+      "sophrosyne"
+    ],
+    "tags": [
+      "scheduling",
+      "nature",
+      "creativity",
+      "decluttering"
+    ],
+    "id": "ledger_010",
+    "extraction_timestamp": "2026-04-07T18:17:02.710951",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "commitment",
+    "content": "Reduce waste, review impact on environment. Recycle. Avoid unnecessary waste. Donate or dispose reusable goods.",
+    "source_section": "Live in Gratitude",
+    "source_entry": 3,
+    "engagement_intensity": 0.65,
+    "sage_path_weight": 0.62,
+    "developmental_priority": "consolidation",
+    "connected_passions": [],
+    "connected_virtues": [
+      "dikaiosyne",
+      "sophrosyne"
+    ],
+    "tags": [
+      "environment",
+      "waste",
+      "nature"
+    ],
+    "id": "ledger_011",
+    "extraction_timestamp": "2026-04-07T18:17:02.710952",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "commitment",
+    "content": "Look into Seven Hills reserve community groups for working bees to preserve the nature reserve.",
+    "source_section": "Live in Gratitude",
+    "source_entry": 5,
+    "engagement_intensity": 0.6,
+    "sage_path_weight": 0.58,
+    "developmental_priority": "aspirational",
+    "connected_passions": [],
+    "connected_virtues": [
+      "dikaiosyne"
+    ],
+    "tags": [
+      "community",
+      "nature",
+      "volunteering"
+    ],
+    "id": "ledger_012",
+    "extraction_timestamp": "2026-04-07T18:17:02.710953",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "commitment",
+    "content": "Will study AI as a step to control my binge-like traits.",
+    "source_section": "Live in Gratitude",
+    "source_entry": 4,
+    "engagement_intensity": 0.68,
+    "sage_path_weight": 0.7,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "philedonia"
+    ],
+    "connected_virtues": [
+      "phronesis"
+    ],
+    "tags": [
+      "AI",
+      "learning",
+      "self_control"
+    ],
+    "id": "ledger_013",
+    "extraction_timestamp": "2026-04-07T18:17:02.710954",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "realisation",
+    "content": "Ignorance and obliviousness is not malicious. Selfishness is not about you — it is where they are at. So be curious why.",
+    "source_section": "Master Your Thoughts",
+    "source_entry": 1,
+    "engagement_intensity": 0.92,
+    "sage_path_weight": 0.9,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "philodoxia"
+    ],
+    "connected_virtues": [
+      "phronesis"
+    ],
+    "tags": [
+      "curiosity",
+      "reframing",
+      "ego",
+      "others"
+    ],
+    "id": "ledger_014",
+    "extraction_timestamp": "2026-04-07T18:17:02.710954",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "realisation",
+    "content": "I felt bad so I made them feel bad. Shouting expressed my disgust, disappointment, dismissed them as worthless. They will always remember how I made them feel.",
+    "source_section": "Master Your Feelings",
+    "source_entry": 4,
+    "engagement_intensity": 0.95,
+    "sage_path_weight": 0.92,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "orge"
+    ],
+    "connected_virtues": [
+      "dikaiosyne"
+    ],
+    "tags": [
+      "parenting",
+      "anger",
+      "harm",
+      "regret"
+    ],
+    "id": "ledger_015",
+    "extraction_timestamp": "2026-04-07T18:17:02.710955",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "realisation",
+    "content": "It wasn't personal. Addictions override decency and trick the brain into survival mode. They were doing it for survival and could block out their impact on others.",
+    "source_section": "Master Your Feelings",
+    "source_entry": 5,
+    "engagement_intensity": 0.88,
+    "sage_path_weight": 0.85,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "penthos"
+    ],
+    "connected_virtues": [
+      "phronesis"
+    ],
+    "tags": [
+      "betrayal",
+      "forgiveness",
+      "understanding",
+      "addiction"
+    ],
+    "id": "ledger_016",
+    "extraction_timestamp": "2026-04-07T18:17:02.710956",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "realisation",
+    "content": "It is only from deriving zero internal motivation from external praise that I can derive zero dismotivation from criticism.",
+    "source_section": "Master Your Thoughts",
+    "source_entry": 7,
+    "engagement_intensity": 0.9,
+    "sage_path_weight": 0.88,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "philodoxia"
+    ],
+    "connected_virtues": [
+      "phronesis",
+      "sophrosyne"
+    ],
+    "tags": [
+      "detachment",
+      "praise",
+      "criticism",
+      "internal_motivation"
+    ],
+    "id": "ledger_017",
+    "extraction_timestamp": "2026-04-07T18:17:02.710957",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "realisation",
+    "content": "Not supposed to 'provide' everything. There is a middle ground. Not a competition to be better than parents or brother at it.",
+    "source_section": "Master Your Thoughts",
+    "source_entry": 5,
+    "engagement_intensity": 0.82,
+    "sage_path_weight": 0.8,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "philodoxia",
+      "agonia"
+    ],
+    "connected_virtues": [
+      "phronesis"
+    ],
+    "tags": [
+      "providing",
+      "family",
+      "competition",
+      "middle_ground"
+    ],
+    "id": "ledger_018",
+    "extraction_timestamp": "2026-04-07T18:17:02.710958",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "realisation",
+    "content": "The shouting may be less but the vitriolic intent is just as strong. I have made delivery less emotional but not the rational response — I can now clearly deliver emotional response, not clearly deliver rational response.",
+    "source_section": "Master Your Feelings",
+    "source_entry": 6,
+    "engagement_intensity": 0.88,
+    "sage_path_weight": 0.86,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "orge"
+    ],
+    "connected_virtues": [
+      "sophrosyne"
+    ],
+    "tags": [
+      "anger",
+      "progress",
+      "genuine_change",
+      "delivery_vs_intent"
+    ],
+    "id": "ledger_019",
+    "extraction_timestamp": "2026-04-07T18:17:02.710959",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "realisation",
+    "content": "What people think of me will have no impact on my things I value.",
+    "source_section": "Embrace Difficulty",
+    "source_entry": 1,
+    "engagement_intensity": 0.78,
+    "sage_path_weight": 0.75,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "philodoxia"
+    ],
+    "connected_virtues": [
+      "phronesis"
+    ],
+    "tags": [
+      "reputation",
+      "values",
+      "detachment"
+    ],
+    "id": "ledger_020",
+    "extraction_timestamp": "2026-04-07T18:17:02.710981",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "realisation",
+    "content": "Reflecting is action.",
+    "source_section": "Live in Gratitude",
+    "source_entry": 7,
+    "engagement_intensity": 0.85,
+    "sage_path_weight": 0.82,
+    "developmental_priority": "foundational",
+    "connected_passions": [],
+    "connected_virtues": [
+      "phronesis"
+    ],
+    "tags": [
+      "reflection",
+      "action",
+      "practice"
+    ],
+    "id": "ledger_021",
+    "extraction_timestamp": "2026-04-07T18:17:02.710995",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "realisation",
+    "content": "Fear is a destructive passion making it an irrational judgement. Fears of external expectations are of a future thing which is not present and in the moment, meaning it is irrelevant to actions/decisions at this time.",
+    "source_section": "Choose Serenity",
+    "source_entry": 7,
+    "engagement_intensity": 0.88,
+    "sage_path_weight": 0.85,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "agonia",
+      "phobos"
+    ],
+    "connected_virtues": [
+      "phronesis"
+    ],
+    "tags": [
+      "fear",
+      "irrational_judgement",
+      "future",
+      "present"
+    ],
+    "id": "ledger_022",
+    "extraction_timestamp": "2026-04-07T18:17:02.710997",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "realisation",
+    "content": "Blame is a way of explaining things that require more consideration and effort to properly determine root cause.",
+    "source_section": "Cultivate Wisdom",
+    "source_entry": 6,
+    "engagement_intensity": 0.82,
+    "sage_path_weight": 0.8,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "lupe"
+    ],
+    "connected_virtues": [
+      "phronesis"
+    ],
+    "tags": [
+      "blame",
+      "root_cause",
+      "self_forgiveness"
+    ],
+    "id": "ledger_023",
+    "extraction_timestamp": "2026-04-07T18:17:02.710998",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "realisation",
+    "content": "Don't feel the same shame. Outlook is more positive as I have found a fulfilment and patience. Outlook is can-do. Journalling has used up some inquisitive self examination in a meaningful way which has meant less often intrusive thoughts.",
+    "source_section": "Cultivate Wisdom",
+    "source_entry": 8,
+    "engagement_intensity": 0.9,
+    "sage_path_weight": 0.88,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "aischyne"
+    ],
+    "connected_virtues": [
+      "phronesis",
+      "andreia"
+    ],
+    "tags": [
+      "progress",
+      "shame_reduction",
+      "fulfilment",
+      "intrusive_thoughts"
+    ],
+    "id": "ledger_024",
+    "extraction_timestamp": "2026-04-07T18:17:02.710999",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "realisation",
+    "content": "There is no good or bad in nature just true or false — everything else is just my or their perspective of things which cannot be trusted. Act not on the perceptions but on the true/false that is the root cause contributing to their perception.",
+    "source_section": "Be Content",
+    "source_entry": 6,
+    "engagement_intensity": 0.95,
+    "sage_path_weight": 0.92,
+    "developmental_priority": "foundational",
+    "connected_passions": [],
+    "connected_virtues": [
+      "phronesis"
+    ],
+    "tags": [
+      "truth",
+      "perception",
+      "nature",
+      "value_theory"
+    ],
+    "id": "ledger_025",
+    "extraction_timestamp": "2026-04-07T18:17:02.711000",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "realisation",
+    "content": "Coveting is imagining the pleasure they must feel from what they have. Pivoting envy to curiosity — breaking down the virtues they employed to achieve what they have is the real gift of their success.",
+    "source_section": "Be Content",
+    "source_entry": 4,
+    "engagement_intensity": 0.85,
+    "sage_path_weight": 0.82,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "phthonos"
+    ],
+    "connected_virtues": [
+      "phronesis"
+    ],
+    "tags": [
+      "envy",
+      "curiosity",
+      "reframing",
+      "others_success"
+    ],
+    "id": "ledger_026",
+    "extraction_timestamp": "2026-04-07T18:17:02.711001",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "question",
+    "content": "Have I done my job as a parent? Failed to prepare them for resilience required? Failed to provide opportunities?",
+    "source_section": "Live in the Present",
+    "source_entry": 4,
+    "engagement_intensity": 0.85,
+    "sage_path_weight": 0.82,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "agonia",
+      "aischyne"
+    ],
+    "connected_virtues": [
+      "dikaiosyne"
+    ],
+    "tags": [
+      "parenting",
+      "duty",
+      "self_doubt"
+    ],
+    "id": "ledger_027",
+    "extraction_timestamp": "2026-04-07T18:17:02.711002",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "question",
+    "content": "Can I reach the attitude of loving everything that happened to me (amor fati)? 'I am at the acceptance of past and am working on future happenings and will work on loving everything.'",
+    "source_section": "Accept Your Fate",
+    "source_entry": 4,
+    "engagement_intensity": 0.8,
+    "sage_path_weight": 0.78,
+    "developmental_priority": "aspirational",
+    "connected_passions": [],
+    "connected_virtues": [
+      "phronesis",
+      "andreia"
+    ],
+    "tags": [
+      "amor_fati",
+      "acceptance",
+      "love",
+      "aspiration"
+    ],
+    "id": "ledger_028",
+    "extraction_timestamp": "2026-04-07T18:17:02.711003",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "question",
+    "content": "How to balance caring for loved ones with the Stoic ideal? 'Me loving everything may not sit well with my loved ones who may value exclusivity.'",
+    "source_section": "Accept Your Fate",
+    "source_entry": 4,
+    "engagement_intensity": 0.78,
+    "sage_path_weight": 0.75,
+    "developmental_priority": "active_edge",
+    "connected_passions": [],
+    "connected_virtues": [
+      "phronesis",
+      "dikaiosyne"
+    ],
+    "tags": [
+      "family",
+      "stoicism",
+      "balance",
+      "marriage"
+    ],
+    "id": "ledger_029",
+    "extraction_timestamp": "2026-04-07T18:17:02.711004",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "question",
+    "content": "What meaningful (and not self-beneficial) contribution can I make from the skills I have? Still searching for a meaningful contribution to community.",
+    "source_section": "Be Responsible to Others",
+    "source_entry": 1,
+    "engagement_intensity": 0.72,
+    "sage_path_weight": 0.7,
+    "developmental_priority": "active_edge",
+    "connected_passions": [],
+    "connected_virtues": [
+      "dikaiosyne"
+    ],
+    "tags": [
+      "community",
+      "contribution",
+      "purpose",
+      "service"
+    ],
+    "id": "ledger_030",
+    "extraction_timestamp": "2026-04-07T18:17:02.711005",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "question",
+    "content": "How to be brave enough to enter awkward situations with nothing to offer? Could be there to listen, not fix problem, contact without anything to offer like help.",
+    "source_section": "Master Your Feelings",
+    "source_entry": 5,
+    "engagement_intensity": 0.82,
+    "sage_path_weight": 0.8,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "oknos"
+    ],
+    "connected_virtues": [
+      "andreia"
+    ],
+    "tags": [
+      "courage",
+      "vulnerability",
+      "presence",
+      "cousin"
+    ],
+    "id": "ledger_031",
+    "extraction_timestamp": "2026-04-07T18:17:02.711006",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "tension",
+    "content": "Knows reputation shouldn't matter but still deeply affected by perceived disrespect. 'Thoughts of perceived disrespect make me feel worthless for several days.'",
+    "source_section": "Master Your Thoughts",
+    "source_entry": 1,
+    "engagement_intensity": 0.9,
+    "sage_path_weight": 0.88,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "philodoxia"
+    ],
+    "connected_virtues": [
+      "phronesis",
+      "sophrosyne"
+    ],
+    "tags": [
+      "reputation",
+      "gap",
+      "disrespect",
+      "worthlessness"
+    ],
+    "id": "ledger_032",
+    "extraction_timestamp": "2026-04-07T18:17:02.711007",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "tension",
+    "content": "Can articulate rational response but still delivers vitriol. 'The shouting may be less but the vitriolic intent is just as strong.' Delivery changed but underlying passion persists.",
+    "source_section": "Master Your Feelings",
+    "source_entry": 6,
+    "engagement_intensity": 0.88,
+    "sage_path_weight": 0.86,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "orge"
+    ],
+    "connected_virtues": [
+      "sophrosyne"
+    ],
+    "tags": [
+      "anger",
+      "intent_vs_delivery",
+      "genuine_change"
+    ],
+    "id": "ledger_033",
+    "extraction_timestamp": "2026-04-07T18:17:02.711008",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "tension",
+    "content": "Wants to let go of past but still holds resentment for some things. 'I still hold resentment for some things that have happened to me.'",
+    "source_section": "Accept Your Fate",
+    "source_entry": 4,
+    "engagement_intensity": 0.78,
+    "sage_path_weight": 0.75,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "penthos"
+    ],
+    "connected_virtues": [
+      "phronesis"
+    ],
+    "tags": [
+      "resentment",
+      "past",
+      "letting_go"
+    ],
+    "id": "ledger_034",
+    "extraction_timestamp": "2026-04-07T18:17:02.711009",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "tension",
+    "content": "Values 'do the right thing' as core ethos but recognises hasn't always followed through. Promotes can-do attitude but hasn't 'walked the walk'.",
+    "source_section": "Practice Acceptance",
+    "source_entry": 6,
+    "engagement_intensity": 0.82,
+    "sage_path_weight": 0.8,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "aischyne"
+    ],
+    "connected_virtues": [
+      "andreia",
+      "dikaiosyne"
+    ],
+    "tags": [
+      "hypocrisy",
+      "walk_the_walk",
+      "integrity"
+    ],
+    "id": "ledger_035",
+    "extraction_timestamp": "2026-04-07T18:17:02.711009",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "tension",
+    "content": "Wealth indifference is the biggest challenge — 'my wife and I have made the journey about these and often celebrate them in ourselves.' Household relationship complicates individual progress.",
+    "source_section": "Accept Your Fate",
+    "source_entry": 3,
+    "engagement_intensity": 0.85,
+    "sage_path_weight": 0.82,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "philoplousia"
+    ],
+    "connected_virtues": [
+      "sophrosyne"
+    ],
+    "tags": [
+      "wealth",
+      "status",
+      "marriage",
+      "shared_values"
+    ],
+    "id": "ledger_036",
+    "extraction_timestamp": "2026-04-07T18:17:02.711010",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "tension",
+    "content": "Over-planning and over-preparing as avoidance — 'overusing the preparation stage of a goal which drains the energy/motivation from taking the first step.' Talking about doing it replaces actually doing it.",
+    "source_section": "Cultivate Wisdom",
+    "source_entry": 7,
+    "engagement_intensity": 0.85,
+    "sage_path_weight": 0.82,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "oknos"
+    ],
+    "connected_virtues": [
+      "andreia"
+    ],
+    "tags": [
+      "procrastination",
+      "avoidance",
+      "talk_vs_action"
+    ],
+    "id": "ledger_037",
+    "extraction_timestamp": "2026-04-07T18:17:02.711011",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "tension",
+    "content": "Without reflection, gratitude disappears and gratification replaces it — 'no gratitude leads to seeking gratification and indulging in excess, as a friendly distraction from the pointlessness.' Practice is not yet self-sustaining.",
+    "source_section": "Choose Serenity",
+    "source_entry": 1,
+    "engagement_intensity": 0.9,
+    "sage_path_weight": 0.88,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "philedonia"
+    ],
+    "connected_virtues": [
+      "sophrosyne",
+      "phronesis"
+    ],
+    "tags": [
+      "reflection",
+      "gratification",
+      "discipline",
+      "sustainability"
+    ],
+    "id": "ledger_038",
+    "extraction_timestamp": "2026-04-07T18:17:02.711012",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "intention",
+    "content": "Default to patience and curiosity when faced with adversity. Fortitude in adversity will draw admiration whether you win or lose.",
+    "source_section": "Embrace Difficulty",
+    "source_entry": 5,
+    "engagement_intensity": 0.82,
+    "sage_path_weight": 0.8,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "orge",
+      "agonia"
+    ],
+    "connected_virtues": [
+      "andreia",
+      "phronesis"
+    ],
+    "tags": [
+      "patience",
+      "curiosity",
+      "adversity",
+      "fortitude"
+    ],
+    "id": "ledger_039",
+    "extraction_timestamp": "2026-04-07T18:17:02.711013",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "intention",
+    "content": "Always have an opinion but refrain from expressing it. Share what's interesting and beautiful instead.",
+    "source_section": "A Virtuous Life",
+    "source_entry": 8,
+    "engagement_intensity": 0.75,
+    "sage_path_weight": 0.72,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "philodoxia"
+    ],
+    "connected_virtues": [
+      "sophrosyne",
+      "phronesis"
+    ],
+    "tags": [
+      "discretion",
+      "restraint",
+      "sharing_beauty"
+    ],
+    "id": "ledger_040",
+    "extraction_timestamp": "2026-04-07T18:17:02.711014",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "intention",
+    "content": "Let emotions bounce off me, not control me. Treat praise the same way as criticism — with external politeness but internally zero good or harm.",
+    "source_section": "Master Your Thoughts",
+    "source_entry": 7,
+    "engagement_intensity": 0.85,
+    "sage_path_weight": 0.82,
+    "developmental_priority": "foundational",
+    "connected_passions": [
+      "philodoxia",
+      "orge"
+    ],
+    "connected_virtues": [
+      "sophrosyne"
+    ],
+    "tags": [
+      "equanimity",
+      "praise",
+      "criticism",
+      "detachment"
+    ],
+    "id": "ledger_041",
+    "extraction_timestamp": "2026-04-07T18:17:02.711015",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "intention",
+    "content": "Embrace AI and explore capabilities as a tool for growth and learning.",
+    "source_section": "A Virtuous Life",
+    "source_entry": 8,
+    "engagement_intensity": 0.7,
+    "sage_path_weight": 0.68,
+    "developmental_priority": "active_edge",
+    "connected_passions": [],
+    "connected_virtues": [
+      "phronesis"
+    ],
+    "tags": [
+      "AI",
+      "learning",
+      "technology",
+      "growth"
+    ],
+    "id": "ledger_042",
+    "extraction_timestamp": "2026-04-07T18:17:02.711016",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "intention",
+    "content": "Instead of relying on humour to diffuse a situation, have the courage to sit in the awkwardness and listen. Instead of preparing the next argument while listening, give complete attention.",
+    "source_section": "Choose Serenity",
+    "source_entry": 3,
+    "engagement_intensity": 0.85,
+    "sage_path_weight": 0.82,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "oknos"
+    ],
+    "connected_virtues": [
+      "andreia",
+      "phronesis"
+    ],
+    "tags": [
+      "listening",
+      "courage",
+      "attention",
+      "humour"
+    ],
+    "id": "ledger_043",
+    "extraction_timestamp": "2026-04-07T18:17:02.711018",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "intention",
+    "content": "Use curiosity as a pause mechanism against insults and perceived disrespect. It gets to the root cause and lets you view the moment from a different angle.",
+    "source_section": "Choose Serenity",
+    "source_entry": 3,
+    "engagement_intensity": 0.82,
+    "sage_path_weight": 0.8,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "philodoxia",
+      "orge"
+    ],
+    "connected_virtues": [
+      "phronesis"
+    ],
+    "tags": [
+      "curiosity",
+      "pause",
+      "reframing",
+      "disrespect"
+    ],
+    "id": "ledger_044",
+    "extraction_timestamp": "2026-04-07T18:17:02.711018",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "intention",
+    "content": "Act not on what will make me happy — act thinking 'what kind of person does this make me'. Motivation from wanting to be honest, brave, fair and self-controlled.",
+    "source_section": "Choose Serenity",
+    "source_entry": 4,
+    "engagement_intensity": 0.9,
+    "sage_path_weight": 0.88,
+    "developmental_priority": "foundational",
+    "connected_passions": [],
+    "connected_virtues": [
+      "phronesis",
+      "andreia",
+      "dikaiosyne",
+      "sophrosyne"
+    ],
+    "tags": [
+      "character",
+      "motivation",
+      "virtue",
+      "identity"
+    ],
+    "id": "ledger_045",
+    "extraction_timestamp": "2026-04-07T18:17:02.711019",
+    "journal_period": "October–December 2025"
+  },
+  {
+    "kind": "intention",
+    "content": "Snap out of catastrophizing daydreams before they take hold — 'how is that relevant in the moment' — and return to real action addressing the four virtues.",
+    "source_section": "Choose Serenity",
+    "source_entry": 5,
+    "engagement_intensity": 0.82,
+    "sage_path_weight": 0.8,
+    "developmental_priority": "active_edge",
+    "connected_passions": [
+      "agonia"
+    ],
+    "connected_virtues": [
+      "phronesis",
+      "sophrosyne"
+    ],
+    "tags": [
+      "daydreaming",
+      "catastrophizing",
+      "present_moment",
+      "discipline"
+    ],
+    "id": "ledger_046",
+    "extraction_timestamp": "2026-04-07T18:17:02.711020",
+    "journal_period": "October–December 2025"
   }
-}
+]

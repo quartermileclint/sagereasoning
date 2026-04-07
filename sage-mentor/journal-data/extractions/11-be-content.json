@@ -1,0 +1,189 @@
+{
+  "section": "Be Content",
+  "section_number": 11,
+  "mapped_group": "Being Content",
+  "entries_count": 11,
+  "word_count": 1278,
+  "passions_detected": [
+    {
+      "passion_id": "phthonos",
+      "sub_species": "phthonos",
+      "root_passion": "lupe",
+      "false_judgement": "That others' success reveals personal deprivation — 'coveting is imagining the pleasure they must feel'",
+      "entry_days": [
+        4
+      ],
+      "intensity": "moderate"
+    },
+    {
+      "passion_id": "philoplousia",
+      "sub_species": "philoplousia",
+      "root_passion": "epithumia",
+      "false_judgement": "That cars and resourcefulness demonstration are genuine goods",
+      "entry_days": [
+        6
+      ],
+      "intensity": "mild"
+    },
+    {
+      "passion_id": "pothos",
+      "sub_species": "pothos",
+      "root_passion": "epithumia",
+      "false_judgement": "That rockstar fantasy/creative recognition represents a lost genuine good",
+      "entry_days": [
+        6
+      ],
+      "intensity": "mild"
+    }
+  ],
+  "causal_observations": [
+    {
+      "failure_point": "synkatathesis",
+      "description": "Envy reframed: 'pivoting envy to curiosity' — learning to withhold assent from the impression that others' success = personal lack. Breaking down their virtues is 'the real gift of their success'.",
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "failure_point": "phantasia",
+      "description": "Social media as false impression generator — 'reduce source of negative emotions' but with wisdom not to quit impulsively.",
+      "entry_days": [
+        1
+      ]
+    }
+  ],
+  "value_observations": [
+    {
+      "item": "Contentment formula",
+      "declared_as": "the right mindset focused on four virtues: Courage (take action), Justice (do the right thing), Temperance (do it consistently), Wisdom (calculated with resources)",
+      "observed_as": "clear, well-formulated, genuinely held",
+      "gap": false,
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "item": "Love, respect, validation",
+      "declared_as": "things I have that I once craved",
+      "observed_as": "still attached to the 'exact amount in the exact way at the exact time' — working to let go",
+      "gap": true,
+      "entry_days": [
+        7
+      ]
+    },
+    {
+      "item": "Freedom through belief",
+      "declared_as": "'there is no good or bad in nature just true or false'",
+      "observed_as": "strongest philosophical articulation in the journal",
+      "gap": false,
+      "entry_days": [
+        6
+      ]
+    }
+  ],
+  "people_mentioned": [
+    {
+      "person_or_role": "Brother (wise)",
+      "relationship": "sibling/counsel",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        2
+      ]
+    },
+    {
+      "person_or_role": "New boss",
+      "relationship": "supervisor",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        2
+      ]
+    },
+    {
+      "person_or_role": "Wife",
+      "relationship": "spouse",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        2
+      ]
+    }
+  ],
+  "virtue_observations": [
+    {
+      "domain": "phronesis",
+      "strength": "strong",
+      "evidence": "'There is no good or bad in nature just true or false everything else is just my or their perspective'. This is the strongest philosophical formulation in the journal — genuine practical wisdom.",
+      "entry_days": [
+        6
+      ]
+    },
+    {
+      "domain": "sophrosyne",
+      "strength": "moderate",
+      "evidence": "Music metaphor for contentment — 'things and pleasures need to be culled down to small morsels of savoury and shareable treats'",
+      "entry_days": [
+        8
+      ]
+    },
+    {
+      "domain": "andreia",
+      "strength": "moderate",
+      "evidence": "Back pain reframed: 'contentment will come once I have done all I can to improve the situation. Lose weight, exercise, become a man I have never been.'",
+      "entry_days": [
+        2
+      ]
+    }
+  ],
+  "preferred_indifferents": [
+    "cars",
+    "creative recognition",
+    "love validation",
+    "health"
+  ],
+  "key_passages": [
+    {
+      "day": 5,
+      "summary": "Contentment formula: Courage (take action), Justice (do the right thing), Temperance (do it consistently), Wisdom (calculated with resources available)",
+      "topic_tags": [
+        "contentment",
+        "virtue_formula",
+        "simplicity"
+      ],
+      "relevance_triggers": [
+        "seeking_contentment",
+        "simplifying_life",
+        "virtue_practice"
+      ]
+    },
+    {
+      "day": 6,
+      "summary": "Freedom through truth: 'there is no good or bad in nature just true or false — act not on the perceptions but on the true/false that is the root cause'",
+      "topic_tags": [
+        "truth",
+        "freedom",
+        "perception",
+        "nature"
+      ],
+      "relevance_triggers": [
+        "philosophical_insight",
+        "decision_making",
+        "perception_vs_reality"
+      ]
+    },
+    {
+      "day": 8,
+      "summary": "Music metaphor for contentment — 'things and pleasures need to be culled down to small morsels of savoury and shareable treats' — instead of search for more, attention to resourcefulness",
+      "topic_tags": [
+        "contentment",
+        "simplicity",
+        "music_metaphor",
+        "resourcefulness"
+      ],
+      "relevance_triggers": [
+        "overconsumption",
+        "simplifying",
+        "enough"
+      ]
+    }
+  ],
+  "proximity_estimate": "deliberate"
+}

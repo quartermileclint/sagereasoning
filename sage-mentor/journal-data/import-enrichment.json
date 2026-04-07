@@ -1,217 +1,402 @@
 {
-  "user_id": "clinton",
+  "extraction_timestamp": "2026-04-07T18:17:02.713687",
   "journal_name": "Clinton's Stoic Journal",
-  "import_date": "2026-04-06",
-  "one_off_import": true,
-  "note": "Temporal-arc-dependent data from original journal import. Cannot be reconstructed from re-interpretation.",
-  "enrichments": {
-    "maxims": [
-      "Measured action provides positive reflection for all parties",
-      "Accept imperfection",
-      "Embrace tasks and the learning to complete them",
-      "The impediment to action advances action",
-      "Every learning before task creates new applicable capability",
-      "Recognize in moment to pause",
-      "Default to patience and curiosity in adversity",
-      "Embrace imperfection",
-      "Give up zero contradictions and pride in it",
-      "Give up 'my way is the right way'",
-      "Treat perfection as moment in time",
-      "Curiosity demands patience",
-      "Do it for the act; outcome doesn't matter",
-      "Nothing stopping me from doing so. Nothing stopping from starting now.",
-      "If through action without verbalizing to others, then not signalling - done for own growth",
-      "Ensure everything measured against courage, justice, temperance, wisdom",
-      "Disassociate from feelings to avoid passionate reaction",
-      "Set internal benchmarks of success for each virtue",
-      "Reflection becomes the reward",
-      "Marathon not a race. Finish this book first.",
-      "Never missing the wonder of the moment",
-      "Create less turbulence (noise/opinions)",
-      "If I don't reflect I don't appreciate my own achievements... like leaving a light on",
-      "Success is the effort trying sincerely, with integrity, didn't avoid effort from fear or laziness",
-      "Act not on what will make me happy act thinking what kind of person does this make me",
-      "How is that relevant in the moment [reframe for catastrophizing]",
-      "Returning to the moment, real action to address or support the 4 virtues will be a positive distraction",
-      "Can the emotion be separated from the opinion and stripped down to just what you believe to be true",
-      "You can never cross the same river twice [flux principle applied to wisdom]",
-      "Blame is a way of explaining things that require more consideration and effort to properly determine root cause",
-      "Every new moment is a chance to use your experience as a starting point to be prepared but then do not drop your attention from the specifics",
-      "If you are fully appreciating the pleasure with all your attention in the moment then you can savour it quickly without over indulging",
-      "Coveting is imagining the pleasure they must feel... It is a sign that not enough attention has been paid to the root cause of the success",
-      "Nothing is ever locked in, it is all a starting point to relate to when applying it to suit that instant",
-      "Instead of the search for more, the attention to resourcefulness of what is present is what will bring contentment"
-    ],
-    "emotional_anchors": [
-      {
-        "experience": "Lazy Sunday family market exploration",
-        "significance": "Contentment anchor; sensory grounding",
-        "source_section": "Live in the Present"
-      },
-      {
-        "experience": "Uncooperative new boss leading to eventual satisfaction",
-        "significance": "Obstacles become transformative",
-        "source_section": "Embrace Difficulty"
-      },
-      {
-        "experience": "Friend dying catalyzing appreciation",
-        "significance": "Mortality teacher",
-        "source_section": "Embrace Difficulty"
-      },
-      {
-        "experience": "Drug addict friend betrayal; group turned against him",
-        "significance": "NOW sees addict afflicted, not personal. Achieved: 'This has passed, I can move on'",
-        "source_section": "Practice Acceptance"
-      },
-      {
-        "experience": "Art pursuits (sketches, poetry, screenplay, filmmaking, music) abandoned for positive feedback dependency",
-        "significance": "Deep identity wound; courage failure; blocks eudaimonia",
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "experience": "Years of habit avoiding/ignoring/dishonoring self",
-        "significance": "Entrenched avoidance identity; reversal requires deliberate counteraction",
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "experience": "Self-concept: Delusional, fraud, lazy, incompetent, frail",
-        "significance": "Core shame beneath virtue efforts; must examine to progress",
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "experience": "Resentment from feeling controlled by compulsory mundane tasks",
-        "personal_significance": "Marks the collapse of motivation when purpose connection breaks",
-        "source_section": "Choose Serenity"
-      },
-      {
-        "experience": "Fear of reputation collapse impacting generations of family",
-        "personal_significance": "Deep intergenerational anxiety; suggests family loyalty operates powerfully in judgment",
-        "source_section": "Choose Serenity"
-      },
-      {
-        "experience": "Recognition that daydreaming about outcomes (winning lotto, perfect boss) wastes energy",
-        "personal_significance": "Visceral insight that fantasy is form of theft from present moment",
-        "source_section": "Choose Serenity"
-      },
-      {
-        "experience": "Multiple instances of self-blame (not reaching out, being selfish, bringing dishonor, missing warning signs, not following through)",
-        "personal_significance": "Deep family-honor sensitivity; guilt is motivator for change but also risk of over-correction",
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "experience": "Recognition that journaling has reduced intrusive thoughts and shame spirals",
-        "personal_significance": "Concrete evidence that disciplined mind improves emotional baseline; builds confidence in method",
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "experience": "Cool heads prevailing in crisis moments creating camaraderie and character-building",
-        "personal_significance": "Positive emotional anchor showing others' example as high-value learning opportunity",
-        "source_section": "Cultivate Wisdom"
-      },
-      {
-        "experience": "Chronic back pain as loss of freedom, sports, masculinity, youth",
-        "personal_significance": "Central trauma; identity-threatening; symbolizes all losses and constraints; deep grief present",
-        "source_section": "Be Content"
-      },
-      {
-        "experience": "New boss as difficult-to-accept circumstance, reframed through wise brother's counsel",
-        "personal_significance": "Model of successful reframing; shows that external circumstances can shift meaning through internal work",
-        "source_section": "Be Content"
-      },
-      {
-        "experience": "Relational alienation and fantasy of future repair (loved one 'one day will not resent me')",
-        "personal_significance": "Avoidant coping; relies on time/change rather than active reconciliation; unresolved guilt",
-        "source_section": "Be Content"
-      },
-      {
-        "experience": "Observation of others who pursued 'grass is greener' paths (own business, inherited wealth, hedonism) and regretted them",
-        "personal_significance": "Powerful negative exemplars; intellectual protection against FOMO via reality-testing",
-        "source_section": "Be Content"
-      }
-    ],
-    "growth_evidence": [
-      "Moving from passive to active intervention with intrusive thoughts",
-      "Developing structured emotion processing",
-      "Naming specific fears and their effects",
-      "Shift from complete avoidance to examining costs",
-      "Developing Stoic vocabulary (inner citadel, pause)",
-      "Tracing catastrophic thinking chains",
-      "Shift from blame to compassionate understanding",
-      "Trace that resistance causes disrespect and morale loss",
-      "Separate normal behavior from catastrophic interpretation",
-      "Honest assessment of ethos-behavior gap",
-      "Move from 'do right thing' ethos to four cardinal virtues integration",
-      "Shift from general shame to specific action-gap identification",
-      "Developing multi-dimensional eudaimonia vision",
-      "Recognition that silent action preserves integrity",
-      "Detailed duty inventory across 9 domains (community, boss, team, friends, wife, kids, parents, family, nature, stoicism)",
-      "From individual virtue to systemic life design",
-      "Shift from 'Fate is pushing me' to commitment to 'flow with it' via virtue-alignment",
-      "Recognition that inner resources exist and only need deployment, not building",
-      "Movement from shame-spiral about failures to reframe-and-correct approach",
-      "Evolution from fear-based external compliance to internally-motivated virtue practice",
-      "Movement from 'I know this' defensiveness to 'What can I learn from this mistake' openness",
-      "Shift from shame-based blame to proportional root-cause analysis",
-      "Development of systematic approach to evaluating information quality (bias checking, source questioning)",
-      "Recognition that disciplined thinking causally reduces emotional volatility",
-      "Shift from unexamined FOMO to conscious evaluation of social media's manipulative design",
-      "Evolution from shame about back limitation to acceptance of it as reality to work within",
-      "Movement from envy-imagination to curiosity-based learning from others' success",
-      "Recognition that creative/status impulses (cars, rockstar fantasy) can be reframed as virtuous contribution rather than suppressed"
-    ],
-    "unfinished_threads": [
-      {
-        "thread": "Creative music return after fear abandonment",
-        "status": "unresolved",
-        "source_section": "Live in the Present"
-      },
-      {
-        "thread": "Art pursuits need courage for rejection-facing and grinding through less-fun work",
-        "status": "unresolved/unstarted",
-        "implication": "Creative self dormant",
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "thread": "Hoarding/unburdened state acknowledged but unactioned",
-        "status": "unresolved",
-        "implication": "Physical clutter mirrors internal",
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "thread": "Sardonic skepticism as lifelong reversal need",
-        "status": "nascent",
-        "implication": "Deep pattern needs sustained practice",
-        "source_section": "A Virtuous Life"
-      },
-      {
-        "thread": "Daily eudaimonia practices (11 items) - not yet evidenced as consistent",
-        "status": "intention-set/untested",
-        "implication": "New regime; sustainability unclear",
-        "source_section": "A Virtuous Life"
-      },
-      "How to sustain reflection practice without relying on structured journal prompts",
-      "Integration of rejected 'rockstar' and 'impressive cars' identities into productive creative channels",
-      "Translation of intellectual understanding of externals-as-uncontrollable into automatic emotional response",
-      "Development of practice for 'letting go of outcomes' that moves beyond intellectual assent",
-      "How to maintain humility when past performance was genuinely skilled (not mere ego-protection)",
-      "Integration of intellectual humor/creativity into wisdom-contribution without domination",
-      "Building proportional responsibility-taking that's neither self-blame nor blame-shifting",
-      "Sustainable practice for bias-checking without cognitive paralysis",
-      "Translation of crisis-competence (cool heads) into daily virtue practice",
-      "Integration of masculine identity with physical limitation and vulnerability",
-      "Reconciliation of relational alienation; moving from fantasy of repair to active restoration",
-      "Clarification of which ambitions are realistic growth vs. impossible fantasy (e.g., recovery of youth vs. optimization of current body)",
-      "Genuine release of external validation need while maintaining relational openness (currently some avoidance present)",
-      "Finding virtuous outlet for creative/impressive impulses without dismissing them as illegitimate impression-seeking"
-    ]
-  },
-  "summary": {
-    "total_items": 99,
-    "by_kind": {
-      "maxims": 35,
-      "emotional_anchors": 17,
-      "growth_evidence": 28,
-      "unfinished_threads": 19
+  "journal_period": "October–December 2025",
+  "note": "One-off import enrichment — temporal arc data that cannot be reconstructed from re-interpretation.",
+  "maxims": [
+    {
+      "id": "maxim_001",
+      "content": "Reflecting is action.",
+      "source_section": "Live in Gratitude",
+      "source_entry": 7,
+      "engagement_intensity": 0.85,
+      "tags": [
+        "reflection",
+        "action",
+        "practice"
+      ],
+      "stoic_concept": "prosoche (attention)"
+    },
+    {
+      "id": "maxim_002",
+      "content": "It is only from deriving zero internal motivation from external praise that I can derive zero dismotivation from criticism.",
+      "source_section": "Master Your Thoughts",
+      "source_entry": 7,
+      "engagement_intensity": 0.9,
+      "tags": [
+        "detachment",
+        "praise",
+        "criticism"
+      ],
+      "stoic_concept": "apatheia (freedom from destructive passion)"
+    },
+    {
+      "id": "maxim_003",
+      "content": "If you are the leader use delegation to bolster the team knowledge, trust, and experience, and free up attention to all levels. Progress will happen whether you do or not.",
+      "source_section": "Cultivate Wisdom",
+      "source_entry": 5,
+      "engagement_intensity": 0.78,
+      "tags": [
+        "leadership",
+        "delegation",
+        "trust"
+      ],
+      "stoic_concept": "oikeiosis (extending concern)"
+    },
+    {
+      "id": "maxim_004",
+      "content": "Nothing is ever locked in, it is all a starting point to relate to when applying it to suit that instant.",
+      "source_section": "Be Content",
+      "source_entry": 6,
+      "engagement_intensity": 0.85,
+      "tags": [
+        "flexibility",
+        "present_moment",
+        "adaptation"
+      ],
+      "stoic_concept": "kairos (the right moment)"
+    },
+    {
+      "id": "maxim_005",
+      "content": "Blame is a way of explaining things that require more consideration and effort to properly determine root cause.",
+      "source_section": "Cultivate Wisdom",
+      "source_entry": 6,
+      "engagement_intensity": 0.82,
+      "tags": [
+        "blame",
+        "root_cause",
+        "wisdom"
+      ],
+      "stoic_concept": "phantasia kataleptike (comprehensive impression)"
+    },
+    {
+      "id": "maxim_006",
+      "content": "Significance can only be derived from truth or false, which can each be perceived as good or bad, but significance derived from truth contributes to reality.",
+      "source_section": "Be Responsible to Others",
+      "source_entry": 4,
+      "engagement_intensity": 0.9,
+      "tags": [
+        "significance",
+        "truth",
+        "reality"
+      ],
+      "stoic_concept": "aletheia (truth)"
+    },
+    {
+      "id": "maxim_007",
+      "content": "Success is the effort trying sincerely, with integrity — didn't avoid effort from fear or laziness.",
+      "source_section": "Choose Serenity",
+      "source_entry": 4,
+      "engagement_intensity": 0.88,
+      "tags": [
+        "success",
+        "effort",
+        "integrity"
+      ],
+      "stoic_concept": "katorthoma (right action)"
+    },
+    {
+      "id": "maxim_008",
+      "content": "The inner goal is the right amount of each virtue at any time, by aiming for the right amount at any moment while heading toward longer goal 'right' amounts.",
+      "source_section": "Master Your Thoughts",
+      "source_entry": 8,
+      "engagement_intensity": 0.82,
+      "tags": [
+        "virtue",
+        "balance",
+        "mean_value"
+      ],
+      "stoic_concept": "metriopatheia (moderation of passion)"
+    },
+    {
+      "id": "maxim_009",
+      "content": "There is no good or bad in nature, just true or false — everything else is just my or their perspective of things which cannot be trusted.",
+      "source_section": "Be Content",
+      "source_entry": 6,
+      "engagement_intensity": 0.95,
+      "tags": [
+        "truth",
+        "perception",
+        "nature",
+        "value_theory"
+      ],
+      "stoic_concept": "axioma (value proposition)"
+    },
+    {
+      "id": "maxim_010",
+      "content": "Curiosity demands patience. Curiosity demands being open to ideas. Curiosity is learning which removes the time-wasting aspect.",
+      "source_section": "Practice Acceptance",
+      "source_entry": 3,
+      "engagement_intensity": 0.78,
+      "tags": [
+        "curiosity",
+        "patience",
+        "learning"
+      ],
+      "stoic_concept": "philomathia (love of learning)"
     }
-  }
+  ],
+  "emotional_anchors": [
+    {
+      "id": "anchor_001",
+      "label": "The lazy Sunday market outing",
+      "content": "The family explored a culture not seen for years, experiencing the sound and sights and tastes of the market. Now home, cosy from the rain outside, the glare making me sleepy like the cat.",
+      "source_section": "Live in the Present",
+      "source_entry": 1,
+      "engagement_intensity": 0.85,
+      "tags": [
+        "family",
+        "contentment",
+        "present_moment",
+        "sensory"
+      ],
+      "mentor_use": "Reference when discussing present-moment awareness and family gratitude"
+    },
+    {
+      "id": "anchor_002",
+      "label": "Betrayal by drug-addicted friend",
+      "content": "Felt heartbroken and worthless when sold out for a few thousand dollars. Ruined reputation with friend group. Later realised: addictions override decency, it was not personal.",
+      "source_section": "Practice Acceptance",
+      "source_entry": 5,
+      "engagement_intensity": 0.95,
+      "tags": [
+        "betrayal",
+        "grief",
+        "trust",
+        "forgiveness",
+        "addiction"
+      ],
+      "mentor_use": "Reference when trust issues or feelings of worthlessness resurface. Reminder of the rational response achieved."
+    },
+    {
+      "id": "anchor_003",
+      "label": "Shouting at the kids → encouragement breakthrough",
+      "content": "Shouting expressed disgust, disappointment, dismissed them as worthless. They will always remember how I made them feel. Later: coaxed kids through similar tasks with encouragement. Good result.",
+      "source_section": "Master Your Feelings",
+      "source_entry": 4,
+      "engagement_intensity": 0.95,
+      "tags": [
+        "parenting",
+        "anger",
+        "growth",
+        "breakthrough"
+      ],
+      "mentor_use": "Proof of capacity to change. Reference both the pain and the triumph when parenting frustration arises."
+    },
+    {
+      "id": "anchor_004",
+      "label": "Morning journalling outside with the cat",
+      "content": "Morning journalling outside is reflecting on myself, the day, nature, mindful of the needs of the cat.",
+      "source_section": "Master Your Feelings",
+      "source_entry": 3,
+      "engagement_intensity": 0.8,
+      "tags": [
+        "practice",
+        "nature",
+        "reflection",
+        "routine"
+      ],
+      "mentor_use": "Ground the practitioner in their established practice. Sensory anchor for returning to calm."
+    },
+    {
+      "id": "anchor_005",
+      "label": "Kangaroo with Joey during mosquito resilience lesson",
+      "content": "Grateful for today's lesson in resilience (mosquitos) to be remodelled with a visitor (kangaroo with Joey).",
+      "source_section": "Accept Your Fate",
+      "source_entry": 6,
+      "engagement_intensity": 0.82,
+      "tags": [
+        "nature",
+        "resilience",
+        "surprise",
+        "gratitude",
+        "Australia"
+      ],
+      "mentor_use": "Reference when discussing how fate delivers both challenge and beauty in the same moment."
+    },
+    {
+      "id": "anchor_006",
+      "label": "Losing the earbud charger",
+      "content": "Lost my earbud charger and overreacted. Trivial event that revealed how accumulated circumstances can still trigger disproportionate reactions.",
+      "source_section": "Master Your Thoughts",
+      "source_entry": 6,
+      "engagement_intensity": 0.7,
+      "tags": [
+        "overreaction",
+        "trivial",
+        "accumulated_stress"
+      ],
+      "mentor_use": "Humorous reference point when the practitioner overreacts to minor setbacks — 'remember the earbud charger?'"
+    },
+    {
+      "id": "anchor_007",
+      "label": "Returning someone else's trolley",
+      "content": "Returned a trolley that wasn't mine. It felt like the actions of a hive mind and that it could become instinctive.",
+      "source_section": "Be Responsible to Others",
+      "source_entry": 6,
+      "engagement_intensity": 0.78,
+      "tags": [
+        "service",
+        "instinct",
+        "community",
+        "small_acts"
+      ],
+      "mentor_use": "Evidence that duty can become instinctive — virtue moving from deliberate to dispositional."
+    }
+  ],
+  "growth_evidence": [
+    {
+      "id": "growth_001",
+      "label": "From doom scrolling to intentional learning",
+      "early": {
+        "content": "Doom scrolling and youtube financial meltdown videos do not lead to tangible actions to prepare for future events.",
+        "source_section": "Live in the Present",
+        "source_entry": 7
+      },
+      "late": {
+        "content": "Use AI/Grok/Wikipedia to summarise. Be in the moment with full attention of all senses. Be responsive where it is in service to the moment.",
+        "source_section": "Cultivate Wisdom",
+        "source_entry": 8
+      },
+      "significance": "Shifted from passive anxiety consumption to active, intentional knowledge seeking."
+    },
+    {
+      "id": "growth_002",
+      "label": "From shouting at kids to encouragement",
+      "early": {
+        "content": "Shouting at the kids when they refused to co-operate. Shouting expressed my disgust at their behaviour. It led to a follow-up apology but they will always remember how I made them feel.",
+        "source_section": "Master Your Feelings",
+        "source_entry": 4
+      },
+      "late": {
+        "content": "Recently I coaxed the kids through similar tasks requiring co-operation and responded to a tantrum behaviour with encouragement which got the job done. Good result.",
+        "source_section": "Master Your Feelings",
+        "source_entry": 4
+      },
+      "significance": "Concrete behavioural change in the most emotionally charged context (parenting). Demonstrates capacity for dispositional shift."
+    },
+    {
+      "id": "growth_003",
+      "label": "From creative despair to internal motivation",
+      "early": {
+        "content": "Dwelling on the lack of impact my art has had, song, screenplay etc. Not having innovated anything meaningful.",
+        "source_section": "Live in the Present",
+        "source_entry": 4
+      },
+      "late": {
+        "content": "Both are a fantasy motivation and has been an outlet for creative or ingenuity callings that I realised need to be motivated for my own benefit not for the fantasy. Appreciation from others will neither motivate nor discourage me.",
+        "source_section": "Be Content",
+        "source_entry": 6
+      },
+      "significance": "Re-sourced creative motivation from external validation to internal virtue. A fundamental value reclassification."
+    },
+    {
+      "id": "growth_004",
+      "label": "From avoidance to reaching out",
+      "early": {
+        "content": "Avoid calling relatives in case they are cross with me (missed connection, support).",
+        "source_section": "Embrace Difficulty",
+        "source_entry": 2
+      },
+      "late": {
+        "content": "I practiced patience, resilience, restraint, took pause to appreciate. Reached out to see how I can be of help. Checked in with old friends/family. Show appreciation not just feel it.",
+        "source_section": "Accept Your Fate",
+        "source_entry": 7
+      },
+      "significance": "Moved from social avoidance driven by fear of rejection to active reaching out. Courage developed."
+    },
+    {
+      "id": "growth_005",
+      "label": "From shame to fulfilment",
+      "early": {
+        "content": "Opinion of myself to overcome: Delusional, fraud, lazy, incompetent, frail.",
+        "source_section": "A Virtuous Life",
+        "source_entry": 6
+      },
+      "late": {
+        "content": "Don't feel the same shame. Outlook is more positive as I have found a fulfilment and patience. Outlook is can-do.",
+        "source_section": "Cultivate Wisdom",
+        "source_entry": 8
+      },
+      "significance": "Measurable reduction in self-directed shame. Replaced by fulfilment and patience. The most significant mood-level change across the journal."
+    }
+  ],
+  "unfinished_threads": [
+    {
+      "id": "thread_001",
+      "label": "The cousin situation",
+      "content": "Wasn't there for cousin during a time of crisis. Feels failure for not reaching out despite having nothing to offer. 'I now have to control my passion at being offended by her dismissing of me.'",
+      "source_section": "Master Your Feelings",
+      "source_entry": 5,
+      "status": "unresolved",
+      "tags": [
+        "family",
+        "guilt",
+        "courage",
+        "vulnerability"
+      ],
+      "mentor_return_when": "When the practitioner discusses family obligations, guilt about not being there, or fear of entering awkward situations."
+    },
+    {
+      "id": "thread_002",
+      "label": "Creative expression — music, art, screenplay",
+      "content": "Acknowledged as internally motivated now but no concrete steps taken. Music production, songwriting, filmmaking referenced but never actioned during journal period.",
+      "source_section": "Live in the Present",
+      "source_entry": 5,
+      "status": "acknowledged_not_actioned",
+      "tags": [
+        "creativity",
+        "music",
+        "art",
+        "procrastination"
+      ],
+      "mentor_return_when": "When the practitioner has energy and is looking for meaningful challenge. The internal motivation is ready; the first step is missing."
+    },
+    {
+      "id": "thread_003",
+      "label": "Community service beyond work",
+      "content": "'Still searching for a meaningful (and not self-beneficial) contribution that I can make from the skills I have.' Seven Hills reserve mentioned. Volunteering belongings as a start.",
+      "source_section": "Be Responsible to Others",
+      "source_entry": 1,
+      "status": "searching",
+      "tags": [
+        "community",
+        "service",
+        "contribution",
+        "oikeiosis"
+      ],
+      "mentor_return_when": "When discussing oikeiosis extension or when the practitioner expresses restlessness about making a difference."
+    },
+    {
+      "id": "thread_004",
+      "label": "The 'list of put off things'",
+      "content": "Referenced repeatedly across sections — 'work through list of put off things', 'doing my put off things will grant freedom physically and mentally'. Never detailed or started systematically.",
+      "source_section": "Master Your Thoughts",
+      "source_entry": 10,
+      "status": "recurring_unactioned",
+      "tags": [
+        "procrastination",
+        "tasks",
+        "freedom",
+        "burden"
+      ],
+      "mentor_return_when": "When the practitioner feels burdened or overwhelmed. The list represents both the obstacle and the opportunity."
+    },
+    {
+      "id": "thread_005",
+      "label": "Stoicism and wife's shared value system",
+      "content": "Wife and self celebrate wealth and status achievements. 'Biggest challenge is to wealth indifference.' How does Stoic practice coexist with a shared household value system that celebrates preferred indifferents?",
+      "source_section": "Accept Your Fate",
+      "source_entry": 3,
+      "status": "acknowledged_tension",
+      "tags": [
+        "marriage",
+        "wealth",
+        "values",
+        "household",
+        "oikeiosis"
+      ],
+      "mentor_return_when": "When discussing money decisions, status purchases, or tension between personal development and marriage harmony."
+    }
+  ]
 }

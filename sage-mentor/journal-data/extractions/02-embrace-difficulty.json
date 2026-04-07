@@ -1,0 +1,198 @@
+{
+  "section": "Embrace Difficulty",
+  "section_number": 2,
+  "mapped_group": "Embracing Difficulty",
+  "entries_count": 14,
+  "word_count": 1024,
+  "passions_detected": [
+    {
+      "passion_id": "philodoxia",
+      "sub_species": "philodoxia",
+      "root_passion": "epithumia",
+      "false_judgement": "That work reputation being tarnished is a genuine evil",
+      "entry_days": [
+        1
+      ],
+      "intensity": "strong"
+    },
+    {
+      "passion_id": "agonia",
+      "sub_species": "agonia",
+      "root_passion": "phobos",
+      "false_judgement": "That future failure from work obstacles is a present reality",
+      "entry_days": [
+        1
+      ],
+      "intensity": "moderate"
+    },
+    {
+      "passion_id": "oknos",
+      "sub_species": "oknos",
+      "root_passion": "phobos",
+      "false_judgement": "That discomfort from reaching out to relatives is a genuine threat",
+      "entry_days": [
+        2
+      ],
+      "intensity": "moderate"
+    },
+    {
+      "passion_id": "aischyne",
+      "sub_species": "aischyne",
+      "root_passion": "phobos",
+      "false_judgement": "That others' judgement of my home reveals genuine personal failure",
+      "entry_days": [
+        2
+      ],
+      "intensity": "mild"
+    }
+  ],
+  "causal_observations": [
+    {
+      "failure_point": "synkatathesis",
+      "description": "Assents to the impression that work obstacles tarnish reputation — treats an indifferent (others' opinion) as evil.",
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "failure_point": "phantasia",
+      "description": "Pre-empts confrontations that haven't happened — imagination generates false impressions of attack.",
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "failure_point": "horme",
+      "description": "Avoidance behaviours adopted systematically: no tennis, no calling relatives, no sharing opinions — impulse redirected away from growth.",
+      "entry_days": [
+        2
+      ]
+    }
+  ],
+  "value_observations": [
+    {
+      "item": "Work reputation",
+      "declared_as": "source of stress",
+      "observed_as": "treated as genuine good — its loss generates phobos",
+      "gap": true,
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "item": "Learning from obstacles",
+      "declared_as": "path to new capabilities",
+      "observed_as": "genuine understanding — Marcus Aurelius quote applied to real examples",
+      "gap": false,
+      "entry_days": [
+        3
+      ]
+    }
+  ],
+  "people_mentioned": [
+    {
+      "person_or_role": "Boss (new)",
+      "relationship": "supervisor",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        3,
+        4
+      ]
+    },
+    {
+      "person_or_role": "Workmates",
+      "relationship": "colleagues",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "person_or_role": "Friend (dying)",
+      "relationship": "close friend",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "person_or_role": "Father",
+      "relationship": "parent",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "person_or_role": "Girlfriend (past)",
+      "relationship": "former partner",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        4
+      ]
+    }
+  ],
+  "virtue_observations": [
+    {
+      "domain": "andreia",
+      "strength": "developing",
+      "evidence": "Can reframe difficulties as opportunities (degree led to career, hernia led to weight loss) but still avoids new challenges.",
+      "entry_days": [
+        3,
+        4
+      ]
+    },
+    {
+      "domain": "sophrosyne",
+      "strength": "developing",
+      "evidence": "Practising patience and curiosity as default responses. Keeping with diet rules.",
+      "entry_days": [
+        5,
+        6
+      ]
+    },
+    {
+      "domain": "dikaiosyne",
+      "strength": "moderate",
+      "evidence": "Looking for opportunities to serve team with pride. Acknowledging when could have been nicer.",
+      "entry_days": [
+        6
+      ]
+    }
+  ],
+  "preferred_indifferents": [
+    "physical health",
+    "reputation at work",
+    "social comfort"
+  ],
+  "key_passages": [
+    {
+      "day": 2,
+      "summary": "Catalogues avoidance behaviours: no tennis, no calling relatives, no sharing opinions, no inviting people over — all to avoid discomfort",
+      "topic_tags": [
+        "avoidance",
+        "courage",
+        "social_isolation"
+      ],
+      "relevance_triggers": [
+        "social_withdrawal",
+        "comfort_zone",
+        "courage_challenge"
+      ]
+    },
+    {
+      "day": 4,
+      "summary": "Challenges reframed as opportunities: new boss → acceptance, going overseas → health, friend dying → appreciation",
+      "topic_tags": [
+        "reframing",
+        "growth",
+        "resilience"
+      ],
+      "relevance_triggers": [
+        "facing_difficulty",
+        "perspective_shift"
+      ]
+    }
+  ],
+  "proximity_estimate": "habitual"
+}

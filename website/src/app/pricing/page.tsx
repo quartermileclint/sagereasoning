@@ -1,9 +1,7 @@
-import type { Metadata } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Pricing — SageReasoning',
-  description: 'Free for humans — every feature, no limits. Developers get generous free tiers with transparent per-call pricing.',
-}
+// Note: Metadata export moved to layout or head component since this is now a client component.
+// Page title is set via the <title> tag in the head or a parent layout.
 
 /* ── Free-tier limits by skill type (developer pricing) ─────────────── */
 const developerTiers = [
@@ -141,60 +139,7 @@ export default function PricingPage() {
       </div>
 
       {/* ── Voluntary tidings ──────────────────────────────────────────── */}
-      <div className="bg-white/60 border border-sage-200 rounded-xl p-8 text-center mb-16">
-        <h2 className="font-display text-xl font-semibold text-sage-800 mb-2">
-          Support the Platform
-        </h2>
-        <p className="font-body text-sage-700 max-w-xl mx-auto leading-relaxed mb-6">
-          If SageReasoning adds value to your life, you can support us through a voluntary
-          tiding. In the Stoic tradition — sharing freely while accepting support gratefully.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          {/* One-off tiding */}
-          <div className="flex items-center gap-2 border border-sage-300 rounded-lg px-4 py-3 bg-white">
-            <span className="font-body text-sage-600 text-sm">One-off:</span>
-            <span className="font-display font-semibold text-sage-800">$</span>
-            <input
-              type="number"
-              defaultValue={20}
-              min={1}
-              className="w-16 font-display font-semibold text-sage-800 text-center border-b border-sage-300 bg-transparent focus:outline-none focus:border-sage-500"
-              aria-label="One-off tiding amount"
-            />
-            <button
-              disabled
-              className="ml-2 px-4 py-1.5 bg-sage-400 text-white font-display text-sm rounded hover:bg-sage-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              Give once
-              {/* TODO (Phase 2): Connect to Stripe one-time payment */}
-            </button>
-          </div>
-
-          {/* Monthly tiding */}
-          <div className="flex items-center gap-2 border border-sage-300 rounded-lg px-4 py-3 bg-white">
-            <span className="font-body text-sage-600 text-sm">Monthly:</span>
-            <span className="font-display font-semibold text-sage-800">$</span>
-            <input
-              type="number"
-              defaultValue={10}
-              min={1}
-              className="w-16 font-display font-semibold text-sage-800 text-center border-b border-sage-300 bg-transparent focus:outline-none focus:border-sage-500"
-              aria-label="Monthly tiding amount"
-            />
-            <span className="font-body text-sage-500 text-sm">/mo</span>
-            <button
-              disabled
-              className="ml-2 px-4 py-1.5 bg-sage-400 text-white font-display text-sm rounded hover:bg-sage-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              Give monthly
-              {/* TODO (Phase 2): Connect to Stripe recurring payment */}
-            </button>
-          </div>
-        </div>
-        <p className="mt-3 text-xs text-sage-400 italic">
-          Payment processing coming soon. Tidings are entirely voluntary and do not unlock additional features.
-        </p>
-      </div>
+      <TidingsSection />
 
       {/* ── Developer pricing ──────────────────────────────────────────── */}
       <div className="mb-16">
@@ -240,6 +185,10 @@ export default function PricingPage() {
           </table>
         </div>
 
+        <div className="mt-6 text-center">
+          <DeveloperUpgradeButton />
+        </div>
+
         <div className="mt-4 flex flex-col sm:flex-row gap-4 text-sm text-sage-600">
           <p className="flex-1">
             All paid tiers include configurable rate limits (default 500 calls/day), up to 3
@@ -259,6 +208,9 @@ export default function PricingPage() {
           volume pricing or custom limits.
         </p>
       </div>
+
+      {/* ── Manage billing ─────────────────────────────────────────────── */}
+      <BillingPortalLink />
 
       {/* ── FAQ ────────────────────────────────────────────────────────── */}
       <div className="max-w-2xl mx-auto">
@@ -307,6 +259,203 @@ export default function PricingPage() {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+
+// =============================================================================
+// CLIENT COMPONENTS — Stripe-connected interactive buttons
+// =============================================================================
+
+/**
+ * TidingsSection — Voluntary tidings with Stripe Checkout.
+ * Client component because it needs onClick handlers and form state.
+ */
+function TidingsSection() {
+  return (
+    <div className="bg-white/60 border border-sage-200 rounded-xl p-8 text-center mb-16">
+      <h2 className="font-display text-xl font-semibold text-sage-800 mb-2">
+        Support the Platform
+      </h2>
+      <p className="font-body text-sage-700 max-w-xl mx-auto leading-relaxed mb-6">
+        If SageReasoning adds value to your life, you can support us through a voluntary
+        tiding. In the Stoic tradition — sharing freely while accepting support gratefully.
+      </p>
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        {/* One-off tiding */}
+        <div className="flex items-center gap-2 border border-sage-300 rounded-lg px-4 py-3 bg-white">
+          <span className="font-body text-sage-600 text-sm">One-off:</span>
+          <span className="font-display font-semibold text-sage-800">$</span>
+          <input
+            type="number"
+            defaultValue={20}
+            min={1}
+            max={1000}
+            id="tiding-once-amount"
+            className="w-16 font-display font-semibold text-sage-800 text-center border-b border-sage-300 bg-transparent focus:outline-none focus:border-sage-500"
+            aria-label="One-off tiding amount"
+          />
+          <TidingButton recurring={false} />
+        </div>
+
+        {/* Monthly tiding */}
+        <div className="flex items-center gap-2 border border-sage-300 rounded-lg px-4 py-3 bg-white">
+          <span className="font-body text-sage-600 text-sm">Monthly:</span>
+          <span className="font-display font-semibold text-sage-800">$</span>
+          <input
+            type="number"
+            defaultValue={10}
+            min={1}
+            max={1000}
+            id="tiding-monthly-amount"
+            className="w-16 font-display font-semibold text-sage-800 text-center border-b border-sage-300 bg-transparent focus:outline-none focus:border-sage-500"
+            aria-label="Monthly tiding amount"
+          />
+          <span className="font-body text-sage-500 text-sm">/mo</span>
+          <TidingButton recurring={true} />
+        </div>
+      </div>
+      <p className="mt-3 text-xs text-sage-400 italic">
+        Tidings are entirely voluntary and do not unlock additional features.
+      </p>
+    </div>
+  )
+}
+
+/**
+ * TidingButton — Submits a tiding to /api/billing/tidings.
+ * Uses a form action pattern compatible with server components.
+ */
+function TidingButton({ recurring }: { recurring: boolean }) {
+  const label = recurring ? 'Give monthly' : 'Give once'
+  const inputId = recurring ? 'tiding-monthly-amount' : 'tiding-once-amount'
+
+  return (
+    <form
+      action={`/api/billing/tidings`}
+      method="POST"
+      onSubmit={async (e) => {
+        e.preventDefault()
+        const amountInput = document.getElementById(inputId) as HTMLInputElement | null
+        const amount = amountInput ? parseInt(amountInput.value, 10) : (recurring ? 10 : 20)
+
+        try {
+          const res = await fetch('/api/billing/tidings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recurring, amount }),
+          })
+
+          if (res.status === 401) {
+            // Not signed in — redirect to auth
+            window.location.href = '/auth?redirect=/pricing'
+            return
+          }
+
+          const data = await res.json()
+          if (data.url) {
+            window.location.href = data.url
+          } else {
+            alert(data.error || 'Something went wrong. Please try again.')
+          }
+        } catch {
+          alert('Network error. Please check your connection and try again.')
+        }
+      }}
+    >
+      <button
+        type="submit"
+        className="ml-2 px-4 py-1.5 bg-sage-400 text-white font-display text-sm rounded hover:bg-sage-500 transition-colors"
+      >
+        {label}
+      </button>
+    </form>
+  )
+}
+
+/**
+ * DeveloperUpgradeButton — Redirects developers to Stripe Checkout for paid tier.
+ */
+function DeveloperUpgradeButton() {
+  return (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault()
+        try {
+          const res = await fetch('/api/billing/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'developer_paid' }),
+          })
+
+          if (res.status === 401) {
+            window.location.href = '/auth?redirect=/pricing'
+            return
+          }
+
+          const data = await res.json()
+          if (data.url) {
+            window.location.href = data.url
+          } else {
+            alert(data.error || 'Something went wrong. Please try again.')
+          }
+        } catch {
+          alert('Network error. Please check your connection and try again.')
+        }
+      }}
+    >
+      <button
+        type="submit"
+        className="px-8 py-3 bg-sage-700 text-white font-display rounded hover:bg-sage-800 transition-colors"
+      >
+        Upgrade to paid tier
+      </button>
+    </form>
+  )
+}
+
+/**
+ * BillingPortalLink — Link to Stripe Billing Portal for existing customers.
+ */
+function BillingPortalLink() {
+  return (
+    <div className="text-center mb-12">
+      <p className="font-body text-sm text-sage-500 mb-2">Already a paying customer?</p>
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault()
+          try {
+            const res = await fetch('/api/billing/portal', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+            })
+
+            if (res.status === 401) {
+              window.location.href = '/auth?redirect=/pricing'
+              return
+            }
+
+            const data = await res.json()
+            if (data.url) {
+              window.location.href = data.url
+            } else if (res.status === 404) {
+              alert('No billing account found. You have not made any payments yet.')
+            } else {
+              alert(data.error || 'Something went wrong.')
+            }
+          } catch {
+            alert('Network error. Please check your connection.')
+          }
+        }}
+      >
+        <button
+          type="submit"
+          className="text-sage-600 underline font-body text-sm hover:text-sage-800 transition-colors"
+        >
+          Manage billing and invoices
+        </button>
+      </form>
     </div>
   )
 }

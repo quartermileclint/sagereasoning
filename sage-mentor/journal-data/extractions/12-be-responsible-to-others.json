@@ -1,0 +1,212 @@
+{
+  "section": "Be Responsible to Others",
+  "section_number": 12,
+  "mapped_group": "Responsibility to Others",
+  "entries_count": 9,
+  "word_count": 1080,
+  "passions_detected": [
+    {
+      "passion_id": "philodoxia",
+      "sub_species": "philodoxia",
+      "root_passion": "epithumia",
+      "false_judgement": "That the best version of self requires external recognition through social connection and being 'part of the rest'",
+      "entry_days": [
+        7
+      ],
+      "intensity": "mild"
+    },
+    {
+      "passion_id": "oknos",
+      "sub_species": "oknos",
+      "root_passion": "phobos",
+      "false_judgement": "That reaching out and being social involves genuine risk of rejection",
+      "entry_days": [
+        7
+      ],
+      "intensity": "mild"
+    }
+  ],
+  "causal_observations": [
+    {
+      "failure_point": "synkatathesis",
+      "description": "Significance from truth not outcome — 'significance derived from truth contributes to reality'. This is a breakthrough in value classification.",
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "failure_point": "phantasia",
+      "description": "Hive mind trolley return — experiencing duty as instinctive rather than calculated. The impression itself is changing.",
+      "entry_days": [
+        6
+      ]
+    }
+  ],
+  "value_observations": [
+    {
+      "item": "Life purpose",
+      "declared_as": "to believe in self and inner approach, break procrastination through Stoic principles, be of service",
+      "observed_as": "genuine, heartfelt, realistic",
+      "gap": false,
+      "entry_days": [
+        6
+      ]
+    },
+    {
+      "item": "Significance",
+      "declared_as": "derived from truth not perception",
+      "observed_as": "strongest value formulation — 'significance can only be derived from truth or false'",
+      "gap": false,
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "item": "Community service",
+      "declared_as": "still searching for meaningful contribution",
+      "observed_as": "aspiration not yet actioned beyond work duties",
+      "gap": true,
+      "entry_days": [
+        1
+      ]
+    }
+  ],
+  "people_mentioned": [
+    {
+      "person_or_role": "Environment/skin club",
+      "relationship": "community",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "person_or_role": "People of Brisbane",
+      "relationship": "civic",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "person_or_role": "Friends",
+      "relationship": "social circle",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "person_or_role": "Neighbourhood",
+      "relationship": "local community",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "person_or_role": "Boss",
+      "relationship": "supervisor",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        6
+      ]
+    },
+    {
+      "person_or_role": "Team at work",
+      "relationship": "colleagues",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        6
+      ]
+    }
+  ],
+  "virtue_observations": [
+    {
+      "domain": "dikaiosyne",
+      "strength": "moderate",
+      "evidence": "Concrete duty formulation: don't ignore cries for help, don't presume, contribute and hope they follow example. Genuine justice understanding.",
+      "entry_days": [
+        2
+      ]
+    },
+    {
+      "domain": "phronesis",
+      "strength": "strong",
+      "evidence": "'Significance can only be derived from truth or false' — applied to all virtue domains for service to others. Actions motivated by internal virtues strive towards truth.",
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "domain": "andreia",
+      "strength": "moderate",
+      "evidence": "Courage to pivot to new way of life. Restraint witnessed as beneficial to others. Returned a trolley that wasn't his — instinctive duty.",
+      "entry_days": [
+        3,
+        6
+      ]
+    },
+    {
+      "domain": "sophrosyne",
+      "strength": "moderate",
+      "evidence": "Temperance as consistency — 'offer to the team my consistency through process and location change'",
+      "entry_days": [
+        3
+      ]
+    }
+  ],
+  "preferred_indifferents": [
+    "social belonging",
+    "neighbourhood perception",
+    "being social"
+  ],
+  "key_passages": [
+    {
+      "day": 4,
+      "summary": "Significance derived from truth: 'If every action is motivated by internal courage, wisdom, temperance, and justice, then the outcomes strive towards truth'",
+      "topic_tags": [
+        "significance",
+        "truth",
+        "virtue",
+        "purpose"
+      ],
+      "relevance_triggers": [
+        "seeking_meaning",
+        "purpose",
+        "contribution"
+      ]
+    },
+    {
+      "day": 6,
+      "summary": "Life purpose statement: 'To believe, when forever I wouldn't, in myself and my inner approach to life... My purpose is to break a lifetime habit of procrastination and overthinking by evolving Stoic principles and be of service'",
+      "topic_tags": [
+        "purpose",
+        "belief",
+        "procrastination",
+        "service"
+      ],
+      "relevance_triggers": [
+        "life_purpose",
+        "self_belief",
+        "direction"
+      ]
+    },
+    {
+      "day": 7,
+      "summary": "Best version of self — 'Energised': lean, capable, mentally resilient, curious, appreciative, reaches out, social, ready for retirement and new experiences",
+      "topic_tags": [
+        "vision",
+        "best_self",
+        "aspiration",
+        "wholeness"
+      ],
+      "relevance_triggers": [
+        "self_improvement",
+        "vision_review",
+        "aspiration"
+      ]
+    }
+  ],
+  "proximity_estimate": "deliberate"
+}

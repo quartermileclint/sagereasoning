@@ -1,0 +1,225 @@
+{
+  "section": "Master Your Thoughts",
+  "section_number": 5,
+  "mapped_group": "Mastering Thoughts",
+  "entries_count": 16,
+  "word_count": 1845,
+  "passions_detected": [
+    {
+      "passion_id": "philodoxia",
+      "sub_species": "philodoxia",
+      "root_passion": "epithumia",
+      "false_judgement": "That lack of acknowledgement means personal worthlessness — entitlement to respect based on time invested",
+      "entry_days": [
+        1
+      ],
+      "intensity": "strong"
+    },
+    {
+      "passion_id": "orge",
+      "sub_species": "orge",
+      "root_passion": "epithumia",
+      "false_judgement": "That desiring credit makes its absence a genuine deprivation",
+      "entry_days": [
+        7
+      ],
+      "intensity": "moderate"
+    },
+    {
+      "passion_id": "phthonos",
+      "sub_species": "phthonos",
+      "root_passion": "lupe",
+      "false_judgement": "That others' spending validates the need to compare and measure against them",
+      "entry_days": [
+        4
+      ],
+      "intensity": "mild"
+    },
+    {
+      "passion_id": "agonia",
+      "sub_species": "agonia",
+      "root_passion": "phobos",
+      "false_judgement": "That losing an earbud charger is a genuine deprivation worthy of strong reaction",
+      "entry_days": [
+        6
+      ],
+      "intensity": "mild"
+    }
+  ],
+  "causal_observations": [
+    {
+      "failure_point": "synkatathesis",
+      "description": "Core pattern: assents to the impression that others' lack of acknowledgement = personal worthlessness. This is the primary assent failure across the journal.",
+      "entry_days": [
+        1,
+        7
+      ]
+    },
+    {
+      "failure_point": "phantasia",
+      "description": "Generates manipulative strategy impressions — plans to influence what is outside control before recognising this as a false approach.",
+      "entry_days": [
+        2
+      ]
+    },
+    {
+      "failure_point": "synkatathesis",
+      "description": "Beautiful metaphor of leaf on stream vs sidecar on motorbike — developing understanding of flexible assent vs rigid control.",
+      "entry_days": [
+        9
+      ]
+    }
+  ],
+  "value_observations": [
+    {
+      "item": "Respect/acknowledgement",
+      "declared_as": "outside my control",
+      "observed_as": "still generates strong emotional energy — not yet truly classified as indifferent",
+      "gap": true,
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "item": "Internal standards",
+      "declared_as": "the only valid source of motivation",
+      "observed_as": "genuine insight — 'Internal standards and goals are always refined'",
+      "gap": false,
+      "entry_days": [
+        7
+      ]
+    },
+    {
+      "item": "External praise/criticism",
+      "declared_as": "should have zero internal effect",
+      "observed_as": "aspirational but not yet embodied",
+      "gap": true,
+      "entry_days": [
+        7
+      ]
+    }
+  ],
+  "people_mentioned": [
+    {
+      "person_or_role": "Kids",
+      "relationship": "children",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        1
+      ]
+    },
+    {
+      "person_or_role": "Wife",
+      "relationship": "spouse",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "person_or_role": "Mother",
+      "relationship": "parent",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "person_or_role": "Boss",
+      "relationship": "supervisor",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "person_or_role": "Female colleague",
+      "relationship": "workmate",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        4
+      ]
+    }
+  ],
+  "virtue_observations": [
+    {
+      "domain": "phronesis",
+      "strength": "moderate",
+      "evidence": "Articulates the mean value concept — 'the right amount of each virtue at any time'. Leaf-on-stream metaphor shows genuine philosophical understanding.",
+      "entry_days": [
+        8,
+        9
+      ]
+    },
+    {
+      "domain": "sophrosyne",
+      "strength": "developing",
+      "evidence": "Recognises need to relinquish control without malice. Working toward equanimity with praise and criticism.",
+      "entry_days": [
+        2,
+        7
+      ]
+    },
+    {
+      "domain": "dikaiosyne",
+      "strength": "developing",
+      "evidence": "Withheld verbal retaliation when called 'dear' incorrectly — chose restraint over habitual verbal crushing.",
+      "entry_days": [
+        4
+      ]
+    }
+  ],
+  "preferred_indifferents": [
+    "respect",
+    "acknowledgement",
+    "being right",
+    "influence over outcomes"
+  ],
+  "key_passages": [
+    {
+      "day": 1,
+      "summary": "Core insight on curiosity replacing disappointment — 'ignorance/obliviousness is not malicious, selfishness is not about you'",
+      "topic_tags": [
+        "curiosity",
+        "reframing",
+        "ego",
+        "relationships"
+      ],
+      "relevance_triggers": [
+        "feeling_disrespected",
+        "relationship_disappointment"
+      ]
+    },
+    {
+      "day": 7,
+      "summary": "Zero-sum insight on praise/criticism — 'only from deriving zero internal motivation from external praise can I derive zero dismotivation from criticism'",
+      "topic_tags": [
+        "detachment",
+        "internal_motivation",
+        "praise",
+        "criticism"
+      ],
+      "relevance_triggers": [
+        "seeking_validation",
+        "handling_criticism",
+        "self_worth"
+      ]
+    },
+    {
+      "day": 9,
+      "summary": "Leaf on stream metaphor — riding the current with flexible virtue rather than rigid control on a motorbike sidecar",
+      "topic_tags": [
+        "metaphor",
+        "flexibility",
+        "virtue_practice",
+        "flow"
+      ],
+      "relevance_triggers": [
+        "control_issues",
+        "rigidity",
+        "adaptability"
+      ]
+    }
+  ],
+  "proximity_estimate": "deliberate"
+}

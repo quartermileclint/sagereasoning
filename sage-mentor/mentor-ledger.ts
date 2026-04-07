@@ -1056,6 +1056,97 @@ function buildSelectionReason(
 }
 
 // ============================================================================
+// RANKING — Sort and rank ledger entries by developmental importance
+// ============================================================================
+
+/**
+ * Rank all entries in a MentorLedger by sage_path_weight descending.
+ *
+ * This is the primary prioritisation mechanism. Higher-ranked entries:
+ *   1. Get surfaced more frequently by the resurfacing engine
+ *   2. Appear first in Hub views and morning/evening prompts
+ *   3. Are tracked more actively for follow-through (commitments)
+ *
+ * Optionally applies profile-aware bonuses when MentorProfile data is provided.
+ *
+ * Returns a new MentorLedger with entries sorted by rank and summary recomputed.
+ */
+export function rankLedgerEntries(
+  ledger: MentorLedger,
+  profileBonuses?: {
+    /** Passions that persist across multiple sections — entries connected to these get +0.2 */
+    persistingPassions?: string[]
+    /** The virtue domain where the practitioner is weakest — entries exercising this get +0.2 */
+    weakestVirtue?: 'phronesis' | 'dikaiosyne' | 'andreia' | 'sophrosyne' | null
+  }
+): MentorLedger {
+  const { persistingPassions = [], weakestVirtue = null } = profileBonuses ?? {}
+
+  // Recompute sage_path_weight with profile bonuses
+  const reweighted = ledger.entries.map(entry => {
+    let weight = entry.sage_path_weight
+
+    // Profile bonus: connected to persisting passions
+    if (persistingPassions.length > 0) {
+      const hasOverlap = entry.connected_passions.some(p =>
+        persistingPassions.some(pp => pp.toLowerCase().includes(p.toLowerCase()) || p.toLowerCase().includes(pp.toLowerCase()))
+      )
+      if (hasOverlap) weight += 0.2
+    }
+
+    // Profile bonus: connected to weakest virtue
+    if (weakestVirtue && entry.connected_virtues.includes(weakestVirtue)) {
+      weight += 0.2
+    }
+
+    return { ...entry, sage_path_weight: Math.round(weight * 1000) / 1000 }
+  })
+
+  // Sort by sage_path_weight descending
+  reweighted.sort((a, b) => b.sage_path_weight - a.sage_path_weight)
+
+  return {
+    ...ledger,
+    entries: reweighted,
+    summary: computeLedgerSummary(reweighted),
+    last_updated: new Date().toISOString(),
+  }
+}
+
+/**
+ * Get the top N entries from a ranked ledger, optionally filtered by kind.
+ * Useful for Hub views that show "Top priorities" or "Active edge items".
+ */
+export function getTopRankedEntries(
+  ledger: MentorLedger,
+  limit: number = 10,
+  filter?: {
+    kinds?: LedgerEntryKind[]
+    statuses?: LedgerEntryStatus[]
+    priorities?: ('foundational' | 'active_edge' | 'consolidation' | 'aspirational')[]
+    minWeight?: number
+  }
+): LedgerEntry[] {
+  let entries = ledger.entries
+
+  if (filter?.kinds) {
+    entries = entries.filter(e => filter.kinds!.includes(e.kind))
+  }
+  if (filter?.statuses) {
+    entries = entries.filter(e => filter.statuses!.includes(e.status))
+  }
+  if (filter?.priorities) {
+    entries = entries.filter(e => filter.priorities!.includes(e.developmental_priority as any))
+  }
+  if (filter?.minWeight !== undefined) {
+    entries = entries.filter(e => e.sage_path_weight >= filter.minWeight!)
+  }
+
+  // Already sorted by sage_path_weight from rankLedgerEntries
+  return entries.slice(0, limit)
+}
+
+// ============================================================================
 // ONE-OFF IMPORT ENRICHMENTS — Extract maximum value from the journal import
 // ============================================================================
 

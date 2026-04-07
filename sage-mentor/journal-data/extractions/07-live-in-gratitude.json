@@ -1,0 +1,173 @@
+{
+  "section": "Live in Gratitude",
+  "section_number": 7,
+  "mapped_group": "Living in Gratitude",
+  "entries_count": 11,
+  "word_count": 1012,
+  "passions_detected": [
+    {
+      "passion_id": "philedonia",
+      "sub_species": "philedonia",
+      "root_passion": "epithumia",
+      "false_judgement": "That luxury and indulgence are genuine goods rather than preferred indifferents to be used moderately",
+      "entry_days": [
+        4
+      ],
+      "intensity": "mild"
+    },
+    {
+      "passion_id": "pothos",
+      "sub_species": "pothos",
+      "root_passion": "epithumia",
+      "false_judgement": "That the 'cynical protection blanket' serves a necessary protective function",
+      "entry_days": [
+        6
+      ],
+      "intensity": "mild"
+    }
+  ],
+  "causal_observations": [
+    {
+      "failure_point": "synkatathesis",
+      "description": "Recognises that without reflection, gratification replaces gratitude — 'no gratitude leads to seeking gratification and indulging in excess'",
+      "entry_days": [
+        6
+      ]
+    },
+    {
+      "failure_point": "phantasia",
+      "description": "Cynicism as a protective false impression — 'let go of the cynical protection blanket' shows awareness of this pattern",
+      "entry_days": [
+        6
+      ]
+    }
+  ],
+  "value_observations": [
+    {
+      "item": "Gratitude",
+      "declared_as": "essential daily practice",
+      "observed_as": "genuine understanding — links to reduced cynicism and serenity",
+      "gap": false,
+      "entry_days": [
+        6
+      ]
+    },
+    {
+      "item": "Nature",
+      "declared_as": "provider of everything essential",
+      "observed_as": "growing appreciation with practical commitments to reciprocate (recycling, waste reduction)",
+      "gap": false,
+      "entry_days": [
+        2,
+        3
+      ]
+    },
+    {
+      "item": "Service to others",
+      "declared_as": "path to cultivating gratitude",
+      "observed_as": "concrete plans formed: serve boss/team, maintain income, community groups, reach out to friends",
+      "gap": false,
+      "entry_days": [
+        5
+      ]
+    }
+  ],
+  "people_mentioned": [
+    {
+      "person_or_role": "Boss",
+      "relationship": "supervisor",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "person_or_role": "Team",
+      "relationship": "colleagues",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "person_or_role": "Friends/family",
+      "relationship": "social circle",
+      "oikeiosis_stage": "household",
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "person_or_role": "Seven Hills reserve community",
+      "relationship": "local community",
+      "oikeiosis_stage": "community",
+      "entry_days": [
+        5
+      ]
+    }
+  ],
+  "virtue_observations": [
+    {
+      "domain": "phronesis",
+      "strength": "moderate",
+      "evidence": "Strong insight linking gratitude to virtue development — 'fresh look and gratitude is a chance to observe, learning from the journey'",
+      "entry_days": [
+        4
+      ]
+    },
+    {
+      "domain": "dikaiosyne",
+      "strength": "moderate",
+      "evidence": "Concrete service plans: work, community groups, reducing waste, checking in with others",
+      "entry_days": [
+        5
+      ]
+    },
+    {
+      "domain": "sophrosyne",
+      "strength": "developing",
+      "evidence": "Understanding that 'quality is more valuable than quantity' and only a small amount of luxury needed",
+      "entry_days": [
+        4
+      ]
+    }
+  ],
+  "preferred_indifferents": [
+    "luxury",
+    "comfort",
+    "health"
+  ],
+  "key_passages": [
+    {
+      "day": 6,
+      "summary": "Links gratitude to releasing cynicism — 'gratitude will make my attitude less cynical making me more serene, comforted the knowledge that I won't be scammed. Let go of the cynical protection blanket.'",
+      "topic_tags": [
+        "cynicism",
+        "gratitude",
+        "protection",
+        "serenity"
+      ],
+      "relevance_triggers": [
+        "cynicism",
+        "trust_issues",
+        "serenity_seeking"
+      ]
+    },
+    {
+      "day": 7,
+      "summary": "Daily reflection protocol: morning mood check, journal on four virtues, nightly mood reflection, weekly goal review",
+      "topic_tags": [
+        "reflection",
+        "daily_practice",
+        "protocol",
+        "habits"
+      ],
+      "relevance_triggers": [
+        "building_habits",
+        "daily_routine",
+        "practice_structure"
+      ]
+    }
+  ],
+  "proximity_estimate": "deliberate"
+}
