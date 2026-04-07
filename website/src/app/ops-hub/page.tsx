@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 
 export default function OpsHub() {
   const [currentView, setCurrentView] = useState('dashboard')
-  const [activeDomain, setActiveDomain] = useState(null)
+  const [activeDomain, setActiveDomain] = useState<string | null>(null)
   const [contextFreshness, setContextFreshness] = useState(87)
   const [lastSyncTime, setLastSyncTime] = useState('Today 6:15 AM')
   const [changesCount, setChangesCount] = useState(12)
@@ -12,18 +12,18 @@ export default function OpsHub() {
   // Stoic Check State
   const [stoicInput, setStoicInput] = useState('')
   const [stoicLoading, setStoicLoading] = useState(false)
-  const [stoicResult, setStoicResult] = useState(null)
+  const [stoicResult, setStoicResult] = useState<Record<string, unknown> | null>(null)
 
   // Decision Scoring State
   const [decisionOption1, setDecisionOption1] = useState('')
   const [decisionOption2, setDecisionOption2] = useState('')
   const [scoringLoading, setScoringLoading] = useState(false)
-  const [scoringResult, setScoringResult] = useState(null)
+  const [scoringResult, setScoringResult] = useState<Record<string, unknown> | null>(null)
 
   // Alert State
   const [alertFilter, setAlertFilter] = useState('all')
-  const [alertEvaluating, setAlertEvaluating] = useState(null)
-  const [alertResults, setAlertResults] = useState({})
+  const [alertEvaluating, setAlertEvaluating] = useState<string | null>(null)
+  const [alertResults, setAlertResults] = useState<Record<string, unknown>>({})
 
   // Toggle states for settings
   const [settings, setSettings] = useState({
@@ -34,7 +34,7 @@ export default function OpsHub() {
   })
 
   // Briefing checkbox states
-  const [completedItems, setCompletedItems] = useState({})
+  const [completedItems, setCompletedItems] = useState<Record<string, boolean>>({})
 
   const handleStoicCheck = async () => {
     if (!stoicInput.trim()) return
@@ -81,7 +81,7 @@ export default function OpsHub() {
     }
   }
 
-  const handleAlertEvaluation = async (alertText) => {
+  const handleAlertEvaluation = async (alertText: string) => {
     if (alertResults[alertText]) {
       delete alertResults[alertText]
       setAlertResults({ ...alertResults })
@@ -107,25 +107,25 @@ export default function OpsHub() {
     }
   }
 
-  const toggleCheckbox = (key) => {
-    setCompletedItems({ ...completedItems, [key]: !completedItems[key] })
+  const toggleCheckbox = (key: string) => {
+    setCompletedItems({ ...completedItems, [key]: !(completedItems as Record<string, boolean>)[key] })
   }
 
-  const toggleSetting = (key) => {
-    setSettings({ ...settings, [key]: !settings[key] })
+  const toggleSetting = (key: string) => {
+    setSettings({ ...settings, [key]: !(settings as Record<string, boolean>)[key] })
   }
 
-  const switchView = (view) => {
+  const switchView = (view: string) => {
     setCurrentView(view)
     setActiveDomain(null)
   }
 
-  const switchDomain = (domain) => {
+  const switchDomain = (domain: string) => {
     setActiveDomain(domain)
     setCurrentView('domain')
   }
 
-  const filterAlerts = (filter) => {
+  const filterAlerts = (filter: string) => {
     setAlertFilter(filter)
   }
 
@@ -370,14 +370,14 @@ export default function OpsHub() {
                 </div>
                 {stoicResult && (
                   <div style={styles.resultBox}>
-                    {stoicResult.error ? (
-                      <div style={styles.errorText}>{stoicResult.error}</div>
+                    {(stoicResult as Record<string, unknown>).error ? (
+                      <div style={styles.errorText}>{String((stoicResult as Record<string, unknown>).error)}</div>
                     ) : (
                       <div>
-                        <div style={styles.resultContent}>{stoicResult.reasoning}</div>
-                        {stoicResult.proximity_rating && (
+                        <div style={styles.resultContent}>{String((stoicResult as Record<string, unknown>).reasoning || JSON.stringify(stoicResult.result || stoicResult, null, 2))}</div>
+                        {Boolean((stoicResult as Record<string, unknown>).proximity_rating) && (
                           <div style={styles.proximityRating}>
-                            Proximity to Sage Reasoning: {stoicResult.proximity_rating}%
+                            Proximity to Sage Reasoning: {String((stoicResult as Record<string, unknown>).proximity_rating)}%
                           </div>
                         )}
                       </div>
@@ -540,13 +540,13 @@ export default function OpsHub() {
                         </button>
                         <button style={styles.alertBtn}>Acknowledge</button>
                       </div>
-                      {alertResults[alert.message] && (
+                      {Boolean(alertResults[alert.message]) && (
                         <div style={styles.resultBox}>
-                          {alertResults[alert.message].error ? (
-                            <div style={styles.errorText}>{alertResults[alert.message].error}</div>
+                          {(alertResults[alert.message] as Record<string, unknown>)?.error ? (
+                            <div style={styles.errorText}>{String((alertResults[alert.message] as Record<string, unknown>).error)}</div>
                           ) : (
                             <div style={styles.resultContent}>
-                              {alertResults[alert.message].reasoning}
+                              {String((alertResults[alert.message] as Record<string, unknown>)?.reasoning || JSON.stringify(alertResults[alert.message], null, 2))}
                             </div>
                           )}
                         </div>
@@ -611,13 +611,13 @@ export default function OpsHub() {
                 {scoringResult && (
                   <div style={styles.resultBox}>
                     {scoringResult.error ? (
-                      <div style={styles.errorText}>{scoringResult.error}</div>
+                      <div style={styles.errorText}>{String(scoringResult.error)}</div>
                     ) : (
                       <div>
-                        <div style={styles.resultContent}>{scoringResult.comparison}</div>
-                        {scoringResult.recommendation && (
+                        <div style={styles.resultContent}>{String(scoringResult.comparison || JSON.stringify(scoringResult.result || scoringResult, null, 2))}</div>
+                        {Boolean(scoringResult.recommendation) && (
                           <div style={styles.recommendation}>
-                            <strong>Recommendation:</strong> {scoringResult.recommendation}
+                            <strong>Recommendation:</strong> {String(scoringResult.recommendation)}
                           </div>
                         )}
                       </div>
@@ -827,7 +827,7 @@ export default function OpsHub() {
                     <div
                       style={{
                         ...styles.toggle,
-                        ...(settings[item.key] ? styles.toggleOn : {}),
+                        ...((settings as Record<string, boolean>)[item.key] ? styles.toggleOn : {}),
                       }}
                       onClick={() => toggleSetting(item.key)}
                     >
@@ -929,7 +929,7 @@ export default function OpsHub() {
                 <div style={styles.domainHeader}>
                   <div style={styles.domainName}>{activeDomain}</div>
                   <div style={styles.domainDescription}>
-                    Active obligations and decisions related to {activeDomain.toLowerCase()} management
+                    Active obligations and decisions related to {activeDomain?.toLowerCase()} management
                   </div>
                 </div>
 
@@ -957,7 +957,7 @@ export default function OpsHub() {
 
             <div style={styles.footer}>
               <div style={styles.footerDisclaimer}>
-                Domain guidance reflects Stoic principles applied to {activeDomain.toLowerCase()} decisions.
+                Domain guidance reflects Stoic principles applied to {activeDomain?.toLowerCase()} decisions.
               </div>
             </div>
           </div>
@@ -1179,7 +1179,7 @@ const styles = {
     borderTop: '1px solid #282e44',
     fontSize: '11px',
     color: '#4a5070',
-    textAlign: 'center',
+    textAlign: 'center' as const,
   },
 
   mainContent: {

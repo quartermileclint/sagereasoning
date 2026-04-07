@@ -67,6 +67,27 @@ export default function NavBar() {
           <a href="/journal" className="text-sage-700 hover:text-sage-900 transition-colors">Journal</a>
           <a href="/community" className="text-sage-700 hover:text-sage-900 transition-colors">Community</a>
           <a href="/dashboard" className="text-sage-700 hover:text-sage-900 transition-colors">Dashboard</a>
+          <div className="relative">
+            <button
+              onClick={() => {
+                setToolsOpen(false)
+                setMenuOpen(false)
+                const el = document.getElementById('hubs-dropdown')
+                if (el) el.style.display = el.style.display === 'block' ? 'none' : 'block'
+              }}
+              className="text-sage-700 hover:text-sage-900 transition-colors flex items-center gap-1"
+            >
+              Hubs
+              <svg className="w-3 h-3 text-sage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div id="hubs-dropdown" className="absolute right-0 mt-2 w-56 bg-white border border-sage-200 rounded-lg shadow-lg z-50 py-1" style={{ display: 'none' }}>
+              <a href="/private-mentor" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50">Private Mentor Hub</a>
+              <a href="/mentor-hub" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50">Mentor Hub</a>
+              <a href="/ops-hub" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50">Sage Ops Hub</a>
+            </div>
+          </div>
           <a href="/api-docs" className="text-sage-700 hover:text-sage-900 transition-colors">API</a>
           <a href="/pricing" className="text-sage-700 hover:text-sage-900 transition-colors">Pricing</a>
 

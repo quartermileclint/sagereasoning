@@ -413,7 +413,7 @@ export default function MentorHub() {
         </div>
         <div style={styles.topbarRight}>
           <div style={styles.pillar}>
-            <span style={styles.dot} style={{ ...styles.dot, background: '#4caf6a' }}></span>
+            <span style={{ ...styles.dot, background: '#4caf6a' }}></span>
             Personal & Agent Development
           </div>
           {sessionMode === 'companion' && (
@@ -599,7 +599,7 @@ export default function MentorHub() {
               messages.map((msg, i) => (
                 <div key={i}>
                   {i === 0 || messages[i - 1].date !== msg.date ? (
-                    <div style={styles.msgSys} style={{ fontSize: '10px', padding: '5px 12px' }}>
+                    <div style={{ ...styles.msgSys, fontSize: '10px', padding: '5px 12px' }}>
                       {msg.date}
                     </div>
                   ) : null}

@@ -1,7 +1,7 @@
 # Hold Point Test Report
 
 **Assessment 1: What works?**
-Generated: 2026-04-06 19:34:05
+Generated: 2026-04-07 06:20:39
 
 ---
 
@@ -9,11 +9,11 @@ Generated: 2026-04-06 19:34:05
 
 | Result | Count |
 |--------|-------|
-| PASS | 155 |
+| PASS | 158 |
 | FAIL | 0 |
 | WARN | 5 |
 | SKIP | 0 |
-| **Total** | **160** |
+| **Total** | **163** |
 
 ### Warnings (WARN)
 
@@ -130,10 +130,13 @@ Generated: 2026-04-06 19:34:05
 | PASS | journal | 613 LOC. Functional UI. | — |
 | PASS | limitations | 162 LOC. Functional UI. | — |
 | PASS | marketplace | 201 LOC. Functional UI. | — |
+| PASS | mentor-hub | 1472 LOC. Functional UI. | — |
 | PASS | methodology | 183 LOC. Functional UI. | — |
+| PASS | ops-hub | 1945 LOC. Functional UI. | — |
 | PASS | Landing Page | 271 LOC. Functional UI. | — |
 | PASS | pricing | 313 LOC. Functional UI. | — |
 | PASS | privacy | 286 LOC. Functional UI. | — |
+| PASS | private-mentor | 1769 LOC. Functional UI. | — |
 | PASS | scenarios | 468 LOC. Functional UI. | — |
 | PASS | score/[id] | 225 LOC. Functional UI. | — |
 | PASS | score | 564 LOC. Functional UI. | — |

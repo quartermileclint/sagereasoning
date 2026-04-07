@@ -47,6 +47,9 @@ export default function RootLayout({
                   <a href="/journal" className="block hover:text-sage-900">Journal</a>
                   <a href="/community" className="block hover:text-sage-900">Community</a>
                   <a href="/dashboard" className="block hover:text-sage-900">Dashboard</a>
+                  <a href="/private-mentor" className="block hover:text-sage-900">Private Mentor Hub</a>
+                  <a href="/mentor-hub" className="block hover:text-sage-900">Mentor Hub</a>
+                  <a href="/ops-hub" className="block hover:text-sage-900">Sage Ops Hub</a>
                   <a href="/api-docs" className="block hover:text-sage-900">API Docs</a>
                 </div>
                 <div>
