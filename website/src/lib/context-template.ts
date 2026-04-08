@@ -13,7 +13,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { checkRateLimit, RATE_LIMITS, requireAuth, validateApiKey, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { getSkillById } from '@/lib/skill-registry'
@@ -55,9 +55,14 @@ export function createContextTemplateHandler(config: ContextTemplateConfig) {
     const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
     if (rateLimitError) return rateLimitError
 
-    // Authentication required for marketplace skills
+    // Authentication: accept user session (JWT) OR API key
+    // Marketplace skills should be accessible to both human users and agent developers
     const auth = await requireAuth(request)
-    if (auth.error) return auth.error
+    const apiKey = auth.error ? await validateApiKey(request, 'other') : null
+
+    if (auth.error && (!apiKey || !apiKey.valid)) {
+      return auth.error
+    }
 
     try {
       const startTime = Date.now()
@@ -75,13 +80,15 @@ export function createContextTemplateHandler(config: ContextTemplateConfig) {
         return NextResponse.json({ error: formatted.error }, { status: 400 })
       }
 
-      // Call sage-reason internally
+      // Call sage-reason internally — forward whichever auth credential was used
       const authHeader = request.headers.get('authorization')
+      const apiKeyHeader = request.headers.get('x-api-key')
       const reasonResponse = await fetch(SAGE_REASON_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(authHeader ? { 'Authorization': authHeader } : {}),
+          ...(apiKeyHeader ? { 'X-Api-Key': apiKeyHeader } : {}),
         },
         body: JSON.stringify({
           input: formatted.input,

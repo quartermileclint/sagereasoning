@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { checkRateLimit, RATE_LIMITS, requireAuth, validateApiKey, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { getSkillById, SKILL_REGISTRY } from '@/lib/skill-registry'
 
@@ -25,9 +25,13 @@ export async function POST(request: NextRequest) {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
   if (rateLimitError) return rateLimitError
 
-  // Authentication required
+  // Authentication: accept user session (JWT) OR API key
   const auth = await requireAuth(request)
-  if (auth.error) return auth.error
+  const apiKey = auth.error ? await validateApiKey(request, 'other') : null
+
+  if (auth.error && (!apiKey || !apiKey.valid)) {
+    return auth.error
+  }
 
   try {
     const startTime = Date.now()

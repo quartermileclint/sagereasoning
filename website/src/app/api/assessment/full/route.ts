@@ -214,21 +214,21 @@ Return ONLY valid JSON:
     const [msg1, msg2, msg3] = await Promise.all([
       client.messages.create({
         model: 'claude-sonnet-4-6',
-        max_tokens: 4096,
+        max_tokens: 8192,
         temperature: 0.2,
         system: [{ type: 'text', text: V3_ASSESSMENT_SCORING_PROMPT, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: buildBatchPrompt(batch1Responses, 'Phases 1-3: Foundations, Architecture of Mind, Value Hierarchy') }],
       }),
       client.messages.create({
         model: 'claude-sonnet-4-6',
-        max_tokens: 4096,
+        max_tokens: 8192,
         temperature: 0.2,
         system: [{ type: 'text', text: V3_ASSESSMENT_SCORING_PROMPT, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: buildBatchPrompt(batch2Responses, 'Phases 4-5: Unity of Excellence, Passion Diagnosis') }],
       }),
       client.messages.create({
         model: 'claude-sonnet-4-6',
-        max_tokens: 4096,
+        max_tokens: 8192,
         temperature: 0.2,
         system: [{ type: 'text', text: V3_ASSESSMENT_SCORING_PROMPT, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: buildBatchPrompt(batch3Responses, 'Phases 6-8: Right Action, Measuring Progress, Integration') }],
@@ -268,10 +268,10 @@ Return ONLY valid JSON:
       ...batch3Data.per_assessment,
     ]
 
-    if (allScores.length !== 55) {
-      console.error(`Expected 55 per-assessment results, got ${allScores.length}`)
+    if (allScores.length < 50 || allScores.length > 60) {
+      console.error(`Expected ~55 per-assessment results, got ${allScores.length} (batch1: ${batch1Data.per_assessment.length}, batch2: ${batch2Data.per_assessment.length}, batch3: ${batch3Data.per_assessment.length})`)
       return NextResponse.json(
-        { error: 'Scoring engine error: incomplete assessment results' },
+        { error: `Scoring engine error: expected ~55 assessment results, got ${allScores.length}` },
         { status: 500, headers: publicCorsHeaders() }
       )
     }

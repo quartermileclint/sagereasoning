@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { checkRateLimit, RATE_LIMITS, requireAuth, validateApiKey, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { runSageReason, type ReasonDepth } from '@/lib/sage-reason-engine'
 
 // =============================================================================
@@ -38,13 +38,17 @@ export async function POST(request: NextRequest) {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
   if (rateLimitError) return rateLimitError
 
-  // Authentication required
+  // Authentication: accept user session (JWT) OR API key
   const auth = await requireAuth(request)
-  if (auth.error) return auth.error
+  const apiKey = auth.error ? await validateApiKey(request, 'other') : null
+
+  if (auth.error && (!apiKey || !apiKey.valid)) {
+    return auth.error
+  }
 
   try {
     const body = await request.json()
-    const { input, context, depth: requestedDepth, domain_context } = body
+    const { input, context, depth: requestedDepth, domain_context, urgency_context } = body
 
     // Validate required input
     if (!input || typeof input !== 'string' || input.trim().length === 0) {
@@ -72,7 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Call the shared reasoning engine
-    const result = await runSageReason({ input, context, depth, domain_context })
+    const result = await runSageReason({ input, context, depth, domain_context, urgency_context })
     return NextResponse.json(result, { headers: corsHeaders() })
   } catch (error) {
     console.error('sage-reason API error:', error)
