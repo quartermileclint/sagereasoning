@@ -51,15 +51,135 @@ export type ContextTemplateConfig = {
  */
 export function createContextTemplateHandler(config: ContextTemplateConfig) {
   return async function POST(request: NextRequest) {
-    // TEMPORARY DIAGNOSTIC — return immediately to prove handler runs
-    const _ctDiagAuth = request.headers.get('authorization')?.substring(0, 15) || 'none'
-    const _ctDiagCookie = request.cookies.get('sb-access-token')?.value?.substring(0, 10) || 'none'
+    // TEMPORARY DIAGNOSTIC
+    const _t0 = Date.now()
+    const _ctBearer = request.headers.get('authorization')?.substring(0, 15) || 'none'
 
-    // TEMPORARY: Early return to prove handler executes — REMOVE after debugging
-    return NextResponse.json({ _ct_diag: true, skill: config.skillId, bearer: _ctDiagAuth, cookie: _ctDiagCookie, v: 'ct-v4-early' }, { status: 299 })
+    // Rate limiting
+    const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+    if (rateLimitError) return rateLimitError
 
-    // Everything below is unreachable due to early return diagnostic above
-    return NextResponse.json({ error: 'unreachable' }, { status: 500 })
+    const _t1 = Date.now()
+
+    // Authentication: accept user session (JWT) OR API key
+    const reqAuthHeader = request.headers.get('authorization')
+    const hasBearer = reqAuthHeader?.startsWith('Bearer ') || false
+
+    let authResult: Awaited<ReturnType<typeof requireAuth>>
+    try {
+      authResult = await requireAuth(request)
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'requireAuth threw', _diag: { msg: String(e), bearer: _ctBearer, skill: config.skillId, ms: Date.now() - _t0, v: 'ct-v5-throw' } },
+        { status: 500 }
+      )
+    }
+
+    const _t2 = Date.now()
+
+    let apiKeyResult: Awaited<ReturnType<typeof validateApiKey>> | null = null
+    if (authResult.error) {
+      apiKeyResult = await validateApiKey(request, 'other')
+    }
+
+    const _t3 = Date.now()
+
+    if (authResult.error && (!apiKeyResult || !apiKeyResult.valid)) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in.', _diag: { hasBearer, authFailed: true, apiKeyValid: apiKeyResult?.valid ?? null, bearer: _ctBearer, skill: config.skillId, requireAuth_ms: _t2 - _t1, total_ms: _t3 - _t0, v: 'ct-v5' } },
+        { status: 401 }
+      )
+    }
+
+    try {
+      const startTime = Date.now()
+      const body = await request.json()
+
+      // Validate skill-specific input
+      const validationError = config.validateInput(body)
+      if (validationError) {
+        return NextResponse.json({ error: validationError }, { status: 400 })
+      }
+
+      // Format input for sage-reason
+      const formatted = config.formatInput(body)
+      if ('error' in formatted) {
+        return NextResponse.json({ error: formatted.error }, { status: 400 })
+      }
+
+      // Call sage-reason internally — forward whichever auth credential was used
+      const authHeader = request.headers.get('authorization')
+      const apiKeyHeader = request.headers.get('x-api-key')
+      const reasonResponse = await fetch(SAGE_REASON_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authHeader ? { 'Authorization': authHeader } : {}),
+          ...(apiKeyHeader ? { 'X-Api-Key': apiKeyHeader } : {}),
+        },
+        body: JSON.stringify({
+          input: formatted.input,
+          context: formatted.context,
+          depth: config.depth,
+          domain_context: config.domainContext,
+        }),
+      })
+
+      const reasonData = await reasonResponse.json()
+
+      if (!reasonResponse.ok) {
+        return NextResponse.json(reasonData, { status: reasonResponse.status })
+      }
+
+      // Extract the result from sage-reason's envelope
+      const reasonResult = reasonData.result || reasonData
+
+      // Apply skill-specific framing if configured
+      const framedResult = config.frameResult
+        ? config.frameResult(reasonResult)
+        : reasonResult
+
+      // Generate reasoning receipt from sage-reason result
+      const skillDef = getSkillById(config.skillId)
+      const mechanisms = (skillDef?.mechanisms || ['control_filter', 'passion_diagnosis', 'oikeiosis']) as MechanismId[]
+      const receipt = extractReceipt({
+        skillId: config.skillId,
+        input: formatted.input,
+        evalData: framedResult as any,
+        mechanisms,
+      })
+
+      // Add skill metadata
+      const skillResult = {
+        skill_id: config.skillId,
+        skill_name: config.name,
+        ...framedResult,
+        reasoning_receipt: receipt,
+        disclaimer: 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.',
+      }
+
+      const envelope = buildEnvelope({
+        result: skillResult,
+        endpoint: config.endpoint,
+        model: 'claude-sonnet-4-6',
+        startTime,
+        maxTokens: config.depth === 'quick' ? 1024 : config.depth === 'standard' ? 1536 : 2048,
+        composability: {
+          next_steps: config.chainsTo.map(id => `/api/skills/${id}`),
+          recommended_action: config.chainsTo.length > 0
+            ? `Consider chaining to: ${config.chainsTo.join(', ')}`
+            : 'This is a terminal skill. Apply the insights directly.',
+        },
+      })
+
+      return NextResponse.json(envelope, { headers: corsHeaders() })
+    } catch (error) {
+      console.error(`${config.skillId} error:`, error)
+      return NextResponse.json(
+        { error: 'Internal server error' },
+        { status: 500 }
+      )
+    }
   }
 }
 
