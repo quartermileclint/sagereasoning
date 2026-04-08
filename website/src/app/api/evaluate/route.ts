@@ -148,21 +148,9 @@ Return only the JSON evaluation object.`
         }
       }
     } catch (parseErr) {
-      console.error('evaluate: Failed to parse response:', responseText)
-      const parseMessage = parseErr instanceof Error ? parseErr.message : 'unknown parse error'
-      // Show text around where the error likely occurs (near the end of the extracted region)
-      const braceStart = responseText.indexOf('{')
-      const braceEnd = responseText.lastIndexOf('}')
-      const extracted = braceStart !== -1 && braceEnd > braceStart ? responseText.substring(braceStart, braceEnd + 1) : ''
+      console.error('evaluate: Failed to parse response:', parseErr instanceof Error ? parseErr.message : parseErr)
       return NextResponse.json(
-        {
-          error: 'Evaluation engine returned invalid response',
-          debug_version: 'v4-parse-diag',
-          debug_parse_error: parseMessage,
-          debug_length: responseText.length,
-          debug_extracted_length: extracted.length,
-          debug_tail: extracted.substring(extracted.length - 200),
-        },
+        { error: 'Evaluation engine returned invalid response' },
         { status: 500 }
       )
     }
