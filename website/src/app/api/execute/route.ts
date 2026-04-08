@@ -26,11 +26,16 @@ export async function POST(request: NextRequest) {
   if (rateLimitError) return rateLimitError
 
   // Authentication: accept user session (JWT) OR API key
+  const authHeader = request.headers.get('authorization')
+  const hasBearer = authHeader?.startsWith('Bearer ') || false
   const auth = await requireAuth(request)
   const apiKey = auth.error ? await validateApiKey(request, 'other') : null
 
   if (auth.error && (!apiKey || !apiKey.valid)) {
-    return auth.error
+    return NextResponse.json(
+      { error: 'Authentication required. Please sign in.', _diag: { hasBearer, hasApiKey: !!request.headers.get('x-api-key'), authFailed: !!auth.error, apiKeyValid: apiKey?.valid ?? null, v: 'dual-auth-v2' } },
+      { status: 401 }
+    )
   }
 
   try {

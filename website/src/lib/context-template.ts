@@ -57,11 +57,16 @@ export function createContextTemplateHandler(config: ContextTemplateConfig) {
 
     // Authentication: accept user session (JWT) OR API key
     // Marketplace skills should be accessible to both human users and agent developers
+    const reqAuthHeader = request.headers.get('authorization')
+    const hasBearer = reqAuthHeader?.startsWith('Bearer ') || false
     const auth = await requireAuth(request)
     const apiKey = auth.error ? await validateApiKey(request, 'other') : null
 
     if (auth.error && (!apiKey || !apiKey.valid)) {
-      return auth.error
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in.', _diag: { hasBearer, hasApiKey: !!request.headers.get('x-api-key'), authFailed: !!auth.error, apiKeyValid: apiKey?.valid ?? null, v: 'dual-auth-v2', skill: config.skillId } },
+        { status: 401 }
+      )
     }
 
     try {
