@@ -129,12 +129,25 @@ Return only the JSON evaluation object.`
 
     const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
 
-    // Parse JSON response
+    // Parse JSON response — extract the JSON object from whatever wrapping the model adds
     let evalData
     try {
-      const cleaned = responseText.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
-      evalData = JSON.parse(cleaned)
-    } catch {
+      // Strategy: strip code fences, then if that fails, find { to } boundaries
+      let cleaned = responseText.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
+      try {
+        evalData = JSON.parse(cleaned)
+      } catch {
+        // Fallback: extract from first { to last }
+        const start = responseText.indexOf('{')
+        const end = responseText.lastIndexOf('}')
+        if (start !== -1 && end > start) {
+          cleaned = responseText.substring(start, end + 1)
+          evalData = JSON.parse(cleaned)
+        } else {
+          throw new Error('No JSON object found in response')
+        }
+      }
+    } catch (parseErr) {
       console.error('evaluate: Failed to parse response:', responseText)
       return NextResponse.json(
         { error: 'Evaluation engine returned invalid response', debug_preview: responseText.substring(0, 300) },
