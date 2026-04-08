@@ -55,8 +55,8 @@ export function createContextTemplateHandler(config: ContextTemplateConfig) {
     const _ctDiagAuth = request.headers.get('authorization')?.substring(0, 15) || 'none'
     const _ctDiagCookie = request.cookies.get('sb-access-token')?.value?.substring(0, 10) || 'none'
 
-    // Uncomment the next line to prove the handler executes:
-    // return NextResponse.json({ _ct_diag: true, skill: config.skillId, bearer: _ctDiagAuth, cookie: _ctDiagCookie, v: 'ct-v4' }, { status: 299 })
+    // TEMPORARY: Early return to prove handler executes — REMOVE after debugging
+    return NextResponse.json({ _ct_diag: true, skill: config.skillId, bearer: _ctDiagAuth, cookie: _ctDiagCookie, v: 'ct-v4-early' }, { status: 299 })
 
     // Rate limiting
     const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
