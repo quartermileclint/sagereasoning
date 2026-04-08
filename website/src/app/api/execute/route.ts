@@ -21,6 +21,10 @@ import { getSkillById, SKILL_REGISTRY } from '@/lib/skill-registry'
  *      to determine the best skill for the input.
  */
 export async function POST(request: NextRequest) {
+  // TEMPORARY DIAGNOSTIC — remove after debugging
+  const _diagBearer = request.headers.get('authorization')?.substring(0, 15) || 'none'
+  const _diagCookie = request.cookies.get('sb-access-token')?.value?.substring(0, 10) || 'none'
+
   // Rate limiting
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
   if (rateLimitError) return rateLimitError
@@ -28,12 +32,22 @@ export async function POST(request: NextRequest) {
   // Authentication: accept user session (JWT) OR API key
   const authHeader = request.headers.get('authorization')
   const hasBearer = authHeader?.startsWith('Bearer ') || false
-  const auth = await requireAuth(request)
+
+  let auth: { user?: { id: string; email?: string }; error?: NextResponse }
+  try {
+    auth = await requireAuth(request)
+  } catch (e) {
+    return NextResponse.json(
+      { error: 'requireAuth threw', _diag: { message: e instanceof Error ? e.message : String(e), bearer: _diagBearer, cookie: _diagCookie, v: 'v3-throw-catch' } },
+      { status: 500 }
+    )
+  }
+
   const apiKey = auth.error ? await validateApiKey(request, 'other') : null
 
   if (auth.error && (!apiKey || !apiKey.valid)) {
     return NextResponse.json(
-      { error: 'Authentication required. Please sign in.', _diag: { hasBearer, hasApiKey: !!request.headers.get('x-api-key'), authFailed: !!auth.error, apiKeyValid: apiKey?.valid ?? null, v: 'dual-auth-v2' } },
+      { error: 'Authentication required. Please sign in.', _diag: { hasBearer, hasApiKey: !!request.headers.get('x-api-key'), authFailed: !!auth.error, apiKeyValid: apiKey?.valid ?? null, bearer: _diagBearer, cookie: _diagCookie, v: 'v3' } },
       { status: 401 }
     )
   }
