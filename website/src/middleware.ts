@@ -47,7 +47,10 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/favicon') ||
     pathname.includes('.')
   ) {
-    return NextResponse.next()
+    const response = NextResponse.next()
+    response.headers.set('x-mw-hit', 'skip-api')
+    response.headers.set('x-mw-path', pathname)
+    return response
   }
 
   // Only enforce auth on protected routes

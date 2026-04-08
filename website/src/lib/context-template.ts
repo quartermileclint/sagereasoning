@@ -51,6 +51,13 @@ export type ContextTemplateConfig = {
  */
 export function createContextTemplateHandler(config: ContextTemplateConfig) {
   return async function POST(request: NextRequest) {
+    // TEMPORARY DIAGNOSTIC — return immediately to prove handler runs
+    const _ctDiagAuth = request.headers.get('authorization')?.substring(0, 15) || 'none'
+    const _ctDiagCookie = request.cookies.get('sb-access-token')?.value?.substring(0, 10) || 'none'
+
+    // Uncomment the next line to prove the handler executes:
+    // return NextResponse.json({ _ct_diag: true, skill: config.skillId, bearer: _ctDiagAuth, cookie: _ctDiagCookie, v: 'ct-v4' }, { status: 299 })
+
     // Rate limiting
     const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
     if (rateLimitError) return rateLimitError
@@ -59,12 +66,22 @@ export function createContextTemplateHandler(config: ContextTemplateConfig) {
     // Marketplace skills should be accessible to both human users and agent developers
     const reqAuthHeader = request.headers.get('authorization')
     const hasBearer = reqAuthHeader?.startsWith('Bearer ') || false
-    const auth = await requireAuth(request)
+
+    let auth: { user?: { id: string; email?: string }; error?: NextResponse }
+    try {
+      auth = await requireAuth(request)
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'requireAuth threw in context template', _diag: { message: e instanceof Error ? e.message : String(e), bearer: _ctDiagAuth, cookie: _ctDiagCookie, skill: config.skillId, v: 'ct-v4-throw' } },
+        { status: 500 }
+      )
+    }
+
     const apiKey = auth.error ? await validateApiKey(request, 'other') : null
 
     if (auth.error && (!apiKey || !apiKey.valid)) {
       return NextResponse.json(
-        { error: 'Authentication required. Please sign in.', _diag: { hasBearer, hasApiKey: !!request.headers.get('x-api-key'), authFailed: !!auth.error, apiKeyValid: apiKey?.valid ?? null, v: 'dual-auth-v2', skill: config.skillId } },
+        { error: 'Authentication required. Please sign in.', _diag: { hasBearer, hasApiKey: !!request.headers.get('x-api-key'), authFailed: !!auth.error, apiKeyValid: apiKey?.valid ?? null, bearer: _ctDiagAuth, cookie: _ctDiagCookie, skill: config.skillId, v: 'ct-v4' } },
         { status: 401 }
       )
     }
