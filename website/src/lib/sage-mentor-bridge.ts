@@ -20,6 +20,10 @@ export type {
   ValueHierarchyEntry,
 } from '../../../sage-mentor'
 
+export type {
+  ReflectionOutput,
+} from '../../../sage-mentor/profile-store'
+
 /**
  * Dynamically load Sage Mentor functions.
  * Returns null if the module can't be loaded (e.g., missing dependencies).
@@ -30,6 +34,24 @@ export async function loadMentorModule() {
     return {
       buildMentorPersona: mod.buildMentorPersona,
       loadProfile: mod.loadProfile,
+    }
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Dynamically load profile-store functions.
+ * Used by the reflect route to feed reflection findings back into the Mentor profile.
+ * Returns null if the module can't be loaded.
+ */
+export async function loadProfileStore() {
+  try {
+    const mod = await import('../../../sage-mentor/profile-store')
+    return {
+      updateProfileFromReflection: mod.updateProfileFromReflection,
+      upsertPassionObservation: mod.upsertPassionObservation,
+      recordInteraction: mod.recordInteraction,
     }
   } catch {
     return null

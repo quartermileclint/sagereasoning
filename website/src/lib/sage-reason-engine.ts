@@ -46,6 +46,13 @@ export interface ReasonInput {
   domain_context?: string
   /** Override the system prompt entirely (used by mentor-baseline, mentor-journal-week, etc.) */
   systemPromptOverride?: string
+  /**
+   * Optional urgency context (Item 6 — urgency → more scrutiny).
+   * When provided, the engine applies additional scrutiny to passion_diagnosis,
+   * specifically checking for hasty assent (propeteia) patterns. The output
+   * will include a hasty_assent_risk field.
+   */
+  urgency_context?: string
 }
 
 export interface ReasonResult {
@@ -58,6 +65,12 @@ export interface ReasonResult {
     ai_generated: boolean
     ai_model: string
     latency_ms: number
+    /** Per-stage quality scores (Item 5 — process reward model). Present when stage scoring is enabled. */
+    stage_scores?: Record<string, 'strong' | 'adequate' | 'weak' | 'not_applied'>
+    /** Hasty assent risk flag (Item 6). Present when urgency_context was provided. */
+    hasty_assent_risk?: 'high' | 'moderate' | 'low' | 'none'
+    /** Whether urgency context was applied */
+    urgency_applied?: boolean
   }
 }
 
@@ -316,6 +329,23 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
   if (params.domain_context?.trim()) {
     userMessage += `\n\nDOMAIN CONTEXT (this reasoning request is being made in the context of a specific domain):\n${params.domain_context.trim()}`
   }
+
+  // Urgency context injection (Item 6 — urgency increases scrutiny)
+  // When present, applies additional scrutiny to passion_diagnosis for hasty assent
+  if (params.urgency_context?.trim()) {
+    userMessage += `\n\nURGENCY CONTEXT: ${params.urgency_context.trim()}\n` +
+      `IMPORTANT: This action is being taken under time pressure. Apply EXTRA scrutiny to the passion diagnosis. ` +
+      `Specifically check for hasty assent (propeteia) — is the urgency itself a passion (phobos/fear) driving action ` +
+      `without adequate examination? In your response, add a "hasty_assent_risk" field with value "high", "moderate", "low", or "none" ` +
+      `indicating whether urgency is compromising deliberation quality.`
+  }
+
+  // Per-stage quality scoring instruction (Item 5 — process reward model)
+  // Always request stage scores so we can evaluate each mechanism independently
+  userMessage += `\n\nFor each mechanism you apply, also include a "stage_scores" object in your response ` +
+    `with a quality rating for each stage: { "control_filter": "strong|adequate|weak", "passion_diagnosis": "strong|adequate|weak", ... } ` +
+    `Rating guide: "strong" = correctly identified all relevant factors, "adequate" = identified the main factors, "weak" = missed significant factors.`
+
   userMessage += '\n\nReturn only the JSON evaluation object.'
 
   // Check cache
@@ -384,6 +414,14 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
   // Cache the result
   cacheSet(ck, evalData)
 
+  // Extract per-stage quality scores if present in the response (Item 5)
+  const stageScores = evalData.stage_scores || undefined
+
+  // Extract hasty assent risk if urgency context was applied (Item 6)
+  const hastyAssentRisk = params.urgency_context?.trim()
+    ? (evalData.hasty_assent_risk || 'none')
+    : undefined
+
   return {
     result: { ...evalData, disclaimer: EVALUATIVE_DISCLAIMER },
     meta: {
@@ -394,6 +432,9 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
       ai_generated: true,
       ai_model: config.model,
       latency_ms: latencyMs,
+      stage_scores: stageScores,
+      hasty_assent_risk: hastyAssentRisk,
+      urgency_applied: !!params.urgency_context?.trim(),
     },
   }
 }

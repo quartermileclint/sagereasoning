@@ -37,11 +37,27 @@ export async function POST(request: NextRequest) {
 
   try {
     const startTime = Date.now()
-    const { action, context, threshold = 'deliberate', agent_id } = await request.json()
+    const { action, context, threshold = 'deliberate', agent_id, risk_class, urgency_context, considered_alternatives } = await request.json()
 
     if (!action || typeof action !== 'string' || action.trim().length === 0) {
       return NextResponse.json({ error: 'action is required' }, { status: 400 })
     }
+
+    // Validate risk_class if provided (Standard / Elevated / Critical)
+    const validRiskClasses = ['standard', 'elevated', 'critical'] as const
+    type RiskClass = typeof validRiskClasses[number]
+    const resolvedRiskClass: RiskClass = (
+      typeof risk_class === 'string' && validRiskClasses.includes(risk_class.toLowerCase() as RiskClass)
+    ) ? (risk_class.toLowerCase() as RiskClass) : 'standard'
+
+    // Map risk_class to evaluation depth (per project instructions 0d-ii)
+    // Standard → quick (3 mechanisms), Elevated → standard (5), Critical → deep (6)
+    const riskDepthMap: Record<RiskClass, 'quick' | 'standard' | 'deep'> = {
+      standard: 'quick',
+      elevated: 'standard',
+      critical: 'deep',
+    }
+    const evaluationDepth = riskDepthMap[resolvedRiskClass]
 
     const actionErr = validateTextLength(action, 'action', TEXT_LIMITS.medium)
     if (actionErr) {
@@ -67,15 +83,20 @@ export async function POST(request: NextRequest) {
       ? (threshold as KatorthomaProximityLevel)
       : 'deliberate'
 
-    // Call the shared reasoning engine at quick depth for speed
-    // Domain context indicates this is a guardrail check
-    const domainContext = 'This is a binary safety gate evaluation. Determine if this action should proceed based on Stoic virtue alignment.'
+    // Call the shared reasoning engine at risk-appropriate depth
+    // Standard actions use quick depth for speed; Critical actions use deep depth for thorough evaluation
+    const domainContext = resolvedRiskClass === 'critical'
+      ? 'This is a CRITICAL safety gate evaluation. The action involves authentication, access control, data deletion, or deployment configuration. Apply maximum scrutiny. Evaluate whether alternatives were considered and whether a rollback path exists.'
+      : resolvedRiskClass === 'elevated'
+        ? 'This is an elevated safety gate evaluation. The action modifies existing user-facing functionality or adds external dependencies. Evaluate carefully.'
+        : 'This is a binary safety gate evaluation. Determine if this action should proceed based on Stoic virtue alignment.'
 
     const reasoningResult = await runSageReason({
       input: action.trim(),
       context,
-      depth: 'quick',
+      depth: evaluationDepth,
       domain_context: domainContext,
+      urgency_context: typeof urgency_context === 'string' ? urgency_context.trim() : undefined,
     })
 
     const assessmentData = reasoningResult.result as any
@@ -83,19 +104,70 @@ export async function POST(request: NextRequest) {
     const recommendation = getV3Recommendation(proximity, thresholdLevel)
     const proceed = meetsThreshold(proximity, thresholdLevel)
 
+    // Mechanisms applied depends on evaluation depth
+    const mechanismsByDepth: Record<string, string[]> = {
+      quick: ['control_filter', 'passion_diagnosis', 'oikeiosis'],
+      standard: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
+      deep: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment', 'iterative_refinement'],
+    }
+
     // Generate reasoning receipt
     const receipt = extractReceipt({
       skillId: 'sage-guard',
       input: action.trim(),
       evalData: assessmentData,
-      mechanisms: ['control_filter', 'passion_diagnosis', 'oikeiosis'],
+      mechanisms: mechanismsByDepth[evaluationDepth] || mechanismsByDepth.quick,
     })
 
-    const result: V3GuardrailResponse & { reasoning_receipt?: typeof receipt } = {
-      proceed,
+    // For Critical actions, extract or flag the rollback path
+    const rollbackPath = resolvedRiskClass === 'critical'
+      ? (assessmentData.rollback_path || assessmentData.improvement_path || 'No rollback path provided — consider specifying one before proceeding.')
+      : undefined
+
+    // Deliberation quality assessment (Item 8)
+    // Evaluates whether the decision to act was adequately deliberated,
+    // not just whether the action itself is virtuous.
+    const hastyAssentRisk = reasoningResult.meta.hasty_assent_risk
+    const stageScores = reasoningResult.meta.stage_scores
+    let deliberationQuality: 'thorough' | 'adequate' | 'hasty' | 'impulsive' = 'adequate'
+    if (hastyAssentRisk === 'high') {
+      deliberationQuality = 'impulsive'
+    } else if (hastyAssentRisk === 'moderate') {
+      deliberationQuality = 'hasty'
+    } else if (stageScores) {
+      // If all stages are strong, deliberation is thorough
+      const scores = Object.values(stageScores).filter(s => s !== 'not_applied')
+      const strongCount = scores.filter(s => s === 'strong').length
+      deliberationQuality = strongCount === scores.length ? 'thorough' : 'adequate'
+    }
+
+    // Considered alternatives check (Item 9)
+    // For Critical + urgent actions, flag if no alternatives were evaluated.
+    // This is the specific check that would have caught the auth middleware incident.
+    let alternativesWarning: string | undefined
+    if (resolvedRiskClass === 'critical' && urgency_context) {
+      if (!considered_alternatives || (Array.isArray(considered_alternatives) && considered_alternatives.length === 0)) {
+        alternativesWarning = 'HASTY ASSENT RISK: This is a Critical action taken under urgency with no alternatives considered. The auth middleware incident pattern applies. Consider what other approaches could achieve the same goal.'
+      } else if (Array.isArray(considered_alternatives) && considered_alternatives.length === 1) {
+        alternativesWarning = 'Only one alternative was considered for a Critical action under urgency. Consider whether additional options exist.'
+      }
+    }
+
+    const result: V3GuardrailResponse & {
+      reasoning_receipt?: typeof receipt
+      risk_class?: string
+      evaluation_depth?: string
+      rollback_path?: string
+      deliberation_quality?: string
+      hasty_assent_risk?: string
+      considered_alternatives_provided?: number
+      alternatives_warning?: string
+      stage_scores?: Record<string, string>
+    } = {
+      proceed: alternativesWarning && resolvedRiskClass === 'critical' ? false : proceed,
       katorthoma_proximity: proximity,
       threshold: thresholdLevel,
-      recommendation,
+      recommendation: alternativesWarning && resolvedRiskClass === 'critical' ? 'pause_for_review' : recommendation,
       passions_detected: assessmentData.passion_diagnosis?.passions_detected || [],
       is_kathekon: assessmentData.is_kathekon,
       kathekon_quality: assessmentData.kathekon_assessment?.quality,
@@ -103,6 +175,14 @@ export async function POST(request: NextRequest) {
       improvement_hint: assessmentData.improvement_path || undefined,
       disclaimer: V3_DISCLAIMER,
       reasoning_receipt: receipt,
+      risk_class: resolvedRiskClass,
+      evaluation_depth: evaluationDepth,
+      rollback_path: rollbackPath,
+      deliberation_quality: deliberationQuality,
+      hasty_assent_risk: hastyAssentRisk,
+      considered_alternatives_provided: Array.isArray(considered_alternatives) ? considered_alternatives.length : undefined,
+      alternatives_warning: alternativesWarning,
+      stage_scores: stageScores,
     }
 
     // Analytics (fire and forget)
@@ -118,6 +198,8 @@ export async function POST(request: NextRequest) {
           threshold: thresholdLevel,
           is_kathekon: result.is_kathekon,
           passions_count: result.passions_detected.length,
+          risk_class: resolvedRiskClass,
+          evaluation_depth: evaluationDepth,
         },
       })
       .then(() => {})
@@ -170,6 +252,7 @@ export async function GET(request: NextRequest) {
           threshold:
             '(optional, default deliberate) Minimum proximity level: reflexive | habitual | deliberate | principled | sage_like',
           agent_id: '(optional) Your agent identifier for tracking',
+          risk_class: '(optional, default standard) Risk classification: standard | elevated | critical. Controls evaluation depth: standard→quick(3 mechanisms), elevated→standard(5), critical→deep(6). Critical actions also receive a rollback_path field.',
         },
         response: {
           proceed: 'boolean — true if proximity meets or exceeds threshold',
@@ -182,6 +265,9 @@ export async function GET(request: NextRequest) {
           reasoning: 'Brief virtue assessment',
           improvement_hint: 'How to make the action more virtuous (if below principled)',
           disclaimer: 'Standard disclaimer about the assessment',
+          risk_class: 'The resolved risk classification (standard | elevated | critical)',
+          evaluation_depth: 'The depth used for evaluation (quick | standard | deep)',
+          rollback_path: '(Critical only) How to undo the action if it causes harm',
         },
       },
       example_integration: `

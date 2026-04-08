@@ -4,6 +4,8 @@
 
 Also triggered at session open when the founder says "read the handoff", "catch up", "where were we", or "continue from last session".
 
+Also triggered for debriefs when the founder says "debrief this session", "run a debrief", "debrief [date]", or any variant indicating a structured retrospective is needed on a specific session.
+
 ---
 
 ## What This Skill Does
@@ -24,6 +26,11 @@ This skill automates the structured session handoff protocol (P0 item 0b). It ca
 ### Session Open (resume)
 - A new session starts and the founder wants to pick up where they left off
 - The founder pastes a "next session prompt" into a new session
+
+### Session Debrief (retrospective)
+- A session involved a significant failure or extended troubleshooting
+- Either party requests a structured retrospective
+- The debrief is produced in a subsequent session, not the same session as the failure
 
 ---
 
@@ -128,6 +135,7 @@ This is a continuation of [project context]. We are in [current phase/priority].
 - [Any standing instructions the new session needs]
 - [User preferences that affect how work is done]
 - [Key file locations the new session will need]
+- [If starting a new priority stage: "**REMINDER:** Check `operations/allowance-for-future.md` for stage-specific action items before beginning work on P[N]."]
 ```
 
 ### Step 4: Confirm with the founder
@@ -158,9 +166,123 @@ Provide a brief summary:
 - "The handoff says to start with: [first item from Next Session Should]."
 - "There are [N] blockers and [N] open questions."
 
-### Step 4: Only then read reference documents
+### Step 4: Check for stage-relevant allowances
+
+If the handoff note or founder's message indicates work is beginning on a **new priority stage** (P1, P2, P3, P4, P6, P7), read:
+```
+operations/allowance-for-future.md
+```
+
+Find the section for that priority stage and present the ACTION and MONITOR items to the founder before starting work. Format:
+
+> **Allowances for [Stage Name]:** There are [N] action items and [N] monitoring checks from external research that apply to this stage. Here's what to review before we begin:
+> - [Summary of each ACTION item]
+> - [Summary of each MONITOR item — with instruction to check for updated information]
+
+If the session is continuing work within the same priority stage (not starting a new one), skip this step.
+
+### Step 5: Only then read reference documents
 
 If the handoff note references specific files needed for the first task, read those. Don't read the entire project just because it exists.
+
+---
+
+## Session Debrief — How It Works
+
+**When to use:** When a session involved a significant failure, extended troubleshooting that affected the founder's ability to use a live system, or when either party requests a structured retrospective. Per protocol 0b-ii, the debrief is always produced in a subsequent session — never in the same session as the failure.
+
+### Step 1: Identify the session to debrief
+
+The founder will specify which session to debrief, either by date or by describing the incident. Find the relevant:
+- Session handoff note in `operations/session-handoffs/`
+- Decision log entries from that date in `operations/decision-log.md`
+- Any existing debrief files in `operations/session-debriefs/`
+
+### Step 2: Analyse the session
+
+Review the available records and assess the session against five dimensions:
+
+1. **What happened** — Plain-language narrative of events. What was the goal? What went wrong? What was the actual impact on the founder's ability to use the system?
+
+2. **Communication failures** — Where did the signals break down? Did the AI present uncertainty as confidence? Did it skip the verify-decide-execute sequence? Did the founder's intent get misunderstood? Reference the communication signals from 0d (e.g., "The AI should have signalled 'This has a known risk' but instead presented the change as routine").
+
+3. **Process failures** — Which protocols were violated or missing? Map failures to specific P0 items (0a–0g) or manifest rules (R0–R20). Identify whether the failure was a protocol gap (no rule existed) or a compliance gap (rule existed but wasn't followed).
+
+4. **What should change** — Specific, actionable proposals. For each proposal, state: what it changes, which governance layer it belongs to (About Me / Project Instructions / Manifest / Verification Framework), and what it prevents.
+
+5. **Mentor observations** — Observations relevant to the founder's mentor profile. What passions were involved? What false judgements? What does this reveal about reasoning patterns? These observations should follow the Stoic framework: identify the impression, the assent (or hasty assent), and the resulting action.
+
+### Step 3: Write the debrief document
+
+Create a file at:
+```
+operations/session-debriefs/YYYY-MM-DD_debrief-[topic].md
+```
+
+Use this format:
+
+```markdown
+# Session Debrief — [Date]: [Brief Topic Description]
+
+**Debrief produced:** [Date of this session]
+**Session debriefed:** [Date of the session being analysed]
+**Trigger:** [What prompted the debrief — failure type, founder request, etc.]
+
+---
+
+## What Happened
+
+[Plain-language narrative. No jargon. Written so someone with no coding experience can understand what went wrong and what the impact was.]
+
+## Communication Failures
+
+- **[Failure]**: [What signal was missing or wrong]. Should have been: [correct signal per 0d]. Impact: [what happened because of the missing signal].
+
+## Process Failures
+
+- **[Failure]**: [Which protocol was violated or missing]. Reference: [P0 item or manifest rule]. Classification: [Protocol gap / Compliance gap].
+
+## What Should Change
+
+### [Proposal 1 Title]
+
+**What it changes:** [Description]
+**Governance layer:** [About Me / Project Instructions / Manifest / Verification Framework]
+**What it prevents:** [Specific failure mode this addresses]
+**Proposed text:** [Exact text to add or modify, if applicable]
+
+### [Proposal 2 Title]
+[Same format]
+
+## Mentor Observations
+
+- **Passion identified:** [Root passion and sub-species, if applicable]
+- **False judgement:** [The specific false judgement involved]
+- **Pattern:** [Does this connect to previously observed patterns?]
+- **Stoic frame:** [Brief Stoic analysis — impression, assent quality, resulting action]
+
+---
+
+## Status
+
+- [ ] Debrief reviewed by founder
+- [ ] Proposals assessed (adopted / modified / rejected)
+- [ ] Adopted changes applied to governance documents
+- [ ] Decision log updated
+```
+
+### Step 4: Cross-reference with the decision log
+
+Check if the debrief's findings connect to any existing decisions in `operations/decision-log.md`. Note connections in the debrief.
+
+### Step 5: Present to the founder
+
+Summarise the debrief:
+- Number of communication failures identified
+- Number of process failures identified
+- Number of proposals
+- Key mentor observation
+- Ask the founder to review and decide which proposals to adopt
 
 ---
 
@@ -182,6 +304,9 @@ If the handoff note references specific files needed for the first task, read th
 | `operations/session-handoffs/` | Directory containing all handoff notes |
 | `operations/session-handoffs/YYYY-MM-DD_session-close[-x].md` | Individual session handoff notes |
 | `operations/session-handoffs/next-session-prompt.md` | Ready-to-paste prompt for the next session |
+| `operations/session-debriefs/` | Directory containing all debrief documents |
+| `operations/session-debriefs/YYYY-MM-DD_debrief-[topic].md` | Individual session debrief documents |
+| `operations/allowance-for-future.md` | Stage-triggered checklists from external research (check when starting new priority stage) |
 
 ---
 

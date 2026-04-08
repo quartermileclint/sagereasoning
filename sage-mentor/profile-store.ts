@@ -1003,3 +1003,132 @@ export async function upsertPassionObservation(
     last_seen: new Date().toISOString(),
   })
 }
+
+// ============================================================================
+// UPDATE PROFILE FROM REFLECTION — Self-improving feedback loop (Gap 3)
+// ============================================================================
+
+/**
+ * Reflection data structure as returned by the /api/reflect endpoint.
+ *
+ * When sage-reflect evaluates a day's actions, it produces passions detected,
+ * a proximity assessment, and a sage perspective. This function takes that
+ * output and feeds it back into the Mentor profile — so the Mentor gets
+ * smarter from every reflection.
+ *
+ * This wiring creates the self-improving feedback loop described in the
+ * research gap analysis: reflect → profile update → ring BEFORE enrichment.
+ * The ring wrapper's BEFORE phase already reads the profile via
+ * buildProfileContext(). By updating the profile here, the next interaction
+ * automatically benefits from the reflection's findings.
+ *
+ * Rules:
+ *   R6c: Qualitative levels only — no numeric scores in storage
+ *   R6d: Passions are diagnostic, not punitive
+ *   R14: Interaction recorded for audit trail
+ */
+export type ReflectionOutput = {
+  katorthoma_proximity: KatorthomaProximityLevel
+  passions_detected: Array<{
+    root_passion: string
+    sub_species: string
+    false_judgement: string
+  }>
+  what_you_did_well?: string
+  sage_perspective?: string
+}
+
+/**
+ * Update the Mentor profile from a sage-reflect output.
+ *
+ * This does three things:
+ * 1. Upserts each detected passion into the passion map (updating frequency
+ *    and last_seen if it already exists, or creating a new entry)
+ * 2. Records the reflection as an interaction in the rolling window
+ * 3. Recomputes the rolling window and updates the core profile if the
+ *    window has enough data
+ *
+ * The caller (the /api/reflect route) passes the reflection output after
+ * saving it to the reflections table. The profile update happens as a
+ * fire-and-forget operation — it should not block the API response.
+ */
+export async function updateProfileFromReflection(
+  supabase: SupabaseClient,
+  userId: string,
+  reflection: ReflectionOutput,
+  reflectionInput: string
+): Promise<{ success: boolean; profileUpdated: boolean; error: string | null }> {
+  try {
+    // 1. Find the user's profile
+    const { data: profiles } = await supabase
+      .from('mentor_profiles')
+      .select('id')
+    const profileRow = profiles?.find((p: any) => p.user_id === userId)
+
+    if (!profileRow) {
+      // No profile yet — this is fine for users who haven't completed onboarding.
+      // The reflection is still stored in the reflections table; it just doesn't
+      // update a profile that doesn't exist yet.
+      return { success: true, profileUpdated: false, error: null }
+    }
+
+    const profileId = profileRow.id
+
+    // 2. Upsert each detected passion into the passion map
+    // Map root_passion strings to the constrained type expected by the schema.
+    // The reflection endpoint uses more flexible passion names; we map to the
+    // four Stoic root passions (epithumia, hedone, phobos, lupe).
+    const rootPassionMap: Record<string, 'epithumia' | 'hedone' | 'phobos' | 'lupe'> = {
+      desire: 'epithumia',
+      epithumia: 'epithumia',
+      pleasure: 'hedone',
+      hedone: 'hedone',
+      fear: 'phobos',
+      phobos: 'phobos',
+      anger: 'phobos',     // anger is a sub-species of phobos in V3
+      aversion: 'phobos',
+      distress: 'lupe',
+      lupe: 'lupe',
+      shame: 'lupe',       // shame is a sub-species of lupe in V3
+      grief: 'lupe',
+    }
+
+    for (const passion of (reflection.passions_detected || [])) {
+      const mappedRoot = rootPassionMap[passion.root_passion.toLowerCase()] || 'lupe'
+      const passionId = `${mappedRoot}_${passion.sub_species.toLowerCase().replace(/\s+/g, '_')}`
+
+      await upsertPassionObservation(supabase, profileId, {
+        passion_id: passionId,
+        sub_species: passion.sub_species,
+        root_passion: mappedRoot,
+        false_judgement: passion.false_judgement,
+      })
+    }
+
+    // 3. Record the reflection as an interaction in the rolling window
+    await recordInteraction(supabase, profileId, {
+      type: 'evening_reflection',
+      description: reflectionInput.substring(0, 200), // Truncate for storage
+      proximity_assessed: reflection.katorthoma_proximity,
+      passions_detected: (reflection.passions_detected || []).map(p => ({
+        passion: p.sub_species,
+        false_judgement: p.false_judgement,
+      })),
+      mechanisms_applied: ['passion_diagnosis', 'oikeiosis'],
+      mentor_observation: reflection.sage_perspective || undefined,
+    })
+
+    // 4. Recompute rolling window and update core profile if enough data
+    const window = await computeRollingWindow(supabase, profileId)
+    if (window && window.interaction_count >= 3) {
+      await updateProfileFromWindow(supabase, profileId, window)
+    }
+
+    return { success: true, profileUpdated: true, error: null }
+  } catch (err) {
+    // Profile update failure should not break the reflection API.
+    // Log the error but return success:false so the caller knows.
+    console.error('Profile update from reflection failed:', err)
+    return { success: false, profileUpdated: false, error: String(err) }
+  }
+}

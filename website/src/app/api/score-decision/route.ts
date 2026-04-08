@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const startTime = Date.now()
-    const { decision, options, context } = await request.json()
+    const { decision, options, context, process: decisionProcess } = await request.json()
 
     if (!decision || typeof decision !== 'string' || decision.trim().length === 0) {
       return NextResponse.json({ error: 'decision is required' }, { status: 400 })
@@ -71,7 +71,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Domain context for decision evaluation
-    const domainContext = `This is a multi-option decision evaluation. Assess each option separately for its Stoic virtue alignment, then the results will be ranked by proximity level.`
+    // When a process description is provided (Item 10), include it for process quality assessment
+    let domainContext = `This is a multi-option decision evaluation. Assess each option separately for its Stoic virtue alignment, then the results will be ranked by proximity level.`
+    if (typeof decisionProcess === 'string' && decisionProcess.trim()) {
+      domainContext += `\n\nDECISION PROCESS DESCRIPTION: ${decisionProcess.trim()}\n` +
+        `In addition to evaluating each option, assess the QUALITY OF THE DECISION PROCESS itself. ` +
+        `A well-identified set of options evaluated through a sound process scores higher than the same ` +
+        `options arrived at through hasty elimination. In your response, include a "process_quality" field ` +
+        `with value "thorough" (considered multiple angles, examined assumptions), "adequate" (reasonable but could be deeper), ` +
+        `or "hasty" (eliminated options too quickly, missed perspectives). ` +
+        `This maps to the Stoic concern with quality of assent — not just what you assent to, but how carefully you examined the impression.`
+    }
 
     // Evaluate each option via sage-reason
     const scoreData: OptionScore[] = []
@@ -139,10 +149,17 @@ export async function POST(request: NextRequest) {
       recommendedNext: `Recommended option: ${scoreData[0]?.option || 'none'}`,
     })
 
+    // Extract process quality from the first option's evaluation if process was described
+    const processQuality = decisionProcess
+      ? ((scoreData[0] as any)?.process_quality || 'not_assessed')
+      : undefined
+
     const result = {
       decision: decision.trim(),
       options_scored: scoreData,
       recommended: scoreData[0]?.option || null,
+      process_described: !!decisionProcess,
+      process_quality: processQuality,
       scored_at: new Date().toISOString(),
       reasoning_receipt: overallReceipt,
       option_receipts: optionReceipts,

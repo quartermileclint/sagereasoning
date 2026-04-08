@@ -185,3 +185,67 @@ Format: Date, Decision, Reasoning, Rules Served, Impact, Status.
 **Impact:** Manifest now includes R17f and 7-step Task Protocol. Verification framework includes auth-specific checks. Project instructions include risk classification system and Critical Change Protocol. About Me preferences encode decision authority and working pace patterns. Debrief stored at `/operations/session-debriefs/2026-04-08_auth-middleware-debrief.md`. Full proposals at `/operations/session-debriefs/2026-04-08_implementation-proposals-v2.md`.
 
 **Status:** Adopted
+
+---
+
+## 8 April 2026 — First Implementation Batch: Debrief Automation, Risk-Aware Guardrails, Self-Improving Feedback Loop
+
+**Decision:** Implemented three changes from the reconciled implementation plan (merging the product line applications and research gap analysis documents):
+
+1. **Batch 1B — sage-stenographer debrief mode** (Standard risk). Added a third trigger mode to the sage-stenographer SKILL.md: "debrief." When invoked, it reads session records, cross-references the decision log and handoff notes, and produces a structured debrief following the 0b-ii protocol format. This automates the manual debrief process used on 8 April.
+
+2. **Batch 1C — sage-guard risk_class** (Elevated risk). Added an optional `risk_class` parameter (standard/elevated/critical) to the guardrail API. Risk class auto-selects evaluation depth: standard→quick (3 mechanisms), elevated→standard (5 mechanisms), critical→deep (6 mechanisms). Critical responses include a `rollback_path` field. This formalises the 0d-ii Change Risk Classification protocol into the product.
+
+3. **Batch 1A — sage-reflect → Mentor profile wiring** (Elevated risk). Wired the /api/reflect endpoint to feed reflection findings back into the Mentor profile. After each reflection, detected passions are upserted into the passion map, the reflection is recorded as an interaction in the rolling window, and the rolling window recomputes the core profile summary. Uses the dynamic import bridge pattern established by sage-mentor-bridge.ts. This creates the self-improving feedback loop identified as Gap 3 in the research analysis.
+
+**Reasoning:** Prioritised by two criteria: (1) Circle 1 first — all three changes serve our own development during P0; (2) wiring before extension before new build — Batch 1A connects existing components, Batches 1B and 1C extend existing components. The full reconciled plan identified 20 items across 4 priority tiers; this batch covers the top 3 items. Remaining items are documented in `/operations/implementation-plan_2026-04-08.md`.
+
+**Rules served:** R0 (oikeiosis — Circle 1 improvements first), R4 (no new IP exposure), R5 (cost increase only for Critical-classified actions in sage-guard, which is appropriate), R12 (all changes route through sage-reason-engine.ts), R14 (reflect→profile updates captured in mentor ledger), R17f (sage-guard risk_class implements the principle that action category determines scrutiny)
+
+**Impact:** sage-stenographer gains debrief capability (Scoped → Scaffolded for debrief mode). sage-guard now supports risk-aware evaluation depth (Wired, extended). sage-reflect now feeds back into the Mentor profile, creating the self-improving loop (Wired, newly connected). The sage-mentor-bridge.ts gains profile-store access functions.
+
+**Status:** Adopted
+
+---
+
+## 8 April 2026 — Second Implementation Batch: Remaining Tier 2 + Tier 3 Items from Reconciled Plan
+
+**Decision:** Implemented all remaining actionable items from the reconciled implementation plan (items 3, 5, 6, 8, 9, 10, 11, 12, 13, 14). Only Tier 4 new builds (sage-challenge, sage-curriculum, sage-reason-trace, sage-context-rag) and Trust Layer extensions (items 15-16) deferred to P3+.
+
+Changes implemented:
+
+1. **sage-reason-engine.ts — Per-stage quality scoring (Item 5)** + **urgency_context / hasty_assent_risk (Item 6).** The engine now requests per-stage quality ratings (strong/adequate/weak) for each mechanism applied, returned in `meta.stage_scores`. A new `urgency_context` parameter triggers extra scrutiny for hasty assent patterns, with results in `meta.hasty_assent_risk`. ReasonInput and ReasonResult types extended.
+
+2. **sage-guard guardrail/route.ts — deliberation_quality (Item 8) + considered_alternatives (Item 9).** The guardrail response now includes a `deliberation_quality` field (thorough/adequate/hasty/impulsive) derived from stage scores and hasty assent risk. For Critical actions under urgency, a `considered_alternatives` array is accepted; if none provided, the guardrail forces `pause_for_review` and adds an `alternatives_warning`. Accepts `urgency_context` and passes it through to the engine.
+
+3. **sage-decide score-decision/route.ts — process parameter (Item 10).** Accepts an optional `process` description of how options were identified and narrowed. When provided, the domain context instructs the engine to assess process quality (thorough/adequate/hasty). Response includes `process_quality` and `process_described` fields.
+
+4. **Mentor persona.ts — confidence signalling (Item 11).** Added a new CONFIDENCE SIGNALLING section to the core persona, requiring the Mentor to distinguish between confident observations (grounded in data), assumptions (limited data), and limitations (framework doesn't apply). Non-negotiable in all assessments.
+
+5. **ring-wrapper.ts — category escalation (Item 12) + side-effect detection (Item 13).** Added `isCriticalActionCategory()` that checks task descriptions for Critical keywords (auth, delete, access control, deploy, etc.). When detected, the BEFORE phase always selects Sonnet (deep) regardless of agent authority — the ring-wrapper equivalent of R17f. The AFTER phase now runs `detectSideEffects()` that checks output for lock files, temp files, rate limits, broken sessions, etc. Side effects trigger LLM evaluation and append remediation instructions.
+
+6. **sage-retro route.ts — debrief structure (Item 14).** Expanded the domain context to request structured debrief analysis across 5 dimensions: what happened, communication quality, assumption errors, verification gaps, and passion diagnosis. Each dimension gets a quality rating. Added `communication_context` and `urgency_context` input fields.
+
+7. **patterns/route.ts — feedback pipeline extension (Item 3).** Added two new pattern types: `stage_score_trend` (detects consistently weak or strong reasoning stages from per-stage scores) and `hasty_assent_frequency` (detects how often urgency leads to hasty assent). This closes the feedback loop: sage skills generate receipts with stage_scores → patterns endpoint detects trends → composability recommends next steps.
+
+**Reasoning:** Founder approved implementing all remaining items. These complete the Tier 2 (P0-serving extensions) and Tier 3 (Circle 3 extensions to ring wrapper and sage-retro) items from the reconciled plan. Trust Layer items (15-16) correctly deferred because the Trust Layer is only Scaffolded. New builds (17-20) deferred to P3+.
+
+**Rules served:** R0 (all items serve Circle 1 development or extend Circle 3 reach), R4 (no new IP exposure — all changes add fields to existing responses), R5 (cost increases are proportional — deeper evaluation only for Critical actions or urgency), R6b (per-stage scoring evaluates mechanism quality, not individual virtues — R6b compliance maintained), R12 (all changes route through sage-reason-engine), R17f (ring wrapper category escalation formalises R17f into the agent evaluation layer)
+
+**Impact:** 8 files modified. sage-reason-engine.ts gains per-stage scoring and urgency awareness. sage-guard gains deliberation quality assessment and alternatives checking. sage-decide gains process evaluation. Mentor persona gains confidence signalling. Ring wrapper gains Critical category escalation and side-effect detection. sage-retro gains structured debrief analysis. Patterns endpoint gains stage score trends and hasty assent frequency detection.
+
+**Status:** Adopted
+
+---
+
+## 8 April 2026 — External Intelligence Allowances and Reminder Protocol
+
+**Decision:** Created `operations/allowance-for-future.md` containing stage-triggered checklists drawn from two external research articles (Glasswing/Mythos Preview analysis and AI arbitrage taxonomy). Integrated an automatic reminder mechanism into the sage-stenographer session-open protocol: when a session indicates work is starting on a new priority stage, the AI checks the allowances file and presents relevant ACTION and MONITOR items before work begins.
+
+**Reasoning:** External research raised specific concerns that map to future priority stages — cost modelling scenarios for P1, security urgency for P2, multi-platform compatibility for P3, marketing language for P6, architecture validation for P7. Without a structured mechanism, these insights would be forgotten by the time the relevant stages begin. The sage-stenographer integration was chosen over a scheduled task because priority stages are condition-bounded, not calendar-dated — a cron job wouldn't know when P1 starts, but the session-open protocol naturally fires at the right time. The next-session-prompt template also includes a stage-change reminder line.
+
+**Rules served:** R0 (examined reasoning about external context, not reactive adoption), 0b (extends session continuity protocol with forward-looking intelligence), 0f (decision captured here)
+
+**Impact:** New file: `operations/allowance-for-future.md`. Modified file: `.claude/skills/sage-stenographer/SKILL.md` (added Step 4 to session-open protocol, added allowances file to file locations table, added reminder line to next-session-prompt template). Source articles recommended for archival to `/reference/`.
+
+**Status:** Adopted

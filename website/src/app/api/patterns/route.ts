@@ -205,6 +205,84 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ── Pattern 6: Stage score trends (Item 5 feedback — per-stage quality) ──
+    // Leverage the new per-stage scoring to identify which reasoning mechanisms
+    // are consistently strong or weak.
+    const stageQualityCounts: Record<string, Record<string, number>> = {}
+    for (const r of receipts) {
+      const meta = (r.meta || r.receipt_meta || {}) as Record<string, unknown>
+      const stageScores = meta.stage_scores as Record<string, string> | undefined
+      if (stageScores) {
+        for (const [stage, quality] of Object.entries(stageScores)) {
+          if (!stageQualityCounts[stage]) stageQualityCounts[stage] = { strong: 0, adequate: 0, weak: 0 }
+          if (quality === 'strong' || quality === 'adequate' || quality === 'weak') {
+            stageQualityCounts[stage][quality]++
+          }
+        }
+      }
+    }
+
+    for (const [stage, counts] of Object.entries(stageQualityCounts)) {
+      const total = counts.strong + counts.adequate + counts.weak
+      if (total >= 3) {
+        const weakRatio = counts.weak / total
+        const strongRatio = counts.strong / total
+        if (weakRatio > 0.4) {
+          patterns.push({
+            pattern_type: 'stage_score_trend',
+            confidence: weakRatio,
+            description: `Weak ${stage} quality: ${Math.round(weakRatio * 100)}% of evaluations rated weak`,
+            data: {
+              stage,
+              quality_distribution: counts,
+              total_evaluations: total,
+              recommendation: `Focus on improving ${stage} reasoning. This stage is rated "weak" more than 40% of the time.`,
+            },
+          })
+        } else if (strongRatio > 0.7) {
+          patterns.push({
+            pattern_type: 'stage_score_trend',
+            confidence: strongRatio,
+            description: `Strong ${stage} quality: ${Math.round(strongRatio * 100)}% of evaluations rated strong`,
+            data: {
+              stage,
+              quality_distribution: counts,
+              total_evaluations: total,
+              observation: `${stage} reasoning is consistently strong. This is a virtue to maintain.`,
+            },
+          })
+        }
+      }
+    }
+
+    // ── Pattern 7: Hasty assent frequency (Item 6 feedback) ──
+    let hastyAssentCount = 0
+    let urgencyReceiptCount = 0
+    for (const r of receipts) {
+      const meta = (r.meta || r.receipt_meta || {}) as Record<string, unknown>
+      if (meta.urgency_applied) {
+        urgencyReceiptCount++
+        const risk = meta.hasty_assent_risk as string
+        if (risk === 'high' || risk === 'moderate') {
+          hastyAssentCount++
+        }
+      }
+    }
+
+    if (urgencyReceiptCount >= 3 && hastyAssentCount > 0) {
+      patterns.push({
+        pattern_type: 'hasty_assent_frequency',
+        confidence: hastyAssentCount / urgencyReceiptCount,
+        description: `Hasty assent detected in ${hastyAssentCount}/${urgencyReceiptCount} urgent actions`,
+        data: {
+          hasty_actions: hastyAssentCount,
+          urgent_actions: urgencyReceiptCount,
+          ratio: (hastyAssentCount / urgencyReceiptCount).toFixed(2),
+          recommendation: 'When urgency arises, pause and name the urgency before acting. The Stoic response to urgency is more examination, not less.',
+        },
+      })
+    }
+
     // Sort patterns by confidence descending
     patterns.sort((a, b) => b.confidence - a.confidence)
 
@@ -316,7 +394,7 @@ export async function OPTIONS() {
 
 // ── Types ──────────────────────────────────────────────────────
 interface PatternResult {
-  pattern_type: 'recurring_passion' | 'proximity_trend' | 'skill_preference' | 'virtue_gap' | 'improvement_trajectory' | 'passion_cluster'
+  pattern_type: 'recurring_passion' | 'proximity_trend' | 'skill_preference' | 'virtue_gap' | 'improvement_trajectory' | 'passion_cluster' | 'stage_score_trend' | 'hasty_assent_frequency'
   confidence: number
   description: string
   data: Record<string, unknown>

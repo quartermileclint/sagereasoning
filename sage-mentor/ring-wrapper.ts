@@ -99,15 +99,43 @@ export const MODEL_IDS: Record<ModelTier, string> = {
  *   - Grade transition boundary → deep (profile-changing moment)
  *   - Everything else           → fast (routine check)
  */
+/**
+ * Critical action categories — actions touching these domains always get
+ * deep (Sonnet) evaluation regardless of agent authority level.
+ * This is the ring-wrapper equivalent of R17f: the category of action
+ * determines the scrutiny, not the agent's track record.
+ *
+ * Item 12 from the implementation plan.
+ */
+const CRITICAL_ACTION_KEYWORDS: string[] = [
+  'auth', 'authentication', 'login', 'logout', 'session', 'password', 'credential',
+  'delete', 'deletion', 'remove', 'destroy', 'purge', 'erase',
+  'access control', 'permission', 'role', 'admin', 'privilege',
+  'encrypt', 'decrypt', 'key', 'token', 'secret',
+  'deploy', 'migration', 'rollback', 'production',
+]
+
+/**
+ * Check if a task description involves a Critical action category.
+ * Returns true if any critical keyword is found in the description.
+ */
+export function isCriticalActionCategory(taskDescription: string): boolean {
+  const lower = taskDescription.toLowerCase()
+  return CRITICAL_ACTION_KEYWORDS.some(keyword => lower.includes(keyword))
+}
+
 export function selectModelTier(
   hasConcerns: boolean,
   isNovel: boolean,
   isHighStakes: boolean,
   agentAuthority: AuthorityLevel,
-  isGradeTransitionBoundary: boolean = false
+  isGradeTransitionBoundary: boolean = false,
+  /** Item 12: If true, the action touches a Critical category (auth, deletion, access control) */
+  isCriticalCategory: boolean = false
 ): ModelTier {
   if (hasConcerns) return 'deep'
   if (isNovel || isHighStakes) return 'deep'
+  if (isCriticalCategory) return 'deep'  // Item 12: category escalation overrides authority
   if (agentAuthority === 'supervised') return 'deep'
   if (isGradeTransitionBoundary) return 'deep'
   return 'fast'
@@ -643,7 +671,9 @@ export function executeBefore(
   }
 
   // 3. Determine if full LLM check is needed
-  const isHighStakes = concerns.length > 0
+  //    Item 12: Check if the action touches a Critical category
+  const criticalCategory = isCriticalActionCategory(task.task_description)
+  const isHighStakes = concerns.length > 0 || criticalCategory
   const needsLlmCheck = shouldCheckAction(
     innerAgent,
     false, // Novelty detection deferred — requires action history tracking per agent
@@ -652,12 +682,14 @@ export function executeBefore(
 
   // 4. TOKEN EFFICIENCY: Select model tier based on complexity
   //    Routine checks → Haiku (3-4x cheaper)
-  //    Concerns detected or new agent → Sonnet (deeper reasoning)
+  //    Concerns detected, new agent, or Critical category → Sonnet (deeper reasoning)
   const modelTier = selectModelTier(
-    isHighStakes,
+    concerns.length > 0,
     false,
-    isHighStakes,
-    innerAgent.authority_level
+    concerns.length > 0,
+    innerAgent.authority_level,
+    false,
+    criticalCategory  // Item 12: category escalation
   )
 
   // 5. TOKEN EFFICIENCY: Use core persona for routine, full for complex
@@ -676,16 +708,23 @@ export function executeBefore(
     }
   }
 
+  // Item 12: Add a concern if the action is in a Critical category
+  if (criticalCategory) {
+    concerns.push(`This action touches a Critical category (authentication, data deletion, or access control). Applying maximum scrutiny per R17f.`)
+  }
+
   const result: BeforeResult = {
     concerns,
     journal_reference: journalRef,
     enrichment_suggestion: null, // Set by LLM if full check runs
     proceed: true, // The ring advises, it does not block
-    mentor_note: passionCheck.matched
-      ? `I notice a familiar pattern here. Take a moment before proceeding.`
-      : journalRef
-        ? `This reminds me of something from your journal — ${journalRef.summary}`
-        : null,
+    mentor_note: criticalCategory
+      ? `This touches authentication, deletion, or access control. I am applying maximum scrutiny regardless of authority level.`
+      : passionCheck.matched
+        ? `I notice a familiar pattern here. Take a moment before proceeding.`
+        : journalRef
+          ? `This reminds me of something from your journal — ${journalRef.summary}`
+          : null,
     mechanisms_applied: [...new Set(mechanisms)],
   }
 
@@ -700,6 +739,32 @@ export function executeBefore(
  *
  * Returns the AfterResult and the prompt for the LLM evaluation.
  */
+/**
+ * Side-effect detection keywords (Item 13).
+ * After an action completes, check if the output mentions artefacts
+ * that may need cleanup (lock files, temp files, rate limits, broken sessions).
+ */
+const SIDE_EFFECT_KEYWORDS: string[] = [
+  'lock file', 'lockfile', '.lock',
+  'temporary file', 'temp file', 'tmp',
+  'rate limit', 'rate-limit', 'throttle',
+  'broken session', 'invalid session',
+  'orphaned', 'stale',
+  'cleanup needed', 'clean up',
+  'side effect', 'unintended',
+]
+
+/**
+ * Detect potential side effects in an agent's output.
+ * Returns an array of detected side-effect indicators.
+ */
+export function detectSideEffects(output: string): string[] {
+  const lower = output.toLowerCase()
+  return SIDE_EFFECT_KEYWORDS
+    .filter(keyword => lower.includes(keyword))
+    .map(keyword => `Possible side effect detected: "${keyword}" mentioned in output`)
+}
+
 export function executeAfter(
   profile: MentorProfile,
   task: RingTask,
@@ -711,15 +776,33 @@ export function executeAfter(
   llmPrompt: string | null
   modelTier: ModelTier
   personaTier: 'full' | 'core'
+  /** Item 13: Side effects detected in the output */
+  sideEffects: string[]
+  /** Item 12: Whether the action was in a Critical category */
+  criticalCategory: boolean
 } {
+  // Item 12: Check critical category for after-phase model tier selection
+  const criticalCategory = isCriticalActionCategory(task.task_description)
+
+  // Item 13: Side-effect detection
+  const sideEffects = detectSideEffects(innerAgentOutput)
+
   const needsLlmCheck = shouldCheckAction(
     innerAgent,
     false,
-    beforeHadConcerns // If before had concerns, after should evaluate the result
+    beforeHadConcerns || sideEffects.length > 0 // Side effects also trigger evaluation
   )
 
+  // Item 13: If side effects detected, append a remediation request to the prompt
+  let afterPromptSuffix = ''
+  if (sideEffects.length > 0) {
+    afterPromptSuffix = `\n\nSIDE EFFECTS DETECTED:\n${sideEffects.join('\n')}\n` +
+      `The agent must remediate these side effects before the action is considered complete. ` +
+      `Include remediation steps in your evaluation.`
+  }
+
   const llmPrompt = needsLlmCheck
-    ? buildAfterPrompt(profile, task.task_description, innerAgentOutput, innerAgent.name)
+    ? buildAfterPrompt(profile, task.task_description, innerAgentOutput, innerAgent.name) + afterPromptSuffix
     : null
 
   // TOKEN EFFICIENCY: Match model tier to complexity
@@ -727,8 +810,10 @@ export function executeAfter(
   const modelTier = selectModelTier(
     beforeHadConcerns,
     false,
-    beforeHadConcerns,
-    innerAgent.authority_level
+    beforeHadConcerns || sideEffects.length > 0,
+    innerAgent.authority_level,
+    false,
+    criticalCategory  // Item 12: category escalation in after phase too
   )
   const personaTier = modelTier === 'deep' ? 'full' as const : 'core' as const
 
@@ -738,7 +823,7 @@ export function executeAfter(
   // Check for authority promotion
   evaluateAuthorityPromotion(innerAgent)
 
-  return { needsLlmCheck, llmPrompt, modelTier, personaTier }
+  return { needsLlmCheck, llmPrompt, modelTier, personaTier, sideEffects, criticalCategory }
 }
 
 // ============================================================================

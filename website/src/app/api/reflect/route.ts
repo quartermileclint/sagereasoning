@@ -5,6 +5,9 @@ import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt } from '@/lib/reasoning-receipt'
+// Profile update is loaded dynamically via the sage-mentor bridge pattern
+// to avoid build-time resolution failures when sage-mentor dependencies
+// aren't available in the website build context.
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -176,6 +179,36 @@ Score my actions and give me the sage perspective.`
       })
       .then(() => {})
 
+    // Self-improving feedback loop (Gap 3 wiring):
+    // Feed reflection findings back into the Mentor profile.
+    // This updates the passion map and causal tendencies so the ring wrapper's
+    // BEFORE phase (which reads the profile) benefits from this reflection
+    // on the next interaction. Fire-and-forget — don't block the API response.
+    //
+    // Uses dynamic import (bridge pattern) to avoid build-time resolution
+    // failures when sage-mentor isn't available in the website build context.
+    if (user_id) {
+      import('../../../../../sage-mentor/profile-store')
+        .then(({ updateProfileFromReflection }) => {
+          return updateProfileFromReflection(
+            supabaseAdmin,
+            user_id,
+            {
+              katorthoma_proximity: reflectionData.katorthoma_proximity,
+              passions_detected: reflectionData.passions_detected || [],
+              what_you_did_well: reflectionData.what_you_did_well,
+              sage_perspective: reflectionData.sage_perspective,
+            },
+            what_happened.trim()
+          )
+        })
+        .catch((err: unknown) => {
+          // Profile update failure must not break the reflection API.
+          // This includes the case where sage-mentor module isn't available.
+          console.error('Reflect → profile update failed (non-blocking):', err)
+        })
+    }
+
     const envelope = buildEnvelope({
       result,
       endpoint: '/api/reflect',
@@ -185,6 +218,7 @@ Score my actions and give me the sage perspective.`
       composability: {
         next_steps: ['/api/reflect', '/api/score'],
         recommended_action: 'Reflect on the sage perspective and evening prompt. Future reflections can be compared or deeper analysis can be done with /api/score.',
+        feedback_loop: user_id ? 'Reflection findings are being fed back into your Mentor profile (passion map, rolling window). The next interaction will benefit from this reflection.' : 'No user_id provided — reflection stored but Mentor profile not updated.',
       },
     })
 
