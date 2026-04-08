@@ -137,7 +137,7 @@ Return only the JSON evaluation object.`
     } catch {
       console.error('evaluate: Failed to parse response:', responseText)
       return NextResponse.json(
-        { error: 'Evaluation engine returned invalid response' },
+        { error: 'Evaluation engine returned invalid response', debug_preview: responseText.substring(0, 300) },
         { status: 500 }
       )
     }
