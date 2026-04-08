@@ -191,7 +191,7 @@ Score my actions and give me the sage perspective.`
       import('../../../../../sage-mentor/profile-store')
         .then(({ updateProfileFromReflection }) => {
           return updateProfileFromReflection(
-            supabaseAdmin,
+            supabaseAdmin as any,
             user_id,
             {
               katorthoma_proximity: reflectionData.katorthoma_proximity,
@@ -217,8 +217,9 @@ Score my actions and give me the sage perspective.`
       maxTokens: 1024,
       composability: {
         next_steps: ['/api/reflect', '/api/score'],
-        recommended_action: 'Reflect on the sage perspective and evening prompt. Future reflections can be compared or deeper analysis can be done with /api/score.',
-        feedback_loop: user_id ? 'Reflection findings are being fed back into your Mentor profile (passion map, rolling window). The next interaction will benefit from this reflection.' : 'No user_id provided — reflection stored but Mentor profile not updated.',
+        recommended_action: user_id
+          ? 'Reflect on the sage perspective and evening prompt. Reflection findings are being fed back into your Mentor profile (passion map, rolling window). The next interaction will benefit from this reflection.'
+          : 'Reflect on the sage perspective and evening prompt. No user_id provided — reflection stored but Mentor profile not updated.',
       },
     })
 
