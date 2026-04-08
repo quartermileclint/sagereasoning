@@ -108,7 +108,7 @@ Return only the JSON evaluation object.`
         endpoint: '/api/evaluate',
         model: MODEL_FAST,
         startTime,
-        maxTokens: 512,
+        maxTokens: 2048,
         composability: {
           next_steps: ['/api/reason'],
           recommended_action: 'Sign up for an API key to access deeper analysis (standard: 5 mechanisms, deep: 6 mechanisms) and iterative deliberation chains.',
@@ -119,7 +119,7 @@ Return only the JSON evaluation object.`
 
     const message = await client.messages.create({
       model: MODEL_FAST,
-      max_tokens: 512,
+      max_tokens: 2048,
       temperature: 0.2,
       system: [{ type: 'text', text: DEMO_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [
@@ -190,7 +190,7 @@ Return only the JSON evaluation object.`
       endpoint: '/api/evaluate',
       model: MODEL_FAST,
       startTime,
-      maxTokens: 512,
+      maxTokens: 2048,
       composability: {
         next_steps: ['/api/reason'],
         recommended_action: 'Sign up for an API key to access deeper analysis (standard: 5 mechanisms, deep: 6 mechanisms) and iterative deliberation chains.',

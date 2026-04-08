@@ -280,9 +280,9 @@ Return ONLY valid JSON:
 
 // Map depth to system prompt, max tokens, and model
 const DEPTH_CONFIG: Record<ReasonDepth, { prompt: string; maxTokens: number; model: string }> = {
-  quick: { prompt: QUICK_SYSTEM_PROMPT, maxTokens: 768, model: MODEL_FAST },
-  standard: { prompt: STANDARD_SYSTEM_PROMPT, maxTokens: 1024, model: MODEL_FAST },
-  deep: { prompt: DEEP_SYSTEM_PROMPT, maxTokens: 1536, model: MODEL_DEEP },
+  quick: { prompt: QUICK_SYSTEM_PROMPT, maxTokens: 2048, model: MODEL_FAST },
+  standard: { prompt: STANDARD_SYSTEM_PROMPT, maxTokens: 3072, model: MODEL_FAST },
+  deep: { prompt: DEEP_SYSTEM_PROMPT, maxTokens: 4096, model: MODEL_DEEP },
 }
 
 // Required fields per depth level (for response validation)
