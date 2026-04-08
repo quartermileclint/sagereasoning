@@ -126,6 +126,7 @@ b. **Access controls for intimate data:** Passion maps, trigger maps, contradict
 c. **Data retention limits:** Profile data must have defined retention periods. Users must be able to delete their complete profile, including all extracted layers, journal references, and interaction history. Deletion must be genuine (not soft-delete) for the most intimate fields.
 d. **Local-first for highest sensitivity:** Consider whether some profile data (particularly trigger maps and contradiction maps) should never be stored server-side at all — local-only storage for the most intimate extractions.
 e. **Passion taxonomy API restrictions:** The 25-species passion taxonomy is available as a philosophical reference via the API (sage-context). However, passion *profiling results* (an individual's specific passion map, trigger conditions, and vulnerability patterns) must never be exposed via any API endpoint. These are private to the individual and their mentor relationship.
+f. **Implementation safety:** Changes to authentication, access control, or encryption that protect intimate data must follow the project's Critical Change Protocol (0c-ii). The urgency of protecting intimate data does not reduce the classification — it increases it. A protection that locks the data owner out of their own system has failed as a protection.
 
 ### R18: Honest Certification Limits (Ethical Analysis — 5 April 2026)
 
@@ -163,6 +164,7 @@ For every task:
 1. **Read** this manifest fully.
 2. **Quote** all applicable rules by number (e.g., "R1, R4, R6a, R14").
 3. **Flag** any conflicts between rules before proposing a plan.
-4. **Propose** a plan citing rules explicitly.
-5. **Wait** for "OK" approval.
-6. **Execute** precisely per plan and rules.
+4. **Classify** the risk level of any code changes (Standard / Elevated / Critical per project instructions 0d-ii).
+5. **Propose** a plan citing rules explicitly. For Critical changes, include Critical Change Protocol responses in the proposal.
+6. **Wait** for "OK" approval.
+7. **Execute** precisely per plan and rules.

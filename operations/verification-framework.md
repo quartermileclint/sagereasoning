@@ -63,6 +63,22 @@ Rule R[X] requires:
 **Founder method:** Open the HTML file in a browser. Use the search/filter to find the updated component. Confirm the status, path, and description are correct.
 **AI method:** Read the JavaScript data array and validate paths exist, statuses are consistent, and no components are missing.
 
+### Authentication or Access Control Change
+**Founder method:** After deployment, check three things:
+1. Visit a protected page while signed in — page should load normally.
+2. Visit a protected page in an incognito/private window (not signed in) — should redirect to sign-in.
+3. Check the NavBar on any page — should show your name if signed in, or a sign-in button if not.
+If any of these three checks fail, report what you see. Do not attempt to fix it.
+
+**AI method:** Before deployment, answer five questions in the conversation:
+1. What happens when a signed-in user visits the protected page?
+2. What happens when a signed-out user visits the protected page?
+3. What happens to existing sessions (localStorage, cookies, or both)?
+4. What does the auth page show if reached via redirect vs direct navigation?
+5. What is the exact rollback command if any of the above fail?
+
+All five questions must be answered visibly in the conversation. If any answer reveals a contradiction, resolve it before deployment.
+
 ---
 
 ## AI Session-Start Verification Protocol
