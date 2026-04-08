@@ -8,7 +8,7 @@ import {
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, validateApiKey, withUsageHeaders, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
-import { extractReceipt } from '@/lib/reasoning-receipt'
+import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { runSageReason } from '@/lib/sage-reason-engine'
 
 /**
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     const proceed = meetsThreshold(proximity, thresholdLevel)
 
     // Mechanisms applied depends on evaluation depth
-    const mechanismsByDepth: Record<string, string[]> = {
+    const mechanismsByDepth: Record<string, MechanismId[]> = {
       quick: ['control_filter', 'passion_diagnosis', 'oikeiosis'],
       standard: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
       deep: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment', 'iterative_refinement'],
