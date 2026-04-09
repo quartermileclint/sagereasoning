@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { runSageReason } from '@/lib/sage-reason-engine'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-summary'
 import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
@@ -127,6 +128,7 @@ export async function POST(request: NextRequest) {
       depth: 'deep',
       systemPromptOverride: REFINEMENT_SYSTEM_PROMPT,
       domain_context: 'mentor_baseline_refinement',
+      stoicBrainContext: getStoicBrainContext('deep'),
     })
 
     return NextResponse.json(

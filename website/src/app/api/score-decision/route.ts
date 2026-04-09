@@ -6,6 +6,8 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST } from '@/lib/model-config'
 import { extractReceipt } from '@/lib/reasoning-receipt'
 import { runSageReason } from '@/lib/sage-reason-engine'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getPractitionerContext } from '@/lib/context/practitioner-context'
 
 /**
  * sage-decide — Compare multiple decision options through Stoic virtue.
@@ -83,6 +85,9 @@ export async function POST(request: NextRequest) {
         `This maps to the Stoic concern with quality of assent — not just what you assent to, but how carefully you examined the impression.`
     }
 
+    // Load practitioner context once (Layer 2 — personalised reasoning)
+    const practitionerContext = await getPractitionerContext(auth.user.id)
+
     // Evaluate each option via sage-reason
     const scoreData: OptionScore[] = []
     for (let i = 0; i < options.length; i++) {
@@ -92,6 +97,8 @@ export async function POST(request: NextRequest) {
         context,
         depth: 'standard',
         domain_context: domainContext,
+        stoicBrainContext: getStoicBrainContext('standard'),
+        practitionerContext,
       })
 
       const evalData = reasoningResult.result as any

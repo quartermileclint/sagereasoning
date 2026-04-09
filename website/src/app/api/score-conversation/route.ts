@@ -5,6 +5,8 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_DEEP } from '@/lib/model-config'
 import { extractReceipt } from '@/lib/reasoning-receipt'
 import { runSageReason } from '@/lib/sage-reason-engine'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getPractitionerContext } from '@/lib/context/practitioner-context'
 
 /**
  * sage-converse — Evaluate a conversation for Stoic virtue and dynamics.
@@ -65,11 +67,16 @@ export async function POST(request: NextRequest) {
       domainContext += `\nFormat: ${format.trim()}`
     }
 
-    // Call the shared reasoning engine at deep depth for nuanced analysis
+    // Load practitioner context (Layer 2 — personalised reasoning)
+    const practitionerContext = await getPractitionerContext(auth.user.id)
+
+    // Call the shared reasoning engine at deep depth with Stoic Brain (Layer 1) + practitioner context (Layer 2)
     const reasoningResult = await runSageReason({
       input: truncated,
       depth: 'deep',
       domain_context: domainContext,
+      stoicBrainContext: getStoicBrainContext('deep'),
+      practitionerContext,
     })
 
     const evalData = reasoningResult.result as any

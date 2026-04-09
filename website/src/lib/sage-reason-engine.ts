@@ -61,6 +61,14 @@ export interface ReasonInput {
    * Set to empty string to explicitly disable Stoic Brain injection.
    */
   stoicBrainContext?: string
+  /**
+   * Optional practitioner context (Layer 2). When provided, injected into the
+   * user message after domain_context. Contains condensed profile data:
+   * proximity level, dominant passions, weakest virtue, causal breakdown.
+   * Enables personalised reasoning without requiring each endpoint to modify
+   * the user message itself.
+   */
+  practitionerContext?: string | null
 }
 
 export interface ReasonResult {
@@ -336,6 +344,14 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
   }
   if (params.domain_context?.trim()) {
     userMessage += `\n\nDOMAIN CONTEXT (this reasoning request is being made in the context of a specific domain):\n${params.domain_context.trim()}`
+  }
+
+  // Practitioner context injection (Layer 2 — personalised reasoning)
+  // When present, adds the practitioner's condensed profile (dominant passions,
+  // weakest virtue, causal breakdown, proximity level) so the LLM can personalise
+  // its analysis to this specific person.
+  if (params.practitionerContext) {
+    userMessage += `\n\n${params.practitionerContext}`
   }
 
   // Urgency context injection (Item 6 — urgency increases scrutiny)

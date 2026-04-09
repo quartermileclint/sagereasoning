@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { runSageReason } from '@/lib/sage-reason-engine'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 
 // =============================================================================
 // mentor-baseline — Post-Extraction Gap Detection Questionnaire
@@ -82,6 +83,7 @@ export async function POST(request: NextRequest) {
       depth: 'deep',
       systemPromptOverride: BASELINE_SYSTEM_PROMPT,
       domain_context: 'mentor_baseline_assessment',
+      stoicBrainContext: getStoicBrainContext('deep'),
     })
 
     return NextResponse.json(

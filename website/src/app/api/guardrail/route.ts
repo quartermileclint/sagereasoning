@@ -10,6 +10,7 @@ import { checkRateLimit, RATE_LIMITS, validateApiKey, withUsageHeaders, validate
 import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { runSageReason } from '@/lib/sage-reason-engine'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 
 /**
  * sage-guard — Binary safety gate for AI agent actions.
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
       depth: evaluationDepth,
       domain_context: domainContext,
       urgency_context: typeof urgency_context === 'string' ? urgency_context.trim() : undefined,
+      stoicBrainContext: getStoicBrainContext(evaluationDepth),
     })
 
     const assessmentData = reasoningResult.result as any

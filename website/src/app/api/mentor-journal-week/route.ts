@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { runSageReason } from '@/lib/sage-reason-engine'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 
 // =============================================================================
 // mentor-journal-week — Weekly Personalised Journal Questions
@@ -98,6 +99,7 @@ export async function POST(request: NextRequest) {
       depth: 'deep',
       systemPromptOverride: WEEKLY_JOURNAL_SYSTEM_PROMPT,
       domain_context: 'mentor_weekly_journal',
+      stoicBrainContext: getStoicBrainContext('deep'),
     })
 
     return NextResponse.json(

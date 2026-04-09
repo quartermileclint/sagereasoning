@@ -3,6 +3,8 @@ import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMI
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST } from '@/lib/model-config'
 import { runSageReason } from '@/lib/sage-reason-engine'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getPractitionerContext } from '@/lib/context/practitioner-context'
 
 /**
  * sage-score — Evaluate a single action through Stoic virtue principles.
@@ -112,12 +114,17 @@ Note: Evaluate the current action on its own merits, but acknowledge if it addre
       }
     }
 
-    // Call the shared reasoning engine at standard depth
+    // Load practitioner context (Layer 2 — personalised reasoning)
+    const practitionerContext = await getPractitionerContext(auth.user.id)
+
+    // Call the shared reasoning engine with Stoic Brain (Layer 1) + practitioner context (Layer 2)
     const reasoningResult = await runSageReason({
       input: action.trim(),
       context,
       depth: 'standard',
       domain_context: domainContext,
+      stoicBrainContext: getStoicBrainContext('standard'),
+      practitionerContext,
     })
 
     // Normalize LLM output to match the structure score/page.tsx expects
