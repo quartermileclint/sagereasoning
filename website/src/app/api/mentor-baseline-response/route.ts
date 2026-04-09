@@ -28,65 +28,45 @@ const mentorProfile = mentorProfileRaw as MentorProfileData
 
 const REFINEMENT_SYSTEM_PROMPT = `You are the Sage Mentor's profile refinement engine for SageReasoning.
 
-You have three inputs:
-1. The practitioner's current MentorProfile (extracted from their Stoic journal)
-2. The baseline gap detection questions that were generated for them
-3. Their answers to those questions
+You have two inputs:
+1. The practitioner's current MentorProfile summary (extracted from their Stoic journal)
+2. Their answers to the baseline gap detection questions
 
-Your task: analyse their answers and produce a REFINED MentorProfile. Specifically:
+Your task: analyse each answer and produce refinement notes explaining what the answer reveals and how the profile should be updated.
 
-CONFIRMATION ANSWERS:
-- If the answer confirms the extraction finding: note "confirmed" and increase confidence
-- If the answer contradicts the extraction: flag the discrepancy, adjust the profile dimension, explain what changed and why
-
-EDGE CASE ANSWERS:
-- Resolve the ambiguity based on their answer
-- Update the relevant passion, virtue, or causal tendency accordingly
-- Note whether the resolution strengthens or weakens the original finding
-
-GAP FILL ANSWERS:
-- Add the new data to the thin dimension
-- Update observation counts and evidence summaries
-- Note whether the gap fill reveals a new pattern not visible in the journal
-
-LIVE REASONING ANSWERS:
-- Assess their actual reasoning quality against the profile's predicted weakness
-- Note whether they performed better, worse, or as expected
-- Adjust andreia, sophrosyne, or other relevant virtue assessments if warranted
+For each answer, assess:
+- CONFIRMATION: Does it confirm or contradict the extraction finding?
+- EDGE CASE: Does it resolve the ambiguity? Which way?
+- GAP FILL: What new data does it add to the thin dimension?
+- LIVE REASONING: How did they actually reason vs what the profile predicted?
 
 RETURN valid JSON with this structure:
 {
-  "refined_profile": {
-    // Full updated MentorProfile JSON with all fields
-    // Include ALL original fields, modifying only what the answers warrant
-  },
   "refinement_notes": [
     {
       "question_id": "baseline_01",
-      "dimension_affected": "which profile dimension changed",
+      "dimension_affected": "which profile dimension this changes",
       "change_type": "confirmed | adjusted | new_finding | gap_filled",
       "before": "what the profile said before",
-      "after": "what the profile says now",
-      "reasoning": "why this change was made based on the answer"
+      "after": "what the profile should say now",
+      "reasoning": "why, based on their answer"
     }
   ],
   "confidence_changes": {
-    // For each major dimension, note whether confidence increased or decreased
     "passion_map": "increased|decreased|unchanged — brief note",
     "virtue_profile": "increased|decreased|unchanged — brief note",
     "causal_tendencies": "increased|decreased|unchanged — brief note",
     "oikeiosis_map": "increased|decreased|unchanged — brief note",
     "proximity_estimate": "increased|decreased|unchanged — brief note"
   },
-  "summary": "2-3 sentence plain-language summary of what the baseline responses revealed about the practitioner that the journal alone did not capture"
+  "summary": "2-3 sentence plain-language summary of what the baseline responses revealed that the journal alone did not capture"
 }
 
-IMPORTANT RULES:
-- Preserve ALL original profile fields — only modify what the evidence warrants
-- Never invent data the practitioner didn't provide
+RULES:
+- Only note changes the evidence warrants — never invent data
 - Where an answer is ambiguous, note the ambiguity rather than guessing
 - Frame everything as philosophical development, not psychological diagnosis (R1)
-- This is diagnostic, not punitive — every finding opens a door (R6d)`
+- Diagnostic, not punitive — every finding opens a door (R6d)`
 
 interface BaselineResponse {
   question_id: string
@@ -122,15 +102,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Build the input for sage-reason: current profile + questions + answers
+    // Build the input for sage-reason: profile summary + answers
+    // Note: We use the text summary only (not the full JSON) to keep input within token limits.
+    // The LLM produces refinement notes; the full JSON is returned alongside for reference.
     const profileSummary = buildProfileSummary(mentorProfile)
 
     const answersFormatted = responses.map(r =>
       `[${r.question_id}] ${r.question_text || '(question text not provided)'}\n\nPRACTITIONER'S ANSWER:\n${r.answer}`
     ).join('\n\n---\n\n')
 
-    const fullInput = `CURRENT MENTOR PROFILE:\n${profileSummary}\n\n` +
-      `FULL PROFILE JSON:\n${JSON.stringify(mentorProfile, null, 2)}\n\n` +
+    const fullInput = `CURRENT MENTOR PROFILE SUMMARY:\n${profileSummary}\n\n` +
       `========================================\n\n` +
       `BASELINE GAP QUESTION RESPONSES (${responses.length} answers):\n\n${answersFormatted}`
 
@@ -145,8 +126,9 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         refinement: result,
+        current_profile: mentorProfile,
         responses_processed: responses.length,
-        usage_note: 'The refined_profile replaces the current MentorProfile. Review refinement_notes to see what changed and why.',
+        usage_note: 'Review refinement_notes to see what the answers revealed. Apply changes to current_profile to produce the refined version.',
         disclaimer: 'SageReasoning offers philosophical exercises for self-examination. This is not psychological assessment or therapy.',
       },
       { headers: corsHeaders() }
