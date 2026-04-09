@@ -375,10 +375,12 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
     }
   }
 
-  // Build Stoic Brain context — auto-generate from depth unless explicitly provided or disabled
-  const stoicBrainBlock = params.stoicBrainContext !== undefined
-    ? params.stoicBrainContext  // Caller provided explicit context (or empty string to disable)
-    : getStoicBrainContext(depth) // Auto-generate from depth
+  // Build Stoic Brain context — only inject when explicitly provided by caller.
+  // Auto-generation disabled: the existing system prompts produce a specific JSON structure
+  // that clients depend on (e.g., virtue_quality.katorthoma_proximity nesting). Adding Stoic
+  // Brain data changes LLM output structure and breaks consumers. Each endpoint must opt in
+  // and ensure its consumers handle the enriched output.
+  const stoicBrainBlock = params.stoicBrainContext || ''
 
   // Build system message array — main prompt + optional Stoic Brain context
   const systemMessages: Array<{ type: 'text'; text: string; cache_control?: { type: 'ephemeral' } }> = [
