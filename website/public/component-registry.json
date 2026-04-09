@@ -1,13 +1,13 @@
 {
-  "version": "1.0.0",
-  "lastUpdated": "2026-04-07",
-  "totalComponents": 150,
+  "version": "1.1.0",
+  "lastUpdated": "2026-04-09",
+  "totalComponents": 155,
   "statusSummary": {
-    "wired": 121,
+    "wired": 126,
     "designed": 5,
     "verified": 22,
-    "live": 1,
-    "scoped": 1
+    "live": 2,
+    "scoped": 0
   },
   "components": [
     {
@@ -1987,15 +1987,15 @@
     },
     {
       "id": "infra-encryption",
-      "name": "Client-Side Encryption (AES-256)",
+      "name": "Encryption (Client AES-256 + Server AES-256-GCM)",
       "type": "infra",
       "subtype": [],
       "status": "wired",
       "oldStatus": "scaffolded",
       "ext": ".ts",
-      "path": "/website/src/lib/encryption.ts",
-      "desc": "AES-256-GCM, PBKDF2 key derivation. Client-side only.",
-      "notes": "Functional encryption module. Used by journal.",
+      "path": "/website/src/lib/encryption.ts + /website/src/lib/server-encryption.ts",
+      "desc": "Two encryption modules: (1) Client-side AES-256-GCM with PBKDF2 key derivation for journal entries. (2) Server-side AES-256-GCM with env key for mentor profile data at rest in Supabase. Both R17b compliant.",
+      "notes": "Updated 9 Apr 2026. Server-side encryption wired to mentor_profiles table in Supabase. Client-side encryption available for journal pipeline.",
       "deps": [],
       "rules": [
         "R17b"
@@ -2004,7 +2004,8 @@
       "proximity": "",
       "connects": [
         "prod-journal",
-        "data-journal-entries"
+        "data-journal-entries",
+        "engine-profile-store"
       ],
       "origin": "",
       "humanReady": "partial",
@@ -2318,12 +2319,12 @@
       "name": "Vercel Hosting",
       "type": "infra",
       "subtype": [],
-      "status": "scoped",
+      "status": "live",
       "oldStatus": "scoped",
       "ext": "--",
-      "path": "(deployment config needed)",
-      "desc": "Not yet deployed to production.",
-      "notes": "Correctly scoped. No deployment config. Nothing is live.",
+      "path": "vercel.json + Vercel dashboard",
+      "desc": "Deployed to production at sagereasoning.com. All 66 API endpoints serving. GitHub main branch auto-deploys.",
+      "notes": "Updated 9 Apr 2026. Previously scoped — now live and serving production traffic. Custom domain configured.",
       "deps": [
         "vercel"
       ],
@@ -2334,8 +2335,8 @@
         "infra-nextjs"
       ],
       "origin": "",
-      "humanReady": "not-ready",
-      "agentReady": "not-ready"
+      "humanReady": "ready",
+      "agentReady": "ready"
     },
     {
       "id": "prod-journal",
@@ -4133,6 +4134,106 @@
       "origin": "",
       "humanReady": "ready",
       "agentReady": "partial"
+    },
+    {
+      "id": "api-mentor-profile",
+      "name": "Mentor Profile Endpoint (GET/POST)",
+      "type": "api",
+      "subtype": ["mentor"],
+      "status": "wired",
+      "oldStatus": "new",
+      "ext": ".ts",
+      "path": "/website/src/app/api/mentor-profile/route.ts",
+      "desc": "GET returns encrypted MentorProfile from Supabase with text summary. POST seeds/updates profile with AES-256-GCM encryption. Falls back to static JSON if Supabase unavailable.",
+      "notes": "Created 9 Apr 2026. Bridges journal extraction to baseline gap questions and weekly journal.",
+      "deps": ["supabase", "infra-encryption"],
+      "rules": ["R17b"],
+      "priority": "P0",
+      "proximity": "",
+      "connects": ["engine-profile-store", "api-mentor-baseline", "api-mentor-journal-week"],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "ready"
+    },
+    {
+      "id": "api-mentor-baseline-response",
+      "name": "Mentor Baseline Response Processor",
+      "type": "api",
+      "subtype": ["mentor"],
+      "status": "wired",
+      "oldStatus": "new",
+      "ext": ".ts",
+      "path": "/website/src/app/api/mentor-baseline-response/route.ts",
+      "desc": "Accepts practitioner's answers to gap detection questions. Reads profile from Supabase (encrypted), generates refinement notes via sage-reason. Returns confidence changes per dimension.",
+      "notes": "Created 9 Apr 2026. Completes the gap-question feedback loop.",
+      "deps": ["claude-api", "supabase", "infra-encryption"],
+      "rules": ["R1", "R6d", "R7", "R17b"],
+      "priority": "P0",
+      "proximity": "",
+      "connects": ["api-mentor-profile", "engine-sage-reason"],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "ready"
+    },
+    {
+      "id": "infra-server-encryption",
+      "name": "Server-Side Encryption Module",
+      "type": "infra",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "new",
+      "ext": ".ts",
+      "path": "/website/src/lib/server-encryption.ts",
+      "desc": "AES-256-GCM encryption for profile data at rest in Supabase. Key from MENTOR_ENCRYPTION_KEY env var. Complements client-side encryption.ts.",
+      "notes": "Created 9 Apr 2026. Used by mentor-profile-store for R17b compliance.",
+      "deps": [],
+      "rules": ["R17b", "R17f"],
+      "priority": "P0",
+      "proximity": "",
+      "connects": ["engine-profile-store", "infra-encryption"],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "engine-mentor-profile-store",
+      "name": "Encrypted Profile Storage (Supabase)",
+      "type": "engine",
+      "subtype": ["storage"],
+      "status": "wired",
+      "oldStatus": "new",
+      "ext": ".ts",
+      "path": "/website/src/lib/mentor-profile-store.ts",
+      "desc": "CRUD for mentor_profiles table with encryption. Encrypts full MentorProfile JSON before write, decrypts on read. Stores non-sensitive metadata in queryable columns.",
+      "notes": "Created 9 Apr 2026. Table created in Supabase with RLS. Profile seeded and tested.",
+      "deps": ["supabase", "infra-encryption"],
+      "rules": ["R17b"],
+      "priority": "P0",
+      "proximity": "",
+      "connects": ["api-mentor-profile", "api-mentor-baseline-response", "data-supabase-core"],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "api-health",
+      "name": "Health Check Endpoint",
+      "type": "api",
+      "subtype": [],
+      "status": "wired",
+      "oldStatus": "new",
+      "ext": ".ts",
+      "path": "/website/src/app/api/health/route.ts",
+      "desc": "GET /api/health — system health check. Reports status of Supabase, Anthropic, Stripe, and mentor encryption subsystems. No auth required.",
+      "notes": "Created 9 Apr 2026. Returns healthy/degraded based on critical subsystem availability.",
+      "deps": [],
+      "rules": [],
+      "priority": "P0",
+      "proximity": "",
+      "connects": ["infra-vercel"],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "ready"
     }
   ]
 }
