@@ -31,6 +31,8 @@ import { POST as reflectPOST } from '@/app/api/reflect/route'
 // stoic-brain is GET-only — no POST handler needed
 import { POST as assessmentFoundationalPOST } from '@/app/api/assessment/foundational/route'
 import { POST as baselineAgentPOST } from '@/app/api/baseline/agent/route'
+import { POST as mentorBaselineResponsePOST } from '@/app/api/mentor-baseline-response/route'
+import { POST as mentorBaselinePOST } from '@/app/api/mentor-baseline/route'
 
 // ── Context template skills (marketplace) ───────────────────────────
 import { POST as preMortemPOST } from '@/app/api/skill/sage-premortem/route'
@@ -67,6 +69,8 @@ export const SKILL_HANDLER_MAP: Record<string, SkillHandler> = {
   // stoic-brain is GET-only — not routable via execute POST
   '/api/assessment/foundational': assessmentFoundationalPOST as SkillHandler,
   '/api/baseline/agent': baselineAgentPOST as SkillHandler,
+  '/api/mentor-baseline': mentorBaselinePOST as SkillHandler,
+  '/api/mentor-baseline-response': mentorBaselineResponsePOST as SkillHandler,
 
   // Context template skills (marketplace)
   '/api/skill/sage-premortem': preMortemPOST as SkillHandler,
