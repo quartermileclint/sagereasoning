@@ -29,10 +29,23 @@ Read the handoff document at `operations/handoffs/context-architecture-build.md`
 - Auth is via `requireAuth()` in `website/src/lib/security.ts`, returns `{ user: { id, email? } }`
 - Models defined in `website/src/lib/model-config.ts`: MODEL_FAST (haiku), MODEL_DEEP (sonnet)
 
+**Context matrix — five endpoint groups get different context:**
+
+| Group | Stoic Brain | Practitioner Profile | Project Context |
+|---|---|---|---|
+| Mentor (baseline, baseline-response, journal-week) | Full per mechanism | Full summary | Summary |
+| Sage Ops (P7 — operational intelligence) | None | None | Full |
+| Operational (guardrail, reason, score-decision, score-iterate) | Per mechanism | Condensed | Condensed |
+| Human-facing (reflect, score-document, score-conversation) | Per mechanism | Condensed | Minimal |
+| Agent-facing (assessment, baseline/agent) | Per mechanism | None | None |
+
+Sage Ops is an "Ops mentor" — full project context, no practitioner profile, no Stoic Brain. It advises on the build, not on the practitioner's virtue. The Sage Mentor is the inverse — full practitioner profile, summary project context, full Stoic Brain. Design `getProjectContext()` to accept a level parameter (`full` | `summary` | `minimal`) so each group gets the right scope.
+
 **Constraints:**
 - Stoic Brain JSON files live in repo root (`stoic-brain/`), not in `website/`. Must be compiled into TypeScript for Vercel deployment.
 - Token budgets are firm. If total injection exceeds limits, condense Stoic Brain before cutting practitioner or project context.
-- Agent-facing endpoints (assessment, trust-layer) must NOT receive project context.
+- Agent-facing endpoints (assessment, trust-layer) must NOT receive project context or practitioner profile.
+- Sage Ops must NOT receive practitioner profile or Stoic Brain data.
 - Every change must build and deploy on Vercel (Next.js).
 
 **Founder context:** I have zero coding experience. I will commit and push. I will verify via URLs and test commands you provide. Use the communication signals from the project instructions (0d). Classify changes per 0d-ii risk levels. Test after each layer before moving to the next.

@@ -167,11 +167,17 @@ Option C — **Hybrid (recommended):**
 - `getProjectContext()` merges both: static baseline + dynamic overlay
 - Runtime cost: One Supabase read per hour (cached). Redeployment only needed for baseline changes.
 
-**Integration points:**
-- **Mentor endpoints** (mentor-baseline, mentor-baseline-response, mentor-journal-week): Full project context injected
-- **Operational endpoints** (guardrail, reason, score-decision): Phase and recent decisions only (condensed)
-- **Human-facing tools** (reflect, score-document): Minimal — just identity and ethical commitments
-- **Agent-facing endpoints** (assessment, baseline/agent): Not injected — agents get the framework, not the project's internal state
+**Integration points — five endpoint groups with distinct context profiles:**
+
+| Endpoint Group | Stoic Brain | Practitioner Profile | Project Context |
+|---|---|---|---|
+| **Mentor** (mentor-baseline, mentor-baseline-response, mentor-journal-week) | Yes — full for invoked mechanisms | Yes — **full** profile summary (~7,500 chars) | Yes — **summary** (phase, recent decisions, founder role) |
+| **Sage Ops** (future — operational intelligence, P7) | No — not a reasoning engine | No — not a personal mentor | Yes — **full** (identity, mission, phase, all recent decisions, active tensions, ethical commitments, component status, blockers) |
+| **Operational** (guardrail, reason, score-decision, score-iterate) | Yes — mechanism-specific | Yes — **condensed** (top passions, weakest virtue, proximity, causal breakdown) | Yes — **condensed** (current phase + recent decisions) |
+| **Human-facing tools** (reflect, score-document, score-conversation) | Yes — mechanism-specific | Yes — **condensed** | Minimal — identity and ethical commitments only |
+| **Agent-facing** (assessment/foundational, assessment/full, baseline/agent) | Yes — mechanism-specific | No — agents evaluate against the framework | No — agents don't get internal project state |
+
+**Sage Ops distinction:** Sage Ops is an "Ops mentor" — it knows the project inside out but has no access to the practitioner's personal Stoic profile. It answers operational questions, flags project risks, and supports build decisions. The Sage Mentor is the inverse — it knows the practitioner deeply and has summary project context so it can interpret personal development in the right situational frame. They serve different functions and receive different context.
 
 **The scheduled update (for Option C dynamic component):**
 - At each session close, the handoff note already captures decisions made and status changes
@@ -191,13 +197,25 @@ System message array:
 
 User message:
   [existing] Input + Context + Domain context + Urgency context
-  [NEW]      Practitioner context (condensed profile, if authenticated)
-  [NEW]      Project context (phase + decisions, for operational endpoints)
+  [NEW]      Practitioner context (condensed or full profile, if authenticated)
+  [NEW]      Project context (level depends on endpoint group — see matrix above)
   [existing] Stage scoring instruction
   [existing] "Return only the JSON evaluation object."
 ```
 
 For direct Anthropic calls (non-engine endpoints), the same pattern applies but is assembled per-endpoint.
+
+**Sage Ops is architecturally separate** — it does not use sage-reason-engine. When wired (P7), it will import `getProjectContext()` directly with the `full` flag and use its own ops-specific system prompt. It receives no Stoic Brain data and no practitioner profile. It is a project operations advisor, not a reasoning engine.
+
+### Context Matrix (reference)
+
+| | Stoic Brain | Practitioner Profile | Project Context |
+|---|---|---|---|
+| **Mentor** | Full (per mechanism) | Full summary | Summary |
+| **Sage Ops** | None | None | Full |
+| **Operational** | Per mechanism | Condensed | Condensed |
+| **Human-facing** | Per mechanism | Condensed | Minimal |
+| **Agent-facing** | Per mechanism | None | None |
 
 ---
 
