@@ -83,7 +83,9 @@ export async function POST(request: NextRequest) {
 
     const authHeader = request.headers.get('authorization')
     const apiKeyHeader = request.headers.get('x-api-key')
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sagereasoning.com'
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sagereasoning.com'
 
     for (let i = 0; i < steps.length; i++) {
       if (chainStopped) {

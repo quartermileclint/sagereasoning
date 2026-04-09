@@ -95,8 +95,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Routing resolved to unknown skill' }, { status: 500 })
       }
 
-      // Forward to the resolved skill
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sagereasoning.com'
+      // Forward to the resolved skill (use VERCEL_URL to avoid redirect-stripping auth headers)
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sagereasoning.com'
       const targetUrl = `${baseUrl}${skill.endpoint}`
       const authHeader = request.headers.get('authorization')
       const apiKeyHeader = request.headers.get('x-api-key')
@@ -159,8 +161,10 @@ export async function POST(request: NextRequest) {
     }
 
     // For V3 launch: route to the skill's endpoint via internal fetch.
-    // This avoids a second external HTTP call while keeping endpoint logic isolated.
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sagereasoning.com'
+    // Use VERCEL_URL to avoid redirect-stripping auth headers.
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sagereasoning.com'
     const targetUrl = `${baseUrl}${skill.endpoint}`
 
     // Forward the request with the skill's expected input format

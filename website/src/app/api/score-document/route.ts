@@ -19,7 +19,9 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sagereasoning.com'
+const BASE_URL = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sagereasoning.com'
 
 // POST — Score a document and return the result + badge URLs
 export async function POST(request: NextRequest) {
