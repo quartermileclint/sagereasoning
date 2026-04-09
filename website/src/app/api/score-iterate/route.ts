@@ -6,6 +6,7 @@ import { buildV3IterationPrompt, getV3IterationWarning, compareProximity, higher
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_DEEP, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import type { V3DeliberationChain, V3DeliberationStep, DetectedPassion } from '@/lib/deliberation'
 
 const client = new Anthropic({
@@ -122,12 +123,18 @@ Return only the JSON evaluation object.`
       let evalData = cacheGet(ck) as Record<string, any> | undefined
       let fromCache = !!evalData
 
+      // Layer 1: Stoic Brain context (agent-facing — standard depth, no Layer 2 or 3)
+      const stoicBrainContext = getStoicBrainContext('standard')
+
       if (!evalData) {
         const message = await client.messages.create({
           model: MODEL_DEEP,
           max_tokens: 1536,
           temperature: 0.2,
-          system: [{ type: 'text', text: INITIAL_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+          system: [
+            { type: 'text', text: INITIAL_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
+            { type: 'text', text: stoicBrainContext },
+          ],
           messages: [{ role: 'user', content: userMessage }],
         })
 
@@ -376,12 +383,18 @@ Evaluate the revised action. Return only the JSON evaluation object.`
     const iterCk = cacheKey('/api/score-iterate/continue', { chain_id, revised_action: revised_action.trim(), revision_rationale: revision_rationale?.trim(), step: nextStepNumber })
     let evalData = cacheGet(iterCk) as Record<string, any> | undefined
 
+    // Layer 1: Stoic Brain context for iteration (agent-facing — standard depth)
+    const iterStoicBrainContext = getStoicBrainContext('standard')
+
     if (!evalData) {
       const message = await client.messages.create({
         model: MODEL_DEEP,
         max_tokens: 1536,
         temperature: 0.2,
-        system: [{ type: 'text', text: iterationPrompt, cache_control: { type: 'ephemeral' } }],
+        system: [
+          { type: 'text', text: iterationPrompt, cache_control: { type: 'ephemeral' } },
+          { type: 'text', text: iterStoicBrainContext },
+        ],
         messages: [{ role: 'user', content: userMessage }],
       })
 
