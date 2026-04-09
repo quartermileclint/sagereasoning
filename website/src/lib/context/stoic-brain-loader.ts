@@ -25,7 +25,9 @@ import {
   SCORING_CONTEXT,
   STOIC_BRAIN_FOUNDATIONS,
 } from '@/data/stoic-brain-compiled'
-import type { ReasonDepth } from '@/lib/sage-reason-engine'
+
+// Define locally to avoid circular dependency with sage-reason-engine.ts
+type ReasonDepth = 'quick' | 'standard' | 'deep'
 
 // =============================================================================
 // MECHANISM-SPECIFIC CONTEXT BUILDERS
