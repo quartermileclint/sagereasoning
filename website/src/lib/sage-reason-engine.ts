@@ -17,6 +17,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { MODEL_FAST, MODEL_DEEP, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 
 // =============================================================================
 // ANTHROPIC CLIENT — Shared singleton
@@ -53,6 +54,13 @@ export interface ReasonInput {
    * will include a hasty_assent_risk field.
    */
   urgency_context?: string
+  /**
+   * Optional Stoic Brain context override. When provided, injected as a second
+   * system message block alongside the main prompt. When omitted, the engine
+   * auto-generates context from the depth level using stoic-brain-loader.
+   * Set to empty string to explicitly disable Stoic Brain injection.
+   */
+  stoicBrainContext?: string
 }
 
 export interface ReasonResult {
@@ -367,12 +375,25 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
     }
   }
 
+  // Build Stoic Brain context — auto-generate from depth unless explicitly provided or disabled
+  const stoicBrainBlock = params.stoicBrainContext !== undefined
+    ? params.stoicBrainContext  // Caller provided explicit context (or empty string to disable)
+    : getStoicBrainContext(depth) // Auto-generate from depth
+
+  // Build system message array — main prompt + optional Stoic Brain context
+  const systemMessages: Array<{ type: 'text'; text: string; cache_control?: { type: 'ephemeral' } }> = [
+    { type: 'text', text: params.systemPromptOverride || config.prompt, cache_control: { type: 'ephemeral' } },
+  ]
+  if (stoicBrainBlock) {
+    systemMessages.push({ type: 'text', text: stoicBrainBlock })
+  }
+
   // Call Claude
   const message = await client.messages.create({
     model: config.model,
     max_tokens: config.maxTokens,
     temperature: 0.2,
-    system: [{ type: 'text', text: params.systemPromptOverride || config.prompt, cache_control: { type: 'ephemeral' } }],
+    system: systemMessages,
     messages: [{ role: 'user', content: userMessage }],
   })
 
