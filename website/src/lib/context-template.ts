@@ -18,10 +18,7 @@ import { checkRateLimit, RATE_LIMITS, validateApiKey, validateTextLength, TEXT_L
 import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { getSkillById } from '@/lib/skill-registry'
-
-const SAGE_REASON_URL = process.env.NEXT_PUBLIC_SITE_URL
-  ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/reason`
-  : 'https://www.sagereasoning.com/api/reason'
+import { runSageReason } from '@/lib/sage-reason-engine'
 
 export type ContextTemplateConfig = {
   /** Skill ID (e.g., 'sage-premortem') */
@@ -86,7 +83,7 @@ export function createContextTemplateHandler(config: ContextTemplateConfig) {
 
     if (!authedUser && (!apiKeyResult || !apiKeyResult.valid)) {
       return NextResponse.json(
-        { error: 'Authentication required. Please sign in.', _debug: { v: 'ct-v7-inline', hasBearer, hasAuthHeader: !!reqAuthHeader, hasSupaUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL, hasAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY } },
+        { error: 'Authentication required. Please sign in.' },
         { status: 401 }
       )
     }
@@ -107,32 +104,15 @@ export function createContextTemplateHandler(config: ContextTemplateConfig) {
         return NextResponse.json({ error: formatted.error }, { status: 400 })
       }
 
-      // Call sage-reason internally — forward whichever auth credential was used
-      const authHeader = request.headers.get('authorization')
-      const apiKeyHeader = request.headers.get('x-api-key')
-      const reasonResponse = await fetch(SAGE_REASON_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authHeader ? { 'Authorization': authHeader } : {}),
-          ...(apiKeyHeader ? { 'X-Api-Key': apiKeyHeader } : {}),
-        },
-        body: JSON.stringify({
-          input: formatted.input,
-          context: formatted.context,
-          depth: config.depth,
-          domain_context: config.domainContext,
-        }),
+      // Call sage-reason engine directly (no HTTP self-call needed)
+      const reasonOutput = await runSageReason({
+        input: formatted.input,
+        context: formatted.context,
+        depth: config.depth,
+        domain_context: config.domainContext,
       })
 
-      const reasonData = await reasonResponse.json()
-
-      if (!reasonResponse.ok) {
-        return NextResponse.json(reasonData, { status: reasonResponse.status })
-      }
-
-      // Extract the result from sage-reason's envelope
-      const reasonResult = reasonData.result || reasonData
+      const reasonResult = reasonOutput.result
 
       // Apply skill-specific framing if configured
       const framedResult = config.frameResult
