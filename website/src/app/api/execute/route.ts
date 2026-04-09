@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { checkRateLimit, RATE_LIMITS, requireAuth, validateApiKey, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { createClient } from '@supabase/supabase-js'
+import { checkRateLimit, RATE_LIMITS, validateApiKey, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { getSkillById, SKILL_REGISTRY } from '@/lib/skill-registry'
 
@@ -21,33 +22,38 @@ import { getSkillById, SKILL_REGISTRY } from '@/lib/skill-registry'
  *      to determine the best skill for the input.
  */
 export async function POST(request: NextRequest) {
-  // TEMPORARY DIAGNOSTIC — remove after debugging
-  const _diagBearer = request.headers.get('authorization')?.substring(0, 15) || 'none'
-  const _diagCookie = request.cookies.get('sb-access-token')?.value?.substring(0, 10) || 'none'
-
   // Rate limiting
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
   if (rateLimitError) return rateLimitError
 
-  // Authentication: accept user session (JWT) OR API key
-  const authHeader = request.headers.get('authorization')
-  const hasBearer = authHeader?.startsWith('Bearer ') || false
+  // Authentication: inline check (matches context-template pattern for consistency)
+  const reqAuthHeader = request.headers.get('authorization')
+  const hasBearer = reqAuthHeader?.startsWith('Bearer ') || false
+  let authedUser: { id: string; email?: string } | null = null
 
-  let auth: { user?: { id: string; email?: string }; error?: NextResponse }
-  try {
-    auth = await requireAuth(request)
-  } catch (e) {
-    return NextResponse.json(
-      { error: 'requireAuth threw', _diag: { message: e instanceof Error ? e.message : String(e), bearer: _diagBearer, cookie: _diagCookie, v: 'v3-throw-catch' } },
-      { status: 500 }
-    )
+  if (hasBearer) {
+    const jwtToken = reqAuthHeader!.slice(7)
+    try {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { global: { headers: { Authorization: `Bearer ${jwtToken}` } } }
+      )
+      const { data: { user }, error } = await supabase.auth.getUser(jwtToken)
+      if (!error && user) {
+        authedUser = user
+      }
+    } catch (_e) {
+      // JWT validation failed — fall through to API key check
+    }
   }
 
-  const apiKey = auth.error ? await validateApiKey(request, 'other') : null
+  // If JWT didn't work, try API key
+  const apiKey = !authedUser ? await validateApiKey(request, 'other') : null
 
-  if (auth.error && (!apiKey || !apiKey.valid)) {
+  if (!authedUser && (!apiKey || !apiKey.valid)) {
     return NextResponse.json(
-      { error: 'Authentication required. Please sign in.', _diag: { hasBearer, hasApiKey: !!request.headers.get('x-api-key'), authFailed: !!auth.error, apiKeyValid: apiKey?.valid ?? null, bearer: _diagBearer, cookie: _diagCookie, v: 'v3' } },
+      { error: 'Authentication required. Please sign in.' },
       { status: 401 }
     )
   }
