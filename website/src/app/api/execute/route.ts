@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, validateApiKey, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { getSkillById, SKILL_REGISTRY } from '@/lib/skill-registry'
+import { SKILL_HANDLER_MAP, createSyntheticRequest } from '@/lib/skill-handler-map'
 
 /**
  * POST /api/execute — Unified Skill Execution Router
@@ -14,6 +15,13 @@ import { getSkillById, SKILL_REGISTRY } from '@/lib/skill-registry'
  * This endpoint lets agents execute any skill by passing the skill_id
  * and the skill's expected input payload. It validates the skill exists,
  * then routes to the appropriate internal handler.
+ *
+ * Routing architecture: Direct import (no HTTP self-calls).
+ * Skill handlers are imported via skill-handler-map.ts and called
+ * in-process with a synthetic NextRequest. This eliminates:
+ *   - HTTP roundtrip overhead
+ *   - Auth header stripping on redirects
+ *   - Deployment protection blocking internal calls
  *
  * Input modes:
  *   1. Explicit: { "skill_id": "sage-reason-quick", "input": { ...payload... } }
@@ -95,25 +103,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Routing resolved to unknown skill' }, { status: 500 })
       }
 
-      // Forward to the resolved skill (use VERCEL_URL to avoid redirect-stripping auth headers)
-      const baseUrl = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sagereasoning.com'
-      const targetUrl = `${baseUrl}${skill.endpoint}`
-      const authHeader = request.headers.get('authorization')
-      const apiKeyHeader = request.headers.get('x-api-key')
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (authHeader) headers['Authorization'] = authHeader
-      if (apiKeyHeader) headers['X-Api-Key'] = apiKeyHeader
-
-      const response = await fetch(targetUrl, {
-        method: skill.method,
-        headers,
-        body: skill.method === 'POST' ? JSON.stringify(skillInput) : undefined,
-      })
-
-      const data = await response.json()
-      if (!response.ok) return NextResponse.json(data, { status: response.status })
+      // Call the skill handler directly (no HTTP self-call)
+      const { data, status } = await callSkillHandler(skill.endpoint, skill.method, skillInput, request)
+      if (status >= 400) return NextResponse.json(data, { status })
 
       const envelope = buildEnvelope({
         result: {
@@ -160,34 +152,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // For V3 launch: route to the skill's endpoint via internal fetch.
-    // Use VERCEL_URL to avoid redirect-stripping auth headers.
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sagereasoning.com'
-    const targetUrl = `${baseUrl}${skill.endpoint}`
-
-    // Forward the request with the skill's expected input format
-    const authHeader = request.headers.get('authorization')
-    const apiKeyHeader = request.headers.get('x-api-key')
-
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    }
-    if (authHeader) headers['Authorization'] = authHeader
-    if (apiKeyHeader) headers['X-Api-Key'] = apiKeyHeader
-
-    const response = await fetch(targetUrl, {
-      method: skill.method,
-      headers,
-      body: skill.method === 'POST' ? JSON.stringify(skillInput) : undefined,
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      return NextResponse.json(data, { status: response.status })
-    }
+    // Call the skill handler directly (no HTTP self-call)
+    const { data, status } = await callSkillHandler(skill.endpoint, skill.method, skillInput, request)
+    if (status >= 400) return NextResponse.json(data, { status })
 
     // Wrap in execute envelope with routing metadata
     const envelope = buildEnvelope({
@@ -221,6 +188,39 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+// ── Direct skill invocation ────────────────────────────────────────
+
+/**
+ * Call a skill handler directly via imported function (no HTTP self-call).
+ * Creates a synthetic NextRequest with the original auth headers and the
+ * skill's input payload, then calls the handler in-process.
+ */
+async function callSkillHandler(
+  endpoint: string,
+  method: string,
+  skillInput: unknown,
+  originalRequest: NextRequest,
+): Promise<{ data: unknown; status: number }> {
+  const handler = SKILL_HANDLER_MAP[endpoint]
+
+  if (!handler) {
+    console.error(`No handler found for endpoint: ${endpoint}. Check skill-handler-map.ts.`)
+    return {
+      data: { error: `No handler registered for endpoint ${endpoint}` },
+      status: 500,
+    }
+  }
+
+  // Create a synthetic request with the skill's input and original auth
+  const syntheticRequest = createSyntheticRequest(endpoint, method, skillInput, originalRequest)
+
+  // Call the handler directly — no HTTP roundtrip
+  const response = await handler(syntheticRequest)
+  const data = await response.json()
+
+  return { data, status: response.status }
 }
 
 // ── Intelligent routing classifier ──────────────────────────────

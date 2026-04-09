@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { getSkillById } from '@/lib/skill-registry'
+import { SKILL_HANDLER_MAP, createSyntheticRequest } from '@/lib/skill-handler-map'
 
 /**
  * POST /api/compose — Execute a chain of skills sequentially
@@ -81,12 +82,6 @@ export async function POST(request: NextRequest) {
     let chainStopped = false
     let stopReason: string | null = null
 
-    const authHeader = request.headers.get('authorization')
-    const apiKeyHeader = request.headers.get('x-api-key')
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sagereasoning.com'
-
     for (let i = 0; i < steps.length; i++) {
       if (chainStopped) {
         results.push({
@@ -100,7 +95,6 @@ export async function POST(request: NextRequest) {
 
       const step = steps[i]
       const skill = getSkillById(step.skill_id)!
-      const targetUrl = `${baseUrl}${skill.endpoint}`
 
       // Merge previous result into input if available
       const stepInput: Record<string, unknown> = {
@@ -108,23 +102,21 @@ export async function POST(request: NextRequest) {
         ...(previousResult ? { _previous_result: previousResult } : {}),
       }
 
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (authHeader) headers['Authorization'] = authHeader
-      if (apiKeyHeader) headers['X-Api-Key'] = apiKeyHeader
-
       const stepStart = Date.now()
 
       try {
-        const response: Response = await fetch(targetUrl, {
-          method: skill.method,
-          headers,
-          body: skill.method === 'POST' ? JSON.stringify(stepInput) : undefined,
-        })
+        // Direct handler call — no HTTP self-call
+        const handler = SKILL_HANDLER_MAP[skill.endpoint]
+        if (!handler) {
+          throw new Error(`No handler registered for endpoint ${skill.endpoint}`)
+        }
 
+        const syntheticRequest = createSyntheticRequest(skill.endpoint, skill.method, stepInput, request)
+        const response = await handler(syntheticRequest)
         const data: Record<string, unknown> = await response.json()
         const stepDuration = Date.now() - stepStart
 
-        if (!response.ok) {
+        if (response.status >= 400) {
           results.push({
             step: i + 1,
             skill_id: step.skill_id,
