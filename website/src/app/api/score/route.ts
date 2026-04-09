@@ -16,6 +16,50 @@ import { runSageReason } from '@/lib/sage-reason-engine'
  *   - Response envelope with composability hints
  */
 
+/**
+ * Normalize engine output to the structure score/page.tsx expects.
+ *
+ * The engine's system prompt defines katorthoma_proximity, ruling_faculty_state,
+ * and virtue_domains_engaged as flat top-level fields, and oikeiosis as a nested
+ * object. But the client reads virtue_quality.katorthoma_proximity (nested) and
+ * oikeiosis_context (flat string). This function bridges the gap regardless of
+ * which shape the LLM returns.
+ */
+function normalizeScoreResult(raw: Record<string, any>): Record<string, any> {
+  const result = { ...raw }
+
+  // 1. Ensure virtue_quality is a nested object
+  if (!result.virtue_quality) {
+    result.virtue_quality = {
+      katorthoma_proximity: result.katorthoma_proximity || 'deliberate',
+      ruling_faculty_state: result.ruling_faculty_state || '',
+      virtue_domains_engaged: result.virtue_domains_engaged || [],
+    }
+    // Clean up flat fields so they don't confuse consumers
+    delete result.katorthoma_proximity
+    delete result.ruling_faculty_state
+    delete result.virtue_domains_engaged
+  }
+
+  // 2. Ensure oikeiosis_context is a flat string
+  if (!result.oikeiosis_context && result.oikeiosis) {
+    if (typeof result.oikeiosis === 'string') {
+      result.oikeiosis_context = result.oikeiosis
+    } else if (result.oikeiosis.deliberation_notes) {
+      result.oikeiosis_context = result.oikeiosis.deliberation_notes
+    } else {
+      result.oikeiosis_context = ''
+    }
+  }
+
+  // 3. Ensure kathekon_assessment has required fields
+  if (result.kathekon_assessment && result.kathekon_assessment.quality === undefined) {
+    result.kathekon_assessment.quality = 'moderate'
+  }
+
+  return result
+}
+
 export async function POST(request: NextRequest) {
   // Rate limiting
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
@@ -76,16 +120,19 @@ Note: Evaluate the current action on its own merits, but acknowledge if it addre
       domain_context: domainContext,
     })
 
+    // Normalize LLM output to match the structure score/page.tsx expects
+    const normalized = normalizeScoreResult(reasoningResult.result as Record<string, any>)
+
     // Build response envelope with composability hints
     const envelope = buildEnvelope({
-      result: reasoningResult.result,
+      result: normalized,
       endpoint: '/api/score',
       model: MODEL_FAST,
       startTime,
       maxTokens: 1024,
       composability: {
         next_steps: ['/api/score-iterate', '/api/reason'],
-        recommended_action: (reasoningResult.result as any).virtue_quality?.katorthoma_proximity === 'reflexive' || (reasoningResult.result as any).virtue_quality?.katorthoma_proximity === 'habitual'
+        recommended_action: normalized.virtue_quality?.katorthoma_proximity === 'reflexive' || normalized.virtue_quality?.katorthoma_proximity === 'habitual'
           ? 'Address the false judgements identified in passion_diagnosis, then re-evaluate with /api/score-iterate.'
           : 'Consider a deeper analysis with /api/reason?depth=deep for iterative refinement tracking.',
       },
