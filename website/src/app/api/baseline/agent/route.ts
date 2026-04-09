@@ -18,6 +18,7 @@ import {
   publicCorsHeaders,
   publicCorsPreflightResponse,
 } from '@/lib/security'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -194,11 +195,17 @@ Return ONLY valid JSON:
   "interpretation": "<string>"
 }`
 
+    // Layer 1: Stoic Brain context (agent-facing — no Layer 2 or 3)
+    const stoicBrainContext = getStoicBrainContext('standard')
+
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 4096,
       temperature: 0.2,
-      system: [{ type: 'text', text: V3_BASELINE_SCORING_PROMPT, cache_control: { type: 'ephemeral' } }],
+      system: [
+        { type: 'text', text: V3_BASELINE_SCORING_PROMPT, cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: stoicBrainContext },
+      ],
       messages: [{ role: 'user', content: scoringPrompt }],
     })
 

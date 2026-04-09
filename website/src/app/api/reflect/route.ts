@@ -5,6 +5,9 @@ import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt } from '@/lib/reasoning-receipt'
+import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loader'
+import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { getProjectContext } from '@/lib/context/project-context'
 // Profile update is loaded dynamically via the sage-mentor bridge pattern
 // to avoid build-time resolution failures when sage-mentor dependencies
 // aren't available in the website build context.
@@ -84,18 +87,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userMessage = `Daily reflection:
+    // Context layers injection
+    const stoicBrainContext = getStoicBrainContextForMechanisms(['passion_diagnosis', 'oikeiosis'])
+    const practitionerContext = await getPractitionerContext(auth.user.id)
+    const projectContext = await getProjectContext('minimal')
+
+    let userMessage = `Daily reflection:
 
 What happened: ${what_happened.trim()}
 ${how_i_responded?.trim() ? `How I responded: ${how_i_responded.trim()}` : ''}
 
 Score my actions and give me the sage perspective.`
 
+    if (practitionerContext) userMessage += `\n\n${practitionerContext}`
+    userMessage += `\n\n${projectContext}`
+
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       temperature: 0.3,
-      system: [{ type: 'text', text: REFLECTION_PROMPT, cache_control: { type: 'ephemeral' } }],
+      system: [
+        { type: 'text', text: REFLECTION_PROMPT, cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: stoicBrainContext },
+      ],
       messages: [{ role: 'user', content: userMessage }],
     })
 

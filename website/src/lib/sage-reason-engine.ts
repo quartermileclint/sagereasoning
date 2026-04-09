@@ -69,6 +69,14 @@ export interface ReasonInput {
    * the user message itself.
    */
   practitionerContext?: string | null
+  /**
+   * Optional project context (Layer 3). When provided, injected into the
+   * user message after practitioner context. Contains project state data
+   * at the appropriate level for the endpoint group (summary/condensed/minimal).
+   * Enables situational awareness without requiring each endpoint to modify
+   * the user message itself.
+   */
+  projectContext?: string | null
 }
 
 export interface ReasonResult {
@@ -352,6 +360,13 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
   // its analysis to this specific person.
   if (params.practitionerContext) {
     userMessage += `\n\n${params.practitionerContext}`
+  }
+
+  // Layer 3: Project context injection
+  // When present, adds project state awareness (phase, recent decisions, identity)
+  // so the LLM can situate its reasoning in the correct operational context.
+  if (params.projectContext) {
+    userMessage += `\n\n${params.projectContext}`
   }
 
   // Urgency context injection (Item 6 — urgency increases scrutiny)

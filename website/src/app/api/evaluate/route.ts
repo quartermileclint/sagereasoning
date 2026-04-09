@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getProjectContext } from '@/lib/context/project-context'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -93,11 +95,17 @@ export async function POST(request: NextRequest) {
     const inputErr = validateTextLength(input, 'Input', 500)
     if (inputErr) return NextResponse.json({ error: inputErr }, { status: 400 })
 
-    const userMessage = `Evaluate this decision through the Stoic core triad:
+    // Context layers (public endpoint — no practitioner context)
+    const stoicBrainContext = getStoicBrainContext('quick')
+    const projectContext = await getProjectContext('minimal')
+
+    let userMessage = `Evaluate this decision through the Stoic core triad:
 
 Input: ${input.trim()}
 
 Return only the JSON evaluation object.`
+
+    userMessage += `\n\n${projectContext}`
 
     // Check cache first
     const ck = cacheKey('/api/evaluate', { input: input.trim() })
@@ -121,7 +129,10 @@ Return only the JSON evaluation object.`
       model: MODEL_FAST,
       max_tokens: 2048,
       temperature: 0.2,
-      system: [{ type: 'text', text: DEMO_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+      system: [
+        { type: 'text', text: DEMO_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: stoicBrainContext },
+      ],
       messages: [
         { role: 'user', content: userMessage }
       ],

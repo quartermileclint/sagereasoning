@@ -11,6 +11,9 @@ import {
 } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { getProjectContext } from '@/lib/context/project-context'
 import {
   buildClassifyPrompt,
   buildClassifyResponse,
@@ -128,8 +131,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(envelope, { headers: corsHeaders() })
     }
 
+    // ── Context layers injection ──────────────────────────────────
+    const stoicBrainContext = getStoicBrainContext('quick')
+    const practitionerContext = await getPractitionerContext(auth.user.id)
+    const projectContext = await getProjectContext('condensed')
+
     // ── Call LLM ────────────────────────────────────────────────────
     const systemPrompt = buildClassifyPrompt(classifyRequest)
+
+    let userContent = `Classify this input and evaluate its reasoning quality. Return only the JSON evaluation object.\n\nInput: ${classifyRequest.input}`
+    if (practitionerContext) userContent += `\n\n${practitionerContext}`
+    userContent += `\n\n${projectContext}`
 
     const message = await client.messages.create({
       model: MODEL_FAST,
@@ -137,11 +149,12 @@ export async function POST(request: NextRequest) {
       temperature: 0.2,
       system: [
         { type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: stoicBrainContext },
       ],
       messages: [
         {
           role: 'user',
-          content: `Classify this input and evaluate its reasoning quality. Return only the JSON evaluation object.\n\nInput: ${classifyRequest.input}`,
+          content: userContent,
         },
       ],
     })

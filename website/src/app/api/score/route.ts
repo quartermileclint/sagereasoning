@@ -5,6 +5,7 @@ import { MODEL_FAST } from '@/lib/model-config'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { getProjectContext } from '@/lib/context/project-context'
 
 /**
  * sage-score — Evaluate a single action through Stoic virtue principles.
@@ -117,7 +118,10 @@ Note: Evaluate the current action on its own merits, but acknowledge if it addre
     // Load practitioner context (Layer 2 — personalised reasoning)
     const practitionerContext = await getPractitionerContext(auth.user.id)
 
-    // Call the shared reasoning engine with Stoic Brain (Layer 1) + practitioner context (Layer 2)
+    // Load project context (Layer 3 — project context)
+    const projectContext = await getProjectContext('condensed')
+
+    // Call the shared reasoning engine with Stoic Brain (Layer 1) + practitioner context (Layer 2) + project context (Layer 3)
     const reasoningResult = await runSageReason({
       input: action.trim(),
       context,
@@ -125,6 +129,7 @@ Note: Evaluate the current action on its own merits, but acknowledge if it addre
       domain_context: domainContext,
       stoicBrainContext: getStoicBrainContext('standard'),
       practitionerContext,
+      projectContext,
     })
 
     // Normalize LLM output to match the structure score/page.tsx expects

@@ -14,6 +14,9 @@ import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMI
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_DEEP } from '@/lib/model-config'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { getProjectContext } from '@/lib/context/project-context'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -58,18 +61,30 @@ export async function POST(request: NextRequest) {
     // Truncate to ~8000 words to stay within token limits
     const truncated = trimmed.split(/\s+/).slice(0, 8000).join(' ')
 
+    // Context layers injection
+    const stoicBrainContext = getStoicBrainContext('deep')
+    const practitionerContext = await getPractitionerContext(auth.user.id)
+    const projectContext = await getProjectContext('minimal')
+
     // Policy mode needs more tokens — its JSON schema is significantly larger
     const maxTokens = isPolicy ? 3072 : 2048
+
+    let userContent = `Evaluate this document:\n\n${title ? `Title: ${title}\n\n` : ''}${truncated}`
+    if (practitionerContext) userContent += `\n\n${practitionerContext}`
+    userContent += `\n\n${projectContext}`
 
     const message = await client.messages.create({
       model: MODEL_DEEP,
       max_tokens: maxTokens,
       temperature: 0.2,
-      system: [{ type: 'text', text: scoringPrompt, cache_control: { type: 'ephemeral' } }],
+      system: [
+        { type: 'text', text: scoringPrompt, cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: stoicBrainContext },
+      ],
       messages: [
         {
           role: 'user',
-          content: `Evaluate this document:\n\n${title ? `Title: ${title}\n\n` : ''}${truncated}`,
+          content: userContent,
         },
       ],
     })

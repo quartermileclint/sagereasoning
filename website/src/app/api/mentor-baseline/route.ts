@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getProjectContext } from '@/lib/context/project-context'
 
 // =============================================================================
 // mentor-baseline — Post-Extraction Gap Detection Questionnaire
@@ -78,12 +79,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Load project context (Layer 3 — project context)
+    const projectContext = await getProjectContext('summary')
+
     const result = await runSageReason({
       input: profile_summary,
       depth: 'deep',
       systemPromptOverride: BASELINE_SYSTEM_PROMPT,
       domain_context: 'mentor_baseline_assessment',
       stoicBrainContext: getStoicBrainContext('deep'),
+      projectContext,
     })
 
     return NextResponse.json(

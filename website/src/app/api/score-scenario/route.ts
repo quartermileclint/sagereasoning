@@ -5,6 +5,9 @@ import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST } from '@/lib/model-config'
+import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { getProjectContext } from '@/lib/context/project-context'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -91,6 +94,9 @@ export async function GET(request: NextRequest) {
     const pool = TOPIC_POOLS[validAudience]
     const selectedTopic = topic || pool[Math.floor(Math.random() * pool.length)]
 
+    // Layer 1 only for scenario generation (creative, not scoring)
+    const stoicBrainContext = getStoicBrainContext('quick')
+
     const userMessage = `Generate an ethical scenario for audience: ${validAudience}
 Topic hint: ${selectedTopic}
 
@@ -100,7 +106,10 @@ Return the JSON scenario with options.`
       model: MODEL_FAST,
       max_tokens: 512,
       temperature: 0.7,
-      system: [{ type: 'text', text: SCENARIO_PROMPT, cache_control: { type: 'ephemeral' } }],
+      system: [
+        { type: 'text', text: SCENARIO_PROMPT, cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: stoicBrainContext },
+      ],
       messages: [{ role: 'user', content: userMessage }],
     })
 
@@ -200,7 +209,12 @@ export async function POST(request: NextRequest) {
 
     const validAudience = audience || 'teen'
 
-    const userMessage = `Audience level: ${validAudience}
+    // Context layers for scoring (human-facing)
+    const scoringStoicContext = getStoicBrainContext('quick')
+    const practitionerContext = await getPractitionerContext(auth.user.id)
+    const projectContext = await getProjectContext('minimal')
+
+    let userMessage = `Audience level: ${validAudience}
 
 Scenario: ${scenario.trim()}
 
@@ -208,11 +222,17 @@ User's response: ${response.trim()}
 
 Score this response. Return the JSON.`
 
+    if (practitionerContext) userMessage += `\n\n${practitionerContext}`
+    userMessage += `\n\n${projectContext}`
+
     const message = await client.messages.create({
       model: MODEL_FAST,
       max_tokens: 512,
       temperature: 0.2,
-      system: [{ type: 'text', text: SCENARIO_PROMPT, cache_control: { type: 'ephemeral' } }],
+      system: [
+        { type: 'text', text: SCENARIO_PROMPT, cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: scoringStoicContext },
+      ],
       messages: [{ role: 'user', content: userMessage }],
     })
 
