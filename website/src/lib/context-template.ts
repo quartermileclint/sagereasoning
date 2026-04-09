@@ -86,7 +86,7 @@ export function createContextTemplateHandler(config: ContextTemplateConfig) {
 
     if (!authedUser && (!apiKeyResult || !apiKeyResult.valid)) {
       return NextResponse.json(
-        { error: 'Authentication required. Please sign in.' },
+        { error: 'Authentication required. Please sign in.', _debug: { v: 'ct-v7-inline', hasBearer, hasAuthHeader: !!reqAuthHeader, hasSupaUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL, hasAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY } },
         { status: 401 }
       )
     }
