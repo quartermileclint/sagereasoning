@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-summary'
-import mentorProfileRaw from '@/data/mentor-profile.json'
+import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
+import { isServerEncryptionConfigured } from '@/lib/server-encryption'
+import mentorProfileFallback from '@/data/mentor-profile.json'
 
 // =============================================================================
 // mentor-baseline-response — Process practitioner's answers to gap questions
@@ -11,20 +13,18 @@ import mentorProfileRaw from '@/data/mentor-profile.json'
 //
 // After the practitioner answers the baseline gap detection questions generated
 // by /api/mentor-baseline, this endpoint:
-//   1. Takes their answers alongside the original questions and current profile
-//   2. Feeds everything through sage-reason to analyse what the answers reveal
-//   3. Returns a refined MentorProfile with gaps filled, edge cases resolved,
-//      and confirmations noted
+//   1. Loads the current profile from Supabase (encrypted, R17b)
+//   2. Feeds profile summary + answers through sage-reason for analysis
+//   3. Returns refinement notes and confidence changes
+//   4. Saves the refinement data alongside the profile for future reference
 //
 // Input: { responses: [{ question_id, question_text, answer }] }
-// Output: { refined_profile, refinement_notes, confidence_changes }
+// Output: { refinement, current_profile, responses_processed }
 //
 // R1:  Philosophical exercise, not therapy
 // R6d: Diagnostic, not punitive — answers open understanding, not judgment
 // R7:  Analysis traces to Stoic Brain source files
 // =============================================================================
-
-const mentorProfile = mentorProfileRaw as MentorProfileData
 
 const REFINEMENT_SYSTEM_PROMPT = `You are the Sage Mentor's profile refinement engine for SageReasoning.
 
@@ -102,10 +102,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Load current profile — Supabase (encrypted) first, then static fallback
+    let currentProfile: MentorProfileData
+    if (isServerEncryptionConfigured() && auth.user?.id) {
+      const stored = await loadMentorProfile(auth.user.id)
+      currentProfile = stored ? stored.profile : (mentorProfileFallback as MentorProfileData)
+    } else {
+      currentProfile = mentorProfileFallback as MentorProfileData
+    }
+
     // Build the input for sage-reason: profile summary + answers
-    // Note: We use the text summary only (not the full JSON) to keep input within token limits.
-    // The LLM produces refinement notes; the full JSON is returned alongside for reference.
-    const profileSummary = buildProfileSummary(mentorProfile)
+    const profileSummary = buildProfileSummary(currentProfile)
 
     const answersFormatted = responses.map(r =>
       `[${r.question_id}] ${r.question_text || '(question text not provided)'}\n\nPRACTITIONER'S ANSWER:\n${r.answer}`
@@ -126,9 +133,9 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         refinement: result,
-        current_profile: mentorProfile,
+        current_profile: currentProfile,
         responses_processed: responses.length,
-        usage_note: 'Review refinement_notes to see what the answers revealed. Apply changes to current_profile to produce the refined version.',
+        usage_note: 'Review refinement_notes to see what the answers revealed. To save the updated profile, POST the modified profile to /api/mentor-profile.',
         disclaimer: 'SageReasoning offers philosophical exercises for self-examination. This is not psychological assessment or therapy.',
       },
       { headers: corsHeaders() }

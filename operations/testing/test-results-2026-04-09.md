@@ -151,6 +151,24 @@ The execute router provides a single endpoint (`/api/execute`) that can route to
 ### Demo 7: Full Agent Assessment (Session 5 — NEW)
 14-response foundational assessment via API key. Returns: Senecan grade estimate (pre_progress), katorthoma proximity summary (habitual), control clarity (moderate), 2 passions detected, direction of travel (stable), 14 per-assessment summaries, and personalised CTA with upgrade path. Demonstrates the complete agent evaluation pipeline.
 
+### Demo 8: Full Mentor Pipeline — End-to-End (Session 6 — NEW)
+All 4 mentor endpoints confirmed wired and returning 200 with real data:
+
+| Endpoint | Method | Status | What It Does |
+|---|---|---|---|
+| `/api/mentor-profile` | GET | 200 ✅ | Returns full MentorProfile JSON + 7,494-char text summary from founder's real journal (12 sections, 119 entries, 13 passions) |
+| `/api/mentor-baseline` | POST | 200 ✅ | Generates 10 tailored gap detection questions (2 confirmation, 3 edge-case, 3 gap-fill, 2 live-reasoning) targeting founder's specific profile |
+| `/api/mentor-baseline-response` | POST | 200 ✅ | Accepts practitioner's answers to gap questions, returns refinement notes and confidence changes |
+| `/api/mentor-journal-week` | POST | 200 ✅ | Generates 7 personalised weekly journal questions targeting weakest virtue, dominant passion, causal breakdown, and tensions |
+
+New files created this session:
+- `website/src/data/mentor-profile.json` — founder's profile embedded in build for Vercel runtime access
+- `website/src/lib/mentor-profile-summary.ts` — converts profile JSON to text summary
+- `website/src/app/api/mentor-profile/route.ts` — GET endpoint serving profile + summary
+- `website/src/app/api/mentor-baseline-response/route.ts` — POST endpoint processing gap answers
+
+This demonstrates the complete mentor extraction pipeline: journal → profile → gap questions → answers → refined profile → weekly journal.
+
 ---
 
-*This report serves P0 hold point (0h) Assessments 1 and 4. Sessions 2–5 took the product from 72% to 95% pass rate. All blockers and significant gaps resolved. 2 minor deferred items remain (baseline retake, export endpoints). The product is ready for Assessment 2 (what's missing) and Assessment 3 (value demonstration).*
+*This report serves P0 hold point (0h) Assessments 1 and 4. Sessions 2–6 took the product from 72% to 95% pass rate (core) with 4 additional mentor endpoints confirmed wired. All blockers and significant gaps resolved. 2 minor deferred items remain (baseline retake, export endpoints). Mentor pipeline confirmed end-to-end. The product is ready for Assessment 2 (what's missing) and Assessment 3 (value demonstration).*
