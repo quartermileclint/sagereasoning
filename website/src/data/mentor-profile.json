@@ -1,0 +1,333 @@
+{
+  "user_id": "founder_clinton",
+  "display_name": "Clinton",
+  "journal_name": "Clinton's Stoic Journal",
+  "journal_period": "October–December 2025",
+  "sections_processed": 12,
+  "entries_processed": 119,
+  "total_word_count": 13834,
+  "interpretation_timestamp": "2026-04-07T18:13:50.506457",
+  "passion_map": [
+    {
+      "passion_id": "philodoxia",
+      "sub_species": "philodoxia",
+      "root_passion": "epithumia",
+      "frequency": 9,
+      "max_intensity": "strong",
+      "sections_present": [
+        "Live in the Present",
+        "Embrace Difficulty",
+        "Practice Acceptance",
+        "A Virtuous Life",
+        "Master Your Thoughts",
+        "Master Your Feelings",
+        "Choose Serenity",
+        "Cultivate Wisdom",
+        "Be Responsible to Others"
+      ],
+      "false_judgements": [
+        "That reputation and others' respect are necessary for self-worth",
+        "That work reputation being tarnished is a genuine evil",
+        "That reputation in friend group defines self-worth",
+        "That virtue pursued without external recognition has less value",
+        "That lack of acknowledgement means personal worthlessness — entitlement to respect based on time invested",
+        "That being the 'good guy' responsible for cousins is necessary for identity",
+        "That creating for fame and impressing people are valid motivations",
+        "That being seen as knowledgeable/witty is necessary for respect",
+        "That the best version of self requires external recognition through social connection and being 'part of the rest'"
+      ]
+    },
+    {
+      "passion_id": "agonia",
+      "sub_species": "agonia",
+      "root_passion": "phobos",
+      "frequency": 5,
+      "max_intensity": "strong",
+      "sections_present": [
+        "Live in the Present",
+        "Embrace Difficulty",
+        "Master Your Thoughts",
+        "Accept Your Fate",
+        "Choose Serenity"
+      ],
+      "false_judgements": [
+        "That future catastrophes are present realities requiring worry now",
+        "That future failure from work obstacles is a present reality",
+        "That losing an earbud charger is a genuine deprivation worthy of strong reaction",
+        "That aging and loss of youth represent genuine evils rather than natural fate",
+        "That disappointing people or bringing harm through inaction is an imminent genuine evil"
+      ]
+    },
+    {
+      "passion_id": "pothos",
+      "sub_species": "pothos",
+      "root_passion": "epithumia",
+      "frequency": 4,
+      "max_intensity": "mild",
+      "sections_present": [
+        "Live in the Present",
+        "Live in Gratitude",
+        "Choose Serenity",
+        "Be Content"
+      ],
+      "false_judgements": [
+        "That past hobbies and eras represent lost identity that must be recovered",
+        "That the 'cynical protection blanket' serves a necessary protective function",
+        "That V8 car racing career represents a genuine loss",
+        "That rockstar fantasy/creative recognition represents a lost genuine good"
+      ]
+    },
+    {
+      "passion_id": "penthos",
+      "sub_species": "penthos",
+      "root_passion": "lupe",
+      "frequency": 4,
+      "max_intensity": "strong",
+      "sections_present": [
+        "Live in the Present",
+        "Practice Acceptance",
+        "Master Your Feelings",
+        "Cultivate Wisdom"
+      ],
+      "false_judgements": [
+        "That lack of creative impact constitutes genuine failure",
+        "That betrayal by a friend is evidence of personal worthlessness",
+        "That not being there for cousin constitutes personal failure",
+        "That not following through on commitments means irredeemable failure"
+      ]
+    },
+    {
+      "passion_id": "oknos",
+      "sub_species": "oknos",
+      "root_passion": "phobos",
+      "frequency": 3,
+      "max_intensity": "moderate",
+      "sections_present": [
+        "Live in the Present",
+        "Embrace Difficulty",
+        "Be Responsible to Others"
+      ],
+      "false_judgements": [
+        "That creative failure is a genuine evil worth fearing",
+        "That discomfort from reaching out to relatives is a genuine threat",
+        "That reaching out and being social involves genuine risk of rejection"
+      ]
+    },
+    {
+      "passion_id": "aischyne",
+      "sub_species": "aischyne",
+      "root_passion": "phobos",
+      "frequency": 3,
+      "max_intensity": "strong",
+      "sections_present": [
+        "Embrace Difficulty",
+        "A Virtuous Life",
+        "Master Your Feelings"
+      ],
+      "false_judgements": [
+        "That others' judgement of my home reveals genuine personal failure",
+        "That self-perceived labels (delusional, fraud, lazy) represent truth about character",
+        "That anger reveals cowardice unless willing to escalate to violence"
+      ]
+    },
+    {
+      "passion_id": "orge",
+      "sub_species": "orge",
+      "root_passion": "epithumia",
+      "frequency": 3,
+      "max_intensity": "strong",
+      "sections_present": [
+        "Practice Acceptance",
+        "Master Your Thoughts",
+        "Master Your Feelings"
+      ],
+      "false_judgements": [
+        "That children's disobedience is a genuine evil requiring forceful correction",
+        "That desiring credit makes its absence a genuine deprivation",
+        "That children's non-cooperation is a genuine evil requiring anger to correct"
+      ]
+    },
+    {
+      "passion_id": "phthonos",
+      "sub_species": "phthonos",
+      "root_passion": "lupe",
+      "frequency": 2,
+      "max_intensity": "moderate",
+      "sections_present": [
+        "Master Your Thoughts",
+        "Be Content"
+      ],
+      "false_judgements": [
+        "That others' spending validates the need to compare and measure against them",
+        "That others' success reveals personal deprivation — 'coveting is imagining the pleasure they must feel'"
+      ]
+    },
+    {
+      "passion_id": "philoplousia",
+      "sub_species": "philoplousia",
+      "root_passion": "epithumia",
+      "frequency": 2,
+      "max_intensity": "moderate",
+      "sections_present": [
+        "Accept Your Fate",
+        "Be Content"
+      ],
+      "false_judgements": [
+        "That wealth and status achievements are genuinely good rather than preferred indifferents — acknowledged as a tension",
+        "That cars and resourcefulness demonstration are genuine goods"
+      ]
+    },
+    {
+      "passion_id": "achthos",
+      "sub_species": "achthos",
+      "root_passion": "lupe",
+      "frequency": 1,
+      "max_intensity": "moderate",
+      "sections_present": [
+        "Practice Acceptance"
+      ],
+      "false_judgements": [
+        "That being instructed differently is an insult to competence"
+      ]
+    },
+    {
+      "passion_id": "epithumia",
+      "sub_species": "philedonia",
+      "root_passion": "epithumia",
+      "frequency": 1,
+      "max_intensity": "mild",
+      "sections_present": [
+        "A Virtuous Life"
+      ],
+      "false_judgements": [
+        "That flavour/taste pleasures provide genuine satisfaction"
+      ]
+    },
+    {
+      "passion_id": "philedonia",
+      "sub_species": "philedonia",
+      "root_passion": "epithumia",
+      "frequency": 1,
+      "max_intensity": "mild",
+      "sections_present": [
+        "Live in Gratitude"
+      ],
+      "false_judgements": [
+        "That luxury and indulgence are genuine goods rather than preferred indifferents to be used moderately"
+      ]
+    },
+    {
+      "passion_id": "kelesis",
+      "sub_species": "kelesis",
+      "root_passion": "hedone",
+      "frequency": 1,
+      "max_intensity": "mild",
+      "sections_present": [
+        "Choose Serenity"
+      ],
+      "false_judgements": [
+        "That gambling/lotto provides a legitimate pleasure worth pursuing"
+      ]
+    }
+  ],
+  "virtue_profile": {
+    "phronesis": {
+      "overall_strength": "strong",
+      "observations_count": 11,
+      "evidence_summary": [
+        "Can articulate what is and isn't in control but struggles to apply in the moment. Good post-hoc anal",
+        "Can rationally analyse the betrayal situation — 'addictions override decency, it was not personal' —",
+        "Practising critical thought with less cynicism. Beginning to hear both sides rather than just expose"
+      ]
+    },
+    "dikaiosyne": {
+      "overall_strength": "moderate",
+      "observations_count": 5,
+      "evidence_summary": [
+        "Looking for opportunities to serve team with pride. Acknowledging when could have been nicer.",
+        "Acknowledging when could have been nicer. Seeking to catch injustice in the moment, not just reflect",
+        "Withheld verbal retaliation when called 'dear' incorrectly — chose restraint over habitual verbal cr"
+      ]
+    },
+    "andreia": {
+      "overall_strength": "developing",
+      "observations_count": 10,
+      "evidence_summary": [
+        "Fear of creative failure prevents action. Fear of work accident prevented attendance.",
+        "Can reframe difficulties as opportunities (degree led to career, hernia led to weight loss) but stil",
+        "Lists 18 things to change about self — honest self-examination including dark thoughts, temper, cyni"
+      ]
+    },
+    "sophrosyne": {
+      "overall_strength": "developing",
+      "observations_count": 12,
+      "evidence_summary": [
+        "Resisted urge to break diet. Beginning to practice moderation.",
+        "Practising patience and curiosity as default responses. Keeping with diet rules.",
+        "Recognises overreaction patterns. Beginning to practice acceptance of imperfection."
+      ]
+    }
+  },
+  "causal_tendencies": {
+    "primary_breakdown": "synkatathesis",
+    "description": "The primary failure point is at assent — particularly assenting to the false judgement that external recognition (respect, acknowledgement, reputation) constitutes a genuine good. This pattern appears in 9 of 12 sections. Secondary breakdowns occur at horme (emotional impulse overriding deliberation, especially anger with children) and phantasia (catastrophizing, daydreaming horrible events).",
+    "specific_breakdowns": {
+      "synkatathesis": "Assents to false impressions about reputation, respect, self-worth. Treats preferred indifferents as genuine goods.",
+      "horme": "Anger impulse bypasses deliberation when children disobey or respect is perceived as absent.",
+      "phantasia": "Catastrophizing imagination generates false impressions of future disasters. Daydreaming horrible events.",
+      "praxis": "Avoidance behaviours (no tennis, no calling relatives, procrastination) — correct impressions but wrong actions."
+    }
+  },
+  "value_hierarchy": {
+    "explicit_top_values": [
+      "Family security and connection",
+      "Virtue through action (not signalling)",
+      "Creative expression",
+      "Being of service",
+      "Learning and wisdom"
+    ],
+    "primary_conflict": "Reputation/validation treated as genuine good despite intellectual understanding that it is a preferred indifferent. Wife and self celebrate wealth/status as shared value system.",
+    "classification_gaps": [
+      "Reputation → treated as genuine good (should be preferred indifferent)",
+      "Creative impact/recognition → treated as genuine good (the creation itself is virtuous, recognition is indifferent)",
+      "Others' respect → treated as genuine good (should be preferred indifferent)",
+      "Wealth/status achievements → celebrated as genuine goods, especially within marriage"
+    ]
+  },
+  "oikeiosis_map": {
+    "self_preservation": {
+      "level": "strong",
+      "evidence": "Diet discipline, health awareness, journalling practice, mood checks"
+    },
+    "household": {
+      "level": "strong",
+      "evidence": "Wife, kids, parents all prominently featured. Strong duty to provide and connect. Parenting growth visible."
+    },
+    "community": {
+      "level": "developing",
+      "evidence": "Boss, team, workmates featured. Beginning to extend to Seven Hills reserve. Work as service. Still searching for meaningful community contribution."
+    },
+    "humanity": {
+      "level": "nascent",
+      "evidence": "Environmental awareness, waste reduction, frugality with world resources. Not yet extended to active humanitarian concern."
+    },
+    "cosmic": {
+      "level": "emerging",
+      "evidence": "Nature appreciation deepening. 'If everything belongs to nature then so do I.' Beginning to see place in larger rational order."
+    }
+  },
+  "proximity_estimate": {
+    "level": "deliberate",
+    "senecan_grade": "proficiens_medius",
+    "description": "Clinton is between habitual and deliberate, trending firmly toward deliberate by journal's end. He can articulate Stoic principles accurately, identifies his own passions and false judgements, and shows genuine developmental change across the journal's 55+ day arc. The gap is between intellectual understanding and dispositional stability — he knows the right answer but doesn't yet reliably apply it under pressure. Key evidence of progress: anger with children reduced and replaced with encouragement, cynicism identified as 'protection blanket' to release, comprehensive bias awareness, contentment formula articulated, self-forgiveness begun."
+  },
+  "preferred_indifferents_aggregate": [
+    "Reputation and respect from others",
+    "Health (back pain, weight, diet)",
+    "Wealth and financial security",
+    "Creative recognition and impact",
+    "Social comfort and belonging",
+    "Status achievements",
+    "Physical capability and youth"
+  ]
+}
