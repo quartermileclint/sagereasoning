@@ -14,8 +14,10 @@ interface Message {
   agent_type: AgentType | null;
   content: string;
   relevance_score?: number;
-  pipeline_meta?: Record<string, unknown>;
-  decision_gate?: Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  pipeline_meta?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  decision_gate?: any;
   created_at: string;
 }
 
@@ -418,25 +420,25 @@ export default function FounderHubPage() {
                 whiteSpace: 'pre-wrap',
                 color: msg.role === 'observer' ? '#AAA' : '#E5E5E5',
               }}>
-                {msg.content}
+                {String(msg.content)}
               </div>
 
               {/* Pipeline meta for agent messages */}
               {msg.pipeline_meta && (
                 <div style={{ fontSize: 10, color: '#444', marginTop: 4, padding: '0 14px' }}>
-                  {(msg.pipeline_meta as Record<string, unknown>).model as string} | {(msg.pipeline_meta as Record<string, unknown>).durationMs as number}ms |{' '}
-                  {(msg.pipeline_meta as Record<string, unknown>).inputTokens as number}+{(msg.pipeline_meta as Record<string, unknown>).outputTokens as number} tokens
+                  {String((msg.pipeline_meta).model || '')} | {String((msg.pipeline_meta).durationMs || 0)}ms |{' '}
+                  {String((msg.pipeline_meta).inputTokens || 0)}+{String((msg.pipeline_meta).outputTokens || 0)} tokens
                 </div>
               )}
 
               {/* Decision gate warning */}
-              {msg.decision_gate && (msg.decision_gate as Record<string, unknown>).requiresApproval && (
+              {msg.decision_gate && (msg.decision_gate).requiresApproval && (
                 <div style={{
                   marginTop: 6, padding: '6px 12px', borderRadius: 6,
                   background: '#3B1A1A', border: '1px solid #6B2A2A',
                   fontSize: 12, color: '#F87171',
                 }}>
-                  Decision gate triggered: {(msg.decision_gate as Record<string, unknown>).reasoning as string}
+                  {'Decision gate triggered: ' + String((msg.decision_gate).reasoning || '')}
                 </div>
               )}
             </div>
