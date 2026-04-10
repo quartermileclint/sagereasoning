@@ -11,6 +11,24 @@ import { getPractitionerContext } from '@/lib/context/practitioner-context'
 // to avoid build-time resolution failures when sage-mentor dependencies
 // aren't available in the website build context.
 
+/**
+ * Robust JSON extraction from LLM responses.
+ * Handles: bare JSON, markdown-wrapped JSON, JSON with surrounding commentary.
+ */
+function parseJsonResponse(text: string): Record<string, unknown> {
+  try { return JSON.parse(text.trim()) } catch { /* continue */ }
+  const fenceStripped = text.replace(/```json?\s*\n?/gi, '').replace(/```\s*\n?/g, '').trim()
+  try { return JSON.parse(fenceStripped) } catch { /* continue */ }
+  const jsonMatch = text.match(/\{[\s\S]*\}/)
+  if (jsonMatch) { try { return JSON.parse(jsonMatch[0]) } catch { /* continue */ } }
+  const lastBrace = text.lastIndexOf('}')
+  const firstBrace = text.indexOf('{')
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    try { return JSON.parse(text.slice(firstBrace, lastBrace + 1)) } catch { /* continue */ }
+  }
+  throw new Error(`Could not extract valid JSON from response (${text.length} chars)`)
+}
+
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
@@ -113,15 +131,12 @@ Score my actions and give me the sage perspective.`
     const responseText =
       message.content[0].type === 'text' ? message.content[0].text : ''
 
-    let reflectionData
+    let reflectionData: Record<string, any>
     try {
-      const cleaned = responseText
-        .replace(/```json?\n?/g, '')
-        .replace(/```\n?/g, '')
-        .trim()
-      reflectionData = JSON.parse(cleaned)
-    } catch {
-      console.error('Reflection scorer parse error:', responseText)
+      reflectionData = parseJsonResponse(responseText) as Record<string, any>
+    } catch (parseErr) {
+      console.error('Reflection scorer parse error. Raw response:', responseText)
+      console.error('Parse error:', parseErr)
       return NextResponse.json(
         { error: 'Reflection engine returned invalid response' },
         { status: 500 }

@@ -24,15 +24,13 @@
 
 ## Next Session Should
 
-1. **Deploy and verify**. Push changes to Vercel. Test public mentor endpoints still work. Set `FOUNDER_USER_ID` env var. Test private endpoints return 403 for non-founder. Run the `SNAPSHOTS_MIGRATION_SQL` in Supabase SQL Editor.
+1. **Verify deployment**. Test public mentor endpoints still work (reflect, baseline). Test private endpoints return 403 for non-founder and 200 for founder. Confirm snapshots table exists.
 2. **Review hold point readiness**. With all context layers cleaned and the orchestrator built, assess which P0 items remain before 0h. The architecture is now clean enough for hold point testing.
 3. **Consider next build target**. Options: (a) wire the orchestrator to a real agent session for P7 prep, (b) begin P2 ethical safeguards (R17a bulk profiling prevention, R20a vulnerable user detection), (c) proceed to hold point assessment 0h.
 
 ## Blocked On
 
-- **`FOUNDER_USER_ID` env var**: Must be set in Vercel (and `.env.local`) for private mentor routes to work. Value = the founder's Supabase user ID.
-- **`mentor_profile_snapshots` migration**: SQL ready in `mentor-context-private.ts` (`SNAPSHOTS_MIGRATION_SQL` export). Must be run in Supabase SQL Editor before temporal snapshots work.
-- **Deployment**: None of Session 10's changes are live until pushed to Vercel.
+- Nothing. All deployment steps complete.
 
 ## Open Questions
 
