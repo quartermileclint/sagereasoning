@@ -5,6 +5,7 @@ import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
 import { getSupportBrainContext } from '@/lib/context/support-brain-loader'
 import { getEnvironmentalContext } from '@/lib/context/environmental-context'
+import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
 
 // =============================================================================
 // mentor-baseline — Post-Extraction Gap Detection Questionnaire
@@ -85,6 +86,7 @@ export async function POST(request: NextRequest) {
     const projectContext = await getProjectContext('summary')
     const supportBrainContext = getSupportBrainContext('quick')
     const environmentalContext = await getEnvironmentalContext('support')
+    const mentorKnowledgeBase = getMentorKnowledgeBase()
 
     const result = await runSageReason({
       input: profile_summary,
@@ -95,6 +97,7 @@ export async function POST(request: NextRequest) {
       projectContext,
       agentBrainContext: supportBrainContext,
       environmentalContext,
+      mentorKnowledgeBase,
     })
 
     return NextResponse.json(

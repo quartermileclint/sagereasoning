@@ -90,6 +90,13 @@ export interface ReasonInput {
    * information from weekly environmental scans.
    */
   environmentalContext?: string | null
+  /**
+   * Optional mentor knowledge base (Layer 5). When provided, injected into the
+   * user message after environmental context. Contains non-doctrinal background
+   * briefings (stoic historical context, global state of humanity).
+   * Does NOT modify the Stoic Brain — informational context only.
+   */
+  mentorKnowledgeBase?: string | null
 }
 
 export interface ReasonResult {
@@ -442,6 +449,11 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
   // Layer 4: Environmental context injection (non-doctrinal, in user message)
   if (params.environmentalContext) {
     userMessage += `\n\n${params.environmentalContext}`
+  }
+
+  // Layer 5: Mentor knowledge base injection (non-doctrinal, in user message)
+  if (params.mentorKnowledgeBase) {
+    userMessage += `\n\n${params.mentorKnowledgeBase}`
   }
 
   // Call Claude

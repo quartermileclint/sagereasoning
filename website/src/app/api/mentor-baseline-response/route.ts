@@ -9,6 +9,7 @@ import { isServerEncryptionConfigured } from '@/lib/server-encryption'
 import mentorProfileFallback from '@/data/mentor-profile.json'
 import { getSupportBrainContext } from '@/lib/context/support-brain-loader'
 import { getEnvironmentalContext } from '@/lib/context/environmental-context'
+import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
 
 // =============================================================================
 // mentor-baseline-response — Process practitioner's answers to gap questions
@@ -130,6 +131,7 @@ export async function POST(request: NextRequest) {
     const projectContext = await getProjectContext('summary')
     const supportBrainContext = getSupportBrainContext('quick')
     const environmentalContext = await getEnvironmentalContext('support')
+    const mentorKnowledgeBase = getMentorKnowledgeBase()
 
     const result = await runSageReason({
       input: fullInput,
@@ -140,6 +142,7 @@ export async function POST(request: NextRequest) {
       projectContext,
       agentBrainContext: supportBrainContext,
       environmentalContext,
+      mentorKnowledgeBase,
     })
 
     return NextResponse.json(

@@ -10,6 +10,7 @@ import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { getSupportBrainContext } from '@/lib/context/support-brain-loader'
 import { getEnvironmentalContext } from '@/lib/context/environmental-context'
+import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
 // Profile update is loaded dynamically via the sage-mentor bridge pattern
 // to avoid build-time resolution failures when sage-mentor dependencies
 // aren't available in the website build context.
@@ -95,6 +96,7 @@ export async function POST(request: NextRequest) {
     const projectContext = await getProjectContext('minimal')
     const supportBrainContext = getSupportBrainContext('standard')
     const environmentalContext = await getEnvironmentalContext('support')
+    const mentorKnowledgeBase = getMentorKnowledgeBase()
 
     let userMessage = `Daily reflection:
 
@@ -106,6 +108,7 @@ Score my actions and give me the sage perspective.`
     if (practitionerContext) userMessage += `\n\n${practitionerContext}`
     userMessage += `\n\n${projectContext}`
     if (environmentalContext) userMessage += `\n\n${environmentalContext}`
+    userMessage += `\n\n${mentorKnowledgeBase}`
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
