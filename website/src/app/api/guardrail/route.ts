@@ -11,7 +11,6 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
-import { getProjectContext } from '@/lib/context/project-context'
 
 /**
  * sage-guard — Binary safety gate for AI agent actions.
@@ -93,9 +92,6 @@ export async function POST(request: NextRequest) {
         ? 'This is an elevated safety gate evaluation. The action modifies existing user-facing functionality or adds external dependencies. Evaluate carefully.'
         : 'This is a binary safety gate evaluation. Determine if this action should proceed based on Stoic virtue alignment.'
 
-    // Load project context (Layer 3 — project context)
-    const projectContext = await getProjectContext('condensed')
-
     const reasoningResult = await runSageReason({
       input: action.trim(),
       context,
@@ -103,7 +99,6 @@ export async function POST(request: NextRequest) {
       domain_context: domainContext,
       urgency_context: typeof urgency_context === 'string' ? urgency_context.trim() : undefined,
       stoicBrainContext: getStoicBrainContext(evaluationDepth),
-      projectContext,
     })
 
     const assessmentData = reasoningResult.result as any

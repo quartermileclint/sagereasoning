@@ -8,7 +8,6 @@ import { extractReceipt } from '@/lib/reasoning-receipt'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
-import { getProjectContext } from '@/lib/context/project-context'
 
 /**
  * sage-decide — Compare multiple decision options through Stoic virtue.
@@ -89,9 +88,6 @@ export async function POST(request: NextRequest) {
     // Load practitioner context once (Layer 2 — personalised reasoning)
     const practitionerContext = await getPractitionerContext(auth.user.id)
 
-    // Load project context (Layer 3 — project context)
-    const projectContext = await getProjectContext('condensed')
-
     // Evaluate each option via sage-reason
     const scoreData: OptionScore[] = []
     for (let i = 0; i < options.length; i++) {
@@ -103,7 +99,6 @@ export async function POST(request: NextRequest) {
         domain_context: domainContext,
         stoicBrainContext: getStoicBrainContext('standard'),
         practitionerContext,
-        projectContext,
       })
 
       const evalData = reasoningResult.result as any

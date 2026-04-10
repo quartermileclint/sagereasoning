@@ -3,7 +3,6 @@ import { checkRateLimit, RATE_LIMITS, requireAuth, validateApiKey, validateTextL
 import { runSageReason, type ReasonDepth } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
-import { getProjectContext } from '@/lib/context/project-context'
 
 // =============================================================================
 // sage-reason — The Universal Reasoning Layer
@@ -83,12 +82,9 @@ export async function POST(request: NextRequest) {
       ? await getPractitionerContext(auth.user.id)
       : null
 
-    // Load project context (Layer 3 — project context)
-    const projectContext = await getProjectContext('condensed')
-
-    // Call the shared reasoning engine with Stoic Brain (Layer 1) + practitioner context (Layer 2) + project context (Layer 3)
+    // Call the shared reasoning engine with Stoic Brain (Layer 1) + practitioner context (Layer 2)
     const stoicBrainContext = getStoicBrainContext(depth)
-    const result = await runSageReason({ input, context, depth, domain_context, urgency_context, stoicBrainContext, practitionerContext, projectContext })
+    const result = await runSageReason({ input, context, depth, domain_context, urgency_context, stoicBrainContext, practitionerContext })
     return NextResponse.json(result, { headers: corsHeaders() })
   } catch (error) {
     console.error('sage-reason API error:', error)
