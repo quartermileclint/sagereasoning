@@ -12,8 +12,10 @@ import {
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getOpsBrainContext } from '@/lib/context/ops-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
+import { getEnvironmentalContext } from '@/lib/context/environmental-context'
 import {
   buildPrioritisePrompt,
   buildPrioritiseResponse,
@@ -159,8 +161,10 @@ export async function POST(request: NextRequest) {
 
     // ── Context layers injection ──────────────────────────────────
     const stoicBrainContext = getStoicBrainContext('quick')
+    const opsBrainContext = getOpsBrainContext('quick')
     const practitionerContext = await getPractitionerContext(auth.user.id)
     const projectContext = await getProjectContext('condensed')
+    const environmentalContext = await getEnvironmentalContext('ops')
 
     // ── Call LLM ────────────────────────────────────────────────────
     const systemPrompt = buildPrioritisePrompt(prioritiseRequest)
@@ -168,6 +172,7 @@ export async function POST(request: NextRequest) {
     let userContent = `Prioritise these ${prioritiseRequest.items.length} items using Stoic reasoning. Return only the JSON evaluation object.`
     if (practitionerContext) userContent += `\n\n${practitionerContext}`
     userContent += `\n\n${projectContext}`
+    if (environmentalContext) userContent += `\n\n${environmentalContext}`
 
     const message = await client.messages.create({
       model: MODEL_FAST,
@@ -176,6 +181,7 @@ export async function POST(request: NextRequest) {
       system: [
         { type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: stoicBrainContext },
+        { type: 'text', text: opsBrainContext },
       ],
       messages: [
         {

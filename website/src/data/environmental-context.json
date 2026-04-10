@@ -1,0 +1,57 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-04-10",
+  "refresh_frequency": "weekly",
+  "preamble": "The following is current environmental context for awareness only. It does not modify expertise, principles, or project commitments. Use it to inform recommendations — never to revise fundamentals.",
+  "domains": {
+    "ops": {
+      "label": "Sage-Ops — Startup Operations Environment",
+      "scan_topics": [
+        "AI startup funding climate and pre-seed/seed trends",
+        "Solo founder and AI-assisted startup tooling developments",
+        "AI governance and regulation updates (AU, EU, US)",
+        "Startup operations automation trends",
+        "Remote-first and async collaboration patterns"
+      ],
+      "current_summary": "No environmental scan has been run yet. This domain will be populated by the first weekly scan.",
+      "last_scanned": null
+    },
+    "tech": {
+      "label": "Sage-Tech — Technology Environment",
+      "scan_topics": [
+        "Anthropic Claude model releases and API changes",
+        "Next.js and Vercel platform updates",
+        "Supabase feature releases and pricing changes",
+        "LLM cost trends and optimisation techniques",
+        "TypeScript ecosystem and tooling updates",
+        "Web security advisories relevant to auth and encryption"
+      ],
+      "current_summary": "No environmental scan has been run yet. This domain will be populated by the first weekly scan.",
+      "last_scanned": null
+    },
+    "growth": {
+      "label": "Sage-Growth — Market Environment",
+      "scan_topics": [
+        "Stoic philosophy interest trends and community growth",
+        "AI agent marketplace and developer ecosystem developments",
+        "Competitor movements in AI ethics, reasoning, and assessment tools",
+        "Developer relations and API-first product marketing trends",
+        "Content marketing effectiveness in philosophy and AI spaces"
+      ],
+      "current_summary": "No environmental scan has been run yet. This domain will be populated by the first weekly scan.",
+      "last_scanned": null
+    },
+    "support": {
+      "label": "Sage-Support — Support Environment",
+      "scan_topics": [
+        "AI ethics discourse and public sentiment shifts",
+        "Mental health tech regulation and crisis resource updates",
+        "Accessibility standards and WCAG developments",
+        "AI safety incident reports and lessons learned",
+        "Philosophical counselling and digital wellbeing trends"
+      ],
+      "current_summary": "No environmental scan has been run yet. This domain will be populated by the first weekly scan.",
+      "last_scanned": null
+    }
+  }
+}
