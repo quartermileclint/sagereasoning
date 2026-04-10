@@ -245,6 +245,7 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  let debugStep = 'parse_body'
   try {
     const { agent, message, conversation_id } = await request.json()
 
@@ -265,9 +266,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Get or create conversation
+    debugStep = 'create_conversation'
     let convId = conversation_id
     if (!convId) {
-      // Create new conversation
       const { data: conv, error: convErr } = await supabaseAdmin
         .from('founder_conversations')
         .insert({
@@ -280,7 +281,7 @@ export async function POST(request: NextRequest) {
       if (convErr || !conv) {
         console.error('Failed to create conversation:', convErr)
         return NextResponse.json(
-          { error: 'Failed to create conversation.' },
+          { error: `Failed to create conversation: ${convErr?.message || 'unknown'}` },
           { status: 500 }
         )
       }
@@ -288,6 +289,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Load conversation history
+    debugStep = 'load_history'
     const { data: history } = await supabaseAdmin
       .from('founder_conversation_messages')
       .select('role, agent_type, content')
@@ -297,6 +299,7 @@ export async function POST(request: NextRequest) {
     const conversationHistory = history || []
 
     // Save founder's message
+    debugStep = 'save_founder_message'
     await supabaseAdmin.from('founder_conversation_messages').insert({
       conversation_id: convId,
       role: 'founder',
@@ -305,6 +308,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Get primary agent response
+    debugStep = `get_primary_response_${agent}`
     const primaryResponse = await getPrimaryAgentResponse(
       agent as AgentType,
       message.trim(),
@@ -313,6 +317,7 @@ export async function POST(request: NextRequest) {
     )
 
     // Save primary agent response
+    debugStep = 'save_primary_response'
     await supabaseAdmin.from('founder_conversation_messages').insert({
       conversation_id: convId,
       role: 'agent',
@@ -323,6 +328,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Get observer contributions (all other agents check in parallel)
+    debugStep = 'get_observers'
     const otherAgents = VALID_AGENTS.filter(a => a !== agent)
     const observerPromises = otherAgents.map(observer =>
       getObserverContribution(
@@ -339,6 +345,7 @@ export async function POST(request: NextRequest) {
     const contributions = observerResults.filter((r): r is AgentResponse => r !== null)
 
     // Save observer contributions
+    debugStep = 'save_observers'
     for (const obs of contributions) {
       await supabaseAdmin.from('founder_conversation_messages').insert({
         conversation_id: convId,
@@ -351,6 +358,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update conversation timestamp
+    debugStep = 'update_timestamp'
     await supabaseAdmin
       .from('founder_conversations')
       .update({ updated_at: new Date().toISOString() })
@@ -374,9 +382,10 @@ export async function POST(request: NextRequest) {
       headers: corsHeaders(),
     })
   } catch (error) {
-    console.error('Founder hub error:', error)
+    const errMsg = error instanceof Error ? error.message : String(error)
+    console.error(`Founder hub error at step [${debugStep}]:`, error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: `Failed at step: ${debugStep}. Detail: ${errMsg}` },
       { status: 500 }
     )
   }
