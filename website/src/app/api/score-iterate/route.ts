@@ -7,6 +7,8 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_DEEP, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getTechBrainContext } from '@/lib/context/tech-brain-loader'
+import { getEnvironmentalContext } from '@/lib/context/environmental-context'
 import type { V3DeliberationChain, V3DeliberationStep, DetectedPassion } from '@/lib/deliberation'
 
 const client = new Anthropic({
@@ -125,6 +127,8 @@ Return only the JSON evaluation object.`
 
       // Layer 1: Stoic Brain context (agent-facing — standard depth, no Layer 2 or 3)
       const stoicBrainContext = getStoicBrainContext('standard')
+      const techBrainContext = getTechBrainContext('quick')
+      const environmentalContext = await getEnvironmentalContext('tech')
 
       if (!evalData) {
         const message = await client.messages.create({
@@ -134,8 +138,9 @@ Return only the JSON evaluation object.`
           system: [
             { type: 'text', text: INITIAL_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
             { type: 'text', text: stoicBrainContext },
+            { type: 'text', text: techBrainContext },
           ],
-          messages: [{ role: 'user', content: userMessage }],
+          messages: [{ role: 'user', content: userMessage + (environmentalContext ? `\n\n${environmentalContext}` : '') }],
         })
 
         const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
@@ -385,6 +390,8 @@ Evaluate the revised action. Return only the JSON evaluation object.`
 
     // Layer 1: Stoic Brain context for iteration (agent-facing — standard depth)
     const iterStoicBrainContext = getStoicBrainContext('standard')
+    const iterTechBrainContext = getTechBrainContext('quick')
+    const iterEnvironmentalContext = await getEnvironmentalContext('tech')
 
     if (!evalData) {
       const message = await client.messages.create({
@@ -394,8 +401,9 @@ Evaluate the revised action. Return only the JSON evaluation object.`
         system: [
           { type: 'text', text: iterationPrompt, cache_control: { type: 'ephemeral' } },
           { type: 'text', text: iterStoicBrainContext },
+          { type: 'text', text: iterTechBrainContext },
         ],
-        messages: [{ role: 'user', content: userMessage }],
+        messages: [{ role: 'user', content: userMessage + (iterEnvironmentalContext ? `\n\n${iterEnvironmentalContext}` : '') }],
       })
 
       const responseText = message.content[0].type === 'text' ? message.content[0].text : ''

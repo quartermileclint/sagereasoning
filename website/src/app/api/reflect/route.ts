@@ -8,6 +8,8 @@ import { extractReceipt } from '@/lib/reasoning-receipt'
 import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
+import { getSupportBrainContext } from '@/lib/context/support-brain-loader'
+import { getEnvironmentalContext } from '@/lib/context/environmental-context'
 // Profile update is loaded dynamically via the sage-mentor bridge pattern
 // to avoid build-time resolution failures when sage-mentor dependencies
 // aren't available in the website build context.
@@ -91,6 +93,8 @@ export async function POST(request: NextRequest) {
     const stoicBrainContext = getStoicBrainContextForMechanisms(['passion_diagnosis', 'oikeiosis'])
     const practitionerContext = await getPractitionerContext(auth.user.id)
     const projectContext = await getProjectContext('minimal')
+    const supportBrainContext = getSupportBrainContext('standard')
+    const environmentalContext = await getEnvironmentalContext('support')
 
     let userMessage = `Daily reflection:
 
@@ -101,6 +105,7 @@ Score my actions and give me the sage perspective.`
 
     if (practitionerContext) userMessage += `\n\n${practitionerContext}`
     userMessage += `\n\n${projectContext}`
+    if (environmentalContext) userMessage += `\n\n${environmentalContext}`
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
@@ -109,6 +114,7 @@ Score my actions and give me the sage perspective.`
       system: [
         { type: 'text', text: REFLECTION_PROMPT, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: stoicBrainContext },
+        { type: 'text', text: supportBrainContext },
       ],
       messages: [{ role: 'user', content: userMessage }],
     })

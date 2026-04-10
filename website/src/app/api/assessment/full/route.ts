@@ -22,6 +22,8 @@ import {
   publicCorsPreflightResponse,
 } from '@/lib/security'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getTechBrainContext } from '@/lib/context/tech-brain-loader'
+import { getEnvironmentalContext } from '@/lib/context/environmental-context'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -213,6 +215,8 @@ Return ONLY valid JSON:
 
     // Layer 1: Stoic Brain context (agent-facing — no Layer 2 or 3)
     const stoicBrainContext = getStoicBrainContext('deep')
+    const techBrainContext = getTechBrainContext('deep')
+    const environmentalContext = await getEnvironmentalContext('tech')
 
     // Run all 3 batches in parallel
     const [msg1, msg2, msg3] = await Promise.all([
@@ -223,8 +227,9 @@ Return ONLY valid JSON:
         system: [
           { type: 'text', text: V3_ASSESSMENT_SCORING_PROMPT, cache_control: { type: 'ephemeral' } },
           { type: 'text', text: stoicBrainContext },
+          { type: 'text', text: techBrainContext },
         ],
-        messages: [{ role: 'user', content: buildBatchPrompt(batch1Responses, 'Phases 1-3: Foundations, Architecture of Mind, Value Hierarchy') }],
+        messages: [{ role: 'user', content: buildBatchPrompt(batch1Responses, 'Phases 1-3: Foundations, Architecture of Mind, Value Hierarchy') + (environmentalContext ? `\n\n${environmentalContext}` : '') }],
       }),
       client.messages.create({
         model: 'claude-sonnet-4-6',
@@ -233,8 +238,9 @@ Return ONLY valid JSON:
         system: [
           { type: 'text', text: V3_ASSESSMENT_SCORING_PROMPT, cache_control: { type: 'ephemeral' } },
           { type: 'text', text: stoicBrainContext },
+          { type: 'text', text: techBrainContext },
         ],
-        messages: [{ role: 'user', content: buildBatchPrompt(batch2Responses, 'Phases 4-5: Unity of Excellence, Passion Diagnosis') }],
+        messages: [{ role: 'user', content: buildBatchPrompt(batch2Responses, 'Phases 4-5: Unity of Excellence, Passion Diagnosis') + (environmentalContext ? `\n\n${environmentalContext}` : '') }],
       }),
       client.messages.create({
         model: 'claude-sonnet-4-6',
@@ -243,8 +249,9 @@ Return ONLY valid JSON:
         system: [
           { type: 'text', text: V3_ASSESSMENT_SCORING_PROMPT, cache_control: { type: 'ephemeral' } },
           { type: 'text', text: stoicBrainContext },
+          { type: 'text', text: techBrainContext },
         ],
-        messages: [{ role: 'user', content: buildBatchPrompt(batch3Responses, 'Phases 6-8: Right Action, Measuring Progress, Integration') }],
+        messages: [{ role: 'user', content: buildBatchPrompt(batch3Responses, 'Phases 6-8: Right Action, Measuring Progress, Integration') + (environmentalContext ? `\n\n${environmentalContext}` : '') }],
       }),
     ])
 
@@ -353,8 +360,9 @@ Return ONLY valid JSON:
       system: [
         { type: 'text', text: V3_ASSESSMENT_SCORING_PROMPT, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: stoicBrainContext },
+        { type: 'text', text: techBrainContext },
       ],
-      messages: [{ role: 'user', content: aggregatePrompt }],
+      messages: [{ role: 'user', content: aggregatePrompt + (environmentalContext ? `\n\n${environmentalContext}` : '') }],
     })
 
     let aggregateData: {

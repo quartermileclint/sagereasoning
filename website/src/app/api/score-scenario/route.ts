@@ -8,6 +8,8 @@ import { MODEL_FAST } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
+import { getGrowthBrainContext } from '@/lib/context/growth-brain-loader'
+import { getEnvironmentalContext } from '@/lib/context/environmental-context'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -96,6 +98,8 @@ export async function GET(request: NextRequest) {
 
     // Layer 1 only for scenario generation (creative, not scoring)
     const stoicBrainContext = getStoicBrainContext('quick')
+    const growthBrainContext = getGrowthBrainContext('quick')
+    const environmentalContext = await getEnvironmentalContext('growth')
 
     const userMessage = `Generate an ethical scenario for audience: ${validAudience}
 Topic hint: ${selectedTopic}
@@ -109,8 +113,9 @@ Return the JSON scenario with options.`
       system: [
         { type: 'text', text: SCENARIO_PROMPT, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: stoicBrainContext },
+        { type: 'text', text: growthBrainContext },
       ],
-      messages: [{ role: 'user', content: userMessage }],
+      messages: [{ role: 'user', content: userMessage + (environmentalContext ? `\n\n${environmentalContext}` : '') }],
     })
 
     const responseText =
@@ -213,6 +218,8 @@ export async function POST(request: NextRequest) {
     const scoringStoicContext = getStoicBrainContext('quick')
     const practitionerContext = await getPractitionerContext(auth.user.id)
     const projectContext = await getProjectContext('minimal')
+    const scoringGrowthContext = getGrowthBrainContext('quick')
+    const scoringEnvironmentalContext = await getEnvironmentalContext('growth')
 
     let userMessage = `Audience level: ${validAudience}
 
@@ -224,6 +231,7 @@ Score this response. Return the JSON.`
 
     if (practitionerContext) userMessage += `\n\n${practitionerContext}`
     userMessage += `\n\n${projectContext}`
+    if (scoringEnvironmentalContext) userMessage += `\n\n${scoringEnvironmentalContext}`
 
     const message = await client.messages.create({
       model: MODEL_FAST,
@@ -232,6 +240,7 @@ Score this response. Return the JSON.`
       system: [
         { type: 'text', text: SCENARIO_PROMPT, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: scoringStoicContext },
+        { type: 'text', text: scoringGrowthContext },
       ],
       messages: [{ role: 'user', content: userMessage }],
     })

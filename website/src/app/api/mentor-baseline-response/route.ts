@@ -7,6 +7,8 @@ import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-sum
 import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
 import mentorProfileFallback from '@/data/mentor-profile.json'
+import { getSupportBrainContext } from '@/lib/context/support-brain-loader'
+import { getEnvironmentalContext } from '@/lib/context/environmental-context'
 
 // =============================================================================
 // mentor-baseline-response — Process practitioner's answers to gap questions
@@ -126,6 +128,8 @@ export async function POST(request: NextRequest) {
 
     // Load project context (Layer 3 — project context)
     const projectContext = await getProjectContext('summary')
+    const supportBrainContext = getSupportBrainContext('quick')
+    const environmentalContext = await getEnvironmentalContext('support')
 
     const result = await runSageReason({
       input: fullInput,
@@ -134,6 +138,8 @@ export async function POST(request: NextRequest) {
       domain_context: 'mentor_baseline_refinement',
       stoicBrainContext: getStoicBrainContext('deep'),
       projectContext,
+      agentBrainContext: supportBrainContext,
+      environmentalContext,
     })
 
     return NextResponse.json(

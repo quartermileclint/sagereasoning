@@ -77,6 +77,19 @@ export interface ReasonInput {
    * the user message itself.
    */
   projectContext?: string | null
+  /**
+   * Optional agent brain context (Block 3). When provided, injected as a third
+   * system message block after the endpoint prompt (Block 1) and Stoic Brain (Block 2).
+   * Contains domain-specific expertise (tech/growth/support/ops).
+   * Each brain gets its own system message block — never concatenated.
+   */
+  agentBrainContext?: string | null
+  /**
+   * Optional environmental context (Layer 4). When provided, injected into the
+   * user message after project context. Contains non-doctrinal background
+   * information from weekly environmental scans.
+   */
+  environmentalContext?: string | null
 }
 
 export interface ReasonResult {
@@ -419,6 +432,16 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
   ]
   if (stoicBrainBlock) {
     systemMessages.push({ type: 'text', text: stoicBrainBlock })
+  }
+
+  // Block 3: Agent Brain context (tech/growth/support/ops)
+  if (params.agentBrainContext) {
+    systemMessages.push({ type: 'text', text: params.agentBrainContext })
+  }
+
+  // Layer 4: Environmental context injection (non-doctrinal, in user message)
+  if (params.environmentalContext) {
+    userMessage += `\n\n${params.environmentalContext}`
   }
 
   // Call Claude
