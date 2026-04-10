@@ -36,6 +36,13 @@ interface ObserverContribution {
   relevance_score?: number;
 }
 
+interface RecommendedAction {
+  action_summary: string;
+  session_prompt: string;
+  risk_classification: 'standard' | 'elevated' | 'critical';
+  risk_reasoning: string;
+}
+
 // =============================================================================
 // Constants
 // =============================================================================
@@ -74,6 +81,8 @@ export default function FounderHubPage() {
   const [showSidebar, setShowSidebar] = useState(true);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [latestAction, setLatestAction] = useState<RecommendedAction | null>(null);
+  const [copiedPrompt, setCopiedPrompt] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -204,6 +213,12 @@ export default function FounderHubPage() {
             created_at: new Date().toISOString(),
           }]);
         }
+      }
+
+      // Capture recommended action
+      if (data.recommended_action) {
+        setLatestAction(data.recommended_action as RecommendedAction);
+        setCopiedPrompt(false);
       }
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
@@ -456,6 +471,75 @@ export default function FounderHubPage() {
 
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Recommended Action Block */}
+        {latestAction && (
+          <div style={{
+            margin: '0 24px 8px', padding: '14px 16px', borderRadius: 8,
+            background: '#111815',
+            border: `1px solid ${
+              latestAction.risk_classification === 'critical' ? '#6B2A2A' :
+              latestAction.risk_classification === 'elevated' ? '#6B5A2A' : '#1F2F1F'
+            }`,
+          }}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <span style={{ fontSize: 14 }}>{'\u2699\uFE0F'}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#3B82F6' }}>Ops — Recommended Action</span>
+              <span style={{
+                fontSize: 10, padding: '2px 8px', borderRadius: 4,
+                background: latestAction.risk_classification === 'critical' ? '#3B1A1A' :
+                             latestAction.risk_classification === 'elevated' ? '#3B2A1A' : '#1A2A1A',
+                color: latestAction.risk_classification === 'critical' ? '#F87171' :
+                       latestAction.risk_classification === 'elevated' ? '#FBBF24' : '#4ADE80',
+                fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5,
+              }}>
+                {latestAction.risk_classification}
+              </span>
+            </div>
+
+            {/* Action summary */}
+            <div style={{ fontSize: 14, color: '#E5E5E5', marginBottom: 6, lineHeight: 1.5 }}>
+              {String(latestAction.action_summary)}
+            </div>
+
+            {/* Risk reasoning */}
+            <div style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>
+              {String(latestAction.risk_reasoning)}
+            </div>
+
+            {/* Session prompt */}
+            <div style={{
+              background: '#0A0A0A', borderRadius: 6, padding: '10px 12px',
+              border: '1px solid #2A2A2A', marginBottom: 8,
+            }}>
+              <div style={{ fontSize: 11, color: '#666', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Session Prompt
+              </div>
+              <div style={{ fontSize: 13, color: '#CCC', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                {String(latestAction.session_prompt)}
+              </div>
+            </div>
+
+            {/* Copy button */}
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(latestAction.session_prompt);
+                setCopiedPrompt(true);
+                setTimeout(() => setCopiedPrompt(false), 2000);
+              }}
+              style={{
+                padding: '6px 14px', borderRadius: 6,
+                background: copiedPrompt ? '#1A2A1A' : '#C4A265',
+                color: copiedPrompt ? '#4ADE80' : '#0A0A0A',
+                border: 'none', fontSize: 12, fontWeight: 600,
+                cursor: 'pointer', transition: 'all 0.15s',
+              }}
+            >
+              {copiedPrompt ? 'Copied!' : 'Copy Prompt'}
+            </button>
+          </div>
+        )}
 
         {/* Error display */}
         {error && (

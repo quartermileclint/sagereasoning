@@ -229,6 +229,104 @@ async function getObserverContribution(
 }
 
 // =============================================================================
+// Ops Recommended Action — Final pass after all responses
+// =============================================================================
+
+interface RecommendedAction {
+  action_summary: string
+  session_prompt: string
+  risk_classification: 'standard' | 'elevated' | 'critical'
+  risk_reasoning: string
+}
+
+async function getOpsRecommendedAction(
+  founderMessage: string,
+  primaryAgent: AgentType,
+  primaryResponse: string,
+  observerSummaries: string,
+): Promise<RecommendedAction> {
+  const client = getClient()
+  const opsBrain = getAgentBrainContext('ops', 'quick')
+
+  const response = await client.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 768,
+    temperature: 0.2,
+    system: [
+      {
+        type: 'text',
+        text: `You are Sage-Ops, producing a recommended next action for the SageReasoning founder after a hub conversation. You have process, financial, and compliance awareness.
+
+Your job: synthesize the conversation into one actionable next step with a ready-to-use session prompt the founder can paste into a new Claude Cowork session.
+
+The session prompt must:
+- Give the new session enough context to start working immediately
+- Reference specific files, endpoints, or decisions when relevant
+- Include the risk classification so the new session knows what protocols to follow
+- Be written as direct instructions to Claude, not as a summary
+
+Risk classification (per 0d-ii):
+- Standard: Additive changes, content updates, new features, cosmetic fixes
+- Elevated: Changes to existing user-facing functionality, new dependencies, schema changes
+- Critical: Auth, session management, access control, encryption, data deletion, deployment config
+
+Return ONLY valid JSON:
+{
+  "action_summary": "<one sentence: what to do next>",
+  "session_prompt": "<the full prompt the founder pastes into a new session — 3-8 sentences, specific and actionable>",
+  "risk_classification": "<standard|elevated|critical>",
+  "risk_reasoning": "<one sentence: why this risk level>"
+}
+
+${opsBrain}`,
+      },
+    ],
+    messages: [
+      {
+        role: 'user',
+        content: `Conversation with ${primaryAgent}:
+
+Founder asked: "${founderMessage}"
+
+${primaryAgent} responded: "${primaryResponse.substring(0, 1200)}"
+
+${observerSummaries ? `Observer contributions:\n${observerSummaries}` : 'No observer contributions.'}
+
+What is the recommended next action?`,
+      },
+    ],
+  })
+
+  const text = response.content[0].type === 'text' ? response.content[0].text : ''
+
+  try {
+    // Robust JSON extraction (same pattern as reflect fix)
+    let parsed: Record<string, any>
+    try { parsed = JSON.parse(text.trim()) } catch {
+      const match = text.match(/\{[\s\S]*\}/)
+      if (match) { parsed = JSON.parse(match[0]) } else { throw new Error('No JSON found') }
+    }
+
+    return {
+      action_summary: String(parsed.action_summary || 'Review the conversation and decide next steps.'),
+      session_prompt: String(parsed.session_prompt || 'Continue from the founder hub conversation.'),
+      risk_classification: ['standard', 'elevated', 'critical'].includes(parsed.risk_classification)
+        ? parsed.risk_classification
+        : 'standard',
+      risk_reasoning: String(parsed.risk_reasoning || 'Default classification.'),
+    }
+  } catch {
+    // Fallback if Haiku doesn't return valid JSON
+    return {
+      action_summary: 'Review the conversation and decide next steps.',
+      session_prompt: `Continue from a founder hub conversation with ${primaryAgent}. The founder asked: "${founderMessage.substring(0, 200)}". Review the response and determine the next concrete action.`,
+      risk_classification: 'standard',
+      risk_reasoning: 'Unable to classify — defaulting to standard.',
+    }
+  }
+}
+
+// =============================================================================
 // POST — Send message to agent
 // =============================================================================
 
@@ -357,6 +455,33 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Get Ops recommended action (final synthesis pass)
+    debugStep = 'get_ops_recommended_action'
+    const observerSummary = contributions
+      .map(obs => `[${obs.agent}]: ${obs.content}`)
+      .join('\n')
+    const recommendedAction = await getOpsRecommendedAction(
+      message.trim(),
+      agent as AgentType,
+      primaryResponse.content,
+      observerSummary,
+    ).catch(err => {
+      console.error('Ops recommended action failed (non-blocking):', err)
+      return null
+    })
+
+    // Save recommended action as an ops observer message
+    if (recommendedAction) {
+      await supabaseAdmin.from('founder_conversation_messages').insert({
+        conversation_id: convId,
+        role: 'observer',
+        agent_type: 'ops',
+        content: `**Recommended Action:** ${recommendedAction.action_summary}\n\n**Risk:** ${recommendedAction.risk_classification} — ${recommendedAction.risk_reasoning}\n\n**Session Prompt:**\n${recommendedAction.session_prompt}`,
+        relevance_score: 1.0,
+        pipeline_meta: { type: 'recommended_action', risk_classification: recommendedAction.risk_classification },
+      })
+    }
+
     // Update conversation timestamp
     debugStep = 'update_timestamp'
     await supabaseAdmin
@@ -377,6 +502,7 @@ export async function POST(request: NextRequest) {
         content: obs.content,
         relevance_score: obs.relevance_score,
       })),
+      recommended_action: recommendedAction || null,
       message_count: conversationHistory.length + 2 + contributions.length,
     }, {
       headers: corsHeaders(),
