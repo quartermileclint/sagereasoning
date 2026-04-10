@@ -29,6 +29,43 @@ Interactive HTML with dark theme. Four tiers: Founder → Shared Stoic Brain lay
 ### Sage-Ops Brain Audit (`session-7f-deep-thought-review.md`)
 Full audit identifying 3 missing positions (Analytics, QA, Compliance Officer), 3 expertise gaps in existing roles (CTO needs AI/ML Ops, CMO needs DevRel, Support needs philosophical sensitivity), and structural recommendations (advisory board, role consolidation for solo phase).
 
+## What Was Built (continued)
+
+### Sage-Ops Brain v1.0.0 — First Non-Stoic Brain
+
+Built following the exact Stoic Brain architecture pattern: compiled TypeScript constants → domain-specific loaders → composite builder by depth level.
+
+**Data file** (`ops-brain-compiled.ts`): 6 operational domains + foundations:
+
+| Domain | Content | Token Budget |
+|--------|---------|-------------|
+| `process` | Workflow states, session protocols, change classification, communication signals | ~500 |
+| `financial` | MRR/ARR/burn/runway/CAC/LTV, cost health thresholds (R5), AU tax basics | ~600 |
+| `compliance` | Active R-rules (R17-R20), legal prep areas, audit schedule | ~500 |
+| `people` | Solo founder energy/skill management, first-hire readiness triggers | ~400 |
+| `analytics` | Phase-appropriate metrics (P0 vs launch), tracked analytics events | ~400 |
+| `vendor` | Current stack (Vercel/Supabase/Anthropic/GitHub), cost monitoring, migration paths | ~400 |
+| `foundations` | Core premise, four operational virtues (Stoic parallels), operating principle | ~200 |
+
+**Loader** (`ops-brain-loader.ts`): Exports `getOpsBrainContext(depth)` with 3 levels:
+
+| Depth | Domains Included | Token Ceiling | Use Case |
+|-------|-----------------|---------------|----------|
+| `quick` | process + financial | ~1500 | Quick operational checks |
+| `standard` | + compliance + analytics | ~3000 | Most operational tasks |
+| `deep` | + people + vendor | ~5000 | Full operational review |
+
+Also exports `getOpsBrainContextForDomains(domains)` for selective loading.
+
+**Design decisions:**
+- Mirrors Stoic Brain exactly: compiled TS constants, domain loaders, depth-based composite builder
+- Ops Brain foundations include four "operational virtues" mapped to Stoic parallels (process harmony ↔ nature, efficiency judgement ↔ wisdom, resource control ↔ temperance, fair scaling ↔ justice)
+- Incorporates project-specific data: the P0 status vocabulary (0a), session protocol (0b), change classification (0d-ii), compliance rules (R17-R20), financial thresholds (R5)
+- NOT yet wired to any endpoint — built and type-checked, ready for integration when the first operational endpoint needs it (likely P7 Sage Ops pipeline, but could be used earlier)
+- The operating principle is explicit: "Sage-Ops provides information; the founder makes decisions"
+
+**TypeScript:** Clean compile (zero errors).
+
 ## Updated Context Matrix (all 19 endpoints)
 
 | Endpoint | Type | Stoic Brain | Practitioner | Project |
@@ -63,10 +100,11 @@ Full audit identifying 3 missing positions (Analytics, QA, Compliance Officer), 
 
 ## Next Session Should
 
-1. **Commit and push** all changes from 7e + 7f (context architecture + score-iterate wiring + org chart)
-2. **Live verification** — run the three test calls documented in `session-7f-deep-thought-review.md` (reflect, evaluate, assessment/foundational) to confirm context differentiation
-3. **Begin Sage-Ops Brain creation** — this is the first brain to build per the confirmed build order. Use the Stoic Brain as the architectural pattern (compiled data → loader → injection).
-4. **Supabase migration** for Layer 3 dynamic state (optional, documented steps in review)
+1. **Commit and push** 7f changes (score-iterate wiring + org chart + Sage-Ops Brain)
+2. **Live verification** — run the three test calls documented in `session-7f-deep-thought-review.md` to confirm context differentiation
+3. **Wire Sage-Ops Brain to first endpoint** — decide which endpoint benefits first. Candidates: a new `/api/ops/*` route, or injecting into existing operational endpoints alongside the Stoic Brain
+4. **Update project-context.json** dynamic_defaults to reflect 7f progress (19 endpoints, Sage-Ops Brain built)
+5. **Supabase migration** for Layer 3 dynamic state (optional, documented steps in review)
 
 ## Blocked On
 
@@ -74,9 +112,11 @@ Full audit identifying 3 missing positions (Analytics, QA, Compliance Officer), 
 
 ## Open Questions
 
-1. **Sage-Ops Brain architecture:** Should it follow the exact Stoic Brain pattern (JSON data files → compiled TypeScript → loader → system prompt injection)? Or is there a simpler pattern for operational knowledge that doesn't need the mechanism-specific granularity?
-2. **Brain activation model:** At runtime, should brains be selected per-endpoint (like now) or should there be a brain router that selects based on the nature of the request?
+1. ~~**Sage-Ops Brain architecture:**~~ RESOLVED — followed exact Stoic Brain pattern. Works well; the domain structure maps cleanly to operational concerns.
+2. **Brain activation model:** At runtime, should brains be selected per-endpoint (like now) or should there be a brain router that selects based on the nature of the request? This matters when we have 3+ brains and some endpoints might benefit from multiple brains.
 3. **Org chart placement:** Should `startup_org_chart.html` live in `/operations/` rather than project root? It's an internal planning document, not a website asset.
+4. **Sage-Ops Brain wiring target:** Which endpoint gets the Ops Brain first? Options: (a) new `/api/ops/*` routes for P7, (b) inject alongside Stoic Brain in existing operational endpoints (`sage-classify`, `sage-prioritise`), (c) wait until the Sage Ops pipeline (P7) is designed.
+5. **Multi-brain injection:** When an endpoint needs both Stoic Brain AND Ops Brain, should they go in separate system message blocks (current pattern) or be concatenated into one block? Token budget implications differ.
 
 ## Files Changed This Session
 
@@ -86,6 +126,8 @@ Full audit identifying 3 missing positions (Analytics, QA, Compliance Officer), 
 | `startup_org_chart.html` | Interactive org chart (simplified: 4 agents + 1 external) |
 | `operations/session-7f-deep-thought-review.md` | Sage-Ops audit + follow-up documentation |
 | `operations/handoffs/session-7f-deep-thought-org-chart.md` | This handoff |
+| `website/src/data/ops-brain-compiled.ts` | Sage-Ops Brain v1.0.0 compiled data (6 domains + foundations) |
+| `website/src/lib/context/ops-brain-loader.ts` | Sage-Ops Brain loader (3 depth levels, domain-specific builders) |
 
 ### Modified files
 | File | Change |
