@@ -21,7 +21,7 @@
 
 import envContextData from '@/data/environmental-context.json'
 
-// Future: import { supabaseAdmin } from '@/lib/supabase-server'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 // =============================================================================
 // TYPES
@@ -65,28 +65,27 @@ async function loadDomainEnvironment(domain: EnvironmentalDomain): Promise<Domai
     return { ...staticDomains[domain], current_summary: cached.summary }
   }
 
-  // Future: When environmental_context table exists in Supabase, uncomment this:
-  //
-  // try {
-  //   const { data, error } = await supabaseAdmin
-  //     .from('environmental_context')
-  //     .select('domain, current_summary, last_scanned')
-  //     .eq('domain', domain)
-  //     .single()
-  //
-  //   if (!error && data && data.current_summary) {
-  //     _cache.set(domain, { summary: data.current_summary, time: Date.now() })
-  //     return {
-  //       ...staticDomains[domain],
-  //       current_summary: data.current_summary,
-  //       last_scanned: data.last_scanned,
-  //     }
-  //   }
-  // } catch {
-  //   // Fall through to defaults
-  // }
+  // Read from Supabase (falls back to static defaults on failure)
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('environmental_context')
+      .select('domain, current_summary, last_scanned')
+      .eq('domain', domain)
+      .single()
 
-  // Use static defaults until Supabase table is created
+    if (!error && data && data.current_summary) {
+      _cache.set(domain, { summary: data.current_summary, time: Date.now() })
+      return {
+        ...staticDomains[domain],
+        current_summary: data.current_summary,
+        last_scanned: data.last_scanned,
+      }
+    }
+  } catch {
+    // Fall through to defaults
+  }
+
+  // Fallback to static defaults
   return staticDomains[domain] || null
 }
 

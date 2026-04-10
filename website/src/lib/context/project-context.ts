@@ -19,7 +19,7 @@
 
 import projectContextData from '@/data/project-context.json'
 
-// Future: import { supabaseAdmin } from '@/lib/supabase-server'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 // =============================================================================
 // TYPES
@@ -69,28 +69,27 @@ async function loadDynamicState(): Promise<ProjectDynamic> {
     return _dynamicCache
   }
 
-  // Future: When project_context table exists in Supabase, uncomment this:
-  //
-  // try {
-  //   const { data, error } = await supabaseAdmin
-  //     .from('project_context')
-  //     .select('current_phase, active_tensions, recent_decisions')
-  //     .single()
-  //
-  //   if (!error && data) {
-  //     _dynamicCache = {
-  //       current_phase: data.current_phase,
-  //       active_tensions: data.active_tensions || [],
-  //       recent_decisions: data.recent_decisions || [],
-  //     }
-  //     _dynamicCacheTime = Date.now()
-  //     return _dynamicCache
-  //   }
-  // } catch {
-  //   // Fall through to defaults
-  // }
+  // Read dynamic state from Supabase (falls back to static defaults on failure)
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('project_context')
+      .select('current_phase, active_tensions, recent_decisions')
+      .single()
 
-  // Use static defaults until Supabase table is created
+    if (!error && data) {
+      _dynamicCache = {
+        current_phase: data.current_phase,
+        active_tensions: data.active_tensions || [],
+        recent_decisions: data.recent_decisions || [],
+      }
+      _dynamicCacheTime = Date.now()
+      return _dynamicCache
+    }
+  } catch {
+    // Fall through to defaults
+  }
+
+  // Fallback to static defaults
   _dynamicCache = dynamicDefaults
   _dynamicCacheTime = Date.now()
   return _dynamicCache
