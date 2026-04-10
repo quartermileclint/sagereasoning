@@ -249,3 +249,41 @@ Changes implemented:
 **Impact:** New file: `operations/allowance-for-future.md`. Modified file: `.claude/skills/sage-stenographer/SKILL.md` (added Step 4 to session-open protocol, added allowances file to file locations table, added reminder line to next-session-prompt template). Source articles recommended for archival to `/reference/`.
 
 **Status:** Adopted
+
+---
+
+## 10 April 2026 — Session 9 Decisions: Unified Agent Orchestration Architecture
+
+**Decision:** Five architectural decisions made in Session 9, implemented in Session 10:
+
+1. **Unified agent pipeline.** All 4 internal Sage agents follow an identical 7-step workflow: trigger → context load → internal reasoning → Stoic evaluation → output routing (5A saged passthrough / 5B non-saged Stoic review) → decision authority gate → handoff. The only thing that varies per agent is which brain is loaded. One orchestration pattern, "which brain" as a parameter.
+
+2. **ATL authority levels apply to external agents only.** Internal agents do not need authority progression because the Stoic Brain is applied to every action through the pipeline. The decision authority gate exists because the founder makes irreplaceable decisions (spending, publishing, external comms, irreversible changes, security changes), not because the agents are untrusted.
+
+3. **Private/public mentor separation.** Route-level split: private mentor endpoints at `/api/mentor/private/*` (founder-only, gated by `FOUNDER_USER_ID` env var) receive full context (L1 + L2 + L2b full profile + L5 + mentor observations + journal references + profile snapshots). Public mentor endpoints at original paths receive only L1 + L2b condensed.
+
+4. **Support Brain removal from mentor endpoints.** Support Brain removed from all 4 mentor endpoints (reflect, mentor-baseline, mentor-baseline-response, mentor-journal-week). All four agent brains are now in identical positions: session-level context for their respective internal agent only, never injected into any endpoint.
+
+5. **Five growth accumulation gaps fixed for private mentor.** (a) Full practitioner profile (~7,500 chars) instead of condensed (~300-500 tokens). (b) Mentor observation persistence — LLM outputs `mentor_observation` field, stored in mentor_interactions. (c) Journal reference recall — topic-tagged cross-references via mentor_journal_refs table. (d) Temporal profile snapshots — new `mentor_profile_snapshots` table stores profile state at key moments. (e) Baseline auto-save — baseline-response endpoint records the interaction and creates a snapshot automatically.
+
+**Reasoning:** The context layer cleaning (Sessions 8-9) revealed that agent brains had no business being in product endpoints. The separation principle — brains define what agents ARE, product endpoints serve any consumer — required a clean orchestration pattern. The private/public mentor split addresses the growth problem: the founder's mentor needs continuity, memory, and full context, while public users get clean Stoic reasoning without project internals.
+
+**Rules served:** R0 (each circle of concern gets appropriate context), R4 (IP protection — project context not exposed to external users), R15 (Sage Ops architecture), R17 (intimate data — private routes founder-only)
+
+**Impact:** 4 public mentor endpoints cleaned. 4 private mentor endpoints created. `mentor-context-private.ts` module created with observation, journal ref, and snapshot functions. `sage-orchestrator/` standalone module created (types.ts, pipeline.ts, presets.ts, index.ts). New Supabase table needed: `mentor_profile_snapshots`. New env var needed: `FOUNDER_USER_ID`. Context layer summary and org chart updated.
+
+**Status:** Adopted
+
+---
+
+## 10 April 2026 — Sage Orchestrator Built as Standalone Module
+
+**Decision:** Built the sage-orchestrator as a standalone module at project root (`/sage-orchestrator/`) rather than inside the website's lib directory. The module exports `runAgentPipeline()`, preset factories for all 4 agents, and `createBrainLoader()` adapter. Reasoning function is injected (not imported) to decouple from the specific LLM caller.
+
+**Reasoning:** Standalone placement means: (a) customer agents in the startup package can import it without pulling in the website; (b) internal agents import it the same way customers do; (c) the orchestration IS the product — keeping it separate from the website reinforces this. The `ReasonFunction` injection pattern means internal agents use `runSageReason` while customers can use any compatible function.
+
+**Rules served:** R0 (the orchestration pattern extends to all rational agents), R4 (clean API boundary for IP), R5 (cost tracking built into pipeline)
+
+**Impact:** 4 new files in `/sage-orchestrator/`. Module ready for internal agent wiring (P7) and customer packaging. All presets use identical governance structure with domain-specific decision gate configurations.
+
+**Status:** Adopted

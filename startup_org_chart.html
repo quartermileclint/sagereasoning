@@ -158,7 +158,7 @@
 <div class="header">
   <h1>SageReasoning — Sole Founder + AI Agents</h1>
   <p>You decide, agents execute, externals verify</p>
-  <div class="sub">4 named agents · 5 context layers · 19 LLM endpoints · Click cards to expand · April 2026</div>
+  <div class="sub">4 named agents · 5 context layers · 19 LLM endpoints · Unified orchestrator · Click cards to expand · April 2026</div>
 </div>
 
 <div class="legend">
@@ -269,10 +269,12 @@
         </div>
         <div class="dl">Brain domains</div>
         <div class="dt">Process Harmony · Financial Stewardship · Compliance Operations · Product Strategy · People Operations · Operational Analytics</div>
-        <div class="dl">Context layers received</div>
-        <div class="dt">L1 Stoic Brain · L2 Project Context (full) · L3 Ops Brain · L4 Environmental (ops domain). Not yet wired to endpoints — reserved for P7 Sage Ops pipeline.</div>
+        <div class="dl">Context layers received (via orchestrator)</div>
+        <div class="dt">L1 Stoic Brain · L3 Ops Brain (session-level). Calls product endpoints for Stoic evaluation through the unified orchestration pipeline. L2 Project Context reserved for P7.</div>
+        <div class="dl">Endpoint relationship</div>
+        <div class="dt">Brain never injected into product endpoints. Agent calls them as a consumer. Reserved for P7 Sage Ops pipeline activation.</div>
         <div class="dl">Activates</div>
-        <div class="dt">P7 (Sage Ops pipeline activation). Brain built and compiled — endpoint wiring at P7.</div>
+        <div class="dt">P7 (Sage Ops pipeline activation). Brain built and compiled. Orchestrator preset ready (createOpsPreset).</div>
       </div>
     </div>
 
@@ -281,7 +283,7 @@
       <div class="bar"></div>
       <div class="title">Sage-Tech Agent <span class="status-live">LIVE</span></div>
       <div class="subtitle">CTO / Engineering</div>
-      <div class="tag">Tech Brain — 6 domains · 4 endpoints</div>
+      <div class="tag">Tech Brain — 6 domains · session-level</div>
       <ul class="items">
         <li>System architecture &amp; code quality</li>
         <li>Security, encryption, access control</li>
@@ -300,10 +302,10 @@
         </div>
         <div class="dl">Brain domains</div>
         <div class="dt">Architecture Patterns · Security-First Design · DevOps &amp; Infrastructure · AI/ML Operations · Code Quality · Tooling &amp; Developer Experience</div>
-        <div class="dl">Context layers received</div>
-        <div class="dt">L1 Stoic Brain · L3 Tech Brain · L4 Environmental (tech domain)</div>
-        <div class="dl">Wired to endpoints</div>
-        <div class="dt">assessment/foundational · assessment/full · baseline/agent · score-iterate</div>
+        <div class="dl">Context layers received (via orchestrator)</div>
+        <div class="dt">L1 Stoic Brain · L3 Tech Brain (session-level). Calls product endpoints (/api/reason, /api/score, etc.) for Stoic evaluation — same endpoints any customer uses.</div>
+        <div class="dl">Endpoint relationship</div>
+        <div class="dt">Brain removed from product endpoints (Sessions 8-9). Agent calls them as a consumer through the unified orchestration pipeline.</div>
         <div class="dl">Activates</div>
         <div class="dt">P0 (all build work) → P2 (R17 encryption, R20 detection) → P3 (ATL, adversarial testing) → P4 (Stripe wiring)</div>
       </div>
@@ -314,7 +316,7 @@
       <div class="bar"></div>
       <div class="title">Sage-Growth Agent <span class="status-live">LIVE</span></div>
       <div class="subtitle">CMO / Sales / DevRel</div>
-      <div class="tag">Growth Brain — 6 domains · 3 endpoints</div>
+      <div class="tag">Growth Brain — 6 domains · session-level</div>
       <ul class="items">
         <li>Customer acquisition &amp; retention strategy</li>
         <li>Content, SEO, community building</li>
@@ -331,10 +333,10 @@
         </div>
         <div class="dl">Brain domains</div>
         <div class="dt">Market Positioning · Audience Intelligence · Content Strategy · Developer Relations · Community Building · Growth Metrics</div>
-        <div class="dl">Context layers received</div>
-        <div class="dt">L1 Stoic Brain · L2 Project Context (minimal) · L3 Growth Brain · L4 Environmental (growth domain)</div>
-        <div class="dl">Wired to endpoints</div>
-        <div class="dt">evaluate · score-scenario · score-document</div>
+        <div class="dl">Context layers received (via orchestrator)</div>
+        <div class="dt">L1 Stoic Brain · L3 Growth Brain (session-level). Calls product endpoints for Stoic evaluation through the unified orchestration pipeline.</div>
+        <div class="dl">Endpoint relationship</div>
+        <div class="dt">Brain removed from product endpoints (Sessions 8-9). Agent calls them as a consumer. Uses /api/score-document for content evaluation.</div>
         <div class="dl">SageReasoning special</div>
         <div class="dt">Dual audience (human practitioners + agent developers) — two voices: philosophical/accessible and technical/developer-native.</div>
       </div>
@@ -344,13 +346,13 @@
     <div class="card c-teal" onclick="toggle(this)">
       <div class="bar"></div>
       <div class="title">Sage-Support Agent <span class="status-live">LIVE</span></div>
-      <div class="subtitle">Customer Success + Mentor</div>
-      <div class="tag">Support Brain — 6 domains · 4 endpoints</div>
+      <div class="subtitle">Customer Success</div>
+      <div class="tag">Support Brain — 6 domains · session-level</div>
       <ul class="items">
         <li>Empathetic troubleshooting &amp; de-escalation</li>
         <li>Vulnerable user detection (R20)</li>
-        <li>Private mentor reasoning support</li>
-        <li>Feedback synthesis → Product</li>
+        <li>Knowledge base &amp; feedback synthesis</li>
+        <li>Escalation protocols</li>
       </ul>
       <div class="detail">
         <div class="dl">Roles consolidated</div>
@@ -358,16 +360,16 @@
           <span class="rolled">Support Lead</span>
           <span class="rolled">Knowledge Base</span>
           <span class="rolled">User Safety (R20)</span>
-          <span class="rolled">Mentor Support</span>
+          <span class="rolled">Escalation</span>
         </div>
         <div class="dl">Brain domains</div>
         <div class="dt">Triage &amp; Classification · Vulnerable User Detection · Philosophical Sensitivity · Escalation Protocols · Knowledge Base Management · Feedback Loop</div>
-        <div class="dl">Context layers received</div>
-        <div class="dt">L1 Stoic Brain · L2 Project Context (summary) · L3 Support Brain · L4 Environmental (support) · L5 Mentor Knowledge Base (mentor endpoints only)</div>
-        <div class="dl">Wired to endpoints</div>
-        <div class="dt">reflect · mentor-baseline · mentor-baseline-response · mentor-journal-week</div>
-        <div class="dl">Unique</div>
-        <div class="dt">Only agent receiving Layer 5 (Mentor Knowledge Base). The mentor endpoints get the richest context stack: all 5 layers plus practitioner context.</div>
+        <div class="dl">Context layers received (via orchestrator)</div>
+        <div class="dt">L1 Stoic Brain · L3 Support Brain (session-level). Calls product endpoints for Stoic evaluation through the unified orchestration pipeline.</div>
+        <div class="dl">Endpoint relationship</div>
+        <div class="dt">Brain removed from mentor endpoints (Session 10). R20 vulnerable user detection is a system-level safeguard at the endpoint level — doesn't need a brain.</div>
+        <div class="dl">Session 10 change</div>
+        <div class="dt">Support Brain no longer injected into mentor endpoints. All four brains are now in identical positions: session-level context for their internal agent only.</div>
       </div>
     </div>
   </div>
@@ -422,7 +424,7 @@
       <tr style="border-bottom: 1px solid rgba(42,45,58,0.5);">
         <td style="padding: 6px 8px; color: var(--accent-blue);">L2</td>
         <td style="padding: 6px 8px;">Project Context</td>
-        <td style="padding: 6px 8px;">22</td>
+        <td style="padding: 6px 8px;">4 (private mentor)</td>
         <td style="padding: 6px 8px;">Hybrid (Supabase + static)</td>
         <td style="padding: 6px 8px; color: var(--accent-green);">LIVE</td>
       </tr>
@@ -443,35 +445,35 @@
       <tr style="border-bottom: 1px solid rgba(42,45,58,0.5);">
         <td style="padding: 6px 8px; color: var(--accent-purple);">L3</td>
         <td style="padding: 6px 8px;">Tech Brain</td>
-        <td style="padding: 6px 8px;">4</td>
+        <td style="padding: 6px 8px;">0 (session-level)</td>
         <td style="padding: 6px 8px;">Manual + deploy</td>
-        <td style="padding: 6px 8px; color: var(--accent-green);">LIVE</td>
+        <td style="padding: 6px 8px; color: var(--accent-green);">BUILT</td>
       </tr>
       <tr style="border-bottom: 1px solid rgba(42,45,58,0.5);">
         <td style="padding: 6px 8px; color: var(--accent-purple);">L3</td>
         <td style="padding: 6px 8px;">Growth Brain</td>
-        <td style="padding: 6px 8px;">3</td>
+        <td style="padding: 6px 8px;">0 (session-level)</td>
         <td style="padding: 6px 8px;">Manual + deploy</td>
-        <td style="padding: 6px 8px; color: var(--accent-green);">LIVE</td>
+        <td style="padding: 6px 8px; color: var(--accent-green);">BUILT</td>
       </tr>
       <tr style="border-bottom: 1px solid rgba(42,45,58,0.5);">
         <td style="padding: 6px 8px; color: var(--accent-purple);">L3</td>
         <td style="padding: 6px 8px;">Support Brain</td>
-        <td style="padding: 6px 8px;">4</td>
+        <td style="padding: 6px 8px;">0 (session-level)</td>
         <td style="padding: 6px 8px;">Manual + deploy</td>
-        <td style="padding: 6px 8px; color: var(--accent-green);">LIVE</td>
+        <td style="padding: 6px 8px; color: var(--accent-green);">BUILT</td>
       </tr>
       <tr style="border-bottom: 1px solid rgba(42,45,58,0.5);">
         <td style="padding: 6px 8px; color: var(--accent-orange);">L4</td>
         <td style="padding: 6px 8px;">Environmental Context</td>
-        <td style="padding: 6px 8px;">14</td>
+        <td style="padding: 6px 8px;">0 (reserved for agents)</td>
         <td style="padding: 6px 8px;">Weekly scan (Supabase)</td>
-        <td style="padding: 6px 8px; color: var(--accent-orange);">WIRED — awaiting first scan</td>
+        <td style="padding: 6px 8px; color: var(--accent-orange);">DESIGNED — awaiting P7</td>
       </tr>
       <tr>
         <td style="padding: 6px 8px; color: var(--accent-teal);">L5</td>
         <td style="padding: 6px 8px;">Mentor Knowledge Base</td>
-        <td style="padding: 6px 8px;">4</td>
+        <td style="padding: 6px 8px;">4 (private mentor)</td>
         <td style="padding: 6px 8px;">Annual + deploy</td>
         <td style="padding: 6px 8px; color: var(--accent-green);">LIVE</td>
       </tr>
@@ -481,8 +483,8 @@
 </div>
 
 <div class="footer">
-  SageReasoning · Session 7h · Sole Founder + AI Agent Org Model · April 2026<br>
-  <span style="color: var(--accent-gold);">16 roles → 4 agents + 1 external</span> · 5 context layers · All brains compiled and deployed
+  SageReasoning · Session 10 · Sole Founder + AI Agent Org Model · April 2026<br>
+  <span style="color: var(--accent-gold);">16 roles → 4 agents + 1 external</span> · 5 context layers · All brains session-level · Unified orchestrator built
 </div>
 
 <script>

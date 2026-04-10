@@ -2,35 +2,23 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getProjectContext } from '@/lib/context/project-context'
+import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
+import { getMentorObservations, getJournalReferences, getProfileSnapshots } from '@/lib/context/mentor-context-private'
 
 // =============================================================================
-// mentor-journal-week — Weekly Personalised Journal Questions
+// PRIVATE mentor-journal-week — Founder-only personalised journal questions
 //
-// POST /api/mentor-journal-week
+// POST /api/mentor/private/journal-week
 //
-// Generates 7 journal questions (one per day) tailored to the practitioner's
-// current developmental needs. Unlike the fixed 55-Day Journal (which teaches
-// the Stoic framework from scratch), these questions are selected and adapted
-// from the Stoic Brain specifically for THIS practitioner based on:
+// Same logic as public /api/mentor-journal-week, but with richer context:
+//   - L2 Project Context (development phase, recent decisions)
+//   - L5 Mentor Knowledge Base (Stoic historical context, global state)
 //
-//   1. Their weakest virtue domain → questions that exercise it
-//   2. Their most persistent passions → questions that expose the false judgement
-//   3. Their causal breakdown point → questions that target that stage
-//   4. Their ledger tensions → questions that revisit unresolved gaps
-//   5. Their recent progress → questions that consolidate or stretch
+// The private mentor generates questions with awareness of the founder's
+// project context and the broader historical/global frame.
 //
-// The mentor picks from all 8 Stoic Brain files (stoic-brain.json, psychology.json,
-// value.json, virtue.json, passions.json, action.json, progress.json, scoring.json)
-// and crafts questions that use the practitioner's own language and reference their
-// actual life situations where possible.
-//
-// Input: Profile summary + optional recent_activity summary
-// Output: 7 journal questions with teaching, source citation, and targeting rationale
-//
-// R1:  Philosophical exercise, not therapy
-// R6d: Diagnostic, not punitive — questions open doors
-// R7:  Every question traces to a Stoic Brain source
-// R8c: English only in user-facing content (Greek in data layer)
+// Access: Founder only (FOUNDER_USER_ID env var)
 // =============================================================================
 
 const WEEKLY_JOURNAL_SYSTEM_PROMPT = `You are the Sage Mentor's weekly journal designer for SageReasoning.
@@ -76,6 +64,15 @@ export async function POST(request: NextRequest) {
   const auth = await requireAuth(request)
   if (auth.error) return auth.error
 
+  // Founder-only gate
+  const founderId = process.env.FOUNDER_USER_ID
+  if (!founderId || auth.user.id !== founderId) {
+    return NextResponse.json(
+      { error: 'This endpoint is restricted to the private mentor.' },
+      { status: 403 }
+    )
+  }
+
   try {
     const body = await request.json()
     const { profile_summary, recent_activity, week_number } = body
@@ -94,13 +91,29 @@ export async function POST(request: NextRequest) {
       ? `\n\nThis is Week ${week_number} of their personalised journal practice.`
       : ''
 
-    // Public mentor gets Stoic Brain only (no project context, no L5)
+    // Private mentor gets project context + L5 + growth accumulation context
+    const [projectContext, mentorObservations, journalRefs, profileSnapshots] = await Promise.all([
+      getProjectContext('summary'),
+      getMentorObservations(auth.user.id),
+      getJournalReferences(auth.user.id), // No topic hints for weekly — surface broadly relevant refs
+      getProfileSnapshots(auth.user.id),
+    ])
+    const mentorKnowledgeBase = getMentorKnowledgeBase()
+
+    // Enrich input with growth accumulation context
+    let enrichedInput = `${profile_summary}${contextNote}${weekNote}`
+    if (mentorObservations) enrichedInput += `\n\n${mentorObservations}`
+    if (journalRefs) enrichedInput += `\n\n${journalRefs}`
+    if (profileSnapshots) enrichedInput += `\n\n${profileSnapshots}`
+
     const result = await runSageReason({
-      input: `${profile_summary}${contextNote}${weekNote}`,
+      input: enrichedInput,
       depth: 'deep',
       systemPromptOverride: WEEKLY_JOURNAL_SYSTEM_PROMPT,
       domain_context: 'mentor_weekly_journal',
       stoicBrainContext: getStoicBrainContext('deep'),
+      projectContext,
+      mentorKnowledgeBase,
     })
 
     return NextResponse.json(
@@ -108,13 +121,14 @@ export async function POST(request: NextRequest) {
         success: true,
         weekly_journal: result,
         week_number: week_number ?? 1,
-        usage_note: 'Present one question per day. After the practitioner answers, their response can be scored via /api/score or /api/reflect to track progress.',
+        mentor_mode: 'private',
+        usage_note: 'Present one question per day. After the practitioner answers, their response can be scored via /api/score or /api/mentor/private/reflect to track progress.',
         disclaimer: 'SageReasoning offers philosophical exercises for self-examination. This is not psychological assessment or therapy.',
       },
       { headers: corsHeaders() }
     )
   } catch (err) {
-    console.error('[mentor-journal-week] Error:', err)
+    console.error('[mentor/private/journal-week] Error:', err)
     return NextResponse.json(
       { error: 'Failed to generate weekly journal questions' },
       { status: 500, headers: corsHeaders() }

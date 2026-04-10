@@ -2,26 +2,23 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getProjectContext } from '@/lib/context/project-context'
+import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
+import { getMentorObservations, getProfileSnapshots } from '@/lib/context/mentor-context-private'
 
 // =============================================================================
-// mentor-baseline — Post-Extraction Gap Detection Questionnaire
+// PRIVATE mentor-baseline — Founder-only gap detection questionnaire
 //
-// POST /api/mentor-baseline
+// POST /api/mentor/private/baseline
 //
-// After sage-interpret extracts a MentorProfile from the journal, this endpoint
-// generates tailored baseline questions to:
-//   1. Confirm the extraction captured the practitioner accurately
-//   2. Probe edge cases where the journal data was ambiguous
-//   3. Fill gaps where sections were thin or passions were borderline
-//   4. Establish a verified foundation before the mentor journey begins
+// Same logic as public /api/mentor-baseline, but with richer context:
+//   - L2 Project Context (development phase, recent decisions)
+//   - L5 Mentor Knowledge Base (Stoic historical context, global state)
 //
-// Input: The current MentorProfile JSON (or a summary of it)
-// Output: 8-12 tailored questions drawn from the Stoic Brain, each targeting
-//         a specific gap, edge case, or ambiguity in the extracted profile.
+// The profile_summary input comes from the caller. The private mentor
+// receives it with full project awareness and historical context.
 //
-// R1:  Philosophical exercise, not therapy
-// R6d: Diagnostic, not punitive
-// R7:  Questions trace to Stoic Brain source files
+// Access: Founder only (FOUNDER_USER_ID env var)
 // =============================================================================
 
 const BASELINE_SYSTEM_PROMPT = `You are the Sage Mentor's baseline assessment engine for SageReasoning.
@@ -67,6 +64,15 @@ export async function POST(request: NextRequest) {
   const auth = await requireAuth(request)
   if (auth.error) return auth.error
 
+  // Founder-only gate
+  const founderId = process.env.FOUNDER_USER_ID
+  if (!founderId || auth.user.id !== founderId) {
+    return NextResponse.json(
+      { error: 'This endpoint is restricted to the private mentor.' },
+      { status: 403 }
+    )
+  }
+
   try {
     const body = await request.json()
     const { profile_summary } = body
@@ -78,26 +84,41 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Public mentor gets Stoic Brain only (no project context, no L5)
+    // Private mentor gets project context + L5 + growth accumulation context
+    const [projectContext, mentorObservations, profileSnapshots] = await Promise.all([
+      getProjectContext('summary'),
+      getMentorObservations(auth.user.id),
+      getProfileSnapshots(auth.user.id),
+    ])
+    const mentorKnowledgeBase = getMentorKnowledgeBase()
+
+    // Enrich the input with growth accumulation context
+    let enrichedInput = profile_summary
+    if (mentorObservations) enrichedInput += `\n\n${mentorObservations}`
+    if (profileSnapshots) enrichedInput += `\n\n${profileSnapshots}`
+
     const result = await runSageReason({
-      input: profile_summary,
+      input: enrichedInput,
       depth: 'deep',
       systemPromptOverride: BASELINE_SYSTEM_PROMPT,
       domain_context: 'mentor_baseline_assessment',
       stoicBrainContext: getStoicBrainContext('deep'),
+      projectContext,
+      mentorKnowledgeBase,
     })
 
     return NextResponse.json(
       {
         success: true,
         baseline_questions: result,
+        mentor_mode: 'private',
         usage_note: 'Present these questions to the practitioner after journal extraction. Their answers refine the MentorProfile before the mentor journey begins.',
         disclaimer: 'SageReasoning offers philosophical exercises for self-examination. This is not psychological assessment or therapy.',
       },
       { headers: corsHeaders() }
     )
   } catch (err) {
-    console.error('[mentor-baseline] Error:', err)
+    console.error('[mentor/private/baseline] Error:', err)
     return NextResponse.json(
       { error: 'Failed to generate baseline questions' },
       { status: 500, headers: corsHeaders() }

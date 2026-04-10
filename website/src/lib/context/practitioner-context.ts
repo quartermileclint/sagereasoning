@@ -23,6 +23,7 @@ import type { MentorProfileData, PassionMapEntry } from '@/lib/mentor-profile-su
 
 /**
  * Get a condensed practitioner context block for LLM injection.
+ * Used by product-facing endpoints and the public mentor.
  *
  * @param userId - Authenticated user's ID
  * @returns Formatted context string (~300-500 tokens), or null if no profile
@@ -37,6 +38,33 @@ export async function getPractitionerContext(userId: string): Promise<string | n
     return buildCondensedContext(stored.profile)
   } catch (err) {
     console.error('[practitioner-context] Failed to load profile:', err)
+    return null
+  }
+}
+
+/**
+ * Get the FULL practitioner profile context for the private mentor.
+ * Returns the complete buildProfileSummary output (~7,500 chars) including:
+ * full passion map with all false judgements, virtue profile with evidence,
+ * detailed causal tendencies, complete oikeiosis map, value hierarchy with
+ * conflicts and classification gaps, and preferred indifferents.
+ *
+ * This is substantially richer than the condensed version (~300-500 tokens)
+ * and should ONLY be used for the private mentor (founder-only) endpoint.
+ *
+ * @param userId - Authenticated user's ID
+ * @returns Full profile context string, or null if no profile
+ */
+export async function getFullPractitionerContext(userId: string): Promise<string | null> {
+  try {
+    if (!isServerEncryptionConfigured()) return null
+
+    const stored = await loadMentorProfile(userId)
+    if (!stored) return null
+
+    return stored.summary // buildProfileSummary output — already computed by loadMentorProfile
+  } catch (err) {
+    console.error('[practitioner-context] Failed to load full profile:', err)
     return null
   }
 }

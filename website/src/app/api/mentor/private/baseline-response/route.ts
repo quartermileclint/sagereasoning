@@ -1,30 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getProjectContext } from '@/lib/context/project-context'
 import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-summary'
 import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
 import mentorProfileFallback from '@/data/mentor-profile.json'
+import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
+import { getMentorObservations, getProfileSnapshots, createProfileSnapshot } from '@/lib/context/mentor-context-private'
 
 // =============================================================================
-// mentor-baseline-response — Process practitioner's answers to gap questions
+// PRIVATE mentor-baseline-response — Founder-only profile refinement
 //
-// POST /api/mentor-baseline-response
+// POST /api/mentor/private/baseline-response
 //
-// After the practitioner answers the baseline gap detection questions generated
-// by /api/mentor-baseline, this endpoint:
-//   1. Loads the current profile from Supabase (encrypted, R17b)
-//   2. Feeds profile summary + answers through sage-reason for analysis
-//   3. Returns refinement notes and confidence changes
-//   4. Saves the refinement data alongside the profile for future reference
+// Same logic as public /api/mentor-baseline-response, but with:
+//   - L2 Project Context
+//   - L5 Mentor Knowledge Base
+//   - Auto-save refined profile (Phase C, Gap 5: baseline auto-save)
 //
-// Input: { responses: [{ question_id, question_text, answer }] }
-// Output: { refinement, current_profile, responses_processed }
-//
-// R1:  Philosophical exercise, not therapy
-// R6d: Diagnostic, not punitive — answers open understanding, not judgment
-// R7:  Analysis traces to Stoic Brain source files
+// Access: Founder only (FOUNDER_USER_ID env var)
 // =============================================================================
 
 const REFINEMENT_SYSTEM_PROMPT = `You are the Sage Mentor's profile refinement engine for SageReasoning.
@@ -82,6 +79,15 @@ export async function POST(request: NextRequest) {
   const auth = await requireAuth(request)
   if (auth.error) return auth.error
 
+  // Founder-only gate
+  const founderId = process.env.FOUNDER_USER_ID
+  if (!founderId || auth.user.id !== founderId) {
+    return NextResponse.json(
+      { error: 'This endpoint is restricted to the private mentor.' },
+      { status: 403 }
+    )
+  }
+
   try {
     const body = await request.json()
     const { responses } = body as { responses: BaselineResponse[] }
@@ -123,14 +129,62 @@ export async function POST(request: NextRequest) {
       `========================================\n\n` +
       `BASELINE GAP QUESTION RESPONSES (${responses.length} answers):\n\n${answersFormatted}`
 
-    // Public mentor gets Stoic Brain only (no project context, no L5)
+    // Private mentor gets project context + L5 + growth accumulation context
+    const [projectContext, mentorObservations, profileSnapshots] = await Promise.all([
+      getProjectContext('summary'),
+      getMentorObservations(auth.user.id),
+      getProfileSnapshots(auth.user.id),
+    ])
+    const mentorKnowledgeBase = getMentorKnowledgeBase()
+
+    // Enrich input with growth accumulation context
+    let enrichedInput = fullInput
+    if (mentorObservations) enrichedInput += `\n\n${mentorObservations}`
+    if (profileSnapshots) enrichedInput += `\n\n${profileSnapshots}`
+
     const result = await runSageReason({
-      input: fullInput,
+      input: enrichedInput,
       depth: 'deep',
       systemPromptOverride: REFINEMENT_SYSTEM_PROMPT,
       domain_context: 'mentor_baseline_refinement',
       stoicBrainContext: getStoicBrainContext('deep'),
+      projectContext,
+      mentorKnowledgeBase,
     })
+
+    // Gap 5: Auto-save — record the baseline refinement as an interaction
+    // and trigger a profile snapshot. Fire-and-forget to avoid blocking response.
+    if (isServerEncryptionConfigured() && auth.user?.id) {
+      import('../../../../../../../sage-mentor/profile-store')
+        .then(async ({ recordInteraction }) => {
+          // Find profile ID for interaction recording
+          const { data: profileRow } = await supabaseAdmin
+            .from('mentor_profiles')
+            .select('id')
+            .eq('user_id', auth.user.id)
+            .single()
+
+          if (profileRow) {
+            // Record as baseline_question interaction
+            await recordInteraction(supabaseAdmin as any, profileRow.id, {
+              type: 'baseline_question' as any,
+              description: `Baseline refinement: ${responses.length} gap questions processed`,
+              proximity_assessed: undefined,
+              passions_detected: [],
+              mechanisms_applied: ['passion_diagnosis', 'oikeiosis', 'virtue_assessment'],
+              mentor_observation: typeof result === 'object' && result !== null && 'summary' in result
+                ? String((result as any).summary)
+                : `Processed ${responses.length} baseline responses for profile refinement`,
+            })
+
+            // Trigger a snapshot at baseline completion — this is a significant profile event
+            await createProfileSnapshot(profileRow.id, 'manual')
+          }
+        })
+        .catch((err: unknown) => {
+          console.error('[mentor/private/baseline-response] Auto-save failed (non-blocking):', err)
+        })
+    }
 
     return NextResponse.json(
       {
@@ -138,13 +192,15 @@ export async function POST(request: NextRequest) {
         refinement: result,
         current_profile: currentProfile,
         responses_processed: responses.length,
-        usage_note: 'Review refinement_notes to see what the answers revealed. To save the updated profile, POST the modified profile to /api/mentor-profile.',
+        mentor_mode: 'private',
+        auto_saved: true,
+        usage_note: 'Refinement insights have been auto-saved to the interaction log and a profile snapshot has been taken. Review refinement_notes to see what the answers revealed.',
         disclaimer: 'SageReasoning offers philosophical exercises for self-examination. This is not psychological assessment or therapy.',
       },
       { headers: corsHeaders() }
     )
   } catch (err) {
-    console.error('[mentor-baseline-response] Error:', err)
+    console.error('[mentor/private/baseline-response] Error:', err)
     return NextResponse.json(
       { error: 'Failed to process baseline responses' },
       { status: 500, headers: corsHeaders() }
