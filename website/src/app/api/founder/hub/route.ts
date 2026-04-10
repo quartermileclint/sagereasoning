@@ -103,20 +103,20 @@ async function getPrimaryAgentResponse(
   if (agent === 'mentor') {
     // Mentor gets: Stoic Brain (deep) + Mentor KB + Project Context
     const stoicContext = getStoicBrainContextForMechanisms([
-      'passion_diagnosis', 'oikeiosis', 'value_theory', 'virtue_framework', 'action_theory', 'progress_scale'
+      'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment', 'control_filter', 'iterative_refinement'
     ])
     const mentorKB = getMentorKnowledgeBase()
     systemBlocks = [
       { type: 'text', text: `You are the Sage Mentor — the founder's personal Stoic advisor. You have deep knowledge of the founder's practitioner profile, development trajectory, and the SageReasoning project. Your role is to help the founder reason well, identify passions and false judgements, and progress toward virtue.\n\nRespond naturally in conversation. Be warm but honest. When the founder's reasoning shows a passion or false judgement, name it specifically. When they reason well, affirm it.\n\n${mentorKB}`, cache_control: { type: 'ephemeral' } },
-      { type: 'text', text: stoicContext },
+      ...(stoicContext ? [{ type: 'text' as const, text: stoicContext }] : []),
     ]
   } else {
     // Agent brain gets: its domain expertise + Stoic Brain (standard) + Project Context
     const brainContext = getAgentBrainContext(agent, 'deep')
-    const stoicContext = getStoicBrainContextForMechanisms(['value_theory', 'action_theory'])
+    const stoicContext = getStoicBrainContextForMechanisms(['passion_diagnosis', 'oikeiosis', 'value_assessment'])
     systemBlocks = [
       { type: 'text', text: `You are ${getAgentDescription(agent)}. You are one of four internal Sage agents serving the SageReasoning founder. Your domain expertise is loaded below.\n\nRespond naturally in conversation. Apply your domain expertise to the founder's questions and tasks. When a task touches ethical, virtue, or principled reasoning concerns, flag them — but your primary value is your domain knowledge.\n\nBe direct, specific, and practical. The founder is a non-technical solo founder building a startup. Explain technical concepts in plain language.\n\n${brainContext}`, cache_control: { type: 'ephemeral' } },
-      { type: 'text', text: stoicContext },
+      ...(stoicContext ? [{ type: 'text' as const, text: stoicContext }] : []),
     ]
   }
 
@@ -186,7 +186,7 @@ async function getObserverContribution(
   const client = getClient()
 
   const brainContext = observer === 'mentor'
-    ? getStoicBrainContextForMechanisms(['passion_diagnosis', 'value_theory'])
+    ? getStoicBrainContextForMechanisms(['passion_diagnosis', 'oikeiosis'])
     : getAgentBrainContext(observer, 'quick')
 
   const observerDesc = getAgentDescription(observer)
