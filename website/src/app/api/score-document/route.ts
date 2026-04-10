@@ -16,9 +16,6 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_DEEP } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
-import { getProjectContext } from '@/lib/context/project-context'
-import { getGrowthBrainContext } from '@/lib/context/growth-brain-loader'
-import { getEnvironmentalContext } from '@/lib/context/environmental-context'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -66,17 +63,11 @@ export async function POST(request: NextRequest) {
     // Context layers injection
     const stoicBrainContext = getStoicBrainContext('deep')
     const practitionerContext = await getPractitionerContext(auth.user.id)
-    const projectContext = await getProjectContext('minimal')
-    const growthBrainContext = getGrowthBrainContext('quick')
-    const environmentalContext = await getEnvironmentalContext('growth')
-
     // Policy mode needs more tokens — its JSON schema is significantly larger
     const maxTokens = isPolicy ? 3072 : 2048
 
     let userContent = `Evaluate this document:\n\n${title ? `Title: ${title}\n\n` : ''}${truncated}`
     if (practitionerContext) userContent += `\n\n${practitionerContext}`
-    userContent += `\n\n${projectContext}`
-    if (environmentalContext) userContent += `\n\n${environmentalContext}`
 
     const message = await client.messages.create({
       model: MODEL_DEEP,
@@ -85,7 +76,6 @@ export async function POST(request: NextRequest) {
       system: [
         { type: 'text', text: scoringPrompt, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: stoicBrainContext },
-        { type: 'text', text: growthBrainContext },
       ],
       messages: [
         {

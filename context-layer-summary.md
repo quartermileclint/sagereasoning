@@ -1,7 +1,7 @@
 # SageReasoning — What Everything Knows
 
-**Date:** 10 April 2026 · Session 7h  
-**Status:** All 5 context layers LIVE and wired
+**Date:** 10 April 2026 · Session 9  
+**Status:** All 5 context layers LIVE. Product endpoints cleaned — Stoic Brain + Practitioner only.
 
 ---
 
@@ -19,7 +19,7 @@
 **Injection:** Varies — some endpoints pass via `runSageReason` params, some inject directly.  
 **Context levels:** Full (Sage Ops), Summary (Mentor endpoints), Condensed (Scoring endpoints), Minimal (Human-facing tools).  
 **Update pattern:** Hybrid. Static baseline from `project-context.json` (updated at deploy). Dynamic state from Supabase `project_context` table (1-hour cache TTL). Dynamic updates happen when decisions are logged or phase changes.  
-**Wired to:** 16 endpoints (mentor endpoints, evaluate, score-document, score-scenario, agent assessment, and skill handlers). Removed from the 6 product-facing scoring endpoints (score, score-conversation, score-decision, score-social, reason, guardrail) because external users should not receive SageReasoning's internal project state.
+**Wired to:** 4 private mentor endpoints only (reflect, mentor-baseline, mentor-baseline-response, mentor-journal-week) and Sage Ops skill handlers. Removed from all product-facing endpoints (Sessions 8-9) because external users and agent developers should not receive SageReasoning's internal project state.
 
 ### Layer 2b — Practitioner Context (User Message)
 **What it is:** The authenticated user's practitioner profile data — their virtue scores, passion patterns, causal tendencies, and oikeiosis map.  
@@ -39,11 +39,11 @@
 
 **Injection:** System message block 3 (after Stoic Brain block).  
 **Update pattern:** Manual only. Changes require editing the respective `*-brain-compiled.ts` file and redeploying.  
-**Wired to:** 16 endpoints total:
-- Tech Brain → assessment/foundational, assessment/full, baseline/agent, score-iterate (4 endpoints)
-- Growth Brain → evaluate, score-scenario, score-document (3 endpoints)
+**Wired to:** 4 internal endpoints only:
 - Support Brain → reflect, mentor-baseline, mentor-baseline-response, mentor-journal-week (4 endpoints)
 - Ops Brain → reserved for P7 Sage Ops pipeline activation (not yet wired to endpoints)
+- Tech Brain → removed from product endpoints (assessment/foundational, assessment/full, baseline/agent, score-iterate) in Session 9
+- Growth Brain → removed from product endpoints (evaluate in Session 8, score-scenario and score-document in Session 9)
 
 ### Layer 4 — Environmental Context (User Message)
 **What it is:** Non-doctrinal background information about each agent domain's external environment. Scan topics like AI regulation trends, Stoic community activity, developer ecosystem changes.  
@@ -51,7 +51,7 @@
 **Domains:** ops, tech, growth, support (each gets its own feed).  
 **Update pattern:** Designed for weekly automated scans. Static defaults from `environmental-context.json` until first scan runs. Dynamic updates stored in Supabase `environmental_context` table (1-hour cache TTL). Returns null (no injection) until first scan has populated data.  
 **Current state:** Static defaults in place. No scan has run yet — Layer 4 is effectively silent until first scan populates Supabase.  
-**Wired to:** 14 endpoints (all endpoints that have an agent brain also get the matching environmental feed).
+**Wired to:** 4 internal endpoints only (reflect, mentor-baseline, mentor-baseline-response, mentor-journal-week). Removed from all product-facing endpoints in Sessions 8-9.
 
 ### Layer 5 — Mentor Knowledge Base (User Message)
 **What it is:** Non-doctrinal background briefings for the Sage Mentor only. Two documents: (1) Stoic Historical Context — the evolution of Stoicism from ancient times to the current AI inflection point, (2) Global State of Humanity — consensus-based 2026 summary of demographics, technology, and planetary systems.  
@@ -73,35 +73,25 @@
 | mentor-baseline-response | deep | summary | — | Support (quick) | support | yes |
 | mentor-journal-week | deep | summary | — | Support (quick) | support | yes |
 
-### Agent Assessment Endpoints (Tech Brain)
+### Product-Facing Endpoints (Stoic Brain + Practitioner only)
 
-| Endpoint | L1 Stoic | L2 Project | L2b | L3 Brain | L4 Env | L5 |
-|---|---|---|---|---|---|---|
-| assessment/foundational | standard | — | — | Tech (std) | tech | — |
-| assessment/full | deep | — | — | Tech (deep) | tech | — |
-| baseline/agent | standard | — | — | Tech (std) | tech | — |
-| score-iterate | standard | — | — | Tech (quick) | tech | — |
+All product endpoints — human-facing and agent-facing — receive only L1 Stoic Brain and L2b Practitioner Context. No agent brains, no project context, no environmental context. This makes them portable for any customer's content.
 
-### Growth-Facing Endpoints (Growth Brain)
-
-| Endpoint | L1 Stoic | L2 Project | L2b | L3 Brain | L4 Env | L5 |
-|---|---|---|---|---|---|---|
-| evaluate | quick | minimal | — | Growth (quick) | growth | — |
-| score-scenario | quick | minimal | yes | Growth (quick) | growth | — |
-| score-document | deep | minimal | yes | Growth (quick) | growth | — |
-
-### Scoring Suite (Product-Facing — Stoic Brain + Practitioner only)
-
-These are external product endpoints serving users and agent developers. They receive no internal project context — reasoning is grounded purely in the Stoic Brain and the user's own practitioner profile.
-
-| Endpoint | L1 Stoic | L2 Project | L2b | L3 Brain | L4 Env | L5 |
-|---|---|---|---|---|---|---|
-| score | standard | — | yes | — | — | — |
-| score-conversation | deep | — | yes | — | — | — |
-| score-decision | standard | — | yes | — | — | — |
-| score-social | standard | — | yes | — | — | — |
-| reason | variable | — | yes | — | — | — |
-| guardrail | variable | — | — | — | — | — |
+| Endpoint | L1 Stoic | L2b Practitioner | Notes |
+|---|---|---|---|
+| score | standard | yes | |
+| score-conversation | deep | yes | |
+| score-decision | standard | yes | |
+| score-social | standard | yes | |
+| reason | variable | yes | |
+| guardrail | variable | — | |
+| evaluate | quick | — | Cleaned Session 8 |
+| score-document | deep | yes | Cleaned Session 9 |
+| score-scenario | quick | yes | Cleaned Session 9 |
+| score-iterate | standard | — | Agent-facing. Cleaned Session 9 |
+| assessment/foundational | standard | — | Agent-facing. Cleaned Session 9 |
+| assessment/full | deep | — | Agent-facing. Cleaned Session 9 |
+| baseline/agent | standard | — | Agent-facing. Cleaned Session 9 |
 
 ### Non-LLM Endpoints (no context layers)
 

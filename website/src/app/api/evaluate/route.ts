@@ -4,9 +4,6 @@ import { checkRateLimit, validateTextLength, TEXT_LIMITS, publicCorsHeaders, pub
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
-import { getProjectContext } from '@/lib/context/project-context'
-import { getGrowthBrainContext } from '@/lib/context/growth-brain-loader'
-import { getEnvironmentalContext } from '@/lib/context/environmental-context'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -97,20 +94,14 @@ export async function POST(request: NextRequest) {
     const inputErr = validateTextLength(input, 'Input', 500)
     if (inputErr) return NextResponse.json({ error: inputErr }, { status: 400 })
 
-    // Context layers (public endpoint — no practitioner context)
+    // Context layers (public endpoint — Stoic Brain only, no project/brain/environmental context)
     const stoicBrainContext = getStoicBrainContext('quick')
-    const projectContext = await getProjectContext('minimal')
-    const growthBrainContext = getGrowthBrainContext('quick')
-    const environmentalContext = await getEnvironmentalContext('growth')
 
-    let userMessage = `Evaluate this decision through the Stoic core triad:
+    const userMessage = `Evaluate this decision through the Stoic core triad:
 
 Input: ${input.trim()}
 
 Return only the JSON evaluation object.`
-
-    userMessage += `\n\n${projectContext}`
-    if (environmentalContext) userMessage += `\n\n${environmentalContext}`
 
     // Check cache first
     const ck = cacheKey('/api/evaluate', { input: input.trim() })
@@ -137,7 +128,6 @@ Return only the JSON evaluation object.`
       system: [
         { type: 'text', text: DEMO_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: stoicBrainContext },
-        { type: 'text', text: growthBrainContext },
       ],
       messages: [
         { role: 'user', content: userMessage }

@@ -19,8 +19,6 @@ import {
   publicCorsPreflightResponse,
 } from '@/lib/security'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
-import { getTechBrainContext } from '@/lib/context/tech-brain-loader'
-import { getEnvironmentalContext } from '@/lib/context/environmental-context'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -199,8 +197,6 @@ Return ONLY valid JSON:
 
     // Layer 1: Stoic Brain context (agent-facing — no Layer 2 or 3)
     const stoicBrainContext = getStoicBrainContext('standard')
-    const techBrainContext = getTechBrainContext('standard')
-    const environmentalContext = await getEnvironmentalContext('tech')
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
@@ -209,9 +205,8 @@ Return ONLY valid JSON:
       system: [
         { type: 'text', text: V3_BASELINE_SCORING_PROMPT, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: stoicBrainContext },
-        { type: 'text', text: techBrainContext },
       ],
-      messages: [{ role: 'user', content: scoringPrompt + (environmentalContext ? `\n\n${environmentalContext}` : '') }],
+      messages: [{ role: 'user', content: scoringPrompt }],
     })
 
     const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
