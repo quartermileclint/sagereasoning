@@ -106,6 +106,42 @@ When reporting verification results, use these signals:
 
 ---
 
+## Pre-Commit Checklist
+
+Before any commit to the codebase, the AI completes every applicable item. Items marked "always" run on every commit. Items marked "when applicable" run when the described condition is true.
+
+### Always
+
+- [ ] `npx tsc --noEmit` passes in `website/` — zero errors, zero warnings treated as errors. If it fails, the commit does not proceed. *(Milestone review finding 2.1)*
+
+### When Applicable
+
+- [ ] **New Supabase table or migration:** After running the migration, verify both (a) the table exists and (b) RLS is active with correct policies by running a test insert + select as the authenticated user. *(Finding 2.2)*
+- [ ] **Safety-critical function (R17, R18, R20):** At least one endpoint calls the function, and a test confirms the end-to-end path. Status may not advance to "Wired" unless this is demonstrated. *(Finding 1.2)*
+- [ ] **Bulk wiring or refactoring (3+ endpoints changed):** A before/after diff checklist was produced showing exactly which endpoints get which changes. The founder reviewed the checklist before execution. *(Finding 1.1)*
+- [ ] **Static public files changed (llms.txt, agent-card.json):** Content verified in browser — vocabulary matches current API schema, version matches current API version. *(Finding 1.4)*
+
+---
+
+## Pre-Deployment Checklist
+
+After pushing to GitHub, before asking the founder to test on production:
+
+- [ ] Vercel deployment hash matches the latest commit. Check at Vercel dashboard → Deployments, or compare `/api/health` response if commit hash is exposed. Do not test until the deployment is confirmed live. *(Finding 4.4)*
+- [ ] All required env vars are set in Vercel (reference Section 6 of TECHNICAL_STATE.md). Pay attention to any new env vars introduced in this session. *(Finding 2.3)*
+- [ ] If the change is **Elevated** or **Critical** (per 0d-ii): rollback plan documented in the conversation before founder deploys.
+
+---
+
+## Pre-Session Environment Check
+
+At the start of any session that will involve testing or deployment:
+
+- [ ] Confirm required env vars are set by checking TECHNICAL_STATE.md Section 6 against Vercel. Flag any that are missing or unverified.
+- [ ] Note any rate-limit-sensitive services being used (Supabase auth, Anthropic API, Vercel deployments). Before suggesting retries, state the expected rate limit window. *(Finding 2.4)*
+
+---
+
 ## First Use
 
 This framework will first be used during the P0 hold point (0h) when every component claimed as "wired" or above is tested with real data.

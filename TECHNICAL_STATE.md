@@ -1,5 +1,5 @@
 # SageReasoning — Technical State
-**Last updated:** 11 April 2026 · Session 11  
+**Last updated:** 11 April 2026 · Session 16  
 **Status vocabulary:** Scoped → Designed → Scaffolded → Wired → Verified → Live  
 **Purpose:** Shared context layer for Tech, Growth, and Support agents. Authoritative reference for architectural state. Update after any endpoint, schema, or env-var change.
 
@@ -7,6 +7,7 @@
 
 ## 1. The `runSageReason()` Function
 
+**Last verified:** 11 April 2026 · Session 16  
 **File:** `website/src/lib/sage-reason-engine.ts`  
 **Role:** Single source of truth for all Stoic 4-stage reasoning. All 9 core LLM-calling endpoints route through this function (or are refactored to do so). Changes to prompt logic, depth configuration, or context injection happen here and propagate everywhere.
 
@@ -38,6 +39,8 @@
 ---
 
 ## 2. The 9 `runSageReason` Endpoints
+
+**Last verified:** 11 April 2026 · Session 16 (all 9 route files confirmed to exist)
 
 These are the endpoints that call `runSageReason()` from `sage-reason-engine.ts`. All other LLM-calling endpoints (mentor, private mentor) use `systemPromptOverride` and are documented separately.
 
@@ -323,6 +326,8 @@ These are the endpoints that call `runSageReason()` from `sage-reason-engine.ts`
 
 ## 3. Non-`runSageReason` LLM Endpoints (Mentor Family)
 
+**Last verified:** 11 April 2026 · Session 15
+
 These use `systemPromptOverride` rather than calling `runSageReason()` directly. They use their own Anthropic client calls or the engine with a full prompt override.
 
 | Route | Auth | Depth | Context Layers | Status |
@@ -347,6 +352,8 @@ These use `systemPromptOverride` rather than calling `runSageReason()` directly.
 
 ## 4. Agent Assessment Endpoints (non-runSageReason, agent-facing)
 
+**Last verified:** 11 April 2026 · Session 15
+
 | Route | Method | Auth | Rate Limit | Status |
 |---|---|---|---|---|
 | /api/assessment/foundational | GET | None | — | Wired |
@@ -359,6 +366,8 @@ These use `systemPromptOverride` rather than calling `runSageReason()` directly.
 ---
 
 ## 5. Database Schema (Supabase — Production)
+
+**Last verified:** 11 April 2026 · Session 15 (table existence and RLS status)
 
 ### Core Tables
 
@@ -666,31 +675,69 @@ Persists iterative agent deliberation chains for score-iterate endpoint.
 
 ## 6. Active Environment Variables
 
-Variables in use across the production Vercel deployment. Never commit these. All required unless marked optional.
+**Last verified:** 11 April 2026 · Session 15
 
-| Variable | Used By | Purpose |
-|---|---|---|
-| `ANTHROPIC_API_KEY` | sage-reason-engine.ts (singleton client) | All LLM calls |
-| `NEXT_PUBLIC_SUPABASE_URL` | All Supabase clients | Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Client-side Supabase | Public/anon access |
-| `SUPABASE_SERVICE_ROLE_KEY` | supabase-server.ts (`supabaseAdmin`) | Server-side privileged access |
-| `FOUNDER_USER_ID` | mentor/private/* routes | Restricts private mentor endpoints to founder only |
-| `STRIPE_SECRET_KEY` | billing routes | Payment processing |
-| `STRIPE_WEBHOOK_SECRET` | webhooks/stripe | Webhook signature verification |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Client billing UI | Stripe Elements |
-| `RESEND_API_KEY` | notification scripts | Transactional email (manual trigger) |
-| `MODEL_FAST` | model-config.ts | Fast model identifier (haiku tier) |
-| `MODEL_DEEP` | model-config.ts | Deep model identifier (sonnet tier) |
+Variables in use across the production Vercel deployment. Never commit these.
 
-**Optional / not yet active:**
+### Required — Core Infrastructure
+
+| Variable | Set In | Used By | Purpose |
+|---|---|---|---|
+| `ANTHROPIC_API_KEY` | Vercel | sage-reason-engine.ts + 12 route files | All LLM calls (singleton client) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Vercel | All Supabase clients, security.ts, middleware.ts | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Vercel | Client-side Supabase, context-template.ts, middleware.ts | Public/anon access |
+| `SUPABASE_SERVICE_ROLE_KEY` | Vercel | supabase-server.ts, security.ts, 12+ route files | Server-side privileged access |
+
+**Note:** `MODEL_FAST` (claude-haiku-4-5-20251001) and `MODEL_DEEP` (claude-sonnet-4-6) are hardcoded constants in `model-config.ts`, not environment variables. To change models, edit the source file and redeploy.
+
+### Required — Access Control
+
+| Variable | Set In | Used By | Purpose |
+|---|---|---|---|
+| `FOUNDER_USER_ID` | Vercel | mentor/private/* routes, founder/hub/route.ts | Restricts private mentor + founder hub to founder only |
+| `ADMIN_USER_ID` | Vercel | admin/api-keys/route.ts, admin/metrics/route.ts | Gates admin endpoints (API key management, metrics) |
+
+### Required — Encryption (R17b)
+
+| Variable | Set In | Used By | Purpose |
+|---|---|---|---|
+| `MENTOR_ENCRYPTION_KEY` | Vercel | server-encryption.ts → mentor-profile-store.ts | Server-side AES-256-GCM for mentor_profiles. 64-char hex string. |
+
+### Required — Billing (Stripe)
+
+| Variable | Set In | Used By | Purpose |
+|---|---|---|---|
+| `STRIPE_SECRET_KEY` | Vercel | stripe.ts, billing routes | Payment processing |
+| `STRIPE_WEBHOOK_SECRET` | Vercel | webhooks/stripe/route.ts | Webhook signature verification |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Vercel | Client billing UI | Stripe Elements (client-side) |
+
+### Optional — Billing Price IDs
+
+| Variable | Set In | Used By | Purpose |
+|---|---|---|---|
+| `STRIPE_DEVELOPER_PRICE_ID` | Vercel | stripe.ts | Stripe price ID for developer tier (fallback: empty) |
+| `STRIPE_TIDING_ONCEOFF_PRICE_ID` | Vercel | stripe.ts | Stripe price ID for one-off tiding (fallback: empty) |
+| `STRIPE_TIDING_MONTHLY_PRICE_ID` | Vercel | stripe.ts | Stripe price ID for monthly tiding (fallback: empty) |
+
+### Optional — Deployment & URLs
+
+| Variable | Set In | Used By | Purpose |
+|---|---|---|---|
+| `NEXT_PUBLIC_SITE_URL` | Vercel | security.ts (CORS), stripe.ts (billing URLs), score-document/route.ts | Deployment URL override. Fallback: hardcoded sagereasoning.com |
+| `VERCEL_URL` | Auto-injected | score-document/route.ts | Vercel-provided deployment URL. Used for staging document URLs. |
+
+### Optional — Not Yet Active
+
 | Variable | Purpose | Status |
 |---|---|---|
 | `PLAUSIBLE_API_KEY` | Privacy-first analytics | Not yet configured |
-| `MENTOR_ENCRYPTION_KEY` | Server-side AES-256-GCM encryption for mentor_profiles (R17b) | Wired via mentor-profile-store.ts |
+| `RESEND_API_KEY` | Transactional email (manual trigger) | Not yet configured |
 
 ---
 
-## 7. Architectural Decisions (Recent — Session 6–10)
+## 7. Architectural Decisions (Recent — Session 6–15)
+
+**Last verified:** 11 April 2026 · Session 16 (ADR-007 encryption claim confirmed against code)
 
 ### ADR-001: sage-reason-engine as shared singleton (6 April)
 All 9 core LLM endpoints route through `runSageReason()`. No endpoint implements 4-stage logic independently. Singleton Anthropic client replaces 24 separate instances. **Rationale:** R4 (IP protection via centralisation), R5 (cost via connection pooling), R12 (2+ mechanisms from one source), R14 (receipts on all routes).
@@ -720,10 +767,12 @@ Routes at `/api/mentor/private/*` are restricted to `FOUNDER_USER_ID`. They rece
 
 ## 8. Module Status
 
+**Last verified:** 11 April 2026 · Session 16 (all file paths confirmed against filesystem)
+
 | Module | Location | Status | Notes |
 |---|---|---|---|
 | sage-reason-engine | website/src/lib/ | Wired | Core LLM engine. Extended 8 April with stage scores, urgency context |
-| stoic-brain-compiled | website/src/lib/context/ | Wired | Layer 1. 8 JSON sources compiled into depth-level strings |
+| stoic-brain-compiled | website/src/data/ | Wired | Layer 1. 8 JSON sources compiled into depth-level strings. Loaded by stoic-brain-loader.ts in website/src/lib/context/. |
 | practitioner-context | website/src/lib/context/ | Wired | Layer 2b. Loads from mentor_profiles, returns condensed string |
 | project-context | website/src/lib/context/ | Wired | Layer 2. Static JSON + Supabase dynamic. Private mentor only |
 | mentor-context-private | website/src/lib/context/ | Wired | Full profile + observations + journal refs + snapshots. Session 10 |
@@ -733,6 +782,9 @@ Routes at `/api/mentor/private/*` are restricted to `FOUNDER_USER_ID`. They rece
 | reasoning-receipt | website/src/lib/ | Wired | Receipt generation on all runSageReason routes |
 | response-envelope | website/src/lib/ | Wired | Standardised API response wrapper |
 | encryption | website/src/lib/ | Wired | Server-side AES-256-GCM via server-encryption.ts + mentor-profile-store.ts. Client-side encryption.ts remains scaffolded (P2 scope). |
+| json-utils | website/src/lib/ | Wired | Shared extractJSON() — 4-step fallback chain. Used by sage-reason-engine, evaluate, reflect, mentor/private/reflect. Session 15. |
+| guardrails | website/src/lib/ | Wired | detectDistress() — R20a distress detection. Wired to 7 human-facing POST routes + context-template.ts (12 marketplace skills). Session 14–15. |
+| context-template | website/src/lib/ | Wired | Shared handler for 12 marketplace skills. Distress-gated (Session 15). |
 | sage-mentor-bridge | sage-mentor/ | Wired | Dynamic import bridge for reflect→profile update loop |
 
 ---

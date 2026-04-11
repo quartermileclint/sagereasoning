@@ -1,6 +1,6 @@
 # SageReasoning Project Index
 
-Last updated: 6 April 2026 | Maintained as part of P0 item 0e
+Last updated: 11 April 2026 | Maintained as part of P0 item 0e
 
 ---
 
@@ -53,7 +53,7 @@ Every strategic folder (adopted, drafts, business, compliance, legal, operations
 | Folder | Purpose | Key Contents |
 |--------|---------|-------------|
 | /product/ | Product specs, brainstorms, architecture docs | AGENTS.md (API guide), Trust Layer Framework, Mentor Architecture, Path of the Prokoptos, Baseline Assessment Spec, 19 files total |
-| /engineering/ | Technical docs, scripts, audits, deployment | Deployment Checklist, Token Efficiency, Website Audit, JS build scripts, SQL scripts |
+| /engineering/ | Technical docs, scripts, audits, deployment | Deployment Checklist, Token Efficiency, Website Audit, Vercel Deployment Gotchas, JS build scripts, SQL scripts |
 | /prototypes/ | Legacy HTML mockups, demo outputs | Setup Plan, Wrapper Demo (hub prototypes superseded by live pages at /mentor-hub, /private-mentor, /ops-hub) |
 
 ### Operations
@@ -63,7 +63,7 @@ Every strategic folder (adopted, drafts, business, compliance, legal, operations
 | /operations/ | Ops blueprints, manuals, assessments | Sage Cofounder Blueprint, Support Agent Manual, Founder Profile, Sage Ops Assessments (v1, v2) |
 | /operations/session-handoffs/ | Session continuity notes (P0 item 0b) | 2026-04-06 session close (first handoff note) |
 | /operations/decision-log.md | Append-only decision record (P0 item 0f) | 11 decisions, 21 March – 6 April 2026 |
-| /operations/verification-framework.md | How both parties verify work (P0 item 0c) | Verification methods by work type, session-start protocol |
+| /operations/verification-framework.md | How both parties verify work (P0 item 0c) | Verification methods by work type, session-start protocol, pre-commit checklist, pre-deployment checklist, pre-session environment check |
 | /compliance/ | Regulatory register, audit logs, security reviews | compliance_register.json (28 obligations), audit_log.json, Security Audits, Art6 Classification |
 | /reference/ | Knowledge context, ethical analysis, research | Ethical Analysis (R17-R20 source), Knowledge Context (45KB), Human-AI Development KB (53KB), Journal 10 Layers |
 
