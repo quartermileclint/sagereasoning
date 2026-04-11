@@ -363,6 +363,33 @@ const REQUIRED_FIELDS: Record<ReasonDepth, string[]> = {
 export const EVALUATIVE_DISCLAIMER = 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.'
 
 // =============================================================================
+// JSON EXTRACTION HELPER
+// =============================================================================
+
+/**
+ * Extract a JSON object from an LLM response string.
+ * Tries bare parse, then strips code fences, then extracts first { to last }.
+ * Throws if all attempts fail.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parseJSONFromResponse(text: string): any {
+  // Strategy: strip code fences, then if that fails, find { to } boundaries
+  let cleaned = text.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
+  try {
+    return JSON.parse(cleaned)
+  } catch {
+    // Fallback: extract from first { to last }
+    const start = text.indexOf('{')
+    const end = text.lastIndexOf('}')
+    if (start !== -1 && end > start) {
+      cleaned = text.substring(start, end + 1)
+      return JSON.parse(cleaned)
+    }
+    throw new Error('No JSON object found in response')
+  }
+}
+
+// =============================================================================
 // CORE REASONING ENGINE
 // =============================================================================
 
@@ -484,25 +511,33 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
 
   // Parse JSON response — extract the JSON object from whatever wrapping the model adds
   let evalData
+  let actualModel = config.model
   try {
-    // Strategy: strip code fences, then if that fails, find { to } boundaries
-    let cleaned = responseText.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
-    try {
-      evalData = JSON.parse(cleaned)
-    } catch {
-      // Fallback: extract from first { to last }
-      const start = responseText.indexOf('{')
-      const end = responseText.lastIndexOf('}')
-      if (start !== -1 && end > start) {
-        cleaned = responseText.substring(start, end + 1)
-        evalData = JSON.parse(cleaned)
-      } else {
-        throw new Error('No JSON object found in response')
-      }
-    }
+    evalData = parseJSONFromResponse(responseText)
   } catch {
-    console.error('sage-reason-engine: Failed to parse response:', responseText)
-    throw new Error('Reasoning engine returned invalid JSON response')
+    // Haiku→Sonnet retry: if quick depth with MODEL_FAST failed to produce parseable JSON,
+    // retry once with MODEL_DEEP (Sonnet) which is reliable across all input types.
+    if (depth === 'quick' && config.model === MODEL_FAST) {
+      console.warn('sage-reason-engine: Quick depth parse failed — retrying with Sonnet')
+      const retryMessage = await client.messages.create({
+        model: MODEL_DEEP,
+        max_tokens: config.maxTokens,
+        temperature: 0.2,
+        system: systemMessages,
+        messages: [{ role: 'user', content: userMessage }],
+      })
+      const retryText = retryMessage.content[0].type === 'text' ? retryMessage.content[0].text : ''
+      try {
+        evalData = parseJSONFromResponse(retryText)
+        actualModel = MODEL_DEEP
+      } catch {
+        console.error('sage-reason-engine: Sonnet retry also failed to parse:', retryText)
+        throw new Error('Reasoning engine returned invalid JSON response')
+      }
+    } else {
+      console.error('sage-reason-engine: Failed to parse response:', responseText)
+      throw new Error('Reasoning engine returned invalid JSON response')
+    }
   }
 
   // Validate required fields for this depth (skip when using custom system prompt)
@@ -546,7 +581,7 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
       mechanisms_applied: DEPTH_MECHANISMS[depth],
       mechanism_count: DEPTH_MECHANISMS[depth].length,
       ai_generated: true,
-      ai_model: config.model,
+      ai_model: actualModel,
       latency_ms: latencyMs,
       stage_scores: stageScores,
       hasty_assent_risk: hastyAssentRisk,
