@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { authFetch } from '@/lib/auth-fetch';
 
 type ViewId = 'conversation' | 'morning' | 'evening' | 'profile' | 'layers' | 'contradictions' | 'triggers' | 'timeline' | 'patterns' | 'settings';
 
@@ -52,7 +53,7 @@ export default function PrivateMentorPage() {
   const loadConversation = async () => {
     try {
       // List conversations to find the most recent mentor conversation
-      const listRes = await fetch('/api/founder/hub?list=true');
+      const listRes = await authFetch('/api/founder/hub?list=true');
       if (!listRes.ok) throw new Error('Failed to list conversations');
       const listData = await listRes.json();
 
@@ -61,7 +62,7 @@ export default function PrivateMentorPage() {
       );
 
       if (mentorConv) {
-        const msgRes = await fetch(`/api/founder/hub?conversation_id=${mentorConv.id}`);
+        const msgRes = await authFetch(`/api/founder/hub?conversation_id=${mentorConv.id}`);
         if (!msgRes.ok) throw new Error('Failed to load conversation');
         const msgData = await msgRes.json();
 
@@ -149,9 +150,8 @@ export default function PrivateMentorPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/founder/hub', {
+      const res = await authFetch('/api/founder/hub', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           agent: 'mentor',
           message: messageText,
