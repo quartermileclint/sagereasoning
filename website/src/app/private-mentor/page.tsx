@@ -33,21 +33,68 @@ export default function PrivateMentorPage() {
   const [toastVisible, setToastVisible] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
 
-  // Load initial proximity score
+  const WELCOME_MESSAGE: Message = {
+    id: '0',
+    type: 'insight',
+    content:
+      "Welcome back, Clinton. I've completed the analysis of your October\u2013December 2025 journal \u2014 12 sections, 119 entries. Your primary passion is philodoxia (love of honour), appearing in 9 of 12 sections. The false judgement: external recognition is necessary for self-worth. You're at Deliberate level \u2014 proficiens medius. You can articulate Stoic principles accurately and identify your own false judgements, but the gap is between knowing and applying under pressure. The good news: concrete growth evidence \u2014 shouting replaced with encouragement, doom scrolling replaced with intentional learning, shame giving way to fulfilment.",
+    timestamp: 'Today, 8:12 AM',
+  };
+
+  // Load existing mentor conversation from Supabase on mount
   useEffect(() => {
     fetchProximityScore();
-    // Pre-load initial conversation message
-    setMessages([
-      {
-        id: '0',
-        type: 'insight',
-        content:
-          "Welcome back, Clinton. I've completed the analysis of your October–December 2025 journal — 12 sections, 119 entries. Your primary passion is philodoxia (love of honour), appearing in 9 of 12 sections. The false judgement: external recognition is necessary for self-worth. You're at Deliberate level — proficiens medius. You can articulate Stoic principles accurately and identify your own false judgements, but the gap is between knowing and applying under pressure. The good news: concrete growth evidence — shouting replaced with encouragement, doom scrolling replaced with intentional learning, shame giving way to fulfilment.",
-        timestamp: 'Today, 8:12 AM',
-      },
-    ]);
+    loadConversation();
   }, []);
+
+  const loadConversation = async () => {
+    try {
+      // List conversations to find the most recent mentor conversation
+      const listRes = await fetch('/api/founder/hub?list=true');
+      if (!listRes.ok) throw new Error('Failed to list conversations');
+      const listData = await listRes.json();
+
+      const mentorConv = (listData.conversations || []).find(
+        (c: { primary_agent: string }) => c.primary_agent === 'mentor'
+      );
+
+      if (mentorConv) {
+        const msgRes = await fetch(`/api/founder/hub?conversation_id=${mentorConv.id}`);
+        if (!msgRes.ok) throw new Error('Failed to load conversation');
+        const msgData = await msgRes.json();
+
+        setConversationId(mentorConv.id);
+
+        const loaded: Message[] = (msgData.messages || []).map(
+          (m: { id: string; role: string; agent_type: string | null; content: string; created_at: string }) => ({
+            id: m.id,
+            type: m.role === 'founder' ? 'human' : m.role === 'observer' ? 'insight' : 'mentor',
+            content: m.content,
+            timestamp: new Date(m.created_at).toLocaleString('en-AU', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+              day: 'numeric',
+              month: 'short',
+            }),
+          })
+        );
+
+        if (loaded.length > 0) {
+          setMessages(loaded);
+          return;
+        }
+      }
+
+      // No existing conversation — show welcome message
+      setMessages([WELCOME_MESSAGE]);
+    } catch (error) {
+      console.error('Failed to load conversation:', error);
+      setMessages([WELCOME_MESSAGE]);
+    }
+  };
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -97,25 +144,55 @@ export default function PrivateMentorPage() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const messageText = composeInput;
     setComposeInput('');
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/reason', {
+      const res = await fetch('/api/founder/hub', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: composeInput, depth: 'standard' }),
+        body: JSON.stringify({
+          agent: 'mentor',
+          message: messageText,
+          conversation_id: conversationId,
+        }),
       });
       const data = await res.json();
 
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to get mentor response');
+      }
+
+      // Store conversation ID for subsequent messages
+      if (data.conversation_id && !conversationId) {
+        setConversationId(data.conversation_id);
+      }
+
+      // Add the primary mentor response
       const mentorMessage: Message = {
         id: `msg-${Date.now()}-mentor`,
         type: 'mentor',
-        content: data.result || 'Thank you for sharing that. Let me consider what you have said.',
+        content: data.primary?.content || 'I encountered an issue formulating my response. Please try again.',
         timestamp: formatTime(),
       };
-
       setMessages((prev) => [...prev, mentorMessage]);
+
+      // Add any relevant observer insights
+      if (data.observers && data.observers.length > 0) {
+        const relevantObservers = data.observers.filter(
+          (obs: { relevance_score?: number }) => (obs.relevance_score ?? 0) > 0.5
+        );
+        for (const obs of relevantObservers) {
+          const obsMessage: Message = {
+            id: `msg-${Date.now()}-obs-${obs.agent}`,
+            type: 'insight',
+            content: obs.content,
+            timestamp: formatTime(),
+          };
+          setMessages((prev) => [...prev, obsMessage]);
+        }
+      }
 
       // Update proximity score after conversation
       await fetchProximityScore();
