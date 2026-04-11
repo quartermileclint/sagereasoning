@@ -514,6 +514,18 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
     }
   }
 
+  // Diagnostic validation — log warnings for unexpected shapes without throwing.
+  // Catches regressions like the virtue_quality nesting issue (Session 7b) early.
+  if (!params.systemPromptOverride) {
+    const responseTail = responseText.slice(-200)
+    if (typeof evalData !== 'object' || evalData === null || Array.isArray(evalData)) {
+      console.warn(`sage-reason-engine: Unexpected response type '${Array.isArray(evalData) ? 'array' : typeof evalData}' at depth '${depth}'. Response tail: ${responseTail}`)
+    } else if (!('katorthoma_proximity' in evalData)) {
+      const keysPresent = Object.keys(evalData).slice(0, 10).join(', ')
+      console.warn(`sage-reason-engine: Missing katorthoma_proximity at depth '${depth}'. Keys present: [${keysPresent}]. Response tail: ${responseTail}`)
+    }
+  }
+
   // Validate required fields for this depth (skip when using custom system prompt)
   if (!params.systemPromptOverride) {
     const requiredFields = REQUIRED_FIELDS[depth]
