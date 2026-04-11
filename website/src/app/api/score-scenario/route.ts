@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
-import { MODEL_FAST } from '@/lib/model-config'
+import { MODEL_FAST, MODEL_DEEP } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { detectDistress } from '@/lib/guardrails'
@@ -231,7 +231,7 @@ Score this response. Return the JSON.`
     if (practitionerContext) userMessage += `\n\n${practitionerContext}`
 
     const message = await client.messages.create({
-      model: MODEL_FAST,
+      model: MODEL_DEEP,
       max_tokens: 1024,
       temperature: 0.2,
       system: [
@@ -306,9 +306,9 @@ Score this response. Return the JSON.`
     const envelope = buildEnvelope({
       result,
       endpoint: '/api/score-scenario',
-      model: MODEL_FAST,
+      model: MODEL_DEEP,
       startTime,
-      maxTokens: 512,
+      maxTokens: 1024,
       composability: {
         next_steps: ['/api/score-iterate'],
         recommended_action: 'Review feedback and sage guidance. Consider deeper reflection with /api/reflect or iterate with /api/score-iterate.',
