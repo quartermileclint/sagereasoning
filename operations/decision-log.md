@@ -287,3 +287,31 @@ Changes implemented:
 **Impact:** 4 new files in `/sage-orchestrator/`. Module ready for internal agent wiring (P7) and customer packaging. All presets use identical governance structure with domain-specific decision gate configurations.
 
 **Status:** Adopted
+
+---
+
+## 11 April 2026 — Analytics Platform: Plausible, Install After P2
+
+**Decision:** Selected Plausible Analytics as the website analytics platform. Installation deferred until P2 ethical safeguards are in place.
+
+**Reasoning:** Plausible was chosen over Fathom for three reasons: lower entry cost at pre-launch scale ($9/month vs $14), self-hosting option preserving future data sovereignty, and open-source codebase (AGPL-3.0) consistent with SageReasoning's transparency values. EU-hosting available if data residency becomes a requirement. Both platforms are fully R17-compliant (cookie-free, no personal data). Installation deferred to post-P2 to batch infrastructure decisions with the ethical safeguards work — analytics does not block P2 but the founder chose to sequence it after.
+
+**Rules served:** R17 (privacy-respecting infrastructure), R5 (cost-appropriate tooling at current scale)
+
+**Impact:** No installation yet. When ready: one script tag in `website/src/app/layout.tsx`, domain configured in Plausible dashboard. UTM parameter conventions documented in `operations/analytics-decision-memo.md`. `PLAUSIBLE_API_KEY` env var to be added to Vercel at install time.
+
+**Status:** Adopted — installation pending P2 completion
+
+---
+
+## 11 April 2026 — Support Agent Profile Access Deferred Until R17b Wired
+
+**Decision:** The Support agent will not receive practitioner profile summary data (proximity estimate, dominant passions) at query entry until application-level encryption for `mentor_profiles` is implemented (P2 item 2c).
+
+**Reasoning:** The privacy architecture assessment confirmed that surfacing condensed profile data (not journal content) to the Support agent is architecturally permissible within R17's intent — it is the user's own data, used to serve that user, processed locally. The limiting factor is ADR-007: `encryption.ts` exists but is not yet wired to the `mentor_profiles` storage pipeline. Adding profile access to the Support agent before the encryption gap is closed would increase the exposure surface of unencrypted intimate data. The correct sequencing is: implement R17b (P2 item 2c) → then wire profile summary to Support agent context.
+
+**Rules served:** R17 (intimate data protection), R17b (application-level encryption), R20a (vulnerable user detection — profile data improves Support's triage accuracy, but not at the cost of R17b)
+
+**Impact:** Support agent implementation plan (Part A, Step 1) should note that profile context injection is not available at first build. The agent will triage without profile context initially. When R17b is wired, the Support agent session-open can be extended to load `proximity_level` + `dominant_passions` + `profile_summary` from `mentor_profiles` via service role. No code changes needed now.
+
+**Status:** Adopted — profile access deferred to post-R17b implementation
