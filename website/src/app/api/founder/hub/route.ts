@@ -327,7 +327,259 @@ What is the recommended next action?`,
 }
 
 // =============================================================================
-// POST — Send message to agent
+// Ask the Org — Parallel domain query with Ops synthesis + Mentor review
+// =============================================================================
+
+type DomainAgentType = 'tech' | 'growth' | 'support'
+const DOMAIN_AGENTS: DomainAgentType[] = ['tech', 'growth', 'support']
+
+interface DomainResponse {
+  agent: DomainAgentType
+  content: string
+  pipeline_meta: Record<string, unknown>
+}
+
+interface OpsSynthesis {
+  unified_answer: string
+  combined_session_prompt: string
+  risk_classification: 'standard' | 'elevated' | 'critical'
+  risk_reasoning: string
+  domain_summary: Record<string, string>
+}
+
+interface MentorReview {
+  has_guidance: boolean
+  guidance: string
+  reasoning_quality: 'sound' | 'needs_examination' | 'passion_detected'
+}
+
+/**
+ * Get a domain agent's independent answer to the founder's question.
+ * Each runs Sonnet with deep brain context — no conversation history (standalone query).
+ */
+async function getDomainAgentResponse(
+  agent: DomainAgentType,
+  question: string,
+  userId: string,
+): Promise<DomainResponse> {
+  const client = getClient()
+  const startTime = Date.now()
+
+  const brainContext = getAgentBrainContext(agent, 'deep')
+  const stoicContext = getStoicBrainContextForMechanisms(['passion_diagnosis', 'oikeiosis', 'value_assessment'])
+  const projectContext = await getProjectContext('summary')
+  const practitionerContext = await getFullPractitionerContext(userId)
+
+  const systemBlocks: Array<{ type: 'text'; text: string; cache_control?: { type: 'ephemeral' } }> = [
+    {
+      type: 'text',
+      text: `You are ${getAgentDescription(agent)}. The SageReasoning founder is asking all domain agents the same question simultaneously. Give your best domain-specific answer.\n\nBe direct, specific, and thorough. Cover what falls within your expertise. Don't try to cover other agents' domains — they're answering in parallel. The founder is a non-technical solo founder.\n\n${brainContext}`,
+      cache_control: { type: 'ephemeral' },
+    },
+    ...(stoicContext ? [{ type: 'text' as const, text: stoicContext }] : []),
+  ]
+
+  let enrichedQuestion = question
+  if (practitionerContext) enrichedQuestion += `\n\n${practitionerContext}`
+  enrichedQuestion += `\n\n${projectContext}`
+
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1500,
+    temperature: 0.4,
+    system: systemBlocks,
+    messages: [{ role: 'user', content: enrichedQuestion }],
+  })
+
+  const content = response.content[0].type === 'text' ? response.content[0].text : ''
+  const durationMs = Date.now() - startTime
+
+  return {
+    agent,
+    content,
+    pipeline_meta: {
+      model: 'claude-sonnet-4-6',
+      inputTokens: response.usage?.input_tokens || 0,
+      outputTokens: response.usage?.output_tokens || 0,
+      durationMs,
+      brainDepth: 'deep',
+    },
+  }
+}
+
+/**
+ * Ops synthesis — Opus 4.6 receives all 3 domain answers and produces:
+ * 1. A unified operational answer
+ * 2. A combined session prompt the founder can paste into a new session
+ * 3. Risk classification
+ */
+async function getOpsSynthesis(
+  question: string,
+  domainResponses: DomainResponse[],
+): Promise<OpsSynthesis> {
+  const client = getClient()
+  const opsBrain = getAgentBrainContext('ops', 'deep')
+
+  const domainInputs = domainResponses.map(r =>
+    `=== ${r.agent.toUpperCase()} ===\n${r.content}`
+  ).join('\n\n')
+
+  const response = await client.messages.create({
+    model: 'claude-opus-4-6',
+    max_tokens: 2500,
+    temperature: 0.3,
+    system: [
+      {
+        type: 'text',
+        text: `You are Sage-Ops, the operational synthesis agent for SageReasoning. You have just received independent answers from Tech, Growth, and Support agents to the same founder question.
+
+Your job:
+1. Synthesize their answers into one unified operational answer that integrates all relevant perspectives. Don't just concatenate — find the through-line, resolve any tensions, and give the founder a clear picture.
+2. Produce a combined session prompt that a new Claude Cowork session can use to execute on this. The prompt must give the new session enough context to start working immediately — reference specific files, endpoints, decisions, and include all three domains' relevant details.
+3. Classify the risk level of the recommended action.
+
+Risk classification (per 0d-ii):
+- Standard: Additive changes, content updates, new features, cosmetic fixes
+- Elevated: Changes to existing user-facing functionality, new dependencies, schema changes
+- Critical: Auth, session management, access control, encryption, data deletion, deployment config
+
+Return ONLY valid JSON:
+{
+  "unified_answer": "<your synthesized answer — thorough but clear, addressed to the founder in plain language>",
+  "combined_session_prompt": "<the full prompt the founder pastes into a new session — 5-12 sentences, specific, actionable, integrating all domain perspectives>",
+  "risk_classification": "<standard|elevated|critical>",
+  "risk_reasoning": "<one sentence: why this risk level>",
+  "domain_summary": {
+    "tech": "<1 sentence: what tech contributed>",
+    "growth": "<1 sentence: what growth contributed>",
+    "support": "<1 sentence: what support contributed>"
+  }
+}
+
+${opsBrain}`,
+        cache_control: { type: 'ephemeral' },
+      },
+    ],
+    messages: [
+      {
+        role: 'user',
+        content: `FOUNDER'S QUESTION:\n"${question}"\n\nDOMAIN AGENT RESPONSES:\n${domainInputs}\n\nSynthesize these into a unified operational answer and combined session prompt.`,
+      },
+    ],
+  })
+
+  const text = response.content[0].type === 'text' ? response.content[0].text : ''
+
+  try {
+    let parsed: Record<string, unknown>
+    try { parsed = JSON.parse(text.trim()) } catch {
+      const match = text.match(/\{[\s\S]*\}/)
+      if (match) { parsed = JSON.parse(match[0]) } else { throw new Error('No JSON found') }
+    }
+
+    return {
+      unified_answer: String(parsed.unified_answer || 'Unable to synthesize — see individual domain responses.'),
+      combined_session_prompt: String(parsed.combined_session_prompt || 'Continue from an Ask the Org query.'),
+      risk_classification: ['standard', 'elevated', 'critical'].includes(String(parsed.risk_classification))
+        ? (parsed.risk_classification as 'standard' | 'elevated' | 'critical')
+        : 'standard',
+      risk_reasoning: String(parsed.risk_reasoning || 'Default classification.'),
+      domain_summary: {
+        tech: String((parsed.domain_summary as Record<string, string>)?.tech || 'No summary.'),
+        growth: String((parsed.domain_summary as Record<string, string>)?.growth || 'No summary.'),
+        support: String((parsed.domain_summary as Record<string, string>)?.support || 'No summary.'),
+      },
+    }
+  } catch {
+    return {
+      unified_answer: 'Unable to parse synthesis — see individual domain responses below.',
+      combined_session_prompt: `Continue from an Ask the Org query. The founder asked: "${question.substring(0, 200)}". Tech, Growth, and Support each provided domain-specific answers. Review and determine the unified next action.`,
+      risk_classification: 'standard',
+      risk_reasoning: 'Unable to classify — defaulting to standard.',
+      domain_summary: { tech: 'See raw response.', growth: 'See raw response.', support: 'See raw response.' },
+    }
+  }
+}
+
+/**
+ * Mentor review — Sonnet checks the Ops synthesis for principled reasoning.
+ * Only adds guidance if warranted (passion detected, reasoning gap, or ethical concern).
+ */
+async function getMentorReview(
+  question: string,
+  opsSynthesis: OpsSynthesis,
+): Promise<MentorReview> {
+  const client = getClient()
+  const stoicContext = getStoicBrainContextForMechanisms([
+    'passion_diagnosis', 'oikeiosis', 'value_assessment', 'control_filter',
+  ])
+  const mentorKB = getMentorKnowledgeBase()
+
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 800,
+    temperature: 0.3,
+    system: [
+      {
+        type: 'text',
+        text: `You are the Sage Mentor reviewing an operational synthesis for the SageReasoning founder. The Ops agent has unified three domain perspectives into an answer and action plan.
+
+Your job: check whether the reasoning and recommended action align with principled reasoning. Specifically look for:
+- Passions (appetite, fear, pleasure, distress) driving the recommendation rather than virtue
+- False judgements embedded in assumptions
+- Oikeiosis violations — is the action appropriately scoped to the founder's current circle of concern?
+- Anything the founder should examine before acting
+
+If the reasoning is sound and no guidance is needed, say so briefly.
+If you detect something worth flagging, explain it warmly and specifically — not as a lecture, but as a mentor observation.
+
+Return ONLY valid JSON:
+{
+  "has_guidance": <true if you have something worth saying, false if reasoning is sound>,
+  "guidance": "<your mentor note — 2-4 sentences if has_guidance is true, or 1 sentence affirming sound reasoning if false>",
+  "reasoning_quality": "<sound|needs_examination|passion_detected>"
+}
+
+${mentorKB}
+${stoicContext || ''}`,
+        cache_control: { type: 'ephemeral' },
+      },
+    ],
+    messages: [
+      {
+        role: 'user',
+        content: `FOUNDER'S QUESTION:\n"${question}"\n\nOPS UNIFIED ANSWER:\n${opsSynthesis.unified_answer}\n\nRECOMMENDED ACTION (${opsSynthesis.risk_classification}):\n${opsSynthesis.combined_session_prompt}\n\nReview for principled reasoning.`,
+      },
+    ],
+  })
+
+  const text = response.content[0].type === 'text' ? response.content[0].text : ''
+
+  try {
+    let parsed: Record<string, unknown>
+    try { parsed = JSON.parse(text.trim()) } catch {
+      const match = text.match(/\{[\s\S]*\}/)
+      if (match) { parsed = JSON.parse(match[0]) } else { throw new Error('No JSON found') }
+    }
+
+    return {
+      has_guidance: Boolean(parsed.has_guidance),
+      guidance: String(parsed.guidance || 'Reasoning appears sound.'),
+      reasoning_quality: ['sound', 'needs_examination', 'passion_detected'].includes(String(parsed.reasoning_quality))
+        ? (parsed.reasoning_quality as 'sound' | 'needs_examination' | 'passion_detected')
+        : 'sound',
+    }
+  } catch {
+    return {
+      has_guidance: false,
+      guidance: 'Unable to review — proceed with awareness.',
+      reasoning_quality: 'sound',
+    }
+  }
+}
+
+// =============================================================================
+// POST — Send message to agent (standard) or Ask the Org (parallel synthesis)
 // =============================================================================
 
 export async function POST(request: NextRequest) {
@@ -345,20 +597,137 @@ export async function POST(request: NextRequest) {
 
   let debugStep = 'parse_body'
   try {
-    const { agent, message, conversation_id } = await request.json()
+    const { agent, message, conversation_id, mode } = await request.json()
 
-    // Validate agent
-    if (!agent || !VALID_AGENTS.includes(agent)) {
+    // Validate message (required for both modes)
+    if (!message || typeof message !== 'string' || message.trim().length < 2) {
       return NextResponse.json(
-        { error: `Invalid agent. Must be one of: ${VALID_AGENTS.join(', ')}` },
+        { error: 'Message is required (min 2 characters).' },
         { status: 400 }
       )
     }
 
-    // Validate message
-    if (!message || typeof message !== 'string' || message.trim().length < 2) {
+    // ── Ask the Org mode ──────────────────────────────────────────────
+    if (mode === 'ask-org') {
+      debugStep = 'ask_org_create_conversation'
+      const { data: conv, error: convErr } = await supabaseAdmin
+        .from('founder_conversations')
+        .insert({
+          primary_agent: 'ops',
+          title: `[Ask Org] ${message.trim().substring(0, 80)}`,
+        })
+        .select('id')
+        .single()
+
+      if (convErr || !conv) {
+        return NextResponse.json(
+          { error: `Failed to create conversation: ${convErr?.message || 'unknown'}` },
+          { status: 500 }
+        )
+      }
+      const orgConvId = conv.id
+
+      // Save founder's question
+      await supabaseAdmin.from('founder_conversation_messages').insert({
+        conversation_id: orgConvId,
+        role: 'founder',
+        agent_type: null,
+        content: message.trim(),
+      })
+
+      // Step 1: Parallel domain queries (Tech, Growth, Support — Sonnet)
+      debugStep = 'ask_org_domain_queries'
+      const domainPromises = DOMAIN_AGENTS.map(da =>
+        getDomainAgentResponse(da, message.trim(), auth.user.id).catch(err => {
+          console.error(`Domain agent ${da} failed:`, err)
+          return { agent: da, content: `[${da} unavailable: ${err.message}]`, pipeline_meta: { error: true } } as DomainResponse
+        })
+      )
+      const domainResponses = await Promise.all(domainPromises)
+
+      // Save domain responses
+      for (const dr of domainResponses) {
+        await supabaseAdmin.from('founder_conversation_messages').insert({
+          conversation_id: orgConvId,
+          role: 'agent',
+          agent_type: dr.agent,
+          content: dr.content,
+          pipeline_meta: dr.pipeline_meta,
+        })
+      }
+
+      // Step 2: Ops synthesis (Opus 4.6)
+      debugStep = 'ask_org_ops_synthesis'
+      const opsSynthesis = await getOpsSynthesis(message.trim(), domainResponses)
+
+      // Save Ops synthesis
+      await supabaseAdmin.from('founder_conversation_messages').insert({
+        conversation_id: orgConvId,
+        role: 'agent',
+        agent_type: 'ops',
+        content: opsSynthesis.unified_answer,
+        pipeline_meta: {
+          type: 'ask_org_synthesis',
+          model: 'claude-opus-4-6',
+          risk_classification: opsSynthesis.risk_classification,
+          domain_summary: opsSynthesis.domain_summary,
+        },
+      })
+
+      // Step 3: Mentor review (Sonnet)
+      debugStep = 'ask_org_mentor_review'
+      const mentorReview = await getMentorReview(message.trim(), opsSynthesis).catch(err => {
+        console.error('Mentor review failed (non-blocking):', err)
+        return { has_guidance: false, guidance: 'Mentor unavailable.', reasoning_quality: 'sound' as const }
+      })
+
+      // Save Mentor review if it has guidance
+      if (mentorReview.has_guidance) {
+        await supabaseAdmin.from('founder_conversation_messages').insert({
+          conversation_id: orgConvId,
+          role: 'observer',
+          agent_type: 'mentor',
+          content: mentorReview.guidance,
+          pipeline_meta: { type: 'ask_org_mentor_review', reasoning_quality: mentorReview.reasoning_quality },
+        })
+      }
+
+      // Update conversation timestamp
+      await supabaseAdmin
+        .from('founder_conversations')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', orgConvId)
+
+      return NextResponse.json({
+        mode: 'ask-org',
+        conversation_id: orgConvId,
+        domain_responses: domainResponses.map(dr => ({
+          agent: dr.agent,
+          content: dr.content,
+          pipeline_meta: dr.pipeline_meta,
+        })),
+        ops_synthesis: {
+          unified_answer: opsSynthesis.unified_answer,
+          combined_session_prompt: opsSynthesis.combined_session_prompt,
+          risk_classification: opsSynthesis.risk_classification,
+          risk_reasoning: opsSynthesis.risk_reasoning,
+          domain_summary: opsSynthesis.domain_summary,
+        },
+        mentor_review: {
+          has_guidance: mentorReview.has_guidance,
+          guidance: mentorReview.guidance,
+          reasoning_quality: mentorReview.reasoning_quality,
+        },
+      }, {
+        headers: corsHeaders(),
+      })
+    }
+
+    // ── Standard agent mode ───────────────────────────────────────────
+    // Validate agent (only required for standard mode)
+    if (!agent || !VALID_AGENTS.includes(agent)) {
       return NextResponse.json(
-        { error: 'Message is required (min 2 characters).' },
+        { error: `Invalid agent. Must be one of: ${VALID_AGENTS.join(', ')}` },
         { status: 400 }
       )
     }

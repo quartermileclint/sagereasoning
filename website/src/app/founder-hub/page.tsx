@@ -43,6 +43,36 @@ interface RecommendedAction {
   risk_reasoning: string;
 }
 
+interface DomainResponseData {
+  agent: AgentType;
+  content: string;
+  pipeline_meta?: Record<string, unknown>;
+}
+
+interface OpsSynthesisData {
+  unified_answer: string;
+  combined_session_prompt: string;
+  risk_classification: 'standard' | 'elevated' | 'critical';
+  risk_reasoning: string;
+  domain_summary: Record<string, string>;
+}
+
+interface MentorReviewData {
+  has_guidance: boolean;
+  guidance: string;
+  reasoning_quality: 'sound' | 'needs_examination' | 'passion_detected';
+}
+
+interface AskOrgResult {
+  conversation_id: string;
+  question: string;
+  domain_responses: DomainResponseData[];
+  ops_synthesis: OpsSynthesisData;
+  mentor_review: MentorReviewData;
+}
+
+type HubMode = 'chat' | 'ask-org';
+
 // =============================================================================
 // Constants
 // =============================================================================
@@ -72,17 +102,22 @@ function getAgentLabel(type: AgentType | null): string {
 // =============================================================================
 
 export default function FounderHubPage() {
+  const [hubMode, setHubMode] = useState<HubMode>('chat');
   const [activeAgent, setActiveAgent] = useState<AgentType>('mentor');
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStage, setLoadingStage] = useState<string>('');
   const [showSidebar, setShowSidebar] = useState(true);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [latestAction, setLatestAction] = useState<RecommendedAction | null>(null);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
+  const [askOrgResult, setAskOrgResult] = useState<AskOrgResult | null>(null);
+  const [copiedOrgPrompt, setCopiedOrgPrompt] = useState(false);
+  const [showDomainDetails, setShowDomainDetails] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -231,9 +266,53 @@ export default function FounderHubPage() {
     }
   }
 
+  async function sendAskOrg() {
+    if (!input.trim() || isLoading) return;
+
+    const question = input.trim();
+    setInput('');
+    setIsLoading(true);
+    setLoadingStage('Querying Tech, Growth & Support in parallel...');
+    setError(null);
+    setAskOrgResult(null);
+
+    try {
+      const res = await fetch('/api/founder/hub', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ mode: 'ask-org', message: question }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Error ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      setAskOrgResult({
+        conversation_id: data.conversation_id,
+        question,
+        domain_responses: data.domain_responses || [],
+        ops_synthesis: data.ops_synthesis,
+        mentor_review: data.mentor_review,
+      });
+      setCopiedOrgPrompt(false);
+      loadConversations(); // Refresh sidebar
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMsg);
+    } finally {
+      setIsLoading(false);
+      setLoadingStage('');
+      inputRef.current?.focus();
+    }
+  }
+
   function startNewConversation() {
     setActiveConversation(null);
     setMessages([]);
+    setAskOrgResult(null);
     inputRef.current?.focus();
   }
 
@@ -262,8 +341,37 @@ export default function FounderHubPage() {
             <p style={{ fontSize: 12, color: '#666', margin: '4px 0 0' }}>Multi-agent communication</p>
           </div>
 
-          {/* Agent selector */}
-          <div style={{ padding: '12px 12px 8px' }}>
+          {/* Mode selector */}
+          <div style={{ padding: '12px 12px 4px' }}>
+            <div style={{ display: 'flex', gap: 4, background: '#0A0A0A', borderRadius: 8, padding: 3 }}>
+              <button
+                onClick={() => { setHubMode('chat'); setAskOrgResult(null); }}
+                style={{
+                  flex: 1, padding: '7px 8px', borderRadius: 6, border: 'none',
+                  background: hubMode === 'chat' ? '#1A1A2E' : 'transparent',
+                  color: hubMode === 'chat' ? '#C4A265' : '#666',
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
+                }}
+              >
+                Chat
+              </button>
+              <button
+                onClick={() => { setHubMode('ask-org'); }}
+                style={{
+                  flex: 1, padding: '7px 8px', borderRadius: 6, border: 'none',
+                  background: hubMode === 'ask-org' ? '#1A2A1A' : 'transparent',
+                  color: hubMode === 'ask-org' ? '#4ADE80' : '#666',
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
+                }}
+              >
+                Ask the Org
+              </button>
+            </div>
+          </div>
+
+          {/* Agent selector (only in chat mode) */}
+          {hubMode === 'chat' && (
+          <div style={{ padding: '8px 12px 8px' }}>
             <div style={{ fontSize: 11, color: '#666', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Primary Agent</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {AGENTS.map(agent => (
@@ -286,6 +394,25 @@ export default function FounderHubPage() {
               ))}
             </div>
           </div>
+          )}
+
+          {/* Ask the Org info (only in ask-org mode) */}
+          {hubMode === 'ask-org' && (
+          <div style={{ padding: '8px 12px 8px' }}>
+            <div style={{ fontSize: 11, color: '#666', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Pipeline</div>
+            <div style={{ fontSize: 12, color: '#888', lineHeight: 1.6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                <span style={{ color: '#4ADE80' }}>1.</span> Tech + Growth + Support <span style={{ fontSize: 10, color: '#555' }}>(parallel)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                <span style={{ color: '#4ADE80' }}>2.</span> Ops synthesizes <span style={{ fontSize: 10, color: '#3B82F6' }}>(Opus)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ color: '#4ADE80' }}>3.</span> Mentor reviews <span style={{ fontSize: 10, color: '#C4A265' }}>(Sonnet)</span>
+              </div>
+            </div>
+          </div>
+          )}
 
           {/* New conversation button */}
           <div style={{ padding: '8px 12px' }}>
@@ -349,24 +476,237 @@ export default function FounderHubPage() {
           >
             {showSidebar ? '\u2630' : '\u2630'}
           </button>
-          <span style={{ fontSize: 16, color: getAgentColor(activeAgent) }}>
-            {getAgentIcon(activeAgent)}
-          </span>
-          <span style={{ fontSize: 14, fontWeight: 500 }}>
-            Talking to <span style={{ color: getAgentColor(activeAgent) }}>{getAgentLabel(activeAgent)}</span>
-          </span>
-          <span style={{ fontSize: 12, color: '#555' }}>
-            {AGENTS.find(a => a.type === activeAgent)?.desc}
-          </span>
-          <div style={{ flex: 1 }} />
-          <span style={{ fontSize: 11, color: '#444' }}>
-            All other agents observing
-          </span>
+          {hubMode === 'chat' ? (
+            <>
+              <span style={{ fontSize: 16, color: getAgentColor(activeAgent) }}>
+                {getAgentIcon(activeAgent)}
+              </span>
+              <span style={{ fontSize: 14, fontWeight: 500 }}>
+                Talking to <span style={{ color: getAgentColor(activeAgent) }}>{getAgentLabel(activeAgent)}</span>
+              </span>
+              <span style={{ fontSize: 12, color: '#555' }}>
+                {AGENTS.find(a => a.type === activeAgent)?.desc}
+              </span>
+              <div style={{ flex: 1 }} />
+              <span style={{ fontSize: 11, color: '#444' }}>
+                All other agents observing
+              </span>
+            </>
+          ) : (
+            <>
+              <span style={{ fontSize: 16 }}>{'\uD83C\uDFDB\uFE0F'}</span>
+              <span style={{ fontSize: 14, fontWeight: 500 }}>
+                <span style={{ color: '#4ADE80' }}>Ask the Org</span>
+              </span>
+              <span style={{ fontSize: 12, color: '#555' }}>
+                All 3 domain agents + Ops synthesis + Mentor review
+              </span>
+              <div style={{ flex: 1 }} />
+              <span style={{ fontSize: 11, color: '#444' }}>
+                Opus-powered synthesis
+              </span>
+            </>
+          )}
         </div>
 
-        {/* Messages */}
+        {/* Messages / Ask the Org Results */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px' }}>
-          {messages.length === 0 && (
+
+          {/* Ask the Org Results */}
+          {hubMode === 'ask-org' && askOrgResult && (
+            <div>
+              {/* Question */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: '#C4A265', marginBottom: 4 }}>Your Question</div>
+                <div style={{
+                  padding: '10px 14px', borderRadius: 8, background: '#1A1A2E',
+                  fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap',
+                }}>
+                  {askOrgResult.question}
+                </div>
+              </div>
+
+              {/* Ops Unified Answer */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <span>{'\u2699\uFE0F'}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#3B82F6' }}>Ops — Unified Answer</span>
+                  <span style={{
+                    fontSize: 10, padding: '2px 8px', borderRadius: 4,
+                    background: '#1A1A2E', color: '#818CF8', fontWeight: 600,
+                  }}>
+                    Opus synthesis
+                  </span>
+                </div>
+                <div style={{
+                  padding: '12px 16px', borderRadius: 8, background: '#141414',
+                  borderLeft: '3px solid #3B82F6',
+                  fontSize: 14, lineHeight: 1.7, whiteSpace: 'pre-wrap',
+                }}>
+                  {askOrgResult.ops_synthesis.unified_answer}
+                </div>
+              </div>
+
+              {/* Domain summaries */}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <span style={{ fontSize: 12, color: '#666' }}>Domain contributions</span>
+                  <button
+                    onClick={() => setShowDomainDetails(!showDomainDetails)}
+                    style={{
+                      background: 'none', border: '1px solid #2A2A2A', borderRadius: 4,
+                      color: '#888', fontSize: 11, padding: '2px 8px', cursor: 'pointer',
+                    }}
+                  >
+                    {showDomainDetails ? 'Hide details' : 'Show details'}
+                  </button>
+                </div>
+
+                {/* Summaries always shown */}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: showDomainDetails ? 12 : 0 }}>
+                  {(['tech', 'growth', 'support'] as const).map(agent => (
+                    <div key={agent} style={{
+                      flex: '1 1 200px', padding: '8px 12px', borderRadius: 6,
+                      background: '#0F0F0F', border: `1px solid ${getAgentColor(agent)}30`,
+                    }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: getAgentColor(agent), marginBottom: 4 }}>
+                        {getAgentIcon(agent)} {getAgentLabel(agent)}
+                      </div>
+                      <div style={{ fontSize: 12, color: '#888', lineHeight: 1.4 }}>
+                        {askOrgResult.ops_synthesis.domain_summary[agent] || 'No summary.'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Full domain responses (expandable) */}
+                {showDomainDetails && askOrgResult.domain_responses.map(dr => (
+                  <div key={dr.agent} style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <span>{getAgentIcon(dr.agent)}</span>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: getAgentColor(dr.agent) }}>
+                        {getAgentLabel(dr.agent)} — Full Response
+                      </span>
+                    </div>
+                    <div style={{
+                      padding: '10px 14px', borderRadius: 8, background: '#111',
+                      borderLeft: `2px solid ${getAgentColor(dr.agent)}40`,
+                      fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap', color: '#AAA',
+                    }}>
+                      {dr.content}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Mentor Review */}
+              {askOrgResult.mentor_review.has_guidance && (
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <span>{'\uD83E\uDDD8'}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#C4A265' }}>Mentor — Reasoning Review</span>
+                    <span style={{
+                      fontSize: 10, padding: '2px 8px', borderRadius: 4,
+                      background: askOrgResult.mentor_review.reasoning_quality === 'passion_detected' ? '#3B1A1A' :
+                                   askOrgResult.mentor_review.reasoning_quality === 'needs_examination' ? '#3B2A1A' : '#1A2A1A',
+                      color: askOrgResult.mentor_review.reasoning_quality === 'passion_detected' ? '#F87171' :
+                             askOrgResult.mentor_review.reasoning_quality === 'needs_examination' ? '#FBBF24' : '#4ADE80',
+                      fontWeight: 600,
+                    }}>
+                      {askOrgResult.mentor_review.reasoning_quality.replace('_', ' ')}
+                    </span>
+                  </div>
+                  <div style={{
+                    padding: '12px 16px', borderRadius: 8,
+                    background: '#1A1510', borderLeft: '3px solid #C4A265',
+                    fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap', color: '#D4B878',
+                  }}>
+                    {askOrgResult.mentor_review.guidance}
+                  </div>
+                </div>
+              )}
+
+              {/* If mentor found reasoning sound, show a small note */}
+              {!askOrgResult.mentor_review.has_guidance && (
+                <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span>{'\uD83E\uDDD8'}</span>
+                  <span style={{ fontSize: 12, color: '#666' }}>
+                    Mentor: {askOrgResult.mentor_review.guidance}
+                  </span>
+                </div>
+              )}
+
+              {/* Combined Session Prompt */}
+              <div style={{
+                padding: '14px 16px', borderRadius: 8,
+                background: '#111815',
+                border: `1px solid ${
+                  askOrgResult.ops_synthesis.risk_classification === 'critical' ? '#6B2A2A' :
+                  askOrgResult.ops_synthesis.risk_classification === 'elevated' ? '#6B5A2A' : '#1F2F1F'
+                }`,
+                marginBottom: 16,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <span>{'\u2699\uFE0F'}</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#3B82F6' }}>Combined Session Prompt</span>
+                  <span style={{
+                    fontSize: 10, padding: '2px 8px', borderRadius: 4,
+                    background: askOrgResult.ops_synthesis.risk_classification === 'critical' ? '#3B1A1A' :
+                                 askOrgResult.ops_synthesis.risk_classification === 'elevated' ? '#3B2A1A' : '#1A2A1A',
+                    color: askOrgResult.ops_synthesis.risk_classification === 'critical' ? '#F87171' :
+                           askOrgResult.ops_synthesis.risk_classification === 'elevated' ? '#FBBF24' : '#4ADE80',
+                    fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5,
+                  }}>
+                    {askOrgResult.ops_synthesis.risk_classification}
+                  </span>
+                </div>
+                <div style={{ fontSize: 12, color: '#888', marginBottom: 10 }}>
+                  {askOrgResult.ops_synthesis.risk_reasoning}
+                </div>
+                <div style={{
+                  background: '#0A0A0A', borderRadius: 6, padding: '10px 12px',
+                  border: '1px solid #2A2A2A', marginBottom: 10,
+                }}>
+                  <div style={{ fontSize: 13, color: '#CCC', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                    {askOrgResult.ops_synthesis.combined_session_prompt}
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(askOrgResult.ops_synthesis.combined_session_prompt);
+                    setCopiedOrgPrompt(true);
+                    setTimeout(() => setCopiedOrgPrompt(false), 2000);
+                  }}
+                  style={{
+                    padding: '6px 14px', borderRadius: 6,
+                    background: copiedOrgPrompt ? '#1A2A1A' : '#C4A265',
+                    color: copiedOrgPrompt ? '#4ADE80' : '#0A0A0A',
+                    border: 'none', fontSize: 12, fontWeight: 600,
+                    cursor: 'pointer', transition: 'all 0.15s',
+                  }}
+                >
+                  {copiedOrgPrompt ? 'Copied!' : 'Copy Prompt'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {hubMode === 'ask-org' && !askOrgResult && !isLoading && (
+            <div style={{ textAlign: 'center', paddingTop: 80, color: '#444' }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>{'\uD83C\uDFDB\uFE0F'}</div>
+              <div style={{ fontSize: 16, marginBottom: 8 }}>
+                <span style={{ color: '#4ADE80' }}>Ask the Org</span>
+              </div>
+              <div style={{ fontSize: 13, color: '#555', maxWidth: 400, margin: '0 auto', lineHeight: 1.6 }}>
+                Your question goes to Tech, Growth, and Support simultaneously.
+                Ops synthesizes their answers into a unified response with a ready-to-use session prompt.
+                Mentor checks the reasoning.
+              </div>
+            </div>
+          )}
+
+          {hubMode === 'chat' && messages.length === 0 && !isLoading && (
             <div style={{ textAlign: 'center', paddingTop: 80, color: '#444' }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>{getAgentIcon(activeAgent)}</div>
               <div style={{ fontSize: 16, marginBottom: 8 }}>
@@ -461,10 +801,21 @@ export default function FounderHubPage() {
 
           {isLoading && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, color: '#666' }}>
-              <span>{getAgentIcon(activeAgent)}</span>
-              <span style={{ fontSize: 13 }}>
-                {getAgentLabel(activeAgent)} is thinking...
-              </span>
+              {hubMode === 'ask-org' ? (
+                <>
+                  <span>{'\uD83C\uDFDB\uFE0F'}</span>
+                  <span style={{ fontSize: 13, color: '#4ADE80' }}>
+                    {loadingStage || 'Processing...'}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span>{getAgentIcon(activeAgent)}</span>
+                  <span style={{ fontSize: 13 }}>
+                    {getAgentLabel(activeAgent)} is thinking...
+                  </span>
+                </>
+              )}
               <span style={{ animation: 'pulse 1.5s ease-in-out infinite' }}>|</span>
             </div>
           )}
@@ -572,10 +923,10 @@ export default function FounderHubPage() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  sendMessage();
+                  hubMode === 'ask-org' ? sendAskOrg() : sendMessage();
                 }
               }}
-              placeholder={`Message ${getAgentLabel(activeAgent)}...`}
+              placeholder={hubMode === 'ask-org' ? 'Ask all agents...' : `Message ${getAgentLabel(activeAgent)}...`}
               rows={1}
               style={{
                 flex: 1, background: 'transparent', border: 'none',
@@ -586,7 +937,7 @@ export default function FounderHubPage() {
               disabled={isLoading}
             />
             <button
-              onClick={sendMessage}
+              onClick={hubMode === 'ask-org' ? sendAskOrg : sendMessage}
               disabled={isLoading || !input.trim()}
               style={{
                 padding: '6px 16px', borderRadius: 6,
@@ -601,7 +952,8 @@ export default function FounderHubPage() {
             </button>
           </div>
           <div style={{ fontSize: 11, color: '#444', marginTop: 4, textAlign: 'center' }}>
-            Enter to send, Shift+Enter for new line. All 5 agents active.
+            Enter to send, Shift+Enter for new line.{' '}
+            {hubMode === 'ask-org' ? 'Tech + Growth + Support → Ops (Opus) → Mentor' : 'All 5 agents active.'}
           </div>
         </div>
       </div>
