@@ -19,6 +19,7 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { getSkillById } from '@/lib/skill-registry'
 import { runSageReason } from '@/lib/sage-reason-engine'
+import { detectDistress } from '@/lib/guardrails'
 
 export type ContextTemplateConfig = {
   /** Skill ID (e.g., 'sage-premortem') */
@@ -102,6 +103,15 @@ export function createContextTemplateHandler(config: ContextTemplateConfig) {
       const formatted = config.formatInput(body)
       if ('error' in formatted) {
         return NextResponse.json({ error: formatted.error }, { status: 400 })
+      }
+
+      // R20a — Vulnerable user detection (before any LLM call)
+      const distressCheck = detectDistress(formatted.input)
+      if (distressCheck.redirect_message) {
+        return NextResponse.json(
+          { distress_detected: true, severity: distressCheck.severity, redirect_message: distressCheck.redirect_message },
+          { status: 200, headers: corsHeaders() }
+        )
       }
 
       // Call sage-reason engine directly (no HTTP self-call needed)
