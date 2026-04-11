@@ -7,6 +7,7 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { detectDistress } from '@/lib/guardrails'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -205,6 +206,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: responseErr }, { status: 400 })
     }
 
+    // R20a — Vulnerable user detection (before any LLM call)
+    const distressCheck = detectDistress(response)
+    if (distressCheck.redirect_message) {
+      return NextResponse.json(
+        { distress_detected: true, severity: distressCheck.severity, redirect_message: distressCheck.redirect_message },
+        { status: 200, headers: corsHeaders() }
+      )
+    }
+
     const validAudience = audience || 'teen'
 
     // Context layers for scoring (human-facing)
@@ -222,7 +232,7 @@ Score this response. Return the JSON.`
 
     const message = await client.messages.create({
       model: MODEL_FAST,
-      max_tokens: 512,
+      max_tokens: 1024,
       temperature: 0.2,
       system: [
         { type: 'text', text: SCENARIO_PROMPT, cache_control: { type: 'ephemeral' } },

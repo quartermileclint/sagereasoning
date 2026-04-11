@@ -7,6 +7,7 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt } from '@/lib/reasoning-receipt'
 import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { detectDistress } from '@/lib/guardrails'
 // Profile update is loaded dynamically via the sage-mentor bridge pattern
 // to avoid build-time resolution failures when sage-mentor dependencies
 // aren't available in the website build context.
@@ -101,6 +102,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'what_happened is required (describe what happened today, min 10 characters)' },
         { status: 400 }
+      )
+    }
+
+    // R20a — Vulnerable user detection (before any LLM call)
+    const distressCheck = detectDistress(what_happened)
+    if (distressCheck.redirect_message) {
+      return NextResponse.json(
+        { distress_detected: true, severity: distressCheck.severity, redirect_message: distressCheck.redirect_message },
+        { status: 200, headers: corsHeaders() }
       )
     }
 

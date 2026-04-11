@@ -3,6 +3,7 @@ import { checkRateLimit, RATE_LIMITS, requireAuth, validateApiKey, validateTextL
 import { runSageReason, type ReasonDepth } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { detectDistress } from '@/lib/guardrails'
 
 // =============================================================================
 // sage-reason — The Universal Reasoning Layer
@@ -67,6 +68,15 @@ export async function POST(request: NextRequest) {
     if (contextErr) return NextResponse.json({ error: contextErr }, { status: 400 })
     const domainErr = validateTextLength(domain_context, 'Domain context', TEXT_LIMITS.medium)
     if (domainErr) return NextResponse.json({ error: domainErr }, { status: 400 })
+
+    // R20a — Vulnerable user detection (before any LLM call)
+    const distressCheck = detectDistress(input)
+    if (distressCheck.redirect_message) {
+      return NextResponse.json(
+        { distress_detected: true, severity: distressCheck.severity, redirect_message: distressCheck.redirect_message },
+        { status: 200, headers: corsHeaders() }
+      )
+    }
 
     // Validate depth parameter
     const depth: ReasonDepth = requestedDepth || 'standard'

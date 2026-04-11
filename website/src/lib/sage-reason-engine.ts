@@ -178,6 +178,11 @@ Return ONLY valid JSON — no markdown:
   "katorthoma_proximity": "reflexive|habitual|deliberate|principled|sage_like",
   "philosophical_reflection": "...",
   "improvement_path": "...",
+  "stage_scores": {
+    "control_filter": "strong|adequate|weak",
+    "passion_diagnosis": "strong|adequate|weak",
+    "oikeiosis": "strong|adequate|weak"
+  },
   "disclaimer": "Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations."
 }`
 
@@ -241,6 +246,13 @@ Return ONLY valid JSON:
   "virtue_domains_engaged": ["phronesis", "..."],
   "philosophical_reflection": "...",
   "improvement_path": "...",
+  "stage_scores": {
+    "control_filter": "strong|adequate|weak",
+    "passion_diagnosis": "strong|adequate|weak",
+    "oikeiosis": "strong|adequate|weak",
+    "value_assessment": "strong|adequate|weak",
+    "kathekon_assessment": "strong|adequate|weak"
+  },
   "disclaimer": "Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations."
 }`
 
@@ -319,14 +331,22 @@ Return ONLY valid JSON:
   "virtue_domains_engaged": ["phronesis", "..."],
   "philosophical_reflection": "...",
   "improvement_path": "...",
+  "stage_scores": {
+    "control_filter": "strong|adequate|weak",
+    "passion_diagnosis": "strong|adequate|weak",
+    "oikeiosis": "strong|adequate|weak",
+    "value_assessment": "strong|adequate|weak",
+    "kathekon_assessment": "strong|adequate|weak",
+    "iterative_refinement": "strong|adequate|weak"
+  },
   "disclaimer": "Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations."
 }`
 
 // Map depth to system prompt, max tokens, and model
 const DEPTH_CONFIG: Record<ReasonDepth, { prompt: string; maxTokens: number; model: string }> = {
   quick: { prompt: QUICK_SYSTEM_PROMPT, maxTokens: 3072, model: MODEL_FAST },
-  standard: { prompt: STANDARD_SYSTEM_PROMPT, maxTokens: 4096, model: MODEL_FAST },
-  deep: { prompt: DEEP_SYSTEM_PROMPT, maxTokens: 4096, model: MODEL_DEEP },
+  standard: { prompt: STANDARD_SYSTEM_PROMPT, maxTokens: 6000, model: MODEL_FAST },
+  deep: { prompt: DEEP_SYSTEM_PROMPT, maxTokens: 8192, model: MODEL_DEEP },
 }
 
 // Required fields per depth level (for response validation)
@@ -398,12 +418,6 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
       `without adequate examination? In your response, add a "hasty_assent_risk" field with value "high", "moderate", "low", or "none" ` +
       `indicating whether urgency is compromising deliberation quality.`
   }
-
-  // Per-stage quality scoring instruction (Item 5 — process reward model)
-  // Always request stage scores so we can evaluate each mechanism independently
-  userMessage += `\n\nFor each mechanism you apply, also include a "stage_scores" object in your response ` +
-    `with a quality rating for each stage: { "control_filter": "strong|adequate|weak", "passion_diagnosis": "strong|adequate|weak", ... } ` +
-    `Rating guide: "strong" = correctly identified all relevant factors, "adequate" = identified the main factors, "weak" = missed significant factors.`
 
   userMessage += '\n\nReturn only the JSON evaluation object.'
 

@@ -82,7 +82,7 @@ These are the endpoints that call `runSageReason()` from `sage-reason-engine.ts`
 }
 ```
 
-**Side effects:** Inserts to `analytics_events` (event_type: `action_score`).
+**Side effects:** None — does not insert to `analytics_events`. (Confirmed by code review, April 2026.)
 
 ---
 

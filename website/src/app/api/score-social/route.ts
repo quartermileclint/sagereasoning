@@ -7,6 +7,7 @@ import { MODEL_FAST } from '@/lib/model-config'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { detectDistress } from '@/lib/guardrails'
 
 /**
  * sage-filter (score-social) — Evaluate a social media post for Stoic virtue.
@@ -74,6 +75,15 @@ export async function POST(request: NextRequest) {
     const textErr = validateTextLength(text, 'text', TEXT_LIMITS.medium)
     if (textErr) {
       return NextResponse.json({ error: textErr }, { status: 400 })
+    }
+
+    // R20a — Vulnerable user detection (before any LLM call)
+    const distressCheck = detectDistress(text)
+    if (distressCheck.redirect_message) {
+      return NextResponse.json(
+        { distress_detected: true, severity: distressCheck.severity, redirect_message: distressCheck.redirect_message },
+        { status: 200, headers: corsHeaders() }
+      )
     }
 
     // Social media is short-form — cap at 2000 characters

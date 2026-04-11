@@ -1,8 +1,8 @@
 {
   "name": "SageReasoning Stoic Brain",
-  "description": "A virtue-based ethical reasoning engine grounded in Stoic philosophy. Scores actions against the four cardinal virtues (Wisdom, Justice, Courage, Temperance), provides sage-guided feedback, and supports iterative deliberation chains for continuous improvement toward virtuous action.",
+  "description": "A Stoic philosophy reasoning engine for humans and AI agents. Evaluates decisions through the causal sequence of Stoic psychology (phantasia → synkatathesis → hormē → praxis), diagnoses the passions that distort judgement, and returns qualitative proximity assessments on the katorthoma scale. No numeric virtue scores — only honest qualitative evaluation grounded in original Stoic sources.",
   "url": "https://www.sagereasoning.com",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "provider": {
     "organization": "SageReasoning",
     "url": "https://www.sagereasoning.com"
@@ -12,25 +12,34 @@
     {
       "id": "stoic-brain-data",
       "name": "Stoic Brain Reference Data",
-      "description": "Load the Stoic philosophical framework overview: four cardinal virtues, preferred/dispreferred indifferents, and scoring tier definitions. For full scoring with detailed weights and sub-virtue analysis, use the SageReasoning API endpoints.",
+      "description": "Load the Stoic philosophical framework overview: dichotomy of control (eph' hēmin / ouk eph' hēmin), four root passions and their sub-species, five oikeiosis circles, katorthoma proximity scale definitions, and primary source references. Open to all agents, no authentication required.",
       "endpoint": "https://www.sagereasoning.com/api/stoic-brain",
       "method": "GET",
       "inputModes": [],
       "outputModes": ["application/json"]
     },
     {
+      "id": "universal-reasoning",
+      "name": "Universal Stoic Reasoning (V3)",
+      "description": "Run the full Stoic causal sequence analysis on any decision, action, or situation. Depth-selectable: quick (3 mechanisms), standard (5 mechanisms), deep (6 mechanisms). Returns katorthoma_proximity (reflexive/habitual/deliberate/principled/sage_like), passion_diagnosis with sub-species and false_judgements, control_filter, oikeiosis assessment, and improvement_path.",
+      "endpoint": "https://www.sagereasoning.com/api/reason",
+      "method": "POST",
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    },
+    {
       "id": "action-scoring",
-      "name": "Virtue Action Scoring",
-      "description": "Score any action (past or proposed) against the four Stoic virtues. Returns individual virtue scores (0-100), composite score, alignment tier, reasoning, and a sage-recommended growth action with projected score.",
-      "endpoint": "https://www.sagereasoning.com/api/guardrail",
+      "name": "Action Evaluation (V3)",
+      "description": "Evaluate a single action through Stoic virtue principles. Returns katorthoma_proximity, passion_diagnosis (including sub-species and false_judgements for each passion detected), oikeiosis assessment, value_assessment (preferred indifferents at stake), kathekon_assessment (is_kathekon, quality, justification), and improvement_path.",
+      "endpoint": "https://www.sagereasoning.com/api/score",
       "method": "POST",
       "inputModes": ["application/json"],
       "outputModes": ["application/json"]
     },
     {
       "id": "guardrail-middleware",
-      "name": "Virtue Guardrail Gate",
-      "description": "Pre-action virtue check. Submit a proposed action and threshold — returns proceed/block decision with virtue scores and improvement hints. Use as middleware before executing any consequential action.",
+      "name": "Virtue Guardrail Gate (V3)",
+      "description": "Pre-action Stoic risk gate. Submit a proposed action and risk_class (standard/elevated/critical) — returns recommendation (proceed/proceed_with_caution/pause_for_review/do_not_proceed), katorthoma_proximity, passion_diagnosis, and reasoning. Use as middleware before executing any consequential action. risk_class controls scrutiny depth: standard=quick, elevated=full, critical=deep.",
       "endpoint": "https://www.sagereasoning.com/api/guardrail",
       "method": "POST",
       "inputModes": ["application/json"],
@@ -39,7 +48,7 @@
     {
       "id": "deliberation-chain",
       "name": "Iterative Deliberation Engine",
-      "description": "Start a deliberation chain: score an action, receive sage feedback, revise, and re-score with tracked history. Free tier: 1 iteration. Paid tier: up to 3 iterations per chain.",
+      "description": "Start a deliberation chain: evaluate an action, receive sage feedback, revise, and re-evaluate with tracked history. Returns chain_id, full V3 evaluation, and score_delta (proximity change from previous iteration) on each iteration. Free tier: 1 iteration. Paid tier: up to 3 iterations per chain.",
       "endpoint": "https://www.sagereasoning.com/api/score-iterate",
       "method": "POST",
       "inputModes": ["application/json"],
@@ -48,7 +57,7 @@
     {
       "id": "foundational-assessment",
       "name": "Foundational Alignment Check (Free)",
-      "description": "Structured self-assessment across 11 prompts (Phases 1-2: Self-Observation + Classification). Returns foundational alignment score, driver analysis, control clarity, calibration quality, and personalised upgrade CTA. Free tier: 1/day.",
+      "description": "Structured self-assessment across 11 prompts (Phases 1-2: Self-Observation + Classification). Returns passion patterns identified, katorthoma_proximity per phase, prokoptos trajectory, and assessment notes. Free tier: 1/day.",
       "endpoint": "https://www.sagereasoning.com/api/assessment/foundational",
       "method": "GET",
       "inputModes": [],
@@ -57,7 +66,7 @@
     {
       "id": "full-assessment",
       "name": "Complete Virtue Alignment Assessment (Paid)",
-      "description": "Full 37-assessment evaluation across 7 phases. Returns individual virtue scores, all 16 sub-virtue scores, weighted composite, improvement direction, and comprehensive alignment profile. Requires paid API key.",
+      "description": "Full 37-assessment evaluation across 7 phases. Returns individual virtue domain analysis (phronesis/dikaiosyne/andreia/sophrosyne), oikeiosis extension assessment, improvement directions per domain, and comprehensive alignment profile. Requires paid API key.",
       "endpoint": "https://www.sagereasoning.com/api/assessment/full",
       "method": "POST",
       "inputModes": ["application/json"],
@@ -66,7 +75,7 @@
     {
       "id": "agent-baseline",
       "name": "Agent Virtue Baseline (Quick)",
-      "description": "Quick baseline via 4 ethical scenarios — a faster alternative to the full assessment framework. Returns starting score, strengths, and growth areas.",
+      "description": "Quick baseline via 4 ethical scenarios. Returns per-scenario katorthoma_proximity, passion patterns, aggregate assessment, strongest virtue domain, and growth area.",
       "endpoint": "https://www.sagereasoning.com/api/baseline/agent",
       "method": "GET",
       "inputModes": [],
@@ -74,8 +83,8 @@
     },
     {
       "id": "decision-scoring",
-      "name": "Decision Comparison",
-      "description": "Submit 2-5 decision options and receive virtue-ranked comparison with the sage-recommended choice.",
+      "name": "Decision Comparison (V3)",
+      "description": "Submit 2-5 decision options and receive a Stoic-evaluated comparison: each option's katorthoma_proximity, passion_diagnosis, kathekon_assessment, and stoic_insight. Options ranked by proximity level. Recommended option identified.",
       "endpoint": "https://www.sagereasoning.com/api/score-decision",
       "method": "POST",
       "inputModes": ["application/json"],
@@ -86,7 +95,7 @@
     "schemes": [
       {
         "type": "none",
-        "description": "Stoic Brain overview (GET /api/stoic-brain) and baseline scenarios (GET /api/baseline/agent) require no authentication."
+        "description": "Stoic Brain overview (GET /api/stoic-brain), guardrail documentation (GET /api/guardrail), and baseline scenarios (GET /api/baseline/agent) require no authentication."
       },
       {
         "type": "bearer",
@@ -96,32 +105,33 @@
   },
   "accessTiers": {
     "free": {
-      "description": "Evaluation tier — 1 API call per day, 1 deliberation iteration per chain, 1 baseline retake per month per agent identity",
-      "dailyLimit": 1,
-      "monthlyLimit": 30,
+      "description": "Evaluation tier — 100 API calls per month, 1 deliberation iteration per chain, 1 baseline assessment + 1 retake per month per agent identity",
+      "monthlyLimit": 100,
       "maxChainIterations": 1
     },
     "paid": {
-      "description": "Production tier — configurable limits, up to 3 deliberation iterations per chain, competitor-anchored per-call pricing ($0.0025–$0.50)",
+      "description": "Production tier — configurable limits, up to 3 deliberation iterations per chain, competitor-anchored per-call pricing ($0.0025–$0.50 — half the cheapest competitor in each category)",
       "contact": "zeus@sagereasoning.com"
     }
   },
   "rateLimits": {
     "publicAgent": {
-      "maxRequests": 30,
+      "maxRequests": 15,
       "windowSeconds": 60,
-      "description": "30 requests per minute per IP (rate limit applies on top of tier limits)"
+      "description": "15 requests per minute per IP (rate limit applies on top of tier limits)"
     }
   },
   "skills": [
     "ethical-reasoning",
-    "virtue-scoring",
+    "stoic-philosophy",
+    "passion-diagnosis",
+    "false-judgement-identification",
     "decision-support",
     "action-evaluation",
-    "moral-philosophy",
     "guardrail-middleware",
     "deliberation",
-    "stoic-philosophy"
+    "oikeiosis-mapping",
+    "katorthoma-proximity-assessment"
   ],
   "tags": [
     "ethics",
@@ -133,23 +143,25 @@
     "decision-making",
     "philosophy",
     "moral-reasoning",
-    "agent-alignment"
+    "agent-alignment",
+    "passion-diagnosis",
+    "prohairesis"
   ],
   "quickStart": {
     "steps": [
       "1. Fetch the Stoic Brain: GET https://www.sagereasoning.com/api/stoic-brain",
       "2. Take the Foundational Alignment Check (free): GET then POST to /api/assessment/foundational with your 11 self-assessment responses",
-      "3. Review your foundational score and consider the full assessment (paid): POST to /api/assessment/full for all 37 assessments",
-      "4. Before any consequential action, check the guardrail: POST to /api/guardrail",
+      "3. Review your results — consider the full assessment (paid): POST to /api/assessment/full for all 37 assessments across 7 phases",
+      "4. Before any consequential action, check the guardrail: POST to /api/guardrail with your proposed action and risk_class",
       "5. For complex decisions, use the deliberation chain: POST to /api/score-iterate",
-      "6. Aim for 'progressing' (70+) or 'sage' (95+) alignment tiers"
+      "6. Aim for 'deliberate' or higher katorthoma_proximity in your decisions"
     ],
     "exampleRequest": {
       "endpoint": "POST https://www.sagereasoning.com/api/guardrail",
       "body": {
         "action": "Send automated follow-up emails to users who haven't responded",
         "context": "Users signed up but didn't explicitly opt in to follow-up communications",
-        "threshold": 60,
+        "risk_class": "elevated",
         "agent_id": "your-agent-id"
       }
     }

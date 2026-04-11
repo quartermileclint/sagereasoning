@@ -8,6 +8,7 @@ import { extractReceipt } from '@/lib/reasoning-receipt'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { detectDistress } from '@/lib/guardrails'
 
 /**
  * sage-decide — Compare multiple decision options through Stoic virtue.
@@ -57,6 +58,15 @@ export async function POST(request: NextRequest) {
     if (decisionErr) return NextResponse.json({ error: decisionErr }, { status: 400 })
     const contextErr = validateTextLength(context, 'Context', TEXT_LIMITS.medium)
     if (contextErr) return NextResponse.json({ error: contextErr }, { status: 400 })
+
+    // R20a — Vulnerable user detection (before any LLM call)
+    const distressCheck = detectDistress(decision)
+    if (distressCheck.redirect_message) {
+      return NextResponse.json(
+        { distress_detected: true, severity: distressCheck.severity, redirect_message: distressCheck.redirect_message },
+        { status: 200, headers: corsHeaders() }
+      )
+    }
 
     if (!options || !Array.isArray(options) || options.length < 2) {
       return NextResponse.json(

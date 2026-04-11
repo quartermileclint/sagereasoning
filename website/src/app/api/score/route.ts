@@ -5,6 +5,7 @@ import { MODEL_FAST } from '@/lib/model-config'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { detectDistress } from '@/lib/guardrails'
 
 /**
  * sage-score — Evaluate a single action through Stoic virtue principles.
@@ -84,6 +85,15 @@ export async function POST(request: NextRequest) {
     if (actionErr) return NextResponse.json({ error: actionErr }, { status: 400 })
     const contextErr = validateTextLength(context, 'Context', TEXT_LIMITS.medium)
     if (contextErr) return NextResponse.json({ error: contextErr }, { status: 400 })
+
+    // R20a — Vulnerable user detection (before any LLM call)
+    const distressCheck = detectDistress(action)
+    if (distressCheck.redirect_message) {
+      return NextResponse.json(
+        { distress_detected: true, severity: distressCheck.severity, redirect_message: distressCheck.redirect_message },
+        { status: 200, headers: corsHeaders() }
+      )
+    }
 
     // Build domain context from score-specific fields
     let domainContext = `This is an action evaluation request. Assess whether the action aligns with Stoic virtue principles.`
