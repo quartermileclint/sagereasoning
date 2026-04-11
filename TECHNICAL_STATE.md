@@ -392,7 +392,7 @@ RLS: enabled, users access own row.
 | created_at | TIMESTAMPTZ | |
 | updated_at | TIMESTAMPTZ | |
 
-**Encryption status:** Planned (R17b). Application-level encryption via `encryption.ts` — not yet wired to storage pipeline. P2 item 2c.
+**Encryption status:** Wired (R17b). Server-side AES-256-GCM via `server-encryption.ts` + `mentor-profile-store.ts`. All profile reads/writes go through the encrypted pipeline when `MENTOR_ENCRYPTION_KEY` is set. Client-side encryption (`encryption.ts`) remains scaffolded for future journal entry protection.
 
 #### `mentor_interactions`
 Rolling log of mentor interactions — observation persistence added Session 10.  
@@ -686,7 +686,7 @@ Variables in use across the production Vercel deployment. Never commit these. Al
 | Variable | Purpose | Status |
 |---|---|---|
 | `PLAUSIBLE_API_KEY` | Privacy-first analytics | Not yet configured |
-| `ENCRYPTION_KEY` | Application-level encryption for mentor_profiles | P2 item 2c — not yet wired |
+| `MENTOR_ENCRYPTION_KEY` | Server-side AES-256-GCM encryption for mentor_profiles (R17b) | Wired via mentor-profile-store.ts |
 
 ---
 
@@ -710,8 +710,8 @@ Routes at `/api/mentor/private/*` are restricted to `FOUNDER_USER_ID`. They rece
 ### ADR-006: Ring wrapper Critical category escalation (8 April)
 `isCriticalActionCategory()` in ring-wrapper.ts checks task descriptions for Critical keywords (auth, delete, access control, deploy, etc.). When detected, BEFORE phase always selects MODEL_DEEP regardless of agent authority level. **Rationale:** R17f — urgency does not reduce classification; Critical actions always warrant deep scrutiny.
 
-### ADR-007: Application-level encryption deferred to P2 (8 April, adopted 10 April)
-`encryption.ts` exists but is not yet wired to `mentor_profiles` storage pipeline. This is P2 item 2c. **Known gap:** Intimate profile data is currently unencrypted at rest (Supabase encryption-at-rest applies, but not application-level column encryption). **Risk:** Until wired, a Supabase breach exposes profile data without additional application-layer protection.
+### ADR-007: Application-level encryption (8 April, adopted 10 April, updated 11 April)
+**Server-side encryption is wired.** `server-encryption.ts` provides AES-256-GCM encrypt/decrypt using `MENTOR_ENCRYPTION_KEY`. `mentor-profile-store.ts` calls `encryptProfileData()` on every save and `decryptProfileData()` on every load. All profile reads (via `practitioner-context.ts`) go through this pipeline. Health endpoint correctly reports `mentor_encryption: "active"`. **Remaining:** Client-side `encryption.ts` (browser-side journal entry encryption via Web Crypto API) remains scaffolded — this is a separate P2 scope item for protecting data the server should never see.
 
 ### ADR-008: pgvector for semantic memory (Support Implementation Plan)
 `mentor_raw_inputs` table uses `vector(1536)` column with `ivfflat` index. `search_mentor_memory()` function enables cosine similarity search. This provides the Support Brain's "compounding advantage" — every interaction makes future triage smarter. **Status:** Table and function scaffolded. Embedding pipeline not yet wired.
@@ -732,7 +732,7 @@ Routes at `/api/mentor/private/*` are restricted to `FOUNDER_USER_ID`. They rece
 | ring-wrapper | sage-mentor/ | Wired | Extended 8 April with Critical category escalation + side-effect detection |
 | reasoning-receipt | website/src/lib/ | Wired | Receipt generation on all runSageReason routes |
 | response-envelope | website/src/lib/ | Wired | Standardised API response wrapper |
-| encryption | website/src/lib/ | Scaffolded | Application-level encryption module. NOT yet wired to mentor_profiles |
+| encryption | website/src/lib/ | Wired | Server-side AES-256-GCM via server-encryption.ts + mentor-profile-store.ts. Client-side encryption.ts remains scaffolded (P2 scope). |
 | sage-mentor-bridge | sage-mentor/ | Wired | Dynamic import bridge for reflect→profile update loop |
 
 ---
