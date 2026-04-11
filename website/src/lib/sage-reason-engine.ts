@@ -18,6 +18,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { MODEL_FAST, MODEL_DEEP, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { extractJSON } from '@/lib/json-utils'
 
 // =============================================================================
 // ANTHROPIC CLIENT — Shared singleton
@@ -363,33 +364,6 @@ const REQUIRED_FIELDS: Record<ReasonDepth, string[]> = {
 export const EVALUATIVE_DISCLAIMER = 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.'
 
 // =============================================================================
-// JSON EXTRACTION HELPER
-// =============================================================================
-
-/**
- * Extract a JSON object from an LLM response string.
- * Tries bare parse, then strips code fences, then extracts first { to last }.
- * Throws if all attempts fail.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseJSONFromResponse(text: string): any {
-  // Strategy: strip code fences, then if that fails, find { to } boundaries
-  let cleaned = text.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
-  try {
-    return JSON.parse(cleaned)
-  } catch {
-    // Fallback: extract from first { to last }
-    const start = text.indexOf('{')
-    const end = text.lastIndexOf('}')
-    if (start !== -1 && end > start) {
-      cleaned = text.substring(start, end + 1)
-      return JSON.parse(cleaned)
-    }
-    throw new Error('No JSON object found in response')
-  }
-}
-
-// =============================================================================
 // CORE REASONING ENGINE
 // =============================================================================
 
@@ -513,7 +487,7 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
   let evalData
   let actualModel = config.model
   try {
-    evalData = parseJSONFromResponse(responseText)
+    evalData = extractJSON(responseText)
   } catch {
     // Haiku→Sonnet retry: if quick depth with MODEL_FAST failed to produce parseable JSON,
     // retry once with MODEL_DEEP (Sonnet) which is reliable across all input types.
@@ -528,7 +502,7 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
       })
       const retryText = retryMessage.content[0].type === 'text' ? retryMessage.content[0].text : ''
       try {
-        evalData = parseJSONFromResponse(retryText)
+        evalData = extractJSON(retryText)
         actualModel = MODEL_DEEP
       } catch {
         console.error('sage-reason-engine: Sonnet retry also failed to parse:', retryText)

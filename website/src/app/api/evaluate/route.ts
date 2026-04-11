@@ -4,6 +4,7 @@ import { checkRateLimit, validateTextLength, TEXT_LIMITS, publicCorsHeaders, pub
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { extractJSON } from '@/lib/json-utils'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -136,24 +137,10 @@ Return only the JSON evaluation object.`
 
     const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
 
-    // Parse JSON response — extract the JSON object from whatever wrapping the model adds
+    // Parse JSON response using shared extraction utility
     let evalData
     try {
-      // Strategy: strip code fences, then if that fails, find { to } boundaries
-      let cleaned = responseText.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
-      try {
-        evalData = JSON.parse(cleaned)
-      } catch {
-        // Fallback: extract from first { to last }
-        const start = responseText.indexOf('{')
-        const end = responseText.lastIndexOf('}')
-        if (start !== -1 && end > start) {
-          cleaned = responseText.substring(start, end + 1)
-          evalData = JSON.parse(cleaned)
-        } else {
-          throw new Error('No JSON object found in response')
-        }
-      }
+      evalData = extractJSON(responseText)
     } catch (parseErr) {
       console.error('evaluate: Failed to parse response:', parseErr instanceof Error ? parseErr.message : parseErr)
       return NextResponse.json(

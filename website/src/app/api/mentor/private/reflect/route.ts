@@ -10,46 +10,7 @@ import { getFullPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
 import { getMentorObservations, getJournalReferences, getProfileSnapshots } from '@/lib/context/mentor-context-private'
-
-/**
- * Robust JSON extraction from LLM responses.
- * Handles: bare JSON, markdown-wrapped JSON, JSON with surrounding commentary,
- * and responses where the model adds text before/after the JSON block.
- */
-function parseJsonResponse(text: string): Record<string, unknown> {
-  // Step 1: Try direct parse (bare JSON)
-  try {
-    return JSON.parse(text.trim())
-  } catch { /* continue */ }
-
-  // Step 2: Strip markdown code fences
-  const fenceStripped = text
-    .replace(/```json?\s*\n?/gi, '')
-    .replace(/```\s*\n?/g, '')
-    .trim()
-  try {
-    return JSON.parse(fenceStripped)
-  } catch { /* continue */ }
-
-  // Step 3: Extract first JSON object from the text (handles surrounding commentary)
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (jsonMatch) {
-    try {
-      return JSON.parse(jsonMatch[0])
-    } catch { /* continue */ }
-  }
-
-  // Step 4: Try to find the last complete JSON object (in case of nested braces)
-  const lastBrace = text.lastIndexOf('}')
-  const firstBrace = text.indexOf('{')
-  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-    try {
-      return JSON.parse(text.slice(firstBrace, lastBrace + 1))
-    } catch { /* continue */ }
-  }
-
-  throw new Error(`Could not extract valid JSON from response (${text.length} chars)`)
-}
+import { extractJSON } from '@/lib/json-utils'
 
 // =============================================================================
 // PRIVATE mentor reflect — Founder-only daily reflection
@@ -197,7 +158,7 @@ Score my actions and give me the sage perspective.`
 
     let reflectionData: Record<string, any>
     try {
-      reflectionData = parseJsonResponse(responseText) as Record<string, any>
+      reflectionData = extractJSON(responseText) as Record<string, any>
     } catch (parseErr) {
       console.error('Private reflect parse error. Raw response:', responseText)
       console.error('Parse error:', parseErr)
