@@ -68,10 +68,15 @@ export default function PrivateMentorPage() {
 
         setConversationId(mentorConv.id);
 
-        const loaded: Message[] = (msgData.messages || []).map(
+        // Filter out observer messages — they belong in the Founder Hub, not the private mentor
+        const mentorMessages = (msgData.messages || []).filter(
+          (m: { role: string }) => m.role === 'founder' || m.role === 'agent'
+        );
+
+        const loaded: Message[] = mentorMessages.map(
           (m: { id: string; role: string; agent_type: string | null; content: string; created_at: string }) => ({
             id: m.id,
-            type: m.role === 'founder' ? 'human' : m.role === 'observer' ? 'insight' : 'mentor',
+            type: m.role === 'founder' ? 'human' : 'mentor',
             content: m.content,
             timestamp: new Date(m.created_at).toLocaleString('en-AU', {
               hour: 'numeric',
@@ -177,22 +182,6 @@ export default function PrivateMentorPage() {
         timestamp: formatTime(),
       };
       setMessages((prev) => [...prev, mentorMessage]);
-
-      // Add any relevant observer insights
-      if (data.observers && data.observers.length > 0) {
-        const relevantObservers = data.observers.filter(
-          (obs: { relevance_score?: number }) => (obs.relevance_score ?? 0) > 0.5
-        );
-        for (const obs of relevantObservers) {
-          const obsMessage: Message = {
-            id: `msg-${Date.now()}-obs-${obs.agent}`,
-            type: 'insight',
-            content: obs.content,
-            timestamp: formatTime(),
-          };
-          setMessages((prev) => [...prev, obsMessage]);
-        }
-      }
 
       // Update proximity score after conversation
       await fetchProximityScore();
