@@ -213,17 +213,27 @@ export default function PrivateMentorPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/score', {
+      // Private mentor uses the dedicated reflect endpoint for knowledge persistence
+      const res = await authFetch('/api/mentor/private/reflect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: reflection }),
+        body: JSON.stringify({
+          what_happened: reflection,
+          how_i_responded: type === 'evening' ? reflection : undefined,
+        }),
       });
       const data = await res.json();
+
+      // Extract the rich response from the private reflect endpoint
+      const result = data?.result || data;
+      const content = result?.sage_perspective
+        ? `**${result.katorthoma_proximity || 'Assessed'}** — ${result.sage_perspective}${result.evening_prompt ? `\n\n*${result.evening_prompt}*` : ''}`
+        : result?.evaluation || 'Your reflection has been recorded and analyzed by the mentor.';
 
       const insightMsg: Message = {
         id: `msg-${Date.now()}`,
         type: 'insight',
-        content: data.evaluation || 'Your reflection has been recorded and analyzed by the mentor.',
+        content,
         timestamp: formatTime(),
       };
 
