@@ -411,7 +411,7 @@ export async function liveAfterCheck(
       passions_detected: [],
       pattern_note: null,
       journal_reference: null,
-      mentor_observation: '(Deeper evaluation unavailable — LLM call failed)',
+      mentor_observation: null,
       record_to_profile: false,
       mechanisms_applied: ['control_filter', 'value_assessment'],
     }
@@ -455,7 +455,10 @@ function parseAfterLLMResponse(
       ),
       pattern_note: parsed.pattern_note || null,
       journal_reference: null,
-      mentor_observation: parsed.mentor_observation || parsed.observation || null,
+      // NOTE (2026-04-13): mentor_observation set to null instead of raw LLM field.
+      // The legacy mentor_interactions.mentor_observation column is deprecated.
+      // Structured observations are now logged via logMentorObservation().
+      mentor_observation: null,
       record_to_profile: parsed.record_to_profile ?? true,
       mechanisms_applied: parsed.mechanisms_applied || ['control_filter', 'passion_diagnosis'],
     }
@@ -496,7 +499,10 @@ function parseAfterLLMResponse(
     passions_detected: passionsDetected,
     pattern_note: null,
     journal_reference: null,
-    mentor_observation: text.slice(0, 300),
+    // NOTE (2026-04-13): mentor_observation set to null instead of truncated text.
+    // The legacy mentor_interactions.mentor_observation column is deprecated.
+    // Structured observations are now logged via logMentorObservation().
+    mentor_observation: null,
     record_to_profile: true,
     mechanisms_applied: ['control_filter', 'passion_diagnosis'],
   }

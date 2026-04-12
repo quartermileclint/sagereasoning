@@ -11,6 +11,8 @@ import { getProjectContext } from '@/lib/context/project-context'
 import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
 import { getMentorObservationsWithParallelLog, getJournalReferences, getProfileSnapshots } from '@/lib/context/mentor-context-private'
 import { extractJSON } from '@/lib/json-utils'
+import { logMentorObservation, validateMentorObservation } from '@/lib/logging/mentor-observation-logger'
+import type { ObservationCategory, ConfidenceLevel } from '@/lib/logging/mentor-observation-logger'
 
 // =============================================================================
 // PRIVATE mentor reflect — Founder-only daily reflection
@@ -67,7 +69,11 @@ Return ONLY valid JSON:
   "what_you_did_well": "<1-2 sentences: specific virtues or actions the user expressed today>",
   "sage_perspective": "<2-3 sentences: what right reason (katorthoma) would suggest, if anything. Be specific to their situation. If they acted well, affirm it.>",
   "evening_prompt": "<1 sentence: a reflective question for the user to sit with tonight, drawn from their specific situation>",
-  "mentor_observation": "<1-2 sentences: a qualitative observation about this practitioner's pattern, tendency, or growth that you want to remember for future sessions. Focus on what this reflection reveals about their development trajectory, not just what happened today. Examples: 'Consistently avoids naming fear as a passion — may indicate blind spot around andreia', 'Shows growing capacity to catch false judgements before acting on them'>",
+  "structured_observation": {
+    "observation": "<50-500 chars, third-person about the practitioner. Focus on what this reflection reveals about their developmental trajectory. Write about the practitioner, NOT to them. Good: 'Founder consistently avoids naming fear as a passion — possible andreia blind spot.' Bad: 'I noticed you seem afraid.' Bad: 'You should work on courage.'",
+    "category": "<passion_event|virtue_marker|reasoning_pattern|progress_signal|oikeiosis_shift|integration_signal>",
+    "confidence": "<low|medium|high>"
+  },
   "disclaimer": "This reflection is guidance, not judgment. Only you know the full context of your choices. Stoic practice is about sustained effort toward virtue, not perfection."
 }`
 
@@ -205,17 +211,56 @@ Score my actions and give me the sage perspective.`
       mechanisms: ['passion_diagnosis', 'oikeiosis'],
     })
 
+    // Extract structured observation text for the API response
+    // The LLM returns structured_observation { observation, category, confidence }
+    // We surface the observation text to the frontend, and log the structured version to the pipeline
+    const structuredObs = reflectionData.structured_observation as {
+      observation?: string
+      category?: string
+      confidence?: string
+    } | null
+
     const result = {
       katorthoma_proximity: reflectionData.katorthoma_proximity,
       passions_detected: reflectionData.passions_detected || [],
       what_you_did_well: reflectionData.what_you_did_well,
       sage_perspective: reflectionData.sage_perspective,
-      mentor_observation: reflectionData.mentor_observation || null,
+      mentor_observation: structuredObs?.observation || null,
       evening_prompt: reflectionData.evening_prompt,
       reasoning_receipt: receipt,
       disclaimer: reflectionData.disclaimer,
       reflected_at: new Date().toISOString(),
       mentor_mode: 'private',
+    }
+
+    // Log structured observation to the unified pipeline (mentor_observations_structured)
+    // This is the primary caller for logMentorObservation() — the data quality gate.
+    if (structuredObs?.observation && structuredObs?.category && structuredObs?.confidence) {
+      try {
+        const { data: profileRow } = await supabaseAdmin
+          .from('mentor_profiles')
+          .select('id')
+          .eq('user_id', effectiveUserId)
+          .single()
+
+        if (profileRow) {
+          const obsResult = await logMentorObservation(
+            (profileRow as { id: string }).id,
+            {
+              date: new Date().toISOString().split('T')[0],
+              observation: structuredObs.observation,
+              category: structuredObs.category as ObservationCategory,
+              confidence: structuredObs.confidence as ConfidenceLevel,
+              source_context: 'evening_reflection',
+            }
+          )
+          if (!obsResult.success) {
+            console.warn('[private/reflect] Structured observation rejected:', obsResult.error)
+          }
+        }
+      } catch (obsErr) {
+        console.warn('[private/reflect] Failed to log structured observation (non-blocking):', obsErr)
+      }
     }
 
     // Analytics
@@ -228,6 +273,7 @@ Score my actions and give me the sage perspective.`
           katorthoma_proximity: reflectionData.katorthoma_proximity,
           passions_count: (reflectionData.passions_detected || []).length,
           mentor_mode: 'private',
+          structured_observation_logged: !!(structuredObs?.observation),
         },
       })
       .then(() => {})
@@ -243,7 +289,7 @@ Score my actions and give me the sage perspective.`
           katorthoma_proximity: reflectionData.katorthoma_proximity,
           passions_detected: reflectionData.passions_detected || [],
           what_you_did_well: reflectionData.what_you_did_well,
-          sage_perspective: reflectionData.mentor_observation || reflectionData.sage_perspective,
+          sage_perspective: reflectionData.sage_perspective,
         },
         what_happened.trim(),
         'private-mentor'

@@ -430,6 +430,11 @@ export function buildProactiveInteractionRecord(
     type: interactionType,
     description: `Proactive ${result.type.replace(/_/g, ' ')}`,
     mechanisms_applied: result.mechanisms_applied,
-    mentor_observation: sanitise(llmResponse, 'inner_agent_output').text,
+    // NOTE (2026-04-13): mentor_observation deliberately set to empty string.
+    // Previously this passed the full sanitised LLM response, which contaminated
+    // the legacy mentor_interactions.mentor_observation column with raw output.
+    // Structured observations are now logged separately via logMentorObservation().
+    // See: website/src/lib/logging/mentor-observation-logger.ts
+    mentor_observation: '',
   }
 }

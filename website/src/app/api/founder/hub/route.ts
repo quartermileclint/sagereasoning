@@ -31,6 +31,9 @@ import { getProjectContext } from '@/lib/context/project-context'
 import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
 import { getFullPractitionerContext } from '@/lib/context/practitioner-context'
 import { getMentorObservationsWithParallelLog, getProfileSnapshots, createProfileSnapshot } from '@/lib/context/mentor-context-private'
+import { logMentorObservation } from '@/lib/logging/mentor-observation-logger'
+import type { ObservationCategory, ConfidenceLevel } from '@/lib/logging/mentor-observation-logger'
+import { extractJSON } from '@/lib/json-utils'
 
 // =============================================================================
 // Types
@@ -830,6 +833,66 @@ export async function POST(request: NextRequest) {
             mechanisms_applied: ['passion_diagnosis', 'oikeiosis', 'value_assessment'],
             // mentor_observation: REMOVED — was passing raw LLM response text (contamination)
           })
+
+          // Extract structured observation from mentor's conversational response
+          // Uses Haiku for lightweight extraction — the mentor response is free-form,
+          // not JSON, so we need a second LLM pass to distil an observation.
+          try {
+            const extractionResponse = await getClient().messages.create({
+              model: 'claude-haiku-4-5-20251001',
+              max_tokens: 256,
+              temperature: 0.1,
+              system: [{
+                type: 'text',
+                text: `You are extracting a developmental observation from a Stoic mentor conversation. The mentor just responded to the founder. Your job: distil ONE observation about the practitioner's developmental trajectory from this exchange.
+
+Rules:
+- Write in THIRD PERSON about the practitioner (e.g. "Founder shows...", "Practitioner demonstrates...")
+- NEVER use first person ("I noticed...") or second person ("You should...", "Your tendency...")
+- 50-500 characters
+- Focus on what the exchange reveals about their reasoning, passions, virtue development, or oikeiosis progression
+
+Return ONLY valid JSON:
+{
+  "observation": "<50-500 chars, third-person>",
+  "category": "<passion_event|virtue_marker|reasoning_pattern|progress_signal|oikeiosis_shift|integration_signal>",
+  "confidence": "<low|medium|high>"
+}
+
+If the conversation is too casual or brief to yield a meaningful observation, return:
+{"observation": null, "category": null, "confidence": null}`,
+              }],
+              messages: [{
+                role: 'user',
+                content: `Founder said: "${message.trim().substring(0, 500)}"\n\nMentor responded: "${primaryResponse.content.substring(0, 1000)}"`,
+              }],
+            })
+
+            const extractionText = extractionResponse.content[0].type === 'text' ? extractionResponse.content[0].text : ''
+            const extracted = extractJSON(extractionText) as {
+              observation?: string | null
+              category?: string | null
+              confidence?: string | null
+            }
+
+            if (extracted.observation && extracted.category && extracted.confidence) {
+              const obsResult = await logMentorObservation(
+                (profileRow as { id: string }).id,
+                {
+                  date: new Date().toISOString().split('T')[0],
+                  observation: extracted.observation,
+                  category: extracted.category as ObservationCategory,
+                  confidence: extracted.confidence as ConfidenceLevel,
+                  source_context: 'founder_hub_conversation',
+                }
+              )
+              if (!obsResult.success) {
+                console.warn('[founder/hub] Structured observation rejected:', obsResult.error)
+              }
+            }
+          } catch (extractErr) {
+            console.warn('[founder/hub] Observation extraction failed (non-blocking):', extractErr)
+          }
         }
       } catch (err) {
         console.error('[founder/hub] Mentor knowledge write failed (non-blocking):', err)
