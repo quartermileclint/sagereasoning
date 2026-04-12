@@ -19,6 +19,8 @@
  */
 
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
+import type { FounderFacts, MentorProfileData } from '@/lib/mentor-profile-summary'
 
 // ── Gap 2: Mentor Observation History ────────────────────────────────
 
@@ -315,6 +317,84 @@ async function getProfileId(userId: string): Promise<string | null> {
   setTimeout(() => profileIdCache.delete(userId), 60_000)
 
   return profileId
+}
+
+// ── Founder Facts Management ────────────────────────────────────────
+
+/**
+ * Set or replace the entire FounderFacts block on a practitioner's profile.
+ * Used for initial population. For incremental updates (mentor-observed
+ * biographical notes), use appendFounderFactsNote() instead.
+ *
+ * @param userId - The user's auth ID
+ * @param facts - The complete FounderFacts object
+ */
+export async function setFounderFacts(
+  userId: string,
+  facts: FounderFacts
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const stored = await loadMentorProfile(userId)
+    if (!stored) return { success: false, error: 'No profile found for user' }
+
+    const updatedProfile: MentorProfileData = {
+      ...stored.profile,
+      founder_facts: {
+        ...facts,
+        last_updated: new Date().toISOString().split('T')[0],
+      },
+    }
+
+    const result = await saveMentorProfile(userId, updatedProfile)
+    return { success: result.success, error: result.error }
+  } catch (err) {
+    console.error('[mentor-context-private] Failed to set founder facts:', err)
+    return { success: false, error: String(err) }
+  }
+}
+
+/**
+ * Append a new biographical observation to the FounderFacts additional_context
+ * array. This is the mechanism by which the mentor grows the "who this person is"
+ * context over time — during sessions, the mentor can note stable personal facts
+ * (e.g., "recently started grandparent caregiving", "changed work role to consultant")
+ * and they persist to future sessions.
+ *
+ * If no FounderFacts block exists yet, this returns an error — use setFounderFacts()
+ * to initialise the block first.
+ *
+ * @param userId - The user's auth ID
+ * @param note - The biographical observation to append
+ */
+export async function appendFounderFactsNote(
+  userId: string,
+  note: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const stored = await loadMentorProfile(userId)
+    if (!stored) return { success: false, error: 'No profile found for user' }
+    if (!stored.profile.founder_facts) {
+      return { success: false, error: 'No founder_facts block initialised — use setFounderFacts() first' }
+    }
+
+    const updatedProfile: MentorProfileData = {
+      ...stored.profile,
+      founder_facts: {
+        ...stored.profile.founder_facts,
+        additional_context: [
+          ...stored.profile.founder_facts.additional_context,
+          `[${new Date().toISOString().split('T')[0]}] ${note}`,
+        ],
+        last_updated: new Date().toISOString().split('T')[0],
+      },
+    }
+
+    const result = await saveMentorProfile(userId, updatedProfile)
+    return { success: result.success, error: result.error }
+  } catch (err) {
+    console.error('[mentor-context-private] Failed to append founder facts note:', err)
+    return { success: false, error: String(err) }
+  }
 }
 
 // ── Migration SQL ────────────────────────────────────────────────────

@@ -24,6 +24,26 @@ export interface VirtueEntry {
   evidence_summary: string[]
 }
 
+/**
+ * Founder Facts — stable biographical context that persists across sessions.
+ * Injected at the top of the full profile summary so the mentor arrives
+ * knowing who the practitioner is as a person, not just their philosophical
+ * profile. Updated manually or by the mentor via session observations.
+ */
+export interface FounderFacts {
+  age: number
+  years_married: number
+  children_ages: number[]
+  work_schedule: string
+  family_situation: string
+  financial_situation: string
+  retirement_horizon: string
+  /** Mentor-appended observations about life circumstances, stable traits,
+   *  relationships, or context that should persist across sessions. */
+  additional_context: string[]
+  last_updated: string
+}
+
 export interface MentorProfileData {
   user_id: string
   display_name: string
@@ -32,6 +52,9 @@ export interface MentorProfileData {
   sections_processed: number
   entries_processed: number
   total_word_count: number
+  /** Stable biographical context — who this person is as a person. Optional
+   *  because older profiles may not have this field yet. */
+  founder_facts?: FounderFacts
   passion_map: PassionMapEntry[]
   virtue_profile: Record<string, VirtueEntry>
   causal_tendencies: {
@@ -67,6 +90,26 @@ export function buildProfileSummary(profile: MentorProfileData): string {
     `Scope: ${profile.sections_processed} sections, ${profile.entries_processed} entries, ${profile.total_word_count} words`,
     ''
   )
+
+  // Founder Facts — stable biographical context (injected first so the mentor
+  // knows who the person IS before reading their philosophical profile)
+  if (profile.founder_facts) {
+    const ff = profile.founder_facts
+    sections.push(
+      'WHO THIS PERSON IS:',
+      `  Age ${ff.age}, married ${ff.years_married} years, children ages ${ff.children_ages.join(' and ')}`,
+      `  Work: ${ff.work_schedule}`,
+      `  Family: ${ff.family_situation}`,
+      `  Financial: ${ff.financial_situation}`,
+      `  Horizon: ${ff.retirement_horizon}`,
+    )
+    if (ff.additional_context.length > 0) {
+      for (const note of ff.additional_context) {
+        sections.push(`  • ${note}`)
+      }
+    }
+    sections.push(`  (Last updated: ${ff.last_updated})`, '')
+  }
 
   // Proximity and grade
   sections.push(

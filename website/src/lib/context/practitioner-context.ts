@@ -19,7 +19,7 @@
 
 import { loadMentorProfile } from '@/lib/mentor-profile-store'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
-import type { MentorProfileData, PassionMapEntry } from '@/lib/mentor-profile-summary'
+import type { MentorProfileData, PassionMapEntry, FounderFacts } from '@/lib/mentor-profile-summary'
 
 /**
  * Get a condensed practitioner context block for LLM injection.
@@ -78,6 +78,14 @@ function buildCondensedContext(profile: MentorProfileData): string {
   const sections: string[] = []
 
   sections.push('PRACTITIONER CONTEXT (personalised to this user):')
+
+  // 0. Founder Facts one-liner — who this person is (if available)
+  if (profile.founder_facts) {
+    const ff = profile.founder_facts
+    sections.push(
+      `Person: age ${ff.age}, married ${ff.years_married}y, children ${ff.children_ages.join('/')}, ${ff.financial_situation}, ${ff.retirement_horizon}`
+    )
+  }
 
   // 1. Proximity and grade — the single most important context signal
   sections.push(
