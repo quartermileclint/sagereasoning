@@ -166,11 +166,43 @@ Score my actions and give me the sage perspective.`
     try {
       reflectionData = extractJSON(responseText) as Record<string, any>
     } catch (parseErr) {
-      console.error('Private reflect parse error. Raw response:', responseText)
+      // Log the FULL raw response so we can see exactly what the LLM returned
+      console.error('[private/reflect] JSON PARSE FAILED. Full LLM response follows:')
+      console.error('--- RAW START ---')
+      console.error(responseText)
+      console.error('--- RAW END ---')
       console.error('Parse error:', parseErr)
+
+      // Instead of crashing with 500, return a degraded response
+      // so the user still gets something useful and we get analytics
+      const effectiveUserId = user_id || auth.user.id
+      await supabaseAdmin
+        .from('analytics_events')
+        .insert({
+          event_type: 'daily_reflection',
+          user_id: effectiveUserId,
+          metadata: {
+            mentor_mode: 'private',
+            obs_log_status: 'json_parse_failed',
+            obs_log_detail: `extractJSON failed. Response length: ${responseText.length}. First 300 chars: ${responseText.substring(0, 300)}`,
+          },
+        })
+        .then(() => {})
+
       return NextResponse.json(
-        { error: 'Reflection engine returned invalid response' },
-        { status: 500 }
+        {
+          result: {
+            katorthoma_proximity: 'unknown',
+            sage_perspective: 'Your reflection was received but the mentor had difficulty formatting the response. Please try again — this is an intermittent issue with LLM JSON output.',
+            evening_prompt: null,
+            mentor_observation: null,
+            passions_detected: [],
+            reflected_at: new Date().toISOString(),
+            mentor_mode: 'private',
+          },
+          _debug_parse_error: true,
+        },
+        { status: 200, headers: corsHeaders() }
       )
     }
 
