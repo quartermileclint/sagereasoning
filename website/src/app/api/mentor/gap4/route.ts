@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
   if (!founderId || auth.user.id !== founderId) {
     return NextResponse.json(
       { error: 'Gap 4 is restricted to the founder.' },
-      { status: 403, headers: corsHeaders }
+      { status: 403, headers: corsHeaders() }
     )
   }
 
@@ -119,42 +119,42 @@ export async function POST(request: NextRequest) {
     if (!['prompted', 'spontaneous'].includes(entry_type)) {
       return NextResponse.json(
         { error: `Invalid entry_type: "${entry_type}". Must be 'prompted' or 'spontaneous'.` },
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: corsHeaders() }
       )
     }
 
     if (!Number.isInteger(month_number) || month_number < 1 || month_number > 6) {
       return NextResponse.json(
         { error: `Invalid month_number: ${month_number}. Must be 1–6.` },
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: corsHeaders() }
       )
     }
 
     if (typeof divergence_reported !== 'boolean') {
       return NextResponse.json(
         { error: 'divergence_reported is required (boolean).' },
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: corsHeaders() }
       )
     }
 
     if (divergence_reported && (!divergence_description || divergence_description.trim().length < 10)) {
       return NextResponse.json(
         { error: 'When divergence is reported, divergence_description is required (min 10 chars).' },
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: corsHeaders() }
       )
     }
 
     if (!content || typeof content !== 'string' || content.trim().length < 10) {
       return NextResponse.json(
         { error: 'content is required (min 10 characters).' },
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: corsHeaders() }
       )
     }
 
     if (content.length > 5000) {
       return NextResponse.json(
         { error: 'content too long (max 5000 characters).' },
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: corsHeaders() }
       )
     }
 
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
       console.error('[gap4] Insert error:', error)
       return NextResponse.json(
         { error: `Failed to save Gap 4 entry: ${error.message}` },
-        { status: 500, headers: corsHeaders }
+        { status: 500, headers: corsHeaders() }
       )
     }
 
@@ -225,13 +225,13 @@ export async function POST(request: NextRequest) {
           ? `No divergence reported in month ${month_number} (months 1–3 are auto-flagged when no divergence is reported — it is statistically unlikely this early in practice).`
           : null,
       },
-      { status: 201, headers: corsHeaders }
+      { status: 201, headers: corsHeaders() }
     )
   } catch (err) {
     console.error('[gap4] POST error:', err)
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500, headers: corsHeaders }
+      { status: 500, headers: corsHeaders() }
     )
   }
 }
@@ -246,7 +246,7 @@ export async function GET(request: NextRequest) {
   if (!founderId || auth.user.id !== founderId) {
     return NextResponse.json(
       { error: 'Gap 4 is restricted to the founder.' },
-      { status: 403, headers: corsHeaders }
+      { status: 403, headers: corsHeaders() }
     )
   }
 
@@ -266,7 +266,7 @@ export async function GET(request: NextRequest) {
           .range(offset, offset + limit - 1)
 
         if (error) throw error
-        return NextResponse.json({ view: 'feed', entries: data }, { headers: corsHeaders })
+        return NextResponse.json({ view: 'feed', entries: data }, { headers: corsHeaders() })
       }
 
       case 'schedule': {
@@ -280,7 +280,7 @@ export async function GET(request: NextRequest) {
         if (!schedule) {
           return NextResponse.json(
             { view: 'schedule', active: false, message: 'No active Gap 4 cycle. Use PATCH to start one.' },
-            { headers: corsHeaders }
+            { headers: corsHeaders() }
           )
         }
 
@@ -301,7 +301,7 @@ export async function GET(request: NextRequest) {
             prompt_due_today: promptStatus.shouldPrompt,
             prompt_reason: promptStatus.reason,
           },
-          { headers: corsHeaders }
+          { headers: corsHeaders() }
         )
       }
 
@@ -315,13 +315,13 @@ export async function GET(request: NextRequest) {
         if (error || !data) {
           return NextResponse.json(
             { view: 'review_m3', available: false, message: 'Not enough data for month 3 review yet.' },
-            { headers: corsHeaders }
+            { headers: corsHeaders() }
           )
         }
 
         return NextResponse.json(
           { view: 'review_m3', available: true, review: data },
-          { headers: corsHeaders }
+          { headers: corsHeaders() }
         )
       }
 
@@ -335,13 +335,13 @@ export async function GET(request: NextRequest) {
         if (error || !data) {
           return NextResponse.json(
             { view: 'review_m6', available: false, message: 'Not enough data for month 6 review yet.' },
-            { headers: corsHeaders }
+            { headers: corsHeaders() }
           )
         }
 
         return NextResponse.json(
           { view: 'review_m6', available: true, review: data },
-          { headers: corsHeaders }
+          { headers: corsHeaders() }
         )
       }
 
@@ -354,20 +354,20 @@ export async function GET(request: NextRequest) {
           .order('entry_date', { ascending: false })
 
         if (error) throw error
-        return NextResponse.json({ view: 'suspect', entries: data }, { headers: corsHeaders })
+        return NextResponse.json({ view: 'suspect', entries: data }, { headers: corsHeaders() })
       }
 
       default:
         return NextResponse.json(
           { error: `Invalid view: "${view}". Use: feed, schedule, review_m3, review_m6, suspect` },
-          { status: 400, headers: corsHeaders }
+          { status: 400, headers: corsHeaders() }
         )
     }
   } catch (err) {
     console.error('[gap4] GET error:', err)
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500, headers: corsHeaders }
+      { status: 500, headers: corsHeaders() }
     )
   }
 }
@@ -382,7 +382,7 @@ export async function PATCH(request: NextRequest) {
   if (!founderId || auth.user.id !== founderId) {
     return NextResponse.json(
       { error: 'Gap 4 is restricted to the founder.' },
-      { status: 403, headers: corsHeaders }
+      { status: 403, headers: corsHeaders() }
     )
   }
 
@@ -401,7 +401,7 @@ export async function PATCH(request: NextRequest) {
       if (existing) {
         return NextResponse.json(
           { error: 'An active Gap 4 cycle already exists. Complete or deactivate it first.' },
-          { status: 409, headers: corsHeaders }
+          { status: 409, headers: corsHeaders() }
         )
       }
 
@@ -428,7 +428,7 @@ export async function PATCH(request: NextRequest) {
       if (error) {
         return NextResponse.json(
           { error: `Failed to start cycle: ${error.message}` },
-          { status: 500, headers: corsHeaders }
+          { status: 500, headers: corsHeaders() }
         )
       }
 
@@ -439,19 +439,19 @@ export async function PATCH(request: NextRequest) {
           first_prompt_date: nextSunday.toISOString().split('T')[0],
           schedule: 'Month 1: weekly Sunday prompts. Months 2–4: monthly (first Sunday). Months 5–6: no prompts (self-initiated).',
         },
-        { status: 201, headers: corsHeaders }
+        { status: 201, headers: corsHeaders() }
       )
     }
 
     return NextResponse.json(
       { error: `Unknown action: "${action}". Supported: start_cycle` },
-      { status: 400, headers: corsHeaders }
+      { status: 400, headers: corsHeaders() }
     )
   } catch (err) {
     console.error('[gap4] PATCH error:', err)
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500, headers: corsHeaders }
+      { status: 500, headers: corsHeaders() }
     )
   }
 }
