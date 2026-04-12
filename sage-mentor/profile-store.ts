@@ -607,10 +607,11 @@ export async function loadProfile(
   userId: string
 ): Promise<MentorProfile | null> {
   // 1. Load core profile
-  const { data: profiles } = await supabase
+  const { data: core } = await supabase
     .from('mentor_profiles')
     .select('*')
-  const core = profiles?.find((p: any) => p.user_id === userId)
+    .eq('user_id', userId)
+    .single()
   if (!core) return null
 
   const profileId = core.id
@@ -785,11 +786,11 @@ export async function recordInteraction(
     }
 
     // 2. Increment interaction count on core profile
-    // Note: In production, use Supabase RPC for atomic increment
-    const { data: profiles } = await supabase
+    const { data: profile } = await supabase
       .from('mentor_profiles')
       .select('interaction_count')
-    const profile = profiles?.find((p: any) => p.id === profileId)
+      .eq('id', profileId)
+      .single()
     if (profile) {
       await supabase
         .from('mentor_profiles')
@@ -1067,10 +1068,11 @@ export async function updateProfileFromReflection(
 ): Promise<{ success: boolean; profileUpdated: boolean; error: string | null }> {
   try {
     // 1. Find the user's profile
-    const { data: profiles } = await supabase
+    const { data: profileRow } = await supabase
       .from('mentor_profiles')
       .select('id')
-    const profileRow = profiles?.find((p: any) => p.user_id === userId)
+      .eq('user_id', userId)
+      .single()
 
     if (!profileRow) {
       // No profile yet — this is fine for users who haven't completed onboarding.
