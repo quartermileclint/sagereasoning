@@ -150,7 +150,7 @@ async function getPrimaryAgentResponse(
 
   const response = await client.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 2048,
+    max_tokens: 4000,
     temperature: 0.4,
     system: systemBlocks,
     messages,
@@ -426,7 +426,7 @@ async function getOpsSynthesis(
 
   const response = await client.messages.create({
     model: 'claude-opus-4-6',
-    max_tokens: 2500,
+    max_tokens: 4000,
     temperature: 0.3,
     system: [
       {
