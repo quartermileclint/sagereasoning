@@ -183,17 +183,20 @@ export async function getMentorObservationsWithParallelLog(
     new_path_chars: structuredResult?.length || 0,
   }
 
-  supabaseAdmin
-    .from('analytics_events')
-    .insert({
-      event_type: 'observation_retrieval_comparison',
-      user_id: userId,
-      metadata: logEntry,
-    })
-    .then(() => {})
-    .catch((err: unknown) => {
+  // Non-blocking analytics write — wrapped in async IIFE to handle errors
+  ;(async () => {
+    try {
+      await supabaseAdmin
+        .from('analytics_events')
+        .insert({
+          event_type: 'observation_retrieval_comparison',
+          user_id: userId,
+          metadata: logEntry,
+        })
+    } catch (err) {
       console.warn('[mentor-context-private] Failed to log retrieval comparison:', err)
-    })
+    }
+  })()
 
   return activeResult
 }
