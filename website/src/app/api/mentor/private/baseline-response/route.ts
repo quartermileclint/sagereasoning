@@ -153,38 +153,34 @@ export async function POST(request: NextRequest) {
     })
 
     // Gap 5: Auto-save — record the baseline refinement as an interaction
-    // and trigger a profile snapshot. Fire-and-forget to avoid blocking response.
+    // and trigger a profile snapshot. Awaited to ensure writes complete before Vercel terminates.
     if (isServerEncryptionConfigured() && auth.user?.id) {
-      import('../../../../../../../sage-mentor/profile-store')
-        .then(async ({ recordInteraction }) => {
-          // Find profile ID for interaction recording
-          const { data: profileRow } = await supabaseAdmin
-            .from('mentor_profiles')
-            .select('id')
-            .eq('user_id', auth.user.id)
-            .single()
+      try {
+        const { recordInteraction } = await import('../../../../../../../sage-mentor/profile-store')
+        const { data: profileRow } = await supabaseAdmin
+          .from('mentor_profiles')
+          .select('id')
+          .eq('user_id', auth.user.id)
+          .single()
 
-          if (profileRow) {
-            // Record as baseline_question interaction
-            await recordInteraction(supabaseAdmin as any, profileRow.id, {
-              type: 'baseline_question' as any,
-              hub_id: 'private-mentor',
-              description: `Baseline refinement: ${responses.length} gap questions processed`,
-              proximity_assessed: undefined,
-              passions_detected: [],
-              mechanisms_applied: ['passion_diagnosis', 'oikeiosis', 'virtue_assessment'],
-              mentor_observation: typeof result === 'object' && result !== null && 'summary' in result
-                ? String((result as any).summary)
-                : `Processed ${responses.length} baseline responses for profile refinement`,
-            })
+        if (profileRow) {
+          await recordInteraction(supabaseAdmin as any, profileRow.id, {
+            type: 'baseline_question' as any,
+            hub_id: 'private-mentor',
+            description: `Baseline refinement: ${responses.length} gap questions processed`,
+            proximity_assessed: undefined,
+            passions_detected: [],
+            mechanisms_applied: ['passion_diagnosis', 'oikeiosis', 'virtue_assessment'],
+            mentor_observation: typeof result === 'object' && result !== null && 'summary' in result
+              ? String((result as any).summary)
+              : `Processed ${responses.length} baseline responses for profile refinement`,
+          })
 
-            // Trigger a snapshot at baseline completion — this is a significant profile event
-            await createProfileSnapshot(profileRow.id, 'manual', 'private-mentor')
-          }
-        })
-        .catch((err: unknown) => {
-          console.error('[mentor/private/baseline-response] Auto-save failed (non-blocking):', err)
-        })
+          await createProfileSnapshot(profileRow.id, 'manual', 'private-mentor')
+        }
+      } catch (err) {
+        console.error('[mentor/private/baseline-response] Auto-save failed (non-blocking):', err)
+      }
     }
 
     return NextResponse.json(

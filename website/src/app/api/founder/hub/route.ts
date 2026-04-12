@@ -806,28 +806,28 @@ export async function POST(request: NextRequest) {
     })
 
     // Fix 2: Knowledge persistence — record mentor interaction with hub_id
+    // Awaited to ensure writes complete before Vercel terminates the function
     if (agent === 'mentor') {
-      import('../../../../../../sage-mentor/profile-store')
-        .then(async ({ recordInteraction }) => {
-          const { data: profileRow } = await supabaseAdmin
-            .from('mentor_profiles')
-            .select('id')
-            .eq('user_id', auth.user.id)
-            .single()
+      try {
+        const { recordInteraction } = await import('../../../../../../sage-mentor/profile-store')
+        const { data: profileRow } = await supabaseAdmin
+          .from('mentor_profiles')
+          .select('id')
+          .eq('user_id', auth.user.id)
+          .single()
 
-          if (profileRow) {
-            await recordInteraction(supabaseAdmin as any, profileRow.id, {
-              type: 'conversation' as any,
-              hub_id: 'founder-mentor',
-              description: message.trim().substring(0, 200),
-              mechanisms_applied: ['passion_diagnosis', 'oikeiosis', 'value_assessment'],
-              mentor_observation: `Founder hub conversation: ${primaryResponse.content.substring(0, 300)}`,
-            })
-          }
-        })
-        .catch((err: unknown) => {
-          console.error('[founder/hub] Mentor knowledge write failed (non-blocking):', err)
-        })
+        if (profileRow) {
+          await recordInteraction(supabaseAdmin as any, profileRow.id, {
+            type: 'conversation' as any,
+            hub_id: 'founder-mentor',
+            description: message.trim().substring(0, 200),
+            mechanisms_applied: ['passion_diagnosis', 'oikeiosis', 'value_assessment'],
+            mentor_observation: `Founder hub conversation: ${primaryResponse.content.substring(0, 300)}`,
+          })
+        }
+      } catch (err) {
+        console.error('[founder/hub] Mentor knowledge write failed (non-blocking):', err)
+      }
     }
 
     // Get observer contributions (all other agents check in parallel)

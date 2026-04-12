@@ -233,25 +233,24 @@ Score my actions and give me the sage perspective.`
       .then(() => {})
 
     // Self-improving feedback loop — feed reflection into Mentor profile
-    // Private mentor uses the dedicated mentor_observation field (richer than sage_perspective)
-    import('../../../../../../../sage-mentor/profile-store')
-      .then(({ updateProfileFromReflection }) => {
-        return updateProfileFromReflection(
-          supabaseAdmin as any,
-          effectiveUserId,
-          {
-            katorthoma_proximity: reflectionData.katorthoma_proximity,
-            passions_detected: reflectionData.passions_detected || [],
-            what_you_did_well: reflectionData.what_you_did_well,
-            sage_perspective: reflectionData.mentor_observation || reflectionData.sage_perspective,
-          },
-          what_happened.trim(),
-          'private-mentor'
-        )
-      })
-      .catch((err: unknown) => {
-        console.error('Private reflect → profile update failed (non-blocking):', err)
-      })
+    // Awaited (not fire-and-forget) to ensure writes complete before Vercel terminates the function
+    try {
+      const { updateProfileFromReflection } = await import('../../../../../../../sage-mentor/profile-store')
+      await updateProfileFromReflection(
+        supabaseAdmin as any,
+        effectiveUserId,
+        {
+          katorthoma_proximity: reflectionData.katorthoma_proximity,
+          passions_detected: reflectionData.passions_detected || [],
+          what_you_did_well: reflectionData.what_you_did_well,
+          sage_perspective: reflectionData.mentor_observation || reflectionData.sage_perspective,
+        },
+        what_happened.trim(),
+        'private-mentor'
+      )
+    } catch (err) {
+      console.error('Private reflect → profile update failed (non-blocking):', err)
+    }
 
     const envelope = buildEnvelope({
       result,
