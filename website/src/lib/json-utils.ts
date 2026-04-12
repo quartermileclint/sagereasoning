@@ -57,5 +57,33 @@ export function extractJSON(text: string): any {
     } catch { /* continue */ }
   }
 
+  // Step 5: Repair common LLM JSON errors, then retry
+  // LLMs sometimes produce malformed lines like:
+  //   "passions_detected [],       ← missing colon between key and value
+  //   "passions_detected": [],     ← correct version on next line
+  // Fix by inserting the missing colon where a quoted key is followed by
+  // a JSON value character ([, {, ", digit, t, f, n) without a colon between.
+  const cleaned = text
+    .replace(/```json?\s*\n?/gi, '')
+    .replace(/```\s*\n?/g, '')
+    .trim()
+  const colonFixed = cleaned.replace(
+    /^(\s*"[^"]+")\s+([\[\{"tfn\d])/gm,
+    '$1: $2'
+  )
+  if (colonFixed !== cleaned) {
+    // Also handle duplicate keys that result from the fix — JSON.parse
+    // uses the last occurrence, so duplicates are harmless.
+    const bracketStart = colonFixed.indexOf('{')
+    const bracketEnd = colonFixed.lastIndexOf('}')
+    if (bracketStart !== -1 && bracketEnd !== -1 && bracketEnd > bracketStart) {
+      try {
+        const result = JSON.parse(colonFixed.slice(bracketStart, bracketEnd + 1))
+        console.warn(`extractJSON: colon-repair fallback succeeded. Input preview: ${preview}`)
+        return result
+      } catch { /* continue */ }
+    }
+  }
+
   throw new Error(`extractJSON: Could not extract valid JSON (${text.length} chars). Preview: ${preview}`)
 }
