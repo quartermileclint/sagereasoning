@@ -235,6 +235,9 @@ Score my actions and give me the sage perspective.`
 
     // Log structured observation to the unified pipeline (mentor_observations_structured)
     // This is the primary caller for logMentorObservation() — the data quality gate.
+    let obsLogStatus = 'not_attempted'
+    let obsLogDetail = ''
+
     if (structuredObs?.observation && structuredObs?.category && structuredObs?.confidence) {
       try {
         const { data: profileRow } = await supabaseAdmin
@@ -244,6 +247,7 @@ Score my actions and give me the sage perspective.`
           .single()
 
         if (profileRow) {
+          obsLogStatus = 'profile_found'
           const obsResult = await logMentorObservation(
             (profileRow as { id: string }).id,
             {
@@ -254,16 +258,38 @@ Score my actions and give me the sage perspective.`
               source_context: 'evening_reflection',
             }
           )
-          if (!obsResult.success) {
+          if (obsResult.success) {
+            obsLogStatus = 'logged'
+          } else {
+            obsLogStatus = 'validation_rejected'
+            obsLogDetail = obsResult.error || 'unknown'
             console.warn('[private/reflect] Structured observation rejected:', obsResult.error)
           }
+        } else {
+          obsLogStatus = 'no_profile'
+          obsLogDetail = 'mentor_profiles query returned no row for user'
+          console.warn('[private/reflect] No mentor profile found for user:', effectiveUserId)
         }
       } catch (obsErr) {
+        obsLogStatus = 'exception'
+        obsLogDetail = String(obsErr)
         console.warn('[private/reflect] Failed to log structured observation (non-blocking):', obsErr)
       }
+    } else {
+      obsLogStatus = 'llm_missing_field'
+      obsLogDetail = JSON.stringify({
+        has_observation: !!structuredObs?.observation,
+        has_category: !!structuredObs?.category,
+        has_confidence: !!structuredObs?.confidence,
+        raw_type: typeof reflectionData.structured_observation,
+        raw_value: reflectionData.structured_observation
+          ? JSON.stringify(reflectionData.structured_observation).substring(0, 200)
+          : 'undefined',
+      })
+      console.warn('[private/reflect] Structured observation not extracted from LLM response:', obsLogDetail)
     }
 
-    // Analytics
+    // Analytics — now includes detailed diagnostic for observation pipeline
     await supabaseAdmin
       .from('analytics_events')
       .insert({
@@ -273,7 +299,9 @@ Score my actions and give me the sage perspective.`
           katorthoma_proximity: reflectionData.katorthoma_proximity,
           passions_count: (reflectionData.passions_detected || []).length,
           mentor_mode: 'private',
-          structured_observation_logged: !!(structuredObs?.observation),
+          structured_observation_logged: obsLogStatus === 'logged',
+          obs_log_status: obsLogStatus,
+          obs_log_detail: obsLogDetail || undefined,
         },
       })
       .then(() => {})
