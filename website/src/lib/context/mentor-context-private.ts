@@ -32,10 +32,12 @@ import { supabaseAdmin } from '@/lib/supabase-server'
  * user message, or null if no observations exist.
  *
  * @param userId - The user's ID (used to find their profile)
+ * @param hubId - The hub context: 'founder-mentor' or 'private-mentor'
  * @param limit - Max observations to return (default 15, most recent first)
  */
 export async function getMentorObservations(
   userId: string,
+  hubId: 'founder-mentor' | 'private-mentor' = 'private-mentor',
   limit: number = 15
 ): Promise<string | null> {
   try {
@@ -43,11 +45,12 @@ export async function getMentorObservations(
     const profileId = await getProfileId(userId)
     if (!profileId) return null
 
-    // Fetch recent interactions that have mentor observations
+    // Fetch recent interactions that have mentor observations — hub-scoped
     const { data, error } = await supabaseAdmin
       .from('mentor_interactions')
       .select('interaction_type, description, proximity_assessed, mentor_observation, created_at')
       .eq('profile_id', profileId)
+      .eq('hub_id', hubId)
       .not('mentor_observation', 'is', null)
       .order('created_at', { ascending: false })
       .limit(limit)
@@ -93,11 +96,13 @@ export async function getMentorObservations(
  *
  * @param userId - The user's ID
  * @param topicHints - Optional keywords from the current interaction to match against
+ * @param hubId - The hub context (journal refs are always private-scoped but param kept for API consistency)
  * @param limit - Max references to return (default 10)
  */
 export async function getJournalReferences(
   userId: string,
   topicHints?: string[],
+  hubId: 'founder-mentor' | 'private-mentor' = 'private-mentor',
   limit: number = 10
 ): Promise<string | null> {
   try {
@@ -184,10 +189,12 @@ function formatJournalRefs(
  * for six weeks," "your dominant passion has shifted from fear to desire."
  *
  * @param userId - The user's ID
+ * @param hubId - The hub context: 'founder-mentor' or 'private-mentor'
  * @param limit - Max snapshots to return (default 8, most recent first)
  */
 export async function getProfileSnapshots(
   userId: string,
+  hubId: 'founder-mentor' | 'private-mentor' = 'private-mentor',
   limit: number = 8
 ): Promise<string | null> {
   try {
@@ -198,6 +205,7 @@ export async function getProfileSnapshots(
       .from('mentor_profile_snapshots')
       .select('snapshot_at, proximity_level, senecan_grade, direction_of_travel, persisting_passions, weakest_virtue, interaction_count, trigger')
       .eq('profile_id', profileId)
+      .eq('hub_id', hubId)
       .order('snapshot_at', { ascending: false })
       .limit(limit)
 
@@ -238,10 +246,12 @@ export async function getProfileSnapshots(
  *
  * @param profileId - The profile's UUID
  * @param trigger - What triggered the snapshot: 'scheduled' | 'proximity_change' | 'direction_change' | 'manual'
+ * @param hubId - The hub context: 'founder-mentor' or 'private-mentor'
  */
 export async function createProfileSnapshot(
   profileId: string,
-  trigger: 'scheduled' | 'proximity_change' | 'direction_change' | 'manual' = 'scheduled'
+  trigger: 'scheduled' | 'proximity_change' | 'direction_change' | 'manual' = 'scheduled',
+  hubId: 'founder-mentor' | 'private-mentor' = 'private-mentor'
 ): Promise<{ success: boolean; error: string | null }> {
   try {
     // Read current profile state
@@ -259,6 +269,7 @@ export async function createProfileSnapshot(
       .from('mentor_profile_snapshots')
       .insert({
         profile_id: profileId,
+        hub_id: hubId,
         snapshot_at: new Date().toISOString(),
         proximity_level: profile.proximity_level,
         senecan_grade: profile.senecan_grade,
@@ -320,6 +331,10 @@ export const SNAPSHOTS_MIGRATION_SQL = `
 CREATE TABLE IF NOT EXISTS mentor_profile_snapshots (
   id                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   profile_id        UUID NOT NULL REFERENCES mentor_profiles(id) ON DELETE CASCADE,
+
+  -- Hub isolation: which mentor hub produced this snapshot
+  hub_id            TEXT NOT NULL DEFAULT 'private-mentor'
+    CHECK (hub_id IN ('founder-mentor', 'private-mentor')),
 
   -- Snapshot timestamp
   snapshot_at       TIMESTAMPTZ NOT NULL DEFAULT now(),

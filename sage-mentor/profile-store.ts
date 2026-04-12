@@ -304,6 +304,10 @@ CREATE TABLE IF NOT EXISTS mentor_interactions (
   id                  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   profile_id          UUID NOT NULL REFERENCES mentor_profiles(id) ON DELETE CASCADE,
 
+  -- Hub isolation: which mentor hub generated this interaction
+  hub_id              TEXT NOT NULL DEFAULT 'private-mentor'
+    CHECK (hub_id IN ('founder-mentor', 'private-mentor')),
+
   -- What happened
   interaction_type    TEXT NOT NULL
     CHECK (interaction_type IN (
@@ -748,6 +752,7 @@ export async function recordInteraction(
   interaction: {
     type: InteractionType
     description: string
+    hub_id?: 'founder-mentor' | 'private-mentor'
     proximity_assessed?: KatorthomaProximityLevel
     passions_detected?: { passion: string; false_judgement: string }[]
     mechanisms_applied?: string[]
@@ -758,11 +763,12 @@ export async function recordInteraction(
   }
 ): Promise<{ success: boolean; error: string | null }> {
   try {
-    // 1. Insert the interaction record
+    // 1. Insert the interaction record — hub-scoped
     const { error: insertError } = await supabase
       .from('mentor_interactions')
       .insert({
         profile_id: profileId,
+        hub_id: interaction.hub_id || 'private-mentor',
         interaction_type: interaction.type,
         description: interaction.description,
         proximity_assessed: interaction.proximity_assessed || null,
@@ -1056,7 +1062,8 @@ export async function updateProfileFromReflection(
   supabase: SupabaseClient,
   userId: string,
   reflection: ReflectionOutput,
-  reflectionInput: string
+  reflectionInput: string,
+  hubId: 'founder-mentor' | 'private-mentor' = 'private-mentor'
 ): Promise<{ success: boolean; profileUpdated: boolean; error: string | null }> {
   try {
     // 1. Find the user's profile
@@ -1105,9 +1112,10 @@ export async function updateProfileFromReflection(
       })
     }
 
-    // 3. Record the reflection as an interaction in the rolling window
+    // 3. Record the reflection as an interaction in the rolling window — hub-scoped
     await recordInteraction(supabase, profileId, {
       type: 'evening_reflection',
+      hub_id: hubId,
       description: reflectionInput.substring(0, 200), // Truncate for storage
       proximity_assessed: reflection.katorthoma_proximity,
       passions_detected: (reflection.passions_detected || []).map(p => ({

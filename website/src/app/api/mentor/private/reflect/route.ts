@@ -122,9 +122,9 @@ export async function POST(request: NextRequest) {
     ] = await Promise.all([
       getFullPractitionerContext(auth.user.id),
       getProjectContext('minimal'),
-      getMentorObservations(auth.user.id),
-      getJournalReferences(auth.user.id, extractTopicHints(what_happened, how_i_responded)),
-      getProfileSnapshots(auth.user.id),
+      getMentorObservations(auth.user.id, 'private-mentor'),
+      getJournalReferences(auth.user.id, extractTopicHints(what_happened, how_i_responded), 'private-mentor'),
+      getProfileSnapshots(auth.user.id, 'private-mentor'),
     ])
     const mentorKnowledgeBase = getMentorKnowledgeBase()
 
@@ -245,7 +245,8 @@ Score my actions and give me the sage perspective.`
             what_you_did_well: reflectionData.what_you_did_well,
             sage_perspective: reflectionData.mentor_observation || reflectionData.sage_perspective,
           },
-          what_happened.trim()
+          what_happened.trim(),
+          'private-mentor'
         )
       })
       .catch((err: unknown) => {

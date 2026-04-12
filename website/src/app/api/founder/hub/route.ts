@@ -30,6 +30,7 @@ import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loa
 import { getProjectContext } from '@/lib/context/project-context'
 import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
 import { getFullPractitionerContext } from '@/lib/context/practitioner-context'
+import { getMentorObservations, getProfileSnapshots, createProfileSnapshot } from '@/lib/context/mentor-context-private'
 
 // =============================================================================
 // Types
@@ -145,6 +146,16 @@ async function getPrimaryAgentResponse(
     enrichedMessage += `\n\n${practitionerContext}`
   }
   enrichedMessage += `\n\n${projectContext}`
+
+  // For the mentor agent: inject hub-scoped observations for session continuity (Fix 2)
+  if (agent === 'mentor') {
+    const [mentorObservations, profileSnapshots] = await Promise.all([
+      getMentorObservations(userId, 'founder-mentor'),
+      getProfileSnapshots(userId, 'founder-mentor'),
+    ])
+    if (mentorObservations) enrichedMessage += `\n\n${mentorObservations}`
+    if (profileSnapshots) enrichedMessage += `\n\n${profileSnapshots}`
+  }
 
   messages.push({ role: 'user', content: enrichedMessage })
 
@@ -793,6 +804,31 @@ export async function POST(request: NextRequest) {
       pipeline_meta: primaryResponse.pipeline_meta,
       decision_gate: primaryResponse.decision_gate || null,
     })
+
+    // Fix 2: Knowledge persistence — record mentor interaction with hub_id
+    if (agent === 'mentor') {
+      import('../../../../../../sage-mentor/profile-store')
+        .then(async ({ recordInteraction }) => {
+          const { data: profileRow } = await supabaseAdmin
+            .from('mentor_profiles')
+            .select('id')
+            .eq('user_id', auth.user.id)
+            .single()
+
+          if (profileRow) {
+            await recordInteraction(supabaseAdmin as any, profileRow.id, {
+              type: 'conversation' as any,
+              hub_id: 'founder-mentor',
+              description: message.trim().substring(0, 200),
+              mechanisms_applied: ['passion_diagnosis', 'oikeiosis', 'value_assessment'],
+              mentor_observation: `Founder hub conversation: ${primaryResponse.content.substring(0, 300)}`,
+            })
+          }
+        })
+        .catch((err: unknown) => {
+          console.error('[founder/hub] Mentor knowledge write failed (non-blocking):', err)
+        })
+    }
 
     // Get observer contributions (all other agents check in parallel)
     debugStep = 'get_observers'

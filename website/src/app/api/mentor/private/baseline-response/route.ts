@@ -132,8 +132,8 @@ export async function POST(request: NextRequest) {
     // Private mentor gets project context + L5 + growth accumulation context
     const [projectContext, mentorObservations, profileSnapshots] = await Promise.all([
       getProjectContext('summary'),
-      getMentorObservations(auth.user.id),
-      getProfileSnapshots(auth.user.id),
+      getMentorObservations(auth.user.id, 'private-mentor'),
+      getProfileSnapshots(auth.user.id, 'private-mentor'),
     ])
     const mentorKnowledgeBase = getMentorKnowledgeBase()
 
@@ -168,6 +168,7 @@ export async function POST(request: NextRequest) {
             // Record as baseline_question interaction
             await recordInteraction(supabaseAdmin as any, profileRow.id, {
               type: 'baseline_question' as any,
+              hub_id: 'private-mentor',
               description: `Baseline refinement: ${responses.length} gap questions processed`,
               proximity_assessed: undefined,
               passions_detected: [],
@@ -178,7 +179,7 @@ export async function POST(request: NextRequest) {
             })
 
             // Trigger a snapshot at baseline completion — this is a significant profile event
-            await createProfileSnapshot(profileRow.id, 'manual')
+            await createProfileSnapshot(profileRow.id, 'manual', 'private-mentor')
           }
         })
         .catch((err: unknown) => {

@@ -94,9 +94,9 @@ export async function POST(request: NextRequest) {
     // Private mentor gets project context + L5 + growth accumulation context
     const [projectContext, mentorObservations, journalRefs, profileSnapshots] = await Promise.all([
       getProjectContext('summary'),
-      getMentorObservations(auth.user.id),
-      getJournalReferences(auth.user.id), // No topic hints for weekly — surface broadly relevant refs
-      getProfileSnapshots(auth.user.id),
+      getMentorObservations(auth.user.id, 'private-mentor'),
+      getJournalReferences(auth.user.id, undefined, 'private-mentor'), // No topic hints for weekly — surface broadly relevant refs
+      getProfileSnapshots(auth.user.id, 'private-mentor'),
     ])
     const mentorKnowledgeBase = getMentorKnowledgeBase()
 
