@@ -9,7 +9,7 @@ import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
 import mentorProfileFallback from '@/data/mentor-profile.json'
 import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
-import { getMentorObservations, getProfileSnapshots, createProfileSnapshot } from '@/lib/context/mentor-context-private'
+import { getMentorObservationsWithParallelLog, getProfileSnapshots, createProfileSnapshot } from '@/lib/context/mentor-context-private'
 
 // =============================================================================
 // PRIVATE mentor-baseline-response — Founder-only profile refinement
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     // Private mentor gets project context + L5 + growth accumulation context
     const [projectContext, mentorObservations, profileSnapshots] = await Promise.all([
       getProjectContext('summary'),
-      getMentorObservations(auth.user.id, 'private-mentor'),
+      getMentorObservationsWithParallelLog(auth.user.id, 'private-mentor', 'private-baseline-response'),
       getProfileSnapshots(auth.user.id, 'private-mentor'),
     ])
     const mentorKnowledgeBase = getMentorKnowledgeBase()
@@ -164,6 +164,10 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (profileRow) {
+          // NOTE (2026-04-13): mentor_observation field deliberately omitted.
+          // Previously passed result.summary (raw LLM text) — same contamination
+          // pattern as the reflect and founder-hub routes. Structured observations
+          // are now logged separately via logMentorObservation().
           await recordInteraction(supabaseAdmin as any, profileRow.id, {
             type: 'baseline_question' as any,
             hub_id: 'private-mentor',
@@ -171,9 +175,7 @@ export async function POST(request: NextRequest) {
             proximity_assessed: undefined,
             passions_detected: [],
             mechanisms_applied: ['passion_diagnosis', 'oikeiosis', 'virtue_assessment'],
-            mentor_observation: typeof result === 'object' && result !== null && 'summary' in result
-              ? String((result as any).summary)
-              : `Processed ${responses.length} baseline responses for profile refinement`,
+            // mentor_observation: REMOVED — was passing raw LLM summary text (contamination)
           })
 
           await createProfileSnapshot(profileRow.id, 'manual', 'private-mentor')

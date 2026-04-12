@@ -136,6 +136,16 @@ export type SessionExchange = {
 /**
  * A strategic decision record ready for persistence.
  */
+/**
+ * Structured observation from the session bridge evaluation.
+ * Matches the input contract in mentor-observation-logger.ts.
+ */
+export type StructuredObservation = {
+  readonly observation: string        // 50-500 chars, third-person
+  readonly category: string           // observation category enum
+  readonly confidence: string         // low | medium | high
+} | null
+
 export type SessionDecisionRecord = {
   readonly session_id: string
   readonly decision_type: DecisionDomain
@@ -147,7 +157,10 @@ export type SessionDecisionRecord = {
     readonly false_judgement: string
   }[]
   readonly mechanisms_applied: readonly string[]
+  /** @deprecated Use structured_observation instead. Raw text field kept for backward compatibility. */
   readonly mentor_observation: string | null
+  /** Structured observation validated against the input contract (2026-04-13 refactor). */
+  readonly structured_observation: StructuredObservation
   readonly journal_reference: JournalReference | null
 }
 
@@ -630,9 +643,18 @@ export function buildBatchEvaluationPrompt(
     '  "decision_index": number,',
     '  "proximity_assessed": "reflexive"|"habitual"|"deliberate"|"principled"|"sage_like",',
     '  "passions_detected": [{"passion": string, "false_judgement": string}],',
-    '  "mentor_observation": string (one sentence),',
+    '  "structured_observation": {',
+    '    "observation": string (50-500 chars, third-person about the practitioner, NOT "I noticed" or "You should"),',
+    '    "category": "passion_event"|"virtue_marker"|"reasoning_pattern"|"progress_signal"|"oikeiosis_shift"|"integration_signal",',
+    '    "confidence": "low"|"medium"|"high"',
+    '  },',
     '  "mechanisms_applied": string[] (minimum 2)',
     '}',
+    '',
+    'OBSERVATION RULES:',
+    '- Write in third person about the practitioner ("Founder showed...", "Recurring pattern of...")',
+    '- Do NOT use first-person ("I noticed", "I think") or second-person ("You should", "Your tendency")',
+    '- 50-500 characters. Distil the developmental signal — this is stored for longitudinal tracking.',
     '',
     'R3 DISCLAIMER: This evaluation provides educational Stoic reasoning frameworks,',
     'not professional advice. It does not consider legal, medical, financial, or',
@@ -661,12 +683,17 @@ export function parseBatchEvaluationResponse(
 ): readonly SessionDecisionRecord[] {
   const records: SessionDecisionRecord[] = []
 
+  // Valid categories and confidence levels for structured observations
+  const VALID_OBS_CATEGORIES = ['passion_event', 'virtue_marker', 'reasoning_pattern', 'progress_signal', 'oikeiosis_shift', 'integration_signal']
+  const VALID_OBS_CONFIDENCE = ['low', 'medium', 'high']
+
   // Attempt to parse JSON from the response
   let evaluations: Array<{
     decision_index: number
     proximity_assessed: KatorthomaProximityLevel
     passions_detected: Array<{ passion: string; false_judgement: string }>
-    mentor_observation: string
+    mentor_observation?: string  // deprecated, may still appear from cached prompts
+    structured_observation?: { observation: string; category: string; confidence: string }
     mechanisms_applied: string[]
   }> = []
 
@@ -691,6 +718,45 @@ export function parseBatchEvaluationResponse(
     const exchange = classified[idx]
     if (!exchange) continue
 
+    // Build structured observation — validate against input contract
+    let structuredObs: StructuredObservation = null
+    let legacyObservation: string | null = null
+
+    if (evaluation.structured_observation) {
+      const so = evaluation.structured_observation
+      const obsText = sanitise(so.observation || '', 'context_field').text
+      const obsLen = obsText.length
+      const validCategory = VALID_OBS_CATEGORIES.includes(so.category)
+      const validConfidence = VALID_OBS_CONFIDENCE.includes(so.confidence)
+      const validLength = obsLen >= 50 && obsLen <= 500
+
+      // Check for first-person contamination
+      const firstPersonPatterns = [
+        /\bI (noticed|observed|think|believe|see|sense|feel|recommend|suggest|would)\b/i,
+        /\byou (should|could|might|need to|seem|appear|are|were|have|had)\b/i,
+        /\byour\b/i,
+      ]
+      const hasFirstPerson = firstPersonPatterns.some(p => p.test(obsText))
+
+      if (validLength && validCategory && validConfidence && !hasFirstPerson) {
+        structuredObs = {
+          observation: obsText,
+          category: so.category,
+          confidence: so.confidence,
+        }
+        legacyObservation = obsText // Keep legacy column populated for summary formatting
+      } else {
+        // Validation failed — log but don't crash. The observation is dropped.
+        console.warn(
+          `[session-bridge] Structured observation rejected: len=${obsLen}, category=${so.category}(${validCategory}), confidence=${so.confidence}(${validConfidence}), firstPerson=${hasFirstPerson}`
+        )
+      }
+    } else if (evaluation.mentor_observation) {
+      // Fallback: LLM returned old format. Store as legacy but don't create structured.
+      legacyObservation = sanitise(evaluation.mentor_observation, 'context_field').text
+      console.warn('[session-bridge] LLM returned legacy mentor_observation format — not promoted to structured.')
+    }
+
     records.push({
       session_id: sessionId,
       decision_type: exchange.decision_domain || 'other',
@@ -702,9 +768,8 @@ export function parseBatchEvaluationResponse(
         false_judgement: sanitise(p.false_judgement, 'context_field').text,
       })),
       mechanisms_applied: evaluation.mechanisms_applied || ['control_filter', 'passion_diagnosis'],
-      mentor_observation: evaluation.mentor_observation
-        ? sanitise(evaluation.mentor_observation, 'context_field').text
-        : null,
+      mentor_observation: legacyObservation,
+      structured_observation: structuredObs,
       journal_reference: null,
     })
   }
@@ -938,6 +1003,36 @@ export async function persistSessionDecisions(
       errors.push(`Failed to persist decision: ${error.message}`)
     } else {
       synced++
+
+      // Also write validated structured observations to the unified pipeline.
+      // This feeds getStructuredMentorObservations() for context injection.
+      if (decision.structured_observation) {
+        try {
+          // Look up profile_id for this user
+          const { data: profileRow } = await supabase
+            .from('mentor_profiles')
+            .select('id')
+            .eq('user_id', userId)
+            .single()
+
+          if (profileRow) {
+            await supabase
+              .from('mentor_observations_structured')
+              .insert({
+                profile_id: profileRow.id,
+                hub_id: 'private-mentor',
+                observation_date: new Date().toISOString().split('T')[0],
+                observation: decision.structured_observation.observation,
+                category: decision.structured_observation.category,
+                confidence: decision.structured_observation.confidence,
+                source_context: `session_bridge_${sessionMode}`,
+              })
+          }
+        } catch (obsErr) {
+          // Non-blocking: session decision was already persisted
+          console.warn('[session-bridge] Failed to write structured observation to unified pipeline:', obsErr)
+        }
+      }
     }
   }
 

@@ -30,7 +30,7 @@ import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loa
 import { getProjectContext } from '@/lib/context/project-context'
 import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
 import { getFullPractitionerContext } from '@/lib/context/practitioner-context'
-import { getMentorObservations, getProfileSnapshots, createProfileSnapshot } from '@/lib/context/mentor-context-private'
+import { getMentorObservationsWithParallelLog, getProfileSnapshots, createProfileSnapshot } from '@/lib/context/mentor-context-private'
 
 // =============================================================================
 // Types
@@ -150,7 +150,7 @@ async function getPrimaryAgentResponse(
   // For the mentor agent: inject hub-scoped observations for session continuity (Fix 2)
   if (agent === 'mentor') {
     const [mentorObservations, profileSnapshots] = await Promise.all([
-      getMentorObservations(userId, 'founder-mentor'),
+      getMentorObservationsWithParallelLog(userId, 'founder-mentor', 'founder-hub'),
       getProfileSnapshots(userId, 'founder-mentor'),
     ])
     if (mentorObservations) enrichedMessage += `\n\n${mentorObservations}`
@@ -817,12 +817,18 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (profileRow) {
+          // NOTE (2026-04-13): mentor_observation field deliberately omitted.
+          // Previously this dumped the first 300 chars of the raw LLM response,
+          // which contaminated the observation log. Structured observations are
+          // now logged separately via logMentorObservation() which enforces
+          // a strict input contract (third-person, categorised, confidence-scored).
+          // See: website/src/lib/logging/mentor-observation-logger.ts
           await recordInteraction(supabaseAdmin as any, profileRow.id, {
             type: 'conversation' as any,
             hub_id: 'founder-mentor',
             description: message.trim().substring(0, 200),
             mechanisms_applied: ['passion_diagnosis', 'oikeiosis', 'value_assessment'],
-            mentor_observation: `Founder hub conversation: ${primaryResponse.content.substring(0, 300)}`,
+            // mentor_observation: REMOVED — was passing raw LLM response text (contamination)
           })
         }
       } catch (err) {

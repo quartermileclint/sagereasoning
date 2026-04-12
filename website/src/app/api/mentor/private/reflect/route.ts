@@ -9,7 +9,7 @@ import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loa
 import { getFullPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
-import { getMentorObservations, getJournalReferences, getProfileSnapshots } from '@/lib/context/mentor-context-private'
+import { getMentorObservationsWithParallelLog, getJournalReferences, getProfileSnapshots } from '@/lib/context/mentor-context-private'
 import { extractJSON } from '@/lib/json-utils'
 
 // =============================================================================
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
     ] = await Promise.all([
       getFullPractitionerContext(auth.user.id),
       getProjectContext('minimal'),
-      getMentorObservations(auth.user.id, 'private-mentor'),
+      getMentorObservationsWithParallelLog(auth.user.id, 'private-mentor', 'private-reflect'),
       getJournalReferences(auth.user.id, extractTopicHints(what_happened, how_i_responded), 'private-mentor'),
       getProfileSnapshots(auth.user.id, 'private-mentor'),
     ])

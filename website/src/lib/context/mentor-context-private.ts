@@ -85,6 +85,119 @@ export async function getMentorObservations(
   }
 }
 
+// ── Parallel Retrieval Logging (2026-04-13 refactor) ────────────────
+//
+// During the transition period, both old (raw text from mentor_interactions)
+// and new (structured from mentor_observations_structured) paths run in
+// parallel. A comparison log records what each path returned, so we can
+// measure whether structured observations improve context quality before
+// cutting over.
+//
+// Cutover criteria: 5–10 structured observations pass manual quality review.
+// Until then, the old path provides context (it has data); the new path
+// accumulates data and logs for comparison.
+
+import {
+  getStructuredMentorObservations,
+} from '@/lib/logging/mentor-observation-logger'
+
+/**
+ * Parallel retrieval log entry format.
+ * Written to analytics_events for measurement.
+ */
+export interface ObservationRetrievalLog {
+  retrieval_timestamp: string
+  hub_id: 'founder-mentor' | 'private-mentor'
+  caller: string                    // which route triggered retrieval
+  old_path_count: number            // observations returned from legacy path
+  new_path_count: number            // observations returned from structured path
+  active_path: 'legacy' | 'structured' | 'legacy_fallback'
+  old_path_chars: number            // total chars in legacy context block
+  new_path_chars: number            // total chars in structured context block
+}
+
+/**
+ * Get mentor observations with parallel retrieval logging.
+ *
+ * Runs BOTH the legacy getMentorObservations() and the new
+ * getStructuredMentorObservations() in parallel. Returns whichever
+ * has data (preferring structured when it has ≥5 observations).
+ * Logs the comparison to analytics_events for measurement.
+ *
+ * Drop-in replacement for getMentorObservations() at all call sites.
+ *
+ * @param userId - Auth user ID
+ * @param hubId - Hub scope
+ * @param caller - Identifying string for the calling route (for log)
+ * @param limit - Max observations per path
+ */
+export async function getMentorObservationsWithParallelLog(
+  userId: string,
+  hubId: 'founder-mentor' | 'private-mentor' = 'private-mentor',
+  caller: string = 'unknown',
+  limit: number = 15
+): Promise<string | null> {
+  const profileId = await getProfileId(userId)
+
+  // Run both paths in parallel
+  const [legacyResult, structuredResult] = await Promise.all([
+    getMentorObservations(userId, hubId, limit),
+    profileId
+      ? getStructuredMentorObservations(profileId, hubId, limit)
+      : Promise.resolve(null),
+  ])
+
+  // Count observations (rough: count date-bracketed lines)
+  const legacyCount = legacyResult
+    ? (legacyResult.match(/^\[/gm) || []).length
+    : 0
+  const structuredCount = structuredResult
+    ? (structuredResult.match(/^\[/gm) || []).length
+    : 0
+
+  // Decision: use structured if it has ≥5 observations, otherwise legacy fallback
+  const STRUCTURED_THRESHOLD = 5
+  let activePath: 'legacy' | 'structured' | 'legacy_fallback'
+  let activeResult: string | null
+
+  if (structuredCount >= STRUCTURED_THRESHOLD) {
+    activePath = 'structured'
+    activeResult = structuredResult
+  } else if (legacyResult) {
+    activePath = 'legacy_fallback'
+    activeResult = legacyResult
+  } else {
+    activePath = 'legacy'
+    activeResult = null
+  }
+
+  // Log the comparison (non-blocking)
+  const logEntry: ObservationRetrievalLog = {
+    retrieval_timestamp: new Date().toISOString(),
+    hub_id: hubId,
+    caller,
+    old_path_count: legacyCount,
+    new_path_count: structuredCount,
+    active_path: activePath,
+    old_path_chars: legacyResult?.length || 0,
+    new_path_chars: structuredResult?.length || 0,
+  }
+
+  supabaseAdmin
+    .from('analytics_events')
+    .insert({
+      event_type: 'observation_retrieval_comparison',
+      user_id: userId,
+      metadata: logEntry,
+    })
+    .then(() => {})
+    .catch((err: unknown) => {
+      console.warn('[mentor-context-private] Failed to log retrieval comparison:', err)
+    })
+
+  return activeResult
+}
+
 // ── Gap 3: Journal Reference Recall ──────────────────────────────────
 
 /**

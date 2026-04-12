@@ -4,7 +4,7 @@ import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
 import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
-import { getMentorObservations, getProfileSnapshots } from '@/lib/context/mentor-context-private'
+import { getMentorObservationsWithParallelLog, getProfileSnapshots } from '@/lib/context/mentor-context-private'
 
 // =============================================================================
 // PRIVATE mentor-baseline — Founder-only gap detection questionnaire
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Private mentor gets project context + L5 + growth accumulation context
     const [projectContext, mentorObservations, profileSnapshots] = await Promise.all([
       getProjectContext('summary'),
-      getMentorObservations(auth.user.id, 'private-mentor'),
+      getMentorObservationsWithParallelLog(auth.user.id, 'private-mentor', 'private-baseline'),
       getProfileSnapshots(auth.user.id, 'private-mentor'),
     ])
     const mentorKnowledgeBase = getMentorKnowledgeBase()

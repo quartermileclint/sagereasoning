@@ -4,7 +4,7 @@ import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
 import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
-import { getMentorObservations, getJournalReferences, getProfileSnapshots } from '@/lib/context/mentor-context-private'
+import { getMentorObservationsWithParallelLog, getJournalReferences, getProfileSnapshots } from '@/lib/context/mentor-context-private'
 
 // =============================================================================
 // PRIVATE mentor-journal-week — Founder-only personalised journal questions
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     // Private mentor gets project context + L5 + growth accumulation context
     const [projectContext, mentorObservations, journalRefs, profileSnapshots] = await Promise.all([
       getProjectContext('summary'),
-      getMentorObservations(auth.user.id, 'private-mentor'),
+      getMentorObservationsWithParallelLog(auth.user.id, 'private-mentor', 'private-journal-week'),
       getJournalReferences(auth.user.id, undefined, 'private-mentor'), // No topic hints for weekly — surface broadly relevant refs
       getProfileSnapshots(auth.user.id, 'private-mentor'),
     ])

@@ -1120,6 +1120,16 @@ export async function updateProfileFromReflection(
     }
 
     // 3. Record the reflection as an interaction in the rolling window — hub-scoped
+    //
+    // NOTE (2026-04-13): mentor_observation field deliberately omitted.
+    // Previously this passed reflection.sage_perspective (raw LLM response text)
+    // which contaminated the observation log with first-person mentor language.
+    // Structured observations are now logged separately via logMentorObservation()
+    // in website/src/lib/logging/mentor-observation-logger.ts, which enforces
+    // a strict input contract: third-person, 50–500 chars, categorised, confidence-scored.
+    //
+    // The mentor_observation column on mentor_interactions is DEPRECATED for new writes.
+    // Existing contaminated rows should be archived (see session handoff 2026-04-13).
     await recordInteraction(supabase, profileId, {
       type: 'evening_reflection',
       hub_id: hubId,
@@ -1130,7 +1140,7 @@ export async function updateProfileFromReflection(
         false_judgement: p.false_judgement,
       })),
       mechanisms_applied: ['passion_diagnosis', 'oikeiosis'],
-      mentor_observation: reflection.sage_perspective || undefined,
+      // mentor_observation: REMOVED — was passing raw sage_perspective (contamination)
     })
 
     // 4. Recompute rolling window and update core profile if enough data
