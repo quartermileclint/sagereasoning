@@ -207,25 +207,24 @@ Score my actions and give me the sage perspective.`
     // Uses dynamic import (bridge pattern) to avoid build-time resolution
     // failures when sage-mentor isn't available in the website build context.
     if (user_id) {
-      import('../../../../../sage-mentor/profile-store')
-        .then(({ updateProfileFromReflection }) => {
-          return updateProfileFromReflection(
-            supabaseAdmin as any,
-            user_id,
-            {
-              katorthoma_proximity: reflectionData.katorthoma_proximity,
-              passions_detected: reflectionData.passions_detected || [],
-              what_you_did_well: reflectionData.what_you_did_well,
-              sage_perspective: reflectionData.sage_perspective,
-            },
-            what_happened.trim()
-          )
-        })
-        .catch((err: unknown) => {
-          // Profile update failure must not break the reflection API.
-          // This includes the case where sage-mentor module isn't available.
-          console.error('Reflect → profile update failed (non-blocking):', err)
-        })
+      try {
+        const { updateProfileFromReflection } = await import('../../../../../sage-mentor/profile-store')
+        await updateProfileFromReflection(
+          supabaseAdmin as any,
+          user_id,
+          {
+            katorthoma_proximity: reflectionData.katorthoma_proximity,
+            passions_detected: reflectionData.passions_detected || [],
+            what_you_did_well: reflectionData.what_you_did_well,
+            sage_perspective: reflectionData.sage_perspective,
+          },
+          what_happened.trim()
+        )
+      } catch (err) {
+        // Profile update failure must not break the reflection API.
+        // This includes the case where sage-mentor module isn't available.
+        console.error('Reflect → profile update failed (non-blocking):', err)
+      }
     }
 
     const envelope = buildEnvelope({
