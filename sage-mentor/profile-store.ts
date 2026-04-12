@@ -396,9 +396,14 @@ CREATE TRIGGER mentor_virtue_profile_updated_at
  * Supabase client type — in production this comes from @supabase/supabase-js.
  * We define a minimal interface here to keep the module self-contained.
  */
+type SupabaseQueryBuilder = Promise<{ data: any[]; error: any }> & {
+  eq: (col: string, val: any) => SupabaseQueryBuilder
+  single: () => Promise<{ data: any; error: any }>
+}
+
 type SupabaseClient = {
   from: (table: string) => {
-    select: (columns?: string) => Promise<{ data: any[]; error: any }>
+    select: (columns?: string) => SupabaseQueryBuilder
     insert: (data: any) => Promise<{ data: any; error: any }>
     update: (data: any) => { eq: (col: string, val: any) => Promise<{ data: any; error: any }> }
     upsert: (data: any) => Promise<{ data: any; error: any }>
