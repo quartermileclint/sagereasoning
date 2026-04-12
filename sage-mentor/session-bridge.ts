@@ -1009,12 +1009,13 @@ export async function persistSessionDecisions(
       if (decision.structured_observation) {
         try {
           // Look up profile_id for this user
-          const { data: profileRow } = await supabase
+          const { data: profileData } = await supabase
             .from('mentor_profiles')
             .select('id')
             .eq('user_id', userId)
             .single()
 
+          const profileRow = profileData as { id: string } | null
           if (profileRow) {
             await supabase
               .from('mentor_observations_structured')
