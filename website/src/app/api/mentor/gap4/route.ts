@@ -196,7 +196,6 @@ export async function POST(request: NextRequest) {
         .update({
           last_prompt_date: new Date().toISOString().split('T')[0],
           current_month: month_number,
-          prompts_sent: supabaseAdmin.rpc ? undefined : undefined, // increment handled below
         })
         .eq('user_id', auth.user.id)
         .eq('active', true)
