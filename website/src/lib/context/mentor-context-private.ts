@@ -171,6 +171,12 @@ export async function getMentorObservationsWithParallelLog(
     activeResult = null
   }
 
+  // Console log on every retrieval — path used, observation counts, and timestamp
+  // This makes it visible in Vercel logs which path is active and when cutover happens
+  console.log(
+    `[observation-retrieval] path=${activePath} structured=${structuredCount} legacy=${legacyCount} threshold=${STRUCTURED_THRESHOLD} caller=${caller} ts=${new Date().toISOString()}`
+  )
+
   // Log the comparison (non-blocking)
   const logEntry: ObservationRetrievalLog = {
     retrieval_timestamp: new Date().toISOString(),
