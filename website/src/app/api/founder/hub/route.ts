@@ -20,7 +20,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
+import { requireAuth, checkRateLimit, RATE_LIMITS, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getOpsBrainContext } from '@/lib/context/ops-brain-loader'
 import { getTechBrainContext } from '@/lib/context/tech-brain-loader'
@@ -597,6 +597,10 @@ ${stoicContext || ''}`,
 // =============================================================================
 
 export async function POST(request: NextRequest) {
+  // Rate limiting — before auth to block brute-force attempts
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.admin)
+  if (rateLimitError) return rateLimitError
+
   const auth = await requireAuth(request)
   if (auth.error) return auth.error
 
@@ -620,6 +624,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Validate text length — prevent oversized payloads reaching the LLM
+    const messageLenErr = validateTextLength(message, 'Message', TEXT_LIMITS.long)
+    if (messageLenErr) return NextResponse.json({ error: messageLenErr }, { status: 400 })
 
     // ── Ask the Org mode ──────────────────────────────────────────────
     if (mode === 'ask-org') {
@@ -996,6 +1004,10 @@ If the conversation is too casual or brief to yield a meaningful observation, re
 // =============================================================================
 
 export async function GET(request: NextRequest) {
+  // Rate limiting
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.admin)
+  if (rateLimitError) return rateLimitError
+
   const auth = await requireAuth(request)
   if (auth.error) return auth.error
 
