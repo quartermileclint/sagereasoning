@@ -496,9 +496,14 @@ Return your evaluation as JSON:
   "passions_detected": [{"passion": "<id>", "false_judgement": "<string>"}],
   "pattern_note": "<observation about emerging patterns or null>",
   "journal_reference": "<relevant passage summary or null>",
-  "mentor_observation": "<one sentence the mentor might say to the person, or null>",
   "record_to_profile": true | false
-}`
+}
+// NOTE (2026-04-13): "mentor_observation" removed from this prompt.
+// The field was deprecated — all downstream consumers (llm-bridge.ts,
+// proactive-scheduler.ts) now set it to null. Structured observations
+// are handled by logMentorObservation() in the website routes instead.
+// The AfterResult type still carries the field (always null) to avoid
+// cascading type changes across ring-wrapper, session-bridge, etc.`
 }
 
 // ============================================================================
