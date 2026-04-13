@@ -85,5 +85,34 @@ export function extractJSON(text: string): any {
     }
   }
 
+  // Step 6: Remove malformed key lines entirely, then retry
+  // LLMs sometimes produce lines where the key has NO closing quote:
+  //   "passions_detected [],       ← no closing quote, no colon
+  //   "passions_detected": [],     ← correct version on next line
+  // The missing closing quote makes the string span across the newline,
+  // breaking all previous repair attempts. Fix by removing lines that
+  // look like a bare JSON key followed by [ or { but contain no ":"
+  const lineRepaired = cleaned.split('\n').filter(line => {
+    const trimmed = line.trim()
+    // Match: starts with "word (with or without closing quote), then [ or {, no ":"
+    // Catches both: "key [],  and  "key" [],
+    if (/^"[a-zA-Z_]+"?\s*[\[\{]/.test(trimmed) && !trimmed.includes('":')) {
+      return false  // Remove this malformed line
+    }
+    return true
+  }).join('\n')
+
+  if (lineRepaired !== cleaned) {
+    const bracketStart2 = lineRepaired.indexOf('{')
+    const bracketEnd2 = lineRepaired.lastIndexOf('}')
+    if (bracketStart2 !== -1 && bracketEnd2 !== -1 && bracketEnd2 > bracketStart2) {
+      try {
+        const result = JSON.parse(lineRepaired.slice(bracketStart2, bracketEnd2 + 1))
+        console.warn(`extractJSON: line-removal fallback succeeded. Input preview: ${preview}`)
+        return result
+      } catch { /* continue */ }
+    }
+  }
+
   throw new Error(`extractJSON: Could not extract valid JSON (${text.length} chars). Preview: ${preview}`)
 }
