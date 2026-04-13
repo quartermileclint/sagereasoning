@@ -59,7 +59,7 @@ export interface MentorObservationInput {
 
   /**
    * Distilled third-person observation about the founder.
-   * Must be 50–750 characters.
+   * Must be 50–1000 characters.
    * Must NOT contain first-person mentor language ("I noticed", "You should").
    * Good: "Founder avoided naming fear as a passion — possible andreia blind spot."
    * Bad:  "I noticed you seem afraid. You should work on courage."
@@ -146,8 +146,8 @@ export function validateMentorObservation(input: MentorObservationInput): Valida
   if (len < 50) {
     errors.push(`Observation too short (${len} chars). Minimum 50 characters. Distil the observation into a meaningful developmental signal.`)
   }
-  if (len > 750) {
-    errors.push(`Observation too long (${len} chars). Maximum 750 characters. Distil further.`)
+  if (len > 1000) {
+    errors.push(`Observation too long (${len} chars). Maximum 1000 characters. Distil further.`)
   }
 
   // First-person mentor language check
