@@ -89,8 +89,25 @@ export async function POST(request: NextRequest) {
     }
 
     // R20a — Vulnerable user detection (before any LLM call)
-    const distressCheck = detectDistress(what_happened)
+    // Scans both fields — distress indicators can appear in either
+    const combinedInput = `${what_happened} ${how_i_responded || ''}`
+    const distressCheck = detectDistress(combinedInput)
     if (distressCheck.redirect_message) {
+      // Log distress detection for safety monitoring (no reflection data stored)
+      await supabaseAdmin
+        .from('analytics_events')
+        .insert({
+          event_type: 'distress_detected',
+          user_id: auth.user.id,
+          metadata: {
+            severity: distressCheck.severity,
+            indicators: distressCheck.indicators_found,
+            mentor_mode: 'public',
+            endpoint: '/api/reflect',
+          },
+        })
+        .then(() => {})
+
       return NextResponse.json(
         { distress_detected: true, severity: distressCheck.severity, redirect_message: distressCheck.redirect_message },
         { status: 200, headers: corsHeaders() }
