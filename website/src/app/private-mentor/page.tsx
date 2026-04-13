@@ -53,7 +53,7 @@ export default function PrivateMentorPage() {
   const loadConversation = async () => {
     try {
       // List conversations to find the most recent mentor conversation
-      const listRes = await authFetch('/api/founder/hub?list=true');
+      const listRes = await authFetch('/api/founder/hub?list=true&hub_id=private-mentor');
       if (!listRes.ok) throw new Error('Failed to list conversations');
       const listData = await listRes.json();
 
@@ -161,6 +161,7 @@ export default function PrivateMentorPage() {
           agent: 'mentor',
           message: messageText,
           conversation_id: conversationId,
+          hub_id: 'private-mentor',
         }),
       });
       const data = await res.json();

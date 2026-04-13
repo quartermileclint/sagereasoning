@@ -615,7 +615,11 @@ export async function POST(request: NextRequest) {
 
   let debugStep = 'parse_body'
   try {
-    const { agent, message, conversation_id, mode } = await request.json()
+    const { agent, message, conversation_id, mode, hub_id } = await request.json()
+
+    // Validate hub_id — required for hub isolation (privacy boundary)
+    const VALID_HUBS = ['founder-hub', 'private-mentor']
+    const effectiveHubId = VALID_HUBS.includes(hub_id) ? hub_id : 'founder-hub'
 
     // Validate message (required for both modes)
     if (!message || typeof message !== 'string' || message.trim().length < 2) {
@@ -637,6 +641,7 @@ export async function POST(request: NextRequest) {
         .insert({
           primary_agent: 'ops',
           title: `[Ask Org] ${message.trim().substring(0, 80)}`,
+          hub_id: effectiveHubId,
         })
         .select('id')
         .single()
@@ -763,6 +768,7 @@ export async function POST(request: NextRequest) {
         .insert({
           primary_agent: agent,
           title: message.trim().substring(0, 100),
+          hub_id: effectiveHubId,
         })
         .select('id')
         .single()
@@ -1022,14 +1028,16 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const list = searchParams.get('list')
   const conversationId = searchParams.get('conversation_id')
+  const hubFilter = searchParams.get('hub_id') || 'founder-hub'
 
   try {
     if (list === 'true') {
-      // List all conversations
+      // List conversations — scoped by hub_id for privacy isolation
       const { data, error } = await supabaseAdmin
         .from('founder_conversations')
         .select('id, primary_agent, title, status, created_at, updated_at')
         .eq('status', 'active')
+        .eq('hub_id', hubFilter)
         .order('updated_at', { ascending: false })
         .limit(50)
 
