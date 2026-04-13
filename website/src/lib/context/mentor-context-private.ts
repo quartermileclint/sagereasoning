@@ -111,6 +111,7 @@ export interface ObservationRetrievalLog {
   caller: string                    // which route triggered retrieval
   old_path_count: number            // observations returned from legacy path
   new_path_count: number            // observations returned from structured path
+  db_structured_count: number       // total structured observations for user (from mentor_profiles counter)
   active_path: 'legacy' | 'structured' | 'legacy_fallback'
   old_path_chars: number            // total chars in legacy context block
   new_path_chars: number            // total chars in structured context block
@@ -139,6 +140,19 @@ export async function getMentorObservationsWithParallelLog(
 ): Promise<string | null> {
   const profileId = await getProfileId(userId)
 
+  // Check the fast counter on mentor_profiles for cutover decision
+  // This avoids querying mentor_observations_structured just to count rows
+  let dbStructuredCount = 0
+  if (profileId) {
+    const { data: profileRow } = await supabaseAdmin
+      .from('mentor_profiles')
+      .select('structured_observation_count')
+      .eq('id', profileId)
+      .single()
+    dbStructuredCount = (profileRow as { structured_observation_count?: number } | null)
+      ?.structured_observation_count || 0
+  }
+
   // Run both paths in parallel
   const [legacyResult, structuredResult] = await Promise.all([
     getMentorObservations(userId, hubId, limit),
@@ -147,7 +161,7 @@ export async function getMentorObservationsWithParallelLog(
       : Promise.resolve(null),
   ])
 
-  // Count observations (rough: count date-bracketed lines)
+  // Count observations from retrieved text (for logging/comparison)
   const legacyCount = legacyResult
     ? (legacyResult.match(/^\[/gm) || []).length
     : 0
@@ -155,12 +169,13 @@ export async function getMentorObservationsWithParallelLog(
     ? (structuredResult.match(/^\[/gm) || []).length
     : 0
 
-  // Decision: use structured if it has ≥5 observations, otherwise legacy fallback
+  // Decision: use structured if the user has ≥5 total structured observations
+  // Uses the DB counter (accurate) rather than the text match count (may be limited)
   const STRUCTURED_THRESHOLD = 5
   let activePath: 'legacy' | 'structured' | 'legacy_fallback'
   let activeResult: string | null
 
-  if (structuredCount >= STRUCTURED_THRESHOLD) {
+  if (dbStructuredCount >= STRUCTURED_THRESHOLD && structuredResult) {
     activePath = 'structured'
     activeResult = structuredResult
   } else if (legacyResult) {
@@ -174,7 +189,7 @@ export async function getMentorObservationsWithParallelLog(
   // Console log on every retrieval — path used, observation counts, and timestamp
   // This makes it visible in Vercel logs which path is active and when cutover happens
   console.log(
-    `[observation-retrieval] path=${activePath} structured=${structuredCount} legacy=${legacyCount} threshold=${STRUCTURED_THRESHOLD} caller=${caller} ts=${new Date().toISOString()}`
+    `[observation-retrieval] path=${activePath} db_count=${dbStructuredCount} structured_retrieved=${structuredCount} legacy=${legacyCount} threshold=${STRUCTURED_THRESHOLD} caller=${caller} ts=${new Date().toISOString()}`
   )
 
   // Log the comparison (non-blocking)
@@ -184,6 +199,7 @@ export async function getMentorObservationsWithParallelLog(
     caller,
     old_path_count: legacyCount,
     new_path_count: structuredCount,
+    db_structured_count: dbStructuredCount,
     active_path: activePath,
     old_path_chars: legacyResult?.length || 0,
     new_path_chars: structuredResult?.length || 0,

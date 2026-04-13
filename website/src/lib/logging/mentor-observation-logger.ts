@@ -223,6 +223,18 @@ export async function logMentorObservation(
       return { success: false, error: `DB insert failed: ${insertError.message}` }
     }
 
+    // Update activation tracking counters on mentor_profiles (non-blocking)
+    // Increments structured_observation_count and sets first_structured_observation_at
+    // on the first successful observation.
+    try {
+      await supabaseAdmin.rpc('increment_structured_observation_count', {
+        p_profile_id: profileId,
+      })
+    } catch (counterErr) {
+      // Non-blocking — counter failure shouldn't fail the observation write
+      console.warn('[mentor-observation-logger] Counter increment failed (non-blocking):', counterErr)
+    }
+
     return { success: true, error: null }
   } catch (err) {
     console.error('[mentor-observation-logger] logMentorObservation failed:', err)
