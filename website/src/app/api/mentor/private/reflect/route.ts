@@ -70,7 +70,7 @@ Return ONLY valid JSON:
   "sage_perspective": "<2-3 sentences: what right reason (katorthoma) would suggest, if anything. Be specific to their situation. If they acted well, affirm it.>",
   "evening_prompt": "<1 sentence: a reflective question for the user to sit with tonight, drawn from their specific situation>",
   "structured_observation": {
-    "observation": "<50-500 chars, third-person about the practitioner. Focus on what this reflection reveals about their developmental trajectory. Write about the practitioner, NOT to them. Good: 'Founder consistently avoids naming fear as a passion — possible andreia blind spot.' Bad: 'I noticed you seem afraid.' Bad: 'You should work on courage.'",
+    "observation": "<50-750 chars, third-person about the practitioner. Focus on what this reflection reveals about their developmental trajectory. Write about the practitioner, NOT to them. Good: 'Founder consistently avoids naming fear as a passion — possible andreia blind spot.' Bad: 'I noticed you seem afraid.' Bad: 'You should work on courage.'",
     "category": "<passion_event|virtue_marker|reasoning_pattern|progress_signal|oikeiosis_shift|integration_signal>",
     "confidence": "<low|medium|high>"
   },
