@@ -22,6 +22,29 @@ import { detectDistress } from '@/lib/guardrails'
  *   - Splits passions into poster_passions and reader_triggered_passions
  *   - Publish recommendation based on proximity level
  *   - Analytics tracking
+ *
+ * ---------------------------------------------------------------------------
+ * CONTEXT LAYERS WIRED HERE:
+ *   Layer 1 (Stoic Brain)        — getStoicBrainContext('standard')
+ *   Layer 2 (Practitioner)       — getPractitionerContext(auth.user.id)
+ *   Layer 3 (Project Context)    — getProjectContext('condensed')
+ *   Loaded in parallel (Promise.all).
+ *
+ * WHY THIS SHAPE:
+ *   Social-post evaluation benefits strongly from Layer 2 (this person's
+ *   communication patterns) because social posting is habitual. Layer 3
+ *   helps catch posts that contradict current project positioning or R19
+ *   language rules.
+ *
+ * WHAT BREAKS IF CONTEXT CHANGES:
+ *   - Layer 2 dropped → no personalisation; returning users get generic
+ *     poster/reader splitting without history
+ *   - Layer 3 dropped → no guard against posts that use prohibited R19
+ *     language (e.g. "AI therapist") from being rated neutral
+ *
+ * DESIGN DECISIONS DOCUMENTED IN:
+ *   - operations/handoffs/session-7d-layer1-layer2.md  (L1/L2 origin)
+ *   - operations/session-handoffs/2026-04-15-layer3-wiring.md  (L3 wired here)
  */
 
 // V3 Social Media Evaluation Response Type

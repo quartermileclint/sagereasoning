@@ -20,6 +20,31 @@ import { getProjectContext } from '@/lib/context/project-context'
  *   - Truncates long conversations to 6000 words
  *   - Splits scoring into overall conversation + per-participant receipts
  *   - Analyzes virtue engagement across multiple participants
+ *
+ * ---------------------------------------------------------------------------
+ * CONTEXT LAYERS WIRED HERE:
+ *   Layer 1 (Stoic Brain)        — getStoicBrainContext('deep')
+ *   Layer 2 (Practitioner)       — getPractitionerContext(auth.user.id)
+ *   Layer 3 (Project Context)    — getProjectContext('condensed')
+ *   Loaded in parallel (Promise.all).
+ *
+ * WHY THIS SHAPE:
+ *   Uses 'deep' Stoic Brain (6 mechanisms) because multi-party dynamics
+ *   need iterative refinement. Layer 2 personalises the USER's role in the
+ *   conversation (their patterns), not the other participants'. Layer 3
+ *   situates the conversation in current project phase where relevant.
+ *
+ * WHAT BREAKS IF CONTEXT CHANGES:
+ *   - Change depth from 'deep' to 'standard' → loses iterative_refinement
+ *     mechanism; multi-party nuance degrades
+ *   - Layer 2 dropped → user's participant role analyzed without their
+ *     known passion patterns
+ *   - Layer 3 dropped → conversations about project matters lose phase
+ *     grounding
+ *
+ * DESIGN DECISIONS DOCUMENTED IN:
+ *   - operations/handoffs/session-7d-layer1-layer2.md  (L1/L2 origin)
+ *   - operations/session-handoffs/2026-04-15-layer3-wiring.md  (L3 wired here)
  */
 
 // POST — Score a conversation

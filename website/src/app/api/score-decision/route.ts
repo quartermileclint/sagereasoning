@@ -22,6 +22,30 @@ import { detectDistress } from '@/lib/guardrails'
  *   - Evaluates each option via sage-reason (standard depth)
  *   - Ranks results by proximity level
  *   - Generates per-option and overall receipts
+ *
+ * ---------------------------------------------------------------------------
+ * CONTEXT LAYERS WIRED HERE:
+ *   Layer 1 (Stoic Brain)        — getStoicBrainContext('standard')
+ *   Layer 2 (Practitioner)       — getPractitionerContext(auth.user.id)
+ *   Layer 3 (Project Context)    — getProjectContext('condensed')
+ *   Loaded ONCE (parallel), reused across every option scored.
+ *
+ * WHY THIS SHAPE:
+ *   Scoring N options shares the same user and the same project state —
+ *   loading context once and passing it into each runSageReason call avoids
+ *   N × load-latency. This matters most on decisions with 4-5 options.
+ *
+ * WHAT BREAKS IF THE CONTEXT WIRING CHANGES:
+ *   - If context is reloaded per-option, cold requests slow by ~3× on 5 options
+ *   - If Layer 2 is dropped, options are ranked without personalisation —
+ *     same ranking for every user given the same inputs. Loses the point of
+ *     the endpoint for returning users.
+ *   - If Layer 3 is dropped, ranking is ungrounded in project phase (this
+ *     particularly matters for decisions about project direction).
+ *
+ * DESIGN DECISIONS DOCUMENTED IN:
+ *   - operations/handoffs/session-7d-layer1-layer2.md  (L1/L2 origin)
+ *   - operations/session-handoffs/2026-04-15-layer3-wiring.md  (L3 wired here)
  */
 
 interface PassionDetected {

@@ -19,6 +19,57 @@ import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistress } from '@/lib/guardrails'
 
+/**
+ * sage-document (score-document) — Deep evaluation of documents and policies.
+ *
+ * POST /api/score-document
+ *
+ * WHAT THIS FILE DOES:
+ *   Takes a long-form document (up to 8000 words) and evaluates it against
+ *   the Stoic virtue framework at 'deep' depth (6 mechanisms, Sonnet model).
+ *   Supports two modes:
+ *     - default: general document evaluation (letters, essays, posts)
+ *     - 'policy': policy-document evaluation with a larger JSON schema
+ *   Returns a proximity assessment, passion diagnoses, and a proximity-coloured
+ *   badge URL that the caller can embed.
+ *
+ * WHY IT IS STRUCTURED THIS WAY:
+ *   This endpoint calls client.messages.create directly (NOT runSageReason).
+ *   Reason: the document scorer predates the shared engine and its system
+ *   prompts (V3_DOCUMENT_SCORING_PROMPT, V3_POLICY_SCORING_PROMPT) already
+ *   embed specialised evaluation instructions that would require significant
+ *   refactoring to pass through the generic engine. Deferred consolidation
+ *   is noted as tech debt (see session-handoffs/2026-04-15-layer3-wiring.md).
+ *
+ * CONTEXT LAYERS WIRED HERE (manual injection pattern):
+ *   Layer 1 (Stoic Brain)        — getStoicBrainContext('deep')
+ *                                   Injected as a system message block.
+ *   Layer 2 (Practitioner)       — getPractitionerContext(auth.user.id)
+ *                                   Appended to user message if present.
+ *   Layer 3 (Project Context)    — getProjectContext('condensed')
+ *                                   Appended to user message if present.
+ *   Layer 2 and Layer 3 loaded in parallel (Promise.all). Injection order in
+ *   user message: content → practitioner → project. Matches the engine's
+ *   internal injection order (see sage-reason-engine.ts line 400–410).
+ *
+ * WHAT BREAKS IF THIS CHANGES:
+ *   - If injection order changes, the LLM may weight the last-seen context
+ *     more heavily. Keep project context last (most situational) unless
+ *     there is a specific reason to change.
+ *   - If scoringPrompt is swapped without updating system block order, the
+ *     Stoic Brain loses cache_control ephemeral caching behaviour (the first
+ *     system block is cached).
+ *   - If the endpoint is switched to runSageReason naively, the specialised
+ *     document schema will not be honoured — the engine returns the generic
+ *     evaluation shape. A proper migration requires passing the scoring
+ *     prompt as domain_context and adapting the response shape.
+ *
+ * DESIGN DECISIONS DOCUMENTED IN:
+ *   - operations/handoffs/session-7d-layer1-layer2.md   (L1/L2 origin)
+ *   - operations/session-handoffs/2026-04-15-layer3-wiring.md
+ *     (L3 added via manual-injection pattern — Group B endpoint)
+ */
+
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })

@@ -18,6 +18,31 @@ import { detectDistress } from '@/lib/guardrails'
  *   - Input parsing for relationships, emotional_state, prior_feedback
  *   - Domain context construction for action scoring
  *   - Response envelope with composability hints
+ *
+ * ---------------------------------------------------------------------------
+ * CONTEXT LAYERS WIRED HERE:
+ *   Layer 1 (Stoic Brain)        — getStoicBrainContext('standard')
+ *   Layer 2 (Practitioner)       — getPractitionerContext(auth.user.id)
+ *                                   (requires auth; this endpoint is user-auth only)
+ *   Layer 3 (Project Context)    — getProjectContext('condensed')
+ *                                   (phase + recent decisions)
+ *   Loaded in parallel (Promise.all), passed as params to runSageReason.
+ *
+ * WHY THIS SHAPE:
+ *   Action-scoring benefits from personalisation (Layer 2 — this person's
+ *   patterns) AND situational awareness (Layer 3 — current project phase
+ *   when the action is project-related). Parallel loading keeps p95 latency
+ *   bounded by the slowest of the three, not their sum.
+ *
+ * WHAT BREAKS IF THE CONTEXT WIRING CHANGES:
+ *   - Drop Layer 2 → reasoning becomes generic, loses personalisation
+ *   - Drop Layer 3 → reasoning loses "why this matters now" grounding
+ *   - Change to sequential (await X; await Y; await Z) → ~3x slower on cold
+ *     requests. Parallel is intentional.
+ *
+ * DESIGN DECISIONS DOCUMENTED IN:
+ *   - operations/handoffs/session-7d-layer1-layer2.md  (L1/L2 origin)
+ *   - operations/session-handoffs/2026-04-15-layer3-wiring.md  (L3 wired here)
  */
 
 /**

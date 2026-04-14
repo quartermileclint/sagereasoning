@@ -10,6 +10,59 @@ import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistress } from '@/lib/guardrails'
 
+/**
+ * sage-scenario (score-scenario) — Ethical-dilemma generator + response scorer.
+ *
+ * POST /api/score-scenario
+ *
+ * WHAT THIS FILE DOES:
+ *   Two operations, selected by request shape:
+ *     (a) Generate: produce an age-appropriate ethical scenario (child/teen/
+ *         adult audience) with 3-4 possible response options.
+ *     (b) Score: given a scenario and a user's response, evaluate the
+ *         response against Stoic virtue using the V3 format (proximity,
+ *         passions, false judgements, philosophical reflection).
+ *   Used primarily by the sagereasoning.com practice tools and as a teaching
+ *   surface for younger users.
+ *
+ * WHY IT IS STRUCTURED THIS WAY:
+ *   Calls client.messages.create directly (two separate calls — one for
+ *   generation at 'quick' depth / MODEL_FAST, one for scoring at 'deep'
+ *   depth / MODEL_DEEP). The two operations share a system prompt
+ *   (SCENARIO_PROMPT) that instructs the LLM in both modes; the user
+ *   message tells the LLM which mode is active.
+ *
+ * CONTEXT LAYERS WIRED HERE (differ per operation):
+ *   GENERATION call (line ~104):
+ *     Layer 1 (Stoic Brain)      — getStoicBrainContext('quick')
+ *     Layer 2                    — OMITTED (creative generation, not
+ *                                   personalised — adding practitioner
+ *                                   context would bias scenario generation
+ *                                   toward the user's patterns).
+ *     Layer 3                    — OMITTED (same reason — creative output,
+ *                                   not evaluative).
+ *   SCORING call (line ~233):
+ *     Layer 1 (Stoic Brain)      — getStoicBrainContext('quick')
+ *     Layer 2 (Practitioner)     — getPractitionerContext(auth.user.id)
+ *     Layer 3 (Project Context)  — getProjectContext('condensed')
+ *     Layer 2 and Layer 3 loaded in parallel, appended to user message.
+ *
+ * WHAT BREAKS IF THIS CHANGES:
+ *   - If Layer 3 is added to the generation call, scenarios start to feel
+ *     "about SageReasoning" instead of about the user's general life — a
+ *     regression for the teaching-tool use case.
+ *   - If Layer 2 is added to generation, the user will see scenarios that
+ *     mirror their own patterns, which defeats the point of scenarios (to
+ *     expose new situations for practice).
+ *   - If the scoring call drops Layer 2, returning users lose the
+ *     personalisation that makes the tool feel like a real practice partner.
+ *
+ * DESIGN DECISIONS DOCUMENTED IN:
+ *   - operations/handoffs/session-7d-layer1-layer2.md   (L1/L2 origin)
+ *   - operations/session-handoffs/2026-04-15-layer3-wiring.md
+ *     (L3 added to scoring call only — Group B endpoint)
+ */
+
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })

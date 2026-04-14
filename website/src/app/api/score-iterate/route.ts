@@ -10,6 +10,67 @@ import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
 import type { V3DeliberationChain, V3DeliberationStep, DetectedPassion } from '@/lib/deliberation'
 
+/**
+ * sage-deliberate (score-iterate) — Stateful iterative deliberation chains.
+ *
+ * POST /api/score-iterate
+ *
+ * WHAT THIS FILE DOES:
+ *   Runs multi-step deliberation: a caller (typically an external agent)
+ *   submits an initial action, receives a Stoic evaluation, revises the
+ *   action based on feedback, and submits the revision for re-evaluation.
+ *   Each step is persisted in Supabase as a V3DeliberationChain so the
+ *   next iteration can reference the previous step's evaluation.
+ *   Purpose: teach iterative refinement — actions get more principled over
+ *   successive revisions.
+ *
+ * WHY IT IS STRUCTURED THIS WAY:
+ *   API-key authenticated (agent-facing). Calls client.messages.create
+ *   directly twice: once with INITIAL_SYSTEM_PROMPT for step 1, and once
+ *   with a dynamically-built iteration prompt for subsequent steps.
+ *   Uses response caching (cacheKey / cacheGet / cacheSet) because
+ *   identical inputs at the same step produce identical evaluations and
+ *   the reasoning is expensive (MODEL_DEEP).
+ *
+ * CONTEXT LAYERS WIRED HERE:
+ *   Layer 1 (Stoic Brain)        — getStoicBrainContext('standard')
+ *                                   Injected as a system message block on both
+ *                                   the initial and iteration calls.
+ *   Layer 2 (Practitioner)       — NOT APPLICABLE. API-key endpoint; no
+ *                                   user session means no userId available
+ *                                   for getPractitionerContext.
+ *   Layer 3 (Project Context)    — getProjectContext('condensed')
+ *                                   Appended to user message on BOTH calls
+ *                                   (initial and iteration).
+ *
+ * ACCEPTED RISK (agent-facing endpoint):
+ *   External agents calling this endpoint receive SageReasoning's project
+ *   state (phase + recent decisions) in every deliberation turn. Mild IP
+ *   exposure (R4) and potential reasoning pollution for agents whose
+ *   deliberation concerns something unrelated to SageReasoning. Accepted
+ *   per founder decision on 15 April 2026. Revisit at P3 (Agent Trust
+ *   Layer) when agent-context boundaries are designed more broadly.
+ *
+ * WHAT BREAKS IF THIS CHANGES:
+ *   - Cache keys do NOT include project context. If project-context.json
+ *     is updated, cached responses remain valid even though the prompt has
+ *     changed. This is acceptable at current content-update cadence
+ *     (project context changes rarely). If cadence increases, add a
+ *     project-context version string to cacheKey.
+ *   - If Layer 3 is removed, external agents lose situational awareness on
+ *     deliberation steps involving SageReasoning. For unrelated deliberation
+ *     this is a neutral change.
+ *   - Layer 2 attempts will fail (no user object) — must use validateApiKey
+ *     payload only if practitioner-style context is ever needed here.
+ *
+ * DESIGN DECISIONS DOCUMENTED IN:
+ *   - operations/handoffs/session-7d-layer1-layer2.md   (L1/L2 origin)
+ *   - operations/session-handoffs/2026-04-15-layer3-wiring.md
+ *     (L3 added this session — Group B endpoint; agent-facing accepted
+ *     risk; Layer 2 correction — was incorrectly flagged as a "gap"
+ *     in the hold point assessment)
+ */
+
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })

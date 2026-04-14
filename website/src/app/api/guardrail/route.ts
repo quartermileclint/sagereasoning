@@ -19,6 +19,47 @@ import { getProjectContext } from '@/lib/context/project-context'
  * Uses the shared sage-reason engine (quick depth for speed) to evaluate
  * whether an action meets a Stoic virtue threshold before executing.
  *
+ * ---------------------------------------------------------------------------
+ * CONTEXT LAYERS WIRED HERE:
+ *   Layer 1 (Stoic Brain)        — getStoicBrainContext(evaluationDepth)
+ *   Layer 2 (Practitioner)       — NOT APPLICABLE. This endpoint uses
+ *                                   validateApiKey only (agent-facing); there
+ *                                   is no user session, so no userId to load
+ *                                   practitioner context for.
+ *   Layer 3 (Project Context)    — getProjectContext('minimal')
+ *                                   ('minimal' = identity + ethical commitments
+ *                                    only; a safety gate does NOT need project
+ *                                    phase or tensions.)
+ *
+ * WHY 'MINIMAL' NOT 'CONDENSED':
+ *   A safety gate's job is threshold evaluation against ethical commitments.
+ *   Phase-of-project detail (in 'condensed') would pollute the evaluation
+ *   without improving it. 'minimal' gives the gate what it needs: who
+ *   SageReasoning is and what commitments it holds.
+ *
+ * ACCEPTED RISK (agent-facing endpoint):
+ *   External agents calling this endpoint will receive SageReasoning's
+ *   identity + ethical commitments on every call. This is mild IP exposure
+ *   (R4) and may pollute their reasoning context slightly. Accepted per
+ *   founder decision on 15 April 2026. Revisit at P3 (Agent Trust Layer)
+ *   when agent-context boundaries are designed more broadly.
+ *
+ * WHAT BREAKS IF CONTEXT CHANGES:
+ *   - Change to 'condensed' → external agents get SageReasoning project
+ *     phase and tensions in every guardrail call. Unwanted leak.
+ *   - Drop Layer 3 entirely → loses ethical-commitment grounding on safety
+ *     evaluations for actions involving SageReasoning's operations
+ *   - Attempt to add Layer 2 → will fail at auth.user.id access (there is
+ *     no auth.user object on this endpoint)
+ *
+ * DESIGN DECISIONS DOCUMENTED IN:
+ *   - operations/handoffs/session-7d-layer1-layer2.md  (L1/L2 origin)
+ *   - operations/session-handoffs/2026-04-15-layer3-wiring.md
+ *     (L3 'minimal' wired here; agent-facing accepted risk; Layer 2
+ *     correction — was incorrectly flagged as a "gap" in the hold
+ *     point assessment)
+ * ---------------------------------------------------------------------------
+ *
  * Unique to this endpoint:
  *   - Uses quick depth (3 mechanisms, Haiku model) for speed
  *   - API-key authentication (not user auth)

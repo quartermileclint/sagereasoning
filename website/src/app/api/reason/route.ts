@@ -33,6 +33,43 @@ import { detectDistress } from '@/lib/guardrails'
 // R6d: Passions are diagnostic (identifying false judgements), not punitive.
 // R7:  All content traces to primary sources.
 // R8a: API responses use Greek identifiers.
+//
+// -----------------------------------------------------------------------------
+// CONTEXT LAYERS WIRED HERE (three-layer architecture):
+//   Layer 1 (Stoic Brain):        Always loaded — getStoicBrainContext(depth).
+//                                 Passed to engine as stoicBrainContext param.
+//                                 Philosophical framework the engine reasons inside.
+//   Layer 2 (Practitioner Context): Loaded only if auth.user.id is present
+//                                 (authenticated session). Personalises reasoning
+//                                 to this user's passions / virtues / proximity.
+//                                 Set to null for API-key callers (agents).
+//   Layer 3 (Project Context):    Always loaded at 'condensed' level. Adds
+//                                 SageReasoning's current phase + recent decisions
+//                                 so reasoning is situated, not abstract.
+//   All three are loaded in parallel (Promise.all) to avoid sequential latency.
+//
+// WHY THIS SHAPE:
+//   Context is loaded IN the route and passed AS PARAMS to runSageReason.
+//   The engine injects into the correct slot of the system/user message — the
+//   route never touches the prompt directly. This keeps context injection
+//   logic in one place (the engine) while letting each endpoint choose which
+//   layers and levels make sense for its audience.
+//
+// WHAT BREAKS IF CONTEXT LOADING CHANGES:
+//   - If getProjectContext fails and returns a thrown error, the endpoint
+//     returns a 500 for all users. Acceptable at single-user traffic; at scale
+//     this should be wrapped in a try/catch with null fallback.
+//   - If practitionerContext returns undefined (not null), the engine's
+//     `if (params.practitionerContext)` check still works, but explicit null
+//     is the documented contract.
+//   - If project-context.json is missing at build time, the loader throws at
+//     import — this endpoint (and all L3 endpoints) fail to start. Caught by
+//     Vercel build — deploy would fail cleanly, not silently.
+//
+// DESIGN DECISIONS DOCUMENTED IN:
+//   - operations/handoffs/session-7d-layer1-layer2.md   (L1/L2 origin)
+//   - operations/handoffs/session-7e-layer3-direct-endpoints.md  (L3 design)
+//   - operations/session-handoffs/2026-04-15-layer3-wiring.md   (L3 wired here)
 // =============================================================================
 
 const VALID_DEPTHS: ReasonDepth[] = ['quick', 'standard', 'deep']
