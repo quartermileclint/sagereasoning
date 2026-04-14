@@ -216,11 +216,15 @@ async function getPrimaryAgentResponse(
     }
     console.log('[mentor-context-tokens]', JSON.stringify(tokenLog))
 
-    // Record session_context_snapshots audit row (non-blocking) when v2 is on.
+    // Record session_context_snapshots audit row when v2 is on.
+    // Awaited (NOT fire-and-forget) — Vercel kills in-flight promises after
+    // the response is sent, so void here means the insert never lands.
+    // recordSessionContextSnapshot swallows its own errors, so awaiting it
+    // cannot break the route.
     if (useProjection) {
       const summary = `hub/v2 profile=${tokenLog.profile_tokens}tk signals=${tokenLog.recent_signals_tokens}tk total=${tokenLog.enriched_message_tokens}tk`
       const hash = fnv1aHash(enrichedMessage)
-      void recordSessionContextSnapshot(userId, summary, hash)
+      await recordSessionContextSnapshot(userId, summary, hash)
     }
   }
 

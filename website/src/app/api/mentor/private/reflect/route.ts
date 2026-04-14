@@ -236,13 +236,16 @@ Score my actions and give me the sage perspective.`
     }
     console.log('[mentor-context-tokens]', JSON.stringify(tokenLog))
 
-    // Record session_context_snapshots row (non-blocking audit trail).
-    // Only when projection is on — this is the new code path's audit point.
+    // Record session_context_snapshots row (audit trail).
+    // Awaited (NOT fire-and-forget) — Vercel terminates the function shortly
+    // after the response is sent, killing in-flight promises before the DB
+    // insert lands. Same lesson as the profile-update path further down.
+    // recordSessionContextSnapshot swallows its own errors via try/catch +
+    // console.warn, so the await cannot break the route.
     if (useProjection) {
       const summary = `reflect/v2 profile=${tokenLog.profile_tokens}tk signals=${tokenLog.recent_signals_tokens}tk total=${tokenLog.user_message_tokens}tk`
       const hash = fnv1aHash(userMessage)
-      // Fire-and-forget — await not needed, errors logged inside helper
-      void recordSessionContextSnapshot(auth.user.id, summary, hash)
+      await recordSessionContextSnapshot(auth.user.id, summary, hash)
     }
 
     const message = await client.messages.create({
