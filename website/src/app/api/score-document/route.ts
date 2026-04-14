@@ -16,6 +16,7 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_DEEP } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistress } from '@/lib/guardrails'
 
 const client = new Anthropic({
@@ -72,12 +73,16 @@ export async function POST(request: NextRequest) {
 
     // Context layers injection
     const stoicBrainContext = getStoicBrainContext('deep')
-    const practitionerContext = await getPractitionerContext(auth.user.id)
+    const [practitionerContext, projectContext] = await Promise.all([
+      getPractitionerContext(auth.user.id),
+      getProjectContext('condensed'),
+    ])
     // Policy mode needs more tokens — its JSON schema is significantly larger
     const maxTokens = isPolicy ? 3072 : 2048
 
     let userContent = `Evaluate this document:\n\n${title ? `Title: ${title}\n\n` : ''}${truncated}`
     if (practitionerContext) userContent += `\n\n${practitionerContext}`
+    if (projectContext) userContent += `\n\n${projectContext}`
 
     const message = await client.messages.create({
       model: MODEL_DEEP,

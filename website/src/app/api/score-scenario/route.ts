@@ -7,6 +7,7 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST, MODEL_DEEP } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistress } from '@/lib/guardrails'
 
 const client = new Anthropic({
@@ -219,7 +220,10 @@ export async function POST(request: NextRequest) {
 
     // Context layers for scoring (human-facing)
     const scoringStoicContext = getStoicBrainContext('quick')
-    const practitionerContext = await getPractitionerContext(auth.user.id)
+    const [practitionerContext, projectContext] = await Promise.all([
+      getPractitionerContext(auth.user.id),
+      getProjectContext('condensed'),
+    ])
     let userMessage = `Audience level: ${validAudience}
 
 Scenario: ${scenario.trim()}
@@ -229,6 +233,7 @@ User's response: ${response.trim()}
 Score this response. Return the JSON.`
 
     if (practitionerContext) userMessage += `\n\n${practitionerContext}`
+    if (projectContext) userMessage += `\n\n${projectContext}`
 
     const message = await client.messages.create({
       model: MODEL_DEEP,

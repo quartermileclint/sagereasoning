@@ -7,6 +7,7 @@ import { MODEL_FAST } from '@/lib/model-config'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistress } from '@/lib/guardrails'
 
 /**
@@ -100,16 +101,20 @@ export async function POST(request: NextRequest) {
       domainContext += `\nAdditional context: ${context.trim()}`
     }
 
-    // Load practitioner context (Layer 2 — personalised reasoning)
-    const practitionerContext = await getPractitionerContext(auth.user.id)
+    // Load practitioner (L2) and project context (L3) in parallel
+    const [practitionerContext, projectContext] = await Promise.all([
+      getPractitionerContext(auth.user.id),
+      getProjectContext('condensed'),
+    ])
 
-    // Call the shared reasoning engine with Stoic Brain (Layer 1) + practitioner context (Layer 2)
+    // Call the shared reasoning engine with Stoic Brain (L1) + practitioner context (L2) + project context (L3)
     const reasoningResult = await runSageReason({
       input: trimmed,
       depth: 'standard',
       domain_context: domainContext,
       stoicBrainContext: getStoicBrainContext('standard'),
       practitionerContext,
+      projectContext,
     })
 
     // Extract poster and reader passions from the reasoning result

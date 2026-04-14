@@ -7,6 +7,7 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_DEEP, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getProjectContext } from '@/lib/context/project-context'
 import type { V3DeliberationChain, V3DeliberationStep, DetectedPassion } from '@/lib/deliberation'
 
 const client = new Anthropic({
@@ -109,7 +110,8 @@ export async function POST(request: NextRequest) {
       if (contextErr) return NextResponse.json({ error: contextErr }, { status: 400 })
 
       // Evaluate the initial action
-      const userMessage = `Please evaluate the following action through the Stoic framework.
+      const projectContext = await getProjectContext('condensed')
+      let userMessage = `Please evaluate the following action through the Stoic framework.
 
 Action: ${action.trim()}
 ${context?.trim() ? `Context: ${context.trim()}` : ''}
@@ -117,13 +119,14 @@ ${relationships?.trim() ? `Relationships/Stakeholders: ${relationships.trim()}` 
 ${emotional_state?.trim() ? `Emotional state: ${emotional_state.trim()}` : ''}
 
 Return only the JSON evaluation object.`
+      if (projectContext) userMessage += `\n\n${projectContext}`
 
       // Check cache for identical initial actions
       const ck = cacheKey('/api/score-iterate/initial', { action: action.trim(), context: context?.trim(), relationships: relationships?.trim(), emotional_state: emotional_state?.trim() })
       let evalData = cacheGet(ck) as Record<string, any> | undefined
       let fromCache = !!evalData
 
-      // Layer 1: Stoic Brain context (agent-facing — standard depth, no Layer 2 or 3)
+      // Layer 1: Stoic Brain context (agent-facing — standard depth); Layer 3 added above.
       const stoicBrainContext = getStoicBrainContext('standard')
 
       if (!evalData) {
@@ -370,7 +373,8 @@ Return only the JSON evaluation object.`
       improvement_path: lastStep.improvement_path,
     }, nextStepNumber)
 
-    const userMessage = `The agent has revised their action (iteration ${nextStepNumber}).
+    const iterProjectContext = await getProjectContext('condensed')
+    let userMessage = `The agent has revised their action (iteration ${nextStepNumber}).
 
 Previous action: ${lastStep.action_description}
 Revised action: ${revised_action.trim()}
@@ -378,12 +382,13 @@ ${revision_rationale?.trim() ? `Revision rationale: ${revision_rationale.trim()}
 ${chain.context?.trim() ? `Original context: ${chain.context.trim()}` : ''}
 
 Evaluate the revised action. Return only the JSON evaluation object.`
+    if (iterProjectContext) userMessage += `\n\n${iterProjectContext}`
 
     // Check cache for identical iteration inputs
     const iterCk = cacheKey('/api/score-iterate/continue', { chain_id, revised_action: revised_action.trim(), revision_rationale: revision_rationale?.trim(), step: nextStepNumber })
     let evalData = cacheGet(iterCk) as Record<string, any> | undefined
 
-    // Layer 1: Stoic Brain context for iteration (agent-facing — standard depth)
+    // Layer 1: Stoic Brain context for iteration (agent-facing — standard depth); Layer 3 added above.
     const iterStoicBrainContext = getStoicBrainContext('standard')
 
     if (!evalData) {

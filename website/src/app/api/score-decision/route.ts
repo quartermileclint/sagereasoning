@@ -8,6 +8,7 @@ import { extractReceipt } from '@/lib/reasoning-receipt'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistress } from '@/lib/guardrails'
 
 /**
@@ -95,8 +96,11 @@ export async function POST(request: NextRequest) {
         `This maps to the Stoic concern with quality of assent — not just what you assent to, but how carefully you examined the impression.`
     }
 
-    // Load practitioner context once (Layer 2 — personalised reasoning)
-    const practitionerContext = await getPractitionerContext(auth.user.id)
+    // Load practitioner (L2) and project context (L3) once in parallel
+    const [practitionerContext, projectContext] = await Promise.all([
+      getPractitionerContext(auth.user.id),
+      getProjectContext('condensed'),
+    ])
 
     // Evaluate each option via sage-reason
     const scoreData: OptionScore[] = []
@@ -109,6 +113,7 @@ export async function POST(request: NextRequest) {
         domain_context: domainContext,
         stoicBrainContext: getStoicBrainContext('standard'),
         practitionerContext,
+        projectContext,
       })
 
       const evalData = reasoningResult.result as any
