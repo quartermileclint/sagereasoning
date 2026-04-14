@@ -774,8 +774,10 @@ export async function getRecentInteractionsAsSignals(
  * Non-blocking: caller should fire-and-forget. Errors are logged, not thrown.
  *
  * snapshot_type is constrained to one of:
- *   'knowledge_context' | 'v3_scope_status' | 'business_plan' | 'custom'
- * We use 'custom' for mentor session context (not one of the existing types).
+ *   'knowledge_context' | 'v3_scope_status' | 'business_plan' | 'custom' | 'mentor_session'
+ * We use 'mentor_session' here so future filters by snapshot_type return
+ * mentor context cleanly without overloading 'custom'. Requires migration
+ * 20260414_snapshot_type_mentor_session.sql to be applied.
  *
  * @param userId - Auth user ID (maps to auth.users)
  * @param summary - One-line summary of what was injected
@@ -791,7 +793,7 @@ export async function recordSessionContextSnapshot(
       .from('session_context_snapshots')
       .insert({
         user_id: userId,
-        snapshot_type: 'custom',
+        snapshot_type: 'mentor_session',
         content_hash: contentHash,
         summary,
       })
