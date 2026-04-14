@@ -7,10 +7,19 @@ import { detectDistress } from '@/lib/guardrails'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt } from '@/lib/reasoning-receipt'
 import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loader'
-import { getFullPractitionerContext } from '@/lib/context/practitioner-context'
+import { getFullPractitionerContext, getProjectedPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
-import { getMentorObservationsWithParallelLog, getJournalReferences, getProfileSnapshots } from '@/lib/context/mentor-context-private'
+import {
+  getMentorObservationsWithParallelLog,
+  getJournalReferences,
+  getProfileSnapshots,
+  getRecentInteractionsAsSignals,
+  recordSessionContextSnapshot,
+  fnv1aHash,
+  estimateTokens,
+} from '@/lib/context/mentor-context-private'
+import { loadMentorProfile } from '@/lib/mentor-profile-store'
 import { extractJSON } from '@/lib/json-utils'
 import { logMentorObservation, validateMentorObservation } from '@/lib/logging/mentor-observation-logger'
 import type { ObservationCategory, ConfidenceLevel } from '@/lib/logging/mentor-observation-logger'
@@ -149,23 +158,54 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Context layers — private mentor gets full profile + project context + L5
+    // Context layers — private mentor gets profile + project context + L5
     // Plus growth accumulation context: observations, journal refs, snapshots
+    //
+    // Session Context Loader feature flag (MENTOR_CONTEXT_V2):
+    //   - true  → topic-projected profile + recent interaction signals (Piece 1 + 2)
+    //   - false → legacy full profile load (rollback path)
+    // Elevated risk change — this modifies what goes to the LLM on every request.
+    const useProjection = process.env.MENTOR_CONTEXT_V2 === 'true'
+    const topicForProjection = `${what_happened} ${how_i_responded || ''}`.trim()
+
     const stoicBrainContext = getStoicBrainContextForMechanisms(['passion_diagnosis', 'oikeiosis'])
+
+    // Profile load varies by flag. When projection is on, we also load the
+    // raw profile once so the recent-interaction signals can match passions.
     const [
-      fullPractitionerContext,
+      projectedProfileContext,
+      legacyProfileContext,
+      storedProfile,
       projectContext,
       mentorObservations,
       journalRefs,
       profileSnapshots,
     ] = await Promise.all([
-      getFullPractitionerContext(auth.user.id),
+      useProjection ? getProjectedPractitionerContext(auth.user.id, topicForProjection) : Promise.resolve(null),
+      useProjection ? Promise.resolve(null) : getFullPractitionerContext(auth.user.id),
+      useProjection ? loadMentorProfile(auth.user.id) : Promise.resolve(null),
       getProjectContext('minimal'),
       getMentorObservationsWithParallelLog(auth.user.id, 'private-mentor', 'private-reflect'),
       getJournalReferences(auth.user.id, extractTopicHints(what_happened, how_i_responded), 'private-mentor'),
       getProfileSnapshots(auth.user.id, 'private-mentor'),
     ])
+
+    // Recent interaction signals (Piece 2) only when projection is enabled.
+    // Fetched in parallel with the profile load above — we resolve it here
+    // because it depends on the loaded profile for passion-map matching.
+    const recentInteractionSignals = useProjection
+      ? await getRecentInteractionsAsSignals(
+          auth.user.id,
+          storedProfile?.profile || null,
+          'private-mentor',
+          7,
+        )
+      : null
+
     const mentorKnowledgeBase = getMentorKnowledgeBase()
+
+    // Pick whichever profile context the flag selected
+    const practitionerContext = useProjection ? projectedProfileContext : legacyProfileContext
 
     let userMessage = `Daily reflection:
 
@@ -174,12 +214,36 @@ ${how_i_responded?.trim() ? `How I responded: ${how_i_responded.trim()}` : ''}
 
 Score my actions and give me the sage perspective.`
 
-    if (fullPractitionerContext) userMessage += `\n\n${fullPractitionerContext}`
+    if (practitionerContext) userMessage += `\n\n${practitionerContext}`
+    if (recentInteractionSignals) userMessage += `\n\n${recentInteractionSignals}`
     if (mentorObservations) userMessage += `\n\n${mentorObservations}`
     if (journalRefs) userMessage += `\n\n${journalRefs}`
     if (profileSnapshots) userMessage += `\n\n${profileSnapshots}`
     userMessage += `\n\n${projectContext}`
     userMessage += `\n\n${mentorKnowledgeBase}`
+
+    // Token-count logging (approx chars/4) for before/after comparison.
+    // Use `mode=v2` vs `mode=legacy` to filter in Vercel logs.
+    const tokenLog = {
+      mode: useProjection ? 'v2' : 'legacy',
+      profile_tokens: estimateTokens(practitionerContext),
+      recent_signals_tokens: estimateTokens(recentInteractionSignals),
+      observations_tokens: estimateTokens(mentorObservations),
+      journal_refs_tokens: estimateTokens(journalRefs),
+      snapshots_tokens: estimateTokens(profileSnapshots),
+      user_message_tokens: estimateTokens(userMessage),
+      endpoint: '/api/mentor/private/reflect',
+    }
+    console.log('[mentor-context-tokens]', JSON.stringify(tokenLog))
+
+    // Record session_context_snapshots row (non-blocking audit trail).
+    // Only when projection is on — this is the new code path's audit point.
+    if (useProjection) {
+      const summary = `reflect/v2 profile=${tokenLog.profile_tokens}tk signals=${tokenLog.recent_signals_tokens}tk total=${tokenLog.user_message_tokens}tk`
+      const hash = fnv1aHash(userMessage)
+      // Fire-and-forget — await not needed, errors logged inside helper
+      void recordSessionContextSnapshot(auth.user.id, summary, hash)
+    }
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',

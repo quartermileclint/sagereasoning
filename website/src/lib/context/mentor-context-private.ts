@@ -20,7 +20,7 @@
 
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
-import type { FounderFacts, MentorProfileData } from '@/lib/mentor-profile-summary'
+import type { FounderFacts, MentorProfileData, PassionMapEntry } from '@/lib/mentor-profile-summary'
 
 // ── Gap 2: Mentor Observation History ────────────────────────────────
 
@@ -588,3 +588,236 @@ CREATE POLICY "Users can read own snapshots"
 CREATE INDEX IF NOT EXISTS idx_snapshots_profile_time
   ON mentor_profile_snapshots (profile_id, snapshot_at DESC);
 `
+
+// =============================================================================
+// Session Context Loader — Piece 2
+// =============================================================================
+//
+// Recent Interaction Loader: fetches the last N interactions for a practitioner
+// from mentor_interactions, pre-processes each into a DIAGNOSTIC SIGNAL (not
+// raw dialogue), and returns a formatted block for injection alongside the
+// projected profile. The mentor diagnoses patterns, not surface utterances.
+//
+// Each interaction is emitted as:
+//
+//   [DATE] Topic: <one line>
+//   Impression presented: <what the practitioner said they saw/felt>
+//   Likely assent: <what false judgement they may have accepted>
+//   Pattern match: <which passion from their profile this resembles>
+//
+// Pre-processing rules:
+//   - No raw dialogue. Use the existing description / observation / passion
+//     fields on mentor_interactions, which are already diagnostic-level.
+//   - Pattern match is inferred by matching passion root names between the
+//     interaction's detected passions and the profile's passion_map.
+//   - Fields missing at source degrade gracefully to "—".
+//
+// Also exports recordSessionContextSnapshot() which writes a row into
+// session_context_snapshots at session start (for audit trail). This is the
+// first writer to that table; it previously had 0 rows.
+// =============================================================================
+
+/**
+ * One interaction shaped as a diagnostic signal line.
+ */
+interface InteractionSignal {
+  date: string
+  topic: string
+  impression: string
+  likely_assent: string
+  pattern_match: string
+}
+
+/**
+ * Pre-process a mentor_interactions row into a diagnostic signal.
+ * NEVER includes raw dialogue. Uses already-diagnostic fields (description,
+ * mentor_observation, passions_detected, proximity_assessed) and matches
+ * detected passions against the practitioner's passion map.
+ */
+function rowToSignal(
+  row: {
+    created_at: string
+    interaction_type: string
+    description: string | null
+    proximity_assessed: string | null
+    passions_detected: unknown
+    mentor_observation: string | null
+  },
+  passionMap: PassionMapEntry[]
+): InteractionSignal {
+  const date = new Date(row.created_at).toISOString().split('T')[0]
+
+  // Topic: first ~100 chars of description or interaction_type.
+  // description is already a structured note, not verbatim user text.
+  const topicRaw = (row.description || row.interaction_type || '').trim()
+  const topic = topicRaw.length > 100 ? topicRaw.substring(0, 97) + '...' : topicRaw
+
+  // Impression: the mentor's prior observation captures what the practitioner
+  // seemed to see/feel. If absent, degrade to proximity assessed.
+  const impression = row.mentor_observation
+    ? (row.mentor_observation.length > 140
+        ? row.mentor_observation.substring(0, 137) + '...'
+        : row.mentor_observation)
+    : (row.proximity_assessed
+        ? `acted at ${row.proximity_assessed} proximity`
+        : '—')
+
+  // Likely assent: pull first false_judgement from passions_detected JSONB.
+  let likelyAssent = '—'
+  let primaryRootPassion: string | null = null
+  try {
+    const passions = Array.isArray(row.passions_detected)
+      ? (row.passions_detected as Array<{
+          root_passion?: string
+          sub_species?: string
+          false_judgement?: string
+        }>)
+      : []
+    if (passions.length > 0) {
+      const first = passions[0]
+      primaryRootPassion = first.root_passion || null
+      if (first.false_judgement) {
+        likelyAssent = first.false_judgement.length > 140
+          ? first.false_judgement.substring(0, 137) + '...'
+          : first.false_judgement
+      } else if (first.sub_species) {
+        likelyAssent = `(unnamed) — surfaced as ${first.sub_species}`
+      }
+    }
+  } catch {
+    // passions_detected malformed — leave as em-dash
+  }
+
+  // Pattern match: find a matching entry in the practitioner's passion map
+  // by root_passion. Surfaces recurring diagnostic patterns to the mentor.
+  let patternMatch = '—'
+  if (primaryRootPassion && passionMap.length > 0) {
+    const match = passionMap.find(
+      p => p.root_passion.toLowerCase() === primaryRootPassion!.toLowerCase()
+    )
+    if (match) {
+      patternMatch = `${match.sub_species} (${match.root_passion}, freq ${match.frequency})`
+    } else {
+      patternMatch = `${primaryRootPassion} (not in profile passion map yet)`
+    }
+  }
+
+  return { date, topic, impression, likely_assent: likelyAssent, pattern_match: patternMatch }
+}
+
+/**
+ * Fetch the last N interactions for a practitioner and return them as
+ * pre-processed diagnostic signals. Returns null if no interactions.
+ *
+ * Typical use: called in parallel with profile projection. Does not block
+ * session start — caller awaits via Promise.all.
+ *
+ * @param userId - Auth user ID
+ * @param profile - The already-loaded MentorProfileData (for pattern match lookup)
+ * @param hubId - Hub scope
+ * @param limit - Max interactions (default 7)
+ */
+export async function getRecentInteractionsAsSignals(
+  userId: string,
+  profile: MentorProfileData | null,
+  hubId: 'founder-mentor' | 'private-mentor' = 'private-mentor',
+  limit: number = 7
+): Promise<string | null> {
+  try {
+    const profileId = await getProfileId(userId)
+    if (!profileId) return null
+
+    const { data, error } = await supabaseAdmin
+      .from('mentor_interactions')
+      .select('interaction_type, description, proximity_assessed, passions_detected, mentor_observation, created_at')
+      .eq('profile_id', profileId)
+      .eq('hub_id', hubId)
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    if (error || !data || data.length === 0) return null
+
+    const passionMap = profile?.passion_map || []
+
+    const signals = data.map(row => rowToSignal(row, passionMap))
+
+    const sections: string[] = [
+      `RECENT INTERACTION SIGNALS (last ${signals.length} interactions, diagnostic pre-processing — not raw dialogue):`,
+      '',
+    ]
+
+    for (const s of signals) {
+      sections.push(
+        `[${s.date}] Topic: ${s.topic}`,
+        `  Impression presented: ${s.impression}`,
+        `  Likely assent: ${s.likely_assent}`,
+        `  Pattern match: ${s.pattern_match}`,
+        ''
+      )
+    }
+
+    sections.push(
+      'Use these signals to recognise recurring patterns and build continuity. Reference what the practitioner has presented before where it illuminates the current conversation. Do not repeat signals verbatim — diagnose the pattern.'
+    )
+
+    return sections.join('\n')
+  } catch (err) {
+    console.error('[mentor-context-private] Failed to load recent interactions:', err)
+    return null
+  }
+}
+
+/**
+ * Record a session_context_snapshots row at session start. Provides an
+ * audit trail of what context was injected into a given mentor request.
+ *
+ * Non-blocking: caller should fire-and-forget. Errors are logged, not thrown.
+ *
+ * snapshot_type is constrained to one of:
+ *   'knowledge_context' | 'v3_scope_status' | 'business_plan' | 'custom'
+ * We use 'custom' for mentor session context (not one of the existing types).
+ *
+ * @param userId - Auth user ID (maps to auth.users)
+ * @param summary - One-line summary of what was injected
+ * @param contentHash - Deterministic hash of injected content (for dedup / comparison)
+ */
+export async function recordSessionContextSnapshot(
+  userId: string,
+  summary: string,
+  contentHash: string
+): Promise<void> {
+  try {
+    await supabaseAdmin
+      .from('session_context_snapshots')
+      .insert({
+        user_id: userId,
+        snapshot_type: 'custom',
+        content_hash: contentHash,
+        summary,
+      })
+  } catch (err) {
+    console.warn('[mentor-context-private] session_context_snapshot write failed (non-blocking):', err)
+  }
+}
+
+/**
+ * Lightweight deterministic hash (FNV-1a 32-bit) suitable for content
+ * fingerprinting in logs. Not cryptographic.
+ */
+export function fnv1aHash(input: string): string {
+  let h = 0x811c9dc5
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i)
+    h = Math.imul(h, 0x01000193)
+  }
+  return (h >>> 0).toString(16)
+}
+
+/**
+ * Rough token estimate: approx 4 chars per token for English text.
+ * Used for before/after comparison in logs — not for billing.
+ */
+export function estimateTokens(text: string | null | undefined): number {
+  if (!text) return 0
+  return Math.ceil(text.length / 4)
+}

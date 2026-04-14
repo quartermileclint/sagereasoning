@@ -29,8 +29,17 @@ import { getSupportBrainContext } from '@/lib/context/support-brain-loader'
 import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
 import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
-import { getFullPractitionerContext } from '@/lib/context/practitioner-context'
-import { getMentorObservationsWithParallelLog, getProfileSnapshots, createProfileSnapshot } from '@/lib/context/mentor-context-private'
+import { getFullPractitionerContext, getProjectedPractitionerContext } from '@/lib/context/practitioner-context'
+import {
+  getMentorObservationsWithParallelLog,
+  getProfileSnapshots,
+  createProfileSnapshot,
+  getRecentInteractionsAsSignals,
+  recordSessionContextSnapshot,
+  fnv1aHash,
+  estimateTokens,
+} from '@/lib/context/mentor-context-private'
+import { loadMentorProfile } from '@/lib/mentor-profile-store'
 import { logMentorObservation } from '@/lib/logging/mentor-observation-logger'
 import type { ObservationCategory, ConfidenceLevel } from '@/lib/logging/mentor-observation-logger'
 import { extractJSON } from '@/lib/json-utils'
@@ -140,9 +149,25 @@ async function getPrimaryAgentResponse(
     }
   }
 
-  // Add project context and practitioner context to the current message
+  // Add project context and practitioner context to the current message.
+  //
+  // Session Context Loader feature flag (MENTOR_CONTEXT_V2):
+  //   - true  → topic-projected profile + recent interaction signals (mentor only)
+  //   - false → legacy full profile load (rollback path)
+  // Non-mentor agents always use the full profile (they need different dimensions).
+  const useProjection = process.env.MENTOR_CONTEXT_V2 === 'true' && agent === 'mentor'
+
   const projectContext = await getProjectContext('summary')
-  const practitionerContext = await getFullPractitionerContext(userId)
+
+  // Load the profile context (projected if flag on, full otherwise). When
+  // projection is on we also load the raw profile once so recent-interaction
+  // signals can match passions against the passion map.
+  const [projectedContext, legacyContext, storedProfile] = await Promise.all([
+    useProjection ? getProjectedPractitionerContext(userId, message) : Promise.resolve(null),
+    useProjection ? Promise.resolve(null) : getFullPractitionerContext(userId),
+    useProjection ? loadMentorProfile(userId) : Promise.resolve(null),
+  ])
+  const practitionerContext = useProjection ? projectedContext : legacyContext
 
   let enrichedMessage = message
   if (practitionerContext) {
@@ -151,13 +176,52 @@ async function getPrimaryAgentResponse(
   enrichedMessage += `\n\n${projectContext}`
 
   // For the mentor agent: inject hub-scoped observations for session continuity (Fix 2)
+  let recentInteractionSignals: string | null = null
+  let mentorObservationsBlock: string | null = null
+  let profileSnapshotsBlock: string | null = null
   if (agent === 'mentor') {
-    const [mentorObservations, profileSnapshots] = await Promise.all([
+    const [mentorObservations, profileSnapshots, signals] = await Promise.all([
       getMentorObservationsWithParallelLog(userId, 'founder-mentor', 'founder-hub'),
       getProfileSnapshots(userId, 'founder-mentor'),
+      useProjection
+        ? getRecentInteractionsAsSignals(
+            userId,
+            storedProfile?.profile || null,
+            'founder-mentor',
+            7,
+          )
+        : Promise.resolve(null),
     ])
+    mentorObservationsBlock = mentorObservations
+    profileSnapshotsBlock = profileSnapshots
+    recentInteractionSignals = signals
+
+    // Inject the new Piece 2 block first so the mentor sees recent signals
+    // near the profile projection, before the older observations/snapshots.
+    if (recentInteractionSignals) enrichedMessage += `\n\n${recentInteractionSignals}`
     if (mentorObservations) enrichedMessage += `\n\n${mentorObservations}`
     if (profileSnapshots) enrichedMessage += `\n\n${profileSnapshots}`
+  }
+
+  // Token-count logging for before/after comparison.
+  if (agent === 'mentor') {
+    const tokenLog = {
+      mode: useProjection ? 'v2' : 'legacy',
+      profile_tokens: estimateTokens(practitionerContext),
+      recent_signals_tokens: estimateTokens(recentInteractionSignals),
+      observations_tokens: estimateTokens(mentorObservationsBlock),
+      snapshots_tokens: estimateTokens(profileSnapshotsBlock),
+      enriched_message_tokens: estimateTokens(enrichedMessage),
+      endpoint: '/api/founder/hub',
+    }
+    console.log('[mentor-context-tokens]', JSON.stringify(tokenLog))
+
+    // Record session_context_snapshots audit row (non-blocking) when v2 is on.
+    if (useProjection) {
+      const summary = `hub/v2 profile=${tokenLog.profile_tokens}tk signals=${tokenLog.recent_signals_tokens}tk total=${tokenLog.enriched_message_tokens}tk`
+      const hash = fnv1aHash(enrichedMessage)
+      void recordSessionContextSnapshot(userId, summary, hash)
+    }
   }
 
   messages.push({ role: 'user', content: enrichedMessage })

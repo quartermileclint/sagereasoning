@@ -158,3 +158,220 @@ function findWeakestVirtue(
 
   return weakest
 }
+
+// =============================================================================
+// Profile Projection Layer (Session Context Loader — Piece 1)
+// =============================================================================
+//
+// The full profile summary (buildProfileSummary) is ~7,500 chars and is sent
+// on every mentor request. As interaction history accumulates in context, this
+// risks context window saturation and wastes tokens on dimensions irrelevant
+// to the current conversation.
+//
+// projectProfile() filters the full profile to the dimensions relevant to the
+// current conversation topic:
+//
+//   ALWAYS INCLUDED
+//     - founder facts one-liner (who this person is)
+//     - proximity estimate (level + senecan grade)
+//     - primary causal tendency (synkatathesis / horme / phantasia / praxis)
+//     - top 3 passions by frequency
+//     - weakest virtue (one line)
+//
+//   CONDITIONALLY INCLUDED (by topic signal, simple keyword match)
+//     - virtue profile (if topic touches action or courage)
+//     - oikeiosis map (if topic touches relationships or community)
+//     - value hierarchy (if topic touches decisions or priorities)
+//     - full passion map (if topic touches emotional reaction)
+//
+//   NEVER INCLUDED BY DEFAULT
+//     - raw journal entries (these are source material, not session context)
+//
+// Topic signal = keyword matching on the incoming user message. Simple by
+// design — can be upgraded later to embedding/LLM-based classification.
+// =============================================================================
+
+export interface TopicSignal {
+  touches_action: boolean           // virtue profile
+  touches_relationships: boolean    // oikeiosis map
+  touches_decisions: boolean        // value hierarchy
+  touches_emotion: boolean          // full passion map
+}
+
+/**
+ * Detect which conditional dimensions the topic touches, via simple keyword
+ * matching on the opening message. Lightweight by design — not NLP.
+ */
+export function detectTopicSignal(topic: string): TopicSignal {
+  const text = (topic || '').toLowerCase()
+  const has = (words: string[]) => words.some(w => text.includes(w))
+
+  return {
+    touches_action: has([
+      'should i', 'should we', 'what do i do', 'what should', 'action', 'act',
+      'courage', 'brave', 'do the right', 'duty', 'obligation',
+      'confront', 'stand up', 'speak up', 'push back', 'hard thing',
+    ]),
+    touches_relationships: has([
+      'wife', 'husband', 'spouse', 'partner', 'marriage',
+      'child', 'children', 'son', 'daughter', 'kids',
+      'parent', 'mother', 'father', 'family', 'sibling',
+      'friend', 'colleague', 'team', 'co-worker', 'coworker',
+      'community', 'relationship', 'neighbour', 'neighbor',
+      'boss', 'manager', 'report', 'customer', 'user',
+    ]),
+    touches_decisions: has([
+      'decide', 'decision', 'choose', 'choice', 'pick', 'select',
+      'priority', 'prioritise', 'prioritize', 'between',
+      'trade-off', 'tradeoff', 'weigh', 'important', 'matters more',
+      'should i pick', 'which one', 'either or',
+    ]),
+    touches_emotion: has([
+      'angry', 'anger', 'furious', 'irritated', 'frustrat',
+      'afraid', 'fear', 'scared', 'anxious', 'anxiety', 'worry', 'worried', 'dread',
+      'ashamed', 'shame', 'embarrass', 'humiliat', 'guilt',
+      'desire', 'crav', 'long for', 'want so bad',
+      'sad', 'grief', 'grieving', 'hurt', 'devastat',
+      'jealous', 'envy', 'resent', 'bitter',
+    ]),
+  }
+}
+
+/**
+ * Project the full practitioner profile down to the dimensions relevant to
+ * the current conversation topic. Returns a formatted context block for
+ * injection into the user message.
+ *
+ * Target size: 40-60% smaller than the full buildProfileSummary output.
+ *
+ * @param profile - The full MentorProfileData loaded from storage
+ * @param topic - The opening message / current conversation content (used for keyword matching)
+ */
+export function projectProfile(profile: MentorProfileData, topic: string): string {
+  const signal = detectTopicSignal(topic)
+  const sections: string[] = []
+
+  sections.push('PRACTITIONER CONTEXT (projected to current topic):')
+
+  // ── Always include ────────────────────────────────────────────────
+
+  // Founder facts one-liner
+  if (profile.founder_facts) {
+    const ff = profile.founder_facts
+    sections.push(
+      `Person: age ${ff.age}, married ${ff.years_married}y, children ${ff.children_ages.join('/')}, ${ff.financial_situation}, ${ff.retirement_horizon}`
+    )
+    // Recent biographical notes (last 3) help the mentor stay current
+    if (ff.additional_context && ff.additional_context.length > 0) {
+      const recent = ff.additional_context.slice(-3)
+      sections.push(`Recent notes: ${recent.join(' | ')}`)
+    }
+  }
+
+  // Proximity estimate + Senecan grade
+  sections.push(
+    `Proximity: ${profile.proximity_estimate.level} (Senecan grade: ${profile.proximity_estimate.senecan_grade})`
+  )
+
+  // Primary causal tendency
+  sections.push(
+    `Primary causal breakdown: ${profile.causal_tendencies.primary_breakdown} — ${profile.causal_tendencies.description}`
+  )
+
+  // Top 3 passions by frequency (always included, brief form)
+  const topPassions = [...profile.passion_map]
+    .sort((a, b) => b.frequency - a.frequency)
+    .slice(0, 3)
+
+  if (topPassions.length > 0) {
+    const passionLines = topPassions.map(formatPassion)
+    sections.push(`Top 3 passions (by frequency): ${passionLines.join('; ')}`)
+  }
+
+  // Weakest virtue (one line, always)
+  const weakest = findWeakestVirtue(profile)
+  if (weakest) {
+    sections.push(`Weakest virtue: ${weakest.name} (${weakest.strength})`)
+  }
+
+  // ── Conditional sections ──────────────────────────────────────────
+
+  if (signal.touches_action) {
+    sections.push('', 'VIRTUE PROFILE (topic touches action/courage):')
+    for (const [virtue, data] of Object.entries(profile.virtue_profile)) {
+      const evidenceBrief = (data.evidence_summary || [])
+        .slice(0, 2)
+        .join('; ')
+      sections.push(
+        `  ${virtue}: ${data.overall_strength} (${data.observations_count} obs)${evidenceBrief ? ` — ${evidenceBrief}` : ''}`
+      )
+    }
+  }
+
+  if (signal.touches_relationships) {
+    sections.push('', 'OIKEIOSIS MAP (topic touches relationships/community):')
+    for (const [ring, data] of Object.entries(profile.oikeiosis_map)) {
+      sections.push(`  ${ring}: ${data.level} — ${data.evidence}`)
+    }
+  }
+
+  if (signal.touches_decisions) {
+    sections.push('', 'VALUE HIERARCHY (topic touches decisions/priorities):')
+    if (profile.value_hierarchy.explicit_top_values?.length > 0) {
+      sections.push(
+        `  Top values: ${profile.value_hierarchy.explicit_top_values.join(', ')}`
+      )
+    }
+    if (profile.value_hierarchy.primary_conflict) {
+      sections.push(`  Primary conflict: ${profile.value_hierarchy.primary_conflict}`)
+    }
+    if (profile.value_hierarchy.classification_gaps?.length > 0) {
+      sections.push(
+        `  Classification gaps: ${profile.value_hierarchy.classification_gaps.join('; ')}`
+      )
+    }
+  }
+
+  if (signal.touches_emotion) {
+    sections.push('', 'FULL PASSION MAP (topic touches emotional reaction):')
+    for (const p of profile.passion_map) {
+      const fj = p.false_judgements[0] || ''
+      const brief = fj.length > 100 ? fj.substring(0, 97) + '...' : fj
+      sections.push(
+        `  ${p.sub_species} (${p.root_passion}, freq ${p.frequency}, ${p.max_intensity})${brief ? ` — "${brief}"` : ''}`
+      )
+    }
+  }
+
+  sections.push(
+    '',
+    'Use this projected context to personalise your analysis. Reference the specific dimensions where relevant. Do not repeat the context verbatim — weave it into your reasoning naturally.'
+  )
+
+  return sections.join('\n')
+}
+
+/**
+ * Load the practitioner's profile and return the topic-projected context
+ * block. Replaces getFullPractitionerContext() when projection is enabled.
+ *
+ * @param userId - Authenticated user's ID
+ * @param topic - The incoming message / conversation content for keyword match
+ * @returns Projected context string, or null if no profile
+ */
+export async function getProjectedPractitionerContext(
+  userId: string,
+  topic: string
+): Promise<string | null> {
+  try {
+    if (!isServerEncryptionConfigured()) return null
+
+    const stored = await loadMentorProfile(userId)
+    if (!stored) return null
+
+    return projectProfile(stored.profile, topic)
+  } catch (err) {
+    console.error('[practitioner-context] Failed to load projected profile:', err)
+    return null
+  }
+}
