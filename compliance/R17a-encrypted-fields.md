@@ -1,9 +1,9 @@
 # R17a — Encrypted Fields Classification
 
-**Status:** [PLACEHOLDER — ops to set: Scoped / Designed / Scaffolded / Wired / Verified / Live]
-**Last reviewed:** [PLACEHOLDER — ops to set: YYYY-MM-DD]
-**Next review due:** [PLACEHOLDER — ops to set: YYYY-MM-DD]
-**Owner:** [PLACEHOLDER — ops to assign]
+**Status:** Wired (Tier C audit infrastructure) — Tier B still Designed
+**Last reviewed:** 2026-04-16
+**Next review due:** 2026-07-16
+**Owner:** Founder (Clinton Aitkenhead)
 
 ---
 
@@ -93,6 +93,8 @@ All server-side encryption uses AES-256-GCM with a fresh 12-byte random IV per c
 
 **Audit requirement:** Every support-role decryption writes a row to `support_access_log` with `{user_id, field_name, reviewer_id, reason, timestamp, session_id}`. The user can view this log for their own account at any time.
 
+**Infrastructure status (as of 2026-04-16):** `support_access_log` and `support_decrypt_request` are live in production. Append-only enforcement is in place at two layers: grant revocation plus a row-level trigger that rejects updates and deletes. The `support_access_type` enum is live with structured values `flag_review`, `field_decrypt`, `support_request`, used alongside the free-text `reason` column. CCP-R17a-01 is closed and verified (2026-04-16). Application code does not yet write to or read from these tables; wiring the Tier C RLS policies on the intimate-data tables themselves — so that Tier C decryption routes through `support_decrypt_request` — is deferred to a second Critical Change Protocol session (see §7).
+
 ### Tier D — Never stored
 
 | Field | Context | Handling |
@@ -155,11 +157,13 @@ The founder's classification departs from typical SaaS practice in both directio
 
 ## 7. Placeholders for Ops
 
-- [ ] Implementation status per tier (Scoped / Designed / Scaffolded / Wired / Verified / Live)
+- [x] Audit infrastructure live — CCP-R17a-01 closed 2026-04-16 (`support_access_log`, `support_decrypt_request`, `support_access_type` enum, append-only enforcement at grant and trigger layers)
+- [x] Last review date — 2026-04-16
+- [x] Next review due date — 2026-07-16
+- [x] Owner — Founder (Clinton Aitkenhead)
+- [ ] Implementation status per tier (Scoped / Designed / Scaffolded / Wired / Verified / Live) — Tier A/B/D pending; Tier C audit layer Wired, Tier C field-level RLS still Designed
 - [ ] Per-field implementation date
-- [ ] Last review date
-- [ ] Next review due date
-- [ ] Owner name / role
+- [ ] Wire Tier C RLS policies on intimate-data tables to reference `support_decrypt_request` — pending a second Critical Change Protocol session
 - [ ] Key rotation schedule for `MENTOR_ENCRYPTION_KEY`
 - [ ] Support-role approval workflow (who can approve `support_decrypt_request`, SLA for revocation)
 - [ ] Resolution of `causal_tendencies` tier (A as written, or B with the passion group)
