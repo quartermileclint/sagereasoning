@@ -315,3 +315,31 @@ Changes implemented:
 **Impact:** Support agent implementation plan (Part A, Step 1) should note that profile context injection is not available at first build. The agent will triage without profile context initially. When R17b is wired, the Support agent session-open can be extended to load `proximity_level` + `dominant_passions` + `profile_summary` from `mentor_profiles` via service role. No code changes needed now.
 
 **Status:** Adopted — profile access deferred to post-R17b implementation
+
+---
+
+## 15 April 2026 — R20a Detection Model: Asynchronous Queue with Persistent Footer
+
+**Decision:** Vulnerability detection for mentor sessions will use an asynchronous moderation queue (not real-time blocking). Mentor responses are served normally; a classifier runs off-path and writes flags to a queue reviewed during declared support hours of **09:00–17:00 AEST, Monday–Friday** (excl. Australian public holidays). A persistent, non-dismissible footer on the mentor and journal UIs displays 000, Lifeline 13 11 14, and lifeline.org.au at all times. Clinical and legal review of the R20a threshold language is scoped into Priority 3; R20a may be adopted on founder reasoning ahead of that review, with any amendments following the Critical Change Protocol.
+
+**Reasoning:** Synchronous blocking detection requires near-real-time human backup that a solo founder cannot staff reliably. Asynchronous review is the honest match for the operating capacity. The persistent footer narrows the acute-crisis gap at near-zero operational cost: a user in immediate danger has a visible self-route independent of the queue. Business-hours weekdays is the widest window the founder can commit to without degrading SLA reliability. The clinical and legal reviews are treated as P3 gating work rather than blockers on adoption, because the threshold language is principled on Stoic framing and amendments can follow.
+
+**Rules served:** R20a (vulnerable user protections), R19c (honest limitations disclosure), R17a (intimate data tiering — for the flag record itself at Tier C), R0 (operating within honestly declared capacity).
+
+**Impact:** R20a draft (`/drafts/R20a-vulnerable-user-protections-DRAFT.md`) updated to reflect the four decisions. Mentor stays stateless about flags (locked as a design constraint). No "paused session" state needed. Persistent footer is a new UI build item. Public holiday calendar source required as operational placeholder. Clinical and legal review added to P3 scope.
+
+**Status:** Adopted as design direction. R20a remains in `/drafts/` pending final founder read-through and move to `/compliance/`.
+
+---
+
+## 15 April 2026 — ADR-R20a-01 Classifier Pipeline: Recommended Defaults Accepted
+
+**Decision:** Seven implementation choices adopted for the R20a detection classifier: (D1-c) two-stage classifier combining rule-based detectors and a small-LLM evaluator for borderline inputs; (D2-a) Anthropic small model (Haiku) as the LLM; (D3-a) YAML file in the repository for rule storage; (D4-a) Supabase table `vulnerability_flag` with R17a Tier C RLS for queue storage; (D5-a) Supabase Studio with saved query as the reviewer interface; (D6-c) fail-open-with-alerting on classifier outage, plus classifier-down marker rows for post-hoc rescoring; (D7-b) variable cost budget via two-stage economics, tightened after the P0 hold point gives real data.
+
+**Reasoning:** The combination matches a solo-founder operating reality: lowest build cost consistent with R20a's detection quality threshold, single vendor to simplify privacy review, versioned rule changes via pull request, single source of truth for flag records, zero-build reviewer UI, and a failure mode that preserves user-facing reliability without hiding safety outages. All seven choices are reversible within one to three days of work if evidence from the hold point points elsewhere.
+
+**Rules served:** R20a (vulnerable user protections — implementation path), R17a (intimate data — classifier operates within the trust boundary on Tier B content), R5 (cost health — classifier cost bounded and separately tracked), R18 (honest certification — asynchronous nature to be disclosed on the limitations page), R0 (reversibility preserves the capacity to learn from evidence).
+
+**Impact:** Build artefacts required: `vulnerability_flag` Supabase table with RLS matching R17a Tier C; `/website/src/lib/r20a-rules.yml` initial rule set derived from R20a §2 indicators; `/website/src/lib/r20a-classifier.ts` two-stage evaluator; worker process running classifier off the mentor response path; persistent footer component on mentor and journal UIs; Studio saved query for the reviewer queue; alert hook for classifier-down events. Monthly Ops cost review tracks classifier as a separate line. If classifier cost exceeds 20% of total mentor-turn cost, the ADR is reopened.
+
+**Status:** Accepted — ADR remains in `/drafts/` pending final founder read-through and move to `/compliance/`. Implementation plan to follow in a separate document.
