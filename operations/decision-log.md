@@ -342,4 +342,32 @@ Changes implemented:
 
 **Impact:** Build artefacts required: `vulnerability_flag` Supabase table with RLS matching R17a Tier C; `/website/src/lib/r20a-rules.yml` initial rule set derived from R20a §2 indicators; `/website/src/lib/r20a-classifier.ts` two-stage evaluator; worker process running classifier off the mentor response path; persistent footer component on mentor and journal UIs; Studio saved query for the reviewer queue; alert hook for classifier-down events. Monthly Ops cost review tracks classifier as a separate line. If classifier cost exceeds 20% of total mentor-turn cost, the ADR is reopened.
 
-**Status:** Accepted — ADR remains in `/drafts/` pending final founder read-through and move to `/compliance/`. Implementation plan to follow in a separate document.
+**Status:** Accepted — ADR adopted and moved to `/compliance/` same day. Implementation plan at `/compliance/R20a-implementation-plan.md`.
+
+---
+
+## 15 April 2026 — CCP-R17a-01: Support Access Audit Schema Approved
+
+**Decision:** Critical Change Protocol session approved. Adds two tables (`support_decrypt_request` workflow gate, `support_access_log` append-only audit trail) and one enum type (`support_access_type` with values `flag_review`, `field_decrypt`, `support_request`) to the production Supabase database. `support_access_log` is enforced as append-only via both RLS grant revocation (`REVOKE UPDATE, DELETE` from `authenticated`, `anon`, `PUBLIC`) and a defence-in-depth trigger that raises an exception on any UPDATE or DELETE regardless of role. Foreign keys on `user_id` use `ON DELETE RESTRICT` — once audit history exists for a user, plain deletion is blocked. R17c (genuine deletion, P2 item 2d) will need an anonymise-then-delete path to satisfy its own commitment without destroying audit trail.
+
+**Reasoning:** R17a §4 and §5 promise audit infrastructure that does not exist in any migration. The schema audit (15 April 2026) confirmed neither `support_access_log` nor `support_decrypt_request` was implemented. Without these tables, R20a Phase B (the `vulnerability_flag` RLS that depends on R17a Tier C support-with-audit policy) cannot be built, and R17a itself does not meet its own stated controls. Building the destination first, then wiring Tier C fields to it in a second CCP session, keeps each Critical change bounded and verifiable. `ON DELETE RESTRICT` is the honest position: an audit trail that can be erased alongside its subject is not an audit trail. The coupling with R17c is accepted and documented.
+
+**Rules served:** R17a (intimate data tiering — §4 audit trail and §5 access gate), R20a (vulnerable user protections — unblocks Phase B), R17c (genuine deletion — coupling surfaced so R17c design can accommodate), R0 (honest capacity — builds the control R17a has always claimed).
+
+**Impact:** Migration file created at `/supabase/migrations/20260415_r17a_audit_schema.sql`. Six verification queries (Q1–Q6) specified in the CCP output are the pass/fail gate for deployment. A second CCP session (still to come) is required to rewrite Tier C RLS policies on existing R17a fields to use these tables — today's change builds the destination only; wiring is the next Critical step. R20a implementation plan §12 prerequisite "confirm `support_access_log` table from R17a is in place" is satisfied by this migration's successful deployment. R17c (P2 item 2d) must include anonymise-then-delete path; recorded here so the R17c build does not encounter this as a surprise.
+
+**Status:** Schema approved by founder. Migration file produced. Deployment pending founder execution of the migration in Supabase Studio; verification Q1–Q6 pending post-deployment.
+
+---
+
+## 15 April 2026 — CCP-R17a-01 Verified and Closed
+
+**Decision:** Migration `20260415_r17a_audit_schema.sql` deployed to production Supabase via Studio SQL Editor. All six verification checks pass: Q1 (two tables present), Q2 (enum has three correct values in declaration order), Q3 (support_access_log has 10 columns matching design), Q4 (support_decrypt_request has 12 columns matching design), Q5 (six RLS policies — two on support_access_log, four on support_decrypt_request), Q6a (both append-only triggers live — trg_sal_no_update and trg_sal_no_delete, BEFORE triggers), Q6b (zero UPDATE/DELETE grants to authenticated, anon, or PUBLIC on support_access_log). Append-only is enforced at two layers — revocation of grants and BEFORE-trigger exception.
+
+**Reasoning:** Closing the CCP required independent verification, not just absence of error on deploy. The original Q6 design was flawed — an UPDATE with `WHERE log_id = gen_random_uuid()` on an empty table matches zero rows and the per-row trigger never fires, so the test proved nothing. Replaced with Q6a (information_schema.triggers) and Q6b (information_schema.role_table_grants) which are static checks independent of table contents. Both passed. This is recorded as an improvement to the CCP verification pattern for future Critical sessions.
+
+**Rules served:** R17a (audit destination now live), R20a (one Phase B blocker removed), §0c-ii (Critical Change Protocol followed end-to-end with documented verification).
+
+**Impact:** R17a §4 audit trail and §5 workflow gate are now backed by live tables. The R17c coupling (audit blocks user deletion) is in effect and must be accommodated when R17c is built. R20a Phase B's prerequisite "confirm support_access_log exists" is now satisfied. Phase B still blocked on the second CCP session — rewriting Tier C RLS policies on existing R17a fields to actually reference these tables. The tables now exist; the wiring does not. CCP verification pattern improvement: future Critical sessions should use static schema/catalog queries for append-only and RLS enforcement checks, not data-dependent mutation tests on empty tables.
+
+**Status:** Verified. CCP-R17a-01 closed.
