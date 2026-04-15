@@ -121,14 +121,50 @@ OVERALL: SCOPE COMPLETE ✓ — with corrections noted above
 - **R20a ADR — vulnerable user distress detection architecture decision.** Priority: P2 blocker. Must be designed before P2 coding begins. The manifest-designated Critical item.
 - **Architectural question — agent-facing endpoints and project context.** /guardrail and /score-iterate now inject SageReasoning project state on every external-agent call. Revisit when building the Agent Trust Layer (P3) — customer agents reasoning about their own actions should probably not receive our project state. Options then: make Layer 3 conditional, add an opt-in flag, or strip project context from agent-facing endpoints entirely.
 
+**Closed this session:**
+
+- **Parallel-retrieval cutover quality review (Session B).** Closed — no regression observed across Sessions B, C, D, and Layer 3 wiring session. Re-open only if degradation observed in production.
+
+- **Layer 3 token measurement.** Closed via offline measurement of
+  `getProjectContext()` output length, same chars÷4 methodology as yesterday's
+  ~150-token estimate.
+
+  | Level | Chars | Estimated tokens | Yesterday's estimate | Delta |
+  |---|---|---|---|---|
+  | condensed (8 of 9 endpoints) | 557 | ~139 | ~150 | -7% ✓ within tolerance |
+  | minimal (/guardrail only)    | 887 | ~222 | ~200 (implicit) | +11% |
+
+  **Unexpected finding — `minimal` > `condensed`.** The 'minimal' level used
+  on /guardrail produces ~60% MORE tokens than 'condensed' because it bundles
+  the full identity paragraph and all four ethical commitments, while
+  condensed is just phase + two recent decisions. Counter-intuitive —
+  'minimal' suggests the lightest overhead but is in fact the heaviest Layer
+  3 level wired this session.
+
+  **R5 implication:** /guardrail is the agent-facing safety gate and will
+  be the highest-volume endpoint at scale. Every external agent safety check
+  pays ~222 tokens of Layer 3 overhead. Not a cost emergency at single-user
+  traffic. Worth revisiting when P3 (Agent Trust Layer) redesigns agent-
+  context boundaries — options then: strip /guardrail back to Layer 1 only,
+  or build a truly-minimal 'identity' level (identity only, no ethical
+  commitments, ~60 tokens).
+
+  **Real `usage.input_tokens` from Anthropic API not captured this session.**
+  Requires authenticated live call; would give TOTAL prompt input (Stoic
+  Brain + domain + practitioner + project + user input) rather than Layer 3
+  isolated. The offline measurement above answers the estimate-accuracy
+  question cleanly. Deferring full-prompt token measurement to P4 (Stripe
+  wiring) when per-call cost tracking becomes billing-critical anyway.
+
 **Still open (restated):**
 
 1. Topic-signal keyword matcher (72.5% overshoot, Session C) — deferred, wait for real-use data
-2. Parallel-retrieval cutover quality review (Session B) — **founder decision needed** (see below)
-3. Founder Hub R20a distress detection (low urgency, inherits from general R20a implementation)
-4. Switch token logging to real `usage.input_tokens` (R5 accuracy) — becomes urgent at P4
-5. Snapshot write cost review (~50–200ms per mentor request) — not urgent at single-user traffic
-6. Token measurement of Layer 3 wiring delta — carry forward from today
+2. Founder Hub R20a distress detection (low urgency, inherits from general R20a implementation)
+3. Switch token logging to real `usage.input_tokens` (R5 accuracy) — becomes urgent at P4
+4. Snapshot write cost review (~50–200ms per mentor request) — not urgent at single-user traffic
+5. **R5 observation — /guardrail 'minimal' Layer 3 overshoots 'condensed'.**
+   ~222 tokens vs ~139. Revisit at P3 (ATL) with option to introduce a truly-
+   minimal 'identity-only' level, or strip /guardrail back to Layer 1 only.
 
 ---
 
