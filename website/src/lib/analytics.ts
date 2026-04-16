@@ -38,7 +38,6 @@ export async function trackEvent({ event_type, metadata }: TrackEventOptions) {
       body: JSON.stringify({
         event_type,
         user_id: user?.id || null,
-        user_email: user?.email || null,
         metadata: metadata || {},
       }),
     })
