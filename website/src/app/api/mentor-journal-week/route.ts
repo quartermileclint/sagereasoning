@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getProjectContext } from '@/lib/context/project-context'
 
 // =============================================================================
 // mentor-journal-week — Weekly Personalised Journal Questions
@@ -94,13 +95,17 @@ export async function POST(request: NextRequest) {
       ? `\n\nThis is Week ${week_number} of their personalised journal practice.`
       : ''
 
-    // Public mentor gets Stoic Brain only (no project context, no L5)
+    // Layer 3: Project context at 'summary' level (mentor endpoints need
+    // identity + phase + recent decisions for contextual question design).
+    const projectContext = await getProjectContext('summary')
+
     const result = await runSageReason({
       input: `${profile_summary}${contextNote}${weekNote}`,
       depth: 'deep',
       systemPromptOverride: WEEKLY_JOURNAL_SYSTEM_PROMPT,
       domain_context: 'mentor_weekly_journal',
       stoicBrainContext: getStoicBrainContext('deep'),
+      projectContext,
     })
 
     return NextResponse.json(

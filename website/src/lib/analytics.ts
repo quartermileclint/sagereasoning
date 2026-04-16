@@ -19,6 +19,9 @@ export type EventType =
   | 'conversation_score'
   | 'daily_reflection'
   | 'evaluate_action'
+  | 'evaluate_demo_started'
+  | 'evaluate_demo_completed'
+  | 'evaluate_demo_error'
 
 interface TrackEventOptions {
   event_type: EventType

@@ -18,6 +18,14 @@
  */
 
 import projectContextData from '@/data/project-context.json'
+import {
+  PROJECT_IDENTITY,
+  FOUNDER_CONTEXT,
+  ETHICAL_COMMITMENTS,
+  PRODUCT_ARCHITECTURE,
+  PHASE_STATUS,
+  ACTIVE_TENSIONS,
+} from '@/data/project-context-compiled'
 
 import { supabaseAdmin } from '@/lib/supabase-server'
 
@@ -31,6 +39,7 @@ interface ProjectBaseline {
   identity: string
   mission: string
   founder: string
+  positioning: string
   ethical_commitments: Record<string, string>
 }
 
@@ -49,10 +58,38 @@ let _dynamicCacheTime = 0
 const CACHE_TTL_MS = 60 * 60 * 1000 // 1 hour
 
 // =============================================================================
-// STATIC BASELINE — imported at build time
+// STATIC BASELINE — Compiled TS as primary, JSON as fallback
 // =============================================================================
 
-const baseline: ProjectBaseline = projectContextData.baseline
+/**
+ * Merge strategy: compiled TS constants are the build-time baseline.
+ * JSON fields override compiled TS where both exist (JSON wins on overlap).
+ * This lets Supabase dynamic state (via JSON defaults) take precedence
+ * while compiled TS provides typed, richer static data.
+ */
+const compiledBaseline: ProjectBaseline = {
+  identity: PROJECT_IDENTITY.identity,
+  mission: PROJECT_IDENTITY.mission,
+  founder: FOUNDER_CONTEXT.role,
+  positioning: PROJECT_IDENTITY.positioning,
+  ethical_commitments: Object.fromEntries(
+    Object.entries(ETHICAL_COMMITMENTS).map(([key, val]) => [key, val.commitment])
+  ),
+}
+
+// JSON wins on overlap — spread compiled first, then JSON on top
+const baseline: ProjectBaseline = {
+  ...compiledBaseline,
+  ...projectContextData.baseline,
+  // Preserve compiled positioning (not in JSON)
+  positioning: compiledBaseline.positioning,
+  // Merge ethical_commitments (JSON wins per-key)
+  ethical_commitments: {
+    ...compiledBaseline.ethical_commitments,
+    ...projectContextData.baseline.ethical_commitments,
+  },
+}
+
 const dynamicDefaults: ProjectDynamic = projectContextData.dynamic_defaults
 
 // =============================================================================
@@ -111,6 +148,7 @@ function buildFullContext(dynamic: ProjectDynamic): string {
   return `PROJECT CONTEXT — SAGEREASONING (full):
 Identity: ${baseline.identity}
 Mission: ${baseline.mission}
+Positioning: ${baseline.positioning}
 Founder: ${baseline.founder}
 
 Current Phase: ${dynamic.current_phase}

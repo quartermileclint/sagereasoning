@@ -5,10 +5,17 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { extractJSON } from '@/lib/json-utils'
+import { supabaseAdmin } from '@/lib/supabase-server'
+import { createHash } from 'crypto'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
+
+/** Privacy-preserving IP hash for anonymous demo analytics. */
+function hashIp(ip: string): string {
+  return createHash('sha256').update(ip + (process.env.SUPABASE_SERVICE_ROLE_KEY || '')).digest('hex').slice(0, 16)
+}
 
 /**
  * POST /api/evaluate — No-auth instant demo endpoint
@@ -95,6 +102,17 @@ export async function POST(request: NextRequest) {
     const inputErr = validateTextLength(input, 'Input', 500)
     if (inputErr) return NextResponse.json({ error: inputErr }, { status: 400 })
 
+    // Analytics: evaluate_demo_started (no PII — hashed IP only)
+    const rawIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+    const ipHash = hashIp(rawIp)
+    supabaseAdmin.from('analytics_events').insert({
+      event_type: 'evaluate_demo_started',
+      user_id: null,
+      ip_address: ipHash,
+      user_agent: request.headers.get('user-agent') || 'unknown',
+      metadata: { input_length: input.trim().length },
+    }).then(() => {}) // Fire-and-forget — never block the demo flow
+
     // Context layers (public endpoint — Stoic Brain only, no project/brain/environmental context)
     const stoicBrainContext = getStoicBrainContext('quick')
 
@@ -119,6 +137,19 @@ Return only the JSON evaluation object.`
           recommended_action: 'Sign up for an API key to access deeper analysis (standard: 5 mechanisms, deep: 6 mechanisms) and iterative deliberation chains.',
         },
       })
+      // Analytics: cache hit still counts as completed demo
+      supabaseAdmin.from('analytics_events').insert({
+        event_type: 'evaluate_demo_completed',
+        user_id: null,
+        ip_address: ipHash,
+        user_agent: request.headers.get('user-agent') || 'unknown',
+        metadata: {
+          input_length: input.trim().length,
+          latency_ms: Date.now() - startTime,
+          from_cache: true,
+        },
+      }).then(() => {})
+
       return NextResponse.json(envelope, { headers: publicCorsHeaders() })
     }
 
@@ -179,9 +210,36 @@ Return only the JSON evaluation object.`
       },
     })
 
+    // Analytics: evaluate_demo_completed (no PII — proximity level only)
+    supabaseAdmin.from('analytics_events').insert({
+      event_type: 'evaluate_demo_completed',
+      user_id: null,
+      ip_address: ipHash,
+      user_agent: request.headers.get('user-agent') || 'unknown',
+      metadata: {
+        input_length: input.trim().length,
+        katorthoma_proximity: evalData.katorthoma_proximity || 'unknown',
+        latency_ms: Date.now() - startTime,
+        from_cache: false,
+      },
+    }).then(() => {}) // Fire-and-forget
+
     return NextResponse.json(envelope, { headers: publicCorsHeaders() })
   } catch (error) {
     console.error('Evaluate API error:', error)
+
+    // Analytics: evaluate_demo_error (no PII — error type only)
+    const rawIpErr = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+    supabaseAdmin.from('analytics_events').insert({
+      event_type: 'evaluate_demo_error',
+      user_id: null,
+      ip_address: hashIp(rawIpErr),
+      user_agent: request.headers.get('user-agent') || 'unknown',
+      metadata: {
+        error_type: error instanceof Error ? error.constructor.name : 'unknown',
+      },
+    }).then(() => {}) // Fire-and-forget
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

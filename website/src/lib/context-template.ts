@@ -20,6 +20,7 @@ import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { getSkillById } from '@/lib/skill-registry'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { detectDistress } from '@/lib/guardrails'
+import { getProjectContext, type ProjectContextLevel } from '@/lib/context/project-context'
 
 export type ContextTemplateConfig = {
   /** Skill ID (e.g., 'sage-premortem') */
@@ -40,6 +41,8 @@ export type ContextTemplateConfig = {
   validateInput: (body: Record<string, unknown>) => string | null
   /** Optional additional framing added to the result */
   frameResult?: (result: Record<string, unknown>) => Record<string, unknown>
+  /** Project context level for Layer 3 injection (defaults to 'condensed') */
+  projectContextLevel?: ProjectContextLevel
 }
 
 /**
@@ -114,12 +117,16 @@ export function createContextTemplateHandler(config: ContextTemplateConfig) {
         )
       }
 
+      // Layer 3 — Project context injection (all skill endpoints get this via factory)
+      const projectContext = await getProjectContext(config.projectContextLevel || 'condensed')
+
       // Call sage-reason engine directly (no HTTP self-call needed)
       const reasonOutput = await runSageReason({
         input: formatted.input,
         context: formatted.context,
         depth: config.depth,
         domain_context: config.domainContext,
+        projectContext,
       })
 
       const reasonResult = reasonOutput.result

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { getProjectContext } from '@/lib/context/project-context'
 import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-summary'
 import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
@@ -123,13 +124,17 @@ export async function POST(request: NextRequest) {
       `========================================\n\n` +
       `BASELINE GAP QUESTION RESPONSES (${responses.length} answers):\n\n${answersFormatted}`
 
-    // Public mentor gets Stoic Brain only (no project context, no L5)
+    // Layer 3: Project context at 'summary' level (mentor endpoints need
+    // identity + phase + recent decisions for contextual refinement).
+    const projectContext = await getProjectContext('summary')
+
     const result = await runSageReason({
       input: fullInput,
       depth: 'deep',
       systemPromptOverride: REFINEMENT_SYSTEM_PROMPT,
       domain_context: 'mentor_baseline_refinement',
       stoicBrainContext: getStoicBrainContext('deep'),
+      projectContext,
     })
 
     return NextResponse.json(

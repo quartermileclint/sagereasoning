@@ -7,6 +7,7 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt } from '@/lib/reasoning-receipt'
 import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
+import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistress } from '@/lib/guardrails'
 import { extractJSON } from '@/lib/json-utils'
 // Profile update is loaded dynamically via the sage-mentor bridge pattern
@@ -114,9 +115,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Context layers — public mentor gets Stoic Brain + condensed practitioner only
+    // Context layers — Stoic Brain (L1) + Practitioner (L2) + Project (L3 minimal)
     const stoicBrainContext = getStoicBrainContextForMechanisms(['passion_diagnosis', 'oikeiosis'])
-    const practitionerContext = await getPractitionerContext(auth.user.id)
+    const [practitionerContext, projectContext] = await Promise.all([
+      getPractitionerContext(auth.user.id),
+      getProjectContext('minimal'),
+    ])
 
     let userMessage = `Daily reflection:
 
@@ -126,6 +130,7 @@ ${how_i_responded?.trim() ? `How I responded: ${how_i_responded.trim()}` : ''}
 Score my actions and give me the sage perspective.`
 
     if (practitionerContext) userMessage += `\n\n${practitionerContext}`
+    if (projectContext) userMessage += `\n\n${projectContext}`
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
