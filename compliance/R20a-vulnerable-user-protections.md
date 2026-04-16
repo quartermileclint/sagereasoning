@@ -1,7 +1,7 @@
 # R20a — Vulnerable User Protections
 
 **Rule status:** Adopted (15 April 2026)
-**Implementation status:** Phase A Verified (persistent footer live on 9 routes, 2026-04-16). Phases B–H remain Designed.
+**Implementation status:** Phases A and B Verified (2026-04-16). Phase A: persistent footer live on 9 routes. Phase B: `vulnerability_flag` table, 3 RLS policies, and `vulnerability_flag_owner_view` deployed to production. Phases C–H remain Designed.
 **Last reviewed:** 2026-04-16
 **Next review due:** 2026-07-15 (quarterly cadence per §7)
 **Owner:** Founder (Clinton Aitkenhead) — to reassign when support role is filled

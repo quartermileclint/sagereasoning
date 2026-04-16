@@ -1,6 +1,6 @@
 # R20a — Implementation Plan
 
-**Status:** In progress — Phase A Verified (2026-04-16). Phases B–H pending.
+**Status:** In progress — Phases A and B Verified (2026-04-16). Phases C–H pending.
 **Date:** 2026-04-15 (plan created) · 2026-04-16 (Phase A closed)
 **Related:** R20a (rule), ADR-R20a-01 (architecture), R17a (intimate data tiering)
 **Execution window:** Priority 2 (Ethical Safeguards), item 2a
@@ -70,6 +70,8 @@ Total working time: roughly five to six working days of focused build, spread ov
 - Explicit approval: required on the RLS policy text specifically, not just the table structure.
 
 **Verification method.** AI provides three Studio queries: one that lists the columns and types, one that lists the RLS policies, one that attempts an unauthorised read and fails. Founder runs each and confirms results.
+
+**Closure record (2026-04-16).** Phase B Verified. Migration: `20260416_r20a_vulnerability_flag.sql`. Data hygiene protocol enforced: schema designed from first principles with zero individual profiles loaded (founder chose Option 1 recusal, recorded in compliance_audit_log.json and decision log). Design decisions: 4a — database view for reviewer identity masking (`vulnerability_flag_owner_view`); 4b — service_role for classifier inserts (code-level enforcement, review at Phase E); 4c — CASCADE delete for R17c genuine deletion (flagged for P3 legal review). Seven CCP verification queries passed: Q1 (12 columns correct), Q2 (3 RLS policies), Q3 (RLS enabled), Q4 (owner view — 11 columns, reviewer_notes excluded, reviewer_id masked), Q5 (2 CHECK constraints), Q6 (updated_at trigger), Q7 (CASCADE FK on user_id). CCP session closed.
 
 ---
 

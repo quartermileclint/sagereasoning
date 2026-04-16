@@ -21,6 +21,30 @@
       "status": "adopted"
     },
     {
+      "run_date": "2026-04-16",
+      "run_type": "ccp_closure",
+      "trigger": "Phase B CCP session — vulnerability_flag table deployed and verified",
+      "migration": "20260416_r20a_vulnerability_flag.sql",
+      "artefacts_deployed": [
+        "vulnerability_flag table (12 columns)",
+        "3 RLS policies (vf_owner_select, vf_support_select, vf_support_update)",
+        "vulnerability_flag_owner_view (reviewer identity masking)",
+        "trg_vf_updated_at trigger",
+        "2 CHECK constraints (vf_severity_range, vf_resolution_valid)",
+        "3 indexes (idx_vf_unresolved, idx_vf_user_id, idx_vf_session_id)"
+      ],
+      "verification_queries_passed": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7"],
+      "design_decisions": {
+        "4a": "Database view for reviewer identity masking",
+        "4b": "service_role for classifier inserts (code-enforced insert-only)",
+        "4c": "CASCADE delete for R17c genuine deletion (flagged for P3 legal review)"
+      },
+      "data_hygiene": "Enforced. Zero individual profiles loaded. First-principles design from role definitions and data sensitivity tiers. Document: /compliance/Phase-B-first-principles-design.md",
+      "founder_approval": "Item 1 (schema) and Item 2 (RLS policies) explicitly approved per CCP brief §(e)",
+      "rules_served": ["R20a", "R17a", "R20b"],
+      "status": "verified_and_closed"
+    },
+    {
       "run_date": "2026-04-04",
       "run_type": "quarterly",
       "trigger": "scheduled quarterly review",

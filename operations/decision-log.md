@@ -402,3 +402,17 @@ Changes implemented:
 **Impact:** Design document updated with adopted decisions. SQL work proceeds. 4c noted for P3 legal review — if counsel recommends a different approach, change follows CCP.
 
 **Status:** Adopted
+
+---
+
+## 16 April 2026 — Phase B CCP Session Verified and Closed
+
+**Decision:** Migration `20260416_r20a_vulnerability_flag.sql` deployed to production Supabase via Studio SQL Editor. All seven verification queries pass: Q1 (12 columns correct), Q2 (3 RLS policies: vf_owner_select, vf_support_select, vf_support_update), Q3 (RLS enabled), Q4 (owner view has 11 columns, reviewer_notes excluded, reviewer_id masked to role label), Q5 (2 CHECK constraints: severity 1–3, resolution enum), Q6 (updated_at trigger active), Q7 (CASCADE FK on user_id confirmed).
+
+**Reasoning:** Phase B is the foundation for R20a Phases C–H — the classifier, worker, reviewer queue, and alert hook all depend on this table. CCP followed end-to-end: brief produced, prerequisites resolved, data hygiene enforced (founder recused from design visibility), first-principles design reviewed, schema and RLS policy text explicitly approved as separate items, deployed, verified with seven static schema/catalog queries. Pattern improvement from CCP-R17a-01 applied: all verification queries are static catalog checks, not data-dependent mutation tests.
+
+**Rules served:** R20a (Phase B complete), R17a (Tier C RLS aligned), R20b (independence principle — data hygiene enforced), §0c-ii (Critical Change Protocol followed).
+
+**Impact:** R20a implementation plan updated: Phases A and B Verified. Phase C (rule file) is next — Standard risk, no CCP required. The vulnerability_flag table exists but is empty; nothing writes to it until Phase E wires the classifier pipeline. Rollback remains available: `DROP TABLE IF EXISTS vulnerability_flag CASCADE;`.
+
+**Status:** Verified. CCP-R20a-Phase-B closed.
