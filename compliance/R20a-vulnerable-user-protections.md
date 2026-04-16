@@ -82,13 +82,17 @@ Support hours are **09:00–17:00 AEST, Monday–Friday** (excluding Australian 
 
 ### Persistent UI resources
 
-The mentor interface and the journal interface display a persistent footer with three crisis contacts, visible on every page where a user can interact with the mentor or journal. Exact wording is held in the UI component; the contacts are:
+The mentor interface, journal interface, and founder-hub display a persistent footer with three crisis contacts, visible on every page where a user can interact with the mentor, journal, or reflective tools. The founder-hub is included as a precautionary measure ahead of its planned user-facing release; `/score` is excluded — assessment results are covered separately under R19 honest positioning (interpretive scaffolding). Exact wording is held in the UI component (`/website/src/components/SupportFooter.tsx`); the contacts are:
 
 - **000** — emergency services
 - **Lifeline 13 11 14** — 24/7 crisis support
 - **lifeline.org.au** — web chat and resources
 
 Presentation is muted: small type, neutral colour, below the main content. The goal is a visible exit without changing the register of the product. The footer is non-dismissible.
+
+**Routes carrying the footer (as of 2026-04-16):** `/mentor-hub`, `/private-mentor`, `/journal`, `/journal-feed`, `/passion-log`, `/premeditatio`, `/oikeiosis`, `/scenarios`, `/founder-hub`. Each route has a per-route `layout.tsx` that imports the `SupportFooter` component. The root layout is not modified; non-listed routes do not display the footer.
+
+**Routes explicitly excluded:** `/score`, `/score-document`, `/score-policy`, `/score-social`. Assessment result pages are not R20a surfaces; the vulnerability concern on `/score` (hasty assent to shame when reading passion diagnostics) is addressed under R19 honest positioning via interpretive scaffolding — see §8 open items.
 
 This closes part of the acute-crisis gap at low operational cost: a user in immediate danger has a visible self-route at any time, independent of the async queue.
 
@@ -178,7 +182,8 @@ Review output is logged to `/compliance/compliance_audit_log.json`. Any threshol
 
 - [ ] Implementation status (Scoped / Designed / Scaffolded / Wired / Verified / Live)
 - [x] Declared support hours — **09:00–17:00 AEST, Monday–Friday** (excl. Australian public holidays)
-- [x] Always-visible crisis resources — **persistent footer adopted** (see §4)
+- [x] Always-visible crisis resources — **persistent footer adopted and built** (see §4). Component: `/website/src/components/SupportFooter.tsx`. Nine routes wired as of 2026-04-16. Founder verification pending before status moves to Verified.
+- [ ] `/score` interpretive scaffolding draft — scheduled for next session under R19 honest positioning. Scope: frame assessment results as data (not verdict), address hasty-assent-to-shame risk on passion diagnostics. No footer addition; no pre-display prompt without separate design review.
 - [ ] Queue reviewer role and name
 - [ ] Classifier choice and version — **see ADR-R20a-01 (classifier pipeline)**
 - [ ] Severity thresholds — numeric cut-points, once classifier is chosen
