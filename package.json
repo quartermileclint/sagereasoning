@@ -22,5 +22,8 @@
   "homepage": "https://github.com/quartermileclint/sagereasoning#readme",
   "dependencies": {
     "docx": "^9.6.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0"
   }
 }
