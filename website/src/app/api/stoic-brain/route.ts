@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { createHash } from 'crypto'
 import fs from 'fs'
 import path from 'path'
 import { checkRateLimit, RATE_LIMITS, publicCorsHeaders } from '@/lib/security'
+
+/** Hash IP with salt for privacy-consistent analytics (matches /api/analytics pattern) */
+function hashIp(ip: string): string {
+  return createHash('sha256').update(ip + (process.env.SUPABASE_SERVICE_ROLE_KEY || '')).digest('hex').slice(0, 16)
+}
 
 // Serve the stoic-brain.json file and log the request for AI agent tracking
 export async function GET(request: NextRequest) {
@@ -22,7 +28,7 @@ export async function GET(request: NextRequest) {
       metadata: {
         is_likely_agent: isLikelyAgent,
         accept: request.headers.get('accept') || '',
-        _ip: ip,
+        _ip_hash: hashIp(ip),
         _user_agent: userAgent,
       },
     }).then(() => {}) // Fire and forget

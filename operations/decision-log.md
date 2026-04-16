@@ -416,3 +416,59 @@ Changes implemented:
 **Impact:** R20a implementation plan updated: Phases A and B Verified. Phase C (rule file) is next — Standard risk, no CCP required. The vulnerability_flag table exists but is empty; nothing writes to it until Phase E wires the classifier pipeline. Rollback remains available: `DROP TABLE IF EXISTS vulnerability_flag CASCADE;`.
 
 **Status:** Verified. CCP-R20a-Phase-B closed.
+
+---
+
+## 16 April 2026 — Skill Context Level Evaluation: sage-premortem and sage-negotiate Retain Condensed
+
+**Decision:** Both `sage-premortem` and `sage-negotiate` remain at the factory default `condensed` project context level. No `projectContextLevel` config overrides added.
+
+**Reasoning:** Evaluated whether these two skills needed `summary` (which adds identity + founder role) for richer situational awareness. Assessment: both skills get their Stoic grounding from Layer 1 (engine system prompt), their domain framing from the `domainContext` config string, and sufficient situational awareness from `condensed` (phase + 2 recent decisions). `summary` would add ~50 tokens per request for identity and founder role, which is informational but not decision-relevant for supplementary marketplace skills. If post-launch user feedback indicates skill outputs feel generic, this can be revisited per-skill via the existing `projectContextLevel` config override.
+
+**Rules served:** R5 (cost awareness — avoiding unnecessary token spend), R12 (mechanism grounding comes from Layer 1, not Layer 3)
+
+**Impact:** No code changes. Evaluation documented for hold point record.
+
+**Status:** Adopted
+
+---
+
+## 16 April 2026 — Runtime Token Monitoring Deferred to P1
+
+**Decision:** Runtime token monitoring (logging `response.usage` fields per skill per request) deferred to P1. Logged as a P1 task.
+
+**Reasoning:** All depth levels have 27-62% headroom verified from source code analysis. `withUsageHeaders()` exposes rate limits only, not token counts. The implementation path is clear: log `input_tokens`, `output_tokens`, `cache_read_input_tokens`, `cache_creation_input_tokens` from the Anthropic response in `runSageReason()` using the existing `withUsageHeaders()` pattern, targeting Vercel log drain with no new infrastructure. This is useful for cost health alerts (P4) but not blocking for the hold point.
+
+**Rules served:** R5 (cost monitoring — future capability), P0 scope governance (not needed for hold point)
+
+**Impact:** No code changes. P1 task logged.
+
+**Status:** Adopted — deferred to P1
+
+---
+
+## 16 April 2026 — score-document Engine Migration Deferred to P1
+
+**Decision:** `/api/score-document` migration from direct `client.messages.create` to `runSageReason()` deferred to P1 as tech debt.
+
+**Reasoning:** score-document is the only endpoint that bypasses the engine entirely — it has no Layer 1 (Stoic Brain), Layer 2 (practitioner context), or Layer 3 (project context). This is a significant gap but has no functional impact on the P0 hold point because score-document is an agent-facing utility endpoint, not a core evaluation tool. The current schema inconsistency between score and document models should be confirmed before P1 to ensure the current structure supports practitioner progress display at launch.
+
+**Rules served:** P0 scope governance, R12 (mechanism grounding — score-document currently lacks it)
+
+**Impact:** No code changes. Tech debt logged with note: 'Schema inconsistency between score and document models — no functional impact on P0 hold point, confirm before P1 that current structure supports practitioner progress display at launch.'
+
+**Status:** Adopted — deferred to P1
+
+---
+
+## 16 April 2026 — Stoic-Brain IP Hashing Aligned with Analytics Route
+
+**Decision:** Changed `/api/stoic-brain/route.ts` to hash the IP address before storing it in analytics metadata, using the same `hashIp()` function pattern as `/api/analytics/route.ts`.
+
+**Reasoning:** The analytics bugfix session (earlier 16 April) moved tracking data into metadata and introduced IP hashing in the analytics route. The stoic-brain route was updated to use metadata but still stored the raw IP as `_ip`. This inconsistency meant one route hashed IPs and the other didn't. Aligning both routes ensures consistent privacy treatment across all analytics events.
+
+**Rules served:** R17 (privacy — consistent IP hashing across all routes)
+
+**Impact:** `_ip` field in stoic-brain metadata replaced with `_ip_hash` using SHA-256 + salt (same as analytics route). Existing raw IP rows in Supabase are historical — no backfill needed.
+
+**Status:** Adopted
