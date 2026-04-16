@@ -1,7 +1,7 @@
 # R20a — Implementation Plan
 
-**Status:** Proposed — founder approval required before any build begins
-**Date:** 2026-04-15
+**Status:** In progress — Phase A Verified (2026-04-16). Phases B–H pending.
+**Date:** 2026-04-15 (plan created) · 2026-04-16 (Phase A closed)
 **Related:** R20a (rule), ADR-R20a-01 (architecture), R17a (intimate data tiering)
 **Execution window:** Priority 2 (Ethical Safeguards), item 2a
 
@@ -45,6 +45,8 @@ Total working time: roughly five to six working days of focused build, spread ov
 **Verification method.** Founder opens the mentor page and the journal page in a browser. Confirms the footer is visible on both. Confirms the three contacts match R20a §4 exactly. Confirms the footer cannot be closed or dismissed.
 
 **Rollback.** If the footer causes layout issues, remove the component import. No data implications.
+
+**Closure record (2026-04-16).** Phase A Verified. Component: `/website/src/components/SupportFooter.tsx`. Nine routes wired via per-route `layout.tsx`: `/mentor-hub`, `/private-mentor`, `/journal`, `/journal-feed`, `/passion-log`, `/premeditatio`, `/oikeiosis`, `/scenarios`, `/founder-hub`. Founder verified footer visible, contacts matching R20a §4, non-dismissible. `/score` excluded — assessment result pages addressed separately under R19 honest positioning.
 
 ---
 

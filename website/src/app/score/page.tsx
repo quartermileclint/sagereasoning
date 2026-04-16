@@ -382,6 +382,20 @@ export default function ScoreActionPage() {
       {result && proximityLevel && proximityDisplay && (
         <div className="space-y-6">
 
+          {/* R19 interpretive scaffolding — frame results as data, not verdict */}
+          <div className="bg-sage-50/60 border border-sage-200 rounded-lg px-6 py-5">
+            <h3 className="font-display text-sm font-medium text-sage-700 mb-2">Before you read</h3>
+            <p className="font-body text-sm text-sage-600 leading-relaxed">
+              Stoic philosophy treats passions — craving, distress, fear, irrational pleasure — as
+              judgements that can be examined, not character flaws that define you. If the evaluation
+              below identifies passions in your action, that is the method working as intended:
+              surfacing what&apos;s there so you can look at it. A score closer to &ldquo;reflexive&rdquo;
+              means the action was less examined, not that you are less worthy. No single evaluation
+              captures who you are. Read these results the way you&apos;d read a mirror — useful for
+              noticing, not for judging.
+            </p>
+          </div>
+
           {/* Katorthoma Proximity — the primary result */}
           <div className="bg-white/60 border border-sage-200 rounded-lg p-8 text-center">
             <p className="font-body text-sm text-sage-500 mb-2">Right Action Proximity</p>

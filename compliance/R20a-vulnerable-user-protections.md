@@ -1,8 +1,8 @@
 # R20a — Vulnerable User Protections
 
 **Rule status:** Adopted (15 April 2026)
-**Implementation status:** Designed — architecture fixed by ADR-R20a-01; no functional code yet
-**Last reviewed:** 2026-04-15
+**Implementation status:** Phase A Verified (persistent footer live on 9 routes, 2026-04-16). Phases B–H remain Designed.
+**Last reviewed:** 2026-04-16
 **Next review due:** 2026-07-15 (quarterly cadence per §7)
 **Owner:** Founder (Clinton Aitkenhead) — to reassign when support role is filled
 
@@ -183,7 +183,7 @@ Review output is logged to `/compliance/compliance_audit_log.json`. Any threshol
 - [ ] Implementation status (Scoped / Designed / Scaffolded / Wired / Verified / Live)
 - [x] Declared support hours — **09:00–17:00 AEST, Monday–Friday** (excl. Australian public holidays)
 - [x] Always-visible crisis resources — **persistent footer adopted and built** (see §4). Component: `/website/src/components/SupportFooter.tsx`. Nine routes wired as of 2026-04-16. Founder verification pending before status moves to Verified.
-- [ ] `/score` interpretive scaffolding draft — scheduled for next session under R19 honest positioning. Scope: frame assessment results as data (not verdict), address hasty-assent-to-shame risk on passion diagnostics. No footer addition; no pre-display prompt without separate design review.
+- [x] `/score` interpretive scaffolding — implemented under R19 honest positioning (2026-04-16). Framing B adopted: "Before you read" panel appears above results, positions passions as examinable judgements (not character flaws), reframes low proximity scores as less-examined actions (not less-worthy persons), uses mirror metaphor. No footer addition; no pre-display prompt. Founder verification pending.
 - [ ] Queue reviewer role and name
 - [ ] Classifier choice and version — **see ADR-R20a-01 (classifier pipeline)**
 - [ ] Severity thresholds — numeric cut-points, once classifier is chosen
