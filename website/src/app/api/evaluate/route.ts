@@ -167,15 +167,26 @@ Return only the JSON evaluation object.`
       )
     }
 
-    // Validate core fields
-    const required = ['control_filter', 'passion_diagnosis', 'oikeiosis', 'katorthoma_proximity']
-    for (const field of required) {
+    // Validate core mechanism fields (hard requirement — useless without these)
+    const requiredMechanisms = ['control_filter', 'passion_diagnosis', 'oikeiosis']
+    for (const field of requiredMechanisms) {
       if (evalData[field] === undefined) {
         return NextResponse.json(
           { error: `Evaluation engine missing field: ${field}` },
           { status: 500 }
         )
       }
+    }
+
+    // Default summary fields if LLM omitted them (don't crash the demo for these)
+    if (!evalData.katorthoma_proximity) {
+      evalData.katorthoma_proximity = 'undetermined'
+    }
+    if (!evalData.philosophical_reflection) {
+      evalData.philosophical_reflection = 'The evaluation engine was unable to generate a philosophical reflection for this input.'
+    }
+    if (!evalData.improvement_path) {
+      evalData.improvement_path = 'Review the passion diagnosis above to identify which false judgement to address first.'
     }
 
     // Ensure disclaimer
