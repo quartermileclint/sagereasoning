@@ -16,16 +16,14 @@ export async function GET(request: NextRequest) {
     // Determine if this is likely an AI agent vs a browser
     const isLikelyAgent = !userAgent.includes('Mozilla') && !userAgent.includes('Chrome') && !userAgent.includes('Safari')
 
-    // Log the fetch event
+    // Log the fetch event — tracking data in metadata, not top-level columns
     await supabaseAdmin.from('analytics_events').insert({
       event_type: 'stoic_brain_fetch',
-      user_id: null,
-      user_email: null,
-      ip_address: ip,
-      user_agent: userAgent,
       metadata: {
         is_likely_agent: isLikelyAgent,
         accept: request.headers.get('accept') || '',
+        _ip: ip,
+        _user_agent: userAgent,
       },
     }).then(() => {}) // Fire and forget
 
