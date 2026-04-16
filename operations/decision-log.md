@@ -371,3 +371,34 @@ Changes implemented:
 **Impact:** R17a §4 audit trail and §5 workflow gate are now backed by live tables. The R17c coupling (audit blocks user deletion) is in effect and must be accommodated when R17c is built. R20a Phase B's prerequisite "confirm support_access_log exists" is now satisfied. Phase B still blocked on the second CCP session — rewriting Tier C RLS policies on existing R17a fields to actually reference these tables. The tables now exist; the wiring does not. CCP verification pattern improvement: future Critical sessions should use static schema/catalog queries for append-only and RLS enforcement checks, not data-dependent mutation tests on empty tables.
 
 **Status:** Verified. CCP-R17a-01 closed.
+
+---
+
+## 16 April 2026 — Phase B Data Hygiene: Founder Recusal from Schema Design
+
+**Decision:** Founder chose Option 1 (recuse from schema design visibility) for the Phase B CCP session. RLS policies and vulnerability_flag schema designed from first principles with zero individual profiles loaded. Founder reviews and approves finished SQL only.
+
+**Reasoning:** Founder's practitioner profile (journal scope, passion map, virtue profile, causal tendencies, value hierarchy, oikeiosis map) was in scope during infrastructure design. Two risks: (1) design contamination — policies shaped by one user's data encode implicit assumptions, creating blind spots for other users' access needs; (2) R20b independence principle violation — founder simultaneously designing the system, being the sole user it protects, and having his profile shape the design. The CCP brief's Data hygiene flag (line 142) already anticipated this; this decision enforces it.
+
+**Rules served:** R20b (independence principle), R17a (intimate data tiering), R20a (vulnerable user protections).
+
+**Impact:** First-principles design document produced (`/compliance/Phase-B-first-principles-design.md`). Decision recorded in compliance_audit_log.json. Phase B proceeds with role-based design validated against 9+ synthetic user archetypes.
+
+**Status:** Adopted
+
+---
+
+## 16 April 2026 — Phase B Schema Design Decisions (4a, 4b, 4c)
+
+**Decision:** Three implementation decisions for the vulnerability_flag schema:
+- 4a: Database view (`vulnerability_flag_owner_view`) for reviewer identity masking. Owner queries the view, which replaces `reviewer_id` with a role label and excludes `reviewer_notes`.
+- 4b: Use existing `service_role` for classifier inserts. Insert-only constraint enforced at function code level. Code review required during Phase E.
+- 4c: CASCADE delete for R17c genuine deletion. Flag rows are hard-deleted with the user account.
+
+**Reasoning:** 4a — structural protection that cannot be bypassed by careless API changes. 4b — lower operational overhead; dedicated Postgres role deferred unless Phase E code review reveals risk. 4c — simplest and most GDPR-aligned; trade-off (lost aggregate audit data for deleted users) accepted and flagged for P3 legal review.
+
+**Rules served:** R20a §5 (reviewer identity masking), R17a (access control), R17c (genuine deletion).
+
+**Impact:** Design document updated with adopted decisions. SQL work proceeds. 4c noted for P3 legal review — if counsel recommends a different approach, change follows CCP.
+
+**Status:** Adopted

@@ -6,6 +6,21 @@
   },
   "runs": [
     {
+      "run_date": "2026-04-16",
+      "run_type": "governance_decision",
+      "trigger": "Data hygiene violation identified: founder practitioner profile in scope during Phase B infrastructure design session",
+      "decision": "Founder chose Option 1 (recuse from schema design visibility). RLS policies and vulnerability_flag schema to be designed from first principles with zero individual profiles visible. Founder reviews and approves finished SQL per CCP brief approval gate.",
+      "rules_served": ["R20b", "R17a", "R20a"],
+      "rationale": "Two risks identified: (1) design contamination — RLS policies shaped by one user's data encode implicit assumptions about that data shape, creating blind spots for other users; (2) independence principle violation (R20b) — founder simultaneously designing the system, being the sole user whose data it protects, and having his profile shape the design. Corrective process: first-principles design from role definitions and data sensitivity tiers, validated against multiple user archetypes using synthetic data only.",
+      "corrective_actions": [
+        "Phase B CCP session proceeds with zero practitioner profiles loaded",
+        "Design inputs are abstract role definitions and data sensitivity tiers only",
+        "Validation uses nine user archetypes with synthetic data",
+        "First-principles design document produced for founder review before any SQL"
+      ],
+      "status": "adopted"
+    },
+    {
       "run_date": "2026-04-04",
       "run_type": "quarterly",
       "trigger": "scheduled quarterly review",
