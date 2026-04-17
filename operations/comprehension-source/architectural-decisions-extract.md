@@ -585,18 +585,22 @@ before complete comprehension blocks can be written.
    the field ordering and the formatter output are not specified in the
    logs. Code read needed before writing the comprehension block.
 
-3. **Exact structure of `project-context.json`.** Spec in
-   `context-architecture-build.md` defines fields; session 7e confirms it was
-   implemented with "identity + mission + founder context + 4 ethical
-   commitments" plus a `dynamic_defaults` section. Code read needed to
-   enumerate the actual JSON shape.
+3. **Exact structure of `project-context.json`.** **RESOLVED 2026-04-17.**
+   Code inspection confirms: `version` (string "1.0.0"), `last_updated`
+   (string), `baseline` object containing `identity` (string), `mission`
+   (string), `founder` (string), `ethical_commitments` object with 4 keys
+   (R17_privacy, R18_honest_certification, R19_limitations,
+   R20_vulnerable_users — all strings). `dynamic_defaults` object containing
+   `current_phase` (string), `active_tensions` (array of 3 strings),
+   `recent_decisions` (array of 5 timestamped strings). Full enumeration
+   in comprehension-blocks-stoic-brain.md, Gap 2.
 
 4. **Supabase `project_context` table migration — is it run in production
-   yet?** Session 7e says "migration prepared but not yet run — loader falls
-   back to static defaults gracefully". 2026-04-15 Layer 3 wiring handoff
-   does not mention running the migration. If still not run, the comprehension
-   block should say: "dynamic overlay is designed but falls back to
-   static defaults in production as of this file's last modification."
+   yet?** **RESOLVED 2026-04-17.** Not run. Evidence chain: session 7e
+   handoff ("not yet run"), session 7f deep thought review ("not urgent"),
+   15 April Layer 3 wiring session ("No migration"), architectural-decisions-
+   extract gap notation. System falls back to static defaults gracefully.
+   Full evidence in comprehension-blocks-stoic-brain.md, Gap 3.
 
 5. **Whether the score-scenario generation call deliberately omits Layer 3
    is documented at the endpoint level or the engine level.** 2026-04-15
@@ -627,3 +631,38 @@ before complete comprehension blocks can be written.
    the three layers were composed. The comprehension block for
    sage-reason-engine.ts should note that urgency_context predates the
    three-layer architecture; the three layers were composed around it.
+
+---
+
+### Addendum: 17 April 2026 — Layer 3 Confirmed Complete, R20a Cost Scaffold
+
+**Layer 3 wiring status — confirmed by code inspection.**
+All 14 `runSageReason()` endpoints and all 7 direct-Anthropic-call
+endpoints that require Layer 3 have `projectContext` wired at the
+assigned level. The 5 endpoints without Layer 3 (evaluate,
+assessment/foundational, assessment/full, baseline/agent,
+mentor/private/reflect) are deliberately excluded per session 7e
+design: agent-facing and public endpoints receive Layer 1 only.
+No unwired endpoints remain. See comprehension-blocks-stoic-brain.md
+for full four-file comprehension blocks.
+
+**R20a classifier cost monitoring — scaffolded.**
+ADR-R20a-01 D7-b requires the ADR to be reopened if classifier cost
+exceeds 20% of mentor-turn cost in any month. The following
+infrastructure was scaffolded (Risk: Elevated):
+
+| Artefact | Path | Status |
+|---|---|---|
+| Migration: `classifier_cost_log` table + `cost_health_snapshots` extension | `supabase/migrations/20260417_r20a_classifier_cost_tracking.sql` | Scaffolded (not yet run) |
+| Cost tracker module | `website/src/lib/r20a-cost-tracker.ts` | Scaffolded |
+| COST_HEALTH constant | `website/src/lib/stripe.ts` → `R20A_CLASSIFIER_MAX_MENTOR_RATIO: 0.20` | Scaffolded |
+| Usage summary integration | `website/src/app/api/billing/usage-summary/route.ts` | Wired (returns zeros until classifier ships) |
+
+**Activation sequence:** Run the migration → build Phase C (rules YAML)
+→ build Phase D (classifier, calls `logClassifierRun()` after each
+invocation) → cost monitoring automatically activates via existing
+usage-summary endpoint.
+
+**Graceful degradation:** All scaffolded code returns zeros if the
+`classifier_cost_log` table doesn't exist or has no rows. The
+usage-summary endpoint continues to work exactly as before.

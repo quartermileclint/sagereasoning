@@ -107,6 +107,9 @@ export const COST_HEALTH = {
   MIN_REVENUE_TO_COST_RATIO: 2.0,
   SAGE_OPS_MONTHLY_CAP_CENTS: 10000,     // $100
   ROLLING_AVERAGE_ALERT_MULTIPLIER: 2.0,  // Alert if 2x rolling average
+  // R20a classifier cost monitoring — ADR-R20a-01 D7-b
+  // If classifier spend exceeds 20% of mentor-turn cost in any month, reopen ADR.
+  R20A_CLASSIFIER_MAX_MENTOR_RATIO: 0.20, // 20% threshold
 } as const
 
 
