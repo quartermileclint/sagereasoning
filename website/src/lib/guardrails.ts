@@ -48,6 +48,31 @@ export interface V3GuardrailResponse {
   disclaimer: string
 }
 
+/** Valid proximity level values — used for runtime validation of LLM output (F14) */
+const VALID_PROXIMITY_LEVELS: readonly KatorthomaProximityLevel[] = [
+  'reflexive', 'habitual', 'deliberate', 'principled', 'sage_like',
+] as const
+
+/** Common LLM misspellings/variants → canonical form */
+const PROXIMITY_ALIASES: Record<string, KatorthomaProximityLevel> = {
+  'sage-like': 'sage_like',
+  'sagelike': 'sage_like',
+  'sage like': 'sage_like',
+}
+
+/**
+ * Validate and normalise a proximity level string from LLM output.
+ * Returns the canonical KatorthomaProximityLevel or null if unrecognisable.
+ * Handles common LLM variants like 'sage-like' → 'sage_like'.
+ */
+export function normaliseProximityLevel(raw: string): KatorthomaProximityLevel | null {
+  const lower = raw.trim().toLowerCase()
+  if (VALID_PROXIMITY_LEVELS.includes(lower as KatorthomaProximityLevel)) {
+    return lower as KatorthomaProximityLevel
+  }
+  return PROXIMITY_ALIASES[lower] ?? null
+}
+
 /** Ordinal rank for proximity levels — higher is closer to sage */
 const PROXIMITY_RANK: Record<KatorthomaProximityLevel, number> = {
   reflexive: 0,

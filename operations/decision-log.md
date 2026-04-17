@@ -472,3 +472,59 @@ Changes implemented:
 **Impact:** `_ip` field in stoic-brain metadata replaced with `_ip_hash` using SHA-256 + salt (same as analytics route). Existing raw IP rows in Supabase are historical — no backfill needed.
 
 **Status:** Adopted
+
+---
+
+## 17 April 2026 — R20a Two-Stage Classifier: Inline Haiku Evaluation
+
+**Decision:** Replaced regex-only distress detection (`detectDistress` in guardrails.ts) with a two-stage classifier (`detectDistressTwoStage` in r20a-classifier.ts). Stage 1: regex keyword/phrase matching (zero latency). Stage 2: Haiku LLM evaluation for borderline inputs only (~500ms). Haiku runs inline (synchronously before the main LLM call), not as a background job.
+
+**Reasoning:** Regex-only detection produced false negatives on nuanced distress language and false positives on metaphorical language. The two-stage design keeps zero-latency performance for clear cases while adding LLM judgement only where it matters. Inline was chosen over background processing because the founder judged that a 500ms delay on borderline inputs is acceptable to avoid the complexity of asynchronous flag queuing and the risk of serving a full response before the classifier finishes. All 9 API routes updated. Eval suite confirmed: 5 must-block inputs blocked, 5 must-pass inputs passed, no false positives or negatives.
+
+**Rules served:** R20a (vulnerable user detection), R5 (cost — Haiku only fires on borderline inputs, not every request)
+
+**Impact:** New files: `r20a-classifier.ts`, `r20a-classifier-eval.ts`. 9 API routes modified. Old `detectDistress` function retained in guardrails.ts but no longer called by any route. Cost tracking via `classifier_cost_log` Supabase table and `r20a-cost-tracker.ts`.
+
+**Status:** Adopted — Wired and verified
+
+---
+
+## 17 April 2026 — Unified Retry Wrapper Replacing Quick-Only Escalation
+
+**Decision:** Replaced the quick-depth-only Haiku→Sonnet escalation pattern with a unified retry wrapper applying to all reasoning depths. Quick depth: 1 retry escalating Haiku to Sonnet. Standard/deep depth: 1 retry with same model. Second failure returns structured error JSON instead of throwing an unhandled exception.
+
+**Reasoning:** The previous implementation only handled parse failures at quick depth (by escalating to Sonnet). Standard and deep depth parse failures threw unhandled exceptions that surfaced as 500 errors to the client. The unified wrapper ensures consistent failure handling across all depths. Returning structured error JSON (with `reasoning_failed: true`) allows client-side UI to display a meaningful message rather than crashing.
+
+**Rules served:** R12 (consistent mechanism application across depths), R19c (honest error reporting to users)
+
+**Impact:** `sage-reason-engine.ts` modified. No more unhandled 500s from parse failures at any depth level.
+
+**Status:** Adopted — Wired
+
+---
+
+## 17 April 2026 — depth-constants.ts: Single Source of Truth for ReasonDepth
+
+**Decision:** Created `depth-constants.ts` as the single authoritative location for the `ReasonDepth` type and `DEPTH_MECHANISMS` mapping. Both `sage-reason-engine.ts` and `stoic-brain-loader.ts` now re-export from this file instead of defining their own copies.
+
+**Reasoning:** Session 7b identified a circular dependency between the engine and loader caused by both files defining and importing `ReasonDepth` from each other. This change breaks the cycle cleanly: a dedicated constants file that both modules import from, with no circular references. Type and constant synchronisation guaranteed at compile time.
+
+**Rules served:** R4 (IP protection — single definition reduces drift risk), R12 (mechanism definitions consistent across all consumers)
+
+**Impact:** New file: `depth-constants.ts`. Two files modified to re-export instead of define. Circular dependency eliminated.
+
+**Status:** Adopted — Wired
+
+---
+
+## 17 April 2026 — Client-Side Distress Detection Handling on All 5 Pages
+
+**Decision:** Added distress_detected response handling to all 5 client-facing pages (score, score-document, score-social, scenarios, private-mentor). When the API returns `{ distress_detected: true }`, pages display a redirect UI with crisis resources instead of attempting to render evaluation results.
+
+**Reasoning:** The API routes correctly returned distress detection responses with HTTP 200, but no client page checked for this field. Pages attempted to destructure evaluation-specific properties from the response, causing undefined property access crashes. This was caused by the remediation session wiring two-stage detection on the API side without updating the client pages that consume those responses. All 5 pages now check for `distress_detected` before processing the response body.
+
+**Rules served:** R20a (vulnerable users see crisis resources, not a crash), R19c (honest error handling)
+
+**Impact:** 5 page files modified. Private mentor handles it as an insight message; the other 4 pages show a full-page redirect UI with crisis contact information.
+
+**Status:** Adopted — Wired and verified

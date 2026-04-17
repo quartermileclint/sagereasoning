@@ -46,6 +46,11 @@ import type { ReasonDepth } from '@/lib/depth-constants'
 export interface ReasonInput {
   input: string
   context?: string
+  /**
+   * Reasoning depth. Defaults to 'standard' if omitted.
+   * WARNING: 'standard' uses MODEL_DEEP (Sonnet) at 6000 max_tokens — the expensive model.
+   * Use 'quick' (Haiku, 2000 max_tokens) for lightweight evaluations.
+   */
   depth?: ReasonDepth
   domain_context?: string
   /** Override the system prompt entirely (used by mentor-baseline, mentor-journal-week, etc.) */

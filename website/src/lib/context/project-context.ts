@@ -122,8 +122,9 @@ async function loadDynamicState(): Promise<ProjectDynamic> {
       _dynamicCacheTime = Date.now()
       return _dynamicCache
     }
-  } catch {
-    // Fall through to defaults
+  } catch (err) {
+    // F8: Log Supabase failures so silent fallback is observable
+    console.warn('[project-context] Supabase query failed, falling back to static defaults:', err)
   }
 
   // Fallback to static defaults
