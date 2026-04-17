@@ -10,6 +10,7 @@ import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import { enforceDistressCheck } from '@/lib/constraints'
 
 /**
  * sage-decide — Compare multiple decision options through Stoic virtue.
@@ -85,10 +86,12 @@ export async function POST(request: NextRequest) {
     if (contextErr) return NextResponse.json({ error: contextErr }, { status: 400 })
 
     // R20a — Vulnerable user detection (before any LLM call)
-    const distressCheck = await detectDistressTwoStage(decision)
-    if (distressCheck.redirect_message) {
+    // enforceDistressCheck() returns a SafetyGate — compile-time proof that
+    // the distress classifier has been awaited before any reasoning proceeds.
+    const gate = await enforceDistressCheck(detectDistressTwoStage(decision))
+    if (gate.shouldRedirect) {
       return NextResponse.json(
-        { distress_detected: true, severity: distressCheck.severity, redirect_message: distressCheck.redirect_message },
+        { distress_detected: true, severity: gate.result.severity, redirect_message: gate.result.redirect_message },
         { status: 200, headers: corsHeaders() }
       )
     }

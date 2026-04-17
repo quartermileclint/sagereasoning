@@ -26,9 +26,9 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk'
-import { MODEL_FAST } from '@/lib/model-config'
 import { logClassifierRun } from '@/lib/r20a-cost-tracker'
 import type { DistressDetectionResult } from '@/lib/guardrails'
+import { getFastModel, type SafetyCriticalCallParams } from '@/lib/constraints'
 
 // ---------------------------------------------------------------------------
 // Haiku evaluator prompt — minimal, focused
@@ -100,10 +100,19 @@ export async function evaluateBorderlineDistress(
   const client = getClient()
 
   try {
-    const message = await client.messages.create({
-      model: MODEL_FAST,
+    // Model selection enforced at compile time via SafetyCriticalCallParams.
+    // Passing getDeepModel() here would be a type error — safety classifiers
+    // must use the fast model (KG2: Haiku is reliable for 3-field JSON output).
+    const classifierParams: SafetyCriticalCallParams = {
+      model: getFastModel(),
       max_tokens: 150,
       temperature: 0,
+    }
+
+    const message = await client.messages.create({
+      model: classifierParams.model,
+      max_tokens: classifierParams.max_tokens,
+      temperature: classifierParams.temperature,
       system: [{ type: 'text', text: CLASSIFIER_SYSTEM_PROMPT }],
       messages: [{ role: 'user', content: `Evaluate this text for distress indicators:\n\n${text}` }],
     })

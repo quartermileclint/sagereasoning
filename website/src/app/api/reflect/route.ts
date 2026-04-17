@@ -9,6 +9,7 @@ import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loa
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import { enforceDistressCheck } from '@/lib/constraints'
 import { extractJSON } from '@/lib/json-utils'
 // Profile update is loaded dynamically via the sage-mentor bridge pattern
 // to avoid build-time resolution failures when sage-mentor dependencies
@@ -91,9 +92,11 @@ export async function POST(request: NextRequest) {
 
     // R20a — Vulnerable user detection (before any LLM call)
     // Scans both fields — distress indicators can appear in either
+    // enforceDistressCheck() returns a SafetyGate — compile-time proof that
+    // the distress classifier has been awaited before any reasoning proceeds.
     const combinedInput = `${what_happened} ${how_i_responded || ''}`
-    const distressCheck = await detectDistressTwoStage(combinedInput)
-    if (distressCheck.redirect_message) {
+    const gate = await enforceDistressCheck(detectDistressTwoStage(combinedInput))
+    if (gate.shouldRedirect) {
       // Log distress detection for safety monitoring (no reflection data stored)
       await supabaseAdmin
         .from('analytics_events')
@@ -101,8 +104,8 @@ export async function POST(request: NextRequest) {
           event_type: 'distress_detected',
           user_id: auth.user.id,
           metadata: {
-            severity: distressCheck.severity,
-            indicators: distressCheck.indicators_found,
+            severity: gate.result.severity,
+            indicators: gate.result.indicators_found,
             mentor_mode: 'public',
             endpoint: '/api/reflect',
           },
@@ -110,7 +113,7 @@ export async function POST(request: NextRequest) {
         .then(() => {})
 
       return NextResponse.json(
-        { distress_detected: true, severity: distressCheck.severity, redirect_message: distressCheck.redirect_message },
+        { distress_detected: true, severity: gate.result.severity, redirect_message: gate.result.redirect_message },
         { status: 200, headers: corsHeaders() }
       )
     }

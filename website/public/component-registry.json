@@ -1,13 +1,12 @@
 {
-  "version": "1.1.0",
-  "lastUpdated": "2026-04-09",
-  "totalComponents": 155,
+  "version": "1.2.0",
+  "lastUpdated": "2026-04-18",
+  "totalComponents": 163,
   "statusSummary": {
-    "wired": 126,
+    "wired": 127,
     "designed": 5,
-    "verified": 22,
-    "live": 2,
-    "scoped": 0
+    "verified": 29,
+    "live": 2
   },
   "components": [
     {
@@ -2745,12 +2744,12 @@
         "logical",
         "heuristic"
       ],
-      "status": "wired",
-      "oldStatus": "scaffolded",
+      "status": "verified",
+      "oldStatus": "wired",
       "ext": ".ts",
       "path": "/website/src/lib/guardrails.ts",
       "desc": "Safety checks: R1 (therapeutic), R2 (employment), R20 (distress detection). Logical rules + heuristic pattern matching.",
-      "notes": "Functional guardrail logic connected to sage-guard and other tools.",
+      "notes": "Functional guardrail logic connected to sage-guard. R20a distress detection now uses enforceDistressCheck() gate pattern with branded SafetyGate token (verified 18 Apr 2026).",
       "deps": [
         "claude-api"
       ],
@@ -4139,18 +4138,29 @@
       "id": "api-mentor-profile",
       "name": "Mentor Profile Endpoint (GET/POST)",
       "type": "api",
-      "subtype": ["mentor"],
+      "subtype": [
+        "mentor"
+      ],
       "status": "wired",
       "oldStatus": "new",
       "ext": ".ts",
       "path": "/website/src/app/api/mentor-profile/route.ts",
       "desc": "GET returns encrypted MentorProfile from Supabase with text summary. POST seeds/updates profile with AES-256-GCM encryption. Falls back to static JSON if Supabase unavailable.",
       "notes": "Created 9 Apr 2026. Bridges journal extraction to baseline gap questions and weekly journal.",
-      "deps": ["supabase", "infra-encryption"],
-      "rules": ["R17b"],
+      "deps": [
+        "supabase",
+        "infra-encryption"
+      ],
+      "rules": [
+        "R17b"
+      ],
       "priority": "P0",
       "proximity": "",
-      "connects": ["engine-profile-store", "api-mentor-baseline", "api-mentor-journal-week"],
+      "connects": [
+        "engine-profile-store",
+        "api-mentor-baseline",
+        "api-mentor-journal-week"
+      ],
       "origin": "",
       "humanReady": "ready",
       "agentReady": "ready"
@@ -4159,18 +4169,32 @@
       "id": "api-mentor-baseline-response",
       "name": "Mentor Baseline Response Processor",
       "type": "api",
-      "subtype": ["mentor"],
+      "subtype": [
+        "mentor"
+      ],
       "status": "wired",
       "oldStatus": "new",
       "ext": ".ts",
       "path": "/website/src/app/api/mentor-baseline-response/route.ts",
       "desc": "Accepts practitioner's answers to gap detection questions. Reads profile from Supabase (encrypted), generates refinement notes via sage-reason. Returns confidence changes per dimension.",
       "notes": "Created 9 Apr 2026. Completes the gap-question feedback loop.",
-      "deps": ["claude-api", "supabase", "infra-encryption"],
-      "rules": ["R1", "R6d", "R7", "R17b"],
+      "deps": [
+        "claude-api",
+        "supabase",
+        "infra-encryption"
+      ],
+      "rules": [
+        "R1",
+        "R6d",
+        "R7",
+        "R17b"
+      ],
       "priority": "P0",
       "proximity": "",
-      "connects": ["api-mentor-profile", "engine-sage-reason"],
+      "connects": [
+        "api-mentor-profile",
+        "engine-sage-reason"
+      ],
       "origin": "",
       "humanReady": "ready",
       "agentReady": "ready"
@@ -4187,10 +4211,16 @@
       "desc": "AES-256-GCM encryption for profile data at rest in Supabase. Key from MENTOR_ENCRYPTION_KEY env var. Complements client-side encryption.ts.",
       "notes": "Created 9 Apr 2026. Used by mentor-profile-store for R17b compliance.",
       "deps": [],
-      "rules": ["R17b", "R17f"],
+      "rules": [
+        "R17b",
+        "R17f"
+      ],
       "priority": "P0",
       "proximity": "",
-      "connects": ["engine-profile-store", "infra-encryption"],
+      "connects": [
+        "engine-profile-store",
+        "infra-encryption"
+      ],
       "origin": "",
       "humanReady": "na",
       "agentReady": "na"
@@ -4199,18 +4229,29 @@
       "id": "engine-mentor-profile-store",
       "name": "Encrypted Profile Storage (Supabase)",
       "type": "engine",
-      "subtype": ["storage"],
+      "subtype": [
+        "storage"
+      ],
       "status": "wired",
       "oldStatus": "new",
       "ext": ".ts",
       "path": "/website/src/lib/mentor-profile-store.ts",
       "desc": "CRUD for mentor_profiles table with encryption. Encrypts full MentorProfile JSON before write, decrypts on read. Stores non-sensitive metadata in queryable columns.",
       "notes": "Created 9 Apr 2026. Table created in Supabase with RLS. Profile seeded and tested.",
-      "deps": ["supabase", "infra-encryption"],
-      "rules": ["R17b"],
+      "deps": [
+        "supabase",
+        "infra-encryption"
+      ],
+      "rules": [
+        "R17b"
+      ],
       "priority": "P0",
       "proximity": "",
-      "connects": ["api-mentor-profile", "api-mentor-baseline-response", "data-supabase-core"],
+      "connects": [
+        "api-mentor-profile",
+        "api-mentor-baseline-response",
+        "data-supabase-core"
+      ],
       "origin": "",
       "humanReady": "na",
       "agentReady": "na"
@@ -4230,10 +4271,225 @@
       "rules": [],
       "priority": "P0",
       "proximity": "",
-      "connects": ["infra-vercel"],
+      "connects": [
+        "infra-vercel"
+      ],
       "origin": "",
       "humanReady": "na",
       "agentReady": "ready"
+    },
+    {
+      "id": "infra-constraints",
+      "name": "Compile-Time Safety Constraints (constraints.ts)",
+      "type": "infra",
+      "subtype": [
+        "type-safety"
+      ],
+      "status": "verified",
+      "oldStatus": "scoped",
+      "ext": ".ts",
+      "path": "/website/src/lib/constraints.ts",
+      "desc": "Branded TypeScript types enforcing model selection and safety gate at compile time. FastModel/DeepModel branded strings, ModelReliabilityBoundary, SafetyCriticalCallParams (enforces FastModel + temperature:0), SafetyGate token, enforceDistressCheck() wrapper, selectModelByDepth().",
+      "notes": "Zero runtime overhead — brands exist only at type level. Verified: passing DeepModel to SafetyCriticalCallParams produces TS2322 compile error. All 8 human-facing POST routes use SafetyGate pattern (18 Apr 2026).",
+      "deps": [],
+      "rules": [
+        "R20"
+      ],
+      "priority": "P0",
+      "proximity": "",
+      "connects": [
+        "reasoning-guardrails",
+        "infra-r20a-classifier"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "infra-r20a-classifier",
+      "name": "R20a Distress Classifier (Two-Stage)",
+      "type": "infra",
+      "subtype": [
+        "safety",
+        "llm"
+      ],
+      "status": "verified",
+      "oldStatus": "wired",
+      "ext": ".ts",
+      "path": "/website/src/lib/r20a-classifier.ts",
+      "desc": "Two-stage distress detection: regex pattern matching (Stage 1) → Haiku LLM evaluator (Stage 2). Uses branded FastModel type via getFastModel(). Integrated with SafetyCriticalCallParams for compile-time temperature enforcement.",
+      "notes": "Regex stage verified against Zone 2 inputs (6/6 pass, zero false positives). Haiku stage untested (needs live API key). Cost tracking via r20a-cost-tracker.ts. Branded type integration verified 18 Apr 2026.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R20"
+      ],
+      "priority": "P2",
+      "proximity": "sage-like",
+      "connects": [
+        "infra-constraints",
+        "reasoning-guardrails"
+      ],
+      "origin": "",
+      "humanReady": "not-ready",
+      "agentReady": "na"
+    },
+    {
+      "id": "infra-invocation-guard-test",
+      "name": "R20a Invocation Guard Test",
+      "type": "infra",
+      "subtype": [
+        "testing"
+      ],
+      "status": "wired",
+      "oldStatus": "scoped",
+      "ext": ".ts",
+      "path": "/website/src/lib/__tests__/r20a-invocation-guard.test.ts",
+      "desc": "Jest test verifying detectDistressTwoStage is imported, called, and awaited in all 8 human-facing POST routes. Also verifies enforceDistressCheck gate import and call pattern.",
+      "notes": "Test source is correct (verified manually) but Jest config (jest.config.ts) does not exist in website directory. Test cannot run via npx jest. Needs ts-jest configuration to run in CI.",
+      "deps": [],
+      "rules": [
+        "R20"
+      ],
+      "priority": "P0",
+      "proximity": "",
+      "connects": [
+        "infra-r20a-classifier",
+        "infra-constraints"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "infra-eslint-config",
+      "name": "ESLint Safety-Critical Configuration",
+      "type": "infra",
+      "subtype": [
+        "build-tooling"
+      ],
+      "status": "verified",
+      "oldStatus": "scoped",
+      "ext": ".json",
+      "path": "/website/.eslintrc.json",
+      "desc": "ESLint configuration with next/core-web-vitals + @typescript-eslint plugin. Enforces no-unused-vars as error on 4 safety-critical files (guardrails.ts, r20a-classifier.ts, r20a-cost-tracker.ts, practitioner-context.ts).",
+      "notes": "Activates ESLint on Vercel builds. Plugin registration fix: @typescript-eslint must be in plugins array explicitly despite eslint-config-next making it resolvable. Verified 18 Apr 2026.",
+      "deps": [],
+      "rules": [],
+      "priority": "P0",
+      "proximity": "",
+      "connects": [
+        "infra-constraints",
+        "infra-husky-precommit"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "infra-husky-precommit",
+      "name": "Husky Pre-Commit Hook",
+      "type": "infra",
+      "subtype": [
+        "build-tooling"
+      ],
+      "status": "verified",
+      "oldStatus": "scoped",
+      "ext": ".sh",
+      "path": "/.husky/pre-commit",
+      "desc": "Two-stage pre-commit hook: (1) tsc --noEmit full codebase compilation, (2) ESLint on safety-critical files only. Graceful npx-missing fallback for machines without Node.js.",
+      "notes": "Hook warns-but-allows if npx not found (founder works through Cowork sandbox; Vercel provides hard enforcement). Verified 18 Apr 2026.",
+      "deps": [],
+      "rules": [],
+      "priority": "P0",
+      "proximity": "",
+      "connects": [
+        "infra-eslint-config"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "infra-r20a-classifier-eval",
+      "name": "R20a Classifier Evaluation Suite",
+      "type": "infra",
+      "subtype": [
+        "testing",
+        "safety"
+      ],
+      "status": "wired",
+      "oldStatus": "scoped",
+      "ext": ".ts",
+      "path": "/website/src/lib/__tests__/r20a-classifier-eval.ts",
+      "desc": "Evaluation inputs for the distress classifier across 4 groups: Group A (clinical crisis), Group B (philosophical), Group C (ambiguous), Group D (Clinton Zone 2 profile — shame, grief, catastrophising, interpersonal diagnosis, framework dependency, self-worth).",
+      "notes": "Group D (Zone 2) tested against regex stage: 6/6 pass, zero false positives. Full suite requires live API key for Haiku stage. Results documented in safety signal audit.",
+      "deps": [
+        "claude-api"
+      ],
+      "rules": [
+        "R20"
+      ],
+      "priority": "P2",
+      "proximity": "",
+      "connects": [
+        "infra-r20a-classifier"
+      ],
+      "origin": "",
+      "humanReady": "na",
+      "agentReady": "na"
+    },
+    {
+      "id": "governance-knowledge-gaps",
+      "name": "Knowledge Gaps Reference (KG1-KG7)",
+      "type": "governance",
+      "subtype": [
+        "protocol"
+      ],
+      "status": "verified",
+      "oldStatus": "scoped",
+      "ext": ".md",
+      "path": "/operations/knowledge-gaps.md",
+      "desc": "Living reference document tracking concepts that required 3+ re-explanations across sessions. 7 knowledge gaps documented: Vercel execution model, Haiku reliability boundary, build-to-wire gap, Layer 2 applicability, token budgets, composition order, systemic build-to-wire pattern.",
+      "notes": "Integrated into verification framework (Step 2: check knowledge-gaps.md). Carry-forward protocol in verification-framework.md. Verified 18 Apr 2026.",
+      "deps": [],
+      "rules": [],
+      "priority": "P0",
+      "proximity": "",
+      "connects": [
+        "governance-verification-framework"
+      ],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "na"
+    },
+    {
+      "id": "governance-safety-signal-audit",
+      "name": "Safety Signal Audit (Zone 2 Clinical Adjacency)",
+      "type": "governance",
+      "subtype": [
+        "audit"
+      ],
+      "status": "verified",
+      "oldStatus": "scoped",
+      "ext": ".md",
+      "path": "/operations/safety-signal-audits/2026-04-18-zone2-clinical-adjacency.md",
+      "desc": "Audit documenting Zone 2 (philosophical self-examination) clinical adjacency testing. Confirms regex stage correctly distinguishes founder's journal language from clinical crisis patterns.",
+      "notes": "6/6 Zone 2 inputs pass (severity: none). Boundary between Zone 2 and Zone 3 confirmed correctly calibrated. Haiku stage testing deferred to when API key available. Produced 18 Apr 2026.",
+      "deps": [],
+      "rules": [
+        "R20"
+      ],
+      "priority": "P2",
+      "proximity": "",
+      "connects": [
+        "infra-r20a-classifier-eval",
+        "infra-r20a-classifier"
+      ],
+      "origin": "",
+      "humanReady": "ready",
+      "agentReady": "na"
     }
   ]
 }

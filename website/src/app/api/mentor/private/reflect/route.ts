@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import { enforceDistressCheck } from '@/lib/constraints'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt } from '@/lib/reasoning-receipt'
 import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loader'
@@ -131,8 +132,8 @@ export async function POST(request: NextRequest) {
     // The graceful degradation path (JSON parse failure) must NOT suppress a distress flag —
     // distress is caught here before the LLM is ever called.
     const combinedInput = `${what_happened} ${how_i_responded || ''}`
-    const distressCheck = await detectDistressTwoStage(combinedInput)
-    if (distressCheck.redirect_message) {
+    const gate = await enforceDistressCheck(detectDistressTwoStage(combinedInput))
+    if (gate.shouldRedirect) {
       // Log the distress detection for safety monitoring (no reflection data stored)
       await supabaseAdmin
         .from('analytics_events')
@@ -140,8 +141,8 @@ export async function POST(request: NextRequest) {
           event_type: 'distress_detected',
           user_id: auth.user.id,
           metadata: {
-            severity: distressCheck.severity,
-            indicators: distressCheck.indicators_found,
+            severity: gate.result.severity,
+            indicators: gate.result.indicators_found,
             mentor_mode: 'private',
             endpoint: '/api/mentor/private/reflect',
           },
@@ -151,8 +152,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           distress_detected: true,
-          severity: distressCheck.severity,
-          redirect_message: distressCheck.redirect_message,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
         },
         { status: 200, headers: corsHeaders() }
       )

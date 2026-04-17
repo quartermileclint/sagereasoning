@@ -54,6 +54,10 @@ const HUMAN_FACING_POST_ROUTES = [
 const REQUIRED_FUNCTION = 'detectDistressTwoStage'
 const REQUIRED_IMPORT_SOURCE = 'r20a-classifier'
 
+// Task 3 addition: the safety gate wrapper that enforces synchronous execution
+const REQUIRED_GATE_FUNCTION = 'enforceDistressCheck'
+const REQUIRED_GATE_SOURCE = 'constraints'
+
 describe('R20a Safety Invocation Guard', () => {
   const websiteRoot = path.resolve(__dirname, '..', '..', '..')
 
@@ -112,10 +116,44 @@ describe('R20a Safety Invocation Guard', () => {
       const fullPath = path.join(websiteRoot, routePath)
       const source = fs.readFileSync(fullPath, 'utf-8')
 
-      // Look for `await detectDistressTwoStage` or `await detectDistressTwoStage(`
-      const hasAwaitedCall = /await\s+detectDistressTwoStage\s*\(/.test(source)
+      // Look for `await enforceDistressCheck(detectDistressTwoStage(` — the Task 3 pattern
+      // OR the original `await detectDistressTwoStage(` pattern for backward compatibility
+      const hasAwaitedCall =
+        /await\s+enforceDistressCheck\s*\(\s*detectDistressTwoStage\s*\(/.test(source) ||
+        /await\s+detectDistressTwoStage\s*\(/.test(source)
 
       expect(hasAwaitedCall).toBe(true)
     }
   })
+
+  test.each(HUMAN_FACING_POST_ROUTES)(
+    '%s imports enforceDistressCheck from constraints (Task 3 — synchronous enforcement)',
+    (routePath) => {
+      const fullPath = path.join(websiteRoot, routePath)
+      expect(fs.existsSync(fullPath)).toBe(true)
+
+      const source = fs.readFileSync(fullPath, 'utf-8')
+
+      // Check import of the safety gate wrapper
+      const hasGateImport =
+        source.includes('import') &&
+        source.includes(REQUIRED_GATE_FUNCTION) &&
+        source.includes(REQUIRED_GATE_SOURCE)
+
+      expect(hasGateImport).toBe(true)
+    }
+  )
+
+  test.each(HUMAN_FACING_POST_ROUTES)(
+    '%s calls enforceDistressCheck wrapping detectDistressTwoStage (Task 3 — compile-time gate)',
+    (routePath) => {
+      const fullPath = path.join(websiteRoot, routePath)
+      const source = fs.readFileSync(fullPath, 'utf-8')
+
+      // The enforceDistressCheck(detectDistressTwoStage(...)) pattern must be present
+      const hasGateCall = /enforceDistressCheck\s*\(\s*detectDistressTwoStage\s*\(/.test(source)
+
+      expect(hasGateCall).toBe(true)
+    }
+  )
 })
