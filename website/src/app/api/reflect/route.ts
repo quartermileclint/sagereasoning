@@ -8,7 +8,7 @@ import { extractReceipt } from '@/lib/reasoning-receipt'
 import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
-import { detectDistress } from '@/lib/guardrails'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
 import { extractJSON } from '@/lib/json-utils'
 // Profile update is loaded dynamically via the sage-mentor bridge pattern
 // to avoid build-time resolution failures when sage-mentor dependencies
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     // R20a — Vulnerable user detection (before any LLM call)
     // Scans both fields — distress indicators can appear in either
     const combinedInput = `${what_happened} ${how_i_responded || ''}`
-    const distressCheck = detectDistress(combinedInput)
+    const distressCheck = await detectDistressTwoStage(combinedInput)
     if (distressCheck.redirect_message) {
       // Log distress detection for safety monitoring (no reflection data stored)
       await supabaseAdmin

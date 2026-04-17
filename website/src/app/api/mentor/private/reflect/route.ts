@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
-import { detectDistress } from '@/lib/guardrails'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt } from '@/lib/reasoning-receipt'
 import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loader'
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
     // The graceful degradation path (JSON parse failure) must NOT suppress a distress flag —
     // distress is caught here before the LLM is ever called.
     const combinedInput = `${what_happened} ${how_i_responded || ''}`
-    const distressCheck = detectDistress(combinedInput)
+    const distressCheck = await detectDistressTwoStage(combinedInput)
     if (distressCheck.redirect_message) {
       // Log the distress detection for safety monitoring (no reflection data stored)
       await supabaseAdmin

@@ -8,7 +8,7 @@ import { MODEL_FAST, MODEL_DEEP } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
-import { detectDistress } from '@/lib/guardrails'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
 
 /**
  * sage-scenario (score-scenario) — Ethical-dilemma generator + response scorer.
@@ -261,7 +261,7 @@ export async function POST(request: NextRequest) {
     }
 
     // R20a — Vulnerable user detection (before any LLM call)
-    const distressCheck = detectDistress(response)
+    const distressCheck = await detectDistressTwoStage(response)
     if (distressCheck.redirect_message) {
       return NextResponse.json(
         { distress_detected: true, severity: distressCheck.severity, redirect_message: distressCheck.redirect_message },

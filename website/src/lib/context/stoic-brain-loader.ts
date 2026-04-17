@@ -26,8 +26,10 @@ import {
   STOIC_BRAIN_FOUNDATIONS,
 } from '@/data/stoic-brain-compiled'
 
-// Define locally to avoid circular dependency with sage-reason-engine.ts
-type ReasonDepth = 'quick' | 'standard' | 'deep'
+// SOURCE OF TRUTH: depth-constants.ts. Do not define ReasonDepth here.
+// (Previously duplicated here to avoid circular dependency with sage-reason-engine.ts —
+// resolved by extracting to depth-constants.ts per audit finding F5.)
+import type { ReasonDepth } from '@/lib/depth-constants'
 
 // =============================================================================
 // MECHANISM-SPECIFIC CONTEXT BUILDERS
@@ -202,15 +204,8 @@ const MECHANISM_LOADERS: Record<string, () => string> = {
   iterative_refinement: getIterativeRefinementContext,
 }
 
-/**
- * Which mechanisms are included at each depth level.
- * Mirrors DEPTH_MECHANISMS from sage-reason-engine.ts.
- */
-const DEPTH_MECHANISMS: Record<ReasonDepth, string[]> = {
-  quick: ['control_filter', 'passion_diagnosis', 'oikeiosis'],
-  standard: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
-  deep: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment', 'iterative_refinement'],
-}
+// SOURCE OF TRUTH: depth-constants.ts. Do not define DEPTH_MECHANISMS here.
+import { DEPTH_MECHANISMS } from '@/lib/depth-constants'
 
 /**
  * Get combined Stoic Brain context for a given depth level.

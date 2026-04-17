@@ -19,7 +19,7 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { getSkillById } from '@/lib/skill-registry'
 import { runSageReason } from '@/lib/sage-reason-engine'
-import { detectDistress } from '@/lib/guardrails'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
 import { getProjectContext, type ProjectContextLevel } from '@/lib/context/project-context'
 
 export type ContextTemplateConfig = {
@@ -109,7 +109,7 @@ export function createContextTemplateHandler(config: ContextTemplateConfig) {
       }
 
       // R20a — Vulnerable user detection (before any LLM call)
-      const distressCheck = detectDistress(formatted.input)
+      const distressCheck = await detectDistressTwoStage(formatted.input)
       if (distressCheck.redirect_message) {
         return NextResponse.json(
           { distress_detected: true, severity: distressCheck.severity, redirect_message: distressCheck.redirect_message },

@@ -4,7 +4,7 @@ import { runSageReason, type ReasonDepth } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
-import { detectDistress } from '@/lib/guardrails'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
 
 // =============================================================================
 // sage-reason — The Universal Reasoning Layer
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     if (domainErr) return NextResponse.json({ error: domainErr }, { status: 400 })
 
     // R20a — Vulnerable user detection (before any LLM call)
-    const distressCheck = detectDistress(input)
+    const distressCheck = await detectDistressTwoStage(input)
     if (distressCheck.redirect_message) {
       return NextResponse.json(
         { distress_detected: true, severity: distressCheck.severity, redirect_message: distressCheck.redirect_message },

@@ -39,7 +39,9 @@ export { getClient }
 // TYPES
 // =============================================================================
 
-export type ReasonDepth = 'quick' | 'standard' | 'deep'
+// SOURCE OF TRUTH: depth-constants.ts. Do not define ReasonDepth here.
+export type { ReasonDepth } from '@/lib/depth-constants'
+import type { ReasonDepth } from '@/lib/depth-constants'
 
 export interface ReasonInput {
   input: string
@@ -123,14 +125,9 @@ export interface ReasonResult {
 // DEPTH CONFIGURATION
 // =============================================================================
 
-/**
- * Map depth to the mechanisms included.
- */
-export const DEPTH_MECHANISMS: Record<ReasonDepth, string[]> = {
-  quick: ['control_filter', 'passion_diagnosis', 'oikeiosis'],
-  standard: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment'],
-  deep: ['control_filter', 'passion_diagnosis', 'oikeiosis', 'value_assessment', 'kathekon_assessment', 'iterative_refinement'],
-}
+// SOURCE OF TRUTH: depth-constants.ts. Do not define DEPTH_MECHANISMS here.
+export { DEPTH_MECHANISMS } from '@/lib/depth-constants'
+import { DEPTH_MECHANISMS } from '@/lib/depth-constants'
 
 // =============================================================================
 // SYSTEM PROMPTS — One per depth level (R4: server-side only)
@@ -483,35 +480,69 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
   const latencyMs = Date.now() - startTime
   const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
 
-  // Parse JSON response — extract the JSON object from whatever wrapping the model adds
+  // Parse JSON response — with unified retry on failure (F2 + F4 fix)
+  // All depths get one retry. Quick escalates Haiku→Sonnet. Standard/deep retry same model.
+  // Second failure returns a structured error response, NOT a 500.
   let evalData
   let actualModel = config.model
+  let retried = false
   try {
     evalData = extractJSON(responseText)
   } catch {
-    // Haiku→Sonnet retry: if quick depth with MODEL_FAST failed to produce parseable JSON,
-    // retry once with MODEL_DEEP (Sonnet) which is reliable across all input types.
-    if (depth === 'quick' && config.model === MODEL_FAST) {
-      console.warn('sage-reason-engine: Quick depth parse failed — retrying with Sonnet')
+    // Retry once: quick escalates to Sonnet, standard/deep retries same model
+    const retryModel = (depth === 'quick' && config.model === MODEL_FAST) ? MODEL_DEEP : config.model
+    console.warn(
+      `sage-reason-engine: Parse failed at depth '${depth}' (${config.model}). ` +
+      `Retrying with ${retryModel}. Input length: ${params.input.length}, response length: ${responseText.length}`
+    )
+
+    try {
       const retryMessage = await client.messages.create({
-        model: MODEL_DEEP,
+        model: retryModel,
         max_tokens: config.maxTokens,
         temperature: 0.2,
         system: systemMessages,
         messages: [{ role: 'user', content: userMessage }],
       })
       const retryText = retryMessage.content[0].type === 'text' ? retryMessage.content[0].text : ''
-      try {
-        evalData = extractJSON(retryText)
-        actualModel = MODEL_DEEP
-      } catch {
-        console.error('sage-reason-engine: Sonnet retry also failed to parse:', retryText)
-        throw new Error('Reasoning engine returned invalid JSON response')
+      evalData = extractJSON(retryText)
+      actualModel = retryModel
+      retried = true
+    } catch (retryError) {
+      // Second failure — return structured error, NOT a 500
+      console.error(
+        `sage-reason-engine: Retry also failed at depth '${depth}'. ` +
+        `Model: ${config.model}. Input length: ${params.input.length}.`,
+        retryError instanceof Error ? retryError.message : retryError
+      )
+      return {
+        result: {
+          error: 'reasoning_parse_failure',
+          error_detail: 'The reasoning engine could not produce a valid evaluation for this input. Please try rephrasing or using a different depth level.',
+          depth,
+          model: config.model,
+          input_length: params.input.length,
+          disclaimer: EVALUATIVE_DISCLAIMER,
+        },
+        meta: {
+          endpoint: '/api/reason',
+          depth,
+          mechanisms_applied: DEPTH_MECHANISMS[depth],
+          mechanism_count: DEPTH_MECHANISMS[depth].length,
+          ai_generated: false,
+          ai_model: config.model,
+          latency_ms: Date.now() - startTime,
+        },
       }
-    } else {
-      console.error('sage-reason-engine: Failed to parse response:', responseText)
-      throw new Error('Reasoning engine returned invalid JSON response')
     }
+  }
+
+  // Log retry for cost visibility (F4)
+  if (retried) {
+    console.warn(
+      `sage-reason-engine: Retry succeeded. depth=${depth}, original_model=${config.model}, ` +
+      `retry_model=${actualModel}, input_length=${params.input.length}`
+    )
   }
 
   // Diagnostic validation — log warnings for unexpected shapes without throwing.
