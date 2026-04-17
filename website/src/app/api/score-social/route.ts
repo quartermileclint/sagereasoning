@@ -47,26 +47,6 @@ import { detectDistressTwoStage } from '@/lib/r20a-classifier'
  *   - operations/session-handoffs/2026-04-15-layer3-wiring.md  (L3 wired here)
  */
 
-// V3 Social Media Evaluation Response Type
-interface _V3SocialMediaScore {
-  poster_passions: Array<{
-    root_passion: string
-    sub_species: string
-    evidence: string
-    false_judgement: string
-  }>
-  reader_triggered_passions: Array<{
-    root_passion: string
-    sub_species: string
-    evidence: string
-    false_judgement: string
-  }>
-  false_judgements: string[]
-  corrections: string[]
-  katorthoma_proximity: KatorthomaProximityLevel
-  disclaimer: string
-}
-
 // Determine publish recommendation based on proximity level
 function getPublishRecommendation(proximity: KatorthomaProximityLevel): 'publish' | 'revise' | 'reconsider' {
   if (proximity === 'sage_like' || proximity === 'principled') {

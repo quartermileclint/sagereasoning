@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# ============================================================================
+# SageReasoning Pre-Commit Hook
+#
+# Two checks, in order:
+#   1. TypeScript compilation (full codebase) — catches unused code, type
+#      errors, and anything noUnusedLocals/noUnusedParameters surfaces.
+#   2. ESLint on safety-critical files only — extra guard on R20a modules.
+#
+# If either fails, the commit is blocked. Fix the error, re-stage, commit.
+#
+# Requires Node.js. If npx is not found (e.g. GitHub Desktop on a machine
+# without Node in PATH), the hook prints a warning and allows the commit.
+# The tsconfig flags and invocation tests provide the primary protection;
+# this hook is an additional enforcement layer.
+#
+# Emergency escape: git commit --no-verify (use sparingly, document why)
+# ============================================================================
+
+# Check if npx is available
+if ! command -v npx >/dev/null 2>&1; then
+  echo "Pre-commit: WARNING — npx not found. Safety checks skipped."
+  echo "  Install Node.js to enable compile-time verification on commit."
+  echo "  The tsconfig.json flags still enforce at build time on Vercel."
+  exit 0
+fi
+
+echo "Pre-commit: TypeScript compilation check..."
+cd website && npx tsc --noEmit
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "TypeScript compilation failed. Fix errors above before committing."
+  exit 1
+fi
+
+echo "Pre-commit: ESLint safety-critical modules..."
+npx eslint \
+  src/lib/guardrails.ts \
+  src/lib/r20a-classifier.ts \
+  src/lib/r20a-cost-tracker.ts \
+  src/lib/context/practitioner-context.ts
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "ESLint found issues in safety-critical files. Fix before committing."
+  exit 1
+fi
+
+echo "Pre-commit checks passed."

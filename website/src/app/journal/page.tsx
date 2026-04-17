@@ -9,13 +9,6 @@ import { authFetch } from '@/lib/auth-fetch'
 
 type StorageMode = 'cloud' | 'local' | null
 
-interface _JournalProgress {
-  currentDay: number
-  completedDays: number[]
-  streak: number
-  storageMode: StorageMode
-}
-
 interface LocalEntry {
   day: number
   text: string
@@ -335,7 +328,6 @@ export default function JournalPage() {
   const allComplete = completedDays.length >= TOTAL_JOURNAL_DAYS
 
   // ─── Calculate streak ───
-  const _today = new Date().toISOString().slice(0, 10)
   // Streak would be computed from the calendar stamps — simplified here
 
   return (

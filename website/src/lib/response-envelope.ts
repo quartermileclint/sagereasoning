@@ -86,7 +86,7 @@ export type ApiResponseEnvelope<T = unknown> = {
  * This function estimates the customer-facing price for response metadata.
  * Actual billing should reference skill-registry.ts prices directly.
  */
-export function estimateCostUsd(model: string, maxTokens: number): number {
+export function estimateCostUsd(model: string, _maxTokens: number): number {
   if (model.includes('haiku')) {
     // sage-guard: $0.0025 per call (competitor-anchored)
     return 0.0025

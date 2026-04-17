@@ -185,7 +185,6 @@ Return only the JSON evaluation object.`
       // Check cache for identical initial actions
       const ck = cacheKey('/api/score-iterate/initial', { action: action.trim(), context: context?.trim(), relationships: relationships?.trim(), emotional_state: emotional_state?.trim() })
       let evalData = cacheGet(ck) as Record<string, any> | undefined
-      let _fromCache = !!evalData
 
       // Layer 1: Stoic Brain context (agent-facing — standard depth); Layer 3 added above.
       const stoicBrainContext = getStoicBrainContext('standard')

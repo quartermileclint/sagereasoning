@@ -347,7 +347,6 @@ function findRelevantMaxim(
   if (!enrichment?.maxims || enrichment.maxims.length === 0) return null
 
   const primaryVirtues = selection.primary.connected_virtues
-  const _primaryPassions = selection.primary.connected_passions
 
   // Try virtue match first
   const virtueMatch = enrichment.maxims.find(

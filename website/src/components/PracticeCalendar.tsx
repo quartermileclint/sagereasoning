@@ -29,15 +29,6 @@ interface PracticeCalendarProps {
   userId: string
 }
 
-// Proximity rank mapping for stamp logic
-const PROXIMITY_RANK = {
-  reflexive: 0,
-  habitual: 1,
-  deliberate: 2,
-  principled: 3,
-  sage_like: 4,
-}
-
 // Proximity label mapping for display
 const PROXIMITY_LABELS: Record<string, string> = {
   reflexive: 'Reflexive',
@@ -213,9 +204,7 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
             const isFuture = new Date(year, month, day) > today
             const strongestVirtue = dayData?.strongest_virtue ? VIRTUE_MAP[dayData.strongest_virtue] : null
             const hasStamp = dayData?.stamp_earned ?? false
-            const _proximityRank = dayData ? PROXIMITY_RANK[dayData.best_proximity] : -1
             const proximityLabel = dayData ? PROXIMITY_LABELS[dayData.best_proximity] : ''
-            const _proximityColor = dayData ? PROXIMITY_COLORS[dayData.best_proximity] : ''
 
             return (
               <button

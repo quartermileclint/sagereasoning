@@ -231,7 +231,6 @@ export function getReactiveEnforcement(
   previousAuthority: AuthorityLevel
 ): ReactiveEnforcement {
   const currentDef = getAuthorityFromRecord(record)
-  const _previousDef = AUTHORITY_DEFINITIONS.find(d => d.level === previousAuthority)!
 
   // Increase check rate temporarily (1.5x the new level's rate, min 25%)
   const enhancedRate = Math.max(0.25, currentDef.pre_check_rate * 1.5)

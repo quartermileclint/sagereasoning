@@ -17,7 +17,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { MODEL_FAST, MODEL_DEEP, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
-import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { extractJSON } from '@/lib/json-utils'
 
 // =============================================================================

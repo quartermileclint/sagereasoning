@@ -4,7 +4,6 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import {
   V3_DOCUMENT_SCORING_PROMPT,
   V3_POLICY_SCORING_PROMPT,
-  PROXIMITY_COLORS,
   PROXIMITY_ENGLISH,
   DOCUMENT_EVALUATIVE_DISCLAIMER,
 } from '@/lib/document-scorer'
@@ -257,7 +256,6 @@ export async function POST(request: NextRequest) {
     const scoreId = record?.id || 'preview'
     const badgeUrl = `${BASE_URL}/api/badge/${scoreId}`
     const proximityLabel = PROXIMITY_ENGLISH[proximity]
-    const _proximityColor = PROXIMITY_COLORS[proximity]
     const embedHtml = `<a href="${BASE_URL}/score/${scoreId}" target="_blank" rel="noopener"><img src="${badgeUrl}" alt="Stoic Evaluation: ${proximityLabel}" height="40" /></a>`
 
     // Build response object

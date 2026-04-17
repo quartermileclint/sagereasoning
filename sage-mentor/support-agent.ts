@@ -44,7 +44,6 @@ import {
   registerInnerAgent,
   getInnerAgent,
   executeBefore,
-  executeAfter,
 } from './ring-wrapper'
 
 import {

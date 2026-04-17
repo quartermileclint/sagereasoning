@@ -23,8 +23,6 @@ import * as crypto from 'crypto'
 const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 12 // 12 bytes for AES-GCM
 const AUTH_TAG_LENGTH = 16 // 16 bytes authentication tag
-const KEY_LENGTH = 32 // 256 bits
-
 export interface ServerEncryptedPayload {
   /** Base64-encoded ciphertext */
   ciphertext: string

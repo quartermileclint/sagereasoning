@@ -1127,13 +1127,6 @@ export function normaliseProfileData(profile: RawRecord): RawRecord {
  * R4: Server-side extraction logic — comments note IP ownership
  */
 export function buildLayer2Prompt(chunk: InterpreterChunk): string {
-  const _entriesText = chunk.entries
-    .map((e, idx) => {
-      const ref = e.page_or_entry ? `${e.page_or_entry}` : `${idx + 1}`
-      return `[${ref}] ${e.response.substring(0, 200)}...`
-    })
-    .join('\n')
-
   return `You are analyzing the META-COGNITIVE STYLE (how the person thinks, not what they think).
 
 SECTION: "${chunk.original_section}"
