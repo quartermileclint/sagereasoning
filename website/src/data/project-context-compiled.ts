@@ -5,17 +5,19 @@
  * optimised for LLM context injection. These are STATIC baselines — dynamic state
  * (current phase, recent decisions) is layered on by project-context.ts at runtime.
  *
- * Four context levels for different endpoint groups:
- *   - 'full':      All fields — for Sage Ops (P7) and founder-only endpoints
- *   - 'summary':   Identity + phase + recent context — for Mentor endpoints
- *   - 'condensed': Phase + decisions only — for Operational endpoints
- *   - 'minimal':   Identity + ethical commitments — for Human-facing tools
+ * Five context levels for different endpoint groups (ordered by token size):
+ *   - 'full':          All fields — for Sage Ops (P7) and founder-only endpoints
+ *   - 'summary':       Identity + phase + recent context — for Mentor endpoints
+ *   - 'minimal':       Identity + ethical commitments — for Human-facing tools
+ *   - 'condensed':     Phase + decisions only — for Operational endpoints
+ *   - 'identity_only': Identity string only — true minimum
  *
- * Token budget targets:
- *   - minimal:    ~150 tokens (used at quick depth)
- *   - condensed:  ~200 tokens
- *   - summary:    ~250 tokens
- *   - full:       ~400 tokens (used at deep depth)
+ * Token budget targets (measured):
+ *   - identity_only: ~50 tokens
+ *   - condensed:  ~139 tokens
+ *   - minimal:    ~222 tokens (⚠️ F13: name inverted — larger than condensed)
+ *   - summary:    ~180 tokens
+ *   - full:       ~500+ tokens
  *
  * Last updated: 2026-04-16
  */

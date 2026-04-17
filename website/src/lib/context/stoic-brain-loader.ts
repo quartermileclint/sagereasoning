@@ -208,7 +208,25 @@ const MECHANISM_LOADERS: Record<string, () => string> = {
 import { DEPTH_MECHANISMS } from '@/lib/depth-constants'
 
 /**
+ * Token budget ceilings per depth level (chars ≈ tokens × 4).
+ * These match the architectural decisions extract:
+ *   quick ~995 tokens (~3980 chars), ceiling 3000 tokens (12000 chars)
+ *   standard ~1538 tokens (~6152 chars), ceiling 6000 tokens (24000 chars)
+ *   deep ~2007 tokens (~8028 chars), ceiling 6000 tokens (24000 chars)
+ *
+ * F15: We warn at the design budget and hard-log at the ceiling.
+ */
+const TOKEN_BUDGET_CHARS: Record<ReasonDepth, { design: number; ceiling: number }> = {
+  quick:    { design: 3980,  ceiling: 12000 },
+  standard: { design: 6152,  ceiling: 24000 },
+  deep:     { design: 8028,  ceiling: 24000 },
+}
+
+/**
  * Get combined Stoic Brain context for a given depth level.
+ *
+ * F15: Includes runtime character-count check against token budgets.
+ * Warns if context exceeds the design budget. Logs error if it exceeds the ceiling.
  *
  * @param depth - 'quick' | 'standard' | 'deep'
  * @returns Formatted context string ready for system prompt injection
@@ -222,7 +240,26 @@ export function getStoicBrainContext(depth: ReasonDepth): string {
     })
     .filter(Boolean)
 
-  return sections.join('\n\n---\n\n')
+  const result = sections.join('\n\n---\n\n')
+
+  // F15: Runtime token budget enforcement
+  const budget = TOKEN_BUDGET_CHARS[depth]
+  const charCount = result.length
+  if (charCount > budget.ceiling) {
+    console.error(
+      `[stoic-brain-loader] OVER CEILING: ${depth} context is ${charCount} chars ` +
+      `(≈${Math.round(charCount / 4)} tokens), ceiling is ${budget.ceiling} chars ` +
+      `(≈${Math.round(budget.ceiling / 4)} tokens). This WILL exceed max_tokens.`
+    )
+  } else if (charCount > budget.design) {
+    console.warn(
+      `[stoic-brain-loader] Over design budget: ${depth} context is ${charCount} chars ` +
+      `(≈${Math.round(charCount / 4)} tokens), design budget is ${budget.design} chars ` +
+      `(≈${Math.round(budget.design / 4)} tokens). Consider condensing mechanism loaders.`
+    )
+  }
+
+  return result
 }
 
 /**

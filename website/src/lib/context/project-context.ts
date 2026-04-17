@@ -33,7 +33,21 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 // TYPES
 // =============================================================================
 
-export type ProjectContextLevel = 'full' | 'summary' | 'condensed' | 'minimal'
+/**
+ * Project context levels, ordered by token size (largest → smallest):
+ *
+ *   full       ~500+ tokens   All fields including ethics, tensions, all decisions
+ *   summary    ~180 tokens    Identity + phase + 3 decisions + founder role
+ *   minimal    ~222 tokens    Identity + ethical commitments (⚠️ NAMING INVERSION: larger than condensed)
+ *   condensed  ~139 tokens    Phase + 2 recent decisions only
+ *   identity_only ~50 tokens  Identity string only — true minimum
+ *
+ * F13 NOTE: 'minimal' > 'condensed' in token count. The names are historically
+ * inverted. A breaking rename is deferred to a major version. New code should
+ * prefer 'identity_only' when the true minimum is needed, or 'condensed' for
+ * the lightest operational context.
+ */
+export type ProjectContextLevel = 'full' | 'summary' | 'condensed' | 'minimal' | 'identity_only'
 
 interface ProjectBaseline {
   identity: string
@@ -192,11 +206,21 @@ Recent decisions: ${recentDecisions.join('; ')}`
 /**
  * Minimal project context — for Human-facing tools.
  * Identity + ethical commitments only.
+ * ~222 tokens (⚠️ larger than condensed — see F13 naming note on type def)
  */
 function buildMinimalContext(): string {
   return `PROJECT CONTEXT (minimal):
 ${baseline.identity}
 Ethical commitments: ${Object.values(baseline.ethical_commitments).join(' ')}`
+}
+
+/**
+ * Identity-only project context — true minimum.
+ * Just the identity string, no ethical commitments, no phase, no decisions.
+ * ~50 tokens. Use when LLM needs to know WHO but not WHAT or WHY.
+ */
+function buildIdentityOnlyContext(): string {
+  return `PROJECT CONTEXT: ${baseline.identity}`
 }
 
 // =============================================================================
@@ -210,10 +234,9 @@ Ethical commitments: ${Object.values(baseline.ethical_commitments).join(' ')}`
  * @returns Formatted context string ready for LLM injection
  */
 export async function getProjectContext(level: ProjectContextLevel): Promise<string> {
-  if (level === 'minimal') {
-    // Minimal uses only static data — no Supabase read needed
-    return buildMinimalContext()
-  }
+  // Static-only levels — no Supabase read needed
+  if (level === 'minimal') return buildMinimalContext()
+  if (level === 'identity_only') return buildIdentityOnlyContext()
 
   const dynamic = await loadDynamicState()
 
@@ -231,8 +254,9 @@ export async function getProjectContext(level: ProjectContextLevel): Promise<str
 
 /**
  * Synchronous minimal context — for endpoints that can't await.
- * Returns only static baseline data.
+ * Returns only static baseline data. Supports 'minimal' and 'identity_only'.
  */
-export function getProjectContextSync(level: 'minimal'): string {
+export function getProjectContextSync(level: 'minimal' | 'identity_only'): string {
+  if (level === 'identity_only') return buildIdentityOnlyContext()
   return buildMinimalContext()
 }
