@@ -488,7 +488,7 @@ export default function ApiDocsPage() {
           </div>
           <div>
             <span className="font-display font-medium text-sage-800">Is Kathekon</span>
-            <p className="font-body text-sm text-sage-700">Boolean indicator of whether the action expresses the appropriate action given the context, virtue principles, and one's rational nature.</p>
+            <p className="font-body text-sm text-sage-700">Boolean indicator of whether the action expresses the appropriate action given the context, virtue principles, and one&apos;s rational nature.</p>
           </div>
           <div>
             <span className="font-display font-medium text-sage-800">Kathekon Quality</span>

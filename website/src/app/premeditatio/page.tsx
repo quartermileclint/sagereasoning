@@ -172,7 +172,7 @@ export default function PremeditatioPage() {
             Premeditatio Malorum
           </h1>
           <p className="font-body text-sage-500">
-            Weekly practice: anticipate what's ahead, identify the false impression,
+            Weekly practice: anticipate what&apos;s ahead, identify the false impression,
             hold the correct judgement in advance.
           </p>
         </div>
@@ -253,7 +253,7 @@ export default function PremeditatioPage() {
       {showForm ? (
         <form onSubmit={handleSubmit} className="bg-white border border-sage-200 rounded-lg p-6 mb-6">
           <h2 className="font-display text-lg font-medium text-sage-800 mb-4">
-            This Week's Premeditatio
+            This Week&apos;s Premeditatio
           </h2>
 
           {/* Anticipated event */}
@@ -315,7 +315,7 @@ export default function PremeditatioPage() {
             <label className="font-display text-sm font-medium text-sage-600 block mb-1">
               Avoidance behaviour tag
               <span className="font-body text-xs text-sage-400 ml-2">
-                Optional — tag a behaviour you've been avoiding
+                Optional — tag a behaviour you&apos;ve been avoiding
               </span>
             </label>
             <input
