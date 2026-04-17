@@ -97,6 +97,7 @@ export default function ScoreActionPage() {
 
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<V3EvaluationResult | null>(null)
+  const [distressRedirect, setDistressRedirect] = useState<{ severity: string; redirect_message: string } | null>(null)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -125,6 +126,7 @@ export default function ScoreActionPage() {
     e.preventDefault()
     setLoading(true)
     setResult(null)
+    setDistressRedirect(null)
     setSaved(false)
 
     try {
@@ -142,7 +144,16 @@ export default function ScoreActionPage() {
 
       const envelope = await response.json()
       // API returns { result, meta } envelope — unwrap to get the evaluation data
-      const evalResult: V3EvaluationResult = envelope.result ?? envelope
+      const data = envelope.result ?? envelope
+
+      // R20a: Check for distress detection redirect before rendering evaluation
+      if (data.distress_detected) {
+        setDistressRedirect({ severity: data.severity, redirect_message: data.redirect_message })
+        setLoading(false)
+        return
+      }
+
+      const evalResult: V3EvaluationResult = data
       setResult(evalResult)
 
       trackEvent({
@@ -377,6 +388,25 @@ export default function ScoreActionPage() {
           </p>
         )}
       </form>
+
+      {/* ─── R20a: Distress Redirect ─── */}
+      {distressRedirect && (
+        <div className="bg-white border-2 border-amber-300 rounded-lg p-8 mb-12">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+              <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-display text-lg font-medium text-sage-800 mb-3">We want to make sure you are okay</h3>
+              <div className="font-body text-sage-700 leading-relaxed whitespace-pre-line">
+                {distressRedirect.redirect_message}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── V3 Output Display (P3.2) ─── */}
       {result && proximityLevel && proximityDisplay && (

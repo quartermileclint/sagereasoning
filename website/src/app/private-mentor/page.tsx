@@ -170,6 +170,19 @@ export default function PrivateMentorPage() {
         throw new Error(data.error || 'Failed to get mentor response');
       }
 
+      // R20a — distress detection: show support message instead of evaluation
+      if (data.distress_detected) {
+        const supportMessage: Message = {
+          id: `msg-${Date.now()}-support`,
+          type: 'insight',
+          content: `❤️ We want to make sure you are okay.\n\n${data.redirect_message}`,
+          timestamp: formatTime(),
+        };
+        setMessages((prev) => [...prev, supportMessage]);
+        setIsLoading(false);
+        return;
+      }
+
       // Store conversation ID for subsequent messages
       if (data.conversation_id && !conversationId) {
         setConversationId(data.conversation_id);
@@ -224,6 +237,21 @@ export default function PrivateMentorPage() {
         }),
       });
       const data = await res.json();
+
+      // R20a — distress detection: show support message instead of evaluation
+      if (data.distress_detected || data?.result?.distress_detected) {
+        const redirectData = data.distress_detected ? data : data.result;
+        const supportMessage: Message = {
+          id: `msg-${Date.now()}-support`,
+          type: 'insight',
+          content: `❤️ We want to make sure you are okay.\n\n${redirectData.redirect_message}`,
+          timestamp: formatTime(),
+        };
+        setMessages((prev) => [...prev, supportMessage]);
+        textarea.value = '';
+        setIsLoading(false);
+        return;
+      }
 
       // Extract the rich response from the private reflect endpoint
       const result = data?.result || data;

@@ -78,6 +78,7 @@ export default function ScenariosPage() {
   const [loading, setLoading] = useState(false)
   const [loadingScenario, setLoadingScenario] = useState(false)
   const [result, setResult] = useState<V3ScenarioResult | null>(null)
+  const [distressRedirect, setDistressRedirect] = useState<{ severity: string; redirect_message: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [step, setStep] = useState<'setup' | 'respond' | 'result'>('setup')
 
@@ -109,6 +110,7 @@ export default function ScenariosPage() {
 
     setLoading(true)
     setError(null)
+    setDistressRedirect(null)
 
     try {
       const res = await authFetch('/api/score-scenario', {
@@ -128,6 +130,14 @@ export default function ScenariosPage() {
       const envelope = await res.json()
       // API returns { result, meta } envelope — unwrap to get evaluation data
       const data = envelope.result ?? envelope
+
+      // R20a — distress detection: show redirect instead of evaluation
+      if (data.distress_detected) {
+        setDistressRedirect({ severity: data.severity, redirect_message: data.redirect_message })
+        setLoading(false)
+        return
+      }
+
       setResult(data)
       setStep('result')
     } catch (err) {
@@ -223,6 +233,28 @@ export default function ScenariosPage() {
               className="w-full py-3 bg-sage-800 text-white font-display text-lg rounded-lg hover:bg-sage-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Evaluating...' : 'Submit My Response'}
+            </button>
+          </div>
+        )}
+
+        {/* R20a — Distress redirect */}
+        {distressRedirect && (
+          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-8 text-center space-y-4">
+            <div className="text-4xl">❤️</div>
+            <h2 className="font-display text-2xl text-red-800">We want to make sure you are okay</h2>
+            <p className="font-body text-red-700 whitespace-pre-line">{distressRedirect.redirect_message}</p>
+            <button
+              onClick={() => {
+                setDistressRedirect(null)
+                setResult(null)
+                setStep('setup')
+                setScenario(null)
+                setSelectedOption(null)
+                setCustomResponse('')
+              }}
+              className="mt-4 px-6 py-3 bg-sage-800 text-white font-display rounded-lg hover:bg-sage-700 transition-colors"
+            >
+              Start Over
             </button>
           </div>
         )}

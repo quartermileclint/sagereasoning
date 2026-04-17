@@ -23,6 +23,7 @@ export default function ScoreSocialPage() {
   const [platform, setPlatform] = useState('general')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<V3SocialMediaEvaluation | null>(null)
+  const [distressRedirect, setDistressRedirect] = useState<{ severity: string; redirect_message: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const charCount = text.length
@@ -36,6 +37,7 @@ export default function ScoreSocialPage() {
     setLoading(true)
     setError(null)
     setResult(null)
+    setDistressRedirect(null)
 
     try {
       const res = await authFetch('/api/score-social', {
@@ -50,6 +52,14 @@ export default function ScoreSocialPage() {
 
       const envelope = await res.json()
       const data = envelope.result ?? envelope
+
+      // R20a — distress detection: show redirect instead of evaluation
+      if (data.distress_detected) {
+        setDistressRedirect({ severity: data.severity, redirect_message: data.redirect_message })
+        setLoading(false)
+        return
+      }
+
       setResult(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
@@ -121,6 +131,24 @@ export default function ScoreSocialPage() {
                 Identifying passions, false judgements, and corrections...
               </p>
             )}
+          </div>
+        )}
+
+        {/* R20a — Distress redirect */}
+        {distressRedirect && (
+          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-8 text-center space-y-4">
+            <div className="text-4xl">❤️</div>
+            <h2 className="font-display text-2xl text-red-800">We want to make sure you are okay</h2>
+            <p className="font-body text-red-700 whitespace-pre-line">{distressRedirect.redirect_message}</p>
+            <button
+              onClick={() => {
+                setDistressRedirect(null)
+                setText('')
+              }}
+              className="mt-4 px-6 py-3 bg-sage-800 text-white font-display rounded-lg hover:bg-sage-700 transition-colors"
+            >
+              Start Over
+            </button>
           </div>
         )}
 
