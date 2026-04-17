@@ -21,7 +21,6 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { requireAuth, checkRateLimit, RATE_LIMITS, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
-import { runSageReason } from '@/lib/sage-reason-engine'
 import { getOpsBrainContext } from '@/lib/context/ops-brain-loader'
 import { getTechBrainContext } from '@/lib/context/tech-brain-loader'
 import { getGrowthBrainContext } from '@/lib/context/growth-brain-loader'
@@ -33,7 +32,6 @@ import { getFullPractitionerContext, getProjectedPractitionerContext } from '@/l
 import {
   getMentorObservationsWithParallelLog,
   getProfileSnapshots,
-  createProfileSnapshot,
   getRecentInteractionsAsSignals,
   recordSessionContextSnapshot,
   fnv1aHash,

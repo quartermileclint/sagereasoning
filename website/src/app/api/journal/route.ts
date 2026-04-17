@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Return all entries (just day numbers and dates for progress, not full text)
-  const { data, error } = await supabase
+  const { data, error: _error } = await supabase
     .from('journal_entries')
     .select('day_number, phase_number, word_count, created_at')
     .eq('user_id', userId)

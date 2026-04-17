@@ -242,7 +242,7 @@ export async function getMentorObservationsWithParallelLog(
 export async function getJournalReferences(
   userId: string,
   topicHints?: string[],
-  hubId: 'founder-mentor' | 'private-mentor' = 'private-mentor',
+  _hubId: 'founder-mentor' | 'private-mentor' = 'private-mentor',
   limit: number = 10
 ): Promise<string | null> {
   try {

@@ -21,8 +21,6 @@
 
 import type {
   KatorthomaProximityLevel,
-  DimensionLevel,
-  DimensionScores,
   ProgressDimensionId,
   RootPassionId,
 } from './accreditation'

@@ -32,8 +32,8 @@
  */
 
 import type { TokenUsage } from './ring-wrapper'
-import type { InboxItem, InboxFrontmatter } from './support-agent'
-import { parseFrontmatter, serialiseFrontmatter, parseInboxFile } from './support-agent'
+import type { InboxItem } from './support-agent'
+import { parseFrontmatter, serialiseFrontmatter } from './support-agent'
 
 // ============================================================================
 // TYPES

@@ -43,27 +43,10 @@
  * deprecation_flag: false
  */
 
-import type {
-  MentorProfile,
-  PassionMapEntry,
-  VirtueDomainAssessment,
-  OikeioisMapEntry,
-} from './persona'
-import type {
-  CognitiveStyleProfile,
-  EngagementGradient,
-  ContradictionMap,
-  RelationalTextureMap,
-  DevelopmentalTimeline,
-  LanguageFingerprint,
-  SituationalTriggerMap,
-  ProductDevelopmentSignal,
-  ProofOfConceptSynthesis,
-} from './journal-interpreter'
 import type { FullInterpretationResult } from './journal-interpreter'
 import type { KatorthomaProximityLevel } from '../trust-layer/types/accreditation'
 import type { ProgressionPrescription } from '../trust-layer/types/progression'
-import type { MentorLedger, LedgerEntry, LedgerEntryKind } from './mentor-ledger'
+import type { MentorLedger, LedgerEntryKind } from './mentor-ledger'
 
 // ============================================================================
 // HUB STATE & NAVIGATION

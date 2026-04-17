@@ -26,7 +26,7 @@ import type {
   OikeiosisStageId,
 } from './stoic-brain'
 
-import type { DimensionLevel, DirectionOfTravel, DetectedPassion } from './agent-assessment'
+import type { DimensionLevel, DetectedPassion } from './agent-assessment'
 
 // ============================================================
 // V3 Scenario types

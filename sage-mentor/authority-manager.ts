@@ -550,7 +550,7 @@ function demoteAgent(
 
 function suspendAgent(
   agent: InnerAgent,
-  perf: AgentPerformance,
+  _perf: AgentPerformance,
   evidence: AuthorityEvidence,
   consecutiveConcerns: number
 ): AuthorityChangeEvent {

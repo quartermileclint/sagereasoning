@@ -43,7 +43,6 @@
 
 import type { MentorProfile } from './persona'
 import type { ChunkExtraction } from './journal-ingestion'
-import type { KatorthomaProximityLevel } from '../trust-layer/types/accreditation'
 import { aggregateExtractions } from './journal-ingestion'
 import { sanitise } from './sanitise'
 import type { MentorLedger } from './mentor-ledger'
@@ -1128,7 +1127,7 @@ export function normaliseProfileData(profile: RawRecord): RawRecord {
  * R4: Server-side extraction logic — comments note IP ownership
  */
 export function buildLayer2Prompt(chunk: InterpreterChunk): string {
-  const entriesText = chunk.entries
+  const _entriesText = chunk.entries
     .map((e, idx) => {
       const ref = e.page_or_entry ? `${e.page_or_entry}` : `${idx + 1}`
       return `[${ref}] ${e.response.substring(0, 200)}...`
@@ -1325,7 +1324,7 @@ Return JSON:
  * Identifies voice calibration data for mentor communication style.
  * R7: Traces to psychology.json (ruling faculty) and virtue.json
  */
-export function buildLayer7Prompt(allChunks: InterpreterChunk[]): string {
+export function buildLayer7Prompt(_allChunks: InterpreterChunk[]): string {
   return `You are identifying LANGUAGE FINGERPRINT — the user's internal vocabulary.
 
 ACROSS ALL SECTIONS:
@@ -1356,7 +1355,7 @@ Return JSON:
  * Maps specific conditions that activate passions.
  * R6d: Diagnostic mapping for mentor to anticipate patterns
  */
-export function buildLayer8Prompt(allChunks: InterpreterChunk[]): string {
+export function buildLayer8Prompt(_allChunks: InterpreterChunk[]): string {
   return `You are building SITUATIONAL TRIGGER MAP — the specific conditions that activate passions.
 
 ACROSS ALL SECTIONS, IDENTIFY:

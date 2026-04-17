@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/analytics'
-import { JOURNAL_ENTRIES, PHASES, TOTAL_JOURNAL_DAYS, getJournalEntry, getPhaseForDay } from '@/lib/journal-content'
+import { PHASES, TOTAL_JOURNAL_DAYS, getJournalEntry, getPhaseForDay } from '@/lib/journal-content'
 import type { User } from '@supabase/supabase-js'
 import { authFetch } from '@/lib/auth-fetch'
 
 type StorageMode = 'cloud' | 'local' | null
 
-interface JournalProgress {
+interface _JournalProgress {
   currentDay: number
   completedDays: number[]
   streak: number
@@ -335,7 +335,7 @@ export default function JournalPage() {
   const allComplete = completedDays.length >= TOTAL_JOURNAL_DAYS
 
   // ─── Calculate streak ───
-  const today = new Date().toISOString().slice(0, 10)
+  const _today = new Date().toISOString().slice(0, 10)
   // Streak would be computed from the calendar stamps — simplified here
 
   return (

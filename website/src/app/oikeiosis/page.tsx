@@ -65,7 +65,7 @@ function getCurrentYear(): number {
 }
 
 export default function OikeiosisPage() {
-  const [user, setUser] = useState<User | null>(null)
+  const [_user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [reflections, setReflections] = useState<OikeiosisReflection[]>([])
   const [progression, setProgression] = useState<StageProgression[]>([])

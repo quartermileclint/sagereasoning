@@ -457,7 +457,7 @@ export function cacheProfileContext(profile: MentorProfile): ProfileWithCache {
  * Returns a new ProfileWithCache with the updated profile and fresh context.
  */
 export function refreshProfileCache(
-  existing: ProfileWithCache,
+  _existing: ProfileWithCache,
   updatedProfile: MentorProfile
 ): ProfileWithCache {
   return cacheProfileContext(updatedProfile)

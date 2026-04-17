@@ -36,7 +36,7 @@
  * deprecation_flag: false
  */
 
-import type { InnerAgent, RingTask, BeforeResult, AfterResult, ModelTier, TokenUsage } from './ring-wrapper'
+import type { InnerAgent, RingTask, AfterResult, TokenUsage } from './ring-wrapper'
 import type { MentorProfile } from './persona'
 import type { AgentActionRecord } from './authority-manager'
 
@@ -45,20 +45,12 @@ import {
   getInnerAgent,
   executeBefore,
   executeAfter,
-  startRingSession,
-  addSessionTokenUsage,
-  completeRingSession,
-  recordTokenUsage,
 } from './ring-wrapper'
 
 import {
   initAgentPerformance,
   recordAgentAction,
-  getAgentPerformance,
-  evaluateAuthority,
 } from './authority-manager'
-
-import { sanitise } from './sanitise'
 
 // ============================================================================
 // CONSTANTS
@@ -674,7 +666,7 @@ export function processInboxItem(
   item: InboxItem,
   profile: MentorProfile,
   knowledgeBaseArticles: KBArticle[],
-  config: RunLoopConfig = DEFAULT_RUN_LOOP_CONFIG
+  _config: RunLoopConfig = DEFAULT_RUN_LOOP_CONFIG
 ): {
   ringTask: RingTask
   beforeResult: ReturnType<typeof executeBefore>
@@ -733,7 +725,7 @@ export function processInboxItem(
  */
 export function completeProcessing(
   item: InboxItem,
-  profile: MentorProfile,
+  _profile: MentorProfile,
   ringTask: RingTask,
   draftResponse: string,
   governanceCheck: ReturnType<typeof detectGovernanceFlags>,

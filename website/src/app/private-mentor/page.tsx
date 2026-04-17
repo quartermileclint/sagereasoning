@@ -121,7 +121,7 @@ export default function PrivateMentorPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ input: 'Current reasoning state assessment', depth: 'quick' }),
       });
-      const data = await res.json();
+      const _data = await res.json();
 
       // Parse the result to extract proximity metrics
       setProximityData({

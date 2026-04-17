@@ -21,7 +21,7 @@ import {
 } from '@/lib/context/mentor-context-private'
 import { loadMentorProfile } from '@/lib/mentor-profile-store'
 import { extractJSON } from '@/lib/json-utils'
-import { logMentorObservation, validateMentorObservation } from '@/lib/logging/mentor-observation-logger'
+import { logMentorObservation } from '@/lib/logging/mentor-observation-logger'
 import type { ObservationCategory, ConfidenceLevel } from '@/lib/logging/mentor-observation-logger'
 
 // =============================================================================

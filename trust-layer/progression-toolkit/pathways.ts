@@ -25,7 +25,6 @@ import type {
   DimensionScores,
   DimensionLevel,
   ProgressDimensionId,
-  SenecanGradeId,
 } from '../types/accreditation'
 
 import { PROXIMITY_TO_GRADE } from '../accreditation/accreditation-record'

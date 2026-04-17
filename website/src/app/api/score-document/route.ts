@@ -7,8 +7,6 @@ import {
   PROXIMITY_COLORS,
   PROXIMITY_ENGLISH,
   DOCUMENT_EVALUATIVE_DISCLAIMER,
-  type V3DocumentEvaluation,
-  type V3PolicyEvaluation,
 } from '@/lib/document-scorer'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
@@ -259,7 +257,7 @@ export async function POST(request: NextRequest) {
     const scoreId = record?.id || 'preview'
     const badgeUrl = `${BASE_URL}/api/badge/${scoreId}`
     const proximityLabel = PROXIMITY_ENGLISH[proximity]
-    const proximityColor = PROXIMITY_COLORS[proximity]
+    const _proximityColor = PROXIMITY_COLORS[proximity]
     const embedHtml = `<a href="${BASE_URL}/score/${scoreId}" target="_blank" rel="noopener"><img src="${badgeUrl}" alt="Stoic Evaluation: ${proximityLabel}" height="40" /></a>`
 
     // Build response object

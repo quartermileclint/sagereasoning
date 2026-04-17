@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 export default function OpsHub() {
   const [currentView, setCurrentView] = useState('dashboard')
   const [activeDomain, setActiveDomain] = useState<string | null>(null)
-  const [contextFreshness, setContextFreshness] = useState(87)
-  const [lastSyncTime, setLastSyncTime] = useState('Today 6:15 AM')
-  const [changesCount, setChangesCount] = useState(12)
+  const [contextFreshness, _setContextFreshness] = useState(87)
+  const [lastSyncTime, _setLastSyncTime] = useState('Today 6:15 AM')
+  const [changesCount, _setChangesCount] = useState(12)
 
   // Stoic Check State
   const [stoicInput, setStoicInput] = useState('')

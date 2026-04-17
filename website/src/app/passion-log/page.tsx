@@ -103,7 +103,7 @@ const PASSION_LABELS: Record<string, string> = {
 type ViewMode = 'log' | 'trends' | 'catch-rate'
 
 export default function PassionLogPage() {
-  const [user, setUser] = useState<User | null>(null)
+  const [_user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeView, setActiveView] = useState<ViewMode>('log')
 

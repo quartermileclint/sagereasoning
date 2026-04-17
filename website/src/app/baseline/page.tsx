@@ -27,7 +27,7 @@ const GRADE_COLORS: Record<string, string> = {
 }
 
 export default function BaselineAssessmentPage() {
-  const [userId, setUserId] = useState<string | null>(null)
+  const [_userId, setUserId] = useState<string | null>(null)
   const [phase, setPhase] = useState<Phase>('intro')
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<string[]>([])

@@ -27,9 +27,9 @@
 import type { InboxItem } from './support-agent'
 import { generateDailySummary } from './support-agent'
 import type { ProactiveResult, ProactiveScheduleType, ProactivePreferences } from './proactive-scheduler'
-import { dispatchProactive, buildProactiveInteractionRecord } from './proactive-scheduler'
+import { dispatchProactive } from './proactive-scheduler'
 import type { ProfileWithCache } from './profile-store'
-import type { LLMBridgeConfig, LLMCallResult } from './llm-bridge'
+import type { LLMBridgeConfig } from './llm-bridge'
 import { executeProactiveWithLLM } from './llm-bridge'
 import type { KatorthomaProximityLevel } from '../trust-layer/types/accreditation'
 

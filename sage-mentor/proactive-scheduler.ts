@@ -61,9 +61,7 @@ import type { ModelTier, TokenUsage } from './ring-wrapper'
 import {
   PROACTIVE_MODEL_ROUTING,
   MODEL_IDS,
-  recordTokenUsage,
 } from './ring-wrapper'
-import { sanitise } from './sanitise'
 
 // ============================================================================
 // TYPES
@@ -415,7 +413,7 @@ export function dispatchProactive(
  */
 export function buildProactiveInteractionRecord(
   result: ProactiveResult,
-  llmResponse: string
+  _llmResponse: string
 ): {
   type: 'morning_check_in' | 'evening_reflection' | 'conversation'
   description: string

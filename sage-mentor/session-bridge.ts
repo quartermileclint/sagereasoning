@@ -67,7 +67,6 @@ import {
   executeAfter,
   registerInnerAgent,
   getInnerAgent,
-  checkPassionPatterns,
 } from './ring-wrapper'
 
 import {

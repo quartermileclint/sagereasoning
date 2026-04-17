@@ -19,7 +19,7 @@
  *   R9:  No outcome promises in milestone descriptions.
  */
 
-import type { KatorthomaProximityLevel, OikeiosisStageId, SenecanGradeId } from './stoic-brain'
+import type { KatorthomaProximityLevel, SenecanGradeId } from './stoic-brain'
 
 export interface MilestoneDefinition {
   id: string

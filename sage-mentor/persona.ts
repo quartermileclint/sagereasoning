@@ -49,7 +49,7 @@
 
 import type { DimensionScores, KatorthomaProximityLevel } from '../trust-layer/types/accreditation'
 import type { ProgressionPrescription } from '../trust-layer/types/progression'
-import { sanitise, sanitiseArray, sanitiseAndDelimit } from './sanitise'
+import { sanitise, sanitiseArray } from './sanitise'
 
 // ============================================================================
 // TYPES

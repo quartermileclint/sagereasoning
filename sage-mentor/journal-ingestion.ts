@@ -45,7 +45,7 @@ import type {
   VirtueDomainAssessment,
   JournalReference,
 } from './persona'
-import { sanitise, sanitiseAndDelimit } from './sanitise'
+import { sanitise } from './sanitise'
 
 import type {
   KatorthomaProximityLevel,

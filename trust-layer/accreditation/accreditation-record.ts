@@ -21,8 +21,6 @@ import type {
   SenecanGradeId,
   AuthorityLevel,
   DimensionScores,
-  DirectionOfTravel,
-  PersistingPassion,
   GradeChangeEvent,
 } from '../types/accreditation'
 

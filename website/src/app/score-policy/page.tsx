@@ -6,7 +6,6 @@ import {
   PROXIMITY_ENGLISH,
   PROXIMITY_BG,
   PROXIMITY_COLORS,
-  KATHEKON_QUALITY_ENGLISH,
   DOCUMENT_EVALUATIVE_DISCLAIMER,
   type V3PolicyEvaluation,
   type DetectedDocumentPassion,

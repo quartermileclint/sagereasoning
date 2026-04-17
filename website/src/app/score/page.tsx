@@ -7,8 +7,6 @@ import { trackEvent } from '@/lib/analytics'
 import {
   VIRTUE_EXPRESSIONS,
   PROXIMITY_LEVELS,
-  ROOT_PASSIONS,
-  OIKEIOSIS_STAGES,
   EVALUATIVE_DISCLAIMER,
   type KatorthomaProximityLevel,
 } from '@/lib/stoic-brain'

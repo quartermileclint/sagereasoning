@@ -307,7 +307,6 @@ export async function cli(args: string[]): Promise<void> {
     fs.writeFileSync(filePath, updatedContent)
 
     // Move to sent/
-    const fileName = path.basename(filePath)
     const sentPath = filePath.replace('/outbox/', '/sent/')
     const sentDir = path.dirname(sentPath)
 

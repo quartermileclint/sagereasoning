@@ -26,7 +26,6 @@ import {
   getOrCreateStripeCustomer,
   CHECKOUT_SUCCESS_URL,
   CHECKOUT_CANCEL_URL,
-  STRIPE_PRICES,
 } from '@/lib/stripe'
 
 export async function OPTIONS() {

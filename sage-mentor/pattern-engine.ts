@@ -52,7 +52,7 @@
  * deprecation_flag: false
  */
 
-import type { MentorProfile, PassionMapEntry } from './persona'
+import type { MentorProfile } from './persona'
 import type {
   KatorthomaProximityLevel,
 } from '../trust-layer/types/accreditation'

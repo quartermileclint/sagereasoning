@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       steps,
       stop_on_failure = true,
       stop_on_guard_block = true,
-      agent_id,
+      agent_id: _agent_id,
     } = body
 
     // Validate steps

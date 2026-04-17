@@ -33,7 +33,6 @@
  */
 
 import type {
-  KatorthomaProximityLevel,
   OikeiosisStageId,
   SenecanGradeId,
   ProgressDimensionId,
@@ -520,7 +519,7 @@ export function scoreCore(answerIds: string[]): V3BaselineResult {
   let needs_q6: V3BaselineResult['needs_q6'] = null
   const distTo_2_3 = Math.abs(internal_avg - 0.5)
   const distTo_1_2 = Math.abs(internal_avg - 1.5)
-  const distTo_1_sage = Math.abs(internal_avg - 2.5)
+  const _distTo_1_sage = Math.abs(internal_avg - 2.5)
 
   if (distTo_2_3 <= 0.25 && (grade === 'grade_3' || grade === 'grade_2')) {
     needs_q6 = 'borderline_grade_2_3'
@@ -669,7 +668,7 @@ function generateV3Interpretation(
   passionReduction: DimensionLevel,
   judgementQuality: DimensionLevel,
   dispositionStability: DimensionLevel,
-  oikeiosisStage: OikeiosisStageId,
+  _oikeiosisStage: OikeiosisStageId,
   dominantPassion: DominantPassionId
 ): string {
   const intro = GRADE_INTROS[grade]

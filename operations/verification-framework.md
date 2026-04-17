@@ -86,10 +86,11 @@ All five questions must be answered visibly in the conversation. If any answer r
 At the start of any session continuing previous work:
 
 1. **Read the latest session handoff note** in `/operations/session-handoffs/`
-2. **Check status claims** — for any component claimed as "wired" or above, run a quick verification (file exists, endpoint responds, page loads)
-3. **Check INDEX.md** — confirm it reflects current file locations
-4. **Check decision log** — read the latest entries to understand recent context
-5. **Report discrepancies** — if anything doesn't match what the handoff note claims, flag it before starting new work
+2. **Check knowledge-gaps.md** — scan `/operations/knowledge-gaps.md` for any concepts relevant to today's planned work. If a listed concept applies, read the resolution before beginning — do not re-derive it in the session.
+3. **Check status claims** — for any component claimed as "wired" or above, run a quick verification (file exists, endpoint responds, page loads)
+4. **Check INDEX.md** — confirm it reflects current file locations
+5. **Check decision log** — read the latest entries to understand recent context
+6. **Report discrepancies** — if anything doesn't match what the handoff note claims, flag it before starting new work
 
 ---
 
@@ -130,6 +131,26 @@ After pushing to GitHub, before asking the founder to test on production:
 - [ ] Vercel deployment hash matches the latest commit. Check at Vercel dashboard → Deployments, or compare `/api/health` response if commit hash is exposed. Do not test until the deployment is confirmed live. *(Finding 4.4)*
 - [ ] All required env vars are set in Vercel (reference Section 6 of TECHNICAL_STATE.md). Pay attention to any new env vars introduced in this session. *(Finding 2.3)*
 - [ ] If the change is **Elevated** or **Critical** (per 0d-ii): rollback plan documented in the conversation before founder deploys.
+
+---
+
+## Knowledge Gap Carry-Forward Rule
+
+**Added:** 18 April 2026 (pre-implementation verification, gap remediation)
+
+During any session, if a concept requires re-explanation (the AI explains something it has explained in a prior session, or the founder asks about something that was previously resolved):
+
+1. **Flag it in the handoff note** under a new section "Knowledge Gap Flags" with the concept name and a cumulative count across sessions.
+2. **At 3 cumulative re-explanations:** Add the concept to `/operations/knowledge-gaps.md` with the resolution that finally stuck. Do not attempt another in-session explanation — point to the knowledge-gaps.md entry instead.
+3. **If the concept already exists in knowledge-gaps.md:** Update the count and refine the resolution if the new explanation was clearer.
+
+**Handoff note format for flagging:**
+```
+## Knowledge Gap Flags
+- [Concept name]: re-explanation #[N] (cumulative). Context: [why it came up this session]
+```
+
+This rule exists because seven concepts required 3-5 re-explanations across the P0 build. Each re-explanation consumed session time and produced inconsistent resolutions. A single, maintained reference file breaks the cycle.
 
 ---
 

@@ -35,7 +35,6 @@ import {
   PROXIMITY_TO_GRADE,
   PROXIMITY_RANK,
   proximityToAuthority,
-  ACCREDITATION_DISCLAIMER,
 } from '../accreditation/accreditation-record'
 
 // ============================================================================

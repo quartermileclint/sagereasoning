@@ -59,7 +59,6 @@ import type {
 import {
   selectForScheduledReflection,
   selectForContextualResurfacing,
-  recordLedgerSurfacing,
   DEFAULT_RESURFACING_CONFIG,
 } from './mentor-ledger'
 
@@ -215,7 +214,7 @@ export function buildMorningReflectionPrompt(
 export function buildContextualReflectionPrompt(
   entries: LedgerEntry[],
   context: ContextualReflectionRequest,
-  profile: MentorProfile | null,
+  _profile: MentorProfile | null,
   enrichment: ImportEnrichment | null
 ): string {
   const parts: string[] = []
@@ -272,7 +271,7 @@ export function buildWeeklyReflectionPrompt(
     persistentTensions: LedgerEntry[]
     openQuestions: LedgerEntry[]
   },
-  profile: MentorProfile | null,
+  _profile: MentorProfile | null,
   enrichment: ImportEnrichment | null
 ): string {
   const parts: string[] = []
@@ -348,7 +347,7 @@ function findRelevantMaxim(
   if (!enrichment?.maxims || enrichment.maxims.length === 0) return null
 
   const primaryVirtues = selection.primary.connected_virtues
-  const primaryPassions = selection.primary.connected_passions
+  const _primaryPassions = selection.primary.connected_passions
 
   // Try virtue match first
   const virtueMatch = enrichment.maxims.find(

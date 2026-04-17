@@ -172,7 +172,7 @@ export default function MentorHub() {
       });
 
       if (proxRes.ok) {
-        const proxData = await proxRes.json();
+        const _proxData = await proxRes.json();
         // Mock update of proximity based on response
         setProximityData((prev) => ({
           ...prev,
@@ -365,7 +365,7 @@ export default function MentorHub() {
     const padL = 110,
       padR = 44,
       padT = 8,
-      padB = 8,
+      _padB = 8,
       barH = 24,
       gap = 14;
 

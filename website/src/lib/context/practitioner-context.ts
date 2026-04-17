@@ -19,7 +19,7 @@
 
 import { loadMentorProfile } from '@/lib/mentor-profile-store'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
-import type { MentorProfileData, PassionMapEntry, FounderFacts } from '@/lib/mentor-profile-summary'
+import type { MentorProfileData, PassionMapEntry } from '@/lib/mentor-profile-summary'
 
 /**
  * Get a condensed practitioner context block for LLM injection.

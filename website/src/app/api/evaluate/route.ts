@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
-import { checkRateLimit, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
+import { checkRateLimit, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'

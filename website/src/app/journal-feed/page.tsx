@@ -39,7 +39,7 @@ interface LagStats {
 }
 
 export default function JournalFeedPage() {
-  const [user, setUser] = useState<User | null>(null)
+  const [_user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [entries, setEntries] = useState<JournalEntry[]>([])
   const [stats, setStats] = useState<LagStats | null>(null)

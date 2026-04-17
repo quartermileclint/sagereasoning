@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, validateApiKey, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
-import { getSkillById, SKILL_REGISTRY } from '@/lib/skill-registry'
+import { getSkillById } from '@/lib/skill-registry'
 import { SKILL_HANDLER_MAP, createSyntheticRequest } from '@/lib/skill-handler-map'
 
 /**

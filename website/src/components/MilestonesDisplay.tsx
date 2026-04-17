@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 import { MILESTONE_DEFINITIONS, MILESTONE_MAP } from '@/lib/milestones'
 
 interface EarnedMilestone {

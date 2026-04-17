@@ -59,7 +59,6 @@
  * deprecation_flag: false
  */
 
-import type { KatorthomaProximityLevel } from '../trust-layer/types/accreditation'
 
 // ============================================================================
 // LEDGER ENTRY TYPES

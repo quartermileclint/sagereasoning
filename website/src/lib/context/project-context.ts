@@ -22,9 +22,6 @@ import {
   PROJECT_IDENTITY,
   FOUNDER_CONTEXT,
   ETHICAL_COMMITMENTS,
-  PRODUCT_ARCHITECTURE,
-  PHASE_STATUS,
-  ACTIVE_TENSIONS,
 } from '@/data/project-context-compiled'
 
 import { supabaseAdmin } from '@/lib/supabase-server'

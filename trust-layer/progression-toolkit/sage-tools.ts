@@ -23,16 +23,6 @@
 import type {
   ProgressionToolId,
   ProgressionToolRequest,
-  ProgressionToolResponse,
-  ExamineResponse,
-  DistinguishResponse,
-  DiagnoseResponse,
-  CounterResponse,
-  ClassifyValueResponse,
-  UnifyResponse,
-  StressResponse,
-  RefineResponse,
-  ExtendResponse,
 } from '../types/progression'
 
 import type { ProgressDimensionId } from '../types/accreditation'
@@ -41,7 +31,7 @@ import type { ProgressDimensionId } from '../types/accreditation'
 // SHARED DISCLAIMER
 // ============================================================================
 
-const PROGRESSION_DISCLAIMER =
+const _PROGRESSION_DISCLAIMER =
   'This coaching evaluates reasoning patterns using Stoic philosophical frameworks. ' +
   'It does not guarantee specific outcomes or fitness for any purpose. ' +
   'Ancient reasoning, modern application.'

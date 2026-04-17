@@ -20,7 +20,6 @@ import {
   buildAccreditationPayload,
   isValidAgentId,
   isExpired,
-  ACCREDITATION_DISCLAIMER,
 } from './accreditation-record'
 
 // ============================================================================

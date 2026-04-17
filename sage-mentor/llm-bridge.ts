@@ -41,7 +41,6 @@ import type {
   AfterResult,
   RingTask,
   InnerAgent,
-  RingSession,
 } from './ring-wrapper'
 
 import {
@@ -49,9 +48,6 @@ import {
   recordTokenUsage,
   executeBefore,
   executeAfter,
-  startRingSession,
-  addSessionTokenUsage,
-  completeRingSession,
   getInnerAgent,
 } from './ring-wrapper'
 
@@ -436,8 +432,8 @@ export async function liveAfterCheck(
  */
 function parseAfterLLMResponse(
   llmText: string,
-  profile: MentorProfile,
-  task: RingTask
+  _profile: MentorProfile,
+  _task: RingTask
 ): AfterResult {
   const sanitised = sanitise(llmText, 'inner_agent_output')
   const text = sanitised.text

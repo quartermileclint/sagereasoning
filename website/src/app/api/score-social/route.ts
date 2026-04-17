@@ -48,7 +48,7 @@ import { detectDistressTwoStage } from '@/lib/r20a-classifier'
  */
 
 // V3 Social Media Evaluation Response Type
-interface V3SocialMediaScore {
+interface _V3SocialMediaScore {
   poster_passions: Array<{
     root_passion: string
     sub_species: string

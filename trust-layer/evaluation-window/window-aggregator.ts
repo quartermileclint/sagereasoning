@@ -234,7 +234,7 @@ function averageRank(levels: KatorthomaProximityLevel[]): number {
  */
 function computeAllDimensionDetails(
   actions: EvaluatedAction[],
-  config: WindowConfig
+  _config: WindowConfig
 ): Record<ProgressDimensionId, DimensionDetail> {
   return {
     passion_reduction: computePassionReduction(actions),

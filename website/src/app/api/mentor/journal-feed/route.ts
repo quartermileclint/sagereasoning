@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Fetch aggregate stats
-  const { data: stats, error: statsError } = await supabase
+  const { data: stats, error: _statsError } = await supabase
     .from('realtime_journal_lag_stats')
     .select('*')
     .eq('user_id', userId)

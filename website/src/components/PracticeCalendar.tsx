@@ -213,9 +213,9 @@ export default function PracticeCalendar({ userId }: PracticeCalendarProps) {
             const isFuture = new Date(year, month, day) > today
             const strongestVirtue = dayData?.strongest_virtue ? VIRTUE_MAP[dayData.strongest_virtue] : null
             const hasStamp = dayData?.stamp_earned ?? false
-            const proximityRank = dayData ? PROXIMITY_RANK[dayData.best_proximity] : -1
+            const _proximityRank = dayData ? PROXIMITY_RANK[dayData.best_proximity] : -1
             const proximityLabel = dayData ? PROXIMITY_LABELS[dayData.best_proximity] : ''
-            const proximityColor = dayData ? PROXIMITY_COLORS[dayData.best_proximity] : ''
+            const _proximityColor = dayData ? PROXIMITY_COLORS[dayData.best_proximity] : ''
 
             return (
               <button

@@ -412,7 +412,7 @@ export async function PATCH(request: NextRequest) {
       const nextSunday = new Date(today)
       nextSunday.setDate(today.getDate() + (daysUntilSunday === 0 ? 7 : daysUntilSunday))
 
-      const { data, error } = await supabaseAdmin
+      const { data: _data, error } = await supabaseAdmin
         .from('gap4_prompt_schedule')
         .insert({
           user_id: auth.user.id,

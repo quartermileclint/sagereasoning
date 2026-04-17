@@ -27,7 +27,6 @@ import type {
   DimensionLevel,
   DimensionScores,
   DirectionOfTravel,
-  PersistingPassion,
 } from '../types/accreditation'
 
 // ============================================================================

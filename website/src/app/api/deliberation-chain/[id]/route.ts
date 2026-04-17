@@ -5,7 +5,6 @@ import type {
   V3ChainSummary,
   V3StepSummary,
   V3DeliberationStep,
-  V3DeliberationChain,
 } from '@/lib/deliberation'
 import { calculateDirectionOfTravel, calculatePassionsArc } from '@/lib/deliberation'
 

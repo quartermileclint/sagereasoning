@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
-import type { ReasoningReceipt } from '@/lib/reasoning-receipt'
 
 /**
  * GET /api/receipts — Query reasoning receipts
