@@ -1,6 +1,6 @@
 {
-  "version": "1.0.0",
-  "last_updated": "2026-04-16",
+  "version": "1.0.1",
+  "last_updated": "2026-04-17",
   "baseline": {
     "identity": "SageReasoning encodes Stoic wisdom into infrastructure that helps any rational agent — human or artificial — examine impressions, diagnose false judgements, and progress toward virtue. The website serves human practitioners. The API and skill contracts serve agent developers. The Agent Trust Layer extends the moral community to include artificial agents.",
     "mission": "That principled reasoning becomes a standard capability of every AI agent and a daily practice for every human who encounters it.",
@@ -20,11 +20,11 @@
       "Builder-product relationship: the founder's own practice is the first test case for every tool."
     ],
     "recent_decisions": [
+      "2026-04-17: Contextual Stewardship Audit completed — 16 findings across 4 tiers. Remediation session targeting F1-F3, F5-F7.",
+      "2026-04-17: R20a Phase D scaffolded — two-stage classifier (regex + Haiku) designed. Inline Haiku evaluation for borderline inputs adopted.",
+      "2026-04-17: DEPTH_MECHANISMS single source of truth created (depth-constants.ts). Resolves circular dependency duplication.",
       "2026-04-16: Layer 3 (project context) verified across all endpoints. Compiled TS merge, factory injection, and analytics events all confirmed.",
-      "2026-04-16: Analytics bugfix deployed — forbidden column validation, metadata-only tracking, evaluate demo events live.",
-      "2026-04-16: score-document flagged as tech debt (direct LLM call, no context layers). Deferred to P1.",
-      "2026-04-10: Layer 1+2 context architecture deployed to all 9 runSageReason endpoints. Practitioner context in user message, not system message.",
-      "2026-04-09: Three-layer context architecture adopted (Stoic Brain + Practitioner + Project). Compiled TypeScript approach for Stoic Brain data."
+      "2026-04-16: Analytics bugfix deployed — forbidden column validation, metadata-only tracking, evaluate demo events live."
     ]
   }
 }

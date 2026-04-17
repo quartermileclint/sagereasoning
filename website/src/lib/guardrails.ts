@@ -135,12 +135,29 @@ const DISTRESS_PATTERNS: { pattern: RegExp; indicator: string; severity: 'mild' 
   { pattern: /\b(feel(ing)?\s+(so\s+)?(broken|shattered|destroyed|crushed)|life\s+is\s+(meaningless|pointless))\b/i, indicator: 'severe emotional distress', severity: 'mild' },
 ]
 
+/**
+ * CRISIS_RESOURCES — Hardcoded support line numbers.
+ *
+ * VERIFICATION SCHEDULE:
+ *   Last verified:        17 April 2026 (all 5 numbers confirmed current)
+ *   Next verification due: 30 June 2026 (quarterly — per distress-signal-taxonomy.md)
+ *   Verification method:   Check each number against the organisation's official website.
+ *   Owner:                 Founder (Clinton)
+ *
+ * CHANGE LOG:
+ *   17 Apr 2026 — US line name updated from "National Suicide Prevention Lifeline"
+ *                 to "988 Suicide & Crisis Lifeline" (official rebrand July 2022).
+ *                 All 5 numbers verified current against official sources.
+ *
+ * If any number changes: edit here, redeploy, update the verification date.
+ * See audit finding F6 (17 April 2026).
+ */
 const CRISIS_RESOURCES = {
   primary: 'If you are in crisis or need immediate support:',
   resources: [
     { name: 'Lifeline (AU)', contact: '13 11 14', available: '24/7' },
     { name: 'Beyond Blue (AU)', contact: '1300 22 4636', available: '24/7' },
-    { name: 'National Suicide Prevention Lifeline (US)', contact: '988', available: '24/7' },
+    { name: '988 Suicide & Crisis Lifeline (US)', contact: '988', available: '24/7' },
     { name: 'Crisis Text Line (US/UK/CA)', contact: 'Text HOME to 741741', available: '24/7' },
     { name: 'Samaritans (UK)', contact: '116 123', available: '24/7' },
   ],
