@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 // ============================================================================
 // Mentor Baseline Refinements — Viewer for saved rounds
@@ -207,9 +207,11 @@ export default function RefinementsPage() {
     'server' | 'mixed' | 'local-only' | 'server-failed'
   >('local-only')
   const [sourceDetail, setSourceDetail] = useState<string>('')
+  // Stage 2c: state for the per-round Import button.
+  const [importing, setImporting] = useState(false)
+  const [importNotice, setImportNotice] = useState<string>('')
 
-  useEffect(() => {
-    const loadRounds = async () => {
+  const loadRounds = useCallback(async () => {
       const localStored = readRounds()
       // Newest first
       localStored.sort((a, b) =>
@@ -309,10 +311,11 @@ export default function RefinementsPage() {
       setRounds(merged)
       if (merged.length > 0) setSelectedId(merged[0].id)
       setLoaded(true)
-    }
-
-    loadRounds()
   }, [])
+
+  useEffect(() => {
+    loadRounds()
+  }, [loadRounds])
 
   const selected = rounds.find(r => r.id === selectedId) || null
   const result = selected?.refinement?.refinement?.result
@@ -348,6 +351,82 @@ export default function RefinementsPage() {
     const nextRounds = rounds.filter(r => r.id !== id)
     setRounds(nextRounds)
     if (selectedId === id) setSelectedId(nextRounds[0]?.id || null)
+  }
+
+  // Stage 2c — import a local-only round into the server appendix table.
+  // Uses the existing POST /api/mentor-appendix endpoint. On success the
+  // localStorage round is stamped with the new serverAppendixId so it
+  // will dedupe against the server copy on subsequent loads.
+  const handleImport = async (id: string) => {
+    const target = rounds.find(r => r.id === id)
+    if (!target || target.source !== 'local') return
+
+    const token = readAuthToken()
+    if (!token) {
+      alert('You are not signed in. Please sign in at /auth and try again.')
+      return
+    }
+
+    const ok = confirm(
+      'Import this round to the server? It will be encrypted at rest and ' +
+        'accessible from any browser you sign in on. The local copy will be ' +
+        'kept and stamped with the server id.'
+    )
+    if (!ok) return
+
+    setImporting(true)
+    setImportNotice('')
+    try {
+      const res = await fetch('/api/mentor-appendix', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          submittedAt: target.submittedAt,
+          generatedAt: target.generatedAt,
+          questions: target.questions,
+          answers: target.answers,
+          refinement: target.refinement,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || !data?.success || !data?.id) {
+        setImporting(false)
+        setImportNotice(
+          `Import failed (${res.status}): ${data?.error || 'unknown error'}`
+        )
+        return
+      }
+
+      // Stamp the local round with the new server id so it dedupes on reload.
+      const localRounds = readRounds()
+      const updatedLocal = localRounds.map(r => {
+        if (r.id === id) {
+          return {
+            ...r,
+            serverAppendixId: data.id as string,
+            serverAppendixVersion: data.appendix_version as number | undefined,
+            serverSavedAt: new Date().toISOString(),
+          }
+        }
+        return r
+      })
+      writeRounds(updatedLocal)
+
+      // Refresh so the imported round now appears with the Server badge.
+      await loadRounds()
+      setSelectedId(data.id as string)
+      setImporting(false)
+      setImportNotice(
+        `Imported as server round #${data.appendix_version ?? '?'}.`
+      )
+      setTimeout(() => setImportNotice(''), 4000)
+    } catch (err) {
+      setImporting(false)
+      setImportNotice(`Import failed: ${String(err)}`)
+    }
   }
 
   const handleCopyJson = () => {
@@ -542,7 +621,25 @@ export default function RefinementsPage() {
                 )}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              {selected.source === 'local' && (
+                <button
+                  onClick={() => handleImport(selected.id)}
+                  disabled={importing}
+                  style={{
+                    padding: '8px 14px',
+                    background: importing ? '#2a2d3a' : '#4caf6a',
+                    color: importing ? '#5a5f70' : '#0f1119',
+                    border: 'none',
+                    borderRadius: 4,
+                    cursor: importing ? 'not-allowed' : 'pointer',
+                    fontSize: 13,
+                    fontWeight: 500,
+                  }}
+                >
+                  {importing ? 'Importing…' : 'Import to server'}
+                </button>
+              )}
               <button
                 onClick={handleCopyJson}
                 style={{
@@ -571,6 +668,16 @@ export default function RefinementsPage() {
               >
                 Delete
               </button>
+              {importNotice && (
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: importNotice.startsWith('Imported') ? '#4caf6a' : '#e0a050',
+                  }}
+                >
+                  {importNotice}
+                </span>
+              )}
             </div>
           </div>
 
