@@ -215,10 +215,30 @@ export default function MentorIndexPage() {
     setResults(prev => ({ ...prev, [card.id]: { status: 'loading', data: '' } }))
     const start = Date.now()
 
+    // Read Supabase access token from localStorage (same pattern as Founder Hub).
+    // Endpoints using requireAuth() expect an `Authorization: Bearer <token>` header.
+    // If no token is present (signed out), the request proceeds without it and
+    // the API returns its standard auth error.
+    let authToken: string | null = null
+    try {
+      const stored = typeof window !== 'undefined'
+        ? localStorage.getItem('sb-jdbefwkonfbhjquozgxr-auth-token')
+        : null
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        authToken = parsed?.access_token || null
+      }
+    } catch {
+      // Ignore — fall through with no token; server will return 401 if required.
+    }
+
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`
+
     try {
       const res = await fetch(card.endpoint, {
         method: card.method,
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: card.method === 'POST' ? JSON.stringify(card.payload) : undefined,
       })
 
