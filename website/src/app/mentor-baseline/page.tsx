@@ -125,7 +125,6 @@ export default function MentorBaselinePage() {
   const [questions, setQuestions] = useState<BaselineQuestion[]>([])
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [errorMsg, setErrorMsg] = useState<string>('')
-  const [refinement, setRefinement] = useState<unknown>(null)
   const [savedNotice, setSavedNotice] = useState<string>('')
   const [draftLoadedAt, setDraftLoadedAt] = useState<string | null>(null)
 
@@ -292,7 +291,6 @@ export default function MentorBaselinePage() {
       saveRound(round)
       clearDraft()
 
-      setRefinement(data)
       setPhase('complete')
     } catch (err) {
       setErrorMsg(`Network error: ${String(err)}`)
@@ -548,7 +546,6 @@ export default function MentorBaselinePage() {
             </a>
             <button
               onClick={() => {
-                setRefinement(null)
                 generateQuestions()
               }}
               style={{
