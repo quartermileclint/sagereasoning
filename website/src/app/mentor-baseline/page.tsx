@@ -33,6 +33,7 @@ interface Draft {
 }
 
 const DRAFT_KEY = 'sage-baseline-draft-v1'
+const ROUNDS_KEY = 'sage-baseline-rounds-v1'
 const SUPABASE_TOKEN_KEY = 'sb-jdbefwkonfbhjquozgxr-auth-token'
 
 // Same profile summary the Mentor Index demo card uses.
@@ -82,6 +83,40 @@ function clearDraft(): void {
     localStorage.removeItem(DRAFT_KEY)
   } catch {
     // Ignore.
+  }
+}
+
+// ── Rounds storage (completed refinement history) ────────────────────
+
+interface StoredRound {
+  id: string
+  generatedAt: string
+  submittedAt: string
+  questions: BaselineQuestion[]
+  answers: Record<string, string>
+  refinement: unknown
+}
+
+function readRounds(): StoredRound[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const stored = localStorage.getItem(ROUNDS_KEY)
+    if (!stored) return []
+    const parsed = JSON.parse(stored)
+    return Array.isArray(parsed) ? (parsed as StoredRound[]) : []
+  } catch {
+    return []
+  }
+}
+
+function saveRound(round: StoredRound): void {
+  if (typeof window === 'undefined') return
+  try {
+    const existing = readRounds()
+    existing.push(round)
+    localStorage.setItem(ROUNDS_KEY, JSON.stringify(existing))
+  } catch {
+    // Ignore quota errors. Round is still shown in-session via state.
   }
 }
 
@@ -243,6 +278,19 @@ export default function MentorBaselinePage() {
         setPhase('error')
         return
       }
+
+      // Persist this round to browser storage so it survives reload / revisit.
+      const nowIso = new Date().toISOString()
+      const round: StoredRound = {
+        id: `round_${nowIso.replace(/[^0-9]/g, '').slice(0, 14)}`,
+        generatedAt: draftLoadedAt || nowIso,
+        submittedAt: nowIso,
+        questions,
+        answers,
+        refinement: data,
+      }
+      saveRound(round)
+      clearDraft()
 
       setRefinement(data)
       setPhase('complete')
@@ -468,44 +516,50 @@ export default function MentorBaselinePage() {
       {phase === 'complete' && (
         <div
           style={{
-            padding: 20,
+            padding: 24,
             background: '#1a3a2a',
             border: '1px solid #2a5a3a',
             borderRadius: 6,
           }}
         >
-          <div style={{ fontSize: 16, color: '#4caf6a', marginBottom: 12, fontWeight: 500 }}>
-            Answers submitted. Refinement returned below.
+          <div style={{ fontSize: 17, color: '#4caf6a', marginBottom: 8, fontWeight: 500 }}>
+            Answers submitted and refinement saved.
           </div>
-          <pre
-            style={{
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              background: '#0f1119',
-              padding: 16,
-              borderRadius: 4,
-              fontSize: 13,
-              color: '#c8c8c8',
-              maxHeight: 600,
-              overflow: 'auto',
-            }}
-          >
-            {JSON.stringify(refinement, null, 2)}
-          </pre>
-          <div style={{ marginTop: 16, display: 'flex', gap: 12 }}>
+          <p style={{ fontSize: 14, color: '#c8d8c8', margin: '0 0 20px 0', lineHeight: 1.5 }}>
+            This round has been stored in this browser. You can view the full refinement
+            (summary, confidence changes, and per-question detail) on the refinements page,
+            export it as JSON for external backup, or start a new round.
+          </p>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <a
+              href="/mentor-baseline/refinements"
+              style={{
+                padding: '10px 18px',
+                background: '#5b9cf5',
+                color: '#fff',
+                textDecoration: 'none',
+                borderRadius: 4,
+                fontSize: 14,
+                fontWeight: 500,
+                display: 'inline-block',
+              }}
+            >
+              View refinement
+            </a>
             <button
               onClick={() => {
-                clearDraft()
+                setRefinement(null)
                 generateQuestions()
               }}
               style={{
-                padding: '8px 16px',
-                background: '#5b9cf5',
-                color: '#fff',
-                border: 'none',
+                padding: '10px 18px',
+                background: 'transparent',
+                color: '#5b9cf5',
+                border: '1px solid #5b9cf5',
                 borderRadius: 4,
                 cursor: 'pointer',
                 fontSize: 14,
+                fontWeight: 500,
               }}
             >
               Start a new round
