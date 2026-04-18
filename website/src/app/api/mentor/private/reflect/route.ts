@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     const gate = await enforceDistressCheck(detectDistressTwoStage(combinedInput))
     if (gate.shouldRedirect) {
       // Log the distress detection for safety monitoring (no reflection data stored)
-      await supabaseAdmin
+      const { error: distressLogError } = await supabaseAdmin
         .from('analytics_events')
         .insert({
           event_type: 'distress_detected',
@@ -148,7 +148,9 @@ export async function POST(request: NextRequest) {
             endpoint: '/api/mentor/private/reflect',
           },
         })
-        .then(() => {})
+      if (distressLogError) {
+        console.error('[private/reflect] distress analytics insert failed:', distressLogError)
+      }
 
       return NextResponse.json(
         {
@@ -282,7 +284,7 @@ Score my actions and give me the sage perspective.`
       // Instead of crashing with 500, return a degraded response
       // so the user still gets something useful and we get analytics
       const effectiveUserId = user_id || auth.user.id
-      await supabaseAdmin
+      const { error: parseFailLogError } = await supabaseAdmin
         .from('analytics_events')
         .insert({
           event_type: 'daily_reflection',
@@ -293,7 +295,9 @@ Score my actions and give me the sage perspective.`
             obs_log_detail: `extractJSON failed. Response length: ${responseText.length}. First 300 chars: ${responseText.substring(0, 300)}`,
           },
         })
-        .then(() => {})
+      if (parseFailLogError) {
+        console.error('[private/reflect] parse-fail analytics insert failed:', parseFailLogError)
+      }
 
       return NextResponse.json(
         {
@@ -324,7 +328,7 @@ Score my actions and give me the sage perspective.`
 
     // Save reflection
     const effectiveUserId = user_id || auth.user.id
-    await supabaseAdmin
+    const { error: reflectionInsertError } = await supabaseAdmin
       .from('reflections')
       .insert({
         user_id: effectiveUserId,
@@ -335,7 +339,9 @@ Score my actions and give me the sage perspective.`
         sage_perspective: reflectionData.sage_perspective,
         evening_prompt: reflectionData.evening_prompt,
       })
-      .then(() => {})
+    if (reflectionInsertError) {
+      console.error('[private/reflect] reflections insert failed:', reflectionInsertError)
+    }
 
     // Generate reasoning receipt
     const receipt = extractReceipt({
@@ -428,7 +434,7 @@ Score my actions and give me the sage perspective.`
     }
 
     // Analytics — now includes detailed diagnostic for observation pipeline
-    await supabaseAdmin
+    const { error: analyticsInsertError } = await supabaseAdmin
       .from('analytics_events')
       .insert({
         event_type: 'daily_reflection',
@@ -442,7 +448,9 @@ Score my actions and give me the sage perspective.`
           obs_log_detail: obsLogDetail || undefined,
         },
       })
-      .then(() => {})
+    if (analyticsInsertError) {
+      console.error('[private/reflect] daily_reflection analytics insert failed:', analyticsInsertError)
+    }
 
     // Self-improving feedback loop — feed reflection into Mentor profile
     // Awaited (not fire-and-forget) to ensure writes complete before Vercel terminates the function
