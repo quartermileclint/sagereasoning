@@ -21,6 +21,7 @@
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
 import type { FounderFacts, MentorProfileData, PassionMapEntry } from '@/lib/mentor-profile-summary'
+import { listAppendixRounds } from '@/lib/mentor-appendix-store'
 
 // ── Gap 2: Mentor Observation History ────────────────────────────────
 
@@ -822,4 +823,149 @@ export function fnv1aHash(input: string): string {
 export function estimateTokens(text: string | null | undefined): number {
   if (!text) return 0
   return Math.ceil(text.length / 4)
+}
+
+// ── Baseline Refinement Appendix Context ──────────────────────────────
+//
+// Inject the most recent baseline gap-question rounds (R17b encrypted at rest,
+// decrypted server-side here) into the mentor's context so the LLM sees what
+// the practitioner's answers revealed beyond the journal.
+//
+// Only the derived refinement output is injected — summary, confidence
+// changes, and refinement notes. Raw answers are NOT included; they remain
+// encrypted in mentor_baseline_appendix and out of the prompt.
+//
+// Returns a formatted string block for user-message injection, or null if
+// the user has no appendix rounds yet (graceful degradation).
+
+/** Shape defensively picked from the stored refinement payload. */
+interface RefinementNote {
+  question_id?: string
+  dimension_affected?: string
+  change_type?: string
+  before?: string
+  after?: string
+  reasoning?: string
+}
+
+interface RefinementResult {
+  summary?: string
+  refinement_notes?: RefinementNote[]
+  confidence_changes?: Record<string, string>
+}
+
+/**
+ * Defensive extractor. The appendix payload stores the full response body
+ * from /api/mentor-baseline-response, which is:
+ *   { success, refinement: { result: {...}, meta: {...} }, ... }
+ * but we fall back to other plausible nesting levels so a minor shape change
+ * upstream does not silently strip the context.
+ */
+function extractRefinementResult(refinement: unknown): RefinementResult | null {
+  if (!refinement || typeof refinement !== 'object') return null
+  const r = refinement as Record<string, unknown>
+
+  // Primary path: response.refinement.result
+  const innerRefinement = r.refinement as Record<string, unknown> | undefined
+  if (innerRefinement && typeof innerRefinement === 'object') {
+    const innerResult = innerRefinement.result as Record<string, unknown> | undefined
+    if (innerResult && typeof innerResult === 'object') {
+      return innerResult as RefinementResult
+    }
+  }
+
+  // Fallback: response.result
+  const directResult = r.result as Record<string, unknown> | undefined
+  if (directResult && typeof directResult === 'object') {
+    return directResult as RefinementResult
+  }
+
+  // Last resort: the object itself may already be the result
+  if ('summary' in r || 'refinement_notes' in r || 'confidence_changes' in r) {
+    return r as RefinementResult
+  }
+
+  return null
+}
+
+/**
+ * Load the user's recent baseline refinement rounds and format them for
+ * injection into the private mentor's user message.
+ *
+ * @param userId     - Auth user ID
+ * @param maxRounds  - Max rounds to include (default 2, newest first)
+ * @param notesPerRound - Max refinement notes to include per round (default 5)
+ */
+export async function getBaselineAppendixContext(
+  userId: string,
+  maxRounds: number = 2,
+  notesPerRound: number = 5
+): Promise<string | null> {
+  try {
+    const rounds = await listAppendixRounds(userId)
+    if (!rounds || rounds.length === 0) return null
+
+    const recent = rounds.slice(0, maxRounds)
+    const sections: string[] = [
+      'BASELINE REFINEMENT APPENDIX (derived findings from the practitioner\'s answers to gap-detection questions — supplements the journal-extracted profile):',
+      '',
+    ]
+
+    let usableRounds = 0
+
+    for (const round of recent) {
+      const result = extractRefinementResult(round.payload?.refinement)
+      if (!result) continue
+      usableRounds += 1
+
+      const date = round.submittedAt ? round.submittedAt.split('T')[0] : 'unknown date'
+      sections.push(
+        `── Round submitted ${date} (${round.responsesProcessed} answers) ──`
+      )
+
+      if (result.summary && typeof result.summary === 'string') {
+        sections.push(`Summary: ${result.summary.trim()}`)
+      }
+
+      if (result.confidence_changes && typeof result.confidence_changes === 'object') {
+        const changes = Object.entries(result.confidence_changes)
+          .filter(([, v]) => typeof v === 'string' && v.trim())
+        if (changes.length > 0) {
+          sections.push('Confidence changes by dimension:')
+          for (const [dim, note] of changes) {
+            sections.push(`  • ${dim}: ${note}`)
+          }
+        }
+      }
+
+      if (Array.isArray(result.refinement_notes) && result.refinement_notes.length > 0) {
+        sections.push('Key refinement notes:')
+        const notes = result.refinement_notes.slice(0, notesPerRound)
+        for (const n of notes) {
+          const dim = n.dimension_affected || 'unspecified'
+          const change = n.change_type || 'note'
+          const reason = (n.reasoning || n.after || '').trim()
+          if (reason) {
+            sections.push(`  • [${dim}] ${change}: ${reason}`)
+          } else {
+            sections.push(`  • [${dim}] ${change}`)
+          }
+        }
+      }
+
+      sections.push('')
+    }
+
+    // If no round produced usable content, return null rather than an empty header
+    if (usableRounds === 0) return null
+
+    sections.push(
+      'Use these findings alongside the journal-derived profile to sharpen your understanding of the practitioner. Treat them as evidence, not verdict — and note when the current reflection confirms, extends, or contradicts them.'
+    )
+
+    return sections.join('\n')
+  } catch (err) {
+    console.error('[mentor-context-private] Failed to load baseline appendix context:', err)
+    return null
+  }
 }

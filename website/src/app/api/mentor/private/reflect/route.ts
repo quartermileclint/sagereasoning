@@ -16,6 +16,7 @@ import {
   getJournalReferences,
   getProfileSnapshots,
   getRecentInteractionsAsSignals,
+  getBaselineAppendixContext,
   recordSessionContextSnapshot,
   fnv1aHash,
   estimateTokens,
@@ -181,6 +182,7 @@ export async function POST(request: NextRequest) {
       mentorObservations,
       journalRefs,
       profileSnapshots,
+      baselineAppendixContext,
     ] = await Promise.all([
       useProjection ? getProjectedPractitionerContext(auth.user.id, topicForProjection) : Promise.resolve(null),
       useProjection ? Promise.resolve(null) : getFullPractitionerContext(auth.user.id),
@@ -189,6 +191,7 @@ export async function POST(request: NextRequest) {
       getMentorObservationsWithParallelLog(auth.user.id, 'private-mentor', 'private-reflect'),
       getJournalReferences(auth.user.id, extractTopicHints(what_happened, how_i_responded), 'private-mentor'),
       getProfileSnapshots(auth.user.id, 'private-mentor'),
+      getBaselineAppendixContext(auth.user.id),
     ])
 
     // Recent interaction signals (Piece 2) only when projection is enabled.
@@ -217,6 +220,7 @@ Score my actions and give me the sage perspective.`
 
     if (practitionerContext) userMessage += `\n\n${practitionerContext}`
     if (recentInteractionSignals) userMessage += `\n\n${recentInteractionSignals}`
+    if (baselineAppendixContext) userMessage += `\n\n${baselineAppendixContext}`
     if (mentorObservations) userMessage += `\n\n${mentorObservations}`
     if (journalRefs) userMessage += `\n\n${journalRefs}`
     if (profileSnapshots) userMessage += `\n\n${profileSnapshots}`
@@ -229,6 +233,7 @@ Score my actions and give me the sage perspective.`
       mode: useProjection ? 'v2' : 'legacy',
       profile_tokens: estimateTokens(practitionerContext),
       recent_signals_tokens: estimateTokens(recentInteractionSignals),
+      baseline_appendix_tokens: estimateTokens(baselineAppendixContext),
       observations_tokens: estimateTokens(mentorObservations),
       journal_refs_tokens: estimateTokens(journalRefs),
       snapshots_tokens: estimateTokens(profileSnapshots),
