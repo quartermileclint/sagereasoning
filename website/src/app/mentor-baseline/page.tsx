@@ -95,6 +95,11 @@ interface StoredRound {
   questions: BaselineQuestion[]
   answers: Record<string, string>
   refinement: unknown
+  // Stage 2a: server persistence — populated if the appendix POST succeeds.
+  // Older rounds saved before Stage 2a will not have these fields.
+  serverAppendixId?: string
+  serverAppendixVersion?: number
+  serverSavedAt?: string
 }
 
 function readRounds(): StoredRound[] {
@@ -127,6 +132,11 @@ export default function MentorBaselinePage() {
   const [errorMsg, setErrorMsg] = useState<string>('')
   const [savedNotice, setSavedNotice] = useState<string>('')
   const [draftLoadedAt, setDraftLoadedAt] = useState<string | null>(null)
+  // Stage 2a: server-side appendix save status, shown on the complete screen.
+  const [serverSaveStatus, setServerSaveStatus] = useState<
+    'idle' | 'saved' | 'failed'
+  >('idle')
+  const [serverSaveDetail, setServerSaveDetail] = useState<string>('')
 
   const generateQuestions = useCallback(async () => {
     setPhase('loading')
@@ -288,6 +298,52 @@ export default function MentorBaselinePage() {
         answers,
         refinement: data,
       }
+
+      // Stage 2a — additive server save. LocalStorage is belt-and-braces:
+      // we save locally regardless of whether the server save succeeds.
+      // If the server save succeeds, we stamp the round with the server id
+      // and version before writing to localStorage.
+      setServerSaveStatus('idle')
+      setServerSaveDetail('')
+      try {
+        const appRes = await fetch('/api/mentor-appendix', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            submittedAt: nowIso,
+            generatedAt: draftLoadedAt || nowIso,
+            questions,
+            answers,
+            refinement: data,
+          }),
+        })
+        const appData = await appRes.json().catch(() => ({}))
+        if (appRes.ok && appData?.success) {
+          round.serverAppendixId = appData.id
+          round.serverAppendixVersion = appData.appendix_version
+          round.serverSavedAt = nowIso
+          setServerSaveStatus('saved')
+          setServerSaveDetail(
+            `Encrypted round #${appData.appendix_version} saved to the server.`
+          )
+        } else {
+          setServerSaveStatus('failed')
+          setServerSaveDetail(
+            `Server save did not succeed (${appRes.status}): ${
+              appData?.error || 'unknown error'
+            }. Your round is still saved in this browser.`
+          )
+        }
+      } catch (serverErr) {
+        setServerSaveStatus('failed')
+        setServerSaveDetail(
+          `Server save failed: ${String(serverErr)}. Your round is still saved in this browser.`
+        )
+      }
+
       saveRound(round)
       clearDraft()
 
@@ -523,11 +579,44 @@ export default function MentorBaselinePage() {
           <div style={{ fontSize: 17, color: '#4caf6a', marginBottom: 8, fontWeight: 500 }}>
             Answers submitted and refinement saved.
           </div>
-          <p style={{ fontSize: 14, color: '#c8d8c8', margin: '0 0 20px 0', lineHeight: 1.5 }}>
+          <p style={{ fontSize: 14, color: '#c8d8c8', margin: '0 0 12px 0', lineHeight: 1.5 }}>
             This round has been stored in this browser. You can view the full refinement
             (summary, confidence changes, and per-question detail) on the refinements page,
             export it as JSON for external backup, or start a new round.
           </p>
+          {serverSaveStatus === 'saved' && (
+            <div
+              style={{
+                padding: '8px 12px',
+                background: '#14221a',
+                border: '1px solid #2a5a3a',
+                borderRadius: 4,
+                fontSize: 13,
+                color: '#a8d8b8',
+                margin: '0 0 20px 0',
+              }}
+            >
+              {serverSaveDetail}
+            </div>
+          )}
+          {serverSaveStatus === 'failed' && (
+            <div
+              style={{
+                padding: '8px 12px',
+                background: '#2a1e14',
+                border: '1px solid #5a4020',
+                borderRadius: 4,
+                fontSize: 13,
+                color: '#f0c89a',
+                margin: '0 0 20px 0',
+              }}
+            >
+              {serverSaveDetail}
+            </div>
+          )}
+          {serverSaveStatus === 'idle' && (
+            <div style={{ marginBottom: 20 }} />
+          )}
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <a
               href="/mentor-baseline/refinements"
