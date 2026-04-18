@@ -5,16 +5,20 @@ import { useState, useEffect } from 'react'
 // ============================================================================
 // Mentor Baseline Refinements — Viewer for saved rounds
 //
-// Lives at /mentor-baseline/refinements. Reads rounds stored in this browser
-// by the /mentor-baseline form page, and renders each round as a readable
+// Lives at /mentor-baseline/refinements. Renders each round as a readable
 // refinement page (summary, confidence changes, per-question detail).
 //
-// Storage is browser-local (sage-baseline-rounds-v1). JSON export lets you
-// back up a round externally. Server-side persistence is a separate future
-// build; this is Phase 1.
+// Stage 2b: prefers server rounds over local storage. On mount the viewer
+// calls GET /api/mentor-appendix. If that succeeds, server rounds are the
+// primary source; localStorage rounds are merged in only when their
+// serverAppendixId is not present on the server (so pre-sync or sync-failed
+// rounds are not hidden). If the server call fails, the viewer falls back
+// entirely to localStorage (sage-baseline-rounds-v1) so the page remains
+// usable offline. Each round carries a Server/Local badge in the selector.
 // ============================================================================
 
 const ROUNDS_KEY = 'sage-baseline-rounds-v1'
+const SUPABASE_TOKEN_KEY = 'sb-jdbefwkonfbhjquozgxr-auth-token'
 
 interface BaselineQuestion {
   id: string
@@ -71,6 +75,32 @@ interface StoredRound {
   questions: BaselineQuestion[]
   answers: Record<string, string>
   refinement: RefinementResponse
+  // Stage 2a: server linkage — stamped by the form after a successful POST.
+  serverAppendixId?: string
+  serverAppendixVersion?: number
+  serverSavedAt?: string
+}
+
+// Stage 2b: server-side appendix round shape (from GET /api/mentor-appendix).
+interface ServerRound {
+  id: string
+  submittedAt: string
+  generatedAt: string | null
+  responsesProcessed: number
+  aiModel: string | null
+  receiptId: string | null
+  schemaVersion: number
+  payload: {
+    questions: BaselineQuestion[]
+    answers: Record<string, string>
+    refinement: RefinementResponse
+  }
+}
+
+// Unified round shape used inside the viewer. Source tells the UI where
+// the round came from so we can surface it honestly.
+interface ViewerRound extends StoredRound {
+  source: 'server' | 'local'
 }
 
 // ── Helpers ────────────────────────────────────────────────────────
@@ -93,6 +123,35 @@ function writeRounds(rounds: StoredRound[]): void {
     localStorage.setItem(ROUNDS_KEY, JSON.stringify(rounds))
   } catch {
     // Ignore quota errors.
+  }
+}
+
+function readAuthToken(): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const stored = localStorage.getItem(SUPABASE_TOKEN_KEY)
+    if (!stored) return null
+    const parsed = JSON.parse(stored)
+    return parsed?.access_token || null
+  } catch {
+    return null
+  }
+}
+
+// Stage 2b: convert a server round into the shape the viewer renders.
+// The server round's top-level id IS the appendix UUID; payload holds
+// the original questions / answers / refinement response.
+function serverRoundToViewer(sr: ServerRound): ViewerRound {
+  return {
+    id: sr.id,
+    generatedAt: sr.generatedAt || sr.submittedAt,
+    submittedAt: sr.submittedAt,
+    questions: sr.payload?.questions || [],
+    answers: sr.payload?.answers || {},
+    refinement: sr.payload?.refinement || {},
+    serverAppendixId: sr.id,
+    serverSavedAt: sr.submittedAt,
+    source: 'server',
   }
 }
 
@@ -138,19 +197,121 @@ function confidenceTone(note: string): { color: string } {
 // ── Component ──────────────────────────────────────────────────────
 
 export default function RefinementsPage() {
-  const [rounds, setRounds] = useState<StoredRound[]>([])
+  const [rounds, setRounds] = useState<ViewerRound[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [copied, setCopied] = useState(false)
   const [loaded, setLoaded] = useState(false)
+  // Stage 2b: where the displayed rounds came from, for the UI status line.
+  const [sourceStatus, setSourceStatus] = useState<
+    'server' | 'mixed' | 'local-only' | 'server-failed'
+  >('local-only')
+  const [sourceDetail, setSourceDetail] = useState<string>('')
 
   useEffect(() => {
-    const stored = readRounds()
-    // Newest first
-    stored.sort((a, b) => (b.submittedAt || '').localeCompare(a.submittedAt || ''))
-    setRounds(stored)
-    if (stored.length > 0) setSelectedId(stored[0].id)
-    setLoaded(true)
+    const loadRounds = async () => {
+      const localStored = readRounds()
+      // Newest first
+      localStored.sort((a, b) =>
+        (b.submittedAt || '').localeCompare(a.submittedAt || '')
+      )
+
+      // Attempt server fetch. If it succeeds, server rounds are primary;
+      // any localStorage rounds WITHOUT a matching serverAppendixId are
+      // merged in as local-only (so early/offline rounds are not hidden).
+      const token = readAuthToken()
+      let serverRounds: ServerRound[] = []
+      let serverOk = false
+      let serverError = ''
+
+      if (token) {
+        try {
+          const res = await fetch('/api/mentor-appendix', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          if (res.ok) {
+            const data = await res.json()
+            if (data?.success && Array.isArray(data.rounds)) {
+              serverRounds = data.rounds as ServerRound[]
+              serverOk = true
+            } else {
+              serverError = 'Unexpected response shape from server.'
+            }
+          } else {
+            const data = await res.json().catch(() => ({}))
+            serverError = `Server responded ${res.status}: ${
+              data?.error || 'unknown error'
+            }`
+          }
+        } catch (err) {
+          serverError = `Network error: ${String(err)}`
+        }
+      } else {
+        serverError = 'Not signed in — server rounds cannot be fetched.'
+      }
+
+      const merged: ViewerRound[] = []
+      if (serverOk) {
+        // Server is source of truth. Include every server round, marked server.
+        const serverIds = new Set<string>()
+        for (const sr of serverRounds) {
+          const vr = serverRoundToViewer(sr)
+          merged.push(vr)
+          serverIds.add(sr.id)
+        }
+        // Include localStorage rounds that are NOT represented on the server
+        // (no serverAppendixId OR serverAppendixId not in the server list).
+        for (const lr of localStored) {
+          const sid = lr.serverAppendixId
+          if (!sid || !serverIds.has(sid)) {
+            merged.push({ ...lr, source: 'local' })
+          }
+        }
+        const localOrphans = merged.filter(r => r.source === 'local').length
+        if (localOrphans === 0) {
+          setSourceStatus('server')
+          setSourceDetail(
+            `${serverRounds.length} round${
+              serverRounds.length === 1 ? '' : 's'
+            } loaded from the server (encrypted at rest).`
+          )
+        } else {
+          setSourceStatus('mixed')
+          setSourceDetail(
+            `${serverRounds.length} server · ${localOrphans} local-only (not yet synced to the server).`
+          )
+        }
+      } else {
+        // Server unreachable — fall back to localStorage entirely.
+        for (const lr of localStored) {
+          merged.push({ ...lr, source: 'local' })
+        }
+        if (merged.length === 0) {
+          setSourceStatus('local-only')
+          setSourceDetail('')
+        } else {
+          setSourceStatus('server-failed')
+          setSourceDetail(
+            `Showing ${merged.length} local round${
+              merged.length === 1 ? '' : 's'
+            } — server load did not succeed. ${serverError}`
+          )
+        }
+      }
+
+      merged.sort((a, b) =>
+        (b.submittedAt || '').localeCompare(a.submittedAt || '')
+      )
+      setRounds(merged)
+      if (merged.length > 0) setSelectedId(merged[0].id)
+      setLoaded(true)
+    }
+
+    loadRounds()
   }, [])
 
   const selected = rounds.find(r => r.id === selectedId) || null
@@ -158,14 +319,35 @@ export default function RefinementsPage() {
   const meta = selected?.refinement?.refinement?.meta
 
   const handleDelete = (id: string) => {
+    const target = rounds.find(r => r.id === id)
+    if (!target) return
+
+    // Stage 2b: server-side rounds cannot be deleted from the viewer yet.
+    // A separate DELETE endpoint + confirmation flow will be scoped later.
+    if (target.source === 'server') {
+      alert(
+        'This round is stored on the server (encrypted). Server-side deletion ' +
+          'is not yet wired into this viewer. The local-only copy (if any) is ' +
+          'already not shown here because the server copy supersedes it.'
+      )
+      return
+    }
+
     const ok = confirm(
-      'Delete this refinement round? This cannot be undone and deletes only the browser-stored copy.'
+      'Delete this round from this browser? This cannot be undone. Any server ' +
+        'copy is not affected.'
     )
     if (!ok) return
-    const next = rounds.filter(r => r.id !== id)
-    writeRounds(next)
-    setRounds(next)
-    if (selectedId === id) setSelectedId(next[0]?.id || null)
+
+    // Only mutate the local store. Read fresh from localStorage (rather than
+    // writing the merged list back) so server rounds never leak into the
+    // local store.
+    const localNext = readRounds().filter(r => r.id !== id)
+    writeRounds(localNext)
+
+    const nextRounds = rounds.filter(r => r.id !== id)
+    setRounds(nextRounds)
+    if (selectedId === id) setSelectedId(nextRounds[0]?.id || null)
   }
 
   const handleCopyJson = () => {
@@ -231,8 +413,9 @@ export default function RefinementsPage() {
             color: '#8a8fa0',
           }}
         >
-          No refinements are stored in this browser yet. Complete a round on the Baseline Gap
-          Questions page and submit your answers — the refinement will appear here.
+          No refinements found — neither on the server nor in this browser. Complete a
+          round on the Baseline Gap Questions page and submit your answers; the
+          refinement will appear here.
         </div>
       </div>
     )
@@ -258,9 +441,24 @@ export default function RefinementsPage() {
         <h1 style={{ fontSize: 26, fontWeight: 700, margin: '8px 0 4px 0', color: '#fff' }}>
           Saved Refinements
         </h1>
-        <p style={{ fontSize: 13, color: '#8a8fa0', margin: 0 }}>
-          Stored in this browser only · {rounds.length} round{rounds.length === 1 ? '' : 's'} saved
+        <p style={{ fontSize: 13, color: '#8a8fa0', margin: '0 0 6px 0' }}>
+          {rounds.length} round{rounds.length === 1 ? '' : 's'} displayed
         </p>
+        {sourceStatus === 'server' && (
+          <p style={{ fontSize: 12, color: '#4caf6a', margin: 0 }}>
+            {sourceDetail}
+          </p>
+        )}
+        {sourceStatus === 'mixed' && (
+          <p style={{ fontSize: 12, color: '#5b9cf5', margin: 0 }}>
+            {sourceDetail}
+          </p>
+        )}
+        {sourceStatus === 'server-failed' && (
+          <p style={{ fontSize: 12, color: '#e0a050', margin: 0 }}>
+            {sourceDetail}
+          </p>
+        )}
       </div>
 
       {/* Rounds selector */}
@@ -280,9 +478,30 @@ export default function RefinementsPage() {
                   borderRadius: 4,
                   cursor: 'pointer',
                   fontSize: 13,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
                 }}
               >
-                {formatDateTime(r.submittedAt)}
+                <span>{formatDateTime(r.submittedAt)}</span>
+                <span
+                  style={{
+                    fontSize: 10,
+                    padding: '2px 6px',
+                    borderRadius: 3,
+                    letterSpacing: 0.5,
+                    textTransform: 'uppercase',
+                    fontWeight: 500,
+                    background:
+                      r.source === 'server'
+                        ? (r.id === selectedId ? 'rgba(76,175,106,0.25)' : '#14221a')
+                        : (r.id === selectedId ? 'rgba(224,160,80,0.25)' : '#2a1e14'),
+                    color:
+                      r.source === 'server' ? '#4caf6a' : '#e0a050',
+                  }}
+                >
+                  {r.source === 'server' ? 'Server' : 'Local'}
+                </span>
               </button>
             ))}
           </div>

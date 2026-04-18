@@ -9,6 +9,7 @@ import {
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
 import {
   saveAppendixRound,
+  listAppendixRounds,
   AppendixPayload,
 } from '@/lib/mentor-appendix-store'
 
@@ -187,6 +188,51 @@ export async function POST(request: NextRequest) {
     console.error('[mentor-appendix] Error:', err)
     return NextResponse.json(
       { error: 'Failed to save appendix round' },
+      { status: 500, headers: corsHeaders() }
+    )
+  }
+}
+
+// ── GET — List all rounds for the authenticated user ────────────────
+//
+// Returns decrypted rounds newest-first. Auth-gated; users can only
+// see their own rounds. Intimate payload is inside each round object.
+//
+// Output: { success, count, rounds: DecryptedAppendixRound[] }
+export async function GET(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+
+  if (!auth.user?.id) {
+    return NextResponse.json(
+      { error: 'Authenticated user missing id' },
+      { status: 401, headers: corsHeaders() }
+    )
+  }
+
+  if (!isServerEncryptionConfigured()) {
+    return NextResponse.json(
+      {
+        error:
+          'Server encryption is not configured. Rounds cannot be decrypted for return.',
+      },
+      { status: 503, headers: corsHeaders() }
+    )
+  }
+
+  try {
+    const rounds = await listAppendixRounds(auth.user.id)
+    return NextResponse.json(
+      { success: true, count: rounds.length, rounds },
+      { headers: corsHeaders() }
+    )
+  } catch (err) {
+    console.error('[mentor-appendix] List error:', err)
+    return NextResponse.json(
+      { error: 'Failed to list appendix rounds' },
       { status: 500, headers: corsHeaders() }
     )
   }
