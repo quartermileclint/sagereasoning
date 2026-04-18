@@ -224,6 +224,15 @@ export default function PrivateMentorPage() {
       return;
     }
 
+    // Evening reflections have an optional second field for "How I responded".
+    // Empty string -> undefined so the API stores null rather than a duplicate.
+    let howResponded: string | undefined;
+    if (type === 'evening') {
+      const responseTextarea = document.getElementById('eveningResponseInput') as HTMLTextAreaElement | null;
+      const responseText = responseTextarea?.value.trim();
+      howResponded = responseText && responseText.length > 0 ? responseText : undefined;
+    }
+
     setIsLoading(true);
 
     try {
@@ -233,7 +242,7 @@ export default function PrivateMentorPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           what_happened: reflection,
-          how_i_responded: type === 'evening' ? reflection : undefined,
+          how_i_responded: howResponded,
         }),
       });
       const data = await res.json();
@@ -268,6 +277,10 @@ export default function PrivateMentorPage() {
 
       setMessages((prev) => [...prev, insightMsg]);
       textarea.value = '';
+      if (type === 'evening') {
+        const responseTextarea = document.getElementById('eveningResponseInput') as HTMLTextAreaElement | null;
+        if (responseTextarea) responseTextarea.value = '';
+      }
       showToast(type === 'morning' ? 'Morning check-in shared with mentor' : 'Evening reflection shared with mentor');
 
       // Update proximity after ritual
@@ -688,6 +701,21 @@ function MorningView({ onSubmit, isLoading }: { onSubmit: () => void; isLoading:
 }
 
 function EveningView({ onSubmit, isLoading }: { onSubmit: () => void; isLoading: boolean }) {
+  const labelStyle: React.CSSProperties = {
+    fontSize: '12px',
+    color: 'var(--text-dim)',
+    marginBottom: '6px',
+    marginTop: '4px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  };
+  const hintStyle: React.CSSProperties = {
+    fontSize: '11px',
+    color: 'var(--text-dim)',
+    marginTop: '4px',
+    marginBottom: '14px',
+    fontStyle: 'italic',
+  };
   return (
     <div style={styles.ritualCard}>
       <div style={styles.ritualIcon}>☾</div>
@@ -696,7 +724,12 @@ function EveningView({ onSubmit, isLoading }: { onSubmit: () => void; isLoading:
       <div style={styles.ritualPrompt}>
         The day is winding down. Walk me through the decisions that mattered today. Not everything — just the ones where you noticed something about your reasoning. Where did you pause? Where did you react? Was there a moment where you caught yourself before giving assent to a first impression?
       </div>
-      <textarea id="eveningInput" style={styles.ritualResponse} placeholder="Reflect on your day..." disabled={isLoading} />
+      <div style={labelStyle}>What happened?</div>
+      <textarea id="eveningInput" style={styles.ritualResponse} placeholder="Walk through the moment or decision that stood out..." disabled={isLoading} />
+      <div style={hintStyle}>Required.</div>
+      <div style={labelStyle}>How I responded</div>
+      <textarea id="eveningResponseInput" style={styles.ritualResponse} placeholder="What did you do, think, or feel in response? (optional)" disabled={isLoading} />
+      <div style={hintStyle}>Optional — leave blank if your reflection doesn&apos;t split this way.</div>
       <div style={styles.ritualActions}>
         <button style={styles.headerBtn} disabled={isLoading}>
           Not tonight

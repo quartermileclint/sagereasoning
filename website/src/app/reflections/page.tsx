@@ -148,20 +148,76 @@ export default function ReflectionsPage() {
   const selected = reflections.find(r => r.id === selectedId) || null
   const passions = selected ? asPassions(selected.passions_detected) : []
 
-  const handleCopyJson = () => {
+  // Format a reflection as readable text for pasting into the mentor conversation.
+  // This is the repurposed "Copy for mentor conversation" flow — the mentor
+  // conversation thread does not yet auto-import reflections, so users can
+  // elect to bring one into the thread by pasting the formatted text here.
+  const formatReflectionForMentor = (r: ReflectionRow): string => {
+    const lines: string[] = []
+    lines.push(`Reflection from ${formatDateTime(r.created_at)}`)
+    const prox = proximityStyle(r.katorthoma_proximity)
+    if (r.katorthoma_proximity) {
+      lines.push(`Proximity: ${prox.label}`)
+    }
+    lines.push('')
+    lines.push('What happened:')
+    lines.push(r.what_happened)
+    if (
+      r.how_responded &&
+      r.how_responded.trim().length > 0 &&
+      r.how_responded.trim() !== r.what_happened.trim()
+    ) {
+      lines.push('')
+      lines.push('How I responded:')
+      lines.push(r.how_responded)
+    }
+    if (r.sage_perspective) {
+      lines.push('')
+      lines.push('Sage perspective:')
+      lines.push(r.sage_perspective)
+    }
+    const passionArr = asPassions(r.passions_detected)
+    if (passionArr.length > 0) {
+      lines.push('')
+      lines.push('Passions detected:')
+      for (const p of passionArr) {
+        const parts: string[] = []
+        if (p.root_passion) parts.push(p.root_passion)
+        if (p.sub_species) parts.push(p.sub_species)
+        const header = parts.length ? `- ${parts.join(' — ')}` : '-'
+        lines.push(header)
+        if (p.false_judgement) {
+          lines.push(`  False judgement: ${p.false_judgement}`)
+        }
+      }
+    }
+    if (r.evening_prompt) {
+      lines.push('')
+      lines.push('Evening prompt:')
+      lines.push(r.evening_prompt)
+    }
+    lines.push('')
+    lines.push(
+      '— Pasted from /reflections so we can continue discussing this entry.'
+    )
+    return lines.join('\n')
+  }
+
+  const handleCopyForMentor = () => {
     if (!selected) return
+    const text = formatReflectionForMentor(selected)
     try {
-      const text = JSON.stringify(selected, null, 2)
       navigator.clipboard.writeText(text).then(() => {
         setCopied(true)
-        setTimeout(() => setCopied(false), 2500)
+        setTimeout(() => setCopied(false), 3500)
       })
     } catch {
-      const blob = new Blob([JSON.stringify(selected, null, 2)], { type: 'application/json' })
+      // Clipboard API unavailable — fall back to a file download.
+      const blob = new Blob([text], { type: 'text/plain' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${selected.id}.json`
+      a.download = `reflection-${selected.id}.txt`
       a.click()
       URL.revokeObjectURL(url)
     }
@@ -333,20 +389,26 @@ export default function ReflectionsPage() {
                 </span>
               </div>
             </div>
-            <button
-              onClick={handleCopyJson}
-              style={{
-                padding: '6px 12px',
-                background: '#1a1d2a',
-                color: '#c8c8c8',
-                border: '1px solid #2a2d3a',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 12,
-              }}
-            >
-              {copied ? 'Copied' : 'Copy JSON'}
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+              <button
+                onClick={handleCopyForMentor}
+                style={{
+                  padding: '8px 14px',
+                  background: copied ? '#1a3a2a' : '#1a2a4a',
+                  color: copied ? '#4caf6a' : '#5b9cf5',
+                  border: `1px solid ${copied ? '#2a4a3a' : '#2a3a5a'}`,
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 600,
+                }}
+              >
+                {copied ? '✓ Copied — paste into the mentor conversation' : 'Copy for mentor conversation'}
+              </button>
+              <div style={{ fontSize: 11, color: '#7a7f8f', maxWidth: 260, textAlign: 'right' }}>
+                Copies a readable summary. Paste into the Private Mentor conversation tab to continue discussing this reflection.
+              </div>
+            </div>
           </div>
 
           {/* What happened */}
@@ -355,13 +417,15 @@ export default function ReflectionsPage() {
             <div style={paragraphBox}>{selected.what_happened}</div>
           </section>
 
-          {/* How I responded */}
-          {selected.how_responded && (
-            <section style={{ marginBottom: 24 }}>
-              <h2 style={sectionHeading}>How I responded</h2>
-              <div style={paragraphBox}>{selected.how_responded}</div>
-            </section>
-          )}
+          {/* How I responded — shown only when distinct from what_happened */}
+          {selected.how_responded &&
+            selected.how_responded.trim().length > 0 &&
+            selected.how_responded.trim() !== selected.what_happened.trim() && (
+              <section style={{ marginBottom: 24 }}>
+                <h2 style={sectionHeading}>How I responded</h2>
+                <div style={paragraphBox}>{selected.how_responded}</div>
+              </section>
+            )}
 
           {/* Sage perspective */}
           {selected.sage_perspective && (
