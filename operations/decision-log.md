@@ -528,3 +528,31 @@ Changes implemented:
 **Impact:** 5 page files modified. Private mentor handles it as an insight message; the other 4 pages show a full-page redirect UI with crisis contact information.
 
 **Status:** Adopted — Wired and verified
+
+---
+
+## 19 April 2026 — Option 2: Removed JSON.stringify Wrap on passions_detected Writer
+
+**Decision:** Changed `sage-mentor/profile-store.ts:781` from `passions_detected: JSON.stringify(interaction.passions_detected || [])` to `passions_detected: interaction.passions_detected || []`. The Supabase client now receives the array directly and the JSONB column stores a proper JSON array rather than a JSON-encoded string scalar containing an array-shaped string.
+
+**Reasoning:** Session-10 first-observation flagged that JSONB columns were holding string-encoded arrays, causing `Array.isArray()` false-negatives at reader sites and forcing defensive `JSON.parse` in three places. Session-12 reader audit confirmed a single writer (profile-store.ts:781) and four readers (two defensive by design as backstops for legacy rows, two pass-through API handlers with no current client consumer). PR1 trivially satisfied — single writer, prove-before-rollout unnecessary. Risk classified Elevated under 0d-ii: user-facing functionality affected (mentor context Recent Interaction Signals), rollback is a single-token revert, no auth/session/deploy touched. Defensive readers retained as backstops for mixed historical rows per the anticipatory comment at `mentor-context-private.ts:668–675`.
+
+**Rules served:** R12 (mechanism grounding — passion taxonomy stored in the intended shape), R4 (IP protection — single writer, single shape, no drift), PR1 (single-endpoint proof — trivially satisfied).
+
+**Impact:** One-line code change plus a five-line inline comment referencing the session-13 close handoff. Vercel Green. Live verification: fresh evening reflection (`id bd3d631c-…`, `sub_species: "agonia"`, `root_passion: "phobos"`) confirmed `jsonb_typeof = 'array'` at the database level; mentor chat probe returned `"agonia (phobos, freq 5)"` confirming the rolling-window aggregator parses and counts the new shape correctly. 0a status: Verified.
+
+**Status:** Adopted — Verified
+
+---
+
+## 19 April 2026 — KG10 Promoted: JSONB Storage Format vs Payload Shape
+
+**Decision:** Promoted the session-10 first-observation candidate "JSONB columns can hold a JSON-encoded string scalar that looks like an array but fails Array.isArray" to a permanent entry in the knowledge-gaps register as KG10. Added full entry with plain-language resolution, write-site rule, read-site defensive pattern, and a verification method using `jsonb_typeof()`.
+
+**Reasoning:** PR5 trigger — this concept has now required re-explanation across three sessions: Session 10 (original `Array.isArray` false-negative investigation), Session 12 (reader audit confirmed the same pattern at the writer site), Session 13 (Option 2 fix and verification). Leaving it as tacit knowledge risks another session independently re-deriving the same lesson. Promoting it means any future endpoint touching a JSONB column will surface the rule at session-open when `knowledge-gaps.md` is scanned.
+
+**Rules served:** PR5 (knowledge-gap carry-forward — third observation triggers promotion), R4 (IP protection — tacit knowledge formalised into discoverable documentation).
+
+**Impact:** `operations/knowledge-gaps.md` updated with KG10 entry. Session-13 close handoff references KG10 in the Knowledge-Gap Carry-Forward section. No code impact.
+
+**Status:** Adopted

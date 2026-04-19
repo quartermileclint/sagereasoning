@@ -173,4 +173,33 @@ The page name suggests a single backend (`/api/mentor/private/*`), but chat traf
 
 ---
 
+## KG10 — JSONB Storage Format vs Payload Shape
+
+**Re-explanations:** 3 (Sessions: 10 (original observation — `Array.isArray` false-negative on `passions_detected`), 12 (reader audit confirmed the same pattern at the writer site), 13 (Option 2 fix applied and Verified))
+
+**Why it caused confusion:** A PostgreSQL JSONB column accepts any valid JSON value — including a JSON-encoded string scalar that *contains* an array-shaped string (e.g., `"[{...}]"`). From the database's perspective this is a valid JSONB value of type `string`. From TypeScript's perspective the Supabase client returns it as a string. Readers that assume the column holds an array fail silently: `Array.isArray(value)` returns `false`, iteration yields characters not objects, and any `.length` check returns the string length rather than the element count. The bug is visible only if the reader explicitly checks `jsonb_typeof` or parses the string — defensive `JSON.parse` masks it in one direction, silent fall-through masks it in the other.
+
+**Plain-language resolution:** JSONB columns have two shapes that look the same but behave differently:
+
+- **Correct:** `passions_detected: [{...}, {...}]` — column stores a JSON array. `jsonb_typeof()` returns `'array'`. `Array.isArray()` on the Supabase-returned value returns `true`. Readers can iterate directly.
+- **Incorrect (bug-shaped):** `passions_detected: "[{...}, {...}]"` — column stores a JSON string scalar whose contents happen to be an array-shaped string. `jsonb_typeof()` returns `'string'`. `Array.isArray()` returns `false`. Readers must `JSON.parse` before using.
+
+This happens when a writer calls `JSON.stringify(array)` before handing the value to the Supabase client. The Supabase client will *not* unwrap the string — it passes the string straight into the JSONB column as a JSON string scalar.
+
+**Write-site rule:** Pass arrays and objects directly to the Supabase client. Do not `JSON.stringify` them. The client handles serialisation correctly for JSONB columns.
+
+**Read-site rule (defensive pattern, only if needed for mixed historical data):**
+```ts
+const parsed = typeof row.jsonb_col === 'string'
+  ? JSON.parse(row.jsonb_col)
+  : (row.jsonb_col || [])
+```
+Keep this defensive pattern on any reader that was written while the writer bug was live — it backstops legacy rows after the writer is fixed. Once the rolling window no longer contains legacy rows, the defensive pattern can be removed.
+
+**Verification method:** Run `SELECT jsonb_typeof(col) FROM table ORDER BY created_at DESC LIMIT 1;` after any fresh write. Expected: `'array'` for array-shaped columns, `'object'` for object-shaped columns. If you get `'string'`, the writer is double-serialising.
+
+**When this matters:** Any new INSERT or UPDATE statement on a JSONB column. Any reader of a JSONB column that expects iteration. Any schema migration that adds a JSONB column. Any bug report that describes "the rolling window is empty" or "the signal list renders `—`".
+
+---
+
 *This is a living document. When a concept hits 3 re-explanations across sessions, add it here with the resolution that worked. Check this file at the start of every session.*
