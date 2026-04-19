@@ -664,14 +664,32 @@ function rowToSignal(
         : '—')
 
   // Likely assent: pull first false_judgement from passions_detected JSONB.
+  //
+  // R2-followup (session 10, 19 April 2026): defensive parse if string.
+  // recordInteraction in sage-mentor/profile-store.ts:781 stores this column
+  // as a JSON string scalar inside the JSONB column (due to a pre-existing
+  // JSON.stringify on insert), so we mirror the parse pattern already used
+  // by computeRollingWindow at profile-store.ts:911. The writer-layer fix
+  // (Option A — remove JSON.stringify at the insert site) is queued as a
+  // follow-up; this reader stays defensive even after that lands so any
+  // mixed historical rows continue to render correctly.
   let likelyAssent = '—'
   let primaryRootPassion: string | null = null
   try {
-    const passions = Array.isArray(row.passions_detected)
-      ? (row.passions_detected as Array<{
+    let parsed: unknown = row.passions_detected
+    if (typeof parsed === 'string') {
+      try {
+        parsed = JSON.parse(parsed)
+      } catch {
+        parsed = []
+      }
+    }
+    const passions = Array.isArray(parsed)
+      ? (parsed as Array<{
           root_passion?: string
           sub_species?: string
           false_judgement?: string
+          passion?: string
         }>)
       : []
     if (passions.length > 0) {
