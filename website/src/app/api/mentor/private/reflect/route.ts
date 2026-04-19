@@ -43,6 +43,11 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
+// R1 extension (19 April 2026): hub label is architecturally fixed for this
+// endpoint (private mentor only). Named constant surfaces the hardcode for
+// future taxonomy refactors. See KG8 in operations/knowledge-gaps.md.
+const PRIVATE_MENTOR_HUB = 'private-mentor' as const
+
 const REFLECTION_PROMPT = `You are the Stoic Sage reflection companion for sagereasoning.com. A user is reflecting on their day — what happened and how they responded. Your role is to evaluate their alignment with right reason (katorthoma), identify what they did well, and show what a Stoic sage would have done differently.
 
 Use 4-stage evaluation to assess their reflection:
@@ -190,9 +195,9 @@ export async function POST(request: NextRequest) {
       useProjection ? Promise.resolve(null) : getFullPractitionerContext(auth.user.id),
       useProjection ? loadMentorProfile(auth.user.id) : Promise.resolve(null),
       getProjectContext('minimal'),
-      getMentorObservationsWithParallelLog(auth.user.id, 'private-mentor', 'private-reflect'),
-      getJournalReferences(auth.user.id, extractTopicHints(what_happened, how_i_responded), 'private-mentor'),
-      getProfileSnapshots(auth.user.id, 'private-mentor'),
+      getMentorObservationsWithParallelLog(auth.user.id, PRIVATE_MENTOR_HUB, 'private-reflect'),
+      getJournalReferences(auth.user.id, extractTopicHints(what_happened, how_i_responded), PRIVATE_MENTOR_HUB),
+      getProfileSnapshots(auth.user.id, PRIVATE_MENTOR_HUB),
       getBaselineAppendixContext(auth.user.id),
     ])
 
@@ -203,7 +208,7 @@ export async function POST(request: NextRequest) {
       ? await getRecentInteractionsAsSignals(
           auth.user.id,
           storedProfile?.profile || null,
-          'private-mentor',
+          PRIVATE_MENTOR_HUB,
           7,
         )
       : null
@@ -401,7 +406,7 @@ Score my actions and give me the sage perspective.`
               confidence: structuredObs.confidence as ConfidenceLevel,
               source_context: 'evening_reflection',
             },
-            'private-mentor',
+            PRIVATE_MENTOR_HUB,
           )
           if (obsResult.success) {
             obsLogStatus = 'logged'
@@ -477,7 +482,7 @@ Score my actions and give me the sage perspective.`
           sage_perspective: reflectionData.sage_perspective,
         },
         what_happened.trim(),
-        'private-mentor',
+        PRIVATE_MENTOR_HUB,
         validatedObservation
       )
     } catch (err) {
