@@ -455,6 +455,16 @@ Score my actions and give me the sage perspective.`
 
     // Self-improving feedback loop — feed reflection into Mentor profile
     // Awaited (not fire-and-forget) to ensure writes complete before Vercel terminates the function
+    //
+    // R3 (session 11, 19 April 2026): if logMentorObservation succeeded above
+    // (obsLogStatus === 'logged'), pass the validated observation text as the
+    // 6th arg so updateProfileFromReflection → recordInteraction populates
+    // mentor_interactions.mentor_observation. Undefined otherwise (stays null,
+    // reader degrades to proximity fallback). Never pass raw LLM text here.
+    // See: website/src/lib/logging/mentor-observation-logger.ts
+    const validatedObservation: string | undefined =
+      obsLogStatus === 'logged' ? (structuredObs?.observation || undefined) : undefined
+
     try {
       const { updateProfileFromReflection } = await import('../../../../../../../sage-mentor/profile-store')
       await updateProfileFromReflection(
@@ -467,7 +477,8 @@ Score my actions and give me the sage perspective.`
           sage_perspective: reflectionData.sage_perspective,
         },
         what_happened.trim(),
-        'private-mentor'
+        'private-mentor',
+        validatedObservation
       )
     } catch (err) {
       console.error('Private reflect → profile update failed (non-blocking):', err)

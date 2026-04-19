@@ -1069,7 +1069,14 @@ export async function updateProfileFromReflection(
   userId: string,
   reflection: ReflectionOutput,
   reflectionInput: string,
-  hubId: 'founder-mentor' | 'private-mentor' = 'private-mentor'
+  hubId: 'founder-mentor' | 'private-mentor' = 'private-mentor',
+  // R3 (session 11, 19 April 2026): optional validated observation text to
+  // populate mentor_interactions.mentor_observation. Pass ONLY content that
+  // has already been accepted by logMentorObservation() (third-person,
+  // 50–500 chars, categorised, confidence-scored). Undefined → stored as null.
+  // Never pass raw LLM text here — that's what caused the April-12 contamination.
+  // See: website/src/lib/logging/mentor-observation-logger.ts
+  mentorObservation?: string
 ): Promise<{ success: boolean; profileUpdated: boolean; error: string | null }> {
   try {
     // 1. Find the user's profile
@@ -1121,15 +1128,24 @@ export async function updateProfileFromReflection(
 
     // 3. Record the reflection as an interaction in the rolling window — hub-scoped
     //
-    // NOTE (2026-04-13): mentor_observation field deliberately omitted.
-    // Previously this passed reflection.sage_perspective (raw LLM response text)
-    // which contaminated the observation log with first-person mentor language.
-    // Structured observations are now logged separately via logMentorObservation()
-    // in website/src/lib/logging/mentor-observation-logger.ts, which enforces
-    // a strict input contract: third-person, 50–500 chars, categorised, confidence-scored.
+    // R3 (session 11, 19 April 2026): mentor_observation is populated from the
+    // optional mentorObservation parameter ONLY. Callers must have obtained
+    // that string from logMentorObservation() success (see parameter comment
+    // on updateProfileFromReflection above). Undefined → stored as null and
+    // the reader degrades to the proximity fallback.
     //
-    // The mentor_observation column on mentor_interactions is DEPRECATED for new writes.
-    // Existing contaminated rows should be archived (see session handoff 2026-04-13).
+    // Pre-R3 behaviour (2026-04-13): this field was deliberately omitted
+    // because the previous writer passed reflection.sage_perspective (raw
+    // LLM response text), which contaminated the observation log with
+    // first-person mentor language. Structured observations are now logged
+    // separately via logMentorObservation() in
+    // website/src/lib/logging/mentor-observation-logger.ts, which enforces
+    // a strict input contract: third-person, 50–500 chars, categorised,
+    // confidence-scored. R3 re-opens mentor_observation to writes, but ONLY
+    // from content that has already passed that input contract.
+    //
+    // Existing contaminated rows (pre-2026-04-13) should be archived (see
+    // session handoff 2026-04-13). Inert after R1.
     await recordInteraction(supabase, profileId, {
       type: 'evening_reflection',
       hub_id: hubId,
@@ -1147,7 +1163,7 @@ export async function updateProfileFromReflection(
         false_judgement: p.false_judgement,
       })),
       mechanisms_applied: ['passion_diagnosis', 'oikeiosis'],
-      // mentor_observation: REMOVED — was passing raw sage_perspective (contamination)
+      mentor_observation: mentorObservation,
     })
 
     // 4. Recompute rolling window and update core profile if enough data
