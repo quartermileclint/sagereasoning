@@ -400,7 +400,8 @@ Score my actions and give me the sage perspective.`
               category: structuredObs.category as ObservationCategory,
               confidence: structuredObs.confidence as ConfidenceLevel,
               source_context: 'evening_reflection',
-            }
+            },
+            'private-mentor',
           )
           if (obsResult.success) {
             obsLogStatus = 'logged'

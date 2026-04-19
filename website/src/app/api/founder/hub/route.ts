@@ -99,11 +99,31 @@ function getClient(): Anthropic {
 // Primary Agent Response
 // =============================================================================
 
+/**
+ * Map the request-level hub identifier (as stored on conversations and
+ * accepted by this endpoint) to the context-layer hub label used by the
+ * mentor context readers / writers.
+ *
+ * Legacy naming: conversations are labelled 'founder-hub' or 'private-mentor'.
+ * Mentor context (observations, signals, snapshots) is labelled
+ * 'founder-mentor' or 'private-mentor'. Reader/writer drift between these
+ * two label schemes is what caused the session-9 diagnosis
+ * (45 clean observations stranded under the wrong label).
+ *
+ * This helper exists so every reader and writer in this file funnels
+ * through a single mapping — no more hardcoded 'founder-mentor' strings.
+ */
+function mapRequestHubToContextHub(effectiveHubId: string): 'founder-mentor' | 'private-mentor' {
+  if (effectiveHubId === 'private-mentor') return 'private-mentor'
+  return 'founder-mentor' // covers 'founder-hub' and any fallback
+}
+
 async function getPrimaryAgentResponse(
   agent: AgentType,
   message: string,
   conversationHistory: Array<{ role: string; agent_type: string | null; content: string }>,
   userId: string,
+  effectiveHubId: string,
 ): Promise<AgentResponse> {
   const client = getClient()
   const startTime = Date.now()
@@ -440,14 +460,15 @@ ${brainContext}`
   let mentorObservationsBlock: string | null = null
   let profileSnapshotsBlock: string | null = null
   if (agent === 'mentor') {
+    const contextHub = mapRequestHubToContextHub(effectiveHubId)
     const [mentorObservations, profileSnapshots, signals] = await Promise.all([
-      getMentorObservationsWithParallelLog(userId, 'founder-mentor', 'founder-hub'),
+      getMentorObservationsWithParallelLog(userId, contextHub, 'founder-hub'),
       getProfileSnapshots(userId, 'founder-mentor'),
       useProjection
         ? getRecentInteractionsAsSignals(
             userId,
             storedProfile?.profile || null,
-            'founder-mentor',
+            contextHub,
             7,
           )
         : Promise.resolve(null),
@@ -1137,6 +1158,7 @@ export async function POST(request: NextRequest) {
       message.trim(),
       conversationHistory,
       auth.user.id,
+      effectiveHubId,
     )
 
     // Save primary agent response
@@ -1170,7 +1192,7 @@ export async function POST(request: NextRequest) {
           // See: website/src/lib/logging/mentor-observation-logger.ts
           await recordInteraction(supabaseAdmin as any, profileRow.id, {
             type: 'conversation' as any,
-            hub_id: 'founder-mentor',
+            hub_id: mapRequestHubToContextHub(effectiveHubId),
             description: message.trim().substring(0, 200),
             mechanisms_applied: ['passion_diagnosis', 'oikeiosis', 'value_assessment'],
             // mentor_observation: REMOVED — was passing raw LLM response text (contamination)
@@ -1226,7 +1248,8 @@ If the conversation is too casual or brief to yield a meaningful observation, re
                   category: extracted.category as ObservationCategory,
                   confidence: extracted.confidence as ConfidenceLevel,
                   source_context: 'founder_hub_conversation',
-                }
+                },
+                mapRequestHubToContextHub(effectiveHubId),
               )
               if (!obsResult.success) {
                 console.warn('[founder/hub] Structured observation rejected:', obsResult.error)

@@ -183,18 +183,27 @@ export function validateMentorObservation(input: MentorObservationInput): Valida
 // ─── Logging Functions ──────────────────────────────────────────────
 
 /**
- * Log a structured mentor observation to the private mentor hub.
+ * Log a structured mentor observation.
  *
  * This is the ONLY way to write to the mentor_observation column.
  * It validates the input contract and rejects raw LLM output.
  *
+ * R1 (session 10, 19 April 2026): hubId is now a required parameter — the
+ * caller must declare which hub the observation belongs to. Previously
+ * hardcoded to 'private-mentor', which meant the founder-hub conversation
+ * extractor wrote to the wrong hub label and the reader at 'founder-mentor'
+ * never saw any of it (45 clean observations stranded). Forcing the caller to
+ * choose stops that drift recurring.
+ *
  * @param profileId - The mentor profile UUID
  * @param input - Structured observation (validated before insert)
+ * @param hubId - Which hub this observation belongs to ('founder-mentor' or 'private-mentor')
  * @returns Success/error result
  */
 export async function logMentorObservation(
   profileId: string,
   input: MentorObservationInput,
+  hubId: 'founder-mentor' | 'private-mentor',
 ): Promise<{ success: boolean; error: string | null; validation?: ValidationResult }> {
   // Validate the input contract
   const validation = validateMentorObservation(input)
@@ -211,7 +220,7 @@ export async function logMentorObservation(
       .from('mentor_observations_structured')
       .insert({
         profile_id: profileId,
-        hub_id: 'private-mentor',
+        hub_id: hubId,
         observation_date: input.date,
         observation: input.observation,
         category: input.category,
