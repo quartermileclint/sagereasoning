@@ -25,8 +25,75 @@ export default function ScoreSocialPage() {
   const [result, setResult] = useState<V3SocialMediaEvaluation | null>(null)
   const [distressRedirect, setDistressRedirect] = useState<{ severity: string; redirect_message: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const charCount = text.length
+
+  // Format the V3 result as readable text for pasting into the mentor
+  // conversation so the private mentor can continue discussing this evaluation.
+  function formatResultForMentor(r: V3SocialMediaEvaluation, draft: string, platformName: string): string {
+    const lines: string[] = []
+    lines.push(`Social Media Filter — ${platformName} draft`)
+    lines.push(`Right Action Proximity: ${PROXIMITY_ENGLISH[r.katorthoma_proximity] || r.katorthoma_proximity}`)
+    lines.push('')
+    lines.push('My draft:')
+    const trimmedDraft = draft.length > 800 ? draft.slice(0, 800) + '…' : draft
+    lines.push(trimmedDraft)
+    if (r.poster_passions.length > 0) {
+      lines.push('')
+      lines.push('My motivating passions:')
+      for (const p of r.poster_passions) {
+        const name = ROOT_PASSION_ENGLISH[p.root_passion] || p.root_passion
+        const sub = p.sub_species ? ` (${p.sub_species})` : ''
+        lines.push(`- ${name}${sub}`)
+        if (p.evidence) lines.push(`  Evidence: ${p.evidence}`)
+        if (p.false_judgement) lines.push(`  False judgement: ${p.false_judgement}`)
+      }
+    }
+    if (r.reader_triggered_passions.length > 0) {
+      lines.push('')
+      lines.push('What this triggers in readers:')
+      for (const p of r.reader_triggered_passions) {
+        const name = ROOT_PASSION_ENGLISH[p.root_passion] || p.root_passion
+        const sub = p.sub_species ? ` (${p.sub_species})` : ''
+        lines.push(`- ${name}${sub}`)
+        if (p.evidence) lines.push(`  Evidence: ${p.evidence}`)
+        if (p.false_judgement) lines.push(`  False judgement: ${p.false_judgement}`)
+      }
+    }
+    if (r.false_judgements.length > 0) {
+      lines.push('')
+      lines.push('False judgements embedded:')
+      for (const fj of r.false_judgements) lines.push(`- ${fj}`)
+    }
+    if (r.corrections.length > 0) {
+      lines.push('')
+      lines.push('Stoic corrections:')
+      for (const c of r.corrections) lines.push(`- ${c}`)
+    }
+    lines.push('')
+    lines.push('— Pasted from /score-social so we can continue discussing this draft.')
+    return lines.join('\n')
+  }
+
+  function handleCopyForMentor() {
+    if (!result) return
+    const payload = formatResultForMentor(result, text, platform)
+    try {
+      navigator.clipboard.writeText(payload).then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 3500)
+      })
+    } catch {
+      const blob = new Blob([payload], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `score-social.txt`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+  }
 
   async function handleScore() {
     if (text.trim().length < 5) {
@@ -241,10 +308,27 @@ export default function ScoreSocialPage() {
               {DOCUMENT_EVALUATIVE_DISCLAIMER}
             </p>
 
+            {/* Copy for mentor conversation */}
+            <div className="bg-sage-50 border border-sage-200 rounded-lg p-4 flex flex-col items-center gap-2">
+              <button
+                onClick={handleCopyForMentor}
+                className={`px-5 py-2 font-display text-sm rounded-lg border transition-colors ${
+                  copied
+                    ? 'bg-green-50 text-green-700 border-green-300'
+                    : 'bg-white text-sage-800 border-sage-400 hover:bg-sage-100'
+                }`}
+              >
+                {copied ? '✓ Copied — paste into the mentor conversation' : 'Copy for mentor conversation'}
+              </button>
+              <p className="font-body text-xs text-sage-500 text-center max-w-xs">
+                Copies a readable summary. Paste into the Private Mentor conversation tab to continue discussing this draft.
+              </p>
+            </div>
+
             {/* Try Again */}
             <div className="text-center">
               <button
-                onClick={() => { setResult(null); setText('') }}
+                onClick={() => { setResult(null); setText(''); setCopied(false) }}
                 className="px-6 py-3 bg-sage-800 text-white font-display rounded-lg hover:bg-sage-700 transition-colors"
               >
                 Check Another Draft

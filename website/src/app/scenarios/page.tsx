@@ -81,6 +81,112 @@ export default function ScenariosPage() {
   const [distressRedirect, setDistressRedirect] = useState<{ severity: string; redirect_message: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [step, setStep] = useState<'setup' | 'respond' | 'result'>('setup')
+  const [copied, setCopied] = useState(false)
+
+  // Format the V3 scenario evaluation as readable text for pasting into the
+  // mentor conversation so the private mentor can continue discussing it.
+  function formatScenarioForMentor(r: V3ScenarioResult, s: Scenario, responseUsed: string): string {
+    const lines: string[] = []
+    lines.push(`Ethical Scenario — ${s.audience}`)
+    lines.push(`Topic: ${s.topic}`)
+    lines.push(`Right Action Proximity: ${PROXIMITY_ENGLISH[r.katorthoma_proximity] || r.katorthoma_proximity}`)
+    lines.push('')
+    lines.push('Scenario:')
+    lines.push(s.scenario)
+    lines.push('')
+    lines.push('My response:')
+    lines.push(responseUsed)
+    if (r.feedback) {
+      lines.push('')
+      lines.push('Evaluation:')
+      lines.push(r.feedback)
+    }
+    if (r.virtue_domains_engaged && r.virtue_domains_engaged.length > 0) {
+      lines.push('')
+      lines.push(`Virtue domains engaged: ${r.virtue_domains_engaged.join(', ')}`)
+    }
+    if (r.ruling_faculty_assessment) {
+      lines.push('')
+      lines.push('Unified virtue assessment:')
+      lines.push(r.ruling_faculty_assessment)
+    }
+    if (r.kathekon_assessment) {
+      lines.push('')
+      lines.push(
+        `Appropriate action: ${r.kathekon_assessment.is_kathekon ? 'Yes' : 'No'} (quality: ${r.kathekon_assessment.quality})`
+      )
+      if (r.kathekon_assessment.reasoning) lines.push(r.kathekon_assessment.reasoning)
+    } else if (r.kathekon_quality) {
+      lines.push('')
+      lines.push(`Kathekon quality: ${r.kathekon_quality}`)
+    }
+    if (r.control_filter) {
+      lines.push('')
+      lines.push('Within my control:')
+      for (const c of r.control_filter.within_control) lines.push(`- ${c}`)
+      lines.push('Outside my control:')
+      for (const c of r.control_filter.outside_control) lines.push(`- ${c}`)
+    }
+    if (r.passions_detected && r.passions_detected.length > 0) {
+      lines.push('')
+      lines.push('Passions identified:')
+      for (const p of r.passions_detected) {
+        const name = ROOT_PASSION_ENGLISH[p.root_passion] || p.root_passion
+        const sub = p.sub_species ? ` (${p.sub_species})` : ''
+        lines.push(`- ${name}${sub}`)
+        if (p.evidence) lines.push(`  Evidence: ${p.evidence}`)
+        if (p.false_judgement) lines.push(`  False judgement: ${p.false_judgement}`)
+      }
+    }
+    if (r.false_judgements && r.false_judgements.length > 0) {
+      lines.push('')
+      lines.push('False judgements:')
+      for (const fj of r.false_judgements) lines.push(`- ${fj}`)
+    }
+    if (r.deliberation_walkthrough) {
+      lines.push('')
+      lines.push('Deliberation walkthrough:')
+      lines.push(`1. Honourable? ${r.deliberation_walkthrough.is_honourable}`)
+      lines.push(`2. More honourable? ${r.deliberation_walkthrough.more_honourable}`)
+      lines.push(`3. Advantageous? ${r.deliberation_walkthrough.is_advantageous}`)
+      lines.push(`4. More advantageous? ${r.deliberation_walkthrough.more_advantageous}`)
+      lines.push(`5. Honour vs advantage: ${r.deliberation_walkthrough.honour_vs_advantage}`)
+    }
+    const sageLine = r.sage_says || r.sage_response
+    if (sageLine) {
+      lines.push('')
+      lines.push('The sage says:')
+      lines.push(sageLine)
+    }
+    if (r.improvement_path) {
+      lines.push('')
+      lines.push('Path forward:')
+      lines.push(r.improvement_path)
+    }
+    lines.push('')
+    lines.push('— Pasted from /scenarios so we can continue discussing this scenario.')
+    return lines.join('\n')
+  }
+
+  function handleCopyForMentor() {
+    if (!result || !scenario) return
+    const responseUsed = customResponse.trim() || selectedOption || ''
+    const payload = formatScenarioForMentor(result, scenario, responseUsed)
+    try {
+      navigator.clipboard.writeText(payload).then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 3500)
+      })
+    } catch {
+      const blob = new Blob([payload], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'scenario.txt'
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+  }
 
   async function loadScenario() {
     setLoadingScenario(true)
@@ -462,16 +568,33 @@ export default function ScenariosPage() {
               {DOCUMENT_EVALUATIVE_DISCLAIMER}
             </p>
 
+            {/* Copy for mentor conversation */}
+            <div className="bg-sage-50 border border-sage-200 rounded-lg p-4 flex flex-col items-center gap-2">
+              <button
+                onClick={handleCopyForMentor}
+                className={`px-5 py-2 font-display text-sm rounded-lg border transition-colors ${
+                  copied
+                    ? 'bg-green-50 text-green-700 border-green-300'
+                    : 'bg-white text-sage-800 border-sage-400 hover:bg-sage-100'
+                }`}
+              >
+                {copied ? '✓ Copied — paste into the mentor conversation' : 'Copy for mentor conversation'}
+              </button>
+              <p className="font-body text-xs text-sage-500 text-center max-w-xs">
+                Copies a readable summary. Paste into the Private Mentor conversation tab to continue discussing this scenario.
+              </p>
+            </div>
+
             {/* Actions */}
             <div className="flex gap-4 justify-center">
               <button
-                onClick={() => { setResult(null); setStep('respond'); setSelectedOption(null); setCustomResponse('') }}
+                onClick={() => { setResult(null); setStep('respond'); setSelectedOption(null); setCustomResponse(''); setCopied(false) }}
                 className="px-6 py-3 border-2 border-sage-300 text-sage-700 font-display rounded-lg hover:border-sage-500 transition-colors"
               >
                 Try Same Scenario Again
               </button>
               <button
-                onClick={() => { setResult(null); setStep('setup'); setScenario(null); setSelectedOption(null); setCustomResponse('') }}
+                onClick={() => { setResult(null); setStep('setup'); setScenario(null); setSelectedOption(null); setCustomResponse(''); setCopied(false) }}
                 className="px-6 py-3 bg-sage-800 text-white font-display rounded-lg hover:bg-sage-700 transition-colors"
               >
                 New Scenario

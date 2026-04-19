@@ -35,6 +35,53 @@ export default function JournalPage() {
   const [viewingDay, setViewingDay] = useState<number | null>(null)
   const [pastEntry, setPastEntry] = useState<string | null>(null)
   const [showCurriculum, setShowCurriculum] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  // Format a journal entry (day + teaching + question + my reflection) as
+  // readable text so the founder can paste it into the Private Mentor
+  // conversation to continue discussing.
+  function formatJournalForMentor(day: number, reflection: string): string {
+    const e = getJournalEntry(day)
+    const p = getPhaseForDay(day)
+    const lines: string[] = []
+    lines.push(`Journal — Day ${day}${e?.title ? ` — ${e.title}` : ''}`)
+    if (p) lines.push(`Phase ${p.number}: ${p.title}`)
+    if (e?.virtue) lines.push(`Virtue: ${e.virtue.charAt(0).toUpperCase() + e.virtue.slice(1)}`)
+    if (e?.teaching) {
+      lines.push('')
+      lines.push('Read:')
+      lines.push(e.teaching)
+    }
+    if (e?.question) {
+      lines.push('')
+      lines.push('Reflect:')
+      lines.push(e.question)
+    }
+    lines.push('')
+    lines.push('My reflection:')
+    lines.push(reflection || '(stored locally on the device where you wrote it)')
+    lines.push('')
+    lines.push('— Pasted from /journal so we can continue discussing this entry.')
+    return lines.join('\n')
+  }
+
+  function handleCopyForMentor(day: number, reflection: string | null) {
+    const payload = formatJournalForMentor(day, reflection || '')
+    try {
+      navigator.clipboard.writeText(payload).then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 3500)
+      })
+    } catch {
+      const blob = new Blob([payload], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `journal-day-${day}.txt`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+  }
 
   // ─── Load user and journal state ───
   useEffect(() => {
@@ -507,13 +554,30 @@ export default function JournalPage() {
               <div className="flex items-center justify-between mb-3">
                 <span className="font-display text-sm font-medium text-sage-500">Your reflection</span>
                 <button
-                  onClick={() => { setViewingDay(null); setPastEntry(null); setReflectionText('') }}
+                  onClick={() => { setViewingDay(null); setPastEntry(null); setReflectionText(''); setCopied(false) }}
                   className="font-body text-sm text-sage-400 hover:text-sage-600"
                 >
                   Back to current day
                 </button>
               </div>
               <p className="font-body text-sage-700 whitespace-pre-wrap">{pastEntry}</p>
+
+              {/* Copy for mentor conversation */}
+              <div className="mt-5 pt-4 border-t border-sage-100 flex flex-col items-center gap-2">
+                <button
+                  onClick={() => handleCopyForMentor(activeDay, pastEntry)}
+                  className={`px-5 py-2 font-display text-sm rounded-lg border transition-colors ${
+                    copied
+                      ? 'bg-green-50 text-green-700 border-green-300'
+                      : 'bg-white text-sage-800 border-sage-400 hover:bg-sage-100'
+                  }`}
+                >
+                  {copied ? '✓ Copied — paste into the mentor conversation' : 'Copy for mentor conversation'}
+                </button>
+                <p className="font-body text-xs text-sage-500 text-center max-w-xs">
+                  Copies the day&apos;s teaching, question, and your reflection. Paste into the Private Mentor conversation tab to continue discussing this entry.
+                </p>
+              </div>
             </div>
           ) : !isCompleted ? (
             <div className="bg-white border border-sage-200 rounded-lg p-6 mb-6">

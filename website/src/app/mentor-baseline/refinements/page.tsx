@@ -429,21 +429,74 @@ export default function RefinementsPage() {
     }
   }
 
-  const handleCopyJson = () => {
+  // Format a round as readable text the founder can paste into the Private
+  // Mentor conversation thread to continue the discussion. Long answers are
+  // truncated so the paste stays manageable.
+  const formatRoundForMentor = (round: ViewerRound): string => {
+    const lines: string[] = []
+    const when = formatDateTime(round.submittedAt || round.generatedAt)
+    lines.push(`Baseline Refinement Round — ${when}`)
+    const result = round.refinement?.refinement?.result
+    if (result?.summary) {
+      lines.push('')
+      lines.push('Summary:')
+      lines.push(result.summary)
+    }
+    if (result?.confidence_changes && Object.keys(result.confidence_changes).length > 0) {
+      lines.push('')
+      lines.push('Confidence changes:')
+      for (const [dim, note] of Object.entries(result.confidence_changes)) {
+        lines.push(`- ${formatDimensionLabel(dim)}: ${note}`)
+      }
+    }
+    if (result?.refinement_notes && result.refinement_notes.length > 0) {
+      lines.push('')
+      lines.push('Refinement notes:')
+      for (const n of result.refinement_notes) {
+        const q = round.questions.find(q => q.id === n.question_id)
+        const ct = changeTypeStyle(n.change_type).label
+        lines.push('')
+        if (q?.category) {
+          lines.push(`[${q.category}] — ${ct}`)
+        } else {
+          lines.push(`${ct}`)
+        }
+        if (q?.question_text) {
+          lines.push(`Q: ${q.question_text}`)
+        }
+        const answer = round.answers[n.question_id]
+        if (answer) {
+          const trimmed = answer.length > 300 ? answer.slice(0, 300) + '…' : answer
+          lines.push(`A: ${trimmed}`)
+        }
+        if (n.dimension_affected) {
+          lines.push(`Dimension: ${formatDimensionLabel(n.dimension_affected)}`)
+        }
+        if (n.before) lines.push(`Before: ${n.before}`)
+        if (n.after) lines.push(`After: ${n.after}`)
+        if (n.reasoning) lines.push(`Reasoning: ${n.reasoning}`)
+      }
+    }
+    lines.push('')
+    lines.push('— Pasted from /mentor-baseline/refinements so we can continue discussing this round.')
+    return lines.join('\n')
+  }
+
+  const handleCopyForMentor = () => {
     if (!selected) return
+    const text = formatRoundForMentor(selected)
     try {
-      const text = JSON.stringify(selected, null, 2)
       navigator.clipboard.writeText(text).then(() => {
         setCopied(true)
-        setTimeout(() => setCopied(false), 2500)
+        setTimeout(() => setCopied(false), 3500)
       })
     } catch {
-      // Fallback: surface as a download
-      const blob = new Blob([JSON.stringify(selected, null, 2)], { type: 'application/json' })
+      // Clipboard unavailable — fall back to a text file download
+      const blob = new Blob([text], { type: 'text/plain' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${selected.id}.json`
+      a.download = `refinement-${selected.id}.txt`
       a.click()
       URL.revokeObjectURL(url)
     }
@@ -640,20 +693,26 @@ export default function RefinementsPage() {
                   {importing ? 'Importing…' : 'Import to server'}
                 </button>
               )}
-              <button
-                onClick={handleCopyJson}
-                style={{
-                  padding: '8px 14px',
-                  background: 'transparent',
-                  color: '#5b9cf5',
-                  border: '1px solid #5b9cf5',
-                  borderRadius: 4,
-                  cursor: 'pointer',
-                  fontSize: 13,
-                }}
-              >
-                {copied ? 'Copied ✓' : 'Copy as JSON'}
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <button
+                  onClick={handleCopyForMentor}
+                  style={{
+                    padding: '8px 14px',
+                    background: copied ? '#1a3a2a' : '#1a2a4a',
+                    color: copied ? '#4caf6a' : '#5b9cf5',
+                    border: `1px solid ${copied ? '#2a4a3a' : '#2a3a5a'}`,
+                    borderRadius: 4,
+                    cursor: 'pointer',
+                    fontSize: 13,
+                    fontWeight: 600,
+                  }}
+                >
+                  {copied ? '✓ Copied — paste into the mentor conversation' : 'Copy for mentor conversation'}
+                </button>
+                <div style={{ fontSize: 11, color: '#7a7f8f', maxWidth: 260 }}>
+                  Copies a readable summary. Paste into the Private Mentor conversation tab to continue discussing this round.
+                </div>
+              </div>
               <button
                 onClick={() => handleDelete(selected.id)}
                 style={{
