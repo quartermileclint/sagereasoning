@@ -778,7 +778,12 @@ export async function recordInteraction(
         interaction_type: interaction.type,
         description: interaction.description,
         proximity_assessed: interaction.proximity_assessed || null,
-        passions_detected: JSON.stringify(interaction.passions_detected || []),
+        // Option 2 fix (Session 13, 19 April 2026): pass the array directly to the
+        // JSONB column. Previously JSON.stringify-wrapped, which stored a JSON-encoded
+        // string scalar in a JSONB column and forced readers to defensively JSON.parse.
+        // See operations/handoffs/session-13-close.md. Related: KG8 (hub-label contracts)
+        // and the session-10 first-observation candidate on JSONB storage format.
+        passions_detected: interaction.passions_detected || [],
         mechanisms_applied: interaction.mechanisms_applied || [],
         inner_agent_id: interaction.inner_agent_id || null,
         inner_agent_name: interaction.inner_agent_name || null,
