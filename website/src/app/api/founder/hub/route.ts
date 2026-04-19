@@ -1184,19 +1184,24 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (profileRow) {
-          // NOTE (2026-04-13): mentor_observation field deliberately omitted.
-          // Previously this dumped the first 300 chars of the raw LLM response,
-          // which contaminated the observation log. Structured observations are
-          // now logged separately via logMentorObservation() which enforces
-          // a strict input contract (third-person, categorised, confidence-scored).
+          // R3 (session 11, 19 April 2026): mentor_observation is written only
+          // from validated mentor_observations_structured content — never raw
+          // LLM text. The Haiku extraction below distils a third-person,
+          // categorised, confidence-scored observation; logMentorObservation()
+          // validates it (50–500 chars, category + confidence required) and
+          // writes to mentor_observations_structured. ONLY on success do we
+          // also populate mentor_interactions.mentor_observation below.
+          // On failure or skip, the column stays null and the reader degrades
+          // to the proximity fallback ("acted at <proximity> proximity").
           // See: website/src/lib/logging/mentor-observation-logger.ts
-          await recordInteraction(supabaseAdmin as any, profileRow.id, {
-            type: 'conversation' as any,
-            hub_id: mapRequestHubToContextHub(effectiveHubId),
-            description: message.trim().substring(0, 200),
-            mechanisms_applied: ['passion_diagnosis', 'oikeiosis', 'value_assessment'],
-            // mentor_observation: REMOVED — was passing raw LLM response text (contamination)
-          })
+          //
+          // Pre-R3 behaviour (2026-04-13): the field was deliberately omitted
+          // because the previous writer dumped raw LLM response text, which
+          // contaminated the observation log with first-person mentor language.
+          // The guardrail against that regression is that this field is
+          // assigned ONLY from validatedObservation below, and that variable
+          // is set ONLY after logMentorObservation() returns success.
+          let validatedObservation: string | undefined = undefined
 
           // Extract structured observation from mentor's conversational response
           // Uses Haiku for lightweight extraction — the mentor response is free-form,
@@ -1251,13 +1256,27 @@ If the conversation is too casual or brief to yield a meaningful observation, re
                 },
                 mapRequestHubToContextHub(effectiveHubId),
               )
-              if (!obsResult.success) {
+              if (obsResult.success) {
+                // R3: validated — eligible to populate mentor_interactions.mentor_observation
+                validatedObservation = extracted.observation
+              } else {
                 console.warn('[founder/hub] Structured observation rejected:', obsResult.error)
               }
             }
           } catch (extractErr) {
             console.warn('[founder/hub] Observation extraction failed (non-blocking):', extractErr)
           }
+
+          // Record interaction AFTER extraction. mentor_observation is populated
+          // only if logMentorObservation() returned success (see R3 guardrail
+          // above). Undefined here → stored as null by recordInteraction.
+          await recordInteraction(supabaseAdmin as any, profileRow.id, {
+            type: 'conversation' as any,
+            hub_id: mapRequestHubToContextHub(effectiveHubId),
+            description: message.trim().substring(0, 200),
+            mechanisms_applied: ['passion_diagnosis', 'oikeiosis', 'value_assessment'],
+            mentor_observation: validatedObservation,
+          })
         }
       } catch (err) {
         console.error('[founder/hub] Mentor knowledge write failed (non-blocking):', err)
