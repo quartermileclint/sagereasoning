@@ -24,6 +24,11 @@ import { getMentorObservationsWithParallelLog, getProfileSnapshots, createProfil
 // Access: Founder only (FOUNDER_USER_ID env var)
 // =============================================================================
 
+// R1 extension (19 April 2026): hub label is architecturally fixed for this
+// endpoint (private mentor only). Named constant surfaces the hardcode for
+// future taxonomy refactors. See KG8 in operations/knowledge-gaps.md.
+const PRIVATE_MENTOR_HUB = 'private-mentor' as const
+
 const REFINEMENT_SYSTEM_PROMPT = `You are the Sage Mentor's profile refinement engine for SageReasoning.
 
 You have two inputs:
@@ -132,8 +137,8 @@ export async function POST(request: NextRequest) {
     // Private mentor gets project context + L5 + growth accumulation context
     const [projectContext, mentorObservations, profileSnapshots] = await Promise.all([
       getProjectContext('summary'),
-      getMentorObservationsWithParallelLog(auth.user.id, 'private-mentor', 'private-baseline-response'),
-      getProfileSnapshots(auth.user.id, 'private-mentor'),
+      getMentorObservationsWithParallelLog(auth.user.id, PRIVATE_MENTOR_HUB, 'private-baseline-response'),
+      getProfileSnapshots(auth.user.id, PRIVATE_MENTOR_HUB),
     ])
     const mentorKnowledgeBase = getMentorKnowledgeBase()
 
@@ -170,7 +175,7 @@ export async function POST(request: NextRequest) {
           // are now logged separately via logMentorObservation().
           await recordInteraction(supabaseAdmin as any, profileRow.id, {
             type: 'baseline_question' as any,
-            hub_id: 'private-mentor',
+            hub_id: PRIVATE_MENTOR_HUB,
             description: `Baseline refinement: ${responses.length} gap questions processed`,
             proximity_assessed: undefined,
             passions_detected: [],
@@ -178,7 +183,7 @@ export async function POST(request: NextRequest) {
             // mentor_observation: REMOVED — was passing raw LLM summary text (contamination)
           })
 
-          await createProfileSnapshot(profileRow.id, 'manual', 'private-mentor')
+          await createProfileSnapshot(profileRow.id, 'manual', PRIVATE_MENTOR_HUB)
         }
       } catch (err) {
         console.error('[mentor/private/baseline-response] Auto-save failed (non-blocking):', err)

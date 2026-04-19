@@ -463,7 +463,11 @@ ${brainContext}`
     const contextHub = mapRequestHubToContextHub(effectiveHubId)
     const [mentorObservations, profileSnapshots, signals] = await Promise.all([
       getMentorObservationsWithParallelLog(userId, contextHub, 'founder-hub'),
-      getProfileSnapshots(userId, 'founder-mentor'),
+      // R1 extension (19 April 2026, session 12): was hardcoded 'founder-mentor'.
+      // Every writer of mentor_profile_snapshots produces rows under the chat hub
+      // (currently only 'private-mentor' via baseline-response). Reading under a
+      // different label strands the rows. See KG8 in operations/knowledge-gaps.md.
+      getProfileSnapshots(userId, contextHub),
       useProjection
         ? getRecentInteractionsAsSignals(
             userId,
