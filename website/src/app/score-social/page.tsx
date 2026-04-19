@@ -37,8 +37,7 @@ export default function ScoreSocialPage() {
     lines.push(`Right Action Proximity: ${PROXIMITY_ENGLISH[r.katorthoma_proximity] || r.katorthoma_proximity}`)
     lines.push('')
     lines.push('My draft:')
-    const trimmedDraft = draft.length > 800 ? draft.slice(0, 800) + '…' : draft
-    lines.push(trimmedDraft)
+    lines.push(draft)
     if (r.poster_passions.length > 0) {
       lines.push('')
       lines.push('My motivating passions:')

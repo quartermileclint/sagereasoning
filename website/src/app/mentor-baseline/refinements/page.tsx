@@ -466,8 +466,7 @@ export default function RefinementsPage() {
         }
         const answer = round.answers[n.question_id]
         if (answer) {
-          const trimmed = answer.length > 300 ? answer.slice(0, 300) + '…' : answer
-          lines.push(`A: ${trimmed}`)
+          lines.push(`A: ${answer}`)
         }
         if (n.dimension_affected) {
           lines.push(`Dimension: ${formatDimensionLabel(n.dimension_affected)}`)
