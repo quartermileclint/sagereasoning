@@ -136,4 +136,41 @@ Status advances only when the verification method for that step has been perform
 
 ---
 
+## KG8 — Hub-Label Consistency Across Writer, Reader, and Client
+
+**Re-explanations:** 3 (Sessions: 9 (original), 10 (session-10 close noted second observation), 11 (R3 implementation))
+
+**Why it caused confusion:** Hub labels (`'founder-mentor'`, `'private-mentor'`, `'founder-hub'`) appear in multiple places: the request body sent by `/private-mentor`, the writer's INSERT into `mentor_interactions.hub_id`, the reader's SQL `.eq('hub_id', ...)`, and the `logMentorObservation` writer. If any one of these uses a different label, rows get written under one hub and read from another, and the feature silently breaks (no error — just an empty result).
+
+**Plain-language resolution:** Treat hub labels as end-to-end contracts. For any new endpoint that reads or writes `mentor_interactions` or `mentor_observations_structured`:
+
+1. Does the client pass `hub_id` in the request body? If yes, use `mapRequestHubToContextHub(effectiveHubId)` in `/api/founder/hub` (and equivalent elsewhere) to map the request label to the context-reader label.
+2. If the endpoint hardcodes a hub label (e.g., `/api/mentor/private/reflect` hardcodes `'private-mentor'`), verify that hardcode matches the reader's expected value. Document the hardcode in a comment so drift is visible.
+3. Run one end-to-end probe: write a row via the new endpoint, then read via the mentor context, confirm the row appears.
+
+**When this matters:** Any new endpoint touching `mentor_interactions` or any reader of hub-scoped mentor data. Any refactor of the hub label taxonomy.
+
+---
+
+## KG9 — The /private-mentor Page Is a Façade Over /api/founder/hub
+
+**Re-explanations:** 3 (Sessions: 9 (original observation), 10 (session-10 close noted second observation), 11 (R3 design had to distinguish chat path from reflection path))
+
+**Why it caused confusion:** The `/private-mentor` page has two user actions with completely different routing:
+- **Chat messages** → POST to `/api/founder/hub` with `hub_id: 'private-mentor'`. Writes `mentor_interactions` rows with `interaction_type: 'conversation'`.
+- **Evening reflections** → POST to `/api/mentor/private/reflect`. Writes a `reflections` row directly, then calls `updateProfileFromReflection` which writes a `mentor_interactions` row with `interaction_type: 'evening_reflection'`.
+
+The page name suggests a single backend (`/api/mentor/private/*`), but chat traffic actually goes through the generic `/api/founder/hub` endpoint scoped to the private hub. This matters because bug fixes that target "the private mentor" often need to be applied at two different files.
+
+**Plain-language resolution:** When investigating a `/private-mentor` issue:
+
+1. Is the symptom about a **chat message** or an **evening reflection**? They go through different endpoints.
+2. Chat message bugs → fix in `website/src/app/api/founder/hub/route.ts`.
+3. Evening reflection bugs → fix in `website/src/app/api/mentor/private/reflect/route.ts`, or upstream in `sage-mentor/profile-store.ts` if the bug is in `updateProfileFromReflection`.
+4. If a fix applies to both (e.g., R3 populating `mentor_observation`), plan for two edits in different files. Apply PR1: prove on one path first, verify live, then extend.
+
+**When this matters:** Any feature that touches the private mentor's data-writing paths. Any verification probe must specify which path it's testing — chat vs evening reflection — and the verification prompt must filter accordingly (e.g., "most recent evening reflection entry" rather than just "most recent entry", since chat messages accumulate as most-recent between test reflections).
+
+---
+
 *This is a living document. When a concept hits 3 re-explanations across sessions, add it here with the resolution that worked. Check this file at the start of every session.*
