@@ -760,7 +760,7 @@ export async function recordInteraction(
     description: string
     hub_id?: 'founder-mentor' | 'private-mentor'
     proximity_assessed?: KatorthomaProximityLevel
-    passions_detected?: { passion: string; false_judgement: string }[]
+    passions_detected?: { root_passion: 'epithumia' | 'hedone' | 'phobos' | 'lupe'; sub_species: string; false_judgement: string }[]
     mechanisms_applied?: string[]
     inner_agent_id?: string
     inner_agent_name?: string
@@ -1135,8 +1135,15 @@ export async function updateProfileFromReflection(
       hub_id: hubId,
       description: reflectionInput.substring(0, 200), // Truncate for storage
       proximity_assessed: reflection.katorthoma_proximity,
+      // R2 (session 10, 19 April 2026): write the shape the reader expects.
+      // Previously wrote { passion, false_judgement }, but rowToSignal in
+      // mentor-context-private.ts reads { root_passion, sub_species,
+      // false_judgement } — so Pattern match always degraded to "—".
+      // The rootPassionMap above already normalises root_passion to one of
+      // the four Stoic constants; we reuse it here.
       passions_detected: (reflection.passions_detected || []).map(p => ({
-        passion: p.sub_species,
+        root_passion: rootPassionMap[p.root_passion.toLowerCase()] || 'lupe',
+        sub_species: p.sub_species,
         false_judgement: p.false_judgement,
       })),
       mechanisms_applied: ['passion_diagnosis', 'oikeiosis'],
