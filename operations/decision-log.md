@@ -686,3 +686,23 @@ Changes implemented:
 **Impact:** Diff footprint this session is bounded. Ops, Growth, and Support chat personas continue to answer from their existing static brains + stoic context + project context. No new load on their request paths.
 
 **Status:** Adopted
+
+---
+
+## 2026-04-20 — D-Tech-5: Tech Channel 1 + Channel 2 Verification Failed on Vercel; Stabilise Now, Fix Next Session
+
+**Decision:** After in-session deploy and live probe at `/founder-hub` with the Tech persona, both Channel 1 (`tech-system-state.ts`) and Channel 2 (`tech-endpoint-inventory.ts`) returned the stub-fallback "unavailable" text on Vercel runtime. The persona disclosed honestly. No code changes were attempted at session tail. Founder selected Option A: stabilise here, log the failure, fix in the next session.
+
+**Reasoning:** Production is in a known-good failure state — the stub-fallback design caused the persona to disclose blindness rather than hallucinate, so no user is being misled. Attempting a fix at session tail would be Elevated risk (touches deployment configuration or moves files referenced from multiple places) on a session that has already absorbed the verification surprise. A fresh session is better positioned to (1) diagnose the actual runtime cwd via a temporary diagnostic endpoint, (2) choose between the three fix approaches (path-fix, file-move, `outputFileTracingIncludes`) based on evidence, and (3) re-verify cleanly. The diagnosis is the Open Question I logged in the close handoff (`process.cwd()` on Vercel serverless probably resolves to the Next.js project root, not the repo root, and/or the bundler does not ship files from outside `website/`).
+
+**Alternatives considered:**
+- **Option B — investigate and fix now.** Would require diagnostic endpoint deploy → cwd readback → fix-path choice → fix implementation → re-deploy → re-probe. Elevated risk under 0d-ii. Realistic chance of needing two iterations. Deferred to next session.
+- **Revert the changes.** Removing the wiring would return the Tech persona to its pre-session state. Rejected because the stub-fallback failure is recoverable (no silent breakage, no user-visible harm) and the Wired code is correct apart from the runtime path issue. Reverting would lose the parser, the harness, and the file-creation work, all of which still apply post-fix.
+
+**Revisit condition:** First task of the next session. Diagnostic endpoint runs → cwd value confirmed → fix approach chosen → fix deployed → live probe at `/founder-hub` returns a reply that references actual endpoint inventory wording and current-issues state. At that point, Channel 1 and Channel 2 move from "Wired-but-stub-on-Vercel" to "Verified", and D-Tech-4 (rollout to other personas) becomes eligible for revisit.
+
+**Rules served:** PR2 (acknowledges the discipline was partially violated when Wired status was applied before the production load path had been exercised; restoring it is the next session's first job), PR7 (deferral recorded with explicit revisit condition), PR9 (stewardship finding logged in addendum at Catastrophic-tier near-miss for the stub-fallback design that prevented silent failure, and Long-term-regression-tier for sandbox-vs-production runtime divergence).
+
+**Impact:** No production code changed in this decision. The two loaders, the route modification, the known-issues file, the harness, and the close handoff remain on disk and committed. The Tech persona continues to answer with stub-disclosure on production until the next session's fix lands. Status of Channel 1 and Channel 2 corrected from "Wired" to "Wired-but-stub-on-Vercel" in the close-handoff addendum.
+
+**Status:** Adopted

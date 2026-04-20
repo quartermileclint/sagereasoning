@@ -273,3 +273,82 @@ Recommended opening: task (1) first (15-minute reconciliation, closes the drift 
 - **The known-issues file is the one operational touchpoint the founder owns day-to-day.** Whenever a live-system issue arises, the expected workflow is: observe the issue → add an entry to `operations/tech-known-issues.md` with the date → commit → Vercel Green → the Tech persona can now answer questions about the issue. When the issue is resolved, move the entry from Current Issues to Recently Resolved. Thirty days later, delete it.
 - **Session closes at Wired, not Verified, on purpose.** Verified status is gated on the founder's Step E sequence. This is the cleanest boundary between "in-session work" and "founder-in-the-loop verification" we have. It also keeps the session's stop-point clean and well-defined, in line with the working agreements.
 - **Four deferred decisions recorded.** D-Tech-1, D-Tech-2, D-Tech-3, D-Tech-4 each carry an explicit revisit condition. The decision log now documents what we chose not to do this session and what would trigger revisiting, not just what we built.
+
+---
+
+## Addendum — Post-Close Verification Outcome (20 April 2026, same session)
+
+This addendum was appended after Step E was executed by the founder. The body of the close handoff above was written before verification ran, on the assumption it would come back clean. It did not. This section records what actually happened, the diagnosis, the corrected status, and the scoped fix plan for the next session.
+
+### What Happened
+
+- **Step E(a) — Vercel push:** Green on first deploy. No build errors.
+- **Step E(b) — Harness run:** Founder reported the `node` command had not worked for them in a previous session. AI ran the harness in the sandbox instead (Node 22.22.0, repo mounted at the same path the harness expects). Read-only operation, Standard risk.
+- **Step E(c) — Harness output:** All 10 parse assertions passed. CHECK 1 GREEN, CHECK 2 GREEN, CHECK 3 reported DRIFT as designed (exit code 2). However, the drift was **larger than the close handoff predicted**. Predicted "9 vs 10, single missing endpoint." Actual: 7 routes in code but not in §2 (six mentor-family routes plus `/api/score-conversation`), and 4 routes in §2 but not in code (`/api/evaluate`, `/api/score-document`, `/api/score-iterate`, `/api/score-scenario`). The harness is working correctly; the AI's drift estimate was not double-checked before being written into the close handoff. AI caused this inaccuracy.
+- **Step E(d) — Live probe:** Founder corrected the URL — Tech persona is on `/founder-hub`, not `/private-mentor` as the close handoff stated. AI caused this error. Founder ran the probe at the correct URL. The Tech persona returned an honest disclosure that **both Channel 1 and Channel 2 are loading as stubs on Vercel**: it explicitly said "Endpoint inventory comes from `/TECHNICAL_STATE.md` — that file's data is marked unavailable in my loaded context" and "Known issues come from `operations/tech-known-issues.md` — also marked unavailable." That wording matches the stub-fallback messages from both loaders verbatim.
+
+### Diagnosis (Two Likely Causes, Possibly Both)
+
+The harness passed in the sandbox because `process.cwd()` happened to resolve to the repo root. On Vercel serverless runtime, the file reads in both loaders fall through to the stub fallback. The two most likely causes:
+
+1. **Path resolution.** Both loaders use `path.join(process.cwd(), 'operations', 'tech-known-issues.md')` and `path.join(process.cwd(), 'TECHNICAL_STATE.md')`. On Vercel serverless functions for a Next.js app, `process.cwd()` typically resolves to the Next.js project root (`website/`), not the repo root. So the lookups become `website/operations/tech-known-issues.md` and `website/TECHNICAL_STATE.md` — neither of which exists.
+
+2. **Bundling.** Vercel's serverless bundler ships only the files it tracks as needed by the deployed function. Files at the repo root, outside the Next.js project directory, may not be included in the bundle at all. Even if path resolution were correct, the source files might not be present at runtime.
+
+Both could be true. The fix has to address whichever applies; in practice, the cleanest single fix probably addresses both at once.
+
+### Status — Corrected
+
+- `website/src/lib/context/tech-system-state.ts`: previously declared **Wired**. Corrected status: **Wired-but-stub-on-Vercel**. Code path is invoked, the stub fallback fires gracefully and self-discloses, but the production load path returns no data. Not Verified.
+- `website/src/lib/context/tech-endpoint-inventory.ts`: same — **Wired-but-stub-on-Vercel**.
+- `website/src/app/api/founder/hub/route.ts` `case 'tech':`: technically Wired (the two `await`s execute, the stub strings reach `primaryText`, the persona reads them and discloses honestly). Functionally degraded: the Tech persona has no current-issues signal and no endpoint inventory.
+- `operations/tech-known-issues.md` and `TECHNICAL_STATE.md`: source files are correct. The problem is on the read path, not the source.
+- `scripts/tech-wiring-verification.mjs`: status unchanged (works correctly in any environment where the repo root and `process.cwd()` align). Does not catch the Vercel runtime divergence — it was not designed to. A future iteration could add a CHECK 4 that probes a live `/api/founder/hub` debug endpoint on Vercel; out of scope for this addendum.
+
+### What Is and Is Not Broken
+
+- **Not broken:** the persona is being honest. The stub-fallback design did the job it was built to do — disclose blindness rather than hallucinate. No user is being misled. The system is in a known-good failure state.
+- **Broken:** the value-add of the two channels. Until the read path resolves on Vercel, the Tech persona has no more system-state context than it had before this session.
+- **Not at risk:** any other persona, any other endpoint, any user data, any auth path, any safety-critical surface. The blast radius of this defect is bounded to the Tech persona's two new context blocks.
+
+### Decision This Addendum Records (D-Tech-5)
+
+Founder selected Option A: **stabilise here and fix in the next session.** No code changes attempted at session tail. Rationale: production is in an honest-failure state, not a dangerous one; a fresh session is better positioned to investigate runtime cwd, choose between fix approaches, and verify cleanly than a tail-end one. This is logged in the decision log.
+
+### Next Session — First Task (Replaces the §2 Reconciliation as the Top Item)
+
+The TECHNICAL_STATE.md §2 reconciliation is bumped to position 2. Position 1 is now:
+
+**1. Diagnose and fix the Vercel stub-fallback failure on Channel 1 and Channel 2.** Sub-steps in order:
+   1. Add a temporary diagnostic endpoint (or one-shot console log on `case 'tech':`) that returns/logs `process.cwd()`, `__dirname` (where applicable), and the result of `fs.access()` on both expected source paths. Deploy. Read the values. This confirms which of the two diagnoses is correct and what the actual runtime cwd is.
+   2. Choose between three fix approaches based on the diagnostic:
+      - **(a) Path-fix only:** if cwd is `website/` and the files would be reachable via `path.join(process.cwd(), '..', 'operations', 'tech-known-issues.md')`, change both loaders to use that pattern. Cheapest fix. Risk: parent-directory traversal may not work if the bundler hasn't tracked those files.
+      - **(b) File-move:** copy or move `operations/tech-known-issues.md` and `TECHNICAL_STATE.md` into `website/` (e.g. `website/operations/tech-known-issues.md` and `website/TECHNICAL_STATE.md`). Update both loaders to read from the new path. Reliable but introduces source-of-truth ambiguity for `TECHNICAL_STATE.md` if it stays at repo root too.
+      - **(c) `outputFileTracingIncludes`:** add the two file paths to `next.config.js` under `outputFileTracingIncludes` so Vercel ships them in the bundle. Keep loaders pointing at repo-root paths but resolve them via a path that survives bundling. Most robust to source-of-truth concerns; slightly more Next.js plumbing.
+   3. Implement the chosen fix. Risk classification: Elevated under 0d-ii (touches deployment configuration or moves files referenced by other documents).
+   4. Re-deploy. Re-run harness in sandbox to confirm parse still passes. Re-run live probe at `/founder-hub` with the same Tech-persona message used in Step E(d). Confirm reply now references actual endpoints and known-issues state, not stub text.
+   5. Remove diagnostic endpoint/log if added in step 1.
+   6. Update this status: Wired-but-stub-on-Vercel → Verified.
+
+**2. Reconcile `TECHNICAL_STATE.md` §2 against the codebase.** Decide first whether §2 should track only direct callers of `runSageReason()` (its current scope) or every endpoint that uses the function (which would absorb the mentor-family routes from §3). Then add or remove entries to match. Re-run harness, confirm CHECK 3 GREEN. The reconciliation is bigger than the close handoff predicted: 7 routes need adding, 4 need investigating-then-removing.
+
+Then the rest of the menu from the original Next Session Should section follows in the same order.
+
+### Errors I Caused This Session
+
+Logged here for honesty and so they appear in any future audit:
+
+1. **Step E(d) URL was wrong.** I told the founder to probe at `/private-mentor`. The Tech persona is on `/founder-hub`. Founder corrected this themselves.
+2. **Drift estimate in Step E(c) was wrong.** I said "9 vs 10, single missing endpoint." Actual drift is much larger (7 vs 4 directional). The estimate was a quick-scan claim that I should have either verified before writing or not made.
+3. **The `process.cwd()` Open Question I logged in the close handoff was the actual root cause of the verification failure.** I logged it as a thing to be aware of but did not test it before declaring Wired status. This is a PR2 violation in spirit if not in letter — I gave the loaders a Wired classification that depended on an untested assumption.
+
+### Process-Rule Implications
+
+- **PR2 — partially violated.** Wired status was applied to the two loaders and the route modification before the production load path had been exercised. The stub fallback is the only reason this did not become a silent failure. Next session must re-establish PR2 discipline by gating Verified on a live probe, not on disk-level tests.
+- **PR7 — applied (D-Tech-5).** Decision to stabilise rather than fix at session tail is recorded with reasoning and revisit condition.
+- **Knowledge-gap candidate (first observation).** "Vercel serverless `process.cwd()` does not resolve to the repo root for Next.js apps; it resolves to the Next.js project root." This is not yet promoted under PR5 (single observation), but if a similar failure recurs in any future loader that reads from disk, this becomes a candidate. Logged for the knowledge-gaps register at next promotion review.
+
+### Stewardship Findings (New)
+
+- **F-series (Catastrophic-tier near-miss):** the stub-fallback design choice prevented this failure from being silent. Without the self-disclosing "unavailable" message, the persona would have answered confidently from training-data knowledge of past conversations, and the founder may not have noticed the loaders were not actually loading. The pattern of writing self-disclosing stub fallbacks for context loaders earned its place this session. Worth treating as default for any future loader of this shape: **never let a context loader fail silently; always make the failure visible to the persona.**
+- **F-series (Long-term regression-tier):** disk-level testing in a sandbox is not a substitute for live verification on the production runtime. Especially when the production runtime has a different working directory than the sandbox. Logged as steady-state awareness; tighter testing discipline required for any change that depends on runtime path resolution.
