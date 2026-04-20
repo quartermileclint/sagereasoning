@@ -26,6 +26,8 @@ import { getTechBrainContext } from '@/lib/context/tech-brain-loader'
 import { getTechSystemState } from '@/lib/context/tech-system-state'
 import { getEndpointInventory } from '@/lib/context/tech-endpoint-inventory'
 import { getGrowthBrainContext } from '@/lib/context/growth-brain-loader'
+import { getGrowthActionsLog } from '@/lib/context/growth-actions-log'
+import { getGrowthMarketSignals } from '@/lib/context/growth-market-signals'
 import { getSupportBrainContext } from '@/lib/context/support-brain-loader'
 import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
@@ -321,7 +323,14 @@ ${techEndpointInventory.formatted_context}
 ${brainContext}`
         break
       }
-      case 'growth':
+      case 'growth': {
+        // Channel 1 + Channel 2 wiring (20 April 2026). Both loaders are
+        // file-based and read-only at request time. Stubs returned on
+        // failure include a self-disclosing message so the persona never
+        // answers blind without saying so. Channel 2's is_sparse path is
+        // the expected state at P0 — empty market signals are not a bug.
+        const growthActionsLog = await getGrowthActionsLog()
+        const growthMarketSignals = await getGrowthMarketSignals()
         primaryText = `You are Sage-Growth: Positioning, audience, content, developer relations, community, metrics expertise. You are one of four internal Sage agents serving the SageReasoning founder. Your domain expertise is loaded below.
 
 Respond naturally in conversation. Apply your domain expertise to the founder's questions and tasks. When a task touches ethical, virtue, or principled reasoning concerns, flag them — but your primary value is your domain knowledge.
@@ -362,8 +371,13 @@ GROWTH REASONING UPGRADES — April 2026
 7. Startup Preparation Toolkit is a hypothesised third audience
    pending 0h confirmation. Treat as in-test, not as a third pillar.
 
+${growthActionsLog.formatted_context}
+
+${growthMarketSignals.formatted_context}
+
 ${brainContext}`
         break
+      }
       case 'support':
         primaryText = `You are Sage-Support: Triage, vulnerable users, philosophical sensitivity, escalation, knowledge base expertise. You are one of four internal Sage agents serving the SageReasoning founder. Your domain expertise is loaded below.
 

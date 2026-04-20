@@ -203,3 +203,43 @@ Keep this defensive pattern on any reader that was written while the writer bug 
 ---
 
 *This is a living document. When a concept hits 3 re-explanations across sessions, add it here with the resolution that worked. Check this file at the start of every session.*
+
+---
+
+## Carry-Forward Notes — Growth Wiring Session (20 April 2026)
+
+### KG1 — Second observation of the `process.cwd()` path-resolution pattern across context loaders
+
+**Context:** The Tech wiring session on 20 April 2026 (morning) observed that `process.cwd()` on Vercel serverless runtime for a Next.js app resolves to the Next.js project root (`website/`), not the repo root. Both Tech loaders fell back to stub text on production because their source files sit outside `website/`.
+
+**Growth session (same day, afternoon) mirrored the Tech pattern deliberately.** Both Growth loaders (`growth-actions-log.ts`, `growth-market-signals.ts`) use `path.join(process.cwd(), 'operations', '...')` identically to Tech. Founder chose this posture so the dedicated Vercel-path fix session sweeps Tech (2 loaders) and Growth (2 loaders) together with a single pattern change.
+
+**Status:** Not yet promoted to its own KG entry because the root-cause diagnosis and fix approach are still pending. Inline comments added in both Growth loaders (see `ACTIONS_LOG_PATH` and `MARKET_SIGNALS_PATH` comment blocks) direct the follow-up session to the known-limitation documentation.
+
+**Expected next observation:** If the Ops wiring session or any future file-based loader is designed *before* the Vercel-path fix lands and copies the same pattern, this becomes the third observation and promotes under PR8. The follow-up session that lands the fix should simultaneously promote this to a full KG entry with the resolution.
+
+### New candidate pattern (first observation) — Sparse-state disclosure in context loaders
+
+**Context:** Channel 2 of Growth (`growth-market-signals.ts`) is the first context loader in the codebase to carry an explicit "Do NOT invent data" disclosure for the sparse-state case.
+
+**Pattern description:** When a context loader legitimately has no data to return (file is readable but empty, not a failure), do not silently inject an empty block. Instead, inject an explicit block that:
+1. Tells the persona the channel is sparse.
+2. Says why it is expected to be sparse at the current stage.
+3. Instructs the persona explicitly not to fabricate data of the kind the channel carries.
+4. Suggests a principled fallback (e.g., "base recommendations on static context and flag the gap when it matters").
+
+This is distinct from the stub-fallback pattern (which fires on unreadable files): the stub-fallback says "I can't read the source." The sparse-state disclosure says "I can read the source and it is deliberately empty."
+
+**Why it matters:** The alternative — silently injecting an empty block — leaves the persona without guidance about what the emptiness means. The persona's default behaviour in that case is often to fall back to training-data knowledge of "what the market typically looks like," which is exactly the hallucination path the block is supposed to prevent.
+
+**Observation count:** 1 (Growth Channel 2, 20 April 2026).
+
+**Promotion trigger:** PR8 promotes on third recurrence. Candidates for future observations: any Ops pipeline-state channel that can legitimately be empty, any journaling-frequency channel that has a bootstrap period before data exists, any per-user memory channel for users who have not yet produced memory-worthy content.
+
+**Status:** Logged for future promotion decision. Not yet a full KG entry.
+
+### Stable observations (no action)
+
+- **KG3 / KG7 (Build-to-Wire Gap):** Actively applied. Grep confirmed both Growth loaders are called exactly once in production (`hub/route.ts` `case 'growth':`). Harness run in-session (16/16 assertions passed). No new observation worth logging.
+- **KG6 (Composition Order Constraint):** Same resolution as Tech — persona-prompt → upgrades → context blocks → brain is the established order for this architecture. Not a violation.
+- **KG2, KG4, KG5, KG8, KG9, KG10:** Not relevant this session.

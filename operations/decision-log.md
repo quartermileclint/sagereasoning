@@ -706,3 +706,93 @@ Changes implemented:
 **Impact:** No production code changed in this decision. The two loaders, the route modification, the known-issues file, the harness, and the close handoff remain on disk and committed. The Tech persona continues to answer with stub-disclosure on production until the next session's fix lands. Status of Channel 1 and Channel 2 corrected from "Wired" to "Wired-but-stub-on-Vercel" in the close-handoff addendum.
 
 **Status:** Adopted
+
+---
+
+## 2026-04-20 — D-Growth-1: Growth Actions Log Starts with One Back-Dated Seeded Entry
+
+**Decision:** `operations/growth-actions-log.md` was scaffolded with front-matter (`updated: 2026-04-20`, `maintainer: founder`), the maintenance contract, the valid-values lists for `domain` and `action_type`, and one back-dated entry recording this wiring session itself (domain `positioning`, action_type `decided`, dated 2026-04-20, reference `operations/handoffs/growth-wiring-fix-handoff.md`, outcome `awaiting_signal`). No other historical actions were back-filled.
+
+**Reasoning:** Option A (one seeded entry describing this session) was chosen over Option B (empty file with placeholder) and Option C (broader back-fill of pre-session positioning/content/pricing decisions). Option A gives the parser a non-empty input on first run, exercises every required field (date, domain, action_type, outcome, reference) so the founder can see what a well-formed entry looks like, and documents the wiring session itself as a legitimate positioning decision. Option B was rejected because it would make the harness's "at least one action parsed" assertion impossible to pass on first run without weakening the assertion. Option C was rejected as scope expansion and as a retroactive-truth risk — the AI should not invent historical entries the founder never actually decided in this form.
+
+**Alternatives considered:** Option B (empty file with placeholder), Option C (back-fill of prior positioning/content/pricing decisions).
+
+**Revisit condition:** The seeded entry remains in place as the first real entry. It does not get removed after being verified — it is a legitimate decision record, not a test artefact. If over time the entry falls outside the 90-day rolling window (after 20 July 2026), it will stop appearing in the Growth persona's context but remains in the file for audit.
+
+**Rules served:** PR1 (single-persona proof — Growth is the second persona to carry the Channel 1+2 pattern; Tech was the first), PR7 (deferred-decision discipline — Options B and C are not rejected silently, they are deferred with the condition that Option A proves the pattern first), R19 (honest positioning — the seeded entry describes a real decision, not an invented one).
+
+**Impact:** File created. Channel 1 loader reads a valid file with one action. Harness CHECK 1 asserts the seeded entry parses with the correct domain and action_type (16/16 assertions pass in-session). Formatted context block produced at request time shows the entry to the Growth persona.
+
+**Status:** Adopted
+
+---
+
+## 2026-04-20 — D-Growth-2: Growth Market Signals File Starts Empty with "No Signal Yet" Placeholders in All Four Sections
+
+**Decision:** `operations/growth-market-signals.md` was scaffolded with front-matter, the maintenance contract, the entry-format spec, and four named sections (Content Performance, Developer Discovery, Community Feedback, Competitive / Market Observations) each carrying the dated placeholder `_no signal yet (as of 2026-04-20)_`. No signals were back-filled. Channel 2's loader is written to detect this sparse state and inject an explicit "Do NOT invent signals" disclosure block into the Growth persona's context.
+
+**Reasoning:** Option A (empty with dated placeholders) was chosen over Option B (back-fill with observations the founder recalls) and Option C (pull observations from past session debriefs). The AI does not invent market signals — market observations are by definition the founder's observations, made at the time, with the reference material in hand. Retroactive reconstruction loses the signal quality that makes the signal worth having. Option B and Option C would both encode reconstructed-memory as equivalent to in-the-moment observation and train the Growth persona on a false precedent. The sparse-state disclosure pattern in the Channel 2 loader is the architectural response to this decision: rather than silently returning an empty block, the loader actively tells the persona "you have no data here; do not invent any."
+
+**Alternatives considered:** Option B (founder back-fills observations from recall), Option C (AI extracts observations from prior session debriefs).
+
+**Revisit condition:** First time the founder observes a signal (content that landed or didn't, developer reaching out, competitor moves, community feedback) and can record it in the dated bullet format with a reference. The Channel 2 loader will parse the entry; the harness needs a targeted re-run to confirm; the persona will start to carry one signal in its context.
+
+**Rules served:** PR1 (single-persona proof — bounded scope), PR7 (deferred-decision discipline — back-fill is not rejected absolutely, it is deferred to legitimate in-the-moment observations), R19 (honest positioning — the sparse-state disclosure is the honest answer to "what do you know about market response?" at P0).
+
+**Impact:** File created. Channel 2 loader reads a valid file with zero signals. `is_sparse` flag is true. Formatted context block carries the "Do NOT invent signals" disclosure. The Growth persona is expected to refuse to fabricate signals and to disclose the sparse state when asked about market response.
+
+**Status:** Adopted
+
+---
+
+## 2026-04-20 — D-Growth-3: Analytics-Events / Agent-Discovery Signals Deferred from Channel 2
+
+**Decision:** Channel 2 (Growth Observation Synthesis) does *not* include automatic signals from `analytics_events`, agent-card.json fetches, API-key sign-ups, or any other system-measured data source in this session. The hand-maintained `operations/growth-market-signals.md` file is the sole source for Channel 2.
+
+**Reasoning:** Option A (defer) was chosen over Option B (wire one automatic signal now, e.g. a count of API key creation events in the last 120 days). Channel 2's current semantics are "signals the founder has observed with their own eyes." Wiring an automatic signal collapses that semantic into a mix of founder-observed and system-measured, which degrades the reasoning the persona can do: founder observations carry qualitative weight ("I noticed this") that system metrics do not, and the persona cannot distinguish them once they are injected into the same block. Wiring automatic signals requires a dedicated ADR — decisions about window alignment, unit normalisation, confidence weighting, and whether to keep founder-observed and system-measured in separate blocks or merged. Out of scope for a wiring fix.
+
+**Alternatives considered:** Option B (wire bounded analytics-events / agent-discovery query into Channel 2 with a tag indicating source).
+
+**Revisit condition:** First time the Growth persona is asked a question that needs engagement-metric or developer-discovery volume data (e.g., "which content has performed best" or "how many agent developers have looked at our card"), and the founder cannot answer from the hand-maintained file alone because observations of that kind have been happening but not being recorded. At that point an ADR is scoped to design the semantic extension.
+
+**Rules served:** PR1 (single source of truth per channel until the pattern is proven), PR7 (deferred with trigger), R5 (no added Supabase read cost or analytics-events coupling in the request path without a named benefit and an ADR).
+
+**Impact:** Channel 2 loader reads one file. No Supabase calls in the Channel 2 request path. The market-signals file carries the full burden of Channel 2's signal. If the file is sparse, the persona discloses sparsity — the disclosure path handles the honest answer.
+
+**Status:** Adopted
+
+---
+
+## 2026-04-20 — D-Growth-4: Pattern Not Extended to Ops Chat Persona This Session
+
+**Decision:** The file-based context-loader pattern wired into the Growth chat persona this session is *not* extended to the Ops chat persona in the same session. Only the `case 'growth':` branch of `website/src/app/api/founder/hub/route.ts` is modified. The `case 'ops':`, `case 'tech':`, `case 'support':`, `case 'mentor':`, and `default:` branches are untouched.
+
+**Reasoning:** Option A (single-persona proof per session) was chosen over Option B (extend Growth's pattern to Ops in the same session). PR1 is the direct rule — a new architectural pattern must be proven on a single surface and reach Verified status before rollout. Tech's Channels 1+2 are still in Wired-but-stub-on-Vercel status pending the dedicated Vercel-path fix session; Growth's Channels 1+2 close this session at Wired + harness-Verified but production-unverified. Rolling out to Ops in the same session as Growth would compound three pieces of unverified work. Cost of waiting one session per persona: small. Cost of carrying a half-proven pattern across three personas: the Session 7b failure mode, this time with two downstream failure sites instead of one.
+
+**Alternatives considered:** Option B (mechanical extension to Ops in the same session as Growth).
+
+**Revisit condition:** Tech Channels 1+2 and Growth Channels 1+2 both reach Verified status after the Vercel-path fix lands, the harnesses both pass on the founder's machine, and both live probes return replies that ground in the injected context. At that point the pattern is proven across two personas and rollout to Ops can begin as its own bounded session — likely with a similar Scoped+Designed handoff scope and similar choice points (what does the Ops actions log contain, what does the Ops signals file contain, what's the rolling window for each).
+
+**Rules served:** PR1 (single-endpoint proof before surface rollout — named directly), PR7 (deferred with trigger).
+
+**Impact:** Diff footprint this session is bounded to the Growth branch. Ops, Tech (unchanged from its own session), Support, Mentor, and the default branch continue to answer from their existing static brains + stoic context + project context. No new load on their request paths.
+
+**Status:** Adopted
+
+---
+
+## 2026-04-20 — D-Growth-5: Rolling Windows — 90 Days (Actions) / 120 Days (Signals), with Channel 2 Widening to All Entries When Sparse
+
+**Decision:** Channel 1 (actions log) returns the last 90 days of actions by default. Channel 2 (market signals) returns the last 120 days of signals by default, and widens to all available entries when fewer than 5 signals parse within the 120-day window. Both windows are parameterisable on the loader options object but the defaults are as stated.
+
+**Reasoning:** Option A (90/120 with widen-on-sparse for Channel 2) was chosen over Option B (same window for both, e.g. 60/60) and Option C (no rolling window — include everything the file contains). Actions accumulate fast relative to signals — pricing changes, content ships, and positioning decisions produce multiple entries per month — so a tight 90-day window keeps the Growth persona's context current and avoids drowning recent actions in old ones. Signals accumulate slowly relative to actions — a single competitor observation or community feedback item can still be reasoning-relevant months later — so Channel 2 defaults wider. The widen-on-sparse behaviour is designed for the bootstrap case: with zero or one signals in the file, a sharp window cutoff that excludes an old-but-existing entry would leave the persona with less information than the file actually contains. The 5-signal `SPARSE_THRESHOLD` is a judgement value, not a research-backed number.
+
+**Alternatives considered:** Option B (unified window — simpler but ignores the different accumulation rates), Option C (no window — cheap now but unbounded as the files grow; would need a window eventually and better to set one at creation time than to retrofit).
+
+**Revisit condition:** If the Growth persona's context starts to feel stale (persona citing 80-day-old actions as current) or irrelevant (persona citing a 115-day-old signal that has since been overtaken by new events), the 90/120 defaults are the first thing to tune. If the signals file grows past ~50 entries total, reconsider the `SPARSE_THRESHOLD` of 5 — at high signal density the widen-on-sparse behaviour never fires and becomes dead code.
+
+**Rules served:** PR7 (deferred-decision discipline — Option B and C are not rejected absolutely, they are deferred to tuning based on evidence), R0 (deliberate choice exercise — window sizes are a principled choice about the persona's information horizon, not an arbitrary default).
+
+**Impact:** Channel 1 loader applies `DEFAULT_WINDOW_DAYS = 90`. Channel 2 loader applies `DEFAULT_WINDOW_DAYS = 120` with `SPARSE_THRESHOLD = 5`. Both values are constants at the top of the respective loader files; tuning is a one-line change plus a re-test.
+
+**Status:** Adopted
