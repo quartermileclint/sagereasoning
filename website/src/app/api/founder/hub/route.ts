@@ -22,6 +22,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { requireAuth, checkRateLimit, RATE_LIMITS, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { getOpsBrainContext } from '@/lib/context/ops-brain-loader'
+import { getOpsCostState } from '@/lib/context/ops-cost-state'
+import { getOpsContinuityState } from '@/lib/context/ops-continuity-state'
 import { getTechBrainContext } from '@/lib/context/tech-brain-loader'
 import { getTechSystemState } from '@/lib/context/tech-system-state'
 import { getEndpointInventory } from '@/lib/context/tech-endpoint-inventory'
@@ -197,7 +199,18 @@ ${mentorKB}`, cache_control: { type: 'ephemeral' } },
     // preamble needs to change later, update all four branches in lockstep.
     let primaryText = ''
     switch (agent) {
-      case 'ops':
+      case 'ops': {
+        // Channel 1 + Channel 2 wiring (20 April 2026). Channel 1 reads the
+        // latest cost_health_snapshots row + last-30-days classifier
+        // aggregate via the service-role Supabase client. Channel 2 reads
+        // five hand-maintained continuity sources (recent handoffs,
+        // decision log, knowledge-gaps register, compliance register,
+        // D-register) at request time. Both loaders degrade gracefully to
+        // self-disclosing stubs so Ops never answers blind without saying
+        // so. Concentration (D-Ops-2) and runway (D-Ops-6) return
+        // 'unknown' by design — do not estimate these from other data.
+        const opsCostState = await getOpsCostState()
+        const opsContinuityState = await getOpsContinuityState()
         primaryText = `You are Sage-Ops: Process, financial, compliance, product, people, analytics expertise. You are one of four internal Sage agents serving the SageReasoning founder. Your domain expertise is loaded below.
 
 Respond naturally in conversation. Apply your domain expertise to the founder's questions and tasks. When a task touches ethical, virtue, or principled reasoning concerns, flag them — but your primary value is your domain knowledge.
@@ -252,8 +265,13 @@ OPERATIONAL REASONING UPGRADES — April 2026
    "The audit trail shows X", not "we are compliant with X". This is
    the mirror principle applied to ops output.
 
+${opsCostState.formatted_context}
+
+${opsContinuityState.formatted_context}
+
 ${brainContext}`
         break
+      }
       case 'tech': {
         // Channel 1 + Channel 2 wiring (20 April 2026). Both loaders are
         // file-based and read-only at request time. Stubs returned on
