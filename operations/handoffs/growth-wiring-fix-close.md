@@ -309,3 +309,51 @@ Recommended opening: task (1) first (the Vercel-path fix sweeps Tech and Growth 
 ---
 
 *End of session close.*
+
+---
+
+## Addendum — Post-Close Verification Outcome (20 April 2026, same session)
+
+This addendum was appended after Step E was executed by the founder. The body of the close handoff above was written before verification ran, on the assumption that the live probe would return the stub disclosure (Vercel-path limitation already known from the Tech session). That assumption held. This section records what actually happened and confirms the corrected status.
+
+### What Happened
+
+- **Step E(a) — Vercel push:** Green on first deploy. No build errors.
+- **Step E(b) — Harness run:** AI ran the harness in the sandbox (Node 22.22.0, repo mounted at the session path). Read-only operation, Standard risk. Exit code 0.
+- **Step E(c) — Harness output:** All 16 assertions passed. CHECK 1 GREEN (8/8 — Channel 1 loader parsed the seeded `positioning/decided` entry). CHECK 2 GREEN (8/8 — Channel 2 loader returned `is_sparse: true`, zero signals, sparse-state disclosure present verbatim including "This is expected at P0" and "Do NOT invent signals"). Final line: `All assertions passed. Growth wiring is verified at the unit level.` as expected.
+- **Step E(d) — Live probe:** Founder opened `/founder-hub`, selected the Growth persona, and pasted the Step E(d) message. The Growth persona returned the predicted outcome (1) from the close handoff: it disclosed honestly that both context files were unavailable in its loaded context, named both file paths verbatim (`operations/growth-market-signals.md` and `operations/growth-actions-log.md`), and said explicitly *"I'd be fabricating if I told you what the market has 'responded' to. The honest answer is: that signal isn't loaded."* It then fell back to the Growth Brain static context and cited R18 certification language, the Zone 1/2/3 positioning, and the two-audiences-two-languages rule. No hallucinated market signals. No invented competitor moves. No pretended engagement metrics.
+
+### Diagnosis
+
+Identical failure mode to Tech. Both Growth loaders use the same `process.cwd()`-based path pattern and therefore fall through to their stub fallbacks on Vercel runtime for the same underlying cause: `process.cwd()` on Vercel serverless for a Next.js app resolves to `website/`, not the repo root, so the loaders look for `website/operations/growth-actions-log.md` and `website/operations/growth-market-signals.md` — neither of which exists. Possibly compounded by the Next.js bundler not tracking files outside `website/`. Both diagnoses point to the same fix family as Tech (path-fix / file-move / `outputFileTracingIncludes`).
+
+### Status — Corrected
+
+- `website/src/lib/context/growth-actions-log.ts`: previously declared **Wired + harness-Verified**. Corrected status: **Wired-but-stub-on-Vercel** (same language used for Tech's loaders). Code path is invoked, the stub fallback fires gracefully and self-discloses, but the production load path returns no data. Not Verified.
+- `website/src/lib/context/growth-market-signals.ts`: same — **Wired-but-stub-on-Vercel**.
+- `website/src/app/api/founder/hub/route.ts` `case 'growth':`: technically Wired (the two `await`s execute, the stub strings reach `primaryText`, the persona reads them and discloses honestly). Functionally degraded: the Growth persona has no actions-log signal and no market-signals signal, falling back to the Growth Brain static context for all its reasoning.
+- `operations/growth-actions-log.md` and `operations/growth-market-signals.md`: source files are correct. The problem is on the read path, not the source.
+- `scripts/growth-wiring-verification.mjs`: status unchanged (works correctly in any environment where `process.cwd()` and the repo root align — local and sandbox). Does not catch the Vercel runtime divergence; was not designed to.
+
+### What Is and Is Not Broken
+
+- **Not broken:** the persona is being honest. The stub-fallback design did the job it was built to do — disclose blindness rather than hallucinate. The reply explicitly named the missing files, refused to invent market response, and fell back to the static context for what it could answer from foundations. This is the ideal failure mode.
+- **Broken:** the value-add of the two channels. Until the read path resolves on Vercel, the Growth persona has no more prior-actions or market-signals context than it had before this session. It continues to reason from the static Growth Brain, which is correct but unchanging.
+- **Not at risk:** any other persona, any other endpoint, any user data, any auth path, any safety-critical surface. Blast radius is bounded to the Growth persona's two new context blocks. Tech's blast radius is identically bounded. No user is being misled — both personas disclose honestly.
+
+### Decision This Addendum Records (D-Growth-6)
+
+Founder confirmed the stub-disclosure outcome matches the expected session-close state. No code changes attempted at session tail. The next session's first task is the already-queued Vercel-path fix (originally scoped for Tech in `operations/handoffs/tech-stub-fix-prompt.md`), now expanded to sweep Tech (2 loaders) and Growth (2 loaders) in a single fix pass. New prompt file produced at `operations/handoffs/context-loader-stub-fix-prompt.md` — supersedes `tech-stub-fix-prompt.md`.
+
+### Errors I Did Not Cause This Session
+
+Logging this explicitly as counter-evidence to the Tech session's tail. The Growth session's close handoff predicted the exact outcome (1) from Step E(d): stub disclosure, both file paths named, no hallucination, fall-back to static context. That prediction held. No URL errors (Growth persona is on `/founder-hub`, stated correctly from the start). No estimation errors in the harness output (structural shape matched the handoff's prediction verbatim for every assertion). The Tech-session lessons (correct URL, no untested assumptions in status claims) were successfully applied.
+
+### Stewardship Findings (New)
+
+- **F-series (Efficiency tier) — second clean observation: the stub-fallback design pattern handles bootstrap and production-failure symmetrically.** On 20 April 2026, the stub-fallback pattern fired once on Tech (because the repo-root path didn't resolve on Vercel) and once on Growth (for the same reason, by design). In both cases the persona disclosed honestly and refused to hallucinate. The pattern's value is confirmed across two personas and two wiring sessions. Worth treating as default for any future file-based context loader: **never let a context loader fail silently; always make the failure visible to the persona.** Second clean observation — one more observation (likely Ops wiring) promotes this under PR8.
+- **F-series (Long-term regression tier): sandbox-harness GREEN remains necessary-but-insufficient.** Same lesson as Tech's addendum. The unit-level harness run does not catch the Vercel runtime divergence. The session-close position of "Wired + harness-Verified, pending production-Verified" is the correct interim state — it is honest about what the harness proves and what it does not.
+
+### Next Session Hand-Off
+
+See `operations/handoffs/context-loader-stub-fix-prompt.md` (new this session). That prompt supersedes `operations/handoffs/tech-stub-fix-prompt.md` by expanding the scope from Tech's two loaders to all four file-based loaders (Tech C1+C2, Growth C1+C2). Single diagnostic run, single fix choice, single implementation pass sweeps both personas.
