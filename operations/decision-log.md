@@ -556,3 +556,45 @@ Changes implemented:
 **Impact:** `operations/knowledge-gaps.md` updated with KG10 entry. Session-13 close handoff references KG10 in the Knowledge-Gap Carry-Forward section. No code impact.
 
 **Status:** Adopted
+
+---
+
+## 20 April 2026 — Support Wiring Fix — Channel 1 Distress Pre-Processor Wired
+
+**Decision:** Wired the proven mentor two-stage distress pattern onto the Support agent as a new pre-processor module `sage-mentor/support-distress-preprocessor.ts`. The preprocessor is synchronous w.r.t. the pipeline (PR3). It awaits the injected classifier and produces a branded `SupportSafetyGate` token. `processInboxItem` was breaking-changed from `sync(item, profile, kb)` to `async(item, profile, kb, deps, gate, config?)`; a `processInboxItemWithGuard` convenience wrapper was added so callers that don't already hold a gate cannot bypass the safety check. Founder approved the Critical Change Protocol with the three named failure modes (fail-closed on Haiku outage, mis-wired `SafetyGate`, cross-context `vulnerability_flag` match) at session open.
+
+**Reasoning:** The mentor's distress pattern on `/api/mentor/private/reflect` has been live and stable since Session 7h (PR1 single-endpoint proof satisfied). Support was the second endpoint to need the same discipline. Channel 1 of the scoping handoff (`operations/handoffs/support-wiring-fix-handoff.md`) identified Support as processing inbox items raw with no distress check — a direct R20a violation on any user path that funnels a distressed message through a support inbox. The branded-gate type was chosen over a boolean flag because it makes bypass a compile error, not a convention (KG3/KG7 invocation guard).
+
+**Rules served:** R20a (vulnerable user detection), PR1 (single-endpoint proof before rollout — Support is the second endpoint following the mentor proof), PR2 (build-to-wire verification immediate — single call site verified in-session), PR3 (safety-critical synchronous gate), PR6 (safety-critical changes always Critical — founder-approved protocol), 0a (status vocabulary — Channel 1 moved Scaffolded → Wired).
+
+**Impact:** Three files created (`sage-mentor/support-distress-preprocessor.ts`, `sage-mentor/support-history-synthesis.ts`, `scripts/support-wiring-verification.mjs`). Two files modified (`sage-mentor/support-agent.ts`, `sage-mentor/index.ts`). Breaking change to `processInboxItem`'s signature — mitigated by the `WithGuard` wrapper and by the fact that the repo currently has zero external callers of `processInboxItem` (grep-verified; single internal call inside `WithGuard`). Verification harness runs 30 assertions against Channel 1 + Channel 2 and exits 0. Integration (real Vercel deploy + real Supabase + real `detectDistressTwoStage`) is the next session's work.
+
+**Status:** Adopted — Wired (integration Verified pending next session).
+
+---
+
+## 20 April 2026 — Support Wiring Fix — Channel 2 History Synthesis Wired
+
+**Decision:** Added a new module `sage-mentor/support-history-synthesis.ts` that reads up to 200 rows from `support_interactions` over a rolling 30-day window, derives category frequency (keyword-bucketed), classifies a `trend` (new / returning / frequent / escalating), surfaces open issues, and emits a `formatHistoryContextBlock` prose block for injection into `buildDraftPrompt`. `buildDraftPrompt` was extended to accept an optional `history: SupportInteractionHistory` parameter; when supplied, the history block is prepended to the drafter instructions. Risk classified Elevated under 0d-ii (new read path, non-safety-critical). Select list scoped to primitive columns only — `ring_evaluation` JSONB is explicitly not read, so KG10 does not apply.
+
+**Reasoning:** Channel 2 of the scoping handoff identified Support as treating every inbox item as a first-time contact. No category frequency, no open-issue acknowledgement, no 30-day rolling window. The feedback loop's 20% category threshold was therefore blind downstream. The new module is read-only, fails soft on DB error (returns an empty history, not a 500), and is additive to the prompt — the drafter still runs if the history read fails. Founder approved the "proceed as designed" variant at the choice point — 90-day baseline uses all `vulnerability_flag` rows (mentor + Support), not a Support-only filter.
+
+**Rules served:** R5 (cost awareness — category frequency informs the 20% feedback-loop threshold), R16 (pipeline data governance — read-only view, no writes), PR1 (additive change, no existing pattern to extend; harness provides the single-endpoint proof), 0a (status vocabulary — Channel 2 moved Scaffolded → Wired).
+
+**Impact:** Same file set as the Channel 1 decision above. Open-issue surfacing and category frequency now available to the drafter whenever `processInboxItemWithGuard` is called. Index `idx_support_interactions_created(user_id, created_at DESC)` already exists (see `api/migrations/support-agent-schema.sql`) — elevated-risk slow-query worst case is pre-mitigated.
+
+**Status:** Adopted — Wired (integration Verified pending next session).
+
+---
+
+## 20 April 2026 — Dependency Injection Adopted for sage-mentor ↔ website Classifier Access
+
+**Decision:** Rather than import `detectDistressTwoStage` from `website/src/lib/r20a-classifier.ts` into `sage-mentor` (not possible — the `@/lib/*` path alias is website-only and there is no shared package), and rather than vendor the classifier into `sage-mentor` (would duplicate safety-critical code in two places and invite drift), the Support preprocessor accepts `classify` as a dependency-injected function. `SupportDistressDeps.classify` has signature `(text: string, sessionId?: string) => Promise<DistressDetectionResult>` — a structural match for `detectDistressTwoStage`. Production callers inject the real classifier; the verification harness injects a deterministic stub. PR6 respected — the classifier itself was not touched.
+
+**Reasoning:** The two surfaces need to converge on the same proven function without either owning it. DI is the minimum-intrusion answer. It also preserves testability — the harness can exercise the full pipeline shape without an Anthropic call, making the single-endpoint unit proof (PR1) cheap to re-run on every change. The pattern is already used in `sage-mentor/sync-to-supabase.ts`, which declares a narrow structural `SupabaseClient` type locally rather than importing from `@supabase/supabase-js`. This decision extends the same discipline to the classifier.
+
+**Rules served:** PR6 (no classifier touch — the proven code is unchanged and unmoved), PR7 (deferred-decision discipline — the alternative of publishing a shared `@sage/safety` package is deferred, not rejected; revisit condition: second cross-module safety function needs to be injected, at which point the shared package becomes worth the cost), R4 (IP protection — single definition of the classifier, no drift).
+
+**Impact:** `SupportDistressDeps` exported from `sage-mentor/support-distress-preprocessor.ts`. Any consumer wiring the Support agent must supply `{ supabase, classify }`. `processInboxItemWithGuard` extends this to `ProcessInboxItemDeps` (adds `userId`, `sessionId`). No change to `r20a-classifier.ts` or `constraints.ts`.
+
+**Status:** Adopted

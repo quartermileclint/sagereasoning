@@ -261,6 +261,8 @@ export type {
   ProcessingResult,
   KBArticle,
   RunLoopConfig,
+  ProcessInboxItemDeps,
+  ProcessInboxItemResult,
 } from './support-agent'
 
 export {
@@ -277,15 +279,52 @@ export {
   searchKnowledgeBase,
   detectGovernanceFlags,
   buildDraftPrompt,
+  buildCrisisRedirectDraft,
   assembleInboxFile,
   formatRingReview,
   initialiseSupportAgent,
   processInboxItem,
+  processInboxItemWithGuard,
   completeProcessing,
   generateDailySummary,
   buildNotification,
   buildLeadFile,
 } from './support-agent'
+
+// ── Support Distress Pre-Processor (Channel 1 — R20a, PR6 Critical) ─────────
+export type {
+  DistressDetectionResult,
+  VulnerabilitySeverityInt,
+  DistressSeverity,
+  PriorDistressFlag,
+  SupportDistressSignal,
+  SupportSafetyGate,
+  SupabaseReadClient,
+  SupportDistressDeps,
+} from './support-distress-preprocessor'
+
+export {
+  readPriorDistressFlags,
+  deriveBaselineSeverity,
+  isSuddenChange,
+  preprocessSupportDistress,
+  enforceSupportDistressCheck,
+  createSupportSafetyGate,
+} from './support-distress-preprocessor'
+
+// ── Support History Synthesis (Channel 2 — Elevated) ───────────────────────
+export type {
+  OpenIssueRef,
+  SupportTrend,
+  SupportInteractionHistory,
+} from './support-history-synthesis'
+
+export {
+  categoriseSubject,
+  classifyTrend,
+  synthesiseSupportHistory,
+  formatHistoryContextBlock,
+} from './support-history-synthesis'
 
 // ── Sync to Supabase ────────────────────────────────────────────────────────
 export type {

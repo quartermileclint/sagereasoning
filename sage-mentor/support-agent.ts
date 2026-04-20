@@ -51,6 +51,28 @@ import {
   recordAgentAction,
 } from './authority-manager'
 
+// ── Channel 1 (distress pre-processing) + Channel 2 (history synthesis) ──
+// Wired 20 April 2026 per operations/handoffs/support-wiring-fix-handoff.md.
+// PR6: Channel 1 touches distress-classifier surface. Classified Critical
+// under 0d-ii. PR3: both channels complete before the drafter runs. PR1:
+// the proven mentor pattern is the single-endpoint proof; Support is the
+// second endpoint — no third rollout in this session.
+import type {
+  SupportDistressDeps,
+  SupportDistressSignal,
+  SupportSafetyGate,
+  SupabaseReadClient,
+} from './support-distress-preprocessor'
+import {
+  preprocessSupportDistress,
+  enforceSupportDistressCheck,
+} from './support-distress-preprocessor'
+import type { SupportInteractionHistory } from './support-history-synthesis'
+import {
+  synthesiseSupportHistory,
+  formatHistoryContextBlock,
+} from './support-history-synthesis'
+
 // ============================================================================
 // CONSTANTS
 // ============================================================================
@@ -467,19 +489,28 @@ export function detectGovernanceFlags(
  * Build a draft response prompt for the LLM.
  *
  * The support agent uses this prompt to generate a customer response
- * based on the inquiry and relevant KB articles.
+ * based on the inquiry, relevant KB articles, and the Channel 2
+ * history_context block.
  *
  * The ring will evaluate the resulting draft via its AFTER check.
+ *
+ * @param history - Synthesised support interaction history (Channel 2).
+ *                  When omitted (legacy callers), the prompt is built
+ *                  without a history block. All new call sites MUST pass
+ *                  this — the processInboxItem signature enforces it.
  */
 export function buildDraftPrompt(
   item: InboxItem,
-  relevantArticles: KBArticle[]
+  relevantArticles: KBArticle[],
+  history?: SupportInteractionHistory,
 ): string {
   const kbContext = relevantArticles.length > 0
     ? relevantArticles.map(a =>
         `### ${a.title}\n${a.content.slice(0, 500)}`
       ).join('\n\n')
     : 'No directly relevant knowledge base articles found.'
+
+  const historyContext = history ? formatHistoryContextBlock(history) : ''
 
   return `You are the SageReasoning support agent. Draft a helpful, accurate response to the following customer inquiry.
 
@@ -497,7 +528,7 @@ Message: ${item.customer_message}
 
 RELEVANT KNOWLEDGE BASE ARTICLES:
 ${kbContext}
-
+${historyContext ? `\n${historyContext}\n` : ''}
 Draft a response that:
 1. Directly addresses the customer's question
 2. References accurate information from the knowledge base
@@ -505,6 +536,32 @@ Draft a response that:
 4. Ends with the standard disclaimer
 
 Write only the response text. No metadata or commentary.`
+}
+
+// ============================================================================
+// CRISIS REDIRECT DRAFT (R20a path — preprocessor says shouldRedirect=true)
+// ============================================================================
+
+/**
+ * Build the crisis-resource redirect message used when the Channel 1
+ * preprocessor returns a SupportSafetyGate with shouldRedirect=true.
+ *
+ * The Support agent does NOT call an LLM in this path. The redirect
+ * message from the proven classifier (which composes crisis resources
+ * from getCrisisResources()) is surfaced verbatim into the inbox file's
+ * Draft Response section. The disclaimer is appended so R3 still holds.
+ *
+ * Mirrors the mentor's behaviour in
+ * website/src/app/api/mentor/private/reflect/route.ts — distress short-
+ * circuits the LLM path.
+ */
+export function buildCrisisRedirectDraft(gate: SupportSafetyGate): string {
+  const redirect = gate.signal.current.redirect_message
+  const body = redirect
+    ? redirect
+    : 'Before we continue, we want to make sure you are okay. Some of what you described sounds like it might be weighing heavily on you. Please consider reaching out to a qualified professional or a trusted person who can support you directly.'
+
+  return `${body}\n\n---\n${SUPPORT_DISCLAIMER}`
 }
 
 // ============================================================================
@@ -643,45 +700,112 @@ export function initialiseSupportAgent(): InnerAgent {
 // RUN LOOP — The support agent's heartbeat
 // ============================================================================
 
+// ============================================================================
+// DEPENDENCIES — injected at the call site (Supabase client + classifier)
+// ============================================================================
+
+/**
+ * Dependencies required by processInboxItem. All external effects live
+ * behind this injection boundary so the function remains testable and
+ * the two sibling modules (distress preprocessor + history synthesis)
+ * stay portable across environments.
+ *
+ * The `classify` callback is the proven R20a two-stage classifier.
+ * Production callers wire `detectDistressTwoStage` from
+ * `website/src/lib/r20a-classifier`. The verification harness wires a
+ * deterministic test double. sage-mentor cannot import from
+ * website/src/lib directly (sibling packages, different tsconfig) — DI
+ * is the only safe bridge and also preserves PR6 (no classifier touch).
+ */
+export interface ProcessInboxItemDeps extends SupportDistressDeps {
+  supabase: SupabaseReadClient
+  userId: string
+  /** Optional classifier session id for R20a cost tracking */
+  sessionId?: string
+}
+
+/**
+ * Result shape of a single processInboxItem call.
+ *
+ * NEW FIELDS vs the pre-20-April signature:
+ *   distress             — Channel 1 output (SupportDistressSignal)
+ *   history              — Channel 2 output (SupportInteractionHistory)
+ *   shouldEscalate       — unified escalation flag (R20a OR R1/R2/R9)
+ *   escalationReason     — human-readable reason, null if no escalation
+ *   crisisRedirectDraft  — populated iff the R20a gate short-circuits
+ */
+export interface ProcessInboxItemResult {
+  readonly ringTask: RingTask
+  readonly beforeResult: ReturnType<typeof executeBefore>
+  readonly draftPrompt: string
+  readonly relevantArticles: KBArticle[]
+  readonly governanceCheck: ReturnType<typeof detectGovernanceFlags>
+  readonly distress: SupportDistressSignal
+  readonly history: SupportInteractionHistory
+  readonly shouldEscalate: boolean
+  readonly escalationReason: string | null
+  /**
+   * When the R20a gate redirects, the crisis-resource message is
+   * populated here. The drafter LLM is NOT called in this case — see
+   * PR6. When null, proceed with the normal draftPrompt flow.
+   */
+  readonly crisisRedirectDraft: string | null
+}
+
 /**
  * Process a single inbox item through the full ring cycle.
  *
- * Flow:
- * 1. Build a RingTask from the inbox item
- * 2. executeBefore() — ring checks governance, passion patterns, journal memory
- * 3. Support agent processes: reads KB, drafts response
- * 4. executeAfter() — ring evaluates the draft against R1/R3/R9
- * 5. Write ring review into the file
- * 6. Record action via recordAgentAction() for authority tracking
+ * Flow (20 April 2026 — Channel 1 + Channel 2 wired):
+ * 1. SYNCHRONOUS R20a distress pre-processing (Channel 1). If the gate
+ *    says shouldRedirect, the Support agent does NOT draft — it
+ *    populates the Draft Response section with the crisis-resource
+ *    message and escalates with R20a in governance_flags. PR3: this
+ *    completes before anything else runs.
+ * 2. Channel 2 history synthesis runs in parallel with Channel 1 (both
+ *    are independent). The 90-day prior flags are shared between them.
+ * 3. Regex-based governance flags (R1/R2/R9) — same as before.
+ * 4. Build ring task + BEFORE check.
+ * 5. KB search + buildDraftPrompt with history_context injected.
  *
- * Returns the processing result (status, evaluation, token usage).
+ * Breaking change (20 April 2026):
+ *   - now async
+ *   - requires deps: { supabase, classify, userId, sessionId? }
+ *   - requires a SupportSafetyGate parameter (branded type — cannot be
+ *     produced without awaiting the preprocessor, so the distress check
+ *     cannot be bypassed at a type level; KG3/KG7 invocation guard).
  *
- * NOTE: This function prepares all prompts and data but does NOT
- * make live LLM calls. The actual API calls are wired in Phase 4
- * (Step 4.1 of the implementation plan). Currently returns the
- * prompt and model tier so the caller can make the API call.
+ * PR6: any change to this function's distress-handling path is Critical
+ * under 0d-ii — the full Critical Change Protocol applies.
  */
-export function processInboxItem(
+export async function processInboxItem(
   item: InboxItem,
   profile: MentorProfile,
   knowledgeBaseArticles: KBArticle[],
-  _config: RunLoopConfig = DEFAULT_RUN_LOOP_CONFIG
-): {
-  ringTask: RingTask
-  beforeResult: ReturnType<typeof executeBefore>
-  draftPrompt: string
-  relevantArticles: KBArticle[]
-  governanceCheck: ReturnType<typeof detectGovernanceFlags>
-} {
+  deps: ProcessInboxItemDeps,
+  gate: SupportSafetyGate,
+  _config: RunLoopConfig = DEFAULT_RUN_LOOP_CONFIG,
+): Promise<ProcessInboxItemResult> {
   const agent = getInnerAgent(SUPPORT_AGENT_ID)
   if (!agent) {
     throw new Error('Support agent not initialised. Call initialiseSupportAgent() first.')
   }
 
-  // 1. Check for governance flags (may trigger auto-escalation)
+  // Channel 2 history synthesis — runs in parallel with the rest of the
+  // prep work. It re-uses the prior distress flags already fetched by
+  // Channel 1 (available via gate.signal.prior_flags), so there is no
+  // duplicate read on vulnerability_flag.
+  const historyPromise = synthesiseSupportHistory(
+    deps.supabase,
+    deps.userId,
+    item.frontmatter.customer || null,
+    30,
+    gate.signal.prior_flags,
+  )
+
+  // Governance flags (R1/R2/R9 keyword matcher — legacy, additive)
   const governanceCheck = detectGovernanceFlags(item.customer_message)
 
-  // 2. Build the ring task
+  // Ring task
   const ringTask: RingTask = {
     task_id: `support-${item.frontmatter.id}-${Date.now()}`,
     inner_agent_id: SUPPORT_AGENT_ID,
@@ -690,17 +814,48 @@ export function processInboxItem(
     timestamp: new Date().toISOString(),
   }
 
-  // 3. Ring BEFORE check
+  // BEFORE check
   const beforeResult = executeBefore(profile, ringTask, agent)
 
-  // 4. Search knowledge base for relevant articles
+  // Knowledge base search (kept fast — keyword match, no LLM)
   const relevantArticles = searchKnowledgeBase(
     knowledgeBaseArticles,
-    `${item.frontmatter.subject} ${item.customer_message}`
+    `${item.frontmatter.subject} ${item.customer_message}`,
   )
 
-  // 5. Build the draft prompt (LLM call happens externally)
-  const draftPrompt = buildDraftPrompt(item, relevantArticles)
+  const history = await historyPromise
+
+  // ── R20a short-circuit ───────────────────────────────────────────────
+  // If the gate tells us to redirect, we do NOT invoke the drafter LLM.
+  // We populate the crisis-resource message directly. The caller writes
+  // this into the inbox file's Draft Response section and sets status
+  // to 'escalated' with R20a on governance_flags.
+  if (gate.shouldRedirect) {
+    return {
+      ringTask,
+      beforeResult,
+      // draftPrompt is still surfaced for audit/logging parity, but the
+      // caller MUST NOT send it to an LLM when crisisRedirectDraft is set.
+      draftPrompt: buildDraftPrompt(item, relevantArticles, history),
+      relevantArticles,
+      governanceCheck,
+      distress: gate.signal,
+      history,
+      shouldEscalate: true,
+      escalationReason:
+        `R20a distress detected (severity=${gate.signal.current.severity}` +
+        (gate.sudden_change ? ', sudden change from baseline' : '') +
+        ')',
+      crisisRedirectDraft: buildCrisisRedirectDraft(gate),
+    }
+  }
+
+  // ── Normal draft path ────────────────────────────────────────────────
+  const draftPrompt = buildDraftPrompt(item, relevantArticles, history)
+
+  // Legacy governance escalation (additive — still fires after the gate)
+  const shouldEscalate = governanceCheck.should_escalate
+  const escalationReason = shouldEscalate ? governanceCheck.reason : null
 
   return {
     ringTask,
@@ -708,7 +863,39 @@ export function processInboxItem(
     draftPrompt,
     relevantArticles,
     governanceCheck,
+    distress: gate.signal,
+    history,
+    shouldEscalate,
+    escalationReason,
+    crisisRedirectDraft: null,
   }
+}
+
+/**
+ * Convenience wrapper: run the preprocessor, construct the safety gate,
+ * and invoke processInboxItem. Callers that don't already hold a gate
+ * should use this entry point to make the PR2/PR3 invocation contract
+ * impossible to bypass at the call site.
+ */
+export async function processInboxItemWithGuard(
+  item: InboxItem,
+  profile: MentorProfile,
+  knowledgeBaseArticles: KBArticle[],
+  deps: ProcessInboxItemDeps,
+  _config: RunLoopConfig = DEFAULT_RUN_LOOP_CONFIG,
+): Promise<ProcessInboxItemResult> {
+  // PR3: build the gate synchronously before the drafter path runs.
+  const combined = `${item.frontmatter.subject || ''}\n\n${item.customer_message}`.trim()
+  const gate = await enforceSupportDistressCheck(
+    preprocessSupportDistress(
+      deps,
+      deps.userId,
+      item.frontmatter.customer || null,
+      combined,
+      deps.sessionId,
+    ),
+  )
+  return processInboxItem(item, profile, knowledgeBaseArticles, deps, gate, _config)
 }
 
 /**
