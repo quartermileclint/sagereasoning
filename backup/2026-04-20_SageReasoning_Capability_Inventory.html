@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SageReasoning Capability Inventory — Hold Point Assessment 4</title>
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #131a2b;
+    --surface2: #1a2340;
+    --border: #2a3555;
+    --border-light: #3a4570;
+    --text: #e0e6f0;
+    --text-dim: #8892a8;
+    --text-muted: #5a6480;
+    --gold: #d4a843;
+    --gold-dim: #a07a20;
+
+    --live: #22c55e;
+    --verified: #3b82f6;
+    --wired: #a855f7;
+    --scaffolded: #f59e0b;
+    --designed: #f97316;
+    --scoped: #ef4444;
+
+    --product: #60a5fa;
+    --tool: #f472b6;
+    --agent: #f59e0b;
+    --engine: #ef4444;
+    --reasoning: #a78bfa;
+    --data: #34d399;
+    --infra: #22d3ee;
+    --governance: #ec4899;
+    --document: #94a3b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5; }
+
+  .header { background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%); border-bottom: 1px solid var(--border); padding: 20px 28px; position: sticky; top: 0; z-index: 100; }
+  .header h1 { font-size: 22px; font-weight: 700; color: var(--gold); margin-bottom: 2px; }
+  .header .subtitle { font-size: 13px; color: var(--text-dim); margin-bottom: 4px; }
+  .header .date { font-size: 11px; color: var(--text-muted); }
+
+  .summary-bar { display: flex; gap: 16px; padding: 14px 28px; background: var(--surface); border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center; }
+  .summary-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 10px 16px; min-width: 120px; text-align: center; }
+  .summary-card .num { font-size: 28px; font-weight: 700; }
+  .summary-card .label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; }
+
+  .controls { display: flex; gap: 8px; padding: 10px 28px; background: var(--surface); border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center; }
+  .controls label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-right: 4px; }
+  .filter-btn { padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface2); color: var(--text-dim); font-size: 11px; cursor: pointer; transition: all 0.15s; }
+  .filter-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+  .filter-btn.active { background: var(--gold-dim); color: #fff; border-color: var(--gold); }
+  .search-box { padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 12px; width: 220px; outline: none; }
+  .search-box:focus { border-color: var(--gold); }
+  .divider { width: 1px; height: 24px; background: var(--border); margin: 0 8px; }
+
+  .honesty-banner { background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(212,168,67,0.1)); border: 1px solid rgba(212,168,67,0.3); border-radius: 6px; padding: 12px 20px; margin: 16px 28px; font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+  .honesty-banner strong { color: var(--gold); }
+
+  .table-wrap { padding: 0 28px 40px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+  thead { position: sticky; top: 0; z-index: 10; }
+  th { background: var(--surface2); border: 1px solid var(--border); padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-dim); cursor: pointer; user-select: none; white-space: nowrap; }
+  th:hover { color: var(--gold); }
+  th .sort-arrow { margin-left: 4px; font-size: 9px; }
+  td { border: 1px solid var(--border); padding: 6px 10px; vertical-align: top; }
+  tr:hover td { background: var(--surface2); }
+
+  .badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+  .badge-live { background: var(--live); color: #fff; }
+  .badge-verified { background: var(--verified); color: #fff; }
+  .badge-wired { background: var(--wired); color: #fff; }
+  .badge-scaffolded { background: var(--scaffolded); color: #000; }
+  .badge-designed { background: var(--designed); color: #fff; }
+  .badge-scoped { background: var(--scoped); color: #fff; }
+
+  .badge-type { display: inline-block; padding: 1px 5px; border-radius: 2px; font-size: 8px; font-weight: 600; border: 1px solid currentColor; }
+  .badge-type-product { color: var(--product); }
+  .badge-type-tool { color: var(--tool); }
+  .badge-type-agent { color: var(--agent); }
+  .badge-type-engine { color: var(--engine); }
+  .badge-type-reasoning { color: var(--reasoning); }
+  .badge-type-data { color: var(--data); }
+  .badge-type-infra { color: var(--infra); }
+  .badge-type-governance { color: var(--governance); }
+  .badge-type-document { color: var(--document); }
+
+  .change-indicator { font-size: 9px; margin-left: 4px; }
+  .upgraded { color: var(--live); }
+  .downgraded { color: var(--scoped); }
+  .unchanged { color: var(--text-muted); }
+
+  .desc-cell { max-width: 360px; font-size: 11px; color: var(--text-dim); line-height: 1.4; }
+  .notes-cell { max-width: 280px; font-size: 11px; color: var(--gold); line-height: 1.4; font-style: italic; }
+  .name-cell { font-weight: 600; white-space: nowrap; }
+  .origin-badge { font-size: 8px; padding: 1px 4px; border-radius: 2px; background: rgba(167,139,250,0.15); color: #a78bfa; border: 1px solid rgba(167,139,250,0.3); }
+  .origin-badge.wrapped { background: rgba(52,211,153,0.15); color: #34d399; border-color: rgba(52,211,153,0.3); }
+
+  .readiness-cell { font-size: 10px; }
+  .ready { color: var(--live); }
+  .partial { color: var(--scaffolded); }
+  .not-ready { color: var(--scoped); }
+
+  .footer { padding: 20px 28px; border-top: 1px solid var(--border); background: var(--surface); font-size: 11px; color: var(--text-muted); }
+  .footer strong { color: var(--text-dim); }
+
+  .count-display { font-size: 12px; color: var(--text-dim); padding: 8px 28px; }
+  .count-display strong { color: var(--gold); }
+
+  .loading-indicator { display: flex; align-items: center; justify-content: center; padding: 40px 28px; font-size: 14px; color: var(--text-dim); }
+  .loading-indicator.hidden { display: none; }
+  .loading-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-message { display: none; padding: 20px 28px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 6px; margin: 16px 28px; color: #fca5a5; font-size: 13px; }
+  .error-message.visible { display: block; }
+
+  .data-source-banner { background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(52,211,153,0.08)); border: 1px solid rgba(167,139,250,0.2); border-radius: 6px; padding: 10px 20px; margin: 16px 28px; font-size: 11px; color: var(--text-dim); text-align: center; }
+  .data-source-banner strong { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Capability Inventory</h1>
+  <div class="subtitle">Hold Point Assessment 4 — Honest status of every component using 0a vocabulary</div>
+  <div class="date">7 April 2026 | 148 components | Statuses re-assessed against actual code</div>
+</div>
+
+<div id="loadingIndicator" class="loading-indicator">
+  <div class="loading-spinner"></div>
+  Loading component data...
+</div>
+
+<div id="errorMessage" class="error-message">
+  Failed to load component registry. Check network connection.
+</div>
+
+<div id="summaryBar" class="summary-bar"></div>
+
+<div class="data-source-banner">
+  <strong>Data source:</strong> component-registry.json · Single source of truth across all dashboards
+</div>
+
+<div class="honesty-banner">
+  <strong>Honesty note:</strong> Statuses have been re-assessed by inspecting actual code, not just file existence. Many components previously labelled "scaffolded" contain complete, functional code that connects to live systems (Anthropic API, Supabase) — these are upgraded to "wired." Two major subsystems (Sage Mentor, Trust Layer) contain ~17K LOC of internally complete code but are <strong>not integrated</strong> into the website — their status reflects this architectural isolation. Nothing is deployed to production, so nothing is "live."
+</div>
+
+<div class="controls">
+  <label>Status:</label>
+  <div id="statusFilters" class="control-group"></div>
+  <div class="divider"></div>
+  <label>Type:</label>
+  <div id="typeFilters" class="control-group"></div>
+  <div class="divider"></div>
+  <label>Readiness:</label>
+  <div id="readinessFilters" class="control-group"></div>
+  <div class="divider"></div>
+  <input type="text" class="search-box" id="search" placeholder="Search name, description, notes...">
+</div>
+
+<div id="countDisplay" class="count-display"></div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th data-sort="name">Name <span class="sort-arrow"></span></th>
+        <th data-sort="type">Type <span class="sort-arrow"></span></th>
+        <th data-sort="oldStatus">Map Status <span class="sort-arrow"></span></th>
+        <th data-sort="newStatus">Honest Status <span class="sort-arrow"></span></th>
+        <th data-sort="change">Change <span class="sort-arrow"></span></th>
+        <th>Description</th>
+        <th>Assessment Notes</th>
+        <th data-sort="humanReady">Human Ready <span class="sort-arrow"></span></th>
+        <th data-sort="agentReady">Agent Ready <span class="sort-arrow"></span></th>
+        <th data-sort="origin">Origin <span class="sort-arrow"></span></th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="footer">
+  <strong>Status vocabulary (P0 item 0a):</strong> Scoped (requirements only) → Designed (architecture decided) → Scaffolded (code exists, doesn't function) → Wired (connects to live systems, functions end-to-end) → Verified (tested and confirmed by both parties) → Live (deployed, serving real users)
+  <br><br>
+  <strong>Assessment methodology:</strong> Each component's code was inspected for: file existence, line count, real logic vs. placeholders, imports of external services (Anthropic, Supabase, Stripe), TODO markers, and integration with the rest of the system. Statuses upgraded or downgraded where the code contradicts the ecosystem map label.
+</div>
+
+<script>
+// ============================================================
+// CAPABILITY INVENTORY DATA — Loaded from component-registry.json
+// ============================================================
+let INV = [];
+
+// Fetch and initialize data from component-registry.json
+async function loadComponentData() {
+  const loadingEl = document.getElementById('loadingIndicator');
+  const errorEl = document.getElementById('errorMessage');
+
+  try {
+    const response = await fetch('/component-registry.json');
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const registry = await response.json();
+
+    // Map registry schema to INV format
+    // Registry has: name, type, status, desc, notes, humanReady, agentReady, origin
+    // INV expects: name, type, oldStatus, newStatus, desc, notes, humanReady, agentReady, origin
+    const components = registry.components || registry;
+    INV = components.map(component => ({
+      name: component.name,
+      type: component.type,
+      oldStatus: component.oldStatus || component.status || 'scoped',
+      newStatus: component.status || 'scoped',
+      desc: component.desc || '',
+      notes: component.notes || '',
+      humanReady: component.humanReady || 'na',
+      agentReady: component.agentReady || 'na',
+      origin: component.origin || ''
+    }));
+
+    // Hide loading indicator
+    loadingEl.classList.add('hidden');
+
+    // Initialize the page with loaded data
+    initializePage();
+  } catch (err) {
+    console.error('Failed to load component registry:', err);
+    loadingEl.classList.add('hidden');
+    errorEl.classList.add('visible');
+  }
+}
+
+function initializePage() {
+  // Setup sort handlers
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    th.onclick = () => {
+      const col = th.dataset.sort;
+      if (sortCol === col) sortDir *= -1;
+      else { sortCol = col; sortDir = 1; }
+      render();
+    };
+  });
+
+  // Setup search
+  document.getElementById('search').oninput = (e) => {
+    searchTerm = e.target.value;
+    render();
+  };
+
+  // Initial render
+  renderSummary();
+  renderFilters();
+  render();
+}
+
+
+// ============================================================
+// RENDERING
+// ============================================================
+const STATUS_ORDER = ['live','verified','wired','scaffolded','designed','scoped'];
+const STATUS_COLORS = {live:'var(--live)',verified:'var(--verified)',wired:'var(--wired)',scaffolded:'var(--scaffolded)',designed:'var(--designed)',scoped:'var(--scoped)'};
+const TYPE_COLORS = {product:'var(--product)',tool:'var(--tool)',agent:'var(--agent)',engine:'var(--engine)',reasoning:'var(--reasoning)',data:'var(--data)',infra:'var(--infra)',governance:'var(--governance)',document:'var(--document)'};
+const READINESS_LABELS = {ready:'Ready',partial:'Partial','not-ready':'Not Ready',na:'N/A'};
+const READINESS_CLASS = {ready:'ready',partial:'partial','not-ready':'not-ready',na:'unchanged'};
+
+let sortCol = 'type';
+let sortDir = 1;
+let statusFilter = 'all';
+let typeFilter = 'all';
+let readinessFilter = 'all';
+let searchTerm = '';
+
+function getChange(o, n) {
+  const oi = STATUS_ORDER.indexOf(o);
+  const ni = STATUS_ORDER.indexOf(n);
+  if (ni < oi) return {label:'Upgraded', cls:'upgraded', val:1};
+  if (ni > oi) return {label:'Downgraded', cls:'downgraded', val:-1};
+  return {label:'Unchanged', cls:'unchanged', val:0};
+}
+
+function getFiltered() {
+  return INV.filter(item => {
+    if (statusFilter !== 'all' && item.newStatus !== statusFilter) return false;
+    if (typeFilter !== 'all' && item.type !== typeFilter) return false;
+    if (readinessFilter !== 'all') {
+      if (readinessFilter === 'human-ready' && item.humanReady !== 'ready' && item.humanReady !== 'partial') return false;
+      if (readinessFilter === 'agent-ready' && item.agentReady !== 'ready' && item.agentReady !== 'partial') return false;
+      if (readinessFilter === 'not-ready' && (item.humanReady !== 'not-ready' || item.agentReady !== 'not-ready')) return false;
+    }
+    if (searchTerm) {
+      const s = searchTerm.toLowerCase();
+      return item.name.toLowerCase().includes(s) || item.desc.toLowerCase().includes(s) || item.notes.toLowerCase().includes(s) || item.type.includes(s) || item.origin.includes(s);
+    }
+    return true;
+  });
+}
+
+function getSorted(items) {
+  return [...items].sort((a, b) => {
+    let va, vb;
+    switch(sortCol) {
+      case 'name': va = a.name; vb = b.name; break;
+      case 'type': va = a.type; vb = b.type; break;
+      case 'oldStatus': va = STATUS_ORDER.indexOf(a.oldStatus); vb = STATUS_ORDER.indexOf(b.oldStatus); return (va - vb) * sortDir;
+      case 'newStatus': va = STATUS_ORDER.indexOf(a.newStatus); vb = STATUS_ORDER.indexOf(b.newStatus); return (va - vb) * sortDir;
+      case 'change': va = getChange(a.oldStatus,a.newStatus).val; vb = getChange(b.oldStatus,b.newStatus).val; return (vb - va) * sortDir;
+      case 'humanReady': va = a.humanReady; vb = b.humanReady; break;
+      case 'agentReady': va = a.agentReady; vb = b.agentReady; break;
+      case 'origin': va = a.origin||'zzz'; vb = b.origin||'zzz'; break;
+      default: va = a.name; vb = b.name;
+    }
+    if (typeof va === 'string') return va.localeCompare(vb) * sortDir;
+    return (va - vb) * sortDir;
+  });
+}
+
+function renderSummary() {
+  const byNew = {};
+  INV.forEach(i => { byNew[i.newStatus] = (byNew[i.newStatus]||0)+1; });
+  const upgraded = INV.filter(i => getChange(i.oldStatus, i.newStatus).val === 1).length;
+  const downgraded = INV.filter(i => getChange(i.oldStatus, i.newStatus).val === -1).length;
+
+  let html = '';
+  STATUS_ORDER.forEach(s => {
+    if (byNew[s]) {
+      html += `<div class="summary-card"><div class="num" style="color:${STATUS_COLORS[s]}">${byNew[s]}</div><div class="label">${s}</div></div>`;
+    }
+  });
+  html += `<div class="summary-card"><div class="num" style="color:var(--live)">${upgraded}</div><div class="label">Upgraded</div></div>`;
+  html += `<div class="summary-card"><div class="num" style="color:var(--text-muted)">0</div><div class="label">Live</div></div>`;
+  html += `<div class="summary-card"><div class="num" style="color:var(--gold)">${INV.length}</div><div class="label">Total</div></div>`;
+  document.getElementById('summaryBar').innerHTML = html;
+}
+
+function renderFilters() {
+  let html = '<button class="filter-btn active" data-val="all">All</button>';
+  STATUS_ORDER.forEach(s => {
+    html += `<button class="filter-btn" data-val="${s}">${s}</button>`;
+  });
+  document.getElementById('statusFilters').innerHTML = html;
+  document.getElementById('statusFilters').querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      statusFilter = btn.dataset.val;
+      document.getElementById('statusFilters').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    };
+  });
+
+  const types = [...new Set(INV.map(i => i.type))];
+  let thtml = '<button class="filter-btn active" data-val="all">All</button>';
+  types.forEach(t => { thtml += `<button class="filter-btn" data-val="${t}">${t}</button>`; });
+  document.getElementById('typeFilters').innerHTML = thtml;
+  document.getElementById('typeFilters').querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      typeFilter = btn.dataset.val;
+      document.getElementById('typeFilters').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    };
+  });
+
+  let rhtml = '<button class="filter-btn active" data-val="all">All</button>';
+  rhtml += '<button class="filter-btn" data-val="human-ready">Human-ready</button>';
+  rhtml += '<button class="filter-btn" data-val="agent-ready">Agent-ready</button>';
+  rhtml += '<button class="filter-btn" data-val="not-ready">Not ready</button>';
+  document.getElementById('readinessFilters').innerHTML = rhtml;
+  document.getElementById('readinessFilters').querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      readinessFilter = btn.dataset.val;
+      document.getElementById('readinessFilters').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    };
+  });
+}
+
+function render() {
+  const filtered = getFiltered();
+  const sorted = getSorted(filtered);
+
+  document.getElementById('countDisplay').innerHTML = `Showing <strong>${sorted.length}</strong> of ${INV.length} components`;
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = sorted.map(item => {
+    const change = getChange(item.oldStatus, item.newStatus);
+    const originHtml = item.origin === 'brain-derived' ? '<span class="origin-badge">BRAIN</span>' :
+                       item.origin === 'wrapped' ? '<span class="origin-badge wrapped">WRAPPED</span>' : '—';
+    return `<tr>
+      <td class="name-cell">${item.name}</td>
+      <td><span class="badge-type badge-type-${item.type}">${item.type}</span></td>
+      <td><span class="badge badge-${item.oldStatus}">${item.oldStatus}</span></td>
+      <td><span class="badge badge-${item.newStatus}">${item.newStatus}</span></td>
+      <td><span class="change-indicator ${change.cls}">${change.label === 'Upgraded' ? '&#9650; ' : change.label === 'Downgraded' ? '&#9660; ' : ''}${change.label}</span></td>
+      <td class="desc-cell">${item.desc}</td>
+      <td class="notes-cell">${item.notes}</td>
+      <td class="readiness-cell"><span class="${READINESS_CLASS[item.humanReady]}">${READINESS_LABELS[item.humanReady]}</span></td>
+      <td class="readiness-cell"><span class="${READINESS_CLASS[item.agentReady]}">${READINESS_LABELS[item.agentReady]}</span></td>
+      <td>${originHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+// Load data and initialize
+loadComponentData();
+</script>
+</body>
+</html>

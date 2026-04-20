@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SageReasoning — AI Agent Org Chart (Sole Founder)</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card-bg: #1a1d27;
+    --card-border: #2a2d3a;
+    --accent-gold: #c9a227;
+    --accent-blue: #4a9eff;
+    --accent-green: #34d399;
+    --accent-purple: #a78bfa;
+    --accent-orange: #fb923c;
+    --accent-red: #f87171;
+    --accent-teal: #2dd4bf;
+    --text-primary: #e8e6e3;
+    --text-secondary: #9ca3af;
+    --text-dim: #6b7280;
+    --line-color: #3a3d4a;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --shared-layer: rgba(201,162,39,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    padding: 28px 20px 14px;
+    border-bottom: 1px solid var(--card-border);
+    background: linear-gradient(180deg, #14161e 0%, var(--bg) 100%);
+  }
+  .header h1 { font-size: 1.5rem; font-weight: 600; color: var(--accent-gold); }
+  .header p { font-size: 0.82rem; color: var(--text-secondary); margin-top: 5px; }
+  .header .sub { font-size: 0.7rem; color: var(--text-dim); margin-top: 3px; }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; justify-content: center; gap: 16px; padding: 12px 20px;
+    flex-wrap: wrap; border-bottom: 1px solid var(--card-border);
+    background: rgba(26,29,39,0.5);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.7rem; color: var(--text-secondary); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+  /* ── Layout ── */
+  .org { padding: 36px 20px 50px; display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .tier { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+  .connector { display: flex; justify-content: center; width: 100%; height: 32px; }
+  .connector .v { width: 1px; height: 100%; background: var(--line-color); }
+
+  /* ── Shared layer banner ── */
+  .shared-layer {
+    width: 100%; max-width: 900px; margin: 0 auto 0;
+    background: var(--shared-layer); border: 1px dashed rgba(201,162,39,0.25);
+    border-radius: 8px; padding: 10px 16px; text-align: center;
+    font-size: 0.7rem; color: var(--accent-gold); letter-spacing: 0.03em;
+  }
+  .shared-layer strong { font-weight: 600; }
+
+  /* ── Layer stack ── */
+  .layer-stack {
+    width: 100%; max-width: 900px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .layer-row {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(26,29,39,0.4); border: 1px solid var(--card-border);
+    border-radius: 6px; padding: 8px 14px; font-size: 0.68rem;
+  }
+  .layer-label {
+    font-weight: 600; min-width: 54px; text-transform: uppercase;
+    letter-spacing: 0.05em; font-size: 0.6rem;
+  }
+  .layer-desc { color: var(--text-secondary); flex: 1; }
+  .layer-update { color: var(--text-dim); font-size: 0.6rem; text-align: right; min-width: 120px; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 10px; padding: 16px 18px; width: 240px;
+    cursor: pointer; transition: all 0.25s ease; position: relative; flex-shrink: 0;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); border-color: var(--accent-gold); }
+  .card .bar { position: absolute; top: 0; left: 16px; right: 16px; height: 3px; border-radius: 0 0 3px 3px; }
+  .card .title { font-size: 0.88rem; font-weight: 600; margin-top: 6px; }
+  .card .subtitle { font-size: 0.68rem; color: var(--text-dim); margin-bottom: 8px; }
+  .card .tag {
+    display: inline-block; font-size: 0.62rem; font-weight: 600;
+    padding: 3px 8px; border-radius: 4px; margin-bottom: 8px; letter-spacing: 0.03em;
+  }
+  .card .items { font-size: 0.68rem; color: var(--text-secondary); line-height: 1.55; }
+  .card .items li { list-style: none; padding-left: 12px; position: relative; margin-bottom: 2px; }
+  .card .items li::before { content: '·'; position: absolute; left: 2px; color: var(--text-dim); }
+
+  /* Expandable */
+  .card .detail { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .card.open .detail { max-height: 500px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--card-border); }
+  .detail .dl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin: 6px 0 3px; }
+  .detail .dl:first-child { margin-top: 0; }
+  .detail .dt { font-size: 0.67rem; color: var(--text-secondary); line-height: 1.45; }
+
+  /* ── Color classes ── */
+  .c-gold .bar, .c-gold .tag { background: var(--accent-gold); color: #000; }
+  .c-blue .bar, .c-blue .tag { background: var(--accent-blue); color: #000; }
+  .c-green .bar, .c-green .tag { background: var(--accent-green); color: #000; }
+  .c-purple .bar, .c-purple .tag { background: var(--accent-purple); color: #000; }
+  .c-orange .bar, .c-orange .tag { background: var(--accent-orange); color: #000; }
+  .c-red .bar, .c-red .tag { background: var(--accent-red); color: #000; }
+  .c-teal .bar, .c-teal .tag { background: var(--accent-teal); color: #000; }
+
+  /* ── External badge ── */
+  .ext {
+    position: absolute; top: 8px; right: 10px;
+    font-size: 0.55rem; padding: 2px 5px; border-radius: 3px;
+    background: rgba(248,113,113,0.15); color: var(--accent-red);
+    border: 1px solid rgba(248,113,113,0.3);
+  }
+
+  /* ── Rolled-in tag ── */
+  .rolled {
+    display: inline-block; font-size: 0.58rem; padding: 2px 6px;
+    border-radius: 3px; margin: 1px 2px;
+    background: rgba(255,255,255,0.05); color: var(--text-dim);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* ── Footer ── */
+  .footer { text-align: center; padding: 18px; font-size: 0.63rem; color: var(--text-dim); border-top: 1px solid var(--card-border); }
+
+  /* ── Phase badge ── */
+  .phase {
+    display: inline-block; font-size: 0.55rem; padding: 2px 6px;
+    border-radius: 3px; margin-left: 6px;
+    background: rgba(74,158,255,0.12); color: var(--accent-blue);
+    border: 1px solid rgba(74,158,255,0.25); vertical-align: middle;
+  }
+
+  /* ── Status badge ── */
+  .status-live {
+    display: inline-block; font-size: 0.55rem; padding: 2px 6px;
+    border-radius: 3px; margin-left: 6px;
+    background: rgba(52,211,153,0.12); color: var(--accent-green);
+    border: 1px solid rgba(52,211,153,0.25); vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>SageReasoning — Sole Founder + AI Agents</h1>
+  <p>You decide, agents execute, externals verify</p>
+  <div class="sub">4 named agents · 5 context layers · 19 LLM endpoints · Unified orchestrator · Click cards to expand · April 2026</div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-gold)"></div>Founder</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-blue)"></div>Sage-Ops</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-purple)"></div>Sage-Tech</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-orange)"></div>Sage-Growth</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-teal)"></div>Sage-Support</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-red)"></div>External</div>
+</div>
+
+<div class="org">
+
+  <!-- ═══ FOUNDER ═══ -->
+  <div class="tier">
+    <div class="card c-gold" onclick="toggle(this)">
+      <div class="bar"></div>
+      <div class="title">Founder / CEO</div>
+      <div class="subtitle">Clinton — You</div>
+      <div class="tag">Stoic Brain + Founder Brain</div>
+      <ul class="items">
+        <li>Vision, direction, scope governance</li>
+        <li>Stakeholder relationships &amp; trust</li>
+        <li>Irreplaceable decisions (ethics, investment, partnerships)</li>
+        <li>Verification of all agent work</li>
+      </ul>
+      <div class="detail">
+        <div class="dl">What only you do</div>
+        <div class="dt">Approve investment case · Set priorities · Accept/reject agent recommendations · Own external relationships (investors, lawyers, partners) · Verify before deploy · Embody what you build</div>
+        <div class="dl">Brain status</div>
+        <div class="dt">Stoic Brain: LIVE (Layer 1, all 19 LLM endpoints). Founder Brain: implicit in project instructions — candidate for standalone artefact.</div>
+        <div class="dl">Delegates to</div>
+        <div class="dt">All four agents below. You set direction; they execute. You verify; they iterate.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="v"></div></div>
+
+  <!-- ═══ CONTEXT LAYER STACK ═══ -->
+  <div class="layer-stack">
+    <div style="font-size: 0.72rem; font-weight: 600; color: var(--accent-gold); margin-bottom: 4px; text-align: center;">Context Layers — What Every Agent Knows</div>
+
+    <div class="layer-row">
+      <div class="layer-label" style="color: var(--accent-gold);">L1</div>
+      <div class="layer-desc"><strong style="color:var(--text-primary);">Stoic Brain</strong> — Ancient philosophical framework. System block 2 (cached). Sacred — never modified at runtime.</div>
+      <div class="layer-update">Manual · Deploy</div>
+    </div>
+
+    <div class="layer-row">
+      <div class="layer-label" style="color: var(--accent-blue);">L2</div>
+      <div class="layer-desc"><strong style="color:var(--text-primary);">Project Context</strong> — Identity, mission, phase, recent decisions, ethical commitments. 4 depth levels.</div>
+      <div class="layer-update">Hybrid · 1hr cache</div>
+    </div>
+
+    <div class="layer-row">
+      <div class="layer-label" style="color: var(--accent-green);">L2b</div>
+      <div class="layer-desc"><strong style="color:var(--text-primary);">Practitioner Context</strong> — User's virtue scores, passion patterns, causal tendencies. Encrypted in Supabase.</div>
+      <div class="layer-update">Per-user · Ongoing</div>
+    </div>
+
+    <div class="layer-row">
+      <div class="layer-label" style="color: var(--accent-purple);">L3</div>
+      <div class="layer-desc"><strong style="color:var(--text-primary);">Agent Brain</strong> — Domain expertise (Ops/Tech/Growth/Support). System block 3. 6 domains each, 3 depth levels.</div>
+      <div class="layer-update">Manual · Deploy</div>
+    </div>
+
+    <div class="layer-row">
+      <div class="layer-label" style="color: var(--accent-orange);">L4</div>
+      <div class="layer-desc"><strong style="color:var(--text-primary);">Environmental Context</strong> — External trends per domain. User message. Non-doctrinal. Awaiting first scan.</div>
+      <div class="layer-update">Weekly scan · 1hr cache</div>
+    </div>
+
+    <div class="layer-row">
+      <div class="layer-label" style="color: var(--accent-teal);">L5</div>
+      <div class="layer-desc"><strong style="color:var(--text-primary);">Mentor Knowledge Base</strong> — Stoic Historical Context + Global State of Humanity. User message. Mentor-only.</div>
+      <div class="layer-update">Annual · Deploy</div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="v"></div></div>
+
+  <!-- ═══ AI AGENTS ═══ -->
+  <div class="tier">
+
+    <!-- SAGE-OPS -->
+    <div class="card c-blue" onclick="toggle(this)">
+      <div class="bar"></div>
+      <div class="title">Sage-Ops Agent <span class="status-live">LIVE</span></div>
+      <div class="subtitle">Chief of Staff / COO</div>
+      <div class="tag">Ops Brain — 6 domains</div>
+      <ul class="items">
+        <li>Process design &amp; workflow optimisation</li>
+        <li>Financial metrics (MRR, burn, runway)</li>
+        <li>Compliance operations &amp; audit scheduling</li>
+        <li>Session continuity &amp; decision tracking</li>
+      </ul>
+      <div class="detail">
+        <div class="dl">Roles consolidated</div>
+        <div style="margin: 4px 0 8px;">
+          <span class="rolled">COO</span>
+          <span class="rolled">Finance (non-tax)</span>
+          <span class="rolled">HR / People</span>
+          <span class="rolled">Compliance</span>
+          <span class="rolled">Legal Prep</span>
+          <span class="rolled">Product Strategy</span>
+          <span class="rolled">Analytics</span>
+        </div>
+        <div class="dl">Brain domains</div>
+        <div class="dt">Process Harmony · Financial Stewardship · Compliance Operations · Product Strategy · People Operations · Operational Analytics</div>
+        <div class="dl">Context layers received (via orchestrator)</div>
+        <div class="dt">L1 Stoic Brain · L3 Ops Brain (session-level). Calls product endpoints for Stoic evaluation through the unified orchestration pipeline. L2 Project Context reserved for P7.</div>
+        <div class="dl">Endpoint relationship</div>
+        <div class="dt">Brain never injected into product endpoints. Agent calls them as a consumer. Reserved for P7 Sage Ops pipeline activation.</div>
+        <div class="dl">Activates</div>
+        <div class="dt">P7 (Sage Ops pipeline activation). Brain built and compiled. Orchestrator preset ready (createOpsPreset).</div>
+      </div>
+    </div>
+
+    <!-- SAGE-TECH -->
+    <div class="card c-purple" onclick="toggle(this)">
+      <div class="bar"></div>
+      <div class="title">Sage-Tech Agent <span class="status-live">LIVE</span></div>
+      <div class="subtitle">CTO / Engineering</div>
+      <div class="tag">Tech Brain — 6 domains · session-level</div>
+      <ul class="items">
+        <li>System architecture &amp; code quality</li>
+        <li>Security, encryption, access control</li>
+        <li>CI/CD, deployment, infrastructure</li>
+        <li>LLM ops: prompt versioning, model migration</li>
+      </ul>
+      <div class="detail">
+        <div class="dl">Roles consolidated</div>
+        <div style="margin: 4px 0 8px;">
+          <span class="rolled">CTO</span>
+          <span class="rolled">Lead Engineer</span>
+          <span class="rolled">DevOps / Infra</span>
+          <span class="rolled">Security</span>
+          <span class="rolled">QA / Testing</span>
+          <span class="rolled">AI/ML Ops</span>
+        </div>
+        <div class="dl">Brain domains</div>
+        <div class="dt">Architecture Patterns · Security-First Design · DevOps &amp; Infrastructure · AI/ML Operations · Code Quality · Tooling &amp; Developer Experience</div>
+        <div class="dl">Context layers received (via orchestrator)</div>
+        <div class="dt">L1 Stoic Brain · L3 Tech Brain (session-level). Calls product endpoints (/api/reason, /api/score, etc.) for Stoic evaluation — same endpoints any customer uses.</div>
+        <div class="dl">Endpoint relationship</div>
+        <div class="dt">Brain removed from product endpoints (Sessions 8-9). Agent calls them as a consumer through the unified orchestration pipeline.</div>
+        <div class="dl">Activates</div>
+        <div class="dt">P0 (all build work) → P2 (R17 encryption, R20 detection) → P3 (ATL, adversarial testing) → P4 (Stripe wiring)</div>
+      </div>
+    </div>
+
+    <!-- SAGE-GROWTH -->
+    <div class="card c-orange" onclick="toggle(this)">
+      <div class="bar"></div>
+      <div class="title">Sage-Growth Agent <span class="status-live">LIVE</span></div>
+      <div class="subtitle">CMO / Sales / DevRel</div>
+      <div class="tag">Growth Brain — 6 domains · session-level</div>
+      <ul class="items">
+        <li>Customer acquisition &amp; retention strategy</li>
+        <li>Content, SEO, community building</li>
+        <li>Developer relations &amp; API evangelism</li>
+        <li>Pricing strategy &amp; conversion</li>
+      </ul>
+      <div class="detail">
+        <div class="dl">Roles consolidated</div>
+        <div style="margin: 4px 0 8px;">
+          <span class="rolled">CMO</span>
+          <span class="rolled">Sales Lead</span>
+          <span class="rolled">Content / Community</span>
+          <span class="rolled">Developer Relations</span>
+        </div>
+        <div class="dl">Brain domains</div>
+        <div class="dt">Market Positioning · Audience Intelligence · Content Strategy · Developer Relations · Community Building · Growth Metrics</div>
+        <div class="dl">Context layers received (via orchestrator)</div>
+        <div class="dt">L1 Stoic Brain · L3 Growth Brain (session-level). Calls product endpoints for Stoic evaluation through the unified orchestration pipeline.</div>
+        <div class="dl">Endpoint relationship</div>
+        <div class="dt">Brain removed from product endpoints (Sessions 8-9). Agent calls them as a consumer. Uses /api/score-document for content evaluation.</div>
+        <div class="dl">SageReasoning special</div>
+        <div class="dt">Dual audience (human practitioners + agent developers) — two voices: philosophical/accessible and technical/developer-native.</div>
+      </div>
+    </div>
+
+    <!-- SAGE-SUPPORT -->
+    <div class="card c-teal" onclick="toggle(this)">
+      <div class="bar"></div>
+      <div class="title">Sage-Support Agent <span class="status-live">LIVE</span></div>
+      <div class="subtitle">Customer Success</div>
+      <div class="tag">Support Brain — 6 domains · session-level</div>
+      <ul class="items">
+        <li>Empathetic troubleshooting &amp; de-escalation</li>
+        <li>Vulnerable user detection (R20)</li>
+        <li>Knowledge base &amp; feedback synthesis</li>
+        <li>Escalation protocols</li>
+      </ul>
+      <div class="detail">
+        <div class="dl">Roles consolidated</div>
+        <div style="margin: 4px 0 8px;">
+          <span class="rolled">Support Lead</span>
+          <span class="rolled">Knowledge Base</span>
+          <span class="rolled">User Safety (R20)</span>
+          <span class="rolled">Escalation</span>
+        </div>
+        <div class="dl">Brain domains</div>
+        <div class="dt">Triage &amp; Classification · Vulnerable User Detection · Philosophical Sensitivity · Escalation Protocols · Knowledge Base Management · Feedback Loop</div>
+        <div class="dl">Context layers received (via orchestrator)</div>
+        <div class="dt">L1 Stoic Brain · L3 Support Brain (session-level). Calls product endpoints for Stoic evaluation through the unified orchestration pipeline.</div>
+        <div class="dl">Endpoint relationship</div>
+        <div class="dt">Brain removed from mentor endpoints (Session 10). R20 vulnerable user detection is a system-level safeguard at the endpoint level — doesn't need a brain.</div>
+        <div class="dl">Session 10 change</div>
+        <div class="dt">Support Brain no longer injected into mentor endpoints. All four brains are now in identical positions: session-level context for their internal agent only.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="v"></div></div>
+
+  <!-- ═══ EXTERNAL ═══ -->
+  <div class="tier">
+    <div class="card c-red" onclick="toggle(this)">
+      <div class="bar"></div>
+      <div class="ext">EXTERNAL</div>
+      <div class="title">Accounting / Tax</div>
+      <div class="subtitle">External provider — connects to Sage-Ops</div>
+      <div class="tag">External Financial Compliance</div>
+      <ul class="items">
+        <li>Bookkeeping &amp; reconciliation</li>
+        <li>BAS / GST lodgement (AU)</li>
+        <li>Tax planning &amp; R&amp;D incentives</li>
+        <li>Financial reporting &amp; audit</li>
+      </ul>
+      <div class="detail">
+        <div class="dl">Why external</div>
+        <div class="dt">Tax compliance requires a registered tax agent (legal requirement in AU). AI can prepare and categorise but cannot sign off.</div>
+        <div class="dl">Interface with Sage-Ops</div>
+        <div class="dt">Sage-Ops prepares financial data, categorises expenses, tracks MRR/costs. External accountant receives pre-organised data → reduces billable hours.</div>
+        <div class="dl">When to engage</div>
+        <div class="dt">P1 (business plan review needs financial clarity) or when first revenue is generated, whichever comes first.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height: 24px;"></div>
+
+  <!-- ═══ BUILD ORDER SUMMARY ═══ -->
+  <div style="max-width: 900px; width: 100%; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 20px 24px;">
+    <div style="font-size: 0.85rem; font-weight: 600; color: var(--accent-gold); margin-bottom: 12px;">Brain &amp; Layer Status</div>
+    <table style="width: 100%; font-size: 0.72rem; color: var(--text-secondary); border-collapse: collapse;">
+      <tr style="border-bottom: 1px solid var(--card-border);">
+        <td style="padding: 6px 8px; color: var(--text-dim);">#</td>
+        <td style="padding: 6px 8px; font-weight: 600; color: var(--text-primary);">Component</td>
+        <td style="padding: 6px 8px;">Endpoints</td>
+        <td style="padding: 6px 8px;">Updates</td>
+        <td style="padding: 6px 8px;">Status</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(42,45,58,0.5);">
+        <td style="padding: 6px 8px; color: var(--accent-gold);">L1</td>
+        <td style="padding: 6px 8px;">Stoic Brain (shared)</td>
+        <td style="padding: 6px 8px;">19</td>
+        <td style="padding: 6px 8px;">Manual + deploy</td>
+        <td style="padding: 6px 8px; color: var(--accent-green);">LIVE</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(42,45,58,0.5);">
+        <td style="padding: 6px 8px; color: var(--accent-blue);">L2</td>
+        <td style="padding: 6px 8px;">Project Context</td>
+        <td style="padding: 6px 8px;">4 (private mentor)</td>
+        <td style="padding: 6px 8px;">Hybrid (Supabase + static)</td>
+        <td style="padding: 6px 8px; color: var(--accent-green);">LIVE</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(42,45,58,0.5);">
+        <td style="padding: 6px 8px; color: var(--accent-green);">L2b</td>
+        <td style="padding: 6px 8px;">Practitioner Context</td>
+        <td style="padding: 6px 8px;">14</td>
+        <td style="padding: 6px 8px;">Per-user (Supabase encrypted)</td>
+        <td style="padding: 6px 8px; color: var(--accent-green);">LIVE</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(42,45,58,0.5);">
+        <td style="padding: 6px 8px; color: var(--accent-purple);">L3</td>
+        <td style="padding: 6px 8px;">Ops Brain</td>
+        <td style="padding: 6px 8px;">0 (P7)</td>
+        <td style="padding: 6px 8px;">Manual + deploy</td>
+        <td style="padding: 6px 8px; color: var(--accent-green);">BUILT</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(42,45,58,0.5);">
+        <td style="padding: 6px 8px; color: var(--accent-purple);">L3</td>
+        <td style="padding: 6px 8px;">Tech Brain</td>
+        <td style="padding: 6px 8px;">0 (session-level)</td>
+        <td style="padding: 6px 8px;">Manual + deploy</td>
+        <td style="padding: 6px 8px; color: var(--accent-green);">BUILT</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(42,45,58,0.5);">
+        <td style="padding: 6px 8px; color: var(--accent-purple);">L3</td>
+        <td style="padding: 6px 8px;">Growth Brain</td>
+        <td style="padding: 6px 8px;">0 (session-level)</td>
+        <td style="padding: 6px 8px;">Manual + deploy</td>
+        <td style="padding: 6px 8px; color: var(--accent-green);">BUILT</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(42,45,58,0.5);">
+        <td style="padding: 6px 8px; color: var(--accent-purple);">L3</td>
+        <td style="padding: 6px 8px;">Support Brain</td>
+        <td style="padding: 6px 8px;">0 (session-level)</td>
+        <td style="padding: 6px 8px;">Manual + deploy</td>
+        <td style="padding: 6px 8px; color: var(--accent-green);">BUILT</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(42,45,58,0.5);">
+        <td style="padding: 6px 8px; color: var(--accent-orange);">L4</td>
+        <td style="padding: 6px 8px;">Environmental Context</td>
+        <td style="padding: 6px 8px;">0 (reserved for agents)</td>
+        <td style="padding: 6px 8px;">Weekly scan (Supabase)</td>
+        <td style="padding: 6px 8px; color: var(--accent-orange);">DESIGNED — awaiting P7</td>
+      </tr>
+      <tr>
+        <td style="padding: 6px 8px; color: var(--accent-teal);">L5</td>
+        <td style="padding: 6px 8px;">Mentor Knowledge Base</td>
+        <td style="padding: 6px 8px;">4 (private mentor)</td>
+        <td style="padding: 6px 8px;">Annual + deploy</td>
+        <td style="padding: 6px 8px; color: var(--accent-green);">LIVE</td>
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">
+  SageReasoning · Session 10 · Sole Founder + AI Agent Org Model · April 2026<br>
+  <span style="color: var(--accent-gold);">16 roles → 4 agents + 1 external</span> · 5 context layers · All brains session-level · Unified orchestrator built
+</div>
+
+<script>
+function toggle(el) { el.classList.toggle('open'); }
+</script>
+
+</body>
+</html>
