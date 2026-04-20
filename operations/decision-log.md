@@ -598,3 +598,91 @@ Changes implemented:
 **Impact:** `SupportDistressDeps` exported from `sage-mentor/support-distress-preprocessor.ts`. Any consumer wiring the Support agent must supply `{ supabase, classify }`. `processInboxItemWithGuard` extends this to `ProcessInboxItemDeps` (adds `userId`, `sessionId`). No change to `r20a-classifier.ts` or `constraints.ts`.
 
 **Status:** Adopted
+
+---
+
+## 20 April 2026 — Support Run-Loop Caller Deferred (Mount Session Closed Early)
+
+**Decision:** The follow-on "mount session" framed by `operations/handoffs/support-wiring-mount-prompt.md` was stopped at Step A. No code was changed. No mount was attempted. The decision to scope and build the Support run-loop caller is deferred to a dedicated future session that is prompted for that work specifically.
+
+**Reasoning:** The mount-session prompt's Step A explicitly anticipated this branch: *"If you find NO caller at all: the run-loop has not been wired yet, and this session's task becomes scoping + building the thinnest possible caller, not mounting. Flag this to the founder immediately with 'I'd push back on this' and wait before building anything new."* The repo grep was thorough (`processInboxItem`, `initialiseSupportAgent`, `parseInboxFile`, `searchKnowledgeBase`, `support_interactions`, `sage-mentor` cross-boundary imports, `vercel.json`, `api/functions/`, `scripts/`) and produced zero external callers. `processInboxItem` is called in exactly one place — `processInboxItemWithGuard` at `support-agent.ts:898` — and `processInboxItemWithGuard` has no callers at all. The `/support/inbox/` directory exists as a file drop but nothing reads it into the agent. Building a caller from scratch forces five decisions that the mount-session prompt does not scope (hosting surface, trigger model, inbox-item source shape, auth context, outbound surface) — these are design decisions with downstream consequences and belong in a dedicated scoping session, not in time pressure at the tail of a mount session. Founder chose option A (close to known-good; record PR7 deferral).
+
+**Rules served:** PR1 (single-endpoint proof before rollout — the next caller surface is a new surface, not a rollout; it needs its own design pass), PR7 (decisions not made are documented — this is the deferred decision with its revisit condition), 0a (status vocabulary — Channels 1 and 2 remain at status **Wired**, they do NOT advance to Verified this session because integration was not possible), R0 (deliberate choice exercise — scope bounded by evidence, not by appetite).
+
+**Impact:** No code change. No file touched. Channel 1 (support-distress-preprocessor) and Channel 2 (support-history-synthesis) remain at status **Wired** per the 20 April 2026 entries above. The 30-assertion unit harness at `scripts/support-wiring-verification.mjs` remains green. Close handoff produced at `operations/handoffs/support-wiring-mount-close.md` in the same format as the prior close handoff, documenting the scope finding, the option taken, and the revisit condition for the next session.
+
+**Revisit condition:** A dedicated session prompt is drafted that scopes the five deferred design decisions (hosting surface, trigger model, inbox-item source shape, auth context, outbound surface). That session produces an ADR under `engineering:architecture`. A subsequent session implements the caller. A third session mounts and live-tests. Do not collapse these into one session — the mount-session prompt's failure mode demonstrates what happens when the scope covers more than one architectural choice at a time.
+
+**Status:** Adopted
+
+---
+
+## 20 April 2026 — D-Tech-1: Known-Issues File Starts Empty with Dated Header
+
+**Decision:** `operations/tech-known-issues.md` was scaffolded as an empty stub with a dated 20 April 2026 header, the maintenance contract, the PR9 severity-tier legend, and both sections (`## Current Issues` and `## Recently Resolved (last 30 days)`) present but carrying placeholder sentences ("No known issues at 20 April 2026." / "No recently-resolved issues at 20 April 2026.").
+
+**Reasoning:** Option A (empty with dated header) was chosen over Option B (prefill with the 9-vs-10 endpoint drift as the first known issue) and Option C (prefill with broader observed items from prior sessions). The stub is the simplest honest answer to the question "what do we actually know about current issues?" — nothing as of this morning. Coupling Channel 1 and Channel 2 via a prefilled drift entry (Option B) was rejected because the drift is a Channel-2 detection signal, not an operator-observed live incident — recording it as a Channel-1 entry conflates two different signal types and trains the mentor agent on a false precedent. Option C was rejected as scope expansion.
+
+**Alternatives considered:** Option B (drift prefilled), Option C (broader sweep).
+
+**Revisit condition:** Any live incident the founder observes after 20 April 2026. First real entry is also the first evidence that the maintenance contract is being honoured.
+
+**Rules served:** PR1 (single-persona proof — Tech before rollout), PR7 (deferred decisions documented — Options B and C are not rejected, they are deferred with the condition that Option A proves the pattern first), R19 (honest positioning — stub is honest about what the system knows).
+
+**Impact:** File created. Channel 1 loader reads a valid empty file. Formatted context block produced at request time reports "none recorded" for both sections. No operational burden on the founder until an issue is observed.
+
+**Status:** Adopted
+
+---
+
+## 20 April 2026 — D-Tech-2: TECHNICAL_STATE.md Reconciliation Deferred to a Follow-up Session
+
+**Decision:** The drift between `/TECHNICAL_STATE.md` §2 (lists 9 `runSageReason` endpoints) and the actual codebase (10 route files call `runSageReason(`) is *not* reconciled in this session. Channel 2 is wired against the file as-is. The verification harness at `scripts/tech-wiring-verification.mjs` runs a grep of `website/src/app/api/**/route.ts` on every run and prints a DRIFT report when inventory and codebase diverge. First-run DRIFT is expected and is the evidence that Channel 2 is working as designed.
+
+**Reasoning:** Option A (wire first, reconcile later) was chosen over Option B (reconcile inside this session before wiring) and Option C (freeze and ignore drift). Option B doubles session scope, risks a partial close if reconciliation turns up further drift across §3 and §5, and couples a bounded wiring change to an unbounded cleanup change. Option C discards the drift-detection benefit that is the single strongest argument for Channel 2 existing at all. Option A respects PR1 (bounded scope per session) and puts the drift signal in front of the founder *first*, so the reconciliation is done with evidence rather than memory.
+
+**Alternatives considered:** Option B (reconcile inside this session), Option C (freeze and ignore drift).
+
+**Revisit condition:** The next session's Next Session Should menu surfaces "Reconcile TECHNICAL_STATE.md §2 against the codebase" as the first queued task. Trigger is the harness's DRIFT output.
+
+**Rules served:** PR1 (single-persona proof; bounded scope), PR7 (deferred-decision discipline — reconciliation is deferred with a named trigger, not silently dropped), R5 (cost-as-health-metric — a session-close at known-good beats a session overshoot).
+
+**Impact:** Channel 2 wired against the current TECHNICAL_STATE.md. Inventory entries parsed from the file do not match the grep count. The harness reports DRIFT on first run with the set difference printed. Channel 1 loader returns the empty stub; Channel 2 loader returns the inventory as documented. No TECHNICAL_STATE.md edit this session.
+
+**Status:** Adopted
+
+---
+
+## 20 April 2026 — D-Tech-3: Analytics-Events Error Signal Deferred from Channel 1
+
+**Decision:** Channel 1 (Live System State / Known Issues) does *not* include a supplementary query of `analytics_events` for recent error markers in this session. The known-issues markdown file is the sole source of truth for Channel 1.
+
+**Reasoning:** Option A (defer) was chosen over Option B (include a bounded 24h query now). The `analytics_events` table is a write-path event log for product events, not an error log; any error-signal semantics would require a classification layer (which event_types count as error markers?) with its own failure modes. Adding a Supabase read to the request path also introduces query-cost, RLS, and latency surfaces that are out of scope for a wiring fix. Deferring preserves the single-source-of-truth property of Channel 1 while the pattern is proven; a second signal can be designed later with its own ADR once Channel 1 is Verified in production.
+
+**Alternatives considered:** Option B (bounded `analytics_events` query wired into Channel 1).
+
+**Revisit condition:** Channel 1 reaches Verified status in production and the operator has visible evidence that manual upkeep of the known-issues file alone is insufficient (e.g., known issues observed in Vercel logs that never reach the file in time). Designed as a separate ADR, not a silent expansion of Channel 1.
+
+**Rules served:** PR1 (single source of truth per channel until the pattern is proven), PR7 (deferred with trigger, not silently dropped), R5 (no added Supabase read cost in the request path without a named benefit).
+
+**Impact:** Channel 1 loader reads one file. No Supabase calls in the Channel 1 request path. The known-issues file carries the full burden of Channel 1's signal. If the file is stale, Tech answers stale — the self-disclosing stub message does not apply here because the file *is* present, just empty.
+
+**Status:** Adopted
+
+---
+
+## 20 April 2026 — D-Tech-4: Pattern Not Extended to Ops / Growth / Support Chat Personas This Session
+
+**Decision:** The file-based context-loader pattern wired into the Tech chat persona this session is *not* extended to the Ops, Growth, or Support chat personas in the same session. Only the `case 'tech':` branch of `website/src/app/api/founder/hub/route.ts` is modified. The other three branches are untouched.
+
+**Reasoning:** Option A (single-persona proof) was chosen over Option B (extend in the same session). PR1 is the direct rule — a new architectural pattern must be proven on a single endpoint and reach Verified status before rollout. The Tech persona has not yet reached Verified (live probe is pending at time of decision), so rollout to the other three personas would compound unverified work. The cost of waiting one session per persona is small; the cost of carrying a half-proven pattern across four personas is the Session 7b failure mode.
+
+**Alternatives considered:** Option B (mechanical extension to all four chat personas in one session).
+
+**Revisit condition:** Tech persona Channel 1 and Channel 2 reach Verified status (harness passes + live probe returns a structured reply demonstrably using the injected blocks). At that point the pattern is proven and rollout to Ops, Growth, and Support can begin — one persona per session, each with its own known-issues file and its own loader if the signal is persona-specific, or a shared loader if the signal is genuinely shared.
+
+**Rules served:** PR1 (single-endpoint proof before surface rollout — named directly), PR7 (deferred with trigger).
+
+**Impact:** Diff footprint this session is bounded. Ops, Growth, and Support chat personas continue to answer from their existing static brains + stoic context + project context. No new load on their request paths.
+
+**Status:** Adopted

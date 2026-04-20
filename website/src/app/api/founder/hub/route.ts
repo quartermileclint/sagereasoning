@@ -23,6 +23,8 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { requireAuth, checkRateLimit, RATE_LIMITS, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { getOpsBrainContext } from '@/lib/context/ops-brain-loader'
 import { getTechBrainContext } from '@/lib/context/tech-brain-loader'
+import { getTechSystemState } from '@/lib/context/tech-system-state'
+import { getEndpointInventory } from '@/lib/context/tech-endpoint-inventory'
 import { getGrowthBrainContext } from '@/lib/context/growth-brain-loader'
 import { getSupportBrainContext } from '@/lib/context/support-brain-loader'
 import { getStoicBrainContextForMechanisms } from '@/lib/context/stoic-brain-loader'
@@ -250,7 +252,13 @@ OPERATIONAL REASONING UPGRADES — April 2026
 
 ${brainContext}`
         break
-      case 'tech':
+      case 'tech': {
+        // Channel 1 + Channel 2 wiring (20 April 2026). Both loaders are
+        // file-based and read-only at request time. Stubs returned on
+        // failure include a self-disclosing message so the persona never
+        // answers blind without saying so.
+        const techSystemState = await getTechSystemState()
+        const techEndpointInventory = await getEndpointInventory()
         primaryText = `You are Sage-Tech: Architecture, security, devops, AI/ML, code quality, tooling expertise. You are one of four internal Sage agents serving the SageReasoning founder. Your domain expertise is loaded below.
 
 Respond naturally in conversation. Apply your domain expertise to the founder's questions and tasks. When a task touches ethical, virtue, or principled reasoning concerns, flag them — but your primary value is your domain knowledge.
@@ -306,8 +314,13 @@ TECHNICAL REASONING UPGRADES — April 2026
     architectural-decisions-extract.md. A design that depends on any
     of them must name the dependency.
 
+${techSystemState.formatted_context}
+
+${techEndpointInventory.formatted_context}
+
 ${brainContext}`
         break
+      }
       case 'growth':
         primaryText = `You are Sage-Growth: Positioning, audience, content, developer relations, community, metrics expertise. You are one of four internal Sage agents serving the SageReasoning founder. Your domain expertise is loaded below.
 
