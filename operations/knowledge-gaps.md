@@ -17,14 +17,17 @@
 
 **Why it caused confusion:** Platform constraints were discovered one at a time through incidents rather than being documented as a set. Each session treated its discovery as a new fact rather than a known constraint.
 
-**Plain-language resolution:** Vercel serverless functions have four rules that affect everything we build:
+**Plain-language resolution:** Vercel serverless functions have five rules that affect everything we build:
 
 1. **No self-calls.** An API route cannot call another API route on the same deployment using fetch/HTTP. The www/non-www redirect strips Authorization headers. Use direct function imports instead.
 2. **Await all database writes.** Vercel terminates execution after the response is sent. Any Supabase write that isn't awaited before the response may never complete. No fire-and-forget.
 3. **Headers can be stripped on redirects.** If Vercel redirects a request (e.g., www → non-www), custom headers including Authorization may be lost.
 4. **Execution terminates after response.** Background processing does not work. If the function returns a response, anything still running is killed.
+5. **`process.cwd()` resolves to the Next.js project directory, not the repo root.** On Vercel, `process.cwd()` = `/var/task/website`. Files at the repo root are accessible via `path.join(process.cwd(), '..')`. All file-based context loaders must use this parent-traversal pattern. Confirmed by diagnostic probe on 21 April 2026 across all five loaders (Tech C1+C2, Growth C1+C2, Ops C2). Fix: `const REPO_ROOT = path.join(process.cwd(), '..')`.
 
-**When this matters:** Any time a new endpoint is designed, any time database writes are added, any time one endpoint needs to call another.
+**Observation history for rule 5:** Tech (1st, 20 April 2026 morning), Growth (2nd, 20 April 2026 afternoon), Ops (3rd, 20 April 2026 evening). Promoted under PR5 (re-explanation threshold) and PR8 (third recurrence). Fix landed 21 April 2026.
+
+**When this matters:** Any time a new endpoint is designed, any time database writes are added, any time one endpoint needs to call another, any time a loader reads files from outside the `website/` directory.
 
 ---
 
@@ -206,17 +209,23 @@ Keep this defensive pattern on any reader that was written while the writer bug 
 
 ---
 
-## Carry-Forward Notes — Growth Wiring Session (20 April 2026)
+## Carry-Forward Notes — Ops Wiring Session (20 April 2026) + Path Fix Session (21 April 2026)
 
-### KG1 — Second observation of the `process.cwd()` path-resolution pattern across context loaders
+### KG1 — RESOLVED (21 April 2026)
 
-**Context:** The Tech wiring session on 20 April 2026 (morning) observed that `process.cwd()` on Vercel serverless runtime for a Next.js app resolves to the Next.js project root (`website/`), not the repo root. Both Tech loaders fell back to stub text on production because their source files sit outside `website/`.
+The `process.cwd()` path-resolution pattern reached its third observation at Ops Channel 2 (20 April 2026 evening) and was fixed on 21 April 2026. Rule 5 has been added to the KG1 resolution entry above. The Growth carry-forward note (previously here) has been absorbed into that entry. See D-Fix-1 in the decision log for the full reasoning.
 
-**Growth session (same day, afternoon) mirrored the Tech pattern deliberately.** Both Growth loaders (`growth-actions-log.ts`, `growth-market-signals.ts`) use `path.join(process.cwd(), 'operations', '...')` identically to Tech. Founder chose this posture so the dedicated Vercel-path fix session sweeps Tech (2 loaders) and Growth (2 loaders) together with a single pattern change.
+### New candidate pattern (first observation) — Supabase-read-path loader for chat persona
 
-**Status:** Not yet promoted to its own KG entry because the root-cause diagnosis and fix approach are still pending. Inline comments added in both Growth loaders (see `ACTIONS_LOG_PATH` and `MARKET_SIGNALS_PATH` comment blocks) direct the follow-up session to the known-limitation documentation.
+Ops Channel 1 is the first loader in the codebase to read Supabase in the live request path for persona context. The stub-fallback pattern applied here worked correctly under production failure (missing table), which validates the approach but leaves the observation count at 1. Logged for future promotion decision.
 
-**Expected next observation:** If the Ops wiring session or any future file-based loader is designed *before* the Vercel-path fix lands and copies the same pattern, this becomes the third observation and promotes under PR8. The follow-up session that lands the fix should simultaneously promote this to a full KG entry with the resolution.
+### New candidate pattern (first observation) — Multi-source synthesis loader with per-source isolation
+
+Ops Channel 2 is the first loader to synthesise five independent sources with per-source isolation. The `OpsContinuitySection<T>` type is the design primitive. Logged for future promotion decision.
+
+### Field-level 'unknown' self-disclosure pattern (second observation)
+
+First seen as the Channel 2 sparse-state disclosure at Growth. Now applied at field level (not block level) at D-Ops-2 and D-Ops-6. Second observation. One more observation promotes under PR8.
 
 ### New candidate pattern (first observation) — Sparse-state disclosure in context loaders
 

@@ -796,3 +796,165 @@ Changes implemented:
 **Impact:** Channel 1 loader applies `DEFAULT_WINDOW_DAYS = 90`. Channel 2 loader applies `DEFAULT_WINDOW_DAYS = 120` with `SPARSE_THRESHOLD = 5`. Both values are constants at the top of the respective loader files; tuning is a one-line change plus a re-test.
 
 **Status:** Adopted
+
+---
+
+## 2026-04-20 — D-Ops-0: Diagnostic outcome for Ops channel-gap hypothesis
+
+**Decision:** Diagnostic probe against Ops persona on /founder-hub confirmed the channel-gap diagnosis from ops-wiring-fix-handoff.md §2. Ops reported no live cost-feed signal and no operational-continuity synthesis. Design adopted as scoped — no re-scope.
+
+**Reasoning:** Handoff required diagnostic confirmation before code (Step B). Ops's reply aligned with the documented hypothesis. Neither a partial-confirm re-scope nor a corrected abandonment was warranted.
+
+**Alternatives considered:** Partial confirm (one channel only) — rejected because Ops named both gaps. Corrected (stop and rewrite handoff) — rejected because Ops's self-report matched the diagnosis.
+
+**Revisit condition:** If a future session's diagnostic reveals additional channels not covered by C1 or C2 (e.g. a Stripe live-signal channel, a pipeline-depth channel), log as a new candidate in the decision log and design in a separate session.
+
+**Rules served:** PR1 (single-persona proof), the project's "diagnostic first" discipline documented in the handoff.
+
+**Impact:** Unblocked scaffolding for both channels in the same session.
+
+**Status:** Adopted
+
+---
+
+## 2026-04-20 — D-Ops-1: Channel 1 data sources — Choice 2 Option A
+
+**Decision:** Channel 1 (Live Cost / Spend Feed) wires `cost_health_snapshots` (latest row) and `get_classifier_cost_summary` (30-day aggregate). Per-endpoint concentration deferred — returns `status: 'unknown'` with reason. Runway deferred — returns `status: 'unknown'` with reason (see D-Ops-6).
+
+**Reasoning:** The classifier_cost_log schema does not currently carry an `endpoint` column, so per-endpoint concentration cannot be computed without either a schema change or a separate per-endpoint spend log. Neither is in scope. The self-disclosing 'unknown' at field level is consistent with the Channel 2 sparse-state disclosure pattern adopted at Growth close.
+
+**Alternatives considered:** Option B (full four-threshold wiring with concentration computed from whatever is available) — rejected; would produce a number that is not actually concentration and would mislead the persona. Option C (defer Channel 1 entirely until concentration is available) — rejected; the other three thresholds are valuable now.
+
+**Revisit condition:** Classifier cost log gains endpoint attribution, or a separate per-endpoint spend log is built.
+
+**Rules served:** PR1, PR2, the stub-fallback discipline from Tech/Growth.
+
+**Impact:** Channel 1 ships with three out of four threshold readings live and one self-disclosed 'unknown'.
+
+**Status:** Adopted
+
+---
+
+## 2026-04-20 — D-Ops-2: Concentration reading returns 'unknown' by design
+
+**Decision:** Concentration field in Channel 1 carries `status: 'unknown'` with inline note: *"Per-endpoint concentration not yet instrumented. Deferred under D-Ops-2."*
+
+**Reasoning:** The self-disclosing stub pattern applied at field level (not just loader level) means the Ops persona cannot misread silence as green. Makes the deferral visible in every reply that surfaces the cost block.
+
+**Alternatives considered:** Omit the field entirely — rejected; invisible deferrals drift. Guess a proxy metric — rejected; produces wrong confidence.
+
+**Revisit condition:** Same as D-Ops-1.
+
+**Rules served:** The stub-fallback discipline, PR7 (deferred decisions documented).
+
+**Impact:** Field-level 'unknown' becomes an established pattern for future loaders.
+
+**Status:** Adopted
+
+---
+
+## 2026-04-20 — D-Ops-3: Channel 2 source filtering — Choice 3 Option A
+
+**Decision:** All five Channel 2 sources wired (handoffs directory, decision log, knowledge gaps, compliance register, D-register). HANDOFF_CAP = 5 most recent closes. DECISION_CAP = 12 most recent entries. Per-source try/catch means one failing source does not break the loader.
+
+**Reasoning:** The handoff §4.2 established the truncation order and per-source isolation. Narrowing the source list would leave operational-continuity gaps.
+
+**Alternatives considered:** Option B (handoffs + decision log only) — rejected; loses compliance posture and D-register non-decisions. Option C (decision log only) — rejected; loses everything observational.
+
+**Revisit condition:** If a source consistently fails or adds noise rather than signal, drop it.
+
+**Rules served:** PR1, PR7.
+
+**Impact:** Ops sees five signals on every request where the source files resolve.
+
+**Status:** Adopted
+
+---
+
+## 2026-04-20 — D-Ops-4: Snapshot freshness policy — Choice 4 Option A
+
+**Decision:** `SNAPSHOT_STALE_AFTER_DAYS = 7`. Warning after 7 days. Do not block.
+
+**Reasoning:** Blocking on stale snapshot would make the Ops persona silently unusable on any week the snapshot job fails. Warning preserves the signal and makes the staleness explicit to the persona.
+
+**Alternatives considered:** Block after 7 days — rejected; worse failure mode. No warning — rejected; persona can't reason about staleness.
+
+**Revisit condition:** If snapshot job frequency changes, update the constant.
+
+**Rules served:** The stub-fallback discipline, PR7.
+
+**Impact:** Stale-snapshot case is a warning, not a failure.
+
+**Status:** Adopted
+
+---
+
+## 2026-04-20 — D-Ops-5: Mentor persona extension — Choice 5 Option A
+
+**Decision:** No. The Channel 1 + Channel 2 pattern is not extended to the mentor persona. Mentor uses a different architecture (memory-based, not session-state-synthesis-based) and is not a continuation of this chat-persona wiring series.
+
+**Reasoning:** Ops is the final chat-persona wiring in the Support / Tech / Growth / Ops series. The mentor branch has its own open architecture question (memory ADR, carried forward across sessions). Reusing this pattern there would conflate two unlike designs.
+
+**Alternatives considered:** Extend the pattern to mentor — rejected; premature without the memory ADR.
+
+**Revisit condition:** Mentor memory architecture ADR adopted, and the ADR independently specifies a continuity-state channel.
+
+**Rules served:** PR1, PR7.
+
+**Impact:** Closes the chat-persona wiring series cleanly. Mentor remains on its own track.
+
+**Status:** Adopted
+
+---
+
+## 2026-04-20 — D-Ops-6: Runway reading returns 'unknown' by design
+
+**Decision:** Runway field in Channel 1 carries `status: 'unknown'` with inline note: *"Runway not in the snapshot schema. Deferred under D-Ops-6."*
+
+**Reasoning:** The `cost_health_snapshots` schema as documented does not carry a runway field. Computing runway in the loader would require a revenue-projection model not in scope. Field-level 'unknown' with self-disclosure is the consistent discipline.
+
+**Alternatives considered:** Compute runway from cash-in-bank and monthly-burn inside the loader — rejected; would require assumptions about revenue projection not in scope and not auditable. Add runway to the snapshot schema — rejected; schema change out of scope for this session.
+
+**Revisit condition:** Snapshot schema gains a runway field, or a separate runway-projection loader is designed.
+
+**Rules served:** PR7, the stub-fallback discipline.
+
+**Impact:** Runway deferral is visible in every reply that surfaces the cost block.
+
+**Status:** Adopted
+
+---
+
+## 2026-04-21 — D-Fix-1: Vercel path resolution — Option A (parent-directory traversal) chosen
+
+**Decision:** Fix all five file-based context loaders by adding `const REPO_ROOT = path.join(process.cwd(), '..')` and resolving all source paths from REPO_ROOT. Option A chosen over Option B (file-move) and Option C (outputFileTracingIncludes).
+
+**Reasoning:** Diagnostic endpoint confirmed `process.cwd()` = `/var/task/website` on Vercel runtime. All parent-traversal paths resolved successfully. All direct paths returned ENOENT. Option A is the smallest diff (one constant + path update per loader), requires no file moves or Next.js config changes, and the bundler already ships the source files at the repo root. Options B and C solve the same problem with more complexity and more rollback surface.
+
+**Alternatives considered:** Option B (file-move) — rejected; unnecessary since files are already accessible via `..`. Introduces source-of-truth ambiguity for files referenced from outside the loaders. Option C (outputFileTracingIncludes) — rejected; unnecessary since the bundler already ships the files.
+
+**Revisit condition:** If a future Vercel runtime change prevents parent-directory traversal (e.g., sandboxing the function to its project directory), revisit with Option C.
+
+**Rules served:** KG1 resolution, PR2 (verified in same session), PR5/PR8 (KG1 promoted at third recurrence).
+
+**Impact:** Five loaders move from Wired-but-stub-on-Vercel to Verified. Tech, Growth, and Ops file-based channels all reading live data on production.
+
+**Status:** Adopted
+
+---
+
+## 2026-04-21 — D-Fix-2: Harness invocation pattern changed — run from website/ subdirectory
+
+**Decision:** All three wiring verification harnesses must now be invoked from the `website/` subdirectory: `cd website && node ../scripts/<harness>.mjs`. This matches Vercel's runtime where `process.cwd()` = the Next.js project dir.
+
+**Reasoning:** The path fix changes the directory contract. Loaders now expect `process.cwd()` to be the Next.js project dir (not the repo root). Running harnesses from the repo root would cause loaders to resolve paths incorrectly (one level too high). Running from `website/` matches Vercel's runtime and all three harnesses pass.
+
+**Alternatives considered:** Modify harnesses to `cd` internally — rejected; harnesses are founder-verification tools and should match the production runtime faithfully. Add a `process.chdir()` to each harness — rejected; changes harness semantics and breaks other assertions that rely on repo-root paths.
+
+**Revisit condition:** If harnesses are refactored for other reasons, consider embedding the directory contract.
+
+**Rules served:** PR2 (build-to-wire verification is immediate).
+
+**Impact:** Harness invocation command changes. Anyone running harnesses must use the new pattern.
+
+**Status:** Adopted
