@@ -13,18 +13,6 @@
  *   6. website/public/component-registry.json                    (capability inventory summary)
  *   7. website/public/flows.json                                 (flow tracer summary)
  *
- * Computed cross-cut indices (Option B, 21 April 2026)
- *   Derived from the sources above; no new files. Live on the existing
- *   sections so the 7-source shape is preserved.
- *   - Source 6 gains `by_journey`: non-Ready components grouped by journey
- *     (paid_api / both / free_tier / internal / unknown). Lets Ops answer
- *     "what's blocking the paid API from launch?" without re-slicing.
- *   - Source 7 gains `components` per flow (deduplicated, order-preserving
- *     component list per flow) and `by_component` (reverse map: for each
- *     node id that appears in any flow, the flow keys that reference it).
- *     Lets Ops answer "which flows touch component X?" and "which
- *     components participate in flow Y?" directly.
- *
  * Independent failure handling
  *   Each source is loaded and parsed in its own try/catch. A failure in one
  *   source produces a self-disclosing stub for that section only — the
@@ -126,10 +114,6 @@ export interface FlowTracerEntry {
   category: string
   color: string
   steps: FlowTracerStep[]
-  // Deduplicated, order-preserving component-id list for this flow.
-  // Computed from `steps`; answers "which components participate in flow X?"
-  // without Ops having to de-dup the step chain mentally.
-  components: string[]
 }
 
 export interface FlowTracerTotals {
@@ -147,21 +131,12 @@ export interface OpsContinuitySection<T> {
 export interface CapabilityInventorySection
   extends OpsContinuitySection<CapabilityNonReadyEntry> {
   totals: CapabilityInventoryTotals | null
-  // Computed cross-cut: non-Ready components grouped by journey field.
-  // Keys are 'paid_api' | 'both' | 'free_tier' | 'internal' | 'unknown'.
-  // Null when the source failed to load.
-  by_journey: Record<string, CapabilityNonReadyEntry[]> | null
 }
 
 // Flow tracer has totals alongside the list; extend the shape.
 export interface FlowTracerSection
   extends OpsContinuitySection<FlowTracerEntry> {
   totals: FlowTracerTotals | null
-  // Reverse map: node-id → flow-keys that reference it. Only includes nodes
-  // that actually appear in at least one flow path (not every node in the
-  // registry). Answers "which flows touch component X?" without scanning
-  // the full step-chain list. Null when the source failed to load.
-  by_component: Record<string, string[]> | null
 }
 
 export interface OpsContinuityBlock {
@@ -583,7 +558,6 @@ async function loadCapabilityInventory(): Promise<CapabilityInventorySection> {
           : 'component-registry.json not readable',
       items: [],
       totals: null,
-      by_journey: null,
     }
   }
 
@@ -599,7 +573,6 @@ async function loadCapabilityInventory(): Promise<CapabilityInventorySection> {
           : 'component-registry.json JSON parse failed',
       items: [],
       totals: null,
-      by_journey: null,
     }
   }
 
@@ -610,7 +583,6 @@ async function loadCapabilityInventory(): Promise<CapabilityInventorySection> {
       note: 'component-registry.json parsed but components array is empty.',
       items: [],
       totals: null,
-      by_journey: null,
     }
   }
 
@@ -645,20 +617,7 @@ async function loadCapabilityInventory(): Promise<CapabilityInventorySection> {
     })
   }
 
-  // Computed cross-cut: group non-Ready items by journey field. Keys are
-  // 'paid_api' | 'both' | 'free_tier' | 'internal' | 'unknown'; any journey
-  // value not in that set still groups under its own key (we don't silently
-  // discard unexpected values). Purpose: lets Ops answer revenue-impact
-  // questions ("what's blocking the paid API from launch?") without having
-  // to re-slice the main non-Ready list.
-  const by_journey: Record<string, CapabilityNonReadyEntry[]> = {}
-  for (const entry of nonReady) {
-    const j = entry.journey || 'unknown'
-    if (!by_journey[j]) by_journey[j] = []
-    by_journey[j].push(entry)
-  }
-
-  return { source: 'file', note: null, items: nonReady, totals, by_journey }
+  return { source: 'file', note: null, items: nonReady, totals }
 }
 
 // =============================================================================
@@ -694,7 +653,6 @@ async function loadFlowTracer(): Promise<FlowTracerSection> {
           : 'flows.json not readable',
       items: [],
       totals: null,
-      by_component: null,
     }
   }
 
@@ -710,7 +668,6 @@ async function loadFlowTracer(): Promise<FlowTracerSection> {
           : 'flows.json JSON parse failed',
       items: [],
       totals: null,
-      by_component: null,
     }
   }
 
@@ -724,49 +681,24 @@ async function loadFlowTracer(): Promise<FlowTracerSection> {
       note: 'flows.json parsed but flows object is empty.',
       items: [],
       totals: { flow_count: 0, node_count: Object.keys(nodesObj).length },
-      by_component: null,
     }
   }
 
   const entries: FlowTracerEntry[] = []
-  // Reverse map for index 2: node-id → flow-keys that reference it.
-  // Populated as each flow's step chain is walked. Only nodes that appear
-  // in at least one flow path end up as keys; isolated nodes from
-  // nodesObj are not included (the reverse map's purpose is "which
-  // flows touch X?", and an unused node has no answer to give).
-  const by_component: Record<string, string[]> = {}
-
   for (const key of flowKeys) {
     const f = flowsObj[key]
     const stepsArr = Array.isArray(f.path) ? f.path : []
-    const steps: FlowTracerStep[] = stepsArr.map((s) => {
-      const rs = s as RawFlowStep
-      return { id: typeof rs.id === 'string' ? rs.id : 'unknown' }
-    })
-
-    // Index 3: deduplicated, order-preserving component list for this flow.
-    // A node visited twice in the same chain (e.g. a router re-entered)
-    // appears once. Order is first-appearance.
-    const seen = new Set<string>()
-    const components: string[] = []
-    for (const st of steps) {
-      if (seen.has(st.id)) continue
-      seen.add(st.id)
-      components.push(st.id)
-      // Populate the reverse map as we go. Guard against duplicate flow
-      // entries for the same component in the same flow — the Set above
-      // already ensures we only record each component once per flow.
-      if (!by_component[st.id]) by_component[st.id] = []
-      by_component[st.id].push(key)
-    }
-
+    const steps: FlowTracerStep[] = stepsArr
+      .map((s) => {
+        const rs = s as RawFlowStep
+        return { id: typeof rs.id === 'string' ? rs.id : 'unknown' }
+      })
     entries.push({
       key,
       name: typeof f.name === 'string' ? f.name : key,
       category: typeof f.category === 'string' ? f.category : 'uncategorised',
       color: typeof f.color === 'string' ? f.color : '',
       steps,
-      components,
     })
   }
 
@@ -775,13 +707,7 @@ async function loadFlowTracer(): Promise<FlowTracerSection> {
     node_count: Object.keys(nodesObj).length,
   }
 
-  return {
-    source: 'file',
-    note: null,
-    items: entries,
-    totals,
-    by_component,
-  }
+  return { source: 'file', note: null, items: entries, totals }
 }
 
 // =============================================================================
@@ -862,54 +788,6 @@ function formatDRegister(s: OpsContinuitySection<DRegisterEntry>): string {
   return `${header}\n${body}`
 }
 
-// Stable render order for journey groups. Revenue-critical first
-// (paid_api, both), then free_tier, then internal, then unknown/other.
-const JOURNEY_ORDER = ['paid_api', 'both', 'free_tier', 'internal', 'unknown']
-
-function compareJourneyKeys(a: string, b: string): number {
-  const ai = JOURNEY_ORDER.indexOf(a)
-  const bi = JOURNEY_ORDER.indexOf(b)
-  // Known keys sort by the order above. Any unknown key sorts after all
-  // known keys, and between unknowns alphabetically.
-  const aRank = ai === -1 ? JOURNEY_ORDER.length : ai
-  const bRank = bi === -1 ? JOURNEY_ORDER.length : bi
-  if (aRank !== bRank) return aRank - bRank
-  return a.localeCompare(b)
-}
-
-function truncate(text: string, max: number): string {
-  if (text.length <= max) return text
-  return text.slice(0, max) + '…'
-}
-
-function formatBlockersByJourney(s: CapabilityInventorySection): string {
-  // Skip the subsection entirely when source was a stub (main section's
-  // Note already explains the failure). Also skip when the main list is
-  // empty — nothing to group.
-  if (!s.by_journey || s.items.length === 0) return ''
-
-  const journeys = Object.keys(s.by_journey).sort(compareJourneyKeys)
-  const header =
-    'Blockers by journey (non-Ready components, grouped; paid_api/both = revenue-critical):'
-  if (journeys.length === 0) return `${header}\n  (none grouped)`
-
-  const body = journeys
-    .map((j) => {
-      const items = s.by_journey![j]
-      const lines = items
-        .map((c) => {
-          const snippet = c.blocker_or_notes
-            ? `: ${truncate(c.blocker_or_notes, 80)}`
-            : ''
-          return `    - ${c.id} [${c.agentReady}]${snippet}`
-        })
-        .join('\n')
-      return `  ${j} (${items.length}):\n${lines}`
-    })
-    .join('\n')
-  return `${header}\n${body}`
-}
-
 function formatCapabilityInventory(s: CapabilityInventorySection): string {
   // Totals appear on the header line — they anchor the rest of the section.
   const totalsLine = s.totals
@@ -927,27 +805,6 @@ function formatCapabilityInventory(s: CapabilityInventorySection): string {
         : ''
       const pathLine = c.path ? `\n      path: ${c.path}` : ''
       return `  - ${c.id} — ${c.name}\n      agentReady: ${c.agentReady}  journey: ${c.journey}${blockerLine}${pathLine}`
-    })
-    .join('\n')
-
-  const byJourneyBlock = formatBlockersByJourney(s)
-  const suffix = byJourneyBlock ? `\n\n${byJourneyBlock}` : ''
-  return `${header}\n${body}${suffix}`
-}
-
-function formatFlowsByComponent(s: FlowTracerSection): string {
-  // Skip the subsection when unavailable or empty. Parent section's Note
-  // already covers the failure case.
-  if (!s.by_component) return ''
-  const nodeIds = Object.keys(s.by_component).sort()
-  if (nodeIds.length === 0) return ''
-
-  const header =
-    'Flows by component (reverse map; only nodes that appear in at least one flow):'
-  const body = nodeIds
-    .map((id) => {
-      const flowKeys = s.by_component![id]
-      return `  - ${id} → ${flowKeys.join(', ')}`
     })
     .join('\n')
   return `${header}\n${body}`
@@ -968,18 +825,10 @@ function formatFlowTracer(s: FlowTracerSection): string {
         f.steps.length === 0
           ? '(no steps)'
           : f.steps.map((st) => st.id).join(' → ')
-      // Components: deduplicated, order-preserving list for this flow.
-      const componentList =
-        f.components.length === 0
-          ? '(none)'
-          : f.components.join(', ')
-      return `  - ${f.key} — ${f.name}\n      category: ${f.category}  steps: ${stepList}\n      components (${f.components.length}): ${componentList}`
+      return `  - ${f.key} — ${f.name}\n      category: ${f.category}  steps: ${stepList}`
     })
     .join('\n')
-
-  const byComponentBlock = formatFlowsByComponent(s)
-  const suffix = byComponentBlock ? `\n\n${byComponentBlock}` : ''
-  return `${header}\n${body}${suffix}`
+  return `${header}\n${body}`
 }
 
 function formatBlock(block: Omit<OpsContinuityBlock, 'formatted_context'>): string {
@@ -1100,7 +949,6 @@ export async function getOpsContinuityState(): Promise<OpsContinuityBlock> {
             : 'capability-inventory loader threw an unknown error',
         items: [],
         totals: null,
-        by_journey: null,
       }),
     ),
     loadFlowTracer().catch(
@@ -1112,7 +960,6 @@ export async function getOpsContinuityState(): Promise<OpsContinuityBlock> {
             : 'flow-tracer loader threw an unknown error',
         items: [],
         totals: null,
-        by_component: null,
       }),
     ),
   ])
