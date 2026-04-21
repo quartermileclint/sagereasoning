@@ -70,7 +70,12 @@ export interface EndpointInventoryBlock {
 // Constants
 // =============================================================================
 
-const TECH_STATE_PATH = path.join(process.cwd(), 'TECHNICAL_STATE.md')
+// Repo root. On Vercel serverless, process.cwd() resolves to /var/task/website
+// (the Next.js project dir), not the repo root (/var/task). Parent traversal
+// reaches the repo root where TECHNICAL_STATE.md lives. Confirmed by diagnostic
+// probe on 21 April 2026.
+const REPO_ROOT = path.join(process.cwd(), '..')
+const TECH_STATE_PATH = path.join(REPO_ROOT, 'TECHNICAL_STATE.md')
 
 const STUB_MESSAGE =
   'Endpoint inventory unavailable. Tech is answering without the /TECHNICAL_STATE.md ' +

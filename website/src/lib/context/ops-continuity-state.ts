@@ -97,10 +97,12 @@ export interface OpsContinuityBlock {
 // Paths
 // =============================================================================
 
-// process.cwd() on Vercel serverless resolves to the project root. These
-// paths match the same pattern used by tech-system-state.ts and
-// growth-actions-log.ts.
-const ROOT = process.cwd()
+// Repo root. On Vercel serverless, process.cwd() resolves to /var/task/website
+// (the Next.js project dir), not the repo root (/var/task). Parent traversal
+// reaches the repo root where operations/ and compliance/ live. Confirmed by
+// diagnostic probe on 21 April 2026 (all parent-traversal paths resolved
+// successfully). Same fix applied to Tech C1+C2 and Growth C1+C2 loaders.
+const ROOT = path.join(process.cwd(), '..')
 const HANDOFFS_DIR = path.join(ROOT, 'operations', 'handoffs')
 const DECISION_LOG_PATH = path.join(ROOT, 'operations', 'decision-log.md')
 const KG_REGISTER_PATH = path.join(ROOT, 'operations', 'knowledge-gaps.md')

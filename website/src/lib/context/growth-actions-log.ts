@@ -77,19 +77,13 @@ export interface GrowthActionsLogOptions {
 // Constants
 // =============================================================================
 
-// From repo root. process.cwd() on Vercel serverless functions resolves to the
-// project root (website/ is the Next.js app, but cwd is the repo root during
-// the function runtime). The file lives in operations/ at repo root.
-//
-// KNOWN LIMITATION (20 April 2026): Tech's Channel 1 and Channel 2 loaders use
-// this same pattern and were observed returning the stub fallback on Vercel
-// runtime. Diagnosis and fix are scheduled for a dedicated follow-up session
-// covering all file-based loaders (Tech + Growth + future Ops). Until that
-// session lands, Growth is expected to return the stub message on Vercel.
-// The self-disclosing stub preserves honesty: Growth will say it is
-// answering without prior-action context rather than inventing one.
+// Repo root. On Vercel serverless, process.cwd() resolves to /var/task/website
+// (the Next.js project dir), not the repo root (/var/task). Parent traversal
+// reaches the repo root where operations/ lives. Confirmed by diagnostic probe
+// on 21 April 2026 (all parent-traversal paths resolved successfully).
+const REPO_ROOT = path.join(process.cwd(), '..')
 const ACTIONS_LOG_PATH = path.join(
-  process.cwd(),
+  REPO_ROOT,
   'operations',
   'growth-actions-log.md',
 )

@@ -62,11 +62,13 @@ export interface TechSystemStateBlock {
 // Constants
 // =============================================================================
 
-// From repo root. process.cwd() on Vercel serverless functions resolves to the
-// project root (website/ is the Next.js app, but cwd is the repo root during
-// the function runtime). The file lives in operations/ at repo root.
+// Repo root. On Vercel serverless, process.cwd() resolves to /var/task/website
+// (the Next.js project dir), not the repo root (/var/task). Parent traversal
+// reaches the repo root where operations/ lives. Confirmed by diagnostic probe
+// on 21 April 2026 (all parent-traversal paths resolved successfully).
+const REPO_ROOT = path.join(process.cwd(), '..')
 const KNOWN_ISSUES_PATH = path.join(
-  process.cwd(),
+  REPO_ROOT,
   'operations',
   'tech-known-issues.md',
 )
