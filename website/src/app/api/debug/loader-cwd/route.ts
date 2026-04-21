@@ -10,19 +10,22 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/security'
 import { promises as fs } from 'fs'
 import path from 'path'
-// fileURLToPath not needed — __dirname check is sufficient for this diagnostic
+
+// Temporary diagnostic endpoint — gated by a secret query param instead of
+// Bearer-token auth (because the founder visits this URL directly in a browser,
+// which doesn't send the Authorization header). The secret is checked against
+// FOUNDER_USER_ID, which is already in the Vercel env and is not publicly known.
+// This endpoint will be deleted at session close.
 
 export async function GET(request: NextRequest) {
-  // Founder-only gate (same pattern as /api/founder/hub)
-  const auth = await requireAuth(request)
-  if (auth.error) return auth.error
+  // Gate: ?key=<FOUNDER_USER_ID>
+  const key = request.nextUrl.searchParams.get('key')
   const founderId = process.env.FOUNDER_USER_ID
-  if (!founderId || auth.user.id !== founderId) {
+  if (!founderId || key !== founderId) {
     return NextResponse.json(
-      { error: 'This endpoint is restricted to the founder.' },
+      { error: 'Access denied. Provide ?key=<founder-id> to access this diagnostic.' },
       { status: 403 }
     )
   }
