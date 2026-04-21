@@ -44,8 +44,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "free_tier"
+      "agentReady": "not-ready"
     },
     {
       "id": "agent-mentor",
@@ -87,8 +86,7 @@
       ],
       "origin": "",
       "humanReady": "ready",
-      "agentReady": "partial",
-      "journey": "free_tier"
+      "agentReady": "partial"
     },
     {
       "id": "agent-sage-ops",
@@ -125,8 +123,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "internal"
+      "agentReady": "not-ready"
     },
     {
       "id": "agent-session-bridge",
@@ -155,8 +152,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "internal"
+      "agentReady": "not-ready"
     },
     {
       "id": "agent-support",
@@ -189,8 +185,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "free_tier"
+      "agentReady": "not-ready"
     },
     {
       "id": "data-agent-assess-v3",
@@ -1078,8 +1073,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "paid_api"
+      "agentReady": "not-ready"
     },
     {
       "id": "engine-agent-assessment",
@@ -1140,8 +1134,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "paid_api"
+      "agentReady": "not-ready"
     },
     {
       "id": "engine-authority-mgr",
@@ -1171,8 +1164,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "free_tier"
+      "agentReady": "not-ready"
     },
     {
       "id": "engine-baseline",
@@ -1199,8 +1191,7 @@
       ],
       "origin": "",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "both"
+      "agentReady": "partial"
     },
     {
       "id": "engine-deliberation",
@@ -1228,8 +1219,7 @@
       ],
       "origin": "",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "both"
+      "agentReady": "partial"
     },
     {
       "id": "engine-doc-scorer",
@@ -1257,8 +1247,7 @@
       ],
       "origin": "",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "both"
+      "agentReady": "partial"
     },
     {
       "id": "engine-embedding",
@@ -1288,8 +1277,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "free_tier"
+      "agentReady": "not-ready"
     },
     {
       "id": "engine-journal-content",
@@ -1345,8 +1333,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "free_tier"
+      "agentReady": "not-ready"
     },
     {
       "id": "engine-mentor-ledger",
@@ -1373,8 +1360,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "free_tier"
+      "agentReady": "not-ready"
     },
     {
       "id": "engine-model-config",
@@ -1433,8 +1419,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "free_tier"
+      "agentReady": "not-ready"
     },
     {
       "id": "engine-proactive",
@@ -1460,8 +1445,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "free_tier"
+      "agentReady": "not-ready"
     },
     {
       "id": "engine-profile-store",
@@ -1490,8 +1474,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "free_tier"
+      "agentReady": "not-ready"
     },
     {
       "id": "engine-progression",
@@ -1521,8 +1504,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "paid_api"
+      "agentReady": "not-ready"
     },
     {
       "id": "engine-receipt",
@@ -1548,8 +1530,7 @@
       ],
       "origin": "",
       "humanReady": "na",
-      "agentReady": "partial",
-      "journey": "both"
+      "agentReady": "partial"
     },
     {
       "id": "engine-ring-wrapper",
@@ -1581,8 +1562,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "both"
+      "agentReady": "not-ready"
     },
     {
       "id": "engine-sage-reason-engine",
@@ -1618,8 +1598,7 @@
       ],
       "origin": "brain-derived",
       "humanReady": "na",
-      "agentReady": "partial",
-      "journey": "both"
+      "agentReady": "partial"
     },
     {
       "id": "engine-skill-registry",
@@ -1648,8 +1627,7 @@
       ],
       "origin": "",
       "humanReady": "na",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "engine-stoic-brain-v3",
@@ -2057,8 +2035,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "internal"
+      "agentReady": "not-ready"
     },
     {
       "id": "infra-mcp-contracts",
@@ -2080,8 +2057,7 @@
       ],
       "origin": "",
       "humanReady": "na",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "infra-nextjs",
@@ -2233,8 +2209,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "both"
+      "agentReady": "not-ready"
     },
     {
       "id": "stripe-portal",
@@ -2339,8 +2314,7 @@
       ],
       "origin": "",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "both"
+      "agentReady": "partial"
     },
     {
       "id": "infra-vercel",
@@ -2471,8 +2445,7 @@
       ],
       "origin": "",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "prod-auth",
@@ -2607,8 +2580,7 @@
       ],
       "origin": "",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "free_tier"
+      "agentReady": "partial"
     },
     {
       "id": "prod-landing",
@@ -2679,8 +2651,7 @@
       ],
       "origin": "",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "prod-social-filter",
@@ -2824,8 +2795,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "internal"
+      "agentReady": "not-ready"
     },
     {
       "id": "reasoning-journal-interp",
@@ -3028,8 +2998,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "not-ready",
-      "journey": "both"
+      "agentReady": "not-ready"
     },
     {
       "id": "reasoning-senecan",
@@ -3112,8 +3081,7 @@
       ],
       "origin": "",
       "humanReady": "na",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-receipts",
@@ -3142,8 +3110,7 @@
       ],
       "origin": "",
       "humanReady": "na",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-align",
@@ -3173,8 +3140,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-audit",
@@ -3204,8 +3170,7 @@
       ],
       "origin": "brain-derived",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "both"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-classify",
@@ -3235,8 +3200,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-coach",
@@ -3267,8 +3231,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-comply",
@@ -3299,8 +3262,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-context",
@@ -3355,8 +3317,7 @@
       ],
       "origin": "brain-derived",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "both"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-decide",
@@ -3387,8 +3348,7 @@
       ],
       "origin": "brain-derived",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "both"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-diagnose",
@@ -3418,8 +3378,7 @@
       ],
       "origin": "brain-derived",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "free_tier"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-educate",
@@ -3450,8 +3409,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-filter",
@@ -3481,8 +3439,7 @@
       ],
       "origin": "brain-derived",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "free_tier"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-govern",
@@ -3512,8 +3469,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-guard",
@@ -3543,8 +3499,7 @@
       ],
       "origin": "brain-derived",
       "humanReady": "na",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-identity",
@@ -3574,8 +3529,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-invest",
@@ -3606,8 +3560,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-iterate",
@@ -3639,8 +3592,7 @@
       ],
       "origin": "brain-derived",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "both"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-moderate",
@@ -3670,8 +3622,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-negotiate",
@@ -3701,8 +3652,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-pivot",
@@ -3732,8 +3682,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-premortem",
@@ -3763,8 +3712,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-prioritise",
@@ -3794,8 +3742,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-profile",
@@ -3828,8 +3775,7 @@
       ],
       "origin": "brain-derived",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-reason",
@@ -3863,8 +3809,7 @@
       ],
       "origin": "brain-derived",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "both"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-reflect",
@@ -3893,8 +3838,7 @@
       ],
       "origin": "brain-derived",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "free_tier"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-resolve",
@@ -3924,8 +3868,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-retro",
@@ -3955,8 +3898,7 @@
       ],
       "origin": "wrapped",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-scenario",
@@ -3987,8 +3929,7 @@
       ],
       "origin": "brain-derived",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "free_tier"
+      "agentReady": "partial"
     },
     {
       "id": "tool-sage-score",
@@ -4021,8 +3962,7 @@
       ],
       "origin": "brain-derived",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "free_tier"
+      "agentReady": "partial"
     },
     {
       "id": "tool-compose",
@@ -4052,8 +3992,7 @@
       ],
       "origin": "",
       "humanReady": "na",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-execute",
@@ -4083,8 +4022,7 @@
       ],
       "origin": "",
       "humanReady": "na",
-      "agentReady": "partial",
-      "journey": "paid_api"
+      "agentReady": "partial"
     },
     {
       "id": "tool-skills-list",
@@ -4140,8 +4078,7 @@
       ],
       "origin": "",
       "humanReady": "partial",
-      "agentReady": "partial",
-      "journey": "internal"
+      "agentReady": "partial"
     },
     {
       "id": "tool-delete",
@@ -4169,8 +4106,7 @@
       ],
       "origin": "",
       "humanReady": "ready",
-      "agentReady": "partial",
-      "journey": "free_tier"
+      "agentReady": "partial"
     },
     {
       "id": "tool-export",
@@ -4199,8 +4135,7 @@
       ],
       "origin": "",
       "humanReady": "ready",
-      "agentReady": "partial",
-      "journey": "free_tier"
+      "agentReady": "partial"
     },
     {
       "id": "api-mentor-profile",

@@ -1,7 +1,7 @@
 /**
  * ops-continuity-state.ts — Channel 2 loader for the Sage-Ops chat persona.
  *
- * Reads five hand-maintained continuity sources at request time and returns
+ * Reads seven hand-maintained continuity sources at request time and returns
  * a structured block plus a ready-to-inject `formatted_context` string.
  *
  * Sources
@@ -10,11 +10,13 @@
  *   3. operations/knowledge-gaps.md                             (KG register)
  *   4. compliance/compliance_register.json                       (active obligations)
  *   5. operations/build-knowledge-extraction-2026-04-17.md      (D-register, decisions not made)
+ *   6. website/public/component-registry.json                    (capability inventory summary)
+ *   7. website/public/flows.json                                 (flow tracer summary)
  *
  * Independent failure handling
  *   Each source is loaded and parsed in its own try/catch. A failure in one
  *   source produces a self-disclosing stub for that section only — the
- *   remaining four sources still render. Silent fallback is worse than a
+ *   remaining sources still render. Silent fallback is worse than a
  *   transparent message.
  *
  * Truncation order (per handoff §4.2)
@@ -25,12 +27,14 @@
  *     - KG register: all entries (file is small — KG1..KG10 range)
  *     - Compliance: all obligations, id + status only (no narrative)
  *     - D-register: all entries (D1..D10 range)
+ *     - Capability inventory: totals + full non-Ready list (partial + not-ready)
+ *     - Flow tracer: totals + flow names/categories + step node-ids only
  *
  * Read-only. Does not import from sage-mentor/. Does not write.
  *
  * Injection point: website/src/app/api/founder/hub/route.ts `case 'ops'`.
  *
- * Risk classification: Standard (0d-ii). Five new read paths, non-safety-
+ * Risk classification: Standard (0d-ii). Seven read paths, non-safety-
  * critical surface. Each source degrades independently.
  *
  * Rules served: R15 (Sage Ops boundaries), R16 (intelligence pipeline data
@@ -77,10 +81,62 @@ export interface DRegisterEntry {
   impact_of_deferral: string
 }
 
+// Capability inventory summary (Source 6).
+// Totals live at the top; non-Ready items enumerate the actionable list.
+export interface CapabilityNonReadyEntry {
+  id: string
+  name: string
+  agentReady: string // 'partial' | 'not-ready'
+  blocker_or_notes: string // component.blocker if present, else component.notes, else ''
+  path: string // file/folder location
+  journey: string // 'free_tier' | 'paid_api' | 'both' | 'internal' | 'unknown'
+}
+
+export interface CapabilityInventoryTotals {
+  total: number
+  ready: number
+  partial: number
+  not_ready: number
+  na: number
+}
+
+// Flow tracer summary (Source 7).
+// Step arrays carry node-ids only — full per-step descriptions live in
+// flows.json and the Architecture Map; surfacing only ids keeps the loader
+// budget in check.
+export interface FlowTracerStep {
+  id: string
+}
+
+export interface FlowTracerEntry {
+  key: string
+  name: string
+  category: string
+  color: string
+  steps: FlowTracerStep[]
+}
+
+export interface FlowTracerTotals {
+  flow_count: number
+  node_count: number
+}
+
 export interface OpsContinuitySection<T> {
   source: 'file' | 'stub'
   note: string | null // set when source === 'stub' to explain why
   items: T[]
+}
+
+// Capability inventory has totals alongside the list; extend the shape.
+export interface CapabilityInventorySection
+  extends OpsContinuitySection<CapabilityNonReadyEntry> {
+  totals: CapabilityInventoryTotals | null
+}
+
+// Flow tracer has totals alongside the list; extend the shape.
+export interface FlowTracerSection
+  extends OpsContinuitySection<FlowTracerEntry> {
+  totals: FlowTracerTotals | null
 }
 
 export interface OpsContinuityBlock {
@@ -90,6 +146,8 @@ export interface OpsContinuityBlock {
   knowledge_gaps: OpsContinuitySection<KnowledgeGapEntry>
   compliance: OpsContinuitySection<ComplianceObligationEntry>
   d_register: OpsContinuitySection<DRegisterEntry>
+  capability_inventory: CapabilityInventorySection
+  flow_tracer: FlowTracerSection
   formatted_context: string
 }
 
@@ -116,6 +174,13 @@ const D_REGISTER_PATH = path.join(
   'operations',
   'build-knowledge-extraction-2026-04-17.md',
 )
+const COMPONENT_REGISTRY_PATH = path.join(
+  ROOT,
+  'website',
+  'public',
+  'component-registry.json',
+)
+const FLOWS_PATH = path.join(ROOT, 'website', 'public', 'flows.json')
 
 // =============================================================================
 // Caps
@@ -451,6 +516,201 @@ async function loadDRegister(): Promise<OpsContinuitySection<DRegisterEntry>> {
 }
 
 // =============================================================================
+// Source 6 — Capability inventory (component-registry.json)
+// =============================================================================
+
+interface RawComponent {
+  id?: unknown
+  name?: unknown
+  type?: unknown
+  status?: unknown
+  path?: unknown
+  desc?: unknown
+  notes?: unknown
+  blocker?: unknown
+  humanReady?: unknown
+  agentReady?: unknown
+  journey?: unknown
+}
+
+interface RawRegistry {
+  components?: RawComponent[]
+  totalComponents?: unknown
+}
+
+function pickBlockerOrNotes(c: RawComponent): string {
+  const blocker = typeof c.blocker === 'string' ? c.blocker.trim() : ''
+  if (blocker) return blocker
+  const notes = typeof c.notes === 'string' ? c.notes.trim() : ''
+  return notes
+}
+
+async function loadCapabilityInventory(): Promise<CapabilityInventorySection> {
+  let raw: string
+  try {
+    raw = await fs.readFile(COMPONENT_REGISTRY_PATH, 'utf8')
+  } catch (e) {
+    return {
+      source: 'stub',
+      note:
+        e instanceof Error
+          ? `component-registry.json not readable: ${e.message}`
+          : 'component-registry.json not readable',
+      items: [],
+      totals: null,
+    }
+  }
+
+  let parsed: RawRegistry
+  try {
+    parsed = JSON.parse(raw) as RawRegistry
+  } catch (e) {
+    return {
+      source: 'stub',
+      note:
+        e instanceof Error
+          ? `component-registry.json JSON parse failed: ${e.message}`
+          : 'component-registry.json JSON parse failed',
+      items: [],
+      totals: null,
+    }
+  }
+
+  const list = Array.isArray(parsed.components) ? parsed.components : []
+  if (list.length === 0) {
+    return {
+      source: 'stub',
+      note: 'component-registry.json parsed but components array is empty.',
+      items: [],
+      totals: null,
+    }
+  }
+
+  // Totals by agentReady.
+  const totals: CapabilityInventoryTotals = {
+    total: list.length,
+    ready: 0,
+    partial: 0,
+    not_ready: 0,
+    na: 0,
+  }
+  for (const c of list) {
+    const v = typeof c.agentReady === 'string' ? c.agentReady : 'na'
+    if (v === 'ready') totals.ready++
+    else if (v === 'partial') totals.partial++
+    else if (v === 'not-ready') totals.not_ready++
+    else totals.na++
+  }
+
+  // Non-Ready items (partial + not-ready).
+  const nonReady: CapabilityNonReadyEntry[] = []
+  for (const c of list) {
+    const ar = typeof c.agentReady === 'string' ? c.agentReady : 'na'
+    if (ar !== 'partial' && ar !== 'not-ready') continue
+    nonReady.push({
+      id: str(c.id, 'unknown'),
+      name: str(c.name, 'unknown'),
+      agentReady: ar,
+      blocker_or_notes: pickBlockerOrNotes(c),
+      path: str(c.path, ''),
+      journey: typeof c.journey === 'string' ? c.journey : 'unknown',
+    })
+  }
+
+  return { source: 'file', note: null, items: nonReady, totals }
+}
+
+// =============================================================================
+// Source 7 — Flow tracer (flows.json)
+// =============================================================================
+
+interface RawFlowStep {
+  id?: unknown
+}
+
+interface RawFlow {
+  name?: unknown
+  category?: unknown
+  color?: unknown
+  path?: unknown
+}
+
+interface RawFlowsFile {
+  nodes?: Record<string, unknown>
+  flows?: Record<string, RawFlow>
+}
+
+async function loadFlowTracer(): Promise<FlowTracerSection> {
+  let raw: string
+  try {
+    raw = await fs.readFile(FLOWS_PATH, 'utf8')
+  } catch (e) {
+    return {
+      source: 'stub',
+      note:
+        e instanceof Error
+          ? `flows.json not readable: ${e.message}`
+          : 'flows.json not readable',
+      items: [],
+      totals: null,
+    }
+  }
+
+  let parsed: RawFlowsFile
+  try {
+    parsed = JSON.parse(raw) as RawFlowsFile
+  } catch (e) {
+    return {
+      source: 'stub',
+      note:
+        e instanceof Error
+          ? `flows.json JSON parse failed: ${e.message}`
+          : 'flows.json JSON parse failed',
+      items: [],
+      totals: null,
+    }
+  }
+
+  const nodesObj = parsed.nodes && typeof parsed.nodes === 'object' ? parsed.nodes : {}
+  const flowsObj = parsed.flows && typeof parsed.flows === 'object' ? parsed.flows : {}
+
+  const flowKeys = Object.keys(flowsObj)
+  if (flowKeys.length === 0) {
+    return {
+      source: 'stub',
+      note: 'flows.json parsed but flows object is empty.',
+      items: [],
+      totals: { flow_count: 0, node_count: Object.keys(nodesObj).length },
+    }
+  }
+
+  const entries: FlowTracerEntry[] = []
+  for (const key of flowKeys) {
+    const f = flowsObj[key]
+    const stepsArr = Array.isArray(f.path) ? f.path : []
+    const steps: FlowTracerStep[] = stepsArr
+      .map((s) => {
+        const rs = s as RawFlowStep
+        return { id: typeof rs.id === 'string' ? rs.id : 'unknown' }
+      })
+    entries.push({
+      key,
+      name: typeof f.name === 'string' ? f.name : key,
+      category: typeof f.category === 'string' ? f.category : 'uncategorised',
+      color: typeof f.color === 'string' ? f.color : '',
+      steps,
+    })
+  }
+
+  const totals: FlowTracerTotals = {
+    flow_count: entries.length,
+    node_count: Object.keys(nodesObj).length,
+  }
+
+  return { source: 'file', note: null, items: entries, totals }
+}
+
+// =============================================================================
 // Formatter
 // =============================================================================
 
@@ -528,21 +788,68 @@ function formatDRegister(s: OpsContinuitySection<DRegisterEntry>): string {
   return `${header}\n${body}`
 }
 
+function formatCapabilityInventory(s: CapabilityInventorySection): string {
+  // Totals appear on the header line — they anchor the rest of the section.
+  const totalsLine = s.totals
+    ? `(total ${s.totals.total}: ready ${s.totals.ready}, partial ${s.totals.partial}, not-ready ${s.totals.not_ready}, n/a ${s.totals.na})`
+    : '(totals unavailable)'
+  const header = sectionHeader(
+    `Capability inventory — non-Ready items ${totalsLine}:`,
+    s.note,
+  )
+  if (s.items.length === 0) return `${header}\n  (none recorded)`
+  const body = s.items
+    .map((c) => {
+      const blockerLine = c.blocker_or_notes
+        ? `\n      blocker/notes: ${c.blocker_or_notes}`
+        : ''
+      const pathLine = c.path ? `\n      path: ${c.path}` : ''
+      return `  - ${c.id} — ${c.name}\n      agentReady: ${c.agentReady}  journey: ${c.journey}${blockerLine}${pathLine}`
+    })
+    .join('\n')
+  return `${header}\n${body}`
+}
+
+function formatFlowTracer(s: FlowTracerSection): string {
+  const totalsLine = s.totals
+    ? `(${s.totals.flow_count} flows across ${s.totals.node_count} nodes)`
+    : '(totals unavailable)'
+  const header = sectionHeader(
+    `Flow tracer summary ${totalsLine}:`,
+    s.note,
+  )
+  if (s.items.length === 0) return `${header}\n  (none recorded)`
+  const body = s.items
+    .map((f) => {
+      const stepList =
+        f.steps.length === 0
+          ? '(no steps)'
+          : f.steps.map((st) => st.id).join(' → ')
+      return `  - ${f.key} — ${f.name}\n      category: ${f.category}  steps: ${stepList}`
+    })
+    .join('\n')
+  return `${header}\n${body}`
+}
+
 function formatBlock(block: Omit<OpsContinuityBlock, 'formatted_context'>): string {
   const header = [
     'OPERATIONAL CONTINUITY — OPS CHANNEL 2',
     'Sources: operations/handoffs/, operations/decision-log.md, ',
     '         operations/knowledge-gaps.md, compliance/compliance_register.json,',
-    '         operations/build-knowledge-extraction-2026-04-17.md',
+    '         operations/build-knowledge-extraction-2026-04-17.md,',
+    '         website/public/component-registry.json,',
+    '         website/public/flows.json',
     `As of: ${block.as_of}`,
     '',
     'Treat this block as the record of what has been decided, recorded, and',
-    'deferred. Ground R0/R15/R16 answers in these entries. If the founder',
-    'asks "what did we decide last session" or "what have we deferred" or',
-    '"what KGs are open", name the specific entries here. If a section shows',
-    'a Note line, that section failed to load — say so rather than invent.',
-    'Do not imply access to prior chat sessions. These files are the only',
-    'authoritative record Ops receives.',
+    'deferred, plus the current capability and flow inventories. Ground',
+    'R0/R15/R16 answers in these entries. If the founder asks "what did we',
+    'decide last session", "what have we deferred", "what KGs are open",',
+    '"what\'s blocking launch", or "what flows touch component X", name the',
+    'specific entries here. If a section shows a Note line, that section',
+    'failed to load — say so rather than invent. Do not imply access to',
+    'prior chat sessions. These files are the only authoritative record',
+    'Ops receives.',
   ].join('\n')
 
   return [
@@ -557,6 +864,10 @@ function formatBlock(block: Omit<OpsContinuityBlock, 'formatted_context'>): stri
     formatCompliance(block.compliance),
     '',
     formatDRegister(block.d_register),
+    '',
+    formatCapabilityInventory(block.capability_inventory),
+    '',
+    formatFlowTracer(block.flow_tracer),
   ].join('\n')
 }
 
@@ -565,64 +876,93 @@ function formatBlock(block: Omit<OpsContinuityBlock, 'formatted_context'>): stri
 // =============================================================================
 
 /**
- * Loads all five continuity sources in parallel. Each source fails
+ * Loads all seven continuity sources in parallel. Each source fails
  * independently — a failure in one section does not prevent the others
  * from rendering. Returns an injection-ready `formatted_context` string.
  */
 export async function getOpsContinuityState(): Promise<OpsContinuityBlock> {
-  const [handoffs, decisions, knowledge_gaps, compliance, d_register] =
-    await Promise.all([
-      loadHandoffs().catch(
-        (e): OpsContinuitySection<HandoffEntry> => ({
-          source: 'stub',
-          note:
-            e instanceof Error
-              ? `handoffs loader threw: ${e.message}`
-              : 'handoffs loader threw an unknown error',
-          items: [],
-        }),
-      ),
-      loadDecisionLog().catch(
-        (e): OpsContinuitySection<DecisionLogEntry> => ({
-          source: 'stub',
-          note:
-            e instanceof Error
-              ? `decision-log loader threw: ${e.message}`
-              : 'decision-log loader threw an unknown error',
-          items: [],
-        }),
-      ),
-      loadKnowledgeGaps().catch(
-        (e): OpsContinuitySection<KnowledgeGapEntry> => ({
-          source: 'stub',
-          note:
-            e instanceof Error
-              ? `knowledge-gaps loader threw: ${e.message}`
-              : 'knowledge-gaps loader threw an unknown error',
-          items: [],
-        }),
-      ),
-      loadCompliance().catch(
-        (e): OpsContinuitySection<ComplianceObligationEntry> => ({
-          source: 'stub',
-          note:
-            e instanceof Error
-              ? `compliance loader threw: ${e.message}`
-              : 'compliance loader threw an unknown error',
-          items: [],
-        }),
-      ),
-      loadDRegister().catch(
-        (e): OpsContinuitySection<DRegisterEntry> => ({
-          source: 'stub',
-          note:
-            e instanceof Error
-              ? `d-register loader threw: ${e.message}`
-              : 'd-register loader threw an unknown error',
-          items: [],
-        }),
-      ),
-    ])
+  const [
+    handoffs,
+    decisions,
+    knowledge_gaps,
+    compliance,
+    d_register,
+    capability_inventory,
+    flow_tracer,
+  ] = await Promise.all([
+    loadHandoffs().catch(
+      (e): OpsContinuitySection<HandoffEntry> => ({
+        source: 'stub',
+        note:
+          e instanceof Error
+            ? `handoffs loader threw: ${e.message}`
+            : 'handoffs loader threw an unknown error',
+        items: [],
+      }),
+    ),
+    loadDecisionLog().catch(
+      (e): OpsContinuitySection<DecisionLogEntry> => ({
+        source: 'stub',
+        note:
+          e instanceof Error
+            ? `decision-log loader threw: ${e.message}`
+            : 'decision-log loader threw an unknown error',
+        items: [],
+      }),
+    ),
+    loadKnowledgeGaps().catch(
+      (e): OpsContinuitySection<KnowledgeGapEntry> => ({
+        source: 'stub',
+        note:
+          e instanceof Error
+            ? `knowledge-gaps loader threw: ${e.message}`
+            : 'knowledge-gaps loader threw an unknown error',
+        items: [],
+      }),
+    ),
+    loadCompliance().catch(
+      (e): OpsContinuitySection<ComplianceObligationEntry> => ({
+        source: 'stub',
+        note:
+          e instanceof Error
+            ? `compliance loader threw: ${e.message}`
+            : 'compliance loader threw an unknown error',
+        items: [],
+      }),
+    ),
+    loadDRegister().catch(
+      (e): OpsContinuitySection<DRegisterEntry> => ({
+        source: 'stub',
+        note:
+          e instanceof Error
+            ? `d-register loader threw: ${e.message}`
+            : 'd-register loader threw an unknown error',
+        items: [],
+      }),
+    ),
+    loadCapabilityInventory().catch(
+      (e): CapabilityInventorySection => ({
+        source: 'stub',
+        note:
+          e instanceof Error
+            ? `capability-inventory loader threw: ${e.message}`
+            : 'capability-inventory loader threw an unknown error',
+        items: [],
+        totals: null,
+      }),
+    ),
+    loadFlowTracer().catch(
+      (e): FlowTracerSection => ({
+        source: 'stub',
+        note:
+          e instanceof Error
+            ? `flow-tracer loader threw: ${e.message}`
+            : 'flow-tracer loader threw an unknown error',
+        items: [],
+        totals: null,
+      }),
+    ),
+  ])
 
   const block: Omit<OpsContinuityBlock, 'formatted_context'> = {
     as_of: new Date().toISOString(),
@@ -631,6 +971,8 @@ export async function getOpsContinuityState(): Promise<OpsContinuityBlock> {
     knowledge_gaps,
     compliance,
     d_register,
+    capability_inventory,
+    flow_tracer,
   }
 
   return {
