@@ -59,7 +59,8 @@
       "ext": ".ts",
       "path": "/sage-mentor/",
       "desc": "General ring orchestrator: BEFORE (context enrichment, safety checks) > inner agent > AFTER (reasoning evaluation, window update). 14K+ LOC TypeScript across 20 modules. Integrated with website via 2 API routes. Delegates intimate data operations to Private Mentor boundary.",
-      "notes": "Fully integrated with website. API routes connect Ring Wrapper to live mentor hubs. Serves real mentoring data.",
+      "blocker": "Tech Brain: stub-on-Vercel (process.cwd() path fix needed, see tech-wiring-fix-close.md). Growth Brain: built but removed from product endpoints per Session 8 architectural decision — internal-only (see 2026-04-10-session-8-handoff.md). Shared fix: context-loader-stub-fix-prompt.md covers Tech (2 loaders) + Growth (2 loaders) + Ops C2 (1 loader) = 5 loaders in one session.",
+      "notes": "Fully integrated with website. API routes connect Ring Wrapper to live mentor hubs. Serves real mentoring data. Tech/Growth/Ops brains scaffolded but context loaders stub on Vercel.",
       "deps": [
         "claude-api",
         "supabase",
@@ -96,12 +97,13 @@
         "autonomous",
         "economic"
       ],
-      "status": "wired",
+      "status": "scaffolded",
       "oldStatus": "designed",
       "ext": ".md",
       "path": "/operations/Sage_Cofounder_Blueprint.md",
       "desc": "AI cofounder operating as Deliberate agent. Layer 0 context sync, 4 capability tiers. Plans, allocates resources, self-directs at higher authority levels.",
-      "notes": "Blueprint document only (52KB). No functional code. Correct status.",
+      "blocker": "C1: Supabase migration not run (cost_health_snapshots table). C2: Vercel process.cwd() path fix. See: ops-wiring-fix-close.md + context-loader-stub-fix-prompt.md",
+      "notes": "Blueprint document only (52KB). Ops Brain scaffolded with 2 context channels. Activation scoped for P7.",
       "deps": [
         "claude-api",
         "supabase"
@@ -159,12 +161,13 @@
       "subtype": [
         "reactive"
       ],
-      "status": "wired",
+      "status": "designed",
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/sage-mentor/support-agent.ts",
       "desc": "Inner agent with 10 markdown tools. Stimulus-response: receives ticket, drafts response, submits to ring. Starts supervised.",
-      "notes": "Part of isolated Sage Mentor subsystem. Not integrated.",
+      "blocker": "No run-loop caller exists. processInboxItem has zero external callers. Next: dedicated 3-session scope (ADR > build caller > mount + test per PR1). See: support-wiring-fix-close.md + support-wiring-mount-close.md",
+      "notes": "Support Brain unit-verified (30/30 assertions). Agent itself Designed — implementation plan complete, build not started.",
       "deps": [
         "claude-api",
         "supabase"

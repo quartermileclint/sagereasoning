@@ -127,7 +127,7 @@
 <div class="header">
   <h1>Capability Inventory</h1>
   <div class="subtitle">Hold Point Assessment 4 — Honest status of every component using 0a vocabulary</div>
-  <div class="date">7 April 2026 | 148 components | Statuses re-assessed against actual code</div>
+  <div class="date">18 April 2026 | 163 components | Statuses re-assessed against actual code | Session 22 refresh</div>
 </div>
 
 <div id="loadingIndicator" class="loading-indicator">
@@ -175,6 +175,7 @@
         <th data-sort="change">Change <span class="sort-arrow"></span></th>
         <th>Description</th>
         <th>Assessment Notes</th>
+        <th>Blocker / Next Step</th>
         <th data-sort="humanReady">Human Ready <span class="sort-arrow"></span></th>
         <th data-sort="agentReady">Agent Ready <span class="sort-arrow"></span></th>
         <th data-sort="origin">Origin <span class="sort-arrow"></span></th>
@@ -217,6 +218,7 @@ async function loadComponentData() {
       newStatus: component.status || 'scoped',
       desc: component.desc || '',
       notes: component.notes || '',
+      blocker: component.blocker || '',
       humanReady: component.humanReady || 'na',
       agentReady: component.agentReady || 'na',
       origin: component.origin || ''
@@ -293,7 +295,7 @@ function getFiltered() {
     }
     if (searchTerm) {
       const s = searchTerm.toLowerCase();
-      return item.name.toLowerCase().includes(s) || item.desc.toLowerCase().includes(s) || item.notes.toLowerCase().includes(s) || item.type.includes(s) || item.origin.includes(s);
+      return item.name.toLowerCase().includes(s) || item.desc.toLowerCase().includes(s) || item.notes.toLowerCase().includes(s) || item.blocker.toLowerCase().includes(s) || item.type.includes(s) || item.origin.includes(s);
     }
     return true;
   });
@@ -398,6 +400,7 @@ function render() {
       <td><span class="change-indicator ${change.cls}">${change.label === 'Upgraded' ? '&#9650; ' : change.label === 'Downgraded' ? '&#9660; ' : ''}${change.label}</span></td>
       <td class="desc-cell">${item.desc}</td>
       <td class="notes-cell">${item.notes}</td>
+      <td class="notes-cell" style="color: ${item.blocker ? '#f87171' : 'var(--text-dim)'};">${item.blocker || '—'}</td>
       <td class="readiness-cell"><span class="${READINESS_CLASS[item.humanReady]}">${READINESS_LABELS[item.humanReady]}</span></td>
       <td class="readiness-cell"><span class="${READINESS_CLASS[item.agentReady]}">${READINESS_LABELS[item.agentReady]}</span></td>
       <td>${originHtml}</td>

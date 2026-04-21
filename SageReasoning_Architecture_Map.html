@@ -347,7 +347,7 @@
     <div class="header">
         <div class="title-section">
             <h1>SageReasoning Flow Tracer</h1>
-            <p>Select a function to trace its path through the system</p>
+            <p>28 LLM endpoints · 78 total routes · Updated 21 April 2026 · Session 22</p>
         </div>
         <div class="controls">
             <label class="control-label">Flow:</label>
@@ -363,8 +363,11 @@
                     <option value="sage-audit">sage-audit</option>
                     <option value="sage-iterate">sage-iterate</option>
                     <option value="sage-reflect">sage-reflect</option>
+                    <option value="sage-scenario">sage-scenario (Scenario Evaluator)</option>
+                    <option value="sage-evaluate">sage-evaluate (Demo endpoint)</option>
                 </optgroup>
                 <optgroup label="Assessment Flows">
+                    <option value="agent-baseline">Agent Baseline (4-scenario ethical eval)</option>
                     <option value="sage-profile">sage-profile (Full agent assessment)</option>
                     <option value="sage-diagnose">sage-diagnose</option>
                     <option value="baseline-assessment">Baseline Assessment</option>
@@ -386,9 +389,15 @@
                     <option value="wrapped-resolve">sage-resolve (Conflict Resolution)</option>
                     <option value="wrapped-retro">sage-retro (Retrospective)</option>
                 </optgroup>
-                <optgroup label="Agent Flows">
+                <optgroup label="Mentor Flows">
                     <option value="mentor-ring">Mentor Ring (BEFORE/AFTER)</option>
                     <option value="private-mentor">Private Mentor: Journal Interpretation</option>
+                    <option value="mentor-private-reflect">Private Mentor: Daily Reflection</option>
+                    <option value="mentor-private-baseline">Private Mentor: Gap Detection</option>
+                    <option value="mentor-public">Public Mentor Endpoints</option>
+                    <option value="founder-hub">Founder Hub (5-Agent Orchestration)</option>
+                </optgroup>
+                <optgroup label="Agent Flows">
                     <option value="trust-layer">Trust Layer: Agent Accreditation</option>
                     <option value="support-agent">Support Agent Pipeline</option>
                 </optgroup>
@@ -503,6 +512,19 @@
             'api-skill-resolve': { x: 500, y: 730, label: '/skill/sage-resolve', category: 'tool', layer: 2, wrapped: true },
             'api-skill-retro': { x: 500, y: 760, label: '/skill/sage-retro', category: 'tool', layer: 2, wrapped: true },
 
+            // Missing endpoints added 21 April 2026 (Session 22 audit)
+            'api-score-scenario': { x: 320, y: 520, label: '/score-scenario', category: 'tool', layer: 2, brainDerived: true },
+            'api-evaluate': { x: 320, y: 580, label: '/evaluate', category: 'tool', layer: 2, brainDerived: true },
+            'api-baseline-agent': { x: 320, y: 640, label: '/baseline/agent', category: 'tool', layer: 2, brainDerived: true },
+            'api-mentor-private-reflect': { x: 160, y: 640, label: '/mentor/private/reflect', category: 'tool', layer: 2, brainDerived: true },
+            'api-mentor-private-baseline': { x: 160, y: 700, label: '/mentor/private/baseline', category: 'tool', layer: 2, brainDerived: true },
+            'api-mentor-private-baseline-response': { x: 160, y: 760, label: '/mentor/private/baseline-response', category: 'tool', layer: 2, brainDerived: true },
+            'api-mentor-private-journal-week': { x: 160, y: 820, label: '/mentor/private/journal-week', category: 'tool', layer: 2, brainDerived: true },
+            'api-mentor-baseline': { x: 320, y: 700, label: '/mentor-baseline', category: 'tool', layer: 2, brainDerived: true },
+            'api-mentor-baseline-response': { x: 320, y: 760, label: '/mentor-baseline-response', category: 'tool', layer: 2, brainDerived: true },
+            'api-mentor-journal-week': { x: 320, y: 820, label: '/mentor-journal-week', category: 'tool', layer: 2, brainDerived: true },
+            'api-founder-hub': { x: 160, y: 880, label: '/founder/hub', category: 'agent', layer: 2 },
+
             // Stoic Brain & 4-Stage Sequence (Layer 3)
             'model-config': { x: 680, y: 60, label: 'Model Config', category: 'reasoning', layer: 3 },
             'stoic-brain': { x: 680, y: 130, label: 'Stoic Brain v3', category: 'reasoning', layer: 3, brainDerived: true },
@@ -609,7 +631,7 @@
                 category: 'Brain-Derived Tools',
                 path: [
                     { id: 'external-agent', description: 'External agent submits content for safety check' },
-                    { id: 'api-guardrail', description: 'Route: /guardrail — API-key auth' },
+                    { id: 'api-guardrail', description: 'Route: /guardrail — API-key auth. ADR-006: Ring wrapper Critical escalation applies' },
                     { id: 'sage-reason-engine', description: 'Calls runSageReason(quick) — 3 mechanisms, Haiku' },
                     { id: 'stoic-brain', description: 'Quick prompt loaded by shared engine' },
                     { id: 'four-stage', description: 'Quick: Control + Passion + Oikeiosis only' },
@@ -624,7 +646,7 @@
                 category: 'Brain-Derived Tools',
                 path: [
                     { id: 'human-user', description: 'User submits 2-5 decision options' },
-                    { id: 'api-score-decision', description: 'Route: /score-decision — loops over each option' },
+                    { id: 'api-score-decision', description: 'Route: /score-decision — loops over each option. ADR-005: risk_class parameter available' },
                     { id: 'sage-reason-engine', description: 'Calls runSageReason(standard) per option' },
                     { id: 'stoic-brain', description: 'Stoic Brain v3 loaded by shared engine' },
                     { id: 'four-stage', description: '4-Stage Sequence per option (same as sage-reason)' },
@@ -1081,6 +1103,104 @@
                     { id: 'response', description: 'Response sent to user' }
                 ],
                 color: '#f59e0b'
+            },
+            // --- New flows added 21 April 2026 (Session 22 audit) ---
+            'sage-scenario': {
+                name: 'sage-scenario (Scenario Evaluator)',
+                category: 'Brain-Derived Tools',
+                path: [
+                    { id: 'human-user', description: 'User requests scenario evaluation' },
+                    { id: 'api-score-scenario', description: 'Route: /score-scenario — GET generates scenario, POST scores it. Distress check on POST.' },
+                    { id: 'sage-reason-engine', description: 'POST: client.messages.create with L1+L2+L3 context' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded' },
+                    { id: 'four-stage', description: '4-Stage Sequence applied to scenario' },
+                    { id: 'reasoning-receipt', description: 'Receipt generated' },
+                    { id: 'response-envelope', description: 'Envelope with scenario metadata' },
+                    { id: 'response', description: 'Return scenario analysis (age-appropriate: child/teen/adult)' }
+                ],
+                color: '#22d3ee'
+            },
+            'sage-evaluate': {
+                name: 'sage-evaluate (Demo endpoint)',
+                category: 'Brain-Derived Tools',
+                path: [
+                    { id: 'human-user', description: 'Anonymous user tries demo (no auth required)' },
+                    { id: 'api-evaluate', description: 'Route: /evaluate — no auth, strict rate limit (5/min), L1 only' },
+                    { id: 'stoic-brain', description: 'Core triad only (minimal context)' },
+                    { id: 'four-stage', description: '4-Stage Sequence (core mechanisms only)' },
+                    { id: 'response', description: 'Return demo evaluation result' }
+                ],
+                color: '#34d399'
+            },
+            'agent-baseline': {
+                name: 'Agent Baseline (4-scenario ethical evaluation)',
+                category: 'Assessment Flows',
+                path: [
+                    { id: 'external-agent', description: 'Agent submits for ethical baseline assessment' },
+                    { id: 'api-baseline-agent', description: 'Route: /baseline/agent — API-key auth, L1 only, Sonnet model' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded' },
+                    { id: 'four-stage', description: '4-Stage V3 methodology across 4 ethical scenarios' },
+                    { id: 'senecan-grading', description: 'Senecan grading applied to agent responses' },
+                    { id: 'baseline-assessments', description: 'Store baseline results (retake limit: 1 initial + 1/month)' },
+                    { id: 'response', description: 'Return agent ethical baseline with Senecan grade' }
+                ],
+                color: '#ec4899'
+            },
+            'mentor-private-reflect': {
+                name: 'Private Mentor: Daily Reflection',
+                category: 'Mentor Flows',
+                path: [
+                    { id: 'human-user', description: 'Founder initiates daily reflection' },
+                    { id: 'api-mentor-private-reflect', description: 'Route: /mentor/private/reflect — founder-only, L1+L2+L3+L5+growth accumulation' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 + full mentor context (MENTOR_CONTEXT_V2)' },
+                    { id: 'reflective-reasoning', description: '4-stage evaluation with growth tracking' },
+                    { id: 'profile-store-load', description: 'updateProfileFromReflection — auto-updates mentor profile' },
+                    { id: 'mentor-ledger', description: 'Observation logged to mentor_observations_structured' },
+                    { id: 'response', description: 'Return personalized reflection with growth insights' }
+                ],
+                color: '#a78bfa'
+            },
+            'mentor-private-baseline': {
+                name: 'Private Mentor: Gap Detection + Journal',
+                category: 'Mentor Flows',
+                path: [
+                    { id: 'human-user', description: 'Founder requests gap detection or journal questions' },
+                    { id: 'api-mentor-private-baseline', description: 'Route: /mentor/private/baseline — 10-question gap detection post-extraction' },
+                    { id: 'sage-reason-engine', description: 'runSageReason with L1+L3+L5+growth context' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded' },
+                    { id: 'api-mentor-private-baseline-response', description: '/mentor/private/baseline-response — processes answers, auto-saves snapshot' },
+                    { id: 'api-mentor-private-journal-week', description: '/mentor/private/journal-week — generates 7 personalized questions' },
+                    { id: 'response', description: 'Return baseline analysis or weekly journal questions' }
+                ],
+                color: '#a78bfa'
+            },
+            'mentor-public': {
+                name: 'Public Mentor Endpoints',
+                category: 'Mentor Flows',
+                path: [
+                    { id: 'human-user', description: 'Authenticated user requests mentor assessment' },
+                    { id: 'api-mentor-baseline', description: 'Route: /mentor-baseline — post-extraction gap detection (L1+L3)' },
+                    { id: 'sage-reason-engine', description: 'runSageReason with L1+L3 context (no L5, no growth)' },
+                    { id: 'stoic-brain', description: 'Stoic Brain v3 loaded' },
+                    { id: 'api-mentor-baseline-response', description: '/mentor-baseline-response — processes answers' },
+                    { id: 'api-mentor-journal-week', description: '/mentor-journal-week — generates weekly questions' },
+                    { id: 'response', description: 'Return public mentor analysis or journal questions' }
+                ],
+                color: '#60a5fa'
+            },
+            'founder-hub': {
+                name: 'Founder Hub (5-Agent Orchestration)',
+                category: 'Mentor Flows',
+                path: [
+                    { id: 'human-user', description: 'Founder opens communication hub' },
+                    { id: 'api-founder-hub', description: 'Route: /founder/hub — 5 agent types: ops, tech, growth, support, mentor' },
+                    { id: 'ring-wrapper-before', description: 'Ring Wrapper BEFORE: load agent brain + observer context' },
+                    { id: 'stoic-brain', description: 'Stoic Brain + agent-specific brain (Tech/Growth/Support/Ops/Mentor)' },
+                    { id: 'ring-wrapper-after', description: 'Ring Wrapper AFTER: evaluate + persist observations' },
+                    { id: 'mentor-ledger', description: 'Conversation persisted to mentor_interactions' },
+                    { id: 'response', description: 'Return agent response with observer insights' }
+                ],
+                color: '#d4a843'
             }
         };
 
