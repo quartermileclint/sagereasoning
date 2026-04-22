@@ -2815,15 +2815,15 @@
       "agentReady": "na"
     },
     {
-      "id": "reasoning-journal-layers",
+      "id": "doc-journal-layers",
       "name": "Journal Interpretation (10 Layers)",
       "type": "reasoning",
       "subtype": [],
       "status": "verified",
       "oldStatus": "designed",
-      "ext": ".ts",
-      "path": "/sage-mentor/journal-interpreter.ts",
-      "desc": "Multi-layer interpretation pipeline implementation. Layers 1-8 wired; layers 9-10 stub only (25 TODOs).",
+      "ext": ".md",
+      "path": "/reference/Journal_Interpretation_10_Layers.md",
+      "desc": "19KB. Multi-layer interpretation pipeline spec. Cognitive profiling for mentorship.",
       "notes": "Spec exists (19KB doc). Code has 25 TODOs, layers 9-10 stub only. Correct status.",
       "deps": [],
       "rules": [
