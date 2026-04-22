@@ -3,6 +3,8 @@
 **Date:** 22 April 2026
 **Scope:** D3 candidate from the B3 forward prompt — fix the pre-existing `doc-journal-layers` duplicate id surfaced during B3. Sweep the registry for other duplicates. Plus: retroactively append the three B3 decision-log entries (D-B3-1, D-B3-2, D-B3-3) drafted in chat and approved in this session.
 
+> **Post-close amendment (same day, after initial close):** D-D3-1 was originally parked as a draft for next-session approval, matching the B2→B3 pattern. A post-close Ops probe returned a stale answer ("duplicate not yet resolved") because the decision log's most recent statement on this item was D-B3-3 ("deferred") with no resolution entry to match the registry edit. Founder authorised appending D-D3-1 in-session to close the log-vs-registry gap. Backup taken as `operations/decision-log.md.backup-2026-04-22-d3-pre-dd3-1` before the append. Lesson noted: retroactive decision-log entries for in-session resolutions should be appended in-session, not deferred to the following session, to avoid log-vs-state drift.
+
 ## Decisions Made
 
 - **Adopted D3 at session open.** Founder directive: "D3 — Registry hygiene (Recommended)".
@@ -75,12 +77,12 @@ If Ops still names `doc-journal-layers` for the internal-journey reasoning item,
 
 ## Open Questions
 
-- **D-D3-1 decision-log entry is pending.** A draft is offered below. The B2→B3 pattern was to defer session-N entries to session-N+1 for approval; this session broke that pattern for B3 decisions but not yet for D3's own decision. The next session should offer the draft for approval, or the current session can approve it now on request.
+- **D-D3-1 appended in-session (see Post-close amendment at the top).** Originally parked for next-session approval; appended same-day at line 1076 of `operations/decision-log.md` after a post-close Ops probe revealed log-vs-state drift. Backup `operations/decision-log.md.backup-2026-04-22-d3-pre-dd3-1` preserves the intermediate state.
 - **"Frankenstein duplicate" pattern first observation.** Logged under PR8. Promotion trigger: third recurrence.
 - **Type-prefix naming invariant first observation.** Logged under PR8. Promotion trigger: third recurrence. A future session could consider adding a loader-level assertion (`assert(component.id.startsWith(TYPE_PREFIX[component.type]))` or similar) as a forcing function.
 - **Archive hygiene step is effectively obsolete under current platform.** The B3 close note recommended archiving B3 probe scripts to `/archive/2026-04-22-b3-tmp-scripts/`, but the outputs scratch folder is cleared between sessions, so there are no scripts to archive. Future close notes can skip this step or rephrase it ("probe scripts were temporary; cleared with session workspace").
 
-## D-D3-1 Draft (for next-session approval, matching B2→B3 pattern)
+## D-D3-1 (applied in-session — retained here as a record of the exact text appended)
 
 ```
 ## 2026-04-22 — D-D3-1: Rename `doc-journal-layers` (reasoning) → `reasoning-journal-layers` with path/desc/ext correction
@@ -119,10 +121,9 @@ Prior backups preserved:
 
 ## Next Session Should
 
-1. Read this close note first.
-2. Offer the D-D3-1 decision-log entry above for founder approval and append to `operations/decision-log.md` if approved (matching the B2→B3 retroactive pattern).
-3. If any of the founder-verification checks above fails, diagnose before starting new work.
-4. Only if all pass: pick a follow-on. Natural candidates (unchanged from B3 except D3 is now done):
+1. Read this close note first (including the Post-close amendment).
+2. If any of the founder-verification checks above fails, diagnose before starting new work. Confirm specifically that Ops' answer to "Any mention of doc-journal-layers?" now references D-D3-1 (resolved) rather than D-B3-3 (deferred) — this was the probe that revealed the log-vs-state drift in the original session.
+3. Only if all pass: pick a follow-on. Natural candidates (unchanged from B3 except D3 is now done):
    - **D1 (C3 journey classifications second pass)** — bounded, judgement-based. Now that blocker text is visible and the registry is clean, mis-classifications are easier to spot.
    - **D2 (B4 flow-step descriptions)** — pending the budget-headroom decision. `formatted_context` remains ~49–50 KB after D3 (essentially no change from B3).
    - **D4 (0h Hold-Point assessment)** — the P0 → P1 gate. Multi-session scope per the project instructions.

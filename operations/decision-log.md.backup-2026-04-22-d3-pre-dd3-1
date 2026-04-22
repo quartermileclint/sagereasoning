@@ -1070,21 +1070,3 @@ Changes implemented:
 **Impact:** Latent data-integrity issue. No current consumer affected; loader reads only the `not-ready` entry at index 104.
 
 **Status:** Adopted
-
----
-
-## 2026-04-22 — D-D3-1: Rename `doc-journal-layers` (reasoning) → `reasoning-journal-layers` with path/desc/ext correction
-
-**Decision:** Index 104 of the component registry, previously `id: doc-journal-layers` / `type: reasoning`, was renamed to `reasoning-journal-layers`. Its `path`, `ext`, and `desc` were updated to describe the implementation (`/sage-mentor/journal-interpreter.ts`, `.ts`, "Multi-layer interpretation pipeline implementation. Layers 1-8 wired; layers 9-10 stub only (25 TODOs)."). Index 27 (the spec document entry, still `doc-journal-layers` / `type: document`) and index 105 (`reasoning-journal-interp`) were left untouched.
-
-**Reasoning:** The duplicate id `doc-journal-layers` was one facet of a three-entry naming overlap. Index 104 was a "Frankenstein" entry: the id, path, ext, and desc came from the spec-document entry (index 27) it was duplicated from, but the type, readiness status, journey, and blocker described the code implementation. Renaming and fixing the three surface fields aligns the entry with the registry's type-prefix naming invariant (`document` → `doc-*`, `reasoning` → `reasoning-*`) and with the semantic content of its readiness fields. Leaves the deeper overlap with index 105 (`reasoning-journal-interp`, which describes the same code at a different abstraction level) for a future design call.
-
-**Alternatives considered:** Option A (rename only, leave path/desc mismatched) — rejected; leaves the Frankenstein shape visible in Ops' rendered context. Option C (merge index 104 into `reasoning-journal-interp`) — rejected; Elevated risk, shifts which entry carries the blocker in `by_journey`, and requires a readiness-status reconciliation (index 104 is `verified`, index 105 is `designed`). Option D (defer entirely) — rejected; the duplicate-id foot-gun was cheap to close and this was the explicit scope of the D3 session.
-
-**Revisit condition:** If a future registry change creates semantic overlap between `reasoning-journal-layers` and `reasoning-journal-interp` that becomes hard to reason about, revisit whether they should be merged (Option C, re-examined with the readiness reconciliation explicit).
-
-**Rules served:** PR1 (scope discipline — only index 104 touched). PR2 (verification immediate — JSON parse, duplicate-count, TypeScript clean, all in-session). Resolves D-B3-3 (which deferred this work to a registry hygiene pass).
-
-**Impact:** Registry duplicate-id count drops 1 → 0. Ops' rendered `by_journey` internal group now shows `reasoning-journal-layers` instead of `doc-journal-layers` for the Journal Interpretation implementation entry. Total entries (163), blocker count (19), and per-journey distribution (paid_api=3, both=3, free_tier=9, internal=4, unknown=0) unchanged. Supersedes D-B3-3's "deferred" status on this specific item.
-
-**Status:** Adopted
