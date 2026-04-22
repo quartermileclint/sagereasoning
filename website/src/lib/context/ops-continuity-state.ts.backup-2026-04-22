@@ -630,11 +630,8 @@ async function loadCapabilityInventory(): Promise<CapabilityInventorySection> {
     else totals.na++
   }
 
-  // Non-Ready items (partial + not-ready). Track the raw component alongside
-  // each entry so downstream filters (e.g. B3's by_journey blocker filter)
-  // can consult fields that aren't projected onto CapabilityNonReadyEntry.
+  // Non-Ready items (partial + not-ready).
   const nonReady: CapabilityNonReadyEntry[] = []
-  const nonReadyRaw: RawComponent[] = []
   for (const c of list) {
     const ar = typeof c.agentReady === 'string' ? c.agentReady : 'na'
     if (ar !== 'partial' && ar !== 'not-ready') continue
@@ -646,7 +643,6 @@ async function loadCapabilityInventory(): Promise<CapabilityInventorySection> {
       path: str(c.path, ''),
       journey: typeof c.journey === 'string' ? c.journey : 'unknown',
     })
-    nonReadyRaw.push(c)
   }
 
   // Computed cross-cut: group non-Ready items by journey field. Keys are
@@ -655,20 +651,8 @@ async function loadCapabilityInventory(): Promise<CapabilityInventorySection> {
   // discard unexpected values). Purpose: lets Ops answer revenue-impact
   // questions ("what's blocking the paid API from launch?") without having
   // to re-slice the main non-Ready list.
-  //
-  // B3 (2026-04-22): Entries are included here only if they carry an explicit
-  // `blocker` field in the registry. Components whose non-Ready status is
-  // descriptive-only (e.g. "Functional. Factory wrapper.") stay in the main
-  // `items` list but are not surfaced in the grouped launch-readiness view.
-  // The main non-Ready list (`items`) is unchanged and still enumerates all
-  // partial + not-ready components with their blocker-or-notes text.
   const by_journey: Record<string, CapabilityNonReadyEntry[]> = {}
-  for (let idx = 0; idx < nonReady.length; idx++) {
-    const raw = nonReadyRaw[idx]
-    const hasBlocker =
-      typeof raw.blocker === 'string' && raw.blocker.trim().length > 0
-    if (!hasBlocker) continue
-    const entry = nonReady[idx]
+  for (const entry of nonReady) {
     const j = entry.journey || 'unknown'
     if (!by_journey[j]) by_journey[j] = []
     by_journey[j].push(entry)

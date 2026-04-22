@@ -45,8 +45,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "free_tier",
-      "blocker": "Isolated. Part of Sage Mentor subsystem. Journal interpreter layers 9-10 incomplete (25 TODOs)."
+      "journey": "free_tier"
     },
     {
       "id": "agent-mentor",
@@ -61,6 +60,7 @@
       "ext": ".ts",
       "path": "/sage-mentor/",
       "desc": "General ring orchestrator: BEFORE (context enrichment, safety checks) > inner agent > AFTER (reasoning evaluation, window update). 14K+ LOC TypeScript across 20 modules. Integrated with website via 2 API routes. Delegates intimate data operations to Private Mentor boundary.",
+      "blocker": "Tech Brain: stub-on-Vercel (process.cwd() path fix needed, see tech-wiring-fix-close.md). Growth Brain: built but removed from product endpoints per Session 8 architectural decision — internal-only (see 2026-04-10-session-8-handoff.md). Shared fix: context-loader-stub-fix-prompt.md covers Tech (2 loaders) + Growth (2 loaders) + Ops C2 (1 loader) = 5 loaders in one session.",
       "notes": "Fully integrated with website. API routes connect Ring Wrapper to live mentor hubs. Serves real mentoring data. Tech/Growth/Ops brains scaffolded but context loaders stub on Vercel.",
       "deps": [
         "claude-api",
@@ -104,7 +104,7 @@
       "ext": ".md",
       "path": "/operations/Sage_Cofounder_Blueprint.md",
       "desc": "AI cofounder operating as Deliberate agent. Layer 0 context sync, 4 capability tiers. Plans, allocates resources, self-directs at higher authority levels.",
-      "blocker": "Supabase migration not run (cost_health_snapshots table). Ops activation scoped for P7.",
+      "blocker": "C1: Supabase migration not run (cost_health_snapshots table). C2: Vercel process.cwd() path fix. See: ops-wiring-fix-close.md + context-loader-stub-fix-prompt.md",
       "notes": "Blueprint document only (52KB). Ops Brain scaffolded with 2 context channels. Activation scoped for P7.",
       "deps": [
         "claude-api",
@@ -156,8 +156,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "internal",
-      "blocker": "Isolated. Part of Sage Mentor subsystem. Not integrated."
+      "journey": "internal"
     },
     {
       "id": "agent-support",
@@ -172,7 +171,7 @@
       "path": "/sage-mentor/support-agent.ts",
       "desc": "Inner agent with 10 markdown tools. Stimulus-response: receives ticket, drafts response, submits to ring. Starts supervised.",
       "blocker": "No run-loop caller exists. processInboxItem has zero external callers. Next: dedicated 3-session scope (ADR > build caller > mount + test per PR1). See: support-wiring-fix-close.md + support-wiring-mount-close.md",
-      "notes": "Support Brain unit-verified (30/30 assertions). Agent itself Designed \u2014 implementation plan complete, build not started.",
+      "notes": "Support Brain unit-verified (30/30 assertions). Agent itself Designed — implementation plan complete, build not started.",
       "deps": [
         "claude-api",
         "supabase"
@@ -434,7 +433,7 @@
       "oldStatus": "designed",
       "ext": ".sql",
       "path": "/api/revenue-model-migration.sql",
-      "desc": "Payment and billing tables. Incomplete \u2014 Stripe not wired.",
+      "desc": "Payment and billing tables. Incomplete — Stripe not wired.",
       "notes": "SQL exists but Stripe integration is scoped only. Correct status.",
       "deps": [
         "supabase",
@@ -1080,8 +1079,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "paid_api",
-      "blocker": "Isolated. Complete internally but not integrated \u2014 cannot produce real cards without website integration."
+      "journey": "paid_api"
     },
     {
       "id": "engine-agent-assessment",
@@ -1143,8 +1141,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "paid_api",
-      "blocker": "Architecturally isolated. Zero imports from website/src. All 14 modules wired to each other but none consumed by the live app."
+      "journey": "paid_api"
     },
     {
       "id": "engine-authority-mgr",
@@ -1175,8 +1172,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "free_tier",
-      "blocker": "Isolated. Part of Sage Mentor / Trust Layer. Not integrated."
+      "journey": "free_tier"
     },
     {
       "id": "engine-baseline",
@@ -1293,8 +1289,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "free_tier",
-      "blocker": "Isolated. Part of Sage Mentor. Embedding API not yet configured."
+      "journey": "free_tier"
     },
     {
       "id": "engine-journal-content",
@@ -1351,8 +1346,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "free_tier",
-      "blocker": "Isolated. Part of Sage Mentor. Website uses sage-reason-engine instead - candidate for deprecation rather than integration."
+      "journey": "free_tier"
     },
     {
       "id": "engine-mentor-ledger",
@@ -1380,8 +1374,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "free_tier",
-      "blocker": "Isolated. Part of Sage Mentor. Not integrated."
+      "journey": "free_tier"
     },
     {
       "id": "engine-model-config",
@@ -1441,8 +1434,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "free_tier",
-      "blocker": "Isolated. Part of Sage Mentor. Not integrated."
+      "journey": "free_tier"
     },
     {
       "id": "engine-proactive",
@@ -1469,8 +1461,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "free_tier",
-      "blocker": "Isolated. Part of Sage Mentor. Not integrated."
+      "journey": "free_tier"
     },
     {
       "id": "engine-profile-store",
@@ -1500,8 +1491,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "free_tier",
-      "blocker": "Isolated. Part of Sage Mentor. Not integrated."
+      "journey": "free_tier"
     },
     {
       "id": "engine-progression",
@@ -1532,8 +1522,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "paid_api",
-      "blocker": "Isolated within Trust Layer. Not integrated with website/src."
+      "journey": "paid_api"
     },
     {
       "id": "engine-receipt",
@@ -1593,8 +1582,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "both",
-      "blocker": "Isolated. Part of Sage Mentor subsystem; not integrated into website."
+      "journey": "both"
     },
     {
       "id": "engine-sage-reason-engine",
@@ -2070,8 +2058,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "internal",
-      "blocker": "Isolated. Part of Sage Mentor. Not integrated into website."
+      "journey": "internal"
     },
     {
       "id": "infra-mcp-contracts",
@@ -2247,8 +2234,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "both",
-      "blocker": "No code exists. P4 priority \u2014 correctly deferred, but blocks paid-tier launch."
+      "journey": "both"
     },
     {
       "id": "stripe-portal",
@@ -2366,7 +2352,7 @@
       "ext": "--",
       "path": "vercel.json + Vercel dashboard",
       "desc": "Deployed to production at sagereasoning.com. All 66 API endpoints serving. GitHub main branch auto-deploys.",
-      "notes": "Updated 9 Apr 2026. Previously scoped \u2014 now live and serving production traffic. Custom domain configured.",
+      "notes": "Updated 9 Apr 2026. Previously scoped — now live and serving production traffic. Custom domain configured.",
       "deps": [
         "vercel"
       ],
@@ -2839,8 +2825,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "internal",
-      "blocker": "Layers 9-10 stub only (25 TODOs). Spec exists (19KB doc) but implementation incomplete."
+      "journey": "internal"
     },
     {
       "id": "reasoning-journal-interp",
@@ -3044,8 +3029,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "both",
-      "blocker": "Isolated. Part of Sage Mentor; not integrated into website API layer."
+      "journey": "both"
     },
     {
       "id": "reasoning-senecan",
@@ -3088,7 +3072,7 @@
       "oldStatus": "verified",
       "ext": ".json",
       "path": "/stoic-brain/virtue.json",
-      "desc": "Stage 4: Holistic character assessment. Unity of virtue thesis \u2014 virtues cannot be scored independently (R6b). Self-examining reflection on whole disposition.",
+      "desc": "Stage 4: Holistic character assessment. Unity of virtue thesis — virtues cannot be scored independently (R6b). Self-examining reflection on whole disposition.",
       "notes": "Verified in Stoic Brain v3 data. Confirmed.",
       "deps": [
         "engine-stoic-brain-v3"
@@ -3204,7 +3188,7 @@
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-document/route.ts",
-      "desc": "Document quality audit + reasoning assessment. Independent \u2014 domain-specific persistence + badge generation.",
+      "desc": "Document quality audit + reasoning assessment. Independent — domain-specific persistence + badge generation.",
       "notes": "Independent of shared engine (by design). Functional.",
       "deps": [
         "claude-api"
@@ -3355,7 +3339,7 @@
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-conversation/route.ts",
-      "desc": "Conversation analysis. Now wraps sage-reason-engine: calls runSageReason(deep) for overall, keeps custom per-participant breakdown. 216\u2192149 LOC.",
+      "desc": "Conversation analysis. Now wraps sage-reason-engine: calls runSageReason(deep) for overall, keeps custom per-participant breakdown. 216→149 LOC.",
       "notes": "Functional. Uses deep reasoning mode.",
       "deps": [
         "sage-reason-engine"
@@ -3386,7 +3370,7 @@
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-decision/route.ts",
-      "desc": "Option ranker. Now wraps sage-reason-engine: loops runSageReason(standard) per option, keeps custom katorthoma ranking. 260\u2192192 LOC.",
+      "desc": "Option ranker. Now wraps sage-reason-engine: loops runSageReason(standard) per option, keeps custom katorthoma ranking. 260→192 LOC.",
       "notes": "Functional. Loops reasoning for multi-option comparison.",
       "deps": [
         "sage-reason-engine"
@@ -3481,7 +3465,7 @@
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-social/route.ts",
-      "desc": "Pre-publish content filter. Now wraps sage-reason-engine: calls runSageReason(standard) with social context, post-processes poster vs reader passions. Now generates receipts. 186\u2192173 LOC.",
+      "desc": "Pre-publish content filter. Now wraps sage-reason-engine: calls runSageReason(standard) with social context, post-processes poster vs reader passions. Now generates receipts. 186→173 LOC.",
       "notes": "Functional with receipt generation added during refactoring.",
       "deps": [
         "sage-reason-engine"
@@ -3543,7 +3527,7 @@
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/guardrail/route.ts",
-      "desc": "Binary go/no-go gate. Now wraps sage-reason-engine: calls runSageReason(quick) with 3 mechanisms via Haiku, post-processes threshold. 231\u2192219 LOC.",
+      "desc": "Binary go/no-go gate. Now wraps sage-reason-engine: calls runSageReason(quick) with 3 mechanisms via Haiku, post-processes threshold. 231→219 LOC.",
       "notes": "Functional guardrail. Uses fast Haiku model for speed.",
       "deps": [
         "sage-reason-engine"
@@ -4018,7 +4002,7 @@
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score/route.ts",
-      "desc": "Pre-action audit. Now wraps sage-reason-engine: builds domain_context from action fields, calls runSageReason(standard). 238\u2192104 LOC.",
+      "desc": "Pre-action audit. Now wraps sage-reason-engine: builds domain_context from action fields, calls runSageReason(standard). 238→104 LOC.",
       "notes": "Refactored, functional. Connected to Anthropic via shared engine.",
       "deps": [
         "sage-reason-engine",
@@ -4349,7 +4333,7 @@
       "oldStatus": "new",
       "ext": ".ts",
       "path": "/website/src/app/api/health/route.ts",
-      "desc": "GET /api/health \u2014 system health check. Reports status of Supabase, Anthropic, Stripe, and mentor encryption subsystems. No auth required.",
+      "desc": "GET /api/health — system health check. Reports status of Supabase, Anthropic, Stripe, and mentor encryption subsystems. No auth required.",
       "notes": "Created 9 Apr 2026. Returns healthy/degraded based on critical subsystem availability.",
       "deps": [],
       "rules": [],
@@ -4374,7 +4358,7 @@
       "ext": ".ts",
       "path": "/website/src/lib/constraints.ts",
       "desc": "Branded TypeScript types enforcing model selection and safety gate at compile time. FastModel/DeepModel branded strings, ModelReliabilityBoundary, SafetyCriticalCallParams (enforces FastModel + temperature:0), SafetyGate token, enforceDistressCheck() wrapper, selectModelByDepth().",
-      "notes": "Zero runtime overhead \u2014 brands exist only at type level. Verified: passing DeepModel to SafetyCriticalCallParams produces TS2322 compile error. All 8 human-facing POST routes use SafetyGate pattern (18 Apr 2026).",
+      "notes": "Zero runtime overhead — brands exist only at type level. Verified: passing DeepModel to SafetyCriticalCallParams produces TS2322 compile error. All 8 human-facing POST routes use SafetyGate pattern (18 Apr 2026).",
       "deps": [],
       "rules": [
         "R20"
@@ -4401,7 +4385,7 @@
       "oldStatus": "wired",
       "ext": ".ts",
       "path": "/website/src/lib/r20a-classifier.ts",
-      "desc": "Two-stage distress detection: regex pattern matching (Stage 1) \u2192 Haiku LLM evaluator (Stage 2). Uses branded FastModel type via getFastModel(). Integrated with SafetyCriticalCallParams for compile-time temperature enforcement.",
+      "desc": "Two-stage distress detection: regex pattern matching (Stage 1) → Haiku LLM evaluator (Stage 2). Uses branded FastModel type via getFastModel(). Integrated with SafetyCriticalCallParams for compile-time temperature enforcement.",
       "notes": "Regex stage verified against Zone 2 inputs (6/6 pass, zero false positives). Haiku stage untested (needs live API key). Cost tracking via r20a-cost-tracker.ts. Branded type integration verified 18 Apr 2026.",
       "deps": [
         "claude-api"
@@ -4507,7 +4491,7 @@
       "oldStatus": "scoped",
       "ext": ".ts",
       "path": "/website/src/lib/__tests__/r20a-classifier-eval.ts",
-      "desc": "Evaluation inputs for the distress classifier across 4 groups: Group A (clinical crisis), Group B (philosophical), Group C (ambiguous), Group D (Clinton Zone 2 profile \u2014 shame, grief, catastrophising, interpersonal diagnosis, framework dependency, self-worth).",
+      "desc": "Evaluation inputs for the distress classifier across 4 groups: Group A (clinical crisis), Group B (philosophical), Group C (ambiguous), Group D (Clinton Zone 2 profile — shame, grief, catastrophising, interpersonal diagnosis, framework dependency, self-worth).",
       "notes": "Group D (Zone 2) tested against regex stage: 6/6 pass, zero false positives. Full suite requires live API key for Haiku stage. Results documented in safety signal audit.",
       "deps": [
         "claude-api"
