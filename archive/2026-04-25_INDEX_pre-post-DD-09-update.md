@@ -1,7 +1,7 @@
 # SageReasoning Project Index
 
-Last updated: 25 April 2026 | Maintained as part of P0 item 0e
-Prior versions preserved in `/archive/` (most recent: `2026-04-25_INDEX_pre-post-DD-09-update.md`)
+Last updated: 24 April 2026 | Maintained as part of P0 item 0e
+Prior versions preserved in `/archive/` (most recent: `2026-04-24_INDEX_pre-D4-trim.md`)
 
 ---
 
@@ -31,7 +31,7 @@ Code directories (`/website/`, `/api/`, `/sage-mentor/`, `/trust-layer/`, etc.) 
 |------|---------|
 | `/manifest.md` | Master governance. R0-R20. Read before every task. Current version: CR-2026-Q2-v4 (Apr 18). |
 | `/operations/decision-log.md` | Append-only record of every consequential decision (P0 item 0f). |
-| `/operations/discrepancy-sort-2026-04-23.md` | Resolved governance-corpus discrepancy register (D1-D17). Closed 2026-04-24 under DD-2026-04-24-09. |
+| `/operations/discrepancy-sort-2026-04-23.md` | Active governance-corpus discrepancy register (D1-D17). |
 | `/operations/knowledge-gaps.md` | PR5 register — concepts that earned a permanent entry after three re-explanations. |
 | `/operations/verification-framework.md` | P0 item 0c — how both parties verify work. |
 | `/operations/handoffs/` | Canonical handoff tree — see "Handoff Structure" below. |
@@ -45,7 +45,7 @@ Root-level files that are **content, not governance** (updated as project evolve
 
 | Folder | Purpose |
 |--------|---------|
-| `/adopted/` | Current governing documents beyond the manifest. As of 2026-04-25 contains two governing files: `session-opening-protocol.md` (adopted 2026-04-24 under DD-2026-04-24-09; governs how an AI agent opens, conducts, and closes a session) and `canonical-sources.md` (adopted 2026-04-24 under DD-2026-04-24-09; single source of truth for what an agent reads at session open). V3 Adoption Scope `.md` and `.docx` resolved earlier under D3 (see decision-log DD-2026-04-24-03 and -04). `backup/` subfolder is a harmless D6-A placeholder. |
+| `/adopted/` | Current governing documents beyond the manifest. As of 2026-04-24 empty of governing files — V3 Adoption Scope `.md` and `.docx` resolved under D3 (see decision-log DD-2026-04-24-03 and -04). `backup/` subfolder is a harmless D6-A placeholder. |
 | `/drafts/` | Documents under review, pending founder approval. Currently empty. `backup/` subfolder is a harmless D6-A placeholder. |
 | `/archive/` | Superseded versions (moved here, never deleted). Single canonical archive location — see "Archive Protocol" below. |
 | `/compliance/` | Regulatory register, audit logs, security reviews. |

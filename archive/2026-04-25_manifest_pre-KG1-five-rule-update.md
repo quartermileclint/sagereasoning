@@ -288,15 +288,13 @@ The register catalogues concepts that were re-explained across multiple sessions
 
 Numbering follows the scheme used in the internal reasoning upgrades (now live in `route.ts`). KG1–KG7 are the permanent slots; KG3 and KG7 are open placeholders pending definition from the next extraction pass. Build-to-wire verification is not a KG entry — it is captured as AC4.
 
-### KG1 — Vercel Five-Rule Constraint
+### KG1 — Vercel Four-Rule Constraint
 
-Vercel's serverless execution model imposes five operational rules: no self-calls (endpoint-to-endpoint within the same deployment); await all database writes (fire-and-forget writes do not complete after response); headers may strip on redirects (do not rely on header propagation through redirect chains); execution terminates after response (no background work); `process.cwd()` resolves to the Next.js project directory (`/var/task/website` on Vercel), not the repo root — file-based loaders reading from outside `website/` must use `path.join(process.cwd(), '..')` to reach the repo root.
+Vercel's serverless execution model imposes four operational rules: no self-calls (endpoint-to-endpoint within the same deployment); await all database writes (fire-and-forget writes do not complete after response); headers may strip on redirects (do not rely on header propagation through redirect chains); execution terminates after response (no background work).
 
-Resolution: every new endpoint design states its posture on all five rules, up front.
+Resolution: every new endpoint design states its posture on all four rules, up front.
 
-Session opening protocol: at endpoint-design time, recite KG1's five rules before architecture is fixed.
-
-Provenance: rule 5 promoted under PR5 on 21 April 2026 after three rediscovery incidents across the Tech, Growth, and Ops loaders. Fix landed same day.
+Session opening protocol: at endpoint-design time, recite KG1's four rules before architecture is fixed.
 
 ### KG2 — Haiku Reliability Boundary
 

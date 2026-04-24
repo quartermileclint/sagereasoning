@@ -2,7 +2,6 @@
 
 **Created:** 18 April 2026
 **Source:** Build Knowledge Extraction Section 7 (17 April 2026)
-**Reconciled:** 25 April 2026 under DD-2026-04-25-03. Seven permanent slots (KG1–KG7) now match the manifest's Knowledge Gaps Register schema. Build-to-wire content retired to AC4; see `/manifest.md` §Architectural Constraints. Hub-label consistency promoted from former KG8 into KG3; JSONB storage promoted from former KG10 into KG7. Former KG9 (`/private-mentor` façade) absorbed into `summary-tech-guide-addendum-context-and-memory.md` §G.2. Former KG11 (FUSE sandbox deletion) removed from register; the AI-discipline resolution at session open remains the operative mitigation. Full pre-reconciliation register preserved at `/archive/2026-04-25_knowledge-gaps_pre-ABC-reconciliation.md`.
 **Purpose:** Session-opening reference. Before beginning work, check whether any of these concepts are relevant to today's tasks. If they are, read the resolution here first — don't re-derive it.
 
 **Protocol:**
@@ -52,21 +51,21 @@ The R20a distress classifier uses Haiku because its output is a single small JSO
 
 ---
 
-## KG3 — Hub-Label Consistency Across Writer, Reader, and Client
+## KG3 — Build-to-Wire Gap (detectDistress History)
 
-**Provenance:** Promoted from former KG8 on 2026-04-25 under DD-2026-04-25-03. The original observations and re-explanation count are preserved. This slot previously held build-to-wire content, which has been retired to AC4 per the manifest's explicit exclusion ("Build-to-wire verification is not a KG entry — it is captured as AC4").
+**Re-explanations:** 5 (Sessions: 6 Apr C, 11 Apr Session 13, 11 Apr Session 14, 11 Apr Session 15, 17 Apr b)
 
-**Re-explanations:** 3 (Sessions: 9 (original), 10 (session-10 close noted second observation), 11 (R3 implementation))
+**Why it caused confusion:** A function can exist in the codebase (defined, exported, even imported) and still never be called in the execution path. TypeScript won't flag this because exported functions are assumed to be consumed externally. Each session that touched safety code had to independently discover whether wiring was complete.
 
-**Why it caused confusion:** Hub labels (`'founder-mentor'`, `'private-mentor'`, `'founder-hub'`) appear in multiple places: the request body sent by `/private-mentor`, the writer's INSERT into `mentor_interactions.hub_id`, the reader's SQL `.eq('hub_id', ...)`, and the `logMentorObservation` writer. If any one of these uses a different label, rows get written under one hub and read from another, and the feature silently breaks (no error — just an empty result).
+**Plain-language resolution:** "Built" does not mean "wired." After implementing any safety-critical function:
 
-**Plain-language resolution:** Treat hub labels as end-to-end contracts. For any new endpoint that reads or writes `mentor_interactions` or `mentor_observations_structured`:
+1. Grep the codebase for actual **calls** to the function (not just imports or definitions).
+2. Confirm at least one route file calls it in the request-response path.
+3. If no route calls it, it is dead code — status is Scaffolded, not Wired.
 
-1. Does the client pass `hub_id` in the request body? If yes, use `mapRequestHubToContextHub(effectiveHubId)` in `/api/founder/hub` (and equivalent elsewhere) to map the request label to the context-reader label.
-2. If the endpoint hardcodes a hub label (e.g., `/api/mentor/private/reflect` hardcodes `'private-mentor'`), verify that hardcode matches the reader's expected value. Document the hardcode in a comment so drift is visible.
-3. Run one end-to-end probe: write a row via the new endpoint, then read via the mentor context, confirm the row appears.
+The automated invocation test (when built) will catch this at CI time.
 
-**When this matters:** Any new endpoint touching `mentor_interactions` or any reader of hub-scoped mentor data. Any refactor of the hub label taxonomy.
+**When this matters:** Any time a safety function is created, modified, or routes are refactored.
 
 ---
 
@@ -121,9 +120,63 @@ Never put per-request context in system blocks (wastes cache, wrong authority le
 
 ---
 
-## KG7 — JSONB Storage Format vs Payload Shape
+## KG7 — Build-to-Wire Gap Pattern (Systemic)
 
-**Provenance:** Promoted from former KG10 on 2026-04-25 under DD-2026-04-25-03. The original observations and re-explanation count are preserved. This slot previously held build-to-wire systemic-pattern content, which has been retired to AC4 per the manifest's explicit exclusion.
+**Re-explanations:** 5 (Sessions: 6 Apr C, 11 Apr Session 13, 14, 15, 17 Apr)
+
+**Why it caused confusion:** This is the same root cause as KG3 but elevated to a pattern. It's not just detectDistress — it's a systemic tendency to believe that writing a function and updating its status constitutes wiring. The status vocabulary (0a) says "Wired" means "connects to live systems and functions end-to-end." But status was being updated based on code existing, not on invocation being verified.
+
+**Plain-language resolution:** After implementing ANY function that must be in the execution path:
+
+1. Write the function → status: **Scaffolded**
+2. Import and call it from at least one route → status: still Scaffolded until verified
+3. Grep the codebase and confirm the call exists in the route → status: **Wired**
+4. Test the end-to-end path with a real input → status: **Verified**
+
+Status advances only when the verification method for that step has been performed. "I wrote it" is not verification.
+
+**When this matters:** Every status update on any module.
+
+---
+
+## KG8 — Hub-Label Consistency Across Writer, Reader, and Client
+
+**Re-explanations:** 3 (Sessions: 9 (original), 10 (session-10 close noted second observation), 11 (R3 implementation))
+
+**Why it caused confusion:** Hub labels (`'founder-mentor'`, `'private-mentor'`, `'founder-hub'`) appear in multiple places: the request body sent by `/private-mentor`, the writer's INSERT into `mentor_interactions.hub_id`, the reader's SQL `.eq('hub_id', ...)`, and the `logMentorObservation` writer. If any one of these uses a different label, rows get written under one hub and read from another, and the feature silently breaks (no error — just an empty result).
+
+**Plain-language resolution:** Treat hub labels as end-to-end contracts. For any new endpoint that reads or writes `mentor_interactions` or `mentor_observations_structured`:
+
+1. Does the client pass `hub_id` in the request body? If yes, use `mapRequestHubToContextHub(effectiveHubId)` in `/api/founder/hub` (and equivalent elsewhere) to map the request label to the context-reader label.
+2. If the endpoint hardcodes a hub label (e.g., `/api/mentor/private/reflect` hardcodes `'private-mentor'`), verify that hardcode matches the reader's expected value. Document the hardcode in a comment so drift is visible.
+3. Run one end-to-end probe: write a row via the new endpoint, then read via the mentor context, confirm the row appears.
+
+**When this matters:** Any new endpoint touching `mentor_interactions` or any reader of hub-scoped mentor data. Any refactor of the hub label taxonomy.
+
+---
+
+## KG9 — The /private-mentor Page Is a Façade Over /api/founder/hub
+
+**Re-explanations:** 3 (Sessions: 9 (original observation), 10 (session-10 close noted second observation), 11 (R3 design had to distinguish chat path from reflection path))
+
+**Why it caused confusion:** The `/private-mentor` page has two user actions with completely different routing:
+- **Chat messages** → POST to `/api/founder/hub` with `hub_id: 'private-mentor'`. Writes `mentor_interactions` rows with `interaction_type: 'conversation'`.
+- **Evening reflections** → POST to `/api/mentor/private/reflect`. Writes a `reflections` row directly, then calls `updateProfileFromReflection` which writes a `mentor_interactions` row with `interaction_type: 'evening_reflection'`.
+
+The page name suggests a single backend (`/api/mentor/private/*`), but chat traffic actually goes through the generic `/api/founder/hub` endpoint scoped to the private hub. This matters because bug fixes that target "the private mentor" often need to be applied at two different files.
+
+**Plain-language resolution:** When investigating a `/private-mentor` issue:
+
+1. Is the symptom about a **chat message** or an **evening reflection**? They go through different endpoints.
+2. Chat message bugs → fix in `website/src/app/api/founder/hub/route.ts`.
+3. Evening reflection bugs → fix in `website/src/app/api/mentor/private/reflect/route.ts`, or upstream in `sage-mentor/profile-store.ts` if the bug is in `updateProfileFromReflection`.
+4. If a fix applies to both (e.g., R3 populating `mentor_observation`), plan for two edits in different files. Apply PR1: prove on one path first, verify live, then extend.
+
+**When this matters:** Any feature that touches the private mentor's data-writing paths. Any verification probe must specify which path it's testing — chat vs evening reflection — and the verification prompt must filter accordingly (e.g., "most recent evening reflection entry" rather than just "most recent entry", since chat messages accumulate as most-recent between test reflections).
+
+---
+
+## KG10 — JSONB Storage Format vs Payload Shape
 
 **Re-explanations:** 3 (Sessions: 10 (original observation — `Array.isArray` false-negative on `passions_detected`), 12 (reader audit confirmed the same pattern at the writer site), 13 (Option 2 fix applied and Verified))
 
@@ -152,15 +205,29 @@ Keep this defensive pattern on any reader that was written while the writer bug 
 
 ---
 
-## Retired content — preserved for provenance
+## KG11 — Sandbox File Deletion Permission (FUSE virtiofs)
 
-The following register entries existed before the 2026-04-25 reconciliation (DD-2026-04-25-03) and are no longer active:
+**Re-explanations:** 3 (Sessions: 2026-04-24 a — V3 `.docx` cleanup under DD-2026-04-24-04; 2026-04-24 b — same session's governance-cleanup pass observed the pattern a second time; 2026-04-24 c — this session's canonical-sources-draft archival step under DD-2026-04-24-09)
 
-- **Former KG3 (Build-to-Wire Gap — detectDistress History)** and **former KG7 (Build-to-Wire Gap Pattern — Systemic):** retired per the manifest's explicit exclusion that build-to-wire is captured in AC4 (Invocation Testing for Safety Functions), not as a KG entry. Both slots' former content is preserved at `/archive/2026-04-25_knowledge-gaps_pre-ABC-reconciliation.md`. See manifest §Architectural Constraints §AC4 for the active discipline.
-- **Former KG8 (Hub-Label Consistency):** promoted into KG3 above. Same content; new slot number to match the manifest's 7-slot schema.
-- **Former KG9 (`/private-mentor` page is a façade over `/api/founder/hub`):** absorbed into `summary-tech-guide-addendum-context-and-memory.md` §G.2 as the more natural home for codebase-map facts. Full original register entry preserved at `/archive/2026-04-25_knowledge-gaps_pre-ABC-reconciliation.md`.
-- **Former KG10 (JSONB Storage Format vs Payload Shape):** promoted into KG7 above. Same content; new slot number.
-- **Former KG11 (Sandbox File Deletion Permission — FUSE virtiofs):** removed from the register. The operational resolution — call `mcp__cowork__allow_cowork_file_delete` proactively at session open for archive/move-heavy sessions — is AI session-opening discipline, not a conceptual knowledge gap. No active register home. Full original entry preserved at `/archive/2026-04-25_knowledge-gaps_pre-ABC-reconciliation.md`.
+**Why it caused confusion:** `rm` on files under the Cowork-mounted workspace fails with `Operation not permitted` even when the file permissions and path look correct. The cause is not a permissions bug but a FUSE virtiofs mount policy: delete operations are disabled per folder by default and must be enabled via an MCP permission tool before `rm` succeeds. This surfaces each time an archive/move workflow reaches the cleanup step and the AI has not proactively requested the permission, producing a mid-task stall and a manual-attention cost.
+
+**Plain-language resolution:** For any session that will need to delete or move a file within the mounted project folder:
+
+1. The first `rm`/`mv` against a mount-backed path will fail with `Operation not permitted` until the folder's delete permission is granted.
+2. Call `mcp__cowork__allow_cowork_file_delete` with the VM path of the file you're trying to delete. The tool grants delete for the enclosing folder (not just the named file).
+3. Retry the `rm`/`mv`. It now succeeds.
+4. The grant appears to persist for the remainder of the session — subsequent deletes in the same folder do not re-trigger the denial.
+
+**Session-opening checkpoint:** If the session's scope includes any of the following, request the permission proactively at the start rather than reactively when the first `rm` fails:
+
+- Archiving drafts to `/archive/` with a source-file delete
+- Moving files between `/outbox/` and `/adopted/` or `/archive/`
+- Cleaning up superseded versions under D6-A
+- Promoting a draft to a canonical location (Track-B-style adoptions)
+
+**When this matters:** Any D6-A archive operation that retires the source; any outbox cleanup after adoption; any directory-hygiene pass.
+
+**Why the permission exists (limitation context):** The permission gate is a Cowork-level safety rail against unintentional destructive changes to connected user folders. The expected flow is AI requests → tool surfaces the request to the user → user grants → deletion enabled. This friction is intentional; the resolution above accelerates the flow without removing the rail.
 
 ---
 
@@ -170,7 +237,7 @@ The following register entries existed before the 2026-04-25 reconciliation (DD-
 
 ## Carry-Forward Notes — Ops Wiring Session (20 April 2026) + Path Fix Session (21 April 2026)
 
-### KG1 rule 5 — RESOLVED (21 April 2026)
+### KG1 — RESOLVED (21 April 2026)
 
 The `process.cwd()` path-resolution pattern reached its third observation at Ops Channel 2 (20 April 2026 evening) and was fixed on 21 April 2026. Rule 5 has been added to the KG1 resolution entry above. The Growth carry-forward note (previously here) has been absorbed into that entry. See D-Fix-1 in the decision log for the full reasoning.
 
@@ -208,6 +275,6 @@ This is distinct from the stub-fallback pattern (which fires on unreadable files
 
 ### Stable observations (no action)
 
-- **AC4 (Invocation Testing for Safety Functions) — formerly KG3 / KG7 build-to-wire entries, retired 2026-04-25 under DD-2026-04-25-03:** Actively applied. Grep confirmed both Growth loaders are called exactly once in production (`hub/route.ts` `case 'growth':`). Harness run in-session (16/16 assertions passed). No new observation worth logging.
+- **KG3 / KG7 (Build-to-Wire Gap):** Actively applied. Grep confirmed both Growth loaders are called exactly once in production (`hub/route.ts` `case 'growth':`). Harness run in-session (16/16 assertions passed). No new observation worth logging.
 - **KG6 (Composition Order Constraint):** Same resolution as Tech — persona-prompt → upgrades → context blocks → brain is the established order for this architecture. Not a violation.
-- **KG2, KG4, KG5:** Not relevant this session. (Former KG8, KG9, KG10 retired under the 2026-04-25 reconciliation — see the "Retired content" block above for their new homes.)
+- **KG2, KG4, KG5, KG8, KG9, KG10:** Not relevant this session.

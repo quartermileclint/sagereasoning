@@ -1,7 +1,7 @@
 # Session Opening Protocol
 
 **Status:** Adopted 2026-04-24 under D17 (discrepancy-sort 2026-04-23). See decision-log DD-2026-04-24-09.
-**Source:** `/archive/2026-04-24_session-opening-protocol-DRAFT_applied.md` (draft archived 2026-04-24 when the paired hub-extract wiring landed).
+**Source:** `/operations/outbox/session-opening-protocol-DRAFT.md` (retained in outbox until the paired hub-extract wiring lands; archived to `/archive/2026-04-24_session-opening-protocol-DRAFT_applied.md` at that point).
 **Governs:** How an AI agent opens, conducts, and closes a session in the SageReasoning project. Applies to every session — founder-driven, Ops, Tech, Growth, Support, Mentor, or scheduled.
 **Does not govern:** What gets built. That is the manifest's and the project instructions' remit. This protocol governs how the agent works, not what the work is.
 **Canonical-sources reference:** `/adopted/canonical-sources.md` (list of the 9 persistent reference files, ordered by read sequence, tier-assigned by session type). This protocol points to that file rather than duplicating its contents, so the list can be maintained in one place.
@@ -96,9 +96,9 @@ State plainly at close that this protocol was the governing frame for the sessio
 
 ## How this protocol relates to the hub route
 
-The hub route (`/website/src/app/api/founder/hub/route.ts`, ~1,540 lines) hosts `getOpsRecommendedAction`, which produces the session's opening `session_prompt`. That prompt is a task brief — specific to the day's intended work — and should remain so. This protocol is the enduring frame surrounding the day's brief.
+The hub route (`/website/src/app/api/founder/hub/route.ts`, ~1,500 lines) hosts `getRecommendedAction`, which produces the session's opening `session_prompt`. That prompt is a task brief — specific to the day's intended work — and should remain so. This protocol is the enduring frame surrounding the day's brief.
 
-The hub wiring concatenates a distilled extract of this protocol (see `/archive/2026-04-24_session-opening-protocol-hub-extract_applied.md` — the extract deployed on 2026-04-24) ahead of `getOpsRecommendedAction`'s output. The extract covers the non-negotiables that every session needs. The full protocol is this file; the hub does not attempt to carry the full text.
+The hub wiring concatenates a distilled extract of this protocol (see `/operations/outbox/session-opening-protocol-hub-extract.md` until the hub is wired, then `/archive/2026-04-24_session-opening-protocol-hub-extract_applied.md` after) ahead of `getRecommendedAction`'s output. The extract covers the non-negotiables that every session needs. The full protocol is this file; the hub does not attempt to carry the full text.
 
 The two artefacts maintain together: amend the full protocol, regenerate the extract, redeploy the hub. The hub change is Elevated risk (affects orchestration behaviour for every session). Founder approval is required before it ships.
 
