@@ -4,14 +4,10 @@
 
 **Method:** Read every adopted governance source, compare against drafts (Option B), check three handoff paths, identify existing archive conventions in use, cross-reference for contradictions. File modification times used alongside filename dates.
 
-**Status of this document:** Track A complete (last update 24 April 2026).
-- **Resolved (Material):** D6 (Option A, 23 Apr), D7 (Option C + R1 manual rollup, 23 Apr), D1 (Option A, 24 Apr), D2 (Option C — archived as unadopted-draft, 24 Apr), D3 (Option E — archive both V3 files as completion records, 24 Apr), D4 (Option D — trim to governance-only, Option C auto-gen deferred under PR7, 24 Apr).
-- **Resolved (Notable):** D5 (Option B — retire, 24 Apr), D8 (Option C — minimum + extensions, amendment drafted, 24 Apr), D10 (Option B — canonical sources list drafted, 24 Apr), D11 (Option B — doc amended to reality, 24 Apr), D12 (Option A — all [TBD]s cleared, 24 Apr), D14 (Option A — both taxonomies documented, amendment drafted, 24 Apr), D15 (Option B — tactical actions mapped to P0–P7, 24 Apr), D16 (Option B — R20a + Ask-the-Org backfilled, 24 Apr).
-- **Resolved (Minor):** D9 (Option A — amend PR5 wording, amendment drafted, 24 Apr), D13 (Option A — line count replaced with descriptor, 24 Apr).
-- **Outstanding:** none. Track A complete.
-- **Scheduled:** D17 — protocol drafting (canonical approach already decided; the draft itself is this session's Track B).
-- **Archives of this document:** `/archive/2026-04-23_discrepancy-sort_pre-resolution.md`, `/archive/2026-04-24_discrepancy-sort_pre-D1-D2-resolution.md`, `/archive/2026-04-24_discrepancy-sort_pre-D4-resolution.md`, `/archive/2026-04-24_discrepancy-sort_pre-Notable-pass.md`.
-- **Founder actions still required:** apply three amendments (D8, D9, D14) at the Cowork project-instructions UI per `/outbox/2026-04-24_project-instructions-amendments.md`. Amendments cannot be applied from a repo file because project instructions are configured at the Cowork project level.
+**Status of this document:** Partially resolved (last update 24 April 2026).
+- **Resolved:** D6 (Option A, 23 Apr), D7 (Option C + R1 manual rollup, 23 Apr), D1 (Option A, 24 Apr), D2 (Option C — archived as unadopted-draft, 24 Apr), D3 (Option E — new: archive both V3 files as completion records, 24 Apr), D4 (Option D — trim to governance-only now, Option C auto-gen deferred under PR7, 24 Apr). See entries below for resolution markers and execution notes. Prior versions preserved at `/archive/2026-04-23_discrepancy-sort_pre-resolution.md`, `/archive/2026-04-24_discrepancy-sort_pre-D1-D2-resolution.md`, and `/archive/2026-04-24_discrepancy-sort_pre-D4-resolution.md`.
+- **Outstanding:** D5, D8, D10–D12, D14–D16 (Notable); D9, D13 (Minor).
+- **Scheduled:** D17 — protocol drafting (canonical decision already recorded; the draft itself is this session's Track B).
 
 ---
 
@@ -212,8 +208,6 @@ INDEX also does not mention either summary-tech-guide.md or its addendum (both a
 
 ## D5 — `TECHNICAL_STATE.md` is materially stale
 
-**✅ RESOLVED 2026-04-24 — Option B (retire).** `TECHNICAL_STATE.md` moved to `/archive/2026-04-11_TECHNICAL_STATE_retired.md` (preserves Apr-11 mtime for faithful chronology). The tech guide + addendum (both Apr 22) carry the technical-state burden at higher fidelity. Decision-log entry: DD-2026-04-24-06.
-
 **Severity:** Notable
 
 **What:** `TECHNICAL_STATE.md` mtime Apr 11. 35,197 bytes — substantial document. Has not been touched since the same day INDEX was last updated. Major technical changes since Apr 11 include the hub orchestration becoming live (per addendum revision Apr 22) and brain loader file-path bug fix (per addendum Section D.6, Apr 21).
@@ -345,8 +339,6 @@ Each stream uses three file types: `*-prompt.md` / `*-handoff.md` / `*-close.md`
 
 ## D8 — 0b session handoff format is documented as 5 sections; actual practice uses 9+
 
-**✅ RESOLVED 2026-04-24 — Option C (minimum + defined extensions).** 5-section minimum retained; 4-section extension set defined (Verification Method / Risk Classification / PR5 Knowledge-Gap Carry-Forward / Founder Verification), used when the session involved code, deployment, or safety changes. **Execution limitation:** project instructions live at Cowork project level; amendment drafted to `/outbox/2026-04-24_project-instructions-amendments.md` for founder to apply. Decision-log entry: DD-2026-04-24-06.
-
 **Severity:** Notable
 
 **What:** Project instructions 0b defines the handoff format as: Decisions Made, Status Changes, Next Session Should, Blocked On, Open Questions. The most recent handoff (`sage-ops-d3-registry-hygiene-close.md`, 22 Apr) uses: Decisions Made, Status Changes, What Was Done, Verification Method Used (0c Framework), Risk Classification Record (0d-ii), PR5 — Knowledge-Gap Carry-Forward, Founder Verification (Between Sessions), Blocked On, Open Questions. Other handoffs use varying subsets.
@@ -363,8 +355,6 @@ Each stream uses three file types: `*-prompt.md` / `*-handoff.md` / `*-close.md`
 ---
 
 ## D9 — Knowledge-gaps register populated beyond 3-recurrence threshold
-
-**✅ RESOLVED 2026-04-24 — Option A (amend PR5 wording).** PR5 updated to recognise three entry states: Candidate / Candidate 2nd recurrence / Entry (promoted on 3rd or pre-populated from a structured extraction pass). Amendment drafted to `/outbox/2026-04-24_project-instructions-amendments.md` for founder to apply. Decision-log entry: DD-2026-04-24-06.
 
 **Severity:** Minor
 
@@ -384,8 +374,6 @@ Each stream uses three file types: `*-prompt.md` / `*-handoff.md` / `*-close.md`
 ---
 
 ## D10 — Decision log not referenced consistently across docs
-
-**✅ RESOLVED 2026-04-24 — Option B (define canonical sources list once).** Canonical sources list drafted at `/outbox/2026-04-24_canonical-sources-for-protocol.md` (9 sources, tier-assigned by session type). List feeds Track B's Session Opening Protocol and will be referenced by the hub's prepended extract. Decision-log entry: DD-2026-04-24-06.
 
 **Severity:** Notable
 
@@ -409,8 +397,6 @@ Each stream uses three file types: `*-prompt.md` / `*-handoff.md` / `*-close.md`
 
 ## D11 — Tech guide [DIVERGENCE] items unresolved
 
-**✅ RESOLVED 2026-04-24 — Option B (amend documentation to match reality).** Tech guide §1.2 library table rewritten to describe actual layout (`security.ts` embeds rate-limit/cors; `response-envelope.ts`; `constraint.ts`+`guardrails.ts`). §1.3 stoic-brain paragraph simplified to single file with depth parameter. §1.5 `vercel.json` row reclassified as "Not present (intentional)". All six [DIVERGENCE] tags removed. Decision-log entry: DD-2026-04-24-06.
-
 **Severity:** Notable (technical accuracy)
 
 **What:** Tech guide flags six [DIVERGENCE] items in §1.2 and §1.3:
@@ -433,8 +419,6 @@ Tech guide §1.2 states: *"Action for founder: decide whether to reconcile the d
 
 ## D12 — `[TBD]` items in tech guide and addendum left open
 
-**✅ RESOLVED 2026-04-24 — Option A (resolve all [TBD]s in one pass).** Tech guide R19/R20 [TBD] markers resolved ("queued for P2"; "R20a wired on 8 routes, hub outside guarded set"). Addendum §E.1 handoff path [TBD]+[DIVERGENCE] block replaced with canonical path note; §E.2 decision log count updated to "31 dated entries"; §E.4 session-debriefs TBD resolved to "~6 files"; §I [DIVERGENCE]/[TBD] block resolved with D7-C / D12-A / D16 cross-references. Grep for `[TBD]` and `[DIVERGENCE]` across both files returns no remaining tags. Decision-log entry: DD-2026-04-24-06.
-
 **Severity:** Notable (governance hygiene)
 
 **What:** Tech guide and addendum collectively contain ~15 [TBD] markers. Examples: R17c deletion endpoint state, R19 limitations page status, R20 implementation completeness, latest handoff date, decision log count, MENTOR_CONTEXT_V2 production setting.
@@ -451,8 +435,6 @@ Tech guide §1.2 states: *"Action for founder: decide whether to reconcile the d
 ---
 
 ## D13 — `route.ts` line count discrepancy (1,504 vs 1,505)
-
-**✅ RESOLVED 2026-04-24 — Option A (replace specific counts with descriptors).** All "1,505 lines" references in the addendum replaced with "~1,500 lines, single-file orchestration endpoint". Removes the drift surface — future line-count changes will not create governance drift. Decision-log entry: DD-2026-04-24-06.
 
 **Severity:** Minor
 
@@ -473,8 +455,6 @@ Tech guide §1.2 states: *"Action for founder: decide whether to reconcile the d
 
 ## D14 — Status vocabulary applied inconsistently
 
-**✅ RESOLVED 2026-04-24 — Option A (document both taxonomies explicitly).** Amendment 3 drafted to `/outbox/2026-04-24_project-instructions-amendments.md` adding a new paragraph after the 0a table documenting both axes: implementation status (0a: Scoped → Live) vs decision status (0f: Adopted / Under review / Superseded). Rule added: do not mix the two. INDEX cleanup already landed under D4-D (unofficial values removed with the governance-navigator trim). Decision-log entry: DD-2026-04-24-06.
-
 **Severity:** Notable
 
 **What:** Project instructions 0a defines six statuses (Scoped → Designed → Scaffolded → Wired → Verified → Live). Actual usage:
@@ -494,8 +474,6 @@ Tech guide §1.2 states: *"Action for founder: decide whether to reconcile the d
 ---
 
 ## D15 — Tech guide 10-step "Steps From Here" sequence vs project instructions P1–P7 sequence
-
-**✅ RESOLVED 2026-04-24 — Option B (frame 10 steps as tactical work inside P0–P2, map each step to priority).** Tech guide §5 preamble rewritten to state P0–P7 is the strategic sequence and §5 is tactical actions mapped to priorities. New "Serves priority" column added to the 10-step table (each step mapped to P0 0h / P2 / P3 / P4 / P6 / P7). Two views preserved — strategic and tactical — with explicit mapping preventing agent/founder confusion. Decision-log entry: DD-2026-04-24-06.
 
 **Severity:** Notable
 
@@ -519,12 +497,6 @@ For example:
 ---
 
 ## D16 — Addendum claims R20a not invoked on the hub; confirmed by code; not yet logged as a decision-to-defer
-
-**✅ RESOLVED 2026-04-24 — Option B (backfill decision log for R20a deferral AND Ask-the-Org feature).** Both PR7 gaps closed:
-- DD-2026-04-24-07 records the R20a-on-hub deferral to P2 (what was considered, why deferred, revisit condition: P2 ethical-safeguards sequence).
-- DD-2026-04-24-08 records the Ask-the-Org feature as PR7 backfill (parallel Tech/Growth/Support → Ops synthesis → Mentor review; PR1 compliance path flagged for P3).
-
-Addendum §I block updated to `[CONFIRMED — carried under D16]`. Decision-log entry: DD-2026-04-24-06 (rollup), with detail in -07 and -08.
 
 **Severity:** Notable
 
@@ -565,18 +537,18 @@ Addendum §I block updated to `[CONFIRMED — carried under D16]`. Decision-log 
 | D2 | `project-instructions-DRAFT-2026-04-18.md` status undocumented | Notable | **✅ Resolved — Option C (archived as unadopted-draft)** |
 | D3 | Two V3 Adoption Scope versions in `/adopted/` | Material | **✅ Resolved — Option E (new: archive both as completion records)** |
 | D4 | `INDEX.md` materially stale | Material | **✅ Resolved — Option D (trim to governance-only; Option C auto-gen deferred under PR7)** |
-| D5 | `TECHNICAL_STATE.md` materially stale | Notable | **✅ Resolved — Option B (retired to archive)** |
+| D5 | `TECHNICAL_STATE.md` materially stale | Notable | Outstanding |
 | D6 | Three archive conventions in active competing use | Material | **✅ Resolved — Option A** |
 | D7 | Three handoff paths; no formal categorisation | Material | **✅ Resolved — Option C + R1** |
-| D8 | 0b handoff format vs actual 9+ sections | Notable | **✅ Resolved — Option C (minimum + defined extensions; amendment drafted)** |
-| D9 | Knowledge-gaps register beyond 3-recurrence threshold | Minor | **✅ Resolved — Option A (amend PR5 wording; amendment drafted)** |
-| D10 | Decision log referenced inconsistently | Notable | **✅ Resolved — Option B (canonical sources list drafted)** |
-| D11 | Tech guide [DIVERGENCE] items unresolved | Notable | **✅ Resolved — Option B (doc amended to match reality)** |
-| D12 | Multiple [TBD] items unresolved across guides | Notable | **✅ Resolved — Option A (all [TBD]s cleared in one pass)** |
-| D13 | `route.ts` line count drift (1,504 vs 1,505) | Minor | **✅ Resolved — Option A (replaced with descriptor)** |
-| D14 | Status vocabulary applied inconsistently | Notable | **✅ Resolved — Option A (both taxonomies documented; amendment drafted)** |
-| D15 | Tech guide 10-step vs P1–P7 sequence | Notable | **✅ Resolved — Option B (tactical actions mapped to P0–P7 priorities)** |
-| D16 | R20a hub deferral not in decision log (PR7 gap) | Notable | **✅ Resolved — Option B (R20a + Ask-the-Org both backfilled)** |
+| D8 | 0b handoff format vs actual 9+ sections | Notable | Outstanding |
+| D9 | Knowledge-gaps register beyond 3-recurrence threshold | Minor | Outstanding |
+| D10 | Decision log referenced inconsistently | Notable | Outstanding |
+| D11 | Tech guide [DIVERGENCE] items unresolved | Notable | Outstanding |
+| D12 | Multiple [TBD] items unresolved across guides | Notable | Outstanding |
+| D13 | `route.ts` line count drift (1,504 vs 1,505) | Minor | Outstanding |
+| D14 | Status vocabulary applied inconsistently | Notable | Outstanding |
+| D15 | Tech guide 10-step vs P1–P7 sequence | Notable | Outstanding |
+| D16 | R20a hub deferral not in decision log (PR7 gap) | Notable | Outstanding |
 | D17 | Hub `session_prompt` is task brief, not protocol | Material | **Scheduled** (canonical approach decided; next-session build) |
 
 Material items (D1, D3, D4, D6, D7, D17) should be resolved before the protocol is drafted, because they affect what "canonical" means for the protocol's pointer-and-reference mechanism.

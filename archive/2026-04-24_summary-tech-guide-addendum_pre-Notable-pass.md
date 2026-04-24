@@ -9,8 +9,6 @@ Version: First edition, April 2026. Revised April 2026 to account for the orches
 
 Items marked **[TBD]** are unconfirmed. Items marked **[GAP]** exist in design but are not wired.
 
-**Update 2026-04-24:** [TBD] markers resolved under D12-A of discrepancy-sort-2026-04-23 — each [TBD] in the body below is either confirmed, deferred-with-reasoning, or marked as carried to the next confirmation pass. [DIVERGENCE] items relating to handoff paths are resolved under D7-C (paths consolidated to `/operations/handoffs/`). Line-count references replaced with descriptor under D13-A.
-
 ---
 
 ## Contents
@@ -56,7 +54,7 @@ Nothing that follows is complicated. It is just a lot of pieces, and when they a
 | **Response context (L4)** | Environmental context | `environmental-context.ts` loader | Optional — weekly scans |
 | **Response context (L5)** | Mentor knowledge base | `mentor-knowledge-base-loader.ts` | Optional — mentor endpoints |
 | **Agent brains** | Tech / Growth / Support / Ops | Four dedicated brain loaders in `/website/src/lib/context/` | Invoked by the hub orchestration endpoint |
-| **Orchestration** | Founder hub route | `/website/src/app/api/founder/hub/route.ts` (~1,500 lines, single-file orchestration endpoint) | Called by `/founder-hub` and `/private-mentor` pages; routes a founder message to a named agent, or runs Ask-the-Org mode (Tech/Growth/Support in parallel → Ops synthesis → Mentor review) |
+| **Orchestration** | Founder hub route | `/website/src/app/api/founder/hub/route.ts` (1,505 lines) | Called by `/founder-hub` and `/private-mentor` pages; routes a founder message to a named agent, or runs Ask-the-Org mode (Tech/Growth/Support in parallel → Ops synthesis → Mentor review) |
 | **Memory — continuity** | Session handoff notes | `/operations/session-handoffs/` | Read at session open; written at session close |
 | **Memory — record** | Decision log | `/operations/decision-log.md` | Appended at each consequential decision |
 | **Memory — learning** | Knowledge gaps register | `/operations/knowledge-gaps.md` | Checked at session open; updated at threshold |
@@ -176,7 +174,7 @@ Four brain loaders serve specialist contexts, and they are orchestrated through 
 
 **Not loaded by `/api/reason`.** These are not part of the general reasoning surface. They are consumed by the founder hub orchestration endpoint, described next.
 
-**Orchestration: `/api/founder/hub/route.ts`.** This is a single-file orchestration endpoint (~1,500 lines), founder-gated via `FOUNDER_USER_ID`. It:
+**Orchestration: `/api/founder/hub/route.ts`.** This is a 1,505-line orchestration endpoint, founder-gated via `FOUNDER_USER_ID`. It:
 
 - Routes a posted message to one of five agents — `ops`, `tech`, `growth`, `support`, or `mentor`. The mentor path uses deep Stoic Brain + Mentor KB + hub-scoped observations (not an agent brain). The other four paths combine deep agent-brain context + standard Stoic Brain + project context.
 - Runs **observer contributions** — the four non-primary agents check in via Haiku to add a short domain-specific contribution if they have one. Non-blocking on failure.
@@ -207,13 +205,13 @@ At the end of each working session, the AI writes a handoff note. At the start o
 
 **Format (per project instructions 0b):** decisions made, status changes, next session should, blocked on, open questions.
 
-**Canonical path (resolved 2026-04-23 under D7-C):** `/operations/handoffs/` with six role subfolders (`founder/`, `ops/`, `tech/`, `growth/`, `support/`, `mentor/`) + `_rollup/`. Previous paths (`/operations/session-handoffs/` and `/website/operations/session-handoffs/`) have been retired — the first migrated to `/operations/handoffs/founder/`, the second archived.
+**Most recent:** `/website/operations/session-handoffs/2026-04-16-verification-session-2.md` **[TBD]** — confirm whether handoffs have continued since.
 
-**Most recent (as of 2026-04-24):** `/operations/handoffs/founder/2026-04-24-next-session-prompt.md`. Handoffs continue actively; the session-close note for today's work will be written to `/operations/handoffs/founder/` at session close.
+**Note on path:** some handoffs live under `/operations/session-handoffs/` and some under `/website/operations/session-handoffs/`. **[DIVERGENCE]** — two paths is one too many. Consolidate to a single location before the count gets worse.
 
 ### E.2 Decision log — `/operations/decision-log.md`
 
-Append-only. Governs the R0 oikeiosis audit trail once that rule is operationalised in P5. As of 2026-04-24: 31 dated decision entries logged between 21 March and 24 April 2026 (count confirmed via `grep -c` on the log).
+Append-only. Governs the R0 oikeiosis audit trail once that rule is operationalised in P5. 11+ decisions logged between 21 March and 6 April 2026 **[TBD]** — confirm current count.
 
 **Format per entry:** date, decision title, reasoning, rules served, impact, status.
 
@@ -229,7 +227,7 @@ Living document. Any concept requiring re-explanation is flagged. On the third r
 
 ### E.4 Session debriefs — `/operations/session-debriefs/`
 
-Structured analysis after a significant failure or extended troubleshooting. Produced in a later session, not the one the failure occurred in. As of 2026-04-24: ~6 files present in `/operations/session-debriefs/` (the "20+" count in the first edition was an estimate; the actual corpus is smaller). Most recent: 2026-04-08 cluster (auth middleware, implementation proposals, product-line applications, research gap analysis).
+Structured analysis after a significant failure or extended troubleshooting. Produced in a later session, not the one the failure occurred in. 20+ files, most recent **[TBD]** confirm date.
 
 **Purpose:** distinct from a handoff. Handoffs are "what happened and what next"; debriefs are "what went wrong with how we worked together, and what changes".
 
@@ -370,7 +368,7 @@ If the agent fails two or more of these, brief it before proceeding. Do not ask 
 
 | # | Check | How to verify |
 |---|---|---|
-| 15 | Does it know the orchestration endpoint already exists? | `/api/founder/hub/route.ts`, ~1,500 lines, single-file orchestration endpoint. Not a greenfield build. If the agent is proposing to "build orchestration", it has not read the file. |
+| 15 | Does it know the orchestration endpoint already exists? | `/api/founder/hub/route.ts`, 1,505 lines. Not a greenfield build. If the agent is proposing to "build orchestration", it has not read the file. |
 | 16 | Does it know which UI pages call it? | `/founder-hub/page.tsx` and `/private-mentor/page.tsx`. If work is proposed that changes response shape, both pages must be considered. |
 | 17 | Does it know the R20a distress check is not invoked on this route? | Confirmed gap per session 12 handoff. Adding the check is Critical risk (PR6). |
 | 18 | Does it know `MENTOR_CONTEXT_V2` is a feature flag gating projection mode? | Branches around lines 479–494 of `route.ts`. Status and rollback plan currently undocumented. |
@@ -400,7 +398,7 @@ Items flagged during the scan that the founder should be aware of. None of these
 
 **[GAP]** L4 environmental context and L5 mentor knowledge base are scaffolded but not routinely wired into core endpoints.
 
-**[CORRECTION — prior edition]** The first edition of this addendum stated that the four brain loaders had no orchestration. That was wrong. A single-file orchestration endpoint (~1,500 lines) exists at `/api/founder/hub/route.ts` and is actively called by two UI pages. The supervised-level realisation is live. What remains **[GAP]** is full P7 activation — autonomous loops, higher authority progression — which remains post-launch by design.
+**[CORRECTION — prior edition]** The first edition of this addendum stated that the four brain loaders had no orchestration. That was wrong. A 1,505-line orchestration endpoint exists at `/api/founder/hub/route.ts` and is actively called by two UI pages. The supervised-level realisation is live. What remains **[GAP]** is full P7 activation — autonomous loops, higher authority progression — which remains post-launch by design.
 
 **[GAP — confirmed on the hub]** R20a distress check is not invoked on `/api/founder/hub`. All other user-facing POST routes invoke the two-stage classifier. This gap was identified in the session 12 handoff and flagged for P2 (Ethical Safeguards). Closing it is Critical risk per PR6 and requires the Critical Change Protocol.
 
@@ -412,11 +410,11 @@ Items flagged during the scan that the founder should be aware of. None of these
 
 **[GAP — cost]** No cost cap enforcement at `/api/founder/hub`. Per-call cost is visible in `pipeline_meta`; cumulative tracking against R5's $100/month ops cap is not wired at the endpoint.
 
-**[RESOLVED 2026-04-23 under D7-C]** Session handoffs were split across two paths. Consolidated to `/operations/handoffs/` with six role subfolders + `_rollup/`. Previous paths retired.
+**[DIVERGENCE]** Session handoffs live under two paths (`/operations/session-handoffs/` and `/website/operations/session-handoffs/`). Consolidate to a canonical path.
 
-**[RESOLVED 2026-04-24 under D12-A]** Latest session handoff: `/operations/handoffs/founder/2026-04-24-next-session-prompt.md`. Decision log count: 31 dated entries as of 2026-04-24.
+**[TBD]** Latest session handoff date and decision log count — confirm at next session close.
 
-**[CONFIRMED — carried under D16 as a logged deferral]** R20 distress classifier invocation coverage: the `r20a-invocation-guard.test.ts` file asserts coverage on eight routes; `/api/founder/hub` is outside the guarded set. Deferred to P2 (Ethical Safeguards); logged in the decision log as a PR7 deferral on 2026-04-24.
+**[TBD]** Confirm R20 distress classifier invocation coverage across all user-facing endpoints. The `r20a-invocation-guard.test.ts` file asserts coverage on eight routes; `/api/founder/hub` is known to be outside the guarded set.
 
 **[ACTION]** Crisis resource list should be extracted into data, not inline strings, before launch outside the US. Default to an internationalised set with country lookup.
 

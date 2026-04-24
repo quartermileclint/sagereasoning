@@ -1,7 +1,18 @@
 # SageReasoning Project Index
 
-Last updated: 23 April 2026 | Maintained as part of P0 item 0e
-Prior version preserved: `/archive/2026-04-11_INDEX.md`
+Last updated: 24 April 2026 | Maintained as part of P0 item 0e
+Prior versions preserved in `/archive/` (most recent: `2026-04-24_INDEX_pre-D4-trim.md`)
+
+---
+
+## Purpose (trimmed as of 2026-04-24, resolving D4-D)
+
+INDEX is a **governance navigator** — it tells you where governing documents, archive protocol, and handoff structure live. It does **not** try to track current project status or current technical state. Those change frequently and drift is the recurring failure mode.
+
+**For current project status:** read `PROJECT_STATE.md` at root.
+**For current technical state:** read `summary-tech-guide.md` + `summary-tech-guide-addendum-context-and-memory.md` at root (both adopted Apr 22 and kept live). `TECHNICAL_STATE.md` is older (Apr 11) and being assessed under D5.
+
+Code directories (`/website/`, `/api/`, `/sage-mentor/`, `/trust-layer/`, etc.) are not listed here to prevent status drift. Their current status is part of `PROJECT_STATE.md` and the tech guide.
 
 ---
 
@@ -9,20 +20,53 @@ Prior version preserved: `/archive/2026-04-11_INDEX.md`
 
 | Folder | Direction | Purpose |
 |--------|-----------|---------|
-| /inbox/ | Founder to AI | Drop any file here for review. It gets read, acted on, then filed into the correct folder. Your in-tray. |
-| /outbox/ | AI to Founder | Drafts, reports, and deliverables placed here for your review. Once approved, moved to the right folder or replaces the correct version. Your out-tray. |
+| /inbox/ | Founder to AI | Drop any file here for review. It gets read, acted on, then filed. |
+| /outbox/ | AI to Founder | Drafts, reports, and deliverables placed here for your review. |
+
+---
+
+## Governance Files (canonical as of 2026-04-24)
+
+| File | Purpose |
+|------|---------|
+| `/manifest.md` | Master governance. R0-R20. Read before every task. Current version: CR-2026-Q2-v4 (Apr 18). |
+| `/operations/decision-log.md` | Append-only record of every consequential decision (P0 item 0f). |
+| `/operations/discrepancy-sort-2026-04-23.md` | Active governance-corpus discrepancy register (D1-D17). |
+| `/operations/knowledge-gaps.md` | PR5 register — concepts that earned a permanent entry after three re-explanations. |
+| `/operations/verification-framework.md` | P0 item 0c — how both parties verify work. |
+| `/operations/handoffs/` | Canonical handoff tree — see "Handoff Structure" below. |
+| `/LICENSE` | Proprietary Evaluation-Only licence. |
+
+Root-level files that are **content, not governance** (updated as project evolves): `README.md`, `PROJECT_STATE.md`, `TECHNICAL_STATE.md`, `summary-tech-guide.md`, `summary-tech-guide-addendum-context-and-memory.md`, `users-guide-to-sagereasoning.md`, `SageReasoning_Ecosystem_Map.html`. Read these for project/technical/user state — do not read INDEX for those.
+
+---
+
+## Governance Corpus Folders
+
+| Folder | Purpose |
+|--------|---------|
+| `/adopted/` | Current governing documents beyond the manifest. As of 2026-04-24 empty of governing files — V3 Adoption Scope `.md` and `.docx` resolved under D3 (see decision-log DD-2026-04-24-03 and -04). `backup/` subfolder is a harmless D6-A placeholder. |
+| `/drafts/` | Documents under review, pending founder approval. Currently empty. `backup/` subfolder is a harmless D6-A placeholder. |
+| `/archive/` | Superseded versions (moved here, never deleted). Single canonical archive location — see "Archive Protocol" below. |
+| `/compliance/` | Regulatory register, audit logs, security reviews. |
+| `/reference/` | Knowledge context, ethical analysis, research (R17-R20 source material, Knowledge Context, Human-AI Development KB). |
+| `/legal/` | Licences, terms, privacy, IP-protection audits. |
+
+---
 
 ## Archive Protocol (canonical as of 2026-04-23, resolving D6-A)
 
 Single canonical archive location: **`/archive/`** at repo root.
 
-When a governing or strategic file is updated, the previous version is copied to `/archive/` with a date-prefixed descriptive name (e.g. `2026-04-23_INDEX.md`) BEFORE the update is applied. No version is silently lost.
+When a governing or strategic file is updated, the previous version is copied to `/archive/` with a date-prefixed descriptive name (e.g. `2026-04-24_INDEX_pre-D4-trim.md`) **before** the update is applied. No version is silently lost.
 
-Superseded forms (retired by D6-A, 23 April 2026):
-- `/backup/` subfolders inside strategic folders — previously documented here. Existing empty `/backup/` folders remain as harmless placeholders; prior content was migrated to `/archive/2026-04-15_R20a-drafts-backup/`.
+Superseded forms (retired by D6-A):
+- `/backup/` subfolders inside strategic folders — retired. Existing empty `/backup/` folders remain as harmless placeholders; prior content was migrated to `/archive/2026-04-15_R20a-drafts-backup/`.
 - Inline `.backup-YYYY-MM-DD` sibling files — retired. Existing inline backups were migrated to `/archive/2026-04-21_inline-backups/` and `/archive/2026-04-22_inline-backups/`.
 
-Resolution recorded in `/operations/decision-log.md` (DD-2026-04-23-01) and `/operations/discrepancy-sort-2026-04-23.md` (D6).
+Recorded in `/operations/decision-log.md` (DD-2026-04-23-01) and `/operations/discrepancy-sort-2026-04-23.md` (D6).
+
+---
 
 ## Handoff Structure (canonical as of 2026-04-23, resolving D7-C)
 
@@ -38,120 +82,46 @@ Single canonical handoff path: **`/operations/handoffs/`** with six role subfold
 | `/operations/handoffs/mentor/` | Mentor-system changes, mentor profile, mentor KB |
 | `/operations/handoffs/_rollup/` | Milestone summaries appended from stream handoffs (R1 manual — founder signals "rollup [milestone-name]") |
 
-File-name conventions per stream (emergent, kept):
+File-name conventions per stream:
 - `*-prompt.md` — session-opening prompt
 - `*-handoff.md` — mid-work state
 - `*-close.md` — session-closing note
 
 Retired paths:
-- `/operations/session-handoffs/` — migrated to `/operations/handoffs/founder/`. Empty stub with `MIGRATED.md` breadcrumb left because the sandbox cannot remove the directory.
+- `/operations/session-handoffs/` — migrated to `/operations/handoffs/founder/`. Empty stub with `MIGRATED.md` breadcrumb.
 - `/website/operations/session-handoffs/` — abandoned; archived to `/archive/2026-04-16_website-session-handoffs/`.
 
-Rollup mechanism: **R1 (manual)**. Founder signals "rollup [milestone-name]"; AI consolidates the relevant stream entries into a single file in `_rollup/` with date and milestone name; stream files remain in place (history preserved); founder approves before commit.
-
----
-
-## Root Files
-
-| File | Purpose | Status |
-|------|---------|--------|
-| manifest.md | Master governance (R0-R20). Read before every task. | Current (CR-2026-Q2-v4) |
-| README.md | Project overview and documentation | Current (needs V1 ref cleanup) |
-| INDEX.md | This file. One-line-per-document navigation. | Current |
-| SageReasoning_Ecosystem_Map.html | Interactive visual map of all 148 components | Current (v3, 6 Apr 2026) |
-| package.json | Root NPM config (docx generation scripts) | Current |
-| LICENSE | Proprietary Evaluation-Only licence | Current |
-
----
-
-## Folder Structure
-
-### Governance and Planning
-
-| Folder | Purpose | Key Contents |
-|--------|---------|-------------|
-| /adopted/ | Current governing documents beyond the manifest | V3 Adoption Scope (complete), Addendum P12-P19 |
-| /drafts/ | Documents under review, pending founder approval | Empty — previous drafts adopted and archived |
-| /archive/ | Superseded versions (moved here, not deleted) | Pre-R17-R20 versions, adopted drafts (Manifest Amendments, Build Priorities, Project Instructions), early marketing strategy, baseline assessment spec |
-
-### Business and Finance
-
-| Folder | Purpose | Key Contents |
-|--------|---------|-------------|
-| /business/ | Business plan, financials, pricing, revenue | Break-Even Analysis (.xlsx), Investment Analysis, Revenue Strategy, Pricing Research |
-| /legal/ | Licences, terms, privacy, IP protection | Source License Audit, Policy Amendments |
-| /marketing/ | Market research, competitive analysis, UX research | Deep Market Research v2, Mythos Competitive Analysis, Market Opportunity, Onboarding AX Research (879KB), Marketing Strategy (early, from inbox) |
-
-### Product and Engineering
-
-| Folder | Purpose | Key Contents |
-|--------|---------|-------------|
-| /product/ | Product specs, brainstorms, architecture docs | AGENTS.md (API guide), Trust Layer Framework, Mentor Architecture, Path of the Prokoptos, Baseline Assessment Spec, 19 files total |
-| /engineering/ | Technical docs, scripts, audits, deployment | Deployment Checklist, Token Efficiency, Website Audit, Vercel Deployment Gotchas, JS build scripts, SQL scripts |
-| /prototypes/ | Legacy HTML mockups, demo outputs | Setup Plan, Wrapper Demo (hub prototypes superseded by live pages at /mentor-hub, /private-mentor, /ops-hub) |
-
-### Operations
-
-| Folder | Purpose | Key Contents |
-|--------|---------|-------------|
-| /operations/ | Ops blueprints, manuals, assessments | Sage Cofounder Blueprint, Support Agent Manual, Founder Profile, Sage Ops Assessments (v1, v2) |
-| /operations/handoffs/ | Canonical handoff tree (P0 item 0b, resolved D7-C on 2026-04-23). Six role subfolders + `_rollup/`. See "Handoff Structure" section above. | founder/, ops/, tech/, growth/, support/, mentor/, _rollup/ |
-| /operations/session-handoffs/ | Retired 2026-04-23. Empty stub with MIGRATED.md breadcrumb. Content moved to /operations/handoffs/founder/. | MIGRATED.md stub only |
-| /operations/decision-log.md | Append-only decision record (P0 item 0f) | 22+ dated entries; most recent 2026-04-23 |
-| /operations/discrepancy-sort-2026-04-23.md | Governance corpus discrepancy register (17 entries D1–D17; D6 and D7 resolved) | Material resolutions: D6-A, D7-C + R1. D1, D3, D4 outstanding; D17 resolution scheduled for next session. |
-| /operations/knowledge-gaps.md | PR5 register — concepts needing permanent reference (seeded KG1–KG10 on 2026-04-17) | 10 entries |
-| /operations/verification-framework.md | How both parties verify work (P0 item 0c) | Verification methods by work type, session-start protocol, pre-commit checklist, pre-deployment checklist, pre-session environment check |
-| /compliance/ | Regulatory register, audit logs, security reviews | compliance_register.json (28 obligations), audit_log.json, Security Audits, Art6 Classification |
-| /reference/ | Knowledge context, ethical analysis, research | Ethical Analysis (R17-R20 source), Knowledge Context (45KB), Human-AI Development KB (53KB), Journal 10 Layers |
-
-### Brand, Templates, and Manuals
-
-| Folder | Purpose | Key Contents |
-|--------|---------|-------------|
-| /brand/ | Brand guidelines, logos, visual assets | Brand_Guidelines.docx, logo concepts (Sage, Owl, Lotus, Lion, Scales, Zeus) |
-| /_templates/ | Operational templates for support, leads, KB | lead.md, workflow-playbook.md, inbox-item.md, kb-article.md, notification.md |
-| /manuals/ | Instruction manuals for how to use things | How-to guides for founder, operators, and users. Distinct from /docs/ which is developer-facing API documentation. |
-
----
-
-## Code Directories (Do Not Reorganise)
-
-| Folder | Purpose | Status |
-|--------|---------|--------|
-| /website/ | Next.js 14 application (React + TypeScript + Tailwind) | Scaffolded |
-| /api/ | OpenAPI spec, SQL schemas, migrations | Scaffolded |
-| /sage-mentor/ | Mentor system (20 TypeScript modules, ~12,800 LOC) | Scaffolded |
-| /trust-layer/ | Agent Trust Layer (14 TypeScript modules) | Scaffolded |
-| /stoic-brain/ | V3 reference dataset (8 JSON files) | Verified |
-| /stoic-brain-v1/ | Archived V1 dataset (read-only) | Archived |
-| /agent-assessment/ | Assessment framework (55 assessments, V3) | Verified |
-
-## Operational Directories
-
-| Folder | Purpose | Status |
-|--------|---------|--------|
-| /docs/ | Technical documentation (4 files) | Current |
-| /knowledge-base/ | Support KB articles (10 articles, 5 categories) | Current |
-| /research/ | Primary Stoic sources (9 texts) + Apple research | Current |
-| /support/ | Support inbox (10 tickets) | Active |
-| /workflows/ | Operational playbooks (6 workflows) | Current |
-| /leads/ | Lead management (active/qualified/closed) | Empty |
-| /notifications/ | Notification outbox and sent archive | Active |
-| /feedback/ | User feedback collection | 3 files |
-| /out/ | Output artifacts (iOS roadmap, gap analysis) | Current |
-| /Scheduled/ | Automated tasks (monthly security, quarterly compliance) | Active |
+Rollup mechanism: **R1 (manual)**. Founder signals "rollup [milestone-name]"; AI consolidates the relevant stream entries into a single file in `_rollup/` with date and milestone name; stream files remain in place; founder approves before commit.
 
 ---
 
 ## Quick Reference
 
-**To find a document:** Open SageReasoning_Ecosystem_Map.html and use the search box.
-
-**Before any task:** Read manifest.md. Quote applicable rules by number.
-
 **Status vocabulary (P0 item 0a):**
-Scoped > Designed > Scaffolded > Wired > Verified > Live
+Scoped → Designed → Scaffolded → Wired → Verified → Live
 
 **Communication signals (P0 item 0d):**
-Founder: "Explore" / "Design" / "Build" / "Ship" / "I've decided" / "Thinking out loud"
-AI: "Confident" / "Making an assumption" / "Need your input" / "Push back" / "Limitation"
+Founder: "Explore" / "Design" / "Build" / "Ship" / "I've decided" / "Thinking out loud" / "I'm done for now" / "Treat this as critical"
+AI: "Confident" / "Making an assumption" / "Need your input" / "Push back" / "Limitation" / "This change has a known risk" / "I caused this"
+
+**Risk classification (0d-ii):** Standard / Elevated / Critical. AI classifies; founder can reclassify upward. Safety-critical code is always Critical (PR6).
+
+**Before any task:** read `manifest.md` and quote applicable rules by number.
+
+**To find a document not listed here:** check `PROJECT_STATE.md` for current content, the ecosystem map (`SageReasoning_Ecosystem_Map.html`) for the full visual inventory, or grep the repo.
+
+---
+
+## What moved out of INDEX in the D4-D trim (2026-04-24)
+
+The trim removed:
+- `Root Files` status table (was drifting — status words contradicted 0a vocabulary).
+- `Folder Structure` listings for business / marketing / product / engineering / prototypes / brand / templates / manuals (descriptions were fine, but they were already duplicated in the ecosystem map).
+- `Code Directories` status table (was explicitly stale — `/website/` marked `Scaffolded` when hub is wired-and-live; this kind of drift is what the trim is for).
+- `Operational Directories` status table (used vocabulary outside 0a — "Current/Active/Empty" — with no clear semantics).
+
+Rationale: INDEX drifts. Every time it drifts, a session has to spend time fixing it. The governing purpose — "where does authoritative governance live" — doesn't need any of those tables. The ecosystem map + `PROJECT_STATE.md` + the tech guide cover the rest.
+
+Prior version preserved at `/archive/2026-04-24_INDEX_pre-D4-trim.md`.
+
+**Backlog item (deferred under PR7):** Option C from D4 — auto-generated INDEX via file-tree scan. Reconsider if the trimmed INDEX itself starts drifting. Tracked in decision-log DD-2026-04-24-05.

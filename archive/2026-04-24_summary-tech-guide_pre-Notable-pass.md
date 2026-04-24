@@ -5,7 +5,7 @@
 Version: First edition, April 2026. Phase: P0 (R&D), all divisions wired.
 Stack: Next.js 14 App Router, Vercel, Supabase, Anthropic.
 
-As of 2026-04-24, this guide describes the actual code layout. [DIVERGENCE] markers from the first edition were resolved under D11 (discrepancy-sort 2026-04-23, Option B: amend docs to match reality) and replaced with plain descriptive entries. [TBD] markers were resolved under D12-A: each is now either confirmed, deferred-with-reasoning in the decision log, or carried to the next confirmation pass. Line-count references to `route.ts` replaced with descriptor under D13-A.
+Items marked **[TBD]** are not yet confirmed. Items marked **[DIVERGENCE]** are places where the named file or structure does not match what was found in the code — the guide reports reality, and the divergence is called out so it can be reconciled.
 
 ---
 
@@ -39,23 +39,27 @@ The API surface is 45 folders at the time of writing. Each folder is a route. Th
 
 ### 1.2 Library files — `website/src/lib/`
 
-The actual code layout (as of 2026-04-24, D11-B reconciliation):
+The project brief named seven library files. Three of them are present as named; four are **not present as standalone files** — their logic exists, but in different locations. The table shows reality.
 
-| File / concern | Location | Notes |
+| Named in brief | Actual state | Actual location / notes |
 |---|---|---|
-| `security.ts` | `website/src/lib/security.ts` | Rate limiting (IP-based, 5-minute cleanup), CORS validation, auth header checks, CR-2026-Q2-v1 regulatory compliance. Rate-limit and CORS logic live inside this file rather than as separate modules — consider extracting if the logic grows. |
-| `model-config.ts` | `website/src/lib/model-config.ts` | Central model selection (Haiku vs Sonnet) and LRU response cache (SHA-256 key, 1-hour TTL). |
-| Response envelope | `website/src/lib/response-envelope.ts` | Standard response shape for sage endpoints. (Earlier briefs called this `response.ts`.) |
-| Validation / guardrails | `website/src/lib/constraint.ts` + `website/src/lib/guardrails.ts` | Constraint checks and safety guardrails are split across these two files. (Earlier briefs referred to a single `validation.ts`.) |
-| `server-encryption.ts` | `website/src/lib/server-encryption.ts` | AES-256-GCM encryption of mentor profile at rest. Keyed on `MENTOR_ENCRYPTION_KEY`. Implements R17b and R17e. |
+| `security.ts` | Present | Rate limiting (IP-based, 5-minute cleanup), CORS validation, auth header checks, CR-2026-Q2-v1 regulatory compliance. |
+| `model-config.ts` | Present | Central model selection (Haiku vs Sonnet) and LRU response cache (SHA-256 key, 1-hour TTL). |
+| `rate-limits.ts` | **[DIVERGENCE]** Not present as a file | Rate-limit logic is embedded inside `security.ts`. Consider extracting if the logic grows. |
+| `cors.ts` | **[DIVERGENCE]** Not present as a file | CORS validation is embedded inside `security.ts`. |
+| `response.ts` | **[DIVERGENCE]** Not present under this name | Response envelope logic lives in `response-envelope.ts`. |
+| `validation.ts` | **[DIVERGENCE]** Not present as a file | Validation is distributed across `constraint.ts` and `guardrails.ts`. |
+| `server-encryption.ts` | Present | AES-256-GCM encryption of mentor profile at rest. Keyed on `MENTOR_ENCRYPTION_KEY`. Implements R17b and R17e. |
 
-**Resolved 2026-04-24:** the earlier brief named standalone `rate-limits.ts`, `cors.ts`, `response.ts`, and `validation.ts`. Under D11-B the documentation was amended to match the actual file layout rather than the other way around — the embedded/split pattern is working and the rename cost was not justified.
+**Action for founder:** decide whether to reconcile the divergence by (a) renaming/refactoring to match the named structure, or (b) amending project documentation to match the actual structure. Both are valid; mixed state is not.
 
 ### 1.3 Stoic Brain depth files
 
-Actual implementation: a single `website/src/lib/stoic-brain.ts` that exports the core reference library by reading eight JSON data files from the `stoic-brain/` root (virtue.json, value.json, passions.json, psychology.json, progress.json, scoring.json, plus others). Depth (quick / standard / deep) is a runtime parameter on `sage-reason`, not three separate code files.
+The brief referred to `stoic-brain-quick.ts`, `stoic-brain-standard.ts`, and `stoic-brain-deep.ts`. **[DIVERGENCE]** These three files do not exist.
 
-**Resolved 2026-04-24 (D11-B):** earlier briefs named `stoic-brain-quick.ts` / `-standard.ts` / `-deep.ts` as separate files. The runtime-parameter pattern is the working design and the documentation is amended to describe it.
+What exists: a single `website/src/lib/stoic-brain.ts` that exports the core reference library by reading eight JSON data files from the `stoic-brain/` root (virtue.json, value.json, passions.json, psychology.json, progress.json, scoring.json, plus others).
+
+Depth (quick / standard / deep) is currently a runtime parameter on `sage-reason`, not three separate code files. That is the actual pattern — and probably the right one — but it differs from the brief.
 
 | Depth | Behaviour | Typical latency |
 |---|---|---|
@@ -82,7 +86,7 @@ Both present.
 | `package.json` | Yes | `website/package.json` | Key deps: `@anthropic-ai/sdk ^0.80.0`, `@supabase/supabase-js ^2.45.0`, `next ^14.2.0`, `stripe ^22.0.0`. |
 | `.env.example` | Yes | project root | Documents Supabase, Anthropic, site URL, and Stripe variables. No values. |
 | `middleware.ts` | Yes | `website/src/middleware.ts` | Request interception, Supabase auth context setup. |
-| `vercel.json` | Not present (intentional) | — | Vercel reads defaults from `next.config.js` and the dashboard. Not required; consider adding only if regional routing or per-function memory overrides become necessary. Resolved 2026-04-24 under D11-B — absence documented as the intended configuration. |
+| `vercel.json` | **[DIVERGENCE]** Not present | — | Vercel reads defaults from `next.config.js` and dashboard. Not required, but consider adding for regional routing / function memory overrides. |
 
 ---
 
@@ -154,8 +158,8 @@ This chapter is operational. It tells you what the system does, what you do, and
 | Rule | Subject | Status today |
 |---|---|---|
 | **R17** | Intimate data — encryption at rest (17b), genuine deletion (17c), no third-party profiling (17a), passion profiling never API-exposed (17e) | Encryption wired (`server-encryption.ts`). Deletion endpoint **[TBD verify]** — brief referenced a 503 placeholder; confirm current state before any launch. |
-| **R19** | Honest positioning — limitations page live, mirror principle in mentor prompts, no universality claims | Queued for P2 (Ethical Safeguards). Limitations page not yet live; mirror principle not yet in production mentor prompts. Resolved 2026-04-24 under D12-A: deferred-to-P2 status is the confirmed position. |
-| **R20** | Vulnerable user protection — distress detection (20a), independence encouragement (20b), relationship asymmetry guidance (20d) | R20a distress classifier wired (`r20a-classifier.ts` + `guardrails.ts`, two-stage) and invoked on eight routes per the invocation guard test; the hub route is outside the guarded set (logged as decision-log entry, resolved under D16). R20b independence detection and R20d relationship asymmetry guidance are queued for P2 — not yet wired. Resolved 2026-04-24 under D12-A. |
+| **R19** | Honest positioning — limitations page live, mirror principle in mentor prompts, no universality claims | **[TBD]** Limitations page not yet confirmed live. Mirror principle not yet confirmed in production mentor prompts. This is P2 work. |
+| **R20** | Vulnerable user protection — distress detection (20a), independence encouragement (20b), relationship asymmetry guidance (20d) | Distress classifier wired (`r20a-classifier.ts` + `guardrails.ts`, two-stage). Independence detection and asymmetry guidance **[TBD]** — confirm state. |
 
 ### 3.2 Crisis protocol
 
@@ -252,22 +256,20 @@ These hold regardless of growth pressure.
 
 ## 5. Steps From Here — Prioritised
 
-**Relationship to project-instructions P0–P7 (resolved 2026-04-24 under D15-B):** this list is tactical — "concrete next actions inside P0–P2." The strategic roadmap remains project-instructions' P0 → P0h (hold point) → P1 (business plan review) → P2 (ethical safeguards) → P3 (Agent Trust Layer) → P4 (Stripe) → P5 (R0 operationalisation) → P6 (launch) → P7 (Sage Ops). Each tactical step below maps to a strategic priority it serves.
-
 A sequenced checklist. The order matters. Each step should be completed (or explicitly deferred with reasoning in the decision log) before the next begins.
 
-| # | Step | Serves priority | Why first | What "done" looks like | Est. effort |
-|---|---|---|---|---|---|
-| 1 | **End-to-end verification pass** | P0 0h (hold point) | Per the 0h hold point, nothing is real until tested on real data. | Founder has personally run journal, reflection, deliberation, foundational assessment, and one API call, each with founder's own data, and confirmed each works. Results logged. | 1 session |
-| 2 | **Personal support readiness** | P2 (R20) | If a user hits S1 today, the founder needs to know what to do. | Crisis protocol printed, hotline numbers for UK + US + international on a printed card at the desk. Response templates drafted for S1–S5. | Half a session |
-| 3 | **Positioning on public surfaces** | P2 (R19) | Everything else inherits from this. | Homepage copy, meta description, OG tags, footer match the Section 2.3 anchors. No universality claims anywhere. | 1 session |
-| 4 | **Publish `llms.txt` and `agent-card.json`** | P6 (launch criterion) | Discovery surface must be live before any developer outreach. | Both files live at their canonical paths on production. Both validated (JSON for agent-card, structure for llms.txt). External agent can fetch and parse. | Half a session |
-| 5 | **Verify `/api/evaluate` GET self-documentation** | P3 (ATL / honest certification) | An endpoint that cannot describe itself when probed is not ready. | GET on `/api/evaluate` (no auth) returns a JSON description of its capability, inputs, outputs, and limits, matching `agent-card.json`. | Half a session |
-| 6 | **First blog posts — one per audience** | P2 (R19) / P6 (launch) | Positioning without evidence is advertising. | One practitioner post (a real situation reasoned through using the framework) and one developer post (one endpoint, one use case, concrete code sample) published. | 1–2 sessions |
-| 7 | **Privacy policy drafting** | P6 (legal review, critical path) | P3 legal review is critical path. Drafting precedes lawyer review. | A draft privacy policy covering data collected, storage, encryption (AES-256-GCM), retention, deletion, third-party sharing (none for intimate data), and user rights. Draft ready for lawyer. | 1 session (draft); external review thereafter |
-| 8 | **R20 implementation completeness** | P2 (ethical safeguards) | Ethical analysis: R20 is not optional before broad deployment. | R20a (distress detection) confirmed wired on every user-facing endpoint. R20b (independence detection) wired. R20d (relationship asymmetry) in mentor prompts. Crisis resource list internationalised per 3.3. | 2–3 sessions |
-| 9 | **Analytics baseline** | P7 (Sage Ops data governance) | You cannot notice drift from what you have not measured. | Minimum metrics captured: weekly active practitioners, foundational assessments completed, API calls per endpoint, paying developer count, error rate, P95 latency per endpoint. Dashboard accessible to founder. Privacy-respecting (no per-user journal content). | 1 session |
-| 10 | **Cost monitoring** | P4 (Stripe + R5 cost-as-health) | R5: cost as health metric. Revenue-to-cost ratio must be trackable. | Daily cost of LLM calls visible. Alert thresholds set. Cost per endpoint class visible. R5 health threshold (2× revenue-to-cost) coded where possible, or manually reviewed weekly. | 1 session |
+| # | Step | Why first | What "done" looks like | Est. effort |
+|---|---|---|---|---|
+| 1 | **End-to-end verification pass** | Per the 0h hold point, nothing is real until tested on real data. | Founder has personally run journal, reflection, deliberation, foundational assessment, and one API call, each with founder's own data, and confirmed each works. Results logged. | 1 session |
+| 2 | **Personal support readiness** | If a user hits S1 today, the founder needs to know what to do. | Crisis protocol printed, hotline numbers for UK + US + international on a printed card at the desk. Response templates drafted for S1–S5. | Half a session |
+| 3 | **Positioning on public surfaces** | Everything else inherits from this. | Homepage copy, meta description, OG tags, footer match the Section 2.3 anchors. No universality claims anywhere. | 1 session |
+| 4 | **Publish `llms.txt` and `agent-card.json`** | Discovery surface must be live before any developer outreach. | Both files live at their canonical paths on production. Both validated (JSON for agent-card, structure for llms.txt). External agent can fetch and parse. | Half a session |
+| 5 | **Verify `/api/evaluate` GET self-documentation** | An endpoint that cannot describe itself when probed is not ready. | GET on `/api/evaluate` (no auth) returns a JSON description of its capability, inputs, outputs, and limits, matching `agent-card.json`. | Half a session |
+| 6 | **First blog posts — one per audience** | Positioning without evidence is advertising. | One practitioner post (a real situation reasoned through using the framework) and one developer post (one endpoint, one use case, concrete code sample) published. | 1–2 sessions |
+| 7 | **Privacy policy drafting** | P3 legal review is critical path. Drafting precedes lawyer review. | A draft privacy policy covering data collected, storage, encryption (AES-256-GCM), retention, deletion, third-party sharing (none for intimate data), and user rights. Draft ready for lawyer. | 1 session (draft); external review thereafter |
+| 8 | **R20 implementation completeness** | Ethical analysis: R20 is not optional before broad deployment. | R20a (distress detection) confirmed wired on every user-facing endpoint. R20b (independence detection) wired. R20d (relationship asymmetry) in mentor prompts. Crisis resource list internationalised per 3.3. | 2–3 sessions |
+| 9 | **Analytics baseline** | You cannot notice drift from what you have not measured. | Minimum metrics captured: weekly active practitioners, foundational assessments completed, API calls per endpoint, paying developer count, error rate, P95 latency per endpoint. Dashboard accessible to founder. Privacy-respecting (no per-user journal content). | 1 session |
+| 10 | **Cost monitoring** | R5: cost as health metric. Revenue-to-cost ratio must be trackable. | Daily cost of LLM calls visible. Alert thresholds set. Cost per endpoint class visible. R5 health threshold (2× revenue-to-cost) coded where possible, or manually reviewed weekly. | 1 session |
 
 **After step 10:** the conditions for the hold-point exit (P0 0h) are substantially closer. At that point: revisit the business plan review (P1) with real cost and engagement data, not projections.
 

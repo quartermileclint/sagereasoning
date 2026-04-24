@@ -1038,9 +1038,9 @@
       "status": "verified",
       "oldStatus": "verified",
       "ext": ".md",
-      "path": "/archive/2026-04-02_V3_Adoption_Scope_Revised_P12-P16_completed.md",
-      "desc": "All 16 migration phases complete (P1-P11 original + P12-P16 revised). V1 archived, V3 in production. Scope archived 2026-04-24 as completion record (D3 resolution).",
-      "notes": "Confirmed verified. Complete. Original P1-P11 scope at /archive/2026-03-30_V3_Adoption_Scope_P1-P11_completed.md.",
+      "path": "/adopted/V3_Adoption_Scope_Revised_April.md",
+      "desc": "All 16 migration phases complete. V1 archived, V3 in production.",
+      "notes": "Confirmed verified. Complete.",
       "deps": [],
       "rules": [
         "R6"
