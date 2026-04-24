@@ -45,7 +45,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "internal",
+      "journey": "free_tier",
       "blocker": "Isolated. Part of Sage Mentor subsystem. Journal interpreter layers 9-10 incomplete (25 TODOs)."
     },
     {
@@ -1175,7 +1175,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "internal",
+      "journey": "free_tier",
       "blocker": "Isolated. Part of Sage Mentor / Trust Layer. Not integrated."
     },
     {
@@ -1293,7 +1293,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "internal",
+      "journey": "free_tier",
       "blocker": "Isolated. Part of Sage Mentor. Embedding API not yet configured."
     },
     {
@@ -1351,7 +1351,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "deprecated",
+      "journey": "free_tier",
       "blocker": "Isolated. Part of Sage Mentor. Website uses sage-reason-engine instead - candidate for deprecation rather than integration."
     },
     {
@@ -1380,7 +1380,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "internal",
+      "journey": "free_tier",
       "blocker": "Isolated. Part of Sage Mentor. Not integrated."
     },
     {
@@ -1441,7 +1441,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "internal",
+      "journey": "free_tier",
       "blocker": "Isolated. Part of Sage Mentor. Not integrated."
     },
     {
@@ -1469,7 +1469,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "internal",
+      "journey": "free_tier",
       "blocker": "Isolated. Part of Sage Mentor. Not integrated."
     },
     {
@@ -1500,7 +1500,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "internal",
+      "journey": "free_tier",
       "blocker": "Isolated. Part of Sage Mentor. Not integrated."
     },
     {
@@ -1593,7 +1593,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "internal",
+      "journey": "both",
       "blocker": "Isolated. Part of Sage Mentor subsystem; not integrated into website."
     },
     {
@@ -2247,7 +2247,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "paid_api",
+      "journey": "both",
       "blocker": "No code exists. P4 priority \u2014 correctly deferred, but blocks paid-tier launch."
     },
     {
@@ -3044,7 +3044,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "not-ready",
-      "journey": "internal",
+      "journey": "both",
       "blocker": "Isolated. Part of Sage Mentor; not integrated into website API layer."
     },
     {
