@@ -98,9 +98,9 @@ State plainly at close that this protocol was the governing frame for the sessio
 
 The hub route (`/website/src/app/api/founder/hub/route.ts`, ~1,540 lines) hosts `getOpsRecommendedAction`, which produces the session's opening `session_prompt`. That prompt is a task brief — specific to the day's intended work — and should remain so. This protocol is the enduring frame surrounding the day's brief.
 
-The hub wiring prepends a one-line pointer — `Governing frame: /adopted/session-opening-protocol.md` — ahead of `getOpsRecommendedAction`'s output. The pointer makes the protocol unmissable at session open without duplicating its content; the agent reads this file as part of the canonical-source sequence at session open (Part A element 2). The full protocol is this file; the hub does not carry the protocol text. Prior to 2026-04-25 the hub concatenated a verbose 8-element extract; the extract was retired under DD-2026-04-25-05 and is preserved at `/archive/2026-04-25_hub-route_pre-extract-shortening.ts.md` (the pre-shortening route file) and `/archive/2026-04-24_session-opening-protocol-hub-extract_applied.md` (the original extract draft).
+The hub wiring concatenates a distilled extract of this protocol (see `/archive/2026-04-24_session-opening-protocol-hub-extract_applied.md` — the extract deployed on 2026-04-24) ahead of `getOpsRecommendedAction`'s output. The extract covers the non-negotiables that every session needs. The full protocol is this file; the hub does not attempt to carry the full text.
 
-This protocol and the hub pointer maintain independently: amendments to this file do not require a hub change unless the pointer wording itself needs to change. Any change to the pointer would be Elevated risk (affects orchestration behaviour for every session) and would require founder approval before deployment.
+The two artefacts maintain together: amend the full protocol, regenerate the extract, redeploy the hub. The hub change is Elevated risk (affects orchestration behaviour for every session). Founder approval is required before it ships.
 
 ---
 

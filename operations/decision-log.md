@@ -1601,6 +1601,38 @@ This reframe generated a new option, E: archive BOTH as completion records. Opti
 
 ---
 
+## 2026-04-25 — DD-2026-04-25-06: Protocol §"How this protocol relates to the hub route" rewritten to describe the pointer pattern (closes the discrepancy flagged in DD-2026-04-25-05)
+
+**Decision:** `/adopted/session-opening-protocol.md` §"How this protocol relates to the hub route" rewritten to reflect the pointer pattern adopted under DD-2026-04-25-05. Two paragraphs changed:
+
+1. **Line 101 (former extract description):** "The hub wiring concatenates a distilled extract of this protocol (see `/archive/...` — the extract deployed on 2026-04-24) ahead of `getOpsRecommendedAction`'s output. The extract covers the non-negotiables that every session needs. The full protocol is this file; the hub does not attempt to carry the full text." → rewritten to describe the pointer pattern, name the exact pointer string (`Governing frame: /adopted/session-opening-protocol.md`), point at canonical-source Part A element 2 as the read mechanism, and preserve provenance pointers to the verbose extract for rollback (both the pre-shortening route file and the original extract draft).
+2. **Line 103 (former maintenance pattern):** "The two artefacts maintain together: amend the full protocol, regenerate the extract, redeploy the hub. The hub change is Elevated risk (affects orchestration behaviour for every session). Founder approval is required before it ships." → rewritten to describe the new independence: amendments to the protocol do not require a hub change unless the pointer wording itself changes; any pointer change is Elevated and requires approval.
+
+**Scope:** Cosmetic/factual rewrite of two paragraphs in `/adopted/session-opening-protocol.md`. No procedural change to the protocol's 21 elements (Parts A 1–8, B 9–18, C 19–21).
+
+**Reasoning:** DD-2026-04-25-05 retired the verbose extract in favour of a one-line pointer. The protocol file's §"How this protocol relates to the hub route" still described the retired pattern, which would mislead any agent or human consulting the protocol about how the hub actually works. Founder verified the pointer pattern in production before approving this rewrite.
+
+**Alternatives considered:**
+- Defer to a future housekeeping pass. Rejected — DD-2026-04-25-05 explicitly flagged this as a follow-up; closing it in the same session honours the principle of keeping governing documents internally consistent before the session closes.
+- Minimal one-line change ("the hub now prepends a pointer instead of an extract"). Rejected — the rewrite is small enough to do properly, and the new wording captures the canonical-source read mechanism, the provenance pointers for rollback, and the new maintenance independence.
+
+**Rules served:**
+- R0 oikeiosis (consistency between governing documents serves Circle 4 future agents).
+- D6-A archive protocol: pre-edit archive at `/archive/2026-04-25_session-opening-protocol_pre-hub-pointer-description.md` (the prior version of the file post-DD-25-01 past-tense edits, pre-this-rewrite). Decision-log pre-edit archive from earlier today (`/archive/2026-04-25_decision-log_pre-DD-25-01.md`) covers the pre-this-append state.
+- The protocol's own "Amendments and maintenance" section (which references D6-A).
+
+**Revisit condition:** If the hub pointer mechanism changes (e.g., the constant moves to a different file, or a different prepend pattern is adopted), this section needs re-sync. The verbose-extract content remains preserved at `/archive/` for full rollback if the pointer pattern fails in practice.
+
+**Impact:**
+- `/adopted/session-opening-protocol.md` is now internally consistent with the hub's actual behaviour as of 2026-04-25.
+- Closes the new-discrepancy flag from DD-2026-04-25-05's "Impact" section.
+- No change to the 21 procedural elements.
+- Provenance for the retired verbose extract is preserved with explicit archive pointers in both the protocol file and the route file's comment block.
+
+**Status:** Adopted.
+
+---
+
 ## 2026-04-25 — D-D1-1: `agent-private-mentor` journey `free_tier` → `internal`
 
 **Decision:** Registry entry `agent-private-mentor` journey reclassified from `free_tier` to `internal`. No other fields changed.
