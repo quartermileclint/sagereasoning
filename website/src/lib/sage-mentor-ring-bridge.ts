@@ -27,6 +27,9 @@ import type {
   ModelTier,
   TokenUsage,
   TokenUsageSummary,
+  InboxItem,
+  KBArticle,
+  SupportInteractionHistory,
 } from '../../../sage-mentor'
 
 // Re-export the types so route code can import them from this single file.
@@ -41,6 +44,9 @@ export type {
   ModelTier,
   TokenUsage,
   TokenUsageSummary,
+  InboxItem,
+  KBArticle,
+  SupportInteractionHistory,
 }
 
 /**
@@ -90,6 +96,19 @@ export interface RingFunctions {
     afterResult: AfterResult,
   ) => RingResult & { token_summary: TokenUsageSummary }
   MODEL_IDS: Record<ModelTier, string>
+
+  // ── Support-agent additions ────────────────────────────────────────────
+  /** Build the support drafter's inner-agent prompt from an inbox item + KB articles. */
+  buildDraftPrompt: (
+    item: InboxItem,
+    relevantArticles: KBArticle[],
+    history?: SupportInteractionHistory,
+  ) => string
+  /** Constants used by the support-agent registration. */
+  SUPPORT_AGENT_ID: string
+  SUPPORT_AGENT_NAME: string
+  SUPPORT_AGENT_TYPE: InnerAgent['type']
+  SUPPORT_DISCLAIMER: string
 }
 
 /**
@@ -111,6 +130,11 @@ export async function loadRingFunctions(): Promise<RingFunctions | null> {
       addSessionTokenUsage: mod.addSessionTokenUsage,
       completeRingSession: mod.completeRingSession,
       MODEL_IDS: mod.MODEL_IDS,
+      buildDraftPrompt: mod.buildDraftPrompt,
+      SUPPORT_AGENT_ID: mod.SUPPORT_AGENT_ID,
+      SUPPORT_AGENT_NAME: mod.SUPPORT_AGENT_NAME,
+      SUPPORT_AGENT_TYPE: mod.SUPPORT_AGENT_TYPE,
+      SUPPORT_DISCLAIMER: mod.SUPPORT_DISCLAIMER,
     }
   } catch (err) {
     console.error('[sage-mentor-ring-bridge] Failed to load ring functions:', err)
