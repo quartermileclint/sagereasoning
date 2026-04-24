@@ -205,32 +205,6 @@ Keep this defensive pattern on any reader that was written while the writer bug 
 
 ---
 
-## KG11 — Sandbox File Deletion Permission (FUSE virtiofs)
-
-**Re-explanations:** 3 (Sessions: 2026-04-24 a — V3 `.docx` cleanup under DD-2026-04-24-04; 2026-04-24 b — same session's governance-cleanup pass observed the pattern a second time; 2026-04-24 c — this session's canonical-sources-draft archival step under DD-2026-04-24-09)
-
-**Why it caused confusion:** `rm` on files under the Cowork-mounted workspace fails with `Operation not permitted` even when the file permissions and path look correct. The cause is not a permissions bug but a FUSE virtiofs mount policy: delete operations are disabled per folder by default and must be enabled via an MCP permission tool before `rm` succeeds. This surfaces each time an archive/move workflow reaches the cleanup step and the AI has not proactively requested the permission, producing a mid-task stall and a manual-attention cost.
-
-**Plain-language resolution:** For any session that will need to delete or move a file within the mounted project folder:
-
-1. The first `rm`/`mv` against a mount-backed path will fail with `Operation not permitted` until the folder's delete permission is granted.
-2. Call `mcp__cowork__allow_cowork_file_delete` with the VM path of the file you're trying to delete. The tool grants delete for the enclosing folder (not just the named file).
-3. Retry the `rm`/`mv`. It now succeeds.
-4. The grant appears to persist for the remainder of the session — subsequent deletes in the same folder do not re-trigger the denial.
-
-**Session-opening checkpoint:** If the session's scope includes any of the following, request the permission proactively at the start rather than reactively when the first `rm` fails:
-
-- Archiving drafts to `/archive/` with a source-file delete
-- Moving files between `/outbox/` and `/adopted/` or `/archive/`
-- Cleaning up superseded versions under D6-A
-- Promoting a draft to a canonical location (Track-B-style adoptions)
-
-**When this matters:** Any D6-A archive operation that retires the source; any outbox cleanup after adoption; any directory-hygiene pass.
-
-**Why the permission exists (limitation context):** The permission gate is a Cowork-level safety rail against unintentional destructive changes to connected user folders. The expected flow is AI requests → tool surfaces the request to the user → user grants → deletion enabled. This friction is intentional; the resolution above accelerates the flow without removing the rail.
-
----
-
 *This is a living document. When a concept hits 3 re-explanations across sessions, add it here with the resolution that worked. Check this file at the start of every session.*
 
 ---
