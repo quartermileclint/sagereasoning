@@ -286,7 +286,7 @@ Source of truth: `operations/knowledge-gaps.md`. This section names the entries;
 
 The register catalogues concepts that were re-explained across multiple sessions at material cost. Each entry has: label, concept name, resolution, and session opening protocol (the action taken at session open to prevent rediscovery).
 
-Numbering follows the scheme used in the internal reasoning upgrades (now live in `route.ts`). KG1–KG7 are the permanent slots. All seven slots populated as of 2026-04-25 under DD-2026-04-25-04: KG3 (Hub-Label Consistency) and KG7 (JSONB Storage Format) were promoted from the register's former KG8 and KG10 respectively under the 2026-04-25 reconciliation (DD-2026-04-25-03). Build-to-wire verification is not a KG entry — it is captured as AC4.
+Numbering follows the scheme used in the internal reasoning upgrades (now live in `route.ts`). KG1–KG7 are the permanent slots; KG3 and KG7 are open placeholders pending definition from the next extraction pass. Build-to-wire verification is not a KG entry — it is captured as AC4.
 
 ### KG1 — Vercel Five-Rule Constraint
 
@@ -306,15 +306,9 @@ Resolution: `constraints.ts` as architectural reference (AC1). Haiku only for si
 
 Session opening protocol: model selection is a session-opening checkpoint, not a mid-session discovery.
 
-### KG3 — Hub-Label Consistency Across Writer, Reader, and Client
+### KG3 — [TBD — to be populated from next extraction pass]
 
-Hub labels (`'founder-mentor'`, `'private-mentor'`, `'founder-hub'`) appear at multiple sites: the client request body, the writer's INSERT into `mentor_interactions.hub_id`, and the reader's SQL filter. Any drift between these sites causes rows to be written under one hub and read from another; the feature silently breaks with no error — only an empty result.
-
-Resolution: treat hub labels as end-to-end contracts. For any new endpoint that reads or writes hub-scoped mentor data, verify the label mapping at the `mapRequestHubToContextHub` boundary; document any hardcoded labels inline; run a write-then-read probe before declaring wired.
-
-Session opening protocol: when touching `mentor_interactions` or any hub-scoped reader, trace the label from client to writer to reader before editing.
-
-*Promoted from register KG8 on 2026-04-25 under DD-2026-04-25-03. Full resolution and session history at `/operations/knowledge-gaps.md` §KG3.*
+Reserved slot. No concept is currently assigned to KG3. A candidate is promoted here when a concept meets the Knowledge Gaps threshold (three re-explanations per PR5) and does not belong to an existing KG slot.
 
 ### KG4 — Capability-Matrix Cell Vocabulary
 
@@ -340,15 +334,9 @@ Resolution: AC6. Audit placement every time a layer is added or moved.
 
 Session opening protocol: when a new context layer is proposed or an existing layer's placement is changed, cite AC6 and verify the placement rule.
 
-### KG7 — JSONB Storage Format vs Payload Shape
+### KG7 — [TBD — to be populated from next extraction pass]
 
-A PostgreSQL JSONB column accepts a JSON string scalar whose contents happen to be an array-shaped string (e.g. `"[{...}]"`) as a valid but bug-shaped JSONB value. `Array.isArray()` returns `false`, iteration yields characters, and the reader silently fails. The cause is a writer that calls `JSON.stringify` before handing the value to the Supabase client — the client does not unwrap strings on insert.
-
-Resolution: pass arrays and objects directly to the Supabase client for JSONB columns; do not `JSON.stringify` them. Verify with `SELECT jsonb_typeof(col) FROM table ORDER BY created_at DESC LIMIT 1;` — expect `'array'` or `'object'`; `'string'` means the writer is double-serialising.
-
-Session opening protocol: when designing any INSERT, UPDATE, or reader against a JSONB column, name the expected `jsonb_typeof` up front.
-
-*Promoted from register KG10 on 2026-04-25 under DD-2026-04-25-03. Full resolution and session history at `/operations/knowledge-gaps.md` §KG7.*
+Reserved slot. No concept is currently assigned to KG7. A candidate is promoted here when a concept meets the Knowledge Gaps threshold (three re-explanations per PR5) and does not belong to an existing KG slot.
 
 ---
 

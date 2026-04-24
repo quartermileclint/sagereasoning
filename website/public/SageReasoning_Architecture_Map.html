@@ -469,6 +469,10 @@
         // Flow definitions
         let flows = {};
 
+        // Set of node IDs whose source-data component has a non-empty `blocker`.
+        // Populated from /component-registry.json in loadFlowData().
+        let blockedNodeIds = new Set();
+
         let currentFlow = null;
         let zoomLevel = 1;
         let panX = 0;
@@ -493,8 +497,12 @@
                 el.className = `node category-${node.category}`;
                 if (node.brainDerived) el.classList.add('brain-derived');
                 if (node.wrapped) el.classList.add('wrapped');
+                // Apply red label text to nodes whose source-data component has a
+                // non-empty `blocker` field. Inline style on the label element so
+                // it does not affect layout, positioning, or the node container.
+                const labelStyle = blockedNodeIds.has(id) ? ' style="color: red"' : '';
                 el.innerHTML = `
-                    <div>${node.label}</div>
+                    <div${labelStyle}>${node.label}</div>
                     <div class="node-step"></div>
                 `;
                 el.style.left = node.x + 'px';
@@ -502,6 +510,65 @@
                 el.dataset.nodeId = id;
                 canvas.appendChild(el);
             });
+        }
+
+        // Compute the set of node IDs that correspond to a component-registry
+        // entry with a non-empty `blocker` field. Source data: component-registry.json
+        // (mirrors Capability_Inventory.html). Matching rules, in order:
+        //   1. node.id === component.id
+        //   2. node.id === component.id with common prefix stripped (agent-/engine-/...)
+        //      — only when the stripped id is multi-word, to avoid over-matching
+        //      generic tokens like "support"
+        //   3. node.id starts with "<stripped-id>-" (multi-word stripped id only)
+        //   4. node.label === component.name
+        //   5. node.label is a word-boundary prefix of component.name (or vice versa)
+        //      after stripping any parenthetical suffix from the component name
+        //   6. explicit alias (for cases where names diverge, e.g. reasoning-journal-layers
+        //      "Journal Interpretation" vs node label "Journal Interpreter")
+        function computeBlockedNodeIds(nodesObj, components) {
+            const blockedIds = new Set();
+            const blockedShortIds = new Set();
+            const blockedNames = new Set();
+            const PREFIX_RE = /^(agent|engine|infra|reasoning|data|doc|product|tool|ops)-(.+)$/;
+            components.forEach(c => {
+                if (!c || typeof c.blocker !== 'string' || c.blocker.trim() === '') return;
+                if (c.id) {
+                    blockedIds.add(c.id);
+                    const m = c.id.match(PREFIX_RE);
+                    if (m && m[2].indexOf('-') !== -1) {
+                        blockedShortIds.add(m[2]);
+                    }
+                }
+                if (c.name) {
+                    blockedNames.add(c.name);
+                    const stripped = c.name.replace(/\s*\([^)]*\)\s*$/, '').trim();
+                    if (stripped) blockedNames.add(stripped);
+                }
+            });
+            // Explicit aliases: blocked component id -> node id
+            const EXPLICIT_ALIASES = new Set([
+                'journal-interpreter' // reasoning-journal-layers
+            ]);
+            const result = new Set();
+            Object.entries(nodesObj).forEach(([nodeId, node]) => {
+                if (blockedIds.has(nodeId)) { result.add(nodeId); return; }
+                if (blockedShortIds.has(nodeId)) { result.add(nodeId); return; }
+                for (const sid of blockedShortIds) {
+                    if (nodeId.startsWith(sid + '-')) { result.add(nodeId); return; }
+                }
+                const label = node && node.label ? node.label : '';
+                if (label && blockedNames.has(label)) { result.add(nodeId); return; }
+                if (label) {
+                    for (const name of blockedNames) {
+                        if (name === label) continue;
+                        if (name.startsWith(label + ' ') || label.startsWith(name + ' ')) {
+                            result.add(nodeId); return;
+                        }
+                    }
+                }
+                if (EXPLICIT_ALIASES.has(nodeId)) { result.add(nodeId); return; }
+            });
+            return result;
         }
 
         // Draw connection lines
@@ -678,6 +745,21 @@
                 const data = await response.json();
                 nodes = data.nodes;
                 flows = data.flows;
+
+                // Also fetch the component registry so we can mark blocked
+                // components' labels in red. Registry load is non-fatal —
+                // if it fails, the map still renders, just without red markers.
+                try {
+                    const regRes = await fetch('/component-registry.json');
+                    if (regRes.ok) {
+                        const registry = await regRes.json();
+                        const components = Array.isArray(registry) ? registry : (registry.components || []);
+                        blockedNodeIds = computeBlockedNodeIds(nodes, components);
+                    }
+                } catch (regErr) {
+                    console.warn('Component registry failed to load; blocker markers will not be applied.', regErr);
+                }
+
                 initializeNodes();
                 drawConnections();
             } catch (err) {

@@ -120,6 +120,14 @@
 
   .data-source-banner { background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(52,211,153,0.08)); border: 1px solid rgba(167,139,250,0.2); border-radius: 6px; padding: 10px 20px; margin: 16px 28px; font-size: 11px; color: var(--text-dim); text-align: center; }
   .data-source-banner strong { color: var(--gold); }
+
+  /* Rows whose component has a non-empty `blocker` field in the source data
+     render their text in red. Layout, badges (which carry their own color),
+     and row positioning are preserved. */
+  tr.blocked-row td { color: red; }
+  tr.blocked-row td.desc-cell,
+  tr.blocked-row td.notes-cell,
+  tr.blocked-row td.name-cell { color: red; }
 </style>
 </head>
 <body>
@@ -219,7 +227,10 @@ async function loadComponentData() {
       notes: component.notes || '',
       humanReady: component.humanReady || 'na',
       agentReady: component.agentReady || 'na',
-      origin: component.origin || ''
+      origin: component.origin || '',
+      // Blocker is the source-data field that drives the red row styling.
+      // Stored as string (empty means unblocked) for consistent checks downstream.
+      blocker: (typeof component.blocker === 'string') ? component.blocker : ''
     }));
 
     // Hide loading indicator
@@ -390,7 +401,8 @@ function render() {
     const change = getChange(item.oldStatus, item.newStatus);
     const originHtml = item.origin === 'brain-derived' ? '<span class="origin-badge">BRAIN</span>' :
                        item.origin === 'wrapped' ? '<span class="origin-badge wrapped">WRAPPED</span>' : '—';
-    return `<tr>
+    const rowClass = (item.blocker && item.blocker.trim() !== '') ? ' class="blocked-row"' : '';
+    return `<tr${rowClass}>
       <td class="name-cell">${item.name}</td>
       <td><span class="badge-type badge-type-${item.type}">${item.type}</span></td>
       <td><span class="badge badge-${item.oldStatus}">${item.oldStatus}</span></td>

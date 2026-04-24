@@ -17,8 +17,8 @@
  *   Derived from the sources above; no new files. Live on the existing
  *   sections so the 7-source shape is preserved.
  *   - Source 6 gains `by_journey`: non-Ready components grouped by journey
- *     (paid_api / both / free_tier / internal / unknown / deprecated). Lets
- *     Ops answer "what's blocking the paid API from launch?" without re-slicing.
+ *     (paid_api / both / free_tier / internal / unknown). Lets Ops answer
+ *     "what's blocking the paid API from launch?" without re-slicing.
  *   - Source 7 gains `components` per flow (deduplicated, order-preserving
  *     component list per flow) and `by_component` (reverse map: for each
  *     node id that appears in any flow, the flow keys that reference it).
@@ -101,7 +101,7 @@ export interface CapabilityNonReadyEntry {
   agentReady: string // 'partial' | 'not-ready'
   blocker_or_notes: string // component.blocker if present, else component.notes, else ''
   path: string // file/folder location
-  journey: string // 'free_tier' | 'paid_api' | 'both' | 'internal' | 'unknown' | 'deprecated'
+  journey: string // 'free_tier' | 'paid_api' | 'both' | 'internal' | 'unknown'
 }
 
 export interface CapabilityInventoryTotals {
@@ -148,7 +148,7 @@ export interface CapabilityInventorySection
   extends OpsContinuitySection<CapabilityNonReadyEntry> {
   totals: CapabilityInventoryTotals | null
   // Computed cross-cut: non-Ready components grouped by journey field.
-  // Keys are 'paid_api' | 'both' | 'free_tier' | 'internal' | 'unknown' | 'deprecated'.
+  // Keys are 'paid_api' | 'both' | 'free_tier' | 'internal' | 'unknown'.
   // Null when the source failed to load.
   by_journey: Record<string, CapabilityNonReadyEntry[]> | null
 }
@@ -650,9 +650,9 @@ async function loadCapabilityInventory(): Promise<CapabilityInventorySection> {
   }
 
   // Computed cross-cut: group non-Ready items by journey field. Keys are
-  // 'paid_api' | 'both' | 'free_tier' | 'internal' | 'unknown' | 'deprecated';
-  // any journey value not in that set still groups under its own key (we don't
-  // silently discard unexpected values). Purpose: lets Ops answer revenue-impact
+  // 'paid_api' | 'both' | 'free_tier' | 'internal' | 'unknown'; any journey
+  // value not in that set still groups under its own key (we don't silently
+  // discard unexpected values). Purpose: lets Ops answer revenue-impact
   // questions ("what's blocking the paid API from launch?") without having
   // to re-slice the main non-Ready list.
   //
@@ -879,9 +879,8 @@ function formatDRegister(s: OpsContinuitySection<DRegisterEntry>): string {
 }
 
 // Stable render order for journey groups. Revenue-critical first
-// (paid_api, both), then free_tier, then internal, then unknown, then
-// deprecated (dead last — items explicitly off any journey path).
-const JOURNEY_ORDER = ['paid_api', 'both', 'free_tier', 'internal', 'unknown', 'deprecated']
+// (paid_api, both), then free_tier, then internal, then unknown/other.
+const JOURNEY_ORDER = ['paid_api', 'both', 'free_tier', 'internal', 'unknown']
 
 function compareJourneyKeys(a: string, b: string): number {
   const ai = JOURNEY_ORDER.indexOf(a)
