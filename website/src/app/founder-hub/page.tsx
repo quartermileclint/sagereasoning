@@ -667,7 +667,7 @@ export default function FounderHubPage() {
                   background: '#0A0A0A', borderRadius: 6, padding: '10px 12px',
                   border: '1px solid #2A2A2A', marginBottom: 10,
                 }}>
-                  <div style={{ fontSize: 13, color: '#CCC', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                  <div style={{ fontSize: 13, color: '#CCC', lineHeight: 1.6, whiteSpace: 'pre-wrap', maxHeight: 105, overflowY: 'auto' }}>
                     {askOrgResult.ops_synthesis.combined_session_prompt}
                   </div>
                 </div>
@@ -867,7 +867,7 @@ export default function FounderHubPage() {
               <div style={{ fontSize: 11, color: '#666', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                 Session Prompt
               </div>
-              <div style={{ fontSize: 13, color: '#CCC', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+              <div style={{ fontSize: 13, color: '#CCC', lineHeight: 1.6, whiteSpace: 'pre-wrap', maxHeight: 105, overflowY: 'auto' }}>
                 {String(latestAction.session_prompt)}
               </div>
             </div>
