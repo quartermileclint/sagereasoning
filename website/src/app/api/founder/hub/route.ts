@@ -56,7 +56,11 @@ type AgentType = 'ops' | 'tech' | 'growth' | 'support' | 'mentor'
 
 const VALID_AGENTS: AgentType[] = ['ops', 'tech', 'growth', 'support', 'mentor']
 
-// Session Opening Protocol extract — prepended to session_prompt by getOpsRecommendedAction.
+// Session Opening Protocol extract — prepended to session prompts surfaced to the founder.
+// Call sites:
+//   1. Inside getOpsRecommendedAction — both return branches (recommended-action flow).
+//   2. At the Ask-the-Org response assembly (combined_session_prompt) — after mentor review has
+//      consumed the raw synthesis, so the extract does not pollute mentor review input.
 // Source of truth: /adopted/session-opening-protocol.md (adopted 2026-04-24 under DD-2026-04-24-09).
 // Canonical-sources reference: /adopted/canonical-sources.md.
 // Maintenance: regenerate this constant whenever the source protocol changes the non-negotiables.
@@ -1165,7 +1169,7 @@ export async function POST(request: NextRequest) {
         })),
         ops_synthesis: {
           unified_answer: opsSynthesis.unified_answer,
-          combined_session_prompt: opsSynthesis.combined_session_prompt,
+          combined_session_prompt: `${SESSION_OPENING_PROTOCOL_EXTRACT}${opsSynthesis.combined_session_prompt}`,
           risk_classification: opsSynthesis.risk_classification,
           risk_reasoning: opsSynthesis.risk_reasoning,
           domain_summary: opsSynthesis.domain_summary,
