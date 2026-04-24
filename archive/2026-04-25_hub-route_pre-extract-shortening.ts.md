@@ -56,17 +56,39 @@ type AgentType = 'ops' | 'tech' | 'growth' | 'support' | 'mentor'
 
 const VALID_AGENTS: AgentType[] = ['ops', 'tech', 'growth', 'support', 'mentor']
 
-// Session Opening Protocol pointer — prepended to session prompts surfaced to the founder.
+// Session Opening Protocol extract — prepended to session prompts surfaced to the founder.
 // Call sites:
 //   1. Inside getOpsRecommendedAction — both return branches (recommended-action flow).
 //   2. At the Ask-the-Org response assembly (combined_session_prompt) — after mentor review has
-//      consumed the raw synthesis, so the pointer does not pollute mentor review input.
+//      consumed the raw synthesis, so the extract does not pollute mentor review input.
 // Source of truth: /adopted/session-opening-protocol.md (adopted 2026-04-24 under DD-2026-04-24-09).
 // Canonical-sources reference: /adopted/canonical-sources.md.
-// Design note: this constant was a verbose 8-element extract until 2026-04-25; shortened to a
-// one-line pointer under DD-2026-04-25-05 because the agent already reads the file at session open.
-// Prior verbose extract preserved at /archive/2026-04-24_session-opening-protocol-hub-extract_applied.md.
-const SESSION_OPENING_PROTOCOL_EXTRACT = `Governing frame: /adopted/session-opening-protocol.md
+// Maintenance: regenerate this constant whenever the source protocol changes the non-negotiables.
+const SESSION_OPENING_PROTOCOL_EXTRACT = `--- Session Opening Protocol (extract) ---
+
+Before doing any work this session, complete these steps. The full protocol is at /adopted/session-opening-protocol.md.
+
+1. State the session's stream focus and the canonical-source tier being read. Tiers: every session reads manifest + project instructions + most recent handoff in the stream; governance sessions add decision log + discrepancy register + knowledge-gaps register; code sessions add tech guide + verification framework; orientation sessions add PROJECT_STATE. Full list and order: /adopted/canonical-sources.md.
+
+2. Read the most recent handoff at /operations/handoffs/[stream]/. The "Next Session Should" block in that handoff is authoritative for opening scope.
+
+3. Scan /operations/knowledge-gaps.md for entries relevant to the session's scope; read the resolution before starting.
+
+4. Confirm the P0 hold-point status. Some work is not permissible pre-hold-point — if the requested work is outside the permissible set, surface this before starting.
+
+5. If the session involves code, confirm model selection against /website/src/lib/ai/constraints.ts. Model selection is a session-opening check, not a mid-session discovery.
+
+6. Use both status taxonomies correctly: implementation status (Scoped / Designed / Scaffolded / Wired / Verified / Live) for modules and features; decision status (Adopted / Under review / Superseded) for decision-log entries. Do not mix.
+
+7. Classify every code change as Standard, Elevated, or Critical (project instructions 0d-ii). Any change to distress classification, Zone 2, Zone 3, encryption, session management, access control, data deletion, or deployment config is Critical regardless of apparent scope (PR6). For Critical changes, complete the Critical Change Protocol (0c-ii) in the conversation before asking for deployment.
+
+8. Prove new architectural patterns on a single endpoint before rolling out (PR1). Verify wiring in the same session as the build (PR2). Safety-critical functions run synchronously, never as background processes (PR3).
+
+9. Log deferred decisions in /operations/decision-log.md with what was considered, why deferred, and the revisit condition (PR7).
+
+10. Close the session with a handoff in the required-minimum format (0b) at /operations/handoffs/[stream]/. Add defined extensions if the session involved code, deployment, or safety. Name any protocol element skipped and the reason.
+
+--- End Session Opening Protocol (extract) ---
 
 `
 

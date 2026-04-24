@@ -1570,6 +1570,37 @@ This reframe generated a new option, E: archive BOTH as completion records. Opti
 
 ---
 
+## 2026-04-25 — DD-2026-04-25-05: Hub session-prompt prepend shortened from full extract to one-line pointer
+
+**Decision:** The `SESSION_OPENING_PROTOCOL_EXTRACT` constant in `/website/src/app/api/founder/hub/route.ts` (line 67) replaced. Previous body: ~1,600-character extract listing 8 protocol elements with sub-explanations. New body: one-line pointer reading `Governing frame: /adopted/session-opening-protocol.md` followed by a blank-line separator. Both call sites (recommended-action flow at lines 738 and 748; Ask-the-Org response assembly at line 1150) inherit the shortened content automatically because they reference the same constant.
+
+**Scope:** One constant-body change in one code file. Comment block above the constant (lines 59–66) updated to describe the new pointer pattern and cite this DD entry. No call-site code changes. No architectural change.
+
+**Reasoning:** The verbose extract was prepended to make the protocol unmissable at session open even when the agent did not read the full file. After today's reconciliations, two facts about session-opening discipline are now stable: (a) the agent already reads `/adopted/session-opening-protocol.md` per the protocol's own Part A element 2 (canonical-source read sequence), and (b) the protocol file is itself a canonical source listed in `/adopted/canonical-sources.md`. The verbose extract therefore duplicates content the agent reads anyway, while consuming UI space (mitigated earlier today by the 5-line cap fix in the founder hub page) and tokens on every hub call. The pointer pattern preserves the unmissable signal — every session prompt still begins with a reference to the protocol — without the duplication.
+
+**Alternatives considered:**
+- Keep the verbose extract. Rejected — duplicates protocol content the agent already reads, costs tokens per call, takes UI space.
+- Shorten to a 3–4 line summary (a halfway point). Rejected — still partial duplication; either the summary covers the full protocol (in which case the file is redundant) or it doesn't (in which case the agent might rely on the partial summary and miss elements). The clean separation is "pointer in the prompt; full protocol in the file".
+- Remove the prepend entirely. Rejected — losing the unmissable signal that this is a session-prompt and the protocol governs would be a regression. The pointer keeps the signal at minimum cost.
+
+**Rules served:**
+- R0 oikeiosis (efficiency for the agent — fewer tokens per call serves Circle 1 founder cost discipline; clearer canonical-source pattern serves Circle 4 future agents).
+- R5 cost guardrail (lower per-call token cost on every hub call).
+- D6-A archive protocol: pre-edit archive at `/archive/2026-04-25_hub-route_pre-extract-shortening.ts.md`. Decision-log pre-edit archive from earlier today (`/archive/2026-04-25_decision-log_pre-DD-25-01.md`) covers the pre-this-append state.
+- PR1 (single-endpoint proof before rollout): the pattern (prepending a constant to session prompts) is already proven across both call sites with the verbose extract. This is a content shortening, not a new architectural pattern.
+
+**Revisit condition:** If session-opening discipline degrades after this change — i.e., the agent fails to read the protocol file when a verbose extract would have covered it inline — revert the constant body to the prior verbose form. The verbose extract is preserved at `/archive/2026-04-24_session-opening-protocol-hub-extract_applied.md` and at `/archive/2026-04-25_hub-route_pre-extract-shortening.ts.md`.
+
+**Impact:**
+- Every future hub session prompt begins with `Governing frame: /adopted/session-opening-protocol.md` followed by the day's task brief.
+- ~1,500 fewer characters per hub call → reduced token cost per call (small absolute number, but applies to every founder hub interaction).
+- The agent must read the protocol file to access protocol content; this matches the canonical-sources read pattern already mandated by Part A element 2.
+- New discrepancy flagged: `/adopted/session-opening-protocol.md` §"How this protocol relates to the hub route" still describes the hub as "concatenat[ing] a distilled extract of this protocol... ahead of `getOpsRecommendedAction`'s output". After this decision, that description is factually out of date — the hub now concatenates a one-line pointer, not a distilled extract. Surfacing this for separate decision; not in this decision's scope.
+
+**Status:** Adopted.
+
+---
+
 ## 2026-04-25 — D-D1-1: `agent-private-mentor` journey `free_tier` → `internal`
 
 **Decision:** Registry entry `agent-private-mentor` journey reclassified from `free_tier` to `internal`. No other fields changed.
