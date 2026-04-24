@@ -194,6 +194,16 @@ async function main() {
   console.log('       }\'')
   console.log('     Expected: 200, JSON with before / draft / after / token_summary.')
   console.log('     Expected: `draft` ends with the SageReasoning disclaimer (R3).')
+  console.log('')
+  console.log('C) FOUNDER-HUB ring proof (persona-agnostic — try all five):')
+  console.log('     curl -X POST https://sagereasoning.com/api/founder/hub/ring-proof \\')
+  console.log('       -H "Authorization: Bearer <YOUR_BEARER_TOKEN>" \\')
+  console.log('       -H "Content-Type: application/json" \\')
+  console.log('       -d \'{"persona": "mentor", "message": "Should I ship Stripe this week or wait until P2 lands?"}\'')
+  console.log('     Then repeat with persona = "ops", "tech", "growth", "support".')
+  console.log('     Expected: 200, JSON with persona_response / before / after / token_summary.')
+  console.log('     Expected: `persona` echoed back matches the request.')
+  console.log('     Expected: each persona produces a different style of response.')
   process.exit(0)
 }
 
