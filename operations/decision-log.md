@@ -1816,3 +1816,21 @@ This reframe generated a new option, E: archive BOTH as completion records. Opti
 **Status:** Adopted
 
 ---
+
+## 2026-04-25 — D-R17-Cache-1: Profile-store retrieval cache (ADR-R17-01)
+
+**Decision:** Accept ADR-R17-01 recommended defaults: cache the encrypted profile blob (not plaintext) in a module-level in-memory `Map` inside the Vercel function instance, 60-second TTL, user-id key, eviction on `saveMentorProfile()` plus TTL backstop, wrap `loadMentorProfile()` in `website/src/lib/mentor-profile-store.ts` so all eight callers benefit transparently. Implementation deferred to a subsequent session under Critical Change Protocol (0c-ii).
+
+**Reasoning:** Diagnostic instrumentation deployed this session (Standard risk) showed DB query dominates retrieval cost (51–79ms per call across two data points) and decryption is essentially free (0–1ms). Caching the encrypted blob captures the bottleneck without growing the R17 plaintext-at-rest surface — the key result that narrowed the design. Module-level cache (Phase 1) matches the warm-call pattern the data showed; external cache (Phase 2) deferred behind Open Question O3 trigger. Founder approved defaults on 25 April 2026 after reviewing §4 (defaults), §5.3 (R17c interaction), §5.7 (Critical risk classification), §6 (open questions), §8 (rollback).
+
+**Alternatives considered:** Cache decrypted plaintext (D1-a) — rejected; decrypt savings 0–1ms while R17 surface grows. No cache (D1-c) — rejected; observed variance is real and warm-call benefit does not happen naturally. External cache for Phase 1 (D2-b) — deferred; adds infrastructure without evidence Phase 1 in-memory is insufficient. 5-minute TTL (D3-b) — rejected; widens stale-data window past acceptable risk for journal-ingestion writes.
+
+**Revisit condition:** Implementation session collects cache hit-rate and cold-call timing data. Phase 2 (external cache) triggered if cache hit rate <50% on observed traffic OR cold-call timings consistently above 200ms (Open Question O3). R17c (genuine deletion endpoint, P2d) implementation must reconcile with this cache (Open Question O1).
+
+**Rules served:** R17 (intimate data containment — R17b encryption pipeline, R17c future deletion semantics), PR1 (single-endpoint proof — wrap is the proof), PR3 (synchronous retrieval preserved), PR6 (safety-critical change recognised as Critical), PR7 (Open Questions O1–O3 logged with revisit conditions), R5 (cost containment via no new infrastructure in Phase 1).
+
+**Impact:** Diagnostic timing log remains in place during the observation window. Cache implementation queued for next tech session under full Critical Change Protocol. ADR moved from `/drafts/` to `/compliance/` with status Accepted.
+
+**Status:** Adopted
+
+---
