@@ -1852,3 +1852,157 @@ This reframe generated a new option, E: archive BOTH as completion records. Opti
 **Status:** Adopted
 
 ---
+
+## 2026-04-26 — D-RING-2-S3a: ADR-Ring-2-01 Session 3a Verified — buildProfileSummary rewritten to consume canonical MentorProfile
+
+**Decision:** Session 3a (proof-of-rewrite for `buildProfileSummary`) reaches Verified status. The function in `/website/src/lib/mentor-profile-summary.ts` now consumes canonical `MentorProfile`. A transitional shim was landed at `/api/mentor/private/baseline-response` to bridge the rewrite. Commit `7065234`, founder-verified post-deploy.
+
+**Reasoning:** First consumer migration in the staged ADR-Ring-2-01 transition. Verified the canonical type's expressive completeness — every field the legacy summariser read had a canonical equivalent, with documented translations (per ADR §2.1/§2.2). The transitional shim was retired in subsequent sessions.
+
+**Rules served:** PR1 (single-endpoint proof), PR2 (verification immediate), R17 (R17b boundary unchanged — adapter operates on plaintext post-decryption).
+
+**Revisit condition:** None. Rollback was per-session via git revert.
+
+**Status:** Adopted (carried from Session 3a close — original proposed text preserved in `/operations/handoffs/tech/2026-04-25-shape-adapter-session-3a-close.md`).
+
+---
+
+## 2026-04-26 — D-RING-2-S3b: ADR-Ring-2-01 Session 3b Verified — /api/mentor-baseline-response migrated to canonical loader
+
+**Decision:** Session 3b (public baseline endpoint migration) reaches Verified status. `/api/mentor-baseline-response` switched from `loadMentorProfile()` to `loadMentorProfileCanonical()`. Session 3a's transitional shim retired at this caller. Commit `ea505ec`, founder-verified.
+
+**Reasoning:** Second PR1 single-endpoint proof in the staged transition. Confirmed the canonical loader works on a public-facing endpoint distinct from the ring-proof endpoint of Session 1.
+
+**Rules served:** PR1, PR2, R17 (boundary unchanged).
+
+**Status:** Adopted (carried from Session 3b close — original proposed text preserved in `/operations/handoffs/tech/2026-04-26-shape-adapter-session-3b-close.md`).
+
+---
+
+## 2026-04-26 — D-RING-2-S3-PRIVATE-FULL: ADR-Ring-2-01 Session 3 follow-up Verified — /api/mentor/private/baseline-response migrated to canonical loader
+
+**Decision:** Session 3 follow-up (private baseline endpoint migration) reaches Verified status. `/api/mentor/private/baseline-response` fully migrated to `loadMentorProfileCanonical()`. Commit `5cdbb52`, founder-verified.
+
+**Reasoning:** Third PR1 single-endpoint proof. Demonstrated that the canonical loader works on the founder-gated private surface as well as the public surface — the encryption pipeline path is identical for both.
+
+**Rules served:** PR1, PR2, R17.
+
+**Status:** Adopted (carried from Session 3 follow-up close — proposed text in the corresponding handoff).
+
+---
+
+## 2026-04-26 — D-RING-2-S3C-MENTOR-PROFILE-GET: ADR-Ring-2-01 Session 3c Verified — /api/mentor-profile GET migrated; last transitional shim retired
+
+**Decision:** Session 3c reaches Verified status. `/api/mentor-profile/route.ts` GET handler migrated to `loadMentorProfileCanonical()`. The last transitional shim across the codebase (the response body's `MentorProfileData → MentorProfile` adaptation at the use site) was retired this session. Wire-contract: GET response's `profile` field now carries canonical shape (Decision 1b = a per Session 3c close). Commit `34019e7`, founder-verified.
+
+**Reasoning:** Fourth PR1 proof. Wire-contract change accepted because the audit at session open found zero detectable consumers of the field. Static fallback JSON file remains in legacy shape and is adapted at the use site (file unchanged this session, retires Session 5).
+
+**Rules served:** PR1, PR2, R17.
+
+**Status:** Adopted (carried from Session 3c close).
+
+---
+
+## 2026-04-26 — D-RING-2-S3D-CONTEXT-LOADERS: ADR-Ring-2-01 Session 3d Verified — practitioner-context.ts fully migrated
+
+**Decision:** Session 3d reaches Verified status. `/website/src/lib/context/practitioner-context.ts` fully migrated to `loadMentorProfileCanonical()` at all 3 read-side context-builder call sites (`getPractitionerContext`, `getFullPractitionerContext`, `getProjectedPractitionerContext`). Field-access translations applied per ADR §2.1/§2.2 across `buildCondensedContext`, `projectProfile`, `formatPassion`, `findWeakestVirtue`. Commit `fbe12d5`, founder-verified via founder hub mentor flow.
+
+**Reasoning:** Fifth PR1 proof, broad consumer surface. The exported function signatures stayed unchanged (still `Promise<string|null>`); content of the prompt-injection strings now derives from canonical fields. The 11-route consumer surface (8 R20a-perimeter routes + founder hub + 2 sage-skill routes) was exercised end-to-end via the live-probe.
+
+**Rules served:** PR1, PR2, R17, AC7 (not engaged — confirmed three checkpoints).
+
+**Status:** Adopted (carried from Session 3d/3e close).
+
+---
+
+## 2026-04-26 — D-RING-2-S3E-FOUNDER-HUB: ADR-Ring-2-01 Session 3e Verified — /api/founder/hub migrated; ProfileForSignals transitional type introduced
+
+**Decision:** Session 3e reaches Verified status. `/api/founder/hub/route.ts` (the hub's only `loadMentorProfile()` call at line 517) fully migrated to `loadMentorProfileCanonical()`. Wire contract unchanged (the hub returns no profile-derived fields per audit). Transitional structural type `ProfileForSignals` introduced in `/website/src/lib/context/mentor-context-private.ts` to allow `getRecentInteractionsAsSignals` to accept both legacy and canonical shapes — necessary because `/api/mentor/private/reflect` was still on legacy until Session 4. Retired under Session 4 (4c). Commit `95c40db`, founder-verified.
+
+**Reasoning:** Sixth PR1 proof. The transitional type was caught by `tsc --noEmit` after the first 3e edit attempt — the founder-hub-only signature change broke the reflect route at compile time. Pivot to the structural type was the correct resolution.
+
+**Rules served:** PR1, PR2, PR7 (transitional type retirement condition named — Session 4), R17, AC7 (not engaged).
+
+**Status:** Adopted (carried from Session 3d/3e close).
+
+---
+
+## 2026-04-26 — D-PR8-PUSH: Process Rule — Sandbox cannot reliably push to GitHub; use GitHub Desktop
+
+**Decision:** Promote to formal process rule (PR8 amendment): the sandbox cannot reliably perform `git push` operations against this repository. The founder pushes via GitHub Desktop after each commit. The agent attempts `git commit` from the sandbox; if a stale `.git/index.lock` blocks the commit, the agent applies D-LOCK-CLEANUP (below) before retrying. The agent does NOT attempt `git push` from the sandbox.
+
+**Reasoning:** Observed across 7 sessions (Session 1 close → Session 3c close → Session 3d/3e close → this session). Pattern is consistent: push fails with permission errors related to the .git directory's mount layer. Cost of each rediscovery: founder time. Promoting to a process rule eliminates the rediscovery cycle. Founder Verification sections in handoffs name the GitHub Desktop steps explicitly.
+
+**Rules served:** PR8 (tacit-knowledge promotion at third recurrence — well past threshold at 7).
+
+**Revisit condition:** If a future sandbox upgrade enables reliable git push, this rule is reviewed. Until then, GitHub Desktop is the mandated push channel.
+
+**Status:** Adopted (carried from Session 3a close, text revised at Session 3c close).
+
+---
+
+## 2026-04-26 — D-LOCK-CLEANUP: Process Rule — Stale .git/index.lock cleanup discipline
+
+**Decision:** Promote to formal process rule: when a sandbox `git commit` fails with `Unable to create '.git/index.lock': File exists` (or similar `HEAD.lock`), the agent attempts cleanup in this order:
+
+1. Call `mcp__cowork__allow_cowork_file_delete` for the repo's `.git/` directory.
+2. Run `rm -f` on the stale lock file from the sandbox.
+3. Retry the `git commit`.
+
+If step 1 returns "Could not find mount for path" (host-side OS not surfacing the directory to the deletion mechanism), the agent surfaces "This is a limitation" and asks the founder for host-side help: either close GitHub Desktop briefly to release the lock, or run `rm -f "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/.git/index.lock"` from a Terminal on the Mac.
+
+**Reasoning:** Observed across 7 sessions (Session 2 close → Session 3c close → Session 3d/3e close → this session). The discipline succeeded under its primary path at Session 3d/3e (1st under revised text) and again twice this session (cleared `.git/index.lock` and `HEAD.lock` separately). Two-tier protocol (cleanup tool first, host-side fallback second) is supported by evidence.
+
+**Rules served:** PR8 (tacit-knowledge promotion).
+
+**Revisit condition:** If the cleanup tool's "Could not find mount for path" error becomes the dominant failure mode (e.g., 3+ consecutive sessions where the host-side fallback is needed), revise to put host-side first.
+
+**Status:** Adopted (carried from Session 3b close, text revised at Session 3c close, supported by primary-path success this session).
+
+---
+
+## 2026-04-26 — D-RING-2-S4A: ADR-Ring-2-01 Session 4a Verified — /api/mentor/private/reflect migrated to canonical loader
+
+**Decision:** Session 4a reaches Verified status. `/website/src/app/api/mentor/private/reflect/route.ts` (R20a perimeter, AC5 — Critical) switched from `loadMentorProfile()` to `loadMentorProfileCanonical()`. The route's distress-classifier wrapper `await enforceDistressCheck(detectDistressTwoStage(...))` at line 152 was untouched by the migration. Commit `cc4d569`. Founder verified at the data layer via Supabase `reflections` row showing valid `katorthoma_proximity`, complete `sage_perspective`, and well-formed `evening_prompt` — proving the full route flow (distress check → context loads → LLM → JSON parse → save) ran cleanly.
+
+**Reasoning:** Last legacy read-side caller in `/website/src/`. Critical Change Protocol (0c-ii) executed in full and approved by founder before commit. AC7 not engaged (no auth/cookie/session/redirect changes). The loaded profile flowed only into `getRecentInteractionsAsSignals` (no direct field access in the route handler; response body returns no profile-derived fields — audit-confirmed).
+
+**Live-probe finding (deferred to next session):** the `/private-mentor` page's chat thread does not load past reflections from `mentor_interactions` on page mount — the in-memory `messages` React state resets on reload. This is a pre-existing UX limitation, not a 4a regression. Logged as O-S5-A in the Session 4 close handoff.
+
+**Rules served:** PR1, PR2, PR3 (distress classifier remains synchronous — unchanged), PR4 (Sonnet selection unchanged — AC1 honoured), PR6 (Critical change recognised, full Critical Change Protocol executed), PR8 (founder push via GitHub Desktop), R17, AC4 (R20a invocation pattern grep-verified intact), AC5 (R20a perimeter unchanged), AC7 (not engaged).
+
+**Status:** Adopted (this session).
+
+---
+
+## 2026-04-26 — D-RING-2-S4B: ADR-Ring-2-01 Session 4b Verified — saveMentorProfile migrated to canonical + loader shape-detection added
+
+**Decision:** Session 4b reaches Verified status. Five edits in three files:
+
+1. `/website/src/lib/mentor-profile-store.ts` — `saveMentorProfile()` parameter type migrated from `MentorProfileData` to canonical `MentorProfile`. Queryable-metadata extraction translated to canonical fields (`senecan_grade` and `proximity_level` top-level; `weakest_virtue` derived by iterating `VirtueDomainAssessment[]`). New `isCanonicalProfileShape()` helper added. `loadMentorProfileCanonical()` updated to dispatch by shape: canonical rows pass through; legacy rows run the existing read-time adapter.
+2. `/website/src/app/api/mentor-profile/route.ts` — POST handler body type migrated to canonical `MentorProfile` (Decision 4-4 = a — wire-contract migration accepted; founder confirmed no external scripts post to this endpoint).
+3. `/website/src/lib/context/mentor-context-private.ts` — `setFounderFacts` and `appendFounderFactsNote` migrated to `loadMentorProfileCanonical()` + canonical spread + canonical save.
+
+Commit `0a9505e`. Founder verified via founder hub mentor flow read-side probe (`dispatch=legacy_adapt` exercised on the founder's existing pre-4b row) and Supabase data sanity check (queryable-metadata columns intact, `jsonb_typeof(encryption_meta) = 'object'` confirmed pre-deploy under Decision 4-7 = a, `updated_at` unchanged confirming no accidental write).
+
+**Reasoning:** Critical change (encryption-pipeline-adjacent write side). Critical Change Protocol (0c-ii) executed in full and approved by founder before commit. The shape-detection helper was a session-time finding: the existing read-time adapter expects legacy `MentorProfileData`; without dispatch, canonical-shape persisted data would be mistransformed (data loss on `false_judgement`, `frequency`, `senecan_grade`, `proximity_level`). Detection criterion (top-level `proximity_level` + `senecan_grade` strings AND no `proximity_estimate` object) is unambiguous — both sets of required fields are mutually exclusive.
+
+**Write-side verification deferred:** no natural founder UI triggers `saveMentorProfile`. Read-side verification confirmed the legacy_adapt dispatch path; the canonical dispatch path will be exercised on the next baseline-response round, journal re-ingestion, or admin operation that triggers a save.
+
+**Rules served:** PR1 (each migration was its own single-endpoint proof — saveMentorProfile, POST /api/mentor-profile, setFounderFacts, appendFounderFactsNote), PR2, PR3 (saveMentorProfile call remains awaited per KG1), PR6 (Critical change recognised), PR7 (Decision 4-4 = a recorded; write-side verification status logged), R17 (R17b encryption pipeline write side migrated; ciphertext envelope unchanged; KG7 confirmed clean pre-edit), AC7 (not engaged).
+
+**Status:** Adopted (this session).
+
+---
+
+## 2026-04-26 — D-RING-2-S4C: ADR-Ring-2-01 Session 4c Verified — ProfileForSignals transitional type retired
+
+**Decision:** Session 4c reaches Verified status. `/website/src/lib/context/mentor-context-private.ts` updated: `ProfileForSignals` structural type definition and its docstring removed; `getRecentInteractionsAsSignals` parameter `profile` retyped from `ProfileForSignals | null` to `MentorProfile | null`; `rowToSignal` parameter `passionMap` retyped from `ProfileForSignals['passion_map']` to `MentorProfile['passion_map']`. Function body unchanged. Commit `b5413fc`. Founder verified via founder hub mentor flow.
+
+**Reasoning:** Standard risk (type-level cleanup, no runtime change). The transitional type was redundant after Sessions 3e, 4a, and 4b — both callers (`/api/founder/hub` and `/api/mentor/private/reflect`) now pass canonical `MentorProfile`. Tightening the function signature to canonical-only makes the contract explicit and removes the structural-type indirection.
+
+**Rules served:** PR1 (single-endpoint proof — type retirement is its own commit), PR2 (`tsc --noEmit` clean pre-deploy is the primary verification for type-only changes), PR7 (the retirement condition named in Session 3e close — "Session 4 when reflect route migrates" — fired as planned).
+
+**Status:** Adopted (this session).
+
+---
