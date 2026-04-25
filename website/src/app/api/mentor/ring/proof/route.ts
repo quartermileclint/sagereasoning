@@ -46,8 +46,10 @@ import type {
   BeforeResult,
   AfterResult,
   PatternAnalysis,
+  MentorProfile,
 } from '@/lib/sage-mentor-ring-bridge'
 import { PROOF_PROFILE, PROOF_INTERACTIONS } from '@/lib/mentor-ring-fixtures'
+import { loadMentorProfileCanonical } from '@/lib/mentor-profile-store'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -152,6 +154,32 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // ─── PROFILE SOURCE ──────────────────────────────────────────────────
+    // ADR-Ring-2-01 Session 1 (Adopted 25 Apr 2026). Use the canonical
+    // loader for live data; fall back to the existing PROOF_PROFILE fixture
+    // if no profile is persisted for this user (founder choice at session
+    // open: "(a) PROOF_PROFILE fallback").
+    //
+    // Risk: Elevated. Encryption-adjacent (canonical loader sits next to
+    // the encryption pipeline) and on the production request path. No
+    // safety surface modified — distress classifier above is unchanged.
+    let profile: MentorProfile = PROOF_PROFILE
+    let profileSource: 'live_canonical' | 'fixture_fallback' = 'fixture_fallback'
+    let profileLoaderError: string | null = null
+    try {
+      const loaded = await loadMentorProfileCanonical(auth.user.id)
+      if (loaded) {
+        profile = loaded.profile
+        profileSource = 'live_canonical'
+      }
+    } catch (loaderErr) {
+      profileLoaderError =
+        loaderErr instanceof Error ? loaderErr.message : 'unknown loader error'
+      console.error('[mentor/ring/proof] Canonical loader error:', loaderErr)
+      // Continue with PROOF_PROFILE — proof endpoint must remain exercisable
+      // even if the live loader degrades.
+    }
+
     // Get-or-register the inner agent (idempotent across requests)
     let innerAgent = ring.getInnerAgent(PROOF_INNER_AGENT_ID)
     if (!innerAgent) {
@@ -180,7 +208,7 @@ export async function POST(request: NextRequest) {
     let patternAnalysis: PatternAnalysis | null = null
     let patternEngineError: string | null = null
     try {
-      patternAnalysis = ring.analysePatterns(PROOF_PROFILE, PROOF_INTERACTIONS, null)
+      patternAnalysis = ring.analysePatterns(profile, PROOF_INTERACTIONS, null)
     } catch (engineErr) {
       patternEngineError = engineErr instanceof Error ? engineErr.message : 'unknown error'
       console.error('[mentor/ring/proof] Pattern-engine error:', engineErr)
@@ -188,7 +216,7 @@ export async function POST(request: NextRequest) {
     const ringSummary = patternAnalysis?.ring_summary ?? null
 
     // ─── BEFORE PHASE ─────────────────────────────────────────────────────
-    const before = ring.executeBefore(PROOF_PROFILE, task, innerAgent)
+    const before = ring.executeBefore(profile, task, innerAgent)
     let beforeResult: BeforeResult = before.result
     let beforeRawLlmJson: unknown = null
     // Track whether the BEFORE prompt was augmented with the pattern summary,
@@ -275,7 +303,7 @@ export async function POST(request: NextRequest) {
 
     // ─── AFTER PHASE ─────────────────────────────────────────────────────
     const after = ring.executeAfter(
-      PROOF_PROFILE,
+      profile,
       task,
       innerOutput,
       innerAgent,
@@ -284,7 +312,7 @@ export async function POST(request: NextRequest) {
 
     let afterRawLlmJson: unknown = null
     let afterResult: AfterResult = {
-      reasoning_quality: PROOF_PROFILE.proximity_level,
+      reasoning_quality: profile.proximity_level,
       passions_detected: [],
       pattern_note: null,
       journal_reference: null,
@@ -374,16 +402,19 @@ export async function POST(request: NextRequest) {
         },
         pattern_analysis: patternAnalysis,
         pattern_engine_error: patternEngineError,
+        profile_source: profileSource,
+        profile_loader_error: profileLoaderError,
         token_summary: result.token_summary,
         total_duration_ms: totalDurationMs,
         notes: [
           'This endpoint is a PR1 single-endpoint proof of the Ring Wrapper.',
-          'Profile source: hand-constructed fixture (mentor-ring-fixtures.ts).',
+          'Profile source: live canonical loader (loadMentorProfileCanonical) when a',
+          'persisted profile exists for the founder; falls back to PROOF_PROFILE fixture otherwise.',
           'Interactions source: hand-constructed fixture (PROOF_INTERACTIONS).',
           'Pattern-engine runs deterministically (no LLM) on the fixture interactions.',
           'When the BEFORE LLM check fires, the BEFORE prompt is augmented with pattern_analysis.ring_summary.',
           'No write to mentor_interactions — KG3 hub-label surface deferred.',
-          'Shape unification adapter is a separately scoped follow-up.',
+          'Canonical-loader transition: ADR-Ring-2-01 Session 1 (25 Apr 2026, Adopted).',
         ],
       },
       { status: 200, headers: corsHeaders() },

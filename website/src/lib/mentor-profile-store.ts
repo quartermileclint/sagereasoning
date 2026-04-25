@@ -20,6 +20,8 @@
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { encryptProfileData, decryptProfileData, ServerEncryptedPayload } from '@/lib/server-encryption'
 import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-summary'
+import { adaptMentorProfileDataToCanonical } from '@/lib/mentor-profile-adapter'
+import type { MentorProfile } from '../../../sage-mentor'
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -97,6 +99,96 @@ export async function loadMentorProfile(
 
   console.log(
     `[mentor-profile-store] timing user=${userId} db_ms=${t1 - t0} decrypt_ms=${t3 - t2} parse_ms=${t4 - t3} summary_ms=${t5 - t4} total_ms=${t5 - t0} found=true`
+  )
+
+  return { profile, summary, version: row.profile_version }
+}
+
+// ── Read (canonical shape) ─────────────────────────────────────────
+
+/**
+ * Load and decrypt a user's profile from Supabase, returning the CANONICAL
+ * MentorProfile shape (defined in /sage-mentor/persona.ts).
+ *
+ * Introduced under ADR-Ring-2-01 (Adopted 25 April 2026) as Session 1 of the
+ * staged transition from MentorProfileData → MentorProfile. Sits alongside
+ * the legacy `loadMentorProfile()` (which continues to return MentorProfileData)
+ * during the transition. Consumers migrate one-at-a-time across Sessions 3–4;
+ * the legacy function retires in Session 5.
+ *
+ * Internally:
+ *   1. Fetches and decrypts the profile (same Supabase + AES-256-GCM path
+ *      as the legacy loader — duplicated here to keep the legacy surface
+ *      untouched in this PR1 single-endpoint proof; a future session
+ *      extracts a shared internal helper when the ADR-R17-01 retrieval
+ *      cache lands, so both functions wrap one cache).
+ *   2. Applies the read-time adapter (`adaptMentorProfileDataToCanonical`)
+ *      to translate the persisted MentorProfileData into MentorProfile.
+ *      Pure synchronous transform — no I/O.
+ *   3. Builds the same legacy text summary from the persisted data shape.
+ *      The summary contract is unchanged for now; Session 5 retires it
+ *      alongside MentorProfileData.
+ *
+ * Returns null if no profile exists for this user. Caller decides the
+ * fallback (the proof endpoint falls back to PROOF_PROFILE — see
+ * /api/mentor/ring/proof).
+ *
+ * R17 footprint: unchanged. Operates on plaintext that already lived in
+ * memory for the legacy loader path. No new at-rest plaintext surface
+ * (per ADR §6.5).
+ */
+export async function loadMentorProfileCanonical(
+  userId: string
+): Promise<{ profile: MentorProfile; summary: string; version: number } | null> {
+  // Diagnostic instrumentation — mirrors the legacy loader's pattern, with
+  // an extra `adapt_ms` slot for the canonical-shape transform. Logs
+  // timings only, no profile content. Removable when ADR-R17-01's cache
+  // lands and timings stabilise.
+  const t0 = Date.now()
+
+  const { data, error } = await supabaseAdmin
+    .from('mentor_profiles')
+    .select('*')
+    .eq('user_id', userId)
+    .single()
+
+  const t1 = Date.now()
+
+  if (error || !data) {
+    if (error?.code === 'PGRST116') {
+      console.log(
+        `[mentor-profile-store] timing-canonical user=${userId} db_ms=${t1 - t0} total_ms=${Date.now() - t0} found=false`
+      )
+      return null // No rows
+    }
+    console.error('[mentor-profile-store] Canonical load error:', error)
+    return null
+  }
+
+  const row = data as StoredProfileRow
+
+  const payload: ServerEncryptedPayload = {
+    ciphertext: row.encrypted_profile,
+    iv: row.encryption_meta.iv,
+    authTag: row.encryption_meta.authTag,
+    algorithm: row.encryption_meta.algorithm as 'AES-256-GCM',
+    version: row.encryption_meta.version,
+  }
+
+  const t2 = Date.now()
+  const decryptedJson = decryptProfileData(payload)
+  const t3 = Date.now()
+  const persisted = JSON.parse(decryptedJson) as MentorProfileData
+  const t4 = Date.now()
+  const profile = adaptMentorProfileDataToCanonical(persisted, {
+    lastUpdated: row.updated_at,
+  })
+  const t5 = Date.now()
+  const summary = buildProfileSummary(persisted)
+  const t6 = Date.now()
+
+  console.log(
+    `[mentor-profile-store] timing-canonical user=${userId} db_ms=${t1 - t0} decrypt_ms=${t3 - t2} parse_ms=${t4 - t3} adapt_ms=${t5 - t4} summary_ms=${t6 - t5} total_ms=${t6 - t0} found=true`
   )
 
   return { profile, summary, version: row.profile_version }

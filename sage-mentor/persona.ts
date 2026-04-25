@@ -58,6 +58,12 @@ import { sanitise, sanitiseArray } from './sanitise'
 /**
  * The user's personal profile — populated by journal ingestion + ongoing
  * interactions. This is what the ring carries permanently.
+ *
+ * Canonical shape under ADR-Ring-2-01 (Adopted 25 April 2026). The website's
+ * persisted shape (MentorProfileData in /website/src/lib/mentor-profile-summary.ts)
+ * converts to this shape via the read-time adapter at
+ * /website/src/lib/mentor-profile-adapter.ts. Any future amendment to either
+ * shape should also touch the adapter so the conversion stays current.
  */
 export type MentorProfile = {
   readonly user_id: string

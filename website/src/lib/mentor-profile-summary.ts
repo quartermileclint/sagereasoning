@@ -44,6 +44,19 @@ export interface FounderFacts {
   last_updated: string
 }
 
+/**
+ * The persisted website profile shape. Written by the journal-ingestion
+ * pipeline; stored encrypted in `mentor_profiles.encrypted_profile`.
+ *
+ * Under ADR-Ring-2-01 (Adopted 25 April 2026) this shape is being retired
+ * in favour of MentorProfile (defined in /sage-mentor/persona.ts). The
+ * read-time conversion is handled by
+ * /website/src/lib/mentor-profile-adapter.ts. Sessions 3–5 of the staged
+ * transition migrate every consumer to MentorProfile and remove this type.
+ *
+ * Until then: any amendment to this shape should also touch the adapter
+ * so the conversion stays current.
+ */
 export interface MentorProfileData {
   user_id: string
   display_name: string
