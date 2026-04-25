@@ -24,28 +24,6 @@ import type { FounderFacts } from '@/lib/mentor-profile-summary'
 import type { MentorProfile } from '../../../../sage-mentor'
 import { listAppendixRounds } from '@/lib/mentor-appendix-store'
 
-// Transitional structural type for getRecentInteractionsAsSignals
-// (introduced ADR-Ring-2-01 Session 3e, 26 April 2026). The function reads
-// only `passion_map[].{root_passion, sub_species, frequency}` from the
-// profile.
-//
-// AS OF Session 4 (4b) — 26 April 2026: both callers now pass canonical
-// MentorProfile.
-//   - /api/mentor/private/reflect migrated under 4a (commit cc4d569).
-//   - setFounderFacts/appendFounderFactsNote migrated under 4b (this commit).
-//
-// The structural type is now redundant. It is retired in the next commit
-// (4c — type tightening to `MentorProfile | null`). Kept here for one more
-// commit so 4c is its own PR1 single-endpoint proof. After 4c lands, this
-// type and its docstring are removed.
-type ProfileForSignals = {
-  passion_map: ReadonlyArray<{
-    root_passion: string
-    sub_species: string
-    frequency: string | number
-  }>
-}
-
 // ── Gap 2: Mentor Observation History ────────────────────────────────
 
 /**
@@ -673,7 +651,7 @@ function rowToSignal(
     passions_detected: unknown
     mentor_observation: string | null
   },
-  passionMap: ProfileForSignals['passion_map'],
+  passionMap: MentorProfile['passion_map'],
 ): InteractionSignal {
   const date = new Date(row.created_at).toISOString().split('T')[0]
 
@@ -765,23 +743,25 @@ function rowToSignal(
  * Typical use: called in parallel with profile projection. Does not block
  * session start — caller awaits via Promise.all.
  *
- * ADR-Ring-2-01 Session 3e (26 April 2026): the `profile` parameter is
- * typed as the transitional structural `ProfileForSignals` (defined at the
- * top of this file). Both legacy MentorProfileData and canonical
- * MentorProfile satisfy the structural shape — the function reads only
- * `passion_map[].{root_passion, sub_species, frequency}`. The "freq "
- * prefix on the pattern-match output line was dropped to read naturally
- * with the canonical bucket string. Tightens to `MentorProfile | null` in
- * Session 4 when /api/mentor/private/reflect retires its legacy loader.
+ * Reads only `passion_map[].{root_passion, sub_species, frequency}` from the
+ * profile, used to classify each interaction's primary passion against the
+ * practitioner's known patterns. Frequency is the canonical bucket string
+ * ('rare' | 'occasional' | 'recurring' | 'persistent').
+ *
+ * Type history: introduced under ADR-Ring-2-01 Session 3e (26 April 2026)
+ * with a transitional `ProfileForSignals` structural shape; tightened to
+ * canonical `MentorProfile | null` under Session 4 (4c) — 26 April 2026 —
+ * once both callers (/api/mentor/private/reflect and /api/founder/hub) had
+ * migrated to the canonical loader.
  *
  * @param userId - Auth user ID
- * @param profile - Loaded profile (legacy or canonical) for pattern-match lookup
+ * @param profile - Loaded canonical MentorProfile for pattern-match lookup
  * @param hubId - Hub scope
  * @param limit - Max interactions (default 7)
  */
 export async function getRecentInteractionsAsSignals(
   userId: string,
-  profile: ProfileForSignals | null,
+  profile: MentorProfile | null,
   hubId: 'founder-mentor' | 'private-mentor' = 'private-mentor',
   limit: number = 7
 ): Promise<string | null> {
