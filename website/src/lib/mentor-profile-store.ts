@@ -52,14 +52,26 @@ export interface StoredProfileRow {
 export async function loadMentorProfile(
   userId: string
 ): Promise<{ profile: MentorProfileData; summary: string; version: number } | null> {
+  // Diagnostic instrumentation — retrieval bottleneck analysis (Path A,
+  // session 2026-04-25). Logs timings only, no profile content.
+  // Remove once cache design is decided and ADR is logged.
+  const t0 = Date.now()
+
   const { data, error } = await supabaseAdmin
     .from('mentor_profiles')
     .select('*')
     .eq('user_id', userId)
     .single()
 
+  const t1 = Date.now()
+
   if (error || !data) {
-    if (error?.code === 'PGRST116') return null // No rows
+    if (error?.code === 'PGRST116') {
+      console.log(
+        `[mentor-profile-store] timing user=${userId} db_ms=${t1 - t0} total_ms=${Date.now() - t0} found=false`
+      )
+      return null // No rows
+    }
     console.error('[mentor-profile-store] Load error:', error)
     return null
   }
@@ -75,9 +87,17 @@ export async function loadMentorProfile(
     version: row.encryption_meta.version,
   }
 
+  const t2 = Date.now()
   const decryptedJson = decryptProfileData(payload)
+  const t3 = Date.now()
   const profile = JSON.parse(decryptedJson) as MentorProfileData
+  const t4 = Date.now()
   const summary = buildProfileSummary(profile)
+  const t5 = Date.now()
+
+  console.log(
+    `[mentor-profile-store] timing user=${userId} db_ms=${t1 - t0} decrypt_ms=${t3 - t2} parse_ms=${t4 - t3} summary_ms=${t5 - t4} total_ms=${t5 - t0} found=true`
+  )
 
   return { profile, summary, version: row.profile_version }
 }
