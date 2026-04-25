@@ -22,15 +22,16 @@ import {
   estimateTokens,
 } from '@/lib/context/mentor-context-private'
 // ADR-Ring-2-01 Session 4 (4a) — 26 April 2026:
-// Loader switched from loadMentorProfile() (legacy MentorProfileData) to
-// loadMentorProfileCanonical() (canonical MentorProfile). This was the last
-// legacy read-side caller in /website/src/. The loaded profile flows only
-// into getRecentInteractionsAsSignals at line ~210 (no direct field access
-// in this route handler; response body returns no profile-derived fields —
+// Migrated to the canonical loader (then named loadMentorProfileCanonical;
+// renamed to loadMentorProfile at Session 5 close, 26 April 2026, when the
+// legacy loader was retired). This was the last legacy read-side caller in
+// /website/src/. The loaded profile flows only into
+// getRecentInteractionsAsSignals at line ~210 (no direct field access in
+// this route handler; response body returns no profile-derived fields —
 // audit-confirmed). AC5/R20a perimeter unchanged: the
-// `await enforceDistressCheck(detectDistressTwoStage(...))` pattern below at
-// line ~141 is untouched. AC7 not engaged (no auth/cookie/session/redirect
-// changes). After this session's 4c (`ProfileForSignals` retirement), only
+// `await enforceDistressCheck(detectDistressTwoStage(...))` pattern below
+// at line ~141 is untouched. AC7 not engaged (no auth/cookie/session/redirect
+// changes). After Session 4c (`ProfileForSignals` retirement), only
 // canonical reaches getRecentInteractionsAsSignals.
 import { loadMentorProfile } from '@/lib/mentor-profile-store'
 import { extractJSON } from '@/lib/json-utils'

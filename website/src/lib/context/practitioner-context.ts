@@ -14,11 +14,11 @@
  * configured, or if the load fails. Callers should proceed without personalisation.
  *
  * R17b: Profile data is encrypted at rest. This module reads through the
- * existing loadMentorProfileCanonical() pipeline which handles decryption.
+ * canonical loadMentorProfile() pipeline which handles decryption.
  *
- * Migrated under ADR-Ring-2-01 Session 3d (26 April 2026): switched from
- * loadMentorProfile() (legacy MentorProfileData envelope) to
- * loadMentorProfileCanonical() (canonical MentorProfile envelope). The string
+ * Migrated under ADR-Ring-2-01 Session 3d (26 April 2026) to consume the
+ * canonical MentorProfile envelope (then named loadMentorProfileCanonical;
+ * renamed to loadMentorProfile at Session 5 close, 26 April 2026). The string
  * builders (buildCondensedContext, projectProfile) and their helpers
  * (formatPassion, findWeakestVirtue) consume the canonical shape per ADR §2.1
  * / §2.2. Field translations applied internally (no wire-contract change —

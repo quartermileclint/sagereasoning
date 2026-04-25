@@ -43,16 +43,14 @@ import {
   fnv1aHash,
   estimateTokens,
 } from '@/lib/context/mentor-context-private'
-// ADR-Ring-2-01 Session 3e (26 April 2026): migrated from
-// `loadMentorProfile()` (legacy MentorProfileData envelope) to
-// `loadMentorProfileCanonical()` (canonical MentorProfile envelope). The
-// loaded profile flows only into `getRecentInteractionsAsSignals()` —
-// migrated alongside in mentor-context-private.ts. The hub does not
-// directly read profile fields and does not return profile-derived fields
-// in its response body, so no wire-contract translation is needed at this
-// caller. After this session every consumer in /website/src is on the
-// canonical loader; only /api/mentor/private/reflect (Session 4 — Critical,
-// R20a perimeter, AC5) remains before Session 5 (legacy retirement).
+// ADR-Ring-2-01 Session 3e (26 April 2026): migrated to the canonical
+// loader (then named `loadMentorProfileCanonical`; renamed to
+// `loadMentorProfile` at Session 5 close, 26 April 2026, when the legacy
+// loader was retired). The loaded profile flows only into
+// `getRecentInteractionsAsSignals()` — migrated alongside in
+// mentor-context-private.ts. The hub does not directly read profile fields
+// and does not return profile-derived fields in its response body, so no
+// wire-contract translation is needed at this caller.
 import { loadMentorProfile } from '@/lib/mentor-profile-store'
 import { logMentorObservation } from '@/lib/logging/mentor-observation-logger'
 import type { ObservationCategory, ConfidenceLevel } from '@/lib/logging/mentor-observation-logger'
@@ -511,8 +509,8 @@ ${brainContext}`
   // Load the profile context (projected if flag on, full otherwise). When
   // projection is on we also load the raw profile once so recent-interaction
   // signals can match passions against the passion map.
-  // ADR-Ring-2-01 Session 3e: switched to `loadMentorProfileCanonical()` —
-  // `storedProfile.profile` is now the canonical MentorProfile shape, which
+  // ADR-Ring-2-01 Session 3e: uses the canonical `loadMentorProfile()` —
+  // `storedProfile.profile` is the canonical MentorProfile shape, which
   // matches `getRecentInteractionsAsSignals`'s migrated parameter type.
   const [projectedContext, legacyContext, storedProfile] = await Promise.all([
     useProjection ? getProjectedPractitionerContext(userId, message) : Promise.resolve(null),

@@ -3,17 +3,17 @@
  *
  * PURPOSE: PR1 single-endpoint proof of the Ring Wrapper integration.
  *
- * The website's loadMentorProfile() returns MentorProfileData (defined in
- * mentor-profile-summary.ts). The Ring Wrapper expects MentorProfile (defined
- * in sage-mentor/persona.ts). The two shapes are not equivalent.
+ * The website's canonical loadMentorProfile() returns the canonical
+ * MentorProfile shape (defined in sage-mentor/persona.ts) since the staged
+ * transition completed at ADR-Ring-2-01 Session 5 close (26 April 2026).
+ * Pre-4b persisted rows in the legacy MentorProfileData shape are converted
+ * by the read-time adapter (mentor-profile-adapter.ts) on every read.
  *
- * Resolving that shape mismatch is a SEPARATELY SCOPED follow-up
- * (see decision-log: "FOLLOW-UP: Shape unification adapter", 25 Apr 2026).
+ * This fixture remains as the proof endpoint's fallback for users who have
+ * no persisted profile yet. It does not exercise the live loader path.
  *
- * This fixture lets the proof exercise the ring end-to-end without
- * committing to an adapter shape we haven't agreed on yet.
- *
- * Status: TEMPORARY. Remove once the shape unification adapter lands.
+ * Status: TEMPORARY. Remove once /api/mentor/ring/proof drops fixture
+ * fallback entirely and runs only on live persisted profiles.
  *
  * Decisions made for this fixture:
  *   - 1 persisting passion (so the ring's checkPassionPatterns has something

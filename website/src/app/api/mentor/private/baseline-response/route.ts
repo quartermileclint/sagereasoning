@@ -134,8 +134,9 @@ export async function POST(request: NextRequest) {
     // shim landing and Session 3b's public-baseline full migration). The
     // founder-only gate above (FOUNDER_USER_ID) keeps the blast radius small.
     // The static fallback JSON remains in legacy MentorProfileData shape and
-    // is adapted at the use site (Decision 3 = a — file unchanged this
-    // session, retires alongside MentorProfileData in Session 5).
+    // is adapted at the use site (Decision 5-3 = b at Session 5 close —
+    // legacy fallback retained alongside the adapter for legacy persisted
+    // rows; both retire if/when ADR Session 6 row migration runs).
     let currentProfile: MentorProfile
     if (isServerEncryptionConfigured() && auth.user?.id) {
       const stored = await loadMentorProfile(auth.user.id)
@@ -149,9 +150,9 @@ export async function POST(request: NextRequest) {
     // Build the input for sage-reason: profile summary + answers.
     //
     // Migrated under ADR-Ring-2-01 Session 3 follow-up (25 April 2026): the
-    // Session 3a transitional shim retired here when the loader switched to
-    // `loadMentorProfileCanonical()` above — `currentProfile` is already
-    // canonical `MentorProfile`, no adaptation needed at this call site.
+    // Session 3a transitional shim retired here when the loader switched
+    // above to the canonical loader — `currentProfile` is already canonical
+    // `MentorProfile`, no adaptation needed at this call site.
     const profileSummary = buildProfileSummary(currentProfile)
 
     const answersFormatted = responses.map(r =>

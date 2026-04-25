@@ -119,10 +119,12 @@ export async function POST(request: NextRequest) {
     // Load current profile — Supabase (encrypted) first, then static fallback.
     //
     // Migrated under ADR-Ring-2-01 Session 3b (25 April 2026) to consume the
-    // canonical loader `loadMentorProfileCanonical()`. The static fallback JSON
-    // remains in legacy MentorProfileData shape and is adapted at the use site
-    // (Decision 3 = a — file unchanged this session, retires alongside
-    // MentorProfileData in Session 5).
+    // canonical loader `loadMentorProfile()` (then named
+    // loadMentorProfileCanonical; renamed at Session 5 close, 26 April 2026).
+    // The static fallback JSON remains in legacy MentorProfileData shape and
+    // is adapted at the use site (Decision 5-3 = b at Session 5 close —
+    // legacy fallback retained alongside the adapter for legacy persisted
+    // rows; both retire if/when ADR Session 6 row migration runs).
     let currentProfile: MentorProfile
     if (isServerEncryptionConfigured() && auth.user?.id) {
       const stored = await loadMentorProfile(auth.user.id)
@@ -137,10 +139,8 @@ export async function POST(request: NextRequest) {
     //
     // Migrated under ADR-Ring-2-01 Session 3b (25 April 2026): this route is
     // the second consumer migration and the PR1 single-endpoint proof for
-    // the public-baseline surface. The transitional shim from Session 3a
-    // retired here when the loader switched to loadMentorProfileCanonical —
-    // currentProfile is already canonical MentorProfile, no adaptation
-    // needed at this call site.
+    // the public-baseline surface. currentProfile is canonical MentorProfile,
+    // no adaptation needed at this call site.
     const profileSummary = buildProfileSummary(currentProfile)
 
     const answersFormatted = responses.map(r =>

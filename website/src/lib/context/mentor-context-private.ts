@@ -475,8 +475,9 @@ export async function setFounderFacts(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // ADR-Ring-2-01 Session 4 (4b), 26 April 2026: load canonical, spread
-    // canonical, save canonical. Pre-4b this was loadMentorProfile() +
-    // MentorProfileData spread + saveMentorProfile(legacy).
+    // canonical, save canonical. Pre-4b this used the legacy loader (since
+    // retired at Session 5 close) + MentorProfileData spread + a legacy
+    // saveMentorProfile signature.
     const stored = await loadMentorProfile(userId)
     if (!stored) return { success: false, error: 'No profile found for user' }
 
@@ -515,8 +516,9 @@ export async function appendFounderFactsNote(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // ADR-Ring-2-01 Session 4 (4b), 26 April 2026: load canonical, spread
-    // canonical, save canonical. Pre-4b this was loadMentorProfile() +
-    // MentorProfileData spread + saveMentorProfile(legacy).
+    // canonical, save canonical. Pre-4b this used the legacy loader (since
+    // retired at Session 5 close) + MentorProfileData spread + a legacy
+    // saveMentorProfile signature.
     const stored = await loadMentorProfile(userId)
     if (!stored) return { success: false, error: 'No profile found for user' }
     if (!stored.profile.founder_facts) {

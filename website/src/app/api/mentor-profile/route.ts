@@ -55,19 +55,18 @@ export async function GET(request: NextRequest) {
 
     // Load current profile — Supabase (encrypted) first, then static fallback.
     //
-    // Migrated under ADR-Ring-2-01 Session 3c (26 April 2026) — last
-    // transitional shim retired. Loader switched from loadMentorProfile()
-    // (legacy MentorProfileData envelope) to loadMentorProfileCanonical()
-    // (canonical MentorProfile envelope). After this session every consumer
-    // of buildProfileSummary across /website/src is on the canonical loader;
-    // /api/founder/hub remains on legacy loadMentorProfile() directly (Session
-    // 3e), and the two context loaders practitioner-context.ts +
-    // mentor-context-private.ts retain their internal legacy calls (Session
-    // 3d).
+    // Migrated under ADR-Ring-2-01 Session 3c (26 April 2026) to consume the
+    // canonical loader (then named loadMentorProfileCanonical; renamed to
+    // loadMentorProfile at Session 5 close, 26 April 2026, when the legacy
+    // loader was retired). All consumers across /website/src — this route,
+    // /api/founder/hub, /api/mentor/private/reflect, the baseline-response
+    // routes, and the practitioner-context / mentor-context-private loaders —
+    // use the single canonical loader.
     //
     // The static fallback JSON file remains in legacy MentorProfileData shape
-    // and is adapted at the use site (Decision 3 = a — file unchanged this
-    // session, retires alongside MentorProfileData in Session 5).
+    // and is adapted at the use site (Decision 5-3 = b at Session 5 close —
+    // legacy fallback retained alongside the adapter for legacy persisted
+    // rows; both retire if/when ADR Session 6 row migration runs).
     if (isServerEncryptionConfigured() && auth.user?.id) {
       const stored = await loadMentorProfile(auth.user?.id)
       if (stored) {

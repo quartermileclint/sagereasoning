@@ -408,7 +408,7 @@ export async function POST(request: NextRequest) {
         total_duration_ms: totalDurationMs,
         notes: [
           'This endpoint is a PR1 single-endpoint proof of the Ring Wrapper.',
-          'Profile source: live canonical loader (loadMentorProfileCanonical) when a',
+          'Profile source: live canonical loader (loadMentorProfile) when a',
           'persisted profile exists for the founder; falls back to PROOF_PROFILE fixture otherwise.',
           'Interactions source: hand-constructed fixture (PROOF_INTERACTIONS).',
           'Pattern-engine runs deterministically (no LLM) on the fixture interactions.',
