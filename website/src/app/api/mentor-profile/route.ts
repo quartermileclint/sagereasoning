@@ -18,10 +18,11 @@ import type { MentorProfile } from '../../../../../sage-mentor'
 // POST /api/mentor-profile
 //   Seeds or updates the profile in Supabase (encrypted).
 //   Used by mentor-baseline-response after processing gap answers,
-//   or to seed the initial profile from journal extraction. POST body remains
-//   in legacy MentorProfileData shape until the journal-pipeline write-side
-//   migration (ADR-Ring-2-01 Session 4) — saveMentorProfile() still consumes
-//   that shape during transition.
+//   or to seed the initial profile from journal extraction. POST body now
+//   accepts canonical MentorProfile shape (ADR-Ring-2-01 Session 4 (4b),
+//   26 April 2026). saveMentorProfile() consumes canonical and persists
+//   it at rest. Legacy MentorProfileData rows already in the table remain
+//   readable via the loader's shape-detection dispatch.
 //
 // Auth: Requires signed-in user (Supabase JWT) or API key
 //
@@ -147,11 +148,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { profile } = body as { profile: MentorProfileData }
+    // ADR-Ring-2-01 Session 4 (4b): body is canonical MentorProfile shape.
+    const { profile } = body as { profile: MentorProfile }
 
     if (!profile || !profile.display_name) {
       return NextResponse.json(
-        { error: 'profile is required (full MentorProfileData JSON)' },
+        { error: 'profile is required (full canonical MentorProfile JSON)' },
         { status: 400, headers: corsHeaders() }
       )
     }

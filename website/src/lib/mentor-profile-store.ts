@@ -111,6 +111,40 @@ export async function loadMentorProfile(
   return { profile, summary, version: row.profile_version }
 }
 
+// ── Shape Detection (ADR-Ring-2-01 Session 4 (4b), 26 April 2026) ──
+
+/**
+ * Detect whether a decrypted-and-parsed persisted profile is in the canonical
+ * MentorProfile shape (post-4b writes) or the legacy MentorProfileData shape
+ * (pre-4b writes).
+ *
+ * Detection criterion:
+ *   - Canonical: top-level `proximity_level` + `senecan_grade` strings, NO
+ *     `proximity_estimate` object.
+ *   - Legacy:    `proximity_estimate` object carrying `level` + `senecan_grade`.
+ *
+ * Both fields are required in their respective types, so the detection is
+ * unambiguous — there is no overlap or ambiguous middle state.
+ *
+ * Used by `loadMentorProfileCanonical()` to dispatch persisted rows past the
+ * read-time adapter when the row is already canonical (no transform needed).
+ *
+ * After ADR-Ring-2-01 Session 6 (optional row migration) every row is canonical
+ * and this function plus the adapter call become removable.
+ */
+function isCanonicalProfileShape(data: unknown): boolean {
+  if (!data || typeof data !== 'object') return false
+  const d = data as Record<string, unknown>
+  const hasTopLevelCanonical =
+    typeof d.proximity_level === 'string' &&
+    typeof d.senecan_grade === 'string'
+  const hasLegacyEstimate =
+    d.proximity_estimate &&
+    typeof d.proximity_estimate === 'object' &&
+    !Array.isArray(d.proximity_estimate)
+  return hasTopLevelCanonical && !hasLegacyEstimate
+}
+
 // ── Read (canonical shape) ─────────────────────────────────────────
 
 /**
@@ -185,21 +219,42 @@ export async function loadMentorProfileCanonical(
   const t2 = Date.now()
   const decryptedJson = decryptProfileData(payload)
   const t3 = Date.now()
-  const persisted = JSON.parse(decryptedJson) as MentorProfileData
+  const persisted = JSON.parse(decryptedJson) as MentorProfileData | MentorProfile
   const t4 = Date.now()
-  const profile = adaptMentorProfileDataToCanonical(persisted, {
-    lastUpdated: row.updated_at,
-  })
+
+  // Shape dispatch (ADR-Ring-2-01 Session 4 (4b), 26 April 2026):
+  //   - Post-4b rows are canonical at rest. Pass through; only override
+  //     `last_interaction` if the persisted value is the adapter sentinel
+  //     ('not yet recorded') AND the row carries a real updated_at.
+  //   - Pre-4b rows are legacy. Run the existing adapter (pure synchronous
+  //     transform; logs honest sentinels per ADR §6.2).
+  // The dispatch is required because the adapter expects MentorProfileData;
+  // calling it on canonical data would mistransform (false_judgement,
+  // frequency, senecan_grade, proximity_level all defaulted to sentinels).
+  let profile: MentorProfile
+  let dispatchPath: 'canonical' | 'legacy_adapt'
+  if (isCanonicalProfileShape(persisted)) {
+    dispatchPath = 'canonical'
+    const canonical = persisted as MentorProfile
+    profile =
+      canonical.last_interaction === 'not yet recorded' && row.updated_at
+        ? { ...canonical, last_interaction: row.updated_at }
+        : canonical
+  } else {
+    dispatchPath = 'legacy_adapt'
+    profile = adaptMentorProfileDataToCanonical(persisted as MentorProfileData, {
+      lastUpdated: row.updated_at,
+    })
+  }
   const t5 = Date.now()
   // Under ADR-Ring-2-01 Session 3 (25 April 2026): `buildProfileSummary` now
   // consumes the canonical MentorProfile. The canonical-shape `profile` from
-  // the adapter call above is passed directly. (Was previously called on
-  // `persisted` because the rewrite hadn't happened yet.)
+  // the dispatch above is passed directly.
   const summary = buildProfileSummary(profile)
   const t6 = Date.now()
 
   console.log(
-    `[mentor-profile-store] timing-canonical user=${userId} db_ms=${t1 - t0} decrypt_ms=${t3 - t2} parse_ms=${t4 - t3} adapt_ms=${t5 - t4} summary_ms=${t6 - t5} total_ms=${t6 - t0} found=true`
+    `[mentor-profile-store] timing-canonical user=${userId} db_ms=${t1 - t0} decrypt_ms=${t3 - t2} parse_ms=${t4 - t3} dispatch=${dispatchPath} adapt_ms=${t5 - t4} summary_ms=${t6 - t5} total_ms=${t6 - t0} found=true`
   )
 
   return { profile, summary, version: row.profile_version }
@@ -208,24 +263,50 @@ export async function loadMentorProfileCanonical(
 // ── Write ──────────────────────────────────────────────────────────
 
 /**
- * Save (upsert) a MentorProfile to Supabase, encrypted.
+ * Save (upsert) a canonical MentorProfile to Supabase, encrypted.
  * If a profile already exists for this user, it's updated and version incremented.
+ *
+ * ADR-Ring-2-01 Session 4 (4b), 26 April 2026:
+ * Parameter type migrated from MentorProfileData → MentorProfile (canonical).
+ * The persisted shape is now canonical at rest. The read path
+ * (`loadMentorProfileCanonical`) detects shape and dispatches: canonical
+ * rows pass through; legacy rows (pre-4b writes) run the read-time adapter.
+ *
+ * Queryable-metadata extraction translated to canonical fields:
+ *   - `senecan_grade`: top-level (was `proximity_estimate.senecan_grade`).
+ *   - `proximity_level`: top-level (was `proximity_estimate.level`).
+ *   - `weakest_virtue`: derived by iterating canonical
+ *     `virtue_profile: VirtueDomainAssessment[]` (was Record iteration).
+ *
+ * KG7 reference: `encryption_meta` is passed as a plain object literal —
+ * Supabase serialises to JSONB correctly. Do NOT JSON.stringify it before
+ * the insert. The encrypted_profile column is TEXT (the ciphertext); not a
+ * JSONB column. Verified pre-4b: SELECT jsonb_typeof(encryption_meta)
+ * returns 'object'. If a future writer accidentally stringifies the meta,
+ * the query returns 'string' and KG7 has regressed.
  */
 export async function saveMentorProfile(
   userId: string,
-  profile: MentorProfileData
+  profile: MentorProfile
 ): Promise<{ success: boolean; version: number; error?: string }> {
-  // Encrypt the full profile JSON
+  // Encrypt the full canonical profile JSON
   const plaintext = JSON.stringify(profile)
   const encrypted = encryptProfileData(plaintext)
 
-  // Extract non-sensitive metadata for queryable columns
-  const weakestVirtue = Object.entries(profile.virtue_profile)
-    .sort((a, b) => {
-      const order = { gap: 0, developing: 1, moderate: 2, strong: 3 }
-      return (order[a[1].overall_strength as keyof typeof order] ?? 1) -
-             (order[b[1].overall_strength as keyof typeof order] ?? 1)
-    })[0]?.[0] ?? 'unknown'
+  // Extract non-sensitive metadata for queryable columns. Canonical
+  // `virtue_profile` is an array of VirtueDomainAssessment, not a Record.
+  // Same strength ordering as before: gap < developing < moderate < strong.
+  const STRENGTH_ORDER: Record<string, number> = {
+    gap: 0,
+    developing: 1,
+    moderate: 2,
+    strong: 3,
+  }
+  const sortedVirtues = [...(profile.virtue_profile ?? [])].sort(
+    (a, b) =>
+      (STRENGTH_ORDER[a.strength] ?? 1) - (STRENGTH_ORDER[b.strength] ?? 1),
+  )
+  const weakestVirtue = sortedVirtues[0]?.domain ?? 'unknown'
 
   // Check if profile exists
   const { data: existing } = await supabaseAdmin
@@ -239,8 +320,8 @@ export async function saveMentorProfile(
   const row = {
     user_id: userId,
     display_name: profile.display_name || 'Practitioner',
-    senecan_grade: profile.proximity_estimate?.senecan_grade || 'pre_progress',
-    proximity_level: profile.proximity_estimate?.level || 'reflexive',
+    senecan_grade: profile.senecan_grade || 'pre_progress',
+    proximity_level: profile.proximity_level || 'reflexive',
     passions_count: profile.passion_map?.length || 0,
     weakest_virtue: weakestVirtue,
     encrypted_profile: encrypted.ciphertext,

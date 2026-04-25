@@ -19,32 +19,25 @@
  */
 
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
-import type { FounderFacts, MentorProfileData } from '@/lib/mentor-profile-summary'
+import { loadMentorProfileCanonical, saveMentorProfile } from '@/lib/mentor-profile-store'
+import type { FounderFacts } from '@/lib/mentor-profile-summary'
+import type { MentorProfile } from '../../../../sage-mentor'
 import { listAppendixRounds } from '@/lib/mentor-appendix-store'
 
 // Transitional structural type for getRecentInteractionsAsSignals
-// (ADR-Ring-2-01 Session 3e, 26 April 2026). The function reads only
-// `passion_map[].{root_passion, sub_species, frequency}` from the profile;
-// both legacy MentorProfileData (frequency: number) and canonical
-// MentorProfile (frequency: bucket string) satisfy this minimum shape.
+// (introduced ADR-Ring-2-01 Session 3e, 26 April 2026). The function reads
+// only `passion_map[].{root_passion, sub_species, frequency}` from the
+// profile.
 //
-// This abstraction is necessary mid-migration because two callers consume
-// the function with different profile shapes:
-//   - /api/founder/hub (canonical post-Session-3e via loadMentorProfileCanonical)
-//   - /api/mentor/private/reflect (legacy until Session 4 — Critical, R20a
-//     perimeter, AC5)
+// AS OF Session 4 (4b) — 26 April 2026: both callers now pass canonical
+// MentorProfile.
+//   - /api/mentor/private/reflect migrated under 4a (commit cc4d569).
+//   - setFounderFacts/appendFounderFactsNote migrated under 4b (this commit).
 //
-// Retires in Session 4 when the reflect route migrates to the canonical
-// loader. At that point this type is replaced with `MentorProfile | null`.
-//
-// NOTE on legacy imports: the `loadMentorProfile`, `saveMentorProfile`, and
-// `MentorProfileData` imports above remain in use by `setFounderFacts` and
-// `appendFounderFactsNote` (write-roundtrip functions that load the legacy
-// shape, spread it, and pass it back to `saveMentorProfile()`). The write
-// side stays on `MentorProfileData` until ADR Session 4 (journal pipeline
-// write-side migration); migrating only the read here would force an
-// inverse adapter the ADR explicitly defers.
+// The structural type is now redundant. It is retired in the next commit
+// (4c — type tightening to `MentorProfile | null`). Kept here for one more
+// commit so 4c is its own PR1 single-endpoint proof. After 4c lands, this
+// type and its docstring are removed.
 type ProfileForSignals = {
   passion_map: ReadonlyArray<{
     root_passion: string
@@ -503,10 +496,13 @@ export async function setFounderFacts(
   facts: FounderFacts
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const stored = await loadMentorProfile(userId)
+    // ADR-Ring-2-01 Session 4 (4b), 26 April 2026: load canonical, spread
+    // canonical, save canonical. Pre-4b this was loadMentorProfile() +
+    // MentorProfileData spread + saveMentorProfile(legacy).
+    const stored = await loadMentorProfileCanonical(userId)
     if (!stored) return { success: false, error: 'No profile found for user' }
 
-    const updatedProfile: MentorProfileData = {
+    const updatedProfile: MentorProfile = {
       ...stored.profile,
       founder_facts: {
         ...facts,
@@ -540,13 +536,16 @@ export async function appendFounderFactsNote(
   note: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const stored = await loadMentorProfile(userId)
+    // ADR-Ring-2-01 Session 4 (4b), 26 April 2026: load canonical, spread
+    // canonical, save canonical. Pre-4b this was loadMentorProfile() +
+    // MentorProfileData spread + saveMentorProfile(legacy).
+    const stored = await loadMentorProfileCanonical(userId)
     if (!stored) return { success: false, error: 'No profile found for user' }
     if (!stored.profile.founder_facts) {
       return { success: false, error: 'No founder_facts block initialised — use setFounderFacts() first' }
     }
 
-    const updatedProfile: MentorProfileData = {
+    const updatedProfile: MentorProfile = {
       ...stored.profile,
       founder_facts: {
         ...stored.profile.founder_facts,
