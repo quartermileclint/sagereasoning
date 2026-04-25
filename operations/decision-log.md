@@ -2006,3 +2006,39 @@ Commit `0a9505e`. Founder verified via founder hub mentor flow read-side probe (
 **Status:** Adopted (this session).
 
 ---
+
+## 2026-04-26 — D-ADR-PE-01: ADR-PE-01 Adopted — Pattern Analysis Storage Inside the Encrypted Profile Blob
+
+**Decision:** ADR-PE-01 v1 adopted. The pattern-engine's `PatternAnalysis` output is persisted as an optional `pattern_analyses` sub-key inside the decrypted `MentorProfile` blob, keyed by `hub_id`. No new schema, no new column, no new table. Encrypted at rest via the existing R17b pipeline. Document promoted from `/drafts/ADR-PE-01-pattern-analysis-storage.md` to `/compliance/ADR-PE-01-pattern-analysis-storage.md` per the D6-A archive protocol.
+
+**Reasoning:** Selected from a four-option comparison (no persistence / sidecar table / plain JSONB column / field inside encrypted blob). Option 3 chosen because (i) it preserves R17b application-level encryption at no incremental cost, (ii) it requires no schema migration, (iii) R17c deletion is inherited from the existing profile-delete path, (iv) hub-scoping by `hub_id` inside the per-user blob matches the data's actual cardinality (one analysis per (user, hub) pair), and (v) it coordinates cleanly with ADR-Ring-2-01 (canonical-shape extension via C-α) and ADR-R17-01 (cache invalidation rules unchanged). Trade-offs accepted: every implementation session is Critical under PR6 (encryption-pipeline blast radius); blob-size growth and read amplification are accepted at current traffic; D7 (local-first) cloud-storage posture is named explicitly in §1.5 + §6.4 so a future D7 resolution is not blocked by silent architectural choice.
+
+**Rules served:** R17b (application-level encryption), R17c (genuine deletion via existing path), R17f (implementation safety — read-modify-write discipline, hub-key scoping, schema-version awareness), PR1 (single-endpoint proof before rollout), PR3 (synchronous writes), PR6 (Critical classification for encryption-pipeline changes), PR7 (deferred sub-decisions documented — write cadence O4, first live consumer, backfill timing O5, blob-size monitoring O2, optional `last_pattern_compute_at` column O3, read amplification O1), KG1 rule 2 (await all DB writes), KG3 (hub-key end-to-end contract).
+
+**Status:** Adopted. Implementation work (Sessions 1+ in §8 of the ADR) carries Critical risk under PR6 and requires the full Critical Change Protocol per session. Five open items O-PE-01-A through O-PE-01-E travel with the ADR and activate at implementation.
+
+---
+
+## 2026-04-26 — D-PE-2-B-RESOLVED: D-PE-2 (b) Pattern-Analysis Storage Location Deferral Closed
+
+**Decision:** The deferral named in the 2026-04-25 pattern-engine close (D-PE-2 (b) — pattern-analysis storage location) is closed. Resolution: Option 3 (field inside the encrypted profile blob, hub-keyed) per ADR-PE-01.
+
+**Reasoning:** D-PE-2 (b) was deferred under PR7 with the revisit condition "next pattern-engine session." That session opened on 2026-04-26 with a brief titled "wire engine-mentor-ledger." Read-and-report found the brief's premise incorrect (the ledger has no write-side). The session was redirected to the deferred storage-location decision. Founder selected Option 3 + Option A hub-scoped + D7 cloud-storage acceptance. ADR drafted, founder-approved on 2026-04-26, promoted to `/compliance/`.
+
+**Rules served:** PR7 (deferred decision resolved with documented reasoning), PR1 (storage decision must be in place before any rollout begins).
+
+**Status:** Adopted. Cross-references: D-PE-2 (Adopted 2026-04-25), D-ADR-PE-01 (Adopted 2026-04-26). The remaining D-PE-2 sub-decisions are: (a) shape adapter — resolved 2026-04-25 under ADR-Ring-2-01; (c) live `mentor_interactions` loader hub-scoped — still deferred, Critical under PR6 + R17, future session.
+
+---
+
+## 2026-04-26 — D-PE-LEDGER-WIRING-REDIRECTED: Session Brief "wire engine-mentor-ledger" Redirected to ADR-PE-01
+
+**Decision:** The 2026-04-26 session opening prompt titled "wire engine-mentor-ledger" was redirected to the deferred D-PE-2 (b) work after read-and-report (Steps 1–6) confirmed the brief's premise was incorrect. `sage-mentor/mentor-ledger.ts` is a pure type/logic module: zero Supabase imports, zero callers in `/website/src`, zero migration references to a `mentor_ledger` table or any ledger-shaped column. Engine-mentor-ledger persistence is out of scope of ADR-PE-01 and would require a separate ADR if pursued.
+
+**Reasoning:** The session brief described the engine-mentor-ledger as the missing write-side that pattern-engine reads. The on-disk reality is that pattern-engine reads `InteractionRecord[]` (per-session events from `mentor_interactions`), not `MentorLedger`. The 2026-04-25 pattern-engine close already named the missing write-side as the deferred `mentor_interactions` loader (D-PE-2 (c)) — not the ledger. The brief conflated three separate things: the journal-extraction ledger, the per-session interaction writes, and the longitudinal passion-frequency map. Surfaced via the AI signal "I'd push back on this" before any code or wiring was attempted.
+
+**Rules served:** PR2 (verification immediate via read-and-report), PR8 candidate (brief-vs-reality misframing logged as observation 1 in this stream; second related observation is the 2026-04-25 pattern-engine close's note about session-opening prompts misframing scope; promotion threshold is third recurrence), PR9 candidate (long-term regression: capability-inventory descriptions could be more explicit about which items are types-only and which have persistence layers).
+
+**Status:** Adopted as a stewardship observation. No promotion this session. Engine-mentor-ledger capability inventory line (`Isolated → Wired`) does not progress under this entry — the module's status is unchanged because it is correctly described as a pure journal-extraction layer with no DB write-side.
+
+---
