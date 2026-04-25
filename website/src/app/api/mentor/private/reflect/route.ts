@@ -21,7 +21,18 @@ import {
   fnv1aHash,
   estimateTokens,
 } from '@/lib/context/mentor-context-private'
-import { loadMentorProfile } from '@/lib/mentor-profile-store'
+// ADR-Ring-2-01 Session 4 (4a) — 26 April 2026:
+// Loader switched from loadMentorProfile() (legacy MentorProfileData) to
+// loadMentorProfileCanonical() (canonical MentorProfile). This was the last
+// legacy read-side caller in /website/src/. The loaded profile flows only
+// into getRecentInteractionsAsSignals at line ~210 (no direct field access
+// in this route handler; response body returns no profile-derived fields —
+// audit-confirmed). AC5/R20a perimeter unchanged: the
+// `await enforceDistressCheck(detectDistressTwoStage(...))` pattern below at
+// line ~141 is untouched. AC7 not engaged (no auth/cookie/session/redirect
+// changes). After this session's 4c (`ProfileForSignals` retirement), only
+// canonical reaches getRecentInteractionsAsSignals.
+import { loadMentorProfileCanonical } from '@/lib/mentor-profile-store'
 import { extractJSON } from '@/lib/json-utils'
 import { logMentorObservation } from '@/lib/logging/mentor-observation-logger'
 import type { ObservationCategory, ConfidenceLevel } from '@/lib/logging/mentor-observation-logger'
@@ -193,7 +204,10 @@ export async function POST(request: NextRequest) {
     ] = await Promise.all([
       useProjection ? getProjectedPractitionerContext(auth.user.id, topicForProjection) : Promise.resolve(null),
       useProjection ? Promise.resolve(null) : getFullPractitionerContext(auth.user.id),
-      useProjection ? loadMentorProfile(auth.user.id) : Promise.resolve(null),
+      // ADR-Ring-2-01 Session 4 (4a): canonical loader. storedProfile.profile
+      // is now MentorProfile (not MentorProfileData). The result flows only to
+      // getRecentInteractionsAsSignals (still accepts ProfileForSignals until 4c).
+      useProjection ? loadMentorProfileCanonical(auth.user.id) : Promise.resolve(null),
       getProjectContext('minimal'),
       getMentorObservationsWithParallelLog(auth.user.id, PRIVATE_MENTOR_HUB, 'private-reflect'),
       getJournalReferences(auth.user.id, extractTopicHints(what_happened, how_i_responded), PRIVATE_MENTOR_HUB),
