@@ -34,7 +34,7 @@ export interface VirtueEntry {
  * import via `@/lib/mentor-profile-summary` continue to work unchanged.
  */
 export type { FounderFacts } from '../../../sage-mentor'
-import type { FounderFacts } from '../../../sage-mentor'
+import type { FounderFacts, MentorProfile } from '../../../sage-mentor'
 
 /**
  * The persisted website profile shape. Written by the journal-ingestion
@@ -84,17 +84,62 @@ export interface MentorProfileData {
 /**
  * Build a text summary of a MentorProfile suitable for the
  * mentor-baseline and mentor-journal-week endpoints.
+ *
+ * Rewritten under ADR-Ring-2-01 Session 3 (25 April 2026) to consume the
+ * canonical `MentorProfile` (defined in /sage-mentor/persona.ts) instead of
+ * the legacy persisted `MentorProfileData`. Field-access translation table
+ * lives in ADR §2.1 / §2.2.
+ *
+ * Key differences from the legacy implementation:
+ *   - `proximity_estimate.{level,senecan_grade,description}` →
+ *     `proximity_level`, `senecan_grade`, optional
+ *     `proximity_estimate_description` (C-α field placement, ADR §6.1).
+ *   - `passion_map[].frequency` is now the bucket string
+ *     ('rare'|'occasional'|'recurring'|'persistent'), not the 1–12 count.
+ *     The inline number-to-bucket mapping that lived at line 131 is retired
+ *     (per Decision 3 of this session — `frequencyBucketFromCount` exported
+ *     from /website/src/lib/mentor-profile-adapter.ts is the single source
+ *     of truth and the rewrite no longer needs the conversion).
+ *   - `passion_map[].false_judgements[]` (plural) →
+ *     `passion_map[].false_judgement` (singular).
+ *   - `passion_map[].max_intensity` and `sections_present` have no
+ *     canonical equivalent; intensity is omitted from the per-passion line.
+ *   - `virtue_profile` is an array of `VirtueDomainAssessment` (not a
+ *     keyed Record). Iterated by `domain`/`strength`/`evidence`.
+ *   - `causal_tendencies` is an array of `CausalTendency` (not a
+ *     summary record). Iterated by `failure_point`/`description`.
+ *   - `value_hierarchy` is an array of `ValueHierarchyEntry` (not a
+ *     summary record). Top values = entries without `gap_detected`;
+ *     classification gaps = entries with `gap_detected: true`.
+ *   - `oikeiosis_map` is an array of `OikeioisMapEntry` (not a keyed
+ *     Record). Iterated by `relationship`/`oikeiosis_stage`.
+ *   - `preferred_indifferents_aggregate` → `preferred_indifferents`.
+ *   - Website-only optional fields (`journal_name`, `journal_period`,
+ *     `sections_processed`, `entries_processed`, `total_word_count`,
+ *     `founder_facts`, `proximity_estimate_description`) are guarded —
+ *     under C-α the canonical type may not carry them for un-seeded or
+ *     un-migrated profiles.
  */
-export function buildProfileSummary(profile: MentorProfileData): string {
+export function buildProfileSummary(profile: MentorProfile): string {
   const sections: string[] = []
 
-  // Identity and scope
-  sections.push(
-    `PRACTITIONER PROFILE: ${profile.display_name}`,
-    `Journal: ${profile.journal_name} (${profile.journal_period})`,
-    `Scope: ${profile.sections_processed} sections, ${profile.entries_processed} entries, ${profile.total_word_count} words`,
-    ''
-  )
+  // Identity and scope (scope line is conditional — optional fields under C-α)
+  sections.push(`PRACTITIONER PROFILE: ${profile.display_name}`)
+  if (profile.journal_name || profile.journal_period) {
+    sections.push(
+      `Journal: ${profile.journal_name ?? 'n/a'} (${profile.journal_period ?? 'n/a'})`,
+    )
+  }
+  if (
+    typeof profile.sections_processed === 'number' ||
+    typeof profile.entries_processed === 'number' ||
+    typeof profile.total_word_count === 'number'
+  ) {
+    sections.push(
+      `Scope: ${profile.sections_processed ?? 0} sections, ${profile.entries_processed ?? 0} entries, ${profile.total_word_count ?? 0} words`,
+    )
+  }
+  sections.push('')
 
   // Founder Facts — stable biographical context (injected first so the mentor
   // knows who the person IS before reading their philosophical profile)
@@ -108,7 +153,11 @@ export function buildProfileSummary(profile: MentorProfileData): string {
       `  Financial: ${ff.financial_situation}`,
       `  Horizon: ${ff.retirement_horizon}`,
     )
-    if (ff.additional_context.length > 0) {
+    // Defensive: O-2B from Session 2 close — `additional_context` is typed as
+    // required `string[]` on FounderFacts but older persisted rows may carry
+    // `undefined`. Guard with `Array.isArray` so the rewrite tolerates the
+    // pre-existing posture without changing the FounderFacts type.
+    if (Array.isArray(ff.additional_context) && ff.additional_context.length > 0) {
       for (const note of ff.additional_context) {
         sections.push(`  • ${note}`)
       }
@@ -118,65 +167,85 @@ export function buildProfileSummary(profile: MentorProfileData): string {
 
   // Proximity and grade
   sections.push(
-    `PROXIMITY ESTIMATE: ${profile.proximity_estimate.level}`,
-    `Senecan grade: ${profile.proximity_estimate.senecan_grade}`,
-    `Assessment: ${profile.proximity_estimate.description}`,
-    ''
+    `PROXIMITY ESTIMATE: ${profile.proximity_level}`,
+    `Senecan grade: ${profile.senecan_grade}`,
   )
+  if (profile.proximity_estimate_description) {
+    sections.push(`Assessment: ${profile.proximity_estimate_description}`)
+  }
+  sections.push('')
 
-  // Passion map (sorted by frequency)
-  const sortedPassions = [...profile.passion_map].sort((a, b) => b.frequency - a.frequency)
-  sections.push('PASSION MAP (sorted by frequency):')
+  // Passion map (sorted by bucket — persistent first, then recurring,
+  // occasional, rare). The bucket order is fixed; sorting is by index in the
+  // ordered list rather than a numeric comparison.
+  const BUCKET_ORDER: Record<MentorProfile['passion_map'][number]['frequency'], number> = {
+    persistent: 0,
+    recurring: 1,
+    occasional: 2,
+    rare: 3,
+  }
+  const sortedPassions = [...profile.passion_map].sort(
+    (a, b) => BUCKET_ORDER[a.frequency] - BUCKET_ORDER[b.frequency],
+  )
+  sections.push('PASSION MAP (sorted by frequency bucket):')
   for (const p of sortedPassions) {
-    const persistence = p.frequency >= 7 ? 'persistent' : p.frequency >= 4 ? 'recurring' : p.frequency >= 2 ? 'occasional' : 'rare'
     sections.push(
-      `  ${p.sub_species} (${p.root_passion}) — frequency: ${p.frequency}/12, intensity: ${p.max_intensity}, pattern: ${persistence}`,
-      `    False judgements: ${p.false_judgements.slice(0, 3).join('; ')}${p.false_judgements.length > 3 ? ` (+${p.false_judgements.length - 3} more)` : ''}`
+      `  ${p.sub_species} (${p.root_passion}) — pattern: ${p.frequency}`,
+      `    False judgement: ${p.false_judgement || 'n/a'}`,
     )
   }
   sections.push('')
 
-  // Virtue profile
+  // Virtue profile (canonical: array of VirtueDomainAssessment)
   sections.push('VIRTUE PROFILE:')
-  for (const [virtue, data] of Object.entries(profile.virtue_profile)) {
+  for (const v of profile.virtue_profile) {
     sections.push(
-      `  ${virtue}: ${data.overall_strength} (${data.observations_count} observations)`,
-      `    Evidence: ${data.evidence_summary[0]}`
+      `  ${v.domain}: ${v.strength}`,
+      `    Evidence: ${v.evidence || 'n/a'}`,
     )
   }
   sections.push('')
 
-  // Causal tendencies
-  sections.push(
-    'CAUSAL TENDENCIES:',
-    `  Primary breakdown: ${profile.causal_tendencies.primary_breakdown}`,
-    `  ${profile.causal_tendencies.description}`
-  )
-  for (const [stage, desc] of Object.entries(profile.causal_tendencies.specific_breakdowns)) {
-    sections.push(`  ${stage}: ${desc}`)
+  // Causal tendencies (canonical: array of CausalTendency)
+  sections.push('CAUSAL TENDENCIES:')
+  for (const t of profile.causal_tendencies) {
+    sections.push(`  ${t.failure_point} (${t.frequency}): ${t.description}`)
   }
   sections.push('')
 
-  // Value hierarchy
+  // Value hierarchy (canonical: array of ValueHierarchyEntry).
+  // Top values = entries without `gap_detected`; gaps = entries with it.
+  const topValues = profile.value_hierarchy
+    .filter((v) => !v.gap_detected)
+    .map((v) => v.item)
+  const valueGaps = profile.value_hierarchy.filter((v) => v.gap_detected)
   sections.push(
     'VALUE HIERARCHY:',
-    `  Top values: ${profile.value_hierarchy.explicit_top_values.join(', ')}`,
-    `  Primary conflict: ${profile.value_hierarchy.primary_conflict}`,
-    `  Classification gaps: ${profile.value_hierarchy.classification_gaps.join('; ')}`
+    `  Top values: ${topValues.join(', ') || 'none recorded'}`,
   )
+  if (valueGaps.length > 0) {
+    sections.push('  Classification gaps:')
+    for (const g of valueGaps) {
+      sections.push(
+        `    "${g.item}" — declared ${g.declared_classification}, observed ${g.observed_classification}`,
+      )
+    }
+  }
   sections.push('')
 
-  // Oikeiosis map
+  // Oikeiosis map (canonical: array of OikeioisMapEntry)
   sections.push('OIKEIOSIS MAP:')
-  for (const [circle, data] of Object.entries(profile.oikeiosis_map)) {
-    sections.push(`  ${circle}: ${data.level} — ${data.evidence}`)
+  for (const o of profile.oikeiosis_map) {
+    sections.push(
+      `  ${o.relationship} (${o.oikeiosis_stage}) — reflection ${o.reflection_frequency}`,
+    )
   }
   sections.push('')
 
   // Preferred indifferents
   sections.push(
     'PREFERRED INDIFFERENTS (treated as genuine goods):',
-    `  ${profile.preferred_indifferents_aggregate.join(', ')}`
+    `  ${profile.preferred_indifferents.join(', ') || 'none recorded'}`,
   )
 
   return sections.join('\n')

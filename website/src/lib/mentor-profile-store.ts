@@ -94,7 +94,14 @@ export async function loadMentorProfile(
   const t3 = Date.now()
   const profile = JSON.parse(decryptedJson) as MentorProfileData
   const t4 = Date.now()
-  const summary = buildProfileSummary(profile)
+  // Transitional shim under ADR-Ring-2-01 Session 3 (25 April 2026):
+  // `buildProfileSummary` was rewritten to consume the canonical MentorProfile.
+  // The legacy loader still returns MentorProfileData in its envelope (legacy
+  // contract preserved); the summary line adapts to canonical for the rewritten
+  // builder. Retires when this loader is removed in Session 5.
+  const summary = buildProfileSummary(
+    adaptMentorProfileDataToCanonical(profile, { lastUpdated: row.updated_at }),
+  )
   const t5 = Date.now()
 
   console.log(
@@ -184,7 +191,11 @@ export async function loadMentorProfileCanonical(
     lastUpdated: row.updated_at,
   })
   const t5 = Date.now()
-  const summary = buildProfileSummary(persisted)
+  // Under ADR-Ring-2-01 Session 3 (25 April 2026): `buildProfileSummary` now
+  // consumes the canonical MentorProfile. The canonical-shape `profile` from
+  // the adapter call above is passed directly. (Was previously called on
+  // `persisted` because the rewrite hadn't happened yet.)
+  const summary = buildProfileSummary(profile)
   const t6 = Date.now()
 
   console.log(

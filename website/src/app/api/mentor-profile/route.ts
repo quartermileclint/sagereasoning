@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-summary'
 import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
+import { adaptMentorProfileDataToCanonical } from '@/lib/mentor-profile-adapter'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
 import mentorProfileFallback from '@/data/mentor-profile.json'
 
@@ -48,7 +49,20 @@ export async function GET(request: NextRequest) {
       source = 'static_fallback'
     }
 
-    const profileSummary = buildProfileSummary(profile)
+    // Transitional shim under ADR-Ring-2-01 Session 3 (25 April 2026):
+    // `buildProfileSummary` was rewritten to consume the canonical
+    // MentorProfile. This route is NOT this session's PR1 single-endpoint
+    // proof (private baseline is — see /api/mentor/private/baseline-response),
+    // so the legacy loader and the wire contract for `profile` and `meta`
+    // (which read MentorProfileData fields directly) are preserved here.
+    // The canonical-shape adaptation happens only at the summary line.
+    //
+    // Retirement condition (PR7): when this GET endpoint migrates as its own
+    // follow-up Session-3 session, the adapter call collapses into a direct
+    // `buildProfileSummary(profile)` (with `profile` typed `MentorProfile`),
+    // the `meta` block translates to canonical field names, and the import
+    // above is removed.
+    const profileSummary = buildProfileSummary(adaptMentorProfileDataToCanonical(profile))
 
     return NextResponse.json(
       {

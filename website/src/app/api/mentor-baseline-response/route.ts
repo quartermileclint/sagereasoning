@@ -5,6 +5,7 @@ import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
 import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-summary'
 import { loadMentorProfile } from '@/lib/mentor-profile-store'
+import { adaptMentorProfileDataToCanonical } from '@/lib/mentor-profile-adapter'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
 import mentorProfileFallback from '@/data/mentor-profile.json'
 
@@ -113,8 +114,20 @@ export async function POST(request: NextRequest) {
       currentProfile = mentorProfileFallback as MentorProfileData
     }
 
-    // Build the input for sage-reason: profile summary + answers
-    const profileSummary = buildProfileSummary(currentProfile)
+    // Build the input for sage-reason: profile summary + answers.
+    //
+    // Transitional shim under ADR-Ring-2-01 Session 3 (25 April 2026):
+    // `buildProfileSummary` was rewritten to consume the canonical
+    // MentorProfile. This route is NOT this session's PR1 single-endpoint
+    // proof (private baseline is — see /api/mentor/private/baseline-response),
+    // so the legacy loader and the wire contract for `current_profile` are
+    // preserved here. The canonical-shape adaptation happens only at the
+    // summary line.
+    //
+    // Retirement condition (PR7): when this route migrates as its own
+    // follow-up Session-3 session, the adapter call collapses into a direct
+    // `buildProfileSummary(currentProfile)` and the import is removed.
+    const profileSummary = buildProfileSummary(adaptMentorProfileDataToCanonical(currentProfile))
 
     const answersFormatted = responses.map(r =>
       `[${r.question_id}] ${r.question_text || '(question text not provided)'}\n\nPRACTITIONER'S ANSWER:\n${r.answer}`

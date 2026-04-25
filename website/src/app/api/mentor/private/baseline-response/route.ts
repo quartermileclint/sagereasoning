@@ -6,6 +6,7 @@ import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
 import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-summary'
 import { loadMentorProfile } from '@/lib/mentor-profile-store'
+import { adaptMentorProfileDataToCanonical } from '@/lib/mentor-profile-adapter'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
 import mentorProfileFallback from '@/data/mentor-profile.json'
 import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
@@ -123,8 +124,21 @@ export async function POST(request: NextRequest) {
       currentProfile = mentorProfileFallback as MentorProfileData
     }
 
-    // Build the input for sage-reason: profile summary + answers
-    const profileSummary = buildProfileSummary(currentProfile)
+    // Build the input for sage-reason: profile summary + answers.
+    //
+    // ADR-Ring-2-01 Session 3 migration (25 April 2026): this is the migrated
+    // PR1 single-endpoint proof. `buildProfileSummary` now consumes the
+    // canonical MentorProfile. We keep the legacy `loadMentorProfile()` here
+    // (rather than switching to `loadMentorProfileCanonical()`) so the wire
+    // contract for `current_profile` in the response body is unchanged this
+    // session. The canonical-shape adaptation happens only at the summary line.
+    //
+    // Retirement condition (PR7): when this route fully migrates to
+    // `loadMentorProfileCanonical()` in a follow-up Session-3 session, the
+    // `adaptMentorProfileDataToCanonical(...)` call below collapses into the
+    // direct `buildProfileSummary(currentProfile)` form (with `currentProfile`
+    // by then typed `MentorProfile`) and the import above is removed.
+    const profileSummary = buildProfileSummary(adaptMentorProfileDataToCanonical(currentProfile))
 
     const answersFormatted = responses.map(r =>
       `[${r.question_id}] ${r.question_text || '(question text not provided)'}\n\nPRACTITIONER'S ANSWER:\n${r.answer}`
