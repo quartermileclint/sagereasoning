@@ -45,8 +45,9 @@ import { loadRingFunctions } from '@/lib/sage-mentor-ring-bridge'
 import type {
   BeforeResult,
   AfterResult,
+  PatternAnalysis,
 } from '@/lib/sage-mentor-ring-bridge'
-import { PROOF_PROFILE } from '@/lib/mentor-ring-fixtures'
+import { PROOF_PROFILE, PROOF_INTERACTIONS } from '@/lib/mentor-ring-fixtures'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -171,17 +172,44 @@ export async function POST(request: NextRequest) {
     // Start a ring session — collects token usage across phases
     const session = ring.startRingSession(task, innerAgent)
 
+    // ─── PATTERN-ENGINE PASS ─────────────────────────────────────────────
+    // PR1 single-endpoint proof of pattern-engine wiring (added 25 Apr 2026).
+    // Deterministic — no LLM call, no DB read, no live data. Operates on
+    // the fixture profile + fixture interactions. Wrapped in try/catch so
+    // an engine failure cannot break the existing ring trace.
+    let patternAnalysis: PatternAnalysis | null = null
+    let patternEngineError: string | null = null
+    try {
+      patternAnalysis = ring.analysePatterns(PROOF_PROFILE, PROOF_INTERACTIONS, null)
+    } catch (engineErr) {
+      patternEngineError = engineErr instanceof Error ? engineErr.message : 'unknown error'
+      console.error('[mentor/ring/proof] Pattern-engine error:', engineErr)
+    }
+    const ringSummary = patternAnalysis?.ring_summary ?? null
+
     // ─── BEFORE PHASE ─────────────────────────────────────────────────────
     const before = ring.executeBefore(PROOF_PROFILE, task, innerAgent)
     let beforeResult: BeforeResult = before.result
     let beforeRawLlmJson: unknown = null
+    // Track whether the BEFORE prompt was augmented with the pattern summary,
+    // so the verification step can confirm the architectural pattern fired.
+    let augmentedPromptIncludesPatterns = false
 
     if (before.needsLlmCheck && before.llmPrompt) {
+      // Append the pattern summary to the BEFORE prompt as a new section.
+      // Composition order (KG6): user-message zone, after the existing
+      // structured prompt — same authority level as profile context.
+      let llmPromptToSend = before.llmPrompt
+      if (ringSummary) {
+        llmPromptToSend = `${before.llmPrompt}\n\nRECURRING PATTERNS DETECTED ACROSS PRIOR INTERACTIONS:\n${ringSummary}\n\n(These are deterministic aggregations from this practitioner's recent interaction history — diagnostic, not punitive. Reference them where relevant; do not repeat verbatim.)`
+        augmentedPromptIncludesPatterns = true
+      }
+
       const beforeMessage = await client.messages.create({
         model: ring.MODEL_IDS[before.modelTier],
         max_tokens: 800,
         temperature: 0.2,
-        messages: [{ role: 'user', content: before.llmPrompt }],
+        messages: [{ role: 'user', content: llmPromptToSend }],
       })
 
       ring.addSessionTokenUsage(
@@ -333,6 +361,7 @@ export async function POST(request: NextRequest) {
           needsLlmCheck: before.needsLlmCheck,
           modelTier: before.modelTier,
           raw_llm_json: beforeRawLlmJson,
+          augmented_prompt_includes_patterns: augmentedPromptIncludesPatterns,
         },
         inner_output: innerOutput,
         after: {
@@ -343,11 +372,16 @@ export async function POST(request: NextRequest) {
           critical_category: after.criticalCategory,
           raw_llm_json: afterRawLlmJson,
         },
+        pattern_analysis: patternAnalysis,
+        pattern_engine_error: patternEngineError,
         token_summary: result.token_summary,
         total_duration_ms: totalDurationMs,
         notes: [
           'This endpoint is a PR1 single-endpoint proof of the Ring Wrapper.',
           'Profile source: hand-constructed fixture (mentor-ring-fixtures.ts).',
+          'Interactions source: hand-constructed fixture (PROOF_INTERACTIONS).',
+          'Pattern-engine runs deterministically (no LLM) on the fixture interactions.',
+          'When the BEFORE LLM check fires, the BEFORE prompt is augmented with pattern_analysis.ring_summary.',
           'No write to mentor_interactions — KG3 hub-label surface deferred.',
           'Shape unification adapter is a separately scoped follow-up.',
         ],

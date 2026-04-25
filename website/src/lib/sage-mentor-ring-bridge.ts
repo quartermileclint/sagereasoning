@@ -30,6 +30,12 @@ import type {
   InboxItem,
   KBArticle,
   SupportInteractionHistory,
+  // Pattern-engine types (added 25 Apr 2026 for the pattern-engine PR1 proof)
+  InteractionRecord,
+  TemporalPattern,
+  PassionCluster,
+  PatternAnalysis,
+  RegressionWarning,
 } from '../../../sage-mentor'
 
 // Re-export the types so route code can import them from this single file.
@@ -47,6 +53,12 @@ export type {
   InboxItem,
   KBArticle,
   SupportInteractionHistory,
+  // Pattern-engine types
+  InteractionRecord,
+  TemporalPattern,
+  PassionCluster,
+  PatternAnalysis,
+  RegressionWarning,
 }
 
 /**
@@ -109,6 +121,36 @@ export interface RingFunctions {
   SUPPORT_AGENT_NAME: string
   SUPPORT_AGENT_TYPE: InnerAgent['type']
   SUPPORT_DISCLAIMER: string
+
+  // ── Pattern-engine additions (added 25 Apr 2026, PR1 proof) ──────────
+  /**
+   * Decide whether the batch pattern analysis should run for this profile,
+   * based on interaction count and time since last analysis.
+   * Deterministic — no LLM call.
+   */
+  shouldRunPatternAnalysis: (
+    interactionCount: number,
+    lastAnalysisTimestamp: string | null,
+  ) => boolean
+  /**
+   * Run the full deterministic pattern analysis over a profile + interactions
+   * window. No LLM calls — produces a structured PatternAnalysis with a
+   * pre-computed ring_summary string for cheap injection into prompts.
+   */
+  analysePatterns: (
+    profile: MentorProfile,
+    interactions: InteractionRecord[],
+    previousAnalysis?: PatternAnalysis | null,
+  ) => PatternAnalysis
+  /**
+   * Build the LLM prompt for narrative interpretation of novel patterns.
+   * Only intended for use when analysis.has_novel_patterns === true.
+   * Caller is responsible for sending the prompt to the LLM (Sonnet tier).
+   */
+  buildPatternNarrativePrompt: (
+    analysis: PatternAnalysis,
+    profile: MentorProfile,
+  ) => string
 }
 
 /**
@@ -135,6 +177,10 @@ export async function loadRingFunctions(): Promise<RingFunctions | null> {
       SUPPORT_AGENT_NAME: mod.SUPPORT_AGENT_NAME,
       SUPPORT_AGENT_TYPE: mod.SUPPORT_AGENT_TYPE,
       SUPPORT_DISCLAIMER: mod.SUPPORT_DISCLAIMER,
+      // Pattern-engine additions
+      shouldRunPatternAnalysis: mod.shouldRunPatternAnalysis,
+      analysePatterns: mod.analysePatterns,
+      buildPatternNarrativePrompt: mod.buildPatternNarrativePrompt,
     }
   } catch (err) {
     console.error('[sage-mentor-ring-bridge] Failed to load ring functions:', err)
