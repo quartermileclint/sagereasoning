@@ -472,6 +472,33 @@ export function adaptMentorProfileDataToCanonical(
   const journalReferences: JournalReference[] = []
   const directionOfTravel: DirectionOfTravel = 'stable'
 
+  // ── Website-only optional fields (ADR-Ring-2-01 Session 2 — C-α) ───────
+  // Pure pass-through. These fields originate in the journal-ingestion
+  // pipeline output (the persisted MentorProfileData shape) and are surfaced
+  // to website consumers. Sage-mentor functions do not currently read them.
+  // Each field falls back to `undefined` when the source is missing or of
+  // an unexpected type — no fabrication, no throw.
+  const journalName = typeof data.journal_name === 'string' ? data.journal_name : undefined
+  const journalPeriod = typeof data.journal_period === 'string' ? data.journal_period : undefined
+  const sectionsProcessed =
+    typeof data.sections_processed === 'number' && Number.isFinite(data.sections_processed)
+      ? data.sections_processed
+      : undefined
+  const entriesProcessed =
+    typeof data.entries_processed === 'number' && Number.isFinite(data.entries_processed)
+      ? data.entries_processed
+      : undefined
+  const totalWordCount =
+    typeof data.total_word_count === 'number' && Number.isFinite(data.total_word_count)
+      ? data.total_word_count
+      : undefined
+  const founderFacts =
+    data.founder_facts && typeof data.founder_facts === 'object' ? data.founder_facts : undefined
+  const proximityEstimateDescription =
+    typeof data.proximity_estimate?.description === 'string'
+      ? data.proximity_estimate.description
+      : undefined
+
   return {
     user_id: typeof data.user_id === 'string' ? data.user_id : '',
     display_name: typeof data.display_name === 'string' ? data.display_name : 'Practitioner',
@@ -490,5 +517,13 @@ export function adaptMentorProfileDataToCanonical(
     current_prescription: null,
     last_interaction: lastInteraction,
     interaction_count: 0,
+    // Website-only optional fields (pass-through)
+    journal_name: journalName,
+    journal_period: journalPeriod,
+    sections_processed: sectionsProcessed,
+    entries_processed: entriesProcessed,
+    total_word_count: totalWordCount,
+    founder_facts: founderFacts,
+    proximity_estimate_description: proximityEstimateDescription,
   }
 }

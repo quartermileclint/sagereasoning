@@ -36,6 +36,17 @@ const SAMPLE_INPUT: MentorProfileData = {
   sections_processed: 4,
   entries_processed: 28,
   total_word_count: 12_345,
+  founder_facts: {
+    age: 47,
+    years_married: 18,
+    children_ages: [12, 9],
+    work_schedule: 'Mon–Fri, ~8h/day',
+    family_situation: 'Two children at school; spouse working part-time.',
+    financial_situation: 'Stable income; mortgage two-thirds paid.',
+    retirement_horizon: '~18 years.',
+    additional_context: ['Recently relocated for family reasons.'],
+    last_updated: '2026-04-01T00:00:00.000Z',
+  },
   passion_map: [
     {
       passion_id: 'phobos-deadline',
@@ -257,6 +268,29 @@ describe('adaptMentorProfileDataToCanonical', () => {
   it('forwards preferred_indifferents from the aggregate field', () => {
     expect(result.preferred_indifferents).toEqual(
       expect.arrayContaining(['professional reputation', 'project velocity', 'recognition']),
+    )
+  })
+
+  it('passes through the seven website-only optional fields (ADR-Ring-2-01 Session 2 — C-α)', () => {
+    // Provenance fields
+    expect(result.journal_name).toBe('Sample Journal')
+    expect(result.journal_period).toBe('2026-Q1')
+    expect(result.sections_processed).toBe(4)
+    expect(result.entries_processed).toBe(28)
+    expect(result.total_word_count).toBe(12_345)
+
+    // Biographical context
+    expect(result.founder_facts).toBeDefined()
+    expect(result.founder_facts?.age).toBe(47)
+    expect(result.founder_facts?.years_married).toBe(18)
+    expect(result.founder_facts?.children_ages).toEqual([12, 9])
+    expect(result.founder_facts?.additional_context).toEqual([
+      'Recently relocated for family reasons.',
+    ])
+
+    // Flat proximity description (per ADR §12 Session 2 — not a sub-object)
+    expect(result.proximity_estimate_description).toBe(
+      'Reasoning is deliberate when calm; reflexive under pressure.',
     )
   })
 

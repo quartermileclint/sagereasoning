@@ -49,6 +49,7 @@
 
 import type { DimensionScores, KatorthomaProximityLevel } from '../trust-layer/types/accreditation'
 import type { ProgressionPrescription } from '../trust-layer/types/progression'
+import type { FounderFacts } from './founder-facts'
 import { sanitise, sanitiseArray } from './sanitise'
 
 // ============================================================================
@@ -113,6 +114,38 @@ export type MentorProfile = {
 
   /** Total interactions since onboarding */
   readonly interaction_count: number
+
+  // ── Website-only optional fields (added under ADR-Ring-2-01 Session 2) ─
+  // Extending MentorProfile in place per C-α field placement (ADR §6.1).
+  // These fields originate in the journal-ingestion pipeline output (the
+  // persisted MentorProfileData shape) and are surfaced to website consumers
+  // such as the founder hub and the baseline endpoints. Sage-mentor functions
+  // do not currently read them; they are carried alongside the philosophical
+  // profile so a single canonical type can serve both audiences.
+
+  /** Source-field on MentorProfileData: `journal_name` */
+  readonly journal_name?: string
+
+  /** Source-field on MentorProfileData: `journal_period` */
+  readonly journal_period?: string
+
+  /** Source-field on MentorProfileData: `sections_processed` */
+  readonly sections_processed?: number
+
+  /** Source-field on MentorProfileData: `entries_processed` */
+  readonly entries_processed?: number
+
+  /** Source-field on MentorProfileData: `total_word_count` */
+  readonly total_word_count?: number
+
+  /** Source-field on MentorProfileData: `founder_facts` (biographical context) */
+  readonly founder_facts?: FounderFacts
+
+  /** Source-field on MentorProfileData: `proximity_estimate.description`.
+   *  Flat (single optional string) per ADR §12 Session 2 — avoids introducing
+   *  a `proximity_estimate?: {...}` sub-object that would duplicate
+   *  `senecan_grade` and `proximity_level` already on the canonical type. */
+  readonly proximity_estimate_description?: string
 }
 
 export type PassionMapEntry = {

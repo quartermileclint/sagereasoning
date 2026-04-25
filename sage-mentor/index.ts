@@ -46,6 +46,9 @@ export type {
   JournalReference,
 } from './persona'
 
+// ── Founder Facts (biographical context, consumed by MentorProfile) ─────────
+export type { FounderFacts } from './founder-facts'
+
 export {
   buildMentorPersona,
   buildMentorPersonaCore,

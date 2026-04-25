@@ -26,23 +26,15 @@ export interface VirtueEntry {
 
 /**
  * Founder Facts — stable biographical context that persists across sessions.
- * Injected at the top of the full profile summary so the mentor arrives
- * knowing who the practitioner is as a person, not just their philosophical
- * profile. Updated manually or by the mentor via session observations.
+ *
+ * Definition moved to /sage-mentor/founder-facts.ts on 2026-04-25 under
+ * ADR-Ring-2-01 Session 2 so the canonical MentorProfile (in
+ * /sage-mentor/persona.ts) can reference the same type without sage-mentor
+ * importing from /website/. Re-exported here so downstream consumers that
+ * import via `@/lib/mentor-profile-summary` continue to work unchanged.
  */
-export interface FounderFacts {
-  age: number
-  years_married: number
-  children_ages: number[]
-  work_schedule: string
-  family_situation: string
-  financial_situation: string
-  retirement_horizon: string
-  /** Mentor-appended observations about life circumstances, stable traits,
-   *  relationships, or context that should persist across sessions. */
-  additional_context: string[]
-  last_updated: string
-}
+export type { FounderFacts } from '../../../sage-mentor'
+import type { FounderFacts } from '../../../sage-mentor'
 
 /**
  * The persisted website profile shape. Written by the journal-ingestion
