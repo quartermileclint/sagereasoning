@@ -14,12 +14,52 @@
  * configured, or if the load fails. Callers should proceed without personalisation.
  *
  * R17b: Profile data is encrypted at rest. This module reads through the
- * existing loadMentorProfile() pipeline which handles decryption.
+ * existing loadMentorProfileCanonical() pipeline which handles decryption.
+ *
+ * Migrated under ADR-Ring-2-01 Session 3d (26 April 2026): switched from
+ * loadMentorProfile() (legacy MentorProfileData envelope) to
+ * loadMentorProfileCanonical() (canonical MentorProfile envelope). The string
+ * builders (buildCondensedContext, projectProfile) and their helpers
+ * (formatPassion, findWeakestVirtue) consume the canonical shape per ADR §2.1
+ * / §2.2. Field translations applied internally (no wire-contract change —
+ * these functions return formatted strings for prompt injection):
+ *   - proximity_estimate.{level,senecan_grade} → proximity_level + senecan_grade
+ *   - virtue_profile Record → VirtueDomainAssessment[] (iterate by domain)
+ *   - causal_tendencies summary record → CausalTendency[] (primary picked by
+ *     frequency order: common > occasional > rare)
+ *   - value_hierarchy summary record → ValueHierarchyEntry[] (top values =
+ *     entries without gap_detected; gaps = entries with it; legacy
+ *     primary_conflict has no canonical equivalent — surface first gap entry)
+ *   - oikeiosis_map Record → OikeioisMapEntry[] (iterate by person_or_role /
+ *     oikeiosis_stage / reflection_frequency)
+ *   - passion_map[].false_judgements[] (plural) → false_judgement (singular)
+ *   - passion_map[].frequency (1–12 number) → bucket string
+ *     ('rare'|'occasional'|'recurring'|'persistent'); sort changes from
+ *     numeric to fixed bucket order
+ *   - passion_map[].max_intensity / sections_present — no canonical equivalent;
+ *     dropped from per-passion lines.
  */
 
-import { loadMentorProfile } from '@/lib/mentor-profile-store'
+import { loadMentorProfileCanonical } from '@/lib/mentor-profile-store'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
-import type { MentorProfileData, PassionMapEntry } from '@/lib/mentor-profile-summary'
+import type { CausalTendency, MentorProfile, PassionMapEntry } from '../../../../sage-mentor'
+
+// ── Bucket-order tables for canonical sorts ─────────────────────────
+// passion_map[].frequency: 'persistent' > 'recurring' > 'occasional' > 'rare'.
+// Lower index sorts first, so persistent appears first in slice(0, 3).
+const PASSION_BUCKET_ORDER: Record<MentorProfile['passion_map'][number]['frequency'], number> = {
+  persistent: 0,
+  recurring: 1,
+  occasional: 2,
+  rare: 3,
+}
+// causal_tendencies[].frequency: 'common' > 'occasional' > 'rare'. Lower
+// index sorts first, so the most common breakdown is picked as primary.
+const CAUSAL_FREQ_ORDER: Record<CausalTendency['frequency'], number> = {
+  common: 0,
+  occasional: 1,
+  rare: 2,
+}
 
 /**
  * Get a condensed practitioner context block for LLM injection.
@@ -32,7 +72,7 @@ export async function getPractitionerContext(userId: string): Promise<string | n
   try {
     if (!isServerEncryptionConfigured()) return null
 
-    const stored = await loadMentorProfile(userId)
+    const stored = await loadMentorProfileCanonical(userId)
     if (!stored) return null
 
     return buildCondensedContext(stored.profile)
@@ -59,10 +99,10 @@ export async function getFullPractitionerContext(userId: string): Promise<string
   try {
     if (!isServerEncryptionConfigured()) return null
 
-    const stored = await loadMentorProfile(userId)
+    const stored = await loadMentorProfileCanonical(userId)
     if (!stored) return null
 
-    return stored.summary // buildProfileSummary output — already computed by loadMentorProfile
+    return stored.summary // buildProfileSummary output — already canonical-consuming since Session 3a
   } catch (err) {
     console.error('[practitioner-context] Failed to load full profile:', err)
     return null
@@ -74,7 +114,7 @@ export async function getFullPractitionerContext(userId: string): Promise<string
  * Target: 300-500 tokens. Focuses on the dimensions most relevant to
  * real-time reasoning quality.
  */
-function buildCondensedContext(profile: MentorProfileData): string {
+function buildCondensedContext(profile: MentorProfile): string {
   const sections: string[] = []
 
   sections.push('PRACTITIONER CONTEXT (personalised to this user):')
@@ -87,14 +127,21 @@ function buildCondensedContext(profile: MentorProfileData): string {
     )
   }
 
-  // 1. Proximity and grade — the single most important context signal
+  // 1. Proximity and grade — the single most important context signal.
+  // ADR-Ring-2-01 Session 3d: flat canonical fields (was nested
+  // proximity_estimate.{level,senecan_grade} on MentorProfileData).
   sections.push(
-    `Proximity: ${profile.proximity_estimate.level} (Senecan grade: ${profile.proximity_estimate.senecan_grade})`
+    `Proximity: ${profile.proximity_level} (Senecan grade: ${profile.senecan_grade})`
   )
 
-  // 2. Top 3 passions by frequency — what distorts this person's reasoning most
+  // 2. Top 3 passions by frequency bucket — what distorts this person's
+  // reasoning most. Sort changes from numeric (b.frequency - a.frequency)
+  // to fixed bucket order (persistent first, then recurring, occasional,
+  // rare) because the canonical frequency is now a string union.
   const topPassions = [...profile.passion_map]
-    .sort((a, b) => b.frequency - a.frequency)
+    .sort(
+      (a, b) => PASSION_BUCKET_ORDER[a.frequency] - PASSION_BUCKET_ORDER[b.frequency]
+    )
     .slice(0, 3)
 
   if (topPassions.length > 0) {
@@ -108,14 +155,27 @@ function buildCondensedContext(profile: MentorProfileData): string {
     sections.push(`Weakest virtue: ${weakest.name} (${weakest.strength})`)
   }
 
-  // 4. Primary causal breakdown — where reasoning fails
-  sections.push(
-    `Causal breakdown: ${profile.causal_tendencies.primary_breakdown} — ${profile.causal_tendencies.description}`
-  )
+  // 4. Primary causal breakdown — where reasoning fails. Canonical:
+  // causal_tendencies is a CausalTendency[]; pick the most-frequent entry
+  // (common > occasional > rare). Skip the section gracefully if empty.
+  const primaryCausal = [...profile.causal_tendencies].sort(
+    (a, b) => CAUSAL_FREQ_ORDER[a.frequency] - CAUSAL_FREQ_ORDER[b.frequency]
+  )[0]
+  if (primaryCausal) {
+    sections.push(
+      `Causal breakdown: ${primaryCausal.failure_point} — ${primaryCausal.description}`
+    )
+  }
 
-  // 5. Top value conflict — the tension most likely to surface
-  if (profile.value_hierarchy.primary_conflict) {
-    sections.push(`Primary value conflict: ${profile.value_hierarchy.primary_conflict}`)
+  // 5. Top value-hierarchy gap — the tension most likely to surface.
+  // Canonical: value_hierarchy is a ValueHierarchyEntry[]; legacy
+  // `primary_conflict` field has no canonical equivalent. Surface the first
+  // gap entry as the closest replacement signal.
+  const firstGap = profile.value_hierarchy.find((v) => v.gap_detected)
+  if (firstGap) {
+    sections.push(
+      `Primary value gap: "${firstGap.item}" — declared ${firstGap.declared_classification}, observed ${firstGap.observed_classification}`
+    )
   }
 
   // Instruction to the LLM on how to use this context
@@ -128,16 +188,25 @@ function buildCondensedContext(profile: MentorProfileData): string {
 }
 
 function formatPassion(p: PassionMapEntry): string {
-  const falseJudgement = p.false_judgements[0] || ''
+  // ADR-Ring-2-01 Session 3d: canonical false_judgement is singular (was
+  // false_judgements[] plural on MentorProfileData). Frequency is now the
+  // bucket string ('rare'|'occasional'|'recurring'|'persistent') — the
+  // legacy "/12" suffix is dropped because the count is no longer numeric.
+  const falseJudgement = p.false_judgement || ''
   const brief = falseJudgement.length > 80
     ? falseJudgement.substring(0, 77) + '...'
     : falseJudgement
-  return `${p.sub_species} (${p.root_passion}, freq ${p.frequency}/12)${brief ? ` — "${brief}"` : ''}`
+  return `${p.sub_species} (${p.root_passion}, ${p.frequency})${brief ? ` — "${brief}"` : ''}`
 }
 
 function findWeakestVirtue(
-  profile: MentorProfileData
+  profile: MentorProfile
 ): { name: string; strength: string } | null {
+  // ADR-Ring-2-01 Session 3d: canonical virtue_profile is an array of
+  // VirtueDomainAssessment (was a Record on MentorProfileData). Iterate by
+  // entry — name comes from `domain`, strength from `strength`. The
+  // strengthOrder values match the canonical strength union one-for-one
+  // ('gap' | 'developing' | 'moderate' | 'strong').
   const strengthOrder: Record<string, number> = {
     gap: 0,
     developing: 1,
@@ -148,11 +217,11 @@ function findWeakestVirtue(
   let weakest: { name: string; strength: string } | null = null
   let weakestScore = Infinity
 
-  for (const [virtue, data] of Object.entries(profile.virtue_profile)) {
-    const score = strengthOrder[data.overall_strength] ?? 1
+  for (const v of profile.virtue_profile) {
+    const score = strengthOrder[v.strength] ?? 1
     if (score < weakestScore) {
       weakestScore = score
-      weakest = { name: virtue, strength: data.overall_strength }
+      weakest = { name: v.domain, strength: v.strength }
     }
   }
 
@@ -244,10 +313,10 @@ export function detectTopicSignal(topic: string): TopicSignal {
  *
  * Target size: 40-60% smaller than the full buildProfileSummary output.
  *
- * @param profile - The full MentorProfileData loaded from storage
+ * @param profile - The full MentorProfile loaded from storage
  * @param topic - The opening message / current conversation content (used for keyword matching)
  */
-export function projectProfile(profile: MentorProfileData, topic: string): string {
+export function projectProfile(profile: MentorProfile, topic: string): string {
   const signal = detectTopicSignal(topic)
   const sections: string[] = []
 
@@ -268,19 +337,30 @@ export function projectProfile(profile: MentorProfileData, topic: string): strin
     }
   }
 
-  // Proximity estimate + Senecan grade
+  // Proximity estimate + Senecan grade. ADR-Ring-2-01 Session 3d: flat
+  // canonical fields (was nested proximity_estimate.{level,senecan_grade}).
   sections.push(
-    `Proximity: ${profile.proximity_estimate.level} (Senecan grade: ${profile.proximity_estimate.senecan_grade})`
+    `Proximity: ${profile.proximity_level} (Senecan grade: ${profile.senecan_grade})`
   )
 
-  // Primary causal tendency
-  sections.push(
-    `Primary causal breakdown: ${profile.causal_tendencies.primary_breakdown} — ${profile.causal_tendencies.description}`
-  )
+  // Primary causal tendency — pick the most-frequent entry from the
+  // canonical CausalTendency[] array (common > occasional > rare). Skip
+  // the section gracefully if the array is empty.
+  const primaryCausal = [...profile.causal_tendencies].sort(
+    (a, b) => CAUSAL_FREQ_ORDER[a.frequency] - CAUSAL_FREQ_ORDER[b.frequency]
+  )[0]
+  if (primaryCausal) {
+    sections.push(
+      `Primary causal breakdown: ${primaryCausal.failure_point} — ${primaryCausal.description}`
+    )
+  }
 
-  // Top 3 passions by frequency (always included, brief form)
+  // Top 3 passions by frequency bucket (always included, brief form). Sort
+  // changes from numeric to fixed bucket order under canonical frequency.
   const topPassions = [...profile.passion_map]
-    .sort((a, b) => b.frequency - a.frequency)
+    .sort(
+      (a, b) => PASSION_BUCKET_ORDER[a.frequency] - PASSION_BUCKET_ORDER[b.frequency]
+    )
     .slice(0, 3)
 
   if (topPassions.length > 0) {
@@ -297,48 +377,66 @@ export function projectProfile(profile: MentorProfileData, topic: string): strin
   // ── Conditional sections ──────────────────────────────────────────
 
   if (signal.touches_action) {
+    // ADR-Ring-2-01 Session 3d: virtue_profile is an array of
+    // VirtueDomainAssessment. Legacy `observations_count` and
+    // `evidence_summary[]` fields don't exist on the canonical type;
+    // surface the canonical `evidence` string instead.
     sections.push('', 'VIRTUE PROFILE (topic touches action/courage):')
-    for (const [virtue, data] of Object.entries(profile.virtue_profile)) {
-      const evidenceBrief = (data.evidence_summary || [])
-        .slice(0, 2)
-        .join('; ')
+    for (const v of profile.virtue_profile) {
+      const evidenceBrief = v.evidence
+        ? (v.evidence.length > 120 ? v.evidence.substring(0, 117) + '...' : v.evidence)
+        : ''
       sections.push(
-        `  ${virtue}: ${data.overall_strength} (${data.observations_count} obs)${evidenceBrief ? ` — ${evidenceBrief}` : ''}`
+        `  ${v.domain}: ${v.strength}${evidenceBrief ? ` — ${evidenceBrief}` : ''}`
       )
     }
   }
 
   if (signal.touches_relationships) {
+    // ADR-Ring-2-01 Session 3d: oikeiosis_map is an array of
+    // OikeioisMapEntry. The legacy Record `[ring, {level, evidence}]`
+    // form has no direct canonical analogue; surface the canonical
+    // person/relationship/stage/frequency fields instead.
     sections.push('', 'OIKEIOSIS MAP (topic touches relationships/community):')
-    for (const [ring, data] of Object.entries(profile.oikeiosis_map)) {
-      sections.push(`  ${ring}: ${data.level} — ${data.evidence}`)
+    for (const o of profile.oikeiosis_map) {
+      sections.push(
+        `  ${o.person_or_role} (${o.oikeiosis_stage}): ${o.relationship} — reflection ${o.reflection_frequency}`
+      )
     }
   }
 
   if (signal.touches_decisions) {
+    // ADR-Ring-2-01 Session 3d: value_hierarchy is an array of
+    // ValueHierarchyEntry. Top values = entries without gap_detected;
+    // classification gaps = entries with it. Legacy `primary_conflict`
+    // string has no canonical equivalent — dropped.
     sections.push('', 'VALUE HIERARCHY (topic touches decisions/priorities):')
-    if (profile.value_hierarchy.explicit_top_values?.length > 0) {
-      sections.push(
-        `  Top values: ${profile.value_hierarchy.explicit_top_values.join(', ')}`
-      )
+    const topValues = profile.value_hierarchy
+      .filter((v) => !v.gap_detected)
+      .map((v) => v.item)
+    if (topValues.length > 0) {
+      sections.push(`  Top values: ${topValues.join(', ')}`)
     }
-    if (profile.value_hierarchy.primary_conflict) {
-      sections.push(`  Primary conflict: ${profile.value_hierarchy.primary_conflict}`)
-    }
-    if (profile.value_hierarchy.classification_gaps?.length > 0) {
-      sections.push(
-        `  Classification gaps: ${profile.value_hierarchy.classification_gaps.join('; ')}`
+    const valueGaps = profile.value_hierarchy.filter((v) => v.gap_detected)
+    if (valueGaps.length > 0) {
+      const gapLines = valueGaps.map(
+        (g) =>
+          `"${g.item}" — declared ${g.declared_classification}, observed ${g.observed_classification}`
       )
+      sections.push(`  Classification gaps: ${gapLines.join('; ')}`)
     }
   }
 
   if (signal.touches_emotion) {
+    // ADR-Ring-2-01 Session 3d: per-passion line uses canonical
+    // false_judgement (singular) and frequency (bucket string). Legacy
+    // max_intensity has no canonical equivalent and is dropped.
     sections.push('', 'FULL PASSION MAP (topic touches emotional reaction):')
     for (const p of profile.passion_map) {
-      const fj = p.false_judgements[0] || ''
+      const fj = p.false_judgement || ''
       const brief = fj.length > 100 ? fj.substring(0, 97) + '...' : fj
       sections.push(
-        `  ${p.sub_species} (${p.root_passion}, freq ${p.frequency}, ${p.max_intensity})${brief ? ` — "${brief}"` : ''}`
+        `  ${p.sub_species} (${p.root_passion}, ${p.frequency})${brief ? ` — "${brief}"` : ''}`
       )
     }
   }
@@ -366,7 +464,7 @@ export async function getProjectedPractitionerContext(
   try {
     if (!isServerEncryptionConfigured()) return null
 
-    const stored = await loadMentorProfile(userId)
+    const stored = await loadMentorProfileCanonical(userId)
     if (!stored) return null
 
     return projectProfile(stored.profile, topic)
