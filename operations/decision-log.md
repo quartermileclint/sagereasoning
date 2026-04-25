@@ -1834,3 +1834,21 @@ This reframe generated a new option, E: archive BOTH as completion records. Opti
 **Status:** Adopted
 
 ---
+
+## 2026-04-25 — D-Ring-2-Adapter-1: Profile-shape canonical type — Option C with MentorProfile canonical (ADR-Ring-2-01)
+
+**Decision:** Adopt `MentorProfile` (defined in `/sage-mentor/persona.ts`) as the single canonical profile shape across the website and sage-mentor. Retire `MentorProfileData` (defined in `/website/src/lib/mentor-profile-summary.ts`) once every consumer has migrated. C-α field placement: extend `MentorProfile` in place with optional fields for the website-only data (`founder_facts`, `journal_name`, `journal_period`, provenance counts, `proximity_estimate.description`). Stage the transition across five sessions plus an optional Session 6 for persisted-row migration. ADR moved from `/drafts/` to `/compliance/ADR-Ring-2-01-shape-adapter.md` with status Accepted.
+
+**Reasoning:** The mismatch between `MentorProfile` (sage-mentor's current-state shape) and `MentorProfileData` (website's journal-ingestion-output shape) blocks live-data integration of the Ring Wrapper and pattern-engine — both consume `MentorProfile` while the website only loads `MentorProfileData`. Three approaches were considered (one-way adapter, refactor sage-mentor to consume `MentorProfileData`, unify the shapes). The founder selected Option C with `MentorProfile` canonical for end-state cleanliness — single source of truth, no permanent dual-type drift, sage-mentor encapsulation preserved (the canonical type already lives there). The AI flagged that under Option C the adapter relocates rather than disappears (now internal to `loadMentorProfileCanonical()` until the journal pipeline writes canonical and any persisted-row migration completes); the founder accepted this trade-off.
+
+**Alternatives considered:** Option A (one-way adapter at every call site) — not selected; preserves dual-type structure indefinitely, drift risk grows. Option B (refactor sage-mentor to consume `MentorProfileData`) — not selected; ~13 sage-mentor files / ~80 occurrences rewritten, breaks zero-imports-from-website encapsulation. Option C with `MentorProfileData` canonical — not selected; would invert the encapsulation. Option C-β (companion envelope) — kept as named fallback if Session 2 surfaces friction with C-α, requires founder approval at the time. Option C-γ (move website-only fields into sage-mentor) — not selected; requires sage-mentor edits the founder declined.
+
+**Revisit condition:** Each implementation session ends with PR1 single-endpoint verification before moving to the next stage. C-α / C-β decision opens at Session 2; falls back to C-β only if Session 2 surfaces a TypeScript or runtime concern. Session 6 (persisted-row migration) is optional and revisited only after Session 5 completes — the read-time adapter handles legacy rows indefinitely otherwise. Open Questions O1 (sage-only field data sources), O2 (`journal_references` source), and O5 (sequencing of the other two ring-proof endpoints) revisit when their upstream prerequisites land.
+
+**Rules served:** R17 (intimate data — R17b encryption pipeline boundary, R17c future deletion semantics, R17f implementation safety), PR1 (single-endpoint proof — staged transition with one proof per session), PR3 (synchronous adapter, no I/O), PR6 (safety-critical change recognised — Session 4 Critical, optional Session 6 Critical), PR7 (Open Questions O1–O5 logged with revisit conditions). Coordinates with ADR-R17-01 (retrieval cache wraps the canonical loader; invalidation rules unchanged).
+
+**Impact:** sage-mentor unchanged (zero-import encapsulation preserved). Website acquires `loadMentorProfileCanonical()` and an internal read-time adapter in Session 1; consumers migrate one at a time across Sessions 3–4; legacy `loadMentorProfile()` and `MentorProfileData` retire in Session 5. Temporary fixtures `PROOF_PROFILE` and `PROOF_INTERACTIONS` retire when Session 1 reaches Verified status. The `frequency` mapping is single-sourced via a new exported `frequencyBucketFromCount` (boundaries 1, 2–3, 4–6, 7–12). v1 of the draft (Option A recommendation) preserved at `/archive/2026-04-25_ADR-Ring-2-shape-adapter_v1-Option-A-recommendation.md` per the standing version-preservation preference.
+
+**Status:** Adopted
+
+---
