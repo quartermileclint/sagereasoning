@@ -32,7 +32,7 @@ import {
 // line ~141 is untouched. AC7 not engaged (no auth/cookie/session/redirect
 // changes). After this session's 4c (`ProfileForSignals` retirement), only
 // canonical reaches getRecentInteractionsAsSignals.
-import { loadMentorProfileCanonical } from '@/lib/mentor-profile-store'
+import { loadMentorProfile } from '@/lib/mentor-profile-store'
 import { extractJSON } from '@/lib/json-utils'
 import { logMentorObservation } from '@/lib/logging/mentor-observation-logger'
 import type { ObservationCategory, ConfidenceLevel } from '@/lib/logging/mentor-observation-logger'
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
       // ADR-Ring-2-01 Session 4 (4a): canonical loader. storedProfile.profile
       // is now MentorProfile (not MentorProfileData). The result flows only to
       // getRecentInteractionsAsSignals (still accepts ProfileForSignals until 4c).
-      useProjection ? loadMentorProfileCanonical(auth.user.id) : Promise.resolve(null),
+      useProjection ? loadMentorProfile(auth.user.id) : Promise.resolve(null),
       getProjectContext('minimal'),
       getMentorObservationsWithParallelLog(auth.user.id, PRIVATE_MENTOR_HUB, 'private-reflect'),
       getJournalReferences(auth.user.id, extractTopicHints(what_happened, how_i_responded), PRIVATE_MENTOR_HUB),

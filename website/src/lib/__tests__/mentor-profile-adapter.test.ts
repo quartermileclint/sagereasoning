@@ -19,8 +19,8 @@
 import {
   adaptMentorProfileDataToCanonical,
   frequencyBucketFromCount,
+  type MentorProfileData,
 } from '../mentor-profile-adapter'
-import type { MentorProfileData } from '../mentor-profile-summary'
 import type { MentorProfile } from '../../../../sage-mentor'
 
 // ---------------------------------------------------------------------------

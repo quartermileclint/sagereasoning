@@ -49,7 +49,7 @@ import type {
   MentorProfile,
 } from '@/lib/sage-mentor-ring-bridge'
 import { PROOF_PROFILE, PROOF_INTERACTIONS } from '@/lib/mentor-ring-fixtures'
-import { loadMentorProfileCanonical } from '@/lib/mentor-profile-store'
+import { loadMentorProfile } from '@/lib/mentor-profile-store'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
     let profileSource: 'live_canonical' | 'fixture_fallback' = 'fixture_fallback'
     let profileLoaderError: string | null = null
     try {
-      const loaded = await loadMentorProfileCanonical(auth.user.id)
+      const loaded = await loadMentorProfile(auth.user.id)
       if (loaded) {
         profile = loaded.profile
         profileSource = 'live_canonical'

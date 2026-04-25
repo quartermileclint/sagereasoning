@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
-import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-summary'
-import { loadMentorProfileCanonical, saveMentorProfile } from '@/lib/mentor-profile-store'
-import { adaptMentorProfileDataToCanonical } from '@/lib/mentor-profile-adapter'
+import { buildProfileSummary } from '@/lib/mentor-profile-summary'
+import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
+import {
+  adaptMentorProfileDataToCanonical,
+  type MentorProfileData,
+} from '@/lib/mentor-profile-adapter'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
 import mentorProfileFallback from '@/data/mentor-profile.json'
 import type { MentorProfile } from '../../../../../sage-mentor'
@@ -66,7 +69,7 @@ export async function GET(request: NextRequest) {
     // and is adapted at the use site (Decision 3 = a — file unchanged this
     // session, retires alongside MentorProfileData in Session 5).
     if (isServerEncryptionConfigured() && auth.user?.id) {
-      const stored = await loadMentorProfileCanonical(auth.user?.id)
+      const stored = await loadMentorProfile(auth.user?.id)
       if (stored) {
         profile = stored.profile
         version = stored.version

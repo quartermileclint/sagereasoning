@@ -19,7 +19,7 @@
  */
 
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { loadMentorProfileCanonical, saveMentorProfile } from '@/lib/mentor-profile-store'
+import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
 import type { FounderFacts } from '@/lib/mentor-profile-summary'
 import type { MentorProfile } from '../../../../sage-mentor'
 import { listAppendixRounds } from '@/lib/mentor-appendix-store'
@@ -477,7 +477,7 @@ export async function setFounderFacts(
     // ADR-Ring-2-01 Session 4 (4b), 26 April 2026: load canonical, spread
     // canonical, save canonical. Pre-4b this was loadMentorProfile() +
     // MentorProfileData spread + saveMentorProfile(legacy).
-    const stored = await loadMentorProfileCanonical(userId)
+    const stored = await loadMentorProfile(userId)
     if (!stored) return { success: false, error: 'No profile found for user' }
 
     const updatedProfile: MentorProfile = {
@@ -517,7 +517,7 @@ export async function appendFounderFactsNote(
     // ADR-Ring-2-01 Session 4 (4b), 26 April 2026: load canonical, spread
     // canonical, save canonical. Pre-4b this was loadMentorProfile() +
     // MentorProfileData spread + saveMentorProfile(legacy).
-    const stored = await loadMentorProfileCanonical(userId)
+    const stored = await loadMentorProfile(userId)
     if (!stored) return { success: false, error: 'No profile found for user' }
     if (!stored.profile.founder_facts) {
       return { success: false, error: 'No founder_facts block initialised — use setFounderFacts() first' }

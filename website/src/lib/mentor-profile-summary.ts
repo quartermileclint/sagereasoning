@@ -1,28 +1,21 @@
 /**
- * mentor-profile-summary.ts — Convert a MentorProfile JSON to a text summary
- * suitable for passing to /api/mentor-baseline and /api/mentor-journal-week.
+ * mentor-profile-summary.ts — Convert a canonical MentorProfile to a text
+ * summary suitable for passing to /api/mentor-baseline and
+ * /api/mentor-journal-week.
  *
  * The mentor-baseline endpoint needs a profile_summary string that captures
- * the practitioner's extracted profile. This function converts the full JSON
- * into a structured text summary that the LLM can use to generate targeted
+ * the practitioner's extracted profile. `buildProfileSummary` converts the
+ * full canonical MentorProfile (defined in /sage-mentor/persona.ts) into a
+ * structured text summary that the LLM can use to generate targeted
  * baseline gap detection questions.
+ *
+ * Post-Session-5 (26 April 2026, ADR-Ring-2-01): the legacy persisted shape
+ * `MentorProfileData` and its sub-types (`PassionMapEntry`, `VirtueEntry`)
+ * have been retired from this file. The legacy shape now lives in
+ * /website/src/lib/mentor-profile-adapter.ts (its only remaining functional
+ * consumer). This file's responsibility is the canonical text summary and
+ * the `FounderFacts` re-export below.
  */
-
-export interface PassionMapEntry {
-  passion_id: string
-  sub_species: string
-  root_passion: string
-  frequency: number
-  max_intensity: string
-  sections_present: string[]
-  false_judgements: string[]
-}
-
-export interface VirtueEntry {
-  overall_strength: string
-  observations_count: number
-  evidence_summary: string[]
-}
 
 /**
  * Founder Facts — stable biographical context that persists across sessions.
@@ -34,52 +27,7 @@ export interface VirtueEntry {
  * import via `@/lib/mentor-profile-summary` continue to work unchanged.
  */
 export type { FounderFacts } from '../../../sage-mentor'
-import type { FounderFacts, MentorProfile } from '../../../sage-mentor'
-
-/**
- * The persisted website profile shape. Written by the journal-ingestion
- * pipeline; stored encrypted in `mentor_profiles.encrypted_profile`.
- *
- * Under ADR-Ring-2-01 (Adopted 25 April 2026) this shape is being retired
- * in favour of MentorProfile (defined in /sage-mentor/persona.ts). The
- * read-time conversion is handled by
- * /website/src/lib/mentor-profile-adapter.ts. Sessions 3–5 of the staged
- * transition migrate every consumer to MentorProfile and remove this type.
- *
- * Until then: any amendment to this shape should also touch the adapter
- * so the conversion stays current.
- */
-export interface MentorProfileData {
-  user_id: string
-  display_name: string
-  journal_name: string
-  journal_period: string
-  sections_processed: number
-  entries_processed: number
-  total_word_count: number
-  /** Stable biographical context — who this person is as a person. Optional
-   *  because older profiles may not have this field yet. */
-  founder_facts?: FounderFacts
-  passion_map: PassionMapEntry[]
-  virtue_profile: Record<string, VirtueEntry>
-  causal_tendencies: {
-    primary_breakdown: string
-    description: string
-    specific_breakdowns: Record<string, string>
-  }
-  value_hierarchy: {
-    explicit_top_values: string[]
-    primary_conflict: string
-    classification_gaps: string[]
-  }
-  oikeiosis_map: Record<string, { level: string; evidence: string }>
-  proximity_estimate: {
-    level: string
-    senecan_grade: string
-    description: string
-  }
-  preferred_indifferents_aggregate: string[]
-}
+import type { MentorProfile } from '../../../sage-mentor'
 
 /**
  * Build a text summary of a MentorProfile suitable for the

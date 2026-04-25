@@ -53,7 +53,7 @@ import {
 // caller. After this session every consumer in /website/src is on the
 // canonical loader; only /api/mentor/private/reflect (Session 4 — Critical,
 // R20a perimeter, AC5) remains before Session 5 (legacy retirement).
-import { loadMentorProfileCanonical } from '@/lib/mentor-profile-store'
+import { loadMentorProfile } from '@/lib/mentor-profile-store'
 import { logMentorObservation } from '@/lib/logging/mentor-observation-logger'
 import type { ObservationCategory, ConfidenceLevel } from '@/lib/logging/mentor-observation-logger'
 import { extractJSON } from '@/lib/json-utils'
@@ -517,7 +517,7 @@ ${brainContext}`
   const [projectedContext, legacyContext, storedProfile] = await Promise.all([
     useProjection ? getProjectedPractitionerContext(userId, message) : Promise.resolve(null),
     useProjection ? Promise.resolve(null) : getFullPractitionerContext(userId),
-    useProjection ? loadMentorProfileCanonical(userId) : Promise.resolve(null),
+    useProjection ? loadMentorProfile(userId) : Promise.resolve(null),
   ])
   const practitionerContext = useProjection ? projectedContext : legacyContext
 

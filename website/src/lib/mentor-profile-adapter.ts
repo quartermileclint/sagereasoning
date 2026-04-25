@@ -1,19 +1,27 @@
 /**
  * mentor-profile-adapter.ts — Read-time adapter
- *   MentorProfileData (persisted website shape) → MentorProfile (canonical sage shape)
+ *   MentorProfileData (persisted legacy website shape) → MentorProfile (canonical sage shape)
  *
- * PURPOSE: Session 1 of the staged transition adopted under
- * /compliance/ADR-Ring-2-01-shape-adapter.md (Adopted 25 April 2026).
+ * PURPOSE: Originally Session 1 of the staged transition adopted under
+ * /compliance/ADR-Ring-2-01-shape-adapter.md (Adopted 25 April 2026). At
+ * Session 5 close (26 April 2026) the legacy shape (`MentorProfileData`) was
+ * relocated from `/website/src/lib/mentor-profile-summary.ts` into this file
+ * — the adapter is the only remaining functional consumer of the legacy
+ * shape post-Session-5.
  *
- * The website's persistence layer stores `MentorProfileData` (defined in
- * /website/src/lib/mentor-profile-summary.ts). The Ring Wrapper, pattern-engine,
+ * The website's persistence layer reads canonical-at-rest profiles for
+ * post-4b writes; pre-4b rows continue to be stored in the legacy shape and
+ * converted at read-time by this adapter. The Ring Wrapper, pattern-engine,
  * and the rest of /sage-mentor/ consume `MentorProfile` (defined in
  * /sage-mentor/persona.ts). The two shapes are similar but not identical
  * (full enumeration in ADR-Ring-2-01 §2).
  *
  * This file is the single read-time conversion. It is consumed by
- * `loadMentorProfileCanonical()` in /website/src/lib/mentor-profile-store.ts
- * to translate decrypted plaintext into the canonical shape on every read.
+ * `loadMentorProfile()` in /website/src/lib/mentor-profile-store.ts
+ * to translate decrypted legacy-shape plaintext into the canonical shape
+ * on every read of a pre-4b row. Optional ADR-Ring-2-01 Session 6
+ * (persisted-row migration) would migrate every existing row to canonical
+ * at rest; after that, this file becomes removable.
  *
  * Properties:
  *   - Pure synchronous function. No I/O. No async. (PR3.)
@@ -22,12 +30,12 @@
  *   - Honest sentinels for data we cannot derive from the persisted shape
  *     (see ADR-Ring-2-01 §6.2). No fabricated data.
  *   - Frequency-bucket conversion uses `frequencyBucketFromCount` — exported
- *     so any future consumer (e.g. the rewritten buildProfileSummary in
- *     Session 5) imports from a single source of truth (ADR §2.4 + §6.3).
+ *     so any future consumer imports from a single source of truth
+ *     (ADR §2.4 + §6.3).
  *
- * Future amendments to either type definition should also touch this file.
- * Reference comments in /sage-mentor/persona.ts (MentorProfile) and
- * /website/src/lib/mentor-profile-summary.ts (MentorProfileData) point here.
+ * Future amendments to the legacy shape (defined below) should preserve the
+ * conversion semantics here. Reference comments in /sage-mentor/persona.ts
+ * (MentorProfile) point at this file as the legacy-to-canonical bridge.
  */
 
 import type {
@@ -38,13 +46,101 @@ import type {
   OikeioisMapEntry,
   VirtueDomainAssessment,
   JournalReference,
+  FounderFacts,
 } from '../../../sage-mentor'
 import type {
   DimensionScores,
   KatorthomaProximityLevel,
   DimensionLevel,
 } from '../../../trust-layer/types/accreditation'
-import type { MentorProfileData } from './mentor-profile-summary'
+
+// ── Legacy persisted shape (post-Session-5 home) ─────────────────────────
+//
+// MentorProfileData is the website's pre-4b persisted shape: written by the
+// journal-ingestion pipeline and stored encrypted in
+// `mentor_profiles.encrypted_profile`. Defined here at Session 5 close
+// (26 April 2026, ADR-Ring-2-01); previously defined in
+// /website/src/lib/mentor-profile-summary.ts. Moved to this file because the
+// adapter is the only remaining functional consumer post-Session-5 — the
+// legacy persisted shape's natural home is alongside the conversion function
+// that translates it to canonical.
+//
+// Post-4b writes are canonical at rest. The shape-dispatch in
+// `loadMentorProfile()` (mentor-profile-store.ts) detects canonical vs legacy
+// and routes accordingly. Legacy rows continue to be readable indefinitely
+// via this shape + adaptMentorProfileDataToCanonical.
+//
+// Optional ADR-Ring-2-01 Session 6 (persisted-row migration) would migrate
+// every existing row to canonical at rest; after that, this interface and
+// the adapter become removable.
+
+/**
+ * Legacy `passion_map[]` entry shape — number-based frequency, plural
+ * `false_judgements[]`, and website-only fields (`max_intensity`,
+ * `sections_present`). Converted to canonical PassionMapEntry (imported as
+ * `CanonicalPassionMapEntry`) by `convertPassionMap()` below.
+ */
+export interface PassionMapEntry {
+  passion_id: string
+  sub_species: string
+  root_passion: string
+  frequency: number
+  max_intensity: string
+  sections_present: string[]
+  false_judgements: string[]
+}
+
+/**
+ * Legacy `virtue_profile[virtue]` entry shape — keyed by virtue name on
+ * MentorProfileData (Record), not an array. Converted to canonical
+ * VirtueDomainAssessment[] by `convertVirtueProfile()` below.
+ */
+export interface VirtueEntry {
+  overall_strength: string
+  observations_count: number
+  evidence_summary: string[]
+}
+
+/**
+ * The persisted website profile shape (pre-4b writes). Written by the
+ * journal-ingestion pipeline; stored encrypted in
+ * `mentor_profiles.encrypted_profile`. Read-time conversion to canonical
+ * MentorProfile is handled by `adaptMentorProfileDataToCanonical()` below.
+ *
+ * Any amendment to this shape should also touch the adapter so the
+ * conversion stays current.
+ */
+export interface MentorProfileData {
+  user_id: string
+  display_name: string
+  journal_name: string
+  journal_period: string
+  sections_processed: number
+  entries_processed: number
+  total_word_count: number
+  /** Stable biographical context — who this person is as a person. Optional
+   *  because older profiles may not have this field yet. */
+  founder_facts?: FounderFacts
+  passion_map: PassionMapEntry[]
+  virtue_profile: Record<string, VirtueEntry>
+  causal_tendencies: {
+    primary_breakdown: string
+    description: string
+    specific_breakdowns: Record<string, string>
+  }
+  value_hierarchy: {
+    explicit_top_values: string[]
+    primary_conflict: string
+    classification_gaps: string[]
+  }
+  oikeiosis_map: Record<string, { level: string; evidence: string }>
+  proximity_estimate: {
+    level: string
+    senecan_grade: string
+    description: string
+  }
+  preferred_indifferents_aggregate: string[]
+}
 
 // ── Type-level helpers (pulled from MentorProfile field unions) ─────────
 

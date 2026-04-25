@@ -40,7 +40,7 @@
  *     dropped from per-passion lines.
  */
 
-import { loadMentorProfileCanonical } from '@/lib/mentor-profile-store'
+import { loadMentorProfile } from '@/lib/mentor-profile-store'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
 import type { CausalTendency, MentorProfile, PassionMapEntry } from '../../../../sage-mentor'
 
@@ -72,7 +72,7 @@ export async function getPractitionerContext(userId: string): Promise<string | n
   try {
     if (!isServerEncryptionConfigured()) return null
 
-    const stored = await loadMentorProfileCanonical(userId)
+    const stored = await loadMentorProfile(userId)
     if (!stored) return null
 
     return buildCondensedContext(stored.profile)
@@ -99,7 +99,7 @@ export async function getFullPractitionerContext(userId: string): Promise<string
   try {
     if (!isServerEncryptionConfigured()) return null
 
-    const stored = await loadMentorProfileCanonical(userId)
+    const stored = await loadMentorProfile(userId)
     if (!stored) return null
 
     return stored.summary // buildProfileSummary output — already canonical-consuming since Session 3a
@@ -464,7 +464,7 @@ export async function getProjectedPractitionerContext(
   try {
     if (!isServerEncryptionConfigured()) return null
 
-    const stored = await loadMentorProfileCanonical(userId)
+    const stored = await loadMentorProfile(userId)
     if (!stored) return null
 
     return projectProfile(stored.profile, topic)

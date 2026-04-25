@@ -19,8 +19,11 @@
 
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { encryptProfileData, decryptProfileData, ServerEncryptedPayload } from '@/lib/server-encryption'
-import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-summary'
-import { adaptMentorProfileDataToCanonical } from '@/lib/mentor-profile-adapter'
+import { buildProfileSummary } from '@/lib/mentor-profile-summary'
+import {
+  adaptMentorProfileDataToCanonical,
+  type MentorProfileData,
+} from '@/lib/mentor-profile-adapter'
 import type { MentorProfile } from '../../../sage-mentor'
 
 // ── Types ──────────────────────────────────────────────────────────
@@ -45,72 +48,6 @@ export interface StoredProfileRow {
   updated_at: string
 }
 
-// ── Read ───────────────────────────────────────────────────────────
-
-/**
- * Load and decrypt a user's MentorProfile from Supabase.
- * Returns null if no profile exists for this user.
- */
-export async function loadMentorProfile(
-  userId: string
-): Promise<{ profile: MentorProfileData; summary: string; version: number } | null> {
-  // Diagnostic instrumentation — retrieval bottleneck analysis (Path A,
-  // session 2026-04-25). Logs timings only, no profile content.
-  // Remove once cache design is decided and ADR is logged.
-  const t0 = Date.now()
-
-  const { data, error } = await supabaseAdmin
-    .from('mentor_profiles')
-    .select('*')
-    .eq('user_id', userId)
-    .single()
-
-  const t1 = Date.now()
-
-  if (error || !data) {
-    if (error?.code === 'PGRST116') {
-      console.log(
-        `[mentor-profile-store] timing user=${userId} db_ms=${t1 - t0} total_ms=${Date.now() - t0} found=false`
-      )
-      return null // No rows
-    }
-    console.error('[mentor-profile-store] Load error:', error)
-    return null
-  }
-
-  const row = data as StoredProfileRow
-
-  // Reconstruct the encrypted payload for decryption
-  const payload: ServerEncryptedPayload = {
-    ciphertext: row.encrypted_profile,
-    iv: row.encryption_meta.iv,
-    authTag: row.encryption_meta.authTag,
-    algorithm: row.encryption_meta.algorithm as 'AES-256-GCM',
-    version: row.encryption_meta.version,
-  }
-
-  const t2 = Date.now()
-  const decryptedJson = decryptProfileData(payload)
-  const t3 = Date.now()
-  const profile = JSON.parse(decryptedJson) as MentorProfileData
-  const t4 = Date.now()
-  // Transitional shim under ADR-Ring-2-01 Session 3 (25 April 2026):
-  // `buildProfileSummary` was rewritten to consume the canonical MentorProfile.
-  // The legacy loader still returns MentorProfileData in its envelope (legacy
-  // contract preserved); the summary line adapts to canonical for the rewritten
-  // builder. Retires when this loader is removed in Session 5.
-  const summary = buildProfileSummary(
-    adaptMentorProfileDataToCanonical(profile, { lastUpdated: row.updated_at }),
-  )
-  const t5 = Date.now()
-
-  console.log(
-    `[mentor-profile-store] timing user=${userId} db_ms=${t1 - t0} decrypt_ms=${t3 - t2} parse_ms=${t4 - t3} summary_ms=${t5 - t4} total_ms=${t5 - t0} found=true`
-  )
-
-  return { profile, summary, version: row.profile_version }
-}
-
 // ── Shape Detection (ADR-Ring-2-01 Session 4 (4b), 26 April 2026) ──
 
 /**
@@ -126,7 +63,7 @@ export async function loadMentorProfile(
  * Both fields are required in their respective types, so the detection is
  * unambiguous — there is no overlap or ambiguous middle state.
  *
- * Used by `loadMentorProfileCanonical()` to dispatch persisted rows past the
+ * Used by `loadMentorProfile()` to dispatch persisted rows past the
  * read-time adapter when the row is already canonical (no transform needed).
  *
  * After ADR-Ring-2-01 Session 6 (optional row migration) every row is canonical
@@ -148,37 +85,34 @@ function isCanonicalProfileShape(data: unknown): boolean {
 // ── Read (canonical shape) ─────────────────────────────────────────
 
 /**
- * Load and decrypt a user's profile from Supabase, returning the CANONICAL
+ * Load and decrypt a user's profile from Supabase, returning the canonical
  * MentorProfile shape (defined in /sage-mentor/persona.ts).
  *
  * Introduced under ADR-Ring-2-01 (Adopted 25 April 2026) as Session 1 of the
- * staged transition from MentorProfileData → MentorProfile. Sits alongside
- * the legacy `loadMentorProfile()` (which continues to return MentorProfileData)
- * during the transition. Consumers migrate one-at-a-time across Sessions 3–4;
- * the legacy function retires in Session 5.
+ * staged transition from MentorProfileData → MentorProfile, originally named
+ * `loadMentorProfileCanonical()`. Renamed to `loadMentorProfile` at Session 5
+ * close (26 April 2026) when the legacy loader was retired and this became
+ * the sole canonical loader.
  *
  * Internally:
- *   1. Fetches and decrypts the profile (same Supabase + AES-256-GCM path
- *      as the legacy loader — duplicated here to keep the legacy surface
- *      untouched in this PR1 single-endpoint proof; a future session
- *      extracts a shared internal helper when the ADR-R17-01 retrieval
- *      cache lands, so both functions wrap one cache).
- *   2. Applies the read-time adapter (`adaptMentorProfileDataToCanonical`)
- *      to translate the persisted MentorProfileData into MentorProfile.
- *      Pure synchronous transform — no I/O.
- *   3. Builds the same legacy text summary from the persisted data shape.
- *      The summary contract is unchanged for now; Session 5 retires it
- *      alongside MentorProfileData.
+ *   1. Fetches and decrypts the profile (Supabase + AES-256-GCM).
+ *   2. Detects shape (canonical vs legacy) via `isCanonicalProfileShape()`.
+ *      Canonical rows (post-4b writes) pass through; legacy rows (pre-4b)
+ *      run the read-time adapter (`adaptMentorProfileDataToCanonical` in
+ *      mentor-profile-adapter.ts). Pure synchronous transform — no I/O.
+ *   3. Builds the canonical text summary via `buildProfileSummary`.
  *
  * Returns null if no profile exists for this user. Caller decides the
- * fallback (the proof endpoint falls back to PROOF_PROFILE — see
- * /api/mentor/ring/proof).
+ * fallback (e.g., `/api/mentor-profile` GET falls back to a static JSON;
+ * `/api/mentor/ring/proof` falls back to PROOF_PROFILE).
  *
- * R17 footprint: unchanged. Operates on plaintext that already lived in
- * memory for the legacy loader path. No new at-rest plaintext surface
- * (per ADR §6.5).
+ * R17 footprint: unchanged from the original loader contract. Operates on
+ * plaintext that lives only for the request lifetime. No new at-rest
+ * plaintext surface (per ADR §6.5). Optional ADR-Ring-2-01 Session 6
+ * (persisted-row migration) would remove the legacy_adapt dispatch branch
+ * and the adapter call entirely.
  */
-export async function loadMentorProfileCanonical(
+export async function loadMentorProfile(
   userId: string
 ): Promise<{ profile: MentorProfile; summary: string; version: number } | null> {
   // Diagnostic instrumentation — mirrors the legacy loader's pattern, with
@@ -269,7 +203,7 @@ export async function loadMentorProfileCanonical(
  * ADR-Ring-2-01 Session 4 (4b), 26 April 2026:
  * Parameter type migrated from MentorProfileData → MentorProfile (canonical).
  * The persisted shape is now canonical at rest. The read path
- * (`loadMentorProfileCanonical`) detects shape and dispatches: canonical
+ * (`loadMentorProfile`) detects shape and dispatches: canonical
  * rows pass through; legacy rows (pre-4b writes) run the read-time adapter.
  *
  * Queryable-metadata extraction translated to canonical fields:

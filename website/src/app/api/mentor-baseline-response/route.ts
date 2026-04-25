@@ -3,9 +3,12 @@ import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightRes
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
-import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-summary'
-import { loadMentorProfileCanonical } from '@/lib/mentor-profile-store'
-import { adaptMentorProfileDataToCanonical } from '@/lib/mentor-profile-adapter'
+import { buildProfileSummary } from '@/lib/mentor-profile-summary'
+import { loadMentorProfile } from '@/lib/mentor-profile-store'
+import {
+  adaptMentorProfileDataToCanonical,
+  type MentorProfileData,
+} from '@/lib/mentor-profile-adapter'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
 import mentorProfileFallback from '@/data/mentor-profile.json'
 import type { MentorProfile } from '../../../../../sage-mentor'
@@ -122,7 +125,7 @@ export async function POST(request: NextRequest) {
     // MentorProfileData in Session 5).
     let currentProfile: MentorProfile
     if (isServerEncryptionConfigured() && auth.user?.id) {
-      const stored = await loadMentorProfileCanonical(auth.user.id)
+      const stored = await loadMentorProfile(auth.user.id)
       currentProfile = stored
         ? stored.profile
         : adaptMentorProfileDataToCanonical(mentorProfileFallback as MentorProfileData)
