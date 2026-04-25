@@ -5,12 +5,13 @@ import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
 import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-summary'
-import { loadMentorProfile } from '@/lib/mentor-profile-store'
+import { loadMentorProfileCanonical } from '@/lib/mentor-profile-store'
 import { adaptMentorProfileDataToCanonical } from '@/lib/mentor-profile-adapter'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
 import mentorProfileFallback from '@/data/mentor-profile.json'
 import { getMentorKnowledgeBase } from '@/lib/context/mentor-knowledge-base-loader'
 import { getMentorObservationsWithParallelLog, getProfileSnapshots, createProfileSnapshot } from '@/lib/context/mentor-context-private'
+import type { MentorProfile } from '../../../../../../../sage-mentor'
 
 // =============================================================================
 // PRIVATE mentor-baseline-response — Founder-only profile refinement
@@ -23,6 +24,14 @@ import { getMentorObservationsWithParallelLog, getProfileSnapshots, createProfil
 //   - Auto-save refined profile (Phase C, Gap 5: baseline auto-save)
 //
 // Access: Founder only (FOUNDER_USER_ID env var)
+//
+// Wire-contract note: `current_profile` was dropped from the response body
+// under ADR-Ring-2-01 Session 3 follow-up (25 April 2026, Decision 1 = c).
+// The field was a pass-through that no client code read; auditing
+// /website/src for `.current_profile` returned zero matches. Dropping it
+// here mirrors the same removal Session 3b applied to the public baseline
+// — both routes now have identical response surfaces around the refinement
+// payload.
 // =============================================================================
 
 // R1 extension (19 April 2026): hub label is architecturally fixed for this
@@ -115,30 +124,32 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Load current profile — Supabase (encrypted) first, then static fallback
-    let currentProfile: MentorProfileData
+    // Load current profile — Supabase (encrypted) first, then static fallback.
+    //
+    // Migrated under ADR-Ring-2-01 Session 3 follow-up (25 April 2026): this
+    // route is the third consumer migration of Session 3 (after Session 3a's
+    // shim landing and Session 3b's public-baseline full migration). The
+    // founder-only gate above (FOUNDER_USER_ID) keeps the blast radius small.
+    // The static fallback JSON remains in legacy MentorProfileData shape and
+    // is adapted at the use site (Decision 3 = a — file unchanged this
+    // session, retires alongside MentorProfileData in Session 5).
+    let currentProfile: MentorProfile
     if (isServerEncryptionConfigured() && auth.user?.id) {
-      const stored = await loadMentorProfile(auth.user.id)
-      currentProfile = stored ? stored.profile : (mentorProfileFallback as MentorProfileData)
+      const stored = await loadMentorProfileCanonical(auth.user.id)
+      currentProfile = stored
+        ? stored.profile
+        : adaptMentorProfileDataToCanonical(mentorProfileFallback as MentorProfileData)
     } else {
-      currentProfile = mentorProfileFallback as MentorProfileData
+      currentProfile = adaptMentorProfileDataToCanonical(mentorProfileFallback as MentorProfileData)
     }
 
     // Build the input for sage-reason: profile summary + answers.
     //
-    // ADR-Ring-2-01 Session 3 migration (25 April 2026): this is the migrated
-    // PR1 single-endpoint proof. `buildProfileSummary` now consumes the
-    // canonical MentorProfile. We keep the legacy `loadMentorProfile()` here
-    // (rather than switching to `loadMentorProfileCanonical()`) so the wire
-    // contract for `current_profile` in the response body is unchanged this
-    // session. The canonical-shape adaptation happens only at the summary line.
-    //
-    // Retirement condition (PR7): when this route fully migrates to
-    // `loadMentorProfileCanonical()` in a follow-up Session-3 session, the
-    // `adaptMentorProfileDataToCanonical(...)` call below collapses into the
-    // direct `buildProfileSummary(currentProfile)` form (with `currentProfile`
-    // by then typed `MentorProfile`) and the import above is removed.
-    const profileSummary = buildProfileSummary(adaptMentorProfileDataToCanonical(currentProfile))
+    // Migrated under ADR-Ring-2-01 Session 3 follow-up (25 April 2026): the
+    // Session 3a transitional shim retired here when the loader switched to
+    // `loadMentorProfileCanonical()` above — `currentProfile` is already
+    // canonical `MentorProfile`, no adaptation needed at this call site.
+    const profileSummary = buildProfileSummary(currentProfile)
 
     const answersFormatted = responses.map(r =>
       `[${r.question_id}] ${r.question_text || '(question text not provided)'}\n\nPRACTITIONER'S ANSWER:\n${r.answer}`
@@ -208,7 +219,13 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         refinement: result,
-        current_profile: currentProfile,
+        // `current_profile` dropped under ADR-Ring-2-01 Session 3 follow-up
+        // (25 April 2026, Decision 1 = c). Audit at session open found zero
+        // readers of the field across /website/src (the only typed reference
+        // was `current_profile?: unknown` in mentor-baseline/refinements/
+        // page.tsx, never accessed). Mirrors the same removal Session 3b
+        // applied to /api/mentor-baseline-response. See
+        // /operations/handoffs/tech/2026-04-25-shape-adapter-session-3-private-baseline-full-migration-close.md.
         responses_processed: responses.length,
         mentor_mode: 'private',
         auto_saved: true,
