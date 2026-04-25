@@ -1,25 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildProfileSummary, MentorProfileData } from '@/lib/mentor-profile-summary'
-import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
+import { loadMentorProfileCanonical, saveMentorProfile } from '@/lib/mentor-profile-store'
 import { adaptMentorProfileDataToCanonical } from '@/lib/mentor-profile-adapter'
 import { isServerEncryptionConfigured } from '@/lib/server-encryption'
 import mentorProfileFallback from '@/data/mentor-profile.json'
+import type { MentorProfile } from '../../../../../sage-mentor'
 
 // =============================================================================
 // mentor-profile — Serve the practitioner's encrypted MentorProfile
 //
 // GET /api/mentor-profile
-//   Returns the full MentorProfile JSON + text summary.
+//   Returns the full canonical MentorProfile JSON + text summary.
 //   Reads from Supabase (encrypted at rest, R17b) with fallback to static JSON
 //   if no Supabase profile exists yet.
 //
 // POST /api/mentor-profile
 //   Seeds or updates the profile in Supabase (encrypted).
 //   Used by mentor-baseline-response after processing gap answers,
-//   or to seed the initial profile from journal extraction.
+//   or to seed the initial profile from journal extraction. POST body remains
+//   in legacy MentorProfileData shape until the journal-pipeline write-side
+//   migration (ADR-Ring-2-01 Session 4) — saveMentorProfile() still consumes
+//   that shape during transition.
 //
 // Auth: Requires signed-in user (Supabase JWT) or API key
+//
+// Wire-contract notes (ADR-Ring-2-01 Session 3c, 26 April 2026):
+//   - The GET response's `profile` field now carries the canonical MentorProfile
+//     shape (Decision 1b = a). Audit at session open across /website/src found
+//     zero detectable consumers of the field; a fetch-call audit returned no
+//     matches anywhere in the repo. Returning canonical aligns with the
+//     route's documented purpose ("Returns the full canonical MentorProfile
+//     JSON") and is the migration's end-state shape.
+//   - The `meta` block is preserved (Decision 1a = a). Output keys are
+//     unchanged from the prior version (proximity_level, senecan_grade, etc.
+//     were already canonical-named); only the source-field paths on the right
+//     side translate (proximity_estimate.level → proximity_level;
+//     proximity_estimate.senecan_grade → senecan_grade). External wire
+//     contract at the meta-block key level is unchanged.
 // =============================================================================
 
 export async function GET(request: NextRequest) {
@@ -27,48 +45,63 @@ export async function GET(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
-    let profile: MentorProfileData
+    let profile: MentorProfile
     let source: string
     let version = 0
 
-    // Try Supabase first (encrypted storage)
+    // Load current profile — Supabase (encrypted) first, then static fallback.
+    //
+    // Migrated under ADR-Ring-2-01 Session 3c (26 April 2026) — last
+    // transitional shim retired. Loader switched from loadMentorProfile()
+    // (legacy MentorProfileData envelope) to loadMentorProfileCanonical()
+    // (canonical MentorProfile envelope). After this session every consumer
+    // of buildProfileSummary across /website/src is on the canonical loader;
+    // /api/founder/hub remains on legacy loadMentorProfile() directly (Session
+    // 3e), and the two context loaders practitioner-context.ts +
+    // mentor-context-private.ts retain their internal legacy calls (Session
+    // 3d).
+    //
+    // The static fallback JSON file remains in legacy MentorProfileData shape
+    // and is adapted at the use site (Decision 3 = a — file unchanged this
+    // session, retires alongside MentorProfileData in Session 5).
     if (isServerEncryptionConfigured() && auth.user?.id) {
-      const stored = await loadMentorProfile(auth.user?.id)
+      const stored = await loadMentorProfileCanonical(auth.user?.id)
       if (stored) {
         profile = stored.profile
         version = stored.version
         source = 'supabase_encrypted'
       } else {
-        // No profile in Supabase — fall back to static file
-        profile = mentorProfileFallback as MentorProfileData
+        // No profile in Supabase — fall back to static file (adapted)
+        profile = adaptMentorProfileDataToCanonical(mentorProfileFallback as MentorProfileData)
         source = 'static_fallback'
       }
     } else {
-      // Encryption not configured — use static fallback
-      profile = mentorProfileFallback as MentorProfileData
+      // Encryption not configured — use static fallback (adapted)
+      profile = adaptMentorProfileDataToCanonical(mentorProfileFallback as MentorProfileData)
       source = 'static_fallback'
     }
 
-    // Transitional shim under ADR-Ring-2-01 Session 3 (25 April 2026):
-    // `buildProfileSummary` was rewritten to consume the canonical
-    // MentorProfile. This route is NOT this session's PR1 single-endpoint
-    // proof (private baseline is — see /api/mentor/private/baseline-response),
-    // so the legacy loader and the wire contract for `profile` and `meta`
-    // (which read MentorProfileData fields directly) are preserved here.
-    // The canonical-shape adaptation happens only at the summary line.
-    //
-    // Retirement condition (PR7): when this GET endpoint migrates as its own
-    // follow-up Session-3 session, the adapter call collapses into a direct
-    // `buildProfileSummary(profile)` (with `profile` typed `MentorProfile`),
-    // the `meta` block translates to canonical field names, and the import
-    // above is removed.
-    const profileSummary = buildProfileSummary(adaptMentorProfileDataToCanonical(profile))
+    // Build the text summary for downstream consumers (e.g., POST
+    // /api/mentor-baseline). Shim retired under ADR-Ring-2-01 Session 3c
+    // (26 April 2026): currentProfile is already canonical MentorProfile,
+    // no adaptation needed at this call site.
+    const profileSummary = buildProfileSummary(profile)
 
     return NextResponse.json(
       {
         success: true,
+        // `profile` now carries canonical MentorProfile shape under
+        // ADR-Ring-2-01 Session 3c (Decision 1b = a). See header docstring.
         profile,
         profile_summary: profileSummary,
+        // `meta` preserved with the same output keys as the prior shape
+        // (Decision 1a = a). Source-field paths translated to canonical:
+        // `proximity_estimate.level` → `proximity_level`;
+        // `proximity_estimate.senecan_grade` → `senecan_grade`. Other source
+        // fields share names with the canonical optional fields under C-α
+        // (journal_name, journal_period, sections_processed,
+        // entries_processed, total_word_count, founder_facts) — see
+        // /sage-mentor/persona.ts.
         meta: {
           journal_name: profile.journal_name,
           journal_period: profile.journal_period,
@@ -76,8 +109,8 @@ export async function GET(request: NextRequest) {
           entries_processed: profile.entries_processed,
           total_word_count: profile.total_word_count,
           passions_detected: profile.passion_map.length,
-          proximity_level: profile.proximity_estimate.level,
-          senecan_grade: profile.proximity_estimate.senecan_grade,
+          proximity_level: profile.proximity_level,
+          senecan_grade: profile.senecan_grade,
           source,
           profile_version: version,
         },
