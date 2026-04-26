@@ -205,10 +205,39 @@ export async function POST(request: NextRequest) {
     // Deterministic — no LLM call, no DB read, no live data. Operates on
     // the fixture profile + fixture interactions. Wrapped in try/catch so
     // an engine failure cannot break the existing ring trace.
+    //
+    // ADR-PE-01 Session 2, Option 2A (Adopted 26 Apr 2026): prefer the
+    // persisted analysis from profile.pattern_analyses['private-mentor']
+    // when present; fall back to recompute when absent. The persistence
+    // block below still fires per_request when profile_source === 'live_
+    // canonical', so the persisted entry is rewritten on every probe with
+    // the same content (only `version` bumps — `computed_at` freezes by
+    // design under 2A + per_request, see CCP worst case B, 26 Apr 2026).
+    // To force a fresh recompute, delete pattern_analyses['private-mentor']
+    // from the blob, or move to a throttled-with-conditional cadence.
+    //
+    // KG3 (hub-label end-to-end): hardcoded 'private-mentor' on the read
+    // side mirrors the writer at line ~267 of this same file (the
+    // persistence block's mutated-profile literal). Any drift between
+    // reader and writer label silently breaks Option 2A — the cache hit
+    // becomes invisible and the route always falls through to recompute.
+    // Verification: probe must return pattern_source === 'persisted' on
+    // hit; pattern_source === 'recomputed' on first probe after deploy
+    // (when the persisted entry is known to exist) is the diagnostic for
+    // KG3 drift.
     let patternAnalysis: PatternAnalysis | null = null
+    let patternSource: 'persisted' | 'recomputed' | null = null
     let patternEngineError: string | null = null
     try {
-      patternAnalysis = ring.analysePatterns(profile, PROOF_INTERACTIONS, null)
+      // Option 2A read precedence: prefer persisted, fall back to recompute
+      const persisted = profile.pattern_analyses?.['private-mentor'] ?? null
+      if (persisted) {
+        patternAnalysis = persisted
+        patternSource = 'persisted'
+      } else {
+        patternAnalysis = ring.analysePatterns(profile, PROOF_INTERACTIONS, null)
+        patternSource = 'recomputed'
+      }
     } catch (engineErr) {
       patternEngineError = engineErr instanceof Error ? engineErr.message : 'unknown error'
       console.error('[mentor/ring/proof] Pattern-engine error:', engineErr)
@@ -465,6 +494,7 @@ export async function POST(request: NextRequest) {
           raw_llm_json: afterRawLlmJson,
         },
         pattern_analysis: patternAnalysis,
+        pattern_source: patternSource,
         pattern_engine_error: patternEngineError,
         pattern_persistence: patternPersistence,
         profile_source: profileSource,
@@ -482,6 +512,11 @@ export async function POST(request: NextRequest) {
           'When profile_source === "live_canonical" and patternAnalysis is non-null,',
           'pattern_analyses[\'private-mentor\'] is written to the encrypted blob (per_request cadence).',
           'Critical risk under PR6 (encryption pipeline). Read-modify-write per ADR §6.3.',
+          'Pattern-analysis read precedence: ADR-PE-01 Session 2, Option 2A (Adopted 26 Apr 2026).',
+          'When profile.pattern_analyses[\'private-mentor\'] is present, the route uses it directly',
+          '(pattern_source: "persisted") and skips the deterministic recompute. When absent, falls',
+          'back to ring.analysePatterns (pattern_source: "recomputed"). Under 2A + per_request',
+          'cadence, computed_at freezes after first hit; version bumps every probe.',
           'No write to mentor_interactions — KG3 hub-label surface still deferred for that table.',
           'Canonical-loader transition: ADR-Ring-2-01 Session 1 (25 Apr 2026, Adopted).',
         ],
