@@ -50,6 +50,11 @@ import type {
 } from '@/lib/sage-mentor-ring-bridge'
 import { PROOF_PROFILE, PROOF_INTERACTIONS } from '@/lib/mentor-ring-fixtures'
 import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
+import {
+  loadMentorInteractionsAsRecords,
+  type InteractionsHubId,
+} from '@/lib/mentor-interactions-loader'
+import type { InteractionRecord } from '@/lib/sage-mentor-ring-bridge'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -157,6 +162,41 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // ─── BYPASS_PATTERN_CACHE PARAMETER (ADR-PE-01 Session 5, 26 Apr 2026) ─
+    // Optional `bypass_pattern_cache` boolean on the request body. When true,
+    // the read site below skips the cache-precedence short-circuit and forces
+    // the recompute branch (live loader on live profile; fixture on fallback).
+    // Default false — back-compat with all existing probes (Sessions 1, 2, 3,
+    // 3.5, 4 verifications all assume false).
+    //
+    // Verification role: this is the deterministic mechanism for exercising
+    // the live mentor_interactions loader on cache-warm labels (worst case J,
+    // accepted at session open). Without bypass, the founder's existing
+    // pattern_analyses['founder-mentor'] and ['private-mentor'] entries would
+    // never cache-miss under normal traffic, so the loader could not be
+    // verified live. Side effect: when bypass is true and the persistence
+    // block fires, the persisted entry is overwritten by the recomputed
+    // result. Q-Backfill posture: opt-in only; the founder controls when
+    // overwrites happen.
+    //
+    // Risk classification (worst case F): optional field, default false,
+    // strict type check. Anything other than `undefined`, `true`, or `false`
+    // returns 400. Back-compat preserved for absent / null fields.
+    const requestedBypass: unknown = body?.bypass_pattern_cache
+    let bypassPatternCache: boolean
+    if (requestedBypass === undefined || requestedBypass === null) {
+      bypassPatternCache = false
+    } else if (typeof requestedBypass === 'boolean') {
+      bypassPatternCache = requestedBypass
+    } else {
+      return NextResponse.json(
+        {
+          error: `bypass_pattern_cache must be a boolean. Received: ${JSON.stringify(requestedBypass)}.`,
+        },
+        { status: 400, headers: corsHeaders() },
+      )
+    }
+
     // R20a — distress check via SafetyGate (AC4 invocation pattern)
     const gate = await enforceDistressCheck(detectDistressTwoStage(taskDescription))
     if (gate.shouldRedirect) {
@@ -241,9 +281,8 @@ export async function POST(request: NextRequest) {
 
     // ─── PATTERN-ENGINE PASS ─────────────────────────────────────────────
     // PR1 single-endpoint proof of pattern-engine wiring (added 25 Apr 2026).
-    // Deterministic — no LLM call, no DB read, no live data. Operates on
-    // the fixture profile + fixture interactions. Wrapped in try/catch so
-    // an engine failure cannot break the existing ring trace.
+    // Deterministic — no LLM call. Wrapped in try/catch so an engine failure
+    // cannot break the existing ring trace.
     //
     // ADR-PE-01 Session 2, Option 2A (Adopted 26 Apr 2026): prefer the
     // persisted analysis from profile.pattern_analyses[proofHubId] when
@@ -252,8 +291,6 @@ export async function POST(request: NextRequest) {
     // canonical', so the persisted entry is rewritten on every probe with
     // the same content (only `version` bumps — `computed_at` freezes by
     // design under 2A + per_request, see CCP worst case B, 26 Apr 2026).
-    // To force a fresh recompute, delete pattern_analyses[proofHubId]
-    // from the blob, or move to a throttled-with-conditional cadence.
     //
     // ADR-PE-01 Session 3.5 (Adopted 26 Apr 2026): the hardcoded
     // 'private-mentor' literal on this read site has been replaced with
@@ -262,27 +299,79 @@ export async function POST(request: NextRequest) {
     // endpoint to seed pattern_analyses['founder-mentor'] for the Session 4
     // founder-hub consumer.
     //
+    // ADR-PE-01 Session 5 (Adopted 26 Apr 2026): the recompute branch now
+    // uses live mentor_interactions data via loadMentorInteractionsAsRecords
+    // when profileSource === 'live_canonical', falling back to PROOF_INTERACTIONS
+    // when fixture_fallback. The cache read is gated on !bypassPatternCache
+    // so verification probes can force the recompute branch on cache-warm
+    // labels — the deterministic mechanism for exercising the live loader
+    // (worst case J accepted at session open). Q-Loader-Scope hub-scoped,
+    // Q-Loader-Cadence per-consumer-request, Q-Loader-Source last 90 days +
+    // limit 100. The diagnostic field `interactions_source` on the response
+    // surfaces which path fired (live_loader vs fixture_fallback vs null on
+    // cache hit).
+    //
     // KG3 (hub-label end-to-end): the read site here uses `proofHubId`,
     // which is the same local variable used at the writer site
-    // (~line 300 below). Single local variable — no drift surface within
-    // this route. Any future consumer route reading pattern_analyses[label]
-    // must use a label from the same allowlist (VALID_PROOF_HUBS) or the
-    // canonical mapper (mapRequestHubToContextHub in /api/founder/hub).
-    // Verification: probe must return pattern_source === 'persisted' on
-    // hit; pattern_source === 'recomputed' on first probe after deploy
-    // (when the persisted entry is known to exist) is the diagnostic for
-    // KG3 drift.
+    // (~line 380 below) and at the loader call (just below). Single local
+    // variable — no drift surface within this route. Any future consumer
+    // route reading pattern_analyses[label] must use a label from the same
+    // allowlist (VALID_PROOF_HUBS) or the canonical mapper
+    // (mapRequestHubToContextHub in /api/founder/hub).
     let patternAnalysis: PatternAnalysis | null = null
     let patternSource: 'persisted' | 'recomputed' | null = null
     let patternEngineError: string | null = null
+    let interactionsSource: 'live_loader' | 'fixture_fallback' | null = null
+    let interactionsCount: number | null = null
     try {
-      // Option 2A read precedence: prefer persisted, fall back to recompute
       const persisted = profile.pattern_analyses?.[proofHubId] ?? null
-      if (persisted) {
+      if (persisted && !bypassPatternCache) {
+        // Cache hit — short-circuit. Loader does not fire. interactionsSource
+        // stays null on the response (diagnostic: cache-hit branch).
         patternAnalysis = persisted
         patternSource = 'persisted'
       } else {
-        patternAnalysis = ring.analysePatterns(profile, PROOF_INTERACTIONS, null)
+        // Recompute branch — fires on cache miss (no persisted entry for
+        // this hub) OR on bypass_pattern_cache=true.
+        let interactions: InteractionRecord[] = PROOF_INTERACTIONS
+        interactionsSource = 'fixture_fallback'
+        if (profileSource === 'live_canonical') {
+          // Profile_id lookup for the loader's hub-scoped query. The proof
+          // endpoint only enters this branch after a successful
+          // loadMentorProfile(), which implies a row exists; this lookup
+          // gets the row's `id` separately. Worst case E mitigation: on null
+          // (lookup race / RLS regression / concurrent delete), fall through
+          // to fixture rather than throwing.
+          const { data: profileRow, error: profileLookupErr } = await supabaseAdmin
+            .from('mentor_profiles')
+            .select('id')
+            .eq('user_id', auth.user.id)
+            .single()
+          if (profileLookupErr) {
+            console.error(
+              '[mentor/ring/proof] profile_id lookup error (loader fallback to fixture):',
+              profileLookupErr,
+            )
+          }
+          const profileId = (profileRow as { id?: string } | null)?.id ?? null
+          if (profileId) {
+            // Live loader: hub-scoped, last 90 days, limit 100 most recent.
+            // Worst cases A/B/C/D mitigated inside the loader (try/catch +
+            // defensive row mapping). Returns [] on any error — recompute
+            // proceeds with empty input and produces a structurally valid
+            // empty PatternAnalysis. KG3 hub-label drift mitigated by the
+            // shared `proofHubId` cast to InteractionsHubId (the two types
+            // are structurally identical; the cast documents intent).
+            interactions = await loadMentorInteractionsAsRecords(
+              profileId,
+              proofHubId as InteractionsHubId,
+              { windowDays: 90, limit: 100 },
+            )
+            interactionsSource = 'live_loader'
+          }
+        }
+        interactionsCount = interactions.length
+        patternAnalysis = ring.analysePatterns(profile, interactions, null)
         patternSource = 'recomputed'
       }
     } catch (engineErr) {
@@ -552,6 +641,15 @@ export async function POST(request: NextRequest) {
         pattern_source: patternSource,
         pattern_engine_error: patternEngineError,
         pattern_persistence: patternPersistence,
+        // ADR-PE-01 Session 5 diagnostics. interactions_source: which input
+        // path fired on the recompute branch ('live_loader' / 'fixture_fallback'
+        // / null on cache hit). interactions_count: row count fed into
+        // analysePatterns on the recompute branch (null on cache hit).
+        // bypass_pattern_cache_used: echoes the request body field for
+        // verification round-trip.
+        interactions_source: interactionsSource,
+        interactions_count: interactionsCount,
+        bypass_pattern_cache_used: bypassPatternCache,
         profile_source: profileSource,
         profile_loader_error: profileLoaderError,
         token_summary: result.token_summary,
@@ -571,10 +669,19 @@ export async function POST(request: NextRequest) {
           'When profile_source === "live_canonical" and patternAnalysis is non-null,',
           'pattern_analyses[proofHubId] is written to the encrypted blob (per_request cadence).',
           'Critical risk under PR6 (encryption pipeline). Read-modify-write per ADR §6.3.',
-          'When profile.pattern_analyses[proofHubId] is present, the route uses it directly',
-          '(pattern_source: "persisted") and skips the deterministic recompute. When absent, falls',
-          'back to ring.analysePatterns (pattern_source: "recomputed"). Under 2A + per_request',
-          'cadence, computed_at freezes after first hit; version bumps every probe.',
+          'When profile.pattern_analyses[proofHubId] is present AND bypass_pattern_cache is false,',
+          'the route uses it directly (pattern_source: "persisted") and skips the deterministic',
+          'recompute. When absent OR when bypass_pattern_cache is true, falls back to',
+          'ring.analysePatterns (pattern_source: "recomputed"). Under 2A + per_request cadence,',
+          'computed_at freezes after first hit; version bumps every probe.',
+          'Live mentor_interactions loader: ADR-PE-01 Session 5, Q-Loader-* (Adopted 26 Apr 2026).',
+          'When recompute fires AND profile_source === "live_canonical", the recompute branch',
+          'reads mentor_interactions rows scoped to (profile_id, proofHubId), last 90 days,',
+          'limit 100, mapped through loadMentorInteractionsAsRecords. interactions_source field',
+          'on the response surfaces "live_loader" vs "fixture_fallback" vs null (on cache hit).',
+          'Optional bypass_pattern_cache request-body boolean (default false): when true, the',
+          'cache-precedence short-circuit is skipped and the recompute branch fires unconditionally',
+          '— the deterministic mechanism for exercising the live loader on cache-warm labels.',
           'No write to mentor_interactions — KG3 hub-label surface still deferred for that table.',
           'Canonical-loader transition: ADR-Ring-2-01 Session 1 (25 Apr 2026, Adopted).',
         ],
