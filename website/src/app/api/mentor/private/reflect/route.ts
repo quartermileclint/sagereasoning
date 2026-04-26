@@ -34,7 +34,7 @@ import {
 // changes). After Session 4c (`ProfileForSignals` retirement), only
 // canonical reaches getRecentInteractionsAsSignals.
 import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
-// ADR-PE-01 Session 3 (Option 3A, Adopted 27 April 2026): import the
+// ADR-PE-01 Session 3 (Option 3A, Adopted 26 April 2026): import the
 // pattern-data types so the load-modify-save spread for the per_request
 // persistence block typechecks. Same import path the proof endpoint uses
 // (`@/lib/sage-mentor-ring-bridge` re-exports both from sage-mentor).
@@ -288,7 +288,7 @@ export async function POST(request: NextRequest) {
       : null
 
     // ─── PATTERN-ENGINE PASS ─────────────────────────────────────────────
-    // ADR-PE-01 Session 3 (Option 3A, Adopted 27 April 2026): first live-
+    // ADR-PE-01 Session 3 (Option 3A, Adopted 26 April 2026): first live-
     // consumer wiring of the pattern-data read precedence proven on the
     // proof endpoint at Sessions 1 (write) and 2 (read). This route is
     // the first surface where real founder reflection traffic consumes
@@ -397,7 +397,7 @@ export async function POST(request: NextRequest) {
     const ringSummary = patternAnalysis?.ring_summary ?? null
 
     // ─── PATTERN-ANALYSIS PERSISTENCE ────────────────────────────────────
-    // ADR-PE-01 Session 3 per_request cadence (Adopted 27 April 2026).
+    // ADR-PE-01 Session 3 per_request cadence (Adopted 26 April 2026).
     // Re-save the loaded profile with pattern_analyses[PRIVATE_MENTOR_HUB]
     // set to the persisted analysis. Under 2A-skip on absence, this block
     // only fires on cache hit — there is no recompute path to persist.

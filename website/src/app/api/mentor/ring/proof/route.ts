@@ -7,7 +7,11 @@
  *
  * This route is INTENTIONALLY a proof, not a permanent feature:
  *   - Founder-only (FOUNDER_USER_ID gate)
- *   - Uses a hand-constructed fixture profile (not the live profile store)
+ *   - Uses the live profile store (loadMentorProfile), with hand-constructed
+ *     fixture profile as fallback when the live profile is absent
+ *     (post-ADR-Ring-2-01 Session 1, 25 April 2026)
+ *   - Uses the live mentor_interactions loader, with PROOF_INTERACTIONS fixture
+ *     as fallback when no live rows exist (post-ADR-PE-01 Session 5, 26 April 2026)
  *   - Does NOT write to mentor_interactions (avoids KG3 hub-label surface)
  *   - Returns the full ring trace in the JSON response for verification
  *

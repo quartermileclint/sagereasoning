@@ -1,7 +1,7 @@
 # SageReasoning Project Index
 
-Last updated: 26 April 2026 | Maintained as part of P0 item 0e
-Prior versions preserved in `/archive/` (most recent: `2026-04-26_INDEX_pre-canonical-patterns-add.md`)
+Last updated: 25 April 2026 | Maintained as part of P0 item 0e
+Prior versions preserved in `/archive/` (most recent: `2026-04-25_INDEX_pre-post-DD-09-update.md`)
 
 ---
 
@@ -45,7 +45,7 @@ Root-level files that are **content, not governance** (updated as project evolve
 
 | Folder | Purpose |
 |--------|---------|
-| `/adopted/` | Current governing documents beyond the manifest. As of 2026-04-26 contains three governing files: `session-opening-protocol.md` (adopted 2026-04-24 under DD-2026-04-24-09; governs how an AI agent opens, conducts, and closes a session), `canonical-sources.md` (adopted 2026-04-24 under DD-2026-04-24-09; single source of truth for what an agent reads at session open), and `canonical-patterns.md` (adopted 2026-04-26 under D-CANONICAL-PATTERNS-CREATED; promoted PR8-rule reusable working patterns; first entry CP-1 is Console-snippet auth-cookie discovery). V3 Adoption Scope `.md` and `.docx` resolved earlier under D3 (see decision-log DD-2026-04-24-03 and -04). `backup/` subfolder is a harmless D6-A placeholder. |
+| `/adopted/` | Current governing documents beyond the manifest. As of 2026-04-25 contains two governing files: `session-opening-protocol.md` (adopted 2026-04-24 under DD-2026-04-24-09; governs how an AI agent opens, conducts, and closes a session) and `canonical-sources.md` (adopted 2026-04-24 under DD-2026-04-24-09; single source of truth for what an agent reads at session open). V3 Adoption Scope `.md` and `.docx` resolved earlier under D3 (see decision-log DD-2026-04-24-03 and -04). `backup/` subfolder is a harmless D6-A placeholder. |
 | `/drafts/` | Documents under review, pending founder approval. Currently empty. `backup/` subfolder is a harmless D6-A placeholder. |
 | `/archive/` | Superseded versions (moved here, never deleted). Single canonical archive location — see "Archive Protocol" below. |
 | `/compliance/` | Regulatory register, audit logs, security reviews. |
