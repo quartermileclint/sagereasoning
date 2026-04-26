@@ -118,6 +118,45 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: lengthError }, { status: 400, headers: corsHeaders() })
     }
 
+    // ─── HUB_ID PARAMETER (ADR-PE-01 Session 3.5, 26 April 2026) ─────────
+    // Optional `hub_id` on the request body. Defaults to 'private-mentor'
+    // for back-compat with Sessions 1/2 (every existing probe call without
+    // this field continues to behave exactly as before). Allowed values:
+    // 'private-mentor', 'founder-mentor'. Any other value returns 400 — the
+    // explicit allowlist prevents writing pattern_analyses under an arbitrary
+    // label that no reader would ever look for (KG3 discipline at the writer).
+    //
+    // The validated value (`proofHubId`) is used at both the reader site
+    // (~line 240) and writer site (~line 300) of this route. Single local
+    // variable — no drift surface within the route. KG3 (hub-label end-to-
+    // end contract): every consumer reading pattern_analyses[label] must
+    // use a label from the same allowlist.
+    //
+    // Seeding role: the 'founder-mentor' branch lets this proof endpoint
+    // act as the seed source for /api/founder/hub Session 4 (Adopted 26
+    // April 2026). One probe with hub_id: 'founder-mentor' populates the
+    // entry from the PROOF_INTERACTIONS fixture; founder-hub then reads
+    // that entry under per_request cadence + 2A-skip on absence.
+    const VALID_PROOF_HUBS = ['private-mentor', 'founder-mentor'] as const
+    type ProofHubId = typeof VALID_PROOF_HUBS[number]
+    const requestedHubId: unknown = body?.hub_id
+    let proofHubId: ProofHubId
+    if (requestedHubId === undefined || requestedHubId === null) {
+      proofHubId = 'private-mentor'
+    } else if (
+      typeof requestedHubId === 'string' &&
+      (VALID_PROOF_HUBS as readonly string[]).includes(requestedHubId)
+    ) {
+      proofHubId = requestedHubId as ProofHubId
+    } else {
+      return NextResponse.json(
+        {
+          error: `hub_id must be one of: ${VALID_PROOF_HUBS.join(', ')}. Received: ${JSON.stringify(requestedHubId)}.`,
+        },
+        { status: 400, headers: corsHeaders() },
+      )
+    }
+
     // R20a — distress check via SafetyGate (AC4 invocation pattern)
     const gate = await enforceDistressCheck(detectDistressTwoStage(taskDescription))
     if (gate.shouldRedirect) {
@@ -207,20 +246,28 @@ export async function POST(request: NextRequest) {
     // an engine failure cannot break the existing ring trace.
     //
     // ADR-PE-01 Session 2, Option 2A (Adopted 26 Apr 2026): prefer the
-    // persisted analysis from profile.pattern_analyses['private-mentor']
-    // when present; fall back to recompute when absent. The persistence
-    // block below still fires per_request when profile_source === 'live_
+    // persisted analysis from profile.pattern_analyses[proofHubId] when
+    // present; fall back to recompute when absent. The persistence block
+    // below still fires per_request when profile_source === 'live_
     // canonical', so the persisted entry is rewritten on every probe with
     // the same content (only `version` bumps — `computed_at` freezes by
     // design under 2A + per_request, see CCP worst case B, 26 Apr 2026).
-    // To force a fresh recompute, delete pattern_analyses['private-mentor']
+    // To force a fresh recompute, delete pattern_analyses[proofHubId]
     // from the blob, or move to a throttled-with-conditional cadence.
     //
-    // KG3 (hub-label end-to-end): hardcoded 'private-mentor' on the read
-    // side mirrors the writer at line ~267 of this same file (the
-    // persistence block's mutated-profile literal). Any drift between
-    // reader and writer label silently breaks Option 2A — the cache hit
-    // becomes invisible and the route always falls through to recompute.
+    // ADR-PE-01 Session 3.5 (Adopted 26 Apr 2026): the hardcoded
+    // 'private-mentor' literal on this read site has been replaced with
+    // the validated `proofHubId` local variable derived from the request
+    // body's `hub_id` field (default 'private-mentor'). Allows the proof
+    // endpoint to seed pattern_analyses['founder-mentor'] for the Session 4
+    // founder-hub consumer.
+    //
+    // KG3 (hub-label end-to-end): the read site here uses `proofHubId`,
+    // which is the same local variable used at the writer site
+    // (~line 300 below). Single local variable — no drift surface within
+    // this route. Any future consumer route reading pattern_analyses[label]
+    // must use a label from the same allowlist (VALID_PROOF_HUBS) or the
+    // canonical mapper (mapRequestHubToContextHub in /api/founder/hub).
     // Verification: probe must return pattern_source === 'persisted' on
     // hit; pattern_source === 'recomputed' on first probe after deploy
     // (when the persisted entry is known to exist) is the diagnostic for
@@ -230,7 +277,7 @@ export async function POST(request: NextRequest) {
     let patternEngineError: string | null = null
     try {
       // Option 2A read precedence: prefer persisted, fall back to recompute
-      const persisted = profile.pattern_analyses?.['private-mentor'] ?? null
+      const persisted = profile.pattern_analyses?.[proofHubId] ?? null
       if (persisted) {
         patternAnalysis = persisted
         patternSource = 'persisted'
@@ -247,21 +294,29 @@ export async function POST(request: NextRequest) {
     // ─── PATTERN-ANALYSIS PERSISTENCE ────────────────────────────────────
     // ADR-PE-01 Session 1, Option 1A (Adopted 26 April 2026). Read-modify-
     // write of the encrypted profile blob: the pattern_analyses sub-key is
-    // updated for hub 'private-mentor' and the full profile is re-encrypted
+    // updated for hub `proofHubId` and the full profile is re-encrypted
     // and re-saved. Critical risk under PR6 (encryption pipeline blast
     // radius). Founder-only traffic via the gate above.
     //
     // Cadence: per-request (founder selection at Session 1 plan walk,
     // 26 April 2026). Every probe writes when profile loaded live. ADR §7.2
     // O-PE-01-D — revisit at Session 2 once read side is wired and write-
-    // load picture is clearer.
+    // load picture is clearer. Resolved for Sessions 1, 2, 3 — per_request.
     //
-    // Hub-key (KG3): hardcoded 'private-mentor'. The proof endpoint is the
-    // private-mentor surface for the founder; the request body carries no
-    // hub_id. The canonical mapper is mapRequestHubToContextHub (used in
-    // /api/founder/hub for request-derived hub_ids). Any future endpoint
-    // that takes hub_id from the request must use that mapper before
-    // writing pattern_analyses[hub_id].
+    // ADR-PE-01 Session 3.5 (Adopted 26 April 2026): the hardcoded
+    // 'private-mentor' literal at the writer site has been replaced with
+    // the validated `proofHubId` local variable. The hub_id field in the
+    // patternPersistence diagnostic also reflects the validated value, so
+    // probes can confirm round-trip correctness for both labels.
+    //
+    // Hub-key (KG3): both the reader (~line 240 above) and the writer
+    // (below) use the same `proofHubId` local variable. Single source of
+    // truth within this route. The canonical mapper is
+    // mapRequestHubToContextHub (used in /api/founder/hub for request-
+    // derived hub_ids); any future endpoint that takes hub_id from the
+    // request must use that mapper or its own equivalent allowlist before
+    // writing pattern_analyses[hub_id]. Allowed labels at the writer
+    // (VALID_PROOF_HUBS): 'private-mentor', 'founder-mentor'.
     //
     // Read-modify-write discipline (ADR §6.3): the loaded `profile` object
     // is spread into the writeable shape with only pattern_analyses set;
@@ -283,7 +338,7 @@ export async function POST(request: NextRequest) {
       ok: false,
       version: null,
       error: null,
-      hub_id: 'private-mentor',
+      hub_id: proofHubId,
       cadence_used: 'per_request',
     }
     if (profileSource === 'live_canonical' && patternAnalysis) {
@@ -293,7 +348,7 @@ export async function POST(request: NextRequest) {
           ...profile,
           pattern_analyses: {
             ...(profile.pattern_analyses ?? {}),
-            'private-mentor': patternAnalysis,
+            [proofHubId]: patternAnalysis,
           },
         }
         // KG1 rule 2: awaited. No fire-and-forget on Vercel.
@@ -509,11 +564,14 @@ export async function POST(request: NextRequest) {
           'Pattern-engine runs deterministically (no LLM) on the fixture interactions.',
           'When the BEFORE LLM check fires, the BEFORE prompt is augmented with pattern_analysis.ring_summary.',
           'Pattern-analysis persistence: ADR-PE-01 Session 1, Option 1A (Adopted 26 Apr 2026).',
-          'When profile_source === "live_canonical" and patternAnalysis is non-null,',
-          'pattern_analyses[\'private-mentor\'] is written to the encrypted blob (per_request cadence).',
-          'Critical risk under PR6 (encryption pipeline). Read-modify-write per ADR §6.3.',
           'Pattern-analysis read precedence: ADR-PE-01 Session 2, Option 2A (Adopted 26 Apr 2026).',
-          'When profile.pattern_analyses[\'private-mentor\'] is present, the route uses it directly',
+          'Hub_id parameterisation: ADR-PE-01 Session 3.5, Option 3.5-α (Adopted 26 Apr 2026).',
+          'Optional hub_id field on the request body, default \'private-mentor\' (back-compat).',
+          'Allowed values: \'private-mentor\', \'founder-mentor\'. Any other value returns 400.',
+          'When profile_source === "live_canonical" and patternAnalysis is non-null,',
+          'pattern_analyses[proofHubId] is written to the encrypted blob (per_request cadence).',
+          'Critical risk under PR6 (encryption pipeline). Read-modify-write per ADR §6.3.',
+          'When profile.pattern_analyses[proofHubId] is present, the route uses it directly',
           '(pattern_source: "persisted") and skips the deterministic recompute. When absent, falls',
           'back to ring.analysePatterns (pattern_source: "recomputed"). Under 2A + per_request',
           'cadence, computed_at freezes after first hit; version bumps every probe.',
