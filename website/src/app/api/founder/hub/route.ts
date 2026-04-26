@@ -51,7 +51,12 @@ import {
 // mentor-context-private.ts. The hub does not directly read profile fields
 // and does not return profile-derived fields in its response body, so no
 // wire-contract translation is needed at this caller.
-import { loadMentorProfile } from '@/lib/mentor-profile-store'
+import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
+// ADR-PE-01 Session 4 (Adopted 26 April 2026): pattern-analysis read+write
+// on this consumer. saveMentorProfile is the third call site in production
+// (after /api/mentor/ring/proof and /api/mentor/private/reflect). The type
+// imports below give the read-modify-write block the canonical shapes.
+import type { PatternAnalysis, MentorProfile } from '@/lib/sage-mentor-ring-bridge'
 import { logMentorObservation } from '@/lib/logging/mentor-observation-logger'
 import type { ObservationCategory, ConfidenceLevel } from '@/lib/logging/mentor-observation-logger'
 import { extractJSON } from '@/lib/json-utils'
@@ -529,6 +534,31 @@ ${brainContext}`
   let recentInteractionSignals: string | null = null
   let mentorObservationsBlock: string | null = null
   let profileSnapshotsBlock: string | null = null
+
+  // ADR-PE-01 Session 4 (Adopted 26 April 2026): pattern-analysis read+write
+  // on this live consumer. Defaults are pre-mentor / pre-cache-hit; the
+  // if (agent === 'mentor') block below populates them on cache hit under
+  // 2A-skip on absence (per_request cadence on cache hit, no-op on absence).
+  // Surfaced via pipeline_meta in the response (option (a) of the CCP
+  // diagnostic shape).
+  let patternAnalysis: PatternAnalysis | null = null
+  let patternSource: 'persisted' | 'absent' = 'absent'
+  const patternPersistence: {
+    attempted: boolean
+    ok: boolean
+    version: number | null
+    error: string | null
+    hub_id: string
+    cadence_used: 'per_request' | 'throttled' | 'lazy'
+  } = {
+    attempted: false,
+    ok: false,
+    version: null,
+    error: null,
+    hub_id: '',
+    cadence_used: 'per_request',
+  }
+
   if (agent === 'mentor') {
     const contextHub = mapRequestHubToContextHub(effectiveHubId)
     const [mentorObservations, profileSnapshots, signals] = await Promise.all([
@@ -551,11 +581,99 @@ ${brainContext}`
     profileSnapshotsBlock = profileSnapshots
     recentInteractionSignals = signals
 
+    // ─── PATTERN-ANALYSIS READ ───────────────────────────────────────────
+    // ADR-PE-01 Session 4 (Adopted 26 April 2026). Option 2A read precedence
+    // with 2A-skip on absence: prefer profile.pattern_analyses[contextHub]
+    // when present; skip pattern augmentation entirely when absent (no
+    // recompute on this consumer because the live mentor_interactions
+    // loader is deferred per ADR §1.2 (c); a recompute branch would call
+    // analysePatterns(profile, [], null) and produce empty data → cache
+    // pollution under per_request — worst case G of the 26 April CCP).
+    //
+    // KG3 (hub-label end-to-end contract): contextHub is derived from
+    // mapRequestHubToContextHub(effectiveHubId) above — the canonical
+    // mapper. The proof endpoint (/api/mentor/ring/proof) writes both
+    // 'private-mentor' and 'founder-mentor' under VALID_PROOF_HUBS
+    // (ADR-PE-01 Session 3.5 parameterisation, Adopted 26 April 2026).
+    // Both labels are read here. Any drift between writer and reader
+    // labels would surface as patternSource: 'absent' on what should
+    // be a cache hit — the diagnostic for KG3 drift on this consumer.
+    //
+    // Gates: useProjection (mentor-only feature flag; also requires
+    // MENTOR_CONTEXT_V2='true') AND storedProfile (must have a live
+    // profile to read from). Without storedProfile the read falls
+    // through to absent.
+    if (useProjection && storedProfile?.profile) {
+      const persisted = storedProfile.profile.pattern_analyses?.[contextHub] ?? null
+      if (persisted) {
+        patternAnalysis = persisted
+        patternSource = 'persisted'
+      }
+      // 2A-skip on absence: leave patternSource as 'absent', patternAnalysis null.
+    }
+
     // Inject the new Piece 2 block first so the mentor sees recent signals
     // near the profile projection, before the older observations/snapshots.
     if (recentInteractionSignals) enrichedMessage += `\n\n${recentInteractionSignals}`
     if (mentorObservations) enrichedMessage += `\n\n${mentorObservations}`
     if (profileSnapshots) enrichedMessage += `\n\n${profileSnapshots}`
+
+    // Pattern context block — ADR-PE-01 Session 4 (Adopted 26 April 2026).
+    // KG6-compliant: user-message zone, after the existing observation
+    // blocks (same authority level as profile context). Only fires on
+    // cache hit under 2A-skip on absence. Mirror of the reflect endpoint
+    // pattern-context block (ADR-PE-01 Session 3, 26 April 2026).
+    if (patternAnalysis?.ring_summary) {
+      enrichedMessage += `\n\nRECURRING PATTERNS DETECTED ACROSS PRIOR INTERACTIONS:\n${patternAnalysis.ring_summary}\n\n(These are deterministic aggregations from this practitioner's recent interaction history — diagnostic, not punitive. Reference them where relevant; do not repeat verbatim.)`
+    }
+
+    // ─── PATTERN-ANALYSIS PERSISTENCE ────────────────────────────────────
+    // ADR-PE-01 Session 4 (Adopted 26 April 2026). Read-modify-write of
+    // the encrypted profile blob: pattern_analyses[contextHub] is rewritten
+    // with the cache-hit value (so version bumps every request — verification
+    // observable). Critical risk under PR6 — third saveMentorProfile call
+    // site in production after /api/mentor/ring/proof (Sessions 1, 3.5)
+    // and /api/mentor/private/reflect (Session 3). Founder approved 26
+    // April 2026 with worst case F (encryption-pipeline regression on this
+    // third writer) accepted.
+    //
+    // Cadence: per_request under 2A-skip on absence. Only fires on cache
+    // hit (patternAnalysis is non-null) — same posture as Session 3's
+    // reflect endpoint. No empty-recompute write surface.
+    //
+    // KG3: contextHub is the canonical mapper output, used at the reader
+    // site above and the writer site here. Same local variable — no drift
+    // surface within this block.
+    //
+    // Read-modify-write discipline (ADR §6.3): the loaded `storedProfile.
+    // profile` object is spread into the writeable shape with only
+    // pattern_analyses set; every other field round-trips unchanged
+    // because we hand back the exact object loadMentorProfile returned,
+    // plus the new field.
+    //
+    // KG1 rule 2: awaited. Vercel kills in-flight promises after the
+    // response is sent.
+    if (useProjection && storedProfile?.profile && patternAnalysis) {
+      patternPersistence.attempted = true
+      patternPersistence.hub_id = contextHub
+      try {
+        const mutatedProfile: MentorProfile = {
+          ...storedProfile.profile,
+          pattern_analyses: {
+            ...(storedProfile.profile.pattern_analyses ?? {}),
+            [contextHub]: patternAnalysis,
+          },
+        }
+        const saveResult = await saveMentorProfile(userId, mutatedProfile)
+        patternPersistence.ok = saveResult.success
+        patternPersistence.version = saveResult.version
+        patternPersistence.error = saveResult.error ?? null
+      } catch (saveErr) {
+        patternPersistence.error =
+          saveErr instanceof Error ? saveErr.message : 'unknown save error'
+        console.error('[founder/hub] Pattern-analysis save error:', saveErr)
+      }
+    }
   }
 
   // Token-count logging for before/after comparison.
@@ -606,6 +724,15 @@ ${brainContext}`
       outputTokens: response.usage?.output_tokens || 0,
       durationMs,
       brainDepth: agent === 'mentor' ? 'deep' : 'deep',
+      // ADR-PE-01 Session 4 (Adopted 26 April 2026): mentor-only diagnostic
+      // fields. Spread-conditional ensures non-mentor agents (ops, tech,
+      // growth, support) carry no pattern_source / pattern_persistence
+      // fields on their pipeline_meta — confirms the agent === 'mentor'
+      // gate by absence on negative-test probes.
+      ...(agent === 'mentor' ? {
+        pattern_source: patternSource,
+        pattern_persistence: patternPersistence,
+      } : {}),
     },
   }
 }
