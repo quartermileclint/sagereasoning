@@ -50,6 +50,7 @@
 import type { DimensionScores, KatorthomaProximityLevel } from '../trust-layer/types/accreditation'
 import type { ProgressionPrescription } from '../trust-layer/types/progression'
 import type { FounderFacts } from './founder-facts'
+import type { PatternAnalysis } from './pattern-engine'
 import { sanitise, sanitiseArray } from './sanitise'
 
 // ============================================================================
@@ -146,6 +147,18 @@ export type MentorProfile = {
    *  a `proximity_estimate?: {...}` sub-object that would duplicate
    *  `senecan_grade` and `proximity_level` already on the canonical type. */
   readonly proximity_estimate_description?: string
+
+  // ── Pattern-engine cache (added under ADR-PE-01, Adopted 26 April 2026) ─
+  // Optional, additive field. Stores the most recent PatternAnalysis output
+  // per hub_id. Encrypted at rest via the existing R17b pipeline (the field
+  // lives inside the encrypted_profile blob, not in a new column or table).
+  // Profiles persisted before ADR-PE-01 Session 1 read this as `undefined`;
+  // the consumer's fallback is to recompute via pattern-engine. Hub keys
+  // match the existing taxonomy ('private-mentor', 'founder-mentor'). See
+  // ADR-PE-01 §3, §4.1 for the full shape rules and §6.3 for the
+  // implementation discipline (read-modify-write, hub-key scoping,
+  // schema-version awareness).
+  readonly pattern_analyses?: Record<string, PatternAnalysis>
 }
 
 export type PassionMapEntry = {

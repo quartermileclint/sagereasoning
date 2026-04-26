@@ -49,7 +49,7 @@ import type {
   MentorProfile,
 } from '@/lib/sage-mentor-ring-bridge'
 import { PROOF_PROFILE, PROOF_INTERACTIONS } from '@/lib/mentor-ring-fixtures'
-import { loadMentorProfile } from '@/lib/mentor-profile-store'
+import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -214,6 +214,70 @@ export async function POST(request: NextRequest) {
       console.error('[mentor/ring/proof] Pattern-engine error:', engineErr)
     }
     const ringSummary = patternAnalysis?.ring_summary ?? null
+
+    // ─── PATTERN-ANALYSIS PERSISTENCE ────────────────────────────────────
+    // ADR-PE-01 Session 1, Option 1A (Adopted 26 April 2026). Read-modify-
+    // write of the encrypted profile blob: the pattern_analyses sub-key is
+    // updated for hub 'private-mentor' and the full profile is re-encrypted
+    // and re-saved. Critical risk under PR6 (encryption pipeline blast
+    // radius). Founder-only traffic via the gate above.
+    //
+    // Cadence: per-request (founder selection at Session 1 plan walk,
+    // 26 April 2026). Every probe writes when profile loaded live. ADR §7.2
+    // O-PE-01-D — revisit at Session 2 once read side is wired and write-
+    // load picture is clearer.
+    //
+    // Hub-key (KG3): hardcoded 'private-mentor'. The proof endpoint is the
+    // private-mentor surface for the founder; the request body carries no
+    // hub_id. The canonical mapper is mapRequestHubToContextHub (used in
+    // /api/founder/hub for request-derived hub_ids). Any future endpoint
+    // that takes hub_id from the request must use that mapper before
+    // writing pattern_analyses[hub_id].
+    //
+    // Read-modify-write discipline (ADR §6.3): the loaded `profile` object
+    // is spread into the writeable shape with only pattern_analyses set;
+    // every other field round-trips unchanged because we hand back the
+    // exact object loadMentorProfile returned, plus the new field.
+    //
+    // Skip conditions:
+    //   - profile_source === 'fixture_fallback' — no real profile to write to
+    //   - patternAnalysis === null — engine failed; nothing to persist
+    let patternPersistence: {
+      attempted: boolean
+      ok: boolean
+      version: number | null
+      error: string | null
+      hub_id: string
+      cadence_used: 'per_request' | 'throttled' | 'lazy'
+    } = {
+      attempted: false,
+      ok: false,
+      version: null,
+      error: null,
+      hub_id: 'private-mentor',
+      cadence_used: 'per_request',
+    }
+    if (profileSource === 'live_canonical' && patternAnalysis) {
+      patternPersistence.attempted = true
+      try {
+        const mutatedProfile: MentorProfile = {
+          ...profile,
+          pattern_analyses: {
+            ...(profile.pattern_analyses ?? {}),
+            'private-mentor': patternAnalysis,
+          },
+        }
+        // KG1 rule 2: awaited. No fire-and-forget on Vercel.
+        const saveResult = await saveMentorProfile(auth.user.id, mutatedProfile)
+        patternPersistence.ok = saveResult.success
+        patternPersistence.version = saveResult.version
+        patternPersistence.error = saveResult.error ?? null
+      } catch (saveErr) {
+        patternPersistence.error =
+          saveErr instanceof Error ? saveErr.message : 'unknown save error'
+        console.error('[mentor/ring/proof] Pattern-analysis save error:', saveErr)
+      }
+    }
 
     // ─── BEFORE PHASE ─────────────────────────────────────────────────────
     const before = ring.executeBefore(profile, task, innerAgent)
@@ -402,6 +466,7 @@ export async function POST(request: NextRequest) {
         },
         pattern_analysis: patternAnalysis,
         pattern_engine_error: patternEngineError,
+        pattern_persistence: patternPersistence,
         profile_source: profileSource,
         profile_loader_error: profileLoaderError,
         token_summary: result.token_summary,
@@ -413,7 +478,11 @@ export async function POST(request: NextRequest) {
           'Interactions source: hand-constructed fixture (PROOF_INTERACTIONS).',
           'Pattern-engine runs deterministically (no LLM) on the fixture interactions.',
           'When the BEFORE LLM check fires, the BEFORE prompt is augmented with pattern_analysis.ring_summary.',
-          'No write to mentor_interactions — KG3 hub-label surface deferred.',
+          'Pattern-analysis persistence: ADR-PE-01 Session 1, Option 1A (Adopted 26 Apr 2026).',
+          'When profile_source === "live_canonical" and patternAnalysis is non-null,',
+          'pattern_analyses[\'private-mentor\'] is written to the encrypted blob (per_request cadence).',
+          'Critical risk under PR6 (encryption pipeline). Read-modify-write per ADR §6.3.',
+          'No write to mentor_interactions — KG3 hub-label surface still deferred for that table.',
           'Canonical-loader transition: ADR-Ring-2-01 Session 1 (25 Apr 2026, Adopted).',
         ],
       },
