@@ -33,7 +33,12 @@ import {
 // at line ~141 is untouched. AC7 not engaged (no auth/cookie/session/redirect
 // changes). After Session 4c (`ProfileForSignals` retirement), only
 // canonical reaches getRecentInteractionsAsSignals.
-import { loadMentorProfile } from '@/lib/mentor-profile-store'
+import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store'
+// ADR-PE-01 Session 3 (Option 3A, Adopted 27 April 2026): import the
+// pattern-data types so the load-modify-save spread for the per_request
+// persistence block typechecks. Same import path the proof endpoint uses
+// (`@/lib/sage-mentor-ring-bridge` re-exports both from sage-mentor).
+import type { PatternAnalysis, MentorProfile } from '@/lib/sage-mentor-ring-bridge'
 import { extractJSON } from '@/lib/json-utils'
 import { logMentorObservation } from '@/lib/logging/mentor-observation-logger'
 import type { ObservationCategory, ConfidenceLevel } from '@/lib/logging/mentor-observation-logger'
@@ -228,6 +233,98 @@ export async function POST(request: NextRequest) {
         )
       : null
 
+    // ─── PATTERN-ENGINE PASS ─────────────────────────────────────────────
+    // ADR-PE-01 Session 3 (Option 3A, Adopted 27 April 2026): first live-
+    // consumer wiring of the pattern-data read precedence proven on the
+    // proof endpoint at Sessions 1 (write) and 2 (read). This route is
+    // the first surface where real founder reflection traffic consumes
+    // the persisted pattern_analyses entry from the encrypted blob.
+    //
+    // Read precedence: Option 2A — prefer persisted, skip augmentation
+    // when absent (2A-skip per founder direction at Session 3 plan walk,
+    // 27 April 2026). Recompute fallback intentionally not wired here:
+    // the live mentor_interactions loader (ADR-PE-01 §1.2 (c), D-PE-2 (c))
+    // is deferred to a future Critical session. Recomputing with empty
+    // interactions would pollute the cache with empty analysis under
+    // per_request cadence — accepted worst case E mitigation.
+    //
+    // KG3 (hub-label end-to-end): hardcoded PRIVATE_MENTOR_HUB constant
+    // (line 61 of this file) mirrors the writer-side hardcode at line
+    // ~286 of /api/mentor/ring/proof/route.ts (Session 1 persistence
+    // block). Any drift between reader and writer label silently breaks
+    // the cache hit and falls through to 2A-skip (no augmentation).
+    //
+    // Gate: useProjection (MENTOR_CONTEXT_V2 === 'true'). When projection
+    // is off, the legacy full-profile path runs and pattern data is not
+    // loaded at all. This is intentional: the projection path is the
+    // only path that calls loadMentorProfile() in this route.
+    let patternAnalysis: PatternAnalysis | null = null
+    let patternSource: 'persisted' | 'absent' = 'absent'
+    if (useProjection && storedProfile?.profile) {
+      const persisted =
+        storedProfile.profile.pattern_analyses?.[PRIVATE_MENTOR_HUB] ?? null
+      if (persisted) {
+        patternAnalysis = persisted
+        patternSource = 'persisted'
+      }
+      // 2A-skip: if absent, leave patternAnalysis = null and
+      // patternSource = 'absent'. No recompute, no augmentation, no save.
+    }
+    const ringSummary = patternAnalysis?.ring_summary ?? null
+
+    // ─── PATTERN-ANALYSIS PERSISTENCE ────────────────────────────────────
+    // ADR-PE-01 Session 3 per_request cadence (Adopted 27 April 2026).
+    // Re-save the loaded profile with pattern_analyses[PRIVATE_MENTOR_HUB]
+    // set to the persisted analysis. Under 2A-skip on absence, this block
+    // only fires on cache hit — there is no recompute path to persist.
+    //
+    // Read-modify-write discipline (ADR §6.3): spread the loaded profile
+    // and overlay only pattern_analyses[hub_id]. Every other field round-
+    // trips unchanged because the loaded `storedProfile.profile` IS the
+    // canonical MentorProfile shape returned by loadMentorProfile.
+    //
+    // Worst case D mitigation (encryption-pipeline regression on the new
+    // writer): the spread pattern is verbatim from the proof endpoint's
+    // Session 1 persistence block (lines ~289-309 of /api/mentor/ring/
+    // proof/route.ts). Same approach, same risk profile.
+    //
+    // KG1 rule 2: awaited. No fire-and-forget on Vercel.
+    let patternPersistence: {
+      attempted: boolean
+      ok: boolean
+      version: number | null
+      error: string | null
+      hub_id: string
+      cadence_used: 'per_request' | 'throttled' | 'lazy'
+    } = {
+      attempted: false,
+      ok: false,
+      version: null,
+      error: null,
+      hub_id: PRIVATE_MENTOR_HUB,
+      cadence_used: 'per_request',
+    }
+    if (useProjection && storedProfile?.profile && patternAnalysis) {
+      patternPersistence.attempted = true
+      try {
+        const mutatedProfile: MentorProfile = {
+          ...storedProfile.profile,
+          pattern_analyses: {
+            ...(storedProfile.profile.pattern_analyses ?? {}),
+            [PRIVATE_MENTOR_HUB]: patternAnalysis,
+          },
+        }
+        const saveResult = await saveMentorProfile(auth.user.id, mutatedProfile)
+        patternPersistence.ok = saveResult.success
+        patternPersistence.version = saveResult.version
+        patternPersistence.error = saveResult.error ?? null
+      } catch (saveErr) {
+        patternPersistence.error =
+          saveErr instanceof Error ? saveErr.message : 'unknown save error'
+        console.error('[private/reflect] Pattern-analysis save error:', saveErr)
+      }
+    }
+
     const mentorKnowledgeBase = getMentorKnowledgeBase()
 
     // Pick whichever profile context the flag selected
@@ -242,6 +339,14 @@ Score my actions and give me the sage perspective.`
 
     if (practitionerContext) userMessage += `\n\n${practitionerContext}`
     if (recentInteractionSignals) userMessage += `\n\n${recentInteractionSignals}`
+    // ADR-PE-01 Session 3 (Option 3A): pattern data context block. KG6
+    // (composition order): user-message zone, after the existing
+    // recent-signals block — same authority level as profile context.
+    // Only injected when patternSource === 'persisted' (ringSummary is
+    // null otherwise under 2A-skip).
+    if (ringSummary) {
+      userMessage += `\n\nRECURRING PATTERNS DETECTED ACROSS PRIOR INTERACTIONS:\n${ringSummary}\n\n(These are deterministic aggregations from this practitioner's recent interaction history — diagnostic, not punitive. Reference them where relevant; do not repeat verbatim.)`
+    }
     if (baselineAppendixContext) userMessage += `\n\n${baselineAppendixContext}`
     if (mentorObservations) userMessage += `\n\n${mentorObservations}`
     if (journalRefs) userMessage += `\n\n${journalRefs}`
@@ -395,6 +500,14 @@ Score my actions and give me the sage perspective.`
       disclaimer: reflectionData.disclaimer,
       reflected_at: new Date().toISOString(),
       mentor_mode: 'private',
+      // ADR-PE-01 Session 3 (Option 3A): verification diagnostic. Indicates
+      // whether the recurring-patterns context block was injected into the
+      // reflection prompt this request. 'persisted' = cache hit, block
+      // injected. 'absent' = 2A-skip, no augmentation. Used by the
+      // post-deploy verification probe to confirm the reader-writer hub
+      // mirror is intact end-to-end (KG3 drift diagnostic).
+      pattern_source: patternSource,
+      pattern_persistence: patternPersistence,
     }
 
     // Log structured observation to the unified pipeline (mentor_observations_structured)
