@@ -38,7 +38,20 @@ import { loadMentorProfile, saveMentorProfile } from '@/lib/mentor-profile-store
 // pattern-data types so the load-modify-save spread for the per_request
 // persistence block typechecks. Same import path the proof endpoint uses
 // (`@/lib/sage-mentor-ring-bridge` re-exports both from sage-mentor).
-import type { PatternAnalysis, MentorProfile } from '@/lib/sage-mentor-ring-bridge'
+// ADR-PE-01 Session 6 (Adopted 26 April 2026): InteractionRecord added so
+// the recompute branch's loader output typechecks against analysePatterns.
+import type { PatternAnalysis, MentorProfile, InteractionRecord } from '@/lib/sage-mentor-ring-bridge'
+// ADR-PE-01 Session 6 (per-consumer 2A-recompute switch on reflect, Adopted
+// 26 April 2026): live mentor_interactions loader + ring bridge for the
+// recompute branch added to the pattern-engine pass below. Verbatim mirror
+// of the imports added to the proof endpoint at Session 5 (26 April 2026).
+// PR1 single-endpoint discipline: reflect is the second consumer of the
+// loader; founder-hub remains on 2A-skip until reflect's switch is Verified.
+import {
+  loadMentorInteractionsAsRecords,
+  type InteractionsHubId,
+} from '@/lib/mentor-interactions-loader'
+import { loadRingFunctions } from '@/lib/sage-mentor-ring-bridge'
 import { extractJSON } from '@/lib/json-utils'
 import { logMentorObservation } from '@/lib/logging/mentor-observation-logger'
 import type { ObservationCategory, ConfidenceLevel } from '@/lib/logging/mentor-observation-logger'
@@ -129,7 +142,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const startTime = Date.now()
-    const { what_happened, how_i_responded, user_id } = await request.json()
+    // ADR-PE-01 Session 6 (Adopted 26 April 2026): parse the body once and
+    // hold a reference so the bypass_pattern_cache validation block (below)
+    // can read it without consuming request.json() a second time.
+    const body = await request.json()
+    const { what_happened, how_i_responded, user_id } = body
 
     const textLengthError = validateTextLength(what_happened, 'what_happened', TEXT_LIMITS.medium)
     if (textLengthError) {
@@ -146,6 +163,43 @@ export async function POST(request: NextRequest) {
     if (!what_happened || typeof what_happened !== 'string' || what_happened.trim().length < 10) {
       return NextResponse.json(
         { error: 'what_happened is required (describe what happened today, min 10 characters)' },
+        { status: 400 }
+      )
+    }
+
+    // ─── BYPASS_PATTERN_CACHE PARAMETER (ADR-PE-01 Session 6, 26 Apr 2026) ─
+    // Optional `bypass_pattern_cache` boolean on the request body. When true,
+    // the pattern-engine pass below skips the cache-precedence short-circuit
+    // and forces the recompute branch (live mentor_interactions loader → ring.
+    // analysePatterns → persist when interactions non-empty per Q-Empty-
+    // Recompute-Posture (i)). Default false — back-compat with all existing
+    // reflect calls (Session 3 Option 3A 2A-skip on absence becomes 2A-
+    // recompute on absence under this session's switch).
+    //
+    // Verification role: the deterministic mechanism for exercising the live
+    // loader on cache-warm labels (worst case J accepted at session open).
+    // Without bypass, the founder's existing pattern_analyses['private-mentor']
+    // entry (last live-recomputed by Session 5 Probe L4) would never cache-
+    // miss under normal traffic, so the loader could not be verified live on
+    // this consumer. Side effect: when bypass=true and the persistence block
+    // fires, the persisted entry is overwritten by the recomputed result.
+    // Q-Backfill posture: opt-in only; the founder controls when overwrites
+    // happen by sending bypass_pattern_cache: true.
+    //
+    // Risk classification (worst case F): optional field, default false,
+    // strict typeof === 'boolean' check. Anything other than undefined, null,
+    // true, or false returns 400. Back-compat preserved for absent fields.
+    const requestedBypass: unknown = body?.bypass_pattern_cache
+    let bypassPatternCache: boolean
+    if (requestedBypass === undefined || requestedBypass === null) {
+      bypassPatternCache = false
+    } else if (typeof requestedBypass === 'boolean') {
+      bypassPatternCache = requestedBypass
+    } else {
+      return NextResponse.json(
+        {
+          error: `bypass_pattern_cache must be a boolean. Received: ${JSON.stringify(requestedBypass)}.`,
+        },
         { status: 400 }
       )
     }
@@ -240,35 +294,105 @@ export async function POST(request: NextRequest) {
     // the first surface where real founder reflection traffic consumes
     // the persisted pattern_analyses entry from the encrypted blob.
     //
-    // Read precedence: Option 2A — prefer persisted, skip augmentation
-    // when absent (2A-skip per founder direction at Session 3 plan walk,
-    // 27 April 2026). Recompute fallback intentionally not wired here:
-    // the live mentor_interactions loader (ADR-PE-01 §1.2 (c), D-PE-2 (c))
-    // is deferred to a future Critical session. Recomputing with empty
-    // interactions would pollute the cache with empty analysis under
-    // per_request cadence — accepted worst case E mitigation.
+    // ADR-PE-01 Session 6 (Adopted 26 April 2026): per-consumer 2A-recompute
+    // switch on reflect. The Session 3 2A-skip on absence is replaced by
+    // 2A-recompute on absence: cache-hit branch unchanged; cache-miss branch
+    // now invokes the live mentor_interactions loader (Verified live on the
+    // proof endpoint at Session 5, 26 April 2026) and runs analysePatterns
+    // over the result. Q-Empty-Recompute-Posture (i) — skip persistence on
+    // empty input — is enforced in the persistence block below to preserve
+    // any existing useful entry when the loader returns no rows.
+    //
+    // Read precedence (post-Session-6): Option 2A — prefer persisted, recompute
+    // when absent OR when bypass_pattern_cache is true.
     //
     // KG3 (hub-label end-to-end): hardcoded PRIVATE_MENTOR_HUB constant
-    // (line 61 of this file) mirrors the writer-side hardcode at line
-    // ~286 of /api/mentor/ring/proof/route.ts (Session 1 persistence
-    // block). Any drift between reader and writer label silently breaks
-    // the cache hit and falls through to 2A-skip (no augmentation).
+    // (line 66 of this file) is the single source of truth used at the cache-
+    // read site, the loader call site, and the writer site (persistence block
+    // below). Same mirror discipline as the proof endpoint's `proofHubId`
+    // local variable (Session 5 pattern). The cast `PRIVATE_MENTOR_HUB as
+    // InteractionsHubId` is structurally sound — both types are the same
+    // literal union.
     //
     // Gate: useProjection (MENTOR_CONTEXT_V2 === 'true'). When projection
     // is off, the legacy full-profile path runs and pattern data is not
     // loaded at all. This is intentional: the projection path is the
     // only path that calls loadMentorProfile() in this route.
+    //
+    // PR1 single-endpoint discipline: this is the second consumer of the
+    // loader (after /api/mentor/ring/proof at Session 5). Founder-hub
+    // remains on 2A-skip on absence until reflect's switch is Verified.
     let patternAnalysis: PatternAnalysis | null = null
-    let patternSource: 'persisted' | 'absent' = 'absent'
+    let patternSource: 'persisted' | 'recomputed' | 'absent' = 'absent'
+    let interactionsSource: 'live_loader' | null = null
+    let interactionsCount: number | null = null
+    let patternEngineError: string | null = null
     if (useProjection && storedProfile?.profile) {
       const persisted =
         storedProfile.profile.pattern_analyses?.[PRIVATE_MENTOR_HUB] ?? null
-      if (persisted) {
+      if (persisted && !bypassPatternCache) {
+        // Cache-hit branch — short-circuit. Loader does not fire.
+        // interactionsSource stays null on the response (diagnostic: cache-hit).
         patternAnalysis = persisted
         patternSource = 'persisted'
+      } else {
+        // Recompute branch — fires on cache miss (no persisted entry for
+        // PRIVATE_MENTOR_HUB) OR on bypass_pattern_cache=true.
+        // Worst cases A/B/C/D/E/G/I/L/N mitigated below + inside the loader.
+        try {
+          const ring = await loadRingFunctions()
+          if (ring) {
+            // Profile_id lookup for the loader's hub-scoped query. Worst case
+            // E mitigation: on null profileId (lookup race / RLS regression /
+            // concurrent delete), leave patternAnalysis null and patternSource
+            // 'absent' rather than throwing. Falls through to today's 2A-skip
+            // behaviour for the request — no augmentation, no persistence
+            // (the persistence block's `&& patternAnalysis` gate handles this).
+            const { data: profileRow, error: profileLookupErr } = await supabaseAdmin
+              .from('mentor_profiles')
+              .select('id')
+              .eq('user_id', auth.user.id)
+              .single()
+            if (profileLookupErr) {
+              console.error(
+                '[private/reflect] profile_id lookup error (recompute fall-through):',
+                profileLookupErr,
+              )
+            }
+            const profileId = (profileRow as { id?: string } | null)?.id ?? null
+            if (profileId) {
+              // Live loader: hub-scoped, last 90 days, limit 100 most recent.
+              // Worst cases A/B/C/D mitigated inside the loader. Returns []
+              // on any error → analysePatterns produces a structurally valid
+              // empty PatternAnalysis (no detections). Q-Empty-Recompute-
+              // Posture (i) — persistence block below skips the empty case.
+              const interactions: InteractionRecord[] = await loadMentorInteractionsAsRecords(
+                profileId,
+                PRIVATE_MENTOR_HUB as InteractionsHubId,
+                { windowDays: 90, limit: 100 },
+              )
+              interactionsSource = 'live_loader'
+              interactionsCount = interactions.length
+              patternAnalysis = ring.analysePatterns(
+                storedProfile.profile,
+                interactions,
+                null,
+              )
+              patternSource = 'recomputed'
+            }
+            // If profileId is null, leave patternAnalysis = null and
+            // patternSource = 'absent'. Worst case E.
+          }
+          // If ring is null (build-context unavailability), leave
+          // patternAnalysis = null. Worst case N — graceful fall-through to
+          // 2A-skip behaviour. Reflect's main flow continues unchanged.
+        } catch (engineErr) {
+          patternEngineError =
+            engineErr instanceof Error ? engineErr.message : 'unknown error'
+          console.error('[private/reflect] Pattern-engine recompute error:', engineErr)
+          // patternAnalysis stays null; patternSource stays 'absent'.
+        }
       }
-      // 2A-skip: if absent, leave patternAnalysis = null and
-      // patternSource = 'absent'. No recompute, no augmentation, no save.
     }
     const ringSummary = patternAnalysis?.ring_summary ?? null
 
@@ -278,15 +402,25 @@ export async function POST(request: NextRequest) {
     // set to the persisted analysis. Under 2A-skip on absence, this block
     // only fires on cache hit — there is no recompute path to persist.
     //
+    // ADR-PE-01 Session 6 (Adopted 26 April 2026): with the recompute branch
+    // wired in the pattern-engine pass above, this block now also fires on
+    // recompute (cache miss OR bypass=true). Q-Empty-Recompute-Posture (i)
+    // — skip persistence on empty input — is enforced via the
+    // `skipPersistEmptyRecompute` gate below: when the recompute branch
+    // produced patternAnalysis from zero loader rows (interactionsCount === 0),
+    // skip the save to preserve any existing useful entry. The cache-hit
+    // branch's per_request re-save behaviour is unchanged.
+    //
     // Read-modify-write discipline (ADR §6.3): spread the loaded profile
     // and overlay only pattern_analyses[hub_id]. Every other field round-
     // trips unchanged because the loaded `storedProfile.profile` IS the
     // canonical MentorProfile shape returned by loadMentorProfile.
     //
-    // Worst case D mitigation (encryption-pipeline regression on the new
-    // writer): the spread pattern is verbatim from the proof endpoint's
-    // Session 1 persistence block (lines ~289-309 of /api/mentor/ring/
-    // proof/route.ts). Same approach, same risk profile.
+    // Worst case G/I mitigation (encryption-pipeline regression on the
+    // recompute writer): the spread pattern is verbatim from the proof
+    // endpoint's Session 1/3.5 persistence block. Same approach, same risk
+    // profile. analysePatterns is unchanged and deterministically produces a
+    // valid PatternAnalysis.
     //
     // KG1 rule 2: awaited. No fire-and-forget on Vercel.
     let patternPersistence: {
@@ -304,7 +438,17 @@ export async function POST(request: NextRequest) {
       hub_id: PRIVATE_MENTOR_HUB,
       cadence_used: 'per_request',
     }
-    if (useProjection && storedProfile?.profile && patternAnalysis) {
+    // Q-Empty-Recompute-Posture (i): skip persistence when the recompute
+    // branch produced patternAnalysis from zero loader rows. Preserves the
+    // existing entry (if any) on the bypass-with-empty-data case.
+    const skipPersistEmptyRecompute =
+      patternSource === 'recomputed' && interactionsCount === 0
+    if (
+      useProjection &&
+      storedProfile?.profile &&
+      patternAnalysis &&
+      !skipPersistEmptyRecompute
+    ) {
       patternPersistence.attempted = true
       try {
         const mutatedProfile: MentorProfile = {
@@ -503,11 +647,23 @@ Score my actions and give me the sage perspective.`
       // ADR-PE-01 Session 3 (Option 3A): verification diagnostic. Indicates
       // whether the recurring-patterns context block was injected into the
       // reflection prompt this request. 'persisted' = cache hit, block
-      // injected. 'absent' = 2A-skip, no augmentation. Used by the
-      // post-deploy verification probe to confirm the reader-writer hub
-      // mirror is intact end-to-end (KG3 drift diagnostic).
+      // injected. 'absent' = 2A-skip / recompute fall-through, no augmentation.
+      // ADR-PE-01 Session 6 (26 Apr 2026): 'recomputed' added — the recompute
+      // branch fired (cache miss OR bypass=true) and produced a fresh analysis
+      // from live mentor_interactions data via the loader.
       pattern_source: patternSource,
       pattern_persistence: patternPersistence,
+      // ADR-PE-01 Session 6 diagnostics (26 Apr 2026). interactions_source:
+      // 'live_loader' when the recompute branch invoked the loader; null on
+      // cache hit / recompute fall-through (ring null / profileId null).
+      // interactions_count: row count fed into analysePatterns (null on
+      // cache hit / fall-through). bypass_pattern_cache_used: echoes the
+      // request body field for verification round-trip. pattern_engine_error:
+      // surfaced to detect malformed loader output (worst case G/I diagnostic).
+      interactions_source: interactionsSource,
+      interactions_count: interactionsCount,
+      bypass_pattern_cache_used: bypassPatternCache,
+      pattern_engine_error: patternEngineError,
     }
 
     // Log structured observation to the unified pipeline (mentor_observations_structured)
