@@ -2042,3 +2042,27 @@ Commit `0a9505e`. Founder verified via founder hub mentor flow read-side probe (
 **Status:** Adopted as a stewardship observation. No promotion this session. Engine-mentor-ledger capability inventory line (`Isolated → Wired`) does not progress under this entry — the module's status is unchanged because it is correctly described as a pure journal-extraction layer with no DB write-side.
 
 ---
+
+## 2026-04-26 — D-PE-01-S1-1A-VERIFIED: ADR-PE-01 Session 1 (Option 1A) Reaches Verified Status
+
+**Decision:** ADR-PE-01 Session 1 (Option 1A — pattern-data write surface on `/api/mentor/ring/proof`) reaches Verified status. Founder selected Option 1A and per_request cadence on 2026-04-26 with explicit acceptance of worst cases A (read-modify-write data loss), B (encryption-pipeline regression), C (hub-key drift). Critical Change Protocol (0c-ii) executed in full pre-deploy. TypeScript clean before deploy; live-probe two-probe verification completed in-session at 01:12:10.701Z (version 3) and 01:14:40.127Z (version 4); both probes returned 200 with `pattern_persistence.ok: true`, `pattern_persistence.error: null`, `cadence_used: 'per_request'`.
+
+**Reasoning:** Session 1 was the single-endpoint proof of the storage architecture adopted under ADR-PE-01 (PR1). Option 1A (write surface first, on the proof endpoint) was chosen over Option 1B (loader build first) to keep the Critical-risk surface to a single session and to verify the encryption-pipeline write path on a low-traffic founder-only endpoint before any live-consumer wiring. Per_request cadence was chosen for verification observability (every probe writes; every probe shows version increment). The deferred sub-decisions O-PE-01-A through O-PE-01-E (ADR §12) carry forward unchanged except O-PE-01-D (write cadence) which is resolved for Session 1 only and revisited at Session 2 plan walk.
+
+**Rules served:** PR1 (single-endpoint proof reached Verified before any rollout begins), PR2 (verification immediate via tsc + grep + smoke check + two-probe live), PR3 (synchronous awaited write), PR6 (Critical Change Protocol executed in full pre-deploy), PR7 (O-PE-01-D resolved with documented reasoning + revisit condition), KG1 rule 2 (awaited DB write), KG3 (hub-label hardcoded `'private-mentor'` with inline comment naming the canonical mapper).
+
+**Status:** Adopted. Cross-references: D-ADR-PE-01 (Adopted 2026-04-26), D-PE-2 (Adopted 2026-04-25). Adoption confirmed by founder at the 2026-04-26 Session 2 open. Commit hash for the Session 1 push: TBD per founder share from GitHub Desktop History tab.
+
+---
+
+## 2026-04-26 — D-PE-01-S2-2A-VERIFIED: ADR-PE-01 Session 2 (Option 2A) Reaches Verified Status
+
+**Decision:** ADR-PE-01 Session 2 (Option 2A — pattern-data read precedence on `/api/mentor/ring/proof`) reaches Verified status. Founder selected Option 2A (prefer persisted, fall back to recompute on absence) and elected to keep per_request cadence on 2026-04-26 with explicit acceptance of worst cases A (stale-cache dominance), B (`computed_at` freeze under 2A + per_request — known consequence of the option/cadence combination, not a bug), C (KG3 hub-key drift latent risk now active), D (TypeScript shape regression on the reader), E (encryption-pipeline regression — same mitigation as Session 1). Critical Change Protocol (0c-ii) executed in full pre-deploy. TypeScript clean before deploy; live-probe two-probe verification completed in-session — both probes returned the expected shape with `pattern_source: "persisted"`, identical `computed_at` between probes (worst case B observed as designed), and `pattern_persistence.version` ticking by one per probe.
+
+**Reasoning:** Session 2 wires the read-side counterpart to Session 1's write-side. Option 2A (prefer persisted) was chosen over Option 2B (always recompute, persisted as fallback) because 2A delivers the cache value Session 1 set up; 2B would defeat the cache. Per_request cadence was preserved (rather than switching to throttled) for verification continuity with Session 1 and to keep the version-bump diagnostic visible. The known consequence — `computed_at` freezes after first persisted hit because the per_request write re-saves the same persisted analysis — was named explicitly in the CCP and accepted; it is the literal behaviour of the chosen combination. To force a fresh recompute, delete `pattern_analyses['private-mentor']` from the blob (absence triggers fallback) or move to a throttled-with-conditional cadence in a future session.
+
+**Rules served:** PR1 (single-endpoint proof of the read precedence; no rollout to other endpoints in this session), PR2 (verification immediate via tsc + grep + two-probe live in-session), PR3 (no async/background introduced; the read path is pure synchronous compute), PR4 (no model selection change; checkpoint cleared at session open), PR5 (KG3 engaged and respected — reader hardcode mirrors writer hardcode at line ~267 with inline comment naming the writer site; KG7 not engaged at column level; KG1 rule 2 not engaged because no new DB write surface added), PR6 (Critical Change Protocol executed in full pre-deploy with founder approval naming worst cases A–E), PR7 (no new deferred decisions beyond what ADR §12 already lists).
+
+**Status:** Adopted. Cross-references: D-PE-01-S1-1A-VERIFIED (Adopted 2026-04-26), D-ADR-PE-01 (Adopted 2026-04-26), ADR-PE-01 §3, §7.3, §8 (Session 2). Commit hash for the Session 2 push: TBD per founder share from GitHub Desktop History tab.
+
+---
