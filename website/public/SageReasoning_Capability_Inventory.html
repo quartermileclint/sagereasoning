@@ -121,6 +121,14 @@
   .data-source-banner { background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(52,211,153,0.08)); border: 1px solid rgba(167,139,250,0.2); border-radius: 6px; padding: 10px 20px; margin: 16px 28px; font-size: 11px; color: var(--text-dim); text-align: center; }
   .data-source-banner strong { color: var(--gold); }
 
+  /* Skill instructions banner — tells the founder how to invoke the
+     sage-registry-update skill in a Cowork session to bring this page
+     up to date. The span#skillLastUpdated is populated at fetch time
+     from registry.lastUpdated so the banner shows the current boundary. */
+  .skill-banner { background: linear-gradient(135deg, rgba(52,211,153,0.08), rgba(167,139,250,0.08)); border: 1px solid rgba(52,211,153,0.2); border-radius: 6px; padding: 10px 20px; margin: 0 28px 16px 28px; font-size: 11px; color: var(--text-dim); text-align: center; }
+  .skill-banner strong { color: var(--gold); }
+  .skill-banner code { background: rgba(255,255,255,0.05); padding: 1px 6px; border-radius: 3px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--gold); }
+
   /* Rows whose component has a non-empty `blocker` field in the source data
      render their text in red. Layout, badges (which carry their own color),
      and row positioning are preserved. */
@@ -151,6 +159,10 @@
 
 <div class="data-source-banner">
   <strong>Data source:</strong> component-registry.json · Single source of truth across all dashboards
+</div>
+
+<div class="skill-banner">
+  <strong>To update this page:</strong> in a Cowork session, say <code>Run the sage-registry-update skill</code>. The skill scans session handoffs since <span id="skillLastUpdated">[loading]</span>, proposes edits, applies on your approval, then gives you the git push command. See <code>.claude/skills/sage-registry-update/SKILL.md</code>.
 </div>
 
 <div class="honesty-banner">
@@ -213,6 +225,13 @@ async function loadComponentData() {
     const response = await fetch('/component-registry.json');
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const registry = await response.json();
+
+    // Surface the registry's lastUpdated date in the skill instructions banner.
+    // This is the boundary the sage-registry-update skill scans back to.
+    const lastUpdatedEl = document.getElementById('skillLastUpdated');
+    if (lastUpdatedEl && registry.lastUpdated) {
+      lastUpdatedEl.textContent = registry.lastUpdated;
+    }
 
     // Map registry schema to INV format
     // Registry has: name, type, status, desc, notes, humanReady, agentReady, origin

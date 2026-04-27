@@ -96,10 +96,33 @@
 
         .container {
             display: flex;
-            height: calc(100vh - 80px);
+            height: calc(100vh - 80px - 44px);
             gap: 16px;
             padding: 16px;
         }
+
+        /* Skill instructions banner — tells the founder how to invoke the
+           sage-registry-update and sage-flows-update skills in a Cowork
+           session to update this page. The span#skillLastUpdated is populated
+           at fetch time from registry.lastUpdated. */
+        .skill-banner {
+            background: linear-gradient(135deg, rgba(52,211,153,0.08), rgba(167,139,250,0.08));
+            border-bottom: 1px solid rgba(52,211,153,0.2);
+            padding: 10px 24px;
+            font-size: 11px;
+            color: #8b92a0;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .skill-banner strong { color: #d4a843; }
+        .skill-banner code {
+            background: rgba(255,255,255,0.05);
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            color: #d4a843;
+        }
+        .skill-banner .skill-banner-divider { color: #4a5060; margin: 0 10px; }
 
         .canvas-wrapper {
             flex: 1;
@@ -401,6 +424,14 @@
             </label>
             <button id="resetView">Reset View</button>
         </div>
+    </div>
+
+    <div class="skill-banner">
+        <strong>To update statuses or red text:</strong> say <code>Run the sage-registry-update skill</code>
+        <span class="skill-banner-divider">·</span>
+        <strong>To add or move a node:</strong> say <code>Run the sage-flows-update skill</code>
+        <span class="skill-banner-divider">·</span>
+        Registry last updated: <span id="skillLastUpdated">[loading]</span>
     </div>
 
     <div class="container">
@@ -755,6 +786,14 @@
                         const registry = await regRes.json();
                         const components = Array.isArray(registry) ? registry : (registry.components || []);
                         blockedNodeIds = computeBlockedNodeIds(nodes, components);
+
+                        // Surface the registry's lastUpdated date in the skill
+                        // instructions banner. This is the boundary the
+                        // sage-registry-update skill scans back to.
+                        const lastUpdatedEl = document.getElementById('skillLastUpdated');
+                        if (lastUpdatedEl && registry.lastUpdated) {
+                            lastUpdatedEl.textContent = registry.lastUpdated;
+                        }
                     }
                 } catch (regErr) {
                     console.warn('Component registry failed to load; blocker markers will not be applied.', regErr);
