@@ -1,12 +1,11 @@
 {
-  "version": "1.3.0",
-  "lastUpdated": "2026-04-28",
-  "totalComponents": 164,
+  "version": "1.2.0",
+  "lastUpdated": "2026-04-18",
+  "totalComponents": 163,
   "statusSummary": {
+    "wired": 127,
     "designed": 5,
-    "scaffolded": 1,
-    "wired": 124,
-    "verified": 32,
+    "verified": 29,
     "live": 2
   },
   "components": [
@@ -47,7 +46,7 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "internal",
-      "blocker": "/api/mentor/private/reflect (the Private Mentor's primary write endpoint) Verified end-to-end on 2026-04-26: canonical-profile loader (D-RING-2-S4A), pattern-engine integration (D-PE-01-S3, D-PE-01-S6 per-consumer 2A-recompute), live mentor_interactions loader (D-PE-01-S5). Distress classifier wrapper untouched per AC5. Outstanding: Journal interpreter layers 9-10 stub only (25 TODOs); /private-mentor page chat thread does not load past reflections from mentor_interactions on page mount (UX limitation logged as O-S5-A in 2026-04-26 Session 4 close)."
+      "blocker": "Isolated. Part of Sage Mentor subsystem. Journal interpreter layers 9-10 incomplete (25 TODOs)."
     },
     {
       "id": "agent-mentor",
@@ -167,8 +166,8 @@
       "subtype": [
         "reactive"
       ],
-      "status": "wired",
-      "oldStatus": "designed",
+      "status": "designed",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/sage-mentor/support-agent.ts",
       "desc": "Inner agent with 10 markdown tools. Stimulus-response: receives ticket, drafts response, submits to ring. Starts supervised.",
@@ -1145,7 +1144,7 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "paid_api",
-      "blocker": "Architecturally isolated. Type-only imports from website/src for AccreditationRecord, EvaluatedAction, GradeChangeEvent (mentor-profile-adapter.ts, trust-layer-bridge.ts). Runtime bridge trust-layer-bridge.ts exists with dynamic import + null-fallback but has zero callers in website/src \u2014 its own status comment reads 'Scaffolded \u2014 full integration requires Supabase schema deployment and ANTHROPIC_API_KEY'. All 14 modules wired to each other but none actively consumed by the live app."
+      "blocker": "Architecturally isolated. Zero imports from website/src. All 14 modules wired to each other but none consumed by the live app."
     },
     {
       "id": "engine-authority-mgr",
@@ -1382,7 +1381,7 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "internal",
-      "blocker": "Type contract integrated; functionality live via website's /website/src/lib/logging/mentor-observation-logger.ts (logMentorObservation called from /api/founder/hub line 1449, /api/mentor/private/reflect, /api/mentor/private/baseline-response). Sage Mentor's own /sage-mentor/mentor-ledger.ts runtime is not invoked from website \u2014 the website re-implemented logging rather than wiring through. Consider deprecated-runtime / journey reclassification (same shape as engine-llm-bridge under D-D1-4)."
+      "blocker": "Isolated. Part of Sage Mentor. Not integrated."
     },
     {
       "id": "engine-model-config",
@@ -1422,8 +1421,8 @@
         "memory",
         "inference"
       ],
-      "status": "verified",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/sage-mentor/pattern-engine.ts",
       "desc": "Temporal pattern recognition: passion clusters, regression warnings, trend analysis.",
@@ -1443,7 +1442,7 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "internal",
-      "blocker": "Live integration Verified end-to-end. Pattern-engine output persists in encrypted profile blob (ADR-PE-01) and runs on /api/mentor/private/reflect via per-consumer 2A-recompute (D-PE-01-S6, 2026-04-26) and on /api/founder/hub via 2A-skip on absence (D-PE-01-S4, 2026-04-26). Live mentor_interactions loader Verified at D-PE-01-S5 (2026-04-26). Outstanding: founder-hub per-consumer 2A-recompute switch is the natural ADR-PE-01 \u00a78 next step (deferred)."
+      "blocker": "Isolated. Part of Sage Mentor. Not integrated."
     },
     {
       "id": "engine-proactive",
@@ -1570,8 +1569,8 @@
       "subtype": [
         "workflow"
       ],
-      "status": "verified",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/sage-mentor/ring-wrapper.ts",
       "desc": "The core orchestrator: BEFORE (profile, passion, context) > inner agent > AFTER (evaluate, update, surface). Central workflow.",
@@ -1595,7 +1594,7 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "internal",
-      "blocker": "Verified across three proof endpoints (mentor-ring, support-agent, founder-hub-ring) per D-RING-1 (2026-04-25). Canonical-profile shape-adapter migration (D-RING-2 / ADR-Ring-2-01 Sessions 1, 2, 3a\u20133e, 4a\u20134c) reached Verified on 2026-04-26 \u2014 /api/founder/hub, /api/mentor/private/reflect, /api/mentor-baseline-response, /api/mentor-profile, /api/mentor/private/baseline-response, setFounderFacts, appendFounderFactsNote, and saveMentorProfile all consume canonical MentorProfile. Transitional ProfileForSignals retired (Session 4c)."
+      "blocker": "Isolated. Part of Sage Mentor subsystem; not integrated into website."
     },
     {
       "id": "engine-sage-reason-engine",
@@ -2072,7 +2071,7 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "internal",
-      "blocker": "Isolated. /sage-mentor/send-notification.ts exists with raw fetch API; zero callers in website/src (read-and-report close, 2026-04-26). Four blockers identified before integration: (a) trigger pipeline (cron / scheduled-function / in-request), (b) audit-trail table for sent notifications, (c) deep-link signing for clickable links in emails, (d) Resend retention verification. ADR-Resend-01 deferred pending P2 ethical-safeguards work (R17 / CR-025). Wiring without (a)-(d) would produce code that exists but is never called (AC4 anti-pattern)."
+      "blocker": "Isolated. Part of Sage Mentor. Not integrated into website."
     },
     {
       "id": "infra-mcp-contracts",
@@ -4575,39 +4574,6 @@
       "origin": "",
       "humanReady": "ready",
       "agentReady": "na"
-    },
-    {
-      "id": "engine-mentor-interactions-loader",
-      "name": "Mentor Interactions Loader",
-      "type": "engine",
-      "subtype": [
-        "data-loader",
-        "context"
-      ],
-      "status": "verified",
-      "oldStatus": "scaffolded",
-      "ext": ".ts",
-      "path": "/website/src/lib/mentor-interactions-loader.ts",
-      "desc": "Loads pattern-engine input from the live mentor_interactions table per ADR-PE-01 \u00a71.2 (c). Returns rows as InteractionRecord[] for consumption by analysePatterns. KG7 defensive parse on passions_detected JSONB. Three-tier passion fallback (worst-case-D). Hub-scoped per (user, hub). Last 90 days, limit 100 per ADR \u00a77.1 default.",
-      "notes": "Created and Verified in ADR-PE-01 Session 5 (D-PE-01-S5-LOADER-VERIFIED, 2026-04-26). Live-probe via bypass_pattern_cache: true confirmed loader invoked on real founder data, returned 51 mentor_interactions rows.",
-      "deps": [
-        "supabase",
-        "engine-pattern-engine"
-      ],
-      "rules": [
-        "R17"
-      ],
-      "priority": "P2",
-      "proximity": "sage-like",
-      "connects": [
-        "engine-pattern-engine",
-        "engine-mentor-profile-store"
-      ],
-      "origin": "ADR-PE-01",
-      "humanReady": "na",
-      "agentReady": "partial",
-      "journey": "internal",
-      "blocker": ""
     }
   ]
 }

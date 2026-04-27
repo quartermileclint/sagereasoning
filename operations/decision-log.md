@@ -2172,3 +2172,31 @@ All five items Standard risk under 0d-ii. Critical Change Protocol (0c-ii) NOT e
 **Status:** Adopted. Cross-references: D-PE-01-S1-1A-VERIFIED through D-PE-01-S6-REFLECT-RECOMPUTE-VERIFIED (2026-04-26), D-RING-2-S3a through D-RING-2-S4C (2026-04-26), D-D3-1 (2026-04-22 — `reasoning-journal-layers` rename which is preserved by this update), D-D1-1 through D-D1-12 (2026-04-25 — journey-field changes preserved). Proposed-edits document at `/operations/registry-updates/proposed-2026-04-28.md` is the audit trail for evidence per edit. Skill at `/.claude/skills/sage-registry-update/SKILL.md`. Commit hash for this push: TBD per founder share after deploy.
 
 ---
+
+## 2026-04-28 — D-REGISTRY-UPDATE-1.3.0-SUPERSEDED: v1.3.0 Update Rolled Back; Skill Redesign Required
+
+**Decision:** v1.3.0 of `/website/public/component-registry.json` rolled back to v1.2.0 before deployment. The disk file has been restored from `/archive/component-registry/component-registry.json.backup-2026-04-28-0908` (pre-edit backup); diff against backup confirms identity. No git push had occurred — the live site at sagereasoning.com is unaffected by this rollback.
+
+**Reasoning:** The first invocation of the `sage-registry-update` skill (the PR1 single-endpoint proof) revealed a design flaw rather than an execution one. The skill's scope is "scan recent handoffs for `status` and `blocker` field changes only; preserve other fields." That conservative-by-design scope produced an internally-contradictory intermediate state: rows promoted to `status: verified` retained `notes` text reading "Part of isolated Sage Mentor. Not integrated.", and the transitive impact on the other 12 still-blocked rows was never assessed. Three patch cycles in one session (initial proposal → mentor-ledger correction → notes-field flag → transitive-impact flag) made it clear that the skill's narrow framing answered the wrong question. The right question is *"does the registry reflect the actual current state of the project, across every field that drives the two HTMLs?"* — not *"what status/blocker edits do recent handoffs justify?"* The founder's stated end-goal is to see what work has been done and what remains, accurately, on the two public dashboards. The skill as currently designed does not deliver that.
+
+The PR1 proof discipline is working as designed: surface flaws on the proof endpoint, fix them, then roll out. This entry is the design-feedback record. No production state was affected.
+
+**Rules served:** PR1 (single-endpoint proof revealed design issues; no rollout to v1.3.0; rollback to known-good v1.2.0 instead), PR7 (this entry is the deferred-decision record — what was considered: ship v1.3.0 partial / continue patching this session / rollback and redesign; why deferred: trust restoration and a single comprehensive update outweigh the partial progress; revisit condition: next session opens with the redesign as its first agenda item), 0b (session-close protocol: stabilise to known-good before closing — this rollback is that stabilisation), session-opening-protocol element 19 (stabilise before closing).
+
+**Status:** Adopted. Supersedes D-REGISTRY-UPDATE-1.3.0 (above, same date — that entry stands as the historical record of what was attempted and what was learned; the registry edits it documents are NOT in effect).
+
+**Carry-forward to next session:**
+
+- The proposed-edits document at `/operations/registry-updates/proposed-2026-04-28.md` contains the evidence and reasoning that v1.3.0 was based on. Useful as input to the redesigned skill but should not be re-applied as-is (it has the same scope flaw as the skill).
+- The skill at `/.claude/skills/sage-registry-update/SKILL.md` requires redesign before next invocation. Specifically: (a) broaden scope from "status + blocker" to "every field that drives the HTMLs"; (b) require a transitive impact pass on still-blocked rows; (c) verify imports/runtime invocation by grep against actual code, not just by handoff scan; (d) treat the registry as the source of truth that answers "what's done / what's next" — not as a thin diff against handoffs.
+- `engine-pattern-engine`, `engine-ring-wrapper`, `agent-private-mentor`, the Verified ADR-PE-01 and ADR-Ring-2-01 work — all of this is still real progress that should land. The redesigned skill / next update will land it cleanly.
+- Pre-edit backup (`/archive/component-registry/component-registry.json.backup-2026-04-28-0908`) preserved as the canonical v1.2.0 state.
+
+**Files in non-default state at session close:**
+
+- `/operations/decision-log.md` — contains both D-REGISTRY-UPDATE-1.3.0 (now historical) and this supersession entry. No archive copy made — decision log is append-only.
+- `/operations/registry-updates/proposed-2026-04-28.md` — preserved as the design-feedback record. Will be marked at the top with a "SUPERSEDED" banner.
+- `/archive/component-registry/component-registry.json.backup-2026-04-28-0908` — preserved as the canonical v1.2.0 backup.
+- `/website/public/component-registry.json` — restored to v1.2.0 (identical to backup).
+
+---
