@@ -54,23 +54,9 @@ Per the redesign plan's reading of both HTML pages' source:
 
 The skill walks every component, not just those mentioned in handoffs. For each, it runs four passes.
 
-### Pass 1 — Source scan since the last *update* run (NOT since `lastUpdated`)
+### Pass 1 — Source scan since `lastUpdated`
 
-**Lookback anchor rule (patched 2026-04-28 under D-REGISTRY-UPDATE-SKILL-PASS1-FIX):**
-
-The registry's `lastUpdated` field is bumped by both `sage-registry-audit` and `sage-registry-update`. Using it as the Pass 1 anchor produces an empty lookback whenever this skill runs after an audit. The fix is to anchor Pass 1 to the most recent *update-skill* run, not to any edit.
-
-Determine the Pass 1 anchor in this priority order:
-
-1. **Walk `/operations/decision-log.md` backwards from today.** Find the most recent entry whose identifier matches `D-REGISTRY-UPDATE-vX.Y.Z` AND whose status is **not** `Superseded`. Use that entry's date as the lookback start. (Skill-level entries like `D-REGISTRY-UPDATE-SKILL-REDESIGNED` or `D-REGISTRY-UPDATE-SKILL-PASS1-FIX` do NOT count — only registry-content updates with a version identifier.)
-
-2. **If no such entry exists** (first non-superseded run, or all prior update runs were superseded), prompt the founder: *"No prior non-superseded update entry found. The pre-audit registry `lastUpdated` was [date X]. Use [date X] as the Pass 1 anchor, or specify a different anchor?"* Read [date X] from the most recent `D-REGISTRY-AUDIT-vX.Y.Z` entry's reasoning section, which records the pre-audit `lastUpdated` value.
-
-3. **If no audit entry exists either** (truly first run on a fresh registry), prompt the founder for the anchor with no suggested default.
-
-The anchor is named explicitly at the top of the proposal document (the "Lookback range" line) so the founder can verify the skill walked the right window.
-
-**Once the anchor is fixed,** read every handoff in `/operations/handoffs/**/*.md` modified on or after that date. Read every entry in `/operations/decision-log.md` dated on or after that date.
+Read every handoff in `/operations/handoffs/**/*.md` modified on or after the registry's `lastUpdated` date. Read every entry in `/operations/decision-log.md` dated on or after `lastUpdated`.
 
 For each handoff and decision-log entry, extract claims about each component:
 
@@ -231,10 +217,10 @@ Use this exact format:
 
 **Registry version:** [current]
 **Registry lastUpdated:** [date from JSON]
-**Lookback range (Pass 1 anchor):** [anchor-date per Pass 1 rule] → [today]
+**Lookback range:** [lastUpdated] → [today]
 **Components audited (Pass 4):** [N — should equal totalComponents]
 **Handoffs scanned (Pass 1):** [N files]
-**Decision-log entries scanned (Pass 1):** [N entries since Pass 1 anchor]
+**Decision-log entries scanned (Pass 1):** [N entries since lastUpdated]
 **Components proposed for update:** [N total]
 **New components proposed (if any):** [N — each needs explicit founder approval]
 **Ambiguous matches needing founder input:** [N]
@@ -369,9 +355,9 @@ Use this exact format:
 
 ## Step 1: Read the registry and capture current header state
 
-Read `/website/public/component-registry.json`. Capture: `version`, `lastUpdated`, `totalComponents`, `statusSummary`. These are baselines for the apply step (recompute). The Pass 1 lookback anchor is determined separately per the Pass 1 rule — NOT from `lastUpdated`.
+Read `/website/public/component-registry.json`. Capture: `version`, `lastUpdated`, `totalComponents`, `statusSummary`. These are the baselines for Pass 1 (lookback range) and the apply step (recompute).
 
-## Step 2: Run Pass 1 (source scan since the last *update* run — see Pass 1 lookback anchor rule)
+## Step 2: Run Pass 1 (source scan since `lastUpdated`)
 
 Walk `/operations/handoffs/**/*.md` modified on or after `lastUpdated`. Read each. Walk `/operations/decision-log.md` for entries dated on or after `lastUpdated`. Extract claims per the matching rules above.
 
@@ -445,7 +431,7 @@ Append to `/operations/decision-log.md`:
 ```markdown
 ## [Today's Date] — D-REGISTRY-UPDATE-vX.Y.Z
 
-**Decision:** Updated /website/public/component-registry.json from vA.B.C to vX.Y.Z. [N] components changed, [N] new components added (if any). Four passes ran: Pass 1 source scan since [anchor-date per Pass 1 rule], Pass 2 code-grep verification, Pass 3 transitive impact, Pass 4 internal consistency. Approved edits documented in /operations/registry-updates/proposed-YYYY-MM-DD.md. Pre-edit backup at /archive/component-registry/component-registry.json.backup-YYYY-MM-DD-HHMM.
+**Decision:** Updated /website/public/component-registry.json from vA.B.C to vX.Y.Z. [N] components changed, [N] new components added (if any). Four passes ran: Pass 1 source scan since [lastUpdated], Pass 2 code-grep verification, Pass 3 transitive impact, Pass 4 internal consistency. Approved edits documented in /operations/registry-updates/proposed-YYYY-MM-DD.md. Pre-edit backup at /archive/component-registry/component-registry.json.backup-YYYY-MM-DD-HHMM.
 
 **Reasoning:** [Brief — what the four passes surfaced, what categories of change were applied. Reference the proposal as the audit trail for evidence per edit. Note any deferrals (Pass-2 inconsistencies the founder chose to defer, etc.) per PR7.]
 

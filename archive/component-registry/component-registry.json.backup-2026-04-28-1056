@@ -1,5 +1,5 @@
 {
-  "version": "1.2.2",
+  "version": "1.2.1",
   "lastUpdated": "2026-04-28",
   "totalComponents": 163,
   "statusSummary": {
@@ -22,7 +22,7 @@
       "ext": ".ts",
       "path": "/sage-mentor/",
       "desc": "Security boundary for intimate data: journal interpretation, profile building, mentor ledger, private Q&A. Handles R17 obligations. 10 modules (journal-ingestion, journal-interpreter, persona, profile-store, mentor-ledger, embedding-pipeline, private-hub-types, sync-to-supabase, pattern-engine [personal patterns], proactive-scheduler [personal rituals]). Architecturally distinct from the general mentor ring.",
-      "notes": "Security boundary for intimate data, with /api/mentor/private/reflect Verified end-to-end on 2026-04-26 (canonical-MentorProfile loader + per-consumer 2A-recompute + live mentor_interactions loader). Layers 9-10 of journal interpreter remain stub state (25 TODOs). /private-mentor page chat-thread UX limitation remains outstanding (O-S5-A).",
+      "notes": "Part of isolated Sage Mentor subsystem. Journal interpreter has 25 TODOs (layers 9-10 incomplete). Not integrated.",
       "deps": [
         "claude-api",
         "supabase"
@@ -44,8 +44,8 @@
         "engine-profile-store"
       ],
       "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready",
       "journey": "internal",
       "blocker": "/api/mentor/private/reflect (the Private Mentor's primary write endpoint) Verified end-to-end on 2026-04-26: canonical-profile loader (D-RING-2-S4A), pattern-engine integration (D-PE-01-S3, D-PE-01-S6 per-consumer 2A-recompute), live mentor_interactions loader (D-PE-01-S5). Distress classifier wrapper untouched per AC5. Outstanding: Journal interpreter layers 9-10 stub only (25 TODOs); /private-mentor page chat thread does not load past reflections from mentor_interactions on page mount (UX limitation logged as O-S5-A in 2026-04-26 Session 4 close)."
     },
@@ -125,8 +125,8 @@
         "gov-compliance"
       ],
       "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready",
       "journey": "internal"
     },
     {
@@ -155,8 +155,8 @@
         "data-session-decisions"
       ],
       "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready",
       "journey": "internal",
       "blocker": "Isolated. Part of Sage Mentor subsystem. Not integrated."
     },
@@ -1174,8 +1174,8 @@
         "engine-trust-layer"
       ],
       "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready",
       "journey": "internal",
       "blocker": "Isolated. Part of Sage Mentor / Trust Layer. Not integrated."
     },
@@ -1292,8 +1292,8 @@
         "agent-mentor"
       ],
       "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready",
       "journey": "internal",
       "blocker": "Isolated. Part of Sage Mentor. Embedding API not yet configured."
     },
@@ -1367,7 +1367,7 @@
       "ext": ".ts",
       "path": "/sage-mentor/mentor-ledger.ts",
       "desc": "Cross-cutting accountability: commitments, realisations, questions, tensions, intentions.",
-      "notes": "Journal-extraction accountability layer (not a write-side). Pattern-engine output persists under ADR-PE-01 in the encrypted profile blob, separate from this ledger. Ledger persistence is out of scope of ADR-PE-01.",
+      "notes": "Part of isolated Sage Mentor. Not integrated.",
       "deps": [
         "supabase"
       ],
@@ -1379,10 +1379,10 @@
         "engine-pattern-engine"
       ],
       "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready",
       "journey": "internal",
-      "blocker": "Wiring approach redirected to ADR-PE-01 per D-PE-LEDGER-WIRING-REDIRECTED (2026-04-26). Module is the journal-extraction accountability layer (six entry kinds: aim/commitment/realisation/question/tension/intention) \u2014 NOT a session-outcome write-side as the prior session brief had assumed. Read-and-report confirmed zero Supabase calls, zero callers in /website/src, zero migration references. ADR-PE-01 \u00a713 names ledger persistence as out of scope. Next: a separate ADR if/when ledger persistence is pursued."
+      "blocker": "Isolated. Part of Sage Mentor. Not integrated."
     },
     {
       "id": "engine-model-config",
@@ -1427,7 +1427,7 @@
       "ext": ".ts",
       "path": "/sage-mentor/pattern-engine.ts",
       "desc": "Temporal pattern recognition: passion clusters, regression warnings, trend analysis.",
-      "notes": "Live integration Verified end-to-end per ADR-PE-01 (Sessions 1-6, 2026-04-26). Pattern-engine output persists in encrypted form and feeds /api/mentor/private/reflect via per-consumer 2A-recompute and /api/founder/hub via 2A-skip. \u00a78 founder-hub switch is the next named step.",
+      "notes": "Part of isolated Sage Mentor. Not integrated.",
       "deps": [
         "supabase",
         "claude-api"
@@ -1440,8 +1440,8 @@
         "agent-support"
       ],
       "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready",
       "journey": "internal",
       "blocker": "Live integration Verified end-to-end per ADR-PE-01 (Sessions 1-6, 2026-04-26). Pattern-engine output persists in encrypted profile blob and runs on /api/mentor/private/reflect via per-consumer 2A-recompute (D-PE-01-S6) and on /api/founder/hub via 2A-skip on absence (D-PE-01-S4). Live mentor_interactions loader Verified at D-PE-01-S5. Outstanding: founder-hub per-consumer 2A-recompute switch is the natural ADR-PE-01 \u00a78 next step (deferred)."
     },
@@ -1468,8 +1468,8 @@
         "agent-mentor"
       ],
       "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready",
       "journey": "internal",
       "blocker": "Isolated. Part of Sage Mentor. Not integrated."
     },
@@ -1499,8 +1499,8 @@
         "engine-ring-wrapper"
       ],
       "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready",
       "journey": "internal",
       "blocker": "Type contract integrated via canonical MentorProfile (per ADR-Ring-2-01 Session 4b, D-RING-2-S4B 2026-04-26). Runtime functions (recordInteraction, updateProfileFromReflection) dynamically imported from /sage-mentor/profile-store by 7 distinct files in /website/src/ including /api/mentor/private/baseline-response, /api/mentor/private/reflect, /api/reflect, /api/founder/hub, /lib/mentor-interactions-loader, /lib/sage-mentor-bridge, /lib/context/mentor-context-private. Outstanding: type-vs-runtime registry semantics question \u2014 should this component be marked deprecated-runtime in favour of the website's engine-mentor-profile-store? Deferred for separate decision."
     },
@@ -1575,7 +1575,7 @@
       "ext": ".ts",
       "path": "/sage-mentor/ring-wrapper.ts",
       "desc": "The core orchestrator: BEFORE (profile, passion, context) > inner agent > AFTER (evaluate, update, surface). Central workflow.",
-      "notes": "Verified across three proof endpoints (mentor-ring, support-agent, founder-hub-ring) per D-RING-1 (2026-04-25) and canonical-MentorProfile migration per D-RING-2-S4C (2026-04-26). Eight callers consume canonical MentorProfile.",
+      "notes": "Internally complete and sophisticated but part of isolated Sage Mentor. Not integrated into website.",
       "deps": [
         "supabase",
         "claude-api"
@@ -1592,8 +1592,8 @@
         "data-profile-store"
       ],
       "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready",
       "journey": "internal",
       "blocker": "Verified across three proof endpoints (mentor-ring, support-agent, founder-hub-ring) per D-RING-1 (2026-04-25). Canonical-profile shape-adapter migration (D-RING-2 / ADR-Ring-2-01 Sessions 1, 2, 3a-3e, 4a-4c) reached Verified on 2026-04-26 \u2014 /api/founder/hub, /api/mentor/private/reflect, /api/mentor-baseline-response, /api/mentor-profile, /api/mentor/private/baseline-response, setFounderFacts, appendFounderFactsNote, and saveMentorProfile all consume canonical MentorProfile. Transitional ProfileForSignals retired (Session 4c). Outstanding: continued use across new mentor-ring endpoints as they land."
     },
@@ -2069,8 +2069,8 @@
         "agent-mentor"
       ],
       "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready",
       "journey": "internal",
       "blocker": "Isolated. Part of Sage Mentor. Not integrated into website."
     },
@@ -2817,8 +2817,7 @@
       ],
       "origin": "",
       "humanReady": "na",
-      "agentReady": "na",
-      "blocker": "AI safety guardrails \u2014 Verified at current scope; ongoing review under R14 quarterly compliance pipeline."
+      "agentReady": "na"
     },
     {
       "id": "reasoning-journal-layers",
@@ -2843,8 +2842,8 @@
         "reasoning-journal-interp"
       ],
       "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready",
       "journey": "internal",
       "blocker": "Layers 9-10 stub only (25 TODOs). Spec exists (19KB doc) but implementation incomplete. Status downgraded from verified to wired per audit 2026-04-28 \u2014 verified requires testing-and-confirmation of complete behaviour, which 25 TODOs preclude."
     },
@@ -3048,8 +3047,8 @@
         "agent-mentor"
       ],
       "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
+      "humanReady": "not-ready",
+      "agentReady": "not-ready",
       "journey": "internal",
       "blocker": "Isolated. Part of Sage Mentor; not integrated into website API layer."
     },
@@ -4393,8 +4392,7 @@
       ],
       "origin": "",
       "humanReady": "na",
-      "agentReady": "na",
-      "blocker": "constraints.ts AC1 thresholds adopted as working values; revisit if operational evidence shifts."
+      "agentReady": "na"
     },
     {
       "id": "infra-r20a-classifier",
@@ -4424,8 +4422,7 @@
       ],
       "origin": "",
       "humanReady": "not-ready",
-      "agentReady": "na",
-      "blocker": "Two-stage distress classifier Verified at AC2 latency budget; ES1 founder-profile inputs must be in Zone 2 eval suite before P1 transition."
+      "agentReady": "na"
     },
     {
       "id": "infra-invocation-guard-test",
@@ -4477,8 +4474,7 @@
       ],
       "origin": "",
       "humanReady": "na",
-      "agentReady": "na",
-      "blocker": "ESLint safety-critical rules Verified; rule set reviewed alongside any AC4 invocation-test changes."
+      "agentReady": "na"
     },
     {
       "id": "infra-husky-precommit",
@@ -4502,8 +4498,7 @@
       ],
       "origin": "",
       "humanReady": "na",
-      "agentReady": "na",
-      "blocker": "Pre-commit hook Verified; revisit if AC4 test surface expands."
+      "agentReady": "na"
     },
     {
       "id": "infra-r20a-classifier-eval",
