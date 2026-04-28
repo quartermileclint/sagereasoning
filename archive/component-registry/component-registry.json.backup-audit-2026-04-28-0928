@@ -1,13 +1,12 @@
 {
-  "version": "1.2.1",
-  "lastUpdated": "2026-04-28",
+  "version": "1.2.0",
+  "lastUpdated": "2026-04-18",
   "totalComponents": 163,
   "statusSummary": {
-    "wired": 120,
-    "verified": 30,
-    "designed": 10,
-    "live": 2,
-    "scaffolded": 1
+    "wired": 127,
+    "designed": 5,
+    "verified": 29,
+    "live": 2
   },
   "components": [
     {
@@ -47,7 +46,7 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "internal",
-      "blocker": "/api/mentor/private/reflect (the Private Mentor's primary write endpoint) Verified end-to-end on 2026-04-26: canonical-profile loader (D-RING-2-S4A), pattern-engine integration (D-PE-01-S3, D-PE-01-S6 per-consumer 2A-recompute), live mentor_interactions loader (D-PE-01-S5). Distress classifier wrapper untouched per AC5. Outstanding: Journal interpreter layers 9-10 stub only (25 TODOs); /private-mentor page chat thread does not load past reflections from mentor_interactions on page mount (UX limitation logged as O-S5-A in 2026-04-26 Session 4 close)."
+      "blocker": "Isolated. Part of Sage Mentor subsystem. Journal interpreter layers 9-10 incomplete (25 TODOs)."
     },
     {
       "id": "agent-mentor",
@@ -167,12 +166,12 @@
       "subtype": [
         "reactive"
       ],
-      "status": "wired",
+      "status": "designed",
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/sage-mentor/support-agent.ts",
       "desc": "Inner agent with 10 markdown tools. Stimulus-response: receives ticket, drafts response, submits to ring. Starts supervised.",
-      "blocker": "Both channels (1 and 2) Wired and unit-verified per 2026-04-20 support-wiring-fix-close. Live integration on the support run-loop with real Supabase client + real detectDistressTwoStage classifier is the next session's work \u2014 that promotion will move status to verified.",
+      "blocker": "No run-loop caller exists. processInboxItem has zero external callers. Next: dedicated 3-session scope (ADR > build caller > mount + test per PR1). See: support-wiring-fix-close.md + support-wiring-mount-close.md",
       "notes": "Support Brain unit-verified (30/30 assertions). Agent itself Designed \u2014 implementation plan complete, build not started.",
       "deps": [
         "claude-api",
@@ -744,7 +743,7 @@
     },
     {
       "id": "doc-journal-layers",
-      "name": "Journal Interpretation (10 Layers) \u2014 Spec Document",
+      "name": "Journal Interpretation (10 Layers)",
       "type": "document",
       "subtype": [],
       "status": "verified",
@@ -752,7 +751,7 @@
       "ext": ".md",
       "path": "/reference/Journal_Interpretation_10_Layers.md",
       "desc": "19KB. Multi-layer interpretation pipeline spec. Cognitive profiling for mentorship.",
-      "notes": "Pre-rename duplicate. D-D3-1 (2026-04-22) intended this row to be renamed to reasoning-journal-layers. Disambiguation applied 2026-04-28; deletion deferred for explicit founder decision (per skill rule: no silent deletions).",
+      "notes": "Confirmed verified as spec. Implementation partially complete.",
       "deps": [],
       "rules": [
         "R1",
@@ -1422,7 +1421,7 @@
         "memory",
         "inference"
       ],
-      "status": "verified",
+      "status": "wired",
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/sage-mentor/pattern-engine.ts",
@@ -1443,7 +1442,7 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "internal",
-      "blocker": "Live integration Verified end-to-end per ADR-PE-01 (Sessions 1-6, 2026-04-26). Pattern-engine output persists in encrypted profile blob and runs on /api/mentor/private/reflect via per-consumer 2A-recompute (D-PE-01-S6) and on /api/founder/hub via 2A-skip on absence (D-PE-01-S4). Live mentor_interactions loader Verified at D-PE-01-S5. Outstanding: founder-hub per-consumer 2A-recompute switch is the natural ADR-PE-01 \u00a78 next step (deferred)."
+      "blocker": "Isolated. Part of Sage Mentor. Not integrated."
     },
     {
       "id": "engine-proactive",
@@ -1502,7 +1501,7 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "internal",
-      "blocker": "Type contract integrated via canonical MentorProfile (per ADR-Ring-2-01 Session 4b, D-RING-2-S4B 2026-04-26). Runtime functions (recordInteraction, updateProfileFromReflection) dynamically imported from /sage-mentor/profile-store by 7 distinct files in /website/src/ including /api/mentor/private/baseline-response, /api/mentor/private/reflect, /api/reflect, /api/founder/hub, /lib/mentor-interactions-loader, /lib/sage-mentor-bridge, /lib/context/mentor-context-private. Outstanding: type-vs-runtime registry semantics question \u2014 should this component be marked deprecated-runtime in favour of the website's engine-mentor-profile-store? Deferred for separate decision."
+      "blocker": "Isolated. Part of Sage Mentor. Not integrated."
     },
     {
       "id": "engine-progression",
@@ -1570,7 +1569,7 @@
       "subtype": [
         "workflow"
       ],
-      "status": "verified",
+      "status": "wired",
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/sage-mentor/ring-wrapper.ts",
@@ -1595,7 +1594,7 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "internal",
-      "blocker": "Verified across three proof endpoints (mentor-ring, support-agent, founder-hub-ring) per D-RING-1 (2026-04-25). Canonical-profile shape-adapter migration (D-RING-2 / ADR-Ring-2-01 Sessions 1, 2, 3a-3e, 4a-4c) reached Verified on 2026-04-26 \u2014 /api/founder/hub, /api/mentor/private/reflect, /api/mentor-baseline-response, /api/mentor-profile, /api/mentor/private/baseline-response, setFounderFacts, appendFounderFactsNote, and saveMentorProfile all consume canonical MentorProfile. Transitional ProfileForSignals retired (Session 4c). Outstanding: continued use across new mentor-ring endpoints as they land."
+      "blocker": "Isolated. Part of Sage Mentor subsystem; not integrated into website."
     },
     {
       "id": "engine-sage-reason-engine",
@@ -2030,9 +2029,9 @@
       "status": "wired",
       "oldStatus": "scaffolded",
       "ext": ".ts",
-      "path": "/website/src/lib/encryption.ts",
+      "path": "/website/src/lib/encryption.ts + /website/src/lib/server-encryption.ts",
       "desc": "Two encryption modules: (1) Client-side AES-256-GCM with PBKDF2 key derivation for journal entries. (2) Server-side AES-256-GCM with env key for mentor profile data at rest in Supabase. Both R17b compliant.",
-      "notes": "Two-tier encryption: client-side AES-256 in encryption.ts; server-side AES-256-GCM in /website/src/lib/server-encryption.ts (separate component: infra-server-encryption). Both wired via mentor profile pipeline.",
+      "notes": "Updated 9 Apr 2026. Server-side encryption wired to mentor_profiles table in Supabase. Client-side encryption available for journal pipeline.",
       "deps": [],
       "rules": [
         "R17b"
@@ -2197,7 +2196,7 @@
       "name": "Stripe Checkout Route",
       "type": "infra",
       "subtype": [],
-      "status": "designed",
+      "status": "wired",
       "oldStatus": "",
       "ext": ".ts",
       "path": "/website/src/app/api/stripe/checkout/route.ts",
@@ -2216,15 +2215,14 @@
       ],
       "origin": "",
       "humanReady": "",
-      "agentReady": "",
-      "blocker": "P4 (Stripe integration). Route file not yet built; path indicates intended location. Status downgraded from wired to designed per audit 2026-04-28."
+      "agentReady": ""
     },
     {
       "id": "infra-stripe",
       "name": "Stripe Integration",
       "type": "infra",
       "subtype": [],
-      "status": "designed",
+      "status": "wired",
       "oldStatus": "scoped",
       "ext": ".ts",
       "path": "/website/src/app/api/stripe/",
@@ -2250,14 +2248,14 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "paid_api",
-      "blocker": "P4 (Stripe integration). Stripe integration not yet wired; path indicates intended location. Status downgraded from wired to designed per audit 2026-04-28."
+      "blocker": "No code exists. P4 priority \u2014 correctly deferred, but blocks paid-tier launch."
     },
     {
       "id": "stripe-portal",
       "name": "Stripe Portal Route",
       "type": "infra",
       "subtype": [],
-      "status": "designed",
+      "status": "wired",
       "oldStatus": "",
       "ext": ".ts",
       "path": "/website/src/app/api/stripe/portal/route.ts",
@@ -2276,15 +2274,14 @@
       ],
       "origin": "",
       "humanReady": "",
-      "agentReady": "",
-      "blocker": "P4 (Stripe integration). Route file not yet built; path indicates intended location. Status downgraded from wired to designed per audit 2026-04-28."
+      "agentReady": ""
     },
     {
       "id": "stripe-tidings",
       "name": "Stripe Tidings Route",
       "type": "infra",
       "subtype": [],
-      "status": "designed",
+      "status": "wired",
       "oldStatus": "",
       "ext": ".ts",
       "path": "/website/src/app/api/stripe/tidings/route.ts",
@@ -2303,15 +2300,14 @@
       ],
       "origin": "",
       "humanReady": "",
-      "agentReady": "",
-      "blocker": "P4 (Stripe integration). Route file not yet built; path indicates intended location. Status downgraded from wired to designed per audit 2026-04-28."
+      "agentReady": ""
     },
     {
       "id": "stripe-webhook",
       "name": "Stripe Webhook Handler",
       "type": "infra",
       "subtype": [],
-      "status": "designed",
+      "status": "wired",
       "oldStatus": "",
       "ext": ".ts",
       "path": "/website/src/app/api/stripe/webhook/route.ts",
@@ -2330,8 +2326,7 @@
       ],
       "origin": "",
       "humanReady": "",
-      "agentReady": "",
-      "blocker": "P4 (Stripe integration). Route file not yet built; path indicates intended location. Status downgraded from wired to designed per audit 2026-04-28."
+      "agentReady": ""
     },
     {
       "id": "infra-supabase-auth",
@@ -2369,9 +2364,9 @@
       "status": "live",
       "oldStatus": "scoped",
       "ext": "--",
-      "path": "",
+      "path": "vercel.json + Vercel dashboard",
       "desc": "Deployed to production at sagereasoning.com. All 66 API endpoints serving. GitHub main branch auto-deploys.",
-      "notes": "Vercel hosting platform. No file path \u2014 managed via Vercel dashboard and next.config.js (/website/next.config.js). Live at sagereasoning.com.",
+      "notes": "Updated 9 Apr 2026. Previously scoped \u2014 now live and serving production traffic. Custom domain configured.",
       "deps": [
         "vercel"
       ],
@@ -2821,10 +2816,10 @@
     },
     {
       "id": "reasoning-journal-layers",
-      "name": "Journal Interpretation (10 Layers) \u2014 Implementation",
+      "name": "Journal Interpretation (10 Layers)",
       "type": "reasoning",
       "subtype": [],
-      "status": "wired",
+      "status": "verified",
       "oldStatus": "designed",
       "ext": ".ts",
       "path": "/sage-mentor/journal-interpreter.ts",
@@ -2845,11 +2840,11 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "internal",
-      "blocker": "Layers 9-10 stub only (25 TODOs). Spec exists (19KB doc) but implementation incomplete. Status downgraded from verified to wired per audit 2026-04-28 \u2014 verified requires testing-and-confirmation of complete behaviour, which 25 TODOs preclude."
+      "blocker": "Layers 9-10 stub only (25 TODOs). Spec exists (19KB doc) but implementation incomplete."
     },
     {
       "id": "reasoning-journal-interp",
-      "name": "Journal Interpretation (10 Layers) \u2014 Inner Engine",
+      "name": "Journal Interpretation (10 Layers)",
       "type": "reasoning",
       "subtype": [
         "multi-step",
@@ -2861,7 +2856,7 @@
       "ext": ".ts/.md",
       "path": "/sage-mentor/journal-interpreter.ts",
       "desc": "Multi-layer cognitive profiling from external journals. 8+ analysis layers. Causal inference of belief patterns from written reflection.",
-      "notes": "Engine for the interpretation logic itself. Distinct from reasoning-journal-layers (the implemented file/layers) and doc-journal-layers (the spec). Disambiguated 2026-04-28 audit.",
+      "notes": "",
       "deps": [
         "claude-api"
       ],
