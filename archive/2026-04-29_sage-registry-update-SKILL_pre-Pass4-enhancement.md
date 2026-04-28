@@ -127,25 +127,12 @@ For every row in the registry, check that the rendered fields are mutually consi
 
 **Status × blocker checks:**
 - `status: verified` AND `blocker` mentions "isolated" / "not integrated" → inconsistent.
-- `status: verified` AND `blocker` is empty → flag per Q2 rule (Verified rows should carry a remaining-work note, unless Q5 ⚠-prefix convention applies — see Conventions section).
+- `status: verified` AND `blocker` is empty → flag per Q2 rule (Verified rows should carry a remaining-work note).
 - `status: live` AND `blocker` mentions "not deployed" → inconsistent.
-- **(added 2026-04-29) `status: verified` AND `blocker` contains achievement language but no next-step language → flag for blocker pare-down per Q2 convention.**
-  - Achievement language: `Verified` / `Confirmed` / `Complete` / `Validated` (case-insensitive).
-  - Next-step language: `Next:` / `Outstanding:` / `Remaining:` / `Pending:` / `P[0-9]:` / `TODO:` (case-insensitive).
-  - Heuristic outcomes:
-    - Achievement only, no next-step → "Pare blocker; achievement description belongs in `notes` per Q2 convention."
-    - Both → "Pare blocker to next-step text only; preserve achievement description in `notes` if not already present."
-    - Next-step only → consistent, no action.
-  - Added 2026-04-29 after `engine-pattern-engine` (achievement + next-step) and `engine-ring-wrapper` (achievement only) fell through the prior Pass 4 — both rows still rendered red on the architecture map after v1.2.2 because the audit's blocker rewrites mixed achievement description with remaining-work text. Per D-REGISTRY-UPDATE-v1.2.3 (2026-04-29).
 
 **Status × notes checks:**
 - `status: verified` AND `notes` contain "Not integrated" / "Isolated" / "stub only" / "Not yet" / "Pending" → inconsistent. The `notes` field is the one most likely to go stale because the audit skill and prior update skill focused on `status` and `blocker`. **Pass 4 catches `notes` drift explicitly.**
 - `status: live` AND `notes` contain "Not yet" / "Pending" → inconsistent.
-
-**Blocker × notes checks (added 2026-04-29):**
-- `blocker` contains integration-claim language AND `notes` contains "Not integrated" / "Isolated" / "stub only" / "Not yet" / "Pending" → flag as `blocker_corrected_notes_stale`. Propose: rewrite `notes` to reflect the blocker's integration claim.
-  - Integration-claim verb set (broadened 2026-04-29): `Verified`, `verified end-to-end`, `Verified at`, `Verified across`, `Verified end-to-end`, `consume canonical`, `consumes canonical`, `now consumes`, `wired through`, `connects via`, `integrated`, `Confirmed`, `Validated`, `Complete` (all case-insensitive).
-  - The verb set was broadened 2026-04-29 after `engine-profile-store` fell through the prior set (it used "integrated" rather than "Verified" / "consume canonical"). Always add new integration-claim verbs to this list when discovered.
 
 **humanReady / agentReady × status checks:**
 - `humanReady: ready` AND `status` in {`scoped`, `designed`, `scaffolded`} → inconsistent.
@@ -183,7 +170,7 @@ Before proposing any change, the skill names where each field's truth comes from
 
 ---
 
-## Conventions encoded as rules (Q1–Q5 + audit-skill conventions)
+## Conventions encoded as rules (Q1–Q4 + audit-skill conventions)
 
 ### Q1 — One comprehensive skill (locked in 2026-04-28)
 
@@ -213,16 +200,6 @@ The audit skill's Pass C flags rows that read `not-ready` and should read `na`. 
 Layer A (rendered fields: `name`, `type`, `oldStatus`, `status`, `desc`, `notes`, `humanReady`, `agentReady`, `origin`, `blocker`) and Layer B (interpretation fields: `connects`, `deps`, `journey`, `priority`, `rules`, `path`, `subtype`) are both subject to drift checking and both edited when stale.
 
 Layer A drift is what users see on the dashboards. Layer B drift misleads future analyses. The skill is comprehensive across both layers.
-
-### Q5 — ⚠ prefix convention for cleared-blocker conditional reviews (locked in 2026-04-29)
-
-When a row's `blocker` is cleared (no actively scheduled work) but the row has a conditional review trigger ("revisit if X", "Verified at current scope; ongoing review under Y"), the conditional-review text moves to `notes` with a `⚠ ` (warning sign + space) prefix. The HTML renderer detects the prefix and renders the notes cell red.
-
-This signals "no scheduled work; future review noted" without using the `blocker` field for non-actionable items. The convention applies to Verified rows whose only "remaining work" is a conditional future review trigger.
-
-The marker is U+26A0 WARNING SIGN. Apply at the start of the notes text. The renderer matches `notes.trim().startsWith('⚠')`.
-
-Adopted 2026-04-29 alongside cell-level red rendering (D-REGISTRY-UPDATE-v1.2.3). The five rows initially adopting this convention: `reasoning-guardrails`, `infra-constraints`, `infra-r20a-classifier`, `infra-eslint-config`, `infra-husky-precommit` — all "Verified at X; revisit if Y" rows where the conditional review is real but no work is actively scheduled.
 
 ### Audit-skill conventions carried over
 

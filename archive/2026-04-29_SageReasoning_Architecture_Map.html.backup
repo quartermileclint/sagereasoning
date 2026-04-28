@@ -183,24 +183,6 @@
             border: 2px solid #f472b6;
         }
 
-        /* Small red marker on the top-left corner of nodes whose source-data
-           component has a non-empty `blocker` field. Adopted 2026-04-29: the
-           marker replaces the prior whole-label-red styling so the at-a-glance
-           "remaining work named" signal does not flood the map with red text. */
-        .node.has-blocker::before {
-            content: '';
-            position: absolute;
-            top: -4px;
-            left: -4px;
-            width: 10px;
-            height: 10px;
-            background: #ef4444;
-            border-radius: 50%;
-            border: 1px solid #0a0e17;
-            box-shadow: 0 0 4px rgba(239, 68, 68, 0.6);
-            z-index: 2;
-        }
-
         .node.dimmed {
             opacity: 0.2;
         }
@@ -546,14 +528,12 @@
                 el.className = `node category-${node.category}`;
                 if (node.brainDerived) el.classList.add('brain-derived');
                 if (node.wrapped) el.classList.add('wrapped');
-                // Add a small red marker on nodes whose source-data component has
-                // a non-empty `blocker` field. The marker is a CSS pseudo-element
-                // on the .has-blocker class (top-left corner of the node box). The
-                // label itself stays neutral colour. Adopted 2026-04-29 to replace
-                // the prior whole-label-red styling.
-                if (blockedNodeIds.has(id)) el.classList.add('has-blocker');
+                // Apply red label text to nodes whose source-data component has a
+                // non-empty `blocker` field. Inline style on the label element so
+                // it does not affect layout, positioning, or the node container.
+                const labelStyle = blockedNodeIds.has(id) ? ' style="color: red"' : '';
                 el.innerHTML = `
-                    <div>${node.label}</div>
+                    <div${labelStyle}>${node.label}</div>
                     <div class="node-step"></div>
                 `;
                 el.style.left = node.x + 'px';

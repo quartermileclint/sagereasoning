@@ -129,13 +129,13 @@
   .skill-banner strong { color: var(--gold); }
   .skill-banner code { background: rgba(255,255,255,0.05); padding: 1px 6px; border-radius: 3px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--gold); }
 
-  /* Cells flagged for attention render their text in red. The blocker-cell
-     class is applied to a row's blocker column when the source-data blocker
-     field is non-empty. The notes-attention class is applied to a row's notes
-     column when the source-data notes field starts with the ⚠ marker
-     (the conditional-review convention adopted 2026-04-29). */
-  td.blocker-cell { color: red; max-width: 280px; font-size: 11px; line-height: 1.4; }
-  td.notes-cell.notes-attention { color: red; }
+  /* Rows whose component has a non-empty `blocker` field in the source data
+     render their text in red. Layout, badges (which carry their own color),
+     and row positioning are preserved. */
+  tr.blocked-row td { color: red; }
+  tr.blocked-row td.desc-cell,
+  tr.blocked-row td.notes-cell,
+  tr.blocked-row td.name-cell { color: red; }
 </style>
 </head>
 <body>
@@ -195,7 +195,6 @@
         <th data-sort="change">Change <span class="sort-arrow"></span></th>
         <th>Description</th>
         <th>Assessment Notes</th>
-        <th>Blocker</th>
         <th data-sort="humanReady">Human Ready <span class="sort-arrow"></span></th>
         <th data-sort="agentReady">Agent Ready <span class="sort-arrow"></span></th>
         <th data-sort="origin">Origin <span class="sort-arrow"></span></th>
@@ -421,26 +420,15 @@ function render() {
     const change = getChange(item.oldStatus, item.newStatus);
     const originHtml = item.origin === 'brain-derived' ? '<span class="origin-badge">BRAIN</span>' :
                        item.origin === 'wrapped' ? '<span class="origin-badge wrapped">WRAPPED</span>' : '—';
-    // Cell-level red rendering (adopted 2026-04-29):
-    //   - blocker-cell renders red when blocker is non-empty (the cell holds the blocker text).
-    //   - notes-cell receives notes-attention class when notes starts with the ⚠ marker
-    //     (the conditional-review convention for rows where blocker is cleared but a
-    //     future review is noted).
-    const blockerHtml = (item.blocker && item.blocker.trim() !== '')
-      ? `<td class="blocker-cell">${item.blocker}</td>`
-      : `<td></td>`;
-    const notesAttn = (item.notes && item.notes.trim().startsWith('⚠'))
-      ? ' notes-attention'
-      : '';
-    return `<tr>
+    const rowClass = (item.blocker && item.blocker.trim() !== '') ? ' class="blocked-row"' : '';
+    return `<tr${rowClass}>
       <td class="name-cell">${item.name}</td>
       <td><span class="badge-type badge-type-${item.type}">${item.type}</span></td>
       <td><span class="badge badge-${item.oldStatus}">${item.oldStatus}</span></td>
       <td><span class="badge badge-${item.newStatus}">${item.newStatus}</span></td>
       <td><span class="change-indicator ${change.cls}">${change.label === 'Upgraded' ? '&#9650; ' : change.label === 'Downgraded' ? '&#9660; ' : ''}${change.label}</span></td>
       <td class="desc-cell">${item.desc}</td>
-      <td class="notes-cell${notesAttn}">${item.notes}</td>
-      ${blockerHtml}
+      <td class="notes-cell">${item.notes}</td>
       <td class="readiness-cell"><span class="${READINESS_CLASS[item.humanReady]}">${READINESS_LABELS[item.humanReady]}</span></td>
       <td class="readiness-cell"><span class="${READINESS_CLASS[item.agentReady]}">${READINESS_LABELS[item.agentReady]}</span></td>
       <td>${originHtml}</td>

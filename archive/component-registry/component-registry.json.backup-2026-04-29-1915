@@ -1,6 +1,6 @@
 {
-  "version": "1.2.3",
-  "lastUpdated": "2026-04-29",
+  "version": "1.2.2",
+  "lastUpdated": "2026-04-28",
   "totalComponents": 163,
   "statusSummary": {
     "wired": 120,
@@ -47,7 +47,7 @@
       "humanReady": "na",
       "agentReady": "na",
       "journey": "internal",
-      "blocker": "Outstanding: Journal interpreter layers 9-10 stub only (25 TODOs); /private-mentor page chat thread does not load past reflections from mentor_interactions on page mount (UX limitation logged as O-S5-A in 2026-04-26 Session 4 close)."
+      "blocker": "/api/mentor/private/reflect (the Private Mentor's primary write endpoint) Verified end-to-end on 2026-04-26: canonical-profile loader (D-RING-2-S4A), pattern-engine integration (D-PE-01-S3, D-PE-01-S6 per-consumer 2A-recompute), live mentor_interactions loader (D-PE-01-S5). Distress classifier wrapper untouched per AC5. Outstanding: Journal interpreter layers 9-10 stub only (25 TODOs); /private-mentor page chat thread does not load past reflections from mentor_interactions on page mount (UX limitation logged as O-S5-A in 2026-04-26 Session 4 close)."
     },
     {
       "id": "agent-mentor",
@@ -172,8 +172,8 @@
       "ext": ".ts",
       "path": "/sage-mentor/support-agent.ts",
       "desc": "Inner agent with 10 markdown tools. Stimulus-response: receives ticket, drafts response, submits to ring. Starts supervised.",
-      "blocker": "Next: live integration on the support run-loop with real Supabase client + real detectDistressTwoStage classifier (will move status to verified).",
-      "notes": "Support Brain unit-verified (30/30 assertions). Agent itself Designed — implementation plan complete, build not started.",
+      "blocker": "Both channels (1 and 2) Wired and unit-verified per 2026-04-20 support-wiring-fix-close. Live integration on the support run-loop with real Supabase client + real detectDistressTwoStage classifier is the next session's work \u2014 that promotion will move status to verified.",
+      "notes": "Support Brain unit-verified (30/30 assertions). Agent itself Designed \u2014 implementation plan complete, build not started.",
       "deps": [
         "claude-api",
         "supabase"
@@ -435,7 +435,7 @@
       "oldStatus": "designed",
       "ext": ".sql",
       "path": "/api/revenue-model-migration.sql",
-      "desc": "Payment and billing tables. Incomplete — Stripe not wired.",
+      "desc": "Payment and billing tables. Incomplete \u2014 Stripe not wired.",
       "notes": "SQL exists but Stripe integration is scoped only. Correct status.",
       "deps": [
         "supabase",
@@ -744,7 +744,7 @@
     },
     {
       "id": "doc-journal-layers",
-      "name": "Journal Interpretation (10 Layers) — Spec Document",
+      "name": "Journal Interpretation (10 Layers) \u2014 Spec Document",
       "type": "document",
       "subtype": [],
       "status": "verified",
@@ -1082,7 +1082,7 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "paid_api",
-      "blocker": "Isolated. Complete internally but not integrated — cannot produce real cards without website integration."
+      "blocker": "Isolated. Complete internally but not integrated \u2014 cannot produce real cards without website integration."
     },
     {
       "id": "engine-agent-assessment",
@@ -1382,7 +1382,7 @@
       "humanReady": "na",
       "agentReady": "na",
       "journey": "internal",
-      "blocker": "Next: a separate ADR if/when ledger persistence is pursued (ADR-PE-01 §13 names ledger persistence as out of scope)."
+      "blocker": "Wiring approach redirected to ADR-PE-01 per D-PE-LEDGER-WIRING-REDIRECTED (2026-04-26). Module is the journal-extraction accountability layer (six entry kinds: aim/commitment/realisation/question/tension/intention) \u2014 NOT a session-outcome write-side as the prior session brief had assumed. Read-and-report confirmed zero Supabase calls, zero callers in /website/src, zero migration references. ADR-PE-01 \u00a713 names ledger persistence as out of scope. Next: a separate ADR if/when ledger persistence is pursued."
     },
     {
       "id": "engine-model-config",
@@ -1427,7 +1427,7 @@
       "ext": ".ts",
       "path": "/sage-mentor/pattern-engine.ts",
       "desc": "Temporal pattern recognition: passion clusters, regression warnings, trend analysis.",
-      "notes": "Live integration Verified end-to-end per ADR-PE-01 (Sessions 1-6, 2026-04-26). Pattern-engine output persists in encrypted form and feeds /api/mentor/private/reflect via per-consumer 2A-recompute and /api/founder/hub via 2A-skip. §8 founder-hub switch is the next named step.",
+      "notes": "Live integration Verified end-to-end per ADR-PE-01 (Sessions 1-6, 2026-04-26). Pattern-engine output persists in encrypted form and feeds /api/mentor/private/reflect via per-consumer 2A-recompute and /api/founder/hub via 2A-skip. \u00a78 founder-hub switch is the next named step.",
       "deps": [
         "supabase",
         "claude-api"
@@ -1443,7 +1443,7 @@
       "humanReady": "na",
       "agentReady": "na",
       "journey": "internal",
-      "blocker": "Next: founder-hub per-consumer 2A-recompute switch (ADR-PE-01 §8 — deferred)."
+      "blocker": "Live integration Verified end-to-end per ADR-PE-01 (Sessions 1-6, 2026-04-26). Pattern-engine output persists in encrypted profile blob and runs on /api/mentor/private/reflect via per-consumer 2A-recompute (D-PE-01-S6) and on /api/founder/hub via 2A-skip on absence (D-PE-01-S4). Live mentor_interactions loader Verified at D-PE-01-S5. Outstanding: founder-hub per-consumer 2A-recompute switch is the natural ADR-PE-01 \u00a78 next step (deferred)."
     },
     {
       "id": "engine-proactive",
@@ -1485,7 +1485,7 @@
       "ext": ".ts",
       "path": "/sage-mentor/profile-store.ts",
       "desc": "User passion map, causal tendencies, value hierarchy, oikeiosis scope. Rolling 100-action window.",
-      "notes": "Type contract integrated via canonical MentorProfile (D-RING-2-S4B 2026-04-26). Runtime functions dynamically imported from /sage-mentor/profile-store by 7 distinct files in /website/src/.",
+      "notes": "Part of isolated Sage Mentor. Not integrated.",
       "deps": [
         "supabase"
       ],
@@ -1502,7 +1502,7 @@
       "humanReady": "na",
       "agentReady": "na",
       "journey": "internal",
-      "blocker": "Next: type-vs-runtime registry semantics question — should this component be marked deprecated-runtime in favour of the website's engine-mentor-profile-store? Deferred for separate decision."
+      "blocker": "Type contract integrated via canonical MentorProfile (per ADR-Ring-2-01 Session 4b, D-RING-2-S4B 2026-04-26). Runtime functions (recordInteraction, updateProfileFromReflection) dynamically imported from /sage-mentor/profile-store by 7 distinct files in /website/src/ including /api/mentor/private/baseline-response, /api/mentor/private/reflect, /api/reflect, /api/founder/hub, /lib/mentor-interactions-loader, /lib/sage-mentor-bridge, /lib/context/mentor-context-private. Outstanding: type-vs-runtime registry semantics question \u2014 should this component be marked deprecated-runtime in favour of the website's engine-mentor-profile-store? Deferred for separate decision."
     },
     {
       "id": "engine-progression",
@@ -1595,7 +1595,7 @@
       "humanReady": "na",
       "agentReady": "na",
       "journey": "internal",
-      "blocker": ""
+      "blocker": "Verified across three proof endpoints (mentor-ring, support-agent, founder-hub-ring) per D-RING-1 (2026-04-25). Canonical-profile shape-adapter migration (D-RING-2 / ADR-Ring-2-01 Sessions 1, 2, 3a-3e, 4a-4c) reached Verified on 2026-04-26 \u2014 /api/founder/hub, /api/mentor/private/reflect, /api/mentor-baseline-response, /api/mentor-profile, /api/mentor/private/baseline-response, setFounderFacts, appendFounderFactsNote, and saveMentorProfile all consume canonical MentorProfile. Transitional ProfileForSignals retired (Session 4c). Outstanding: continued use across new mentor-ring endpoints as they land."
     },
     {
       "id": "engine-sage-reason-engine",
@@ -2371,7 +2371,7 @@
       "ext": "--",
       "path": "",
       "desc": "Deployed to production at sagereasoning.com. All 66 API endpoints serving. GitHub main branch auto-deploys.",
-      "notes": "Vercel hosting platform. No file path — managed via Vercel dashboard and next.config.js (/website/next.config.js). Live at sagereasoning.com.",
+      "notes": "Vercel hosting platform. No file path \u2014 managed via Vercel dashboard and next.config.js (/website/next.config.js). Live at sagereasoning.com.",
       "deps": [
         "vercel"
       ],
@@ -2800,7 +2800,7 @@
       "ext": ".ts",
       "path": "/website/src/lib/guardrails.ts",
       "desc": "Safety checks: R1 (therapeutic), R2 (employment), R20 (distress detection). Logical rules + heuristic pattern matching.",
-      "notes": "⚠ Verified at current scope; ongoing review under R14 quarterly compliance pipeline. Functional guardrail logic connected to sage-guard. R20a distress detection uses enforceDistressCheck() gate pattern with branded SafetyGate token (verified 18 Apr 2026).",
+      "notes": "Functional guardrail logic connected to sage-guard. R20a distress detection now uses enforceDistressCheck() gate pattern with branded SafetyGate token (verified 18 Apr 2026).",
       "deps": [
         "claude-api"
       ],
@@ -2818,11 +2818,11 @@
       "origin": "",
       "humanReady": "na",
       "agentReady": "na",
-      "blocker": ""
+      "blocker": "AI safety guardrails \u2014 Verified at current scope; ongoing review under R14 quarterly compliance pipeline."
     },
     {
       "id": "reasoning-journal-layers",
-      "name": "Journal Interpretation (10 Layers) — Implementation",
+      "name": "Journal Interpretation (10 Layers) \u2014 Implementation",
       "type": "reasoning",
       "subtype": [],
       "status": "wired",
@@ -2846,11 +2846,11 @@
       "humanReady": "na",
       "agentReady": "na",
       "journey": "internal",
-      "blocker": "Layers 9-10 stub only (25 TODOs). Spec exists (19KB doc) but implementation incomplete."
+      "blocker": "Layers 9-10 stub only (25 TODOs). Spec exists (19KB doc) but implementation incomplete. Status downgraded from verified to wired per audit 2026-04-28 \u2014 verified requires testing-and-confirmation of complete behaviour, which 25 TODOs preclude."
     },
     {
       "id": "reasoning-journal-interp",
-      "name": "Journal Interpretation (10 Layers) — Inner Engine",
+      "name": "Journal Interpretation (10 Layers) \u2014 Inner Engine",
       "type": "reasoning",
       "subtype": [
         "multi-step",
@@ -3094,7 +3094,7 @@
       "oldStatus": "verified",
       "ext": ".json",
       "path": "/stoic-brain/virtue.json",
-      "desc": "Stage 4: Holistic character assessment. Unity of virtue thesis — virtues cannot be scored independently (R6b). Self-examining reflection on whole disposition.",
+      "desc": "Stage 4: Holistic character assessment. Unity of virtue thesis \u2014 virtues cannot be scored independently (R6b). Self-examining reflection on whole disposition.",
       "notes": "Verified in Stoic Brain v3 data. Confirmed.",
       "deps": [
         "engine-stoic-brain-v3"
@@ -3210,7 +3210,7 @@
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-document/route.ts",
-      "desc": "Document quality audit + reasoning assessment. Independent — domain-specific persistence + badge generation.",
+      "desc": "Document quality audit + reasoning assessment. Independent \u2014 domain-specific persistence + badge generation.",
       "notes": "Independent of shared engine (by design). Functional.",
       "deps": [
         "claude-api"
@@ -3361,7 +3361,7 @@
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-conversation/route.ts",
-      "desc": "Conversation analysis. Now wraps sage-reason-engine: calls runSageReason(deep) for overall, keeps custom per-participant breakdown. 216→149 LOC.",
+      "desc": "Conversation analysis. Now wraps sage-reason-engine: calls runSageReason(deep) for overall, keeps custom per-participant breakdown. 216\u2192149 LOC.",
       "notes": "Functional. Uses deep reasoning mode.",
       "deps": [
         "sage-reason-engine"
@@ -3392,7 +3392,7 @@
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-decision/route.ts",
-      "desc": "Option ranker. Now wraps sage-reason-engine: loops runSageReason(standard) per option, keeps custom katorthoma ranking. 260→192 LOC.",
+      "desc": "Option ranker. Now wraps sage-reason-engine: loops runSageReason(standard) per option, keeps custom katorthoma ranking. 260\u2192192 LOC.",
       "notes": "Functional. Loops reasoning for multi-option comparison.",
       "deps": [
         "sage-reason-engine"
@@ -3487,7 +3487,7 @@
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-social/route.ts",
-      "desc": "Pre-publish content filter. Now wraps sage-reason-engine: calls runSageReason(standard) with social context, post-processes poster vs reader passions. Now generates receipts. 186→173 LOC.",
+      "desc": "Pre-publish content filter. Now wraps sage-reason-engine: calls runSageReason(standard) with social context, post-processes poster vs reader passions. Now generates receipts. 186\u2192173 LOC.",
       "notes": "Functional with receipt generation added during refactoring.",
       "deps": [
         "sage-reason-engine"
@@ -3549,7 +3549,7 @@
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/guardrail/route.ts",
-      "desc": "Binary go/no-go gate. Now wraps sage-reason-engine: calls runSageReason(quick) with 3 mechanisms via Haiku, post-processes threshold. 231→219 LOC.",
+      "desc": "Binary go/no-go gate. Now wraps sage-reason-engine: calls runSageReason(quick) with 3 mechanisms via Haiku, post-processes threshold. 231\u2192219 LOC.",
       "notes": "Functional guardrail. Uses fast Haiku model for speed.",
       "deps": [
         "sage-reason-engine"
@@ -4024,7 +4024,7 @@
       "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score/route.ts",
-      "desc": "Pre-action audit. Now wraps sage-reason-engine: builds domain_context from action fields, calls runSageReason(standard). 238→104 LOC.",
+      "desc": "Pre-action audit. Now wraps sage-reason-engine: builds domain_context from action fields, calls runSageReason(standard). 238\u2192104 LOC.",
       "notes": "Refactored, functional. Connected to Anthropic via shared engine.",
       "deps": [
         "sage-reason-engine",
@@ -4355,7 +4355,7 @@
       "oldStatus": "new",
       "ext": ".ts",
       "path": "/website/src/app/api/health/route.ts",
-      "desc": "GET /api/health — system health check. Reports status of Supabase, Anthropic, Stripe, and mentor encryption subsystems. No auth required.",
+      "desc": "GET /api/health \u2014 system health check. Reports status of Supabase, Anthropic, Stripe, and mentor encryption subsystems. No auth required.",
       "notes": "Created 9 Apr 2026. Returns healthy/degraded based on critical subsystem availability.",
       "deps": [],
       "rules": [],
@@ -4380,7 +4380,7 @@
       "ext": ".ts",
       "path": "/website/src/lib/constraints.ts",
       "desc": "Branded TypeScript types enforcing model selection and safety gate at compile time. FastModel/DeepModel branded strings, ModelReliabilityBoundary, SafetyCriticalCallParams (enforces FastModel + temperature:0), SafetyGate token, enforceDistressCheck() wrapper, selectModelByDepth().",
-      "notes": "⚠ AC1 thresholds adopted as working values; revisit if operational evidence shifts. Zero runtime overhead — brands exist only at type level. Verified: passing DeepModel to SafetyCriticalCallParams produces TS2322 compile error. All 8 human-facing POST routes use SafetyGate pattern (18 Apr 2026).",
+      "notes": "Zero runtime overhead \u2014 brands exist only at type level. Verified: passing DeepModel to SafetyCriticalCallParams produces TS2322 compile error. All 8 human-facing POST routes use SafetyGate pattern (18 Apr 2026).",
       "deps": [],
       "rules": [
         "R20"
@@ -4394,7 +4394,7 @@
       "origin": "",
       "humanReady": "na",
       "agentReady": "na",
-      "blocker": ""
+      "blocker": "constraints.ts AC1 thresholds adopted as working values; revisit if operational evidence shifts."
     },
     {
       "id": "infra-r20a-classifier",
@@ -4408,8 +4408,8 @@
       "oldStatus": "wired",
       "ext": ".ts",
       "path": "/website/src/lib/r20a-classifier.ts",
-      "desc": "Two-stage distress detection: regex pattern matching (Stage 1) → Haiku LLM evaluator (Stage 2). Uses branded FastModel type via getFastModel(). Integrated with SafetyCriticalCallParams for compile-time temperature enforcement.",
-      "notes": "⚠ ES1 founder-profile inputs must be in Zone 2 eval suite before P1 transition. Regex stage verified against Zone 2 inputs (6/6 pass, zero false positives). Haiku stage untested (needs live API key). Cost tracking via r20a-cost-tracker.ts. Branded type integration verified 18 Apr 2026.",
+      "desc": "Two-stage distress detection: regex pattern matching (Stage 1) \u2192 Haiku LLM evaluator (Stage 2). Uses branded FastModel type via getFastModel(). Integrated with SafetyCriticalCallParams for compile-time temperature enforcement.",
+      "notes": "Regex stage verified against Zone 2 inputs (6/6 pass, zero false positives). Haiku stage untested (needs live API key). Cost tracking via r20a-cost-tracker.ts. Branded type integration verified 18 Apr 2026.",
       "deps": [
         "claude-api"
       ],
@@ -4425,7 +4425,7 @@
       "origin": "",
       "humanReady": "not-ready",
       "agentReady": "na",
-      "blocker": ""
+      "blocker": "Two-stage distress classifier Verified at AC2 latency budget; ES1 founder-profile inputs must be in Zone 2 eval suite before P1 transition."
     },
     {
       "id": "infra-invocation-guard-test",
@@ -4466,7 +4466,7 @@
       "ext": ".json",
       "path": "/website/.eslintrc.json",
       "desc": "ESLint configuration with next/core-web-vitals + @typescript-eslint plugin. Enforces no-unused-vars as error on 4 safety-critical files (guardrails.ts, r20a-classifier.ts, r20a-cost-tracker.ts, practitioner-context.ts).",
-      "notes": "⚠ Rule set reviewed alongside any AC4 invocation-test changes. Activates ESLint on Vercel builds. Plugin registration fix: @typescript-eslint must be in plugins array explicitly despite eslint-config-next making it resolvable. Verified 18 Apr 2026.",
+      "notes": "Activates ESLint on Vercel builds. Plugin registration fix: @typescript-eslint must be in plugins array explicitly despite eslint-config-next making it resolvable. Verified 18 Apr 2026.",
       "deps": [],
       "rules": [],
       "priority": "P0",
@@ -4478,7 +4478,7 @@
       "origin": "",
       "humanReady": "na",
       "agentReady": "na",
-      "blocker": ""
+      "blocker": "ESLint safety-critical rules Verified; rule set reviewed alongside any AC4 invocation-test changes."
     },
     {
       "id": "infra-husky-precommit",
@@ -4492,7 +4492,7 @@
       "ext": ".sh",
       "path": "/.husky/pre-commit",
       "desc": "Two-stage pre-commit hook: (1) tsc --noEmit full codebase compilation, (2) ESLint on safety-critical files only. Graceful npx-missing fallback for machines without Node.js.",
-      "notes": "⚠ Revisit if AC4 test surface expands. Hook warns-but-allows if npx not found (founder works through Cowork sandbox; Vercel provides hard enforcement). Verified 18 Apr 2026.",
+      "notes": "Hook warns-but-allows if npx not found (founder works through Cowork sandbox; Vercel provides hard enforcement). Verified 18 Apr 2026.",
       "deps": [],
       "rules": [],
       "priority": "P0",
@@ -4503,7 +4503,7 @@
       "origin": "",
       "humanReady": "na",
       "agentReady": "na",
-      "blocker": ""
+      "blocker": "Pre-commit hook Verified; revisit if AC4 test surface expands."
     },
     {
       "id": "infra-r20a-classifier-eval",
@@ -4517,7 +4517,7 @@
       "oldStatus": "scoped",
       "ext": ".ts",
       "path": "/website/src/lib/__tests__/r20a-classifier-eval.ts",
-      "desc": "Evaluation inputs for the distress classifier across 4 groups: Group A (clinical crisis), Group B (philosophical), Group C (ambiguous), Group D (Clinton Zone 2 profile — shame, grief, catastrophising, interpersonal diagnosis, framework dependency, self-worth).",
+      "desc": "Evaluation inputs for the distress classifier across 4 groups: Group A (clinical crisis), Group B (philosophical), Group C (ambiguous), Group D (Clinton Zone 2 profile \u2014 shame, grief, catastrophising, interpersonal diagnosis, framework dependency, self-worth).",
       "notes": "Group D (Zone 2) tested against regex stage: 6/6 pass, zero false positives. Full suite requires live API key for Haiku stage. Results documented in safety signal audit.",
       "deps": [
         "claude-api"
