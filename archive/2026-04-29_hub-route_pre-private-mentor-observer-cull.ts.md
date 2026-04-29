@@ -1484,73 +1484,61 @@ If the conversation is too casual or brief to yield a meaningful observation, re
       }
     }
 
-    // D-PRIVATE-MENTOR-OBSERVER-CULL-2026-04-29:
-    // Steps 17 (observer agents) and 18 (Ops recommended-action synthesis)
-    // are skipped on the private-mentor surface. The private-mentor page
-    // does not render observer or recommended-action rows, so the four
-    // observer LLM calls plus one Ops synthesis call were pure cost on
-    // that surface. The founder-hub flow retains both steps unchanged.
-    // Pre-edit backup: /archive/2026-04-29_hub-route_pre-private-mentor-observer-cull.ts.md
-    let contributions: AgentResponse[] = []
-    let recommendedAction: RecommendedAction | null = null
-
-    if (effectiveHubId !== 'private-mentor') {
-      // Get observer contributions (all other agents check in parallel)
-      debugStep = 'get_observers'
-      const otherAgents = VALID_AGENTS.filter(a => a !== agent)
-      const observerPromises = otherAgents.map(observer =>
-        getObserverContribution(
-          observer,
-          agent as AgentType,
-          message.trim(),
-          primaryResponse.content,
-        ).catch(err => {
-          console.error(`Observer ${observer} failed (non-blocking):`, err)
-          return null
-        })
-      )
-      const observerResults = await Promise.all(observerPromises)
-      contributions = observerResults.filter((r): r is AgentResponse => r !== null)
-
-      // Save observer contributions
-      debugStep = 'save_observers'
-      for (const obs of contributions) {
-        await supabaseAdmin.from('founder_conversation_messages').insert({
-          conversation_id: convId,
-          role: 'observer',
-          agent_type: obs.agent,
-          content: obs.content,
-          relevance_score: obs.relevance_score,
-          pipeline_meta: obs.pipeline_meta,
-        })
-      }
-
-      // Get Ops recommended action (final synthesis pass)
-      debugStep = 'get_ops_recommended_action'
-      const observerSummary = contributions
-        .map(obs => `[${obs.agent}]: ${obs.content}`)
-        .join('\n')
-      recommendedAction = await getOpsRecommendedAction(
-        message.trim(),
+    // Get observer contributions (all other agents check in parallel)
+    debugStep = 'get_observers'
+    const otherAgents = VALID_AGENTS.filter(a => a !== agent)
+    const observerPromises = otherAgents.map(observer =>
+      getObserverContribution(
+        observer,
         agent as AgentType,
+        message.trim(),
         primaryResponse.content,
-        observerSummary,
       ).catch(err => {
-        console.error('Ops recommended action failed (non-blocking):', err)
+        console.error(`Observer ${observer} failed (non-blocking):`, err)
         return null
       })
+    )
+    const observerResults = await Promise.all(observerPromises)
+    const contributions = observerResults.filter((r): r is AgentResponse => r !== null)
 
-      // Save recommended action as an ops observer message
-      if (recommendedAction) {
-        await supabaseAdmin.from('founder_conversation_messages').insert({
-          conversation_id: convId,
-          role: 'observer',
-          agent_type: 'ops',
-          content: `**Recommended Action:** ${recommendedAction.action_summary}\n\n**Risk:** ${recommendedAction.risk_classification} — ${recommendedAction.risk_reasoning}\n\n**Session Prompt:**\n${recommendedAction.session_prompt}`,
-          relevance_score: 1.0,
-          pipeline_meta: { type: 'recommended_action', risk_classification: recommendedAction.risk_classification },
-        })
-      }
+    // Save observer contributions
+    debugStep = 'save_observers'
+    for (const obs of contributions) {
+      await supabaseAdmin.from('founder_conversation_messages').insert({
+        conversation_id: convId,
+        role: 'observer',
+        agent_type: obs.agent,
+        content: obs.content,
+        relevance_score: obs.relevance_score,
+        pipeline_meta: obs.pipeline_meta,
+      })
+    }
+
+    // Get Ops recommended action (final synthesis pass)
+    debugStep = 'get_ops_recommended_action'
+    const observerSummary = contributions
+      .map(obs => `[${obs.agent}]: ${obs.content}`)
+      .join('\n')
+    const recommendedAction = await getOpsRecommendedAction(
+      message.trim(),
+      agent as AgentType,
+      primaryResponse.content,
+      observerSummary,
+    ).catch(err => {
+      console.error('Ops recommended action failed (non-blocking):', err)
+      return null
+    })
+
+    // Save recommended action as an ops observer message
+    if (recommendedAction) {
+      await supabaseAdmin.from('founder_conversation_messages').insert({
+        conversation_id: convId,
+        role: 'observer',
+        agent_type: 'ops',
+        content: `**Recommended Action:** ${recommendedAction.action_summary}\n\n**Risk:** ${recommendedAction.risk_classification} — ${recommendedAction.risk_reasoning}\n\n**Session Prompt:**\n${recommendedAction.session_prompt}`,
+        relevance_score: 1.0,
+        pipeline_meta: { type: 'recommended_action', risk_classification: recommendedAction.risk_classification },
+      })
     }
 
     // Update conversation timestamp

@@ -2352,3 +2352,69 @@ The audit's apply pattern matches the skill's design: pre-edit backup, six-pass 
 **Status:** Adopted. Cross-references: D-REGISTRY-UPDATE-v1.2.2-2026-04-28 (the prior deploy whose surfaced issues this resolves), D-REGISTRY-UPDATE-SKILL-REDESIGNED-2026-04-28 (the redesign whose Pass 4 this enhances), D-REGISTRY-UPDATE-SKILL-PASS1-FIX-2026-04-28 (the prior patch), D-REGISTRY-AUDIT-v1.2.1-2026-04-28 (the audit baseline whose blocker-rewrite shape originally introduced the achievement-vs-next-step issue), D-PE-01-* and D-RING-* entries (sources for the per-row corrections in Workstream 1). Proposal at `/operations/registry-updates/proposed-2026-04-29.md`. Pre-edit backups listed above. Skill at `/.claude/skills/sage-registry-update/SKILL.md` (now 588 lines, up from 550). Commit hash for the apply push: TBD per founder share after deploy.
 
 ---
+
+## 2026-04-29 — D-MENTOR-PIPELINE-SNAPSHOT: End-to-End Mentor Pipeline Snapshot Captured; Founder-Hub Duplicate Parked
+
+**Decision:** Capture the current end-to-end mentor pipeline (the shared `/api/founder/hub` flow that today serves both the private-mentor surface at `sagereasoning.com/private-mentor` and the founder-hub mentor conversation at `sagereasoning.com/founder-hub`) as a milestone rollback target before any private-mentor corrections are made. Concurrently, duplicate the snapshot's content into a founder-hub-scoped reference with uniquely-named steps (`FH-01` through `FH-24`) and park it. The parked reference describes the founder-hub mentor conversation as it currently behaves and is the behavioural baseline that future private-mentor changes must not implicitly modify. The known pending tweak for the founder-hub side — wiring distress detection per PR6 / R20a — is documented in the parked file but is **not** in scope for this snapshot session.
+
+**Files created:**
+- `/archive/2026-04-29_end-to-end-mentor-pipeline_snapshot.md` — the rollback baseline. Steps numbered descriptively (no prefix) because today the pipeline is shared across both surfaces.
+- `/archive/2026-04-29_end-to-end-founder-hub-mentor_parked.md` — the founder-hub-scoped duplicate with `FH-01` to `FH-24` step names. Front-matter status: **Parked**.
+
+**Reasoning:** The founder asked for a snapshot archive as a milestone we can roll back to so we can safely experiment with corrections to the private-mentor flow. The two surfaces serve different functions and need to be separated. Today the underlying code is shared via `/api/founder/hub` distinguished only by `hub_id`. The founder's intent is that the founder-hub mentor conversation continues to work as it currently does, end to end, while the private-mentor flow is corrected. The unique-step-naming convention (`FH-XX` for founder-hub; `PM-XX` reserved for the future private-mentor reference) protects the founder-hub reference from being implicitly modified by private-mentor changes — even when both flows share underlying code today, the documents are aligned to a separated mental model. Alternative locations considered: `/reference/end-to-end-flows/` and `/operations/end-to-end-flows/`. Founder chose `/archive/` (Q1c) so the snapshot is unambiguously the rollback baseline. The "parked" status is implemented as front-matter on the founder-hub file (no relocation required) so the file remains visible and easily retrieved without being treated as superseded.
+
+**Observations recorded with the snapshot (not in scope for this session, held for separate decision):**
+- The route runs four observer agents (`ops`, `tech`, `growth`, `support`) plus an Ops "recommended action" synthesis on every mentor turn and persists their outputs. The private-mentor page renders only `data.primary.content` and ignores observer + recommended-action rows; the founder-hub page may render them. Cost implication: each private-mentor turn includes four observer LLM calls plus one Ops synthesis call that the founder does not see on that surface.
+- The page-side `data.distress_detected` handler is currently dead code because `/api/founder/hub` does not invoke `enforceDistressCheck` / `detectDistressTwoStage`. The R20a perimeter today is the eight named POST routes in `r20a-invocation-guard.test.ts`; `founder/hub` is not among them.
+- The proximity ring values shown by the private-mentor page after `/api/reason` is called are partly hard-coded in `fetchProximityScore` rather than derived from the response.
+- The Haiku observation extraction at FH-16 / step 16 truncates inputs (`message.trim().substring(0, 500)` and `primaryResponse.content.substring(0, 1000)`) before extraction. Long messages or replies get truncated before the developmental observation is distilled.
+
+These four observations are noted in the snapshot. They are candidate corrections for the private-mentor flow and will be discussed under the founder's "Q5" — held for the next session.
+
+**Rules served:** R0 (oikeiosis audit trail — this entry plus the two snapshot files form the trail entry for the rollback baseline), 0a (status vocabulary preserved — the parked file uses the decision-status word "Parked" applied to a reference document, distinct from any implementation status), 0b (session continuity — the snapshot is a session-spanning artefact that lets the next session begin without re-deriving the pipeline), 0c (verification framework — the snapshot is the founder-verifiable behavioural reference; rollback uses git history for code and these files for observable behaviour), 0d-ii (Standard risk classification — new docs in `/archive/` with no live-system effect; no code touched), 0f (decision-log entry created concurrently with the snapshot), R17 (intimate data protections — the snapshot documents the encrypted profile read-modify-write at FH-12 / step 12 as Critical under PR6, preserving the protection's visibility), R20 (vulnerable user safeguards — the parked file names the missing distress-detection wiring as the known pending tweak so the gap is visible), KG3 (hub-label end-to-end contract — the snapshot makes the `mapRequestHubToContextHub` mapper visible at every hub-scoped read/write site), PR1 (single-endpoint proof discipline — separating the founder-hub reference from any future private-mentor changes mirrors the same discipline for documentation), PR6 (safety-critical changes — the snapshot names distress detection as the founder-hub pending tweak; the future tweak inherits Critical classification by default), PR7 (decisions not made are documented — the four observations above are explicitly held for Q5 discussion next session, recorded here so the deferral is visible).
+
+**Risk classification:** Standard under 0d-ii. Two new files in `/archive/` plus this decision-log entry. No live-system effect. No code touched. Rollback by deleting both files and removing this entry.
+
+**Impact:**
+- Future sessions opening under `/adopted/session-opening-protocol.md` can use the snapshot as the behavioural reference for the mentor pipeline as of 2026-04-29.
+- Private-mentor corrections (the upcoming Q5 discussion) can proceed knowing that the founder-hub reference is preserved with uniquely-named steps and will not be implicitly modified.
+- The four observations recorded with the snapshot are visible as candidate corrections without committing to any of them.
+- The known pending founder-hub tweak (distress detection per PR6 / R20a) is documented and held for a separate session.
+
+**Status:** Adopted. Cross-references: KG3 (hub-label end-to-end contract), PR6 (safety-critical changes are always Critical), PR7 (decisions not made are documented), `/adopted/session-opening-protocol.md` (governing frame for the session that captured this snapshot).
+
+---
+
+## 2026-04-29 — D-PRIVATE-MENTOR-OBSERVER-CULL: Steps 17 + 18 Skipped on Private-Mentor Surface
+
+**Decision:** Modify `/website/src/app/api/founder/hub/route.ts` so that steps 17 (observer agents — `ops`, `tech`, `growth`, `support` running in parallel as observers) and 18 (Ops "recommended action" final-synthesis pass) are skipped when `effectiveHubId === 'private-mentor'`. The founder-hub flow (`effectiveHubId === 'founder-hub'`) continues to run both steps unchanged.
+
+**Implementation:** A single hub-id guard wraps both blocks. The `contributions` and `recommendedAction` variables are declared above the guard with empty defaults (`AgentResponse[] = []` and `RecommendedAction | null = null`), so the response payload at the end of the handler reads them unconditionally and returns `observers: []` and `recommended_action: null` for private-mentor responses. No change to the response shape.
+
+**Reasoning:** The four-observer pipeline plus Ops recommended-action synthesis run on every mentor turn under the shared `/api/founder/hub` route. The private-mentor page (`/website/src/app/private-mentor/page.tsx`) renders only `data.primary.content` and ignores the observer + recommended-action fields entirely. That meant every private-mentor turn included four observer LLM calls plus one Ops Opus 4.6 synthesis call whose outputs were persisted to `founder_conversation_messages` but never displayed. The cull removes that pure-cost overhead from the private-mentor surface while preserving the founder-hub behaviour (which does render those rows). The cull is the first concrete change identified in the snapshot session under D-MENTOR-PIPELINE-SNAPSHOT-2026-04-29 and is the mechanically simplest of the four candidate corrections recorded there.
+
+**Files touched:**
+- `/website/src/app/api/founder/hub/route.ts` — single guard added; one block of code reorganised; no functional change to the founder-hub branch.
+
+**Pre-edit backup:** `/archive/2026-04-29_hub-route_pre-private-mentor-observer-cull.ts.md` (whole-file copy taken before edit per D6-A).
+
+**Risk classification:** Standard under 0d-ii. Additive guard around two non-safety blocks; founder-hub branch unchanged; response shape unchanged; no auth/session/encryption/redirect surface engaged; AC7 not engaged. Rollback by restoring the pre-edit backup or by `git revert`.
+
+**Verification method (founder-performable, between sessions):**
+1. Send a message in the **private-mentor** conversation at `sagereasoning.com/private-mentor`. Mentor reply should arrive as before (no visible change to the user). Latency should drop noticeably because four observer calls + one Opus synthesis call are no longer running.
+2. Send a message in the **founder-hub** mentor conversation at `sagereasoning.com/founder-hub`. Mentor reply should arrive AND any observer / recommended-action UI elements that the founder-hub page renders should still appear, exactly as before.
+3. (Optional, if Supabase visibility is convenient.) After a private-mentor turn, query `founder_conversation_messages` for that conversation: there should be exactly one `role: 'agent', agent_type: 'mentor'` row for the new turn and zero `role: 'observer'` rows. After a founder-hub turn, observer rows should be present as before.
+
+**Type check:** `npx tsc --noEmit --project website/tsconfig.json` ran cleanly post-edit (no errors emitted).
+
+**Rules served:** R0 (oikeiosis audit trail — this entry plus the pre-edit backup form the trail), 0a (status vocabulary preserved — the cull does not advance any module's implementation status; it removes work), 0d-ii (Standard classification justified above), 0c (verification framework — three founder-performable verification steps named above), 0f (decision-log entry concurrent with code change), R5 (cost-as-health-metric — the cull removes 4× observer LLM calls + 1× Opus 4.6 synthesis call per private-mentor turn; cost reduction is the direct intent), PR6 (safety-critical changes — explicitly NOT engaged: the cull does not touch the distress classifier, encryption pipeline, session management, access control, data deletion, or deployment configuration; the cull's perimeter is observer-pipeline orchestration only), PR1 (single-endpoint proof — not engaged: this is not a new architectural pattern; it is a guard on an existing pattern, scoped by hub_id which is already the established discrimination axis at this route).
+
+**Impact:**
+- Private-mentor turns no longer incur four observer LLM calls plus one Ops Opus 4.6 synthesis call. Latency reduction expected; cost reduction expected (specific magnitude depends on token volume).
+- `founder_conversation_messages` no longer accumulates observer rows under private-mentor `conversation_id`s. Historic rows remain undisturbed.
+- The founder-hub mentor flow is unchanged.
+- The private-mentor snapshot at `/archive/2026-04-29_end-to-end-mentor-pipeline_snapshot.md` step 17 and step 18 are now founder-hub-only behaviours; the snapshot itself remains as captured (the as-built record at the moment of capture). The founder-hub parked file at `/archive/2026-04-29_end-to-end-founder-hub-mentor_parked.md` remains accurate (FH-17 and FH-18 still describe live behaviour for that surface).
+
+**Status:** Adopted. Code edit applied locally; founder push pending. Cross-references: D-MENTOR-PIPELINE-SNAPSHOT-2026-04-29 (the snapshot session that identified this cull as candidate correction #1 of four), R5 (cost-as-health-metric).
+
+---
