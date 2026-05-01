@@ -1,11 +1,11 @@
 {
-  "version": "1.3.0",
-  "lastUpdated": "2026-05-02",
-  "totalComponents": 168,
+  "version": "1.2.3",
+  "lastUpdated": "2026-04-29",
+  "totalComponents": 163,
   "statusSummary": {
-    "wired": 121,
+    "wired": 120,
     "verified": 30,
-    "designed": 14,
+    "designed": 10,
     "live": 2,
     "scaffolded": 1
   },
@@ -22,7 +22,7 @@
       "ext": ".ts",
       "path": "/sage-mentor/",
       "desc": "Security boundary for intimate data: journal interpretation, profile building, mentor ledger, private Q&A. Handles R17 obligations. 10 modules (journal-ingestion, journal-interpreter, persona, profile-store, mentor-ledger, embedding-pipeline, private-hub-types, sync-to-supabase, pattern-engine [personal patterns], proactive-scheduler [personal rituals]). Architecturally distinct from the general mentor ring.",
-      "notes": "Security boundary for intimate data, with /api/mentor/private/reflect Verified end-to-end on 2026-04-26 (canonical-MentorProfile loader + per-consumer 2A-recompute + live mentor_interactions loader). Layers 9-10 of journal interpreter remain stub state (25 TODOs). /private-mentor page chat-thread UX limitation remains outstanding (O-S5-A).; alt-3 future-phase block: this surface is the load-bearing first build for Phase 2 of the alt-3 architecture per AC-19; /api/mentor/private/reflect migrates first, conversation surface migrates second. D24 audit names this as one of two endpoints requiring snapshot before Phase-2 begins.",
+      "notes": "Security boundary for intimate data, with /api/mentor/private/reflect Verified end-to-end on 2026-04-26 (canonical-MentorProfile loader + per-consumer 2A-recompute + live mentor_interactions loader). Layers 9-10 of journal interpreter remain stub state (25 TODOs). /private-mentor page chat-thread UX limitation remains outstanding (O-S5-A).",
       "deps": [
         "claude-api",
         "supabase"
@@ -47,7 +47,7 @@
       "humanReady": "na",
       "agentReady": "na",
       "journey": "internal",
-      "blocker": "Outstanding: Journal interpreter layers 9-10 stub only (25 TODOs); /private-mentor page chat thread does not load past reflections from mentor_interactions on page mount (UX limitation logged as O-S5-A in 2026-04-26 Session 4 close). Next: Phase-2 pass 1 — reflect endpoint /api/mentor/private/reflect migrated to alt-3 translation-sandwich (load-bearing per AC-19 reflect-endpoint-first build order, D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). Next: Phase-2 pass 2 — conversation-surface migration to alt-3 (after Phase-2 pass 1)."
+      "blocker": "Outstanding: Journal interpreter layers 9-10 stub only (25 TODOs); /private-mentor page chat thread does not load past reflections from mentor_interactions on page mount (UX limitation logged as O-S5-A in 2026-04-26 Session 4 close)."
     },
     {
       "id": "agent-mentor",
@@ -3211,7 +3211,7 @@
       "ext": ".ts",
       "path": "/website/src/app/api/score-document/route.ts",
       "desc": "Document quality audit + reasoning assessment. Independent — domain-specific persistence + badge generation.",
-      "notes": "Independent of shared engine (by design). Functional. alt-3 future-phase block: scoped for Phase-3+ migration; bypasses shared engine today and would land independently in the alt-3 consumer pattern.",
+      "notes": "Independent of shared engine (by design). Functional.",
       "deps": [
         "claude-api"
       ],
@@ -3227,8 +3227,7 @@
       "origin": "brain-derived",
       "humanReady": "partial",
       "agentReady": "partial",
-      "journey": "both",
-      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). D24 audit found KG1 rule 2 candidate violations (fire-and-forget analytics inserts) — surfaced for founder triage."
+      "journey": "both"
     },
     {
       "id": "tool-sage-classify",
@@ -3363,7 +3362,7 @@
       "ext": ".ts",
       "path": "/website/src/app/api/score-conversation/route.ts",
       "desc": "Conversation analysis. Now wraps sage-reason-engine: calls runSageReason(deep) for overall, keeps custom per-participant breakdown. 216→149 LOC.",
-      "notes": "Functional. Uses deep reasoning mode. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern. Note: this endpoint is outside the AC5 R20a perimeter (eight named routes); migration sequencing follows the perimeter routes.",
+      "notes": "Functional. Uses deep reasoning mode.",
       "deps": [
         "sage-reason-engine"
       ],
@@ -3379,8 +3378,7 @@
       "origin": "brain-derived",
       "humanReady": "partial",
       "agentReady": "partial",
-      "journey": "both",
-      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29)."
+      "journey": "both"
     },
     {
       "id": "tool-sage-decide",
@@ -3395,7 +3393,7 @@
       "ext": ".ts",
       "path": "/website/src/app/api/score-decision/route.ts",
       "desc": "Option ranker. Now wraps sage-reason-engine: loops runSageReason(standard) per option, keeps custom katorthoma ranking. 260→192 LOC.",
-      "notes": "Functional. Loops reasoning for multi-option comparison. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern.",
+      "notes": "Functional. Loops reasoning for multi-option comparison.",
       "deps": [
         "sage-reason-engine"
       ],
@@ -3412,8 +3410,7 @@
       "origin": "brain-derived",
       "humanReady": "partial",
       "agentReady": "partial",
-      "journey": "both",
-      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). D24 audit found Ops Hub malformed body to this endpoint, missing distress handling on Ops Hub callers, and partial R20a input coverage — surfaced for founder triage."
+      "journey": "both"
     },
     {
       "id": "tool-sage-diagnose",
@@ -3491,7 +3488,7 @@
       "ext": ".ts",
       "path": "/website/src/app/api/score-social/route.ts",
       "desc": "Pre-publish content filter. Now wraps sage-reason-engine: calls runSageReason(standard) with social context, post-processes poster vs reader passions. Now generates receipts. 186→173 LOC.",
-      "notes": "Functional with receipt generation added during refactoring. alt-3 future-phase block: scoped for Phase-3+ migration; D11 Layer-3 specification will gain per-consumer projection rules including reader_triggered_passions invitation-language framing per R20d.",
+      "notes": "Functional with receipt generation added during refactoring.",
       "deps": [
         "sage-reason-engine"
       ],
@@ -3507,8 +3504,7 @@
       "origin": "brain-derived",
       "humanReady": "partial",
       "agentReady": "partial",
-      "journey": "free_tier",
-      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). D24 audit identifies reader_triggered_passions invitation-language framing as a D11 per-consumer projection rule (R20d alignment)."
+      "journey": "free_tier"
     },
     {
       "id": "tool-sage-govern",
@@ -3648,7 +3644,7 @@
       "ext": ".ts",
       "path": "/website/src/app/api/score-iterate/route.ts",
       "desc": "Iterative refinement: submit > feedback > revise > track. Multi-turn transformation.",
-      "notes": "Independent by necessity (chain state). Functional with Supabase. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern; chain state and multi-turn transformation pattern must be preserved by the migration design.",
+      "notes": "Independent by necessity (chain state). Functional with Supabase.",
       "deps": [
         "claude-api",
         "supabase"
@@ -3666,8 +3662,7 @@
       "origin": "brain-derived",
       "humanReady": "partial",
       "agentReady": "partial",
-      "journey": "both",
-      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). Independent by necessity (chain state) — migration design must preserve multi-turn transformation pattern."
+      "journey": "both"
     },
     {
       "id": "tool-sage-moderate",
@@ -3871,7 +3866,7 @@
       "ext": ".ts",
       "path": "/website/src/app/api/reason/route.ts",
       "desc": "Universal reasoning layer. Quick (3 mechanisms), Standard (5), Deep (6 + Senecan tracking). Core tool all agents use.",
-      "notes": "Core tool. Fully functional with Anthropic API. Upgrade justified. alt-3 future-phase block: scoped for Phase-3+ migration; pre-migration snapshot recommended per D24.",
+      "notes": "Core tool. Fully functional with Anthropic API. Upgrade justified.",
       "deps": [
         "claude-api",
         "stoic-brain-v3"
@@ -3891,8 +3886,7 @@
       "origin": "brain-derived",
       "humanReady": "partial",
       "agentReady": "partial",
-      "journey": "both",
-      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). Engine entry point with dual-auth pattern (canonical KG4 example); D24 audit names this as one of two endpoints requiring snapshot before Phase-2 pass 1 begins. KG2 (Haiku reliability boundary) is engaged on quick-depth invocations and remains a constraint."
+      "journey": "both"
     },
     {
       "id": "tool-sage-reflect",
@@ -3907,7 +3901,7 @@
       "ext": ".ts",
       "path": "/website/src/app/api/reflect/route.ts",
       "desc": "End-of-day decision review. Transforms daily actions into patterns + examination prompts.",
-      "notes": "Functional with Anthropic API. Narrative reflection output. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern; not in Phase-1 or Phase-2 scope.",
+      "notes": "Functional with Anthropic API. Narrative reflection output.",
       "deps": [
         "claude-api"
       ],
@@ -3922,8 +3916,7 @@
       "origin": "brain-derived",
       "humanReady": "partial",
       "agentReady": "partial",
-      "journey": "free_tier",
-      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). Note: this is the public reflect endpoint; the AC-19 load-bearing reflect endpoint is /api/mentor/private/reflect (covered by agent-private-mentor blocker). D24 audit found a fire-and-forget on the safety-relevant distress-event log at this endpoint plus a user_id vs auth.user.id mismatch (R17, Critical under PR6) — both surfaced for founder triage independent of Phase-3+ migration."
+      "journey": "free_tier"
     },
     {
       "id": "tool-sage-resolve",
@@ -4001,7 +3994,7 @@
       "ext": ".ts",
       "path": "/website/src/app/api/score-scenario/route.ts",
       "desc": "Decision scenario generator + scorer. Simulates ethical situations.",
-      "notes": "Functional with Anthropic API. Generates and evaluates scenarios. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern.",
+      "notes": "Functional with Anthropic API. Generates and evaluates scenarios.",
       "deps": [
         "claude-api"
       ],
@@ -4017,8 +4010,7 @@
       "origin": "brain-derived",
       "humanReady": "partial",
       "agentReady": "partial",
-      "journey": "free_tier",
-      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29)."
+      "journey": "free_tier"
     },
     {
       "id": "tool-sage-score",
@@ -4033,7 +4025,7 @@
       "ext": ".ts",
       "path": "/website/src/app/api/score/route.ts",
       "desc": "Pre-action audit. Now wraps sage-reason-engine: builds domain_context from action fields, calls runSageReason(standard). 238→104 LOC.",
-      "notes": "Refactored, functional. Connected to Anthropic via shared engine. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern.",
+      "notes": "Refactored, functional. Connected to Anthropic via shared engine.",
       "deps": [
         "sage-reason-engine",
         "stoic-brain-v3"
@@ -4052,8 +4044,7 @@
       "origin": "brain-derived",
       "humanReady": "partial",
       "agentReady": "partial",
-      "journey": "free_tier",
-      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). D24 audit found partial R20a input coverage (distress check on primary input only) — surfaced for perimeter-wide policy decision before per-route fix."
+      "journey": "free_tier"
     },
     {
       "id": "tool-compose",
@@ -4593,193 +4584,6 @@
       "origin": "",
       "humanReady": "ready",
       "agentReady": "na"
-    },
-    {
-      "id": "doc-rag-mentor-alt3-handoff",
-      "name": "Alt-3 Architecture Handoff (Translation-Sandwich + Deterministic Engine)",
-      "type": "governance",
-      "subtype": [
-        "architecture"
-      ],
-      "status": "wired",
-      "oldStatus": "",
-      "ext": ".md",
-      "path": "/operations/handoffs/founder/2026-04-29e-private-mentor-rag-phase1-ALT3-close.md",
-      "desc": "Foundational architecture handoff for SageReasoning. Translation-sandwich (Claude restricted to Layer 1 input + Layer 3 output translation; deterministic engine in the middle). AC-1 through AC-19: passion-indexed retrieval, hybrid retrieval, re-ranking, small chunks, strict prompting, Phase-1 conversation-only surface, single canonical mechanism framework, score-in-reply, slot-filled focus questions, proximity ring wired, translation-sandwich, three-tier intake clarification, withholding as deterministic kathekon, sub-option 1b structured intake at reflect endpoint, three principles for long-deferred questions, two residual seams, no-shareable-artifact constraint, reflect-endpoint-first build order. Adopted under D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29; validated under D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29 with three adjustments + description correction + scope limitation captured in the handoff’s Validation Addendum (added 2026-05-02).",
-      "notes": "Active architectural reference. Phase-2 build order is fixed: reflect endpoint first per AC-19, then conversation surface. Validation Addendum (2026-05-02) names three adjustments (Rule 9 unity-thesis flag-not-reclassify; Rule 8 compound severity; Rule 7 explicit operative-circle dependency on Rule 6) + description correction (deterministic-for-rule-like + soft-gating-for-interpretive-core) + scope limitation (philodoxia calibration of the 10-rule rule book).",
-      "deps": [],
-      "rules": [
-        "R0",
-        "R6b",
-        "R6d",
-        "R7",
-        "R17",
-        "R19",
-        "R20",
-        "ES1"
-      ],
-      "priority": "P3",
-      "proximity": "",
-      "connects": [
-        "agent-private-mentor",
-        "gov-manifest",
-        "gov-ethical-analysis"
-      ],
-      "origin": "",
-      "humanReady": "ready",
-      "agentReady": "na",
-      "blocker": ""
-    },
-    {
-      "id": "doc-rag-mentor-alt3-canonical-framework",
-      "name": "Alt-3 Canonical Mechanism Framework (D2)",
-      "type": "document",
-      "subtype": [
-        "design"
-      ],
-      "status": "designed",
-      "oldStatus": "",
-      "ext": ".md",
-      "path": "/drafts/rag-mentor-alt3/canonical-framework.md",
-      "desc": "Phase-1 Deliverable 2 — 9+1 mechanism canonical framework reconciling 5-mechanism (sage-reason-engine STANDARD_SYSTEM_PROMPT) / 4-stage (mentor/private/reflect REFLECTION_PROMPT) / compact (score-scenario, score-social) variants. The deterministic engine’s mechanism taxonomy. Critical-path deliverable.",
-      "notes": "Drafted 2026-05-01 under D-RAG-MENTOR-ALT3-PHASE1-DRAFTS. Critical-path: must be founder-approved before downstream Phase-1 deliverables proceed. D24 audit identified five small coverage-gap recommendations for Phase-1 session 2 amendment (none require redesigning the 9+1 set).",
-      "deps": [],
-      "rules": [
-        "R6a",
-        "R6b",
-        "R6c",
-        "R6d",
-        "R6e",
-        "R7",
-        "R8a",
-        "R8b",
-        "R8c",
-        "R8d"
-      ],
-      "priority": "P3",
-      "proximity": "",
-      "connects": [
-        "doc-rag-mentor-alt3-handoff",
-        "doc-rag-mentor-alt3-passion-taxonomy",
-        "doc-rag-mentor-alt3-operationalised-rules"
-      ],
-      "origin": "",
-      "humanReady": "ready",
-      "agentReady": "na",
-      "blocker": "Next: founder review/approval (with D24 coverage-gap amendments incorporated); on approval, move from /drafts/ to /adopted/ as Elevated change."
-    },
-    {
-      "id": "doc-rag-mentor-alt3-passion-taxonomy",
-      "name": "Alt-3 Passion Taxonomy (D3)",
-      "type": "document",
-      "subtype": [
-        "design"
-      ],
-      "status": "designed",
-      "oldStatus": "",
-      "ext": ".md",
-      "path": "/drafts/rag-mentor-alt3/passion-taxonomy.md",
-      "desc": "Phase-1 Deliverable 3 — formal controlled vocabulary of 4 root passions, 20 sub-species, 3 eupatheiai, false-judgement template, compound-passion handling. The deterministic engine’s passion vocabulary that Rules 2, 3, 5 of D8 consume. Critical-path deliverable.",
-      "notes": "Drafted 2026-05-01 under D-RAG-MENTOR-ALT3-PHASE1-DRAFTS. Critical-path: must be founder-approved before downstream Phase-1 deliverables proceed. AC3 (Zone 2 domains) and R20d (relationship asymmetry) compliance preserved.",
-      "deps": [],
-      "rules": [
-        "R6b",
-        "R6d",
-        "R7",
-        "R8a",
-        "R8b",
-        "R8c",
-        "R8d",
-        "R20",
-        "ES1"
-      ],
-      "priority": "P3",
-      "proximity": "",
-      "connects": [
-        "doc-rag-mentor-alt3-handoff",
-        "doc-rag-mentor-alt3-canonical-framework",
-        "doc-rag-mentor-alt3-operationalised-rules"
-      ],
-      "origin": "",
-      "humanReady": "ready",
-      "agentReady": "na",
-      "blocker": "Next: founder review/approval; on approval, move from /drafts/ to /adopted/ as Elevated change."
-    },
-    {
-      "id": "doc-rag-mentor-alt3-operationalised-rules",
-      "name": "Alt-3 Operationalised Scoring Rules (D8)",
-      "type": "document",
-      "subtype": [
-        "design",
-        "rule-book"
-      ],
-      "status": "designed",
-      "oldStatus": "",
-      "ext": ".md",
-      "path": "/drafts/rag-mentor-alt3/operationalised-rules.md",
-      "desc": "Phase-1 Deliverable 8 — the 10 operationalised scoring rules (PROHAIRESIS-FILTER-001 through KATORTHOMA-PROXIMITY-001) packaging the alt-3 architecture exercise output as a versioned rule book. The deterministic engine’s per-instance scoring logic. All ten rules PARTIAL cleanliness with small named interpretive sub-steps mostly resolved by structured intake (AC-13 Tier 1) and AC-17 named flags. Critical-path deliverable.",
-      "notes": "Drafted 2026-05-01 under D-RAG-MENTOR-ALT3-PHASE1-DRAFTS as a re-derivation (architecture-exercise transcript not in front of drafting session). Validation Addendum added 2026-05-02 under D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29 names three adjustments (Rule 9 unity-thesis flag-not-reclassify with unstable-vs-false-phronesis distinction; Rule 8 compound severity for INFLATION/DEFLATION same-root errors; Rule 7 explicit operative-circle dependency on Rule 6) + description correction (deterministic-for-rule-like + soft-gating-for-interpretive-core) + scope limitation (philodoxia calibration; recalibration needed for other primary passions).",
-      "deps": [],
-      "rules": [
-        "R6a",
-        "R6b",
-        "R6c",
-        "R6d",
-        "R7",
-        "R8a",
-        "R8b",
-        "R20",
-        "ES1"
-      ],
-      "priority": "P3",
-      "proximity": "",
-      "connects": [
-        "doc-rag-mentor-alt3-handoff",
-        "doc-rag-mentor-alt3-canonical-framework",
-        "doc-rag-mentor-alt3-passion-taxonomy",
-        "engine-sage-reason-engine"
-      ],
-      "origin": "",
-      "humanReady": "ready",
-      "agentReady": "na",
-      "blocker": "Next: founder review/approval (with Validation Addendum incorporated); subsequent revision pass folds the three adjustments into per-rule sections before the rule book moves from /drafts/ to /adopted/ as Elevated change."
-    },
-    {
-      "id": "doc-rag-mentor-alt3-r20a-audit",
-      "name": "Alt-3 Consumer Workflow Audit — R20a Perimeter (D24)",
-      "type": "document",
-      "subtype": [
-        "audit",
-        "design"
-      ],
-      "status": "designed",
-      "oldStatus": "",
-      "ext": ".md",
-      "path": "/drafts/rag-mentor-alt3/consumer-workflow-audit.md",
-      "desc": "Phase-1 Deliverable 24 — Consumer Workflow Audit (R20a Perimeter). End-to-end workflow audit of the eight R20a perimeter routes per AC5 (/api/score, /api/score-decision, /api/score-document, /api/score-scenario, /api/score-social, /api/reason, /api/reflect, /api/mentor/private/reflect). 1081 lines, ~18,481 words.",
-      "notes": "Drafted 2026-05-01 under D-RAG-MENTOR-ALT3-PHASE1-AUDIT. Headline findings: AC-18 Option 1 (no-shareable-artifact constraint scoped to deferral-resolution) is sufficient as written; two snapshots recommended before Phase-1 session 2 (/api/reason engine entry point with dual-auth pattern; /api/mentor/private/reflect load-bearing for Phase-2 pass 1); seven current-state findings span Standard to Critical classifications including a Critical-under-PR6/R17 user_id vs auth.user.id finding at /api/reflect.",
-      "deps": [],
-      "rules": [
-        "R0",
-        "R17",
-        "R20",
-        "PR1",
-        "PR6",
-        "PR7",
-        "PR9"
-      ],
-      "priority": "P3",
-      "proximity": "",
-      "connects": [
-        "doc-rag-mentor-alt3-handoff",
-        "tool-sage-reflect",
-        "tool-sage-reason",
-        "agent-private-mentor"
-      ],
-      "origin": "",
-      "humanReady": "ready",
-      "agentReady": "na",
-      "blocker": "Next: founder triage of seven current-state findings (Ops Hub malformed body to /api/score-decision; missing distress handling on Ops Hub callers; KG1 rule 2 candidate violations on Routes 2, 3, 7; fire-and-forget on safety-relevant distress-event log at /api/reflect; user_id vs auth.user.id at /api/reflect — Critical under PR6/R17; partial R20a input coverage on Routes 1, 2, 6) and approval of Phase-1 session 2 scope refinements (D2 coverage-gap amendments; D11 per-consumer projection rules; D13 expanded trigger catalogue; D14 split into 14a engine substitution + 14b deferral-resolution build)."
     }
   ]
 }

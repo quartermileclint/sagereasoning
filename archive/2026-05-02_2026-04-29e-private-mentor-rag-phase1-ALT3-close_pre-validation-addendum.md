@@ -17,26 +17,6 @@ The architecture was validated through a sustained operationalisation exercise i
 
 ---
 
-## Validation Addendum (added 2026-05-02 under D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29)
-
-After the alt-3 architecture was adopted, the live private mentor performed an independent validation of the operationalised rule book (the ten rules above examined as a body, not rule by rule). Verdict: **commit**, with three specific adjustments and one description correction. The validation also surfaced one scope limitation that this handoff names below.
-
-**Three adjustments to the candidate rule book (Phase-1 Deliverable 8 — `/drafts/rag-mentor-alt3/operationalised-rules.md`):**
-
-1. **Rule 9 — unity-thesis flag-not-reclassify for progressors.** `UNITY_INCONSISTENCY` is a diagnostic signal, not a hard reclassification rule, for the practitioner population most likely to use the product. The architecture distinguishes *unstable phronesis* (genuine but not yet stable) from *false phronesis* (misidentification of the genuine good).
-2. **Rule 8 — compound severity for INFLATION/DEFLATION same-root errors.** The compound case (e.g., craving recognition + fearing humiliation as two expressions of the same false root judgement) carries a higher severity than either error alone. A compound severity level is added to Rule 8's value-error vocabulary.
-3. **Rule 7 — explicit operative-circle dependency on Rule 6.** Rule 7 uses the operative circle from Rule 6 (the actual circle from which the action operates), not the stated circle. Closes the seam between Rule 6's `STATED_OPERATIVE_CONFLICT` detection and Rule 9's dikaiosyne classification.
-
-**Description correction.** The architecture is described accurately as *"a deterministic engine for the rule-like components of Stoic reasoning, with honest soft-gating for the components that are not rule-like"* — not as a *"fully deterministic system"*. The OPEN_DEFERRAL mechanism (AC-14) is honest precisely because it acknowledges that the deterministic frame does not reach the interpretive core. R19 (honest positioning) is preserved by the corrected language.
-
-**Scope limitation (philodoxia calibration).** The 10 rules in the candidate rule book are calibrated against one practitioner profile (philodoxia primary; the founder's profile per ES1). Severity weightings, prior probabilities, and compound-passion thresholds reflect that calibration. Other primary passions (philoplousia-strong, agonia-strong, penthos-strong) will require recalibration before the rule book is applied across the full coverage envelope. This is a scope limitation, not a design flaw — it is named here so that future coverage-expansion work proceeds with the assumption surfaced rather than implicit.
-
-**Effect on this handoff's body below.** The architectural commitments AC-1 through AC-19 are unchanged. The rule book in §"The candidate rule book" remains as adopted. The three adjustments and the description correction are requirements that Phase 2 implementation must incorporate; they do not require revision of the architectural commitments themselves. The Phase-1 prompt at `/operations/handoffs/founder/2026-04-29-rag-phase1-ALT3-NEXT-SESSION-PROMPT.md` was used by Phase-1 session 1 (`D-RAG-MENTOR-ALT3-PHASE1-DRAFTS-2026-05-01`) before this validation was recorded; the prompt is therefore historical and is not edited. The validation findings are landed in Deliverable 8 (the rule book) directly, which is the document Phase-1 session 2 and any subsequent rule-book revision session reads.
-
-See `D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29` in `/operations/decision-log.md` for full reasoning.
-
----
-
 ## Decisions Made (carried forward from main session and exercise)
 
 - **D-MENTOR-PIPELINE-SNAPSHOT-2026-04-29** — End-to-end mentor pipeline snapshot + founder-hub-scoped duplicate parked.
