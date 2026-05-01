@@ -2625,3 +2625,91 @@ No Critical changes this session. PR6 not engaged. AC7 not engaged.
 **Status:** Adopted. Cross-references: D-REGISTRY-UPDATE-v1.2.3-2026-04-29 (prior version), D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29 (the architecture commit driving the new entries and transitive updates), D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29 (the validation that informed the D8 entry's notes), D-RAG-MENTOR-ALT3-PHASE1-DRAFTS-2026-05-01 (D2 / D3 / D8 source), D-RAG-MENTOR-ALT3-PHASE1-AUDIT-2026-05-01 (D24 source), D-MENTOR-PIPELINE-SNAPSHOT-2026-04-29 (the rollback baseline whose snapshots remain `/archive/`-only and not registry-tracked), D-PRIVATE-MENTOR-OBSERVER-CULL-2026-04-29 (the pre-alt-3 cull on `/website/src/app/api/founder/hub/route.ts` whose effect is captured in the existing agent-private-mentor notes). Proposal at `/operations/registry-updates/proposed-2026-05-02.md`. Pre-edit backups listed above. Skill at `/.claude/skills/sage-registry-update/SKILL.md` (588 lines, Q1–Q5 + Pass-4-enhanced — unchanged this session). Commit hash for the apply push: TBD per founder share after deploy.
 
 ---
+
+## 2026-05-02 — D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED: Founder Approval of D2 / D3 / D8 (Path A)
+
+**Decision:** Founder approved the three Phase-1 critical-path deliverables (D2 — canonical mechanism framework; D3 — passion taxonomy; D8 — operationalised scoring rules with Validation Addendum) as drafted. Path A under the Phase-1 session 2 prompt's pre-condition options (a / b / c / d): "Approve all three as drafted." D8 becomes v1.0.0 with the Validation Addendum carried forward to a future revision pass that produces v1.1.0. Phase-1 session 2 proceeds against the addendum-only state of D8 — the addendum's per-adjustment implementation guidance is sufficient direction for D9 / D11 / D13.
+
+The founder also confirmed D24 (R20a consumer-workflow audit) reviewed and accepted as found; current-state findings (Ops Hub malformed body; Ops Hub missing distress handling; KG1 rule 2 candidate violations on analytics inserts; fire-and-forget on safety-relevant distress-event log at /api/reflect; user_id vs auth.user.id at /api/reflect — Critical under PR6/R17; partial R20a input coverage on Routes 1, 2, 6) are logged for separate triage outside the Phase-1 design scope.
+
+**Reasoning:** The Phase-1 session 2 prompt at `/operations/handoffs/founder/2026-05-01-rag-phase1-alt3-NEXT-SESSION-PROMPT.md` specifies that the session does not begin until both pre-conditions are met:
+
+1. Founder approval of the three critical-path deliverables.
+2. D24 (R20a perimeter workflow audit) drafted and reviewed.
+
+Both pre-conditions are met as of this entry. The approval unblocks downstream Phase-1 deliverables (D4, D9, D10, D11, D13, D14a, D14b, D15) which are produced in this same session under D-RAG-MENTOR-ALT3-PHASE1-SESSION2-DRAFTS-2026-05-02.
+
+The Validation Addendum's per-adjustment implementation guidance (Rule 7 explicit operative-circle dependency on Rule 6; Rule 8 compound severity for INFLATION/DEFLATION same-root errors; Rule 9 unity-thesis flag-not-reclassify for progressors) is incorporated into D9 (engine sequencing, Dependency 5b and Dependency 4 interaction; Dependency 6 conditional logic), D11 (Layer 3 Refinement 5 — Validation Addendum prose projection), and D13 (back-edge interaction notes). The transcript-faithful redo of D8 to v1.1.0 happens in a future session when the architecture-exercise transcript is surfaced.
+
+**File-move-to-`/adopted/` housekeeping (separate Elevated-risk action):** D2, D3, D8 currently sit under `/drafts/rag-mentor-alt3/`. The approval-gate footer of each deliverable specifies the move to `/adopted/` as a separate Elevated-risk action requiring its own decision-log entry. **The move is not executed in this session;** it is surfaced to the founder for separate scheduling. Until the move is executed, the deliverables retain `Designed` implementation status under the 0a vocabulary (drafted under founder review = Designed; approved-as-drafted = Designed → moves to Verified once the file-move + decision-log entry close out the gate).
+
+**Rules served:** R0 (oikeiosis — the audit trail entry for the approval); 0a (implementation status vocabulary preserved — Designed remains the status until the move completes); 0c (verification framework — founder verified by AskUserQuestion at session open; founder reads the deliverables directly); 0f (decision-log entry concurrent with the approval); PR7 (decisions not made are documented — the file move to `/adopted/` is explicitly deferred with revisit condition: founder schedules the move as a separate Elevated-risk action).
+
+**Status:** Adopted. Cross-references: D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29 (the architecture); D-RAG-MENTOR-ALT3-PHASE1-DRAFTS-2026-05-01 (the original drafting session for D2 / D3 / D8); D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29 (the validation findings carried forward in the addendum); D-RAG-MENTOR-ALT3-PHASE1-AUDIT-2026-05-01 (D24 source); D-RAG-MENTOR-ALT3-PHASE1-SESSION2-DRAFTS-2026-05-02 (the eight session-2 deliverables produced post-approval).
+
+---
+
+## 2026-05-02 — D-RAG-MENTOR-ALT3-PHASE1-SESSION2-DRAFTS: Phase-1 Session 2 Deliverables (D4, D9, D10, D11, D13, D14a, D14b, D15) Drafted
+
+**Decision:** Eight Phase-1 alt-3 deliverables produced as drafts under `/drafts/rag-mentor-alt3/`:
+
+- **D4 — Corpus inventory** → `/drafts/rag-mentor-alt3/corpus-inventory.md`. Tagging schema (passage_id, source_file, source_citation, passage_type, canonical_mechanism, passion, sub_passion, audience_tier); per-file structural inventory across the 8 source files; coverage gaps surfaced (D-A16 focus-question stems; D-A10 corpus expansion limits).
+- **D9 — Rule dependency map and engine sequencing logic** → `/drafts/rag-mentor-alt3/rule-dependency-map.md`. Six dependencies in full treatment; canonical engine sequencing 1 → 2 → 3 → 4 → 5(p) → 6 → 7(p) → 8 → 9 → 5(e) → 7(c) → 10; conditional back-edge from Rule 8 to Rules 2/3 with `value_error_without_passion_flag` trigger and 1-re-run loop guard; Validation Addendum guidance incorporated (Adjustment 1 conditional at Rule 10; Adjustment 2 compound-severity interaction with back-edge; Adjustment 3 explicit Rule 6 → Rule 7 operative-circle dependency).
+- **D10 — Layer 1 translation specification** → `/drafts/rag-mentor-alt3/layer-1-translation.md`. Narrow-scope specification (entities, temporal/evaluative axes, scope markers, target identifiers, indifferents); controlled vocabulary from D3 + value.json; prompt template with cache discipline per AC6; ELEMENT_FUSION + empty-schema-with-reason + validation-failure error handling; worked examples for all named anchor patterns (philodoxia, orge with children, six procedural reports, bus story, agonia in catastrophising, ELEMENT_FUSION case).
+- **D11 — Layer 3 translation specification** → `/drafts/rag-mentor-alt3/layer-3-translation.md`. Inclusion + exclusion strict prompting; per-consumer projection rules covering D2 Tables 1, 2, 4a, 4b, 5; AC-10 slot-fill mechanics for focus questions; D24 audit refinements incorporated (Refinement 1 — reader_triggered_passions invitation-language for `/api/score-social`; Refinement 2 — institutional-distance soft clarification for `/api/score-document` policy mode; Refinement 3 — AC-17 flag projection per surface; Refinement 4 — Table 4a dual applicability; Refinement 5 — Validation Addendum Adjustment 1 prose projection); R20d second-person passion attribution prohibited.
+- **D13 — Three-tier intake clarification specification** → `/drafts/rag-mentor-alt3/three-tier-intake.md`. Tier 1 force / Tier 2 soft / Tier 3 deterministic-withhold model; engine-level vs surface-level trigger distinction; full trigger catalogue (7 engine-level + 12 surface-level codes per D24 audit findings); OPEN_DEFERRAL data structure; timestamping logic; interaction with engine sequencing per D9.
+- **D14a — Daily-reflection ritual endpoint design** → `/drafts/rag-mentor-alt3/reflect-endpoint-14a-daily-ritual.md`. Visible-output preservation per D2 Table 4a; surface design recommendation (own page over embedded view — founder calls); morning/evening symmetry with `ritual_type` parameter recommendation; persistence pipeline preserved; pattern-engine pass per ADR-PE-01 preserved; founder-performable verification specification; Phase-2 build sequence (snapshot → engine implementation → env-flag deployment → verification → page move → mentor_observation surfacing → audit-finding integration).
+- **D14b — Deferral-resolution surface design** → `/drafts/rag-mentor-alt3/reflect-endpoint-14b-deferral-resolution.md`. **The load-bearing Phase-2 pass-1 deliverable per AC-19.** New route recommendation (`/api/mentor/private/deferral-resolve`); new page recommendation (`/private-mentor/deferred-questions`); structured intake form shape; deferred-question presentation logic (engine-composed at scoring time, presented verbatim at resolution time); reflection content processing through Tier 1/2/3; retrospective score update mechanism with new `open_deferrals` and `deferral_resolutions` schema tables; **AC-18 architectural specification** (what surface DOES NOT and DOES produce); R17 intimate data protection conformance (RLS, application-level encryption per R17b, cascade deletion per R17c); AC5 ninth-route discipline; founder-performable verification protocol; Phase-2 pass-1 build readiness with Critical Change Protocol applied per PR6.
+- **D15 — Long-deferred questions handling** → `/drafts/rag-mentor-alt3/long-deferred-questions.md`. Three principles operationalised: Principle 1 (engine doesn't nag — operational specification of what "nag" means); Principle 2 (OPEN_DEFERRAL flags visible in scoring record — data structure + surface presentation, visible but not celebratory); Principle 3 (mentor names pattern at next natural opportunity — domain-match algorithm across four axes; long-deferred threshold N=7 days; observation language constraints; worked example).
+
+**Reasoning:** Per the Phase-1 session 2 prompt at `/operations/handoffs/founder/2026-05-01-rag-phase1-alt3-NEXT-SESSION-PROMPT.md`, the session's deliverables are eight design documents that follow Phase-1 session 1's three critical-path drafts. The pre-conditions (founder approval of D2 / D3 / D8 — Path A; D24 reviewed) are met per D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02. The deliverables collectively specify:
+
+- The corpus the engine reads from (D4).
+- The engine's execution order with the Validation Addendum incorporated (D9).
+- Claude's narrow input translation task (D10).
+- Claude's narrow output translation task with per-consumer projection rules (D11).
+- The intake-clarification dispatch logic with the engine-level vs surface-level distinction surfaced by D24 (D13).
+- The two reflect endpoint surfaces — the daily-reflection ritual surface preserving visible output (D14a) and the deferral-resolution surface holding AC-18 (D14b — load-bearing for Phase-2 pass 1).
+- The long-deferred-questions handling that operationalises AC-16's three principles as engine behaviour (D15).
+
+**Phase-2 build implications surfaced:**
+
+1. **Phase-2 pass 1 is the deferral-resolution surface (D14b).** AC-19's reflect-endpoint-first build order is preserved. Phase-2 pass 1's Critical Change Protocol per PR6 + AC5 perimeter expansion + R17 intimate data perimeter applies at deployment time.
+2. **Phase-2 pass 2 is the daily-reflection ritual surface (D14a).** Engine substitution under the `MENTOR_RAG_V1=true` env flag with the existing route's REFLECTION_PROMPT direct-call path as the rollback path.
+3. **D-A16 (focus-question stems catalogue) is a Phase-2 build precondition.** D4 surfaces the gap; D11's slot-fill mechanics, D13's question stems, and D14a's `evening_prompt` slot-fill all depend on the catalogue's promotion. Phase-2 build of D14b requires at minimum the EUPATHEIA_BOUNDARY and PRAXIS_MOTIVATION_AMBIGUITY trigger code stems.
+4. **Two snapshots before Phase-2 begins** (per D24 audit recommendation): `/api/reason` snapshot (engine entry point); `/api/mentor/private/reflect` snapshot (ritual flow as it stands today, plus architectural placeholder for the deferral-resolution flow). These remain Phase-2 work; this session is design only.
+
+**Validation Addendum guidance incorporation (cross-cutting):** The three adjustments named in D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29 are honoured by:
+- **Adjustment 1 (Rule 9 unity-thesis flag-not-reclassify):** D9 Dependency 6 specifies the conditional logic at Rule 10's composite step (unstable phronesis vs false phronesis vs insufficient longitudinal evidence). D11 Refinement 5 specifies the Layer 3 prose projection per case.
+- **Adjustment 2 (Rule 8 compound severity for INFLATION/DEFLATION same-root errors):** D9 Dependency 4 names the back-edge interaction with the new compound severity level.
+- **Adjustment 3 (Rule 7 explicit operative-circle dependency on Rule 6):** D9 Dependency 5b specifies the forward sub-dependency; D11 prose translates the operative-circle distinction.
+
+**Files touched (this session, 2026-05-02 — design-only, no live-system effect):**
+- `/drafts/rag-mentor-alt3/corpus-inventory.md` — new (D4).
+- `/drafts/rag-mentor-alt3/rule-dependency-map.md` — new (D9).
+- `/drafts/rag-mentor-alt3/layer-1-translation.md` — new (D10).
+- `/drafts/rag-mentor-alt3/layer-3-translation.md` — new (D11).
+- `/drafts/rag-mentor-alt3/three-tier-intake.md` — new (D13).
+- `/drafts/rag-mentor-alt3/reflect-endpoint-14a-daily-ritual.md` — new (D14a).
+- `/drafts/rag-mentor-alt3/reflect-endpoint-14b-deferral-resolution.md` — new (D14b).
+- `/drafts/rag-mentor-alt3/long-deferred-questions.md` — new (D15).
+- `/operations/decision-log.md` — this entry + D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 appended.
+- `/operations/handoffs/founder/2026-05-02-rag-phase1-alt3-session2-close.md` — new session close.
+- `/operations/handoffs/founder/2026-05-02-rag-phase1-alt3-session3-NEXT-SESSION-PROMPT.md` — new next-session prompt.
+
+**Pre-edit backups:** none required. All eight new deliverables are new files (no overwrites). Decision-log appends only. Session close and next-session prompt are new files.
+
+**Risk classification (this session, design only):**
+- All eight drafts: Standard under 0d-ii. Drafts under `/drafts/`, no live-system effect. No code, no schema migrations, no auth/encryption/session/redirect surface engaged.
+- Decision-log appends: Standard.
+- Session close + next-session prompt: Standard.
+
+No Critical changes this session. No safety-critical surface touched. PR6 not engaged. AC7 not engaged.
+
+The Phase-2 pass 1 build (D14b implementation) is **Critical** when it runs at its own time per the Critical Change Protocol; this session only designs.
+
+**Rules served:** R0 (oikeiosis audit trail — the eight deliverables form the design foundation for Phase 2's build of the alt-3 architecture); R6 (methodology-first derivation — the deliverables derive from D2 / D3 / D8 plus the Validation Addendum, not from V1/V2 patterns); R7 (source fidelity — every deliverable's tagging / vocabulary / question stems trace to corpus or are explicitly flagged as alt-3 derived); R8a–R8d (audience-tier glossary preserved across deliverables); R17 (intimate data protection — D14b's schema and encryption commitments); R19c, R19d (limitations + mirror principle in D11 prose); R20a (perimeter conformance preserved on D14a; AC5 ninth-route discipline specified for D14b); R20d (relationship asymmetry — invitation-language in D11; no second-person passion attribution); 0a (status vocabulary — eight deliverables produced as Designed); 0b (session continuity — handoff and next-session prompt produced); 0c (verification framework — founder-performable verification specifications in D14a and D14b); 0d-ii (Standard classification justified above); 0f (decision-log entry concurrent with the deliverables); 0h (P0 hold point preserved — design-only work); PR1 (single-endpoint proof discipline — D14b is the Phase-2 pass-1 single-endpoint target); PR4 (model selection as constraint — Sonnet for Layer 1 / Layer 3 per AC1 named in D10 / D11); PR5 (knowledge-gap carry-forward — KG1 rule 2 awaited-pattern discipline named in D14a / D14b; KG3 hub-label end-to-end contract preserved in D14a / D14b; KG7 JSONB storage format named in D14a verification protocol); PR6 (safety-critical changes Critical — D14b's Phase-2 pass-1 build is named as Critical); PR7 (decisions not made are documented — D-A16 catalogue promotion deferred with revisit condition; founder direction questions in D14a / D14b deferred to founder review).
+
+**Status:** Drafted — under founder review. Cross-references: D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29 (the architecture); D-RAG-MENTOR-ALT3-PHASE1-DRAFTS-2026-05-01 (Phase-1 session 1's critical path); D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29 (the validation findings incorporated in D9, D11, D13); D-RAG-MENTOR-ALT3-PHASE1-AUDIT-2026-05-01 (D24 source for D11 / D13 / D14a / D14b refinements); D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 (the precondition this session honours); D-REGISTRY-UPDATE-v1.3.0-2026-05-02 (registry tracking the alt-3 governance artefacts; will be updated to add the eight new deliverables in a future v1.4.0 registry update).
+
+---
