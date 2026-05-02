@@ -1,6 +1,6 @@
 # Deliverable 2 — Canonical Mechanism Framework
 
-**Status:** Adopted as v1.1.0 (founder approval per Path A on 2026-05-02; D-D2-AMENDMENT-2026-05-02 — incorporating five D24 coverage-gap additions: Table 1a quick-depth projection for `/api/reason`; Coverage notes A + B for `prior_feedback` and aggregate-across-options projections; Table 4a heading + preamble making Routes 7 + 8 dual applicability explicit; Table 6 policy-mode shape for `/api/score-document`). Pre-amendment v1.0.0 archived at `/archive/2026-05-02_canonical-framework_pre-d24-amendment.md`. Adopted as v1.0.0 (founder approval per Path A on 2026-05-02; D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02). Moved from `/drafts/rag-mentor-alt3/` to `/adopted/rag-mentor-alt3/` 2026-05-02. Amended 2026-05-01 — Table 4 split into 4a (daily-reflection ritual surface, visible output preserved) and 4b (deferral-resolution surface, AC-18 holds) per Option 1 scoping correction. Pre-amendment version archived at `/archive/2026-05-01_canonical-framework_pre-option-1-table4-split.md`.
+**Status:** Adopted (founder approval per Path A on 2026-05-02; D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02). Moved from `/drafts/rag-mentor-alt3/` to `/adopted/rag-mentor-alt3/` 2026-05-02. Amended 2026-05-01 — Table 4 split into 4a (daily-reflection ritual surface, visible output preserved) and 4b (deferral-resolution surface, AC-18 holds) per Option 1 scoping correction. Pre-amendment version archived at `/archive/2026-05-01_canonical-framework_pre-option-1-table4-split.md`.
 **Date:** 2026-05-01 (initial draft); 2026-05-01 (Option 1 amendment).
 **Stream:** founder.
 **Governing frame:** `/adopted/session-opening-protocol.md`.
@@ -107,36 +107,6 @@ The following tables specify how each existing endpoint shape projects onto the 
 | `improvement_path` | Layer 3 prose | Translation of mechanism 5's `dominant_false_judgement`. |
 | `stage_scores` | per-mechanism quality flag | Currently subjective; under alt-3 it becomes a derived projection of cleanliness ratings + intake-clarification status. |
 
-### Table 1a — 3-mechanism (`/api/reason` quick depth) → canonical
-
-The quick-depth shape returned by `/api/reason` when called with `depth: 'quick'`. Three mechanisms (`control_filter`, `passion_diagnosis`, `oikeiosis`) plus `katorthoma_proximity`, `philosophical_reflection`, `improvement_path`, `stage_scores` (3-entry), `disclaimer`. This is also the shape consumed by the proximity-ring widget (per D24 §"Caller A — `/private-mentor` proximity-ring widget" + the `/api/reason` snapshot at `/archive/2026-05-02_api-reason_pre-alt-3-snapshot.md`). Quick-depth uses Haiku per AC1 / KG2; the engine retry path escalates to Sonnet on parse failure.
-
-| Existing field | Canonical mechanism(s) | Notes |
-|---|---|---|
-| `control_filter.within_prohairesis` / `outside_prohairesis` | mechanism 1 | Direct projection (same as Table 1). |
-| `passion_diagnosis.passions_detected[]` | mechanisms 2 + 3 | `id` is sub-species (mechanism 3); `root_passion` is mechanism 2. |
-| `passion_diagnosis.false_judgements[]` | mechanism 5 | Direct projection. |
-| `passion_diagnosis.correct_judgements[]` | derived from mechanism 5 + eupatheia data | Layer 3 derivation. |
-| `passion_diagnosis.causal_stage_affected` | mechanism 4 | Direct projection. |
-| `oikeiosis.relevant_circles[]` | mechanism 6 (with `obligation_met` from mechanism 7) | Two mechanisms folded. |
-| `oikeiosis.deliberation_notes` | Layer 3 prose translation of mechanism 7 | Projection. |
-| `katorthoma_proximity` | mechanism 10 | Direct projection. |
-| `philosophical_reflection` | Layer 3 prose | Translation of upstream rule outputs. |
-| `improvement_path` | Layer 3 prose | Translation of mechanism 5's `dominant_false_judgement`. |
-| `stage_scores` (3 entries: control_filter / passion_diagnosis / oikeiosis) | per-mechanism quality flag | Currently subjective; under alt-3 it becomes a derived projection of cleanliness ratings + intake-clarification status. |
-
-The quick-depth shape is the **subset of Table 1 covering only mechanisms 1, 2, 3, 4, 5, 6, 7, 10** (no mechanism 8 value assessment, no mechanism 9 virtue domain, no Senecan grade overlay). It is sufficient for the proximity-ring widget's display purpose and for any agent caller that needs the core triad without the full 5- or 6-mechanism analysis.
-
-### Coverage notes — per-route projection refinements
-
-**Note A — `prior_feedback` (Route 1, `/api/score` iterative-refinement variant) (D24 §"Coverage gaps in D2 mapping tables" item 1).** `prior_feedback` is a Layer 1 input shape used by `/api/score`'s iterative-refinement variant: prior evaluation findings are passed back into the next evaluation as deliberation context. It is not an output of the canonical framework; it is an upstream input. Architecturally, `prior_feedback` projects onto the practitioner profile's recent-interaction signals (the same surface mechanism 10's Senecan grade overlay reads from). The convention recognises that *using prior evaluation findings as deliberation context for the next evaluation* is a longitudinal-reasoning feature alongside mechanism 10's profile-derived inputs. This convention does not introduce a new canonical mechanism; it names where `prior_feedback` lives in the Layer 1 → engine input pipeline.
-
-**Note B — Aggregate-across-options projections (Route 2, `/api/score-decision`) (D24 §"Coverage gaps in D2 mapping tables" item 2).** `/api/score-decision` produces aggregate projections across N independent canonical evaluations (one per decision option), not per-instance projections. Specifically:
-- `recommended` — downstream classification rule selecting the highest-proximity option from the N evaluations. The selection rule is application-specific; the underlying per-option proximities are mechanism 10 outputs.
-- `process_quality` — separate classification on the practitioner's framing of the decision (e.g., whether the practitioner posed a false dichotomy or a genuine choice).
-
-Neither field is in the canonical 9+1 mechanism set. Both live in the Layer 3 projection for the decision-comparison surface. The convention recognises that **decision-comparison surfaces produce aggregate projections across N independent canonical evaluations**, distinct from per-instance projections in Table 1. Phase 3+ migration of `/api/score-decision` preserves this aggregate-across-options layer at the surface; the engine itself produces only per-option canonical evaluations.
-
 ### Table 2 — 6-mechanism (`/api/reason` deep depth) → canonical
 
 Same as Table 1 plus:
@@ -164,11 +134,9 @@ Same as Table 1 plus:
 
 These two flows have different practitioner intentions and different architectural needs. Under Option 1, AC-18 is **scoped to the deferral-resolution surface only**. The daily-reflection ritual surface preserves its visible output. Tables 4a (ritual) and 4b (deferral) replace the prior single Table 4.
 
-#### Table 4a — `REFLECTION_PROMPT` daily-reflection ritual surface (Routes 7 + 8 ritual flow) → canonical (visible output preserved)
+#### Table 4a — `REFLECTION_PROMPT` daily-reflection ritual surface → canonical (visible output preserved)
 
 The morning check-in and evening reflection rituals on the private-mentor page. Practitioner submits `what_happened` (and optionally `how_i_responded`); response appears as a formatted message in the conversation surface (`**proximity** — sage_perspective`, italicised `evening_prompt`).
-
-**Dual applicability (D24 §"Coverage gaps in D2 mapping tables" item 5).** Table 4a's mapping serves both `/api/reflect` (Route 7 — public sister of the founder-only ritual surface) and `/api/mentor/private/reflect`'s ritual flow (Route 8 first flow — the founder-only daily-reflection ritual). Both routes project through Table 4a; per D24 §"Phase-1 session 2 implication" the dual applicability is now made explicit at the table heading. The differences between Routes 7 and 8 are upstream (Route 7 is anonymous-or-authenticated; Route 8 is founder-only with rich Layer 2 context) and downstream (visible-bubble rendering details), not at the canonical projection itself.
 
 | `REFLECTION_PROMPT` field | Canonical mechanism(s) / source | Status under alt-3 (Option 1) |
 |---|---|---|
@@ -234,20 +202,6 @@ This Option 1 scoping correction does not relax the philosophical commitment beh
 | `publish_recommendation` (`publish` / `revise` / `reconsider`) | downstream classification rule on top of mechanism 10 | Application-specific classification. Lives in the score-social projection, not in the canonical framework. The mapping is `principled` / `sage_like` → `publish`; `deliberate` → `revise`; `habitual` / `reflexive` → `reconsider`. |
 
 The compact variants are honest projections. The fields that add information beyond the canonical framework (`kathekon_quality`, `publish_recommendation`) are application-specific downstream classifications, not new canonical content. They live in their respective endpoint projections.
-
-### Table 6 — `/api/score-document` policy-mode-specific shape → canonical
-
-`/api/score-document` runs in two modes: standard mode (treats the document as a generic artefact for evaluation) and policy mode (treats the document as a policy text with institutional / clause-level structure). Standard mode projects through Table 1 + Table 5's compact-V3 conventions; policy mode produces three additional fields not represented elsewhere in D2 (D24 §"Coverage gaps in D2 mapping tables" item 3).
-
-| Existing field (policy mode) | Canonical mechanism(s) | Notes |
-|---|---|---|
-| `deliberation_assessment` | composite read across mechanisms 7 + 9 with policy-text scoping | Cicero's 5 deliberation questions (mechanism 7) applied to the policy's deliberative quality, plus a virtue-domain read (mechanism 9) on whether the policy text expresses phronesis / dikaiosyne / andreia / sophrosyne. Layer 3 projection scoped to the policy domain. |
-| `oikeiosis_impact` | mechanisms 6 + 7 projection scoped to affected circles | Maps the policy's circles-of-impact (which oikeiosis circles the policy affects) and the obligation status it implies for each. Distinct from the practitioner's own oikeiosis classification (which is what Tables 1, 1a, 2 cover); here, the *policy's* operative circle is the subject. |
-| `flagged_clauses[]` | per-clause structured projection | Each clause is itself a mini-evaluation with its own canonical-mechanism shape (typically a Table 1-shape evaluation scoped to the clause's text). The array is a structured-per-passage projection — the canonical framework would need to support per-clause evaluations as nested per-instance objects, not as a flat output. Layer 3 projection convention: each `flagged_clauses[]` entry carries the canonical mechanism outputs for the clause plus the surface-specific framing fields. |
-
-The policy-mode shape is the most complex of the score-family per-route projections because it introduces **per-clause nested canonical evaluations** alongside the document-level evaluation. Phase 3+ migration of `/api/score-document` policy mode requires the engine to support nested invocations — one document-level evaluation plus N clause-level evaluations, with the surface aggregating into the `flagged_clauses[]` structure. The standard-mode path (which uses the engine flat) is unchanged.
-
-This table extends the canonical framework's coverage to surface-specific structured per-passage projections without introducing a new canonical mechanism. The policy-mode-specific fields live in the Layer 3 projection for `/api/score-document`'s policy mode; the canonical 9+1 mechanism set is unchanged.
 
 ## Cleanliness ratings per canonical mechanism
 
