@@ -3429,3 +3429,140 @@ Vercel post-deploy verification: founder confirmed green deployment status on ht
 **Status:** Adopted. Cross-references: Project Instructions Priority 2 §2c (the source priority — "Wire application-level encryption for intimate data — Connect encryption.ts to mentor profile storage pipeline" — now operative); D-ENCRYPTION-WIRING-ADR-ADOPTED-2026-05-02 (the ADR this session executes); ADR-ENCRYPTION-WIRING-01 §"Action Items" (the 12-step plan; Items 4–7 + 9 + 11 + 12 executed; Items 1–3 skipped per Option 1 path; Item 5 adapted; Items 8 + 10 deferred to Phase-2 pass-1 commencement); D-RAG-MENTOR-ALT3-PHASE1-COMPLETION-REVIEW-APPROVED-2026-05-02 (D21 migration plan; § Precondition 4 closed by this session); D-RAG-MENTOR-ALT3-PHASE1-SESSION2-DRAFTS-2026-05-02 (D14b — defines the schema this session implements); D-D2-AMENDMENT-2026-05-02 + D-VALIDATION-ADDENDUM-PROMOTED-2026-05-02 + D-API-REASON-PRE-ALT3-SNAPSHOT-2026-05-02 + D-REGISTRY-UPDATE-v1.5.0-2026-05-02 (predecessor session governance context). The new files: `/website/src/lib/encryption-helpers.ts`; `/website/src/lib/__tests__/encryption-helpers.test.ts`; `/operations/migrations/2026-05-03-encryption-wiring-schema.sql`. Production Supabase: 2 new tables, 4 new indexes, 2 new RLS policies. **Phase-2 pass-1 readiness inventory after this entry: ALL preconditions complete.** The encryption-wiring IMPLEMENTATION (the only remaining work before Phase-2 pass 1 per the predecessor close) has now landed. Phase-2 pass 1 commencement awaits founder direction at next-next session per Candidate G in the predecessor session-close.
 
 ---
+
+## 2026-05-03 — D-PHASE-2-PASS-1-SCOPE-BLOCK-AND-REPLAN
+
+**Decision:** Pause Phase-2 pass-1 commencement at the entry gate (before any code work). Re-plan Phase-2 pass-1 as a **dependency-respecting sequence of bounded sub-sessions** rather than a single Critical session. The single-session scope assumed by the predecessor next-session prompt (`2026-05-03-post-encryption-wiring-NEXT-SESSION-PROMPT.md`) is materially wrong: Step 7 ("Implement engine integration") was sized at 30 minutes "stitching pre-existing modules"; Part A reads of the codebase confirmed no such modules exist. The alt-3 deterministic engine — Layer 1 translator (D10), 10 deterministic rules (D8), 12-position sequencer with two-pass + back-edge logic (D9), trigger-code dispatch (D13), Layer 3 NULL projection (D11 Table 4b minimum) — is fully **Designed** but not **Scaffolded** in code. The new route at `/api/mentor/private/deferral-resolve` cannot meaningfully exist without an engine to call; D14b §"Founder-performable verification protocol" Verifications 2, 3, 4, 6, 7, 8 cannot be tested without the engine producing OPEN_DEFERRAL flags upstream.
+
+The new build order, founder-approved at this session via AskUserQuestion (Path "Pause and replan, check for previous build order, review against current status, propose new order"):
+
+| Sub-session | Substance | Risk | Estimate |
+|---|---|---|---|
+| **A** | `corpus_passages` schema migration (D5) — pgvector + tsvector + RLS + 6 indexes | Standard | 1–2 h |
+| **B** | Index population script + D-A16 catalogue insertion (20 stems) | Standard | 2–4 h |
+| **C** | Retrieval interface (D6) + re-ranker (D7) | Standard | 4–8 h |
+| **D** | Layer 1 translator (D10) — Sonnet wiring + structured-output validation | Standard | 3–5 h |
+| **E1–E4** | 10 deterministic rules (D8) + 12-position sequencer (D9) + trigger dispatch (D13) | Standard per piece | 4 × 4–10 h |
+| **F** | Layer 3 NULL projection (D11 Table 4b only — minimal for D14b) | Standard | 2–3 h |
+| **G** | New route + page + R20a ninth-route addition (Steps 5/6/8) — pre-deploy | Standard | 4–6 h |
+| **H** | env flag flip + 8 founder verifications (Steps 10/12) | **Critical** | 1–3 h |
+
+Total realistic effort: ~35–65 hours across ~10–12 sub-sessions. Each sub-session is bounded, founder-verifiable between sessions per 0c, and respects PR1 (single-endpoint proof on each substrate piece before integration). The Critical Change Protocol applies at Sub-session H only — Sub-sessions A–G are Standard risk by themselves.
+
+**Founder-approved next session: Sub-session A (`corpus_passages` schema migration).** Smallest, lowest-risk starting point. Standard risk per 0d-ii. Pattern matches the predecessor encryption-wiring session: pgvector + tsvector schema applied via Supabase SQL Editor; founder verifies via 4 SQL queries; no code deploy this session. The next-session prompt at `/operations/handoffs/founder/2026-05-03-corpus-passages-schema-NEXT-SESSION-PROMPT.md` carries the full opening protocol.
+
+**Reasoning:** Three forces converged at this session:
+
+1. **The predecessor next-session prompt was scope-blocked at Step 7.** "Engine integration — 30 minutes mostly stitching pre-existing modules" was the load-bearing claim. Searches against the codebase (`grep -rilE 'mechanism_1|mechanism_5|mechanism_10|prohairesis_filter|passion_root_detection|virtue_domain_engaged|ELEMENT_FUSION|EUPATHEIA_BOUNDARY|REFLECTION_NARRATIVE_THIN|layer_1_output|layer_3' lib/ app/`) returned zero matches in active code paths. The only file referencing these terms in `/website/src/` is the D14b-encryption helpers JSDoc (introductory commentary; no implementation). The existing `sage-reason-engine.ts` (612 lines) implements the **V3 LLM-end-to-end engine** — not the alt-3 deterministic engine.
+
+2. **D21 sequenced steps without separating engine substrate from route build.** D21's "Phase-2 Pass 1 build steps" lists 11 steps (Schema → Encryption → Index population → D-A16 catalogue → Route → Page → Engine integration → R20a → Verifier → env flag → CCP). The implicit assumption is that "Engine integration" is a stitching step. It is not — it is the bulk of the work, distributed across Layer 1 + 10 rules + sequencer + trigger dispatch + Layer 3 minimum. D21's sequencing is structurally correct (the ordering of pieces) but operationally wrong (the time + risk allocation per piece).
+
+3. **Founder honoured PR1 + the founder's stated working pace.** Per the founder's project preferences ("I work in fast, bounded phases"; "I verify your work between sessions, not in real time"; "Risk and Side Effects — explain the specific risk in plain language and get my approval"), pushing through Step 7 with stub-implementations or rushed engine code would violate both the working pace and the verification rhythm. The founder's selection at the AskUserQuestion gate ("Pause and replan, check for previous build order, review against current status, propose new order") confirms the principled path. PR1 (single-endpoint proof before surface rollout) is preserved at a deeper level: each substrate piece (Sub-sessions A–F) reaches Verified status before the integration session (G) attempts the route + page; Sub-session G itself reaches Verified before the Critical activation session (H) flips the env flag.
+
+**Honest disclosure:** the scope-block could have been surfaced earlier. The encryption-wiring ADR-Adopted session (2026-05-02) and the encryption-wiring implementation session (2026-05-03) both treated Phase-2 pass-1 commencement as the next-next-session candidate without auditing whether the engine substrate existed. Neither session was scope-broken at its own scope (both delivered what they promised — the ADR + the helpers + the schema + Vercel green) but the cumulative narrative implied pass-1 was a single session away. The corrective action is this entry + the new sub-session sequence; the lesson is that "Designed" status (per 0a) is not "Scaffolded" status, and a build prompt that names a build step assumes the substrate is at least Scaffolded.
+
+**Files touched (this session — paperwork only; no code touched; no live-system effect):**
+
+- `operations/decision-log.md` — this entry appended.
+- `operations/handoffs/founder/2026-05-03-phase-2-pass-1-scope-block-and-replan-close.md` — session close (this session's central artefact).
+- `operations/handoffs/founder/2026-05-03-corpus-passages-schema-NEXT-SESSION-PROMPT.md` — Sub-session A opening prompt.
+
+**Pre-edit backups:** none required (decision-log is append-only; the two new handoff files are new).
+
+**Risk classification:** Standard under 0d-ii. Documentation-only entry. No code touched; no schema migrations; no auth/encryption/session/redirect surface engaged; no live-system effect. AC7 not engaged. PR6 not engaged (no safety-critical surface touched). Critical Change Protocol not engaged.
+
+**Rollback path:** if the new sub-session sequence needs revision, append `D-PHASE-2-PASS-1-SCOPE-BLOCK-AND-REPLAN-SUPERSEDED` entry naming the revised sequence. The decision-log is append-only; supersession is via subsequent entry per amendment-supersession discipline. The two new handoff files can be moved to `/archive/` if superseded.
+
+**Verification step (founder-performable):**
+
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -A 1 "D-PHASE-2-PASS-1-SCOPE-BLOCK-AND-REPLAN" operations/decision-log.md | head -3
+ls -la operations/handoffs/founder/2026-05-03-phase-2-pass-1-scope-block-and-replan-close.md
+ls -la operations/handoffs/founder/2026-05-03-corpus-passages-schema-NEXT-SESSION-PROMPT.md
+wc -l operations/decision-log.md
+```
+
+Expected: grep returns this entry's headline; both new files exist; line count is 3431 + delta from this entry (~80–100 lines added).
+
+**Open questions / what was deferred:**
+
+1. **Engine substrate test strategy.** Each sub-session E1–E4 lands a piece of the engine. Do we (a) write Jest tests per rule per session and rely on those, or (b) defer all rule-level tests until a single end-to-end test session before Sub-session G? Recommendation: (a) — per-piece tests honour PR1's intent. Logged for Sub-session E1 commencement.
+2. **Layer 1 LLM cost in development.** D20 (cost model) projects per-call costs; the engine substrate's iterative test cycles across Sub-sessions D–E4 will accumulate test-call costs. Founder may prefer a fixture-based dev path (canonical test inputs with golden Layer 1 outputs cached) over hitting Sonnet on each test cycle. Logged for Sub-session D commencement.
+3. **Whether Sub-session G's route + page work merits one session or two.** The 15-step server-side workflow + the page-side state model + the R20a addition + AC4 invocation test may exceed a single bounded session. Logged for re-assessment at Sub-session F close.
+4. **Whether D14a (Phase-2 pass 2 — ritual surface) shares any of the new sub-session sequence.** D14a's engine substitution (Pass 2) reuses the same Layer 1 + engine + Layer 3 substrate, with Layer 3 producing the Table 4a projection (visible prose) rather than the Table 4b NULL projection. So Sub-sessions A–F serve both passes; Sub-session F could be expanded to cover Layer 3 Table 4a alongside Table 4b in one session. Recommendation: defer this expansion call to Sub-session F commencement so we measure F's actual scope before committing. Logged.
+5. **D18 verifier wiring** (Sub-session G's Step 9 in D21). D18 specifies narrative-trace + score-consistency verification on D22 canonical test inputs. CI wiring is Standard risk; can land alongside Sub-session G or as a sibling Standard session post-G. Logged.
+6. **Component-registry update for the `encryption-helpers.ts` follow-up** (still open from the predecessor session) — bundle into the next registry update post-Sub-session A or B. Logged.
+
+**Rules served:** R0 (oikeiosis audit trail — the re-plan is itself an oikeiosis act of honesty about Circle 1 capacity vs the work's true shape; pushing a stub-implementation to Circle 3 would have been mis-aligned action); 0a (status vocabulary preserved — "Designed" status names the engine substrate's true state; "Scaffolded" / "Wired" / "Verified" / "Live" remain ahead per the sub-session sequence; no implementation status was misrepresented); 0b (session continuity — predecessor handoff read at open; this entry concurrent with the re-plan; session-close artefact follows); 0c (verification framework — founder-performable verification specifications named for the entry itself; per-sub-session verification specifications carried in the next-session prompts); 0d-ii (Standard classification justified above; no code touched; no live-system effect); 0e (file organisation — decision-log appended; handoff files at `/operations/handoffs/founder/`); 0f (decision-log entry concurrent with the decision); **PR1 (single-endpoint proof — preserved + strengthened by the new sub-session sequence; each substrate piece reaches Verified before the integration session attempts the route);** PR2 (verification immediate — not engaged this session; no wiring landed); PR4 (model selection — N/A this session; no LLM calls); **PR5 (knowledge-gap carry-forward — the "Designed ≠ Scaffolded" lesson is logged here as a candidate for KG promotion if it recurs; observation only at first recurrence per PR8);** **PR6 (safety-critical changes always Critical — preserved at the future Sub-session H level; the Critical Change Protocol applies at H only, and the new sub-session sequence ensures the Critical surface is reached only when the substrate is Verified);** **PR7 (decisions not made are documented — six open questions logged with revisit conditions);** PR8 (third-recurrence promotion — N/A first recurrence of "Designed ≠ Scaffolded" mismatch); PR9 (stewardship findings — the scope-block finding is upper-Long-term-regression tier per PR9 because it could have been caught at the encryption-wiring ADR session if a substrate audit had been part of that session's scope; absorbed into ongoing steady-state work — future ADR adoptions should include a substrate-existence audit when the ADR's downstream session prompt names "stitching pre-existing modules" or equivalent claims).
+
+**Status:** Adopted. Cross-references: `D-ENCRYPTION-WIRING-IMPLEMENTED-2026-05-03` (the predecessor session — encryption + schema landed; pass-1 commencement was the named next-next session); `D-RAG-MENTOR-ALT3-PHASE1-COMPLETION-REVIEW-APPROVED-2026-05-02` (D21 migration plan adopted; the sequencing artefact this re-plan extends); `D-RAG-MENTOR-ALT3-PHASE1-SESSION2-DRAFTS-2026-05-02` + `D-RAG-MENTOR-ALT3-PHASE1-SESSION3-DRAFTS-2026-05-02` (the 22 deliverables that constitute the alt-3 design — none of which are scaffolded in code apart from the encryption helpers + schema); `D-A16-CATALOGUE-ASSEMBLED-AND-ADOPTED-2026-05-02` (the 20-stem catalogue that Sub-session B inserts into `corpus_passages`); `D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29` (the foundational AC-19 reflect-endpoint-first build-order commitment, preserved by this re-plan: the new sequence still arrives at the deferral-resolution surface as Phase-2 pass-1's load-bearing deliverable; the change is the granularity of the build, not the destination). The new files: `/operations/handoffs/founder/2026-05-03-phase-2-pass-1-scope-block-and-replan-close.md`; `/operations/handoffs/founder/2026-05-03-corpus-passages-schema-NEXT-SESSION-PROMPT.md`. **Phase-2 pass-1 readiness inventory after this entry: substrate not yet scaffolded; sub-session sequence A–H named; Sub-session A is the next session.** The re-plan is the operative architectural commitment for Phase-2 pass-1's actual build — D21's 11-step sequence is preserved as the canonical "pieces in order" reference; this entry's 8-sub-session sequence is the canonical "pieces in dependency order with bounded sessions" reference.
+
+---
+
+## 2026-05-03 — D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT
+
+**Decision:** Refine the Phase-2 pass-1 build sequence (per `D-PHASE-2-PASS-1-SCOPE-BLOCK-AND-REPLAN-2026-05-03`) with three efficiency moves, founder-approved this session via AskUserQuestion. The moves: (1) **Standing Protocol Cache** — new document at `/adopted/standing-protocol-cache.md` replaces full re-reads of manifest + session-opening-protocol + knowledge-gaps register at every session open with a one-stop reference. Full re-reads only when work specifically requires. (2) **Lean Standard-risk templates** — for Sub-sessions A–G, the decision-log entry shrinks to ~20-30 lines, the session close shrinks to ~40-60 lines, the next-session prompt shrinks to ~70-120 lines. Sub-session H (Critical) keeps the full templates per the existing protocol. (3) **Sub-session A + B combined** — schema migration + index population + D-A16 catalogue insertion in a single ~3-4 hour session. Founder rejected (4) pattern-precedent shorthand at the same gate; the lean templates already absorb most of (4)'s benefits.
+
+The amended Phase-2 pass-1 sub-session sequence:
+
+| Sub-session | Substance | Risk | Estimate |
+|---|---|---|---|
+| **A+B (combined)** | `corpus_passages` schema (D5) + index population (stoic-brain.ts → corpus_passages) + D-A16 catalogue insertion (20 stems) | Standard | 3–4 h |
+| **C** | Retrieval interface (D6) + re-ranker (D7) | Standard | 4–8 h |
+| **D** | Layer 1 translator (D10) — Sonnet wiring + structured-output validation | Standard | 3–5 h |
+| **E1–E4** | 10 deterministic rules (D8) + 12-position sequencer (D9) + trigger dispatch (D13) | Standard per piece | 4 × 4–10 h |
+| **F** | Layer 3 NULL projection (D11 Table 4b only) | Standard | 2–3 h |
+| **G** | New route + page + R20a ninth-route addition | Standard | 4–6 h |
+| **H** | env flag flip + 8 founder verifications | **Critical** | 1–3 h |
+
+Total realistic effort post-refinement: ~30–55 hours across ~9–11 sub-sessions (down from 35–65 hours / 10–12 sub-sessions per the prior re-plan). The savings come from collapsing A+B + the lean-templates overhead reduction (~60–90 min saved per Sub-session C–G). Sub-session H's Critical full-form discipline is preserved.
+
+**Reasoning:** The prior re-plan (`D-PHASE-2-PASS-1-SCOPE-BLOCK-AND-REPLAN`) named the dependency-respecting sequence but did not address the per-session overhead. Founder calculated that protocol re-reads + full-form decision-log entries + full-form closes + full-form next-session prompts consume ~1.5–2.5 hours of overhead per sub-session against a working budget of 1–4 hours. For Sub-sessions A and B specifically, overhead would exceed substantive work. The three approved moves recover that overhead without compromising the audit trail or the Critical-risk discipline:
+
+- **Move 1 (Standing Protocol Cache).** Per the session-opening protocol's own design (Element 2 — "Read the tier's sources in the order listed"), the canonical-sources file already abstracts the read sequence. The cache extends the same logic: it abstracts the standing answers (manifest rules per category; model selection table; signals; risk classification defaults; lean templates). Sessions read the cache (~3 min) instead of the manifest + protocol + knowledge-gaps in full (~25–40 min). When governance changes, the cache updates in the same session as the governance change (Standard risk amendment; cache-drift entries logged via `D-CACHE-DRIFT-RESOLVED-…`).
+
+- **Move 2 (Lean Standard-risk templates).** The full templates were designed for Critical-risk sessions where every section has audit value. For Standard-risk schema migrations, registry updates, and decision-log governance work, several sections (Orchestration Reminder; expanded Risk Classification Record; "Where We Are in P0" extended block; exhaustive cross-reference list) have low marginal audit value because the corresponding work surface is itself lean. The lean templates preserve the load-bearing fields (Verification Step, Files Touched, Risk Classification, Status, Founder Verification with commit commands) and drop the boilerplate. The Critical full form remains for Sub-session H (env flag flip — the load-bearing activation step) and for any future Critical work.
+
+- **Move 3 (Combine A + B).** Schema + index population + D-A16 insertion is structurally one piece of work — schema declares columns; population fills them. Splitting into two sessions adds an entire close + prompt + open cycle for no architectural benefit. The combined session reaches Verified status via 4 SQL queries (schema verification, same as predecessor encryption-wiring shape) plus a corpus_passages row count + spot-check on D-A16 stem rows.
+
+The trade-offs are honestly named:
+
+- **Cache drift risk.** Mitigation: the cache document includes its own update discipline section (in-session amendment when governance changes; `D-CACHE-DRIFT-RESOLVED-…` entries for tracking). The cache header also explicitly states "the governance documents are authoritative; the cache is a reference convenience, not a substitute."
+- **Trail thinning at lean-form entries.** Mitigation: lean form preserves the load-bearing audit fields. The boilerplate that's dropped (Orchestration Reminder, expanded Risk Classification Record, etc.) is itself derivable from the cache's standing answers — re-deriving from the cache at audit time produces the same content the boilerplate carried.
+- **Combined-session risk for A + B.** The combined session is larger (~3–4 hours) than either piece alone. If founder needs to pause mid-session, the schema apply + verification can land in one bounded segment, and the index population can resume at next session.
+
+**Files touched (this session — paperwork-only refinement; no code touched; no live-system effect):**
+
+- `/adopted/standing-protocol-cache.md` — new file (~250 lines). The operative session-opening reference for `governance` / `schema` / `code-standard` / `registry` / `archive` categories.
+- `/operations/decision-log.md` — this entry appended.
+- `/operations/handoffs/founder/2026-05-03-phase-2-pass-1-scope-block-and-replan-close.md` — updated in place with the refinement (additional artefact list, amended next-session pointer, updated commit instructions).
+- `/operations/handoffs/founder/2026-05-03-corpus-passages-schema-NEXT-SESSION-PROMPT.md` — replaced with the lean A+B combined form (~120 lines instead of ~400+).
+
+**Risk classification:** Standard under 0d-ii. Documentation-only refinement. No code touched; no schema migrations; no auth/encryption/session/redirect surface engaged; no live-system effect. AC7 not engaged. PR6 not engaged. Critical Change Protocol explicitly NOT engaged.
+
+**Rollback path:** if the cache or lean templates prove insufficient at first use (Sub-session A+B), append `D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT-SUPERSEDED` entry naming what reverted. The cache document can be moved to `/archive/` and the original full templates restored to use. The Sub-session A+B combination can be re-split if the combined session proves unwieldy in practice.
+
+**Verification step (founder-performable):**
+
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+ls -la adopted/standing-protocol-cache.md
+grep -A 1 "D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT" operations/decision-log.md | head -3
+wc -l operations/decision-log.md
+head -30 operations/handoffs/founder/2026-05-03-corpus-passages-schema-NEXT-SESSION-PROMPT.md
+```
+
+Expected: cache file exists at the path; grep returns the entry headline; line count returns 3501 + delta (~80 lines from this entry); the lean prompt's first 30 lines fit in the screen comfortably and are visibly shorter than the prior version.
+
+**Open questions:**
+
+1. **Whether the cache also covers Critical-risk sessions.** This refinement explicitly preserves full templates for Critical (Sub-session H + future Critical work). If the cache proves so useful that it accelerates Critical sessions too, the cache scope can extend in a future amendment. Logged for re-assessment after Sub-session A+B verifies the cache's first use.
+2. **Whether Sub-sessions C–G should also combine adjacent pairs.** A+B combination was structurally clean. C (retrieval + re-ranker) is already two deliverables in one session. D (Layer 1) might combine with F (Layer 3 NULL projection — minimal). Logged for re-assessment as evidence accumulates.
+3. **D14a Pass 2 substrate-sharing.** Per the prior re-plan's open question 4 — Sub-sessions A–F serve both Pass 1 and Pass 2. Sub-session F could expand to cover Layer 3 Table 4a (ritual surface) alongside Table 4b (deferral surface). Logged for Sub-session F commencement.
+
+**Rules served:** R0 (oikeiosis audit trail — the refinement honours Circle 1 capacity by recovering working time without compromising audit fidelity to Circle 3); 0a (status vocabulary — implementation status `Adopted` for the cache document; decision status `Adopted` for this entry; kept separate); 0b (session continuity — cache becomes the operative session-opening reference; full re-reads remain available when needed); 0c (verification framework — founder-performable verification specifications named); 0d-ii (Standard classification justified above); 0e (file organisation — cache at `/adopted/`); 0f (decision-log entry concurrent with the refinement); **PR1 (single-endpoint proof — preserved; the cache is itself proven on the first session that uses it: Sub-session A+B; if the cache proves insufficient there, supersession entry follows);** PR4 (model selection — cache codifies the AC1 model selection table for future quick reference); PR5 (knowledge-gap carry-forward — cache codifies KG1–KG7 engagement criteria per work category); PR6 (safety-critical changes always Critical — preserved; the cache explicitly carves out the full templates for Critical work); PR7 (decisions not made are documented — three open questions logged with revisit conditions); PR8 (third-recurrence promotion — N/A first refinement); PR9 (stewardship findings — the per-session overhead observation tiered as upper-Efficiency-and-stewardship per PR9; absorbed into the cache + lean templates).
+
+**Status:** Adopted. Cross-references: `D-PHASE-2-PASS-1-SCOPE-BLOCK-AND-REPLAN-2026-05-03` (the parent re-plan this entry refines); `D-ENCRYPTION-WIRING-IMPLEMENTED-2026-05-03` (the predecessor session whose full-form templates this entry honours as the Critical-risk template precedent); D17 (the original session-opening-protocol adoption, 2026-04-24, which the cache supplements but does not replace); manifest §"Architectural Constraints" (AC1–AC7 — codified in the cache's model-selection + risk-classification tables); manifest §"Knowledge Gaps Register" (KG1–KG7 — codified in the cache's KG-engagement-criteria table); project instructions §0a + §0c-ii + §0d-ii (codified in the cache's status-vocabulary + Critical-Change-Protocol pointer + risk-classification sections). The new file: `/adopted/standing-protocol-cache.md`. **Phase-2 pass-1 readiness inventory after this entry: substrate not yet Scaffolded; Sub-session A+B combined is the next session, governed by the lean templates + cache.**
+
+---
