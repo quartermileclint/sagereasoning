@@ -1,6 +1,6 @@
 # Alt-3 Architectural Conventions Catalogue
 
-**Status:** Drafted (under founder review). Awaiting approval-pathway call (Path A — adopt this session vs Path B — adopt at separate session). On approval, moves to `/adopted/rag-mentor-alt3/architectural-conventions.md`.
+**Status:** Adopted (founder approval per Path A on 2026-05-02; D-VALIDATION-ADDENDUM-PROMOTED-2026-05-02). Moved from `/drafts/rag-mentor-alt3/` to `/adopted/rag-mentor-alt3/` 2026-05-02. Promoted from D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29 (Validation Addendum) under PR8 third-recurrence promotion.
 **Date:** 2026-05-02.
 **Stream:** founder.
 **Governing frame:** `/adopted/session-opening-protocol.md`.
