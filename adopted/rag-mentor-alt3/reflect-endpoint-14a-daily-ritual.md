@@ -1,7 +1,7 @@
 # Deliverable 14a — Daily-Reflection Ritual Endpoint Design
 
-**Status:** Drafted (under founder review).
-**Date:** 2026-05-02.
+**Status:** Adopted (founder approval per Path A on 2026-05-02 — Phase-1 completion review; D-RAG-MENTOR-ALT3-PHASE1-COMPLETION-REVIEW-APPROVED-2026-05-02). Founder direction calls captured in §"Founder direction — resolved 2026-05-02" below. Moved from `/drafts/rag-mentor-alt3/` to `/adopted/rag-mentor-alt3/` 2026-05-02.
+**Date:** 2026-05-02 (drafted); 2026-05-02 (adopted with founder direction resolved).
 **Stream:** founder.
 **Governing frame:** `/adopted/session-opening-protocol.md`.
 **Implements:** AC-12 (translation-sandwich — the daily-reflection ritual surface adopts the engine substitution); AC-13 (three-tier intake clarification — REFLECTION_NARRATIVE_THIN / RESPONSE_FIELD_INCONSISTENCY surface-level Tier 1 triggers); D2 Table 4a (Option 1 scoping — visible output preserved on the ritual surface); R3 (disclaimer); R7 (source fidelity); R8c (user-facing English); R20a (vulnerable user detection — perimeter route, AC5); R20d (relationship asymmetry — guidance in mentor prompts).
@@ -438,11 +438,23 @@ The R20a perimeter conformance is **HIGH cleanliness** — preserved.
 
 The Phase-2 build readiness is **PARTIAL** — the engine substitution is verifiable post-build via the founder verification protocol, but Phase-2 build is itself the Critical-risk implementation.
 
-## Open questions (founder direction)
+## Founder direction — resolved 2026-05-02
 
-1. **Surface design — own page or embedded view?** (Recommendation: own page.)
-2. **`mentor_observation` visibility — visible, hidden, opt-in?** (Recommendation: visible.)
-3. **Naming — `evening_prompt` vs `reflective_prompt`?** (Recommendation: keep schema name; user-facing label is "A question to sit with".)
+The three founder direction questions for this deliverable were called at the Phase-1 completion review session on 2026-05-02 (per `D-RAG-MENTOR-ALT3-PHASE1-COMPLETION-REVIEW-APPROVED-2026-05-02`):
+
+1. **Surface design — own page (Recommended) — confirmed.** The daily-reflection ritual moves to its own page. The specific page route name (between recommendations `/private-mentor/ritual` and `/daily-reflection`, or another) is settled at Phase-2 build time per this deliverable's "Surface design — own page vs embedded view" section.
+
+2. **`mentor_observation` visibility — Visible (Recommended) — confirmed.** The structured_observation surfaces as a visible field on the ritual response per this deliverable's "Visible output specification" §"Founder direction needed — `mentor_observation` visibility". The Layer 3 projection adds the `mentor_observation` field per the table.
+
+3. **Naming `evening_prompt` vs `reflective_prompt` — recommendation accepted.** Schema field name `evening_prompt` retained for back-compat; user-facing label is "A question to sit with" per R8c. (This was a recommendation in this deliverable, not a deferred founder direction question; folded here for completeness.)
+
+The above resolutions hold for Phase-2 pass 2 (D14a engine substitution) per D21's migration plan. Further refinements (e.g., the specific own-page route name) land at Phase-2 build time as Standard-risk operational decisions.
+
+## Open questions (resolved)
+
+1. **Surface design — own page or embedded view?** Resolved 2026-05-02 → own page.
+2. **`mentor_observation` visibility — visible, hidden, opt-in?** Resolved 2026-05-02 → visible.
+3. **Naming — `evening_prompt` vs `reflective_prompt`?** Recommendation accepted — keep schema name; user-facing label is "A question to sit with".
 
 ## Approval gate
 

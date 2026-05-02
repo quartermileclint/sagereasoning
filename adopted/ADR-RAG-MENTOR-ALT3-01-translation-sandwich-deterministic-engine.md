@@ -1,6 +1,6 @@
 # ADR-RAG-MENTOR-ALT3-01 — Translation-Sandwich + Deterministic Engine + Three-Tier Clarification + Reflect-Endpoint-First Build Order
 
-**Status:** Drafted — under founder review.
+**Status:** Adopted (founder approval per Path A on 2026-05-02 — Phase-1 completion review; D-RAG-MENTOR-ALT3-PHASE1-COMPLETION-REVIEW-APPROVED-2026-05-02). Moved from `/drafts/` to `/adopted/` 2026-05-02.
 **Date:** 2026-05-02.
 **Stream:** founder.
 **Governing frame:** `/adopted/session-opening-protocol.md`.

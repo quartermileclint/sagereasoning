@@ -2875,3 +2875,101 @@ The deliverables collectively specify:
 **Status:** Drafted — under founder review. Cross-references: D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29 (the architecture); D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29 (the Validation Addendum honoured); D-RAG-MENTOR-ALT3-PHASE1-DRAFTS-2026-05-01 (Phase-1 session 1's critical path); D-RAG-MENTOR-ALT3-PHASE1-AUDIT-2026-05-01 (D24 source); D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 (the predecessor approval); D-RAG-MENTOR-ALT3-PHASE1-SESSION2-DRAFTS-2026-05-02 (the eight session-2 deliverables this session builds on); D-RAG-MENTOR-ALT3-CRITICAL-PATH-MOVED-TO-ADOPTED-2026-05-02 (the move that made D2/D3/D8 available at /adopted/); D-MENTOR-PRIVATE-REFLECT-PRE-ALT3-SNAPSHOT-2026-05-02 (the snapshot referenced by D21); the 13 new deliverable files; the session-3 close.
 
 ---
+
+## 2026-05-02 — D-RAG-MENTOR-ALT3-PHASE1-COMPLETION-REVIEW-APPROVED: Phase-1 Design Batch Approved (Path A) + Three Founder Direction Calls Resolved + 22 Deliverables Moved to `/adopted/`
+
+**Decision:** Approve the Phase-1 alt-3 design batch as drafted (Path A), record the three founder direction calls deferred from D14a / D14b, and move the remaining 22 Phase-1 deliverables (13 session-3 + 8 session-2 + D24 audit + D1 ADR) from `/drafts/rag-mentor-alt3/` (and `/drafts/` for the ADR) to `/adopted/rag-mentor-alt3/` (and `/adopted/` for the ADR). Phase-1 design is now fully Adopted at 25 of 25 deliverables (D2 / D3 / D8 already in `/adopted/rag-mentor-alt3/` per D-RAG-MENTOR-ALT3-CRITICAL-PATH-MOVED-TO-ADOPTED-2026-05-02; the remaining 22 moved by this entry).
+
+**Founder direction calls (resolved at this session, recorded in D14a / D14b before the move):**
+
+1. **D14a — daily-reflection ritual surface design:** **own page** (Recommended) confirmed. The specific page route name (between recommendations `/private-mentor/ritual` and `/daily-reflection`, or another) is settled at Phase-2 build time per D14a §"Surface design — own page vs embedded view".
+2. **D14a — `mentor_observation` visibility:** **Visible** (Recommended) confirmed. The structured_observation field surfaces as a visible field on the ritual response per D14a §"Visible output specification". Layer 3's Table 4a projection adds `mentor_observation` to the visible output fields.
+3. **D14b — route name + page name:** **`/api/mentor/private/deferral-resolve`** (Recommended) confirmed for the route name; **`/private-mentor/deferred-questions`** (Recommended) confirmed for the page route. Phase-2 pass 1 builds against these names per D21's migration plan.
+
+The three calls update D14a (open questions resolved; mentor_observation visibility resolved; founder direction section added) and D14b (open questions resolved; route name + page name confirmed; founder direction section added). The recommendations in those deliverables stand as drafted; no design content changed beyond the resolution status of the deferred questions.
+
+**Reasoning:** Per the Phase-1 completion review session prompt at `/operations/handoffs/founder/2026-05-02-rag-phase1-completion-review-NEXT-SESSION-PROMPT.md`, the session sequenced (1) founder direction calls per D23 §O2.1, O2.2, O2.3; (2) approval path selection (a/b/c/d); (3) batched move-to-`/adopted/` per the deliverables' approval-gate footers. Path A (approved as drafted) was selected; the recommendations on all three direction questions were accepted; the batched move was authorised under the Elevated-risk protocol with rollback path named.
+
+The decision adopts the full 25-deliverable Phase-1 design as the foundational architecture for SageReasoning. Phase 2 build commences against the design per D21's migration plan, beginning with Phase-2 pass 1 (D14b deferral-resolution surface — load-bearing per AC-19) at its own time under the Critical Change Protocol per PR6 + AC5 + R17.
+
+**Files moved (via `git mv` — preserves git history):**
+
+Session-3 deliverables (13 files):
+- `drafts/rag-mentor-alt3/index-schema.md` → `adopted/rag-mentor-alt3/index-schema.md` (D5).
+- `drafts/rag-mentor-alt3/retrieval-interface.md` → `adopted/rag-mentor-alt3/retrieval-interface.md` (D6).
+- `drafts/rag-mentor-alt3/re-rank-design.md` → `adopted/rag-mentor-alt3/re-rank-design.md` (D7).
+- `drafts/rag-mentor-alt3/strict-prompting.md` → `adopted/rag-mentor-alt3/strict-prompting.md` (D12).
+- `drafts/rag-mentor-alt3/score-in-reply.md` → `adopted/rag-mentor-alt3/score-in-reply.md` (D16).
+- `drafts/rag-mentor-alt3/progression-delta.md` → `adopted/rag-mentor-alt3/progression-delta.md` (D17).
+- `drafts/rag-mentor-alt3/verification.md` → `adopted/rag-mentor-alt3/verification.md` (D18).
+- `drafts/rag-mentor-alt3/residual-seams.md` → `adopted/rag-mentor-alt3/residual-seams.md` (D19).
+- `drafts/rag-mentor-alt3/cost-model.md` → `adopted/rag-mentor-alt3/cost-model.md` (D20).
+- `drafts/rag-mentor-alt3/migration-plan.md` → `adopted/rag-mentor-alt3/migration-plan.md` (D21 — load-bearing).
+- `drafts/rag-mentor-alt3/test-plan.md` → `adopted/rag-mentor-alt3/test-plan.md` (D22).
+- `drafts/rag-mentor-alt3/open-questions.md` → `adopted/rag-mentor-alt3/open-questions.md` (D23).
+- `drafts/ADR-RAG-MENTOR-ALT3-01-translation-sandwich-deterministic-engine.md` → `adopted/ADR-RAG-MENTOR-ALT3-01-translation-sandwich-deterministic-engine.md` (D1 ADR — placed at `/adopted/` root mirroring its `/drafts/` root location, per the ADR-as-top-level-architectural-document convention).
+
+Session-2 deliverables (8 files):
+- `drafts/rag-mentor-alt3/corpus-inventory.md` → `adopted/rag-mentor-alt3/corpus-inventory.md` (D4).
+- `drafts/rag-mentor-alt3/rule-dependency-map.md` → `adopted/rag-mentor-alt3/rule-dependency-map.md` (D9).
+- `drafts/rag-mentor-alt3/layer-1-translation.md` → `adopted/rag-mentor-alt3/layer-1-translation.md` (D10).
+- `drafts/rag-mentor-alt3/layer-3-translation.md` → `adopted/rag-mentor-alt3/layer-3-translation.md` (D11).
+- `drafts/rag-mentor-alt3/three-tier-intake.md` → `adopted/rag-mentor-alt3/three-tier-intake.md` (D13).
+- `drafts/rag-mentor-alt3/reflect-endpoint-14a-daily-ritual.md` → `adopted/rag-mentor-alt3/reflect-endpoint-14a-daily-ritual.md` (D14a — with founder direction calls captured).
+- `drafts/rag-mentor-alt3/reflect-endpoint-14b-deferral-resolution.md` → `adopted/rag-mentor-alt3/reflect-endpoint-14b-deferral-resolution.md` (D14b — with founder direction calls captured; Phase-2 pass-1 load-bearing).
+- `drafts/rag-mentor-alt3/long-deferred-questions.md` → `adopted/rag-mentor-alt3/long-deferred-questions.md` (D15).
+
+D24 audit (1 file):
+- `drafts/rag-mentor-alt3/consumer-workflow-audit.md` → `adopted/rag-mentor-alt3/consumer-workflow-audit.md` (D24 — reviewed; informs D11 / D13 / D14a / D14b refinements; identifies five D2 amendment coverage gaps).
+
+Total: 22 files moved. Plus the three already-moved critical-path deliverables (D2 / D3 / D8 — moved 2026-05-02 morning per D-RAG-MENTOR-ALT3-CRITICAL-PATH-MOVED-TO-ADOPTED-2026-05-02), the full 25-deliverable Phase-1 set is now in `/adopted/rag-mentor-alt3/` (24 files) and `/adopted/` (1 file — the ADR).
+
+**Header updates within moved files:**
+
+- All 22 moved files: Status line updated from "Drafted (under founder review)" (or for the ADR, "Drafted — under founder review") to "Adopted (founder approval per Path A on 2026-05-02 — Phase-1 completion review; D-RAG-MENTOR-ALT3-PHASE1-COMPLETION-REVIEW-APPROVED-2026-05-02). Moved from `/drafts/...` to `/adopted/...` 2026-05-02."
+- D14a additionally: "Founder direction — resolved 2026-05-02" section added; "Open questions" reframed as resolved or accepted.
+- D14b additionally: "Founder direction — resolved 2026-05-02" section added; "Open questions" reframed as resolved (Q1, Q2 — route + page names) or deferred to Phase-2 build operational decisions (Q3, Q4, Q5).
+
+**Cross-reference path updates within moved files:**
+
+Per fast-bounded session principle and per the prior D-RAG-MENTOR-ALT3-CRITICAL-PATH-MOVED-TO-ADOPTED-2026-05-02 precedent, **internal cross-references within the moved files (pointing at `/drafts/rag-mentor-alt3/<other-deliverable>.md` paths) are not updated in this housekeeping action.** They are stale-but-not-broken — the files are findable; the path tag is just out-of-date. Updating ~75–100 internal cross-references across 22 files would expand the move's scope substantially. The cleanup is logged as a follow-up housekeeping item below.
+
+**Risk classification:** Elevated under 0d-ii. The move is a structural change to governing-document locations affecting 22 files. Specifically:
+
+- **What could break:** internal cross-references within the moved files (and external references in the session-2 close, the session-3 close, the session-3 next-session prompt, the decision-log historical entries, the component registry) point to `/drafts/rag-mentor-alt3/` paths and become stale. Practitioners reading those documents and clicking through will get file-not-found errors. The files themselves are findable via filesystem search.
+- **What does not break:** the live website (no website file references the alt-3 deliverables); the engine implementation (Phase 2 hasn't built yet); auth / session / cookie behaviour (not touched); the database (not touched). AC7 not engaged. PR6 not engaged. Critical Change Protocol not engaged.
+- **Rollback path:** `git mv adopted/rag-mentor-alt3/<file> drafts/rag-mentor-alt3/<file>` (and `git mv adopted/<adr> drafts/<adr>` for the ADR) — 22 reverse moves. Plus `git revert` of this commit's header / direction-call edits. Reversible at any time before the next dependent action.
+- **Verification step (founder-performable):** `ls adopted/rag-mentor-alt3/` should show 24 files (3 critical-path + 21 newly moved). `ls drafts/rag-mentor-alt3/` should be empty. `ls adopted/ADR-*.md` should show the alt-3 ADR. Each moved file's first 10 lines should show "Status: Adopted" rather than "Status: Drafted." The D14a and D14b "Founder direction — resolved 2026-05-02" sections should be present.
+
+**Stale-reference cleanup follow-ups (logged for transparency, scheduled for separate sessions):**
+
+1. **Internal cross-references within the 22 moved files** — currently point at `/drafts/rag-mentor-alt3/<deliverable>.md`; will update at a separate cross-reference housekeeping pass (Standard risk — text-edit-only) or as part of natural next-touch work on each file.
+2. **Component registry update (v1.3.1 or v1.4.0)** — the registry's `path` fields for the 22 newly moved deliverables (and D24's already-noted entry from the prior move) become stale. Per the registry-update skill discipline, a focused registry-update session resolves. **Stream 7 of this session's prompt — recommended schedule: focused session.**
+3. **Session-2 close, session-3 close, session-3 next-session prompt, this session's next-session prompt** — these handoff documents reference the deliverables at `/drafts/` paths. Per protocol convention, historical handoff documents are not retroactively edited; readers resolve the path mentally or via filesystem search.
+4. **Decision-log historical entries** — D-RAG-MENTOR-ALT3-PHASE1-SESSION2-DRAFTS, D-RAG-MENTOR-ALT3-PHASE1-SESSION3-DRAFTS, etc. — reference the deliverables at `/drafts/` paths. These are append-only historical entries per 0f; not retroactively edited.
+
+**Streams 4–9 from the session prompt — scope decisions deferred to subsequent sessions or the founder's explicit call:**
+
+- **Stream 4 (D2 amendment for the 5 D24 coverage gaps).** Recommendation in prompt: focused D2 amendment session post-this-session (Elevated risk — D2 is in `/adopted/`; amendment requires re-approval).
+- **Stream 5 (D-A16 catalogue assembly process planning).** Recommendation in prompt: focused session before Phase-2 pass 1 commences. Required precondition for Phase-2 pass 1 per D21 / D14b.
+- **Stream 6 (`/api/reason` snapshot scheduling).** Recommendation in prompt: schedule before Phase-2 pass 3 commences. Standard risk (documentary).
+- **Stream 7 (component registry update).** Recommendation in prompt: focused registry-update session post-batched move.
+- **Stream 8 (Validation Addendum third-recurrence promotion per PR8).** Recommendation in prompt: separate alt-3 architectural-conventions catalogue under `/adopted/rag-mentor-alt3/`.
+- **Stream 9 (Phase-2 pass 1 commencement scheduling).** Recommendation in prompt: defer the scheduling discussion until D-A16 catalogue assembly + P2 task 2c encryption wiring land. Phase-2 pass 1 commences as its own Critical-risk session in its own right.
+
+These six streams are the founder's separate calls. The session close (forthcoming) names recommendations and the founder calls the next session's scope.
+
+**Files touched (this session, 2026-05-02 — design-only, no live-system effect):**
+
+- `adopted/rag-mentor-alt3/<22 deliverable files>` — moved + Status line updated; D14a / D14b additionally updated with "Founder direction — resolved 2026-05-02" sections.
+- `adopted/ADR-RAG-MENTOR-ALT3-01-translation-sandwich-deterministic-engine.md` — moved + Status line updated.
+- `operations/decision-log.md` — this entry appended.
+- `operations/handoffs/founder/2026-05-02-rag-phase1-completion-review-close.md` — new (the session close, produced concurrently with this entry).
+
+**Pre-edit backups:** none required (`git mv` preserves history; moved files' pre-edit content preserved in git history at commit `8b6d6d4` and earlier).
+
+**Rules served:** R0 (oikeiosis audit trail — Phase-1 design adoption recorded; the 25-deliverable design is now the foundational architecture); 0a (status vocabulary — moved files' implementation status `Adopted`; this entry's decision status `Adopted` per the 0a separation); 0c (verification framework — founder-performable verification step named above); 0d-ii (Elevated classification justified above; rollback path documented; founder approval explicit per the AskUserQuestion calls during the session); 0e (file organisation — `/adopted/rag-mentor-alt3/` subfolder mirrors the source grouping per the prior D-RAG-MENTOR-ALT3-CRITICAL-PATH-MOVED-TO-ADOPTED-2026-05-02 precedent); 0f (decision-log entry concurrent with the move); PR1 (single-endpoint proof preserved — the 22 moved files are governance documents; the move is internal to documentation and does not affect alt-3's single-endpoint architectural commitment); PR6 (safety-critical changes are Critical — Phase-2 pass 1's eventual build remains Critical at its own time); PR7 (decisions not made are documented — Streams 4–9 deferred with named follow-ups; D14b open questions Q3 / Q4 / Q5 deferred to Phase-2 build with named conditions; stale-reference cleanup logged with named follow-ups).
+
+**Status:** Adopted. Cross-references: D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 (the predecessor approval — D2 / D3 / D8); D-RAG-MENTOR-ALT3-CRITICAL-PATH-MOVED-TO-ADOPTED-2026-05-02 (the predecessor move — D2 / D3 / D8); D-RAG-MENTOR-ALT3-PHASE1-SESSION2-DRAFTS-2026-05-02 (the eight session-2 deliverables); D-RAG-MENTOR-ALT3-PHASE1-SESSION3-DRAFTS-2026-05-02 (the thirteen session-3 deliverables); D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29 (the Validation Addendum honoured); D-RAG-MENTOR-ALT3-PHASE1-AUDIT-2026-05-01 (D24 source); D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29 (the architecture); D-MENTOR-PRIVATE-REFLECT-PRE-ALT3-SNAPSHOT-2026-05-02 (the snapshot referenced by D21 — Phase-2 pass-2 verification reference); D-REGISTRY-UPDATE-v1.3.0-2026-05-02 (registry tracking the alt-3 governance artefacts; will be updated to add the 22 newly moved deliverables in a future v1.4.0 registry update per Stream 7 follow-up).
+
+---

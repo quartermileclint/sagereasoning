@@ -1,6 +1,6 @@
 # Deliverable 17 — Progression Delta Design
 
-**Status:** Drafted (under founder review).
+**Status:** Adopted (founder approval per Path A on 2026-05-02 — Phase-1 completion review; D-RAG-MENTOR-ALT3-PHASE1-COMPLETION-REVIEW-APPROVED-2026-05-02). Moved from `/drafts/rag-mentor-alt3/` to `/adopted/rag-mentor-alt3/` 2026-05-02.
 **Date:** 2026-05-02.
 **Stream:** founder.
 **Governing frame:** `/adopted/session-opening-protocol.md`.

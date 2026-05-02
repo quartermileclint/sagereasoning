@@ -1,7 +1,7 @@
 # Deliverable 14b — Deferral-Resolution Surface Design
 
-**Status:** Drafted (under founder review).
-**Date:** 2026-05-02.
+**Status:** Adopted (founder approval per Path A on 2026-05-02 — Phase-1 completion review; D-RAG-MENTOR-ALT3-PHASE1-COMPLETION-REVIEW-APPROVED-2026-05-02). Founder direction calls captured in §"Founder direction — resolved 2026-05-02" below. Moved from `/drafts/rag-mentor-alt3/` to `/adopted/rag-mentor-alt3/` 2026-05-02.
+**Date:** 2026-05-02 (drafted); 2026-05-02 (adopted with founder direction resolved).
 **Stream:** founder.
 **Governing frame:** `/adopted/session-opening-protocol.md`.
 **Implements:** AC-12 (translation-sandwich); AC-13 (three-tier intake clarification — the deferral-resolution surface is where Tier 3 OPEN_DEFERRAL flags resolve); AC-14 (withholding as deterministic kathekon); **AC-15 (1b sub-option with structured intake — this surface is the architectural implementation)**; AC-16 (three principles for long-deferred questions); **AC-18 (no-shareable-artifact constraint — non-negotiable on this surface)**; **AC-19 (reflect-endpoint-first build order — Phase-2 pass 1 builds this surface first)**; PR1 (single-endpoint proof before surface rollout); PR6 (safety-critical changes are always Critical risk); R3 (disclaimer); R7 (source fidelity); R17 (intimate data protection — the deferred questions are intimate data); R20a (vulnerable-user detection — perimeter route per AC5); R20d (relationship asymmetry).
@@ -572,13 +572,23 @@ The R20a perimeter conformance is **HIGH cleanliness** — AC5 ninth-route disci
 
 The R17 intimate data protection conformance is **HIGH cleanliness** at the architectural level (encryption tables; RLS policies; cascade deletion); the implementation cleanliness depends on P2 task 2c's encryption module wiring.
 
-## Open questions (founder direction)
+## Founder direction — resolved 2026-05-02
 
-1. **Route name.** Recommendation: `/api/mentor/private/deferral-resolve`. Alternatives: `/api/mentor/private/sit-with`, `/api/mentor/private/return`. Founder approves.
-2. **Page route.** Recommendation: `/private-mentor/deferred-questions`. Founder approves.
-3. **Visibility of `mentor_observation` in daily-reflection ritual response (D14a question).** Decided in D14a. Reflected here for cross-reference: D14b's surface is unaffected — `mentor_observation` does not appear here regardless of D14a's resolution.
-4. **D-A16 catalogue promotion sequencing for Phase-2 pass 1.** EUPATHEIA_BOUNDARY and PRAXIS_MOTIVATION_AMBIGUITY trigger code stems are required at minimum. Other catalogue stems can land at later passes. Phase-2 build sequencing resolves.
-5. **Whether the page-side surface displays a count of recently-closed deferrals.** AC-18 prohibits celebratory artefacts. The count itself is borderline — it is informational rather than celebratory but could become a quasi-streak counter. **Recommendation: do not display a count. The closed deferrals are visible only via the explicit "show closed" toggle.** Founder calls.
+The two founder direction questions for this deliverable were called at the Phase-1 completion review session on 2026-05-02 (per `D-RAG-MENTOR-ALT3-PHASE1-COMPLETION-REVIEW-APPROVED-2026-05-02`):
+
+1. **Route name — `/api/mentor/private/deferral-resolve` (Recommended) — confirmed.** Phase-2 pass 1 builds against this route name per D21's migration plan.
+
+2. **Page route — `/private-mentor/deferred-questions` (Recommended) — confirmed.** Phase-2 pass 1 builds against this page route per D21's migration plan.
+
+The above resolutions hold for Phase-2 pass 1 (D14b deferral-resolution surface build, the load-bearing first build per AC-19) per D21's migration plan. The remaining founder questions below (Q3 D14a cross-reference, Q4 D-A16 catalogue sequencing, Q5 closed-deferral count) are not in scope for the Phase-1 completion review — Q3 is now resolved via D14a's call (visible in D14a; no effect here per AC-18); Q4 and Q5 land as Phase-2 build operational decisions.
+
+## Open questions (resolved or deferred to Phase-2 build)
+
+1. **Route name.** Resolved 2026-05-02 → `/api/mentor/private/deferral-resolve`.
+2. **Page route.** Resolved 2026-05-02 → `/private-mentor/deferred-questions`.
+3. **Visibility of `mentor_observation` in daily-reflection ritual response (D14a question).** Resolved in D14a 2026-05-02 → visible. D14b's surface unaffected — `mentor_observation` does not appear here regardless per AC-18.
+4. **D-A16 catalogue promotion sequencing for Phase-2 pass 1.** Deferred to Phase-2 build operational decisions. EUPATHEIA_BOUNDARY and PRAXIS_MOTIVATION_AMBIGUITY trigger code stems are required at minimum.
+5. **Whether the page-side surface displays a count of recently-closed deferrals.** Deferred to Phase-2 build operational decisions. **Recommendation: do not display a count.** Closed deferrals visible only via the explicit "show closed" toggle.
 
 ## Approval gate
 
