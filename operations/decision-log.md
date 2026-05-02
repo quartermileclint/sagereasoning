@@ -2801,3 +2801,77 @@ The component registry (`/website/public/component-registry.json`) tracks D2, D3
 **Status:** Adopted. Cross-references: D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 (the predecessor approval); D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29 (the Validation Addendum carried forward in D8 v1.0.0); D-RAG-MENTOR-ALT3-PHASE1-DRAFTS-2026-05-01 (the original drafting); D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29 (the architecture); D-MENTOR-PRIVATE-REFLECT-PRE-ALT3-SNAPSHOT-2026-05-02 (the companion snapshot from this housekeeping action).
 
 ---
+
+## 2026-05-02 — D-RAG-MENTOR-ALT3-PHASE1-SESSION3-DRAFTS: Phase-1 Session 3 Deliverables (D1, D5, D6, D7, D12, D16, D17, D18, D19, D20, D21, D22, D23) Drafted
+
+**Decision:** Produce the remaining 13 Phase-1 deliverables for the alt-3 architecture, completing Phase-1 design. The deliverables are drafted under `/drafts/rag-mentor-alt3/` (12 files) plus the ADR under `/drafts/` (1 file). Together with the eight Phase-1 session-2 deliverables (D-RAG-MENTOR-ALT3-PHASE1-SESSION2-DRAFTS-2026-05-02) and the three critical-path deliverables (now in `/adopted/rag-mentor-alt3/` per D-RAG-MENTOR-ALT3-CRITICAL-PATH-MOVED-TO-ADOPTED-2026-05-02), the full set of 23 Phase-1 deliverables exists as drafts (or adopted). Phase 2 build does not commence until the founder reviews and approves the remaining 13 deliverables.
+
+**Files added (this session):**
+
+- `/drafts/rag-mentor-alt3/index-schema.md` (D5) — Supabase pgvector + tsvector single-table storage; embedding model selection (text-embedding-3-small); chunk-size policy per AC-4; RLS read-only at request time; migration shape from stoic-brain-compiled.ts; Graph RAG extensibility per AC-6.
+- `/drafts/rag-mentor-alt3/retrieval-interface.md` (D6) — hybrid retrieve function signature; BM25 + vector + RRF; per-mechanism call patterns; per-request cache; error modes (timeout, embedding failure, both-channels-failed) with engine fallback paths.
+- `/drafts/rag-mentor-alt3/re-rank-design.md` (D7) — heuristic default with multiplicative tag-match boosts; cross-encoder upgrade path (Cohere or self-hosted); LLM-as-reranker fallback; per-mechanism re-rank policy.
+- `/drafts/rag-mentor-alt3/strict-prompting.md` (D12) — Layer 3 paraphrase prompt template with cached system block (inclusion + exclusion rules; per-consumer projection schemas; AC-17 flag projection; refusal protocol) and per-request user message; slot-fill mechanics flow.
+- `/drafts/rag-mentor-alt3/score-in-reply.md` (D16) — conversation surface response payload (narrative + structured score + proximity_ring_data + ac_17 + open_deferrals_referenced); pre-migration vs post-migration aliases; per-consumer mapping per D2 Tables 1+2.
+- `/drafts/rag-mentor-alt3/progression-delta.md` (D17) — prior-state read with windowing (90 days / 30 instances default); 8 per-mechanism delta signals; composite direction with confidence_weighted thresholds (3/10 instances; 14/60 days); profile-tension flag disambiguation (breakthrough vs regression vs lateral movement); 4 worked scenarios.
+- `/drafts/rag-mentor-alt3/verification.md` (D18) — narrative trace verification + score consistency verification; algorithm specifications; pass/fail criteria; 5 founder-performable verifications per 0c framework.
+- `/drafts/rag-mentor-alt3/residual-seams.md` (D19) — full SELF_REPORT_DEPENDENT and CONFIDENCE_WEIGHTED specifications; per-surface projection rules (4 surface categories); 4 named interaction cases with worked examples; integration with Validation Addendum Adjustment 1 prose; integration with D5 Rule 5's refinement_source.
+- `/drafts/rag-mentor-alt3/cost-model.md` (D20) — per-request cost decomposition by surface (~$0.030 deferral-resolution; ~$0.036 ritual; ~$0.046 conversation); free-tier R5 budget validated ($4.50/practitioner/month); paid-tier 2x revenue analysis; cost-as-health-metric alert specifications.
+- `/drafts/rag-mentor-alt3/migration-plan.md` (D21 — load-bearing) — Phase-2 build sequencing with 5 preconditions; 3 passes (D14b first per AC-19; D14a second; conversation surface third); per-pass build steps + founder verification + rollback paths; Phase-3+ score-family migrations per D24 projections; Critical Change Protocol per pass per PR6 + AC5 + R17.
+- `/drafts/rag-mentor-alt3/test-plan.md` (D22) — 5 test categories (structural / behavioural / purity / founder-performable / R20a invocation + eval suite per ES1-3); 5 canonical anchor patterns from architecture exercise; 30+ founder verifications consolidated across deliverables; CI integration per Phase-2 pass.
+- `/drafts/rag-mentor-alt3/open-questions.md` (D23) — 28 open questions across 6 categories (architectural commitments deferred, founder direction deferred, working-value parameters, build preconditions, future revisions, cross-cutting limitations); summary table; PR7-compliant audit trail.
+- `/drafts/ADR-RAG-MENTOR-ALT3-01-translation-sandwich-deterministic-engine.md` (D1, written last) — full ADR documenting AC-1 through AC-19 with cross-references to all 23 deliverables; alternatives considered (alt 1, alt 2 progression); positive / negative / neutral consequences; review questions for founder approval.
+
+**Reasoning:** Per the Phase-1 session 3 prompt at `/operations/handoffs/founder/2026-05-02-rag-phase1-alt3-session3-NEXT-SESSION-PROMPT.md`, the session's deliverables are the remaining 13 Phase-1 design documents needed before Phase-2 build commences. The pre-conditions (founder approval of session-2 deliverables — Path A; D2/D3/D8 already moved to /adopted/; pre-alt-3 reflect snapshot already produced) are met. The session produced the deliverables in the recommended sequence: D5 → D6 → D7 → D12 → D16 → D17 → D18 → D19 → D20 → D21 → D22 → D23 → D1 (ADR last, against actual deliverables).
+
+The deliverables collectively specify:
+
+- The storage layer (D5) — Supabase pgvector + tsvector with passion-indexed retrieval per AC-1.
+- The retrieval pipeline (D6 + D7) — hybrid retrieval per AC-2; top-K → re-rank → top 3-5 per AC-3.
+- The Layer 3 prompting (D12 packaged from D11) — strict inclusion + exclusion per AC-5; cache discipline per AC-6.
+- The conversation surface contract (D16) — score-in-reply per AC-9; proximity ring data per AC-11.
+- The longitudinal mechanics (D17) — direction signal; confidence_weighted interaction with AC-17.
+- The verification work (D18) — narrative trace + score consistency confirming AC-12 at runtime.
+- The residual seams (D19) — full AC-17 specification with per-surface projection.
+- The cost model (D20) — per-request decomposition; R5 free-tier and 2x paid-tier validation.
+- The migration plan (D21) — Phase-2 build sequencing per AC-19 reflect-endpoint-first commitment.
+- The test plan (D22) — structural, behavioural, purity, founder-performable, AC4 invocation per AC5.
+- The open-questions register (D23) — PR7 audit trail of deferred decisions.
+- The ADR (D1) — full architectural commitment documentation across AC-1 through AC-19.
+
+**Validation Addendum guidance incorporation:** Adjustment 1 prose projection (Rule 9 unstable vs false phronesis) materialised in D11 Refinement 5 (already drafted in session 2) and cross-referenced in D17 (composite direction with profile-tension disambiguation) and D19 (per-Adjustment confidence interaction). Adjustment 2 (Rule 8 compound severity) and Adjustment 3 (Rule 7 explicit operative-circle dependency) are honoured in D17's signal definition table and in D9's dependency map (already drafted in session 2).
+
+**D24 audit findings carried forward (per session-2 close):**
+- D11 Refinements 1–5 (already incorporated in session 2) cross-referenced in D12, D16, D19.
+- D24 §"Coverage gaps in D2 mapping tables" (5 D2 amendments) deferred to D23 §O5.2 per PR7 — Elevated risk amendment to D2 happens at its own time post-Phase-1 approval batch.
+- D24 §"Snapshots needed" — `/api/mentor/private/reflect` snapshot already produced (D-MENTOR-PRIVATE-REFLECT-PRE-ALT3-SNAPSHOT-2026-05-02); `/api/reason` snapshot deferred per D21 / D23 §O4.2 to land before Phase-2 pass 3.
+- D24 audit current-state findings (KG1 rule 2 violations on `/api/reflect`; user_id discrimination on `/api/reflect`; Ops Hub page-side defects; partial R20a input coverage) deferred for separate triage per session-2 decision.
+
+**Pre-D-A16 transitional behaviour disclosure:** Pre-promotion of the focus-question-stem catalogue, AC-10's full operationalisation depends on alt-3-derived patterns. D11 / D12 / D13 explicitly flag transitional questions in `engine_diagnostics.alt3_derived_questions[]`. D-A16 promotion is named as a Phase-2 build precondition per D21 / D14b §"Phase-2 pass 1 build readiness" / D23 §O4.1.
+
+**Files touched:**
+- `/drafts/rag-mentor-alt3/index-schema.md` — new.
+- `/drafts/rag-mentor-alt3/retrieval-interface.md` — new.
+- `/drafts/rag-mentor-alt3/re-rank-design.md` — new.
+- `/drafts/rag-mentor-alt3/strict-prompting.md` — new.
+- `/drafts/rag-mentor-alt3/score-in-reply.md` — new.
+- `/drafts/rag-mentor-alt3/progression-delta.md` — new.
+- `/drafts/rag-mentor-alt3/verification.md` — new.
+- `/drafts/rag-mentor-alt3/residual-seams.md` — new.
+- `/drafts/rag-mentor-alt3/cost-model.md` — new.
+- `/drafts/rag-mentor-alt3/migration-plan.md` — new.
+- `/drafts/rag-mentor-alt3/test-plan.md` — new.
+- `/drafts/rag-mentor-alt3/open-questions.md` — new.
+- `/drafts/ADR-RAG-MENTOR-ALT3-01-translation-sandwich-deterministic-engine.md` — new.
+- `/operations/decision-log.md` — this entry appended.
+- `/operations/handoffs/founder/2026-05-02-rag-phase1-alt3-session3-close.md` — new (the session close, produced concurrently with this entry).
+
+**Pre-edit backups:** none required (new files; no overwrites of existing content).
+
+**Risk classification:** Standard under 0d-ii. All deliverables are drafts in `/drafts/`. No live-system effect; no code changes; no schema migrations; no auth/encryption/session/redirect surfaces touched. The eventual ADR adoption (D1 move-to-`/adopted/` after founder approval) is Elevated risk per the deliverable's approval-gate footer; deliberately deferred to a focused approval session.
+
+**Rules served:** R0 (oikeiosis audit trail — the deliverables and this entry are part of the audit trail); 0a (status vocabulary — `Designed` for new drafts; this entry's decision status `Drafted — under founder review` per the 0a separation between implementation status and decision status); 0b (session continuity — handoff read at open; session close concurrent with this entry); 0c (verification framework — founder-performable verifications consolidated in D22; D18's verifier specifies the trace algorithm); 0d-ii (Standard classification justified above); 0f (decision-log entry concurrent with the deliverables); PR1 (single-endpoint proof preserved — D14b is named as Phase-2 pass 1's single-endpoint target per AC-19 in D21); PR4 (model selection — D5/D6/D7 specify model choices per AC1/KG2 — embeddings = OpenAI text-embedding-3-small; Layer 1/3 = Sonnet from D10/D11; re-rank = heuristic default); PR5 (knowledge-gap carry-forward — KG1 rule 2 awaited-pattern preserved across D14b/D14a; KG3 hub-label end-to-end contract preserved; KG6 composition-order discipline applied to D5/D6/D12; KG7 JSONB array discipline named in D5's `slot_fields` and D14a's `passions_detected[]`); PR6 (safety-critical changes are Critical — D14b/D14a/conversation-surface Phase-2 builds named as Critical at their own time per D21); PR7 (decisions not made are documented — D23 catalogues 28 deferred decisions with reasoning and revisit conditions).
+
+**Status:** Drafted — under founder review. Cross-references: D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29 (the architecture); D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29 (the Validation Addendum honoured); D-RAG-MENTOR-ALT3-PHASE1-DRAFTS-2026-05-01 (Phase-1 session 1's critical path); D-RAG-MENTOR-ALT3-PHASE1-AUDIT-2026-05-01 (D24 source); D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 (the predecessor approval); D-RAG-MENTOR-ALT3-PHASE1-SESSION2-DRAFTS-2026-05-02 (the eight session-2 deliverables this session builds on); D-RAG-MENTOR-ALT3-CRITICAL-PATH-MOVED-TO-ADOPTED-2026-05-02 (the move that made D2/D3/D8 available at /adopted/); D-MENTOR-PRIVATE-REFLECT-PRE-ALT3-SNAPSHOT-2026-05-02 (the snapshot referenced by D21); the 13 new deliverable files; the session-3 close.
+
+---
