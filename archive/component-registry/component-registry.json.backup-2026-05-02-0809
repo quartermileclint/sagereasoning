@@ -1,9 +1,9 @@
 {
-  "version": "1.5.0",
+  "version": "1.4.0",
   "lastUpdated": "2026-05-02",
-  "totalComponents": 191,
+  "totalComponents": 190,
   "statusSummary": {
-    "wired": 148,
+    "wired": 147,
     "verified": 30,
     "designed": 10,
     "live": 2,
@@ -4642,7 +4642,7 @@
       "ext": ".md",
       "path": "/adopted/rag-mentor-alt3/canonical-framework.md",
       "desc": "Phase-1 Deliverable 2 — 9+1 mechanism canonical framework reconciling 5-mechanism (sage-reason-engine STANDARD_SYSTEM_PROMPT) / 4-stage (mentor/private/reflect REFLECTION_PROMPT) / compact (score-scenario, score-social) variants. The deterministic engine’s mechanism taxonomy. Critical-path deliverable.",
-      "notes": "Adopted 2026-05-02 under D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 (Path A). Moved from /drafts/ to /adopted/ 2026-05-02 under D-RAG-MENTOR-ALT3-CRITICAL-PATH-MOVED-TO-ADOPTED-2026-05-02. The deterministic engine's mechanism taxonomy (9+1). Critical-path deliverable for the alt-3 architecture. Amended 2026-05-02 to v1.1.0 under D-D2-AMENDMENT-2026-05-02 — five D24 coverage-gap additions landed (Table 1a for /api/reason quick-depth shape; Coverage notes for Routes 1+2 projection refinements; Table 4a heading + preamble for Routes 7+8 dual applicability; Table 6 for /api/score-document policy-mode shape; Status line bump). 9+1 mechanism set unchanged. Pre-edit backup at /archive/2026-05-02_canonical-framework_pre-d24-amendment.md.",
+      "notes": "Adopted 2026-05-02 under D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 (Path A). Moved from /drafts/ to /adopted/ 2026-05-02 under D-RAG-MENTOR-ALT3-CRITICAL-PATH-MOVED-TO-ADOPTED-2026-05-02. The deterministic engine's mechanism taxonomy (9+1). Critical-path deliverable for the alt-3 architecture. D24 audit identified five small coverage-gap amendments deferred to a focused D2-amendment session (Elevated risk; D23 §O5.2).",
       "deps": [],
       "rules": [
         "R6a",
@@ -4666,7 +4666,7 @@
       "origin": "",
       "humanReady": "ready",
       "agentReady": "na",
-      "blocker": ""
+      "blocker": "Next: D2 amendment for the five D24 coverage-gap additions (prior_feedback projection note for Route 1; aggregate-across-options note for Route 2; policy-mode-specific Table 6 for Route 3; quick-depth Table 0/1a for Route 6; Table 4a dual applicability for Routes 7+8 ritual flow). Amendment requires re-approval per D2 approval-gate footer (Elevated risk per project instructions Priority 2 Candidate B)."
     },
     {
       "id": "doc-rag-mentor-alt3-passion-taxonomy",
@@ -5624,46 +5624,6 @@
         "doc-rag-mentor-alt3-reflect-14b-deferral-resolution",
         "doc-rag-mentor-alt3-index-schema",
         "doc-rag-mentor-alt3-r20a-audit"
-      ],
-      "origin": "",
-      "humanReady": "ready",
-      "agentReady": "na",
-      "blocker": ""
-    },
-    {
-      "id": "doc-rag-mentor-alt3-architectural-conventions",
-      "name": "Alt-3 Architectural Conventions Catalogue (Validation Addendum Promoted)",
-      "type": "document",
-      "subtype": [
-        "design",
-        "catalogue"
-      ],
-      "status": "wired",
-      "oldStatus": null,
-      "ext": ".md",
-      "path": "/adopted/rag-mentor-alt3/architectural-conventions.md",
-      "desc": "Standalone architectural-conventions catalogue promoted 2026-05-02 from D8's Validation Addendum content under PR8 third-recurrence promotion. Catalogues three adjustments (Rule 9 unstable-vs-false phronesis distinction; Rule 8 compound severity for INFLATION/DEFLATION same-root errors; Rule 7 explicit operative-circle dependency on Rule 6) + description correction (deterministic-for-rule-like + soft-gating-for-interpretive-core) + scope limitation (philodoxia calibration). Cross-references D9 dependencies, D11 Refinement 5, D-A16 catalogue stems carrying validation_addendum_aware flags, D17 / D19 examples. Documentation-consolidation artefact: downstream alt-3 deliverables reference this catalogue rather than re-inlining the prose patterns.",
-      "notes": "Adopted 2026-05-02 under D-VALIDATION-ADDENDUM-PROMOTED-2026-05-02 (Path A — approve as drafted; move to /adopted/ this session). Drafted at /drafts/rag-mentor-alt3/architectural-conventions.md, then git mv-moved to /adopted/. Three recurrence sessions cited per PR8 promotion (D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 first; D-RAG-MENTOR-ALT3-PHASE1-SESSION2-DRAFTS-2026-05-02 second; D-RAG-MENTOR-ALT3-PHASE1-SESSION3-DRAFTS-2026-05-02 + D-A16-CATALOGUE-ASSEMBLED-AND-ADOPTED-2026-05-02 third). 8 top-level sections covering 3 adjustments + 1 description correction + 1 scope limitation + cross-reference table + promotion provenance + 5 future-revision items. D8 retains v1.0.0 plus Addendum until a future v1.1.0 revision pass folds adjustments into per-rule sections; this catalogue persists as the standalone architectural reference.",
-      "deps": [],
-      "rules": [
-        "R6b",
-        "R6d",
-        "R7",
-        "R19",
-        "ES1"
-      ],
-      "priority": "P2",
-      "proximity": "",
-      "connects": [
-        "doc-rag-mentor-alt3-handoff",
-        "doc-rag-mentor-alt3-canonical-framework",
-        "doc-rag-mentor-alt3-operationalised-rules",
-        "doc-rag-mentor-alt3-rule-dependency-map",
-        "doc-rag-mentor-alt3-layer-3-translation",
-        "doc-rag-mentor-alt3-d-a16-catalogue",
-        "doc-rag-mentor-alt3-progression-delta",
-        "doc-rag-mentor-alt3-residual-seams",
-        "doc-rag-mentor-alt3-adr-01"
       ],
       "origin": "",
       "humanReady": "ready",
