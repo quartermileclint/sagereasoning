@@ -2713,3 +2713,91 @@ The Phase-2 pass 1 build (D14b implementation) is **Critical** when it runs at i
 **Status:** Drafted — under founder review. Cross-references: D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29 (the architecture); D-RAG-MENTOR-ALT3-PHASE1-DRAFTS-2026-05-01 (Phase-1 session 1's critical path); D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29 (the validation findings incorporated in D9, D11, D13); D-RAG-MENTOR-ALT3-PHASE1-AUDIT-2026-05-01 (D24 source for D11 / D13 / D14a / D14b refinements); D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 (the precondition this session honours); D-REGISTRY-UPDATE-v1.3.0-2026-05-02 (registry tracking the alt-3 governance artefacts; will be updated to add the eight new deliverables in a future v1.4.0 registry update).
 
 ---
+
+## 2026-05-02 — D-MENTOR-PRIVATE-REFLECT-PRE-ALT3-SNAPSHOT: Approach B Documentary Snapshot Produced
+
+**Decision:** Per D24 §"Route 8 — As-built rollback baseline pointer" recommendation and per founder direction post-session-2-close (Approach B), produce a documentary snapshot of `/api/mentor/private/reflect` end-to-end behaviour as it stands at git ref `1e7cffa`. The snapshot captures the route's full server-side workflow (rate limit → founder-only auth → body parse → R20a check → context loading → pattern-engine pass → user-message construction → direct Sonnet call with `REFLECTION_PROMPT` → response parse with graceful-degradation fallback → reflections insert → reasoning receipt → structured observation extraction and pipeline log → analytics insert → self-improving feedback loop → response envelope), the page-side `submitRitual` flow (textarea → distress branch → formatted bubble rendering with `**proximity** — sage_perspective` plus italicised `*evening_prompt*` → cleanup → proximity ring refresh), the full `REFLECTION_PROMPT` text, the `reflections` table schema reference, and the architectural facts captured for post-build comparison (visible output shape; persistence shapes; diagnostic fields; latency profile; R20a perimeter compliance). Snapshot written to `/archive/2026-05-02_api-mentor-private-reflect_pre-alt-3-snapshot.md`.
+
+**Reasoning:** The D24 audit identified two snapshots before Phase-2 begins as the only urgency recommendation (`/api/reason` and `/api/mentor/private/reflect`). The founder direction at session-2 close was to defer in favour of D14a's env-flag-gated dual-path verification (Approach C). Post-session-2-close, the founder revised to take both Approach B (snapshot) **and** Approach C (env flag from D14a). The snapshot is now produced as a documentary record; the env-flag mechanism remains the comparison protocol per D14a §"Verification 1 — Visible output preserved."
+
+The snapshot serves three concrete purposes:
+
+1. **Phase-2 pass-2 verification reference.** When Phase-2 pass 2 substitutes the deterministic engine for the direct Claude call, the snapshot is the comparison reference. With `MENTOR_RAG_V1=false`, observed behaviour should match the snapshot. With `MENTOR_RAG_V1=true`, observed behaviour should produce semantically equivalent visible-output content.
+2. **Rollback verification reference.** If Phase-2 pass 2 surfaces issues and the founder rolls back via the env flag, the snapshot is what the rollback target looks like. The snapshot is the operational definition of "today's behaviour preserved."
+3. **AC4 invocation testing reference.** The snapshot names `enforceDistressCheck(detectDistressTwoStage(combinedInput))` as the canonical R20a call pattern on this route. The Phase-2 build's invocation tests verify the call appears in the execution path post-substitution.
+
+The snapshot is not a runnable duplicate; it is documentary. Approach A (baseline duplicate route + page) was not chosen — the founder's call is that env-flag verification (sequential comparison) is sufficient for the Phase-2 verification need.
+
+**`/api/reason` snapshot deferred.** D24 also recommended a `/api/reason` snapshot before Phase-1 session 2; it remains unproduced. Phase-2 pass-3 build (conversation surface migration) is downstream of Phase-2 passes 1 and 2; the `/api/reason` snapshot can land alongside Phase-2 pass-3 planning without blocking Phase-1 session 3 design or Phase-2 pass-1 / pass-2 builds. Logged for the founder's awareness; not blocking.
+
+**Files touched:**
+- `/archive/2026-05-02_api-mentor-private-reflect_pre-alt-3-snapshot.md` — new (documentary).
+
+**Pre-edit backups:** none required (new file under `/archive/`; no existing content).
+
+**Risk classification:** Standard under 0d-ii. Documentary file; no live-system effect; no code touched; no schema migration; no auth/encryption/session/redirect surface engaged.
+
+**Rules served:** R0 (oikeiosis audit trail — the snapshot is part of the documentary trail); 0a (status vocabulary — the snapshot is documentary, no implementation status); 0c (verification framework — the snapshot is the verification reference for Phase-2 pass-2 founder-performable verification); 0d-ii (Standard classification justified above); 0f (decision-log entry concurrent with the snapshot); PR1 (single-endpoint proof discipline — the snapshot supports Phase-2 pass-1's single-endpoint discipline by giving the rollback target a documentary form); PR2 (build-to-wire verification is immediate — the snapshot will be wired to D14a's Verification 1 protocol at Phase-2 build time); PR7 (decisions not made are documented — Approach A and the `/api/reason` snapshot both deferred, with reasoning recorded above).
+
+**Status:** Adopted. Cross-references: D-RAG-MENTOR-ALT3-PHASE1-AUDIT-2026-05-01 (D24 source for the snapshot recommendation); D-RAG-MENTOR-ALT3-PHASE1-SESSION2-DRAFTS-2026-05-02 (D14a §"Verification 1" — the verification protocol the snapshot supports); D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 (the founder-direction context).
+
+---
+
+## 2026-05-02 — D-RAG-MENTOR-ALT3-CRITICAL-PATH-MOVED-TO-ADOPTED: D2 / D3 / D8 Moved from `/drafts/rag-mentor-alt3/` to `/adopted/rag-mentor-alt3/`
+
+**Decision:** Move the three Phase-1 critical-path deliverables (D2 — canonical mechanism framework; D3 — passion taxonomy; D8 — operationalised scoring rules with Validation Addendum, v1.0.0) from `/drafts/rag-mentor-alt3/` to `/adopted/rag-mentor-alt3/`. Three `git mv` operations preserve git history. Plus three header updates and three cross-reference path updates within the moved files (D3's reference to D2; D8's references to D2 and D3). D2 contains no `/drafts/`-pathed cross-references and required only a header update. The destination subfolder `/adopted/rag-mentor-alt3/` mirrors the source structure (`/drafts/rag-mentor-alt3/`) so the alt-3 deliverables remain grouped within `/adopted/` as the rest of Phase 1's deliverables eventually move there.
+
+**Reasoning:** Per the deliverables' own approval-gate footers (e.g., D8 footer: *"When approved, this rule book moves from `/drafts/rag-mentor-alt3/` to `/adopted/`. The move is itself a separate decision-log entry."*), the move is a separate Elevated-risk action distinct from the approval itself. The approval landed in D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 (Path A, founder approved as drafted). The move is now executed under this entry.
+
+The destination convention (`/adopted/rag-mentor-alt3/` subfolder rather than flat `/adopted/`) is the minimum-surprise read of the deliverables' approval-gate footer language ("moves from `/drafts/rag-mentor-alt3/` to `/adopted/`" preserved as group). The existing flat `/adopted/` (canonical-patterns.md, canonical-sources.md, session-opening-protocol.md) holds top-level governance docs; the alt-3 deliverables are project-grouped artefacts that mirror their source grouping. As Phase-1 session 3 deliverables and the eventual ADR (D1) move to `/adopted/`, they will land at `/adopted/rag-mentor-alt3/<deliverable>.md` to preserve the grouping.
+
+**File moves (via `git mv`):**
+- `drafts/rag-mentor-alt3/canonical-framework.md` → `adopted/rag-mentor-alt3/canonical-framework.md` (D2).
+- `drafts/rag-mentor-alt3/passion-taxonomy.md` → `adopted/rag-mentor-alt3/passion-taxonomy.md` (D3).
+- `drafts/rag-mentor-alt3/operationalised-rules.md` → `adopted/rag-mentor-alt3/operationalised-rules.md` (D8 v1.0.0 with Validation Addendum carried forward).
+
+**Header updates within moved files:**
+- D2: Status line updated from "Drafted (under founder review)" to "Adopted (founder approval per Path A on 2026-05-02; D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02). Moved from `/drafts/rag-mentor-alt3/` to `/adopted/rag-mentor-alt3/` 2026-05-02." Critical-path language amended from "must be approved before downstream Phase-1 deliverables proceed" to "form the critical path" (the approval has happened; the descriptive language reflects the present state).
+- D3: same pattern of Status line + Critical-path language updates.
+- D8: Status line updated to "Adopted as v1.0.0" (preserves the v1.0.0 versioning per the Validation Addendum revision-pass commitment); Critical-path language amended.
+
+**Cross-reference path updates within moved files:**
+- D3's cross-reference to D2 updated from `/drafts/rag-mentor-alt3/canonical-framework.md` to `/adopted/rag-mentor-alt3/canonical-framework.md`.
+- D8's cross-references to D2 and D3 updated similarly.
+- D2 contains no `/drafts/`-pathed cross-references to D3 / D8 directly (it references the alt-3 handoff and the manifest by absolute paths; D3 / D8 are referenced as "Deliverable 3" / "Deliverable 8" in body prose, which need no path update).
+
+**Cross-references in other documents — known-stale and intentionally not updated this session:**
+
+The eight Phase-1 session-2 deliverables (D4, D9, D10, D11, D13, D14a, D14b, D15) reference D2 / D3 / D8 at `/drafts/rag-mentor-alt3/` paths in their cross-references blocks. These references will become stale post-this-move. **Per fast-bounded session principle, these references are not updated in this housekeeping action.** They will update when the session-2 deliverables themselves move to `/adopted/` (likely as part of Phase-1 session 3's eventual approval batch when all 23 deliverables move together; or as a focused housekeeping action between sessions).
+
+The session-2 close (`/operations/handoffs/founder/2026-05-02-rag-phase1-alt3-session2-close.md`) and the session-3 next-session prompt (`/operations/handoffs/founder/2026-05-02-rag-phase1-alt3-session3-NEXT-SESSION-PROMPT.md`) also reference D2 / D3 / D8 at `/drafts/` paths. The session-3 prompt's read sequence in Part A is conditional ("Read in full (or their `/adopted/`-version if option (a) of the preconditions was taken)") — so the prompt language anticipates the move and resolves correctly post-move.
+
+The decision log itself (this entry's predecessor entries — D-RAG-MENTOR-ALT3-VALIDATED, D-RAG-MENTOR-ALT3-PHASE1-DRAFTS, etc.) references D2 / D3 / D8 at `/drafts/` paths. These are historical entries; per the append-only discipline (project instructions 0f), historical entries are not retroactively edited. The decision log accepts that historical entries reference predecessor file locations.
+
+The component registry (`/website/public/component-registry.json`) tracks D2, D3, D8, D24 as registry entries. The registry's `path` fields reference `/drafts/rag-mentor-alt3/` paths. Per the registry-update skill discipline, a registry update (v1.3.1 or v1.4.0) is the appropriate vehicle to reflect the moves to `/adopted/`. **This is logged as a follow-up housekeeping item.** Phase-1 session 3 close or a separate registry-update session resolves.
+
+**Risk classification:** Elevated under 0d-ii. The move is a structural change to governing-document locations. Specifically:
+
+- **What could break:** cross-references in other documents (the session-2 deliverables, the session-2 close, the session-3 prompt, the decision-log historical entries, the component registry) point to the old paths and become stale. Practitioners reading those documents and clicking through to D2 / D3 / D8 at the old paths will get file-not-found errors.
+- **What does not break:** the live website (no website file references D2 / D3 / D8); the engine implementation (Phase 2 hasn't built yet); auth / session / cookie behaviour (not touched); the database (not touched).
+- **Rollback path:** `git mv adopted/rag-mentor-alt3/<file> drafts/rag-mentor-alt3/<file>` (three reverse moves). Plus revert the header / cross-reference edits via git's revert mechanism on this commit. Reversible at any time before the next dependent action.
+- **Verification step (founder-performable):** `ls adopted/rag-mentor-alt3/` should show three files (canonical-framework.md, passion-taxonomy.md, operationalised-rules.md). `ls drafts/rag-mentor-alt3/` should show the eight session-2 deliverables plus consumer-workflow-audit.md (D24) — D2 / D3 / D8 absent. Each moved file's first 10 lines should show "Status: Adopted" rather than "Status: Drafted."
+
+**Stale-reference cleanup follow-ups (logged for transparency):**
+1. Update component registry `path` fields for D2 / D3 / D8 / D24 entries (registry update v1.3.1 or v1.4.0 — follows the standard registry-update skill).
+2. Update cross-references in the eight session-2 deliverables when they themselves move to `/adopted/` (likely in Phase-1 session 3's eventual approval batch).
+3. Update cross-references in the session-2 close and session-3 prompt — these are historical handoff documents and per protocol convention are not retroactively edited; readers resolve the path mentally or via filesystem search.
+
+**Files touched:**
+- `adopted/rag-mentor-alt3/canonical-framework.md` — moved + header updated (D2).
+- `adopted/rag-mentor-alt3/passion-taxonomy.md` — moved + header updated + cross-reference path updated (D3).
+- `adopted/rag-mentor-alt3/operationalised-rules.md` — moved + header updated + cross-reference paths updated (D8).
+- `operations/decision-log.md` — this entry appended (and D-MENTOR-PRIVATE-REFLECT-PRE-ALT3-SNAPSHOT appended above).
+
+**Pre-edit backups:** none required for the moves (`git mv` preserves history; the file move is the change). Pre-edit content of moved files preserved in git history at commit `1e7cffa` (the predecessor session-2 commit) and earlier commits where the deliverables were originally drafted.
+
+**Rules served:** R0 (oikeiosis audit trail — the move is part of the audit trail; D2 / D3 / D8 transition from `Drafted` to `Adopted` is recorded here); 0a (status vocabulary — the moved files now carry implementation status `Adopted`; the `Adopted` decision status of the approval is preserved in D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02; the two taxonomies remain separate per the 0a discipline); 0c (verification framework — founder-performable verification step named above); 0d-ii (Elevated classification justified above; rollback path documented; founder approval covered by the predecessor approval entry plus this move's classification); 0f (decision-log entry concurrent with the move); PR1 (single-endpoint proof discipline preserved — D2 / D3 / D8 are governance documents, not endpoints; the move is internal to the documentation hierarchy and does not affect the alt-3 architecture's single-endpoint commitment); PR7 (decisions not made are documented — stale-reference cleanup deferred with named follow-ups).
+
+**Status:** Adopted. Cross-references: D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 (the predecessor approval); D-RAG-MENTOR-ALT3-VALIDATED-2026-04-29 (the Validation Addendum carried forward in D8 v1.0.0); D-RAG-MENTOR-ALT3-PHASE1-DRAFTS-2026-05-01 (the original drafting); D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29 (the architecture); D-MENTOR-PRIVATE-REFLECT-PRE-ALT3-SNAPSHOT-2026-05-02 (the companion snapshot from this housekeeping action).
+
+---

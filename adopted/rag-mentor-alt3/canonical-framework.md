@@ -1,6 +1,6 @@
 # Deliverable 2 — Canonical Mechanism Framework
 
-**Status:** Drafted (under founder review). Amended 2026-05-01 — Table 4 split into 4a (daily-reflection ritual surface, visible output preserved) and 4b (deferral-resolution surface, AC-18 holds) per Option 1 scoping correction. Pre-amendment version archived at `/archive/2026-05-01_canonical-framework_pre-option-1-table4-split.md`.
+**Status:** Adopted (founder approval per Path A on 2026-05-02; D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02). Moved from `/drafts/rag-mentor-alt3/` to `/adopted/rag-mentor-alt3/` 2026-05-02. Amended 2026-05-01 — Table 4 split into 4a (daily-reflection ritual surface, visible output preserved) and 4b (deferral-resolution surface, AC-18 holds) per Option 1 scoping correction. Pre-amendment version archived at `/archive/2026-05-01_canonical-framework_pre-option-1-table4-split.md`.
 **Date:** 2026-05-01 (initial draft); 2026-05-01 (Option 1 amendment).
 **Stream:** founder.
 **Governing frame:** `/adopted/session-opening-protocol.md`.

@@ -1,14 +1,14 @@
 # Deliverable 3 — Passion Taxonomy
 
-**Status:** Drafted (under founder review).
+**Status:** Adopted (founder approval per Path A on 2026-05-02; D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02). Moved from `/drafts/rag-mentor-alt3/` to `/adopted/rag-mentor-alt3/` 2026-05-02.
 **Date:** 2026-05-01.
 **Stream:** founder.
 **Governing frame:** `/adopted/session-opening-protocol.md`.
 **Implements:** AC-1 (passion-indexed retrieval, alt-1 inheritance carried through alt-3).
-**Critical path:** This deliverable plus Deliverables 2 (canonical mechanism framework) and 8 (operationalised scoring rules) must be approved before downstream Phase-1 deliverables proceed.
+**Critical path:** This deliverable plus Deliverables 2 (canonical mechanism framework) and 8 (operationalised scoring rules) form the critical path.
 
 **Cross-references:**
-- `/drafts/rag-mentor-alt3/canonical-framework.md` (Deliverable 2 — the canonical taxonomy this passion taxonomy slots into)
+- `/adopted/rag-mentor-alt3/canonical-framework.md` (Deliverable 2 — the canonical taxonomy this passion taxonomy slots into)
 - `/operations/handoffs/founder/2026-04-29e-private-mentor-rag-phase1-ALT3-close.md` (alt-3 architecture)
 - `/manifest.md` AC3 (Zone 2 clinical adjacency domains — naming the practitioner profile risk surface), R20d (relationship asymmetry), ES1 (Zone 2 eval inputs must include founder-profile inputs)
 - `/stoic-brain/stoic-brain.json` (corpus index)

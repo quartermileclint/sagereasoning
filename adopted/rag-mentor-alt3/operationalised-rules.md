@@ -1,15 +1,15 @@
 # Deliverable 8 — Operationalised Scoring Rules
 
-**Status:** Drafted (under founder review). **Re-derivation, not transcript-package.** See "Honest disclosure" below.
+**Status:** Adopted as v1.0.0 (founder approval per Path A on 2026-05-02; D-RAG-MENTOR-ALT3-CRITICAL-PATH-APPROVED-2026-05-02 — accepted as drafted with Validation Addendum carried forward to a future v1.1.0 revision pass). Moved from `/drafts/rag-mentor-alt3/` to `/adopted/rag-mentor-alt3/` 2026-05-02. **Re-derivation, not transcript-package.** See "Honest disclosure" below.
 **Date:** 2026-05-01.
 **Stream:** founder.
 **Governing frame:** `/adopted/session-opening-protocol.md`.
 **Implements:** AC-12 (translation-sandwich architecture — the deterministic engine's rule book); AC-14 (withholding as deterministic kathekon); AC-17 (two residual seams as named flags).
-**Critical path:** This deliverable plus Deliverables 2 (canonical mechanism framework) and 3 (passion taxonomy) must be approved before downstream Phase-1 deliverables proceed.
+**Critical path:** This deliverable plus Deliverables 2 (canonical mechanism framework) and 3 (passion taxonomy) form the critical path.
 
 **Cross-references:**
-- `/drafts/rag-mentor-alt3/canonical-framework.md` (Deliverable 2 — the 9+1 mechanism taxonomy this rule book implements)
-- `/drafts/rag-mentor-alt3/passion-taxonomy.md` (Deliverable 3 — the controlled vocabulary Rules 2, 3, 5 consume)
+- `/adopted/rag-mentor-alt3/canonical-framework.md` (Deliverable 2 — the 9+1 mechanism taxonomy this rule book implements)
+- `/adopted/rag-mentor-alt3/passion-taxonomy.md` (Deliverable 3 — the controlled vocabulary Rules 2, 3, 5 consume)
 - `/operations/handoffs/founder/2026-04-29e-private-mentor-rag-phase1-ALT3-close.md` (alt-3 handoff — output schemas for all 10 rules)
 - `/operations/decision-log.md` D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29
 - `/manifest.md` R6a–R6e, R7, R8a–R8d, AC3 (Zone 2 domains), AC4 (invocation testing — applies to Phase 2 build, not this design)
