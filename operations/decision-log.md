@@ -3566,3 +3566,55 @@ Expected: cache file exists at the path; grep returns the entry headline; line c
 **Status:** Adopted. Cross-references: `D-PHASE-2-PASS-1-SCOPE-BLOCK-AND-REPLAN-2026-05-03` (the parent re-plan this entry refines); `D-ENCRYPTION-WIRING-IMPLEMENTED-2026-05-03` (the predecessor session whose full-form templates this entry honours as the Critical-risk template precedent); D17 (the original session-opening-protocol adoption, 2026-04-24, which the cache supplements but does not replace); manifest §"Architectural Constraints" (AC1–AC7 — codified in the cache's model-selection + risk-classification tables); manifest §"Knowledge Gaps Register" (KG1–KG7 — codified in the cache's KG-engagement-criteria table); project instructions §0a + §0c-ii + §0d-ii (codified in the cache's status-vocabulary + Critical-Change-Protocol pointer + risk-classification sections). The new file: `/adopted/standing-protocol-cache.md`. **Phase-2 pass-1 readiness inventory after this entry: substrate not yet Scaffolded; Sub-session A+B combined is the next session, governed by the lean templates + cache.**
 
 ---
+
+## 2026-05-03 — D-CORPUS-PASSAGES-SCHEMA
+
+**Decision:** Apply the `corpus_passages` schema to production Supabase (`sagereasoning-us`) per D5 §"The corpus_passages table — schema". Schema is Live; population is paused at script-ready state and resumes at next session per local-Node blocker (founder Mac shell does not have Node available; founder does not want to use Terminal). Sub-session A+B combined splits in practice into A (this session — schema only) + B (next session — population). Two consequential session-shape decisions logged:
+
+1. **Embedding deferral to Sub-session C.** OpenAI `text-embedding-3-small` requires `OPENAI_API_KEY` which is not in `.env.local` and the founder has no OpenAI account today. All `embedding` values land as NULL during the population pass; tsvector_en (BM25) auto-populates via the schema's trigger (no external API). Sub-session C absorbs OpenAI key setup + embedding generation pass alongside D6 retrieval interface + D7 re-ranker. The ivfflat embedding index is correspondingly commented out in the schema migration (would be useless on a NULL column; pgvector centroid computation needs data). Re-introduce at Sub-session C. **Revisit condition:** Sub-session C commencement.
+2. **Catalogue insertion scope.** Founder selected "All 27 stems" (not 20 per outdated count in prompt; not 2-only minimum per D14b). Path B for ritual stems (synthetic `intake_tier: 1`) per the D-A16 catalogue's documentation default — avoids D5 schema amendment (Elevated risk). **Revisit condition:** if D6 retrieval surfaces issues with the synthetic intake_tier dispatch.
+
+**Reasoning:** D-PHASE-2-PASS-1-SCOPE-BLOCK-AND-REPLAN-2026-05-03 + D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT-2026-05-03 named Sub-session A+B as the combined Standard-risk opening of Phase-2 pass-1's actual build. This session executes the schema portion. The Node-on-PATH blocker emerged at Step 6; founder selected Path C (stabilise + close) per stated working pace ("fast, bounded phases"; "stabilise to a known-good state and close"). Population script is written + parsing-validated; resumes at next session.
+
+**Files touched:**
+- `/operations/migrations/2026-05-03-corpus-passages-schema.sql` — new (~245 lines). Idempotent DDL; ivfflat index commented out per session deviation note.
+- `/operations/migrations/2026-05-03-corpus-passages-population.mjs` — new (~768 lines). Reads stoic-brain-compiled.ts via TS-strip + dynamic-import; decomposes into ~159 corpus rows with D4-aligned `canonical_mechanism` tagging; KG7-aware (canonical_mechanism passed as plain JS arrays); KG1 rule 2 (await all DB writes); idempotent via passage_id UNIQUE upsert. NOT yet run.
+- Production Supabase `sagereasoning-us` — 1 new table (`corpus_passages`) + 5 user-defined indexes (1 GIN tsvector + 1 GIN canonical_mechanism + 1 composite mechanism_passion + 1 partial trigger-condition + 1 source_file) + 3 RLS policies (read_authenticated + read_service + write_service) + 1 trigger function (`corpus_passages_tsvector_update`) + 1 trigger (`corpus_passages_tsvector_trigger`). 6th index (ivfflat embedding) deferred per deviation.
+- `/operations/decision-log.md` — this entry appended.
+- `/operations/handoffs/founder/2026-05-03-corpus-passages-schema-close.md` — session close (this session).
+- `/operations/handoffs/founder/2026-05-03-corpus-passages-population-NEXT-SESSION-PROMPT.md` — next-session opening prompt for the population resumption.
+
+**Risk classification:** Standard under 0d-ii. Idempotent additive schema migration; reversible via DROP TABLE. No existing tables modified; no auth/encryption/session/redirect surface engaged. AC7 NOT engaged. PR6 NOT engaged. Critical Change Protocol explicitly NOT engaged.
+
+**Rollback path:** `DROP TRIGGER IF EXISTS corpus_passages_tsvector_trigger ON corpus_passages; DROP FUNCTION IF EXISTS corpus_passages_tsvector_update(); DROP TABLE IF EXISTS corpus_passages;` Reversible because the table is empty (no data rows; population deferred to next session).
+
+**Verification step (founder-performable, executed):**
+
+```sql
+-- V1: 1 row + 1 row (vector 0.8.0+) ✓
+SELECT table_name FROM information_schema.tables WHERE table_name = 'corpus_passages';
+SELECT extname, extversion FROM pg_extension WHERE extname = 'vector';
+-- V2: 5 rows ✓
+SELECT indexname FROM pg_indexes WHERE tablename = 'corpus_passages' AND indexname LIKE 'idx_%';
+-- V3: 3 policies + relrowsecurity = true ✓
+SELECT polname FROM pg_policy p JOIN pg_class c ON p.polrelid = c.oid WHERE c.relname = 'corpus_passages';
+SELECT relrowsecurity FROM pg_class WHERE relname = 'corpus_passages';
+-- V4: 0 rows ✓
+SELECT count(*) FROM corpus_passages;
+```
+
+Founder confirmed all four queries returned expected results.
+
+**Open questions / what was deferred:**
+
+1. **Local Node availability.** Founder Mac shell does not have `node` on PATH. Standard install locations checked (`ls /usr/local/bin/node /opt/homebrew/bin/node ~/.nvm/versions/node/*/bin/node`) returned nothing. `node_modules` in `/website/` was likely populated by Vercel CI, not local install. **Revisit condition:** next session open. Founder either installs Node via the official installer at nodejs.org (~5 min, no Terminal needed) or selects the Vercel ad-hoc endpoint alternative (next session prompt carries both paths).
+2. **Embedding generation pass.** Deferred to Sub-session C per session-shape decision above. **Revisit condition:** Sub-session C commencement.
+3. **ivfflat embedding index re-introduction.** Deferred to Sub-session C alongside the embedding population. **Revisit condition:** Sub-session C commencement, after embeddings populated.
+4. **27 vs 20 stem count discrepancy** in upstream documents. The catalogue's own coverage check (D-A16 line 789) is authoritative: 27 entries. The "20 stems" count in the session prompt + predecessor close + the two parent decision-log entries (D-PHASE-2-PASS-1-SCOPE-BLOCK-AND-REPLAN-2026-05-03 line 3442; D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT-2026-05-03 line 3511) is outdated (predates the 2026-05-02 ritual additions including RIT-E-001b philodoxia variant). No correction needed in the existing entries (append-only discipline); future references should cite 27.
+5. **Vercel ad-hoc endpoint alternative — risk classification.** If the founder selects the endpoint path at next session open, the new route (`/api/dev/populate-corpus`) is a new code surface. Cache 0d-ii lists "Deployment-configuration changes (env flags activating new surfaces)" → Critical, but the cache rule's intent targets user-facing surface activation (Sub-session H pattern). The proposed dev endpoint is dev-only, founder-auth-gated, env-flag-gated, idempotent, and touches only the `corpus_passages` table (no user data, no auth surface). **Recommendation:** classify as Standard at session open via explicit AskUserQuestion with risk reasoning surfaced; founder can reclassify upward to Critical at any time per 0d-ii. **Revisit condition:** next session open if endpoint path selected.
+
+**Rules served:** R7 (source fidelity — every decomposed row carries source_citation per D5); R8a (strict glossary preserved in passage text — Greek IDs + English glosses); 0a (status vocabulary — `corpus_passages` table → Live; population script → Designed + Scaffolded but NOT Wired); 0c (verification framework — 4 SQL queries founder-performable, all confirmed); 0d-ii (Standard classification per cache risk row "Idempotent schema migration"); 0e (file organisation — SQL artefact + population script in `/operations/migrations/`); 0f (this entry concurrent with the schema apply); KG1 rule 2 (population script `await`s every upsert); KG7 (population script enforces `canonical_mechanism` as plain JS array; defensive runtime check aborts script on violation); PR1 (single-endpoint proof preserved — schema is the substrate piece reaching Verified before population pass attempts the rows); PR4 (model selection — N/A this session; no LLM calls); PR7 (decisions not made are documented — five open questions logged with revisit conditions).
+
+**Status:** Adopted. Cross-references: `D-PHASE-2-PASS-1-SCOPE-BLOCK-AND-REPLAN-2026-05-03` (the re-plan this Sub-session A+B serves); `D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT-2026-05-03` (the lean templates this entry honours); `D-A16-CATALOGUE-ASSEMBLED-AND-ADOPTED-2026-05-02` (the 27 stems whose insertion is deferred to next session); `D-ENCRYPTION-WIRING-IMPLEMENTED-2026-05-03` (the predecessor schema-migration session whose pattern this entry replicates). The new files: `/operations/migrations/2026-05-03-corpus-passages-schema.sql`; `/operations/migrations/2026-05-03-corpus-passages-population.mjs` (NOT yet run); `/operations/handoffs/founder/2026-05-03-corpus-passages-schema-close.md`; `/operations/handoffs/founder/2026-05-03-corpus-passages-population-NEXT-SESSION-PROMPT.md`. Production Supabase: 1 new table + 5 indexes + 3 RLS policies + 1 trigger. **Phase-2 pass-1 readiness inventory after this entry: corpus_passages schema is Live (substrate piece 1 of 7 reaches Verified); population pending; remainder of sub-session sequence (B remainder + C + D + E1-E4 + F + G + H) unchanged.**
+
+---
