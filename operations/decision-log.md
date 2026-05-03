@@ -3676,3 +3676,57 @@ Founder confirmed: "all pass".
 **Status:** Adopted. Cross-references: `D-CORPUS-PASSAGES-SCHEMA-2026-05-03` (predecessor — the schema this entry populates); `D-A16-CATALOGUE-ASSEMBLED-AND-ADOPTED-2026-05-02` (the 27 stems' source — D-A16 catalogue Sections 1–6); `D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT-2026-05-03` (the lean template this entry honours). The new files: `/operations/migrations/2026-05-03-d-a16-catalogue-population.mjs`; `/operations/handoffs/founder/2026-05-03-corpus-passages-population-close.md`; `/operations/handoffs/founder/2026-05-XX-retrieval-and-rerank-NEXT-SESSION-PROMPT.md`. Production Supabase: 159 corpus rows + 27 D-A16 stem rows = **186 `corpus_passages` rows total**. **Phase-2 pass-1 readiness inventory after this entry: corpus_passages substrate (rows + D-A16 stems) reaches Verified — substrate piece 2 of 7 complete; remainder of sub-session sequence (C + D + E1–E4 + F + G + H) unchanged.**
 
 ---
+
+## 2026-05-04 — D-CORPUS-EMBEDDINGS-IVFFLAT
+
+**Decision:** Embedding generation pass executed against the 186 `corpus_passages` rows (every row now carries a 1536-dim `text-embedding-3-small` vector in the `embedding` column); ivfflat embedding index re-introduced (`idx_corpus_passages_embedding` Live with `lists = 100`, `vector_cosine_ops`); `OPENAI_API_KEY` Live in `website/.env.local` (local dev) + Vercel Production + Vercel Preview environments (Vercel UI denied the Development environment for sensitive vars; covered by `.env.local`); `openai` npm package added as a `website/` dependency (^6.35.0); D6 retrieval interface + D7 re-ranker implementation deferred to **Sub-session C-bis** per founder-selected Option B (substrate-only this session) at session open.
+
+**Reasoning:** Sub-session C per `/operations/handoffs/founder/2026-05-XX-retrieval-and-rerank-NEXT-SESSION-PROMPT.md`. At session open the AI presented three session-shape options: (A) full session including D6/D7 implementation (~3.5–5 hours); (B) substrate-only (~1.5–2 hours, leaving D6/D7 to a follow-up Sub-session C-bis); (C) code-only — closed since pre-conditions for B not met. Founder selected B for fast-bounded-phases alignment + PR1 alignment (substrate Verified before code is layered on it). This entry records the substrate completion. Cost observed: $0.000076 USD for the entire embedding pass — about half of one US cent — well under the projected $0.001.
+
+**Files touched:**
+- `/operations/migrations/2026-05-04-corpus-passages-embeddings.mjs` — new (~210 lines). Idempotent batched UPDATE script; reads rows where `embedding IS NULL`; sends to OpenAI in batches of 100; awaits every UPDATE in `for...of` loop (KG1 rule 2); reports cumulative tokens + cost per batch.
+- `/website/package.json` + `/website/package-lock.json` — added `openai: ^6.35.0`. Note: `npm install openai` also pruned 31 packages from `website/node_modules/` that were outside the declared dep tree (benign npm 10+ reconciliation; pre-existing 13 vulnerabilities surfaced by the post-install audit but pre-date this session).
+- `/website/.env.local` — appended `OPENAI_API_KEY=sk-proj-...`. Gitignored; not committed.
+- Vercel project env vars (sagereasoning project) — added `OPENAI_API_KEY` to Production + Preview envs. Development denied by Vercel as sensitive-var class; not needed (local dev uses `.env.local`).
+- `/node_modules/openai` — symlink → `../website/node_modules/openai` (mirrors the existing `@supabase` symlink pattern from D-CORPUS-PASSAGES-POPULATION-2026-05-03). Gitignored; not committed.
+- Production Supabase `supabase-us` — all 186 `corpus_passages` rows now have populated `embedding` columns; 1 new index `idx_corpus_passages_embedding` (USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)); total user-defined indexes on the table now 6 of 6 per D5 §"Retrieval indexes".
+- `/operations/decision-log.md` — this entry appended.
+- `/operations/handoffs/founder/2026-05-04-embeddings-and-ivfflat-close.md` — new lean session close.
+- `/operations/handoffs/founder/2026-05-XX-sub-session-C-bis-NEXT-SESSION-PROMPT.md` — new Sub-session C-bis next-session prompt (D6 + D7 implementation against the now-Verified embedded substrate).
+
+**Risk classification:** Standard under 0d-ii. Idempotent data-write against an existing column; new external dependency (`openai` package — additive, isolated to the migration script's import surface, not yet wired into application routes); session-level memory setting (`SET maintenance_work_mem = '128MB'` — non-persistent, scoped to the SQL Editor session that built the index); index creation on existing table (additive, reversible via DROP INDEX IF EXISTS). No auth/encryption/safety surface engaged. AC7 not engaged. PR6 not engaged. Critical Change Protocol not engaged.
+
+**Rollback path:**
+- Embeddings: `UPDATE corpus_passages SET embedding = NULL;` in Supabase SQL Editor reverts the column to NULL across all 186 rows. Re-run `node operations/migrations/2026-05-04-corpus-passages-embeddings.mjs` to repopulate.
+- ivfflat index: `DROP INDEX IF EXISTS idx_corpus_passages_embedding;` removes the index without affecting data. Re-creating requires the same `SET maintenance_work_mem = '128MB';` prefix per the open question below.
+- `openai` dependency: `cd website && npm uninstall openai` removes the dependency.
+- OpenAI key: revoke at `platform.openai.com/api-keys`; remove from `website/.env.local` (TextEdit) + Vercel project env (UI). Blast radius if compromised: limited to OpenAI billing on the founder's account; no app-side secret used elsewhere.
+
+**Verification step (founder-performable, executed):**
+
+```sql
+-- V1: Embedding population
+SELECT count(*) FROM corpus_passages WHERE embedding IS NOT NULL;
+-- Expected: 186 ✓ (founder confirmed)
+
+-- V2: ivfflat index exists (6 total indexes)
+SELECT indexname FROM pg_indexes
+WHERE tablename = 'corpus_passages' AND indexname LIKE 'idx_%'
+ORDER BY indexname;
+-- Expected: 6 rows including idx_corpus_passages_embedding ✓ (founder confirmed)
+```
+
+**Open questions / what was deferred:**
+
+1. **D6 retrieval interface + D7 re-ranker implementation.** Deferred to Sub-session C-bis per the Option B session-shape decision at session open. **Revisit condition:** Sub-session C-bis commencement.
+2. **Vercel "Development" environment env-var.** Vercel UI denied `OPENAI_API_KEY` in the Development environment (classifies as sensitive). Not problematic — local development uses `.env.local` via `npm run dev` (the standard Next.js pattern). The Vercel "Development" env only applies if running `vercel dev` (the Vercel CLI's local server), which is not in our workflow. **Revisit condition:** if `vercel dev` is ever needed, revisit then.
+3. **`SET maintenance_work_mem = '128MB'` workaround for ivfflat build.** Default Supabase `maintenance_work_mem` (32 MB) is insufficient for the lists=100 ivfflat build (needed 61 MB). Resolved with a session-level SET. The setting is non-persistent (scoped to the SQL Editor session). **Revisit condition:** any future ivfflat re-build (embedding model upgrade to `text-embedding-3-large` = 3072 dims; or `lists` retuning) needs the same prefix. Document the workaround in any future ivfflat re-build session prompt.
+4. **OpenAI billing setup gotcha.** New OpenAI accounts (since mid-2024) require an explicit payment method add + minimum $5 credit purchase before the API accepts calls — discovered live this session via `429 insufficient_quota`. Founder set a monthly hard cap during setup (recommended $20). **Revisit condition:** if monthly OpenAI spend approaches the cap, retune cap or revisit D5 §"Embedding model selection" with cost data.
+5. **31 npm packages pruned during `npm install openai`.** Benign reconciliation per npm 10+ behavior; pruned packages were not in `package.json`'s declared dep tree. **Revisit condition:** if any subsequent npm action surfaces missing-package errors traceable to a pruned package, install it explicitly then.
+6. **13 npm vulnerabilities (3 moderate, 10 high) in the existing dependency tree.** Pre-existing, surfaced by the post-install audit; not introduced by this session. **Revisit condition:** dedicated maintenance session. Should NOT run `npm audit fix --force` without dedicated planning — could break existing deps (Elevated/Critical risk depending on what gets touched).
+
+**Rules served:** R7 (source fidelity preserved through embedding — no text rewriting); R8a (controlled vocabulary preserved in embedded text — Greek IDs + English glosses indexed verbatim); 0a (status vocabulary: embeddings → Live; ivfflat index → Live; openai dependency → Live; OPENAI_API_KEY → Live in `.env.local` + Vercel Production + Vercel Preview); 0c (verification framework — 2 SQL queries founder-performable, both confirmed); 0d-ii (Standard classification per cache risk row "Idempotent data-write" + "New external dependencies" combined; no Critical surface engaged); 0e (file organisation — script in `/operations/migrations/`, close + next-prompt in `/operations/handoffs/founder/`); 0f (this entry concurrent with the changes); KG1 rule 2 (embedding script `await`s every UPDATE in `for...of` loop; defensive runtime check on OpenAI return shape before write); KG7 (N/A — `embedding` column is `vector` type, not JSONB); PR1 (substrate proven before D6/D7 code is layered on; the substrate-only session shape per Option B aligns with PR1's discipline); PR4 (model selection — `text-embedding-3-small` per D5 §"Embedding model selection" canonical Phase-1 choice; no Anthropic LLM calls this session per heuristic re-rank deferral via Option B); PR7 (decisions not made are documented — six open questions above with revisit conditions).
+
+**Status:** Adopted. Cross-references: `D-CORPUS-PASSAGES-SCHEMA-2026-05-03` (the schema this entry's index extends); `D-CORPUS-PASSAGES-POPULATION-2026-05-03` (the 186-row substrate this entry embeds); `D5` §"Embedding model selection" (the model adopted); `D5` §"ivfflat embedding index" (the index parameters adopted); `D6` retrieval-interface.md (awaiting Sub-session C-bis implementation); `D7` re-rank-design.md (awaiting Sub-session C-bis implementation); `D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT-2026-05-03` (the lean template this entry honours). The new files: `/operations/migrations/2026-05-04-corpus-passages-embeddings.mjs`; `/operations/handoffs/founder/2026-05-04-embeddings-and-ivfflat-close.md`; `/operations/handoffs/founder/2026-05-XX-sub-session-C-bis-NEXT-SESSION-PROMPT.md`. Production Supabase: 186 rows now embedded; 6 of 6 D5 indexes Live. **Phase-2 pass-1 readiness inventory after this entry: corpus_passages substrate (rows + D-A16 stems + embeddings + all D5 indexes) reaches Verified — substrate pieces 3 + 4 of 7 complete; substrate piece 5 (D6 + D7 implementation) deferred to Sub-session C-bis; remainder of sub-session sequence (D + E1–E4 + F + G + H) unchanged.**
+
+---
