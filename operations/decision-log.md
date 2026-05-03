@@ -3618,3 +3618,61 @@ Founder confirmed all four queries returned expected results.
 **Status:** Adopted. Cross-references: `D-PHASE-2-PASS-1-SCOPE-BLOCK-AND-REPLAN-2026-05-03` (the re-plan this Sub-session A+B serves); `D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT-2026-05-03` (the lean templates this entry honours); `D-A16-CATALOGUE-ASSEMBLED-AND-ADOPTED-2026-05-02` (the 27 stems whose insertion is deferred to next session); `D-ENCRYPTION-WIRING-IMPLEMENTED-2026-05-03` (the predecessor schema-migration session whose pattern this entry replicates). The new files: `/operations/migrations/2026-05-03-corpus-passages-schema.sql`; `/operations/migrations/2026-05-03-corpus-passages-population.mjs` (NOT yet run); `/operations/handoffs/founder/2026-05-03-corpus-passages-schema-close.md`; `/operations/handoffs/founder/2026-05-03-corpus-passages-population-NEXT-SESSION-PROMPT.md`. Production Supabase: 1 new table + 5 indexes + 3 RLS policies + 1 trigger. **Phase-2 pass-1 readiness inventory after this entry: corpus_passages schema is Live (substrate piece 1 of 7 reaches Verified); population pending; remainder of sub-session sequence (B remainder + C + D + E1-E4 + F + G + H) unchanged.**
 
 ---
+
+## 2026-05-03 — D-CORPUS-PASSAGES-POPULATION
+
+**Decision:** Both `corpus_passages` population scripts (corpus rows from `stoic-brain-compiled.ts` + 27 D-A16 catalogue stems) executed against `supabase-us` Supabase project via founder's local Node 24.15.0; final `corpus_passages` count = **186 rows** (159 corpus + 27 D-A16 stems); `embedding` column NULL across all rows per Sub-session C deferral; KG7 shape verified at retrieval time (slot_fields stored as JSONB arrays, not stringified).
+
+**Reasoning:** Resumes Sub-session B from `D-CORPUS-PASSAGES-SCHEMA-2026-05-03`'s paused-at-script-ready state. Founder selected Path 1 (local Node install) via session-open AskUserQuestion after a follow-up AskUserQuestion explained what Node install entails. Sandbox-execution path was attempted first to save the founder install time but failed at the Supabase fetch boundary (HTTP 403 from sandbox outbound proxy on the `*.supabase.co` host) — sandbox network restriction is fixed and cannot be relaxed at session time. Founder then installed Node 24.15.0 (current LTS) and ran both scripts via three Terminal commands (`node --version` to verify; corpus population script; D-A16 stems script). Both scripts completed with `Errors 0`.
+
+**Files touched:**
+- `/operations/migrations/2026-05-03-d-a16-catalogue-population.mjs` — new file (~480 lines); 27 D-A16 catalogue stems as `focus_question_stem` rows; KG7-aware (`canonical_mechanism` + `slot_fields` as plain JS arrays/objects); Path B for ritual stems (synthetic `intake_tier: 1`; `trigger_condition` carries dispatch); per-row schema-validation pre-flight checks against the four corpus_passages CHECK constraints.
+- `/operations/decision-log.md` — this entry appended (~80 lines).
+- `/operations/handoffs/founder/2026-05-03-corpus-passages-population-close.md` — new lean session close (~70 lines).
+- `/operations/handoffs/founder/2026-05-XX-retrieval-and-rerank-NEXT-SESSION-PROMPT.md` — new Sub-session C next-session prompt (~120 lines).
+- `/node_modules/@supabase` — symlink → `../website/node_modules/@supabase`. Created during sandbox-path probing (`ln -s` from sandbox bash). Necessary at script-run time: without it, Node module resolution fails for the bare `@supabase/supabase-js` import in any script living outside `/website/`. Documented as load-bearing for future migration scripts. `node_modules/` is `.gitignore`d so the symlink is not committed.
+
+**Risk classification:** Standard under 0d-ii. Pure data-write population; idempotent (upsert by `passage_id` UNIQUE); no application code touched; no auth/encryption/safety surface; no production-affecting deploy. AC7 not engaged. PR6 not engaged. Critical Change Protocol not engaged.
+
+**Rollback path:** `TRUNCATE corpus_passages;` in Supabase SQL Editor returns the table to empty. Then re-run the two scripts to repopulate. The schema (D5 — `D-CORPUS-PASSAGES-SCHEMA-2026-05-03`) and its indexes are untouched.
+
+**Verification step (founder-performable, executed):**
+
+```sql
+-- P1: Total count
+SELECT count(*) FROM corpus_passages;
+-- Expected: 186 ✓
+
+-- P2: Source distribution
+SELECT source_file, count(*) FROM corpus_passages GROUP BY source_file ORDER BY source_file;
+-- Expected: 9 source_file values summing to 186 ✓
+
+-- P3: KG7 shape (slot_fields stored as JSONB array, not stringified)
+SELECT count(*), jsonb_typeof(slot_fields) FROM corpus_passages
+  WHERE passage_type = 'focus_question_stem' GROUP BY jsonb_typeof(slot_fields);
+-- Expected: rows showing 'array' and/or NULL; no 'string' ✓
+
+-- P4: Pass-1 critical stems present
+SELECT trigger_condition, count(*) FROM corpus_passages
+  WHERE trigger_condition IN ('EUPATHEIA_BOUNDARY', 'PRAXIS_MOTIVATION_AMBIGUITY')
+  GROUP BY trigger_condition;
+-- Expected: 2 rows × count=1 ✓
+
+-- P5: Embedding deferred (all NULL)
+SELECT count(*) FROM corpus_passages WHERE embedding IS NOT NULL;
+-- Expected: 0 ✓
+```
+
+Founder confirmed: "all pass".
+
+**Open questions / what was deferred:**
+
+1. **Symlink at `/node_modules/@supabase` → load-bearing for migration scripts.** Created during sandbox-path probing; subsequent removal attempts via sandbox bash failed with "Operation not permitted" (mount-level perms allow create but not delete; the cowork `allow_cowork_file_delete` tool was loaded but not exercised because the symlink became necessary mid-session). Symlink is `.gitignore`d (covered by `node_modules/` rule). Recommendation: leave in place — any future migration script living outside `/website/` needs it. Cleaner long-term: `npm install @supabase/supabase-js` at project root (modifies root `package.json` + `package-lock.json` — Standard risk; defer to a future session). **Revisit condition:** if any future migration session sees the symlink missing (founder cleaned via Finder) and the script fails import, install at project root then.
+2. **Embedding generation pass + ivfflat index re-introduction.** Deferred to Sub-session C per `D-CORPUS-PASSAGES-SCHEMA-2026-05-03`. **Revisit condition:** Sub-session C commencement.
+3. **Founder Node.js v24.15.0 vs the prompt's stated v22.x.** The session prompt anticipated LTS v22; founder install yielded v24.15.0 (which is also fully supported and may be the current LTS). Both run the script syntax (ES modules, top-level await, dynamic imports) without modification. No action required. **Revisit condition:** if any future Node-using script breaks on v24-specific behavior; vanishingly unlikely.
+
+**Rules served:** R7 (source fidelity — every D-A16 stem carries explicit `source_citation` per the catalogue); R8c (user-facing English preserved verbatim from catalogue stem text); 0a (status vocabulary: `corpus_passages` rows → Live; both population scripts → Verified); 0c (verification framework — 5 SQL queries founder-performable, all confirmed); 0d-ii (Standard classification — pure data-write idempotent migration); KG1 rule 2 (both scripts `await` every upsert in their `for...of` loops); KG7 (D-A16 script enforces `canonical_mechanism` + `slot_fields` as plain JS arrays + objects with defensive runtime checks aborting on violation; P3 verification confirms storage shape is `array` not `string`); PR4 (model selection — N/A; no LLM calls); PR7 (decisions not made are documented — three open questions above with revisit conditions).
+
+**Status:** Adopted. Cross-references: `D-CORPUS-PASSAGES-SCHEMA-2026-05-03` (predecessor — the schema this entry populates); `D-A16-CATALOGUE-ASSEMBLED-AND-ADOPTED-2026-05-02` (the 27 stems' source — D-A16 catalogue Sections 1–6); `D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT-2026-05-03` (the lean template this entry honours). The new files: `/operations/migrations/2026-05-03-d-a16-catalogue-population.mjs`; `/operations/handoffs/founder/2026-05-03-corpus-passages-population-close.md`; `/operations/handoffs/founder/2026-05-XX-retrieval-and-rerank-NEXT-SESSION-PROMPT.md`. Production Supabase: 159 corpus rows + 27 D-A16 stem rows = **186 `corpus_passages` rows total**. **Phase-2 pass-1 readiness inventory after this entry: corpus_passages substrate (rows + D-A16 stems) reaches Verified — substrate piece 2 of 7 complete; remainder of sub-session sequence (C + D + E1–E4 + F + G + H) unchanged.**
+
+---
