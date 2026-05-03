@@ -1,0 +1,143 @@
+[env] loaded /Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website/.env.local
+[env] all required env vars present
+
+========================================================
+ Sub-session C-bis verification harness — D6 + D7
+========================================================
+Started: 2026-05-03T23:32:59.945Z
+
+
+==============================================================================
+Q1 — philodoxia false-judgement template
+------------------------------------------------------------------------------
+Rule 5 Pass-1 shape: retrieve canonical false-judgement template for philodoxia.
+Query: "philodoxia false judgement reputation"
+
+Retrieval diagnostics:
+  bm25_count:   0
+  vector_count: 1
+  fusion_count: 1
+  cache_hit:    false
+  elapsed_ms:   3774
+
+Post-rerank top 3:
+  [1] passage_id="passions:epithumia:philodoxia:definition"  type=mechanism  rrf=0.00820  rerank=0.01918
+      text: philodoxia (Love of Honour) — sub-species of epithumia.
+
+Expected match for "philodoxia" in top 3: ✓ YES
+
+==============================================================================
+Q2 — dichotomy of control
+------------------------------------------------------------------------------
+Rule 1 shape: retrieve up_to_us list for prohairesis filter.
+Query: "dichotomy of control what is up to us"
+
+Retrieval diagnostics:
+  bm25_count:   0
+  vector_count: 40
+  fusion_count: 40
+  cache_hit:    false
+  elapsed_ms:   986
+
+Post-rerank top 3:
+  [1] passage_id="stoic-brain:foundations:dichotomy_of_control:up_to_us:list"  type=mechanism  rrf=0.00820  rerank=0.01475
+      text: What is up to us (eph' hemin), per Epictetus Enchiridion 1: judgements (hypolepseis); impulses (hor…
+  [2] passage_id="stoic-brain:foundations:dichotomy_of_control:not_up_to_us:list"  type=mechanism  rrf=0.00806  rerank=0.01452
+      text: What is not up to us, per Epictetus Enchiridion 1: body (soma); reputation (doxa); possessions (kte…
+  [3] passage_id="stoic-brain:foundations:dichotomy_of_control:up_to_us:5"  type=mechanism  rrf=0.00794  rerank=0.01429
+      text: moral choice (prohairesis)
+
+Expected match for "dichotomy_of_control" in top 3: ✓ YES
+
+==============================================================================
+Q3 — oikeiosis stage
+------------------------------------------------------------------------------
+Rule 6 shape: retrieve oikeiosis stage definitions.
+Query: "oikeiosis circle of concern self-other expansion"
+
+Retrieval diagnostics:
+  bm25_count:   0
+  vector_count: 5
+  fusion_count: 5
+  cache_hit:    false
+  elapsed_ms:   1371
+
+Post-rerank top 3:
+  [1] passage_id="action:oikeiosis:stage_2_family"  type=mechanism  rrf=0.00820  rerank=0.01475
+      text: Stage 2 — Family and Intimates (family): Affiliation extends to parents, children, spouse, siblings…
+  [2] passage_id="action:oikeiosis:stage_4_humanity"  type=mechanism  rrf=0.00806  rerank=0.01452
+      text: Stage 4 — All Rational Beings (humanity): Recognising all humans as fellow citizens of the cosmos s…
+  [3] passage_id="action:oikeiosis:stage_5_cosmos"  type=mechanism  rrf=0.00794  rerank=0.01429
+      text: Stage 5 — The Rational Cosmos (cosmos): The sage's affiliation extends to the cosmos itself — align…
+
+Expected match for "oikeiosis" in top 3: ✓ YES
+
+==============================================================================
+Q4 — TEMPORAL_AMBIGUITY focus stem
+------------------------------------------------------------------------------
+Layer 3 trigger fire: retrieve canonical Tier 1 stem.
+Query: "temporal ambiguity when is the reflection covering"
+
+Retrieval diagnostics:
+  bm25_count:   0
+  vector_count: 1
+  fusion_count: 1
+  cache_hit:    false
+  elapsed_ms:   748
+
+Post-rerank top 3:
+  [1] passage_id="tier_1:temporal_ambiguity:001"  type=focus_question_stem  rrf=0.00820  rerank=0.00984
+      text: When you think about [SITUATION] right now, are you more concerned about something that's already h…
+
+Expected match for "TEMPORAL_AMBIGUITY" in top 3: ✓ YES
+
+==============================================================================
+Q5 — passion root detection
+------------------------------------------------------------------------------
+Rule 2 shape: retrieve root passion definitions.
+Query: "epithumia desire grasping for what we lack"
+
+Retrieval diagnostics:
+  bm25_count:   0
+  vector_count: 24
+  fusion_count: 24
+  cache_hit:    false
+  elapsed_ms:   3229
+
+Post-rerank top 3:
+  [1] passage_id="passions:epithumia:definition"  type=mechanism  rrf=0.00820  rerank=0.01475
+      text: epithumia (Craving / Irrational Desire) — root passion targeting future_apparent_good.
+  [2] passage_id="passions:epithumia:philoplousia:definition"  type=mechanism  rrf=0.00806  rerank=0.01452
+      text: philoplousia (Love of Wealth) — sub-species of epithumia.
+  [3] passage_id="passions:epithumia:philedonia:definition"  type=mechanism  rrf=0.00794  rerank=0.01429
+      text: philedonia (Love of Pleasure) — sub-species of epithumia.
+
+Expected match for "epithumia" in top 3: ✓ YES
+
+==============================================================================
+Q1 cold + warm comparison (cache test)
+------------------------------------------------------------------------------
+  cold: elapsed_ms=790, cache_hit=false
+  warm: elapsed_ms=0, cache_hit=true
+
+==============================================================================
+SUMMARY
+==============================================================================
+Tests run:                       5/5
+Tests with expected match top-3: 5/5
+Tests with degraded retrieval:   0/5
+
+Cost (text-embedding-3-small @ $0.02/1M):
+  estimated tokens: ~72
+  estimated cost:   $0.0000014
+
+Latencies (warm target <200ms; cold target <500ms):
+  Q1 — philodoxia false-judgement template           3774ms  bm25=0 vec=1 fusion=1
+  Q2 — dichotomy of control                          986ms  bm25=0 vec=40 fusion=40
+  Q3 — oikeiosis stage                               1371ms  bm25=0 vec=5 fusion=5
+  Q4 — TEMPORAL_AMBIGUITY focus stem                 748ms  bm25=0 vec=1 fusion=1
+  Q5 — passion root detection                        3229ms  bm25=0 vec=24 fusion=24
+  Q1 cold (cache miss)                              790ms
+  Q1 warm (cache hit)                               0ms
+
+Completed: 2026-05-03T23:33:10.975Z
