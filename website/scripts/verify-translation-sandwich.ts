@@ -16,9 +16,9 @@
  * Phases (per ADR-004 §7.2):
  *   Phase 1 — Layer 1 extraction completeness (M1-CP1)
  *   Phase 2 — Layer 1 schema fidelity (M1-CP1)
- *   Phase 3 — Layer 2 determinism (THIS SESSION, M1-CP2)
- *   Phase 4 — Layer 2 coverage (THIS SESSION, M1-CP2)
- *   Phase 5 — Layer 3 prose-assessment consistency (DEFERRED to M1-CP3; see ADR-004 §7.2)
+ *   Phase 3 — Layer 2 determinism (M1-CP2)
+ *   Phase 4 — Layer 2 coverage (M1-CP2)
+ *   Phase 5 — Layer 3 prose-assessment consistency (THIS SESSION, M1-CP3 — per ADR-007 §8)
  *   Phase 6 — End-to-end orchestration (DEFERRED to M1-CP4; see ADR-004 §7.2)
  *   Phase 7 — R20a perimeter preservation (DEFERRED to M1-CP4; see ADR-004 §7.2)
  *   Phase 8 — Fallback semantics (DEFERRED to M1-CP4; see ADR-004 §7.2)
@@ -26,9 +26,12 @@
  *
  * Cost note: Phase 1 + Phase 2 issue real Sonnet calls (4 fixtures). Per ADR-005
  * §8 the per-run cost is ~$0.10–0.40. Phase 3 + Phase 4 add NO LLM cost (Layer 2
- * is deterministic). Cached Layer 1 schemas at scripts/.translation-sandwich-cache/
+ * is deterministic). Phase 5 issues real Sonnet calls (4 fixtures × 2000 max-tokens).
+ * Per ADR-007 §8.3 the per-run cost is ~$0.04–0.16. Combined harness cost ~$0.20–0.60.
+ * Cached Layer 1 schemas + Layer 3 prose at scripts/.translation-sandwich-cache/
  * (gitignored) let subsequent runs replay without re-calling Sonnet — set
- * LAYER1_REPLAY_CACHE=1 to use the cache. Do not run in a tight loop.
+ * LAYER1_REPLAY_CACHE=1 to use the cache (single env flag governs both layers
+ * at M1-CP3). Do not run in a tight loop.
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
@@ -47,6 +50,14 @@ import {
   validateLayer2Assessment,
   type Layer2Assessment,
 } from '../src/lib/translation-sandwich/layer2-mechanisms'
+
+import {
+  generateProse,
+  generateFallbackProse,
+  validateLayer3Prose,
+  Layer3ValidationError,
+  type Layer3Prose,
+} from '../src/lib/translation-sandwich/layer3-prose'
 
 // -----------------------------------------------------------------------------
 // 1. Load .env.local manually (no dotenv dep) — same pattern as verify-reason-rag.ts
@@ -134,6 +145,34 @@ function saveCachedSchema(fixtureId: string, schema: Layer1Schema): void {
   ensureCacheDir()
   const path = cacheFilePath(fixtureId)
   writeFileSync(path, JSON.stringify(schema, null, 2), 'utf8')
+}
+
+// Layer 3 cache helpers — same pattern, same env flag (LAYER1_REPLAY_CACHE)
+// per ADR-007 §8.3 (single env flag at M1-CP3; can be split later).
+
+function layer3CacheFilePath(fixtureId: string): string {
+  return join(CACHE_DIR, `layer3-${fixtureId}.json`)
+}
+
+function loadCachedLayer3Prose(fixtureId: string): Layer3Prose | null {
+  const path = layer3CacheFilePath(fixtureId)
+  if (!existsSync(path)) return null
+  try {
+    const raw = readFileSync(path, 'utf8')
+    const parsed = JSON.parse(raw)
+    return validateLayer3Prose(parsed)
+  } catch (err) {
+    console.warn(
+      `[cache] failed to load layer3 ${path}: ${err instanceof Error ? err.message : String(err)}`
+    )
+    return null
+  }
+}
+
+function saveCachedLayer3Prose(fixtureId: string, prose: Layer3Prose): void {
+  ensureCacheDir()
+  const path = layer3CacheFilePath(fixtureId)
+  writeFileSync(path, JSON.stringify(prose, null, 2), 'utf8')
 }
 
 // -----------------------------------------------------------------------------
@@ -639,14 +678,431 @@ function runPhase4(layer2Results: Layer2FixtureResult[]): void {
 }
 
 // -----------------------------------------------------------------------------
-// 7. Phase 5+ stubs (DEFERRED to later checkpoints per ADR-004 §7.2)
+// 7. Phase 5 — Layer 3 prose-assessment consistency (per ADR-004 §7.2 + ADR-007 §8)
 // -----------------------------------------------------------------------------
 
-function runPhase5Stub(): void {
-  // TODO: M1-CP3 — see ADR-004 §7.2
-  // Layer 3 prose-assessment consistency: extract claims from prose; check each against Layer 2 assessment.
-  console.log('[SKIP] Phase 5 (Layer 3 consistency) — DEFERRED to M1-CP3; see ADR-004 §7.2')
+// Greek identifiers Layer 3's prose may name. Used for the consistency check
+// (assertion 6 in ADR-007 §8.2): every Greek identifier in prose must appear
+// in the assessment.
+const GREEK_IDENTIFIERS_TO_CHECK: ReadonlyArray<string> = [
+  // root passions
+  'epithumia', 'hedone', 'phobos', 'lupe',
+  // sub-species
+  'orge', 'eros', 'pothos', 'philedonia', 'philoplousia', 'philodoxia',
+  'kelesis', 'epichairekakia', 'terpsis',
+  'deima', 'oknos', 'aischyne', 'thambos', 'thorybos', 'agonia',
+  'eleos', 'phthonos', 'zelotypia', 'penthos', 'achos',
+  // causal stages
+  'phantasia', 'synkatathesis', 'horme', 'praxis',
+  // virtues
+  'phronesis', 'dikaiosyne', 'andreia', 'sophrosyne',
+]
+
+// Note: oikeiosis, kathekon, prohairesis are excluded from the per-input check
+// list above — they are architectural vocabulary always present at /api/reason
+// regardless of the per-input assessment, so naming them in prose is always OK.
+
+interface AssessmentVocabulary {
+  passion_roots: Set<string>
+  passion_sub_species: Set<string>
+  causal_stages: Set<string>
+  virtues: Set<string>
 }
+
+function buildAssessmentVocabulary(a: Layer2Assessment): AssessmentVocabulary {
+  const passion_roots = new Set<string>()
+  const passion_sub_species = new Set<string>()
+  const causal_stages = new Set<string>()
+  for (const p of a.passion_diagnosis.passions_detected) {
+    passion_roots.add(p.root_passion)
+    if (p.sub_species) passion_sub_species.add(p.sub_species)
+    causal_stages.add(p.causal_stage_affected)
+  }
+  if (a.passion_diagnosis.causal_stage_affected) {
+    causal_stages.add(a.passion_diagnosis.causal_stage_affected)
+  }
+  const virtues = new Set<string>(a.virtue_domains_engaged)
+  return { passion_roots, passion_sub_species, causal_stages, virtues }
+}
+
+function findUnsupportedGreekIdentifiers(
+  prose: string,
+  vocab: AssessmentVocabulary
+): string[] {
+  const lower = prose.toLowerCase()
+  const found: string[] = []
+  for (const ident of GREEK_IDENTIFIERS_TO_CHECK) {
+    // word-boundary match (handle parens around translations like "phobos (fear)")
+    const re = new RegExp(`\\b${ident}\\b`, 'i')
+    if (!re.test(lower)) continue
+    const supported =
+      vocab.passion_roots.has(ident) ||
+      vocab.passion_sub_species.has(ident) ||
+      vocab.causal_stages.has(ident) ||
+      vocab.virtues.has(ident)
+    if (!supported) found.push(ident)
+  }
+  return found
+}
+
+// Marginal-case phrasing recognisers — keyed off ADR-007 §3 prompt + §6 fallback.
+// Loose substring matches (case-insensitive) so close paraphrases pass.
+
+function proseHasUndecidableKathekonPhrasing(prose: string): boolean {
+  const l = prose.toLowerCase()
+  return (
+    l.includes('cannot be determined') ||
+    l.includes('appropriateness cannot') ||
+    l.includes('undetermined') ||
+    l.includes("cannot determine")
+  )
+}
+
+function proseHasSingleSnapshotPhrasing(prose: string): boolean {
+  const l = prose.toLowerCase()
+  return (
+    l.includes('single snapshot') ||
+    l.includes('no trajectory') ||
+    l.includes('snapshot; no')
+  )
+}
+
+function proseHasNoImprovementPathPhrasing(prose: string): boolean {
+  const l = prose.toLowerCase()
+  return (
+    l.includes('no specific improvement path') ||
+    l.includes('no improvement path identified') ||
+    l.includes('no specific improvement')
+  )
+}
+
+interface Phase5Result {
+  fixture_id: string
+  llm_prose?: Layer3Prose
+  fallback_prose?: Layer3Prose
+  llm_latency_ms: number
+  llm_skipped: boolean
+}
+
+async function runFixtureLayer3(
+  fixtureId: string,
+  assessment: Layer2Assessment
+): Promise<Phase5Result> {
+  // LLM path — replay cache if enabled
+  let llm_prose: Layer3Prose | undefined
+  let llm_latency_ms = 0
+  let llm_skipped = false
+
+  if (REPLAY_CACHE) {
+    const cached = loadCachedLayer3Prose(fixtureId)
+    if (cached) {
+      info(`  [cache] loaded layer3 ${fixtureId} from cache (no Sonnet call)`)
+      llm_prose = cached
+    } else {
+      info(
+        `  [cache] no layer3 cache for ${fixtureId}; LLM call will be skipped (re-run without LAYER1_REPLAY_CACHE to populate)`
+      )
+      llm_skipped = true
+    }
+  } else {
+    const start = Date.now()
+    try {
+      llm_prose = await generateProse(assessment, { consumer: 'api_reason' })
+      llm_latency_ms = Date.now() - start
+      try {
+        saveCachedLayer3Prose(fixtureId, llm_prose)
+      } catch (cacheErr) {
+        info(
+          `  [cache] write failed for layer3 ${fixtureId}: ${
+            cacheErr instanceof Error ? cacheErr.message : String(cacheErr)
+          }`
+        )
+      }
+    } catch (err) {
+      llm_latency_ms = Date.now() - start
+      llm_skipped = true
+      const detail =
+        err instanceof Layer3ValidationError
+          ? `Layer3ValidationError category=${err.category} field=${err.field ?? 'n/a'}: ${err.message}`
+          : err instanceof Error
+            ? `${err.name}: ${err.message}`
+            : String(err)
+      fail(`${fixtureId}.P5 — generateProse threw — ${detail}`)
+      totalChecks++
+    }
+  }
+
+  // Fallback path — always runs (no LLM, no I/O — cheap)
+  let fallback_prose: Layer3Prose | undefined
+  try {
+    fallback_prose = generateFallbackProse(assessment)
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err)
+    fail(`${fixtureId}.P5 — generateFallbackProse threw — ${detail}`)
+    totalChecks++
+  }
+
+  return {
+    fixture_id: fixtureId,
+    llm_prose,
+    fallback_prose,
+    llm_latency_ms,
+    llm_skipped,
+  }
+}
+
+async function runPhase5Async(
+  layer2Results: Layer2FixtureResult[]
+): Promise<Phase5Result[]> {
+  console.log('=== PHASE 5 — Layer 3 prose-assessment consistency ===\n')
+
+  const usable = layer2Results.filter((r) => r.assessment_a !== undefined)
+  if (usable.length === 0) {
+    fail('Phase 5: no usable Phase 3 results — Layer 3 cannot be exercised')
+    totalChecks++
+    return []
+  }
+
+  if (REPLAY_CACHE) {
+    console.log(`Running ${usable.length} fixtures (REPLAY mode — Layer 3 cache lookup)\n`)
+  } else {
+    console.log(
+      `Running ${usable.length} fixtures (real Sonnet calls; per-run cost ~$0.04–0.16)\n`
+    )
+  }
+
+  const phase5Results: Phase5Result[] = []
+
+  for (const l2r of usable) {
+    const fixtureId = l2r.fixture.id
+    const assessment = l2r.assessment_a!
+    console.log(`--- ${fixtureId} — ${l2r.fixture.label} ---`)
+
+    const p5 = await runFixtureLayer3(fixtureId, assessment)
+    phase5Results.push(p5)
+
+    info(`  layer3_latency_ms=${p5.llm_latency_ms} llm_skipped=${p5.llm_skipped}`)
+
+    // ---- Per-fixture assertions ----
+
+    // Assertion 1: generateProse completes (no throw)
+    if (!p5.llm_skipped) {
+      check(
+        `${fixtureId}.P5 — generateProse completes (no throw)`,
+        p5.llm_prose !== undefined
+      )
+    } else {
+      info(`  ${fixtureId}.P5 — generateProse SKIPPED (replay cache miss or throw above)`)
+    }
+
+    if (p5.llm_prose) {
+      // Assertion 2: result validates (JSON roundtrip + validator)
+      let llmRoundtripOk = false
+      let llmRoundtripDetail = ''
+      try {
+        validateLayer3Prose(JSON.parse(JSON.stringify(p5.llm_prose)))
+        llmRoundtripOk = true
+      } catch (err) {
+        llmRoundtripDetail = err instanceof Error ? err.message : String(err)
+      }
+      check(
+        `${fixtureId}.P5 — generateProse output validates (JSON roundtrip)`,
+        llmRoundtripOk,
+        llmRoundtripDetail || undefined
+      )
+
+      // Assertion 3: source === 'llm'
+      check(
+        `${fixtureId}.P5 — generateProse output has source='llm'`,
+        p5.llm_prose.source === 'llm',
+        `source=${p5.llm_prose.source}`
+      )
+    }
+
+    if (p5.fallback_prose) {
+      // Assertion 4: generateFallbackProse is idempotent
+      const fb_a = JSON.stringify(p5.fallback_prose)
+      const fb_b = JSON.stringify(generateFallbackProse(assessment))
+      check(
+        `${fixtureId}.P5 — generateFallbackProse IDEMPOTENT (call A === call B by JSON)`,
+        fb_a === fb_b,
+        fb_a === fb_b
+          ? undefined
+          : 'fallback_a !== fallback_b — generateFallbackProse is non-deterministic; this is a hard fail'
+      )
+
+      // Assertion 5: fallback validates with source='fallback'
+      let fbValid = false
+      let fbValidDetail = ''
+      try {
+        const reparsed = JSON.parse(fb_a)
+        const v = validateLayer3Prose(reparsed)
+        fbValid = v.source === 'fallback'
+        if (!fbValid) fbValidDetail = `source=${v.source}`
+      } catch (err) {
+        fbValidDetail = err instanceof Error ? err.message : String(err)
+      }
+      check(
+        `${fixtureId}.P5 — generateFallbackProse validates with source='fallback'`,
+        fbValid,
+        fbValidDetail || undefined
+      )
+    }
+
+    // Assertion 6: consistency check (per ADR-007 §5)
+    // Run against LLM prose if available; else against fallback prose (also exercises §5 contract).
+    const proseForConsistency = p5.llm_prose ?? p5.fallback_prose
+    if (proseForConsistency) {
+      const vocab = buildAssessmentVocabulary(assessment)
+      const allProseText = [
+        proseForConsistency.philosophical_reflection,
+        proseForConsistency.improvement_guidance,
+        proseForConsistency.summary,
+      ].join(' ')
+
+      // Greek identifier consistency
+      const unsupported = findUnsupportedGreekIdentifiers(allProseText, vocab)
+      if (unsupported.length > 0) {
+        // SOFT-WARN: log but do not fail (per ADR-007 §5 — soft-warn for unsupported Greek)
+        info(
+          `  ${fixtureId}.P5 — soft-warn: prose names Greek identifier(s) not in assessment: ${unsupported.join(', ')}`
+        )
+      } else {
+        info(`  ${fixtureId}.P5 — Greek identifier consistency: clean`)
+      }
+
+      // Marginal-case phrasing — HARD asserts when assessment has marginal field
+      const isKathekonNull = assessment.kathekon_assessment.is_kathekon === null
+      const isSingleSnapshot =
+        assessment.iterative_refinement.direction_of_travel === 'single_snapshot'
+      const noImprovementPath = assessment.improvement_path_structured === null
+
+      if (isKathekonNull) {
+        const has = proseHasUndecidableKathekonPhrasing(allProseText)
+        check(
+          `${fixtureId}.P5 — is_kathekon=null → prose contains undecidable phrasing`,
+          has,
+          has ? undefined : 'expected phrasing like "cannot be determined" — missing'
+        )
+      }
+
+      if (isSingleSnapshot) {
+        const has = proseHasSingleSnapshotPhrasing(allProseText)
+        check(
+          `${fixtureId}.P5 — direction_of_travel=single_snapshot → prose contains single-snapshot phrasing`,
+          has,
+          has
+            ? undefined
+            : 'expected phrasing like "single snapshot" or "no trajectory" — missing'
+        )
+      }
+
+      if (noImprovementPath) {
+        const has = proseHasNoImprovementPathPhrasing(allProseText)
+        check(
+          `${fixtureId}.P5 — improvement_path_structured=null → prose contains no-improvement-path phrasing`,
+          has,
+          has
+            ? undefined
+            : 'expected phrasing like "no specific improvement path" — missing'
+        )
+      }
+
+      // Hard contradiction checks
+      // Prose must not assert kathekon when assessment says null
+      if (isKathekonNull) {
+        const lower = allProseText.toLowerCase()
+        const assertsTrue =
+          lower.includes('the action is appropriate') ||
+          lower.includes('this is appropriate') ||
+          lower.includes('action is kathekon')
+        const assertsFalse =
+          lower.includes('the action is not appropriate') ||
+          lower.includes('this is not appropriate') ||
+          lower.includes('action is contrary')
+        check(
+          `${fixtureId}.P5 — is_kathekon=null → prose does NOT assert appropriateness either way`,
+          !assertsTrue && !assertsFalse,
+          assertsTrue
+            ? 'prose asserts appropriate when assessment is null — HARD FAIL'
+            : assertsFalse
+              ? 'prose asserts not appropriate when assessment is null — HARD FAIL'
+              : undefined
+        )
+      }
+    }
+
+    // Diagnostics for founder review
+    if (p5.llm_prose) {
+      const r = p5.llm_prose
+      info(`  llm.summary: ${r.summary.length > 200 ? r.summary.slice(0, 200) + '…' : r.summary}`)
+      info(
+        `  llm.philosophical_reflection.length=${r.philosophical_reflection.length} improvement_guidance.length=${r.improvement_guidance.length}`
+      )
+    }
+    if (p5.fallback_prose) {
+      const r = p5.fallback_prose
+      info(
+        `  fallback.summary: ${r.summary.length > 200 ? r.summary.slice(0, 200) + '…' : r.summary}`
+      )
+    }
+
+    console.log()
+  }
+
+  // ---- Cross-fixture coverage assertion (Phase 5 assertion 7) ----
+
+  console.log('--- Phase 5 cross-fixture coverage ---')
+  // Coverage: at least one fixture must exercise marginal-case phrasing
+  // (is_kathekon=null OR direction_of_travel=single_snapshot OR improvement_path_structured=null)
+  // AND that fixture's prose must contain the corresponding marginal-case phrasing.
+  const coverageHits: string[] = []
+  for (const p5r of phase5Results) {
+    const l2 = layer2Results.find((l) => l.fixture.id === p5r.fixture_id)
+    if (!l2 || !l2.assessment_a) continue
+    const a = l2.assessment_a
+    const proseForCheck = p5r.llm_prose ?? p5r.fallback_prose
+    if (!proseForCheck) continue
+    const proseText = [
+      proseForCheck.philosophical_reflection,
+      proseForCheck.improvement_guidance,
+      proseForCheck.summary,
+    ].join(' ')
+
+    if (
+      a.kathekon_assessment.is_kathekon === null &&
+      proseHasUndecidableKathekonPhrasing(proseText)
+    ) {
+      coverageHits.push(`${p5r.fixture_id}/is_kathekon=null`)
+    }
+    if (
+      a.iterative_refinement.direction_of_travel === 'single_snapshot' &&
+      proseHasSingleSnapshotPhrasing(proseText)
+    ) {
+      coverageHits.push(`${p5r.fixture_id}/single_snapshot`)
+    }
+    if (
+      a.improvement_path_structured === null &&
+      proseHasNoImprovementPathPhrasing(proseText)
+    ) {
+      coverageHits.push(`${p5r.fixture_id}/no_improvement_path`)
+    }
+  }
+  check(
+    `P5 — marginal-case coverage: at least one fixture surfaces a marginal field AND prose contains the marginal-case phrasing`,
+    coverageHits.length >= 1,
+    coverageHits.length >= 1
+      ? `(satisfied by: ${coverageHits.join(', ')})`
+      : 'NO fixture surfaced a marginal field with matching prose phrasing'
+  )
+
+  console.log()
+  return phase5Results
+}
+
+// -----------------------------------------------------------------------------
+// 7b. Phase 6+ stubs (DEFERRED to M1-CP4 per ADR-004 §7.2)
+// -----------------------------------------------------------------------------
 
 function runPhase6Stub(): void {
   // TODO: M1-CP4 — see ADR-004 §7.2
@@ -679,15 +1135,15 @@ function runPhase9Stub(): void {
 // -----------------------------------------------------------------------------
 
 async function main(): Promise<void> {
-  console.log('verify-translation-sandwich.ts — M1-CP2 standalone harness')
-  console.log('Per ADR-004 §7 + ADR-005 §8 + ADR-006 §4\n')
+  console.log('verify-translation-sandwich.ts — M1-CP3 standalone harness')
+  console.log('Per ADR-004 §7 + ADR-005 §8 + ADR-006 §4 + ADR-007 §8\n')
 
   const fixtureResults = await runPhase1AndPhase2()
   const layer2Results = runPhase3(fixtureResults)
   runPhase4(layer2Results)
+  await runPhase5Async(layer2Results)
 
-  console.log('=== PHASES 5–9 (DEFERRED) ===\n')
-  runPhase5Stub()
+  console.log('=== PHASES 6–9 (DEFERRED) ===\n')
   runPhase6Stub()
   runPhase7Stub()
   runPhase8Stub()
@@ -701,7 +1157,7 @@ async function main(): Promise<void> {
   console.log('---')
   console.log(`SUMMARY: ${passedChecks} / ${totalChecks} checks passed`)
   if (passedChecks === totalChecks) {
-    console.log('ALL CHECKS PASSED (Phase 1 + Phase 2 + Phase 3 + Phase 4)')
+    console.log('ALL CHECKS PASSED (Phase 1 + Phase 2 + Phase 3 + Phase 4 + Phase 5)')
     process.exit(0)
   } else {
     console.log(`FAILED: ${totalChecks - passedChecks} check(s) did not pass`)
