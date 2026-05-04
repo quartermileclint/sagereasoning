@@ -6,7 +6,8 @@ import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST } from '@/lib/model-config'
 import { extractReceipt } from '@/lib/reasoning-receipt'
 import { runSageReason } from '@/lib/sage-reason-engine'
-import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { type RetrieveResult } from '@/lib/rag'
+import { loadLayer1BlockWithFallback } from '@/lib/rag/load-layer1-block-with-fallback'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistressTwoStage } from '@/lib/r20a-classifier'
@@ -26,15 +27,24 @@ import { enforceDistressCheck } from '@/lib/constraints'
  *
  * ---------------------------------------------------------------------------
  * CONTEXT LAYERS WIRED HERE:
- *   Layer 1 (Stoic Brain)        — getStoicBrainContext('standard')
+ *   Layer 1 (Stoic Brain)        — loadLayer1BlockWithFallback(decision.trim(), 'standard', …)
+ *                                  Pattern A1 (per ADR-001) under the α loop pattern (per
+ *                                  ADR-002): one retrieve + one rerank + one format on the
+ *                                  decision text; the same block string is passed to every
+ *                                  iteration of the option-scoring loop. Falls back silently
+ *                                  to the compiled getStoicBrainContext('standard') path on
+ *                                  any retrieval error (the wrapper imports it).
  *   Layer 2 (Practitioner)       — getPractitionerContext(auth.user.id)
  *   Layer 3 (Project Context)    — getProjectContext('condensed')
- *   Loaded ONCE (parallel), reused across every option scored.
+ *   Loaded ONCE (parallel via Promise.all), reused across every option scored.
  *
  * WHY THIS SHAPE:
- *   Scoring N options shares the same user and the same project state —
- *   loading context once and passing it into each runSageReason call avoids
- *   N × load-latency. This matters most on decisions with 4-5 options.
+ *   Scoring N options shares the same user, the same project state, and the
+ *   same Stoic Brain grounding (the decision's framing). Loading all three
+ *   contexts once in parallel and passing them into each runSageReason call
+ *   avoids N × load-latency. This matters most on decisions with 4-5 options.
+ *   For Layer 1, the α loop pattern grounds retrieval in the decision text —
+ *   option-blind, like the predecessor compiled-string path it replaces.
  *
  * WHAT BREAKS IF THE CONTEXT WIRING CHANGES:
  *   - If context is reloaded per-option, cold requests slow by ~3× on 5 options
@@ -43,10 +53,16 @@ import { enforceDistressCheck } from '@/lib/constraints'
  *     the endpoint for returning users.
  *   - If Layer 3 is dropped, ranking is ungrounded in project phase (this
  *     particularly matters for decisions about project direction).
+ *   - If Layer 1 is moved out of the Promise.all and into the loop body,
+ *     N retrievals fire per request — Direction β shape — increasing cold
+ *     request latency by N × retrieval cost.
  *
  * DESIGN DECISIONS DOCUMENTED IN:
  *   - operations/handoffs/session-7d-layer1-layer2.md  (L1/L2 origin)
  *   - operations/session-handoffs/2026-04-15-layer3-wiring.md  (L3 wired here)
+ *   - adopted/adr/2026-05-04-d6-d7-consumer-wiring.md  (ADR-001 — Pattern A1 spec)
+ *   - adopted/adr/2026-05-04-d6-d7-loop-pattern-wiring.md  (ADR-002 — α loop pattern; this wiring)
+ *   - operations/decision-log.md D-DECISION-RAG-WIRED-2026-05-04 (E7 wiring entry)
  */
 
 interface PassionDetected {
@@ -123,8 +139,14 @@ export async function POST(request: NextRequest) {
         `This maps to the Stoic concern with quality of assent — not just what you assent to, but how carefully you examined the impression.`
     }
 
-    // Load practitioner (L2) and project context (L3) once in parallel
-    const [practitionerContext, projectContext] = await Promise.all([
+    // Load Layer 1 (Stoic Brain via D6+D7+format), Layer 2 (Practitioner),
+    // and Layer 3 (Project Context) once in parallel. α loop pattern per
+    // ADR-002 — Layer 1 is grounded in the decision text and the same block
+    // string is reused across every option's runSageReason call. ragCache is
+    // declared per-request (KG1 rule 4 — never module-level).
+    const ragCache = new Map<string, RetrieveResult>()
+    const [stoicBrainContext, practitionerContext, projectContext] = await Promise.all([
+      loadLayer1BlockWithFallback(decision.trim(), 'standard', ragCache, '/api/score-decision'),
       getPractitionerContext(auth.user.id),
       getProjectContext('condensed'),
     ])
@@ -138,7 +160,7 @@ export async function POST(request: NextRequest) {
         context,
         depth: 'standard',
         domain_context: domainContext,
-        stoicBrainContext: getStoicBrainContext('standard'),
+        stoicBrainContext,
         practitionerContext,
         projectContext,
       })

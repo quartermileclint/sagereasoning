@@ -75,6 +75,21 @@
  *     topic string (e.g., 'honesty'), not the prose-rich F1/F2/F3 fixtures
  *     used here. Production observability tracks fallback-rate per call site.
  *
+ *   PHASE I (E7) — /api/score-decision wired via Pattern A1 + α loop pattern
+ *     (per ADR-002; Group B third consumer). The route evaluates a 2–5 option
+ *     array against the same Stoic grounding (the decision text); α loop
+ *     pattern realises this as one wrapper call against decision.trim() at
+ *     standard depth, with the returned block reused across every option's
+ *     runSageReason call. Two sub-phases:
+ *       I1 — substrate continuity: runConsumerWiringPhase('I', 'standard', ...).
+ *            Same shape as Phase D / F at standard depth; labelled for the
+ *            new consumer.
+ *       I2 — Pattern A1 wrapper surface at standard depth (bespoke; same
+ *            shape as G2 / H2 but at the standard-depth ceiling 12000). One
+ *            block exercises the wrapper contract; the route's option-loop
+ *            is a downstream consumer of the single returned string (α loop
+ *            pattern — see ADR-002 §"Pattern variant — α loop pattern").
+ *
  * Exit code 0 if all checks pass; 1 otherwise.
  *
  * Sub-session E3 changes:
@@ -110,6 +125,18 @@
  *     contract for both. Source-code review of the route confirms both call
  *     sites follow the same code path with distinct routeName labels.
  *
+ * Sub-session E7 changes:
+ *   - Phase I added at standard depth (/api/score-decision — Group B third
+ *     consumer; Pattern A1 third surface; α loop pattern first surface). Two
+ *     sub-phases: I1 reuses runConsumerWiringPhase for substrate continuity
+ *     at standard depth (16 checks); I2 is bespoke and exercises
+ *     loadLayer1BlockWithFallback at the function-call boundary at standard
+ *     depth (16 checks: 5 per fixture × 3 + 1 cache replay). Total checks
+ *     139 → 171 (Phase I adds 32). The route's option-loop calls runSageReason
+ *     N times with the same stoicBrainContext string; the wrapper is invoked
+ *     once per request (α loop pattern per ADR-002 — single retrieve, one
+ *     block reused across every option).
+ *
  * Cross-references:
  *   - /adopted/adr/2026-05-04-d6-d7-consumer-wiring.md (ADR-001)
  *   - /website/src/app/api/reason/route.ts (E1 consumer — quick depth)
@@ -130,6 +157,9 @@
  *   - /operations/decision-log.md D-PATTERN-A1-INTRODUCED-AND-WIRED-2026-05-04
  *   - /website/src/app/api/score-scenario/route.ts (E6 consumer — both call sites at quick depth, Pattern A1)
  *   - /operations/decision-log.md D-SCENARIO-RAG-WIRED-2026-05-04
+ *   - /adopted/adr/2026-05-04-d6-d7-loop-pattern-wiring.md (ADR-002 — α loop pattern spec)
+ *   - /website/src/app/api/score-decision/route.ts (E7 consumer — standard depth, Pattern A1 + α loop)
+ *   - /operations/decision-log.md D-DECISION-RAG-WIRED-2026-05-04
  */
 
 import { readFileSync } from 'node:fs'
@@ -909,6 +939,148 @@ async function main() {
     fail(
       `expected non-empty block + <200ms via cache, got length=${replayBlockH2.length}, ` +
       `elapsed_ms=${elapsedReplayH2}`,
+    )
+  }
+  console.log()
+
+  // ===========================================================================
+  // PHASE I — /api/score-decision wired via Pattern A1 + α loop pattern (E7)
+  // Two sub-phases:
+  //   I1 — substrate continuity (runConsumerWiringPhase at standard depth)
+  //   I2 — Pattern A1 wrapper surface at standard depth (one bespoke block;
+  //        the route invokes the wrapper once per request and reuses the
+  //        returned string across every option's runSageReason call — α loop
+  //        pattern per ADR-002. The wrapper is invoked once at standard depth
+  //        with decision.trim() as input; the option-loop is a downstream
+  //        consumer of that single string, exercising no additional wrapper
+  //        contract.)
+  // /api/score-decision evaluates a 2–5 option array against the same Stoic
+  // grounding (the decision text). The route's pre-E7 state used
+  // getStoicBrainContext('standard'); E7 swaps that for the wrapper, with
+  // Layer 1 grounded in decision.trim() at standard depth.
+  //
+  // Open question family (continuity from G2 + H2): the wrapper's fallback
+  // path is not exercised here. Production observability tracks fallback-
+  // rate per route via routeName tag '/api/score-decision'.
+  // ===========================================================================
+
+  // -- I1: substrate continuity at standard depth ---------------------------
+
+  const phaseI1 = await runConsumerWiringPhase(
+    {
+      label: 'I',
+      depth: 'standard',
+      consumerDescription: '/api/score-decision wiring (E7; Pattern A1 + α loop pattern) — I1 substrate continuity',
+      ceilingChars: 12000,
+    },
+    deps,
+  )
+  totalChecks += phaseI1.totalChecks
+  passedChecks += phaseI1.passedChecks
+
+  // -- I2: Pattern A1 wrapper surface at standard depth ---------------------
+
+  console.log('PHASE I2 — Pattern A1 wrapper surface @ standard depth (loadLayer1BlockWithFallback)')
+  console.log('-------------------------------------------------------------------------------------')
+  console.log()
+
+  const I2_STANDARD_CEILING = 12000
+  const i2Cache = new Map()
+  // Single call site: /api/score-decision invokes the wrapper once per
+  // request with decision.trim() as input. The α loop pattern reuses the
+  // returned string across every option's runSageReason call; the wrapper
+  // contract is identical to G2 / H2 except for depth.
+  const i2RouteName = '/api/score-decision'
+
+  for (const fixture of FIXTURES) {
+    console.log(`I2/${fixture.label} — invoke loadLayer1BlockWithFallback @ standard depth`)
+    info(`input: ${fixture.input.slice(0, 80)}${fixture.input.length > 80 ? '...' : ''}`)
+
+    const startI2 = Date.now()
+    const block = await loadLayer1BlockWithFallback(fixture.input, 'standard', i2Cache, i2RouteName)
+    const elapsedI2 = Date.now() - startI2
+
+    info(`elapsed_ms=${elapsedI2} block_chars=${block.length}`)
+
+    // I2.a — non-empty string
+    totalChecks++
+    if (typeof block === 'string' && block.length > 0) {
+      ok(`wrapper returned non-empty string (${block.length} chars)`)
+      passedChecks++
+    } else {
+      fail(`wrapper returned empty/non-string: typeof=${typeof block} length=${block.length}`)
+    }
+
+    // I2.b — contains the Stoic Brain header
+    totalChecks++
+    if (block.includes('STOIC BRAIN — RETRIEVED PASSAGES')) {
+      ok(`block contains STOIC BRAIN — RETRIEVED PASSAGES header`)
+      passedChecks++
+    } else {
+      fail(`block missing header. first 200 chars: ${block.slice(0, 200)}`)
+    }
+
+    // I2.c — contains at least one bracketed citation
+    totalChecks++
+    if (/\[[^\]]+\]/.test(block)) {
+      ok(`block contains at least one bracketed citation [..]`)
+      passedChecks++
+    } else {
+      fail(`block missing bracketed citation. first 200 chars: ${block.slice(0, 200)}`)
+    }
+
+    // I2.d — under standard-depth ceiling
+    totalChecks++
+    if (block.length <= I2_STANDARD_CEILING) {
+      ok(`block under ceiling (${block.length} ≤ ${I2_STANDARD_CEILING})`)
+      passedChecks++
+    } else {
+      fail(`block exceeds ceiling: ${block.length} > ${I2_STANDARD_CEILING}`)
+    }
+
+    // I2.e — wrapper output equals direct formatRetrievedPassagesAsBlock(top)
+    // Re-run retrieve+rerank with a separate cache, format directly, compare.
+    const corpusMechanisms = deps.getCorpusMechanismsForDepth('standard')
+    const { top_k, top_k_after_rerank } = deps.RETRIEVAL_TOP_K_BY_DEPTH.standard
+    const retrieveInputDirect = {
+      query: fixture.input,
+      bm25_query: deps.toBm25OrShape(fixture.input),
+      mechanism_filter: corpusMechanisms,
+      passage_type_filter: ['mechanism' as const],
+      top_k,
+    }
+    const directCache = new Map()
+    const directResult = await deps.retrievePassages(retrieveInputDirect, directCache)
+    const directTop = await deps.reRank(directResult.passages, retrieveInputDirect, 'heuristic', { top_k_after_rerank })
+    const directBlock = deps.formatRetrievedPassagesAsBlock(directTop)
+
+    totalChecks++
+    if (block === directBlock) {
+      ok(`wrapper output ≡ formatRetrievedPassagesAsBlock(top) (${block.length} chars)`)
+      passedChecks++
+    } else {
+      fail(`wrapper output diverges from direct format. wrapper=${block.length}c direct=${directBlock.length}c`)
+      info(`wrapper first 200: ${block.slice(0, 200).replace(/\n/g, ' / ')}`)
+      info(`direct  first 200: ${directBlock.slice(0, 200).replace(/\n/g, ' / ')}`)
+    }
+
+    console.log()
+  }
+
+  // I2 cache replay — re-invoke wrapper with F1 input on the same i2Cache;
+  // the underlying retrievePassages should hit the cache.
+  console.log(`I2-cache. Replay F1 with the same per-phase wrapper cache`)
+  totalChecks++
+  const startReplayI2 = Date.now()
+  const replayBlockI2 = await loadLayer1BlockWithFallback(FIXTURES[0].input, 'standard', i2Cache, i2RouteName)
+  const elapsedReplayI2 = Date.now() - startReplayI2
+  if (replayBlockI2.length > 0 && elapsedReplayI2 < 200) {
+    ok(`replay produced non-empty block in ${elapsedReplayI2}ms (cache active)`)
+    passedChecks++
+  } else {
+    fail(
+      `expected non-empty block + <200ms via cache, got length=${replayBlockI2.length}, ` +
+      `elapsed_ms=${elapsedReplayI2}`,
     )
   }
   console.log()
