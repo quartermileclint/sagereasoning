@@ -141,18 +141,19 @@ Your prose MUST be consistent with the assessment. Specifically:
 
 - Every claim in your prose MUST be supported by a field in the assessment. If the assessment says false_judgements is empty, your prose MUST NOT name a false judgement. If is_kathekon is null, your prose MUST NOT assert appropriateness either way.
 - Every fact in your prose MUST be drawn from the assessment, not from your training. Do not add Stoic citations the assessment did not provide. Do not name virtues the assessment did not engage. Do not invent obligations the oikeiosis assessment did not name.
-- Marginal/undecidable assessments MUST be named explicitly. Do not flatten them, do not skip them, do not paper over them with generic forward-looking prose. Specifically:
+- Marginal/undecidable assessments MUST be named explicitly. Do not flatten them, do not skip them, do not paper over them with generic forward-looking prose. Inputs without temporal markers will always have direction_of_travel = "single_snapshot" — naming the constraint is required, not optional. Specifically:
     - is_kathekon: null → "the action's appropriateness cannot be determined from the available evidence" (or close paraphrase)
-    - direction_of_travel: "single_snapshot" → "this is a single snapshot; no trajectory data is available" (or close paraphrase)
+    - direction_of_travel: "single_snapshot" → "this is a single snapshot; no trajectory data is available" (or close paraphrase). Required for every input without temporal markers. The OUTPUT example below shows the wording in context.
     - improvement_path_structured: null → "no specific improvement path identified at this time" (or close paraphrase)
 - The practitioner is the agent who submitted the input. Address them in second person ("you", "your"). Do not refer to them in the third person.
 
 PROSE FIELDS
 
-1. philosophical_reflection (2–3 sentences, ~40–80 words)
+1. philosophical_reflection (2–4 sentences, ~40–110 words)
    - Open with the principal Stoic dynamic in the assessment: the most-prominent passion (passion_diagnosis.passions_detected[0]) and its false judgement, OR the principal control-filter pattern (when no passions detected), OR the principal oikeiosis tension (when no passions and no control conflict).
    - Connect to the agent's katorthoma_proximity (reflexive | habitual | deliberate | principled | sage_like) and the engaged virtue_domains_engaged.
    - Close with one sentence of philosophical orientation drawn from the assessment's correct_judgements (when present) or the assessment's ruling_faculty_state.
+   - **MANDATORY** when iterative_refinement.direction_of_travel === "single_snapshot": include one explicit sentence naming the single-snapshot constraint (the OUTPUT example below shows it as the closing sentence). The 4-sentence upper bound exists for this case.
 
 2. improvement_guidance (1–3 sentences, ~30–80 words)
    - If improvement_path_structured is non-null: name the false_judgement_to_correct, the corrected_judgement, and which mechanism (mechanism_applies) the correction belongs to. Use second person.
@@ -174,7 +175,7 @@ Return ONLY valid JSON conforming to Layer3Prose. No markdown. No commentary out
   "version": "layer3-prose-v1",
   "layer2_assessment_version": "layer2-assessment-v1",
   "consumer": "api_reason",
-  "philosophical_reflection": "Your repeated checking of the phone reflects phobos (fear) lodged at the assent stage, where you are treating her response as something genuinely good rather than as a preferred indifferent. Your reasoning is currently deliberate but the false judgement that her opinion determines your worth is engaging phronesis (practical wisdom) without yet stabilising it. The correct view is that her judgement is outside your prohairesis; your character and your impulses are within it.",
+  "philosophical_reflection": "Your repeated checking of the phone reflects phobos (fear) lodged at the assent stage, where you are treating her response as something genuinely good rather than as a preferred indifferent. Your reasoning is currently deliberate but the false judgement that her opinion determines your worth is engaging phronesis (practical wisdom) without yet stabilising it. The correct view is that her judgement is outside your prohairesis; your character and your impulses are within it. This is a single snapshot; no trajectory data is available to assess your direction of travel.",
   "improvement_guidance": "The false judgement to correct is the assumption that another's response constitutes evidence of your standing. Replace it with the assessment that her response is one external among many and your worth rests in your own ruling faculty. This is a passion-diagnosis correction at the synkatathesis stage — work it at the moment of impression, before you assent.",
   "summary": "Your reasoning is deliberate but lodged at the assent stage of phobos, where the false judgement that another's response determines your worth requires correction.",
   "source": "llm"
@@ -222,9 +223,9 @@ When `generateProse` throws (LLM failure, parse failure, validation failure, tim
 
 `generateFallbackProse` produces a `Layer3Prose` with `source: 'fallback'`. The three prose fields are produced from canned templates that key off the assessment's structure:
 
-- **`philosophical_reflection`:** template strings keyed by `katorthoma_proximity` + `passion_diagnosis.passions_detected.length`. Five base templates (one per proximity value) × two passion-presence states.
+- **`philosophical_reflection`:** template strings keyed by `katorthoma_proximity` + `passion_diagnosis.passions_detected.length`. Five base templates (one per proximity value) × two passion-presence states. **Marginal-case append (per the in-session amendment of 2026-05-04):** when `iterative_refinement.direction_of_travel === 'single_snapshot'`, the helper appends one explicit sentence: "This is a single snapshot; no trajectory data is available." The fallback honours the same marginal-case discipline as the LLM prompt.
 - **`improvement_guidance`:** template strings keyed by `improvement_path_structured.mechanism_applies` (when non-null) or by the marginal-case template (when null).
-- **`summary`:** templated as `"Your reasoning is {proximity}. {primary_issue_phrase}."` where `primary_issue_phrase` is selected from a small lookup keyed by which mechanism produced the principal issue.
+- **`summary`:** templated as `"Your reasoning is {proximity}. {primary_issue_phrase}."` where `primary_issue_phrase` is selected from a small lookup keyed by which mechanism produced the principal issue. When `is_kathekon === null` and no other primary issue applies, the summary names the undecidable verdict explicitly per the marginal-case discipline.
 
 The fallback templates are listed in the implementation; they are deliberately less varied than the LLM prose. This is the explicit intent — the user sees a working response, not a polished one, when Layer 3 fails.
 
@@ -357,6 +358,8 @@ If the founder rejects ADR-007 or requests substantial edits, the draft is revis
 ## Changelog
 
 - **2026-05-04 (initial Adoption, Sub-session M1-CP3)** — drafted in `/drafts/adr/`, approved verbatim by founder ("approved as drafted") across all four load-bearing decisions (prose shape: three flat fields; prompt input scope: full assessment JSON; marginal-case phrasing: explicit; fallback architecture: separate exported function), moved to `/adopted/adr/`. PR5 carry-forward discipline applied to the OUTPUT example in §3 (concrete JSON keys + concrete realistic prose values, no placeholder syntax). Two AI-flagged points the founder accepted as drafted: second-person prose addressing convention ("you/your"); marginal-case coverage assertion satisfied trivially by the all-single-snapshot fixture set F1–F4 (fixture-set expansion deferred to M1-CP4).
+
+- **2026-05-04 (in-session amendment, Sub-session M1-CP3 post-harness)** — founder ran the real-Sonnet harness; Phases 1–4 passed cleanly (4/4 fixtures); Phase 5 surfaced 4 failures all of the same root cause: the LLM-generated prose silently omitted the `single_snapshot` marginal-case sentence on F1, F3, F4 (the three fixtures with `direction_of_travel === 'single_snapshot'`). F2 passed because its `direction_of_travel === 'stable'`. Greek-identifier consistency was clean across all four — the LLM honoured the JSON contract and did not invent assessment content. The fallback prose ALSO omitted the single-snapshot phrasing because the original §6 fallback design had no `direction_of_travel` handling. Founder approved fix-in-session ("Fix in this session — Recommended"). Amendment: §3 PROSE FIELDS instruction strengthened to mark single-snapshot phrasing as MANDATORY when applicable and to expand the philosophical_reflection word budget from 2–3 sentences (~40–80 words) to 2–4 sentences (~40–110 words); §3 OUTPUT example's philosophical_reflection now includes the closing single-snapshot sentence as a worked example (PR5 discipline: worked example > written instruction); §6 fallback documentation updated to note the single-snapshot append in `philosophical_reflection`. PR5 carry-forward stays in **watch (second-recurrence)** — JSON-key fidelity passed; the failure was content-discipline, not key-drift. New PR5 candidate logged this session (first observation): "LLM marginal-case discipline (instruction to explicitly name undecidable verdicts) requires worked examples in OUTPUT, not just bullet-point instruction." Will engage at M1-CP4 if observed again. Mirror amendments applied to `layer3-prose.ts` (LAYER3_SYSTEM_PROMPT_API_REASON constant + fallbackPhilosophicalReflection function) in the same session-commit. Founder re-runs harness between sessions to confirm 77/77 (4 failures resolved by the amendment).
 
 ---
 

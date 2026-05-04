@@ -9,6 +9,8 @@
 
 - **D-M1-CP3-LAYER3-MODULE-AND-ADR007-2026-05-04** appended to active log (2122 → 2178 lines). ADR-007 (Layer 3 Prose Template for `/api/reason`) drafted in `/drafts/adr/`, founder-approved verbatim ("approved as drafted") across all four load-bearing decisions surfaced before drafting (prose shape: three flat string fields per ADR-004 §2.4; prompt input scope: full `Layer2Assessment` JSON; marginal-case phrasing: explicit per Stoic discipline; fallback architecture: separate exported `generateFallbackProse` function), moved to `/adopted/adr/`. Layer 3 module `/website/src/lib/translation-sandwich/layer3-prose.ts` built and Verified (standalone) via synthetic-schema smoke test (32/32 checks across F1-style fixture + marginal-case fixture + 9 validator-rejection cases across all four error categories shape/version/enum/string_required). Harness extended at Phase 5 (Layer 3 prose-assessment consistency); Phases 6–9 remain stubbed.
 
+- **In-session amendment to D-M1-CP3 — post-harness fix.** Founder ran the real-Sonnet harness; 73/77 checks passed; 4 failures all traced to one root cause: the LLM silently omitted the single-snapshot marginal-case sentence on the 3 fixtures with `direction_of_travel === 'single_snapshot'` (F1, F3, F4); the fallback also omitted it because the original `fallbackPhilosophicalReflection` had no `direction_of_travel` handling. Founder approved fix-in-session ("Recommended"). Amendment applied to ADR-007 §3 (OUTPUT example now includes the single-snapshot sentence as a worked example; prose-field instruction strengthened to mark single-snapshot phrasing as MANDATORY) + ADR-007 §6 (fallback documentation updated) + Changelog. Mirror amendment applied to `layer3-prose.ts` (LAYER3_SYSTEM_PROMPT_API_REASON constant + `fallbackPhilosophicalReflection` function). In-sandbox smoke test re-run: 34/34 (was 32/32) — fallback fix verified. Decision-log Amendment block + new PR5 candidate ("LLM marginal-case discipline requires worked OUTPUT examples"; first observation) logged to `/operations/knowledge-gaps.md`. Decision log: 2178 → 2233 lines. Founder re-runs harness post-amendment between sessions to confirm 77/77.
+
 ## Status Changes
 
 | Item | Old status | New status |
@@ -34,11 +36,12 @@ Next-session prompt: `/operations/handoffs/founder/2026-05-04-M1-CP3-NEXT-SESSIO
 
 **Files remaining uncommitted at session close:**
 
-- `/adopted/adr/2026-05-04-layer3-prose-template-api-reason.md` (new — ADR-007 in adopted state; ~365 lines)
-- `/website/src/lib/translation-sandwich/layer3-prose.ts` (new — Layer 3 module; ~470 lines)
+- `/adopted/adr/2026-05-04-layer3-prose-template-api-reason.md` (new + amended — ADR-007 in adopted state; original ~365 lines + in-session amendment to §3 + §6 + Changelog)
+- `/website/src/lib/translation-sandwich/layer3-prose.ts` (new + amended — Layer 3 module; original ~470 lines + in-session amendment to LAYER3_SYSTEM_PROMPT_API_REASON + fallbackPhilosophicalReflection)
 - `/website/scripts/verify-translation-sandwich.ts` (modified — extended with Phase 5 + Layer 3 cache helpers; ~720 → ~1130 lines)
-- `/operations/decision-log.md` (modified — D-M1-CP3 entry appended; 2122 → 2178 lines)
-- `/operations/handoffs/founder/2026-05-04-sub-session-M1-CP3-close.md` (this file — new)
+- `/operations/decision-log.md` (modified — D-M1-CP3 entry + in-session Amendment block appended; 2122 → 2233 lines)
+- `/operations/knowledge-gaps.md` (modified — new PR5 candidate "LLM marginal-case discipline requires worked OUTPUT examples" logged for first observation)
+- `/operations/handoffs/founder/2026-05-04-sub-session-M1-CP3-close.md` (this file — new + amended)
 - `/operations/handoffs/founder/2026-05-04-M1-CP3-NEXT-SESSION-PROMPT.md` (next — new)
 - *Note: the original `/drafts/adr/2026-05-04-layer3-prose-template-api-reason.md` was created earlier this session via Write and then moved via bash `mv` into `/adopted/adr/`. Per E9/E10 snapshot semantics, git tracks only the file at its `/adopted/adr/` location.*
 
@@ -73,9 +76,9 @@ Next-session prompt: `/operations/handoffs/founder/2026-05-04-M1-CP3-NEXT-SESSIO
 Open Terminal, paste this exact block, press **Enter** (one combined command — adds all touched files):
 
 ```
-cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning" && git add -A adopted/adr/ drafts/adr/ operations/decision-log.md operations/handoffs/founder/2026-05-04-sub-session-M1-CP3-close.md operations/handoffs/founder/2026-05-04-M1-CP3-NEXT-SESSION-PROMPT.md website/src/lib/translation-sandwich/layer3-prose.ts website/scripts/verify-translation-sandwich.ts && git commit -m "session close: M1-CP3 Layer 3 module Verified (standalone) + ADR-007 Adopted — translation-sandwich engine third build — 2026-05-04 (Sub-session M1-CP3)
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning" && git add -A adopted/adr/ drafts/adr/ operations/decision-log.md operations/knowledge-gaps.md operations/handoffs/founder/2026-05-04-sub-session-M1-CP3-close.md operations/handoffs/founder/2026-05-04-M1-CP3-NEXT-SESSION-PROMPT.md website/src/lib/translation-sandwich/layer3-prose.ts website/scripts/verify-translation-sandwich.ts && git commit -m "session close: M1-CP3 Layer 3 module Verified (standalone) + ADR-007 Adopted + post-harness in-session amendment — translation-sandwich engine third build — 2026-05-04 (Sub-session M1-CP3)
 
-- D-M1-CP3-LAYER3-MODULE-AND-ADR007-2026-05-04 — Layer 3 build + per-consumer prompt template codification
+- D-M1-CP3-LAYER3-MODULE-AND-ADR007-2026-05-04 — Layer 3 build + per-consumer prompt template codification + post-harness in-session amendment
 
 - ADR-007 (Layer 3 Prose Template for /api/reason) drafted in /drafts/adr/, founder-approved verbatim ('approved as drafted') across all four load-bearing decisions, moved to /adopted/adr/. Defines Layer3Prose TypeScript type with three flat string fields + version metadata + source flag; the Layer 3 system prompt for /api/reason with concrete OUTPUT example per PR5 discipline; composition rule mapping Layer2Assessment fields to prose categories; consistency contract per ADR-004 §5.3; deterministic fallback prose mechanics per ADR-004 §9.3; validator pattern; standalone harness Phase 5 fixture set; KG-compliance summary.
 
@@ -87,7 +90,9 @@ cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning" && git add -A a
 
 - Limitation surfaced at session close: workspace bash sandbox blocks outbound Anthropic API calls, so the AI verified Layer 3 via a synthetic-schema smoke test (32/32) rather than the real-Sonnet harness Phase 5. Founder's between-sessions verification of the real-Sonnet harness is the standing-protocol completion.
 
-- M1-CP3 Verified (standalone). M1-CP4 (parallel-run wiring on /api/reason — Critical-tier; full Critical Change Protocol applies) is the next session's deliverable."
+- Post-harness amendment: founder ran the real-Sonnet harness and surfaced 4 failures (LLM omitting single-snapshot marginal-case sentence on F1, F3, F4; F2 passed with direction_of_travel=stable). Founder approved fix-in-session ('Recommended'). ADR-007 §3 OUTPUT example amended to include the single-snapshot sentence in philosophical_reflection (worked-example demonstration of the discipline per the PR5 lesson — worked example beats written instruction); §3 PROSE FIELDS instruction strengthened to mark single-snapshot phrasing as MANDATORY when applicable; §6 fallback documentation updated; Changelog amendment entry appended. layer3-prose.ts LAYER3_SYSTEM_PROMPT_API_REASON constant + fallbackPhilosophicalReflection function mirrored the amendment. In-sandbox smoke test re-run 34/34 (was 32/32 — +2 single-snapshot fallback assertions). New PR5 candidate logged to /operations/knowledge-gaps.md (first observation): 'LLM marginal-case discipline requires worked OUTPUT examples'. Original PR5 candidate (JSON-key fidelity) stays in watch (second-recurrence) — JSON contract held cleanly. Founder re-runs harness post-amendment between sessions to confirm 77/77.
+
+- M1-CP3 Verified (standalone) + amended. M1-CP4 (parallel-run wiring on /api/reason — Critical-tier; full Critical Change Protocol applies) is the next session's deliverable."
 ```
 
 Then push via **GitHub Desktop**: open GitHub Desktop → select sagereasoning repo → click **Push origin**. Vercel auto-rebuilds on push to main but no behaviour change deploys (new module + harness extension land; `layer3-prose.ts` is not imported by any route).

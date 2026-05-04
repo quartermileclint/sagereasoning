@@ -112,18 +112,19 @@ Your prose MUST be consistent with the assessment. Specifically:
 
 - Every claim in your prose MUST be supported by a field in the assessment. If the assessment says false_judgements is empty, your prose MUST NOT name a false judgement. If is_kathekon is null, your prose MUST NOT assert appropriateness either way.
 - Every fact in your prose MUST be drawn from the assessment, not from your training. Do not add Stoic citations the assessment did not provide. Do not name virtues the assessment did not engage. Do not invent obligations the oikeiosis assessment did not name.
-- Marginal/undecidable assessments MUST be named explicitly. Do not flatten them, do not skip them, do not paper over them with generic forward-looking prose. Specifically:
+- Marginal/undecidable assessments MUST be named explicitly. Do not flatten them, do not skip them, do not paper over them with generic forward-looking prose. Inputs without temporal markers will always have direction_of_travel = "single_snapshot" — naming the constraint is required, not optional. Specifically:
     - is_kathekon: null → "the action's appropriateness cannot be determined from the available evidence" (or close paraphrase)
-    - direction_of_travel: "single_snapshot" → "this is a single snapshot; no trajectory data is available" (or close paraphrase)
+    - direction_of_travel: "single_snapshot" → "this is a single snapshot; no trajectory data is available" (or close paraphrase). Required for every input without temporal markers. The OUTPUT example below shows the wording in context.
     - improvement_path_structured: null → "no specific improvement path identified at this time" (or close paraphrase)
 - The practitioner is the agent who submitted the input. Address them in second person ("you", "your"). Do not refer to them in the third person.
 
 PROSE FIELDS
 
-1. philosophical_reflection (2–3 sentences, ~40–80 words)
+1. philosophical_reflection (2–4 sentences, ~40–110 words)
    - Open with the principal Stoic dynamic in the assessment: the most-prominent passion (passion_diagnosis.passions_detected[0]) and its false judgement, OR the principal control-filter pattern (when no passions detected), OR the principal oikeiosis tension (when no passions and no control conflict).
    - Connect to the agent's katorthoma_proximity (reflexive | habitual | deliberate | principled | sage_like) and the engaged virtue_domains_engaged.
    - Close with one sentence of philosophical orientation drawn from the assessment's correct_judgements (when present) or the assessment's ruling_faculty_state.
+   - **MANDATORY** when iterative_refinement.direction_of_travel === "single_snapshot": include one explicit sentence naming the single-snapshot constraint (the OUTPUT example below shows it as the closing sentence). The 4-sentence upper bound exists for this case.
 
 2. improvement_guidance (1–3 sentences, ~30–80 words)
    - If improvement_path_structured is non-null: name the false_judgement_to_correct, the corrected_judgement, and which mechanism (mechanism_applies) the correction belongs to. Use second person.
@@ -145,7 +146,7 @@ Return ONLY valid JSON conforming to Layer3Prose. No markdown. No commentary out
   "version": "layer3-prose-v1",
   "layer2_assessment_version": "layer2-assessment-v1",
   "consumer": "api_reason",
-  "philosophical_reflection": "Your repeated checking of the phone reflects phobos (fear) lodged at the assent stage, where you are treating her response as something genuinely good rather than as a preferred indifferent. Your reasoning is currently deliberate but the false judgement that her opinion determines your worth is engaging phronesis (practical wisdom) without yet stabilising it. The correct view is that her judgement is outside your prohairesis; your character and your impulses are within it.",
+  "philosophical_reflection": "Your repeated checking of the phone reflects phobos (fear) lodged at the assent stage, where you are treating her response as something genuinely good rather than as a preferred indifferent. Your reasoning is currently deliberate but the false judgement that her opinion determines your worth is engaging phronesis (practical wisdom) without yet stabilising it. The correct view is that her judgement is outside your prohairesis; your character and your impulses are within it. This is a single snapshot; no trajectory data is available to assess your direction of travel.",
   "improvement_guidance": "The false judgement to correct is the assumption that another's response constitutes evidence of your standing. Replace it with the assessment that her response is one external among many and your worth rests in your own ruling faculty. This is a passion-diagnosis correction at the synkatathesis stage — work it at the moment of impression, before you assent.",
   "summary": "Your reasoning is deliberate but lodged at the assent stage of phobos, where the false judgement that another's response determines your worth requires correction.",
   "source": "llm"
@@ -529,7 +530,15 @@ function fallbackPhilosophicalReflection(assessment: Layer2Assessment): string {
     if (!closingSentence.endsWith('.')) closingSentence += '.'
   }
 
-  return `${proximityOpener}${passionSentence}${virtueSentence}${closingSentence}`.trim()
+  // Single-snapshot marginal-case append (per ADR-007 §6 in-session amendment 2026-05-04
+  // + harness Phase 5 finding that the original fallback omitted this discipline).
+  // Required for every input without temporal markers.
+  let singleSnapshotSentence = ''
+  if (assessment.iterative_refinement.direction_of_travel === 'single_snapshot') {
+    singleSnapshotSentence = ' This is a single snapshot; no trajectory data is available.'
+  }
+
+  return `${proximityOpener}${passionSentence}${virtueSentence}${closingSentence}${singleSnapshotSentence}`.trim()
 }
 
 /**

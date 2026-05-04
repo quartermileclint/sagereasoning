@@ -206,6 +206,20 @@ This is distinct from the stub-fallback pattern (which fires on unreadable files
 
 **Status:** Logged for future promotion decision. Not yet a full KG entry.
 
+### New candidate pattern (first observation) — LLM marginal-case discipline requires worked OUTPUT examples (M1-CP3, 2026-05-04)
+
+**Observation:** ADR-007 §3 (Layer 3 prose template for `/api/reason`) instructed the LLM to name marginal/undecidable assessments explicitly via a bullet list ("is_kathekon: null → 'the action's appropriateness cannot be determined...'"; "direction_of_travel: 'single_snapshot' → 'this is a single snapshot; no trajectory data is available'"; "improvement_path_structured: null → 'no specific improvement path...'"). The OUTPUT example showed a worked F1-style case but did NOT include the single-snapshot sentence in its philosophical_reflection.
+
+The founder's between-sessions real-Sonnet harness Phase 5 run surfaced 4 failures (3 per-fixture + 1 cross-fixture coverage). The LLM silently omitted the single-snapshot sentence on F1, F3, F4 (all 3 fixtures with `direction_of_travel === 'single_snapshot'`); F2 passed because its `direction_of_travel === 'stable'`. The LLM honoured the JSON contract (validation passed; Greek-identifier consistency clean) — it just treated the marginal-case discipline as optional because the OUTPUT example didn't demonstrate it.
+
+**Pattern:** Worked OUTPUT examples > written instructions. When an ADR specifies LLM behaviour in bullet-point instruction without demonstrating it in a concrete worked example, the LLM treats it as optional. This generalises PR5's existing JSON-key-fidelity lesson (placeholder vs concrete keys) to semantic-content discipline (marginal-case phrasing, mandatory framings, similar disciplines named in instruction but not demonstrated).
+
+**Resolution sketch (in-session amendment 2026-05-04):** ADR-007 §3 OUTPUT example amended to include the single-snapshot sentence in philosophical_reflection (worked example demonstrating the discipline). The prose-field instruction strengthened to mark single-snapshot phrasing as MANDATORY when applicable. The fallback prose helper (`fallbackPhilosophicalReflection`) extended to append the same sentence when `direction_of_travel === 'single_snapshot'`. Founder re-runs the harness post-amendment; 77/77 pass would confirm the resolution worked.
+
+**Promotion trigger:** PR5 promotes on third recurrence. This is the first observation. If the post-amendment re-run still shows the LLM omitting the single-snapshot sentence, OR if a similar marginal-case-omission pattern appears in M2/M3/M4 Layer 3 templates, that is the second observation. Resolution at second observation: tighten to a permanent rule that every marginal-case discipline named in any ADR's "Composition Contract" or equivalent section MUST appear in the OUTPUT example as worked prose.
+
+**Status:** Logged for future promotion decision. Not yet a full KG entry. Cross-references: `D-M1-CP3-LAYER3-MODULE-AND-ADR007-2026-05-04` (parent entry + Amendment block); `/adopted/adr/2026-05-04-layer3-prose-template-api-reason.md` §3 + §6 + Changelog (the amendment).
+
 ### Stable observations (no action)
 
 - **AC4 (Invocation Testing for Safety Functions) — formerly KG3 / KG7 build-to-wire entries, retired 2026-04-25 under DD-2026-04-25-03:** Actively applied. Grep confirmed both Growth loaders are called exactly once in production (`hub/route.ts` `case 'growth':`). Harness run in-session (16/16 assertions passed). No new observation worth logging.
