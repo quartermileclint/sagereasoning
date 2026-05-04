@@ -18,6 +18,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { MODEL_FAST, MODEL_DEEP, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { extractJSON } from '@/lib/json-utils'
+import type { RetrievedPassage } from '@/lib/rag'
 
 // =============================================================================
 // ANTHROPIC CLIENT — Shared singleton
@@ -68,6 +69,21 @@ export interface ReasonInput {
    * Set to empty string to explicitly disable Stoic Brain injection.
    */
   stoicBrainContext?: string
+  /**
+   * Optional retrieved passages (Pattern A2 — Sub-session E1).
+   *
+   * When provided AND `stoicBrainContext` is empty/omitted, the engine builds
+   * the Stoic Brain block from these passages (joined with citations +
+   * separators) instead of using a pre-composed string. R7 source fidelity
+   * preserved through inline citations.
+   *
+   * When `stoicBrainContext` is also provided, `stoicBrainContext` wins
+   * (existing callers unaffected — backward-compatible).
+   *
+   * Wired by /api/reason route per Sub-session E1 (PR1 rollout phase).
+   * See: /adopted/adr/2026-05-04-d6-d7-consumer-wiring.md
+   */
+  retrievedPassages?: RetrievedPassage[]
   /**
    * Optional practitioner context (Layer 2). When provided, injected into the
    * user message after domain_context. Contains condensed profile data:
@@ -365,6 +381,31 @@ const REQUIRED_FIELDS: Record<ReasonDepth, string[]> = {
 export const EVALUATIVE_DISCLAIMER = 'Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.'
 
 // =============================================================================
+// PATTERN A2 — RETRIEVED-PASSAGE FORMATTING (Sub-session E1)
+// =============================================================================
+
+/**
+ * Format retrieved passages as a Stoic Brain block.
+ *
+ * Mirrors the existing stoic-brain-loader.ts output shape:
+ *   - Header: STOIC BRAIN — RETRIEVED PASSAGES
+ *   - Each passage: [<source_citation>] <text>
+ *   - Separator: \n\n---\n\n
+ *
+ * R7 source fidelity preserved through inline citations.
+ *
+ * @param passages - Array of RetrievedPassage from D6 + D7
+ * @returns Formatted string for system prompt injection (empty string if no passages)
+ *
+ * Cross-reference: /adopted/adr/2026-05-04-d6-d7-consumer-wiring.md
+ */
+export function formatRetrievedPassagesAsBlock(passages: RetrievedPassage[]): string {
+  if (!passages || passages.length === 0) return ''
+  const sections = passages.map((p) => `[${p.source_citation}] ${p.text}`)
+  return `STOIC BRAIN — RETRIEVED PASSAGES\n\n${sections.join('\n\n---\n\n')}`
+}
+
+// =============================================================================
 // CORE REASONING ENGINE
 // =============================================================================
 
@@ -447,7 +488,15 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
   // that clients depend on (e.g., virtue_quality.katorthoma_proximity nesting). Adding Stoic
   // Brain data changes LLM output structure and breaks consumers. Each endpoint must opt in
   // and ensure its consumers handle the enriched output.
-  const stoicBrainBlock = params.stoicBrainContext || ''
+  //
+  // Pattern A2 (Sub-session E1): if `retrievedPassages` is provided AND
+  // `stoicBrainContext` is empty/omitted, build the block from passages.
+  // Existing callers that pass `stoicBrainContext` (a string) are unaffected —
+  // the string wins. See ADR-001 + Sub-session E1 decision-log entry.
+  let stoicBrainBlock = params.stoicBrainContext || ''
+  if (!stoicBrainBlock && params.retrievedPassages && params.retrievedPassages.length > 0) {
+    stoicBrainBlock = formatRetrievedPassagesAsBlock(params.retrievedPassages)
+  }
 
   // Build system message array — main prompt + optional Stoic Brain context
   const systemMessages: Array<{ type: 'text'; text: string; cache_control?: { type: 'ephemeral' } }> = [

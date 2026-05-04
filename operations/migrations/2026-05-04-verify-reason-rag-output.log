@@ -1,0 +1,102 @@
+[env] loaded /Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website/.env.local
+[env] all required env vars present
+
+PHASE A — Pure-helper tests
+---------------------------
+
+A1. getCorpusMechanismsForDepth
+  ✓ depth='quick' → 6 mechanisms: prohairesis_filter, passion_root_detection, passion_sub_species, passion_false_judgement, oikeiosis_stage, oikeiosis_obligation
+  ✓ depth='standard' → 8 mechanisms: prohairesis_filter, passion_root_detection, passion_sub_species, passion_false_judgement, oikeiosis_stage, oikeiosis_obligation, value_indifferent, virtue_domain_engaged
+  ✓ depth='deep' → 9 mechanisms: prohairesis_filter, passion_root_detection, passion_sub_species, passion_false_judgement, oikeiosis_stage, oikeiosis_obligation, value_indifferent, virtue_domain_engaged, katorthoma_proximity
+
+A2. RETRIEVAL_TOP_K_BY_DEPTH structure
+  ✓ depth='quick' → top_k=20, top_k_after_rerank=8
+  ✓ depth='standard' → top_k=25, top_k_after_rerank=12
+  ✓ depth='deep' → top_k=30, top_k_after_rerank=15
+
+A3. toBm25OrShape on 3 representative inputs
+  ✓ F1 career decision → have OR been OR offered OR new OR job OR at OR competitor...
+  ✓ F2 passion-driven anger → am OR furious OR with OR my OR colleague OR for OR missin...
+  ✓ F3 oikeiosis-relevant family → am OR thinking OR about OR cutting OR back OR on OR my OR...
+
+A4. formatRetrievedPassagesAsBlock with empty array
+  ✓ empty input → empty string
+
+A5. formatRetrievedPassagesAsBlock with one synthetic passage
+  ✓ block contains header + citation + text
+    → first 100 chars: STOIC BRAIN — RETRIEVED PASSAGES
+
+[Test citation] This is the test passage text....
+
+PHASE B — Wiring test (real Supabase + OpenAI)
+----------------------------------------------
+
+B/F1 career decision — running retrievePassages + reRank
+    → input: I have been offered a new job at a competitor. The pay is significantly higher b...
+    → rationale: Exercises control_filter (what is up to me) + value_assessment via oikeiosis (preferred indifferents).
+    → bm25_count=0 vector_count=40 fusion_count=40 elapsed_ms=3265 (D6=3265ms) → reranked top=8
+  ✓ returned 8 passages (top_k_after_rerank=8)
+  ✓ every passage's canonical_mechanism is in depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         action:deliberation:Q2
+         action:deliberation:Q4
+         action:deliberation:Q5
+         action:deliberation:Q3
+         action:deliberation:Q1
+
+B/F2 passion-driven anger — running retrievePassages + reRank
+    → input: I am furious with my colleague for missing yet another deadline. I want to confr...
+    → rationale: Exercises passion_diagnosis (orge sub-species under epithumia) + control_filter (the colleague's action is not up to me).
+    → bm25_count=0 vector_count=40 fusion_count=40 elapsed_ms=3979 (D6=3978ms) → reranked top=8
+  ✓ returned 8 passages (top_k_after_rerank=8)
+  ✓ every passage's canonical_mechanism is in depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         passions:phobos:definition
+         stoic-brain:foundations:dichotomy_of_control:not_up_to_us:4
+         passions:lupe:definition
+         action:deliberation:Q5
+         action:deliberation:Q2
+
+B/F3 oikeiosis-relevant family — running retrievePassages + reRank
+    → input: I am thinking about cutting back on my weekly calls to my elderly parents becaus...
+    → rationale: Exercises oikeiosis_stage (family obligations, stage 2) + oikeiosis_obligation (Cicero's deliberation).
+    → bm25_count=1 vector_count=40 fusion_count=40 elapsed_ms=1129 (D6=1129ms) → reranked top=8
+  ✓ returned 8 passages (top_k_after_rerank=8)
+  ✓ every passage's canonical_mechanism is in depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         action:oikeiosis:stage_2_family
+         value:dispreferred:loneliness
+         value:dispreferred:exile
+         passions:hedone:terpsis:definition
+         value:dispreferred:low_birth
+
+B-cache. Replay F1 with the same per-request cache
+  ✓ cache_hit=true, elapsed_ms=0 (≈0ms)
+
+PHASE C — Comparison axis (old vs new Layer 1)
+----------------------------------------------
+
+OLD path getStoicBrainContext('quick'): 3978 chars
+         first 200: STOIC BRAIN — CONTROL FILTER DATA / Ruling Faculty (hegemonikon): The rational, commanding part of the soul that receives impressions, grants assent, and generates impulses. / Causal Sequence: phantasia (...
+
+NEW path for F1 career decision: 797 chars (8 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Cicero De Officiis Book 1] Q2. Between two honourable options, which is MORE honourable? /  / --- /  / [Cicero De Officiis Book 1] Q4. Between two advantageous options, whic...
+  ✓ both paths non-empty (OLD=3978 chars, NEW=797 chars)
+  ✓ new path within ceiling (797 ≤ 12000)
+
+NEW path for F2 passion-driven anger: 889 chars (8 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Stobaeus Eclogae Section 5; DL Lives 7.110-116] phobos (Fear / Irrational Shrinking) — root passion targeting future_apparent_evil. /  / --- /  / [Epictetus Enchiridion 1; D...
+  ✓ both paths non-empty (OLD=3978 chars, NEW=889 chars)
+  ✓ new path within ceiling (889 ≤ 12000)
+
+NEW path for F3 oikeiosis-relevant family: 1128 chars (8 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Cicero De Finibus 3.62-68; Hierocles On Appropriate Acts; Stobaeus Eclogae Section 4] Stage 2 — Family and Intimates (family): Affiliation extends to parents, childr...
+  ✓ both paths non-empty (OLD=3978 chars, NEW=1128 chars)
+  ✓ new path within ceiling (1128 ≤ 12000)
+
+---
+SUMMARY: 27 / 27 checks passed
+ALL CHECKS PASSED
