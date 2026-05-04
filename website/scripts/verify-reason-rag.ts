@@ -5,7 +5,9 @@
  * Sub-session E2 with Phase D (/api/score standard-depth). Refactored in
  * Sub-session E3 with the V2 phase helper (`runConsumerWiringPhase`) so each
  * Pattern A2 consumer is one function call instead of an inline block, and
- * extended with Phase E (/api/score-conversation deep depth).
+ * extended with Phase E (/api/score-conversation deep depth). Extended in
+ * Sub-session E4 with Phase F (/api/score-social standard-depth wiring;
+ * Group A second consumer).
  *
  * Run from inside website/:
  *   npx tsx scripts/verify-reason-rag.ts
@@ -39,6 +41,10 @@
  *     runConsumerWiringPhase('E', 'deep', ...). First deep-depth Pattern A2
  *     consumer; completes coverage across all three depth settings.
  *
+ *   PHASE F (E4) — /api/score-social standard-depth wiring. Same shape via
+ *     runConsumerWiringPhase('F', 'standard', ...). Group A second consumer
+ *     (matches /api/score-conversation Pattern A2 on the shared substrate).
+ *
  * Exit code 0 if all checks pass; 1 otherwise.
  *
  * Sub-session E3 changes:
@@ -49,11 +55,17 @@
  *   - Phase A and Phase C kept inline (per-helper tests + retained quick-depth
  *     surface for continuity with E1's verification record).
  *
+ * Sub-session E4 changes:
+ *   - Phase F added at standard depth (/api/score-social — Group A second
+ *     consumer). One additional `runConsumerWiringPhase` call; no other shape
+ *     change. Total checks 59 → 75 (Phase F adds 16).
+ *
  * Cross-references:
  *   - /adopted/adr/2026-05-04-d6-d7-consumer-wiring.md (ADR-001)
  *   - /website/src/app/api/reason/route.ts (E1 consumer — quick depth)
  *   - /website/src/app/api/score/route.ts (E2 consumer — standard depth)
  *   - /website/src/app/api/score-conversation/route.ts (E3 consumer — deep depth)
+ *   - /website/src/app/api/score-social/route.ts (E4 consumer — standard depth)
  *   - /website/src/lib/rag/helpers.ts (depth-mechanism mapping; shared by all consumers)
  *   - /website/src/lib/rag/load-layer1-with-fallback.ts (the shared wrapper)
  *   - /website/src/lib/sage-reason-engine.ts (formatRetrievedPassagesAsBlock)
@@ -62,6 +74,7 @@
  *   - /operations/decision-log.md D-REASON-RAG-WIRED-2026-05-04
  *   - /operations/decision-log.md D-SCORE-RAG-WIRED-2026-05-04
  *   - /operations/decision-log.md D-CONSUMER-WIRING-LIFT-2026-05-04
+ *   - /operations/decision-log.md D-SCORE-SOCIAL-RAG-WIRED-2026-05-04
  */
 
 import { readFileSync } from 'node:fs'
@@ -557,6 +570,22 @@ async function main() {
   )
   totalChecks += phaseE.totalChecks
   passedChecks += phaseE.passedChecks
+
+  // ===========================================================================
+  // PHASE F — /api/score-social standard-depth wiring (E4)
+  // ===========================================================================
+
+  const phaseF = await runConsumerWiringPhase(
+    {
+      label: 'F',
+      depth: 'standard',
+      consumerDescription: '/api/score-social standard-depth wiring (E4)',
+      ceilingChars: 12000,
+    },
+    deps,
+  )
+  totalChecks += phaseF.totalChecks
+  passedChecks += phaseF.passedChecks
 
   // ===========================================================================
   // SUMMARY
