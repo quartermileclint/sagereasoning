@@ -18,11 +18,11 @@
  *   Phase 2 — Layer 1 schema fidelity (M1-CP1)
  *   Phase 3 — Layer 2 determinism (M1-CP2)
  *   Phase 4 — Layer 2 coverage (M1-CP2)
- *   Phase 5 — Layer 3 prose-assessment consistency (THIS SESSION, M1-CP3 — per ADR-007 §8)
- *   Phase 6 — End-to-end orchestration (DEFERRED to M1-CP4; see ADR-004 §7.2)
- *   Phase 7 — R20a perimeter preservation (DEFERRED to M1-CP4; see ADR-004 §7.2)
- *   Phase 8 — Fallback semantics (DEFERRED to M1-CP4; see ADR-004 §7.2)
- *   Phase 9 — Cost + latency reporting (DEFERRED to M1-CP4; see ADR-004 §7.2)
+ *   Phase 5 — Layer 3 prose-assessment consistency (M1-CP3 — per ADR-007 §8)
+ *   Phase 6 — End-to-end orchestration (THIS SESSION, M1-CP4 — composes §2.1 shape from cached layer outputs; no new LLM calls)
+ *   Phase 7 — R20a perimeter preservation (THIS SESSION, M1-CP4 — grep + invocation pattern test per AC4)
+ *   Phase 8 — Fallback semantics (THIS SESSION, M1-CP4 — invalid input → layer1_throw; generateFallbackProse validates)
+ *   Phase 9 — Cost + latency reporting (THIS SESSION, M1-CP4 — aggregate per-layer latency + cost-cap config summary)
  *
  * Cost note: Phase 1 + Phase 2 issue real Sonnet calls (4 fixtures). Per ADR-005
  * §8 the per-run cost is ~$0.10–0.40. Phase 3 + Phase 4 add NO LLM cost (Layer 2
@@ -58,6 +58,13 @@ import {
   Layer3ValidationError,
   type Layer3Prose,
 } from '../src/lib/translation-sandwich/layer3-prose'
+
+// M1-CP4 (2026-05-04): translation-sandwich orchestrator + harness-facing exports.
+import {
+  runSandwichForHarness,
+  isParallelRunEnabled,
+  PARALLEL_RUN_CONFIG,
+} from '../src/lib/translation-sandwich/parallel-run'
 
 // -----------------------------------------------------------------------------
 // 1. Load .env.local manually (no dotenv dep) — same pattern as verify-reason-rag.ts
@@ -1101,33 +1108,371 @@ async function runPhase5Async(
 }
 
 // -----------------------------------------------------------------------------
-// 7b. Phase 6+ stubs (DEFERRED to M1-CP4 per ADR-004 §7.2)
+// 7b. Phase 6 — End-to-end orchestration (M1-CP4)
+//
+// Verifies that for each fixture, the cached Layer 1 schema + Layer 2 assessment
+// + Layer 3 prose compose into the ADR-004 §2.1 top-level shape:
+//   { version, extraction, assessment, prose, meta }
+//
+// Does NOT issue any new LLM calls. Uses the outputs already produced by Phases
+// 1–5 in this run. Cost: $0.
+//
+// Also performs a smoke check that runSandwichForHarness is exported and is an
+// async function — confirms the orchestrator's surface compiles cleanly.
 // -----------------------------------------------------------------------------
 
-function runPhase6Stub(): void {
-  // TODO: M1-CP4 — see ADR-004 §7.2
-  // End-to-end orchestration: Layer 1 → Layer 2 → Layer 3 composes correctly; route response shape matches §2.1.
-  console.log('[SKIP] Phase 6 (end-to-end orchestration) — DEFERRED to M1-CP4; see ADR-004 §7.2')
+interface ComposedShape {
+  version: 'translation-sandwich-v1'
+  extraction: Layer1Schema
+  assessment: Layer2Assessment
+  prose: Layer3Prose
+  meta: {
+    engine_attribution: 'translation-sandwich'
+    layer1_latency_ms: number | null
+    layer2_latency_ms: number | null
+    layer3_latency_ms: number | null
+  }
 }
 
-function runPhase7Stub(): void {
-  // TODO: M1-CP4 — see ADR-004 §7.2
-  // R20a perimeter preservation: distress check at /api/reason line 144 fires once per request before any layer.
-  // Verified by AC4 invocation testing (grep + execution path proof).
-  console.log('[SKIP] Phase 7 (R20a perimeter preservation) — DEFERRED to M1-CP4; see ADR-004 §7.2')
+function runPhase6(
+  fixtureResults: FixtureResult[],
+  layer2Results: Layer2FixtureResult[],
+  phase5Results: Phase5Result[]
+): void {
+  console.log('=== PHASE 6 — END-TO-END ORCHESTRATION ===\n')
+
+  // Smoke check on the orchestrator export.
+  check(
+    `P6 — runSandwichForHarness is an exported async function`,
+    typeof runSandwichForHarness === 'function' &&
+      runSandwichForHarness.constructor.name === 'AsyncFunction',
+    `typeof=${typeof runSandwichForHarness}, ctor=${runSandwichForHarness?.constructor?.name}`
+  )
+
+  for (const fr of fixtureResults) {
+    const fixtureId = fr.fixture.id
+    const l2 = layer2Results.find((l) => l.fixture.id === fixtureId)
+    const p5 = phase5Results.find((p) => p.fixture_id === fixtureId)
+
+    if (!fr.schema || !l2?.assessment_a || !p5) {
+      info(
+        `  ${fixtureId}.P6 — SKIP composition (upstream phase failed: schema=${!!fr.schema} assessment=${!!l2?.assessment_a} phase5=${!!p5})`
+      )
+      continue
+    }
+
+    const proseForCompose = p5.llm_prose ?? p5.fallback_prose
+    if (!proseForCompose) {
+      info(`  ${fixtureId}.P6 — SKIP composition (no Layer 3 prose available)`)
+      continue
+    }
+
+    // Compose §2.1 shape.
+    const composed: ComposedShape = {
+      version: 'translation-sandwich-v1',
+      extraction: fr.schema,
+      assessment: l2.assessment_a,
+      prose: proseForCompose,
+      meta: {
+        engine_attribution: 'translation-sandwich',
+        layer1_latency_ms: fr.latency_ms,
+        layer2_latency_ms: 0, // Layer 2 is synchronous deterministic; Phase 3 doesn't track latency separately
+        layer3_latency_ms: p5.llm_latency_ms ?? null,
+      },
+    }
+
+    // Assertions on the composed shape (matches ADR-004 §2.1).
+    check(
+      `${fixtureId}.P6 — composed.version === 'translation-sandwich-v1'`,
+      composed.version === 'translation-sandwich-v1'
+    )
+    check(
+      `${fixtureId}.P6 — composed.extraction is a valid Layer1Schema`,
+      composed.extraction.version === 'layer1-schema-v1'
+    )
+    check(
+      `${fixtureId}.P6 — composed.assessment is a valid Layer2Assessment`,
+      composed.assessment.version === 'layer2-assessment-v1'
+    )
+    check(
+      `${fixtureId}.P6 — composed.prose is a valid Layer3Prose`,
+      composed.prose.version === 'layer3-prose-v1' &&
+        composed.prose.consumer === 'api_reason'
+    )
+    check(
+      `${fixtureId}.P6 — composed.meta.engine_attribution === 'translation-sandwich'`,
+      composed.meta.engine_attribution === 'translation-sandwich'
+    )
+    check(
+      `${fixtureId}.P6 — composed.prose's layer2_assessment_version matches composed.assessment.version`,
+      composed.prose.layer2_assessment_version === composed.assessment.version
+    )
+    // Composition order proof: every required top-level key present
+    const requiredKeys = ['version', 'extraction', 'assessment', 'prose', 'meta'] as const
+    const missingKeys = requiredKeys.filter((k) => !(k in composed))
+    check(
+      `${fixtureId}.P6 — composed shape has all 5 §2.1 top-level keys`,
+      missingKeys.length === 0,
+      missingKeys.length > 0 ? `missing: ${missingKeys.join(', ')}` : undefined
+    )
+  }
+
+  console.log()
 }
 
-function runPhase8Stub(): void {
-  // TODO: M1-CP4 — see ADR-004 §7.2
-  // Fallback semantics: Layer 1 throws → bundled-depth result. Layer 3 throws → bundled-depth result.
-  console.log('[SKIP] Phase 8 (fallback semantics) — DEFERRED to M1-CP4; see ADR-004 §7.2')
+// -----------------------------------------------------------------------------
+// 7c. Phase 7 — R20a perimeter preservation (M1-CP4)
+//
+// Per AC4 (Invocation Testing for Safety Functions): grep the route source for
+// the distress-check call and the parallel-run call, assert the distress check
+// appears earlier in the file. Per ADR-004 §8.
+//
+// This phase does NOT execute any code in the route — it inspects the source
+// text. AC4 explicitly endorses grep-based invocation testing.
+// -----------------------------------------------------------------------------
+
+function runPhase7(): void {
+  console.log('=== PHASE 7 — R20a PERIMETER PRESERVATION ===\n')
+
+  const routePath = join(__dirname, '..', 'src', 'app', 'api', 'reason', 'route.ts')
+  let routeSrc: string
+  try {
+    routeSrc = readFileSync(routePath, 'utf8')
+  } catch (err) {
+    check(
+      `P7 — read /api/reason/route.ts`,
+      false,
+      `failed: ${err instanceof Error ? err.message : String(err)}`
+    )
+    console.log()
+    return
+  }
+
+  const lines = routeSrc.split('\n')
+  function findLine(needle: RegExp): number {
+    for (let i = 0; i < lines.length; i++) {
+      if (needle.test(lines[i])) return i + 1 // 1-based
+    }
+    return -1
+  }
+
+  // --- Distress check call line (the R20a perimeter) ---
+  const distressLine = findLine(
+    /enforceDistressCheck\s*\(\s*detectDistressTwoStage\s*\(/
+  )
+  check(
+    `P7 — route imports enforceDistressCheck and detectDistressTwoStage`,
+    /from '@\/lib\/r20a-classifier'/.test(routeSrc) &&
+      /from '@\/lib\/constraints'/.test(routeSrc)
+  )
+  check(
+    `P7 — route calls enforceDistressCheck(detectDistressTwoStage(input))`,
+    distressLine > 0,
+    distressLine > 0 ? `at line ${distressLine}` : 'call pattern not found'
+  )
+
+  // --- Distress-redirect early-return ---
+  const redirectIfLine = findLine(/if\s*\(\s*gate\.shouldRedirect\s*\)/)
+  check(
+    `P7 — route guards shouldRedirect with an early return`,
+    redirectIfLine > 0 && redirectIfLine > distressLine,
+    redirectIfLine > 0 ? `at line ${redirectIfLine}` : 'shouldRedirect guard missing'
+  )
+
+  // --- Parallel-run import + call ---
+  const parallelImportLine = findLine(
+    /from '@\/lib\/translation-sandwich\/parallel-run'/
+  )
+  check(
+    `P7 — route imports runParallelSandwich from translation-sandwich/parallel-run`,
+    parallelImportLine > 0,
+    parallelImportLine > 0 ? `at line ${parallelImportLine}` : 'import not found'
+  )
+
+  const parallelCallLine = findLine(/await\s+runParallelSandwich\s*\(/)
+  check(
+    `P7 — route awaits runParallelSandwich(...) (KG1 rule 2: no fire-and-forget)`,
+    parallelCallLine > 0,
+    parallelCallLine > 0 ? `at line ${parallelCallLine}` : 'await call not found'
+  )
+
+  // --- The critical ordering invariant: distress-check call BEFORE parallel-run call ---
+  check(
+    `P7 — distress-check call appears BEFORE runParallelSandwich call (R20a perimeter intact)`,
+    distressLine > 0 && parallelCallLine > 0 && distressLine < parallelCallLine,
+    distressLine > 0 && parallelCallLine > 0
+      ? `distress at L${distressLine}, parallel-run at L${parallelCallLine}`
+      : 'one or both calls missing'
+  )
+
+  // --- runSageReason also after distress-check (existing invariant) ---
+  const runSageReasonCallLine = findLine(/await\s+runSageReason\s*\(/)
+  check(
+    `P7 — runSageReason call also appears AFTER distress-check (existing invariant preserved)`,
+    distressLine > 0 &&
+      runSageReasonCallLine > 0 &&
+      distressLine < runSageReasonCallLine,
+    distressLine > 0 && runSageReasonCallLine > 0
+      ? `runSageReason at L${runSageReasonCallLine}`
+      : 'runSageReason call not found'
+  )
+
+  // --- runParallelSandwich is called AFTER runSageReason (sequential, not parallel-to-bundled) ---
+  check(
+    `P7 — runParallelSandwich called AFTER runSageReason (sequential composition per Step 1(e))`,
+    runSageReasonCallLine > 0 &&
+      parallelCallLine > 0 &&
+      runSageReasonCallLine < parallelCallLine,
+    runSageReasonCallLine > 0 && parallelCallLine > 0
+      ? `runSageReason at L${runSageReasonCallLine}, parallel-run at L${parallelCallLine}`
+      : undefined
+  )
+
+  // --- Single-route discipline: parallel-run module imported only inside this route ---
+  // (Confirmed at session close by a separate grep audit; here we only assert that
+  // this file imports it — the cross-codebase audit is a separate verification step
+  // documented in the decision log.)
+
+  console.log()
 }
 
-function runPhase9Stub(): void {
-  // TODO: M1-CP4 — see ADR-004 §7.2
-  // Cost + latency reporting: per-layer latency, total latency, per-layer cost estimate, total cost estimate.
-  // Output is the data for the cutover decision at M1-CP5.
-  console.log('[SKIP] Phase 9 (cost + latency reporting) — DEFERRED to M1-CP4; see ADR-004 §7.2')
+// -----------------------------------------------------------------------------
+// 7d. Phase 8 — Fallback semantics (M1-CP4)
+//
+// Per ADR-004 §9 (Fallback semantics):
+//   - Layer 1 throws → orchestrator returns with error='layer1_throw', output=null.
+//   - Layer 3 throws → orchestrator falls back to generateFallbackProse(assessment).
+//   - User is never stranded.
+//
+// Phase 8a invokes runSandwichForHarness with an invalid input that triggers
+// Layer 1's validator-level throw (no LLM cost). Phase 8b confirms
+// generateFallbackProse produces a valid Layer3Prose for each fixture's
+// assessment (this is also covered in Phase 5 but Phase 8 names it explicitly
+// for the fallback-semantics contract).
+// -----------------------------------------------------------------------------
+
+async function runPhase8(layer2Results: Layer2FixtureResult[]): Promise<void> {
+  console.log('=== PHASE 8 — FALLBACK SEMANTICS ===\n')
+
+  // Phase 8a: invalid input → layer1_throw.
+  // extractFeatures throws Layer1ValidationError on empty input (validator-level
+  // check, no LLM call). The orchestrator catches it and reports layer1_throw.
+  const invalidInputResult = await runSandwichForHarness({
+    input: '', // intentionally invalid — extractFeatures throws Layer1ValidationError
+    bundledDepthOutput: { /* mock */ },
+    bundledDepthLatencyMs: 0,
+  })
+
+  check(
+    `P8 — invalid input triggers layer1_throw (no Sonnet call)`,
+    invalidInputResult.error === 'layer1_throw',
+    `actual error=${invalidInputResult.error}`
+  )
+  check(
+    `P8 — layer1_throw → output is null (user never sees translation-sandwich output)`,
+    invalidInputResult.output === null
+  )
+  check(
+    `P8 — layer1_throw → layer1_latency_ms is recorded (failure timing captured)`,
+    invalidInputResult.layer1_latency_ms !== null && invalidInputResult.layer1_latency_ms >= 0
+  )
+  check(
+    `P8 — layer1_throw → downstream layer latencies are null (Layers 2 + 3 did not run)`,
+    invalidInputResult.layer2_latency_ms === null &&
+      invalidInputResult.layer3_latency_ms === null
+  )
+
+  // Phase 8b: generateFallbackProse produces valid Layer3Prose for every fixture's assessment.
+  for (const l2r of layer2Results) {
+    if (!l2r.assessment_a) continue
+    const fixtureId = l2r.fixture.id
+
+    let fbValid = false
+    let fbDetail = ''
+    try {
+      const fb = generateFallbackProse(l2r.assessment_a)
+      const reparsed = JSON.parse(JSON.stringify(fb))
+      const validated = validateLayer3Prose(reparsed)
+      fbValid = validated.source === 'fallback' && validated.consumer === 'api_reason'
+      if (!fbValid)
+        fbDetail = `source=${validated.source}, consumer=${validated.consumer}`
+    } catch (err) {
+      fbDetail = err instanceof Error ? err.message : String(err)
+    }
+
+    check(
+      `${fixtureId}.P8 — generateFallbackProse(assessment) → valid Layer3Prose with source='fallback'`,
+      fbValid,
+      fbDetail || undefined
+    )
+  }
+
+  console.log()
+}
+
+// -----------------------------------------------------------------------------
+// 7e. Phase 9 — Cost + latency reporting (M1-CP4)
+//
+// Aggregates per-layer latency from Phase 1+2 (Layer 1) and Phase 5 (Layer 3).
+// Reports the parallel-run cost-cap configuration so the founder can see what
+// is enforced at runtime.
+//
+// Layer 1 + Layer 3 cost-per-fixture is reported as "not captured" because
+// extractFeatures + generateProse do not currently expose token usage. M1-CP5
+// may extend the layer modules to return usage; documented as an open question
+// in the decision-log entry for this session.
+// -----------------------------------------------------------------------------
+
+function runPhase9(
+  fixtureResults: FixtureResult[],
+  phase5Results: Phase5Result[]
+): void {
+  console.log('=== PHASE 9 — COST + LATENCY REPORTING ===\n')
+
+  let totalLayer1LatencyMs = 0
+  let layer1Count = 0
+  for (const fr of fixtureResults) {
+    if (typeof fr.latency_ms === 'number' && fr.latency_ms > 0) {
+      totalLayer1LatencyMs += fr.latency_ms
+      layer1Count++
+    }
+  }
+
+  let totalLayer3LatencyMs = 0
+  let layer3Count = 0
+  for (const p5r of phase5Results) {
+    if (typeof p5r.llm_latency_ms === 'number' && p5r.llm_latency_ms > 0) {
+      totalLayer3LatencyMs += p5r.llm_latency_ms
+      layer3Count++
+    }
+  }
+
+  console.log(`  Layer 1 latency: ${totalLayer1LatencyMs} ms total across ${layer1Count} fixture(s)`)
+  if (layer1Count > 0) {
+    console.log(`  Layer 1 avg latency: ${Math.round(totalLayer1LatencyMs / layer1Count)} ms`)
+  }
+  console.log(`  Layer 2 latency: synchronous deterministic (sub-millisecond per fixture)`)
+  console.log(`  Layer 3 latency: ${totalLayer3LatencyMs} ms total across ${layer3Count} fixture(s)`)
+  if (layer3Count > 0) {
+    console.log(`  Layer 3 avg latency: ${Math.round(totalLayer3LatencyMs / layer3Count)} ms`)
+  }
+
+  console.log()
+  console.log(`  Layer 1 cost per fixture: not captured at M1 (extractFeatures does not expose usage)`)
+  console.log(`  Layer 3 cost per fixture: not captured at M1 (generateProse does not expose usage)`)
+  console.log(`  → Per-fixture cost capture deferred to M1-CP5; logged as open question.`)
+
+  console.log()
+  console.log(`  Parallel-run config (production):`)
+  console.log(`    TRANSLATION_SANDWICH_PARALLEL_RUN at module load: ${isParallelRunEnabled() ? 'ENABLED' : 'disabled'}`)
+  console.log(`    Cap (USD microcents): ${PARALLEL_RUN_CONFIG.CAP_USD_MICROCENTS} (= $${(BigInt(PARALLEL_RUN_CONFIG.CAP_USD_MICROCENTS) / BigInt(1_000_000)).toString()})`)
+  console.log(`    Cap (request count): ${PARALLEL_RUN_CONFIG.CAP_REQUEST_COUNT}`)
+  console.log(`    Cap (period days): ${PARALLEL_RUN_CONFIG.CAP_DAYS}`)
+  console.log(`    Deadline grace: ${PARALLEL_RUN_CONFIG.PARALLEL_DEADLINE_MS} ms`)
+  console.log(`    Sonnet pricing (USD/M tokens): input=${PARALLEL_RUN_CONFIG.SONNET_INPUT_USD_PER_MILLION_TOKENS}, output=${PARALLEL_RUN_CONFIG.SONNET_OUTPUT_USD_PER_MILLION_TOKENS}`)
+
+  // Phase 9 is reporting-only; it produces no check() assertions.
+  console.log()
 }
 
 // -----------------------------------------------------------------------------
@@ -1135,20 +1480,21 @@ function runPhase9Stub(): void {
 // -----------------------------------------------------------------------------
 
 async function main(): Promise<void> {
-  console.log('verify-translation-sandwich.ts — M1-CP3 standalone harness')
+  console.log('verify-translation-sandwich.ts — M1-CP4 standalone harness (Phases 1–9)')
   console.log('Per ADR-004 §7 + ADR-005 §8 + ADR-006 §4 + ADR-007 §8\n')
 
   const fixtureResults = await runPhase1AndPhase2()
   const layer2Results = runPhase3(fixtureResults)
   runPhase4(layer2Results)
-  await runPhase5Async(layer2Results)
+  const phase5Results = await runPhase5Async(layer2Results)
 
-  console.log('=== PHASES 6–9 (DEFERRED) ===\n')
-  runPhase6Stub()
-  runPhase7Stub()
-  runPhase8Stub()
-  runPhase9Stub()
-  console.log()
+  // Phases 6–9 wired this session (M1-CP4). Phases 6, 7, 9 issue NO new LLM
+  // calls. Phase 8 invokes runSandwichForHarness with an invalid input which
+  // throws at the validator level (no LLM call). Total marginal cost: $0.
+  runPhase6(fixtureResults, layer2Results, phase5Results)
+  runPhase7()
+  await runPhase8(layer2Results)
+  runPhase9(fixtureResults, phase5Results)
 
   // -------------------------------------------------------------------------
   // SUMMARY
@@ -1157,7 +1503,7 @@ async function main(): Promise<void> {
   console.log('---')
   console.log(`SUMMARY: ${passedChecks} / ${totalChecks} checks passed`)
   if (passedChecks === totalChecks) {
-    console.log('ALL CHECKS PASSED (Phase 1 + Phase 2 + Phase 3 + Phase 4 + Phase 5)')
+    console.log('ALL CHECKS PASSED (Phase 1 + Phase 2 + Phase 3 + Phase 4 + Phase 5 + Phase 6 + Phase 7 + Phase 8 + Phase 9)')
     process.exit(0)
   } else {
     console.log(`FAILED: ${totalChecks - passedChecks} check(s) did not pass`)

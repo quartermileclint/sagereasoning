@@ -7,6 +7,11 @@ import { detectDistressTwoStage } from '@/lib/r20a-classifier'
 import { enforceDistressCheck } from '@/lib/constraints'
 import { type RetrieveResult } from '@/lib/rag'
 import { loadLayer1WithFallback } from '@/lib/rag/load-layer1-with-fallback'
+// M1-CP4 (2026-05-04): translation-sandwich parallel-run orchestrator.
+// Imported AFTER the R20a perimeter line below (line ~144). The orchestrator
+// is invoked AFTER runSageReason returns (line ~184) and never throws.
+// Per ADR-004 §6 + §6.3 + §10. Per AC4 + AC5 + AC8 + PR1 + PR6.
+import { runParallelSandwich } from '@/lib/translation-sandwich/parallel-run'
 
 // =============================================================================
 // sage-reason — The Universal Reasoning Layer
@@ -171,6 +176,7 @@ export async function POST(request: NextRequest) {
 
     // Call the shared reasoning engine. layer1 spreads into either
     // retrievedPassages (success path) or stoicBrainContext (fallback path).
+    const bundledStartedAt = Date.now()
     const result = await runSageReason({
       input,
       context,
@@ -181,6 +187,41 @@ export async function POST(request: NextRequest) {
       practitionerContext,
       projectContext,
     })
+    const bundledDepthLatencyMs = Date.now() - bundledStartedAt
+
+    // -------------------------------------------------------------------------
+    // M1-CP4 (2026-05-04): Translation-sandwich parallel-run.
+    // Per ADR-004 §6.1 (parallel-run shape) + §6.3 (failure isolation).
+    //
+    // Runs Layer 1 → Layer 2 → Layer 3 strictly AFTER runSageReason returns.
+    // Logs both engines' outputs to translation_sandwich_comparisons for offline
+    // comparison at M1-CP5. NEVER throws — all errors are logged internally.
+    //
+    // Activation: gated on env TRANSLATION_SANDWICH_PARALLEL_RUN=1 inside the
+    // orchestrator module (read once at module load). When unset/"0", this is
+    // a no-op and user-facing latency is identical to today.
+    //
+    // Deadline: up to 500ms grace after this point. If the sandwich does not
+    // complete in time, deadline_exceeded is logged and Vercel kills the
+    // in-flight sandwich after the user response is sent (KG1 rule 4).
+    //
+    // R20a perimeter preservation: this call sits AFTER both line-144 distress
+    // check AND the bundled-depth call. Phase 7 of the harness asserts the
+    // line-position invariant. Per AC4 + AC5 + PR6.
+    // -------------------------------------------------------------------------
+    await runParallelSandwich({
+      input,
+      context,
+      domain_context,
+      urgency_context,
+      stoicBrainContext: layer1.stoicBrainContext,
+      retrievedPassages: layer1.retrievedPassages,
+      practitionerContext,
+      projectContext,
+      bundledDepthOutput: result,
+      bundledDepthLatencyMs,
+    })
+
     return NextResponse.json(result, { headers: corsHeaders() })
   } catch (error) {
     console.error('sage-reason API error:', error)
