@@ -11,11 +11,12 @@ import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMI
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_DEEP } from '@/lib/model-config'
-import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistressTwoStage } from '@/lib/r20a-classifier'
 import { enforceDistressCheck } from '@/lib/constraints'
+import type { RetrieveResult } from '@/lib/rag'
+import { loadLayer1BlockWithFallback } from '@/lib/rag/load-layer1-block-with-fallback'
 
 /**
  * sage-document (score-document) — Deep evaluation of documents and policies.
@@ -39,9 +40,15 @@ import { enforceDistressCheck } from '@/lib/constraints'
  *   refactoring to pass through the generic engine. Deferred consolidation
  *   is noted as tech debt (see session-handoffs/2026-04-15-layer3-wiring.md).
  *
- * CONTEXT LAYERS WIRED HERE (manual injection pattern):
- *   Layer 1 (Stoic Brain)        — getStoicBrainContext('deep')
- *                                   Injected as a system message block.
+ * CONTEXT LAYERS WIRED HERE (manual injection pattern; Pattern A1 per ADR-001):
+ *   Layer 1 (Stoic Brain)        — loadLayer1BlockWithFallback(text, 'deep', …)
+ *                                   D6 + D7 RAG retrieval; formatted block
+ *                                   string injected as the second system
+ *                                   message block (replaces predecessor
+ *                                   getStoicBrainContext('deep') call site).
+ *                                   On any retrieval error, falls back to
+ *                                   getStoicBrainContext('deep') silently.
+ *                                   Wired at Sub-session E5 (2026-05-04).
  *   Layer 2 (Practitioner)       — getPractitionerContext(auth.user.id)
  *                                   Appended to user message if present.
  *   Layer 3 (Project Context)    — getProjectContext('condensed')
@@ -66,6 +73,9 @@ import { enforceDistressCheck } from '@/lib/constraints'
  *   - operations/handoffs/session-7d-layer1-layer2.md   (L1/L2 origin)
  *   - operations/session-handoffs/2026-04-15-layer3-wiring.md
  *     (L3 added via manual-injection pattern — Group B endpoint)
+ *   - adopted/adr/2026-05-04-d6-d7-consumer-wiring.md (ADR-001 — amended at E5
+ *     to specify Pattern A1; this route is the first Group B consumer)
+ *   - operations/decision-log.md D-PATTERN-A1-INTRODUCED-AND-WIRED-2026-05-04
  */
 
 const client = new Anthropic({
@@ -122,9 +132,11 @@ export async function POST(request: NextRequest) {
     // Truncate to ~8000 words to stay within token limits
     const truncated = trimmed.split(/\s+/).slice(0, 8000).join(' ')
 
-    // Context layers injection
-    const stoicBrainContext = getStoicBrainContext('deep')
-    const [practitionerContext, projectContext] = await Promise.all([
+    // Context layers injection — Pattern A1 (per ADR-001 amended at E5).
+    // Per-request RetrieveResult cache — KG1 rule 4 (never module-level).
+    const ragCache = new Map<string, RetrieveResult>()
+    const [stoicBrainContext, practitionerContext, projectContext] = await Promise.all([
+      loadLayer1BlockWithFallback(truncated, 'deep', ragCache, '/api/score-document'),
       getPractitionerContext(auth.user.id),
       getProjectContext('condensed'),
     ])

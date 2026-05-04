@@ -162,6 +162,32 @@ The route makes **no LLM call**. D6's retrieval is deterministic (BM25 + vector 
 
 The route's response **is** the placement — it returns ranked passages to its caller. No prompt composition happens here. Future consumers (E1–E4) are responsible for placing the response's `passages[]` into their own prompt's system block (cached) or user message (per-request) per their KG6 needs. This route honours KG6 by not imposing a placement.
 
+## Pattern variants (named retrospectively; amended 2026-05-04 at Sub-session E5)
+
+The wiring shape this ADR originally documented (engine receives a structured `retrievedPassages: RetrievedPassage[]`; the engine formats internally via `formatRetrievedPassagesAsBlock`; the formatted block lands in the engine's system array) is **Pattern A2** (engine-managed). It serves consumers that already call `runSageReason` — Group A in the rollout vocabulary (`/api/reason`, `/api/score`, `/api/score-conversation`, `/api/score-social`).
+
+Some consumers don't call `runSageReason` — they call `client.messages.create` directly because their system prompts (`V3_DOCUMENT_SCORING_PROMPT`, `V3_POLICY_SCORING_PROMPT`, equivalent scenario/decision prompts) embed specialised evaluation instructions whose return shape is bespoke and would require significant refactoring to pass through the generic engine. These are Group B in the rollout vocabulary.
+
+For Group B, this ADR introduces **Pattern A1** (route-managed; manual injection). The route calls `retrievePassages` + `reRank` directly, calls the engine's exported `formatRetrievedPassagesAsBlock` to turn the result into the Stoic Brain block string, and injects that string into its own `client.messages.create` system array — replacing the predecessor `getStoicBrainContext(depth)` call site. The engine is not invoked.
+
+### Pattern A1 specification
+
+1. **Wiring shape.** The formatted block string lands in the route's existing system array as the second block, replacing the text source for the block currently filled by `getStoicBrainContext(depth)`. The first system block (the route's scoring prompt) keeps its `cache_control: { type: 'ephemeral' }`. The second block does NOT carry `cache_control` because its content varies per request (the retrieved passages depend on the user's input), so caching would not hit. Pattern A1 changes the source of the second block's text, not the array structure.
+
+2. **KG6 composition order.** The route owns the placement decision under Pattern A1. The formatted block lands in the same logical slot as the predecessor `getStoicBrainContext(depth)` — second system block, after the scoring prompt, before the user message. KG6 is honoured because the route makes a deliberate placement choice; the engine is not involved.
+
+3. **AC-12 narrowness preservation.** Pattern A1 introduces no new LLM call. The existing `client.messages.create` invocation count is unchanged (one per request). Only the system-block text source changes. AC-12 commitment preserved without compromise.
+
+4. **Fallback semantics.** Same as Pattern A2: `try { … } catch (err) { … }` around the D6 + D7 + format steps; on any throw (`RetrievalUnavailableError`, `EmbeddingFailureError`, `RetrievalTimeoutError`, or any other), the route substitutes `getStoicBrainContext(depth)` (the compiled-string path) and continues. The failure is logged via `console.warn` carrying the route name so Phase-2 production observation can attribute. The user sees a working response either way.
+
+5. **Cache shape.** A `Map<string, RetrieveResult>` declared inside POST (KG1 rule 4 — never module-level). Same as Pattern A2.
+
+6. **Wrapper choice.** A sibling wrapper `loadLayer1BlockWithFallback` lives alongside `loadLayer1WithFallback` in `/website/src/lib/rag/`. Signature: `(input, depth, cache, routeName) => Promise<string>` — always returns a string suitable for direct injection into a system block. On success, the string is the formatted passage block. On fallback, the string is `getStoicBrainContext(depth)`. The two wrappers share the helpers (`getCorpusMechanismsForDepth`, `RETRIEVAL_TOP_K_BY_DEPTH`, `toBm25OrShape`) from `/website/src/lib/rag/helpers.ts` and the formatter (`formatRetrievedPassagesAsBlock`) from the engine. Rationale for a sibling over an extension to `loadLayer1WithFallback`: the two callers want different return types (engine spread vs. string), TypeScript discrimination is clearer with two functions, and the sibling has identical fallback semantics so behaviour parity is straightforward to verify.
+
+### Pattern A1 risk classification
+
+Wiring a Group B consumer under Pattern A1 is Elevated under 0d-ii — changes to existing user-facing functionality. AC7 not engaged. PR6 not engaged. The R20a distress check at the start of each Group B route is unchanged by the wiring; only the system-block text source changes downstream.
+
 ## Consequences
 
 ### Positive
@@ -189,6 +215,7 @@ The route's response **is** the placement — it returns ranked passages to its 
 - The wiring into `/api/reason` quick-depth (Candidate A). Likely Sub-session E1.
 - Cross-request embedding cache. Founder direction was "no cache for the proof"; future-session candidate.
 - ~~D6 contract extension to accept separate `bm25_query`. Future-session candidate.~~ **Implemented in this session per the in-session refinement** (see changelog).
+- ~~The wiring of Group B consumers (`/api/score-document`, `/api/score-scenario`, …) under Pattern A1 (manual injection). Future Sub-session E5+.~~ **Pattern A1 specified in this amendment** (Sub-session E5, 2026-05-04). First Group B consumer (`/api/score-document` deep depth) wired in the same session — see `D-PATTERN-A1-INTRODUCED-AND-WIRED-2026-05-04`.
 
 ## Approval
 
@@ -198,6 +225,7 @@ Approval signal from the founder: "approve" (or specific edits) → ADR moves fr
 
 - **2026-05-04 (initial Adoption)** — drafted in /drafts/adr/, approved by founder, moved to /adopted/adr/.
 - **2026-05-04 (in-session refinement)** — D6's `retrievePassages` contract extended with optional `bm25_query` parameter (additive; backward-compatible). Reason: first verification run (Sub-session D Step 4) surfaced Q3 ranking shift caused by the OR-shape contaminating the vector channel's embedding. The "cleaner separation" originally named as a Phase-2 / Sub-session E candidate was promoted to in-session implementation per founder direction ("fix it now"). Two passages in this ADR amended to reflect the new state. See `D-INTERNAL-RETRIEVE-ROUTE-VERIFIED-2026-05-04` for the full reasoning.
+- **2026-05-04 (in-session amendment, Sub-session E5)** — Pattern A1 (route-managed; manual injection) specified for Group B consumers. Sibling wrapper `loadLayer1BlockWithFallback` adopted alongside the existing `loadLayer1WithFallback`. Pattern A2 retrospectively named for the original wiring shape this ADR documents. New section "Pattern variants (named retrospectively)" added before "Consequences". Strike-through entry added to "What this ADR does not decide" marking Pattern A1 as no longer deferred. Approved by founder at Sub-session E5 Step 1. See `D-PATTERN-A1-INTRODUCED-AND-WIRED-2026-05-04` for full reasoning.
 
 ---
 

@@ -45,6 +45,20 @@
  *     runConsumerWiringPhase('F', 'standard', ...). Group A second consumer
  *     (matches /api/score-conversation Pattern A2 on the shared substrate).
  *
+ *   PHASE G (E5) — /api/score-document deep-depth wiring via Pattern A1
+ *     (Group B first consumer). Two sub-phases:
+ *       G1 — substrate continuity: runConsumerWiringPhase('G', 'deep', ...).
+ *            Same shape as Phase E; confirms the substrate after the new
+ *            sibling wrapper is added.
+ *       G2 — Pattern A1 wrapper surface (bespoke; not via runConsumerWiringPhase):
+ *            For each fixture, calls loadLayer1BlockWithFallback directly and
+ *            asserts the returned string is non-empty, contains the
+ *            STOIC BRAIN — RETRIEVED PASSAGES header, contains at least one
+ *            bracketed citation, is under the deep-depth ceiling, and matches
+ *            byte-for-byte what formatRetrievedPassagesAsBlock(top) would
+ *            produce when called directly with the same retrieve+rerank result.
+ *            Plus one cache-replay assertion.
+ *
  * Exit code 0 if all checks pass; 1 otherwise.
  *
  * Sub-session E3 changes:
@@ -59,6 +73,14 @@
  *   - Phase F added at standard depth (/api/score-social — Group A second
  *     consumer). One additional `runConsumerWiringPhase` call; no other shape
  *     change. Total checks 59 → 75 (Phase F adds 16).
+ *
+ * Sub-session E5 changes:
+ *   - Phase G added at deep depth (/api/score-document — Group B first
+ *     consumer; Pattern A1 first surface). Two sub-phases: G1 reuses
+ *     runConsumerWiringPhase for substrate continuity (16 checks); G2 is
+ *     bespoke and exercises loadLayer1BlockWithFallback at the function-call
+ *     boundary (16 checks: 5 per fixture × 3 + 1 cache replay). Total checks
+ *     75 → 107 (Phase G adds 32).
  *
  * Cross-references:
  *   - /adopted/adr/2026-05-04-d6-d7-consumer-wiring.md (ADR-001)
@@ -75,6 +97,9 @@
  *   - /operations/decision-log.md D-SCORE-RAG-WIRED-2026-05-04
  *   - /operations/decision-log.md D-CONSUMER-WIRING-LIFT-2026-05-04
  *   - /operations/decision-log.md D-SCORE-SOCIAL-RAG-WIRED-2026-05-04
+ *   - /website/src/app/api/score-document/route.ts (E5 consumer — deep depth, Pattern A1)
+ *   - /website/src/lib/rag/load-layer1-block-with-fallback.ts (sibling wrapper for Pattern A1)
+ *   - /operations/decision-log.md D-PATTERN-A1-INTRODUCED-AND-WIRED-2026-05-04
  */
 
 import { readFileSync } from 'node:fs'
@@ -586,6 +611,132 @@ async function main() {
   )
   totalChecks += phaseF.totalChecks
   passedChecks += phaseF.passedChecks
+
+  // ===========================================================================
+  // PHASE G — /api/score-document deep-depth wiring via Pattern A1 (E5)
+  // Two sub-phases:
+  //   G1 — substrate continuity (runConsumerWiringPhase at deep depth)
+  //   G2 — Pattern A1 wrapper surface (bespoke loadLayer1BlockWithFallback assertions)
+  // ===========================================================================
+
+  // -- G1: substrate continuity at deep depth -------------------------------
+
+  const phaseG1 = await runConsumerWiringPhase(
+    {
+      label: 'G',
+      depth: 'deep',
+      consumerDescription: '/api/score-document deep-depth wiring (E5; Pattern A1) — G1 substrate continuity',
+      ceilingChars: 14000,
+    },
+    deps,
+  )
+  totalChecks += phaseG1.totalChecks
+  passedChecks += phaseG1.passedChecks
+
+  // -- G2: Pattern A1 wrapper surface ---------------------------------------
+
+  console.log('PHASE G2 — Pattern A1 wrapper surface (loadLayer1BlockWithFallback)')
+  console.log('-------------------------------------------------------------------')
+  console.log()
+
+  const { loadLayer1BlockWithFallback } = await import('@/lib/rag/load-layer1-block-with-fallback')
+
+  const G2_DEEP_CEILING = 14000
+  const g2Cache = new Map()
+  const g2RouteName = '/api/score-document'
+
+  for (const fixture of FIXTURES) {
+    console.log(`G2/${fixture.label} — invoke loadLayer1BlockWithFallback @ deep depth`)
+    info(`input: ${fixture.input.slice(0, 80)}${fixture.input.length > 80 ? '...' : ''}`)
+
+    const startG2 = Date.now()
+    const block = await loadLayer1BlockWithFallback(fixture.input, 'deep', g2Cache, g2RouteName)
+    const elapsedG2 = Date.now() - startG2
+
+    info(`elapsed_ms=${elapsedG2} block_chars=${block.length}`)
+
+    // G2.a — non-empty string
+    totalChecks++
+    if (typeof block === 'string' && block.length > 0) {
+      ok(`wrapper returned non-empty string (${block.length} chars)`)
+      passedChecks++
+    } else {
+      fail(`wrapper returned empty/non-string: typeof=${typeof block} length=${block.length}`)
+    }
+
+    // G2.b — contains the Stoic Brain header
+    totalChecks++
+    if (block.includes('STOIC BRAIN — RETRIEVED PASSAGES')) {
+      ok(`block contains STOIC BRAIN — RETRIEVED PASSAGES header`)
+      passedChecks++
+    } else {
+      fail(`block missing header. first 200 chars: ${block.slice(0, 200)}`)
+    }
+
+    // G2.c — contains at least one bracketed citation
+    totalChecks++
+    if (/\[[^\]]+\]/.test(block)) {
+      ok(`block contains at least one bracketed citation [..]`)
+      passedChecks++
+    } else {
+      fail(`block missing bracketed citation. first 200 chars: ${block.slice(0, 200)}`)
+    }
+
+    // G2.d — under deep-depth ceiling
+    totalChecks++
+    if (block.length <= G2_DEEP_CEILING) {
+      ok(`block under ceiling (${block.length} ≤ ${G2_DEEP_CEILING})`)
+      passedChecks++
+    } else {
+      fail(`block exceeds ceiling: ${block.length} > ${G2_DEEP_CEILING}`)
+    }
+
+    // G2.e — wrapper output equals direct formatRetrievedPassagesAsBlock(top)
+    // Re-run retrieve+rerank with a separate cache, format directly, compare.
+    const corpusMechanisms = deps.getCorpusMechanismsForDepth('deep')
+    const { top_k, top_k_after_rerank } = deps.RETRIEVAL_TOP_K_BY_DEPTH.deep
+    const retrieveInputDirect = {
+      query: fixture.input,
+      bm25_query: deps.toBm25OrShape(fixture.input),
+      mechanism_filter: corpusMechanisms,
+      passage_type_filter: ['mechanism' as const],
+      top_k,
+    }
+    const directCache = new Map()
+    const directResult = await deps.retrievePassages(retrieveInputDirect, directCache)
+    const directTop = await deps.reRank(directResult.passages, retrieveInputDirect, 'heuristic', { top_k_after_rerank })
+    const directBlock = deps.formatRetrievedPassagesAsBlock(directTop)
+
+    totalChecks++
+    if (block === directBlock) {
+      ok(`wrapper output ≡ formatRetrievedPassagesAsBlock(top) (${block.length} chars)`)
+      passedChecks++
+    } else {
+      fail(`wrapper output diverges from direct format. wrapper=${block.length}c direct=${directBlock.length}c`)
+      info(`wrapper first 200: ${block.slice(0, 200).replace(/\n/g, ' / ')}`)
+      info(`direct  first 200: ${directBlock.slice(0, 200).replace(/\n/g, ' / ')}`)
+    }
+
+    console.log()
+  }
+
+  // G2 cache replay — re-invoke wrapper with F1 input on the same g2Cache;
+  // the underlying retrievePassages should hit the cache.
+  console.log(`G2-cache. Replay F1 with the same per-phase wrapper cache`)
+  totalChecks++
+  const startReplayG2 = Date.now()
+  const replayBlock = await loadLayer1BlockWithFallback(FIXTURES[0].input, 'deep', g2Cache, g2RouteName)
+  const elapsedReplayG2 = Date.now() - startReplayG2
+  if (replayBlock.length > 0 && elapsedReplayG2 < 200) {
+    ok(`replay produced non-empty block in ${elapsedReplayG2}ms (cache active)`)
+    passedChecks++
+  } else {
+    fail(
+      `expected non-empty block + <200ms via cache, got length=${replayBlock.length}, ` +
+      `elapsed_ms=${elapsedReplayG2}`,
+    )
+  }
+  console.log()
 
   // ===========================================================================
   // SUMMARY
