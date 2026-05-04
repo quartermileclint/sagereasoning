@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST } from '@/lib/model-config'
-import { runSageReason } from '@/lib/sage-reason-engine'
+import { runSageReason, type ReasonDepth } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistressTwoStage } from '@/lib/r20a-classifier'
 import { enforceDistressCheck } from '@/lib/constraints'
+import { retrievePassages, reRank, type RetrievedPassage, type RetrieveInput, type RetrieveResult } from '@/lib/rag'
+import { getCorpusMechanismsForDepth, RETRIEVAL_TOP_K_BY_DEPTH, toBm25OrShape } from '@/app/api/reason/helpers'
 
 /**
  * sage-score — Evaluate a single action through Stoic virtue principles.
@@ -22,7 +24,13 @@ import { enforceDistressCheck } from '@/lib/constraints'
  *
  * ---------------------------------------------------------------------------
  * CONTEXT LAYERS WIRED HERE:
- *   Layer 1 (Stoic Brain)        — getStoicBrainContext('standard')
+ *   Layer 1 (Stoic Brain)        — Loaded via D6 + D7 RAG retrieval per
+ *                                   Sub-session E2 (Pattern A2; same shape as
+ *                                   /api/reason quick-depth from Sub-session E1).
+ *                                   Passages passed to engine as structured
+ *                                   `retrievedPassages`; engine builds the system
+ *                                   block. If retrieval fails, falls back to the
+ *                                   compiled-string path via getStoicBrainContext('standard').
  *   Layer 2 (Practitioner)       — getPractitionerContext(auth.user.id)
  *                                   (requires auth; this endpoint is user-auth only)
  *   Layer 3 (Project Context)    — getProjectContext('condensed')
@@ -40,10 +48,26 @@ import { enforceDistressCheck } from '@/lib/constraints'
  *   - Drop Layer 3 → reasoning loses "why this matters now" grounding
  *   - Change to sequential (await X; await Y; await Z) → ~3x slower on cold
  *     requests. Parallel is intentional.
+ *   - If D6/D7 retrieval throws, the route falls back to the compiled string
+ *     path; the user sees a successful response (with the prior Layer 1 content)
+ *     instead of a 500. Failure is logged via console.warn.
+ *
+ * SUB-SESSION E2 (2026-05-04 — D6/D7 wired into Layer 1 at standard depth, Pattern A2):
+ *   - Per-request `Map<string, RetrieveResult>` cache declared inside POST
+ *     handler (KG1 rule 4 — never module-level).
+ *   - Retrieval failure (RetrievalUnavailableError, EmbeddingFailureError,
+ *     RetrievalTimeoutError, or any thrown error) falls back to the compiled
+ *     stoic-brain-loader path. Logged via console.warn for Phase-2 observation.
+ *   - Helpers imported from /api/reason/helpers (Pattern S1 — lighter-touch
+ *     cross-route import; lift to /lib/rag/helpers candidate if E3+ also needs them).
+ *   - See: /adopted/adr/2026-05-04-d6-d7-consumer-wiring.md (ADR-001)
+ *   - See: /operations/decision-log.md D-REASON-RAG-WIRED-2026-05-04 (E1 predecessor)
  *
  * DESIGN DECISIONS DOCUMENTED IN:
  *   - operations/handoffs/session-7d-layer1-layer2.md  (L1/L2 origin)
  *   - operations/session-handoffs/2026-04-15-layer3-wiring.md  (L3 wired here)
+ *   - operations/handoffs/founder/2026-05-04-sub-session-E1-close.md (PR1 rollout begin)
+ *   - operations/handoffs/founder/2026-05-XX-sub-session-E2-NEXT-SESSION-PROMPT.md (this wiring)
  */
 
 /**
@@ -88,6 +112,49 @@ function normalizeScoreResult(raw: Record<string, any>): Record<string, any> {
   }
 
   return result
+}
+
+/**
+ * Load Layer 1 Stoic Brain content via D6 + D7 RAG retrieval.
+ *
+ * Returns either `{ retrievedPassages }` (success path) or
+ * `{ stoicBrainContext }` (fallback path), spreadable into the engine input.
+ * The engine prefers `stoicBrainContext` when both are present, so the
+ * fallback shape is safe.
+ *
+ * Sub-session E2: graceful degradation. If retrieval fails (any thrown error),
+ * we fall back to the compiled-string path via getStoicBrainContext(depth).
+ * The user sees a working response; the failure is observable via console.warn.
+ *
+ * Pattern mirrors /api/reason/route.ts loadLayer1WithFallback (Sub-session E1).
+ * If E3+ wires this into a third consumer, this helper becomes a candidate
+ * for extraction to /website/src/lib/rag/helpers.ts.
+ */
+async function loadLayer1WithFallback(
+  input: string,
+  depth: ReasonDepth,
+  cache: Map<string, RetrieveResult>,
+): Promise<{ retrievedPassages?: RetrievedPassage[]; stoicBrainContext?: string }> {
+  try {
+    const corpusMechanisms = getCorpusMechanismsForDepth(depth)
+    const { top_k, top_k_after_rerank } = RETRIEVAL_TOP_K_BY_DEPTH[depth]
+    const retrieveInput: RetrieveInput = {
+      query: input,
+      bm25_query: toBm25OrShape(input),
+      mechanism_filter: corpusMechanisms,
+      passage_type_filter: ['mechanism'],
+      top_k,
+    }
+    const result = await retrievePassages(retrieveInput, cache)
+    const top = await reRank(result.passages, retrieveInput, 'heuristic', { top_k_after_rerank })
+    return { retrievedPassages: top }
+  } catch (err) {
+    console.warn(
+      `/api/score: D6/D7 retrieval failed, falling back to compiled stoic-brain path. ` +
+      `depth=${depth} error=${err instanceof Error ? err.message : String(err)}`,
+    )
+    return { stoicBrainContext: getStoicBrainContext(depth) }
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -153,19 +220,25 @@ Note: Evaluate the current action on its own merits, but acknowledge if it addre
       }
     }
 
-    // Load practitioner (L2) and project context (L3) in parallel
-    const [practitionerContext, projectContext] = await Promise.all([
+    // Per-request cache for D6 retrievals (KG1 rule 4 — never module-level).
+    const ragCache = new Map<string, RetrieveResult>()
+
+    // Load Layer 1 (Stoic Brain via D6/D7), Layer 2 (practitioner context), and
+    // Layer 3 (project context) in parallel to avoid sequential latency.
+    const [layer1, practitionerContext, projectContext] = await Promise.all([
+      loadLayer1WithFallback(action.trim(), 'standard', ragCache),
       getPractitionerContext(auth.user.id),
       getProjectContext('condensed'),
     ])
 
-    // Call the shared reasoning engine with Stoic Brain (L1) + practitioner context (L2) + project context (L3)
+    // Call the shared reasoning engine. layer1 spreads into either
+    // retrievedPassages (success path) or stoicBrainContext (fallback path).
     const reasoningResult = await runSageReason({
       input: action.trim(),
       context,
       depth: 'standard',
       domain_context: domainContext,
-      stoicBrainContext: getStoicBrainContext('standard'),
+      ...layer1,
       practitionerContext,
       projectContext,
     })

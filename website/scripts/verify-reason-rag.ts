@@ -1,5 +1,8 @@
 /**
- * verify-reason-rag.ts — verification harness for /api/reason RAG wiring (E1).
+ * verify-reason-rag.ts — verification harness for /api/reason + /api/score RAG wiring.
+ *
+ * Originally produced for Sub-session E1 (/api/reason quick-depth). Extended in
+ * Sub-session E2 with Phase D — /api/score standard-depth wiring.
  *
  * Run from inside website/:
  *   npx tsx scripts/verify-reason-rag.ts
@@ -14,7 +17,7 @@
  *     A5. formatRetrievedPassagesAsBlock with one passage builds the expected
  *         header + citation + text shape.
  *
- *   PHASE B — Wiring test (real OpenAI + real Supabase):
+ *   PHASE B — /api/reason quick-depth wiring test (real OpenAI + real Supabase):
  *     For each of 3 representative /api/reason quick-depth inputs (career
  *     decision, passion-driven situation, oikeiosis-relevant relationship):
  *     B1. Run retrievePassages + reRank with the depth-mapped mechanism filter
@@ -27,7 +30,7 @@
  *     B5. Cache replay test — call fixture 1 a second time with the same
  *         per-request cache; assert cache_hit and elapsed_ms ≈ 0.
  *
- *   PHASE C — Comparison axis (old vs new Layer 1):
+ *   PHASE C — Comparison axis (old vs new Layer 1) at quick depth:
  *     For each of the 3 fixtures, render Layer 1 content via:
  *       - OLD path: getStoicBrainContext('quick') string
  *       - NEW path: formatRetrievedPassagesAsBlock(<retrieved passages>)
@@ -36,15 +39,32 @@
  *     C3. Print a first-200-char preview of each path for founder visual
  *         comparison. The founder judges semantic equivalence.
  *
+ *   PHASE D (E2) — /api/score standard-depth wiring + comparison axis:
+ *     Same shape as Phase B + C, but at standard depth (8 corpus mechanisms,
+ *     top_k=25/top_k_after_rerank=12). The existing 3 fixtures function as
+ *     "actions to score" — input semantics overlap closely with /api/reason.
+ *     D1. retrievePassages + reRank at standard depth → non-empty.
+ *     D2. Every passage's canonical_mechanism in the standard-depth filter.
+ *     D3. Every passage carries source_citation (R7).
+ *     D4. Cache replay (separate per-request cache from Phase B).
+ *     D5. OLD vs NEW comparison axis at standard depth (against
+ *         getStoicBrainContext('standard') ~1538 tokens / ~6000 chars).
+ *
  * Exit code 0 if all checks pass; 1 otherwise.
+ *
+ * E3+ candidate: factor Phase B + Phase D into a shared
+ *   `runConsumerWiringPhase(depth, fixtures, harness)` helper if more consumers
+ *   come online. Lighter touch for E2 — duplicate the block for clarity.
  *
  * Cross-references:
  *   - /adopted/adr/2026-05-04-d6-d7-consumer-wiring.md (ADR-001)
- *   - /website/src/app/api/reason/route.ts (the consumer)
- *   - /website/src/app/api/reason/helpers.ts (depth-mechanism mapping)
+ *   - /website/src/app/api/reason/route.ts (E1 consumer — quick depth)
+ *   - /website/src/app/api/score/route.ts (E2 consumer — standard depth)
+ *   - /website/src/app/api/reason/helpers.ts (depth-mechanism mapping; shared by both consumers)
  *   - /website/src/lib/sage-reason-engine.ts (formatRetrievedPassagesAsBlock)
  *   - /website/scripts/verify-internal-retrieve.ts (Sub-session D harness pattern)
  *   - /operations/decision-log.md D-INTERNAL-RETRIEVE-ROUTE-VERIFIED-2026-05-04
+ *   - /operations/decision-log.md D-REASON-RAG-WIRED-2026-05-04
  */
 
 import { readFileSync } from 'node:fs'
@@ -134,6 +154,8 @@ const QUICK_DEPTH_EXPECTED_MECHANISMS = [
   'oikeiosis_stage',
   'oikeiosis_obligation',
 ]
+// Standard-depth expected mechanisms = quick + ['value_indifferent', 'virtue_domain_engaged'].
+// Asserted inline in Phase A; resolved at runtime via getCorpusMechanismsForDepth('standard') in Phase D.
 
 // -----------------------------------------------------------------------------
 // 3. Pretty-print helpers
@@ -415,6 +437,167 @@ async function main() {
       passedChecks++
     } else {
       fail(`new path exceeds ceiling: ${newLayer1.length} > ${QUICK_CEILING_CHARS}`)
+    }
+    console.log()
+  }
+
+  // ===========================================================================
+  // PHASE D (E2) — /api/score standard-depth wiring + comparison axis
+  // ===========================================================================
+
+  console.log('PHASE D — /api/score standard-depth wiring (E2)')
+  console.log('-----------------------------------------------\n')
+
+  const cacheD = new Map()
+  const fixtureResultsStandard: Array<{
+    fixture: ReasonFixture
+    passages: Awaited<ReturnType<typeof reRank>>
+    elapsed_ms: number
+  }> = []
+
+  const standardCorpusMechanisms = getCorpusMechanismsForDepth('standard')
+  const { top_k: standardTopK, top_k_after_rerank: standardTopKRerank } =
+    RETRIEVAL_TOP_K_BY_DEPTH.standard
+
+  for (const fixture of FIXTURES) {
+    console.log(`D/${fixture.label} — running retrievePassages + reRank @ standard depth`)
+    info(`input (as /api/score 'action'): ${fixture.input.slice(0, 80)}${fixture.input.length > 80 ? '...' : ''}`)
+    info(`rationale: ${fixture.rationale}`)
+
+    const retrieveInput = {
+      query: fixture.input,
+      bm25_query: toBm25OrShape(fixture.input),
+      mechanism_filter: standardCorpusMechanisms,
+      passage_type_filter: ['mechanism' as const],
+      top_k: standardTopK,
+    }
+
+    const start = Date.now()
+    const result = await retrievePassages(retrieveInput, cacheD)
+    const top = await reRank(result.passages, retrieveInput, 'heuristic', {
+      top_k_after_rerank: standardTopKRerank,
+    })
+    const elapsed_ms = Date.now() - start
+
+    info(
+      `bm25_count=${result.retrieval_diagnostics.bm25_count} ` +
+      `vector_count=${result.retrieval_diagnostics.vector_count} ` +
+      `fusion_count=${result.retrieval_diagnostics.fusion_count} ` +
+      `elapsed_ms=${elapsed_ms} (D6=${result.retrieval_diagnostics.elapsed_ms}ms) ` +
+      `→ reranked top=${top.length}`,
+    )
+
+    // D-assert: non-empty
+    totalChecks++
+    if (top.length > 0) {
+      ok(`returned ${top.length} passages (top_k_after_rerank=${standardTopKRerank})`)
+      passedChecks++
+    } else {
+      fail(`returned 0 passages`)
+    }
+
+    // D-assert: every passage's canonical_mechanism overlaps the standard-depth filter
+    totalChecks++
+    const allInFilter = top.every((p) =>
+      p.canonical_mechanism.some((m) => standardCorpusMechanisms.includes(m)),
+    )
+    if (allInFilter) {
+      ok(`every passage's canonical_mechanism is in standard-depth filter`)
+      passedChecks++
+    } else {
+      const offenders = top.filter(
+        (p) => !p.canonical_mechanism.some((m) => standardCorpusMechanisms.includes(m)),
+      )
+      fail(`${offenders.length}/${top.length} passages outside filter`)
+      for (const o of offenders)
+        info(`  out-of-filter: ${o.passage_id} mechanisms=[${o.canonical_mechanism.join(',')}]`)
+    }
+
+    // D-assert: every passage carries source_citation (R7)
+    totalChecks++
+    const allCited = top.every(
+      (p) => typeof p.source_citation === 'string' && p.source_citation.length > 0,
+    )
+    if (allCited) {
+      ok(`every passage carries source_citation (R7 fidelity)`)
+      passedChecks++
+    } else {
+      fail(`some passages missing source_citation`)
+    }
+
+    // Print top-5 passage_ids for founder review
+    const top5 = top.slice(0, 5).map((p) => p.passage_id).join('\n         ')
+    info(`top-5 passage_ids:\n         ${top5}`)
+
+    fixtureResultsStandard.push({ fixture, passages: top, elapsed_ms })
+    console.log()
+  }
+
+  console.log('D-cache. Replay F1 with the same per-request cache (Phase D)')
+  totalChecks++
+  const f1Standard = FIXTURES[0]
+  const retrieveInputReplayStandard = {
+    query: f1Standard.input,
+    bm25_query: toBm25OrShape(f1Standard.input),
+    mechanism_filter: standardCorpusMechanisms,
+    passage_type_filter: ['mechanism' as const],
+    top_k: standardTopK,
+  }
+  const startD = Date.now()
+  const replayD = await retrievePassages(retrieveInputReplayStandard, cacheD)
+  const elapsedD_ms = Date.now() - startD
+  if (replayD.retrieval_diagnostics.cache_hit && elapsedD_ms < 50) {
+    ok(`cache_hit=true, elapsed_ms=${elapsedD_ms} (≈0ms)`)
+    passedChecks++
+  } else {
+    fail(
+      `expected cache_hit + ≈0ms, got cache_hit=${replayD.retrieval_diagnostics.cache_hit}, ` +
+      `elapsed_ms=${elapsedD_ms}`,
+    )
+  }
+  console.log()
+
+  // Comparison axis at standard depth
+  console.log('D-comparison. OLD vs NEW Layer 1 at standard depth')
+  const oldLayer1Standard = getStoicBrainContext('standard')
+  console.log(
+    `OLD path getStoicBrainContext('standard'): ${oldLayer1Standard.length} chars`,
+  )
+  console.log(
+    `         first 200: ${oldLayer1Standard.slice(0, 200).replace(/\n/g, ' / ')}...\n`,
+  )
+
+  const STANDARD_CEILING_CHARS = 12000
+
+  for (const { fixture, passages } of fixtureResultsStandard) {
+    const newLayer1Standard = formatRetrievedPassagesAsBlock(passages)
+    console.log(
+      `NEW path for ${fixture.label}: ${newLayer1Standard.length} chars (${passages.length} passages)`,
+    )
+    console.log(
+      `         first 200: ${newLayer1Standard.slice(0, 200).replace(/\n/g, ' / ')}...`,
+    )
+
+    // D-assert: both paths produce non-empty content
+    totalChecks++
+    if (oldLayer1Standard.length > 0 && newLayer1Standard.length > 0) {
+      ok(
+        `both paths non-empty (OLD=${oldLayer1Standard.length} chars, NEW=${newLayer1Standard.length} chars)`,
+      )
+      passedChecks++
+    } else {
+      fail(`empty content: OLD=${oldLayer1Standard.length}, NEW=${newLayer1Standard.length}`)
+    }
+
+    // D-assert: new path under standard-depth ceiling
+    totalChecks++
+    if (newLayer1Standard.length <= STANDARD_CEILING_CHARS) {
+      ok(`new path within ceiling (${newLayer1Standard.length} ≤ ${STANDARD_CEILING_CHARS})`)
+      passedChecks++
+    } else {
+      fail(
+        `new path exceeds ceiling: ${newLayer1Standard.length} > ${STANDARD_CEILING_CHARS}`,
+      )
     }
     console.log()
   }
