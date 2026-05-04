@@ -59,6 +59,22 @@
  *            produce when called directly with the same retrieve+rerank result.
  *            Plus one cache-replay assertion.
  *
+ *   PHASE H (E6) — /api/score-scenario both call sites wired via Pattern A1
+ *     (Group B second consumer). Both call sites (GENERATION via GET; SCORING
+ *     via POST) are at 'quick' depth — preserving pre-E6 behaviour byte-for-
+ *     byte. Two sub-phases:
+ *       H1 — substrate continuity: runConsumerWiringPhase('H', 'quick', ...).
+ *            Same shape as Phase B at quick depth; labelled for the new
+ *            consumer.
+ *       H2 — Pattern A1 wrapper surface at quick depth (bespoke; same shape
+ *            as G2 but at the quick-depth ceiling 12000). One block exercises
+ *            the wrapper contract; the two call sites' invocations follow the
+ *            same code path (only routeName differs and that affects only
+ *            console.warn attribution on fallback).
+ *     Open question (continuity from G2): GENERATION's production input is a
+ *     topic string (e.g., 'honesty'), not the prose-rich F1/F2/F3 fixtures
+ *     used here. Production observability tracks fallback-rate per call site.
+ *
  * Exit code 0 if all checks pass; 1 otherwise.
  *
  * Sub-session E3 changes:
@@ -82,6 +98,18 @@
  *     boundary (16 checks: 5 per fixture × 3 + 1 cache replay). Total checks
  *     75 → 107 (Phase G adds 32).
  *
+ * Sub-session E6 changes:
+ *   - Phase H added at quick depth (/api/score-scenario — Group B second
+ *     consumer; Pattern A1 second surface; both call sites wired). Two
+ *     sub-phases: H1 reuses runConsumerWiringPhase for substrate continuity
+ *     at quick depth (16 checks); H2 is bespoke and exercises
+ *     loadLayer1BlockWithFallback at the function-call boundary at quick
+ *     depth (16 checks: 5 per fixture × 3 + 1 cache replay). Total checks
+ *     107 → 139 (Phase H adds 32). The two call sites at /api/score-scenario
+ *     wire the same wrapper at the same depth; one H2 block proves the
+ *     contract for both. Source-code review of the route confirms both call
+ *     sites follow the same code path with distinct routeName labels.
+ *
  * Cross-references:
  *   - /adopted/adr/2026-05-04-d6-d7-consumer-wiring.md (ADR-001)
  *   - /website/src/app/api/reason/route.ts (E1 consumer — quick depth)
@@ -100,6 +128,8 @@
  *   - /website/src/app/api/score-document/route.ts (E5 consumer — deep depth, Pattern A1)
  *   - /website/src/lib/rag/load-layer1-block-with-fallback.ts (sibling wrapper for Pattern A1)
  *   - /operations/decision-log.md D-PATTERN-A1-INTRODUCED-AND-WIRED-2026-05-04
+ *   - /website/src/app/api/score-scenario/route.ts (E6 consumer — both call sites at quick depth, Pattern A1)
+ *   - /operations/decision-log.md D-SCENARIO-RAG-WIRED-2026-05-04
  */
 
 import { readFileSync } from 'node:fs'
@@ -734,6 +764,151 @@ async function main() {
     fail(
       `expected non-empty block + <200ms via cache, got length=${replayBlock.length}, ` +
       `elapsed_ms=${elapsedReplayG2}`,
+    )
+  }
+  console.log()
+
+  // ===========================================================================
+  // PHASE H — /api/score-scenario both call sites wired via Pattern A1 (E6)
+  // Two sub-phases:
+  //   H1 — substrate continuity (runConsumerWiringPhase at quick depth)
+  //   H2 — Pattern A1 wrapper surface at quick depth (one bespoke block;
+  //        contract is identical across both call sites — only routeName
+  //        differs and that affects only console.warn attribution on
+  //        fallback, which is not exercised in the success path)
+  // Both call sites of /api/score-scenario (GENERATION via GET; SCORING via
+  // POST) currently wire Layer 1 at 'quick' depth. The harness exercises the
+  // wrapper once at 'quick' depth; the two call sites' invocations follow
+  // the same code path. The differentiation between call sites lives in the
+  // route's source code (distinct routeName labels).
+  //
+  // Open question: GENERATION's production input is a topic string (e.g.,
+  // 'honesty'), not the prose-rich F1/F2/F3 fixtures used here. Topic-shaped
+  // inputs may retrieve poorly and trigger the wrapper's fallback path more
+  // often than the SCORING call site. The harness contract test is sufficient
+  // for proving the wrapper works on known-good inputs; production
+  // observability catches GENERATION-specific behaviour. Same family as
+  // Pattern A1's existing "fallback path not exercised by harness" finding.
+  // ===========================================================================
+
+  // -- H1: substrate continuity at quick depth ------------------------------
+
+  const phaseH1 = await runConsumerWiringPhase(
+    {
+      label: 'H',
+      depth: 'quick',
+      consumerDescription: '/api/score-scenario both call sites wiring (E6; Pattern A1) — H1 substrate continuity',
+      ceilingChars: 12000,
+    },
+    deps,
+  )
+  totalChecks += phaseH1.totalChecks
+  passedChecks += phaseH1.passedChecks
+
+  // -- H2: Pattern A1 wrapper surface at quick depth ------------------------
+
+  console.log('PHASE H2 — Pattern A1 wrapper surface @ quick depth (loadLayer1BlockWithFallback)')
+  console.log('---------------------------------------------------------------------------------')
+  console.log()
+
+  const H2_QUICK_CEILING = 12000
+  const h2Cache = new Map()
+  // Use the SCORING call site's routeName (the higher-stakes call). The
+  // wrapper contract is identical regardless of routeName parameter — it
+  // affects only console.warn attribution on fallback. Both call sites are
+  // covered by this single block; route source code review confirms both
+  // invocations follow the same code path.
+  const h2RouteName = '/api/score-scenario:scoring'
+
+  for (const fixture of FIXTURES) {
+    console.log(`H2/${fixture.label} — invoke loadLayer1BlockWithFallback @ quick depth`)
+    info(`input: ${fixture.input.slice(0, 80)}${fixture.input.length > 80 ? '...' : ''}`)
+
+    const startH2 = Date.now()
+    const block = await loadLayer1BlockWithFallback(fixture.input, 'quick', h2Cache, h2RouteName)
+    const elapsedH2 = Date.now() - startH2
+
+    info(`elapsed_ms=${elapsedH2} block_chars=${block.length}`)
+
+    // H2.a — non-empty string
+    totalChecks++
+    if (typeof block === 'string' && block.length > 0) {
+      ok(`wrapper returned non-empty string (${block.length} chars)`)
+      passedChecks++
+    } else {
+      fail(`wrapper returned empty/non-string: typeof=${typeof block} length=${block.length}`)
+    }
+
+    // H2.b — contains the Stoic Brain header
+    totalChecks++
+    if (block.includes('STOIC BRAIN — RETRIEVED PASSAGES')) {
+      ok(`block contains STOIC BRAIN — RETRIEVED PASSAGES header`)
+      passedChecks++
+    } else {
+      fail(`block missing header. first 200 chars: ${block.slice(0, 200)}`)
+    }
+
+    // H2.c — contains at least one bracketed citation
+    totalChecks++
+    if (/\[[^\]]+\]/.test(block)) {
+      ok(`block contains at least one bracketed citation [..]`)
+      passedChecks++
+    } else {
+      fail(`block missing bracketed citation. first 200 chars: ${block.slice(0, 200)}`)
+    }
+
+    // H2.d — under quick-depth ceiling
+    totalChecks++
+    if (block.length <= H2_QUICK_CEILING) {
+      ok(`block under ceiling (${block.length} ≤ ${H2_QUICK_CEILING})`)
+      passedChecks++
+    } else {
+      fail(`block exceeds ceiling: ${block.length} > ${H2_QUICK_CEILING}`)
+    }
+
+    // H2.e — wrapper output equals direct formatRetrievedPassagesAsBlock(top)
+    // Re-run retrieve+rerank with a separate cache, format directly, compare.
+    const corpusMechanisms = deps.getCorpusMechanismsForDepth('quick')
+    const { top_k, top_k_after_rerank } = deps.RETRIEVAL_TOP_K_BY_DEPTH.quick
+    const retrieveInputDirect = {
+      query: fixture.input,
+      bm25_query: deps.toBm25OrShape(fixture.input),
+      mechanism_filter: corpusMechanisms,
+      passage_type_filter: ['mechanism' as const],
+      top_k,
+    }
+    const directCache = new Map()
+    const directResult = await deps.retrievePassages(retrieveInputDirect, directCache)
+    const directTop = await deps.reRank(directResult.passages, retrieveInputDirect, 'heuristic', { top_k_after_rerank })
+    const directBlock = deps.formatRetrievedPassagesAsBlock(directTop)
+
+    totalChecks++
+    if (block === directBlock) {
+      ok(`wrapper output ≡ formatRetrievedPassagesAsBlock(top) (${block.length} chars)`)
+      passedChecks++
+    } else {
+      fail(`wrapper output diverges from direct format. wrapper=${block.length}c direct=${directBlock.length}c`)
+      info(`wrapper first 200: ${block.slice(0, 200).replace(/\n/g, ' / ')}`)
+      info(`direct  first 200: ${directBlock.slice(0, 200).replace(/\n/g, ' / ')}`)
+    }
+
+    console.log()
+  }
+
+  // H2 cache replay — re-invoke wrapper with F1 input on the same h2Cache;
+  // the underlying retrievePassages should hit the cache.
+  console.log(`H2-cache. Replay F1 with the same per-phase wrapper cache`)
+  totalChecks++
+  const startReplayH2 = Date.now()
+  const replayBlockH2 = await loadLayer1BlockWithFallback(FIXTURES[0].input, 'quick', h2Cache, h2RouteName)
+  const elapsedReplayH2 = Date.now() - startReplayH2
+  if (replayBlockH2.length > 0 && elapsedReplayH2 < 200) {
+    ok(`replay produced non-empty block in ${elapsedReplayH2}ms (cache active)`)
+    passedChecks++
+  } else {
+    fail(
+      `expected non-empty block + <200ms via cache, got length=${replayBlockH2.length}, ` +
+      `elapsed_ms=${elapsedReplayH2}`,
     )
   }
   console.log()

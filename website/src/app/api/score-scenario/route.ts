@@ -5,11 +5,12 @@ import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST, MODEL_DEEP } from '@/lib/model-config'
-import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistressTwoStage } from '@/lib/r20a-classifier'
 import { enforceDistressCheck } from '@/lib/constraints'
+import type { RetrieveResult } from '@/lib/rag'
+import { loadLayer1BlockWithFallback } from '@/lib/rag/load-layer1-block-with-fallback'
 
 /**
  * sage-scenario (score-scenario) — Ethical-dilemma generator + response scorer.
@@ -28,25 +29,50 @@ import { enforceDistressCheck } from '@/lib/constraints'
  *
  * WHY IT IS STRUCTURED THIS WAY:
  *   Calls client.messages.create directly (two separate calls — one for
- *   generation at 'quick' depth / MODEL_FAST, one for scoring at 'deep'
- *   depth / MODEL_DEEP). The two operations share a system prompt
- *   (SCENARIO_PROMPT) that instructs the LLM in both modes; the user
+ *   generation at 'quick' depth / MODEL_FAST, one for scoring at MODEL_DEEP
+ *   with Layer 1 still at 'quick' tier). The two operations share a system
+ *   prompt (SCENARIO_PROMPT) that instructs the LLM in both modes; the user
  *   message tells the LLM which mode is active.
  *
- * CONTEXT LAYERS WIRED HERE (differ per operation):
- *   GENERATION call (line ~104):
- *     Layer 1 (Stoic Brain)      — getStoicBrainContext('quick')
+ * CONTEXT LAYERS WIRED HERE — Pattern A1 (per ADR-001 amended at E5; both
+ * call sites wired at E6):
+ *   GENERATION call (GET; ~line 165):
+ *     Layer 1 (Stoic Brain)      — loadLayer1BlockWithFallback(selectedTopic,
+ *                                   'quick', ragCache, '/api/score-scenario:generation')
+ *                                   D6 + D7 RAG retrieval; formatted block
+ *                                   string injected as the second system
+ *                                   message block (replaces predecessor
+ *                                   getStoicBrainContext('quick') call site).
+ *                                   On any retrieval error, falls back to
+ *                                   getStoicBrainContext('quick') silently.
+ *                                   Wired at Sub-session E6 (2026-05-04).
+ *                                   NOTE: input is the topic string (e.g.,
+ *                                   'honesty'); short topic strings may
+ *                                   trigger the wrapper's fallback path more
+ *                                   often than the SCORING call site.
  *     Layer 2                    — OMITTED (creative generation, not
  *                                   personalised — adding practitioner
  *                                   context would bias scenario generation
  *                                   toward the user's patterns).
  *     Layer 3                    — OMITTED (same reason — creative output,
  *                                   not evaluative).
- *   SCORING call (line ~233):
- *     Layer 1 (Stoic Brain)      — getStoicBrainContext('quick')
+ *   SCORING call (POST; ~line 305):
+ *     Layer 1 (Stoic Brain)      — loadLayer1BlockWithFallback(response.trim(),
+ *                                   'quick', ragCache, '/api/score-scenario:scoring')
+ *                                   D6 + D7 RAG retrieval; formatted block
+ *                                   string injected as the second system
+ *                                   message block. Loaded in parallel with
+ *                                   L2 + L3 via Promise.all.
+ *                                   Wired at Sub-session E6 (2026-05-04).
+ *                                   NOTE: Layer 1 retained at 'quick' depth
+ *                                   to preserve pre-E6 behaviour byte-for-
+ *                                   byte; the LLM uses MODEL_DEEP. The
+ *                                   depth-mismatch (MODEL_DEEP with 'quick'-
+ *                                   tier Layer 1 corpus) is the route's
+ *                                   pre-existing state; logged as an open
+ *                                   question for separate review.
  *     Layer 2 (Practitioner)     — getPractitionerContext(auth.user.id)
  *     Layer 3 (Project Context)  — getProjectContext('condensed')
- *     Layer 2 and Layer 3 loaded in parallel, appended to user message.
  *
  * WHAT BREAKS IF THIS CHANGES:
  *   - If Layer 3 is added to the generation call, scenarios start to feel
@@ -57,11 +83,20 @@ import { enforceDistressCheck } from '@/lib/constraints'
  *     expose new situations for practice).
  *   - If the scoring call drops Layer 2, returning users lose the
  *     personalisation that makes the tool feel like a real practice partner.
+ *   - If the system block order changes (scoring/scenario prompt → stoic
+ *     brain), the first block's cache_control: { type: 'ephemeral' } stops
+ *     hitting because the second-block content varies per request now.
+ *     Pattern A1 spec keeps the prompt as the first block deliberately.
  *
  * DESIGN DECISIONS DOCUMENTED IN:
  *   - operations/handoffs/session-7d-layer1-layer2.md   (L1/L2 origin)
  *   - operations/session-handoffs/2026-04-15-layer3-wiring.md
  *     (L3 added to scoring call only — Group B endpoint)
+ *   - adopted/adr/2026-05-04-d6-d7-consumer-wiring.md (ADR-001 — amended at
+ *     E5 to specify Pattern A1; this route is the second Group B consumer
+ *     wired at E6)
+ *   - operations/decision-log.md D-PATTERN-A1-INTRODUCED-AND-WIRED-2026-05-04
+ *   - operations/decision-log.md D-SCENARIO-RAG-WIRED-2026-05-04
  */
 
 const client = new Anthropic({
@@ -149,8 +184,19 @@ export async function GET(request: NextRequest) {
     const pool = TOPIC_POOLS[validAudience]
     const selectedTopic = topic || pool[Math.floor(Math.random() * pool.length)]
 
-    // Layer 1 only for scenario generation (creative, not scoring)
-    const stoicBrainContext = getStoicBrainContext('quick')
+    // Layer 1 only for scenario generation (creative, not scoring) — Pattern A1
+    // (per ADR-001 amended at E5; wired at E6).
+    // Per-request RetrieveResult cache — KG1 rule 4 (never module-level).
+    // Input = selectedTopic (semantic core; the LLM is asked to generate a
+    // scenario about this topic, so the retrieved Layer 1 passages are scoped
+    // to that topic's mechanism-tagged corpus content).
+    const ragCache = new Map<string, RetrieveResult>()
+    const stoicBrainContext = await loadLayer1BlockWithFallback(
+      selectedTopic,
+      'quick',
+      ragCache,
+      '/api/score-scenario:generation',
+    )
     const userMessage = `Generate an ethical scenario for audience: ${validAudience}
 Topic hint: ${selectedTopic}
 
@@ -274,9 +320,19 @@ export async function POST(request: NextRequest) {
 
     const validAudience = audience || 'teen'
 
-    // Context layers for scoring (human-facing)
-    const scoringStoicContext = getStoicBrainContext('quick')
-    const [practitionerContext, projectContext] = await Promise.all([
+    // Context layers for scoring (human-facing) — Pattern A1
+    // (per ADR-001 amended at E5; wired at E6).
+    // Per-request RetrieveResult cache — KG1 rule 4 (never module-level).
+    // Input = response.trim() (the user's actual response — prose-rich
+    // evaluative input the corpus is indexed against).
+    // Layer 1 retained at 'quick' depth to preserve existing behaviour
+    // byte-for-byte; the SCORING call uses MODEL_DEEP for the LLM but the
+    // Layer 1 corpus tier ('quick' = 6 mechanisms) is unchanged from the
+    // pre-E6 state. Depth-mismatch with MODEL_DEEP is logged as an open
+    // question for separate review (D-SCENARIO-RAG-WIRED-2026-05-04).
+    const ragCache = new Map<string, RetrieveResult>()
+    const [scoringStoicContext, practitionerContext, projectContext] = await Promise.all([
+      loadLayer1BlockWithFallback(response.trim(), 'quick', ragCache, '/api/score-scenario:scoring'),
       getPractitionerContext(auth.user.id),
       getProjectContext('condensed'),
     ])

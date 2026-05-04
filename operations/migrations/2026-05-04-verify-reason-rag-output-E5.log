@@ -1,0 +1,407 @@
+[env] loaded /Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website/.env.local
+[env] all required env vars present
+
+PHASE A — Pure-helper tests
+---------------------------
+
+A1. getCorpusMechanismsForDepth
+  ✓ depth='quick' → 6 mechanisms: prohairesis_filter, passion_root_detection, passion_sub_species, passion_false_judgement, oikeiosis_stage, oikeiosis_obligation
+  ✓ depth='standard' → 8 mechanisms: prohairesis_filter, passion_root_detection, passion_sub_species, passion_false_judgement, oikeiosis_stage, oikeiosis_obligation, value_indifferent, virtue_domain_engaged
+  ✓ depth='deep' → 9 mechanisms: prohairesis_filter, passion_root_detection, passion_sub_species, passion_false_judgement, oikeiosis_stage, oikeiosis_obligation, value_indifferent, virtue_domain_engaged, katorthoma_proximity
+
+A2. RETRIEVAL_TOP_K_BY_DEPTH structure
+  ✓ depth='quick' → top_k=20, top_k_after_rerank=8
+  ✓ depth='standard' → top_k=25, top_k_after_rerank=12
+  ✓ depth='deep' → top_k=30, top_k_after_rerank=15
+
+A3. toBm25OrShape on 3 representative inputs
+  ✓ F1 career decision → have OR been OR offered OR new OR job OR at OR competitor...
+  ✓ F2 passion-driven anger → am OR furious OR with OR my OR colleague OR for OR missin...
+  ✓ F3 oikeiosis-relevant family → am OR thinking OR about OR cutting OR back OR on OR my OR...
+
+A4. formatRetrievedPassagesAsBlock with empty array
+  ✓ empty input → empty string
+
+A5. formatRetrievedPassagesAsBlock with one synthetic passage
+  ✓ block contains header + citation + text
+    → first 100 chars: STOIC BRAIN — RETRIEVED PASSAGES
+
+[Test citation] This is the test passage text....
+
+PHASE B — /api/reason quick-depth wiring (E1)
+---------------------------------------------
+
+B/F1 career decision — running retrievePassages + reRank @ quick depth
+    → input: I have been offered a new job at a competitor. The pay is significantly higher b...
+    → rationale: Exercises control_filter (what is up to me) + value_assessment via oikeiosis (preferred indifferents).
+    → bm25_count=0 vector_count=40 fusion_count=40 elapsed_ms=4010 (D6=4010ms) → reranked top=8
+  ✓ returned 8 passages (top_k_after_rerank=8)
+  ✓ every passage's canonical_mechanism is in quick-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         action:deliberation:Q2
+         action:deliberation:Q4
+         action:deliberation:Q5
+         action:deliberation:Q3
+         action:deliberation:Q1
+
+B/F2 passion-driven anger — running retrievePassages + reRank @ quick depth
+    → input: I am furious with my colleague for missing yet another deadline. I want to confr...
+    → rationale: Exercises passion_diagnosis (orge sub-species under epithumia) + control_filter (the colleague's action is not up to me).
+    → bm25_count=0 vector_count=40 fusion_count=40 elapsed_ms=1025 (D6=1025ms) → reranked top=8
+  ✓ returned 8 passages (top_k_after_rerank=8)
+  ✓ every passage's canonical_mechanism is in quick-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         passions:phobos:definition
+         stoic-brain:foundations:dichotomy_of_control:not_up_to_us:4
+         passions:lupe:definition
+         action:deliberation:Q5
+         action:deliberation:Q2
+
+B/F3 oikeiosis-relevant family — running retrievePassages + reRank @ quick depth
+    → input: I am thinking about cutting back on my weekly calls to my elderly parents becaus...
+    → rationale: Exercises oikeiosis_stage (family obligations, stage 2) + oikeiosis_obligation (Cicero's deliberation).
+    → bm25_count=1 vector_count=40 fusion_count=40 elapsed_ms=2872 (D6=2872ms) → reranked top=8
+  ✓ returned 8 passages (top_k_after_rerank=8)
+  ✓ every passage's canonical_mechanism is in quick-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         action:oikeiosis:stage_2_family
+         value:dispreferred:loneliness
+         value:dispreferred:exile
+         passions:hedone:terpsis:definition
+         value:dispreferred:low_birth
+
+B-cache. Replay F1 with the same per-phase cache
+  ✓ cache_hit=true, elapsed_ms=0 (≈0ms)
+
+B-comparison. OLD vs NEW Layer 1 at quick depth
+OLD path getStoicBrainContext('quick'): 3978 chars
+         first 200: STOIC BRAIN — CONTROL FILTER DATA / Ruling Faculty (hegemonikon): The rational, commanding part of the soul that receives impressions, grants assent, and generates impulses. / Causal Sequence: phantasia (...
+
+NEW path for F1 career decision: 797 chars (8 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Cicero De Officiis Book 1] Q2. Between two honourable options, which is MORE honourable? /  / --- /  / [Cicero De Officiis Book 1] Q4. Between two advantageous options, whic...
+  ✓ both paths non-empty (OLD=3978 chars, NEW=797 chars)
+  ✓ new path within ceiling (797 ≤ 12000)
+
+NEW path for F2 passion-driven anger: 889 chars (8 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Stobaeus Eclogae Section 5; DL Lives 7.110-116] phobos (Fear / Irrational Shrinking) — root passion targeting future_apparent_evil. /  / --- /  / [Epictetus Enchiridion 1; D...
+  ✓ both paths non-empty (OLD=3978 chars, NEW=889 chars)
+  ✓ new path within ceiling (889 ≤ 12000)
+
+NEW path for F3 oikeiosis-relevant family: 1128 chars (8 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Cicero De Finibus 3.62-68; Hierocles On Appropriate Acts; Stobaeus Eclogae Section 4] Stage 2 — Family and Intimates (family): Affiliation extends to parents, childr...
+  ✓ both paths non-empty (OLD=3978 chars, NEW=1128 chars)
+  ✓ new path within ceiling (1128 ≤ 12000)
+
+PHASE C — (covered by Phase B runConsumerWiringPhase comparison axis)
+--------------------------------------------------------------------
+    → No additional checks; Phase B comparison axis covers OLD vs NEW Layer 1 at quick depth.
+
+PHASE D — /api/score standard-depth wiring (E2)
+-----------------------------------------------
+
+D/F1 career decision — running retrievePassages + reRank @ standard depth
+    → input: I have been offered a new job at a competitor. The pay is significantly higher b...
+    → rationale: Exercises control_filter (what is up to me) + value_assessment via oikeiosis (preferred indifferents).
+    → bm25_count=0 vector_count=50 fusion_count=50 elapsed_ms=1179 (D6=1179ms) → reranked top=12
+  ✓ returned 12 passages (top_k_after_rerank=12)
+  ✓ every passage's canonical_mechanism is in standard-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         action:deliberation:Q2
+         action:deliberation:Q4
+         action:deliberation:Q5
+         action:deliberation:Q3
+         action:deliberation:Q1
+
+D/F2 passion-driven anger — running retrievePassages + reRank @ standard depth
+    → input: I am furious with my colleague for missing yet another deadline. I want to confr...
+    → rationale: Exercises passion_diagnosis (orge sub-species under epithumia) + control_filter (the colleague's action is not up to me).
+    → bm25_count=0 vector_count=50 fusion_count=50 elapsed_ms=1048 (D6=1048ms) → reranked top=12
+  ✓ returned 12 passages (top_k_after_rerank=12)
+  ✓ every passage's canonical_mechanism is in standard-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         passions:phobos:definition
+         stoic-brain:foundations:dichotomy_of_control:not_up_to_us:4
+         passions:lupe:definition
+         action:deliberation:Q5
+         action:deliberation:Q2
+
+D/F3 oikeiosis-relevant family — running retrievePassages + reRank @ standard depth
+    → input: I am thinking about cutting back on my weekly calls to my elderly parents becaus...
+    → rationale: Exercises oikeiosis_stage (family obligations, stage 2) + oikeiosis_obligation (Cicero's deliberation).
+    → bm25_count=1 vector_count=50 fusion_count=50 elapsed_ms=1061 (D6=1061ms) → reranked top=12
+  ✓ returned 12 passages (top_k_after_rerank=12)
+  ✓ every passage's canonical_mechanism is in standard-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         action:oikeiosis:stage_2_family
+         value:dispreferred:loneliness
+         value:dispreferred:exile
+         passions:hedone:terpsis:definition
+         value:dispreferred:low_birth
+
+D-cache. Replay F1 with the same per-phase cache
+  ✓ cache_hit=true, elapsed_ms=0 (≈0ms)
+
+D-comparison. OLD vs NEW Layer 1 at standard depth
+[stoic-brain-loader] Over design budget: standard context is 6153 chars (≈1538 tokens), design budget is 6152 chars (≈1538 tokens). Consider condensing mechanism loaders.
+OLD path getStoicBrainContext('standard'): 6153 chars
+         first 200: STOIC BRAIN — CONTROL FILTER DATA / Ruling Faculty (hegemonikon): The rational, commanding part of the soul that receives impressions, grants assent, and generates impulses. / Causal Sequence: phantasia (...
+
+NEW path for F1 career decision: 1284 chars (12 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Cicero De Officiis Book 1] Q2. Between two honourable options, which is MORE honourable? /  / --- /  / [Cicero De Officiis Book 1] Q4. Between two advantageous options, whic...
+  ✓ both paths non-empty (OLD=6153 chars, NEW=1284 chars)
+  ✓ new path within ceiling (1284 ≤ 12000)
+
+NEW path for F2 passion-driven anger: 1445 chars (12 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Stobaeus Eclogae Section 5; DL Lives 7.110-116] phobos (Fear / Irrational Shrinking) — root passion targeting future_apparent_evil. /  / --- /  / [Epictetus Enchiridion 1; D...
+  ✓ both paths non-empty (OLD=6153 chars, NEW=1445 chars)
+  ✓ new path within ceiling (1445 ≤ 12000)
+
+NEW path for F3 oikeiosis-relevant family: 1594 chars (12 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Cicero De Finibus 3.62-68; Hierocles On Appropriate Acts; Stobaeus Eclogae Section 4] Stage 2 — Family and Intimates (family): Affiliation extends to parents, childr...
+  ✓ both paths non-empty (OLD=6153 chars, NEW=1594 chars)
+  ✓ new path within ceiling (1594 ≤ 12000)
+
+PHASE E — /api/score-conversation deep-depth wiring (E3)
+--------------------------------------------------------
+
+E/F1 career decision — running retrievePassages + reRank @ deep depth
+    → input: I have been offered a new job at a competitor. The pay is significantly higher b...
+    → rationale: Exercises control_filter (what is up to me) + value_assessment via oikeiosis (preferred indifferents).
+    → bm25_count=1 vector_count=60 fusion_count=60 elapsed_ms=1016 (D6=1016ms) → reranked top=15
+  ✓ returned 15 passages (top_k_after_rerank=15)
+  ✓ every passage's canonical_mechanism is in deep-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         progress:metrics:passion_reduction
+         action:deliberation:Q2
+         action:deliberation:Q4
+         action:deliberation:Q5
+         action:deliberation:Q3
+
+E/F2 passion-driven anger — running retrievePassages + reRank @ deep depth
+    → input: I am furious with my colleague for missing yet another deadline. I want to confr...
+    → rationale: Exercises passion_diagnosis (orge sub-species under epithumia) + control_filter (the colleague's action is not up to me).
+    → bm25_count=2 vector_count=60 fusion_count=60 elapsed_ms=1040 (D6=1039ms) → reranked top=15
+  ✓ returned 15 passages (top_k_after_rerank=15)
+  ✓ every passage's canonical_mechanism is in deep-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         progress:gradient:grade_1:indicators:4
+         progress:gradient:grade_1:indicators:2
+         passions:phobos:definition
+         stoic-brain:foundations:dichotomy_of_control:not_up_to_us:4
+         passions:lupe:definition
+
+E/F3 oikeiosis-relevant family — running retrievePassages + reRank @ deep depth
+    → input: I am thinking about cutting back on my weekly calls to my elderly parents becaus...
+    → rationale: Exercises oikeiosis_stage (family obligations, stage 2) + oikeiosis_obligation (Cicero's deliberation).
+    → bm25_count=1 vector_count=60 fusion_count=60 elapsed_ms=1670 (D6=1670ms) → reranked top=15
+  ✓ returned 15 passages (top_k_after_rerank=15)
+  ✓ every passage's canonical_mechanism is in deep-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         action:oikeiosis:stage_2_family
+         progress:metrics:passion_reduction
+         value:dispreferred:loneliness
+         progress:gradient:grade_2:indicators:1
+         progress:metrics:oikeiosis_extension
+
+E-cache. Replay F1 with the same per-phase cache
+  ✓ cache_hit=true, elapsed_ms=0 (≈0ms)
+
+E-comparison. OLD vs NEW Layer 1 at deep depth
+OLD path getStoicBrainContext('deep'): 8026 chars
+         first 200: STOIC BRAIN — CONTROL FILTER DATA / Ruling Faculty (hegemonikon): The rational, commanding part of the soul that receives impressions, grants assent, and generates impulses. / Causal Sequence: phantasia (...
+
+NEW path for F1 career decision: 1598 chars (15 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Stobaeus Eclogae 2.66; Epictetus Discourses 1.4 (alt-3 derived from Stoic Brain v3.0.0)] passion_reduction (Reduction of Passions) — Are fewer passions operative? Ar...
+  ✓ both paths non-empty (OLD=8026 chars, NEW=1598 chars)
+  ✓ new path within ceiling (1598 ≤ 14000)
+
+NEW path for F2 passion-driven anger: 1491 chars (15 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Seneca Ep. 75] Disposition approaching hexis but not yet fully stable /  / --- /  / [Seneca Ep. 75] Understanding is strong but not yet complete /  / --- /  / [Stobaeus Eclogae Sect...
+  ✓ both paths non-empty (OLD=8026 chars, NEW=1491 chars)
+  ✓ new path within ceiling (1491 ≤ 14000)
+
+NEW path for F3 oikeiosis-relevant family: 2003 chars (15 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Cicero De Finibus 3.62-68; Hierocles On Appropriate Acts; Stobaeus Eclogae Section 4] Stage 2 — Family and Intimates (family): Affiliation extends to parents, childr...
+  ✓ both paths non-empty (OLD=8026 chars, NEW=2003 chars)
+  ✓ new path within ceiling (2003 ≤ 14000)
+
+PHASE F — /api/score-social standard-depth wiring (E4)
+------------------------------------------------------
+
+F/F1 career decision — running retrievePassages + reRank @ standard depth
+    → input: I have been offered a new job at a competitor. The pay is significantly higher b...
+    → rationale: Exercises control_filter (what is up to me) + value_assessment via oikeiosis (preferred indifferents).
+    → bm25_count=0 vector_count=50 fusion_count=50 elapsed_ms=974 (D6=974ms) → reranked top=12
+  ✓ returned 12 passages (top_k_after_rerank=12)
+  ✓ every passage's canonical_mechanism is in standard-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         action:deliberation:Q2
+         action:deliberation:Q4
+         action:deliberation:Q5
+         action:deliberation:Q3
+         action:deliberation:Q1
+
+F/F2 passion-driven anger — running retrievePassages + reRank @ standard depth
+    → input: I am furious with my colleague for missing yet another deadline. I want to confr...
+    → rationale: Exercises passion_diagnosis (orge sub-species under epithumia) + control_filter (the colleague's action is not up to me).
+    → bm25_count=0 vector_count=50 fusion_count=50 elapsed_ms=978 (D6=978ms) → reranked top=12
+  ✓ returned 12 passages (top_k_after_rerank=12)
+  ✓ every passage's canonical_mechanism is in standard-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         passions:phobos:definition
+         stoic-brain:foundations:dichotomy_of_control:not_up_to_us:4
+         passions:lupe:definition
+         action:deliberation:Q5
+         action:deliberation:Q2
+
+F/F3 oikeiosis-relevant family — running retrievePassages + reRank @ standard depth
+    → input: I am thinking about cutting back on my weekly calls to my elderly parents becaus...
+    → rationale: Exercises oikeiosis_stage (family obligations, stage 2) + oikeiosis_obligation (Cicero's deliberation).
+    → bm25_count=1 vector_count=50 fusion_count=50 elapsed_ms=930 (D6=930ms) → reranked top=12
+  ✓ returned 12 passages (top_k_after_rerank=12)
+  ✓ every passage's canonical_mechanism is in standard-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         action:oikeiosis:stage_2_family
+         value:dispreferred:loneliness
+         value:dispreferred:exile
+         passions:hedone:terpsis:definition
+         value:dispreferred:low_birth
+
+F-cache. Replay F1 with the same per-phase cache
+  ✓ cache_hit=true, elapsed_ms=0 (≈0ms)
+
+F-comparison. OLD vs NEW Layer 1 at standard depth
+[stoic-brain-loader] Over design budget: standard context is 6153 chars (≈1538 tokens), design budget is 6152 chars (≈1538 tokens). Consider condensing mechanism loaders.
+OLD path getStoicBrainContext('standard'): 6153 chars
+         first 200: STOIC BRAIN — CONTROL FILTER DATA / Ruling Faculty (hegemonikon): The rational, commanding part of the soul that receives impressions, grants assent, and generates impulses. / Causal Sequence: phantasia (...
+
+NEW path for F1 career decision: 1284 chars (12 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Cicero De Officiis Book 1] Q2. Between two honourable options, which is MORE honourable? /  / --- /  / [Cicero De Officiis Book 1] Q4. Between two advantageous options, whic...
+  ✓ both paths non-empty (OLD=6153 chars, NEW=1284 chars)
+  ✓ new path within ceiling (1284 ≤ 12000)
+
+NEW path for F2 passion-driven anger: 1445 chars (12 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Stobaeus Eclogae Section 5; DL Lives 7.110-116] phobos (Fear / Irrational Shrinking) — root passion targeting future_apparent_evil. /  / --- /  / [Epictetus Enchiridion 1; D...
+  ✓ both paths non-empty (OLD=6153 chars, NEW=1445 chars)
+  ✓ new path within ceiling (1445 ≤ 12000)
+
+NEW path for F3 oikeiosis-relevant family: 1594 chars (12 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Cicero De Finibus 3.62-68; Hierocles On Appropriate Acts; Stobaeus Eclogae Section 4] Stage 2 — Family and Intimates (family): Affiliation extends to parents, childr...
+  ✓ both paths non-empty (OLD=6153 chars, NEW=1594 chars)
+  ✓ new path within ceiling (1594 ≤ 12000)
+
+PHASE G — /api/score-document deep-depth wiring (E5; Pattern A1) — G1 substrate continuity
+------------------------------------------------------------------------------------------
+
+G/F1 career decision — running retrievePassages + reRank @ deep depth
+    → input: I have been offered a new job at a competitor. The pay is significantly higher b...
+    → rationale: Exercises control_filter (what is up to me) + value_assessment via oikeiosis (preferred indifferents).
+    → bm25_count=1 vector_count=60 fusion_count=60 elapsed_ms=1057 (D6=1057ms) → reranked top=15
+  ✓ returned 15 passages (top_k_after_rerank=15)
+  ✓ every passage's canonical_mechanism is in deep-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         progress:metrics:passion_reduction
+         action:deliberation:Q2
+         action:deliberation:Q4
+         action:deliberation:Q5
+         action:deliberation:Q3
+
+G/F2 passion-driven anger — running retrievePassages + reRank @ deep depth
+    → input: I am furious with my colleague for missing yet another deadline. I want to confr...
+    → rationale: Exercises passion_diagnosis (orge sub-species under epithumia) + control_filter (the colleague's action is not up to me).
+    → bm25_count=2 vector_count=60 fusion_count=60 elapsed_ms=1024 (D6=1024ms) → reranked top=15
+  ✓ returned 15 passages (top_k_after_rerank=15)
+  ✓ every passage's canonical_mechanism is in deep-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         progress:gradient:grade_1:indicators:4
+         progress:gradient:grade_1:indicators:2
+         passions:phobos:definition
+         stoic-brain:foundations:dichotomy_of_control:not_up_to_us:4
+         passions:lupe:definition
+
+G/F3 oikeiosis-relevant family — running retrievePassages + reRank @ deep depth
+    → input: I am thinking about cutting back on my weekly calls to my elderly parents becaus...
+    → rationale: Exercises oikeiosis_stage (family obligations, stage 2) + oikeiosis_obligation (Cicero's deliberation).
+    → bm25_count=1 vector_count=60 fusion_count=60 elapsed_ms=924 (D6=924ms) → reranked top=15
+  ✓ returned 15 passages (top_k_after_rerank=15)
+  ✓ every passage's canonical_mechanism is in deep-depth filter
+  ✓ every passage carries source_citation (R7 fidelity)
+    → top-5 passage_ids:
+         action:oikeiosis:stage_2_family
+         progress:metrics:passion_reduction
+         value:dispreferred:loneliness
+         progress:gradient:grade_2:indicators:1
+         progress:metrics:oikeiosis_extension
+
+G-cache. Replay F1 with the same per-phase cache
+  ✓ cache_hit=true, elapsed_ms=0 (≈0ms)
+
+G-comparison. OLD vs NEW Layer 1 at deep depth
+OLD path getStoicBrainContext('deep'): 8026 chars
+         first 200: STOIC BRAIN — CONTROL FILTER DATA / Ruling Faculty (hegemonikon): The rational, commanding part of the soul that receives impressions, grants assent, and generates impulses. / Causal Sequence: phantasia (...
+
+NEW path for F1 career decision: 1598 chars (15 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Stobaeus Eclogae 2.66; Epictetus Discourses 1.4 (alt-3 derived from Stoic Brain v3.0.0)] passion_reduction (Reduction of Passions) — Are fewer passions operative? Ar...
+  ✓ both paths non-empty (OLD=8026 chars, NEW=1598 chars)
+  ✓ new path within ceiling (1598 ≤ 14000)
+
+NEW path for F2 passion-driven anger: 1491 chars (15 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Seneca Ep. 75] Disposition approaching hexis but not yet fully stable /  / --- /  / [Seneca Ep. 75] Understanding is strong but not yet complete /  / --- /  / [Stobaeus Eclogae Sect...
+  ✓ both paths non-empty (OLD=8026 chars, NEW=1491 chars)
+  ✓ new path within ceiling (1491 ≤ 14000)
+
+NEW path for F3 oikeiosis-relevant family: 2003 chars (15 passages)
+         first 200: STOIC BRAIN — RETRIEVED PASSAGES /  / [Cicero De Finibus 3.62-68; Hierocles On Appropriate Acts; Stobaeus Eclogae Section 4] Stage 2 — Family and Intimates (family): Affiliation extends to parents, childr...
+  ✓ both paths non-empty (OLD=8026 chars, NEW=2003 chars)
+  ✓ new path within ceiling (2003 ≤ 14000)
+
+PHASE G2 — Pattern A1 wrapper surface (loadLayer1BlockWithFallback)
+-------------------------------------------------------------------
+
+G2/F1 career decision — invoke loadLayer1BlockWithFallback @ deep depth
+    → input: I have been offered a new job at a competitor. The pay is significantly higher b...
+    → elapsed_ms=963 block_chars=1598
+  ✓ wrapper returned non-empty string (1598 chars)
+  ✓ block contains STOIC BRAIN — RETRIEVED PASSAGES header
+  ✓ block contains at least one bracketed citation [..]
+  ✓ block under ceiling (1598 ≤ 14000)
+  ✓ wrapper output ≡ formatRetrievedPassagesAsBlock(top) (1598 chars)
+
+G2/F2 passion-driven anger — invoke loadLayer1BlockWithFallback @ deep depth
+    → input: I am furious with my colleague for missing yet another deadline. I want to confr...
+    → elapsed_ms=997 block_chars=1491
+  ✓ wrapper returned non-empty string (1491 chars)
+  ✓ block contains STOIC BRAIN — RETRIEVED PASSAGES header
+  ✓ block contains at least one bracketed citation [..]
+  ✓ block under ceiling (1491 ≤ 14000)
+  ✓ wrapper output ≡ formatRetrievedPassagesAsBlock(top) (1491 chars)
+
+G2/F3 oikeiosis-relevant family — invoke loadLayer1BlockWithFallback @ deep depth
+    → input: I am thinking about cutting back on my weekly calls to my elderly parents becaus...
+    → elapsed_ms=1330 block_chars=2003
+  ✓ wrapper returned non-empty string (2003 chars)
+  ✓ block contains STOIC BRAIN — RETRIEVED PASSAGES header
+  ✓ block contains at least one bracketed citation [..]
+  ✓ block under ceiling (2003 ≤ 14000)
+  ✓ wrapper output ≡ formatRetrievedPassagesAsBlock(top) (2003 chars)
+
+G2-cache. Replay F1 with the same per-phase wrapper cache
+  ✓ replay produced non-empty block in 0ms (cache active)
+
+---
+SUMMARY: 107 / 107 checks passed
+ALL CHECKS PASSED
