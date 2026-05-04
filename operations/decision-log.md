@@ -2231,3 +2231,78 @@ Expected post-amendment: 77/77 checks pass. The four previously-failing assertio
 If the LLM still omits the single-snapshot sentence after the amendment (re-run shows the same failure pattern), this is the **second observation** of the new PR5 candidate and the AI surfaces options at the next session: (a) tighten the prompt further (e.g., add a second worked OUTPUT example specifically for the marginal-case path); (b) demote the per-fixture hard-assert to soft-warn given ALL fixtures hit the marginal field; (c) accept the limitation and document it as a known M1-CP4 work item.
 
 **Status:** Adopted (ADR-007 amended in-session; layer3-prose.ts mirror amendment applied; in-sandbox smoke test 34/34 verified; harness re-run pending founder between-sessions verification).
+
+### Post-amendment harness re-run record — D-M1-CP3 (2026-05-04)
+
+**Trigger:** Founder ran the harness after the first amendment landed.
+
+**Result:** **78 / 79 checks passed** (improved from 73/77 pre-amendment). The amendment achieved its named purpose: the 3 previously-failing per-fixture single-snapshot assertions (F1.P5, F3.P5, F4.P5) all PASSED + the cross-fixture marginal-case coverage assertion PASSED. The 4 failures the founder approved fix-in-session for are all resolved.
+
+**One residual failure (new pattern surfaced):** F1.P5 hard-asserted `is_kathekon: null → prose contains "cannot be determined"` and the LLM did not satisfy it. This is the **same structural pattern** as the single-snapshot drift — marginal-case discipline named in instruction but not demonstrated in OUTPUT example — now manifesting on a different marginal field (kathekon-null). The Greek-identifier consistency check was clean across all 4 fixtures; the LLM produced rich, substantively accurate prose; it silently skipped the kathekon-null discipline sentence.
+
+**Fixture-driven visibility note:** F1's Layer 1 output is non-deterministic at temperature 0.2, so different runs produce different kathekon profiles. The previous run had F1 with `kathekon: contrary` (`is_kathekon === false`), so the kathekon-null assertion didn't fire. This run had F1 with `kathekon: marginal` (`is_kathekon === null`), and the assertion fired and failed. The latent issue was masked, not absent.
+
+**PR5 disposition update:** The new candidate ("LLM marginal-case discipline requires worked OUTPUT examples") was logged at first observation (single-snapshot, last run). This run is the **second observation** (kathekon-null, this run). Per PR5: "Candidate (2nd recurrence) — observed twice. Promoted to 'watch' status with a proposed resolution sketch." Updated `/operations/knowledge-gaps.md` to reflect Watch (2nd recurrence) status with three resolution-sketch options. Third observation triggers permanent KG entry per PR5.
+
+**Founder decision pending:** the founder is choosing whether to (a) apply a second in-session amendment fixing the kathekon-null pattern (and improvement_path_structured-null pre-emptively), (b) demote the marginal-case per-fixture hard-asserts to soft-warns, or (c) accept the residual failure and defer the comprehensive fix to M1-CP4. The chosen path becomes a second amendment block to this entry (or a new entry if a new ADR is created).
+
+**Files touched (in addition to those in the parent entry + first Amendment block):**
+
+- `/operations/knowledge-gaps.md` — modified (PR5 candidate promoted from "Candidate (first observation)" to "Candidate (2nd recurrence — watch status)" with resolution sketch + second-observation evidence; ~227 → ~245 lines)
+- `/operations/decision-log.md` — modified (this Post-amendment block appended; ~2233 → ~2263 lines)
+
+**Status:** Adopted (post-amendment re-run record; PR5 candidate promoted to watch (2nd recurrence)). Founder decision on residual failure path pending.
+
+### Second Amendment to D-M1-CP3 — Post-amendment kathekon-null fix (2026-05-04)
+
+**Trigger:** Founder ran the harness post-first-amendment; score moved from 73/77 → 78/79; one residual failure (F1.P5 kathekon-null phrasing missing from LLM prose). Same structural pattern as the single-snapshot drift, on a different marginal field.
+
+**Founder direction:** "Second fix-in-session amendment (apply same pattern that worked) — Recommended."
+
+**Fix applied (second in-session amendment):**
+
+1. ADR-007 §3 COMPOSITION CONTRACT bullets: all three marginal-case bullets (is_kathekon: null, direction_of_travel: 'single_snapshot', improvement_path_structured: null) updated to MANDATORY with explicit placement guidance per field. The improvement_path_structured-null bullet was MANDATORY-marked defensively even though it has not yet failed in any harness run — preempts the same drift pattern on the third marginal field.
+2. ADR-007 §3 PROSE FIELDS instruction for philosophical_reflection: word budget expanded from 2–4 sentences (~40–110 words) to 2–5 sentences (~40–140 words) to accommodate both marginal-case sentences when both apply (kathekon-null + single-snapshot together fire on F1 in some Layer 1 outputs); MANDATORY clause added for kathekon-null parallel to the existing single-snapshot MANDATORY clause.
+3. ADR-007 §3 OUTPUT example: philosophical_reflection now includes "The action's appropriateness cannot be determined from the available evidence." between the correct-view sentence and the single-snapshot closing — demonstrating the kathekon-null discipline as a worked example (PR5 lesson: worked example > written instruction).
+4. ADR-007 §6 fallback documentation: updated to note the new kathekon-null append + the independence of both appends.
+5. ADR-007 Changelog: second amendment entry appended naming the harness re-run result, the diagnosis, the fix.
+6. `/website/src/lib/translation-sandwich/layer3-prose.ts` `LAYER3_SYSTEM_PROMPT_API_REASON` constant: mirrored ADR-007 §3 second amendment verbatim (with backticks removed inside the template literal — the COMPOSITION CONTRACT bullets use plain text for code references rather than backtick-quoted, matching the rest of the prompt's style).
+7. `/website/src/lib/translation-sandwich/layer3-prose.ts` `fallbackPhilosophicalReflection` function: extended to append "The action's appropriateness cannot be determined from the available evidence." when `assessment.kathekon_assessment.is_kathekon === null`, independently of the single-snapshot append. Both appends fire on assessments where both marginal fields are engaged (e.g., SYNTH_F1 in the smoke test).
+
+**In-sandbox verification of fix:** Smoke-test extended with 2 new assertions (F1 + MARG fixtures must contain kathekon-null phrasing in fallback's philosophical_reflection). Previously 34/34 passed; now 36/36 pass with the new assertions. `npx tsc --noEmit -p .` clean. The fallback path is verified in-session for both marginal disciplines (single-snapshot + kathekon-null fire independently when applicable); the LLM path will be verified by the founder's between-sessions re-run.
+
+**PR5 carry-forward update:**
+
+- The candidate "LLM marginal-case discipline requires worked OUTPUT examples" stays in **watch (2nd recurrence) status**. Resolution applied at 2nd observation per the PR5 watch-status convention; promotion to permanent KG entry is deferred to third observation if it occurs.
+- Updated `/operations/knowledge-gaps.md` to record the resolution-applied note + the revised promotion trigger criteria.
+- If the post-second-amendment harness re-run passes 79/79, the resolution worked and the candidate stays in watch. If it still shows marginal-case omission for any of the three marginal fields, that is the third observation and PR5 promotes per the rule.
+
+**Defensive note on improvement_path_structured-null:** This marginal field has not yet failed in any harness run (none of F1–F4 produced `improvement_path_structured === null` in either run; all four had non-null improvement paths). The MANDATORY-marking + OUTPUT-example demonstration is preemptive. If a future fixture (M1-CP4 with parallel-run traffic, or M2/M3/M4 with new fixtures) produces `improvement_path_structured === null` and the LLM omits the corresponding sentence, that is the third observation of the same root pattern and PR5 promotes regardless of whether the failure surface is single-snapshot, kathekon-null, or improvement_path-null.
+
+**M1-CP4 implications:**
+
+- The next-session prompt's pre-condition "founder runs the optional real-Sonnet harness from M1-CP3 close" is now a re-run after the second amendment. Expected: 79/79 pass.
+- Open question 2 from the parent entry ("Marginal-case coverage adequacy of F1–F4") remains open: the assertions now exercise more disciplines reliably, but the question of whether ALL fixtures should hit ALL marginal fields (or whether the assertions should be soft-warn vs hard-fail when a fixture lacks the marginal field) is a fixture-design question for M1-CP4.
+
+**Files touched (in addition to those in the parent entry + first Amendment + Post-amendment blocks):**
+
+- `/adopted/adr/2026-05-04-layer3-prose-template-api-reason.md` — modified (second in-session amendment to §3 + §6 + Changelog; ~370 → ~378 lines)
+- `/website/src/lib/translation-sandwich/layer3-prose.ts` — modified (LAYER3_SYSTEM_PROMPT_API_REASON constant updated to mirror §3 second amendment; fallbackPhilosophicalReflection extended with kathekon-null append; ~485 → ~500 lines)
+- `/operations/knowledge-gaps.md` — modified (PR5 candidate watch-status entry updated with resolution-applied note + revised promotion trigger; ~245 → ~252 lines)
+- `/operations/decision-log.md` — modified (this Second Amendment block appended; ~2254 → ~2310 lines)
+
+**Risk classification of the second amendment:** Standard under 0d-ii (documentation amendment + non-safety module change). The second amendment touches the prompt template + fallback function but does NOT change the module surface (exports unchanged), the validator (unchanged), the type definitions (unchanged), or the harness (unchanged — the assertion logic was already in place). Critical Change Protocol NOT engaged.
+
+**Rollback path:** `git revert` of this session's combined commit reverts the original M1-CP3 work + first amendment + second amendment together. To revert ONLY the second amendment, revert the specific edits to ADR-007 §3 + §6 + Changelog and to layer3-prose.ts LAYER3_SYSTEM_PROMPT_API_REASON + fallbackPhilosophicalReflection. The smoke-test additions are scratch artefacts in `/outputs/` and not committed.
+
+**Founder verification (post-second-amendment):**
+
+The founder re-runs the harness:
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website" && npx tsx scripts/verify-translation-sandwich.ts
+```
+Expected: **79/79 pass.** The previously-failing F1.P5 kathekon-null assertion should now pass. F2 still has `is_kathekon: 'moderate'` (non-null) so its kathekon-null assertion does not fire. F3 had `kathekon=strong` last run (non-null assertion does not fire). F4 had `kathekon=moderate` last run (non-null assertion does not fire). Only F1 reliably triggers the kathekon-null assertion when its Layer 1 output produces the marginal kathekon profile.
+
+If the LLM still omits the kathekon-null sentence after the second amendment (third observation of the same root pattern), the AI engages "I caused this" signal at the next session, surfaces the result, and the founder decides whether to (a) tighten the prompt with a second worked OUTPUT example specifically for the marginal-case profile, (b) demote the marginal-case hard-asserts to soft-warns, or (c) accept the residual + defer to M1-CP4. PR5 then promotes the candidate to a permanent KG entry per the third-recurrence rule.
+
+**Status:** Adopted (ADR-007 second amendment applied; layer3-prose.ts mirror amendment applied; in-sandbox smoke test 36/36 verified; harness re-run pending founder between-sessions verification).
