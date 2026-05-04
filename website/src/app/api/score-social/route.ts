@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { PROXIMITY_ENGLISH } from '@/lib/document-scorer'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
-import { MODEL_FAST } from '@/lib/model-config'
+import { MODEL_DEEP } from '@/lib/model-config'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
       {
         ...result,
         ai_generated: true,
-        ai_model: MODEL_FAST,
+        ai_model: MODEL_DEEP,
       },
       { headers: corsHeaders() }
     )
