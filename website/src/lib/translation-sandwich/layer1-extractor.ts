@@ -1,0 +1,801 @@
+/**
+ * layer1-extractor.ts — Layer 1 of the translation-sandwich engine.
+ *
+ * Per ADR-005 (Layer 1 Schema Specification, Sub-session M1-CP1, 2026-05-04).
+ * Per ADR-004 (Translation-Sandwich Engine Pilot on /api/reason, Sub-session E10).
+ *
+ * EXTRACTION ONLY. This module reads agent input and produces a structured
+ * Layer1Schema. It does not assess, judge, recommend, or generate prose.
+ * Layer 2 (deterministic mechanism application) consumes its output.
+ *
+ * Compliance:
+ *   - AC1: Sonnet (MODEL_DEEP) per row "Layer 1 translation (alt-3)"
+ *   - AC6: Layer 1 RAG block in system message (cached); per-request contexts in user message
+ *   - AC8: New module under translation-sandwich/ — first build under the architecture
+ *   - KG1: Awaited LLM call; no module-level cache; no DB writes; no self-calls
+ *   - KG2: Sonnet selected (multi-step structured extraction outside Haiku boundary)
+ *   - R7:  Verbatim evidence quotes preserved in every category entry
+ *   - R8a: Controlled vocabularies (Greek identifiers, canonical taxonomies)
+ *
+ * Status at file creation: Wired (standalone). Reaches Verified (standalone) after
+ * harness Phase 1 + Phase 2 pass against fixtures F1–F4. Not imported by any route
+ * until M1-CP4 (per ADR-004 §10.1 inter-checkpoint state).
+ */
+
+import { getClient, formatRetrievedPassagesAsBlock } from '@/lib/sage-reason-engine'
+import { MODEL_DEEP } from '@/lib/model-config'
+import { extractJSON } from '@/lib/json-utils'
+import type { RetrievedPassage } from '@/lib/rag'
+
+// ============================================================================
+// CONTROLLED VOCABULARIES (R8a) — exported for Layer 2 + harness consumption
+// ============================================================================
+
+export type RootPassion = 'epithumia' | 'hedone' | 'phobos' | 'lupe'
+
+export type EpithumiaSubSpecies =
+  | 'orge'
+  | 'eros'
+  | 'pothos'
+  | 'philedonia'
+  | 'philoplousia'
+  | 'philodoxia'
+
+export type HedoneSubSpecies = 'kelesis' | 'epichairekakia' | 'terpsis'
+
+export type PhobosSubSpecies =
+  | 'deima'
+  | 'oknos'
+  | 'aischyne'
+  | 'thambos'
+  | 'thorybos'
+  | 'agonia'
+
+export type LupeSubSpecies =
+  | 'eleos'
+  | 'phthonos'
+  | 'zelotypia'
+  | 'penthos'
+  | 'achos'
+
+export type PassionSubSpecies =
+  | EpithumiaSubSpecies
+  | HedoneSubSpecies
+  | PhobosSubSpecies
+  | LupeSubSpecies
+
+export type CausalStage = 'phantasia' | 'synkatathesis' | 'horme' | 'praxis'
+
+export type OikeiosisCircle =
+  | 'self_preservation'
+  | 'household'
+  | 'local_community'
+  | 'political_community'
+  | 'cosmopolis'
+
+export type Indifferent =
+  | 'life'
+  | 'health'
+  | 'pleasure'
+  | 'beauty'
+  | 'strength'
+  | 'wealth'
+  | 'reputation'
+  | 'noble_birth'
+  | 'death'
+  | 'disease'
+  | 'pain'
+  | 'ugliness'
+
+export type AgentFraming = 'good' | 'evil' | 'indifferent' | 'unspecified'
+
+export type AgentNamedPosition = 'within' | 'outside' | 'unspecified'
+
+export type KathekonFactorType =
+  | 'natural_relationship'
+  | 'role_obligation'
+  | 'justification_offered'
+
+export type UrgencySignalType =
+  | 'time_pressure'
+  | 'imminent_deadline'
+  | 'finality_language'
+  | 'irreversibility_language'
+
+// ============================================================================
+// PER-CATEGORY ENTRY SHAPES
+// ============================================================================
+
+export interface PassionPresent {
+  /** Root passion per the canonical taxonomy. */
+  root_passion: RootPassion
+  /** Sub-species when identifiable; null when the root is named but the sub-species
+   *  cannot be determined from the input. */
+  sub_species: PassionSubSpecies | null
+  /** Verbatim quote from the input. R7 source fidelity. */
+  evidence: string
+}
+
+export interface ControlFilterElement {
+  /** Verbatim item the agent named as a concern. */
+  item: string
+  /** How the agent appears to frame this item. Layer 2 decides the canonical
+   *  classification using its rules table; this field records the agent's
+   *  framing only. */
+  agent_named_position: AgentNamedPosition
+}
+
+export interface OikeiosisCircleEngaged {
+  circle: OikeiosisCircle
+  /** Verbatim quote naming the parties or relationships at this circle level. */
+  evidence: string
+}
+
+export interface ValueCategoryAtStake {
+  indifferent: Indifferent
+  /** How the agent frames this indifferent. Layer 2 compares against axia
+   *  (canonical Stoic ranking) to compute value errors. */
+  agent_framing: AgentFraming
+  evidence: string
+}
+
+export interface KathekonFactor {
+  factor_type: KathekonFactorType
+  /** Layer 1's brief description (one phrase). */
+  description: string
+  evidence: string
+}
+
+export interface UrgencyIndicator {
+  signal_type: UrgencySignalType
+  evidence: string
+}
+
+export interface CausalStageEvidence {
+  stage: CausalStage
+  evidence: string
+}
+
+// ============================================================================
+// TOP-LEVEL SCHEMA
+// ============================================================================
+
+export interface Layer1Schema {
+  version: 'layer1-schema-v1'
+  passions_present: PassionPresent[]
+  control_filter_elements: ControlFilterElement[]
+  oikeiosis_circles_engaged: OikeiosisCircleEngaged[]
+  value_categories_at_stake: ValueCategoryAtStake[]
+  kathekon_factors: KathekonFactor[]
+  urgency_indicators: UrgencyIndicator[]
+  causal_stage_evidence: CausalStageEvidence[]
+  /** Free-form notes naming any uncertainty. Empty when the extraction is
+   *  unambiguous. */
+  ambiguity_notes: string[]
+}
+
+// ============================================================================
+// MODULE INPUT (mirrors runSageReason's input shape — L7a per ADR-005)
+// ============================================================================
+
+export interface ExtractInput {
+  /** Required — the agent's input text. */
+  input: string
+  /** Optional — supplemental context provided by the caller. */
+  context?: string
+  /** Optional — domain context. */
+  domain_context?: string
+  /** Optional — supplemental urgency context from the caller. Layer 1's
+   *  `urgency_indicators` field extracts urgency from the agent's own language;
+   *  this parameter is supplemental information only. */
+  urgency_context?: string
+  /** Optional — formatted Stoic Brain block. When provided, placed in the system
+   *  message with cache_control. */
+  stoicBrainContext?: string
+  /** Optional — D6 + D7 retrieved passages. When provided AND stoicBrainContext
+   *  is empty, the module formats them via formatRetrievedPassagesAsBlock. */
+  retrievedPassages?: RetrievedPassage[]
+  /** Optional — practitioner profile (AC6 layer 2). User-message placement. */
+  practitionerContext?: string | null
+  /** Optional — project state (AC6 layer 3). User-message placement. */
+  projectContext?: string | null
+}
+
+// ============================================================================
+// VALID-VALUE SETS (used by validator)
+// ============================================================================
+
+const ROOT_PASSIONS: ReadonlyArray<RootPassion> = [
+  'epithumia',
+  'hedone',
+  'phobos',
+  'lupe',
+]
+
+const SUB_SPECIES: ReadonlyArray<PassionSubSpecies> = [
+  // epithumia
+  'orge',
+  'eros',
+  'pothos',
+  'philedonia',
+  'philoplousia',
+  'philodoxia',
+  // hedone
+  'kelesis',
+  'epichairekakia',
+  'terpsis',
+  // phobos
+  'deima',
+  'oknos',
+  'aischyne',
+  'thambos',
+  'thorybos',
+  'agonia',
+  // lupe
+  'eleos',
+  'phthonos',
+  'zelotypia',
+  'penthos',
+  'achos',
+]
+
+const CAUSAL_STAGES: ReadonlyArray<CausalStage> = [
+  'phantasia',
+  'synkatathesis',
+  'horme',
+  'praxis',
+]
+
+const CIRCLES: ReadonlyArray<OikeiosisCircle> = [
+  'self_preservation',
+  'household',
+  'local_community',
+  'political_community',
+  'cosmopolis',
+]
+
+const INDIFFERENTS: ReadonlyArray<Indifferent> = [
+  'life',
+  'health',
+  'pleasure',
+  'beauty',
+  'strength',
+  'wealth',
+  'reputation',
+  'noble_birth',
+  'death',
+  'disease',
+  'pain',
+  'ugliness',
+]
+
+const AGENT_FRAMINGS: ReadonlyArray<AgentFraming> = [
+  'good',
+  'evil',
+  'indifferent',
+  'unspecified',
+]
+
+const AGENT_POSITIONS: ReadonlyArray<AgentNamedPosition> = [
+  'within',
+  'outside',
+  'unspecified',
+]
+
+const KATHEKON_FACTOR_TYPES: ReadonlyArray<KathekonFactorType> = [
+  'natural_relationship',
+  'role_obligation',
+  'justification_offered',
+]
+
+const URGENCY_SIGNAL_TYPES: ReadonlyArray<UrgencySignalType> = [
+  'time_pressure',
+  'imminent_deadline',
+  'finality_language',
+  'irreversibility_language',
+]
+
+// ============================================================================
+// VALIDATOR (per ADR-005 §6 — hand-rolled, no Zod)
+// ============================================================================
+
+export type Layer1ValidationCategory = 'parse' | 'shape' | 'enum' | 'version'
+
+export class Layer1ValidationError extends Error {
+  readonly category: Layer1ValidationCategory
+  readonly field?: string
+  readonly value?: unknown
+
+  constructor(
+    category: Layer1ValidationCategory,
+    message: string,
+    field?: string,
+    value?: unknown
+  ) {
+    super(message)
+    this.name = 'Layer1ValidationError'
+    this.category = category
+    this.field = field
+    this.value = value
+  }
+}
+
+function isObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v)
+}
+
+function assertString(value: unknown, path: string): string {
+  if (typeof value !== 'string') {
+    throw new Layer1ValidationError(
+      'shape',
+      `Expected string at ${path}, got ${typeof value}`,
+      path,
+      value
+    )
+  }
+  return value
+}
+
+function assertEnum<T extends string>(
+  value: unknown,
+  valid: ReadonlyArray<T>,
+  path: string
+): T {
+  if (typeof value !== 'string' || !valid.includes(value as T)) {
+    throw new Layer1ValidationError(
+      'enum',
+      `Invalid enum value at ${path}: ${JSON.stringify(value)} (expected one of: ${valid.join(', ')})`,
+      path,
+      value
+    )
+  }
+  return value as T
+}
+
+function assertArray(value: unknown, path: string): unknown[] {
+  if (!Array.isArray(value)) {
+    throw new Layer1ValidationError(
+      'shape',
+      `Expected array at ${path}, got ${typeof value}`,
+      path,
+      value
+    )
+  }
+  return value
+}
+
+function assertObject(value: unknown, path: string): Record<string, unknown> {
+  if (!isObject(value)) {
+    throw new Layer1ValidationError(
+      'shape',
+      `Expected object at ${path}, got ${Array.isArray(value) ? 'array' : typeof value}`,
+      path,
+      value
+    )
+  }
+  return value
+}
+
+const REQUIRED_KEYS: ReadonlyArray<keyof Layer1Schema> = [
+  'version',
+  'passions_present',
+  'control_filter_elements',
+  'oikeiosis_circles_engaged',
+  'value_categories_at_stake',
+  'kathekon_factors',
+  'urgency_indicators',
+  'causal_stage_evidence',
+  'ambiguity_notes',
+]
+
+/**
+ * Validate that `parsed` conforms to Layer1Schema. Throws Layer1ValidationError
+ * on any structural, enum, or version mismatch.
+ *
+ * Per ADR-005 §6. Per ADR-004 §9.1 — a throw triggers the bundled-depth fallback
+ * at the route at M1-CP4.
+ */
+export function validateLayer1Schema(parsed: unknown): Layer1Schema {
+  const root = assertObject(parsed, '$')
+
+  // Required keys present
+  for (const key of REQUIRED_KEYS) {
+    if (!(key in root)) {
+      throw new Layer1ValidationError('shape', `Missing required key: ${key}`, key)
+    }
+  }
+
+  // Version
+  if (root.version !== 'layer1-schema-v1') {
+    throw new Layer1ValidationError(
+      'version',
+      `Expected version 'layer1-schema-v1', got ${JSON.stringify(root.version)}`,
+      'version',
+      root.version
+    )
+  }
+
+  // passions_present
+  const passions: PassionPresent[] = assertArray(root.passions_present, 'passions_present').map(
+    (entry, i) => {
+      const o = assertObject(entry, `passions_present[${i}]`)
+      const subSpeciesRaw = o.sub_species
+      return {
+        root_passion: assertEnum(o.root_passion, ROOT_PASSIONS, `passions_present[${i}].root_passion`),
+        sub_species:
+          subSpeciesRaw === null
+            ? null
+            : assertEnum(subSpeciesRaw, SUB_SPECIES, `passions_present[${i}].sub_species`),
+        evidence: assertString(o.evidence, `passions_present[${i}].evidence`),
+      }
+    }
+  )
+
+  // control_filter_elements
+  const controlFilterElements: ControlFilterElement[] = assertArray(
+    root.control_filter_elements,
+    'control_filter_elements'
+  ).map((entry, i) => {
+    const o = assertObject(entry, `control_filter_elements[${i}]`)
+    return {
+      item: assertString(o.item, `control_filter_elements[${i}].item`),
+      agent_named_position: assertEnum(
+        o.agent_named_position,
+        AGENT_POSITIONS,
+        `control_filter_elements[${i}].agent_named_position`
+      ),
+    }
+  })
+
+  // oikeiosis_circles_engaged
+  const oikeiosisCirclesEngaged: OikeiosisCircleEngaged[] = assertArray(
+    root.oikeiosis_circles_engaged,
+    'oikeiosis_circles_engaged'
+  ).map((entry, i) => {
+    const o = assertObject(entry, `oikeiosis_circles_engaged[${i}]`)
+    return {
+      circle: assertEnum(o.circle, CIRCLES, `oikeiosis_circles_engaged[${i}].circle`),
+      evidence: assertString(o.evidence, `oikeiosis_circles_engaged[${i}].evidence`),
+    }
+  })
+
+  // value_categories_at_stake
+  const valueCategoriesAtStake: ValueCategoryAtStake[] = assertArray(
+    root.value_categories_at_stake,
+    'value_categories_at_stake'
+  ).map((entry, i) => {
+    const o = assertObject(entry, `value_categories_at_stake[${i}]`)
+    return {
+      indifferent: assertEnum(
+        o.indifferent,
+        INDIFFERENTS,
+        `value_categories_at_stake[${i}].indifferent`
+      ),
+      agent_framing: assertEnum(
+        o.agent_framing,
+        AGENT_FRAMINGS,
+        `value_categories_at_stake[${i}].agent_framing`
+      ),
+      evidence: assertString(o.evidence, `value_categories_at_stake[${i}].evidence`),
+    }
+  })
+
+  // kathekon_factors
+  const kathekonFactors: KathekonFactor[] = assertArray(
+    root.kathekon_factors,
+    'kathekon_factors'
+  ).map((entry, i) => {
+    const o = assertObject(entry, `kathekon_factors[${i}]`)
+    return {
+      factor_type: assertEnum(
+        o.factor_type,
+        KATHEKON_FACTOR_TYPES,
+        `kathekon_factors[${i}].factor_type`
+      ),
+      description: assertString(o.description, `kathekon_factors[${i}].description`),
+      evidence: assertString(o.evidence, `kathekon_factors[${i}].evidence`),
+    }
+  })
+
+  // urgency_indicators
+  const urgencyIndicators: UrgencyIndicator[] = assertArray(
+    root.urgency_indicators,
+    'urgency_indicators'
+  ).map((entry, i) => {
+    const o = assertObject(entry, `urgency_indicators[${i}]`)
+    return {
+      signal_type: assertEnum(
+        o.signal_type,
+        URGENCY_SIGNAL_TYPES,
+        `urgency_indicators[${i}].signal_type`
+      ),
+      evidence: assertString(o.evidence, `urgency_indicators[${i}].evidence`),
+    }
+  })
+
+  // causal_stage_evidence
+  const causalStageEvidence: CausalStageEvidence[] = assertArray(
+    root.causal_stage_evidence,
+    'causal_stage_evidence'
+  ).map((entry, i) => {
+    const o = assertObject(entry, `causal_stage_evidence[${i}]`)
+    return {
+      stage: assertEnum(o.stage, CAUSAL_STAGES, `causal_stage_evidence[${i}].stage`),
+      evidence: assertString(o.evidence, `causal_stage_evidence[${i}].evidence`),
+    }
+  })
+
+  // ambiguity_notes
+  const ambiguityNotes: string[] = assertArray(root.ambiguity_notes, 'ambiguity_notes').map(
+    (entry, i) => assertString(entry, `ambiguity_notes[${i}]`)
+  )
+
+  return {
+    version: 'layer1-schema-v1',
+    passions_present: passions,
+    control_filter_elements: controlFilterElements,
+    oikeiosis_circles_engaged: oikeiosisCirclesEngaged,
+    value_categories_at_stake: valueCategoriesAtStake,
+    kathekon_factors: kathekonFactors,
+    urgency_indicators: urgencyIndicators,
+    causal_stage_evidence: causalStageEvidence,
+    ambiguity_notes: ambiguityNotes,
+  }
+}
+
+// ============================================================================
+// LAYER 1 SYSTEM PROMPT (per ADR-005 §4)
+// ============================================================================
+
+const LAYER1_SYSTEM_PROMPT = `You are Layer 1 of the SageReasoning translation-sandwich engine. Your role is FEATURE EXTRACTION ONLY. You do not assess, judge, recommend, or generate prose. You extract structured features from the input text and return them as JSON conforming exactly to Layer1Schema.
+
+Your output drives a deterministic Stoic mechanism engine (Layer 2). The quality of the engine's assessment depends on the fidelity of your extraction.
+
+EXTRACTION CONTRACT
+
+Read the input text carefully. For each of the seven content categories below, extract everything the input names and return it in the specified shape.
+
+If a category is absent from the input, return an empty array for that category — do not omit the field.
+
+If you are uncertain about a classification (e.g., a passion that could map to two sub-species, a statement that could be evidence for two causal stages, a metaphorical text whose literal target is unclear), add a note to ambiguity_notes naming the field and the source of uncertainty. Do not guess.
+
+Quote the input verbatim in every \`evidence\` field. Do not paraphrase. Do not add interpretation. Layer 1's value depends on Layer 2 receiving the agent's actual words, not your summary of them.
+
+CATEGORIES
+
+1. passions_present — passions detected in the input.
+   - Root passion (required): epithumia, hedone, phobos, or lupe.
+   - Sub-species (when identifiable, else null):
+     • Epithumia: orge, eros, pothos, philedonia, philoplousia, philodoxia.
+     • Hedone: kelesis, epichairekakia, terpsis.
+     • Phobos: deima, oknos, aischyne, thambos, thorybos, agonia.
+     • Lupe: eleos, phthonos, zelotypia, penthos, achos.
+   - Evidence: verbatim quote from the input.
+   Multiple passions are allowed. Same root with different sub-species is allowed.
+
+2. control_filter_elements — items the agent names as concerns or objects of deliberation.
+   - Item: verbatim item from the input.
+   - agent_named_position: how the agent frames it — "within" their control, "outside" their control, or "unspecified" if the agent does not signal either.
+   Layer 2 decides the canonical classification using a rules table; you record only the agent's framing.
+
+3. oikeiosis_circles_engaged — circles the input touches.
+   - Circle: self_preservation | household | local_community | political_community | cosmopolis.
+   - Evidence: verbatim quote naming the parties or relationships.
+   Multiple circles allowed.
+
+4. value_categories_at_stake — preferred indifferents named in the input.
+   - Indifferent: life | health | pleasure | beauty | strength | wealth | reputation | noble_birth | death | disease | pain | ugliness.
+   - agent_framing: good | evil | indifferent | unspecified — how the agent treats this indifferent.
+   - Evidence.
+   Map natural-language references to canonical names ("money" → wealth, "looks" → beauty, "what people think" → reputation).
+
+5. kathekon_factors — natural relationships, role obligations, and justifications.
+   - factor_type: natural_relationship | role_obligation | justification_offered.
+   - Description: one phrase.
+   - Evidence.
+
+6. urgency_indicators — language patterns from the agent suggesting time pressure.
+   - signal_type: time_pressure | imminent_deadline | finality_language | irreversibility_language.
+   - Evidence.
+   Extract urgency from the agent's own words. Do not infer urgency from the supplemental urgency_context parameter unless the agent's text itself names it.
+
+7. causal_stage_evidence — textual evidence supporting placement at causal stages.
+   - Stage: phantasia (impression) | synkatathesis (assent) | horme (impulse) | praxis (action).
+   - Evidence: verbatim quote.
+   Multiple stages allowed — an input can show evidence at several stages simultaneously.
+
+OUTPUT
+
+Return ONLY valid JSON conforming to Layer1Schema. No markdown. No commentary outside the JSON.
+
+{
+  "version": "layer1-schema-v1",
+  "passions_present": [
+    {"root_passion": "phobos", "sub_species": "agonia", "evidence": "..."}
+  ],
+  "control_filter_elements": [
+    {"item": "...", "agent_named_position": "outside"}
+  ],
+  "oikeiosis_circles_engaged": [
+    {"circle": "household", "evidence": "..."}
+  ],
+  "value_categories_at_stake": [
+    {"indifferent": "reputation", "agent_framing": "good", "evidence": "..."}
+  ],
+  "kathekon_factors": [
+    {"factor_type": "role_obligation", "description": "...", "evidence": "..."}
+  ],
+  "urgency_indicators": [
+    {"signal_type": "time_pressure", "evidence": "..."}
+  ],
+  "causal_stage_evidence": [
+    {"stage": "synkatathesis", "evidence": "..."}
+  ],
+  "ambiguity_notes": [
+    "passions_present[0].sub_species: could be eros or pothos"
+  ]
+}
+
+Use the EXACT JSON keys shown above (e.g. "root_passion", not "root"; "agent_named_position", not "position"; "factor_type", not "type"). Use the EXACT enum values from the controlled vocabularies above.
+
+ambiguity_notes is a string array. Each entry is a single string naming the field and the source of uncertainty in plain text. Do NOT use objects. Do NOT use nested structure. Each entry is one string.
+
+Example of correct ambiguity_notes:
+  "ambiguity_notes": [
+    "passions_present[0].sub_species: could be eros or pothos",
+    "causal_stage_evidence: 'I keep checking my phone' could be evidence for synkatathesis or horme"
+  ]
+
+Incorrect (do not use this shape):
+  "ambiguity_notes": [
+    {"field": "passions_present[0].sub_species", "note": "could be eros or pothos"}
+  ]
+
+If everything was unambiguous, return [].
+
+Return only the JSON.`
+
+// ============================================================================
+// EXTRACTION FUNCTION (per ADR-005 §1 + §5)
+// ============================================================================
+
+/**
+ * Extract Stoic features from agent input. Returns Layer1Schema.
+ *
+ * Throws on:
+ *   - LLM API failure (network, timeout, rate limit) — original error from Anthropic SDK
+ *   - JSON parse failure — error from extractJSON
+ *   - Schema validation failure — Layer1ValidationError (use instanceof to detect)
+ *
+ * Per ADR-004 §9.1: a throw at the route layer (M1-CP4) triggers the
+ * bundled-depth fallback. During parallel-run, failures are logged but the
+ * user is unaffected.
+ *
+ * Per KG1: this function is awaited by its caller (no fire-and-forget).
+ * Per KG6: system message carries cached prompt + RAG block (when present);
+ *           user message carries per-request contexts.
+ *
+ * @param params - ExtractInput (mirrors runSageReason's input shape)
+ * @returns Layer1Schema — validated against the schema's controlled vocabularies
+ */
+export async function extractFeatures(params: ExtractInput): Promise<Layer1Schema> {
+  if (!params || typeof params.input !== 'string' || params.input.trim().length === 0) {
+    throw new Layer1ValidationError(
+      'shape',
+      'extractFeatures: params.input is required and must be a non-empty string',
+      'input'
+    )
+  }
+
+  const client = getClient()
+
+  // Build user message — mirrors runSageReason's composition order (AC6 + KG6).
+  let userMessage = `Extract Stoic features from the following input.\n\nInput: ${params.input.trim()}`
+
+  if (params.context?.trim()) {
+    userMessage += `\nContext: ${params.context.trim()}`
+  }
+
+  if (params.domain_context?.trim()) {
+    userMessage += `\n\nDOMAIN CONTEXT (this extraction is being made in the context of a specific domain):\n${params.domain_context.trim()}`
+  }
+
+  if (params.practitionerContext) {
+    userMessage += `\n\n${params.practitionerContext}`
+  }
+
+  if (params.projectContext) {
+    userMessage += `\n\n${params.projectContext}`
+  }
+
+  if (params.urgency_context?.trim()) {
+    // Layer 1's urgency_indicators field extracts from the agent's own language.
+    // This supplemental context is exposed to the LLM but the system prompt instructs
+    // it not to echo this into urgency_indicators unless the agent names urgency.
+    userMessage += `\n\nURGENCY CONTEXT (supplemental — extract urgency_indicators from the agent's text only): ${params.urgency_context.trim()}`
+  }
+
+  userMessage += '\n\nReturn only the JSON Layer1Schema object.'
+
+  // Build Stoic Brain block (D6 + D7 RAG). Same precedence as runSageReason.
+  let stoicBrainBlock = params.stoicBrainContext || ''
+  if (!stoicBrainBlock && params.retrievedPassages && params.retrievedPassages.length > 0) {
+    stoicBrainBlock = formatRetrievedPassagesAsBlock(params.retrievedPassages)
+  }
+
+  // System messages: prompt (cached) + optional RAG block.
+  const systemMessages: Array<{
+    type: 'text'
+    text: string
+    cache_control?: { type: 'ephemeral' }
+  }> = [
+    {
+      type: 'text',
+      text: LAYER1_SYSTEM_PROMPT,
+      cache_control: { type: 'ephemeral' },
+    },
+  ]
+
+  if (stoicBrainBlock) {
+    systemMessages.push({ type: 'text', text: stoicBrainBlock })
+  }
+
+  // LLM call — Sonnet, 4000 max-tokens, 0.2 temperature (per ADR-005 §5).
+  let responseText: string
+  try {
+    const message = await client.messages.create({
+      model: MODEL_DEEP,
+      max_tokens: 4000,
+      temperature: 0.2,
+      system: systemMessages,
+      messages: [{ role: 'user', content: userMessage }],
+    })
+
+    responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+  } catch (err) {
+    console.warn(
+      `layer1-extractor: LLM call failed (target route /api/reason at M1-CP4). ` +
+        `Input length: ${params.input.length}.`,
+      err instanceof Error ? err.message : err
+    )
+    throw err
+  }
+
+  // Parse JSON.
+  let parsed: unknown
+  try {
+    parsed = extractJSON(responseText)
+  } catch (err) {
+    console.warn(
+      `layer1-extractor: JSON parse failed (target route /api/reason at M1-CP4). ` +
+        `Input length: ${params.input.length}, response length: ${responseText.length}.`,
+      err instanceof Error ? err.message : err
+    )
+    throw err
+  }
+
+  // Validate against Layer1Schema.
+  try {
+    return validateLayer1Schema(parsed)
+  } catch (err) {
+    if (err instanceof Layer1ValidationError) {
+      console.warn(
+        `layer1-extractor: schema validation failed (target route /api/reason at M1-CP4). ` +
+          `Category: ${err.category}, field: ${err.field ?? 'n/a'}.`,
+        err.message
+      )
+    } else {
+      console.warn(
+        `layer1-extractor: unexpected validation error (target route /api/reason at M1-CP4).`,
+        err instanceof Error ? err.message : err
+      )
+    }
+    throw err
+  }
+}
+
+// ============================================================================
+// EXPORTS — for harness consumption
+// ============================================================================
+
+export { LAYER1_SYSTEM_PROMPT }
