@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateApiKey, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { runSageReason, type ReasonDepth } from '@/lib/sage-reason-engine'
-import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistressTwoStage } from '@/lib/r20a-classifier'
 import { enforceDistressCheck } from '@/lib/constraints'
-import { retrievePassages, reRank, type RetrievedPassage, type RetrieveInput, type RetrieveResult } from '@/lib/rag'
-import { getCorpusMechanismsForDepth, RETRIEVAL_TOP_K_BY_DEPTH, toBm25OrShape } from './helpers'
+import { type RetrieveResult } from '@/lib/rag'
+import { loadLayer1WithFallback } from '@/lib/rag/load-layer1-with-fallback'
 
 // =============================================================================
 // sage-reason — The Universal Reasoning Layer
@@ -71,6 +70,17 @@ import { getCorpusMechanismsForDepth, RETRIEVAL_TOP_K_BY_DEPTH, toBm25OrShape } 
 //   - See: /adopted/adr/2026-05-04-d6-d7-consumer-wiring.md (ADR-001)
 //   - See: /operations/decision-log.md D-INTERNAL-RETRIEVE-ROUTE-VERIFIED-2026-05-04
 //
+// SUB-SESSION E3 (2026-05-04 — Pattern S2 + S3 helper-lift):
+//   - loadLayer1WithFallback now imported from /lib/rag/load-layer1-with-fallback
+//     (was a route-local function; lifted alongside the helpers in E3 because
+//     three+ consumers now share the same wrapper).
+//   - Mechanism-mapping helpers now imported from /lib/rag/helpers (was
+//     ./helpers; the route-local file is removed in E3 since no other route
+//     depends on it after the lift).
+//   - Behaviour unchanged — pure relocation. No regression risk; harness re-run
+//     proves Phases A/B/C still pass.
+//   - See: /operations/decision-log.md D-CONSUMER-WIRING-LIFT-2026-05-04
+//
 // WHAT BREAKS IF CONTEXT LOADING CHANGES:
 //   - If getProjectContext fails and returns a thrown error, the endpoint
 //     returns a 500 for all users. Acceptable at single-user traffic; at scale
@@ -94,45 +104,6 @@ import { getCorpusMechanismsForDepth, RETRIEVAL_TOP_K_BY_DEPTH, toBm25OrShape } 
 // =============================================================================
 
 const VALID_DEPTHS: ReasonDepth[] = ['quick', 'standard', 'deep']
-
-/**
- * Load Layer 1 Stoic Brain content via D6 + D7 RAG retrieval.
- *
- * Returns either `{ retrievedPassages }` (success path) or
- * `{ stoicBrainContext }` (fallback path), spreadable into the engine input.
- * The engine prefers `stoicBrainContext` when both are present, so the
- * fallback shape is safe.
- *
- * Sub-session E1: graceful degradation. If retrieval fails (any thrown error),
- * we fall back to the compiled-string path via getStoicBrainContext(depth).
- * The user sees a working response; the failure is observable via console.warn.
- */
-async function loadLayer1WithFallback(
-  input: string,
-  depth: ReasonDepth,
-  cache: Map<string, RetrieveResult>,
-): Promise<{ retrievedPassages?: RetrievedPassage[]; stoicBrainContext?: string }> {
-  try {
-    const corpusMechanisms = getCorpusMechanismsForDepth(depth)
-    const { top_k, top_k_after_rerank } = RETRIEVAL_TOP_K_BY_DEPTH[depth]
-    const retrieveInput: RetrieveInput = {
-      query: input,
-      bm25_query: toBm25OrShape(input),
-      mechanism_filter: corpusMechanisms,
-      passage_type_filter: ['mechanism'],
-      top_k,
-    }
-    const result = await retrievePassages(retrieveInput, cache)
-    const top = await reRank(result.passages, retrieveInput, 'heuristic', { top_k_after_rerank })
-    return { retrievedPassages: top }
-  } catch (err) {
-    console.warn(
-      `/api/reason: D6/D7 retrieval failed, falling back to compiled stoic-brain path. ` +
-      `depth=${depth} error=${err instanceof Error ? err.message : String(err)}`,
-    )
-    return { stoicBrainContext: getStoicBrainContext(depth) }
-  }
-}
 
 export async function POST(request: NextRequest) {
   // Rate limiting
@@ -193,7 +164,7 @@ export async function POST(request: NextRequest) {
     // Load Layer 1 (Stoic Brain via D6/D7), Layer 2 (practitioner context), and
     // Layer 3 (project context) in parallel to avoid sequential latency.
     const [layer1, practitionerContext, projectContext] = await Promise.all([
-      loadLayer1WithFallback(input, depth, ragCache),
+      loadLayer1WithFallback(input, depth, ragCache, '/api/reason'),
       auth.user?.id ? getPractitionerContext(auth.user.id) : Promise.resolve(null),
       getProjectContext('condensed'),
     ])

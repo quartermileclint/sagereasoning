@@ -1,8 +1,11 @@
 /**
- * verify-reason-rag.ts — verification harness for /api/reason + /api/score RAG wiring.
+ * verify-reason-rag.ts — verification harness for D6/D7 Pattern A2 consumer wiring.
  *
  * Originally produced for Sub-session E1 (/api/reason quick-depth). Extended in
- * Sub-session E2 with Phase D — /api/score standard-depth wiring.
+ * Sub-session E2 with Phase D (/api/score standard-depth). Refactored in
+ * Sub-session E3 with the V2 phase helper (`runConsumerWiringPhase`) so each
+ * Pattern A2 consumer is one function call instead of an inline block, and
+ * extended with Phase E (/api/score-conversation deep depth).
  *
  * Run from inside website/:
  *   npx tsx scripts/verify-reason-rag.ts
@@ -17,54 +20,48 @@
  *     A5. formatRetrievedPassagesAsBlock with one passage builds the expected
  *         header + citation + text shape.
  *
- *   PHASE B — /api/reason quick-depth wiring test (real OpenAI + real Supabase):
- *     For each of 3 representative /api/reason quick-depth inputs (career
- *     decision, passion-driven situation, oikeiosis-relevant relationship):
- *     B1. Run retrievePassages + reRank with the depth-mapped mechanism filter
- *         and top_k_after_rerank — exactly the call shape loadLayer1WithFallback
- *         runs in the route.
- *     B2. Assert: returned passages array is non-empty.
- *     B3. Assert: every returned passage's canonical_mechanism overlaps with
- *         the depth's expected corpus mechanism IDs.
- *     B4. Assert: every returned passage carries source_citation (R7).
- *     B5. Cache replay test — call fixture 1 a second time with the same
- *         per-request cache; assert cache_hit and elapsed_ms ≈ 0.
+ *   PHASE B — /api/reason quick-depth wiring (real OpenAI + real Supabase):
+ *     For each of 3 representative inputs (career decision, passion-driven
+ *     anger, oikeiosis-relevant family), invokes runConsumerWiringPhase('B',
+ *     'quick', ...). Asserts non-empty top, every passage's mechanism in
+ *     filter, every passage carries source_citation (R7), separate-cache
+ *     replay, and comparison-axis (both paths non-empty; new path under
+ *     ceiling).
  *
- *   PHASE C — Comparison axis (old vs new Layer 1) at quick depth:
- *     For each of the 3 fixtures, render Layer 1 content via:
- *       - OLD path: getStoicBrainContext('quick') string
- *       - NEW path: formatRetrievedPassagesAsBlock(<retrieved passages>)
- *     C1. Both paths produce non-empty content.
- *     C2. New path stays under the 12000-char ceiling (quick-depth budget).
- *     C3. Print a first-200-char preview of each path for founder visual
- *         comparison. The founder judges semantic equivalence.
+ *   PHASE C — Quick-depth comparison axis (preserved from E1 for continuity).
+ *     Note: Phase B's comparison axis (delegated to runConsumerWiringPhase)
+ *     covers the same checks; Phase C is retained as the original surface.
  *
- *   PHASE D (E2) — /api/score standard-depth wiring + comparison axis:
- *     Same shape as Phase B + C, but at standard depth (8 corpus mechanisms,
- *     top_k=25/top_k_after_rerank=12). The existing 3 fixtures function as
- *     "actions to score" — input semantics overlap closely with /api/reason.
- *     D1. retrievePassages + reRank at standard depth → non-empty.
- *     D2. Every passage's canonical_mechanism in the standard-depth filter.
- *     D3. Every passage carries source_citation (R7).
- *     D4. Cache replay (separate per-request cache from Phase B).
- *     D5. OLD vs NEW comparison axis at standard depth (against
- *         getStoicBrainContext('standard') ~1538 tokens / ~6000 chars).
+ *   PHASE D — /api/score standard-depth wiring (E2). Same shape as Phase B
+ *     via runConsumerWiringPhase('D', 'standard', ...).
+ *
+ *   PHASE E (E3) — /api/score-conversation deep-depth wiring. Same shape via
+ *     runConsumerWiringPhase('E', 'deep', ...). First deep-depth Pattern A2
+ *     consumer; completes coverage across all three depth settings.
  *
  * Exit code 0 if all checks pass; 1 otherwise.
  *
- * E3+ candidate: factor Phase B + Phase D into a shared
- *   `runConsumerWiringPhase(depth, fixtures, harness)` helper if more consumers
- *   come online. Lighter touch for E2 — duplicate the block for clarity.
+ * Sub-session E3 changes:
+ *   - Helper imports moved from `@/app/api/reason/helpers` to `@/lib/rag/helpers`
+ *     (Pattern S2 lift completed this session).
+ *   - Phase B / D / E refactored to call runConsumerWiringPhase (V2).
+ *   - Phase E added at deep depth.
+ *   - Phase A and Phase C kept inline (per-helper tests + retained quick-depth
+ *     surface for continuity with E1's verification record).
  *
  * Cross-references:
  *   - /adopted/adr/2026-05-04-d6-d7-consumer-wiring.md (ADR-001)
  *   - /website/src/app/api/reason/route.ts (E1 consumer — quick depth)
  *   - /website/src/app/api/score/route.ts (E2 consumer — standard depth)
- *   - /website/src/app/api/reason/helpers.ts (depth-mechanism mapping; shared by both consumers)
+ *   - /website/src/app/api/score-conversation/route.ts (E3 consumer — deep depth)
+ *   - /website/src/lib/rag/helpers.ts (depth-mechanism mapping; shared by all consumers)
+ *   - /website/src/lib/rag/load-layer1-with-fallback.ts (the shared wrapper)
  *   - /website/src/lib/sage-reason-engine.ts (formatRetrievedPassagesAsBlock)
  *   - /website/scripts/verify-internal-retrieve.ts (Sub-session D harness pattern)
  *   - /operations/decision-log.md D-INTERNAL-RETRIEVE-ROUTE-VERIFIED-2026-05-04
  *   - /operations/decision-log.md D-REASON-RAG-WIRED-2026-05-04
+ *   - /operations/decision-log.md D-SCORE-RAG-WIRED-2026-05-04
+ *   - /operations/decision-log.md D-CONSUMER-WIRING-LIFT-2026-05-04
  */
 
 import { readFileSync } from 'node:fs'
@@ -118,7 +115,8 @@ for (const key of REQUIRED_ENV) {
 console.log(`[env] all required env vars present\n`)
 
 // -----------------------------------------------------------------------------
-// 2. Test fixtures — 3 representative /api/reason quick-depth inputs
+// 2. Test fixtures — 3 representative inputs (work for all three depths /
+//    consumer shapes; see fixture rationale)
 // -----------------------------------------------------------------------------
 
 interface ReasonFixture {
@@ -154,8 +152,9 @@ const QUICK_DEPTH_EXPECTED_MECHANISMS = [
   'oikeiosis_stage',
   'oikeiosis_obligation',
 ]
-// Standard-depth expected mechanisms = quick + ['value_indifferent', 'virtue_domain_engaged'].
-// Asserted inline in Phase A; resolved at runtime via getCorpusMechanismsForDepth('standard') in Phase D.
+// Standard-depth = quick + ['value_indifferent', 'virtue_domain_engaged']
+// Deep-depth     = standard + ['katorthoma_proximity']
+// Asserted inline in Phase A; resolved at runtime via getCorpusMechanismsForDepth in B/D/E.
 
 // -----------------------------------------------------------------------------
 // 3. Pretty-print helpers
@@ -172,7 +171,199 @@ function info(msg: string) {
 }
 
 // -----------------------------------------------------------------------------
-// 4. Main
+// 4. V2 phase helper — runs one Pattern A2 consumer wiring phase end-to-end.
+//
+// Encapsulates the per-fixture assertion sequence (non-empty top, mechanism
+// filter overlap, R7 source_citation), separate-cache replay assertion, and
+// the OLD-vs-NEW Layer 1 comparison axis. Each Pattern A2 consumer is one call.
+// -----------------------------------------------------------------------------
+
+interface PhaseDeps {
+  retrievePassages: typeof import('@/lib/rag').retrievePassages
+  reRank: typeof import('@/lib/rag').reRank
+  getCorpusMechanismsForDepth: typeof import('@/lib/rag/helpers').getCorpusMechanismsForDepth
+  RETRIEVAL_TOP_K_BY_DEPTH: typeof import('@/lib/rag/helpers').RETRIEVAL_TOP_K_BY_DEPTH
+  toBm25OrShape: typeof import('@/lib/rag/helpers').toBm25OrShape
+  formatRetrievedPassagesAsBlock: typeof import('@/lib/sage-reason-engine').formatRetrievedPassagesAsBlock
+  getStoicBrainContext: typeof import('@/lib/context/stoic-brain-loader').getStoicBrainContext
+}
+
+interface PhaseConfig {
+  /** Phase letter for log prefixes (e.g., 'B', 'D', 'E'). */
+  label: string
+  /** Engine depth — controls mechanism filter + top-k via the shared helpers. */
+  depth: 'quick' | 'standard' | 'deep'
+  /** Plain-English description of which consumer this phase exercises. */
+  consumerDescription: string
+  /** Per-depth NEW Layer 1 ceiling in chars. */
+  ceilingChars: number
+}
+
+interface PhaseResult {
+  totalChecks: number
+  passedChecks: number
+}
+
+async function runConsumerWiringPhase(
+  cfg: PhaseConfig,
+  deps: PhaseDeps,
+): Promise<PhaseResult> {
+  let totalChecks = 0
+  let passedChecks = 0
+
+  console.log(`PHASE ${cfg.label} — ${cfg.consumerDescription}`)
+  console.log('-'.repeat(`PHASE ${cfg.label} — ${cfg.consumerDescription}`.length))
+  console.log()
+
+  const cache = new Map()
+  const fixtureResults: Array<{
+    fixture: ReasonFixture
+    passages: Awaited<ReturnType<typeof deps.reRank>>
+    elapsed_ms: number
+  }> = []
+
+  const corpusMechanisms = deps.getCorpusMechanismsForDepth(cfg.depth)
+  const { top_k, top_k_after_rerank } = deps.RETRIEVAL_TOP_K_BY_DEPTH[cfg.depth]
+
+  for (const fixture of FIXTURES) {
+    console.log(`${cfg.label}/${fixture.label} — running retrievePassages + reRank @ ${cfg.depth} depth`)
+    info(`input: ${fixture.input.slice(0, 80)}${fixture.input.length > 80 ? '...' : ''}`)
+    info(`rationale: ${fixture.rationale}`)
+
+    const retrieveInput = {
+      query: fixture.input,
+      bm25_query: deps.toBm25OrShape(fixture.input),
+      mechanism_filter: corpusMechanisms,
+      passage_type_filter: ['mechanism' as const],
+      top_k,
+    }
+
+    const start = Date.now()
+    const result = await deps.retrievePassages(retrieveInput, cache)
+    const top = await deps.reRank(result.passages, retrieveInput, 'heuristic', { top_k_after_rerank })
+    const elapsed_ms = Date.now() - start
+
+    info(
+      `bm25_count=${result.retrieval_diagnostics.bm25_count} ` +
+      `vector_count=${result.retrieval_diagnostics.vector_count} ` +
+      `fusion_count=${result.retrieval_diagnostics.fusion_count} ` +
+      `elapsed_ms=${elapsed_ms} (D6=${result.retrieval_diagnostics.elapsed_ms}ms) ` +
+      `→ reranked top=${top.length}`,
+    )
+
+    // Assert: non-empty top
+    totalChecks++
+    if (top.length > 0) {
+      ok(`returned ${top.length} passages (top_k_after_rerank=${top_k_after_rerank})`)
+      passedChecks++
+    } else {
+      fail(`returned 0 passages`)
+    }
+
+    // Assert: every passage's canonical_mechanism overlaps the depth filter
+    totalChecks++
+    const allInFilter = top.every((p) =>
+      p.canonical_mechanism.some((m) => corpusMechanisms.includes(m)),
+    )
+    if (allInFilter) {
+      ok(`every passage's canonical_mechanism is in ${cfg.depth}-depth filter`)
+      passedChecks++
+    } else {
+      const offenders = top.filter(
+        (p) => !p.canonical_mechanism.some((m) => corpusMechanisms.includes(m)),
+      )
+      fail(`${offenders.length}/${top.length} passages outside filter`)
+      for (const o of offenders)
+        info(`  out-of-filter: ${o.passage_id} mechanisms=[${o.canonical_mechanism.join(',')}]`)
+    }
+
+    // Assert: every passage carries source_citation (R7)
+    totalChecks++
+    const allCited = top.every(
+      (p) => typeof p.source_citation === 'string' && p.source_citation.length > 0,
+    )
+    if (allCited) {
+      ok(`every passage carries source_citation (R7 fidelity)`)
+      passedChecks++
+    } else {
+      fail(`some passages missing source_citation`)
+    }
+
+    // Print top-5 passage_ids for founder review
+    const top5 = top.slice(0, 5).map((p) => p.passage_id).join('\n         ')
+    info(`top-5 passage_ids:\n         ${top5}`)
+
+    fixtureResults.push({ fixture, passages: top, elapsed_ms })
+    console.log()
+  }
+
+  // Cache replay
+  console.log(`${cfg.label}-cache. Replay F1 with the same per-phase cache`)
+  totalChecks++
+  const f1 = FIXTURES[0]
+  const retrieveInputReplay = {
+    query: f1.input,
+    bm25_query: deps.toBm25OrShape(f1.input),
+    mechanism_filter: corpusMechanisms,
+    passage_type_filter: ['mechanism' as const],
+    top_k,
+  }
+  const startReplay = Date.now()
+  const replay = await deps.retrievePassages(retrieveInputReplay, cache)
+  const elapsedReplay = Date.now() - startReplay
+  if (replay.retrieval_diagnostics.cache_hit && elapsedReplay < 50) {
+    ok(`cache_hit=true, elapsed_ms=${elapsedReplay} (≈0ms)`)
+    passedChecks++
+  } else {
+    fail(
+      `expected cache_hit + ≈0ms, got cache_hit=${replay.retrieval_diagnostics.cache_hit}, ` +
+      `elapsed_ms=${elapsedReplay}`,
+    )
+  }
+  console.log()
+
+  // Comparison axis
+  console.log(`${cfg.label}-comparison. OLD vs NEW Layer 1 at ${cfg.depth} depth`)
+  const oldLayer1 = deps.getStoicBrainContext(cfg.depth)
+  console.log(`OLD path getStoicBrainContext('${cfg.depth}'): ${oldLayer1.length} chars`)
+  console.log(`         first 200: ${oldLayer1.slice(0, 200).replace(/\n/g, ' / ')}...\n`)
+
+  for (const { fixture, passages } of fixtureResults) {
+    const newLayer1 = deps.formatRetrievedPassagesAsBlock(passages)
+    console.log(
+      `NEW path for ${fixture.label}: ${newLayer1.length} chars (${passages.length} passages)`,
+    )
+    console.log(
+      `         first 200: ${newLayer1.slice(0, 200).replace(/\n/g, ' / ')}...`,
+    )
+
+    // Assert: both paths produce non-empty content
+    totalChecks++
+    if (oldLayer1.length > 0 && newLayer1.length > 0) {
+      ok(
+        `both paths non-empty (OLD=${oldLayer1.length} chars, NEW=${newLayer1.length} chars)`,
+      )
+      passedChecks++
+    } else {
+      fail(`empty content: OLD=${oldLayer1.length}, NEW=${newLayer1.length}`)
+    }
+
+    // Assert: new path under depth-specific ceiling
+    totalChecks++
+    if (newLayer1.length <= cfg.ceilingChars) {
+      ok(`new path within ceiling (${newLayer1.length} ≤ ${cfg.ceilingChars})`)
+      passedChecks++
+    } else {
+      fail(`new path exceeds ceiling: ${newLayer1.length} > ${cfg.ceilingChars}`)
+    }
+    console.log()
+  }
+
+  return { totalChecks, passedChecks }
+}
+
+// -----------------------------------------------------------------------------
+// 5. Main
 // -----------------------------------------------------------------------------
 
 async function main() {
@@ -182,9 +373,19 @@ async function main() {
     getCorpusMechanismsForDepth,
     RETRIEVAL_TOP_K_BY_DEPTH,
     toBm25OrShape,
-  } = await import('@/app/api/reason/helpers')
+  } = await import('@/lib/rag/helpers')
   const { formatRetrievedPassagesAsBlock } = await import('@/lib/sage-reason-engine')
   const { getStoicBrainContext } = await import('@/lib/context/stoic-brain-loader')
+
+  const deps: PhaseDeps = {
+    retrievePassages,
+    reRank,
+    getCorpusMechanismsForDepth,
+    RETRIEVAL_TOP_K_BY_DEPTH,
+    toBm25OrShape,
+    formatRetrievedPassagesAsBlock,
+    getStoicBrainContext,
+  }
 
   let totalChecks = 0
   let passedChecks = 0
@@ -297,310 +498,65 @@ async function main() {
   console.log()
 
   // ===========================================================================
-  // PHASE B — Wiring test (real Supabase + OpenAI)
+  // PHASE B — /api/reason quick-depth wiring (E1)
   // ===========================================================================
 
-  console.log('PHASE B — Wiring test (real Supabase + OpenAI)')
-  console.log('----------------------------------------------\n')
+  const phaseB = await runConsumerWiringPhase(
+    {
+      label: 'B',
+      depth: 'quick',
+      consumerDescription: '/api/reason quick-depth wiring (E1)',
+      ceilingChars: 12000,
+    },
+    deps,
+  )
+  totalChecks += phaseB.totalChecks
+  passedChecks += phaseB.passedChecks
 
-  const cache = new Map()
-  const fixtureResults: Array<{ fixture: ReasonFixture; passages: Awaited<ReturnType<typeof reRank>>; elapsed_ms: number }> = []
+  // ===========================================================================
+  // PHASE C — Quick-depth comparison axis surface (preserved from E1)
+  //
+  // Phase B's runConsumerWiringPhase already covers the comparison checks. This
+  // section is retained as a record-keeping surface so the E1 verification log
+  // continues to read with PHASE C labelling. No new assertions here.
+  // ===========================================================================
 
-  for (const fixture of FIXTURES) {
-    console.log(`B/${fixture.label} — running retrievePassages + reRank`)
-    info(`input: ${fixture.input.slice(0, 80)}${fixture.input.length > 80 ? '...' : ''}`)
-    info(`rationale: ${fixture.rationale}`)
-
-    const corpusMechanisms = getCorpusMechanismsForDepth('quick')
-    const { top_k, top_k_after_rerank } = RETRIEVAL_TOP_K_BY_DEPTH.quick
-    const retrieveInput = {
-      query: fixture.input,
-      bm25_query: toBm25OrShape(fixture.input),
-      mechanism_filter: corpusMechanisms,
-      passage_type_filter: ['mechanism' as const],
-      top_k,
-    }
-
-    const start = Date.now()
-    const result = await retrievePassages(retrieveInput, cache)
-    const top = await reRank(result.passages, retrieveInput, 'heuristic', { top_k_after_rerank })
-    const elapsed_ms = Date.now() - start
-
-    info(
-      `bm25_count=${result.retrieval_diagnostics.bm25_count} ` +
-      `vector_count=${result.retrieval_diagnostics.vector_count} ` +
-      `fusion_count=${result.retrieval_diagnostics.fusion_count} ` +
-      `elapsed_ms=${elapsed_ms} (D6=${result.retrieval_diagnostics.elapsed_ms}ms) ` +
-      `→ reranked top=${top.length}`,
-    )
-
-    // B-assert: non-empty
-    totalChecks++
-    if (top.length > 0) {
-      ok(`returned ${top.length} passages (top_k_after_rerank=${top_k_after_rerank})`)
-      passedChecks++
-    } else {
-      fail(`returned 0 passages`)
-    }
-
-    // B-assert: every passage's canonical_mechanism overlaps the depth filter
-    totalChecks++
-    const allInFilter = top.every((p) =>
-      p.canonical_mechanism.some((m) => corpusMechanisms.includes(m)),
-    )
-    if (allInFilter) {
-      ok(`every passage's canonical_mechanism is in depth filter`)
-      passedChecks++
-    } else {
-      const offenders = top.filter(
-        (p) => !p.canonical_mechanism.some((m) => corpusMechanisms.includes(m)),
-      )
-      fail(`${offenders.length}/${top.length} passages outside filter`)
-      for (const o of offenders) info(`  out-of-filter: ${o.passage_id} mechanisms=[${o.canonical_mechanism.join(',')}]`)
-    }
-
-    // B-assert: every passage carries source_citation (R7)
-    totalChecks++
-    const allCited = top.every((p) => typeof p.source_citation === 'string' && p.source_citation.length > 0)
-    if (allCited) {
-      ok(`every passage carries source_citation (R7 fidelity)`)
-      passedChecks++
-    } else {
-      fail(`some passages missing source_citation`)
-    }
-
-    // Print top-5 passage_ids for founder review
-    const top5 = top.slice(0, 5).map((p) => p.passage_id).join('\n         ')
-    info(`top-5 passage_ids:\n         ${top5}`)
-
-    fixtureResults.push({ fixture, passages: top, elapsed_ms })
-    console.log()
-  }
-
-  console.log('B-cache. Replay F1 with the same per-request cache')
-  totalChecks++
-  const f1 = FIXTURES[0]
-  const corpusMechanisms = getCorpusMechanismsForDepth('quick')
-  const { top_k } = RETRIEVAL_TOP_K_BY_DEPTH.quick
-  const retrieveInputReplay = {
-    query: f1.input,
-    bm25_query: toBm25OrShape(f1.input),
-    mechanism_filter: corpusMechanisms,
-    passage_type_filter: ['mechanism' as const],
-    top_k,
-  }
-  const start = Date.now()
-  const replay = await retrievePassages(retrieveInputReplay, cache)
-  const elapsed_ms = Date.now() - start
-  if (replay.retrieval_diagnostics.cache_hit && elapsed_ms < 50) {
-    ok(`cache_hit=true, elapsed_ms=${elapsed_ms} (≈0ms)`)
-    passedChecks++
-  } else {
-    fail(
-      `expected cache_hit + ≈0ms, got cache_hit=${replay.retrieval_diagnostics.cache_hit}, ` +
-      `elapsed_ms=${elapsed_ms}`,
-    )
-  }
+  console.log('PHASE C — (covered by Phase B runConsumerWiringPhase comparison axis)')
+  console.log('--------------------------------------------------------------------')
+  info('No additional checks; Phase B comparison axis covers OLD vs NEW Layer 1 at quick depth.')
   console.log()
 
   // ===========================================================================
-  // PHASE C — Comparison axis (old vs new Layer 1)
+  // PHASE D — /api/score standard-depth wiring (E2)
   // ===========================================================================
 
-  console.log('PHASE C — Comparison axis (old vs new Layer 1)')
-  console.log('----------------------------------------------\n')
-
-  const oldLayer1 = getStoicBrainContext('quick')
-  console.log(`OLD path getStoicBrainContext('quick'): ${oldLayer1.length} chars`)
-  console.log(`         first 200: ${oldLayer1.slice(0, 200).replace(/\n/g, ' / ')}...\n`)
-
-  const QUICK_CEILING_CHARS = 12000
-
-  for (const { fixture, passages } of fixtureResults) {
-    const newLayer1 = formatRetrievedPassagesAsBlock(passages)
-    console.log(`NEW path for ${fixture.label}: ${newLayer1.length} chars (${passages.length} passages)`)
-    console.log(`         first 200: ${newLayer1.slice(0, 200).replace(/\n/g, ' / ')}...`)
-
-    // C-assert: both paths produce non-empty content
-    totalChecks++
-    if (oldLayer1.length > 0 && newLayer1.length > 0) {
-      ok(`both paths non-empty (OLD=${oldLayer1.length} chars, NEW=${newLayer1.length} chars)`)
-      passedChecks++
-    } else {
-      fail(`empty content: OLD=${oldLayer1.length}, NEW=${newLayer1.length}`)
-    }
-
-    // C-assert: new path under quick-depth ceiling
-    totalChecks++
-    if (newLayer1.length <= QUICK_CEILING_CHARS) {
-      ok(`new path within ceiling (${newLayer1.length} ≤ ${QUICK_CEILING_CHARS})`)
-      passedChecks++
-    } else {
-      fail(`new path exceeds ceiling: ${newLayer1.length} > ${QUICK_CEILING_CHARS}`)
-    }
-    console.log()
-  }
-
-  // ===========================================================================
-  // PHASE D (E2) — /api/score standard-depth wiring + comparison axis
-  // ===========================================================================
-
-  console.log('PHASE D — /api/score standard-depth wiring (E2)')
-  console.log('-----------------------------------------------\n')
-
-  const cacheD = new Map()
-  const fixtureResultsStandard: Array<{
-    fixture: ReasonFixture
-    passages: Awaited<ReturnType<typeof reRank>>
-    elapsed_ms: number
-  }> = []
-
-  const standardCorpusMechanisms = getCorpusMechanismsForDepth('standard')
-  const { top_k: standardTopK, top_k_after_rerank: standardTopKRerank } =
-    RETRIEVAL_TOP_K_BY_DEPTH.standard
-
-  for (const fixture of FIXTURES) {
-    console.log(`D/${fixture.label} — running retrievePassages + reRank @ standard depth`)
-    info(`input (as /api/score 'action'): ${fixture.input.slice(0, 80)}${fixture.input.length > 80 ? '...' : ''}`)
-    info(`rationale: ${fixture.rationale}`)
-
-    const retrieveInput = {
-      query: fixture.input,
-      bm25_query: toBm25OrShape(fixture.input),
-      mechanism_filter: standardCorpusMechanisms,
-      passage_type_filter: ['mechanism' as const],
-      top_k: standardTopK,
-    }
-
-    const start = Date.now()
-    const result = await retrievePassages(retrieveInput, cacheD)
-    const top = await reRank(result.passages, retrieveInput, 'heuristic', {
-      top_k_after_rerank: standardTopKRerank,
-    })
-    const elapsed_ms = Date.now() - start
-
-    info(
-      `bm25_count=${result.retrieval_diagnostics.bm25_count} ` +
-      `vector_count=${result.retrieval_diagnostics.vector_count} ` +
-      `fusion_count=${result.retrieval_diagnostics.fusion_count} ` +
-      `elapsed_ms=${elapsed_ms} (D6=${result.retrieval_diagnostics.elapsed_ms}ms) ` +
-      `→ reranked top=${top.length}`,
-    )
-
-    // D-assert: non-empty
-    totalChecks++
-    if (top.length > 0) {
-      ok(`returned ${top.length} passages (top_k_after_rerank=${standardTopKRerank})`)
-      passedChecks++
-    } else {
-      fail(`returned 0 passages`)
-    }
-
-    // D-assert: every passage's canonical_mechanism overlaps the standard-depth filter
-    totalChecks++
-    const allInFilter = top.every((p) =>
-      p.canonical_mechanism.some((m) => standardCorpusMechanisms.includes(m)),
-    )
-    if (allInFilter) {
-      ok(`every passage's canonical_mechanism is in standard-depth filter`)
-      passedChecks++
-    } else {
-      const offenders = top.filter(
-        (p) => !p.canonical_mechanism.some((m) => standardCorpusMechanisms.includes(m)),
-      )
-      fail(`${offenders.length}/${top.length} passages outside filter`)
-      for (const o of offenders)
-        info(`  out-of-filter: ${o.passage_id} mechanisms=[${o.canonical_mechanism.join(',')}]`)
-    }
-
-    // D-assert: every passage carries source_citation (R7)
-    totalChecks++
-    const allCited = top.every(
-      (p) => typeof p.source_citation === 'string' && p.source_citation.length > 0,
-    )
-    if (allCited) {
-      ok(`every passage carries source_citation (R7 fidelity)`)
-      passedChecks++
-    } else {
-      fail(`some passages missing source_citation`)
-    }
-
-    // Print top-5 passage_ids for founder review
-    const top5 = top.slice(0, 5).map((p) => p.passage_id).join('\n         ')
-    info(`top-5 passage_ids:\n         ${top5}`)
-
-    fixtureResultsStandard.push({ fixture, passages: top, elapsed_ms })
-    console.log()
-  }
-
-  console.log('D-cache. Replay F1 with the same per-request cache (Phase D)')
-  totalChecks++
-  const f1Standard = FIXTURES[0]
-  const retrieveInputReplayStandard = {
-    query: f1Standard.input,
-    bm25_query: toBm25OrShape(f1Standard.input),
-    mechanism_filter: standardCorpusMechanisms,
-    passage_type_filter: ['mechanism' as const],
-    top_k: standardTopK,
-  }
-  const startD = Date.now()
-  const replayD = await retrievePassages(retrieveInputReplayStandard, cacheD)
-  const elapsedD_ms = Date.now() - startD
-  if (replayD.retrieval_diagnostics.cache_hit && elapsedD_ms < 50) {
-    ok(`cache_hit=true, elapsed_ms=${elapsedD_ms} (≈0ms)`)
-    passedChecks++
-  } else {
-    fail(
-      `expected cache_hit + ≈0ms, got cache_hit=${replayD.retrieval_diagnostics.cache_hit}, ` +
-      `elapsed_ms=${elapsedD_ms}`,
-    )
-  }
-  console.log()
-
-  // Comparison axis at standard depth
-  console.log('D-comparison. OLD vs NEW Layer 1 at standard depth')
-  const oldLayer1Standard = getStoicBrainContext('standard')
-  console.log(
-    `OLD path getStoicBrainContext('standard'): ${oldLayer1Standard.length} chars`,
+  const phaseD = await runConsumerWiringPhase(
+    {
+      label: 'D',
+      depth: 'standard',
+      consumerDescription: '/api/score standard-depth wiring (E2)',
+      ceilingChars: 12000,
+    },
+    deps,
   )
-  console.log(
-    `         first 200: ${oldLayer1Standard.slice(0, 200).replace(/\n/g, ' / ')}...\n`,
+  totalChecks += phaseD.totalChecks
+  passedChecks += phaseD.passedChecks
+
+  // ===========================================================================
+  // PHASE E — /api/score-conversation deep-depth wiring (E3)
+  // ===========================================================================
+
+  const phaseE = await runConsumerWiringPhase(
+    {
+      label: 'E',
+      depth: 'deep',
+      consumerDescription: '/api/score-conversation deep-depth wiring (E3)',
+      ceilingChars: 14000,
+    },
+    deps,
   )
-
-  const STANDARD_CEILING_CHARS = 12000
-
-  for (const { fixture, passages } of fixtureResultsStandard) {
-    const newLayer1Standard = formatRetrievedPassagesAsBlock(passages)
-    console.log(
-      `NEW path for ${fixture.label}: ${newLayer1Standard.length} chars (${passages.length} passages)`,
-    )
-    console.log(
-      `         first 200: ${newLayer1Standard.slice(0, 200).replace(/\n/g, ' / ')}...`,
-    )
-
-    // D-assert: both paths produce non-empty content
-    totalChecks++
-    if (oldLayer1Standard.length > 0 && newLayer1Standard.length > 0) {
-      ok(
-        `both paths non-empty (OLD=${oldLayer1Standard.length} chars, NEW=${newLayer1Standard.length} chars)`,
-      )
-      passedChecks++
-    } else {
-      fail(`empty content: OLD=${oldLayer1Standard.length}, NEW=${newLayer1Standard.length}`)
-    }
-
-    // D-assert: new path under standard-depth ceiling
-    totalChecks++
-    if (newLayer1Standard.length <= STANDARD_CEILING_CHARS) {
-      ok(`new path within ceiling (${newLayer1Standard.length} ≤ ${STANDARD_CEILING_CHARS})`)
-      passedChecks++
-    } else {
-      fail(
-        `new path exceeds ceiling: ${newLayer1Standard.length} > ${STANDARD_CEILING_CHARS}`,
-      )
-    }
-    console.log()
-  }
+  totalChecks += phaseE.totalChecks
+  passedChecks += phaseE.passedChecks
 
   // ===========================================================================
   // SUMMARY
