@@ -44,8 +44,18 @@ export type PassageType =
   | 'scoring_rule';
 
 export interface RetrieveInput {
-  /** Free-text query (paraphrase or exact terms). */
+  /** Free-text query (paraphrase or exact terms). Used for the vector channel
+   *  embedding and (when bm25_query is not supplied) for the BM25 channel. */
   query: string;
+
+  /** Optional separate BM25-channel query string. When provided, the BM25
+   *  channel uses this instead of `query`; the vector channel always uses
+   *  `query`. Lets a consumer reformulate the query for BM25 (e.g., OR-shape
+   *  to defeat the websearch_to_tsquery default-AND behaviour) without
+   *  affecting the vector channel's embedding.
+   *  Per ADR-001 (2026-05-04 D6/D7 consumer wiring) §"Query construction
+   *  discipline" + D-RETRIEVAL-RERANK-IMPLEMENTED-2026-05-04 finding #1. */
+  bm25_query?: string;
 
   /** Mechanism IDs — restricts to passages whose canonical_mechanism contains any of these. */
   mechanism_filter?: string[];
@@ -189,6 +199,7 @@ export function makeCacheKey(input: RetrieveInput): string {
 
   return JSON.stringify({
     query: input.query,
+    bm25_query: input.bm25_query,
     mechanism_filter: sortedMech,
     passion_filter: input.passion_filter,
     sub_passion_filter: input.sub_passion_filter,
@@ -497,8 +508,10 @@ async function runBm25Query(
   input: RetrieveInput,
   match_count: number
 ): Promise<BM25Row[]> {
+  // Per ADR-001: BM25 channel uses bm25_query when supplied, falling back to
+  // query for backward compatibility. The vector channel always uses query.
   const { data, error } = await supabaseAdmin.rpc('match_passages_bm25', {
-    query_text: input.query,
+    query_text: input.bm25_query ?? input.query,
     match_count,
     mechanism_filter: input.mechanism_filter ?? null,
     passion_filter: input.passion_filter ?? null,

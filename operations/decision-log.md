@@ -3796,3 +3796,68 @@ Result (full log at `/operations/migrations/2026-05-04-test-output.log`):
 **Status:** Adopted. Cross-references: `D-CORPUS-EMBEDDINGS-IVFFLAT-2026-05-04` (the substrate this session's code consumes); `D-CORPUS-PASSAGES-POPULATION-2026-05-03` (the 186-row corpus); `D-CORPUS-PASSAGES-SCHEMA-2026-05-03` (the table the RPCs query); `D6` retrieval-interface.md (the spec this implements); `D7` re-rank-design.md (the spec this implements); `D5` §"Retrieval indexes" (the indexes the RPCs use). The new files: `/website/src/lib/rag/retrieve-passages.ts`; `/website/src/lib/rag/rerank.ts`; `/website/src/lib/rag/index.ts`; `/operations/migrations/2026-05-04-retrieval-rpc-functions.sql`; `/website/scripts/test-retrieval-rerank.ts`; `/website/scripts/test-retrieval-rerank.mts` (stub); `/operations/migrations/2026-05-04-test-output.log` (verification record); `/operations/handoffs/founder/2026-05-04-sub-session-C-bis-close.md`; `/operations/handoffs/founder/2026-05-XX-sub-session-D-NEXT-SESSION-PROMPT.md`. Production Supabase: 2 new RPC functions Live. **Phase-2 pass-1 readiness inventory after this entry: substrate piece 5 of 7 (D6 + D7 implementation) Verified — six pieces complete (rows + D-A16 stems + embeddings + ivfflat + RPC functions + retrieve/rerank code); piece 7 of 7 is the wiring of D6/D7 into the first consumer route per Sub-session D's PR1 single-endpoint proof. Sub-session sequence (D + E1–E4 + F + G + H) unchanged.**
 
 ---
+
+## 2026-05-04 — D-INTERNAL-RETRIEVE-ROUTE-VERIFIED
+
+**Decision:** D6 + D7 wired into a new dedicated `/api/internal/retrieve` route as Sub-session D's PR1 single-endpoint proof; D6 `retrievePassages` contract extended with optional `bm25_query` parameter (additive; backward-compatible) so consumers can reformulate the BM25 channel query without affecting the vector channel embedding; ADR-001 (D6/D7 consumer wiring pattern) drafted and Adopted; verification harness `/website/scripts/verify-internal-retrieve.ts` executed with **25/25 ALL CHECKS PASSED**, exercising helpers (toBm25OrShape, validateRequest), real-Supabase + real-OpenAI wiring (5 C-bis-aligned queries → expected passage_id in top-3 for all 5; per-request cache warm path = 0ms), and BM25 reformulation lift (5/5 non-negative). Route + helpers + D6 contract reach **Verified** (script-based wiring proof); HTTP-surface verification (auth/rate-limit/JSON parsing) deferred to optional post-deploy curl.
+
+**Reasoning:** Sub-session D per `/operations/handoffs/founder/2026-05-XX-sub-session-D-NEXT-SESSION-PROMPT.md`. Founder selected Candidate C (new dedicated internal route) at session open over Candidate A (`/api/reason` quick-depth) and Candidate B (V3 mentor reflection) for cleanest PR1 proof — no production users at risk; standard risk; rollback trivial. Founder selected "reformulate queries (BM25) + accept per-call cost" for the C-bis findings. Initial wiring passed the OR-shaped query to BOTH channels via D6's single `query` parameter; first verification run surfaced Q3 ranking shift (focus_question_stems outranked the expected oikeiosis mechanism passage when vector channel was fed OR-shape). Founder selected "fix it now" over "log + proceed", promoting the ADR's stated Phase-2 candidate ("D6 accepts a separate bm25_query") to in-session implementation. Two further verification re-runs surfaced founder-side transcription errors (Q3 query string variant; passage_type_filter omitted from 4 of 5 queries) which were corrected by aligning the harness verbatim to C-bis. Final run: 25/25 PASS, with Q3 vector_count=5 + top-3 matching C-bis exactly.
+
+**Files touched:**
+- `/drafts/adr/2026-05-04-d6-d7-consumer-wiring.md` — created (ADR-001 draft).
+- `/adopted/adr/2026-05-04-d6-d7-consumer-wiring.md` — moved from `/drafts/adr/` (Adopted).
+- `/website/src/lib/rag/retrieve-passages.ts` — added optional `bm25_query` to `RetrieveInput`; `runBm25Query` uses `input.bm25_query ?? input.query`; `makeCacheKey` includes `bm25_query` so cache stays correct. Vector channel still uses `input.query`. Backward-compatible; existing callers unaffected.
+- `/website/src/app/api/internal/retrieve/route.ts` — new (~190 lines). POST handler: rate-limit → admin auth → JSON parse → validate → per-request `Map` cache (KG1 rule 4) → `toBm25OrShape` → `retrievePassages({ query, bm25_query })` → `reRank` → response. Maps the three D6 error classes + NotImplementedError to HTTP 504/502/503/501; unknown → 500. No CORS; no LLM call (AC-12 narrowness preserved).
+- `/website/src/app/api/internal/retrieve/helpers.ts` — new (~210 lines). `toBm25OrShape` (BM25 OR-shape transform); `validateRequest` (field-by-field discriminated-union validation; rejects `cross_encoder` + `llm` rerank policies at the validation layer so they don't reach D7's NotImplementedError). Constants: `VALID_PASSAGE_TYPES`, `VALID_RERANK_POLICIES`. Extracted from route.ts so the verification harness can import + test independently.
+- `/website/scripts/verify-internal-retrieve.ts` — new (~360 lines). Three-phase verification: (A) pure helpers — 14 checks; (B) real Supabase + OpenAI wiring against 5 C-bis-aligned queries + cache test — 6 checks; (C) BM25 reformulation lift on raw vs OR-shaped via the new `bm25_query` separation — 5 checks. Runs via `npx tsx`.
+- `/operations/migrations/2026-05-04-verify-internal-retrieve-output.log` — final verification run record (25/25 PASS).
+- `/operations/decision-log.md` — this entry appended.
+- `/operations/handoffs/founder/2026-05-04-sub-session-D-close.md` — new lean session close.
+- `/operations/handoffs/founder/2026-05-XX-sub-session-E1-NEXT-SESSION-PROMPT.md` — new next-session prompt.
+
+**Risk classification:** Elevated under 0d-ii. Highest-risk action this session = ADR move from `/drafts/adr/` to `/adopted/adr/` (Elevated per cache row). All other changes Standard: new module/route files (not yet wired to user-facing surfaces); D6 additive parameter (backward-compatible); idempotent verification harness (no DB writes; reads only). AC7 NOT engaged. PR6 NOT engaged. Critical Change Protocol NOT engaged.
+
+**Rollback path:**
+- Code: `git revert` of the implementation commits removes the new route + helpers + verification harness. The D6 `bm25_query` extension can be left in place (no caller depends on it being unwired); or reverted alongside.
+- ADR: move back from `/adopted/adr/` to `/drafts/adr/` (Elevated risk; document in a future entry if reverted).
+- Production data / Supabase: no data touched this session; no rollback needed.
+- The route is admin-only and not advertised; rollback urgency is low even if the deploy goes live with the route present but unverified by curl.
+
+**Verification step (founder-performable, PERFORMED):**
+
+Run from Mac Terminal (executed three times this session — first 24/25 surfaced ranking shift; second 24/25 surfaced query-string transcription error; third 25/25 ALL PASS):
+
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website" && npx -y tsx scripts/verify-internal-retrieve.ts 2>&1 | tee ../operations/migrations/2026-05-04-verify-internal-retrieve-output.log
+```
+
+Final run summary:
+
+| Query | bm25 | vector | fusion | elapsed | top-3 expected match |
+|---|---|---|---|---|---|
+| Q1 philodoxia false-judgement | 1 | 1 | 1 | 1321ms | ✓ `passions:epithumia:philodoxia:definition` |
+| Q2 dichotomy of control | 2 | 40 | 40 | 857ms | ✓ `stoic-brain:foundations:dichotomy_of_control:up_to_us:list` |
+| Q3 oikeiosis stage | 0 | 5 | 5 | 704ms | ✓ `action:oikeiosis:stage_2_family` |
+| Q4 TEMPORAL_AMBIGUITY focus stem | 0 | 1 | 1 | 838ms | ✓ `tier_1:temporal_ambiguity:001` |
+| Q5 passion root detection | 7 | 24 | 24 | 805ms | ✓ `passions:epithumia:definition` |
+| Q1 cache warm replay | (cached) | (cached) | — | 0ms | ✓ cache_hit=true |
+
+Phase A: 14/14. Phase B: 6/6. Phase C: 5/5. Total: 25/25 ALL CHECKS PASSED.
+
+**Open questions / findings from the run:**
+
+1. **OR-shape lift varies with filter narrowness.** Q3 + Q4 had BM25=0 for both raw and OR-shaped queries because the `passage_type_filter` (mechanism / focus_question_stem only) returned passages whose text doesn't contain the OR'd terms densely. Phase C's lift assertion is non-negative (held in all 5 cases); the *size* of the lift depends on the search-space breadth that the filters leave. Not a blocker. **Revisit condition:** Phase-2 production observation per D6 §"Open questions" item 1 — per-mechanism BM25 reformulation tuning may sharpen lift on narrower filter sets.
+
+2. **Verification harness transcription errors (founder-error mode documented).** Two of three runs failed because the verification harness's queries / filters drifted from the C-bis baseline (Q3 query missing hyphen in "self-other"; Q2/Q3/Q5 missing `passage_type_filter`). Fixed by aligning all 5 queries + filters verbatim to `/website/scripts/test-retrieval-rerank.ts`. **Revisit condition:** future verification harnesses for new wirings should copy the baseline's filter set verbatim rather than re-deriving from spec; consider extracting a shared `BASELINE_QUERIES` constant in a future cleanup session if E1+ harnesses reuse the same shapes. Promoted to PR5 candidate (knowledge-gap register) — see knowledge-gaps register entry queued for next session.
+
+3. **HTTP-layer verification deferred.** Script-based verification proves the wiring (D6 + D7 + cache + reformulation + error class behaviour) but does not exercise the route's auth / rate-limit / JSON parsing / HTTP-status mapping under real HTTP traffic. Auth pattern is reused from `/api/admin/api-keys` (existing; proven). Founder may optionally hit `https://sagereasoning.com/api/internal/retrieve` post-deploy with a Supabase JWT (extract from browser DevTools cookie). **Revisit condition:** if Sub-session E1 needs to verify the HTTP layer specifically (e.g., for a route consuming user-bearing requests), build an HTTP-call verification script then.
+
+4. **ADR text accuracy.** ADR-001 §"What this ADR does not decide" + §"Query construction discipline" both name the D6 `bm25_query` separation as a "Phase-2 / Sub-session E refinement candidate." The separation was implemented in this session. ADR text not yet amended. **Revisit condition:** founder approval at session close; if amended, move to `/adopted/adr/` with the same filename + appended changelog note (preserves the ADR's identity).
+
+5. **Vercel deploy state at session close.** The new route is admin-only and importable from the new modules; Vercel will redeploy on the founder's push and the route will be Live (reachable at `/api/internal/retrieve` with admin auth). No public-facing surface change.
+
+**Rules served:** R7 (source fidelity preserved through every retrieved passage); R8a (controlled vocabulary IDs preserved through filter parameters); 0a (status vocabulary: ADR-001 → Adopted; route + helpers + harness → Verified; D6 contract → Verified with new optional param); 0c (verification framework — founder ran the harness from Mac terminal; observations documented); 0d-ii (Elevated classification per cache row "Move file from `/drafts/` to `/adopted/`" — highest-risk action this session); 0e (file organisation — ADR in `/adopted/adr/`; route in canonical `/website/src/app/api/internal/retrieve/`; harness in `/website/scripts/`); 0f (this entry concurrent with the changes); KG1 rule 2 (route awaits all DB calls; D6's `Promise.all` joins channels); KG1 rule 4 (per-request `Map` cache declared inside POST handler — never module-level); KG6 (composition order — the route's response IS the placement; future consumers decide where the passages land in their own prompts); AC-12 (translation-sandwich narrowness — no LLM call in this route; D6 + D7 deterministic only); PR1 (single-endpoint proof complete — pattern proven on Candidate C; rollout to Candidates A + B is Sub-session E1+ scope); PR4 (model selection — `text-embedding-3-small` for D6; no Anthropic LLM call this session per heuristic re-rank determinism); PR5 (knowledge-gap register — finding #2 above queued as a candidate entry: "verification harnesses must copy baseline filter sets verbatim"); PR7 (decisions not made are documented — five open questions above with revisit conditions).
+
+**Status:** Adopted. Cross-references: `D-RETRIEVAL-RERANK-IMPLEMENTED-2026-05-04` (predecessor — D6 + D7 modules this session wires); `D-CORPUS-EMBEDDINGS-IVFFLAT-2026-05-04` (the substrate the consumer reads); `D-CORPUS-PASSAGES-POPULATION-2026-05-03` (the 186-row corpus); `/adopted/adr/2026-05-04-d6-d7-consumer-wiring.md` (ADR-001 — wiring pattern); `D6` retrieval-interface.md (the contract this session extended with `bm25_query`); `D7` re-rank-design.md (the heuristic policy the route invokes). Production Supabase: unchanged. **Phase-2 pass-1 readiness inventory after this entry: substrate piece 7 of 7 (first consumer route wired per PR1 single-endpoint proof) Verified — all seven pieces complete; the rollout phase begins with Sub-session E1 (the second consumer wiring; pattern now proven).**
+
+---

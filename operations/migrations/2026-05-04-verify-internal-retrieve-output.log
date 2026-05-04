@@ -1,0 +1,69 @@
+[env] loaded /Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website/.env.local
+[env] all required env vars present
+
+PHASE A — Pure-helper tests
+---------------------------
+
+A1. toBm25OrShape on 5 C-bis queries
+  ✓ Q1 philodoxia false-judgement → philodoxia OR false OR judgement OR reputation
+  ✓ Q2 dichotomy of control → dichotomy OR of OR control OR what OR is OR up OR to OR us
+  ✓ Q3 oikeiosis stage → oikeiosis OR circle OR of OR concern OR self-other OR exp...
+  ✓ Q4 TEMPORAL_AMBIGUITY focus stem → temporal OR ambiguity OR when OR is OR the OR reflection ...
+  ✓ Q5 passion root detection → epithumia OR desire OR grasping OR for OR what OR we OR lack
+
+A2. validateRequest acceptance / rejection
+  ✓ valid minimal request: accepted
+  ✓ valid full request: accepted
+  ✓ missing query: rejected as expected
+  ✓ empty query: rejected as expected
+  ✓ wrong type passage_type_filter: rejected as expected
+  ✓ bad rerank_policy (cross_encoder rejected at validation): rejected as expected
+  ✓ bad intake_tier_filter (4): rejected as expected
+  ✓ top_k out of range (101): rejected as expected
+  ✓ non-object body: rejected as expected
+
+PHASE B — Wiring test (real OpenAI + Supabase)
+----------------------------------------------
+
+  ✓ Q1 philodoxia false-judgement: expected passage_id in top-3
+    → bm25=1, vector=1, fusion=1, elapsed=1321ms
+    → top-3: passions:epithumia:philodoxia:definition
+  ✓ Q2 dichotomy of control: expected passage_id in top-3
+    → bm25=2, vector=40, fusion=40, elapsed=857ms
+    → top-3: stoic-brain:foundations:dichotomy_of_control:up_to_us:list, stoic-brain:foundations:dichotomy_of_control:not_up_to_us:list, stoic-brain:foundations:dichotomy_of_control:up_to_us:5
+  ✓ Q3 oikeiosis stage: expected passage_id in top-3
+    → bm25=0, vector=5, fusion=5, elapsed=704ms
+    → top-3: action:oikeiosis:stage_2_family, action:oikeiosis:stage_4_humanity, action:oikeiosis:stage_5_cosmos
+  ✓ Q4 TEMPORAL_AMBIGUITY focus stem: expected passage_id in top-3
+    → bm25=0, vector=1, fusion=1, elapsed=838ms
+    → top-3: tier_1:temporal_ambiguity:001
+  ✓ Q5 passion root detection: expected passage_id in top-3
+    → bm25=7, vector=24, fusion=24, elapsed=805ms
+    → top-3: passions:epithumia:definition, passions:epithumia:philedonia:definition, passions:epithumia:pothos:definition
+
+B2. Cache test — re-running Q1 against the warm cache
+  ✓ cache hit: cache_hit=true, elapsed=0ms
+
+PHASE C — BM25 reformulation effect (raw query vs OR-shaped)
+------------------------------------------------------------
+
+  ✓ Q1 philodoxia false-judgement: BM25 raw=0 → OR=1 (lift +1)
+  ✓ Q2 dichotomy of control: BM25 raw=0 → OR=2 (lift +2)
+  ✓ Q3 oikeiosis stage: BM25 raw=0 → OR=0 (lift +0)
+  ✓ Q4 TEMPORAL_AMBIGUITY focus stem: BM25 raw=0 → OR=0 (lift +0)
+  ✓ Q5 passion root detection: BM25 raw=0 → OR=7 (lift +7)
+
+SUMMARY
+-------
+Checks passed: 25 / 25
+
+Per-query wiring summary:
+  label                              | bm25 | vec | fusion | elapsed | top-3 ✓
+  -----------------------------------|------|-----|--------|---------|--------
+  Q1 philodoxia false-judgement      |    1 |   1 |      1 |    1321 | ✓
+  Q2 dichotomy of control            |    2 |  40 |     40 |     857 | ✓
+  Q3 oikeiosis stage                 |    0 |   5 |      5 |     704 | ✓
+  Q4 TEMPORAL_AMBIGUITY focus stem   |    0 |   1 |      1 |     838 | ✓
+  Q5 passion root detection          |    7 |  24 |     24 |     805 | ✓
+
+ALL CHECKS PASSED.
