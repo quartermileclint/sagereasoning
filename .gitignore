@@ -36,6 +36,10 @@ research/originals/manuscripts/
 # Private journal data — founder's personal practice, NEVER commit
 journal/private/
 
+# Translation-sandwich harness cache — Layer 1 schema replay for Phase 3+4
+# Per ADR-006 §4 idempotency verification approach. Local-only; not committed.
+website/scripts/.translation-sandwich-cache/
+
 # IDE
 .vscode/
 .idea/
