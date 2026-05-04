@@ -330,7 +330,7 @@ If the cache and the governance documents diverge, the governance documents are 
 - `/manifest.md` — full manifest (R0–R20, AC1–AC7, KG1–KG7)
 - `/adopted/session-opening-protocol.md` — full 21-element protocol
 - `/operations/knowledge-gaps.md` — full knowledge-gaps register
-- `/operations/decision-log.md` — append-only decision trail; entries cross-reference this cache by section name
+- `/operations/decision-log.md` — append-only decision trail (active log = entries dated 2026-05-01 onwards); entries cross-reference this cache by section name. Earlier entries are in monthly archive files in `/operations/decision-log-archive-YYYY-MM.md` per the quarterly archive policy adopted under `D-DECISION-LOG-ARCHIVE-POLICY-ADOPTED-2026-05-04` (see active log's INDEX header for full archive list + policy)
 - Project instructions (system prompt) — process rules PR1–PR9; verification framework 0c; Critical Change Protocol 0c-ii; risk classification 0d-ii
 
 ---
