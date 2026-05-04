@@ -278,6 +278,16 @@ Any change to authentication, cookie scope, session validation, or domain-redire
 
 Session 7b refers to the authentication and cookie-scope incident that required a multi-session recovery. The architectural lesson is permanent: urgency does not downgrade classification for this surface.
 
+### AC8 — Translation-Sandwich Architectural Constraint
+
+The reasoning engine's target architecture is the translation-sandwich: text → Layer 1 LLM (extract schema) → Layer 2 deterministic mechanism application (no LLM) → schema → Layer 3 LLM (per-consumer prose). LLM calls operate at the boundaries; mechanism application is deterministic code.
+
+Today's bundled-depth engine (where depth-tier on `runSageReason` selects mechanism count, system prompt, model, max-tokens, required fields, and Layer 1 corpus tier in a single bundled choice) is migration scaffolding. It persists in the codebase only because not all consumers operate under the new architecture. The depth parameter on `runSageReason` and on Layer 1 retrieval is retired (per the migration plan in ADR-003) once all consumers have moved.
+
+Any new consumer added to the codebase before scaffolding retirement (M5) operates under the bundled-depth engine to maintain consistency; consumers added after M5 operate under the translation-sandwich engine.
+
+*Source: ADR-003, 2026-05-04. Migration sequence: ADR-003 §"Migration sequence — consumer-by-consumer". Retirement triggers: ADR-003 §"Retirement triggers".*
+
 ---
 
 ## Knowledge Gaps Register

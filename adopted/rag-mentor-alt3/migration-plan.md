@@ -19,7 +19,7 @@
 - `/drafts/rag-mentor-alt3/test-plan.md` (D22 — test plan that runs verification)
 - `/drafts/rag-mentor-alt3/consumer-workflow-audit.md` (D24 — Phase-3+ migration projections per route)
 - `/operations/handoffs/founder/2026-04-29e-private-mentor-rag-phase1-ALT3-close.md` (alt-3 architecture)
-- `/manifest.md` AC1–AC7, R5, R17, R20a
+- `/manifest.md` AC1–AC8, R5, R17, R20a
 - `/operations/decision-log.md` D-MENTOR-PRIVATE-REFLECT-PRE-ALT3-SNAPSHOT-2026-05-02 (the snapshot already produced)
 
 ---

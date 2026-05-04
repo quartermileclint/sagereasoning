@@ -43,7 +43,7 @@ A session may span multiple categories; the highest-risk category sets the templ
 
 **Standing answer:** the full read sequence in `/adopted/canonical-sources.md` is replaced by this cache for `governance` / `schema` / `code-standard` / `registry` / `archive` categories. Read the cache + the day's primary deliverable + predecessor close.
 
-For `code-elevated` and `code-critical` categories, also read in full: the manifest's relevant rules; the protocol's Part B + C elements that engage; any deliverable that names architectural constraints (AC1–AC7); the predecessor session close; the operational deliverable spec.
+For `code-elevated` and `code-critical` categories, also read in full: the manifest's relevant rules; the protocol's Part B + C elements that engage; any deliverable that names architectural constraints (AC1–AC8); the predecessor session close; the operational deliverable spec.
 
 ### Element 3 — Handoff read
 
@@ -314,7 +314,7 @@ The full session close for a Critical session includes the additional sections p
 
 When any of the following changes:
 
-- Manifest rules (R0–R20, AC1–AC7, KG1–KG7)
+- Manifest rules (R0–R20, AC1–AC8, KG1–KG7)
 - Session-opening protocol (Parts A, B, C; the 21 elements)
 - Project instructions (this version is per the project instructions snapshot at adoption time)
 - Process rules (PR1–PR9)
@@ -327,7 +327,7 @@ If the cache and the governance documents diverge, the governance documents are 
 
 ## Cross-references
 
-- `/manifest.md` — full manifest (R0–R20, AC1–AC7, KG1–KG7)
+- `/manifest.md` — full manifest (R0–R20, AC1–AC8, KG1–KG7)
 - `/adopted/session-opening-protocol.md` — full 21-element protocol
 - `/operations/knowledge-gaps.md` — full knowledge-gaps register
 - `/operations/decision-log.md` — append-only decision trail (active log = entries dated 2026-05-01 onwards); entries cross-reference this cache by section name. Earlier entries are in monthly archive files in `/operations/decision-log-archive-YYYY-MM.md` per the quarterly archive policy adopted under `D-DECISION-LOG-ARCHIVE-POLICY-ADOPTED-2026-05-04` (see active log's INDEX header for full archive list + policy)
