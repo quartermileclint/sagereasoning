@@ -207,6 +207,23 @@ cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website" && npx 
 
 Expected: `tsc clean` (exit 0). Confirmed at session close.
 
+## Operational note for future sessions — canonical host
+
+**Canonical host:** `https://www.sagereasoning.com` (with `www.` prefix). The non-www form (`https://sagereasoning.com`) issues a 308 redirect to the www form.
+
+**Implication for terminal verification (curl, scripts, any HTTP client):** by default, curl drops the `Authorization` header on cross-host redirects, including the non-www → www redirect (KG1 rule 3 — headers may strip on redirects). Always target the canonical host directly when making authenticated terminal requests:
+
+```
+curl -X POST https://www.sagereasoning.com/api/reason \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <TOKEN>" \
+  -d '{...}'
+```
+
+Do NOT use `https://sagereasoning.com/...` in scripts that send Authorization headers — the auth will be stripped silently and the request will fail with `{"error":"Authentication required. Please sign in."}`.
+
+This was observed in M1-CP4's between-sessions verification: the curl smoke test failed for an hour before the canonical-host hypothesis was confirmed. Future verification scripts must hard-code `https://www.sagereasoning.com` rather than the non-www form.
+
 ## Cross-references
 
 - `/operations/handoffs/founder/2026-05-04-sub-session-M1-CP3-close.md` (predecessor — Sub-session M1-CP3: Layer 3 module Verified standalone + ADR-007 Adopted + two amendments)
