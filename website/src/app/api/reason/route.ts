@@ -174,10 +174,40 @@ export async function POST(request: NextRequest) {
       getProjectContext('condensed'),
     ])
 
+    // -------------------------------------------------------------------------
+    // M1-CP4 (2026-05-04, refactored to concurrent execution post-close):
+    // Translation-sandwich parallel-run.
+    // Per ADR-004 §6.1 (parallel-run shape) + §6.3 (failure isolation).
+    //
+    // CONCURRENT EXECUTION MODEL:
+    //   runSageReason and runParallelSandwich fire concurrently. Both promises
+    //   are awaited; total user-facing latency = max(bundled, sandwich).
+    //   No deadline cutoff during the M1-CP4-CP5 testing window — per founder
+    //   directive: testing-period observations should not be artificially
+    //   pre-empted before realistic latencies are known.
+    //
+    // FAILURE ISOLATION (preserved):
+    //   runParallelSandwich never throws (errors caught internally; logged to
+    //   console.warn). If runSageReason throws, the outer try/catch returns
+    //   500 to the user; the sandwich's outcome is logged to console.warn but
+    //   no comparison row is written (table requires bundled_depth_output to
+    //   be non-null).
+    //
+    // ACTIVATION:
+    //   Gated on env TRANSLATION_SANDWICH_PARALLEL_RUN=1 inside the
+    //   orchestrator module (read once at module load). When unset/"0", the
+    //   sandwich is a no-op and only bundled-depth runs.
+    //
+    // R20a PERIMETER PRESERVATION:
+    //   runSageReason + runParallelSandwich both sit AFTER line-144 distress
+    //   check. Phase 7 of the harness asserts: distress-check before any
+    //   reasoning call. AC4 + AC5 + PR6.
+    // -------------------------------------------------------------------------
+
     // Call the shared reasoning engine. layer1 spreads into either
     // retrievedPassages (success path) or stoicBrainContext (fallback path).
     const bundledStartedAt = Date.now()
-    const result = await runSageReason({
+    const bundledPromise = runSageReason({
       input,
       context,
       depth,
@@ -187,28 +217,10 @@ export async function POST(request: NextRequest) {
       practitionerContext,
       projectContext,
     })
-    const bundledDepthLatencyMs = Date.now() - bundledStartedAt
 
-    // -------------------------------------------------------------------------
-    // M1-CP4 (2026-05-04): Translation-sandwich parallel-run.
-    // Per ADR-004 §6.1 (parallel-run shape) + §6.3 (failure isolation).
-    //
-    // Runs Layer 1 → Layer 2 → Layer 3 strictly AFTER runSageReason returns.
-    // Logs both engines' outputs to translation_sandwich_comparisons for offline
-    // comparison at M1-CP5. NEVER throws — all errors are logged internally.
-    //
-    // Activation: gated on env TRANSLATION_SANDWICH_PARALLEL_RUN=1 inside the
-    // orchestrator module (read once at module load). When unset/"0", this is
-    // a no-op and user-facing latency is identical to today.
-    //
-    // Deadline: up to 500ms grace after this point. If the sandwich does not
-    // complete in time, deadline_exceeded is logged and Vercel kills the
-    // in-flight sandwich after the user response is sent (KG1 rule 4).
-    //
-    // R20a perimeter preservation: this call sits AFTER both line-144 distress
-    // check AND the bundled-depth call. Phase 7 of the harness asserts the
-    // line-position invariant. Per AC4 + AC5 + PR6.
-    // -------------------------------------------------------------------------
+    // Fire the parallel sandwich concurrently with bundled-depth.
+    // Awaiting it ensures user response waits until both have settled (no
+    // fire-and-forget — KG1 rule 2). The function never throws.
     await runParallelSandwich({
       input,
       context,
@@ -218,9 +230,14 @@ export async function POST(request: NextRequest) {
       retrievedPassages: layer1.retrievedPassages,
       practitionerContext,
       projectContext,
-      bundledDepthOutput: result,
-      bundledDepthLatencyMs,
+      bundledDepthPromise: bundledPromise,
+      bundledStartedAt,
     })
+
+    // Extract the bundled result. By this point the promise has already
+    // settled (runParallelSandwich awaited it internally). If runSageReason
+    // threw, this re-throws and the outer catch returns 500.
+    const result = await bundledPromise
 
     return NextResponse.json(result, { headers: corsHeaders() })
   } catch (error) {

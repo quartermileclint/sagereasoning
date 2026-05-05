@@ -1306,7 +1306,10 @@ function runPhase7(): void {
   )
 
   // --- runSageReason also after distress-check (existing invariant) ---
-  const runSageReasonCallLine = findLine(/await\s+runSageReason\s*\(/)
+  // Concurrent execution model: runSageReason is called WITHOUT await (returns
+  // a promise captured as bundledPromise). The await happens later on
+  // bundledPromise. So the grep no longer requires `await` immediately before.
+  const runSageReasonCallLine = findLine(/=\s*runSageReason\s*\(|await\s+runSageReason\s*\(/)
   check(
     `P7 — runSageReason call also appears AFTER distress-check (existing invariant preserved)`,
     distressLine > 0 &&
@@ -1317,9 +1320,12 @@ function runPhase7(): void {
       : 'runSageReason call not found'
   )
 
-  // --- runParallelSandwich is called AFTER runSageReason (sequential, not parallel-to-bundled) ---
+  // --- runSageReason is invoked BEFORE runParallelSandwich (so the bundledPromise
+  //     can be passed in). Both run concurrently — bundled-depth is already in
+  //     flight by the time runParallelSandwich is called.
+  //     Per the M1-CP4 follow-up refactor (concurrent execution model). ---
   check(
-    `P7 — runParallelSandwich called AFTER runSageReason (sequential composition per Step 1(e))`,
+    `P7 — runSageReason invoked BEFORE runParallelSandwich (concurrent composition: bundled fires first; parallel awaits both)`,
     runSageReasonCallLine > 0 &&
       parallelCallLine > 0 &&
       runSageReasonCallLine < parallelCallLine,
@@ -1359,8 +1365,6 @@ async function runPhase8(layer2Results: Layer2FixtureResult[]): Promise<void> {
   // check, no LLM call). The orchestrator catches it and reports layer1_throw.
   const invalidInputResult = await runSandwichForHarness({
     input: '', // intentionally invalid — extractFeatures throws Layer1ValidationError
-    bundledDepthOutput: { /* mock */ },
-    bundledDepthLatencyMs: 0,
   })
 
   check(
@@ -1468,7 +1472,7 @@ function runPhase9(
   console.log(`    Cap (USD microcents): ${PARALLEL_RUN_CONFIG.CAP_USD_MICROCENTS} (= $${(BigInt(PARALLEL_RUN_CONFIG.CAP_USD_MICROCENTS) / BigInt(1_000_000)).toString()})`)
   console.log(`    Cap (request count): ${PARALLEL_RUN_CONFIG.CAP_REQUEST_COUNT}`)
   console.log(`    Cap (period days): ${PARALLEL_RUN_CONFIG.CAP_DAYS}`)
-  console.log(`    Deadline grace: ${PARALLEL_RUN_CONFIG.PARALLEL_DEADLINE_MS} ms`)
+  console.log(`    Execution model: ${PARALLEL_RUN_CONFIG.EXECUTION_MODEL} (no deadline cutoff during M1-CP4-CP5 testing window)`)
   console.log(`    Sonnet pricing (USD/M tokens): input=${PARALLEL_RUN_CONFIG.SONNET_INPUT_USD_PER_MILLION_TOKENS}, output=${PARALLEL_RUN_CONFIG.SONNET_OUTPUT_USD_PER_MILLION_TOKENS}`)
 
   // Phase 9 is reporting-only; it produces no check() assertions.

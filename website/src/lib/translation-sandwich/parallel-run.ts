@@ -86,17 +86,31 @@ const CAP_DAYS = 14
 const SONNET_INPUT_USD_PER_MILLION_TOKENS = 3
 const SONNET_OUTPUT_USD_PER_MILLION_TOKENS = 15
 
-// Deadline grace period AFTER runSageReason returns. The parallel sandwich has
-// up to this long to complete before the user response proceeds.
-// Per Step 1(e): 500ms is a starting point.
-const PARALLEL_DEADLINE_MS = 500
+// Concurrent execution model (M1-CP4 follow-up, 2026-05-04):
+//   The parallel sandwich runs CONCURRENTLY with runSageReason rather than
+//   sequentially after it. There is NO deadline cutoff during the parallel-run
+//   period — the founder's directive is "during testing we don't have a cutoff
+//   deadline until we know how long it takes to get an appropriate result."
+//   Total user-facing latency = max(bundled, sandwich), capped only by
+//   Vercel's serverless function timeout (60s on Pro plan).
+//
+//   When M1-CP5 has measured realistic Layer 1 + Layer 3 latencies, an informed
+//   deadline can be reintroduced if the user-latency trade-off justifies it.
+//
+// The 'deadline_exceeded' FailureCategory is preserved in the type union for
+// forward-compatibility — if a deadline is reintroduced at M1-CP5+ it can be
+// logged with that category without a schema change.
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-export interface ParallelRunInput {
-  // ---- Same inputs as runSageReason (passed through to Layer 1) ----
+/**
+ * Inputs the sandwich layers need (Layer 1 + Layer 2 + Layer 3).
+ * Used by runSandwichForHarness (the harness can run the sandwich with no
+ * bundled-depth coordination — it just exercises the layers).
+ */
+export interface SandwichInput {
   input: string
   context?: string
   domain_context?: string
@@ -107,12 +121,23 @@ export interface ParallelRunInput {
   retrievedPassages?: RetrievedPassage[]
   practitionerContext?: string | null
   projectContext?: string | null
+}
 
-  // ---- Bundled-depth context for the comparison row ----
-  /** The full ReasonResult object returned by runSageReason. */
-  bundledDepthOutput: unknown
-  /** Latency of the bundled-depth call in milliseconds. */
-  bundledDepthLatencyMs: number
+/**
+ * Inputs for the route's parallel-run wiring. Adds bundled-depth coordination
+ * to SandwichInput so the sandwich can execute concurrently with bundled-depth
+ * and log a comparison row when both have settled.
+ */
+export interface ParallelRunInput extends SandwichInput {
+  /** Promise resolving to the bundled-depth ReasonResult. The route fires
+   *  runSageReason and passes the unresolved promise here so the sandwich can
+   *  execute concurrently with bundled-depth rather than waiting for it.
+   *  When bundled rejects, the comparison row is skipped (the table's
+   *  bundled_depth_output column is NOT NULL). */
+  bundledDepthPromise: Promise<unknown>
+  /** Date.now() value captured immediately before runSageReason fires.
+   *  Used to compute bundled-depth latency once it resolves. */
+  bundledStartedAt: number
 }
 
 type FailureCategory =
@@ -255,10 +280,12 @@ async function incrementCostTracker(addedCostMicrocents: number): Promise<void> 
 // COMPARISON-TABLE WRITE
 // ============================================================================
 
-async function logComparison(
-  params: ParallelRunInput,
+async function logComparisonRow(
+  _params: ParallelRunInput,
   requestId: string,
   inputHash: string,
+  bundledOutput: unknown,
+  bundledLatencyMs: number,
   result: SandwichRunResult
 ): Promise<void> {
   try {
@@ -267,13 +294,13 @@ async function logComparison(
       .insert({
         request_id: requestId,
         input_text_hash: inputHash,
-        bundled_depth_output: params.bundledDepthOutput,
+        bundled_depth_output: bundledOutput,
         translation_sandwich_output: result.output,
         translation_sandwich_error: result.error,
         layer1_latency_ms: result.layer1_latency_ms,
         layer2_latency_ms: result.layer2_latency_ms,
         layer3_latency_ms: result.layer3_latency_ms,
-        bundled_depth_latency_ms: params.bundledDepthLatencyMs,
+        bundled_depth_latency_ms: bundledLatencyMs,
         layer1_cost_usd_microcents: result.layer1_cost_usd_microcents,
         layer3_cost_usd_microcents: result.layer3_cost_usd_microcents,
         bundled_depth_cost_usd_microcents: null, // not captured at M1; revisit at M1-CP5
@@ -293,7 +320,7 @@ async function logComparison(
 // failure (per ADR-007 §6). Returns SandwichRunResult; never throws.
 // ============================================================================
 
-async function runSandwichInner(params: ParallelRunInput): Promise<SandwichRunResult> {
+async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResult> {
   const result: SandwichRunResult = {
     output: null,
     error: null,
@@ -383,56 +410,39 @@ async function runSandwichInner(params: ParallelRunInput): Promise<SandwichRunRe
 }
 
 // ============================================================================
-// DEADLINE WRAPPER
-// Per Step 1(e): the parallel sandwich has up to PARALLEL_DEADLINE_MS to
-// complete after invocation. If it does not finish in time, we proceed with
-// 'deadline_exceeded' and the in-flight sandwich is killed by Vercel after
-// the user response is sent (KG1 rule 4).
-// ============================================================================
-
-async function runWithDeadline(
-  params: ParallelRunInput,
-  deadlineMs: number
-): Promise<SandwichRunResult> {
-  const sandwichPromise = runSandwichInner(params)
-  // Attach a no-op catch so a deadline-loss does not produce an unhandled rejection.
-  sandwichPromise.catch(() => {/* deadline already won; outcome is logged by the deadline branch */})
-
-  const deadlineSentinel = Symbol('deadline')
-  const deadlinePromise = new Promise<typeof deadlineSentinel>((resolve) =>
-    setTimeout(() => resolve(deadlineSentinel), deadlineMs)
-  )
-
-  const winner = await Promise.race([sandwichPromise, deadlinePromise])
-  if (winner === deadlineSentinel) {
-    return {
-      output: null,
-      error: 'deadline_exceeded',
-      layer1_latency_ms: null,
-      layer2_latency_ms: null,
-      layer3_latency_ms: null,
-      layer1_cost_usd_microcents: null,
-      layer3_cost_usd_microcents: null,
-    }
-  }
-  return winner as SandwichRunResult
-}
-
-// ============================================================================
 // PUBLIC ENTRY POINT
-// Imported by /api/reason/route.ts ONLY. Invoked AFTER runSageReason returns
-// and BEFORE the response is sent. Never throws.
+// Imported by /api/reason/route.ts ONLY.
+//
+// CONCURRENT EXECUTION MODEL (M1-CP4 follow-up, 2026-05-04):
+//   The route fires runSageReason as a Promise and passes it here as
+//   `bundledDepthPromise`. runSandwichInner runs CONCURRENTLY with bundled-
+//   depth (which is already in flight by the time this function is called).
+//   No deadline cutoff. Comparison row is logged once both have settled.
+//
+//   Total user-facing latency = max(bundled-depth, sandwich), capped only by
+//   Vercel's serverless function timeout. This trades worst-case user latency
+//   for guaranteed parallel-sandwich completion during the M1-CP4-CP5 testing
+//   window — which is exactly what the founder directed: "during testing we
+//   don't have a cutoff deadline until we know how long it takes to get an
+//   appropriate result."
+//
+// Never throws. Every error is caught and logged to console.warn. The user
+// response flow is in the route — runParallelSandwich's role is purely to
+// observe both engines + log the comparison row.
 // ============================================================================
 
 /**
- * Run the translation-sandwich engine in parallel-run mode and log a comparison row.
+ * Run the translation-sandwich engine concurrently with the bundled-depth
+ * engine and log a comparison row when both settle.
  *
  * NEVER throws. Every error is caught and logged to console.warn.
- * If the env flag TRANSLATION_SANDWICH_PARALLEL_RUN is unset/"0", returns immediately.
+ * If TRANSLATION_SANDWICH_PARALLEL_RUN is unset/"0", awaits bundled (so the
+ * route can extract the result) and returns without sandwich activity.
  *
- * Per ADR-004 §6.3 (Failure isolation): the user is unaffected by translation-sandwich failures.
+ * Per ADR-004 §6.3 (Failure isolation): the user is unaffected by
+ * translation-sandwich failures.
  *
- * @param params - The same inputs runSageReason received plus the bundled-depth output.
+ * @param params - Layer-1 inputs + the bundled-depth promise + start timestamp.
  */
 export async function runParallelSandwich(params: ParallelRunInput): Promise<void> {
   if (!PARALLEL_RUN_ENABLED) return
@@ -440,10 +450,9 @@ export async function runParallelSandwich(params: ParallelRunInput): Promise<voi
   try {
     // 1. Cost-cap check.
     const capStatus = await readCostTracker()
+    let sandwichResult: SandwichRunResult
     if (capStatus.cap_reached) {
-      const requestId = randomUUID()
-      const inputHash = sha256Hex(params.input)
-      await logComparison(params, requestId, inputHash, {
+      sandwichResult = {
         output: null,
         error: 'cost_cap_reached',
         layer1_latency_ms: null,
@@ -451,28 +460,49 @@ export async function runParallelSandwich(params: ParallelRunInput): Promise<voi
         layer3_latency_ms: null,
         layer1_cost_usd_microcents: null,
         layer3_cost_usd_microcents: null,
-      })
+      }
+    } else {
+      // 2. Fire the sandwich. Runs concurrently with bundled-depth (which the
+      //    route fired before calling us). No deadline.
+      sandwichResult = await runSandwichInner(params)
+    }
+    // capStatus.read_failed: fail-open posture — proceed; logged inside readCostTracker.
+
+    // 3. Wait for bundled-depth to settle. By this point the sandwich is done;
+    //    bundled may already be done (if it was faster) or still running (if
+    //    sandwich was faster). Either way we wait — total latency from the
+    //    user's perspective is max(bundled, sandwich).
+    let bundledOutput: unknown
+    try {
+      bundledOutput = await params.bundledDepthPromise
+    } catch (err) {
+      // Bundled threw. The route's outer try/catch will return 500 to the user.
+      // We skip the comparison-row write because the table's bundled_depth_output
+      // column is NOT NULL. Log the sandwich outcome to console.warn so it's
+      // recoverable from Vercel logs if needed.
+      console.warn(
+        '[parallel-run] bundled-depth threw; comparison row skipped. Sandwich outcome:',
+        sandwichResult.error ?? 'completed',
+        'err:',
+        err instanceof Error ? err.message : err
+      )
       return
     }
-    if (capStatus.read_failed) {
-      // Continue conservatively — read failed but we proceed (cap may not enforce
-      // for this request). Logged in readCostTracker. We could fail closed here
-      // instead; current choice is fail open to keep the parallel-run period
-      // running through transient Supabase blips.
-    }
+    const bundledLatencyMs = Date.now() - params.bundledStartedAt
 
-    // 2. Run the sandwich with deadline.
+    // 4. Log comparison row.
     const requestId = randomUUID()
     const inputHash = sha256Hex(params.input)
-    const sandwichResult = await runWithDeadline(params, PARALLEL_DEADLINE_MS)
+    await logComparisonRow(
+      params,
+      requestId,
+      inputHash,
+      bundledOutput,
+      bundledLatencyMs,
+      sandwichResult
+    )
 
-    // 3. Log comparison row (always, even on failure).
-    await logComparison(params, requestId, inputHash, sandwichResult)
-
-    // 4. Increment cost tracker (only on attempts that actually called the LLM —
-    //    deadline_exceeded incurs partial cost; we count it conservatively as 0
-    //    here because we do not have token counts; revisit at M1-CP5 when the
-    //    layer modules return usage).
+    // 5. Increment cost tracker (skip when cost-cap-reached path).
     if (sandwichResult.error !== 'cost_cap_reached') {
       const totalCost =
         (sandwichResult.layer1_cost_usd_microcents ?? 0) +
@@ -480,8 +510,7 @@ export async function runParallelSandwich(params: ParallelRunInput): Promise<voi
       await incrementCostTracker(totalCost)
     }
   } catch (err) {
-    // Defense-in-depth — runWithDeadline + logComparison + incrementCostTracker
-    // all swallow errors internally, but if any unexpected throw escapes, catch it here.
+    // Defense-in-depth — every helper swallows errors internally. Backstop here.
     console.warn('[parallel-run] runParallelSandwich caught unexpected error:', err)
   }
 }
@@ -508,7 +537,7 @@ function sha256Hex(text: string): string {
  * needing Supabase access. The production runParallelSandwich also uses this
  * internally (via runWithDeadline).
  */
-export async function runSandwichForHarness(params: ParallelRunInput): Promise<SandwichRunResult> {
+export async function runSandwichForHarness(params: SandwichInput): Promise<SandwichRunResult> {
   return runSandwichInner(params)
 }
 
@@ -517,12 +546,14 @@ export function isParallelRunEnabled(): boolean {
   return PARALLEL_RUN_ENABLED
 }
 
-/** Test-only: cost-cap constants for harness Phase 9 reporting. */
+/** Test-only: cost-cap constants for harness Phase 9 reporting.
+ *  No deadline_ms field — concurrent execution model has no cutoff during
+ *  the M1-CP4-CP5 testing window per founder directive. */
 export const PARALLEL_RUN_CONFIG = {
   CAP_USD_MICROCENTS: CAP_USD_MICROCENTS.toString(),
   CAP_REQUEST_COUNT,
   CAP_DAYS,
-  PARALLEL_DEADLINE_MS,
+  EXECUTION_MODEL: 'concurrent_no_deadline' as const,
   SONNET_INPUT_USD_PER_MILLION_TOKENS,
   SONNET_OUTPUT_USD_PER_MILLION_TOKENS,
 } as const

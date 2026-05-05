@@ -207,6 +207,19 @@ cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website" && npx 
 
 Expected: `tsc clean` (exit 0). Confirmed at session close.
 
+## Operational note for future sessions — testing-period deadline principle
+
+**Founder directive (M1-CP4 follow-up, 2026-05-04):** *"During testing we don't have a cutoff deadline until we know how long it takes to get an appropriate result."*
+
+**The principle:** Observation periods (parallel-run, A/B testing, traffic shadowing, any pre-production verification window) should not be artificially curtailed by deadline cutoffs that pre-empt completion before realistic latency profiles are known. Set deadlines AFTER measuring production-traffic latencies, not BEFORE — otherwise the data collected reflects the deadline's artifact, not the system's real behaviour.
+
+**What happened in this session that surfaced the principle:** The original Step 1(e) decision recommended a 500ms grace deadline AFTER `runSageReason` returns. The math was wrong — Layer 1 + Layer 3 Sonnet calls realistically take 4–25 seconds. After 25 successful sends from /admin/test-reason, all 25 comparison rows had `error: deadline_exceeded` and zero had populated `translation_sandwich_output`. M1-CP5's comparison rubric (proximity match, virtue domains overlap, etc.) cannot be applied to rows where the sandwich never completed. The 500ms deadline was producing pure deadline-artifact data, not engine-comparison data.
+
+**The fix:** Refactored to concurrent execution (sandwich + bundled-depth fire together; both awaited; total user-facing latency = max(bundled, sandwich)). No deadline cutoff during the M1-CP4-CP5 testing window. If realistic latencies surface a user-experience problem at M1-CP5, an informed deadline can be reintroduced — but informed by data, not by guess.
+
+**Future application — flag for promotion to standing-protocol-cache at next governance session:**
+This principle generalises beyond `parallel-run.ts`. Anywhere a future surface adds an observation/testing/comparison phase before going GA, the default posture is "no cutoff until production traffic measures realistic completion times". Worth promoting into the standing-protocol-cache (Element §"AI signals" or a new §"Testing-period principles" subsection) at the next governance session that touches the cache.
+
 ## Operational note for future sessions — canonical host
 
 **Canonical host:** `https://www.sagereasoning.com` (with `www.` prefix). The non-www form (`https://sagereasoning.com`) issues a 308 redirect to the www form.
