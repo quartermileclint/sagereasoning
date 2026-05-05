@@ -8,6 +8,7 @@
 ## Decisions Made
 
 - **D-M1-CP5-FIRST-PASS-DEFERRED-2026-05-05** appended to active decision log (~30 lines added). M1-CP5 first-pass deferred. The cutover / revise / rollback decision is **not** taken at this session. The parallel run continues unchanged; M1-CP5 resumes in a future session once a meaningful sample has accumulated (founder's call; ≥50 completed rows is the working threshold).
+- **D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05** appended (~70 lines). Scope decision made during this session's deferral discussion: AC-13 (three-tier intake clarification) + AC-14 (withholding as deterministic kathekon — OPEN_DEFERRAL) must be wired into M1's Layer 1/2/3 + `/api/reason` route + parallel-run orchestrator before M1-CP6 cutover. M1 arc expanded with a new sub-session block (M1-CP4b → 4c → 4d → 4e → 4f) inserted before M1-CP5 resume. Standard-tier governance entry; downstream sub-sessions will be mixed Standard / Critical tier when they touch perimeter route. Five named open implications carried forward to next session-open: multi-turn input flow architecture; ADR-004 §10 amendment timing; comparison-table baseline reset; sub-session ordering and labelling; `/admin/test-reason` fixture-set + export-button work.
 
 ## Status Changes
 
@@ -19,14 +20,23 @@
 
 ## Next Session Should
 
-**Resume M1-CP5 — Parallel-run observation + cutover decision (resume after sufficient data).** Same governing frame, same Part B procedure, updated pre-conditions. Per the resume prompt at `/operations/handoffs/founder/2026-05-05-M1-CP5-RESUME-NEXT-SESSION-PROMPT.md`. Standard-tier; lean form per cache. Reclassifies to Critical mid-session ONLY if rollback is decided.
+**The M1-CP5 resume is now gated on a sub-session block (per D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05).** The next session-open is the first of that block — a governance session that locks in the sub-session sequence (M1-CP4b → 4c → 4d → 4e → 4f), confirms the multi-turn input flow design posture for AC-13 Tier 1, and amends ADR-004 §10's checkpoint table accordingly. The five open implications named in the scope-decision entry are the agenda items.
 
-Resume pre-conditions (founder confirms before opening the next session):
-1. `translation_sandwich_comparisons` has at least ~50 rows where `translation_sandwich_output IS NOT NULL` (the working "meaningful sample" threshold).
-2. The founder has decided whether to wire per-layer cost capture before resume (Open Q1) or to resume without cost data and accept the limitation in the resume entry.
-3. Optional: the 25 pre-fix `deadline_exceeded` rows are either left in place (filter at query time) or deleted via SQL Editor (Open Q2). Either is acceptable; the resume queries already filter on `translation_sandwich_output IS NOT NULL`.
+**Working sub-session sequence (founder may reorder at next session-open):**
 
-Estimated time at resume: 2–4 hours (analytical) + 60–90 minutes if rollback is decided mid-session. Same as the original M1-CP5 envelope.
+| Sub-session | Tier | Deliverable |
+|---|---|---|
+| M1-CP4b | governance (Standard) | ADR-005 + ADR-006 + ADR-007 amendments for AC-14 + Tier 2 soft-clarification (deterministic — design-first not required). ADR-004 §10 checkpoint-table amendment. |
+| M1-CP4c | code-standard (Standard) | Layer 1 + Layer 2 + Layer 3 module updates implementing AC-14 + Tier 2. Modules updated + Verified standalone via harness extension. |
+| M1-CP4d | governance (Standard) | Multi-turn input flow design ADR for AC-13 Tier 1 force-clarification at `/api/reason`. Founder design call on server-side ephemeral session vs client-renders-form stateless protocol vs Tier 1 deferred. |
+| M1-CP4e | code-critical (Critical) | Layer 1/2/3 module + route updates for AC-13 Tier 1. Touches the R20a perimeter route — Critical Change Protocol applies. May touch auth/session if server-side flow is chosen. |
+| M1-CP4f | code-elevated (Elevated) | parallel-run.ts orchestrator update to capture AC-13 + AC-14 outputs + per-layer cost capture; comparison-table baseline reset; `/admin/test-reason` fixture-set expansion + export-JSON button. |
+| M1-CP5 (resume) | governance (Standard at open) | Per the (now-revised) resume prompt — analytical session against with-mechanism engine data. |
+| M1-CP6 | code-critical (Critical) | Cutover (per ADR-004 §10). |
+
+After the M1-CP4f baseline reset, M1-CP5 resume conditions become: `count(*) WHERE translation_sandwich_output IS NOT NULL ≥ 50` AFTER reset OR `cap_reached = true` (with per-layer cost capture now wired) OR 14 days from new `period_start` OR founder's discretion.
+
+Estimated total time across the sub-session block: 15–25 hours spread across 5 sessions (rough — depends heavily on the multi-turn input flow design decision at M1-CP4d). M1-CP5 resume itself remains the original 2–4 hour analytical envelope.
 
 ## Blocked On
 
@@ -60,19 +70,15 @@ Estimated time at resume: 2–4 hours (analytical) + 60–90 minutes if rollback
 **Step A — Commit + push.** Open Terminal, paste this exact block, press **Enter** (one combined command):
 
 ```
-cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning" && git add -A operations/decision-log.md operations/handoffs/founder/2026-05-05-sub-session-M1-CP5-first-pass-deferred-close.md operations/handoffs/founder/2026-05-05-M1-CP5-RESUME-NEXT-SESSION-PROMPT.md && git commit -m "session close: M1-CP5 first-pass deferred — insufficient data (12 sandwich_completed of 37 total; 25 pre-fix deadline-artefact rows; cost-tracker null due to deferred token capture) — parallel run continues; M1-CP5 resumes when sandwich_completed >= 50 or cap_reached or founder discretion — 2026-05-05 (Sub-session M1-CP5 first-pass)
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning" && git add -A operations/decision-log.md operations/handoffs/founder/2026-05-05-sub-session-M1-CP5-first-pass-deferred-close.md operations/handoffs/founder/2026-05-05-M1-CP5-RESUME-NEXT-SESSION-PROMPT.md && git commit -m "session close: M1-CP5 first-pass deferred + AC-13/AC-14 wiring required before M1-CP6 cutover — M1 arc expanded with new sub-session block (M1-CP4b through 4f) — 2026-05-05 (Sub-session M1-CP5 first-pass)
 
-- D-M1-CP5-FIRST-PASS-DEFERRED-2026-05-05 — appended to active log (~30 lines)
+- D-M1-CP5-FIRST-PASS-DEFERRED-2026-05-05 — appended (~30 lines). 12 sandwich_completed of 37 total; 25 pre-fix deadline-artefact rows; cost-tracker null due to deferred token capture. Latency: sandwich p50 ~25s (L1 ~13s + L3 ~12s sequential); bundled p50 ~57s. Defer is the principled posture pending sufficient data + AC-13/AC-14 wiring.
 
-- Standard risk under 0d-ii. Documentation-only. No code change, no production touch, no environment change, no perimeter touched. AC4 / AC5 / AC7 / AC8 / PR1 / PR3 / PR4 / PR6 NOT engaged.
+- D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05 — appended (~70 lines). Scope decision: AC-13 (three-tier intake clarification) + AC-14 (withholding as deterministic kathekon — OPEN_DEFERRAL) must be wired into M1's Layer 1/2/3 + /api/reason route + parallel-run orchestrator before M1-CP6 cutover. Surfaced via grep across four M1 ADRs + /website/src/lib/translation-sandwich/ — zero matches for the AC-13/AC-14 vocabulary (OPEN_DEFERRAL, EUPATHEIA_BOUNDARY, PRAXIS_MOTIVATION_AMBIGUITY, ELEMENT_FUSION, SCOPE_AMBIGUITY, TEMPORAL_AMBIGUITY, STATED_OPERATIVE_CONFLICT, three-tier, sit with, AC-13, AC-14). M1 arc expanded with M1-CP4b through 4f sub-session block before M1-CP5 resume. Five open implications carried: multi-turn input flow architecture (Tier 1); ADR-004 §10 amendment timing; comparison-table baseline reset; sub-session ordering; /admin/test-reason fixture-set + export-button work.
 
-- Findings: 37 rows total in translation_sandwich_comparisons; 12 sandwich_completed (32%); 25 deadline_exceeded (the pre-fix /admin/test-reason artefacts named in M1-CP4 close — count matches exactly); 0 layer1/layer3/cap failures. Latency: sandwich p50 ~25s (L1 ~13s + L3 ~12s sequential); bundled p50 ~57s. Cost tracker = 0 microcents at 37 requests because per-layer token capture is deferred (M1-CP4 Open Q2). Cap not reached.
+- Standard risk under 0d-ii on both entries. Documentation-only. No code change, no production touch, no environment change, no perimeter touched at this session. AC4 / AC5 / AC7 / AC8 / PR1 / PR3 / PR4 / PR6 NOT engaged at this session. Downstream sub-sessions M1-CP4b through 4f will engage Standard / Elevated / Critical tier as appropriate; Critical Change Protocol applies at M1-CP4e (route wiring) and M1-CP6 (cutover).
 
-- Latency win is real (sandwich ~2-3x faster than bundled at p50) but insufficient on its own to justify cutover commitment without cost evidence and without enough rows to evaluate rubric agreement rates.
-
-- Defer is the principled posture: the parallel run continues, the comparison data accumulates, M1-CP5 resumes when we have enough to apply the rubric meaningfully.
-
-- Resume pre-conditions named in close + resume prompt. Open Questions carried: (1) wire per-layer cost capture as small Standard-tier session before resume, or fold into resume; (2) pre-fix deadline_exceeded rows — leave/filter or delete; (3) resume threshold (working: 50 completed rows; founder may overrule)."
+- Cross-references: ADR-RAG-MENTOR-ALT3-01 (the architecturally adopted withholding-as-kathekon principle); /adopted/rag-mentor-alt3/three-tier-intake.md (Tier 1/2/3 specification); /adopted/rag-mentor-alt3/long-deferred-questions.md (sit-with-question principle); /adopted/rag-mentor-alt3/reflect-endpoint-14b-deferral-resolution.md (sit-with-this UI surface); /adopted/rag-mentor-alt3/d-a16-catalogue.md (deferred-question stems)."
 ```
 
 Then push via **GitHub Desktop**: open GitHub Desktop → select sagereasoning repo → click **Push origin**. Vercel auto-rebuilds on push to main. **Expected behaviour change at deploy: none** (this commit is documentation-only — no `/website/**` files touched). Vercel may or may not redeploy depending on its path-filter configuration; either way, runtime behaviour is unchanged.

@@ -5,6 +5,7 @@
 **Governing frame:** `/adopted/standing-protocol-cache.md` (lean form; no Critical Change Protocol unless the founder decides rollback at this session).
 **Predecessor session close:** `/operations/handoffs/founder/2026-05-05-sub-session-M1-CP5-first-pass-deferred-close.md`.
 **Predecessor decision-log entries:**
+- `D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05` (scope decision — AC-13 + AC-14 must be wired into M1 Layer 1/2/3 before M1-CP6 cutover; new sub-session block M1-CP4b → 4f inserted before resume)
 - `D-M1-CP5-FIRST-PASS-DEFERRED-2026-05-05` (M1-CP5 first-pass — first data pull; insufficient data; deferred)
 - `D-M1-CP4-PARALLEL-RUN-WIRING-2026-05-04` (M1-CP4 — `/api/reason` Wired (parallel-run, dormant by default); harness Phases 1-9 all passing 124/124)
 - `D-M1-CP3-LAYER3-MODULE-AND-ADR007-2026-05-04` through `D-M1-CP1-LAYER1-MODULE-AND-ADR005-2026-05-04` (Layer modules + ADRs)
@@ -16,20 +17,21 @@
 
 Same as the original M1-CP5: this is the analytical session that decides what the parallel-run period showed. The first-pass attempt on 2026-05-05 surfaced only 12 usable rows — below the meaningful-analysis threshold — and was deferred per `D-M1-CP5-FIRST-PASS-DEFERRED-2026-05-05`. This session resumes the M1-CP5 procedure with a meaningful sample. Three outcomes per ADR-004 §10 remain available: **cutover** (advance to M1-CP6, Critical-tier, full Critical Change Protocol, public deprecation notice required); **revise** (specific issues warrant revisiting Layer 1 prompt OR Layer 2 deterministic rules OR Layer 3 prompt template); **rollback** (revert M1-CP4 wiring; revisit ADR-003 + ADR-004).
 
+**IMPORTANT — scope expansion under D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05:** This session **cannot meaningfully proceed** until AC-13 (three-tier intake clarification: Tier 1 force / Tier 2 soft / Tier 3 deterministic-withhold) and AC-14 (withholding as deterministic kathekon — OPEN_DEFERRAL) are wired into M1's Layer 1 / Layer 2 / Layer 3 modules + the `/api/reason` route + the parallel-run orchestrator. The first-pass discussion established that the cutover at M1-CP6 must commit a translation-sandwich engine that honours the architecturally adopted withholding-as-kathekon discipline, not a stripped-down version. The proposed sub-session block before this resume: **M1-CP4b → M1-CP4c → M1-CP4d → M1-CP4e → M1-CP4f**, mixed Standard / Critical tier. Working ordering and labels per the scope-decision entry — founder may reorder at next session-open.
+
 ## Pre-conditions
 
 1. The two SQL migrations (`translation_sandwich_comparisons` + `translation_sandwich_cost_tracker`) are applied (confirmed at M1-CP4 close Step A; remain applied — this session does not redo them).
 2. The M1-CP4 commit is in production via Vercel (confirmed at M1-CP4 close Step B + C; remains in production).
 3. `TRANSLATION_SANDWICH_PARALLEL_RUN=1` is active in Vercel Production (confirmed active as of 2026-05-05 first-pass; no need to re-activate).
-4. **The data threshold is met (founder's call):**
-   - **Working threshold:** `count(*) WHERE translation_sandwich_output IS NOT NULL ≥ 50` in `translation_sandwich_comparisons`.
-   - OR `cap_reached = true` in `translation_sandwich_cost_tracker` (note: cap is cost-based; if Open Q1 below is not yet wired, cumulative cost stays at 0 and cap will not trigger — fall back to row count or elapsed time).
-   - OR 14 days elapsed from `period_start = 2026-05-04` (i.e., from 2026-05-18).
+4. **AC-13 + AC-14 are wired into M1 (NEW — under D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05).** All five sub-sessions (M1-CP4b → 4c → 4d → 4e → 4f) are complete or the founder has explicitly revised the scope at a session-open. Specifically: (a) ADR-005 amended for structural-trigger fields; (b) ADR-006 amended for Tier 1/2/3 trigger rules + OPEN_DEFERRAL output; (c) ADR-007 amended for "sit with this" template path; (d) multi-turn input flow design ADR adopted (or Tier 1 explicitly deferred); (e) Layer 1/2/3 modules updated and Verified; (f) `/api/reason` route updated to surface OPEN_DEFERRAL channel (and multi-turn input flow if Tier 1 is in scope); (g) parallel-run.ts orchestrator updated to capture AC-13/AC-14 outputs in comparison data; (h) `translation_sandwich_comparisons` table truncated or filtered against a cutover timestamp so M1-CP5 rubric data is from the with-mechanism engine only.
+5. **The data threshold is met (founder's call) — measured against the with-mechanism engine only:**
+   - **Working threshold:** `count(*) WHERE translation_sandwich_output IS NOT NULL ≥ 50` in `translation_sandwich_comparisons` AFTER the M1-CP4f baseline reset (or after the cutover-timestamp filter).
+   - OR `cap_reached = true` in `translation_sandwich_cost_tracker` (with per-layer cost capture wired at M1-CP4f).
+   - OR 14 days elapsed from the new `period_start` (i.e., from M1-CP4f's reset date).
    - OR the founder chooses to resume regardless.
-5. **Open Question 1 disposition (founder's call at session-open):**
-   - **Option (a) — Resume without cost data.** Acknowledge the limitation in the resume entry; cutover would carry the cost question into M1-CP6 unresolved. Defensible if the latency win + rubric agreement rates are decisive.
-   - **Option (b) — Wire per-layer cost capture first this session.** Adds a Standard-tier code session step ahead of the analysis. `extractFeatures` and `generateProse` expose token usage; orchestrator multiplies via the existing `sonnetCostMicrocents` utility and writes via `incrementCostTracker`. Once wired, allow some traffic to accumulate cost data, then proceed to the analysis. May extend session significantly.
-   - **Option (c) — Wire cost capture as a separate small Standard-tier session before this resume.** Cleanest scoping but requires another session-open.
+6. **Per-layer cost capture wired (folded into M1-CP4f).** The cost tracker captures real Sonnet costs from `extractFeatures` + `generateProse` so the cap mechanic functions and so the M1-CP5 rubric has cost data for the R5 evaluation.
+7. **Fixture-coverage expansion on `/admin/test-reason`.** The fixture set intentionally exercises (a) Tier 1 force-clarification triggers; (b) Tier 2 soft-clarification triggers; (c) Tier 3 OPEN_DEFERRAL triggers per the d-a16 catalogue; (d) the existing marginal-case discipline (kathekon-null / single_snapshot / improvement_path-null). Plus the export-JSON button on `/admin/test-reason` for offline analysis. Folds into M1-CP4f or its own dedicated sub-session.
 
 ## Part A — Open under the protocol
 
