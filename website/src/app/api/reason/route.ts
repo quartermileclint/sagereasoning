@@ -12,6 +12,12 @@ import { loadLayer1WithFallback } from '@/lib/rag/load-layer1-with-fallback'
 // is invoked AFTER runSageReason returns (line ~184) and never throws.
 // Per ADR-004 §6 + §6.3 + §10. Per AC4 + AC5 + AC8 + PR1 + PR6.
 import { runParallelSandwich } from '@/lib/translation-sandwich/parallel-run'
+// M1-CP4e (2026-05-06): AC-13 Tier 1 force-clarification continuation-token
+// mechanic. Imported AFTER the R20a perimeter line below; token validation
+// runs AFTER the distress check on every turn (per ADR-008 §6). The continuation
+// token is a stateless HMAC signature, NOT a session credential — AC7 NOT
+// engaged. Per ADR-008 §4 + AC4 + AC5 + PR6.
+import { validateContinuationToken } from '@/lib/translation-sandwich/tier1-token'
 
 // =============================================================================
 // sage-reason — The Universal Reasoning Layer
@@ -125,7 +131,18 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { input, context, depth: requestedDepth, domain_context, urgency_context } = body
+    // M1-CP4e (2026-05-06): continuation_token is optional, present on
+    // second-turn re-submission after a Tier 1 force-clarification (per
+    // ADR-008 §1 + §4). When present, it is validated AFTER the R20a
+    // distress check (preserves perimeter on every turn per ADR-008 §6).
+    const {
+      input,
+      context,
+      depth: requestedDepth,
+      domain_context,
+      urgency_context,
+      continuation_token,
+    } = body
 
     // Validate required input
     if (!input || typeof input !== 'string' || input.trim().length === 0) {
@@ -146,6 +163,13 @@ export async function POST(request: NextRequest) {
     // R20a — Vulnerable user detection (before any LLM call)
     // enforceDistressCheck() returns a SafetyGate — compile-time proof that
     // the distress classifier has been awaited before any reasoning proceeds.
+    //
+    // M1-CP4e (2026-05-06): R20a runs on EVERY turn — including second-turn
+    // re-submissions with a continuation_token. The augmented input on the
+    // second turn is what gets distress-checked. The continuation token does
+    // NOT bypass the perimeter (per ADR-008 §6). A second-turn distress fire
+    // takes precedence over the token: the token is discarded; the practitioner
+    // sees the redirect.
     const gate = await enforceDistressCheck(detectDistressTwoStage(input))
     if (gate.shouldRedirect) {
       return NextResponse.json(
@@ -153,6 +177,65 @@ export async function POST(request: NextRequest) {
         { status: 200, headers: corsHeaders() }
       )
     }
+
+    // M1-CP4e (2026-05-06): Continuation-token validation. Runs AFTER the
+    // R20a perimeter and BEFORE the engine is called. Per ADR-008 §4.4 +
+    // §5 step 3 + §6.
+    //
+    // When `continuation_token` is present, the request is a second-turn
+    // re-submission after a Tier 1 force-clarification. The token is a
+    // stateless HMAC signature (not a session credential — AC7 NOT engaged).
+    // On any validation failure: return HTTP 400 with the specific error
+    // code per ADR-008 §4.4. On success: extract `previous_trigger` for
+    // downstream meta logging.
+    //
+    // When `continuation_token` is absent, the request is a fresh first-turn
+    // request and validation is skipped.
+    let previousTrigger: 'ELEMENT_FUSION' | 'SCOPE_AMBIGUITY' | 'TEMPORAL_AMBIGUITY' | null = null
+    if (continuation_token !== undefined && continuation_token !== null) {
+      const tokenResult = validateContinuationToken(continuation_token, input)
+      if (!tokenResult.ok) {
+        // Map error codes to HTTP responses per ADR-008 §4.4.
+        if (tokenResult.error_code === 'continuation_token_secret_missing') {
+          // The TRANSLATION_SANDWICH_TIER1_SECRET env var is not set on this
+          // deployment. Fail-closed: the engine cannot validate tokens. Return
+          // 503 (engine misconfigured) rather than 400 (client error) because
+          // the client did everything right; the server is misconfigured.
+          // This path should only fire pre-Sub-session-M1-CP4e-B (env var
+          // provision); after that, the secret is always set.
+          console.error(
+            '[/api/reason] Tier 1 continuation token presented but ' +
+              'TRANSLATION_SANDWICH_TIER1_SECRET is not set. The engine cannot ' +
+              'validate the token. Set the env var per ADR-008 §4.2.'
+          )
+          return NextResponse.json(
+            {
+              error: 'continuation_token_engine_unavailable',
+              detail:
+                'Tier 1 force-clarification is not available on this deployment. ' +
+                'Submit your input again as a fresh request.',
+            },
+            { status: 503, headers: corsHeaders() }
+          )
+        }
+        // All other validation failures are 400.
+        const errorBody: Record<string, unknown> = { error: tokenResult.error_code }
+        if (tokenResult.error_code === 'continuation_token_expired' && tokenResult.expired_at !== undefined) {
+          errorBody.expired_at = tokenResult.expired_at
+        }
+        return NextResponse.json(errorBody, { status: 400, headers: corsHeaders() })
+      }
+      // Token validated. Extract previous trigger code for meta logging.
+      previousTrigger = tokenResult.payload.trigger_code
+    }
+    // previousTrigger is referenced in downstream meta logging at M1-CP6
+    // cutover when the orchestrator becomes user-facing. During parallel-run
+    // (M1-CP4e-A → M1-CP6), the user-facing path remains bundled-depth and
+    // previousTrigger is preserved for diagnostic logging only.
+    //
+    // We reference the variable here to satisfy the TS no-unused-locals check
+    // without semantic effect during parallel-run. Removable at cutover.
+    void previousTrigger
 
     // Validate depth parameter
     const depth: ReasonDepth = requestedDepth || 'standard'

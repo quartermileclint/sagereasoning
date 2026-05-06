@@ -47,9 +47,23 @@ import {
 
 import {
   applyMechanisms,
+  detectTier1Trigger,
   validateLayer2Assessment,
   type Layer2Assessment,
+  type Tier1Trigger,
 } from '../src/lib/translation-sandwich/layer2-mechanisms'
+
+// M1-CP4e (2026-05-06): AC-13 Tier 1 force-clarification continuation-token mechanic
+// for Phase 11 + Phase 12 of the harness extension. Phase 11 + 12 implementations
+// land at Sub-session M1-CP4e-B alongside the real-Sonnet harness run; the imports
+// are scaffolded here so the module dependency is materialised at this checkpoint.
+//
+// Phase 11/12 stub functions reference these to keep them imported.
+import {
+  issueContinuationToken,
+  validateContinuationToken,
+  TIER1_TOKEN_CONFIG,
+} from '../src/lib/translation-sandwich/tier1-token'
 
 import {
   generateProse,
@@ -562,10 +576,23 @@ async function runPhase1AndPhase2(): Promise<FixtureResult[]> {
 
 interface Layer2FixtureResult {
   fixture: Fixture
-  /** First applyMechanisms call result. */
+  /** First applyMechanisms call result — full Layer2Assessment when no Tier 1 fires. */
   assessment_a?: Layer2Assessment
   /** Second applyMechanisms call result — must deep-equal assessment_a. */
   assessment_b?: Layer2Assessment
+  /** First applyMechanisms call result — Tier1Trigger when applyMechanisms short-circuits
+   *  at Position 2 / Position 6 (added 2026-05-06, M1-CP4e). Mutually exclusive with
+   *  assessment_a — exactly one of {assessment_a, layer2_tier1_a} is set on a successful
+   *  call. */
+  layer2_tier1_a?: Tier1Trigger
+  /** Second applyMechanisms call result — Tier1Trigger short-circuit. */
+  layer2_tier1_b?: Tier1Trigger
+  /** First detectTier1Trigger call result — Tier1Trigger when Layer 1 ELEMENT_FUSION
+   *  fires (added 2026-05-06, M1-CP4e). Detected upstream of applyMechanisms; when
+   *  non-null, applyMechanisms is NOT called for the fixture. */
+  layer1_tier1_a?: Tier1Trigger
+  /** Second detectTier1Trigger call result. */
+  layer1_tier1_b?: Tier1Trigger
   error?: unknown
   layer2_latency_ms_a: number
   layer2_latency_ms_b: number
@@ -578,12 +605,41 @@ function runLayer2Twice(schema: Layer1Schema, fixture: Fixture): Layer2FixtureRe
     layer2_latency_ms_b: 0,
   }
   try {
+    // Added 2026-05-06 (M1-CP4e) — detectTier1Trigger upstream of applyMechanisms.
+    // When ELEMENT_FUSION fires at Layer 1, applyMechanisms is NOT called — the
+    // engine halts at Layer 1. Determinism is verified by calling detectTier1Trigger
+    // twice and comparing.
     const startA = Date.now()
-    result.assessment_a = applyMechanisms(schema)
+    const layer1TriggerA = detectTier1Trigger(schema)
+    if (layer1TriggerA !== null) {
+      result.layer1_tier1_a = layer1TriggerA
+      result.layer2_latency_ms_a = Date.now() - startA
+      const startB = Date.now()
+      const layer1TriggerB = detectTier1Trigger(schema)
+      if (layer1TriggerB !== null) {
+        result.layer1_tier1_b = layer1TriggerB
+      }
+      result.layer2_latency_ms_b = Date.now() - startB
+      return result
+    }
+
+    // applyMechanisms returns Layer2Assessment | { tier1_trigger: Tier1Trigger }.
+    // Type-narrow to the appropriate field.
+    const layer2A = applyMechanisms(schema)
+    if ('tier1_trigger' in layer2A) {
+      result.layer2_tier1_a = layer2A.tier1_trigger
+    } else {
+      result.assessment_a = layer2A
+    }
     result.layer2_latency_ms_a = Date.now() - startA
 
     const startB = Date.now()
-    result.assessment_b = applyMechanisms(schema)
+    const layer2B = applyMechanisms(schema)
+    if ('tier1_trigger' in layer2B) {
+      result.layer2_tier1_b = layer2B.tier1_trigger
+    } else {
+      result.assessment_b = layer2B
+    }
     result.layer2_latency_ms_b = Date.now() - startB
   } catch (err) {
     result.error = err
@@ -1743,12 +1799,201 @@ function runPhase9(
 }
 
 // -----------------------------------------------------------------------------
+// Phase 11 (added 2026-05-06, M1-CP4e) — continuation-token mechanic
+// Per ADR-008 §4 + §8 + ADR-006 §3.10. Exercises issueContinuationToken +
+// validateContinuationToken across success, expiry, signature-tamper, and
+// input-mismatch paths. No LLM calls. Runs independently of fixtures F1–F9.
+// -----------------------------------------------------------------------------
+
+function runPhase11(): void {
+  console.log('=== PHASE 11 — Tier 1 continuation-token mechanic ===\n')
+
+  // Set a deterministic test secret for the duration of Phase 11. Restored at
+  // the end. This does NOT affect production: process.env mutation is
+  // process-local and the harness exits at completion.
+  const ORIGINAL_SECRET = process.env.TRANSLATION_SANDWICH_TIER1_SECRET
+  const TEST_SECRET =
+    'M1-CP4e-PHASE-11-TEST-SECRET-base64-value-not-for-production-use'
+  process.env.TRANSLATION_SANDWICH_TIER1_SECRET = TEST_SECRET
+
+  try {
+    // P11.1 — Issue a token
+    const inputText = 'I have several distinct concerns and cannot decide which is primary.'
+    let token: string | undefined
+    let issueErr = ''
+    try {
+      token = issueContinuationToken(inputText, 'ELEMENT_FUSION')
+    } catch (err) {
+      issueErr = err instanceof Error ? err.message : String(err)
+    }
+    check(
+      'P11.1 — issueContinuationToken succeeds with secret set',
+      typeof token === 'string' && token.includes('.'),
+      issueErr || (token ? undefined : 'token is undefined')
+    )
+    if (typeof token !== 'string') return
+
+    // P11.2 — Token format: base64.hex per ADR-008 §4.1
+    const parts = token.split('.')
+    check(
+      'P11.2 — token has the base64.hex two-part shape',
+      parts.length === 2 && parts[0].length > 0 && parts[1].length > 0
+    )
+
+    // P11.3 — Default expiry is 30 minutes per ADR-008 §4.1
+    check(
+      'P11.3 — TIER1_TOKEN_CONFIG.TOKEN_EXPIRY_SECONDS is 30 minutes (1800s)',
+      TIER1_TOKEN_CONFIG.TOKEN_EXPIRY_SECONDS === 1800,
+      `actual: ${TIER1_TOKEN_CONFIG.TOKEN_EXPIRY_SECONDS}s`
+    )
+
+    // P11.4 — Token validates with matching input
+    const validResult = validateContinuationToken(token, inputText)
+    check(
+      'P11.4 — token validates with original input',
+      validResult.ok === true,
+      validResult.ok ? undefined : `error_code: ${validResult.error_code}`
+    )
+    if (validResult.ok) {
+      check(
+        'P11.4a — validated payload trigger_code === ELEMENT_FUSION',
+        validResult.payload.trigger_code === 'ELEMENT_FUSION'
+      )
+      check(
+        'P11.4b — validated payload v === 1',
+        validResult.payload.v === 1,
+        `actual: ${validResult.payload.v}`
+      )
+      check(
+        'P11.4c — validated payload input_hash is sha256 of input (64 hex chars)',
+        typeof validResult.payload.input_hash === 'string' &&
+          validResult.payload.input_hash.length === 64
+      )
+    }
+
+    // P11.5 — Token rejects with mismatched input
+    const mismatchResult = validateContinuationToken(token, 'a different input text')
+    check(
+      'P11.5 — token rejects with mismatched input (continuation_token_input_mismatch)',
+      mismatchResult.ok === false &&
+        'error_code' in mismatchResult &&
+        mismatchResult.error_code === 'continuation_token_input_mismatch',
+      mismatchResult.ok ? 'unexpectedly accepted' : `error_code: ${(mismatchResult as { error_code: string }).error_code}`
+    )
+
+    // P11.6 — Token rejects with tampered signature (last hex char flipped)
+    const tampered = parts[1].endsWith('0') ? `${parts[0]}.${parts[1].slice(0, -1)}1` : `${parts[0]}.${parts[1].slice(0, -1)}0`
+    const tamperedResult = validateContinuationToken(tampered, inputText)
+    check(
+      'P11.6 — token rejects with tampered signature (invalid_continuation_token_signature)',
+      tamperedResult.ok === false &&
+        'error_code' in tamperedResult &&
+        tamperedResult.error_code === 'invalid_continuation_token_signature'
+    )
+
+    // P11.7 — Token rejects with malformed shape (no delimiter)
+    const malformedResult = validateContinuationToken('no-delimiter-here', inputText)
+    check(
+      'P11.7 — malformed token rejected (invalid_continuation_token)',
+      malformedResult.ok === false &&
+        'error_code' in malformedResult &&
+        malformedResult.error_code === 'invalid_continuation_token'
+    )
+
+    // P11.8 — Token rejects when secret is missing
+    const ORIGINAL = process.env.TRANSLATION_SANDWICH_TIER1_SECRET
+    delete process.env.TRANSLATION_SANDWICH_TIER1_SECRET
+    const noSecretResult = validateContinuationToken(token, inputText)
+    process.env.TRANSLATION_SANDWICH_TIER1_SECRET = ORIGINAL
+    check(
+      'P11.8 — token validation reports continuation_token_secret_missing when secret is unset',
+      noSecretResult.ok === false &&
+        'error_code' in noSecretResult &&
+        noSecretResult.error_code === 'continuation_token_secret_missing'
+    )
+
+    // P11.9 — issueContinuationToken throws when secret is missing
+    delete process.env.TRANSLATION_SANDWICH_TIER1_SECRET
+    let issueWithoutSecretErr = ''
+    try {
+      issueContinuationToken(inputText, 'ELEMENT_FUSION')
+    } catch (err) {
+      issueWithoutSecretErr = err instanceof Error ? err.name : String(err)
+    }
+    process.env.TRANSLATION_SANDWICH_TIER1_SECRET = TEST_SECRET
+    check(
+      'P11.9 — issueContinuationToken throws Tier1SecretMissingError when secret unset',
+      issueWithoutSecretErr === 'Tier1SecretMissingError',
+      issueWithoutSecretErr ? undefined : 'no error thrown'
+    )
+
+    // P11.10 — Issuance is deterministic-modulo-time (same input + same trigger
+    // produce tokens whose payloads agree on input_hash, trigger_code, v, but
+    // differ on issued_at/expires_at by at most a few seconds).
+    const token2 = issueContinuationToken(inputText, 'ELEMENT_FUSION')
+    const r1 = validateContinuationToken(token, inputText)
+    const r2 = validateContinuationToken(token2, inputText)
+    if (r1.ok && r2.ok) {
+      check(
+        'P11.10 — repeated issuance: same input_hash + trigger_code',
+        r1.payload.input_hash === r2.payload.input_hash &&
+          r1.payload.trigger_code === r2.payload.trigger_code
+      )
+    } else {
+      check(
+        'P11.10 — repeated issuance: token validation prerequisite',
+        false,
+        'one of the two repeated tokens failed to validate'
+      )
+    }
+
+    console.log()
+  } finally {
+    // Restore original secret (or delete if it was unset).
+    if (ORIGINAL_SECRET === undefined) {
+      delete process.env.TRANSLATION_SANDWICH_TIER1_SECRET
+    } else {
+      process.env.TRANSLATION_SANDWICH_TIER1_SECRET = ORIGINAL_SECRET
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Phase 12 (added 2026-05-06, M1-CP4e — STUBBED for Sub-session M1-CP4e-A) —
+// second-turn resume
+// Per ADR-008 §4 + §8. Exercises the full multi-turn flow:
+//   1. First-turn input fires Tier 1 (e.g., F7 ELEMENT_FUSION).
+//   2. Token issued.
+//   3. Second-turn input augmented with practitioner answer.
+//   4. Token validated.
+//   5. Engine restarted from Position 1 with augmented input.
+//   6. Either full evaluation OR a different Tier 1 fire (never the same trigger
+//      twice in a row per D13's loop-guard implication).
+//
+// IMPLEMENTATION DEFERRED to Sub-session M1-CP4e-B because Phase 12 requires:
+//   (a) A real Sonnet call to extract Layer 1 schema for the second-turn
+//       augmented input (cost ~$0.04 per fixture × 3 fixtures = ~$0.12).
+//   (b) The TRANSLATION_SANDWICH_TIER1_SECRET env var provisioned in Vercel.
+// Sub-session M1-CP4e-A scope per the founder-confirmed split is "modules +
+// ADRs + harness — no deploy"; Phase 12 lands at M1-CP4e-B alongside the
+// real-Sonnet harness run.
+// -----------------------------------------------------------------------------
+
+function runPhase12(): void {
+  console.log('=== PHASE 12 — Second-turn resume (STUBBED — M1-CP4e-B scope) ===\n')
+  info('  Phase 12 implementation deferred to M1-CP4e-B per founder-confirmed session split.')
+  info('  Required at M1-CP4e-B: TRANSLATION_SANDWICH_TIER1_SECRET env var + real-Sonnet')
+  info('  Layer 1 re-extraction on augmented inputs (~$0.12 LLM cost across F7/F8/F9).')
+  console.log()
+}
+
+// -----------------------------------------------------------------------------
 // 6. main()
 // -----------------------------------------------------------------------------
 
 async function main(): Promise<void> {
-  console.log('verify-translation-sandwich.ts — M1-CP4 standalone harness (Phases 1–9)')
-  console.log('Per ADR-004 §7 + ADR-005 §8 + ADR-006 §4 + ADR-007 §8\n')
+  console.log('verify-translation-sandwich.ts — M1-CP4 standalone harness (Phases 1–9 + 11–12)')
+  console.log('Per ADR-004 §7 + ADR-005 §8 + ADR-006 §4 + ADR-007 §8 + ADR-008 §8\n')
 
   const fixtureResults = await runPhase1AndPhase2()
   const layer2Results = runPhase3(fixtureResults)
@@ -1763,6 +2008,13 @@ async function main(): Promise<void> {
   await runPhase8(layer2Results)
   runPhase9(fixtureResults, phase5Results)
 
+  // Phases 11 + 12 added 2026-05-06 (M1-CP4e) per ADR-008 §8.
+  // Phase 11 (continuation-token mechanic) issues no LLM calls; runs offline.
+  // Phase 12 (second-turn resume) is stubbed at M1-CP4e-A; full implementation
+  // at M1-CP4e-B.
+  runPhase11()
+  runPhase12()
+
   // -------------------------------------------------------------------------
   // SUMMARY
   // -------------------------------------------------------------------------
@@ -1770,7 +2022,7 @@ async function main(): Promise<void> {
   console.log('---')
   console.log(`SUMMARY: ${passedChecks} / ${totalChecks} checks passed`)
   if (passedChecks === totalChecks) {
-    console.log('ALL CHECKS PASSED (Phase 1 + Phase 2 + Phase 3 + Phase 4 + Phase 5 + Phase 6 + Phase 7 + Phase 8 + Phase 9)')
+    console.log('ALL CHECKS PASSED (Phase 1 + Phase 2 + Phase 3 + Phase 4 + Phase 5 + Phase 6 + Phase 7 + Phase 8 + Phase 9 + Phase 11 + Phase 12)')
     process.exit(0)
   } else {
     console.log(`FAILED: ${totalChecks - passedChecks} check(s) did not pass`)

@@ -235,6 +235,20 @@ export interface MotivationEvidenceEntry {
   evidence: string
 }
 
+// Added 2026-05-06 (M1-CP4e) — element-fusion entry shape for AC-13 Tier 1 force-clarification
+
+export interface ElementFusionDetected {
+  /** True when Layer 1 recognises that the input narrative contains multiple distinct
+   *  concerns at the high-level Layer 1 categories AND cannot decompose them into
+   *  separable entities suitable for downstream mechanisms. False is the typical case. */
+  fused: boolean
+  /** When `fused: true`: a non-empty array of high-level concern labels Layer 1 partially
+   *  extracted before the fusion was detected (e.g., ["work deadlines", "my mother's
+   *  health", "the town meeting"]). When `fused: false`: null. The validator enforces
+   *  the cross-field invariant. */
+  fused_concerns: string[] | null
+}
+
 // =============================================================================
 // TOP-LEVEL SCHEMA
 // =============================================================================
@@ -274,6 +288,13 @@ export interface Layer1Schema {
   /** Verbatim motivation phrases when motivation_stated is true. Empty when
    *  motivation_stated is false. */
   motivation_evidence: MotivationEvidenceEntry[]
+  // Added 2026-05-06 (M1-CP4e) — element-fusion field for AC-13 Tier 1 force-clarification
+  /** Element-fusion detection. `fused: true` halts the engine at Layer 1 and surfaces a
+   *  Tier 1 ELEMENT_FUSION force-clarification per ADR-008 §3.1. `fused_concerns` carries
+   *  the high-level concern labels when `fused: true`; null when `fused: false`. The
+   *  cross-field invariant (non-empty array when fused; null when not fused) is enforced
+   *  by `validateLayer1Schema`. Default `{ fused: false, fused_concerns: null }`. */
+  element_fusion_detected: ElementFusionDetected
   /** Free-form notes naming any uncertainty — e.g. a passion that could map to two
    *  sub-species, a statement that could be evidence for two causal stages, or
    *  a metaphorical text whose literal target is unclear. Empty when the extraction
@@ -380,6 +401,17 @@ Each entry in this section names what evidence in the input populates the field,
 - **Distinction from `kathekon_factors.justification_offered`:** `justification_offered` records justifications for the *action* (why this action is appropriate); `motivation_stated` + `motivation_evidence` record what was *operative* for the agent (their inner state at the moment of action). The same input can populate both, neither, or only one. Layer 2's PRAXIS_MOTIVATION_AMBIGUITY trigger reads `motivation_stated`, not `kathekon_factors`.
 - **Layer 2 consumer:** `applyMechanisms` → PRAXIS_MOTIVATION_AMBIGUITY check → Tier 3 OPEN_DEFERRAL with stem_id `tier_3:praxis_motivation_ambiguity:001`. Also: `iterative_refinement.motivation_classification` is set to `'unclear_pending_clarification'` when this trigger fires.
 
+#### 3.12 `element_fusion_detected` (added 2026-05-06, M1-CP4e)
+
+- **Source:** the input narrative as a whole. Element fusion fires when the agent names multiple distinct concerns at the high-level Layer 1 categories (e.g., work + family + a community obligation + a financial decision in a single phrase) AND the narrative does not decompose them into separable entities that downstream mechanisms can process independently. Indicators include: rapid topic-shifting within a single sentence; multiple distinct emotional anchors with no narrative thread connecting them; the agent appearing to enumerate concerns rather than reason about one of them.
+- **What to extract:** boolean `fused` (true when fusion is detected, else false); when `fused: true`, `fused_concerns` is a non-empty array of high-level concern labels Layer 1 partially extracted before recognising the fusion (drawn from the agent's verbatim phrasing where possible, paraphrased to a concise label otherwise — e.g. ["work deadlines", "my mother's health", "the town meeting Thursday"]).
+- **Default:** `{ fused: false, fused_concerns: null }`. This is the *typical* case. Most inputs name one primary concern even when secondary concerns are present in the background; fusion is reserved for the structurally undecidable case where Layer 2 cannot pick a primary entity to reason about.
+- **Discipline:** `fused: true` is a structural halt. When set, Layer 2 is not called for this request — the route's orchestrator dispatches a Tier 1 ELEMENT_FUSION force-clarification per ADR-008 §3.1 + §5. The clarification question stem (per D13, pre-D-A16 transitional): *"There are several distinct concerns here — [LIST_OF_FUSED_CONCERNS]. Before I work through this with you, can you tell me which one of these is most centrally on your mind right now?"* with `LIST_OF_FUSED_CONCERNS` rendered as a comma-separated list with Oxford "and" before the final item, drawn from `element_fusion_detected.fused_concerns`.
+- **Distinction from `ambiguity_notes`:** `ambiguity_notes` records *within-field* uncertainty (e.g., a passion that could be eros or pothos). `element_fusion_detected` records *across-field* structural undecidability — the engine cannot pick a primary entity to reason about. The two can coexist; an input may be element-fused AND have ambiguities within Layer 1's partial extraction.
+- **Distinction from multiple `oikeiosis_circles_engaged`:** an input that engages multiple circles (e.g., household + local_community) is the typical multi-circle case, NOT fusion. Fusion fires when the *agent's narrative* enumerates concerns without committing to a primary one — not when one concern engages multiple Stoic circles.
+- **Calibration toward under-firing:** when uncertain, prefer `fused: false`. Tier 1 force-clarification halts the engine and demands a clarification turn from the practitioner; over-firing produces a clunky "it keeps asking me questions" workflow per ADR-008's risk note. Under-firing produces an impoverished assessment that the practitioner can correct via re-submission. The architectural intent is to fire only when the input is structurally undecidable.
+- **Layer 2 consumer:** Layer 2 is NOT called when `element_fusion_detected.fused === true`. The route's orchestrator (per ADR-008 §5) bypasses `applyMechanisms` and emits the Tier 1 force-clarification response. On the no-fusion path (`fused: false`), Layer 2 reads this field to confirm fusion is not active and proceeds normally.
+
 ### 4. Layer 1 system prompt
 
 Stored as a constant inside the module. Sent as a cached system block per AC6.
@@ -391,7 +423,7 @@ Your output drives a deterministic Stoic mechanism engine (Layer 2). The quality
 
 EXTRACTION CONTRACT
 
-Read the input text carefully. For each of the seven content categories below, extract everything the input names and return it in the specified shape.
+Read the input text carefully. For each of the twelve content categories below, extract everything the input names and return it in the specified shape.
 
 If a category is absent from the input, return an empty array for that category — do not omit the field.
 
@@ -465,6 +497,16 @@ CATEGORIES
     - motivation_evidence: array of {motivation, evidence}. One entry per stated motivation. Empty when motivation_stated is false.
     Default is motivation_stated: false — the typical case. Agents narrate what happened more often than they narrate why. "Because I care about her", "out of duty", "for the principle" are motivation phrases. Justifications for the action ("because she needs help") go in kathekon_factors.justification_offered, not here. Motivations are about the agent's *inner state*; justifications are about the *action's appropriateness*.
 
+12. element_fusion_detected — structural detection of element fusion (whether the input names multiple distinct concerns the engine cannot decompose).
+    - fused: boolean (true when the input enumerates multiple distinct concerns at high-level Layer 1 categories AND cannot be decomposed into separable entities suitable for downstream mechanisms; false otherwise).
+    - fused_concerns: array of strings naming the high-level concerns when fused: true; null when fused: false.
+    Default is {fused: false, fused_concerns: null} — the typical case. Most inputs name one primary concern even when secondary concerns are present in the background. Fusion is reserved for the structurally undecidable case where Layer 2 cannot pick a primary entity to reason about.
+    Indicators of fusion: rapid topic-shifting within a single sentence; multiple distinct emotional anchors with no narrative thread connecting them; the agent appearing to enumerate concerns rather than reason about one of them ("I've got work deadlines, my mother's health, the town meeting, and I haven't slept all week").
+    When uncertain, prefer fused: false. Tier 1 force-clarification halts the engine and demands a clarification turn from the practitioner; over-firing produces a clunky workflow. Under-firing produces an impoverished assessment the practitioner can correct via re-submission.
+    Distinct from multiple oikeiosis_circles_engaged: an input that engages household + local_community is the typical multi-circle case, NOT fusion. Fusion fires when the *agent's narrative* enumerates concerns without committing to a primary one — not when one concern engages multiple Stoic circles.
+    Distinct from ambiguity_notes: ambiguity_notes records *within-field* uncertainty (a passion that could be eros or pothos); element_fusion_detected records *across-field* structural undecidability (no primary entity to reason about).
+    When fused: true, fused_concerns lists the concerns drawn from the agent's verbatim phrasing where possible (paraphrased to a concise label otherwise — e.g. ["work deadlines", "my mother's health", "the town meeting"]). When fused: false, fused_concerns MUST be null (not an empty array).
+
 OUTPUT
 
 Return ONLY valid JSON conforming to Layer1Schema. No markdown. No commentary outside the JSON.
@@ -503,6 +545,7 @@ Return ONLY valid JSON conforming to Layer1Schema. No markdown. No commentary ou
   ],
   "motivation_stated": false,
   "motivation_evidence": [],
+  "element_fusion_detected": {"fused": false, "fused_concerns": null},
   "ambiguity_notes": [
     "passions_present[0].sub_species: could be eros or pothos"
   ]
@@ -540,11 +583,12 @@ Return only the JSON.
 
 Module exports a private `validateLayer1Schema(parsed: unknown): Layer1Schema`. The validator:
 
-1. Asserts `parsed` is an object with the exact required keys (`version`, the seven original categories, the four M1-CP4b fields — `eupatheia_candidates`, `stated_concern_targets`, `stated_equanimity_signals`, `motivation_stated`, `motivation_evidence` — and `ambiguity_notes`). Missing key → throw.
+1. Asserts `parsed` is an object with the exact required keys (`version`, the seven original categories, the five M1-CP4b fields — `eupatheia_candidates`, `stated_concern_targets`, `stated_equanimity_signals`, `motivation_stated`, `motivation_evidence` — the M1-CP4e field `element_fusion_detected`, and `ambiguity_notes`). Missing key → throw.
 2. Asserts `version === 'layer1-schema-v1'`. Mismatch → throw.
-3. Asserts each array-category is an array (all categories except `motivation_stated`, which must be a boolean). Non-array (or non-boolean for `motivation_stated`) → throw.
+3. Asserts each array-category is an array (all categories except `motivation_stated`, which must be a boolean, and `element_fusion_detected`, which must be an object). Non-array / non-boolean / non-object as appropriate → throw.
 4. For each entry in each array-category, asserts the required fields are present and have the correct primitive types and enum membership. Bad enum value → throw with the field name and the offending value.
-   - For the four M1-CP4b fields, the entry shapes are: `EupatheiaCandidate` (shape ∈ chara/boulesis/eulabeia, evidence string, narrative_target string|null); `StatedConcernTarget` (stated_target string, for_self_concern string|null, evidence string); `StatedEquanimitySignalEntry` (signal_type ∈ felt_fine/felt_calm/felt_at_peace/didnt_bother_me/other_explicit_calm, evidence string); `MotivationEvidenceEntry` (motivation string, evidence string).
+   - For the four M1-CP4b array-fields, the entry shapes are: `EupatheiaCandidate` (shape ∈ chara/boulesis/eulabeia, evidence string, narrative_target string|null); `StatedConcernTarget` (stated_target string, for_self_concern string|null, evidence string); `StatedEquanimitySignalEntry` (signal_type ∈ felt_fine/felt_calm/felt_at_peace/didnt_bother_me/other_explicit_calm, evidence string); `MotivationEvidenceEntry` (motivation string, evidence string).
+   - For the M1-CP4e object-field `element_fusion_detected`: shape `{ fused: boolean, fused_concerns: string[] | null }`. The validator asserts `fused` is a boolean and `fused_concerns` is either null or an array of strings. Cross-field invariant: when `fused === true`, `fused_concerns` MUST be a non-empty array of strings (the orchestrator depends on this for slot-fill rendering); when `fused === false`, `fused_concerns` MUST be null. Cross-field violation → throw with field path `element_fusion_detected` and a message naming the violation.
 5. On success, returns the input narrowed to `Layer1Schema`.
 
 A throw from the validator is caught by the route at M1-CP4 per ADR-004 §9.1 and triggers the bundled-depth fallback. At CP1 (standalone), a throw fails the harness phase 2 fixture and the founder reviews the LLM output to revise the prompt or schema.
@@ -606,18 +650,39 @@ Input: "I told myself I'm fine with the decision the board made, but I keep repl
 
 Expected exercise: `stated_equanimity_signals` (felt_fine — "I'm fine with the decision"); `passions_present` (lupe / penthos or epithumia / orge — the replaying pattern with "should be over it" suggests unresolved distress); `motivation_stated` false; `causal_stage_evidence` (synkatathesis — assenting to the impression that the decision matters); `ambiguity_notes` likely populated (the stated calm contradicts the structural features). Layer 2 will fire STATED_EQUANIMITY_UNVERIFIED (Tier 2 soft clarification) per AC-13.
 
+**F7 — Element-fusion case (added 2026-05-06, M1-CP4e).**
+
+Input: "I've got the work deadline tomorrow, my mother's been calling about her health all week, the town council meeting is Thursday and I said I'd speak, and I haven't slept properly in days. I don't know what I'm doing anymore."
+
+Expected exercise: `element_fusion_detected` (`fused: true`; `fused_concerns` = ["the work deadline", "my mother's health", "the town council meeting", "lack of sleep"] or close paraphrase). The narrative enumerates four distinct concerns at high-level Layer 1 categories (kathekon/work, household/parent, political_community/civic role, self_preservation/health) with no narrative thread tying them to one primary entity. The route's orchestrator (per ADR-008 §5) bypasses Layer 2 entirely and emits a Tier 1 ELEMENT_FUSION force-clarification with the question stem rendered against `fused_concerns`. Layer 2 is not exercised on this fixture in the no-fusion path; harness Phase 1 + Phase 4 verify the fusion fires + stops the engine pre-Layer-2; Phase 6 verifies the response shape is force-clarification (not full-evaluation). Other Layer 1 fields (passions_present, oikeiosis_circles_engaged, etc.) MAY be partially populated from the fragments Layer 1 extracted before recognising fusion, but the orchestrator does not read them on the Tier 1 path. F7's purpose is to verify the upstream-most Tier 1 trigger (ELEMENT_FUSION at Layer 1) fires correctly and halts the engine; it is the Tier 1 fixture that exercises the Layer 1 → orchestrator hand-off most directly.
+
+**F8 — Scope-ambiguity case (added 2026-05-06, M1-CP4e).**
+
+Input: "I responded to them this morning the way I usually do, and now I'm second-guessing whether I handled it well. I keep replaying what I said to them in my head."
+
+Expected exercise: Layer 1 extracts `causal_stage_evidence` with praxis-stage entries ("I responded to them", "what I said to them") and synkatathesis-stage entries ("second-guessing", "keep replaying"). `passions_present` populates with lupe (penthos or achos — the second-guessing pattern). Critically, `oikeiosis_circles_engaged` is empty OR contains only self_preservation — the agent uses "them" without naming who "them" is or what their relational role is. `element_fusion_detected.fused === false` (one concern present, just the relational scope is undetermined). At Layer 2 / Position 6, the SCOPE_AMBIGUITY short-circuit fires per ADR-006 §3.10 (action present + "them" / "to them" referents + no relational circle). The orchestrator emits a Tier 1 SCOPE_AMBIGUITY force-clarification with the canonical D13 stem (no slot-fills). Mechanisms 7+ do not run; Layer 3 does not run. Harness Phase 1 verifies Layer 1 extracts as expected (no fusion); Phase 4 verifies SCOPE_AMBIGUITY fires at Position 6; Phase 6 verifies the response shape is force-clarification with `fired_at_position: 'position-6'`.
+
+**F9 — Temporal-ambiguity case (added 2026-05-06, M1-CP4e).**
+
+Input: "I keep thinking about that conversation. I should have said something different. And now I don't know what's going to happen — they might bring it up again at the next meeting."
+
+Expected exercise: Layer 1 extracts `causal_stage_evidence` with both past-anchored entries ("I should have said") AND future-anchored entries ("what's going to happen", "they might bring it up"). `passions_present` populates with lupe (penthos / achos — the past regret) AND phobos (agonia / thorybos — the future worry); both regret and worry passions present per ADR-006 §3.10's REGRET_PASSIONS + WORRY_PASSIONS lookup tables. `element_fusion_detected.fused === false`. At Layer 2 / Position 2, the TEMPORAL_AMBIGUITY short-circuit fires per ADR-006 §3.10 (passion_root signal present + past_count + future_count both ≥ 1 + |past − future| ≤ 1 + regret/worry passion family). The orchestrator emits a Tier 1 TEMPORAL_AMBIGUITY force-clarification with the canonical D13 stem (no slot-fills). Mechanisms 3+ do not run; Layer 3 does not run. Harness Phase 1 verifies Layer 1 extracts as expected; Phase 4 verifies TEMPORAL_AMBIGUITY fires at Position 2; Phase 6 verifies the response shape is force-clarification with `fired_at_position: 'position-2'`.
+
 #### 8.2 Phase 1 — extraction completeness
 
 For each fixture, assert that:
 
 - The returned schema is a valid JSON object.
-- `passions_present.length > 0` for F1, F2, F4, F6 (F3 may have empty if interpreted as deliberation-without-passion; ambiguity_notes records that; F5 explicitly disclaims passions).
-- `control_filter_elements.length > 0` for F1–F4 (F5 + F6 may be empty depending on extraction).
+- `passions_present.length > 0` for F1, F2, F4, F6 (F3 may have empty if interpreted as deliberation-without-passion; ambiguity_notes records that; F5 explicitly disclaims passions; F7 may be partial — the fusion-bypass means downstream extraction is not load-bearing).
+- `control_filter_elements.length > 0` for F1–F4 (F5 + F6 may be empty depending on extraction; F7 may be partial).
 - `oikeiosis_circles_engaged.length > 0` for F1, F2, F3, F5.
 - `eupatheia_candidates.length > 0` for F5 (M1-CP4b — added).
 - `stated_equanimity_signals.length > 0` for F5 + F6 (M1-CP4b — added).
-- `motivation_stated === false` for all six fixtures (none of F1–F6 names the agent's motivation explicitly; all should produce empty `motivation_evidence`).
-- The expected categories per fixture (above) are non-empty.
+- `motivation_stated === false` for F1–F6 (none of F1–F6 names the agent's motivation explicitly; all should produce empty `motivation_evidence`). F7 may be either; the fusion-bypass means motivation extraction is not load-bearing.
+- `element_fusion_detected.fused === false` for F1–F6 + F8 + F9 (none of these fixtures present element fusion — F8 is scope-ambiguous and F9 is temporally-ambiguous, but neither is fused). `element_fusion_detected.fused === true` for F7 (M1-CP4e — added; the only Layer-1-level Tier 1 fixture). When `fused: true`, `fused_concerns` is a non-empty array; when `fused: false`, `fused_concerns` is null (validator enforces this cross-field invariant).
+- For F8 (scope-ambiguity): `causal_stage_evidence` includes at least one praxis-stage or horme-stage entry; the entry's `evidence` text contains an unspecified-other referent (per ADR-006 §3.10 OTHER_REFERENT_MARKERS — "them", "to them", "responded to", "said to", etc.); `oikeiosis_circles_engaged` is either empty OR contains only `self_preservation`. These are the structural conditions the Layer 2 / Position 6 SCOPE_AMBIGUITY short-circuit consumes; Phase 4 verifies the trigger fires.
+- For F9 (temporal-ambiguity): `causal_stage_evidence` includes at least one past-anchored entry (`evidence` matches PAST_TEMPORAL_MARKERS — "should have", "I keep thinking about that conversation", etc.) AND at least one future-anchored entry (`evidence` matches FUTURE_TEMPORAL_MARKERS — "going to happen", "they might", etc.); `passions_present` includes at least one entry whose sub_species is in REGRET_PASSIONS (penthos/achos/eleos) AND at least one in WORRY_PASSIONS (agonia/thorybos/deima). These are the structural conditions the Layer 2 / Position 2 TEMPORAL_AMBIGUITY short-circuit consumes; Phase 4 verifies the trigger fires.
+- The expected categories per fixture (above) are non-empty (with the F7 fusion-bypass exception named above).
 - `version === 'layer1-schema-v1'`.
 
 Phase 1 is observational. The harness prints the schema for each fixture. Founder reviews the diagnostics; if a fixture's expected category is empty, this surfaces a prompt-tuning or schema-revision opportunity at CP1 (or in CP1b if deferred).
@@ -692,6 +757,8 @@ If the founder rejects ADR-005 or requests substantial edits, the draft is revis
 - **2026-05-04 (second in-session amendment, Sub-session M1-CP1, post-harness re-run)** — second harness run: F4 passed; F1/F2/F3 failed with `passions_present[0].root_passion: undefined` because Sonnet used the key `root` (with `"root": "lupe"` etc.) instead of `root_passion`. Same root-cause class as the first amendment: the OUTPUT example used `[...]` placeholders for all seven category arrays, leaving Sonnet to guess per-entry JSON keys from the semantic bullet descriptions ("Root passion", "Sub-species") which it did inconsistently across fixtures. Per founder direction (Path A extension approved 2026-05-04), the OUTPUT example was replaced with one concrete entry per category showing exact JSON keys and enum values, plus an explicit instruction to "use the EXACT JSON keys shown above". Schema (§2) and validator (§6) unchanged. Module and ADR-005 §4 updated together. PR5 promotes the underlying observation from candidate to watch status (second recurrence within the same session): "the LLM produces JSON keys consistent with semantic bullet descriptions only when an explicit example shows the canonical keys; placeholder examples (`[...]`) leave field-name choice to the LLM and produce inconsistent keys across runs". Resolution: every category in the Layer 1 OUTPUT example now shows one concrete entry with exact keys and a representative enum value.
 
 - **2026-05-06 (cross-session amendment, Sub-session M1-CP4b)** — M1-CP4b adds structural-trigger fields to `Layer1Schema` for AC-14 (withholding as deterministic kathekon) + Tier 2 soft-clarification per `D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05`. Schema additions (§2): four new entry-shape interfaces (`EupatheiaCandidate`, `StatedConcernTarget`, `StatedEquanimitySignalEntry`, `MotivationEvidenceEntry`); two new controlled-vocabulary types (`EupatheiaShape`, `StatedEquanimitySignal`); five new top-level fields on `Layer1Schema` (`eupatheia_candidates`, `stated_concern_targets`, `stated_equanimity_signals`, `motivation_stated`, `motivation_evidence`). All additive — schema version remains `layer1-schema-v1`. Per-field guidance (§3) extended with §3.8 (`eupatheia_candidates`), §3.9 (`stated_concern_targets`), §3.10 (`stated_equanimity_signals`), §3.11 (`motivation_stated` + `motivation_evidence`). System prompt (§4) extended with categories 8–11 in the EXTRACTION CONTRACT and the OUTPUT example extended with concrete entries per PR5 worked-example discipline. Validator (§6) extended to assert the four new fields' presence and types. Fixtures (§8) extended with F5 (eupatheia-candidate case) and F6 (stated-equanimity-with-passion case); Phase 1 assertions updated. Tier 1 force-clarification triggers (`ELEMENT_FUSION` at Layer 1, `SCOPE_AMBIGUITY` at Position 6, `TEMPORAL_AMBIGUITY` at Position 2) explicitly out of scope at this amendment — those engage at M1-CP4d's multi-turn input flow design ADR. Standard-tier governance amendment under 0d-ii (documentation; no production touch). Module update + harness re-verification scheduled for M1-CP4c.
+
+- **2026-05-06 (cross-session amendment, Sub-session M1-CP4e — companion to ADR-008)** — M1-CP4e adds the upstream-most AC-13 Tier 1 force-clarification trigger (`ELEMENT_FUSION` at Layer 1) per ADR-008 §3.1 + §3.4. Schema additions (§2): one new entry-shape interface `ElementFusionDetected` (shape `{ fused: boolean, fused_concerns: string[] | null }`); one new top-level field on `Layer1Schema` named `element_fusion_detected`. All additive — schema version remains `layer1-schema-v1`. Per-field guidance (§3) extended with §3.12 (`element_fusion_detected`) including detection condition, default, calibration discipline (prefer `fused: false` when uncertain), distinction from multi-circle / ambiguity_notes, and Layer 2 consumer note (Layer 2 is NOT called when `fused: true`; orchestrator dispatches Tier 1 ELEMENT_FUSION force-clarification per ADR-008 §5). System prompt (§4): drift fix on the count line ("seven content categories" → "twelve content categories" — the M1-CP4b amendment had updated the categories list 1–11 but missed the count line; this amendment closes that drift while extending to twelve); category 12 added to EXTRACTION CONTRACT; OUTPUT example extended with `"element_fusion_detected": {"fused": false, "fused_concerns": null}` per PR5 worked-example discipline. Validator (§6) extended to assert the new field's presence, type (object), nested-field types (boolean + string array | null), and the cross-field invariant (`fused === true` ⇔ `fused_concerns` is non-empty array; `fused === false` ⇔ `fused_concerns === null`). Fixtures (§8.1) extended with three new entries in this M1-CP4e amendment cycle: F7 (element-fusion case — exercises the Layer 1 ELEMENT_FUSION trigger detected by `detectTier1Trigger` upstream of `applyMechanisms`); F8 (scope-ambiguity case — exercises the Layer 2 / Position 6 SCOPE_AMBIGUITY short-circuit per ADR-006 §3.10); F9 (temporal-ambiguity case — exercises the Layer 2 / Position 2 TEMPORAL_AMBIGUITY short-circuit per ADR-006 §3.10). Phase 1 assertions updated: `fused: false` baseline across F1–F6 + F8 + F9; `fused: true` on F7 with non-empty `fused_concerns`. F8 + F9 exercise structural Layer 1 conditions (praxis-stage actions with unspecified-other referents and absent relational circles for F8; past-anchored + future-anchored causal evidence with regret-passion + worry-passion family for F9) but do NOT themselves fire Tier 1 at Layer 1 — the Tier 1 fires are at Layer 2 short-circuits and are verified by Phase 4 + 6 + 11 + 12 (the harness extension drafted alongside this amendment in M1-CP4e). Companion ADR-006 amendment (the two Layer 2 short-circuits at Position 2 + Position 6 + the orchestrator-side `detectTier1Trigger` function) drafted in the same M1-CP4e session per ADR-008 §3.5. Critical-tier session under PR6 + AC5 (the implementation amendments touch the R20a perimeter route + add a new env var `TRANSLATION_SANDWICH_TIER1_SECRET` per ADR-008 §4); the ADR amendments themselves are the documentation surface of the Critical session, governance-tier within the Critical session's perimeter. Module update + orchestrator extension + route amendment + harness extension are all part of M1-CP4e (the "modules + ADRs + harness" portion lands in Sub-session M1-CP4e-A; deployment under the Critical Change Protocol lands in Sub-session M1-CP4e-B per the founder-confirmed split at session midpoint).
 
 ---
 

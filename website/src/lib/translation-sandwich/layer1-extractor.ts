@@ -203,6 +203,24 @@ export interface MotivationEvidenceEntry {
   evidence: string
 }
 
+// Added 2026-05-06 (M1-CP4e) — element-fusion entry shape per ADR-005 §3.12 + ADR-008 §3.1
+
+/** Layer 1's structural detection of element fusion (whether the input names multiple
+ *  distinct concerns the engine cannot decompose into separable entities). When
+ *  `fused: true`, the orchestrator (per ADR-008 §5) bypasses Layer 2 entirely and
+ *  emits a Tier 1 ELEMENT_FUSION force-clarification. Default `{ fused: false,
+ *  fused_concerns: null }`. */
+export interface ElementFusionDetected {
+  /** True when Layer 1 recognises that the input contains multiple distinct concerns
+   *  at the high-level Layer 1 categories AND cannot decompose them. False is the
+   *  typical case. */
+  fused: boolean
+  /** When `fused: true`: a non-empty array of high-level concern labels Layer 1
+   *  partially extracted before the fusion was detected. When `fused: false`:
+   *  null. The validator enforces this cross-field invariant. */
+  fused_concerns: string[] | null
+}
+
 // ============================================================================
 // TOP-LEVEL SCHEMA
 // ============================================================================
@@ -242,6 +260,13 @@ export interface Layer1Schema {
   /** Verbatim motivation phrases when motivation_stated is true. Empty when
    *  motivation_stated is false. */
   motivation_evidence: MotivationEvidenceEntry[]
+  // Added 2026-05-06 (M1-CP4e) — element-fusion field per ADR-005 §3.12 + ADR-008 §3.1
+  /** Element-fusion detection. `fused: true` halts the engine at Layer 1; the
+   *  orchestrator (per ADR-008 §5) emits a Tier 1 ELEMENT_FUSION force-clarification.
+   *  Default `{ fused: false, fused_concerns: null }`. The validator enforces the
+   *  cross-field invariant (fused: true ⇔ fused_concerns is non-empty array;
+   *  fused: false ⇔ fused_concerns === null). */
+  element_fusion_detected: ElementFusionDetected
   /** Free-form notes naming any uncertainty. Empty when the extraction is
    *  unambiguous. */
   ambiguity_notes: string[]
@@ -480,6 +505,8 @@ const REQUIRED_KEYS: ReadonlyArray<keyof Layer1Schema> = [
   'stated_equanimity_signals',
   'motivation_stated',
   'motivation_evidence',
+  // Added 2026-05-06 (M1-CP4e) — Tier 1 ELEMENT_FUSION trigger field
+  'element_fusion_detected',
   'ambiguity_notes',
 ]
 
@@ -696,6 +723,54 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
     }
   })
 
+  // Added 2026-05-06 (M1-CP4e) — element_fusion_detected (object with cross-field invariant)
+  const elementFusion = assertObject(root.element_fusion_detected, 'element_fusion_detected')
+  if (typeof elementFusion.fused !== 'boolean') {
+    throw new Layer1ValidationError(
+      'shape',
+      `Expected boolean at element_fusion_detected.fused, got ${typeof elementFusion.fused}`,
+      'element_fusion_detected.fused',
+      elementFusion.fused
+    )
+  }
+  const fused: boolean = elementFusion.fused
+  const fusedConcernsRaw = elementFusion.fused_concerns
+  let fusedConcerns: string[] | null
+  if (fusedConcernsRaw === null) {
+    fusedConcerns = null
+  } else {
+    // Must be an array of strings
+    fusedConcerns = assertArray(
+      fusedConcernsRaw,
+      'element_fusion_detected.fused_concerns'
+    ).map((entry, i) =>
+      assertString(entry, `element_fusion_detected.fused_concerns[${i}]`)
+    )
+  }
+  // Cross-field invariant: fused === true ⇔ fused_concerns is non-empty array;
+  //                       fused === false ⇔ fused_concerns === null.
+  if (fused === true) {
+    if (fusedConcerns === null || fusedConcerns.length === 0) {
+      throw new Layer1ValidationError(
+        'shape',
+        `Cross-field invariant violation at element_fusion_detected: fused === true requires fused_concerns to be a non-empty array of strings; got ${fusedConcerns === null ? 'null' : 'empty array'}.`,
+        'element_fusion_detected',
+        elementFusion
+      )
+    }
+  } else {
+    // fused === false
+    if (fusedConcerns !== null) {
+      throw new Layer1ValidationError(
+        'shape',
+        `Cross-field invariant violation at element_fusion_detected: fused === false requires fused_concerns === null; got ${fusedConcerns.length === 0 ? 'empty array' : 'non-empty array'}.`,
+        'element_fusion_detected',
+        elementFusion
+      )
+    }
+  }
+  const elementFusionDetected: ElementFusionDetected = { fused, fused_concerns: fusedConcerns }
+
   // ambiguity_notes
   const ambiguityNotes: string[] = assertArray(root.ambiguity_notes, 'ambiguity_notes').map(
     (entry, i) => assertString(entry, `ambiguity_notes[${i}]`)
@@ -716,6 +791,8 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
     stated_equanimity_signals: statedEquanimitySignals,
     motivation_stated: motivationStated,
     motivation_evidence: motivationEvidence,
+    // Added 2026-05-06 (M1-CP4e)
+    element_fusion_detected: elementFusionDetected,
     ambiguity_notes: ambiguityNotes,
   }
 }
@@ -730,7 +807,7 @@ Your output drives a deterministic Stoic mechanism engine (Layer 2). The quality
 
 EXTRACTION CONTRACT
 
-Read the input text carefully. For each of the eleven content categories below, extract everything the input names and return it in the specified shape.
+Read the input text carefully. For each of the twelve content categories below, extract everything the input names and return it in the specified shape.
 
 If a category is absent from the input, return an empty array for that category — do not omit the field.
 
@@ -804,6 +881,16 @@ CATEGORIES
     - motivation_evidence: array of {motivation, evidence}. One entry per stated motivation. Empty when motivation_stated is false.
     Default is motivation_stated: false — the typical case. Agents narrate what happened more often than they narrate why. "Because I care about her", "out of duty", "for the principle" are motivation phrases. Justifications for the action ("because she needs help") go in kathekon_factors.justification_offered, not here. Motivations are about the agent's *inner state*; justifications are about the *action's appropriateness*.
 
+12. element_fusion_detected — structural detection of element fusion (whether the input names multiple distinct concerns the engine cannot decompose).
+    - fused: boolean (true when the input enumerates multiple distinct concerns at high-level Layer 1 categories AND cannot be decomposed into separable entities suitable for downstream mechanisms; false otherwise).
+    - fused_concerns: array of strings naming the high-level concerns when fused: true; null when fused: false.
+    Default is {fused: false, fused_concerns: null} — the typical case. Most inputs name one primary concern even when secondary concerns are present in the background. Fusion is reserved for the structurally undecidable case where the engine cannot pick a primary entity to reason about.
+    Indicators of fusion: rapid topic-shifting within a single sentence; multiple distinct emotional anchors with no narrative thread connecting them; the agent appearing to enumerate concerns rather than reason about one of them ("I've got work deadlines, my mother's health, the town meeting, and I haven't slept all week").
+    When uncertain, prefer fused: false. Tier 1 force-clarification halts the engine and demands a clarification turn from the practitioner; over-firing produces a clunky workflow. Under-firing produces an impoverished assessment the practitioner can correct via re-submission.
+    Distinct from multiple oikeiosis_circles_engaged: an input that engages household + local_community is the typical multi-circle case, NOT fusion. Fusion fires when the *agent's narrative* enumerates concerns without committing to a primary one.
+    Distinct from ambiguity_notes: ambiguity_notes records *within-field* uncertainty (a passion that could be eros or pothos); element_fusion_detected records *across-field* structural undecidability.
+    When fused: true, fused_concerns lists the concerns drawn from the agent's verbatim phrasing where possible (paraphrased to a concise label otherwise — e.g. ["work deadlines", "my mother's health", "the town meeting"]). When fused: false, fused_concerns MUST be null (not an empty array).
+
 OUTPUT
 
 Return ONLY valid JSON conforming to Layer1Schema. No markdown. No commentary outside the JSON.
@@ -842,6 +929,7 @@ Return ONLY valid JSON conforming to Layer1Schema. No markdown. No commentary ou
   ],
   "motivation_stated": false,
   "motivation_evidence": [],
+  "element_fusion_detected": {"fused": false, "fused_concerns": null},
   "ambiguity_notes": [
     "passions_present[0].sub_species: could be eros or pothos"
   ]

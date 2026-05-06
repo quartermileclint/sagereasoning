@@ -129,6 +129,22 @@ export type IntakeTriggerCode =
 
 export type DeferralStatus = 'open' | 'closed'
 
+// Added 2026-05-06 (M1-CP4e) — AC-13 Tier 1 force-clarification trigger vocabulary per ADR-008 §3.5
+
+/** Engine-level Tier 1 trigger codes per D13. Surface-level Tier 1 codes (per D13's
+ *  surface-level table) are out of scope for `/api/reason` because `/api/reason` has
+ *  no consumer-specific input fields beyond `text`; surface-level codes engage at
+ *  M2/M3/M4 consumers' own ADRs. */
+export type Tier1TriggerCode =
+  | 'ELEMENT_FUSION'      // Layer 1; fired by element_fusion_detected.fused === true
+  | 'SCOPE_AMBIGUITY'     // Layer 2 / Position 6 (oikeiosis_stage)
+  | 'TEMPORAL_AMBIGUITY'  // Layer 2 / Position 2 (passion_root_detection)
+
+/** Where in the engine sequencing the Tier 1 trigger fired. Used for diagnostics +
+ *  meta logging + harness coverage. The orchestrator emits this on the Tier 1
+ *  response's `meta.fired_at_position` field per ADR-008 §2. */
+export type Tier1FiredAtPosition = 'layer1' | 'position-2' | 'position-6'
+
 /** Layer 2's classification of motivation underlying a praxis-stage action.
  *  - 'virtue_explicit' — the agent named virtue-aligned motivation (e.g., "for the principle").
  *  - 'virtue_inferred' — Layer 2 inferred virtue alignment from structural features
@@ -339,6 +355,35 @@ export interface IntakeClarifications {
   /** Tier 3 OPEN_DEFERRAL entries produced this assessment. Empty when no Tier 3
    *  triggers fire. */
   open_deferrals: OpenDeferralEntry[]
+}
+
+// Added 2026-05-06 (M1-CP4e) — AC-13 Tier 1 force-clarification interface per ADR-008 §3.5
+
+/** A force-clarification trigger fired by the engine. The orchestrator (per ADR-008
+ *  §5) inspects this — if non-null, the engine halts at the named position, Layer 3
+ *  is not called, and the route emits a force-clarification response per ADR-008 §2.
+ *  When null, the engine proceeds normally and Layer 2 produces a full assessment.
+ *  Tier 1 is engine-flow-control, NOT a field on Layer2Assessment — it is returned
+ *  separately by `detectTier1Trigger` and (for Position 2 / Position 6) signalled by
+ *  `applyMechanisms` via a thrown sentinel or a dedicated return-shape extension
+ *  (per §3.10 below). The orchestrator dispatches Tier 1 fires before Layer 3. */
+export interface Tier1Trigger {
+  /** The engine-level trigger code per Tier1TriggerCode. */
+  trigger_code: Tier1TriggerCode
+  /** The slot-filled question text in English, ready for the client to render
+   *  verbatim. Per D13 stems; pre-D-A16 alt-3 derived. */
+  question_text: string
+  /** The d-a16 catalogue stem ID once promoted; null pre-promotion. Allows R7
+   *  source-fidelity verification of the stem against the canonical catalogue. */
+  stem_id: string | null
+  /** The resolved slot variables. Surfaced for diagnostics + for clients who wish
+   *  to re-render the question with their own template (R10 skill marketplace
+   *  consumers). For Tier 1 stems with no slots (SCOPE_AMBIGUITY, TEMPORAL_AMBIGUITY
+   *  per D13), this is an empty object. For ELEMENT_FUSION, contains
+   *  LIST_OF_FUSED_CONCERNS as a comma-separated string. */
+  slot_fills: Record<string, string>
+  /** Where in the engine sequencing the trigger fired. */
+  fired_at_position: Tier1FiredAtPosition
 }
 
 // =============================================================================
@@ -1360,6 +1405,294 @@ CONVENTION_SUBSTITUTION_DESCRIPTION =
 
 **Cross-reference to mechanisms.** STATED_OPERATIVE_CONFLICT consumes outputs from §3.3 (oikeiosis); STATED_EQUANIMITY_UNVERIFIED consumes §3.2 (passion_diagnosis); EUPATHEIA_BOUNDARY consumes Layer 1's `eupatheia_candidates` directly (no upstream Layer 2 dependency); PRAXIS_MOTIVATION_AMBIGUITY consumes §3.7.1 (katorthoma_proximity) + §3.7.3 (virtue_domains_engaged) + Layer 1's `causal_stage_evidence` and `motivation_stated`.
 
+#### 3.10 Tier 1 force-clarification triggers (added 2026-05-06, M1-CP4e)
+
+**Source citations:** `/adopted/adr/2026-05-06-multi-turn-input-flow-tier-1.md` (ADR-008 — the design ADR this section implements); `/adopted/rag-mentor-alt3/three-tier-intake.md` (D13 — engine-level Tier 1 trigger catalogue with full stems); `/adopted/ADR-RAG-MENTOR-ALT3-01-translation-sandwich-deterministic-engine.md` AC-13 (the architectural commitment); `/adopted/rag-mentor-alt3/d-a16-catalogue.md` (canonical stem source post-promotion; alt-3 derived pre-promotion).
+
+**Architectural intent.** Per ADR-008 §1, Tier 1 force-clarification is engine-flow-control, NOT a field on `Layer2Assessment`. When a Tier 1 trigger fires, the engine halts at the firing position; subsequent positions do not run; Layer 3 is not called. The orchestrator (per ADR-008 §5) emits a force-clarification response shape (`clarification_required: true` + `Tier1Trigger` payload + opaque continuation token); the client renders the question, gathers the answer, re-submits the augmented input + token; the engine starts fresh from Position 1.
+
+This contrasts with Tier 2 + Tier 3 (§3.9 above): those produce *additions to* `Layer2Assessment.intake_clarifications` while the full assessment proceeds. Tier 1 short-circuits the assessment entirely.
+
+**Three trigger surfaces:**
+
+| Trigger code | Layer | Surface |
+|---|---|---|
+| `ELEMENT_FUSION` | Layer 1 | Detected upstream of Layer 2 by `element_fusion_detected.fused === true` (per ADR-005 §3.12). Detected via the new exported function `detectTier1Trigger(schema)` BEFORE `applyMechanisms` is called. |
+| `TEMPORAL_AMBIGUITY` | Layer 2 / Position 2 | Detected inside `applyMechanisms` at the passion_root_detection step (Position 2 in `applyMechanisms` execution order — the second mechanism after control_filter). Short-circuits Layer 2 with the trigger flag. |
+| `SCOPE_AMBIGUITY` | Layer 2 / Position 6 | Detected inside `applyMechanisms` at the oikeiosis_stage step (Position 6 in `applyMechanisms` execution order). Short-circuits Layer 2 with the trigger flag. |
+
+**Position numbering note.** "Position N" refers to the mechanism's place in the `applyMechanisms` execution sequence, not to the §3.X exposition order. The execution order in `applyMechanisms` (set at M1-CP2 implementation, preserved across M1-CP4b/4c/4e) is: Position 1 = control_filter (§3.1); Position 2 = passion_diagnosis with passion_root_detection sub-step (§3.2); Position 3-5 = additional sub-steps within passion_diagnosis + value_assessment + kathekon_assessment; Position 6 = oikeiosis with oikeiosis_stage sub-step (§3.3); Position 7+ = iterative_refinement + derived fields. The numbering reflects the canonical Stoic-mechanism sequencing where prohairesis examination precedes passion diagnosis, which precedes social-circle deliberation. The implementation may collapse some Positions into combined steps; the harness Phase 4 + Phase 6 verifies each trigger fires at the documented position regardless of internal sub-step grouping.
+
+**Module surface — new exported function:**
+
+```typescript
+/** Detects upstream-most (Layer 1) Tier 1 triggers. Runs before applyMechanisms.
+ *  Returns the Tier1Trigger when fusion is detected; null otherwise. */
+export function detectTier1Trigger(schema: Layer1Schema): Tier1Trigger | null
+```
+
+The function inspects `schema.element_fusion_detected.fused`. When `true`, it constructs a `Tier1Trigger` with `trigger_code: 'ELEMENT_FUSION'`, renders the question_text by slot-filling LIST_OF_FUSED_CONCERNS from `schema.element_fusion_detected.fused_concerns` (comma-separated with Oxford "and" before final), populates `slot_fills`, and sets `fired_at_position: 'layer1'`. When `false`, returns null and the orchestrator proceeds to `applyMechanisms`.
+
+**Algorithm — `detectTier1Trigger`:**
+
+```
+function detectTier1Trigger(schema: Layer1Schema): Tier1Trigger | null:
+  if schema.element_fusion_detected.fused == true:
+    concerns = schema.element_fusion_detected.fused_concerns
+    if concerns == null OR concerns.length == 0:
+      throw new Layer2Error("element_fusion_detected.fused === true but " +
+                            "fused_concerns is null/empty — cross-field invariant " +
+                            "violation. Validator should have caught this.")
+    list_str = formatConcernsList(concerns)  // "X, Y, and Z"
+    question_text = TIER1_STEMS.ELEMENT_FUSION
+                    .replace("[LIST_OF_FUSED_CONCERNS]", list_str)
+    return {
+      trigger_code: "ELEMENT_FUSION",
+      question_text: question_text,
+      stem_id: null,  // pre-D-A16 promotion; populated post-promotion
+      slot_fills: { "LIST_OF_FUSED_CONCERNS": list_str },
+      fired_at_position: "layer1"
+    }
+  return null
+
+function formatConcernsList(concerns: string[]): string:
+  if concerns.length == 1: return concerns[0]
+  if concerns.length == 2: return `${concerns[0]} and ${concerns[1]}`
+  # 3+ items with Oxford "and"
+  head = concerns.slice(0, -1).join(", ")
+  tail = concerns[concerns.length - 1]
+  return `${head}, and ${tail}`
+```
+
+**Module surface — short-circuits inside `applyMechanisms`:**
+
+`applyMechanisms` is amended to detect SCOPE_AMBIGUITY and TEMPORAL_AMBIGUITY at their respective Positions and return early via a discriminated-union extension. The function signature changes from:
+
+```typescript
+// Before M1-CP4e
+export function applyMechanisms(schema: Layer1Schema, options?: ApplyOptions): Layer2Assessment
+```
+
+to:
+
+```typescript
+// After M1-CP4e
+export function applyMechanisms(
+  schema: Layer1Schema,
+  options?: ApplyOptions
+): Layer2Assessment | { tier1_trigger: Tier1Trigger }
+```
+
+The discriminated union: when no Tier 1 fires, returns `Layer2Assessment` (the existing shape, unchanged). When Tier 1 fires at Position 2 or Position 6, returns `{ tier1_trigger: Tier1Trigger }`. The orchestrator type-narrows on the presence of `tier1_trigger` to dispatch.
+
+**Algorithm — Position 2 (TEMPORAL_AMBIGUITY) short-circuit:**
+
+The detection condition (per ADR-008 §3.3): the temporal axis (past / future) is undetermined for the dominant entity. The narrative references a past event ("that conversation") but the practitioner's continued concern is ambiguous between regret (past-orientation) and worry about consequences (future-orientation).
+
+```
+function detectTemporalAmbiguity(schema: Layer1Schema,
+                                  passion_diagnosis: PassionDiagnosis | null):
+                                  Tier1Trigger | null:
+  # Short-circuits at passion_root_detection (Position 2). passion_diagnosis is
+  # the partial result through the passion_root_detection step; null if Position 2
+  # is implemented as a single combined step that hasn't completed yet.
+
+  # Heuristic predicate: passion_root signal present BUT causal_stage_evidence
+  # spans both past-anchored stages (synkatathesis, horme on a past event) AND
+  # future-anchored stages (phantasia about a future-conditional outcome) without
+  # a dominant temporal anchor.
+  past_count = schema.causal_stage_evidence
+    .filter(s => isPastAnchored(s.evidence)).length
+  future_count = schema.causal_stage_evidence
+    .filter(s => isFutureAnchored(s.evidence)).length
+
+  has_passion_signal = schema.passions_present.length > 0
+  has_temporal_split = past_count >= 1 AND future_count >= 1
+  no_dominant_anchor = abs(past_count - future_count) <= 1
+
+  # Plus: at least one passion is in the regret/worry family (lupe.penthos /
+  # lupe.achos for past-anchored regret; phobos.agonia / phobos.thorybos for
+  # future-anchored worry). This filters cases where the temporal split is
+  # narratively obvious (e.g., reporting a sequence of events) from cases where
+  # the temporal anchor of the *concern* is the ambiguous element.
+  has_regret_or_worry = schema.passions_present.some(p =>
+    REGRET_PASSIONS.includes(p.sub_species) OR
+    WORRY_PASSIONS.includes(p.sub_species)
+  )
+
+  if has_passion_signal AND has_temporal_split AND no_dominant_anchor
+     AND has_regret_or_worry:
+    return {
+      trigger_code: "TEMPORAL_AMBIGUITY",
+      question_text: TIER1_STEMS.TEMPORAL_AMBIGUITY,
+      stem_id: null,  // pre-D-A16 promotion
+      slot_fills: {},  // stem is fully canonical; no slot-fills per D13
+      fired_at_position: "position-2"
+    }
+  return null
+
+function isPastAnchored(evidence: string): boolean:
+  lower = evidence.toLowerCase()
+  return PAST_TEMPORAL_MARKERS.some(m => lower.includes(m))
+
+function isFutureAnchored(evidence: string): boolean:
+  lower = evidence.toLowerCase()
+  return FUTURE_TEMPORAL_MARKERS.some(m => lower.includes(m))
+```
+
+Lookup tables for Position 2:
+
+```
+REGRET_PASSIONS = ["penthos", "achos", "eleos"]  // lupe sub-species anchored on past loss/harm
+
+WORRY_PASSIONS = ["agonia", "thorybos", "deima"]  // phobos sub-species anchored on future imminent
+
+PAST_TEMPORAL_MARKERS = [
+  "happened", "did", "said", "was", "were",
+  "yesterday", "last week", "last month", "last year",
+  "earlier", "before", "previously", "in the past",
+  "i used to", "we used to", "i had", "we had",
+  "should have", "shouldn't have", "could have",
+  "i wish i had", "i wish i hadn't"
+]
+
+FUTURE_TEMPORAL_MARKERS = [
+  "will", "going to", "might", "could", "may",
+  "tomorrow", "next week", "next month", "next year",
+  "later", "soon", "if i", "if we", "what if",
+  "i'm worried", "i fear", "i'm afraid", "what they'll do",
+  "what they might do", "what's going to"
+]
+```
+
+**Algorithm — Position 6 (SCOPE_AMBIGUITY) short-circuit:**
+
+The detection condition (per ADR-008 §3.2): Mechanism 6 (oikeiosis_stage) cannot map the action's target to a canonical oikeiosis circle because the narrative names an action ("I responded to them") without identifying the target's relational role.
+
+```
+function detectScopeAmbiguity(schema: Layer1Schema,
+                               control_filter: ControlFilter | null):
+                               Tier1Trigger | null:
+  # Short-circuits at oikeiosis_stage (Position 6). Runs after control_filter
+  # has been computed (Position 1) so we can read which actions / targets the
+  # agent named.
+
+  # Heuristic predicate: schema.oikeiosis_circles_engaged is empty OR contains
+  # only self_preservation, BUT the schema names an action involving another
+  # entity ("I responded", "I told them", "I said to") AND that other entity
+  # is not classified into a circle.
+  has_action = schema.causal_stage_evidence
+    .some(s => s.stage == "praxis" OR s.stage == "horme")
+
+  has_other_referent = OTHER_REFERENT_MARKERS.some(m =>
+    schema.causal_stage_evidence.some(s => s.evidence.toLowerCase().includes(m)) OR
+    schema.passions_present.some(p => p.evidence.toLowerCase().includes(m))
+  )
+
+  has_no_relational_circle =
+    schema.oikeiosis_circles_engaged.length == 0 OR
+    (schema.oikeiosis_circles_engaged.length == 1 AND
+     schema.oikeiosis_circles_engaged[0].circle == "self_preservation")
+
+  if has_action AND has_other_referent AND has_no_relational_circle:
+    return {
+      trigger_code: "SCOPE_AMBIGUITY",
+      question_text: TIER1_STEMS.SCOPE_AMBIGUITY,
+      stem_id: null,
+      slot_fills: {},
+      fired_at_position: "position-6"
+    }
+  return null
+```
+
+Lookup table for Position 6:
+
+```
+OTHER_REFERENT_MARKERS = [
+  // Pronouns indicating an unspecified other
+  "they", "them", "their", "the others", "the other",
+  "him", "her", "his", "hers",
+  "to him", "to her", "to them",
+  // Generic relational markers without circle assignment
+  "the person", "this person", "that person",
+  "someone", "somebody", "everyone",
+  // Action-direction phrases
+  "responded to", "replied to", "said to", "told them",
+  "wrote to", "called", "messaged"
+]
+```
+
+**Tier 1 stems lookup table (per D13, pre-D-A16 transitional):**
+
+```
+TIER1_STEMS = {
+  ELEMENT_FUSION:
+    "There are several distinct concerns here — [LIST_OF_FUSED_CONCERNS]. " +
+    "Before I work through this with you, can you tell me which one of these " +
+    "is most centrally on your mind right now?",
+
+  SCOPE_AMBIGUITY:
+    "Who else was affected by this, if anyone? And what role do they play in " +
+    "your life — colleague, family member, someone you don't know well?",
+
+  TEMPORAL_AMBIGUITY:
+    "When you think about this situation right now, are you more concerned " +
+    "about something that's already happened, or something you're worried " +
+    "might happen?"
+}
+```
+
+Source: `/adopted/rag-mentor-alt3/three-tier-intake.md` (D13). Stems rendered verbatim; no paraphrase. R7 source fidelity. Post-D-A16 promotion, the table values remain stable and the catalogue ID populates `stem_id` on each Tier1Trigger.
+
+**Wiring inside `applyMechanisms`:**
+
+```
+function applyMechanisms(schema: Layer1Schema,
+                          options?: ApplyOptions):
+                          Layer2Assessment | { tier1_trigger: Tier1Trigger }:
+  # Position 1 — control_filter
+  control_filter = classifyControlFilter(schema.control_filter_elements)
+
+  # Position 2 — passion_diagnosis (with passion_root_detection sub-step)
+  passion_diagnosis = diagnosePassions(schema.passions_present,
+                                        schema.causal_stage_evidence)
+
+  # Position 2 short-circuit — TEMPORAL_AMBIGUITY
+  temporal_trigger = detectTemporalAmbiguity(schema, passion_diagnosis)
+  if temporal_trigger != null:
+    return { tier1_trigger: temporal_trigger }
+
+  # Positions 3-5 — value_assessment, kathekon_assessment, intermediate steps
+  value_assessment = assessValue(schema.value_categories_at_stake)
+  kathekon_assessment = assessKathekon(schema.kathekon_factors)
+
+  # Position 6 — oikeiosis (with oikeiosis_stage sub-step)
+  oikeiosis = assessOikeiosis(schema.oikeiosis_circles_engaged,
+                               schema.kathekon_factors,
+                               schema.value_categories_at_stake)
+
+  # Position 6 short-circuit — SCOPE_AMBIGUITY
+  scope_trigger = detectScopeAmbiguity(schema, control_filter)
+  if scope_trigger != null:
+    return { tier1_trigger: scope_trigger }
+
+  # Positions 7+ — iterative_refinement + derived fields + intake_clarifications
+  # (the existing M1-CP2 + M1-CP4b path, unchanged)
+  ...
+
+  return assembleLayer2Assessment(...)  // existing path
+```
+
+ELEMENT_FUSION is NOT detected inside `applyMechanisms` — it is detected by `detectTier1Trigger` upstream (the orchestrator runs `detectTier1Trigger` after Layer 1 completes and before `applyMechanisms` is called). When ELEMENT_FUSION fires, `applyMechanisms` is not called for the request.
+
+**Cross-reference to Tier 2 + Tier 3.** Tier 1 supersedes Tier 2 + Tier 3 (per ADR-008 §3.2). When Tier 1 fires at Position 2 or Position 6, `applyMechanisms` returns the trigger and never reaches the M1-CP4b §3.9 intake_clarification detection step. The standard `intake_clarifications.open_deferrals` and `soft_clarifications` are not produced for the request. The orchestrator's response shape for Tier 1 is `Tier1Trigger`, not `Layer2Assessment.intake_clarifications`.
+
+**Determinism review:** all predicates use deterministic substring matching, lookup-table reads, and array iteration in input order. `formatConcernsList` is a pure function over array length. Two calls with the same `Layer1Schema` produce the same `Tier1Trigger | null` result (or the same `{ tier1_trigger: ... }` short-circuit return).
+
+**Calibration toward under-firing.** Per ADR-008's risk note (§"Risks named — Tier 1 over-firing"), the predicates are calibrated conservatively. TEMPORAL_AMBIGUITY requires *both* a temporal split *and* a regret/worry passion to fire — narrative ambiguity alone does not trigger. SCOPE_AMBIGUITY requires an action *and* an unspecified-other referent *and* the absence of a relational circle — naming an action without naming the target circle does not alone trigger. M1-CP5 real-traffic data refines these thresholds.
+
+**Cross-reference to ADR-008 §6 (R20a perimeter preservation).** Tier 1 detection runs server-side after the route's R20a perimeter line. The Tier 1 response is emitted by the orchestrator; the route's distress check has already fired by that point. On the second turn, the augmented input is distress-checked again before token validation. The Tier 1 mechanic does not weaken the perimeter.
+
 ### 4. Idempotency guarantee
 
 `applyMechanisms` is **idempotent**: given the same `Layer1Schema` input, two calls produce byte-for-byte equal outputs across:
@@ -1398,6 +1731,8 @@ Module exports `validateLayer2Assessment(parsed: unknown): Layer2Assessment` fol
 6. Returns the input narrowed to `Layer2Assessment` on success; throws `Layer2ValidationError` on failure.
 
 The validator is primarily defensive: under correct module behaviour, `applyMechanisms` always returns a valid `Layer2Assessment`. The validator catches programming-error regressions during refactor and supports JSON round-trip safety in the harness.
+
+**Note on Tier 1 (M1-CP4e).** Tier 1 force-clarification triggers (per §3.10) are NOT validated here because they are not fields on `Layer2Assessment` — they are an alternative return shape from `applyMechanisms` (the discriminated union `Layer2Assessment | { tier1_trigger: Tier1Trigger }`). The orchestrator (per ADR-008 §5) type-narrows on the presence of `tier1_trigger` to dispatch. A separate function `validateTier1Trigger(parsed: unknown): Tier1Trigger` validates the trigger shape: asserts `trigger_code ∈ Tier1TriggerCode`, `question_text` is a non-empty string, `stem_id` is null or a non-empty string, `slot_fills` is an object whose values are strings, and `fired_at_position ∈ Tier1FiredAtPosition`. The harness Phase 4 + Phase 6 + Phase 11 + Phase 12 (M1-CP4e additions) exercise this validation across F7/F8/F9 fixtures.
 
 ### 6. Citations summary
 
@@ -1468,6 +1803,8 @@ If the founder rejects ADR-006 or requests substantial edits, the draft is revis
 - **2026-05-04 (initial Adoption, Sub-session M1-CP2)** — drafted in `/drafts/adr/` after founder selected "all recommended" across the six load-bearing decisions surfaced at session open, founder-approved verbatim ("approve as drafted"), moved to `/adopted/adr/`. Defines `Layer2Assessment` TypeScript type with all per-mechanism output shapes; specifies per-mechanism deterministic algorithm in pseudocode with lookup tables in full; cites canonical Stoic primary sources per mechanism; names the idempotency guarantee with verification approach (Phase 3 of harness this session); names the validator pattern; surfaces the dropped kathekon "proportionate" rule explicitly as an implied follow-on decision under Decision 1's recommendation.
 
 - **2026-05-06 (cross-session amendment, Sub-session M1-CP4b)** — M1-CP4b adds intake-clarification trigger detection to Layer 2 for AC-13 (Tier 2 soft-clarification) + AC-14 (Tier 3 deterministic-withhold) per `D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05`. Schema additions (§2): three new vocabulary types (`IntakeTriggerCode`, `DeferralStatus`, `MotivationClassification`); three new interfaces (`SoftClarification`, `OpenDeferralEntry`, `IntakeClarifications`); `motivation_classification` field added to `IterativeRefinement`; `intake_clarifications` field added to `Layer2Assessment`. All additive — assessment version remains `layer2-assessment-v1`. Algorithm additions (§3): new §3.9 "Intake clarification triggers" specifies four trigger detection steps in fixed order (STATED_OPERATIVE_CONFLICT, STATED_EQUANIMITY_UNVERIFIED, EUPATHEIA_BOUNDARY, PRAXIS_MOTIVATION_AMBIGUITY); cross-references back into §3.3 (oikeiosis), §3.2 (passion_diagnosis), §3.7.1 (katorthoma_proximity); lookup tables for eupatheia display names + descriptions + passion counterparts + virtue descriptions + convention substitution description. Validator (§5) extended to assert intake_clarifications shape and enum membership. Citation summary (§6) extended with the §3.9 sources. Phase 4 fixture coverage extended (per ADR-005 §8.1 F5/F6 additions): F5 must produce non-empty `open_deferrals` (EUPATHEIA_BOUNDARY); F6 must produce non-empty `soft_clarifications` (STATED_EQUANIMITY_UNVERIFIED); F1–F4 must produce empty intake_clarifications when no triggers fire (default-empty discipline). Tier 1 force-clarification triggers (`ELEMENT_FUSION` at Layer 1, `SCOPE_AMBIGUITY` at Position 6 / oikeiosis, `TEMPORAL_AMBIGUITY` at Position 2 / passion_diagnosis) explicitly out of scope at this amendment — those engage at M1-CP4d/4e. Standard-tier governance amendment under 0d-ii (documentation; no production touch). Module update + harness re-verification scheduled for M1-CP4c.
+
+- **2026-05-06 (cross-session amendment, Sub-session M1-CP4e — companion to ADR-008)** — M1-CP4e adds AC-13 Tier 1 force-clarification trigger detection at Layer 2 per ADR-008 §3.5. Schema additions (§2): two new vocabulary types (`Tier1TriggerCode` with three values — `ELEMENT_FUSION`, `SCOPE_AMBIGUITY`, `TEMPORAL_AMBIGUITY` — and `Tier1FiredAtPosition` with three values — `'layer1'`, `'position-2'`, `'position-6'`); one new interface `Tier1Trigger` (trigger_code + question_text + stem_id + slot_fills + fired_at_position). Tier 1 is engine-flow-control, NOT a field on `Layer2Assessment`; instead, `applyMechanisms`'s return type changes to a discriminated union `Layer2Assessment | { tier1_trigger: Tier1Trigger }`. The existing Layer2Assessment shape is preserved unchanged (assessment version remains `layer2-assessment-v1`). Algorithm additions (§3): new §3.10 "Tier 1 force-clarification triggers" specifies (a) the new exported function `detectTier1Trigger(schema: Layer1Schema): Tier1Trigger | null` that runs upstream of `applyMechanisms` and detects ELEMENT_FUSION via `schema.element_fusion_detected.fused === true`; (b) a Position 2 short-circuit detecting TEMPORAL_AMBIGUITY (passion_root signal + temporal split + regret/worry passion family — calibrated toward under-firing per ADR-008's risk note); (c) a Position 6 short-circuit detecting SCOPE_AMBIGUITY (action present + unspecified-other referent + no relational circle — calibrated toward under-firing); (d) Position numbering note clarifying that "Position N" refers to `applyMechanisms` execution order (Position 1 = control_filter, Position 2 = passion_root_detection, Position 6 = oikeiosis_stage); (e) lookup tables for canonical Tier 1 stems per D13 (TIER1_STEMS) + temporal markers (PAST_TEMPORAL_MARKERS, FUTURE_TEMPORAL_MARKERS) + regret/worry passion families (REGRET_PASSIONS, WORRY_PASSIONS) + other-referent markers (OTHER_REFERENT_MARKERS); (f) cross-reference to Tier 2 + Tier 3 (Tier 1 supersedes per ADR-008 §3.2 — when Tier 1 fires, intake_clarifications are not produced). Validator (§5) extended with a note that Tier 1 is an alternative return shape (not a Layer2Assessment field) plus a separate `validateTier1Trigger` function. Citation summary (§6) gains §3.10 sources (ADR-008 + D13 + AC-13 + d-a16 catalogue). Phase 4 + 6 fixture coverage extended (per ADR-005 §8.1 F7/F8/F9 additions in the same M1-CP4e amendment cycle): F7 (element-fusion case) must produce ELEMENT_FUSION via `detectTier1Trigger` upstream of `applyMechanisms`; F8 (scope-ambiguity case) must produce SCOPE_AMBIGUITY short-circuit at Position 6; F9 (temporal-ambiguity case) must produce TEMPORAL_AMBIGUITY short-circuit at Position 2. F1–F6 must NOT fire any Tier 1 trigger (baseline preserved). The orchestrator + route + harness extension are part of M1-CP4e (Critical-tier session under PR6 + AC5; the route amendment touches the R20a perimeter and adds a new env var per ADR-008 §4). The ADR amendment itself is the documentation surface within the Critical session (governance-tier inside the Critical perimeter). Module update + orchestrator extension + route amendment + harness extension are split into Sub-session M1-CP4e-A (modules + ADRs + harness — no deploy) and Sub-session M1-CP4e-B (deployment under Critical Change Protocol) per the founder-confirmed split at session midpoint.
 
 ---
 

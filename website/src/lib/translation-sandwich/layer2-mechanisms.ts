@@ -47,6 +47,8 @@ import type {
   AgentNamedPosition,
   // Added 2026-05-06 (M1-CP4b) — for §3.9 lookup-table typing
   EupatheiaShape,
+  // Added 2026-05-06 (M1-CP4e) — for §3.10 Tier 1 ELEMENT_FUSION detection
+  ElementFusionDetected,
 } from './layer1-extractor'
 
 // Re-export Layer 1 vocabularies that Layer 3 + harness will consume.
@@ -58,6 +60,8 @@ export type {
   Indifferent,
   AgentFraming,
   AgentNamedPosition,
+  // Added 2026-05-06 (M1-CP4e) — re-exported for orchestrator + harness consumption
+  ElementFusionDetected,
 }
 
 // ============================================================================
@@ -125,6 +129,19 @@ export type MotivationClassification =
   | 'convention_inferred'
   | 'unclear_pending_clarification'
   | null
+
+// Added 2026-05-06 (M1-CP4e) — AC-13 Tier 1 force-clarification vocabulary per ADR-006 §3.10 + ADR-008 §3.5
+
+/** Engine-level Tier 1 trigger codes per D13. Surface-level Tier 1 codes (per D13's
+ *  surface-level table) are out of scope for `/api/reason`. */
+export type Tier1TriggerCode =
+  | 'ELEMENT_FUSION'      // Layer 1; fired by element_fusion_detected.fused === true
+  | 'SCOPE_AMBIGUITY'     // Layer 2 / Position 6 (oikeiosis_stage)
+  | 'TEMPORAL_AMBIGUITY'  // Layer 2 / Position 2 (passion_root_detection)
+
+/** Where in the engine sequencing the Tier 1 trigger fired. Used for diagnostics +
+ *  meta logging + harness coverage. */
+export type Tier1FiredAtPosition = 'layer1' | 'position-2' | 'position-6'
 
 // ============================================================================
 // PER-MECHANISM OUTPUT SHAPES (per ADR-006 §2)
@@ -281,6 +298,41 @@ export interface IntakeClarifications {
   /** Tier 3 OPEN_DEFERRAL entries produced this assessment. Empty when no Tier 3
    *  triggers fire. */
   open_deferrals: OpenDeferralEntry[]
+}
+
+// Added 2026-05-06 (M1-CP4e) — AC-13 Tier 1 force-clarification interface per ADR-006 §3.10 + ADR-008 §3.5
+
+/** A force-clarification trigger fired by the engine. The orchestrator (per ADR-008
+ *  §5) inspects this — if non-null, the engine halts at the named position, Layer 3
+ *  is not called, and the route emits a force-clarification response per ADR-008 §2.
+ *  When null, the engine proceeds normally and Layer 2 produces a full assessment.
+ *
+ *  Tier 1 is engine-flow-control, NOT a field on Layer2Assessment. detectTier1Trigger
+ *  returns this for ELEMENT_FUSION (Layer 1 upstream); applyMechanisms returns
+ *  { tier1_trigger: Tier1Trigger } as one branch of its discriminated-union return
+ *  type for SCOPE_AMBIGUITY (Position 6) + TEMPORAL_AMBIGUITY (Position 2). */
+export interface Tier1Trigger {
+  /** The engine-level trigger code per Tier1TriggerCode. */
+  trigger_code: Tier1TriggerCode
+  /** The slot-filled question text in English, ready for the client to render
+   *  verbatim. Per D13 stems; pre-D-A16 alt-3 derived. */
+  question_text: string
+  /** The d-a16 catalogue stem ID once promoted; null pre-promotion. */
+  stem_id: string | null
+  /** The resolved slot variables. Empty object for SCOPE_AMBIGUITY + TEMPORAL_AMBIGUITY
+   *  (canonical stems with no slots). For ELEMENT_FUSION, contains
+   *  LIST_OF_FUSED_CONCERNS as a comma-separated string. */
+  slot_fills: Record<string, string>
+  /** Where in the engine sequencing the trigger fired. */
+  fired_at_position: Tier1FiredAtPosition
+}
+
+/** Discriminated-union return type for applyMechanisms (post M1-CP4e). When Tier 1
+ *  fires at Position 2 or Position 6, applyMechanisms returns this shape; the
+ *  orchestrator type-narrows on the presence of `tier1_trigger`. ELEMENT_FUSION is
+ *  detected upstream by detectTier1Trigger and never reaches applyMechanisms. */
+export interface Tier1ShortCircuit {
+  tier1_trigger: Tier1Trigger
 }
 
 // ============================================================================
@@ -1700,7 +1752,283 @@ function composeLayer2AmbiguityNotes(
 }
 
 // ============================================================================
-// TOP-LEVEL applyMechanisms (per ADR-006 §1)
+// TIER 1 FORCE-CLARIFICATION (added 2026-05-06, M1-CP4e)
+// Per ADR-006 §3.10 + ADR-008 §3.5. Tier 1 is engine-flow-control: when fired,
+// the engine halts at the named position; Layer 3 is not called; the orchestrator
+// emits a force-clarification response per ADR-008 §2.
+// ============================================================================
+
+/** Canonical D13 stems for the three engine-level Tier 1 triggers. Pre-D-A16
+ *  promotion: alt-3 derived. Post-promotion: corpus-traced via stem_id. The stem
+ *  text remains stable across promotion. */
+const TIER1_STEMS: Record<Tier1TriggerCode, string> = {
+  ELEMENT_FUSION:
+    'There are several distinct concerns here — [LIST_OF_FUSED_CONCERNS]. ' +
+    'Before I work through this with you, can you tell me which one of these ' +
+    'is most centrally on your mind right now?',
+  SCOPE_AMBIGUITY:
+    'Who else was affected by this, if anyone? And what role do they play in ' +
+    "your life — colleague, family member, someone you don't know well?",
+  TEMPORAL_AMBIGUITY:
+    'When you think about this situation right now, are you more concerned ' +
+    "about something that's already happened, or something you're worried " +
+    'might happen?',
+}
+
+/** Lupe sub-species anchored on past loss / harm. TEMPORAL_AMBIGUITY requires at
+ *  least one of these (or a WORRY_PASSION) to be present in passions_present —
+ *  filters narrative ambiguity from concern-anchor ambiguity. */
+const REGRET_PASSIONS: ReadonlySet<PassionSubSpecies> = new Set<PassionSubSpecies>([
+  'penthos',
+  'achos',
+  'eleos',
+])
+
+/** Phobos sub-species anchored on future imminent harm. */
+const WORRY_PASSIONS: ReadonlySet<PassionSubSpecies> = new Set<PassionSubSpecies>([
+  'agonia',
+  'thorybos',
+  'deima',
+])
+
+/** Past-anchored temporal markers in evidence text. Calibrated toward under-firing
+ *  per ADR-008 risk note (over-firing produces clunky workflow). */
+const PAST_TEMPORAL_MARKERS: ReadonlyArray<string> = [
+  'happened',
+  'did',
+  'said',
+  'was',
+  'were',
+  'yesterday',
+  'last week',
+  'last month',
+  'last year',
+  'earlier',
+  'before',
+  'previously',
+  'in the past',
+  'i used to',
+  'we used to',
+  'i had',
+  'we had',
+  'should have',
+  "shouldn't have",
+  'could have',
+  'i wish i had',
+  "i wish i hadn't",
+]
+
+/** Future-anchored temporal markers in evidence text. */
+const FUTURE_TEMPORAL_MARKERS: ReadonlyArray<string> = [
+  'will',
+  'going to',
+  'might',
+  'could',
+  'may',
+  'tomorrow',
+  'next week',
+  'next month',
+  'next year',
+  'later',
+  'soon',
+  'if i',
+  'if we',
+  'what if',
+  "i'm worried",
+  'i fear',
+  "i'm afraid",
+  "what they'll do",
+  'what they might do',
+  "what's going to",
+]
+
+/** Markers indicating an unspecified-other referent without a relational role.
+ *  SCOPE_AMBIGUITY fires when an action involves an other-referent AND no
+ *  oikeiosis circle is engaged (or only self_preservation). */
+const OTHER_REFERENT_MARKERS: ReadonlyArray<string> = [
+  // Pronouns indicating an unspecified other
+  ' they ',
+  ' them ',
+  ' their ',
+  'the others',
+  'the other',
+  ' him ',
+  ' her ',
+  ' his ',
+  ' hers ',
+  'to him',
+  'to her',
+  'to them',
+  // Generic relational markers without circle assignment
+  'the person',
+  'this person',
+  'that person',
+  'someone',
+  'somebody',
+  'everyone',
+  // Action-direction phrases
+  'responded to',
+  'replied to',
+  'said to',
+  'told them',
+  'wrote to',
+  'called',
+  'messaged',
+]
+
+/**
+ * Format a list of fused concerns as a comma-separated string with Oxford "and"
+ * before the final item. Used to slot-fill LIST_OF_FUSED_CONCERNS in the
+ * ELEMENT_FUSION stem.
+ *
+ * @param concerns - non-empty array of concern labels
+ * @returns formatted string ("X", "X and Y", "X, Y, and Z")
+ */
+function formatConcernsList(concerns: ReadonlyArray<string>): string {
+  if (concerns.length === 0) {
+    // Defensive: validator should have caught fused === true with empty array.
+    throw new Error(
+      'formatConcernsList: empty concerns array — cross-field invariant violation upstream'
+    )
+  }
+  if (concerns.length === 1) return concerns[0]
+  if (concerns.length === 2) return `${concerns[0]} and ${concerns[1]}`
+  const head = concerns.slice(0, -1).join(', ')
+  const tail = concerns[concerns.length - 1]
+  return `${head}, and ${tail}`
+}
+
+/**
+ * Detect upstream-most (Layer 1) Tier 1 trigger. Runs before applyMechanisms.
+ * Returns the Tier1Trigger when ELEMENT_FUSION is detected; null otherwise.
+ *
+ * Per ADR-006 §3.10 + ADR-008 §3.4 (companion ADR-005 amendment specifies the
+ * Layer 1 element_fusion_detected field this function consumes).
+ *
+ * @param schema - validated Layer1Schema
+ * @returns Tier1Trigger when fusion is detected; null otherwise
+ */
+export function detectTier1Trigger(schema: Layer1Schema): Tier1Trigger | null {
+  if (schema.element_fusion_detected.fused === true) {
+    const concerns = schema.element_fusion_detected.fused_concerns
+    if (concerns === null || concerns.length === 0) {
+      // Defensive: validator should have caught this; preserve a clear error.
+      throw new Error(
+        'detectTier1Trigger: element_fusion_detected.fused === true but ' +
+          'fused_concerns is null/empty. Cross-field invariant violation; ' +
+          'validateLayer1Schema should have caught this upstream.'
+      )
+    }
+    const listStr = formatConcernsList(concerns)
+    const questionText = TIER1_STEMS.ELEMENT_FUSION.replace(
+      '[LIST_OF_FUSED_CONCERNS]',
+      listStr
+    )
+    return {
+      trigger_code: 'ELEMENT_FUSION',
+      question_text: questionText,
+      stem_id: null, // pre-D-A16 promotion; populated post-promotion
+      slot_fills: { LIST_OF_FUSED_CONCERNS: listStr },
+      fired_at_position: 'layer1',
+    }
+  }
+  return null
+}
+
+/**
+ * Detect TEMPORAL_AMBIGUITY at Position 2 (passion_root_detection step).
+ *
+ * Calibrated toward under-firing: requires (a) at least one passion present, (b)
+ * causal_stage_evidence with both past-anchored AND future-anchored entries, (c)
+ * no dominant temporal anchor (|past_count - future_count| <= 1), (d) at least
+ * one passion in the regret-or-worry family. Narrative ambiguity alone does not
+ * trigger; the *concern-anchor* must be ambiguous.
+ *
+ * Per ADR-006 §3.10. Pure synchronous predicate; no I/O.
+ */
+function detectTemporalAmbiguity(schema: Layer1Schema): Tier1Trigger | null {
+  if (schema.passions_present.length === 0) return null
+
+  // Count past-vs-future anchored causal stage evidence.
+  let pastCount = 0
+  let futureCount = 0
+  for (const stage of schema.causal_stage_evidence) {
+    const lower = stage.evidence.toLowerCase()
+    if (PAST_TEMPORAL_MARKERS.some((m) => lower.includes(m))) {
+      pastCount += 1
+    }
+    if (FUTURE_TEMPORAL_MARKERS.some((m) => lower.includes(m))) {
+      futureCount += 1
+    }
+  }
+
+  const hasTemporalSplit = pastCount >= 1 && futureCount >= 1
+  if (!hasTemporalSplit) return null
+
+  const noDominantAnchor = Math.abs(pastCount - futureCount) <= 1
+  if (!noDominantAnchor) return null
+
+  const hasRegretOrWorry = schema.passions_present.some(
+    (p) =>
+      p.sub_species !== null &&
+      (REGRET_PASSIONS.has(p.sub_species) || WORRY_PASSIONS.has(p.sub_species))
+  )
+  if (!hasRegretOrWorry) return null
+
+  return {
+    trigger_code: 'TEMPORAL_AMBIGUITY',
+    question_text: TIER1_STEMS.TEMPORAL_AMBIGUITY,
+    stem_id: null,
+    slot_fills: {}, // canonical stem; no slots per D13
+    fired_at_position: 'position-2',
+  }
+}
+
+/**
+ * Detect SCOPE_AMBIGUITY at Position 6 (oikeiosis_stage step).
+ *
+ * Calibrated toward under-firing: requires (a) an action present (praxis or horme
+ * stage), (b) an unspecified-other referent in evidence ("them", "to them",
+ * "responded to", etc.), (c) the absence of a relational oikeiosis circle (none
+ * or only self_preservation).
+ *
+ * Per ADR-006 §3.10. Pure synchronous predicate; no I/O.
+ */
+function detectScopeAmbiguity(schema: Layer1Schema): Tier1Trigger | null {
+  // (a) action present
+  const hasAction = schema.causal_stage_evidence.some(
+    (s) => s.stage === 'praxis' || s.stage === 'horme'
+  )
+  if (!hasAction) return null
+
+  // (b) unspecified-other referent in evidence
+  const evidenceTexts: string[] = [
+    ...schema.causal_stage_evidence.map((s) => ` ${s.evidence.toLowerCase()} `),
+    ...schema.passions_present.map((p) => ` ${p.evidence.toLowerCase()} `),
+  ]
+  const hasOtherReferent = evidenceTexts.some((text) =>
+    OTHER_REFERENT_MARKERS.some((m) => text.includes(m))
+  )
+  if (!hasOtherReferent) return null
+
+  // (c) absence of relational circle
+  const circles = schema.oikeiosis_circles_engaged
+  const hasNoRelationalCircle =
+    circles.length === 0 ||
+    (circles.length === 1 && circles[0].circle === 'self_preservation')
+  if (!hasNoRelationalCircle) return null
+
+  return {
+    trigger_code: 'SCOPE_AMBIGUITY',
+    question_text: TIER1_STEMS.SCOPE_AMBIGUITY,
+    stem_id: null,
+    slot_fills: {},
+    fired_at_position: 'position-6',
+  }
+}
+
+// ============================================================================
+// TOP-LEVEL applyMechanisms (per ADR-006 §1, amended M1-CP4e per §3.10)
 // ============================================================================
 
 /**
@@ -1709,19 +2037,34 @@ function composeLayer2AmbiguityNotes(
  * Pure synchronous function. Same Layer1Schema input → byte-for-byte equal
  * Layer2Assessment output. No LLM, no I/O, no module state.
  *
+ * Post M1-CP4e: return type is a discriminated union. When a Tier 1 trigger
+ * fires at Position 2 (TEMPORAL_AMBIGUITY) or Position 6 (SCOPE_AMBIGUITY), the
+ * function returns `{ tier1_trigger: Tier1Trigger }` and short-circuits before
+ * subsequent mechanisms run. The orchestrator type-narrows on the presence of
+ * `tier1_trigger`. ELEMENT_FUSION is detected upstream by detectTier1Trigger
+ * and never reaches applyMechanisms.
+ *
  * @param schema  - Layer1Schema from layer1-extractor.ts
  * @param options - reserved for future use; ignored at CP2
- * @returns Layer2Assessment
+ * @returns Layer2Assessment | { tier1_trigger: Tier1Trigger }
  */
 export function applyMechanisms(
   schema: Layer1Schema,
   _options?: ApplyOptions
-): Layer2Assessment {
+): Layer2Assessment | Tier1ShortCircuit {
   // Mechanism 1 — control filter
   const cf = classifyControlFilter(schema.control_filter_elements)
 
   // Mechanism 2 — passion diagnosis
   const pd = diagnosePassions(schema.passions_present, schema.causal_stage_evidence)
+
+  // Position 2 short-circuit (M1-CP4e) — TEMPORAL_AMBIGUITY
+  // Per ADR-006 §3.10 + ADR-008 §3.3. Fires when the temporal axis of the
+  // practitioner's concern is undetermined (regret vs worry); halts the engine.
+  const temporalTrigger = detectTemporalAmbiguity(schema)
+  if (temporalTrigger !== null) {
+    return { tier1_trigger: temporalTrigger }
+  }
 
   // Mechanism 3 — oikeiosis
   const oik = assessOikeiosis(
@@ -1729,6 +2072,15 @@ export function applyMechanisms(
     schema.kathekon_factors,
     schema.value_categories_at_stake
   )
+
+  // Position 6 short-circuit (M1-CP4e) — SCOPE_AMBIGUITY
+  // Per ADR-006 §3.10 + ADR-008 §3.2. Fires when an action involves an
+  // unspecified-other referent and no relational circle is engaged; halts the
+  // engine.
+  const scopeTrigger = detectScopeAmbiguity(schema)
+  if (scopeTrigger !== null) {
+    return { tier1_trigger: scopeTrigger }
+  }
 
   // Mechanism 4 — value assessment
   const va = assessValue(schema.value_categories_at_stake)

@@ -41,7 +41,12 @@ import { createHash, randomUUID } from 'node:crypto'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 import { extractFeatures } from './layer1-extractor'
-import { applyMechanisms } from './layer2-mechanisms'
+import {
+  applyMechanisms,
+  detectTier1Trigger,
+  type Tier1Trigger,
+  type Layer2Assessment,
+} from './layer2-mechanisms'
 import {
   generateProse,
   generateFallbackProse,
@@ -148,13 +153,21 @@ type FailureCategory =
   | 'deadline_exceeded'
 
 interface SandwichRunResult {
-  output: unknown // The composed { extraction, assessment, prose, ... } shape (or null on failure)
+  output: unknown // The composed { extraction, assessment, prose, ... } shape OR a Tier 1 force-clarification shape (per ADR-008 §2). null on failure.
   error: FailureCategory | null
   layer1_latency_ms: number | null
   layer2_latency_ms: number | null
   layer3_latency_ms: number | null
   layer1_cost_usd_microcents: number | null
   layer3_cost_usd_microcents: number | null
+  // Added 2026-05-06 (M1-CP4e) — Tier 1 force-clarification surface per ADR-008 §2 + §3.10.
+  // When non-null, the engine halted at the named position and `output` carries a
+  // Tier 1 response shape (NOT a full evaluation). Layer 3 was not called.
+  // The route (Step 7) is responsible for issuing the continuation token + composing
+  // the final response shape with `continuation_token`. Logged in the comparison
+  // row regardless; user-facing during parallel-run remains bundled-depth per
+  // ADR-008 §7 + ADR-004 §6.3 failure-isolation guarantee.
+  tier1_trigger: Tier1Trigger | null
 }
 
 // ============================================================================
@@ -329,6 +342,7 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     layer3_latency_ms: null,
     layer1_cost_usd_microcents: null,
     layer3_cost_usd_microcents: null,
+    tier1_trigger: null,
   }
 
   // ---- Layer 1 ----
@@ -357,11 +371,40 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
   // return usage alongside the schema. For now, log null.
   result.layer1_cost_usd_microcents = null
 
+  // ---- Tier 1 ELEMENT_FUSION detection (added 2026-05-06, M1-CP4e) ----
+  // Per ADR-008 §5 step 5(b)–(c) + ADR-006 §3.10. detectTier1Trigger inspects
+  // schema.element_fusion_detected.fused. When fused === true, the engine halts
+  // at Layer 1; Layer 2 is not called; Layer 3 is not called; the orchestrator
+  // composes a Tier 1 force-clarification response shape per ADR-008 §2.
+  let elementFusionTrigger: Tier1Trigger | null
+  try {
+    elementFusionTrigger = detectTier1Trigger(layer1Schema)
+  } catch (err) {
+    // detectTier1Trigger throws only on cross-field invariant violation (which
+    // validateLayer1Schema should have caught upstream). Treat as a programming
+    // error and fail closed.
+    result.error = 'validation_throw'
+    console.warn(
+      '[parallel-run] detectTier1Trigger threw (cross-field invariant; likely upstream validator gap):',
+      err instanceof Error ? err.message : err
+    )
+    return result
+  }
+  if (elementFusionTrigger !== null) {
+    // Tier 1 ELEMENT_FUSION fired at Layer 1. Halt; compose Tier 1 response
+    // shape; skip Layer 2 + Layer 3.
+    result.tier1_trigger = elementFusionTrigger
+    result.output = composeTier1ResponseShape(elementFusionTrigger, result)
+    // layer2_latency_ms remains null because applyMechanisms was not called.
+    // layer3_latency_ms + layer3_cost remain null (Layer 3 not called).
+    return result
+  }
+
   // ---- Layer 2 (deterministic, synchronous) ----
   const layer2Start = Date.now()
-  let layer2Assessment
+  let layer2Result: Layer2Assessment | { tier1_trigger: Tier1Trigger }
   try {
-    layer2Assessment = applyMechanisms(layer1Schema)
+    layer2Result = applyMechanisms(layer1Schema)
   } catch (err) {
     result.layer2_latency_ms = Date.now() - layer2Start
     result.error = 'validation_throw'
@@ -369,6 +412,20 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     return result
   }
   result.layer2_latency_ms = Date.now() - layer2Start
+
+  // ---- Tier 1 SCOPE_AMBIGUITY / TEMPORAL_AMBIGUITY short-circuit (M1-CP4e) ----
+  // Per ADR-008 §5 step 5(d)–(e) + ADR-006 §3.10. applyMechanisms returns a
+  // discriminated union; when `tier1_trigger` is present, the engine halted at
+  // Position 2 or Position 6.
+  if ('tier1_trigger' in layer2Result) {
+    result.tier1_trigger = layer2Result.tier1_trigger
+    result.output = composeTier1ResponseShape(layer2Result.tier1_trigger, result)
+    // layer3_latency_ms + layer3_cost remain null (Layer 3 not called).
+    return result
+  }
+
+  // No Tier 1 fired — Layer 2 produced a full assessment. Type-narrowed.
+  const layer2Assessment: Layer2Assessment = layer2Result
 
   // ---- Layer 3 (with deterministic fallback) ----
   let layer3Prose: Layer3Prose
@@ -407,6 +464,58 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     },
   }
   return result
+}
+
+// ============================================================================
+// TIER 1 RESPONSE-SHAPE COMPOSITION (added 2026-05-06, M1-CP4e)
+// Per ADR-008 §2. The orchestrator produces the response shape *without* the
+// continuation_token — the route at Step 7 issues the token (which requires
+// the TRANSLATION_SANDWICH_TIER1_SECRET env var) and stitches it into the
+// final response. This separation keeps token issuance dependent on the route
+// (which has access to the request body for input_hash computation) while
+// keeping the orchestrator pure with respect to env-var availability.
+// ============================================================================
+
+/**
+ * Compose the Tier 1 force-clarification response shape per ADR-008 §2 — minus
+ * the continuation_token (the route fills that in at Step 7). The result is
+ * stored in result.output and surfaces in the comparison row's
+ * translation_sandwich_output column. During parallel-run, this is logged but
+ * does not surface to the user (failure-isolation per ADR-008 §7).
+ */
+function composeTier1ResponseShape(
+  trigger: Tier1Trigger,
+  runResult: Pick<
+    SandwichRunResult,
+    'layer1_latency_ms' | 'layer2_latency_ms' | 'layer1_cost_usd_microcents'
+  >
+): unknown {
+  return {
+    version: 'translation-sandwich-v1',
+    clarification_required: true,
+    intake_tier: 1,
+    trigger_code: trigger.trigger_code,
+    clarification: {
+      question_text: trigger.question_text,
+      stem_id: trigger.stem_id,
+      slot_fills: trigger.slot_fills,
+    },
+    // continuation_token is filled by the route (Step 7). The orchestrator
+    // emits null here; the route replaces with the issued token.
+    continuation_token: null,
+    evaluation_partial: null,
+    meta: {
+      engine_version: 'translation-sandwich-v1',
+      fired_at_position: trigger.fired_at_position,
+      latency_ms:
+        (runResult.layer1_latency_ms ?? 0) + (runResult.layer2_latency_ms ?? 0),
+      cost_usd_microcents: runResult.layer1_cost_usd_microcents ?? 0,
+    },
+    // R3 evaluative disclaimer is composed by the route (it has access to the
+    // canonical disclaimer string from the bundled-depth path). Orchestrator
+    // emits null here; the route replaces with the disclaimer.
+    disclaimer: null,
+  }
 }
 
 // ============================================================================
@@ -460,6 +569,7 @@ export async function runParallelSandwich(params: ParallelRunInput): Promise<voi
         layer3_latency_ms: null,
         layer1_cost_usd_microcents: null,
         layer3_cost_usd_microcents: null,
+        tier1_trigger: null,
       }
     } else {
       // 2. Fire the sandwich. Runs concurrently with bundled-depth (which the
