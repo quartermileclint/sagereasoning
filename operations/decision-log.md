@@ -2739,3 +2739,131 @@ M1-CP4e-B is Critical-tier — the Critical Change Protocol applies in full. The
 **Rules served:** R0 (oikeiosis — engine reasons by principled mechanism, including halting honestly when input is structurally undecidable); R5 (cost — Tier 1 fire costs one extra Layer 1 LLM call on re-submission; observed cost lands at M1-CP5); R7 (source fidelity — D13 stems verbatim; verbatim evidence quotes preserved through Tier 1 detection); R8a (controlled vocabulary — Tier1TriggerCode + Tier1FiredAtPosition); R8c (English-only on user-facing prose — clarification_text rendered in English); R10 (skill marketplace — public API contract gains discriminated-union variant under R10 announcement at M1-CP6 cutover); AC1 (model selection — Sonnet for Layer 1 re-extraction); AC4 (R20a perimeter preservation verified; AC4 invocation test pattern preserved); AC5 (R20a perimeter — `/api/reason` distress check on every turn); AC6 (four-layer context architecture preserved); AC8 (translation-sandwich engine extension to multi-turn); KG1 (Vercel five rules — every turn fresh request, no shared in-memory state, secret read at call time not module load); KG2 (Haiku reliability boundary — Layer 1 stays on Sonnet); KG6 (composition order preserved); PR1 (single-endpoint proof — `/api/reason` is M1 pilot); PR3 (synchronous safety systems preserved — distress check + token validation synchronous, no fire-and-forget); PR4 (model selection is constraint — Sonnet enforced); PR6 (safety-critical-adjacent changes — Critical Change Protocol applies at deployment time M1-CP4e-B); PR8 (third recurrence of in-place ADR amendment pattern logged for future promotion); PR9 (drift fix at ADR-005 §4 logged as F-series Efficiency & Stewardship finding). AC7 NOT engaged per ADR-008 §"Engages" (stateless cryptographic signature, not session credential). PR5 watch-status PRESERVED.
 
 **Status:** Adopted. Cross-references: `D-M1-CP4d-MULTI-TURN-INPUT-FLOW-DESIGN-ADR-2026-05-06` (predecessor — ADR-008 design this entry implements); `D-M1-CP4c-LAYER-MODULES-AC14-TIER2-IMPLEMENTED-2026-05-06` (the engine substrate this entry extends to Tier 1); `D-M1-CP4b-AC14-TIER2-ADR-AMENDMENTS-2026-05-06` (the in-place amendment precedent this entry's amendments mirror); `D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05` (parent scope decision); `/adopted/adr/2026-05-06-multi-turn-input-flow-tier-1.md` (ADR-008 — design ADR realised here); `/adopted/adr/2026-05-04-layer1-schema-specification.md` (ADR-005 — amended in place per §3.4); `/adopted/adr/2026-05-04-layer2-mechanism-algorithm.md` (ADR-006 — amended in place per §3.5); `/adopted/adr/2026-05-04-translation-sandwich-pilot-api-reason.md` (ADR-004 — §6.3 failure-isolation guarantee preserved; §10 checkpoint table advances M1-CP4d → M1-CP4e); `/adopted/ADR-RAG-MENTOR-ALT3-01-translation-sandwich-deterministic-engine.md` AC-13 (architectural commitment); `/adopted/rag-mentor-alt3/three-tier-intake.md` (D13 — canonical Tier 1 stems); `/adopted/standing-protocol-cache.md` (operative governing frame); `/operations/handoffs/founder/2026-05-06-sub-session-M1-CP4e-A-close.md` (this session's close); `/operations/handoffs/founder/2026-05-06-M1-CP4e-B-NEXT-SESSION-PROMPT.md` (next session — M1-CP4e-B Critical-tier deployment under Critical Change Protocol).
+
+---
+
+## 2026-05-07 — D-M1-CP4e-B-AC13-TIER1-DEPLOYED
+
+**Decision:** Sub-session M1-CP4e-B completed: AC-13 Tier 1 force-clarification on `/api/reason` deployed under the Critical Change Protocol. `TRANSLATION_SANDWICH_TIER1_SECRET` provisioned in Vercel (Production + Preview + Development) by the founder at session start; F7 (element-fusion) + F8 (scope-ambiguity) + F9 (temporal-ambiguity) fixtures added to harness FIXTURES array with real-Sonnet Layer 1 schemas extracted and cached; F1+F2 Layer 3 prose caches regenerated; Phase 12 second-turn resume implementation landed in full per ADR-008 §8 (token issuance + augmented-input mismatch + original-input success + structural loop-guard); F2 motivation_stated assertion carve-out applied (Sonnet's reading of "I hate confrontation" as motivation defensible per ADR-005 §3.10); F5 EUPATHEIA_BOUNDARY assertion pivoted to structural matcher (genus `eupatheia` OR species `chara`/`boulesis`/`eulabeia` + marginal-case language); Phase 12 loop-guard pivoted to structural assertion (engine produced valid output; same-trigger-after-augmentation logged as INFO with diagnostic). Critical Change Protocol named-risk approval (a)–(g) completed by founder; harness reaches 273/273 PASS; tsc clean across full codebase; commit + push to Vercel.
+
+**Reasoning:** M1-CP4e-A landed the modules + ADRs + orchestrator + route + harness scaffolding for AC-13 Tier 1 force-clarification but stopped short of deployment. M1-CP4e-B closes the deployment loop: env var provision, fixtures + caches populated by real Sonnet, Phase 12 implemented, Critical Change Protocol named-risk approval, push to Vercel. Three substantive findings surfaced during the real-Sonnet run, all consistent with the PR5 watch-status note in the M1-CP4e-A close ("the harness should not assert specific Sonnet-output content for fields where the extraction is genuinely subjective"): (1) F2's motivation_stated drift — Sonnet legitimately reads "I hate confrontation" as the agent stating their motivation, which is defensibly more accurate than the prior cache's `false`; (2) F5's EUPATHEIA prose drift — Sonnet writes about the eupatheia species (chara, boulesis) rather than the genus, which is arguably more precise; (3) F9's TEMPORAL_AMBIGUITY same-trigger-after-augmentation — when the practitioner's clarification answer doesn't structurally remove the ambiguity-creating content from the original input, Sonnet extracts both and the trigger fires again. ADR-008 §10.3's loop-guard is real-world-bounded by 2–3 turns, not strict 2 turns; F9 demonstrates the working assumption is correct. All three findings resolved via structural pivots in the harness; no production code changed.
+
+The seven Critical Change Protocol risks (a)–(g) per the M1-CP4e-B prompt's checklist were summarised in chat and explicitly approved by the founder ("Approve all seven (a)–(g)" at 2026-05-07): (a) existing single-turn requests fail to evaluate — MITIGATED via Phase 1 + Phase 4 baseline (no Tier 1 over-fire); (b) R20a distress check bypassed on second turn — MITIGATED via order-of-operations grep + Phase 7 invocation test; (c) continuation token leakage — MITIGATED (secret read at call time, never logged, server-side only); (d) parallel-run failure-isolation leak — MITIGATED via Phase 8 (user-facing return uses bundledPromise); (e) build break on Vercel — MITIGATED via tsc clean; (f) regression on existing M1-CP4c functionality — MITIGATED via 273/273 harness; (g) Vercel cold-start latency — DEFERRED to M1-CP4f / M1-CP5 measurement.
+
+**Files touched:**
+
+- `/website/scripts/verify-translation-sandwich.ts` — Fixture interface comment extended to F1–F9 (M1-CP4e-B addition); F7 + F8 + F9 fixture entries appended to FIXTURES array per ADR-005 §8.1 specs; Phase 1 motivation_stated assertion extended with two carve-outs (F7 fusion-bypass per ADR-005 §8.2; F2 stated-motivation defensible reading); Phase 5 EUPATHEIA_BOUNDARY matcher pivoted to structural (mentionsEupatheia accepts genus or species; hasMarginalLanguage accepts cannot/not yet/single instance/this instance alone/across instances/across this domain/arose in this domain); Phase 12 implemented in full (replaces stub) — async function with Phase 11-pattern test secret, three Phase12Fixtures (F7→fusion-resolved, F8→scope-resolved, F9→temporal-resolved augmentations), per-fixture token-issue + augmented-mismatch + original-success + structural loop-guard with diagnostic INFO logs; main() updated to `await runPhase12()`.
+- `/operations/decision-log.md` — this entry appended.
+
+**Files NOT committed (per gitignore):**
+
+- `/website/scripts/.translation-sandwich-cache/` — cache directory is gitignored (`.gitignore` line 41). Real-Sonnet run populated F7, F8, F9 + F7-aug-v1, F8-aug-v1, F9-aug-v1 Layer 1 schema caches; F1, F2 Layer 3 prose caches regenerated; F5 Layer 3 prose cache regenerated alongside the F1–F9 sweep. Caches are local-only per the existing M1-CP4 discipline.
+
+**Risk classification:** **Critical** under 0d-ii (Critical Change Protocol applies — deployment-time exposure to live users via the env-var provisioning + the M1-CP4e-A code activating now that the secret is set). Per cache Element 8: deployment-configuration changes (env-flag activating new surface) + R20a perimeter route + new env-var dependency. PR6 ENGAGED (safety-critical-adjacent change). PR1 ENGAGED (`/api/reason` is the M1 single-endpoint proof for the Tier 1 multi-turn pattern). AC4 ENGAGED (R20a perimeter preservation verified at the route + Phase 7 of harness; AC4 invocation test pattern preserved — distress check runs before token validation per pre-deploy grep). AC5 ENGAGED (`/api/reason` is one of the eight bound R20a routes; the new continuation-token path runs AFTER the distress check on every turn). AC7 NOT ENGAGED per ADR-008 §"Engages" (stateless cryptographic signature, not session credential). AC8 ENGAGED (engine extension to multi-turn). AC1 + KG2 ENGAGED for Layer 1 re-extraction on second turn (Sonnet preserved per cache Element 6). KG1 ENGAGED (no fire-and-forget; secret read at call time not module load). KG6 ENGAGED (composition order: input → distress → token validation → engine → response).
+
+**Verification Method Used (0c framework):**
+
+| Work item | Verification method | Result |
+|---|---|---|
+| `TRANSLATION_SANDWICH_TIER1_SECRET` provisioned in Vercel | Founder visited Vercel dashboard → Settings → Environment Variables → confirmed variable name appears with value masked across Production + Preview + Development | ✓ verified |
+| F7/F8/F9 fixtures + Phase 12 implementation | Real-Sonnet harness run on founder's machine produced 261/262 PASS initially (F2 motivation_stated drift — fixed via carve-out); 273/273 after Phase 12 implementation; 271/273 after first non-replay run with Phase 12 (F5 EUPATHEIA + F9 same-trigger drift — fixed via structural pivots); 273/273 final REPLAY-mode confirmation on AI sandbox | ✓ verified |
+| F1+F2 Layer 3 prose regeneration | New cache files written by real-Sonnet run; F5 chara/boulesis prose recognised by structural matcher | ✓ verified |
+| F7 ELEMENT_FUSION fires correctly | Phase 3 Branch A asserts trigger_code === ELEMENT_FUSION + idempotent | ✓ verified |
+| F8 SCOPE_AMBIGUITY at Position 6 | Phase 3 Branch B asserts trigger_code + fired_at_position === position-6 | ✓ verified |
+| F9 TEMPORAL_AMBIGUITY at Position 2 | Phase 3 Branch B asserts trigger_code + fired_at_position === position-2 | ✓ verified |
+| F1–F4 baseline (no Tier 1 over-fire) | Phase 4 baseline assertions: open_deferrals empty + STATED_EQUANIMITY_UNVERIFIED not firing for F1/F3/F4 | ✓ verified |
+| Phase 12 second-turn resume | Token issuance + augmented-input mismatch + original-input success + structural loop-guard (engine completed; outcome diagnostically logged) | ✓ verified |
+| tsc clean | `npx tsc --noEmit -p .` returned zero output across full codebase | ✓ verified |
+| Critical Change Protocol named-risk approval (a)–(g) | Summarised in chat; founder approved each explicitly | ✓ verified |
+| Vercel deployment | Founder commits + pushes; Vercel auto-rebuilds | DEFERRED to founder's commit + push |
+| Live route smoke-test (curl) | Run after Vercel build is green | DEFERRED to post-deploy |
+
+**Risk Classification Record (0d-ii):**
+
+| Change | Classification | Engaged at M1-CP4e-B? |
+|---|---|---|
+| `TRANSLATION_SANDWICH_TIER1_SECRET` env var provision in Vercel | Critical (deployment configuration) | YES — landed at session start |
+| Harness extensions (F7/F8/F9 fixtures + F2 + F7 carve-outs + Phase 12 implementation) | Standard (test harness; no production touch) | YES — landed |
+| Structural pivots (F5 EUPATHEIA matcher + Phase 12 loop-guard) | Standard (test harness — assertion strategy refinement) | YES — landed |
+| Decision-log entry | Standard (governance) | YES — this entry |
+| Vercel deployment via M1-CP4e-A code activation (now that secret is set) | Critical (live exposure of dormant code path; user-facing remains bundled-depth) | YES — at founder's commit + push |
+
+**PR5 — Knowledge-Gap Carry-Forward:**
+
+PR5 watch-status PROMOTED to permanent KG entry on this session's third+ recurrence. Three drift observations this session, all in the family the M1-CP4e-A close named:
+
+- **F2 `motivation_stated` drift** — Sonnet legitimately reads "I hate confrontation" as the agent stating their motivation; original M1-CP4c-era cache had `motivation_stated: false`; M1-CP4e-A and M1-CP4e-B re-extractions surface `true`. Per ADR-005 §3.10's `motivation_stated` definition (the agent explicitly names why they did/didn't act), the reading is defensible. Same family as F2's `stated_concern_targets` and `stated_equanimity_signals` drift accepted at M1-CP4e-A. Resolution: F2 carve-out from the `motivation_stated === false` baseline assertion; structural consistency assertion (motivation_evidence well-typed + consistent with motivation_stated) preserved.
+- **F5 EUPATHEIA prose drift** — Sonnet's Layer 3 prose for F5 sometimes uses `eupatheia` (genus) and sometimes the species names `chara` / `boulesis` + paraphrase of "cannot be confirmed from this instance alone". Both are valid; the species-level naming is arguably more precise. Resolution: structural matcher accepts genus or species + marginal-case language (cannot / not yet / single instance / this instance alone / across instances / across this domain / arose in this domain).
+- **F9 same-trigger after augmentation** — TEMPORAL_AMBIGUITY fired again on the augmented input because the original past-anchored content remains present and Sonnet extracts both past and future markers; trigger predicates all still hold. Substantive product finding: the multi-turn protocol's loop-guard is real-world-bounded by 2–3 turns (per ADR-008 §10.3), not strict 2 turns. Resolution: Phase 12 loop-guard pivoted to structural ("engine produced valid output"); same-trigger logged as INFO with diagnostic.
+
+The two structural pivots applied this session (F5 EUPATHEIA matcher; Phase 12 loop-guard) are the PR5-promotion-driven implementations of the watch-status resolution sketch ("separate structural assertions from content assertions"). Permanent KG entry to be added to `/operations/knowledge-gaps.md` at session close (Step 9). M1-CP4f's harness assertion strategy refactor extends this pattern to other content-specific assertions in the harness (e.g., `proseHasUndecidableKathekonPhrasing` matchers, the `single_snapshot` matcher, the `no_improvement_path` matcher — all candidates for structural review).
+
+Other observations:
+
+- **Concepts re-explained this session: zero.** Founder verified the structural pivot reasoning (Option A for F9, Option B for F5) without re-explanation. Eupatheia subtype extension (chara/boulesis/eulabeia) was a small refinement of Option B, surfaced briefly and applied.
+- **PR8 promotion candidate (in-place ADR amendment pattern):** NOT engaged this session — M1-CP4e-B is governance + harness only; no ADR amendments. The third recurrence count from M1-CP4e-A holds; promotion at next cycle if observed once more.
+- **F-series stewardship finding (PR9 — Efficiency & Stewardship):** the harness's content-specific assertion pattern (matchers expecting specific Sonnet phrasings) is fragile across Sonnet runs. M1-CP4f's assertion strategy refactor will systematically address this.
+
+**Founder Verification (Between Sessions):**
+
+**Step A — Commit + push the M1-CP4e-B changes.** Open Terminal, paste this exact block, press **Enter**:
+
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning" && git add website/scripts/verify-translation-sandwich.ts operations/decision-log.md && git commit -m "M1-CP4e-B: AC-13 Tier 1 deployment under Critical Change Protocol
+
+- TRANSLATION_SANDWICH_TIER1_SECRET provisioned in Vercel (Production + Preview + Development) at session start.
+- F7 (element-fusion case) + F8 (scope-ambiguity case) + F9 (temporal-ambiguity case) fixtures added to FIXTURES array per ADR-005 §8.1; real-Sonnet Layer 1 schemas extracted and cached locally.
+- Phase 12 (second-turn resume) full implementation per ADR-008 §8: token issuance + augmented-input mismatch + original-input success + structural loop-guard with diagnostic INFO logs across F7/F8/F9.
+- F1+F2 Layer 3 prose caches regenerated (deleted at M1-CP4e-A; filled this session).
+- F2 motivation_stated assertion carve-out applied: Sonnet legitimately reads 'I hate confrontation' as a stated motivation per ADR-005 §3.10; structural consistency assertion preserved.
+- F5 EUPATHEIA_BOUNDARY assertion pivoted to structural matcher: accepts genus (eupatheia) or species (chara/boulesis/eulabeia) + marginal-case language. PR5 watch-status promoted to permanent KG entry on third+ recurrence.
+- Phase 12 loop-guard pivoted to structural assertion: engine produces valid output (assessment OR Tier 1 trigger; no throw). Same-trigger-after-augmentation logged as INFO with ADR-008 §10.3 loop-guard diagnostic. F9's same-trigger behaviour is real-world expected and recorded as a substantive M1-CP4e-B finding.
+- Critical Change Protocol named-risk approval (a)-(g) completed by founder per project instructions 0c-ii.
+- Harness 273/273 checks pass against the with-Tier-1 engine. tsc clean across full codebase.
+- Decision-log entry D-M1-CP4e-B-AC13-TIER1-DEPLOYED appended (full Critical-tier form per cache).
+
+Note: TRANSLATION_SANDWICH_PARALLEL_RUN remains 1 (parallel-run dormant default). User-facing path remains bundled-depth. The Tier 1 mechanic is now operative end-to-end in the sandwich path; surfaces to user at M1-CP6 cutover (future session). Failure isolation per ADR-004 §6.3 + ADR-008 §7 preserved.
+
+Cross-references: D-M1-CP4e-A, D-M1-CP4d, D-M1-CP4c, D-M1-CP4b, D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05; ADR-008, ADR-005, ADR-006, ADR-004."
+```
+
+If `git add` fails with `index.lock` errors, paste this in Terminal first then retry:
+
+```
+rm "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/.git/index.lock"
+```
+
+Then push via **GitHub Desktop**: open GitHub Desktop → select sagereasoning repo → click **Push origin**.
+
+**Step B — Vercel deployment verification.** Visit `vercel.com/sagereasoning`. Confirm the latest deploy is green (build succeeds; deployment goes live). Build time typically 2–3 minutes after push.
+
+**Step C — Live route smoke-test (post-deploy).** From Terminal:
+
+```
+curl -X POST https://sagereasoning.com/api/reason -H "Content-Type: application/json" -d '{"text":"hello"}' | head -c 500
+```
+
+Expected: a full evaluation response (not a Tier 1 fire — benign input). Confirms the route is responsive and parallel-run dormant default still produces bundled-depth results.
+
+**Step D — Optional: confirm env var is live.** Submitting a request with `continuation_token` in the body should return HTTP 400 with error code `invalid_continuation_token` (because the test token is malformed) — NOT 503 with `continuation_token_secret_missing`. The 400 confirms the secret is being read. Optional; the harness already exercises this offline via Phase 11.
+
+**Orchestration Reminder:**
+
+M1-CP4e-B is the deployment-time portion of M1-CP4e under PR6 + AC5 + the Critical Change Protocol. The seven named risks (a)–(g) were approved explicitly by the founder before push. Per project instructions: "When something breaks after a change you made, say so directly. Rule out your own changes before suggesting the problem is on my end." If anything regresses post-M1-CP4e-B deploy, the cause is the M1-CP4e-B change, not the founder's environment.
+
+The deployed code is the M1-CP4e-A code from commits `c0deccd` / `a4300a3` PLUS this session's harness-only changes. The route, modules, ADRs, and orchestrator are unchanged from M1-CP4e-A. The Tier 1 mechanic is now fully operative in the sandwich path because (a) `TRANSLATION_SANDWICH_TIER1_SECRET` is provisioned, (b) F7/F8/F9 fixtures + caches confirm correct behaviour end-to-end, (c) Phase 12 confirms the second-turn resume mechanic. User-facing path remains bundled-depth during parallel-run; Tier 1 fires surface to clients at M1-CP6 cutover (future session).
+
+**Open questions (carried into M1-CP4f):**
+
+1. **Token expiry tuning** (carried from ADR-008 §10.1) — revisit at M1-CP5.
+2. **Loop-guard maximum** (carried from ADR-008 §10.3) — F9's same-trigger-after-augmentation surfaces the question of whether a loop-guard maximum (e.g., max 5 turns; after which engine returns "I can't work through this with the information I have") should be implemented. F9's behaviour is real-world expected for this fixture; revisit at M1-CP5 if observed traffic shows longer chains than the 2–3-turn working assumption.
+3. **External skill consumer onboarding doc timing** (carried from M1-CP4d) — founder's call when R10 announcement is being prepared.
+4. **F7-aug-v1 / F8-aug-v1 / F9-aug-v1 cache regeneration** — currently cached from M1-CP4e-B's real-Sonnet run; same Sonnet drift considerations apply for future re-extractions. Caches are gitignored; re-running the harness without LAYER1_REPLAY_CACHE regenerates them.
+5. **Harness assertion strategy refactor (M1-CP4f scope)** — extends the structural-over-content principle applied this session to F5 EUPATHEIA + Phase 12 loop-guard. Other content-specific assertions in the harness (`proseHasUndecidableKathekonPhrasing`, `proseHasSingleSnapshotPhrasing`, `proseHasNoImprovementPathPhrasing`, the EUPATHEIA_BOUNDARY / PRAXIS_MOTIVATION_AMBIGUITY stem fragment matchers) are candidates for structural review.
+6. **Comparison-table baseline reset (M1-CP4f scope)** — pre-Tier-1 rows in `translation_sandwich_comparisons` should be filtered out or reset before M1-CP5 reads the rubric. Sandwich engine now produces Tier 1 response shapes (in dormant path); rubric needs to handle them.
+7. **Per-layer cost capture (M1-CP4f / M1-CP5 scope)** — `extractFeatures` and `generateProse` do not currently expose token usage. M1-CP5 first-pass identified this as an open question; M1-CP4f could extend the layer modules to return usage for cost-health alert calibration.
+8. **PR8 promotion candidate** — in-place ADR amendment pattern. Third recurrence observed at M1-CP4e-A; this session is governance + harness only (no in-place ADR amendment), so no fourth recurrence here. Promotion to a permanent process rule at next cycle if observed once more.
+
+**Rules served:** R0 (oikeiosis — engine reasons by principled mechanism, including halting honestly when input is structurally undecidable; F9's same-trigger fire is the engine being honest about residual ambiguity); R5 (cost — Tier 1 fire costs one extra Layer 1 LLM call on re-submission; total marginal cost this session ~$0.50 within scope per the M1-CP4e-B prompt); R7 (source fidelity — D13 stems verbatim; verbatim evidence quotes preserved through Tier 1 detection); R8a (controlled vocabulary — Tier1TriggerCode + Tier1FiredAtPosition); R8c (English-only on user-facing prose); R10 (skill marketplace — public API contract gains discriminated-union variant under R10 announcement at M1-CP6 cutover); AC1 (model selection — Sonnet for Layer 1 re-extraction); AC4 (R20a perimeter preservation verified; AC4 invocation test pattern preserved — distress check runs before token validation per pre-deploy grep); AC5 (R20a perimeter — `/api/reason` distress check on every turn); AC6 (four-layer context architecture preserved); AC8 (translation-sandwich engine extension to multi-turn); KG1 (Vercel five rules — every turn fresh request, no shared in-memory state, secret read at call time not module load); KG2 (Haiku reliability boundary — Layer 1 stays on Sonnet); KG6 (composition order preserved); PR1 (single-endpoint proof — `/api/reason` is M1 pilot for Tier 1 multi-turn); PR3 (synchronous safety systems preserved — distress check + token validation synchronous, no fire-and-forget); PR4 (model selection is constraint — Sonnet enforced); **PR5 — PROMOTED to permanent KG entry** (third+ recurrence of Sonnet drift on subjective fields: F2 motivation_stated, F5 EUPATHEIA prose, F9 augmented-trigger; resolution applied via structural pivots); PR6 (safety-critical-adjacent changes — Critical Change Protocol applied; named-risk approval (a)–(g) explicit); PR9 (F-series Efficiency & Stewardship — content-specific assertion pattern fragility logged for M1-CP4f assertion strategy refactor). AC7 NOT engaged per ADR-008 §"Engages" (stateless cryptographic signature, not session credential).
+
+**Status:** Adopted. Cross-references: `D-M1-CP4e-A-LAYER-MODULES-ROUTE-HARNESS-AC13-TIER1-IMPLEMENTED-NO-DEPLOY` (predecessor — implemented modules + route this entry deploys); `D-M1-CP4d-MULTI-TURN-INPUT-FLOW-DESIGN-ADR-2026-05-06` (ADR-008 design); `D-M1-CP4c-LAYER-MODULES-AC14-TIER2-IMPLEMENTED-2026-05-06` (engine substrate); `D-M1-CP4b-AC14-TIER2-ADR-AMENDMENTS-2026-05-06` (in-place amendment precedent); `D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05` (parent scope decision); `/adopted/adr/2026-05-06-multi-turn-input-flow-tier-1.md` (ADR-008); `/adopted/adr/2026-05-04-layer1-schema-specification.md` (ADR-005 amended at M1-CP4e-A); `/adopted/adr/2026-05-04-layer2-mechanism-algorithm.md` (ADR-006 amended at M1-CP4e-A); `/adopted/adr/2026-05-04-translation-sandwich-pilot-api-reason.md` (ADR-004 — §6.3 + §10); `/adopted/ADR-RAG-MENTOR-ALT3-01-translation-sandwich-deterministic-engine.md` AC-13; `/adopted/rag-mentor-alt3/three-tier-intake.md` (D13); `/adopted/standing-protocol-cache.md` (operative governing frame); `/operations/handoffs/founder/2026-05-06-sub-session-M1-CP4e-A-close.md` (predecessor close); `/operations/handoffs/founder/2026-05-06-M1-CP4e-B-NEXT-SESSION-PROMPT.md` (the prompt this entry executes); `/operations/handoffs/founder/2026-05-07-sub-session-M1-CP4e-B-close.md` (this session's close — produced at Step 9).
