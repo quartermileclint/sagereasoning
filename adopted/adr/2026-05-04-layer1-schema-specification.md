@@ -131,6 +131,17 @@ export type UrgencySignalType =
   | 'finality_language'
   | 'irreversibility_language'
 
+// Added 2026-05-06 (M1-CP4b) — eupatheia + stated-equanimity vocabularies per AC-14 + Tier 2
+
+export type EupatheiaShape = 'chara' | 'boulesis' | 'eulabeia'
+
+export type StatedEquanimitySignal =
+  | 'felt_fine'
+  | 'felt_calm'
+  | 'felt_at_peace'
+  | 'didnt_bother_me'
+  | 'other_explicit_calm'
+
 // =============================================================================
 // PER-CATEGORY ENTRY SHAPES
 // =============================================================================
@@ -186,12 +197,54 @@ export interface CausalStageEvidence {
   evidence: string
 }
 
+// Added 2026-05-06 (M1-CP4b) — entry shapes for the four new top-level fields
+
+export interface EupatheiaCandidate {
+  /** Eupatheia shape detected in the input. */
+  shape: EupatheiaShape
+  /** Verbatim quote from the input that motivates this detection. R7 source fidelity. */
+  evidence: string
+  /** Who or what the candidate eupatheia is about (e.g., "the team's win", "her promotion").
+   *  Null when the input names the eupatheia shape but not a specific target. */
+  narrative_target: string | null
+}
+
+export interface StatedConcernTarget {
+  /** The agent's named focus — verbatim phrase ("the team", "her", "my daughter"). */
+  stated_target: string
+  /** What the agent says they're worried about for themselves, separately from the
+   *  named target. Null when the agent names the target without a self-concern phrase
+   *  ("I'm doing this for the community" without naming what they're worried about for
+   *  themselves). */
+  for_self_concern: string | null
+  /** Verbatim quote from the input. R7 source fidelity. */
+  evidence: string
+}
+
+export interface StatedEquanimitySignalEntry {
+  signal_type: StatedEquanimitySignal
+  /** Verbatim quote from the input. R7 source fidelity. */
+  evidence: string
+}
+
+export interface MotivationEvidenceEntry {
+  /** Verbatim phrase naming the agent's stated motivation ("because I care about her",
+   *  "to be the kind of person who shows up"). */
+  motivation: string
+  /** Verbatim quote from the input. R7 source fidelity. */
+  evidence: string
+}
+
 // =============================================================================
 // TOP-LEVEL SCHEMA
 // =============================================================================
 
 export interface Layer1Schema {
-  /** Schema version. Constant. Bumped if the schema shape changes. */
+  /** Schema version. Constant. Bumped if the schema shape changes.
+   *  Note (M1-CP4b, 2026-05-06): the four new fields below are additive; version
+   *  remains 'layer1-schema-v1'. The producer (extractFeatures + system prompt) is
+   *  updated in the same amendment cycle so no consumer reads the schema without
+   *  the new fields. */
   version: 'layer1-schema-v1'
   passions_present: PassionPresent[]
   control_filter_elements: ControlFilterElement[]
@@ -200,6 +253,27 @@ export interface Layer1Schema {
   kathekon_factors: KathekonFactor[]
   urgency_indicators: UrgencyIndicator[]
   causal_stage_evidence: CausalStageEvidence[]
+  // Added 2026-05-06 (M1-CP4b) — structural-trigger fields for AC-14 + Tier 2
+  /** Eupatheia (good emotion) shapes detected in the input. Empty when no chara /
+   *  boulesis / eulabeia patterns are present. Layer 2's eupatheia-boundary check
+   *  fires Tier 3 OPEN_DEFERRAL on each entry per AC-14. */
+  eupatheia_candidates: EupatheiaCandidate[]
+  /** Phrases where the agent names a target distinct from the implicit operative
+   *  circle ("I'm doing this for the community", "It's about the kids"). Layer 2's
+   *  STATED_OPERATIVE_CONFLICT check compares stated target vs operative circle.
+   *  Empty when the agent doesn't explicitly name a target beyond the engaged circle. */
+  stated_concern_targets: StatedConcernTarget[]
+  /** Explicit calm-language signals ("I felt fine", "it didn't bother me"). Layer 2's
+   *  STATED_EQUANIMITY_UNVERIFIED check fires when calm coincides with passion-shape
+   *  detection. Empty when the agent does not explicitly name calm. */
+  stated_equanimity_signals: StatedEquanimitySignalEntry[]
+  /** True when the agent explicitly states why they did what they did. Default false
+   *  (motivation unstated) — the structural condition for PRAXIS_MOTIVATION_AMBIGUITY
+   *  when combined with principled+ katorthoma_proximity at praxis stage. */
+  motivation_stated: boolean
+  /** Verbatim motivation phrases when motivation_stated is true. Empty when
+   *  motivation_stated is false. */
+  motivation_evidence: MotivationEvidenceEntry[]
   /** Free-form notes naming any uncertainty — e.g. a passion that could map to two
    *  sub-species, a statement that could be evidence for two causal stages, or
    *  a metaphorical text whose literal target is unclear. Empty when the extraction
@@ -272,6 +346,40 @@ Each entry in this section names what evidence in the input populates the field,
 - **Multiple stages allowed:** an input can show evidence at several stages — e.g. an impression that was assented to and then acted on. Each stage gets its own entry.
 - **Layer 2 consumer:** `applyMechanisms` → `passion_diagnosis.causal_stage_affected` (the latest stage with evidence is typically the assessment's anchor).
 
+#### 3.8 `eupatheia_candidates` (added 2026-05-06, M1-CP4b)
+
+- **Source:** language displaying chara (joy in another's good — *not* in possession or status), boulesis (rational wishing — wanting what virtue would have one want), or eulabeia (reverent caution — disinclination from what virtue would not endorse). Phrases like "I felt real joy when she got the promotion", "I want to do the right thing here", "I held back out of respect, not fear".
+- **What to extract:** the eupatheia shape; verbatim evidence; narrative target when identifiable (who/what the eupatheia is about — e.g., "the team's win", "her success") or null.
+- **When silent:** empty array. Most inputs do not exercise eupatheia; that is the typical case.
+- **Discipline:** eupatheia is *candidate*, not confirmed. Layer 2's eupatheia-boundary check fires Tier 3 OPEN_DEFERRAL per AC-14 because confirmation requires longitudinal evidence the engine does not have at single-instance read. Do NOT classify the input as displaying eupatheia in any other field; only this field carries the candidate detection.
+- **Distinction from `passions_present`:** the four passions (epithumia / hedone / phobos / lupe) are *irrational* affections. Eupatheia (chara / boulesis / eulabeia) are *rational* affections — the wise person's analogues. They are conceptually distinct domains; the same input can show both (e.g., joy at a friend's success that is partly chara and partly philodoxia). When ambiguous, populate both fields and add an ambiguity note.
+- **Layer 2 consumer:** `applyMechanisms` → eupatheia-boundary check → Tier 3 OPEN_DEFERRAL with stem_id `tier_3:eupatheia_boundary:001` per the d-a16 catalogue.
+
+#### 3.9 `stated_concern_targets` (added 2026-05-06, M1-CP4b)
+
+- **Source:** phrases where the agent explicitly names what or whom they are acting / deliberating *for* — particularly when this differs from the implicit operative concern. "I'm doing this for the community", "It's about my daughter", "This is about the team's morale".
+- **What to extract:** the stated target (verbatim phrase); what the agent says they're worried about for themselves separately (when present — e.g., "but I also don't want to look weak"); verbatim evidence quote.
+- **When silent:** empty array. Most inputs name the parties via `oikeiosis_circles_engaged` without separately naming a target framing.
+- **Discipline:** this field captures the agent's *framing*, not Layer 2's analysis. If the agent says "I'm doing this for X" and the rest of the narrative reveals their operative concern is Y, both belong elsewhere — Layer 1 just records the agent's stated framing here. Layer 2 detects the divergence in `STATED_OPERATIVE_CONFLICT` per AC-13 Tier 2.
+- **Layer 2 consumer:** `applyMechanisms` → STATED_OPERATIVE_CONFLICT check → Tier 2 soft clarification with stem_id `tier_2:stated_operative_conflict:001`.
+
+#### 3.10 `stated_equanimity_signals` (added 2026-05-06, M1-CP4b)
+
+- **Source:** the agent's explicit statements of calm. "I felt fine about it", "it didn't bother me", "I'm at peace with the decision", "I made my peace with that years ago".
+- **What to extract:** signal_type (one of `felt_fine`, `felt_calm`, `felt_at_peace`, `didnt_bother_me`, `other_explicit_calm`); verbatim evidence.
+- **When silent:** empty array. The default case — most inputs that report concern do not also report explicit calm.
+- **Discipline:** this field captures the agent's *report* of calm, not the engine's assessment of whether the calm is genuine eupatheia. Layer 2 fires `STATED_EQUANIMITY_UNVERIFIED` when this field is non-empty AND `passions_present` is non-empty (the agent reports calm but the structural features show passion-shape reasoning). If the input claims calm without surface evidence of passion, no Tier 2 trigger fires — the agent's report is honoured.
+- **Layer 2 consumer:** `applyMechanisms` → STATED_EQUANIMITY_UNVERIFIED check → Tier 2 soft clarification with stem_id `tier_2:stated_equanimity_unverified:001`.
+
+#### 3.11 `motivation_stated` + `motivation_evidence` (added 2026-05-06, M1-CP4b)
+
+- **Source:** phrases naming *why* the agent did what they did. "Because I care about her", "to be the kind of person who shows up", "for the principle of the thing", "out of duty".
+- **What to extract:** boolean `motivation_stated` (true when any motivation phrase is present); array `motivation_evidence` (one entry per stated motivation, with verbatim phrase + evidence quote).
+- **Default:** `motivation_stated: false` and `motivation_evidence: []` when no motivation is named. This is the *typical* case — agents narrate what happened more often than they narrate why they acted.
+- **Discipline:** Layer 2's PRAXIS_MOTIVATION_AMBIGUITY check fires when `motivation_stated == false` AND the action's `katorthoma_proximity` computes to principled+ AND there is praxis-stage evidence in `causal_stage_evidence`. The architectural intent (AC-14): the engine cannot tell whether a principled-looking action was performed from virtue or from convention without the agent's self-report. Withholding the motivation classification is the principled kathekon when the self-report is absent.
+- **Distinction from `kathekon_factors.justification_offered`:** `justification_offered` records justifications for the *action* (why this action is appropriate); `motivation_stated` + `motivation_evidence` record what was *operative* for the agent (their inner state at the moment of action). The same input can populate both, neither, or only one. Layer 2's PRAXIS_MOTIVATION_AMBIGUITY trigger reads `motivation_stated`, not `kathekon_factors`.
+- **Layer 2 consumer:** `applyMechanisms` → PRAXIS_MOTIVATION_AMBIGUITY check → Tier 3 OPEN_DEFERRAL with stem_id `tier_3:praxis_motivation_ambiguity:001`. Also: `iterative_refinement.motivation_classification` is set to `'unclear_pending_clarification'` when this trigger fires.
+
 ### 4. Layer 1 system prompt
 
 Stored as a constant inside the module. Sent as a cached system block per AC6.
@@ -334,6 +442,29 @@ CATEGORIES
    - Evidence: verbatim quote.
    Multiple stages allowed — an input can show evidence at several stages simultaneously.
 
+8. eupatheia_candidates — eupatheia (good emotion) shapes detected in the input.
+   - Shape: chara (joy in another's good) | boulesis (rational wishing) | eulabeia (reverent caution).
+   - Evidence: verbatim quote.
+   - narrative_target: who/what the candidate eupatheia is about (verbatim phrase) or null.
+   Eupatheia is the *rational* analogue to the four irrational passions. It is distinct from passions_present. Same input may show both (e.g., joy at a friend's success that is partly chara and partly philodoxia). When ambiguous, populate both fields and add an ambiguity note. Most inputs do not exercise eupatheia — empty array is the typical case.
+   Do NOT classify the input as displaying eupatheia anywhere else; only this field carries the candidate detection. Confirmation requires longitudinal evidence the engine does not have at single-instance read.
+
+9. stated_concern_targets — phrases where the agent explicitly names a target framing.
+   - stated_target: verbatim phrase ("the team", "her", "the community").
+   - for_self_concern: what the agent separately says they're worried about for themselves (when present, verbatim) or null.
+   - Evidence.
+   Capture the agent's *framing*. If they say "I'm doing this for the community" and elsewhere reveal "but I also don't want to look weak", record the stated target here and the self-concern phrase. Most inputs do not separately name a target framing — empty array is the typical case.
+
+10. stated_equanimity_signals — explicit statements of calm.
+    - signal_type: felt_fine | felt_calm | felt_at_peace | didnt_bother_me | other_explicit_calm.
+    - Evidence: verbatim quote.
+    Capture the agent's *report* of calm, not your own assessment. If the agent says "I felt fine about it" or "it didn't bother me", record it here. Most inputs that report concern do not also report calm — empty array is the typical case.
+
+11. motivation_stated + motivation_evidence — whether the agent named *why* they acted.
+    - motivation_stated: boolean (true when any motivation phrase is present, else false).
+    - motivation_evidence: array of {motivation, evidence}. One entry per stated motivation. Empty when motivation_stated is false.
+    Default is motivation_stated: false — the typical case. Agents narrate what happened more often than they narrate why. "Because I care about her", "out of duty", "for the principle" are motivation phrases. Justifications for the action ("because she needs help") go in kathekon_factors.justification_offered, not here. Motivations are about the agent's *inner state*; justifications are about the *action's appropriateness*.
+
 OUTPUT
 
 Return ONLY valid JSON conforming to Layer1Schema. No markdown. No commentary outside the JSON.
@@ -361,6 +492,17 @@ Return ONLY valid JSON conforming to Layer1Schema. No markdown. No commentary ou
   "causal_stage_evidence": [
     {"stage": "synkatathesis", "evidence": "..."}
   ],
+  "eupatheia_candidates": [
+    {"shape": "chara", "evidence": "I felt real joy when she got the promotion", "narrative_target": "her promotion"}
+  ],
+  "stated_concern_targets": [
+    {"stated_target": "the team", "for_self_concern": "but I also don't want to look weak in front of them", "evidence": "I'm doing this for the team but I also don't want to look weak in front of them"}
+  ],
+  "stated_equanimity_signals": [
+    {"signal_type": "felt_fine", "evidence": "I told myself I'm fine with the decision"}
+  ],
+  "motivation_stated": false,
+  "motivation_evidence": [],
   "ambiguity_notes": [
     "passions_present[0].sub_species: could be eros or pothos"
   ]
@@ -398,10 +540,11 @@ Return only the JSON.
 
 Module exports a private `validateLayer1Schema(parsed: unknown): Layer1Schema`. The validator:
 
-1. Asserts `parsed` is an object with the exact required keys (`version`, all seven categories, `ambiguity_notes`). Missing key → throw.
+1. Asserts `parsed` is an object with the exact required keys (`version`, the seven original categories, the four M1-CP4b fields — `eupatheia_candidates`, `stated_concern_targets`, `stated_equanimity_signals`, `motivation_stated`, `motivation_evidence` — and `ambiguity_notes`). Missing key → throw.
 2. Asserts `version === 'layer1-schema-v1'`. Mismatch → throw.
-3. Asserts each category is an array. Non-array → throw.
-4. For each entry in each category, asserts the required fields are present and have the correct primitive types and enum membership. Bad enum value → throw with the field name and the offending value.
+3. Asserts each array-category is an array (all categories except `motivation_stated`, which must be a boolean). Non-array (or non-boolean for `motivation_stated`) → throw.
+4. For each entry in each array-category, asserts the required fields are present and have the correct primitive types and enum membership. Bad enum value → throw with the field name and the offending value.
+   - For the four M1-CP4b fields, the entry shapes are: `EupatheiaCandidate` (shape ∈ chara/boulesis/eulabeia, evidence string, narrative_target string|null); `StatedConcernTarget` (stated_target string, for_self_concern string|null, evidence string); `StatedEquanimitySignalEntry` (signal_type ∈ felt_fine/felt_calm/felt_at_peace/didnt_bother_me/other_explicit_calm, evidence string); `MotivationEvidenceEntry` (motivation string, evidence string).
 5. On success, returns the input narrowed to `Layer1Schema`.
 
 A throw from the validator is caught by the route at M1-CP4 per ADR-004 §9.1 and triggers the bundled-depth fallback. At CP1 (standalone), a throw fails the harness phase 2 fixture and the founder reviews the LLM output to revise the prompt or schema.
@@ -451,14 +594,29 @@ Input: "I have to send the contract back today or the deal falls through. I have
 
 Expected exercise: urgency_indicators (time_pressure, imminent_deadline, finality_language); passions_present (phobos / agonia — pressure); kathekon_factors (justification_offered — "everyone's pressing me"); causal_stage_evidence (phantasia / synkatathesis — wavering between the impression that it's safe and the impression that signing without reading is wrong); ambiguity_notes likely populated.
 
+**F5 — Eupatheia-candidate case (added 2026-05-06, M1-CP4b).**
+
+Input: "I felt real joy when she got the promotion. No envy at all — I just wanted her to have it. It's strange to notice it that clearly."
+
+Expected exercise: `eupatheia_candidates` (chara — joy in another's good; narrative_target "her promotion"); `stated_equanimity_signals` (other_explicit_calm — "no envy at all"); `passions_present` empty or low (the input explicitly disclaims envy/phthonos); `oikeiosis_circles_engaged` (local_community or household); `causal_stage_evidence` (synkatathesis — the agent has assented to the impression of their own state). Layer 2 will fire EUPATHEIA_BOUNDARY (Tier 3 OPEN_DEFERRAL) on the chara candidate per AC-14 — confirmation requires longitudinal evidence.
+
+**F6 — Stated-equanimity-with-passion case (added 2026-05-06, M1-CP4b).**
+
+Input: "I told myself I'm fine with the decision the board made, but I keep replaying it in my head. I should be over it by now."
+
+Expected exercise: `stated_equanimity_signals` (felt_fine — "I'm fine with the decision"); `passions_present` (lupe / penthos or epithumia / orge — the replaying pattern with "should be over it" suggests unresolved distress); `motivation_stated` false; `causal_stage_evidence` (synkatathesis — assenting to the impression that the decision matters); `ambiguity_notes` likely populated (the stated calm contradicts the structural features). Layer 2 will fire STATED_EQUANIMITY_UNVERIFIED (Tier 2 soft clarification) per AC-13.
+
 #### 8.2 Phase 1 — extraction completeness
 
 For each fixture, assert that:
 
 - The returned schema is a valid JSON object.
-- `passions_present.length > 0` for F1, F2, F4 (F3 may have empty if interpreted as deliberation-without-passion; ambiguity_notes records that).
-- `control_filter_elements.length > 0` for all four fixtures.
-- `oikeiosis_circles_engaged.length > 0` for F1, F2, F3.
+- `passions_present.length > 0` for F1, F2, F4, F6 (F3 may have empty if interpreted as deliberation-without-passion; ambiguity_notes records that; F5 explicitly disclaims passions).
+- `control_filter_elements.length > 0` for F1–F4 (F5 + F6 may be empty depending on extraction).
+- `oikeiosis_circles_engaged.length > 0` for F1, F2, F3, F5.
+- `eupatheia_candidates.length > 0` for F5 (M1-CP4b — added).
+- `stated_equanimity_signals.length > 0` for F5 + F6 (M1-CP4b — added).
+- `motivation_stated === false` for all six fixtures (none of F1–F6 names the agent's motivation explicitly; all should produce empty `motivation_evidence`).
 - The expected categories per fixture (above) are non-empty.
 - `version === 'layer1-schema-v1'`.
 
@@ -532,6 +690,8 @@ If the founder rejects ADR-005 or requests substantial edits, the draft is revis
 - **2026-05-04 (in-session amendment, Sub-session M1-CP1, post-harness)** — first harness run failed Phase 2 across all four fixtures with the same error: Sonnet produced `ambiguity_notes` as an array of objects (`{field, note}`) rather than strings. Root cause: the system prompt's instruction "add a note … naming the field and the source of uncertainty" read as a request for structured shape. Schema design (§2) tested clean across the other seven categories on all four fixtures. Per founder direction (Path A approved 2026-05-04), the system prompt §4 was amended to add an explicit example showing the correct string-array form and an explicit anti-pattern showing the incorrect object-array form. L3b decision preserved (single string array at top level). Schema (§2) and validator (§6) unchanged. Module's `LAYER1_SYSTEM_PROMPT` constant updated to match. Re-run pending. Candidate observation for the knowledge-gaps register (PR5 first-observation): Sonnet defaults to structured-object form for free-form annotation arrays unless the prompt's OUTPUT example explicitly shows string form.
 
 - **2026-05-04 (second in-session amendment, Sub-session M1-CP1, post-harness re-run)** — second harness run: F4 passed; F1/F2/F3 failed with `passions_present[0].root_passion: undefined` because Sonnet used the key `root` (with `"root": "lupe"` etc.) instead of `root_passion`. Same root-cause class as the first amendment: the OUTPUT example used `[...]` placeholders for all seven category arrays, leaving Sonnet to guess per-entry JSON keys from the semantic bullet descriptions ("Root passion", "Sub-species") which it did inconsistently across fixtures. Per founder direction (Path A extension approved 2026-05-04), the OUTPUT example was replaced with one concrete entry per category showing exact JSON keys and enum values, plus an explicit instruction to "use the EXACT JSON keys shown above". Schema (§2) and validator (§6) unchanged. Module and ADR-005 §4 updated together. PR5 promotes the underlying observation from candidate to watch status (second recurrence within the same session): "the LLM produces JSON keys consistent with semantic bullet descriptions only when an explicit example shows the canonical keys; placeholder examples (`[...]`) leave field-name choice to the LLM and produce inconsistent keys across runs". Resolution: every category in the Layer 1 OUTPUT example now shows one concrete entry with exact keys and a representative enum value.
+
+- **2026-05-06 (cross-session amendment, Sub-session M1-CP4b)** — M1-CP4b adds structural-trigger fields to `Layer1Schema` for AC-14 (withholding as deterministic kathekon) + Tier 2 soft-clarification per `D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05`. Schema additions (§2): four new entry-shape interfaces (`EupatheiaCandidate`, `StatedConcernTarget`, `StatedEquanimitySignalEntry`, `MotivationEvidenceEntry`); two new controlled-vocabulary types (`EupatheiaShape`, `StatedEquanimitySignal`); five new top-level fields on `Layer1Schema` (`eupatheia_candidates`, `stated_concern_targets`, `stated_equanimity_signals`, `motivation_stated`, `motivation_evidence`). All additive — schema version remains `layer1-schema-v1`. Per-field guidance (§3) extended with §3.8 (`eupatheia_candidates`), §3.9 (`stated_concern_targets`), §3.10 (`stated_equanimity_signals`), §3.11 (`motivation_stated` + `motivation_evidence`). System prompt (§4) extended with categories 8–11 in the EXTRACTION CONTRACT and the OUTPUT example extended with concrete entries per PR5 worked-example discipline. Validator (§6) extended to assert the four new fields' presence and types. Fixtures (§8) extended with F5 (eupatheia-candidate case) and F6 (stated-equanimity-with-passion case); Phase 1 assertions updated. Tier 1 force-clarification triggers (`ELEMENT_FUSION` at Layer 1, `SCOPE_AMBIGUITY` at Position 6, `TEMPORAL_AMBIGUITY` at Position 2) explicitly out of scope at this amendment — those engage at M1-CP4d's multi-turn input flow design ADR. Standard-tier governance amendment under 0d-ii (documentation; no production touch). Module update + harness re-verification scheduled for M1-CP4c.
 
 ---
 

@@ -119,6 +119,32 @@ export type AxiaGrade = 'high' | 'moderate' | 'low'
 
 export type TreatedAs = 'good' | 'evil' | 'indifferent'
 
+// Added 2026-05-06 (M1-CP4b) — AC-13 / AC-14 trigger vocabulary
+
+export type IntakeTriggerCode =
+  | 'STATED_OPERATIVE_CONFLICT'
+  | 'STATED_EQUANIMITY_UNVERIFIED'
+  | 'EUPATHEIA_BOUNDARY'
+  | 'PRAXIS_MOTIVATION_AMBIGUITY'
+
+export type DeferralStatus = 'open' | 'closed'
+
+/** Layer 2's classification of motivation underlying a praxis-stage action.
+ *  - 'virtue_explicit' — the agent named virtue-aligned motivation (e.g., "for the principle").
+ *  - 'virtue_inferred' — Layer 2 inferred virtue alignment from structural features
+ *    (used sparingly; default is to defer rather than infer).
+ *  - 'convention_inferred' — Layer 2 detected convention-shaped motivation
+ *    (used sparingly; default is to defer rather than infer).
+ *  - 'unclear_pending_clarification' — set when PRAXIS_MOTIVATION_AMBIGUITY fires;
+ *    the OPEN_DEFERRAL holds the pending classification per AC-14.
+ *  - null — not applicable (no praxis-stage action observed in the input). */
+export type MotivationClassification =
+  | 'virtue_explicit'
+  | 'virtue_inferred'
+  | 'convention_inferred'
+  | 'unclear_pending_clarification'
+  | null
+
 // =============================================================================
 // PER-MECHANISM OUTPUT SHAPES
 // =============================================================================
@@ -234,6 +260,11 @@ export interface IterativeRefinement {
   senecan_grade: SenecanGrade
   progress_dimensions: IterativeRefinementProgressDimensions
   direction_of_travel: DirectionOfTravel
+  /** Added 2026-05-06 (M1-CP4b) — set to 'unclear_pending_clarification' when
+   *  PRAXIS_MOTIVATION_AMBIGUITY fires per AC-14; null when not applicable
+   *  (no praxis-stage action observed). Other values reserved for future
+   *  motivation-classification work. */
+  motivation_classification: MotivationClassification
 }
 
 export interface ImprovementPathStructured {
@@ -259,6 +290,57 @@ export interface StageScores {
   iterative_refinement: StageScore
 }
 
+// Added 2026-05-06 (M1-CP4b) — intake-clarification entries per AC-13 / AC-14
+
+export interface SoftClarification {
+  /** Tier 2 trigger code per the d-a16 catalogue. */
+  trigger_code: 'STATED_OPERATIVE_CONFLICT' | 'STATED_EQUANIMITY_UNVERIFIED'
+  /** Always 2 for soft clarifications. */
+  intake_tier: 2
+  /** d-a16 catalogue stem ID — 'tier_2:stated_operative_conflict:001' or
+   *  'tier_2:stated_equanimity_unverified:001'. */
+  stem_id: string
+  /** Slot variables filled from the assessment + Layer 1 evidence. Keys per
+   *  d-a16 stem specification (e.g., 'STATED_CIRCLE_TARGET', 'SITUATION'). */
+  slot_fills: Record<string, string>
+  /** Plain-language description of which fields would refine if the practitioner
+   *  answers (e.g., "oikeiosis primary circle and its operative obligation"). */
+  scope_of_change: string
+}
+
+export interface OpenDeferralEntry {
+  /** Tier 3 trigger code per the d-a16 catalogue. */
+  trigger_code: 'EUPATHEIA_BOUNDARY' | 'PRAXIS_MOTIVATION_AMBIGUITY'
+  /** Always 3 for open deferrals. */
+  intake_tier: 3
+  /** d-a16 catalogue stem ID — 'tier_3:eupatheia_boundary:001' or
+   *  'tier_3:praxis_motivation_ambiguity:001'. */
+  stem_id: string
+  /** Slot variables filled from the assessment + Layer 1 evidence per the
+   *  d-a16 stem specification. */
+  slot_fills: Record<string, string>
+  /** Names which classification field is being withheld and why. The field_path
+   *  is a dot-path into the Layer2Assessment shape (e.g.,
+   *  'iterative_refinement.motivation_classification'). */
+  withheld_classification: {
+    field_path: string
+    withheld_at_position: string
+    reason: string
+  }
+  /** Lifecycle status. Layer 2 always sets 'open' at creation. The 'closed'
+   *  transition is a downstream concern (D14b deferral-resolution surface). */
+  status: DeferralStatus
+}
+
+export interface IntakeClarifications {
+  /** Tier 2 soft clarifications produced this assessment. Empty when no Tier 2
+   *  triggers fire. */
+  soft_clarifications: SoftClarification[]
+  /** Tier 3 OPEN_DEFERRAL entries produced this assessment. Empty when no Tier 3
+   *  triggers fire. */
+  open_deferrals: OpenDeferralEntry[]
+}
+
 // =============================================================================
 // TOP-LEVEL ASSESSMENT
 // =============================================================================
@@ -280,6 +362,13 @@ export interface Layer2Assessment {
   improvement_path_structured: ImprovementPathStructured | null
   stage_scores: StageScores
   hasty_assent_risk: HastyAssentRisk
+  /** Added 2026-05-06 (M1-CP4b) — intake-clarification triggers per AC-13 / AC-14.
+   *  Always present; arrays empty when no triggers fire. Carries Tier 2 soft
+   *  clarifications and Tier 3 OPEN_DEFERRAL entries from the four engine-level
+   *  triggers (STATED_OPERATIVE_CONFLICT, STATED_EQUANIMITY_UNVERIFIED,
+   *  EUPATHEIA_BOUNDARY, PRAXIS_MOTIVATION_AMBIGUITY). Layer 3 reads this field
+   *  to render soft_clarification_prose + open_deferrals_prose per ADR-007. */
+  intake_clarifications: IntakeClarifications
   /** Layer 1's ambiguity_notes passed through verbatim. */
   layer1_ambiguity_notes: string[]
   /** Layer 2's own ambiguity notes (e.g., disambiguation_required summary). */
@@ -1100,6 +1189,177 @@ function computeHastyAssentRisk(urgency_indicators: UrgencyIndicator[],
 
 **Determinism review:** counts over input arrays; threshold checks. Two calls produce the same output.
 
+#### 3.9 Intake clarification triggers (added 2026-05-06, M1-CP4b)
+
+**Source citations:** `/adopted/ADR-RAG-MENTOR-ALT3-01-translation-sandwich-deterministic-engine.md` AC-13 + AC-14; `/adopted/rag-mentor-alt3/three-tier-intake.md` (engine-level trigger catalogue); `/adopted/rag-mentor-alt3/long-deferred-questions.md` (the architectural commitment that withholding is kathekon, not fallback); `/adopted/rag-mentor-alt3/d-a16-catalogue.md` Section 1 + Section 3 (canonical stem text and slot specifications).
+
+**Architectural intent.** Per AC-14, withholding is kathekon — the appropriate action when the practitioner needs self-knowledge that has not yet been provided. The engine deliberately declines to assert classifications it cannot honestly confirm from the current instance. Per AC-13, three intake tiers govern this: Tier 1 (force clarification — out of scope at M1-CP4b; engages at M1-CP4d/4e), Tier 2 (soft clarification — offered alongside the result), Tier 3 (deterministic withhold — OPEN_DEFERRAL flag).
+
+**Algorithm.** After mechanisms §3.1 through §3.8 complete, run four trigger detection steps in fixed order. Each step appends entries to `intake_clarifications.soft_clarifications` (Tier 2) or `intake_clarifications.open_deferrals` (Tier 3) per the trigger's tier classification. The trigger order does not affect output (each trigger's predicate is independent) but is fixed for harness determinism.
+
+```
+function detectIntakeClarifications(layer1: Layer1Schema,
+                                     passion_diagnosis: PassionDiagnosis,
+                                     oikeiosis: Oikeiosis,
+                                     virtue_domains: VirtueDomain[],
+                                     katorthoma_proximity: KatorthomaProximity,
+                                     causal_stage_evidence: CausalStageEvidence[],
+                                     iterative_refinement_in: IterativeRefinement):
+                                     {
+                                       intake_clarifications: IntakeClarifications,
+                                       motivation_classification: MotivationClassification
+                                     }:
+  soft = []
+  open = []
+  motivation_class = null  // overridden by PRAXIS_MOTIVATION_AMBIGUITY when it fires
+
+  # Step 1: STATED_OPERATIVE_CONFLICT (Tier 2)
+  for each sct in layer1.stated_concern_targets:
+    if sct.for_self_concern != null:
+      # Heuristic: if the agent named a stated_target AND a separate self-concern,
+      # the operative concern is divergent from the stated target. Soft clarification.
+      operative_circle = oikeiosis.relevant_circles.length > 0
+                         ? oikeiosis.relevant_circles[0].circle  # highest-stage; sorted
+                         : "self_preservation"
+      situation = pickSituationPhrase(layer1)  // highest-narrative-weight entity description
+      soft.push({
+        trigger_code: "STATED_OPERATIVE_CONFLICT",
+        intake_tier: 2,
+        stem_id: "tier_2:stated_operative_conflict:001",
+        slot_fills: {
+          "STATED_CIRCLE_TARGET": sct.stated_target,
+          "SITUATION": situation
+        },
+        scope_of_change: "Refinement of the operative circle and its kathekon assessment if the practitioner confirms which concern is dominant."
+      })
+      break  // Append at most one STATED_OPERATIVE_CONFLICT per assessment
+
+  # Step 2: STATED_EQUANIMITY_UNVERIFIED (Tier 2)
+  if layer1.stated_equanimity_signals.length > 0
+     AND passion_diagnosis.passions_detected.length > 0:
+    soft.push({
+      trigger_code: "STATED_EQUANIMITY_UNVERIFIED",
+      intake_tier: 2,
+      stem_id: "tier_2:stated_equanimity_unverified:001",
+      slot_fills: {},  # T2E-002 stem is fully canonical (no slot-fills)
+      scope_of_change: "Refinement of the passion classification — whether the stated calm is genuine eupatheia or polished surface over the detected passion-shape."
+    })
+
+  # Step 3: EUPATHEIA_BOUNDARY (Tier 3) — one OPEN_DEFERRAL per candidate
+  for each ec in layer1.eupatheia_candidates:
+    eupatheia_label = EUPATHEIA_DISPLAY_NAMES[ec.shape]
+    eupatheia_descr = EUPATHEIA_DESCRIPTIONS[ec.shape]
+    counterpart_descr = EUPATHEIA_PASSION_COUNTERPARTS[ec.shape]
+    situational_trigger = ec.narrative_target ?? pickSituationPhrase(layer1)
+    open.push({
+      trigger_code: "EUPATHEIA_BOUNDARY",
+      intake_tier: 3,
+      stem_id: "tier_3:eupatheia_boundary:001",
+      slot_fills: {
+        "EUPATHEIA_SHAPE": eupatheia_label,
+        "TIME_WINDOW": "recent days",  # M1 has no longitudinal context; default per d-a16
+        "SITUATIONAL_TRIGGER": situational_trigger,
+        "EUPATHEIA_DESCRIPTION": eupatheia_descr,
+        "PASSION_COUNTERPART_DESCRIPTION": counterpart_descr
+      },
+      withheld_classification: {
+        field_path: "passion_diagnosis.eupatheia_confirmation_pending",
+        withheld_at_position: "post-passion-diagnosis (M1-CP4b extension)",
+        reason: "Eupatheia confirmation requires longitudinal evidence that the practitioner's calm is not polished surface over passion. The current instance does not provide this evidence."
+      },
+      status: "open"
+    })
+
+  # Step 4: PRAXIS_MOTIVATION_AMBIGUITY (Tier 3)
+  has_praxis_evidence = causal_stage_evidence.some(s => s.stage == "praxis")
+  is_principled_plus = katorthoma_proximity == "principled" OR
+                       katorthoma_proximity == "sage_like"
+  if layer1.motivation_stated == false AND is_principled_plus AND has_praxis_evidence:
+    surface_pattern = KATORTHOMA_PROXIMITY_LABEL[katorthoma_proximity]
+    virtue_descr = virtue_domains.length > 0
+                   ? VIRTUE_DESCRIPTIONS[virtue_domains[0]]
+                   : "phronesis (practical wisdom understanding the right action)"
+    convention_descr = CONVENTION_SUBSTITUTION_DESCRIPTION
+    open.push({
+      trigger_code: "PRAXIS_MOTIVATION_AMBIGUITY",
+      intake_tier: 3,
+      stem_id: "tier_3:praxis_motivation_ambiguity:001",
+      slot_fills: {
+        "SURFACE_PATTERN": surface_pattern,
+        "VIRTUE_DESCRIPTION": virtue_descr,
+        "CONVENTION_DESCRIPTION": convention_descr
+      },
+      withheld_classification: {
+        field_path: "iterative_refinement.motivation_classification",
+        withheld_at_position: "post-iterative-refinement (M1-CP4b extension)",
+        reason: "Motivation classification depends on self-report the practitioner has not provided. The action's surface pattern is consistent with virtue but cannot be distinguished from convention without the practitioner's reflection on what was operative for them."
+      },
+      status: "open"
+    })
+    motivation_class = "unclear_pending_clarification"
+
+  return {
+    intake_clarifications: { soft_clarifications: soft, open_deferrals: open },
+    motivation_classification: motivation_class
+  }
+
+function pickSituationPhrase(layer1: Layer1Schema): string:
+  # Highest-narrative-weight entity description per Layer 1; falls back to first
+  # oikeiosis circle's evidence; falls back to first passion's evidence;
+  # falls back to "this situation".
+  if layer1.oikeiosis_circles_engaged.length > 0:
+    return layer1.oikeiosis_circles_engaged[0].evidence
+  if layer1.passions_present.length > 0:
+    return layer1.passions_present[0].evidence
+  return "this situation"
+```
+
+**Lookup tables:**
+
+```
+EUPATHEIA_DISPLAY_NAMES = {
+  chara:    "chara (joy in another's good)",
+  boulesis: "boulesis (rational wishing)",
+  eulabeia: "eulabeia (reverent caution)"
+}
+
+EUPATHEIA_DESCRIPTIONS = {
+  chara:    "genuine joy in another's good as an end in itself",
+  boulesis: "wanting what virtue would have you want, without grasping",
+  eulabeia: "disinclination from what virtue would not endorse, without fear"
+}
+
+EUPATHEIA_PASSION_COUNTERPARTS = {
+  chara:    "philodoxia (pleasure in being associated with success)",
+  boulesis: "epithumia (craving an external as a genuine good)",
+  eulabeia: "phobos (fear of an external as a genuine evil)"
+}
+
+KATORTHOMA_PROXIMITY_LABEL = {
+  reflexive:  "an action driven by impulse without deliberation",
+  habitual:   "an action shaped by convention without examined understanding",
+  deliberate: "an action with conscious reasoning and some understanding",
+  principled: "an action approaching the principled level",
+  sage_like:  "an action approaching the level of perfected understanding"
+}
+
+VIRTUE_DESCRIPTIONS = {
+  phronesis:  "phronesis (practical wisdom understanding the right action)",
+  dikaiosyne: "dikaiosyne (justice — giving each what is due)",
+  andreia:    "andreia (courage — endurance of right judgement under fear)",
+  sophrosyne: "sophrosyne (temperance — moderation of desire by right judgement)"
+}
+
+CONVENTION_SUBSTITUTION_DESCRIPTION =
+  "habit, social expectation, or what is conventionally praiseworthy in the agent's role"
+```
+
+**Wiring back into IterativeRefinement.** When PRAXIS_MOTIVATION_AMBIGUITY fires, the assembling step (top of `applyMechanisms`) sets `iterative_refinement.motivation_classification = 'unclear_pending_clarification'`. When the trigger does not fire and no praxis-stage evidence is present, `motivation_classification = null`. When the trigger does not fire and praxis-stage evidence IS present (because the agent named their motivation), Layer 2 reads `layer1.motivation_evidence` and sets `motivation_classification = 'virtue_explicit'` (M1 default — virtue-vs-convention inference is reserved for future work; if the agent named *any* motivation, M1 records it as 'virtue_explicit'). This conservative posture honours AC-14's discipline — Layer 2 does not infer convention substitution from absence; it defers when the signal is genuinely ambiguous and accepts the agent's self-report when present.
+
+**Determinism review:** array iteration in input order; lookup tables are `const`; predicate evaluations are deterministic. Two calls produce the same output.
+
+**Cross-reference to mechanisms.** STATED_OPERATIVE_CONFLICT consumes outputs from §3.3 (oikeiosis); STATED_EQUANIMITY_UNVERIFIED consumes §3.2 (passion_diagnosis); EUPATHEIA_BOUNDARY consumes Layer 1's `eupatheia_candidates` directly (no upstream Layer 2 dependency); PRAXIS_MOTIVATION_AMBIGUITY consumes §3.7.1 (katorthoma_proximity) + §3.7.3 (virtue_domains_engaged) + Layer 1's `causal_stage_evidence` and `motivation_stated`.
+
 ### 4. Idempotency guarantee
 
 `applyMechanisms` is **idempotent**: given the same `Layer1Schema` input, two calls produce byte-for-byte equal outputs across:
@@ -1130,11 +1390,12 @@ A Phase 3 failure indicates a regression in the determinism guarantee and is a h
 
 Module exports `validateLayer2Assessment(parsed: unknown): Layer2Assessment` following ADR-005 §6's hand-rolled pattern. The validator:
 
-1. Asserts `parsed` is an object with the exact required keys.
+1. Asserts `parsed` is an object with the exact required keys (including the M1-CP4b additions: `intake_clarifications`, plus `motivation_classification` on `iterative_refinement`).
 2. Asserts `version === 'layer2-assessment-v1'` and `layer1_schema_version === 'layer1-schema-v1'`.
 3. Asserts each per-mechanism field has the correct shape (delegated to per-mechanism sub-validators).
-4. Asserts enum membership for all controlled-vocabulary fields.
-5. Returns the input narrowed to `Layer2Assessment` on success; throws `Layer2ValidationError` on failure.
+4. Asserts enum membership for all controlled-vocabulary fields, including the M1-CP4b additions (`IntakeTriggerCode`, `DeferralStatus`, `MotivationClassification`).
+5. For `intake_clarifications` (M1-CP4b): asserts `soft_clarifications` and `open_deferrals` are arrays; for each entry, asserts `trigger_code` is in the allowed set for the tier, `intake_tier` matches the tier, `stem_id` is a non-empty string, `slot_fills` is an object whose values are strings, and (for OpenDeferralEntry) `withheld_classification.field_path` / `withheld_at_position` / `reason` are non-empty strings and `status` ∈ `{'open', 'closed'}`.
+6. Returns the input narrowed to `Layer2Assessment` on success; throws `Layer2ValidationError` on failure.
 
 The validator is primarily defensive: under correct module behaviour, `applyMechanisms` always returns a valid `Layer2Assessment`. The validator catches programming-error regressions during refactor and supports JSON round-trip safety in the harness.
 
@@ -1156,6 +1417,7 @@ ADR-006's per-mechanism algorithms are grounded in the following primary Stoic s
 | Improvement path (§3.7.4) | Epictetus *Discourses* III.21; Marcus Aurelius *Meditations* IV.3, VIII.49; Seneca *Epistulae Morales* 16 |
 | Stage scores (§3.7.5) | Existing engine `STANDARD_SYSTEM_PROMPT` lines 267–273 (the "strong / adequate / weak" rubric) |
 | Hasty assent risk (§3.8) | Epictetus *Enchiridion* §1, §5; Marcus Aurelius *Meditations* V.16, VIII.7; Stoic Brain assent module |
+| Intake clarification triggers (§3.9) | `/adopted/ADR-RAG-MENTOR-ALT3-01-translation-sandwich-deterministic-engine.md` AC-13 + AC-14; `/adopted/rag-mentor-alt3/three-tier-intake.md`; `/adopted/rag-mentor-alt3/long-deferred-questions.md`; `/adopted/rag-mentor-alt3/d-a16-catalogue.md` Section 1 + Section 3 |
 
 Module comments cite ADR-006 §X.Y for the corresponding rule (per Decision 1's "+ citations" disposition).
 
@@ -1204,6 +1466,8 @@ If the founder rejects ADR-006 or requests substantial edits, the draft is revis
 ## Changelog
 
 - **2026-05-04 (initial Adoption, Sub-session M1-CP2)** — drafted in `/drafts/adr/` after founder selected "all recommended" across the six load-bearing decisions surfaced at session open, founder-approved verbatim ("approve as drafted"), moved to `/adopted/adr/`. Defines `Layer2Assessment` TypeScript type with all per-mechanism output shapes; specifies per-mechanism deterministic algorithm in pseudocode with lookup tables in full; cites canonical Stoic primary sources per mechanism; names the idempotency guarantee with verification approach (Phase 3 of harness this session); names the validator pattern; surfaces the dropped kathekon "proportionate" rule explicitly as an implied follow-on decision under Decision 1's recommendation.
+
+- **2026-05-06 (cross-session amendment, Sub-session M1-CP4b)** — M1-CP4b adds intake-clarification trigger detection to Layer 2 for AC-13 (Tier 2 soft-clarification) + AC-14 (Tier 3 deterministic-withhold) per `D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05`. Schema additions (§2): three new vocabulary types (`IntakeTriggerCode`, `DeferralStatus`, `MotivationClassification`); three new interfaces (`SoftClarification`, `OpenDeferralEntry`, `IntakeClarifications`); `motivation_classification` field added to `IterativeRefinement`; `intake_clarifications` field added to `Layer2Assessment`. All additive — assessment version remains `layer2-assessment-v1`. Algorithm additions (§3): new §3.9 "Intake clarification triggers" specifies four trigger detection steps in fixed order (STATED_OPERATIVE_CONFLICT, STATED_EQUANIMITY_UNVERIFIED, EUPATHEIA_BOUNDARY, PRAXIS_MOTIVATION_AMBIGUITY); cross-references back into §3.3 (oikeiosis), §3.2 (passion_diagnosis), §3.7.1 (katorthoma_proximity); lookup tables for eupatheia display names + descriptions + passion counterparts + virtue descriptions + convention substitution description. Validator (§5) extended to assert intake_clarifications shape and enum membership. Citation summary (§6) extended with the §3.9 sources. Phase 4 fixture coverage extended (per ADR-005 §8.1 F5/F6 additions): F5 must produce non-empty `open_deferrals` (EUPATHEIA_BOUNDARY); F6 must produce non-empty `soft_clarifications` (STATED_EQUANIMITY_UNVERIFIED); F1–F4 must produce empty intake_clarifications when no triggers fire (default-empty discipline). Tier 1 force-clarification triggers (`ELEMENT_FUSION` at Layer 1, `SCOPE_AMBIGUITY` at Position 6 / oikeiosis, `TEMPORAL_AMBIGUITY` at Position 2 / passion_diagnosis) explicitly out of scope at this amendment — those engage at M1-CP4d/4e. Standard-tier governance amendment under 0d-ii (documentation; no production touch). Module update + harness re-verification scheduled for M1-CP4c.
 
 ---
 
