@@ -882,13 +882,30 @@ CATEGORIES
     Default is motivation_stated: false — the typical case. Agents narrate what happened more often than they narrate why. "Because I care about her", "out of duty", "for the principle" are motivation phrases. Justifications for the action ("because she needs help") go in kathekon_factors.justification_offered, not here. Motivations are about the agent's *inner state*; justifications are about the *action's appropriateness*.
 
 12. element_fusion_detected — structural detection of element fusion (whether the input names multiple distinct concerns the engine cannot decompose).
-    - fused: boolean (true when the input enumerates multiple distinct concerns at high-level Layer 1 categories AND cannot be decomposed into separable entities suitable for downstream mechanisms; false otherwise).
+    - fused: boolean. STRONG DEFAULT: false. Set to true ONLY when the input enumerates multiple distinct, unrelated concerns with no narrative thread connecting them — i.e., the agent has not committed to a primary entity to reason about.
     - fused_concerns: array of strings naming the high-level concerns when fused: true; null when fused: false.
-    Default is {fused: false, fused_concerns: null} — the typical case. Most inputs name one primary concern even when secondary concerns are present in the background. Fusion is reserved for the structurally undecidable case where the engine cannot pick a primary entity to reason about.
-    Indicators of fusion: rapid topic-shifting within a single sentence; multiple distinct emotional anchors with no narrative thread connecting them; the agent appearing to enumerate concerns rather than reason about one of them ("I've got work deadlines, my mother's health, the town meeting, and I haven't slept all week").
-    When uncertain, prefer fused: false. Tier 1 force-clarification halts the engine and demands a clarification turn from the practitioner; over-firing produces a clunky workflow. Under-firing produces an impoverished assessment the practitioner can correct via re-submission.
-    Distinct from multiple oikeiosis_circles_engaged: an input that engages household + local_community is the typical multi-circle case, NOT fusion. Fusion fires when the *agent's narrative* enumerates concerns without committing to a primary one.
-    Distinct from ambiguity_notes: ambiguity_notes records *within-field* uncertainty (a passion that could be eros or pothos); element_fusion_detected records *across-field* structural undecidability.
+    Default is {fused: false, fused_concerns: null} — this is the OVERWHELMINGLY TYPICAL case. The vast majority of inputs name one primary concern (which may involve multiple parties, obligations, circles, or considerations). Fusion is RESERVED for the rare structurally undecidable case where there is genuinely no primary entity to reason about.
+
+    POSITIVE INDICATOR (fused: true): the agent rapid-lists distinct unrelated situations with no narrative thread. Example: "I've got the work deadline tomorrow, my mother's been calling about her health all week, the town council meeting is Thursday, and I haven't slept properly in days. I don't know what I'm doing anymore." → fused: true, fused_concerns: ["the work deadline", "my mother's health", "the town council meeting", "lack of sleep"]. Note: there is no narrative connecting these — they are four separate situations the agent is enumerating, not one situation the agent is reasoning about.
+
+    NEGATIVE INDICATORS (fused: false) — these are NOT fusion, even though they involve multiple parties / obligations / concerns:
+
+    (a) Obligation conflict: "My mother needs me at home this weekend, but I promised the volunteer group I'd be at the community event. I can't be in two places. I keep going back and forth on which obligation matters more." → fused: false. The agent IS reasoning about ONE primary entity: the conflict between two obligations. The "two obligations" are constituents of the one decision the agent is deliberating about. This is multi-circle (household + local_community), NOT fusion.
+
+    (b) Multi-circle situation: any input that engages household + local_community + political_community + cosmopolis is the typical multi-circle case (oikeiosis_circles_engaged is non-empty with multiple entries). Multi-circle is NOT fusion.
+
+    (c) Decision with multiple considerations: "Should I take this job? It would mean more money but less time with my family." → fused: false. The agent is reasoning about ONE decision (the job offer); money and family time are considerations within that decision, not separate concerns.
+
+    (d) Mixed feelings about one situation: "I'm angry at her but I also feel guilty about being angry." → fused: false. ONE situation, multiple emotional layers (this is multi-passion, NOT fusion).
+
+    (e) Past-and-future thinking about one situation: "I keep replaying that conversation, and now I'm worried about what they'll say next time." → fused: false. ONE situation; both regret and worry attach to it (this is temporal-ambiguity territory, handled by Layer 2's TEMPORAL_AMBIGUITY trigger — not fusion).
+
+    HEURISTIC: when uncertain, ask yourself: "Could the engine reason about this by picking ONE primary entity?" If yes (even if that entity is a conflict, a decision, or a complex situation) → fused: false. Only when the answer is genuinely no — because the agent has enumerated separate unrelated situations with no narrative thread — set fused: true.
+
+    When uncertain, ALWAYS prefer fused: false. Tier 1 force-clarification halts the engine and demands a clarification turn from the practitioner; over-firing produces a clunky "it keeps asking me questions" workflow. Under-firing produces an impoverished assessment the practitioner can correct via re-submission. The under-firing failure mode is dramatically less harmful than the over-firing failure mode.
+
+    Distinct from ambiguity_notes: ambiguity_notes records *within-field* uncertainty (a passion that could be eros or pothos); element_fusion_detected records *across-field* structural undecidability about which entity to reason about.
+
     When fused: true, fused_concerns lists the concerns drawn from the agent's verbatim phrasing where possible (paraphrased to a concise label otherwise — e.g. ["work deadlines", "my mother's health", "the town meeting"]). When fused: false, fused_concerns MUST be null (not an empty array).
 
 OUTPUT
