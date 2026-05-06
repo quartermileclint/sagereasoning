@@ -45,6 +45,8 @@ import type {
   Indifferent,
   AgentFraming,
   AgentNamedPosition,
+  // Added 2026-05-06 (M1-CP4b) — for §3.9 lookup-table typing
+  EupatheiaShape,
 } from './layer1-extractor'
 
 // Re-export Layer 1 vocabularies that Layer 3 + harness will consume.
@@ -100,6 +102,29 @@ export type HastyAssentRisk = 'high' | 'moderate' | 'low' | 'none'
 export type AxiaGrade = 'high' | 'moderate' | 'low'
 
 export type TreatedAs = 'good' | 'evil' | 'indifferent'
+
+// Added 2026-05-06 (M1-CP4b) — AC-13 / AC-14 trigger vocabulary per ADR-006 §2
+
+export type IntakeTriggerCode =
+  | 'STATED_OPERATIVE_CONFLICT'
+  | 'STATED_EQUANIMITY_UNVERIFIED'
+  | 'EUPATHEIA_BOUNDARY'
+  | 'PRAXIS_MOTIVATION_AMBIGUITY'
+
+export type DeferralStatus = 'open' | 'closed'
+
+/** Layer 2's classification of motivation underlying a praxis-stage action.
+ *  - 'virtue_explicit' — the agent named virtue-aligned motivation (e.g., "for the principle").
+ *  - 'virtue_inferred' — Layer 2 inferred virtue alignment (reserved; not used at M1).
+ *  - 'convention_inferred' — Layer 2 detected convention-shaped motivation (reserved; not used at M1).
+ *  - 'unclear_pending_clarification' — set when PRAXIS_MOTIVATION_AMBIGUITY fires per AC-14.
+ *  - null — not applicable (no praxis-stage action observed in the input). */
+export type MotivationClassification =
+  | 'virtue_explicit'
+  | 'virtue_inferred'
+  | 'convention_inferred'
+  | 'unclear_pending_clarification'
+  | null
 
 // ============================================================================
 // PER-MECHANISM OUTPUT SHAPES (per ADR-006 §2)
@@ -182,6 +207,12 @@ export interface IterativeRefinement {
   senecan_grade: SenecanGrade
   progress_dimensions: IterativeRefinementProgressDimensions
   direction_of_travel: DirectionOfTravel
+  /** Added 2026-05-06 (M1-CP4b) — set to 'unclear_pending_clarification' when
+   *  PRAXIS_MOTIVATION_AMBIGUITY fires per AC-14; 'virtue_explicit' when the
+   *  agent named motivation at praxis-stage; null when not applicable
+   *  (no praxis-stage action observed). Other values reserved for future
+   *  motivation-classification work. */
+  motivation_classification: MotivationClassification
 }
 
 export interface ImprovementPathStructured {
@@ -204,6 +235,54 @@ export interface StageScores {
   iterative_refinement: StageScore
 }
 
+// Added 2026-05-06 (M1-CP4b) — intake-clarification entries per AC-13 / AC-14, ADR-006 §2
+
+export interface SoftClarification {
+  /** Tier 2 trigger code per the d-a16 catalogue. */
+  trigger_code: 'STATED_OPERATIVE_CONFLICT' | 'STATED_EQUANIMITY_UNVERIFIED'
+  /** Always 2 for soft clarifications. */
+  intake_tier: 2
+  /** d-a16 catalogue stem ID. */
+  stem_id: string
+  /** Slot variables filled from the assessment + Layer 1 evidence. Keys per
+   *  d-a16 stem specification (e.g., 'STATED_CIRCLE_TARGET', 'SITUATION'). */
+  slot_fills: Record<string, string>
+  /** Plain-language description of which fields would refine if the practitioner
+   *  answers. */
+  scope_of_change: string
+}
+
+export interface OpenDeferralEntry {
+  /** Tier 3 trigger code per the d-a16 catalogue. */
+  trigger_code: 'EUPATHEIA_BOUNDARY' | 'PRAXIS_MOTIVATION_AMBIGUITY'
+  /** Always 3 for open deferrals. */
+  intake_tier: 3
+  /** d-a16 catalogue stem ID. */
+  stem_id: string
+  /** Slot variables filled from the assessment + Layer 1 evidence per the
+   *  d-a16 stem specification. */
+  slot_fills: Record<string, string>
+  /** Names which classification field is being withheld and why. The field_path
+   *  is a dot-path into the Layer2Assessment shape. */
+  withheld_classification: {
+    field_path: string
+    withheld_at_position: string
+    reason: string
+  }
+  /** Lifecycle status. Layer 2 always sets 'open' at creation. The 'closed'
+   *  transition is a downstream concern (D14b deferral-resolution surface). */
+  status: DeferralStatus
+}
+
+export interface IntakeClarifications {
+  /** Tier 2 soft clarifications produced this assessment. Empty when no Tier 2
+   *  triggers fire. */
+  soft_clarifications: SoftClarification[]
+  /** Tier 3 OPEN_DEFERRAL entries produced this assessment. Empty when no Tier 3
+   *  triggers fire. */
+  open_deferrals: OpenDeferralEntry[]
+}
+
 // ============================================================================
 // TOP-LEVEL ASSESSMENT (per ADR-006 §2)
 // ============================================================================
@@ -223,6 +302,12 @@ export interface Layer2Assessment {
   improvement_path_structured: ImprovementPathStructured | null
   stage_scores: StageScores
   hasty_assent_risk: HastyAssentRisk
+  /** Added 2026-05-06 (M1-CP4b) — intake-clarification triggers per AC-13 / AC-14.
+   *  Always present; arrays empty when no triggers fire. Carries Tier 2 soft
+   *  clarifications and Tier 3 OPEN_DEFERRAL entries from the four engine-level
+   *  triggers. Layer 3 reads this field to render soft_clarification_prose +
+   *  open_deferrals_prose per ADR-007. */
+  intake_clarifications: IntakeClarifications
   layer1_ambiguity_notes: string[]
   layer2_ambiguity_notes: string[]
 }
@@ -1048,6 +1133,9 @@ function assessIterativeRefinement(
       oikeiosis_extension: describeOikeiosisExtension(oik),
     },
     direction_of_travel: computeDirectionOfTravel(layer1EvidenceQuotes),
+    // Added 2026-05-06 (M1-CP4b) — overridden by detectIntakeClarifications wiring
+    // in applyMechanisms (per ADR-006 §3.9 "Wiring back into IterativeRefinement").
+    motivation_classification: null,
   }
 }
 
@@ -1373,6 +1461,207 @@ function computeHastyAssentRisk(
 }
 
 // ============================================================================
+// MECHANISM 8 — INTAKE CLARIFICATION TRIGGERS (per ADR-006 §3.9)
+// Added 2026-05-06 (M1-CP4b) — AC-13 Tier 2 + AC-14 Tier 3.
+// ============================================================================
+
+// Lookup tables per ADR-006 §3.9. Frozen at module load.
+// (EupatheiaShape imported at top of file alongside other Layer 1 types.)
+
+const EUPATHEIA_DISPLAY_NAMES: Record<EupatheiaShape, string> = {
+  chara: "chara (joy in another's good)",
+  boulesis: 'boulesis (rational wishing)',
+  eulabeia: 'eulabeia (reverent caution)',
+}
+
+const EUPATHEIA_DESCRIPTIONS: Record<EupatheiaShape, string> = {
+  chara: "genuine joy in another's good as an end in itself",
+  boulesis: 'wanting what virtue would have you want, without grasping',
+  eulabeia: 'disinclination from what virtue would not endorse, without fear',
+}
+
+const EUPATHEIA_PASSION_COUNTERPARTS: Record<EupatheiaShape, string> = {
+  chara: 'philodoxia (pleasure in being associated with success)',
+  boulesis: 'epithumia (craving an external as a genuine good)',
+  eulabeia: 'phobos (fear of an external as a genuine evil)',
+}
+
+const KATORTHOMA_PROXIMITY_LABEL: Record<KatorthomaProximity, string> = {
+  reflexive: 'an action driven by impulse without deliberation',
+  habitual: 'an action shaped by convention without examined understanding',
+  deliberate: 'an action with conscious reasoning and some understanding',
+  principled: 'an action approaching the principled level',
+  sage_like: 'an action approaching the level of perfected understanding',
+}
+
+const VIRTUE_DESCRIPTIONS: Record<VirtueDomain, string> = {
+  phronesis: 'phronesis (practical wisdom understanding the right action)',
+  dikaiosyne: 'dikaiosyne (justice — giving each what is due)',
+  andreia: 'andreia (courage — endurance of right judgement under fear)',
+  sophrosyne: 'sophrosyne (temperance — moderation of desire by right judgement)',
+}
+
+const CONVENTION_SUBSTITUTION_DESCRIPTION =
+  "habit, social expectation, or what is conventionally praiseworthy in the agent's role"
+
+/**
+ * Pick a "situation phrase" for slot-filling, per ADR-006 §3.9 helper:
+ * highest-narrative-weight entity description per Layer 1; falls back to
+ * first oikeiosis circle's evidence; falls back to first passion's evidence;
+ * falls back to "this situation".
+ */
+function pickSituationPhrase(layer1: Layer1Schema): string {
+  if (layer1.oikeiosis_circles_engaged.length > 0) {
+    return layer1.oikeiosis_circles_engaged[0].evidence
+  }
+  if (layer1.passions_present.length > 0) {
+    return layer1.passions_present[0].evidence
+  }
+  return 'this situation'
+}
+
+/**
+ * Detect AC-13 / AC-14 intake-clarification triggers per ADR-006 §3.9.
+ * Pure synchronous; deterministic; no I/O.
+ *
+ * Returns intake_clarifications + the resolved motivation_classification for
+ * the wiring back into iterative_refinement.
+ */
+function detectIntakeClarifications(
+  layer1: Layer1Schema,
+  passionDiagnosis: PassionDiagnosis,
+  oikeiosis: Oikeiosis,
+  virtueDomains: VirtueDomain[],
+  katorthomaProximity: KatorthomaProximity,
+  causalStageEvidence: CausalStageEvidence[]
+): {
+  intake_clarifications: IntakeClarifications
+  motivation_classification: MotivationClassification
+} {
+  const soft: SoftClarification[] = []
+  const open: OpenDeferralEntry[] = []
+  let motivationClassification: MotivationClassification = null
+
+  // Step 1: STATED_OPERATIVE_CONFLICT (Tier 2). At most one entry per assessment.
+  for (const sct of layer1.stated_concern_targets) {
+    if (sct.for_self_concern !== null) {
+      const operativeCircle =
+        oikeiosis.relevant_circles.length > 0
+          ? oikeiosis.relevant_circles[0].circle
+          : 'self_preservation'
+      const situation = pickSituationPhrase(layer1)
+      soft.push({
+        trigger_code: 'STATED_OPERATIVE_CONFLICT',
+        intake_tier: 2,
+        stem_id: 'tier_2:stated_operative_conflict:001',
+        slot_fills: {
+          STATED_CIRCLE_TARGET: sct.stated_target,
+          SITUATION: situation,
+          // Operative circle exposed for traceability (not part of the canonical
+          // d-a16 stem template but useful for downstream analysis).
+          OPERATIVE_CIRCLE: operativeCircle,
+        },
+        scope_of_change:
+          'Refinement of the operative circle and its kathekon assessment if the practitioner confirms which concern is dominant.',
+      })
+      break
+    }
+  }
+
+  // Step 2: STATED_EQUANIMITY_UNVERIFIED (Tier 2). Fires when stated calm
+  // coincides with detected passion-shape.
+  if (
+    layer1.stated_equanimity_signals.length > 0 &&
+    passionDiagnosis.passions_detected.length > 0
+  ) {
+    soft.push({
+      trigger_code: 'STATED_EQUANIMITY_UNVERIFIED',
+      intake_tier: 2,
+      stem_id: 'tier_2:stated_equanimity_unverified:001',
+      slot_fills: {},
+      scope_of_change:
+        'Refinement of the passion classification — whether the stated calm is genuine eupatheia or polished surface over the detected passion-shape.',
+    })
+  }
+
+  // Step 3: EUPATHEIA_BOUNDARY (Tier 3). One OPEN_DEFERRAL per candidate.
+  for (const ec of layer1.eupatheia_candidates) {
+    const eupatheiaLabel = EUPATHEIA_DISPLAY_NAMES[ec.shape]
+    const eupatheiaDescr = EUPATHEIA_DESCRIPTIONS[ec.shape]
+    const counterpartDescr = EUPATHEIA_PASSION_COUNTERPARTS[ec.shape]
+    const situationalTrigger = ec.narrative_target ?? pickSituationPhrase(layer1)
+    open.push({
+      trigger_code: 'EUPATHEIA_BOUNDARY',
+      intake_tier: 3,
+      stem_id: 'tier_3:eupatheia_boundary:001',
+      slot_fills: {
+        EUPATHEIA_SHAPE: eupatheiaLabel,
+        TIME_WINDOW: 'recent days',
+        SITUATIONAL_TRIGGER: situationalTrigger,
+        EUPATHEIA_DESCRIPTION: eupatheiaDescr,
+        PASSION_COUNTERPART_DESCRIPTION: counterpartDescr,
+      },
+      withheld_classification: {
+        field_path: 'passion_diagnosis.eupatheia_confirmation_pending',
+        withheld_at_position: 'post-passion-diagnosis (M1-CP4b extension)',
+        reason:
+          "Eupatheia confirmation requires longitudinal evidence that the practitioner's calm is not polished surface over passion. The current instance does not provide this evidence.",
+      },
+      status: 'open',
+    })
+  }
+
+  // Step 4: PRAXIS_MOTIVATION_AMBIGUITY (Tier 3).
+  const hasPraxisEvidence = causalStageEvidence.some((s) => s.stage === 'praxis')
+  const isPrincipledPlus =
+    katorthomaProximity === 'principled' || katorthomaProximity === 'sage_like'
+  if (layer1.motivation_stated === false && isPrincipledPlus && hasPraxisEvidence) {
+    const surfacePattern = KATORTHOMA_PROXIMITY_LABEL[katorthomaProximity]
+    const virtueDescr =
+      virtueDomains.length > 0
+        ? VIRTUE_DESCRIPTIONS[virtueDomains[0]]
+        : 'phronesis (practical wisdom understanding the right action)'
+    const conventionDescr = CONVENTION_SUBSTITUTION_DESCRIPTION
+    open.push({
+      trigger_code: 'PRAXIS_MOTIVATION_AMBIGUITY',
+      intake_tier: 3,
+      stem_id: 'tier_3:praxis_motivation_ambiguity:001',
+      slot_fills: {
+        SURFACE_PATTERN: surfacePattern,
+        VIRTUE_DESCRIPTION: virtueDescr,
+        CONVENTION_DESCRIPTION: conventionDescr,
+      },
+      withheld_classification: {
+        field_path: 'iterative_refinement.motivation_classification',
+        withheld_at_position: 'post-iterative-refinement (M1-CP4b extension)',
+        reason:
+          "Motivation classification depends on self-report the practitioner has not provided. The action's surface pattern is consistent with virtue but cannot be distinguished from convention without the practitioner's reflection on what was operative for them.",
+      },
+      status: 'open',
+    })
+    motivationClassification = 'unclear_pending_clarification'
+  }
+
+  // Wiring back into IterativeRefinement (per ADR-006 §3.9 paragraph after
+  // the algorithm). When the trigger does not fire and praxis-stage evidence
+  // IS present (because the agent named their motivation), set 'virtue_explicit'
+  // (M1 default — virtue-vs-convention inference is reserved for future work).
+  // Otherwise leave as null.
+  if (
+    motivationClassification === null &&
+    hasPraxisEvidence &&
+    layer1.motivation_stated === true
+  ) {
+    motivationClassification = 'virtue_explicit'
+  }
+
+  return {
+    intake_clarifications: { soft_clarifications: soft, open_deferrals: open },
+    motivation_classification: motivationClassification,
+  }
+}
+
+// ============================================================================
 // COMPOSE LAYER 2 AMBIGUITY NOTES (per ADR-006 §"Founder-confirmed decisions")
 // ============================================================================
 
@@ -1480,8 +1769,28 @@ export function applyMechanisms(
   const stageScores = computeStageScores(schema, cf, pd, oik, va, ir)
   const hastyAssentRisk = computeHastyAssentRisk(schema.urgency_indicators, cf)
 
+  // Mechanism 8 — intake clarification triggers (added 2026-05-06, M1-CP4b)
+  // Per ADR-006 §3.9. Runs after derived fields are computed (consumes
+  // proximity + virtue_domains + Layer 1's stated_concern_targets / eupatheia
+  // candidates / motivation_stated / causal_stage_evidence).
+  const intakeResult = detectIntakeClarifications(
+    schema,
+    pd,
+    oik,
+    virtueDomains,
+    proximity,
+    schema.causal_stage_evidence
+  )
+
+  // Wire motivation_classification back into iterative_refinement per ADR-006
+  // §3.9. Replace the placeholder null assigned at assessIterativeRefinement.
+  const irWithMotivation: IterativeRefinement = {
+    ...ir,
+    motivation_classification: intakeResult.motivation_classification,
+  }
+
   // Layer 2 ambiguity notes
-  const layer2Ambiguity = composeLayer2AmbiguityNotes(cf, pd, ir, kathekon)
+  const layer2Ambiguity = composeLayer2AmbiguityNotes(cf, pd, irWithMotivation, kathekon)
 
   return {
     version: 'layer2-assessment-v1',
@@ -1491,13 +1800,14 @@ export function applyMechanisms(
     oikeiosis: oik,
     value_assessment: va,
     kathekon_assessment: kathekon,
-    iterative_refinement: ir,
+    iterative_refinement: irWithMotivation,
     katorthoma_proximity: proximity,
     ruling_faculty_state: rulingFacultyState,
     virtue_domains_engaged: virtueDomains,
     improvement_path_structured: improvementPath,
     stage_scores: stageScores,
     hasty_assent_risk: hastyAssentRisk,
+    intake_clarifications: intakeResult.intake_clarifications,
     layer1_ambiguity_notes: schema.ambiguity_notes.slice(),
     layer2_ambiguity_notes: layer2Ambiguity,
   }
@@ -1583,8 +1893,33 @@ const REQUIRED_LAYER2_KEYS: ReadonlyArray<keyof Layer2Assessment> = [
   'improvement_path_structured',
   'stage_scores',
   'hasty_assent_risk',
+  // Added 2026-05-06 (M1-CP4b)
+  'intake_clarifications',
   'layer1_ambiguity_notes',
   'layer2_ambiguity_notes',
+]
+
+// Added 2026-05-06 (M1-CP4b) — valid-value sets for AC-13 / AC-14 enums
+
+const SOFT_TRIGGER_CODES: ReadonlyArray<SoftClarification['trigger_code']> = [
+  'STATED_OPERATIVE_CONFLICT',
+  'STATED_EQUANIMITY_UNVERIFIED',
+]
+
+const OPEN_TRIGGER_CODES: ReadonlyArray<OpenDeferralEntry['trigger_code']> = [
+  'EUPATHEIA_BOUNDARY',
+  'PRAXIS_MOTIVATION_AMBIGUITY',
+]
+
+const DEFERRAL_STATUSES: ReadonlyArray<DeferralStatus> = ['open', 'closed']
+
+const MOTIVATION_CLASSIFICATIONS: ReadonlyArray<
+  Exclude<MotivationClassification, null>
+> = [
+  'virtue_explicit',
+  'virtue_inferred',
+  'convention_inferred',
+  'unclear_pending_clarification',
 ]
 
 /**
@@ -1628,7 +1963,7 @@ export function validateLayer2Assessment(parsed: unknown): Layer2Assessment {
   l2AssertObject(root.oikeiosis, 'oikeiosis')
   l2AssertObject(root.value_assessment, 'value_assessment')
   l2AssertObject(root.kathekon_assessment, 'kathekon_assessment')
-  l2AssertObject(root.iterative_refinement, 'iterative_refinement')
+  const iterativeRefinement = l2AssertObject(root.iterative_refinement, 'iterative_refinement')
   l2AssertObject(root.stage_scores, 'stage_scores')
   l2AssertString(root.ruling_faculty_state, 'ruling_faculty_state')
   l2AssertArray(root.virtue_domains_engaged, 'virtue_domains_engaged')
@@ -1639,6 +1974,142 @@ export function validateLayer2Assessment(parsed: unknown): Layer2Assessment {
   if (root.improvement_path_structured !== null) {
     l2AssertObject(root.improvement_path_structured, 'improvement_path_structured')
   }
+
+  // Added 2026-05-06 (M1-CP4b) — iterative_refinement.motivation_classification
+  // Allow null OR membership in MOTIVATION_CLASSIFICATIONS.
+  const mc = iterativeRefinement.motivation_classification
+  if (mc !== null) {
+    if (
+      typeof mc !== 'string' ||
+      !MOTIVATION_CLASSIFICATIONS.includes(mc as Exclude<MotivationClassification, null>)
+    ) {
+      throw new Layer2ValidationError(
+        'enum',
+        `Invalid motivation_classification: ${JSON.stringify(mc)} (expected null or one of: ${MOTIVATION_CLASSIFICATIONS.join(', ')})`,
+        'iterative_refinement.motivation_classification',
+        mc
+      )
+    }
+  }
+
+  // Added 2026-05-06 (M1-CP4b) — intake_clarifications shape and enum membership
+  const intakeClar = l2AssertObject(root.intake_clarifications, 'intake_clarifications')
+  const softArr = l2AssertArray(intakeClar.soft_clarifications, 'intake_clarifications.soft_clarifications')
+  const openArr = l2AssertArray(intakeClar.open_deferrals, 'intake_clarifications.open_deferrals')
+
+  softArr.forEach((entry, i) => {
+    const path = `intake_clarifications.soft_clarifications[${i}]`
+    const o = l2AssertObject(entry, path)
+    const trigger = o.trigger_code
+    if (
+      typeof trigger !== 'string' ||
+      !SOFT_TRIGGER_CODES.includes(trigger as SoftClarification['trigger_code'])
+    ) {
+      throw new Layer2ValidationError(
+        'enum',
+        `Invalid soft trigger_code at ${path}: ${JSON.stringify(trigger)} (expected one of: ${SOFT_TRIGGER_CODES.join(', ')})`,
+        `${path}.trigger_code`,
+        trigger
+      )
+    }
+    if (o.intake_tier !== 2) {
+      throw new Layer2ValidationError(
+        'enum',
+        `Expected intake_tier === 2 at ${path}, got ${JSON.stringify(o.intake_tier)}`,
+        `${path}.intake_tier`,
+        o.intake_tier
+      )
+    }
+    l2AssertString(o.stem_id, `${path}.stem_id`)
+    if (o.stem_id === '') {
+      throw new Layer2ValidationError(
+        'shape',
+        `Expected non-empty stem_id at ${path}`,
+        `${path}.stem_id`,
+        o.stem_id
+      )
+    }
+    const slots = l2AssertObject(o.slot_fills, `${path}.slot_fills`)
+    for (const [k, v] of Object.entries(slots)) {
+      if (typeof v !== 'string') {
+        throw new Layer2ValidationError(
+          'shape',
+          `Expected string slot_fill at ${path}.slot_fills.${k}, got ${typeof v}`,
+          `${path}.slot_fills.${k}`,
+          v
+        )
+      }
+    }
+    l2AssertString(o.scope_of_change, `${path}.scope_of_change`)
+  })
+
+  openArr.forEach((entry, i) => {
+    const path = `intake_clarifications.open_deferrals[${i}]`
+    const o = l2AssertObject(entry, path)
+    const trigger = o.trigger_code
+    if (
+      typeof trigger !== 'string' ||
+      !OPEN_TRIGGER_CODES.includes(trigger as OpenDeferralEntry['trigger_code'])
+    ) {
+      throw new Layer2ValidationError(
+        'enum',
+        `Invalid open trigger_code at ${path}: ${JSON.stringify(trigger)} (expected one of: ${OPEN_TRIGGER_CODES.join(', ')})`,
+        `${path}.trigger_code`,
+        trigger
+      )
+    }
+    if (o.intake_tier !== 3) {
+      throw new Layer2ValidationError(
+        'enum',
+        `Expected intake_tier === 3 at ${path}, got ${JSON.stringify(o.intake_tier)}`,
+        `${path}.intake_tier`,
+        o.intake_tier
+      )
+    }
+    l2AssertString(o.stem_id, `${path}.stem_id`)
+    if (o.stem_id === '') {
+      throw new Layer2ValidationError(
+        'shape',
+        `Expected non-empty stem_id at ${path}`,
+        `${path}.stem_id`,
+        o.stem_id
+      )
+    }
+    const slots = l2AssertObject(o.slot_fills, `${path}.slot_fills`)
+    for (const [k, v] of Object.entries(slots)) {
+      if (typeof v !== 'string') {
+        throw new Layer2ValidationError(
+          'shape',
+          `Expected string slot_fill at ${path}.slot_fills.${k}, got ${typeof v}`,
+          `${path}.slot_fills.${k}`,
+          v
+        )
+      }
+    }
+    const wc = l2AssertObject(o.withheld_classification, `${path}.withheld_classification`)
+    l2AssertString(wc.field_path, `${path}.withheld_classification.field_path`)
+    l2AssertString(wc.withheld_at_position, `${path}.withheld_classification.withheld_at_position`)
+    l2AssertString(wc.reason, `${path}.withheld_classification.reason`)
+    if (wc.field_path === '' || wc.withheld_at_position === '' || wc.reason === '') {
+      throw new Layer2ValidationError(
+        'shape',
+        `Expected non-empty withheld_classification fields at ${path}`,
+        `${path}.withheld_classification`,
+        wc
+      )
+    }
+    if (
+      typeof o.status !== 'string' ||
+      !DEFERRAL_STATUSES.includes(o.status as DeferralStatus)
+    ) {
+      throw new Layer2ValidationError(
+        'enum',
+        `Invalid status at ${path}: ${JSON.stringify(o.status)} (expected one of: ${DEFERRAL_STATUSES.join(', ')})`,
+        `${path}.status`,
+        o.status
+      )
+    }
+  })
 
   return root as unknown as Layer2Assessment
 }

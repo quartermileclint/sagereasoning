@@ -139,6 +139,20 @@ function loadCachedSchema(fixtureId: string): Layer1Schema | null {
   try {
     const raw = readFileSync(path, 'utf8')
     const parsed = JSON.parse(raw)
+    // Added 2026-05-06 (M1-CP4b) — backwards-compat shim for caches written before
+    // M1-CP4b's schema additions. Empty/default values are correct for fixtures that
+    // do not exercise the new categories; the harness asserts these defaults below.
+    // This avoids the founder needing to re-extract F1–F4 fresh just to populate
+    // empty-array fields. If the cache contains real content for the new fields
+    // (because it was written post-M1-CP4b), the existing values are preserved.
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      const o = parsed as Record<string, unknown>
+      if (!('eupatheia_candidates' in o)) o.eupatheia_candidates = []
+      if (!('stated_concern_targets' in o)) o.stated_concern_targets = []
+      if (!('stated_equanimity_signals' in o)) o.stated_equanimity_signals = []
+      if (!('motivation_stated' in o)) o.motivation_stated = false
+      if (!('motivation_evidence' in o)) o.motivation_evidence = []
+    }
     return validateLayer1Schema(parsed)
   } catch (err) {
     console.warn(
@@ -167,6 +181,15 @@ function loadCachedLayer3Prose(fixtureId: string): Layer3Prose | null {
   try {
     const raw = readFileSync(path, 'utf8')
     const parsed = JSON.parse(raw)
+    // Added 2026-05-06 (M1-CP4b) — backwards-compat shim for L3 caches written
+    // before M1-CP4b's prose-field additions. Null values are correct for fixtures
+    // that do not produce intake_clarifications; the harness asserts this null
+    // default below in assertions 8 + 9.
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      const o = parsed as Record<string, unknown>
+      if (!('soft_clarification_prose' in o)) o.soft_clarification_prose = null
+      if (!('open_deferrals_prose' in o)) o.open_deferrals_prose = null
+    }
     return validateLayer3Prose(parsed)
   } catch (err) {
     console.warn(
@@ -216,13 +239,14 @@ function check(message: string, condition: boolean, detail?: string): void {
 // -----------------------------------------------------------------------------
 
 interface Fixture {
-  /** Identifier (F1–F4). */
+  /** Identifier (F1–F6). F5 + F6 added 2026-05-06 (M1-CP4b) for AC-14 + Tier 2. */
   id: string
   /** Short label for output. */
   label: string
   /** The agent input — what the LLM extracts from. */
   input: string
-  /** Expected non-empty categories per ADR-005 §8.2. Used in Phase 1 assertions. */
+  /** Expected non-empty categories per ADR-005 §8.2. Used in Phase 1 assertions.
+   *  Only array-typed Layer1Schema keys here (motivation_stated is checked separately). */
   expected_non_empty: Array<keyof Layer1Schema>
   /** Categories where empty is acceptable (e.g., F3's passions_present). */
   expected_optional: Array<keyof Layer1Schema>
@@ -283,6 +307,48 @@ const FIXTURES: Fixture[] = [
     ],
     expected_optional: ['oikeiosis_circles_engaged', 'value_categories_at_stake'],
   },
+  {
+    id: 'F5',
+    label: 'Eupatheia-candidate case (added 2026-05-06, M1-CP4b)',
+    input:
+      "I felt real joy when she got the promotion. No envy at all — I just wanted her to have it. It's strange to notice it that clearly.",
+    expected_non_empty: [
+      'oikeiosis_circles_engaged',
+      'eupatheia_candidates',
+      'stated_equanimity_signals',
+      'causal_stage_evidence',
+    ],
+    expected_optional: [
+      'passions_present',
+      'control_filter_elements',
+      'value_categories_at_stake',
+      'kathekon_factors',
+      'urgency_indicators',
+      'stated_concern_targets',
+      'motivation_evidence',
+    ],
+  },
+  {
+    id: 'F6',
+    label: 'Stated-equanimity-with-passion case (added 2026-05-06, M1-CP4b)',
+    input:
+      "I told myself I'm fine with the decision the board made, but I keep replaying it in my head. I should be over it by now.",
+    expected_non_empty: [
+      'passions_present',
+      'stated_equanimity_signals',
+      'causal_stage_evidence',
+    ],
+    expected_optional: [
+      'control_filter_elements',
+      'oikeiosis_circles_engaged',
+      'value_categories_at_stake',
+      'kathekon_factors',
+      'urgency_indicators',
+      'eupatheia_candidates',
+      'stated_concern_targets',
+      'motivation_evidence',
+    ],
+  },
 ]
 
 // -----------------------------------------------------------------------------
@@ -300,18 +366,20 @@ interface FixtureResult {
 async function runFixture(fixture: Fixture): Promise<FixtureResult> {
   const start = Date.now()
 
-  // Replay cache path — skip Sonnet, load from disk
+  // Replay cache path — try cache first; fall through to fresh extraction when missing.
+  // (Updated 2026-05-06, M1-CP4b — previously errored on cache miss; now falls through
+  // so newly added fixtures like F5/F6 work in REPLAY mode without forcing the founder
+  // to re-extract the cached fixtures. Logs explicitly when incurring Sonnet cost.)
   if (REPLAY_CACHE) {
     const cached = loadCachedSchema(fixture.id)
     if (cached) {
       info(`  [cache] loaded ${fixture.id} from cache (no Sonnet call)`)
       return { fixture, schema: cached, latency_ms: Date.now() - start }
     }
-    return {
-      fixture,
-      error: new Error(`LAYER1_REPLAY_CACHE=1 but cache file missing for ${fixture.id}; run without LAYER1_REPLAY_CACHE first to populate cache`),
-      latency_ms: Date.now() - start,
-    }
+    info(
+      `  [cache] MISS for ${fixture.id} — falling through to fresh Sonnet extraction (cost will be incurred; cache will be populated for next run)`
+    )
+    // fall through to fresh extraction below
   }
 
   // Fresh extraction path — call Sonnet, save to cache on success
@@ -344,6 +412,14 @@ function diagnoseSchema(schema: Layer1Schema): void {
       `urgency_indicators(${schema.urgency_indicators.length}) ` +
       `causal_stage_evidence(${schema.causal_stage_evidence.length}) ` +
       `ambiguity_notes(${schema.ambiguity_notes.length})`
+  )
+  // Added 2026-05-06 (M1-CP4b) — diagnostics for the four new fields
+  info(
+    `  eupatheia_candidates(${schema.eupatheia_candidates.length}) ` +
+      `stated_concern_targets(${schema.stated_concern_targets.length}) ` +
+      `stated_equanimity_signals(${schema.stated_equanimity_signals.length}) ` +
+      `motivation_stated=${schema.motivation_stated} ` +
+      `motivation_evidence(${schema.motivation_evidence.length})`
   )
   if (schema.passions_present.length > 0) {
     const summary = schema.passions_present
@@ -446,6 +522,22 @@ async function runPhase1AndPhase2(): Promise<FixtureResult[]> {
         }`
       )
     }
+
+    // Added 2026-05-06 (M1-CP4b) — motivation_stated assertion per ADR-005 §8.2.
+    // None of F1–F6 names the agent's motivation explicitly, so motivation_stated
+    // must be false on all six fixtures and motivation_evidence must be empty.
+    check(
+      `${fixture.id}.P1 — motivation_stated === false`,
+      result.schema.motivation_stated === false,
+      `motivation_stated=${result.schema.motivation_stated}`
+    )
+    check(
+      `${fixture.id}.P1 — motivation_evidence is empty when motivation_stated is false`,
+      Array.isArray(result.schema.motivation_evidence) &&
+        (result.schema.motivation_stated === true ||
+          result.schema.motivation_evidence.length === 0),
+      `motivation_evidence.length=${result.schema.motivation_evidence?.length ?? 'n/a'}`
+    )
 
     console.log()
   }
@@ -678,6 +770,51 @@ function runPhase4(layer2Results: Layer2FixtureResult[]): void {
       `P4 — ${cc.label}`,
       passed,
       passed ? `(satisfied by: ${matchingFixtures.join(', ')})` : '(NOT satisfied by any fixture)'
+    )
+  }
+
+  // -------------------------------------------------------------------------
+  // Added 2026-05-06 (M1-CP4b) — per-fixture intake_clarifications expectations
+  // per ADR-006 §3.9 + ADR-005 §8.2.
+  // -------------------------------------------------------------------------
+
+  // F1–F4: intake_clarifications must be empty (no AC-13 / AC-14 triggers fire).
+  // F5: open_deferrals must contain at least one EUPATHEIA_BOUNDARY entry.
+  // F6: soft_clarifications must contain at least one STATED_EQUANIMITY_UNVERIFIED entry.
+
+  const baselineFixtures = ['F1', 'F2', 'F3', 'F4']
+  for (const fid of baselineFixtures) {
+    const r = usable.find((u) => u.fixture.id === fid)
+    if (!r) continue
+    const ic = r.assessment_a!.intake_clarifications
+    check(
+      `P4 — ${fid}.intake_clarifications baseline: soft_clarifications + open_deferrals BOTH empty`,
+      ic.soft_clarifications.length === 0 && ic.open_deferrals.length === 0,
+      `soft_clarifications.length=${ic.soft_clarifications.length}, open_deferrals.length=${ic.open_deferrals.length}`
+    )
+  }
+
+  const f5 = usable.find((u) => u.fixture.id === 'F5')
+  if (f5) {
+    const ic = f5.assessment_a!.intake_clarifications
+    const eupHits = ic.open_deferrals.filter((d) => d.trigger_code === 'EUPATHEIA_BOUNDARY')
+    check(
+      `P4 — F5.intake_clarifications.open_deferrals contains at least one EUPATHEIA_BOUNDARY entry`,
+      eupHits.length >= 1,
+      `EUPATHEIA_BOUNDARY count=${eupHits.length}; total open_deferrals=${ic.open_deferrals.length}`
+    )
+  }
+
+  const f6 = usable.find((u) => u.fixture.id === 'F6')
+  if (f6) {
+    const ic = f6.assessment_a!.intake_clarifications
+    const stEqHits = ic.soft_clarifications.filter(
+      (s) => s.trigger_code === 'STATED_EQUANIMITY_UNVERIFIED'
+    )
+    check(
+      `P4 — F6.intake_clarifications.soft_clarifications contains at least one STATED_EQUANIMITY_UNVERIFIED entry`,
+      stEqHits.length >= 1,
+      `STATED_EQUANIMITY_UNVERIFIED count=${stEqHits.length}; total soft_clarifications=${ic.soft_clarifications.length}`
     )
   }
 
@@ -1036,6 +1173,132 @@ async function runPhase5Async(
               ? 'prose asserts not appropriate when assessment is null — HARD FAIL'
               : undefined
         )
+      }
+
+      // -----------------------------------------------------------------------
+      // Added 2026-05-06 (M1-CP4b) — assertions 8, 9, 10 per ADR-007 §8.2.
+      // -----------------------------------------------------------------------
+
+      const ic = assessment.intake_clarifications
+      const hasSoft = ic.soft_clarifications.length > 0
+      const hasOpen = ic.open_deferrals.length > 0
+
+      // Assertion 8: soft_clarification_prose surfacing.
+      // When soft_clarifications is non-empty: prose's soft_clarification_prose MUST
+      // be non-null AND contain a recognisable d-a16 stem fragment.
+      // When empty: soft_clarification_prose MUST be null.
+      const softProse = proseForConsistency.soft_clarification_prose
+      if (hasSoft) {
+        const lower = (softProse ?? '').toLowerCase()
+        const hasStemFragment =
+          lower.includes('i want to check something with you') ||
+          lower.includes('has there been a recent time')
+        check(
+          `${fixtureId}.P5 — soft_clarifications non-empty → soft_clarification_prose non-null AND contains d-a16 stem fragment`,
+          softProse !== null && hasStemFragment,
+          softProse === null
+            ? 'soft_clarification_prose is null but soft_clarifications is non-empty — HARD FAIL'
+            : !hasStemFragment
+              ? `prose missing recognisable d-a16 stem fragment — got: ${softProse.slice(0, 200)}…`
+              : undefined
+        )
+      } else {
+        check(
+          `${fixtureId}.P5 — soft_clarifications empty → soft_clarification_prose === null`,
+          softProse === null,
+          softProse !== null
+            ? `soft_clarification_prose is non-null when soft_clarifications is empty — HARD FAIL: ${softProse.slice(0, 200)}…`
+            : undefined
+        )
+      }
+
+      // Assertion 9: open_deferrals_prose surfacing + AC-14 marginal-case sentence
+      // in philosophical_reflection per trigger code.
+      const openProse = proseForConsistency.open_deferrals_prose
+      if (hasOpen) {
+        const lower = (openProse ?? '').toLowerCase()
+        // Per-trigger fragment recogniser: at least one stem fragment per entry's
+        // trigger code must be present in the concatenated prose.
+        const triggers = ic.open_deferrals.map((d) => d.trigger_code)
+        const hasEupatheiaFragment =
+          !triggers.includes('EUPATHEIA_BOUNDARY') ||
+          (lower.includes('across') && lower.includes('arose in this domain'))
+        const hasPraxisFragment =
+          !triggers.includes('PRAXIS_MOTIVATION_AMBIGUITY') ||
+          lower.includes('the engine cannot tell from the current instance alone')
+        const allFragmentsPresent = hasEupatheiaFragment && hasPraxisFragment
+        check(
+          `${fixtureId}.P5 — open_deferrals non-empty → open_deferrals_prose non-null AND contains per-trigger d-a16 stem fragments`,
+          openProse !== null && allFragmentsPresent,
+          openProse === null
+            ? 'open_deferrals_prose is null but open_deferrals is non-empty — HARD FAIL'
+            : !allFragmentsPresent
+              ? `prose missing per-trigger stem fragments — eupatheia=${hasEupatheiaFragment} praxis=${hasPraxisFragment}; got: ${openProse.slice(0, 200)}…`
+              : undefined
+        )
+
+        // AC-14 marginal-case sentence in philosophical_reflection per trigger code
+        const reflLower = proseForConsistency.philosophical_reflection.toLowerCase()
+        if (triggers.includes('EUPATHEIA_BOUNDARY')) {
+          const hasEupSentence =
+            reflLower.includes('classification of this calm') ||
+            (reflLower.includes('genuine eupatheia') &&
+              reflLower.includes('cannot be confirmed'))
+          check(
+            `${fixtureId}.P5 — EUPATHEIA_BOUNDARY → philosophical_reflection contains AC-14 marginal-case sentence`,
+            hasEupSentence,
+            hasEupSentence
+              ? undefined
+              : 'expected sentence like "The classification of this calm as genuine eupatheia versus polished surface over passion cannot be confirmed from this instance alone." — missing'
+          )
+        }
+        if (triggers.includes('PRAXIS_MOTIVATION_AMBIGUITY')) {
+          const hasPraxSentence =
+            (reflLower.includes('virtue') &&
+              reflLower.includes('convention') &&
+              reflLower.includes('cannot be determined')) ||
+            reflLower.includes('arose from virtue or from convention')
+          check(
+            `${fixtureId}.P5 — PRAXIS_MOTIVATION_AMBIGUITY → philosophical_reflection contains AC-14 marginal-case sentence`,
+            hasPraxSentence,
+            hasPraxSentence
+              ? undefined
+              : 'expected sentence like "Whether this action arose from virtue or from convention cannot be determined from the current instance alone." — missing'
+          )
+        }
+      } else {
+        check(
+          `${fixtureId}.P5 — open_deferrals empty → open_deferrals_prose === null`,
+          openProse === null,
+          openProse !== null
+            ? `open_deferrals_prose is non-null when open_deferrals is empty — HARD FAIL: ${openProse.slice(0, 200)}…`
+            : undefined
+        )
+      }
+
+      // Assertion 10: fallback prose intake-clarification parity.
+      // For any fixture where intake_clarifications is non-empty, generateFallbackProse
+      // MUST also produce non-null soft_clarification_prose / open_deferrals_prose.
+      if (p5.fallback_prose && (hasSoft || hasOpen)) {
+        const fb = p5.fallback_prose
+        if (hasSoft) {
+          check(
+            `${fixtureId}.P5 — fallback parity: soft_clarifications non-empty → fallback.soft_clarification_prose non-null`,
+            fb.soft_clarification_prose !== null,
+            fb.soft_clarification_prose === null
+              ? 'fallback.soft_clarification_prose is null but soft_clarifications is non-empty — HARD FAIL'
+              : undefined
+          )
+        }
+        if (hasOpen) {
+          check(
+            `${fixtureId}.P5 — fallback parity: open_deferrals non-empty → fallback.open_deferrals_prose non-null`,
+            fb.open_deferrals_prose !== null,
+            fb.open_deferrals_prose === null
+              ? 'fallback.open_deferrals_prose is null but open_deferrals is non-empty — HARD FAIL'
+              : undefined
+          )
+        }
       }
     }
 

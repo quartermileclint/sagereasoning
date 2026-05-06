@@ -102,6 +102,17 @@ export type UrgencySignalType =
   | 'finality_language'
   | 'irreversibility_language'
 
+// Added 2026-05-06 (M1-CP4b) — eupatheia + stated-equanimity vocabularies per AC-14 + Tier 2
+
+export type EupatheiaShape = 'chara' | 'boulesis' | 'eulabeia'
+
+export type StatedEquanimitySignal =
+  | 'felt_fine'
+  | 'felt_calm'
+  | 'felt_at_peace'
+  | 'didnt_bother_me'
+  | 'other_explicit_calm'
+
 // ============================================================================
 // PER-CATEGORY ENTRY SHAPES
 // ============================================================================
@@ -156,11 +167,52 @@ export interface CausalStageEvidence {
   evidence: string
 }
 
+// Added 2026-05-06 (M1-CP4b) — entry shapes for the four new top-level fields per ADR-005 §3.8–§3.11
+
+export interface EupatheiaCandidate {
+  /** Eupatheia shape detected in the input. */
+  shape: EupatheiaShape
+  /** Verbatim quote from the input that motivates this detection. R7 source fidelity. */
+  evidence: string
+  /** Who or what the candidate eupatheia is about (e.g., "the team's win", "her promotion").
+   *  Null when the input names the eupatheia shape but not a specific target. */
+  narrative_target: string | null
+}
+
+export interface StatedConcernTarget {
+  /** The agent's named focus — verbatim phrase ("the team", "her", "my daughter"). */
+  stated_target: string
+  /** What the agent says they're worried about for themselves, separately from the
+   *  named target. Null when the agent names the target without a self-concern phrase. */
+  for_self_concern: string | null
+  /** Verbatim quote from the input. R7 source fidelity. */
+  evidence: string
+}
+
+export interface StatedEquanimitySignalEntry {
+  signal_type: StatedEquanimitySignal
+  /** Verbatim quote from the input. R7 source fidelity. */
+  evidence: string
+}
+
+export interface MotivationEvidenceEntry {
+  /** Verbatim phrase naming the agent's stated motivation ("because I care about her",
+   *  "to be the kind of person who shows up"). */
+  motivation: string
+  /** Verbatim quote from the input. R7 source fidelity. */
+  evidence: string
+}
+
 // ============================================================================
 // TOP-LEVEL SCHEMA
 // ============================================================================
 
 export interface Layer1Schema {
+  /** Schema version. Constant. Bumped if the schema shape changes.
+   *  Note (M1-CP4b, 2026-05-06): the four new fields below are additive; version
+   *  remains 'layer1-schema-v1'. The producer (extractFeatures + system prompt) is
+   *  updated in the same amendment cycle so no consumer reads the schema without
+   *  the new fields. */
   version: 'layer1-schema-v1'
   passions_present: PassionPresent[]
   control_filter_elements: ControlFilterElement[]
@@ -169,6 +221,27 @@ export interface Layer1Schema {
   kathekon_factors: KathekonFactor[]
   urgency_indicators: UrgencyIndicator[]
   causal_stage_evidence: CausalStageEvidence[]
+  // Added 2026-05-06 (M1-CP4b) — structural-trigger fields for AC-14 + Tier 2
+  /** Eupatheia (good emotion) shapes detected in the input. Empty when no chara /
+   *  boulesis / eulabeia patterns are present. Layer 2's eupatheia-boundary check
+   *  fires Tier 3 OPEN_DEFERRAL on each entry per AC-14. */
+  eupatheia_candidates: EupatheiaCandidate[]
+  /** Phrases where the agent names a target distinct from the implicit operative
+   *  circle ("I'm doing this for the community", "It's about the kids"). Layer 2's
+   *  STATED_OPERATIVE_CONFLICT check compares stated target vs operative circle.
+   *  Empty when the agent doesn't explicitly name a target beyond the engaged circle. */
+  stated_concern_targets: StatedConcernTarget[]
+  /** Explicit calm-language signals ("I felt fine", "it didn't bother me"). Layer 2's
+   *  STATED_EQUANIMITY_UNVERIFIED check fires when calm coincides with passion-shape
+   *  detection. Empty when the agent does not explicitly name calm. */
+  stated_equanimity_signals: StatedEquanimitySignalEntry[]
+  /** True when the agent explicitly states why they did what they did. Default false
+   *  (motivation unstated) — the structural condition for PRAXIS_MOTIVATION_AMBIGUITY
+   *  when combined with principled+ katorthoma_proximity at praxis stage. */
+  motivation_stated: boolean
+  /** Verbatim motivation phrases when motivation_stated is true. Empty when
+   *  motivation_stated is false. */
+  motivation_evidence: MotivationEvidenceEntry[]
   /** Free-form notes naming any uncertainty. Empty when the extraction is
    *  unambiguous. */
   ambiguity_notes: string[]
@@ -295,6 +368,22 @@ const URGENCY_SIGNAL_TYPES: ReadonlyArray<UrgencySignalType> = [
   'irreversibility_language',
 ]
 
+// Added 2026-05-06 (M1-CP4b) — valid-value sets for AC-14 + Tier 2 vocabularies
+
+const EUPATHEIA_SHAPES: ReadonlyArray<EupatheiaShape> = [
+  'chara',
+  'boulesis',
+  'eulabeia',
+]
+
+const STATED_EQUANIMITY_SIGNALS: ReadonlyArray<StatedEquanimitySignal> = [
+  'felt_fine',
+  'felt_calm',
+  'felt_at_peace',
+  'didnt_bother_me',
+  'other_explicit_calm',
+]
+
 // ============================================================================
 // VALIDATOR (per ADR-005 §6 — hand-rolled, no Zod)
 // ============================================================================
@@ -385,6 +474,12 @@ const REQUIRED_KEYS: ReadonlyArray<keyof Layer1Schema> = [
   'kathekon_factors',
   'urgency_indicators',
   'causal_stage_evidence',
+  // Added 2026-05-06 (M1-CP4b)
+  'eupatheia_candidates',
+  'stated_concern_targets',
+  'stated_equanimity_signals',
+  'motivation_stated',
+  'motivation_evidence',
   'ambiguity_notes',
 ]
 
@@ -525,6 +620,82 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
     }
   })
 
+  // Added 2026-05-06 (M1-CP4b) — eupatheia_candidates
+  const eupatheiaCandidates: EupatheiaCandidate[] = assertArray(
+    root.eupatheia_candidates,
+    'eupatheia_candidates'
+  ).map((entry, i) => {
+    const o = assertObject(entry, `eupatheia_candidates[${i}]`)
+    const narrativeTargetRaw = o.narrative_target
+    return {
+      shape: assertEnum(o.shape, EUPATHEIA_SHAPES, `eupatheia_candidates[${i}].shape`),
+      evidence: assertString(o.evidence, `eupatheia_candidates[${i}].evidence`),
+      narrative_target:
+        narrativeTargetRaw === null
+          ? null
+          : assertString(narrativeTargetRaw, `eupatheia_candidates[${i}].narrative_target`),
+    }
+  })
+
+  // Added 2026-05-06 (M1-CP4b) — stated_concern_targets
+  const statedConcernTargets: StatedConcernTarget[] = assertArray(
+    root.stated_concern_targets,
+    'stated_concern_targets'
+  ).map((entry, i) => {
+    const o = assertObject(entry, `stated_concern_targets[${i}]`)
+    const forSelfRaw = o.for_self_concern
+    return {
+      stated_target: assertString(
+        o.stated_target,
+        `stated_concern_targets[${i}].stated_target`
+      ),
+      for_self_concern:
+        forSelfRaw === null
+          ? null
+          : assertString(forSelfRaw, `stated_concern_targets[${i}].for_self_concern`),
+      evidence: assertString(o.evidence, `stated_concern_targets[${i}].evidence`),
+    }
+  })
+
+  // Added 2026-05-06 (M1-CP4b) — stated_equanimity_signals
+  const statedEquanimitySignals: StatedEquanimitySignalEntry[] = assertArray(
+    root.stated_equanimity_signals,
+    'stated_equanimity_signals'
+  ).map((entry, i) => {
+    const o = assertObject(entry, `stated_equanimity_signals[${i}]`)
+    return {
+      signal_type: assertEnum(
+        o.signal_type,
+        STATED_EQUANIMITY_SIGNALS,
+        `stated_equanimity_signals[${i}].signal_type`
+      ),
+      evidence: assertString(o.evidence, `stated_equanimity_signals[${i}].evidence`),
+    }
+  })
+
+  // Added 2026-05-06 (M1-CP4b) — motivation_stated (boolean)
+  if (typeof root.motivation_stated !== 'boolean') {
+    throw new Layer1ValidationError(
+      'shape',
+      `Expected boolean at motivation_stated, got ${typeof root.motivation_stated}`,
+      'motivation_stated',
+      root.motivation_stated
+    )
+  }
+  const motivationStated: boolean = root.motivation_stated
+
+  // Added 2026-05-06 (M1-CP4b) — motivation_evidence
+  const motivationEvidence: MotivationEvidenceEntry[] = assertArray(
+    root.motivation_evidence,
+    'motivation_evidence'
+  ).map((entry, i) => {
+    const o = assertObject(entry, `motivation_evidence[${i}]`)
+    return {
+      motivation: assertString(o.motivation, `motivation_evidence[${i}].motivation`),
+      evidence: assertString(o.evidence, `motivation_evidence[${i}].evidence`),
+    }
+  })
+
   // ambiguity_notes
   const ambiguityNotes: string[] = assertArray(root.ambiguity_notes, 'ambiguity_notes').map(
     (entry, i) => assertString(entry, `ambiguity_notes[${i}]`)
@@ -539,6 +710,12 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
     kathekon_factors: kathekonFactors,
     urgency_indicators: urgencyIndicators,
     causal_stage_evidence: causalStageEvidence,
+    // Added 2026-05-06 (M1-CP4b)
+    eupatheia_candidates: eupatheiaCandidates,
+    stated_concern_targets: statedConcernTargets,
+    stated_equanimity_signals: statedEquanimitySignals,
+    motivation_stated: motivationStated,
+    motivation_evidence: motivationEvidence,
     ambiguity_notes: ambiguityNotes,
   }
 }
@@ -553,7 +730,7 @@ Your output drives a deterministic Stoic mechanism engine (Layer 2). The quality
 
 EXTRACTION CONTRACT
 
-Read the input text carefully. For each of the seven content categories below, extract everything the input names and return it in the specified shape.
+Read the input text carefully. For each of the eleven content categories below, extract everything the input names and return it in the specified shape.
 
 If a category is absent from the input, return an empty array for that category — do not omit the field.
 
@@ -604,6 +781,29 @@ CATEGORIES
    - Evidence: verbatim quote.
    Multiple stages allowed — an input can show evidence at several stages simultaneously.
 
+8. eupatheia_candidates — eupatheia (good emotion) shapes detected in the input.
+   - Shape: chara (joy in another's good) | boulesis (rational wishing) | eulabeia (reverent caution).
+   - Evidence: verbatim quote.
+   - narrative_target: who/what the candidate eupatheia is about (verbatim phrase) or null.
+   Eupatheia is the *rational* analogue to the four irrational passions. It is distinct from passions_present. Same input may show both (e.g., joy at a friend's success that is partly chara and partly philodoxia). When ambiguous, populate both fields and add an ambiguity note. Most inputs do not exercise eupatheia — empty array is the typical case.
+   Do NOT classify the input as displaying eupatheia anywhere else; only this field carries the candidate detection. Confirmation requires longitudinal evidence the engine does not have at single-instance read.
+
+9. stated_concern_targets — phrases where the agent explicitly names a target framing.
+   - stated_target: verbatim phrase ("the team", "her", "the community").
+   - for_self_concern: what the agent separately says they're worried about for themselves (when present, verbatim) or null.
+   - Evidence.
+   Capture the agent's *framing*. If they say "I'm doing this for the community" and elsewhere reveal "but I also don't want to look weak", record the stated target here and the self-concern phrase. Most inputs do not separately name a target framing — empty array is the typical case.
+
+10. stated_equanimity_signals — explicit statements of calm.
+    - signal_type: felt_fine | felt_calm | felt_at_peace | didnt_bother_me | other_explicit_calm.
+    - Evidence: verbatim quote.
+    Capture the agent's *report* of calm, not your own assessment. If the agent says "I felt fine about it" or "it didn't bother me", record it here. Most inputs that report concern do not also report calm — empty array is the typical case.
+
+11. motivation_stated + motivation_evidence — whether the agent named *why* they acted.
+    - motivation_stated: boolean (true when any motivation phrase is present, else false).
+    - motivation_evidence: array of {motivation, evidence}. One entry per stated motivation. Empty when motivation_stated is false.
+    Default is motivation_stated: false — the typical case. Agents narrate what happened more often than they narrate why. "Because I care about her", "out of duty", "for the principle" are motivation phrases. Justifications for the action ("because she needs help") go in kathekon_factors.justification_offered, not here. Motivations are about the agent's *inner state*; justifications are about the *action's appropriateness*.
+
 OUTPUT
 
 Return ONLY valid JSON conforming to Layer1Schema. No markdown. No commentary outside the JSON.
@@ -631,6 +831,17 @@ Return ONLY valid JSON conforming to Layer1Schema. No markdown. No commentary ou
   "causal_stage_evidence": [
     {"stage": "synkatathesis", "evidence": "..."}
   ],
+  "eupatheia_candidates": [
+    {"shape": "chara", "evidence": "I felt real joy when she got the promotion", "narrative_target": "her promotion"}
+  ],
+  "stated_concern_targets": [
+    {"stated_target": "the team", "for_self_concern": "but I also don't want to look weak in front of them", "evidence": "I'm doing this for the team but I also don't want to look weak in front of them"}
+  ],
+  "stated_equanimity_signals": [
+    {"signal_type": "felt_fine", "evidence": "I told myself I'm fine with the decision"}
+  ],
+  "motivation_stated": false,
+  "motivation_evidence": [],
   "ambiguity_notes": [
     "passions_present[0].sub_species: could be eros or pothos"
   ]
