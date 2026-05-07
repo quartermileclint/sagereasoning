@@ -432,6 +432,8 @@ If the founder rejects ADR-007 or requests substantial edits, the draft is revis
 
 - **2026-05-07 (cross-session amendment, Sub-session M1-CP5b)** — see "Amendment — 2026-05-07" section below for full text. Per `D-M1-CP5-COMPARISON-RUBRIC-FIRST-PASS-2026-05-07`. Seven Revisions to the Layer 3 prompt template: (1) closing sentence MUST be the action; (2) voice as guidance, not factual recap; (3) consistent bracketed Greek-to-English glossing on first use per response (R8c application); (4) careful false-judgement framing — virtue/vice carry moral weight, not the practitioner's character; (5) marginal-case disclaimers demoted from closing line (Pattern B — discipline preserved, placement changed); (6) surface preferred-indifferent observations from `value_assessment.identified_value_errors`; (7) lighter assessment recap (≤25%), heavier actionable guidance (≥60%) by sentence count. Gap 6 dispositioned: Possibility B confirmed — Layer 1 already extracts preferred-indifferent data into `value_categories_at_stake[]` (ADR-005 §2 + §3.4); ADR-005 NOT co-amended. Implementation scope (M1-CP5c): `layer3-prose.ts` LAYER3_SYSTEM_PROMPT_API_REASON constant + generateFallbackProse helpers + both OUTPUT examples rewritten; harness Phase 5 assertions updated (assertion 7 reworded for non-closing-line placement; new negative assertion that closing sentence is NOT a disclaimer; new soft-warn assertion for proportion); F1–F5 layer3 fixture caches regenerated against live Sonnet; brief parallel-run re-validation via 5–10 `/admin/test-reason` clicks. Standard-tier governance amendment under 0d-ii (documentation; no production touch).
 
+- **2026-05-07 (cross-session amendment, Sub-session M1-CP5d)** — see "Amendment 2 — 2026-05-07" section below for full text. Per `D-M1-CP5-RETURN-RUBRIC-REFRESH-2026-05-07`. Two refinements arising from return-to-M1-CP5's 27/28 prose-quality verdict against the M1-CP5b Revisions: (a) **Refinement to Revision 3** — `axia (worth/value)` added to the Architecture row of the controlled-vocabulary list, and the gloss-discipline language strengthened to require gloss on every term in the controlled-vocabulary list (not only terms named in the assessment); (b) **Revision 8** — third OUTPUT example added demonstrating a `horme`-lodged passion (different causal stage from Example 1's `synkatathesis`-lodged phobos and Example 2's eupatheia case that does not lodge at a causal stage), with the COMPOSITION CONTRACT extended with an explicit "use the stage named in the assessment, not the stage in any OUTPUT example" instruction. The `fallbackValueErrorSentence` template is updated to gloss `axia (worth/value)` on first use. Founder elected Approach (a-variant) at session open — combining the explicit COMPOSITION CONTRACT instruction (Approach b) with stage variation across OUTPUT examples (Approach a) for maximum discipline at minimum invasiveness (Examples 1 and 2 preserved unchanged; Example 3 is additive). Implementation scope (M1-CP5d): `layer3-prose.ts` LAYER3_SYSTEM_PROMPT_API_REASON constant + `fallbackValueErrorSentence` template; harness NOT touched (no per-term gloss-on-first-use assertion exists in the harness — the prompt's CONTROLLED VOCABULARY list is the only governing list for the gloss discipline); F1–F5 layer3 fixture caches regenerated against live Sonnet under the new prompt template. Elevated-tier governance amendment under 0d-ii (Layer 3 module is on the parallel-run path; user-facing path remains bundled-depth so the change is dormant until M1-CP6 cutover).
+
 ---
 
 ## Amendment — 2026-05-07 — M1-CP5b: Layer 3 prose-template revisions per M1-CP5 prose-quality findings
@@ -540,6 +542,78 @@ Estimated time for M1-CP5c: 2–3 hours. Risk class: Elevated (existing user-fac
 ---
 
 *End of Amendment — 2026-05-07.*
+
+---
+
+## Amendment 2 — 2026-05-07 — M1-CP5d: Revision 3 term-list refinement + Q1 OUTPUT-example over-imitation correction
+
+**Status:** Adopted (founder approval at Sub-session M1-CP5d, 2026-05-07).
+**Predecessor decision:** `D-M1-CP5-RETURN-RUBRIC-REFRESH-2026-05-07`.
+**Predecessor amendment:** Amendment — 2026-05-07 (M1-CP5b adoption + M1-CP5c implementation; Revisions 1–7).
+**Engages rules:** R0 (oikeiosis — Layer 3 prose is what Circles 1 + 2 of the practitioner's oikeiosis sequence actually experience), R8a (controlled vocabulary refined — `axia` added to the Architecture row), R8c (English-only on user-facing prose — gloss discipline strengthened), R7 (source fidelity preserved — no new claims invented), AC1 (Sonnet retained — no model change), AC8 (translation-sandwich engine surface), KG1 (no DB writes; no fire-and-forget), PR1 (single-endpoint proof — `/api/reason` is the M1 pilot consumer), PR3 (synchronous discipline preserved — generateProse remains awaited), PR4 (model selection unchanged — Sonnet per cache Element 6), PR5 (LLM marginal-case discipline observed — Q1 over-imitation soft-warn count carried forward).
+**NOT engaged:** AC4, AC5, AC7, PR6 (no R20a perimeter or auth surface touched).
+**Risk class:** Elevated under 0d-ii (existing user-facing functionality changes — Layer 3 module is on the parallel-run path; user-facing path remains bundled-depth so the change is dormant until M1-CP6 cutover, but the module that will become user-facing at M1-CP6 is the one being changed). Critical Change Protocol NOT engaged.
+
+### Why this amendment
+
+Sub-session return-to-M1-CP5 (2026-05-07) refreshed the six-dimension comparison rubric against four post-M1-CP5c parallel-run rows and ran the prose-quality verdict against the seven Revisions adopted at M1-CP5b. The verdict was 27/28 micro-checks pass — five of six rubric dimensions clean (latency, cost, failures, threshold posture, fire distribution); the sixth (proximity match 50%) reproduces the M1-CP5 first-pass architectural finding (sandwich differentiating, bundled mode-collapsing). Two prose-quality items were surfaced for refinement before M1-CP6 cutover:
+
+1. **Revision 3 soft miss (Row 1).** The Row 1 prose used `axia` mid-prose ("the indifferent ranked by axia") without glossing. `axia` is not in the Revision 3 term list as adopted at M1-CP5b. The Architecture row currently lists `prohairesis`, `kathekon`, `katorthoma`, `oikeiosis`, `eudaimonia` — five terms — and does not name `axia`. Two factors compounded: the term wasn't listed, and the Revision 3 framing ("any Greek or technical term the assessment uses must be glossed") left ambiguity about whether architecture-row terms must be glossed when the assessment did not explicitly name them. The fix is to add `axia` to the Architecture row and clarify that every term in the controlled-vocabulary list MUST be glossed on first occurrence per response, regardless of whether the assessment explicitly named the term.
+
+2. **Q1 OUTPUT-example over-imitation soft-warns.** Across all four post-M1-CP5c parallel-run rows the LLM persistently named causal-chain terms (`synkatathesis`, `phantasia`, `horme`) in prose that did not appear in the assessment's `passion_diagnosis.passions_detected[].causal_stage_affected` field. The pattern: the OUTPUT example in §3 demonstrates `phobos (fear) lodged at the synkatathesis (assent) stage`, and the LLM pattern-matches the example's causal-stage selection rather than reading the stage from the assessment. The fix is to demonstrate stage variation — adding a third OUTPUT example with a passion lodged at a different stage (this amendment chooses `horme`) so the LLM sees three distinct stage selections across Examples 1 (`synkatathesis`-lodged phobos), 2 (eupatheia case — no causal stage lodged), and 3 (`horme`-lodged passion) — and to extend the COMPOSITION CONTRACT with an explicit instruction that the LLM must use the stage named in the assessment, not the stage shown in any OUTPUT example.
+
+Both items are surface-level prose-quality refinements that do not change the analytical engine (Layer 1 + Layer 2 are unaffected). Both would be addressed at cutover anyway; the founder elected Branch B (precautionary refinement) at return-to-M1-CP5 to land them in M1-CP5d rather than ship-then-refine. M1-CP6 cutover is deferred until M1-CP5d + M1-CP5e + return-to-M1-CP5-prime land.
+
+### Refinement to Revision 3 — axia added; gloss discipline strengthened
+
+**Hard rule (refined).** Every Greek or technical term named in the assessment OR in the controlled-vocabulary list below MUST be glossed in parentheses on its first occurrence per response (across `philosophical_reflection`, `improvement_guidance`, `summary`, `soft_clarification_prose`, `open_deferrals_prose`). The discipline applies to every term in the controlled-vocabulary list, including architecture-row terms. Architecture-row terms are NOT optional; they require glossing on first occurrence whenever the prose names them, regardless of whether the assessment explicitly named the term. The original Revision 3 framing of "any Greek or technical term the assessment uses must be glossed" is replaced by "any Greek or technical term in the controlled-vocabulary list OR named in the assessment must be glossed."
+
+The Architecture row of the term list is amended to add `axia (worth/value)`:
+
+- Architecture: `prohairesis (moral choice / ruling faculty)`, `kathekon (appropriate action)`, `katorthoma (perfect action)`, `oikeiosis (appropriation)`, `eudaimonia (flourishing)`, `axia (worth/value)`.
+
+The other rows of the term list (Causal-chain stages, Passions, Eupatheiai, Virtues, Affect descriptors) are unchanged from Revision 3 as adopted at M1-CP5b.
+
+The fallback prose helpers in `/website/src/lib/translation-sandwich/layer3-prose.ts` §6 (`fallbackPhilosophicalReflection`, `fallbackImprovementGuidance`, `fallbackValueErrorSentence`) are reviewed at M1-CP5d for `axia` glossing. The current `fallbackValueErrorSentence` template uses "axia ranking" without a gloss — at M1-CP5d this is updated to gloss `axia (worth/value)` on first use. The other helpers do not currently use `axia` and require no change at M1-CP5d.
+
+### Revision 8 — Third OUTPUT example demonstrating causal-stage variation (Q1 over-imitation correction)
+
+**New worked example added to §3.** A third OUTPUT example is added to the prompt, demonstrating a passion lodged at a causal stage other than `synkatathesis` (the existing Example 1's stage). The third example uses `horme` (impulse stage) — the practitioner has assented to a false judgement and the work to do is at the impulse stage, before the impulse runs into action.
+
+The third example exemplifies, as a contrast pattern to Examples 1 and 2:
+- A `horme`-lodged passion (different stage from Example 1's `synkatathesis`-lodged phobos and Example 2's eupatheia case that does not lodge at a causal stage).
+- The refined Revision 3 gloss discipline including `axia (worth/value)` glossed on first use.
+- The Revision 4 false-judgement framing (criterion of good and evil applied to the false judgement and the mis-categorised indifferent, not to the practitioner's character).
+- The Revision 5 marginal-case placement (in this example no marginal-case sentences fire by design — the contrast against Examples 1 and 2 demonstrates that the closing action is the load-bearing pattern, not the marginal-case sentences).
+- The Revision 6 peer-rendering of passion + value-error (both observations carry principled findings).
+- The Revision 1 closing-line discipline (the field closes on a concrete practice, not on a disclaimer).
+- The Revision 7 proportional balance (improvement_guidance ≥ philosophical_reflection by sentence count).
+
+The third example's notes section explicitly flags the over-imitation discipline: the LLM must use the causal stage named in `passion_diagnosis.passions_detected[].causal_stage_affected`, not the stage shown in any OUTPUT example. Examples 1, 2, and 3 demonstrate three distinct stage selections — the variation is the point.
+
+The COMPOSITION CONTRACT is also extended with one explicit instruction: "Use the causal stage named in the assessment (`passion_diagnosis.passions_detected[].causal_stage_affected`), not the stages shown in the OUTPUT examples. The OUTPUT examples illustrate the prose shape across distinct stage selections — they do not constrain stage selection."
+
+This combines Approach (b) (the explicit COMPOSITION CONTRACT instruction) with Approach (a) (stage variation across OUTPUT examples) — the founder elected Approach (a-variant) at session open to combine both for maximum discipline at minimum invasiveness to the existing examples (Examples 1 and 2 are preserved unchanged; Example 3 is additive).
+
+### Implementation scope (M1-CP5d)
+
+Files touched at M1-CP5d:
+- `/adopted/adr/2026-05-04-layer3-prose-template-api-reason.md` — this Amendment 2 appended (in-place — fifth recurrence of the in-place ADR amendment pattern; PR8 candidate held one more cycle per founder direction at M1-CP5b).
+- `/website/src/lib/translation-sandwich/layer3-prose.ts` — `LAYER3_SYSTEM_PROMPT_API_REASON` constant updated: (1) Architecture row of CONTROLLED VOCABULARY adds `axia (worth/value)`; (2) gloss-discipline language strengthened to require gloss on every term in the controlled-vocabulary list, not only terms named in the assessment; (3) new third OUTPUT example added demonstrating `horme`-lodged passion + `axia` + value-error peer rendering; (4) COMPOSITION CONTRACT extended with explicit "use the stage named in the assessment, not the stage in any OUTPUT example" instruction. `fallbackValueErrorSentence` template updated to gloss `axia (worth/value)` on first use.
+- `/website/scripts/verify-translation-sandwich.ts` — NO CHANGE. The harness's `GREEK_IDENTIFIERS_TO_CHECK` (lines 1152–1164) is for the inverse direction (every Greek term in prose must appear in the assessment); there is no per-term gloss-on-first-use assertion. The CONTROLLED VOCABULARY list in the prompt is the only governing list for the gloss discipline. The harness's existing assertions (closing-line discipline, single-snapshot/kathekon-null mid-prose placement, EUPATHEIA_BOUNDARY/PRAXIS_MOTIVATION_AMBIGUITY surfacing, cross-fixture coverage) are unchanged and continue to apply.
+- `/website/scripts/.translation-sandwich-cache/layer3-{F.id}.json` — F1, F2, F3, F4, F5 caches regenerated against live Sonnet under the new prompt template (founder runs the harness locally with `LAYER1_REPLAY_CACHE=1 LAYER3_FORCE_REGEN=1`).
+
+After M1-CP5d module update + harness re-cache: M1-CP5e (Q2 + Q6) → return-to-M1-CP5-prime (rubric refresh #2) → M1-CP6 cutover.
+
+Estimated time for M1-CP5d: 2–3 hours. Risk class: Elevated (per metadata above). Critical Change Protocol NOT engaged.
+
+### PR8 candidate notes
+
+This Amendment is the **fifth recurrence** of the in-place ADR amendment pattern (Amendments 2026-05-04 first + second; 2026-05-06 (M1-CP4b); 2026-05-07 (M1-CP5b); 2026-05-07 (M1-CP5d) — this Amendment). The founder elected at M1-CP5b to hold the PR8 promotion one more cycle. At M1-CP5d the pattern recurs again — the candidate is held in the open-questions register for another cycle per the same founder direction. The decision-log entry for M1-CP5d names the recurrence count and revisit condition.
+
+---
+
+*End of Amendment 2 — 2026-05-07.*
 
 ---
 

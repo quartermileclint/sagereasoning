@@ -126,6 +126,7 @@ Your prose MUST be consistent with the assessment. Specifically:
 - Every claim in your prose MUST be supported by a field in the assessment. If the assessment says false_judgements is empty, your prose MUST NOT name a false judgement. If is_kathekon is null, your prose MUST NOT assert appropriateness either way.
 - Every fact in your prose MUST be drawn from the assessment, not from your training. Do not add Stoic citations the assessment did not provide. Do not name virtues the assessment did not engage. Do not invent obligations the oikeiosis assessment did not name.
 - The practitioner is the agent who submitted the input. Address them in second person ("you", "your"). Do not refer to them in the third person.
+- Use the causal stage named in the assessment (\`passion_diagnosis.passions_detected[].causal_stage_affected\`), not the stages shown in the OUTPUT examples. The OUTPUT examples below illustrate the prose shape across distinct stage selections — they do not constrain stage selection. Examples 1, 2, and 3 demonstrate three distinct shapes (synkatathesis-lodged passion; eupatheia case with no causal-stage lodging; horme-lodged passion); the variation is the point.
 
 VOICE AND PROPORTIONS
 
@@ -209,14 +210,14 @@ The base budget for philosophical_reflection is 2–4 sentences (~40–110 words
 
 CONTROLLED VOCABULARY (R8a + R8c)
 
-Greek and technical Stoic terms MUST carry an English translation in parentheses on FIRST occurrence per response (across all prose fields combined — philosophical_reflection, improvement_guidance, summary, soft_clarification_prose, open_deferrals_prose). The gloss attaches to the first appearance anywhere in the response; subsequent appearances of the same term anywhere in the same response do not need re-glossing. This is a discipline, not decoration: every Greek term across the response is glossed once on first appearance.
+Greek and technical Stoic terms MUST carry an English translation in parentheses on FIRST occurrence per response (across all prose fields combined — philosophical_reflection, improvement_guidance, summary, soft_clarification_prose, open_deferrals_prose). The gloss attaches to the first appearance anywhere in the response; subsequent appearances of the same term anywhere in the same response do not need re-glossing. This is a discipline, not decoration: every Greek or technical term in the controlled-vocabulary list below OR named in the assessment is glossed once on first appearance per response. Architecture-row terms are NOT optional — they require glossing on first occurrence whenever the prose names them, regardless of whether the assessment explicitly named the term.
 
-Required-gloss term list (non-exhaustive — any Greek or technical term the assessment uses must be glossed):
+Required-gloss term list — every term in this list MUST be glossed on its first appearance per response. Sub-species are non-exhaustive — when the assessment names a sub-species not in this list, gloss it on first occurrence too.
 - Causal-chain stages: phantasia (impression), synkatathesis (assent), horme (impulse), praxis (action).
-- Passions: epithumia (irrational desire), hedone (pleasure), phobos (fear), lupe (distress); sub-species when named (e.g., philodoxia (love of reputation), agonia (anguished anxiety), achos (anguished grief), pothos (longing for the absent), oknos (sluggishness)).
+- Passions: epithumia (irrational desire), hedone (pleasure), phobos (fear), lupe (distress); sub-species when named (e.g., philodoxia (love of reputation), agonia (anguished anxiety), achos (anguished grief), pothos (longing for the absent), oknos (sluggishness), orge (anger)).
 - Eupatheiai: chara (rational joy), boulesis (rational wishing), eulabeia (reverent caution), eupatheia (rational affection).
 - Virtues: phronesis (practical wisdom), dikaiosyne (justice), andreia (courage), sophrosyne (temperance).
-- Architecture: prohairesis (moral choice / ruling faculty), kathekon (appropriate action), katorthoma (perfect action), oikeiosis (appropriation), eudaimonia (flourishing).
+- Architecture: prohairesis (moral choice / ruling faculty), kathekon (appropriate action), katorthoma (perfect action), oikeiosis (appropriation), eudaimonia (flourishing), axia (worth/value).
 - Affect descriptors: ataraxia (freedom from disturbance) when used.
 
 When the term itself is the English translation already in common use (e.g., "ruling faculty"), no gloss is required, but if the prose introduces "ruling faculty" alongside prohairesis, the gloss attaches to prohairesis on first occurrence. Do not introduce Greek terms the assessment did not name.
@@ -275,6 +276,32 @@ Notes on this example:
 - Greek glossing per response: chara glossed in philosophical_reflection sentence 1 (rational joy); not re-glossed in open_deferrals_prose. phronesis, dikaiosyne, eupatheia glossed in philosophical_reflection. philodoxia glossed in open_deferrals_prose (first occurrence in the response). Per Revision 3.
 - Sentence-count proportions: reflection 4, guidance 4, summary 1. guidance ≥ reflection (equal — soft-warn does NOT fire). Per Revision 7.
 - The open_deferrals_prose renders the d-a16 T3-001 stem text with the slot-fills.
+
+WORKED EXAMPLE — passion at horme stage with peer value-error rendering (no marginal-case sentences fire; demonstrates causal-stage variation against Example 1)
+
+When assessment.passion_diagnosis.passions_detected[0] is orge lodged at the horme stage, with a value-error observation on the perceived slight (treated as a genuine evil), and intake_clarifications.soft_clarifications + open_deferrals are both empty, direction_of_travel is not single_snapshot, and is_kathekon is not null, the prose looks like this:
+
+{
+  "version": "layer3-prose-v1",
+  "layer2_assessment_version": "layer2-assessment-v1",
+  "consumer": "api_reason",
+  "philosophical_reflection": "The principal dynamic is orge (anger) lodged at the horme (impulse) stage — you have already assented to the criticism as an injury, and the impulse to retaliate is now in motion. phronesis (practical wisdom) and sophrosyne (temperance) are the virtues at stake. The criticism itself is a dispreferred indifferent ranked low by axia (worth/value), and treating it as a genuine evil is what locates the orge — that is where the false judgement sits, not in your standing. Carry this forward: her criticism falls outside your prohairesis (moral choice / ruling faculty); your response, which is within it, is what matters.",
+  "improvement_guidance": "The false judgement to correct is the assumption that another's criticism injures the part of you that matters. Replace it with the assessment that her criticism, like all externals, is a dispreferred indifferent — a setback to your reputation perhaps, but not to your character. This is a passion-diagnosis correction, and the work is at the horme stage: the impulse is already running, so the move is to interrupt it before it becomes praxis (action). Notice the impulse the moment it surfaces, hold it for a beat, and ask whether what you are about to do reflects the corrected judgement or merely the heat of the moment. Practise this when the next sharp reply rises in you: pause the impulse, name what you are reacting to as a dispreferred indifferent, and choose a response that aligns with phronesis rather than with the urge to retaliate.",
+  "summary": "Your reasoning is deliberate but lodged at the impulse stage of orge, where the false judgement that criticism injures your character requires correction before the impulse becomes action.",
+  "soft_clarification_prose": null,
+  "open_deferrals_prose": null,
+  "source": "llm"
+}
+
+Notes on this example:
+- The opener (sentence 1) names the passion lodged at horme — a DIFFERENT STAGE from Example 1's synkatathesis-lodged phobos. The LLM MUST use the stage named in passion_diagnosis.passions_detected[].causal_stage_affected, not the stage shown in any OUTPUT example. Examples 1, 2, and 3 demonstrate three distinct stage selections (synkatathesis; no causal-stage lodging in the eupatheia case; horme) — the variation is the point.
+- No marginal-case sentences fire by design (direction_of_travel is not single_snapshot; is_kathekon is not null; no AC-13 / AC-14 entries fire). The contrast against Examples 1 and 2 demonstrates that the closing action is the load-bearing pattern, not the marginal-case sentences.
+- The closing sentence of philosophical_reflection is the action-orientation ("Carry this forward..."), drawn from the corrected judgement and reframed as something the practitioner can carry. NOT a disclaimer. Per Revision 1.
+- Sentence 3 folds the value-error observation into a peer of the principal-passion observation — both carry principled findings. Per Revision 6.
+- "Treated as a genuine evil" is predicated of the indifferent (the criticism), not of the practitioner's character. Per Revision 4.
+- Greek and architecture terms glossed once on first appearance per response: orge (anger), horme (impulse), phronesis (practical wisdom), sophrosyne (temperance), axia (worth/value), prohairesis (moral choice / ruling faculty), praxis (action). Per Revision 3 (refined at M1-CP5d to require gloss on every controlled-vocabulary-list term, including architecture-row terms, regardless of whether the assessment explicitly named the term).
+- Sentence-count proportions: reflection 4, guidance 5, summary 1. guidance ≥ reflection. Per Revision 7.
+- The closing sentence of improvement_guidance is a concrete practice ("Practise this when the next sharp reply rises..."), NOT the recap of the mechanism naming. Per Revision 1.
 
 Return only the JSON.`
 
@@ -776,8 +803,8 @@ function fallbackValueErrorSentence(assessment: Layer2Assessment): string {
         ? 'a genuine evil'
         : 'something more than indifferent'
   return (
-    ` The indifferent ${indifferentName} (a ${axiaClass} indifferent by axia ranking) ` +
-    `is being treated as ${treatedAsLabel} — that is where the false judgement sits, ` +
+    ` The indifferent ${indifferentName} is a ${axiaClass} indifferent by axia (worth/value), ` +
+    `and treating it as ${treatedAsLabel} is where the false judgement sits, ` +
     `not in your standing.`
   )
 }
