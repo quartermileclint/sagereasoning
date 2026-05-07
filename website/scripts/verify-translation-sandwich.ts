@@ -118,9 +118,19 @@ try {
 }
 
 const REPLAY_CACHE = process.env.LAYER1_REPLAY_CACHE === '1'
+// LAYER3_FORCE_REGEN added 2026-05-07 (M1-CP5c): when set, Phase 5 ignores
+// any cached L3 prose and always calls live Sonnet, then writes the fresh
+// result to the L3 cache. Used to regenerate L3 fixture caches under a new
+// prompt template without re-running L1 (when LAYER1_REPLAY_CACHE=1 is also
+// set, L1 is served from cache while L3 regenerates fresh — minimises cost).
+const FORCE_REGEN_LAYER3 = process.env.LAYER3_FORCE_REGEN === '1'
 const CACHE_DIR = join(__dirname, '.translation-sandwich-cache')
 
-if (!REPLAY_CACHE) {
+// Real Sonnet calls are needed when EITHER (a) Layer 1 replay is off, OR
+// (b) Layer 3 is being force-regenerated (Phase 5 will hit Sonnet even if
+// Phase 1+2 are served from cache).
+const NEEDS_API_KEY = !REPLAY_CACHE || FORCE_REGEN_LAYER3
+if (NEEDS_API_KEY) {
   const REQUIRED_ENV = ['ANTHROPIC_API_KEY']
   for (const key of REQUIRED_ENV) {
     if (!process.env[key]) {
@@ -131,6 +141,11 @@ if (!REPLAY_CACHE) {
   console.log(`[env] all required env vars present\n`)
 } else {
   console.log(`[env] LAYER1_REPLAY_CACHE=1 — Phase 1+2 will replay cached schemas (no Sonnet calls)\n`)
+}
+if (FORCE_REGEN_LAYER3) {
+  console.log(
+    `[env] LAYER3_FORCE_REGEN=1 — Phase 5 will call live Sonnet for every fixture and rewrite L3 caches\n`
+  )
 }
 
 // -----------------------------------------------------------------------------
@@ -1272,6 +1287,156 @@ function proseHasNoImprovementPathPhrasing(prose: string): boolean {
   )
 }
 
+// =============================================================================
+// REVISION 5 INPUT-CONDITION HEURISTIC HELPERS (added 2026-05-07, M1-CP5c)
+//
+// Per ADR-007 Amendment §"Revision 5" (Pattern B): the marginal-case sentences
+// for single_snapshot and is_kathekon: null fire mid-prose ONLY when the input
+// has a corresponding hook. The harness applies the same heuristic so it can
+// distinguish "LLM omitted phrasing because heuristic was not satisfied"
+// (acceptable) from "LLM omitted phrasing despite heuristic being satisfied"
+// (regression). The placement rule (mid-prose, never closing) is enforced
+// separately by the closing-line negative assertion below.
+// =============================================================================
+
+/** Detect temporal hooks in the input that would naturally raise a trajectory
+ *  question — iterative phrasing, repeated context, longitudinal markers.
+ *  When present + assessment.iterative_refinement.direction_of_travel ===
+ *  'single_snapshot', the LLM MUST emit the single-snapshot disclaimer
+ *  mid-prose. When absent, the LLM MAY omit the disclaimer (per Revision 5). */
+function inputHasTemporalHooks(input: string): boolean {
+  const l = input.toLowerCase()
+  return (
+    /\bi (keep|always|often|usually|frequently|repeatedly)\b/.test(l) ||
+    /\bevery (time|day|morning|night|week|month)\b/.test(l) ||
+    /\beach (time|day|morning|week)\b/.test(l) ||
+    /\blately\b/.test(l) ||
+    /\brecently\b/.test(l) ||
+    /\bfor (weeks|months|years|days)\b/.test(l) ||
+    /\bover (the past|the last|recent)\b/.test(l) ||
+    /\bthis keeps\b/.test(l) ||
+    /\bit keeps\b/.test(l) ||
+    /\brepeatedly\b/.test(l) ||
+    /\bagain and again\b/.test(l) ||
+    /\bover and over\b/.test(l) ||
+    /\bnever (manage|seem)\b/.test(l) ||
+    /\bhas been (going|happening)\b/.test(l) ||
+    /\bevery single\b/.test(l)
+  )
+}
+
+/** Detect whether the input has raised the question of appropriateness — the
+ *  agent has named or implied a question about whether what they did or are
+ *  considering was the right thing. When present + is_kathekon === null, the
+ *  LLM MUST emit the undecidable-kathekon disclaimer mid-prose. When absent,
+ *  the LLM MAY omit the disclaimer (per Revision 5). */
+function inputRaisesAppropriatenessQuestion(input: string): boolean {
+  const l = input.toLowerCase()
+  return (
+    /\bshould i\b/.test(l) ||
+    /\bshould (have|i have)\b/.test(l) ||
+    /\bwas (that|it|this) (the right|right|wrong|the wrong)\b/.test(l) ||
+    /\bwas i (right|wrong|justified|correct)\b/.test(l) ||
+    /\bdid i do (the right|right|the wrong|wrong)\b/.test(l) ||
+    /\bnot sure (if i|whether i)\b/.test(l) ||
+    /\b(don'?t|do not) know (if|whether) (i|that)\b/.test(l) ||
+    /\bdon'?t know what to do\b/.test(l) ||
+    /\bwhat (should|do|am i)\b/.test(l) ||
+    /\b(was|is) it appropriate\b/.test(l) ||
+    /\b(the )?right (thing|move|response|call|choice)\b/.test(l) ||
+    /\b(the )?wrong (thing|move|response|call|choice)\b/.test(l) ||
+    /\bcorrect (thing|response|action|choice)\b/.test(l)
+  )
+}
+
+// =============================================================================
+// SENTENCE PARSING + CLOSING-LINE HELPERS (added 2026-05-07, M1-CP5c)
+//
+// Per Revision 1 + Revision 7. The harness needs to:
+//   - Identify the closing sentence of each prose field for the negative
+//     assertion (closing line is NOT a disclaimer).
+//   - Count sentences for the soft-warn proportion assertion.
+// =============================================================================
+
+/** Split prose into sentences via terminal-punctuation lookbehind. Robust
+ *  against em-dashes and parenthetical glosses ("phobos (fear)") which use
+ *  parentheses without terminal punctuation. */
+function splitSentences(prose: string): string[] {
+  if (!prose || !prose.trim()) return []
+  return prose
+    .trim()
+    .split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+}
+
+function countSentences(prose: string): number {
+  return splitSentences(prose).length
+}
+
+function getClosingSentence(prose: string): string {
+  const sentences = splitSentences(prose)
+  return sentences.length > 0 ? sentences[sentences.length - 1] : ''
+}
+
+/** Match a prose sentence (typically the closing sentence) against any
+ *  marginal-case / disclaimer template. Returns the matched template name
+ *  when the sentence reads as a disclaimer; null otherwise. Paraphrase-
+ *  tolerant: matches on conceptual substring rather than verbatim. */
+function classifyDisclaimerSentence(sentence: string): string | null {
+  const l = sentence.toLowerCase()
+  // Single-snapshot template
+  if (
+    l.includes('single snapshot') ||
+    l.includes('no trajectory') ||
+    l.includes('snapshot; no') ||
+    l.includes('no longitudinal') ||
+    l.includes('no temporal data') ||
+    l.includes('no direction of travel') ||
+    l.includes('point-in-time') ||
+    l.includes('point in time')
+  ) {
+    return 'single_snapshot'
+  }
+  // Undecidable-kathekon template
+  if (
+    l.includes('cannot be determined from the available evidence') ||
+    l.includes('appropriateness cannot be determined') ||
+    (l.includes('appropriateness') && l.includes('cannot')) ||
+    (l.includes('kathekon') && l.includes('cannot'))
+  ) {
+    return 'undecidable_kathekon'
+  }
+  // No-improvement-path template
+  if (
+    l.includes('no specific improvement path') ||
+    l.includes('no improvement path identified') ||
+    l.includes('no improvement path is identified') ||
+    l.includes('no clear improvement path')
+  ) {
+    return 'no_improvement_path'
+  }
+  // EUPATHEIA_BOUNDARY template
+  if (
+    l.includes('polished surface over passion') ||
+    (l.includes('eupatheia') && l.includes('cannot be confirmed')) ||
+    (l.includes('eupatheia') && l.includes('cannot be determined')) ||
+    (l.includes('genuine eupatheia versus') && l.includes('cannot'))
+  ) {
+    return 'eupatheia_boundary'
+  }
+  // PRAXIS_MOTIVATION_AMBIGUITY template
+  if (
+    l.includes('from virtue or from convention') ||
+    (l.includes('arose from virtue') && l.includes('cannot')) ||
+    (l.includes('virtue or convention') && l.includes('cannot')) ||
+    (l.includes('virtue versus convention') && l.includes('cannot'))
+  ) {
+    return 'praxis_motivation'
+  }
+  return null
+}
+
 interface Phase5Result {
   fixture_id: string
   llm_prose?: Layer3Prose
@@ -1294,14 +1459,14 @@ async function runFixtureLayer3(
   let llm_skipped = false
   let llm_usage: { input_tokens: number; output_tokens: number } | undefined
 
-  if (REPLAY_CACHE) {
+  if (REPLAY_CACHE && !FORCE_REGEN_LAYER3) {
     const cached = loadCachedLayer3Prose(fixtureId)
     if (cached) {
       info(`  [cache] loaded layer3 ${fixtureId} from cache (no Sonnet call)`)
       llm_prose = cached
     } else {
       info(
-        `  [cache] no layer3 cache for ${fixtureId}; LLM call will be skipped (re-run without LAYER1_REPLAY_CACHE to populate)`
+        `  [cache] no layer3 cache for ${fixtureId}; LLM call will be skipped (re-run without LAYER1_REPLAY_CACHE or with LAYER3_FORCE_REGEN=1 to populate)`
       )
       llm_skipped = true
     }
@@ -1380,6 +1545,7 @@ async function runPhase5Async(
   for (const l2r of usable) {
     const fixtureId = l2r.fixture.id
     const assessment = l2r.assessment_a!
+    const fixtureInput = l2r.fixture.input
     console.log(`--- ${fixtureId} — ${l2r.fixture.label} ---`)
 
     const p5 = await runFixtureLayer3(fixtureId, assessment)
@@ -1476,32 +1642,55 @@ async function runPhase5Async(
       }
 
       // Marginal-case phrasing — HARD asserts when assessment has marginal field
+      // Per Revision 5 (2026-05-07, M1-CP5c): single_snapshot + is_kathekon: null
+      // disclaimers fire mid-prose ONLY when the input has the corresponding hook.
+      // Reflection of Pattern B election: the LLM may legitimately omit the
+      // disclaimer when the input does not engage the trajectory question /
+      // appropriateness question. The harness applies the same heuristic.
       const isKathekonNull = assessment.kathekon_assessment.is_kathekon === null
       const isSingleSnapshot =
         assessment.iterative_refinement.direction_of_travel === 'single_snapshot'
       const noImprovementPath = assessment.improvement_path_structured === null
+      const hasTemporalHooks = inputHasTemporalHooks(fixtureInput)
+      const raisesAppropriatenessQuestion = inputRaisesAppropriatenessQuestion(fixtureInput)
 
-      if (isKathekonNull) {
+      if (isKathekonNull && raisesAppropriatenessQuestion) {
+        // Hard assert: heuristic satisfied → phrasing required (mid-prose).
         const has = proseHasUndecidableKathekonPhrasing(allProseText)
         check(
-          `${fixtureId}.P5 — is_kathekon=null → prose contains undecidable phrasing`,
+          `${fixtureId}.P5 — is_kathekon=null AND input raises appropriateness question → prose contains undecidable phrasing`,
           has,
           has ? undefined : 'expected phrasing like "cannot be determined" — missing'
         )
+      } else if (isKathekonNull) {
+        // Heuristic not satisfied → phrasing optional per Revision 5.
+        info(
+          `  ${fixtureId}.P5 — is_kathekon=null but input does not raise appropriateness question; phrasing optional per Revision 5`
+        )
       }
 
-      if (isSingleSnapshot) {
+      if (isSingleSnapshot && hasTemporalHooks) {
+        // Hard assert: heuristic satisfied → phrasing required (mid-prose).
         const has = proseHasSingleSnapshotPhrasing(allProseText)
         check(
-          `${fixtureId}.P5 — direction_of_travel=single_snapshot → prose contains single-snapshot phrasing`,
+          `${fixtureId}.P5 — direction_of_travel=single_snapshot AND input has temporal hooks → prose contains single-snapshot phrasing`,
           has,
           has
             ? undefined
             : 'expected phrasing like "single snapshot" or "no trajectory" — missing'
         )
+      } else if (isSingleSnapshot) {
+        // Heuristic not satisfied → phrasing optional per Revision 5.
+        info(
+          `  ${fixtureId}.P5 — direction_of_travel=single_snapshot but input has no temporal hooks; phrasing optional per Revision 5`
+        )
       }
 
       if (noImprovementPath) {
+        // Revision 5 does NOT define an input-condition heuristic for
+        // improvement_path_structured: null — the disclaimer always fires
+        // mid-prose, with the reflective prompt closing the field. Hard
+        // assertion preserved.
         const has = proseHasNoImprovementPathPhrasing(allProseText)
         check(
           `${fixtureId}.P5 — improvement_path_structured=null → prose contains no-improvement-path phrasing`,
@@ -1509,6 +1698,52 @@ async function runPhase5Async(
           has
             ? undefined
             : 'expected phrasing like "no specific improvement path" — missing'
+        )
+      }
+
+      // -----------------------------------------------------------------------
+      // NEW negative assertion (Revision 1, 2026-05-07, M1-CP5c):
+      // The closing sentence of philosophical_reflection AND improvement_guidance
+      // MUST NOT be a disclaimer / marginal-case sentence. Hard fail.
+      // Paraphrase-tolerant; conceptual substring match via classifyDisclaimerSentence.
+      // -----------------------------------------------------------------------
+      const reflClosing = getClosingSentence(proseForConsistency.philosophical_reflection)
+      const reflClosingDisclaimer = classifyDisclaimerSentence(reflClosing)
+      check(
+        `${fixtureId}.P5 — closing line of philosophical_reflection is NOT a disclaimer/marginal-case sentence`,
+        reflClosingDisclaimer === null,
+        reflClosingDisclaimer !== null
+          ? `closing line matches "${reflClosingDisclaimer}" template; expected actionable orientation. Got: ${reflClosing.slice(0, 200)}`
+          : undefined
+      )
+
+      const guideClosing = getClosingSentence(proseForConsistency.improvement_guidance)
+      const guideClosingDisclaimer = classifyDisclaimerSentence(guideClosing)
+      check(
+        `${fixtureId}.P5 — closing line of improvement_guidance is NOT a disclaimer/marginal-case sentence`,
+        guideClosingDisclaimer === null,
+        guideClosingDisclaimer !== null
+          ? `closing line matches "${guideClosingDisclaimer}" template; expected practitioner-facing move. Got: ${guideClosing.slice(0, 200)}`
+          : undefined
+      )
+
+      // -----------------------------------------------------------------------
+      // NEW soft-warn assertion (Revision 7, 2026-05-07, M1-CP5c):
+      // Sentence-count proportion. Log a warning (not a hard-fail) when
+      // improvement_guidance sentence count is less than philosophical_reflection
+      // sentence count. Useful diagnostic during parallel-run re-validation —
+      // surfaces cases where the LLM produced more reflection than guidance,
+      // contrary to Revision 7's heavier-actionable-guidance proportion.
+      // -----------------------------------------------------------------------
+      const reflSentenceCount = countSentences(proseForConsistency.philosophical_reflection)
+      const guideSentenceCount = countSentences(proseForConsistency.improvement_guidance)
+      if (guideSentenceCount < reflSentenceCount) {
+        info(
+          `  ${fixtureId}.P5 — soft-warn (Revision 7 proportion): improvement_guidance has ${guideSentenceCount} sentence(s); philosophical_reflection has ${reflSentenceCount}. Per Revision 7, guidance should be ≥ reflection in sentence count.`
+        )
+      } else {
+        info(
+          `  ${fixtureId}.P5 — Revision 7 proportion: reflection=${reflSentenceCount} guidance=${guideSentenceCount} (guidance ≥ reflection)`
         )
       }
 
@@ -1781,16 +2016,22 @@ async function runPhase5Async(
   }
 
   // ---- Cross-fixture coverage assertion (Phase 5 assertion 7) ----
+  // Reworded 2026-05-07 (M1-CP5c) per Revision 5 + Revision 1.
+  // Coverage now requires:
+  //   (a) at least one fixture surfaces a marginal field AND its input-condition
+  //       heuristic is satisfied (per Revision 5);
+  //   (b) the prose for that fixture contains the corresponding marginal-case
+  //       phrasing (the discipline preserved); AND
+  //   (c) the marginal-case phrasing is NOT the closing sentence of any prose
+  //       field (per Revision 1 — the closing line is the actionable orientation).
 
   console.log('--- Phase 5 cross-fixture coverage ---')
-  // Coverage: at least one fixture must exercise marginal-case phrasing
-  // (is_kathekon=null OR direction_of_travel=single_snapshot OR improvement_path_structured=null)
-  // AND that fixture's prose must contain the corresponding marginal-case phrasing.
   const coverageHits: string[] = []
   for (const p5r of phase5Results) {
     const l2 = layer2Results.find((l) => l.fixture.id === p5r.fixture_id)
     if (!l2 || !l2.assessment_a) continue
     const a = l2.assessment_a
+    const fixtureInput = l2.fixture.input
     const proseForCheck = p5r.llm_prose ?? p5r.fallback_prose
     if (!proseForCheck) continue
     const proseText = [
@@ -1799,31 +2040,48 @@ async function runPhase5Async(
       proseForCheck.summary,
     ].join(' ')
 
+    // (c) closing-line check: no prose field's closing sentence may be a
+    // disclaimer / marginal-case sentence. The per-fixture negative assertion
+    // above hard-fails this; here we use it as a coverage filter.
+    const reflClosing = getClosingSentence(proseForCheck.philosophical_reflection)
+    const guideClosing = getClosingSentence(proseForCheck.improvement_guidance)
+    const closingsClean =
+      classifyDisclaimerSentence(reflClosing) === null &&
+      classifyDisclaimerSentence(guideClosing) === null
+
+    // is_kathekon: null — input-condition heuristic gates the requirement.
     if (
       a.kathekon_assessment.is_kathekon === null &&
-      proseHasUndecidableKathekonPhrasing(proseText)
+      inputRaisesAppropriatenessQuestion(fixtureInput) &&
+      proseHasUndecidableKathekonPhrasing(proseText) &&
+      closingsClean
     ) {
       coverageHits.push(`${p5r.fixture_id}/is_kathekon=null`)
     }
+    // single_snapshot — input-condition heuristic gates the requirement.
     if (
       a.iterative_refinement.direction_of_travel === 'single_snapshot' &&
-      proseHasSingleSnapshotPhrasing(proseText)
+      inputHasTemporalHooks(fixtureInput) &&
+      proseHasSingleSnapshotPhrasing(proseText) &&
+      closingsClean
     ) {
       coverageHits.push(`${p5r.fixture_id}/single_snapshot`)
     }
+    // improvement_path null — no input-condition heuristic; placement only.
     if (
       a.improvement_path_structured === null &&
-      proseHasNoImprovementPathPhrasing(proseText)
+      proseHasNoImprovementPathPhrasing(proseText) &&
+      closingsClean
     ) {
       coverageHits.push(`${p5r.fixture_id}/no_improvement_path`)
     }
   }
   check(
-    `P5 — marginal-case coverage: at least one fixture surfaces a marginal field AND prose contains the marginal-case phrasing`,
+    `P5 — marginal-case coverage (Revisions 1 + 5): at least one fixture surfaces a marginal field with input-condition satisfied, contains the marginal-case phrasing, AND the phrasing is NOT the closing sentence of any prose field`,
     coverageHits.length >= 1,
     coverageHits.length >= 1
       ? `(satisfied by: ${coverageHits.join(', ')})`
-      : 'NO fixture surfaced a marginal field with matching prose phrasing'
+      : 'NO fixture satisfied: marginal field + input-condition heuristic + marginal-case phrasing present + closings not disclaimer-style. Revise prompt or fixture set.'
   )
 
   console.log()

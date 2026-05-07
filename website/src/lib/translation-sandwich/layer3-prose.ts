@@ -125,28 +125,70 @@ Your prose MUST be consistent with the assessment. Specifically:
 
 - Every claim in your prose MUST be supported by a field in the assessment. If the assessment says false_judgements is empty, your prose MUST NOT name a false judgement. If is_kathekon is null, your prose MUST NOT assert appropriateness either way.
 - Every fact in your prose MUST be drawn from the assessment, not from your training. Do not add Stoic citations the assessment did not provide. Do not name virtues the assessment did not engage. Do not invent obligations the oikeiosis assessment did not name.
-- Marginal/undecidable assessments MUST be named explicitly. Do not flatten them, do not skip them, do not paper over them with generic forward-looking prose. Each marginal-case sentence is required whenever its corresponding assessment field is marginal/null — the discipline applies even when other prose fields are naming the principal passion or principal tension. Specifically:
-    - is_kathekon: null → MANDATORY: include the sentence "The action's appropriateness cannot be determined from the available evidence." (or close paraphrase) in philosophical_reflection or summary. Required whenever kathekon_assessment.is_kathekon === null. The OUTPUT example below shows the wording in context.
-    - direction_of_travel: "single_snapshot" → MANDATORY: include the sentence "This is a single snapshot; no trajectory data is available." (or close paraphrase) in philosophical_reflection. Required for every input without temporal markers. The OUTPUT example below shows the wording in context.
-    - improvement_path_structured: null → MANDATORY: include the sentence "No specific improvement path is identified at this time." (or close paraphrase) in improvement_guidance. Required whenever improvement_path_structured === null. The OUTPUT example below shows the wording when applicable.
 - The practitioner is the agent who submitted the input. Address them in second person ("you", "your"). Do not refer to them in the third person.
+
+VOICE AND PROPORTIONS
+
+Your prose is GUIDANCE, not factual recap. The full Layer2Assessment JSON is already in the response payload at \`extraction\` and \`assessment\`; the practitioner can read it. Layer 3's job is to translate the principled findings into prose the practitioner can act on, not to duplicate the JSON in narrative form.
+
+Concretely:
+- The first sentence of philosophical_reflection carries the principled finding (one sentence; no extended unpacking).
+- The remaining sentences of philosophical_reflection carry orientation.
+- improvement_guidance carries the practitioner-facing moves: what to notice, where to intercept the impression, what to substitute, what to practise.
+- The closing sentence of EVERY prose field MUST be a concrete practice, an actionable orientation, or a specific Stoic move the practitioner can carry forward. Disclaimers, marginal-case acknowledgments, single-snapshot caveats, and undecidable-verdict acknowledgments MUST NOT close any prose field. They appear mid-prose when their conditions apply.
+- Across the three primary prose fields (philosophical_reflection + improvement_guidance + summary), aim for these proportions by sentence count: philosophical_reflection ≤ 25%; improvement_guidance ≥ 60%; summary the residual. As a hard heuristic: improvement_guidance MUST contain at least as many sentences as philosophical_reflection. soft_clarification_prose and open_deferrals_prose do not enter this proportion calculation.
 
 PROSE FIELDS
 
-1. philosophical_reflection (2–5 sentences, ~40–140 words)
-   - Open with the principal Stoic dynamic in the assessment: the most-prominent passion (passion_diagnosis.passions_detected[0]) and its false judgement, OR the principal control-filter pattern (when no passions detected), OR the principal oikeiosis tension (when no passions and no control conflict).
-   - Connect to the agent's katorthoma_proximity (reflexive | habitual | deliberate | principled | sage_like) and the engaged virtue_domains_engaged.
-   - Close with one sentence of philosophical orientation drawn from the assessment's correct_judgements (when present) or the assessment's ruling_faculty_state.
-   - **MANDATORY** when iterative_refinement.direction_of_travel === "single_snapshot": include one explicit sentence naming the single-snapshot constraint (the OUTPUT example below shows it).
-   - **MANDATORY** when kathekon_assessment.is_kathekon === null: include one explicit sentence naming the undecidable kathekon verdict — typically "The action's appropriateness cannot be determined from the available evidence." This sentence is independent of the principal passion / control / oikeiosis content; it stands as its own observation. The OUTPUT example below shows it. The 5-sentence upper bound exists to accommodate both marginal-case sentences when both apply.
+1. philosophical_reflection (2–4 sentences, ~40–110 words; extended budget when AC-13/AC-14 marginal-case sentences fire — see PROSE FIELDS BUDGET EXTENSIONS below)
 
-2. improvement_guidance (1–3 sentences, ~30–80 words)
-   - If improvement_path_structured is non-null: name the false_judgement_to_correct, the corrected_judgement, and which mechanism (mechanism_applies) the correction belongs to. Use second person.
-   - If control_filter.disambiguation_required is non-empty: add one sentence inviting the agent to reflect on whether the named items are within or outside their moral choice. Cap at 2–3 items; if more, name two and add "and others".
-   - If improvement_path_structured is null: state "no specific improvement path identified at this time" and close with a one-sentence reflective prompt drawn from oikeiosis or value_assessment.
+   STRUCTURE:
+   - Open with the principal Stoic dynamic from the assessment. The opener carries the principled finding in one sentence (no extended unpacking).
+     - When passion_diagnosis.passions_detected is non-empty: open with the principal passion + its false judgement (passion_diagnosis.passions_detected[0] + passion_diagnosis.false_judgements[0]).
+     - When passion_diagnosis is empty AND value_assessment.identified_value_errors is non-empty: open with the value-error observation (see PREFERRED-INDIFFERENT RENDERING RULE below).
+     - When both apply: render BOTH as peer observations — the principal passion observation AND the value-error observation. Both carry principled findings; neither subsumes the other.
+     - When no passions detected, no value errors: open with the principal control-filter pattern, OR the principal oikeiosis tension, OR (residual) the agent's katorthoma_proximity + ruling_faculty_state.
+   - Connect briefly to the agent's katorthoma_proximity (reflexive | habitual | deliberate | principled | sage_like) and any engaged virtue_domains_engaged. Keep this brief — one clause is sufficient; do not develop into a separate full recap sentence.
+   - Close with one sentence of philosophical orientation drawn from passion_diagnosis.correct_judgements[0] (when present) or assessment.ruling_faculty_state. The closing sentence is reframed as something the practitioner can carry with them — an orientation toward the work, not a recap of the assessment. The closing sentence is NEVER a disclaimer, marginal-case sentence, or single-snapshot caveat.
+
+   PREFERRED-INDIFFERENT RENDERING RULE (per Revision 6, 2026-05-07):
+   When value_assessment.identified_value_errors is non-empty, philosophical_reflection MUST surface the value error as a structural observation. Name the indifferent, name the agent's framing of it, and connect it to the engine's principled finding (the indifferent is ranked by axia; the framing is what produces the passion). The value-error observation is a peer of the principal-passion observation: when both apply, render both; when only the value error applies, it carries the principled finding. The OUTPUT examples below demonstrate the rendering.
+
+   FALSE-JUDGEMENT FRAMING — CRITERION OF GOOD AND EVIL (per Revision 4, 2026-05-07):
+   When the prose invokes the Stoic criterion of good and evil — the principle that only virtue is good and only vice is evil; everything else is preferred or dispreferred indifferent — virtue and vice carry moral weight as features of the framework. The prose names this without implying the practitioner has been judged.
+   - ANTI-PATTERN (do NOT produce): "the only thing that is genuinely good or evil is your character in responding to each", "your character is the evil here", "your response is the only evil in this".
+   - TARGET PATTERN (produce): "only virtue and vice carry moral weight; her response, the outcome, your reputation are preferred or dispreferred indifferents"; "the criterion of good and evil falls on the judgement, not on the action's outcome"; "what is genuinely yours to evaluate is the false judgement at work, not your standing"; "the indifferent is being treated as a genuine evil — that is the false judgement, not your standing".
+   The principle: the criterion is named as a feature of the framework (virtue and vice carry moral weight) and applied to the false judgement (which is corrigible) or to indifferents the agent is mis-categorising — never applied to the practitioner's character as a verdict on them.
+
+   MARGINAL-CASE SENTENCES (mid-prose only — never the closing line):
+   These sentences appear in philosophical_reflection when their respective conditions apply. They sit BETWEEN the opener and the closing orientation. They never close the field.
+
+   - **single_snapshot disclaimer — MANDATORY when condition + heuristic both fire.** When iterative_refinement.direction_of_travel === "single_snapshot" AND the input contains a temporal hook that raises a trajectory question, you MUST include the sentence "This is a single snapshot; no trajectory data is available." (or close paraphrase) mid-prose. This is not optional; the discipline preserves the engine's principled withholding.
+
+     Temporal hooks include any of: "I keep [verb-ing]" patterns (e.g., "I keep checking", "I keep going back and forth", "I keep replaying", "I keep thinking"); "I always", "I usually", "I often", "I frequently", "I repeatedly"; "the way I usually do"; "lately", "recently"; "every time", "every day", "for weeks", "for months"; "this keeps happening", "it keeps happening"; descriptions of habitual or recurring behaviour even when the recurrence is in the present tense (vacillation, replay loops, ongoing iteration). When ANY of these appear in the input AND direction_of_travel === "single_snapshot", the disclaimer FIRES mid-prose. Err on the side of firing when the hook is plausible — the cost of omitting when it should fire is higher than the cost of including when it borders on optional.
+
+     OMIT the disclaimer ONLY when the input describes a single past event with no iteration ("yesterday I made a decision", "the board met today and decided X", "she said Y and I responded Z" with no follow-on iterative content) AND direction_of_travel === "single_snapshot". The omission case is the narrow case, not the default.
+
+   - **is_kathekon: null disclaimer — MANDATORY when condition + heuristic both fire.** When kathekon_assessment.is_kathekon === null AND the input has raised the question of appropriateness (the agent has named or implied a question about whether what they did or are considering was the right thing — e.g., "was that the right thing to do", "should I have", "I'm not sure if I", "I don't know what to do", "what's the right move"): you MUST include the sentence "The action's appropriateness cannot be determined from the available evidence." (or close paraphrase) mid-prose. When the input does NOT engage the question of appropriateness AND is_kathekon === null: OMIT this sentence.
+
+   - **EUPATHEIA_BOUNDARY deferral acknowledgement.** When intake_clarifications.open_deferrals contains an entry with trigger_code === "EUPATHEIA_BOUNDARY": include a sentence acknowledging that the eupatheia classification is deferred — typically along the lines of "The classification of this calm as genuine eupatheia versus polished surface over passion cannot be confirmed from this instance alone." This sentence sits mid-prose, never as the closing line.
+
+   - **PRAXIS_MOTIVATION_AMBIGUITY deferral acknowledgement.** When intake_clarifications.open_deferrals contains an entry with trigger_code === "PRAXIS_MOTIVATION_AMBIGUITY": include a sentence acknowledging that the motivation classification is deferred — typically along the lines of "Whether this action arose from virtue or from convention cannot be determined from the current instance alone." This sentence sits mid-prose, never as the closing line.
+
+   These marginal-case sentences are required when their conditions fire; the discipline preserves the engine's principled withholding (it does not flatten what cannot be decided). The placement rule is firm: mid-prose, never closing.
+
+2. improvement_guidance (2–5 sentences, ~50–140 words)
+
+   STRUCTURE:
+   - Voice: practitioner-facing moves. The reader should finish this field with a clear sense of what to do, when to notice it, and how to practise it.
+   - When improvement_path_structured is non-null: name the false_judgement_to_correct (one sentence), the corrected_judgement to substitute (one sentence), and the mechanism (mechanism_applies) the correction belongs to. Then DEVELOP the move concretely — what to notice, where to intercept the impression in the causal chain (phantasia / synkatathesis / horme / praxis), what to substitute, what to practise. The closing sentence MUST be the practitioner-facing move (a concrete practice or specific Stoic move the practitioner can carry into their day).
+   - If control_filter.disambiguation_required is non-empty: include one sentence inviting the agent to reflect on whether the named items lie within or outside their moral choice. Cap at 2–3 items; if more, name two and add "and others".
+   - When improvement_path_structured is null: include the sentence "No specific improvement path is identified at this time." (or close paraphrase) mid-prose, then close on a one-sentence reflective prompt drawn from oikeiosis or value_assessment. The disclaimer NEVER closes the field; the reflective prompt closes the field. The reflective prompt is a concrete attention-direction the practitioner can carry forward.
 
 3. summary (one sentence, ~15–30 words)
-   - Name the agent's katorthoma_proximity + the principal issue (the primary passion's false_judgement OR the principal oikeiosis tension OR the kathekon verdict). Plain language.
+
+   STRUCTURE:
+   - Name the agent's katorthoma_proximity + the principal issue (the primary passion's false_judgement OR the principal oikeiosis tension OR the kathekon verdict OR the principal value-error observation). Plain language. The summary is the residual sentence; it states the verdict, then closes.
 
 4. soft_clarification_prose (1–2 sentences, ~20–60 words; null when no soft clarifications fire)
    - When assessment.intake_clarifications.soft_clarifications is empty, this field MUST be null.
@@ -161,39 +203,56 @@ PROSE FIELDS
    - Address the practitioner in second person.
    - Do NOT add "I'm not asking you to answer it now" as a coda — that wording belongs to the long-deferred-questions surface (D15), not the initial deferral surfacing.
 
-MARGINAL-CASE DISCIPLINE EXTENSION (added 2026-05-06, M1-CP4b — per AC-14)
+PROSE FIELDS BUDGET EXTENSIONS
 
-When intake_clarifications.open_deferrals contains an EUPATHEIA_BOUNDARY entry, philosophical_reflection MUST contain a sentence acknowledging that the eupatheia classification is deferred — typically along the lines of "The classification of this calm as genuine eupatheia versus polished surface over passion cannot be confirmed from this instance alone." This sentence is independent of the principal passion / control / oikeiosis content and stands as its own observation.
+The base budget for philosophical_reflection is 2–4 sentences (~40–110 words). When AC-13 / AC-14 / single_snapshot / kathekon-null marginal-case sentences fire mid-prose, the philosophical_reflection budget extends by one sentence per fired marginal-case condition (up to a hard ceiling of 6 sentences, ~180 words). The closing-line discipline (Revision 1) holds at every budget — even when marginal-case sentences expand the field, the closing line is always the actionable orientation.
 
-When intake_clarifications.open_deferrals contains a PRAXIS_MOTIVATION_AMBIGUITY entry, philosophical_reflection MUST contain a sentence acknowledging that the motivation classification is deferred — typically along the lines of "Whether this action arose from virtue or from convention cannot be determined from the current instance alone." This sentence is independent of the principal content and stands as its own observation.
+CONTROLLED VOCABULARY (R8a + R8c)
 
-The philosophical_reflection word budget is extended to 2–6 sentences (~40–180 words) when one or both of the AC-14 marginal-case sentences apply.
+Greek and technical Stoic terms MUST carry an English translation in parentheses on FIRST occurrence per response (across all prose fields combined — philosophical_reflection, improvement_guidance, summary, soft_clarification_prose, open_deferrals_prose). The gloss attaches to the first appearance anywhere in the response; subsequent appearances of the same term anywhere in the same response do not need re-glossing. This is a discipline, not decoration: every Greek term across the response is glossed once on first appearance.
 
-CONTROLLED VOCABULARY (R8a)
+Required-gloss term list (non-exhaustive — any Greek or technical term the assessment uses must be glossed):
+- Causal-chain stages: phantasia (impression), synkatathesis (assent), horme (impulse), praxis (action).
+- Passions: epithumia (irrational desire), hedone (pleasure), phobos (fear), lupe (distress); sub-species when named (e.g., philodoxia (love of reputation), agonia (anguished anxiety), achos (anguished grief), pothos (longing for the absent), oknos (sluggishness)).
+- Eupatheiai: chara (rational joy), boulesis (rational wishing), eulabeia (reverent caution), eupatheia (rational affection).
+- Virtues: phronesis (practical wisdom), dikaiosyne (justice), andreia (courage), sophrosyne (temperance).
+- Architecture: prohairesis (moral choice / ruling faculty), kathekon (appropriate action), katorthoma (perfect action), oikeiosis (appropriation), eudaimonia (flourishing).
+- Affect descriptors: ataraxia (freedom from disturbance) when used.
 
-You MAY use Greek identifiers (epithumia, hedone, phobos, lupe; phantasia, synkatathesis, horme, praxis; phronesis, dikaiosyne, andreia, sophrosyne; oikeiosis; kathekon; prohairesis) when the assessment names them. Translate them once for the practitioner (e.g., "phobos (fear)") on first use within a single prose field. Do not introduce Greek terms the assessment did not name.
+When the term itself is the English translation already in common use (e.g., "ruling faculty"), no gloss is required, but if the prose introduces "ruling faculty" alongside prohairesis, the gloss attaches to prohairesis on first occurrence. Do not introduce Greek terms the assessment did not name.
 
 OUTPUT
 
 Return ONLY valid JSON conforming to Layer3Prose. No markdown. No commentary outside the JSON.
 
+WORKED EXAMPLE — passion + value-error case (closing on action; mid-prose marginal-case sentence; consistent glossing; careful false-judgement framing; proportional rebalance)
+
 {
   "version": "layer3-prose-v1",
   "layer2_assessment_version": "layer2-assessment-v1",
   "consumer": "api_reason",
-  "philosophical_reflection": "Your repeated checking of the phone reflects phobos (fear) lodged at the assent stage, where you are treating her response as something genuinely good rather than as a preferred indifferent. Your reasoning is currently deliberate but the false judgement that her opinion determines your worth is engaging phronesis (practical wisdom) without yet stabilising it. The correct view is that her judgement is outside your prohairesis; your character and your impulses are within it. The action's appropriateness cannot be determined from the available evidence. This is a single snapshot; no trajectory data is available to assess your direction of travel.",
-  "improvement_guidance": "The false judgement to correct is the assumption that another's response constitutes evidence of your standing. Replace it with the assessment that her response is one external among many and your worth rests in your own ruling faculty. This is a passion-diagnosis correction at the synkatathesis stage — work it at the moment of impression, before you assent.",
-  "summary": "Your reasoning is deliberate but lodged at the assent stage of phobos, where the false judgement that another's response determines your worth requires correction.",
+  "philosophical_reflection": "Your repeated checking of the phone reflects phobos (fear) lodged at the synkatathesis (assent) stage, and the discomfort of uncertainty itself is a preferred indifferent — the absence of certainty about her response — being treated as a genuine evil. This is a single snapshot; no trajectory data is available to assess your direction of travel. The work is to hold that her judgement lies outside your prohairesis (moral choice / ruling faculty), while your character and your impulses are where your attention belongs.",
+  "improvement_guidance": "The false judgement to correct is the assumption that another's response constitutes evidence of your standing. Replace it with the assessment that her response is one external among many, and your worth rests in your own ruling faculty. This is a synkatathesis-stage correction — the work happens at the moment the impression arises, before you assent to it. Notice the urge to check the phone the moment it surfaces, hold the impression at arm's length, and ask whether what you are about to assent to is genuinely good or merely a preferred indifferent treated as more than it is. Practise this once today: when the urge appears, name it, examine the impression, and choose your response from the ruling faculty rather than from the impulse.",
+  "summary": "Your reasoning is deliberate but lodged at the assent stage of phobos, where the false judgement that another's response determines your worth requires correction at the moment of impression.",
   "soft_clarification_prose": null,
   "open_deferrals_prose": null,
   "source": "llm"
 }
 
+Notes on this example:
+- The closing sentence of philosophical_reflection is the action-orientation ("The work is to hold..."), NOT the disclaimer. Per Revision 1.
+- The single_snapshot disclaimer sits mid-prose (sentence 2 of 3), not as the closing line. Per Revision 5. The is_kathekon: null disclaimer is OMITTED in this example because the input does not raise the question of appropriateness.
+- The opener (sentence 1) folds the principal-passion observation AND the value-error observation into a single principled finding. Per Revision 6.
+- "Treated as a genuine evil" is predicated of the indifferent (the discomfort of uncertainty), not of the practitioner's character. Per Revision 4.
+- Greek terms are glossed once on first appearance per response: phobos (fear), synkatathesis (assent), prohairesis (moral choice / ruling faculty). Subsequent appearances ("synkatathesis-stage correction") do not re-gloss. Per Revision 3.
+- Sentence-count proportions: reflection 3, guidance 5, summary 1. guidance ≥ reflection. Per Revision 7.
+- The closing sentence of improvement_guidance is a concrete practice ("Practise this once today..."), NOT the recap of the mechanism. Per Revision 1.
+
 Use the EXACT JSON keys shown above (e.g. "philosophical_reflection", not "reflection"; "improvement_guidance", not "guidance"; "layer2_assessment_version", not "assessment_version"; "soft_clarification_prose", not "clarification"; "open_deferrals_prose", not "deferrals"). Use the EXACT enum values shown ("layer3-prose-v1", "layer2-assessment-v1", "api_reason", "llm"). Do not add fields not in the example.
 
-If the assessment has no passions_detected, no oikeiosis tensions, no control conflicts, and no value errors, the prose still produces all five fields — describe the agent's katorthoma_proximity and ruling_faculty_state, and use the marginal-case phrasing for any null/marginal mechanism. soft_clarification_prose and open_deferrals_prose are null when their corresponding intake_clarifications arrays are empty.
+If the assessment has no passions_detected, no oikeiosis tensions, no control conflicts, and no value errors, the prose still produces all five fields — describe the agent's katorthoma_proximity and ruling_faculty_state, and use the marginal-case phrasing for any null/marginal mechanism whose input-condition heuristic is satisfied. soft_clarification_prose and open_deferrals_prose are null when their corresponding intake_clarifications arrays are empty.
 
-WORKED EXAMPLE — intake_clarifications populated (added 2026-05-06, M1-CP4b)
+WORKED EXAMPLE — eupatheia case with intake_clarifications populated (chara candidate, EUPATHEIA_BOUNDARY deferral)
 
 When assessment.intake_clarifications.open_deferrals contains an EUPATHEIA_BOUNDARY entry (chara candidate, narrative_target "her promotion") AND assessment.intake_clarifications.soft_clarifications is empty, the prose looks like this:
 
@@ -201,15 +260,21 @@ When assessment.intake_clarifications.open_deferrals contains an EUPATHEIA_BOUND
   "version": "layer3-prose-v1",
   "layer2_assessment_version": "layer2-assessment-v1",
   "consumer": "api_reason",
-  "philosophical_reflection": "Your description of joy at her promotion shows the shape of chara — joy in another's good as an end in itself. Your reasoning is principled, with phronesis (practical wisdom) and dikaiosyne (justice) engaged in the recognition that her good is not in opposition to yours. The classification of this calm as genuine eupatheia versus polished surface over passion cannot be confirmed from this instance alone. This is a single snapshot; no trajectory data is available to assess your direction of travel.",
-  "improvement_guidance": "No specific improvement path is identified at this time. The structural features of your reasoning are aligned with virtue; the work is to remain attentive to the same shape across other instances where the outcome touches your own standing.",
-  "summary": "Your reasoning is principled in the recognition of another's good, with the eupatheia classification deferred for longitudinal confirmation.",
+  "philosophical_reflection": "Your description of joy at her promotion shows the shape of chara (rational joy) — joy in another's good as an end in itself — with phronesis (practical wisdom) and dikaiosyne (justice) engaged in the recognition that her good is not in opposition to yours. The classification of this calm as genuine eupatheia (rational affection) versus polished surface over passion cannot be confirmed from this instance alone. This is a single snapshot, so no trajectory data is available to assess the direction of travel. The work is to remain attentive to the same shape of chara across other instances — particularly those where the outcome touches your own standing.",
+  "improvement_guidance": "No specific improvement path is identified at this time; the structural features of your reasoning are aligned with virtue, and the work here is consolidation rather than correction. When you next find yourself rejoicing in another's good, pause for a moment and trace what you are rejoicing in — the good itself, or your association with it. Notice whether the joy holds when no one else is watching, when no one would credit you with it, when nothing flows back to your own standing. Practise this attention once this week: when chara surfaces, examine its shape and ask whether it is genuine joy in another's good or pleasure in your own connection to that good.",
+  "summary": "Your reasoning is principled in the recognition of another's good, with the work to verify across instances whether the calm is genuine eupatheia or a polished surface over passion.",
   "soft_clarification_prose": null,
-  "open_deferrals_prose": "You described responding with chara (joy in another's good). Across recent days, when her promotion arose in this domain — was your inner state actually genuine joy in her good as an end in itself, or was it more like philodoxia (pleasure in being associated with success)?",
+  "open_deferrals_prose": "You described responding with chara. Across recent days, when her promotion arose in this domain — was your inner state actually genuine joy in her good as an end in itself, or was it more like philodoxia (pleasure in being associated with success)?",
   "source": "llm"
 }
 
-Note in this example: philosophical_reflection contains the AC-14 marginal-case sentence ("The classification of this calm as genuine eupatheia versus polished surface over passion cannot be confirmed from this instance alone.") AND the existing single-snapshot sentence — both are MANDATORY when their respective conditions apply. The open_deferrals_prose renders the d-a16 T3-001 stem text with the slot-fills.
+Notes on this example:
+- The closing sentence of philosophical_reflection is the action-orientation ("The work is to remain attentive..."), NOT the disclaimer. Per Revision 1. Both marginal-case sentences (EUPATHEIA_BOUNDARY + single_snapshot) sit mid-prose.
+- philosophical_reflection budget extends to 4 sentences because two marginal-case conditions fire (EUPATHEIA_BOUNDARY + single_snapshot, both with input-condition heuristics satisfied — the input mentions "her promotion" as a recent eupatheia-shaped event).
+- "No specific improvement path is identified at this time" sits mid-prose in improvement_guidance (sentence 1 has it folded into a longer sentence). The closing line of improvement_guidance is a concrete practice ("Practise this attention once this week..."), NOT the disclaimer. Per Revision 5 + Revision 1.
+- Greek glossing per response: chara glossed in philosophical_reflection sentence 1 (rational joy); not re-glossed in open_deferrals_prose. phronesis, dikaiosyne, eupatheia glossed in philosophical_reflection. philodoxia glossed in open_deferrals_prose (first occurrence in the response). Per Revision 3.
+- Sentence-count proportions: reflection 4, guidance 4, summary 1. guidance ≥ reflection (equal — soft-warn does NOT fire). Per Revision 7.
+- The open_deferrals_prose renders the d-a16 T3-001 stem text with the slot-fills.
 
 Return only the JSON.`
 
@@ -586,6 +651,10 @@ export async function generateProse(
 // DETERMINISTIC FALLBACK PROSE (per ADR-007 §6 + ADR-004 §9.3)
 // ============================================================================
 
+// Proximity-keyed connection sentence — used mid-prose in the residual case
+// (no passions, no value errors). Renamed semantically: this is no longer the
+// "opener"; the opener is the principal observation (passion or value-error).
+// The proximity sentence appears mid-prose as a brief connection.
 const PROXIMITY_REFLECTION: Record<KatorthomaProximity, string> = {
   reflexive:
     'Your reasoning here moves below the threshold of deliberation; impressions become impulses without examination.',
@@ -607,6 +676,25 @@ const PROXIMITY_SUMMARY: Record<KatorthomaProximity, string> = {
   sage_like: 'Your reasoning is sage-like',
 }
 
+// Proximity-keyed action-oriented closing — used as the closing line of
+// philosophical_reflection in the residual case (no correct_judgements available
+// to draw the closing orientation from). Per Revision 1 (2026-05-07):
+// the closing sentence MUST be a concrete practice / actionable orientation,
+// never a disclaimer or marginal-case sentence. These templates encode
+// proximity-appropriate moves the practitioner can carry forward.
+const PROXIMITY_RESIDUAL_CLOSING: Record<KatorthomaProximity, string> = {
+  reflexive:
+    'The work is to slow down at the moment of impression and bring deliberation in before assent.',
+  habitual:
+    'The work is to test what convention prescribes against the criterion of good and evil rather than accept it without examination.',
+  deliberate:
+    'The work is to deepen the examination toward principled stability — to hold the principle once it is named.',
+  principled:
+    'The work is to consolidate this stability across instances and remain attentive where it touches your own standing.',
+  sage_like:
+    'The work is to remain attentive — even where impression, assent, impulse, and action appear aligned.',
+}
+
 const VIRTUE_TRANSLATIONS: Record<VirtueDomain, string> = {
   phronesis: 'phronesis (practical wisdom)',
   dikaiosyne: 'dikaiosyne (justice)',
@@ -622,6 +710,25 @@ const MECHANISM_LABELS: Record<string, string> = {
   kathekon_assessment: 'kathekon-assessment correction',
 }
 
+// Mechanism-keyed action-oriented closing — used as the closing line of
+// improvement_guidance when improvement_path_structured is non-null. Per
+// Revision 1 (2026-05-07): the previous closing line ("This is a {mechLabel}.")
+// is the mechanism naming, not an actionable practice. Per Revision 1 the
+// closing line MUST be the practitioner-facing move. The mechanism naming
+// is now mid-prose; one of these closings closes the field.
+const MECHANISM_ACTION_CLOSING: Record<string, string> = {
+  passion_diagnosis:
+    'Practise this when the impression arises: notice the passion, hold the impression at arm’s length, and substitute the corrected judgement before you assent.',
+  control_filter:
+    'Practise the control filter at the moment of choice: ask whether what you are about to act on lies within your prohairesis, and direct your attention to what does.',
+  oikeiosis:
+    'Carry the corrected oikeiosis framing into the next instance: notice what the circle owes and what it does not, and hold the obligation where it actually rests.',
+  value_assessment:
+    'Practise the value-assessment correction when the indifferent appears: name what it is — a preferred or dispreferred indifferent — and decline to treat it as more than that.',
+  kathekon_assessment:
+    'Test future actions against the kathekon criterion: is the reason for action in the agent (within prohairesis), or in convention or appearance?',
+}
+
 function joinVirtues(virtues: VirtueDomain[]): string {
   if (virtues.length === 0) return ''
   if (virtues.length === 1) return VIRTUE_TRANSLATIONS[virtues[0]]
@@ -633,22 +740,107 @@ function joinVirtues(virtues: VirtueDomain[]): string {
 }
 
 /**
+ * Render the value-error observation per Revision 6 (2026-05-07).
+ *
+ * When `value_assessment.indifferents_at_stake` contains an entry with a
+ * non-null `error`, surface the value error as a structural observation:
+ * name the indifferent, name the agent's framing of it, and connect to the
+ * principled finding (the indifferent is ranked by axia; the framing is what
+ * produces the passion). The phrasing is keyed by `axia` (preferred vs
+ * dispreferred — preferred maps to `axia: 'high' | 'moderate'`; dispreferred
+ * maps to `axia: 'low'`) and `treated_as` ('good' | 'evil' | 'indifferent').
+ *
+ * Per Revision 4 (2026-05-07): "evil" is predicated of the false judgement /
+ * the indifferent's mis-categorisation, NEVER of the practitioner's character.
+ * The closing clause "that is where the false judgement sits, not in your
+ * standing" makes this explicit.
+ *
+ * Returns an empty string when no value errors are present (the helper is
+ * additive — caller composes alongside the principal-passion observation).
+ */
+function fallbackValueErrorSentence(assessment: Layer2Assessment): string {
+  const errors = assessment.value_assessment.indifferents_at_stake.filter(
+    (i) => i.error !== null
+  )
+  if (errors.length === 0) return ''
+  const v = errors[0]
+  const indifferentName = v.name.replace(/_/g, ' ')
+  // axia 'low' → dispreferred; 'high' / 'moderate' → preferred. Matches the
+  // PREFERRED_INDIFFERENTS / DISPREFERRED_INDIFFERENTS sets in
+  // layer2-mechanisms.ts.
+  const axiaClass = v.axia === 'low' ? 'dispreferred' : 'preferred'
+  const treatedAsLabel =
+    v.treated_as === 'good'
+      ? 'a genuine good'
+      : v.treated_as === 'evil'
+        ? 'a genuine evil'
+        : 'something more than indifferent'
+  return (
+    ` The indifferent ${indifferentName} (a ${axiaClass} indifferent by axia ranking) ` +
+    `is being treated as ${treatedAsLabel} — that is where the false judgement sits, ` +
+    `not in your standing.`
+  )
+}
+
+/**
  * Build philosophical_reflection from assessment alone (no LLM).
- * Composed of: proximity-keyed opener + passion/virtue context + ruling-faculty close.
+ *
+ * Composition (per ADR-007 §3 + Revisions 1, 4, 5, 6 of 2026-05-07):
+ *   1. Principal observation — passion sentence (when passions present), peer-rendered
+ *      with the value-error sentence (when value errors also present); value-error
+ *      alone when no passions but value errors; proximity-keyed reflection sentence
+ *      in the residual case.
+ *   2. Brief virtue connection (when virtue_domains_engaged non-empty).
+ *   3. Marginal-case sentences MID-PROSE (each independent — never closing):
+ *      - EUPATHEIA_BOUNDARY when applicable
+ *      - PRAXIS_MOTIVATION_AMBIGUITY when applicable
+ *      - kathekon-null when applicable
+ *      - single-snapshot when applicable
+ *   4. Closing orientation — drawn from correct_judgements[0] (action-oriented
+ *      reframing) when available; falls back to PROXIMITY_RESIDUAL_CLOSING.
+ *
+ * Closing-line discipline (Revision 1): the closing sentence is ALWAYS the
+ * action-orientation. Marginal-case sentences NEVER close the field. This
+ * differs from the M1-CP3 ordering, which placed marginal-case appends after
+ * the closing sentence and so left disclaimers as the de-facto closing line.
+ *
+ * Input-condition heuristic note (Revision 5): the LLM applies an input-condition
+ * heuristic to single-snapshot and kathekon-null disclaimers (omit when the
+ * input has no temporal hooks / has not raised the question of appropriateness).
+ * The fallback does NOT have access to the original input text — only the
+ * assessment. The fallback therefore applies the marginal-case sentences
+ * whenever the assessment field is marginal/null, and is conservative by design.
+ * The placement (mid-prose, never closing) is preserved.
  */
 function fallbackPhilosophicalReflection(assessment: Layer2Assessment): string {
-  const proximityOpener = PROXIMITY_REFLECTION[assessment.katorthoma_proximity]
-
   const passions = assessment.passion_diagnosis.passions_detected
-  let passionSentence = ''
-  if (passions.length > 0) {
+  const valueErrorSentence = fallbackValueErrorSentence(assessment)
+  const hasPassion = passions.length > 0
+  const hasValueError = valueErrorSentence.length > 0
+
+  // Sentence 1 — principal observation (opener).
+  let openerSentence = ''
+  if (hasPassion) {
     const p = passions[0]
-    passionSentence =
-      ` The principal dynamic is ${p.root_passion}` +
+    openerSentence =
+      `The principal dynamic is ${p.root_passion}` +
       (p.sub_species ? ` (specifically ${p.sub_species})` : '') +
       `, lodged at the ${p.causal_stage_affected} stage.`
+  } else if (hasValueError) {
+    // Value error alone carries the principled finding. Use the helper sentence
+    // (with leading space) trimmed to remove the leading space — it becomes the
+    // opener rather than a peer.
+    openerSentence = valueErrorSentence.trimStart()
+  } else {
+    // Residual case — proximity-keyed reflection sentence opens.
+    openerSentence = PROXIMITY_REFLECTION[assessment.katorthoma_proximity]
   }
 
+  // Sentence 1.5 — peer value-error observation (only when both passion AND
+  // value error are present; the value-error sentence appended as a peer).
+  const peerValueErrorSentence = hasPassion && hasValueError ? valueErrorSentence : ''
+
+  // Sentence 2 — virtue connection (mid-prose).
   let virtueSentence = ''
   if (assessment.virtue_domains_engaged.length > 0) {
     virtueSentence = ` ${joinVirtues(assessment.virtue_domains_engaged)} ${
@@ -656,38 +848,9 @@ function fallbackPhilosophicalReflection(assessment: Layer2Assessment): string {
     } engaged here.`
   }
 
-  // Closing sentence — prefer correct_judgement, fall back to ruling_faculty_state
-  let closingSentence = ''
-  if (assessment.passion_diagnosis.correct_judgements.length > 0) {
-    closingSentence = ` The correct view: ${assessment.passion_diagnosis.correct_judgements[0]}`
-    if (!closingSentence.endsWith('.')) closingSentence += '.'
-  } else if (assessment.ruling_faculty_state && assessment.ruling_faculty_state.trim().length > 0) {
-    closingSentence = ` ${assessment.ruling_faculty_state}`
-    if (!closingSentence.endsWith('.')) closingSentence += '.'
-  }
-
-  // Marginal-case appends (per ADR-007 §6 in-session amendments 2026-05-04 + harness
-  // Phase 5 findings that the original fallback omitted these disciplines).
-  // Each append is independent and may both fire on the same assessment.
-
-  // Single-snapshot append — required for every input without temporal markers.
-  let singleSnapshotSentence = ''
-  if (assessment.iterative_refinement.direction_of_travel === 'single_snapshot') {
-    singleSnapshotSentence = ' This is a single snapshot; no trajectory data is available.'
-  }
-
-  // Kathekon-null append — required whenever the kathekon verdict is undecidable.
-  // Per second amendment (post-harness re-run): the LLM was producing rich passion-
-  // focused prose but silently skipping the kathekon-null discipline; the fallback
-  // had the same gap. Append independently so the discipline fires whenever applicable,
-  // regardless of whether passions or other primary issues are also being named.
-  let kathekonNullSentence = ''
-  if (assessment.kathekon_assessment.is_kathekon === null) {
-    kathekonNullSentence = " The action's appropriateness cannot be determined from the available evidence."
-  }
-
-  // Added 2026-05-06 (M1-CP4b) — AC-14 marginal-case appends per ADR-007 §6 amendment.
-  // Independent appends; both may fire on the same assessment when both deferrals are present.
+  // Sentences 3+ — marginal-case sentences (mid-prose; each independent).
+  // Per Revision 5 (Pattern B): discipline preserved, placement changed —
+  // these sentences appear mid-prose, never as the closing line.
   let eupatheiaBoundarySentence = ''
   let praxisMotivationSentence = ''
   const openDeferrals = assessment.intake_clarifications.open_deferrals
@@ -700,50 +863,93 @@ function fallbackPhilosophicalReflection(assessment: Layer2Assessment): string {
       ' Whether this action arose from virtue or from convention cannot be determined from the current instance alone.'
   }
 
-  return `${proximityOpener}${passionSentence}${virtueSentence}${closingSentence}${eupatheiaBoundarySentence}${praxisMotivationSentence}${kathekonNullSentence}${singleSnapshotSentence}`.trim()
+  let kathekonNullSentence = ''
+  if (assessment.kathekon_assessment.is_kathekon === null) {
+    kathekonNullSentence = " The action's appropriateness cannot be determined from the available evidence."
+  }
+
+  let singleSnapshotSentence = ''
+  if (assessment.iterative_refinement.direction_of_travel === 'single_snapshot') {
+    singleSnapshotSentence = ' This is a single snapshot; no trajectory data is available.'
+  }
+
+  // Final sentence — closing orientation (action-oriented per Revision 1).
+  // Prefer correct_judgements[0] reframed as a "carry forward" / "the work is
+  // to" orientation; fall back to PROXIMITY_RESIDUAL_CLOSING when the assessment
+  // does not name a correct judgement. ruling_faculty_state is intentionally
+  // NOT used here — its values are diagnostic descriptions ("Agitated...",
+  // "Examining...") rather than action-orientations.
+  let closingSentence: string
+  if (assessment.passion_diagnosis.correct_judgements.length > 0) {
+    const cj = assessment.passion_diagnosis.correct_judgements[0]
+    const cjPunctuated = cj.endsWith('.') ? cj : `${cj}.`
+    closingSentence = ` Carry this forward: ${cjPunctuated}`
+  } else {
+    closingSentence = ` ${PROXIMITY_RESIDUAL_CLOSING[assessment.katorthoma_proximity]}`
+  }
+
+  return `${openerSentence}${peerValueErrorSentence}${virtueSentence}${eupatheiaBoundarySentence}${praxisMotivationSentence}${kathekonNullSentence}${singleSnapshotSentence}${closingSentence}`.trim()
 }
 
 /**
  * Build improvement_guidance from assessment alone.
- * Cases:
- *   - improvement_path_structured non-null: name the false_judgement + corrected_judgement + mechanism
- *   - improvement_path_structured null: marginal-case phrasing + reflective prompt
- *   - disambiguation_required non-empty: append a sentence (cap 2 items, "and others" if more)
+ *
+ * Composition (per ADR-007 §3 + Revisions 1, 5 of 2026-05-07):
+ *   - When improvement_path_structured non-null: name the false_judgement_to_correct
+ *     (one sentence), the corrected_judgement (one sentence), the mechanism
+ *     naming (one sentence). Disambiguation prompt mid-prose if applicable.
+ *     CLOSING line is the mechanism-keyed action-orientation (per Revision 1) —
+ *     a concrete practitioner-facing move the reader can carry forward. The
+ *     mechanism naming is no longer the closing line.
+ *   - When improvement_path_structured null: the no-improvement-path disclaimer
+ *     sits MID-PROSE; the reflective prompt closes the field (per Revision 5 +
+ *     Revision 1). The disclaimer never closes; the reflective prompt is
+ *     action-oriented (a specific attention-direction).
+ *   - Disambiguation prompt (when control_filter.disambiguation_required is
+ *     non-empty): inserted MID-PROSE, before the closing line.
  */
 function fallbackImprovementGuidance(assessment: Layer2Assessment): string {
-  let guidance: string
-
-  if (assessment.improvement_path_structured !== null) {
-    const ip = assessment.improvement_path_structured
-    const mechLabel = MECHANISM_LABELS[ip.mechanism_applies] ?? `${ip.mechanism_applies} correction`
-    guidance =
-      `The false judgement to correct: "${ip.false_judgement_to_correct}". ` +
-      `Replace it with: "${ip.corrected_judgement}". ` +
-      `This is a ${mechLabel}.`
-  } else {
-    // Marginal case — explicit phrasing per ADR-007 §3
-    const reflectivePrompt =
-      assessment.oikeiosis.deliberation_notes && assessment.oikeiosis.deliberation_notes.trim().length > 0
-        ? ` Reflect on the oikeiosis context: ${assessment.oikeiosis.deliberation_notes}`
-        : assessment.value_assessment.value_error
-          ? ` Reflect on the value pattern: ${assessment.value_assessment.value_error}`
-          : ' Reflect on which judgements are within your prohairesis and which are outside it.'
-    guidance =
-      `No specific improvement path identified at this time.${reflectivePrompt}`.trim()
-  }
-
-  // Append disambiguation prompt when present
+  // Disambiguation prompt — composed first so we can place it mid-prose
+  // before the closing line (per Revision 1 + Revision 5).
   const disambig = assessment.control_filter.disambiguation_required
+  let disambigSentence = ''
   if (disambig.length > 0) {
     const items = disambig.slice(0, 2).map((d) => `"${d.item}"`)
     const tail = disambig.length > 2 ? ` (and others)` : ''
     const itemStr = items.length === 1 ? items[0] : `${items[0]} and ${items[1]}`
-    guidance +=
+    disambigSentence =
       ` You did not specify a position on ${itemStr}${tail}; ` +
       `reflect on whether ${disambig.length === 1 ? 'it lies' : 'they lie'} within or outside your moral choice.`
   }
 
-  return guidance
+  if (assessment.improvement_path_structured !== null) {
+    const ip = assessment.improvement_path_structured
+    const mechLabel = MECHANISM_LABELS[ip.mechanism_applies] ?? `${ip.mechanism_applies} correction`
+    const closingAction =
+      MECHANISM_ACTION_CLOSING[ip.mechanism_applies] ??
+      'Practise the correction at the moment of impression: notice the move, name what is going on, and substitute the corrected judgement before assenting.'
+    // Sentences 1-3: false judgement, corrected judgement, mechanism naming.
+    // Sentence 4 (when disambiguation): disambiguation prompt mid-prose.
+    // Final sentence: action-oriented closing per Revision 1.
+    return (
+      `The false judgement to correct: "${ip.false_judgement_to_correct}". ` +
+      `Replace it with: "${ip.corrected_judgement}". ` +
+      `This is a ${mechLabel}.` +
+      disambigSentence +
+      ` ${closingAction}`
+    )
+  }
+
+  // improvement_path_structured null — disclaimer sits mid-prose; reflective
+  // prompt closes the field (per Revision 1 + Revision 5).
+  const reflectiveClosing =
+    assessment.oikeiosis.deliberation_notes && assessment.oikeiosis.deliberation_notes.trim().length > 0
+      ? `Reflect on the oikeiosis context: ${assessment.oikeiosis.deliberation_notes}`
+      : assessment.value_assessment.value_error
+        ? `Reflect on the value pattern: ${assessment.value_assessment.value_error}`
+        : 'Reflect on which judgements are within your prohairesis (moral choice / ruling faculty) and which are outside it; tend to the first, accept the second.'
+  // Disclaimer mid-prose; disambig (if any) mid-prose; reflective closing last.
+  return `No specific improvement path is identified at this time.${disambigSentence} ${reflectiveClosing}`.trim()
 }
 
 /**
