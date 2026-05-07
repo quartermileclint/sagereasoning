@@ -3088,3 +3088,72 @@ Expected: `SUMMARY: 282 / 283 checks passed` (or higher if F4 Sonnet variance do
 **Rules served:** R0 (oikeiosis — Layer 3 prose is what Circles 1 + 2 of the practitioner experience; this implementation lands the prose-quality bar founder set at M1-CP5); R8a (controlled vocabulary — Greek identifiers from the assessment vocabulary used; soft-warns track over-imitation); R8c (English-only on user-facing prose — Revision 3's per-response glossing discipline working in spot-check); R7 (source fidelity — value-error rendering surfaces assessment data without invention); AC1 (model selection — Sonnet `MODEL_DEEP` retained; cited per cache Element 6); AC8 (translation-sandwich engine surface); KG1 (Vercel five rules — LLM call awaited; no fire-and-forget; no module-level cache; no DB writes; harness env flag is script-only); KG2 (Sonnet retained per cache Element 6); PR1 (single-endpoint proof — `/api/reason` is M1 pilot consumer); PR3 (synchronous discipline — `generateProse` awaited); PR4 (model selection enforced via `assessment_deep` PermittedModel); PR5 (knowledge-gap carry-forward — third recurrence of in-session prompt-strengthening pattern observed but PR8 promotion held). NOT engaged: AC4, AC5, AC7, PR6 (no R20a perimeter or auth surface touched).
 
 **Status:** Adopted. Cross-references: `D-M1-CP5b-ADR-007-AMENDMENT-2026-05-07` (predecessor — the seven Revisions adopted); `D-M1-CP5-COMPARISON-RUBRIC-FIRST-PASS-2026-05-07` (the seven gaps catalogued); `D-M1-CP4f-PARALLEL-RUN-OBSERVATION-INFRA-2026-05-07` (the parallel-run infrastructure used for re-validation); `/adopted/adr/2026-05-04-layer3-prose-template-api-reason.md` (the implemented specification — Amendment section dated 2026-05-07 + the original §3 + §5 + §6 + §7 + §8); `/adopted/standing-protocol-cache.md` (operative governing frame); `/operations/handoffs/founder/2026-05-07-sub-session-M1-CP5b-close.md` (predecessor close); `/operations/handoffs/founder/2026-05-07-M1-CP5c-NEXT-SESSION-PROMPT.md` (this session's input prompt); `/operations/handoffs/founder/2026-05-07-sub-session-M1-CP5c-close.md` (this session's close — produced at Step 7); `/operations/handoffs/founder/2026-05-07-return-to-M1-CP5-NEXT-SESSION-PROMPT.md` (next-session prompt for return-to-M1-CP5 — drafted at Step 7).
+
+---
+
+## 2026-05-07 — D-M1-CP5-RETURN-RUBRIC-REFRESH
+
+**Decision:** Sub-session return-to-M1-CP5 (refreshed comparison-rubric read against post-M1-CP5c parallel-run sample) completed. Founder reviewed the six ADR-004 §6.4 dimensions across 4 post-M1-CP5c rows (all standard-depth, all full-sandwich, no Tier 1 fires) plus prose spot-check across the same 4 rows against the seven Revisions per ADR-007 Amendment 2026-05-07. Founder elected **Branch B — Revise-again** rather than Branch A (cutover) or Branch C (rollback). Scope split into two follow-on sessions per founder direction: M1-CP5d (Revision 3 term-list refinement + Q1 OUTPUT-example over-imitation) → M1-CP5e (Q2 extractJSON / "no markdown" hardening + Q6 upstream-causal-chain soft-warn refinement) → return-to-M1-CP5-prime (rubric refresh #2) → M1-CP6 cutover. The evidence supported cutover (5/6 rubric dimensions clean; 27/28 prose micro-checks pass); founder elected precautionary refinement of the surfaced items rather than ship-as-is.
+
+**Reasoning:** Per ADR-004 §10's checkpoint table, return-to-M1-CP5 is the cutover-readiness verdict for the M1 arc. Five rubric dimensions returned clean signals supporting cutover (L1 latency 12,442 ms, comparable to first-pass 13,355; L3 latency 16,835 ms, modest 18% rise from 14,228 explained by longer prompt, well below 25,000 flag; sandwich/bundled ratio 47%, sandwich still ~half bundled; cost $0.0369/req, modest 21% rise from $0.0306 under R5 $0.05 baseline, 0 over $0.05 / 0 over $0.10; Tier 1 distribution null this sample as the input set didn't include trigger fixtures, no regression signal). The sixth dimension (proximity match 50%; bundled all `deliberate`, sandwich differentiating with `habitual` ×1 / `deliberate` ×2 / `reflexive` ×1) reproduced the M1-CP5 first-pass architectural finding. Step 3 prose spot-check across all 4 rows: 27/28 micro-checks pass. Revision 1 (closing-line action) holds 4/4 — every closing line is concrete practice or actionable orientation, not a disclaimer. Revision 5 (marginal-case mid-prose + input-condition heuristic) holds 4/4 — Row 3's correctly-OMITTED single-snapshot disclaimer (no iterative hook in input) is the clearest evidence the M1-CP5c strengthened MANDATORY language is working. Revision 6 (preferred-indifferent observations) holds 4/4 — every row surfaces the indifferent + agent's framing + structural finding in the row-5b8bf957 shape. The single soft miss: Row 1 didn't gloss `axia` ("preferred indifferents of moderate axia"). Step 4 open-question track-rate: none of M1-CP5c's six open questions surface new failure modes; Q3 (Pattern B heuristic) confirmed working at small scale; Q5 (Revision 7 soft-warn) 0 fires across cumulative 8 spot-check rows. Founder's Branch B election is precautionary refinement of surfaced items rather than evidence-supported rollback or revise-blocker.
+
+**Schema-vs-prompt drift surfaced this session.** The next-session prompt's draft queries assumed JSONB sub-fields (`layer_latencies->>'layer1_ms'`, `layer_costs->>'total_usd'`); actual schema (per `/website/migrations/2026-05-04-translation-sandwich-comparisons.sql`) has top-level integer columns `layer1_latency_ms` / `layer2_latency_ms` / `layer3_latency_ms` / `bundled_depth_latency_ms` and microcent columns `layer1_cost_usd_microcents` / `layer3_cost_usd_microcents` / `bundled_depth_cost_usd_microcents`. AI caused — same shape of error as M1-CP5 first-pass `->'depth_data'` correction. Corrected at session-open recovery. **Standing process improvement carried forward as Open Question 5:** at next next-session-prompt drafting, AI verifies all column / JSONB-path references against migration files + module source before issuing the prompt.
+
+**Files touched:**
+- `/operations/decision-log.md` — this entry appended (lean form per cache).
+- `/operations/handoffs/founder/2026-05-07-return-to-M1-CP5-close.md` — session close produced at Step 7.
+- `/operations/handoffs/founder/2026-05-07-M1-CP5d-NEXT-SESSION-PROMPT.md` — next-session prompt for M1-CP5d (Revisions 1 + 2 scope), drafted at Step 7.
+
+**Rubric data captured (4 post-M1-CP5c rows):**
+
+| Dimension | M1-CP5 first-pass | This session | Verdict |
+|---|---|---|---|
+| L1 latency avg | 13,355 ms | 12,442 ms (median 12,062; p95 14,496) | comparable; L1 unchanged |
+| L3 latency avg | 14,228 ms | 16,835 ms (median 17,044; p95 18,570) | modest rise; longer prompt; below 25k flag |
+| Sandwich vs bundled | 22,248 / 53,354 = 42% | 29,278 / 62,276 = 47% | sandwich still ~half bundled |
+| Cost per request | $0.0306/req | $0.0369/req; cumulative $0.1474 | under R5 baseline |
+| Cost cap exceedances | 0 over $0.05; 0 over $0.10 | 0 over $0.05; 0 over $0.10 | safe posture |
+| Tier 1 fires | EF ×2, TA ×1, SA ×0 | 0 fires (input set didn't trigger) | no regression signal |
+| Proximity match | 40%; sandwich differentiating | 50%; sandwich differentiating | architectural pattern preserved |
+
+**Prose-quality verdict per Revision (4 rows):**
+
+| Revision | Verdict | Notes |
+|---|---|---|
+| 1 — Closing line action | 4/4 ✓ | reflection + guidance both close on action |
+| 2 — Voice as guidance | 4/4 ✓ | finding → orientation → move structure |
+| 3 — Greek-to-English glossing | 3/4 (Row 1 axia miss) | M1-CP5d Revision 3 term-list refinement |
+| 4 — False-judgement framing | 4/4 ✓ | virtue/vice carry moral weight |
+| 5 — Marginal-case mid-prose + heuristic | 4/4 ✓ | Row 3 correctly OMITTED disclaimer |
+| 6 — Preferred-indifferent observations | 4/4 ✓ | row-5b8bf957 shape rendered |
+| 7 — Guidance heavier than reflection | 4/4 ✓ | soft-warn does not fire |
+
+**Risk classification:** Standard under 0d-ii. Read-only analysis against existing data; no production code touched; no schema change; no env-flag change. AC4/AC5/AC7/PR6 NOT engaged. Critical Change Protocol NOT engaged. Founder's Branch B election triggers downstream M1-CP5d (Elevated, ~1.5hr) + M1-CP5e (Standard, ~1.5hr) + return-to-M1-CP5-prime (Standard, ~1.5–2hr) + M1-CP6 (Critical when reached); none engage Critical Change Protocol unless M1-CP5d's prompt-template implementation discovers a Layer 1 extraction gap requiring ADR-005 amendment.
+
+**Rollback path:** Read-only against existing data; no `git revert` needed. Founder's Branch B is itself the rollback gesture relative to cutover-now — the cutover commit is not made; M1-CP6 is deferred until M1-CP5d + M1-CP5e + return-to-M1-CP5-prime land.
+
+**Verification step (founder-performable):**
+
+```sql
+SELECT
+  COUNT(*) FILTER (WHERE tier1_aware = true AND created_at > '2026-05-07 06:00:00'::timestamptz) AS post_cp5c_rows,
+  ROUND(AVG((COALESCE(layer1_cost_usd_microcents, 0) + COALESCE(layer3_cost_usd_microcents, 0))::numeric / 1000000.0) FILTER (WHERE tier1_aware = true AND created_at > '2026-05-07 06:00:00'::timestamptz), 4) AS avg_cost_post_cp5c_usd,
+  ROUND(AVG(COALESCE(layer1_latency_ms, 0) + COALESCE(layer2_latency_ms, 0) + COALESCE(layer3_latency_ms, 0)) FILTER (WHERE tier1_aware = true AND created_at > '2026-05-07 06:00:00'::timestamptz), 0) AS avg_sandwich_total_post_cp5c_ms
+FROM translation_sandwich_comparisons;
+```
+
+Expected: `post_cp5c_rows = 4`; `avg_cost_post_cp5c_usd = 0.0369`; `avg_sandwich_total_post_cp5c_ms = 29278`.
+
+**Open questions (carried into M1-CP5d + M1-CP5e):**
+
+1. **Revision 3 term-list refinement.** M1-CP5d scope. Add `axia`, `kathekon`, `katorthoma`, `oikeiosis`, `eudaimonia` to mandatory-gloss list (currently in the Amendment's term list as Architecture row but the Row 1 evidence shows the LLM treats them as optional).
+2. **Q1 OUTPUT-example over-imitation soft-warns.** M1-CP5d scope. Amend OUTPUT example to vary causal stages OR add explicit instruction "use the causal stage NAMED IN THE ASSESSMENT, not the one shown in the OUTPUT examples". Track-rate at M1-CP5d harness re-run.
+3. **Q2 F4 one-off JSON parse failure.** M1-CP5e scope. Strengthen `extractJSON` parser OR strengthen prompt's "no markdown" instruction. Track-rate at M1-CP5e harness re-run.
+4. **Q6 upstream-causal-chain soft-warn refinement.** M1-CP5e scope. Refine harness Phase 5 §5 consistency check to allow pedagogically-correct upstream causal-chain references.
+5. **Schema-vs-prompt drift.** New this session. AI verifies column / JSONB-path references against migration files + module source before issuing any next-session prompt. Standing process improvement; not a session-bound revision.
+6. **PR8 promotion candidate count — in-place ADR amendment pattern.** Held at fourth recurrence per M1-CP5b. M1-CP5d will be the fifth. Founder may promote at any cycle or continue holding.
+7. **PR8 promotion candidate count — in-session prompt-strengthening pattern.** Held at three recurrences per M1-CP5c. No new recurrence this session. Revisit at M1-CP5d if its scope-2 work surfaces drift requiring in-session strengthening.
+
+**Rules served:** R0 (oikeiosis — return-to-M1-CP5 is the audit step on whether prose-template revisions held under larger sample; founder confirmed they did with refinements named); R5 (cost-as-health-metric — observed avg $0.0369/req under baseline); R8a (controlled vocabulary preserved); R8c (English-only on user-facing prose — Revision 3 axia miss surfaced); R7 (source fidelity — value-error rendering surfaces assessment data without invention; confirmed across 4 rows); AC1 (model selection — Sonnet retained; cited not exercised); AC8 (translation-sandwich engine surface); KG1 (N/A this session; no code changes); KG7 (JSONB storage format — relevant for the rubric queries; the schema-vs-prompt drift is KG7-adjacent); PR1 (single-endpoint proof — `/api/reason` is M1 pilot consumer); PR5 (knowledge-gap carry-forward — schema-vs-prompt drift is the second instance of column-path error; standing process improvement carried). NOT engaged: AC4, AC5, AC7, PR6, PR3, PR4, PR8 (PR8 candidates remain held).
+
+**Status:** Adopted. Cross-references: `D-M1-CP5c-LAYER3-MODULE-AMENDED-2026-05-07` (predecessor — the seven Revisions implemented + per-row spot-check this session extends); `D-M1-CP5b-ADR-007-AMENDMENT-2026-05-07` (the seven Revisions adopted); `D-M1-CP5-COMPARISON-RUBRIC-FIRST-PASS-2026-05-07` (the seven gaps catalogued + the rubric this session re-runs); `D-M1-CP4f-PARALLEL-RUN-OBSERVATION-INFRA-2026-05-07` (the parallel-run infrastructure this session reads); `/adopted/adr/2026-05-04-translation-sandwich-pilot-api-reason.md` §6.4 (the rubric contract); `/adopted/adr/2026-05-04-layer3-prose-template-api-reason.md` Amendment section dated 2026-05-07 (the prose-quality target); `/adopted/standing-protocol-cache.md` (operative governing frame); `/operations/handoffs/founder/2026-05-07-sub-session-M1-CP5c-close.md` (predecessor close); `/operations/handoffs/founder/2026-05-07-return-to-M1-CP5-NEXT-SESSION-PROMPT.md` (this session's input prompt); `/operations/handoffs/founder/2026-05-07-return-to-M1-CP5-close.md` (this session's close — produced at Step 7); `/operations/handoffs/founder/2026-05-07-M1-CP5d-NEXT-SESSION-PROMPT.md` (next-session prompt for M1-CP5d — drafted at Step 7).
