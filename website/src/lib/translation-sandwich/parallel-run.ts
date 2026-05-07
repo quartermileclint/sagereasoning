@@ -85,9 +85,20 @@ const CAP_REQUEST_COUNT = 1000
 const CAP_DAYS = 14
 
 // Sonnet pricing (USD per 1M tokens) as of May 2026.
-// Update if Anthropic pricing changes. Used at M1-CP5 when extractFeatures +
-// generateProse are extended to expose token usage; capture path scaffolded
-// here for that future integration. Currently logged in Phase 9 reporting only.
+// Update if Anthropic pricing changes. Activated at M1-CP4f (2026-05-07) when
+// extractFeatures + generateProse were extended to return token usage. The
+// helper sonnetCostMicrocents() (below) computes per-layer cost; the
+// orchestrator wires it into result.layer1_cost_usd_microcents +
+// result.layer3_cost_usd_microcents which surface in the comparison row.
+//
+// NOTE on cache pricing: the formula below treats input_tokens as full price.
+// In reality input_tokens excludes cache reads (per Anthropic SDK convention),
+// and cache reads are billed at ~10% of input price. The current capture
+// approximates *marginal* per-request cost rather than total cost — which is
+// the right thing for R5 cost-health alerts (alerts should reflect
+// traffic-driven cost growth, which is what scales). Cache-aware refinement
+// is a future open question; revisit at M1-CP5+ if total-cost accuracy
+// becomes load-bearing.
 const SONNET_INPUT_USD_PER_MILLION_TOKENS = 3
 const SONNET_OUTPUT_USD_PER_MILLION_TOKENS = 15
 
@@ -171,11 +182,13 @@ interface SandwichRunResult {
 }
 
 // ============================================================================
-// COST CALCULATION (utility — currently unused; activated at M1-CP5)
+// COST CALCULATION (utility — activated at M1-CP4f, 2026-05-07)
 //
 // Convert Anthropic SDK usage (input_tokens, output_tokens) to USD microcents.
 // 1 microcent = $0.000001. So Sonnet input @ $3/M tokens = 3 microcents/token.
-// Exported so M1-CP5 can wire it without a parallel-run module amendment.
+// Wired into runSandwichInner: layer1Result.usage and layer3Result.usage feed
+// this helper, which writes to result.layer{1,3}_cost_usd_microcents and
+// surfaces in the comparison row at logComparisonRow.
 // ============================================================================
 
 export function sonnetCostMicrocents(inputTokens: number, outputTokens: number): number {
@@ -349,7 +362,7 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
   let layer1Schema
   const layer1Start = Date.now()
   try {
-    layer1Schema = await extractFeatures({
+    const layer1Result = await extractFeatures({
       input: params.input,
       context: params.context,
       domain_context: params.domain_context,
@@ -359,6 +372,15 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
       practitionerContext: params.practitionerContext,
       projectContext: params.projectContext,
     })
+    layer1Schema = layer1Result.schema
+    // Layer 1 cost capture (M1-CP4f Step 3). usage.input_tokens excludes cache
+    // reads per Anthropic SDK convention; see LayerTokenUsage docs in
+    // layer1-extractor.ts. Tracking input + output approximates marginal
+    // per-request cost (the right thing for R5 cost-health alerts).
+    result.layer1_cost_usd_microcents = sonnetCostMicrocents(
+      layer1Result.usage.input_tokens,
+      layer1Result.usage.output_tokens
+    )
   } catch (err) {
     result.layer1_latency_ms = Date.now() - layer1Start
     result.error = 'layer1_throw'
@@ -366,10 +388,6 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     return result
   }
   result.layer1_latency_ms = Date.now() - layer1Start
-  // Layer 1 cost is currently not captured because extractFeatures does not
-  // expose token usage. Revisit at M1-CP5 by extending the layer module to
-  // return usage alongside the schema. For now, log null.
-  result.layer1_cost_usd_microcents = null
 
   // ---- Tier 1 ELEMENT_FUSION detection (added 2026-05-06, M1-CP4e) ----
   // Per ADR-008 §5 step 5(b)–(c) + ADR-006 §3.10. detectTier1Trigger inspects
@@ -431,7 +449,13 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
   let layer3Prose: Layer3Prose
   const layer3Start = Date.now()
   try {
-    layer3Prose = await generateProse(layer2Assessment, { consumer: 'api_reason' })
+    const layer3Result = await generateProse(layer2Assessment, { consumer: 'api_reason' })
+    layer3Prose = layer3Result.prose
+    // Layer 3 cost capture (M1-CP4f Step 3). Same convention as Layer 1.
+    result.layer3_cost_usd_microcents = sonnetCostMicrocents(
+      layer3Result.usage.input_tokens,
+      layer3Result.usage.output_tokens
+    )
   } catch (err) {
     // Per ADR-007 §6: invoke the deterministic fallback so the composed output is complete.
     // Per ADR-004 §9.3: the user is never stranded by a Layer 3 failure.
@@ -439,6 +463,10 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     console.warn('[parallel-run] Layer 3 generateProse threw, falling back:', err instanceof Error ? err.message : err)
     try {
       layer3Prose = generateFallbackProse(layer2Assessment)
+      // Fallback path has no LLM call → zero marginal cost. Leave
+      // result.layer3_cost_usd_microcents at its initial null (the comparison
+      // row will record null for this case, distinguishing it from "no data
+      // captured" by virtue of layer3_latency_ms being non-null).
     } catch (fallbackErr) {
       // Both LLM + fallback failed. Catastrophic — log and short-circuit.
       result.error = 'layer3_throw'
@@ -447,8 +475,6 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     }
   }
   result.layer3_latency_ms = Date.now() - layer3Start
-  // Layer 3 cost is currently not captured (same reason as Layer 1). Revisit at M1-CP5.
-  result.layer3_cost_usd_microcents = null
 
   // ---- Compose final output per ADR-004 §2.1 top-level shape ----
   result.output = {

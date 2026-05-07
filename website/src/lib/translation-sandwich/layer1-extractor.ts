@@ -972,11 +972,47 @@ If everything was unambiguous, return [].
 Return only the JSON.`
 
 // ============================================================================
+// TOKEN USAGE (per M1-CP4f Step 3 — per-layer cost capture for R5)
+// ============================================================================
+
+/**
+ * Token usage captured from the Anthropic API response. Used by parallel-run.ts
+ * to compute per-layer USD cost via sonnetCostMicrocents() and populate the
+ * comparison table's layer1_cost_usd_microcents column.
+ *
+ * IMPORTANT: input_tokens here EXCLUDES cache-read tokens (Anthropic SDK
+ * convention). Cache-read tokens are billed at ~10% of input price; they're
+ * captured separately in the SDK's `usage.cache_read_input_tokens` field but
+ * NOT yet propagated through this interface. This is intentional for M1-CP4f:
+ * tracking input + output approximates the *marginal* per-request cost, which
+ * is what R5 cost-health alerts should reflect (cache amortizes; new traffic
+ * is what scales). Cache-aware refinement is a future open question, revisit
+ * at M1-CP5 or later if cost-tracking accuracy becomes load-bearing.
+ *
+ * Shared across Layer 1 + Layer 3 (layer3-prose.ts imports this).
+ */
+export interface LayerTokenUsage {
+  input_tokens: number
+  output_tokens: number
+}
+
+/**
+ * Result shape returned by extractFeatures. Replaces the previous
+ * `Promise<Layer1Schema>` signature so the orchestrator + harness can read
+ * Sonnet usage without a second SDK call. Per M1-CP4f Step 3.
+ */
+export interface ExtractFeaturesResult {
+  schema: Layer1Schema
+  usage: LayerTokenUsage
+}
+
+// ============================================================================
 // EXTRACTION FUNCTION (per ADR-005 §1 + §5)
 // ============================================================================
 
 /**
- * Extract Stoic features from agent input. Returns Layer1Schema.
+ * Extract Stoic features from agent input. Returns ExtractFeaturesResult
+ * (schema + token usage from the Anthropic API response).
  *
  * Throws on:
  *   - LLM API failure (network, timeout, rate limit) — original error from Anthropic SDK
@@ -991,10 +1027,14 @@ Return only the JSON.`
  * Per KG6: system message carries cached prompt + RAG block (when present);
  *           user message carries per-request contexts.
  *
+ * Return-type change (M1-CP4f, 2026-05-07): previously `Promise<Layer1Schema>`;
+ * now returns `{ schema, usage }`. Callers must destructure. Two callers
+ * updated in the same change: parallel-run.ts orchestrator + harness.
+ *
  * @param params - ExtractInput (mirrors runSageReason's input shape)
- * @returns Layer1Schema — validated against the schema's controlled vocabularies
+ * @returns ExtractFeaturesResult — schema validated against controlled vocabularies, usage from Anthropic SDK
  */
-export async function extractFeatures(params: ExtractInput): Promise<Layer1Schema> {
+export async function extractFeatures(params: ExtractInput): Promise<ExtractFeaturesResult> {
   if (!params || typeof params.input !== 'string' || params.input.trim().length === 0) {
     throw new Layer1ValidationError(
       'shape',
@@ -1058,6 +1098,7 @@ export async function extractFeatures(params: ExtractInput): Promise<Layer1Schem
 
   // LLM call — Sonnet, 4000 max-tokens, 0.2 temperature (per ADR-005 §5).
   let responseText: string
+  let usage: LayerTokenUsage
   try {
     const message = await client.messages.create({
       model: MODEL_DEEP,
@@ -1068,6 +1109,12 @@ export async function extractFeatures(params: ExtractInput): Promise<Layer1Schem
     })
 
     responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+    // Capture usage from the SDK response (M1-CP4f Step 3). input_tokens
+    // EXCLUDES cache reads per the SDK convention; see LayerTokenUsage docs.
+    usage = {
+      input_tokens: message.usage.input_tokens,
+      output_tokens: message.usage.output_tokens,
+    }
   } catch (err) {
     console.warn(
       `layer1-extractor: LLM call failed (target route /api/reason at M1-CP4). ` +
@@ -1091,8 +1138,9 @@ export async function extractFeatures(params: ExtractInput): Promise<Layer1Schem
   }
 
   // Validate against Layer1Schema.
+  let schema: Layer1Schema
   try {
-    return validateLayer1Schema(parsed)
+    schema = validateLayer1Schema(parsed)
   } catch (err) {
     if (err instanceof Layer1ValidationError) {
       console.warn(
@@ -1108,6 +1156,8 @@ export async function extractFeatures(params: ExtractInput): Promise<Layer1Schem
     }
     throw err
   }
+
+  return { schema, usage }
 }
 
 // ============================================================================

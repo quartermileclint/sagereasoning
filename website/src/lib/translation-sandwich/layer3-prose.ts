@@ -42,6 +42,7 @@ import type {
   KatorthomaProximity,
   VirtueDomain,
 } from './layer2-mechanisms'
+import type { LayerTokenUsage } from './layer1-extractor'
 
 // ============================================================================
 // CONSUMER ENUMERATION (extensible — M2/M3/M4 add their consumers in their ADRs)
@@ -412,11 +413,30 @@ export function validateLayer3Prose(parsed: unknown): Layer3Prose {
 }
 
 // ============================================================================
+// PROSE-RESULT SHAPE (per M1-CP4f Step 3 — per-layer cost capture for R5)
+// ============================================================================
+
+/**
+ * Result shape returned by generateProse. Replaces the previous
+ * `Promise<Layer3Prose>` signature so the orchestrator + harness can read
+ * Sonnet usage without a second SDK call. Per M1-CP4f Step 3.
+ *
+ * `generateFallbackProse` (sync, no LLM) is intentionally NOT updated — the
+ * fallback path has no token usage to report; callers wrap its result with
+ * `{ input_tokens: 0, output_tokens: 0 }` if cost tracking is needed.
+ */
+export interface GenerateProseResult {
+  prose: Layer3Prose
+  usage: LayerTokenUsage
+}
+
+// ============================================================================
 // LLM-BACKED PROSE GENERATION (per ADR-007 §1 + §3 + §4)
 // ============================================================================
 
 /**
- * Generate Stoic prose from a Layer2Assessment. Returns Layer3Prose.
+ * Generate Stoic prose from a Layer2Assessment. Returns GenerateProseResult
+ * (prose + token usage from the Anthropic API response).
  *
  * Throws on:
  *   - Unsupported consumer — Layer3ValidationError category 'enum'
@@ -431,14 +451,18 @@ export function validateLayer3Prose(parsed: unknown): Layer3Prose {
  * Per KG6 + AC6: system message carries cached prompt; user message carries
  *                the per-request assessment JSON.
  *
+ * Return-type change (M1-CP4f, 2026-05-07): previously `Promise<Layer3Prose>`;
+ * now returns `{ prose, usage }`. Callers must destructure. Two callers
+ * updated in the same change: parallel-run.ts orchestrator + harness.
+ *
  * @param assessment - Layer2Assessment from layer2-mechanisms.ts
  * @param params - ProseInput (consumer + optional overrides)
- * @returns Layer3Prose with source='llm'
+ * @returns GenerateProseResult — prose with source='llm' + usage from SDK
  */
 export async function generateProse(
   assessment: Layer2Assessment,
   params: ProseInput
-): Promise<Layer3Prose> {
+): Promise<GenerateProseResult> {
   if (!params || typeof params.consumer !== 'string') {
     throw new Layer3ValidationError(
       'shape',
@@ -490,6 +514,7 @@ export async function generateProse(
   // LLM call — Sonnet, 2000 max-tokens, 0.3 temperature (per ADR-007 §4).
   const client = getClient()
   let responseText: string
+  let usage: LayerTokenUsage
   try {
     const message = await client.messages.create({
       model: MODEL_DEEP,
@@ -500,6 +525,13 @@ export async function generateProse(
     })
 
     responseText = message.content[0].type === 'text' ? message.content[0].text : ''
+    // Capture usage from the SDK response (M1-CP4f Step 3). input_tokens
+    // EXCLUDES cache reads per the SDK convention; see LayerTokenUsage docs
+    // in layer1-extractor.ts.
+    usage = {
+      input_tokens: message.usage.input_tokens,
+      output_tokens: message.usage.output_tokens,
+    }
   } catch (err) {
     console.warn(
       `layer3-prose: LLM call failed (consumer=${params.consumer}, target route /api/reason at M1-CP4).`,
@@ -528,8 +560,9 @@ export async function generateProse(
     parsed.source = 'llm'
   }
 
+  let prose: Layer3Prose
   try {
-    return validateLayer3Prose(parsed)
+    prose = validateLayer3Prose(parsed)
   } catch (err) {
     if (err instanceof Layer3ValidationError) {
       console.warn(
@@ -545,6 +578,8 @@ export async function generateProse(
     }
     throw err
   }
+
+  return { prose, usage }
 }
 
 // ============================================================================

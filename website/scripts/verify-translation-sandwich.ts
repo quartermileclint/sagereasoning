@@ -479,6 +479,11 @@ interface FixtureResult {
   schema?: Layer1Schema
   error?: unknown
   latency_ms: number
+  /** Token usage from the Anthropic SDK response, captured at M1-CP4f Step 3.
+   *  undefined when (a) the call was served from REPLAY cache (no LLM call), or
+   *  (b) extractFeatures threw before a response was received. Phase 9 reports
+   *  per-fixture cost when defined. */
+  usage?: { input_tokens: number; output_tokens: number }
 }
 
 async function runFixture(fixture: Fixture): Promise<FixtureResult> {
@@ -502,7 +507,7 @@ async function runFixture(fixture: Fixture): Promise<FixtureResult> {
 
   // Fresh extraction path — call Sonnet, save to cache on success
   try {
-    const schema = await extractFeatures({ input: fixture.input })
+    const { schema, usage } = await extractFeatures({ input: fixture.input })
     try {
       saveCachedSchema(fixture.id, schema)
     } catch (cacheErr) {
@@ -513,7 +518,7 @@ async function runFixture(fixture: Fixture): Promise<FixtureResult> {
         }`
       )
     }
-    return { fixture, schema, latency_ms: Date.now() - start }
+    return { fixture, schema, latency_ms: Date.now() - start, usage }
   } catch (err) {
     return { fixture, error: err, latency_ms: Date.now() - start }
   }
@@ -1191,33 +1196,79 @@ function findUnsupportedGreekIdentifiers(
 }
 
 // Marginal-case phrasing recognisers — keyed off ADR-007 §3 prompt + §6 fallback.
-// Loose substring matches (case-insensitive) so close paraphrases pass.
+//
+// Structural-over-content refactor (M1-CP4f Step 5, 2026-05-07) per the new
+// permanent KG entry "Harness assertions on subjective LLM extractions must be
+// structural, not content-specific" (promoted at M1-CP4e-B). Each matcher below
+// is broadened to accept paraphrases Sonnet might legitimately produce while
+// preserving the canonical fallback phrasings used by generateFallbackProse.
+// Fallbacks are deterministic and continue to match by construction (their
+// canonical phrases are members of the broadened sets).
 
+/**
+ * Match prose claiming the kathekon verdict cannot be settled from this input.
+ * Structural pattern: (a) negative-ability signal ("cannot", "unable", etc.)
+ * combined with (b) a target — appropriateness, kathekon, or "determine"-class
+ * verb. The disjunctive lexical set below covers (a)+(b) jointly without
+ * requiring exact phrasing.
+ */
 function proseHasUndecidableKathekonPhrasing(prose: string): boolean {
   const l = prose.toLowerCase()
   return (
     l.includes('cannot be determined') ||
+    l.includes('cannot be confirmed') ||
+    l.includes('cannot be settled') ||
+    l.includes('cannot be ascertained') ||
+    l.includes('cannot be established') ||
+    l.includes('cannot be definitively') ||
     l.includes('appropriateness cannot') ||
+    l.includes("cannot determine") ||
+    l.includes("cannot ascertain") ||
+    l.includes("cannot confirm") ||
     l.includes('undetermined') ||
-    l.includes("cannot determine")
+    l.includes('undecidable') ||
+    l.includes('indeterminate')
   )
 }
 
+/**
+ * Match prose acknowledging the input is a single point-in-time without
+ * trajectory data. Structural pattern: (a) snapshot/instance signal AND/OR
+ * (b) absence-of-trajectory signal. The lexical set captures both axes.
+ */
 function proseHasSingleSnapshotPhrasing(prose: string): boolean {
   const l = prose.toLowerCase()
   return (
     l.includes('single snapshot') ||
+    l.includes('one snapshot') ||
+    l.includes('snapshot; no') ||
     l.includes('no trajectory') ||
-    l.includes('snapshot; no')
+    l.includes('without trajectory') ||
+    l.includes('no longitudinal') ||
+    l.includes('no temporal data') ||
+    l.includes('no direction of travel') ||
+    l.includes('point in time') ||
+    l.includes('point-in-time')
   )
 }
 
+/**
+ * Match prose stating no improvement path is identified for this input.
+ * Structural pattern: negative quantifier ("no") combined with an
+ * improvement-path / next-step / correction noun phrase.
+ */
 function proseHasNoImprovementPathPhrasing(prose: string): boolean {
   const l = prose.toLowerCase()
   return (
     l.includes('no specific improvement path') ||
     l.includes('no improvement path identified') ||
-    l.includes('no specific improvement')
+    l.includes('no specific improvement') ||
+    l.includes('no improvement path') ||
+    l.includes('no clear improvement') ||
+    l.includes('no actionable correction') ||
+    l.includes('no specific correction') ||
+    l.includes('no direction is named') ||
+    l.includes('no specific path')
   )
 }
 
@@ -1227,6 +1278,10 @@ interface Phase5Result {
   fallback_prose?: Layer3Prose
   llm_latency_ms: number
   llm_skipped: boolean
+  /** Token usage from the Anthropic SDK response, captured at M1-CP4f Step 3.
+   *  undefined when the call was served from REPLAY cache or generateProse threw.
+   *  Phase 9 reports per-fixture Layer 3 cost when defined. */
+  llm_usage?: { input_tokens: number; output_tokens: number }
 }
 
 async function runFixtureLayer3(
@@ -1237,6 +1292,7 @@ async function runFixtureLayer3(
   let llm_prose: Layer3Prose | undefined
   let llm_latency_ms = 0
   let llm_skipped = false
+  let llm_usage: { input_tokens: number; output_tokens: number } | undefined
 
   if (REPLAY_CACHE) {
     const cached = loadCachedLayer3Prose(fixtureId)
@@ -1252,7 +1308,9 @@ async function runFixtureLayer3(
   } else {
     const start = Date.now()
     try {
-      llm_prose = await generateProse(assessment, { consumer: 'api_reason' })
+      const result = await generateProse(assessment, { consumer: 'api_reason' })
+      llm_prose = result.prose
+      llm_usage = result.usage
       llm_latency_ms = Date.now() - start
       try {
         saveCachedLayer3Prose(fixtureId, llm_prose)
@@ -1293,6 +1351,7 @@ async function runFixtureLayer3(
     fallback_prose,
     llm_latency_ms,
     llm_skipped,
+    llm_usage,
   }
 }
 
@@ -1515,18 +1574,68 @@ async function runPhase5Async(
 
       // Assertion 9: open_deferrals_prose surfacing + AC-14 marginal-case sentence
       // in philosophical_reflection per trigger code.
+      //
+      // Structural-over-content refactor (M1-CP4f Step 5, 2026-05-07) per the
+      // permanent KG entry. The fragment recognisers below accept the canonical
+      // d-a16 stem (which generateFallbackProse renders verbatim) AND
+      // structurally-equivalent paraphrases Sonnet may produce in the LLM path.
       const openProse = proseForConsistency.open_deferrals_prose
       if (hasOpen) {
         const lower = (openProse ?? '').toLowerCase()
-        // Per-trigger fragment recogniser: at least one stem fragment per entry's
-        // trigger code must be present in the concatenated prose.
         const triggers = ic.open_deferrals.map((d) => d.trigger_code)
+
+        // EUPATHEIA_BOUNDARY structural recogniser: prose must reference (a) a
+        // temporal-window/look-back signal AND (b) a domain/situation reference.
+        // Canonical fallback ("Across [TIME_WINDOW], when [TRIGGER] arose in
+        // this domain") is a member of the structural set.
+        const hasTemporalWindowSignal =
+          lower.includes('across') ||
+          lower.includes('over recent') ||
+          lower.includes('over the recent') ||
+          lower.includes('over past') ||
+          lower.includes('looking back') ||
+          lower.includes('in recent days') ||
+          lower.includes('recent days') ||
+          lower.includes('recent instances') ||
+          lower.includes('past instances')
+        const hasDomainOrPastReference =
+          lower.includes('arose in this domain') ||
+          lower.includes('this domain') ||
+          lower.includes('similar situation') ||
+          lower.includes('came up') ||
+          lower.includes('happened') ||
+          lower.includes('emerged') ||
+          lower.includes('arose')
         const hasEupatheiaFragment =
           !triggers.includes('EUPATHEIA_BOUNDARY') ||
-          (lower.includes('across') && lower.includes('arose in this domain'))
+          (hasTemporalWindowSignal && hasDomainOrPastReference)
+
+        // PRAXIS_MOTIVATION_AMBIGUITY structural recogniser: prose must
+        // reference (a) a negative-ability signal AND (b) a single-instance
+        // signal AND (c) a determine/tell/confirm/establish verb. Canonical
+        // fallback ("The engine cannot tell from the current instance alone…")
+        // is a member of the structural set.
+        const hasCannotSignal =
+          lower.includes('cannot tell') ||
+          lower.includes('cannot determine') ||
+          lower.includes('cannot confirm') ||
+          lower.includes('cannot be determined') ||
+          lower.includes('cannot establish') ||
+          lower.includes('unable to tell') ||
+          lower.includes('unable to determine') ||
+          lower.includes('unable to confirm')
+        const hasSingleInstanceSignal =
+          lower.includes('current instance') ||
+          lower.includes('this instance') ||
+          lower.includes('single instance') ||
+          lower.includes('one instance') ||
+          lower.includes('from the instance') ||
+          lower.includes('from this case') ||
+          lower.includes('from a single')
         const hasPraxisFragment =
           !triggers.includes('PRAXIS_MOTIVATION_AMBIGUITY') ||
-          lower.includes('the engine cannot tell from the current instance alone')
+          (hasCannotSignal && hasSingleInstanceSignal)
+
         const allFragmentsPresent = hasEupatheiaFragment && hasPraxisFragment
         check(
           `${fixtureId}.P5 — open_deferrals non-empty → open_deferrals_prose non-null AND contains per-trigger d-a16 stem fragments`,
@@ -1582,17 +1691,39 @@ async function runPhase5Async(
           )
         }
         if (triggers.includes('PRAXIS_MOTIVATION_AMBIGUITY')) {
+          // Structural matcher (M1-CP4f Step 5 refactor) per the permanent KG
+          // entry. Required structure: philosophical_reflection contains the
+          // virtue/convention contrast (a) AND a negative-ability signal (b)
+          // OR an explicit "arose from virtue or from convention" disjunction.
+          // Canonical fallback ("Whether this action arose from virtue or from
+          // convention cannot be determined from the current instance alone")
+          // is a member of the structural set.
+          const hasVirtueConventionContrast =
+            reflLower.includes('virtue') && reflLower.includes('convention')
+          const hasNegativeAbilitySignal =
+            reflLower.includes('cannot be determined') ||
+            reflLower.includes('cannot be confirmed') ||
+            reflLower.includes('cannot be settled') ||
+            reflLower.includes('cannot be established') ||
+            reflLower.includes('cannot be definitively') ||
+            reflLower.includes('cannot tell') ||
+            reflLower.includes('cannot determine') ||
+            reflLower.includes('unable to determine') ||
+            reflLower.includes('unable to confirm') ||
+            reflLower.includes('undecidable') ||
+            reflLower.includes('indeterminate')
           const hasPraxSentence =
-            (reflLower.includes('virtue') &&
-              reflLower.includes('convention') &&
-              reflLower.includes('cannot be determined')) ||
-            reflLower.includes('arose from virtue or from convention')
+            (hasVirtueConventionContrast && hasNegativeAbilitySignal) ||
+            reflLower.includes('arose from virtue or from convention') ||
+            reflLower.includes('virtue or from convention') ||
+            reflLower.includes('virtue versus convention') ||
+            reflLower.includes('virtue or convention')
           check(
             `${fixtureId}.P5 — PRAXIS_MOTIVATION_AMBIGUITY → philosophical_reflection contains AC-14 marginal-case sentence`,
             hasPraxSentence,
             hasPraxSentence
               ? undefined
-              : 'expected sentence like "Whether this action arose from virtue or from convention cannot be determined from the current instance alone." — missing'
+              : `expected virtue/convention contrast + negative-ability signal — got hasVirtueConventionContrast=${hasVirtueConventionContrast} hasNegativeAbilitySignal=${hasNegativeAbilitySignal}`
           )
         }
       } else {
@@ -2007,16 +2138,17 @@ async function runPhase8(layer2Results: Layer2FixtureResult[]): Promise<void> {
 }
 
 // -----------------------------------------------------------------------------
-// 7e. Phase 9 — Cost + latency reporting (M1-CP4)
+// 7e. Phase 9 — Cost + latency reporting (M1-CP4; per-layer cost added M1-CP4f)
 //
 // Aggregates per-layer latency from Phase 1+2 (Layer 1) and Phase 5 (Layer 3).
-// Reports the parallel-run cost-cap configuration so the founder can see what
-// is enforced at runtime.
+// Aggregates per-layer cost from captured usage (M1-CP4f Step 3 — extractFeatures
+// + generateProse now return token usage). Reports the parallel-run cost-cap
+// configuration so the founder can see what is enforced at runtime.
 //
-// Layer 1 + Layer 3 cost-per-fixture is reported as "not captured" because
-// extractFeatures + generateProse do not currently expose token usage. M1-CP5
-// may extend the layer modules to return usage; documented as an open question
-// in the decision-log entry for this session.
+// REPLAY-mode caveat: when LAYER1_REPLAY_CACHE=1, extraction is served from
+// cached schemas (no LLM call, no usage data). usage is undefined for those
+// fixtures and Phase 9 reports "no usage captured (REPLAY)". To get real cost
+// data, run without LAYER1_REPLAY_CACHE.
 // -----------------------------------------------------------------------------
 
 function runPhase9(
@@ -2054,9 +2186,69 @@ function runPhase9(
   }
 
   console.log()
-  console.log(`  Layer 1 cost per fixture: not captured at M1 (extractFeatures does not expose usage)`)
-  console.log(`  Layer 3 cost per fixture: not captured at M1 (generateProse does not expose usage)`)
-  console.log(`  → Per-fixture cost capture deferred to M1-CP5; logged as open question.`)
+
+  // ---- Per-layer cost from captured usage (M1-CP4f Step 3) ----
+  // Aggregate Layer 1 cost from FixtureResult.usage (when defined — i.e., when
+  // a real LLM call was made; cache-served fixtures have undefined usage).
+  let layer1TotalInputTokens = 0
+  let layer1TotalOutputTokens = 0
+  let layer1UsageCount = 0
+  for (const fr of fixtureResults) {
+    if (fr.usage) {
+      layer1TotalInputTokens += fr.usage.input_tokens
+      layer1TotalOutputTokens += fr.usage.output_tokens
+      layer1UsageCount++
+    }
+  }
+  let layer3TotalInputTokens = 0
+  let layer3TotalOutputTokens = 0
+  let layer3UsageCount = 0
+  for (const p5r of phase5Results) {
+    if (p5r.llm_usage) {
+      layer3TotalInputTokens += p5r.llm_usage.input_tokens
+      layer3TotalOutputTokens += p5r.llm_usage.output_tokens
+      layer3UsageCount++
+    }
+  }
+
+  // Sonnet pricing (mirrors PARALLEL_RUN_CONFIG): input $3/M tokens, output $15/M tokens.
+  // 1 microcent = $0.000001 → input = 3 microcents/token, output = 15 microcents/token.
+  const inputRateMicrocentsPerToken = PARALLEL_RUN_CONFIG.SONNET_INPUT_USD_PER_MILLION_TOKENS
+  const outputRateMicrocentsPerToken = PARALLEL_RUN_CONFIG.SONNET_OUTPUT_USD_PER_MILLION_TOKENS
+
+  if (layer1UsageCount > 0) {
+    const layer1CostMicrocents =
+      layer1TotalInputTokens * inputRateMicrocentsPerToken +
+      layer1TotalOutputTokens * outputRateMicrocentsPerToken
+    const layer1AvgCostMicrocents = Math.round(layer1CostMicrocents / layer1UsageCount)
+    console.log(
+      `  Layer 1 cost: ${layer1CostMicrocents.toLocaleString()} microcents total across ${layer1UsageCount} fixture(s) ` +
+        `(input=${layer1TotalInputTokens} tokens, output=${layer1TotalOutputTokens} tokens)`
+    )
+    console.log(
+      `  Layer 1 avg cost per fixture: ${layer1AvgCostMicrocents.toLocaleString()} microcents (= $${(layer1AvgCostMicrocents / 1_000_000).toFixed(6)})`
+    )
+  } else {
+    console.log(`  Layer 1 cost: no usage captured (REPLAY mode or all fixtures threw before LLM call)`)
+  }
+
+  if (layer3UsageCount > 0) {
+    const layer3CostMicrocents =
+      layer3TotalInputTokens * inputRateMicrocentsPerToken +
+      layer3TotalOutputTokens * outputRateMicrocentsPerToken
+    const layer3AvgCostMicrocents = Math.round(layer3CostMicrocents / layer3UsageCount)
+    console.log(
+      `  Layer 3 cost: ${layer3CostMicrocents.toLocaleString()} microcents total across ${layer3UsageCount} fixture(s) ` +
+        `(input=${layer3TotalInputTokens} tokens, output=${layer3TotalOutputTokens} tokens)`
+    )
+    console.log(
+      `  Layer 3 avg cost per fixture: ${layer3AvgCostMicrocents.toLocaleString()} microcents (= $${(layer3AvgCostMicrocents / 1_000_000).toFixed(6)})`
+    )
+  } else {
+    console.log(`  Layer 3 cost: no usage captured (REPLAY mode or all fixtures threw / skipped)`)
+  }
+
+  console.log(`  → Cost basis: input EXCLUDES cache reads (Anthropic SDK convention); approximates marginal per-request cost.`)
 
   console.log()
   console.log(`  Parallel-run config (production):`)
@@ -2396,9 +2588,13 @@ async function runPhase12(): Promise<void> {
       } else {
         try {
           const start = Date.now()
-          augSchema = await extractFeatures({ input: f.augmentedInput })
+          const augResult = await extractFeatures({ input: f.augmentedInput })
+          augSchema = augResult.schema
           const augLatency = Date.now() - start
-          info(`  augmented Layer 1 extracted (latency_ms=${augLatency})`)
+          info(
+            `  augmented Layer 1 extracted (latency_ms=${augLatency}, ` +
+              `tokens in/out=${augResult.usage.input_tokens}/${augResult.usage.output_tokens})`
+          )
           try {
             saveCachedSchema(augFixtureId, augSchema)
           } catch (cacheErr) {

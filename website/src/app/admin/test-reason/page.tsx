@@ -34,11 +34,30 @@ import { authFetch } from '@/lib/auth-fetch'
 import type { User } from '@supabase/supabase-js'
 
 // =============================================================================
-// HARNESS FIXTURES F1–F4 (per ADR-005 §8.1; identical to the standalone harness)
-// Keeping these inline so the page is self-contained — no import from scripts/.
+// HARNESS FIXTURES F1–F4 + F7–F9 (per ADR-005 §8.1; identical to the standalone
+// harness — kept inline so the page is self-contained, no import from scripts/).
+//
+// F7/F8/F9 added 2026-05-07 (M1-CP4f Step 4) to exercise the AC-13 Tier 1
+// force-clarification mechanic. F7 fires ELEMENT_FUSION at Layer 1; F8 fires
+// SCOPE_AMBIGUITY at Position 6; F9 fires TEMPORAL_AMBIGUITY at Position 2.
+// During parallel-run (current state), Tier 1 fires are logged in the
+// comparison row's translation_sandwich_output; the user-facing response
+// remains bundled-depth per ADR-004 §6.3 + ADR-008 §7. See the Tier-1-aware
+// response renderer + help text below.
 // =============================================================================
 
-const FIXTURES: Array<{ id: string; label: string; input: string }> = [
+interface Fixture {
+  id: string
+  label: string
+  input: string
+  /** True for F7/F8/F9 — signals to the renderer that this fixture is expected
+   *  to fire Tier 1 force-clarification in the orchestrator's comparison-row
+   *  output (sandwich path). User-facing response remains bundled-depth until
+   *  M1-CP6 cutover. */
+  tier1_expected?: boolean
+}
+
+const FIXTURES: Fixture[] = [
   {
     id: 'F1',
     label: 'F1 — Simple control-filter case',
@@ -63,7 +82,70 @@ const FIXTURES: Array<{ id: string; label: string; input: string }> = [
     input:
       "I have to send the contract back today or the deal falls through. I haven't had time to read it properly but everyone's pressing me. Just sign and move on, that's what they're saying.",
   },
+  {
+    id: 'F7',
+    label: 'F7 — ELEMENT_FUSION (Tier 1)',
+    input:
+      "I've got the work deadline tomorrow, my mother's been calling about her health all week, the town council meeting is Thursday and I said I'd speak, and I haven't slept properly in days. I don't know what I'm doing anymore.",
+    tier1_expected: true,
+  },
+  {
+    id: 'F8',
+    label: 'F8 — SCOPE_AMBIGUITY (Tier 1)',
+    input:
+      "I responded to them this morning the way I usually do, and now I'm second-guessing whether I handled it well. I keep replaying what I said to them in my head.",
+    tier1_expected: true,
+  },
+  {
+    id: 'F9',
+    label: 'F9 — TEMPORAL_AMBIGUITY (Tier 1)',
+    input:
+      "I keep thinking about that conversation. I should have said something different. And now I don't know what's going to happen — they might bring it up again at the next meeting.",
+    tier1_expected: true,
+  },
 ]
+
+// =============================================================================
+// TIER 1 FORCE-CLARIFICATION RESPONSE SHAPE
+// Per ADR-008 §2 — the discriminated-union response shape returned by /api/reason
+// when an AC-13 Tier 1 trigger fires. Used by the renderer to detect Tier 1
+// responses and render them distinctly.
+//
+// Note: during parallel-run (current state through M1-CP6 cutover), the route
+// returns bundled-depth responses; this shape is dormant scaffolding. Activated
+// when the user-facing path switches to the translation-sandwich engine.
+// =============================================================================
+
+interface Tier1ClarificationResponse {
+  clarification_required: true
+  intake_tier: 1
+  trigger_code: 'ELEMENT_FUSION' | 'SCOPE_AMBIGUITY' | 'TEMPORAL_AMBIGUITY'
+  clarification: {
+    question_text: string
+    stem_id: string
+    slot_fills: Record<string, string>
+  }
+  continuation_token: string | null
+  meta: {
+    engine_version: string
+    fired_at_position: string
+    latency_ms?: number
+    cost_usd_microcents?: number
+  }
+  disclaimer: string | null
+  [key: string]: unknown
+}
+
+function isTier1ClarificationResponse(
+  data: unknown
+): data is Tier1ClarificationResponse {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    (data as Record<string, unknown>).clarification_required === true &&
+    typeof (data as Record<string, unknown>).trigger_code === 'string'
+  )
+}
 
 const DEPTH_OPTIONS: Array<'quick' | 'standard' | 'deep'> = ['quick', 'standard', 'deep']
 
@@ -181,16 +263,27 @@ export default function TestReasonPage() {
             disabled={sending}
             style={{
               padding: '8px 12px',
-              border: '1px solid #888',
-              background: '#f5f5f5',
+              border: f.tier1_expected ? '1px solid #b85c00' : '1px solid #888',
+              background: f.tier1_expected ? '#fff4e6' : '#f5f5f5',
+              color: f.tier1_expected ? '#7a3d00' : '#222',
               cursor: sending ? 'not-allowed' : 'pointer',
               borderRadius: 4,
             }}
+            title={
+              f.tier1_expected
+                ? 'Tier 1 fixture — fires force-clarification in the orchestrator (logged in comparison row; user-facing response is bundled-depth until M1-CP6 cutover).'
+                : undefined
+            }
           >
             {f.label}
           </button>
         ))}
       </div>
+      <p style={{ fontSize: 12, color: '#666', margin: '0 0 16px 0' }}>
+        F7/F8/F9 (orange) exercise the AC-13 Tier 1 force-clarification path. During parallel-run, Tier 1 fires are logged in
+        <code style={{ margin: '0 4px' }}>translation_sandwich_comparisons.translation_sandwich_output</code>
+        only — the user-facing response below remains bundled-depth until M1-CP6 cutover.
+      </p>
 
       <h2 style={{ fontSize: 18 }}>Input text</h2>
       <textarea
@@ -267,7 +360,57 @@ export default function TestReasonPage() {
         </div>
       )}
 
-      {response !== null && (
+      {response !== null && isTier1ClarificationResponse(response) && (
+        <div style={{ marginTop: 24 }}>
+          <h2 style={{ fontSize: 18 }}>Response — Tier 1 force-clarification</h2>
+          <div
+            style={{
+              padding: 16,
+              background: '#fff4e6',
+              border: '1px solid #b85c00',
+              borderRadius: 4,
+              marginBottom: 16,
+            }}
+          >
+            <div style={{ fontSize: 12, color: '#7a3d00', marginBottom: 8 }}>
+              <strong>trigger_code:</strong> {response.trigger_code} &nbsp;·&nbsp;
+              <strong>fired_at_position:</strong> {response.meta.fired_at_position}
+              {' '}&nbsp;·&nbsp;
+              <strong>continuation_token:</strong>{' '}
+              {response.continuation_token
+                ? <span title="Token issued (value not displayed for safety)">issued ✓</span>
+                : <span style={{ color: '#7a3d00' }}>null (orchestrator-side; route fills at issuance time)</span>}
+            </div>
+            <p style={{ margin: '8px 0 0 0', fontSize: 14, color: '#222', whiteSpace: 'pre-wrap' }}>
+              {response.clarification.question_text}
+            </p>
+            <div style={{ fontSize: 11, color: '#666', marginTop: 8 }}>
+              stem_id: <code>{response.clarification.stem_id}</code>
+            </div>
+          </div>
+          <details>
+            <summary style={{ cursor: 'pointer', fontSize: 13, color: '#0070f3' }}>
+              Full response (raw JSON)
+            </summary>
+            <pre
+              style={{
+                background: '#f5f5f5',
+                padding: 12,
+                border: '1px solid #ccc',
+                borderRadius: 4,
+                fontSize: 12,
+                overflow: 'auto',
+                maxHeight: 480,
+                marginTop: 8,
+              }}
+            >
+              {JSON.stringify(response, null, 2)}
+            </pre>
+          </details>
+        </div>
+      )}
+
+      {response !== null && !isTier1ClarificationResponse(response) && (
         <div style={{ marginTop: 24 }}>
           <h2 style={{ fontSize: 18 }}>Response (raw JSON)</h2>
           <pre
