@@ -152,10 +152,10 @@ Your prose MUST be consistent with the assessment. Specifically:
 
 - Every claim in your prose MUST be supported by a field in the assessment. If the assessment says false_judgements is empty, your prose MUST NOT name a false judgement. If is_kathekon is null, your prose MUST NOT assert appropriateness either way.
 - Every fact in your prose MUST be drawn from the assessment, not from your training. Do not add Stoic citations the assessment did not provide. Do not name virtues the assessment did not engage. Do not invent obligations the oikeiosis assessment did not name.
-- Marginal/undecidable assessments MUST be named explicitly. Do not flatten them, do not skip them, do not paper over them with generic forward-looking prose. Each marginal-case sentence is required whenever its corresponding assessment field is marginal/null — the discipline applies even when other prose fields are naming the principal passion or principal tension. Specifically:
-    - is_kathekon: null → MANDATORY: include the sentence "The action's appropriateness cannot be determined from the available evidence." (or close paraphrase) in `philosophical_reflection` or `summary`. Required whenever `kathekon_assessment.is_kathekon === null`. The OUTPUT example below shows the wording in context.
-    - direction_of_travel: "single_snapshot" → MANDATORY: include the sentence "This is a single snapshot; no trajectory data is available." (or close paraphrase) in `philosophical_reflection`. Required for every input without temporal markers. The OUTPUT example below shows the wording in context.
-    - improvement_path_structured: null → MANDATORY: include the sentence "No specific improvement path is identified at this time." (or close paraphrase) in `improvement_guidance`. Required whenever `improvement_path_structured === null`. The OUTPUT example below shows the wording when applicable.
+- Marginal/undecidable assessments are named explicitly when their input-condition heuristic fires (per Revision 5 in Amendment 1, refined at Amendment 4 — see Amendment sections below for full firing rules and placement discipline). Do not flatten them, do not skip them, do not paper over them with generic forward-looking prose; equally, do not fire them when the heuristic is not met. The discipline preserves the engine's principled withholding without contradicting the assessment. The three marginal-case sentence shapes are:
+    - is_kathekon: null → "The action's appropriateness cannot be determined from the available evidence." (or close paraphrase) in `philosophical_reflection` or `summary`. The firing condition is governed by Revision 5's input-condition heuristic. The OUTPUT examples below show the wording in context when it does fire and the omission discipline (Example 4) when it does not.
+    - direction_of_travel: "single_snapshot" → "This is a single snapshot; no trajectory data is available." (or close paraphrase) in `philosophical_reflection`. The firing condition is governed by Revision 5's input-condition heuristic. The OUTPUT examples below show the wording in context when it does fire and the omission discipline (Examples 3 + 4) when it does not.
+    - improvement_path_structured: null → "No specific improvement path is identified at this time." (or close paraphrase) in `improvement_guidance`. The firing condition is governed by Revision 5's placement discipline (the sentence appears mid-prose; the closing line is a reflective prompt drawn from `oikeiosis` or `value_assessment`). The OUTPUT examples below show the wording when applicable.
 - The practitioner is the agent who submitted the input. Address them in second person ("you", "your"). Do not refer to them in the third person.
 
 PROSE FIELDS
@@ -164,8 +164,8 @@ PROSE FIELDS
    - Open with the principal Stoic dynamic in the assessment: the most-prominent passion (passion_diagnosis.passions_detected[0]) and its false judgement, OR the principal control-filter pattern (when no passions detected), OR the principal oikeiosis tension (when no passions and no control conflict).
    - Connect to the agent's katorthoma_proximity (reflexive | habitual | deliberate | principled | sage_like) and the engaged virtue_domains_engaged.
    - Close with one sentence of philosophical orientation drawn from the assessment's correct_judgements (when present) or the assessment's ruling_faculty_state.
-   - **MANDATORY** when iterative_refinement.direction_of_travel === "single_snapshot": include one explicit sentence naming the single-snapshot constraint (the OUTPUT example below shows it).
-   - **MANDATORY** when kathekon_assessment.is_kathekon === null: include one explicit sentence naming the undecidable kathekon verdict — typically "The action's appropriateness cannot be determined from the available evidence." This sentence is independent of the principal passion / control / oikeiosis content; it stands as its own observation. The OUTPUT example below shows it. The 5-sentence upper bound exists to accommodate both marginal-case sentences when both apply.
+   - When iterative_refinement.direction_of_travel === "single_snapshot" AND Revision 5's input-condition heuristic fires (per Amendment 1, refined at Amendment 4): include one explicit sentence naming the single-snapshot constraint mid-prose (the OUTPUT examples below show it when applicable; Examples 3 + 4 demonstrate the omission discipline). When the heuristic is not met, omit the sentence.
+   - When kathekon_assessment.is_kathekon === null AND Revision 5's input-condition heuristic fires (per Amendment 1, refined at Amendment 4): include one explicit sentence naming the undecidable kathekon verdict — typically "The action's appropriateness cannot be determined from the available evidence." — mid-prose. This sentence is independent of the principal passion / control / oikeiosis content; it stands as its own observation. The OUTPUT examples below show it when applicable; Example 4 demonstrates the omission discipline. The 5-sentence upper bound exists to accommodate both marginal-case sentences when both apply.
 
 2. improvement_guidance (1–3 sentences, ~30–80 words)
    - If improvement_path_structured is non-null: name the false_judgement_to_correct, the corrected_judgement, and which mechanism (mechanism_applies) the correction belongs to. Use second person.
@@ -679,6 +679,83 @@ A second PR8 candidate (in-session prompt-strengthening pattern) is **NOT engage
 ---
 
 *End of Amendment 3 — 2026-05-07.*
+
+---
+
+## Amendment 4 — 2026-05-07 — M1-CP5f: Revision 5 prompt-tension fix + OUTPUT-example over-imitation pattern-shift fix
+
+**Status:** Adopted (founder approval at Sub-session M1-CP5f, 2026-05-07).
+**Predecessor decision:** `D-RETURN-TO-M1-CP5-PRIME-RUBRIC-REFRESH-2026-05-07` + `D-M1-CP5e-LAYER3-Q2-Q6-RESOLVED-2026-05-07`.
+**Predecessor amendment:** Amendment 3 — 2026-05-07 (M1-CP5e adoption + module changes — Q2 truncation defense + Q6 STAGE DISCIPLINE).
+**Engages rules:** R0 (oikeiosis preserved — Layer 3 prose remains what Circles 1 + 2 of the practitioner experience), R7 (source fidelity preserved — n=5 R5 hard miss surfaced at return-to-M1-CP5-prime is itself a source-fidelity violation; this amendment closes it), R8a (controlled vocabulary preserved — no term changes), R8c (English-only on user-facing prose — gloss discipline holding), AC1 (Sonnet retained — no model change), AC8 (translation-sandwich engine surface), KG1 (no DB writes; no fire-and-forget; LLM call still awaited), KG7 (JSONB storage format — N/A this amendment, retained from rubric session), PR1 (single-endpoint proof — `/api/reason` is the M1 pilot consumer), PR3 (synchronous discipline preserved — `generateProse` remains awaited; no change to call-site discipline), PR4 (model selection unchanged — Sonnet per cache Element 6), PR5 (knowledge-gap carry-forward — schema-vs-prompt drift carry-forward strengthened at predecessor; observed; no SQL issued this amendment).
+**NOT engaged:** AC4, AC5, AC7, PR6 (no R20a perimeter or auth surface touched), PR8 (in-place ADR amendment pattern at seventh recurrence; founder elected to hold one more cycle at M1-CP5f session-open).
+**Risk class:** Elevated under 0d-ii (existing user-facing functionality changes — Layer 3 module is on the parallel-run path; user-facing path remains bundled-depth per ADR-004 §6.3 so the change is dormant in production until M1-CP6 cutover, but the module that will become user-facing at M1-CP6 is the one being changed). Critical Change Protocol NOT engaged.
+
+### Why this amendment
+
+Sub-session return-to-M1-CP5-prime (2026-05-07) refreshed the six-dimension comparison rubric against six post-M1-CP5e parallel-run rows + the prose-quality verdict against the cumulative seven Revisions + Refinement to Revision 3 + Revision 8 + M1-CP5e Q2 truncation defense + Q6 STAGE DISCIPLINE rule. The verdict was 38/40 prose micro-checks pass — five of six rubric dimensions clean + the sixth (proximity match) reproducing the M1-CP5 first-pass architectural finding. Three substantive refinements held cleanly: Refined Revision 3 (axia gloss) 5/5, Revision 8 (causal-stage variation) 5/5, Q6 STAGE DISCIPLINE 5/5. Q2 truncation defense verified working under real traffic (0 throws; ~42% cap utilisation).
+
+Two surfaced items, both on Revision 5 (single-snapshot disclaimer): a soft miss at n=4 (input-condition heuristic violated — input lacked iterative temporal hook but disclaimer fired anyway) and a hard miss at n=5 (disclaimer fired on `direction_of_travel = stable` — a COMPOSITION CONTRACT violation, prose contradicting assessment). The most likely root cause was structural: ADR-007 §3 PROSE FIELDS bullets retained M1-CP3's MANDATORY framing alongside Revision 5's input-condition heuristic; the two co-existed in the prompt and the LLM defaulted to the older MANDATORY pattern. Compounding this, two of three OUTPUT examples carried the disclaimer (Examples 1 + 2; Example 3 demonstrated omission per M1-CP5d), pattern-defaulting the LLM toward firing the disclaimer. This was the same shape as the Q1 OUTPUT-example over-imitation issue from M1-CP5d, migrated from causal-stage selection to marginal-case sentence firing.
+
+The founder elected Branch B (Revise-again) at return-to-M1-CP5-prime rather than Branch A (cutover) or Branch C (rollback). This Amendment 4 lands two complementary fixes per founder direction: **D1 Option (b)** — additive fourth OUTPUT example demonstrating `direction_of_travel = stable` + no marginal-case sentences firing (so the LLM sees variation across four examples rather than two-of-three firing the disclaimer); **D2 in** — defensive removal of M1-CP3's MANDATORY framing from §3 COMPOSITION CONTRACT marginal/undecidable bullets and §3 PROSE FIELDS philosophical_reflection bullets for all three marginal fields (`single_snapshot`, `is_kathekon: null`, `improvement_path_structured: null`), preserving Revision 5's input-condition heuristic which already covers all three. Both items are surface-level prose-quality refinements that do not change the analytical engine (Layer 1 + Layer 2 unaffected). M1-CP6 cutover is deferred until M1-CP5f + return-to-M1-CP5-prime-prime land.
+
+### D1 Option (b) — Fourth OUTPUT example: iterative phobos at synkatathesis with stable trajectory
+
+**Additive scope.** A fourth OUTPUT example is added to the prompt, demonstrating an assessment where `direction_of_travel = stable` (not single-snapshot) AND `is_kathekon` is non-null AND `improvement_path_structured` is non-null AND `intake_clarifications.open_deferrals` + `intake_clarifications.soft_clarifications` are both empty. Under Revision 5's input-condition heuristic NONE of the three marginal-case sentences fire by design — the example proves the omission discipline.
+
+The fourth example uses **Pattern A — iterative phobos at synkatathesis with stable trajectory** (founder-elected at session-open). Input shape: an iterative checking pattern ("I keep checking the team channel after I post anything important; this has been the case for weeks now — the urge is the same each time, and my reasoning has been the same each time"). The iterative temporal hook is present in the input, but `direction_of_travel = stable` rather than `single_snapshot` because Layer 2 has determined the trajectory is consistent across recurrence — so the single_snapshot disclaimer condition does not fire (the assessment field is not `single_snapshot`). The kathekon assessment is `is_kathekon = false` (the action driven by phobos is not appropriate), so the is_kathekon: null disclaimer condition does not fire. The improvement_path_structured is non-null (synkatathesis correction), so the improvement_path-null disclaimer condition does not fire. None of the three marginal-case sentences fire.
+
+The fourth example exemplifies, as a contrast pattern to Examples 1 + 2 + 3:
+- A `synkatathesis`-lodged passion (same stage as Example 1 — but the trajectory contrast is the load-bearing variation here, not stage).
+- The Refined Revision 3 gloss discipline (phobos, agonia, synkatathesis, prohairesis — glossed once per response).
+- The Revision 4 false-judgement framing (criterion of good and evil applied to the false judgement and the mis-categorised indifferent — peer response — not to the practitioner's character).
+- The Revision 5 omission discipline: NONE of the three marginal-case sentences fire (the contrast against Examples 1 + 2 demonstrates that omission is the default when the assessment is fully determined and the input-condition heuristic conditions are not met for the disclaimers).
+- The Revision 6 peer-rendering (phobos observation surfaces alongside preferred-indifferent observation about peer response).
+- The Revision 1 closing-line discipline (the field closes on a concrete practice, not on a disclaimer).
+- The Revision 7 proportional balance (improvement_guidance ≥ philosophical_reflection by sentence count).
+- The Q6 STAGE DISCIPLINE rule (synkatathesis is the lodged stage; no upstream stages named in the prose).
+
+The four-example progression after this Amendment (Examples 1 + 2 + 3 + 4):
+- **Example 1** (M1-CP3 original): phobos at synkatathesis, single-snapshot, is_kathekon: null — fires single_snapshot + is_kathekon-null marginal cases.
+- **Example 2** (M1-CP4b): chara at no-stage (eupatheia case), single-snapshot, AC-14 EUPATHEIA_BOUNDARY — fires single_snapshot + AC-14 marginal cases.
+- **Example 3** (M1-CP5d): horme-lodged orge with peer value-error rendering, no marginal cases by design.
+- **Example 4** (this Amendment): phobos at synkatathesis with stable trajectory + iterative input, no marginal cases by design (stable trajectory rather than single-snapshot — demonstrates that omission is the default when the assessment is fully determined).
+
+Two of four examples now demonstrate omission (Examples 3 + 4); two demonstrate firing (Examples 1 + 2). The pattern-default toward firing is corrected.
+
+### D2 — Defensive MANDATORY-language removal from §3
+
+**Defensive scope.** ADR-007 §3 contains MANDATORY framing for the three marginal-case fields in two locations: (1) the COMPOSITION CONTRACT marginal/undecidable bullets (three bullets — single_snapshot, is_kathekon: null, improvement_path_structured: null); (2) the PROSE FIELDS philosophical_reflection bullets (two bullets — single_snapshot, is_kathekon: null). Both were carried forward from M1-CP3 and were not updated when M1-CP5b's Revision 5 (input-condition heuristic) was adopted. The two prescriptive signals co-existed in the prompt and the LLM defaulted to MANDATORY behaviour, producing the soft miss at n=4 and the hard miss at n=5.
+
+The amendment removes the MANDATORY framing from both locations. The bullet content (the description of the sentence shape and where it appears) is preserved; the firing condition is now governed exclusively by Revision 5's input-condition heuristic in Amendment 1, refined here at Amendment 4. The bullets become descriptive (shape of the sentence when it does fire) rather than prescriptive (when it MUST fire).
+
+Cleaned content above this Amendment (the two edits made to §3 at session-open):
+- COMPOSITION CONTRACT bullets at §3 — "Marginal/undecidable assessments are named explicitly when their input-condition heuristic fires (per Revision 5 in Amendment 1, refined at Amendment 4)..." replaces "Marginal/undecidable assessments MUST be named explicitly..."; the three bullet items are reframed from "→ MANDATORY: include the sentence..." to descriptive shape with cross-reference to Revision 5's heuristic.
+- PROSE FIELDS philosophical_reflection bullets — "When iterative_refinement.direction_of_travel === 'single_snapshot' AND Revision 5's input-condition heuristic fires (per Amendment 1, refined at Amendment 4): include one explicit sentence..." replaces "**MANDATORY** when iterative_refinement.direction_of_travel === 'single_snapshot': include one explicit sentence..."; same pattern for the is_kathekon: null bullet.
+
+The third marginal field (improvement_path_structured: null) is covered by Revision 5's placement discipline (the sentence appears mid-prose; the closing line is a reflective prompt drawn from `oikeiosis` or `value_assessment`) — not by an input-condition heuristic, because improvement_path_structured: null is a property of the assessment alone, not the input. The MANDATORY framing for that bullet is also removed at COMPOSITION CONTRACT; the bullet is reframed to point to Revision 5's placement discipline.
+
+### Implementation scope (M1-CP5f)
+
+Files touched at M1-CP5f:
+- `/adopted/adr/2026-05-04-layer3-prose-template-api-reason.md` — this Amendment 4 appended (in-place — seventh recurrence of the in-place ADR amendment pattern; PR8 candidate held one more cycle per founder direction at M1-CP5f session-open). Plus two §3 edits made at session-open before drafting this Amendment: COMPOSITION CONTRACT marginal/undecidable bullets cleaned of MANDATORY framing; PROSE FIELDS philosophical_reflection bullets cleaned of MANDATORY framing.
+- `/website/src/lib/translation-sandwich/layer3-prose.ts` — `LAYER3_SYSTEM_PROMPT_API_REASON` constant updated: (1) two bullet headers in the philosophical_reflection MARGINAL-CASE SENTENCES section reframed from "**[disclaimer name] — MANDATORY when condition + heuristic both fire.**" to "**[disclaimer name] — input-condition heuristic governs firing.**" (the bullet body which already implements Revision 5's heuristic correctly is preserved unchanged); (2) new fourth OUTPUT example block appended (Pattern A — iterative phobos at synkatathesis with stable trajectory). `generateFallbackProse` helpers unchanged — the input-condition heuristic applies to the LLM only; the fallback fires marginal-case appends based on the assessment-side conditions (which is the correct behaviour and parallel-run-consistent with the LLM under Revision 5 because Layer 2 sets `direction_of_travel` correctly upstream).
+- `/website/scripts/verify-translation-sandwich.ts` — NO CHANGE. The harness has no per-marginal-case-language-omission assertion; the cleaned bullets affect the LLM's pattern but not any harness assertion. The existing assertions (closing-line discipline, single-snapshot/kathekon-null mid-prose placement when fired, EUPATHEIA_BOUNDARY/PRAXIS_MOTIVATION_AMBIGUITY surfacing, cross-fixture coverage) are unchanged and continue to apply.
+- `/website/scripts/.translation-sandwich-cache/layer3-{F.id}.json` — F1–F5 (and F6, F8 if present) caches regenerated against live Sonnet under the M1-CP5f-amended prompt template (founder runs the harness locally with `LAYER1_REPLAY_CACHE=1 LAYER3_FORCE_REGEN=1`).
+
+After M1-CP5f module update + harness re-cache: return-to-M1-CP5-prime-prime (rubric refresh #3 against fresh post-M1-CP5f parallel-run sample) → M1-CP6 cutover.
+
+Estimated time for M1-CP5f: 2.5–3.5 hours. Risk class: Elevated (per metadata above). Critical Change Protocol NOT engaged.
+
+### PR8 candidate notes
+
+This Amendment is the **seventh recurrence** of the in-place ADR amendment pattern (Amendments 2026-05-04 first + second; 2026-05-06 (M1-CP4b); 2026-05-07 (M1-CP5b); 2026-05-07 (M1-CP5d); 2026-05-07 (M1-CP5e); 2026-05-07 (M1-CP5f) — this Amendment). The founder elected at M1-CP5b + M1-CP5d + M1-CP5e to hold the PR8 promotion one more cycle each time; at M1-CP5f session-open the founder elected the same disposition (hold one more cycle). The pattern is now well-established across seven recurrences spanning the M1 arc. Revisit condition: founder explicit revisit, OR promotion at the founder's discretion at any subsequent ADR-amending session. The decision-log entry for M1-CP5f names the recurrence count (seventh) and the revisit condition.
+
+A second PR8 candidate (in-session prompt-strengthening pattern) is **NOT engaged** this session. M1-CP5f's prompt amendments were planned in the session prompt — not produced after observing harness drift in a same-session run. Revisit condition: next observed-drift recurrence.
+
+---
+
+*End of Amendment 4 — 2026-05-07.*
 
 ---
 
