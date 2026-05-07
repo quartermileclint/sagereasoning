@@ -430,6 +430,117 @@ If the founder rejects ADR-007 or requests substantial edits, the draft is revis
 
 - **2026-05-06 (cross-session amendment, Sub-session M1-CP4b)** — M1-CP4b adds Layer 3 prose paths for `intake_clarifications` (Tier 2 soft clarifications + Tier 3 OPEN_DEFERRALs) per `D-M1-AC13-AC14-WIRING-REQUIRED-BEFORE-CUTOVER-2026-05-05`. Schema additions (§2): two new fields on `Layer3Prose` — `soft_clarification_prose: string | null` and `open_deferrals_prose: string | null`. All additive — prose version remains `layer3-prose-v1`. System prompt additions (§3): new prose fields 4 (soft_clarification_prose) and 5 (open_deferrals_prose) specified; new MARGINAL-CASE DISCIPLINE EXTENSION block requires philosophical_reflection to acknowledge EUPATHEIA_BOUNDARY and PRAXIS_MOTIVATION_AMBIGUITY deferrals when present; word budget extended to 2–6 sentences (~40–180 words). OUTPUT example extended with the two new fields (null when not applicable) plus a second WORKED EXAMPLE block showing a EUPATHEIA_BOUNDARY case with both `open_deferrals_prose` populated and the AC-14 marginal-case sentence in philosophical_reflection (per PR5 worked-example discipline — preempts content-discipline drift on the new marginal-case fields). Fallback mechanics (§6) extended: `generateFallbackProse` produces both new fields with d-a16 stem text rendered verbatim from slot_fills (LLM and fallback paths produce identical stem text for the AC-14 deferral surfacing — the stems are canonical). Validator (§7) extended to assert `soft_clarification_prose` and `open_deferrals_prose` are `string | null`. Phase 5 assertions (§8.2) extended with assertions 8 (soft-clarification surfacing), 9 (open-deferral surfacing + corresponding marginal-case sentence in philosophical_reflection), 10 (fallback prose intake-clarification parity). Cross-fixture coverage extended: F5 must produce non-null `open_deferrals_prose`; F6 must produce non-null `soft_clarification_prose`; F1–F4 must produce null for both new fields. Tier 1 force-clarification triggers explicitly out of scope at this amendment. Standard-tier governance amendment under 0d-ii (documentation; no production touch). Module update + harness re-verification scheduled for M1-CP4c.
 
+- **2026-05-07 (cross-session amendment, Sub-session M1-CP5b)** — see "Amendment — 2026-05-07" section below for full text. Per `D-M1-CP5-COMPARISON-RUBRIC-FIRST-PASS-2026-05-07`. Seven Revisions to the Layer 3 prompt template: (1) closing sentence MUST be the action; (2) voice as guidance, not factual recap; (3) consistent bracketed Greek-to-English glossing on first use per response (R8c application); (4) careful false-judgement framing — virtue/vice carry moral weight, not the practitioner's character; (5) marginal-case disclaimers demoted from closing line (Pattern B — discipline preserved, placement changed); (6) surface preferred-indifferent observations from `value_assessment.identified_value_errors`; (7) lighter assessment recap (≤25%), heavier actionable guidance (≥60%) by sentence count. Gap 6 dispositioned: Possibility B confirmed — Layer 1 already extracts preferred-indifferent data into `value_categories_at_stake[]` (ADR-005 §2 + §3.4); ADR-005 NOT co-amended. Implementation scope (M1-CP5c): `layer3-prose.ts` LAYER3_SYSTEM_PROMPT_API_REASON constant + generateFallbackProse helpers + both OUTPUT examples rewritten; harness Phase 5 assertions updated (assertion 7 reworded for non-closing-line placement; new negative assertion that closing sentence is NOT a disclaimer; new soft-warn assertion for proportion); F1–F5 layer3 fixture caches regenerated against live Sonnet; brief parallel-run re-validation via 5–10 `/admin/test-reason` clicks. Standard-tier governance amendment under 0d-ii (documentation; no production touch).
+
+---
+
+## Amendment — 2026-05-07 — M1-CP5b: Layer 3 prose-template revisions per M1-CP5 prose-quality findings
+
+**Status:** Adopted (founder approval at Sub-session M1-CP5b, 2026-05-07).
+**Predecessor decision:** `D-M1-CP5-COMPARISON-RUBRIC-FIRST-PASS-2026-05-07`.
+**Engages rules:** R0 (oikeiosis — Layer 3 prose is what Circles 1 + 2 of the practitioner's oikeiosis sequence actually experience), R8a (controlled vocabulary preserved), R8c (English-only on user-facing prose — Revision 3 directly addresses), R7 (source fidelity preserved — no new claims invented), AC8 (translation-sandwich engine surface), PR1 (single-endpoint proof — `/api/reason` is the M1 pilot consumer).
+**NOT engaged:** AC4, AC5, AC7, PR6 (no R20a perimeter or auth surface touched), PR3 (synchronous discipline N/A this amendment), PR4 (model selection N/A — Sonnet retained).
+**Risk class:** Standard under 0d-ii (governance — documentation only; no production touch).
+
+### Why this amendment
+
+M1-CP5's first-pass comparison-rubric read confirmed the analytical engine (Layer 1 + Layer 2) produces correct differentiated assessment where the bundled-depth engine mode-collapses to a uniform answer. The rubric's six dimensions returned five clean signals supporting cutover (latency, cost, failures, threshold posture, fire distribution) plus a sixth signal (proximity match at 40%) that resolved in favour of differentiation once the founder spot-checked the analytical content. The cutover-blocking issue localised to the Layer 3 prose-rendering layer: seven specific gaps that, in aggregate, would replace user-facing prose closing on actionable practice with prose closing on filler disclaimers. The founder elected Revise rather than Cutover; this amendment specifies the prompt-template changes M1-CP5c implements. Gap 6 was investigated as part of this amendment — Layer 1 already extracts preferred-indifferent data into `value_categories_at_stake[]` (ADR-005 §2 + §3.4) and Layer 2 consumes it via `value_assessment` (ADR-004 §2.3) — so ADR-007 amendment alone is sufficient; ADR-005 is NOT co-amended.
+
+### Revisions to the Layer 3 prompt template
+
+#### Revision 1 — Closing sentence MUST be the action
+
+**Hard rule.** The closing sentence of `philosophical_reflection` and the closing sentence of `improvement_guidance` MUST be a concrete practice, an actionable orientation, or a specific Stoic move the practitioner can make. Disclaimers, marginal-case acknowledgments, single-snapshot caveats, and undecidable-verdict acknowledgments MUST NOT close any prose field.
+
+Concretely:
+- `philosophical_reflection` closes on the philosophical orientation drawn from `correct_judgements[0]` or `ruling_faculty_state` (per the existing §3 pattern), reframed as something the practitioner can carry with them — not as a recap of the assessment.
+- `improvement_guidance` closes on the practitioner-facing move: the corrected judgement worked at the causal stage where the false judgement is lodged (synkatathesis correction is the typical case for `/api/reason`), or — when `improvement_path_structured` is null — a one-sentence reflective prompt drawn from `oikeiosis` or `value_assessment`.
+- `summary` already closes itself; no change.
+
+The OUTPUT example in §3 is updated at M1-CP5c to demonstrate this rule. The current OUTPUT example closes `philosophical_reflection` on "This is a single snapshot; no trajectory data is available to assess your direction of travel." — under this revision, that sentence is moved mid-prose (per Revision 5) and replaced as the closing line by the existing third sentence ("The correct view is that her judgement is outside your prohairesis; your character and your impulses are within it.") or a near-paraphrase reordered to the end.
+
+#### Revision 2 — Voice as guidance, not factual recap
+
+**Structural rule.** The prose's structure shifts from "assessment recap → disclaimer" to "principled finding → orientation → practitioner-facing move". The full `Layer2Assessment` JSON is already in the response payload at `extraction` + `assessment`. Layer 3's job is to translate the principled findings into prose the practitioner can act on, not to duplicate the JSON in narrative form. The founder's reformatted prose for row `ae112723` is the target shape — assessment is named, then the prose pivots quickly to the move.
+
+Concretely, the §3 PROSE FIELDS instructions are updated at M1-CP5c so each prose field's first sentence carries the principled finding (one sentence, no extended unpacking) and the remaining sentences carry orientation + move. The "open with the principal Stoic dynamic" guidance is preserved but tightened: open with the dynamic, name it once, and move to what to do with it.
+
+#### Revision 3 — Consistent bracketed Greek-to-English glossing on first use (R8c application)
+
+**Hard rule.** Every Greek or technical Stoic term used in any prose field MUST carry an English translation in parentheses on first occurrence per response. The current §3 CONTROLLED VOCABULARY (R8a) instruction reads "Translate them once for the practitioner (e.g., 'phobos (fear)') on first use within a single prose field." — under this revision, the scope changes from "within a single prose field" to "per response" (so the gloss appears the first time the term is used anywhere across `philosophical_reflection`, `improvement_guidance`, `summary`, `soft_clarification_prose`, `open_deferrals_prose`).
+
+The required-gloss term list (non-exhaustive — any Greek or technical term the assessment uses must be glossed):
+- Causal-chain stages: `phantasia (impression)`, `synkatathesis (assent)`, `horme (impulse)`, `praxis (action)`.
+- Passions: `epithumia (irrational desire)`, `hedone (pleasure)`, `phobos (fear)`, `lupe (distress)`. Sub-species when named: `philodoxia (love of reputation)`, `agonia (anguished anxiety)`, `achos (anguished grief)`, `pothos (longing for the absent)`, `oknos (sluggishness)`, etc.
+- Eupatheiai: `chara (rational joy)`, `boulesis (rational wishing)`, `eulabeia (reverent caution)`, `eupatheia (rational affection)`.
+- Virtues: `phronesis (practical wisdom)`, `dikaiosyne (justice)`, `andreia (courage)`, `sophrosyne (temperance)`.
+- Architecture: `prohairesis (moral choice / ruling faculty)`, `kathekon (appropriate action)`, `katorthoma (perfect action)`, `oikeiosis (appropriation)`, `eudaimonia (flourishing)`.
+- Affect descriptors: `ataraxia (freedom from disturbance)` if used.
+
+When the term is itself the English translation already in common use (e.g., "ruling faculty"), no gloss is required, but if the prose introduces "ruling faculty" alongside `prohairesis`, the gloss attaches to `prohairesis` on first occurrence. Glossing is a discipline, not a one-time decoration: every Greek term across the response is glossed on its first appearance, even if the practitioner may have seen the term in earlier interactions. The fallback prose helper (§6) follows the same discipline.
+
+#### Revision 4 — Careful false-judgement framing (criterion of good and evil)
+
+**New sub-section under §3 PROSE FIELDS.** When the prose invokes the Stoic criterion of good and evil — the principle that only virtue is good and only vice is evil; everything else is preferred or dispreferred indifferent — the prose MUST NOT predicate "evil" (or "good") of the practitioner's character itself, of their response, or of their person. Virtue and vice are the only carriers of moral weight; the prose names this without implying the practitioner has been judged.
+
+Anti-pattern (do not produce): "the only thing that is genuinely good or evil is your character in responding to each", "your character is the evil here", "your response is the only evil in this".
+
+Target patterns (produce): "only virtue and vice carry moral weight; her response, the outcome, your reputation are preferred or dispreferred indifferents", "the criterion of good and evil falls on the judgement, not on the action's outcome", "what is genuinely yours to evaluate is the false judgement at work, not your standing".
+
+The principle: the criterion is named as a feature of the framework (virtue and vice carry moral weight) and applied to the false judgement (which is corrigible) — never applied to the practitioner's character as a verdict on them. The fallback prose helper (§6) follows the same discipline; the templates are reviewed at M1-CP5c against this rule.
+
+#### Revision 5 — Marginal-case disclaimers demoted from closing line (Pattern B)
+
+**Discipline preserved; placement changed.** The MANDATORY marginal-case discipline established in the M1-CP3 amendments (single-snapshot, is_kathekon: null, improvement_path_structured: null) and the M1-CP4b amendment (EUPATHEIA_BOUNDARY, PRAXIS_MOTIVATION_AMBIGUITY) is preserved — these sentences MUST appear in the prose when their respective conditions apply. The placement rule changes: these sentences MUST NOT be the closing sentence of any prose field; they appear mid-prose as brief acknowledgments before the prose pivots to the closing action (per Revision 1).
+
+Specifically:
+- **single_snapshot disclaimer.** Currently MANDATORY in `philosophical_reflection` whenever `iterative_refinement.direction_of_travel === 'single_snapshot'`. Under this revision: the sentence appears in `philosophical_reflection` only when the input has temporal hooks that would naturally raise a trajectory question (e.g., the input mentions iterative or repeated context, "this keeps happening", "I always", "lately") AND the assessment has computed `direction_of_travel === 'single_snapshot'`. When the input has no temporal hook at all and `direction_of_travel === 'single_snapshot'`, the sentence is OMITTED and the prose simply does not make trajectory claims. The harness (§8) is updated at M1-CP5c to reflect this conditional. Per Revision 1, this sentence — when it does appear — never closes the field; it sits mid-prose before the closing orientation.
+- **is_kathekon: null disclaimer.** Currently MANDATORY in `philosophical_reflection` or `summary` whenever `kathekon_assessment.is_kathekon === null`. Under this revision: the sentence appears mid-prose only when the input has raised the question of appropriateness (the agent has named or implied a question about whether what they did or are considering was the right thing). When the input does not engage the question of appropriateness AND `is_kathekon === null`, the sentence is OMITTED. When it does appear, it sits mid-prose, not as the closing line.
+- **improvement_path_structured: null disclaimer.** Currently MANDATORY in `improvement_guidance` whenever `improvement_path_structured === null`. Under this revision: the sentence appears mid-prose, then the prose pivots to a one-sentence reflective prompt drawn from `oikeiosis` or `value_assessment` — that prompt is the closing line, not the disclaimer.
+- **AC-14 marginal-case sentences (EUPATHEIA_BOUNDARY, PRAXIS_MOTIVATION_AMBIGUITY).** Currently MANDATORY in `philosophical_reflection` per the M1-CP4b amendment. Under this revision: same pattern — these sentences appear mid-prose when their respective AC-14 conditions apply, never as the closing line.
+
+The principle: the marginal-case discipline catches silent drift on what the engine cannot decide; the closing line carries what the engine has decided the practitioner can act on. Both are required; they don't compete for the same position.
+
+The fallback prose helper (§6) follows the same placement discipline: marginal-case appends are inserted mid-prose, not as closings; the closing sentence is the action-orientation drawn from `correct_judgements` / `ruling_faculty_state` / `oikeiosis` / `value_assessment` per template.
+
+#### Revision 6 — Surface preferred-indifferent observations
+
+**New rendering rule.** When `value_assessment.identified_value_errors` is non-empty (the agent is treating a preferred or dispreferred indifferent as a genuine good or evil), `philosophical_reflection` MUST surface the value error as a structural observation: name the indifferent, name the agent's framing of it, and connect it to the engine's principled finding (the indifferent is ranked by axia; the framing is what produces the passion). The value-error observation is a peer of the principal-passion observation — when both apply, both are rendered; when only the value error applies, it carries the principled finding.
+
+Worked example (target shape, drawn from row `5b8bf957`'s bundled observation): "Your repeated checking of the phone is a search for relief from the discomfort of uncertainty — and the discomfort itself is a preferred indifferent (the absence of certainty about her response) being treated as a genuine evil." The observation names the indifferent (uncertainty about her response), the agent's framing (treated as evil), and the structural finding (the framing is what locates the passion).
+
+The §5 composition table is extended at M1-CP5c to add `value_assessment.identified_value_errors` as a source for `philosophical_reflection` (peer to `passion_diagnosis.passions_detected[0]` and `passion_diagnosis.false_judgements[0]`). The §3 OUTPUT example is extended with a worked example demonstrating value-error rendering. The fallback prose helper (§6) is extended to render value-error observations from `value_assessment.identified_value_errors[0]` when present, using a templated rendering keyed by `indifferent` × `agent_framing`.
+
+#### Revision 7 — Lighter assessment recap, heavier actionable guidance
+
+**Proportional rebalance.** The full `Layer2Assessment` JSON is already in the response payload at `extraction` + `assessment`; Layer 3 prose duplicating the JSON in narrative form is filler. The proportions of the prose shift toward actionable guidance.
+
+Concretely (sentence-count proportions across the three primary prose fields, computed across `philosophical_reflection` + `improvement_guidance` + `summary`):
+- `philosophical_reflection`: ≤ 25% of total prose by sentence count. Word budget narrowed from "2–6 sentences (~40–180 words)" to **2–4 sentences (~40–110 words)**. The marginal-case sentences from Revision 5 (when they fire) count toward this budget.
+- `improvement_guidance`: ≥ 60% of total prose by sentence count. Word budget widened from "1–3 sentences (~30–80 words)" to **2–5 sentences (~50–140 words)**. The actionable closing line is the anchor; the preceding sentences develop the move.
+- `summary`: residual — one sentence, ~15–30 words. Unchanged.
+
+When AC-14 / AC-13 marginal cases fire (additional mandatory sentences in `philosophical_reflection` or `soft_clarification_prose` / `open_deferrals_prose`), the sentence-count proportions are computed only across the three primary fields; `soft_clarification_prose` and `open_deferrals_prose` are governed by their own M1-CP4b budgets and do not enter the proportion computation.
+
+The §3 OUTPUT example is rewritten at M1-CP5c to demonstrate the new proportions. The harness (§8) Phase 5 acquires a new soft-warn assertion: prose where `improvement_guidance` sentence count is less than `philosophical_reflection` sentence count is logged for review (not hard-failed, because some inputs legitimately produce more reflection than guidance — but the pattern should be the exception, not the default).
+
+### Implementation scope (M1-CP5c)
+
+Files touched at M1-CP5c:
+- `/website/src/lib/translation-sandwich/layer3-prose.ts` — `LAYER3_SYSTEM_PROMPT_API_REASON` constant rewritten per Revisions 1–7; `generateFallbackProse` helpers updated for Revisions 4 + 5 + 6 (template review + new value-error template + closing-line discipline); both OUTPUT examples in the prompt rewritten to demonstrate the new shape.
+- `/website/scripts/verify-translation-sandwich.ts` — Phase 5 assertions updated: assertion 7 (marginal-case coverage) reworded to allow non-closing-line placement; new negative assertion (closing sentence is NOT a disclaimer or marginal-case sentence); new soft-warn assertion (improvement_guidance sentence count proportion); assertions 8 + 9 + 10 (M1-CP4b additions) preserved.
+- `/website/scripts/.translation-sandwich-cache/layer3-{F.id}.json` — F1, F2, F3, F4, F5 caches regenerated against live Sonnet under the new prompt template.
+
+ADR-005 NOT amended (gap 6 disposition: Possibility B — Layer 1 already extracts).
+
+After M1-CP5c module update + harness re-cache: brief parallel-run re-validation via 5–10 `/admin/test-reason` clicks against fixtures that exercise the seven gaps' conditions. Then return-to-M1-CP5 with refreshed comparison data.
+
+Estimated time for M1-CP5c: 2–3 hours. Risk class: Elevated (existing user-facing functionality changes — Layer 3 module is on the parallel-run path; user-facing path remains bundled-depth so the change is dormant until cutover, but the module that will become user-facing at M1-CP6 is the one being changed). Critical Change Protocol NOT engaged.
+
+---
+
+*End of Amendment — 2026-05-07.*
+
 ---
 
 *End of ADR-007.*
