@@ -230,6 +230,28 @@ The visibility difference is fixture-driven: F1's Layer 1 output is non-determin
 
 **Status:** Watch (2nd recurrence). Logged for promotion decision at third recurrence. Cross-references: `D-M1-CP3-LAYER3-MODULE-AND-ADR007-2026-05-04` (parent entry + Amendment block + post-amendment re-run record); `/adopted/adr/2026-05-04-layer3-prose-template-api-reason.md` §3 + §6 + Changelog (the amendment).
 
+### Promoted pattern (3rd+ recurrence — load-bearing resolution) — Harness assertions on subjective LLM extractions must be structural, not content-specific (M1-CP4e-B, 2026-05-07)
+
+**Re-explanations:** 3+ (M1-CP4b worked-example fix for placeholder-vs-concrete JSON keys + per-fixture motivation_evidence assertion calibration; M1-CP4e-A F1+F2+F5 cache invalidation drift requiring P4 baseline split + F2 STATED_EQUANIMITY_UNVERIFIED carve-out + F5 stated_equanimity_signals relaxation; M1-CP4e-B F2 motivation_stated drift + F5 EUPATHEIA prose drift + F9 augmented-trigger same-fire). PR5 PROMOTED from watch-status (M1-CP4e-A close) to permanent at M1-CP4e-B.
+
+**Why it caused confusion:** Sonnet's structured-output extraction is non-deterministic on subjective fields — whether "I hate confrontation" is a stated motivation or a passion-disclaimer; whether "no envy at all" is a stated_equanimity_signal; whether "she" is a stated_concern_target; whether F5's prose names eupatheia (genus) or chara/boulesis (species); whether the practitioner's clarification answer structurally removes the ambiguity-creating content from the original input. The harness's expected_non_empty / per-fixture assertions crystallised specific Sonnet outputs at one moment in time and then drifted out of alignment as Sonnet's output varied between runs. Each drift looked like a failure but was a defensible (sometimes more-accurate) reading.
+
+**Plain-language resolution:** The harness asserts STRUCTURAL invariants (correct types, valid enum values, schema conformance, fields-non-empty-when-expected) — never specific content. Where content matters (e.g., a marginal-case discipline must appear in prose), the matcher accepts paraphrases via lexical-set membership rather than fixed phrases. Genus-or-species naming (eupatheia / chara / boulesis / eulabeia) is structurally equivalent. Loop-guard assertions accept any valid output (no throw) rather than prescribing trigger outcomes. Per-fixture carve-outs are documented inline with the reason and the date (e.g., F2's "I hate confrontation" reading; F7's fusion-bypass).
+
+**Pattern:** Subjective fields where Sonnet has interpretive latitude → structural assertion + diagnostic INFO logs of the actual outcome → per-fixture carve-outs documented when content drift is genuinely defensible.
+
+**When this matters:** Any harness assertion on LLM-derived output. Any new fixture's assertion design. Any review of `verify-translation-sandwich.ts` or M2/M3/M4 consumer harnesses.
+
+**Resolution applied (2026-05-07, M1-CP4e-B):**
+- F2 motivation_stated carve-out from `=== false` baseline assertion (Sonnet's reading defensible per ADR-005 §3.10).
+- F5 EUPATHEIA_BOUNDARY matcher pivoted to structural (genus or species + marginal-case language).
+- Phase 12 loop-guard pivoted to structural (engine completed; outcome diagnostically logged; same-trigger logged as INFO with ADR-008 §10.3 diagnostic).
+- F7 motivation_stated carve-out (fusion-bypass per ADR-005 §8.2).
+
+**M1-CP4f scope:** Extend the structural-over-content principle to other content-specific assertions in the harness — `proseHasUndecidableKathekonPhrasing`, `proseHasSingleSnapshotPhrasing`, `proseHasNoImprovementPathPhrasing`, EUPATHEIA_BOUNDARY / PRAXIS_MOTIVATION_AMBIGUITY stem fragment matchers. Systematic refactor of harness assertion strategy. Note: this is a different but related pattern from the marginal-case discipline watch entry above — that one is about LLM-prompt design (worked OUTPUT examples for marginal cases); this one is about HARNESS-assertion design (structural over content). M1-CP4f integrates both.
+
+**Status:** Promoted (3rd+ recurrence — load-bearing). Cross-references: `D-M1-CP4e-B-AC13-TIER1-DEPLOYED-2026-05-07` (this promotion); `D-M1-CP4e-A-LAYER-MODULES-ROUTE-HARNESS-AC13-TIER1-IMPLEMENTED-NO-DEPLOY-2026-05-06` (watch-status finding); `D-M1-CP4b-AC14-TIER2-ADR-AMENDMENTS-2026-05-06` (first observation — worked-example fix); `/website/scripts/verify-translation-sandwich.ts` (the harness with the structural pivots applied).
+
 ### Stable observations (no action)
 
 - **AC4 (Invocation Testing for Safety Functions) — formerly KG3 / KG7 build-to-wire entries, retired 2026-04-25 under DD-2026-04-25-03:** Actively applied. Grep confirmed both Growth loaders are called exactly once in production (`hub/route.ts` `case 'growth':`). Harness run in-session (16/16 assertions passed). No new observation worth logging.
