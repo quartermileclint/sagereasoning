@@ -152,6 +152,9 @@ PROSE FIELDS
    - Connect briefly to the agent's katorthoma_proximity (reflexive | habitual | deliberate | principled | sage_like) and any engaged virtue_domains_engaged. Keep this brief — one clause is sufficient; do not develop into a separate full recap sentence.
    - Close with one sentence of philosophical orientation drawn from passion_diagnosis.correct_judgements[0] (when present) or assessment.ruling_faculty_state. The closing sentence is reframed as something the practitioner can carry with them — an orientation toward the work, not a recap of the assessment. The closing sentence is NEVER a disclaimer, marginal-case sentence, or single-snapshot caveat.
 
+   STAGE DISCIPLINE (per Q6 refinement, 2026-05-07):
+   Name the stage where the passion is lodged (\`passion_diagnosis.passions_detected[].causal_stage_affected\`). Do NOT name upstream stages in the prose unless the assessment explicitly names them as part of the corrective sequence — naming multiple stages dilutes the practitioner-facing focus. The third OUTPUT example below demonstrates the correct pattern: \`horme\` is the lodged stage; \`praxis\` is named as the downstream stage to prevent, not as an upstream stage. Naming an upstream stage IS permitted when the assessment's corrective path includes it (e.g., when the lodged stage is \`horme\` but the corrective work is to intercept at \`synkatathesis\` going forward — there the upstream stage is named because it is where the corrective work happens, not as a redundant reference). The default is single-stage focus; the upstream-stage case is the narrow exception.
+
    PREFERRED-INDIFFERENT RENDERING RULE (per Revision 6, 2026-05-07):
    When value_assessment.identified_value_errors is non-empty, philosophical_reflection MUST surface the value error as a structural observation. Name the indifferent, name the agent's framing of it, and connect it to the engine's principled finding (the indifferent is ranked by axia; the framing is what produces the passion). The value-error observation is a peer of the principal-passion observation: when both apply, render both; when only the value error applies, it carries the principled finding. The OUTPUT examples below demonstrate the rendering.
 
@@ -224,7 +227,7 @@ When the term itself is the English translation already in common use (e.g., "ru
 
 OUTPUT
 
-Return ONLY valid JSON conforming to Layer3Prose. No markdown. No commentary outside the JSON.
+Return ONLY the raw JSON object conforming to Layer3Prose. Do NOT wrap it in markdown fences (no \`\`\`json, no \`\`\`). The first character of your response MUST be \`{\` and the last character MUST be \`}\`. No commentary outside the JSON. No code-block syntax. No prose before or after the JSON.
 
 WORKED EXAMPLE — passion + value-error case (closing on action; mid-prose marginal-case sentence; consistent glossing; careful false-judgement framing; proportional rebalance)
 
@@ -303,7 +306,7 @@ Notes on this example:
 - Sentence-count proportions: reflection 4, guidance 5, summary 1. guidance ≥ reflection. Per Revision 7.
 - The closing sentence of improvement_guidance is a concrete practice ("Practise this when the next sharp reply rises..."), NOT the recap of the mechanism naming. Per Revision 1.
 
-Return only the JSON.`
+Return only the raw JSON object. First character \`{\`. Last character \`}\`. No markdown fences. No code-block syntax.\``
 
 // ============================================================================
 // VALIDATOR (per ADR-007 §7 — hand-rolled, mirrors ADR-005 §6 + ADR-006 §5)
@@ -578,7 +581,15 @@ export async function generateProse(
     )
   }
 
-  const max_tokens = params.max_tokens ?? 2000
+  // max_tokens raised from 2000 to 3000 at M1-CP5e (Q2 truncation defense).
+  // The M1-CP5d-amended prompt is verbose (3 OUTPUT examples + extended
+  // CONTROLLED VOCABULARY + extended COMPOSITION CONTRACT); responses
+  // approached the previous 2000-token cap and the F4 one-off failure at
+  // M1-CP5c was diagnosed as truncation-or-escape mid-string. Anthropic
+  // bills only on actual output tokens, so the raised cap costs nothing
+  // when the response fits in <2000 tokens. See decision-log entry
+  // D-M1-CP5e-LAYER3-Q2-Q6-RESOLVED-2026-05-07.
+  const max_tokens = params.max_tokens ?? 3000
   const temperature = params.temperature ?? 0.3
 
   // Select per-consumer system prompt. At M1, only api_reason exists.
@@ -603,7 +614,8 @@ export async function generateProse(
     },
   ]
 
-  // LLM call — Sonnet, 2000 max-tokens, 0.3 temperature (per ADR-007 §4).
+  // LLM call — Sonnet, 3000 max-tokens default (raised from 2000 at M1-CP5e),
+  // 0.3 temperature (per ADR-007 §4).
   const client = getClient()
   let responseText: string
   let usage: LayerTokenUsage
@@ -615,6 +627,22 @@ export async function generateProse(
       system: systemMessages,
       messages: [{ role: 'user', content: userMessage }],
     })
+
+    // Truncation defense (M1-CP5e Q2). If Sonnet hit the max_tokens cap
+    // mid-response, the JSON will be unterminated and extractJSON's six-step
+    // fallback chain cannot repair it. Throw a clear, diagnosable error
+    // BEFORE extractJSON runs so future failures surface as truncation rather
+    // than as opaque parse failures. The route's catch path (ADR-004 §9.3)
+    // routes the user to generateFallbackProse so production behaviour is
+    // unchanged. See decision-log entry D-M1-CP5e-LAYER3-Q2-Q6-RESOLVED.
+    if (message.stop_reason === 'max_tokens') {
+      throw new Error(
+        `layer3-prose: LLM response truncated at max_tokens=${max_tokens} ` +
+          `(stop_reason=max_tokens; output_tokens=${message.usage.output_tokens}). ` +
+          `Increase max_tokens or shorten the prompt. ` +
+          `Consumer: ${params.consumer}.`
+      )
+    }
 
     responseText = message.content[0].type === 'text' ? message.content[0].text : ''
     // Capture usage from the SDK response (M1-CP4f Step 3). input_tokens
