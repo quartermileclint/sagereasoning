@@ -1,23 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateApiKey, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
-import { runSageReason, type ReasonDepth } from '@/lib/sage-reason-engine'
+import { type ReasonDepth, EVALUATIVE_DISCLAIMER } from '@/lib/sage-reason-engine'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { detectDistressTwoStage } from '@/lib/r20a-classifier'
 import { enforceDistressCheck } from '@/lib/constraints'
 import { type RetrieveResult } from '@/lib/rag'
 import { loadLayer1WithFallback } from '@/lib/rag/load-layer1-with-fallback'
-// M1-CP4 (2026-05-04): translation-sandwich parallel-run orchestrator.
-// Imported AFTER the R20a perimeter line below (line ~144). The orchestrator
-// is invoked AFTER runSageReason returns (line ~184) and never throws.
-// Per ADR-004 §6 + §6.3 + §10. Per AC4 + AC5 + AC8 + PR1 + PR6.
-import { runParallelSandwich } from '@/lib/translation-sandwich/parallel-run'
-// M1-CP4e (2026-05-06): AC-13 Tier 1 force-clarification continuation-token
-// mechanic. Imported AFTER the R20a perimeter line below; token validation
-// runs AFTER the distress check on every turn (per ADR-008 §6). The continuation
-// token is a stateless HMAC signature, NOT a session credential — AC7 NOT
-// engaged. Per ADR-008 §4 + AC4 + AC5 + PR6.
-import { validateContinuationToken } from '@/lib/translation-sandwich/tier1-token'
+// M1-CP6 cutover (2026-05-08): translation-sandwich is the sole user-facing
+// path. runSandwich sits AFTER the R20a perimeter (line 173 below). Per
+// design choice 2A (parallel-run retired), bundled engine is no longer
+// called from this route. Per ADR-004 §6 + §10 CP6 + AC4 + AC5 + AC8 + PR1 + PR6.
+import { runSandwich } from '@/lib/translation-sandwich/parallel-run'
+// M1-CP4e (2026-05-06) + M1-CP6 (2026-05-08): AC-13 Tier 1 force-clarification
+// continuation-token mechanic. validateContinuationToken handles second-turn
+// re-submission; issueContinuationToken (M1-CP6 design choice 3A) handles
+// first-turn issuance when the sandwich emits a Tier 1 trigger. Token is a
+// stateless HMAC signature — AC7 NOT engaged. Per ADR-008 §4 + AC4 + AC5 + PR6.
+import {
+  validateContinuationToken,
+  issueContinuationToken,
+  Tier1SecretMissingError,
+} from '@/lib/translation-sandwich/tier1-token'
 
 // =============================================================================
 // sage-reason — The Universal Reasoning Layer
@@ -228,14 +232,9 @@ export async function POST(request: NextRequest) {
       // Token validated. Extract previous trigger code for meta logging.
       previousTrigger = tokenResult.payload.trigger_code
     }
-    // previousTrigger is referenced in downstream meta logging at M1-CP6
-    // cutover when the orchestrator becomes user-facing. During parallel-run
-    // (M1-CP4e-A → M1-CP6), the user-facing path remains bundled-depth and
-    // previousTrigger is preserved for diagnostic logging only.
-    //
-    // We reference the variable here to satisfy the TS no-unused-locals check
-    // without semantic effect during parallel-run. Removable at cutover.
-    void previousTrigger
+    // previousTrigger is integrated into the response meta below (Branch 3 — happy path)
+    // when non-null. M1-CP6 cutover (2026-05-08) — was diagnostic-only during parallel-run;
+    // is now load-bearing for second-turn meta logging.
 
     // Validate depth parameter
     const depth: ReasonDepth = requestedDepth || 'standard'
@@ -258,53 +257,27 @@ export async function POST(request: NextRequest) {
     ])
 
     // -------------------------------------------------------------------------
-    // M1-CP4 (2026-05-04, refactored to concurrent execution post-close):
-    // Translation-sandwich parallel-run.
-    // Per ADR-004 §6.1 (parallel-run shape) + §6.3 (failure isolation).
+    // M1-CP6 cutover (2026-05-08): translation-sandwich is the sole user-facing
+    // path on /api/reason. Bundled engine no longer called from this route
+    // (per ADR-004 §10 CP6 + design choice 2A — parallel-run retired).
     //
-    // CONCURRENT EXECUTION MODEL:
-    //   runSageReason and runParallelSandwich fire concurrently. Both promises
-    //   are awaited; total user-facing latency = max(bundled, sandwich).
-    //   No deadline cutoff during the M1-CP4-CP5 testing window — per founder
-    //   directive: testing-period observations should not be artificially
-    //   pre-empted before realistic latencies are known.
+    // Failure isolation per ADR-004 §9 + design choice 1C:
+    //   - Layer 1/2 throws → deterministic minimal fallback shape (200 status,
+    //     fallback flag in meta). No bundled call.
+    //   - Layer 3 LLM throw with fallback success → composed sandwich output
+    //     with deterministic fallback prose (handled inside runSandwich).
+    //   - Layer 3 LLM AND fallback both failing → deterministic minimal fallback.
     //
-    // FAILURE ISOLATION (preserved):
-    //   runParallelSandwich never throws (errors caught internally; logged to
-    //   console.warn). If runSageReason throws, the outer try/catch returns
-    //   500 to the user; the sandwich's outcome is logged to console.warn but
-    //   no comparison row is written (table requires bundled_depth_output to
-    //   be non-null).
+    // Tier 1 force-clarification surfacing per ADR-008 §2 + design choice 3A:
+    //   When sandwich emits a Tier 1 trigger, the route issues the continuation
+    //   token, splices it into the orchestrator's Tier 1 response shape, and
+    //   returns to the user. First-turn surfacing.
     //
-    // ACTIVATION:
-    //   Gated on env TRANSLATION_SANDWICH_PARALLEL_RUN=1 inside the
-    //   orchestrator module (read once at module load). When unset/"0", the
-    //   sandwich is a no-op and only bundled-depth runs.
-    //
-    // R20a PERIMETER PRESERVATION:
-    //   runSageReason + runParallelSandwich both sit AFTER line-144 distress
-    //   check. Phase 7 of the harness asserts: distress-check before any
-    //   reasoning call. AC4 + AC5 + PR6.
+    // R20a perimeter at line 173 unchanged — runSandwich sits AFTER it.
+    // AC4 + AC5 + AC8 + PR1 + PR6 preserved.
     // -------------------------------------------------------------------------
 
-    // Call the shared reasoning engine. layer1 spreads into either
-    // retrievedPassages (success path) or stoicBrainContext (fallback path).
-    const bundledStartedAt = Date.now()
-    const bundledPromise = runSageReason({
-      input,
-      context,
-      depth,
-      domain_context,
-      urgency_context,
-      ...layer1,
-      practitionerContext,
-      projectContext,
-    })
-
-    // Fire the parallel sandwich concurrently with bundled-depth.
-    // Awaiting it ensures user response waits until both have settled (no
-    // fire-and-forget — KG1 rule 2). The function never throws.
-    await runParallelSandwich({
+    const sandwichResult = await runSandwich({
       input,
       context,
       domain_context,
@@ -313,16 +286,58 @@ export async function POST(request: NextRequest) {
       retrievedPassages: layer1.retrievedPassages,
       practitionerContext,
       projectContext,
-      bundledDepthPromise: bundledPromise,
-      bundledStartedAt,
     })
 
-    // Extract the bundled result. By this point the promise has already
-    // settled (runParallelSandwich awaited it internally). If runSageReason
-    // threw, this re-throws and the outer catch returns 500.
-    const result = await bundledPromise
+    // Branch 1 — Tier 1 force-clarification fired (3A surfacing).
+    if (sandwichResult.tier1_trigger !== null && sandwichResult.output) {
+      let token: string
+      try {
+        token = issueContinuationToken(input, sandwichResult.tier1_trigger.trigger_code)
+      } catch (err) {
+        if (err instanceof Tier1SecretMissingError) {
+          console.error(
+            '[/api/reason] Tier 1 fired but TRANSLATION_SANDWICH_TIER1_SECRET unset; ' +
+            'cannot issue continuation token. Set the env var per ADR-008 §4.2.'
+          )
+          return NextResponse.json(
+            {
+              error: 'continuation_token_engine_unavailable',
+              detail:
+                'Tier 1 force-clarification is not available on this deployment. ' +
+                'Submit your input again as a fresh request.',
+            },
+            { status: 503, headers: corsHeaders() }
+          )
+        }
+        throw err  // outer catch returns 500
+      }
+      const tier1Output = sandwichResult.output as Record<string, unknown>
+      tier1Output.continuation_token = token
+      tier1Output.disclaimer = EVALUATIVE_DISCLAIMER
+      return NextResponse.json(tier1Output, { headers: corsHeaders() })
+    }
 
-    return NextResponse.json(result, { headers: corsHeaders() })
+    // Branch 2 — Layer 1/2 throw OR Layer 3 LLM+fallback both failed (1C minimal fallback).
+    if (
+      sandwichResult.error === 'layer1_throw' ||
+      sandwichResult.error === 'validation_throw' ||
+      sandwichResult.error === 'layer3_throw'
+    ) {
+      return NextResponse.json(
+        buildMinimalFallback(sandwichResult.error),
+        { status: 200, headers: corsHeaders() }
+      )
+    }
+
+    // Branch 3 — happy path: composed sandwich output. Add R3 disclaimer + previousTrigger meta.
+    const output = sandwichResult.output as Record<string, unknown>
+    output.disclaimer = EVALUATIVE_DISCLAIMER
+    if (previousTrigger !== null) {
+      const meta = (output.meta as Record<string, unknown>) ?? {}
+      meta.previous_trigger = previousTrigger
+      output.meta = meta
+    }
+    return NextResponse.json(output, { headers: corsHeaders() })
   } catch (error) {
     console.error('sage-reason API error:', error)
     const message = error instanceof Error ? error.message : 'Internal server error'
@@ -330,6 +345,47 @@ export async function POST(request: NextRequest) {
       { error: message },
       { status: 500 }
     )
+  }
+}
+
+// =============================================================================
+// HELPERS
+// =============================================================================
+
+/**
+ * 1C deterministic minimal fallback shape (M1-CP6 design choice 1C, 2026-05-08).
+ * Returned when Layer 1/2 throws or Layer 3 LLM AND deterministic fallback both fail.
+ * Honest about the failure; no bundled call (parallel-run retired per 2A); structured
+ * per ADR-004 §2.1 shape so consumers parsing the new schema don't break on null fields.
+ *
+ * R3 evaluative disclaimer included.
+ */
+function buildMinimalFallback(
+  reason: 'layer1_throw' | 'validation_throw' | 'layer3_throw'
+): Record<string, unknown> {
+  return {
+    version: 'translation-sandwich-v1',
+    extraction: null,
+    assessment: null,
+    prose: {
+      philosophical_reflection:
+        'The reasoning engine could not complete an evaluation for this input. ' +
+        'The framework itself is unaffected — the limitation is in this single processing run. ' +
+        'Stoic practice asks us to engage with what is within our control: this temporary ' +
+        'limitation is one such case.',
+      improvement_guidance:
+        'Please try again. If the issue persists, consider rephrasing the input or shortening it. ' +
+        'Direct reflection or human counsel may also serve well — algorithmic analysis is one tool ' +
+        'among several.',
+      summary:
+        'Evaluation unavailable for this run; the framework remains available on retry.',
+    },
+    meta: {
+      engine_attribution: 'translation-sandwich',
+      fallback: true,
+      fallback_reason: reason,
+    },
+    disclaimer: EVALUATIVE_DISCLAIMER,
   }
 }
 

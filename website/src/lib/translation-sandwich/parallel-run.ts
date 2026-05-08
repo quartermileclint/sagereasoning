@@ -567,6 +567,11 @@ function composeTier1ResponseShape(
 // ============================================================================
 
 /**
+ * @deprecated Per M1-CP6 cutover (2026-05-08, design choice 2A): parallel-run is
+ * retired. The user-facing production path on /api/reason is now `runSandwich`
+ * (below). This function remains in the codebase for offline / testing /
+ * curiosity use only — not called from any user-facing route post-cutover.
+ *
  * Run the translation-sandwich engine concurrently with the bundled-depth
  * engine and log a comparison row when both settle.
  *
@@ -674,6 +679,30 @@ function sha256Hex(text: string): string {
  * internally (via runWithDeadline).
  */
 export async function runSandwichForHarness(params: SandwichInput): Promise<SandwichRunResult> {
+  return runSandwichInner(params)
+}
+
+// ============================================================================
+// PRODUCTION ENTRY POINT (M1-CP6 cutover — 2026-05-08)
+// Per design choice 2A: parallel-run retired; sandwich is the sole user-facing
+// path on /api/reason. This function is the production orchestrator.
+//
+// No DB I/O — no comparison row, no cost tracker. Failure isolation per
+// ADR-004 §9 is the route's responsibility: Layer 1/2/3 throws are surfaced
+// via the SandwichRunResult.error discriminator; the route composes the
+// deterministic minimal fallback per design choice 1C.
+//
+// runParallelSandwich (above) is retained for offline / testing / curiosity
+// use only (per founder's 2F brainstorm note — bundled is renamed for
+// non-production use; the parallel-run orchestrator follows it). Not called
+// from any user-facing route post-cutover.
+// ============================================================================
+
+/**
+ * Run the translation-sandwich engine and return the result.
+ * Never throws. Every error is captured in result.error.
+ */
+export async function runSandwich(params: SandwichInput): Promise<SandwichRunResult> {
   return runSandwichInner(params)
 }
 
