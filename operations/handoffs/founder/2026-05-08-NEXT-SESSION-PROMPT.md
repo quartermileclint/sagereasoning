@@ -112,9 +112,9 @@ The founder elects ONE primary item below. Other items are deferred to subsequen
 
 ### Item I — Post-cutover hygiene + auth-path restoration
 
-**Scope:** bundles 5 carry-forwards surfaced during the M1-CP6 post-audit sub-session (consumer audit on 2026-05-08). All are pre-existing bugs (4) or transient browser issues (1) — not caused by the cutover, but visible in the post-cutover audit. May be elected as a single bundled item or split across sessions per founder discretion. In rough priority of user impact:
+**Scope:** bundles 6 carry-forwards related to the post-M1-CP6-cutover surface — 5 surfaced during the M1-CP6 post-audit sub-session (consumer audit on 2026-05-08) plus 1 (sub-item (vi)) added at the 2026-05-09 sub-item (i) session. Sub-item (i) **[CLOSED 2026-05-09 — see `D-ITEM-I-i-AUTHFETCH-MIGRATION-2026-05-09`]**. Remaining 5 sub-items: (ii) + (iii) + (iv) + (v) + (vi) — all pre-existing bugs (4) or transient browser issues (1) — not caused by the cutover. May be elected as a single bundled item or split across sessions per founder discretion. In rough priority of user impact:
 
-(i) **`/private-mentor` + `/mentor-hub` + `/ops-hub` plain `fetch()` → `authFetch` migration.** Highest user impact — these three pages are user-facing reasoning surfaces that have been broken on auth (documented in `/admin/test-reason/page.tsx` lines 11–14). Three pages × ~5 LOC each = trivial diff. Standard tier (additive — restoring intended behaviour). Estimated 30–45 min including post-deploy verification on each page.
+(i) **[CLOSED 2026-05-09]** **`/private-mentor` + `/mentor-hub` + `/ops-hub` plain `fetch()` → `authFetch` migration.** Highest user impact — these three pages are user-facing reasoning surfaces that have been broken on auth (documented in `/admin/test-reason/page.tsx` lines 11–14). Three pages × ~5 LOC each = trivial diff. Standard tier (additive — restoring intended behaviour). Estimated 30–45 min including post-deploy verification on each page. **Closed via `D-ITEM-I-i-AUTHFETCH-MIGRATION-2026-05-09`; session close at `/operations/handoffs/founder/2026-05-09-item-I-i-authfetch-migration-close.md`. Verified live on all three pages.**
 
 (ii) **`/api/usage/route.ts` line 43 — `user_id` → `owner_user_id` column-name fix.** Same single-character fix as the `/api/keys` fix from the M1-CP6 post-audit sub-session. Pre-existing; same Elevated-tier discipline. Estimated 5 min code change + commit + verify.
 
@@ -124,9 +124,11 @@ The founder elects ONE primary item below. Other items are deferred to subsequen
 
 (v) **React hydration errors investigation.** `/private-mentor` + `/mentor-hub` + `/ops-hub` (and possibly `/admin/test-reason`) show React errors #418, #423, #425. Likely cause: service-worker cache + Vercel-rebuild interaction (the `[Sage] Journal service worker registered` log line accompanies the errors). Diagnostic step from M1-CP6 post-audit chat: hard refresh + service-worker unregister via dev tools → Application → Service Workers. Investigation tier: Standard (read-only diagnostic) → Elevated if a code fix is needed. Estimated 30 min investigation; fix scope TBD (could be additive — skip the service worker for affected pages — or no-fix and document the workflow for users encountering the issue post-deploy).
 
-**Risk class:** Standard for items (i), (iv), (v); Elevated for items (ii) and (iii) — both touch existing user-facing functionality. Critical Change Protocol NOT engaged for any sub-item.
+(vi) **Out-of-scope plain `fetch()` calls — `/api/score-conversation` (mentor-hub line 152) + `/api/score-decision` (ops-hub line 67).** Surfaced during the 2026-05-09 sub-item (i) session as out-of-scope observations while migrating /api/reason calls. Same broken-on-auth pattern as sub-item (i); both endpoints likely require Authorization header (companion routes to /api/reason in same R20a perimeter per Deliverable 24 audit). Standard tier (additive — restoring intended behaviour); ~5 min per fix; same pattern as sub-item (i). Could be folded into a follow-up sub-item (i)-style sweep across the perimeter to catch any other plain `fetch()` call sites on R20a perimeter routes.
 
-**Estimated total:** 2–4 hours if all done in one session. Could be split across two sessions: e.g., session 1 = items (i) + (ii) + (iii) (auth-path restoration + Elevated hygiene; user-facing restoration); session 2 = items (iv) + (v) (documentation + investigation).
+**Risk class:** Standard for items (i) [CLOSED], (iv), (v), (vi); Elevated for items (ii) and (iii) — both touch existing user-facing functionality. Critical Change Protocol NOT engaged for any sub-item.
+
+**Estimated total:** 1.5–3.5 hours if remaining items done in one session [item (i) closed 2026-05-09]. Could be split across two sessions: e.g., session 1 = items (ii) + (iii) + (vi) (Elevated hygiene + auth-path sweep; user-facing restoration); session 2 = items (iv) + (v) (documentation + investigation).
 
 **Pre-work founder may bring:** any preference on scope (all-in-one vs split); any preference on which sub-item is highest priority (default sequencing above is rough user-impact-priority).
 
@@ -160,13 +162,13 @@ Per item:
 
 **Most-likely paths:**
 
-- **Item I sub-item (i) (auth-path restoration on `/private-mentor` + `/mentor-hub` + `/ops-hub`)** is the most user-impacting carry-forward — restoring these three pages to working auth state means human-facing reasoning surfaces function for end users. Trivial diff; quick win. Could be elected first to maximise immediate user value.
+- **Item I sub-item (i) (auth-path restoration on `/private-mentor` + `/mentor-hub` + `/ops-hub`)** **[CLOSED 2026-05-09]** — was the most user-impacting carry-forward; closed via `D-ITEM-I-i-AUTHFETCH-MIGRATION-2026-05-09`. Three pages now Live on /api/reason auth path; verified live with full Layer 1 + Layer 3 sandwich response.
 - **Item B (post-cutover watch)** is the cheapest first session — read-only analysis against live traffic; produces evidence informing whether Q3 / Q4 / F4 close naturally or escalate.
 - **Item D (cost monitoring restoration)** is hygiene; pairs well with Item B (observing post-cutover behaviour benefits from cost observability) or with Item I (both are post-cutover hygiene; could be done in the same session).
-- **Item I full bundle** consolidates the 5 audit-surfaced carry-forwards into one focused session (~3–5 hr) or two split sessions (~1.5–3 hr each). Practical for capturing all known pre-existing bugs in a single push.
+- **Item I remaining bundle** (sub-items (ii)+(iii)+(iv)+(v)+(vi) — five remaining post-(i)-closure) consolidates the audit-surfaced + 2026-05-09-surfaced carry-forwards into one focused session (~2–4 hr) or two split sessions. Practical for capturing all known pre-existing bugs in a single push.
 - **Item A (2F arc)** is the most ambitious and most aligned with founder's M1-CP6 brainstorm. Founder elects when ready (may want to sit with the cutover for some time first).
 
-**Recommendation (not prescription):** Item I sub-item (i) first as quickest user-value-restoration (auth fix on the three pages — ~30–45 min); Item B + Item D bundled as a single observation+hygiene session; remaining Item I sub-items (ii)–(v) folded opportunistically; Item A 2F arc when founder is ready. Items E + F + G can be folded opportunistically into other sessions when their relevant surfaces are touched.
+**Recommendation (not prescription):** With Item I sub-item (i) closed 2026-05-09, the natural next step is Item I sub-item (vi) (companion perimeter fetch sweep — natural extension of (i)) bundled with sub-items (ii) + (iii) (Elevated hygiene). Then Item B + Item D as a single observation+hygiene session. Item I sub-items (iv) + (v) folded opportunistically. Item A 2F arc when founder is ready. Items E + F + G can be folded opportunistically into other sessions when their relevant surfaces are touched.
 
 The founder elects. The above is information for the choice, not a prescription on it.
 

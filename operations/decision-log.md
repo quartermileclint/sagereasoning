@@ -3541,3 +3541,38 @@ Founder elected 3c at session-open per Pre-conditions §3 of the M1-CP6 next-ses
 **Status:** Adopted. Cross-references: `D-RETURN-TO-M1-CP5-PRIME-PRIME-RUBRIC-REFRESH-2026-05-08` (predecessor — Branch A election authorising this cutover; 39/40 prose verdict; F4 soft miss accepted as known limitation post-cutover); `D-M1-CP5f-LAYER3-AMENDMENT-4-2026-05-07` (the Layer 3 module + ADR-007 state being made Live by this cutover); `D-M1-CP5b-ADR-007-AMENDMENT-2026-05-07` (the seven Revisions adopted — the prose-template foundation now Live); `/adopted/adr/2026-05-04-translation-sandwich-pilot-api-reason.md` §2.1 + §6 + §8 + §9 + §10 CP6 + §10.2 CP6 (the architectural specification cutover commits); `/adopted/adr/2026-05-04-layer3-prose-template-api-reason.md` Amendment 4 (the Layer 3 prose template now Live); `/adopted/adr/2026-05-06-tier1-force-clarification-api-reason.md` ADR-008 §2 + §4 (Tier 1 first-turn surfacing wired this session — 3A); `/manifest.md` AC5 + AC7 + R10 + R20a + R0 (rules engaged); `/adopted/standing-protocol-cache.md` (operative governing frame); `/operations/handoffs/founder/2026-05-08-return-to-M1-CP5-prime-prime-close.md` (predecessor close); `/operations/handoffs/founder/2026-05-08-M1-CP6-NEXT-SESSION-PROMPT.md` (this session's input prompt); `/operations/handoffs/founder/2026-05-08-M1-CP6-close.md` (this session's close — produced at Step 9); `/operations/handoffs/founder/2026-05-08-NEXT-SESSION-PROMPT.md` (next-session prompt — open agenda; produced at Step 9).
 
 ---
+
+## 2026-05-09 — D-ITEM-I-i-AUTHFETCH-MIGRATION-2026-05-09
+
+**Decision:** Sub-session Item I (i) — auth-path restoration. Migrated `/private-mentor` + `/mentor-hub` + `/ops-hub` from plain `fetch('/api/reason'...)` to `authFetch('/api/reason'...)`. Five call-site renames + two new `authFetch` imports across three files. Item I sub-item (i) of five Closed; (ii)+(iii)+(iv)+(v) remain open; new sub-item (vi) added to next-session prompt for the out-of-scope plain `fetch()` calls on `/api/score-conversation` (mentor-hub line 152) and `/api/score-decision` (ops-hub line 67).
+
+**Reasoning:** Highest-user-impact + cheapest carry-forward in Item I per M1-CP6 post-audit close. Three reasoning pages broken on auth since `/admin/test-reason/page.tsx` was built (~2026-05-04). Migration is additive — same pattern as 16 other authFetch users across the app. Founder approved Standard-tier diff plan in chat per project preferences (sign-in-affecting change requires explicit approval); all seven edits applied; founder verified live on all three pages post-deploy.
+
+**Files touched:**
+- `/website/src/app/private-mentor/page.tsx` — line 119 fetch → authFetch (no import change; authFetch already imported on line 4).
+- `/website/src/app/mentor-hub/page.tsx` — line 4 added `import { authFetch } from '@/lib/auth-fetch';`; line 124 + line 169 fetch → authFetch.
+- `/website/src/app/ops-hub/page.tsx` — line 4 added `import { authFetch } from '@/lib/auth-fetch'`; line 46 + line 94 fetch → authFetch.
+- `/operations/decision-log.md` — this entry appended.
+- `/operations/handoffs/founder/2026-05-09-item-I-i-authfetch-migration-close.md` — session close (this session).
+- `/operations/handoffs/founder/2026-05-08-NEXT-SESSION-PROMPT.md` — modified in place (8 edits) to mark Item I (i) Closed and add Item I (vi) + amend Risk class / Estimated total / Forecast / Recommendation.
+
+**Risk classification:** Standard under 0d-ii. Additive; restoring intended behaviour on already-broken code path; no auth/encryption/perimeter/deletion surface modified; client-side fetch-wrapper change only. AC7 NOT engaged. PR6 NOT engaged.
+
+**Rollback path:** `git revert <commit-hash>` of the migration commit + `git push origin main`. Restores prior broken-on-auth state on the three pages — no further regression possible since prior state was already broken.
+
+**Verification step (founder-performable):**
+```
+Per page (signed in to sagereasoning.com): trigger /api/reason call (page-mount on /private-mentor; send any message on /mentor-hub; Stoic Check on /ops-hub); confirm 200 in DevTools Network tab.
+```
+Expected (verified live this session): `/private-mentor` 200; `/mentor-hub` 200 + structured mentor reply; `/ops-hub` 200 + full translation-sandwich-v1 response with Layer 1 (Sonnet, 18,703 ms) + Layer 3 (Sonnet, 15,851 ms) calls.
+
+**Open questions:**
+- Item I sub-items (ii) + (iii) + (iv) + (v) + new (vi) remain open — see /operations/handoffs/founder/2026-05-08-NEXT-SESSION-PROMPT.md Item I; details by sub-item there.
+- `value_assessment.identified_value_errors` predecessor null observation: response on /ops-hub this session showed `value_assessment.value_error` (singular) populated; the `identified_value_errors` field is absent in v1 schema. Either renamed in late-M1 work or predecessor's null was on a different fixture. Disposition: needs Layer 2 module audit (Item B Q4 #4). Revisit at Item B election.
+- L3 latency observation this session: 15,851 ms — within Q4 watch threshold (20,000 ms; flag at 25,000 ms). Q4 unchanged.
+
+**Rules served:** R0, R7, R8a, R8c. NOT engaged: AC4, AC5, AC7, AC8, PR3, PR4, PR6, R10, KG1–KG7.
+
+**Status:** Adopted. Cross-references: `D-M1-CP6-CUTOVER-2026-05-08` (predecessor — M1 arc closure; Item I bundle context), `/operations/handoffs/founder/2026-05-08-M1-CP6-post-audit-close.md` (the close that surfaced Item I), `/operations/handoffs/founder/2026-05-08-NEXT-SESSION-PROMPT.md` (open-agenda prompt; updated this session), `/operations/handoffs/founder/2026-05-09-item-I-i-authfetch-migration-close.md` (this session's close), `/website/src/lib/auth-fetch.ts` (the helper), `/website/src/app/admin/test-reason/page.tsx` lines 11–14 (the comment block that documented this gap pre-fix).
+
+---
