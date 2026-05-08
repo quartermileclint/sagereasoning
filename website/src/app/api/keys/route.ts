@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const { data: keys, error } = await supabaseAdmin
       .from('api_keys')
       .select('id, label, tier, is_active, suspended_reason, monthly_limit, daily_limit, max_chain_iterations, created_at')
-      .eq('user_id', auth.user.id)
+      .eq('owner_user_id', auth.user.id)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     const { count } = await supabaseAdmin
       .from('api_keys')
       .select('id', { count: 'exact', head: true })
-      .eq('user_id', auth.user.id)
+      .eq('owner_user_id', auth.user.id)
       .eq('is_active', true)
 
     if ((count || 0) >= 5) {
@@ -110,12 +110,17 @@ export async function POST(request: NextRequest) {
     const rawKey = `sr_live_${randomBytes(16).toString('hex')}`
     const keyHash = createHash('sha256').update(rawKey).digest('hex')
 
-    // Store only the hash
+    // Store only the hash.
+    // 2026-05-08 fix: schema requires `key_prefix` (NOT NULL) per api/api-keys-schema.sql
+    // line 21–22 — populate with first 14 chars of raw key (e.g. "sr_live_a1b2c3").
+    // Same-session column-name fix: user_id → owner_user_id across this file (replace_all)
+    // per schema line 27. Pre-existing bug; endpoint never inserted a row prior.
     const { data: newKey, error } = await supabaseAdmin
       .from('api_keys')
       .insert({
-        user_id: auth.user.id,
+        owner_user_id: auth.user.id,
         key_hash: keyHash,
+        key_prefix: rawKey.slice(0, 14),
         label: label.trim(),
         tier: 'free',
         is_active: true,
@@ -172,9 +177,9 @@ export async function DELETE(request: NextRequest) {
     // Verify ownership
     const { data: key } = await supabaseAdmin
       .from('api_keys')
-      .select('id, user_id')
+      .select('id, owner_user_id')
       .eq('id', key_id)
-      .eq('user_id', auth.user.id)
+      .eq('owner_user_id', auth.user.id)
       .single()
 
     if (!key) {
