@@ -116,7 +116,7 @@ export default function PrivateMentorPage() {
 
   const fetchProximityScore = async () => {
     try {
-      const res = await fetch('/api/reason', {
+      const res = await authFetch('/api/reason', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ input: 'Current reasoning state assessment', depth: 'quick' }),

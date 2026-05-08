@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { authFetch } from '@/lib/auth-fetch'
 
 export default function OpsHub() {
   const [currentView, setCurrentView] = useState('dashboard')
@@ -42,7 +43,7 @@ export default function OpsHub() {
     setStoicResult(null)
 
     try {
-      const res = await fetch('/api/reason', {
+      const res = await authFetch('/api/reason', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ input: stoicInput, depth: 'standard' }),
@@ -90,7 +91,7 @@ export default function OpsHub() {
 
     setAlertEvaluating(alertText)
     try {
-      const res = await fetch('/api/reason', {
+      const res = await authFetch('/api/reason', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ input: alertText, depth: 'quick' }),

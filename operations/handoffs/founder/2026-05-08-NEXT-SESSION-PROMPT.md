@@ -3,17 +3,17 @@
 **Stream:** founder.
 **Tier:** TBD at session-open per founder election from candidate items below.
 **Governing frame:** /adopted/standing-protocol-cache.md (operative reference).
-**Predecessor session close:** `/operations/handoffs/founder/2026-05-08-M1-CP6-close.md`.
-**Predecessor decision-log entry:** `D-M1-CP6-CUTOVER-2026-05-08` (M1 arc complete; Layer 3 module Live; eight open questions tracked; 2F architectural arc deferred per PR7).
+**Predecessor session close:** `/operations/handoffs/founder/2026-05-08-M1-CP6-post-audit-close.md` (extends `/operations/handoffs/founder/2026-05-08-M1-CP6-close.md` — the post-audit sub-session captured a consumer audit + `/api/keys` fix + Test 7 validation; 5 additional carry-forwards surfaced and bundled into Item I below).
+**Predecessor decision-log entry:** `D-M1-CP6-CUTOVER-2026-05-08` (M1 arc complete; Layer 3 module Live; eight original open questions tracked + 5 carry-forwards added at the post-audit sub-session; 2F architectural arc deferred per PR7).
 **Risk classification:** TBD per elected item.
 
 ## Why this session matters
 
-M1 arc closed. Translation-sandwich is Live on `/api/reason`. The project is in a known-good state — no immediate next-session is required. This prompt surfaces candidate work items so the founder can elect direction at session-open. The candidate items range from architectural (2F arc continuation) to operational (cost monitoring restoration) to governance (Q5 / PR8 promotion) to maintenance (post-cutover watch deep-dive) to project-level (M2 scoping). The founder may also elect to **stabilise and pause** — no work required.
+M1 arc closed. Translation-sandwich is Live on `/api/reason`. The project is in a known-good state — no immediate next-session is required. This prompt surfaces candidate work items so the founder can elect direction at session-open. The candidate items range from architectural (2F arc continuation) to operational (cost monitoring restoration) to governance (Q5 / PR8 promotion) to maintenance (post-cutover watch deep-dive) to hygiene (post-cutover audit + auth-path restoration — Item I, added at the M1-CP6 post-audit sub-session) to project-level (M2 scoping). The founder may also elect to **stabilise and pause** — no work required.
 
 ## Pre-conditions
 
-1. **All M1-CP6 commits pushed.** Vercel green; production behaviour stable on the new translation-sandwich-v1 schema. Verify before session-open via the Independent verification block in `/operations/handoffs/founder/2026-05-08-M1-CP6-close.md` §"Founder Verification (Between Sessions)" Step B.
+1. **All M1-CP6 commits pushed (cutover commit + `/api/keys` fix commit + governance bundle).** Vercel green; production behaviour stable on the new translation-sandwich-v1 schema. Verify before session-open via the Independent verification block in `/operations/handoffs/founder/2026-05-08-M1-CP6-post-audit-close.md` §"Founder Verification (Between Sessions)" Step B.
 2. **M1 arc closure acknowledged.** No outstanding work items from M1 are blocking the next session — eight open questions are watch items, not blockers.
 3. **2F clarifying questions pre-considered (if 2F is elected).** If the founder elects 2F arc continuation, the four open clarifying questions captured in `D-M1-CP6-CUTOVER-2026-05-08` deferred-decision section need answers at session-open: (i) Opus model version; (ii) replace or augment Layer 3; (iii) Component A scoring scope vs R6c; (iv) raw-data scope. Founder may pre-think; not all four must be answered to begin scoping.
 
@@ -22,7 +22,7 @@ M1 arc closed. Translation-sandwich is Live on `/api/reason`. The project is in 
 Read in order:
 
 1. `/adopted/standing-protocol-cache.md` (~3 min — confirms tier, model selection, risk class, signals).
-2. `/operations/handoffs/founder/2026-05-08-M1-CP6-close.md` (~5 min — predecessor close; status changes; eight open questions; candidate items).
+2. `/operations/handoffs/founder/2026-05-08-M1-CP6-post-audit-close.md` (~5 min — most recent predecessor close; consumer audit findings; `/api/keys` fix; 5 new carry-forwards bundled in Item I) AND `/operations/handoffs/founder/2026-05-08-M1-CP6-close.md` (~5 min — M1-CP6 cutover proper; status changes; original eight open questions).
 3. **For 2F election only:** `D-M1-CP6-CUTOVER-2026-05-08` deferred-decision section (~3 min — captures founder's underlying intent + four clarifying questions + governance work + sequencing recommendation).
 4. **For post-cutover watch / M2 scoping / cost monitoring:** the relevant section of the predecessor close (Open Questions / Production state).
 
@@ -108,19 +108,41 @@ The founder elects ONE primary item below. Other items are deferred to subsequen
 
 ### Item H — Stabilise and pause
 
-**Scope:** no work this session. M1 arc closure is acknowledged; production state is stable; next-session is deferred to founder's next initiative. The candidate items above remain available; this prompt remains the entry point for whichever direction the founder elects next.
+**Scope:** no work this session. M1 arc closure is acknowledged; production state is stable; next-session is deferred to founder's next initiative. The candidate items above (and Item I below) remain available; this prompt remains the entry point for whichever direction the founder elects next.
+
+### Item I — Post-cutover hygiene + auth-path restoration
+
+**Scope:** bundles 5 carry-forwards surfaced during the M1-CP6 post-audit sub-session (consumer audit on 2026-05-08). All are pre-existing bugs (4) or transient browser issues (1) — not caused by the cutover, but visible in the post-cutover audit. May be elected as a single bundled item or split across sessions per founder discretion. In rough priority of user impact:
+
+(i) **`/private-mentor` + `/mentor-hub` + `/ops-hub` plain `fetch()` → `authFetch` migration.** Highest user impact — these three pages are user-facing reasoning surfaces that have been broken on auth (documented in `/admin/test-reason/page.tsx` lines 11–14). Three pages × ~5 LOC each = trivial diff. Standard tier (additive — restoring intended behaviour). Estimated 30–45 min including post-deploy verification on each page.
+
+(ii) **`/api/usage/route.ts` line 43 — `user_id` → `owner_user_id` column-name fix.** Same single-character fix as the `/api/keys` fix from the M1-CP6 post-audit sub-session. Pre-existing; same Elevated-tier discipline. Estimated 5 min code change + commit + verify.
+
+(iii) **`/api/keys` GET api_key_usage column-name mismatch (line 40).** Queries `monthly_total` + `daily_total` columns; actual columns on `api_key_usage` table per `api/api-keys-schema.sql` are `total_calls` + `guardrail_calls` + others. Affects usage display in list response only; does not affect key creation (already fixed). Standard or Elevated tier depending on scope. Estimated 15–30 min code review + fix.
+
+(iv) **Public agent-discovery + skill-wrapper documentation update.** `/.well-known/agent-card.json`, `/llms.txt`, `/openapi.yaml`, and `/public/wrappers/*.md` all describe the OLD bundled-depth response shape. Update to reflect translation-sandwich-v1 (new top-level fields: `version`, `extraction`, `assessment`, `prose`, `meta`, `disclaimer`). Reduces the R10 / 3c trade-off cost retroactively for any external agents reading the descriptors going forward. Standard tier (documentation only). Estimated 45–60 min.
+
+(v) **React hydration errors investigation.** `/private-mentor` + `/mentor-hub` + `/ops-hub` (and possibly `/admin/test-reason`) show React errors #418, #423, #425. Likely cause: service-worker cache + Vercel-rebuild interaction (the `[Sage] Journal service worker registered` log line accompanies the errors). Diagnostic step from M1-CP6 post-audit chat: hard refresh + service-worker unregister via dev tools → Application → Service Workers. Investigation tier: Standard (read-only diagnostic) → Elevated if a code fix is needed. Estimated 30 min investigation; fix scope TBD (could be additive — skip the service worker for affected pages — or no-fix and document the workflow for users encountering the issue post-deploy).
+
+**Risk class:** Standard for items (i), (iv), (v); Elevated for items (ii) and (iii) — both touch existing user-facing functionality. Critical Change Protocol NOT engaged for any sub-item.
+
+**Estimated total:** 2–4 hours if all done in one session. Could be split across two sessions: e.g., session 1 = items (i) + (ii) + (iii) (auth-path restoration + Elevated hygiene; user-facing restoration); session 2 = items (iv) + (v) (documentation + investigation).
+
+**Pre-work founder may bring:** any preference on scope (all-in-one vs split); any preference on which sub-item is highest priority (default sequencing above is rough user-impact-priority).
 
 ## Part C — Anticipated session shape
 
-| Phase | Item A | Item B | Item C | Item D | Item E | Item F | Item G |
-|---|---|---|---|---|---|---|---|
-| Cache + predecessor close read | 10 min | 10 min | 10 min | 10 min | 10 min | 10 min | 10 min |
-| Founder election + framing | 5–10 min | 5 min | 5–10 min | 5 min | 5 min | 5 min | 5 min |
-| Substantive work | 2–3 hr | 1.5–3 hr | 1 hr | 20–40 min | 15 min | 15 min | 30–45 min |
-| Decision-log + close (lean) | 30 min | 20–30 min | 30 min | 20–30 min | 20 min | 20 min | 20–30 min |
-| **Total** | **~3–4 hr** | **~2–4 hr** | **~1.5–2 hr** | **~1 hr** | **~50 min** | **~50 min** | **~1–1.5 hr** |
+| Phase | Item A | Item B | Item C | Item D | Item E | Item F | Item G | Item I |
+|---|---|---|---|---|---|---|---|---|
+| Cache + predecessor close read | 10 min | 10 min | 10 min | 10 min | 10 min | 10 min | 10 min | 10 min |
+| Founder election + framing | 5–10 min | 5 min | 5–10 min | 5 min | 5 min | 5 min | 5 min | 5–10 min |
+| Substantive work | 2–3 hr | 1.5–3 hr | 1 hr | 20–40 min | 15 min | 15 min | 30–45 min | 2–4 hr |
+| Decision-log + close (lean) | 30 min | 20–30 min | 30 min | 20–30 min | 20 min | 20 min | 20–30 min | 30 min |
+| **Total** | **~3–4 hr** | **~2–4 hr** | **~1.5–2 hr** | **~1 hr** | **~50 min** | **~50 min** | **~1–1.5 hr** | **~3–5 hr** |
 
 For Item H (stabilise + pause): no session.
+
+For Item I split (sub-items (i)+(ii)+(iii) in one session, (iv)+(v) in another): each split session ~1.5–3 hr.
 
 ## Rollback path
 
@@ -132,16 +154,19 @@ Per item:
 - Item D (cost monitoring): Standard rollback — `git revert` of the wiring commit; no user-facing impact.
 - Items E + F + G: documentation-only; `git revert` reverses cleanly.
 - Item H: N/A.
+- Item I per sub-item: (i) `git revert` of authFetch migration commits — restores broken auth state (no further regression possible — pages were already broken); (ii) + (iii) `git revert` of column-name fix commits — restores broken state on those endpoints; (iv) `git revert` of docs update — restores docs to old shape; (v) read-only investigation — no rollback. All Standard or Elevated; no Critical-tier rollback discipline needed.
 
 ## Forecast
 
 **Most-likely paths:**
 
-- **Item B (post-cutover watch)** lands first — observing live traffic against the eight open questions provides empirical data informing whether Q3 closes naturally or escalates, whether Q4 latency creep continues, whether F4 generalises beyond the fixture, etc. Cheapest first session post-arc-close; produces evidence for subsequent session prioritisation.
+- **Item I sub-item (i) (auth-path restoration on `/private-mentor` + `/mentor-hub` + `/ops-hub`)** is the most user-impacting carry-forward — restoring these three pages to working auth state means human-facing reasoning surfaces function for end users. Trivial diff; quick win. Could be elected first to maximise immediate user value.
+- **Item B (post-cutover watch)** is the cheapest first session — read-only analysis against live traffic; produces evidence informing whether Q3 / Q4 / F4 close naturally or escalate.
+- **Item D (cost monitoring restoration)** is hygiene; pairs well with Item B (observing post-cutover behaviour benefits from cost observability) or with Item I (both are post-cutover hygiene; could be done in the same session).
+- **Item I full bundle** consolidates the 5 audit-surfaced carry-forwards into one focused session (~3–5 hr) or two split sessions (~1.5–3 hr each). Practical for capturing all known pre-existing bugs in a single push.
 - **Item A (2F arc)** is the most ambitious and most aligned with founder's M1-CP6 brainstorm. Founder elects when ready (may want to sit with the cutover for some time first).
-- **Item D (cost monitoring restoration)** is hygiene; pairs well with Item B (observing post-cutover behaviour benefits from cost observability).
 
-**Recommendation (not prescription):** Item B first to gather post-cutover evidence + observe behaviour against open questions; Item D as a parallel hygiene task; then Item A 2F arc when founder is ready.
+**Recommendation (not prescription):** Item I sub-item (i) first as quickest user-value-restoration (auth fix on the three pages — ~30–45 min); Item B + Item D bundled as a single observation+hygiene session; remaining Item I sub-items (ii)–(v) folded opportunistically; Item A 2F arc when founder is ready. Items E + F + G can be folded opportunistically into other sessions when their relevant surfaces are touched.
 
 The founder elects. The above is information for the choice, not a prescription on it.
 

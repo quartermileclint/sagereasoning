@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface Contact {
   name: string;
@@ -120,7 +121,7 @@ export default function MentorHub() {
 
     try {
       // Call /api/reason
-      const res = await fetch('/api/reason', {
+      const res = await authFetch('/api/reason', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ input: text, depth: 'standard', category: selectedCategory }),
@@ -165,7 +166,7 @@ export default function MentorHub() {
       }
 
       // Update proximity
-      const proxRes = await fetch('/api/reason', {
+      const proxRes = await authFetch('/api/reason', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ input: text, depth: 'quick' }),
