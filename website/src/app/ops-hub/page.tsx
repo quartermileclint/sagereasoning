@@ -65,7 +65,7 @@ export default function OpsHub() {
     setScoringResult(null)
 
     try {
-      const res = await fetch('/api/score-decision', {
+      const res = await authFetch('/api/score-decision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

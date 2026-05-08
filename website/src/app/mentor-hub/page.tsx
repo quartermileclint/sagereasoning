@@ -149,7 +149,7 @@ export default function MentorHub() {
         const fullThread = [...threads[activeContact], newMsg, resMsg];
         const threadText = fullThread.map((m) => `${m.dir === 'sent' ? 'You' : contacts[activeContact].name}: ${m.text}`).join('\n');
 
-        const scoreRes = await fetch('/api/score-conversation', {
+        const scoreRes = await authFetch('/api/score-conversation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ input: threadText }),
