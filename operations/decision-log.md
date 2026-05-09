@@ -3576,3 +3576,36 @@ Expected (verified live this session): `/private-mentor` 200; `/mentor-hub` 200 
 **Status:** Adopted. Cross-references: `D-M1-CP6-CUTOVER-2026-05-08` (predecessor — M1 arc closure; Item I bundle context), `/operations/handoffs/founder/2026-05-08-M1-CP6-post-audit-close.md` (the close that surfaced Item I), `/operations/handoffs/founder/2026-05-08-NEXT-SESSION-PROMPT.md` (open-agenda prompt; updated this session), `/operations/handoffs/founder/2026-05-09-item-I-i-authfetch-migration-close.md` (this session's close), `/website/src/lib/auth-fetch.ts` (the helper), `/website/src/app/admin/test-reason/page.tsx` lines 11–14 (the comment block that documented this gap pre-fix).
 
 ---
+
+## 2026-05-09 — D-ITEM-I-vi-AUTHFETCH-COMPANION-2026-05-09
+
+**Decision:** Sub-session Item I (vi) — companion-perimeter sweep. Migrated `/api/score-conversation` (mentor-hub line 152) + `/api/score-decision` (ops-hub line 68) call sites from plain `fetch()` to `authFetch()`. Two single-token call-site renames + zero import additions across two files (`authFetch` already imported on line 4 of both files from D-ITEM-I-i-AUTHFETCH-MIGRATION-2026-05-09). Item I sub-item (vi) of six Closed; (ii)+(iii)+(iv)+(v) remain open; new sub-item (vii) added to next-session prompt for the pre-existing payload-shape mismatch on both call sites surfaced during this session's verification.
+
+**Reasoning:** Direct continuation of D-ITEM-I-i-AUTHFETCH-MIGRATION-2026-05-09 — same migration pattern; same R20a-perimeter consistency goal (every R20a perimeter call from the three reasoning pages now sends Authorization). Both endpoints confirmed auth-required via Step 1 read of route.ts files (`requireAuth(request)` at /api/score-conversation route.ts:80 + /api/score-decision route.ts:88). Founder approved Standard-tier diff plan in chat per project preferences (sign-in-affecting change requires explicit approval); both edits applied; founder verified post-deploy with status 400 on both call sites — past auth-check (would have been 401 if migration failed), tripping on body-validation only.
+
+**Files touched:**
+- `/website/src/app/mentor-hub/page.tsx` — line 152 fetch → authFetch (no import change; authFetch already imported on line 4 from sub-item (i)).
+- `/website/src/app/ops-hub/page.tsx` — line 68 fetch → authFetch (no import change; authFetch already imported on line 4 from sub-item (i)). Line drift from prompt: prompt cited line 67; actual line 68 (sub-item (i) import addition shifted file by one line).
+- `/operations/decision-log.md` — this entry appended.
+- `/operations/handoffs/founder/2026-05-09-item-I-vi-authfetch-companion-close.md` — session close (this session).
+- `/operations/handoffs/founder/2026-05-08-NEXT-SESSION-PROMPT.md` — modified in place (7 edits) to mark Item I (vi) Closed + add new Item I (vii) for payload-shape bugs surfaced this session + amend Risk class / Estimated total / Pre-work / Forecast / Recommendation.
+
+**Risk classification:** Standard under 0d-ii. Additive client-side fetch-wrapper change; restoring intended behaviour on already-broken code path; no auth/encryption/perimeter/deletion surface modified. AC7 NOT engaged. PR6 NOT engaged.
+
+**Rollback path:** `git revert <commit-hash>` of the migration commit + `git push origin main`. Restores prior broken-on-auth state on the two call sites — no further regression possible since prior state was already broken (now demonstrably broken on a different layer too — payload-shape; see new sub-item (vii)).
+
+**Verification step (founder-performable):**
+```
+Per page (signed in to sagereasoning.com): trigger the call site (send a message in companion mode on /mentor-hub for /api/score-conversation; on /ops-hub navigate to Morning Briefing → Decision Scoring, fill two options, click Score Decisions for /api/score-decision); confirm status 400 in DevTools Network tab (NOT 401 — 401 would mean auth migration didn't take).
+```
+Expected (verified live this session): `/api/score-conversation` 400 with body `"conversation is required (min 20 characters)..."`; `/api/score-decision` 400 with body `"decision is required"`. Both 400s confirm auth-check passed and the request reached body-validation — auth migration verified working. Both 400s expose pre-existing payload-shape mismatches (page sends `{ input }` / `{ option1, option2 }`; routes expect `{ conversation }` / `{ decision, options: [...] }`) — captured as new sub-item (vii) for a future session.
+
+**Open questions:**
+- Item I sub-items (ii) + (iii) + (iv) + (v) remain open from the original Item I bundle; new sub-item (vii) added this session for the payload-shape mismatch on both call sites this session migrated. See /operations/handoffs/founder/2026-05-08-NEXT-SESSION-PROMPT.md Item I.
+- Sub-item (vii) requires a small design decision for ops-hub's `/api/score-decision` payload fix: the route requires a `decision` string field, but the page UI captures only two option text-boxes. Three options sketched in the next-session prompt: (a) synthesize placeholder decision from option texts; (b) add a third UI text-box; (c) change the API contract. Founder elects at (vii) session-open.
+
+**Rules served:** R0, R7, R8a, R8c. NOT engaged: AC4, AC5, AC7, AC8, PR3, PR4, PR6, R10, KG1–KG7.
+
+**Status:** Adopted. Cross-references: `D-ITEM-I-i-AUTHFETCH-MIGRATION-2026-05-09` (direct predecessor — same migration pattern; verified live earlier this day on three pages), `/operations/handoffs/founder/2026-05-09-item-I-i-authfetch-migration-close.md` (predecessor close), `/operations/handoffs/founder/2026-05-09-item-I-vi-authfetch-companion-close.md` (this session's close), `/operations/handoffs/founder/2026-05-08-NEXT-SESSION-PROMPT.md` (open-agenda prompt; updated this session), `/website/src/lib/auth-fetch.ts` (the helper), `/website/src/app/api/score-conversation/route.ts` lines 80 + 85 (auth check + body-validation that produced the verified 400), `/website/src/app/api/score-decision/route.ts` lines 88 + 93 (auth check + body-validation that produced the verified 400).
+
+---
