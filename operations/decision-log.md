@@ -3691,3 +3691,46 @@ Hard refresh (Ctrl-Shift-R / Cmd-Shift-R) if surfaces still show old behaviour a
 **Status:** Adopted. Cross-references: `D-ITEM-I-ii-iii-vii-COLUMN-AND-PAYLOAD-FIXES-2026-05-09` (direct predecessor — sub-item (vii) closure surfaced sub-item (viii) by exposing real-traffic display issues), `D-M1-CP6-CUTOVER-2026-05-08` (parent — translation-sandwich-v1 shape introduced; this hygiene closes the consumer-side gap that the cutover left open), `/operations/handoffs/founder/2026-05-09-item-I-ii-iii-vii-close.md` (predecessor close), `/operations/handoffs/founder/2026-05-09-item-I-viii-consumer-page-adaptation-close.md` (this session's close), `/operations/handoffs/founder/2026-05-08-NEXT-SESSION-PROMPT.md` (open-agenda prompt; updated this session to mark (viii) closed), `/website/src/lib/translation-sandwich/parallel-run.ts` (runSandwich return shape — lines 480-491 happy path, 363-389 minimal fallback), `/website/src/lib/translation-sandwich/layer3-prose.ts` (Layer3Prose interface — lines 79-106), `/website/src/lib/response-envelope.ts` (buildEnvelope shape used by /api/score-decision), `/website/src/app/api/reason/route.ts` (cutover consumer; response branches at lines 291-340), `/website/src/app/api/score-decision/route.ts` (response shape lines 228-238 + envelope wrap lines 253-263).
 
 ---
+
+## 2026-05-09 — D-SUBSTRATE-BUILD-PLAN-ADOPTED-2026-05-09
+
+**Decision:** Adopt the Stoic Agent Substrate Build Plan v1.2 in full per founder direction in Phase A of Build Session 1. The plan governs Sessions 1 through 32 of the substrate v1 build, plus the inserted Session 17.5 (B1 licensing + final legal scaffolding) for a v1 total of 33 sessions.
+
+**Reasoning:** v1.0 was drafted in the predecessor session as recommendation-only, session-shaped, batched-decision form. In Phase A of this session, the founder rejected §4.4 (Apache 2.0 + custom Layer-2-API addendum) "at this time", prompting v1.1 (PR7 deferral with Session-11 deadline). On further consultation the v1.1 deadline was found unnecessarily early — Session 11 governance files only need a placeholder licence string until just before public release. v1.2 corrected the deadline to "before Session 18" and consolidated all licence + legal scaffolding (B1 licensing, B6 trademark filings, governance file string population, lawyer engagement) into a new Session 17.5 immediately before public release. v1.2 establishes Sessions 1–17 as an explicit private-build phase: the substrate is invisible to anyone outside the founder + AI loop until Session 18. Founder approved v1.2 in full at session close.
+
+**Files touched:**
+- `/drafts/stoic-agent-substrate-build-plan.md` — three in-session revisions (v1.0 → v1.1 → v1.2); current state v1.2 approved. Header header rev-history block, §1, §2, §4.4, §4.8, Stream A Session 1, Stream A (removed Session 2.5 placeholder), Stream C header, Stream C Session 11 (downgraded to Standard), Stream C Session 17 (notes private-repo), Stream C Session 17.5 (NEW), Stream C Session 18 (pre-conditions revised), §6 critical path, §7 rework-prevention, §9 totals.
+- `/operations/decision-log.md` — this entry appended.
+- `/operations/handoffs/founder/2026-05-09-substrate-build-plan-v1.2-approval-close.md` — session close (this session).
+- `/operations/handoffs/founder/2026-05-09-substrate-build-session-1-NEXT-SESSION-PROMPT.md` — re-written in place to reflect v1.2 (Phase A removed; Phase B drafts five ADRs — H1, A6, A5, H3, H5; B1 deferred to Session 17.5).
+
+**Risk classification:** Standard under 0d-ii. Drafts under `/drafts/`; no production touch; no `/adopted/` change; no manifest amendment. AC7 not engaged. PR6 not engaged. The build plan, when execution begins, includes Critical-tier sessions (Stream B, parts of Stream E, and Session 16 / 18); each engages 0c-ii at execution time per its session card.
+
+**Rollback path:** All revisions in `/drafts/` and `/operations/handoffs/`. Revert via `git revert` of the commit(s) or by editing the plan back to v1.0 / v1.1 (full revision history retained at the top of the plan file).
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+head -20 drafts/stoic-agent-substrate-build-plan.md
+```
+Expected: header reads `**Status:** Draft v1.2`; revision-history block shows v1.0, v1.1, v1.2 entries.
+
+**Founder positions on the ten §4 decisions (all locked at session close):**
+1. Approve plan: approved (as v1.2).
+2. Confirm v1 scope per §3: approved as written.
+3. Confirm operational model per §2: approved as written (incl. v1.2 private-build-phase amendment to rework-prevention list).
+4. Licence direction: deferred to Session 17.5 per v1.2 §4.4 (B1 licensing ADR + LICENSE file + governance string population + B6 trademark filings + lawyer engagement consolidated).
+5. Migration path (six-month coexist then deprecate): approved as written.
+6. R20a perimeter handover (belt-and-braces): approved as written.
+7. Repo structure (monorepo for v1): approved as written.
+8. External-engagement budget: approved as v1.2 (lawyer engagement consolidated to Session 17.5 lead-up; cryptographer parallel from Session 5; philosopher deferred to v1 mid-point or v2).
+9. Pilot endpoint (`/api/reason` quick depth): approved as written.
+10. Beta cohort (closed invitation, 5–10 developers): approved as written.
+
+**Open questions:** None at planning level. Open questions surface inside the build itself; each session close contributes to a rolling register. One architectural risk recorded on the §4.4 record for explicit revisit: copyleft licence direction may require code-separation patterns; v1.2 default is permissive-architecturally; founder may elect a single 30-min architectural-direction lawyer consult before Session 12 if they want to keep copyleft live as an option.
+
+**Rules served:** R0 (oikeiosis audit trail — plan adoption recorded), 0a (status vocabulary preserved — "Designed" for plan; substrate components remain "Scoped" until execution), 0b (session continuity — close + next-session prompt produced), 0c (verification framework — founder reads plan + close directly per the verification table in the close), 0d-ii (Standard classification recorded), 0f (decision-log entry concurrent with file production), PR1 (single-endpoint proof discipline preserved at execution time per Stream B sessions), PR4 (model selection — N/A this session, no LLM calls), PR5 (knowledge-gap carry-forward — none triggered), PR6 (NOT engaged this session; flagged for downstream Critical sessions), PR7 (decision-not-made documented for §4.4: condition for revisit is Session 17 complete + lawyer engagement returned, OR founder elects to proceed without counsel), PR9 (stewardship — copyleft architectural-risk noted as accepted in exchange for legal-cost deferral).
+
+**Status:** Adopted. Cross-references: predecessor close `/operations/handoffs/founder/2026-05-09-substrate-build-plan-close.md` (the session that drafted v1.0); this session's close `/operations/handoffs/founder/2026-05-09-substrate-build-plan-v1.2-approval-close.md`; build plan `/drafts/stoic-agent-substrate-build-plan.md` v1.2; next-session prompt `/operations/handoffs/founder/2026-05-09-substrate-build-session-1-NEXT-SESSION-PROMPT.md` (re-written this session for Phase B execution).
+
+---
