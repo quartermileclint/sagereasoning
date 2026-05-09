@@ -129,7 +129,27 @@ export default function MentorHub() {
 
       if (!res.ok) throw new Error('API error');
       const data = await res.json();
-      const reasoning = data.result || data.response || 'I acknowledge your message.';
+      // 2026-05-09 fix (sub-item viii): /api/reason now returns translation-sandwich-v1
+      // shape per ADR-004 §2.1: { version, extraction, assessment, prose: {
+      // philosophical_reflection, improvement_guidance, summary, ... }, meta, disclaimer }.
+      // OLD shape's `data.result` / `data.response` no longer exist post-M1-CP6 cutover,
+      // so the placeholder string ("I acknowledge your message.") was always shown.
+      // Extract from data.prose.* with safe fallbacks. Handle distress-redirect (200
+      // status with { distress_detected: true, redirect_message }) and Tier-1
+      // force-clarification (200 status with { clarification_required: true,
+      // clarification: { question_text, ... }, continuation_token }) explicitly so the
+      // user sees the appropriate response instead of the placeholder.
+      let reasoning: string;
+      if (data.distress_detected === true && typeof data.redirect_message === 'string') {
+        reasoning = data.redirect_message;
+      } else if (data.clarification_required === true && data.clarification?.question_text) {
+        reasoning = String(data.clarification.question_text);
+      } else {
+        reasoning =
+          (typeof data.prose?.philosophical_reflection === 'string' && data.prose.philosophical_reflection) ||
+          (typeof data.prose?.summary === 'string' && data.prose.summary) ||
+          'I acknowledge your message.';
+      }
 
       // Add mentor response
       const resMsg: Message = {

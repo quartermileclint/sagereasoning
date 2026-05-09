@@ -379,18 +379,67 @@ export default function OpsHub() {
                 </div>
                 {stoicResult && (
                   <div style={styles.resultBox}>
-                    {(stoicResult as Record<string, unknown>).error ? (
-                      <div style={styles.errorText}>{String((stoicResult as Record<string, unknown>).error)}</div>
-                    ) : (
-                      <div>
-                        <div style={styles.resultContent}>{String((stoicResult as Record<string, unknown>).reasoning || JSON.stringify(stoicResult.result || stoicResult, null, 2))}</div>
-                        {Boolean((stoicResult as Record<string, unknown>).proximity_rating) && (
-                          <div style={styles.proximityRating}>
-                            Proximity to Sage Reasoning: {String((stoicResult as Record<string, unknown>).proximity_rating)}%
+                    {(() => {
+                      // 2026-05-09 fix (sub-item viii): /api/reason now returns translation-sandwich-v1
+                      // shape per ADR-004 §2.1: { version, extraction, assessment: { katorthoma_proximity, ... },
+                      // prose: { philosophical_reflection, improvement_guidance, summary, ... }, meta, disclaimer }.
+                      // OLD shape's `reasoning` and numeric `proximity_rating` no longer exist; pre-fix,
+                      // the page fell through to JSON.stringify (raw JSON dump). Per R6c proximity is
+                      // qualitative not numeric; render the level as text. Handle distress-redirect,
+                      // Tier-1 clarification, and minimal-fallback shapes explicitly.
+                      const r = stoicResult as Record<string, any>;
+                      if (r.error) {
+                        return <div style={styles.errorText}>{String(r.error)}</div>;
+                      }
+                      if (r.distress_detected === true && typeof r.redirect_message === 'string') {
+                        return <div style={styles.resultContent}>{r.redirect_message}</div>;
+                      }
+                      if (r.clarification_required === true && r.clarification?.question_text) {
+                        return (
+                          <div>
+                            <div style={styles.resultContent}><strong>Clarification needed:</strong> {String(r.clarification.question_text)}</div>
+                            <div style={{ ...styles.proximityRating, fontStyle: 'italic' }}>
+                              The reasoning engine needs more context to evaluate this input.
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    )}
+                        );
+                      }
+                      const prose = r.prose as Record<string, any> | undefined;
+                      const assessment = r.assessment as Record<string, any> | undefined;
+                      const meta = r.meta as Record<string, any> | undefined;
+                      const isFallback = meta?.fallback === true;
+                      const reflection = typeof prose?.philosophical_reflection === 'string' ? prose.philosophical_reflection : null;
+                      const guidance = typeof prose?.improvement_guidance === 'string' ? prose.improvement_guidance : null;
+                      const summary = typeof prose?.summary === 'string' ? prose.summary : null;
+                      const proximity = typeof assessment?.katorthoma_proximity === 'string' ? assessment.katorthoma_proximity : null;
+                      if (!reflection && !guidance && !summary) {
+                        // Defensive: shape didn't match any known case; show JSON so the issue is debuggable.
+                        return <div style={styles.resultContent}>{JSON.stringify(r, null, 2)}</div>;
+                      }
+                      return (
+                        <div>
+                          {isFallback && (
+                            <div style={{ ...styles.errorText, marginBottom: '8px', fontStyle: 'italic' }}>
+                              The reasoning engine could not complete a full evaluation; deterministic guidance shown.
+                            </div>
+                          )}
+                          {reflection && (
+                            <div style={{ ...styles.resultContent, marginBottom: '10px' }}>{reflection}</div>
+                          )}
+                          {guidance && (
+                            <div style={{ ...styles.resultContent, marginBottom: '10px' }}>{guidance}</div>
+                          )}
+                          {summary && (
+                            <div style={{ ...styles.resultContent, fontStyle: 'italic', color: '#6a7192' }}>{summary}</div>
+                          )}
+                          {proximity && (
+                            <div style={styles.proximityRating}>
+                              Proximity to virtue: {proximity.replace(/_/g, ' ')}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -551,13 +600,31 @@ export default function OpsHub() {
                       </div>
                       {Boolean(alertResults[alert.message]) && (
                         <div style={styles.resultBox}>
-                          {(alertResults[alert.message] as Record<string, unknown>)?.error ? (
-                            <div style={styles.errorText}>{String((alertResults[alert.message] as Record<string, unknown>).error)}</div>
-                          ) : (
-                            <div style={styles.resultContent}>
-                              {String((alertResults[alert.message] as Record<string, unknown>)?.reasoning || JSON.stringify(alertResults[alert.message], null, 2))}
-                            </div>
-                          )}
+                          {(() => {
+                            // 2026-05-09 fix (sub-item viii): /api/reason now returns translation-sandwich-v1
+                            // shape per ADR-004 §2.1. OLD `reasoning` field no longer exists post-cutover;
+                            // pre-fix, the page fell through to JSON.stringify (raw JSON dump). Alert
+                            // evaluations call /api/reason with depth: 'quick', so prose.summary is the
+                            // natural fit (one-sentence verdict). Fall back to philosophical_reflection
+                            // if summary is missing. Handle distress-redirect + Tier-1 clarification
+                            // explicitly.
+                            const r = alertResults[alert.message] as Record<string, any>;
+                            if (r?.error) return <div style={styles.errorText}>{String(r.error)}</div>;
+                            if (r?.distress_detected === true && typeof r.redirect_message === 'string') {
+                              return <div style={styles.resultContent}>{r.redirect_message}</div>;
+                            }
+                            if (r?.clarification_required === true && r.clarification?.question_text) {
+                              return <div style={styles.resultContent}><strong>Clarification needed:</strong> {String(r.clarification.question_text)}</div>;
+                            }
+                            const prose = r?.prose as Record<string, any> | undefined;
+                            const summary = typeof prose?.summary === 'string' ? prose.summary : null;
+                            const reflection = typeof prose?.philosophical_reflection === 'string' ? prose.philosophical_reflection : null;
+                            const text = summary || reflection;
+                            if (!text) {
+                              return <div style={styles.resultContent}>{JSON.stringify(r, null, 2)}</div>;
+                            }
+                            return <div style={styles.resultContent}>{text}</div>;
+                          })()}
                         </div>
                       )}
                     </div>
@@ -632,18 +699,108 @@ export default function OpsHub() {
 
                 {scoringResult && (
                   <div style={styles.resultBox}>
-                    {scoringResult.error ? (
-                      <div style={styles.errorText}>{String(scoringResult.error)}</div>
-                    ) : (
-                      <div>
-                        <div style={styles.resultContent}>{String(scoringResult.comparison || JSON.stringify(scoringResult.result || scoringResult, null, 2))}</div>
-                        {Boolean(scoringResult.recommendation) && (
-                          <div style={styles.recommendation}>
-                            <strong>Recommendation:</strong> {String(scoringResult.recommendation)}
+                    {(() => {
+                      // 2026-05-09 fix (sub-item viii — presentable polish): /api/score-decision
+                      // returns the buildEnvelope shape: { result: { decision, options_scored:
+                      // [{option, katorthoma_proximity, passions_detected, is_kathekon,
+                      // kathekon_quality, stoic_insight}, ...], recommended, reasoning_receipt,
+                      // disclaimer, ... }, meta: { ... } }. Pre-fix, the page read
+                      // `scoringResult.comparison` (doesn't exist) and `scoringResult.recommendation`
+                      // (doesn't exist; the field is `result.recommended`), falling through to a raw
+                      // JSON dump. Polished display per founder's M1-CP6 sub-item-viii election:
+                      // ranked option cards with proximity badge + kathekon line + stoic_insight +
+                      // passions_detected chips, recommended option highlighted, reasoning_receipt
+                      // summary at bottom, disclaimer at bottom. Handle distress-redirect explicitly.
+                      const r = scoringResult as Record<string, any>;
+                      if (r.error) return <div style={styles.errorText}>{String(r.error)}</div>;
+                      if (r.distress_detected === true && typeof r.redirect_message === 'string') {
+                        return <div style={styles.resultContent}>{r.redirect_message}</div>;
+                      }
+                      const result = r.result as Record<string, any> | undefined;
+                      const optionsScored = (result?.options_scored as Array<Record<string, any>> | undefined) || [];
+                      const recommended = typeof result?.recommended === 'string' ? result.recommended : null;
+                      const reasoningReceipt = result?.reasoning_receipt;
+                      const disclaimer = typeof result?.disclaimer === 'string' ? result.disclaimer : null;
+                      if (optionsScored.length === 0) {
+                        return <div style={styles.resultContent}>{JSON.stringify(r, null, 2)}</div>;
+                      }
+                      return (
+                        <div>
+                          {recommended && (
+                            <div style={styles.recommendation}>
+                              <strong>Recommended:</strong> {recommended}
+                            </div>
+                          )}
+                          <div style={{ marginTop: '12px' }}>
+                            {optionsScored.map((opt, idx) => {
+                              const isRecommended = opt.option === recommended;
+                              const proximity = typeof opt.katorthoma_proximity === 'string' ? opt.katorthoma_proximity : 'unspecified';
+                              const isKathekon = opt.is_kathekon;
+                              const kathekonQuality = typeof opt.kathekon_quality === 'string' ? opt.kathekon_quality : null;
+                              const stoicInsight = typeof opt.stoic_insight === 'string' ? opt.stoic_insight : null;
+                              const passions = (opt.passions_detected as Array<Record<string, any>> | undefined) || [];
+                              return (
+                                <div
+                                  key={idx}
+                                  style={{
+                                    marginBottom: '12px',
+                                    padding: '12px',
+                                    backgroundColor: '#1d2233',
+                                    borderRadius: '6px',
+                                    borderLeft: isRecommended ? '3px solid #4daa6a' : '3px solid #282e44',
+                                  }}
+                                >
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '8px' }}>
+                                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#eef0f8', flex: 1 }}>
+                                      {isRecommended ? '★ ' : ''}{String(opt.option)}
+                                    </div>
+                                    <div style={{ fontSize: '10px', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#282e44', color: '#c9a24d', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                                      {proximity.replace(/_/g, ' ')}
+                                    </div>
+                                  </div>
+                                  <div style={{ fontSize: '11px', color: '#6a7192', marginBottom: '8px' }}>
+                                    {isKathekon === true ? 'Appropriate action' : isKathekon === false ? 'Not appropriate' : 'Appropriateness undetermined'}
+                                    {kathekonQuality && ` — quality: ${kathekonQuality}`}
+                                  </div>
+                                  {stoicInsight && (
+                                    <div style={{ ...styles.resultContent, marginBottom: '8px' }}>{stoicInsight}</div>
+                                  )}
+                                  {passions.length > 0 && (
+                                    <div style={{ fontSize: '11px', color: '#6a7192' }}>
+                                      <span style={{ fontWeight: 600 }}>Passions detected:</span>{' '}
+                                      {passions.map((p, pi) => {
+                                        const sub = typeof p?.sub_species === 'string' ? p.sub_species : 'unspecified';
+                                        const fj = typeof p?.false_judgement === 'string' ? p.false_judgement : '';
+                                        return (
+                                          <span key={pi} style={{ display: 'inline-block', marginRight: '6px', padding: '2px 6px', backgroundColor: '#282e44', borderRadius: '3px', fontSize: '10px', color: '#d0d4e2' }} title={fj}>
+                                            {sub}
+                                          </span>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
-                        )}
-                      </div>
-                    )}
+                          {Boolean(reasoningReceipt) && (
+                            <div style={{ marginTop: '12px', padding: '10px', backgroundColor: '#282e44', borderRadius: '6px', fontSize: '11px', color: '#6a7192' }}>
+                              <strong style={{ color: '#eef0f8' }}>Reasoning receipt:</strong>{' '}
+                              {typeof reasoningReceipt === 'string'
+                                ? reasoningReceipt
+                                : typeof (reasoningReceipt as Record<string, any>)?.summary === 'string'
+                                  ? (reasoningReceipt as Record<string, any>).summary
+                                  : typeof (reasoningReceipt as Record<string, any>)?.recommended_next === 'string'
+                                    ? (reasoningReceipt as Record<string, any>).recommended_next
+                                    : JSON.stringify(reasoningReceipt)}
+                            </div>
+                          )}
+                          {disclaimer && (
+                            <div style={{ marginTop: '8px', fontSize: '10px', color: '#4a5070', fontStyle: 'italic' }}>{disclaimer}</div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
