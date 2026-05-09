@@ -1,12 +1,17 @@
 # Stoic Agent Substrate — Build Plan (recommendation-only)
 
-**Status:** Draft — under founder review and approval.
-**Date:** 2026-05-09.
+**Status:** Draft v1.2 — under founder review and approval.
+**Date:** 2026-05-09 (twice revised in-session on §4.4 per founder direction).
 **Stream:** founder.
 **Tier:** governance.
 **Risk classification:** Standard under 0d-ii (drafts only; no production touch).
 **Supersedes:** `/drafts/stoic-agent-substrate-staging-plan.md` (the options-form draft preserved for reference).
 **Source materials:** predecessor close `2026-05-09-substrate-architecture-explore-close.md`; the five inbox files; the founder's open-source declaration; the staging-plan options-form draft.
+
+**Revision history:**
+- v1.0 (2026-05-09) — initial draft (recommendation-only, session-shaped, batched-decision form). B1 licensing recommended at Apache 2.0 + custom Layer-2-API addendum, drafted in Session 1.
+- v1.1 (2026-05-09) — §4.4 deferred under PR7 with hard deadline before Session 11. Found to be unnecessarily early; Session 11's governance files only need a licence-string placeholder until Session 18.
+- v1.2 (2026-05-09) — §4.4 deadline relaxed to "before Session 18 public release". Sessions 1–17 explicitly a **private-build phase**; the substrate is invisible to anyone outside the founder + AI loop until Session 18. All licence and legal scaffolding (B1 licensing, B6 trademark filings, governance file licence strings) consolidated into a single dedicated session (Session 17.5) immediately before public release. Lawyer engagement deferred to Session 17.5 lead-up. Session 11 (B7 governance) downgraded from Elevated to Standard risk because no trademark or licence work happens there. Critical path updated. v1 total session count remains 33 (the +1 is now Session 17.5 in Stream C, not Session 2.5 in Stream A).
 
 This plan is a single recommended path. No alternative options are presented inside the plan; where a decision is needed before Session 1, the recommendation is named in §4 and the founder approves or adjusts. After §4 decisions, Sessions 1 onward run with minimum founder mid-session input.
 
@@ -14,7 +19,9 @@ This plan is a single recommended path. No alternative options are presented ins
 
 ## 1. Executive summary
 
-**What this plan delivers:** v1 of the Stoic Agent Substrate — open-source Layers 1 and 3, authoritative Layer 2 with auth/signing/keys/metering, a published schema with documentation, decision-path mechanisms in evaluative mode, and a translation pattern wiki — across **32 packed sessions** estimated at **8–12 calendar months** at 4–6 sessions per month with calendar-parallel external engagements.
+**What this plan delivers:** v1 of the Stoic Agent Substrate — open-source Layers 1 and 3, authoritative Layer 2 with auth/signing/keys/metering, a published schema with documentation, decision-path mechanisms in evaluative mode, and a translation pattern wiki — across **33 packed sessions** estimated at **8–12 calendar months** at 4–6 sessions per month with calendar-parallel external engagements.
+
+**Private-build phase (v1.2):** Sessions 1–17 are explicitly private. The substrate is built end-to-end in a private repo with no external visibility. Session 17.5 is a dedicated legal-scaffolding session (B1 licensing, B6 trademark filings, governance file licence strings, lawyer engagement consolidated). Session 18 is the first public exposure — repo flips public, governance goes live, licence is in place. No legal work, lawyer engagement, or trademark filing happens before Session 17.5. This is a deliberate cost-and-risk deferral: legal effort is incurred only after the build proves itself.
 
 **What is deferred to v2:** credential infrastructure (F-cluster), other modes beyond evaluative (E5 prescriptive/configurable/combo), ecosystem offerings (G-cluster), and public engagement / standards formation (B8, H7). v2 is sketched at §8 and re-planned at v1 close.
 
@@ -42,6 +49,7 @@ This plan is a single recommended path. No alternative options are presented ins
 - Schema precedes validation. C1 schemas are stable before A4 validation surface is wired.
 - Design precedes execution. E5 mode-separation paper design lands before any E1/E2/E3 implementation.
 - Open-source readiness precedes publication. B3/B4 hardening lands before B7 governance goes live; B7 governance lands before public release.
+- **Private-build phase (Sessions 1–17).** v1.2 makes the build phase explicitly private. The substrate is invisible to anyone outside the founder + AI loop until Session 18. All legal scaffolding (B1 licensing, B6 trademark filings, lawyer engagement) is consolidated into Session 17.5 immediately before the public-release gate. This defers legal cost and risk until the build proves itself.
 - External validation precedes scale. Stage gates require external validation (developer beta in Stream C exit; external agent test in Stream E exit) before declaring stage complete.
 
 **Status vocabulary.** Implementation status (Scoped → Designed → Scaffolded → Wired → Verified → Live) for substrate components. Decision status (Adopted / Under review / Superseded) for ADRs and this plan. Never mixed.
@@ -92,7 +100,21 @@ The founder approves or adjusts each item below before Session 1 opens. After Se
 
 **Architectural signals (7):**
 
-4. **Licence direction.** Recommendation: **Apache 2.0 with a custom Layer-2-API addendum.** Apache 2.0 is permissive, well-understood, friendly to commercial adoption, and patent-grant-bearing. The custom addendum specifies that any system claiming to provide "SageReasoning Authoritative Layer 2" assessments must call the SageReasoning Layer 2 endpoint (or a successor licensed by SageReasoning); brand and trademark posture (B6) enforces this in parallel. Lawyer review at Session 2 confirms the addendum's enforceability. Adjust if you want pure permissive (no addendum), copyleft (AGPL), or dual-licence.
+4. **Licence direction.** Recommendation: **defer all licence and legal scaffolding to a single dedicated session (Session 17.5) immediately before public release.** The substrate is built end-to-end in a private repo from Session 1 through Session 17 — invisible to anyone outside the founder + AI loop. The licence question only needs to be resolved at the moment the repo flips public (Session 18). Deferring this entire question until Session 17.5 saves lawyer cost (engaged once, with the build evidence in hand), avoids prematurely committing to a direction the build might invalidate, and aligns with the founder's request to defer all licence + legals until the build proves itself.
+
+   **What v1.2 changes from v1.1:** v1.1 deferred B1 with a deadline of Session 11 — that was unnecessarily early. Session 11's governance files (CONTRIBUTING.md, etc.) can be drafted as templates with placeholder licence strings; the strings only need to be populated immediately before Session 18. v1.2 corrects the deadline to "before Session 18 public release" and consolidates B1, B6, and all lawyer work into Session 17.5.
+
+   **Conditions for revisit:** Session 17 complete; ready to begin pre-public-release legal scaffolding; lawyer engagement initiated 2–4 weeks before Session 17.5 per typical lead time.
+
+   **Timing constraint:** B1 must be adopted at Session 17.5; LICENSE file in repo before Session 18 begins. If Session 17.5 cannot complete on schedule, Session 18 is paused until B1 lands.
+
+   **Implication for Session 1:** B1 ADR drops out of Session 1's deliverable list. Session 1 drafts **five** ADRs (H1, A6, A5, H3, H5).
+
+   **Implication for v1 session count:** v1 total remains **33 sessions**. The +1 vs v1.0 is now Session 17.5 in Stream C (not Session 2.5 in Stream A as in v1.1). Calendar impact is unchanged because lawyer engagement is consolidated into a single window before Session 17.5.
+
+   **Architectural risk to flag (single mention):** if you eventually choose copyleft (AGPL or GPL family), it can require code-separation patterns affecting Layer 1 / Layer 3 design. The v1.2 default is permissive-architecturally — Layer 1, Layer 2, Layer 3 are designed and built without copyleft separation discipline. If the Session 17.5 lawyer engagement returns with copyleft as the only viable direction, some retroactive separation work may be needed. Mitigation if you want to keep copyleft live as a real option: a 30-min architectural-direction consult before Session 12 (Layer 1 hardening begins) — but this is a single optional consult, not a recurring engagement, and it sits outside this plan's default. Your call; v1.2 default treats this as an acceptable risk in exchange for the legal-cost deferral.
+
+   **Alternatives considered (deferred to Session 17.5):** Apache 2.0 + custom Layer-2-API addendum (the original v1.0 recommendation); pure permissive (Apache 2.0 / MIT, no addendum); copyleft (AGPL); dual-licence. Trade-offs to be documented in the B1 ADR when drafted.
 
 5. **Migration path direction (A6).** Recommendation: **coexist for six months, then deprecate `/api/reason` and the V3 endpoint family in favour of the substrate.** During the coexistence window, both endpoints are live; the substrate carries the new schema; `/api/reason` is internally re-implemented as a substrate consumer where reasonable. Deprecation announcement in v2. Adjust if you want immediate cutover (faster but riskier) or permanent coexistence (slower but lower-risk).
 
@@ -100,7 +122,7 @@ The founder approves or adjusts each item below before Session 1 opens. After Se
 
 7. **Repo structure direction (B2).** Recommendation: **monorepo for v1.** All open-source components (Layer 1, Layer 3, schema, docs, wiki) in one repository. Multi-repo split deferred to v2 if volume warrants. Monorepo is simpler for governance and contribution; multi-repo complicates B7 day-one governance. Adjust if you want multi-repo from v1.
 
-8. **External-engagement budget.** Recommendation: **engage lawyer (B1, B6) and cryptographer (A2, A3) within v1; defer philosopher review (C2, D2 corpus) to v1 mid-point or v2.** Lawyer engagement starts at Session 2; cryptographer at Session 5 mid-point. Budget figure for these is a separate operational decision; the plan assumes engagement happens. Adjust if budget constrains.
+8. **External-engagement budget.** Recommendation (v1.2): **lawyer engagement consolidated into a single sustained engagement at Session 17.5** covering B1 licence, B6 trademark filings, governance file licence-string finalisation, and any addendum wording. **Cryptographer engagement** runs calendar-parallel from Session 5 mid-point (A2/A3 review) — unchanged from v1.0. **Philosopher review** (C2, D2 corpus) deferred to v1 mid-point or v2 — unchanged. Budget figure is a separate operational decision; the plan assumes engagement happens. Adjust if budget constrains, OR if you want a single 30-min architectural-direction lawyer consult before Session 12 (per §4.4 architectural risk).
 
 9. **Pilot endpoint for Critical infrastructure (A1–A7).** Recommendation: **`/api/reason` quick depth.** It is currently live, has a known shape, is a Layer 2 entry point per the existing V3 architecture, and provides the cleanest pilot surface for auth + signing + metering. Critical Change Protocol rollback paths preserve its current behaviour throughout. Adjust if you want a fresh `/api/substrate/v1/score` endpoint instead (cleaner naming; more code; no rollback to existing behaviour).
 
@@ -112,7 +134,7 @@ After founder confirms or adjusts the ten items above, Session 1 opens.
 
 ## 5. v1 session-by-session plan
 
-Five streams, 32 sessions. Each session is a card.
+Five streams, 33 sessions. Each session is a card.
 
 ### Stream A — Governance and ADRs (Sessions 1–4)
 
@@ -122,14 +144,14 @@ Five streams, 32 sessions. Each session is a card.
 - **Mid-session founder input:** None.
 - **Deliverables drafted in `/drafts/`:**
   - H1 substrate concept ADR (substrate as unified architecture; layers; addressable Stoic causal-sequence moments; scope)
-  - B1 licensing ADR (Apache 2.0 + custom Layer-2-API addendum per §4.4; lawyer engagement note)
   - A6 migration ADR (six-month coexist then deprecate per §4.5)
   - A5 R20a handover ADR (belt-and-braces per §4.6)
   - H3 three-mode access ADR (developmental sequence; Mode 1/2/3 contracts)
   - H5 cost impact preliminary update in `/business/`
+- **Note (v1.2):** B1 licensing ADR is **not** drafted in Session 1 per §4.4 deferral. B1 is rescheduled to Session 17.5 (dedicated legal-scaffolding session immediately before public release). Sessions 1–17 are a private-build phase; no licence is required for the build to proceed.
 - **Verification (founder, between sessions):** read each ADR; mark approve, request revisions, or escalate.
 - **Rollback:** all files in `/drafts/`; revert by `rm`.
-- **Next session pre-conditions:** founder approval of all six ADRs; lawyer engagement initiated for B1 (calendar parallel).
+- **Next session pre-conditions:** founder approval of all five Session-1 ADRs. (No lawyer engagement initiated yet; deferred to Session 17.5 lead-up per §4.4 + §4.8.)
 
 **Session 2 — Foundational ADRs Pass 2 + Critical-infrastructure Unified ADR**
 - **Risk:** Standard. **Sessions:** 1.
@@ -142,7 +164,7 @@ Five streams, 32 sessions. Each session is a card.
   - H6 manifest amendments draft (R-codes, AC additions, PR additions if any, KG entries needed)
 - **Verification:** founder reads four ADRs; cryptographer engagement initiated for A1+A2+A3+A7 review (calendar parallel).
 - **Rollback:** revert in `/drafts/`.
-- **Next session pre-conditions:** ADRs approved; lawyer review of B1 returned (or the ADR proceeds with a "lawyer-pending" note); cryptographer review initiated.
+- **Next session pre-conditions:** ADRs approved; cryptographer review initiated. (B1 not in scope per §4.4 deferral; the dedicated B1 session is scheduled separately once §4.4 revisit conditions are met.)
 
 **Session 3 — Adoption + Manifest Amendment + Reconciliation**
 - **Risk:** Elevated (file moves from `/drafts/` to `/adopted/`).
@@ -229,16 +251,18 @@ Each Stream B session executes one Critical change with the full Critical Change
 - **Rollback:** `git revert`; R20a reverts to prior surface.
 - **Next session pre-conditions:** A5 Verified live; Stream B complete; Stream C begins.
 
-### Stream C — Open-source publication (Sessions 11–18)
+### Stream C — Open-source publication (Sessions 11–18, incl. 17.5)
 
-**Session 11 — B7 community governance day-one + B6 brand posture**
-- **Risk:** Elevated (governance; trademark filing initiated).
-- **Pre-conditions:** B1 licence adopted; B6 ADR drafted (in Session 2 if folded; otherwise drafted here).
+All Stream C sessions before Session 17.5 happen in a **private repo**. No external visibility until Session 18 (per v1.2 private-build-phase model — §2, §4.4).
+
+**Session 11 — B7 community governance templates + B6 brand posture (internal draft)**
+- **Risk:** Standard (was Elevated in v1.0/v1.1; reduced because no trademark filings or licence work happens here per v1.2).
+- **Pre-conditions:** Stream B complete (Session 10 A5 Verified).
 - **Mid-session founder input:** None.
-- **Deliverables:** `CONTRIBUTING.md`, `MAINTAINERS.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md` drafted; brand posture document published; trademark filings drafted (lawyer-bound from §4.8 engagement).
-- **Verification:** founder reads governance files; lawyer confirms trademark filings are filed.
-- **Rollback:** revert.
-- **Next session pre-conditions:** Governance files in place; trademark process underway.
+- **Deliverables:** `CONTRIBUTING.md`, `MAINTAINERS.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md` drafted as **templates with licence-string placeholders** (e.g., `<LICENSE_STRING_TO_BE_POPULATED_AT_17.5>`); B6 brand posture document drafted as **internal-only** (no trademark filings; no lawyer engagement). All files committed to the private repo.
+- **Verification:** founder reads governance templates; founder reviews B6 posture document.
+- **Rollback:** revert in private repo.
+- **Next session pre-conditions:** Templates in place; ready for B3 hardening to begin in private repo.
 
 **Sessions 12–13 — B3 Layer 1 hardening (two passes)**
 - **Risk:** Elevated.
@@ -269,20 +293,35 @@ Each Stream B session executes one Critical change with the full Critical Change
 
 **Session 17 — C4 developer guide + C7 test fixtures**
 - **Risk:** Standard.
-- **Pre-conditions:** B3 + B4 + B5 published; C2 documentation site populated.
+- **Pre-conditions:** B3 + B4 + B5 published (in private repo); C2 documentation site populated.
 - **Mid-session founder input:** None.
-- **Deliverables:** developer guide with 5–10 worked examples (text input alongside corresponding self-classified Layer1Schema); C7 fixtures published; integration with C6 linter.
-- **Verification:** founder follows guide and successfully runs all worked examples.
+- **Deliverables:** developer guide with 5–10 worked examples (text input alongside corresponding self-classified Layer1Schema); C7 fixtures published; integration with C6 linter. All in private repo.
+- **Verification:** founder follows guide and successfully runs all worked examples locally.
 - **Rollback:** revert.
-- **Next session pre-conditions:** C4 + C7 published; closed beta cohort invited per §4.10.
+- **Next session pre-conditions:** C4 + C7 in private repo; closed beta cohort invited per §4.10 (still no public visibility); ready to begin pre-public-release legal scaffolding.
+
+**Session 17.5 — B1 licensing ADR + B6 trademark filings + final legal scaffolding (NEW in v1.2)**
+- **Risk:** Elevated (legal documents drafted, filed, and tied to public-release gate).
+- **Pre-conditions:** Session 17 complete; lawyer engagement initiated 2–4 weeks earlier per typical lead time; founder has reviewed §4.4 alternatives and is ready to confirm licence direction at session open.
+- **Mid-session founder input:** founder confirms licence direction at session open (the choice deferred from §4.4); founder confirms trademark scope (jurisdictions; brand strings).
+- **Deliverables:**
+  - B1 licensing ADR drafted and adopted (chosen direction; alternatives considered; addendum content if any; lawyer-review status documented)
+  - `LICENSE` file committed to repo (the chosen licence string)
+  - Governance files (CONTRIBUTING.md, MAINTAINERS.md, CODE_OF_CONDUCT.md, SECURITY.md) updated — placeholder strings replaced with actual licence references
+  - B6 brand posture document finalised (lawyer-reviewed)
+  - Trademark filings filed (jurisdictions per founder direction)
+- **Verification:** founder reads B1 ADR; lawyer confirms trademark filings filed; founder verifies LICENSE file at expected repo path; governance files no longer contain placeholders.
+- **Rollback:** revert in private repo; trademark filings withdrawn (cost: filing fees lost). Public release deferred until next attempt.
+- **Hard deadline:** must complete before Session 18 begins. If revisit conditions per §4.4 are not met (lawyer engagement returns or founder elects to proceed without counsel), Session 18 is paused.
+- **Next session pre-conditions:** B1 adopted; LICENSE file in repo; governance files complete; trademark filings filed; ready for Session 18 public release.
 
 **Session 18 — Public release execution**
 - **Risk:** Elevated (deployment-configuration change; first public exposure).
-- **Pre-conditions:** Beta cohort feedback incorporated; B7 governance review process tested; trademark filings filed.
+- **Pre-conditions:** Session 17.5 complete (B1 adopted; LICENSE file in repo; governance files finalised; trademark filings filed); beta cohort feedback incorporated; B7 governance review process tested.
 - **Mid-session founder input:** explicit go/no-go before flipping repo public.
-- **Deliverables:** repo flipped public; announcement holding-post drafted (not yet sent — that's Stream L in v2); first public PR review process exercised.
-- **Verification:** founder visits public repo URL; sees expected files.
-- **Rollback:** repo reverted to private; announcement pulled.
+- **Deliverables:** repo flipped from private to public; announcement holding-post drafted (not yet sent — that's Stream L in v2); first public PR review process exercised.
+- **Verification:** founder visits public repo URL; sees expected files including LICENSE.
+- **Rollback:** repo reverted to private; announcement pulled. (Trademark filings cannot be unfiled, but a private repo with a filed trademark is a recoverable state.)
 - **Next session pre-conditions:** Stream C complete.
 
 ### Stream D — Translation pattern wiki (Sessions 19–24)
@@ -376,9 +415,9 @@ Each Stream B session executes one Critical change with the full Critical Change
 
 The longest dependency chain — items whose delay delays v1 release:
 
-**Plan approval → Session 1 → Session 2 → Session 3 → Session 4 → Session 5 (A1) → Session 6 (A2) → Session 9 (A4) → Session 10 (A5) → Sessions 12–13 (B3) → Sessions 14–15 (B4) → Session 18 (public release) → Session 25 (E5 paper) → Session 26 (E1) → Session 27 (E2) → Session 29 (E5 evaluative) → Session 31 (integration) → Session 32 (external test).**
+**Plan approval → Session 1 → Session 2 → Session 3 → Session 4 → Session 5 (A1) → Session 6 (A2) → Session 9 (A4) → Session 10 (A5) → Session 11 (B7 templates) → Sessions 12–13 (B3) → Sessions 14–15 (B4) → Session 17 → Session 17.5 (B1 + legal scaffolding) → Session 18 (public release) → Session 25 (E5 paper) → Session 26 (E1) → Session 27 (E2) → Session 29 (E5 evaluative) → Session 31 (integration) → Session 32 (external test).**
 
-Sessions on the critical path: ~21 of 32.
+Sessions on the critical path: ~22 of 33 (Session 17.5 added per v1.2 §4.4 deferral; this is the same +1 that v1.1 placed at Session 2.5, repositioned to immediately before public release).
 
 **Items NOT on the critical path** (run in calendar parallel without delaying release):
 
@@ -406,8 +445,9 @@ Every session below carries one explicit rework-prevention measure. Surfaced her
 - **Session 11** — B7 governance lands before B3/B4 publication. Prevents external contributions arriving without policy.
 - **Sessions 12–15** — B3/B4 hardening sequenced with B3 first because B4 consumes B3's schema outputs. Prevents interface drift between Layer 1 and Layer 3.
 - **Session 16** — B5 (open-source R20a) lands AFTER A5 server-side enforcement (Session 10). Prevents open Layer 1 carrying the only safety surface.
-- **Session 17** — C4 developer guide lands after B3+B4+B5 publication. Prevents documenting examples against unstable code.
-- **Session 18** — beta cohort feedback gates public release. Prevents public-facing rough edges.
+- **Session 17** — C4 developer guide lands after B3+B4+B5 publication (in private repo). Prevents documenting examples against unstable code.
+- **Session 17.5 (v1.2)** — all legal scaffolding (B1 licence, B6 trademark, governance file licence strings, lawyer review) consolidated into a single session before public release. Prevents legal effort being incurred while the build is still proving itself, and prevents the build being shaped by licence assumptions that turn out wrong.
+- **Session 18** — beta cohort feedback gates public release. Prevents public-facing rough edges. Session 17.5 must be complete; LICENSE file must be in repo.
 - **Sessions 19–24** — wiki references B3 extractors (D4) only after B3 stable. Prevents wiki–code linkage drift.
 - **Session 25** — E5 paper design lands before any E1/E2/E3 implementation. Prevents mode-separation forcing redesign of decision-path mechanisms.
 - **Sessions 26–29** — E1 → E2 → E3 → E5 sequenced because each depends on prior. Critical changes executed against adopted ADRs only.
@@ -442,15 +482,15 @@ B8 announcement strategy; H7 standards-formation engagement plan; v2 manifest am
 |---|---|---|
 | A — Governance + ADRs | 4 | Standard / Elevated |
 | B — Critical infrastructure | 6 | Critical (5 of 6) + Elevated (1) |
-| C — Open-source publication | 8 | Elevated (mostly) + 1 Critical (B5) |
+| C — Open-source publication | 9 (incl. Session 17.5 B1 + legal scaffolding per v1.2) | Standard / Elevated (mostly) + 1 Critical (B5) |
 | D — Wiki | 6 | Standard |
 | E — Decision-path mechanisms | 8 | Critical (4 of 8) + Elevated (4) |
-| **v1 total** | **32** | |
+| **v1 total** | **33** (was 32 in v1.0; v1.2 adds Session 17.5 per §4.4 deferral) | |
 | F + G + H + I (v2, sketch) | 26–42 | Critical (F-cluster, E5 modes) + Standard/Elevated (rest) |
 
-**v1 calendar:** 32 sessions at 4–6 sessions per month = **5–8 months**. Add 2–4 months for external-engagement calendar (lawyer for B1/B6; cryptographer for A2/A3; beta cohort for Stream C). Total **8–12 months end-to-end** for v1.
+**v1 calendar:** 33 sessions at 4–6 sessions per month = **5–8 months**. Add 2–4 weeks for the lawyer-engagement window before Session 17.5 (B1, B6 trademark filings) and ~1 month for the cryptographer engagement at Session 5 mid-point (A2/A3 review) — these run calendar-parallel and do not extend the per-session pace. Add the closed beta-cohort window (~2–4 weeks before Session 18). Total **8–12 months end-to-end** for v1. v1.2 reduces total external-engagement spread compared to v1.0/v1.1: lawyer effort is consolidated into a single window before Session 17.5 rather than active from Session 2 onwards.
 
-**Compared with predecessor staging-plan estimate:** v1 of this build plan corresponds to ~Stages 1–5 of the predecessor at ~70–105 sessions. This recommendation-only form compresses to 32 sessions through:
+**Compared with predecessor staging-plan estimate:** v1 of this build plan corresponds to ~Stages 1–5 of the predecessor at ~70–105 sessions. This recommendation-only form compresses to 33 sessions (v1.1; v1.0 was 32) through:
 - ADR packing (Sessions 1–2 produce 10 ADRs that the predecessor counted as ~10 separate items)
 - Bundling decisions in unified ADRs where coupling exists (A1+A2+A3+A7)
 - v1-scoped mode separation (evaluative only; rest deferred to v2)
