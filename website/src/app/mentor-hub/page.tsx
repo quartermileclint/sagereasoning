@@ -160,7 +160,18 @@ export default function MentorHub() {
 
         if (scoreRes.ok) {
           const scoreData = await scoreRes.json();
-          const analysis = scoreData.result || scoreData.response || 'Strategic decision pattern identified.';
+          // 2026-05-09 fix (sub-item vii follow-up): /api/score-conversation
+          // returns a structured envelope where `result` is an OBJECT
+          // ({ overall: { reasoning, katorthoma_proximity, ... }, participants,
+          //   disclaimer, ...}). The previous code set `text: scoreData.result`
+          // and React crashed trying to render an object as a child. Extract
+          // the philosophical reflection string with safe fallbacks.
+          const resultObj = (scoreData.result as Record<string, any>) || {};
+          const overall = (resultObj.overall as Record<string, any>) || {};
+          const analysis: string =
+            (typeof overall.reasoning === 'string' && overall.reasoning) ||
+            (typeof resultObj.reasoning === 'string' && resultObj.reasoning) ||
+            `Conversation evaluated: ${overall.katorthoma_proximity || 'reflexive'} proximity to virtue.`;
           setOpinions((prev) => [
             ...prev,
             { color: 'blue', text: analysis, time: getTime() },
