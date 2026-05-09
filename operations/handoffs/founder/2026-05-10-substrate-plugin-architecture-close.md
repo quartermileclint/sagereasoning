@@ -23,6 +23,10 @@ This session was an Explore session (per 0d), Standard tier, no production touch
 
 **6. Next session is dedicated to detailed planning only — staging the build with the agreed architecture in mind.** Reasoning: founder explicit — the prior 2026-05-09 staging prompt was scoped against an earlier architecture; the architecture has now changed materially and warrants its own planning pass. → Impact: see `2026-05-10-plugin-build-staging-NEXT-SESSION-PROMPT.md`. The planning incorporates two specific learnings from the prior staging attempt: (a) licensing is staged immediately before going public with open-source, not as a generic Stage 1 item; (b) after all planning steps are scoped, a holistic second pass reviews the whole for implications, efficiencies, time-bounded session structure, and minimal founder mid-session input.
 
+**7. Once Layer 1, 2, 3 are finalised and adopted, every existing SageReasoning product currently using the bundled prose method swaps to the translation-sandwich method. Migration is part of this build arc, not a separate project.** Reasoning: the bundled engine's limitations (those that drove the translation-sandwich design originally) currently still affect every consumer except `/api/reason` (the only endpoint M1-CP6 cut over). Structural consistency across the product line; future-proofs the entire codebase; brings the website front-end into the same architectural posture as the agent-facing plugin. → Impact: adds a "Migration of existing bundled-prose consumers to translation-sandwich" category (the K-category) to the build inventory, alongside the substrate work and plugin-packaging work. The component-registry.json (`/website/public/component-registry.json`, 191 components) is the source of truth for what products exist and current statuses. The two manuals (`/users-guide-to-sagereasoning.md` and `/summary-tech-guide.md`, plus `/summary-tech-guide-addendum-context-and-memory.md`) describe what those products do for practitioners and where they live in the codebase. Migration sequencing, verification methodology, and cost impact assessment are part of the staging plan.
+
+**8. Build-sessions-protocol-cache created as a one-stop reference for the build arc.** Reasoning: the build arc spans many sessions; without a cache, every session would re-read the architecture exploration, the agreed decisions, the rules, and the migration intent — burning tokens unnecessarily. The cache mirrors the existing `/adopted/standing-protocol-cache.md` pattern but is build-arc-specific. → Impact: `/drafts/build-sessions-protocol-cache.md` created this session; pending validation by the planning session, then moves to `/adopted/`. All build-arc sessions read this cache + the standing cache + the predecessor close at session-open instead of re-reading exploration transcripts and inbox research files. Materially reduces session-opening token consumption.
+
 ## Status Changes
 
 None. No module or rule status changed. Design exploration only.
@@ -71,7 +75,7 @@ The `/operations/handoffs/founder/2026-05-09-substrate-build-staging-NEXT-SESSIO
 9. Layer 2 signing infrastructure timeline — when authoritative-assessment signing gets built; key management posture.
 10. Standards-formation engagement — smaller in scope under plugin paradigm but still relevant for credential interoperability and the Layer 1 input contract.
 11. Brand and trademark posture — distinguishing "running open SageReasoning Layer 1" from "calling the authoritative SageReasoning Layer 2 + Layer 3 services."
-12. Migration path for sagereasoning.com consumers — decoupled from plugin work but still needs explicit handling.
+12. Migration path for sagereasoning.com consumers — refined per Decision 7: this is the K-category in the build inventory (not "decoupled from plugin work" — alongside it as a major category). Component-registry is source of truth; manuals describe products; migration is part of substrate finalisation.
 13. R20a perimeter handover mechanism — answered as Decision 3 (three-layer defence).
 
 **New questions surfaced specifically by the plugin paradigm:**
@@ -82,7 +86,7 @@ The `/operations/handoffs/founder/2026-05-09-substrate-build-staging-NEXT-SESSIO
 17. Plugin sandbox limitations per marketplace — what each marketplace's plugins can and cannot do affects what the SageReasoning plugin can contain.
 18. Plugin economics — free-to-install with paid services via connectors is the standard pattern; the Layer 2 + Layer 3 services remain metered. Specific pricing strategy is a planning question.
 19. Plugin variant strategy — one plugin with mode parameter, or a small family of plugins for evaluative / prescriptive / augmentative-combo?
-20. The relationship of existing V3 endpoints to plugin tools — each existing endpoint becomes a plugin-internal tool wrapper; verified mapping needed.
+20. The relationship of existing V3 endpoints to plugin tools — answered: each existing V3 endpoint becomes a plugin-internal tool wrapper *after* it has been migrated from bundled to translation-sandwich (per Decision 7 / K-category). Verified mapping needed during migration planning.
 
 ## Verification Method Used (0c Framework)
 
@@ -105,7 +109,9 @@ The `/operations/handoffs/founder/2026-05-09-substrate-build-staging-NEXT-SESSIO
 
 - Read this session close (`/operations/handoffs/founder/2026-05-10-substrate-plugin-architecture-close.md`)
 - Read the new next-session prompt (`/operations/handoffs/founder/2026-05-10-plugin-build-staging-NEXT-SESSION-PROMPT.md`)
-- Edit either file or request changes before next session opens
+- Read the new build-sessions-protocol-cache (`/drafts/build-sessions-protocol-cache.md`) — pending validation by the planning session, then moves to `/adopted/`
+- Optional: skim `/website/public/component-registry.json` (bundled-prose consumers + statuses) and `/users-guide-to-sagereasoning.md` Parts Two and Four if you want to pre-form views on migration sequencing before the planning session
+- Edit any of these files or request changes before next session opens
 - No live system to verify; no code touched
 
 ## Session-Output Artefacts (For Reference)
@@ -120,5 +126,13 @@ The substantive content produced this session lives in the conversation transcri
 - Permissive licensing on Layer 1 reference (specific licence TBD)
 - Q6 (distribution channel) closed — answered as plugins via marketplaces
 - The plugin paradigm dissolves several previously open architectural questions (SDK language priority, MCP-server-vs-SaaS choice, cross-platform credential readability worry)
+- Migration of all existing bundled-prose consumers to translation-sandwich is part of this build arc (the K-category); component-registry.json is the source of truth; manuals describe what's being migrated
+- Build-sessions-protocol-cache created at `/drafts/build-sessions-protocol-cache.md` — carries build-arc context across all build-arc sessions for token efficiency
+
+## Files Created This Session
+
+- `/operations/handoffs/founder/2026-05-10-substrate-plugin-architecture-close.md` — this file
+- `/operations/handoffs/founder/2026-05-10-plugin-build-staging-NEXT-SESSION-PROMPT.md` — next-session prompt
+- `/drafts/build-sessions-protocol-cache.md` — new cache for the build arc; pending validation, then moves to `/adopted/`
 
 End of session close.

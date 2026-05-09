@@ -9,9 +9,11 @@
 
 ## Why this session matters
 
-The architecture is now agreed. Layer 1 is open-sourced; Layer 3 stays closed; the substrate is delivered as a plugin (or plugin family) installable via plugin marketplaces. Two front-ends, one substrate: sagereasoning.com for humans, plugins for agents, shared Layer 2 + Layer 3 backend.
+The architecture is now agreed. Layer 1 is open-sourced; Layer 3 stays closed; the substrate is delivered as a plugin (or plugin family) installable via plugin marketplaces. Two front-ends, one substrate: sagereasoning.com for humans, plugins for agents, shared Layer 2 + Layer 3 backend. **And:** once Layer 1, 2, 3 are finalised, every existing SageReasoning product currently using the bundled prose method swaps to the translation-sandwich method — migration is part of this build arc, not separate from it (per Decision 7 in the predecessor close).
 
 This session exists to take the agreed architecture and stage the build into an ordered, dependency-aware plan that subsequent sessions execute. The plan is the artefact. No code, no licence file, no public announcement, no ADR drafting other than the staging plan itself.
+
+This session also formally **validates and approves the build-sessions-protocol-cache** (`/drafts/build-sessions-protocol-cache.md`). The cache is intended to carry across all sessions of this build arc for token efficiency at session-opens — without the cache, each subsequent session would re-read the architecture exploration, the agreed decisions, the rules, and the migration intent, burning tokens unnecessarily. If the cache is approved as written, move it to `/adopted/`. If refinements are needed, refine and then move. If material rework is needed, save the revised version back to `/drafts/` and flag for a follow-up session.
 
 The staging plan must apply two specific rules carried forward from the founder's first staging attempt — both placed up-front so they govern the whole plan:
 
@@ -23,21 +25,30 @@ Both rules are embedded in the planning method, not the planning output. They sh
 
 ## Pre-conditions
 
-1. **Predecessor session close read.** `/operations/handoffs/founder/2026-05-10-substrate-plugin-architecture-close.md` covers what was agreed (the six decisions) and twenty open questions carried into planning.
-2. **Research files re-read if needed.** `/inbox/plugin transcript.rtf` and `/inbox/plugin summary.rtf` ground the plugin paradigm. The five earlier inbox files (`Layer A` through `Layer D` + `sage-intuit.txt`) ground the substrate architecture. `Untitled 4.rtf` is empty and can be ignored.
-3. **2026-05-09 predecessor records optionally referenced.** `/operations/handoffs/founder/2026-05-09-substrate-architecture-explore-close.md` and `/operations/handoffs/founder/2026-05-09-substrate-build-staging-NEXT-SESSION-PROMPT.md` are predecessor records; specific items in them have been refined per the 2026-05-10 close. Read only if cross-reference helps.
-4. **Standing protocol cache opened.** Tier confirmation, model selection (planning is documentation work; cite the AC1 N/A row), risk class, signals, status vocabulary in scope.
-5. **No founder pre-work required.** The planning session uses what's already been decided and recorded. New decisions during the session are welcome but not required.
+1. **Predecessor session close read.** `/operations/handoffs/founder/2026-05-10-substrate-plugin-architecture-close.md` covers what was agreed (now eight decisions, with Decision 7 adding the migration intent and Decision 8 noting the cache creation) and twenty open questions carried into planning.
+2. **Build-sessions-protocol-cache read.** `/drafts/build-sessions-protocol-cache.md` is the new build-arc cache; this session validates it. Read it carefully — it carries the architecture, decisions, rules, and migration intent in a form intended to be the standing reference for every subsequent build-arc session.
+3. **Standing protocol cache opened.** `/adopted/standing-protocol-cache.md` — the general session protocol (model selection, KG register, signals, risk classification, lean templates). Tier confirmation, model selection (planning is documentation work; cite the AC1 N/A row), risk class, signals, status vocabulary in scope.
+4. **Component registry read.** `/website/public/component-registry.json` is the source of truth for what products exist (191 components), their current statuses (`scoped → designed → scaffolded → wired → verified → live`), dependencies, blockers. The K-category (migration of bundled-prose consumers) is built against this registry. The planning session must identify which components currently use bundled prose vs translation-sandwich vs are in transitional states. Skim at session-open; deep-read the bundled-prose entries during K-category scoping.
+5. **The two manuals read** — at session-open or during K-category scoping:
+   - `/users-guide-to-sagereasoning.md` — what each product does for practitioners; intended use; audience. Parts Two and Four describe the product surface.
+   - `/summary-tech-guide.md` — operational/technical manual; Section 1 (File Map) names the API surface and what each route directs.
+   - `/summary-tech-guide-addendum-context-and-memory.md` — addendum; relevant for migration of context-dependent consumers.
+6. **Research files re-read if needed.** `/inbox/plugin transcript.rtf` and `/inbox/plugin summary.rtf` ground the plugin paradigm. The five earlier inbox files (`Layer A` through `Layer D` + `sage-intuit.txt`) ground the substrate architecture. `Untitled 4.rtf` is empty and can be ignored.
+7. **2026-05-09 predecessor records optionally referenced.** `/operations/handoffs/founder/2026-05-09-substrate-architecture-explore-close.md` and `/operations/handoffs/founder/2026-05-09-substrate-build-staging-NEXT-SESSION-PROMPT.md` are predecessor records; specific items in them have been refined per the 2026-05-10 close. Read only if cross-reference helps.
+8. **No founder pre-work required.** The planning session uses what's already been decided and recorded. New decisions during the session are welcome but not required. Founder's optional pre-skim of the component-registry and Users' Guide Parts Two and Four (per the close's Founder Verification block) may help if founder wants to pre-form views on migration sequencing.
 
 ## Part A — Open under the protocol
 
 Read in order:
 
-1. `/adopted/standing-protocol-cache.md` (~3 min)
-2. `/operations/handoffs/founder/2026-05-10-substrate-plugin-architecture-close.md` (~5 min — most recent predecessor close; six decisions, twenty open questions, supersedes/refines from 2026-05-09)
-3. `/inbox/plugin transcript.rtf` and `/inbox/plugin summary.rtf` if not already familiar (~10–15 min)
+1. `/adopted/standing-protocol-cache.md` (~3 min — general session protocol)
+2. `/drafts/build-sessions-protocol-cache.md` (~5 min — build-arc-specific cache; this session validates it)
+3. `/operations/handoffs/founder/2026-05-10-substrate-plugin-architecture-close.md` (~5 min — most recent predecessor close; eight decisions, twenty open questions, supersedes/refines from 2026-05-09)
+4. `/website/public/component-registry.json` skim — focus on components with `engine: bundled` or where the description names the bundled-prose method; flag for K-category scoping (~10 min skim; deeper during K-category)
+5. `/users-guide-to-sagereasoning.md` and `/summary-tech-guide.md` — Parts Two and Four of users guide; Section 1 of tech guide; consult during K-category scoping (~10 min if pre-read; can defer to inventory pass)
+6. `/inbox/plugin transcript.rtf` and `/inbox/plugin summary.rtf` if not already familiar (~10–15 min)
 
-Confirm at open: tier (Standard); hold-point status (P0 0h still active — substrate work happens alongside the hold-point assessment, not after); model selection (planning is documentation; cite the AC1 N/A row); status vocabulary; signals/risk class.
+Confirm at open: tier (Standard); hold-point status (P0 0h still active — substrate work happens alongside the hold-point assessment, not after); model selection (planning is documentation; cite the AC1 N/A row); status vocabulary; signals/risk class. Confirm the build-sessions-protocol-cache is the operative reference for this and subsequent build-arc sessions.
 
 ## Part B — Session work: produce the staged build plan
 
@@ -139,20 +150,34 @@ The list below carries forward from the 2026-05-09 inventory and is reorganised 
 - J3. ADR for the plugin-as-end-goal decision
 - J4. ADR for the three-layer R20a defence
 - J5. ADR for the licensing strategy
-- J6. R5 cost-as-health-metric impact assessment under the new architecture (Layer 1 cost shifts to plugin; Layer 2 cost near-zero; Layer 3 cost stays metered)
+- J6. R5 cost-as-health-metric impact assessment under the new architecture (Layer 1 cost shifts to plugin; Layer 2 cost near-zero; Layer 3 cost stays metered; per-consumer cost shifts as K-category migrations land)
 - J7. Manifest amendments — AC additions, new PR rules if needed, project-instructions updates
-- J8. Decision-log entries for the six decisions in the 2026-05-10 close
-- J9. Migration path for existing sagereasoning.com consumers — coexistence design, no rewrite needed at this stage
+- J8. Decision-log entries for the eight decisions in the 2026-05-10 close
+- J9. Build-sessions-protocol-cache validation and movement to `/adopted/`
+
+**K. Migration of existing bundled-prose consumers to translation-sandwich**
+
+This category implements Decision 7 from the 2026-05-10 close. Source-of-truth: `/website/public/component-registry.json`. Reference materials: `/users-guide-to-sagereasoning.md` Parts Two + Four; `/summary-tech-guide.md` Section 1; `/summary-tech-guide-addendum-context-and-memory.md`.
+
+- K1. Inventory of bundled-prose consumers from the component-registry — which endpoints, which pages, which agent surfaces still use bundled prose vs which have already migrated to translation-sandwich vs which are in transitional states
+- K2. Per-consumer migration plan template (mirrors the M1-CP1–CP6 pattern that migrated `/api/reason`)
+- K3. Migration sequencing strategy — which consumers first (criteria: criticality to users, safety surface, cost impact, engineering complexity, dependencies on substrate refinements). Most plausible: the V3 endpoint family (`/api/score`, `/api/score-decision`, `/api/score-document`, `/api/score-scenario`, `/api/score-social`, `/api/guardrail`, `/api/score-iterate`) before the mentor surfaces (`/api/reflect`, `/api/mentor/private/reflect`) since the latter touch R17 intimate-data boundaries
+- K4. Verification methodology per migration — mirrors the M1-CP6 pattern (consumer-page audit + payload-shape adaptation + post-deploy verification)
+- K5. Cost impact assessment per migration — Sonnet → Sonnet+Sonnet (substrate runs Layer 1 + Layer 3 server-side for website front-end, since the website doesn't run an open-Layer-1 plugin); cost increase per call but architectural consistency. R5 cost-as-health-metric implications.
+- K6. Migration ↔ plugin-build interaction — does the plugin work depend on K-category being substantially complete? Probably yes for the agent-facing plugin, since the plugin's open Layer 1 must produce input that all the Layer 2 endpoints accept consistently. Order this in the staging plan deliberately.
+- K7. Substrate refinements driven by migration findings — each consumer migration may surface Layer 1 / Layer 2 / Layer 3 limitations that need fixing in the substrate itself. Migration is iterative refinement of the substrate, not just "swap and done."
+- K8. Feedback loop into the build inventory — migration findings may add or modify items in categories A through J.
 
 ### Importance criteria the plan should use
 
 The staging plan must order items by importance, defined here as:
 
-1. **Items that block other work.** Backend authentication and signing (A1–A4) block most plugin features. R20a server-side gate (A7) blocks public release. The first marketplace decision (G1) shapes plugin packaging.
+1. **Items that block other work.** Backend authentication and signing (A1–A4) block most plugin features. R20a server-side gate (A7) blocks public release. The first marketplace decision (G1) shapes plugin packaging. K-category migration of consumers using the bundled engine may need to advance ahead of plugin work because the plugin's open Layer 1 must produce input that all the Layer 2 endpoints accept consistently.
 2. **Items that preserve safety.** All three layers of the R20a defence (B2, A7, A5's deterministic injection) are non-negotiable before any public release.
 3. **Items that establish moat.** Layer 2 + Layer 3 service infrastructure (A1–A7) is foundational to the value proposition.
-4. **Items that prepare for distribution.** Plugin packaging (C), marketplace work (G), and licensing gate (H) come once foundations are ready.
-5. **Items that extend the substrate.** Decision-path mechanisms (D), three-mode access (E), wiki (F), and ecosystem polish come after the first plugin ships.
+4. **Items that finalise the substrate.** K-category migration is part of finalising Layers 1, 2, 3 — each migration may surface substrate limitations that need fixing. Migration findings feed back into A, B, and other categories.
+5. **Items that prepare for distribution.** Plugin packaging (C), marketplace work (G), and licensing gate (H) come once foundations are ready and substrate is finalised.
+6. **Items that extend the substrate.** Decision-path mechanisms (D), three-mode access (E), wiki (F), and ecosystem polish come after the first plugin ships.
 
 The plan is free to override these defaults with reasoning. The defaults are starting points, not constraints. **Rule A applies regardless:** licensing (H1–H4) sits immediately before the first stage that goes public, wherever in the order that lands.
 
@@ -161,36 +186,42 @@ The plan is free to override these defaults with reasoning. The defaults are sta
 The staging plan saved to `/drafts/substrate-plugin-staging-plan.md` should include:
 
 - **Executive summary.** What's being planned, why, what's out of scope.
-- **Architecture recap.** One-paragraph statement of the agreed substrate architecture (Layer 1 open / Layer 2 closed / Layer 3 closed; plugin as end-goal; three-layer R20a defence; two front-ends one substrate).
-- **Stage-by-stage breakdown.** Stage 1 through Stage N. Each stage with: items in the stage, dependencies, estimated time/work, risk class, success criteria.
+- **Architecture recap.** One-paragraph statement of the agreed substrate architecture (Layer 1 open / Layer 2 closed / Layer 3 closed; plugin as end-goal; three-layer R20a defence; two front-ends one substrate; K-category migration of bundled-prose consumers part of substrate finalisation).
+- **Stage-by-stage breakdown.** Stage 1 through Stage N. Each stage with: items in the stage, dependencies, estimated time/work, risk class, success criteria. K-category items distributed appropriately across stages or batched as a stage of their own.
 - **Licensing gate placement.** Explicitly marked in the stage order, immediately before the first public-release stage.
-- **Dependency map.** Which items depend on which.
+- **Dependency map.** Which items depend on which. K-category interactions with substrate refinements (A, B) and plugin work (C–E) named explicitly.
 - **Critical path.** The chain of items that determines overall length.
 - **Parallel work opportunities.** Stages or items that can run concurrently.
 - **Open questions surfaced during planning** that need founder decision before execution begins.
 - **Recommended first three stages** with reasoning.
 - **Holistic second-pass review.** A separate section produced AFTER the step-scoping, applying Rule B — implications across stages, efficiencies, time-bounded session repackaging, minimal-founder-input session design, parallel-work confirmation, new risks visible only at the holistic level.
+- **Build-sessions-protocol-cache validation outcome.** Whether the cache (`/drafts/build-sessions-protocol-cache.md`) was approved as written, refined, or needs material rework. If approved or refined, move to `/adopted/`. If material rework, save revisions to `/drafts/` and flag for follow-up.
 
-The plan is a draft. Founder reviews, edits, requests changes, and approves. Only an approved plan moves to `/adopted/`.
+The plan is a draft. Founder reviews, edits, requests changes, and approves. Only an approved plan moves to `/adopted/`. The build-sessions-protocol-cache, once approved, becomes the operative reference for every subsequent build-arc session and is updated in-session whenever the underlying records change.
 
 ## Part C — Anticipated session shape
 
 | Phase | Time |
 |---|---|
-| Cache + predecessor close + research file re-read | 15 min |
+| Standing cache + build-sessions cache + predecessor close + research file re-read | 20 min |
+| Component-registry skim + manuals consult (or deferred to inventory pass) | 15 min |
 | Founder confirms scope and any pre-session position changes | 5 min |
-| Inventory pass — confirm the list above is complete; add or remove items | 30 min |
-| Dependency mapping — for each item, what does it depend on | 30 min |
+| Build-sessions-protocol-cache validation pass | 15 min |
+| Inventory pass — confirm categories A–K are complete; add or remove items; identify K-category bundled-prose consumers from registry | 45 min |
+| Dependency mapping — for each item, what does it depend on; K-category ↔ substrate ↔ plugin interactions | 30 min |
 | Importance ordering — apply the criteria; produce stage assignments; place the licensing gate per Rule A | 45 min |
 | Initial staging draft — write the plan document | 60–90 min |
 | **Holistic second pass — Rule B** — review for cross-stage implications, efficiencies, time-bounded session repackaging, minimal-founder-input session design | 45–60 min |
+| Build-sessions-protocol-cache moved to `/adopted/` (or refined and re-saved) | 5 min |
 | Founder review of draft + revisions | 30 min |
 | Decision-log entry + close | 30 min |
-| **Total** | **~5–6 hr** |
+| **Total** | **~6–7 hr** |
 
-If the inventory grows beyond capacity for one session, the planning work is itself staged — Session 1 produces a complete inventory and Stage 1–3 detail with the holistic second pass on those stages; subsequent stages are planned in follow-up sessions with another holistic pass at the end. Founder elects scope at session-open.
+If the inventory grows beyond capacity for one session, the planning work is itself staged — Session 1 produces a complete inventory (including the K-category) and Stage 1–3 detail with the holistic second pass on those stages; subsequent stages are planned in follow-up sessions with another holistic pass at the end. Founder elects scope at session-open.
 
 The Rule B holistic second pass is essential and must not be skipped, even if the session runs to its time limit. If time pressure forces a choice between completing all step-scoping and performing the second pass, prefer to scope fewer steps and complete the second pass on what was scoped. The second pass is what converts a step-by-step plan into an executable plan.
+
+The build-sessions-protocol-cache validation should happen early in the session (after reads, before deep planning) so that subsequent build-arc sessions inherit a stable cache.
 
 ## Rollback path
 
@@ -198,17 +229,19 @@ The Rule B holistic second pass is essential and must not be skipped, even if th
 
 ## Forecast
 
-**Most-likely path:** the inventory above is roughly complete; the planning session produces a staging plan with the licensing gate explicitly placed, ordering 5–10 stages spanning an estimated 25–50 build sessions. The Rule B holistic second pass repackages the work into time-bounded sessions of consistent length (e.g., 3–4 hours each) with founder input concentrated at session-open and session-close.
+**Most-likely path:** the inventory above is roughly complete; the planning session produces a staging plan with the licensing gate explicitly placed, ordering 6–12 stages (more than the prior estimate due to the K-category) spanning an estimated 35–70 build sessions. The Rule B holistic second pass repackages the work into time-bounded sessions of consistent length (e.g., 3–4 hours each) with founder input concentrated at session-open and session-close.
 
 The first three stages are likely:
 
-1. **Stage 1 — Backend foundations.** A1–A4 (Layer 2 authentication, validation, signing, key management), A7 (server-side R20a gate), A8 (V3 endpoint relationship design), A9 (cost monitoring restoration). Blocks most downstream work.
-2. **Stage 2 — Layer 3 service + plugin internals.** A5–A6 (Layer 3 service, prose_mode parameter), C1–C5 (plugin manifest, skills, tools, scripts, hooks), B1–B2 (Layer 1 hardening + in-plugin R20a). Builds the substrate's deliverable.
-3. **Stage 3 — Plugin packaging and first-marketplace prep.** C6–C8 (assets, documentation, variant strategy), G1 (first marketplace target), G2–G3 (per-marketplace packaging, listing design), B3–B5 (Layer 1 documentation and contribution surface).
+1. **Stage 1 — Backend foundations.** A1–A4 (Layer 2 authentication, validation, signing, key management), A7 (server-side R20a gate), A8 (V3 endpoint relationship design), A9 (cost monitoring restoration), A5–A6 (Layer 3 service + prose_mode parameter as substrate matures). Blocks K-category and plugin work both. K1 (inventory of bundled-prose consumers from component-registry) likely happens here too.
+2. **Stage 2 — K-category migration begins.** K2–K7 — per-consumer migration plans, sequencing, verification, cost impact, plus substrate refinements driven by migration findings (feeds back into A and B). The V3 endpoint family migrates first (per K3 plausible sequencing), then mentor surfaces.
+3. **Stage 3 — Layer 1 hardening + plugin internals.** B1–B2 (Layer 1 hardening + in-plugin R20a), B3–B5 (Layer 1 documentation, repository structure, contribution surface), C1–C5 (plugin manifest, skills, tools, scripts, hooks). Substrate is now finalised; plugin internals can be built against it confidently.
 
-The licensing gate (H1–H4) sits immediately after Stage 3 and before Stage 4. Stage 4 is the first stage that goes public.
+K-category and plugin-internals work may run partially in parallel once the substrate is mature enough to support both.
 
-The decision-path mechanisms (D), three-mode access surface (E), wiki publication (F), and ecosystem polish come in Stages 5+.
+The licensing gate (H1–H4) sits immediately before the first stage that goes public — likely after Stage 3 and before plugin packaging / marketplace work, but the planning session decides exactly where based on what's actually being released first.
+
+The decision-path mechanisms (D), three-mode access surface (E), wiki publication (F), and ecosystem polish come after the first plugin ships.
 
 **Alternative paths the planning may surface:**
 
@@ -216,7 +249,8 @@ The decision-path mechanisms (D), three-mode access surface (E), wiki publicatio
 - **First marketplace = Claude Code.** Larger audience; more stringent review; might require longer Stage 3.
 - **Multi-marketplace simultaneous launch.** Maximal reach but multi-times the Stage 3 + licensing gate + public-release work. Probably not first iteration.
 - **Plugin variant family vs single configurable plugin.** Each has different complexity profiles in C8 and downstream.
+- **K-category migration in parallel with plugin work, or strictly sequential.** Parallel risks substrate divergence; strictly sequential delays plugin shipping. Planning session decides.
 
-**Recommendation (not prescription):** the planning session is the discipline. The temptation will be to start designing or building during planning. Hold the line: this session is *only* planning. Execution starts in the session after the plan is approved. Rule B (holistic second pass) is what makes the plan executable rather than aspirational; do not skip it under time pressure — prefer scoping fewer steps and completing the pass on what was scoped.
+**Recommendation (not prescription):** the planning session is the discipline. The temptation will be to start designing or building during planning. Hold the line: this session is *only* planning. Execution starts in the session after the plan is approved. Rule B (holistic second pass) is what makes the plan executable rather than aspirational; do not skip it under time pressure — prefer scoping fewer steps and completing the pass on what was scoped. The build-sessions-protocol-cache validation should happen early so the cache is stable when the planning detail begins.
 
 End of prompt.
