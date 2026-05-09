@@ -1,0 +1,16 @@
+Sage-intuit 
+
+Action Space Generation stage
+
+The agent creates possible next action based on patterns:
+	•	“When solving X, typical next steps are A, B, C”
+
+b) Tool affordances define actions:
+	•	call API
+	•	retrieve data
+	•	run computation
+
+c) Templates / skills / workflows
+are predefined structures (search → retrieve → summarize) or (plan → execute → verify) to generate options.
+
+d) Decomposition complex goals into subgoal actions 
