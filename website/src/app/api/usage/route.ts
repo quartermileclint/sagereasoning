@@ -37,10 +37,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user's API keys
+    // 2026-05-09 fix (sub-item ii): user_id -> owner_user_id per api/api-keys-schema.sql
+    // line 27. Same-domain pre-existing bug as the /api/keys fix on 2026-05-08.
     let keysQuery = supabaseAdmin
       .from('api_keys')
       .select('id, label, tier, monthly_limit')
-      .eq('user_id', auth.user.id)
+      .eq('owner_user_id', auth.user.id)
 
     if (keyIdParam) {
       keysQuery = keysQuery.eq('id', keyIdParam)
@@ -58,40 +60,53 @@ export async function GET(request: NextRequest) {
       }, { headers: corsHeaders() })
     }
 
-    // Get usage data for the month
+    // Get usage data for the month.
+    // 2026-05-09 fix (sub-item ii expanded scope): the api_key_usage SELECT was
+    // referencing columns that do not exist on the deployed schema. Per
+    // api/api-keys-schema.sql lines 63-87, the actual columns are:
+    //   total_calls, guardrail_calls, score_iterate_calls, agent_baseline_calls,
+    //   other_calls, current_day, daily_calls.
+    // Old code referenced: endpoint, day, daily_total — none of which exist.
+    // Per (api_key_id, year, month) the schema stores AT MOST ONE ROW (UNIQUE
+    // constraint, line 87). Per-endpoint stored as separate counter columns.
+    // Daily trend cannot be reconstructed from this schema (only the current
+    // day's count is tracked); that field has been dropped from the response in
+    // favour of a single daily_calls_today value.
     const keyIds = keys.map(k => k.id)
 
     const { data: usageRows, error: usageError } = await supabaseAdmin
       .from('api_key_usage')
-      .select('api_key_id, endpoint, day, daily_total')
+      .select('api_key_id, total_calls, guardrail_calls, score_iterate_calls, agent_baseline_calls, other_calls, current_day, daily_calls')
       .in('api_key_id', keyIds)
       .eq('year', year)
       .eq('month', month)
-      .order('day', { ascending: true })
 
     if (usageError) {
       console.error('Usage query error:', usageError)
       return NextResponse.json({ error: 'Failed to fetch usage data' }, { status: 500 })
     }
 
-    // Aggregate by key
+    // Aggregate by key — at most one row per (api_key_id, year, month).
+    const todayDay = now.getUTCDate()
+
     const keyUsage = keys.map(key => {
-      const keyRows = (usageRows || []).filter(r => r.api_key_id === key.id)
-      const totalCalls = keyRows.reduce((sum, r) => sum + (r.daily_total || 0), 0)
+      const row = (usageRows || []).find(r => r.api_key_id === key.id)
+      const totalCalls = row?.total_calls ?? 0
 
-      // By endpoint
-      const byEndpoint: Record<string, number> = {}
-      keyRows.forEach(r => {
-        if (r.endpoint) {
-          byEndpoint[r.endpoint] = (byEndpoint[r.endpoint] || 0) + (r.daily_total || 0)
-        }
-      })
+      // Per-endpoint counts read directly from schema columns.
+      const byEndpoint: Record<string, number> = {
+        guardrail: row?.guardrail_calls ?? 0,
+        score_iterate: row?.score_iterate_calls ?? 0,
+        agent_baseline: row?.agent_baseline_calls ?? 0,
+        other: row?.other_calls ?? 0,
+      }
 
-      // Daily trend
-      const dailyTrend: Record<number, number> = {}
-      keyRows.forEach(r => {
-        dailyTrend[r.day] = (dailyTrend[r.day] || 0) + (r.daily_total || 0)
-      })
+      // daily_calls is meaningful only when current_day matches today.
+      // If the row's current_day is older than today, the counter has not yet
+      // been reset by an incoming call; treat as 0 for "today's calls".
+      const dailyCallsToday = (row?.current_day === todayDay)
+        ? (row.daily_calls ?? 0)
+        : 0
 
       return {
         key_id: key.id,
@@ -101,7 +116,7 @@ export async function GET(request: NextRequest) {
         monthly_limit: key.monthly_limit,
         monthly_remaining: Math.max(0, key.monthly_limit - totalCalls),
         by_endpoint: byEndpoint,
-        daily_trend: dailyTrend,
+        daily_calls_today: dailyCallsToday,
       }
     })
 

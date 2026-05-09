@@ -33,24 +33,34 @@ export async function GET(request: NextRequest) {
     const year = now.getUTCFullYear()
     const month = now.getUTCMonth() + 1
 
+    // 2026-05-09 fix (sub-item iii): api_key_usage column-name corrections.
+    // Per api/api-keys-schema.sql lines 63-87, the columns are total_calls,
+    // daily_calls, current_day. The OLD code queried monthly_total + daily_total
+    // and filtered by day — none of those exist. Schema also stores AT MOST
+    // ONE ROW per (api_key_id, year, month); the row carries `current_day` +
+    // `daily_calls` for whatever day is currently being counted.
+    // The .eq('current_day', today) filter preserves today-aware semantics: if
+    // the row's current_day is today, `daily_calls` is today's count; otherwise
+    // .single() returns no row and daily_calls displays as 0 (which is correct
+    // from a "today's calls" perspective, since no calls have been made today).
     const keysWithUsage = await Promise.all(
       (keys || []).map(async (key) => {
         const { data: usage } = await supabaseAdmin
           .from('api_key_usage')
-          .select('monthly_total, daily_total')
+          .select('total_calls, daily_calls')
           .eq('api_key_id', key.id)
           .eq('year', year)
           .eq('month', month)
-          .eq('day', now.getUTCDate())
+          .eq('current_day', now.getUTCDate())
           .single()
 
         return {
           ...key,
           usage: {
-            monthly_calls: usage?.monthly_total || 0,
+            monthly_calls: usage?.total_calls || 0,
             monthly_limit: key.monthly_limit,
-            monthly_remaining: key.monthly_limit - (usage?.monthly_total || 0),
-            daily_calls: usage?.daily_total || 0,
+            monthly_remaining: key.monthly_limit - (usage?.total_calls || 0),
+            daily_calls: usage?.daily_calls || 0,
             daily_limit: key.daily_limit,
           },
         }

@@ -16,6 +16,10 @@ export default function OpsHub() {
   const [stoicResult, setStoicResult] = useState<Record<string, unknown> | null>(null)
 
   // Decision Scoring State
+  // 2026-05-09 fix (sub-item vii): added decisionQuestion state. The
+  // /api/score-decision route requires a `decision` field naming the question
+  // (e.g. "Should I take the new job?"); options are the alternatives.
+  const [decisionQuestion, setDecisionQuestion] = useState('')
   const [decisionOption1, setDecisionOption1] = useState('')
   const [decisionOption2, setDecisionOption2] = useState('')
   const [scoringLoading, setScoringLoading] = useState(false)
@@ -60,17 +64,21 @@ export default function OpsHub() {
   }
 
   const handleDecisionScoring = async () => {
-    if (!decisionOption1.trim() || !decisionOption2.trim()) return
+    if (!decisionQuestion.trim() || !decisionOption1.trim() || !decisionOption2.trim()) return
     setScoringLoading(true)
     setScoringResult(null)
 
     try {
+      // 2026-05-09 fix (sub-item vii): /api/score-decision route expects
+      // { decision: <string>, options: [<opt1>, <opt2>], context, process }
+      // per route.ts line 93. OLD payload {option1, option2} failed validation
+      // with 400 (missing `decision`).
       const res = await authFetch('/api/score-decision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          option1: decisionOption1,
-          option2: decisionOption2,
+          decision: decisionQuestion,
+          options: [decisionOption1, decisionOption2],
         }),
       })
       const data = await res.json()
@@ -580,6 +588,19 @@ export default function OpsHub() {
               <div style={{ ...styles.card, ...styles.stoicCheck }}>
                 <div style={styles.cardTitleBold}>Evaluate Two Decisions</div>
                 <div style={styles.decisionContainer}>
+                  {/* 2026-05-09 (sub-item vii): added Decision Question textarea
+                      so the page captures the framing question that
+                      /api/score-decision requires alongside the option list. */}
+                  <div style={styles.decisionInputGroup}>
+                    <label style={styles.inputLabel}>Decision Question:</label>
+                    <textarea
+                      placeholder="What is the question you are deciding? (e.g., 'Should I take the new job?')"
+                      value={decisionQuestion}
+                      onChange={(e) => setDecisionQuestion(e.target.value)}
+                      style={styles.stoicTextarea}
+                    />
+                  </div>
+
                   <div style={styles.decisionInputGroup}>
                     <label style={styles.inputLabel}>Option 1:</label>
                     <textarea
@@ -602,7 +623,7 @@ export default function OpsHub() {
 
                   <button
                     onClick={handleDecisionScoring}
-                    disabled={scoringLoading || !decisionOption1.trim() || !decisionOption2.trim()}
+                    disabled={scoringLoading || !decisionQuestion.trim() || !decisionOption1.trim() || !decisionOption2.trim()}
                     style={scoringLoading ? { ...styles.btn, opacity: 0.6 } : styles.btn}
                   >
                     {scoringLoading ? 'Scoring...' : 'Score Decisions'}

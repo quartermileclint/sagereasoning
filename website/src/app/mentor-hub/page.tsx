@@ -149,10 +149,13 @@ export default function MentorHub() {
         const fullThread = [...threads[activeContact], newMsg, resMsg];
         const threadText = fullThread.map((m) => `${m.dir === 'sent' ? 'You' : contacts[activeContact].name}: ${m.text}`).join('\n');
 
+        // 2026-05-09 fix (sub-item vii): /api/score-conversation route handler
+        // expects { conversation, context, format } per route.ts line 85.
+        // OLD payload field name `input` failed validation with 400.
         const scoreRes = await authFetch('/api/score-conversation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ input: threadText }),
+          body: JSON.stringify({ conversation: threadText }),
         });
 
         if (scoreRes.ok) {
