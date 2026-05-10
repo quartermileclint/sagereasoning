@@ -125,14 +125,15 @@ const VALID_DEPTHS: ReasonDepth[] = ['quick', 'standard', 'deep']
 // A1 — Stage 1 Layer 2 plugin-auth scaffolding (PR1 single-endpoint proof)
 // =============================================================================
 //
-// Status: Wired (2026-05-MM). Scaffolded 2026-05-10 behind feature flag set
-// to off; invocation site added 2026-05-MM under Option (a) (extend the
-// existing 401 branch).
+// Status: Verified (2026-05-10). Scaffolded 2026-05-10 behind feature flag
+// set to off; invocation site added 2026-05-10 under Option (a) (extend the
+// existing 401 branch); flag flipped + three verification scenarios passed
+// 2026-05-10.
 // Per: /adopted/substrate-plugin-staging-plan.md Stage 1 item A1
 //      /adopted/ADR-stoic-agent-substrate-concept.md (Decision §"The three layers")
 //      D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10 (scaffold predecessor)
-//      D-A1-INVOCATION-SITE-2026-05-MM (this invocation-site change)
-//      D-A1-FLAG-FLIP-VERIFIED-2026-05-MM (companion deploy + flag-flip entry)
+//      D-A1-INVOCATION-SITE-2026-05-10 (this invocation-site change)
+//      D-A1-FLAG-FLIP-VERIFIED-2026-05-10 (companion deploy + flag-flip entry)
 //
 // This is the first execution-session work of the substrate-as-plugin build
 // arc. /api/reason is the PR1 single-endpoint proof target — chosen because it
@@ -146,7 +147,7 @@ const VALID_DEPTHS: ReasonDepth[] = ['quick', 'standard', 'deep']
 // to this scaffold and its invocation site. PR6 applies (auth surface). AC7
 // applies (auth-surface change). AC4 applies (invocation testing for safety
 // functions — verified post-deploy via the three Step-5 verification scenarios
-// recorded in D-A1-FLAG-FLIP-VERIFIED-2026-05-MM).
+// recorded in D-A1-FLAG-FLIP-VERIFIED-2026-05-10).
 //
 // PR1 single-endpoint proof: /api/reason is the proof endpoint. No other route
 // file is touched by this invocation-site change. Roll-out to additional
@@ -164,7 +165,7 @@ const VALID_DEPTHS: ReasonDepth[] = ['quick', 'standard', 'deep']
  *
  * When set to 'true' in the deployment environment, plugin-originated calls
  * to /api/reason are authenticated via the X-Plugin-Auth header. The
- * invocation site (added 2026-05-MM under D-A1-INVOCATION-SITE-2026-05-MM)
+ * invocation site (added 2026-05-MM under D-A1-INVOCATION-SITE-2026-05-10)
  * sits inside the existing user-auth + API-key 401 branch — plugin-auth is
  * tried only when both user-auth and API-key have failed AND this flag is
  * on. With the flag off (or unset), the auth behaviour is byte-identical to
@@ -176,7 +177,7 @@ const VALID_DEPTHS: ReasonDepth[] = ['quick', 'standard', 'deep']
 const PLUGIN_AUTH_ENABLED = process.env.PLUGIN_AUTH_ENABLED === 'true'
 
 /**
- * Plugin-auth check (Wired 2026-05-MM under D-A1-INVOCATION-SITE-2026-05-MM).
+ * Plugin-auth check (Wired 2026-05-MM under D-A1-INVOCATION-SITE-2026-05-10).
  *
  * Reads the X-Plugin-Auth header and performs a constant-time comparison
  * against PLUGIN_AUTH_SECRET. Returns valid=true with a placeholder plugin_id
@@ -270,7 +271,7 @@ function checkPluginAuth(
 // Scaffold-presence assertion for the feature flag (zero runtime effect).
 // `checkPluginAuth` no longer needs a `void` reference because it now has
 // a real call site below in the POST handler's authentication branch (added
-// 2026-05-MM under D-A1-INVOCATION-SITE-2026-05-MM). The flag reference is
+// 2026-05-MM under D-A1-INVOCATION-SITE-2026-05-10). The flag reference is
 // retained because the runtime constant is read inside the conditional and
 // keeping it referenced at module level guards against any future refactor
 // that might inadvertently remove its only usage.
@@ -288,7 +289,7 @@ export async function POST(request: NextRequest) {
   // Authentication: accept user session (JWT) OR API key OR plugin-auth.
   //
   // Precedence (Option (a) — extend the existing 401 branch, elected in
-  // D-A1-INVOCATION-SITE-2026-05-MM):
+  // D-A1-INVOCATION-SITE-2026-05-10):
   //   1. requireAuth — Supabase JWT (existing user-auth path)
   //   2. validateApiKey — API key fallback (existing agent-auth path)
   //   3. checkPluginAuth — plugin-auth (NEW; gated by PLUGIN_AUTH_ENABLED flag)
