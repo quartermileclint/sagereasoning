@@ -40,7 +40,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-import { extractFeatures } from './layer1-extractor'
+import { extractFeatures, type Layer1Schema } from './layer1-extractor'
 import {
   applyMechanisms,
   detectTier1Trigger,
@@ -137,6 +137,26 @@ export interface SandwichInput {
   retrievedPassages?: RetrievedPassage[]
   practitionerContext?: string | null
   projectContext?: string | null
+  /**
+   * Pre-computed Layer1Schema (added 2026-05-10 under
+   * D-A2-INPUT-VALIDATION-SURFACE-2026-05-10).
+   *
+   * When present, server-side Layer 1 extraction is SKIPPED and the supplied
+   * schema is used directly as Layer 2 input. Used by plugin-authenticated
+   * traffic per the substrate ADR (Decision §"The three layers"): the plugin
+   * runs Layer 1 locally and submits a validated Layer1Schema to the
+   * substrate.
+   *
+   * The CALLER is responsible for validating the schema via
+   * validateLayer1Schema before passing it here. This branch trusts that
+   * contract (the route's validatePluginRequest helper enforces it for
+   * /api/reason).
+   *
+   * When undefined (the default — the existing user-auth + API-key path),
+   * Layer 1 runs server-side via extractFeatures as today. Behaviour is
+   * byte-identical to the pre-A2 state.
+   */
+  preExtractedLayer1Schema?: Layer1Schema
 }
 
 /**
@@ -359,35 +379,46 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
   }
 
   // ---- Layer 1 ----
-  let layer1Schema
+  let layer1Schema: Layer1Schema
   const layer1Start = Date.now()
-  try {
-    const layer1Result = await extractFeatures({
-      input: params.input,
-      context: params.context,
-      domain_context: params.domain_context,
-      urgency_context: params.urgency_context,
-      stoicBrainContext: params.stoicBrainContext,
-      retrievedPassages: params.retrievedPassages,
-      practitionerContext: params.practitionerContext,
-      projectContext: params.projectContext,
-    })
-    layer1Schema = layer1Result.schema
-    // Layer 1 cost capture (M1-CP4f Step 3). usage.input_tokens excludes cache
-    // reads per Anthropic SDK convention; see LayerTokenUsage docs in
-    // layer1-extractor.ts. Tracking input + output approximates marginal
-    // per-request cost (the right thing for R5 cost-health alerts).
-    result.layer1_cost_usd_microcents = sonnetCostMicrocents(
-      layer1Result.usage.input_tokens,
-      layer1Result.usage.output_tokens
-    )
-  } catch (err) {
+  if (params.preExtractedLayer1Schema !== undefined) {
+    // Stage 1 A2 (D-A2-INPUT-VALIDATION-SURFACE-2026-05-10): pre-computed
+    // Layer1Schema supplied by a plugin-authenticated caller. The plugin ran
+    // Layer 1 locally per the substrate ADR (Decision §"The three layers");
+    // the route validated the schema via validatePluginRequest before
+    // passing here. Skip server-side extractFeatures.
+    layer1Schema = params.preExtractedLayer1Schema
+    result.layer1_latency_ms = 0       // No server-side Layer 1 work performed
+    result.layer1_cost_usd_microcents = 0 // No LLM call
+  } else {
+    try {
+      const layer1Result = await extractFeatures({
+        input: params.input,
+        context: params.context,
+        domain_context: params.domain_context,
+        urgency_context: params.urgency_context,
+        stoicBrainContext: params.stoicBrainContext,
+        retrievedPassages: params.retrievedPassages,
+        practitionerContext: params.practitionerContext,
+        projectContext: params.projectContext,
+      })
+      layer1Schema = layer1Result.schema
+      // Layer 1 cost capture (M1-CP4f Step 3). usage.input_tokens excludes cache
+      // reads per Anthropic SDK convention; see LayerTokenUsage docs in
+      // layer1-extractor.ts. Tracking input + output approximates marginal
+      // per-request cost (the right thing for R5 cost-health alerts).
+      result.layer1_cost_usd_microcents = sonnetCostMicrocents(
+        layer1Result.usage.input_tokens,
+        layer1Result.usage.output_tokens
+      )
+    } catch (err) {
+      result.layer1_latency_ms = Date.now() - layer1Start
+      result.error = 'layer1_throw'
+      console.warn('[parallel-run] Layer 1 threw:', err instanceof Error ? err.message : err)
+      return result
+    }
     result.layer1_latency_ms = Date.now() - layer1Start
-    result.error = 'layer1_throw'
-    console.warn('[parallel-run] Layer 1 threw:', err instanceof Error ? err.message : err)
-    return result
   }
-  result.layer1_latency_ms = Date.now() - layer1Start
 
   // ---- Tier 1 ELEMENT_FUSION detection (added 2026-05-06, M1-CP4e) ----
   // Per ADR-008 §5 step 5(b)–(c) + ADR-006 §3.10. detectTier1Trigger inspects
