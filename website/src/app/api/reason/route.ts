@@ -125,29 +125,33 @@ const VALID_DEPTHS: ReasonDepth[] = ['quick', 'standard', 'deep']
 // A1 — Stage 1 Layer 2 plugin-auth scaffolding (PR1 single-endpoint proof)
 // =============================================================================
 //
-// Status: Scaffolded behind feature flag set to off (2026-05-10).
+// Status: Wired (2026-05-MM). Scaffolded 2026-05-10 behind feature flag set
+// to off; invocation site added 2026-05-MM under Option (a) (extend the
+// existing 401 branch).
 // Per: /adopted/substrate-plugin-staging-plan.md Stage 1 item A1
 //      /adopted/ADR-stoic-agent-substrate-concept.md (Decision §"The three layers")
-//      D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10 (decision-log entry)
+//      D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10 (scaffold predecessor)
+//      D-A1-INVOCATION-SITE-2026-05-MM (this invocation-site change)
+//      D-A1-FLAG-FLIP-VERIFIED-2026-05-MM (companion deploy + flag-flip entry)
 //
 // This is the first execution-session work of the substrate-as-plugin build
 // arc. /api/reason is the PR1 single-endpoint proof target — chosen because it
 // is already on the translation-sandwich substrate per M1-CP6 (2026-05-08) and
 // the existing dual-auth pattern (user-auth + API-key) is canonical here per
-// KG4. The scaffold extends the dual-auth pattern with a third path
-// (plugin-auth) without yet invoking it.
+// KG4. The dual-auth pattern is now extended with a third path (plugin-auth);
+// the third path is gated by PLUGIN_AUTH_ENABLED at runtime, so when the flag
+// is off, the route's auth behaviour is byte-identical to pre-invocation.
 //
 // Critical Change Protocol (project instructions §0c-ii) governs every change
-// to this scaffold. PR6 applies (auth surface). AC7 applies (auth-surface
-// change). The function is defined but NOT INVOKED. Until PLUGIN_AUTH_ENABLED
-// is set to 'true' in the deployment environment AND a future code change
-// inserts an invocation site, this scaffold has zero runtime effect.
+// to this scaffold and its invocation site. PR6 applies (auth surface). AC7
+// applies (auth-surface change). AC4 applies (invocation testing for safety
+// functions — verified post-deploy via the three Step-5 verification scenarios
+// recorded in D-A1-FLAG-FLIP-VERIFIED-2026-05-MM).
 //
-// Deploy + flag-flip + verification sequence: NOT IN SCOPE FOR THIS SESSION.
-// Per PR1, the proof is the flag-on verification on /api/reason; that happens
-// in the subsequent session after Critical Change Protocol review of any
-// post-scaffold-discovered risks. Approval requested in this session is for
-// the scaffold commit only, not for deploy.
+// PR1 single-endpoint proof: /api/reason is the proof endpoint. No other route
+// file is touched by this invocation-site change. Roll-out to additional
+// endpoints (and any refactor into a unified pre-handler middleware per
+// Option (c)) is deferred to dedicated post-A2 sessions per the staging plan.
 //
 // Build-arc no-current-users governing note: only founder + test logins exist
 // during the build arc; the Critical Change Protocol's "What happens to
@@ -159,10 +163,12 @@ const VALID_DEPTHS: ReasonDepth[] = ['quick', 'standard', 'deep']
  * Plugin-auth feature flag.
  *
  * When set to 'true' in the deployment environment, plugin-originated calls
- * to /api/reason MAY be authenticated via the X-Plugin-Auth header (subject
- * to a future code change wiring checkPluginAuth into the authentication
- * branch). Until both the flag is set AND an invocation site exists, this
- * scaffold has zero runtime effect.
+ * to /api/reason are authenticated via the X-Plugin-Auth header. The
+ * invocation site (added 2026-05-MM under D-A1-INVOCATION-SITE-2026-05-MM)
+ * sits inside the existing user-auth + API-key 401 branch — plugin-auth is
+ * tried only when both user-auth and API-key have failed AND this flag is
+ * on. With the flag off (or unset), the auth behaviour is byte-identical to
+ * the pre-invocation scaffold state.
  *
  * Default: 'false' (or unset, treated as false). The PLUGIN_AUTH_ENABLED
  * variable is documented in /website/.env.example.
@@ -170,7 +176,7 @@ const VALID_DEPTHS: ReasonDepth[] = ['quick', 'standard', 'deep']
 const PLUGIN_AUTH_ENABLED = process.env.PLUGIN_AUTH_ENABLED === 'true'
 
 /**
- * Plugin-auth check (scaffold — NOT INVOKED in this session).
+ * Plugin-auth check (Wired 2026-05-MM under D-A1-INVOCATION-SITE-2026-05-MM).
  *
  * Reads the X-Plugin-Auth header and performs a constant-time comparison
  * against PLUGIN_AUTH_SECRET. Returns valid=true with a placeholder plugin_id
@@ -188,10 +194,9 @@ const PLUGIN_AUTH_ENABLED = process.env.PLUGIN_AUTH_ENABLED === 'true'
  *
  * AC7 standing constraint: this function does not touch the user session,
  * cookie scope, redirect behaviour, or domain configuration. It only inspects
- * the X-Plugin-Auth header and returns a result. AC7 NOT engaged at the
- * function level; AC7 ENGAGED at the eventual invocation-site change (when
- * checkPluginAuth is wired into the authentication branch in a future
- * session).
+ * the X-Plugin-Auth header and returns a result. AC7 ENGAGED at the
+ * invocation site (the POST handler's authentication branch), not at the
+ * function-definition level.
  *
  * The return shape mirrors validateApiKey for consistency with the existing
  * dual-auth pattern in security.ts.
@@ -262,13 +267,14 @@ function checkPluginAuth(
   return { valid: true, plugin_id: 'scaffold-plugin' }
 }
 
-// Scaffold-presence assertions (zero runtime effect; references the feature
-// flag and the function so that bundlers/linters do not tree-shake the
-// scaffold out of the build before the eventual invocation site lands).
-// Replace with the real invocation site in a future session once the
-// Critical Change Protocol's deploy-phase review is complete.
+// Scaffold-presence assertion for the feature flag (zero runtime effect).
+// `checkPluginAuth` no longer needs a `void` reference because it now has
+// a real call site below in the POST handler's authentication branch (added
+// 2026-05-MM under D-A1-INVOCATION-SITE-2026-05-MM). The flag reference is
+// retained because the runtime constant is read inside the conditional and
+// keeping it referenced at module level guards against any future refactor
+// that might inadvertently remove its only usage.
 void PLUGIN_AUTH_ENABLED
-void checkPluginAuth
 
 // =============================================================================
 // END A1 scaffold
@@ -279,11 +285,49 @@ export async function POST(request: NextRequest) {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
   if (rateLimitError) return rateLimitError
 
-  // Authentication: accept user session (JWT) OR API key
+  // Authentication: accept user session (JWT) OR API key OR plugin-auth.
+  //
+  // Precedence (Option (a) — extend the existing 401 branch, elected in
+  // D-A1-INVOCATION-SITE-2026-05-MM):
+  //   1. requireAuth — Supabase JWT (existing user-auth path)
+  //   2. validateApiKey — API key fallback (existing agent-auth path)
+  //   3. checkPluginAuth — plugin-auth (NEW; gated by PLUGIN_AUTH_ENABLED flag)
+  //
+  // Plugin-auth is checked LAST, only when both user-auth and API-key have
+  // failed AND the PLUGIN_AUTH_ENABLED flag is on. With the flag off (the
+  // pre-flag-flip production state), this branch is byte-identical to today's
+  // behaviour — the new conditional short-circuits and `auth.error` is
+  // returned exactly as before.
+  //
+  // On plugin-auth success, the request proceeds with no `auth.user`. The
+  // downstream Layer 2 context loader treats this exactly like an API-key
+  // call: `practitionerContext` resolves to `null` (see the
+  // `auth.user?.id ? getPractitionerContext(...) : Promise.resolve(null)`
+  // line further down). Plugin callers do not yet receive per-user context;
+  // the placeholder `plugin_id: 'scaffold-plugin'` returned by checkPluginAuth
+  // becomes a real identifier once Stage 1 A3 (signing) and A4 (key management)
+  // ADRs land.
+  //
+  // AC7 engaged at the invocation site (auth-surface change). AC4 engaged
+  // (the function is now actually invoked in production once flag is on).
+  // PR1 single-endpoint proof: this is the invocation site on the proof
+  // endpoint /api/reason; no other route file is touched.
+  // PR6 engaged (safety-critical change to authentication).
   const auth = await requireAuth(request)
   const apiKey = auth.error ? await validateApiKey(request, 'other') : null
 
-  if (auth.error && (!apiKey || !apiKey.valid)) {
+  let pluginAuth: ReturnType<typeof checkPluginAuth> | null = null
+  if (auth.error && (!apiKey || !apiKey.valid) && PLUGIN_AUTH_ENABLED) {
+    pluginAuth = checkPluginAuth(request)
+  }
+
+  if (auth.error && (!apiKey || !apiKey.valid) && (!pluginAuth || !pluginAuth.valid)) {
+    // Prefer plugin-auth's specific 401 if the plugin-auth path was attempted
+    // and produced its own error response; otherwise fall back to the
+    // user-auth 401 (existing behaviour).
+    if (pluginAuth && !pluginAuth.valid) {
+      return pluginAuth.error
+    }
     return auth.error
   }
 
