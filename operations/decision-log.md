@@ -4031,3 +4031,44 @@ Expected: Vercel commit history shows `6e57663` deployed; the re-run curl return
 **Status:** Adopted. Cross-references: scaffold predecessor `D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10`; invocation-site predecessor `D-A1-INVOCATION-SITE-2026-05-10` (preceding entry); predecessor close `/operations/handoffs/founder/2026-05-10-stage-1-kickoff-close.md`; this session's prompt `/operations/handoffs/founder/2026-05-10-stage-1-a1-invocation-flag-flip-NEXT-SESSION-PROMPT.md`; this session's close `/operations/handoffs/founder/2026-05-10-stage-1-a1-verified-close.md`; staging plan `/adopted/substrate-plugin-staging-plan.md` Stage 1 item A1 (success criteria SATISFIED for `/api/reason`); ADR `/adopted/ADR-stoic-agent-substrate-concept.md`; route file `/website/src/app/api/reason/route.ts`; example env file `/website/.env.example`; build-arc cache `/adopted/build-sessions-protocol-cache.md`; standing protocol cache `/adopted/standing-protocol-cache.md`; canonical translation-sandwich cutover `D-M1-CP6-CUTOVER-2026-05-08`; commit `6e57663` on origin/main.
 
 ---
+
+## 2026-05-10 — D-A2-INPUT-VALIDATION-SURFACE-2026-05-10
+
+**Decision:** Stage 1 item A2 (Layer 2 input validation surface for plugin-originated calls) reaches **Verified** status on `/api/reason`. Plugin-authenticated callers per the substrate ADR submit a pre-computed `Layer1Schema` (the plugin ran Layer 1 locally) alongside the original input text. The route validates the schema via `validateLayer1Schema`, skips server-side `extractFeatures` + `loadLayer1WithFallback` (RAG retrieval), and feeds the validated schema directly to Layer 2 via `runSandwich`. R20a continues to run on the input text per AC5. Three design choices elected: **1(i)** new `Layer1Schema` ingress; **2(a)** R20a on original text alongside the schema; **3(β)** wrap `validateLayer1Schema` in a route-ingress helper (`validatePluginRequest`). All three were the recommended options. Three production verification scenarios passed: valid schema → 200 with `extraction` field returning the supplied schema; invalid schema (wrong `version` value) → 400 with `category` + `field` + `detail` preserved from `Layer1ValidationError`; existing user-auth path → 200 (zero regression). PR1 single-endpoint proof on `/api/reason` is COMPLETE for A2.
+
+**Reasoning:** Choice 1(i) matches the substrate ADR (Decision §"The three layers") and sets up A3 (signing) cleanly — the schema is the thing to be cryptographically signed. Choice 2(a) preserves AC5 unchanged with no architectural commitment about the three-layer R20a defence's specific handover mechanism (which belongs in A7 and B2, not A2). Choice 3(β) mirrors the existing `requireAuth`/`validateApiKey` helper pattern in `security.ts` and converts `Layer1ValidationError` throws into structured 400 responses with the validator's `category` and `field` info preserved. Cross-references predecessor entries `D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10`, `D-A1-INVOCATION-SITE-2026-05-10`, `D-A1-FLAG-FLIP-VERIFIED-2026-05-10`.
+
+**Files touched:**
+- `/website/src/app/api/reason/route.ts` — A2 doc-comment block; imports for `validateLayer1Schema` + `Layer1ValidationError` + `Layer1Schema` type from layer1-extractor; `validatePluginRequest` helper function (~70 lines, β wrapper pattern); validation branch added inside POST handler gated on `isPluginAuth`; `loadLayer1WithFallback` skipped when `preExtractedLayer1Schema` is present (avoids unnecessary RAG retrieval); `preExtractedLayer1Schema` field passed to `runSandwich`.
+- `/website/src/lib/translation-sandwich/parallel-run.ts` — `Layer1Schema` type added to existing layer1-extractor import; `preExtractedLayer1Schema?: Layer1Schema` field added to `SandwichInput` interface; `runSandwichInner` updated to skip `extractFeatures` branch when schema is supplied (additive — existing path unchanged when field is absent; latency + cost recorded as 0 for the skip path).
+- `/operations/decision-log.md` — this entry appended.
+
+**Risk classification:** Elevated under 0d-ii. Input-validation surface; not auth surface, not safety-critical, not deployment-configuration. AC7 NOT engaged (no auth surface change). PR6 NOT engaged (no R20a / distress-classifier / signing change). Critical Change Protocol NOT engaged. Zero regression risk on user-auth + API-key paths is structurally enforced by the `isPluginAuth` gate (when `pluginAuth` is `null` — the existing paths — the new branches are dead code). TypeScript compile via `npx tsc --noEmit -p tsconfig.json` returned exit 0 before deploy. PR1 single-endpoint discipline preserved (only `/api/reason/route.ts` and `parallel-run.ts` touched; no other route file).
+
+**Rollback path:** `git revert <wiring-commit-hash>` and push via GitHub Desktop. Vercel redeploys prior code. Recovery ≤5 min. No env-var or production-state changes to undo.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+git log --oneline -3 origin/main
+# Expected: A2 wiring commit on origin/main (or second-most-recent after session-close commit).
+
+# Re-run Scenario 1 happy-path proof against canonical www. URL
+# (apex domain sagereasoning.com redirects POSTs and the body does not
+# survive the redirect — PR5 watch-status carry-forward from A1).
+curl -X POST https://www.sagereasoning.com/api/reason \
+  -H "Content-Type: application/json" \
+  -H "X-Plugin-Auth: <PLUGIN_AUTH_SECRET-value-from-vercel>" \
+  -d '{"input":"post-close verification","depth":"quick","layer1_schema":{"version":"layer1-schema-v1","passions_present":[],"control_filter_elements":[],"oikeiosis_circles_engaged":[],"value_categories_at_stake":[],"kathekon_factors":[],"urgency_indicators":[],"causal_stage_evidence":[],"eupatheia_candidates":[],"stated_concern_targets":[],"stated_equanimity_signals":[],"motivation_stated":false,"motivation_evidence":[],"element_fusion_detected":{"fused":false,"fused_concerns":null},"ambiguity_notes":[]}}' | head -c 400
+```
+Expected: response starts with `{"version":"translation-sandwich-v1","extraction":{"version":"layer1-schema-v1",...` — the `extraction` field returns the `Layer1Schema` we sent in (proving server-side Layer 1 was skipped and the schema flowed through the new ingress).
+
+**Open questions:**
+- Capability-matrix update for the new validation surface remains deferred to a routine governance session as part of K-category migration planning. Inherited from A1 close; not new this session.
+- Minimal-empty-schema test exercises the ingress but produces thin Layer 2/3 output. Richer schemas (with actual passions, circles, etc.) will be tested implicitly when the sandwich runs over them; full coverage pending Stage 3 B1 (in-plugin Layer 1 implementation).
+
+**Rules served:** R0, 0a, 0b, 0c, 0d-ii (Elevated), 0f, AC5 (preserved at line 376; R20a runs on input text exactly as today per Choice 2(a)), AC7 (NOT engaged), AC8 (translation-sandwich canonical at `/api/reason` per M1-CP6 — preserved unchanged), KG1 (N/A — no DB writes), KG2 (N/A — A2 has no LLM call; existing Layer 1/2/3 model selection unchanged), KG3 (N/A), KG4 (capability-matrix update deferred), KG5 (N/A), KG6 (N/A), KG7 (N/A), PR1 (single-endpoint proof on `/api/reason` — COMPLETE for A2; reaches Verified), PR4 (N/A — no LLM call in A2 itself), PR5 (knowledge-gap carry-forward — three-layer architecture concept observed at third recurrence this session; resolution already canonical via `/adopted/ADR-stoic-agent-substrate-concept.md` so no new KG entry needed; see session close PR5 block for full carry-forward), PR6 (NOT engaged — no safety-critical surface), PR7 (open questions documented above), PR8 (T-AT-LEAST-NEW-1 three-scenario verification methodology re-applied this session — count 2; one more recurrence promotes to a process rule), PR9 (no F-tier findings).
+
+**Status:** Adopted. Cross-references: predecessor entries `D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10` + `D-A1-INVOCATION-SITE-2026-05-10` + `D-A1-FLAG-FLIP-VERIFIED-2026-05-10`; staging plan `/adopted/substrate-plugin-staging-plan.md` Stage 1 item A2 (success criteria SATISFIED for `/api/reason`); ADR `/adopted/ADR-stoic-agent-substrate-concept.md` §"The three layers"; route file `/website/src/app/api/reason/route.ts` (A2 doc-comment block + `validatePluginRequest` helper + validation branch); orchestrator `/website/src/lib/translation-sandwich/parallel-run.ts` (`preExtractedLayer1Schema` field on `SandwichInput`); validator `/website/src/lib/translation-sandwich/layer1-extractor.ts` (`validateLayer1Schema` reused unchanged); build-arc cache `/adopted/build-sessions-protocol-cache.md`; standing protocol cache `/adopted/standing-protocol-cache.md`; canonical translation-sandwich cutover `D-M1-CP6-CUTOVER-2026-05-08`; this session's close `/operations/handoffs/founder/2026-05-10-stage-1-a2-verified-close.md`.
+
+---
