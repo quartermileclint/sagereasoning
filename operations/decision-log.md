@@ -3734,3 +3734,196 @@ Expected: header reads `**Status:** Draft v1.2`; revision-history block shows v1
 **Status:** Adopted. Cross-references: predecessor close `/operations/handoffs/founder/2026-05-09-substrate-build-plan-close.md` (the session that drafted v1.0); this session's close `/operations/handoffs/founder/2026-05-09-substrate-build-plan-v1.2-approval-close.md`; build plan `/drafts/stoic-agent-substrate-build-plan.md` v1.2; next-session prompt `/operations/handoffs/founder/2026-05-09-substrate-build-session-1-NEXT-SESSION-PROMPT.md` (re-written this session for Phase B execution).
 
 ---
+
+## 2026-05-10 — D-BUILD-SESSIONS-CACHE-ADOPTED-2026-05-10
+
+**Decision:** The build-sessions-protocol-cache, drafted in the predecessor session at `/drafts/build-sessions-protocol-cache.md`, is adopted as written. Founder validated between sessions per direction at the close of the planning-session prompt ("the founder has reviewed the close and prompt and validates the draft build cache for use with no edits"). The cache is now `/adopted/build-sessions-protocol-cache.md` with status header updated to "Adopted 2026-05-10". The `/drafts/` predecessor remains in place for git-history preservation per preserve-prior-versions.
+
+**Reasoning:** The build arc spans many sessions; without a cache, every session would re-read the architecture exploration, the eight decisions, the rules, and the migration intent. The cache mirrors the existing `/adopted/standing-protocol-cache.md` pattern but is build-arc-specific. Adopting per founder direction (post-Decision-7 founder note in the planning-session prompt) without further amendment.
+
+**Files touched:**
+- `/adopted/build-sessions-protocol-cache.md` — created with adopted status header; cross-references updated to point to `/adopted/` location
+- `/drafts/build-sessions-protocol-cache.md` — preserved unchanged in place (git-history preservation; not deleted because deletion is permission-gated and the founder pref preserves prior versions)
+- `/operations/decision-log.md` — this entry appended
+
+**Risk classification:** Elevated under 0d-ii (move file from `/drafts/` to `/adopted/`). AC7 not engaged. PR6 not engaged. No production touch; no manifest amendment.
+
+**Rollback path:** `git revert` of the adoption commit, or move `/adopted/build-sessions-protocol-cache.md` back to `/drafts/` and edit status header to revert to "Draft. Pending validation".
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+head -8 adopted/build-sessions-protocol-cache.md
+```
+Expected: header reads `**Status:** Adopted 2026-05-10 under D-BUILD-SESSIONS-CACHE-ADOPTED-2026-05-10`.
+
+**Open questions:** None. The cache itself flags twenty open questions in its parking-lot section; those are tracked there, not in this entry.
+
+**Rules served:** 0a (status vocabulary preserved), 0b (session continuity — cache reduces token spend at session-open), 0c (verification framework — founder verifies via head command), 0d-ii (Elevated classification recorded), 0f (decision-log entry concurrent), PR5 (knowledge-gap discipline — cache supports concept tracking).
+
+**Status:** Adopted. Cross-references: predecessor close `/operations/handoffs/founder/2026-05-10-substrate-plugin-architecture-close.md` (Decision 8 named cache creation); planning-session prompt `/operations/handoffs/founder/2026-05-10-plugin-build-staging-NEXT-SESSION-PROMPT.md` (validation step); standing cache `/adopted/standing-protocol-cache.md` (pattern reference); D-BUILD-PLUGIN-STAGING-PLAN-DRAFTED-2026-05-10 (the next entry — same-session companion).
+
+---
+
+## 2026-05-10 — D-BUILD-PLUGIN-STAGING-PLAN-DRAFTED-2026-05-10
+
+**Decision:** A staged build plan for the substrate-as-plugin work, including the K-category migration of existing bundled-prose consumers, has been drafted at `/drafts/substrate-plugin-staging-plan.md`. The plan covers six stages plus a licensing gate (Rule A) sitting between Stage 3 and Stage 4. The plan estimates 38–62 sessions to first marketplace listing + public Layer 1 release + initial ecosystem polish. The plan is a draft pending founder review; once approved, it moves to `/adopted/`.
+
+**Reasoning:** The architecture was finalised in the predecessor close (eight decisions + the build-arc cache). The planning session was dedicated entirely to staging the build per Decision 6. The plan applies Rule A (licensing gate immediately before any public release) and Rule B (holistic second pass after step-scoping) per the founder's specific carry-forward from the prior staging attempt. The K-category was integrated based on `/website/public/component-registry.json` consumer inventory and the manuals' descriptions of what each consumer does. The recommended first three stages are: (1) Backend foundations, (2) K-category migration, (3) Layer 1 hardening + plugin internals. The licensing gate sits between Stage 3 and Stage 4; nothing public ships until the gate clears (lawyer review at the gate; recommendation in the plan: lawyer engagement starts at Stage 3 kickoff so review is queued in parallel).
+
+**Files touched:**
+- `/drafts/substrate-plugin-staging-plan.md` — created
+- `/operations/decision-log.md` — this entry appended
+- `/operations/handoffs/founder/2026-05-10-substrate-plugin-staging-close.md` — session close (this session, see following file)
+
+**Risk classification:** Standard under 0d-ii. Drafts under `/drafts/`; no production touch; no `/adopted/` change; no manifest amendment. The substrate-build-plan adopted under D-SUBSTRATE-BUILD-PLAN-ADOPTED-2026-05-09 was a predecessor staging attempt scoped against an earlier architecture; this new plan is built against the architecture agreed in the 2026-05-10 close and supersedes the earlier plan in scope. The earlier plan's adoption status remains for now until the founder approves this plan; both can coexist in `/drafts/` until then. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` of the drafting commit, or delete `/drafts/substrate-plugin-staging-plan.md`. The predecessor `/drafts/stoic-agent-substrate-staging-plan.md` is preserved unchanged.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+ls -la drafts/substrate-plugin-staging-plan.md
+head -50 drafts/substrate-plugin-staging-plan.md
+```
+Expected: file exists, ~600+ lines, status header reads "Draft. Created 2026-05-10".
+
+**Founder review tasks (between sessions):**
+- Read `/drafts/substrate-plugin-staging-plan.md` in full; flag any items in inventory that don't belong, are missing, or are wrongly classified
+- Decide on the eight "Open questions surfaced during planning" (variant strategy C8, repo structure B4, first marketplace G1, lawyer engagement timing, Tier 3 sequencing approach, cost-shape acceptance, plugin economics G6, trust signalling I5)
+- Confirm or revise the recommended first three stages
+- Approve, request revisions, or reject the time-bounded session repackaging (3–4 hr sessions)
+- Once approved, move from `/drafts/` to `/adopted/substrate-plugin-staging-plan.md` (Elevated risk per archive vocabulary)
+
+**Open questions:** All eight planning-surfaced open questions (in the staging plan §"Open questions surfaced during planning") are revisit conditions for founder decision before Stage 3 begins. Stage 1 + 2 can begin without all eight resolved if the founder elects to defer the Stage-3-affecting ones until later in the arc.
+
+**Rules served:** R0 (oikeiosis audit trail — staging plan recorded), 0a (status vocabulary used throughout the plan), 0b (session continuity — plan is the artefact), 0c (verification framework — founder reads plan directly), 0d-ii (Standard classification recorded), 0f (decision-log entry concurrent), PR1 (single-endpoint proof discipline preserved in stage success criteria for A1/A3/A5/A7/C5), PR4 (model selection per AC1 — N/A this session, planning is documentation), PR5 (knowledge-gap carry-forward — Risk 6 in holistic-pass section flags substrate-novel concepts as candidate KG entries; no concepts re-explained this session), PR6 (NOT engaged this session; flagged for downstream Critical sessions in Stage 1 A1/A3/A5/A7, Stage 2 R20a-perimeter routes, Stage 3 B2), PR7 (decision-not-made documented — eight planning open questions named with revisit conditions), PR9 (stewardship — Risk 1–6 in holistic-pass section catalogued).
+
+**Status:** Adopted (this entry adopts the drafting; the staging plan itself remains in `/drafts/` pending founder approval). Cross-references: predecessor close `/operations/handoffs/founder/2026-05-10-substrate-plugin-architecture-close.md`; planning-session prompt `/operations/handoffs/founder/2026-05-10-plugin-build-staging-NEXT-SESSION-PROMPT.md`; build-arc cache `/adopted/build-sessions-protocol-cache.md`; staging plan `/drafts/substrate-plugin-staging-plan.md`; predecessor staging plan (superseded in scope) `/drafts/stoic-agent-substrate-staging-plan.md`; D-SUBSTRATE-BUILD-PLAN-ADOPTED-2026-05-09 (predecessor v1.2 plan, scoped against earlier architecture); D-BUILD-SESSIONS-CACHE-ADOPTED-2026-05-10 (same-session companion).
+
+---
+
+## 2026-05-10 — D-STAGING-PLAN-ADOPTED-2026-05-10
+
+**Decision:** The substrate-plugin staging plan, drafted in the predecessor planning session at `/drafts/substrate-plugin-staging-plan.md`, is adopted in full per founder direction between sessions. The plan moves from `/drafts/` to `/adopted/substrate-plugin-staging-plan.md` and becomes the operative reference for every execution session in the substrate-as-plugin build arc per the build-arc cache's "Living-state references" entry. The status header is updated to read "Adopted 2026-05-10 under D-STAGING-PLAN-ADOPTED-2026-05-10. Founder approved with eight open questions answered (see decision-log entry). Governing for every execution session in the build arc." All eight planning-surfaced open questions are resolved by founder direction at session-open of the Stage 1 kickoff session and recorded below for forward reference. The predecessor staging plan `/drafts/stoic-agent-substrate-staging-plan.md` (2026-05-09, scoped against an earlier architecture) is moved to `/archive/2026-05-09-stoic-agent-substrate-staging-plan-superseded.md` per the preserve-prior-versions principle. The build-arc cache draft `/drafts/build-sessions-protocol-cache.md` (preserved in place under D-BUILD-SESSIONS-CACHE-ADOPTED-2026-05-10 because deletion was permission-gated) is now archived to `/archive/2026-05-10-build-sessions-protocol-cache-draft-superseded.md`.
+
+**Reasoning:** The build arc is now leaving planning and entering execution. The staging plan's adoption is the threshold that crosses that boundary. The eight founder decisions answer the planning-session-surfaced open questions and unlock execution work that depended on them. The two predecessor draft files (the superseded staging plan and the build-arc cache draft) have served their git-history purpose and are archived to clear `/drafts/` of items that are no longer pending. The build-arc cache itself is also amended in this session with a new "Founder governing notes" section recording the no-current-users governing note (logged separately under `D-BUILD-CACHE-DRIFT-RESOLVED-2026-05-10-NO-USERS`).
+
+**Founder decisions inherited at session-open (locked; do not re-debate):**
+
+1. **Plugin variant strategy (C8):** As recommended — single configurable plugin with mode parameter for the first marketplace listing; revisit family-strategy after first-listing telemetry. Applied at Stage 3 start.
+2. **Repository structure (B4):** Substrate-as-package. Applied at Stage 3 start; informs Stage 1's A8 endpoint mapping (each future endpoint consumable as a package import).
+3. **First marketplace target (G1):** Claude Cowork marketplace. Applied at Stage 4 start; Stage 1 + 2 + 3 work feeds packaging for this target.
+4. **Lawyer engagement timing:** As recommended — kick off at Stage 3 start so review is queued in parallel.
+5. **Tier 3 (R20a perimeter) migration sequencing approach:** Resolve D24 findings during migration — not critical at this time with no users. Applied at K3 sequencing.
+6. **Cost-shape acceptance for migrated website endpoints (K5):** Cost and pricing examined immediately before Stage 4 (deferred from K5 in-Stage-2). Stage 2 proceeds without per-route cost-acceptance gating; pre-Stage-4 cost-and-pricing session inserted.
+7. **Plugin economics tariff (G6):** Decided when cost and pricing are examined immediately before Stage 4 (same session as #6). Combined with #6 into a single pre-Stage-4 cost-and-pricing session.
+8. **Trust signalling specifics (I5):** As recommended — limitations page link, R18 honest-certification language, security review status. Applied at Stage 4.
+
+**Founder governing note inherited at session-open:** No current users (affirmed 2026-05-10). The Critical Change Protocol's step 3 ("What happens to existing sessions?") is moot for the build arc and may be answered "N/A — only founder + test logins exist; no third-party sessions to invalidate." All other Critical Change Protocol steps remain in full force. Recorded as a `D-BUILD-CACHE-DRIFT-RESOLVED-2026-05-10-NO-USERS` lean entry (next entry).
+
+**Files touched:**
+- `/drafts/substrate-plugin-staging-plan.md` → `/adopted/substrate-plugin-staging-plan.md` — moved (filesystem `mv`; git will detect rename when staged)
+- `/adopted/substrate-plugin-staging-plan.md` — status header updated; one cross-reference updated to point to archived predecessor
+- `/drafts/stoic-agent-substrate-staging-plan.md` → `/archive/2026-05-09-stoic-agent-substrate-staging-plan-superseded.md` — moved
+- `/drafts/build-sessions-protocol-cache.md` → `/archive/2026-05-10-build-sessions-protocol-cache-draft-superseded.md` — moved
+- `/operations/decision-log.md` — this entry appended
+
+**Risk classification:** Elevated under 0d-ii. Three file moves between `/drafts/`, `/adopted/`, `/archive/`, and one in-place edit to an `/adopted/` governing document (status header + one cross-reference in the staging plan). AC7 NOT engaged. PR6 NOT engaged. No code touched in this entry's scope; no production state change.
+
+**Rollback path:** `git revert` of the housekeeping commit reverses the three moves and the two in-place edits. The staging plan returns to `/drafts/` with the "Draft" status header; predecessor drafts return to `/drafts/`. No production effect either way (no code touched).
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+ls adopted/substrate-plugin-staging-plan.md
+ls archive/2026-05-09-stoic-agent-substrate-staging-plan-superseded.md
+ls archive/2026-05-10-build-sessions-protocol-cache-draft-superseded.md
+head -3 adopted/substrate-plugin-staging-plan.md
+```
+Expected: three files exist; the staging plan's first three lines include status header reading "Adopted 2026-05-10 under D-STAGING-PLAN-ADOPTED-2026-05-10."
+
+**Open questions:** None at adoption level. The eight pre-existing planning-session open questions are resolved above. Stage 3-affecting decisions (#1, #2, #3, #4) are applied at Stage 3 start; Stage-4 cost-and-pricing decisions (#6, #7) are applied immediately before Stage 4; Stage-4 trust-signalling (#8) and K3 sequencing (#5) are applied at their respective stages. Forward open questions surface inside execution sessions per their session prompts.
+
+**Rules served:** R0 (oikeiosis audit trail — adoption recorded), 0a (status vocabulary preserved — staging plan moves from "Designed" to "Adopted" decision-status; implementation status of the substrate components remains "Scoped" until execution begins), 0b (session continuity — adoption is the threshold from planning to execution), 0c (verification framework — founder verifies via filesystem listing + head command), 0d-ii (Elevated classification recorded), 0e (file organisation — `/drafts/` → `/adopted/` and `/archive/` per the standing folder structure), 0f (decision-log entry concurrent with file moves), 0g (workflow skills — sage-stenographer pattern continues to prove out manually before automation), PR1 (single-endpoint proof discipline preserved in plan; companion entry `D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10` performs the proof on `/api/reason` for A1), PR4 (model selection — N/A this entry; documentation only), PR5 (knowledge-gap carry-forward — none triggered for this housekeeping entry), PR6 (NOT engaged this entry; engaged in companion `D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10`), PR7 (decisions not made — N/A; the eight open questions are now resolved and are decisions made), PR9 (stewardship — three filesystem moves are routine `/drafts/` → `/archive/` housekeeping; F-tier classification not engaged).
+
+**Status:** Adopted. Cross-references: predecessor entries `D-BUILD-SESSIONS-CACHE-ADOPTED-2026-05-10` and `D-BUILD-PLUGIN-STAGING-PLAN-DRAFTED-2026-05-10` (both 2026-05-10); companion entries `D-BUILD-CACHE-DRIFT-RESOLVED-2026-05-10-NO-USERS` (next entry) and `D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10` (entry after); predecessor close `/operations/handoffs/founder/2026-05-10-substrate-plugin-staging-close.md`; this session's prompt `/operations/handoffs/founder/2026-05-10-stage-1-kickoff-NEXT-SESSION-PROMPT.md`; this session's close `/operations/handoffs/founder/2026-05-10-stage-1-kickoff-close.md`; staging plan `/adopted/substrate-plugin-staging-plan.md`; build-arc cache `/adopted/build-sessions-protocol-cache.md`; standing protocol cache `/adopted/standing-protocol-cache.md`.
+
+---
+
+## 2026-05-10 — D-BUILD-CACHE-DRIFT-RESOLVED-2026-05-10-NO-USERS
+
+**Decision:** The build-arc cache `/adopted/build-sessions-protocol-cache.md` is amended in-place to add a new "Founder governing notes for the duration of the build arc" section recording the no-current-users governing note (the only logins are the founder's and known test logins; the Critical Change Protocol's step 3 is moot for the build arc; all other Critical Change Protocol steps remain in full force).
+
+**Reasoning:** The founder affirmed on 2026-05-10 that no current users will be affected by build because the only login is the founder's and known test logins. This materially reduces the friction of Critical-tier work without weakening any other Critical Change Protocol step. The build-arc cache's update discipline (Standard-risk in-session amendment when the build-arc context changes) authorises this addition. The no-current-users simplification is build-arc-wide; when the plugin ships and external users exist, the simplification ends.
+
+**Files touched:**
+- `/adopted/build-sessions-protocol-cache.md` — new section "Founder governing notes for the duration of the build arc" inserted before "Living-state references"; references this entry by ID
+- `/operations/decision-log.md` — this entry appended
+
+**Risk classification:** Standard under 0d-ii. In-place amendment to a governing document; the cache's own update discipline authorises in-session amendments at Standard risk. AC7 NOT engaged. PR6 NOT engaged.
+
+**Rollback path:** `git revert` of the cache amendment removes the new section.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -i -A 4 "no current users" adopted/build-sessions-protocol-cache.md
+```
+Expected: the governing-notes paragraph appears with the entry-ID reference.
+
+**Rules served:** 0a, 0b, 0c, 0d-ii (Standard recorded), 0f, PR5 (governing-note tracking).
+
+**Status:** Adopted. Cross-references: companion entries `D-STAGING-PLAN-ADOPTED-2026-05-10` (preceding) and `D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10` (following); build-arc cache `/adopted/build-sessions-protocol-cache.md`.
+
+---
+
+## 2026-05-10 — D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10
+
+**Decision:** Stage 1 item A1 (Layer 2 server-side authentication infrastructure for plugin-originated calls) is scaffolded on `/api/reason` as the PR1 single-endpoint proof. A new function `checkPluginAuth` is added to `/website/src/app/api/reason/route.ts` that reads an `X-Plugin-Auth` HTTP header, performs a constant-time comparison against the `PLUGIN_AUTH_SECRET` environment variable using node:crypto's `timingSafeEqual`, and returns `{valid: true, plugin_id: string}` on match or `{valid: false, error: NextResponse}` on any failure. A feature flag `PLUGIN_AUTH_ENABLED` is added (currently set to `'false'`) governing whether the function is allowed to run. **The function is defined but NOT INVOKED in this session** — the scaffold exists in the code with zero runtime effect; the eventual invocation site lands in a subsequent session after the Critical Change Protocol's deploy-phase review. A new `/website/.env.example` file is created documenting `PLUGIN_AUTH_ENABLED` (default `false`) and `PLUGIN_AUTH_SECRET` (placeholder; real value in `/website/.env.local` and Vercel project settings, never committed). Companion ADR `/adopted/ADR-stoic-agent-substrate-concept.md` (Stage 1 item J1) is adopted under this entry, capturing the three-layer substrate architecture, three-layer R20a defence, two-front-ends-one-substrate pattern, moat boundary, and consequences.
+
+**Critical Change Protocol writeup (six steps, full form, per project instructions §0c-ii and standing-cache §"Critical-risk sessions"):**
+
+1. **What is changing** — A new authentication-check function (`checkPluginAuth`) and a feature flag (`PLUGIN_AUTH_ENABLED`, default `false`) are added to `/website/src/app/api/reason/route.ts`. The function reads the `X-Plugin-Auth` header, performs a constant-time comparison against `PLUGIN_AUTH_SECRET`, and returns a structured pass/fail result. The function is defined but not invoked — the scaffold exists with zero runtime effect. A new `/website/.env.example` file documents the flag and the companion secret placeholder. The existing user-auth + API-key dual-auth pattern is unchanged. PR1 single-endpoint proof discipline: scaffolded only on `/api/reason`; no other route files touched.
+
+2. **What could break** — Worst case: if the function is invoked (flag flipped to `true`) and `PLUGIN_AUTH_SECRET` is missing or malformed, plugin-originated requests would receive 401 responses while user-auth and API-key requests continue working. This is the intended fail-closed behaviour for plugin auth, but it would block legitimate plugin traffic until the secret is set. **In this session, the flag stays at `false` and the function is not invoked, so this failure mode cannot fire.** If a future bug introduced a code path that called `checkPluginAuth` regardless of the flag, the worst case would still be limited to plugin-originated traffic; existing user-auth and API-key paths remain unaffected because `checkPluginAuth` does not modify or short-circuit them.
+
+3. **What happens to existing sessions** — N/A — only founder + test logins exist; no third-party sessions to invalidate. Per the no-current-users governing note added to the build-arc cache in this session (logged via `D-BUILD-CACHE-DRIFT-RESOLVED-2026-05-10-NO-USERS`).
+
+4. **Rollback plan** — Three rollback paths in order of decreasing scope. (a) **No-deploy rollback (this session's posture):** the scaffold commit is not deployed. Rollback is simply not deploying. The flag remains `false` even if deployed; rollback is "leave the flag off." (b) **Flag-off rollback (if deployed):** ensure `PLUGIN_AUTH_ENABLED` is not set in Vercel environment variables, or set it to `false`. The function exists in code but is never invoked. Effectively a no-op deploy. (c) **Code-revert rollback:** `git revert <scaffold-commit-hash>` and `git push origin main`. Vercel redeploys the prior route handler. This is the strongest rollback path.
+
+5. **Verification step** — In-session (no deploy): two grep commands confirm scaffold presence and zero call sites. Expected: function defined at line ~199; flag declaration at line ~170; zero call sites of `checkPluginAuth(...)` other than the function declaration itself; `PLUGIN_AUTH_ENABLED=false` declared in `/website/.env.example`. Post-deploy verification (next session, after deploy + flag-flip): a `curl` test of `/api/reason` with and without the `X-Plugin-Auth` header against the real `PLUGIN_AUTH_SECRET` value, confirming 200 with valid secret and 401 without when the flag is on; confirming all paths still return 200 (with user-auth or API-key) when the flag is off.
+
+6. **Explicit founder approval** — Requested for the scaffold commit only, NOT for deploy. The deploy approval is a separate explicit-approval moment in the next session after CCP review of any post-scaffold-discovered risks (per PR1 single-endpoint proof discipline — verify on `/api/reason` before any rollout). The founder responds "go ahead" specific to the named risks above (or pushes back) before staging the scaffold commit.
+
+**Files touched:**
+- `/website/src/app/api/reason/route.ts` — added `import { timingSafeEqual } from 'node:crypto'`; added `PLUGIN_AUTH_ENABLED` const declaration (line ~170); added `checkPluginAuth` function definition (line ~199); added `void` references to prevent tree-shaking (lines ~270–271); added inline documentation block above the scaffold (lines ~127–168). Existing route handler unchanged. No call sites added.
+- `/website/.env.example` — created with `PLUGIN_AUTH_ENABLED=false` declaration, `PLUGIN_AUTH_SECRET=` placeholder, header documenting convention, and per-variable inline rationale referencing the ADR and staging plan.
+- `/adopted/ADR-stoic-agent-substrate-concept.md` — created (companion ADR for Stage 1 item J1; captures three-layer architecture, three-layer R20a defence, two-front-ends-one-substrate, moat boundary, consequences).
+- `/operations/decision-log.md` — this entry appended.
+
+**Risk classification:** Critical under 0d-ii (auth surface change per AC7 + PR6). PR1 (single-endpoint proof — `/api/reason` only) engaged. PR4 (model selection) — N/A this scaffold has no LLM calls. PR6 (safety-critical changes — auth function added; the function does not yet engage user-facing safety, but the surface is the auth layer and is treated as Critical). AC7 (auth-surface change) — engaged at the scaffold-introduction level even though the function is not yet invoked; the eventual invocation-site change in a future session will re-engage AC7 with full force. AC1 (model selection constraints) — N/A (no LLM calls in scaffold). The deploy + flag-flip + verification sequence (next session) will be a separate Critical-classified change with its own Critical Change Protocol writeup.
+
+**Rollback path:** Per CCP step 4 above. Most likely rollback is "no-deploy" (the scaffold commit is staged but not deployed in this session) followed by code-revert if a future review surfaces concerns. Flag-off rollback covers any post-deploy concern without requiring code changes.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -n "checkPluginAuth\|PLUGIN_AUTH_ENABLED" website/src/app/api/reason/route.ts
+grep -n "PLUGIN_AUTH_ENABLED" website/.env.example
+grep -nE "checkPluginAuth\(" website/src/app/api/reason/route.ts | grep -v "^.*:function"
+ls adopted/ADR-stoic-agent-substrate-concept.md
+head -10 adopted/ADR-stoic-agent-substrate-concept.md
+```
+Expected: function-definition + flag-declaration + void-references hits in `route.ts`; one hit in `.env.example` for the flag; **zero call sites** of `checkPluginAuth(...)` other than the function declaration line itself (confirmed via the third grep returning empty); ADR file exists with adopted-status header citing this entry ID.
+
+**Open questions:**
+- The eventual invocation site for `checkPluginAuth` is not yet designed. Options include: (a) extending the existing `if (auth.error && (!apiKey || !apiKey.valid))` branch to also check `checkPluginAuth` before returning the 401; (b) adding a third precedence tier where plugin-auth is checked first if `PLUGIN_AUTH_ENABLED` is true and the `X-Plugin-Auth` header is present; (c) fully separating plugin-auth into its own pre-handler middleware. Decision deferred to the next session, where the invocation-site Critical Change Protocol writeup names the chosen option with reasoning.
+- The `plugin_id: 'scaffold-plugin'` placeholder needs a real identifier scheme. Options include: signed plugin metadata (cryptographically attested at install time); registered-plugin lookup table in Supabase; or a hybrid. Decision deferred to Stage 1 item A3 (signing infrastructure) or A4 (key management) ADRs.
+- The fail-closed posture (return 401 when secret is missing) versus fail-noisy posture (return 503 when secret is missing) is currently set to fail-closed. The reasoning is documented inline in the function. The posture may be revisited if production observation suggests fail-noisy is preferable.
+
+**Rules served:** R0 (oikeiosis audit trail — execution-session work recorded), 0a (status vocabulary — A1 moves to "Scaffolded" status; J1 ADR moves to "Adopted" decision-status), 0b (session continuity — full-form close produced for Critical session), 0c (verification framework — founder verifies via grep commands), 0c-ii (Critical Change Protocol — full six-step writeup above), 0d-ii (Critical classification recorded for the scaffold; deploy + flag-flip will be a separate Critical-classified change), 0f (decision-log entry concurrent with code change), AC1 (model selection — N/A; no LLM calls), AC4 (invocation testing for safety functions — engaged for the eventual invocation site, not for the scaffold itself; the scaffold has zero runtime effect), AC5 (R20a perimeter — preserved at line 177 of `/api/reason/route.ts`; the scaffold sits before the rate-limiter and existing auth, structurally above the R20a perimeter; the eventual invocation site will be ordered such that R20a runs after authentication of any kind, preserving AC5), AC7 (auth-surface change — engaged at scaffold introduction; full Critical Change Protocol applied; will be re-engaged at invocation-site change), AC8 (translation-sandwich substrate canonical at `/api/reason` per M1-CP6 — preserved unchanged), KG1 (Vercel five rules — N/A; no DB writes in scaffold), KG2 (Haiku reliability boundary — N/A; no LLM calls), KG3 (hub-label end-to-end contract — N/A; no `mentor_interactions` writes), KG4 (capability-matrix cell vocabulary — engaged at the dual-auth pattern reference; the eventual third-tier addition extends the matrix and will be reflected in capability-matrix updates at the invocation-site change), KG5 (token counts — N/A), KG6 (context-layer composition — N/A; scaffold does not touch context), KG7 (JSONB storage — N/A), PR1 (single-endpoint proof — `/api/reason` is the proof target; no other route touched), PR4 (model selection — N/A), PR5 (knowledge-gap carry-forward — three concepts surfaced this session that may become PR5 candidates if they recur: the substrate's three-layer architecture (open vs closed boundary), the no-current-users governing note's effect on Critical Change Protocol step 3, the PR1 single-endpoint proof discipline applied to a feature-flag-gated function), PR6 (safety-critical changes — auth surface; scaffold-introduction is Critical; invocation-site change will be Critical; deploy + flag-flip will be Critical), PR7 (decisions not made — three open questions documented above with revisit conditions), PR8 (tacit-knowledge findings — none third-recurrence this session; PR1's application to feature-flag-gated functions is candidate-status if it recurs), PR9 (stewardship — F-tier not engaged; the `void` references for tree-shaking prevention may become a recurring pattern worth promoting if other scaffold sessions need it).
+
+**Status:** Adopted. Cross-references: companion entries `D-STAGING-PLAN-ADOPTED-2026-05-10` (preceding) and `D-BUILD-CACHE-DRIFT-RESOLVED-2026-05-10-NO-USERS` (preceding); predecessor close `/operations/handoffs/founder/2026-05-10-substrate-plugin-staging-close.md`; this session's prompt `/operations/handoffs/founder/2026-05-10-stage-1-kickoff-NEXT-SESSION-PROMPT.md`; this session's close `/operations/handoffs/founder/2026-05-10-stage-1-kickoff-close.md`; staging plan `/adopted/substrate-plugin-staging-plan.md` Stage 1 items A1 + J1; ADR `/adopted/ADR-stoic-agent-substrate-concept.md`; route file `/website/src/app/api/reason/route.ts`; example env file `/website/.env.example`; build-arc cache `/adopted/build-sessions-protocol-cache.md`; standing protocol cache `/adopted/standing-protocol-cache.md`; canonical translation-sandwich cutover `D-M1-CP6-CUTOVER-2026-05-08`; canonical encryption-wiring `ADR-ENCRYPTION-WIRING-01`.
+
+---

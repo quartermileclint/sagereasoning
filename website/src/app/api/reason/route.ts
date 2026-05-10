@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { timingSafeEqual } from 'node:crypto'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateApiKey, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { type ReasonDepth, EVALUATIVE_DISCLAIMER } from '@/lib/sage-reason-engine'
 import { getPractitionerContext } from '@/lib/context/practitioner-context'
@@ -119,6 +120,159 @@ import {
 // =============================================================================
 
 const VALID_DEPTHS: ReasonDepth[] = ['quick', 'standard', 'deep']
+
+// =============================================================================
+// A1 — Stage 1 Layer 2 plugin-auth scaffolding (PR1 single-endpoint proof)
+// =============================================================================
+//
+// Status: Scaffolded behind feature flag set to off (2026-05-10).
+// Per: /adopted/substrate-plugin-staging-plan.md Stage 1 item A1
+//      /adopted/ADR-stoic-agent-substrate-concept.md (Decision §"The three layers")
+//      D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10 (decision-log entry)
+//
+// This is the first execution-session work of the substrate-as-plugin build
+// arc. /api/reason is the PR1 single-endpoint proof target — chosen because it
+// is already on the translation-sandwich substrate per M1-CP6 (2026-05-08) and
+// the existing dual-auth pattern (user-auth + API-key) is canonical here per
+// KG4. The scaffold extends the dual-auth pattern with a third path
+// (plugin-auth) without yet invoking it.
+//
+// Critical Change Protocol (project instructions §0c-ii) governs every change
+// to this scaffold. PR6 applies (auth surface). AC7 applies (auth-surface
+// change). The function is defined but NOT INVOKED. Until PLUGIN_AUTH_ENABLED
+// is set to 'true' in the deployment environment AND a future code change
+// inserts an invocation site, this scaffold has zero runtime effect.
+//
+// Deploy + flag-flip + verification sequence: NOT IN SCOPE FOR THIS SESSION.
+// Per PR1, the proof is the flag-on verification on /api/reason; that happens
+// in the subsequent session after Critical Change Protocol review of any
+// post-scaffold-discovered risks. Approval requested in this session is for
+// the scaffold commit only, not for deploy.
+//
+// Build-arc no-current-users governing note: only founder + test logins exist
+// during the build arc; the Critical Change Protocol's "What happens to
+// existing sessions?" step is moot for this scaffold and any subsequent
+// flag-flip during the build arc. See /adopted/build-sessions-protocol-cache.md
+// §"Founder governing notes for the duration of the build arc".
+
+/**
+ * Plugin-auth feature flag.
+ *
+ * When set to 'true' in the deployment environment, plugin-originated calls
+ * to /api/reason MAY be authenticated via the X-Plugin-Auth header (subject
+ * to a future code change wiring checkPluginAuth into the authentication
+ * branch). Until both the flag is set AND an invocation site exists, this
+ * scaffold has zero runtime effect.
+ *
+ * Default: 'false' (or unset, treated as false). The PLUGIN_AUTH_ENABLED
+ * variable is documented in /website/.env.example.
+ */
+const PLUGIN_AUTH_ENABLED = process.env.PLUGIN_AUTH_ENABLED === 'true'
+
+/**
+ * Plugin-auth check (scaffold — NOT INVOKED in this session).
+ *
+ * Reads the X-Plugin-Auth header and performs a constant-time comparison
+ * against PLUGIN_AUTH_SECRET. Returns valid=true with a placeholder plugin_id
+ * on match; returns valid=false with a ready-to-send 401 NextResponse on any
+ * failure (missing header, missing secret, secret mismatch, malformed input).
+ *
+ * Constant-time comparison is enforced via node:crypto's timingSafeEqual to
+ * prevent timing-side-channel attacks against the secret.
+ *
+ * Fail-closed posture: if PLUGIN_AUTH_SECRET is missing or malformed, the
+ * function returns 401 (not 503). This is deliberate — until the secret is
+ * provisioned, plugin auth simply does not authenticate, which is the safe
+ * default for an authentication function. The existing user-auth and API-key
+ * paths are unaffected.
+ *
+ * AC7 standing constraint: this function does not touch the user session,
+ * cookie scope, redirect behaviour, or domain configuration. It only inspects
+ * the X-Plugin-Auth header and returns a result. AC7 NOT engaged at the
+ * function level; AC7 ENGAGED at the eventual invocation-site change (when
+ * checkPluginAuth is wired into the authentication branch in a future
+ * session).
+ *
+ * The return shape mirrors validateApiKey for consistency with the existing
+ * dual-auth pattern in security.ts.
+ */
+function checkPluginAuth(
+  request: NextRequest
+): { valid: true; plugin_id: string } | { valid: false; error: NextResponse } {
+  const headerValue = request.headers.get('x-plugin-auth')
+
+  if (!headerValue || typeof headerValue !== 'string' || headerValue.length === 0) {
+    return {
+      valid: false,
+      error: NextResponse.json(
+        {
+          error: 'Plugin authentication required',
+          message: 'Plugin-originated calls require an X-Plugin-Auth header.',
+        },
+        { status: 401, headers: corsHeaders() }
+      ),
+    }
+  }
+
+  const secret = process.env.PLUGIN_AUTH_SECRET
+
+  if (!secret || typeof secret !== 'string' || secret.length === 0) {
+    // Fail-closed: secret not provisioned. Return 401 (auth failure) rather
+    // than 503 (server misconfigured) so plugin-auth simply does not
+    // authenticate when the secret is absent. The existing user-auth and
+    // API-key paths remain available.
+    return {
+      valid: false,
+      error: NextResponse.json(
+        { error: 'Plugin authentication unavailable' },
+        { status: 401, headers: corsHeaders() }
+      ),
+    }
+  }
+
+  // Constant-time comparison. Both buffers must be the same length;
+  // mismatched lengths fail without leaking the actual secret length.
+  const headerBuf = Buffer.from(headerValue)
+  const secretBuf = Buffer.from(secret)
+
+  if (headerBuf.length !== secretBuf.length) {
+    return {
+      valid: false,
+      error: NextResponse.json(
+        { error: 'Plugin authentication failed' },
+        { status: 401, headers: corsHeaders() }
+      ),
+    }
+  }
+
+  const match = timingSafeEqual(headerBuf, secretBuf)
+  if (!match) {
+    return {
+      valid: false,
+      error: NextResponse.json(
+        { error: 'Plugin authentication failed' },
+        { status: 401, headers: corsHeaders() }
+      ),
+    }
+  }
+
+  // Match. Return a placeholder plugin_id; future Stage 1 work will replace
+  // this with a real identifier scheme (likely tied to signed plugin
+  // metadata or a registered-plugin lookup).
+  return { valid: true, plugin_id: 'scaffold-plugin' }
+}
+
+// Scaffold-presence assertions (zero runtime effect; references the feature
+// flag and the function so that bundlers/linters do not tree-shake the
+// scaffold out of the build before the eventual invocation site lands).
+// Replace with the real invocation site in a future session once the
+// Critical Change Protocol's deploy-phase review is complete.
+void PLUGIN_AUTH_ENABLED
+void checkPluginAuth
+
+// =============================================================================
+// END A1 scaffold
+// =============================================================================
 
 export async function POST(request: NextRequest) {
   // Rate limiting
