@@ -698,6 +698,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(tier1Output, { headers: corsHeaders() })
     }
 
+    // Branch 1.5 — A3 signing failure (fail-closed per ADR-layer2-signing-infrastructure §"Critical Change Protocol responses").
+    //
+    // When SUBSTRATE_LAYER2_SIGNING_ENABLED is 'true' on this deployment but
+    // SUBSTRATE_LAYER2_SIGNING_KEY is unset/malformed (or canonicalisation
+    // rejected a value), the substrate MUST NOT return an unsigned
+    // assessment. The orchestrator surfaces error='signing_throw'; this
+    // branch translates that into a 503 user-facing response.
+    //
+    // Recovery (operational): rollback Path A is to flip
+    // SUBSTRATE_LAYER2_SIGNING_ENABLED=false in Vercel; existing pipeline
+    // resumes immediately on the next redeploy. Path C (env var loss) is
+    // restoring SUBSTRATE_LAYER2_SIGNING_KEY from the founder's three-copy
+    // backup per ADR §Decision 4 Option 4A.
+    //
+    // Per /adopted/ADR-layer2-signing-infrastructure.md §"Critical Change
+    // Protocol responses" — fail-closed posture is non-negotiable when
+    // signing is enabled.
+    if (sandwichResult.error === 'signing_throw') {
+      console.error(
+        '[/api/reason] Layer 2 signing failed; SUBSTRATE_LAYER2_SIGNING_KEY ' +
+        'env var likely unset or malformed. Per ADR-layer2-signing-infrastructure §Decision 1.'
+      )
+      return NextResponse.json(
+        {
+          error: 'substrate_signing_unavailable',
+          detail:
+            'The substrate cannot produce a signed assessment on this deployment. ' +
+            'This is an operational issue. If the issue persists, contact support.',
+        },
+        { status: 503, headers: corsHeaders() }
+      )
+    }
+
     // Branch 2 — Layer 1/2 throw OR Layer 3 LLM+fallback both failed (1C minimal fallback).
     if (
       sandwichResult.error === 'layer1_throw' ||

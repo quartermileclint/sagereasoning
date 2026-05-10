@@ -52,6 +52,17 @@ import {
   generateFallbackProse,
   type Layer3Prose,
 } from './layer3-prose'
+// Stage 1 A3 (D-A3-LAYER2-SIGNING-WIRED-...): cryptographic signing of the
+// authoritative Layer2Assessment. Per /adopted/ADR-layer2-signing-infrastructure.md
+// Decision 1 (Ed25519) + Decision 2 (Layer2Assessment-only signed payload).
+// Wired between Layer 2 production and composed-output construction below.
+// Fail-closed: SubstrateSigningKeyMissingError surfaces as error='signing_throw';
+// the route translates that to a 503 user-facing response.
+import {
+  signLayer2Assessment,
+  SubstrateSigningKeyMissingError,
+  type SignedLayer2Assessment,
+} from './layer2-signer'
 import type { RetrievedPassage } from '@/lib/rag'
 
 // Lazy-create the Supabase service-role client INSIDE functions, never at module
@@ -76,6 +87,27 @@ function getAdminClient(): SupabaseClient {
  */
 const PARALLEL_RUN_ENABLED =
   process.env.TRANSLATION_SANDWICH_PARALLEL_RUN === '1'
+
+/**
+ * Stage 1 A3 — Layer 2 signing activation flag. Read once at module load.
+ * Set SUBSTRATE_LAYER2_SIGNING_ENABLED='true' in Vercel env to activate
+ * cryptographic signing of every Layer2Assessment.
+ *
+ * When 'true': the composed sandwich output's `assessment` field carries
+ * {assessment, signature, key_id} instead of the bare Layer2Assessment.
+ * Verifiers (plugins, third-party agents) check signatures against the
+ * public key published at /api/public-key.
+ *
+ * When unset/'false' (the default — pre-flag-flip and rollback Path A):
+ * the `assessment` field carries the bare Layer2Assessment exactly as today.
+ * Behaviour is byte-identical to the pre-A3 wire format.
+ *
+ * Per /adopted/ADR-layer2-signing-infrastructure.md §"Critical Change Protocol
+ * responses" — Path A rollback is "flip this flag false" (~30s recovery via
+ * Vercel redeploy).
+ */
+const SUBSTRATE_LAYER2_SIGNING_ENABLED =
+  process.env.SUBSTRATE_LAYER2_SIGNING_ENABLED === 'true'
 
 // Cap defaults per ADR-004 §6.2. To change, modify here + redeploy.
 // (Founder approves any change as a Critical-tier amendment per project instructions §0c-ii.)
@@ -182,6 +214,13 @@ type FailureCategory =
   | 'validation_throw'
   | 'cost_cap_reached'
   | 'deadline_exceeded'
+  // Added 2026-05-MM (D-A3-LAYER2-SIGNING-WIRED-...) — Layer 2 signing failed
+  // (env var unset/malformed, or canonicalisation rejected a value). Per
+  // /adopted/ADR-layer2-signing-infrastructure.md §"Critical Change Protocol
+  // responses" — fail-closed: the substrate never returns an unsigned
+  // assessment when signing is enabled. The route translates this to a 503
+  // user-facing response (substrate_signing_unavailable).
+  | 'signing_throw'
 
 interface SandwichRunResult {
   output: unknown // The composed { extraction, assessment, prose, ... } shape OR a Tier 1 force-clarification shape (per ADR-008 §2). null on failure.
@@ -507,11 +546,51 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
   }
   result.layer3_latency_ms = Date.now() - layer3Start
 
+  // ---- A3 signing wiring (D-A3-LAYER2-SIGNING-WIRED-...) ----
+  // Per /adopted/ADR-layer2-signing-infrastructure.md Decision 2: when
+  // SUBSTRATE_LAYER2_SIGNING_ENABLED is 'true', the composed `assessment`
+  // field carries {assessment, signature, key_id} (a SignedLayer2Assessment)
+  // instead of the bare Layer2Assessment. The bare form is preserved when
+  // the flag is unset/'false', which is the default at deploy time and the
+  // rollback Path A target.
+  //
+  // Fail-closed posture per the ADR's CCP responses: if signing throws (env
+  // var unset, env var malformed, or canonicalisation rejects a value), the
+  // orchestrator returns error='signing_throw'; the route translates that
+  // into a 503 substrate_signing_unavailable response. The substrate NEVER
+  // returns an unsigned assessment when the flag is on.
+  //
+  // PR3: synchronous; no async signing.
+  // PR6: this branch is the safety-critical surface; changes are Critical.
+  // AC4: invocation-tested by the Step 12 production scenarios on /api/reason.
+  let assessmentField: Layer2Assessment | SignedLayer2Assessment = layer2Assessment
+  if (SUBSTRATE_LAYER2_SIGNING_ENABLED) {
+    try {
+      assessmentField = signLayer2Assessment(layer2Assessment)
+    } catch (err) {
+      result.error = 'signing_throw'
+      console.warn(
+        '[parallel-run] Layer 2 signing failed (fail-closed; route returns 503):',
+        err instanceof SubstrateSigningKeyMissingError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : String(err)
+      )
+      return result
+    }
+  }
+
   // ---- Compose final output per ADR-004 §2.1 top-level shape ----
+  // The `assessment` field is bare Layer2Assessment when signing disabled
+  // (existing behaviour) or SignedLayer2Assessment when signing enabled
+  // (A3 wire format). Verifiers re-derive canonical bytes via
+  // canonicaliseLayer2Assessment and check the signature against the public
+  // key matching the key_id (published at /api/public-key).
   result.output = {
     version: 'translation-sandwich-v1',
     extraction: layer1Schema,
-    assessment: layer2Assessment,
+    assessment: assessmentField,
     prose: layer3Prose,
     meta: {
       engine_attribution: 'translation-sandwich',
