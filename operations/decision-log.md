@@ -4072,3 +4072,48 @@ Expected: response starts with `{"version":"translation-sandwich-v1","extraction
 **Status:** Adopted. Cross-references: predecessor entries `D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10` + `D-A1-INVOCATION-SITE-2026-05-10` + `D-A1-FLAG-FLIP-VERIFIED-2026-05-10`; staging plan `/adopted/substrate-plugin-staging-plan.md` Stage 1 item A2 (success criteria SATISFIED for `/api/reason`); ADR `/adopted/ADR-stoic-agent-substrate-concept.md` §"The three layers"; route file `/website/src/app/api/reason/route.ts` (A2 doc-comment block + `validatePluginRequest` helper + validation branch); orchestrator `/website/src/lib/translation-sandwich/parallel-run.ts` (`preExtractedLayer1Schema` field on `SandwichInput`); validator `/website/src/lib/translation-sandwich/layer1-extractor.ts` (`validateLayer1Schema` reused unchanged); build-arc cache `/adopted/build-sessions-protocol-cache.md`; standing protocol cache `/adopted/standing-protocol-cache.md`; canonical translation-sandwich cutover `D-M1-CP6-CUTOVER-2026-05-08`; this session's close `/operations/handoffs/founder/2026-05-10-stage-1-a2-verified-close.md`.
 
 ---
+
+## 2026-05-10 — D-A3-LAYER2-SIGNING-ADR-ADOPTED-2026-05-10
+
+**Decision:** Stage 1 item A3 (Layer 2 signing infrastructure) ADR drafted, founder-approved, and moved to `/adopted/ADR-layer2-signing-infrastructure.md` (Path A elected at session-open). Four named design choices committed to architecture: **(1) Ed25519** asymmetric signing via `node:crypto` native primitives (rejected HMAC, ECDSA P-256, hybrid); **(2) `Layer2Assessment` only** as the signed payload with canonical-JSON serialisation (rejected composed sandwich output, `Layer1Schema + Layer2Assessment` together, hash-of-canonical-JSON); **(3) hybrid distribution** of the public verification key via both a new `/api/public-key` endpoint and the plugin manifest's `signing_keys` block (rejected API-discovery-only, manifest-only, HMAC-secret-via-plugin-auth); **(4) single key with quarterly rotation and 30-day overlap window** (rejected long-lived no-rotation, key-per-Layer-2-version, defer-to-separate-ADR). Wire format becomes `{assessment, signature, key_id}` in place of bare `Layer2Assessment` in the composed sandwich output. A3 implementation status: **Scoped → Designed**. Decision status: **Adopted**.
+
+**Reasoning:** Ed25519 + asymmetric is the architecturally honest choice for a substrate whose value proposition includes third-party verifiability — verifiers need only the public key, never the signing capability. `Layer2Assessment` only is the smallest moat-aligned payload per the substrate ADR's §"The moat boundary" — signing makes Layer 2 authoritative without entangling the signing surface with Layer 3's intentional per-consumer prose adaptation per `prose_mode`. Hybrid distribution combines plugin-manifest offline verification (works without network; manifest is the trust anchor against MITM on key fetch) with API-discovery rotation support (rotation can publish a new key without forcing immediate plugin updates). Single-key quarterly rotation with 30-day overlap matches the founder's operational scale (one signer; manual rotation cadence sustainable) while building rotation hygiene before any compromise event makes it urgent. Cross-references predecessor entries `D-A2-INPUT-VALIDATION-SURFACE-2026-05-10` (the validated input contract A3 will sign), `D-A1-FLAG-FLIP-VERIFIED-2026-05-10` (A1 plugin-auth ingress this signing surface is reachable from), `D-STAGING-PLAN-ADOPTED-2026-05-10` (Stage 1 A3 commitment), and the substrate ADR `/adopted/ADR-stoic-agent-substrate-concept.md` §"The moat boundary" (the architectural anchor for why signing matters here).
+
+**Files touched:**
+- `/adopted/ADR-layer2-signing-infrastructure.md` — new file (~440 lines). Mirrors the `/adopted/ADR-ENCRYPTION-WIRING-01.md` format. Sections: Status header, Plain-language summary, Context (why this ADR now; what already exists; what does not yet exist; substrate ADR's anchor), Decisions (the four elections with concrete specifications), Alternatives considered (the twelve unselected options with reasoning), Consequences (what becomes easier; what this requires; what becomes harder; what we'll need to revisit; risks accepted), Open questions parked for downstream ADRs (A3 scaffolding + A4 + B1 + C1 + Stage 4 details), Critical Change Protocol responses drafted ahead of time for the eventual scaffolding session, AC7 compatibility posture, Honest disclosure, Approval gate.
+- `/drafts/ADR-layer2-signing-infrastructure.md` — file created in this session and moved to `/adopted/` per Path A. Predecessor preserved in git history per the preserve-prior-versions principle.
+- `/operations/decision-log.md` — this entry appended.
+
+**Risk classification:** Elevated under 0d-ii. The ADR drafting itself is Standard (governance-only; no code touched; no production state change), but the file move from `/drafts/` to `/adopted/` is Elevated per the standing cache's risk table. AC7 NOT engaged this session (no auth surface change). PR6 NOT engaged this session (no safety-critical surface change; the safety-criticality of the signing surface engages at A3 scaffolding, not at ADR drafting). Critical Change Protocol NOT engaged this session — drafted ahead of time inside the ADR for the eventual scaffolding session per PR6 + AC7 discipline. PR1 single-endpoint discipline preserved (no code change).
+
+**Rollback path:** `git revert <session-close-commit-hash>` and push via GitHub Desktop. The revert removes the ADR from `/adopted/`, restores the `/drafts/` version, and removes this decision-log entry. No env-var or production-state changes to undo. Recovery ≤5 min.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+
+# 1. Confirm the ADR exists at /adopted/ and not at /drafts/
+ls adopted/ADR-layer2-signing-infrastructure.md
+ls drafts/ADR-layer2-signing-infrastructure.md 2>&1 | head -1
+
+# Expected: first command lists the file; second command returns "ls: ... No such file or directory"
+
+# 2. Confirm decision-log entry
+grep -nE "^## 2026-05-10 — D-A3-LAYER2-SIGNING-ADR-ADOPTED-2026-05-10" operations/decision-log.md
+
+# Expected: one hit at the bottom of the active log.
+
+# 3. Open the ADR and confirm the Status header reads "Adopted"
+head -3 adopted/ADR-layer2-signing-infrastructure.md
+
+# Expected: line 3 starts with "**Status:** Adopted 2026-05-10 under `D-A3-LAYER2-SIGNING-ADR-ADOPTED-2026-05-10`"
+```
+
+**Open questions:**
+- Eight downstream ADR/scaffolding open questions parked inside the ADR §"Open questions parked for downstream ADRs". These do not require resolution this session; each names the session that resolves it (A3 scaffolding, A4, B1, C1, Stage 4 details). Listed for visibility, not re-litigation.
+
+**Rules served:** R0, R18 (honest certification — signing is what makes "authoritative" defensible), 0a (status taxonomy — A3 moves Scoped → Designed), 0b (session continuity), 0c (verification framework), 0d-ii (Elevated — file move from /drafts/ to /adopted/), 0e (file organisation — ADR placed in /adopted/ per the canonical structure), 0f (decision log entry appended), AC1 (N/A — no LLM call this session; cited inside the ADR for context), AC5 (N/A this session; preserved by Layer 2 signing decision — R20a perimeter unaffected), AC7 (NOT engaged this session; Critical Change Protocol drafted ahead of time inside the ADR for the eventual scaffolding session), AC8 (translation-sandwich substrate; A3 is the next critical-path item for the substrate's authoritative-output property), KG1 (N/A — no DB writes), KG2 (N/A — no LLM call), KG3 (N/A), KG4 (capability-matrix update deferred per A2 close's open question), KG5 (N/A), KG6 (N/A), KG7 (N/A), PR1 (single-endpoint proof discipline preserved — A3 scaffolding will prove on `/api/reason` first), PR4 (N/A this session), PR5 (knowledge-gap carry-forward — see session close), PR6 (Critical-classification of the signing surface drafted into the ADR for the eventual scaffolding session; not engaged this session), PR7 (open questions documented above and inside the ADR), PR8 (T-series tacit-knowledge findings — see session close), PR9 (no F-tier findings).
+
+**Status:** Adopted. Cross-references: predecessor entries `D-A2-INPUT-VALIDATION-SURFACE-2026-05-10` + `D-A1-FLAG-FLIP-VERIFIED-2026-05-10` + `D-A1-INVOCATION-SITE-2026-05-10` + `D-A1-LAYER2-AUTH-SCAFFOLD-2026-05-10` + `D-STAGING-PLAN-ADOPTED-2026-05-10`; substrate ADR `/adopted/ADR-stoic-agent-substrate-concept.md` §"The moat boundary" (the architectural anchor); cryptographic ADR precedent `/adopted/ADR-ENCRYPTION-WIRING-01.md` (format mirrored); staging plan `/adopted/substrate-plugin-staging-plan.md` Stage 1 item A3 (success criteria for ADR-drafting SATISFIED — A3 implementation status: Scoped → Designed); existing crypto-precedent files `/website/src/lib/translation-sandwich/tier1-token.ts` (HMAC-signed continuation tokens) + `/website/src/app/api/reason/route.ts` lines 215–278 (`checkPluginAuth` constant-time comparison); the payload to be signed `/website/src/lib/translation-sandwich/layer2-mechanisms.ts` lines 342–365 (`Layer2Assessment` interface); the wiring site `/website/src/lib/translation-sandwich/parallel-run.ts` lines 480–523 (`runSandwichInner` Layer 2 + Layer 3 composition); build-arc cache `/adopted/build-sessions-protocol-cache.md`; standing protocol cache `/adopted/standing-protocol-cache.md`; this session's close `/operations/handoffs/founder/2026-05-10-stage-1-a3-adr-adopted-close.md`.
+
+---
