@@ -1,29 +1,66 @@
 ---
-compliance_version: "CR-2026-Q2-v4"
+compliance_version: "CR-2026-Q2-v5"
 last_regulatory_review: "2026-04-05"
+last_register_amendment: "2026-05-12"
 applicable_jurisdictions: ["AU", "EU", "US"]
-regulatory_references:
-  - id: "CR-001"
-    status: "MONITORING"
-  - id: "CR-002"
-    status: "COMPLIANT"
-  - id: "CR-004"
-    status: "ALIGNED"
-  - id: "CR-005"
-    status: "COMPLIANT"
-  - id: "CR-006"
-    status: "COMPLIANT"
-  - id: "CR-007"
-    status: "PARTIAL"
-  - id: "CR-008"
-    status: "ALIGNED"
+compliance_register:
+  - id: "CR-GDPR-A17-DELETION"
+    obligation: "GDPR Article 17 (right to erasure)"
+    jurisdiction: "EU"
+    posture: "PARTIAL"
+    note: "R17c placeholder 503 currently in place; A15a operationalises a genuine deletion endpoint."
+    next_review: "2026-07-06"
+  - id: "CR-GDPR-A15-ACCESS"
+    obligation: "GDPR Article 15 (right of access / Subject Access Request)"
+    jurisdiction: "EU"
+    posture: "SCOPED"
+    note: "R17g defines the rule; A15b operationalises /api/user/access."
+    next_review: "2026-07-06"
+  - id: "CR-GDPR-A16-RECTIFICATION"
+    obligation: "GDPR Article 16 (right to rectification)"
+    jurisdiction: "EU"
+    posture: "SCOPED"
+    note: "R17h defines the rule; A15c operationalises /api/user/rectify."
+    next_review: "2026-07-06"
+  - id: "CR-GDPR-A20-PORTABILITY"
+    obligation: "GDPR Article 20 (right to data portability)"
+    jurisdiction: "EU"
+    posture: "SCOPED"
+    note: "R17i defines the rule; A15d operationalises /api/user/export. Export-format ADR may precede implementation."
+    next_review: "2026-07-06"
+  - id: "CR-EAA-WCAG-AA"
+    obligation: "European Accessibility Act (WCAG 2.1 AA via EN 301 549 v3.2.1)"
+    jurisdiction: "EU"
+    posture: "ESCALATED"
+    note: "EU customer plausibility decision pending; gates EAA + WCAG scope. Revisit at Stage 1 close (lawyer engagement)."
+    next_review: "Stage 1 close (lawyer engagement)"
+  - id: "CR-EU-AIA-A50"
+    obligation: "EU AI Act Article 50 (transparency for AI-generated content)"
+    jurisdiction: "EU"
+    posture: "SCOPED"
+    note: "R18 §Article 50 placeholder in force; final language deferred to lawyer engagement at Stage 1 close. Enforcement live 2026-12-02."
+    next_review: "2026-12-02"
+  - id: "CR-AU-PRIVACY-1988"
+    obligation: "Australia Privacy Act 1988 (founder-personal as sole trader, or company-as-controller post-Pty Ltd)"
+    jurisdiction: "AU"
+    posture: "ALIGNED"
+    note: "Encryption R17b in place; deletion R17c on roadmap (A15a). Lawyer review at Stage 1 close confirms posture post-Pty Ltd incorporation (FPE-1 parallel track)."
+    next_review: "2026-07-06"
+  - id: "CR-CCPA-DELETION"
+    obligation: "California Consumer Privacy Act (deletion rights)"
+    jurisdiction: "US-CA"
+    posture: "PARTIAL"
+    note: "R17c placeholder 503 currently in place; A15a operationalises a genuine deletion endpoint."
+    next_review: "2026-07-06"
 review_cycle: "quarterly"
 owner: "founder"
 next_review_due: "2026-07-06"
 change_trigger:
   - "EU AI Act classification guidance publication"
+  - "EU AI Act Article 50 enforcement (2026-12-02)"
   - "Australia mandatory guardrails announcement"
   - "Australian Privacy Act reform bill passage"
+  - "Pty Ltd incorporation (FPE-1) — switches CR-AU-PRIVACY-1988 controller posture"
 deprecation_flag: false
 ---
 
@@ -150,14 +187,24 @@ d. **Local-first for highest sensitivity:** Consider whether some profile data (
 e. **Passion taxonomy API restrictions:** The 25-species passion taxonomy is available as a philosophical reference via the API (sage-context). However, passion *profiling results* (an individual's specific passion map, trigger conditions, and vulnerability patterns) must never be exposed via any API endpoint. These are private to the individual and their mentor relationship.
 f. **Implementation safety:** Changes to authentication, access control, or encryption that protect intimate data must follow the project's Critical Change Protocol (0c-ii). The urgency of protecting intimate data does not reduce the classification — it increases it. A protection that locks the data owner out of their own system has failed as a protection.
 
+g. **Subject Access Request (SAR) handling — GDPR Article 15:** When a user requests access to their data, the substrate produces a structured export within 30 days containing all stored data attributable to that user, including: mentor profile fields, journal ingestion content, decision-log mentions, audit-trail entries, and any third-party data the substrate has retained. Implementation surface: `/api/user/access` (NEW; authenticated; rate-limited; every request logged in the operations decision log). Critical surface — any change here follows the Critical Change Protocol per R17f and PR6. Sequencing: lands at A15b under the amended staging plan.
+
+h. **Rectification handling — GDPR Article 16:** When a user requests rectification of inaccurate data, the substrate updates the named fields within 30 days. Rectification is logged with before/after values in an immutable audit row. Implementation surface: `/api/user/rectify` (NEW; same governance as R17g). Critical surface — Critical Change Protocol applies per R17f and PR6. Sequencing: lands at A15c under the amended staging plan.
+
+i. **Portability handling — GDPR Article 20:** When a user requests data portability, the substrate produces a machine-readable structured export of all user-supplied data (not derived data) within 30 days, in a commonly-used format (JSON; CSV for tabular structures). Implementation surface: `/api/user/export` (NEW; same governance as R17g). Critical surface — Critical Change Protocol applies per R17f and PR6. Sequencing: lands at A15d under the amended staging plan; export-format ADR may precede implementation.
+
 ### R18: Honest Certification Limits (Ethical Analysis — 5 April 2026)
 
 The Agent Trust Layer positions SageReasoning as a certification authority. This concentrates power and creates obligations of honesty about what the certification means:
 
-a. **Certification scope language:** The trust badge, accreditation card, and all public-facing documentation must clearly state that accreditation certifies "observable reasoning patterns as measured against the Stoic philosophical framework." It does not certify safety, ethics, or trustworthiness in any absolute sense.
+a. **Certification scope language + substrate category (Character Kernel):** The trust badge, accreditation card, and all public-facing documentation must clearly state that accreditation certifies "observable reasoning patterns as measured against the Stoic philosophical framework." It does not certify safety, ethics, or trustworthiness in any absolute sense.
+
+   **Substrate category — Character Kernel.** SageReasoning's substrate is a Character Kernel: a Judgment + Continuity primitive for production agent systems. The Character Kernel preserves the agent's identity (continuity of judgement) while reasoning, distinguishing the substrate from guardrail-only validators (Guardrails AI; Patronus AI; Lakera) and from memory-only continuity layers (MemGPT; Letta). Peer category language for marketplace listings + public documentation: "Character Kernel; peers in this category include ANCHOR (Cognitive Middleware), ResontoLogic (Reasoning for Humans), and other normative-cognitive-middleware substrates." The Character Kernel category label is locked in under ST2 (2026-05-12); J1 ADR `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` captures the decision, alternatives considered, substrate-as-judge consultation record, and revisit conditions.
+
 b. **Badge transparency:** The trust badge must link directly to documentation explaining what it measures, how the evaluation works, and what its limitations are. Third parties encountering the badge must be able to make informed judgements rather than treating it as a blanket endorsement.
 c. **Interoperability by design:** The Agent Trust Layer architecture must be designed so that SageReasoning is one certification provider among potential others, not a monopoly by design. The accreditation schema should accommodate future interoperability with certifications grounded in other ethical reasoning traditions (utilitarian, deontological, care ethics, indigenous wisdom, etc.).
 d. **Adversarial evaluation:** Before broad deployment, the evaluation sequence must be tested adversarially — specifically to identify strategies for gaming the evaluation. The evaluation criteria must be designed to evolve continuously to stay ahead of optimisation pressure. Accreditation measures observable reasoning patterns, not inner states, and the documentation must say so.
+e. **EU AI Act Article 50 transparency (placeholder; lawyer-coupled):** R18 honest-certification commitments include EU AI Act Article 50 transparency where the substrate's authoritative output is AI-generated. Specifically: every Layer 3 prose output produced by the substrate carries a transparency notice that it is generated by an AI model (substrate Layer 3) and not by a human authority. The cryptographic signing of Layer 2 assessments (R18 + A3 Verified) establishes provenance; the Article 50 transparency notice establishes audience awareness. **Status:** Placeholder language adopted under ST2 (2026-05-12); final wording deferred to lawyer engagement at Stage 1 close (per ST2 Q4 lawyer bring-forward). Article 50 enforcement live 2026-12-02 per CR-EU-AIA-A50.
 
 ### R19: Honest Positioning (Ethical Analysis — 5 April 2026)
 
@@ -173,6 +220,8 @@ d. **The mirror principle:** The framework is a mirror, not a lens — it is for
 Disclaimers are necessary but insufficient. The system must actively protect users from foreseeable harms:
 
 a. **Vulnerable user detection:** The mentor and all human-facing tools must actively detect language patterns indicating acute psychological distress (grief, crisis, suicidal ideation) and redirect to appropriate professional support resources. The Stoic physician metaphor applies: a good physician knows when to refer the patient to a different specialist. Offering philosophical self-examination to someone in acute distress is not appropriate action (kathekon).
+
+   **Perimeter potential-broadening note (placeholder; ST2 2026-05-12):** When A10 (per-agent credentials + revocation API; Stage 1 expansion sub-stage) introduces new authenticated routes, the R20a perimeter (currently eight routes per AC5) is re-evaluated for each addition. Any new route added to the perimeter is a Critical change under AC5 + PR6; PR1 single-endpoint proof applies before rollout to additional routes. Revisit condition: A10 sub-stage kickoff.
 b. **Independence, not dependence:** The system must be designed to encourage internalisation of principled reasoning, not dependence on the tool. Usage patterns indicating growing dependence (running every trivial decision through evaluation, inability to reason without the framework) should trigger a response from the mentor: "You're ready to reason through this yourself." Success means users who need the tool less over time.
 c. **Human override supremacy:** No level of agent accreditation may make it harder for a human to override, correct, or disagree with an agent's reasoning. "I evaluated this through the 4-stage sequence and it scored at the principled level" must never be treated as sufficient grounds to override human judgement. A human's right to say "no" is absolute, regardless of the agent's accreditation level.
 d. **Relationship asymmetry awareness:** User-facing content must include guidance that the passion taxonomy and reasoning evaluation are tools for self-examination, not for diagnosing others. The system should actively discourage interpersonal application of the framework (e.g., "your partner is acting from epithumia") as this constitutes a misapplication with potential for psychological harm.
@@ -208,7 +257,9 @@ Sonnet: Preferred for all deliberation endpoints, passion diagnosis, distress cl
 
 This constraint exists because the Haiku reliability boundary (KG2 in the register below) was rediscovered across multiple sessions. Violation cost: multi-session rediscovery cycles.
 
-*Source: build-knowledge extraction, 18 April 2026. Thresholds are working values — revisit if operational evidence shifts.*
+**Governance task (ST2 2026-05-12; next due 2026-07-06):** The AC1 model-selection table is reviewed at every quarterly governance review per R14. Current entries reflect model strings + reliability boundaries as of last review. At each review: verify table currency against latest model strings (Opus 4.7, Sonnet 4.6, Haiku 4.5 at the time of this amendment); re-derive the KG2 Haiku-reliability-boundary observation against the current Haiku release; recalculate R5 cost thresholds against any tokenizer-tax change (a new tokenizer maps text up to ~1.47x more tokens per inbox synthesis Theme G); evaluate Opus 4.7 for highest-stakes reasoning (Layer 2 mechanism reasoning; R20a borderline-distress classification); record any changes in the decision log; update the standing protocol cache per cache-update discipline.
+
+*Source: build-knowledge extraction, 18 April 2026; quarterly governance task added under ST2 2026-05-12. Thresholds are working values — revisit if operational evidence shifts.*
 
 ### AC2 — Safety System Latency Budget
 
@@ -260,6 +311,8 @@ Adding a ninth route to the perimeter requires, before merge:
 3. Call pattern: `await enforceDistressCheck(detectDistressTwoStage(...))`
 4. Passing invocation test per AC4
 
+**ST2 amendment note (2026-05-12):** Stage 1 A10 (per-agent credentials + revocation API) may surface new authenticated routes (e.g., `/api/agent/revoke`, `/api/agent/credentials`). Each addition is evaluated for perimeter inclusion at A10 sub-stage kickoff. Cross-reference to R20a perimeter-broadening note above.
+
 ### AC6 — Four-Layer Context Architecture
 
 Agent context composes in four layers with fixed placement:
@@ -287,6 +340,50 @@ Today's bundled-depth engine (where depth-tier on `runSageReason` selects mechan
 Any new consumer added to the codebase before scaffolding retirement (M5) operates under the bundled-depth engine to maintain consistency; consumers added after M5 operate under the translation-sandwich engine.
 
 *Source: ADR-003, 2026-05-04. Migration sequence: ADR-003 §"Migration sequence — consumer-by-consumer". Retirement triggers: ADR-003 §"Retirement triggers".*
+
+### AC9 — Layer2Decision Four-Outcome Envelope
+
+Layer 2 outputs include a top-level `decision` field with values from `{ALLOW, BLOCK, REVISE, ESCALATE}`. The decision is derived from existing mechanism outputs (allowance flags + value-assessment scores) via a deterministic rule set documented in `/website/src/lib/layer2-decision-mapping.ts`. The categorical decision is exposed alongside the existing Layer2Assessment fields (mechanism outputs); both are available to consumers.
+
+**Rationale:** Aligns Layer 2 outputs with the OpenBrain Judge Extender contract vocabulary; gives downstream consumers a clean routing field; preserves existing mechanism outputs for fine-grained consumers. The four-outcome vocabulary (ALLOW / BLOCK / REVISE / ESCALATE) is the same vocabulary ST2 used for the stress-test triage of 57 items, and is intended as the substrate's standing decision language.
+
+*Source: ST2 2026-05-12, Phase 3 Step 2 Amendment 2A (REVISE election). Implementation lands at Stage 1 close gating step or Stage 3 D-mechanisms work, whichever surfaces first.*
+
+### AC10 — Provenance + Use-Policy Tags on Layer 2 Outputs
+
+Every Layer 2 assessment output carries:
+- `provenance`: one of `{observed, inferred, user_confirmed, generated}` per OpenBrain Judge Extender contract
+- `use_policies`: array of `{advisory, binding_within_session, binding_cross_session, requires_founder_approval}`
+
+The decision-log adopts these tags as a separate amendment (a future Phase 4 sub-step) once the Layer 2 output discipline proves the pattern. Existing prose entries are not retrofitted (per ST2 Amendment 2B REVISE election: Layer 2 outputs first; decision log later).
+
+**Rationale:** Provides downstream agents with structured guidance on how to treat a Layer 2 assessment beyond the raw decision value; supports R18 honest-certification posture; aligns substrate outputs with emerging Judge Extender interoperability conventions.
+
+*Source: ST2 2026-05-12, Phase 3 Step 2 Amendment 2B (REVISE election). Implementation lands at Stage 1 A12 (OpenTelemetry instrumentation) and Stage 3 plugin-tools work.*
+
+### AC11 — OpenTelemetry GenAI Semantic Conventions
+
+All substrate operations are instrumented per OpenTelemetry GenAI semantic conventions. Auto-instrumentation for Anthropic SDK calls; trace propagation across Layer 1 → Layer 2 → Layer 3 → Supabase write; correlation IDs preserved across the plugin → substrate boundary.
+
+**Cross-references:** Enables AC10 call-grain provenance logging; AC1 cost telemetry (R5); per-identity behavioural baselines (Stage 1 expansion S1 / A10).
+
+*Source: ST2 2026-05-12, Phase 3 Step 8 Domain 5 O1 (ALLOW). Implementation lands at Stage 1 A12.*
+
+### AC12 — Sub-Agent Verification Option for Critical-Tier Work
+
+Critical-tier verification steps (per AC4 invocation testing) MAY be performed by a verifier sub-agent that independently runs the production scenarios and reports. The sub-agent's report is appended to the decision-log entry as a verification artefact. Use of a verifier sub-agent does not replace founder verification — it supplements it, providing an independent invocation-pattern check before the founder runs the verification commands.
+
+**Rationale:** Replaces the Jest-configuration debt (F-series stewardship findings); closes the "agent self-reports verification" gap (Theme G hallucinated audit trails per inbox synthesis); takes advantage of the Sub-Agents primitive (ST2 Phase 2.5 Candidate 2 ALLOW).
+
+*Source: ST2 2026-05-12, Phase 3 Step 5 Candidate 2 (ALLOW Sub-Agents). Available for use immediately on any Critical-tier session where a verifier sub-agent can be spawned.*
+
+### AC13 — Outcomes-Grader Option for PR1 Verification (Cost-Aware)
+
+PR1 single-endpoint-proof verification MAY use Anthropic Outcomes (rubric + separate-grader pattern) as an additional verification layer. Adoption is cost-aware: when Outcomes evaluation cost per session is below the R5 cost-as-health-metric session-budget, use it; otherwise rely on standard verification.
+
+**Pre-condition:** Outcomes pricing confirmed against R5 thresholds before first use. **Open question:** the specific cost-aware adoption threshold is deferred to first-use evaluation (revisit condition: first Outcomes adoption attempt; verify pricing fits R5 cost session-budget).
+
+*Source: ST2 2026-05-12, Phase 3 Step 5 Candidate 6 (ALLOW with pre-condition). Available for use once R5 threshold check is performed.*
 
 ---
 

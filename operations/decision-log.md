@@ -4333,3 +4333,134 @@ Both expected results must hold simultaneously. If both folders show no file, th
 **Status:** Adopted. Cross-references: ST2 close `/operations/handoffs/founder/2026-05-12-build-plan-stress-test-ST2-close.md`; ST1 close `/operations/handoffs/founder/2026-05-12-build-plan-stress-test-ST1-close.md`; Phase 2 gap analysis `/drafts/2026-05-12-phase-2-gap-analysis.md`; four amendment drafts in `/drafts/`; v2 prompt `/operations/handoffs/founder/2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT-v2.md`; adopted staging plan `/adopted/substrate-plugin-staging-plan.md`; manifest `/manifest.md`; predecessor entries `D-STAGING-PLAN-ADOPTED-2026-05-10`, `D-BUILD-SESSIONS-CACHE-ADOPTED-2026-05-10`, `D-A4-KEY-MANAGEMENT-WIRED-VERIFIED-2026-05-10`, `D-STRESS-TEST-PROMPT-V2-ADOPTED-V1-ARCHIVED-2026-05-12`.
 
 ---
+
+## 2026-05-12 — D-STAGING-PLAN-AMENDED-FROM-ST2-2026-05-12
+
+**Decision:** Adopt ST2 staging-plan amendments into `/adopted/substrate-plugin-staging-plan.md`. Stage 1 expanded with A10-A19 sub-stages (per-agent credentials; audits + prompt-injection defence; OpenTelemetry; cost-as-health-metric alerts; SLOs; R17 SAR + rectification + portability expansion; privacy governance; regulatory governance; onboarding governance; abuse-detection). Stage 2 start delayed pending Stage 1 close exit criteria. Stage 3 re-scoped: C1-C7 adopt Anthropic Plugin spec + MCP; C5 stays bespoke; D1+D2 re-evaluated against Sub-Agents primitive; Claude Agent SDK selectively adopted for Layer 1 plugin client; S4 OWASP Agentic Top 10 2026 mapping + U4 plugin-developer first-call success path added. Stage 4 G1 = Cowork locked in as first marketplace; G3 = Character Kernel category label; G4 gating expanded to include parallel pre-launch track items + substrate Verified status. Stage 6 multi-marketplace strategy locked in: Cowork → anthropics/skills → Claude Code Plugins. Parallel pre-launch founder-personal-exposure track (FPE-1 through FPE-5) recorded with Stage 4 G4 gating dependency.
+
+**Reasoning:** ST2 Phase 3 four-outcome triage of 34 Phase 2 amendments + 16 Phase 2.5 candidates + 4 meta-decisions, all under founder elections recorded in `D-STRESS-TEST-STAGING-PLAN-AMENDMENTS-2026-05-12`. This entry adopts those elections into the operative staging plan.
+
+**Files touched:**
+- `/adopted/substrate-plugin-staging-plan.md` — re-written incorporating amendments (~600 lines, was ~507 lines)
+- `/archive/2026-05-12-staging-plan-amendments-source-of-amendment.md` — source draft preserved (git mv from `/drafts/`)
+- `/drafts/2026-05-12-staging-plan-amendments.md` — removed (moved to archive)
+
+**Risk classification:** Elevated under 0d-ii (file move `/drafts/` → `/adopted/`; staging-plan amendment). CCP NOT engaged (no code; no env vars; documentation only). AC7 NOT engaged. PR6 NOT engaged.
+
+**Rollback path:** `git revert <this commit>`. Restores `/adopted/substrate-plugin-staging-plan.md` to pre-amendment content; restores `/drafts/2026-05-12-staging-plan-amendments.md` from archive position.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "A10\|A11\|A12\|A13\|A14\|A15\|A16\|A17\|A18\|A19" adopted/substrate-plugin-staging-plan.md   # expected: >= 10
+grep -c "FPE-1\|FPE-2\|FPE-3\|FPE-4\|FPE-5" adopted/substrate-plugin-staging-plan.md                  # expected: >= 5
+grep -c "Character Kernel" adopted/substrate-plugin-staging-plan.md                                    # expected: >= 2
+ls archive/2026-05-12-staging-plan-amendments-source-of-amendment.md                                   # expected: file exists
+ls drafts/2026-05-12-staging-plan-amendments.md 2>&1 | grep "No such"                                  # expected: file gone
+```
+Expected: all checks pass.
+
+**Rules served:** R0, R14, R18a, AC1 (governance task), Q3, Q4, Q6, Q8 from ST2 Phase 3 elections.
+
+**Status:** Adopted. Cross-references: parent triage entry `D-STRESS-TEST-STAGING-PLAN-AMENDMENTS-2026-05-12`; ST2 close `/operations/handoffs/founder/2026-05-12-build-plan-stress-test-ST2-close.md`; adoption checklist `/drafts/2026-05-12-amendment-adoption-checklist.md`; archived source `/archive/2026-05-12-staging-plan-amendments-source-of-amendment.md`; sibling adoption entries `D-MANIFEST-AMENDED-FROM-ST2-2026-05-12` (Move 3, this session), `D-PROJECT-INSTRUCTIONS-AMENDED-FROM-ST2-2026-05-12` (Move 4, this session), `D-CACHE-DRIFT-RESOLVED-2026-05-12` (Move 5, this session).
+
+---
+
+## 2026-05-12 — D-MANIFEST-AMENDED-FROM-ST2-2026-05-12
+
+**Decision:** Adopt ST2 manifest amendments into `/manifest.md`. R17 expanded with R17g (SAR — GDPR Article 15), R17h (rectification — Article 16), R17i (portability — Article 20), each Critical surface with new endpoint stubs (`/api/user/access`, `/api/user/rectify`, `/api/user/export`) sequenced at A15b/c/d under amended staging plan. R18a expanded with Character Kernel substrate-category language + peer-category framing; R18e added as EU AI Act Article 50 transparency placeholder (lawyer-coupled at Stage 1 close). AC9 (Layer2Decision four-outcome envelope), AC10 (provenance + use-policy tags), AC11 (OpenTelemetry GenAI semantic conventions), AC12 (sub-agent verification option), AC13 (Outcomes-grader option, cost-aware) added to Architectural Constraints. AC1 carries new quarterly governance-task note (next due 2026-07-06; model-string + tokenizer-tax + Haiku-boundary re-derivation). R20a perimeter potential-broadening placeholder added (A10 per-agent credentials may surface new authenticated routes; each addition Critical under AC5 + PR6). AC5 carries ST2 amendment cross-reference note. YAML frontmatter `regulatory_references` (status-flags-only) replaced with populated `compliance_register` carrying 8 live binding obligations (GDPR A15/16/17/20; EAA WCAG 2.1 AA; EU AIA A50; Australia Privacy Act 1988; CCPA deletion); `change_trigger` extended with Article 50 enforcement date and Pty Ltd incorporation switch. J1 ADR `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` created (Character Kernel category label; alternatives considered; substrate-as-judge consultation record; revisit conditions).
+
+**Reasoning:** ST2 Phase 3 elections per parent triage entry `D-STRESS-TEST-STAGING-PLAN-AMENDMENTS-2026-05-12`. This entry adopts those elections into the operative manifest + creates the J1 ADR scaffolded in the manifest-amendments draft.
+
+**Files touched:**
+- `/manifest.md` — frontmatter `compliance_register` replaces `regulatory_references`; R17g/h/i added; R18a expanded; R18e added; R20a perimeter-broadening placeholder added; AC1 governance-task note added; AC5 ST2 amendment note added; AC9-AC13 added; compliance_version bumped to CR-2026-Q2-v5; last_register_amendment field added (2026-05-12)
+- `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` — NEW (J1 ADR; ~170 lines; Character Kernel category label decision)
+- `/archive/2026-05-12-manifest-amendments-source-of-amendment.md` — source draft preserved (git mv from `/drafts/`)
+- `/drafts/2026-05-12-manifest-amendments.md` — removed (moved to archive)
+
+**Risk classification:** Elevated under 0d-ii (file move `/drafts/` → `/adopted/`; manifest amendment touching R17, R18, R20a placeholder, AC1, AC5, AC9-AC13). CCP NOT engaged (no code; no env vars; documentation only). AC7 NOT engaged (no auth surface change; R17g/h/i endpoints are scoped at A15b/c/d, not implemented this session). PR6 NOT engaged (no safety-critical functions touched; R20a perimeter placeholder is a forward-looking note, not a perimeter change).
+
+**Rollback path:** `git revert <this commit>`. Restores `/manifest.md` to pre-amendment content; removes J1 ADR; restores draft to `/drafts/` from archive position.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "R17g\|R17h\|R17i" manifest.md                                                              # expected: >= 3
+grep -c "Character Kernel" manifest.md                                                              # expected: >= 2
+grep -c "AC9\|AC10\|AC11\|AC12\|AC13" manifest.md                                                   # expected: >= 5
+grep -c "CR-GDPR-A17-DELETION\|CR-GDPR-A15-ACCESS\|CR-GDPR-A16-RECTIFICATION\|CR-GDPR-A20-PORTABILITY\|CR-EAA-WCAG-AA\|CR-EU-AIA-A50\|CR-AU-PRIVACY-1988\|CR-CCPA-DELETION" manifest.md  # expected: >= 8
+ls adopted/adr/2026-05-12-substrate-category-character-kernel.md                                    # expected: file exists
+ls archive/2026-05-12-manifest-amendments-source-of-amendment.md                                    # expected: file exists
+ls drafts/2026-05-12-manifest-amendments.md 2>&1 | grep "No such"                                   # expected: file gone
+```
+Expected: all checks pass.
+
+**Rules served:** R0, R14, R17 (a-i full expansion), R18 (a + e new sub-rules), R20 (a perimeter placeholder), AC1 (governance task), AC5 (perimeter cross-reference), AC9-AC13 (new constraints), CR-### register (populated). ST2 Phase 3 Step 1 (J1 ADR), Step 2 Amendments 2A + 2B, Step 5 Candidates 2 + 6, Step 7 Candidate 13, Step 8 Domains 1 + 2 + 4 + 5.
+
+**Status:** Adopted. Cross-references: parent triage entry `D-STRESS-TEST-STAGING-PLAN-AMENDMENTS-2026-05-12`; ST2 close `/operations/handoffs/founder/2026-05-12-build-plan-stress-test-ST2-close.md`; adoption checklist `/drafts/2026-05-12-amendment-adoption-checklist.md` (still in `/drafts/`; archives at session close); sibling adoption entries `D-STAGING-PLAN-AMENDED-FROM-ST2-2026-05-12` (Move 2), `D-PROJECT-INSTRUCTIONS-AMENDED-FROM-ST2-2026-05-12` (Move 4), `D-CACHE-DRIFT-RESOLVED-2026-05-12` (Move 5); J1 ADR `/adopted/adr/2026-05-12-substrate-category-character-kernel.md`; archived source `/archive/2026-05-12-manifest-amendments-source-of-amendment.md`.
+
+---
+
+## 2026-05-12 — D-PROJECT-INSTRUCTIONS-AMENDED-FROM-ST2-2026-05-12
+
+**Decision:** Adopt ST2 project-instruction amendments. PR10 (PEV loop + diagnostic-certainty) added as new Process Rule. PR11-PR15 add SR1, SR1a, SR2, SR3, SR4 (Standing Requirements promoted from session-open commitments to permanent Process Rules per ST2 Phase 3 Q8 election): authoritative-current-sources rule (PR11); negative-finding discipline (PR12); consider-implications five-question assessment (PR13); proactive surfacing of ten domains (PR14); bias toward existing Anthropic infrastructure (PR15). PR16 adds SR5 (positioning + dogfood lens at every triage decision). AI signals table extended with three diagnostic-certainty rows ("Diagnostic-certain — root cause identified"; "Diagnostic-uncertain — symptom level"; "Diagnostic-uncertain — pattern level"). Authoritative surface: NEW repo file `/adopted/project-instructions-snapshot.md` (founder elected repo-snapshot option at session-open over Cowork-panel-only option, per founder preference for git-history audit trail). Founder paste-syncs snapshot content into Cowork project-instructions panel between sessions.
+
+**Reasoning:** ST2 Phase 3 Q8 election (Adopt SR1-SR5 as PR11-PR15) per parent triage entry `D-STRESS-TEST-STAGING-PLAN-AMENDMENTS-2026-05-12`. SR5 added as PR16 (separate slot for the positioning + dogfood lens; not a session-opening commitment but a per-decision discipline). PR10 PEV loop adopted per ST2 Phase 3 Step 5 Candidate 16 (ALLOW). AI signals additions per PR10 PEV loop's Verify step.
+
+**Files touched:**
+- `/adopted/project-instructions-snapshot.md` — NEW (first repo-tracked snapshot of project-instructions surface; ~450 lines; includes full current project-instructions content + PR10-PR16 + diagnostic-certainty AI signals)
+- `/archive/2026-05-12-project-instruction-amendments-source-of-amendment.md` — source draft preserved (git mv from `/drafts/`)
+- `/drafts/2026-05-12-project-instruction-amendments.md` — removed (moved to archive)
+
+**Risk classification:** Elevated under 0d-ii (file move `/drafts/` → `/adopted/`; project-instructions amendment touching Process Rules + AI signals table). CCP NOT engaged (no code; no env vars; documentation only). AC7 NOT engaged. PR6 NOT engaged.
+
+**Rollback path:** `git revert <this commit>`. Removes `/adopted/project-instructions-snapshot.md`; restores draft to `/drafts/` from archive position. Note: if founder has paste-synced the snapshot content into the Cowork panel before the revert, the founder must also revert the Cowork-panel edit via Cowork's panel edit-history; otherwise Cowork-panel content will drift from repo (log via `D-PI-DRIFT-…` entry if this occurs).
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+ls adopted/project-instructions-snapshot.md                                                                     # expected: file exists
+grep -c "PR10\|PR11\|PR12\|PR13\|PR14\|PR15\|PR16" adopted/project-instructions-snapshot.md                     # expected: >= 7
+grep -c "Diagnostic-certain\|Diagnostic-uncertain" adopted/project-instructions-snapshot.md                     # expected: >= 3
+grep -c "Character Kernel" adopted/project-instructions-snapshot.md                                             # expected: >= 1
+ls archive/2026-05-12-project-instruction-amendments-source-of-amendment.md                                     # expected: file exists
+ls drafts/2026-05-12-project-instruction-amendments.md 2>&1 | grep "No such"                                    # expected: file gone
+```
+Expected: all checks pass. **Between-session action for founder:** paste the content of `/adopted/project-instructions-snapshot.md` into the Cowork project-instructions panel to keep both surfaces in sync. A subsequent session will log a `D-PI-SYNC-…` entry confirming both surfaces aligned.
+
+**Rules served:** Project-instructions Process Rules section (PR1-PR9 existing + PR10-PR16 new); section 0d Communication Signals (AI signals table extended). ST2 Phase 3 Step 5 Candidate 16, Q8 election.
+
+**Status:** Adopted. Cross-references: parent triage entry `D-STRESS-TEST-STAGING-PLAN-AMENDMENTS-2026-05-12`; ST2 close `/operations/handoffs/founder/2026-05-12-build-plan-stress-test-ST2-close.md`; adoption checklist `/drafts/2026-05-12-amendment-adoption-checklist.md`; sibling adoption entries `D-STAGING-PLAN-AMENDED-FROM-ST2-2026-05-12` (Move 2), `D-MANIFEST-AMENDED-FROM-ST2-2026-05-12` (Move 3), `D-CACHE-DRIFT-RESOLVED-2026-05-12` (Move 5); archived source `/archive/2026-05-12-project-instruction-amendments-source-of-amendment.md`.
+
+---
+
+## 2026-05-12 — D-CACHE-DRIFT-RESOLVED-2026-05-12
+
+**Decision:** Resolve cache drift from ST2 adoption (Moves 2, 3, 4). Update `/adopted/standing-protocol-cache.md` and `/adopted/build-sessions-protocol-cache.md` to incorporate the newly-adopted amendments per the cache-update discipline embedded in both caches.
+
+**Reasoning:** Per cache-update discipline in both caches, when manifest rules, session-opening protocol, project instructions, or process rules change, the relevant cache is updated in the same session. ST2 Moves 2-4 changed all four governance surfaces; this Move 5 resolves the resulting drift in one entry.
+
+**Files touched:**
+- `/adopted/standing-protocol-cache.md` — Element 8 AI signals table extended with three diagnostic-certainty rows (per PR10 PEV-loop Verify step); §"Cache update discipline" updated to reference AC1-AC13 (was AC1-AC8) and PR1-PR16 (was PR1-PR9); §"Cross-references" updated to point at new project-instructions snapshot path, J1 ADR path, and amended staging plan note; header status line updated to flag ST2 amendments adopted.
+- `/adopted/build-sessions-protocol-cache.md` — Open-questions parking lot updated: Q9 (Layer 2 signing infrastructure timeline) CLOSED — A3 + A4 Verified; Q14 (first marketplace target) CLOSED — Cowork locked in; Q4 (credential portability) status refined to A10 sub-stage; Q11 (brand/trademark) status refined to parallel pre-launch FPE-5 + lawyer engagement; Q16 (plugin trust signalling) status refined to R18a Character Kernel + Stage 4 G3. Living-state references table updated: adopted staging plan note now reflects 2026-05-12 ST2 amendments rather than "currently in `/drafts/`". Header status line updated to flag ST2 amendments adopted.
+
+**Risk classification:** Standard under 0d-ii (cache update; in-session resolution of drift caused by Elevated amendments in same session). CCP NOT engaged. AC7 NOT engaged. PR6 NOT engaged.
+
+**Rollback path:** `git revert <this commit>`. Restores both caches to pre-ST2 state. Note: rollback of this entry alone is unusual — if rolling back ST2 amendments, revert in dependency order (Move 5 first, then Move 4, Move 3, Move 2) or revert the whole adoption-session commit at once.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "Diagnostic-certain\|Diagnostic-uncertain" adopted/standing-protocol-cache.md           # expected: >= 3
+grep -c "PR1.\|PR16" adopted/standing-protocol-cache.md                                          # expected: >= 1 (PR16 appears in cache-discipline section)
+grep -c "AC1.\|AC13" adopted/standing-protocol-cache.md                                          # expected: >= 1
+grep -c "CLOSED 2026-05-12" adopted/build-sessions-protocol-cache.md                            # expected: >= 2 (Q9 + Q14)
+grep -c "Refined under ST2" adopted/build-sessions-protocol-cache.md                            # expected: >= 3 (Q4 + Q11 + Q16)
+```
+Expected: all checks pass.
+
+**Rules served:** Cache-update discipline in both caches (Standard-risk amendment when underlying governance changes); ST2 Phase 3 Steps 1, 2, 5, 6, 8 + Q3, Q4, Q6, Q8 elections (closed via amended caches).
+
+**Status:** Adopted. Cross-references: parent triage entry `D-STRESS-TEST-STAGING-PLAN-AMENDMENTS-2026-05-12`; ST2 close `/operations/handoffs/founder/2026-05-12-build-plan-stress-test-ST2-close.md`; sibling adoption entries `D-STAGING-PLAN-AMENDED-FROM-ST2-2026-05-12` (Move 2), `D-MANIFEST-AMENDED-FROM-ST2-2026-05-12` (Move 3), `D-PROJECT-INSTRUCTIONS-AMENDED-FROM-ST2-2026-05-12` (Move 4); the amended caches themselves.
+
+---

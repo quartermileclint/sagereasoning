@@ -1,6 +1,6 @@
 # Standing Protocol Cache
 
-**Status:** Adopted 2026-05-03 under `D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT-2026-05-03`.
+**Status:** Adopted 2026-05-03 under `D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT-2026-05-03`. **Amended 2026-05-12 under `D-CACHE-DRIFT-RESOLVED-2026-05-12`** to incorporate ST2 changes: AI signals table extended with three diagnostic-certainty rows; manifest range updated (AC1–AC13); process-rule range updated (PR1–PR16); project-instructions surface now `/adopted/project-instructions-snapshot.md` (first repo-tracked snapshot, created at ST2 adoption); cross-references updated for new ADR (J1 Character Kernel) and amended staging plan.
 **Governs:** Session-opening overhead. Replaces full re-reads of the manifest + session-opening protocol + knowledge-gaps register at every session open with a one-stop reference. Full re-reads only when work specifically requires it.
 **Does not govern:** What gets built (manifest's remit) or how to work together (project instructions' remit). The full governance documents remain authoritative when this cache flags a change or when work touches a surface this cache does not pre-resolve.
 **Update discipline:** When the manifest, session-opening protocol, project instructions, or knowledge-gaps register changes, this cache must be updated in the same session as the change (Standard-risk amendment). Cache drift is logged via a `D-CACHE-DRIFT-…` entry.
@@ -106,6 +106,9 @@ A decision can be `Adopted` while the implementation it names is only `Designed`
 | "This is a limitation" | I can't do this / outside what I can verify |
 | "This change has a known risk" | I'm confident in the approach but want to name a specific failure mode |
 | "I caused this" | The problem is a result of a change I made, not something on your end |
+| "Diagnostic-certain — root cause identified" | I've isolated the root cause; the proposed change addresses it directly (per PR10 PEV-loop Verify step; added ST2 2026-05-12) |
+| "Diagnostic-uncertain — symptom level" | I can describe the symptom; root cause not yet confirmed; the proposed change addresses the symptom. Founder acknowledgement required before treating as resolved (per PR10; added ST2 2026-05-12) |
+| "Diagnostic-uncertain — pattern level" | The situation matches a known pattern; applicability to *this* case is not confirmed. Founder acknowledgement required before treating as resolved (per PR10; added ST2 2026-05-12) |
 
 **Founder signals:**
 
@@ -314,10 +317,10 @@ The full session close for a Critical session includes the additional sections p
 
 When any of the following changes:
 
-- Manifest rules (R0–R20, AC1–AC8, KG1–KG7)
+- Manifest rules (R0–R20, AC1–AC13, KG1–KG7) — AC9–AC13 added under ST2 2026-05-12
 - Session-opening protocol (Parts A, B, C; the 21 elements)
-- Project instructions (this version is per the project instructions snapshot at adoption time)
-- Process rules (PR1–PR9)
+- Project instructions (this version is per `/adopted/project-instructions-snapshot.md` — first repo-tracked snapshot created 2026-05-12 under ST2)
+- Process rules (PR1–PR16) — PR10–PR16 added under ST2 2026-05-12
 
 …update this cache **in the same session as the governance change**. The update is Standard risk per 0d-ii. Append `D-CACHE-DRIFT-RESOLVED-YYYY-MM-DD` entry to the decision log naming the cache-update step.
 
@@ -327,11 +330,14 @@ If the cache and the governance documents diverge, the governance documents are 
 
 ## Cross-references
 
-- `/manifest.md` — full manifest (R0–R20, AC1–AC8, KG1–KG7)
+- `/manifest.md` — full manifest (R0–R20, AC1–AC13, KG1–KG7; AC9-AC13 added under ST2 2026-05-12; R17g/h/i + R18e added; R20a perimeter potential-broadening placeholder)
+- `/adopted/project-instructions-snapshot.md` — first repo-tracked snapshot of project instructions; created under ST2 2026-05-12. Authoritative surface for the operative project instructions; founder paste-syncs into Cowork panel between sessions.
+- `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` — J1 ADR (Character Kernel category label)
+- `/adopted/substrate-plugin-staging-plan.md` — substrate-as-plugin staging plan (amended at ST2; A10-A19 Stage 1 expansion; Stage 3 re-scope on Anthropic Plugin spec + MCP; Stage 4 G4 expanded gating; parallel pre-launch track)
 - `/adopted/session-opening-protocol.md` — full 21-element protocol
 - `/operations/knowledge-gaps.md` — full knowledge-gaps register
 - `/operations/decision-log.md` — append-only decision trail (active log = entries dated 2026-05-01 onwards); entries cross-reference this cache by section name. Earlier entries are in monthly archive files in `/operations/decision-log-archive-YYYY-MM.md` per the quarterly archive policy adopted under `D-DECISION-LOG-ARCHIVE-POLICY-ADOPTED-2026-05-04` (see active log's INDEX header for full archive list + policy)
-- Project instructions (system prompt) — process rules PR1–PR9; verification framework 0c; Critical Change Protocol 0c-ii; risk classification 0d-ii
+- Project instructions: see `/adopted/project-instructions-snapshot.md` for the operative content (PR1–PR16; verification framework 0c; Critical Change Protocol 0c-ii; risk classification 0d-ii; AI signals diagnostic-certainty rows added ST2)
 
 ---
 

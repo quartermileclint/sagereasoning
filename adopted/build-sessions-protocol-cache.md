@@ -1,6 +1,6 @@
 # Build-Sessions Protocol Cache — Substrate as Plugin
 
-**Status:** Adopted 2026-05-10 under `D-BUILD-SESSIONS-CACHE-ADOPTED-2026-05-10`. Validated as-written by the founder between sessions; no edits during planning-session validation pass. Moved from `/drafts/build-sessions-protocol-cache.md` (predecessor preserved in git history).
+**Status:** Adopted 2026-05-10 under `D-BUILD-SESSIONS-CACHE-ADOPTED-2026-05-10`. Validated as-written by the founder between sessions; no edits during planning-session validation pass. Moved from `/drafts/build-sessions-protocol-cache.md` (predecessor preserved in git history). **Amended 2026-05-12 under `D-CACHE-DRIFT-RESOLVED-2026-05-12`** following ST2 adoption: open-questions parking lot updated (Q9 + Q14 closed; Q4, Q11, Q16 status refined); staging plan amendments now adopted at `/adopted/substrate-plugin-staging-plan.md` (no longer a `/drafts/` reference); J1 ADR adopted at `/adopted/adr/2026-05-12-substrate-category-character-kernel.md`; project-instructions snapshot at `/adopted/project-instructions-snapshot.md` carries PR10-PR16.
 **Governs:** All sessions of the substrate-as-plugin build arc — from initial planning through to the plugin's first marketplace listing AND the migration of existing bundled-prose consumers onto the translation-sandwich substrate. Carries the build-arc-specific context that would otherwise be re-read at every session open.
 **Does not govern:** The general session protocol (handled by `/adopted/standing-protocol-cache.md`), what gets built (manifest's remit), or how to work together (project instructions' remit).
 **Update discipline:** When the build-arc architecture, decisions, or migration scope changes, this cache must be updated in the same session as the change. Cache drift is logged via a `D-BUILD-CACHE-DRIFT-…` entry. Diverges from architecture? Architecture wins; cache is reference convenience.
@@ -88,7 +88,7 @@ These are the documents that describe **current state** and must be re-read when
 | Standing protocol cache | `/adopted/standing-protocol-cache.md` | General session protocol (model selection, KG register, signals, risk classification, lean templates) | Every session — the basic session-opening reference |
 | This cache | `/adopted/build-sessions-protocol-cache.md` | Build-arc-specific context | Every build-arc session |
 | Predecessor build-arc close | Most recent in `/operations/handoffs/founder/` matching `*substrate*` or `*plugin*` | Immediate handoff | Every build-arc session |
-| Adopted staging plan | `/adopted/substrate-plugin-staging-plan.md` (once approved; currently in `/drafts/`) | The staged build plan governing the arc | Every execution session in the arc |
+| Adopted staging plan | `/adopted/substrate-plugin-staging-plan.md` (Adopted 2026-05-10; Amended 2026-05-12 under ST2 — Stage 1 expansion A10-A19; Stage 3 re-scope; Stage 4 G4 expanded gating; parallel pre-launch track) | The staged build plan governing the arc | Every execution session in the arc |
 
 ---
 
@@ -101,19 +101,19 @@ The build arc carries twenty open questions. They are tracked here for visibilit
 | 1 | Mode separation (evaluative / prescriptive / augmentative-combo) — plugin variants or single configurable plugin? | Planning-session question |
 | 2 | Layer 2 schema scale + middle protection | Confirmed by Decision 1 + closed Layer 3; permissive licence appropriate for Layer 1 |
 | 3 | Distress check posture | Answered by Decision 3 (three-layer R20a defence) |
-| 4 | Credential portability | Mostly resolved by plugin paradigm; specific format (JWT / W3C VC / hybrid) is planning question |
+| 4 | Credential portability | Refined under ST2: surfaces as Stage 1 A10 (per-agent credentials + revocation); token-format ADR (JWT / W3C VC / hybrid) drafted before A10 implementation. Revisit: A10 sub-stage kickoff. |
 | 5 | Action scorer parallel | Confirmed: agent action scorer mirrors human action scorer wherever evaluative is in play |
 | 6 | Distribution channel | Answered: plugins via marketplaces |
 | 7 | Specific licence form for open Layer 1 | Deferred to lawyer review at the licensing gate (Rule A) |
 | 8 | Plugin governance model | Planning-session question; minimum-viable on day one |
-| 9 | Layer 2 signing infrastructure timeline | Planning-session question; foundational for the moat |
+| 9 | Layer 2 signing infrastructure timeline | **CLOSED 2026-05-12.** A3 (Layer 2 signing) + A4 (Key management) Verified per ST2 close. Moat foundation operational. |
 | 10 | Standards-formation engagement | Planning-session question; smaller scope under plugin paradigm |
-| 11 | Brand and trademark posture | Planning-session question |
+| 11 | Brand and trademark posture | Refined under ST2: parallel pre-launch FPE-5 (TOS + liability) covers liability allocation; lawyer review at Stage 1 close covers brand/trademark posture. Revisit: Stage 1 close + lawyer engagement. |
 | 12 | Migration path for sagereasoning.com consumers | Now framed as the K-category in the build inventory |
 | 13 | R20a perimeter handover mechanism | Answered by Decision 3 |
-| 14 | First marketplace target | Planning-session question (Cowork is candidate per Decision 5) |
+| 14 | First marketplace target | **CLOSED 2026-05-12.** Cowork locked in as first marketplace per ST2 Phase 3 Step 6 + Step 9 M3. Marketplace adoption sequence: Cowork → anthropics/skills → Claude Code Plugins. |
 | 15 | Plugin version compatibility and update mechanics | Planning-session question |
-| 16 | Plugin trust signalling | Planning-session question; meaningful for ethical-claim plugins |
+| 16 | Plugin trust signalling | Refined under ST2: R18a Character Kernel category language + R18b badge transparency + R18e Article 50 transparency placeholder adopted in manifest. Specific trust-signalling UI scoped in Stage 4 G3 marketplace listing copy + I5. |
 | 17 | Plugin sandbox limitations per marketplace | Per-marketplace question; surfaces during marketplace targeting |
 | 18 | Plugin economics | Planning-session question (free-to-install + paid via connector services is the standard pattern) |
 | 19 | Plugin variant strategy | Same as Q1 |
