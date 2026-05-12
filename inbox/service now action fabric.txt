@@ -1,0 +1,48 @@
+Service now action fabric
+
+For years, Bill McDermott has said ServiceNow goes east to west, north to south, across the enterprise and every enterprise application. Every department, function, and persona across IT, Security, Risk, HR, finance, legal, procurement, customer service, and more, plus vertical depth through the technology stack. The ServiceNow AI Platform moves across the entire organization without gaps, from the AI layer at the top, down through workflows, and into the underlying systems of record, data sources, and integrations. 
+
+That has always been a deliberate platform vision: one platform underneath all the work an enterprise does, across every function and department.
+
+And it has been compounding. Our customers have built tens of thousands of workflows, playbooks, approval chains, and business rules on the platform, automating work across every corner of the enterprise, every day.
+
+At Knowledge 2026, this foundation scales to the AI era with ServiceNow Action Fabric.
+
+We are opening the ServiceNow AI Platform and its full system of action to any AI agent, whether it's built on ServiceNow, or, for example, with Claude, Copilot, or a customer's own homegrown agent. With ServiceNow Action Fabric, AI can tap directly into secure, governed enterprise actions headlessly through our generally available Model Context Protocol (MCP) Server.
+
+Beyond records, into action
+
+The world has changed. AI is being built and developed in new ways, and enterprises need platforms that can keep up. Every record inside the ServiceNow platform is tied to an action, such as an automated process or workflow. When an incident is created, business rules activate, assignment flows execute, Service Level Agreement (SLA) timers start, and all action has guardrails grounded in business context. For AI agents, this combination is what matters: Knowledge Graph and Context Engine provide the situational awareness to make intelligent decisions, while workflows, playbooks, and business rules provide the governed execution to act on them. The ServiceNow AI Platform stores records and does the end-to-end work that follows.
+
+Take a new employee starting on Monday. In a system of record, that employee is a row in a database. On day one, nothing is ready because the work to provision a laptop, create accounts, set up payroll, and assign training lives in separate systems and email threads. In ServiceNow, the moment that employee record is created, the platform takes over. IT provisions accounts. Security creates the badge scoped to the role. Learning assigns onboarding curriculum. Finance sets up payroll. SLAs run on every step, and if anything stalls, the platform escalates. The employee shows up and everything is ready, because the record was the trigger and the trigger drove governed work end to end.
+
+ServiceNow Action Fabric exposes the ability for this work to happen headlessly (directly into the platform) without a traditional user experience. For example, the playbook that powers a password reset through the ServiceNow UI can now power that same reset directly from Claude. The onboarding workflow that HR triggers through our portal can now also run when an AI agent submits the request directly from their preferred collaboration tool.
+
+One of our first launch partners is Anthropic, where they’re helping us bring this vision to life through Claude Cowork.
+
+
+Claude: from conversation to governed action
+
+Anthropic has quickly become one of the most trusted AI providers in the enterprise. As organizations evaluate which AI platforms to build on, Claude has emerged as a preferred choice for the world's largest companies, and a growing number of those companies are also ServiceNow customers. That overlap is not a coincidence. Enterprises that invest in governed workflows also invest in AI they can trust.
+
+Anthropic is the first design partner for ServiceNow Action Fabric, connecting Claude Cowork directly to our governed system of action and bringing enterprise execution into the tools employees already have open. 
+
+Picture a product manager who just transitioned internally into a new role. They're ramping up in Cowork: reviewing docs and asking questions. But friction keeps accumulating with repos they can't access, a Slack channel they haven't joined, and tools that aren't provisioned yet. They're just hitting walls. Claude queries ServiceNow, which evaluates their current access and surfaces five missing items. They review the list, drop the one they don't need, and confirm. ServiceNow routes each request through the right approval chain. The walls are gone.
+
+As Boris Cherny, Head of Claude Code at Anthropic, says: "The gap between knowing what needs to happen and making it happen is where productivity dies. Connecting Claude Cowork to ServiceNow's system of action closes that gap with enterprise execution, directly in the flow of work."
+
+Governed work, not just data access
+
+The Anthropic partnership is one example of what ServiceNow Action Fabric enables. But the platform is open to every agent. MCP is an open protocol, and dozens of enterprise vendors support it. Our approach is different, because of what comes next.
+
+Other platforms let agents read and write data. ServiceNow enables agents to execute governed work: flows, playbooks, approvals, catalogs — the full system of action. Every action runs through ServiceNow AI Control Tower (AICT), so it’s identity-verified, permission-scoped, and fully auditable. The MCP Server Console includes AICT governance, consumption metering, managed open authorization (OAuth), enterprise audit trails, session management, and role-based tool packages. 
+
+The MCP Server spans IT, HR, customer service, security, risk and compliance, and app development, enabling coordinated, multi-agent systems at enterprise scale.
+
+Every operational workload, human or AI, runs on ServiceNow 
+
+According to IDC, the number of active AI agents globally is projected to grow from roughly 28.6 million in 2025 to over 2.2 billion by 2030. As those agents scale across the enterprise, each one becomes a channel into the platform. A developer using Claude in the terminal, a manager using Copilot in Teams, a security analyst running a custom agent: they all route actions through ServiceNow. The addressable surface expands dramatically, bringing both human and AI operational workloads onto a single platform.
+
+This creates a compounding effect. Every agent that acts through ServiceNow generates operational data that flows back into process mining, Configuration Management Database (CMDB), and analytics. The more agents that route actions through the platform, the richer the enterprise’s operational intelligence becomes. That operational data feeds Context Engine, which makes every agent more effective over time.
+
+Humans and AI agents need a shared runtime. One where every action is governed, every workflow is connected, and every interaction makes the platform smarter. That runtime is ServiceNow Action Fabric.
