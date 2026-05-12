@@ -1,0 +1,94 @@
+What peers we have
+
+If SageReasoning is your category of “judgment middleware” (a continuity + normative reasoning layer inserted between an LLM’s raw reasoning and its actions), there’s a growing family of adjacent architectures. They usually sit in one of these buckets:
+
+1. Constitutional / normative reasoning layers
+
+These explicitly inject values, principles, or constitutions before action.
+	•	Anthropic — canonical example; model critiques/revises against a constitution.
+	•	SentientROUTER — “constitutional gate” before model/tool access; decides whether autonomy is allowed at all.  ￼
+	•	SPQR / Aegis Kernel — sovereign AI governance with immutable constitutional constraints.  ￼
+	•	AEGIS Constitution + aegis-core — constitution → governance spec → runtime enforcement chain.  ￼
+	•	Ternary Moral Logic (TML) — legal-ethical triage layer (“pause / refuse / proceed”).  ￼
+
+Closest to SageReasoning if your Stoic layer is explicitly virtue-based.
+
+⸻
+
+2. Cognitive middleware / governed reasoning layers
+
+These govern how the agent reasons, not just what it outputs.
+	•	ANCHOR — explicitly describes itself as “cognitive middleware”; governs authority, escalation, uncertainty, second-order effects. Very close conceptually.  ￼
+	•	ResontoLogic / ARH — “AI Reasoning for Humans”; separates governance, assurance, runtime, and hazard reasoning.  ￼
+	•	SageReasoning fits here naturally.
+
+This is likely your primary peer group.
+
+⸻
+
+3. Runtime governance kernels
+
+Deterministic control planes beneath the LLM.
+	•	VIGIL — event-sourced persistent agent runtime; classify → decide → govern → act.  ￼
+	•	ASK Framework — “agents are principals to be governed”; external enforcement architecture.  ￼
+	•	Deterministic Governance Kernel (Zylos) — rule engine beneath probabilistic reasoning.  ￼
+
+These are less “ethical judge,” more “OS kernel for agents.”
+
+⸻
+
+4. Guardrail / judge layers
+
+Focused on validation and intervention.
+	•	Guardrails AI
+	•	Patronus AI
+	•	Lakera
+	•	LLM-as-Judge patterns (Notch etc.) — evaluate each step for policy compliance.  ￼
+
+Usually narrower than SageReasoning because they don’t maintain continuity of judgment.
+
+⸻
+
+5. Memory / continuity layers
+
+Preserve coherent identity and judgment over time.
+	•	MemGPT
+	•	LangGraph checkpoints/state
+	•	Letta
+	•	VIGIL overlaps here too.
+
+These solve “same self tomorrow.”
+
+⸻
+
+Where SageReasoning appears unique
+
+Your framing sounds like:
+
+Perception
+  → LLM intuition
+  → SageReasoning (Stoic assent / judgment)
+      - test impressions
+      - check virtues
+      - continuity with prior commitments
+      - rank preferred indifferents
+      - decide assent / withhold / escalate
+  → action/runtime
+
+That is unusual because it combines:
+	1.	normative philosophy layer (Stoicism),
+	2.	judgment-as-process (synkatathesis / assent),
+	3.	continuity of character over time,
+	4.	production middleware.
+
+Most others do only 1–2 of those.
+
+A good label for this category might be:
+	•	Normative Cognitive Middleware
+	•	Judgment Continuity Layer
+	•	Virtue Middleware
+	•	Assent Engine
+	•	Character Kernel (my favorite)
+	•	Practical Wisdom Layer (Phronesis Layer)
+
+“Character Kernel” is especially strong: the layer that preserves who the agent is while reasoning.

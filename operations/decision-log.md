@@ -4236,3 +4236,38 @@ Expected: PASS line. If it fails, A4 has regressed; engage Path A rollback (un-s
 **Status:** Adopted. Cross-references: predecessor `D-A3-LAYER2-SIGNING-WIRED-VERIFIED-2026-05-10` (A4 operationalises A3 ADR §Decision 4); A3 ADR predecessor `D-A3-LAYER2-SIGNING-ADR-ADOPTED-2026-05-10` (the rotation contract A4 makes concrete); staging plan `/adopted/substrate-plugin-staging-plan.md` Stage 1 item A4 (success criteria SATISFIED for `/api/public-key` — A4 implementation status: Designed → Scaffolded → Wired → Verified); A4 ADR `/adopted/ADR-A4-key-management.md` (the four design choices implemented this session); A3 ADR `/adopted/ADR-layer2-signing-infrastructure.md` §Decision 4 (the architectural anchor for rotation cadence + 30-day overlap); cryptographic-precedent ADR `/adopted/ADR-ENCRYPTION-WIRING-01.md` §Decision 4 Option 4A + §Decision 5 (key-custody and rollback discipline mirrored); modified file `/website/src/app/api/public-key/route.ts`; new test file `/website/src/app/api/public-key/__tests__/public-key-route.test.ts`; new runbook `/operations/runbooks/substrate-layer2-key-rotation.md`; build-arc cache `/adopted/build-sessions-protocol-cache.md`; standing protocol cache `/adopted/standing-protocol-cache.md`; predecessor close `/operations/handoffs/founder/2026-05-10-stage-1-a3-wired-verified-close.md`; this session's close `/operations/handoffs/founder/2026-05-10-stage-1-a4-key-management-close.md`.
 
 ---
+
+## 2026-05-12 — D-STRESS-TEST-PROMPT-V2-ADOPTED-V1-ARCHIVED-2026-05-12
+
+**Decision:** The Build-Plan Stress-Test next-session prompt v2 is the authoritative version going forward. v1 has been archived. Filesystem state: v2 lives at `/operations/handoffs/founder/2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT-v2.md` (397 lines, 33,779 bytes, originally saved 2026-05-12 06:26); v1 has been moved to `/archive/2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT-v1.md` (49,104 bytes, original timestamp 2026-05-11 19:44 preserved). The `build-plan-stress-test-NEXT-SESSION-PROMPT` prefix in `/operations/handoffs/founder/` now resolves to exactly one file (v2). v2 itself was authored by the founder progressively across 2026-05-10–12 and contains the in-body "Supersedes" pointer to v1. No content was rewritten in this operation — the move is governance housekeeping only.
+
+**Reasoning:** v2 consolidates v1's content plus the foundational positioning + ethos section (Character Kernel framing); the six Standing Requirements; the May 2026 Anthropic features survey (Dreams / Outcomes / Multi-agent orchestration); the 5-MCP routine + hooks pattern from `/inbox/claude on track.txt`; the PEV / diagnostic-certainty patterns from the vibe-coding-debugging research; the three Judge Layer structural amendment candidates; Phase 1.5 Action Surface Audit; the four-outcome triage framework (ALLOW / REVISE / BLOCK / ESCALATE) for Phase 3; and dogfood-discipline checks across phases. With v2 adopted, leaving v1 in `/operations/handoffs/founder/` alongside v2 would create ambiguity at session-open about which prompt governs. Archival to `/archive/` (per the project instructions' file-organisation convention: "superseded versions moved here, not deleted") preserves v1 for historical reference without ambiguity. Filename convention: `-v1` suffix added on archive to disambiguate from v2 in any cross-folder search; original date (`2026-05-10`) preserved in the filename to reflect when v1 was authored.
+
+**Files touched:**
+- `/operations/handoffs/founder/2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT.md` — REMOVED from this path via `mv`. Founder had already saved v2 alongside it at `/operations/handoffs/founder/2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT-v2.md`; the v1 path was the obsolete one.
+- `/archive/2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT-v1.md` — NEW at this path. Contents byte-identical to former v1 (no edits; pure move).
+- `/operations/decision-log.md` — this entry appended.
+
+**Risk classification:** **Standard** under 0d-ii. Pure file-organisation operation: one file moved between folders within the same git repo; no code touched; no live system affected; no environment variables changed; no manifest or staging-plan amendment; no deletion (content preserved by the move). The substrate's production state (A4 Verified; all `SUBSTRATE_LAYER2_PREVIOUS_*` env vars UNSET; `/api/public-key` steady state) is unchanged.
+
+**Rollback path:** Trivial. If v1 is needed back in `/operations/handoffs/founder/`, run: `mv "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/archive/2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT-v1.md" "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/operations/handoffs/founder/2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT.md"`. ~5 seconds. No git revert required (the move is captured in this session's commit when made).
+
+**Verification step (founder-performable, between sessions):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+ls operations/handoffs/founder/ | grep build-plan-stress
+# Expected: one line only — 2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT-v2.md
+ls archive/ | grep build-plan-stress
+# Expected: one line — 2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT-v1.md
+```
+Both expected results must hold simultaneously. If both folders show no file, the move failed and the file is lost (engage git restore from origin/main). If both folders show the same file, the operation duplicated rather than moved (delete the unwanted copy).
+
+**Open questions:**
+- Whether the standing-protocol-cache or build-sessions-protocol-cache should be updated to name v2 explicitly as "the authoritative build-plan stress-test prompt." Not material until the stress-test session begins; the v2's in-body "Supersedes" line is sufficient governance for now. Revisit at session-open if cache amendment is desirable.
+- Whether the `/archive/` flat-file convention should be evolved to mirror the `/operations/handoffs/founder/` substructure (e.g., `/archive/operations/handoffs/founder/`). Not material to this entry; flagged as an F-series stewardship observation for the routine governance session already on the backlog (gitignore additions; T-series promotions; calendar consolidation).
+
+**Rules served:** R0 (oikeiosis audit trail — archival recorded with reasoning), 0a (status taxonomy — v2 implementation status now sole-occupant of the active path; v1 retired to archive), 0e (file organisation — `/archive/` per the project instructions' "superseded versions moved here, not deleted" convention), 0f (decision-log entry — append-only log updated with the supersession event so v1's retirement is traceable from the log without folder spelunking), PR7 (decisions not made are documented — two open questions parked with revisit conditions). The full governance-rule load (AC*, KG*, PR1–6, PR8–9) is N/A for a pure file-move operation.
+
+**Status:** Adopted. Cross-references: predecessor `D-STAGING-PLAN-ADOPTED-2026-05-10` (the build plan v2 stress-tests); v2 itself at `/operations/handoffs/founder/2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT-v2.md` (the authoritative prompt going forward); archived v1 at `/archive/2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT-v1.md` (preserved for historical reference); the four prep documents v2 references (`/drafts/security-audit-build-plan-vs-agentic-security-strategies-2026-05-10.md`; `/drafts/anthropic-features-survey-2026-05-10.md`; `/drafts/inbox-research-synthesis-2026-05-10.md`; plus v2 itself); previous full-day close `/operations/handoffs/founder/2026-05-10-full-day-close.md` (the authoritative full-day session-end record v2 builds on).
+
+---

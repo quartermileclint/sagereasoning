@@ -1,0 +1,192 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2869
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Roman;\f1\froman\fcharset0 Times-Bold;\f2\fnil\fcharset0 HelveticaNeue;
+\f3\fnil\fcharset0 HelveticaNeue-Bold;\f4\fmodern\fcharset0 Courier;}
+{\colortbl;\red255\green255\blue255;\red224\green225\blue230;\red13\green18\blue32;}
+{\*\expandedcolortbl;;\cssrgb\c90196\c90588\c92157;\cssrgb\c5882\c9020\c16863;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat0\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Karri Saarinen, the CEO of Linear, declared issue tracking dead in March. His argument was reasonable. Issue trackers were built for a world where coordination between humans was the bottleneck, and when agents can interpret context directly, that translation step is friction. It was a clean thesis from a designer who had spent his career making the category better.\
+Then OpenAI open-sourced Symphony, and Linear became the literal control plane for the most ambitious autonomous-coding system ever shipped. Some internal teams saw a 500% increase in landed pull requests. The thing Saarinen had just eulogized was now the substrate that made all of it work.\
+He was right about the user experience and wrong about the infrastructure. The translation step is going away. The state machine, the assignee field, the audit history, the dependency graph, those are staying. They are quietly becoming the most strategic infrastructure in the enterprise software stack, and that repricing extends to every boring tool you own.\
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f1\b \cf2 Here\'92s what\'92s inside:
+\f0\b0 \
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0
+\f1\b \cf2 \cb3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 The five properties that make a tool agent infrastructure.
+\f0\b0 \'a0Why Symphony looks obvious in retrospect, and a diagnostic you can run on every system in your stack.\cb1 \
+\ls1\ilvl0
+\f1\b \cb3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Why your UX choice was actually a data choice.
+\f0\b0 \'a0How Linear\'92s design discipline accidentally produced the cleanest agent substrate on the market, and what that means for tool selection from here.\cb1 \
+\ls1\ilvl0
+\f1\b \cb3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 The Atlassian repricing.
+\f0\b0 \'a0The MCP server, the Anthropic partnership, the acquisition rumor, and why the market is treating Jira\'92s installed base as a strategic AI asset.\cb1 \
+\ls1\ilvl0
+\f1\b \cb3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Which of your tools are next.
+\f0\b0 \'a0CRMs, ERPs, service desks, calendars, spreadsheets: five yes-or-no questions that tell you which ones become agent infrastructure and which ones get wrapped.\cb1 \
+\ls1\ilvl0
+\f1\b \cb3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 What to do about it.
+\f0\b0 \'a0Three prompts that score your stack, spec out an MCP server for anything you build, and produce the migration brief your leadership team is missing.\cb1 \
+\pard\pardeftab720\sa400\partightenfactor0
+\cf2 \cb3 \strokec2 It started with a bug tracker in 1998. The accident is the whole story.\
+\pard\pardeftab720\sa400\qc\partightenfactor0
+
+\f2\fs36 \cf2 Subscribers get all posts like these!\cb1 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\fs38 \cf2 \
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f3\b\fs61\fsmilli30875 \cf2 \cb3 LINK:\'a0{\field{\*\fldinst{HYPERLINK "https://promptkit.natebjones.com/20260428_cx5_promptkit_1"}}{\fldrslt \cf2 \cb3 \ul \ulc2 \strokec2 Grab the prompts}}\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 These prompts exist because the five-question diagnostic in this article is only useful if you actually run it. The substrate audit forces you to score every tool in your stack against the five properties and confronts you with where your real work state lives. The MCP server spec turns \'93make this agent-ready\'94 into a one-page engineering artifact. The migration diagnostic interviews you about your specific patchwork of systems and produces the leadership brief most organizations are missing. If you can\'92t fill in the blanks, you\'92re looking at the swamp tax this article describes. That is the starting point.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f3\b\fs61\fsmilli30875 \cf2 Where issue trackers came from\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 The genre starts with Bugzilla in 1998. Terry Weissman wrote it for Mozilla to replace the in-house defect tracker Netscape had been using. It was originally Tcl, later rewritten in Perl with MySQL underneath. The first public deployment hit a Mozilla server on April 6, 1998. The Bugzilla team\'92s stated discipline, written down on the project\'92s own about page and remarkable in its narrowness, was: \'93Bugzilla\'92s developers have chosen to focus on the task of designing a system to track software defects. While the potential exists in the code to turn Bugzilla into a technical support ticket system, task management tool, or project management tool,\'94 they deliberately chose not to. The scope stayed narrow, and the structural shape that came out of that narrowness is the template every issue tracker since has copied.\
+What Bugzilla encoded, almost as a side effect of taking software defects seriously, was a small set of structural primitives.\
+It encoded\'a0
+\f1\b persistent state outside any single person\'92s memory
+\f0\b0 . A bug existed in a database row, not in someone\'92s inbox. The state of the bug was visible to everyone with permissions, and it survived people leaving the team, going on vacation, or forgetting they had ever filed it.\
+It encoded a\'a0
+\f1\b state machine with well-defined transitions
+\f0\b0 . NEW. ASSIGNED. RESOLVED. VERIFIED. CLOSED. Plus the famously cynical WONTFIX, one of the most emotionally honest software states ever invented. These were not labels. They were positions in a graph, and only certain transitions were legal. The state of a bug was both human-readable and machine-readable in the same moment.\
+It encoded\'a0
+\f1\b ownership
+\f0\b0 . The assignee field made it unambiguous whose turn it was. When the assignee changed, the audit history captured who reassigned the bug and when. Responsibility was a first-class property of the data model, not a social convention.\
+It encoded\'a0
+\f1\b defined verbs
+\f0\b0 . Create. Comment. Assign. Resolve. Reopen. Mark duplicate. Block on another bug. Each verb had clear semantics, clear preconditions, and a clear effect on state. You could not \'93sort of\'94 resolve a bug in Bugzilla.\
+It encoded\'a0
+\f1\b dependencies as first-class objects
+\f0\b0 . Bug A blocks Bug B. Bug C depends on Bug D. The graph was queryable. You could ask, in 1998, what work needs to happen before the next release ships.\
+And it encoded\'a0
+\f1\b audit history by default
+\f0\b0 . Every change to a bug was logged with timestamp and actor. Twenty years of work on a single bug in Mozilla still survives, replayable, in the system.\
+None of this was designed for AI. There was no AI. Weissman was solving a coordination problem for a few hundred Mozilla developers spread around the world, working asynchronously, through dial-up. The constraints he was responding to were human constraints: limited memory, time-zone friction, hand-off ambiguity, accountability gaps. The structural choices that fell out of those constraints happen to be exactly the choices you\'92d make if you were designing a substrate for autonomous agents to coordinate work through. That accident is the whole story.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f3\b\fs61\fsmilli30875 \cf2 How the genre evolved: Bugzilla, Jira, Linear\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 Bugzilla escaped Mozilla and became the de facto open-source bug tracker for a generation of projects. Atlassian\'92s Jira shipped in 2002, took the same structural model, and added the things enterprises needed: workflows configurable by administrators, custom fields, project hierarchy, role-based permissions, integration with everything. Jira became universal in part because it was infinitely flexible. Each company could shape Jira to its specific organizational structure, which was both Jira\'92s commercial advantage and the source of its terrible reputation. The thing every developer hated about Jira was that no two Jira deployments looked the same. Every company had configured it into its own particular maze.\
+Linear arrived in 2019 with the opposite philosophy. Saarinen, then a principal designer at Airbnb, was tired of how bad project-management tools were and tired of how Jira specifically had become a tax on engineering teams. He started Linear with two co-founders and built it around a single opinionated model: issues live inside cycles, cycles ladder up to projects, and the customization surface is deliberately narrow. You don\'92t configure Linear to match your org chart. You change your workflow to match Linear, and you accept that this is part of the deal.\
+I\'92ve spent real time inside both Linear and Jira. The speed difference alone explains most of the switching, but the narrower opinion about how work should flow is what makes people stay.\
+The interesting thing about Linear, in retrospect, is that the data model is the same data model Bugzilla shipped in 1998. Issue. State. Assignee. Priority. History. Dependencies. The verbs are the same. Linear\'92s contribution was speed, design discipline, and an opinionated point of view about what good engineering coordination looks like. The substrate underneath was unchanged. Linear didn\'92t reinvent the issue tracker. It made the issue tracker pleasant enough that people stopped fighting it, which had the effect of letting the underlying data become much cleaner. Because when people don\'92t fight a tool, they use it consistently, and consistent use produces consistent state.\
+This is the part that counterintuitively matters for agents: good UX produces cleaner data. When people resent a tool, they route around it. Important decisions end up in Slack instead of the tracker. Statuses become performative rather than accurate. Tickets get created retroactively, after the work is already done, to satisfy a process nobody believes in. When people actually like the tool, the real work migrates into the system voluntarily. The state gets cleaner. The ownership stays current. The dependencies reflect reality instead of fiction.\
+Linear was a UX win, and the UX win was a data win, and the data win turned out to matter more than anyone could have known in 2019. The implication is counterintuitive: the tool that will serve your agents best might not be the one with the flashiest AI features. It might be the one your team has been filling in honestly for three years because the experience never made them want to cheat. Good human UX, it turns out, is still doing load-bearing work in 2026.\
+Saarinen\'92s bet, articulated explicitly in his interviews from 2024 and 2025, was that \'93engineering is really the front line of all this information.\'94 That phrasing reads differently now than it did then. He was saying that engineers\'92 work was where the real organizational state lived, and that putting good tools in their hands meant the rest of the organization would inherit cleaner state for free. He was right, but the implication he didn\'92t quite name in 2024 is that \'93the rest of the organization\'94 includes a population of agents that didn\'92t exist yet.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f3\b\fs61\fsmilli30875 \cf2 Why the substrate fits agents\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 The reason Symphony works, the reason some OpenAI teams reportedly got 500% more landed pull requests by routing autonomous Codex agents through Linear tickets, is that an issue tracker is the thing an agent system would have built for itself if it were starting from scratch.\
+An agent loop needs a place to put state that survives between runs. The context window doesn\'92t qualify. It gets reset, summarized, drifted, lost. A ticket in a database is durable, queryable, and structured. The agent reads its ticket at the start of a run and writes back to it at the end. The next run picks up where the last one left off because the state lived outside the agent. That sounds boring. It is one of the biggest differences between a demo and a working agentic system.\
+Handoff semantics are the second requirement. Who owns this work right now? Is it the agent, or is it back to a human? Is it blocked by another task? Is it ready for review? In a good tracker, these are not vibes. They are fields. The assignee field answers that question. The status field encodes the next legal transition. The state machine is the protocol. That is exactly what Symphony is exploiting. The board is a state machine, not a visual planning surface.\
+Parallel agents also need a coordination layer that prevents contention. Cursor\'92s \'93Scaling long-running autonomous coding\'94 post from January documents what happens when you don\'92t have one: agents hold locks, throttle each other, become risk-averse, and refuse to take on hard problems. They pick small safe tasks instead of hard end-to-end work. Flat orgs of agents, it turns out, have a coordination problem. And issue trackers are coordination tools. A ticket board solves the coordination problem the way it has always solved it for humans: tickets are claimed, worked, and released, and the contention surface is small because tickets are coarse-grained units.\
+An agent loop needs audit history that humans can review when something goes wrong. IDC research from 2025 found that 88% of AI pilots never reach production at all, and the failure mode in many of those cases is investigability. The agent did something wrong and nobody could reconstruct the chain: what it saw, what it decided, what it changed, who approved the change, what state the work was in before and after. Issue trackers logged every change for thirty years, because thirty years ago we already knew that humans coordinating asynchronously needed audit trails to function. That same history is now what makes agent runs reconstructable.\
+The last property is permissioned access to the underlying systems. The whole AppSec story for autonomous agents this year, capability tokens, OAuth scopes, sandboxes, IP allowlisting, scoped API access, is solving a problem that issue trackers have had a defensible answer to for a decade. The agent doesn\'92t get to do anything the human assignee couldn\'92t have done. The permissions model already exists.\
+Each of these properties was built into issue trackers because of a human constraint. Each turns out to be exactly the property an agent system needs. I\'92d stop short of calling that a coincidence, though. We designed agents to compensate for the same weaknesses we designed issue trackers to compensate for. Limited memory, ambiguous handoffs, and no native accountability. The overlap might feel accidental, but it probably reflects the fact that we built agents in our own image and then handed them tools shaped for our own limitations. The substrate fits agents because the substrate fit asynchronous coordination in general, and AI agents are asynchronous coordinators whose specific weaknesses (no memory, no permissions, no audit) the substrate exactly compensates for.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f3\b\fs61\fsmilli30875 \cf2 What Atlassian and Anthropic are doing about it\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 If issue trackers are the substrate for agentic work, the company holding the largest installed base of issue trackers, Atlassian, with Jira, is sitting on what just became one of the most strategic data assets in enterprise software. Atlassian has noticed, and the moves they\'92ve been making in the last twelve months read very differently when you frame them through this lens.\
+In July 2025, Atlassian shipped its Remote MCP Server, branded Rovo, which exposes Jira and Confluence to any MCP-compatible client. Anthropic was the first official partner. Cloudflare hosts the infrastructure. The launch post emphasized that Jira and Confluence customers can \'93interact with their data directly from Claude.\'94 Agents create issues, update statuses, search Confluence, link work across products. The product is now in general availability with OAuth 2.1, granular scopes, IP allowlisting, and admin controls. Docker added it to the MCP Catalog in February. The Atlassian Rovo MCP Server is, mechanically, exactly what Symphony assumes Linear is. Atlassian shipped the agent-substrate version of Jira before OpenAI had a public spec for what to do with it.\
+In February 2026, Atlassian and Anthropic announced a multi-year partnership with the Williams Formula 1 team. Claude as Williams\'92 \'93official thinking partner,\'94 branding on the cars and team kit, integration across the team\'92s race-strategy and engineering operations. This was unusual enough as a deal structure (frontier AI lab \'d7 F1 team \'d7 enterprise SaaS company) that it caught analyst attention. Yahoo Finance\'92s coverage flagged that the partnership \'93links Atlassian more closely to real world AI use cases that may support its story with enterprise customers.\'94 Read in isolation, it\'92s a sponsorship deal. Read alongside the MCP server launch and the strategic positioning around agent-readable enterprise data, it\'92s brand-level alignment between the company that owns the largest issue-tracker install base and the AI lab that\'92s the most natural consumer of it.\
+And then in late April 2026, around the same time Symphony shipped, a rumor began circulating on Blind, Hacker News, and Reddit that Anthropic was in advanced talks to acquire Atlassian for $150 a share, all-cash. Atlassian\'92s market cap at that price would put the deal in the $40-billion range. The rumor is unconfirmed. There has been no SEC filing, no formal statement from either company, and the conventional skepticism applies. But the rumor is itself a tell. The fact that the market is willing to treat \'93Anthropic buys Atlassian\'94 as plausible enough to move share price tells you something about how the strategic value of issue trackers is now perceived. Whether the deal closes or not, the underlying logic, that an AI lab building agent infrastructure has reason to want the largest installed base of agent-substrate in the enterprise, is what\'92s driving the speculation.\
+The frame to hold here is not \'93Anthropic is going to buy Atlassian.\'94 The frame is: in 2026 it became reasonable to model issue trackers as strategic AI assets. That repricing is the news, regardless of whether any specific deal happens.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f3\b\fs61\fsmilli30875 \cf2 Which other tools are like this\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 The substrate hypothesis is general. Tools with the same structural properties as issue trackers, persistent state, defined verbs, ownership, permissions, audit history, become agent-usable by accident, because they were already shaped that way for human coordination. Tools without those properties don\'92t, regardless of how much chat you bolt on.\
+The strong candidates are obvious once you see the pattern. CRMs (Salesforce, HubSpot) have records, owners, stages, history, and permissions. They are issue trackers for revenue. A deal moves from prospecting to qualification to proposal to negotiation to closed-won or closed-lost. That is agent substrate. The agent can research an account, draft follow-up, update fields, flag risk, prepare the next meeting, ask for human approval before sending something externally. The CRM is already a durable state layer.\
+Service desks (Zendesk, ServiceNow, Intercom) have tickets, assignees, statuses, and SLAs. They are issue trackers for customer problems. If you were designing a customer-support agent from scratch, you would end up rebuilding half of what ServiceNow already has. The agent will not replace the service desk. It will operate through it.\
+ERPs (SAP, Oracle, Workday) have records, workflows, approvals, and audit trails. They are issue trackers for business process at large. Nobody wakes up excited to spend their day in an approval workflow, but they encode how money, people, inventory, procurement, payroll, and compliance move through the business. The kind of boring structure agents need to do real work.\
+The pattern keeps showing up in every direction you look: calendars, source control, procurement, HRIS, finance systems. Each one is an issue tracker for its own domain. If a system was built to coordinate people asynchronously around important work, it probably has the bones of an agent substrate.\
+The weaker candidates are the ones with state but ambiguous verbs and ownership. Email has audit history and permissions but its action verbs are conversational rather than structural. There is no\'a0
+\f4 \cf2 \cb3 \strokec2 assign
+\f0 \cf2 \cb3 \strokec2 \'a0or\'a0
+\f4 \cf2 \cb3 \strokec2 resolve
+\f0 \cf2 \cb3 \strokec2 \'a0in email, just\'a0
+\f4 \cf2 \cb3 \strokec2 reply
+\f0 \cf2 \cb3 \strokec2 . That means agents can help with email, but email itself is not a clean control plane. It is too conversational. Chat (Slack, Teams) has even less structure. The state of a Slack thread is \'93the messages in it,\'94 which is closer to a transcript than a database. Agents already operate inside Slack, and Slack has benefited enormously from being the place where humans naturally congregate, because that proximity makes it the first place agent builders integrate. But proximity is not the same as substrate. If Slack is the only place your work state lives, the agent has to infer too much.\
+Documentation (Confluence, Notion) sits in the middle. It has versioning and permissions but its verbs are weak (edit, comment) and ownership is fuzzy. Useful context, but weaker as a work substrate.\
+Spreadsheets are the strangest middle case. They have structure, but the structure is user-defined, and often implicit. The spreadsheet can be incredibly structured if the human designed it well, and completely impossible if the human designed it like a personal scratchpad. Claude for Excel is essentially a bet that the LLM can infer enough of the user\'92s implicit schema to operate on the data anyway. That bet is probably correct in the long run but hard in the short run. Spreadsheets are not the same easy substrate that Jira is.\
+The diagnostic for any tool in your stack is five questions. Does it have records or just content? Does it have a state machine or just labels? Is ownership a field or an implication? Are the verbs structural or conversational? Is the history queryable or just visible? Tools that score well on these will become agent infrastructure. Tools that score poorly will need to be replaced or wrapped, and the wrapping will be expensive.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f3\b\fs61\fsmilli30875 \cf2 What this means for you\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 For individual builders, the implication is direct. Your data model is your strategic surface now. If you are building a product that you want agents to use later, don\'92t start by bolting chat onto the UI. That is a very 2024 approach. Start by making the underlying state clean. Expose state, verbs, ownership, and history through an MCP server. Treat your data model as the public interface, not your UI. If your product is opaque, the agent has to scrape the UI or guess what the user meant. That is fragile. If your product exposes clean state and clean verbs, the agent can operate through it. That is the difference between \'93we added AI\'94 and \'93we became part of the agent stack.\'94 The pattern Symphony makes explicit, work-tracking system as the literal control plane for autonomous work, is going to repeat across every domain where work is already tracked.\
+For teams, the implication is sharper than it sounds. Your work-tracking system choice is now your agent-infrastructure choice. The decision between Jira and Linear isn\'92t a UX question anymore. It\'92s a question about which substrate your future agents will run on, how cleanly your work data is encoded, and what shape of automation will be cheap to build versus expensive to retrofit. The same is true for your CRM, your service desk, your HRIS, your ERP. If your operations are spread across systems with poor MCP support and ambiguous data models, you have a substrate problem you\'92ll be paying for in 2027 even though it doesn\'92t feel like a problem today. This is one of the hidden costs of messy operations. Messy operations used to be a human tax. People could compensate with meetings, memory, relationships, and heroics. Agents are worse at that. Agents need the business to be legible. The cost of consolidating onto better-shaped tools is going to look small, in retrospect, compared to the cost of running agents on top of a swamp.\
+For leaders, the strategic frame is the one the Atlassian rumor surfaces whether or not the deal happens. The boring infrastructure your organization already runs on, the tickets, the records, the workflows, the audit logs that nobody finds interesting, is being repriced as agent substrate. The companies that own the substrate (Atlassian, Salesforce, ServiceNow, Microsoft, Oracle) are going to be unusually well-positioned for the next several years, because the substrate is hard to displace and the agent layer wants to consume it. The companies whose strategy depends on building agent-native replacements for these systems are fighting gravity. The thirty-year accumulation of human-coordination infrastructure isn\'92t going to be eaten by a green-field \'93agent platform.\'94 It\'92s going to be wrapped, and the wrappers are mostly going to be the incumbents with MCP servers stapled on. Bet accordingly.\
+But there\'92s a practical question underneath the strategic one that I don\'92t think enough leaders are asking: what does your specific substrate actually look like right now? Every organization runs on a different patchwork of these systems, and the real work of building agentic pipelines isn\'92t choosing which AI model to use. It\'92s mapping the substrate you already have. Where does your ERP hand off to your CRM? How do your tickets connect to your customer feedback? Where are the clean handoffs, and where is the work state living in Slack threads and spreadsheets that nobody besides the person who built them can interpret? You cannot build a serious agent layer by wiping that away and starting fresh. You have to audit what you have, understand the schemas across your systems of record, and figure out where the connectors belong. The point where this stops being a strategy conversation and starts being an implementation one.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f3\b\fs61\fsmilli30875 \cf2 The boring tools won\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 Saarinen\'92s \'93issue tracking is dead\'94 framing was right about the user interface and wrong about the substrate. The translation step is dying. The state machine is staying. What we built for ourselves over thirty years, the boring infrastructure of records, workflows, ownership, and audit trails, turned out to be the substrate agents needed, and we built it by accident, because the constraints that shaped it for human coordination happened to be the same constraints agents are now trying to compensate for.\
+The accident is the whole story. The thing nobody loved is the thing nobody can replace. Issue trackers won. The interesting question for the rest of 2026 is which other boring tools are about to follow them, and the diagnostic is sitting in plain sight: persistent state, defined verbs, ownership, permissions, history. If your tool has those, it\'92s about to become much more strategic than it looks. If it doesn\'92t, the substrate is going to be built around it, by someone else, and the difference between owning the substrate and being wrapped by it is the difference between the next decade going well and going badly.\
+The boring tools won. Now we figure out which other boring tools are next.\
+}
