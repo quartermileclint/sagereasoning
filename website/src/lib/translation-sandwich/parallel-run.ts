@@ -63,6 +63,21 @@ import {
   SubstrateSigningKeyMissingError,
   type SignedLayer2Assessment,
 } from './layer2-signer'
+// Stage 1 A5 (D-A5-LAYER3-SCAFFOLDED-...): substrate Layer 3 service.
+// Wraps the existing Layer 3 prose with deterministic R3 + R19 + R20a + R18a +
+// R18e injections; projects AC9 / AC10 / AC11 fields. Activation gated by
+// SUBSTRATE_LAYER3_ENABLED env flag (default OFF). When OFF, the existing
+// generateProse path runs exactly as today (byte-identical behaviour).
+// When ON, A5 wraps the prose AFTER generateProse returns; the wrapped
+// Layer3Response is surfaced as a new top-level `substrate_layer3_response`
+// field on the composed output. The existing user-facing fields (extraction,
+// assessment, prose, meta, disclaimer) are preserved unchanged.
+// PR1 single-endpoint proof: /api/reason is the proof endpoint for A5.
+import {
+  applyLayer3Injections,
+  isSubstrateLayer3Enabled,
+  type Layer3Response,
+} from '@/lib/substrate/layer3-service'
 import type { RetrievedPassage } from '@/lib/rag'
 
 // Lazy-create the Supabase service-role client INSIDE functions, never at module
@@ -238,6 +253,11 @@ interface SandwichRunResult {
   // row regardless; user-facing during parallel-run remains bundled-depth per
   // ADR-008 §7 + ADR-004 §6.3 failure-isolation guarantee.
   tier1_trigger: Tier1Trigger | null
+  // Added 2026-05-12 (D-A5-LAYER3-SCAFFOLDED-VERIFIED-2026-05-12) — substrate
+  // Layer 3 service response when SUBSTRATE_LAYER3_ENABLED is 'true'. Null when
+  // flag is off (the default; byte-identical to pre-A5 behaviour). Surfaced on
+  // the composed output as `substrate_layer3_response` for downstream consumers.
+  substrate_layer3_response: Layer3Response | null
 }
 
 // ============================================================================
@@ -415,6 +435,7 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     layer1_cost_usd_microcents: null,
     layer3_cost_usd_microcents: null,
     tier1_trigger: null,
+    substrate_layer3_response: null,
   }
 
   // ---- Layer 1 ----
@@ -546,6 +567,57 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
   }
   result.layer3_latency_ms = Date.now() - layer3Start
 
+  // ---- A5 substrate Layer 3 service wiring (D-A5-LAYER3-SCAFFOLDED-VERIFIED-2026-05-12) ----
+  // Per /adopted/substrate-plugin-staging-plan.md Stage 1 item A5.
+  // Per /website/src/lib/substrate/layer3-service.ts.
+  //
+  // SUBSTRATE_LAYER3_ENABLED gates A5 wiring. When OFF (the default), control
+  // flow skips the A5 call entirely — behaviour is byte-identical to pre-A5.
+  // When ON, applyLayer3Injections wraps the just-generated Layer3Prose with
+  // the five deterministic injections (R3 + R19c + R19d + R20a + R18a + R18e)
+  // and projects AC9/AC10/AC11 fields. The Layer3Response is attached to the
+  // SandwichRunResult; the route or downstream consumers can read it.
+  //
+  // PR1 single-endpoint proof: /api/reason is the proof endpoint for A5.
+  // PR3 synchronous: applyLayer3Injections is synchronous; no fire-and-forget.
+  // PR6 safety-critical: A5.4 (R20a distress pass-through injection) is the
+  //   third-layer R20a defence. Functional + invocation tested in this session.
+  // AC4 invocation testing: the grep on the test file in the same session
+  //   confirms applyLayer3Injections is called here.
+  // AC5 perimeter: A5 is downstream of the route-level R20a perimeter (line
+  //   ~173 of /api/reason/route.ts); A5 enforces injection AFTER the gate has
+  //   already had a chance to redirect.
+  if (isSubstrateLayer3Enabled()) {
+    try {
+      result.substrate_layer3_response = applyLayer3Injections(
+        {
+          assessment: layer2Assessment,
+          consumer_context: {
+            consumer: 'api_reason',
+            is_mentor_flavoured: false,
+            include_category_framing: false,
+          },
+          // distress_gate intentionally omitted: /api/reason's route-level
+          // R20a perimeter already enforces redirection upstream. A5.4's
+          // defensive read of assessment.decision === 'ESCALATE' and
+          // assessment.distress_signal activates when A7 wires the gate
+          // attaching distress signals to the Layer2Assessment.
+        },
+        layer3Prose
+      )
+    } catch (err) {
+      // A5 injection should not throw on valid input; if it does, log and
+      // continue with the legacy non-A5 output. Fail-open posture — A5 is
+      // additive metadata, not the user-facing prose path. A12 instrumentation
+      // surfaces these failures via OTel spans.
+      console.warn(
+        '[parallel-run] A5 applyLayer3Injections threw; falling back to non-A5 output:',
+        err instanceof Error ? err.message : err
+      )
+      result.substrate_layer3_response = null
+    }
+  }
+
   // ---- A3 signing wiring (D-A3-LAYER2-SIGNING-WIRED-...) ----
   // Per /adopted/ADR-layer2-signing-infrastructure.md Decision 2: when
   // SUBSTRATE_LAYER2_SIGNING_ENABLED is 'true', the composed `assessment`
@@ -598,6 +670,14 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
       layer2_latency_ms: result.layer2_latency_ms,
       layer3_latency_ms: result.layer3_latency_ms,
     },
+    // A5 (D-A5-LAYER3-SCAFFOLDED-VERIFIED-2026-05-12) — substrate Layer 3
+    // response when SUBSTRATE_LAYER3_ENABLED is 'true'. Absent (undefined)
+    // when flag is off; the existing user-facing fields (prose, disclaimer
+    // at route level) preserve byte-identical pre-A5 behaviour.
+    // Type: Layer3Response | undefined. See layer3-service.ts.
+    ...(result.substrate_layer3_response !== null && {
+      substrate_layer3_response: result.substrate_layer3_response,
+    }),
   }
   return result
 }
@@ -711,6 +791,7 @@ export async function runParallelSandwich(params: ParallelRunInput): Promise<voi
         layer1_cost_usd_microcents: null,
         layer3_cost_usd_microcents: null,
         tier1_trigger: null,
+        substrate_layer3_response: null,
       }
     } else {
       // 2. Fire the sandwich. Runs concurrently with bundled-depth (which the
