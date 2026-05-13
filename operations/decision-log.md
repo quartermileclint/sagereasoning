@@ -4767,3 +4767,225 @@ If any check fails, A9 has regressed; engage Path A rollback (git revert).
 **Status:** Adopted. Cross-references: predecessor substrate-build entry `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13` (A7 Verified — A9 + J6 inherit the substrate cost-capture infrastructure from A5/A7 unchanged); predecessor governance entry `D-AGENTIC-COMMERCE-UPSTREAM-REWORK-2026-05-13`; staging plan `/adopted/substrate-plugin-staging-plan.md` Stage 1 A9 + J6 (success criteria SATISFIED — cost-as-health-metric alerts re-pointed; cost-impact assessment produced; next: A6 prose_mode templates OR A10 per-agent credentials OR A11a audits OR A8 V3 endpoint mapping per founder election); manifest `/manifest.md` §R5 (both alert rules now wired); J6 assessment `/operations/r5-cost-shape-impact-assessment-2026-05-14.md`; modified file `/website/src/app/api/billing/usage-summary/route.ts`; standing protocol cache `/adopted/standing-protocol-cache.md`; this session's close `/operations/handoffs/founder/2026-05-14-A9-J6-cost-monitoring-close.md`.
 
 ---
+
+## 2026-05-14 — D-ANTHROPIC-NATIVE-POSTURE-2026-05-14
+
+**Decision:** Adopt the Anthropic-native posture pattern alongside existing multi-stream governance. Five coordinated changes land this session: (1) `/CLAUDE.md` entry-point file created at repo root for Claude Code sessions (~75 lines; points at existing governance heavy-lifters; doesn't replace them); (2) 17 official Anthropic skills from `anthropics/skills` installed at `/.claude/skills/anthropic/` (4 document-skills + 13 example-skills; provenance README at the subfolder; sage-* skills preserved at top level); (3) PR15 amended in `/adopted/project-instructions-snapshot.md` to add Cookbook patterns + Reference agents to the canonical-primitives list and introduce a new OPERATIONAL DISCIPLINE subsection mandating consultation of `.claude/skills/anthropic/` + the agentic-commerce-findings tracker before bespoke election; (4) standing-protocol-cache amended to reference CLAUDE.md + the PR15 amendment date + the new cross-references; (5) features survey refreshed to current state (May 2026), moved from `/drafts/anthropic-features-survey-2026-05-10.md` to `/adopted/anthropic-features-survey-2026-05-14.md`. Plus two complementary 2026-05-14 changes recorded as separate entries: agent-card.json currency check vs A2A v1 (`D-AGENT-CARD-CURRENCY-CHECK-2026-05-14`) and J1 ADR A2A-coordination-layer addendum.
+
+**Reasoning:** The 2026-05-13 Cowork research surfaced two related gaps: (a) the 17 Anthropic-canonical skills were not installed in this repo for Claude Code sessions (6 of the 17 are bundled in Cowork mode but unavailable to Claude Code); (b) PR15 named category labels but didn't mandate consulting specific Anthropic repos. The founder's call after the research was to converge: adopt the Anthropic-canonical CLAUDE.md + Skills pattern where it has clear advantages; preserve the multi-stream governance cache pattern where it has clear advantages. This session executes the convergence. CLAUDE.md is a *pointer* to the cache, not a replacement for it — the cache's tier-declaration / KG-engagement / model-selection / lean+Critical-template selection are not delivered by CLAUDE.md special handling; the cache stays the heavy-lifter. The 17 skills land in a subfolder (`anthropic/`) to coexist cleanly with the 7 sage-* skills already present in `.claude/skills/`. PR15's operational discipline articulates how to satisfy the existing rule, not a new gate — it doesn't add friction; it makes the rule actionable. PR12 negative-finding discipline applied at session-open: the prompt assumed `.claude/skills/` was empty; PR12 caught the 7 sage-* skills and triggered the layout election that drove the subfolder choice. PR11 authoritative-current-sources rule applied: inbox scan at session-open found no material since 2026-05-13; anthropics/skills repo + code.claude.com docs consulted as canonical install guidance. PR13 consider-implications: (1) refines PR15 prior decision; (2) refines features-survey prior recommendation (now adopted as governing reference); (3) affects this session's work directly; (4) affects future-stage work (every subsequent build session now consults .claude/skills/anthropic/ + agentic-commerce-findings); (5) affects operational discipline (cache update, CLAUDE.md auto-load, project-instructions panel paste-sync). PR16 positioning + dogfood lens: strengthens Character Kernel positioning by adopting standard Anthropic primitives without compromising governance discipline; dogfood relevance partial (the convergence decision itself was substrate-mechanism-walkthrough-able but consulted via founder-AI reasoning, not live `/api/reason` call).
+
+**Files touched:**
+- `/CLAUDE.md` — NEW. Entry-point file for Claude Code sessions (75 lines). Points at standing-protocol-cache + build-arc cache + project-instructions snapshot + manifest as governance heavy-lifters; lists installed skills; names amended PR15 expectation.
+- `/.claude/skills/anthropic/` — NEW. 17 official Anthropic skills installed (`algorithmic-art`, `brand-guidelines`, `canvas-design`, `claude-api`, `doc-coauthoring`, `docx`, `frontend-design`, `internal-comms`, `mcp-builder`, `pdf`, `pptx`, `skill-creator`, `slack-gif-creator`, `theme-factory`, `web-artifacts-builder`, `webapp-testing`, `xlsx`). ~11MB.
+- `/.claude/skills/anthropic/README.md` — NEW. Provenance note + per-skill license table + update instructions.
+- `/adopted/project-instructions-snapshot.md` §PR15 — MODIFIED. Two added category items (Cookbook patterns; Reference agents); new OPERATIONAL DISCIPLINE subsection with four steps; date-stamp + decision-log ID for the amendment. Lines 502-519 of pre-amendment snapshot replaced with 32 lines of amended text.
+- `/archive/2026-05-14-pr15-pre-anthropic-native.md` — NEW. Preserve-prior-versions snapshot of pre-amendment PR15.
+- `/adopted/standing-protocol-cache.md` — MODIFIED. Header status line extended with 2026-05-14 amendment note; new "Mode-specific note" added to §How-to-use-this-cache; §Cache-update-discipline updated with PR15-amendment date; §Cross-references updated to add CLAUDE.md + .claude/skills/anthropic/ + agentic-commerce-findings tracker + PR15-amendment dates throughout.
+- `/adopted/anthropic-features-survey-2026-05-14.md` — NEW (via `git mv` from `/drafts/anthropic-features-survey-2026-05-10.md`). 304→384 lines (+80). Correction-on-correction notice; §5 (Skills) + §9 (CLAUDE.md) updated to reflect this session's resolution; four new sections added: §11 (17 official skills), §12 (anthropic-cookbook), §13 (finance + legal reference agents), §14 (AAIF/A2A governance); summary table extended.
+- `/drafts/anthropic-features-survey-2026-05-10.md` — REMOVED via `git mv`.
+- `/operations/decision-log.md` — this entry + 4 complementary entries appended.
+
+**Risk classification:** **Standard** under 0d-ii for the umbrella (this is a documentation-and-config posture change; no auth/encryption/safety surface touched; no production hot-path change). The PR15 amendment specifically is Elevated (governing-rule change; tracked as its own entry below). The features-survey adoption is Elevated per cache risk-table (move file from `/drafts/` to `/adopted/` = Elevated; tracked as its own entry below). The cache-update is Standard per cache discipline (tracked as its own entry below). The agent-card.json currency-check + J1 ADR addendum are tracked as their own entry. Critical Change Protocol NOT engaged. AC7 NOT engaged. PR6 NOT engaged. AC5 perimeter unchanged. PR1 (single-endpoint proof) N/A (no new endpoint introduced; CLAUDE.md is repo-config, not a service surface). PR2 (build-to-wire-verification-immediate) applied in same session via the 11-check verification.
+
+**Rollback path:** `git revert <session-commit>` and push via GitHub Desktop. The `.claude/skills/anthropic/` directory disappears on revert (created in this session's commit). CLAUDE.md disappears on revert. PR15 reverts to prior text (the archive at `/archive/2026-05-14-pr15-pre-anthropic-native.md` survives the revert as a verbatim record). Standing-cache reverts. Features survey returns to `/drafts/anthropic-features-survey-2026-05-10.md` (git tracks the rename). No production impact (no Vercel deployment configuration changed; no env vars touched; no Next.js bundle path affected — `.claude/` is a Claude Code convention, not part of the deployable bundle).
+
+**Verification step (founder-performable, between sessions):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+
+# 1. Confirm commit + push succeeded
+git log --oneline -3 origin/main
+# Expected: top commit = this session's commit; preceded by A9+J6 + A7.
+
+# 2. CLAUDE.md exists at repo root
+ls -la CLAUDE.md
+# Expected: file exists; size > 0.
+
+# 3. 17 Anthropic skills installed
+ls .claude/skills/anthropic/ | wc -l
+# Expected: 18 (17 skill folders + README.md).
+
+# 4. PR15 amendment present
+grep "AMENDED 2026-05-14" adopted/project-instructions-snapshot.md
+# Expected: at least one match (the PR15 amendment line).
+
+# 5. Standing cache references CLAUDE.md
+grep -c "CLAUDE.md" adopted/standing-protocol-cache.md
+# Expected: >= 1.
+
+# 6. Features survey adopted
+ls adopted/anthropic-features-survey-2026-05-14.md
+# Expected: file exists. (Original draft at /drafts/ is gone via git mv.)
+
+# 7. Archive preserved
+ls archive/2026-05-14-pr15-pre-anthropic-native.md
+ls archive/2026-05-14-j1-adr-pre-a2a-addendum.md
+# Expected: both files exist.
+
+# 8. Substrate steady state preserved (production)
+curl -sS -o /dev/null -w "%{http_code}\n" -X POST https://www.sagereasoning.com/api/substrate/layer3
+# Expected: 503 (A5 flag still UNSET).
+
+curl -sS https://www.sagereasoning.com/api/public-key | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+ok = d.get('previous') is None and d.get('rotation_overlap_until') is None and d.get('algorithm') == 'Ed25519'
+print('PASS' if ok else 'FAIL')
+"
+# Expected: PASS.
+
+# 9. Regressions (defensive — no code changes expected)
+cd website && npx tsc --noEmit -p tsconfig.json && cd ..
+cd website && npx tsx src/lib/substrate/__tests__/layer3-service.test.ts && cd ..
+cd website && npx tsx src/lib/substrate/__tests__/r20a-gate.test.ts && cd ..
+# Expected: all clean; A5 28/28; A7 33/33.
+```
+If any check fails, engage rollback (git revert).
+
+**Open questions:**
+- **agent-card.json A2A v1 reshape session timing.** Load-bearing schema misalignments deferred to a follow-up Elevated session under `D-AGENT-CARD-CURRENCY-CHECK-2026-05-14`. Revisit condition: founder direction (priority vs A6/A10/A11a/A8).
+- **Component-registry update batching.** This session does not touch the registry; the deferred batch with A1-A5 + A7 + A9 + J6 entries grows by `CLAUDE.md` + the 17 Anthropic skills + the amended PR15 + the refreshed survey + the J1 ADR addendum. Revisit condition: routine governance session.
+- **CLAUDE.md edit-by-Claude convention.** Anthropic's CLAUDE.md special handling allows Claude to edit the file as work progresses. We have not adopted this convention (CLAUDE.md is treated as static pointer; cache stays the heavy-lifter). Revisit condition: if a future session would meaningfully benefit from CLAUDE.md auto-update, surface the option.
+
+**Rules served:** R0 (oikeiosis audit trail — convergence decision recorded with reasoning), 0a (status taxonomy — CLAUDE.md + 17 Anthropic skills Scoped → Live in one session; PR15 Adopted → Amended; survey Drafted → Adopted), 0b (session continuity — lean-form Elevated close), 0c (verification framework — 11 in-session checks + production probes deferred to founder), 0d-ii (risk classification — Standard for umbrella; Elevated for PR15 amendment + survey adoption + J1 ADR addendum tracked as their own entries), 0e (file organisation — preserve-prior-versions for PR15 + J1 ADR; archive folder populated), 0f (this entry + 4 complementary entries), 0g (Workflow Skills — manual process first; the convergence pattern was hand-curated this session, not pre-automated), PR4 (model selection — N/A; no LLM calls this session), PR7 (deferred decisions documented — agent-card v1 reshape; registry batch; CLAUDE.md edit-by-Claude convention), PR10 (PEV loop in lean form — Plan inline at each step; Execute with founder approval gates; Verify with diagnostic-certain signal), PR11 (authoritative-current-sources — inbox scan + anthropics/skills repo + code.claude.com + a2a-protocol.org consulted at session-open and at Step 6), PR12 (negative-finding discipline — `.claude/skills/` checked at both project-local and user-global paths; .claude/skills/ not concluded as "empty" before verifying the path itself), PR13 (consider-implications — 5-question assessment applied), PR14 (proactive 10-domain surfacing — N/A; this is a posture session, not a stress-test), PR15 (bias toward existing Anthropic infrastructure — the session itself is the canonical example; convergence on Anthropic-canonical primitives where they don't conflict with governance discipline), PR16 (positioning + dogfood — applied per item). KG1-KG7 N/A (no DB writes; no LLM calls; no token-counts work; no JSONB writes). AC1, AC2, AC4, AC5, AC7, AC8, AC11 not engaged.
+
+**Status:** Adopted. Cross-references: predecessor substrate-build entries `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13`, `D-A9-J6-COST-MONITORING-WIRED-2026-05-14`; predecessor governance entry `D-AGENTIC-COMMERCE-UPSTREAM-REWORK-2026-05-13`; this session's complementary entries `D-PR15-AMENDED-FROM-ANTHROPIC-NATIVE-2026-05-14`, `D-CACHE-DRIFT-RESOLVED-2026-05-14`, `D-FEATURES-SURVEY-ADOPTED-2026-05-14`, `D-AGENT-CARD-CURRENCY-CHECK-2026-05-14`; deliverables `/CLAUDE.md`, `/.claude/skills/anthropic/`, `/adopted/project-instructions-snapshot.md` §PR15, `/adopted/standing-protocol-cache.md`, `/adopted/anthropic-features-survey-2026-05-14.md`, `/adopted/adr/2026-05-12-substrate-category-character-kernel.md`; archives `/archive/2026-05-14-pr15-pre-anthropic-native.md`, `/archive/2026-05-14-j1-adr-pre-a2a-addendum.md`; this session's close `/operations/handoffs/founder/2026-05-14-anthropic-native-posture-close.md`.
+
+---
+
+## 2026-05-14 — D-PR15-AMENDED-FROM-ANTHROPIC-NATIVE-2026-05-14
+
+**Decision:** PR15 (Bias Toward Existing Anthropic Infrastructure) amended in `/adopted/project-instructions-snapshot.md` lines 502-519. Two infrastructure categories added (Cookbook patterns; Reference agents) to the existing 10. New OPERATIONAL DISCIPLINE subsection added with four mandatory steps the AI must perform before electing a bespoke build: consult `.claude/skills/anthropic/`; consult `/operations/agentic-commerce-findings-downstream-order.md`; state whether an Anthropic-canonical primitive could deliver the outcome; record justification in the decision-log entry under "Reasoning" naming the considered primitive. Prior PR15 text preserved verbatim at `/archive/2026-05-14-pr15-pre-anthropic-native.md` per §0e preserve-prior-versions discipline.
+
+**Reasoning:** Pre-amendment PR15 listed category labels but didn't mandate consulting specific Anthropic repos or the agentic-commerce-findings tracker. In practice this meant the rule's intent ("existing infrastructure is the default; bespoke is the alternative requiring justification") was honoured inconsistently — sometimes consulted at session-open, sometimes not. The amendment operationalises the rule: the four steps articulate how to satisfy it; the result is recorded in the decision-log "Reasoning" field. Two new categories added because the 2026-05-13 agentic-commerce upstream re-work surfaced anthropic-cookbook patterns/agents + finance/legal reference agents as canonical primitives not in the prior list. The amendment is articulation, not gate-addition — the existing "default is canonical; bespoke needs justification" framing is preserved. Founder approval given explicitly before applying (Critical-Change-Protocol-style surface delivered inline despite Elevated tier, given the rule governs every future session).
+
+**Files touched:**
+- `/adopted/project-instructions-snapshot.md` — MODIFIED. Lines 502-519 (18 lines) replaced with 32 lines of amended text. Section header now includes "AMENDED 2026-05-14 per D-PR15-AMENDED-FROM-ANTHROPIC-NATIVE-2026-05-14".
+- `/archive/2026-05-14-pr15-pre-anthropic-native.md` — NEW. Verbatim snapshot of pre-amendment PR15.
+
+**Risk classification:** **Elevated** under 0d-ii. Governing-document change (project instructions surface). Critical Change Protocol NOT engaged (not auth/encryption/perimeter/deployment). PR6 NOT engaged (not safety-critical). AC5 perimeter unchanged. AC7 NOT engaged. Risk: future sessions misread the operational discipline as a new gate rather than an articulation. Mitigation: the existing default-canonical-bespoke-needs-justification framing is preserved verbatim at the end of the amended text. PR10 PEV-loop applied in full: Plan (CCP-style surface inline); Execute (archive + Edit); Verify (grep -A confirms amended text present + archive file present).
+
+**Rollback path:** `git revert` of the amendment commit restores prior PR15 in `/adopted/project-instructions-snapshot.md`. The archive at `/archive/2026-05-14-pr15-pre-anthropic-native.md` persists either way as a verbatim record.
+
+**Verification step (founder-performable, between sessions):**
+```
+grep -A 30 "PR15 — Bias Toward Existing Anthropic Infrastructure" adopted/project-instructions-snapshot.md | head -40
+# Expected: amended text visible, including "OPERATIONAL DISCIPLINE (added 2026-05-14)" subsection + "Cookbook patterns" + "Reference agents" items + four numbered steps.
+
+ls archive/2026-05-14-pr15-pre-anthropic-native.md
+# Expected: file exists; readable.
+```
+
+**Open questions:** none specific to this entry. See umbrella entry's open questions.
+
+**Rules served:** 0a (status — PR15 Adopted → Amended; decision-status taxonomy applied), 0d-ii (Elevated classification), 0e (preserve-prior-versions), 0f (this entry), PR10 (PEV loop full), PR11 (authoritative-current-sources — anthropics/skills + cookbook + AAIF state consulted), PR15 (the rule itself; this is its self-amendment).
+
+**Status:** Adopted. Cross-references: umbrella entry `D-ANTHROPIC-NATIVE-POSTURE-2026-05-14`; ST2 parent `D-PROJECT-INSTRUCTIONS-AMENDED-FROM-ST2-2026-05-12`; archive `/archive/2026-05-14-pr15-pre-anthropic-native.md`.
+
+---
+
+## 2026-05-14 — D-CACHE-DRIFT-RESOLVED-2026-05-14
+
+**Decision:** `/adopted/standing-protocol-cache.md` updated in the same session as the PR15 amendment, per cache-update discipline (§Cache update discipline, lines 316-327 of pre-amendment cache). Four targeted amendments: (1) header status line extended with the 2026-05-14 amendment note + new decision-log ID; (2) new "Mode-specific note" paragraph added to §How-to-use-this-cache-at-session-open clarifying CLAUDE.md auto-load for Claude Code sessions + project-instructions-panel paste-sync for Cowork sessions, with the cache as heavy-lifter for both; (3) §Cache-update-discipline updated to reference the PR15-amendment date in both bullet items; (4) §Cross-references rebuilt to add `/CLAUDE.md` + `/.claude/skills/anthropic/` + `/operations/agentic-commerce-findings-downstream-order.md` as new entries; existing entries updated with PR15-amendment date callouts.
+
+**Reasoning:** When governance documents (manifest, session-opening protocol, project instructions, process rules) change, the cache must be updated in the same session per its own discipline. PR15 amendment in this session triggers the update. No drift accepted between cache and governance documents.
+
+**Files touched:**
+- `/adopted/standing-protocol-cache.md` — MODIFIED in four locations as above.
+
+**Risk classification:** **Standard** under 0d-ii. Cache update discipline (cache lines 316-325). Documentation-only change. PR10 PEV-loop applied in lean form.
+
+**Rollback path:** `git revert` of the cache commit restores prior cache. Cache + governance documents are eventually consistent — if drift returns, cache discipline names a subsequent D-CACHE-DRIFT-RESOLVED entry.
+
+**Verification step (founder-performable, between sessions):**
+```
+grep -c "CLAUDE.md" adopted/standing-protocol-cache.md
+# Expected: >= 3 (Mode-specific note + Cross-references).
+
+grep -c "PR15 amended 2026-05-14" adopted/standing-protocol-cache.md
+# Expected: >= 1.
+```
+
+**Rules served:** 0a (cache discipline), 0b (cache-as-session-opening-reference), 0f (this entry), PR10 (PEV loop lean), PR11 (authoritative-current-sources).
+
+**Status:** Adopted. Cross-references: umbrella entry `D-ANTHROPIC-NATIVE-POSTURE-2026-05-14`; predecessor cache amendment `D-CACHE-DRIFT-RESOLVED-2026-05-12`.
+
+---
+
+## 2026-05-14 — D-FEATURES-SURVEY-ADOPTED-2026-05-14
+
+**Decision:** The 2026-05-10 features survey draft refreshed in place (Option a per founder election) to incorporate four new sections (17 installed skills; anthropic-cookbook patterns/agents; finance + legal reference agents; AAIF/A2A governance), correction-on-correction notice, updates to §5 + §9 reflecting this session's resolutions, and an extended summary table. Moved via `git mv` from `/drafts/anthropic-features-survey-2026-05-10.md` to `/adopted/anthropic-features-survey-2026-05-14.md`. Status flipped Drafted → Adopted (revisable in place when new features ship).
+
+**Reasoning:** The 2026-05-10 draft was a research artefact authored before this session's adoptions. Refreshing it in place + adopting promotes it from a snapshot of "what was known on 2026-05-10" to a governing reference for Anthropic-platform features. Option a (revise in place) preserves git diff history; Option b (separate supplement) would have fragmented the survey. The four new sections (11-14) document features that landed after the original draft + features that the original draft missed but PR15 now mandates consulting. The correction-on-correction notice closes the original CORRECTION NOTICE's stale cross-reference (the original mentioned "Standing Requirement 1a" which became PR12 under ST2).
+
+**Files touched:**
+- `/drafts/anthropic-features-survey-2026-05-10.md` — REMOVED (via `git mv`).
+- `/adopted/anthropic-features-survey-2026-05-14.md` — NEW (via `git mv` + in-place edits). 304→384 lines.
+
+**Risk classification:** **Elevated** under 0d-ii. Per cache risk-table (lines 130-141): "Move file from `/drafts/` to `/adopted/`" = Elevated. The session prompt classified this Standard; cache is authoritative per its own discipline. Founder approval given explicitly before applying. Critical Change Protocol NOT engaged. PR6 NOT engaged. AC5 perimeter unchanged. AC7 NOT engaged.
+
+**Rollback path:** `git revert` restores `/drafts/anthropic-features-survey-2026-05-10.md` (git tracks the rename + tracks the content edits separately).
+
+**Verification step (founder-performable, between sessions):**
+```
+ls adopted/anthropic-features-survey-2026-05-14.md
+ls drafts/anthropic-features-survey-2026-05-10.md 2>&1 | grep -c "No such"
+# Expected: first exists; second returns 1 (file no longer in /drafts/).
+
+grep -c "### 1[1234]\." adopted/anthropic-features-survey-2026-05-14.md
+# Expected: 4 (the four new sections 11-14).
+```
+
+**Open questions:** none specific to this entry.
+
+**Rules served:** 0a (status — survey Drafted → Adopted), 0d-ii (Elevated per cache discipline), 0e (file organisation — drafts → adopted move), 0f (this entry), PR11 (authoritative-current-sources — anthropics/financial-services + legal plugins + AAIF state consulted for new sections), PR13 (consider-implications applied to the four new sections), PR15 (the amended rule's category list informs the survey's new content), PR16 (positioning + dogfood — survey now governs Anthropic-platform feature awareness).
+
+**Status:** Adopted. Cross-references: umbrella entry `D-ANTHROPIC-NATIVE-POSTURE-2026-05-14`; predecessor `D-PROJECT-INSTRUCTIONS-AMENDED-FROM-ST2-2026-05-12` (which created the snapshot pattern); featured content cross-references J1 ADR (R18a Character Kernel) + agentic-commerce-findings tracker + Anthropic-cookbook + anthropics/financial-services + AAIF/A2A governance state.
+
+---
+
+## 2026-05-14 — D-AGENT-CARD-CURRENCY-CHECK-2026-05-14
+
+**Decision:** The SageReasoning agent-card.json at `/website/public/.well-known/agent-card.json` (served LIVE at `sagereasoning.com/.well-known/agent-card.json` since 28 March 2026) reviewed against A2A v1 canonical schema. **Finding:** four load-bearing shape misalignments + missing required fields. **This session's actions:** (1) minor README drift fixed (README line 114 "6 capabilities" → "9 capabilities"; line 240 "5-step quickstart" → "6-step quickstart" + cross-reference to this entry); (2) J1 ADR `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` §"Agentic-commerce-stack adjacency" amended with an A2A-foundational-coordination-protocol addendum (~3 paragraphs) naming A2A as the canonical agent-to-agent coordination layer under the AAIF, recording the A2A v1 alignment status as a forward-looking gap; prior J1 ADR sub-section archived at `/archive/2026-05-14-j1-adr-pre-a2a-addendum.md`. **Deferred:** the actual agent-card.json reshape (capabilities-object-vs-array; skills-objects-vs-strings; authentication.schemes-strings-vs-objects; missing defaultInputModes/defaultOutputModes; custom extensions moved to A2A `extensions` field) to a follow-up Elevated session with its own approval gate.
+
+**Reasoning:** The card declares semantically-correct content but in shapes that A2A v1 consumers won't parse. Specifically: A2A v1 expects `capabilities` to be an OBJECT with booleans (`streaming`, `pushNotifications`, `stateTransitionHistory`); ours is an ARRAY of 9 capability-objects with endpoints. A2A v1 expects `skills` to be an ARRAY of skill-objects with `id`/`name`/`description`/`tags`/`examples`; ours is an array of 10 strings. The shapes are effectively swapped — the substance is right, the structure is wrong. Fixing the structure is a substantive change to a user-facing JSON file served at a well-known path; it deserves its own bounded session with its own approval gate, not an inline cosmetic fix. The minor README drift (capabilities count + quickstart-step count) is descriptive text drift around the file and is safe to correct now. The J1 ADR addendum positions A2A in the architecture in a way that makes the deferred reshape session's context clearer (A2A is the foundational coordination layer; commerce protocols ride on it; Character Kernel publishes its capabilities via A2A discovery). Step 6b applied per founder election; Step 6 deferral applied per founder election.
+
+**Files touched:**
+- `/README.md` — MODIFIED. Lines 114 + 240 corrected (capabilities count + quickstart step count + cross-reference to this entry).
+- `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` — MODIFIED. Header status line extended with 2026-05-14 amendment note. §"Agentic-commerce-stack adjacency" sub-section extended with three paragraphs naming A2A as foundational coordination protocol + recording A2A v1 alignment status.
+- `/archive/2026-05-14-j1-adr-pre-a2a-addendum.md` — NEW. Verbatim snapshot of pre-addendum J1 ADR §"Agentic-commerce-stack adjacency" sub-section.
+- `/website/public/.well-known/agent-card.json` — NOT touched this session. Reshape deferred.
+
+**Risk classification:** **Elevated** under 0d-ii for the J1 ADR addendum (amending an Adopted ADR). **Standard** for the README drift fix (descriptive text correction). Critical Change Protocol NOT engaged. PR6 NOT engaged (not safety-critical). AC7 NOT engaged. AC5 perimeter unchanged. The agent-card.json reshape — when it lands in a follow-up session — will be Elevated (changes user-facing JSON file served at a well-known path; agent-developer-consumer visible).
+
+**Rollback path:** `git revert` of this session's commit restores prior README + prior J1 ADR. The archive at `/archive/2026-05-14-j1-adr-pre-a2a-addendum.md` persists either way as a verbatim record. The agent-card.json is unchanged this session, so no rollback needed for it.
+
+**Verification step (founder-performable, between sessions):**
+```
+grep "9 capabilities" README.md
+# Expected: line 114 visible with corrected count.
+
+grep "6-step quickstart" README.md
+# Expected: line 240 visible with corrected count.
+
+grep "A2A (Agent2Agent) protocol — foundational coordination layer" adopted/adr/2026-05-12-substrate-category-character-kernel.md
+# Expected: addendum text present.
+
+ls archive/2026-05-14-j1-adr-pre-a2a-addendum.md
+# Expected: file exists.
+
+# Confirm agent-card.json is NOT reshape this session:
+git diff HEAD~1 website/public/.well-known/agent-card.json | wc -l
+# Expected: 0 (no changes to the file this session).
+```
+
+**Open questions:**
+- **Agent-card.json reshape session timing.** When is the right session for the actual reshape? Trade-off: doing it before A6/A10/A11a/A8 means agent-developer consumers see A2A-v1-compliant card sooner; doing it after means substrate-build progress is uninterrupted. Revisit condition: founder direction.
+- **A2A v1 extensions vs custom top-level fields.** When reshape happens, `accessTiers`/`rateLimits`/`tags`/`quickStart` move to the A2A v1 `extensions` field per the canonical pattern. Confirm at reshape time that A2A v1 extensions support this content shape.
+- **agent-card.json deploy path.** The file is in `/website/public/`; Next.js serves it from the public folder. Reshape requires Vercel redeploy. Routine deployment, but Elevated change classification flags it for explicit approval at reshape time.
+
+**Rules served:** 0a (status — agent-card.json Verified → "Verified but A2A-v1-misaligned-pending-reshape"; J1 ADR Adopted → Amended), 0d-ii (Elevated for J1 ADR addendum; Standard for README drift), 0e (preserve-prior-versions for J1 ADR), 0f (this entry), 0g (workflow skills — N/A), PR7 (deferred decisions documented — three open questions with revisit conditions), PR10 (PEV loop in lean form), PR11 (authoritative-current-sources — a2a-protocol.org + agent2agent.info canonical schema consulted), PR12 (negative-finding discipline — the initial "no protocolVersion field required" check was self-corrected mid-step after verifying A2A v1 spec; the spec does not require it), PR13 (consider-implications — 5-question assessment applied), PR16 (positioning + dogfood — A2A citizenship strengthens Character-Kernel-as-discoverable-agent positioning).
+
+**Status:** Adopted. Cross-references: umbrella entry `D-ANTHROPIC-NATIVE-POSTURE-2026-05-14`; J1 ADR predecessor `D-AGENTIC-COMMERCE-UPSTREAM-REWORK-2026-05-13`; features survey §14 (AAIF/A2A governance); deferred follow-up session (TBD).
+
+---

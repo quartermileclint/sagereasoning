@@ -111,7 +111,7 @@ Built with Next.js (a web framework), hosted on Vercel (free), auto-deploys ever
 | `src/components/MilestonesDisplay.tsx` | Visual milestone progress display on the dashboard |
 | `public/llms.txt` | A plain-text file (v2.0) that tells AI agents and LLMs what this site does and how to use it — includes deliberation chain endpoints and API key guidance |
 | `public/robots.txt` | Explicitly welcomes AI crawlers (GPTBot, Claude-Web, Perplexity, etc.) and points them to llms.txt and the agent card |
-| `public/.well-known/agent-card.json` | A2A (Agent2Agent) protocol discovery file — declares 6 capabilities, rate limits, authentication, and integration quickstart for autonomous agents |
+| `public/.well-known/agent-card.json` | A2A (Agent2Agent) protocol discovery file — declares 9 capabilities, rate limits, authentication, and integration quickstart for autonomous agents |
 | `AGENTS.md` | Coding agent integration guide targeting GitHub Copilot, Cursor, Claude Code, and OpenClaw — curl examples, endpoint table, deliberation chain flow |
 
 ---
@@ -237,7 +237,7 @@ These files sit in public locations so AI crawlers, search engines, and AI agent
 |------------|-----------|----------------|
 | `public/llms.txt` → `sagereasoning.com/llms.txt` | Plain-text guide (v2.0) for LLMs and AI agents — explains all endpoints, deliberation chain flow, API key instructions, and adoption guidance | Website public folder |
 | `public/robots.txt` → `sagereasoning.com/robots.txt` | Explicitly welcomes AI crawlers (GPTBot, Claude-Web, Anthropic-AI, PerplexityBot, Google-Extended) and directs them to llms.txt and agent card | Website public folder |
-| `public/.well-known/agent-card.json` → `sagereasoning.com/.well-known/agent-card.json` | A2A (Agent2Agent) protocol standard — declares capabilities, endpoints, rate limits, authentication, and a 5-step quickstart for autonomous agents | Website public folder |
+| `public/.well-known/agent-card.json` → `sagereasoning.com/.well-known/agent-card.json` | A2A (Agent2Agent) protocol standard — declares capabilities, endpoints, rate limits, authentication, and a 6-step quickstart for autonomous agents. **Note:** A2A v1 alignment review under `D-AGENT-CARD-CURRENCY-CHECK-2026-05-14` identified load-bearing schema misalignments deferred to a follow-up session. | Website public folder |
 | `AGENTS.md` → root of GitHub repo | Coding agent integration guide (GitHub Copilot, Cursor, Claude Code, OpenClaw) — curl examples, full endpoint table, deliberation chain flow, tech stack | Repo root |
 | Schema.org JSON-LD on homepage | Structured data (Dataset, WebSite, Organization) that tells Google and AI crawlers what this site is | Embedded in homepage HTML |
 | Schema.org JSON-LD on API Docs | Structured data (SoftwareApplication, WebAPI) for the API | Embedded in api-docs page |

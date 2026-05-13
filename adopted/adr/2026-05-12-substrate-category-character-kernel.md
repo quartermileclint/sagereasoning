@@ -1,6 +1,6 @@
 # ADR — Substrate Category: Character Kernel
 
-**Status:** Adopted 2026-05-12 under `D-MANIFEST-AMENDED-FROM-ST2-2026-05-12`. **Amended 2026-05-13 under `D-AGENTIC-COMMERCE-UPSTREAM-REWORK-2026-05-13`** (peer-category landscape extension; new "Agentic-commerce-stack adjacency" sub-section). Parent triage entry: `D-STRESS-TEST-STAGING-PLAN-AMENDMENTS-2026-05-12` (ST2 Phase 3 Step 1 Candidate 14 ALLOW).
+**Status:** Adopted 2026-05-12 under `D-MANIFEST-AMENDED-FROM-ST2-2026-05-12`. **Amended 2026-05-13 under `D-AGENTIC-COMMERCE-UPSTREAM-REWORK-2026-05-13`** (peer-category landscape extension; new "Agentic-commerce-stack adjacency" sub-section). **Amended 2026-05-14 under `D-AGENT-CARD-CURRENCY-CHECK-2026-05-14`** (A2A foundational-coordination-protocol addendum added to the agentic-commerce-stack-adjacency sub-section; A2A v1 alignment status recorded). Parent triage entry: `D-STRESS-TEST-STAGING-PLAN-AMENDMENTS-2026-05-12` (ST2 Phase 3 Step 1 Candidate 14 ALLOW).
 **Decision ID:** J1 ADR (Substrate Category).
 **Scope:** SageReasoning's substrate-category label for marketplace listings, public-facing documentation, R18 honest-certification language, and external positioning.
 **Authoritative cross-references:** `/manifest.md` §R18a (Certification scope language + Character Kernel); `/adopted/substrate-plugin-staging-plan.md` §Stage 4 G3 (marketplace listing copy); `/operations/handoffs/founder/2026-05-12-build-plan-stress-test-ST2-close.md` (substrate-as-judge dogfood walkthrough record).
@@ -61,6 +61,12 @@ The agentic-commerce protocols map onto these layers:
 - **AP2** (Agent Payments Protocol; Google) — delegated authorization records ("mandates") with scope + constraints + proof of approval; primarily authorization + governance
 - **MPP / x402** (Machine Payments Protocol) — machine-to-machine payment rails; primarily settlement + payment credential
 - **AWS AgentCore Payments** — enterprise governance of agent spending; primarily governance + authorization
+
+**A2A (Agent2Agent) protocol — foundational coordination layer.** Underneath the commerce-flow protocols above, the **A2A protocol** (governed under the Linux Foundation Agentic AI Foundation; co-founded by Anthropic, OpenAI, Google, AWS, Microsoft, Stripe) defines the agent-to-agent coordination layer: how agents discover each other (`.well-known/agent-card.json`), declare capabilities and skills, negotiate authentication, and exchange messages and tasks. SageReasoning has served an A2A-discoverable agent card at `sagereasoning.com/.well-known/agent-card.json` since 28 March 2026.
+
+A2A is not in the agentic-commerce stack; it is the *coordination substrate that the commerce-flow protocols ride on*. ACP/UCP/AP2/MPP/AgentCore Payments all assume an underlying agent-to-agent discovery + coordination mechanism — A2A is the canonical one. The Character Kernel's relationship to A2A is "discoverable agent that publishes a Character Kernel capability via the standard A2A discovery surface" — not a competition with A2A but a citizenship within it.
+
+**A2A v1 alignment status (recorded 2026-05-14 under `D-AGENT-CARD-CURRENCY-CHECK-2026-05-14`):** the SageReasoning agent-card.json is operational at the discovery surface but has load-bearing shape mismatches against the A2A v1 schema (capabilities-object-vs-array; skills-objects-vs-strings; authentication.schemes-strings-vs-objects; missing defaultInputModes/defaultOutputModes). A reshape session is scheduled as a follow-up to this 2026-05-14 close.
 
 **Character Kernel's position relative to the stack: upstream of commerce.** The judgment primitive that informs commerce action but is not itself in the commerce stack. Specifically:
 

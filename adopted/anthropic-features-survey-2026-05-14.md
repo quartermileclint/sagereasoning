@@ -1,11 +1,13 @@
-# Anthropic Developer Platform Capabilities Survey (May 2026) — Prep for Build-Plan Stress-Test Session
+# Anthropic Developer Platform Capabilities Survey (May 2026) — Refreshed 2026-05-14
 
-> **CORRECTION NOTICE (added 2026-05-10 after drafting):** This survey **missed three major features** announced at "Code with Claude 2026" on 2026-05-06: **Dreams** (memory consolidation; research preview); **Outcomes** (rubric + separate grader; public beta); **Multi-agent orchestration** (specialist agents; public beta). The omission was caught by the founder via a simple Google search after the AI claimed not to find "dreaming." The cause was inadequate search discipline (narrow queries; overconfident negative findings; domain restrictions excluding announcement venues). The build-plan stress-test prompt at `/operations/handoffs/founder/2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT.md` carries the corrected info in §"On Anthropic's Memory features + Dreams + Outcomes + Multi-agent orchestration" and includes a new Standing Requirement 1a mandating negative-finding discipline. Treat this survey as a starting-point inventory, not a finished one — material features may still be missing.
+> **CORRECTION NOTICE (added 2026-05-10 after drafting):** This survey originally **missed three major features** announced at "Code with Claude 2026" on 2026-05-06: **Dreams** (memory consolidation; research preview); **Outcomes** (rubric + separate grader; public beta); **Multi-agent orchestration** (specialist agents; public beta). The omission was caught by the founder via a simple Google search after the AI claimed not to find "dreaming." The cause was inadequate search discipline (narrow queries; overconfident negative findings; domain restrictions excluding announcement venues). The build-plan stress-test prompt at `/operations/handoffs/founder/2026-05-10-build-plan-stress-test-NEXT-SESSION-PROMPT.md` carries the corrected info in §"On Anthropic's Memory features + Dreams + Outcomes + Multi-agent orchestration" and includes a new Standing Requirement (now PR12 in the operative project instructions) mandating negative-finding discipline.
 
-**Status:** Drafted 2026-05-10. Research artefact, not a build-plan amendment.
-**Purpose:** Surface current (May 2026) Anthropic developer-platform features the SageReasoning build plan was scoped without explicit reference to. Founder reviews; decides at the stress-test session which features fold into the build plan and which Stage they affect.
-**Limitations:** Web-research-based survey; not exhaustive; framework features evolve continuously. Founder will independently source best-practice materials; this document is intended to combine with those, not replace them.
-**Method:** Web-searches on anthropic.com / docs.anthropic.com / docs.claude.com / modelcontextprotocol.io for current state of: security review automation, sub-agents, Agent SDK, Managed Agents, Skills marketplace, Memory tool, MCP, Plugins, GitHub Actions integration.
+> **CORRECTION-ON-CORRECTION NOTICE (added 2026-05-14 in the Anthropic-native posture session):** The three previously-omitted features (Dreams, Outcomes, Multi-agent orchestration) are now named in PR15's category list (per the 2026-05-14 amendment in `/adopted/project-instructions-snapshot.md`). The original "Standing Requirement 1a" became **PR12 — Negative-Finding Discipline** under ST2 2026-05-12; the cross-reference in the 2026-05-10 notice is stale (kept as historical record). This 2026-05-14 refresh adds three new sections that the 2026-05-10 draft did not cover: the 17 official skills (now installed at `.claude/skills/anthropic/`); finance + legal reference agents; agentic-commerce stack alignment (AAIF/A2A governance). Treat this 2026-05-14 version as a governing reference for Anthropic-platform features, revisable in place when new features ship.
+
+**Status:** Adopted 2026-05-14 under `D-FEATURES-SURVEY-ADOPTED-2026-05-14`. Original draft 2026-05-10; refreshed 2026-05-14 in the Anthropic-native posture session. Was a research artefact; now governing reference for Anthropic-platform features (revisable in place when new features ship).
+**Purpose:** Surface current (May 2026) Anthropic developer-platform features the SageReasoning build plan was scoped without explicit reference to, plus features named in PR15 as Anthropic-canonical primitives to consult before bespoke election. Founder uses this as session-opening context for any session whose scope touches Anthropic-platform features.
+**Limitations:** Web-research-based survey; not exhaustive; framework features evolve continuously. Founder independently sources best-practice materials; this document combines with those, not replaces them.
+**Method:** Web-searches on anthropic.com / docs.anthropic.com / docs.claude.com / modelcontextprotocol.io for current state. 2026-05-14 refresh added: anthropics/skills repo inspection; anthropic-cookbook patterns/agents; AAIF (Linux Foundation Agentic AI Foundation) A2A governance state.
 
 ---
 
@@ -102,22 +104,25 @@ The features below are presented as options + risks for the stress-test session'
 
 ---
 
-### 5. Agent Skills (anthropics/skills marketplace)
+### 5. Agent Skills (anthropics/skills marketplace) — INSTALLED 2026-05-14
 
 **What it is:**
 - Organised folders of instructions, scripts, and resources that agents discover and load dynamically.
-- Marketplace at `github.com/anthropics/skills` with ready-made skills (docx, pdf, pptx, xlsx, brand-guidelines, internal-comms, skill-creator).
-- Skills installed via plugins; Claude loads them automatically when relevant.
+- Marketplace at `github.com/anthropics/skills` with 17 official skills (March 2026 release; ~117k stars).
+- Two upstream plugin manifests: `document-skills` (docx/pdf/pptx/xlsx — source-available, not open source) and `example-skills` (the other 13 — Apache-2.0).
+- Skills installed via plugins (`/plugin marketplace add anthropics/skills`) or by manual git clone into `.claude/skills/`; Claude loads them automatically when relevant.
 - Already available to Claude.ai paid plans by default.
+- Six of these skills are bundled into Cowork mode automatically (docx, pdf, pptx, xlsx, setup-cowork, consolidate-memory); the other 11 are not — installation closes that gap for Claude Code sessions on this repo.
 
-**Relevance to SageReasoning build plan:**
-- **Distribution channel for substrate:** the substrate's plugin work (Stage 4 G1) currently names Cowork as candidate first marketplace. `anthropics/skills` is another path — potentially a faster path to first listing.
-- **Re-use of existing skills:** rather than building bespoke `sage-stenographer` (P0 0g candidate skill), evaluate whether existing skills in the marketplace cover similar workflows.
-- **Stage 3 F-series wiki content:** could ship as skills rather than as bespoke documentation.
+**Status as of 2026-05-14:** **All 17 official skills installed at `.claude/skills/anthropic/`** under `D-ANTHROPIC-NATIVE-POSTURE-2026-05-14`. See `.claude/skills/anthropic/README.md` for the full per-skill table + license + update instructions. PR15 amended 2026-05-14 to mandate consultation of this folder before bespoke election (operational discipline).
 
-**Risk if not adopted:** SageReasoning ships to a single marketplace (Cowork) when ecosystem distribution via `anthropics/skills` is also available with lower per-marketplace packaging cost.
+**Relevance to SageReasoning build plan (refreshed):**
+- **Consultation discipline (new under amended PR15):** any future session that contemplates a bespoke build first consults `.claude/skills/anthropic/` for relevant `SKILL.md` patterns matching the session's scope.
+- **Distribution channel for substrate:** the substrate's plugin work (Stage 4 G1) currently names Cowork as candidate first marketplace. `anthropics/skills` remains a candidate path — potentially a faster path to first listing. Decision deferred to Stage 4 G3.
+- **Re-use of existing skills + concrete map for sage-* skills:** the seven `sage-*` skills (`sage-consult`, `sage-flows-update`, `sage-interpret`, `sage-registry-audit`, `sage-registry-update`, `sage-stenographer`, `sage-wiring-fix`) coexist with the installed Anthropic skills at `.claude/skills/`. The Anthropic `skill-creator` skill is now consultable for any future sage-* skill iteration.
+- **Stage 3 F-series wiki content:** could ship as skills rather than as bespoke documentation; defer the decision to Stage 3.
 
-**Recommended in the stress-test:** evaluate `anthropics/skills` as a first or second marketplace target; review existing skills for overlap with substrate workflows.
+**Risk closed by adoption:** the original "single-marketplace risk" remains for distribution; the "consultation-before-bespoke" risk is closed by installation.
 
 ---
 
@@ -178,22 +183,20 @@ The features below are presented as options + risks for the stress-test session'
 
 ---
 
-### 9. CLAUDE.md and project-instruction special handling
+### 9. CLAUDE.md and project-instruction special handling — RESOLVED 2026-05-14 (convergence pattern)
 
 **What it is:**
 - Claude Code treats `CLAUDE.md` files specially: kept in context; referenced for overall plan; **Claude can edit CLAUDE.md as it works**, updating instructions for future work.
 - Memory tool reinforces this — `/memories` directory checked at task start.
 
-**Relevance to SageReasoning build plan:**
-- **The project-instructions you currently maintain should likely be a CLAUDE.md at the repository root**, not surfaced through Cowork's project-instructions panel. This affects:
-  - How project instructions are loaded at session-open
-  - Whether amendments to project instructions are made via Claude Code's special handling or via your current `/adopted/standing-protocol-cache.md` approach
-  - Whether the standing protocol cache pattern is necessary or whether Claude Code's CLAUDE.md handling makes it redundant
-- **The `/adopted/standing-protocol-cache.md` pattern is a manual implementation of CLAUDE.md special-handling** — your governance discipline is sound; the implementation could be simpler.
+**Status as of 2026-05-14:** **`/CLAUDE.md` created at repo root** under `D-ANTHROPIC-NATIVE-POSTURE-2026-05-14`. The convergence pattern: CLAUDE.md is a short pointer file (~75 lines) that auto-loads in Claude Code sessions; the standing protocol cache + the build-arc cache + the project-instructions snapshot remain the heavy-lifters for governance. **Both coexist; neither replaces the other.**
 
-**Risk if not adopted:** the build's governance overhead is higher than it needs to be; Claude Code's special handling of CLAUDE.md goes unused; the cache pattern requires more discipline than is necessary.
+**Resolution reasoning (recorded 2026-05-14):**
+- The standing-protocol-cache pattern's advantages — explicit tier declaration; lean+Critical risk-template selection; KG engagement table; model-selection AC1 table; cache-update discipline tied to specific decision-log IDs — are not delivered by CLAUDE.md special handling. Replacing the cache with CLAUDE.md would lose these advantages.
+- CLAUDE.md's advantage — auto-loaded entry point that doesn't require explicit "read in order" prose — is delivered by making CLAUDE.md a *pointer* to the cache, not a *replacement* for it.
+- For Cowork sessions, the project-instructions panel remains the operative surface; the founder paste-syncs against the snapshot file between sessions. The cache is the heavy-lifter for both Cowork and Claude Code.
 
-**Recommended in the stress-test:** evaluate whether `/adopted/standing-protocol-cache.md` should become `CLAUDE.md` at the repo root and use Claude Code's special handling.
+**Risk closed by resolution:** Claude Code's special handling is now used (CLAUDE.md auto-loads); the cache pattern's governance advantages are preserved; the build's overhead is no higher than it needs to be.
 
 ---
 
@@ -212,6 +215,79 @@ The features below are presented as options + risks for the stress-test session'
 
 ---
 
+## Features added in the 2026-05-14 refresh
+
+The original 2026-05-10 draft covered features 1-10 above. The 2026-05-14 refresh adds four more, each surfaced after the original draft was written.
+
+### 11. The 17 Official Anthropic Skills (anthropics/skills, March 2026 release)
+
+**What it is:**
+- Public repository at `github.com/anthropics/skills` (Apache-2.0 for example-skills; source-available for document-skills) containing 17 official skills released March 2026.
+- Two upstream plugin manifests: `document-skills` (docx, pdf, pptx, xlsx) and `example-skills` (algorithmic-art, brand-guidelines, canvas-design, claude-api, doc-coauthoring, frontend-design, internal-comms, mcp-builder, skill-creator, slack-gif-creator, theme-factory, web-artifacts-builder, webapp-testing).
+- Repository carries ~117k stars; 13.4k forks; actively maintained.
+- Upstream disclaimer: "These skills are provided for demonstration and educational purposes only."
+
+**Status as of 2026-05-14:** **All 17 installed at `.claude/skills/anthropic/`** in this repo under `D-ANTHROPIC-NATIVE-POSTURE-2026-05-14`. Coexist with seven SageReasoning-internal `sage-*` skills at the top level of `.claude/skills/`. Six of the 17 (docx, pdf, pptx, xlsx + setup-cowork + consolidate-memory from a separate bundle) are auto-loaded in Cowork mode; the other 11 are available to Claude Code sessions on this repo.
+
+**Relevance to SageReasoning build plan:**
+- **PR15 operational discipline (amended 2026-05-14):** every future session that contemplates a bespoke build first consults `.claude/skills/anthropic/` for relevant `SKILL.md` patterns. `skill-creator` is specifically consultable for any future `sage-*` skill work.
+- **`mcp-builder` skill:** consultable for Stage 3 C3 plugin-tools-as-MCP-servers work.
+- **`claude-api` skill:** consultable for any session that touches the Anthropic SDK usage in `/website/src/lib/` (currently `runSandwich`, Layer 1 + Layer 3 services, mentor reflection).
+- **`frontend-design` + `web-artifacts-builder`:** consultable for Stage 4 marketplace listing copy + accreditation-card UI work.
+
+**Risk closed by adoption:** the "bespoke-build-when-Anthropic-canonical-exists" risk that PR15 was authored against is now operationally addressed.
+
+---
+
+### 12. Anthropic-cookbook patterns/agents
+
+**What it is:**
+- `anthropics/anthropic-cookbook` repository — official patterns and reference implementations for common agentic-AI workflows.
+- `patterns/agents/` subfolder specifically holds reference implementations for: tool use, multi-step reasoning, RAG, evaluation, structured output, agent loops.
+
+**Relevance to SageReasoning build plan:**
+- **PR15 consultable surface (amended 2026-05-14):** named as one of the Anthropic-canonical primitives in PR15's category list ("Cookbook patterns") — to be consulted before any bespoke build whose scope overlaps with a cookbook pattern.
+- **Specific candidates:** A6 prose_mode templates (consult `patterns/agents/structured-output`); A10 per-agent credentials (consult `patterns/agents/auth` if present); A12 OpenTelemetry GenAI instrumentation (consult `patterns/agents/evaluation`).
+
+**Risk if not consulted:** SageReasoning reinvents wheels that Anthropic has already documented as reference patterns.
+
+---
+
+### 13. Finance + Legal reference agents (anthropics/financial-services + legal plugins)
+
+**What it is:**
+- `anthropics/financial-services` — 10 reference financial-services agents released as Apache-2.0 reference implementations (per Anthropic's 2026-05-05 announcement). Covers: account reconciliation, fraud detection, compliance monitoring, contract analysis, regulatory filing assistance, treasury management, audit trail generation, financial reporting, KYC workflows, transaction monitoring.
+- Legal-tools plugins — 12 plugins (per TechRadar 2026 coverage) covering contract review, legal research, case-law summarisation, regulatory tracking, e-discovery, document automation, court-filing prep, deposition-summary generation, IP research, compliance training, GDPR/CCPA tooling, dispute-resolution support.
+- Both are reference implementations, not products — installed via the Claude Code Plugin spec or by manual git clone; meant to be adapted to the consumer's domain.
+
+**Relevance to SageReasoning build plan:**
+- **PR15 consultable surface (amended 2026-05-14):** named as one of the Anthropic-canonical primitives in PR15's category list ("Reference agents") — to be consulted when a build session's scope overlaps a domain Anthropic has already published a reference implementation for.
+- **Specific relevance to Stage 1 close lawyer engagement (per ST2 Q4 bring-forward):** the legal plugins (especially contract review, regulatory tracking, GDPR/CCPA tooling) are consultable by the founder + lawyer when the FPE-5 TOS + liability work begins.
+- **Relevance to A14 / R5 cost-as-health-metric:** the financial-services reference agents are consultable for A14 cost-monitoring patterns + R5 alert-design refinements (treasury management + audit-trail-generation patterns).
+- **Not in scope for SageReasoning's substrate today:** the substrate is a Character Kernel (R18a; J1 ADR), not a financial-services or legal-tools substrate. These reference agents are consultable resources, not adoption candidates.
+
+**Risk if not consulted:** founder pays lawyer-engagement hours to produce work that Anthropic's reference implementations already cover.
+
+---
+
+### 14. Agentic-commerce stack alignment (AAIF / A2A governance)
+
+**What it is:**
+- **AAIF (Agentic AI Foundation)** — Linux Foundation umbrella organisation for agentic-AI infrastructure governance, launched late 2025. Six co-founders: Anthropic, OpenAI, Google, AWS, Microsoft, Stripe. Governs A2A + MCP + related agentic-AI protocols.
+- **A2A (Agent2Agent) protocol** — agent-to-agent coordination protocol; the `.well-known/agent-card.json` standard that SageReasoning has served LIVE at `sagereasoning.com/.well-known/agent-card.json` since 28 March 2026 (per README line 411).
+- **MCP (Model Context Protocol)** — already covered at §7 above; complementary to A2A (MCP = agent-to-tool; A2A = agent-to-agent).
+- **Agentic-commerce stack** — ACP (OpenAI + Stripe) + UCP + AP2 (Google) + MPP/x402 + AgentCore Payments (AWS); see J1 ADR `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` §"Agentic-commerce-stack adjacency" for the six-layer responsibility framework. Character Kernel sits upstream of all of them.
+
+**Relevance to SageReasoning build plan:**
+- **agent-card.json currency check** is a 2026-05-14 session deliverable (Step 6 of the Anthropic-native posture session). Checks the card against A2A v1 spec; outcome recorded under `D-AGENT-CARD-CURRENCY-CHECK-2026-05-14` if a fix or deferred follow-up is surfaced.
+- **A10 token-format ADR (Critical; ~3-4hr session)** consumes four candidates per the 2026-05-13 agentic-commerce upstream re-work: JWT / W3C VC / AP2-style mandate / hybrid. The decision is gated on the AAIF governance state for the relevant token formats.
+- **F4 forward-looking finding** (per `/operations/agentic-commerce-findings-downstream-order.md`) folds AC10 / AP2 mandate alignment into A12 when A12 begins.
+- **F1 + FPE-5 TOS + liability** (parallel pre-launch track) consumes the AAIF + agentic-commerce-stack governance state for liability-allocation language.
+
+**Risk if not aligned:** SageReasoning's substrate ships as A2A-discoverable but with stale schema (no `protocolVersion` field, etc.) — agent-developer consumers may treat the card as out-of-date and ignore it.
+
+---
+
 ## Summary table — feature × build-plan stage impact
 
 | Feature | Build-plan items potentially affected | Magnitude |
@@ -226,6 +302,10 @@ The features below are presented as options + risks for the stress-test session'
 | Plugin spec + marketplaces | Stage 3 C1-C7 (almost entire plugin work); Stage 4 G2 | **Highest** — re-scope Stage 3 plugin internals on standard spec |
 | CLAUDE.md special handling | Project instructions; standing-protocol-cache; build-sessions-cache | **Medium** — implementation simplification |
 | Opus 4.6 + Sonnet 4.5 | Model selection table (AC1); KG2 boundary | **Low** — no immediate change needed |
+| The 17 official Anthropic skills (installed 2026-05-14) | PR15 operational discipline; every future session's bespoke-vs-canonical evaluation; future sage-* skill iteration via `skill-creator`; A6 / A10 / mcp-builder consultations | **High** — closes the bespoke-when-canonical-exists risk |
+| Anthropic-cookbook patterns/agents | PR15 consultable surface; A6 / A10 / A12 reference patterns | **Medium** — augments PR15 consultation with documented reference patterns |
+| Finance + Legal reference agents (financial-services + legal plugins) | PR15 consultable surface; FPE-5 (lawyer engagement); A14 cost-monitoring patterns | **Medium** — reduces lawyer-engagement hours; substrate scope unchanged |
+| AAIF / A2A governance + agentic-commerce stack | agent-card.json currency (Step 6 outcome); A10 token-format ADR; F4 (A12); F1 (FPE-5) | **High** — substrate already serves A2A surface; alignment with AAIF governance state is load-bearing for plugin migration |
 
 ---
 

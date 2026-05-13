@@ -499,22 +499,35 @@ When scoping a stress-test or gap-analysis session, the AI proactively surfaces 
 
 Additional domains may be added per session; existing domains may be folded into adjacent ones; the default ten anchors the scope.
 
-### PR15 — Bias Toward Existing Anthropic Infrastructure (NEW; ST2 2026-05-12)
+### PR15 — Bias Toward Existing Anthropic Infrastructure (NEW; ST2 2026-05-12; AMENDED 2026-05-14 per D-PR15-AMENDED-FROM-ANTHROPIC-NATIVE-2026-05-14)
 
-**Source:** ST2 Phase 3 Q8 election (Adopt SR4 as PR15).
+**Source:** ST2 Phase 3 Q8 election (Adopt SR4 as PR15). Amended 2026-05-14 to operationalise the 2026-05-13 agentic-commerce upstream re-work findings and the 2026-05-14 Anthropic-native posture session.
 
-Before proposing any bespoke build, the AI evaluates whether existing Anthropic infrastructure delivers the same outcome with less custom work. Candidate infrastructures include:
+Before proposing any bespoke build, the AI evaluates whether existing Anthropic infrastructure delivers the same outcome with less custom work.
 
-- Claude Code commands
-- Sub-agents
-- Skills
-- Managed agents
-- MCP servers
-- SDK patterns
-- Plugin spec
-- Dreams
-- Outcomes
-- Multi-agent orchestration
+**Existing infrastructure categories (Anthropic-canonical primitives):**
+
+- Claude Code commands (incl. `/security-review`, `/plugin`)
+- Sub-agents (Claude Code; Agent SDK)
+- Skills (Anthropic-published at `github.com/anthropics/skills`; 17 official skills installed locally at `.claude/skills/anthropic/` as of 2026-05-14)
+- Managed agents (REST API; long-horizon agents)
+- MCP servers (Model Context Protocol; standardised tool integration)
+- SDK patterns (Claude Agent SDK Python + TypeScript)
+- Plugin spec (Claude Code Plugins; lightweight packaging)
+- Cookbook patterns (`anthropic-cookbook/patterns/agents`; reference implementations) — *added 2026-05-14*
+- Reference agents (`anthropics/financial-services`; legal-tools plugins; domain-specific reference agents) — *added 2026-05-14*
+- Dreams (memory consolidation; research preview)
+- Outcomes (rubric + separate grader; public beta)
+- Multi-agent orchestration (specialist agents; public beta)
+
+**Operational discipline (added 2026-05-14):**
+
+Before electing a bespoke build, the AI MUST:
+
+1. Consult skills installed at `/.claude/skills/anthropic/` for relevant `SKILL.md` patterns matching the session's scope (Claude Code's recursive `SKILL.md` discovery surfaces these automatically; in Cowork sessions the founder paste-syncs the project-instructions panel which references this folder).
+2. Consult `/operations/agentic-commerce-findings-downstream-order.md` for forward-looking findings (F1–F4) whose target session matches the day's scope; fold-in the named action at the named point per the findings document.
+3. State whether an Anthropic-canonical primitive could deliver the outcome before stating the bespoke election.
+4. If bespoke is elected, justification is recorded in the decision-log entry under "Reasoning" naming the Anthropic primitive considered and why bespoke is preferable for this case.
 
 Existing infrastructure is the default; bespoke work is the alternative requiring justification. Justification is recorded in the decision log when bespoke is elected.
 

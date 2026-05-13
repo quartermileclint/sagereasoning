@@ -1,6 +1,6 @@
 # Standing Protocol Cache
 
-**Status:** Adopted 2026-05-03 under `D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT-2026-05-03`. **Amended 2026-05-12 under `D-CACHE-DRIFT-RESOLVED-2026-05-12`** to incorporate ST2 changes: AI signals table extended with three diagnostic-certainty rows; manifest range updated (AC1–AC13); process-rule range updated (PR1–PR16); project-instructions surface now `/adopted/project-instructions-snapshot.md` (first repo-tracked snapshot, created at ST2 adoption); cross-references updated for new ADR (J1 Character Kernel) and amended staging plan.
+**Status:** Adopted 2026-05-03 under `D-PHASE-2-PASS-1-REPLAN-EFFICIENCY-REFINEMENT-2026-05-03`. **Amended 2026-05-12 under `D-CACHE-DRIFT-RESOLVED-2026-05-12`** to incorporate ST2 changes: AI signals table extended with three diagnostic-certainty rows; manifest range updated (AC1–AC13); process-rule range updated (PR1–PR16); project-instructions surface now `/adopted/project-instructions-snapshot.md` (first repo-tracked snapshot, created at ST2 adoption); cross-references updated for new ADR (J1 Character Kernel) and amended staging plan. **Amended 2026-05-14 under `D-CACHE-DRIFT-RESOLVED-2026-05-14`** to incorporate the Anthropic-native posture session changes: `/CLAUDE.md` entry-point file created at repo root for Claude Code sessions; 17 Anthropic skills installed at `/.claude/skills/anthropic/`; PR15 amended (operational discipline mandating consultation of `.claude/skills/anthropic/` + agentic-commerce-findings tracker before bespoke election).
 **Governs:** Session-opening overhead. Replaces full re-reads of the manifest + session-opening protocol + knowledge-gaps register at every session open with a one-stop reference. Full re-reads only when work specifically requires it.
 **Does not govern:** What gets built (manifest's remit) or how to work together (project instructions' remit). The full governance documents remain authoritative when this cache flags a change or when work touches a surface this cache does not pre-resolve.
 **Update discipline:** When the manifest, session-opening protocol, project instructions, or knowledge-gaps register changes, this cache must be updated in the same session as the change (Standard-risk amendment). Cache drift is logged via a `D-CACHE-DRIFT-…` entry.
@@ -16,6 +16,8 @@
 5. **Confirm at session open**: tier; hold-point status (P0 0h); model selection per AC1 table below; status vocabulary; signals + risk classification.
 
 If any standing answer below is contested by the day's work or by founder direction, treat the cache as overridable and re-read the underlying governance document.
+
+**Mode-specific note (added 2026-05-14):** For Claude Code sessions, `/CLAUDE.md` at repo root is the auto-loaded entry point (Claude Code's special handling). It points at this cache and the other governance surfaces below; it is supplementary, not authoritative. For Cowork mode sessions, the project-instructions panel is the operative surface; the founder paste-syncs it against `/adopted/project-instructions-snapshot.md` between sessions. This cache is the heavy-lifter for both modes.
 
 ---
 
@@ -319,8 +321,8 @@ When any of the following changes:
 
 - Manifest rules (R0–R20, AC1–AC13, KG1–KG7) — AC9–AC13 added under ST2 2026-05-12
 - Session-opening protocol (Parts A, B, C; the 21 elements)
-- Project instructions (this version is per `/adopted/project-instructions-snapshot.md` — first repo-tracked snapshot created 2026-05-12 under ST2)
-- Process rules (PR1–PR16) — PR10–PR16 added under ST2 2026-05-12
+- Project instructions (this version is per `/adopted/project-instructions-snapshot.md` — first repo-tracked snapshot created 2026-05-12 under ST2; PR15 amended 2026-05-14 under `D-PR15-AMENDED-FROM-ANTHROPIC-NATIVE-2026-05-14`)
+- Process rules (PR1–PR16) — PR10–PR16 added under ST2 2026-05-12; PR15 amended 2026-05-14
 
 …update this cache **in the same session as the governance change**. The update is Standard risk per 0d-ii. Append `D-CACHE-DRIFT-RESOLVED-YYYY-MM-DD` entry to the decision log naming the cache-update step.
 
@@ -330,14 +332,17 @@ If the cache and the governance documents diverge, the governance documents are 
 
 ## Cross-references
 
+- `/CLAUDE.md` — entry-point file for Claude Code sessions (auto-loaded by Claude Code's special handling); created 2026-05-14 under `D-ANTHROPIC-NATIVE-POSTURE-2026-05-14`. Pointer file, not the governing surface itself.
+- `/.claude/skills/anthropic/` — 17 official Anthropic skills installed 2026-05-14; consulted before bespoke election per PR15. See `/.claude/skills/anthropic/README.md` for the full table + update instructions.
 - `/manifest.md` — full manifest (R0–R20, AC1–AC13, KG1–KG7; AC9-AC13 added under ST2 2026-05-12; R17g/h/i + R18e added; R20a perimeter potential-broadening placeholder)
-- `/adopted/project-instructions-snapshot.md` — first repo-tracked snapshot of project instructions; created under ST2 2026-05-12. Authoritative surface for the operative project instructions; founder paste-syncs into Cowork panel between sessions.
+- `/adopted/project-instructions-snapshot.md` — first repo-tracked snapshot of project instructions; created under ST2 2026-05-12; PR15 amended 2026-05-14. Authoritative surface for the operative project instructions; founder paste-syncs into Cowork panel between sessions.
 - `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` — J1 ADR (Character Kernel category label)
 - `/adopted/substrate-plugin-staging-plan.md` — substrate-as-plugin staging plan (amended at ST2; A10-A19 Stage 1 expansion; Stage 3 re-scope on Anthropic Plugin spec + MCP; Stage 4 G4 expanded gating; parallel pre-launch track)
 - `/adopted/session-opening-protocol.md` — full 21-element protocol
 - `/operations/knowledge-gaps.md` — full knowledge-gaps register
+- `/operations/agentic-commerce-findings-downstream-order.md` — forward-looking findings tracker (F1–F4); consulted at session-open per PR15 operational discipline
 - `/operations/decision-log.md` — append-only decision trail (active log = entries dated 2026-05-01 onwards); entries cross-reference this cache by section name. Earlier entries are in monthly archive files in `/operations/decision-log-archive-YYYY-MM.md` per the quarterly archive policy adopted under `D-DECISION-LOG-ARCHIVE-POLICY-ADOPTED-2026-05-04` (see active log's INDEX header for full archive list + policy)
-- Project instructions: see `/adopted/project-instructions-snapshot.md` for the operative content (PR1–PR16; verification framework 0c; Critical Change Protocol 0c-ii; risk classification 0d-ii; AI signals diagnostic-certainty rows added ST2)
+- Project instructions: see `/adopted/project-instructions-snapshot.md` for the operative content (PR1–PR16; verification framework 0c; Critical Change Protocol 0c-ii; risk classification 0d-ii; AI signals diagnostic-certainty rows added ST2; PR15 amended 2026-05-14)
 
 ---
 
