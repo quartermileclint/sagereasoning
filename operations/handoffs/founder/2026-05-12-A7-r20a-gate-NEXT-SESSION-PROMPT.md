@@ -5,9 +5,9 @@
 
 **Governing frame:** `/adopted/standing-protocol-cache.md` + `/adopted/build-sessions-protocol-cache.md` + the amended staging plan + the amended manifest + the project-instructions snapshot.
 
-**Predecessor session close:** `/operations/handoffs/founder/2026-05-12-A5-layer3-service-close.md` (A5 Layer 3 substrate service reaches Scaffolded + Wired + Verified on `/api/reason` PR1 single-endpoint proof).
+**Predecessor session close:** `/operations/handoffs/founder/2026-05-13-agentic-commerce-upstream-rework-close.md` (most recent close — governance-only session); preceded by `/operations/handoffs/founder/2026-05-12-A5-layer3-service-close.md` (A5 Layer 3 substrate service reaches Scaffolded + Wired + Verified on `/api/reason` PR1 single-endpoint proof — last substrate-build close).
 
-**Predecessor decision-log entries:** `D-A5-LAYER3-SCAFFOLDED-VERIFIED-2026-05-12` (the most recent substrate-build entry); `D-A4-KEY-MANAGEMENT-WIRED-VERIFIED-2026-05-10`; `D-STAGING-PLAN-AMENDED-FROM-ST2-2026-05-12`; `D-MANIFEST-AMENDED-FROM-ST2-2026-05-12`.
+**Predecessor decision-log entries:** `D-AGENTIC-COMMERCE-UPSTREAM-REWORK-2026-05-13` (most recent entry — J1 ADR amended + A10 staging-plan candidates extended + recommended-order artefact created); `D-A5-LAYER3-SCAFFOLDED-VERIFIED-2026-05-12` (most recent substrate-build entry); `D-A4-KEY-MANAGEMENT-WIRED-VERIFIED-2026-05-10`; `D-STAGING-PLAN-AMENDED-FROM-ST2-2026-05-12`; `D-MANIFEST-AMENDED-FROM-ST2-2026-05-12`.
 
 **Risk classification:** **Critical** under 0d-ii. AC5 + AC7 + PR6 all engage (R20a perimeter; auth surface for plugin-originated calls into the Layer 2 API; safety-critical distress classifier path). **Critical Change Protocol applies** — see §"Critical Change Protocol pointer" below. The session-as-a-whole is Critical.
 
@@ -23,7 +23,7 @@ This session is **A7 scaffolding** — the gate module, the call site in `parall
 
 ## Pre-conditions
 
-1. **A5 commit pushed.** Confirm `git log --oneline -1 origin/main` shows the A5 scaffolding commit. The A5 work must be on origin/main before A7 begins (A7 attaches `distress_signal` to a Layer2Assessment that A5 reads — out-of-order commits break the chain).
+1. **A5 commit pushed.** Confirm `git log --oneline -1 origin/main` shows the A5 scaffolding commit on origin/main (followed by the 2026-05-13 agentic-commerce upstream re-work commit). Out-of-order commits break the chain.
 2. **A5 verification clean between sessions.** Founder confirms at session-open that the four verification checks from the A5 close passed:
    - `npx tsc --noEmit -p tsconfig.json` (clean)
    - `npx tsx src/lib/substrate/__tests__/layer3-service.test.ts` (28 pass / 0 fail)
@@ -33,7 +33,7 @@ This session is **A7 scaffolding** — the gate module, the call site in `parall
 4. **A1, A2, A3, A4 still Verified.** No regression since A4 session.
 5. **Founder commits to a 3-4 hour bounded session** — Critical-tier session.
 6. **Project-instructions snapshot paste-sync state confirmed.** If the operative Cowork-panel content still shows the pre-A5 (or pre-ST2) project instructions, the AI should note that PR10-PR16 are only authoritative via the repo snapshot for this session.
-7. **Production state unchanged from A5 close.** `SUBSTRATE_LAYER3_ENABLED` env var UNSET in Vercel; `/api/reason` byte-identical to pre-A5; `/api/substrate/layer3` returns 503.
+7. **Production state unchanged from A5 close + agentic-commerce upstream re-work close.** `SUBSTRATE_LAYER3_ENABLED` env var UNSET in Vercel; `/api/reason` byte-identical to pre-A5; `/api/substrate/layer3` returns 503.
 
 ## Critical Change Protocol pointer (for §Part B Step 5)
 
@@ -54,9 +54,11 @@ Read in order (full canonical-source reads required for code-critical category p
 
 1. **`/adopted/standing-protocol-cache.md`** (~3 min) — tier; model selection (Haiku for the distress classifier per AC1 row + KG2); KG register; signals (incl. diagnostic-certainty); risk classification.
 2. **`/adopted/build-sessions-protocol-cache.md`** (~3 min) — build-arc context; three-layer R20a architecture; no-current-users note.
-3. **`/operations/handoffs/founder/2026-05-12-A5-layer3-service-close.md`** (~5 min) — predecessor close; confirms A5 reaches Verified; lists A5.4's defensive read of `assessment.distress_signal` which A7 will populate.
-4. **`/adopted/substrate-plugin-staging-plan.md`** §Stage 1 — A7 (~5 min) — the operative item description; A7's risk + dependencies + estimated sessions.
-5. **`/manifest.md`** — read these sections in full:
+3. **`/operations/handoffs/founder/2026-05-13-agentic-commerce-upstream-rework-close.md`** (~3 min) — most recent close (governance-only); confirms production state unchanged + J1 ADR + A10 candidates amended + recommended-order doc created.
+4. **`/operations/handoffs/founder/2026-05-12-A5-layer3-service-close.md`** (~5 min) — predecessor substrate-build close; confirms A5 reaches Verified; lists A5.4's defensive read of `assessment.distress_signal` which A7 will populate.
+5. **`/operations/agentic-commerce-findings-downstream-order.md`** (~3 min) — forward-looking findings tracker. **F3 applies to this session** (A5 retrospective mandate-producer framing — action: note in session-open + decision-log entry that A5's Layer3Response shape is structurally a substrate-consultation-mandate producer).
+6. **`/adopted/substrate-plugin-staging-plan.md`** §Stage 1 — A7 (~5 min) — the operative item description; A7's risk + dependencies + estimated sessions.
+7. **`/manifest.md`** — read these sections in full:
    - **R20a** (incl. the perimeter potential-broadening placeholder added under ST2) — Active protection; the rule A7 enforces
    - **AC2** — Safety system latency budget (the ~500ms regex → Haiku cost is accepted and non-negotiable; A7 inherits this budget)
    - **AC4** — Invocation testing for safety functions (A7 + its distress-classifier wrapper require both functional + invocation tests)
@@ -64,13 +66,13 @@ Read in order (full canonical-source reads required for code-critical category p
    - **AC7** — Session 7b standing constraint (A7 introduces a new auth-surface posture for plugin-originated calls; named explicitly)
    - **AC1** — Model selection (Haiku for safety-critical distress classification per the row + KG2; cite the row)
    - **AC8** — Translation-sandwich architectural constraint (A7 sits in `/lib/substrate/` alongside A5; new module; preserves the architecture)
-6. **`/website/src/lib/r20a-classifier.ts`** (~5 min) — the existing two-stage distress classifier (`detectDistressTwoStage`); A7 reuses it; do NOT re-implement.
-7. **`/website/src/lib/constraints.ts`** (~3 min) — the SafetyGate token pattern; A7 produces SafetyGate-equivalent shapes; consider whether A7 should produce an actual SafetyGate via `enforceDistressCheck` for type-level compile guarantees.
-8. **`/website/src/lib/substrate/layer3-service.ts`** (~5 min) — A5's expectations for the `distress_signal` field; A7 must populate this field on `Layer2Assessment` when a sub-threshold signal is detected (or when A7 is bypassed but the assessment passes through).
-9. **`/website/src/lib/translation-sandwich/parallel-run.ts`** (~10 min) — the orchestrator A7 wires into; specifically `runSandwichInner` and the existing path Layer 1 → Layer 2 → Layer 3. A7 sits BEFORE `applyMechanisms` (so distress redirection short-circuits before Layer 2 work).
-10. **`/website/src/lib/translation-sandwich/layer2-mechanisms.ts`** (skim the `Layer2Assessment` interface ~5 min) — A7 must extend the type to optionally carry `distress_signal: boolean`; defensive default false; readable by A5.4.
-11. **`/website/src/app/api/reason/route.ts`** (skim the existing route-level R20a perimeter at line ~173 ~5 min) — A7 must NOT duplicate the route-level perimeter check for human-facing traffic; the route-level check stays. A7 covers the plugin-originated path that bypasses the route-level perimeter (the `preExtractedLayer1Schema` path).
-12. **`/operations/decision-log.md`** — read the last 2 entries (`D-A5-LAYER3-SCAFFOLDED-VERIFIED-2026-05-12`; `D-CACHE-DRIFT-RESOLVED-2026-05-12`) for the most recent substrate-build context.
+8. **`/website/src/lib/r20a-classifier.ts`** (~5 min) — the existing two-stage distress classifier (`detectDistressTwoStage`); A7 reuses it; do NOT re-implement.
+9. **`/website/src/lib/constraints.ts`** (~3 min) — the SafetyGate token pattern; A7 produces SafetyGate-equivalent shapes; consider whether A7 should produce an actual SafetyGate via `enforceDistressCheck` for type-level compile guarantees.
+10. **`/website/src/lib/substrate/layer3-service.ts`** (~5 min) — A5's expectations for the `distress_signal` field; A7 must populate this field on `Layer2Assessment` when a sub-threshold signal is detected (or when A7 is bypassed but the assessment passes through). **F3 trigger fires on this read** — note the Layer3Response mandate-producer shape at the session-open + in the decision-log entry.
+11. **`/website/src/lib/translation-sandwich/parallel-run.ts`** (~10 min) — the orchestrator A7 wires into; specifically `runSandwichInner` and the existing path Layer 1 → Layer 2 → Layer 3. A7 sits BEFORE `applyMechanisms` (so distress redirection short-circuits before Layer 2 work).
+12. **`/website/src/lib/translation-sandwich/layer2-mechanisms.ts`** (skim the `Layer2Assessment` interface ~5 min) — A7 must extend the type to optionally carry `distress_signal: boolean`; defensive default false; readable by A5.4.
+13. **`/website/src/app/api/reason/route.ts`** (skim the existing route-level R20a perimeter at line ~173 ~5 min) — A7 must NOT duplicate the route-level perimeter check for human-facing traffic; the route-level check stays. A7 covers the plugin-originated path that bypasses the route-level perimeter (the `preExtractedLayer1Schema` path).
+14. **`/operations/decision-log.md`** — read the last 3 entries (`D-AGENTIC-COMMERCE-UPSTREAM-REWORK-2026-05-13`; `D-A5-LAYER3-SCAFFOLDED-VERIFIED-2026-05-12`; `D-CACHE-DRIFT-RESOLVED-2026-05-12`) for the most recent substrate-build context.
 
 **Confirm at session open** (state explicitly, briefly):
 
@@ -82,6 +84,7 @@ Read in order (full canonical-source reads required for code-critical category p
 - **PR10 PEV loop applies** — Plan (Critical Change Protocol inline); Execute (PR1 single-endpoint-proof + PR2 build-to-wire-immediate); Verify (diagnostic-certainty signalling)
 - **PR11-PR15 standing requirements engaged**
 - **PR16 positioning + dogfood lens** at each design decision
+- **F3 fold-in (per `/operations/agentic-commerce-findings-downstream-order.md`):** state at session-open that A5's Layer3Response shape is structurally a substrate-consultation-mandate producer — R3 + R19c + R19d + R20a + R18a + R18e injections + AC9/AC10/AC11 projections form an AP2-style mandate-output shape. A7 produces the `distress_signal` field that completes A5.4's defensive read; A7 is therefore a producer in the mandate-input chain. Reference in this session's decision-log entry under "Reasoning" or "Cross-references."
 
 ## Part B — Procedure
 
@@ -148,6 +151,8 @@ Per the A5.4 activation contract — verify that when A7 returns PASS with `dist
 
 Entry ID: `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-YYYY-MM-DD`. Full template per the standing cache §"Critical-risk sessions". Include all sections (Decision, Reasoning, Files touched, Risk classification, Rollback path, Verification step, Verification Method Used, PR5 Knowledge-Gap Carry-Forward, Open questions, Rules served, Status, Cross-references).
 
+**F3 fold-in for this entry (per `/operations/agentic-commerce-findings-downstream-order.md`):** under "Reasoning" or "Cross-references", include a one-sentence note that A7 is a producer in the substrate-consultation-mandate-input chain — A7 produces the `distress_signal` field that completes A5.4's defensive read; A5's Layer3Response shape (R3 + R19c + R19d + R20a + R18a + R18e injections + AC9/AC10/AC11 projections) is structurally an AP2-style mandate-output. Cross-reference `D-AGENTIC-COMMERCE-UPSTREAM-REWORK-2026-05-13` (the entry that first recorded this framing).
+
 ### Step 8 — Session close (full form for Critical)
 
 Path: `/operations/handoffs/founder/YYYY-MM-DD-A7-r20a-gate-close.md`. Full template. Include: Decisions Made; Status Changes (A7 Scoped → Scaffolded → Verified; `Layer2Assessment.distress_signal` field added; A5.4 status note — defensive read now meets a real producer); Next Session Should (A6 prose_mode templates OR A10 per-agent credentials kickoff per founder election); Blocked On; Open Questions; Verification Method Used; Risk Classification Record; PR5 Knowledge-Gap Carry-Forward; Founder Verification (Between Sessions); Orchestration Reminder; Cross-references.
@@ -158,14 +163,14 @@ Path: `/operations/handoffs/founder/YYYY-MM-DD-A7-r20a-gate-close.md`. Full temp
 |---|---|
 | Cache + predecessor close + manifest + ADR reads (Part A) | 30-40 min |
 | Decision-log + classifier + parallel-run.ts review (Part A continued) | 15-20 min |
-| Session-open confirmation + PR1/PR2/PR15 checks stated | 5 min |
+| Session-open confirmation + PR1/PR2/PR15 checks stated + F3 fold-in stated | 5 min |
 | Step 1 — Plan (Critical Change Protocol inline) | 15-20 min |
 | Step 2 — Scaffold A7.1-A7.7 | 45-60 min |
 | Step 3 — Single-endpoint proof on `/api/reason` | 20-30 min |
 | Step 4 — Build-to-wire verification | 15-20 min |
 | Step 5 — Critical Change Protocol completion + founder approval | 10-15 min |
 | Step 6 — Verify (functional + invocation + AC2 latency + A5.4 interlock) | 20-30 min |
-| Step 7 — Decision-log entry (full form) | 20-25 min |
+| Step 7 — Decision-log entry (full form; F3 fold-in included) | 20-25 min |
 | Step 8 — Session close (full form) | 20-25 min |
 | **Total** | **~3.5-4.5 hours** |
 
@@ -196,7 +201,7 @@ Successful A7 scaffolding produces:
 - All AC4 invocation tests pass; functional tests pass; latency budget met
 - Substrate production state at session close: A7 in dev/staging behind flag; production unchanged unless founder explicitly elects to flip the flag in production after Critical Change Protocol completion
 
-**Next session after A7 Verified:** A6 (prose_mode per-mode templates — Standard-risk; ~2-3 hours) OR A10 (per-agent credentials kickoff — Critical-risk; ~3-4 hours; requires token-format ADR drafted in the same session per ST2 open question). Founder elects.
+**Next session after A7 Verified:** A6 (prose_mode per-mode templates — Standard-risk; ~2-3 hours) OR A10 (per-agent credentials kickoff — Critical-risk; ~3-4 hours; requires token-format ADR drafted in the same session per ST2 open question; AP2-style mandate is now a fourth candidate format per the 2026-05-13 agentic-commerce upstream re-work session). Founder elects.
 
 **Stage 1 status after A7 Verified:** existing critical chain A1→A2→A3→A4→A5→A7 complete; A10-A19 Stage 1 expansion items remain Scoped. R20a three-layer defence operationally active (Layers 2 + 3 wired; Layer 1 in-plugin script is Stage 3 work). Substrate ready for K-category migration prep (Stage 2 still gated on A10 per-agent credentials).
 
