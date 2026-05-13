@@ -667,6 +667,14 @@ export async function POST(request: NextRequest) {
       // runSandwich skips server-side extractFeatures and uses this schema
       // directly. Undefined for user-auth + API-key paths (existing behaviour).
       preExtractedLayer1Schema,
+      // Stage 1 A7 (D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13): pass
+      // the route-level SafetyGate (already awaited at line 544) so A7
+      // inside runSandwichInner can REUSE the gate's result without making
+      // a new classifier call. This is the latency-zero path for /api/reason.
+      // Future substrate consumers without their own route-level perimeter
+      // would omit this and A7 would run a fresh classifier call inheriting
+      // the AC2 ~500ms budget.
+      safetyGate: gate,
     })
 
     // Branch 1 — Tier 1 force-clarification fired (3A surfacing).
@@ -696,6 +704,34 @@ export async function POST(request: NextRequest) {
       tier1Output.continuation_token = token
       tier1Output.disclaimer = EVALUATIVE_DISCLAIMER
       return NextResponse.json(tier1Output, { headers: corsHeaders() })
+    }
+
+    // Branch 1.7 — A7 server-side R20a gate REDIRECT (D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13).
+    //
+    // A7 (inside runSandwichInner) detected moderate/acute distress and
+    // short-circuited Layer 2 + Layer 3. The substrate produced a redirect
+    // shape on `output` carrying the user-facing redirect_message.
+    //
+    // For /api/reason today this branch is mostly defence-in-depth: the
+    // route-level perimeter at line 544 handles MODERATE/ACUTE before
+    // runSandwich is called, so A7's REDIRECT branch should not fire in
+    // steady-state /api/reason traffic. If it does fire (line 544
+    // regressed, or A7 made an independent decision via fresh classifier
+    // call on a future code path), the redirect surfaces here.
+    //
+    // The response shape matches the line 547-549 route-level redirect
+    // shape so clients see consistent redirect behaviour regardless of
+    // which layer caught the distress signal.
+    if (sandwichResult.error === 'r20a_gate_redirect') {
+      const gateOutput = sandwichResult.output as Record<string, unknown>
+      return NextResponse.json(
+        {
+          distress_detected: true,
+          severity: gateOutput.severity,
+          redirect_message: gateOutput.redirect_message,
+        },
+        { status: 200, headers: corsHeaders() }
+      )
     }
 
     // Branch 1.5 — A3 signing failure (fail-closed per ADR-layer2-signing-infrastructure §"Critical Change Protocol responses").

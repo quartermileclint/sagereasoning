@@ -78,6 +78,28 @@ import {
   isSubstrateLayer3Enabled,
   type Layer3Response,
 } from '@/lib/substrate/layer3-service'
+// Stage 1 A7 (D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13): substrate
+// server-side R20a gate. Sits between Layer 1 and Layer 2 inside
+// runSandwichInner. Decides PASS / REDIRECT / BYPASSED based on the feature
+// flag SUBSTRATE_R20A_GATE_ENABLED (default OFF). When OFF, A7 returns
+// BYPASSED and the orchestrator falls through to existing logic unchanged.
+// When ON, A7 reuses the SafetyGate from the route-level perimeter check
+// (zero added latency) or runs a fresh classifier call.
+//
+// REDIRECT → orchestrator short-circuits Layer 2 + Layer 3; sets error=
+// 'r20a_gate_redirect'; the route translates to a user-facing redirect.
+// PASS + distress_signal=true (mild) → attached to Layer2Assessment AFTER
+// applyMechanisms; A5.4 reads the flag during Layer 3 prose generation
+// and injects R20A_DISTRESS_PASSTHROUGH.
+//
+// PR1 single-endpoint proof: /api/reason is the proof endpoint for A7.
+import {
+  enforceLayer2R20aGate,
+  attachDistressSignalToAssessment,
+  isSubstrateR20aGateEnabled,
+  type R20aGateOutput,
+} from '@/lib/substrate/r20a-gate'
+import type { SafetyGate } from '@/lib/constraints'
 import type { RetrievedPassage } from '@/lib/rag'
 
 // Lazy-create the Supabase service-role client INSIDE functions, never at module
@@ -204,6 +226,25 @@ export interface SandwichInput {
    * byte-identical to the pre-A2 state.
    */
   preExtractedLayer1Schema?: Layer1Schema
+  /**
+   * Added 2026-05-13 (D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13):
+   * SafetyGate token from the route-level R20a perimeter check
+   * (constraints.ts §enforceDistressCheck).
+   *
+   * When provided (the /api/reason path — the route at line 544 already
+   * ran detectDistressTwoStage on the input), A7 inside runSandwichInner
+   * REUSES this gate's result without making a new classifier call. Zero
+   * added latency.
+   *
+   * When undefined (future substrate consumers that don't have their own
+   * route-level perimeter), A7 runs a fresh classifier call inheriting
+   * the AC2 ~500ms regex → Haiku budget.
+   *
+   * The gate-passthrough is the operational basis for A7's "defence in
+   * depth" + "mild-severity gap closure" without doubling the safety-
+   * classifier cost on /api/reason traffic.
+   */
+  safetyGate?: SafetyGate
 }
 
 /**
@@ -236,6 +277,16 @@ type FailureCategory =
   // assessment when signing is enabled. The route translates this to a 503
   // user-facing response (substrate_signing_unavailable).
   | 'signing_throw'
+  // Added 2026-05-13 (D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13) — A7
+  // server-side R20a gate decided REDIRECT. The substrate short-circuited
+  // Layer 2 + Layer 3; the orchestrator's `output` field carries a redirect
+  // shape with the user-facing redirect_message. The route translates this
+  // to a 200 user-facing redirect response (matching the pattern at the
+  // route-level perimeter line 544-549). For /api/reason this branch is
+  // mostly defence-in-depth (line 544 already handles MODERATE/ACUTE before
+  // runSandwich is called); for future substrate consumers without their
+  // own perimeter, this is the primary REDIRECT surface.
+  | 'r20a_gate_redirect'
 
 interface SandwichRunResult {
   output: unknown // The composed { extraction, assessment, prose, ... } shape OR a Tier 1 force-clarification shape (per ADR-008 §2). null on failure.
@@ -258,6 +309,15 @@ interface SandwichRunResult {
   // flag is off (the default; byte-identical to pre-A5 behaviour). Surfaced on
   // the composed output as `substrate_layer3_response` for downstream consumers.
   substrate_layer3_response: Layer3Response | null
+  // Added 2026-05-13 (D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13) — A7
+  // server-side R20a gate output. Null when SUBSTRATE_R20A_GATE_ENABLED is
+  // unset (the default; byte-identical to pre-A7 behaviour). When the flag
+  // is on, carries the R20aGateOutput discriminated union (PASS / REDIRECT
+  // / BYPASSED). PASS + distress_signal=true is attached to Layer2Assessment
+  // via attachDistressSignalToAssessment so A5.4 reads it in Layer 3 prose
+  // generation. REDIRECT short-circuits Layer 2 + Layer 3 and sets
+  // result.error='r20a_gate_redirect'.
+  substrate_r20a_gate_output: R20aGateOutput | null
 }
 
 // ============================================================================
@@ -436,6 +496,7 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     layer3_cost_usd_microcents: null,
     tier1_trigger: null,
     substrate_layer3_response: null,
+    substrate_r20a_gate_output: null,
   }
 
   // ---- Layer 1 ----
@@ -478,6 +539,71 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
       return result
     }
     result.layer1_latency_ms = Date.now() - layer1Start
+  }
+
+  // ---- A7 substrate R20a gate (D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13) ----
+  // Per /adopted/substrate-plugin-staging-plan.md Stage 1 item A7.
+  // Per /website/src/lib/substrate/r20a-gate.ts.
+  //
+  // A7 sits AFTER Layer 1 extraction and BEFORE the Tier 1 ELEMENT_FUSION
+  // detection (founder Option (a) election at session-open 2026-05-13 —
+  // distress redirect takes precedence over clarification questions).
+  //
+  // SUBSTRATE_R20A_GATE_ENABLED gates the entire A7 path. When OFF (the
+  // default), the flag check short-circuits before any classifier work;
+  // behaviour is byte-identical to pre-A7. When ON:
+  //
+  //   - A7 reuses params.safetyGate when provided (the /api/reason route
+  //     passes its line-544 gate down; zero added latency).
+  //   - A7 makes a fresh classifier call otherwise (future substrate
+  //     consumers without their own perimeter; inherits AC2 ~500ms budget).
+  //   - REDIRECT (moderate/acute) → short-circuit Layer 2 + Layer 3; set
+  //     error='r20a_gate_redirect'; output carries the redirect shape; the
+  //     route translates to a user-facing redirect response.
+  //   - PASS + distress_signal=true (mild severity) → store for later
+  //     attachment AFTER applyMechanisms; A5.4 reads the flag at Layer 3.
+  //   - PASS + distress_signal=false → no special handling; continue.
+  //
+  // PR1 single-endpoint proof: /api/reason is the proof endpoint for A7.
+  // PR2 build-to-wire-immediate: invocation verified by Step 4 grep in
+  //   the same session.
+  // PR3 synchronous: enforceLayer2R20aGate is awaited; no fire-and-forget.
+  // PR6 safety-critical: A7 is the second-layer R20a defence; Critical
+  //   change classification per 0d-ii.
+  // AC2 latency: reused-gate path is zero added latency; fresh-call path
+  //   inherits the existing classifier's ~500ms budget.
+  // AC4 invocation testing: the grep on parallel-run.ts in the same session
+  //   confirms enforceLayer2R20aGate is called here.
+  // AC5 perimeter: A7 does NOT add a ninth perimeter route. A7 is a
+  //   substrate-internal function. The eight enumerated perimeter routes
+  //   are unchanged.
+  // AC7: not engaged. A7 doesn't touch auth, sessions, or redirects.
+  let a7GateOutput: R20aGateOutput | null = null
+  if (isSubstrateR20aGateEnabled()) {
+    a7GateOutput = await enforceLayer2R20aGate({
+      text: params.input,
+      gate: params.safetyGate,
+    })
+    result.substrate_r20a_gate_output = a7GateOutput
+
+    if (a7GateOutput.decision === 'REDIRECT') {
+      result.error = 'r20a_gate_redirect'
+      result.output = {
+        version: 'translation-sandwich-v1',
+        distress_detected: true,
+        severity: a7GateOutput.severity,
+        redirect_message: a7GateOutput.redirect_message,
+        meta: {
+          engine_attribution: 'translation-sandwich',
+          r20a_gate_redirect: true,
+          r20a_gate_source: a7GateOutput.source,
+        },
+      }
+      // layer2_latency_ms, layer3_latency_ms remain null (Layer 2 + 3 not called).
+      return result
+    }
+    // PASS or BYPASSED → continue. PASS+distress_signal=true is attached
+    // after applyMechanisms below.
   }
 
   // ---- Tier 1 ELEMENT_FUSION detection (added 2026-05-06, M1-CP4e) ----
@@ -534,7 +660,28 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
   }
 
   // No Tier 1 fired — Layer 2 produced a full assessment. Type-narrowed.
-  const layer2Assessment: Layer2Assessment = layer2Result
+  // Mutable so A7's distress_signal attachment can rebind it below.
+  let layer2Assessment: Layer2Assessment = layer2Result
+
+  // ---- A7 distress_signal attachment (PASS + mild severity case) ----
+  // Per D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13 + r20a-gate.ts §A7.3.
+  //
+  // A7 ran above (between Layer 1 and Tier 1 ELEMENT_FUSION). If A7 returned
+  // PASS with a sub-threshold (mild-severity) distress signal, attach the
+  // flag to the Layer2Assessment so A5.4 (in Layer 3 prose generation)
+  // reads it and injects R20A_DISTRESS_PASSTHROUGH into the prose output.
+  //
+  // attachDistressSignalToAssessment is a no-op when:
+  //   - a7GateOutput is null (flag was off; BYPASSED)
+  //   - a7GateOutput.decision === 'BYPASSED' or 'REDIRECT' (latter is
+  //     unreachable here because REDIRECT short-circuits above)
+  //   - a7GateOutput.distress_signal === false (no signal)
+  //
+  // AC4 invocation testing: the grep on parallel-run.ts confirms
+  // attachDistressSignalToAssessment is called here.
+  if (a7GateOutput !== null) {
+    layer2Assessment = attachDistressSignalToAssessment(layer2Assessment, a7GateOutput)
+  }
 
   // ---- Layer 3 (with deterministic fallback) ----
   let layer3Prose: Layer3Prose
@@ -792,6 +939,7 @@ export async function runParallelSandwich(params: ParallelRunInput): Promise<voi
         layer3_cost_usd_microcents: null,
         tier1_trigger: null,
         substrate_layer3_response: null,
+        substrate_r20a_gate_output: null,
       }
     } else {
       // 2. Fire the sandwich. Runs concurrently with bundled-depth (which the

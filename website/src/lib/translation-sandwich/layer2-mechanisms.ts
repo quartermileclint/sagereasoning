@@ -362,6 +362,28 @@ export interface Layer2Assessment {
   intake_clarifications: IntakeClarifications
   layer1_ambiguity_notes: string[]
   layer2_ambiguity_notes: string[]
+  /**
+   * Added 2026-05-13 (D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13) — A7
+   * server-side R20a gate's sub-threshold distress signal. When A7 detects
+   * MILD severity distress (route-level perimeter at /api/reason/route.ts
+   * line 544 does NOT redirect for mild — only for moderate/acute), A7
+   * attaches this flag to the assessment via attachDistressSignalToAssessment.
+   * A5.4 reads this field during Layer 3 prose generation and injects
+   * R20A_DISTRESS_PASSTHROUGH into the prose output.
+   *
+   * Optional + defensive default false: when A7 is bypassed (flag UNSET in
+   * Vercel — the default at session close) or finds no signal, the field is
+   * absent. A5.4's defensive read via type assertion handles this.
+   *
+   * Type narrows safely: A5's existing defensive read of
+   * `(assessment as { distress_signal?: boolean }).distress_signal` continues
+   * to work; the type assertion is now redundant but harmless.
+   *
+   * See: /website/src/lib/substrate/r20a-gate.ts §A7.3
+   * See: /website/src/lib/substrate/layer3-service.ts §A5.4
+   * See: /manifest.md §R20a
+   */
+  distress_signal?: boolean
 }
 
 // ============================================================================
