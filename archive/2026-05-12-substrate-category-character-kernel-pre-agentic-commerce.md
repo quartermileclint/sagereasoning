@@ -1,6 +1,6 @@
 # ADR — Substrate Category: Character Kernel
 
-**Status:** Adopted 2026-05-12 under `D-MANIFEST-AMENDED-FROM-ST2-2026-05-12`. **Amended 2026-05-13 under `D-AGENTIC-COMMERCE-UPSTREAM-REWORK-2026-05-13`** (peer-category landscape extension; new "Agentic-commerce-stack adjacency" sub-section). Parent triage entry: `D-STRESS-TEST-STAGING-PLAN-AMENDMENTS-2026-05-12` (ST2 Phase 3 Step 1 Candidate 14 ALLOW).
+**Status:** Adopted 2026-05-12 under `D-MANIFEST-AMENDED-FROM-ST2-2026-05-12`. Parent triage entry: `D-STRESS-TEST-STAGING-PLAN-AMENDMENTS-2026-05-12` (ST2 Phase 3 Step 1 Candidate 14 ALLOW).
 **Decision ID:** J1 ADR (Substrate Category).
 **Scope:** SageReasoning's substrate-category label for marketplace listings, public-facing documentation, R18 honest-certification language, and external positioning.
 **Authoritative cross-references:** `/manifest.md` §R18a (Certification scope language + Character Kernel); `/adopted/substrate-plugin-staging-plan.md` §Stage 4 G3 (marketplace listing copy); `/operations/handoffs/founder/2026-05-12-build-plan-stress-test-ST2-close.md` (substrate-as-judge dogfood walkthrough record).
@@ -39,44 +39,8 @@ Peer-category landscape (as of ST2):
 - **Runtime Governance Kernels** (VIGIL) — adjacent; governance-flavoured
 - **Guardrail-only validators** (Guardrails AI; Patronus AI; Lakera) — a distinct category; not character-preserving
 - **Memory-only continuity layers** (MemGPT; Letta) — adjacent on continuity; not judgement-grounded
-- **Agentic-commerce-stack protocols** (ACP, UCP, AP2, MPP, AgentCore Payments) — a distinct adjacency cluster. These protocols own commerce-flow layers (discovery, authorization, payment credential, settlement, merchant relationship, governance), not character continuity. Character Kernel sits upstream of all of them as the judgment primitive that informs an agent's commerce action. See §"Agentic-commerce-stack adjacency" below.
 
 The Character Kernel label sits inside the emerging "normative cognitive middleware" cluster and is distinguished by: (a) preserving the agent's identity (continuity of judgement), (b) being a judgement primitive (not a guardrail or a memory layer), and (c) being grounded in a normative tradition (Stoicism, in SageReasoning's case).
-
-### Agentic-commerce-stack adjacency
-
-The May 2026 agentic-commerce inbox synthesis (see `/operations/handoffs/founder/2026-05-12-agentic-commerce-inbox-synthesis-close.md`) identified a six-layer responsibility framework that the agentic-commerce protocols collectively address:
-
-1. **Discovery** — ranking, recommendation, comparison, substitution; the surface where intent forms
-2. **Authorization** — the evidence layer recording what the buyer (or buyer's organisation) approved the agent to do
-3. **Payment credential** — the card, token, wallet, or stablecoin address the agent uses to pay
-4. **Settlement** — how money moves; rail, timing, currency, reconciliation
-5. **Merchant relationship** — order management, fulfillment, returns, refunds, support, disputes
-6. **Governance** — spending policies, vendor lists, budget limits, audit trails, revocation authority
-
-The agentic-commerce protocols map onto these layers:
-
-- **ACP** (Agentic Commerce Protocol; OpenAI + Stripe) — agent-to-merchant checkout; primarily authorization + payment credential
-- **UCP** (Universal Commerce Protocol) — merchant-system interoperability; primarily merchant relationship + settlement
-- **AP2** (Agent Payments Protocol; Google) — delegated authorization records ("mandates") with scope + constraints + proof of approval; primarily authorization + governance
-- **MPP / x402** (Machine Payments Protocol) — machine-to-machine payment rails; primarily settlement + payment credential
-- **AWS AgentCore Payments** — enterprise governance of agent spending; primarily governance + authorization
-
-**Character Kernel's position relative to the stack: upstream of commerce.** The judgment primitive that informs commerce action but is not itself in the commerce stack. Specifically:
-
-- **Touches authorization (indirectly).** Character Kernel produces judgment output (assessments + assents) that *informs* what authorization an agent should seek and accept. The Layer 3 substrate response shape (`/website/src/lib/substrate/layer3-service.ts`; A5 Verified 2026-05-12) is structurally a mandate-input — it carries provenance (AC10), use-policies (AC10), and the four-outcome envelope (AC9 `ALLOW` / `BLOCK` / `REVISE` / `ESCALATE`) that maps cleanly onto agentic-commerce authorization vocabulary (authorize / decline / scope-narrow / escalate).
-- **Touches governance (via R0 + R18).** R0 oikeiosis (concentric area-of-concern reasoning) and R18 honest certification language are governance contributions — they describe how the agent reasons about who is affected by its actions and what the agent honestly says about its own scope.
-- **Does not touch directly.** Payment credential, settlement, merchant relationship. Character Kernel is not in the payment path; it does not hold credentials, move money, or own merchant relationships.
-
-This positioning is **interoperable, not competitive**. An agent using ACP for checkout + AP2 for delegated authorization + AgentCore Payments for enterprise governance can also consume Character Kernel for upstream judgment without architectural overlap. Character Kernel makes the agent's authorization request more principled; the agentic-commerce protocols make the authorization actionable.
-
-**External validation of internal architectural decisions** (per the 2026-05-12 inbox synthesis):
-
-- AC9 four-outcome envelope maps cleanly onto agentic-commerce authorization vocabulary
-- AC10 provenance + use-policy tags are structurally identical to AP2 mandate concept (scope + constraints + proof of approval, travelling with the assessment)
-- AC11 OpenTelemetry GenAI semantic conventions is the same telemetry transport AWS AgentCore Payments uses
-
-ST2 reached these designs via OpenBrain Judge Extender vocabulary; the agentic-commerce stack is converging on the same shape independently.
 
 ## Alternatives considered (and reasoning for rejection)
 
@@ -140,11 +104,6 @@ Each revisit produces a new ADR superseding this one. The original is preserved.
 - `/operations/decision-log.md` — `D-STRESS-TEST-STAGING-PLAN-AMENDMENTS-2026-05-12` (parent triage entry); `D-MANIFEST-AMENDED-FROM-ST2-2026-05-12` (adoption entry for this ADR)
 - `/inbox/peers we have.txt` (research file informing peer-category landscape)
 - `/inbox/sage-intuit.txt` (research file on action-space-generation, relevant to substrate-as-judgement-primitive positioning)
-- `/operations/handoffs/founder/2026-05-12-agentic-commerce-inbox-synthesis-close.md` (inbox synthesis identifying the agentic-commerce-stack adjacency)
-- `/operations/agentic-commerce-findings-downstream-order.md` (forward-looking findings tracker created alongside this amendment)
-- `/inbox/20260508-104-promptkit-1.md` (responsibility-layer audit + agent-spending-authorization prompt kit — primary source for the six-layer responsibility framework)
-- `/inbox/acp.rtf` (ACP architecture reference)
-- `/operations/decision-log.md` — `D-AGENTIC-COMMERCE-UPSTREAM-REWORK-2026-05-13` (amendment entry for this ADR; peer-category landscape extension)
 
 ---
 

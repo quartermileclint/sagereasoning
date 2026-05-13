@@ -59,7 +59,7 @@ The Stoic Agent Substrate has three layers. Layer 1 (text → structured feature
 - Per-token metadata: `identity_type` (human | agent), `install_id`, `scope` (assessment-only | mentor-also | admin)
 - Revocation list checked at every authenticated call (Redis-backed or Supabase row read)
 - Admin-only revocation API + revocation runbook mirroring rotation runbook
-- Token format ADR drafted before implementation. Candidate formats: JWT (HMAC or asymmetric); W3C Verifiable Credentials; hybrid.
+- Token format ADR drafted before implementation. Candidate formats: JWT (HMAC or asymmetric); W3C Verifiable Credentials; AP2-style mandate (Google's spec for agent authorization records — scope + constraints + proof of approval; per the 2026-05-12 agentic-commerce inbox synthesis close); hybrid.
 
 **Pre-conditions:** Token format ADR adopted (open question; revisit at A10 kickoff).
 **Stage 1 sequencing:** Lands AFTER A5 (Layer 3 service) wires up; BEFORE Stage 2 K-category migration broadens substrate exposure to multiple consumers.

@@ -4544,3 +4544,67 @@ If any check fails, A5 has regressed; engage Path A rollback (unset `SUBSTRATE_L
 **Status:** Adopted. Cross-references: predecessor `D-A4-KEY-MANAGEMENT-WIRED-VERIFIED-2026-05-10` (last substrate-build entry; A5 continues the A1→A2→A3→A4→A5 critical chain); ST2 adoption umbrella entries `D-STAGING-PLAN-AMENDED-FROM-ST2-2026-05-12` (A5 status pre-ST2 = Scoped, post-A5 = Verified), `D-MANIFEST-AMENDED-FROM-ST2-2026-05-12` (AC9 + AC10 + AC11 forward-looking constraints scaffolded by A5), `D-PROJECT-INSTRUCTIONS-AMENDED-FROM-ST2-2026-05-12` (PR10 PEV loop + PR11-PR15 + PR16 applied in this session); staging plan `/adopted/substrate-plugin-staging-plan.md` Stage 1 A5 (success criteria SATISFIED on `/api/reason`); J1 ADR `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` (R18a Character Kernel category language sourced); Layer 3 prose template ADR `/adopted/adr/2026-05-04-layer3-prose-template-api-reason.md` (the per-consumer api_reason template A5 wraps); new files `/website/src/lib/substrate/layer3-service.ts` + `/website/src/app/api/substrate/layer3/route.ts` + `/website/src/lib/substrate/__tests__/layer3-service.test.ts`; modified file `/website/src/lib/translation-sandwich/parallel-run.ts`; standing protocol cache `/adopted/standing-protocol-cache.md`; build-arc cache `/adopted/build-sessions-protocol-cache.md`; predecessor close `/operations/handoffs/founder/2026-05-12-adoption-session-close.md`; this session's close `/operations/handoffs/founder/2026-05-12-A5-layer3-service-close.md`.
 
 ---
+
+## 2026-05-13 — D-AGENTIC-COMMERCE-UPSTREAM-REWORK-2026-05-13
+
+**Decision:** Apply three governance changes operationalising the 2026-05-12 agentic-commerce inbox synthesis findings: (1) amend J1 ADR `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` per founder-elected Option (b) Standard scope — extend peer-category landscape with ACP / UCP / AP2 / MPP / AgentCore Payments bullet, add new "Agentic-commerce-stack adjacency" sub-section to §Context with six-layer responsibility framework + protocol-to-layer mapping + Character Kernel position-relative-to-stack statement; (2) add AP2-style mandate as fourth token-format candidate to A10 candidates line in `/adopted/substrate-plugin-staging-plan.md` §A10 (single surgical line edit); (3) create new operations artefact `/operations/agentic-commerce-findings-downstream-order.md` recording four forward-looking findings (F1 FPE-5 liability scope; F2 Stage 4 G3 positioning; F3 A5 retrospective mandate-producer framing; F4 AC10 / AP2 alignment at A12) with target session + trigger + action + cross-reference each, plus recommended order of next ~18 downstream substrate-build sessions. Pre-amendment J1 ADR preserved verbatim at `/archive/2026-05-12-substrate-category-character-kernel-pre-agentic-commerce.md`.
+
+**Reasoning:** The 2026-05-12 inbox synthesis close (per PR11 authoritative-current-sources rule + PR13 consider-implications) identified two gaps in upstream governance documents (J1 ADR peer-category landscape missing agentic-commerce stack; A10 token-format candidates missing AP2-style mandate) and four forward-looking findings whose ride-along into natural downstream sessions risked being lost in the inbox-close bedrock. This session executes the two amendments and creates the forward-looking-findings tracker to prevent downstream re-discovery cost. The amendments are additive — J1's existing decision (Character Kernel category adopted) is not reversed; A10's token-format question remains open with one additional candidate.
+
+**Files touched:**
+- `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` — amended in place; +41 lines (Option (b) Standard scope); Status line updated to record amendment; new §"Agentic-commerce-stack adjacency" sub-section added to §Context; Cross-references extended with five new entries.
+- `/archive/2026-05-12-substrate-category-character-kernel-pre-agentic-commerce.md` — NEW; verbatim copy of J1 ADR pre-amendment state (110 lines; preserve-prior-versions discipline per project instructions §0e).
+- `/adopted/substrate-plugin-staging-plan.md` — surgical addition to line 62 (A10 candidates list); AP2-style mandate added as fourth candidate format with gloss + cross-reference to inbox synthesis close. Line 602 parallel summary intentionally untouched (single-surgical-addition scope).
+- `/operations/agentic-commerce-findings-downstream-order.md` — NEW (99 lines); four findings F1-F4 + recommended order of next ~18 sessions + how-to-use guidance for future PR11 inbox-scans.
+- `/operations/decision-log.md` — this entry appended.
+- `/operations/handoffs/founder/2026-05-13-agentic-commerce-upstream-rework-close.md` — lean-form session close (created concurrently with this entry).
+
+**Risk classification:** Elevated for J1 ADR amendment under 0d-ii (amending an Adopted strategic document; preserve-prior-versions discipline engaged + satisfied). Standard for A10 line edit + recommended-order document creation. Critical Change Protocol (0c-ii) NOT engaged — no code; no auth; no env-vars; no deployment surface. AC7 NOT engaged. PR6 NOT engaged.
+
+**Rollback path:** `git revert <session-commit>` restores J1 ADR + staging plan to pre-session state and removes both the new operations artefact and the new decision-log entry. Pre-amendment J1 ADR is independently preserved at `/archive/2026-05-12-substrate-category-character-kernel-pre-agentic-commerce.md` and survives `git revert` of this session's commit (the archive copy is itself part of this session's commit; rollback removes the archive file but the archive file is itself a verbatim copy of the file rollback restores, so the pre-amendment state is recoverable either way).
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+
+# 1. J1 ADR amendment present (>= 4 protocol names per prompt; observed 9)
+grep -c "ACP\|UCP\|AP2\|AgentCore" adopted/adr/2026-05-12-substrate-category-character-kernel.md
+# Expected: >= 4
+
+# 2. J1 ADR Amended status line present
+grep "Amended 2026-05-13" adopted/adr/2026-05-12-substrate-category-character-kernel.md
+# Expected: one match
+
+# 3. New adjacency sub-section header present
+grep "### Agentic-commerce-stack adjacency" adopted/adr/2026-05-12-substrate-category-character-kernel.md
+# Expected: one match
+
+# 4. A10 staging-plan AP2 mandate candidate present
+grep "AP2-style mandate" adopted/substrate-plugin-staging-plan.md
+# Expected: one match (line 62)
+
+# 5. Recommended-order file exists with F1-F4 headers
+ls operations/agentic-commerce-findings-downstream-order.md && grep -c "^### F[1-4]" operations/agentic-commerce-findings-downstream-order.md
+# Expected: file exists; F-header count = 4
+
+# 6. Archive copy of pre-amendment J1 exists
+ls archive/2026-05-12-substrate-category-character-kernel-pre-agentic-commerce.md
+# Expected: file exists (110 lines)
+
+# 7. Production state unchanged
+curl -sS https://www.sagereasoning.com/api/public-key | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+ok = d.get('previous') is None and d.get('rotation_overlap_until') is None and d.get('algorithm') == 'Ed25519'
+print('PASS' if ok else 'FAIL')
+"
+# Expected: PASS
+```
+
+**Open questions:** None new this session. Forward-looking findings F1-F4 are recorded in `/operations/agentic-commerce-findings-downstream-order.md` with named target sessions; they are deferred decisions per PR7 (target session, trigger, action all named).
+
+**Rules served:** R18a (Character Kernel positioning strengthened via peer-category landscape extension + adjacency sub-section), 0a (status taxonomy — no implementation status change this session; decision taxonomy Adopted applied), 0c (verification framework — founder-performable commands provided), 0d-ii (Elevated for J1 amendment; Standard for A10 + recommended-order; risk classification recorded), 0e (file organisation — preserve-prior-versions for J1; archive copy created before edit; recommended-order artefact under `/operations/`), 0f (this entry), PR7 (deferred decisions documented — F1-F4 with revisit conditions), PR11 (authoritative-current-sources rule — operationalises findings from predecessor session's inbox scan + URL fetches), PR13 (consider-implications five-question assessment — applied at session-open; five questions re-stated and implications addressed by the three amendments), PR16 (positioning + dogfood lens — J1 amendment explicitly strengthens Character Kernel positioning; recommended-order artefact mirrors AP2-style mandate-output shape as substrate-of-our-own-work dogfood discipline). KG1-KG7 — N/A this session (no code; no DB writes; no JSONB; no LLM calls). PR1-PR6, PR8-PR10, PR12, PR14, PR15 — not engaged this session.
+
+**Status:** Adopted. Cross-references: predecessor inbox synthesis close `/operations/handoffs/founder/2026-05-12-agentic-commerce-inbox-synthesis-close.md` (provenance for findings); predecessor substrate-build entry `D-A5-LAYER3-SCAFFOLDED-VERIFIED-2026-05-12` (A5 Verified — F3 references); ST2 umbrella entries `D-STAGING-PLAN-AMENDED-FROM-ST2-2026-05-12` (A10 staging context — extended by this entry) + `D-MANIFEST-AMENDED-FROM-ST2-2026-05-12` (AC9/AC10/AC11 external-validation findings recorded in J1 adjacency sub-section) + `D-PROJECT-INSTRUCTIONS-AMENDED-FROM-ST2-2026-05-12` (PR11 + PR13 + PR16 applied in this session); amended files `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` + `/adopted/substrate-plugin-staging-plan.md`; new files `/archive/2026-05-12-substrate-category-character-kernel-pre-agentic-commerce.md` + `/operations/agentic-commerce-findings-downstream-order.md`; session close `/operations/handoffs/founder/2026-05-13-agentic-commerce-upstream-rework-close.md`. Next session: A7 R20a gate scaffolding per `/operations/handoffs/founder/2026-05-12-A7-r20a-gate-NEXT-SESSION-PROMPT.md` (founder may alternatively elect A10 first to consume the new AP2 mandate candidate; recommendation: A7 for critical-chain continuity, founder elects).
+
+---
