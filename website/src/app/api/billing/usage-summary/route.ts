@@ -89,10 +89,43 @@ export async function GET(request: NextRequest) {
     0
   ) || 0
 
-  // ── Estimate LLM costs ────────────────────────────────────────────────
-  // Rough estimate: average $0.005 per API call (mix of haiku and sonnet)
-  // This should be refined with actual Anthropic billing data
-  const estimatedLlmCostCents = Math.round(totalApiCalls * 0.5)
+  // ── Compute LLM costs from substrate path (A9 Option B, 2026-05-14) ───
+  // Post-M1-CP6 the translation-sandwich is the sole engine on /api/reason.
+  // Each successful request writes layer1_cost_usd_microcents +
+  // layer3_cost_usd_microcents to translation_sandwich_comparisons. Sum
+  // those for the period instead of the prior heuristic of
+  // totalApiCalls * $0.005 (see J6 assessment 2026-05-14 for cost-shape
+  // analysis). Defensive: if the query fails or the table is empty, fall
+  // back to the heuristic so the endpoint still returns rather than 500.
+  let llmCostMicrocents = 0
+  let substrateCostQueryOk = false
+  try {
+    const { data: costRows, error: costErr } = await supabaseAdmin
+      .from('translation_sandwich_comparisons')
+      .select('layer1_cost_usd_microcents, layer3_cost_usd_microcents')
+      .gte('created_at', `${periodStart}T00:00:00Z`)
+      .lte('created_at', `${periodEnd}T23:59:59Z`)
+
+    if (!costErr && costRows) {
+      llmCostMicrocents = costRows.reduce(
+        (sum: number, row: { layer1_cost_usd_microcents: number | null; layer3_cost_usd_microcents: number | null }) =>
+          sum + (row.layer1_cost_usd_microcents || 0) + (row.layer3_cost_usd_microcents || 0),
+        0
+      )
+      substrateCostQueryOk = true
+    }
+  } catch (err) {
+    console.warn('[usage-summary] substrate cost query failed; falling back to heuristic:', err)
+  }
+
+  // Convert microcents (1e-6 USD) → cents (1e-2 USD): divide by 1e4.
+  const substrateLlmCostCents = Math.round(llmCostMicrocents / 10000)
+  // Fallback heuristic (preserves prior behaviour if the substrate query failed
+  // or returned no rows — e.g., very first request of the month).
+  const fallbackLlmCostCents = Math.round(totalApiCalls * 0.5)
+  const estimatedLlmCostCents = substrateCostQueryOk && substrateLlmCostCents > 0
+    ? substrateLlmCostCents
+    : fallbackLlmCostCents
 
   // ── Compute ratio ─────────────────────────────────────────────────────
   const ratio = estimatedLlmCostCents > 0
@@ -114,6 +147,70 @@ export async function GET(request: NextRequest) {
     alerts.push(
       `R5 ALERT: Sage Ops costs ($${(sageOpsCostCents / 100).toFixed(2)}) exceed the $100/month cap.`
     )
+  }
+
+  // ── Rolling 7-day daily-spend alert (A9 Option B, 2026-05-14) ─────────
+  // R5 manifest rule: "Cost-as-health-metric alerts trigger at 2x the
+  // rolling 7-day average daily spend." Sources cost from the substrate
+  // path (translation_sandwich_comparisons). Cold-start guard: require
+  // at least 3 days of observed data before firing (per J6 assessment
+  // §5 — insufficient signal otherwise).
+  //
+  // The window is the 7 calendar UTC days preceding today. Today's spend
+  // is compared to the average of the prior 7 (excluding today). If today
+  // exceeds 2.0x that average, the alert fires.
+  let rollingWindow: { todayCents: number; avgCents: number; daysObserved: number } | null = null
+  try {
+    const today = new Date(now)
+    today.setUTCHours(0, 0, 0, 0)
+    const sevenDaysAgo = new Date(today)
+    sevenDaysAgo.setUTCDate(today.getUTCDate() - 7)
+
+    const { data: windowRows, error: windowErr } = await supabaseAdmin
+      .from('translation_sandwich_comparisons')
+      .select('created_at, layer1_cost_usd_microcents, layer3_cost_usd_microcents')
+      .gte('created_at', sevenDaysAgo.toISOString())
+      .lte('created_at', new Date().toISOString())
+
+    if (!windowErr && windowRows && windowRows.length > 0) {
+      // Bucket by UTC date.
+      const dailyCents: Record<string, number> = {}
+      for (const row of windowRows as Array<{
+        created_at: string
+        layer1_cost_usd_microcents: number | null
+        layer3_cost_usd_microcents: number | null
+      }>) {
+        const dayKey = row.created_at.slice(0, 10) // YYYY-MM-DD
+        const rowMicrocents =
+          (row.layer1_cost_usd_microcents || 0) + (row.layer3_cost_usd_microcents || 0)
+        dailyCents[dayKey] = (dailyCents[dayKey] || 0) + rowMicrocents / 10000
+      }
+
+      const todayKey = today.toISOString().slice(0, 10)
+      const todayCents = Math.round(dailyCents[todayKey] || 0)
+
+      // Prior-7-day average excludes today.
+      const priorDays = Object.entries(dailyCents).filter(([k]) => k !== todayKey)
+      const daysObserved = priorDays.length
+      const priorSum = priorDays.reduce((sum, [, v]) => sum + v, 0)
+      const avgCents = daysObserved > 0 ? Math.round(priorSum / daysObserved) : 0
+
+      rollingWindow = { todayCents, avgCents, daysObserved }
+
+      // Cold-start guard: require 3+ days of prior data before firing.
+      if (daysObserved >= 3 && avgCents > 0) {
+        const multiplier = todayCents / avgCents
+        if (multiplier >= COST_HEALTH.ROLLING_AVERAGE_ALERT_MULTIPLIER) {
+          alerts.push(
+            `R5 ALERT: Today's substrate spend ($${(todayCents / 100).toFixed(2)}) is ` +
+            `${multiplier.toFixed(2)}x the rolling 7-day average ($${(avgCents / 100).toFixed(2)}) — ` +
+            `at or above the ${COST_HEALTH.ROLLING_AVERAGE_ALERT_MULTIPLIER.toFixed(1)}x threshold.`
+          )
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[usage-summary] rolling-7-day window query failed:', err)
   }
 
   // ── R20a classifier cost monitoring (ADR-R20a-01 D7-b) ───────────────
@@ -160,8 +257,24 @@ export async function GET(request: NextRequest) {
       total_api_calls: totalApiCalls,
       total_revenue_usd: totalRevenueCents / 100,
       estimated_llm_cost_usd: estimatedLlmCostCents / 100,
+      // A9 Option B (2026-05-14): cost source is now substrate-derived when
+      // available; falls back to the prior heuristic only if the substrate
+      // query failed or returned zero rows.
+      cost_source: substrateCostQueryOk && substrateLlmCostCents > 0 ? 'substrate' : 'heuristic_fallback',
       revenue_to_cost_ratio: ratio,
       sage_ops_cost_usd: sageOpsCostCents / 100,
+      // Rolling 7-day daily-spend window (A9 Option B, 2026-05-14).
+      // Null when the window query failed or returned no rows.
+      rolling_seven_day: rollingWindow
+        ? {
+            today_usd: rollingWindow.todayCents / 100,
+            prior_seven_day_avg_usd: rollingWindow.avgCents / 100,
+            prior_days_observed: rollingWindow.daysObserved,
+            multiplier_today_over_avg: rollingWindow.avgCents > 0
+              ? rollingWindow.todayCents / rollingWindow.avgCents
+              : null,
+          }
+        : null,
       // R20a classifier cost metrics (scaffolded — returns zeros until Phase D ships)
       r20a_classifier: {
         total_invocations: classifierSummary.total_invocations,
@@ -178,6 +291,7 @@ export async function GET(request: NextRequest) {
       min_revenue_to_cost_ratio: COST_HEALTH.MIN_REVENUE_TO_COST_RATIO,
       sage_ops_monthly_cap_usd: COST_HEALTH.SAGE_OPS_MONTHLY_CAP_CENTS / 100,
       r20a_classifier_max_mentor_ratio: COST_HEALTH.R20A_CLASSIFIER_MAX_MENTOR_RATIO,
+      rolling_seven_day_alert_multiplier: COST_HEALTH.ROLLING_AVERAGE_ALERT_MULTIPLIER,
     },
     alerts,
     health: alerts.length === 0 ? 'healthy' : 'warning',
