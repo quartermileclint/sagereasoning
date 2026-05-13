@@ -1,0 +1,258 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2869
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Roman;\f1\froman\fcharset0 Times-Bold;\f2\fnil\fcharset0 HelveticaNeue;
+\f3\fnil\fcharset0 .SFNS-Regular_wdth_opsz1EE000_GRAD_wght3840000;\f4\fnil\fcharset0 HelveticaNeue-Bold;\f5\froman\fcharset0 Times-Italic;
+}
+{\colortbl;\red255\green255\blue255;\red224\green225\blue230;\red13\green18\blue32;}
+{\*\expandedcolortbl;;\cssrgb\c90196\c90588\c92157;\cssrgb\c5882\c9020\c16863;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat0\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 For most of the internet\'92s history, a purchase has been a human action that everyone in the chain could see. A person clicked a button on a merchant\'92s site. A payment credential moved through a processor. A network or wallet weighed the risk. The merchant took responsibility for the order. The records were imperfect, but everyone agreed on the shape of the evidence: a human was present, a page was shown, a credential was used, a final action was taken.\
+Agentic commerce breaks that structure.\
+Software is starting to hold wallets, sign authorizations, and pay merchants directly. Some of those agents are spending your money. Some are spending your company\'92s. Some are spending your customers\'92. When one of them sends money to the wrong place \'97 and one of them will \'97 someone is going to be left holding the bag. Protocol camps are fighting over who that someone is.\
+The question stops being \'93can the customer pay?\'94 and becomes \'93how does everyone know the agent was allowed to do what it just did?\'94 That question reaches well past checkout. It touches identity, authorization, fraud, payment credentials, settlement, refunds, liability, data rights, and the merchant\'92s relationship with the customer. The old purchase bundle comes apart, and the market isn\'92t converging on a single replacement. It\'92s splitting into protocol camps, each owning a different piece of what used to live behind one click.\
+That\'92s the split. A fight over where commercial trust lives, not over a single button. And it will shape who keeps the customer, who carries the loss, and who gets to write the rules of online buying for the next decade.\
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f1\b \cf2 Here\'92s what\'92s inside:
+\f0\b0 \
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0
+\f1\b \cf2 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 The first round of the fight is already over.
+\f0\b0 \'a0OpenAI and Stripe shipped Instant Checkout in September. Five months later it was scaled back, while Shopify and Google\'92s counter-protocol gained ground.\cb1 \
+\ls1\ilvl0
+\f1\b \cb3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Authorization is not payment.
+\f0\b0 \'a0The evidence layer agentic commerce needs, why it has to outlive the transaction, and the two routes Google and Stripe are taking to build it.\cb1 \
+\ls1\ilvl0
+\f1\b \cb3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 The stablecoin case that holds up.
+\f0\b0 \'a0Software paying software is a different business problem than a person buying shoes, and the rails should be different too.\cb1 \
+\ls1\ilvl0
+\f1\b \cb3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Where this lands and who owns which layer.
+\f0\b0 \'a0Why AWS quietly matters most, and what every kind of builder, merchant, and operator should do now.\cb1 \
+\ls1\ilvl0
+\f1\b \cb3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Two prompts to expose your own gaps.
+\f0\b0 \'a0A responsibility-layer audit that forces you to name who owns each piece of an agentic purchase in your product, and an authorization spec that finance and legal will actually accept.\cb1 \
+\pard\pardeftab720\sa400\partightenfactor0
+\cf2 \cb3 The split started a year ago. Start with Instant Checkout: how OpenAI and Stripe launched it, and why OpenAI walked it back.\
+\pard\pardeftab720\sa400\qc\partightenfactor0
+
+\f2\fs36 \cf2 Subscribers get all posts like these!\cb1 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\fs38 \cf2 \
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f3\b\fs61\fsmilli30875 \cf2 \cb3 LINK: Grab the\'a0{\field{\*\fldinst{HYPERLINK "https://promptkit.natebjones.com/20260508_104_promptkit_1"}}{\fldrslt \ul prompts}}
+\f4 \cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 The old checkout page collapsed six commercial responsibilities into one human click. The prompts in this kit do the opposite \'97 they pull those responsibilities apart and force you to put a name next to each one. The first prompt is a responsibility-layer audit. You describe what your agent does, who\'92s buying, who\'92s selling, and the prompt produces a populated table showing who owns each of the six layers: discovery, authorization, payment credential, settlement, merchant relationship, governance. The rows labeled \'93nobody owns this yet\'94 are the ones to read first. Those are the failure modes you haven\'92t priced in. The second prompt is the authorization spec finance, legal, and security will demand the moment your agent goes near real money \'97 scope, limits, evidence layer, failure handling, escalation thresholds. You will eventually be asked for this document. Better to draft it before you\'92re asked. If you can\'92t answer the questions either prompt asks, the prompt tells you so \'97 and that answer is the artifact you actually needed.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f4\b\fs61\fsmilli30875 \cf2 The checkout button was the wrong center\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 The most visible version of this shift arrived September 29, 2025, when OpenAI and Stripe co-launched the\'a0{\field{\*\fldinst{HYPERLINK "https://github.com/agentic-commerce-protocol/agentic-commerce-protocol"}}{\fldrslt \ul Agentic Commerce Protocol}}, or ACP, alongside\'a0{\field{\*\fldinst{HYPERLINK "https://openai.com/index/buy-it-in-chatgpt/"}}{\fldrslt \ul Instant Checkout in ChatGPT}}. The product was easy to grasp: ask ChatGPT about something, and for supported merchants, buy without leaving the conversation. Stripe handled payment. OpenAI ran the agent surface. The merchant stayed merchant of record \'97 still on the hook for fulfillment, returns, and support.\
+Five months later, OpenAI\'a0{\field{\*\fldinst{HYPERLINK "https://www.cnbc.com/2026/03/24/openai-revamps-shopping-experience-in-chatgpt-after-instant-checkout.html"}}{\fldrslt \ul scaled it back}}. Etsy reported low volume. Walmart\'92s head of AI told\'a0
+\f5\i Wired
+\f0\i0 \'a0that conversion inside the chatbot ran three times lower than the same items requiring a click-out. The infrastructure problem turned out to be harder than the demo suggested \'97 real-time inventory sync across millions of SKUs, sales tax collection, fraud prevention, multi-item carts. OpenAI\'92s revised position is that ChatGPT should focus on discovery and let merchants own checkout in their own apps and sites.\
+The more interesting fact is what didn\'92t retire: ACP itself kept going. The spec is on its fifth revision, still co-maintained by OpenAI and Stripe,\'a0{\field{\*\fldinst{HYPERLINK "https://newsroom.paypal-corp.com/2025-10-28-PayPal-Launches-Agentic-Commerce-Services-to-Power-AI-Driven-Shopping"}}{\fldrslt \ul PayPal joined as a payment provider}}\'a0in October,\'a0{\field{\*\fldinst{HYPERLINK "https://investor.salesforce.com/news/news-details/2025/Salesforce-Announces-Support-for-Agentic-Commerce-Protocol-in-Collaboration-with-Stripe/default.aspx"}}{\fldrslt \ul Salesforce}}\'a0is in, Shopify supports both ACP and UCP. What got retired was a product hypothesis: that checkout itself should live inside the assistant. What survived was the protocol that defines how an agent and a merchant pass structured purchase data to each other.\
+The ACP/Instant Checkout story is the cleanest possible proof of what this whole article is arguing \'97 the checkout button was never the right center. OpenAI bet that the assistant should own the moment intent becomes a completed transaction. The market said: own the moment intent forms, sure; the transaction is going somewhere else. ACP solves the data problem between agent and merchant. Whether checkout completes inside chat, inside a merchant app surfaced inside chat, or back on the merchant\'92s website turns out to be a product question, not a protocol question.\
+Stripe made it easy for software businesses to accept money from humans on web pages. ACP carries that logic into a world where software, not a human at a browser, is the source of buying intent. Stripe is making payment authority programmable enough for agents to use safely, and the protocol travels with the agent surface regardless of which checkout flow wins.\
+For OpenAI, the retreat is sharper. ACP still gives ChatGPT a path from recommendation to transaction. But the retreat means the assistant is back upstream of the actual economic event, sending intent and structured purchase context downstream to whoever owns conversion. A system that answers and recommends but doesn\'92t close the loop is in a different strategic position than one that does.\
+The limitation Instant Checkout ran into is the same limitation any assistant-owned checkout will run into. If checkout moves into the agent surface, the merchant risks losing parts of the customer experience that have always been central to its business. The merchant may stay merchant of record while the assistant controls discovery, ranking, comparison, bundling, substitution, and the final presentation of choices. That weakens the merchant\'92s ability to tell its story, gather first-party context, and shape repeat behavior.\
+This isn\'92t an abstract branding worry. It\'92s a control problem. If the assistant becomes where customers express intent, the merchant\'92s website stops being the default starting point of the relationship. The merchant still sells, but through a surface it doesn\'92t own.\
+That\'92s why Shopify\'92s response matters.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f4\b\fs61\fsmilli30875 \cf2 UCP is a merchant control argument\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 Shopify and Google\'92s\'a0{\field{\*\fldinst{HYPERLINK "https://shopify.engineering/UCP"}}{\fldrslt \ul Universal Commerce Protocol}}, or UCP, should be read as a merchant control argument.\
+UCP represents a different view of what needs to be standardized. ACP focuses tightly on the agent-to-merchant checkout flow. UCP is broader, aiming to make the full shopping journey work across AI agents, merchants, payment providers, identity systems, and commerce platforms \'97 discovery, cart, checkout, order management, returns, customer identity, loyalty, and merchant rules.\
+The distinction is the whole point. A merchant doesn\'92t only need an agent to pay. It needs the agent to understand what the merchant actually sells and the conditions it\'92s willing to sell under. Real commerce involves product variants, inventory, shipping rules, promotions, loyalty accounts, return policies, subscriptions, bundles, warranties, fraud rules, taxes, support, and post-purchase communication. A checkout protocol that ignores most of that may complete a transaction, but it won\'92t preserve the merchant\'92s business.\
+Shopify\'92s incentive is straightforward. Shopify merchants need to be visible to agents without becoming anonymous inventory nodes inside someone else\'92s assistant. They need to keep the customer relationship, the order record, the checkout rules, and the post-purchase flow \'97 and to know which channel created the demand and what data they get back.\
+The threat isn\'92t theoretical. I\'92ve largely stopped using Google to start shopping research and I rarely begin on Amazon. A sound system, a couple of bicycles \'97 I worked through the comparison and the decision inside ChatGPT, and only went to a merchant site to finish. ChatGPT crossed\'a0{\field{\*\fldinst{HYPERLINK "https://techcrunch.com/2026/02/27/chatgpt-reaches-900m-weekly-active-users/"}}{\fldrslt \ul 900 million weekly active users}}\'a0in February. Some meaningful share of those users is doing what I\'92m doing. A merchant that isn\'92t legible to that surface isn\'92t in the running before the surface even shows results.\
+That\'92s the tension UCP tries to manage: agents should be able to shop across merchants, but merchants shouldn\'92t have to surrender the structure of their business to participate. The pitch, in plain terms, is to make commerce machine-readable without reducing the merchant to a product feed and a payment endpoint.\
+Google\'92s involvement adds another layer. Google has every reason to make AI shopping work through Gemini, AI Mode, Merchant Center, and its broader advertising and commerce stack. If people start asking agents what to buy, Google needs its merchant graph to stay useful. UCP keeps merchants connected to AI discovery without forcing every purchase into a single assistant-owned checkout.\
+The first split, then, isn\'92t ACP versus UCP in a winner-takes-all sense. ACP is strongest as an agent-surface checkout standard. UCP is strongest as a merchant-system interoperability standard. ACP asks how a purchase gets completed when the buyer is inside an assistant. UCP asks how a merchant\'92s whole commercial system can be understood and used by agents without removing the merchant from the relationship.\
+Both questions are real. They just locate power in different places.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f4\b\fs61\fsmilli30875 \cf2 Why AI agent authorization is different from payment\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 Below checkout sits a layer that\'92s easy to miss: authorization.\
+Authorization is proof that the agent was allowed to take the action. It\'92s not the same as payment. A payment system can move money; that doesn\'92t prove the money should have moved. In human commerce, authorization is usually compressed into the final click, a wallet confirmation, a card challenge, or an account login. With agents, that compression breaks down.\
+Suppose a person tells an agent, \'93Book me the best hotel near the conference under $300 a night.\'94 The agent searches, compares, and finds a room. But the final purchase depends on taxes, fees, cancellation policy, loyalty status, distance from the venue, check-in time, and whether the rate is refundable. If the agent books a non-refundable room that technically fits the budget but violates what the user actually meant \'97 who\'92s responsible?\
+Now run the same scenario inside a company. A procurement agent is told to find a software vendor, compare pricing, and buy access for a team. The agent has to know budget owner, vendor approval status, security policy, contract threshold, data handling requirements, renewal terms, and whether the purchase creates a long-term obligation. Being able to pay isn\'92t sufficient. The company needs evidence that the agent had the authority to pay.\
+Google\'92s\'a0{\field{\*\fldinst{HYPERLINK "https://cloud.google.com/blog/products/ai-machine-learning/announcing-agents-to-payments-ap2-protocol"}}{\fldrslt \ul Agent Payments Protocol}}, or AP2, targets this gap. AP2 introduces the idea of a\'a0
+\f5\i mandate
+\f0\i0 \'a0\'97 a structured record of what the user authorized the agent to do. In plain English, it\'92s a permission slip: the scope of the task, the constraints, and the proof that the user approved the agent\'92s action.\
+Agentic commerce needs a new evidence layer. The old checkout page generated evidence through a human session and a final click. An agent\'92s evidence may need to begin earlier, last longer, and travel across systems. The user might authorize the agent before the merchant is even known. The agent might act later. The final price might shift. The purchase might be one of several options the agent considered. If the transaction is disputed, a payment receipt isn\'92t enough \'97 the system has to show what the user asked for, what the agent was permitted to do, and whether the agent stayed inside those limits.\
+Stripe shipped the consumer-facing version of the same idea in April.\'a0{\field{\*\fldinst{HYPERLINK "https://stripe.com/blog/giving-agents-the-ability-to-pay"}}{\fldrslt \ul Link\'92s wallet for agents}}\'a0lets a person grant an agent OAuth access to their Link wallet. The agent submits a spend request with context \'97 merchant, amount, line items, purpose. The user approves on the web or in the Link app. Link returns either a one-time-use card or a Shared Payment Token, scoped to that purchase. The agent never sees the underlying card. Google designed a protocol for the authorization record; Stripe shipped a product that produces one.\
+Visa, Mastercard, and PayPal are moving in the same general direction, each from its own position in the payments system.\'a0{\field{\*\fldinst{HYPERLINK "https://www.mastercard.com/news/press/2025/april/mastercard-unveils-agent-pay-pioneering-agentic-payments-technology-to-power-commerce-in-the-age-of-ai"}}{\fldrslt \ul Mastercard Agent Pay}}\'a0is built around agent registration, tokenized credentials, consumer control, and continuity of fraud and dispute protections.\'a0{\field{\*\fldinst{HYPERLINK "https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.22276.html"}}{\fldrslt \ul Visa Intelligent Commerce}}\'a0takes a similar approach \'97 trusted agents, payment tokens, secure transaction rules.\'a0{\field{\*\fldinst{HYPERLINK "https://newsroom.paypal-corp.com/2025-10-28-PayPal-Launches-Agentic-Commerce-Services-to-Power-AI-Driven-Shopping"}}{\fldrslt \ul PayPal\'92s agentic commerce services}}\'a0try to make PayPal the wallet, trust, merchant services, and buyer protection layer across AI surfaces.\
+These companies aren\'92t trying to own the recommendation layer. They\'92re trying to own the trusted transaction layer. The bet is that agentic commerce won\'92t scale unless consumers, merchants, and businesses trust the credential, the permission record, and the dispute process.\
+It\'92s a strong bet. The more autonomous agents become, the more valuable authorization gets. Companies won\'92t allow software to spend meaningful money unless the system can prove who authorized the action, which policy applied, what limit existed, and what happens if the outcome is wrong.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f4\b\fs61\fsmilli30875 \cf2 Stablecoins matter most when agents buy software from software\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 Stablecoins enter for a different reason.\
+A stablecoin is a digital token designed to track the value of a currency, usually the U.S. dollar \'97 USDC is the canonical example. They can move value quickly, often across borders and outside traditional card settlement windows. They\'92re particularly useful when the buyer and seller are both software systems rather than a consumer and a retail merchant.\
+The consumer version of agentic commerce is easy to picture: a person asks an agent to buy shoes, groceries, coffee, or a flight. In those cases, cards and wallets remain useful because they already carry consumer protection, refunds, cardholder recognition, fraud monitoring, and broad merchant acceptance.\
+The more interesting stablecoin case is different. An agent may need to pay an API for a single data request. A coding agent may buy access to a hosted tool. A research agent may spend a few cents for a document, a model call, a browser action, or some specialized service. A SaaS service may want to charge per task instead of per month. A company may want each of its agents to have its own wallet, budget, and spending log. These payments are often too small, too frequent, or too software-native for ordinary checkout.\
+Coinbase\'92s\'a0{\field{\*\fldinst{HYPERLINK "https://docs.cdp.coinbase.com/x402/docs/welcome"}}{\fldrslt \ul x402}}\'a0matters for this reason. x402 makes payment part of the web request itself. The name refers to HTTP 402 \'97 the long-dormant \'93payment required\'94 status code that was always in the web\'92s design but never became a real payment layer. In an x402 flow, software requests a resource, receives payment instructions, pays, and gets access. The payment becomes part of the interaction between machines.\
+Stripe\'92s\'a0{\field{\*\fldinst{HYPERLINK "https://stripe.com/blog/machine-payments-protocol"}}{\fldrslt \ul Machine Payments Protocol}}, or MPP, points the same way. MPP is built for agents and software systems paying other software systems \'97 less about a person buying from a merchant website, more about agents paying for services, tools, API calls, data, compute, or access. Stripe\'92s broader stablecoin work (Bridge, Privy, and Tempo) gives it the wallet, issuance, orchestration, and settlement infrastructure to back it up.\
+Circle\'92s\'a0{\field{\*\fldinst{HYPERLINK "https://www.circle.com/en/pressroom/circle-launches-arc-public-testnet"}}{\fldrslt \ul Arc}}\'a0belongs in the same category, aimed at making USDC and related infrastructure credible for enterprise-grade stablecoin settlement. Coinbase is pushing x402 and agentic wallets. Stripe is building across cards, wallets, stablecoins, merchant infrastructure, and machine payments. None of these companies is asking, narrowly, whether consumers will pay merchants in stablecoins. They\'92re asking whether software will need a native way to pay other software.\
+That\'92s worth being precise about, because \'93stablecoins replace cards\'94 is too broad. Stablecoins may be a better rail for some machine-to-machine payments. Cards and wallets may stay better for many consumer purchases. Both can coexist because they solve different business problems.\
+A card is still a strong adapter to the existing commercial web. A stablecoin wallet may be a better primitive for agents that need small, fast, programmable payments. A payment token from Stripe, Visa, Mastercard, or PayPal may be the safest credential for a consumer purchase. An x402 or MPP payment may fit best when an agent buys a digital resource from another service.\
+The right product question isn\'92t which rail is more futuristic. It\'92s which rail matches the responsibility, economics, and risk of the transaction.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f4\b\fs61\fsmilli30875 \cf2 The hyperscalers will try to own the governance layer\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 The newest signal is AWS.\
+On May 7, AWS announced\'a0{\field{\*\fldinst{HYPERLINK "https://aws.amazon.com/blogs/machine-learning/agents-that-transact-introducing-amazon-bedrock-agentcore-payments-built-with-coinbase-and-stripe/"}}{\fldrslt \ul Amazon Bedrock AgentCore Payments}}, built with Coinbase and Stripe. The announcement shows where enterprise agent payments are likely to land. If companies build agents on a cloud platform, they\'92ll expect the platform to help manage payment authority, wallet access, budgets, approval rules, and logs.\
+That\'92s the governance layer.\
+Governance is the set of controls that determine what an agent is allowed to do, what it isn\'92t, how much it can spend, which vendors it can pay, which human must approve which action, and what record gets kept. In normal companies, that means procurement policy, finance controls, expense rules, vendor approval, audit trails, security policy, and compliance requirements. Agentic commerce drags those controls into the agent runtime.\
+AWS doesn\'92t need to own every payment protocol to own part of this layer. It can connect to Coinbase for x402 and stablecoin wallet flows. It can connect to Stripe and Privy for wallet infrastructure. It can support more protocols over time. Its strategic position isn\'92t necessarily the payment rail. It\'92s the environment where enterprise agents run, receive tools, execute tasks, and are monitored.\
+That\'92s a powerful place to sit. The agent runtime knows the task, which tools were called, which policy was active, which budget applied, and what the agent did before and after the transaction. A payment provider sees the payment. The agent platform sees the work around the payment.\
+Amazon\'92s commerce platform shows the other side of the same story. Big platforms aren\'92t going to let outside agents act freely inside their systems. Amazon\'92s own AI shopping work and its resistance to unauthorized agentic browsing make clear that platform commerce will stay controlled. The open agentic web may grow, but powerful marketplaces will decide which agents they trust, which data they expose, and which automated purchases they allow.\
+So product teams shouldn\'92t assume agentic commerce is a march toward open interoperability. Some parts of the market will be protocol-driven. Some will stay platform-controlled. Some will open up only under strict trust, identity, and data-sharing terms.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f4\b\fs61\fsmilli30875 \cf2 The real product question is where responsibility lives\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 The most useful way to evaluate any agentic commerce product is to ask where responsibility lives.\
+When the agent finds the product, who\'92s responsible for the recommendation? When it interprets the user\'92s intent, who\'92s responsible for the interpretation? When it requests permission, who records what the user approved? When it pays, who owns the credential and the risk? When the merchant fulfills, who owns the order? When the buyer wants a refund, who handles the return? When the payment is disputed, what evidence exists? When the agent is manipulated by a malicious site, who absorbs the loss? When the agent buys something technically allowed but commercially foolish, who\'92s accountable?\
+These questions don\'92t have one answer. They divide across layers.\
+ACP answers the agent-surface checkout question, with the merchant still as merchant of record. UCP answers the merchant-system question, preserving merchant control across the full commerce journey. AP2 answers the delegated-authorization question. Visa, Mastercard, and PayPal answer through network trust, tokenized credentials, and dispute infrastructure. Coinbase, x402, Stripe MPP, Circle, Tempo, Bridge, and Privy answer through wallet and settlement infrastructure. AWS answers through enterprise agent governance.\
+The market isn\'92t messy because too many people are inventing acronyms. It\'92s messy because the old purchase flow hid many responsibilities inside a single human action. Once that action is delegated to software, every hidden responsibility has to be named.\
+That\'92s uncomfortable for product teams, but it\'92s also useful. It forces a clarity that internet commerce mostly avoided. A company building agentic commerce has to define what it means by identity, permission, payment, settlement, merchant control, fraud, refunds, and liability. If it can\'92t define those terms, it isn\'92t ready to let agents transact.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f4\b\fs61\fsmilli30875 \cf2 How to prepare your product for agentic commerce\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 The first decision is what kind of commerce the product actually supports.\
+A consumer shopping assistant is a different beast from an enterprise procurement agent. A merchant agent-readiness product is not the same as an agent wallet. A stablecoin payment tool for API calls is not a retail checkout integration. A platform that lets agents buy inside a controlled marketplace is not an open protocol for the web.\
+This sounds basic, but ignoring it produces bad architecture. Most agentic commerce conversations blur retail shopping, B2B procurement, machine-to-machine payments, stablecoin settlement, and consumer wallets into one bucket. They share a word; they don\'92t share a risk model.\
+Retail needs product presentation, merchant trust, returns, customer service, taxes, shipping, fraud monitoring, and familiar payment protection. Machine-to-machine API payments need pricing, access control, metering, settlement, rate limits, wallet policy, and automated reconciliation. Enterprise procurement needs vendor approval, budget, compliance, spend authority, audit logs, and approval thresholds. Marketplace purchases need platform rules, seller identity, buyer protection, dispute handling, and data controls.\
+Once the use case is clear, the protocol decisions get easier.\
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f1\b \cf2 Merchants
+\f0\b0 \'a0should focus first on becoming usable by trusted agents without giving up the business itself. That means clean product data, current inventory, accurate pricing, explicit policies, callable checkout, order status, refund handling, customer support paths, fraud signals, and clear data terms. A merchant that exposes only a product feed isn\'92t agent-ready. A merchant that exposes the commercial path behind the product has a real shot.\
+
+\f1\b Agent builders
+\f0\b0 \'a0should treat payment authority as part of the core product, not as a late integration. The product needs to define what the agent can buy, from whom, under what budget, with which credential, after which approval, and with what record. The user has to be able to inspect and revoke that authority. A business has to be able to set policies by role, vendor, project, department, risk level, or transaction type.\
+
+\f1\b Payment companies and wallet providers
+\f0\b0 \'a0should focus on scoped authority. A safe agent payment credential shouldn\'92t behave like a raw card number handed to a bot. It should have limits. It should know, where possible, the merchant, amount, currency, time window, use case, user, or policy context. It should support refunds and disputes and produce evidence other systems can read later.\
+
+\f1\b Stablecoin and machine-payment builders
+\f0\b0 \'a0should be precise about their target market. The strongest near-term use case isn\'92t every consumer purchase. It\'92s software paying software, agents buying digital resources, companies assigning budgets to agents, and services charging for work below a monthly subscription. A real market. It isn\'92t replacing all of checkout.\
+
+\f1\b Enterprise teams
+\f0\b0 \'a0should focus on governance. If agents are going to spend company money, finance, security, procurement, and legal need a shared model. Which agents can spend? Who approved them? Which vendors are allowed? What\'92s the limit? What happens above it? Can the agent hold a balance? Can it use a card token? Can it use stablecoins? How are refunds handled? How is spend reconciled? What appears in the audit trail?\
+These aren\'92t administrative details. They\'92re the product.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f4\b\fs61\fsmilli30875 \cf2 Claims to be careful with\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f1\b\fs38 \cf2 \cb3 One protocol won\'92t win in the short term.
+\f0\b0 \'a0The protocols answer different questions. A retailer may need UCP for merchant-controlled commerce, ACP for ChatGPT transactions, AP2-style authorization for delegated consent, card tokens for consumer payment protection, and stablecoin rails for software services. Layered compatibility is more likely than a single universal standard.\
+
+\f1\b Checkout inside chat won\'92t kill merchant checkout.
+\f0\b0 \'a0Some purchases will happen inside agent surfaces. Others will route back to merchant-controlled flows. In many categories, the merchant\'92s site or app will remain important because the buyer needs detail, configuration, support, or brand context. The truer claim is that checkout becomes less tied to one surface: the merchant site stays important, but it\'92s no longer the only place commercial intent can turn into action.\
+
+\f1\b Stablecoins won\'92t replace cards.
+\f0\b0 \'a0Stablecoins matter, especially for machine payments and programmable settlement. Cards, wallets, and payment networks still carry consumer trust, merchant acceptance, fraud systems, and dispute processes. The likely future is mixed: different transaction types using different rails.\
+
+\f1\b Agents won\'92t buy fully autonomously.
+\f0\b0 \'a0Some low-risk transactions will become automatic. Many won\'92t. The higher the value, risk, irreversibility, or policy sensitivity, the more the system needs explicit authorization, review, or escalation. The right framing is\'a0
+\f5\i graduated autonomy
+\f0\i0 : agents act freely where risk is low, ask for approval where risk is moderate, and prepare evidence for humans where risk is high.\
+
+\f1\b Open protocols don\'92t automatically protect merchants.
+\f0\b0 \'a0Open protocols help, but control still depends on distribution, defaults, data access, ranking, customer identity, payment credentials, and governance. A merchant can stay merchant of record on paper and still lose influence over discovery and the customer relationship. Protocol terms matter, but so do the platforms where customers begin.\
+\pard\pardeftab720\sa385\partightenfactor0
+
+\f4\b\fs61\fsmilli30875 \cf2 The strategic read\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\pardeftab720\qc\partightenfactor0
+
+\f2\b0 \cf2 \
+\pard\pardeftab720\sa400\partightenfactor0
+
+\f0\fs38 \cf2 \cb3 Agentic commerce is forcing a reallocation of commercial responsibility that the old checkout page used to hide.\
+The old internet assumed a seller could pull a human into a controlled environment and persuade that person to complete a purchase. The agentic internet starts with the buyer\'92s intent somewhere else \'97 in a chat, a workflow, a coding environment, a procurement system, a browser agent, or an enterprise automation platform. By the time the merchant sees the request, much of the decision has already been made.\
+That doesn\'92t make merchants powerless. It makes the job different: merchants need to express their business in forms agents can read and trust. Product data, pricing, terms, policies, availability, payment methods, refunds, support. All of it has to become more explicit. The merchant\'92s commercial reality has to travel outside the website.\
+It also doesn\'92t turn payment companies into invisible utilities. The opposite, really. Agentic commerce makes payment infrastructure more important because the system needs safe delegation. A human clicking a button is one kind of authorization. An agent acting later, under constraints, with a scoped credential, is a much more complex one. The companies that can define, enforce, and prove that authority will matter.\
+The strongest companies in this market won\'92t be the ones that build the prettiest shopping agent. They\'92ll be the ones that own a necessary responsibility layer. OpenAI has the surface where intent forms. Stripe has merchant and payment infrastructure. Shopify has the merchant operating system. Google has discovery, merchant data, and protocol ambition. PayPal has wallet trust and merchant reach. Visa and Mastercard have network rules, tokenization, and dispute infrastructure. Coinbase has stablecoin wallets and x402. Circle has stablecoin settlement credibility. AWS has the enterprise agent runtime. Amazon has platform commerce control.\
+Different strengths, all defensible. The single-winner story is weak.\
+The more useful question is which part of the purchase each company makes safer, easier, or more controllable when the buyer isn\'92t directly clicking through the old funnel.\
+This is the protocol war. Not a fight over a checkout button. It\'92s a fight over the rules that make a purchase valid when software is acting for the buyer.\
+The companies that understand this early won\'92t just ask \'93how do we let agents buy?\'94 They\'92ll ask the harder questions: What exactly is the agent allowed to do? What evidence proves that? Which system owns the customer relationship? Which payment credential is safe enough? Which settlement rail fits the transaction? Who handles the refund? Who takes the fraud loss? What record survives after the agent finishes?\
+Those aren\'92t footnotes. They\'92re the new commercial architecture.\
+}
