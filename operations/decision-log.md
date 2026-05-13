@@ -4986,6 +4986,112 @@ git diff HEAD~1 website/public/.well-known/agent-card.json | wc -l
 
 **Rules served:** 0a (status — agent-card.json Verified → "Verified but A2A-v1-misaligned-pending-reshape"; J1 ADR Adopted → Amended), 0d-ii (Elevated for J1 ADR addendum; Standard for README drift), 0e (preserve-prior-versions for J1 ADR), 0f (this entry), 0g (workflow skills — N/A), PR7 (deferred decisions documented — three open questions with revisit conditions), PR10 (PEV loop in lean form), PR11 (authoritative-current-sources — a2a-protocol.org + agent2agent.info canonical schema consulted), PR12 (negative-finding discipline — the initial "no protocolVersion field required" check was self-corrected mid-step after verifying A2A v1 spec; the spec does not require it), PR13 (consider-implications — 5-question assessment applied), PR16 (positioning + dogfood — A2A citizenship strengthens Character-Kernel-as-discoverable-agent positioning).
 
-**Status:** Adopted. Cross-references: umbrella entry `D-ANTHROPIC-NATIVE-POSTURE-2026-05-14`; J1 ADR predecessor `D-AGENTIC-COMMERCE-UPSTREAM-REWORK-2026-05-13`; features survey §14 (AAIF/A2A governance); deferred follow-up session (TBD).
+**Status:** Adopted. Cross-references: umbrella entry `D-ANTHROPIC-NATIVE-POSTURE-2026-05-14`; J1 ADR predecessor `D-AGENTIC-COMMERCE-UPSTREAM-REWORK-2026-05-13`; features survey §14 (AAIF/A2A governance); deferred follow-up session (TBD). **Superseded by `D-AGENT-CARD-A2A-V1-RESHAPE-2026-05-14` (the deferred follow-up; closes the documented gaps).**
+
+---
+
+## 2026-05-14 — D-AGENT-CARD-A2A-V1-RESHAPE-2026-05-14
+
+**Decision:** The SageReasoning agent-card.json at `/website/public/.well-known/agent-card.json` reshaped from its prior mixed shape (Verified-but-A2A-v1-misaligned per `D-AGENT-CARD-CURRENCY-CHECK-2026-05-14`) to **A2A v1 canonical shape**. Single-file reshape, substance preserved, structure aligned to the canonical AgentCard interface per agent2agent.info + a2a-protocol.org. Closes the deferred gap from the predecessor entry.
+
+**Reasoning:** The predecessor session (`D-AGENT-CARD-CURRENCY-CHECK-2026-05-14`) documented four load-bearing shape misalignments + missing required fields, and deferred the reshape to this follow-up Elevated session. PR11 + PR12 spec verification during this session yielded a **load-bearing correction to the predecessor's draft mapping**: the canonical A2A v1 spec places `extensions` **inside** `capabilities` (as `capabilities.extensions[]` of AgentExtension objects), NOT at top level as the predecessor prompt assumed. The agent2agent.info canonical TypeScript interface combined with a2a-protocol.org's published v1 examples (verified via WebSearch) confirmed the nested shape. The reshape therefore: (1) moved the 9 current endpoint-objects from `capabilities` (array) to `skills` (array of skill-objects); (2) created the new top-level `capabilities` object with three boolean flags (all `false` — reflects actual substrate behaviour) + `extensions[]` nested; (3) reshaped `authentication.schemes` from array-of-objects to array-of-strings `["bearer", "none"]` with the descriptive content consolidated into `authentication.credentials`; (4) added required `defaultInputModes: ["application/json"]` + `defaultOutputModes: ["application/json"]`; (5) distributed the prior top-level `skills` (10 strings) + top-level `tags` (12 strings) across per-skill `tags[]` arrays per the founder-approved mapping; (6) moved the three custom blocks (`accessTiers`, `rateLimits`, `quickStart`) into `capabilities.extensions[]` as AgentExtension objects with versioned URIs at `https://sagereasoning.com/extensions/{name}/v1`; (7) retained `endpoint` + `method` as supplementary fields on each skill-object (not in canonical Skill interface but not forbidden; preserves substantive routing info).
+
+**Files touched:**
+- `/website/public/.well-known/agent-card.json` — RESHAPED. From mixed pre-A2A-v1 shape to canonical A2A v1 shape. 169 lines → 168 lines (substance preserved; structure aligned).
+- `/README.md` line 114 — MODIFIED. "9 capabilities" → "9 skills"; added "(v1-shape; reshaped 2026-05-14)" parenthetical; phrasing aligned to canonical schema language.
+- `/README.md` line 240 — MODIFIED. Updated description from "Note: ... deferred to a follow-up session" to "Reshape under D-AGENT-CARD-A2A-V1-RESHAPE-2026-05-14 closed the gaps" + "v1-aligned" + "9 skills" phrasing.
+- `/operations/decision-log.md` predecessor entry `D-AGENT-CARD-CURRENCY-CHECK-2026-05-14` — MODIFIED. Status line extended with "**Superseded by `D-AGENT-CARD-A2A-V1-RESHAPE-2026-05-14`**" pointer (the deferred follow-up has now landed).
+
+**Files NOT touched (checked + no drift found):**
+- `/product/AGENTS.md` — references agent-card by URL only; no shape-specific references.
+- `/website/public/llms.txt` — references agent-card by URL only; no shape-specific references.
+- `/website/src/app/api-docs/page.tsx` — not consulted directly this session; the page renders capabilities from the API, not from agent-card.json. Out of scope for this Elevated change.
+
+**Risk classification:** **Elevated** under 0d-ii (user-facing JSON file served at the well-known A2A discovery path; agent-developer-consumer visible; Vercel redeploys on push). **Critical Change Protocol NOT engaged.** AC7 not engaged (no auth/encryption/perimeter change). AC5 perimeter unchanged. PR6 not engaged (not safety-critical). No env-var changes; no schema migrations; no deployment-configuration changes beyond the routine Vercel redeploy that follows any push.
+
+**Rollback path:** `git revert <reshape-commit>` and push via GitHub Desktop. Vercel redeploys the prior agent-card.json shape on first request post-deploy. Agent-developer consumers see the prior mixed shape again until a subsequent reshape attempt. **No data loss; no user impact** — the agent-card is metadata; reverting changes only the discovery surface, not any operational endpoint.
+
+**Verification step (in-session, all PASS):**
+
+```
+# CHECK 1: JSON valid
+python3 -m json.tool website/public/.well-known/agent-card.json > /dev/null  → CHECK 1 PASS
+
+# CHECK 2: A2A v1 required fields present
+python3 [required-fields-check]  → CHECK 2 PASS: all A2A v1 required fields present
+
+# CHECK 3: capabilities is object (with streaming/pushNotifications/stateTransitionHistory + extensions)
+python3 [capabilities-shape-check]  → CHECK 3 PASS
+
+# CHECK 4: skills is array of 9 skill-objects with id field
+python3 [skills-shape-check]  → CHECK 4 PASS (9 skill-objects)
+
+# CHECK 5: authentication.schemes is array of strings
+python3 [auth-schemes-check]  → CHECK 5 PASS
+
+# BONUS: extensions correctly nested inside capabilities (NOT top-level)
+python3 [extensions-location-check]  → top-level extensions: False; capabilities.extensions: True (3 extensions)
+
+# CHECK 6: TypeScript compile
+cd website && npx tsc --noEmit -p tsconfig.json  → EXITCODE=0 (clean)
+
+# CHECK 7a: A5 regression (Layer 3 service)
+cd website && npx tsx src/lib/substrate/__tests__/layer3-service.test.ts  → 28 pass / 0 fail
+
+# CHECK 7b: A7 regression (R20a gate)
+cd website && npx tsx src/lib/substrate/__tests__/r20a-gate.test.ts  → 33/33 pass
+
+# CHECK 8: Substrate steady state (deferred to founder between-sessions verification —
+# sandbox proxy blocks outbound HTTPS to sagereasoning.com; founder runs from local
+# machine per the predecessor-close pattern)
+```
+
+**Verification step (founder-performable, between sessions + post-deploy):**
+
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+
+# Pre-deploy: confirm local file shape (mirrors CHECK 1-5 + bonus above)
+python3 -m json.tool website/public/.well-known/agent-card.json > /dev/null && echo "JSON valid"
+python3 -c "
+import json
+d = json.load(open('website/public/.well-known/agent-card.json'))
+print('top-level extensions present:', 'extensions' in d)
+print('capabilities.extensions count:', len(d['capabilities'].get('extensions', [])))
+print('skills count:', len(d['skills']))
+print('authentication.schemes:', d['authentication']['schemes'])
+"
+# Expected: top-level extensions: False; capabilities.extensions count: 3; skills count: 9; schemes ['bearer', 'none']
+
+# Substrate steady state (founder verifies from local; sandbox can't):
+curl -sS https://www.sagereasoning.com/api/public-key | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+ok = d.get('previous') is None and d.get('rotation_overlap_until') is None and d.get('algorithm') == 'Ed25519'
+print('PASS' if ok else 'FAIL')
+"
+# Expected: PASS
+
+curl -sS -o /dev/null -w "%{http_code}\n" -X POST https://www.sagereasoning.com/api/substrate/layer3
+# Expected: 503
+
+# POST-DEPLOY (after Vercel redeploys following the push):
+curl -sS https://www.sagereasoning.com/.well-known/agent-card.json | python3 -m json.tool > /dev/null && echo "Live card valid"
+# Expected: "Live card valid"
+
+diff <(curl -sS https://www.sagereasoning.com/.well-known/agent-card.json | python3 -m json.tool) \
+     <(python3 -m json.tool < website/public/.well-known/agent-card.json) | head
+# Expected: empty diff
+```
+
+**Open questions:**
+
+- **Per-skill `endpoint` + `method` field portability.** Retained as supplementary fields; A2A v1 consumers parse the canonical fields and ignore the rest. If a future strict-validator A2A consumer rejects unknown fields, the supplementary routing info would need to move (e.g., to a SageReasoning routing extension at `capabilities.extensions[]`). Revisit condition: founder receives feedback from an agent-developer consumer about parsing failures, or a stricter validation library is identified.
+- **`protocolVersions` + `supportedInterfaces` (newer A2A v1 fields).** WebSearch surfaced these as v1 fields advertising A2A spec versions + concrete endpoint bindings. NOT added this session — outside the documented gap scope; would require additional founder approval and a small follow-up. Revisit condition: agent-developer consumer requests them, or a subsequent A2A spec consult shows them as required.
+- **README `/api-docs` page consistency.** The `/api-docs` page renders capability info from the live API (not from agent-card.json), so the reshape doesn't change what renders there. Not touched this session. Revisit condition: if the page is ever changed to render from agent-card.json, the new shape needs handling.
+
+**Rules served:** 0a (status — agent-card.json "Verified but A2A-v1-misaligned-pending-reshape" → **A2A v1 Reshape Verified**), 0c-ii (Critical Change Protocol NOT engaged — Elevated only), 0d-ii (Elevated classification under user-facing-JSON criterion), 0e (predecessor entry retained with supersedes pointer; not archived since the predecessor remains the authoritative gap-documentation), 0f (this entry), PR1 (single-endpoint proof — this IS the single endpoint), PR2 (build-to-wire-verification immediate — JSON syntax + A2A shape validated before declaring done), PR7 (deferred decisions documented — three open questions with revisit conditions), PR10 (PEV loop applied in full Elevated form — Plan with mapping + approval gate; Execute with single-file reshape; Verify with 7 in-session checks + diagnostic-certain finding), PR11 (authoritative-current-sources — agent2agent.info AgentCard interface + Extensions topic + v1.0 changes page + a2a-protocol.org via WebSearch; 4 sources cross-verified), PR12 (negative-finding discipline — **yielded load-bearing correction**: predecessor's top-level `extensions[]` assumption was wrong; canonical shape is `capabilities.extensions[]`. Three queries tried; multiple official sources consulted; correction stated explicitly before reshape began), PR13 (consider-implications — 5-question assessment: contradicts predecessor draft mapping shape but refines it / refines D-AGENT-CARD-CURRENCY-CHECK / affects this session in-flight / no future-stage impact beyond closing the gap / no operational-discipline impact), PR15 (no bespoke election — A2A v1 spec IS the canonical primitive being conformed to; `.claude/skills/anthropic/claude-api/SKILL.md` consultation not invoked because the session involves no Anthropic-API calls), PR16 (positioning + dogfood — strengthens Character-Kernel-as-discoverable-agent positioning per J1 ADR §"Agentic-commerce-stack adjacency"; dogfood relevance n/a — substrate doesn't consult its own agent card).
+
+**Status:** Adopted. Cross-references: predecessor `D-AGENT-CARD-CURRENCY-CHECK-2026-05-14` (superseded by this entry, which closes the deferred gap); umbrella `D-ANTHROPIC-NATIVE-POSTURE-2026-05-14`; J1 ADR `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` §"Agentic-commerce-stack adjacency" (A2A v1 alignment status note now reflects "Reshape Verified"); features survey §14 (AAIF/A2A governance); session close at `/operations/handoffs/founder/2026-05-14-agent-card-a2a-reshape-close.md`.
 
 ---
