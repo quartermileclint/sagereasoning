@@ -5320,3 +5320,51 @@ Expected: tsc clean; 37/0; 28/0; 33/0. (The tests need the `.env.local` Supabase
 **Status:** Adopted. Cross-references: predecessor `D-FOUR-MODE-SPECS-ADOPTED-2026-05-14`, `D-STAGING-PLAN-AMENDED-FOUR-MODE-2026-05-14`; deliverable-of-the-day `/adopted/substrate-modes/philosophical-mode-response-spec.md`; new files `/website/src/lib/substrate/philosophical-mode-service.ts` + `/website/src/lib/substrate/__tests__/philosophical-mode-service.test.ts`; agentic-commerce F3 `/operations/agentic-commerce-findings-downstream-order.md`; session close `/operations/handoffs/founder/2026-05-14-philosophical-mode-build-close.md`.
 
 ---
+
+## 2026-05-15 — D-ATL-BRIDGE-WIRED-VERIFIED-2026-05-15
+
+**Decision:** The `Layer2Assessment → EvaluatedAction` mapping function — "the bridge" — is built, Wired, and Verified as a new module (`atl-bridge.ts`): a pure, synchronous, deterministic projection that makes the translation-sandwich substrate's signed `Layer2Assessment` the source of the existing `/trust-layer/` build's `EvaluatedAction`. It is the PR1 single-endpoint proof of the substrate↔ATL bridge pattern. The Step 2 design-decision gate resolved three founder-confirmed questions: (1) the **tsconfig-boundary problem** — `EvaluatedAction` + its two dependency enums (`KatorthomaProximityLevel`, `RootPassionId`) are **mirrored** into `website/src` as local target types, because `/trust-layer/` sits outside `website/`'s tsconfig root and cannot be imported; (2) **`receipt_id`** is derived from the Ed25519 signature (`deriveReceiptId` — SHA-256 of the `SignedLayer2Assessment` signature); (3) **`oikeiosis_met` / `oikeiosis_stage`** are taken from the **first** relevant circle (`relevant_circles[0]` — the Layer 2 engine's own "primary circle" convention).
+
+**Reasoning:** The bridge is the central reconciliation move of the ATL Wrapper — it lets the existing `/trust-layer/` window-aggregator / grade-engine / badge infrastructure run on substrate output instead of the superseded bundled engine's "ReasoningReceipts". Built as the simplest reconciliation unit first per PR1; the wrapper, badge, and trajectory components (spec steps 3–7) depend on this mapping existing. **tsconfig-boundary decision:** `website/tsconfig.json`'s `include` globs are rooted at `website/`; there is no root-level or `/trust-layer/` tsconfig; importing `EvaluatedAction` from `/trust-layer/` would pull ~4,200 lines of never-strict-compiled code into `tsc`. Mirroring the target type is the only Step-2 option fitting this session's Standard-risk, PR1 scope, and is consistent with `/trust-layer/`'s own established self-containment pattern (its BUILD-LOG records re-declaring `KatorthomaProximityLevel` etc. rather than coupling to `website/src`). Bringing `/trust-layer/` under the tsconfig / relocating its types / a shared package were all rejected as structural changes larger than the bridge. **Step 1 survey finding:** four `EvaluatedAction` fields are not on `Layer2Assessment` and cannot be (it is idempotent by design — no clock, no identity, no signature) — `agent_id` (which the spec's Component 1 mapping table omits entirely; the survey surfaced it), `evaluated_at`, `skill_id`, and the `receipt_id` material; all four are supplied via a `BridgeContext` parameter, so the bridge signature is `(Layer2Assessment, BridgeContext) → EvaluatedAction`. **PR15:** an Anthropic-canonical primitive was considered — the `.claude/skills/anthropic/` skills + the canonical-primitive list — and rejected; no skill or primitive delivers a deterministic in-process TypeScript type-projection function (the closest, `claude-api`, concerns API usage; the spec flags multi-agent orchestration for Component 5, spec step 5, not the bridge); bespoke is correct. **PR11:** no `/inbox/` files dated since the predecessor session; the agentic-commerce findings tracker carries no F-finding targeting the bridge (F4 targets the wrapper — spec step 5 — not this session).
+
+**Files touched:**
+- `/website/src/lib/substrate/atl-bridge.ts` — NEW. The bridge: `mapLayer2AssessmentToEvaluatedAction` (the projection), `deriveReceiptId` + `RECEIPT_ID_PREFIX` (the SHA-256-of-signature receipt_id convention), the `BridgeContext` input type, and the mirrored `EvaluatedAction` / `KatorthomaProximityLevel` / `RootPassionId` target types. Consumes `Layer2Assessment` (type-only) + `node:crypto`'s `createHash`. No existing file modified; not wired to any route.
+- `/website/src/lib/substrate/__tests__/atl-bridge.test.ts` — NEW. 31 assertions (receipt_id derivation; full-assessment mapping; context fields; oikeiosis first-circle selection; null narrowing; minimal assessment; determinism + no-mutation invariants; shape-validity for `window-aggregator.ts`). Invokes `mapLayer2AssessmentToEvaluatedAction` — PR2 build-to-wire verification immediate.
+- `/website/tsconfig.tsbuildinfo` — touched by `tsc --noEmit` (incremental-build cache; tracked; routinely changes when tsc runs).
+- `/operations/decision-log.md` — this entry appended.
+
+**Risk classification:** Standard under 0d-ii — two new files, not wired to any route, no existing file modified. No auth / encryption / data-deletion / deployment-config / R20a-perimeter surface. AC7 not engaged. PR6 not engaged. PR1 single-endpoint proof: the bridge is the substrate↔ATL pattern, proven on one mapping. PR2: the test invokes the mapping function in the same session.
+
+**Rollback path:** `git revert <commit>` and push via GitHub Desktop. The two new files are imported by no route — reverting removes the bridge module; `/api/reason`, `/api/substrate/layer3`, and the existing `/trust-layer/` codebase are unaffected either way. No production behaviour change; no data loss; no user impact.
+
+**Verification step (founder-performable, between sessions):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+
+# 0. Clear the stale sandbox-created .git/index.lock (I caused this — running
+#    git status in the build sandbox; the mount blocks unlink. One-time cleanup.)
+rm -f .git/index.lock
+
+# 1. TypeScript compile (expected: clean, exit 0)
+cd website && npx tsc --noEmit -p tsconfig.json && cd ..
+
+# 2. ATL bridge test (expected: 31 pass / 0 fail)
+cd website && npx tsx src/lib/substrate/__tests__/atl-bridge.test.ts && cd ..
+
+# 3. Regressions (expected: 37/0; 28/0; 33/33 — unchanged, new code only)
+cd website && npx tsx src/lib/substrate/__tests__/philosophical-mode-service.test.ts && cd ..
+cd website && npx tsx src/lib/substrate/__tests__/layer3-service.test.ts && cd ..
+cd website && npx tsx src/lib/substrate/__tests__/r20a-gate.test.ts && cd ..
+```
+Expected: tsc clean; 31/0; 37/0; 28/0; 33/33. (The philosophical-mode regression imports `retrieve-passages.ts → supabase-server.ts`, which constructs a Supabase client at module load — it needs the `.env.local` Supabase vars resolvable in the shell environment. The build sandbox lacked them; confirmed 37/0 in-session by supplying dummy import-resolution env vars. The bridge test imports neither Supabase nor retrieve-passages, so it runs clean unconditionally.)
+
+**Open questions:**
+- **The `EvaluatedAction` type mirror is a manual-sync point.** `atl-bridge.ts` re-declares `EvaluatedAction` + `KatorthomaProximityLevel` + `RootPassionId` verbatim from `/trust-layer/types/`. Revisit condition: a later ATL session (the wrapper build, spec step 5) consolidates the `/trust-layer/` ↔ `website` boundary, OR `/trust-layer/`'s `EvaluatedAction` changes — in which case the mirror must be updated in the same change.
+- **`agent_id` is a `BridgeContext` field, not a `Layer2Assessment` field.** The spec's Component 1 mapping table omits it; the Step 1 survey surfaced it (the substrate holds no server-side agent identity — the wrapper does). Revisit condition: the wrapper build (spec step 5) establishes how `agent_id` is established and authenticated (spec open question 8).
+- **PR10 PEV Verify diagnostic.** The philosophical-mode regression fails on *import* in the build sandbox (Supabase client constructs at module load; env vars absent from the process environment). **Diagnostic-certain — root cause identified:** missing process-env Supabase vars, not a regression; confirmed 37/0 when run with import-resolution env vars present. Not caused by this session (adds new files only; modifies nothing). Revisit condition: none — sandbox env limitation, documented in the predecessor close as well.
+
+**Rules served:** 0a, 0c, 0d-ii, 0f, R4, AC8, PR1, PR2, PR10, PR11, PR15. PR4: N/A (no LLM call — the bridge is a deterministic projection; `deriveReceiptId` uses synchronous `createHash`). PR6: not engaged (no R20a / distress-classifier surface). AC7: not engaged. KG1–KG7: N/A (no DB writes, no model selection, no JSONB, no context-layer change).
+
+**Status:** Adopted. Cross-references: predecessor `D-PHILOSOPHICAL-MODE-BUILD-WIRED-VERIFIED-2026-05-14`; deliverable-of-the-day `/adopted/substrate-modes/agent-trust-layer-wrapper-spec.md`; survey target `/trust-layer/` (all 14 files); new files `/website/src/lib/substrate/atl-bridge.ts` + `/website/src/lib/substrate/__tests__/atl-bridge.test.ts`; consumed `/website/src/lib/translation-sandwich/layer2-mechanisms.ts` (`Layer2Assessment` shape); session close `/operations/handoffs/founder/2026-05-15-atl-bridge-close.md`.
+
+---
