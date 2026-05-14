@@ -1,4 +1,4 @@
-# Standard-Mode Worked Example — for review
+# Standard-Mode Worked Example
 
 **What this is:** A worked example of the proposed **standard mode** rendering, for founder review during the 2026-05-14 scoping session. Standard mode = philosophical mode's structure (deterministic field rendering + source material + mandatory wraps), with Greek replaced by English, observational tone, and the `/api/reason` prose disciplines folded in.
 
@@ -212,4 +212,4 @@ The assessment noted: the persistence of the pattern despite the submitter's nam
 ---
 ---
 
-*End of worked example. For review during the 2026-05-14 scoping session. When approved, this becomes the worked example in `/drafts/standard-mode-response-spec.md`.*
+*End of worked example. Reviewed and approved during the 2026-05-14 scoping session; adopted alongside the standard-mode spec on 2026-05-14 (D-FOUR-MODE-SPECS-ADOPTED-2026-05-14). At the standard-mode build session this becomes the worked example reproduced inline in `/adopted/substrate-modes/standard-mode-response-spec.md`.*

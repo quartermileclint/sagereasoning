@@ -1,9 +1,9 @@
-# Philosophical-Mode Response Specification — Draft
+# Philosophical-Mode Response Specification
 
-**Status:** Drafted 2026-05-14 in scoping session. **Implementation status:** Designed (per 0a vocabulary). Not yet Adopted. Build session deferred.
+**Status:** **Adopted 2026-05-14** under `D-FOUR-MODE-SPECS-ADOPTED-2026-05-14` — moved `/drafts/` → `/adopted/substrate-modes/`. **Implementation status:** Designed (per 0a vocabulary) — the mode is specified, not built; the build session is deferred. (Decision status `Adopted` and implementation status `Designed` are distinct 0a taxonomies, stated separately per the standing cache's Element 7.)
 **Stream:** founder.
 **Supersedes scope:** the "clinical" mode entry in the original A6 row of `/adopted/substrate-plugin-staging-plan.md` ("Enum of supported modes (clinical / terse / standard / educational); SageReasoning-authored, not community-extensible"). This specification re-scopes and **renames "clinical" to "philosophical"**, repositioning the mode from a tone variant (observational framing for therapists) to a **transparency surface** (the substrate's reasoning shown directly to the user, without narrative composition).
-**Companion spec:** `/drafts/agent-mode-response-spec.md` (the "terse → agent" rename). Both modes share the mandatory wraps, the Layer 2 source, and the per-response-only discipline. They diverge in shape (agent mode is structured for software consumption; philosophical mode is structured for human inspection) and in source material (philosophical mode adds a retrieve-passages-driven Source Material section; agent mode does not).
+**Companion spec:** `/archive/2026-05-14_agent-mode-response-spec-superseded.md` (the "terse → agent" rename). Both modes share the mandatory wraps, the Layer 2 source, and the per-response-only discipline. They diverge in shape (agent mode is structured for software consumption; philosophical mode is structured for human inspection) and in source material (philosophical mode adds a retrieve-passages-driven Source Material section; agent mode does not).
 **F3 fold-in (per `/operations/agentic-commerce-findings-downstream-order.md`):** The philosophical-mode response shape is the human-readable rendering of the Layer3Response substrate-consultation-mandate (R3 + R19c + R19d + R20a + R18a + R18e injections + AC9/AC10/AC11 projections + verdict + score + Layer 2 fields verbatim).
 
 ---
@@ -129,7 +129,7 @@ Term list per R8a (manifest): every Greek / Stoic-technical term in the controll
 
 ## Score handling for human consumers
 
-The full score architecture (gate, components, multiplier, precision band) is shared with agent mode. See `/drafts/agent-mode-response-spec.md` §"Component score" for the full specification.
+The full score architecture (gate, components, multiplier, precision band) is shared with agent mode. See `/archive/2026-05-14_agent-mode-response-spec-superseded.md` §"Component score" for the full specification.
 
 Differences for philosophical-mode rendering:
 
@@ -269,7 +269,7 @@ The four-mode work surfaced eight Layer 1 input field additions in total — non
 ## Cross-references for the future build session
 
 - `/manifest.md` §R3 / §R4 (IP boundary distinction from R17) / §R8a (controlled-vocabulary glossing) / §R17 (full intimate-data protection rules) / §R18a / §R18e / §R19c / §R19d / §R20a / §AC1 / §AC2 / §AC4 / §AC9 / §AC10 / §AC11
-- `/drafts/agent-mode-response-spec.md` — companion spec; shares mandatory wraps, Layer 2 source, score architecture
+- `/archive/2026-05-14_agent-mode-response-spec-superseded.md` — companion spec; shares mandatory wraps, Layer 2 source, score architecture
 - `/adopted/substrate-plugin-staging-plan.md` §A6 row (currently scoped as "prose_mode parameter"; this spec re-scopes A6's "clinical" sub-mode and renames it "philosophical")
 - `/adopted/adr/2026-05-04-layer3-prose-template-api-reason.md` (ADR-007 — the existing per-consumer Layer 3 prose template; philosophical mode does NOT use this — it bypasses LLM composition entirely)
 - `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` (J1 ADR — Character Kernel category label injected via R18a wrap)
@@ -311,4 +311,4 @@ Renders beautifully in markdown-aware consumers (the website, modern email clien
 
 ---
 
-*End of draft spec. Status: Designed. Not yet Adopted. Build session deferred. Authored 2026-05-14 in scoping/exploration session. The companion agent-mode spec at `/drafts/agent-mode-response-spec.md` and the upcoming standard-mode + educational-mode specs round out the substrate's four-mode taxonomy.*
+*End of spec. Status: Adopted 2026-05-14 (document); Designed (implementation). Build session deferred. Authored 2026-05-14 in scoping/exploration session; adopted 2026-05-14 under D-FOUR-MODE-SPECS-ADOPTED-2026-05-14. The four-mode taxonomy is agent (now the Agent Trust Layer Wrapper) / philosophical / standard / private; the superseded agent-mode spec is preserved at `/archive/2026-05-14_agent-mode-response-spec-superseded.md`.*

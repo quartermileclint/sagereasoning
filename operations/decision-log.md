@@ -5202,3 +5202,70 @@ Expected: tsc clean; 33/0; 28/0; 33/33; 503; PASS.
 **Status:** Adopted. Cross-references: predecessor `D-A6-RESCOPED-TO-FOUR-MODE-REDESIGN-2026-05-14` (the re-scope that surfaced the eight fields); next-session prompt `/operations/handoffs/founder/2026-05-14-layer1-schema-additions-NEXT-SESSION-PROMPT.md`; predecessor close `/operations/handoffs/founder/2026-05-14-A6-rescope-four-mode-redesign-close.md`; specs `/drafts/private-mode-response-spec.md` + `/drafts/agent-trust-layer-wrapper-spec.md`; this session's close `/operations/handoffs/founder/2026-05-14-layer1-schema-additions-close.md`; modified files `/website/src/lib/translation-sandwich/layer1-extractor.ts` + `layer2-mechanisms.ts`; new test `/website/src/lib/translation-sandwich/__tests__/layer1-schema-additions.test.ts`.
 
 ---
+
+## 2026-05-14 — D-FOUR-MODE-SPECS-ADOPTED-2026-05-14
+
+**Decision:** The four active substrate mode specs — philosophical, standard, private, and the Agent Trust Layer Wrapper — are Adopted and moved `/drafts/` → `/adopted/substrate-modes/`; the superseded `agent-mode-response-spec.md` is moved to `/archive/` per 0e; the `standard-mode-example.md` worked example is adopted alongside its spec; `private-mode-example.md` is held in `/drafts/` (known-stale — carries the obsolete standalone "Reflection component" section).
+
+**Reasoning:** Closes the "spec adoption (Draft → Adopted)" open question carried forward from `D-LAYER1-SCHEMA-ADDITIONS-WIRED-VERIFIED-2026-05-14`. The four specs sat at implementation status `Designed` in `/drafts/` while the re-scope decision (`D-A6-RESCOPED-TO-FOUR-MODE-REDESIGN-2026-05-14`) and the eight Layer 1 placeholder fields were already in force — adopting the specs gives every downstream mode build an Adopted spec to open against and confirms the eight `Layer1Schema` field names against governing specs. Adoption accepts each spec's design *and* its explicitly-deferred "open questions deferred to build" sections (PR7) — it does not answer them.
+
+**Files touched:**
+- `adopted/substrate-modes/philosophical-mode-response-spec.md`, `standard-mode-response-spec.md`, `private-mode-response-spec.md`, `agent-trust-layer-wrapper-spec.md` — moved from `/drafts/`; H1 "— Draft" dropped; status header `Drafted … Not yet Adopted` → `Adopted 2026-05-14` (document) with `Designed` retained as the distinct implementation status (0a two-taxonomy discipline); footer status line updated; internal `/drafts/` cross-references repointed to `/adopted/substrate-modes/` and `/archive/`
+- `adopted/substrate-modes/standard-mode-example.md` — moved from `/drafts/` alongside its spec; "— for review" header + footer updated to adopted status
+- `archive/2026-05-14_agent-mode-response-spec-superseded.md` — moved from `/drafts/agent-mode-response-spec.md` per 0e ("superseded versions moved here, not deleted"); the superseded-pointer header was already in place; its pointer path repointed to the adopted ATL Wrapper spec
+- `drafts/private-mode-example.md` — HELD in `/drafts/` (not adopted; regeneration deferred to the private-mode build)
+- `operations/decision-log.md` — this entry + `D-STAGING-PLAN-AMENDED-FOUR-MODE-2026-05-14` appended
+
+**Risk classification:** Elevated under 0d-ii — `archive` category (file moves `/drafts/` → `/adopted/` and → `/archive/`). Documentation + governance only; no code, auth, encryption, or safety surface touched. Critical Change Protocol NOT engaged. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert <commit>` and push via GitHub Desktop — restores the four specs to `/drafts/` at `Designed` status and the agent-mode spec to `/drafts/`. The `/archive/` snapshots survive the revert as verbatim records either way. No production surface affected; `/api/reason` and every endpoint are byte-identical regardless. No data loss; no user impact.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+ls adopted/substrate-modes/                                          # 4 specs + standard-mode-example.md
+ls drafts/ | grep -i mode                                            # private-mode-example.md only
+head -3 adopted/substrate-modes/philosophical-mode-response-spec.md   # "Adopted 2026-05-14" status header
+```
+Expected: the four specs + the standard example in `/adopted/substrate-modes/`; only `private-mode-example.md` left in `/drafts/` among the mode files; each adopted spec's status header reads "Adopted 2026-05-14".
+
+**Open questions:**
+- `private-mode-example.md` regeneration — held in `/drafts/`; carries the obsolete standalone "Reflection component" section the founder judged "added nothing of value." Revisit condition: the private-mode build session (regenerate without the section per the private-mode spec's note).
+- `layer1-extractor.ts` placeholder comments — the file's `PLACEHOLDER (pending spec adoption)` comments are now technically stale (the specs are Adopted). Not flipped this session to keep the session code-free. Revisit condition: founder elects the one-line `code-standard` follow-up, or the first mode build picks it up.
+- `ADR-stoic-agent-substrate-concept.md` line 92 + `anthropic-features-survey-2026-05-14.md` line 250 still carry the old four-mode enum / "A6 prose_mode templates" phrasing — left as-is per founder election at the Step 2 gate (an ADR has its own supersede discipline; the survey is a dated snapshot). Revisit condition: founder elects an ADR amendment note.
+
+**Rules served:** 0a, 0d-ii, 0e, 0f, PR7, PR11, PR12, PR16.
+
+**Status:** Adopted. Cross-references: predecessor `D-A6-RESCOPED-TO-FOUR-MODE-REDESIGN-2026-05-14`, `D-LAYER1-SCHEMA-ADDITIONS-WIRED-VERIFIED-2026-05-14`; same-session `D-STAGING-PLAN-AMENDED-FOUR-MODE-2026-05-14`; deliverables `/adopted/substrate-modes/` (four specs + worked example); `/archive/2026-05-14_agent-mode-response-spec-superseded.md`; session close `/operations/handoffs/founder/2026-05-14-spec-adoption-and-governing-doc-updates-close.md`.
+
+---
+
+## 2026-05-14 — D-STAGING-PLAN-AMENDED-FOUR-MODE-2026-05-14
+
+**Decision:** The substrate-plugin staging plan §A6 row is amended from "Layer 3 `prose_mode` parameter — Enum of supported modes (clinical / terse / standard / educational)" to "Layer 3 four-mode response-shape redesign," reflecting `D-A6-RESCOPED-TO-FOUR-MODE-REDESIGN-2026-05-14`; the indicative session-packaging table (line 686) receives the matching "A6 four-mode redesign" consistency fix. The standing protocol cache and the build-sessions protocol cache are NOT amended — see Reasoning.
+
+**Reasoning:** Brings the governing staging plan current with the four-mode re-scope so downstream mode builds open against an accurate map. **PR12 negative-finding discipline (load-bearing):** the predecessor close (`D-LAYER1-SCHEMA-ADDITIONS-WIRED-VERIFIED-2026-05-14`) named the standing cache and the build-sessions cache as also carrying the old A6 framing. Step 1 verified — via three keyword greps across all of `/adopted/` — that they do **not**: zero occurrences of the old four-mode enum in either cache (the build-sessions cache carries one generic `prose_mode` mention in its Decision-1 summary, not the old enum). Therefore no `D-CACHE-DRIFT-RESOLVED` / `D-BUILD-CACHE-DRIFT-RESOLVED` entries are required and neither cache was touched. The only governing-document carrying the old A6 framing was the staging plan.
+
+**Files touched:**
+- `adopted/substrate-plugin-staging-plan.md` — §A6 row (line 43) re-scoped to the four-mode redesign with per-mode risk tiers (philosophical + standard: Standard; private: Critical per R17f; ATL Wrapper: multi-session) and status `Designed (four specs Adopted 2026-05-14; builds deferred)`; line-686 indicative-packaging table "A6 prose_mode" → "A6 four-mode redesign"
+- `archive/2026-05-14_substrate-plugin-staging-plan_pre-A6-four-mode-amendment.md` — verbatim pre-amendment snapshot created **before** the edit (preserve-prior-versions, per the `D-ANTHROPIC-NATIVE-POSTURE` precedent)
+- `operations/decision-log.md` — this entry appended
+
+**Risk classification:** Elevated under 0d-ii — substantive edit to an adopted governing document. Documentation + governance only; no code, auth, or safety surface. Critical Change Protocol NOT engaged. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert <commit>` and push via GitHub Desktop — restores the §A6 row + line 686 to their prior text. The `/archive/` snapshot survives the revert as a verbatim record either way. No production surface affected.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -n "^| A6 |" adopted/substrate-plugin-staging-plan.md
+diff <(sed -n '43p' adopted/substrate-plugin-staging-plan.md) \
+     <(sed -n '43p' archive/2026-05-14_substrate-plugin-staging-plan_pre-A6-four-mode-amendment.md)
+```
+Expected: the §A6 row reads "Layer 3 four-mode response-shape redesign …"; the `diff` shows the old enum row preserved verbatim in the `/archive/` snapshot.
+
+**Rules served:** 0a, 0d-ii, 0e, 0f, PR11, PR12.
+
+**Status:** Adopted. Cross-references: `D-A6-RESCOPED-TO-FOUR-MODE-REDESIGN-2026-05-14`; same-session `D-FOUR-MODE-SPECS-ADOPTED-2026-05-14`; `/adopted/substrate-plugin-staging-plan.md` §A6; `/archive/2026-05-14_substrate-plugin-staging-plan_pre-A6-four-mode-amendment.md`; session close `/operations/handoffs/founder/2026-05-14-spec-adoption-and-governing-doc-updates-close.md`.
+
+---

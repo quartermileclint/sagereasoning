@@ -40,7 +40,7 @@ The Stoic Agent Substrate has three layers. Layer 1 (text → structured feature
 | A3 | Layer 2 signing | Every authoritative Layer2Assessment cryptographically signed; verifiers (plugins, downstream agents) check signatures | Critical (crypto) | 2-3 | Verified |
 | A4 | Key management | Signing keys managed, rotated, protected; rotation procedure documented | Critical (crypto) | 1-2 | Verified |
 | A5 | Layer 3 server-side service | Generates prose from Layer 2 output; injects R3 disclaimer + R19 limitations + R20a distress pass-through deterministically | Critical (R20a) | 2-3 | Scoped |
-| A6 | Layer 3 four-mode response-shape redesign | Re-scoped 2026-05-14 per `D-A6-RESCOPED-TO-FOUR-MODE-REDESIGN-2026-05-14`: from "prose_mode per-mode templates" to a four-mode redesign — philosophical (transparency surface), standard (plain-English digest + Summary Response), private (developmental-practice; the private-mentor substrate replacement), and the Agent Trust Layer Wrapper (absorbs the former "agent" mode). `prose_mode` remains the Layer 3 selection parameter; the modes it selects are re-conceived. Four specs Adopted at `/adopted/substrate-modes/`; SageReasoning-authored, not community-extensible. | Mixed (philosophical + standard: Standard; private: Critical per R17f; ATL Wrapper: multi-session) | 4+ (one build per mode) | Designed (four specs Adopted 2026-05-14; builds deferred) |
+| A6 | Layer 3 `prose_mode` parameter | Enum of supported modes (clinical / terse / standard / educational); SageReasoning-authored, not community-extensible | Standard | 1 | Scoped |
 | A7 | Server-side R20a gate | Layer 2 of the three-layer R20a defence; guards Layer 2 API regardless of plugin behaviour | Critical (R20a / PR6) | 2 | Scoped |
 | A8 | V3 endpoint relationship design | Decide how each existing /api/score-* endpoint becomes a plugin-internal tool wrapper after migration; produce the mapping document | Standard | 1 | Scoped |
 | A9 | Cost monitoring restoration on the new substrate path (R5) | Layer 1 cost shifts to plugin; Layer 2 cost near-zero; Layer 3 cost stays metered; R5 cost-as-health-metric alerts re-pointed | Elevated | 1-2 | Scoped |
@@ -683,7 +683,7 @@ Sessions 1-7 are complete or in-progress (A1, A2, A3, A4 Verified; A5 next). Ind
 
 | # | Session focus | Items | Est. duration | Risk class |
 |---|---|---|---|---|
-| 8 | A5 Layer 3 scaffolding + A6 four-mode redesign + A8 endpoint mapping + K1 inventory | A5 (partial), A6, A8, K1 | 3-4 hr | Mixed |
+| 8 | A5 Layer 3 scaffolding + A6 prose_mode + A8 endpoint mapping + K1 inventory | A5 (partial), A6, A8, K1 | 3-4 hr | Mixed |
 | 9 | A5 Verified; A7 R20a gate scaffolding (PR1 single-endpoint proof) | A5 (complete), A7 (partial) | 3-4 hr | Critical |
 | 10 | A7 Verified; A9 cost monitoring + J6 cost-impact | A7 (complete), A9, J6 | 3-4 hr | Critical → Standard |
 | 11 | A10 token-format ADR + kickoff scaffolding | A10 (partial); ADR drafted | 3-4 hr | Critical (PR6 + AC7) |

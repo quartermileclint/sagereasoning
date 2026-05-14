@@ -1,10 +1,10 @@
-# Standard-Mode Response Specification — Draft
+# Standard-Mode Response Specification
 
-**Status:** Drafted 2026-05-14 in scoping session. **Implementation status:** Designed (per 0a vocabulary). Not yet Adopted. Build session deferred.
+**Status:** **Adopted 2026-05-14** under `D-FOUR-MODE-SPECS-ADOPTED-2026-05-14` — moved `/drafts/` → `/adopted/substrate-modes/`. **Implementation status:** Designed (per 0a vocabulary) — the mode is specified, not built; the build session is deferred. (Decision status `Adopted` and implementation status `Designed` are distinct 0a taxonomies, stated separately per the standing cache's Element 7.)
 **Stream:** founder.
 **Name:** "standard" — retained (founder decision 2026-05-14). The name signals the default mode for the default consumer.
 **Supersedes scope:** the "standard" mode entry in the original A6 row of `/adopted/substrate-plugin-staging-plan.md`. The original A6 prompt framed standard mode as "keep byte-identical to today's `/api/reason` output" — a regression-guard. This specification **re-scopes** standard mode: it is no longer byte-identical to today's LLM-composed three-field prose. It adopts philosophical mode's structure (deterministic field rendering + source material + mandatory wraps), adds a Summary Response digest at the top, replaces Greek with plain English, and folds in the prose disciplines from today's `/api/reason`. This is a deliberate scope change made during the 2026-05-14 scoping session.
-**Companion specs:** `/drafts/agent-mode-response-spec.md` ("terse → agent"), `/drafts/philosophical-mode-response-spec.md` ("clinical → philosophical"). All three share the mandatory wraps, the Layer 2 source, the per-response-only discipline (R17e), and the reflection component handling. Standard mode is closest to philosophical mode structurally — it IS philosophical mode with Greek replaced by English, observational tone, and a Summary Response added on top.
+**Companion specs:** `/archive/2026-05-14_agent-mode-response-spec-superseded.md` ("terse → agent"), `/adopted/substrate-modes/philosophical-mode-response-spec.md` ("clinical → philosophical"). All three share the mandatory wraps, the Layer 2 source, the per-response-only discipline (R17e), and the reflection component handling. Standard mode is closest to philosophical mode structurally — it IS philosophical mode with Greek replaced by English, observational tone, and a Summary Response added on top.
 **F3 fold-in (per `/operations/agentic-commerce-findings-downstream-order.md`):** The standard-mode response shape is the plain-English human-readable rendering of the Layer3Response substrate-consultation-mandate (R3 + R19c + R19d + R20a + R18a + R18e injections + AC9/AC10/AC11 projections + verdict + score + Layer 2 fields).
 
 ---
@@ -223,7 +223,7 @@ Sections subject to omission when empty: Soft clarifications, Open deferrals, Im
 
 ## Score handling
 
-Same score architecture as agent mode and philosophical mode (kathekon as gate; component score; quality multiplier; precision band). See `/drafts/agent-mode-response-spec.md` §"Component score" for the full specification.
+Same score architecture as agent mode and philosophical mode (kathekon as gate; component score; quality multiplier; precision band). See `/archive/2026-05-14_agent-mode-response-spec-superseded.md` §"Component score" for the full specification.
 
 Standard-mode rendering specifics:
 
@@ -241,7 +241,7 @@ The score sits in the "additional detail" zone below the Summary Response. The a
 
 ## Source material
 
-Same mechanism as philosophical mode (Option A — Layer 3 calls `retrieve-passages.ts` directly; `top_k: 3`; passages keyed to the principal findings; rendered at the closing of the report before the mandatory closing wraps; JSON-excluded). See `/drafts/philosophical-mode-response-spec.md` §"Source material section" for the full retrieve parameters and rendering shape.
+Same mechanism as philosophical mode (Option A — Layer 3 calls `retrieve-passages.ts` directly; `top_k: 3`; passages keyed to the principal findings; rendered at the closing of the report before the mandatory closing wraps; JSON-excluded). See `/adopted/substrate-modes/philosophical-mode-response-spec.md` §"Source material section" for the full retrieve parameters and rendering shape.
 
 The one difference: the contextual framing lines above each passage use plain English ("On fear at the assent stage", not "On phobos at the synkatathesis stage").
 
@@ -255,7 +255,7 @@ All six mandatory injection rules from `layer3-service.ts` apply identically in 
 
 ## R17 compliance
 
-Standard mode is compliant with R17e for the same reasons philosophical mode is — see `/drafts/philosophical-mode-response-spec.md` §"R17 compliance". In brief: per-response only; no cross-submission aggregation; `iterative_refinement` excluded; the user is the subject of the evaluation; retrieved Stoic passages are public framework content; aggregation surfaces (journal dashboard, mentor hub) are governed separately by R17a/b/c/d.
+Standard mode is compliant with R17e for the same reasons philosophical mode is — see `/adopted/substrate-modes/philosophical-mode-response-spec.md` §"R17 compliance". In brief: per-response only; no cross-submission aggregation; `iterative_refinement` excluded; the user is the subject of the evaluation; retrieved Stoic passages are public framework content; aggregation surfaces (journal dashboard, mentor hub) are governed separately by R17a/b/c/d.
 
 One standard-mode-specific note: the Summary Response's LLM rephraser receives the raw input text. The raw input is the user's own submission — already known to the user. The rephraser does not retain it, aggregate it, or expose it beyond the single response. The grounding validator ensures the rephraser adds nothing; it does not cause the rephraser to leak anything. No new R17 surface is created by the rephraser.
 
@@ -282,7 +282,7 @@ One standard-mode-specific note: the Summary Response's LLM rephraser receives t
 
 ## Worked example
 
-See `/drafts/standard-mode-example.md` — the team-channel-checking scenario rendered in full standard-mode format, reviewed and approved during the 2026-05-14 scoping session. The example demonstrates: the Summary Response (LLM-rephrased version shown), the digest/detail boundary line, Greek replaced with English, technical-English terms glossed per section, observational field detail, the `/api/reason` disciplines folded in, de-jargoned section labels, the score in the additional-detail zone, source material at closing, all six mandatory wraps, `iterative_refinement` excluded, empty fields omitted.
+See `/adopted/substrate-modes/standard-mode-example.md` — the team-channel-checking scenario rendered in full standard-mode format, reviewed and approved during the 2026-05-14 scoping session. The example demonstrates: the Summary Response (LLM-rephrased version shown), the digest/detail boundary line, Greek replaced with English, technical-English terms glossed per section, observational field detail, the `/api/reason` disciplines folded in, de-jargoned section labels, the score in the additional-detail zone, source material at closing, all six mandatory wraps, `iterative_refinement` excluded, empty fields omitted.
 
 The example's scenario does not fire an open deferral, so the reflection component is not shown in the rendered body — the example file's header notes what it would look like if `PRAXIS_MOTIVATION_AMBIGUITY` had fired.
 
@@ -311,9 +311,9 @@ The four-mode work surfaced eight Layer 1 input field additions in total — non
 ## Cross-references for the future build session
 
 - `/manifest.md` §R3 / §R4 (IP boundary) / §R5 (cost; free-tier full-output rule) / §R8a (controlled-vocabulary glossing — transformed for standard mode) / §R17 (intimate-data protection) / §R18a / §R18e / §R19c / §R19d / §R20a / §AC1 (model selection for the rephraser) / §AC2 (latency) / §AC4 / §AC9 / §AC10 / §AC11
-- `/drafts/agent-mode-response-spec.md` — companion spec; shares the score architecture, mandatory wraps, Layer 2 source, reflection component
-- `/drafts/philosophical-mode-response-spec.md` — companion spec; standard mode IS this spec's structure with Greek replaced by English + a Summary Response added
-- `/drafts/standard-mode-example.md` — the reviewed worked example
+- `/archive/2026-05-14_agent-mode-response-spec-superseded.md` — companion spec; shares the score architecture, mandatory wraps, Layer 2 source, reflection component
+- `/adopted/substrate-modes/philosophical-mode-response-spec.md` — companion spec; standard mode IS this spec's structure with Greek replaced by English + a Summary Response added
+- `/adopted/substrate-modes/standard-mode-example.md` — the reviewed worked example
 - `/adopted/substrate-plugin-staging-plan.md` §A6 row — the original "standard" sub-mode entry this spec re-scopes
 - `/adopted/adr/2026-05-04-layer3-prose-template-api-reason.md` (ADR-007 — today's `/api/reason` prose template; standard mode adapts its disciplines but replaces its LLM-composition approach with field rendering + LLM-rephrased Summary)
 - `/website/src/lib/substrate/layer3-service.ts` (A5 service — standard mode would dispatch from `applyLayer3Injections` based on `prose_mode` value)
@@ -343,4 +343,4 @@ Confirmed 2026-05-14: markdown for the text rendering — `#`/`##`/`###` headers
 
 ---
 
-*End of draft spec. Status: Designed. Not yet Adopted. Build session deferred. Authored 2026-05-14 in scoping/exploration session. Three of four modes now drafted (agent, philosophical, standard). Educational mode is the only one of the four-mode taxonomy not yet scoped.*
+*End of spec. Status: Adopted 2026-05-14 (document); Designed (implementation). Build session deferred. Authored 2026-05-14 in scoping/exploration session; adopted 2026-05-14 under D-FOUR-MODE-SPECS-ADOPTED-2026-05-14. All four modes of the taxonomy are now specified and adopted: philosophical / standard / private / the Agent Trust Layer Wrapper.*

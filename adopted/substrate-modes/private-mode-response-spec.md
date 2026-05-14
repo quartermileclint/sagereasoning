@@ -1,10 +1,10 @@
-# Private-Mode Response Specification — Draft
+# Private-Mode Response Specification
 
-**Status:** Drafted 2026-05-14 in scoping session. **Implementation status:** Designed (per 0a vocabulary). Not yet Adopted. Build session deferred.
+**Status:** **Adopted 2026-05-14** under `D-FOUR-MODE-SPECS-ADOPTED-2026-05-14` — moved `/drafts/` → `/adopted/substrate-modes/`. **Implementation status:** Designed (per 0a vocabulary) — the mode is specified, not built; the build session is deferred (and Critical-tier when it comes, per R17f). (Decision status `Adopted` and implementation status `Designed` are distinct 0a taxonomies, stated separately per the standing cache's Element 7.)
 **Stream:** founder.
 **Name:** "private" (renamed from "educational" — founder decision 2026-05-14). The original "educational" framing (learners understanding the framework) is dropped; private mode is the individual's own developmental-practice rendering.
 **Supersedes scope:** the "educational" mode entry in the original A6 row of `/adopted/substrate-plugin-staging-plan.md`. This specification re-scopes and renames it. Private mode is also, in effect, **the substrate-based replacement for the existing private mentor** — making it both a new mode and a K-category migration item.
-**Companion specs:** `/drafts/agent-mode-response-spec.md`, `/drafts/philosophical-mode-response-spec.md`, `/drafts/standard-mode-response-spec.md`. Private mode shares the mandatory wraps, the Layer 2 source, the score architecture, and the reflection component with all three. It is closest to standard mode structurally (plain English, Summary Response, observational field detail) but **inverts the profile-data discipline**: what the other three modes exclude per R17e, private mode includes — because the consumer IS the data subject.
+**Companion specs:** `/archive/2026-05-14_agent-mode-response-spec-superseded.md`, `/adopted/substrate-modes/philosophical-mode-response-spec.md`, `/adopted/substrate-modes/standard-mode-response-spec.md`. Private mode shares the mandatory wraps, the Layer 2 source, the score architecture, and the reflection component with all three. It is closest to standard mode structurally (plain English, Summary Response, observational field detail) but **inverts the profile-data discipline**: what the other three modes exclude per R17e, private mode includes — because the consumer IS the data subject.
 **F3 fold-in (per `/operations/agentic-commerce-findings-downstream-order.md`):** The private-mode response shape is the developmental-practice rendering of the Layer3Response substrate-consultation-mandate, with the profile-aware sections (Development Arc, Iterative refinement, Cross-submission patterns) added.
 
 ---
@@ -74,7 +74,7 @@ Private mode requires these additions to the Layer 1 input schema. Names are pla
 | `history_window` | How far back to draw trajectory + cross-submission data (mirrors the existing interactions-loader's windowDays/limit; default 90 days / 100 rows). |
 | `topic_signal` *(optional)* | The current entry's topic, for the topic-projection logic that `practitioner-context.ts` already implements (`detectTopicSignal` / `projectProfile`) — lets private mode project the profile to the dimensions relevant to this entry rather than loading the full ~7,500-char summary every time. |
 
-For agents, the parallel Layer 1 fields are `carried_profile`, `profile_provenance`, `peer_agent_assessments`, and `objective_function_declaration` — specified in `/drafts/agent-trust-layer-wrapper-spec.md` §"Layer 1 implications". `subject_identity_binding` (private, human) and `carried_profile` (agent) are the parallel identity/profile-bearing fields — server-side encrypted load for humans, wrapper-carried for agents.
+For agents, the parallel Layer 1 fields are `carried_profile`, `profile_provenance`, `peer_agent_assessments`, and `objective_function_declaration` — specified in `/adopted/substrate-modes/agent-trust-layer-wrapper-spec.md` §"Layer 1 implications". `subject_identity_binding` (private, human) and `carried_profile` (agent) are the parallel identity/profile-bearing fields — server-side encrypted load for humans, wrapper-carried for agents.
 
 The four-mode work surfaced eight Layer 1 input field additions in total — four from private mode (above), four from the ATL Wrapper, none from philosophical or standard mode. The consolidated set and the build approach are carried in the Layer 1 code-changes next-session prompt (`/operations/handoffs/founder/2026-05-14-layer1-schema-additions-NEXT-SESSION-PROMPT.md`).
 
@@ -124,7 +124,7 @@ Recurring findings across the practitioner's history: recurring false judgements
 
 ## Score handling
 
-Founder decision 2026-05-14: the same score architecture as the other three modes is fine (kathekon gate + components + quality multiplier + precision band — see `/drafts/agent-mode-response-spec.md` §"Component score"). Two private-mode additions:
+Founder decision 2026-05-14: the same score architecture as the other three modes is fine (kathekon gate + components + quality multiplier + precision band — see `/archive/2026-05-14_agent-mode-response-spec-superseded.md` §"Component score"). Two private-mode additions:
 
 ### Direction score
 
@@ -144,7 +144,7 @@ The score and direction score sit in the "additional detail" zone (Overall score
 
 Inherited from standard mode: plain English (Greek replaced; approximate English for the four hard terms — `prohairesis → moral choice`, `kathekon → appropriate action`, `katorthoma → right action`, `oikeiosis → circles of concern`); English-but-technical terms kept and glossed lightly per section; observational field detail with the development-arc-aware Summary leaning second-person where it connects to the practitioner's situation; no softening of the deterministic finding; `/api/reason` disciplines folded in; markdown formatting convention.
 
-The Summary Response uses the same LLM-rephrased-from-deterministic-base + grounding-validator + deterministic-fallback architecture as standard mode (see `/drafts/standard-mode-response-spec.md` §"The Summary Response"). The grounding validator's allowed-concept set, for private mode, includes the profile data the deterministic base draws on.
+The Summary Response uses the same LLM-rephrased-from-deterministic-base + grounding-validator + deterministic-fallback architecture as standard mode (see `/adopted/substrate-modes/standard-mode-response-spec.md` §"The Summary Response"). The grounding validator's allowed-concept set, for private mode, includes the profile data the deterministic base draws on.
 
 ---
 
@@ -193,9 +193,9 @@ Note: the example file still carries the standalone "Reflection component" secti
 ## Cross-references for the future build session
 
 - `/manifest.md` §R3 / §R8a / §R17 (all sub-rules — heaviest engagement) / §R18a / §R18e / §R19c / §R19d / §R20a / §AC1 / §AC2 / §AC4 / §AC9 / §AC10 / §AC11
-- `/drafts/agent-mode-response-spec.md` — companion; the `carried_profile` mechanism is the agent parallel to private mode's server-side profile
-- `/drafts/philosophical-mode-response-spec.md` — companion
-- `/drafts/standard-mode-response-spec.md` — companion; private mode inherits standard mode's base (Summary Response, plain English, tone, disciplines)
+- `/archive/2026-05-14_agent-mode-response-spec-superseded.md` — companion; the `carried_profile` mechanism is the agent parallel to private mode's server-side profile
+- `/adopted/substrate-modes/philosophical-mode-response-spec.md` — companion
+- `/adopted/substrate-modes/standard-mode-response-spec.md` — companion; private mode inherits standard mode's base (Summary Response, plain English, tone, disciplines)
 - `/drafts/private-mode-example.md` — the reviewed worked example
 - `/website/src/app/api/mentor/private/reflect/route.ts` — the existing private mentor reflect route; private mode is its substrate-based replacement
 - `/website/src/lib/context/practitioner-context.ts` — the three context builders (condensed / full / projected)
@@ -224,4 +224,4 @@ Note: the example file still carries the standalone "Reflection component" secti
 
 ---
 
-*End of draft spec. Status: Designed. Not yet Adopted. Build session deferred — and Critical-tier when it comes. Authored 2026-05-14 in scoping/exploration session. All four modes of the renamed taxonomy (agent / philosophical / standard / private) are now drafted. Next: revisit the agent-mode spec amendments for the carried-profile mechanism, per founder direction.*
+*End of spec. Status: Adopted 2026-05-14 (document); Designed (implementation). Build session deferred — and Critical-tier when it comes (R17f). Authored 2026-05-14 in scoping/exploration session; adopted 2026-05-14 under D-FOUR-MODE-SPECS-ADOPTED-2026-05-14. All four modes of the taxonomy (philosophical / standard / private / the Agent Trust Layer Wrapper) are now specified and adopted.*

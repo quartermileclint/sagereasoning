@@ -1,10 +1,10 @@
-# Agent Trust Layer Wrapper Specification — Draft
+# Agent Trust Layer Wrapper Specification
 
-**Status:** Drafted 2026-05-14 in scoping session. **Implementation status:** Designed (per 0a vocabulary). Not yet Adopted. Build session deferred.
+**Status:** **Adopted 2026-05-14** under `D-FOUR-MODE-SPECS-ADOPTED-2026-05-14` — moved `/drafts/` → `/adopted/substrate-modes/`. **Implementation status:** Designed (per 0a vocabulary) — the wrapper is specified, not built; the build session(s) are deferred. (Decision status `Adopted` and implementation status `Designed` are distinct 0a taxonomies, stated separately per the standing cache's Element 7.)
 **Stream:** founder.
-**Supersedes:** `/drafts/agent-mode-response-spec.md` — the original "agent mode" spec. Founder direction 2026-05-14: a full re-write, not an addendum. "Agent mode" was mis-framed as a peer of the other three Layer 3 rendering modes (philosophical / standard / private). It is not. It is the **Agent Trust Layer Wrapper** — a larger architectural thing, of which the Layer 3 agent-mode *rendering* is one component. The original agent-mode spec's still-valid content (the score architecture, the gaming defences, the verdict/vector/scalar rendering) is absorbed into this spec as §"Component 2 — the Layer 3 agent-mode rendering"; the original file should be marked superseded with a pointer here.
+**Supersedes:** `/archive/2026-05-14_agent-mode-response-spec-superseded.md` — the original "agent mode" spec. Founder direction 2026-05-14: a full re-write, not an addendum. "Agent mode" was mis-framed as a peer of the other three Layer 3 rendering modes (philosophical / standard / private). It is not. It is the **Agent Trust Layer Wrapper** — a larger architectural thing, of which the Layer 3 agent-mode *rendering* is one component. The original agent-mode spec's still-valid content (the score architecture, the gaming defences, the verdict/vector/scalar rendering) is absorbed into this spec as §"Component 2 — the Layer 3 agent-mode rendering"; the original file should be marked superseded with a pointer here.
 **Reconciles with:** the **existing ATL build** at `/trust-layer/` — a substantial offline framework codebase built 3 April 2026 (pre-substrate), "all 5 priorities complete — offline framework code ready for review." This spec connects that existing build to the translation-sandwich substrate and to the founder's expanded ATL Wrapper scope.
-**Companion specs:** `/drafts/philosophical-mode-response-spec.md`, `/drafts/standard-mode-response-spec.md`, `/drafts/private-mode-response-spec.md` — the three human-facing Layer 3 rendering modes. The ATL Wrapper *consumes* a Layer 3 rendering (the agent-mode rendering) the way those three modes *are* renderings — but the wrapper is the larger structure around it.
+**Companion specs:** `/adopted/substrate-modes/philosophical-mode-response-spec.md`, `/adopted/substrate-modes/standard-mode-response-spec.md`, `/adopted/substrate-modes/private-mode-response-spec.md` — the three human-facing Layer 3 rendering modes. The ATL Wrapper *consumes* a Layer 3 rendering (the agent-mode rendering) the way those three modes *are* renderings — but the wrapper is the larger structure around it.
 **F3 fold-in:** the Layer3Response is structurally a substrate-consultation-mandate producer; in the ATL Wrapper context, the wrapper accumulates these mandate-outputs as the agent's trajectory.
 
 ---
@@ -78,7 +78,7 @@ The mapping is clean — the substrate produces everything the existing `Evaluat
 
 ### Component 2 — The Layer 3 agent-mode rendering
 
-The structured decision-support output. This is the content of the original `/drafts/agent-mode-response-spec.md`, absorbed here. It is **dual-purpose** — the founder's 2026-05-14 framing: "the agent mode potentially has to be the report that the agent hands back to the developer."
+The structured decision-support output. This is the content of the original `/archive/2026-05-14_agent-mode-response-spec-superseded.md`, absorbed here. It is **dual-purpose** — the founder's 2026-05-14 framing: "the agent mode potentially has to be the report that the agent hands back to the developer."
 
 - **In-loop rendering (machine-readable JSON):** the agent consumes this to make its next decision. Verdict → score vector → scalar score → all Layer 2 fields → caveats. The kathekon-gate score architecture, the gaming defences (Form 1 / 2 / 3), the receiving-agent caveats, the PROVISIONAL flag rules — all as specified in the superseded agent-mode spec.
 - **Hand-back rendering (human-readable report):** the report the wrapped agent hands back to **its developer**. The developer's view of what their agent did: the decisions made and how the substrate assessed each; the agent's trajectory; the agent's grade + authority level + badge status; persisting passions; direction of travel. For an orchestrator agent, also: how it weighed the peer agents' assessments.
@@ -211,8 +211,8 @@ The build session decides risk tiers per change. The Layer 1 open-contract chang
 
 ## Cross-references
 
-- `/drafts/agent-mode-response-spec.md` — **superseded by this spec**; its rendering content is Component 2 here
-- `/drafts/philosophical-mode-response-spec.md`, `/drafts/standard-mode-response-spec.md`, `/drafts/private-mode-response-spec.md` — the three human-facing rendering modes
+- `/archive/2026-05-14_agent-mode-response-spec-superseded.md` — **superseded by this spec**; its rendering content is Component 2 here
+- `/adopted/substrate-modes/philosophical-mode-response-spec.md`, `/adopted/substrate-modes/standard-mode-response-spec.md`, `/adopted/substrate-modes/private-mode-response-spec.md` — the three human-facing rendering modes
 - `/trust-layer/` — the existing ATL build (all files; BUILD-LOG.md is the overview)
 - `/trust-layer/BUILD-LOG.md` — the 3 April 2026 build record + pending-items list
 - `/trust-layer/types/accreditation.ts` + `/trust-layer/types/evaluation.ts` — the `EvaluatedAction`, `WindowSnapshot`, `AccreditationRecord`, `AccreditationPayload` shapes
@@ -240,4 +240,4 @@ The build session decides risk tiers per change. The Layer 1 open-contract chang
 
 ---
 
-*End of draft spec. Status: Designed. Not yet Adopted. Build session(s) deferred — multi-session, intersecting the existing /trust-layer/ build, the substrate build arc, and Priority 3. Authored 2026-05-14 in scoping/exploration session. This spec supersedes /drafts/agent-mode-response-spec.md; the three human-facing rendering-mode specs (philosophical / standard / private) are unaffected and complete.*
+*End of spec. Status: Adopted 2026-05-14 (document); Designed (implementation). Build session(s) deferred — multi-session, intersecting the existing /trust-layer/ build, the substrate build arc, and Priority 3. Authored 2026-05-14 in scoping/exploration session; adopted 2026-05-14 under D-FOUR-MODE-SPECS-ADOPTED-2026-05-14. This spec supersedes /archive/2026-05-14_agent-mode-response-spec-superseded.md; the three human-facing rendering-mode specs (philosophical / standard / private) are also Adopted.*

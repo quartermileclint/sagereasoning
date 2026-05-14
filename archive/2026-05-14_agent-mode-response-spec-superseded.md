@@ -1,7 +1,7 @@
 # Agent-Mode Response Specification — Draft
 
-> **⚠ SUPERSEDED 2026-05-14 by `/drafts/agent-trust-layer-wrapper-spec.md`.**
-> Founder direction during the 2026-05-14 scoping session: "agent mode" was mis-framed as a peer of the other three Layer 3 rendering modes. It is not — it is one component (the Layer 3 agent-mode *rendering*) of the larger **Agent Trust Layer Wrapper**. This spec is not deleted: its still-valid content — the kathekon-gate score architecture, the gaming defences (Form 1/2/3), the verdict/vector/scalar rendering, the receiving-agent caveats, the PROVISIONAL flag rules, the reflection component section — is absorbed into the ATL Wrapper spec as "Component 2 — the Layer 3 agent-mode rendering." Read this file for the rendering detail; read `/drafts/agent-trust-layer-wrapper-spec.md` for the full wrapper architecture that contains it.
+> **⚠ SUPERSEDED 2026-05-14 by `/adopted/substrate-modes/agent-trust-layer-wrapper-spec.md`.**
+> Founder direction during the 2026-05-14 scoping session: "agent mode" was mis-framed as a peer of the other three Layer 3 rendering modes. It is not — it is one component (the Layer 3 agent-mode *rendering*) of the larger **Agent Trust Layer Wrapper**. This spec is not deleted: its still-valid content — the kathekon-gate score architecture, the gaming defences (Form 1/2/3), the verdict/vector/scalar rendering, the receiving-agent caveats, the PROVISIONAL flag rules, the reflection component section — is absorbed into the ATL Wrapper spec as "Component 2 — the Layer 3 agent-mode rendering." Read this file for the rendering detail; read `/adopted/substrate-modes/agent-trust-layer-wrapper-spec.md` for the full wrapper architecture that contains it.
 
 **Status:** Drafted 2026-05-14 in scoping session. **Implementation status:** Designed (per 0a vocabulary). **Superseded** as a standalone spec; content absorbed into the ATL Wrapper spec. Not yet Adopted. Build session deferred.
 **Stream:** founder.
