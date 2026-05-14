@@ -5269,3 +5269,54 @@ Expected: the §A6 row reads "Layer 3 four-mode response-shape redesign …"; th
 **Status:** Adopted. Cross-references: `D-A6-RESCOPED-TO-FOUR-MODE-REDESIGN-2026-05-14`; same-session `D-FOUR-MODE-SPECS-ADOPTED-2026-05-14`; `/adopted/substrate-plugin-staging-plan.md` §A6; `/archive/2026-05-14_substrate-plugin-staging-plan_pre-A6-four-mode-amendment.md`; session close `/operations/handoffs/founder/2026-05-14-spec-adoption-and-governing-doc-updates-close.md`.
 
 ---
+
+## 2026-05-14 — D-PHILOSOPHICAL-MODE-BUILD-WIRED-VERIFIED-2026-05-14
+
+**Decision:** Philosophical mode's v1 renderings — the canonical JSON projection and the Markdown text rendering — are built, Wired, and Verified as a new module (`philosophical-mode-service.ts`) behind the `SUBSTRATE_LAYER3_ENABLED` gate, with the Layer 3 mode-dispatch entry point (`renderLayer3Mode`) as the PR1 single-endpoint proof. The spec's score-dependent pieces — sections 4 (Score vector) + 5 (Scalar score) and the Verdict's `justification_source` line — are DEFERRED per the founder's Step 1 election, because the substrate score architecture does not exist (it is not a field on `Layer2Assessment` and there is no score-computation module in the substrate).
+
+**Reasoning:** Philosophical mode is the simplest of the four modes — deterministic field rendering of `Layer2Assessment`, no LLM composition — so it is the right place to prove the Layer 3 mode-dispatch pattern (PR1) that standard / private / ATL Wrapper inherit. The score deferral: the score architecture is specified only in the superseded agent-mode spec, whose content the philosophical-mode spec itself locates in the not-yet-built ATL Wrapper, with formulas explicitly marked "build session computes" — it is at most `Designed`, not `Scaffolded` (standing-cache Element 7: "`Designed` is not `Scaffolded`"). PR15: an Anthropic-canonical primitive was considered — the `anthropic-cookbook` structured-output pattern and the `claude-api` skill — and rejected; both concern getting an LLM to *produce* structured output, the inverse of philosophical mode, which deterministically *projects* an already-typed `Layer2Assessment`. No primitive delivers a typed-object→Markdown rendering function; bespoke is correct. F3 (agentic-commerce findings): this session reads the A5 service file — A5's `Layer3Response` shape is structurally a substrate-consultation-mandate producer, and philosophical mode is its human-readable rendering (already folded into the spec's F3 note).
+
+**Files touched:**
+- `/website/src/lib/substrate/philosophical-mode-service.ts` — NEW. The philosophical-mode renderer + the `renderLayer3Mode` dispatch entry. Exports `renderLayer3Mode`, `applyR17eExclusionFilter`, `R17E_EXCLUDED_FIELD_PATHS`, `buildSourceMaterialRetrieveInput`, `projectPhilosophicalModeJSON`, `renderPhilosophicalModeMarkdown`, `renderSourceMaterialMarkdown`, and the `Layer3RenderMode` / `Layer3ModeRenderInput` / `Layer3ModeRenderResult` / `PhilosophicalModeResponse` types. Consumes the six wrap constants via `layer3-service.ts`'s `inject*` functions; consumes `retrievePassages` via a DI seam; no existing file modified.
+- `/website/src/lib/substrate/__tests__/philosophical-mode-service.test.ts` — NEW. 37 assertions (dispatch; six wraps + positions; R17e exclusion; section ordering; per-section glossing; empty-field omission; score deferral; source material + graceful degradation; R20a passthrough; determinism). Invokes `renderLayer3Mode` 9× — PR2 build-to-wire verification immediate.
+- `/website/tsconfig.tsbuildinfo` — touched by `tsc --noEmit` (incremental-build cache; tracked; routinely changes when tsc runs).
+- `/operations/decision-log.md` — this entry appended.
+
+**Risk classification:** Standard under 0d-ii — new module + new test file, not wired to any route, builds behind `SUBSTRATE_LAYER3_ENABLED` (UNSET in Vercel). No existing file modified; no auth / encryption / data-deletion / deployment-config surface. AC7 not engaged. PR6 not engaged — philosophical mode *renders* the R20a passthrough by consuming the existing `R20A_DISTRESS_PASSTHROUGH` constant via `injectR20aDistressPassthrough()`; it does not touch R20a classifier / redirection / wrapper logic. AC8 engaged (translation-sandwich substrate). PR1 single-endpoint proof: `renderLayer3Mode` is the dispatch pattern, proven on one mode. PR2: the test invokes the dispatch entry in the same session.
+
+**Rollback path:** `git revert <commit>` and push via GitHub Desktop. The two new files are not imported by any route — reverting removes the new module; `/api/reason` and `/api/substrate/layer3` are byte-identical either way. No production behaviour change; no data loss; no user impact.
+
+**Verification step (founder-performable, between sessions):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+
+# 0. Clear the stale sandbox-created .git/index.lock + delete the temp capture file
+rm -f .git/index.lock
+rm -f website/_capture-tmp.ts
+
+# 1. TypeScript compile (expected: clean, exit 0)
+cd website && npx tsc --noEmit -p tsconfig.json && cd ..
+
+# 2. Philosophical-mode test (expected: 37 pass / 0 fail)
+cd website && npx tsx src/lib/substrate/__tests__/philosophical-mode-service.test.ts && cd ..
+
+# 3. A5 regression (expected: 28 pass / 0 fail)
+cd website && npx tsx src/lib/substrate/__tests__/layer3-service.test.ts && cd ..
+
+# 4. A7 regression (expected: 33 pass / 0 fail)
+cd website && npx tsx src/lib/substrate/__tests__/r20a-gate.test.ts && cd ..
+```
+Expected: tsc clean; 37/0; 28/0; 33/0. (The tests need the `.env.local` Supabase + OpenAI vars present so `retrieve-passages.ts` resolves on import — the philosophical-mode test uses a *stub* retrieve fn, so the real client is never called, but the import must resolve.)
+
+**Open questions:**
+- **Score architecture deferral (PR7).** Sections 4 + 5 + the `justification_source` line are deferred — the substrate score architecture (kathekon gate, component score, quality multiplier, validity flag, precision band, `justification_source`) is not built and is not on `Layer2Assessment`. The JSON `score` field carries `{ deferred: true, deferral_reason }`; the Markdown carries a one-line transparency note. Revisit condition: the substrate score architecture reaches `Scaffolded` (its natural home is a dedicated score build or the ATL Wrapper build, per the superseded agent-mode spec). Considered and rejected: building a minimal score module this session (formulas partly unspecified; over budget; defeats PR1's simplest-mode-first discipline) and building the score architecture first (the founder elected to proceed with philosophical mode now).
+- **Spec-internal tension — "Excluded fields" vs "Reflection component".** The spec's "Excluded fields" section says `iterative_refinement.*` fields "do not appear in philosophical mode at all"; its "Reflection component" section requires rendering an open deferral's `withheld_classification.field_path` verbatim — and a `PRAXIS_MOTIVATION_AMBIGUITY` deferral's `field_path` legitimately reads `iterative_refinement.motivation_classification`. Resolved conservatively: both sections honoured — `applyR17eExclusionFilter` strips the top-level `iterative_refinement` object (no excluded *value* renders; canary-tested), and `withheld_classification.field_path` renders verbatim (it names a *withheld* classification — surfaces the absence of data, not data). `stage_scores.iterative_refinement` (a per-response stage grade, not trajectory data) also renders per spec section 6i. Revisit condition: founder elects a spec clarification note if the conservative reading is not what was intended.
+- **Worked-example regeneration (spec open question 7) deferred.** The spec's worked example should be regenerated from *actual* `retrieve-passages.ts` output — this needs production Supabase + OpenAI credentials (unavailable in the build sandbox), and editing the now-Adopted spec needs founder approval + a preserve-prior-versions snapshot. The rendered Markdown *was* eyeballed against the spec's section ordering this session using a stub retrieve fn (matches). Revisit condition: a between-sessions run with real credentials, or the next mode-build session, with founder approval to amend the Adopted spec.
+- **`website/_capture-tmp.ts` — I caused this.** A throwaway verification-capture file written to the website dir; the sandbox mount blocked `unlink`, so it could not be removed in-session — it was truncated to a harmless 2-line comment stub. Delete it before committing: `rm website/_capture-tmp.ts`. The Founder Verification `git add` is targeted (explicit paths, not `git add -A`) so it cannot be committed accidentally. Revisit condition: none — one-time cleanup.
+- **Stale `.git/index.lock` — I caused this.** Running `git status` inside the build sandbox created `.git/index.lock`; the sandbox mount blocks `unlink` on it. It is a 0-byte stale lock with no live git process. Remove it (`rm -f .git/index.lock`) before `git add` / `git commit`. Revisit condition: none — one-time cleanup.
+
+**Rules served:** 0a, 0c, 0d-ii, 0f, R3, R4, R8a, R17e, R18a, R18e, R19c, R19d, R20a, AC8, PR1, PR2, PR7, PR10, PR11, PR15, PR16. PR4: N/A (no LLM call — philosophical mode is deterministic; `retrieve-passages.ts` uses the documented OpenAI embedding model via existing infrastructure). PR6: not engaged (R20a passthrough rendered, not modified). KG1–KG7: N/A (no DB writes, no model selection, no JSONB, no context-layer change).
+
+**Status:** Adopted. Cross-references: predecessor `D-FOUR-MODE-SPECS-ADOPTED-2026-05-14`, `D-STAGING-PLAN-AMENDED-FOUR-MODE-2026-05-14`; deliverable-of-the-day `/adopted/substrate-modes/philosophical-mode-response-spec.md`; new files `/website/src/lib/substrate/philosophical-mode-service.ts` + `/website/src/lib/substrate/__tests__/philosophical-mode-service.test.ts`; agentic-commerce F3 `/operations/agentic-commerce-findings-downstream-order.md`; session close `/operations/handoffs/founder/2026-05-14-philosophical-mode-build-close.md`.
+
+---
