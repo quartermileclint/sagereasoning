@@ -5095,3 +5095,110 @@ diff <(curl -sS https://www.sagereasoning.com/.well-known/agent-card.json | pyth
 **Status:** Adopted. Cross-references: predecessor `D-AGENT-CARD-CURRENCY-CHECK-2026-05-14` (superseded by this entry, which closes the deferred gap); umbrella `D-ANTHROPIC-NATIVE-POSTURE-2026-05-14`; J1 ADR `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` §"Agentic-commerce-stack adjacency" (A2A v1 alignment status note now reflects "Reshape Verified"); features survey §14 (AAIF/A2A governance); session close at `/operations/handoffs/founder/2026-05-14-agent-card-a2a-reshape-close.md`.
 
 ---
+
+## 2026-05-14 — D-A6-RESCOPED-TO-FOUR-MODE-REDESIGN-2026-05-14
+
+**Decision:** A6 re-scoped from "prose_mode per-mode templates" to a
+four-mode substrate response-shape redesign. Modes renamed + re-conceived:
+terse->agent (further re-conceived as the Agent Trust Layer Wrapper),
+clinical->philosophical, educational->private, standard kept. Five draft
+design specs + two worked-example files produced; no code written.
+
+**Reasoning:** The A6 build prompt scoped a one-session template fill-in.
+At the design gate the founder redirected into scoping/exploration. Each
+mode was found to need re-conception, not just a template: philosophical
+became a transparency surface; private became the developmental-practice
+mode surfacing profile data (the private-mentor substrate replacement);
+standard became philosophical-structure-in-plain-English plus a Summary
+Response; agent outgrew the rendering-mode framing entirely and is the
+Agent Trust Layer Wrapper, reconciling with the existing /trust-layer/
+build. Score architecture mentor-consulted (kathekon-as-gate).
+
+**Files touched:** five draft specs + two examples in /drafts/; session
+close + Layer 1 next-session prompt in /operations/handoffs/founder/.
+
+**Risk classification:** Standard under 0d-ii. governance tier. No code
+touched. Critical Change Protocol NOT engaged.
+
+**Rollback path:** the deliverables are /drafts/ design documents; no
+production surface affected. Revert the commit if the re-scope is rejected.
+
+**Open questions:** staging plan / caches still carry old A6 framing
+(update pending adoption); mentor's Risk 4 sequencing observation;
+grounding-validator manifest constraint; direction-score formula;
+ATL Wrapper's nine open questions; spec adoption Draft -> Adopted.
+
+**Rules served:** 0a (status vocabulary), 0d-ii (Standard), 0f (this
+entry), 0g (workflow-skill candidates not triggered), PR7 (decisions
+deferred documented — Risk 4, grounding-validator, direction-score),
+PR11 (inbox scanned; no new material), PR15 (ATL Wrapper flags the
+Anthropic multi-agent-orchestration primitive check), PR16 (positioning:
+all four modes strengthen Character-Kernel-as-tone/audience-controllable).
+
+**Status:** Adopted. Cross-references: /operations/handoffs/founder/
+2026-05-14-A6-rescope-four-mode-redesign-close.md;
+/operations/handoffs/founder/2026-05-14-layer1-schema-additions-NEXT-SESSION-PROMPT.md;
+/drafts/{agent-mode,philosophical-mode,standard-mode,private-mode}-response-spec.md;
+/drafts/agent-trust-layer-wrapper-spec.md.
+
+---
+
+## 2026-05-14 — D-LAYER1-SCHEMA-ADDITIONS-WIRED-VERIFIED-2026-05-14
+
+**Decision:** Eight optional carried-context fields added to the open `Layer1Schema` contract as placeholder scaffolding pending mode-spec adoption — four from private mode (`subject_identity_binding`, `reflective_self_report`, `history_window`, `topic_signal`) and four from the Agent Trust Layer Wrapper (`carried_profile`, `profile_provenance`, `peer_agent_assessments`, `objective_function_declaration`). All optional + additive; `validateLayer1Schema` accepts them when present (shape-checked) and still validates a schema without them; Layer 2 defensively tolerates them (passes through untouched, does not yet act on them). Implementation status: Scoped → Designed → Scaffolded → Wired → Verified in one session.
+
+**Reasoning:** The A6 four-mode re-scope (`D-A6-RESCOPED-TO-FOUR-MODE-REDESIGN-2026-05-14`) surfaced eight Layer 1 input fields that private mode and the ATL Wrapper consume; philosophical and standard modes need none. Landing them in one deliberate act versions the open Layer 1 contract once rather than piecemeal across four mode builds, and unblocks all four mode builds at the Layer 1 layer. Founder elected at the session-open gate to land them now as clearly-marked placeholders rather than wait for spec adoption — the fields are optional and unconsumed, so renaming on adoption is cheap.
+
+**Flow-through decision:** Layer 1 still does "text → structured features" unchanged. The eight fields are *carried context* — they are NOT extracted. This session does not wire population: `extractFeatures`, `ExtractInput`, and the Layer 1 LLM system prompt are untouched, so the fields default to absent on every server-side `/api/reason` call (behaviour byte-identical to pre-session). The plugin-auth path (`route.ts` → `validateLayer1Schema` on the request body) already accepts a pre-built `layer1_schema`; that is where the future ATL-wrapper and private-mode build sessions populate the fields. Placeholder types are local (`SubjectIdentityBinding`, `HistoryWindow`; `CarriedProfile` / `ProfileProvenance` / `PeerAgentAssessment` as permissive `Record<string, unknown>`) — NOT imports of `/trust-layer/` types, which sit outside `website/`'s tsconfig root and would break the compile + prematurely lock the contract before spec adoption.
+
+**Open-contract version:** `version` string stays `'layer1-schema-v1'` — optional + additive + backward-compatible is a non-breaking change; the validator accepts v1 with or without the fields. Follows the file's own M1-CP4b precedent. The `version` field doc-comment records the 2026-05-14 addition.
+
+**Files touched:**
+- `/website/src/lib/translation-sandwich/layer1-extractor.ts` — MODIFIED. New CARRIED-CONTEXT PLACEHOLDER TYPES section (5 placeholder type defs); 8 optional fields appended to the `Layer1Schema` interface; `version` doc-comment extended; `assertNumber` validator helper added; `validateLayer1Schema` extended with an 8-field accept-when-present block (NOT added to `REQUIRED_KEYS`); return refactored to a mutable `result` object.
+- `/website/src/lib/translation-sandwich/layer2-mechanisms.ts` — MODIFIED. `applyMechanisms` JSDoc extended with a carried-context-tolerance note. No logic change — Layer 2 reads only named feature fields and never iterates / spreads / stringifies the schema, so it is already structurally tolerant.
+- `/website/src/lib/translation-sandwich/__tests__/layer1-schema-additions.test.ts` — NEW. First Layer 1 test file (no pre-existing suite). 33 assertions: backward-compat (no fields), valid-present (each field + all eight), valid-null, validator-rejects-malformed (12 negative cases incl. a required-field negative-control), Layer 2 ingress tolerance + inertness (`applyMechanisms` / `detectTier1Trigger` output byte-identical with vs without carried context).
+- `/operations/decision-log.md` — `D-A6-RESCOPED-TO-FOUR-MODE-REDESIGN-2026-05-14` appended at session-open (founder-approved; verbatim from the predecessor close); this entry appended.
+- `/website/tsconfig.tsbuildinfo` — touched by `tsc --noEmit` (incremental-build cache; tracked; routinely changes whenever tsc runs).
+
+**Risk classification:** Elevated under 0d-ii — versions the open `Layer1Schema` contract. Additive + backward-compatible + optional, but a versioned change to an open contract. Critical Change Protocol NOT engaged. AC7 not engaged (no auth surface). PR6 not engaged (no distress-classifier / Zone 2/3 / R20a surface). AC8 engaged (translation-sandwich substrate). PR1 single-endpoint proof: `/api/reason` is the proof endpoint — server-side behaviour byte-identical (fields unset on every current call). PR2 build-to-wire-verification immediate: the validator actually accepts + shape-checks the fields (33-assertion test, same session), not just the type declaring them.
+
+**Rollback path:** `git revert <commit>` and push via GitHub Desktop. The eight fields are optional and additive — reverting removes them; nothing constructs or consumes them yet. No production behaviour change either way; `/api/reason` byte-identical with or without the fields. No data loss; no user impact.
+
+**Verification step (founder-performable, between sessions):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+
+# 0. Clear the stale sandbox-created .git/index.lock BEFORE committing (see Open questions)
+rm -f .git/index.lock
+
+# 1. TypeScript compile (expected: clean, EXITCODE=0)
+cd website && npx tsc --noEmit -p tsconfig.json && cd ..
+
+# 2. New behavioural test (expected: 33 pass / 0 fail)
+cd website && npx tsx src/lib/translation-sandwich/__tests__/layer1-schema-additions.test.ts && cd ..
+
+# 3. A5 regression (expected: 28 pass / 0 fail)
+cd website && npx tsx src/lib/substrate/__tests__/layer3-service.test.ts && cd ..
+
+# 4. A7 regression (expected: 33/33 pass)
+cd website && npx tsx src/lib/substrate/__tests__/r20a-gate.test.ts && cd ..
+
+# 5. Substrate steady state (production unchanged)
+curl -sS -o /dev/null -w "%{http_code}\n" -X POST https://www.sagereasoning.com/api/substrate/layer3
+# Expected: 503
+curl -sS https://www.sagereasoning.com/api/public-key | python3 -c "import json,sys; d=json.load(sys.stdin); print('PASS' if d.get('previous') is None and d.get('algorithm')=='Ed25519' else 'FAIL')"
+# Expected: PASS
+```
+Expected: tsc clean; 33/0; 28/0; 33/33; 503; PASS.
+
+**Open questions:**
+- **Stale `.git/index.lock` (sandbox side effect).** A `git status` run inside the build sandbox created `.git/index.lock`; the sandbox mount blocks `unlink` on it ("Operation not permitted"), so it could not be cleared from the sandbox. It is a 0-byte stale lock with no live git process; it must be removed (`rm -f .git/index.lock`) from the founder's machine before `git add` / `git commit`, or GitHub Desktop will report the index is locked. Revisit condition: none — one-time cleanup.
+- **Spec adoption (Draft → Adopted).** The eight field names are placeholders pending adoption of the five mode specs. Revisit condition: founder elects spec adoption (governance session).
+- **Governing-document drift.** The staging plan, standing cache, and build-sessions cache still carry the old A6 framing (`clinical / terse / standard / educational`; "Standard; 1 session"). Updating them is a governance step pending the founder's adoption of the four-mode re-scope. Revisit condition: founder adopts the re-scope.
+- **No pre-existing Layer 1 test suite.** This session's `layer1-schema-additions.test.ts` is the first Layer 1 test file; the prompt's Step 4 referenced a non-existent `layer1-extractor.test.ts`. A broader Layer 1 extractor/validator test suite is not in scope here. Revisit condition: a future Layer 1 build session, or founder direction.
+
+**Rules served:** 0a (status taxonomy — Scoped → Designed → Scaffolded → Wired → Verified in one session), 0b (lean + Elevated session close produced), 0c (verification framework — tsc + new test + A5/A7 regressions in-session; founder between-session verification block provided), 0d-ii (Elevated classification recorded), 0e (file organisation — new test under existing `__tests__/`), 0f (this entry), R4 (IP boundary — Layer 1 stays the open layer; the carried-context fields are documented input contract, no scoring/engine internals exposed), R17 (private-mode fields serve R17e — the `subject_identity_binding` gate placeholder), R18 (ATL Wrapper fields serve R18 honest-certification — carried profile + provenance + gaming defences), AC8 (translation-sandwich substrate — Layer 1 → Layer 2 pipeline preserved), PR1 (single-endpoint proof on `/api/reason`), PR2 (build-to-wire-verification immediate — validator accept-when-present proven by the 33-assertion test in-session), PR10 (PEV loop — Plan at the Step 2 design gate; Execute under PR1/PR2; Verify with the 6-check block; diagnostic-certain on the stale-lock root cause), PR11 (authoritative-current-sources — inbox scanned at session-open, no material since the last session; no external recommendation made this session), PR16 (positioning + dogfood — the carried-context contract strengthens Character-Kernel positioning by making the substrate's wrapper / private-mentor continuity contract explicit; dogfood relevance partial — the fields are the future substrate-consultation carriers but inert today). KG1–KG7: N/A (no DB writes, no model selection, no JSONB, no context-layer change). PR4: N/A (no LLM call added; Layer 1's Sonnet extraction unchanged).
+
+**Status:** Adopted. Cross-references: predecessor `D-A6-RESCOPED-TO-FOUR-MODE-REDESIGN-2026-05-14` (the re-scope that surfaced the eight fields); next-session prompt `/operations/handoffs/founder/2026-05-14-layer1-schema-additions-NEXT-SESSION-PROMPT.md`; predecessor close `/operations/handoffs/founder/2026-05-14-A6-rescope-four-mode-redesign-close.md`; specs `/drafts/private-mode-response-spec.md` + `/drafts/agent-trust-layer-wrapper-spec.md`; this session's close `/operations/handoffs/founder/2026-05-14-layer1-schema-additions-close.md`; modified files `/website/src/lib/translation-sandwich/layer1-extractor.ts` + `layer2-mechanisms.ts`; new test `/website/src/lib/translation-sandwich/__tests__/layer1-schema-additions.test.ts`.
+
+---

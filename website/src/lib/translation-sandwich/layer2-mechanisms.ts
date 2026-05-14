@@ -2066,6 +2066,17 @@ function detectScopeAmbiguity(schema: Layer1Schema): Tier1Trigger | null {
  * `tier1_trigger`. ELEMENT_FUSION is detected upstream by detectTier1Trigger
  * and never reaches applyMechanisms.
  *
+ * Carried-context tolerance (D-LAYER1-SCHEMA-ADDITIONS, 2026-05-14): the
+ * Layer1Schema may carry eight optional carried-context fields
+ * (subject_identity_binding, reflective_self_report, history_window,
+ * topic_signal, carried_profile, profile_provenance, peer_agent_assessments,
+ * objective_function_declaration). Layer 2 reads only named feature fields and
+ * never iterates / spreads / stringifies the whole schema, so these fields pass
+ * through applyMechanisms untouched. Layer 2 does NOT yet act on them — that is
+ * deferred to the private-mode and ATL Wrapper build sessions. Their presence
+ * does not change the Layer2Assessment output (the idempotency invariant above
+ * holds over the feature fields; carried context is inert here).
+ *
  * @param schema  - Layer1Schema from layer1-extractor.ts
  * @param options - reserved for future use; ignored at CP2
  * @returns Layer2Assessment | { tier1_trigger: Tier1Trigger }

@@ -222,6 +222,66 @@ export interface ElementFusionDetected {
 }
 
 // ============================================================================
+// CARRIED-CONTEXT PLACEHOLDER TYPES (added 2026-05-14, D-LAYER1-SCHEMA-ADDITIONS)
+// ============================================================================
+//
+// PLACEHOLDER SCAFFOLDING — pending mode-spec adoption. The four-mode substrate
+// response redesign (D-A6-RESCOPED-TO-FOUR-MODE-REDESIGN-2026-05-14) surfaced
+// eight optional Layer 1 input fields: four for private mode, four for the
+// Agent Trust Layer Wrapper. They are *carried context* — context the wrapper
+// or the private-mode service supplies, which flows THROUGH Layer 1 untouched
+// to Layer 2. Layer 1 does NOT extract them; the LLM system prompt is unchanged.
+//
+// The field names and types here are PLACEHOLDERS. The five mode specs are at
+// Designed status (not Adopted); these types are refined when the specs are
+// adopted. Nothing consumes these fields yet, so renaming/reshaping is cheap.
+//
+// The three trust-layer-owned shapes (CarriedProfile, ProfileProvenance,
+// PeerAgentAssessment) are intentionally permissive Record<string, unknown>
+// rather than imports of WindowSnapshot / EvaluatedAction / AccreditationPayload
+// from /trust-layer/: that directory is outside website/'s tsconfig root, and
+// the ATL Wrapper build is where the substrate<->trust-layer reconciliation
+// happens. Locking the shapes here would be premature.
+
+/** PLACEHOLDER — private mode. The authenticated subject's identity reference.
+ *  The R17e gate: private mode cannot be called about anyone else. Triggers the
+ *  server-side load of the subject's encrypted profile. Final shape pending
+ *  private-mode spec adoption + the agent-identity-binding design.
+ *  See /drafts/private-mode-response-spec.md §"Layer 1 input placeholder fields". */
+export interface SubjectIdentityBinding {
+  subject_id: string
+}
+
+/** PLACEHOLDER — private mode. How far back to draw trajectory + cross-submission
+ *  data. Mirrors mentor-interactions-loader.ts windowDays/limit (default 90 days
+ *  / 100 rows). Final shape pending private-mode spec adoption.
+ *  See /drafts/private-mode-response-spec.md §"Layer 1 input placeholder fields". */
+export interface HistoryWindow {
+  window_days?: number
+  limit?: number
+}
+
+/** PLACEHOLDER — ATL Wrapper. The agent's accumulated trajectory (a WindowSnapshot
+ *  or raw EvaluatedAction[] from /trust-layer/). Permissive until the ATL Wrapper
+ *  build reconciles the substrate's Layer2Assessment with the existing
+ *  /trust-layer/ EvaluatedAction type.
+ *  See /drafts/agent-trust-layer-wrapper-spec.md §"Layer 1 implications". */
+export type CarriedProfile = Record<string, unknown>
+
+/** PLACEHOLDER — ATL Wrapper. Gaming defence: attests the carried_profile came
+ *  from the agent's own prior substrate assessments, not injected third-party
+ *  content. Final shape pending ATL Wrapper spec adoption.
+ *  See /drafts/agent-trust-layer-wrapper-spec.md §"Layer 1 implications". */
+export type ProfileProvenance = Record<string, unknown>
+
+/** PLACEHOLDER — ATL Wrapper. One peer agent's assessment, for multi-agent
+ *  orchestration — an AccreditationPayload and/or agent-mode rendering of a peer
+ *  agent an orchestrator is deciding based on. Final shape pending ATL Wrapper
+ *  spec adoption.
+ *  See /drafts/agent-trust-layer-wrapper-spec.md §"Layer 1 implications". */
+export type PeerAgentAssessment = Record<string, unknown>
+
+// ============================================================================
 // TOP-LEVEL SCHEMA
 // ============================================================================
 
@@ -230,7 +290,13 @@ export interface Layer1Schema {
    *  Note (M1-CP4b, 2026-05-06): the four new fields below are additive; version
    *  remains 'layer1-schema-v1'. The producer (extractFeatures + system prompt) is
    *  updated in the same amendment cycle so no consumer reads the schema without
-   *  the new fields. */
+   *  the new fields.
+   *  Note (D-LAYER1-SCHEMA-ADDITIONS, 2026-05-14): the eight carried-context
+   *  fields at the end of this interface are additive AND optional — version
+   *  remains 'layer1-schema-v1'. Unlike the M1-CP4b fields, the producer is NOT
+   *  updated: Layer 1 does not populate carried context; the wrapper /
+   *  private-mode service does (future build sessions). A v1 schema is valid
+   *  with or without them; optional + additive + backward-compatible. */
   version: 'layer1-schema-v1'
   passions_present: PassionPresent[]
   control_filter_elements: ControlFilterElement[]
@@ -270,6 +336,67 @@ export interface Layer1Schema {
   /** Free-form notes naming any uncertainty. Empty when the extraction is
    *  unambiguous. */
   ambiguity_notes: string[]
+
+  // ==========================================================================
+  // CARRIED-CONTEXT FIELDS — added 2026-05-14 (D-LAYER1-SCHEMA-ADDITIONS).
+  // PLACEHOLDER SCAFFOLDING pending mode-spec adoption. All eight are OPTIONAL
+  // and additive: a Layer1Schema with none of them is valid (the per-response,
+  // un-wrapped, public case — every /api/reason call today). Layer 1 does NOT
+  // populate these — they are carried context the wrapper / private-mode service
+  // supplies (future build sessions), flowing through Layer 1 untouched to
+  // Layer 2. Layer 2 defensively tolerates them (does not yet act on them).
+  // Version string stays 'layer1-schema-v1'.
+  // ==========================================================================
+
+  // -- From private mode (4 fields) --
+  // See /drafts/private-mode-response-spec.md §"Layer 1 input placeholder fields".
+
+  /** PLACEHOLDER — private mode. The authenticated subject's identity. The R17e
+   *  gate — private mode cannot be called about anyone else. Triggers the
+   *  server-side load of the subject's encrypted profile (the human equivalent
+   *  of the agent's carried_profile). */
+  subject_identity_binding?: SubjectIdentityBinding | null
+
+  /** PLACEHOLDER — private mode. The practitioner's own account of what was
+   *  operative for them. Closes the reflection-component loop: when provided,
+   *  the motivation + eupatheia classifications are not withheld. */
+  reflective_self_report?: string | null
+
+  /** PLACEHOLDER — private mode. How far back to draw trajectory +
+   *  cross-submission data. Mirrors mentor-interactions-loader.ts
+   *  windowDays/limit (default 90 days / 100 rows). */
+  history_window?: HistoryWindow | null
+
+  /** PLACEHOLDER — private mode. The current entry's topic, for the
+   *  topic-projection logic practitioner-context.ts already implements
+   *  (detectTopicSignal / projectProfile). */
+  topic_signal?: string | null
+
+  // -- From the ATL Wrapper (4 fields) --
+  // See /drafts/agent-trust-layer-wrapper-spec.md §"Layer 1 implications".
+
+  /** PLACEHOLDER — ATL Wrapper. The agent's accumulated trajectory (the
+   *  WindowSnapshot, or raw EvaluatedAction[], from /trust-layer/). Lets Layer 2
+   *  do trajectory-aware assessment for agents. Parallel to private mode's
+   *  subject_identity_binding: server-side encrypted load for humans,
+   *  wrapper-carried for agents. The Layer 2 JSON is the universal
+   *  profile-update unit for both. */
+  carried_profile?: CarriedProfile | null
+
+  /** PLACEHOLDER — ATL Wrapper. Gaming defence — attests the carried_profile
+   *  came from the agent's own prior substrate assessments, not injected
+   *  third-party content. */
+  profile_provenance?: ProfileProvenance | null
+
+  /** PLACEHOLDER — ATL Wrapper. For multi-agent orchestration — the
+   *  AccreditationPayloads and/or agent-mode renderings of the peer agents an
+   *  orchestrator agent is deciding based on. */
+  peer_agent_assessments?: PeerAgentAssessment[] | null
+
+  /** PLACEHOLDER — ATL Wrapper. Gaming defence (Form 2) — the agent's declared
+   *  optimisation target, checked against the candidate action for
+   *  STATED_OPERATIVE_CONFLICT. */
+  objective_function_declaration?: string | null
 }
 
 // ============================================================================
@@ -443,6 +570,20 @@ function assertString(value: unknown, path: string): string {
     throw new Layer1ValidationError(
       'shape',
       `Expected string at ${path}, got ${typeof value}`,
+      path,
+      value
+    )
+  }
+  return value
+}
+
+/** Added 2026-05-14 (D-LAYER1-SCHEMA-ADDITIONS) — used by the optional
+ *  carried-context field validation (history_window numeric sub-fields). */
+function assertNumber(value: unknown, path: string): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new Layer1ValidationError(
+      'shape',
+      `Expected finite number at ${path}, got ${typeof value}`,
       path,
       value
     )
@@ -776,7 +917,7 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
     (entry, i) => assertString(entry, `ambiguity_notes[${i}]`)
   )
 
-  return {
+  const result: Layer1Schema = {
     version: 'layer1-schema-v1',
     passions_present: passions,
     control_filter_elements: controlFilterElements,
@@ -795,6 +936,96 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
     element_fusion_detected: elementFusionDetected,
     ambiguity_notes: ambiguityNotes,
   }
+
+  // ==========================================================================
+  // Added 2026-05-14 (D-LAYER1-SCHEMA-ADDITIONS) — optional carried-context
+  // fields. PLACEHOLDER SCAFFOLDING pending mode-spec adoption.
+  //
+  // All eight are OPTIONAL and NOT in REQUIRED_KEYS — a Layer1Schema with none
+  // of them still validates (backward-compat: every /api/reason call today).
+  // For each field: absent (=== undefined) → omit; `null` → preserved as null;
+  // a present value → shape-checked, then passed through. Layer 1's LLM never
+  // produces these; they are carried context supplied by a plugin-authenticated
+  // caller (the wrapper / private-mode service, in their future build sessions)
+  // on the pre-extracted layer1_schema path validated by this same function.
+  // ==========================================================================
+
+  // subject_identity_binding — null | { subject_id: string }
+  if (root.subject_identity_binding !== undefined) {
+    const v = root.subject_identity_binding
+    if (v === null) {
+      result.subject_identity_binding = null
+    } else {
+      const o = assertObject(v, 'subject_identity_binding')
+      result.subject_identity_binding = {
+        subject_id: assertString(o.subject_id, 'subject_identity_binding.subject_id'),
+      }
+    }
+  }
+
+  // reflective_self_report — null | string
+  if (root.reflective_self_report !== undefined) {
+    const v = root.reflective_self_report
+    result.reflective_self_report =
+      v === null ? null : assertString(v, 'reflective_self_report')
+  }
+
+  // history_window — null | { window_days?: number; limit?: number }
+  if (root.history_window !== undefined) {
+    const v = root.history_window
+    if (v === null) {
+      result.history_window = null
+    } else {
+      const o = assertObject(v, 'history_window')
+      const hw: HistoryWindow = {}
+      if (o.window_days !== undefined) {
+        hw.window_days = assertNumber(o.window_days, 'history_window.window_days')
+      }
+      if (o.limit !== undefined) {
+        hw.limit = assertNumber(o.limit, 'history_window.limit')
+      }
+      result.history_window = hw
+    }
+  }
+
+  // topic_signal — null | string
+  if (root.topic_signal !== undefined) {
+    const v = root.topic_signal
+    result.topic_signal = v === null ? null : assertString(v, 'topic_signal')
+  }
+
+  // carried_profile — null | Record<string, unknown>
+  if (root.carried_profile !== undefined) {
+    const v = root.carried_profile
+    result.carried_profile = v === null ? null : assertObject(v, 'carried_profile')
+  }
+
+  // profile_provenance — null | Record<string, unknown>
+  if (root.profile_provenance !== undefined) {
+    const v = root.profile_provenance
+    result.profile_provenance = v === null ? null : assertObject(v, 'profile_provenance')
+  }
+
+  // peer_agent_assessments — null | Record<string, unknown>[]
+  if (root.peer_agent_assessments !== undefined) {
+    const v = root.peer_agent_assessments
+    if (v === null) {
+      result.peer_agent_assessments = null
+    } else {
+      result.peer_agent_assessments = assertArray(v, 'peer_agent_assessments').map(
+        (entry, i) => assertObject(entry, `peer_agent_assessments[${i}]`)
+      )
+    }
+  }
+
+  // objective_function_declaration — null | string
+  if (root.objective_function_declaration !== undefined) {
+    const v = root.objective_function_declaration
+    result.objective_function_declaration =
+      v === null ? null : assertString(v, 'objective_function_declaration')
+  }
+
+  return result
 }
 
 // ============================================================================
