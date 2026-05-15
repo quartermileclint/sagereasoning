@@ -56,4 +56,14 @@ Bespoke election requires justification in the session's decision-log entry unde
 
 Verify against `/manifest.md` AC7 disposition + the most-recent session close's "Production state at session close" line before any change to user-facing functionality.
 
+## Running the substrate test suite
+
+The substrate + translation-sandwich test files (`website/src/lib/substrate/__tests__/*.test.ts`, `website/src/lib/translation-sandwich/__tests__/*.test.ts`) are plain-assertion scripts run with `tsx` — no Jest. Standing requirements (added 2026-05-15 after a founder cross-session verification run surfaced both gaps):
+
+- **`tsx` is a devDependency** (`website/package.json`, added 2026-05-15). On a clean checkout run `npm install` in `website/` first; if `tsx` is somehow absent, `npm install --save-dev tsx`.
+- **Run the verification commands one at a time**, not as a pasted block — any command that prompts (e.g. a missing-package install) otherwise consumes the next pasted line.
+- **Tests that transitively import `supabase-server.ts` need `--env-file`.** `supabase-server.ts` constructs a Supabase client at *module load*, so any test importing that chain throws `supabaseUrl is required.` under a bare `npx tsx`. Run those with `npx tsx --env-file=.env.local <path>` — the client is constructed but never called, so real creds are loaded but unused. As of 2026-05-15 this applies to `agent-mode-service.test.ts` and `philosophical-mode-service.test.ts`; the other substrate/translation-sandwich tests run with plain `npx tsx <path>`.
+
+Every session close's "Founder Verification" block must use this working form: plain `npx tsx` for the Supabase-free tests, `npx tsx --env-file=.env.local` for the two that need it. The root cause (eager client construction at module load in `supabase-server.ts`) is a test-harness ergonomics issue noted for a future session — not a defect in any substrate module.
+
 *End of CLAUDE.md. Updated when the underlying governance changes; this is a pointer file, not the governing surface itself.*

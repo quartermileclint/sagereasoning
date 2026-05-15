@@ -47,7 +47,7 @@ There are two unblocked next steps; the founder elects which at session-open.
 
 **ATL Wrapper step 6 — the badge (Component 3):** `AccreditationRecord` / `AccreditationPayload` / `public-endpoint.ts` / `accreditation-card.ts`, Supabase-integrated. This is **higher-risk** — it adds a public verification endpoint (an auth + a route surface) and engages the existing build's pending Supabase integration + the DRAFT 5-table schema. Likely `code-elevated` or `code-critical` per the auth surface; the build session classifies. It ports the remaining `/trust-layer/` files (badge / card) it needs. Once the badge lands, the **trajectory-enriched developer hand-back report** becomes buildable.
 
-A step-6 / Session-6 next-session prompt is to be drafted separately.
+The **ATL Wrapper Session 6 next-session prompt (Component 5 — the three iteration patterns)** is drafted and ready to paste into a new session: `/operations/handoffs/founder/2026-05-16-atl-wrapper-session6-component5-NEXT-SESSION-PROMPT.md`. A step-6 (badge) prompt is drafted separately if the founder elects that path instead at session-open.
 
 ## Blocked On
 
@@ -81,6 +81,14 @@ The `trust-layer/` directory contains 5 files: `types/accreditation.ts`, `types/
 
 ## Founder Verification (between sessions)
 
+> **Post-session correction (2026-05-15).** This block was corrected after the
+> founder's cross-session verification check surfaced two gaps — in the *tooling*,
+> not in any session's code, and affecting no Verified status: (a) `tsx` (the test
+> runner) was never declared as a devDependency, and (b) the `agent-mode` /
+> `philosophical-mode` test commands need `--env-file=.env.local` to run under
+> `tsx`. Both are fixed below. See the "## Post-session note" section and
+> `/CLAUDE.md` §"Running the substrate test suite".
+
 ```
 cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
 
@@ -89,25 +97,30 @@ cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
 #    unlink. One-time cleanup, same as the predecessor sessions.)
 rm -f .git/index.lock
 
-# 1. Verify the build (expected: tsc clean; 55/0; then 31/0; 69/0; 63/0; 43/0;
-#    28/0; 33/33; 33/0). The agent-mode + philosophical-mode tests need your
-#    .env.local Supabase vars resolvable in the shell so supabase-server.ts
-#    constructs on import — neither test CALLS the client. The atl-wrapper /
-#    atl-bridge / score-architecture / layer3-service / r20a-gate /
-#    layer1-schema-additions tests import no Supabase and run clean regardless.
+# 1. Ensure tsx is installed (one-time). tsx is the runner for the .ts test
+#    files — a dev-only tool, imported by no route, ships to nothing. Skip if
+#    `npx tsx --version` already prints a version.
 cd website
-npx tsc --noEmit -p tsconfig.json
-npx tsx src/lib/substrate/__tests__/atl-wrapper.test.ts
-npx tsx src/lib/substrate/__tests__/atl-bridge.test.ts
-npx tsx src/lib/substrate/__tests__/score-architecture.test.ts
-npx tsx src/lib/substrate/__tests__/agent-mode-service.test.ts
-npx tsx src/lib/substrate/__tests__/philosophical-mode-service.test.ts
-npx tsx src/lib/substrate/__tests__/layer3-service.test.ts
-npx tsx src/lib/substrate/__tests__/r20a-gate.test.ts
-npx tsx src/lib/translation-sandwich/__tests__/layer1-schema-additions.test.ts
+npm install --save-dev tsx
+
+# 2. Verify the build. RUN ONE LINE AT A TIME (a pasted block can break on an
+#    interactive prompt). Expected result is in the comment on each line.
+npx tsc --noEmit -p tsconfig.json                                               # clean, exit 0
+npx tsx src/lib/substrate/__tests__/atl-wrapper.test.ts                         # 55/0
+npx tsx src/lib/substrate/__tests__/atl-bridge.test.ts                          # 31/0
+npx tsx src/lib/substrate/__tests__/score-architecture.test.ts                  # 69/0
+npx tsx src/lib/substrate/__tests__/layer3-service.test.ts                      # 28/0
+npx tsx src/lib/substrate/__tests__/r20a-gate.test.ts                           # 33/33
+npx tsx src/lib/translation-sandwich/__tests__/layer1-schema-additions.test.ts  # 33/0
+# These two transitively import supabase-server.ts, which builds a Supabase
+# client at MODULE LOAD — they need --env-file so tsx loads .env.local. Both
+# tests construct the client but never call it: your real creds are loaded but
+# unused; nothing touches live Supabase.
+npx tsx --env-file=.env.local src/lib/substrate/__tests__/agent-mode-service.test.ts          # 63/0
+npx tsx --env-file=.env.local src/lib/substrate/__tests__/philosophical-mode-service.test.ts  # 43/0
 cd ..
 
-# 2. Commit — TARGETED add (explicit paths, not `git add -A`).
+# 3. Commit the wrapper build — TARGETED add (explicit paths, not `git add -A`).
 git add website/src/lib/substrate/atl-wrapper.ts
 git add website/src/lib/substrate/__tests__/atl-wrapper.test.ts
 git add website/src/lib/substrate/trust-layer/
@@ -115,6 +128,7 @@ git add website/src/lib/substrate/atl-bridge.ts
 git add website/tsconfig.tsbuildinfo
 git add operations/decision-log.md
 git add operations/handoffs/founder/2026-05-15-atl-wrapper-build-close.md
+git add operations/handoffs/founder/2026-05-16-atl-wrapper-session6-component5-NEXT-SESSION-PROMPT.md
 git commit -m "ATL Wrapper Session 5: the wrapper (Components 1 + 4)
 
 Builds ATL Wrapper spec step 5 — the carried-profile mechanism
@@ -165,14 +179,45 @@ code-standard, Standard risk; AC7 / PR6 / Critical Change Protocol not
 engaged. tsc clean; atl-wrapper 55/0 + atl-bridge 31/0 +
 score-architecture 69/0 + agent-mode 63/0 + philosophical 43/0 +
 layer3-service 28/0 + r20a-gate 33/33 + layer1-schema-additions 33/0."
+
+# 4. Commit the verification-tooling fix SEPARATELY — kept as its own small
+#    housekeeping commit so this session's decision-log entry (which lists only
+#    the wrapper files) stays accurate. tsx is test tooling — imported by no
+#    route, ships to nothing. CLAUDE.md gains the standing "how to run the
+#    substrate test suite" note.
+git add website/package.json website/package-lock.json
+git add CLAUDE.md
+git commit -m "Add tsx as devDependency + document the substrate test-run form
+
+The substrate / translation-sandwich test files run via npx tsx (no
+Jest framework). tsx was assumed by every ATL-arc session's
+verification commands but never declared, and the agent-mode /
+philosophical-mode test commands needed an --env-file flag that no
+prior close gave — both surfaced by the founder's 2026-05-15
+cross-session verification check. Fixes: tsx declared as a devDependency
+(dev-only test runner; imported by no route, ships to nothing);
+CLAUDE.md gains a standing 'Running the substrate test suite' note so
+every future session close uses the working command form."
 ```
 
-Then push via GitHub Desktop. **No Vercel behaviour change** — all six new files are imported by no route; the `atl-bridge.ts` refactor is behaviour-preserving and `atl-bridge.ts` is itself imported by no route; `/api/reason` and `/api/substrate/layer3` are byte-identical. Vercel should build green (everything compiles clean under `tsc`).
+Then push via GitHub Desktop. **No Vercel behaviour change** — all six new files are imported by no route; the `atl-bridge.ts` refactor is behaviour-preserving and `atl-bridge.ts` is itself imported by no route; `tsx` is a devDependency (test tooling, never imported by app code); `/api/reason` and `/api/substrate/layer3` are byte-identical. Vercel should build green (everything compiles clean under `tsc`).
+
+## Post-session note — verification tooling (added 2026-05-15)
+
+The founder's cross-session verification check (run 2026-05-15, immediately after this session) surfaced two gaps in the *verification tooling* — not in any session's code, and not affecting any Verified status:
+
+1. **`tsx` was never declared as a devDependency.** Every ATL-arc session's close wrote `npx tsx …` verification commands, but `tsx` was assumed, never added to `website/package.json`. On a clean checkout `npx tsx` prompts to install interactively, which breaks a pasted command block. Fixed: `npm install --save-dev tsx` (committed separately — see step 4 above).
+2. **The `agent-mode` / `philosophical-mode` test commands were not runnable as written.** Both tests transitively import `supabase-server.ts`, which constructs a Supabase client at *module load*; `npx tsx` does not auto-load `.env.local` the way the Next.js app does, so the commands threw `supabaseUrl is required.` before the test could start. The predecessor closes said these "run clean on the founder's machine with `.env.local` resolvable" but never gave the flag that resolves it. Fixed: those two commands now use `npx tsx --env-file=.env.local …`.
+
+Both gaps are now reflected in the corrected Founder Verification block above, and the working form is recorded as a standing note in `/CLAUDE.md` §"Running the substrate test suite" so every future session close uses it. All eight suites were confirmed green on the founder's machine after the fixes (`55/0, 31/0, 69/0, 28/0, 33/33, 33/0, 63/0, 43/0`; `tsc` clean) — the cross-session integrity check the founder ran *passed*.
+
+The deeper root cause — `supabase-server.ts` eagerly constructs its client at module load, so any test importing that chain needs the env present even though it never calls Supabase — is a test-harness ergonomics issue noted for a future session; it is not a defect in any substrate module and changes no Verified status.
 
 ## Cross-references
 
 - Predecessor close: `/operations/handoffs/founder/2026-05-15-philosophical-mode-score-wiring-close.md`
-- Operative session prompt: `/operations/handoffs/founder/2026-05-16-atl-wrapper-build-NEXT-SESSION-PROMPT.md`
+- Operative session prompt (this session): `/operations/handoffs/founder/2026-05-16-atl-wrapper-build-NEXT-SESSION-PROMPT.md`
+- Next-session prompt (Session 6 — Component 5, the three iteration patterns): `/operations/handoffs/founder/2026-05-16-atl-wrapper-session6-component5-NEXT-SESSION-PROMPT.md`
 - Decision-log entry: `D-ATL-WRAPPER-WIRED-VERIFIED-2026-05-15`
 - Predecessor decision-log entry: `D-PHILOSOPHICAL-MODE-SCORE-WIRED-VERIFIED-2026-05-15`
 - Integration-boundary open question closed from: `D-ATL-BRIDGE-WIRED-VERIFIED-2026-05-15`
