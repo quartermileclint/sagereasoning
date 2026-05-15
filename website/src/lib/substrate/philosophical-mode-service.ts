@@ -2,9 +2,11 @@
  * philosophical-mode-service.ts — Layer 3 philosophical-mode renderer + the
  * Layer 3 mode-dispatch entry point.
  *
- * STATUS: Scaffolded → Wired → Verified (2026-05-14, this session). Builds
- * behind the SUBSTRATE_LAYER3_ENABLED gate (UNSET in Vercel — no route imports
- * this module yet, so there is no production exposure this session).
+ * STATUS: Verified (2026-05-14). Score sections (4 + 5) and the Verdict's
+ * justification_source line WIRED 2026-05-15 (this session) — the PR7 score
+ * deferral is resolved; see "SCORE WIRING" below. Still builds behind the
+ * SUBSTRATE_LAYER3_ENABLED gate (UNSET in Vercel — no route imports this
+ * module, so there is no production exposure this session).
  *
  * GOVERNING DOCUMENTS:
  *   - /adopted/substrate-modes/philosophical-mode-response-spec.md (the spec —
@@ -13,9 +15,13 @@
  *     redesign)
  *   - /manifest.md §R3 / §R4 / §R8a / §R17e / §R18a / §R18e / §R19c / §R19d /
  *     §R20a / §AC8
+ *   - /website/src/lib/substrate/score-architecture.ts (the substrate score
+ *     module — `computeSubstrateScore`; consumed for sections 4 + 5 + the
+ *     Verdict's justification_source)
  *   - /operations/decision-log.md — D-PHILOSOPHICAL-MODE-BUILD-WIRED-VERIFIED-
- *     2026-05-14 (this build); the score-architecture deferral is logged there
- *     under PR7.
+ *     2026-05-14 (the original build; the PR7 score deferral was logged there);
+ *     D-PHILOSOPHICAL-MODE-SCORE-WIRED-VERIFIED-2026-05-15 (the score-wiring
+ *     session; the PR7 deferral is resolved there).
  *
  * PURPOSE
  *
@@ -34,9 +40,10 @@
  *
  *   1. Mandatory opening wrap (R3 disclaimer)
  *   2. Title + Input observed (R18a category framing sits here when requested)
- *   3. Verdict (kathekon outcome + quality + justification)
- *   4. Score vector        — DEFERRED this session (see "SCORE DEFERRAL" below)
- *   5. Scalar score        — DEFERRED this session (see "SCORE DEFERRAL" below)
+ *   3. Verdict (kathekon outcome + quality + justification + justification
+ *      source + gate outcome)
+ *   4. Score vector        — markdown table of the seven score components
+ *   5. Scalar score        — the composite score, validity flag, precision band
  *   6. Field-by-field rendering of the Layer 2 assessment (R20a distress
  *      passthrough replaces this section's content when a distress signal is
  *      active)
@@ -44,20 +51,29 @@
  *      JSON does not carry retrieved passages per the spec)
  *   8. Mandatory closing wraps (R19c + R19d when mentor-flavoured + R18e)
  *
- * SCORE DEFERRAL (founder decision, 2026-05-14)
+ * SCORE WIRING (2026-05-15 — resolves the PR7 deferral from
+ * D-PHILOSOPHICAL-MODE-BUILD-WIRED-VERIFIED-2026-05-14)
  *
  * The spec's sections 4 (Score vector) + 5 (Scalar score) and the Verdict's
- * "justification source" line render a substrate score architecture that does
- * NOT exist yet: Layer2Assessment carries no score / score vector / scalar /
- * validity flag / precision band / justification_source, and there is no
- * score-computation module in the substrate. The score architecture is
- * specified only in the superseded agent-mode spec, whose content the spec
- * itself locates in the not-yet-built ATL Wrapper. Per the founder's election
- * at this session's Step 1 gate, the score-dependent pieces are DEFERRED. The
- * JSON `score` field carries an explicit `{ deferred: true, deferral_reason }`;
- * the Markdown renders a one-line transparency note where sections 4–5 sit.
- * Revisit condition: the substrate score architecture reaches Scaffolded (its
- * natural home is a dedicated score build or the ATL Wrapper build).
+ * "justification source" line render the substrate score architecture, which is
+ * now built and Verified (`score-architecture.ts` — `computeSubstrateScore`).
+ * `renderPhilosophicalMode` computes the score from the UNFILTERED
+ * `input.assessment` — `computeSubstrateScore` requires it (it reads
+ * `iterative_refinement.direction_of_travel` + `.motivation_classification` by
+ * design; its parameter is typed `Layer2Assessment`, NOT the philosophical-mode
+ * `R17eFilteredAssessment`). Philosophical mode then projects an R17e-SAFE
+ * SUBSET of the resulting `SubstrateScore`: the gate fields onto the Verdict,
+ * and the seven-component vector + `component_sum` + the scalar onto
+ * `PhilosophicalModeScore`. The `confidence` field is OMITTED — it is derived
+ * from `direction_of_travel`, which is R17e-excluded (it is already listed in
+ * `R17E_EXCLUDED_FIELD_PATHS` as `score_confidence`). This is safe because
+ * `SubstrateScore` carries only DERIVED outputs (numbers, gate enums, validity
+ * flags, plain-English cap reasons) — no raw `iterative_refinement` values —
+ * and the test's R17E-3 canary check + the SCORE-6 confidence-exclusion check
+ * confirm it. The `ScoreContext` is caller-supplied on `Layer3ModeRenderInput`;
+ * when absent, the honest `{ justification_source: 'absent' }` default applies
+ * (the gate does not confirm; the score caps at 35) — consistent with the
+ * agent-mode renderer, and it keeps `renderPhilosophicalMode` total.
  *
  * PR6 WATCH-POINT (no R20a logic change)
  *
@@ -81,12 +97,18 @@
  *   - R17e (intimate-data protection): the iterative_refinement fields
  *     (direction-of-travel, senecan-grade, progress-dimensions,
  *     motivation-classification) and score-confidence are profile-derived /
- *     trajectory data. `applyR17eExclusionFilter` strips them BEFORE any
- *     projection runs — a single dedicated filter step, so the exclusion is
- *     testable in one place. The excluded paths are recorded in the exported
- *     `R17E_EXCLUDED_FIELD_PATHS` module constant; the response payload itself
- *     carries only a `meta.r17e_exclusion_applied` flag — it never carries the
- *     profile-field name strings, so no excluded field name appears in output.
+ *     trajectory data. `applyR17eExclusionFilter` strips them from the
+ *     assessment BEFORE any field-by-field projection runs — a single dedicated
+ *     filter step, so the exclusion is testable in one place. The score is a
+ *     second projection path: `computeSubstrateScore` consumes the UNFILTERED
+ *     assessment (it requires the iterative_refinement sub-fields), but
+ *     philosophical mode projects only an R17e-safe SUBSET of the result — the
+ *     `confidence` field (derived from direction_of_travel) is OMITTED via the
+ *     explicit-allowlist `projectPhilosophicalModeScalar`. The excluded paths
+ *     are recorded in the exported `R17E_EXCLUDED_FIELD_PATHS` module constant;
+ *     the response payload itself carries only a `meta.r17e_exclusion_applied`
+ *     flag — it never carries the profile-field name strings, so no excluded
+ *     field name appears in output.
  *   - AC8: this module sits in /website/src/lib/substrate/ and consumes the
  *     translation-sandwich Layer 2 output + the A5 injection layer.
  *   - PR1: single-endpoint proof — `renderLayer3Mode` is the dispatch pattern;
@@ -157,10 +179,23 @@ import {
 import { renderAgentMode } from '@/lib/substrate/agent-mode-service'
 import type { AgentModeRenderResult } from '@/lib/substrate/agent-mode-service'
 
-// The ScoreContext the agent-mode rendering needs — the caller-supplied inputs
-// the substrate score does not itself emit. Carried on Layer3ModeRenderInput so
-// the shared dispatch input type is the single render-input surface.
-import type { ScoreContext } from '@/lib/substrate/score-architecture'
+// The substrate score module. `computeSubstrateScore` is consumed by
+// philosophical mode to wire sections 4 + 5 + the Verdict's justification_source
+// (resolving the PR7 deferral). It requires the UNFILTERED Layer2Assessment;
+// philosophical mode projects only an R17e-safe SUBSET of the result (the
+// `confidence` field is omitted — see "SCORE WIRING" in the module header). The
+// ScoreContext is the caller-supplied input the substrate score does not itself
+// emit; it is carried on Layer3ModeRenderInput so the shared dispatch input type
+// is the single render-input surface.
+import {
+  computeSubstrateScore,
+  type ScoreContext,
+  type SubstrateScore,
+  type SubstrateScoreComponents,
+  type SubstrateScoreScalar,
+  type GateOutcome,
+  type JustificationSource,
+} from '@/lib/substrate/score-architecture'
 
 // ============================================================================
 // MODE-DISPATCH TYPES (PR1 — the pattern standard / private / ATL extend)
@@ -237,22 +272,45 @@ export interface Layer3ModeRenderResult {
 export interface PhilosophicalModeVerdict {
   /** Kathekon outcome — true / false / null. */
   is_kathekon: boolean | null
-  /** Kathekon quality grade. */
+  /** Kathekon quality grade — verbatim from Layer 2. */
   quality: KathekonQuality
   /** Layer 2's justification text, verbatim. */
   justification: string
-  /** DEFERRED this session — `justification_source` (engine_constructed /
-   *  agent_asserted / absent) is part of the substrate score architecture,
-   *  which is not yet built. Always null until the score architecture lands. */
-  justification_source: null
+  /** The kathekon gate's primary input — engine_constructed / agent_asserted /
+   *  absent. Sourced from the computed SubstrateScore's verdict (which takes it
+   *  from the caller-supplied ScoreContext). Per the spec's section 3, the
+   *  Verdict names the justification source. (WIRED 2026-05-15 — was `null`
+   *  while the score architecture was deferred.) */
+  justification_source: JustificationSource
+  /** Which gate row fired — names the combination of is_kathekon +
+   *  justification_source that produced the gate outcome. Per the spec's
+   *  section 3: "the Verdict section names which combination fired." */
+  gate_outcome: GateOutcome
+  /** `quality` after the convention-inferred cap (strong → moderate) is
+   *  applied. Equal to `quality` when the cap did not fire. */
+  effective_quality: KathekonQuality
+  /** True when motivation_classification 'convention_inferred' downgraded a
+   *  'strong' quality to 'moderate' for the score's quality multiplier. */
+  convention_quality_cap_applied: boolean
 }
 
+/** The R17e-safe scalar score — the SubstrateScore's SubstrateScoreScalar with
+ *  the `confidence` field omitted. `confidence` is derived from
+ *  direction_of_travel, which is on the R17e exclusion list (see
+ *  R17E_EXCLUDED_FIELD_PATHS — `score_confidence`); the philosophical / standard
+ *  renderers omit it per their specs, agent mode surfaces it. */
+export type PhilosophicalModeScalar = Omit<SubstrateScoreScalar, 'confidence'>
+
 export interface PhilosophicalModeScore {
-  /** Sections 4 (Score vector) + 5 (Scalar score) are deferred this session —
-   *  the substrate score architecture does not exist yet. */
-  deferred: true
-  /** Why the score sections are deferred + the revisit condition. */
-  deferral_reason: string
+  /** Section 4 — the score vector: the seven per-component contributions plus
+   *  the baseline. Projected verbatim from the SubstrateScore. */
+  components: SubstrateScoreComponents
+  /** baseline + all components (a null hasty_assent counts as 0), before the
+   *  quality multiplier. */
+  component_sum: number
+  /** Section 5 — the scalar score, R17e-safe (the SubstrateScoreScalar minus
+   *  `confidence`; see projectPhilosophicalModeScalar). */
+  scalar: PhilosophicalModeScalar
 }
 
 export interface PhilosophicalModeFields {
@@ -289,7 +347,8 @@ export interface PhilosophicalModeResponse {
   }
   /** Section 3 — Verdict. */
   verdict: PhilosophicalModeVerdict
-  /** Sections 4 + 5 — Score. Deferred this session. */
+  /** Sections 4 + 5 — Score vector + Scalar score. An R17e-safe projection of
+   *  the SubstrateScore (the `confidence` field is omitted). */
   score: PhilosophicalModeScore
   /** Section 6 — field-by-field rendering of the Layer 2 assessment. Null when
    *  the R20a distress passthrough is active (it replaces this section's
@@ -310,8 +369,11 @@ export interface PhilosophicalModeResponse {
   meta: {
     /** True when the R20a passthrough replaced section 6. */
     distress_passthrough_active: boolean
-    /** True — sections 4 + 5 are deferred this session. */
-    score_sections_deferred: true
+    /** False — sections 4 + 5 (Score vector + Scalar score) are wired
+     *  (2026-05-15). The key is retained (rather than removed) for
+     *  backward-compatible meta-shape stability across the score-deferred →
+     *  score-wired transition. */
+    score_sections_deferred: false
     /** True — the R17e exclusion filter ran before projection. The excluded
      *  field paths are recorded in the `R17E_EXCLUDED_FIELD_PATHS` module
      *  constant, NOT in this payload — so the response carries no
@@ -668,23 +730,51 @@ export function buildSourceMaterialRetrieveInput(
 // JSON PROJECTION (pure, synchronous, deterministic)
 // ============================================================================
 
-const SCORE_DEFERRAL_REASON =
-  'Sections 4 (Score vector) and 5 (Scalar score) are deferred. The substrate ' +
-  'score architecture (kathekon gate, component score, quality multiplier, ' +
-  'validity flag, precision band, justification_source) is not yet built and ' +
-  'is not carried on Layer2Assessment. Revisit when the score architecture ' +
-  'reaches Scaffolded (its natural home is a dedicated score build or the ATL ' +
-  'Wrapper build). See decision log: D-PHILOSOPHICAL-MODE-BUILD-WIRED-VERIFIED-2026-05-14.'
-
 const PHILOSOPHICAL_MODE_TITLE = 'Stoic Reasoning Assessment'
 
+/** The default ScoreContext when the caller supplies none on the render-input.
+ *  `justification_source` is REQUIRED on ScoreContext; 'absent' is the honest
+ *  default — "no justification available; the kathekon gate does not confirm"
+ *  (the score caps at 35). Mirrors agent-mode-service.ts's DEFAULT_SCORE_CONTEXT;
+ *  keeps renderPhilosophicalMode total — it never throws on a missing context. */
+const DEFAULT_SCORE_CONTEXT: ScoreContext = { justification_source: 'absent' }
+
 /**
- * Project a filtered Layer2Assessment + the injection set into the canonical
- * PhilosophicalModeResponse JSON. Pure, synchronous, deterministic — same
- * inputs produce a byte-identical object.
+ * Project the R17e-safe scalar — the SubstrateScoreScalar with `confidence`
+ * omitted. `confidence` is derived from direction_of_travel, which is
+ * R17e-excluded (R17E_EXCLUDED_FIELD_PATHS — `score_confidence`). This is an
+ * EXPLICIT-ALLOWLIST projection: it lists exactly the fields that ARE rendered,
+ * so `confidence` cannot accidentally slip in if SubstrateScoreScalar gains a
+ * field later. A single dedicated projection step, so the omission is enforced
+ * and tested in one place (the R17e analogue of applyR17eExclusionFilter).
+ */
+function projectPhilosophicalModeScalar(
+  scalar: SubstrateScoreScalar
+): PhilosophicalModeScalar {
+  return {
+    value: scalar.value,
+    kathekon_quality_multiplier: scalar.kathekon_quality_multiplier,
+    validity: scalar.validity,
+    cap_applied: scalar.cap_applied,
+    precision_band: scalar.precision_band,
+  }
+}
+
+/**
+ * Project a filtered Layer2Assessment + the computed SubstrateScore + the
+ * injection set into the canonical PhilosophicalModeResponse JSON. Pure,
+ * synchronous, deterministic — same inputs produce a byte-identical object.
+ *
+ * The `score` is computed (upstream, in renderPhilosophicalMode) from the
+ * UNFILTERED assessment — `computeSubstrateScore` requires it. This function
+ * receives the already-computed SubstrateScore and projects an R17e-safe SUBSET
+ * of it: the gate fields onto the Verdict, and the components + component_sum +
+ * the scalar (minus `confidence`, via projectPhilosophicalModeScalar) onto
+ * `score`.
  */
 export function projectPhilosophicalModeJSON(
   filtered: R17eFilteredAssessment,
+  score: SubstrateScore,
   injections: Layer3InjectionSet,
   inputObserved: string
 ): PhilosophicalModeResponse {
@@ -728,11 +818,20 @@ export function projectPhilosophicalModeJSON(
       is_kathekon: filtered.kathekon_assessment.is_kathekon,
       quality: filtered.kathekon_assessment.quality,
       justification: filtered.kathekon_assessment.justification,
-      justification_source: null,
+      // The gate fields, projected from the computed SubstrateScore's verdict.
+      justification_source: score.verdict.justification_source,
+      gate_outcome: score.verdict.gate_outcome,
+      effective_quality: score.verdict.effective_quality,
+      convention_quality_cap_applied:
+        score.verdict.convention_quality_cap_applied,
     },
     score: {
-      deferred: true,
-      deferral_reason: SCORE_DEFERRAL_REASON,
+      // Section 4 — the score vector (the seven components + baseline).
+      components: score.components,
+      component_sum: score.component_sum,
+      // Section 5 — the scalar, R17e-safe (the `confidence` field is omitted —
+      // see projectPhilosophicalModeScalar).
+      scalar: projectPhilosophicalModeScalar(score.score),
     },
     fields,
     distress_passthrough: distress,
@@ -743,7 +842,7 @@ export function projectPhilosophicalModeJSON(
     },
     meta: {
       distress_passthrough_active: distressActive,
-      score_sections_deferred: true,
+      score_sections_deferred: false,
       r17e_exclusion_applied: true,
     },
   }
@@ -1003,6 +1102,69 @@ function capitalise(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
+/** Render a signed score contribution: positive → "+N"; zero → "0"; negative →
+ *  "-N" (the minus sign is already on a negative number). Mirrors agent-mode-
+ *  service.ts's `signed`. */
+function signedScore(n: number): string {
+  return n > 0 ? `+${n}` : String(n)
+}
+
+/**
+ * Section 4 — the score vector, rendered as a Markdown table (per the spec's
+ * "Score handling for human consumers": "Rendered as a markdown table showing
+ * each component's contribution"). Eight signed rows; a null `hasty_assent`
+ * renders as "n/a" (single_snapshot input — no trajectory pattern to assess
+ * against). The `component_sum` line follows the table.
+ */
+function renderScoreVectorSection(
+  components: SubstrateScoreComponents,
+  componentSum: number
+): string {
+  const hasty =
+    components.hasty_assent === null
+      ? 'n/a — single snapshot, no pattern to assess'
+      : signedScore(components.hasty_assent)
+  return [
+    '## Score vector',
+    '',
+    '| Component | Contribution |',
+    '| --- | --- |',
+    `| Baseline | ${signedScore(components.baseline)} |`,
+    `| Katorthoma proximity | ${signedScore(components.proximity)} |`,
+    `| Structural passion | ${signedScore(components.passion_structural)} |`,
+    `| Declared-motivation passion | ${signedScore(components.passion_declared)} |`,
+    `| Motivation undeclared | ${signedScore(components.passion_undeclared)} |`,
+    `| Virtue bonus | ${signedScore(components.virtue_bonus)} |`,
+    `| Value error | ${signedScore(components.value_error)} |`,
+    `| Hasty-assent | ${hasty} |`,
+    '',
+    `**Component sum:** ${componentSum} (baseline + components, before the quality multiplier)`,
+  ].join('\n')
+}
+
+/**
+ * Section 5 — the scalar score. Labelled lines: the score value (with the
+ * "(CAPPED at N — reason)" notation when a cap applied — per the spec's "Cap
+ * notation" row), the kathekon quality multiplier, the validity flag (NORMAL /
+ * PROVISIONAL), and the precision band (±N). The `confidence` field is NOT
+ * rendered — it is R17e-excluded (PhilosophicalModeScalar omits it; see
+ * projectPhilosophicalModeScalar).
+ */
+function renderScalarScoreSection(scalar: PhilosophicalModeScalar): string {
+  const capNote =
+    scalar.cap_applied !== null
+      ? ` (CAPPED at ${scalar.cap_applied.cap} — ${scalar.cap_applied.reason})`
+      : ''
+  return [
+    '## Scalar score',
+    '',
+    `**Score:** ${scalar.value} / 100${capNote}`,
+    `**Kathekon quality multiplier:** ${scalar.kathekon_quality_multiplier}`,
+    `**Validity:** ${scalar.validity}`,
+    `**Precision band:** ±${scalar.precision_band}`,
+  ].join('\n')
+}
+
 /**
  * Render the source-material Markdown section from the retrieved passages and
  * the selected principal findings. Each passage renders as a blockquote with a
@@ -1046,7 +1208,7 @@ export function renderSourceMaterialMarkdown(
  * already-rendered source-material section. Pure, synchronous, deterministic.
  *
  * Section ordering follows the spec: opening wrap → title block → verdict →
- * score (deferred note) → field-by-field (or R20a passthrough) → source
+ * score vector → scalar score → field-by-field (or R20a passthrough) → source
  * material → closing wraps.
  */
 export function renderPhilosophicalModeMarkdown(
@@ -1067,7 +1229,10 @@ export function renderPhilosophicalModeMarkdown(
   blocks.push(`**Input observed.** ${json.title_block.input_observed}`)
   blocks.push('---')
 
-  // Section 3 — Verdict.
+  // Section 3 — Verdict. Carries the kathekon outcome + quality + the
+  // justification source + the gate outcome (per the spec's section 3: "the
+  // Verdict section names which combination fired") + Layer 2's justification
+  // text verbatim.
   {
     const v = json.verdict
     const verdictLines: string[] = ['## Verdict', '']
@@ -1080,20 +1245,32 @@ export function renderPhilosophicalModeMarkdown(
             : 'no'
       }`
     )
-    verdictLines.push(`**Quality:** ${v.quality}`)
+    verdictLines.push(
+      `**Quality:** ${v.quality}${
+        v.convention_quality_cap_applied
+          ? ` (effective: ${v.effective_quality} — convention-inferred motivation cap applied)`
+          : ''
+      }`
+    )
+    verdictLines.push(
+      `**Justification source:** ${humanise(v.justification_source)}`
+    )
+    verdictLines.push(`**Gate outcome:** ${humanise(v.gate_outcome)}`)
     verdictLines.push(`**Justification:** ${v.justification}`)
     blocks.push(verdictLines.join('\n'))
     blocks.push('---')
   }
 
-  // Sections 4 + 5 — Score. Deferred this session — a one-line transparency
-  // note where the score sections sit (philosophical mode is a transparency
-  // surface; silently hiding the deferral would be dishonest).
+  // Sections 4 + 5 — Score vector + Scalar score. An R17e-safe projection of
+  // the SubstrateScore (the `confidence` field is omitted). Both sections
+  // render in every response, including when the R20a passthrough is active
+  // (the verdict + score still render — the passthrough replaces only section
+  // 6, mirroring agent mode).
   blocks.push(
-    '*Score breakdown and scalar score: deferred to a future build — the ' +
-      'substrate score architecture is not yet built. See the decision log ' +
-      '(D-PHILOSOPHICAL-MODE-BUILD-WIRED-VERIFIED-2026-05-14).*'
+    renderScoreVectorSection(json.score.components, json.score.component_sum)
   )
+  blocks.push('---')
+  blocks.push(renderScalarScoreSection(json.score.scalar))
   blocks.push('---')
 
   // Section 6 — field-by-field rendering, OR the R20a distress passthrough
@@ -1213,10 +1390,25 @@ export function renderPhilosophicalModeMarkdown(
 async function renderPhilosophicalMode(
   input: Layer3ModeRenderInput
 ): Promise<Layer3ModeRenderResult> {
-  // Step 1 — apply the R17e exclusion filter BEFORE any projection runs.
+  // Step 1 — apply the R17e exclusion filter BEFORE any field-by-field
+  // projection of the assessment's own fields runs.
   const filtered = applyR17eExclusionFilter(input.assessment)
 
-  // Step 2 — build the six mandatory wraps via the existing injection layer.
+  // Step 2 — compute the substrate score. computeSubstrateScore REQUIRES the
+  // UNFILTERED assessment (it reads iterative_refinement.direction_of_travel +
+  // .motivation_classification by design — its parameter is typed
+  // Layer2Assessment, not R17eFilteredAssessment). Philosophical mode then
+  // projects only an R17e-safe SUBSET of the result (the `confidence` field is
+  // omitted — see projectPhilosophicalModeScalar). The ScoreContext is
+  // caller-supplied on the shared render-input; when absent, the honest
+  // 'absent' default applies (the kathekon gate does not confirm; the score
+  // caps at 35) — consistent with the agent-mode renderer, and it keeps this
+  // renderer total (it never throws on a missing context).
+  const scoreContext: ScoreContext =
+    input.score_context ?? DEFAULT_SCORE_CONTEXT
+  const score = computeSubstrateScore(input.assessment, scoreContext)
+
+  // Step 3 — build the six mandatory wraps via the existing injection layer.
   // These are taken verbatim from layer3-service.ts — this module never
   // re-authors a wrap string. The R20a passthrough decision is made here,
   // synchronously, before the response is constructed.
@@ -1235,17 +1427,24 @@ async function renderPhilosophicalMode(
     r18e_transparency_notice: injectR18eTransparencyNotice(),
   }
 
-  // Step 3 — compose the Input observed characterisation (caller override, or
+  // Step 4 — compose the Input observed characterisation (caller override, or
   // a deterministic composition from the assessment).
   const inputObserved =
     input.input_observed && input.input_observed.trim().length > 0
       ? input.input_observed.trim()
       : composeInputObserved(filtered)
 
-  // Step 4 — project the canonical JSON. Pure, synchronous.
-  const json = projectPhilosophicalModeJSON(filtered, injections, inputObserved)
+  // Step 5 — project the canonical JSON. Pure, synchronous. The score was
+  // computed at Step 2 from the UNFILTERED assessment; projectPhilosophical-
+  // ModeJSON projects an R17e-safe subset of it.
+  const json = projectPhilosophicalModeJSON(
+    filtered,
+    score,
+    injections,
+    inputObserved
+  )
 
-  // Step 5 — source material. Skipped entirely when the R20a passthrough is
+  // Step 6 — source material. Skipped entirely when the R20a passthrough is
   // active (the passthrough replaces the assessment content; appending Stoic
   // passages after a distress redirection would be inappropriate).
   let sourceMaterialMarkdown: string
@@ -1273,7 +1472,7 @@ async function renderPhilosophicalMode(
     sourceMaterialMarkdown = renderSourceMaterialMarkdown(passages, findings)
   }
 
-  // Step 6 — render the Markdown text rendering.
+  // Step 7 — render the Markdown text rendering.
   const markdown = renderPhilosophicalModeMarkdown(json, sourceMaterialMarkdown)
 
   return {

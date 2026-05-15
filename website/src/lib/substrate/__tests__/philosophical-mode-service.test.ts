@@ -26,7 +26,8 @@
  *   R17e EXCLUSION (load-bearing)
  *     R17E-1  applyR17eExclusionFilter removes iterative_refinement
  *     R17E-2  excluded field NAMES never appear in JSON or Markdown
- *     R17E-3  excluded field VALUES (canaries) never appear in JSON or Markdown
+ *     R17E-3  excluded field VALUES (canaries incl. direction_of_travel) never
+ *             appear in JSON or Markdown — re-run + extended for the now-live score
  *     R17E-4  meta.excluded_field_paths records the exclusion
  *
  *   SECTION ORDERING
@@ -46,10 +47,16 @@
  *     OMIT-3  empty soft_clarifications omitted even when open_deferrals present
  *     OMIT-4  the JSON preserves all fields (no omission in the JSON)
  *
- *   SCORE DEFERRAL
- *     SCORE-1  json.score.deferred === true
- *     SCORE-2  json.verdict.justification_source === null
- *     SCORE-3  Markdown carries the score-deferral transparency note
+ *   SCORE PROJECTION (PR7 deferral resolved — sections 4 + 5 wired 2026-05-15)
+ *     SCORE-1  json.score.components + component_sum project from computeSubstrateScore
+ *     SCORE-2  json.score.scalar projects the SubstrateScoreScalar MINUS confidence
+ *     SCORE-3  json.verdict carries the real justification_source + gate fields
+ *     SCORE-4  Markdown renders the score-vector table + scalar-score section
+ *     SCORE-5  PROVISIONAL flag + the "(CAPPED at N — reason)" notation render
+ *     SCORE-6  the confidence field is excluded from JSON and Markdown (R17e)
+ *     SCORE-7  meta.score_sections_deferred === false (key retained)
+ *     SCORE-8  the score_context render-input override is consumed
+ *     SCORE-9  null hasty_assent (single_snapshot) renders as "n/a" in the table
  *
  *   SOURCE MATERIAL
  *     SRC-1  Markdown source-material section renders the retrieved passages
@@ -90,6 +97,8 @@ import {
   R18E_ARTICLE_50_TRANSPARENCY_NOTICE,
   type ConsumerContext,
 } from '../layer3-service'
+
+import { computeSubstrateScore } from '../score-architecture'
 
 import type { Layer2Assessment } from '../../translation-sandwich/layer2-mechanisms'
 import type { RetrievedPassage } from '../../rag/retrieve-passages'
@@ -464,6 +473,15 @@ async function main(): Promise<void> {
     consumer_context: CONSUMER_PLAIN,
     retrievePassagesFn: stubRetrieve,
   })
+  // A render with an explicit score_context — proves the caller-supplied
+  // ScoreContext is consumed (the default is { justification_source: 'absent' }).
+  const withScoreContext = await renderLayer3Mode({
+    mode: 'philosophical',
+    assessment: FULL_ASSESSMENT,
+    consumer_context: CONSUMER_PLAIN,
+    score_context: { justification_source: 'engine_constructed' },
+    retrievePassagesFn: stubRetrieve,
+  })
 
   // --- DISPATCH ---------------------------------------------------------
   assert('DSP-1  renderLayer3Mode returns a result', fullPlain != null)
@@ -598,10 +616,23 @@ async function main(): Promise<void> {
     )
     // R17E-3 — the substantive protection: excluded field VALUES never render.
     // Canaries: the four progress_dimensions strings, the distinctive
-    // senecan_grade value (grade_1), and the motivation_classification value.
+    // senecan_grade value (grade_1), the motivation_classification value, and —
+    // re-run + EXTENDED for the now-live score (2026-05-15) — the
+    // direction_of_travel value ('stable' on FULL_ASSESSMENT). The score is
+    // computed from the UNFILTERED assessment, so this canary is load-bearing:
+    // it confirms the SubstrateScore projection leaks no raw iterative_refinement
+    // value. ('stable' is a generic enum value — a weaker canary than the
+    // LEAKCANARY strings — so the score's confidence field, which IS derived
+    // from direction_of_travel, is additionally guarded structurally: it is
+    // omitted from PhilosophicalModeScalar and checked by SCORE-6.)
     const jsonStr = JSON.stringify(fullPlain.json)
     const md = fullPlain.markdown
-    const valueCanaries = ['LEAKCANARY', 'grade_1', 'unclear_pending_clarification']
+    const valueCanaries = [
+      'LEAKCANARY',
+      'grade_1',
+      'unclear_pending_clarification',
+      'stable',
+    ]
     const valueLeaks = valueCanaries.filter(
       (c) => jsonStr.includes(c) || md.includes(c)
     )
@@ -627,7 +658,8 @@ async function main(): Promise<void> {
       md.indexOf(R3_DISCLAIMER),
       md.indexOf('# Stoic Reasoning Assessment'),
       md.indexOf('## Verdict'),
-      md.indexOf('Score breakdown and scalar score: deferred'),
+      md.indexOf('## Score vector'),
+      md.indexOf('## Scalar score'),
       md.indexOf(SECTION6_HEADING),
       md.indexOf(SRC_HEADING),
       md.indexOf(R19C_LIMITATIONS_LINK),
@@ -723,19 +755,92 @@ async function main(): Promise<void> {
     )
   }
 
-  // --- SCORE DEFERRAL ---------------------------------------------------
-  assertEqual('SCORE-1  json.score.deferred === true', fullPlain.json.score.deferred, true)
-  assertEqual(
-    'SCORE-2  json.verdict.justification_source === null',
-    fullPlain.json.verdict.justification_source,
-    null
-  )
-  assert(
-    'SCORE-3  Markdown carries the score-deferral transparency note',
-    fullPlain.markdown.includes(
-      'Score breakdown and scalar score: deferred to a future build'
-    ) && fullPlain.json.meta.score_sections_deferred === true
-  )
+  // --- SCORE PROJECTION (PR7 deferral resolved — sections 4 + 5 wired) --
+  {
+    // The score projects from computeSubstrateScore on the UNFILTERED
+    // assessment with the default ScoreContext ({ justification_source:
+    // 'absent' } — no score_context supplied in the fullPlain render).
+    const expectedScore = computeSubstrateScore(FULL_ASSESSMENT, {
+      justification_source: 'absent',
+    })
+    const s = fullPlain.json.score
+    const md = fullPlain.markdown
+    assert(
+      'SCORE-1  json.score.components + component_sum project from computeSubstrateScore',
+      JSON.stringify(s.components) === JSON.stringify(expectedScore.components) &&
+        s.component_sum === expectedScore.component_sum
+    )
+    assert(
+      'SCORE-2  json.score.scalar projects the SubstrateScoreScalar MINUS confidence',
+      s.scalar.value === expectedScore.score.value &&
+        s.scalar.kathekon_quality_multiplier ===
+          expectedScore.score.kathekon_quality_multiplier &&
+        s.scalar.validity === expectedScore.score.validity &&
+        s.scalar.precision_band === expectedScore.score.precision_band &&
+        JSON.stringify(s.scalar.cap_applied) ===
+          JSON.stringify(expectedScore.score.cap_applied) &&
+        !('confidence' in (s.scalar as object))
+    )
+    assert(
+      'SCORE-3  json.verdict carries the real justification_source + gate fields',
+      fullPlain.json.verdict.justification_source ===
+        expectedScore.verdict.justification_source &&
+        fullPlain.json.verdict.gate_outcome ===
+          expectedScore.verdict.gate_outcome &&
+        fullPlain.json.verdict.effective_quality ===
+          expectedScore.verdict.effective_quality &&
+        fullPlain.json.verdict.convention_quality_cap_applied ===
+          expectedScore.verdict.convention_quality_cap_applied
+    )
+    assert(
+      'SCORE-4  Markdown renders the score-vector table + scalar-score section',
+      md.includes('## Score vector') &&
+        md.includes('| Component | Contribution |') &&
+        md.includes('| Baseline |') &&
+        md.includes('**Component sum:**') &&
+        md.includes('## Scalar score') &&
+        md.includes(`**Score:** ${expectedScore.score.value} / 100`) &&
+        md.includes(`**Precision band:** ±${expectedScore.score.precision_band}`)
+    )
+    // FULL_ASSESSMENT is contrary (is_kathekon false) + motivation-unclear →
+    // PROVISIONAL, capped at 35. The cap notation names both cap and reason.
+    const cap = expectedScore.score.cap_applied
+    assert(
+      'SCORE-5  PROVISIONAL flag + the "(CAPPED at N — reason)" notation render',
+      expectedScore.score.validity === 'PROVISIONAL' &&
+        md.includes('**Validity:** PROVISIONAL') &&
+        cap !== null &&
+        md.includes(`(CAPPED at ${cap.cap} — ${cap.reason})`)
+    )
+    // confidence is R17e-excluded (derived from direction_of_travel) — it must
+    // not appear as a scalar key, in the serialised score JSON, or in Markdown.
+    assert(
+      'SCORE-6  the confidence field is excluded from JSON and Markdown (R17e)',
+      !('confidence' in (s.scalar as object)) &&
+        !JSON.stringify(s).includes('confidence') &&
+        !md.includes('**Confidence:**')
+    )
+    assertEqual(
+      'SCORE-7  meta.score_sections_deferred === false (key retained)',
+      fullPlain.json.meta.score_sections_deferred,
+      false
+    )
+    // The score_context render-input override is consumed: withScoreContext
+    // supplies 'engine_constructed'; the default (fullPlain) is 'absent'.
+    assert(
+      'SCORE-8  the score_context render-input override is consumed',
+      withScoreContext.json.verdict.justification_source ===
+        'engine_constructed' &&
+        fullPlain.json.verdict.justification_source === 'absent'
+    )
+    // MINIMAL_ASSESSMENT has direction_of_travel 'single_snapshot' → the score
+    // module returns hasty_assent: null → the table renders "n/a".
+    assert(
+      'SCORE-9  null hasty_assent (single_snapshot) renders as "n/a" in the table',
+      minimal.json.score.components.hasty_assent === null &&
+        minimal.markdown.includes('| Hasty-assent | n/a')
+    )
+  }
 
   // --- SOURCE MATERIAL --------------------------------------------------
   {
