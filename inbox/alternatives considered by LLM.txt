@@ -1,0 +1,109 @@
+Alternatives considered by LLM
+
+There isn’t a fixed number. An LLM doesn’t usually “pick from exactly N alternatives” the way a classical search algorithm would. It can reason in a few different modes, and the number of alternatives depends on which mode is being used.
+
+The common patterns are:
+
+1. Implicit next-token / intuition mode (most common)
+
+The model often generates the single most likely next thought, but that thought is informed by many latent alternatives in probability space.
+
+Think:
+	•	thousands of possible continuations exist,
+	•	maybe the top 5–20 token paths materially compete,
+	•	but only one is emitted unless explicitly asked otherwise.
+
+This is closest to human intuition: “what feels like the next right move?”
+
+⸻
+
+2. Explicit branching / self-consistency
+
+If prompted to “consider options,” the model may internally or externally generate k candidate paths.
+
+Typical values:
+	•	3 alternatives → common for simple decisions
+	•	5–8 → good practical exploration
+	•	10–20 → used in research settings for harder reasoning
+
+Example:
+“Should I A, B, or C?”
+→ model generates several solution traces, then selects the most consistent.
+
+This is similar to self-consistency decoding in LLM research. Self-consistency
+
+⸻
+
+3. Tree search / agentic planning
+
+When wrapped in an agent framework, an LLM can perform explicit search:
+	•	branching factor b = 2–5 per step is common
+	•	depth maybe 3–10 steps
+	•	total nodes explored: 10–1000+
+
+Examples:
+	•	Tree of Thoughts
+	•	Monte Carlo Tree Search
+	•	beam search
+
+This is much more deliberate but slower.
+
+⸻
+
+4. Tool-assisted evaluation
+
+An agent may:
+	1.	generate 3 options,
+	2.	simulate each,
+	3.	score them,
+	4.	keep top 1–2.
+
+Typical:
+	•	propose 3–7
+	•	retain 1–3
+
+Very common in production agents because it balances cost and reliability.
+
+⸻
+
+What frontier models likely do by default
+
+Without scaffolding, probably:
+
+~1 explicit path
+built from
+many latent micro-alternatives (dozens to hundreds at token level).
+
+A useful mental model:
+
+“The model considers many micro-options continuously, but usually commits to one macro-path unless forced to branch.”
+
+⸻
+
+Human-like comparison
+
+Rough analogy:
+
+System	Typical alternatives
+Human intuition	1–3
+Careful human deliberation	3–7
+Default LLM	1 explicit, many implicit
+LLM + self-consistency	3–20
+LLM + tree search agent	10–1000+
+
+
+⸻
+
+For your Stoic judgment middleware idea, a useful design is:
+
+LLM intuition (1 path)
+→ generate 3 alternatives
+→ Stoic assent filter scores each
+→ choose top path
+
+That mirrors how a human might:
+	•	notice an impulse,
+	•	consider a few options,
+	•	judge them by values,
+	•	then act.
+
