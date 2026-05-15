@@ -28,22 +28,20 @@
  * in the ATL arc (the wrapper, the badge, trajectory awareness) depends on
  * this mapping existing.
  *
- * THE tsconfig BOUNDARY (Step 2 design-decision gate — founder-confirmed)
+ * THE tsconfig BOUNDARY (resolved 2026-05-15 — ATL Wrapper build, spec step 5)
  *
- * /trust-layer/ sits OUTSIDE website/'s tsconfig root: website/tsconfig.json's
- * "include" globs are rooted at website/, and there is no root-level or
- * trust-layer/ tsconfig. A module here therefore CANNOT import EvaluatedAction
- * from /trust-layer/types/evaluation.ts without pulling ~4,200 lines of
- * never-strict-compiled code into tsc. Per the founder's election at this
- * session's Step 2 gate, the EvaluatedAction target type — and its two
- * dependency enums — are MIRRORED into this file as local declarations (see
- * "MIRRORED TARGET TYPES" below). This is consistent with /trust-layer/'s own
- * established self-containment pattern: its BUILD-LOG records that it
- * re-declared KatorthomaProximityLevel etc. rather than coupling to
- * website/src. The mirror is a known manual-sync point — if /trust-layer/'s
- * EvaluatedAction changes, this mirror must be updated in the same change. A
- * later ATL session (the wrapper build, spec step 5) can consolidate the
- * boundary once more of it is crossed.
+ * /trust-layer/ sits OUTSIDE website/'s tsconfig root. When this bridge was
+ * first built it MIRRORED its EvaluatedAction target type (+ two dependency
+ * enums) as local declarations, because importing them from /trust-layer/
+ * would pull never-strict-compiled code into tsc — and the bridge session
+ * deferred "consolidating the /trust-layer/ ↔ website boundary" to the wrapper
+ * build. That build (D-ATL-WRAPPER-WIRED-VERIFIED-2026-05-15) needed the
+ * window-aggregator + grade-engine LOGIC, not just types, so per the founder's
+ * Step 2 election it PORTED the 5-file dependency closure of those functions
+ * into website/src/lib/substrate/trust-layer/ — verbatim, KEEP-IN-SYNC mirrors,
+ * inside website/'s tsconfig. This module now imports the CANONICAL
+ * EvaluatedAction from that ported closure: one definition, no local mirror,
+ * the bridge session's open question closed.
  *
  * THE BridgeContext (Step 1 survey finding)
  *
@@ -78,65 +76,22 @@ import { createHash } from 'node:crypto'
 
 import type { Layer2Assessment } from '@/lib/translation-sandwich/layer2-mechanisms'
 
-// ============================================================================
-// MIRRORED TARGET TYPES
-//
-// Re-declared verbatim from /trust-layer/types/evaluation.ts +
-// /trust-layer/types/accreditation.ts. /trust-layer/ sits outside website/'s
-// tsconfig root and cannot be imported here (see the module header). KEEP IN
-// SYNC: if the /trust-layer/ originals change, update these mirrors in the
-// same change. The source-of-truth path is named on each declaration.
-// ============================================================================
+// EvaluatedAction — the MAPPING TARGET, the single-action unit the trust
+// layer's window-aggregator consumes — and its two dependency enums now live
+// in the ported /trust-layer/ closure at website/src/lib/substrate/trust-layer/,
+// INSIDE website/'s tsconfig. The ATL Wrapper build (D-ATL-WRAPPER-WIRED-
+// VERIFIED-2026-05-15, spec step 5) ported that closure per the founder's
+// Step 2 election; this module now imports the CANONICAL EvaluatedAction
+// rather than carrying its own mirror — there is one definition in website/src.
+import type { EvaluatedAction } from './trust-layer/types/evaluation'
 
-/** MIRRORED from /trust-layer/types/accreditation.ts — the 5-level katorthoma
- *  proximity scale. Structurally identical to the substrate's own
- *  `KatorthomaProximity` (layer2-mechanisms.ts); mirrored here so the target
- *  EvaluatedAction shape is self-contained on this side of the boundary. */
-export type KatorthomaProximityLevel =
-  | 'reflexive'
-  | 'habitual'
-  | 'deliberate'
-  | 'principled'
-  | 'sage_like'
-
-/** MIRRORED from /trust-layer/types/accreditation.ts — the 4 root passion
- *  identifiers. Structurally identical to the substrate's own `RootPassion`
- *  (layer1-extractor.ts). */
-export type RootPassionId = 'epithumia' | 'hedone' | 'phobos' | 'lupe'
-
-/** MIRRORED from /trust-layer/types/evaluation.ts — `EvaluatedAction`, the
- *  single-action unit the trust layer's window-aggregator consumes. This is
- *  the MAPPING TARGET. The mirror is verbatim including `readonly` modifiers;
- *  keep it byte-faithful to the /trust-layer/ original. */
-export type EvaluatedAction = {
-  /** Receipt ID linking back to the full reasoning trace. */
-  readonly receipt_id: string
-  /** Agent that performed this action. */
-  readonly agent_id: string
-  /** When this action was evaluated (ISO 8601). */
-  readonly evaluated_at: string
-  /** Proximity level from the 4-stage evaluation. */
-  readonly proximity: KatorthomaProximityLevel
-  /** Whether the action was deemed appropriate. */
-  readonly is_kathekon: boolean
-  /** Quality of the kathekon assessment. */
-  readonly kathekon_quality: 'strong' | 'moderate' | 'marginal' | 'contrary'
-  /** Passions detected during evaluation. */
-  readonly passions_detected: {
-    readonly root_passion: RootPassionId
-    readonly sub_species: string
-  }[]
-  /** Virtue domains engaged in this action. */
-  readonly virtue_domains_engaged: string[]
-  /** Whether oikeiosis obligations were met (null when not assessed). */
-  readonly oikeiosis_met: boolean | null
-  /** Which oikeiosis stage was relevant, if any. */
-  readonly oikeiosis_stage: string | null
-  /** Ruling faculty state description. */
-  readonly ruling_faculty_state: string
-  /** Which skill produced this evaluation. */
-  readonly skill_id: string
-}
+// Re-exported so the bridge's existing consumers (atl-bridge.test.ts) and
+// downstream ATL modules keep importing these from one place.
+export type { EvaluatedAction } from './trust-layer/types/evaluation'
+export type {
+  KatorthomaProximityLevel,
+  RootPassionId,
+} from './trust-layer/types/accreditation'
 
 // ============================================================================
 // BRIDGE CONTEXT — the four fields Layer2Assessment does not carry
