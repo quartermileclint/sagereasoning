@@ -149,18 +149,33 @@ import {
   type RetrievedPassage,
 } from '@/lib/rag/retrieve-passages'
 
+// Agent-mode rendering (ATL Wrapper Component 2) — the 'atl_wrapper' dispatch
+// case delegates to renderAgentMode. The value import is one-directional
+// (philosophical-mode-service.ts → agent-mode-service.ts at runtime);
+// agent-mode-service.ts imports only the Layer3ModeRenderInput TYPE back, which
+// is erased — so there is no runtime import cycle.
+import { renderAgentMode } from '@/lib/substrate/agent-mode-service'
+import type { AgentModeRenderResult } from '@/lib/substrate/agent-mode-service'
+
+// The ScoreContext the agent-mode rendering needs — the caller-supplied inputs
+// the substrate score does not itself emit. Carried on Layer3ModeRenderInput so
+// the shared dispatch input type is the single render-input surface.
+import type { ScoreContext } from '@/lib/substrate/score-architecture'
+
 // ============================================================================
 // MODE-DISPATCH TYPES (PR1 — the pattern standard / private / ATL extend)
 // ============================================================================
 
-/** The Layer 3 render modes. Today only 'philosophical' is implemented; the
- *  other three are reserved so the dispatch switch is exhaustively typed. */
+/** The Layer 3 render modes. 'philosophical' and 'atl_wrapper' are implemented;
+ *  the other two are reserved so the dispatch switch is exhaustively typed.
+ *  'atl_wrapper' is the Layer 3 agent-mode rendering — ATL Wrapper Component 2;
+ *  added 2026-05-15 (D-ATL-AGENT-MODE-RENDERING-WIRED-VERIFIED-2026-05-15). */
 export type Layer3RenderMode =
   | 'philosophical'
+  | 'atl_wrapper'
   // Reserved — implemented in subsequent build sessions:
   // | 'standard'
   // | 'private'
-  // | 'atl_wrapper'
 
 /** Signature of the retrieve-passages function. Exposed as a dependency-
  *  injection seam so tests can run without a database / OpenAI dependency.
@@ -189,6 +204,14 @@ export interface Layer3ModeRenderInput {
   /** Dependency-injection seam for retrieve-passages. Defaults to the real
    *  `retrievePassages`. Tests pass a stub. */
   retrievePassagesFn?: RetrievePassagesFn
+  /** Optional ScoreContext — the caller-supplied inputs the substrate score
+   *  needs but does not itself emit (`justification_source` required;
+   *  `declared_motivation_passion` optional). Consumed by the agent-mode
+   *  ('atl_wrapper') renderer; IGNORED by philosophical mode. When absent, the
+   *  agent-mode renderer defaults to `{ justification_source: 'absent' }` (the
+   *  honest "no justification available" path). The wrapper (spec step 5)
+   *  becomes the eventual producer; until then the caller supplies it. */
+  score_context?: ScoreContext
 }
 
 export interface Layer3ModeRenderResult {
@@ -1263,34 +1286,55 @@ async function renderPhilosophicalMode(
 // ============================================================================
 // THE LAYER 3 MODE-DISPATCH ENTRY POINT (PR1 — single-endpoint proof)
 //
-// This is the dispatch pattern the four-mode build arc is proven on. Today the
-// switch handles 'philosophical' only; standard / private / atl_wrapper extend
-// the same switch in subsequent build sessions. The mandatory-injection layer
+// This is the dispatch pattern the four-mode build arc is proven on. The switch
+// handles 'philosophical' and 'atl_wrapper'; standard / private extend the same
+// switch in subsequent build sessions. The mandatory-injection layer
 // (layer3-service.ts) is shared by every mode regardless.
 //
-// PR2: the test file (__tests__/philosophical-mode-service.test.ts) invokes
-// this entry point in the same session this module is written — build-to-wire-
-// verification is immediate.
+// Function overloads keep each mode's return type precise: a caller that passes
+// a literal `mode` gets that mode's exact result type back, so existing callers
+// of the 'philosophical' mode are unchanged (their `.json` is still a
+// PhilosophicalModeResponse, not a union). A caller with a non-narrowed mode
+// gets the union and must narrow on `.mode`.
+//
+// PR2: the test files (__tests__/philosophical-mode-service.test.ts +
+// __tests__/agent-mode-service.test.ts) invoke this entry point in the same
+// session each mode is written — build-to-wire-verification is immediate.
 // ============================================================================
 
 /**
- * Render a Layer 3 response in the requested mode. Branches on `mode`; today
- * only 'philosophical' is implemented. Throws on an unimplemented mode rather
- * than silently producing nothing.
+ * Render a Layer 3 response in the requested mode. Branches on `mode`;
+ * 'philosophical' and 'atl_wrapper' are implemented. Throws on an unimplemented
+ * mode rather than silently producing nothing.
  */
 export async function renderLayer3Mode(
+  input: Layer3ModeRenderInput & { mode: 'philosophical' }
+): Promise<Layer3ModeRenderResult>
+export async function renderLayer3Mode(
+  input: Layer3ModeRenderInput & { mode: 'atl_wrapper' }
+): Promise<AgentModeRenderResult>
+export async function renderLayer3Mode(
   input: Layer3ModeRenderInput
-): Promise<Layer3ModeRenderResult> {
+): Promise<Layer3ModeRenderResult | AgentModeRenderResult>
+export async function renderLayer3Mode(
+  input: Layer3ModeRenderInput
+): Promise<Layer3ModeRenderResult | AgentModeRenderResult> {
   switch (input.mode) {
     case 'philosophical':
       return renderPhilosophicalMode(input)
+    case 'atl_wrapper':
+      // renderAgentMode is synchronous + deterministic (no LLM call, no
+      // retrieve-passages call); the async wrapper here resolves it
+      // immediately. PR1 single-endpoint proof of the agent-mode rendering
+      // pattern.
+      return renderAgentMode(input)
     default: {
       // Exhaustiveness guard — when a new mode is added to Layer3RenderMode
       // without a case here, this line stops compiling.
       const unimplemented: never = input.mode
       throw new Error(
         `Layer 3 render mode '${String(unimplemented)}' is not implemented yet. ` +
-          'Implemented modes: philosophical.'
+          'Implemented modes: philosophical, atl_wrapper.'
       )
     }
   }
