@@ -118,9 +118,9 @@ A next-session prompt for A10 has NOT been pre-drafted. The founder can request 
 | Component | Founder Verification Method |
 |---|---|
 | Library (`atl-accreditation-writer.ts`) | Run `npx tsx --env-file=.env.local src/lib/substrate/__tests__/atl-accreditation-writer.test.ts` locally; expect `N passed / 0 failed`. |
-| POST handler (`route.ts`) | (1) Run `npx tsx --env-file=.env.local src/app/api/accreditation/\[agent_id\]/__tests__/route.test.ts` locally; expect `Pass: N  Fail: 0`. The `--env-file` is required as of this session — route.ts now imports the writer + store chain, both of which transitively load `supabase-server.ts` (CLAUDE.md "Running the substrate test suite"). (2) After push + Vercel rebuild, run `curl -i -X POST https://sagereasoning.com/api/accreditation/agent_test_v1 -H "Content-Type: application/json" -d '{"kind":"seed"}'`; expect `HTTP/2 503` with body containing `"not yet enabled"`. |
+| POST handler (`route.ts`) | (1) Run `npx tsx --env-file=.env.local src/app/api/accreditation/\[agent_id\]/__tests__/route.test.ts` locally; expect `Pass: N  Fail: 0`. The `--env-file` is required as of this session — route.ts now imports the writer + store chain, both of which transitively load `supabase-server.ts` (CLAUDE.md "Running the substrate test suite"). (2) After push + Vercel rebuild, run `curl -i -X POST https://www.sagereasoning.com/api/accreditation/agent_test_v1 -H "Content-Type: application/json" -d '{"kind":"seed"}'`; expect `HTTP/2 503` with body containing `"not yet enabled"`. |
 | Auth gate (env-flag) | The 503 response on POST (above) confirms the env-unset code path. Founder elects whether to test the flag-set path (a separate decision; not part of this session). |
-| Existing GET handler regression | After push, run `curl -i https://sagereasoning.com/api/accreditation/agent_test_v1`; expect `HTTP/2 404` with body `{"status":"not_found",...}` (the table is empty). |
+| Existing GET handler regression | After push, run `curl -i https://www.sagereasoning.com/api/accreditation/agent_test_v1`; expect `HTTP/2 404` with body `{"status":"not_found",...}` (the table is empty). |
 | Type-correctness | In-session `tsc --noEmit -p tsconfig.json` ran clean (exit 0). |
 
 ## Risk Classification Record (0d-ii)
@@ -246,12 +246,14 @@ Then push via **GitHub Desktop**.
 
 ### 3. Post-deploy URL checks
 
-After Vercel reports the deployment as green, run each `curl` on its own line:
+After Vercel reports the deployment as green, run each `curl` on its own line.
+
+**Domain note:** the project's canonical domain is `www.sagereasoning.com`. The bare `sagereasoning.com` redirects to `www.` at the Vercel edge (HTTP 307). Hitting the bare URL with `curl` (without `-L`) shows the redirect, not the route. Use `www.` in the commands below.
 
 **POST inert-state check (proves the route exists, the auth gate fires, nothing writes):**
 
 ```
-curl -i -X POST https://sagereasoning.com/api/accreditation/agent_test_v1 -H "Content-Type: application/json" -d '{"kind":"seed"}'
+curl -i -X POST https://www.sagereasoning.com/api/accreditation/agent_test_v1 -H "Content-Type: application/json" -d '{"kind":"seed"}'
 ```
 
 **Expected:** the first line is `HTTP/2 503`. The body (after the headers) is a JSON object containing `"status":"error"` and a message saying the write surface is not yet enabled, plus `"documentation_url":"https://sagereasoning.com/limitations"`. If you see HTTP 200 instead, the auth gate is misconfigured — message me before doing anything else, and follow rollback path (B) (`git revert HEAD --no-edit` + push). If you see HTTP 401 / 400 / 404 / 409, that's unexpected but probably fine — message me so we can confirm what fired.
@@ -259,7 +261,7 @@ curl -i -X POST https://sagereasoning.com/api/accreditation/agent_test_v1 -H "Co
 **GET regression check (proves the existing read endpoint is unchanged):**
 
 ```
-curl -i https://sagereasoning.com/api/accreditation/agent_test_v1
+curl -i https://www.sagereasoning.com/api/accreditation/agent_test_v1
 ```
 
 **Expected:** `HTTP/2 404` with body `{"status":"not_found", "message":"No accreditation record found...", "documentation_url":"https://sagereasoning.com/limitations"}`. If you see 503 or 500 or anything auth-related, the GET regressed — message me; follow rollback path (B).
