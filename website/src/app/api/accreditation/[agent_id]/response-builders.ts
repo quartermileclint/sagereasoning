@@ -201,3 +201,163 @@ export function httpStatusFor(
       return 400
   }
 }
+
+// ============================================================================
+// WRITE-PATH RESPONSE BUILDERS — added 2026-05-16 under D-ATL-WRITE-PATH-
+// BUILD-WIRED-VERIFIED-2026-05-16 (Decision A's route half + Decision C's
+// auth gate). The POST handler at /api/accreditation/[agent_id] uses these
+// to map seedAccreditation / updateAccreditation outcomes to HTTP status
+// codes. Each response carries the documentation_url + ACCREDITATION_RESPONSE_-
+// HEADERS by the same discipline as the GET-path builders above.
+//
+// All write-path failure messages are intentionally vague (Decision C's
+// non-leaking posture) — internal details about Supabase state, the
+// feature-flag state, or the body's validation failure stay in the server
+// logs, not the response body.
+// ============================================================================
+
+/**
+ * 200 ok — the write succeeded. Body carries no payload (the write returns
+ * void from the library); the verifier confirms via a subsequent GET if it
+ * needs the persisted shape.
+ */
+export function buildWriteSuccessResponse(): NextResponse {
+  return NextResponse.json(
+    {
+      status: 'ok',
+      documentation_url: DOCUMENTATION_URL,
+    },
+    {
+      status: 200,
+      headers: {
+        ...ACCREDITATION_RESPONSE_HEADERS,
+        // Don't cache the write response — even a 200 should be re-checked
+        // on the next call. Writes are mutating; GET responses can stay
+        // cached at 5 min per their own discipline.
+        'Cache-Control': 'no-store',
+      },
+    },
+  )
+}
+
+/**
+ * 503 service-temporarily-unavailable — the write-path feature flag is
+ * unset. Pre-A10 stopgap per Decision C's option (1). The message names
+ * the inert state without leaking what env var controls it.
+ */
+export function buildWriteDisabledResponse(): NextResponse {
+  return NextResponse.json(
+    {
+      status: 'error',
+      message:
+        'The accreditation write surface is not yet enabled. ' +
+        'Please try again later.',
+      documentation_url: DOCUMENTATION_URL,
+    },
+    {
+      status: 503,
+      headers: {
+        ...ACCREDITATION_RESPONSE_HEADERS,
+        'Cache-Control': 'no-store',
+      },
+    },
+  )
+}
+
+/**
+ * 401 unauthorized — the auth gate rejected the request. Non-leaking
+ * message per Decision C's structural constraint (the kathekon close's
+ * "Unauthorized." pattern). Pre-A10 stopgap option (1) does not return this
+ * variant; it is the call site A10 (step 8) will fill.
+ */
+export function buildWriteUnauthorizedResponse(): NextResponse {
+  return NextResponse.json(
+    {
+      status: 'error',
+      message: 'Unauthorized.',
+      documentation_url: DOCUMENTATION_URL,
+    },
+    {
+      status: 401,
+      headers: {
+        ...ACCREDITATION_RESPONSE_HEADERS,
+        'Cache-Control': 'no-store',
+      },
+    },
+  )
+}
+
+/**
+ * 400 bad-request — body validation failed (missing kind, malformed
+ * profile, etc.). Message names the specific failure so the caller can
+ * correct it; the validation surface is the client's, not the server's
+ * internals.
+ */
+export function buildWriteBadRequestResponse(message: string): NextResponse {
+  return NextResponse.json(
+    {
+      status: 'error',
+      message,
+      documentation_url: DOCUMENTATION_URL,
+    },
+    {
+      status: 400,
+      headers: {
+        ...ACCREDITATION_RESPONSE_HEADERS,
+        'Cache-Control': 'no-store',
+      },
+    },
+  )
+}
+
+/**
+ * 404 not-found — an 'update' call was made against an agent_id that has
+ * no existing row. The persistence layer's upsertAccreditationRecord would
+ * silently insert (matching idempotent semantics), but the route's
+ * pre-flight lookup catches the mismatch so the caller knows to use 'seed'
+ * for the first write.
+ */
+export function buildWriteNotFoundResponse(): NextResponse {
+  return NextResponse.json(
+    {
+      status: 'error',
+      message:
+        "No accreditation record exists for this agent_id. " +
+        "Use kind: 'seed' for the first write.",
+      documentation_url: DOCUMENTATION_URL,
+    },
+    {
+      status: 404,
+      headers: {
+        ...ACCREDITATION_RESPONSE_HEADERS,
+        'Cache-Control': 'no-store',
+      },
+    },
+  )
+}
+
+/**
+ * 409 conflict — a 'seed' call was made against an agent_id that already
+ * has a row. The persistence layer's upsert with onConflict: 'agent_id'
+ * would update in place (matching idempotent semantics), but the route's
+ * pre-flight lookup catches the mismatch so the caller knows to use
+ * 'update' for subsequent writes.
+ */
+export function buildWriteConflictResponse(): NextResponse {
+  return NextResponse.json(
+    {
+      status: 'error',
+      message:
+        "An accreditation record already exists for this agent_id. " +
+        "Use kind: 'update' for subsequent writes.",
+      documentation_url: DOCUMENTATION_URL,
+    },
+    {
+      status: 409,
+      headers: {
+        ...ACCREDITATION_RESPONSE_HEADERS,
+        'Cache-Control': 'no-store',
+      },
+    },
+  )
+}

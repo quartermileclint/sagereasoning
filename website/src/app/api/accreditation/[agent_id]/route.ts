@@ -2,34 +2,67 @@
  * /api/accreditation/[agent_id] — Public Verification Endpoint (ATL Wrapper
  * Component 3 — the badge / accreditation, public face).
  *
- * STATUS: Scaffolded → Wired → Verified (2026-05-16, this session — step 6b).
+ * STATUS: Scaffolded → Wired → Verified (2026-05-16, step 6b; POST handler +
+ * auth gate added 2026-05-16 under the write-path build — D-ATL-WRITE-PATH-
+ * BUILD-WIRED-VERIFIED-2026-05-16).
  *
  * GOVERNING DOCUMENTS:
  *   - /adopted/substrate-modes/agent-trust-layer-wrapper-spec.md §"Component 3"
  *     (the spec, Adopted 2026-05-14). This is the named public surface — the
  *     verifiable credential third parties query.
+ *   - /adopted/atl-write-path-design.md — the write-path design (Adopted
+ *     2026-05-16 under D-ATL-WRITE-PATH-DESIGN-LOCKED-2026-05-16). Decision A
+ *     names the POST handler at this route group; Decision C names the auth
+ *     gate (pre-A10 stopgap option (1) — feature-flag gated via
+ *     SUBSTRATE_WRITE_PATH_ENABLED env var).
  *   - /operations/decision-log.md —
+ *       D-ATL-WRITE-PATH-BUILD-WIRED-VERIFIED-2026-05-16
+ *       (this build's write-path additions — POST handler + auth gate; the
+ *       seven Critical Change Protocol responses recorded there)
  *       D-ATL-PUBLIC-ACCREDITATION-ENDPOINT-WIRED-VERIFIED-2026-05-16
- *       (this build; the Critical Change Protocol responses recorded there)
+ *       (the predecessor GET-only build; this session's POST handler
+ *       coexists with the GET-handler that build wired)
  *       D-ATL-BADGE-SCHEMA-PERSISTENCE-WIRED-VERIFIED-2026-05-15
- *       (predecessor — the 6a persistence layer this route consumes)
+ *       (predecessor — the 6a persistence layer this route's GET + POST
+ *       consume)
  *   - /manifest.md §R3 (disclaimer) / §R4 (IP boundary) / §R9 (does not promise
- *     outcomes) / §R18 a–e (the badge certifies the carried profile) / §AC5
- *     (R20a perimeter — NOT engaged: no distress surface) / §AC7 (NOT engaged:
- *     no auth/cookie/session/redirect surface) / §AC8 (translation-sandwich
- *     substrate) / §KG1 (Vercel five-rule constraint).
+ *     outcomes) / §R17 (auth gate engaged on POST — see Compliance below) /
+ *     §R18 a–e (the badge certifies the carried profile) / §AC5
+ *     (R20a perimeter — NOT engaged: no distress surface) / §AC7 (ENGAGED on
+ *     POST — new auth surface; full Critical Change Protocol applied at the
+ *     write-path build session) / §AC8 (translation-sandwich substrate) /
+ *     §KG1 (Vercel five-rule constraint).
  *
  * WHAT THIS ROUTE IS
  *
- * The single public read endpoint for the ATL badge. A verifier — a person, an
- * agent, an auditor — calls
- *     GET https://sagereasoning.com/api/accreditation/{agent_id}
- * and receives that wrapped agent's reasoning-pattern credential as JSON. The
- * credential is the R4-compliant AccreditationPayload (Senecan grade, typical
- * proximity, authority level, the four dimension levels, direction of travel,
- * persisting passions, evaluation window, timestamps, verification URL,
- * disclaimer). Optionally `?format=card` returns the richer displayable
- * AccreditationCard.
+ * The public read AND write endpoint for the ATL badge.
+ *
+ * READ — GET https://sagereasoning.com/api/accreditation/{agent_id}
+ *   A verifier — a person, an agent, an auditor — receives that wrapped
+ *   agent's reasoning-pattern credential as JSON. The credential is the
+ *   R4-compliant AccreditationPayload (Senecan grade, typical proximity,
+ *   authority level, the four dimension levels, direction of travel,
+ *   persisting passions, evaluation window, timestamps, verification URL,
+ *   disclaimer). Optionally `?format=card` returns the richer displayable
+ *   AccreditationCard.
+ *
+ * WRITE — POST https://sagereasoning.com/api/accreditation/{agent_id}
+ *   A wrapper consumer — orchestrator, dashboard, external agent platform,
+ *   CI integration — populates or updates an agent's accreditation row. The
+ *   POST handler validates the body, runs the auth gate (pre-A10 stopgap:
+ *   feature-flag gated via SUBSTRATE_WRITE_PATH_ENABLED), does a pre-flight
+ *   lookup to disambiguate seed vs update vs conflict, then invokes the
+ *   atl-accreditation-writer library's seedAccreditation or
+ *   updateAccreditation. Outcomes map to 200 / 401 / 400 / 404 / 409 / 503
+ *   per the design's Decision A response envelope. The library writes the
+ *   row via the persistence layer's existing upsertAccreditationRecord +
+ *   appendGradeHistory / appendInitialGradeHistory.
+ *
+ *   Pre-A10 default state: SUBSTRATE_WRITE_PATH_ENABLED is UNSET in Vercel,
+ *   so every POST returns 503 "writes not yet enabled" — the route is inert
+ *   until the founder flips the flag. Setting the flag accepts writes from
+ *   anywhere (per Decision C option (1)'s coarse-grained gate); A10 (step 8)
+ *   replaces this with per-agent token verification.
  *
  * THE THREE 6a LIBRARY SEAMS THIS ROUTE CONSUMES
  *   - lookupAccreditationRecord (atl-accreditation-store.ts) — the Supabase
@@ -93,7 +126,16 @@
  *   - AC5 (R20a perimeter): NOT engaged. The route carries no distress
  *     surface; it serves a credential record. The R20a eight-route perimeter is
  *     unchanged.
- *   - AC7 (auth/session/cookie/redirect): NOT engaged. Public, no-auth GET.
+ *   - R17 (auth — engaged on POST only): the POST handler's auth gate is
+ *     the primary R17 engagement on this route. Pre-A10 stopgap option (1) —
+ *     feature-flag gated. The gate's signature (verifyAgentIdOwnership) is
+ *     A10-shaped: post-A10 (step 8), the body swaps to per-agent token
+ *     verification without changing the call site. The GET handler remains
+ *     auth-free (public read endpoint per spec).
+ *   - AC7 (auth/session/cookie/redirect — engaged on POST): the POST handler
+ *     introduces a new auth surface (feature-flag gated pre-A10; per-agent
+ *     token verification post-A10). The full Critical Change Protocol was
+ *     applied at the write-path build session. GET remains AC7-untouched.
  *     No cookies read or set; no redirects; no session state.
  *   - AC8: this route is the first public substrate-consumer that serves the
  *     ATL Wrapper's credential.
@@ -149,9 +191,23 @@ import {
 import { lookupAccreditationRecord } from '@/lib/substrate/atl-accreditation-store'
 
 import {
+  seedAccreditation,
+  updateAccreditation,
+} from '@/lib/substrate/atl-accreditation-writer'
+
+import type { CarriedProfile } from '@/lib/substrate/atl-wrapper'
+import type { TransitionResult } from '@/lib/substrate/atl-wrapper'
+
+import {
   buildAccreditationResponse,
   buildCardResponse,
   buildServerErrorResponse,
+  buildWriteSuccessResponse,
+  buildWriteDisabledResponse,
+  buildWriteUnauthorizedResponse,
+  buildWriteBadRequestResponse,
+  buildWriteNotFoundResponse,
+  buildWriteConflictResponse,
   DOCUMENTATION_URL,
 } from './response-builders'
 
@@ -231,6 +287,278 @@ export async function GET(
 }
 
 // ============================================================================
+// POST — THE WRITE-PATH HANDLER (D-ATL-WRITE-PATH-BUILD-WIRED-VERIFIED-2026-05-16)
+// ============================================================================
+
+/**
+ * Auth-gate result — discriminated. The route maps `not_enabled` to 503 (the
+ * stopgap's inert state) and `unauthorized` to 401 (the future A10 token
+ * failure). `ok` lets the request proceed; `claims.agent_id` is the verified
+ * subject the request is authorised to write.
+ *
+ * Defined inline (rather than in security.ts) because the gate's pre-A10
+ * stopgap is route-local and the A10 implementation will live alongside the
+ * route's other concerns. Promote to security.ts if a second route reuses
+ * the gate.
+ */
+type AuthGateResult =
+  | { ok: true; claims: { agent_id: string } }
+  | { ok: false; reason: 'not_enabled' | 'unauthorized' }
+
+/**
+ * verifyAgentIdOwnership — the auth gate for POST.
+ *
+ * PRE-A10 STOPGAP (Decision C option (1) — feature-flag gated): the gate
+ * reads SUBSTRATE_WRITE_PATH_ENABLED from the environment. If the value is
+ * not the exact string "true", the gate returns `not_enabled` → route
+ * returns 503 with a non-leaking "writes not yet enabled" message. Any
+ * value other than "true" (including the unset state, "false", "0", "")
+ * fails closed; the strictest possible truthiness check.
+ *
+ * When the flag is set to "true", all writes are allowed — the route is
+ * open to any caller with a valid agent_id path parameter and a well-formed
+ * body. This is the coarse-grained gate Decision C grants pre-A10; A10
+ * (step 8) replaces it with per-agent token verification.
+ *
+ * THE A10-SHAPED SEAM (per Decision C's structural constraint):
+ *   - Signature: (request, agent_id) → discriminated result.
+ *   - Pre-A10: the request + agent_id parameters are unused; the gate
+ *     decision is purely env-driven.
+ *   - Post-A10: the function body swaps to read Authorization: Bearer
+ *     headers, verify the token against an A10 per-agent credential store,
+ *     check the verified subject matches `agent_id`, and return
+ *     `unauthorized` on any failure. The call site does not change.
+ *
+ * The `request` and `_agent_id` parameters are declared but unused under
+ * the pre-A10 stopgap; they are part of the seam that A10 fills.
+ */
+function verifyAgentIdOwnership(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _request: NextRequest,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _agent_id: string,
+): AuthGateResult {
+  // PRE-A10: feature-flag gated only. Strictest possible truthiness — only
+  // the exact string "true" enables writes; anything else (unset, "false",
+  // "0", "") fails closed.
+  if (process.env.SUBSTRATE_WRITE_PATH_ENABLED !== 'true') {
+    return { ok: false, reason: 'not_enabled' }
+  }
+  // Flag is set — accept the write. A10 will replace this with token
+  // verification; the claims object's shape is forward-compatible.
+  return { ok: true, claims: { agent_id: _agent_id } }
+}
+
+/**
+ * The discriminated request-body shape the POST handler accepts. Validated
+ * inline below; consumers may submit additional fields, which are ignored.
+ */
+type WriteRequestBody =
+  | { kind: 'seed'; profile: CarriedProfile }
+  | {
+      kind: 'update'
+      profile: CarriedProfile
+      transition_result: TransitionResult
+    }
+
+/**
+ * Pure body-shape validator. Returns the typed body or an error message
+ * (non-leaking). Validates only the structural shape needed to dispatch to
+ * the library; deep validation of CarriedProfile internals is deferred
+ * (the library + persistence layer will throw on a malformed shape, which
+ * the route catches and maps to 503 — but the explicit 400 here avoids
+ * round-tripping the throw for obvious shape errors).
+ */
+function validateWriteBody(
+  raw: unknown,
+): { ok: true; body: WriteRequestBody } | { ok: false; message: string } {
+  if (typeof raw !== 'object' || raw === null) {
+    return { ok: false, message: 'Request body must be a JSON object.' }
+  }
+  const obj = raw as Record<string, unknown>
+
+  if (obj.kind !== 'seed' && obj.kind !== 'update') {
+    return {
+      ok: false,
+      message: "Body field 'kind' must be 'seed' or 'update'.",
+    }
+  }
+
+  if (typeof obj.profile !== 'object' || obj.profile === null) {
+    return {
+      ok: false,
+      message: "Body field 'profile' must be a CarriedProfile object.",
+    }
+  }
+
+  // Minimal shape check on the CarriedProfile — we look for the fields the
+  // library reads directly (agent_id, accreditation_record, regressing_check_-
+  // count). Deeper validation is the library + persistence layer's job.
+  const profile = obj.profile as Record<string, unknown>
+  if (typeof profile.agent_id !== 'string' || profile.agent_id.length === 0) {
+    return {
+      ok: false,
+      message: "Body field 'profile.agent_id' must be a non-empty string.",
+    }
+  }
+  if (
+    typeof profile.accreditation_record !== 'object' ||
+    profile.accreditation_record === null
+  ) {
+    return {
+      ok: false,
+      message:
+        "Body field 'profile.accreditation_record' must be an object.",
+    }
+  }
+  if (typeof profile.regressing_check_count !== 'number') {
+    return {
+      ok: false,
+      message:
+        "Body field 'profile.regressing_check_count' must be a number.",
+    }
+  }
+
+  if (obj.kind === 'update') {
+    if (
+      typeof obj.transition_result !== 'object' ||
+      obj.transition_result === null
+    ) {
+      return {
+        ok: false,
+        message:
+          "Body field 'transition_result' is required when kind is 'update'.",
+      }
+    }
+    const tr = obj.transition_result as Record<string, unknown>
+    if (typeof tr.grade_changed !== 'boolean') {
+      return {
+        ok: false,
+        message:
+          "Body field 'transition_result.grade_changed' must be a boolean.",
+      }
+    }
+    if (typeof tr.record !== 'object' || tr.record === null) {
+      return {
+        ok: false,
+        message: "Body field 'transition_result.record' must be an object.",
+      }
+    }
+    return {
+      ok: true,
+      body: {
+        kind: 'update',
+        profile: obj.profile as unknown as CarriedProfile,
+        transition_result: obj.transition_result as unknown as TransitionResult,
+      },
+    }
+  }
+
+  return {
+    ok: true,
+    body: {
+      kind: 'seed',
+      profile: obj.profile as unknown as CarriedProfile,
+    },
+  }
+}
+
+/**
+ * POST /api/accreditation/[agent_id]
+ *
+ * Request body (JSON):
+ *   { kind: 'seed', profile: <CarriedProfile> }
+ *   { kind: 'update', profile: <CarriedProfile>, transition_result: <TransitionResult> }
+ *
+ * Outcomes:
+ *   200 — write succeeded
+ *   400 — invalid body
+ *   401 — auth gate rejected the request (A10-shaped reason)
+ *   404 — kind='update' against non-existent row
+ *   409 — kind='seed' against existing row
+ *   503 — write surface not enabled (pre-A10 stopgap) OR Supabase error
+ *
+ * The handler:
+ *   1. Rate-limit (mirrors the GET's 30 req/min/IP — same RATE_LIMITS.publicAgent).
+ *   2. Auth-gate check (verifyAgentIdOwnership; pre-A10: env-flag).
+ *   3. Body parse + validate (validateWriteBody).
+ *   4. Pre-flight lookup to disambiguate seed/update against the row's existence.
+ *   5. Invoke seedAccreditation or updateAccreditation from the writer library.
+ *   6. Map outcomes to HTTP status codes.
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ agent_id: string }> },
+): Promise<NextResponse> {
+  // 1. Rate limit — same posture as GET (30 req/min/IP).
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.publicAgent)
+  if (rateLimitError) return rateLimitError
+
+  const { agent_id } = await params
+
+  // 2. Auth gate (pre-A10: feature-flag gated).
+  const auth = verifyAgentIdOwnership(request, agent_id)
+  if (!auth.ok) {
+    if (auth.reason === 'not_enabled') return buildWriteDisabledResponse()
+    return buildWriteUnauthorizedResponse()
+  }
+
+  // 3. Body parse + validate.
+  let rawBody: unknown
+  try {
+    rawBody = await request.json()
+  } catch {
+    return buildWriteBadRequestResponse(
+      'Request body is not valid JSON.',
+    )
+  }
+
+  const validated = validateWriteBody(rawBody)
+  if (!validated.ok) {
+    return buildWriteBadRequestResponse(validated.message)
+  }
+
+  // Ensure the body's profile.agent_id matches the path param — the path
+  // is the authority on which row is being written; a mismatch is a client
+  // error.
+  if (validated.body.profile.agent_id !== agent_id) {
+    return buildWriteBadRequestResponse(
+      "Body field 'profile.agent_id' must match the URL path's agent_id.",
+    )
+  }
+
+  // 4. Pre-flight lookup — disambiguates seed vs update vs conflict.
+  try {
+    const existing = await lookupAccreditationRecord(agent_id)
+
+    if (validated.body.kind === 'seed' && existing !== null) {
+      return buildWriteConflictResponse()
+    }
+    if (validated.body.kind === 'update' && existing === null) {
+      return buildWriteNotFoundResponse()
+    }
+
+    // 5. Invoke the writer library.
+    if (validated.body.kind === 'seed') {
+      await seedAccreditation(validated.body.profile)
+    } else {
+      await updateAccreditation(
+        validated.body.profile,
+        validated.body.transition_result,
+      )
+    }
+
+    return buildWriteSuccessResponse()
+  } catch (err) {
+    // Any Supabase failure inside lookupAccreditationRecord or the writer
+    // library's persistence-layer calls propagates here. Map to 503 with a
+    // non-leaking message; the error is logged for the operator.
+    console.error('Accreditation write error:', err)
+    return buildServerErrorResponse()
+  }
+}
+
+// ============================================================================
 // OPTIONS — CORS preflight
 // ============================================================================
 
@@ -249,32 +577,30 @@ export async function OPTIONS(): Promise<NextResponse> {
 }
 
 // ============================================================================
-// POST / PUT / DELETE / PATCH — 405
+// PUT / DELETE / PATCH — 405
 // ============================================================================
 
 /**
- * Helper for the four method-not-allowed handlers below. Each method-handler
- * is exported separately (Next.js convention); they delegate here.
+ * Helper for the three method-not-allowed handlers below. POST is REMOVED
+ * from the 405 set as of 2026-05-16 (D-ATL-WRITE-PATH-BUILD-WIRED-VERIFIED-
+ * 2026-05-16) — POST now has a real handler above. Allow header advertises
+ * the three accepted methods.
  */
 function methodNotAllowed(): NextResponse {
   return NextResponse.json(
     {
       status: 'error',
-      message: 'Method not allowed. This endpoint accepts GET only.',
+      message: 'Method not allowed. This endpoint accepts GET, POST, and OPTIONS.',
       documentation_url: DOCUMENTATION_URL,
     },
     {
       status: 405,
       headers: {
         ...ACCREDITATION_RESPONSE_HEADERS,
-        Allow: 'GET, OPTIONS',
+        Allow: 'GET, POST, OPTIONS',
       },
     }
   )
-}
-
-export async function POST(): Promise<NextResponse> {
-  return methodNotAllowed()
 }
 
 export async function PUT(): Promise<NextResponse> {
