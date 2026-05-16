@@ -49,7 +49,11 @@
 // imports are fine in TypeScript; accreditation.ts and evaluation.ts already
 // strongly couple, and this is a type-only edge added 2026-05-16 for Decision A
 // of the items 1-3 build (D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16).
-import type { DeliberationBreadth } from './evaluation'
+// KathekonQuality is similarly defined in ../types/evaluation.ts (used both per-
+// action on EvaluatedAction.kathekon_quality and aggregated to typical_kathekon_-
+// quality). Added 2026-05-16 for the kathekon-aligned alternative build
+// (D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-WIRED-VERIFIED-2026-05-16).
+import type { DeliberationBreadth, KathekonQuality } from './evaluation'
 
 // Re-export types from existing V3 infrastructure
 // In production, these would import from '../../website/src/lib/stoic-brain'
@@ -201,6 +205,17 @@ export type AccreditationRecord = {
    *  verifiers that don't parse it are unaffected. Added 2026-05-16 under
    *  D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16 §"Decision A". */
   readonly typical_deliberation_breadth: DeliberationBreadth
+
+  /** The typical (most-common-qualifying) kathekon-quality bucket across the
+   *  evaluation window — the R18a-honest observable credential parallel to
+   *  typical_deliberation_breadth. Derived from the WindowSnapshot's same-
+   *  named field. R18c-additive: additional field; third-party verifiers that
+   *  don't parse it are unaffected. Per the kathekon-aligned alternative design
+   *  (Decision C), authority_level stays driven by typical_proximity — this
+   *  field is observable on the record but does NOT modulate operational
+   *  permissions. Added 2026-05-16 under D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-
+   *  BUILD-WIRED-VERIFIED-2026-05-16 §"Decision C". */
+  readonly typical_kathekon_quality: KathekonQuality
 }
 
 /**
@@ -229,6 +244,12 @@ export type AccreditationPayload = {
    *  (intuited / deliberated / multi_branch_deliberated). Added 2026-05-16
    *  under D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16 §"Decision A". */
   readonly typical_deliberation_breadth: DeliberationBreadth
+
+  /** The R18a-honest observable credential parallel to typical_deliberation_-
+   *  breadth — qualitative kathekon pattern (strong / moderate / marginal /
+   *  contrary). Added 2026-05-16 under D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-
+   *  BUILD-WIRED-VERIFIED-2026-05-16 §"Decision C". */
+  readonly typical_kathekon_quality: KathekonQuality
 }
 
 /**

@@ -255,6 +255,7 @@ export function evaluateGradeTransition(
     passions_persisting: snapshot.persisting_passions,
     updated_at: new Date().toISOString(),
     typical_deliberation_breadth: snapshot.typical_deliberation_breadth,
+    typical_kathekon_quality: snapshot.typical_kathekon_quality,
   }
 
   return {
@@ -326,6 +327,7 @@ function checkUpgrade(
     passions_persisting: snapshot.persisting_passions,
     updated_at: now,
     typical_deliberation_breadth: snapshot.typical_deliberation_breadth,
+    typical_kathekon_quality: snapshot.typical_kathekon_quality,
   }
 
   return {
@@ -398,6 +400,7 @@ function checkDowngrade(
     passions_persisting: snapshot.persisting_passions,
     updated_at: now,
     typical_deliberation_breadth: snapshot.typical_deliberation_breadth,
+    typical_kathekon_quality: snapshot.typical_kathekon_quality,
   }
 
   const reasons: string[] = []

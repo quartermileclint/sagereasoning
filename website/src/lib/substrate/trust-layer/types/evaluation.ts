@@ -64,8 +64,15 @@ export type EvaluatedAction = {
   /** Whether the action was deemed appropriate */
   readonly is_kathekon: boolean
 
-  /** Quality of the kathekon assessment */
-  readonly kathekon_quality: 'strong' | 'moderate' | 'marginal' | 'contrary'
+  /** Quality of the kathekon assessment. Per D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-
+   *  BUILD-WIRED-VERIFIED-2026-05-16 §"Decision B", this now references the
+   *  named KathekonQuality alias (defined below) — type-equivalent to the prior
+   *  inline literal; the alias exists so WindowSnapshot.typical_kathekon_quality
+   *  + AccreditationRecord.typical_kathekon_quality can share the same name. The
+   *  alias is re-declared inside trust-layer/ rather than imported from
+   *  layer2-mechanisms.ts (the established self-containment pattern noted in
+   *  ../types/accreditation.ts banner). */
+  readonly kathekon_quality: KathekonQuality
 
   /** Passions detected during evaluation */
   readonly passions_detected: {
@@ -97,6 +104,32 @@ export type EvaluatedAction = {
    *  D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16 §"Decision A". */
   readonly candidates_considered: number
 }
+
+// ============================================================================
+// KATHEKON QUALITY — alias re-declared inside trust-layer/ (self-contained)
+// ============================================================================
+
+/**
+ * The kathekon-quality bucket — whether each evaluated action was the
+ * appropriate-in-the-circumstances fitting act ('strong' / 'moderate' /
+ * 'marginal' / 'contrary'). Carried per-action on EvaluatedAction.kathekon_-
+ * quality; aggregated across the window via computeTypicalKathekonQuality;
+ * surfaced as the R18a-honest observable credential on AccreditationRecord.
+ * typical_kathekon_quality + AccreditationPayload.typical_kathekon_quality.
+ *
+ * The canonical type lives at /website/src/lib/translation-sandwich/layer2-
+ * mechanisms.ts (`KathekonQuality`). It is re-declared here — type-equivalent
+ * — rather than imported across the trust-layer self-containment boundary
+ * (the same pattern the ported KatorthomaProximityLevel + SenecanGradeId +
+ * DimensionLevel + ... use; see ../types/accreditation.ts banner). KEEP IN
+ * SYNC: if /website/src/lib/translation-sandwich/layer2-mechanisms.ts changes
+ * the KathekonQuality domain, re-port it here in the same change.
+ *
+ * Added 2026-05-16 under D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-WIRED-
+ * VERIFIED-2026-05-16 §"Decision B" (the kathekon-aligned alternative build —
+ * step 6 of the post-6b arc; parallels Decision A of the items 1-3 build).
+ */
+export type KathekonQuality = 'strong' | 'moderate' | 'marginal' | 'contrary'
 
 // ============================================================================
 // DELIBERATION BREADTH — derived from EvaluatedAction.candidates_considered
@@ -244,6 +277,23 @@ export type WindowSnapshot = {
    *  R18a-honest observable credential the badge surfaces. Mirrors
    *  typical_proximity (most common qualifying level). */
   readonly typical_deliberation_breadth: DeliberationBreadth
+
+  /** Distribution of kathekon-quality buckets across the window — counts each
+   *  EvaluatedAction's kathekon_quality (already on the per-action shape via
+   *  the existing bridge). Mirrors proximity_distribution + deliberation_-
+   *  breadth_distribution. Per D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-WIRED-
+   *  VERIFIED-2026-05-16 §"Decision B". */
+  readonly kathekon_quality_distribution: Record<KathekonQuality, number>
+
+  /** The typical (most-common-qualifying) kathekon-quality bucket — the
+   *  R18a-honest observable credential parallel to typical_deliberation_breadth.
+   *  Same threshold convention as typical_proximity: highest bucket whose
+   *  cumulative at-or-above share meets WindowConfig.typical_proximity_threshold.
+   *  Conservative-baseline default 'contrary' when no actions qualify (matches
+   *  the empty-window aggregation; the deliberation-breadth equivalent uses
+   *  'intuited' as its baseline). Per D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-
+   *  WIRED-VERIFIED-2026-05-16 §"Decision B". */
+  readonly typical_kathekon_quality: KathekonQuality
 }
 
 /**

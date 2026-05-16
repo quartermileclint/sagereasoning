@@ -23,6 +23,12 @@
  *     RENDER-6  typical_deliberation_breadth headline appears in Section 2
  *     RENDER-7  persisting passions non-empty renders the passion strings
  *     RENDER-8  verification_url renders and matches the record's URL
+ *     RENDER-9  typical_kathekon_quality headline appears in Section 2
+ *               (Decision G — kathekon-aligned alternative build, 2026-05-16)
+ *     RENDER-10 kathekon_quality_distribution appears in Section 2
+ *               (Decision G — kathekon-aligned alternative build, 2026-05-16)
+ *     RENDER-11 typical_kathekon_quality appears in Section 3
+ *               (Decision G — kathekon-aligned alternative build, 2026-05-16)
  *
  *   INVARIANTS
  *     DET-1     two renders with identical input + supplied snapshot →
@@ -682,6 +688,102 @@ function main(): void {
       'RENDER-8  Signoff carries the verify-this-report URL footer',
       md,
       `Verify this report's credential at ${expectedUrl}`
+    )
+  }
+
+  // --------------------------------------------------------------------------
+  // RENDER-9 — typical_kathekon_quality headline appears in Section 2
+  // (Decision G — kathekon-aligned alternative build, 2026-05-16)
+  // --------------------------------------------------------------------------
+  {
+    const fresh = withFixedRecordTimestamps(createCarriedProfile(AGENT_ID))
+    const step = runSequentialStep({
+      profile: fresh,
+      assessment: goodHabitual(),
+      context: ctxWithSignature('render9_1'),
+    })
+    const profileAfter = withFixedRecordTimestamps(step.profile)
+    const snapshot = makeFixedSnapshot(profileAfter)
+    const result = renderAgentHandBackReport({
+      profile: profileAfter,
+      steps: [step],
+      snapshot,
+      consumer_context: CONSUMER_CTX,
+    })
+    const md = result.markdown
+
+    // goodHabitual() supplies kathekon_quality 'strong' on a single action;
+    // with 1 strong action and a 0.6 threshold, typical_kathekon_quality
+    // computes to 'strong' (1/1 strong at-or-above >= 0.6).
+    assertContains(
+      'RENDER-9  typical_kathekon_quality headline in Section 2',
+      md,
+      '**typical kathekon quality:** strong'
+    )
+  }
+
+  // --------------------------------------------------------------------------
+  // RENDER-10 — kathekon_quality_distribution appears in Section 2
+  // (Decision G — kathekon-aligned alternative build, 2026-05-16)
+  // --------------------------------------------------------------------------
+  {
+    const fresh = withFixedRecordTimestamps(createCarriedProfile(AGENT_ID))
+    const step = runSequentialStep({
+      profile: fresh,
+      assessment: goodHabitual(),
+      context: ctxWithSignature('render10_1'),
+    })
+    const profileAfter = withFixedRecordTimestamps(step.profile)
+    const snapshot = makeFixedSnapshot(profileAfter)
+    const result = renderAgentHandBackReport({
+      profile: profileAfter,
+      steps: [step],
+      snapshot,
+      consumer_context: CONSUMER_CTX,
+    })
+    const md = result.markdown
+
+    assertContains(
+      'RENDER-10  kathekon quality distribution rendered (label)',
+      md,
+      '**kathekon quality distribution:**'
+    )
+    // goodHabitual() => one 'strong' action; distribution has strong: 1.
+    assertContains(
+      'RENDER-10  kathekon quality distribution carries the strong count',
+      md,
+      'strong: 1'
+    )
+    assertContains(
+      'RENDER-10  kathekon quality distribution carries the contrary zero',
+      md,
+      'contrary: 0'
+    )
+  }
+
+  // --------------------------------------------------------------------------
+  // RENDER-11 — typical_kathekon_quality appears in Section 3
+  // (Decision G — kathekon-aligned alternative build, 2026-05-16)
+  // --------------------------------------------------------------------------
+  {
+    // A fresh CarriedProfile's AccreditationRecord seeds
+    // typical_kathekon_quality to 'contrary' (the conservative baseline) via
+    // createAccreditationRecord. Section 3 reads it from the payload-shape
+    // projection.
+    const fresh = withFixedRecordTimestamps(createCarriedProfile(AGENT_ID))
+    const snapshot = makeFixedSnapshot(fresh)
+    const result = renderAgentHandBackReport({
+      profile: fresh,
+      steps: [],
+      snapshot,
+      consumer_context: CONSUMER_CTX,
+    })
+    const md = result.markdown
+
+    assertContains(
+      'RENDER-11  typical_kathekon_quality appears in Section 3 (fresh baseline = contrary)',
+      md,
+      '**typical kathekon quality:** contrary'
     )
   }
 

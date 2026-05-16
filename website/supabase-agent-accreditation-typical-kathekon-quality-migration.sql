@@ -1,0 +1,52 @@
+-- supabase-agent-accreditation-typical-kathekon-quality-migration.sql
+--
+-- Adds the typical_kathekon_quality column to public.agent_accreditation for
+-- Decision C of D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-WIRED-VERIFIED-
+-- 2026-05-16 (the kathekon-aligned alternative build session — ATL Wrapper
+-- post-6b enhancement arc, step 6 of 8).
+--
+-- The column carries the qualitative kathekon-quality bucket (strong /
+-- moderate / marginal / contrary) the badge surfaces as an R18a-honest
+-- observable credential PARALLEL to typical_deliberation_breadth. Computed at
+-- aggregation time from EvaluatedAction.kathekon_quality (already on the
+-- per-action shape via the existing bridge) by computeTypicalKathekonQuality()
+-- and projected into the AccreditationPayload by buildAccreditationPayload().
+--
+-- Per the kathekon-aligned alternative design (Decision D), authority_level
+-- stays driven by typical_proximity — this credential is observable on the
+-- record but does NOT modulate operational permissions.
+--
+-- Properties:
+--   - ADDITIVE: only ADDS a column to an existing table. No data migration
+--     required. Existing rows are not rewritten (the server-side DEFAULT
+--     applies).
+--   - IDEMPOTENT: ADD COLUMN IF NOT EXISTS — re-running the migration is a
+--     no-op.
+--   - EMPTY-TABLE-SAFE: at the time of the kathekon-aligned alternative build
+--     session (2026-05-16), public.agent_accreditation is empty in production
+--     (the write-path is step 7 of the post-6b arc — not yet built). The
+--     default applies to no rows on first run.
+--   - NOT NULL DEFAULT 'contrary' — the conservative no-evidence-yet baseline
+--     matching the rest of the schema's defaults (reflexive / pre_progress /
+--     emerging / intuited). createAccreditationRecord() uses the same default
+--     when constructing a fresh AccreditationRecord.
+--
+-- Verification (founder-performable after running):
+--   SELECT column_name, data_type, is_nullable, column_default
+--   FROM information_schema.columns
+--   WHERE table_schema = 'public'
+--     AND table_name = 'agent_accreditation'
+--     AND column_name = 'typical_kathekon_quality';
+--
+--   Expected one row:
+--     column_name                | data_type | is_nullable | column_default
+--     ---------------------------+-----------+-------------+----------------
+--     typical_kathekon_quality   | text      | NO          | 'contrary'::text
+--
+-- Rollback (data-loss-free, given the empty-table state at session close):
+--   ALTER TABLE public.agent_accreditation DROP COLUMN IF EXISTS typical_kathekon_quality;
+
+ALTER TABLE public.agent_accreditation
+  ADD COLUMN IF NOT EXISTS typical_kathekon_quality text NOT NULL DEFAULT 'contrary';
+
+-- End of migration.

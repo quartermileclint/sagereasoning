@@ -99,6 +99,8 @@ const SAMPLE_PAYLOAD: AccreditationPayload = {
     'safety, ethics, or trustworthiness in any absolute sense.',
   // Added 2026-05-16 under D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16 §"Decision A".
   typical_deliberation_breadth: 'intuited',
+  // Added 2026-05-16 under D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-WIRED-VERIFIED-2026-05-16 §"Decision C".
+  typical_kathekon_quality: 'contrary',
 }
 
 const SAMPLE_RECORD: AccreditationRecord = {
@@ -125,6 +127,8 @@ const SAMPLE_RECORD: AccreditationRecord = {
   updated_at: '2026-05-16T00:00:00.000Z',
   // Added 2026-05-16 under D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16 §"Decision A".
   typical_deliberation_breadth: 'intuited',
+  // Added 2026-05-16 under D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-WIRED-VERIFIED-2026-05-16 §"Decision C".
+  typical_kathekon_quality: 'contrary',
 }
 
 const EXPECTED_DOC_URL = 'https://sagereasoning.com/limitations'

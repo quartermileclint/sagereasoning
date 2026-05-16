@@ -131,6 +131,7 @@ import {
   type WindowSnapshot,
   type DeliberationBreadth,
   type EvaluatedAction,
+  type KathekonQuality,
 } from './trust-layer/types/evaluation'
 
 import { computeWindowSnapshot } from './trust-layer/evaluation-window/window-aggregator'
@@ -424,6 +425,18 @@ function renderDeliberationDistribution(
 }
 
 /**
+ * Render the kathekon_quality_distribution as a compact "level: count" string.
+ * Canonical order (highest first): strong → moderate → marginal → contrary.
+ * Per Decision G of the kathekon-aligned alternative build (2026-05-16).
+ */
+function renderKathekonQualityDistribution(
+  distribution: Record<string, number>
+): string {
+  const order: KathekonQuality[] = ['strong', 'moderate', 'marginal', 'contrary']
+  return order.map((k) => `${k}: ${distribution[k] ?? 0}`).join(' · ')
+}
+
+/**
  * Render the proximity_trajectory as a compact arrow-separated sequence. The
  * trajectory may contain many entries — for legibility this caps display at
  * the last 20 entries (with a leading "…" when truncated).
@@ -633,6 +646,20 @@ function renderTrajectorySection(snapshot: WindowSnapshot): string {
         renderDeliberationDistribution(snapshot.deliberation_breadth_distribution)
     )
   )
+  // Decision G (kathekon-aligned alternative build, 2026-05-16) — typical
+  // kathekon quality + distribution mirror typical_deliberation_breadth +
+  // deliberation_breadth_distribution directly above.
+  lines.push(
+    bullet(
+      `**typical kathekon quality:** ${snapshot.typical_kathekon_quality}`
+    )
+  )
+  lines.push(
+    bullet(
+      '**kathekon quality distribution:** ' +
+        renderKathekonQualityDistribution(snapshot.kathekon_quality_distribution)
+    )
+  )
   lines.push(
     bullet(
       `**kathekon compliance rate:** ${pct(snapshot.kathekon_compliance_rate)}`
@@ -692,6 +719,13 @@ function renderGradeSection(payload: AccreditationPayload): string {
       `**typical deliberation breadth:** ${payload.typical_deliberation_breadth}`
     )
   )
+  // Decision G (kathekon-aligned alternative build, 2026-05-16) — parallel
+  // R18a-honest credential on the payload-shape projection.
+  lines.push(
+    bullet(
+      `**typical kathekon quality:** ${payload.typical_kathekon_quality}`
+    )
+  )
   lines.push(bullet(`**verify:** ${payload.verification_url}`))
   return lines.join('\n')
 }
@@ -745,7 +779,8 @@ function renderOrchestratorSection(
       bullet(
         `**${peer.agent_id}** · ${acc.senecan_grade} · ${acc.typical_proximity} · ` +
           `${acc.authority_level} · ${acc.direction_of_travel} · ` +
-          `deliberation: ${acc.typical_deliberation_breadth} · ${latestNote}`
+          `deliberation: ${acc.typical_deliberation_breadth} · ` +
+          `kathekon: ${acc.typical_kathekon_quality} · ${latestNote}`
       )
     )
   })

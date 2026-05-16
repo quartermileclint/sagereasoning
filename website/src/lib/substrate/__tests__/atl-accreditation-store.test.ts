@@ -47,6 +47,13 @@
  *     RT-2  record → row → record is lossless (rich record — passions, actions)
  *     RT-3  the persisting-passion objects survive the round-trip intact
  *
+ *   kathekon-aligned-alternative columns (Decision C, 2026-05-16)
+ *     KATH-1  REC2ROW copies typical_kathekon_quality through to the row
+ *     KATH-2  ROW2REC reads typical_kathekon_quality back into the record
+ *     KATH-3  Default seed value is 'contrary' (conservative baseline)
+ *     KATH-4  starting_kathekon_quality override is honoured by
+ *             createAccreditationRecord
+ *
  *   rowToStoreMetadata
  *     META-1  extracts tier + regressing_check_count (opts case)
  *     META-2  extracts the defaults case
@@ -321,6 +328,50 @@ async function main(): Promise<void> {
     const rebuilt = rowToAccreditationRecord(accreditationRecordToRow(rich))
     assertDeepEqual('RT-2 rich record round-trips losslessly', rebuilt, rich)
     assertDeepEqual('RT-3 persisting-passion objects survive intact', rebuilt.passions_persisting, [SAMPLE_PASSION])
+  }
+
+  // --------------------------------------------------------------------------
+  // kathekon-aligned alternative — Decision C (2026-05-16)
+  // --------------------------------------------------------------------------
+  {
+    // KATH-1: REC2ROW copies typical_kathekon_quality through to the row.
+    const record = freshRecord()
+    const row = accreditationRecordToRow(record)
+    assertEqual(
+      'KATH-1 typical_kathekon_quality copied to row',
+      row.typical_kathekon_quality,
+      record.typical_kathekon_quality
+    )
+
+    // KATH-2: ROW2REC reads typical_kathekon_quality back into the record.
+    const roundTripped = rowToAccreditationRecord(row)
+    assertEqual(
+      'KATH-2 typical_kathekon_quality read back from row',
+      roundTripped.typical_kathekon_quality,
+      row.typical_kathekon_quality
+    )
+
+    // KATH-3: Default seed value is 'contrary' (matches the migration's
+    // server-side DEFAULT and the empty-window aggregation baseline).
+    assertEqual(
+      'KATH-3 default seed is contrary',
+      record.typical_kathekon_quality,
+      'contrary'
+    )
+
+    // KATH-4: starting_kathekon_quality override is honoured.
+    const overridden = createAccreditationRecord({
+      agent_id: 'agent_acme_v3',
+      starting_grade: 'pre_progress',
+      starting_proximity: 'reflexive',
+      starting_dimensions: ALL_EMERGING,
+      starting_kathekon_quality: 'strong',
+    })
+    assertEqual(
+      'KATH-4 starting_kathekon_quality override honoured',
+      overridden.typical_kathekon_quality,
+      'strong'
+    )
   }
 
   // --------------------------------------------------------------------------

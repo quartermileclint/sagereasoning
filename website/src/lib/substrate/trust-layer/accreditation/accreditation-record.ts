@@ -45,7 +45,7 @@ import type {
   DimensionScores,
   GradeChangeEvent,
 } from '../types/accreditation'
-import type { DeliberationBreadth } from '../types/evaluation'
+import type { DeliberationBreadth, KathekonQuality } from '../types/evaluation'
 
 // ============================================================================
 // CONSTANTS
@@ -127,6 +127,11 @@ export type CreateAccreditationOptions = {
    *  2026-05-16 under D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16
    *  §"Decision A". */
   starting_deliberation_breadth?: DeliberationBreadth
+  /** Optional override for the seeded typical_kathekon_quality — the
+   *  conservative no-evidence-yet baseline (default 'contrary'). Added
+   *  2026-05-16 under D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-WIRED-VERIFIED-
+   *  2026-05-16 §"Decision C". */
+  starting_kathekon_quality?: KathekonQuality
 }
 
 /**
@@ -143,6 +148,7 @@ export function createAccreditationRecord(
     window_size = DEFAULT_WINDOW_SIZE,
     expiry_days = DEFAULT_EXPIRY_DAYS,
     starting_deliberation_breadth = 'intuited',
+    starting_kathekon_quality = 'contrary',
   } = options
 
   const now = new Date().toISOString()
@@ -168,6 +174,7 @@ export function createAccreditationRecord(
     created_at: now,
     updated_at: now,
     typical_deliberation_breadth: starting_deliberation_breadth,
+    typical_kathekon_quality: starting_kathekon_quality,
   }
 }
 
@@ -230,6 +237,10 @@ export function buildAccreditationPayload(
     // R18a-observable credential; R18c-additive schema (Decision A,
     // D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16).
     typical_deliberation_breadth: record.typical_deliberation_breadth,
+    // R18a-observable credential parallel to typical_deliberation_breadth;
+    // R18c-additive schema (Decision C, D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-
+    // BUILD-WIRED-VERIFIED-2026-05-16).
+    typical_kathekon_quality: record.typical_kathekon_quality,
   }
 }
 

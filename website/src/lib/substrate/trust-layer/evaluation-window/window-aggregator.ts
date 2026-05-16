@@ -59,6 +59,7 @@ import type {
   WindowSnapshot,
   DimensionDetail,
   DeliberationBreadth,
+  KathekonQuality,
 } from '../types/evaluation'
 
 import { DEFAULT_WINDOW_CONFIG, deriveDeliberationBreadth } from '../types/evaluation'
@@ -115,6 +116,15 @@ export function computeWindowSnapshot(
     window.length,
     config.typical_proximity_threshold
   )
+  // Added 2026-05-16 (D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-WIRED-VERIFIED-
+  // 2026-05-16, Decision B) — kathekon_quality aggregation parallels the
+  // deliberation-breadth aggregation directly above. Same threshold convention.
+  const kathekonQualityDistribution = computeKathekonQualityDistribution(window)
+  const typicalKathekonQuality = computeTypicalKathekonQuality(
+    kathekonQualityDistribution,
+    window.length,
+    config.typical_proximity_threshold
+  )
 
   return {
     agent_id: agentId,
@@ -132,6 +142,8 @@ export function computeWindowSnapshot(
     dimension_detail: dimensionDetail,
     deliberation_breadth_distribution: deliberationBreadthDistribution,
     typical_deliberation_breadth: typicalDeliberationBreadth,
+    kathekon_quality_distribution: kathekonQualityDistribution,
+    typical_kathekon_quality: typicalKathekonQuality,
   }
 }
 
@@ -178,6 +190,62 @@ function computeTypicalDeliberationBreadth(
   if (multi / totalActions >= threshold) return 'multi_branch_deliberated'
   if ((multi + delib) / totalActions >= threshold) return 'deliberated'
   return 'intuited'
+}
+
+// ============================================================================
+// KATHEKON QUALITY DISTRIBUTION (Decision B — kathekon-aligned alternative
+// build, 2026-05-16). Parallels the deliberation-breadth pair directly above.
+// ============================================================================
+
+/**
+ * Count how many actions fall at each kathekon-quality bucket — the raw signal
+ * (`kathekon_quality`) is already on each EvaluatedAction via the existing
+ * bridge. No derivation needed.
+ */
+function computeKathekonQualityDistribution(
+  actions: EvaluatedAction[]
+): Record<KathekonQuality, number> {
+  const dist: Record<KathekonQuality, number> = {
+    strong: 0,
+    moderate: 0,
+    marginal: 0,
+    contrary: 0,
+  }
+  for (const action of actions) {
+    dist[action.kathekon_quality]++
+  }
+  return dist
+}
+
+/**
+ * Determine the typical kathekon-quality bucket — the most-common-qualifying
+ * level at the threshold (mirrors computeTypicalProximity + computeTypical-
+ * DeliberationBreadth).
+ *
+ * Order (highest first): strong > moderate > marginal > contrary. The
+ * "at or above" count is exactly the count at that level plus the counts at
+ * higher levels.
+ *
+ * Conservative-baseline default 'contrary' when no actions qualify (and on
+ * empty window) — same pattern as Decision A's 'intuited' baseline; pairs with
+ * createAccreditationRecord's seed default + the migration's column DEFAULT.
+ */
+function computeTypicalKathekonQuality(
+  distribution: Record<KathekonQuality, number>,
+  totalActions: number,
+  threshold: number
+): KathekonQuality {
+  if (totalActions === 0) return 'contrary'
+
+  const strong = distribution.strong
+  const moderate = distribution.moderate
+  const marginal = distribution.marginal
+  // Highest-first: strong → strong+moderate → strong+moderate+marginal →
+  // contrary (floor).
+  if (strong / totalActions >= threshold) return 'strong'
+  if ((strong + moderate) / totalActions >= threshold) return 'moderate'
+  if ((strong + moderate + marginal) / totalActions >= threshold) return 'marginal'
+  return 'contrary'
 }
 
 // ============================================================================

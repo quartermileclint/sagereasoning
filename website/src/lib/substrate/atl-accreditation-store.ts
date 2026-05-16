@@ -133,7 +133,10 @@ import type {
   PersistingPassion,
   SenecanGradeId,
 } from './trust-layer/types/accreditation'
-import type { DeliberationBreadth } from './trust-layer/types/evaluation'
+import type {
+  DeliberationBreadth,
+  KathekonQuality,
+} from './trust-layer/types/evaluation'
 
 // Re-export the domain types a persistence-layer consumer (the spec step 6b
 // route) needs, so it imports them from one place.
@@ -184,6 +187,13 @@ export interface AgentAccreditationRow {
    *  WIRED-VERIFIED-2026-05-16 §"Decision A"; column added by
    *  /website/supabase-agent-accreditation-typical-deliberation-breadth-migration.sql. */
   readonly typical_deliberation_breadth: DeliberationBreadth
+  /** R18a-observable credential parallel to typical_deliberation_breadth — the
+   *  typical kathekon-quality bucket the badge surfaces. Default 'contrary' at
+   *  the DB layer (the conservative no-evidence-yet baseline). Added 2026-05-16
+   *  under D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-WIRED-VERIFIED-2026-05-16
+   *  §"Decision C"; column added by
+   *  /website/supabase-agent-accreditation-typical-kathekon-quality-migration.sql. */
+  readonly typical_kathekon_quality: KathekonQuality
 }
 
 /** A row of public.grade_history — the append-only grade-change audit trail. */
@@ -272,6 +282,11 @@ export function accreditationRecordToRow(
     // path for the new column. Column has a NOT NULL DEFAULT 'intuited'
     // server-side; we pass the record's value explicitly.
     typical_deliberation_breadth: record.typical_deliberation_breadth,
+    // Decision C (D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-WIRED-VERIFIED-
+    // 2026-05-16) — write path for the parallel kathekon credential column.
+    // Column has a NOT NULL DEFAULT 'contrary' server-side; we pass the
+    // record's value explicitly.
+    typical_kathekon_quality: record.typical_kathekon_quality,
   }
 }
 
@@ -321,6 +336,10 @@ export function rowToAccreditationRecord(
     // side default; older rows missing this field would be filled by the
     // default at write time.
     typical_deliberation_breadth: row.typical_deliberation_breadth,
+    // Decision C — read path for the parallel kathekon credential column. The
+    // migration sets a server-side default; older rows missing this field
+    // would be filled by the default at write time.
+    typical_kathekon_quality: row.typical_kathekon_quality,
   }
 }
 
