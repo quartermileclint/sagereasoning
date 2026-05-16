@@ -33,9 +33,9 @@ import {
   buildAccreditationResponse,
   buildCardResponse,
   buildServerErrorResponse,
-  OPTIONS,
-  POST,
-} from '../route'
+} from '../response-builders'
+
+import { OPTIONS, POST } from '../route'
 
 import type { AccreditationEndpointResponse } from '@/lib/substrate/trust-layer/accreditation/public-endpoint'
 import type {

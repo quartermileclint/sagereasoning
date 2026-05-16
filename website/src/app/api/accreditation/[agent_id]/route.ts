@@ -139,7 +139,6 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/security'
 import {
   handleAccreditationLookup,
   ACCREDITATION_RESPONSE_HEADERS,
-  type AccreditationEndpointResponse,
 } from '@/lib/substrate/trust-layer/accreditation/public-endpoint'
 
 import {
@@ -147,146 +146,22 @@ import {
   isExpired,
 } from '@/lib/substrate/trust-layer/accreditation/accreditation-record'
 
-import {
-  buildAccreditationCard,
-  serializeCard,
-} from '@/lib/substrate/trust-layer/card/accreditation-card'
-
 import { lookupAccreditationRecord } from '@/lib/substrate/atl-accreditation-store'
 
-// ============================================================================
-// CONSTANTS
-// ============================================================================
+import {
+  buildAccreditationResponse,
+  buildCardResponse,
+  buildServerErrorResponse,
+  DOCUMENTATION_URL,
+} from './response-builders'
 
-/**
- * The R18b documentation link injected into every response body.
- *
- * /limitations is the R19c/R19d page describing what SageReasoning can and
- * cannot do — the documented place for what the badge measures, how, and its
- * limitations. Lives at /website/src/app/limitations/page.tsx.
- *
- * Absolute URL (rather than env-var-derived) because an external verifier
- * reading the JSON needs a URL it can click; relative URLs don't resolve out
- * of the API consumer's context.
- */
-const DOCUMENTATION_URL = 'https://sagereasoning.com/limitations'
-
-// ============================================================================
-// PURE RESPONSE BUILDERS (testable without a Supabase round-trip)
-// ============================================================================
-
-/**
- * Build the payload-format NextResponse from a discriminated
- * AccreditationEndpointResponse. Pure — no I/O.
- *
- * THIS IS THE TESTABLE SEAM. The route's GET handler does the orchestration
- * (rate-limit → params → handleAccreditationLookup). This function does the
- * status → HTTP mapping + header attachment + documentation_url injection.
- * The test file invokes this function directly with hand-constructed
- * AccreditationEndpointResponse values, asserting status codes, headers, and
- * body shape across all four discriminated variants — no Supabase round-trip
- * required (PR2).
- */
-export function buildAccreditationResponse(
-  result: AccreditationEndpointResponse
-): NextResponse {
-  const httpStatus = httpStatusFor(result.status)
-
-  // Body: spread the discriminated AccreditationEndpointResponse + inject
-  // documentation_url as a sibling. The wire shape stays the union shape;
-  // verifiers can switch on `status` exactly as the handler intended.
-  const body = {
-    ...result,
-    documentation_url: DOCUMENTATION_URL,
-  }
-
-  return NextResponse.json(body, {
-    status: httpStatus,
-    headers: ACCREDITATION_RESPONSE_HEADERS,
-  })
-}
-
-/**
- * Build the card-format NextResponse. The card path bypasses
- * handleAccreditationLookup (which produces a payload, not a card); the route
- * does the equivalent validation + expiry check inline and builds the card
- * directly. Pure — no I/O; takes the already-looked-up record.
- *
- * If `expired` is true, the response shape mirrors handleAccreditationLookup's
- * 'expired' variant (status 'expired' + a message + the data) so verifiers can
- * branch on the same discriminator regardless of format.
- */
-export function buildCardResponse(
-  record: import('@/lib/substrate/trust-layer/types/accreditation').AccreditationRecord,
-  expired: boolean
-): NextResponse {
-  const card = buildAccreditationCard(record)
-  const data = serializeCard(card)
-
-  const body = expired
-    ? {
-        status: 'expired' as const,
-        message:
-          'This accreditation has expired and requires re-evaluation. ' +
-          'The last known card is included for reference.',
-        data,
-        documentation_url: DOCUMENTATION_URL,
-      }
-    : {
-        status: 'ok' as const,
-        data,
-        documentation_url: DOCUMENTATION_URL,
-      }
-
-  return NextResponse.json(body, {
-    status: 200,
-    headers: ACCREDITATION_RESPONSE_HEADERS,
-  })
-}
-
-/**
- * Build a 503 service-temporarily-unavailable response. Used when the
- * Supabase read throws. The message is intentionally vague to avoid leaking
- * internal details; the failure is NOT cached so operators can fix and retry.
- * Mirrors the /api/public-key fail-closed posture.
- */
-export function buildServerErrorResponse(): NextResponse {
-  return NextResponse.json(
-    {
-      status: 'error',
-      message:
-        'The accreditation service is temporarily unavailable. ' +
-        'Please try again shortly.',
-      documentation_url: DOCUMENTATION_URL,
-    },
-    {
-      status: 503,
-      headers: {
-        ...ACCREDITATION_RESPONSE_HEADERS,
-        // Don't cache failures — operators must be able to fix the underlying
-        // issue and see the next request succeed.
-        'Cache-Control': 'no-store',
-      },
-    }
-  )
-}
-
-/**
- * Map an AccreditationEndpointResponse.status to its HTTP code.
- * Pure; trivial; extracted so the mapping is a single source of truth.
- */
-function httpStatusFor(status: AccreditationEndpointResponse['status']): number {
-  switch (status) {
-    case 'ok':
-      return 200
-    case 'not_found':
-      return 404
-    case 'expired':
-      return 200 // carries data; the body's `status` field signals staleness
-    case 'error':
-      return 400
-  }
-}
+// =============================================================================
+// HOTFIX NOTE 2026-05-16 — Next.js App Router rejected the original co-located
+// helpers ("buildAccreditationResponse is not a valid Route export field").
+// route.ts may only export HTTP method handlers and route-segment config; the
+// pure response-builders moved to ./response-builders.ts. No behaviour change.
+// See response-builders.ts module header for the full diagnostic.
+// =============================================================================
 
 // ============================================================================
 // GET — THE PUBLIC VERIFICATION ENDPOINT
