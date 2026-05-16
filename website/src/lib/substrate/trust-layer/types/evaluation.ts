@@ -87,6 +87,60 @@ export type EvaluatedAction = {
 
   /** Which skill produced this evaluation */
   readonly skill_id: string
+
+  /** How many candidate decisions the wrapper considered before committing to
+   *  this one — the deliberation_breadth signal source. Wrapper-supplied (no
+   *  agent-declared fallback): the wrapper KNOWS whether it intuited (1),
+   *  deliberated (2), or multi-branch deliberated (≥3) on this decision. Layer
+   *  2 stays idempotent — this signal cannot live on Layer2Assessment.
+   *  See deriveDeliberationBreadth() below for the enum derivation; see
+   *  D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16 §"Decision A". */
+  readonly candidates_considered: number
+}
+
+// ============================================================================
+// DELIBERATION BREADTH — derived from EvaluatedAction.candidates_considered
+// ============================================================================
+
+/**
+ * The deliberation-breadth bucket — the carried profile's R0-relevant signal
+ * about HOW the agent reached this decision (intuited / deliberated /
+ * multi-branch deliberated). Derived at aggregation time from
+ * EvaluatedAction.candidates_considered (the raw number is the source of
+ * truth; the enum is the qualitative bucket).
+ *
+ * Per D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16 §"Decision A" (items 1-3 design
+ * pass). The thresholds are tunable later without data migration — the raw
+ * number stays on EvaluatedAction.
+ */
+export type DeliberationBreadth =
+  | 'intuited'
+  | 'deliberated'
+  | 'multi_branch_deliberated'
+
+/** Threshold: N ≥ DELIBERATED_THRESHOLD → at least 'deliberated'. */
+export const DELIBERATED_THRESHOLD = 2 as const
+
+/** Threshold: N ≥ MULTI_BRANCH_THRESHOLD → 'multi_branch_deliberated'. */
+export const MULTI_BRANCH_THRESHOLD = 3 as const
+
+/**
+ * Derive the DeliberationBreadth bucket from a candidates_considered count.
+ *
+ *   N = 1                          → 'intuited'
+ *   N = 2 (i.e. DELIBERATED..)     → 'deliberated'
+ *   N ≥ 3 (i.e. MULTI_BRANCH..)    → 'multi_branch_deliberated'
+ *
+ * Defensive on zero / negative inputs — treated as 'intuited' (the conservative
+ * no-evidence-yet baseline; pairs with the createAccreditationRecord seed
+ * default). Pure, deterministic, no I/O.
+ */
+export function deriveDeliberationBreadth(
+  candidatesConsidered: number
+): DeliberationBreadth {
+  if (candidatesConsidered >= MULTI_BRANCH_THRESHOLD) return 'multi_branch_deliberated'
+  if (candidatesConsidered >= DELIBERATED_THRESHOLD) return 'deliberated'
+  return 'intuited'
 }
 
 // ============================================================================
@@ -112,6 +166,14 @@ export type WindowConfig = {
 
   /** Threshold: percentage of actions at a dimension level to earn it */
   readonly dimension_level_threshold: number
+
+  /** Maximum number of unchosen-but-still-live candidates retained on
+   *  CarriedProfile.carried_candidates (default: 5). Per D-ATL-ITEMS-1-3-
+   *  DESIGN-LOCKED-2026-05-16 §"Decision D" — the agent-overridable top-K cap.
+   *  Surfaced on WindowConfig so it threads through CarriedProfile via the
+   *  existing window_config carriage; createCarriedProfile reads it from the
+   *  caller-supplied (or defaulted) config. */
+  readonly carried_candidates_max: number
 }
 
 /** Default window configuration per framework doc */
@@ -121,6 +183,7 @@ export const DEFAULT_WINDOW_CONFIG: WindowConfig = {
   minimum_actions_for_grade: 20,
   typical_proximity_threshold: 0.6,   // 60% of actions at or above level
   dimension_level_threshold: 0.5,     // 50% of actions demonstrating this level
+  carried_candidates_max: 5,          // Decision D default; agent-overridable
 }
 
 // ============================================================================
@@ -170,6 +233,17 @@ export type WindowSnapshot = {
 
   /** Per-dimension detail for diagnostic purposes */
   readonly dimension_detail: Record<ProgressDimensionId, DimensionDetail>
+
+  /** Distribution of deliberation-breadth buckets across the window — derived
+   *  from each EvaluatedAction's candidates_considered via
+   *  deriveDeliberationBreadth(). Mirrors proximity_distribution. Per
+   *  D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16 §"Decision A". */
+  readonly deliberation_breadth_distribution: Record<DeliberationBreadth, number>
+
+  /** The typical (most common qualifying) deliberation-breadth bucket — the
+   *  R18a-honest observable credential the badge surfaces. Mirrors
+   *  typical_proximity (most common qualifying level). */
+  readonly typical_deliberation_breadth: DeliberationBreadth
 }
 
 /**

@@ -45,6 +45,7 @@ import type {
   DimensionScores,
   GradeChangeEvent,
 } from '../types/accreditation'
+import type { DeliberationBreadth } from '../types/evaluation'
 
 // ============================================================================
 // CONSTANTS
@@ -121,6 +122,11 @@ export type CreateAccreditationOptions = {
   starting_dimensions: DimensionScores
   window_size?: number
   expiry_days?: number
+  /** Optional override for the seeded typical_deliberation_breadth — the
+   *  conservative no-evidence-yet baseline (default 'intuited'). Added
+   *  2026-05-16 under D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16
+   *  §"Decision A". */
+  starting_deliberation_breadth?: DeliberationBreadth
 }
 
 /**
@@ -136,6 +142,7 @@ export function createAccreditationRecord(
     starting_dimensions,
     window_size = DEFAULT_WINDOW_SIZE,
     expiry_days = DEFAULT_EXPIRY_DAYS,
+    starting_deliberation_breadth = 'intuited',
   } = options
 
   const now = new Date().toISOString()
@@ -160,6 +167,7 @@ export function createAccreditationRecord(
     disclaimer: ACCREDITATION_DISCLAIMER,
     created_at: now,
     updated_at: now,
+    typical_deliberation_breadth: starting_deliberation_breadth,
   }
 }
 
@@ -219,6 +227,9 @@ export function buildAccreditationPayload(
     ),
     verification_url: record.verification_url,
     disclaimer: record.disclaimer,
+    // R18a-observable credential; R18c-additive schema (Decision A,
+    // D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16).
+    typical_deliberation_breadth: record.typical_deliberation_breadth,
   }
 }
 

@@ -242,6 +242,10 @@ function ctxWithSignature(signature: string): BridgeContext {
     evaluated_at: '2026-05-15T10:00:00.000Z',
     skill_id: 'sage-reason',
     signature,
+    // Decision A (2026-05-16) — Pattern 1's default supply is 1; the iteration
+    // patterns themselves override per pattern (accumulateChosen overrides to
+    // candidates.length, etc.).
+    candidates_considered: 1,
   }
 }
 
@@ -260,7 +264,32 @@ function makeRenderInput(opts: {
   }
 }
 
-/** A parallel candidate — a render input plus its bridge context. */
+/** A minimal Layer1Schema fixture for parallel candidates — Decision B
+ *  (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16) requires layer1_input on
+ *  ParallelCandidate so the N-1 unchosen candidates can be retained on
+ *  CarriedProfile.carried_candidates. */
+function makeLayer1Input(): import('../../translation-sandwich/layer1-extractor').Layer1Schema {
+  return {
+    version: 'layer1-schema-v1',
+    passions_present: [],
+    control_filter_elements: [],
+    oikeiosis_circles_engaged: [],
+    value_categories_at_stake: [],
+    kathekon_factors: [],
+    urgency_indicators: [],
+    causal_stage_evidence: [],
+    eupatheia_candidates: [],
+    stated_concern_targets: [],
+    stated_equanimity_signals: [],
+    motivation_stated: false,
+    motivation_evidence: [],
+    element_fusion_detected: { fused: false, fused_concerns: null },
+    ambiguity_notes: [],
+  }
+}
+
+/** A parallel candidate — a render input plus its bridge context plus the
+ *  layer1_input required by Decision B's carried-candidates retention. */
 function makeCandidate(opts: {
   proximity: KatorthomaProximityLevel
   is_kathekon?: boolean | null
@@ -268,6 +297,7 @@ function makeCandidate(opts: {
   signature: string
 }): ParallelCandidate {
   return {
+    layer1_input: makeLayer1Input(),
     input: makeRenderInput(opts),
     context: ctxWithSignature(opts.signature),
   }

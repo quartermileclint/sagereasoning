@@ -125,6 +125,16 @@ export interface BridgeContext {
   evaluated_at: string
   skill_id: string
   signature: string
+  /** How many candidates the wrapper considered before committing to this
+   *  decision — the deliberation_breadth signal source (Decision A,
+   *  D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16). Wrapper-supplied: 1 for an
+   *  intuited single-call commitment, N for a parallel evaluation that
+   *  picked among N siblings. The wrapper KNOWS this; Layer 2 doesn't (it is
+   *  idempotent by design and sees only the single per-call Layer1Schema in
+   *  / Layer2Assessment out). Cannot live on Layer2Assessment — must travel
+   *  on BridgeContext to EvaluatedAction. The iteration patterns (Component
+   *  5) override this field to enforce the wrapper-sole-source rule. */
+  candidates_considered: number
 }
 
 // ============================================================================
@@ -218,5 +228,6 @@ export function mapLayer2AssessmentToEvaluatedAction(
     oikeiosis_stage: primaryCircle ? primaryCircle.circle : null,
     ruling_faculty_state: assessment.ruling_faculty_state,
     skill_id: context.skill_id,
+    candidates_considered: context.candidates_considered,
   }
 }

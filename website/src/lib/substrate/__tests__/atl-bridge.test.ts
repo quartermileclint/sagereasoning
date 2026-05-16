@@ -328,6 +328,7 @@ const CTX: BridgeContext = {
   evaluated_at: '2026-05-15T09:30:00.000Z',
   skill_id: 'sage-reason',
   signature: 'TEST_SIGNATURE_BASE64_AAAA',
+  candidates_considered: 1,
 }
 
 const CTX_OTHER: BridgeContext = {
@@ -335,7 +336,9 @@ const CTX_OTHER: BridgeContext = {
   signature: 'TEST_SIGNATURE_BASE64_BBBB',
 }
 
-/** The 12 keys of EvaluatedAction — the contract window-aggregator.ts consumes. */
+/** The 13 keys of EvaluatedAction — the contract window-aggregator.ts consumes.
+ *  Bumped 2026-05-16 (Decision A — D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-
+ *  05-16): added `candidates_considered`. */
 const EVALUATED_ACTION_KEYS = [
   'receipt_id',
   'agent_id',
@@ -349,6 +352,7 @@ const EVALUATED_ACTION_KEYS = [
   'oikeiosis_stage',
   'ruling_faculty_state',
   'skill_id',
+  'candidates_considered',
 ].sort()
 
 // ============================================================================
@@ -437,6 +441,22 @@ function main(): void {
     '2026-05-15T09:30:00.000Z'
   )
   assertEqual('CTX-3  skill_id ← context.skill_id', mappedFull.skill_id, 'sage-reason')
+  // Decision A (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16) — the 5th
+  // BridgeContext field flows through the bridge onto EvaluatedAction.
+  assertEqual(
+    'CTX-4  candidates_considered ← context.candidates_considered (Decision A)',
+    mappedFull.candidates_considered,
+    1
+  )
+  {
+    const ctxN: BridgeContext = { ...CTX, candidates_considered: 5 }
+    const mappedN = mapLayer2AssessmentToEvaluatedAction(FULL_ASSESSMENT, ctxN)
+    assertEqual(
+      'CTX-5  candidates_considered carries N=5 through the bridge',
+      mappedN.candidates_considered,
+      5
+    )
+  }
 
   // --- OIKEIOSIS FIRST-CIRCLE SELECTION --------------------------------
   assertEqual(
@@ -545,7 +565,11 @@ function main(): void {
         (typeof mappedFull.oikeiosis_stage === 'string' ||
           mappedFull.oikeiosis_stage === null) &&
         typeof mappedFull.ruling_faculty_state === 'string' &&
-        typeof mappedFull.skill_id === 'string'
+        typeof mappedFull.skill_id === 'string' &&
+        // Decision A (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16) —
+        // candidates_considered is a finite non-negative number.
+        typeof mappedFull.candidates_considered === 'number' &&
+        Number.isFinite(mappedFull.candidates_considered)
     )
     // SHAPE-3 — compile-time assignability to the mirrored EvaluatedAction is
     // shape-validity for computeWindowSnapshot(agentId, EvaluatedAction[], ...)

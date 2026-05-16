@@ -133,6 +133,7 @@ import type {
   PersistingPassion,
   SenecanGradeId,
 } from './trust-layer/types/accreditation'
+import type { DeliberationBreadth } from './trust-layer/types/evaluation'
 
 // Re-export the domain types a persistence-layer consumer (the spec step 6b
 // route) needs, so it imports them from one place.
@@ -177,6 +178,12 @@ export interface AgentAccreditationRow {
   readonly updated_at: string
   readonly tier: AccreditationTier
   readonly regressing_check_count: number
+  /** R18a-observable credential — the typical deliberation-breadth bucket the
+   *  badge surfaces. Default 'intuited' at the DB layer (the conservative
+   *  no-evidence-yet baseline). Added 2026-05-16 under D-ATL-ITEMS-1-3-BUILD-
+   *  WIRED-VERIFIED-2026-05-16 §"Decision A"; column added by
+   *  /website/supabase-agent-accreditation-typical-deliberation-breadth-migration.sql. */
+  readonly typical_deliberation_breadth: DeliberationBreadth
 }
 
 /** A row of public.grade_history — the append-only grade-change audit trail. */
@@ -261,6 +268,10 @@ export function accreditationRecordToRow(
     // store-only columns — verification_url + disclaimer are NOT stored
     tier: opts.tier ?? 'free',
     regressing_check_count: opts.regressing_check_count ?? 0,
+    // Decision A (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16) — write
+    // path for the new column. Column has a NOT NULL DEFAULT 'intuited'
+    // server-side; we pass the record's value explicitly.
+    typical_deliberation_breadth: record.typical_deliberation_breadth,
   }
 }
 
@@ -306,6 +317,10 @@ export function rowToAccreditationRecord(
     disclaimer: ACCREDITATION_DISCLAIMER,
     created_at: row.created_at,
     updated_at: row.updated_at,
+    // Decision A — read path for the new column. The migration sets a server-
+    // side default; older rows missing this field would be filled by the
+    // default at write time.
+    typical_deliberation_breadth: row.typical_deliberation_breadth,
   }
 }
 

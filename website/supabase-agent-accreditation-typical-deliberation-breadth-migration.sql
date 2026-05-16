@@ -1,0 +1,47 @@
+-- supabase-agent-accreditation-typical-deliberation-breadth-migration.sql
+--
+-- Adds the typical_deliberation_breadth column to public.agent_accreditation
+-- for Decision A of D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16
+-- (the items 1-3 build session — ATL Wrapper post-6b enhancement arc, step 3
+-- of 8).
+--
+-- The column carries the qualitative deliberation-breadth bucket
+-- (intuited / deliberated / multi_branch_deliberated) the badge surfaces as
+-- an R18a-honest observable credential. Derived at aggregation time from
+-- EvaluatedAction.candidates_considered via deriveDeliberationBreadth() and
+-- projected into the AccreditationPayload by buildAccreditationPayload().
+--
+-- Properties:
+--   - ADDITIVE: only ADDS a column to an existing table. No data migration
+--     required. Existing rows are not rewritten (the server-side DEFAULT
+--     applies).
+--   - IDEMPOTENT: ADD COLUMN IF NOT EXISTS — re-running the migration is a
+--     no-op.
+--   - EMPTY-TABLE-SAFE: at the time of the items 1-3 build session
+--     (2026-05-16), public.agent_accreditation is empty in production (the
+--     write-path is step 7 of the post-6b arc — not yet built). The default
+--     applies to no rows on first run.
+--   - NOT NULL DEFAULT 'intuited' — the conservative no-evidence-yet baseline
+--     matching the rest of the schema's defaults (reflexive / pre_progress /
+--     emerging). createAccreditationRecord() uses the same default when
+--     constructing a fresh AccreditationRecord.
+--
+-- Verification (founder-performable after running):
+--   SELECT column_name, data_type, is_nullable, column_default
+--   FROM information_schema.columns
+--   WHERE table_schema = 'public'
+--     AND table_name = 'agent_accreditation'
+--     AND column_name = 'typical_deliberation_breadth';
+--
+--   Expected one row:
+--     column_name                    | data_type | is_nullable | column_default
+--     -------------------------------+-----------+-------------+----------------
+--     typical_deliberation_breadth   | text      | NO          | 'intuited'::text
+--
+-- Rollback (data-loss-free, given the empty-table state at session close):
+--   ALTER TABLE public.agent_accreditation DROP COLUMN IF EXISTS typical_deliberation_breadth;
+
+ALTER TABLE public.agent_accreditation
+  ADD COLUMN IF NOT EXISTS typical_deliberation_breadth text NOT NULL DEFAULT 'intuited';
+
+-- End of migration.

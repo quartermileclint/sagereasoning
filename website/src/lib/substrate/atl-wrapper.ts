@@ -100,6 +100,7 @@ import {
 } from './atl-bridge'
 
 import type { Layer2Assessment } from '../translation-sandwich/layer2-mechanisms'
+import type { Layer1Schema } from '../translation-sandwich/layer1-extractor'
 
 import { computeWindowSnapshot } from './trust-layer/evaluation-window/window-aggregator'
 import {
@@ -188,6 +189,48 @@ export interface CarriedProfile {
 
   /** The rolling-window configuration in force for this agent. */
   readonly window_config: WindowConfig
+
+  /** Unchosen-but-still-live candidates the agent considered in past parallel
+   *  evaluations — the working set distinct from evaluated_actions[] (which
+   *  records ONLY committed reasoning). Top-K capped (K from
+   *  window_config.carried_candidates_max — default 5). Added 2026-05-16 under
+   *  D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16 §"Decision B". The slot
+   *  enables two use cases:
+   *    1. Compare against new candidates in the next round (skip re-paying
+   *       the substrate cost on options already evaluated).
+   *    2. Revisit a sibling if the committed action fails downstream.
+   *  carried_candidates does NOT feed grade transitions — only
+   *  evaluated_actions[] does. The committed-record semantics are preserved. */
+  readonly carried_candidates: readonly CarriedCandidate[]
+}
+
+// ----------------------------------------------------------------------------
+// CARRIED CANDIDATE — one unchosen-but-still-live candidate (Decision B)
+// ----------------------------------------------------------------------------
+
+/**
+ * One unchosen-but-still-live candidate retained in
+ * CarriedProfile.carried_candidates. Per Decision B of
+ * D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16: the slim-rich shape — enough to
+ * compare or revisit, without the bloat of carrying a re-derivable Layer 3
+ * rendering.
+ *
+ * Layer 3 (the agent-mode rendering) is omitted from the carry — it is
+ * re-derivable via renderAgentMode(layer1_input + layer2_assessment), a pure
+ * deterministic function with no LLM call. Avoids bloat.
+ */
+export interface CarriedCandidate {
+  /** The substrate input that produced the assessment — replayable. */
+  readonly layer1_input: Layer1Schema
+  /** The substrate's response for this candidate — verbatim. */
+  readonly layer2_assessment: Layer2Assessment
+  /** 1-based rank from the parallel evaluation that surfaced this candidate
+   *  (input order at the time of the parallel evaluation; not the post-prune
+   *  rank). */
+  readonly rank: number
+  /** ISO 8601 timestamp of the parallel evaluation that surfaced this
+   *  candidate (BridgeContext.evaluated_at of the originating step). */
+  readonly considered_at: string
 }
 
 // ----------------------------------------------------------------------------
@@ -261,6 +304,9 @@ export function createCarriedProfile(
     accreditation_record,
     regressing_check_count: 0,
     window_config: options.window_config ?? DEFAULT_WINDOW_CONFIG,
+    // Decision B (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16) — empty
+    // working set at fresh-agent creation.
+    carried_candidates: [],
   }
 }
 
@@ -422,6 +468,31 @@ export interface CarriedProfilePayload {
   readonly total_actions_evaluated: number
 }
 
+// ============================================================================
+// CARRIED-CANDIDATES PAYLOAD — Decision B (Layer 1 schema-version bump)
+// ============================================================================
+
+/** Schema tag for the carried_candidates Layer 1 payload — versions the field
+ *  independently. Added 2026-05-16 under D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-
+ *  2026-05-16 §"Decision B". */
+export const CARRIED_CANDIDATES_PAYLOAD_SCHEMA = 'atl-carried-candidates-v1' as const
+
+/**
+ * The wrapper's working-set payload — projected into Layer1Schema.carried_candidates
+ * via toCarriedCandidatesPayload(). Distinct from the carried_profile payload:
+ * the carried_profile carries the COMMITTED-reasoning trajectory; this carries
+ * unchosen-but-still-live candidates the agent retained for revisit / comparison.
+ *
+ * Plain, JSON-serialisable — round-trips through Layer1Schema.carried_candidates
+ * (typed Record<string, unknown>[] | null) and validateLayer1Schema's per-entry
+ * assertObject check.
+ */
+export interface CarriedCandidatesPayload {
+  readonly schema: typeof CARRIED_CANDIDATES_PAYLOAD_SCHEMA
+  readonly agent_id: string
+  readonly candidates: readonly CarriedCandidate[]
+}
+
 /**
  * The profile_provenance payload — the Layer 1 gaming-defence attestation that
  * the carried profile came from the agent's OWN prior substrate assessments,
@@ -490,5 +561,24 @@ export function toProfileProvenancePayload(
     source: 'own_prior_substrate_assessments',
     accumulated_action_count: profile.evaluated_actions.length,
     receipt_id_chain: profile.evaluated_actions.map((a) => a.receipt_id),
+  }
+}
+
+/**
+ * Build the carried_candidates payload for the agent's next Layer 1 input —
+ * Decision B (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16). The wrapper's
+ * working set of unchosen-but-still-live candidates is projected into
+ * Layer1Schema.carried_candidates so Layer 2 can see what the agent is still
+ * holding under consideration.
+ *
+ * PURE — reads only the carried profile's existing carried_candidates slot.
+ */
+export function toCarriedCandidatesPayload(
+  profile: CarriedProfile
+): CarriedCandidatesPayload {
+  return {
+    schema: CARRIED_CANDIDATES_PAYLOAD_SCHEMA,
+    agent_id: profile.agent_id,
+    candidates: profile.carried_candidates,
   }
 }

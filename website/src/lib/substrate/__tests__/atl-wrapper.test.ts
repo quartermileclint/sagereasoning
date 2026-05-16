@@ -213,6 +213,9 @@ function ctxWithSignature(signature: string): BridgeContext {
     evaluated_at: '2026-05-15T10:00:00.000Z',
     skill_id: 'sage-reason',
     signature,
+    // Decision A (2026-05-16) — sequential default value supplied by the test
+    // (Pattern 1's wrapper-supply convention is 1).
+    candidates_considered: 1,
   }
 }
 

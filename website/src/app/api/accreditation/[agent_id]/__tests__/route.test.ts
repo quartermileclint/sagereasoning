@@ -97,6 +97,8 @@ const SAMPLE_PAYLOAD: AccreditationPayload = {
     'This accreditation evaluates reasoning quality against the Stoic ' +
     'philosophical framework. It does not promise outcomes or certify ' +
     'safety, ethics, or trustworthiness in any absolute sense.',
+  // Added 2026-05-16 under D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16 §"Decision A".
+  typical_deliberation_breadth: 'intuited',
 }
 
 const SAMPLE_RECORD: AccreditationRecord = {
@@ -121,6 +123,8 @@ const SAMPLE_RECORD: AccreditationRecord = {
   disclaimer: SAMPLE_PAYLOAD.disclaimer,
   created_at: '2026-05-01T00:00:00.000Z',
   updated_at: '2026-05-16T00:00:00.000Z',
+  // Added 2026-05-16 under D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16 §"Decision A".
+  typical_deliberation_breadth: 'intuited',
 }
 
 const EXPECTED_DOC_URL = 'https://sagereasoning.com/limitations'

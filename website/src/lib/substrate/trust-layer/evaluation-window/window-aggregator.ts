@@ -58,9 +58,10 @@ import type {
   WindowConfig,
   WindowSnapshot,
   DimensionDetail,
+  DeliberationBreadth,
 } from '../types/evaluation'
 
-import { DEFAULT_WINDOW_CONFIG } from '../types/evaluation'
+import { DEFAULT_WINDOW_CONFIG, deriveDeliberationBreadth } from '../types/evaluation'
 import { PROXIMITY_RANK } from '../accreditation/accreditation-record'
 
 // ============================================================================
@@ -106,6 +107,14 @@ export function computeWindowSnapshot(
   const persistingPassions = computePersistingPassions(window)
   const kathekonRate = computeKathekonRate(window)
   const virtueBreadth = computeVirtueBreadth(window)
+  // Added 2026-05-16 (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16, Decision A) —
+  // deliberation_breadth aggregation mirrors proximity_distribution / typical_proximity.
+  const deliberationBreadthDistribution = computeDeliberationBreadthDistribution(window)
+  const typicalDeliberationBreadth = computeTypicalDeliberationBreadth(
+    deliberationBreadthDistribution,
+    window.length,
+    config.typical_proximity_threshold
+  )
 
   return {
     agent_id: agentId,
@@ -121,7 +130,54 @@ export function computeWindowSnapshot(
     virtue_breadth: virtueBreadth,
     proximity_trajectory: proximityTrajectory,
     dimension_detail: dimensionDetail,
+    deliberation_breadth_distribution: deliberationBreadthDistribution,
+    typical_deliberation_breadth: typicalDeliberationBreadth,
   }
+}
+
+// ============================================================================
+// DELIBERATION BREADTH DISTRIBUTION (Decision A — items 1-3 build, 2026-05-16)
+// ============================================================================
+
+/**
+ * Count how many actions fall at each deliberation-breadth bucket — derived
+ * from each EvaluatedAction's candidates_considered via deriveDeliberationBreadth.
+ */
+function computeDeliberationBreadthDistribution(
+  actions: EvaluatedAction[]
+): Record<DeliberationBreadth, number> {
+  const dist: Record<DeliberationBreadth, number> = {
+    intuited: 0,
+    deliberated: 0,
+    multi_branch_deliberated: 0,
+  }
+  for (const action of actions) {
+    dist[deriveDeliberationBreadth(action.candidates_considered)]++
+  }
+  return dist
+}
+
+/**
+ * Determine the typical deliberation-breadth bucket — the most-common-
+ * qualifying level at the threshold (mirrors computeTypicalProximity).
+ *
+ * Order (highest first): multi_branch_deliberated > deliberated > intuited.
+ * The "at or above" count is exactly the count at that level plus the counts
+ * at higher levels.
+ */
+function computeTypicalDeliberationBreadth(
+  distribution: Record<DeliberationBreadth, number>,
+  totalActions: number,
+  threshold: number
+): DeliberationBreadth {
+  if (totalActions === 0) return 'intuited'
+
+  const multi = distribution.multi_branch_deliberated
+  const delib = distribution.deliberated
+  // Highest-first: multi_branch first, then deliberated, then intuited (floor).
+  if (multi / totalActions >= threshold) return 'multi_branch_deliberated'
+  if ((multi + delib) / totalActions >= threshold) return 'deliberated'
+  return 'intuited'
 }
 
 // ============================================================================

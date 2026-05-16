@@ -134,10 +134,13 @@ import {
   computeTrajectory,
   toCarriedProfilePayload,
   toProfileProvenancePayload,
+  toCarriedCandidatesPayload,
   type CarriedProfile,
+  type CarriedCandidate,
   type TrajectoryResult,
   type CarriedProfilePayload,
   type ProfileProvenancePayload,
+  type CarriedCandidatesPayload,
   type BridgeContext,
 } from './atl-wrapper'
 
@@ -150,6 +153,7 @@ import {
 import type { Layer3ModeRenderInput } from './philosophical-mode-service'
 
 import type { Layer2Assessment } from '../translation-sandwich/layer2-mechanisms'
+import type { Layer1Schema } from '../translation-sandwich/layer1-extractor'
 
 import { buildAccreditationPayload } from './trust-layer/accreditation/accreditation-record'
 import type { AccreditationPayload } from './trust-layer/types/accreditation'
@@ -159,9 +163,11 @@ import type { AccreditationPayload } from './trust-layer/types/accreditation'
 // hand-back report) import them from one place.
 export type {
   CarriedProfile,
+  CarriedCandidate,
   TrajectoryResult,
   CarriedProfilePayload,
   ProfileProvenancePayload,
+  CarriedCandidatesPayload,
   BridgeContext,
 } from './atl-wrapper'
 export type {
@@ -215,6 +221,11 @@ export interface SequentialStepResult {
   readonly carried_profile_payload: CarriedProfilePayload
   /** The profile_provenance payload for the agent's NEXT Layer 1 input. */
   readonly profile_provenance_payload: ProfileProvenancePayload
+  /** The carried_candidates payload for the agent's NEXT Layer 1 input —
+   *  Decision B (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16). Always
+   *  produced (will be empty for fresh agents or sequential-only flows); the
+   *  next decision wants the current working set. */
+  readonly carried_candidates_payload: CarriedCandidatesPayload
 }
 
 /**
@@ -240,6 +251,13 @@ export function runSequentialStep(
   input: SequentialStepInput,
   options: SequentialStepOptions = {}
 ): SequentialStepResult {
+  // Decision A (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16) — BridgeContext
+  // carries candidates_considered. The caller (the wrapper code constructing
+  // BridgeContext) supplies the value: 1 for a sequential commitment.
+  // accumulateChosen passes candidates.length here. runOrchestrationStep
+  // delegates with 1 for the orchestrator's own commitment. The Layer 1
+  // implication (Decision B) flows through unchanged.
+
   // Component 1 — accumulate (pure).
   const accumulated = accumulate(input.profile, input.assessment, input.context)
 
@@ -267,6 +285,9 @@ export function runSequentialStep(
     : toCarriedProfilePayload(advancedProfile)
 
   const profileProvenancePayload = toProfileProvenancePayload(advancedProfile)
+  // Decision B (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16) — also emit
+  // the carried_candidates payload for the next Layer 1 input.
+  const carriedCandidatesPayload = toCarriedCandidatesPayload(advancedProfile)
 
   return {
     profile: advancedProfile,
@@ -274,6 +295,7 @@ export function runSequentialStep(
     grade_check_ran: gradeCheckRan,
     carried_profile_payload: carriedProfilePayload,
     profile_provenance_payload: profileProvenancePayload,
+    carried_candidates_payload: carriedCandidatesPayload,
   }
 }
 
@@ -325,10 +347,20 @@ export function runSequentialLoop(
  * One candidate decision in a parallel evaluation: the Layer3ModeRenderInput
  * the substrate produced for it (mode 'atl_wrapper'), plus the BridgeContext
  * needed to accumulate it into the carried profile IF it is the one chosen.
+ *
+ * Added 2026-05-16 under D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16
+ * (Decision B): each candidate also carries its `layer1_input` so the N-1
+ * unchosen candidates can be retained on CarriedProfile.carried_candidates
+ * (the slim-rich shape — replayable via renderAgentMode).
  */
 export interface ParallelCandidate {
+  /** The substrate's Layer1Schema input for this candidate — replayable.
+   *  Required for Decision B's carried_candidates retention; the wrapper
+   *  produced it when it called the substrate for this candidate. */
+  readonly layer1_input: Layer1Schema
   /** The agent-mode render input for this candidate. mode is fixed to
-   *  'atl_wrapper' — parallel evaluation collects agent-mode renderings. */
+   *  'atl_wrapper' — parallel evaluation collects agent-mode renderings.
+   *  The Layer 2 assessment is reached via input.assessment. */
   readonly input: Layer3ModeRenderInput & { mode: 'atl_wrapper' }
   /** The BridgeContext for this candidate — used only by accumulateChosen if
    *  this candidate is the one the agent commits to. */
@@ -438,11 +470,58 @@ export function accumulateChosen(
         'the candidate the agent committed to.'
     )
   }
+
+  // Decision A (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16) — Pattern 2
+  // KNOWS the slate size: the wrapper considered N candidates before committing
+  // to one. Override the chosen candidate's BridgeContext.candidates_considered
+  // to candidates.length — the wrapper-sole-source rule. The chosen context's
+  // other fields (signature, evaluated_at, skill_id, agent_id) are preserved.
+  const contextWithBreadth: BridgeContext = {
+    ...chosen.context,
+    candidates_considered: candidates.length,
+  }
+
+  // Decisions B + D (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16) — the
+  // N-1 unchosen candidates from this parallel evaluation are added to the
+  // carried_candidates slot, then pruned to window_config.carried_candidates_max
+  // by the default comparator (proximity rank — higher first; objective_function
+  // declaration retained as opaque context for future tightening). The chosen
+  // candidate does NOT go into carried_candidates — it goes into evaluated_actions
+  // via accumulate() inside runSequentialStep.
+  const consideredAt = chosen.context.evaluated_at
+  const newCandidates: CarriedCandidate[] = candidates
+    .map((c, idx) => ({ c, idx }))
+    .filter((entry) => entry.idx !== chosenIndex)
+    .map((entry) => ({
+      layer1_input: entry.c.layer1_input,
+      layer2_assessment: entry.c.input.assessment,
+      // 1-based rank by input order at the time of the parallel evaluation;
+      // post-prune rank is recomputed against the default comparator below.
+      rank: entry.idx + 1,
+      considered_at: consideredAt,
+    }))
+  const merged: CarriedCandidate[] = [
+    ...profile.carried_candidates,
+    ...newCandidates,
+  ]
+  const comparator = defaultCarriedCandidateComparator(
+    chosen.layer1_input.objective_function_declaration ?? null
+  )
+  const prunedCandidates = pruneToTopK(
+    merged,
+    profile.window_config.carried_candidates_max,
+    comparator
+  )
+  const profileWithCandidates: CarriedProfile = {
+    ...profile,
+    carried_candidates: prunedCandidates,
+  }
+
   return runSequentialStep(
     {
-      profile,
+      profile: profileWithCandidates,
       assessment: chosen.input.assessment,
-      context: chosen.context,
+      context: contextWithBreadth,
     },
     options
   )
@@ -596,5 +675,89 @@ export function runOrchestrationStep(
   return {
     ...ownStep,
     peer_agent_assessments: peerAgentAssessments,
+  }
+}
+
+// ============================================================================
+// DECISION D — TOP-K RETENTION (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16)
+//
+// Generic top-K pruner + default carried-candidate comparator. Used by
+// accumulateChosen to cap CarriedProfile.carried_candidates after adding the
+// N-1 unchosen candidates from a parallel evaluation.
+// ============================================================================
+
+/**
+ * Prune a list of candidates to the top K by a ranking comparator.
+ *
+ * STABLE for tied scores — input order survives where the comparator returns
+ * 0 (Array.sort is stable since ES2019; the implementation copies the input
+ * with [...candidates] so the original array is never mutated).
+ *
+ * @param candidates  The candidates to prune (input not mutated).
+ * @param k           The maximum count to retain. If k ≥ candidates.length,
+ *                    returns a fresh copy of the input (still sorted). If k
+ *                    is 0 or negative, returns []. If k is non-finite, throws.
+ * @param comparator  Optional ranking function — same contract as
+ *                    Array.prototype.sort's compareFn (negative if a should
+ *                    rank before b). When omitted, the input order is the
+ *                    rank (i.e. effectively "keep the first k").
+ * @returns           A new array of length min(k, candidates.length).
+ */
+export function pruneToTopK<T>(
+  candidates: readonly T[],
+  k: number,
+  comparator?: (a: T, b: T) => number
+): T[] {
+  if (!Number.isFinite(k)) {
+    throw new Error(`pruneToTopK: k must be a finite number, got ${k}`)
+  }
+  if (k <= 0) return []
+
+  // Copy before sorting so the input is never mutated (PR1 + spec invariant).
+  const sorted = comparator ? [...candidates].sort(comparator) : [...candidates]
+  return sorted.slice(0, k)
+}
+
+/**
+ * The default comparator for CarriedProfile.carried_candidates pruning.
+ *
+ * Per Decision D of D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16, the default is
+ * HYBRID:
+ *   1. If the agent's objective_function_declaration is present, the comparator
+ *      uses it as a tie-breaker hint — but the declaration is a string
+ *      (Form-2 gaming defence), not a scoring function, so the comparator
+ *      falls back to (2) for the actual comparison. The declaration's presence
+ *      is preserved as opaque context for a future tighter typing.
+ *   2. Rank by katorthoma_proximity (sage_like > principled > deliberate >
+ *      habitual > reflexive). Higher proximity = better rank = appears first.
+ *
+ * Returns the comparator function suitable for Array.prototype.sort or for
+ * passing into pruneToTopK as the third argument.
+ *
+ * @param objectiveFunctionDeclaration  The agent's declared optimisation
+ *        target (Layer1Schema.objective_function_declaration). Presence is
+ *        currently observed but the field is opaque — see (1) above.
+ */
+export function defaultCarriedCandidateComparator(
+  objectiveFunctionDeclaration: string | null
+): (a: CarriedCandidate, b: CarriedCandidate) => number {
+  // (Reserved for the future tighter typing of objective_function_declaration;
+  //  retained in the closure so it's logged in the comparator's lexical scope
+  //  for downstream introspection.)
+  void objectiveFunctionDeclaration
+
+  const PROXIMITY_RANK: Record<string, number> = {
+    sage_like: 4,
+    principled: 3,
+    deliberate: 2,
+    habitual: 1,
+    reflexive: 0,
+  }
+
+  return (a, b) => {
+    const aRank = PROXIMITY_RANK[a.layer2_assessment.katorthoma_proximity] ?? 0
+    const bRank = PROXIMITY_RANK[b.layer2_assessment.katorthoma_proximity] ?? 0
+    // Higher proximity should appear FIRST → sort descending.
+    return bRank - aRank
   }
 }

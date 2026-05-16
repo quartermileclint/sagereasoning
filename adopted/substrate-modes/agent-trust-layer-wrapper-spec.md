@@ -117,6 +117,94 @@ The carried-profile, aggregated, IS the agent's trajectory. The agent-mode rende
 
 ---
 
+## Tree-search composition
+
+Added 2026-05-16 under `D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16` §"Decision C". The Wrapper spec's items 1, 2, 3 design pass (`/adopted/atl-items-1-3-design.md`) locked the doc + small helper this section describes.
+
+### The per-node contract
+
+Tree-search algorithms (MCTS, BFS, beam search, Tree-of-Thoughts) need a per-node evaluator — a function that takes a candidate node's substrate input and returns an assessment the algorithm's comparator can rank. The substrate already supplies this contract:
+
+```
+callSubstrate(layer1Input) → Layer2Assessment
+bridge(layer2Assessment, bridgeContext) → EvaluatedAction
+```
+
+`Layer1Schema` carries everything a tree-search algorithm needs to thread per node: `carried_profile` (the parent's trajectory), `carried_candidates` (sibling unchosen candidates from prior expansions — Decision B), `profile_provenance` (gaming defence), `peer_agent_assessments` (when the orchestrator is itself the searched agent), and `objective_function_declaration` (Form-2 gaming defence). All five are optional + additive.
+
+The PR15 finding governs: **the substrate is the per-node evaluator; tree search stays agent-side or framework-side. We do not reimplement tree search inside the substrate.** The helper `createSubstrateEvaluator(callSubstrate, bridgeContextProvider)` in `atl-tree-search-adapter.ts` is the only composition surface — a thin convenience returning the per-node evaluator function the agent's tree-search framework hands to its search loop.
+
+### Pseudocode — MCTS
+
+```
+tree = Tree(root = initial_state)
+evaluator = createSubstrateEvaluator(callSubstrate, providerForThisAgent)
+while not stop_condition():
+  // SELECTION — descend tree using UCB1 or similar
+  leaf = tree.select_by_ucb1()
+  // EXPANSION — generate children
+  children = expand(leaf)
+  // SIMULATION — substrate evaluates each child
+  for child in children:
+    child.action = await evaluator(layer1InputFor(child))
+  // BACKPROPAGATION — propagate the child scores up the tree
+  best_score = max(c.action.score for c in children)
+  tree.backpropagate(leaf, best_score)
+return tree.best_child(root)
+```
+
+The substrate call sits at SIMULATION. The framework decides which path to descend (SELECTION), which children to spawn (EXPANSION), and how to combine scores (BACKPROPAGATION).
+
+### Pseudocode — BFS / beam search
+
+```
+frontier = [root]
+evaluator = createSubstrateEvaluator(callSubstrate, providerForThisAgent)
+while frontier and not at_depth_limit():
+  next_level = []
+  for node in frontier:
+    children = expand(node)
+    for child in children:
+      child.action = await evaluator(layer1InputFor(child))
+    next_level.extend(children)
+  // Beam — keep only top-K by score
+  frontier = top_k(next_level, k = beam_width, by = node => node.action.score)
+return best(frontier)
+```
+
+The substrate ranks expansions per level. The framework decides the beam width and the termination condition.
+
+### Pseudocode — Tree-of-Thoughts
+
+```
+thoughts = [seed_thought]
+evaluator = createSubstrateEvaluator(callSubstrate, providerForThisAgent)
+while not converged():
+  // BRANCH — LLM proposes alternative next-thoughts from each leaf
+  branches = []
+  for leaf in thoughts:
+    next_thoughts = llmExpandThoughts(leaf)
+    for t in next_thoughts:
+      t.action = await evaluator(layer1InputFor(t))
+    branches.extend(next_thoughts)
+  // PRUNE — keep the most promising threads
+  thoughts = top_k(branches, k = thought_width)
+return best(thoughts)
+```
+
+Tree-of-Thoughts adds LLM-driven branching to the BFS/beam structure. The substrate still evaluates per-thought; the LLM proposes the branches.
+
+### Composition with Anthropic multi-agent orchestration
+
+In-process tree search (this section) and multi-agent tree-like behaviour are distinct patterns:
+
+- **In-process tree search** — substrate-as-per-node-evaluator. Sibling nodes share one agent's context. The agent's framework drives the search. The wrapper's carried profile accumulates COMMITTED commitments only; siblings considered but not committed-to are tracked in `carried_candidates` (Decision B), not in the trajectory.
+- **Multi-agent tree-like behaviour** — Anthropic multi-agent orchestration is the runtime substrate. Sibling agents run in INDEPENDENT contexts. The ATL wraps the orchestrator per Pattern 3 (multi-agent orchestration in §"Component 5"): peer agents' `AccreditationPayload`s thread through `peer_agent_assessments`; the orchestrator's own trajectory accumulates its OWN commitments.
+
+Choose by whether candidate paths share a single agent's context (in-process tree) or run in independent agent contexts (multi-agent orchestration). The two compose: a multi-agent orchestrator can itself run in-process tree search over its own decision space, and each peer agent's framework can independently run tree search inside its own context.
+
+---
+
 ## Layer 1 implications
 
 This is the part the founder specifically flagged: "we need to understand how it effects layer 1."

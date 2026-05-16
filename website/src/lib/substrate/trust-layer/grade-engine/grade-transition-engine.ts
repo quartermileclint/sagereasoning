@@ -254,6 +254,7 @@ export function evaluateGradeTransition(
     last_evaluation: snapshot.computed_at,
     passions_persisting: snapshot.persisting_passions,
     updated_at: new Date().toISOString(),
+    typical_deliberation_breadth: snapshot.typical_deliberation_breadth,
   }
 
   return {
@@ -324,6 +325,7 @@ function checkUpgrade(
     last_evaluation: snapshot.computed_at,
     passions_persisting: snapshot.persisting_passions,
     updated_at: now,
+    typical_deliberation_breadth: snapshot.typical_deliberation_breadth,
   }
 
   return {
@@ -395,6 +397,7 @@ function checkDowngrade(
     last_evaluation: snapshot.computed_at,
     passions_persisting: snapshot.persisting_passions,
     updated_at: now,
+    typical_deliberation_breadth: snapshot.typical_deliberation_breadth,
   }
 
   const reasons: string[] = []

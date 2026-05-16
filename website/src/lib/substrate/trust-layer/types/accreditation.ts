@@ -44,6 +44,13 @@
  *   R9:  Evaluates reasoning quality, does not promise outcomes
  */
 
+// DeliberationBreadth is defined in ../types/evaluation.ts (its natural home — it
+// is derived from EvaluatedAction.candidates_considered). Type-only mutual
+// imports are fine in TypeScript; accreditation.ts and evaluation.ts already
+// strongly couple, and this is a type-only edge added 2026-05-16 for Decision A
+// of the items 1-3 build (D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16).
+import type { DeliberationBreadth } from './evaluation'
+
 // Re-export types from existing V3 infrastructure
 // In production, these would import from '../../website/src/lib/stoic-brain'
 // For now, we define compatible types to keep trust-layer self-contained
@@ -187,6 +194,13 @@ export type AccreditationRecord = {
 
   /** Last update timestamp */
   readonly updated_at: string
+
+  /** The typical (most-common-qualifying) deliberation-breadth bucket across
+   *  the evaluation window — the R18a-honest observable credential. Derived
+   *  from the WindowSnapshot. R18c-additive: this is a new field; third-party
+   *  verifiers that don't parse it are unaffected. Added 2026-05-16 under
+   *  D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16 §"Decision A". */
+  readonly typical_deliberation_breadth: DeliberationBreadth
 }
 
 /**
@@ -211,6 +225,10 @@ export type AccreditationPayload = {
   readonly passions_persisting: string[]
   readonly verification_url: string
   readonly disclaimer: string
+  /** The R18a-honest observable credential — qualitative deliberation pattern
+   *  (intuited / deliberated / multi_branch_deliberated). Added 2026-05-16
+   *  under D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16 §"Decision A". */
+  readonly typical_deliberation_breadth: DeliberationBreadth
 }
 
 /**

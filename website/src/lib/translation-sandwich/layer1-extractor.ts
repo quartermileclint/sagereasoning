@@ -281,6 +281,13 @@ export type ProfileProvenance = Record<string, unknown>
  *  See /drafts/agent-trust-layer-wrapper-spec.md §"Layer 1 implications". */
 export type PeerAgentAssessment = Record<string, unknown>
 
+/** ATL Wrapper — Decision B (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16,
+ *  added 2026-05-16). The wrapper's working set of unchosen-but-still-live
+ *  candidates from past parallel evaluations, projected via
+ *  toCarriedCandidatesPayload(). Permissive Record<string, unknown> (matches
+ *  the existing carried-context pattern) until tighter ATL-spec coupling. */
+export type CarriedCandidatesField = Record<string, unknown>
+
 // ============================================================================
 // TOP-LEVEL SCHEMA
 // ============================================================================
@@ -296,8 +303,16 @@ export interface Layer1Schema {
    *  remains 'layer1-schema-v1'. Unlike the M1-CP4b fields, the producer is NOT
    *  updated: Layer 1 does not populate carried context; the wrapper /
    *  private-mode service does (future build sessions). A v1 schema is valid
-   *  with or without them; optional + additive + backward-compatible. */
-  version: 'layer1-schema-v1'
+   *  with or without them; optional + additive + backward-compatible.
+   *  Note (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16, 2026-05-16):
+   *  schema version BUMPED to 'layer1-schema-v2' with the addition of the 5th
+   *  wrapper-populated optional field `carried_candidates` (Decision B). The
+   *  field is OPTIONAL (nullable) and additive — a v2 schema without it is
+   *  valid, and existing v1 consumers that don't read the field are unaffected.
+   *  Older v1 schemas are forward-compatible (parser accepts them and treats
+   *  the new field as absent). The bump is recorded for Rule A (licensing
+   *  gate); the Layer 1 open-source reference distribution carries v2 onward. */
+  version: 'layer1-schema-v1' | 'layer1-schema-v2'
   passions_present: PassionPresent[]
   control_filter_elements: ControlFilterElement[]
   oikeiosis_circles_engaged: OikeiosisCircleEngaged[]
@@ -397,6 +412,19 @@ export interface Layer1Schema {
    *  optimisation target, checked against the candidate action for
    *  STATED_OPERATIVE_CONFLICT. */
   objective_function_declaration?: string | null
+
+  /** ATL Wrapper — Decision B (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16).
+   *  The wrapper's working set of unchosen-but-still-live candidates from past
+   *  parallel evaluations — populated by toCarriedCandidatesPayload() in
+   *  atl-wrapper.ts and threaded into the agent's next substrate call so
+   *  Layer 2 can see what the agent is still holding under consideration.
+   *
+   *  This is the 5th wrapper-populated optional field, alongside
+   *  carried_profile / profile_provenance / peer_agent_assessments /
+   *  objective_function_declaration. OPTIONAL (nullable) → additive +
+   *  backward-compatible. Versioned change to the open Layer 1 contract — see
+   *  the `version` field note on the schema-version bump to v2. */
+  carried_candidates?: CarriedCandidatesField | null
 }
 
 // ============================================================================
@@ -668,15 +696,18 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
     }
   }
 
-  // Version
-  if (root.version !== 'layer1-schema-v1') {
+  // Version — accepts v1 (legacy) or v2 (post-D-ATL-ITEMS-1-3-BUILD-WIRED-
+  // VERIFIED-2026-05-16). The new optional carried_candidates field is the
+  // sole shape difference; v1 schemas without it remain valid (forward-compat).
+  if (root.version !== 'layer1-schema-v1' && root.version !== 'layer1-schema-v2') {
     throw new Layer1ValidationError(
       'version',
-      `Expected version 'layer1-schema-v1', got ${JSON.stringify(root.version)}`,
+      `Expected version 'layer1-schema-v1' or 'layer1-schema-v2', got ${JSON.stringify(root.version)}`,
       'version',
       root.version
     )
   }
+  const schemaVersion: 'layer1-schema-v1' | 'layer1-schema-v2' = root.version
 
   // passions_present
   const passions: PassionPresent[] = assertArray(root.passions_present, 'passions_present').map(
@@ -918,7 +949,7 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
   )
 
   const result: Layer1Schema = {
-    version: 'layer1-schema-v1',
+    version: schemaVersion,
     passions_present: passions,
     control_filter_elements: controlFilterElements,
     oikeiosis_circles_engaged: oikeiosisCirclesEngaged,
@@ -1023,6 +1054,15 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
     const v = root.objective_function_declaration
     result.objective_function_declaration =
       v === null ? null : assertString(v, 'objective_function_declaration')
+  }
+
+  // carried_candidates — null | Record<string, unknown> — added 2026-05-16
+  // under D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16 §"Decision B".
+  // Like the other carried-context fields, OPTIONAL + additive + permissive
+  // (Record<string, unknown>) pending tighter ATL-spec coupling.
+  if (root.carried_candidates !== undefined) {
+    const v = root.carried_candidates
+    result.carried_candidates = v === null ? null : assertObject(v, 'carried_candidates')
   }
 
   return result
