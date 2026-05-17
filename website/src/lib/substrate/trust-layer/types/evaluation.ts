@@ -103,7 +103,190 @@ export type EvaluatedAction = {
    *  See deriveDeliberationBreadth() below for the enum derivation; see
    *  D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16 §"Decision A". */
   readonly candidates_considered: number
+
+  // ==========================================================================
+  // PASS-THROUGH FIELDS — enterprise-accountability metadata (Decisions A, D, E, F)
+  // Added 2026-05-17 under D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17. All fields
+  // optional with sensible defaults; backward-compatible with existing
+  // substrate consumers (ATL Wrapper, kathekon-aligned scorer, hand-back
+  // report) that produce EvaluatedAction values without these fields. The
+  // substrate validates the enum values and persists them; it does NOT
+  // interpret them for Layer 1/2/3 reasoning. Downstream consumers (Option C
+  // tiered billing once activated; enterprise procurement reviewers reading
+  // the AccreditationPayload; the A10 credential surface at session #5;
+  // future MCP integrations per R18c) read these fields for audit,
+  // compliance, and tiered-billing decisions. PR15-bias-toward-existing
+  // infrastructure honoured: extends the existing EvaluatedAction shape
+  // rather than introducing a sidecar type.
+  // ==========================================================================
+
+  /** Optional pass-through metadata; wrapper-supplied; default 'unknown'.
+   *  Substrate does not interpret for Layer 1/2/3 reasoning. Used by
+   *  downstream consumers (Option C tiered billing; AccreditationPayload
+   *  enterprise readability; A10 credential scoping). Added 2026-05-17
+   *  under D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17 §"Decision A". */
+  readonly operation_class?: OperationClass
+
+  /** Optional pass-through metadata; wrapper-supplied; default 'none'.
+   *  Substrate does not interpret. Used by downstream consumers for
+   *  vendor-level aggregation + procurement readability. Added 2026-05-17
+   *  under D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17 §"Decision D". */
+  readonly target_system_vendor?: TargetSystemVendor
+
+  /** Optional sub-system detail (free-form); wrapper-supplied; no default.
+   *  Substrate does not validate beyond length cap (100 chars; see
+   *  pass-through-fields validator). Wrappers SHOULD NOT put PII in this
+   *  field — it is structural sub-system identification only (e.g.,
+   *  'opportunities', 'outlook.calendar', 'change_requests'). Added
+   *  2026-05-17 under D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17 §"Decision D". */
+  readonly target_system_detail?: string
+
+  /** Optional pass-through metadata; wrapper-supplied; default 'self_reported'.
+   *  Substrate does not enforce verification; field describes wrapper's
+   *  verification posture. R9 primary engagement — the verification posture
+   *  is exactly where R9's "evaluates reasoning quality, does not promise
+   *  outcomes" lives; the field describes the verification claim, not the
+   *  actual outcome. Added 2026-05-17 under D-PASS-THROUGH-FIELDS-LOCKED-
+   *  2026-05-17 §"Decision E". */
+  readonly outcome_verification?: OutcomeVerification
+
+  /** Optional pass-through metadata; wrapper-supplied; default 'unknown'.
+   *  Substrate does not interpret for Layer 1/2/3 reasoning. Used by
+   *  downstream consumers for risk assessment + cost-aware decisioning.
+   *  Adjacent to R20a (a future session may elect to derive R20a's
+   *  risk_class from (operation_class, reversibility_signal,
+   *  outcome_verification) — deferred under PR7). Added 2026-05-17 under
+   *  D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17 §"Decision F". */
+  readonly reversibility_signal?: ReversibilitySignal
 }
+
+// ============================================================================
+// PASS-THROUGH FIELD ENUMS — Decisions A, B, C, D, E, F
+// ============================================================================
+//
+// Six enum types supporting the EvaluatedAction pass-through fields above
+// (Decisions A + D + E + F) and the CarriedProfile pass-through fields in
+// /website/src/lib/substrate/atl-wrapper.ts (Decisions B + C). All six
+// vocabularies are taken VERBATIM from the Nate B Jones SaaS Renewal Agent
+// License Prompt Kit — Agent System Touch Map (/inbox/20260508-262-promptkit-
+// 1.md). Adopted 2026-05-17 under D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17;
+// implemented in this build under D-PASS-THROUGH-FIELDS-BUILD-WIRED-VERIFIED-
+// 2026-05-17. Validator helpers live at /website/src/lib/substrate/trust-
+// layer/validation/pass-through-fields.ts (the soft-fallback + length-cap
+// semantics are documented there).
+// ============================================================================
+
+/**
+ * Decision A — operation taxonomy. Answers "what kind of action is the agent
+ * taking?" — the gating question for every downstream accountability
+ * assessment. Tiered billing (Option C, deferred under PR7) requires this
+ * field exist before it can fire.
+ *
+ * 9 prompt-kit values + 1 'unknown' default (10-value enum). The 'unknown'
+ * value is the conservative no-evidence-yet baseline AND the honest-reporting
+ * choice for wrappers that genuinely don't know the class.
+ */
+export type OperationClass =
+  | 'read'
+  | 'search'
+  | 'summarize'
+  | 'draft'
+  | 'recommend'
+  | 'write'
+  | 'approve'
+  | 'execute'
+  | 'delete'
+  | 'unknown'
+
+/**
+ * Decision B — identity-model attribution. Answers "on whose behalf does the
+ * agent act?" — the foundational accountability question. Lands on
+ * CarriedProfile (not EvaluatedAction) because identity model holds across
+ * an agent's operational posture, not per single action.
+ *
+ * 7 prompt-kit values + 'unknown' default (8-value enum).
+ */
+export type DownstreamIdentityModel =
+  | 'delegated_user'
+  | 'service_account'
+  | 'vendor_framework'
+  | 'api_key'
+  | 'browser_session'
+  | 'mcp_server'
+  | 'unknown'
+
+/**
+ * Decision C — access-path-status (the 🟢🟡🔴 flag from the Agent System
+ * Touch Map). Answers "how does the agent reach the target system?".
+ * Lands on CarriedProfile (not EvaluatedAction) because path posture holds
+ * across an agent's operational posture.
+ *
+ * 4 prompt-kit values (no 'unknown'); default 'ambiguous' (matches the
+ * prompt-kit's "do not invent specific licensing status; flag as ambiguous
+ * rather than guessing" guardrail).
+ */
+export type PathPosture =
+  | 'endorsed'
+  | 'open_api'
+  | 'ambiguous'
+  | 'unsanctioned'
+
+/**
+ * Decision D — target-system vendor enumeration. Answers "what system does
+ * the action affect?" — the vendor enumeration procurement reviews use.
+ *
+ * 8 canonical prompt-kit vendors + 'other' (for target systems not in the
+ * canonical 8 — e.g., vertical-specific platforms, internal company
+ * systems) + 'none' default (the action doesn't affect any external system
+ * — e.g., internal reasoning, drafts never sent).
+ *
+ * Paired with EvaluatedAction.target_system_detail (free-form sub-system
+ * granularity).
+ */
+export type TargetSystemVendor =
+  | 'salesforce'
+  | 'microsoft'
+  | 'servicenow'
+  | 'sap'
+  | 'workday'
+  | 'zendesk'
+  | 'hubspot'
+  | 'atlassian'
+  | 'other'
+  | 'none'
+
+/**
+ * Decision E — outcome-verification posture. Answers "how will the agent
+ * know if the action succeeded?". R9 primary engagement — describes the
+ * verification claim, not the actual outcome.
+ *
+ * 4 values; default 'self_reported' (the most honest baseline; downstream
+ * consumers know to weight self-reported claims as agent-asserted).
+ * 'external_auditor' is included to support a future use case where a
+ * third-party verifier confirms the action (forward-looking compatibility
+ * at the cost of one extra enum value).
+ */
+export type OutcomeVerification =
+  | 'self_reported'
+  | 'system_confirmed'
+  | 'external_auditor'
+  | 'not_applicable'
+
+/**
+ * Decision F — reversibility signal. Answers "can the action be undone?"
+ * — the buyer's risk-model question. Adjacent to R20a (a future session
+ * may elect to derive R20a's risk_class from (operation_class,
+ * reversibility_signal, outcome_verification) — deferred under PR7).
+ *
+ * 4 values + 'unknown' default. 'partially_reversible' captures the real
+ * "you can recover but it'll cost you" middle ground (e.g., 'unsend' an
+ * email by sending a follow-up — original message has been seen).
+ */
+export type ReversibilitySignal =
+  | 'reversible'
+  | 'partially_reversible'
+  | 'irreversible'
+  | 'unknown'
 
 // ============================================================================
 // KATHEKON QUALITY — alias re-declared inside trust-layer/ (self-contained)

@@ -47,6 +47,48 @@
         }
       },
       {
+        "uri": "https://sagereasoning.com/extensions/pass-through-metadata/v1",
+        "description": "Wrapper-supplied enterprise-accountability metadata. The substrate validates and persists; it does NOT interpret these for reasoning. Downstream consumers (tiered billing, procurement reviews reading the Accreditation Payload, future MCP integrations) read for audit, compliance, and tiered-billing decisions. All fields optional with sensible defaults; unrecognised values soft-fall-back to the default with a warning log. Vocabularies taken verbatim from the Nate B Jones SaaS Renewal Agent License Prompt Kit — Agent System Touch Map. Adopted 2026-05-17 per D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17.",
+        "required": false,
+        "params": {
+          "perEvaluation": {
+            "description": "Five optional fields on EvaluatedAction.",
+            "operation_class": {
+              "values": ["read", "search", "summarize", "draft", "recommend", "write", "approve", "execute", "delete", "unknown"],
+              "default": "unknown"
+            },
+            "target_system_vendor": {
+              "values": ["salesforce", "microsoft", "servicenow", "sap", "workday", "zendesk", "hubspot", "atlassian", "other", "none"],
+              "default": "none"
+            },
+            "target_system_detail": {
+              "type": "string",
+              "maxLength": 100,
+              "note": "Free-form sub-system identifier (e.g., 'opportunities', 'outlook.calendar'). NO PII."
+            },
+            "outcome_verification": {
+              "values": ["self_reported", "system_confirmed", "external_auditor", "not_applicable"],
+              "default": "self_reported"
+            },
+            "reversibility_signal": {
+              "values": ["reversible", "partially_reversible", "irreversible", "unknown"],
+              "default": "unknown"
+            }
+          },
+          "perAgentPosture": {
+            "description": "Two optional fields on CarriedProfile.",
+            "downstream_identity_model": {
+              "values": ["delegated_user", "service_account", "vendor_framework", "api_key", "browser_session", "mcp_server", "unknown"],
+              "default": "unknown"
+            },
+            "path_posture": {
+              "values": ["endorsed", "open_api", "ambiguous", "unsanctioned"],
+              "default": "ambiguous"
+            }
+          }
+        }
+      },
+      {
         "uri": "https://sagereasoning.com/extensions/quick-start/v1",
         "description": "SageReasoning recommended onboarding sequence + example request.",
         "required": false,

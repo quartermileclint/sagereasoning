@@ -112,6 +112,8 @@ import {
   DEFAULT_WINDOW_CONFIG,
   type WindowConfig,
   type WindowSnapshot,
+  type DownstreamIdentityModel,
+  type PathPosture,
 } from './trust-layer/types/evaluation'
 import type {
   AccreditationRecord,
@@ -130,6 +132,12 @@ export type {
 export type {
   WindowSnapshot,
   WindowConfig,
+  OperationClass,
+  DownstreamIdentityModel,
+  PathPosture,
+  TargetSystemVendor,
+  OutcomeVerification,
+  ReversibilitySignal,
 } from './trust-layer/types/evaluation'
 export type {
   AccreditationRecord,
@@ -202,6 +210,42 @@ export interface CarriedProfile {
    *  carried_candidates does NOT feed grade transitions — only
    *  evaluated_actions[] does. The committed-record semantics are preserved. */
   readonly carried_candidates: readonly CarriedCandidate[]
+
+  // ==========================================================================
+  // PASS-THROUGH FIELDS — operational-posture metadata (Decisions B + C)
+  // Added 2026-05-17 under D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17. Both
+  // fields optional with sensible defaults; backward-compatible with
+  // existing wrappers that produce CarriedProfile values without these
+  // fields. The substrate validates the enum values and persists them; it
+  // does NOT interpret them for Layer 1/2/3 reasoning. Downstream
+  // consumers (A10 credential scoping at session #5; AccreditationPayload
+  // enterprise readability; future per-identity-model + per-path-posture
+  // billing variants deferred under PR7) read these fields for
+  // accountability attribution.
+  //
+  // Why on CarriedProfile and not on EvaluatedAction: identity model and
+  // path posture are properties of the agent's operational posture across
+  // actions, not properties of any single action. A CarriedProfile
+  // typically spans many actions; these fields hold across them.
+  //
+  // Validator helpers live at /website/src/lib/substrate/trust-layer/
+  // validation/pass-through-fields.ts (soft-fallback to default with
+  // warning log; same posture as the EvaluatedAction-side validators).
+  // ==========================================================================
+
+  /** Optional pass-through metadata; wrapper-supplied; default 'unknown'.
+   *  Substrate does not interpret for Layer 1/2/3 reasoning. Used by
+   *  downstream consumers for accountability attribution (A10 credential
+   *  scoping; AccreditationPayload enterprise readability). Per
+   *  D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17 §"Decision B". */
+  readonly downstream_identity_model?: DownstreamIdentityModel
+
+  /** Optional pass-through metadata; wrapper-supplied; default 'ambiguous'.
+   *  Substrate does not enforce; field is observability for downstream
+   *  consumers (including the wrapper itself for self-reporting in its
+   *  own audit trails). Per D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17
+   *  §"Decision C". */
+  readonly path_posture?: PathPosture
 }
 
 // ----------------------------------------------------------------------------

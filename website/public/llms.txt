@@ -249,6 +249,25 @@ Agent Card (A2A discovery): https://www.sagereasoning.com/.well-known/agent-card
 - One loop = one wrapper invocation (regardless of internal API call count); wrapper passes X-Loop-Id request header (UUIDv4) or server auto-generates
 - Contact zeus@sagereasoning.com to upgrade
 
+## Pass-Through Metadata for Wrappers
+
+Wrappers may attach enterprise-accountability metadata to each evaluation. The substrate validates the values and persists them; it does **not** interpret them for reasoning. Downstream consumers (tiered billing, procurement reviews reading the Accreditation Payload, future MCP integrations) read these fields for audit, compliance, and tiered-billing decisions. Adopted 2026-05-17 per `D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17`; vocabularies taken verbatim from the Nate B Jones SaaS Renewal Agent License Prompt Kit — Agent System Touch Map.
+
+**Five fields land per evaluation (on `EvaluatedAction`):**
+
+- `operation_class`: `read | search | summarize | draft | recommend | write | approve | execute | delete | unknown` (default `unknown`)
+- `target_system_vendor`: `salesforce | microsoft | servicenow | sap | workday | zendesk | hubspot | atlassian | other | none` (default `none`)
+- `target_system_detail`: free-form string ≤100 chars (e.g., `opportunities`, `outlook.calendar`); **no PII**; no default
+- `outcome_verification`: `self_reported | system_confirmed | external_auditor | not_applicable` (default `self_reported`)
+- `reversibility_signal`: `reversible | partially_reversible | irreversible | unknown` (default `unknown`)
+
+**Two fields land per agent posture (on `CarriedProfile`):**
+
+- `downstream_identity_model`: `delegated_user | service_account | vendor_framework | api_key | browser_session | mcp_server | unknown` (default `unknown`)
+- `path_posture`: `endorsed | open_api | ambiguous | unsanctioned` (default `ambiguous`)
+
+All seven fields are optional. Unrecognised values soft-fall-back to the default with a warning log; the request is not rejected. Existing wrappers that don't populate these fields are unaffected.
+
 ## Core Principle for AI Reasoning
 
 An action is virtuous to the degree it expresses phronesis, dikaiosyne, andreia, and sophrosyne simultaneously — judged by the quality of the agent's synkatathesis (assent) and the accuracy of its phantasiai (impressions), not outcome alone. The goal is flourishing (eudaimonia) for the agent and all those affected.

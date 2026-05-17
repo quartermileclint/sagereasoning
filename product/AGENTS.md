@@ -170,6 +170,29 @@ switch to a cheaper depth when overage fires.
 
 **Rules for wrapper authors (R11):** Wrappers must NOT embed API keys, system prompts, evaluation sequences, or scoring logic. Wrappers contain only the checkpoint invocation pattern. All reasoning evaluation logic remains server-side per R4.
 
+### Pass-Through Metadata for Wrappers
+
+Wrappers may attach enterprise-accountability metadata to each evaluation. The substrate validates the values and persists them; it does **not** interpret them for reasoning. Downstream consumers (tiered billing, procurement reviews reading the Accreditation Payload, future MCP integrations) read these fields for audit, compliance, and tiered-billing decisions. Adopted 2026-05-17 per `D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17`; vocabularies taken verbatim from the Nate B Jones SaaS Renewal Agent License Prompt Kit — Agent System Touch Map.
+
+**Five fields land per evaluation (on `EvaluatedAction`):**
+
+| Field | Values | Default |
+|-------|--------|---------|
+| `operation_class` | `read`, `search`, `summarize`, `draft`, `recommend`, `write`, `approve`, `execute`, `delete`, `unknown` | `unknown` |
+| `target_system_vendor` | `salesforce`, `microsoft`, `servicenow`, `sap`, `workday`, `zendesk`, `hubspot`, `atlassian`, `other`, `none` | `none` |
+| `target_system_detail` | free-form string ≤100 chars (e.g., `opportunities`, `outlook.calendar`) — **no PII** | (none) |
+| `outcome_verification` | `self_reported`, `system_confirmed`, `external_auditor`, `not_applicable` | `self_reported` |
+| `reversibility_signal` | `reversible`, `partially_reversible`, `irreversible`, `unknown` | `unknown` |
+
+**Two fields land per agent posture (on `CarriedProfile`):**
+
+| Field | Values | Default |
+|-------|--------|---------|
+| `downstream_identity_model` | `delegated_user`, `service_account`, `vendor_framework`, `api_key`, `browser_session`, `mcp_server`, `unknown` | `unknown` |
+| `path_posture` | `endorsed`, `open_api`, `ambiguous`, `unsanctioned` | `ambiguous` |
+
+All seven fields are optional — existing wrappers that don't populate them are unaffected (every field defaults to a sensible value). Unrecognised values soft-fall-back to the default with a warning log; the request is not rejected. Validators live at `website/src/lib/substrate/trust-layer/validation/pass-through-fields.ts`.
+
 ### Marketplace
 
 Original sage skills (proprietary skills built on the stoic brain) are available through the marketplace:
