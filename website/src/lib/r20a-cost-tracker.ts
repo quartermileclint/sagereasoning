@@ -13,6 +13,35 @@
  *
  * Rules served: R5 (cost health), R20a (vulnerable user protections)
  *
+ * ---------------------------------------------------------------------------
+ * Option D integration (per D-BILLING-MODEL-LOCKED-2026-05-17 + Decision E +
+ * build session Step 6, 2026-05-MM):
+ *
+ * `logClassifierRun` accepts an optional `loop_id` that is persisted into
+ * classifier_cost_log.loop_id (new column added in option-d-billing-schema.sql).
+ * This enables forensic queries that join classifier_cost_log with
+ * loop_billing_events on loop_id (e.g., "total LLM cost for loop X including
+ * its classifier run").
+ *
+ * Live add-to-loop-aggregate at the TypeScript layer (so the loop's
+ * loop_billing_events.anthropic_cost_cents includes the classifier's cost)
+ * is DEFERRED under PR7 to avoid touching r20a-classifier.ts (Critical
+ * under PR6). Current shape: classifier cost lives in classifier_cost_log;
+ * loop cost in loop_billing_events; the two are joined post-hoc by analytics
+ * or reconciliation queries via the new loop_id column. Revisit condition:
+ * the discrepancy materially affects R5 ratio analysis OR an integration
+ * use case requires unified cost surfaces.
+ *
+ * Pricing convention reconciliation with /website/src/lib/loop-cost-tracker.ts:
+ * the per-million constants below (HAIKU_INPUT_COST_PER_MILLION = 25,
+ * OUTPUT = 125) appear to overestimate Anthropic Haiku 4.5 pricing by ~25x
+ * relative to the design's cost-per-loop appendix and loop-cost-tracker.ts's
+ * convention ($1/$5 per million tokens). The two trackers are NOT yet sharing
+ * the per-call cost-estimation primitive — re-aligning is a follow-on
+ * Standard-risk session per PR7 to avoid pricing-correction scope creep into
+ * the Option D build.
+ * ---------------------------------------------------------------------------
+ *
  * @compliance
  * compliance_version: CR-2026-Q2-v4
  * regulatory_references: [CR-005]
@@ -33,6 +62,10 @@ export interface ClassifierRunLog {
   llm_output_tokens?: number  // Haiku output tokens (null if LLM not called)
   severity_result: number     // 0=clear, 1=mild, 2=moderate, 3=acute
   flag_written: boolean       // true if a vulnerability_flag row was created
+  loop_id?: string            // OPTIONAL — parent loop UUID when classifier runs inside a wrapper
+                              // invocation (Option D integration per D-BILLING-MODEL-LOCKED-2026-05-17
+                              // Decision E + Step 6). Persisted to classifier_cost_log.loop_id.
+                              // Enables forensic JOIN with loop_billing_events.
 }
 
 export interface ClassifierCostSummary {
@@ -112,6 +145,8 @@ export async function logClassifierRun(run: ClassifierRunLog): Promise<void> {
       estimated_cost_cents: estimatedCostCents,
       severity_result: run.severity_result,
       flag_written: run.flag_written,
+      loop_id: run.loop_id || null,  // Option D integration — null when classifier
+                                      // runs outside a wrapper loop (mentor surfaces, etc.)
     })
 
   if (error) {

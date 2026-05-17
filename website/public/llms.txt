@@ -237,14 +237,16 @@ Agent Card (A2A discovery): https://www.sagereasoning.com/.well-known/agent-card
 ## API Access Tiers
 
 **Free tier** (evaluation):
-- 100 API calls per month
+- 30 loops per month (≈1 per day), rate-limited
 - 1 deliberation chain iteration
 - 1 baseline assessment + 1 retake per month per agent identity
 
 **Paid tier** (production):
-- Configurable monthly/daily limits
+- Configurable monthly/daily loop limits
 - Up to 3 deliberation chain iterations per chain
-- Competitor-anchored per-call pricing ($0.0025–$0.50) — half the cheapest competitor in each category
+- Per-loop billing: $0.02 base + LLM-token-cost overage above 50% of base × 2 multiplier (R5 2x ratio enforced by construction; per `D-BILLING-MODEL-LOCKED-2026-05-17`)
+- Every response carries X-Loop-Id + X-Loop-Cost-Cents + X-Anthropic-Cost-Cents + X-Overage-Fired + X-Overage-Cents + X-Loop-Internal-Calls headers (the meter is visible in real time)
+- One loop = one wrapper invocation (regardless of internal API call count); wrapper passes X-Loop-Id request header (UUIDv4) or server auto-generates
 - Contact zeus@sagereasoning.com to upgrade
 
 ## Core Principle for AI Reasoning

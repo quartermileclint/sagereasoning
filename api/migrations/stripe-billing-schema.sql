@@ -7,6 +7,29 @@
 -- Compliance: CR-2026-Q2-v4
 -- Rules served: R0 (oikeiosis — revenue for sustainability), R5 (cost guardrails),
 --               R9 (no outcome promises in billing), R10 (billing compliance)
+--
+-- ---------------------------------------------------------------------------
+-- See also: /api/migrations/option-d-billing-schema.sql
+-- ---------------------------------------------------------------------------
+-- The Option D billing model (per D-BILLING-MODEL-LOCKED-2026-05-17 +
+-- /adopted/billing-model-design.md Decision E) adds a per-loop forensic
+-- ledger (loop_billing_events) alongside the surfaces in this file, plus
+-- five loop-level aggregate columns on api_key_usage (loop_count,
+-- anthropic_cost_cents, billed_cents, overage_count, overage_cents) and a
+-- billing_model discriminator column on api_keys.
+--
+-- This file's cost_health_snapshots table is unchanged structurally
+-- (Decision G keeps it as a retrospective sanity check; aggregation queries
+-- may optionally use the new api_key_usage.billed_cents +
+-- anthropic_cost_cents columns for more precise ratios — discretion of a
+-- follow-on Standard-risk session per the design's deferred items).
+--
+-- Option D's per-loop bill is rendered to Stripe invoices via a webhook
+-- handler that reads loop_billing_events (per-day-aggregate line items
+-- with a per-loop CSV download attached; Step 1(b) election at build).
+-- Webhook handler reuses constructWebhookEvent + logPaymentEvent from
+-- /website/src/lib/stripe.ts; payment_events here remains the canonical
+-- audit log of all Stripe webhook events.
 -- =============================================================================
 
 -- ---------------------------------------------------------------------------

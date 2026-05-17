@@ -33,6 +33,23 @@ import {
   issueContinuationToken,
   Tier1SecretMissingError,
 } from '@/lib/translation-sandwich/tier1-token'
+// Option D billing (per D-BILLING-MODEL-LOCKED-2026-05-17 + build session 2026-05-MM).
+// Metering wraps every API-key-authenticated request: a loop_id is extracted
+// from X-Loop-Id (or server-generated); per-layer Anthropic cost is read from
+// SandwichRunResult's microcents fields; finalizeLoopResponse persists the
+// loop_billing_events row and emits the six X-Loop-* response headers.
+// User-auth (Supabase JWT) + plugin-auth callers are NOT metered — they aren't
+// commercial customers; the api_keys row that Option D bills against doesn't
+// exist for them. Step 1(e) hard-error posture: a duplicate (api_key_id,
+// loop_id) returns HTTP 400 with loop_id_already_billed.
+import {
+  createLoopAccumulator,
+  extractLoopId,
+  generateLoopId,
+  finalizeLoopResponse,
+  buildLoopHeaders,
+  type LoopAccumulator,
+} from '@/lib/loop-cost-tracker'
 
 // =============================================================================
 // sage-reason — The Universal Reasoning Layer
@@ -478,7 +495,66 @@ export async function POST(request: NextRequest) {
     return auth.error
   }
 
+  // =============================================================================
+  // Option D per-loop billing metering setup (build session 2026-05-MM).
+  //
+  // Metering applies ONLY when API-key auth succeeded — user-auth (Supabase
+  // JWT) and plugin-auth callers are not commercial customers (no api_keys
+  // row to bill against). For those paths, loopAccumulator stays null and
+  // every return below falls through to its pre-existing NextResponse shape.
+  //
+  // For API-key auth:
+  //   - loopId is extracted from the X-Loop-Id request header (validated
+  //     UUIDv4) or auto-generated server-side if absent/malformed
+  //   - loopAccumulator collects per-call Anthropic cost as the request flows
+  //   - At each response branch, finalizeLoopResponse computes the bill,
+  //     persists loop_billing_events + api_key_usage aggregates via the
+  //     extended increment_api_usage RPC, and emits the six X-Loop-* headers
+  // =============================================================================
+  const isApiKeyAuth = apiKey !== null && apiKey.valid === true
+  const loopId: string | null = isApiKeyAuth
+    ? (extractLoopId(request) ?? generateLoopId())
+    : null
+  const loopAccumulator: LoopAccumulator | null = isApiKeyAuth && loopId !== null && apiKey !== null && apiKey.valid
+    ? createLoopAccumulator({
+        loopId,
+        apiKeyId: apiKey.api_key_id,
+        surface: 'api_reason',
+        agentId: null,  // /api/reason doesn't accept agent_id in body (unlike /api/score-iterate)
+      })
+    : null
+
   try {
+    // Local helper that wraps every response branch with Option D metering
+    // when loopAccumulator is active (API-key auth path). For user-auth +
+    // plugin-auth paths, falls through to a plain NextResponse.
+    //
+    // isBillable=false on validation-error branches that occurred BEFORE the
+    // request reached the substrate (malformed body, invalid depth) — those
+    // get X-Loop-* headers (cost=0) but no ledger row written.
+    // isBillable=true on every other branch (R20a redirect, Tier 1, A7,
+    // signing throw, layer throws, happy path, 500).
+    const respond = async (opts: {
+      body: unknown
+      status: number
+      headers: Record<string, string>
+      isBillable?: boolean
+    }): Promise<NextResponse> => {
+      if (loopAccumulator && loopId && apiKey && apiKey.valid) {
+        return await finalizeLoopResponse({
+          loopId,
+          accumulator: loopAccumulator,
+          apiKeyId: apiKey.api_key_id,
+          endpoint: 'other',
+          responseBody: opts.body,
+          responseStatus: opts.status,
+          responseHeaders: opts.headers,
+          isBillable: opts.isBillable ?? true,
+        })
+      }
+      return NextResponse.json(opts.body, { status: opts.status, headers: opts.headers })
+    }
+
     const body = await request.json()
 
     // Stage 1 A2 (D-A2-INPUT-VALIDATION-SURFACE-2026-05-10): plugin-auth
@@ -517,19 +593,21 @@ export async function POST(request: NextRequest) {
 
     // Validate required input
     if (!input || typeof input !== 'string' || input.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'Input is required. Provide the decision, action, or situation to reason about.' },
-        { status: 400 }
-      )
+      return await respond({
+        body: { error: 'Input is required. Provide the decision, action, or situation to reason about.' },
+        status: 400,
+        headers: {},
+        isBillable: false,  // Pre-substrate validation error — no LLM cost incurred.
+      })
     }
 
     // Validate text lengths
     const inputErr = validateTextLength(input, 'Input', TEXT_LIMITS.medium)
-    if (inputErr) return NextResponse.json({ error: inputErr }, { status: 400 })
+    if (inputErr) return await respond({ body: { error: inputErr }, status: 400, headers: {}, isBillable: false })
     const contextErr = validateTextLength(context, 'Context', TEXT_LIMITS.medium)
-    if (contextErr) return NextResponse.json({ error: contextErr }, { status: 400 })
+    if (contextErr) return await respond({ body: { error: contextErr }, status: 400, headers: {}, isBillable: false })
     const domainErr = validateTextLength(domain_context, 'Domain context', TEXT_LIMITS.medium)
-    if (domainErr) return NextResponse.json({ error: domainErr }, { status: 400 })
+    if (domainErr) return await respond({ body: { error: domainErr }, status: 400, headers: {}, isBillable: false })
 
     // R20a — Vulnerable user detection (before any LLM call)
     // enforceDistressCheck() returns a SafetyGate — compile-time proof that
@@ -543,10 +621,12 @@ export async function POST(request: NextRequest) {
     // sees the redirect.
     const gate = await enforceDistressCheck(detectDistressTwoStage(input))
     if (gate.shouldRedirect) {
-      return NextResponse.json(
-        { distress_detected: true, severity: gate.result.severity, redirect_message: gate.result.redirect_message },
-        { status: 200, headers: corsHeaders() }
-      )
+      return await respond({
+        body: { distress_detected: true, severity: gate.result.severity, redirect_message: gate.result.redirect_message },
+        status: 200,
+        headers: corsHeaders(),
+        isBillable: true,  // Substrate engaged via R20a perimeter — billed at base rate per R9.
+      })
     }
 
     // M1-CP4e (2026-05-06): Continuation-token validation. Runs AFTER the
@@ -579,22 +659,29 @@ export async function POST(request: NextRequest) {
               'TRANSLATION_SANDWICH_TIER1_SECRET is not set. The engine cannot ' +
               'validate the token. Set the env var per ADR-008 §4.2.'
           )
-          return NextResponse.json(
-            {
+          return await respond({
+            body: {
               error: 'continuation_token_engine_unavailable',
               detail:
                 'Tier 1 force-clarification is not available on this deployment. ' +
                 'Submit your input again as a fresh request.',
             },
-            { status: 503, headers: corsHeaders() }
-          )
+            status: 503,
+            headers: corsHeaders(),
+            isBillable: false,  // Server misconfig (env var missing) — not customer fault.
+          })
         }
         // All other validation failures are 400.
         const errorBody: Record<string, unknown> = { error: tokenResult.error_code }
         if (tokenResult.error_code === 'continuation_token_expired' && tokenResult.expired_at !== undefined) {
           errorBody.expired_at = tokenResult.expired_at
         }
-        return NextResponse.json(errorBody, { status: 400, headers: corsHeaders() })
+        return await respond({
+          body: errorBody,
+          status: 400,
+          headers: corsHeaders(),
+          isBillable: true,  // Client error post-perimeter — billed at base rate per R9.
+        })
       }
       // Token validated. Extract previous trigger code for meta logging.
       previousTrigger = tokenResult.payload.trigger_code
@@ -606,10 +693,12 @@ export async function POST(request: NextRequest) {
     // Validate depth parameter
     const depth: ReasonDepth = requestedDepth || 'standard'
     if (!VALID_DEPTHS.includes(depth)) {
-      return NextResponse.json(
-        { error: `Invalid depth. Must be one of: ${VALID_DEPTHS.join(', ')}` },
-        { status: 400 }
-      )
+      return await respond({
+        body: { error: `Invalid depth. Must be one of: ${VALID_DEPTHS.join(', ')}` },
+        status: 400,
+        headers: {},
+        isBillable: false,  // Pre-substrate validation error — no LLM cost incurred.
+      })
     }
 
     // Per-request cache for D6 retrievals (KG1 rule 4 — never module-level).
@@ -677,6 +766,31 @@ export async function POST(request: NextRequest) {
       safetyGate: gate,
     })
 
+    // Option D metering — populate loopAccumulator with the per-layer Anthropic
+    // cost from SandwichRunResult's microcents fields. 1 microcent = 0.0001
+    // cents (i.e., divide microcents by 10000 to get cents). Both layers use
+    // Sonnet per AC1 of the manifest. Layer 1's microcents will be 0 when
+    // preExtractedLayer1Schema was supplied (plugin-auth path) or null/0 if
+    // Layer 1 short-circuited (Tier 1 ELEMENT_FUSION). Layer 3 microcents
+    // will be null if Layer 3 wasn't called (Tier 1, A7 redirect, layer throws).
+    // Token counts are not exposed by SandwichRunResult — left at 0 in the
+    // accumulator (loop_billing_events.total_input_tokens / total_output_tokens
+    // will be 0 for /api/reason loops; design's accepted scope per PR7).
+    if (loopAccumulator) {
+      if (sandwichResult.layer1_cost_usd_microcents !== null && sandwichResult.layer1_cost_usd_microcents > 0) {
+        loopAccumulator.addPrecomputedCall(
+          'claude-sonnet-4-6',
+          sandwichResult.layer1_cost_usd_microcents / 10000
+        )
+      }
+      if (sandwichResult.layer3_cost_usd_microcents !== null && sandwichResult.layer3_cost_usd_microcents > 0) {
+        loopAccumulator.addPrecomputedCall(
+          'claude-sonnet-4-6',
+          sandwichResult.layer3_cost_usd_microcents / 10000
+        )
+      }
+    }
+
     // Branch 1 — Tier 1 force-clarification fired (3A surfacing).
     if (sandwichResult.tier1_trigger !== null && sandwichResult.output) {
       let token: string
@@ -688,22 +802,29 @@ export async function POST(request: NextRequest) {
             '[/api/reason] Tier 1 fired but TRANSLATION_SANDWICH_TIER1_SECRET unset; ' +
             'cannot issue continuation token. Set the env var per ADR-008 §4.2.'
           )
-          return NextResponse.json(
-            {
+          return await respond({
+            body: {
               error: 'continuation_token_engine_unavailable',
               detail:
                 'Tier 1 force-clarification is not available on this deployment. ' +
                 'Submit your input again as a fresh request.',
             },
-            { status: 503, headers: corsHeaders() }
-          )
+            status: 503,
+            headers: corsHeaders(),
+            isBillable: false,  // Server misconfig — not customer fault (even though Layer 1 ran).
+          })
         }
         throw err  // outer catch returns 500
       }
       const tier1Output = sandwichResult.output as Record<string, unknown>
       tier1Output.continuation_token = token
       tier1Output.disclaimer = EVALUATIVE_DISCLAIMER
-      return NextResponse.json(tier1Output, { headers: corsHeaders() })
+      return await respond({
+        body: tier1Output,
+        status: 200,
+        headers: corsHeaders(),
+        isBillable: true,  // Layer 1 ran — bill at base rate + any Layer 1 cost.
+      })
     }
 
     // Branch 1.7 — A7 server-side R20a gate REDIRECT (D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13).
@@ -724,14 +845,16 @@ export async function POST(request: NextRequest) {
     // which layer caught the distress signal.
     if (sandwichResult.error === 'r20a_gate_redirect') {
       const gateOutput = sandwichResult.output as Record<string, unknown>
-      return NextResponse.json(
-        {
+      return await respond({
+        body: {
           distress_detected: true,
           severity: gateOutput.severity,
           redirect_message: gateOutput.redirect_message,
         },
-        { status: 200, headers: corsHeaders() }
-      )
+        status: 200,
+        headers: corsHeaders(),
+        isBillable: true,  // Layer 1 ran (A7 fires after Layer 1) — billed.
+      })
     }
 
     // Branch 1.5 — A3 signing failure (fail-closed per ADR-layer2-signing-infrastructure §"Critical Change Protocol responses").
@@ -756,15 +879,17 @@ export async function POST(request: NextRequest) {
         '[/api/reason] Layer 2 signing failed; SUBSTRATE_LAYER2_SIGNING_KEY ' +
         'env var likely unset or malformed. Per ADR-layer2-signing-infrastructure §Decision 1.'
       )
-      return NextResponse.json(
-        {
+      return await respond({
+        body: {
           error: 'substrate_signing_unavailable',
           detail:
             'The substrate cannot produce a signed assessment on this deployment. ' +
             'This is an operational issue. If the issue persists, contact support.',
         },
-        { status: 503, headers: corsHeaders() }
-      )
+        status: 503,
+        headers: corsHeaders(),
+        isBillable: false,  // Server misconfig (signing key) — not customer fault.
+      })
     }
 
     // Branch 2 — Layer 1/2 throw OR Layer 3 LLM+fallback both failed (1C minimal fallback).
@@ -773,10 +898,12 @@ export async function POST(request: NextRequest) {
       sandwichResult.error === 'validation_throw' ||
       sandwichResult.error === 'layer3_throw'
     ) {
-      return NextResponse.json(
-        buildMinimalFallback(sandwichResult.error),
-        { status: 200, headers: corsHeaders() }
-      )
+      return await respond({
+        body: buildMinimalFallback(sandwichResult.error),
+        status: 200,
+        headers: corsHeaders(),
+        isBillable: true,  // Whatever cost was incurred up to the throw is in the accumulator; billed.
+      })
     }
 
     // Branch 3 — happy path: composed sandwich output. Add R3 disclaimer + previousTrigger meta.
@@ -787,10 +914,30 @@ export async function POST(request: NextRequest) {
       meta.previous_trigger = previousTrigger
       output.meta = meta
     }
-    return NextResponse.json(output, { headers: corsHeaders() })
+    return await respond({
+      body: output,
+      status: 200,
+      headers: corsHeaders(),
+      isBillable: true,
+    })
   } catch (error) {
     console.error('sage-reason API error:', error)
     const message = error instanceof Error ? error.message : 'Internal server error'
+    // Catch-all 500 — emit X-Loop-* headers if metering was set up but skip the
+    // ledger write (uncertain whether the failure was customer-side or server-side;
+    // fail-open on the bill rather than charging for a server error).
+    if (loopAccumulator && loopId && apiKey && apiKey.valid) {
+      const state = loopAccumulator.getState()
+      return NextResponse.json(
+        { error: message },
+        {
+          status: 500,
+          headers: {
+            ...buildLoopHeaders({ loopId, state }),
+          },
+        }
+      )
+    }
     return NextResponse.json(
       { error: message },
       { status: 500 }

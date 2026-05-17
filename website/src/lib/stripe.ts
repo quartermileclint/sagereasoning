@@ -6,9 +6,20 @@
  *
  * Rules served:
  *   R0  — Revenue for sustainability, not accumulation
- *   R5  — Paid tier must achieve 2x margin over LLM API costs
+ *   R5  — Paid tier must achieve 2x margin over LLM API costs.
+ *         Under Option D (per D-BILLING-MODEL-LOCKED-2026-05-17 +
+ *         /adopted/billing-model-design.md), the 2x ratio is enforced
+ *         PROSPECTIVELY at the loop level by construction via
+ *         computeLoopBill below (Decision D's overage formula). The
+ *         retrospective cost_health_snapshots surface (Decision G) is
+ *         retained as a sanity check — its alert is now an exception signal,
+ *         not a normal-state signal.
  *   R9  — No outcome promises in billing communications
  *   R10 — Billing compliance with payment processor terms
+ *   R18a — No category-language change (billing is commercial, not credential)
+ *   AC7 — Engaged at the Option D build session via deployment-config
+ *         changes (STRIPE_PER_LOOP_PRICE_ID env var) + access-control changes
+ *         (RPC signature extension + new loop_billing_events surface)
  *
  * @compliance
  * compliance_version: CR-2026-Q2-v4
@@ -96,12 +107,35 @@ export const STRIPE_PRICES = {
   developerPaid: process.env.STRIPE_DEVELOPER_PRICE_ID || '',
   tidingOnceOff: process.env.STRIPE_TIDING_ONCEOFF_PRICE_ID || '',
   tidingMonthly: process.env.STRIPE_TIDING_MONTHLY_PRICE_ID || '',
+  /**
+   * Option D per-loop billing Price ID.
+   *
+   * Per D-BILLING-MODEL-LOCKED-2026-05-17 + /adopted/billing-model-design.md
+   * Decision F. The founder generates this Price ID in the Stripe Dashboard
+   * (Products → New Product → Per-loop billing) and sets it in Vercel
+   * (Project → Settings → Environment Variables → STRIPE_PER_LOOP_PRICE_ID).
+   *
+   * Until set, the per-loop billing surfaces still meter (writes to
+   * loop_billing_events; emits X-Loop-* response headers) but Stripe invoice
+   * rendering is inert — the webhook handler has no Price ID to attach line
+   * items to. The metering data is preserved for forensic review.
+   *
+   * Step 0 election (build session 2026-05-MM): Stripe Price ID deferred to
+   * a follow-on session. The metering layer + webhook handler land in this
+   * build; the Price ID + live invoice flow lands separately.
+   */
+  perLoop: process.env.STRIPE_PER_LOOP_PRICE_ID || '',
 } as const
 
 /**
  * R5 cost health thresholds.
  * revenue_to_cost_ratio must be >= 2.0.
  * Sage Ops monthly cap is $100 (10000 cents).
+ *
+ * Under Option D (per D-BILLING-MODEL-LOCKED-2026-05-17), the 2x ratio is
+ * enforced prospectively at the loop level by construction via OPTION_D_BILLING
+ * below. cost_health_snapshots (queries against this surface) remains as a
+ * retrospective sanity check — Decision G's defence-in-depth posture.
  */
 export const COST_HEALTH = {
   MIN_REVENUE_TO_COST_RATIO: 2.0,
@@ -111,6 +145,92 @@ export const COST_HEALTH = {
   // If classifier spend exceeds 20% of mentor-turn cost in any month, reopen ADR.
   R20A_CLASSIFIER_MAX_MENTOR_RATIO: 0.20, // 20% threshold
 } as const
+
+
+/**
+ * Option D per-loop billing constants.
+ *
+ * Per D-BILLING-MODEL-LOCKED-2026-05-17 + /adopted/billing-model-design.md
+ * Decisions B, C, D. Single source of truth for the prospective R5 formula.
+ *
+ *   LOOP_BASE_RATE_CENTS         = $0.02/loop headline (Decision B)
+ *   OVERAGE_TRIGGER_RATIO        = overage fires above 50% of base (Decision C)
+ *   OVERAGE_RATE_MULTIPLIER      = 2.0× the excess Anthropic cost (Decision D)
+ *
+ * Worked example at the elected formula:
+ *   Anthropic cost = $0.005 (typical): no overage; bill = $0.02; ratio = 4.0×
+ *   Anthropic cost = $0.010 (threshold): no overage; bill = $0.02; ratio = 2.0×
+ *   Anthropic cost = $0.020 (above): overage = ($0.020 - $0.010) × 2 = $0.020;
+ *                                     bill = $0.040; ratio = 2.0×
+ *   Anthropic cost = $0.030 (heavy): overage = $0.040; bill = $0.060; ratio = 2.0×
+ *
+ * As Anthropic cost rises above threshold, bill rises ×2 as fast; revenue/cost
+ * ratio asymptotes to 2.0× from above; never goes below. R5 floor by construction.
+ *
+ * Re-tuning post-launch: see the design's "Real-cost-distribution-based base-rate
+ * re-tuning" deferred item — first 2–4 weeks of production data informs whether
+ * $0.02 stays put. Re-tuning is Elevated under 0d-ii.
+ */
+export const OPTION_D_BILLING = {
+  LOOP_BASE_RATE_CENTS: 2,
+  OVERAGE_TRIGGER_RATIO: 0.5,
+  OVERAGE_RATE_MULTIPLIER: 2.0,
+} as const
+
+
+/**
+ * Result of computing one loop's bill from its accumulated Anthropic cost.
+ *
+ * All values in integer cents (no floats; no rounding ambiguity at billing time).
+ */
+export interface LoopBill {
+  base_cents: number          // = OPTION_D_BILLING.LOOP_BASE_RATE_CENTS
+  threshold_cents: number     // = LOOP_BASE_RATE_CENTS × OVERAGE_TRIGGER_RATIO (rounded down)
+  overage_cents: number       // 0 if overage didn't fire; else round(max(0, excess) × multiplier)
+  overage_fired: boolean      // overage_cents > 0
+  total_cents: number         // base_cents + overage_cents (what the customer pays)
+}
+
+/**
+ * Single source of truth for the per-loop bill formula (Decisions B + C + D).
+ *
+ * Input: the loop's accumulated Anthropic cost in cents (float input from
+ * loop-cost-tracker's accumulator OK; arithmetic happens in integer cents
+ * via Math.round at the conversion boundary). Output: structured LoopBill.
+ *
+ * The formula is intentionally simple — every line traceable to one of the
+ * three decisions. computeLoopBill is the function any code that needs "how
+ * much would this cost the customer?" should call; metering layer in
+ * /api/reason + /api/score-iterate calls it once at terminal call; Stripe
+ * webhook handler may call it for reconciliation; future audit / sanity-check
+ * tools may call it to verify persisted bills.
+ */
+export function computeLoopBill(anthropicCostCents: number): LoopBill {
+  const base_cents = OPTION_D_BILLING.LOOP_BASE_RATE_CENTS
+
+  // Threshold = base × trigger ratio; integer cents (round down to be conservative
+  // on the overage trigger — favours the customer at the cent boundary).
+  const threshold_cents = Math.floor(base_cents * OPTION_D_BILLING.OVERAGE_TRIGGER_RATIO)
+
+  // Anthropic cost rounded to integer cents for the comparison + arithmetic.
+  // The accumulator works in float for precision; we round at the boundary.
+  const anthropic_cost_int = Math.round(anthropicCostCents)
+
+  const excess = anthropic_cost_int - threshold_cents
+  const overage_cents = excess > 0
+    ? Math.round(excess * OPTION_D_BILLING.OVERAGE_RATE_MULTIPLIER)
+    : 0
+  const overage_fired = overage_cents > 0
+  const total_cents = base_cents + overage_cents
+
+  return {
+    base_cents,
+    threshold_cents,
+    overage_cents,
+    overage_fired,
+    total_cents,
+  }
+}
 
 
 // =============================================================================

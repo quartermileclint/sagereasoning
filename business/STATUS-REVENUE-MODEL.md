@@ -2,7 +2,41 @@
 
 **Priority:** 10 (Revenue Generation)
 **Created:** 2026-03-29
-**Last Updated:** 2026-03-29
+**Last Updated:** 2026-05-17 (supersession header — see below)
+
+> ## ⚠️ SUPERSESSION NOTICE (2026-05-17)
+>
+> **Tasks 4 + 5 of this document — the per-API-call (count-based)
+> free/paid pricing rationales — are SUPERSEDED by
+> `/adopted/billing-model-design.md`
+> (`D-BILLING-MODEL-LOCKED-2026-05-17`).**
+>
+> The Option D per-loop billing model replaces the per-call competitor-
+> anchored pricing this document originally specified. Under Option D:
+> - One loop = one wrapper invocation (regardless of internal API call count)
+> - Free tier: 30 loops/month, 1/day
+> - Paid tier: $0.02 base per loop + LLM-token-cost overage above 50% of
+>   base × 2 multiplier
+> - R5's 2x ratio enforced prospectively at the loop level by construction
+> - X-Loop-* response headers on every /api/reason + /api/score-iterate
+>   response (the meter is visible in real time)
+>
+> **Tasks 1, 2, 3, 6, 7, 8 of this document remain in force** (IP
+> protection, JSON file stripping, server-side asset protection, baseline
+> retake limits, discovery file updates, consistency verification — all
+> unaffected by the billing-model change).
+>
+> The Option D build session (2026-05-MM) implemented the spec defined
+> in `/adopted/billing-model-design.md` (eight decisions A–H across
+> schema, RPC, modules, route metering, Stripe webhook integration,
+> discovery files). Re-tuning of the $0.02 base rate based on real
+> cost distribution is permitted as an Elevated edit during the first
+> 2–4 weeks of production operation pre-Stripe activation per the
+> design's deferred items.
+>
+> Read this document for Tasks 1, 2, 3, 6, 7, 8 context. For Tasks 4
+> + 5 (free/paid pricing) — refer to the design document and the
+> Option D build decision-log entry instead.
 
 ## Overview
 

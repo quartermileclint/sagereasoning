@@ -2,6 +2,56 @@
 -- SageReasoning — API Key & Usage Metering Schema
 -- Minimum viable cost protection, bridges to Stripe
 -- Run in: Supabase Dashboard → SQL Editor → New Query
+--
+-- ============================================================
+-- See also: /api/migrations/option-d-billing-schema.sql
+--           /api/migrations/option-d-billing-rpc.sql
+-- ============================================================
+-- The Option D billing model (per D-BILLING-MODEL-LOCKED-2026-05-17 +
+-- /adopted/billing-model-design.md) extends api_keys + api_key_usage and
+-- the increment_api_usage RPC with per-loop billing fields. Specifically:
+--
+-- api_keys.billing_model         — TEXT NOT NULL DEFAULT 'per_loop'
+--                                  CHECK (billing_model IN ('per_call',
+--                                  'per_loop')). Discriminator; all existing
+--                                  rows default to 'per_loop' at column-add.
+--                                  'per_call' retained for rollback safety
+--                                  (Step 1(c) — dead per-call paths kept one
+--                                  release cycle).
+--
+-- api_key_usage (5 new columns)  — loop_count, anthropic_cost_cents,
+--                                  billed_cents, overage_count, overage_cents.
+--                                  All INTEGER NOT NULL DEFAULT 0. Under
+--                                  Option D, loop_count is the billable
+--                                  counter; the existing total_calls/
+--                                  guardrail_calls/etc. continue to increment
+--                                  for forensic/diagnostic purposes (per
+--                                  Step 1(c) election) but are not the
+--                                  quota-relevant counter.
+--
+-- increment_api_usage (RPC)      — Extended with 13 optional Option D params
+--                                  (p_loop_id, p_surface, p_anthropic_cost_
+--                                  cents, p_base_cents, p_threshold_cents,
+--                                  p_overage_cents, p_overage_fired,
+--                                  p_total_cents, p_internal_calls,
+--                                  p_models_used, p_total_input_tokens,
+--                                  p_total_output_tokens, p_agent_id). All
+--                                  have DEFAULT values; old 5-arg callers
+--                                  continue to work. When p_loop_id is
+--                                  provided, the RPC also writes a
+--                                  loop_billing_events row + increments the
+--                                  five new api_key_usage aggregate columns
+--                                  in the same transaction. Return shape
+--                                  extended with new_monthly_loops INTEGER
+--                                  (post-increment loop_count for the bucket).
+--
+-- loop_billing_events (NEW)      — Append-only per-loop ledger. UNIQUE
+--                                  (api_key_id, loop_id) enforces "one loop
+--                                  = one HTTP request" framing (Step 1(e):
+--                                  hard error on duplicate; multi-HTTP-
+--                                  request loops are deferred under PR7).
+--                                  See option-d-billing-schema.sql for the
+--                                  full DDL.
 -- ============================================================
 
 -- ============================================================

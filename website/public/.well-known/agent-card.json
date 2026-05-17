@@ -19,12 +19,17 @@
         "required": false,
         "params": {
           "free": {
-            "description": "Evaluation tier — 100 API calls per month, 1 deliberation iteration per chain, 1 baseline assessment + 1 retake per month per agent identity",
-            "monthlyLimit": 100,
+            "description": "Evaluation tier — 30 loops per month (≈1 per day), 1 deliberation iteration per chain, 1 baseline assessment + 1 retake per month per agent identity. One loop = one wrapper invocation (X-Loop-Id-correlated).",
+            "monthlyLoopLimit": 30,
+            "dailyLoopLimit": 1,
             "maxChainIterations": 1
           },
           "paid": {
-            "description": "Production tier — configurable limits, up to 3 deliberation iterations per chain, competitor-anchored per-call pricing ($0.0025–$0.50 — half the cheapest competitor in each category)",
+            "description": "Production tier — configurable loop limits; up to 3 deliberation iterations per chain; per-loop billing at $0.02 base + LLM-token-cost overage above 50% of base × 2 multiplier (R5 2x ratio enforced by construction per D-BILLING-MODEL-LOCKED-2026-05-17). Every response carries X-Loop-Id, X-Loop-Cost-Cents, X-Anthropic-Cost-Cents, X-Overage-Fired, X-Overage-Cents, X-Loop-Internal-Calls headers.",
+            "billingModel": "per_loop",
+            "loopBaseRateCents": 2,
+            "overageTriggerRatio": 0.5,
+            "overageRateMultiplier": 2.0,
             "contact": "zeus@sagereasoning.com"
           }
         }

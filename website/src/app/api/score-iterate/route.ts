@@ -9,6 +9,18 @@ import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
 import type { DetectedPassion } from '@/lib/deliberation'
+// Option D billing (per D-BILLING-MODEL-LOCKED-2026-05-17 + build session 2026-05-MM).
+// Each HTTP request to /api/score-iterate is ONE loop (one Anthropic call;
+// existing max_chain_iterations enforcement preserved at the chain level).
+// Step 1(e) hard error on duplicate (api_key_id, loop_id) — wrappers must
+// issue fresh loop_ids per HTTP request even within a deliberation chain.
+import {
+  createLoopAccumulator,
+  extractLoopId,
+  generateLoopId,
+  finalizeLoopResponse,
+  buildLoopHeaders,
+} from '@/lib/loop-cost-tracker'
 
 /**
  * sage-deliberate (score-iterate) — Stateful iterative deliberation chains.
@@ -155,20 +167,59 @@ export async function POST(request: NextRequest) {
   const keyCheck = await validateApiKey(request, 'score_iterate')
   if (!keyCheck.valid) return keyCheck.error
 
+  // =============================================================================
+  // Option D per-loop billing setup. Every /api/score-iterate HTTP request is
+  // one loop (one Anthropic call). loop_id extracted from X-Loop-Id header
+  // (or auto-generated). loopAccumulator collects the call's token-derived
+  // Anthropic cost; finalizeLoopResponse persists + emits headers at each
+  // return branch. agent_id (from body) plumbed in below once it's parsed.
+  // =============================================================================
+  const loopId = extractLoopId(request) ?? generateLoopId()
+
   try {
     const body = await request.json()
     const { chain_id, action, revised_action, revision_rationale, context, relationships, emotional_state, agent_id } = body
 
+    // Create the loop accumulator after body parse so we have agent_id for the
+    // loop_billing_events row. surface = 'api_score_iterate' per Decision A.
+    const loopAccumulator = createLoopAccumulator({
+      loopId,
+      apiKeyId: keyCheck.api_key_id,
+      surface: 'api_score_iterate',
+      agentId: typeof agent_id === 'string' ? agent_id : null,
+    })
+
+    // Local respond() wraps every response branch with metering. isBillable
+    // is true when the Anthropic call ran (cost accumulated); false for
+    // pre-substrate validation errors. Matches /api/reason pattern.
+    const respond = async (opts: {
+      body: unknown
+      status: number
+      headers: Record<string, string>
+      isBillable?: boolean
+    }): Promise<NextResponse> => {
+      return await finalizeLoopResponse({
+        loopId,
+        accumulator: loopAccumulator,
+        apiKeyId: keyCheck.api_key_id,
+        endpoint: 'score_iterate',
+        responseBody: opts.body,
+        responseStatus: opts.status,
+        responseHeaders: opts.headers,
+        isBillable: opts.isBillable ?? true,
+      })
+    }
+
     // ── MODE 1: Start a new deliberation chain ──────────────────────
     if (!chain_id) {
       if (!action || typeof action !== 'string' || action.trim().length === 0) {
-        return NextResponse.json({ error: 'action is required to start a new deliberation chain' }, { status: 400 })
+        return await respond({ body: { error: 'action is required to start a new deliberation chain' }, status: 400, headers: {}, isBillable: false })
       }
 
       const actionErr = validateTextLength(action, 'action', TEXT_LIMITS.medium)
-      if (actionErr) return NextResponse.json({ error: actionErr }, { status: 400 })
+      if (actionErr) return await respond({ body: { error: actionErr }, status: 400, headers: {}, isBillable: false })
       const contextErr = validateTextLength(context, 'context', TEXT_LIMITS.medium)
-      if (contextErr) return NextResponse.json({ error: contextErr }, { status: 400 })
+      if (contextErr) return await respond({ body: { error: contextErr }, status: 400, headers: {}, isBillable: false })
 
       // Evaluate the initial action
       const projectContext = await getProjectContext('condensed')
@@ -201,20 +252,24 @@ Return only the JSON evaluation object.`
           messages: [{ role: 'user', content: userMessage }],
         })
 
+        // Option D metering: capture this call's token usage into the loop's accumulator.
+        // MODEL_DEEP = 'claude-sonnet-4-6' per /website/src/lib/model-config.ts.
+        loopAccumulator.addCall(MODEL_DEEP, message.usage.input_tokens, message.usage.output_tokens)
+
         const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
         try {
           const cleaned = responseText.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
           evalData = JSON.parse(cleaned)
         } catch {
           console.error('Failed to parse Claude response:', responseText)
-          return NextResponse.json({ error: 'Evaluation engine returned invalid response' }, { status: 500 })
+          return await respond({ body: { error: 'Evaluation engine returned invalid response' }, status: 500, headers: {}, isBillable: true })
         }
 
         // Validate required V3 fields
         const required = ['control_filter', 'kathekon_assessment', 'passion_diagnosis', 'virtue_quality', 'cicero_assessment', 'improvement_path', 'oikeiosis_context', 'philosophical_reflection']
         for (const field of required) {
           if (evalData![field] === undefined) {
-            return NextResponse.json({ error: `Missing field: ${field}` }, { status: 500 })
+            return await respond({ body: { error: `Missing field: ${field}` }, status: 500, headers: {}, isBillable: true })
           }
         }
 
@@ -227,7 +282,7 @@ Return only the JSON evaluation object.`
 
       const proximity = initialEval.virtue_quality?.katorthoma_proximity
       if (!proximity || !['reflexive', 'habitual', 'deliberate', 'principled', 'sage_like'].includes(proximity)) {
-        return NextResponse.json({ error: 'Invalid katorthoma_proximity value' }, { status: 500 })
+        return await respond({ body: { error: 'Invalid katorthoma_proximity value' }, status: 500, headers: {}, isBillable: true })
       }
 
       // Create the V3 deliberation chain
@@ -250,7 +305,7 @@ Return only the JSON evaluation object.`
 
       if (chainErr || !chain) {
         console.error('Failed to create deliberation chain:', chainErr)
-        return NextResponse.json({ error: 'Failed to create deliberation chain' }, { status: 500 })
+        return await respond({ body: { error: 'Failed to create deliberation chain' }, status: 500, headers: {}, isBillable: true })
       }
 
       // Record step 1 in V3 format
@@ -345,18 +400,23 @@ Return only the JSON evaluation object.`
         },
       })
 
-      return NextResponse.json(envelope, { headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck) })
+      return await respond({
+        body: envelope,
+        status: 200,
+        headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck),
+        isBillable: true,
+      })
     }
 
     // ── MODE 2: Continue an existing deliberation chain ─────────────
     if (!revised_action || typeof revised_action !== 'string' || revised_action.trim().length === 0) {
-      return NextResponse.json({ error: 'revised_action is required when continuing a deliberation chain' }, { status: 400 })
+      return await respond({ body: { error: 'revised_action is required when continuing a deliberation chain' }, status: 400, headers: {}, isBillable: false })
     }
 
     const revisedErr = validateTextLength(revised_action, 'revised_action', TEXT_LIMITS.medium)
-    if (revisedErr) return NextResponse.json({ error: revisedErr }, { status: 400 })
+    if (revisedErr) return await respond({ body: { error: revisedErr }, status: 400, headers: {}, isBillable: false })
     const rationaleErr = validateTextLength(revision_rationale, 'revision_rationale', TEXT_LIMITS.medium)
-    if (rationaleErr) return NextResponse.json({ error: rationaleErr }, { status: 400 })
+    if (rationaleErr) return await respond({ body: { error: rationaleErr }, status: 400, headers: {}, isBillable: false })
 
     // Fetch the V3 chain
     const { data: chain, error: chainErr } = await supabaseAdmin
@@ -366,25 +426,30 @@ Return only the JSON evaluation object.`
       .single()
 
     if (chainErr || !chain) {
-      return NextResponse.json({ error: 'Deliberation chain not found' }, { status: 404 })
+      return await respond({ body: { error: 'Deliberation chain not found' }, status: 404, headers: {}, isBillable: false })
     }
 
     if (chain.status !== 'active') {
-      return NextResponse.json({
-        error: `This deliberation chain has been ${chain.status}. Start a new chain to continue deliberating.`,
-        chain_summary: {
-          chain_id: chain.id,
-          initial_proximity: chain.initial_proximity,
-          current_proximity: chain.current_proximity,
-          best_proximity: chain.best_proximity,
-          iterations: chain.iteration_count,
-        }
-      }, { status: 400 })
+      return await respond({
+        body: {
+          error: `This deliberation chain has been ${chain.status}. Start a new chain to continue deliberating.`,
+          chain_summary: {
+            chain_id: chain.id,
+            initial_proximity: chain.initial_proximity,
+            current_proximity: chain.current_proximity,
+            best_proximity: chain.best_proximity,
+            iterations: chain.iteration_count,
+          }
+        },
+        status: 400,
+        headers: {},
+        isBillable: false,
+      })
     }
 
     // Verify agent ownership if agent_id provided
     if (agent_id && chain.agent_id && chain.agent_id !== agent_id) {
-      return NextResponse.json({ error: 'agent_id does not match this deliberation chain' }, { status: 403 })
+      return await respond({ body: { error: 'agent_id does not match this deliberation chain' }, status: 403, headers: {}, isBillable: false })
     }
 
     // Enforce max chain iterations based on API key tier
@@ -392,17 +457,22 @@ Return only the JSON evaluation object.`
       const tierMessage = keyCheck.tier === 'free'
         ? 'Free tier deliberation chains are limited to 1 iteration. Upgrade to a paid API key for up to 3 iterations per chain.'
         : `Paid tier deliberation chains are limited to ${keyCheck.max_chain_iterations} iterations per chain.`
-      return NextResponse.json({
-        error: 'Deliberation chain iteration limit reached',
-        message: tierMessage,
-        chain_id: chain_id,
-        iterations_used: chain.iteration_count,
-        max_iterations: keyCheck.max_chain_iterations,
-        current_proximity: chain.current_proximity,
-        best_proximity: chain.best_proximity,
-        upgrade: keyCheck.tier === 'free' ? 'Contact zeus@sagereasoning.com to upgrade to a paid API key.' : undefined,
-        conclude_hint: `To conclude this chain: POST to /api/deliberation-chain/${chain_id}/conclude`,
-      }, { status: 403, headers: publicCorsHeaders() })
+      return await respond({
+        body: {
+          error: 'Deliberation chain iteration limit reached',
+          message: tierMessage,
+          chain_id: chain_id,
+          iterations_used: chain.iteration_count,
+          max_iterations: keyCheck.max_chain_iterations,
+          current_proximity: chain.current_proximity,
+          best_proximity: chain.best_proximity,
+          upgrade: keyCheck.tier === 'free' ? 'Contact zeus@sagereasoning.com to upgrade to a paid API key.' : undefined,
+          conclude_hint: `To conclude this chain: POST to /api/deliberation-chain/${chain_id}/conclude`,
+        },
+        status: 403,
+        headers: publicCorsHeaders(),
+        isBillable: false,  // Iteration limit hit before any LLM call.
+      })
     }
 
     // Get the latest step for context
@@ -415,7 +485,7 @@ Return only the JSON evaluation object.`
       .single()
 
     if (stepErr || !lastStep) {
-      return NextResponse.json({ error: 'Could not retrieve previous deliberation step' }, { status: 500 })
+      return await respond({ body: { error: 'Could not retrieve previous deliberation step' }, status: 500, headers: {}, isBillable: false })
     }
 
     const nextStepNumber = lastStep.step_number + 1
@@ -463,20 +533,23 @@ Evaluate the revised action. Return only the JSON evaluation object.`
         messages: [{ role: 'user', content: userMessage }],
       })
 
+      // Option D metering: capture this iteration's token usage.
+      loopAccumulator.addCall(MODEL_DEEP, message.usage.input_tokens, message.usage.output_tokens)
+
       const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
       try {
         const cleaned = responseText.replace(/```json?\n?/g, '').replace(/```\n?/g, '').trim()
         evalData = JSON.parse(cleaned)
       } catch {
         console.error('Failed to parse iteration response:', responseText)
-        return NextResponse.json({ error: 'Evaluation engine returned invalid response' }, { status: 500 })
+        return await respond({ body: { error: 'Evaluation engine returned invalid response' }, status: 500, headers: {}, isBillable: true })
       }
 
       // Validate V3 fields
       const required = ['control_filter', 'kathekon_assessment', 'passion_diagnosis', 'virtue_quality', 'cicero_assessment', 'improvement_path', 'oikeiosis_context', 'philosophical_reflection']
       for (const field of required) {
         if (evalData![field] === undefined) {
-          return NextResponse.json({ error: `Missing field: ${field}` }, { status: 500 })
+          return await respond({ body: { error: `Missing field: ${field}` }, status: 500, headers: {}, isBillable: true })
         }
       }
 
@@ -489,7 +562,7 @@ Evaluate the revised action. Return only the JSON evaluation object.`
 
     const newProximity = iterEval.virtue_quality?.katorthoma_proximity
     if (!newProximity || !['reflexive', 'habitual', 'deliberate', 'principled', 'sage_like'].includes(newProximity)) {
-      return NextResponse.json({ error: 'Invalid katorthoma_proximity value' }, { status: 500 })
+      return await respond({ body: { error: 'Invalid katorthoma_proximity value' }, status: 500, headers: {}, isBillable: true })
     }
 
     // Determine direction of travel
@@ -628,10 +701,26 @@ Evaluate the revised action. Return only the JSON evaluation object.`
       },
     })
 
-    return NextResponse.json(envelope, { headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck) })
+    return await respond({
+      body: envelope,
+      status: 200,
+      headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck),
+      isBillable: true,
+    })
   } catch (error) {
     console.error('Score-iterate API error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    // Catch-all 500 — emit X-Loop-* headers (we have an accumulator) but skip
+    // the ledger write (uncertain whether the failure was customer-side or
+    // server-side; matches /api/reason catch-block posture).
+    // Note: loopAccumulator is defined inside the try block above, so it may
+    // not be in scope here — emit basic headers from loopId only.
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      {
+        status: 500,
+        headers: { ...buildLoopHeaders({ loopId }) },
+      }
+    )
   }
 }
 

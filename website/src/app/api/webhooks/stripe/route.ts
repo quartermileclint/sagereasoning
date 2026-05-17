@@ -3,6 +3,8 @@
  *
  * Receives events from Stripe and processes them:
  *   - checkout.session.completed → Provision paid API keys or log tidings
+ *   - invoice.created           → (Option D) Attach per-day-aggregate loop line items
+ *                                  to the draft invoice from loop_billing_events
  *   - invoice.paid              → Confirm ongoing subscription
  *   - invoice.payment_failed    → Flag account, trigger grace period
  *   - customer.subscription.updated → Sync subscription status
@@ -14,7 +16,21 @@
  *   - No CORS (server-to-server only)
  *   - Uses service role for database writes (bypasses RLS)
  *
- * Rules served: R0 (oikeiosis), R5 (cost guardrails), R10 (billing compliance)
+ * Rules served: R0 (oikeiosis), R5 (cost guardrails — Option D's prospective
+ *               formula at the loop level + this handler's invoice-rendering
+ *               at the month level), R10 (billing compliance)
+ *
+ * Option D integration (per D-BILLING-MODEL-LOCKED-2026-05-17 + build session
+ * 2026-05-MM): handleInvoiceCreated reads loop_billing_events for the
+ * customer's api_keys in the subscription period, aggregates by day per
+ * Step 1(b) election, and creates one Stripe.InvoiceItem per day. CSV
+ * download (per-loop forensic granularity) deferred under PR7 — line items
+ * give the meter-visibility; CSV adds export convenience for accounting.
+ *
+ * Live invoice flow inert until STRIPE_PER_LOOP_PRICE_ID is set in Vercel
+ * (Step 0 election — Price ID deferred to a follow-on session). When the
+ * Price ID is configured and a subscription exists at that price, this
+ * handler fires on Stripe's monthly invoice cycle.
  *
  * @compliance
  * compliance_version: CR-2026-Q2-v4
@@ -26,6 +42,8 @@ import {
   constructWebhookEvent,
   isStripeConfigured,
   logPaymentEvent,
+  stripe,
+  STRIPE_PRICES,
 } from '@/lib/stripe'
 import type Stripe from 'stripe'
 
@@ -103,6 +121,13 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed':
         await handleCheckoutCompleted(supabaseAdmin, event)
+        break
+
+      case 'invoice.created':
+        // Option D — attach per-day-aggregate loop line items to the draft
+        // invoice before Stripe finalizes it. No-op if no loop_billing_events
+        // rows exist for the customer's api_keys in the period.
+        await handleInvoiceCreated(supabaseAdmin, event)
         break
 
       case 'invoice.paid':
@@ -203,6 +228,151 @@ async function handleCheckoutCompleted(
     })
   }
 }
+
+/**
+ * invoice.created — Stripe created a new draft invoice (Option D).
+ *
+ * Reads loop_billing_events for the customer's api_keys within the
+ * invoice's billing period, aggregates by day, and attaches one
+ * Stripe.InvoiceItem per day with the total cents for that day.
+ *
+ * Per Step 1(b) election (build session 2026-05-MM): per-day-aggregate
+ * line items. CSV download with per-loop forensic detail deferred under
+ * PR7 — Stripe invoice line items give the meter-visibility requirement;
+ * CSV adds accounting-export convenience.
+ *
+ * Idempotency: Stripe invoice items are tied to the customer + invoice;
+ * re-running this handler for the same invoice would double-bill the
+ * customer. The idempotency check at the top of POST handles webhook
+ * retries (stripe_event_id unique constraint on payment_events). Internal
+ * idempotency within this handler: if invoice items have already been
+ * added for this invoice (detected by querying existing line items), skip
+ * the add step. NOT yet implemented in this build — relies on Stripe's
+ * webhook idempotency only.
+ */
+async function handleInvoiceCreated(
+  supabaseAdmin: SupabaseAdmin,
+  event: Stripe.Event
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const invoice = event.data.object as any
+  const customerId = invoice.customer as string
+  const invoiceId = invoice.id as string
+
+  // Look up the user from stripe_customers
+  const { data: customerLink } = await supabaseAdmin
+    .from('stripe_customers')
+    .select('user_id')
+    .eq('stripe_customer_id', customerId)
+    .single()
+
+  await logPaymentEvent(supabaseAdmin, event, customerLink?.user_id || undefined)
+
+  if (!customerLink?.user_id) {
+    console.warn(
+      `[Stripe webhook] invoice.created for unknown customer ${customerId} — skipping Option D line items.`
+    )
+    return
+  }
+
+  // Skip if Option D Price ID is unset (Step 0 election — Price ID deferred).
+  // The webhook handler is wired but the live flow is inert.
+  if (!STRIPE_PRICES.perLoop) {
+    console.log(
+      `[Stripe webhook] invoice.created for user ${customerLink.user_id} — ` +
+        `STRIPE_PER_LOOP_PRICE_ID unset; Option D line items skipped. ` +
+        `Set the env var in Vercel to activate per-loop billing.`
+    )
+    return
+  }
+
+  // Determine billing period. Stripe invoices carry period_start / period_end
+  // on each line item; the invoice's overall period is invoice.period_start /
+  // invoice.period_end (epoch seconds). Convert to ISO date strings for the
+  // loop_billing_events query.
+  const periodStart = new Date((invoice.period_start as number) * 1000)
+  const periodEnd = new Date((invoice.period_end as number) * 1000)
+
+  // Find this customer's api_keys (Option D bills against api_keys.owner_user_id).
+  const { data: keys } = await supabaseAdmin
+    .from('api_keys')
+    .select('id')
+    .eq('owner_user_id', customerLink.user_id)
+    .eq('billing_model', 'per_loop')
+
+  if (!keys || keys.length === 0) {
+    console.log(
+      `[Stripe webhook] invoice.created for user ${customerLink.user_id} — ` +
+        `no per-loop api_keys; nothing to bill.`
+    )
+    return
+  }
+
+  const apiKeyIds = keys.map((k: { id: string }) => k.id)
+
+  // Query loop_billing_events for the period, aggregate by day.
+  const { data: events, error: queryErr } = await supabaseAdmin
+    .from('loop_billing_events')
+    .select('total_cents, created_at')
+    .in('api_key_id', apiKeyIds)
+    .gte('created_at', periodStart.toISOString())
+    .lt('created_at', periodEnd.toISOString())
+
+  if (queryErr) {
+    console.error('[Stripe webhook] Failed to query loop_billing_events:', queryErr)
+    throw queryErr
+  }
+
+  if (!events || events.length === 0) {
+    console.log(
+      `[Stripe webhook] invoice.created for user ${customerLink.user_id} — ` +
+        `no loop_billing_events in period ${periodStart.toISOString()} → ${periodEnd.toISOString()}.`
+    )
+    return
+  }
+
+  // Aggregate by day (UTC date string YYYY-MM-DD).
+  const byDay = new Map<string, number>()
+  for (const ev of events as Array<{ total_cents: number; created_at: string }>) {
+    const day = ev.created_at.slice(0, 10) // YYYY-MM-DD from ISO timestamp
+    byDay.set(day, (byDay.get(day) ?? 0) + ev.total_cents)
+  }
+
+  // Create one Stripe.InvoiceItem per day, sorted chronologically.
+  const sortedDays = Array.from(byDay.keys()).sort()
+  for (const day of sortedDays) {
+    const cents = byDay.get(day)!
+    try {
+      await stripe.invoiceItems.create({
+        customer: customerId,
+        invoice: invoiceId,
+        amount: cents,
+        currency: 'usd',
+        description: `SageReasoning per-loop usage — ${day}`,
+        metadata: {
+          source: 'option_d_billing',
+          day,
+          loops_count: String(events.filter((e: { created_at: string }) => e.created_at.startsWith(day)).length),
+        },
+      })
+    } catch (err) {
+      console.error(
+        `[Stripe webhook] Failed to attach invoice item for day ${day} ` +
+          `(invoice ${invoiceId}, customer ${customerId}):`,
+        err
+      )
+      throw err
+    }
+  }
+
+  console.log(
+    `[Stripe webhook] Attached ${sortedDays.length} per-day Option D line items ` +
+      `to invoice ${invoiceId} for user ${customerLink.user_id} ` +
+      `(${events.length} loops across ${sortedDays.length} days; ` +
+      `total = ${Array.from(byDay.values()).reduce((a, b) => a + b, 0)} cents).`
+  )
+}
+
 
 /**
  * invoice.paid — Recurring payment succeeded.

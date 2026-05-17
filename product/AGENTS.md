@@ -69,18 +69,26 @@ Each skill follows the **Outcome / Cost + Speed / Chains To** contract pattern:
 
 | Skill | Outcome | Cost + Speed | Chains To |
 |-------|---------|-------------|-----------|
-| `sage-score` | Pre-action decision audit with structured reasoning + improvement path | ~$0.18, ~2s | sage-iterate, sage-reason |
-| `sage-decide` | Option ranker — submit 2-5 choices, ranked by reasoning quality | ~$0.18, ~2s | sage-guard |
-| `sage-guard` | Sub-100ms decision gate — binary go/no-go check before acting | ~$0.0025, <100ms | sage-iterate |
-| `sage-iterate` | Iterative decision refinement — submit, get feedback, revise, track improvement | ~$0.18 per iteration, ~2s | sage-score |
-| `sage-filter` | Pre-publish content filter — catches tone and judgement issues | ~$0.18, ~2s | sage-iterate |
-| `sage-audit` | Document quality audit + shareable trust badge | ~$0.18, ~3s | sage-iterate |
-| `sage-converse` | Conversation quality breakdown — per-participant reasoning analysis | ~$0.18, ~3s | — |
-| `sage-scenario` | Decision scenario generator + scorer | ~$0.18, ~4s | sage-score |
-| `sage-reflect` | End-of-day decision review — identifies patterns + structured examination | ~$0.18, ~2s | — |
-| `sage-profile` | Agent decision profile — 4 scenarios, returns tendencies and blind spots | ~$0.50, ~2s | sage-diagnose |
-| `sage-diagnose` | Decision-making diagnostic — 14-question quick or 55-assessment deep evaluation | ~$0.50, ~3s | sage-iterate |
+| `sage-score` | Pre-action decision audit with structured reasoning + improvement path | $0.02/loop + overage*, ~2s | sage-iterate, sage-reason |
+| `sage-decide` | Option ranker — submit 2-5 choices, ranked by reasoning quality | $0.02/loop + overage*, ~2s | sage-guard |
+| `sage-guard` | Sub-100ms decision gate — binary go/no-go check before acting | $0.02/loop, <100ms | sage-iterate |
+| `sage-iterate` | Iterative decision refinement — submit, get feedback, revise, track improvement | $0.02/loop + overage*, ~2s | sage-score |
+| `sage-filter` | Pre-publish content filter — catches tone and judgement issues | $0.02/loop + overage*, ~2s | sage-iterate |
+| `sage-audit` | Document quality audit + shareable trust badge | $0.02/loop + overage*, ~3s | sage-iterate |
+| `sage-converse` | Conversation quality breakdown — per-participant reasoning analysis | $0.02/loop + overage*, ~3s | — |
+| `sage-scenario` | Decision scenario generator + scorer | $0.02/loop + overage*, ~4s | sage-score |
+| `sage-reflect` | End-of-day decision review — identifies patterns + structured examination | $0.02/loop + overage*, ~2s | — |
+| `sage-profile` | Agent decision profile — 4 scenarios, returns tendencies and blind spots | $0.02/loop + overage*, ~2s | sage-diagnose |
+| `sage-diagnose` | Decision-making diagnostic — 14-question quick or 55-assessment deep evaluation | $0.02/loop + overage*, ~3s | sage-iterate |
 | `sage-context` | Reasoning framework context loader — public, no auth | Free, <50ms | — |
+
+\* Per-loop billing model (Option D, adopted 2026-05-17 per
+`D-BILLING-MODEL-LOCKED-2026-05-17`): each wrapper invocation = one loop
+billed at $0.02 base. If the loop's Anthropic-token cost exceeds 50% of base
+($0.01), an overage of 2× the excess is added so the customer pays for their
+own LLM-cost variance. Every response carries `X-Loop-Cost-Cents` +
+`X-Anthropic-Cost-Cents` + `X-Overage-Fired` headers — the meter is visible
+in real time. See `/adopted/billing-model-design.md` for the full formula.
 
 ### All Endpoints
 
@@ -128,18 +136,32 @@ The system evaluates intention and reasoning quality, not outcomes. An agent tha
 
 ### Free Tier
 
-100 API calls per month, rate-limited. No daily cap. Full evaluation output on all endpoints — the distinction between free and paid is volume, not capability. Sage skill wrappers consume 2-3 calls per invocation (guard + score + optional iterate).
+30 loops per month (≈1 per day), rate-limited. Full evaluation output on
+all endpoints — the distinction between free and paid is volume, not
+capability. One loop = one wrapper invocation, regardless of how many
+internal API calls bridge it (guard + score + optional iterate).
 
 ### Sage Skill Wrappers (Tier 3 — Open Source)
 
 SageReasoning provides open-source skill wrappers that add reasoning checkpoints to existing skills:
 
-- **BEFORE**: `sage-guard` checks the task via POST /api/guardrail (~$0.0025, <100ms)
+- **BEFORE**: `sage-guard` checks the task via POST /api/guardrail
 - **EXECUTE**: The original skill runs unchanged
-- **AFTER**: `sage-score` evaluates output via POST /api/reason (~$0.18)
-- **OPTIONAL**: `sage-iterate` if proximity is below deliberate via POST /api/score-iterate (~$0.18)
+- **AFTER**: `sage-score` evaluates output via POST /api/reason
+- **OPTIONAL**: `sage-iterate` if proximity is below deliberate via POST /api/score-iterate
 
-Wrapper code is free (R11). The API calls within the wrapper are metered against your monthly allowance (R5). Each wrapped invocation consumes 2-3 API calls.
+Wrapper code is free (R11). Each wrapper invocation = one loop billed at
+$0.02 base (per-loop billing per `D-BILLING-MODEL-LOCKED-2026-05-17`),
+regardless of whether the wrapper makes 1, 2, or 3 internal API calls. The
+loop is identified by the `X-Loop-Id` request header (server auto-generates
+a UUIDv4 if absent). Heavy deliberation chains where Anthropic cost exceeds
+$0.01 trigger an overage of 2× the excess — your bill rises with the LLM
+cost you cause.
+
+**Cost-aware wrappers:** every response carries `X-Loop-Cost-Cents`,
+`X-Anthropic-Cost-Cents`, `X-Overage-Fired`, `X-Overage-Cents`,
+`X-Loop-Internal-Calls`, `X-Loop-Id`. Read them to implement budget caps or
+switch to a cheaper depth when overage fires.
 
 **Resources:**
 
