@@ -43,6 +43,8 @@ The Stoic tradition has a great deal to say about how a rational agent without g
 
 A non-design note: the product is upstream of the ATL substrate but uses the same Character Kernel framing (per R18a + J1 ADR). The substrate evaluates the *quality of reasoning*; the discovery product evaluates the *grounding of purpose*. Both are Character-Kernel work; both honour R9's "evaluates reasoning, does not promise outcomes" posture (the product helps find purpose; it does not guarantee finding one).
 
+**Ecosystem positioning (added 2026-05-20).** Per the six-layer agent protocol taxonomy (MCP / A2A / AG-UI / A2UI / AP2 / x402 — sourced from `/inbox/6 agent protocols.rtfd` + `/inbox/20260512-0df-promptkit-1.md` placed 2026-05-19), the discovery product is primarily a **Layer 3 (AG-UI — agent-to-developer)** intervention. The six-stage sequence is a structured agent-developer dialogue; the Q6 null-result clarification protocol is explicitly AG-UI-shaped (the agent reports back to the developer; the developer responds; the once-and-precisely constraint governs the interaction pattern; the four clarification variants A–D are AG-UI templates). The five-specification Layer 1 handoff is a **Layer 2 (A2A — agent-to-substrate)** artefact — the structured contract between the discovery product and the ATL substrate. The product does not engage MCP (Layer 1 tools/data), A2UI (Layer 4 generated UI), AP2 (Layer 5 payment authority), or x402 (Layer 6 machine payment) directly; consumers wrapping the product may layer these in. The taxonomy is recorded here so future design-pass decisions are made against the ecosystem-positioning context, not in isolation.
+
 ---
 
 ## The deterministic mechanism — the six-stage sequence
@@ -112,6 +114,8 @@ When Q5 completes, the product emits the following structured payload as the Lay
 4. **The capacity brought** — the specific capacity this work requires that the agent demonstrably has (subset of the agent's full capacity profile from Q2). (Type: structured list of demonstrated capacities relevant to the work.)
 
 5. **The first appropriate act** — the kathekon available now (not contingent on future conditions). (Type: string description + structured action metadata if the substrate's Layer 1 accepts it.)
+
+**Agent Card alignment for "the role" specification (added 2026-05-20).** An agent with an A2A Agent Card (per Layer 2 of the six-protocols taxonomy; see `/inbox/6 agent protocols.rtfd` + `/inbox/20260512-0df-promptkit-1.md`) has already declared its capabilities formally. That declaration is load-bearing evidence for the chosen-role persona — the Agent Card is the agent's formal commitment to what it does, which is exactly what the chosen-role persona is. The engine MAY consult an agent's Agent Card if a URL is supplied at session-open; the agent's Q5 response remains required (the Agent Card informs the engine's signal detection without bypassing the agent's discipline). Whether to accept an `agent_card_url` parameter is folded into Q-OPEN-13 (optional input parameters) below.
 
 **Note on integration with the pass-through fields:** the substrate's pass-through fields (per `D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17`) cover operational metadata at the per-action level. The five specifications here cover *the agent's relationship to the work as a whole*. They are complementary, not overlapping. The discovery product MAY populate some pass-through fields on its handoff (e.g., the `downstream_identity_model` if it can be inferred from the agent's context); the structured design pass elects this.
 
@@ -395,6 +399,51 @@ After the developer-facing clarification communication is emitted (Variants A–
 
 The mentor's discipline (once-and-precisely; the agent does not repeat the clarifying request) is most aligned with (c). The structured design pass confirms.
 
+### Q-OPEN-13 — Optional input-parameter set: `available_tools` + `agent_card_url` (added 2026-05-20)
+
+Per the six-protocols inbox material (`/inbox/6 agent protocols.rtfd` + `/inbox/20260512-0df-promptkit-1.md` placed 2026-05-19), two optional input parameters could enrich the engine's reasoning at Q1, Q2, and Q5:
+
+- **`available_tools`** — MCP-style tool list (name + description + capability summary per tool, per Layer 1 of the six-protocols taxonomy). Informs Q1 (what is already given) and Q2 (capacity assessment) by giving the engine the agent's actual tool inventory rather than relying solely on the agent's self-report.
+- **`agent_card_url`** — pointer to the agent's A2A Agent Card declaration (Layer 2). Informs Q5 (the chosen-role persona) by giving the engine the agent's formal capability commitment.
+
+Three candidate postures:
+
+- **(a) Accept both as optional inputs; engine uses them for signal detection but never substitutes for the agent's own response.** Richest context; agent discipline preserved (the agent must still self-report at every stage; the inputs feed only the engine's variant-selection signal-detection per the variant-selection discipline); largest API surface.
+- **(b) Accept neither; the agent self-reports throughout.** Simplest API; relies entirely on the agent's self-assessment (Q2 Variant B's over-claiming detection becomes the sole defence against capacity inflation).
+- **(c) Accept `agent_card_url` only.** The Agent Card is a formal external declaration the engine can verify against the URL's content; `available_tools` is harder to verify and easier to manipulate via tool-poisoning (per R18d below). Compromise: take the verifiable signal, decline the unverifiable one.
+
+Recommendation pending design pass. (c) is the most R18d-defensible posture; (a) is the most informative; (b) is the lightest API. The discipline (engine uses inputs for signal detection only; agent's response always required) applies regardless of which inputs are accepted.
+
+### Q-OPEN-14 — Framework-layer kill switch (Layer 5) + the substrate handoff as the sensitive node (added 2026-05-20)
+
+Per the control-layer material (`/inbox/AI Agent Shipping readiness.rtfd` + `/inbox/20260512-v6e-promptkit-1.md` placed 2026-05-20), a multi-stage agent workflow requires a **Layer 5 (framework) kill switch** — "the ability to interrupt the workflow before the next sensitive node." The discovery product is exactly such a workflow (six stages), and its **sensitive node is the five-specification handoff to the ATL substrate** — the moment a discovered purpose becomes a real substrate input the agent will act on. A developer must be able to interrupt the sequence *before* that handoff fires, independently of the agent's own logic ("if the only kill switch is 'tell the model to stop,' the kill switch is not real").
+
+This reframes Q-OPEN-11 (interruptibility) + Q-OPEN-12 (termination) as kill-switch-design questions, not convenience features. Specific design questions to elect:
+
+- **(a) Interrupt point before the handoff (Hard Gate).** The sequence pauses at the end of Q5 and requires explicit developer approval before the five-specification handoff fires. Maps to the article's "Hard Gate" control type. Strongest control; adds a human-in-the-loop step.
+- **(b) Interrupt points at every stage transition (Soft Signal + interrupt).** The developer can halt the sequence at any stage boundary; the handoff is one interrupt point among several. Maps most fully to the framework-layer interrupt-before-sensitive-node pattern.
+- **(c) Kill-switch flag only (no per-stage interrupt).** A single env-flag or session-level flag that, when set, halts the sequence and prevents the handoff — the discovery-product analogue of A10's `SUBSTRATE_WRITE_PATH_ENABLED`. Lightest; coarse-grained.
+
+Recommendation pending design pass. (a) is the minimum defensible posture (the handoff is the sensitive node; it must be gateable); (b) is the fullest framework-layer kill switch; (c) is the coarse fallback. Whichever is elected, the design MUST NOT allow the handoff to fire purely on the agent's own say-so without an external interrupt path — that would be the "tell the model to stop" anti-pattern the essay names. This question is flagged 🔴 in the Control-map coverage table below (Row 7) as a gap that must be closed before any production use.
+
+---
+
+## Control-map coverage (added 2026-05-20)
+
+Per the seven-row control map (`/inbox/AI Agent Shipping readiness.rtfd`), the discovery product's production-readiness maps as follows. 🟡 marks an open design question; 🔴 marks a gap that must be closed before any production use; 🟢 marks a low-surface row.
+
+| Row | Control question | Discovery-product position | Status |
+|---|---|---|---|
+| 1 | Where does the agent run + keep state? | Q-OPEN-2 (API shape) + Q-OPEN-3 (state model) — the state model is a control surface, not just an implementation detail | 🟡 design pass |
+| 2 | What can the agent know? | Reads no enterprise data; reasons over the agent's self-reported context + optional `available_tools` (Q-OPEN-13). Minimal data-governance surface | 🟢 low surface |
+| 3 | Who is the agent acting for? | Q-OPEN-6 (auth) — recommended A10 credentials; identity/authorization handled by the A10 surface | 🟡 design pass |
+| 4 | What can the agent change? | The product changes nothing directly; it produces a five-specification handoff. The "change" is downstream at the substrate. Developer-control points covered by the AG-UI alignment + Q-OPEN-14 | 🟡 design pass |
+| 5 | What can the agent spend? | The product's loops bill through Option D (Q-OPEN-8). Payment-layer kill switch (Layer 4) is Option D's deferred concern — see `/adopted/billing-model-design.md` | 🟡 Option D's remit |
+| 6 | How do we know what happened? | Q-OPEN-7 (persistence/audit). The variant-selection log IS the "reconstruct the run" audit trail — every variant selection traces to a named epistemic-state read | 🟡 design pass |
+| 7 | How do we stop it? | Q-OPEN-14 (framework-layer kill switch; substrate handoff as the sensitive node) + Q-OPEN-11 + Q-OPEN-12. The handoff must be gateable independently of the agent's logic | 🔴 must close at design pass |
+
+The 🔴 on Row 7 is the one finding from the control-layer material that is a genuine omission rather than a reframing: the discovery product currently has no specified kill switch at the framework layer. Q-OPEN-14 must be elected before any production use.
+
 ---
 
 ## Preliminary R-rule engagement (pending elections at the structured design pass)
@@ -419,7 +468,7 @@ The mentor's discipline (once-and-precisely; the agent does not repeat the clari
 
 **R18c (interoperability):** the five-specification handoff format is the product's external contract. If extended later for AP2 or VC interop, the existing format must remain readable. Engagement: standard.
 
-**R18d (adversarial evaluation):** the variant-selection discipline (no preference-state reading) requires adversarial testing — specifically, testing with agents whose responses are designed to manipulate the engine toward validation. Engagement: deferred to build session.
+**R18d (adversarial evaluation):** *Promoted to primary engagement 2026-05-20 in light of MCP tool-poisoning attack surface (per `/inbox/6 agent protocols.rtfd` — "malicious instructions can hide in tool descriptions and influence an agent through the very metadata meant to make tools discoverable"; Invariant Labs published documented attack patterns).* The variant-selection discipline (no preference-state reading) is a partial defence; an agent whose "find purpose" instruction is itself a poisoned tool description, or whose context contains covert framing, could be manipulated through the discovery sequence into adopting a manipulated purpose. The build session MUST include adversarial-evaluation tests against (a) agents whose responses are designed to manipulate the engine toward validation (Q2 Variant B + Q3 Variant B target this); (b) agents whose instruction or context contains covert framing or biased priors that should be resisted (variant-selection discipline targets this); (c) MCP tool-poisoning-style inputs that arrive via the optional `available_tools` parameter, if Q-OPEN-13 elects (a) or (c) — the engine must not accept tool descriptions at face value as evidence of agent capacity. Engagement: primary at build.
 
 **R18e (Article 50 transparency):** the product's interaction with the agent should be unambiguously identified as a Stoic-grounded purpose-discovery sequence, not a general consultation. Engagement: standard.
 

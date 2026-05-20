@@ -1,3 +1,5 @@
+> **⚠️ SUPERSEDED 2026-05-20 by `/operations/handoffs/founder/2026-05-20-A10-build-NEXT-SESSION-PROMPT.md`.** That version folds in the six-protocols + control-layer annotations applied to the A10 design on 2026-05-20 (the §Control-layer alignment subsection; the agent-card.json build row; the AP2/MCP PR7 trigger notes). Use the 2026-05-20 prompt for the build session. This file is preserved for version history only — do not paste it into a session.
+
 # Next-Session Prompt — Session #6 of the post-6b arc tail: A10 Build (Critical)
 
 **Stream:** founder.
@@ -63,7 +65,7 @@ Read in order:
 14. **`/website/src/lib/substrate/trust-layer/types/evaluation.ts`** (~3 min) — confirm the 7 pass-through enum types landed correctly per session #4 (informational; the build session imports these for the agent_accreditation CHECK constraints' enum values).
 15. **`/website/src/lib/substrate/atl-wrapper.ts`** (~3 min) — confirm the 2 CarriedProfile fields (`downstream_identity_model`, `path_posture`) landed in the interface per session #4 (informational).
 16. **`/operations/decision-log.md`** last 3 entries (~5 min) — confirm `D-ATL-A10-DESIGN-LOCKED-REWRITE-2026-05-17`, `D-PASS-THROUGH-FIELDS-BUILD-WIRED-VERIFIED-2026-05-17`, `D-BILLING-MODEL-BUILD-WIRED-VERIFIED-2026-05-17` are visible and the predecessor `D-ATL-A10-DESIGN-LOCKED-2026-05-16` has Status `Superseded by D-ATL-A10-DESIGN-LOCKED-REWRITE-2026-05-17`.
-17. **PR11 inbox scan** — list `/inbox/` for files dated since the predecessor close (2026-05-17). No new files expected.
+17. **PR11 inbox scan** — list `/inbox/` for files dated since the predecessor close. Two files placed 2026-05-19 have been integrated at session #5's close via the 2026-05-20 light-touch annotations to the A10 design: `/inbox/20260512-0df-promptkit-1.md` (Nate B Jones — six-protocols prompt kit) and `/inbox/6 agent protocols.rtfd` (companion essay). The touches added to the rewritten design (agent-card.json A2A row in the build summary; AP2 FIDO trigger note; MCP-server purpose-value adoption signal) are visible inline in the design. The build session may encounter additional inbox files dated after 2026-05-20 — re-run the scan at session open.
 18. **PR15 consult** — `.claude/skills/anthropic/` review. Candidate primitives: `claude-api` (informational SDK patterns); `mcp-builder` (forward pointer for R18c — post-A10 credential issuance could later be exposed as an MCP tool). Bespoke election expected — substrate-internal auth surface has no Anthropic primitive substitute; the existing `api_keys` + `validateApiKey` infrastructure IS the production-adjacent reusable primitive (Finding 1 correction strengthens this; the columns already exist). Record the consult.
 
 **Confirm at open:** tier (`code-critical`); hold-point status (P0 0h active); model selection (N/A — no LLM calls; AC1 + KG2 NOT engaged); status vocabulary (`Scoped → Designed → Scaffolded → Wired → Verified → Live` for implementation; `Adopted / Under review / Superseded` for decisions); signals + risk classification per 0d-ii; **Critical Change Protocol APPLIES**; **AC7 ENGAGED**; PR6 NOT engaged; PR1 (single-build proof — every change below lands this session); PR2 (build-to-wire immediate — tests invoke new code paths same session); KG1 ENGAGED (every DB write/read in the new admin endpoint + validator + audit logger + writer extension must be awaited; no fire-and-forget); KG7 NOT engaged (no JSONB writes at the credential layer; `credential_audit.details` is JSONB but holds free-form context only).
@@ -176,6 +178,16 @@ Extend `/website/src/app/api/accreditation/[agent_id]/route.ts` per the rewritte
 6. Update the route file's header comments to describe post-A10 behaviour (per Decision I's structural constraint).
 
 Run `npx tsc --noEmit` after this step.
+
+### Step 5b — Update agent-card.json with A10 auth declaration (~5 min; added 2026-05-20)
+
+Per the rewritten design's 2026-05-20 build-session implementation summary row (A2A Agent Card alignment touch from the six-protocols inbox files). Update `/website/public/.well-known/agent-card.json` to declare the write-surface auth method so third-party agents discovering the substrate via A2A know to authenticate with `Bearer sr_atl_<...>` tokens.
+
+Specific JSON shape per build-session discretion within the constraint that the declaration is machine-readable per A2A conventions. Candidate patterns:
+- (i) Add a top-level `authentication` block naming the auth scheme for the write surface.
+- (ii) Add an entry under `capabilities.extensions` named `atl-write-auth/v1` describing the Bearer-token scheme (mirrors the existing `pass-through-metadata/v1` entry pattern landed at session #4).
+
+Validate as valid JSON (`python3 -m json.tool /website/public/.well-known/agent-card.json` or equivalent). tsc not affected (JSON file). No runtime behaviour change — this is a discovery-file update.
 
 ### Step 6 — Modified atl-accreditation-writer.ts (~15–20 min)
 
@@ -340,6 +352,7 @@ Pattern: per `/adopted/standing-protocol-cache.md` §"Critical-risk sessions" �
 | Step 3 — security.ts extensions (6 additions; tsc check) | 30–40 min |
 | Step 4 — NEW admin endpoint (POST + DELETE handlers; tsc check) | 25–35 min |
 | Step 5 — Modified accreditation/[agent_id]/route.ts (verifyAgentIdOwnership extension; tsc check) | 20–30 min |
+| Step 5b — Update agent-card.json with A10 auth declaration (added 2026-05-20) | ~5 min |
 | Step 6 — Modified atl-accreditation-writer.ts (4 + 1 field extension; tsc check) | 15–20 min |
 | Step 7 — Modified accreditation-record.ts + types (4 typical_* extension; tsc check) | 15–20 min |
 | Step 8 — Tests (3 files; ~25–35 tests total; run all) | 30–40 min |
