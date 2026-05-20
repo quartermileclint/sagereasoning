@@ -197,6 +197,15 @@ export function buildAccreditationPayload(
     ),
     verification_url: record.verification_url,
     disclaimer: record.disclaimer,
+    // Aggregate credentials (port-mirror sync 2026-05-21,
+    // D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21). Mirrors the website port's
+    // buildAccreditationPayload; A10 typical_* default to null when absent.
+    typical_deliberation_breadth: record.typical_deliberation_breadth,
+    typical_kathekon_quality: record.typical_kathekon_quality,
+    typical_operation_class: record.typical_operation_class ?? null,
+    typical_target_system_vendor: record.typical_target_system_vendor ?? null,
+    typical_outcome_verification: record.typical_outcome_verification ?? null,
+    typical_reversibility_signal: record.typical_reversibility_signal ?? null,
   }
 }
 

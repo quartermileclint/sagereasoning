@@ -108,6 +108,45 @@ export type DimensionScores = {
   readonly oikeiosis_extension: DimensionLevel
 }
 
+// ============================================================================
+// AGGREGATE + PASS-THROUGH ENUMS
+// Port-mirror sync 2026-05-21 (D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21) —
+// brought into the source-of-truth to match the website port at
+// /website/src/lib/substrate/trust-layer/types/{accreditation,evaluation}.ts.
+// Defined inline per this tree's self-containment convention (see header).
+// Closes accreditation-type drift from the items-1-3 (deliberation breadth),
+// kathekon-aligned (kathekon quality), pass-through-fields, and A10 builds.
+// (The broader EvaluatedAction / WindowSnapshot evaluation.ts drift is out of
+// scope for this port-mirror — only the accreditation types are reconciled.)
+// ============================================================================
+
+/** Qualitative deliberation-breadth bucket (items-1-3 build, 2026-05-16). */
+export type DeliberationBreadth =
+  | 'intuited'
+  | 'deliberated'
+  | 'multi_branch_deliberated'
+
+/** Qualitative kathekon-quality bucket (kathekon-aligned build, 2026-05-16). */
+export type KathekonQuality = 'strong' | 'moderate' | 'marginal' | 'contrary'
+
+/** Operation taxonomy (pass-through fields, 2026-05-17). */
+export type OperationClass =
+  | 'read' | 'search' | 'summarize' | 'draft' | 'recommend'
+  | 'write' | 'approve' | 'execute' | 'delete' | 'unknown'
+
+/** Target-system vendor enumeration (pass-through fields, 2026-05-17). */
+export type TargetSystemVendor =
+  | 'salesforce' | 'microsoft' | 'servicenow' | 'sap' | 'workday'
+  | 'zendesk' | 'hubspot' | 'atlassian' | 'other' | 'none'
+
+/** Outcome-verification posture (pass-through fields, 2026-05-17). */
+export type OutcomeVerification =
+  | 'self_reported' | 'system_confirmed' | 'external_auditor' | 'not_applicable'
+
+/** Reversibility signal (pass-through fields, 2026-05-17). */
+export type ReversibilitySignal =
+  | 'reversible' | 'partially_reversible' | 'irreversible' | 'unknown'
+
 /**
  * The Accreditation Record — the persistent agent credential.
  *
@@ -165,6 +204,17 @@ export type AccreditationRecord = {
 
   /** Last update timestamp */
   readonly updated_at: string
+
+  // Aggregate credentials (port-mirror sync 2026-05-21). Optional in the
+  // source-of-truth reference; the website port carries deliberation_breadth +
+  // kathekon_quality as required (live rows always set them via server-side
+  // DEFAULTs) and the four A10 typical_* as optional.
+  readonly typical_deliberation_breadth?: DeliberationBreadth
+  readonly typical_kathekon_quality?: KathekonQuality
+  readonly typical_operation_class?: OperationClass
+  readonly typical_target_system_vendor?: TargetSystemVendor
+  readonly typical_outcome_verification?: OutcomeVerification
+  readonly typical_reversibility_signal?: ReversibilitySignal
 }
 
 /**
@@ -189,6 +239,14 @@ export type AccreditationPayload = {
   readonly passions_persisting: string[]
   readonly verification_url: string
   readonly disclaimer: string
+
+  // Aggregate credentials surfaced on the payload (port-mirror sync 2026-05-21).
+  readonly typical_deliberation_breadth?: DeliberationBreadth
+  readonly typical_kathekon_quality?: KathekonQuality
+  readonly typical_operation_class?: OperationClass | null
+  readonly typical_target_system_vendor?: TargetSystemVendor | null
+  readonly typical_outcome_verification?: OutcomeVerification | null
+  readonly typical_reversibility_signal?: ReversibilitySignal | null
 }
 
 /**

@@ -86,6 +86,7 @@ import {
 } from '../response-builders'
 
 import { OPTIONS, PUT, DELETE, PATCH } from '../route'
+import { extractCarriedProfileForAuth, extractWriteExtras } from '../request-helpers'
 
 import type { AccreditationEndpointResponse } from '@/lib/substrate/trust-layer/accreditation/public-endpoint'
 import type {
@@ -151,6 +152,11 @@ const SAMPLE_PAYLOAD: AccreditationPayload = {
   typical_deliberation_breadth: 'intuited',
   // Added 2026-05-16 under D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-WIRED-VERIFIED-2026-05-16 §"Decision C".
   typical_kathekon_quality: 'contrary',
+  // Added 2026-05-21 under D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21 (A10 typical-class aggregates).
+  typical_operation_class: null,
+  typical_target_system_vendor: null,
+  typical_outcome_verification: null,
+  typical_reversibility_signal: null,
 }
 
 const SAMPLE_RECORD: AccreditationRecord = {
@@ -579,6 +585,61 @@ async function testPatchNotAllowed(): Promise<void> {
 }
 
 // ============================================================================
+// A10 REQUEST HELPERS — extractCarriedProfileForAuth + extractWriteExtras
+// (D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21). Pure body-extraction logic the
+// POST handler uses for the scope check + loop_id persistence.
+// ============================================================================
+
+function testExtractCarriedProfileForAuth(): void {
+  // Both scope fields present on the profile.
+  const both = extractCarriedProfileForAuth({
+    profile: { downstream_identity_model: 'vendor_framework', path_posture: 'endorsed' },
+  })
+  assertEqual(both?.downstream_identity_model, 'vendor_framework', 'CP-1 extracts downstream_identity_model')
+  assertEqual(both?.path_posture, 'endorsed', 'CP-2 extracts path_posture')
+
+  // Only one field present.
+  const one = extractCarriedProfileForAuth({ profile: { path_posture: 'open_api' } })
+  assertEqual(one?.path_posture, 'open_api', 'CP-3 extracts a single present field')
+  assertEqual(one?.downstream_identity_model, undefined, 'CP-4 missing field is undefined')
+
+  // Neither field → undefined (unscoped credentials pass; scoped fail closed).
+  assertEqual(
+    extractCarriedProfileForAuth({ profile: { agent_id: 'agent_x' } }),
+    undefined,
+    'CP-5 profile with no scope fields → undefined',
+  )
+  // Malformed bodies → undefined.
+  assertEqual(extractCarriedProfileForAuth(null), undefined, 'CP-6 null body → undefined')
+  assertEqual(extractCarriedProfileForAuth('nope'), undefined, 'CP-7 non-object body → undefined')
+  assertEqual(extractCarriedProfileForAuth({}), undefined, 'CP-8 body with no profile → undefined')
+}
+
+function testExtractWriteExtras(): void {
+  // Header takes precedence (primary per §Option D billing).
+  assertEqual(
+    extractWriteExtras('loop-from-header', { loop_id: 'loop-from-body' }).loop_id,
+    'loop-from-header',
+    'WE-1 X-Loop-Id header takes precedence over body.loop_id',
+  )
+  // Body fallback when no header.
+  assertEqual(
+    extractWriteExtras(null, { loop_id: 'loop-from-body' }).loop_id,
+    'loop-from-body',
+    'WE-2 falls back to body.loop_id when no header',
+  )
+  // Neither → null.
+  assertEqual(extractWriteExtras(null, {}).loop_id, null, 'WE-3 no header + no body → null')
+  assertEqual(extractWriteExtras(null, null).loop_id, null, 'WE-4 no header + null body → null')
+  // Non-string body loop_id ignored.
+  assertEqual(
+    extractWriteExtras(null, { loop_id: 12345 }).loop_id,
+    null,
+    'WE-5 non-string body loop_id ignored → null',
+  )
+}
+
+// ============================================================================
 // RUNNER
 // ============================================================================
 
@@ -605,6 +666,10 @@ async function run(): Promise<void> {
   await testPutNotAllowed()
   await testDeleteNotAllowed()
   await testPatchNotAllowed()
+
+  // A10 request helpers (added 2026-05-21).
+  testExtractCarriedProfileForAuth()
+  testExtractWriteExtras()
 
   console.log('')
   console.log(`Total: ${passed + failed}  Pass: ${passed}  Fail: ${failed}`)

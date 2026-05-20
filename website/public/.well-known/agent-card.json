@@ -89,6 +89,24 @@
         }
       },
       {
+        "uri": "https://sagereasoning.com/extensions/atl-write-auth/v1",
+        "description": "Authentication for the Agent Trust Layer WRITE surface (POST /api/accreditation/{agent_id}). The public GET verification endpoint requires no auth; only the write surface requires this credential. Writes are gated by per-agent opaque bearer tokens (prefix sr_atl_) bound to a specific agent_id and optionally scoped to a downstream_identity_model and/or path_posture. Present as: Authorization: Bearer sr_atl_<token>. Tokens are issued out-of-band by the substrate operator (contact zeus@sagereasoning.com) and shown once; renewal is revoke-and-reissue. A global operator kill-switch may additionally gate the surface (503 when disabled). Adopted under D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21.",
+        "required": false,
+        "params": {
+          "writeSurface": {
+            "endpoint": "POST https://www.sagereasoning.com/api/accreditation/{agent_id}",
+            "scheme": "bearer",
+            "tokenPrefix": "sr_atl_",
+            "header": "Authorization: Bearer sr_atl_<token>",
+            "scoping": {
+              "description": "A credential MAY be scoped. When scoped, a write whose CarriedProfile field does not match the credential's scope is rejected (401). An unscoped credential (NULL scope) accepts any value.",
+              "downstream_identity_model": ["delegated_user", "service_account", "vendor_framework", "api_key", "browser_session", "mcp_server", "unknown"],
+              "path_posture": ["endorsed", "open_api", "ambiguous", "unsanctioned"]
+            }
+          }
+        }
+      },
+      {
         "uri": "https://sagereasoning.com/extensions/quick-start/v1",
         "description": "SageReasoning recommended onboarding sequence + example request.",
         "required": false,
@@ -116,7 +134,7 @@
   },
   "authentication": {
     "schemes": ["bearer", "none"],
-    "credentials": "Stoic Brain overview (GET /api/stoic-brain), guardrail documentation (GET /api/guardrail), and baseline scenarios (GET /api/baseline/agent) require no authentication. All scoring endpoints require an API key: Authorization: Bearer sr_live_<key>. Request a free key at zeus@sagereasoning.com."
+    "credentials": "Stoic Brain overview (GET /api/stoic-brain), guardrail documentation (GET /api/guardrail), and baseline scenarios (GET /api/baseline/agent) require no authentication. All scoring endpoints require an API key: Authorization: Bearer sr_live_<key>. Request a free key at zeus@sagereasoning.com. The Agent Trust Layer write surface (POST /api/accreditation/{agent_id}) requires a per-agent write token: Authorization: Bearer sr_atl_<token> — see the atl-write-auth/v1 extension."
   },
   "defaultInputModes": ["application/json"],
   "defaultOutputModes": ["application/json"],

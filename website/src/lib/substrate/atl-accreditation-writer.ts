@@ -224,6 +224,19 @@ const DEFAULT_DEPS: AccreditationWriterDeps = {
   logger: defaultLogger,
 }
 
+/**
+ * Per-write extras supplied by the route at call time — NOT part of the agent's
+ * profile or record. Currently the A10 loop_id forensic trace (Decision 2 of
+ * the A10 rewrite): the X-Loop-Id the wrapper supplies on the write-path POST,
+ * persisted on agent_accreditation.loop_id for JOIN traceability against
+ * loop_billing_events. A10 does NOT write loop_billing_events itself. Optional;
+ * defaults to {} (loop_id NULL). Added 2026-05-21 under
+ * D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21.
+ */
+export interface AccreditationWriteExtras {
+  readonly loop_id?: string | null
+}
+
 // ============================================================================
 // PUBLIC API — seedAccreditation + updateAccreditation (Decision D)
 // ============================================================================
@@ -262,6 +275,7 @@ const DEFAULT_DEPS: AccreditationWriterDeps = {
 export async function seedAccreditation(
   profile: CarriedProfile,
   deps: AccreditationWriterDeps = DEFAULT_DEPS,
+  extras: AccreditationWriteExtras = {},
 ): Promise<void> {
   const startTime = Date.now()
   const record = profile.accreditation_record
@@ -269,6 +283,7 @@ export async function seedAccreditation(
   try {
     await deps.upsertAccreditationRecord(record, {
       regressing_check_count: profile.regressing_check_count,
+      loop_id: extras.loop_id ?? null,
     })
     await deps.appendInitialGradeHistory(record)
 
@@ -349,6 +364,7 @@ export async function updateAccreditation(
   profile: CarriedProfile,
   transitionResult: TransitionResult,
   deps: AccreditationWriterDeps = DEFAULT_DEPS,
+  extras: AccreditationWriteExtras = {},
 ): Promise<void> {
   const startTime = Date.now()
   const record = transitionResult.record
@@ -356,6 +372,7 @@ export async function updateAccreditation(
   try {
     await deps.upsertAccreditationRecord(record, {
       regressing_check_count: profile.regressing_check_count,
+      loop_id: extras.loop_id ?? null,
     })
 
     if (transitionResult.grade_changed && transitionResult.trigger !== null) {

@@ -53,7 +53,14 @@
 // action on EvaluatedAction.kathekon_quality and aggregated to typical_kathekon_-
 // quality). Added 2026-05-16 for the kathekon-aligned alternative build
 // (D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-WIRED-VERIFIED-2026-05-16).
-import type { DeliberationBreadth, KathekonQuality } from './evaluation'
+import type {
+  DeliberationBreadth,
+  KathekonQuality,
+  OperationClass,
+  TargetSystemVendor,
+  OutcomeVerification,
+  ReversibilitySignal,
+} from './evaluation'
 
 // Re-export types from existing V3 infrastructure
 // In production, these would import from '../../website/src/lib/stoic-brain'
@@ -216,6 +223,20 @@ export type AccreditationRecord = {
    *  permissions. Added 2026-05-16 under D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-
    *  BUILD-WIRED-VERIFIED-2026-05-16 §"Decision C". */
   readonly typical_kathekon_quality: KathekonQuality
+
+  // ==========================================================================
+  // A10 TYPICAL-CLASS AGGREGATES (Decision 3b + 3c of the A10 rewrite) — the
+  // EvaluatedAction-derived pass-through aggregates surfaced on the credential.
+  // Optional (the wrapper may or may not supply them; createAccreditationRecord
+  // does not seed them). R18c-additive: third-party verifiers that don't parse
+  // them are unaffected. Aggregates only — raw EvaluatedAction history is NOT
+  // persisted (Decision 3c). Added 2026-05-21 under
+  // D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21.
+  // ==========================================================================
+  readonly typical_operation_class?: OperationClass
+  readonly typical_target_system_vendor?: TargetSystemVendor
+  readonly typical_outcome_verification?: OutcomeVerification
+  readonly typical_reversibility_signal?: ReversibilitySignal
 }
 
 /**
@@ -250,6 +271,15 @@ export type AccreditationPayload = {
    *  contrary). Added 2026-05-16 under D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-
    *  BUILD-WIRED-VERIFIED-2026-05-16 §"Decision C". */
   readonly typical_kathekon_quality: KathekonQuality
+
+  /** A10 typical-class aggregates (Decision 3b) — R18c-additive fields exposing
+   *  the agent's operational footprint to procurement reviewers. Always present
+   *  on the payload; null when no aggregate is available on the record. Added
+   *  2026-05-21 under D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21. */
+  readonly typical_operation_class: OperationClass | null
+  readonly typical_target_system_vendor: TargetSystemVendor | null
+  readonly typical_outcome_verification: OutcomeVerification | null
+  readonly typical_reversibility_signal: ReversibilitySignal | null
 }
 
 /**

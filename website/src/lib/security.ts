@@ -12,7 +12,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { createHash } from 'node:crypto'
+import { createHash, randomBytes } from 'node:crypto'
 
 // =============================================================================
 // RATE LIMITING — In-memory IP-based rate limiter
@@ -521,4 +521,262 @@ export function withUsageHeaders(
     'X-RateLimit-Daily-Remaining': String(usage.daily_remaining),
     'X-RateLimit-Monthly-Used': String(usage.monthly_calls_after),
   }
+}
+
+// =============================================================================
+// A10 — PER-AGENT WRITE CREDENTIALS (ATL write surface)
+// Implements Decisions A + B + D + E + F + H + 3a of /adopted/atl-a10-design.md
+// (Adopted under D-ATL-A10-DESIGN-LOCKED-REWRITE-2026-05-17; built
+// D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21).
+//
+// A10 credentials gate writes to POST /api/accreditation/[agent_id]. They reuse
+// the production-tested opaque-token + SHA-256 + DB-lookup pattern that
+// validateApiKey above uses for sr_live_ ecosystem keys, but with a distinct
+// sr_atl_ prefix and a separate verification path (filtered by purpose).
+//
+// Token format (Decision A): opaque random token, server-side lookup. No claims
+// carried in the token; the api_keys row carries them. Tokens are sent as
+// `Authorization: Bearer sr_atl_<key>` only (NOT X-Api-Key — narrows the attack
+// surface and keeps A10 distinct from the sr_live_ ecosystem keys).
+//
+// Expiry (Decision G): A10 credentials have NO expiry. Renewal is
+// revoke-and-reissue via the admin endpoint. Verification does not check expiry.
+//
+// Kill-switch (Decision I): the SUBSTRATE_WRITE_PATH_ENABLED env flag is checked
+// in the route's verifyAgentIdOwnership BEFORE this function — if unset, all
+// writes are blocked globally regardless of credential validity.
+// =============================================================================
+
+/** The fixed namespace prefix for A10 write tokens (distinct from sr_live_). */
+export const ATL_WRITE_TOKEN_PREFIX = 'sr_atl_'
+
+/**
+ * Discriminated result of validateAtlWriteToken.
+ *
+ * On success: the bound credential identifiers + an echo of the credential's
+ * scope columns (may be null) so the caller can log them for forensic auditing.
+ * On failure: the specific reason. The ROUTE collapses every failure to a single
+ * 401 to the caller (no information leak); the audit log (Decision H) captures
+ * the specific reason.
+ */
+export type AtlWriteValidationResult =
+  | {
+      valid: true
+      credential_id: string
+      owner_user_id: string
+      agent_id: string
+      scope_downstream_identity_model: string | null
+      scope_path_posture: string | null
+    }
+  | {
+      valid: false
+      reason:
+        | 'no_token' // missing Authorization header or wrong (non-sr_atl_) prefix
+        | 'invalid_token' // hash lookup returned no active atl_write row (unknown OR revoked)
+        | 'wrong_agent' // credential is active but binds a different agent_id
+        | 'wrong_scope' // agent_id matches but the supplied CarriedProfile doesn't match the credential's non-null scope columns
+    }
+
+/**
+ * Generate a new A10 write credential. Returns the raw token (shown to the
+ * caller exactly once) and its SHA-256 hash (stored in api_keys.key_hash).
+ *
+ * Shape: sr_atl_<32 hex chars>. Mirrors generateApiKey's sr_live_ pattern.
+ */
+export function generateAtlWriteToken(): { raw: string; hash: string } {
+  const raw = `${ATL_WRITE_TOKEN_PREFIX}${randomBytes(16).toString('hex')}`
+  const hash = createHash('sha256').update(raw).digest('hex')
+  return { raw, hash }
+}
+
+/** The minimal api_keys row shape the A10 verification path selects + reasons over. */
+export interface AtlCredentialRow {
+  id: string
+  agent_id: string
+  owner_user_id: string
+  scope_downstream_identity_model: string | null
+  scope_path_posture: string | null
+}
+
+/**
+ * PURE decision: given the looked-up active atl_write row (or null), the target
+ * agent_id, and the supplied CarriedProfile subset, decide the validation
+ * result. No I/O — the unit-testable core of validateAtlWriteToken (factored
+ * per PR2; mirrors how this route group factors pure logic into testable units).
+ *
+ * - null row (unknown token OR revoked — the lookup filters is_active=true, so
+ *   the two collapse here, by design) → 'invalid_token'.
+ * - agent mismatch → 'wrong_agent' (a distinct attack profile).
+ * - scope check (Decision 3a): permissive when the credential's scope column is
+ *   NULL; strict + fail-closed ('wrong_scope') when set (the supplied value must
+ *   match exactly; a missing supplied value against a scoped credential fails).
+ */
+export function evaluateAtlWriteRow(
+  row: AtlCredentialRow | null,
+  agent_id: string,
+  carriedProfile?: { downstream_identity_model?: string; path_posture?: string },
+): AtlWriteValidationResult {
+  if (!row) {
+    return { valid: false, reason: 'invalid_token' }
+  }
+  if (row.agent_id !== agent_id) {
+    return { valid: false, reason: 'wrong_agent' }
+  }
+  if (
+    row.scope_downstream_identity_model !== null &&
+    carriedProfile?.downstream_identity_model !== row.scope_downstream_identity_model
+  ) {
+    return { valid: false, reason: 'wrong_scope' }
+  }
+  if (
+    row.scope_path_posture !== null &&
+    carriedProfile?.path_posture !== row.scope_path_posture
+  ) {
+    return { valid: false, reason: 'wrong_scope' }
+  }
+  return {
+    valid: true,
+    credential_id: row.id,
+    owner_user_id: row.owner_user_id,
+    agent_id: row.agent_id,
+    scope_downstream_identity_model: row.scope_downstream_identity_model,
+    scope_path_posture: row.scope_path_posture,
+  }
+}
+
+/**
+ * Validate an A10 write token against a target agent_id and (optionally) a
+ * supplied CarriedProfile for per-credential scope enforcement (Decision E).
+ *
+ * Prefix-rejects non-sr_atl_ tokens ('no_token'); otherwise hashes, looks up the
+ * ACTIVE atl_write row, and delegates the decision to evaluateAtlWriteRow.
+ *
+ * KG1 rule 2: the Supabase read is awaited; a query error is treated as
+ * 'invalid_token' (fail closed), not swallowed-and-allowed.
+ */
+export async function validateAtlWriteToken(
+  rawToken: string,
+  agent_id: string,
+  carriedProfile?: {
+    downstream_identity_model?: string
+    path_posture?: string
+  },
+): Promise<AtlWriteValidationResult> {
+  // Prefix check — wrong prefix is treated as no token (no DB hit).
+  if (!rawToken.startsWith(ATL_WRITE_TOKEN_PREFIX)) {
+    return { valid: false, reason: 'no_token' }
+  }
+
+  // Hash the presented token (same algorithm as the sr_live_ path).
+  const keyHash = createHash('sha256').update(rawToken).digest('hex')
+
+  // Look up the active atl_write row by hash (service role, bypasses RLS).
+  const admin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+
+  const { data: row, error } = await admin
+    .from('api_keys')
+    .select(
+      'id, agent_id, owner_user_id, scope_downstream_identity_model, scope_path_posture',
+    )
+    .eq('key_hash', keyHash)
+    .eq('purpose', 'atl_write')
+    .eq('is_active', true)
+    .maybeSingle()
+
+  // A query error is fail-closed (treated as no row → invalid_token).
+  if (error) {
+    return { valid: false, reason: 'invalid_token' }
+  }
+
+  return evaluateAtlWriteRow((row as AtlCredentialRow | null) ?? null, agent_id, carriedProfile)
+}
+
+/**
+ * The Vercel-structured-logs event shape for the verification path (Decision H).
+ * One emission per POST attempt (emitted by the route's verifyAgentIdOwnership,
+ * which is where all outcomes — including the kill-switch 'not_enabled' and the
+ * missing-token 'no_token' — converge and where ip + elapsed_ms are available).
+ *
+ * grep-friendly: every line matching `"kind":"atl_verify"` is a verification
+ * event. When outcome='wrong_scope' all four scope fields are populated; when
+ * outcome='ok' the credential's scope columns + the matching supplied values are
+ * populated.
+ */
+export interface AtlVerifyEvent {
+  readonly kind: 'atl_verify'
+  readonly agent_id: string
+  readonly outcome:
+    | 'ok'
+    | 'no_token'
+    | 'invalid_token'
+    | 'wrong_agent'
+    | 'wrong_scope'
+    | 'not_enabled'
+  readonly credential_id: string | null
+  readonly scope_downstream_identity_model: string | null
+  readonly scope_path_posture: string | null
+  readonly supplied_downstream_identity_model: string | null
+  readonly supplied_path_posture: string | null
+  readonly ip: string | null
+  readonly elapsed_ms: number
+  readonly timestamp: string
+}
+
+/** Emit one verification event to Vercel structured logs (Decision H). */
+export function logAtlVerifyEvent(event: AtlVerifyEvent): void {
+  console.log(JSON.stringify(event))
+}
+
+/**
+ * Require admin access for the credential-management endpoints (Decision D).
+ *
+ * Per the founder's Step 1 election, this reuses the existing ADMIN_USER_ID env
+ * var (the same var /api/admin/api-keys uses) — checking the authenticated
+ * Supabase user's id against it. No new env var is introduced.
+ *
+ * Returns 401 for any non-admin caller (unauthenticated OR wrong user) — a
+ * single status, no information leak about why.
+ */
+export async function requireAdmin(request: NextRequest): Promise<
+  { user: { id: string; email?: string }; error?: never } |
+  { user?: never; error: NextResponse }
+> {
+  const user = await getAuthenticatedUser(request)
+  const adminId = process.env.ADMIN_USER_ID
+  if (!user || !adminId || user.id !== adminId) {
+    return {
+      error: NextResponse.json(
+        { error: 'Admin authentication required.' },
+        { status: 401 },
+      ),
+    }
+  }
+  return { user }
+}
+
+/**
+ * Resolve an auth.users.id to its public.profiles.id (Decision D step 3).
+ *
+ * profiles.id IS the auth user's id by construction (the handle_new_user trigger
+ * inserts profiles.id = auth.users.id), so this is effectively an existence
+ * check: it confirms the profile row exists (so the api_keys.owner_user_id FK to
+ * profiles(id) will not be violated) and returns that id, or null if absent.
+ *
+ * KG1 rule 2: the read is awaited; an error returns null (caller fails closed).
+ */
+export async function resolveProfileId(userId: string): Promise<string | null> {
+  const admin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+  const { data, error } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('id', userId)
+    .maybeSingle()
+  if (error || !data) return null
+  return data.id
 }

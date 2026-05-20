@@ -241,6 +241,13 @@ export function buildAccreditationPayload(
     // R18c-additive schema (Decision C, D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-
     // BUILD-WIRED-VERIFIED-2026-05-16).
     typical_kathekon_quality: record.typical_kathekon_quality,
+    // A10 typical-class aggregates (Decision 3b of the A10 rewrite) —
+    // R18c-additive; null when the record carries no aggregate. Added
+    // 2026-05-21 under D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21.
+    typical_operation_class: record.typical_operation_class ?? null,
+    typical_target_system_vendor: record.typical_target_system_vendor ?? null,
+    typical_outcome_verification: record.typical_outcome_verification ?? null,
+    typical_reversibility_signal: record.typical_reversibility_signal ?? null,
   }
 }
 

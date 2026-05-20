@@ -136,6 +136,10 @@ import type {
 import type {
   DeliberationBreadth,
   KathekonQuality,
+  OperationClass,
+  TargetSystemVendor,
+  OutcomeVerification,
+  ReversibilitySignal,
 } from './trust-layer/types/evaluation'
 
 // Re-export the domain types a persistence-layer consumer (the spec step 6b
@@ -194,6 +198,16 @@ export interface AgentAccreditationRow {
    *  §"Decision C"; column added by
    *  /website/supabase-agent-accreditation-typical-kathekon-quality-migration.sql. */
   readonly typical_kathekon_quality: KathekonQuality
+  /** A10 typical-class aggregates (Decision 3b/3c). Nullable columns added by
+   *  /website/supabase-agent-accreditation-a10-migration.sql. */
+  readonly typical_operation_class: OperationClass | null
+  readonly typical_target_system_vendor: TargetSystemVendor | null
+  readonly typical_outcome_verification: OutcomeVerification | null
+  readonly typical_reversibility_signal: ReversibilitySignal | null
+  /** A10 forensic JOIN trace to loop_billing_events.loop_id (Decision 2 — A10
+   *  does NOT write loop_billing_events). Store-only; no AccreditationRecord
+   *  counterpart. Nullable column added by the same migration. */
+  readonly loop_id: string | null
 }
 
 /** A row of public.grade_history — the append-only grade-change audit trail. */
@@ -225,6 +239,10 @@ export interface AccreditationRowOptions {
   /** Defaults to 0 (the table default). The wrapper's CarriedProfile is the
    *  authority on this value — pass CarriedProfile.regressing_check_count. */
   readonly regressing_check_count?: number
+  /** A10 forensic JOIN trace (Decision 2). Per-write value supplied by the
+   *  route from the X-Loop-Id header; defaults to NULL. Store-only column —
+   *  no AccreditationRecord counterpart. */
+  readonly loop_id?: string | null
 }
 
 /** Write-time options for a grade_history row's optional audit note. */
@@ -287,6 +305,14 @@ export function accreditationRecordToRow(
     // Column has a NOT NULL DEFAULT 'contrary' server-side; we pass the
     // record's value explicitly.
     typical_kathekon_quality: record.typical_kathekon_quality,
+    // A10 (D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21) — nullable typical-class
+    // aggregate columns (carried on the record) + the store-only loop_id trace
+    // (supplied via opts from the route's X-Loop-Id header).
+    typical_operation_class: record.typical_operation_class ?? null,
+    typical_target_system_vendor: record.typical_target_system_vendor ?? null,
+    typical_outcome_verification: record.typical_outcome_verification ?? null,
+    typical_reversibility_signal: record.typical_reversibility_signal ?? null,
+    loop_id: opts.loop_id ?? null,
   }
 }
 
@@ -340,6 +366,14 @@ export function rowToAccreditationRecord(
     // migration sets a server-side default; older rows missing this field
     // would be filled by the default at write time.
     typical_kathekon_quality: row.typical_kathekon_quality,
+    // A10 (D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21) — read path for the
+    // nullable typical-class aggregates. NULL in the DB → undefined on the
+    // (optional) record field. loop_id is store-only — not folded into the
+    // record (see rowToStoreMetadata pattern for tier/regressing_check_count).
+    typical_operation_class: row.typical_operation_class ?? undefined,
+    typical_target_system_vendor: row.typical_target_system_vendor ?? undefined,
+    typical_outcome_verification: row.typical_outcome_verification ?? undefined,
+    typical_reversibility_signal: row.typical_reversibility_signal ?? undefined,
   }
 }
 

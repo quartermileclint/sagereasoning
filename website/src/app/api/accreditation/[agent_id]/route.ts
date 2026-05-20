@@ -176,7 +176,13 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
-import { checkRateLimit, RATE_LIMITS } from '@/lib/security'
+import {
+  checkRateLimit,
+  RATE_LIMITS,
+  validateAtlWriteToken,
+  logAtlVerifyEvent,
+  type AtlVerifyEvent,
+} from '@/lib/security'
 
 import {
   handleAccreditationLookup,
@@ -210,6 +216,11 @@ import {
   buildWriteConflictResponse,
   DOCUMENTATION_URL,
 } from './response-builders'
+
+import {
+  extractCarriedProfileForAuth,
+  extractWriteExtras,
+} from './request-helpers'
 
 // =============================================================================
 // HOTFIX NOTE 2026-05-16 — Next.js App Router rejected the original co-located
@@ -306,47 +317,95 @@ type AuthGateResult =
   | { ok: false; reason: 'not_enabled' | 'unauthorized' }
 
 /**
- * verifyAgentIdOwnership — the auth gate for POST.
+ * verifyAgentIdOwnership — the auth gate for POST (POST-A10).
  *
- * PRE-A10 STOPGAP (Decision C option (1) — feature-flag gated): the gate
- * reads SUBSTRATE_WRITE_PATH_ENABLED from the environment. If the value is
- * not the exact string "true", the gate returns `not_enabled` → route
- * returns 503 with a non-leaking "writes not yet enabled" message. Any
- * value other than "true" (including the unset state, "false", "0", "")
- * fails closed; the strictest possible truthiness check.
+ * POST-A10 (D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21): two gates, both must
+ * pass.
  *
- * When the flag is set to "true", all writes are allowed — the route is
- * open to any caller with a valid agent_id path parameter and a well-formed
- * body. This is the coarse-grained gate Decision C grants pre-A10; A10
- * (step 8) replaces it with per-agent token verification.
+ *   1. KILL-SWITCH (Decision I): SUBSTRATE_WRITE_PATH_ENABLED must be the exact
+ *      string "true". Anything else (unset, "false", "0", "") fails closed →
+ *      `not_enabled` → route returns 503. The env flag is now a global override
+ *      that blocks ALL writes regardless of credential validity.
  *
- * THE A10-SHAPED SEAM (per Decision C's structural constraint):
- *   - Signature: (request, agent_id) → discriminated result.
- *   - Pre-A10: the request + agent_id parameters are unused; the gate
- *     decision is purely env-driven.
- *   - Post-A10: the function body swaps to read Authorization: Bearer
- *     headers, verify the token against an A10 per-agent credential store,
- *     check the verified subject matches `agent_id`, and return
- *     `unauthorized` on any failure. The call site does not change.
+ *   2. PER-AGENT TOKEN (Decisions A + E + 3a): the caller must present
+ *      `Authorization: Bearer sr_atl_<token>`. validateAtlWriteToken (in
+ *      security.ts) hashes it, looks up the ACTIVE atl_write row, checks the
+ *      bound agent_id matches the path, and — when the credential is scoped —
+ *      checks the supplied CarriedProfile (downstream_identity_model /
+ *      path_posture) matches the credential's scope columns. Any failure →
+ *      `unauthorized` → route returns 401. The route returns a single 401 for
+ *      every token failure mode (no information leak); the audit log
+ *      (logAtlVerifyEvent) captures the specific reason.
  *
- * The `request` and `_agent_id` parameters are declared but unused under
- * the pre-A10 stopgap; they are part of the seam that A10 fills.
+ * The `carriedProfile` subset is parsed once by the POST handler from
+ * body.profile and passed in (avoids a double body-parse). One atl_verify event
+ * is emitted per attempt — covering not_enabled, no_token, and every
+ * validateAtlWriteToken outcome — with ip + elapsed_ms.
  */
-function verifyAgentIdOwnership(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _request: NextRequest,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _agent_id: string,
-): AuthGateResult {
-  // PRE-A10: feature-flag gated only. Strictest possible truthiness — only
-  // the exact string "true" enables writes; anything else (unset, "false",
-  // "0", "") fails closed.
+async function verifyAgentIdOwnership(
+  request: NextRequest,
+  agent_id: string,
+  carriedProfile: { downstream_identity_model?: string; path_posture?: string } | undefined,
+): Promise<AuthGateResult> {
+  const startTime = Date.now()
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    request.headers.get('x-real-ip') ??
+    null
+  const suppliedIdentity = carriedProfile?.downstream_identity_model ?? null
+  const suppliedPath = carriedProfile?.path_posture ?? null
+
+  const emit = (
+    outcome: AtlVerifyEvent['outcome'],
+    fields: {
+      credential_id?: string | null
+      scope_downstream_identity_model?: string | null
+      scope_path_posture?: string | null
+    } = {},
+  ): void => {
+    logAtlVerifyEvent({
+      kind: 'atl_verify',
+      agent_id,
+      outcome,
+      credential_id: fields.credential_id ?? null,
+      scope_downstream_identity_model: fields.scope_downstream_identity_model ?? null,
+      scope_path_posture: fields.scope_path_posture ?? null,
+      supplied_downstream_identity_model: suppliedIdentity,
+      supplied_path_posture: suppliedPath,
+      ip,
+      elapsed_ms: Date.now() - startTime,
+      timestamp: new Date().toISOString(),
+    })
+  }
+
+  // 1. Kill-switch (Decision I). Strictest possible truthiness.
   if (process.env.SUBSTRATE_WRITE_PATH_ENABLED !== 'true') {
+    emit('not_enabled')
     return { ok: false, reason: 'not_enabled' }
   }
-  // Flag is set — accept the write. A10 will replace this with token
-  // verification; the claims object's shape is forward-compatible.
-  return { ok: true, claims: { agent_id: _agent_id } }
+
+  // 2. Token extraction — Bearer sr_atl_ only (X-Api-Key is NOT accepted for
+  //    A10 tokens, per Decision A).
+  const authHeader = request.headers.get('authorization')
+  if (!authHeader?.startsWith('Bearer sr_atl_')) {
+    emit('no_token')
+    return { ok: false, reason: 'unauthorized' }
+  }
+  const rawToken = authHeader.slice(7).trim()
+
+  // 3. Delegate verification + scope check to security.ts (Decision E).
+  const result = await validateAtlWriteToken(rawToken, agent_id, carriedProfile)
+  if (!result.valid) {
+    emit(result.reason)
+    return { ok: false, reason: 'unauthorized' }
+  }
+
+  emit('ok', {
+    credential_id: result.credential_id,
+    scope_downstream_identity_model: result.scope_downstream_identity_model,
+    scope_path_posture: result.scope_path_posture,
+  })
+  return { ok: true, claims: { agent_id: result.agent_id } }
 }
 
 /**
@@ -496,23 +555,29 @@ export async function POST(
 
   const { agent_id } = await params
 
-  // 2. Auth gate (pre-A10: feature-flag gated).
-  const auth = verifyAgentIdOwnership(request, agent_id)
+  // 2. Parse the body ONCE (A10: the auth-gate scope check needs the
+  //    CarriedProfile from the body, so the parse moves ahead of the gate).
+  let rawBody: unknown = null
+  let bodyIsValidJson = true
+  try {
+    rawBody = await request.json()
+  } catch {
+    bodyIsValidJson = false
+  }
+
+  // 3. Auth gate (A10: kill-switch + per-agent token + per-credential scope).
+  //    The CarriedProfile scope subset is extracted from the parsed body.
+  const carriedProfileForAuth = extractCarriedProfileForAuth(rawBody)
+  const auth = await verifyAgentIdOwnership(request, agent_id, carriedProfileForAuth)
   if (!auth.ok) {
     if (auth.reason === 'not_enabled') return buildWriteDisabledResponse()
     return buildWriteUnauthorizedResponse()
   }
 
-  // 3. Body parse + validate.
-  let rawBody: unknown
-  try {
-    rawBody = await request.json()
-  } catch {
-    return buildWriteBadRequestResponse(
-      'Request body is not valid JSON.',
-    )
+  // 4. Body shape validation (only reached once auth has passed).
+  if (!bodyIsValidJson) {
+    return buildWriteBadRequestResponse('Request body is not valid JSON.')
   }
-
   const validated = validateWriteBody(rawBody)
   if (!validated.ok) {
     return buildWriteBadRequestResponse(validated.message)
@@ -527,7 +592,10 @@ export async function POST(
     )
   }
 
-  // 4. Pre-flight lookup — disambiguates seed vs update vs conflict.
+  // 5. Per-write extras for persistence (loop_id; typical_* ride on the record).
+  const writeExtras = extractWriteExtras(request.headers.get('x-loop-id'), rawBody)
+
+  // 6. Pre-flight lookup — disambiguates seed vs update vs conflict.
   try {
     const existing = await lookupAccreditationRecord(agent_id)
 
@@ -538,13 +606,16 @@ export async function POST(
       return buildWriteNotFoundResponse()
     }
 
-    // 5. Invoke the writer library.
+    // 7. Invoke the writer library (typical_* are carried on the record;
+    //    loop_id is passed via writeExtras).
     if (validated.body.kind === 'seed') {
-      await seedAccreditation(validated.body.profile)
+      await seedAccreditation(validated.body.profile, undefined, writeExtras)
     } else {
       await updateAccreditation(
         validated.body.profile,
         validated.body.transition_result,
+        undefined,
+        writeExtras,
       )
     }
 
