@@ -397,8 +397,18 @@ export interface Layer1Schema {
    *  valid, and existing v1 consumers that don't read the field are unaffected.
    *  Older v1 schemas are forward-compatible (parser accepts them and treats
    *  the new field as absent). The bump is recorded for Rule A (licensing
-   *  gate); the Layer 1 open-source reference distribution carries v2 onward. */
-  version: 'layer1-schema-v1' | 'layer1-schema-v2'
+   *  gate); the Layer 1 open-source reference distribution carries v2 onward.
+   *  Note (D-SAGE-CALLING-STAGE2-ENDPOINT, 2026-05-21): schema version BUMPED to
+   *  'layer1-schema-v3' to reflect the `discovered_purpose` field (D-5; added
+   *  additively in Stage 1) now being a populated handoff target (Sage Calling
+   *  build Stage 2). Same precedent as the v2 bump: the type union + validator
+   *  widen to ACCEPT v3 (rejecting nothing previously valid); the producer
+   *  system-prompt example is NOT changed (discovered_purpose is wrapper-supplied,
+   *  not Layer-1-LLM-emitted — exactly like carried_candidates), so /api/reason's
+   *  Layer 1 runtime output is byte-unchanged. Layer 2's layer1_schema_version is
+   *  a SEPARATE, decoupled field hard-pinned to 'layer1-schema-v1', so this bump
+   *  does not touch Layer 2. Recorded for Rule A (licensing gate). */
+  version: 'layer1-schema-v1' | 'layer1-schema-v2' | 'layer1-schema-v3'
   passions_present: PassionPresent[]
   control_filter_elements: ControlFilterElement[]
   oikeiosis_circles_engaged: OikeiosisCircleEngaged[]
@@ -817,15 +827,19 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
   // Version — accepts v1 (legacy) or v2 (post-D-ATL-ITEMS-1-3-BUILD-WIRED-
   // VERIFIED-2026-05-16). The new optional carried_candidates field is the
   // sole shape difference; v1 schemas without it remain valid (forward-compat).
-  if (root.version !== 'layer1-schema-v1' && root.version !== 'layer1-schema-v2') {
+  if (
+    root.version !== 'layer1-schema-v1' &&
+    root.version !== 'layer1-schema-v2' &&
+    root.version !== 'layer1-schema-v3'
+  ) {
     throw new Layer1ValidationError(
       'version',
-      `Expected version 'layer1-schema-v1' or 'layer1-schema-v2', got ${JSON.stringify(root.version)}`,
+      `Expected version 'layer1-schema-v1', 'layer1-schema-v2', or 'layer1-schema-v3', got ${JSON.stringify(root.version)}`,
       'version',
       root.version
     )
   }
-  const schemaVersion: 'layer1-schema-v1' | 'layer1-schema-v2' = root.version
+  const schemaVersion: 'layer1-schema-v1' | 'layer1-schema-v2' | 'layer1-schema-v3' = root.version
 
   // passions_present
   const passions: PassionPresent[] = assertArray(root.passions_present, 'passions_present').map(
