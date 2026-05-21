@@ -6779,3 +6779,61 @@ Expected: tsc exits 0 (no output); engine prints `41 pass / 0 fail`; store print
 
 ---
 
+
+## 2026-05-21 — D-SAGE-CALLING-STAGE2-LIVE-VERIFIED-2026-05-21
+
+**Decision:** Sage Calling Stage 2 — the Critical public surface (`POST /api/calling` + the admin Hard-Gate approval route `POST /api/calling/approve`) — moved **Wired → Verified / Live** in production on the founder's 2026-05-21 post-deploy smoke test. The Sage Calling product line is now **Live, gated by `SAGE_CALLING_ENABLED`** (unset/`false` → 503, no code change). The Sage Calling build arc is **complete**.
+
+**Reasoning:** Records the founder-performed Critical Change Protocol step 5 (post-deploy verification) from `D-SAGE-CALLING-STAGE2-ENDPOINT-WIRED-VERIFIED-2026-05-21`. Against `https://www.sagereasoning.com` with `SAGE_CALLING_ENABLED='true'`, the founder: minted an unscoped `sr_atl_` test credential (agent `agent_smoketest_v1`); confirmed all three auth failure modes → 401 (no token; garbage token; valid token + wrong `agent_id`) and the positive control → 200; walked Q1→Q5 on session `smoke-001` to `awaiting_approval`; confirmed in Supabase `current_stage=Q5`, `gate_status=awaiting_approval`, `outcome=found`, `jsonb_typeof(response_history)='array'` + `signals_detected='array'` (KG7 clean); then ran the admin approve call → 200, `gate_status=approved`, five-spec `discovered_purpose` returned — proving the agent's `sr_atl_` token cannot release the handoff (only the admin token can, per D-14). That clears the three named Critical risks (auth-gate exposure; Hard Gate firing un-approved; KG7 double-serialisation) on the live deployment.
+
+**Files touched:**
+- `operations/decision-log.md` — this entry appended (Live/Verified transition record).
+- `operations/handoffs/founder/2026-05-21-sage-calling-stage2-endpoint-close.md` — curl examples corrected to the canonical `www.` host (operational finding this session; see Step 2 below).
+- `operations/verification-framework.md` — one-line convention note added to the API-Endpoint method (canonical host + `-L` Authorization-drop + admin-JWT freshness).
+- `operations/knowledge-gaps.md` — candidate note added under KG1 (founder-verification curl blocks; the www↔non-www header-strip is a KG1 rule-3 instance).
+- (No `component-registry.json` change — the registry does not track Sage Calling components as of this session.)
+
+**Risk classification:** **Standard** under 0d-ii — governance close-out (decision-log entry + operations-doc edits). Records an already-completed, already-governed Critical change; the underlying Critical change was governed under the predecessor's full Critical Change Protocol. AC7 was engaged there and is **not** re-engaged by this record. PR6 not engaged. No production runtime change in this close-out.
+
+**Rollback path:** Reversible via git (`git revert`/restore the decision-log + doc edits). The Live runtime itself is reverted independently of this record by unsetting `SAGE_CALLING_ENABLED` in Vercel → every call 503s, no code change, no redeploy.
+
+**Verification step (founder-performable):** The verification IS the founder's 2026-05-21 smoke test recorded above (already performed). To re-confirm Live status at any time — with a fresh admin Supabase JWT and an unscoped `sr_atl_` token, against the canonical `www.` host:
+```
+# flag ON, cold open -> 200 + Q1 (do NOT use -L; it drops Authorization on the www redirect)
+curl -i -X POST https://www.sagereasoning.com/api/calling \
+  -H "Authorization: Bearer sr_atl_YOURTOKEN" -H "Content-Type: application/json" \
+  -d '{"session_id":"recheck-001","agent_id":"agent_smoketest_v1"}'
+```
+Expected: `200`, `"status":"in_progress"`, `"stage":"Q1"`. To return to the inert state: unset `SAGE_CALLING_ENABLED` → `503`.
+
+**Open questions:** Carried unchanged from the predecessor under PR7 — (i) persist the Agent-Card chosen-role verdict (approval-time `role` currently defaults to `individual_nature`); (ii) per-developer delegated Hard-Gate approval vs admin-only; (iii) D-4 PR7 rules+LLM hybrid (not triggered — R18d rules held); (iv) 90-day retention + privacy-policy-adjacent values (lawyer-engagement track). None blocks Live status.
+
+**Rules served:** R0, R3, R4, R9, R10, R17, R17h, R18a, R18c, R18d, R18e, AC7, KG1, KG7, PR2, PR6.
+
+**Status:** Adopted. Implementation status: Sage Calling Stage 2 public surface — **Live / Verified** (master switch `SAGE_CALLING_ENABLED`). Cross-references: `D-SAGE-CALLING-STAGE2-ENDPOINT-WIRED-VERIFIED-2026-05-21` (the Critical build this verifies); `D-SAGE-CALLING-STAGE2-ENGINE-STORE-WIRED-VERIFIED-2026-05-21`; `D-SAGE-CALLING-STAGE1-BUILD-WIRED-VERIFIED-2026-05-21`; `D-PURPOSE-DISCOVERY-DESIGN-LOCKED-2026-05-21`; `/adopted/purpose-discovery-product-design.md`; `/operations/handoffs/founder/2026-05-21-sage-calling-stage2-endpoint-close.md`; standing cache + build-arc cache ("no current users").
+
+---
+
+## 2026-05-21 — D-SAGE-REFLECT-DESIGN-DRAFTED-2026-05-21
+
+**Decision:** Drafted the full **Sage Reflect** product design (the fourth Sage Practice product — post-action reflection; the fourth Stoic discipline) in a design-only session, on the founder's election of a new track after the Sage Calling Live close-out. Four design-governing elections taken at open (AskUserQuestion): (1) deliverable = **full locked design doc**; (2) dependencies = **reuse existing infrastructure where possible + rename ATL→Sage Assent later**; (3) audience = **agent-first**, migrate human reflect surfaces onto this substrate later; (4) scoring = **deterministic where possible + SageReasoning translation-sandwich (Layer 1→2→3) where semantic**. Load-bearing reconciliation locked: **Sage Assent IS the renamed Agent Trust Layer (ATL) — it exists** (founder-confirmed), so Sage Reflect couples to it for real and **reuses its grade-engine + evaluation-window** rather than re-implementing the input spec's parallel grade logic (design decision SR-4). Design is a DRAFT at `/drafts/sage-reflect-product-design.md`, **pending founder lock**.
+
+**Reasoning:** Founder elected this track over the three offered (K-category migration / lawyer engagement / PR7 follow-ons), supplying `/inbox/reflect mentor input.rtf` as the source spec. Repo investigation corrected the initial dependency reading (Sage Assent ≠ unbuilt; it = ATL, fully built — `trust-layer/` + `agent_accreditation`), which mooted the "standalone-because-unbuilt" hypothesis and made reuse the right posture. The founder set and then cleared a "confirm the full cycle first" gate before design commenced. PR15: reuse of the existing internal ATL grade-engine over a bespoke grade implementation, and reuse of the existing translation-sandwich substrate for semantic scoring, are recorded as the load-bearing reuse decisions.
+
+**Files touched:**
+- `drafts/sage-reflect-product-design.md` (NEW) — the full design (DRAFT, pending lock).
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** **Standard** under 0d-ii — documentation only (design draft). No code, schema, env, or production change. AC7 not engaged. PR6 not engaged. (The eventual *build* is **Critical** — Critical Change Protocol applies then; flagged in the design's Risk Classification section. Build will follow the Sage Calling two-stage pattern: Elevated engine+store, then Critical endpoint.)
+
+**Rollback path:** Reversible via git (delete or `git revert` the draft + this entry). Nothing deployed; production byte-identical.
+
+**Verification step (founder-performable):** Read `drafts/sage-reflect-product-design.md`. Confirm: the cycle + naming (Sage Assent = ATL); the four elections are correctly baked in (SR-6 scoring / SR-11 audience / SR-4 reuse / SR-5 vocabulary); the reuse-over-rebuild reconciliation (the vocabulary + cadence table); and the boundary conditions (not a performance review / not a crisis pathway / not a Sage Calling substitute). To lock: approve, then a session moves the file to `/adopted/` (Elevated archive step) and appends `D-SAGE-REFLECT-DESIGN-LOCKED-…`.
+
+**Open questions:** Per the design's "Open items" — per-domain katorthoma proximity (a Sage Assent/ATL enhancement if not already stored), `evaluated_actions` shape compatibility for the Q4 feed, route-name lock (`/api/practice/reflect`), human-surface migration timing, the ATL→Sage Assent rename track, and 90-day retention confirmation (lawyer track).
+
+**Rules served:** R0, R3, R4, R5, R9, R10, R17, R18, R19, R20, AC1, AC7, KG1, KG7, PR1, PR2, PR6, PR15.
+
+**Status:** Adopted (the four elections + the drafted design). Implementation status: Sage Reflect — **Designed** (draft; pending founder lock → then build). Cross-references: `D-SAGE-CALLING-STAGE2-LIVE-VERIFIED-2026-05-21`; `/drafts/sage-reflect-product-design.md`; `/adopted/purpose-discovery-product-design.md`; `/inbox/reflect mentor input.rtf`; standing + build-arc caches.
+
+---

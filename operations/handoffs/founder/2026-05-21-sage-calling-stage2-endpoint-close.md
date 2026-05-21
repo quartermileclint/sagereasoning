@@ -109,9 +109,13 @@ Vercel → your project → **Settings → Environment Variables** → add `SAGE
 
 **4. Post-deploy smoke test** (needs an UNSCOPED `sr_atl_` test credential for an agent_id you control — mint via the A10 admin credential surface):
 
+> **Curl conventions (operational findings, recorded 2026-05-21):**
+> - **Use the canonical `https://www.sagereasoning.com` host.** The apex `sagereasoning.com` returns a Vercel **307** to `www`; `curl` does not follow it by default, and `curl -L` **drops the `Authorization` header on the cross-host redirect** → a spurious 401. Do not add `-L`; target `www.` directly. (This is a KG1 rule-3 manifestation — www↔non-www header stripping.)
+> - **Admin Supabase JWT expires (~1 hour).** The admin endpoints (`/api/admin/accreditation-credentials`, `/api/calling/approve`) need a fresh `ey…` token grabbed immediately before the call.
+
 Flag OFF (before step 3), or after turning it off:
 ```
-curl -i -X POST https://sagereasoning.com/api/calling \
+curl -i -X POST https://www.sagereasoning.com/api/calling \
   -H "Authorization: Bearer sr_atl_YOURTOKEN" -H "Content-Type: application/json" \
   -d '{"session_id":"smoke-001","agent_id":"agent_YOURORG_v1"}'
 ```
@@ -119,7 +123,7 @@ Expected: **503** `"Sage Calling is not currently enabled."`
 
 Flag ON — cold open (no `response`):
 ```
-curl -i -X POST https://sagereasoning.com/api/calling \
+curl -i -X POST https://www.sagereasoning.com/api/calling \
   -H "Authorization: Bearer sr_atl_YOURTOKEN" -H "Content-Type: application/json" \
   -d '{"session_id":"smoke-001","agent_id":"agent_YOURORG_v1"}'
 ```
@@ -128,10 +132,10 @@ Expected: **200**, `"status":"in_progress"`, `"stage":"Q1"`, a `question`, plus 
 Auth failure modes:
 ```
 # no token  -> 401
-curl -i -X POST https://sagereasoning.com/api/calling -H "Content-Type: application/json" \
+curl -i -X POST https://www.sagereasoning.com/api/calling -H "Content-Type: application/json" \
   -d '{"session_id":"smoke-002","agent_id":"agent_YOURORG_v1"}'
 # wrong agent_id for the token -> 401
-curl -i -X POST https://sagereasoning.com/api/calling \
+curl -i -X POST https://www.sagereasoning.com/api/calling \
   -H "Authorization: Bearer sr_atl_YOURTOKEN" -H "Content-Type: application/json" \
   -d '{"session_id":"smoke-003","agent_id":"agent_SOMEONEELSE_v1"}'
 ```
@@ -147,7 +151,7 @@ Expected: `rh_type='array'`, `sd_type='array'`, `gate_status` progressing `pendi
 
 Approve (releases the handoff) — needs your **admin Supabase session JWT** (the `/api/calling/approve` route is admin-gated; the agent's `sr_atl_` token cannot approve):
 ```
-curl -i -X POST https://sagereasoning.com/api/calling/approve \
+curl -i -X POST https://www.sagereasoning.com/api/calling/approve \
   -H "Authorization: Bearer <YOUR_ADMIN_SUPABASE_JWT>" -H "Content-Type: application/json" \
   -d '{"session_id":"smoke-001","decision":"approve"}'
 ```

@@ -28,6 +28,10 @@ STEP 3: You should see: [expected output here]
 STEP 4: If you see something different, tell me what you see
 ```
 
+**Curl-block convention (added 2026-05-21 from the Sage Calling go-live verification):**
+- **Always target the canonical `https://www.sagereasoning.com` host in example curls.** The apex `sagereasoning.com` returns a Vercel **307** redirect to `www`; `curl` does not follow it by default, and `curl -L` **drops the `Authorization` header on the www↔non-www redirect** → a spurious 401. Never add `-L` to an authenticated example. (Root cause: KG1 rule 3 — header stripping on the www/non-www redirect.)
+- **Admin-token freshness:** any example that calls an admin-gated route (e.g. `/api/admin/accreditation-credentials`, `/api/calling/approve`) must tell the founder to grab a **fresh admin Supabase JWT immediately before the call** — these tokens expire in ~1 hour.
+
 ### Database Change
 **Founder method:** AI runs a query and shows the result in plain language. Founder confirms the data looks correct.
 **AI method:** Query the database directly and validate against the expected state.

@@ -30,6 +30,8 @@
 
 **When this matters:** Any time a new endpoint is designed, any time database writes are added, any time one endpoint needs to call another, any time a loader reads files from outside the `website/` directory.
 
+**Candidate observation (PR5 — logged 2026-05-21, 1st recurrence):** *Founder-verification curl blocks.* During the Sage Calling go-live verification, two friction points cost time: (a) example curls hit the apex `sagereasoning.com`, which 307-redirects to `www`, and `curl -L` dropped the `Authorization` header on that cross-host redirect → spurious 401 — this is **rule 3 above** observed at the verification layer rather than the application layer; (b) admin Supabase JWTs expire (~1h), so an admin-gated call needs a token grabbed immediately before it. Resolution applied: verification-block convention updated (`/operations/verification-framework.md` §API Endpoint) to mandate the canonical `www.` host, forbid `-L` on authenticated examples, and flag admin-token freshness. Not promoted to a standalone KG (root cause already lives in rule 3); promote per PR5 only if it recurs a 3rd time as a distinct pattern.
+
 ---
 
 ## KG2 — Haiku Model Reliability Boundary
