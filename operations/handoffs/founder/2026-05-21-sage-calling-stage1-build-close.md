@@ -22,8 +22,8 @@ This session built Stage 1 of the two-stage Sage Calling build (D-9): the **iner
 ## Status Changes
 | Item | Old | New |
 |---|---|---|
-| Sage Calling — Stage 1 (content + schema) | Designed | **Wired** (→ Verified on founder migration run) |
-| `discovery_sessions` table | Scoped (D-3) | **Wired** (migration authored; not yet run in Supabase) |
+| Sage Calling — Stage 1 (content + schema) | Designed | **Verified** (migration run 2026-05-21; commit + push remain) |
+| `discovery_sessions` table | Scoped (D-3) | **Verified** (migration run + 5 VERIFY blocks confirmed 2026-05-21) |
 | Substrate Layer 1 `discovered_purpose` field (D-5) | Designed | **Verified** (in-session: tsc + 50/0 schema test) |
 | Sage Calling question library + clarification templates | Designed | **Verified** (90/0 content-integrity, verbatim vs design) |
 
@@ -55,7 +55,7 @@ No concept required re-explanation. KG1 (await all DB read/writes; no fire-and-f
 
 **Side-effect I caused (cleanup):** running `tsc` modified the tracked build cache `website/tsconfig.tsbuildinfo`. It's a generated incremental-build artefact — leave it out of the commit, or discard it with `git restore website/tsconfig.tsbuildinfo`. Untracked `reference/*.md`/`*.svg` and the NEXT-SESSION-PROMPT in `git status` are from prior sessions, not this one — not part of this commit.
 
-**Production state at session close:** **UNCHANGED — nothing deployed.** No public Sage Calling surface exists; the optional Layer 1 `discovered_purpose` field is unused until Stage 2; `discovery_sessions` is not yet created in Supabase (the migration is authored but not run). A10 Live + Verified. Substrate at A7 Verified. `SUBSTRATE_LAYER3_ENABLED` UNSET. `SUBSTRATE_R20A_GATE_ENABLED` UNSET. Option D Live. A Vercel rebuild on push will compile the additive type but change no runtime behaviour.
+**Production state at session close:** **UNCHANGED — nothing deployed.** No public Sage Calling surface exists; the optional Layer 1 `discovered_purpose` field is unused until Stage 2; `discovery_sessions` now exists in Supabase (migration run + 5 VERIFY blocks confirmed 2026-05-21) but is empty and unread — no code touches it until Stage 2. A10 Live + Verified. Substrate at A7 Verified. `SUBSTRATE_LAYER3_ENABLED` UNSET. `SUBSTRATE_R20A_GATE_ENABLED` UNSET. Option D Live. A Vercel rebuild on push will compile the additive type but change no runtime behaviour.
 
 ## Open Questions
 - **Retention window = 90 days** (set this session per D-7's delegation). Confirm — privacy-policy-adjacent; candidate for the Stage 1 lawyer-engagement track. Policy is documented-only at Stage 1; enforcement (sweep + on-demand R17h deletion endpoint) is Stage 2.
