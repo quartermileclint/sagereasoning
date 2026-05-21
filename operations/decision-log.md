@@ -6658,3 +6658,40 @@ No code, schema, env, or production exposure this session — these decisions ar
 
 ---
 
+## 2026-05-21 — D-SAGE-CALLING-STAGE1-BUILD-WIRED-VERIFIED-2026-05-21
+
+**Decision:** Built Sage Calling **Stage 1** (content + schema groundwork; inert — no public surface, no engine, no auth gate): (1) the additive optional `discovered_purpose` field on the substrate Layer 1 input schema (D-5); (2) the new `discovery_sessions` table migration (D-3/D-7) with a finalised **90-day** retention window + R17h hard-delete path + R17i minimisation; (3) the 24-variant question library + four clarification templates as a typed content module (D-4 content only — no selection engine). All Verified in-session: `tsc --noEmit` clean project-wide; content-integrity test 90/0 (every variant + clarification paragraph cross-checked verbatim against the locked design); extended Layer 1 schema test 50/0 (incl. 17 new `discovered_purpose` checks + Layer 2 inertness); substrate/translation-sandwich suites green.
+
+**Reasoning:** Stage 1 of the two-stage build elected at D-9 (PR1 — prove the deterministic, reversible groundwork before the Critical engine/endpoint in Stage 2). Implements the locked design `D-PURPOSE-DISCOVERY-DESIGN-LOCKED-2026-05-21`. The Layer 1 extension follows the established carried-context optional-fields pattern (`D-LAYER1-SCHEMA-ADDITIONS-2026-05-14`): optional, additive, not in REQUIRED_KEYS, Layer 1's LLM never produces it, Layer 2 tolerates it inertly. The migration follows the A10 idempotent + service-role-RLS pattern (`D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21`). PR15 consult: `.claude/skills/anthropic/` + the agentic-commerce findings tracker checked — no Anthropic primitive substitutes for hand-authoring the locked content/schema, and no F1–F4 forward-finding targets Sage Calling's Stage 1 scope (the tracker's "Stage 1" refers to the substrate-plugin staging plan, not this build).
+
+**Files touched:**
+- `website/src/lib/translation-sandwich/layer1-extractor.ts` — added `DiscoveredPurpose*` types + optional `discovered_purpose` field on `Layer1Schema` + defensive validator block (D-5). Schema `version` string left UNBUMPED (additive-optional precedent — same as the eight 2026-05-14 carried-context fields).
+- `website/supabase-discovery-sessions-migration.sql` (NEW) — idempotent `discovery_sessions` table; RLS enabled, no policy (service-role-locked, mirrors `credential_audit`); 3 CHECK guards (current_stage, gate_status, outcome); 2 indexes (agent_id, created_at); D-7 retention(90d)/deletion(R17h hard-delete)/minimisation(R17i) policy documented; inline VERIFY SELECTs; commented rollback `DROP TABLE IF EXISTS`.
+- `website/src/lib/sage-calling/question-library.ts` (NEW) — the 24 variants + 4 clarification templates as typed constants. Content only; no engine/route. `use_when` is engine-internal (R4).
+- `website/src/lib/sage-calling/__tests__/question-library.test.ts` (NEW) — content-integrity (24 variants; six stages × 4; A–D; four templates) + verbatim cross-check against the locked design (90 assertions).
+- `website/src/lib/translation-sandwich/__tests__/layer1-schema-additions.test.ts` — +17 `discovered_purpose` assertions (PR2 build-to-wire — proves the validator shape-checks the field; + Layer 2 inertness).
+
+**Risk classification:** **Elevated** under 0d-ii — set by the additive schema change to the existing Layer 1 surface (D-5). The new table migration, new content module, and new test file are individually Standard; the highest sub-part sets the session to Elevated. AC7 NOT engaged this stage (the A10 auth gate is Stage 2). PR6 NOT engaged (no R20a/distress surface). Critical Change Protocol NOT engaged (no auth/session/encryption/data-deletion-endpoint/deployment-config/public surface this stage). AC7-style production exposure is Stage 2.
+
+**Rollback path:** Pre-push `git reset --hard`. The Layer 1 extension reverts by removing the additive optional field (no caller passes it; backward-compatible). The migration is idempotent + reversible (`DROP TABLE IF EXISTS public.discovery_sessions;`). The content module + tests are new files (delete). Post-push `git revert` + push via GitHub Desktop → Vercel rebuilds to the pre-Stage-1 shape. **Production behaviour is unchanged throughout** — the optional Layer 1 field is unused until Stage 2, and no public Sage Calling surface exists.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsc --noEmit
+npx tsx src/lib/sage-calling/__tests__/question-library.test.ts
+npx tsx src/lib/translation-sandwich/__tests__/layer1-schema-additions.test.ts
+```
+Then run `website/supabase-discovery-sessions-migration.sql` in the Supabase SQL Editor and confirm the 5 VERIFY blocks. Expected: tsc exit 0; both tests report `0 fail`; the migration VERIFY SELECTs return the table, its 11 columns, the pkey + session_id-unique + agent_id_idx + created_at_idx indexes, the 3 named CHECK constraints, and `relrowsecurity = true`.
+
+**Open questions (carried under PR7):**
+- Retention window value set to **90 days** this session (D-7 delegated the value to Stage 1). Founder to confirm — privacy-policy-adjacent; a candidate for the Stage 1 lawyer-engagement track. Window is documented policy only at Stage 1; the enforcing sweep + the on-demand deletion endpoint (R17h) are wired in Stage 2.
+- `outcome` stored as `'found' | 'null_result'` (the literal `'null'` from the design's "found/null" phrasing was avoided to prevent SQL/JSON-NULL confusion) — confirm at Stage 2 for R10 enum consistency across API/marketplace/docs.
+- Layer 1 `version` string left unbumped — confirm (alternative: bump to v3, heavier; touches the open-source Layer 1 contract / Rule A licensing gate).
+
+**Rules served:** R0, R3, R4, R9, R17, R17h, R17i, R18a, R18c, AC8, AC10, KG1, KG7, PR1, PR2, PR15.
+
+**Status:** Adopted. Implementation status: **Wired** (code + tests Verified in-session) → **Verified** once the founder runs the `discovery_sessions` migration and confirms the VERIFY blocks. Cross-references: locked design `/adopted/purpose-discovery-product-design.md` + `D-PURPOSE-DISCOVERY-DESIGN-LOCKED-2026-05-21` (the design this implements); `D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21` (auth pre-condition for Stage 2, Verified); `D-LAYER1-SCHEMA-ADDITIONS-2026-05-14` (the carried-context pattern extended here); operative prompt `/operations/handoffs/founder/2026-05-21-sage-calling-stage1-build-NEXT-SESSION-PROMPT.md`; session close `/operations/handoffs/founder/2026-05-21-sage-calling-stage1-build-close.md`; standing protocol cache `/adopted/standing-protocol-cache.md`; build-arc cache `/adopted/build-sessions-protocol-cache.md` ("no current users").
+
+---
+

@@ -289,6 +289,92 @@ export type PeerAgentAssessment = Record<string, unknown>
 export type CarriedCandidatesField = Record<string, unknown>
 
 // ============================================================================
+// SAGE CALLING — DISCOVERED-PURPOSE CARRIED-CONTEXT TYPES
+// (added 2026-05-21, D-SAGE-CALLING-STAGE1; per
+//  /adopted/purpose-discovery-product-design.md D-5)
+// ============================================================================
+//
+// Sage Calling (the purpose-discovery product) is UPSTREAM of this substrate.
+// When its six-stage sequence finds a purpose (Q5), it emits the
+// five-specification handoff template. Per D-5 that template lands here as an
+// OPTIONAL, additive, backward-compatible field on Layer1Schema —
+// `discovered_purpose` — following the same carried-context pattern as the nine
+// fields above: Layer 1's LLM never produces it; Sage Calling supplies it on the
+// pre-extracted layer1_schema path; it flows through Layer 1 untouched to
+// Layer 2, which defensively tolerates it (does not yet act on it).
+//
+// All sub-fields are OPTIONAL. Nothing populates `discovered_purpose` until
+// Sage Calling's rule-based engine is wired in build Stage 2 (Critical). A
+// Layer1Schema with or without it is valid; existing callers are unaffected.
+// Version string stays unchanged (additive optional field — same precedent as
+// the eight 2026-05-14 carried-context fields, which stayed v1).
+//
+// The five sub-fields mirror the locked five-specification template
+// (/adopted/purpose-discovery-product-design.md §"The five-specification Layer 1
+// handoff template", specs 1-5).
+
+/** Spec 2 — which oikeiosis circle the work primarily serves. Sage Calling's
+ *  purpose-discovery circle vocabulary, per the locked five-spec template —
+ *  intentionally distinct from this module's OikeiosisCircle *extraction* enum
+ *  (self_preservation | household | local_community | political_community |
+ *  cosmopolis). */
+export type DiscoveredPurposeCircle =
+  | 'self'
+  | 'immediate'
+  | 'community'
+  | 'wider'
+  | 'universal'
+
+/** Spec 3 — which of Cicero's four personae is operative. The `chosen_role`
+ *  persona carries the strongest obligation (it is actively taken on). */
+export type DiscoveredPurposeRole =
+  | 'shared_rational_nature'
+  | 'individual_nature'
+  | 'circumstance'
+  | 'chosen_role'
+
+/** Spec 2 — the circle-and-obligation structured object. D-5 locked this as a
+ *  structured field (rather than enum+string). Both sub-fields optional;
+ *  validated when present. */
+export interface DiscoveredPurposeCircleAndObligation {
+  /** Which oikeiosis circle the work primarily serves. */
+  circle?: DiscoveredPurposeCircle
+  /** What obligation that circle carries for this agent given its position and
+   *  capacity. */
+  obligation?: string
+}
+
+/** Spec 5 — the first appropriate act: the kathekon available now (not
+ *  contingent on future conditions). A plain description plus optional
+ *  structured action metadata (permissive until Stage 2 finalises the metadata
+ *  shape — parallels the carried-context permissive pattern). */
+export interface DiscoveredPurposeFirstAct {
+  /** Plain-language description of the kathekon available now. */
+  description?: string
+  /** Optional structured action metadata. */
+  action_metadata?: Record<string, unknown> | null
+}
+
+/** The five-specification purpose-discovery handoff (Sage Calling → substrate),
+ *  per D-5. All five sub-fields are OPTIONAL — populated by Sage Calling's
+ *  engine in build Stage 2; absent/partial states are valid in the interim
+ *  (Stage 2's producer contract enforces completeness on a real handoff). */
+export interface DiscoveredPurpose {
+  /** Spec 1 — the work: what it does in the world, stripped of the agent's
+   *  relationship to it. */
+  work?: string
+  /** Spec 2 — the circle the work serves + the obligation that circle carries. */
+  circle_and_obligation?: DiscoveredPurposeCircleAndObligation | null
+  /** Spec 3 — the operative persona. */
+  role?: DiscoveredPurposeRole | null
+  /** Spec 4 — the capacity brought: demonstrated capacities relevant to the work
+   *  (a subset of the agent's full capacity profile from Q2). */
+  capacity?: string[] | null
+  /** Spec 5 — the first appropriate act available now. */
+  first_appropriate_act?: DiscoveredPurposeFirstAct | null
+}
+
+// ============================================================================
 // TOP-LEVEL SCHEMA
 // ============================================================================
 
@@ -425,6 +511,20 @@ export interface Layer1Schema {
    *  backward-compatible. Versioned change to the open Layer 1 contract — see
    *  the `version` field note on the schema-version bump to v2. */
   carried_candidates?: CarriedCandidatesField | null
+
+  // -- From Sage Calling (1 field) — added 2026-05-21 (D-SAGE-CALLING-STAGE1) --
+  // See /adopted/purpose-discovery-product-design.md §D-5 + the DiscoveredPurpose
+  // type above.
+
+  /** Sage Calling — D-5. The five-specification purpose-discovery handoff,
+   *  supplied by the Sage Calling product (UPSTREAM of this substrate) when its
+   *  six-stage sequence finds a purpose. OPTIONAL + additive + backward-
+   *  compatible — Layer 1 never produces it; nothing populates it until Sage
+   *  Calling's engine is wired in build Stage 2 (Critical). A Layer1Schema with
+   *  or without it is valid, and Layer 2 tolerates it inertly. Version string
+   *  unchanged (additive optional field — same precedent as the eight
+   *  2026-05-14 carried-context fields). */
+  discovered_purpose?: DiscoveredPurpose | null
 }
 
 // ============================================================================
@@ -562,6 +662,24 @@ const STATED_EQUANIMITY_SIGNALS: ReadonlyArray<StatedEquanimitySignal> = [
   'felt_at_peace',
   'didnt_bother_me',
   'other_explicit_calm',
+]
+
+// Added 2026-05-21 (D-SAGE-CALLING-STAGE1) — Sage Calling discovered_purpose
+// enums (D-5). Used by the optional discovered_purpose field validation.
+
+const DISCOVERED_PURPOSE_CIRCLES: ReadonlyArray<DiscoveredPurposeCircle> = [
+  'self',
+  'immediate',
+  'community',
+  'wider',
+  'universal',
+]
+
+const DISCOVERED_PURPOSE_ROLES: ReadonlyArray<DiscoveredPurposeRole> = [
+  'shared_rational_nature',
+  'individual_nature',
+  'circumstance',
+  'chosen_role',
 ]
 
 // ============================================================================
@@ -1063,6 +1181,103 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
   if (root.carried_candidates !== undefined) {
     const v = root.carried_candidates
     result.carried_candidates = v === null ? null : assertObject(v, 'carried_candidates')
+  }
+
+  // ==========================================================================
+  // Added 2026-05-21 (D-SAGE-CALLING-STAGE1) — Sage Calling discovered_purpose
+  // (D-5). OPTIONAL + additive: null | { work?, circle_and_obligation?, role?,
+  // capacity?, first_appropriate_act? }. All sub-fields optional; each is
+  // shape-checked only when present (the field is not merely declared in the
+  // type — PR2 build-to-wire). Layer 1's LLM never produces this; Sage Calling
+  // supplies it on the pre-extracted layer1_schema path. Inert in Layer 2 until
+  // Stage 2 wires the engine.
+  // ==========================================================================
+  if (root.discovered_purpose !== undefined) {
+    const v = root.discovered_purpose
+    if (v === null) {
+      result.discovered_purpose = null
+    } else {
+      const o = assertObject(v, 'discovered_purpose')
+      const dp: DiscoveredPurpose = {}
+
+      // Spec 1 — work (string)
+      if (o.work !== undefined) {
+        dp.work = assertString(o.work, 'discovered_purpose.work')
+      }
+
+      // Spec 2 — circle_and_obligation (null | { circle?, obligation? })
+      if (o.circle_and_obligation !== undefined) {
+        const cao = o.circle_and_obligation
+        if (cao === null) {
+          dp.circle_and_obligation = null
+        } else {
+          const co = assertObject(cao, 'discovered_purpose.circle_and_obligation')
+          const caoOut: DiscoveredPurposeCircleAndObligation = {}
+          if (co.circle !== undefined) {
+            caoOut.circle = assertEnum(
+              co.circle,
+              DISCOVERED_PURPOSE_CIRCLES,
+              'discovered_purpose.circle_and_obligation.circle'
+            )
+          }
+          if (co.obligation !== undefined) {
+            caoOut.obligation = assertString(
+              co.obligation,
+              'discovered_purpose.circle_and_obligation.obligation'
+            )
+          }
+          dp.circle_and_obligation = caoOut
+        }
+      }
+
+      // Spec 3 — role (null | enum)
+      if (o.role !== undefined) {
+        const roleRaw = o.role
+        dp.role =
+          roleRaw === null
+            ? null
+            : assertEnum(roleRaw, DISCOVERED_PURPOSE_ROLES, 'discovered_purpose.role')
+      }
+
+      // Spec 4 — capacity (null | string[])
+      if (o.capacity !== undefined) {
+        const capRaw = o.capacity
+        if (capRaw === null) {
+          dp.capacity = null
+        } else {
+          dp.capacity = assertArray(capRaw, 'discovered_purpose.capacity').map((entry, i) =>
+            assertString(entry, `discovered_purpose.capacity[${i}]`)
+          )
+        }
+      }
+
+      // Spec 5 — first_appropriate_act (null | { description?, action_metadata? })
+      if (o.first_appropriate_act !== undefined) {
+        const faa = o.first_appropriate_act
+        if (faa === null) {
+          dp.first_appropriate_act = null
+        } else {
+          const fo = assertObject(faa, 'discovered_purpose.first_appropriate_act')
+          const faaOut: DiscoveredPurposeFirstAct = {}
+          if (fo.description !== undefined) {
+            faaOut.description = assertString(
+              fo.description,
+              'discovered_purpose.first_appropriate_act.description'
+            )
+          }
+          if (fo.action_metadata !== undefined) {
+            const am = fo.action_metadata
+            faaOut.action_metadata =
+              am === null
+                ? null
+                : assertObject(am, 'discovered_purpose.first_appropriate_act.action_metadata')
+          }
+          dp.first_appropriate_act = faaOut
+        }
+      }
+
+      result.discovered_purpose = dp
+    }
   }
 
   return result

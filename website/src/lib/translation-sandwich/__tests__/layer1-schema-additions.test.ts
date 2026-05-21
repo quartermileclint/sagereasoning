@@ -405,6 +405,126 @@ assertThrowsValidation('VR-13 malformed required field still throws (motivation_
 }
 
 // ============================================================================
+// DP — Sage Calling discovered_purpose (D-5, added 2026-05-21
+//      D-SAGE-CALLING-STAGE1). Optional + additive; same carried-context
+//      pattern. Proves the validator shape-checks the new field (PR2).
+// ============================================================================
+
+/** A raw schema carrying a fully-populated discovered_purpose (all five specs). */
+function buildRawWithDiscoveredPurpose(): Record<string, unknown> {
+  return {
+    ...buildMinimalRaw(),
+    discovered_purpose: {
+      work: 'maintain the integrity of the shared knowledge base',
+      circle_and_obligation: {
+        circle: 'community',
+        obligation: 'keep the commons accurate for those who rely on it',
+      },
+      role: 'chosen_role',
+      capacity: ['structured extraction', 'consistency checking'],
+      first_appropriate_act: {
+        description: 'reconcile the three conflicting entries flagged today',
+        action_metadata: { priority: 'high' },
+      },
+    },
+  }
+}
+
+{
+  const r = validateLayer1Schema(buildMinimalRaw())
+  assert('DP-1  discovered_purpose absent (undefined) on minimal schema', r.discovered_purpose === undefined)
+}
+
+{
+  const raw = buildRawWithDiscoveredPurpose()
+  const r = validateLayer1Schema(raw)
+  assertEqual(
+    'DP-2  full discovered_purpose passes through verbatim',
+    JSON.stringify(r.discovered_purpose),
+    JSON.stringify(raw.discovered_purpose)
+  )
+}
+
+{
+  const r = validateLayer1Schema({ ...buildMinimalRaw(), discovered_purpose: null })
+  assert('DP-3  discovered_purpose accepts null and preserves it', r.discovered_purpose === null)
+}
+
+{
+  // All sub-fields optional — a partial discovered_purpose (work only) validates.
+  const r = validateLayer1Schema({ ...buildMinimalRaw(), discovered_purpose: { work: 'tend the commons' } })
+  assertEqual(
+    'DP-4  partial discovered_purpose (work only) validates',
+    JSON.stringify(r.discovered_purpose),
+    JSON.stringify({ work: 'tend the commons' })
+  )
+}
+
+{
+  // circle_and_obligation + first_appropriate_act accept null sub-objects.
+  const r = validateLayer1Schema({
+    ...buildMinimalRaw(),
+    discovered_purpose: { circle_and_obligation: null, role: null, capacity: null, first_appropriate_act: null },
+  })
+  assert(
+    'DP-5  discovered_purpose sub-fields accept null and preserve them',
+    r.discovered_purpose !== undefined &&
+      r.discovered_purpose !== null &&
+      r.discovered_purpose.circle_and_obligation === null &&
+      r.discovered_purpose.role === null &&
+      r.discovered_purpose.capacity === null &&
+      r.discovered_purpose.first_appropriate_act === null
+  )
+}
+
+assertThrowsValidation('DP-6  invalid circle enum throws', () =>
+  validateLayer1Schema({ ...buildMinimalRaw(), discovered_purpose: { circle_and_obligation: { circle: 'galaxy' } } })
+)
+assertThrowsValidation('DP-7  invalid role enum throws', () =>
+  validateLayer1Schema({ ...buildMinimalRaw(), discovered_purpose: { role: 'overlord' } })
+)
+assertThrowsValidation('DP-8  capacity non-array throws', () =>
+  validateLayer1Schema({ ...buildMinimalRaw(), discovered_purpose: { capacity: 'lots' } })
+)
+assertThrowsValidation('DP-9  capacity array of non-strings throws', () =>
+  validateLayer1Schema({ ...buildMinimalRaw(), discovered_purpose: { capacity: [1, 2] } })
+)
+assertThrowsValidation('DP-10 work non-string throws', () =>
+  validateLayer1Schema({ ...buildMinimalRaw(), discovered_purpose: { work: 123 } })
+)
+assertThrowsValidation('DP-11 circle_and_obligation non-object throws', () =>
+  validateLayer1Schema({ ...buildMinimalRaw(), discovered_purpose: { circle_and_obligation: 'self' } })
+)
+assertThrowsValidation('DP-12 first_appropriate_act non-object throws', () =>
+  validateLayer1Schema({ ...buildMinimalRaw(), discovered_purpose: { first_appropriate_act: 'do it' } })
+)
+assertThrowsValidation('DP-13 discovered_purpose non-object (string) throws', () =>
+  validateLayer1Schema({ ...buildMinimalRaw(), discovered_purpose: 'a purpose' })
+)
+
+{
+  const minimal = validateLayer1Schema(buildMinimalRaw())
+  const withDP = validateLayer1Schema(buildRawWithDiscoveredPurpose())
+
+  assertNoThrow('DP-14 applyMechanisms accepts a schema carrying discovered_purpose', () =>
+    applyMechanisms(withDP)
+  )
+  assertNoThrow('DP-15 detectTier1Trigger accepts a schema carrying discovered_purpose', () =>
+    detectTier1Trigger(withDP)
+  )
+  assertEqual(
+    'DP-16 applyMechanisms output identical with vs without discovered_purpose (inert)',
+    JSON.stringify(applyMechanisms(withDP)),
+    JSON.stringify(applyMechanisms(minimal))
+  )
+  assertEqual(
+    'DP-17 detectTier1Trigger output identical with vs without discovered_purpose (inert)',
+    JSON.stringify(detectTier1Trigger(withDP)),
+    JSON.stringify(detectTier1Trigger(minimal))
+  )
+}
+
+// ============================================================================
 // Report
 // ============================================================================
 
