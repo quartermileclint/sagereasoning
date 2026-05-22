@@ -14,7 +14,7 @@ process.env.MENTOR_ENCRYPTION_KEY = 'a'.repeat(64)
 
 import { openReflection, answerReflection, type ReflectServiceDeps, type MeterFn } from '../reflect-service'
 import { encryptPersistedState, type SageReflectSessionRow, type StoreResult } from '../session-store'
-import type { ReflectExtractor } from '../reflect-extractor'
+import { usageToCents, type ReflectExtractor } from '../reflect-extractor'
 import type { Q1Assessment, Q2Assessment, Q3Assessment, Q4Assessment, SessionSummary } from '../engine'
 import type { SageAssentFeedResult, FeedParams } from '../sage-assent-feed'
 
@@ -148,6 +148,18 @@ async function run(): Promise<void> {
     const r = await answerReflection('s6', 'account q1', deps, failMeter)
     assert('SVC-6  meter failure → server error', r.ok === false && r.code === 'server')
     assert('SVC-6b state NOT advanced (still at Q1; safely retryable)', store.get('s6')?.current_step === before && before === 'Q1')
+  }
+
+  // COST — metering cents conversion: correct magnitude + integer-roundable.
+  // Regression for the increment_api_usage integer-contract failure (2026-05-22):
+  // the float cost must convert via /10000 (1 cent = 10,000 microcents) and round
+  // to a non-negative integer before the RPC.
+  {
+    const c = usageToCents({ input_tokens: 100, output_tokens: 50 }) // (100*3 + 50*15)/10000
+    assert('COST-1 microcents→cents magnitude (/10000)', Math.abs(c - 0.105) < 1e-9, `got ${c}`)
+    assert('COST-2 a single Layer-1 call is sub-cent', c < 1)
+    assert('COST-3 rounds to a non-negative integer for the RPC', Number.isInteger(Math.round(c)) && Math.round(c) >= 0)
+    assert('COST-4 zero usage → 0 cents', usageToCents({ input_tokens: 0, output_tokens: 0 }) === 0)
   }
 
   console.log(`\n${passCount} pass / ${failCount} fail`)

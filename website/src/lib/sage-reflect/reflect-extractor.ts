@@ -108,9 +108,13 @@ export function addUsage(a: ExtractorTokenUsage, b: ExtractorTokenUsage): Extrac
   return { input_tokens: a.input_tokens + b.input_tokens, output_tokens: a.output_tokens + b.output_tokens }
 }
 
-/** Convert a usage to integer-friendly cents for the loop bill (microcents / 1000). */
+/** Convert a usage to cents for the loop bill. 1 cent = 10,000 microcents (1
+ *  microcent = $0.000001), so cents = microcents / 10000 — matching the canonical
+ *  loop-cost-tracker formula `(tokens/1e6) * USD_per_million * 100`. Returns a
+ *  PRECISE FLOAT; rounding to the integer cents the `increment_api_usage` RPC
+ *  requires happens at the meter/billing boundary (loop-cost-tracker convention). */
 export function usageToCents(usage: ExtractorTokenUsage): number {
-  return sonnetCostMicrocents(usage.input_tokens, usage.output_tokens) / 1000
+  return sonnetCostMicrocents(usage.input_tokens, usage.output_tokens) / 10000
 }
 
 export interface ExtractResult<A> {

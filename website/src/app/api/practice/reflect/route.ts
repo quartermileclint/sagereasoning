@@ -137,7 +137,13 @@ async function verifyReflectToken(request: NextRequest, agent_id: string): Promi
 // ============================================================================
 
 function makeMeter(loopId: string, apiKeyId: string, agentId: string): MeterFn {
-  return async (costCents: number) => {
+  return async (rawCostCents: number) => {
+    // The increment_api_usage RPC stores INTEGER cents — round at the billing
+    // boundary (loop-cost-tracker convention). A sub-cent Layer-1 cost rounds to 0,
+    // billing the loop at base rate (the Sage Calling posture). `rawCostCents > 0`
+    // still records that an LLM call happened (internalCalls / modelsUsed).
+    const costCents = Math.round(rawCostCents)
+    const calledModel = rawCostCents > 0
     const bill = computeLoopBill(costCents)
     const now = new Date()
     const persist = await recordLoopBilling({
@@ -151,10 +157,10 @@ function makeMeter(loopId: string, apiKeyId: string, agentId: string): MeterFn {
       overageFired: bill.overage_fired,
       totalCents: bill.total_cents,
       anthropicCostCents: costCents,
-      internalCalls: costCents > 0 ? 1 : 0,
+      internalCalls: calledModel ? 1 : 0,
       totalInputTokens: 0,
       totalOutputTokens: 0,
-      modelsUsed: costCents > 0 ? [MODEL_DEEP] : [],
+      modelsUsed: calledModel ? [MODEL_DEEP] : [],
       endpoint: 'other',
       year: now.getUTCFullYear(),
       month: now.getUTCMonth() + 1,
