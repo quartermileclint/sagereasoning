@@ -6967,3 +6967,32 @@ Both migrations flip **Wired → Verified, 2026-05-22**. Two cosmetic VERIFY-com
 **Status:** Adopted. Implementation status: Sage Reflect Stage B — **Verified in-session** (tsc clean; 163/0; PR2 invocation proof). Goes **Live / Verified (gated)** when the founder sets `MENTOR_ENCRYPTION_KEY` + flips `SAGE_REFLECT_ENABLED=true` and runs the live smoke test — completing the Calling → Reasoning → Assent → Reflect loop (the fourth Sage Practice product). Cross-references: `D-SAGE-REFLECT-STAGE-A-BUILD-WIRED-VERIFIED-2026-05-22`; `D-SAGE-REFLECT-DESIGN-LOCKED-2026-05-22`; `/adopted/sage-reflect-product-design.md`; `/drafts/sage-reflect-build-staging-plan.md` Stage B; predecessor close `/operations/handoffs/founder/2026-05-22-sage-reflect-stage-a-build-close.md`; this session's close + the Stage B prompt.
 
 ---
+
+## 2026-05-22 — D-SAGE-REFLECT-STAGE-B-METERING-FIX-AND-LIVE-VERIFICATION-2026-05-22
+
+**Decision:** Fixed two metering defects in the Stage-B endpoint surfaced by the live smoke test, then completed the founder live-verification (Critical Change Protocol step 5) against production with `SAGE_REFLECT_ENABLED=true`. **Sage Reflect is now Live / Verified (gated)** — the fourth Sage Practice product; the Calling → Reasoning → Assent → Reflect loop is closed.
+
+**The defects (both AI-introduced; found via the post-deploy log line added this session):** the answer path returned 503 `metering failed` because `increment_api_usage` rejected a non-integer: `invalid input syntax for type integer: "1.02"`. Root cause (Diagnostic-certain): (1) the per-call Sonnet cost was passed to `recordLoopBilling` as a raw float — the RPC stores INTEGER cents, and the loop-cost-tracker convention is "rounding to integer cents happens at the billing-construction step"; the route now rounds (`Math.round`) at the meter boundary, recording sub-cent Layer-1 costs as 0 (base-rate loop, the Sage Calling posture) while still flagging `internalCalls`/`modelsUsed` when a call occurred. (2) `usageToCents` divided microcents by 1000; 1 cent = 10,000 microcents, so the figure was 10× inflated — corrected to `/10000` (matches the canonical `(tokens/1e6)·USD_per_million·100`). The Sonnet extraction itself was always succeeding (the `1.02` was a real computed cost); only the billing write failed. Two earlier same-session fixes also landed on the answer path: a static `decryptPersistedState` import (removed a fragile dynamic `import()`), and the server-error log line that made this diagnosis possible. Regression locked: `reflect-service.test.ts` COST-1..4 (magnitude `/10000`; sub-cent; integer-roundable; zero-usage→0).
+
+**Live verification (founder-run, production, `agent_reflect_smoke_v1` unscoped `sr_atl_` credential):** auth — no token / bad token / valid+wrong-agent → **401**, valid+matching → **200**. Full walk on real Sonnet calls: Q1→Q2→Q3→**FD-R1 verification step**→Q4→Q5→Q6→**complete**, `exit_path:'sage_reasoning'` (RS-1). FD-R3 fired live (the canned smoke answer's bare pressure-assent denial → `profile_update_confidence:'low'` + a `pressure_assent` scrutiny flag). Completion surfaced the Sage Assent profile read-back (grade `pre_progress`; per-domain `katorthoma_proximity_by_domain`; dimension levels; `direction_of_travel`), the developer note, and the R19d mandatory mirror note. Harm-flagged open → `status:'flagged'`, the Zone-3 developer note, no reflection (R20a/SR-9). Every Stage-B surface confirmed live: auth, kill switch, translation-sandwich (Sonnet Q1–Q4), deterministic engine, FD-R1 + FD-R3, Sage Assent feed, SR-15 per-domain proximity, mirror principle, Zone-3 boundary, metering.
+
+**Files touched:**
+- `website/src/app/api/practice/reflect/route.ts` — `makeMeter` rounds to integer cents; added the server-error log line (observability).
+- `website/src/lib/sage-reflect/reflect-extractor.ts` — `usageToCents` microcents→cents `/10000`.
+- `website/src/lib/sage-reflect/reflect-service.ts` — static `decryptPersistedState` import (removed dynamic `import()`).
+- `website/src/lib/sage-reflect/__tests__/reflect-service.test.ts` — COST-1..4 regression (suite now 20/0).
+- `smoke-test-reflect.sh` (repo-root local helper) — fixed sections 1–3 quoting; adaptive Q-walk.
+
+**Risk classification:** **Critical** (changes to the live authenticated endpoint's metering path; AC7 surface). But strictly repairs an already-503ing path; behaviour-preserving for auth/flag/safety. Verified: `tsc` clean; 8 suites green (Stage A 115/0 + Stage B 52/0 — reflect-service now 20/0); live smoke test passed end-to-end.
+
+**Rollback path:** unset `SAGE_REFLECT_ENABLED` → all calls 503, no redeploy; or `git revert` the metering-fix commit → the answer path returns to its prior (broken) 503, no other surface affected.
+
+**Production state (CHANGED this verification):** `SAGE_REFLECT_ENABLED=true` and `MENTOR_ENCRYPTION_KEY` set in Vercel; `POST /api/practice/reflect` **Live**. Sage Calling Live (gated); substrate A7 Verified; A10 Live + Verified; Layer-3 + R20a substrate gates UNSET. Build-arc "no current users" still holds (founder + test logins only).
+
+**Open questions (carried under PR7):** unchanged from `D-SAGE-REFLECT-STAGE-B-BUILD-WIRED-VERIFIED-2026-05-22` (Zone-3 harm-flag carrier ack; cross-session context population; Q5 sandwich-escalation; precise R5 cost-health microcent tracking — the integer-cents loop bill rounds sub-cent Sonnet costs to 0, so a microcent-precise cost-health accumulator is the faithful R5 follow-on). Plus founder cleanup: delete `smoke-reflect-%` rows; revoke `agent_smoketest_v1` + `agent_reflect_smoke_v1` test credentials; optionally delete the local `smoke-test-reflect.sh`.
+
+**Rules served:** R0, R4, R5, R17b, AC7, KG1, PR2, PR4, PR10 (Diagnostic-certain root-cause), PR15.
+
+**Status:** Adopted. Implementation status: **Sage Reflect — Live / Verified (gated)** as of 2026-05-22. Cross-references: `D-SAGE-REFLECT-STAGE-B-BUILD-WIRED-VERIFIED-2026-05-22`; the Stage B close; `/adopted/sage-reflect-product-design.md` (LOCKED).
+
+---
