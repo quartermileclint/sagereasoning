@@ -39,6 +39,7 @@ import {
   persistProgress as realPersistProgress,
   persistCompletion as realPersistCompletion,
   persistZone3Block as realPersistZone3Block,
+  decryptPersistedState,
   type ReflectPersistedState,
   type KathekonLogEntry,
   type StoreResult,
@@ -259,7 +260,6 @@ export async function answerReflection(
   // Reconstruct {session_summary, turns} from the encrypted blob (R17b).
   let state: ReflectPersistedState
   try {
-    const { decryptPersistedState } = await import('./session-store')
     state = decryptPersistedState({
       ciphertext: row.response_history_ciphertext,
       meta: row.response_history_meta,
@@ -434,7 +434,6 @@ export async function peekReflection(
 
   let state: ReflectPersistedState
   try {
-    const { decryptPersistedState } = await import('./session-store')
     state = decryptPersistedState({ ciphertext: row.response_history_ciphertext, meta: row.response_history_meta })
   } catch (e) {
     return { ok: false, code: 'server', error: `decrypt failed: ${(e as Error).message}` }

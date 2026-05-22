@@ -183,6 +183,10 @@ function respond(session_id: string, result: ServiceResult): NextResponse {
   if (!result.ok) {
     if (result.code === 'not_found') return buildReflectNotFoundResponse()
     if (result.code === 'conflict') return buildReflectConflictResponse('This reflection session has no pending question to answer.')
+    // Surface the specific server-error reason to Vercel logs (observability):
+    // 'extraction failed: …' (Layer-1 Sonnet), 'decrypt failed: …', 'metering failed',
+    // or a store error. The client still gets the vague non-leaking 503 (R4).
+    console.error('[api/practice/reflect] server error:', result.error)
     return buildReflectServerErrorResponse()
   }
   const { decision, loop_headers } = result.value
