@@ -60,6 +60,7 @@ import type {
   FabricationRiskLevel,
   ScrutinyFlag,
   SageCallingTrigger,
+  SessionSummary,
   PhantasiaDistortion,
   SynkatathesisFailure,
   HormePattern,
@@ -252,22 +253,40 @@ export function deriveCompletionFields(outcome: ReflectOutcome): {
   }
 }
 
-/** R17b — encrypt the verbatim response history (the intimate free text) for
- *  storage. Returns the ciphertext + meta column pair. Reads MENTOR_ENCRYPTION_KEY
- *  at call time (server-encryption is lazy). */
-export function encryptResponseHistory(history: readonly ReflectTurn[]): EncryptedField {
-  // Persist the per-turn verbatim responses only — the structured assessments are
-  // already captured (categorically) in the plaintext log columns (R17i).
-  const responses = history.map((t) => ({ step: t.step, response: t.response }))
-  return encryptForStorage(responses)
+/**
+ * The Stage-B resumable session state, persisted (encrypted) across the stateless
+ * HTTP calls of POST /api/practice/reflect.
+ *
+ * WHY THE FULL TURNS (not just verbatim responses): the deterministic engine's
+ * nextStep() reconstructs its routing + outcome from the STRUCTURED per-turn
+ * assessments (Q2 pressure-assent, Q4 calibration, Q5 deltas, the FD-R1 result,
+ * the Q6 response-shape, the RS-4 ladder). The plaintext log columns are written
+ * only at completion and omit several of these, so they cannot resume a mid-run
+ * sequence. The full ReflectTurn[] + the session summary are therefore the
+ * minimum state needed to resume (R17i — necessary operational state, not extra).
+ *
+ * R17b posture is UNCHANGED from Stage A: the same AES-256-GCM /
+ * MENTOR_ENCRYPTION_KEY mechanism encrypts this blob (the intimate verbatim
+ * responses live inside the turns); the five CATEGORICAL log columns remain
+ * plaintext-queryable (founder-confirmed verbatim-only split, 2026-05-22). Only
+ * the encrypted plaintext PAYLOAD shape grew from {step,response}[] to this state.
+ */
+export interface ReflectPersistedState {
+  readonly session_summary: SessionSummary
+  readonly turns: readonly ReflectTurn[]
 }
 
-/** R17b — decrypt the stored response history back to the per-turn responses. */
-export function decryptResponseHistory(
-  field: EncryptedField,
-): { step: string; response: string }[] {
+/** R17b — encrypt the resumable session state (intimate free text + the structured
+ *  turns needed to resume the engine). Reads MENTOR_ENCRYPTION_KEY at call time
+ *  (server-encryption is lazy). */
+export function encryptPersistedState(state: ReflectPersistedState): EncryptedField {
+  return encryptForStorage(state)
+}
+
+/** R17b — decrypt the stored session state back to {session_summary, turns}. */
+export function decryptPersistedState(field: EncryptedField): ReflectPersistedState {
   const plaintext = decryptFromStorage(field)
-  return JSON.parse(plaintext) as { step: string; response: string }[]
+  return JSON.parse(plaintext) as ReflectPersistedState
 }
 
 /** Pure: the ISO cutoff timestamp for the retention sweep. Exported for tests. */
@@ -358,11 +377,11 @@ export async function createSession(
 export async function persistProgress(
   session_id: string,
   currentStep: ReflectStepId,
-  history: readonly ReflectTurn[],
+  state: ReflectPersistedState,
 ): Promise<StoreResult<void>> {
   try {
     const admin = getAdminClient()
-    const enc = encryptResponseHistory(history) // R17b
+    const enc = encryptPersistedState(state) // R17b
     const { error } = await admin
       .from(SESSIONS)
       .update({
@@ -385,14 +404,14 @@ export async function persistProgress(
  */
 export async function persistCompletion(
   session_id: string,
-  history: readonly ReflectTurn[],
+  state: ReflectPersistedState,
   outcome: ReflectOutcome,
   completedAt: string = new Date().toISOString(),
 ): Promise<StoreResult<void>> {
   try {
     const admin = getAdminClient()
-    const enc = encryptResponseHistory(history) // R17b
-    const logs = buildLogs(history) // KG7 — arrays direct
+    const enc = encryptPersistedState(state) // R17b
+    const logs = buildLogs(state.turns) // KG7 — arrays direct
     const fields = deriveCompletionFields(outcome)
     const { error } = await admin
       .from(SESSIONS)
@@ -409,6 +428,45 @@ export async function persistCompletion(
     return { ok: true, value: undefined }
   } catch (e) {
     return { ok: false, error: `persistCompletion threw: ${(e as Error).message}` }
+  }
+}
+
+/**
+ * SR-9 / R20a Zone-3 block — persist a harm-flagged session as completed WITHOUT
+ * running the reflection: record the contrary kathekon failure (profile update) +
+ * the developer note, set current_step='complete', exit_path/rs_class left null
+ * (the boundary is neither a sage_reasoning nor a sage_calling exit). One awaited
+ * UPDATE. The encrypted state preserves the audit trail (R0). Sage Reflect does
+ * NOT feed a fabricated grade move from a harm flag — the contrary kathekon log
+ * entry is the minimal honest profile record.
+ */
+export async function persistZone3Block(
+  session_id: string,
+  state: ReflectPersistedState,
+  kathekonLog: KathekonLogEntry[],
+  developerNote: string,
+  completedAt: string = new Date().toISOString(),
+): Promise<StoreResult<void>> {
+  try {
+    const admin = getAdminClient()
+    const enc = encryptPersistedState(state) // R17b
+    const { error } = await admin
+      .from(SESSIONS)
+      .update({
+        current_step: 'complete',
+        response_history_ciphertext: enc.ciphertext,
+        response_history_meta: enc.meta, // KG7 — object
+        kathekon_quality_log: kathekonLog, // KG7 — array, direct
+        scrutiny_flags: [], // KG7 — array, direct
+        developer_note: developerNote,
+        fabrication_risk_level: 'low',
+        completed_at: completedAt,
+      })
+      .eq('session_id', session_id)
+    if (error) return { ok: false, error: `persistZone3Block: ${error.message}` }
+    return { ok: true, value: undefined }
+  } catch (e) {
+    return { ok: false, error: `persistZone3Block threw: ${(e as Error).message}` }
   }
 }
 

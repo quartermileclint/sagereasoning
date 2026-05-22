@@ -26,11 +26,12 @@ import {
   initialSessionInsert,
   buildLogs,
   deriveCompletionFields,
-  encryptResponseHistory,
-  decryptResponseHistory,
+  encryptPersistedState,
+  decryptPersistedState,
   computeRetentionCutoffIso,
   proximityDomainsToRow,
   RETENTION_WINDOW_DAYS,
+  type ReflectPersistedState,
 } from '../session-store'
 import type { ReflectTurn, ReflectOutcome } from '../engine'
 import type { PerDomainProximity } from '../proximity-domains'
@@ -126,19 +127,29 @@ function assert(label: string, condition: boolean, detail?: string): void {
 }
 
 // ============================================================================
-// ENC — R17b encrypt/decrypt round-trip
+// ENC — R17b encrypt/decrypt round-trip (Stage-B persisted state: summary + turns)
 // ============================================================================
 {
-  const history: ReflectTurn[] = [
-    { step: 'Q1', assessment: { distortions: [] }, response: 'the deadline felt like a genuine evil' },
-    { step: 'Q2', assessment: { failures: [], pressure_assent: { admitted: false, account_given: true, moments: [] } }, response: 'I withheld assent' },
-  ]
-  const enc = encryptResponseHistory(history)
+  const state: ReflectPersistedState = {
+    session_summary: {
+      purpose_at_open: 'ship the triage tooling',
+      circle_at_open: 'community',
+      role_at_open: 'maintainer',
+      capacity_at_open: ['triage'],
+      sage_reasoning_passes: 1,
+    },
+    turns: [
+      { step: 'Q1', assessment: { distortions: [] }, response: 'the deadline felt like a genuine evil' },
+      { step: 'Q2', assessment: { failures: [], pressure_assent: { admitted: false, account_given: true, moments: [] } }, response: 'I withheld assent' },
+    ],
+  }
+  const enc = encryptPersistedState(state)
   assert('ENC-1  ciphertext is a non-empty base64 string', typeof enc.ciphertext === 'string' && enc.ciphertext.length > 0)
   assert('ENC-2  meta is a PLAIN OBJECT (KG7 jsonb_typeof=object precondition)', typeof enc.meta === 'object' && enc.meta !== null && !Array.isArray(enc.meta))
   assert('ENC-3  meta carries iv/authTag/algorithm/version', !!enc.meta.iv && !!enc.meta.authTag && enc.meta.algorithm === 'AES-256-GCM' && enc.meta.version === 1)
-  const round = decryptResponseHistory(enc)
-  assert('ENC-4  round-trip recovers the verbatim responses', round.length === 2 && round[0].response === 'the deadline felt like a genuine evil' && round[1].step === 'Q2')
+  const round = decryptPersistedState(enc)
+  assert('ENC-4  round-trip recovers the full turns', round.turns.length === 2 && round.turns[0].response === 'the deadline felt like a genuine evil' && round.turns[1].step === 'Q2')
+  assert('ENC-4b round-trip recovers the session summary', round.session_summary.purpose_at_open === 'ship the triage tooling' && round.session_summary.circle_at_open === 'community')
   // Ciphertext does not leak plaintext.
   assert('ENC-5  ciphertext does not contain the plaintext', !enc.ciphertext.includes('genuine evil'))
 }
