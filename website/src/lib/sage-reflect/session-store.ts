@@ -64,6 +64,7 @@ import type {
   PhantasiaDistortion,
   SynkatathesisFailure,
   HormePattern,
+  PriorSessionSummary,
 } from './engine'
 
 // ============================================================================
@@ -113,6 +114,10 @@ export interface SageReflectSessionRow {
   scrutiny_flags: ScrutinyFlag[]
   developer_note: string | null
   sage_calling_trigger: SageCallingTrigger | null
+  /** A1 (PR7) cross-session scalars, written at completion. Optional + nullable:
+   *  pre-A1-migration rows + non-completed rows carry null. */
+  complexity?: number | null
+  calibration_all_correct?: boolean | null
   started_at: string
   completed_at: string | null
   created_at: string
@@ -254,6 +259,42 @@ export function deriveCompletionFields(outcome: ReflectOutcome): {
 }
 
 /**
+ * A1 (PR7) — derive the cross-session scalars written at completion so the NEXT
+ * session's open-path read can populate FD-R2 / Q1-3-null / FD-R4 in cleartext
+ * (R17b stays intact — no decryption of a prior session's intimate blob is needed).
+ * PURE.
+ *   • complexity = the completed turn count (== the engine's currentComplexity =
+ *     history.length used by FD-R2).
+ *   • calibration_all_correct = the Q4 calibration was reviewed AND clean
+ *     (verdicts_reviewed > 0 AND discrepancies_found === 0) — the FD-R4 streak input.
+ *     No Q4 turn, or no verdicts reviewed → false (there is nothing to be "all
+ *     correct" about; a non-reviewing session does not extend a deference streak).
+ */
+export function deriveCrossSessionScalars(state: ReflectPersistedState): {
+  complexity: number
+  calibration_all_correct: boolean
+} {
+  const q4 = state.turns.find((t) => t.step === 'Q4')
+  const cal = q4 && q4.step === 'Q4' ? q4.assessment.calibration : null
+  return {
+    complexity: state.turns.length,
+    calibration_all_correct: !!cal && cal.verdicts_reviewed > 0 && cal.discrepancies_found === 0,
+  }
+}
+
+/** A1 (PR7) — the cross-session inputs the engine consumes (FD-R2 + FD-R4 + Q1-3-null). */
+export interface CrossSessionContext {
+  prior_sessions: PriorSessionSummary[]
+  sage_assent_agreement_streak: number
+}
+
+/** Empty cross-session context — the fail-closed default (== pre-A1 behaviour). */
+export const EMPTY_CROSS_SESSION_CONTEXT: CrossSessionContext = {
+  prior_sessions: [],
+  sage_assent_agreement_streak: 0,
+}
+
+/**
  * The Stage-B resumable session state, persisted (encrypted) across the stateless
  * HTTP calls of POST /api/practice/reflect.
  *
@@ -351,6 +392,58 @@ export async function getSession(
   }
 }
 
+/**
+ * A1 (PR7) — read the cross-session context for an agent from the COMPLETED rows:
+ * the last 3 (most-recent-first) mapped to PriorSessionSummary, plus the
+ * Sage-Assent agreement streak (consecutive most-recent completed sessions whose
+ * calibration_all_correct is true). All in cleartext columns — no decryption of any
+ * prior session's intimate blob (R17b intact).
+ *
+ * total_failures mirrors the engine's countFailures EXACTLY: distortions + assent
+ * failures + impulse patterns (the three causal-layer plaintext logs), NOT just
+ * synkatathesis (resolves the A1 build open-question against engine.ts).
+ *
+ * FAIL-CLOSED (design-pack A1): on ANY error this returns the EMPTY context rather
+ * than throwing — a bad read degrades to today's behaviour (no cross-session
+ * signal), never a 503. A bounded window (20) caps the streak walk; the FD-R4
+ * threshold is 5, so the cap never changes a verdict.
+ */
+export async function getCrossSessionContext(agent_id: string): Promise<CrossSessionContext> {
+  try {
+    const admin = getAdminClient()
+    const { data, error } = await admin
+      .from(SESSIONS)
+      .select('phantasia_distortion_log, synkatathesis_failure_log, horme_pattern_log, complexity, calibration_all_correct')
+      .eq('agent_id', agent_id)
+      .eq('current_step', 'complete')
+      .order('completed_at', { ascending: false })
+      .limit(20)
+    if (error || !data) {
+      if (error) console.warn('[session-store] getCrossSessionContext read failed; empty context:', error.message)
+      return { ...EMPTY_CROSS_SESSION_CONTEXT }
+    }
+
+    const arrLen = (x: unknown): number => (Array.isArray(x) ? x.length : 0)
+    const prior_sessions: PriorSessionSummary[] = data.slice(0, 3).map((r) => ({
+      total_failures:
+        arrLen(r.phantasia_distortion_log) + arrLen(r.synkatathesis_failure_log) + arrLen(r.horme_pattern_log),
+      complexity: typeof r.complexity === 'number' ? r.complexity : 0,
+      q1_clean: arrLen(r.phantasia_distortion_log) === 0,
+    }))
+
+    let sage_assent_agreement_streak = 0
+    for (const r of data) {
+      if (r.calibration_all_correct === true) sage_assent_agreement_streak += 1
+      else break
+    }
+
+    return { prior_sessions, sage_assent_agreement_streak }
+  } catch (e) {
+    console.warn('[session-store] getCrossSessionContext threw; empty context:', (e as Error).message)
+    return { ...EMPTY_CROSS_SESSION_CONTEXT }
+  }
+}
+
 /** Create a new reflection-session row (minimised initial state). */
 export async function createSession(
   session_id: string,
@@ -413,6 +506,7 @@ export async function persistCompletion(
     const enc = encryptPersistedState(state) // R17b
     const logs = buildLogs(state.turns) // KG7 — arrays direct
     const fields = deriveCompletionFields(outcome)
+    const cross = deriveCrossSessionScalars(state) // A1 (PR7) — complexity + calibration_all_correct
     const { error } = await admin
       .from(SESSIONS)
       .update({
@@ -421,6 +515,7 @@ export async function persistCompletion(
         response_history_meta: enc.meta, // KG7 — object
         ...logs, // five JSONB arrays, direct
         ...fields, // scalars + scrutiny_flags array + sage_calling_trigger object
+        ...cross, // A1 — complexity (int) + calibration_all_correct (bool)
         completed_at: completedAt,
       })
       .eq('session_id', session_id)

@@ -1,6 +1,7 @@
 # Sage Reflect — Post-Action Reflection Product — Design (DRAFT — pending founder lock)
 
 **Status:** **LOCKED** 2026-05-22 under `D-SAGE-REFLECT-DESIGN-LOCKED-2026-05-22`. Moved from `/drafts/sage-reflect-product-design.md` (Elevated archive step; predecessor preserved in git history). Adopts the draft `D-SAGE-REFLECT-DESIGN-DRAFTED-2026-05-21`. Three lockable open items resolved at lock — route name (`/api/practice/reflect`), per-virtue-domain proximity (Sage Reflect computes it; SR-15), and `evaluated_actions` shape (type-compatible; table is a Stage-A migration). See the updated "Open items" section.
+**Amended 2026-05-23 under `D-TRACK-FOLLOWONS-A-BUILD-2026-05-23`:** (i) **A3(a)** — SR-9's harm-flag *carrier field* is now stated explicitly in the note below the Locked-design-decisions table; the two-signal reading is confirmed **canonical** (founder option (a) at the 2026-05-23 track-follow-ons gate). Governance-only; **no code change** (the live `zone3-boundary.ts` already implements it). (ii) **A4** — the R5 Layer-1 cost bound is raised from ≤4 to **≤5** (Q1–Q4 + one conditional Q5 escalation when the answer is ambiguous; see the R5 cost note under "Model selection"). The original SR-9 row and bullet are unchanged; the prior version is preserved in git history.
 **Stream:** founder. **Tier of the design session:** `governance` (Standard) — design only, no code.
 **Date drafted:** 2026-05-21.
 **Source input:** `/inbox/reflect mentor input.rtf` (the clinical-mode build specification; extracted to `/operations/` working text this session).
@@ -169,7 +170,7 @@ The **semantic scoring of free-text answers** is where judgement is required —
 | Q5 trajectory deltas; Q6 response-shape classification | **Deterministic structural rules first; translation-sandwich escalation only if ambiguous** | Q6 in particular maps onto a small RS-1..RS-4 decision; lexical/structural cues resolve most cases. Ambiguity (RS-4) is handled by the deterministic supporting-question ladder before any LLM escalation. |
 | Grade / proximity / progress-dimension / direction-of-travel updates | **Deterministic — and delegated to Sage Assent's existing engine** (see below) | Already deterministic in `trust-layer/grade-engine` + `evaluation-window`; do not re-implement. |
 
-**Model selection (PR4 / AC1, cache row "Layer 1 translation = Sonnet"):** the Layer 1 feature extraction for Q1–Q4 uses **Sonnet** (multi-mechanism structured extraction; Haiku unreliable here per KG2). No safety-critical Haiku call is in this product (the distress/Zone-3 path is a deterministic boundary check — see R20a engagement). **R5 cost note:** each semantic-scored question is one substrate call; a full six-question pass is bounded (≤4 Layer-1 calls + deterministic remainder) and must be costed against the R5 2x guardrail at build time.
+**Model selection (PR4 / AC1, cache row "Layer 1 translation = Sonnet"):** the Layer 1 feature extraction for Q1–Q4 uses **Sonnet** (multi-mechanism structured extraction; Haiku unreliable here per KG2). No safety-critical Haiku call is in this product (the distress/Zone-3 path is a deterministic boundary check — see R20a engagement). **R5 cost note:** each semantic-scored question is one substrate call; a full six-question pass is bounded (**≤5 Layer-1 calls** — Q1–Q4 always, plus **one conditional Q5 escalation** when the Q5 answer is ambiguous, per A4/PR7 — + deterministic remainder) and must be costed against the R5 2x guardrail at build time. *(Bound raised ≤4→≤5 on 2026-05-23 under `D-TRACK-FOLLOWONS-A-BUILD-2026-05-23`; see the Status amendment.)*
 
 ---
 
@@ -305,6 +306,13 @@ Sage Calling opens at its Q1 with these learnings already present — it does **
 | **SR-13** | Kill switch + route name | **Global `SAGE_REFLECT_ENABLED` flag (off by default)**; route **`/api/practice/reflect` (LOCKED 2026-05-22)** | Matches the Sage Calling go-live discipline (503 until flipped). Route confirmed at lock; avoids collision with the human `/api/reflect` + `/api/mentor/private/reflect`. |
 | **SR-14** | Authentication | **Reuse A10 `sr_atl_` credentials** (the Sage Assent credential), unscoped, as Sage Calling does | Coherent with the cycle; one credential across the agent's practice. |
 | **SR-15** | Per-virtue-domain proximity (KP-03/04) | **Sage Reflect computes + stores per-domain proximity itself**; ATL stores aggregate only (confirmed by code read 2026-05-22) | Founder election at lock 2026-05-22, overriding the design's defer-to-ATL-enhancement recommendation. Gives KP-03/04 (unity-thesis weakest-link aggregation) a home now rather than waiting on an untimelined ATL enhancement. Known-risk: reconcile with any future native ATL per-domain field. |
+
+> **SR-9 harm-flag carrier (canonical — confirmed 2026-05-23 under `D-TRACK-FOLLOWONS-A-BUILD-2026-05-23`, founder option (a)).** SR-9 (above) names the boundary's *behaviour*; the original lock did not name the exact *carrier field*. The canonical carrier is the **two-signal reading**: the R20a / Zone-3 boundary engages — records the contrary-*kathekon*, surfaces the developer note, and does **NOT** run the six-question sequence — when **either** of the following is present:
+>
+> 1. `safety_signal.harm_flagged === true` — the explicit boolean the upstream/developer sets at session close (the TR-03 "blocked act" path supplies this), **or**
+> 2. any entry in `acts_blocked[]` whose `category === 'harm'` — i.e. Sage Assent blocked an act for a harm reason.
+>
+> This is **permissive by design**: more inputs trip the harm gate, never fewer — the conservative posture for a safety boundary. It matches the live implementation in `website/src/lib/sage-reflect/zone3-boundary.ts` (`checkZone3Boundary`, the `explicit || harmBlock` condition), so this confirmation is **governance-only — no code change**. It resolves the Stage B *Diagnostic-uncertain (symptom-level)* flag on the carrier field, now founder-acked under PR10. Narrowing the carrier to a single field (option (b)) or broadening it (option (c)) would be a change to a safety boundary → PR6 → Critical; neither was elected.
 
 ---
 

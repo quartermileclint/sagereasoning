@@ -13,9 +13,9 @@
 process.env.MENTOR_ENCRYPTION_KEY = 'a'.repeat(64)
 
 import { openReflection, answerReflection, type ReflectServiceDeps, type MeterFn } from '../reflect-service'
-import { encryptPersistedState, type SageReflectSessionRow, type StoreResult } from '../session-store'
+import { encryptPersistedState, type SageReflectSessionRow, type StoreResult, type CrossSessionContext } from '../session-store'
 import { usageToCents, type ReflectExtractor } from '../reflect-extractor'
-import type { Q1Assessment, Q2Assessment, Q3Assessment, Q4Assessment, SessionSummary } from '../engine'
+import type { Q1Assessment, Q2Assessment, Q3Assessment, Q4Assessment, Q5Assessment, PriorSessionSummary, SessionSummary } from '../engine'
 import type { SageAssentFeedResult, FeedParams } from '../sage-assent-feed'
 
 let passCount = 0
@@ -45,11 +45,20 @@ const Q1: Q1Assessment = { distortions: [{ impression: 'deadline=evil', root_pas
 const Q2: Q2Assessment = { failures: [], pressure_assent: { admitted: false, account_given: true, moments: [] } }
 const Q3: Q3Assessment = { patterns: [] }
 const Q4: Q4Assessment = { actions: [{ action: 'sent fix', quality: 'moderate', is_kathekon: true, proximity: 'deliberate', passions_detected: [], virtue_domains_engaged: ['phronesis'], oikeiosis_met: true, oikeiosis_stage: 'community' }], calibration: { verdicts_reviewed: 2, discrepancies_found: 0 } }
+// A4 (PR7): the escalated Q5 reading the mock returns + a call counter so the test
+// can assert extractQ5 is invoked ONLY on an ambiguous Q5 answer (PR2 wired-path).
+let q5EscalationCalls = 0
+const Q5_CHANGED: Q5Assessment = {
+  capacity_delta: { domains_added: ['incident triage'], domains_removed: [], domains_updated: [] },
+  circle_need_delta: { circle: 'community', need_description: '', independence_confirmed: false, proportion_assessment: '' },
+  reasoning_pattern_change: true,
+}
 const mockExtractor: ReflectExtractor = {
   extractQ1: async () => ({ assessment: Q1, usage: { input_tokens: 100, output_tokens: 50 } }),
   extractQ2: async () => ({ assessment: Q2, usage: { input_tokens: 100, output_tokens: 50 } }),
   extractQ3: async () => ({ assessment: Q3, usage: { input_tokens: 100, output_tokens: 50 } }),
   extractQ4: async () => ({ assessment: Q4, usage: { input_tokens: 100, output_tokens: 50 } }),
+  extractQ5: async () => { q5EscalationCalls++; return { assessment: Q5_CHANGED, usage: { input_tokens: 120, output_tokens: 40 } } },
 }
 
 function baseRow(session_id: string, agent_id: string): SageReflectSessionRow {
@@ -63,7 +72,7 @@ function baseRow(session_id: string, agent_id: string): SageReflectSessionRow {
   }
 }
 
-function makeDeps(): { deps: ReflectServiceDeps; store: Map<string, SageReflectSessionRow>; feedCalls: FeedParams[] } {
+function makeDeps(crossOverride?: (agent_id: string) => Promise<CrossSessionContext>): { deps: ReflectServiceDeps; store: Map<string, SageReflectSessionRow>; feedCalls: FeedParams[] } {
   const store = new Map<string, SageReflectSessionRow>()
   const feedCalls: FeedParams[] = []
   const writeState = (sid: string, state: { session_summary: SessionSummary; turns: readonly import('../engine').ReflectTurn[] }, patch: Partial<SageReflectSessionRow>): void => {
@@ -79,6 +88,7 @@ function makeDeps(): { deps: ReflectServiceDeps; store: Map<string, SageReflectS
     persistProgress: async (sid, step, state): Promise<StoreResult<void>> => { writeState(sid, state, { current_step: step }); return { ok: true, value: undefined } },
     persistCompletion: async (sid, state): Promise<StoreResult<void>> => { writeState(sid, state, { current_step: 'complete', completed_at: 'now' }); return { ok: true, value: undefined } },
     persistZone3Block: async (sid, state, log, note): Promise<StoreResult<void>> => { writeState(sid, state, { current_step: 'complete', completed_at: 'now', developer_note: note, kathekon_quality_log: log }); return { ok: true, value: undefined } },
+    getCrossSessionContext: crossOverride ?? (async () => ({ prior_sessions: [], sage_assent_agreement_streak: 0 })),
     feedSageAssent: async (params): Promise<StoreResult<SageAssentFeedResult>> => { feedCalls.push(params); return { ok: true, value: MOCK_FEED } },
   }
   return { deps, store, feedCalls }
@@ -160,6 +170,69 @@ async function run(): Promise<void> {
     assert('COST-2 a single Layer-1 call is sub-cent', c < 1)
     assert('COST-3 rounds to a non-negative integer for the RPC', Number.isInteger(Math.round(c)) && Math.round(c) >= 0)
     assert('COST-4 zero usage → 0 cents', usageToCents({ input_tokens: 0, output_tokens: 0 }) === 0)
+  }
+
+  // A4 — Q5 sandwich-escalation. Drive Q1→Q4 (Q1 dirty → no FD-R1 on the path), then
+  // a Q5 answer. An AMBIGUOUS Q5 answer must invoke extractQ5 (the 5th call) and bill
+  // it; a clearly-unchanged answer must NOT (cost 0). Mirrors the design-pack verify.
+  {
+    const { deps } = makeDeps()
+    q5EscalationCalls = 0
+    await openReflection({ session_id: 'sA4a', agent_id: 'aA4a', session_summary: SUMMARY }, deps, okMeter)
+    for (const a of ['account q1', 'account q2', 'account q3', 'account q4']) await answerReflection('sA4a', a, deps, okMeter)
+    const q5 = await answerReflection('sA4a', 'my reasoning pattern changed this session and I developed a new approach', deps, okMeter)
+    assert('A4-1  ambiguous Q5 escalated — extractQ5 called exactly once', q5EscalationCalls === 1, `calls=${q5EscalationCalls}`)
+    assert('A4-1b escalated Q5 stage billed a non-zero cost', q5.ok === true && q5.value.billable_cost_cents > 0, q5.ok ? `cost=${q5.value.billable_cost_cents}` : 'not ok')
+  }
+  {
+    const { deps } = makeDeps()
+    q5EscalationCalls = 0
+    await openReflection({ session_id: 'sA4b', agent_id: 'aA4b', session_summary: SUMMARY }, deps, okMeter)
+    for (const a of ['account q1', 'account q2', 'account q3', 'account q4']) await answerReflection('sA4b', a, deps, okMeter)
+    const q5 = await answerReflection('sA4b', 'capacity unchanged; same patterns as before', deps, okMeter)
+    assert('A4-2  clearly-unchanged Q5 makes NO 5th call', q5EscalationCalls === 0, `calls=${q5EscalationCalls}`)
+    assert('A4-2b unchanged Q5 stage not billed (cost 0)', q5.ok === true && q5.value.billable_cost_cents === 0, q5.ok ? `cost=${q5.value.billable_cost_cents}` : 'not ok')
+  }
+
+  // A1 — cross-session context wiring. The fetched prior_sessions + streak must
+  // reach the engine's completion outcome. (The engine arithmetic itself is proven
+  // in engine.test.ts; here we prove the SERVICE feeds it the real context — PR2.)
+  const ANSWERS_RS1 = ['account q1', 'account q2', 'account q3', 'account q4', 'capacity unchanged', 'the purpose remains fitting and continues']
+
+  // A1-1 — prior sessions with high failures at equal complexity → FD-R2 holds
+  // progress dimensions (current pass reports 1 failure; Q5 not ambiguous → no
+  // confirmed change). With the empty default this would NOT hold.
+  {
+    let crossCalls = 0
+    const prior: PriorSessionSummary[] = [
+      { total_failures: 5, complexity: 6, q1_clean: false },
+      { total_failures: 5, complexity: 6, q1_clean: false },
+      { total_failures: 5, complexity: 6, q1_clean: false },
+    ]
+    const { deps } = makeDeps(async () => { crossCalls++; return { prior_sessions: prior, sage_assent_agreement_streak: 0 } })
+    await openReflection({ session_id: 'sA1a', agent_id: 'aA1a', session_summary: SUMMARY }, deps, okMeter)
+    let last: Awaited<ReturnType<typeof answerReflection>> | null = null
+    for (const a of ANSWERS_RS1) last = await answerReflection('sA1a', a, deps, okMeter)
+    assert('A1-1  getCrossSessionContext invoked on the answer path', crossCalls >= 1, `calls=${crossCalls}`)
+    assert('A1-1b FD-R2 HOLD flows from injected prior sessions (progress_dimensions_held)', !!last && last.ok === true && last.value.decision.kind === 'complete' && last.value.decision.outcome.progress_dimensions_held === true)
+  }
+  // A1-1c — control: empty context (default) → no hold on the same pass.
+  {
+    const { deps } = makeDeps()
+    await openReflection({ session_id: 'sA1c', agent_id: 'aA1c', session_summary: SUMMARY }, deps, okMeter)
+    let last: Awaited<ReturnType<typeof answerReflection>> | null = null
+    for (const a of ANSWERS_RS1) last = await answerReflection('sA1c', a, deps, okMeter)
+    assert('A1-1c control: empty context → progress dimensions NOT held', !!last && last.ok === true && last.value.decision.kind === 'complete' && last.value.decision.outcome.progress_dimensions_held === false)
+  }
+  // A1-2 — a streak of 4 + this session all-correct (mock Q4: 2 verdicts, 0
+  // discrepancies) → FD-R4 deference flag flows into the developer note.
+  {
+    const prior: PriorSessionSummary[] = [{ total_failures: 0, complexity: 6, q1_clean: true }]
+    const { deps } = makeDeps(async () => ({ prior_sessions: prior, sage_assent_agreement_streak: 4 }))
+    await openReflection({ session_id: 'sA1d', agent_id: 'aA1d', session_summary: SUMMARY }, deps, okMeter)
+    let last: Awaited<ReturnType<typeof answerReflection>> | null = null
+    for (const a of ANSWERS_RS1) last = await answerReflection('sA1d', a, deps, okMeter)
+    assert('A1-2  FD-R4 deference flows from injected streak (developer_note)', !!last && last.ok === true && last.value.decision.kind === 'complete' && (last.value.decision.outcome.developer_note ?? '').includes('deference'))
   }
 
   console.log(`\n${passCount} pass / ${failCount} fail`)

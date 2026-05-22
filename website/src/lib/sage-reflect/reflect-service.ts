@@ -10,9 +10,10 @@
  *   • DETERMINISTIC control flow — the engine's nextStep() decides every step; the
  *     service never branches on free text.
  *   • Each agent answer maps to ONE typed turn: Q1–Q4 via the translation-sandwich
- *     (Sonnet, billable), Q5 via the deterministic consolidation reader, Q6/RS-4
+ *     (Sonnet, billable), Q5 via the deterministic consolidation reader with a
+ *     CONDITIONAL Sonnet escalation (A4, PR7 — only when isQ5Ambiguous), Q6/RS-4
  *     via the deterministic response-shape classifier, FD-R1 via the deterministic
- *     substantive-answer test. ≤4 Layer-1 calls per pass (R5).
+ *     substantive-answer test. ≤5 Layer-1 calls per pass (Q1–Q4 + conditional Q5; R5).
  *   • SR-9 / R20a Zone-3 boundary runs at session OPEN, BEFORE any reflection. A
  *     harm-flagged session is recorded (contrary kathekon + developer note) and
  *     returned — it never enters the six-question sequence (not a crisis pathway).
@@ -39,14 +40,18 @@ import {
   persistProgress as realPersistProgress,
   persistCompletion as realPersistCompletion,
   persistZone3Block as realPersistZone3Block,
+  getCrossSessionContext as realGetCrossSessionContext,
   decryptPersistedState,
   type ReflectPersistedState,
   type KathekonLogEntry,
   type StoreResult,
+  type CrossSessionContext,
 } from './session-store'
+import type { PriorSessionSummary } from './engine'
 import {
   createSonnetExtractor,
   buildQ5Deterministic,
+  isQ5Ambiguous,
   classifyResponseShape,
   isSubstantiveResponse,
   usageToCents,
@@ -71,15 +76,20 @@ export const MIRROR_NOTE =
 // CONTEXT (cross-session inputs)
 // ============================================================================
 //
-// prior_sessions = [] and sage_assent_agreement_streak = 0 in the live endpoint:
-// correct for current state (no agent has prior reflection history; the schema
-// stores neither a complexity measure nor calibration history to populate them
-// faithfully). The engine fully implements FD-R2 / Q1-3-null / FD-R4; the R18d
-// adversarial suite proves them on fixtures. Faithful cross-session population is a
-// bounded PR7 follow-on (adds a complexity column + a calibration-history read).
+// A1 (PR7): prior_sessions + sage_assent_agreement_streak are now populated from
+// the agent's COMPLETED rows (session-store.getCrossSessionContext), feeding the
+// engine's FD-R2 / Q1-3-null / FD-R4 with real history. answerReflection fetches
+// the context (the only path that builds a completion outcome); open + peek pass
+// the empty default (Q1-surfacing and pure-peek never build an outcome, so the
+// cross-session fields are unused there). The read fails CLOSED to empty (never a
+// 503), so a bad read degrades to the pre-A1 behaviour.
 
-function buildContext(summary: SessionSummary): ReflectContext {
-  return { session_summary: summary, prior_sessions: [], sage_assent_agreement_streak: 0 }
+function buildContext(
+  summary: SessionSummary,
+  prior_sessions: readonly PriorSessionSummary[] = [],
+  sage_assent_agreement_streak = 0,
+): ReflectContext {
+  return { session_summary: summary, prior_sessions, sage_assent_agreement_streak }
 }
 
 // ============================================================================
@@ -142,6 +152,8 @@ export interface ReflectServiceDeps {
   readonly persistProgress: typeof realPersistProgress
   readonly persistCompletion: typeof realPersistCompletion
   readonly persistZone3Block: typeof realPersistZone3Block
+  /** A1 (PR7) — cross-session context read; fails closed to empty (never 503). */
+  readonly getCrossSessionContext: (agent_id: string) => Promise<CrossSessionContext>
   readonly feedSageAssent: (params: FeedParams) => Promise<StoreResult<SageAssentFeedResult>>
 }
 
@@ -153,6 +165,7 @@ function defaultDeps(): ReflectServiceDeps {
     persistProgress: realPersistProgress,
     persistCompletion: realPersistCompletion,
     persistZone3Block: realPersistZone3Block,
+    getCrossSessionContext: realGetCrossSessionContext,
     feedSageAssent: realFeedSageAssent,
   }
 }
@@ -268,7 +281,11 @@ export async function answerReflection(
     return { ok: false, code: 'server', error: `decrypt failed: ${(e as Error).message}` }
   }
 
-  const ctx = buildContext(state.session_summary)
+  // A1 (PR7): populate the cross-session context from the agent's completed history
+  // (FD-R2 / Q1-3-null / FD-R4). Fails CLOSED to empty — never a 503 (the store read
+  // swallows errors and returns the empty default).
+  const cross = await deps.getCrossSessionContext(row.agent_id)
+  const ctx = buildContext(state.session_summary, cross.prior_sessions, cross.sage_assent_agreement_streak)
   const turns: ReflectTurn[] = [...state.turns]
 
   // What is the engine currently awaiting an answer to?
@@ -307,9 +324,21 @@ export async function answerReflection(
           newTurn = { step: 'Q4', assessment: r.assessment, response }
           break
         }
-        case 'Q5':
-          newTurn = { step: 'Q5', assessment: buildQ5Deterministic(response, state.session_summary), response }
+        case 'Q5': {
+          // A4 (PR7): deterministic-first. Escalate to the 5th Sonnet call ONLY when
+          // the answer is ambiguous (substantive AND carrying a change cue), to
+          // confirm a genuine capacity / reasoning-pattern change (the engine's FD-R2
+          // q5ConfirmsChange gate). A non-ambiguous answer keeps the conservative
+          // default and makes NO 5th call (cost stays 0).
+          if (isQ5Ambiguous(response)) {
+            const r = await deps.extractor.extractQ5(response, state.session_summary)
+            cost = usageToCents(r.usage)
+            newTurn = { step: 'Q5', assessment: r.assessment, response }
+          } else {
+            newTurn = { step: 'Q5', assessment: buildQ5Deterministic(response, state.session_summary), response }
+          }
           break
+        }
         case 'Q6':
           newTurn = { step: 'Q6', assessment: { response_shape: classifyResponseShape(response) }, response }
           break

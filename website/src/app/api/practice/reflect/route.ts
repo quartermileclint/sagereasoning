@@ -51,6 +51,7 @@ import {
 
 import { computeLoopBill } from '@/lib/stripe'
 import { recordLoopBilling, buildLoopHeaders, extractLoopId, generateLoopId } from '@/lib/loop-cost-tracker'
+import { incrementReflectCostMicrocents, centsToMicrocents } from '@/lib/sage-reflect/reflect-cost-tracker'
 import { MODEL_DEEP } from '@/lib/model-config'
 
 import { getSession } from '@/lib/sage-reflect/session-store'
@@ -176,6 +177,18 @@ function makeMeter(loopId: string, apiKeyId: string, agentId: string): MeterFn {
       if (persist.error.kind === 'duplicate_loop_id') return { ok: true, headers } // resume — no double-bill
       console.error('[api/practice/reflect] meter RPC failed:', persist.error.message)
       return { ok: false }
+    }
+    // A2 (R5, PR7): record the MICROCENT-precise cost for the cost-health metric,
+    // decoupled from the (unchanged) integer-cents bill above. Fail-soft — never
+    // blocks the response. Reached only after the bill persists and NOT on a resume
+    // (the duplicate_loop_id case returns early above), so no double-count. Base /
+    // deterministic stages cost 0 → centsToMicrocents(0) = 0 → no-op write.
+    if (calledModel) {
+      await incrementReflectCostMicrocents(centsToMicrocents(rawCostCents), {
+        surface: REFLECT_METERING_SURFACE,
+        year: now.getUTCFullYear(),
+        month: now.getUTCMonth() + 1,
+      })
     }
     return { ok: true, headers }
   }

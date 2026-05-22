@@ -7020,3 +7020,43 @@ Both migrations flip **Wired → Verified, 2026-05-22**. Two cosmetic VERIFY-com
 **Status:** Adopted. Cross-references: `D-SAGE-REFLECT-STAGE-B-METERING-FIX-AND-LIVE-VERIFICATION-2026-05-22`; predecessor close `/operations/handoffs/founder/2026-05-22-sage-reflect-stage-b-build-close.md`; this session's close; `/drafts/2026-05-23-track-followons-design-pack.md`.
 
 ---
+
+## 2026-05-23 — D-TRACK-FOLLOWONS-A-BUILD-2026-05-23
+
+**Decision:** Built the full Sage Reflect A-track (Steps 0–3) per `/drafts/2026-05-23-track-followons-design-pack.md` §A. **A3(a)** (Standard, governance): SR-9 of `/adopted/sage-reflect-product-design.md` now states the canonical harm-flag carrier explicitly — the two-signal reading (`safety_signal.harm_flagged === true` OR any `acts_blocked[].category === 'harm'`); confirmed canonical (founder option (a)); **no code change** (live `zone3-boundary.ts` already implements it); resolves the Stage-B Diagnostic-uncertain (symptom-level) flag under PR10. **A2** (Elevated): a microcent-precise R5 cost-health accumulator (`reflect-cost-tracker.ts` + `sage_reflect_cost_tracker` table) wired fail-soft into `route.ts` `makeMeter` after the bill persists (skipped on resume → no double-count); the integer-cents loop bill is byte-for-byte unchanged; decoupled from `increment_api_usage`/`loop_billing_events`. **A4** (Elevated): a conditional 5th Sonnet call (`extractQ5` + `Q5_SYSTEM` + `isQ5Ambiguous`) — `buildQ5Deterministic` runs first; escalation fires only when the Q5 answer is substantive AND carries a word-boundary change cue, letting the engine's FD-R2 `q5ConfirmsChange` gate be satisfied from a genuine change; documented R5 bound raised ≤4→≤5. **A1** (Elevated): two cleartext scalars (`complexity int`, `calibration_all_correct boolean`) on `sage_reflect_sessions` written at `persistCompletion`, and `getCrossSessionContext` replacing `buildContext`'s hardcoded empties on the answer path (last-3 completed rows → `PriorSessionSummary`; streak walk over `calibration_all_correct`); read fails CLOSED to empty context (never a 503).
+
+**Reasoning:** Makes the live (gated) product faithful to its locked design — Sage Reflect was feeding the engine empty cross-session context and rounding sub-cent cost to zero; A1/A2/A4 feed real data faithfully. Built before the C rename (locked order A→C→E) so C renames finished code once. A1 open-question resolved against `engine.ts`: `PriorSessionSummary.total_failures` = distortions + assent failures + impulse patterns (the three causal-layer logs, per `countFailures`), NOT just synkatathesis. PR15 consult: no Anthropic-canonical primitive substitutes for these product-internal refinements; the load-bearing reuse is SageReasoning's own substrate (the `incrementCostTracker` microcent pattern, `usageToCents`/`sonnetCostMicrocents`, the engine's DI seam). PR16: A-track strengthens the live product (positioning neutral; dogfood relevance n/a — internal metering/extraction).
+
+**Files touched:**
+- `adopted/sage-reflect-product-design.md` — SR-9 carrier note (A3a) + Status amendment; R5 bound ≤4→≤5 (A4). Prior text preserved (git + in-place).
+- `website/src/lib/sage-reflect/reflect-cost-tracker.ts` (NEW) — microcent accumulator + reader + pure conversion helpers (A2).
+- `website/supabase-sage-reflect-cost-tracker-migration.sql` (NEW) — `sage_reflect_cost_tracker` table (A2; additive, idempotent).
+- `website/src/app/api/practice/reflect/route.ts` — `makeMeter` microcent-accumulator call, fail-soft, after the bill persists (A2).
+- `website/src/lib/sage-reflect/reflect-extractor.ts` — `isQ5Ambiguous`, `Q5_SYSTEM`, `mapQ5Escalation`, `extractQ5` on the DI seam; header ≤4→≤5 (A4).
+- `website/src/lib/sage-reflect/reflect-service.ts` — Q5 deterministic-first-then-escalate branch (A4); `buildContext` populated via `getCrossSessionContext` on the answer path (A1).
+- `website/src/lib/sage-reflect/session-store.ts` — `deriveCrossSessionScalars`, `persistCompletion` writes the two columns, `getCrossSessionContext` fail-closed read, `CrossSessionContext` type (A1).
+- `website/supabase-sage-reflect-a1-cross-session-migration.sql` (NEW) — `complexity` + `calibration_all_correct` columns + composite index (A1; additive, idempotent).
+- `website/src/lib/sage-reflect/__tests__/reflect-cost-tracker.test.ts` (NEW), `reflect-q5-ambiguity.test.ts` (NEW), `reflect-service.test.ts` — A2 precision, A4 ambiguity/mapper, A4 escalation + A1 wiring assertions.
+
+**Risk classification:** **Elevated** under 0d-ii — changes to existing user-facing functionality (the live metering/extraction path) + an additive schema change to an existing table (`sage_reflect_sessions`). PEV loop per PR10. No auth/encryption/safety/deploy-config surface → **not Critical; AC7 not engaged; PR6 NOT engaged** (the Zone-3 safety boundary is untouched — A3a was governance-only). "No current users" holds (Critical Change Protocol step 3 N/A regardless).
+
+**Rollback path:** Fully reversible. A2 — remove the `incrementReflectCostMicrocents` call in `makeMeter` (bill untouched throughout); `DROP TABLE sage_reflect_cost_tracker`. A4 — remove the `isQ5Ambiguous` branch (reverts to the always-conservative deterministic Q5). A1 — `ALTER TABLE ... DROP COLUMN complexity, calibration_all_correct` + revert `buildContext`/`getCrossSessionContext` (the fail-closed read already degrades safely). The product remains reversible end-to-end by unsetting `SAGE_REFLECT_ENABLED` (→ 503, no redeploy).
+
+**Verification step (founder-performable):** Run the two migrations in the Supabase SQL editor (paste the VERIFY block output back): `website/supabase-sage-reflect-cost-tracker-migration.sql`, `website/supabase-sage-reflect-a1-cross-session-migration.sql`. Run the suite one command at a time from `website/` (per `/CLAUDE.md` — `npm install` first on a clean checkout):
+```
+npx tsx src/lib/sage-reflect/__tests__/reflect-cost-tracker.test.ts      # A2: 11 pass
+npx tsx src/lib/sage-reflect/__tests__/reflect-q5-ambiguity.test.ts      # A4: 16 pass
+npx tsx src/lib/sage-reflect/__tests__/engine.test.ts                    # 48 pass
+npx tsx src/lib/sage-reflect/__tests__/r18d-adversarial.test.ts          # 13 pass
+npx tsx --env-file=.env.local src/lib/sage-reflect/__tests__/reflect-service.test.ts   # 28 pass (incl. A4 + A1)
+npx tsx --env-file=.env.local src/lib/sage-reflect/__tests__/session-store.test.ts     # 30 pass
+```
+Expected: all green; `npx tsc --noEmit` exits 0. Live (after migrations + a real pass for a test agent): A2 — `sage_reflect_cost_tracker.cumulative_cost_microcents / 10000` ≈ summed per-call cents while `loop_billing_events.anthropic_cost_cents` rounds the sub-cent pass to 0; A1 — a 2nd/3rd reflection populates `complexity` + `calibration_all_correct`, and a 3rd clean session trips the Q1-3-null / FD-R2 hold in the coarse status; A4 — a Q5 answer stating a confirmed change releases the FD-R2 hold, an unchanged answer makes no 5th call.
+
+**Open questions:** A1 `total_failures` mapping — **resolved** (all three causal-layer logs, not just synkatathesis). Carried: C rename arc (Critical; sequenced after A1, full internal+external per the design pack) and E#1 (persist Agent-Card verdict, pre-launch) remain to build; the founder's held "something else" (draws on the `/inbox/` "build the project room" promptkit; does not reorder the A→C→E order — surfaced and acked at session open).
+
+**Rules served:** R0, R5, R17b, R18a, R18d, R20a, PR1, PR2, PR4, PR7, PR10, PR11, PR13, PR15, PR16, KG1, KG7.
+
+**Status:** Adopted. Cross-references: `D-TRACK-FOLLOWONS-DESIGN-PACK-2026-05-23`; predecessor close `/operations/handoffs/founder/2026-05-23-track-election-design-pack-close.md`; build prompt `/operations/handoffs/founder/2026-05-23-track-followons-build-NEXT-SESSION-PROMPT.md`; this session's close; `/drafts/2026-05-23-track-followons-design-pack.md` §A.
+
+---

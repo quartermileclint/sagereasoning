@@ -15,11 +15,16 @@
  *   safety-critical Haiku call in this product; the Zone-3 path (zone3-boundary.ts)
  *   is a deterministic boundary check, not an LLM classifier.
  *
- * R5 COST BOUND: a full pass makes AT MOST 4 Layer-1 (Sonnet) calls — Q1, Q2, Q3,
- * Q4. Q5 (consolidation deltas) and Q6 (response-shape) are DETERMINISTIC-FIRST
- * (no LLM by default — see buildQ5Deterministic / classifyResponseShape); the
- * FD-R1 null-suspicion test and the RS-4 ladder answers are deterministic too. Each
- * Q1–Q4 call's token usage is returned so the route can bill the loop (R5 2x).
+ * R5 COST BOUND: a full pass makes AT MOST 5 Layer-1 (Sonnet) calls — Q1, Q2, Q3,
+ * Q4 (always), plus ONE CONDITIONAL Q5 escalation (A4, PR7). Q5 is DETERMINISTIC-
+ * FIRST: buildQ5Deterministic returns the conservative reading for free; only when
+ * the answer is AMBIGUOUS (isQ5Ambiguous — substantive AND carrying a change cue)
+ * does extractQ5 make a 5th Sonnet call to confirm a genuine capacity/reasoning-
+ * pattern change (so the engine's FD-R2 q5ConfirmsChange gate can be satisfied from
+ * a real, clearly-stated change). Q6 (response-shape) stays deterministic; the FD-R1
+ * null-suspicion test and the RS-4 ladder answers are deterministic too. Each
+ * Q1–Q5 call's token usage is returned so the route can bill the loop (R5 2x).
+ * (Bound raised ≤4→≤5 on 2026-05-23 under D-TRACK-FOLLOWONS-A-BUILD-2026-05-23.)
  *
  * DEPENDENCY-INJECTION SEAM: the route uses createSonnetExtractor() (real Sonnet);
  * tests pass a deterministic mock implementing ReflectExtractor. This is the same
@@ -53,6 +58,7 @@ import type {
   Q3Assessment,
   Q4Assessment,
   Q5Assessment,
+  CapacityDelta,
   ResponseShape,
   VirtueDomain,
   HormeDirection,
@@ -131,6 +137,8 @@ export interface ReflectExtractor {
   extractQ2(response: string): Promise<ExtractResult<Q2Assessment>>
   extractQ3(response: string): Promise<ExtractResult<Q3Assessment>>
   extractQ4(response: string): Promise<ExtractResult<Q4Assessment>>
+  /** A4 (PR7): the conditional 5th call — only invoked when isQ5Ambiguous(response). */
+  extractQ5(response: string, summary: SessionSummary): Promise<ExtractResult<Q5Assessment>>
 }
 
 // ============================================================================
@@ -174,17 +182,18 @@ export function classifyResponseShape(response: string): ResponseShape {
 }
 
 /**
- * Q5 consolidation deltas — DETERMINISTIC-FIRST (SR-6; honours the ≤4-Layer-1
- * cost bound). The default reading is conservative: NO capacity change and NO
- * confirmed reasoning-pattern change (so FD-R2 holds progress dimensions unless a
- * genuine change is later confirmed), with the circle-need carried from the
- * session's opening circle and the verbatim Q5 answer as the need description.
+ * Q5 consolidation deltas — DETERMINISTIC-FIRST (SR-6). The default reading is
+ * conservative: NO capacity change and NO confirmed reasoning-pattern change (so
+ * FD-R2 holds progress dimensions unless a genuine change is confirmed), with the
+ * circle-need carried from the session's opening circle and the verbatim Q5 answer
+ * as the need description. PURE.
  *
- * Faithful-escalation note (PR7): a richer Q5 that detects an explicit capacity
- * delta / confirmed change from the free text is a bounded follow-on (it would add
- * an optional 5th Layer-1 call when the structural read is ambiguous). The
- * conservative default is correct for current state: a single session does not move
- * the profile without confirmation. PURE.
+ * A4 (PR7) escalation: when isQ5Ambiguous(response) is true, reflect-service calls
+ * extractQ5 — the optional 5th Layer-1 call — to CONFIRM a genuine capacity /
+ * reasoning-pattern change from the free text, rather than leaving the conservative
+ * default in place. The default below is still correct when the answer is NOT
+ * ambiguous (no change cue): a single session does not move the profile without a
+ * clearly-stated change.
  */
 export function buildQ5Deterministic(response: string, summary: SessionSummary): Q5Assessment {
   return {
@@ -197,6 +206,32 @@ export function buildQ5Deterministic(response: string, summary: SessionSummary):
     },
     reasoning_pattern_change: false,
   }
+}
+
+/**
+ * Change cues that mark a Q5 answer as AMBIGUOUS (a possible confirmed change the
+ * deterministic reading can't resolve). Matched on WORD BOUNDARIES so a negation
+ * like "unchanged" does NOT match "changed" / "change", and "still"/"same"
+ * (continuation, not change) are deliberately absent.
+ */
+const Q5_CHANGE_CUES: readonly string[] = [
+  'changed', 'change', 'different', 'shifted', 'shift', 'revised', 'revise', 'revision',
+  'no longer', 'new need', 'gained', 'lost', 'grew', 'developed', 'expanded', 'improved',
+  'learned', 'realised', 'realized', 'acquired', 'dropped',
+]
+
+/**
+ * A4 (PR7) ambiguity detector. A Q5 answer is ambiguous — warranting the optional
+ * 5th Layer-1 (extractQ5) call — when it is SUBSTANTIVE (not a bare denial) AND
+ * carries at least one change cue on a word boundary. A non-substantive answer, or
+ * one with no change cue, keeps the conservative deterministic default (no 5th
+ * call). Over-escalation only costs one extra Sonnet call that returns "no change"
+ * (safe); under-escalation just keeps the conservative hold (also safe). PURE.
+ */
+export function isQ5Ambiguous(response: string): boolean {
+  if (!isSubstantiveResponse(response)) return false
+  const t = response.trim().toLowerCase()
+  return Q5_CHANGE_CUES.some((cue) => new RegExp(`\\b${cue}\\b`).test(t))
 }
 
 // ============================================================================
@@ -287,6 +322,30 @@ function mapQ4(raw: unknown): Q4Assessment {
   }
 }
 
+/**
+ * A4 (PR7) Q5 escalation mapper — extracts ONLY the capacity delta + the confirmed
+ * reasoning-pattern-change boolean from the LLM output. Defensive: capacity domains
+ * are the agent's own free-text capability labels (NOT the four virtue domains), so
+ * each is kept iff it is a non-empty string (trimmed) — invalid entries are dropped,
+ * never coerced. reasoning_pattern_change defaults to false unless the LLM returns
+ * an explicit true. The circle-need carry is built deterministically by the caller.
+ * PURE.
+ */
+function mapQ5Escalation(raw: unknown): { capacity_delta: CapacityDelta; reasoning_pattern_change: boolean } {
+  const obj = (raw ?? {}) as Record<string, unknown>
+  const cap = (obj.capacity_delta ?? {}) as Record<string, unknown>
+  const domains = (key: string): string[] =>
+    asArray(cap[key]).map(asString).map((s) => s.trim()).filter((s) => s.length > 0)
+  return {
+    capacity_delta: {
+      domains_added: domains('domains_added'),
+      domains_removed: domains('domains_removed'),
+      domains_updated: domains('domains_updated'),
+    },
+    reasoning_pattern_change: asBool(obj.reasoning_pattern_change),
+  }
+}
+
 // ============================================================================
 // SONNET LAYER-1 CALL
 // ============================================================================
@@ -340,6 +399,21 @@ const Q4_SYSTEM =
   'discrepancies_found=how many the agent judged miscalibrated (blocked-should-have- ' +
   'been-taken / taken-should-have-been-blocked). 0 = all verdicts judged correct.'
 
+const Q5_SYSTEM =
+  `${SHARED_SYSTEM_PREAMBLE}\n\n` +
+  'TASK (Q5 — consolidation / capacity + reasoning-pattern change): the agent reports ' +
+  'what this session consolidated. Extract ONLY changes the agent explicitly and ' +
+  'confidently reports — do NOT infer a change from a restatement, a hedge, or a ' +
+  'description of a different task.\n' +
+  'Return: {"capacity_delta":{"domains_added":[string],"domains_removed":[string],"domains_updated":[string]},' +
+  '"reasoning_pattern_change":boolean}\n' +
+  'domains_* = the agent\'s own capability/capacity labels in free text (e.g. ' +
+  '"incident triage", "spec review"); added=newly held, removed=no longer held, ' +
+  'updated=meaningfully revised. reasoning_pattern_change=true ONLY when the agent ' +
+  'affirms a genuine, confirmed change in HOW they reason (not merely that the task ' +
+  'differed, not a tentative "maybe"). When no real change is reported, return empty ' +
+  'arrays and false.'
+
 async function callSonnetJSON(system: string, response: string): Promise<{ raw: unknown; usage: ExtractorTokenUsage }> {
   const client = getClient()
   const userMessage =
@@ -385,8 +459,21 @@ export function createSonnetExtractor(): ReflectExtractor {
       const { raw, usage } = await callSonnetJSON(Q4_SYSTEM, response)
       return { assessment: mapQ4(raw), usage }
     },
+    // A4 (PR7): the conditional 5th call. The circle-need carry is deterministic
+    // (same as buildQ5Deterministic); the LLM supplies only capacity_delta +
+    // reasoning_pattern_change. The caller (reflect-service) invokes this ONLY when
+    // isQ5Ambiguous(response) — otherwise the conservative default stands (no call).
+    async extractQ5(response, summary) {
+      const { raw, usage } = await callSonnetJSON(Q5_SYSTEM, response)
+      const esc = mapQ5Escalation(raw)
+      const base = buildQ5Deterministic(response, summary)
+      return {
+        assessment: { ...base, capacity_delta: esc.capacity_delta, reasoning_pattern_change: esc.reasoning_pattern_change },
+        usage,
+      }
+    },
   }
 }
 
 // Exported for unit tests (Layer-2 mapping is pure + vocabulary-validated).
-export const __testing = { mapQ1, mapQ2, mapQ3, mapQ4 }
+export const __testing = { mapQ1, mapQ2, mapQ3, mapQ4, mapQ5Escalation }
