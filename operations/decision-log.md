@@ -6837,3 +6837,34 @@ Expected: `200`, `"status":"in_progress"`, `"stage":"Q1"`. To return to the iner
 **Status:** Adopted (the four elections + the drafted design). Implementation status: Sage Reflect — **Designed** (draft; pending founder lock → then build). Cross-references: `D-SAGE-CALLING-STAGE2-LIVE-VERIFIED-2026-05-21`; `/drafts/sage-reflect-product-design.md`; `/adopted/purpose-discovery-product-design.md`; `/inbox/reflect mentor input.rtf`; standing + build-arc caches.
 
 ---
+
+## 2026-05-22 — D-SAGE-REFLECT-DESIGN-LOCKED-2026-05-22
+
+**Decision:** Locked the Sage Reflect product design (fourth Sage Practice product — post-action reflection). Moved `/drafts/sage-reflect-product-design.md` → `/adopted/sage-reflect-product-design.md` (git rename; draft preserved in history); status DRAFT → LOCKED. Three lockable open items resolved at lock: (1) **route = `/api/practice/reflect`** (SR-13, founder-confirmed); (2) **per-virtue-domain katorthoma proximity (KP-03/04) = Sage Reflect computes + stores it itself** (new **SR-15**, founder election overriding the design's defer-to-ATL-enhancement recommendation); (3) **`evaluated_actions` shape = type-compatible** (Q4 maps onto the live `EvaluatedAction` type, can call `computeWindowSnapshot()` directly, no type change) — but the `evaluated_actions` **table is not migrated** (DRAFT-only; the live ATL runs the window in-memory from the wrapper's `CarriedProfile`), so creating it is a Stage-A additive migration.
+
+**Reasoning:** Founder elected "lock + scope build" at session open (AskUserQuestion). Code read (`trust-layer/types/{evaluation,accreditation}.ts`; `supabase-agent-accreditation-migration.sql`; `trust-layer/schema/trust-layer-schema-REVIEW.sql`) confirmed both technical items (Diagnostic-certain). Per-domain proximity: founder overrode the recommended defer; AI concern stated once (duplicates proximity logic in a second place; enlarges Stage A; future native ATL field must reconcile) then executed per founder authority. PR13 five-question assessment: both findings *refine* (not contradict) SR-4/SR-5 and sharpen Stage-A scope. PR15: SR-4 reuse posture preserved (feed the existing aggregator/grade-engine); the only new bespoke element is the SR-15 per-domain computation, justified by founder election + no ATL primitive providing it.
+
+**Files touched:**
+- `adopted/sage-reflect-product-design.md` — moved from `/drafts/` (git rename); status → LOCKED; SR-13 route locked; new SR-15; reconciliation-table katorthoma row + output-schema note + Open-items section + Stage-A risk note updated.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** **Elevated** under 0d-ii — archive move of a governing design doc (`/drafts/` → `/adopted/`) + in-place doc edits. No code, schema, env, or production runtime change. AC7 not engaged. PR6 not engaged. (The eventual *build* is Critical — Critical Change Protocol applies then; Stage A Elevated → Stage B Critical per the design's Risk Classification section.)
+
+**Rollback path:** Reversible via git — `git mv adopted/sage-reflect-product-design.md drafts/sage-reflect-product-design.md` then `git restore`/`git revert` the doc edits + this entry. Nothing deployed; production byte-identical.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+git status
+sed -n '1,6p' adopted/sage-reflect-product-design.md
+grep -n "SR-15" adopted/sage-reflect-product-design.md
+```
+Expected: `adopted/sage-reflect-product-design.md` present, `drafts/` copy gone (git shows `R` rename); the doc's status line reads "**LOCKED** 2026-05-22"; SR-15 present in the locked-decisions table.
+
+**Open questions:** Carried forward under PR7 — human-surface migration (K-category track); ATL→Sage Assent rename (carries the SR-15 per-domain reconciliation known-risk); 90-day retention confirmation (lawyer track).
+
+**Rules served:** R0, R4, R5, R17, R18, R19, R20, AC1, AC7, KG1, KG7, PR1, PR2, PR6, PR7, PR13, PR15.
+
+**Status:** Adopted. Implementation status: Sage Reflect — **Designed (LOCKED)**; build pending (Stage A Elevated → Stage B Critical). Cross-references: `D-SAGE-REFLECT-DESIGN-DRAFTED-2026-05-21`; `D-SAGE-CALLING-STAGE2-LIVE-VERIFIED-2026-05-21`; `/adopted/sage-reflect-product-design.md`; `/adopted/purpose-discovery-product-design.md`; standing + build-arc caches.
+
+---
