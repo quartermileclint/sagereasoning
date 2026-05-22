@@ -6996,3 +6996,27 @@ Both migrations flip **Wired → Verified, 2026-05-22**. Two cosmetic VERIFY-com
 **Status:** Adopted. Implementation status: **Sage Reflect — Live / Verified (gated)** as of 2026-05-22. Cross-references: `D-SAGE-REFLECT-STAGE-B-BUILD-WIRED-VERIFIED-2026-05-22`; the Stage B close; `/adopted/sage-reflect-product-design.md` (LOCKED).
 
 ---
+
+## 2026-05-23 — D-TRACK-FOLLOWONS-DESIGN-PACK-2026-05-23
+
+**Decision:** Track-election session. Founder elected tracks **A** (Sage Reflect PR7 follow-ons), **C** (ATL→Sage Assent rename), **E** (Sage Calling PR7 follow-ons), **F** (cleanup), with a further item held for after the rest. Produced a consolidated safe-layer design pack (`/drafts/2026-05-23-track-followons-design-pack.md`): **A3** harm-flag-carrier governance ack (awaiting founder (a)/(b)/(c)); design notes for **A1** (cross-session context — `complexity int` + `calibration_all_correct boolean` columns on `sage_reflect_sessions`, an open-path prior-3 read + streak walk, wire `buildContext`), **A2** (microcent-precise cost accumulator alongside the unchanged integer-cents bill), **A4** (conditional 5th Sonnet call when the deterministic Q5 read is ambiguous; raises the documented bound to ≤5); a categorised **ATL→Sage Assent impact-map** (~140 files; ~50 code; two breaking external/wire-format surfaces — the live `sr_atl_` credential prefix + the persisted `atl_write` DB scope value + the published agent-card extension URI) with a 4-phase plan (Critical arc); the **Sage Calling** follow-on list (only #1, persist the Agent-Card verdict, is actionable pre-launch; the rest are condition-gated on "external users exist" / a missed-signal finding); and a founder-side **F** cleanup handoff (smoke-row inspect/delete SQL, credential revocation via `DELETE /api/admin/accreditation-credentials?id=<uuid>`, `git rm smoke-test-reflect.sh`). No code touched, no schema change, no deploy.
+
+**Reasoning:** The elected tracks exceed one session to Verified; several A items and all of C touch the live metering/extraction path or external contracts that 0d-ii gates behind explicit approval, so the session produced the safe layer (design/scope/ack/handoff) to a single build-go-ahead gate rather than building Elevated/Critical code unattended (concern stated once, then executed within governance). A1 "design note then build" is the founder's own stated A1 sequence. PR15 consult: no Anthropic-canonical primitive substitutes for these product-specific refinements; the load-bearing reuse is SageReasoning's own substrate (`getClient`/`sonnetCostMicrocents`/the Sage-Assent feed). PR16: C Phase-0 is a positioning decision (R18a Character Kernel category label — does the *external* name change or only internals) surfaced for founder election; A-track items strengthen the live product.
+
+**Files touched:**
+- `/drafts/2026-05-23-track-followons-design-pack.md` (NEW) — the consolidated design/scope/ack/handoff pack.
+- `smoke-test-reflect.sh` — removal attempted; workspace-blocked (deletion permission-gated); handed to the founder as `git rm` (file intact, no side effect).
+
+**Risk classification:** **Standard** under 0d-ii. Governance/design only; no code, schema, or deploy. AC7 not engaged this session. PR6 not engaged this session (A3 stays governance unless the founder elects (b)/(c), which re-engages PR6 → Critical for the build).
+
+**Rollback path:** N/A — no system change. The draft is reversible by deletion; the baseline (Sage Reflect Live/Verified, gated) is unchanged.
+
+**Verification step (founder-performable):** Read `/drafts/2026-05-23-track-followons-design-pack.md`; answer A3 ((a)/(b)/(c)); greenlight any A subset + the C Phase-0 naming decision; elect E#1 if wanted; run the three F command blocks. No test commands this session (no code changed).
+
+**Open questions (carried under PR7):** A3 harm-flag carrier — Diagnostic-uncertain (symptom level) until founder-acked; A1/A2/A4 await build go-ahead (recommended order A2→A4; A1 before C); C Phase-0 external-vs-internal naming decision (sets whether C is Elevated-internal or Critical-external); E#1 election; the founder's held "something else."
+
+**Rules served:** R0, R5, R17b, R18a, R20a, AC7, PR1, PR6, PR7, PR10, PR15, PR16.
+
+**Status:** Adopted. Cross-references: `D-SAGE-REFLECT-STAGE-B-METERING-FIX-AND-LIVE-VERIFICATION-2026-05-22`; predecessor close `/operations/handoffs/founder/2026-05-22-sage-reflect-stage-b-build-close.md`; this session's close; `/drafts/2026-05-23-track-followons-design-pack.md`.
+
+---

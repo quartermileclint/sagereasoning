@@ -1,0 +1,184 @@
+Using both
+
+Short answer: yes, you can use both—and no, your cowork project won’t “break” just because you start using the Claude Code tab.
+But there are some gotchas that matter if you want a clean system.
+
+⸻
+
+What Actually Happens When You Use Both
+
+Think of it like this:
+	•	Cowork = structured, deterministic layer (your existing system)
+	•	Claude Code 2.0 (Anthropic) = flexible, agent-driven layer
+
+They don’t overwrite each other automatically.
+They just operate on the same underlying project assets (files, tools, context).
+
+So nothing explodes—but things can drift.
+
+⸻
+
+When It Works Well (Best Case)
+
+Using both is powerful if you separate roles
+
+Cowork
+	•	Reliable execution
+	•	Production workflows
+	•	Deterministic outputs
+
+
+Claude Code
+	•	Exploration
+	•	Refactoring
+	•	Designing new agents/tools
+	•	Testing new patterns
+
+👉 This is actually an ideal setup:
+	•	Cowork = “stable system”
+	•	Code tab = “R&D lab”
+
+⸻
+
+Where You Can Get Into Trouble
+
+1. Silent Logic Drift
+
+If you:
+	•	Modify tools in Code
+	•	But cowork scripts still assume old behavior
+
+You get:
+	•	subtle inconsistencies
+	•	hard-to-debug outputs
+
+👉 Fix: treat tool definitions as a single source of truth
+
+⸻
+
+2. Duplicated Logic
+
+Common pattern:
+	•	You already have a script in cowork
+	•	Then recreate similar logic as an agent in Code
+
+Now you have:
+	•	two systems doing the same thing differently
+
+👉 Pick one as canonical:
+	•	deterministic → cowork
+	•	adaptive → Code
+
+⸻
+
+3. Overwriting Structure (Accidentally)
+
+In Code you might:
+	•	rename files
+	•	restructure folders
+	•	change schemas
+
+Cowork may:
+	•	still reference old paths or formats
+
+👉 This is the only way things “break”
+
+⸻
+
+4. Context Mismatch
+
+Claude Code relies heavily on:
+	•	what files are visible
+	•	how they’re structured
+
+Cowork workflows might:
+	•	assume fixed inputs
+
+👉 Same data, different assumptions → inconsistent results
+
+⸻
+
+Safe Way to Use Both (Recommended Setup)
+
+Treat your project like this:
+
+/core
+  tools/
+  schemas/
+  data/
+
+/cowork
+  workflows/
+  scripts/
+
+/agents
+  (Claude Code experiments)
+
+Rules:
+	•	Core = shared truth
+	•	Cowork reads from core
+	•	Code experiments build on core (not overwrite blindly)
+
+⸻
+
+Practical Workflow
+
+Use this loop:
+	1.	Build/test new capability in Claude Code
+	2.	Once stable:
+	•	either:
+	•	promote it into cowork (if deterministic)
+	•	keep it as an agent (if adaptive)
+	3.	Avoid maintaining both versions
+
+⸻
+
+Simple Rule of Thumb
+
+If it needs:
+	•	consistency, auditability, repeatability → keep in cowork
+	•	judgment, flexibility, evolving logic → use Claude Code
+
+⸻
+
+The Real Answer to Your Concern
+
+“Will my project break?”
+
+Not by default.
+
+It only breaks if you:
+	•	change shared assets (tools, schemas, file structure)
+	•	without updating cowork to match
+
+⸻
+
+If You Want to Be Extra Safe
+
+Before using Code tab heavily:
+	•	snapshot your current:
+	•	tool definitions
+	•	schemas
+	•	key workflows
+
+Then:
+	•	experiment freely
+	•	compare outputs
+
+⸻
+
+Bottom Line
+
+You’re not choosing one or the other.
+
+You’re moving toward a stack like:
+
+Cowork = execution engine
+Claude Code = intelligence layer
+
+That combination is stronger than either alone—just don’t let them diverge silently.
+
+⸻
+
+If you want, I can map your current cowork architecture into a “dual system” setup so you know exactly what should live where.
+
