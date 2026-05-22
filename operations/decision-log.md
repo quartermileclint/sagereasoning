@@ -6868,3 +6868,61 @@ Expected: `adopted/sage-reflect-product-design.md` present, `drafts/` copy gone 
 **Status:** Adopted. Implementation status: Sage Reflect — **Designed (LOCKED)**; build pending (Stage A Elevated → Stage B Critical). Cross-references: `D-SAGE-REFLECT-DESIGN-DRAFTED-2026-05-21`; `D-SAGE-CALLING-STAGE2-LIVE-VERIFIED-2026-05-21`; `/adopted/sage-reflect-product-design.md`; `/adopted/purpose-discovery-product-design.md`; standing + build-arc caches.
 
 ---
+
+## 2026-05-22 — D-SAGE-REFLECT-STAGE-A-BUILD-WIRED-VERIFIED-2026-05-22
+
+**Decision:** Built Sage Reflect **Stage A** (Elevated) over the LOCKED design — INERT (no auth/endpoint/LLM/env-flag/R20a surface; nothing imports the modules yet): (1) the deterministic six-question engine (`engine.ts` + `question-bank.ts`) — a pure step function over structured per-question assessments: Q1→Q6 ordering, branching only at Q5/Q6, FD-R1 null-suspicion gate, FD-R2 progress-dimension hold, FD-R3 mandatory pressure-assent flagging, FD-R4 Sage Assent calibration cross-check, Q6 response-shape → RS-1..RS-4 routing + the RS-4 supporting-question ladder (defaults RS-2), and the Sage Calling trigger-payload assembly; (2) the Sage-Reflect-owned additive store (`session-store.ts`) — the five logs (phantasia/synkatathesis/horme/kathekon-quality/circle-need) as KG7 JSONB arrays + R17b app-level encryption of the verbatim responses + SR-12 retention/hard-deletion/minimisation + the SR-15 per-domain proximity store I/O; (3) the **new `evaluated_actions` table migration** (`supabase-evaluated-actions-migration.sql`) extracted from the DRAFT review schema (additive, idempotent, FK to agent_accreditation, RLS service-role); (4) the SR-15 per-domain proximity computation (`proximity-domains.ts`, KP-04 unity rule = weakest cardinal domain) + its store table (`supabase-sage-reflect-migration.sql`); (5) the Sage Assent feed (`sage-assent-feed.ts`, SR-4) — maps Q4 kathekon → `EvaluatedAction`, ensures the parent accreditation row, persists, reads back, calls the existing `computeWindowSnapshot()` → `evaluateGradeTransition()` → upserts the engine's record (NOT a hand-written grade — preserves hysteresis), and writes the SR-15 store. Plus the `evaluated_actions` data layer (`evaluated-actions-store.ts`). Verified in-session: `tsc --noEmit` clean project-wide; four `tsx` suites green — engine **48/0**, proximity-domains **10/0**, session-store **29/0**, sage-assent-feed **27/0** (114/0 total).
+
+**Reasoning:** Stage A of the two-stage build (PR1 — prove the deterministic engine + store + feed in isolation before the Critical Stage-B endpoint wires onto a Verified engine). Implements `D-SAGE-REFLECT-DESIGN-LOCKED-2026-05-22` (SR-4 reuse / SR-6 deterministic control flow / SR-7 FD-R1..R4 / SR-12 R17 posture / SR-13 route + flag scoped to Stage B / SR-15 per-domain). The Stage-A/Stage-B boundary (PR1): the engine reads STRUCTURED assessments; the translation-sandwich that produces them from free text is Stage B — so Stage A is testable in isolation on fixtures (SR-6: "Layer 2 keeps the judgement deterministic; the LLM only extracts features"). PR15 consult: `.claude/skills/anthropic/` + the agentic-commerce findings tracker checked — no Anthropic primitive substitutes for a deterministic, auditable reflection engine; SR-4 reuse of the existing ATL aggregator/grade-engine is the load-bearing reuse (bespoke limited to the engine + the SR-15 computation, justified at lock). Diagnostic-certain finding confirmed at kickoff (the A-3 open item): `computeWindowSnapshot()` is a pure function over an `EvaluatedAction[]` — it consumes the persisted rows UNCHANGED. Known-risk surfaced + handled: the `evaluated_actions.agent_id` FK to `agent_accreditation` means a Q4 row cannot be inserted unless the agent has an accreditation row, so the feed seeds a conservative starting credential (pre_progress/reflexive/all-emerging) before inserting (built in; tested in the FLOW seed branch).
+
+**Files touched:**
+- `website/src/lib/sage-reflect/question-bank.ts` (NEW) — verbatim Q1–Q6 + sub-questions + RS-4 ladder + FD-R1 test + R19d mirror note.
+- `website/src/lib/sage-reflect/engine.ts` (NEW) — the deterministic step function + FD-R1..R4 + RS routing + trigger assembly (pure).
+- `website/src/lib/sage-reflect/proximity-domains.ts` (NEW) — SR-15 per-domain proximity (KP-04 weakest-link).
+- `website/src/lib/sage-reflect/session-store.ts` (NEW) — the five logs + R17b encryption seam + SR-12 retention/deletion + SR-15 store I/O (lazy admin client, KG1/KG7).
+- `website/src/lib/sage-reflect/evaluated-actions-store.ts` (NEW) — durable evaluated_actions data layer (lazy client, KG1/KG7).
+- `website/src/lib/sage-reflect/sage-assent-feed.ts` (NEW) — the SR-4 feed (DI seam; reuses computeWindowSnapshot + evaluateGradeTransition; FK-ensure).
+- `website/src/lib/sage-reflect/__tests__/{engine,proximity-domains,session-store,sage-assent-feed}.test.ts` (NEW) — 114 assertions.
+- `website/supabase-evaluated-actions-migration.sql` (NEW) — additive, idempotent; FK to agent_accreditation; RLS service-role.
+- `website/supabase-sage-reflect-migration.sql` (NEW) — sage_reflect_sessions + sage_reflect_proximity_domains; additive, idempotent; RLS service-role.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** **Elevated** under 0d-ii — new modules + two additive idempotent schema migrations; no auth/endpoint/env-flag/R20a/distress surface (all Stage B). AC7 NOT engaged. PR6 NOT engaged (no R20a/distress surface this stage). Critical Change Protocol NOT engaged. PR1 honoured (engine + store + feed proven before any public wiring). PR2 honoured (every FD gate + the feed's reuse-fn calls are invoked in the execution path — grep-confirmed; tests invoke nextStep + feedSageAssent across 27 call-sites). KG1 (every Supabase call awaited; no fire-and-forget; direct imports, no self-calls). KG7 (the five logs + scrutiny_flags written as direct JSONB arrays; meta + trigger as direct objects). PR4 N/A (no LLM in Stage A).
+
+**Rollback path:** All artefacts are NEW + inert. Pre-push `git reset --hard` or delete the files. Post-push `git revert` + push → Vercel rebuilds; runtime byte-identical because nothing imports these modules (no endpoint, no flag). The two migrations are idempotent + reversible (`DROP TABLE IF EXISTS public.evaluated_actions;` / `... sage_reflect_sessions;` / `... sage_reflect_proximity_domains;`). No existing table modified; no production endpoint touched.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsc --noEmit
+npx tsx src/lib/sage-reflect/__tests__/engine.test.ts
+npx tsx src/lib/sage-reflect/__tests__/proximity-domains.test.ts
+npx tsx src/lib/sage-reflect/__tests__/session-store.test.ts
+npx tsx --env-file=.env.local src/lib/sage-reflect/__tests__/sage-assent-feed.test.ts
+```
+Expected: tsc exit 0 (no output); engine `48 pass / 0 fail`; proximity-domains `10 pass / 0 fail`; session-store `29 pass / 0 fail`; sage-assent-feed `27 pass / 0 fail`. Then run `website/supabase-evaluated-actions-migration.sql` and `website/supabase-sage-reflect-migration.sql` in the Supabase SQL Editor and confirm their VERIFY blocks. (No live row round-trip until Stage B writes the tables.)
+
+**Open questions (carried under PR7):**
+- **R17b encryption interpretation (founder-confirmable):** Stage A encrypts the verbatim free-text responses (the most intimate content) and keeps the five categorical logs as plaintext queryable JSONB. SR-12 says "app-level encryption for the intimate introspective fields"; this split is the AI's interpretation of "intimate fields." Confirm or widen at Stage B.
+- **`MENTOR_ENCRYPTION_KEY` is NOT in `.env.local`** (and must be set in Vercel) before Stage B persists real sessions — `encryptForStorage` throws without it. Not blocking Stage A (nothing persists live). Founder action for Stage B.
+- **`regressing_check_count` passed as 0** to `evaluateGradeTransition` (the lookup returns no store-only count). Conservative (a single feed cannot trip a regression-count downgrade — intended hysteresis). A CarriedProfile-style carry is a PR7 enhancement.
+- **FD-R2 / FD-R4 thresholds** (`FD_R2_FAILURE_DROP_THRESHOLD=2`, `FD_R4_DEFERENCE_STREAK=5`) and the **SR-15 weakest-link rule** are tunable without data migration; confirm against real data in/after Stage B.
+- **90-day retention** value — lawyer-engagement track (carried).
+- **SR-15 ↔ future native ATL per-domain field** reconciliation — Sage Assent rename/enhancement track (carried from lock).
+
+**Rules served:** R0, R4, R5, R17, R17b, R17h, R17i, R18a, R18d, R19d, R20a (boundary deferred to Stage B), AC7 (Stage B), KG1, KG7, PR1, PR2, PR4, PR6, PR7, PR13, PR15.
+
+**Status:** Adopted. Implementation status: Sage Reflect Stage A — **Verified in-session** (tsc clean; 114/0; PR2 grep). The two migrations are **Wired → Verified** once the founder runs them in Supabase + confirms the VERIFY blocks. Stage B (Critical: `POST /api/practice/reflect` + translation-sandwich Q1–Q4 scoring + R20a/Zone-3 boundary + R18d suite, behind `SAGE_REFLECT_ENABLED`) is **Scoped** — next-session prompt written. Cross-references: `D-SAGE-REFLECT-DESIGN-LOCKED-2026-05-22`; `D-SAGE-REFLECT-DESIGN-DRAFTED-2026-05-21`; `/adopted/sage-reflect-product-design.md`; `/drafts/sage-reflect-build-staging-plan.md`; predecessor close `/operations/handoffs/founder/2026-05-22-sage-reflect-design-lock-build-scope-close.md`; this session's close + the Stage B prompt (paths in the close); standing + build-arc caches.
+
+---
+
+## 2026-05-22 — Verification confirmation — D-SAGE-REFLECT-STAGE-A-BUILD-WIRED-VERIFIED-2026-05-22 (migrations)
+
+**Confirmation:** Founder ran both Stage-A migrations in the Supabase SQL Editor between sessions and pasted the VERIFY-block outputs. All blocks returned as expected:
+- `evaluated_actions` — table present; **14 columns** with correct types/defaults (`passions_detected` jsonb default `'[]'`, `virtue_domains_engaged` text[] default `'{}'`, `candidates_considered` integer default 1, `evaluated_at` timestamptz default now()); 3 indexes (`evaluated_actions_pkey`, `idx_evaluated_agent_time`, `idx_evaluated_receipt`); FK `evaluated_actions_agent_id_fkey` → `agent_accreditation`; RLS `relrowsecurity = true`.
+- `sage_reflect_sessions` — present; **22 columns** with correct defaults (`current_step` 'Q1'; `profile_update_confidence` 'normal'; `fabrication_risk_level` 'low'; `progress_dimensions_held` false; the five logs + `scrutiny_flags` jsonb default `'[]'`; `response_history_ciphertext`/`response_history_meta` nullable; `exit_path`/`rs_class` nullable); 4 indexes (pkey, session_id unique, agent_id_idx, created_at_idx); the 5 named CHECK constraints (confidence, current_step, exit_path, fabrication_risk, rs_class); RLS true.
+- `sage_reflect_proximity_domains` — present; 7 columns; RLS true.
+
+Both migrations flip **Wired → Verified, 2026-05-22**. Two cosmetic VERIFY-comment column-counts were corrected in the migration files post-run (`12 → 14` in `supabase-evaluated-actions-migration.sql`; `23 → 22` in `supabase-sage-reflect-migration.sql`) — comment-only; no schema change; the run tables are correct as-is. The Stage-A code remains Verified-in-session; only commit + push now remains (after the founder removes the stale `.git/index.lock` the sandbox left). (R0 audit-trail accuracy; Standard-risk governance edit.)
+
+---
