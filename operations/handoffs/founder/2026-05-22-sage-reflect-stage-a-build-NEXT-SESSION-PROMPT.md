@@ -12,7 +12,7 @@
 Sage Reflect's design is LOCKED and adopted. Stage A builds the part that needs no perimeter: the deterministic six-question engine, the Sage Reflect-owned additive store, the (new) `evaluated_actions` table, the SR-15 per-domain proximity store, and the Sage Assent feed that recomputes `agent_accreditation` via the existing aggregator/grade-engine. Proving this in isolation first is PR1 discipline — Stage B's endpoint wires onto a Verified engine, not an unproven one.
 
 ## Pre-conditions (confirm at open)
-1. The 2026-05-22 lock commit is pushed + Vercel green (founder-confirmed between sessions), and the stale `.git/index.lock` was removed.
+1. The 2026-05-22 lock commit is pushed + Vercel green (**founder-confirmed 2026-05-22**); the stale `.git/index.lock` was removed; the design is LOCKED at `/adopted/sage-reflect-product-design.md` (status line reads "LOCKED 2026-05-22"; SR-15 present).
 2. Production unchanged: Sage Calling Live (gated); substrate A7 Verified; A10 Live + Verified; `SUBSTRATE_LAYER3_ENABLED` + `SUBSTRATE_R20A_GATE_ENABLED` UNSET; Layer 1 schema v3.
 3. Sage Calling smoke-test cleanup status (surface; don't block).
 
