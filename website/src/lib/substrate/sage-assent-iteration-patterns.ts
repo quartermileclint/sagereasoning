@@ -1,5 +1,5 @@
 /**
- * sage-assent-iteration-patterns.ts — the Agent Trust Layer Wrapper, Component 5:
+ * sage-assent-iteration-patterns.ts — the Sage Assent Wrapper, Component 5:
  * the three iteration patterns (sequential loop / parallel evaluation /
  * multi-agent orchestration).
  *
@@ -7,10 +7,10 @@
  * imported by no route — no production exposure this session.
  *
  * GOVERNING DOCUMENTS:
- *   - /adopted/substrate-modes/agent-trust-layer-wrapper-spec.md — the spec
+ *   - /adopted/substrate-modes/sage-assent-wrapper-spec.md — the spec
  *     (Adopted 2026-05-14). This module builds spec §"Component 5 — The three
  *     iteration patterns" and the §"Layer 1 implications" peer_agent_assessments
- *     field; it is the last ATL Wrapper component before the badge (Component 3).
+ *     field; it is the last Sage Assent Wrapper component before the badge (Component 3).
  *   - /operations/decision-log.md — D-ATL-ITERATION-PATTERNS-WIRED-VERIFIED-
  *     2026-05-15 (this build; the Step 2 design-decision gate is recorded there).
  *   - /manifest.md §R4 (IP boundary) / §R17e (named as NOT applying to agent
@@ -103,13 +103,13 @@
  *     the score weight tables stay module-private inside the ported
  *     /trust-layer/ closure + score-architecture.ts; nothing here returns them.
  *   - R17e: does NOT apply to agent profiles — an agent's reasoning-pattern
- *     profile is not an intimate human vulnerability (ATL Wrapper spec §"R-rule
+ *     profile is not an intimate human vulnerability (Sage Assent Wrapper spec §"R-rule
  *     engagement"; the load-bearing distinction from private mode). This module
  *     applies no R17e filter.
  *   - R18 a–e: the iteration patterns produce the carried profiles +
  *     renderings + peer payloads the badge (Component 3, spec step 6) certifies.
  *   - AC8: this module sits in /website/src/lib/substrate/ and orchestrates the
- *     translation-sandwich substrate's ATL pieces.
+ *     translation-sandwich substrate's Sage Assent pieces.
  *   - PR1: sage-assent-wrapper.ts was the single-endpoint proof of the carried-profile/
  *     trajectory pattern; this module is its next consumer — kept pure /
  *     deterministic, no I/O, no LLM call inside the module.
@@ -125,7 +125,7 @@
  *   - PR15: Anthropic's multi-agent orchestration primitive (Claude Managed
  *     Agents, Multiagent sessions — public beta) was evaluated for pattern 3
  *     and found COMPLEMENTARY, not competing: it is the runtime substrate an
- *     orchestrator runs on; the ATL Wrapper wraps such an orchestrator. Bespoke
+ *     orchestrator runs on; the Sage Assent Wrapper wraps such an orchestrator. Bespoke
  *     is correct — see the decision-log entry's Reasoning.
  */
 
@@ -158,7 +158,7 @@ import type { Layer1Schema } from '../translation-sandwich/layer1-extractor'
 import { buildAccreditationPayload } from './trust-layer/accreditation/accreditation-record'
 import type { AccreditationPayload } from './trust-layer/types/accreditation'
 
-// Re-export the types Component 5's signatures use, so downstream ATL consumers
+// Re-export the types Component 5's signatures use, so downstream Sage Assent consumers
 // (Component 3 the badge — spec step 6; the trajectory-enriched developer
 // hand-back report) import them from one place.
 export type {

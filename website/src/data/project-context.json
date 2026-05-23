@@ -2,7 +2,7 @@
   "version": "1.0.1",
   "last_updated": "2026-04-17",
   "baseline": {
-    "identity": "SageReasoning encodes Stoic wisdom into infrastructure that helps any rational agent — human or artificial — examine impressions, diagnose false judgements, and progress toward virtue. The website serves human practitioners. The API and skill contracts serve agent developers. The Agent Trust Layer extends the moral community to include artificial agents.",
+    "identity": "SageReasoning encodes Stoic wisdom into infrastructure that helps any rational agent — human or artificial — examine impressions, diagnose false judgements, and progress toward virtue. The website serves human practitioners. The API and skill contracts serve agent developers. The Sage Assent extends the moral community to include artificial agents.",
     "mission": "That principled reasoning becomes a standard capability of every AI agent and a daily practice for every human who encounters it.",
     "founder": "Sole founder, non-technical, learning to build a startup with AI collaboration. The builder must embody what they build — personal virtue practice grounds the product.",
     "ethical_commitments": {

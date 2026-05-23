@@ -1,4 +1,4 @@
-# ATL Wrapper — Kathekon-Aligned Alternative Design
+# Sage Assent Wrapper — Kathekon-Aligned Alternative Design
 
 **Status:** Adopted 2026-05-16 under `D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-DESIGN-LOCKED-2026-05-16`. **Implementation status:** Designed (per 0a vocabulary) — the seven decisions below are specified, not built; the kathekon-aligned alternative build session is the next sub-session in the post-6b arc.
 **Stream:** founder.
@@ -55,7 +55,7 @@ The relationship-to-proximity question had four candidate answers:
 
 ### Structural constraint
 
-The substrate's existing `EvaluatedAction` shape already carries `is_kathekon: boolean` and `kathekon_quality: 'strong' | 'moderate' | 'marginal' | 'contrary'` per the 3 April 2026 ATL build (ported into `website/src/lib/substrate/trust-layer/types/evaluation.ts` on 2026-05-15). The raw signals are already in the substrate. What this design adds is an aggregation + a credential field projecting from it — no new raw input is needed.
+The substrate's existing `EvaluatedAction` shape already carries `is_kathekon: boolean` and `kathekon_quality: 'strong' | 'moderate' | 'marginal' | 'contrary'` per the 3 April 2026 Sage Assent build (ported into `website/src/lib/substrate/trust-layer/types/evaluation.ts` on 2026-05-15). The raw signals are already in the substrate. What this design adds is an aggregation + a credential field projecting from it — no new raw input is needed.
 
 ### R-rule engagement
 
@@ -374,8 +374,8 @@ Expected risk classification: **Elevated** (additive schema changes, new column,
 - `/operations/handoffs/founder/2026-05-16-kathekon-aligned-alternative-design-pass-close.md` — this session's close.
 - `/operations/handoffs/founder/2026-05-16-hand-back-report-close.md` — immediate predecessor session close.
 - `/operations/handoffs/founder/2026-05-15-post-build-brainstorm-close.md` — sequencing source (step 5 of 8 in the post-6b arc).
-- `/adopted/atl-items-1-3-design.md` — structural precedent and pattern source for Decisions B + C + E + G (the `typical_deliberation_breadth` pattern this design mirrors).
-- `/adopted/substrate-modes/agent-trust-layer-wrapper-spec.md` — the Wrapper spec; especially §"Component 2 — The Layer 3 agent-mode rendering", §"Component 3 — The Badge / Accreditation", §"Component 4 — Trajectory awareness", §"The report the agent hands back to the developer", §"R-rule engagement".
+- `/adopted/sage-assent-items-1-3-design.md` — structural precedent and pattern source for Decisions B + C + E + G (the `typical_deliberation_breadth` pattern this design mirrors).
+- `/adopted/substrate-modes/sage-assent-wrapper-spec.md` — the Wrapper spec; especially §"Component 2 — The Layer 3 agent-mode rendering", §"Component 3 — The Badge / Accreditation", §"Component 4 — Trajectory awareness", §"The report the agent hands back to the developer", §"R-rule engagement".
 - `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` — J1 ADR (Character Kernel category language; Decision F's no-change basis).
 - `/website/src/lib/translation-sandwich/layer2-mechanisms.ts` — `KathekonAssessment` + `KathekonQuality` shape (the raw signal source).
 - `/website/src/lib/substrate/trust-layer/types/evaluation.ts` — `EvaluatedAction` + `WindowSnapshot` shape (extended for Decision B).

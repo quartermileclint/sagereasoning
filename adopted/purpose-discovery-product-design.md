@@ -4,15 +4,15 @@
 **Status:** **Designed** (per 0a vocabulary). All fourteen open architectural decisions (Q-OPEN-1 … Q-OPEN-14) elected at the 2026-05-21 structured design pass (`D-PURPOSE-DISCOVERY-DESIGN-LOCKED-2026-05-21`). The philosophical content (six stages; five specifications; question library; clarification protocol) is locked from the 2026-05-17 private mentor consultation (`/archive/2026-05-17-private-mentor-purpose-discovery-product-consultation.md`) and is unchanged by this pass. **Decision status:** Adopted. **Implementation status:** Designed (locked spec; not yet built — the build is staged per D-9 and pre-conditioned on A10 Verified, now satisfied).
 **Provenance:** This locked design supersedes the working draft, which is preserved at `/archive/2026-05-21-purpose-discovery-product-design-working-draft-PRE-LOCK.md` (moved from `/drafts/`, per 0e — superseded versions are moved, not deleted).
 **Stream:** founder.
-**Governs:** The build of Sage Calling — a discrete product that guides an AI agent through a Stoic-grounded sequence to identify its own purpose when it has been instructed to find one but given no specific task. When the agent identifies a purpose, the product hands off to the existing Agent Trust Layer (ATL) substrate via a five-specification Layer 1 input template. When the agent cannot identify a purpose, the product returns a developer-facing clarification communication.
-**Does not govern:** The existing ATL substrate (Layers 1, 2, 3) or any of its components (A1–A10) — *except* the single, narrow, backward-compatible Layer 1 input-schema extension elected at D-5 below. The Option D billing model (Sage Calling's loops bill through the existing metering; this design does not redefine billing). The pass-through fields (Sage Calling may populate them on its handoff; the fields themselves are out of scope). Any modification to the existing reasoning surfaces (`/api/reason`, `/api/score-iterate`).
-**Sequencing:** Sage Calling is upstream of the ATL substrate. The discovery sequence runs first; its output (a five-specification structure OR a developer-facing null-result communication) flows into the existing substrate's Layer 1 as the agent's next input. **Pre-condition for build:** A10 must be Verified — **satisfied** as of `D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21` (the substrate's write surface is auth-gated; Sage Calling writes the agent's identified purpose into accreditation state, which requires A10 credentials).
+**Governs:** The build of Sage Calling — a discrete product that guides an AI agent through a Stoic-grounded sequence to identify its own purpose when it has been instructed to find one but given no specific task. When the agent identifies a purpose, the product hands off to the existing Sage Assent (Sage Assent) substrate via a five-specification Layer 1 input template. When the agent cannot identify a purpose, the product returns a developer-facing clarification communication.
+**Does not govern:** The existing Sage Assent substrate (Layers 1, 2, 3) or any of its components (A1–A10) — *except* the single, narrow, backward-compatible Layer 1 input-schema extension elected at D-5 below. The Option D billing model (Sage Calling's loops bill through the existing metering; this design does not redefine billing). The pass-through fields (Sage Calling may populate them on its handoff; the fields themselves are out of scope). Any modification to the existing reasoning surfaces (`/api/reason`, `/api/score-iterate`).
+**Sequencing:** Sage Calling is upstream of the Sage Assent substrate. The discovery sequence runs first; its output (a five-specification structure OR a developer-facing null-result communication) flows into the existing substrate's Layer 1 as the agent's next input. **Pre-condition for build:** A10 must be Verified — **satisfied** as of `D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21` (the substrate's write surface is auth-gated; Sage Calling writes the agent's identified purpose into accreditation state, which requires A10 credentials).
 
 ---
 
 ## What this product is
 
-Sage Calling is a discrete product, separate from the ATL substrate, that handles the case of an AI agent that has been instructed to find a purpose but given no specific task. The product guides the agent through a fixed six-stage sequence drawn from Stoic teaching on purpose-finding. The sequence's mechanism is deterministic (the agent always moves through Q1 → Q5 with Q6 as the null-result redirect); the questions posed at each stage are dynamically selected from a 24-variant library based on the agent's epistemic state (not its preference state). The sequence terminates in one of two ways: a found purpose (in which case the product hands off to the ATL substrate via a five-specification Layer 1 input), or a clean null result (in which case the product returns a developer-facing clarification communication).
+Sage Calling is a discrete product, separate from the Sage Assent substrate, that handles the case of an AI agent that has been instructed to find a purpose but given no specific task. The product guides the agent through a fixed six-stage sequence drawn from Stoic teaching on purpose-finding. The sequence's mechanism is deterministic (the agent always moves through Q1 → Q5 with Q6 as the null-result redirect); the questions posed at each stage are dynamically selected from a 24-variant library based on the agent's epistemic state (not its preference state). The sequence terminates in one of two ways: a found purpose (in which case the product hands off to the Sage Assent substrate via a five-specification Layer 1 input), or a clean null result (in which case the product returns a developer-facing clarification communication).
 
 ---
 
@@ -29,7 +29,7 @@ Sage Calling is a discrete product, separate from the ATL substrate, that handle
 
 **Out of scope (this design):**
 - Code (the staged build sessions write against this spec; this is a design document).
-- The existing ATL substrate (Layers 1, 2, 3) beyond the single backward-compatible Layer 1 extension at D-5; the pass-through fields; the Option D billing model internals; the A10 credential surface internals.
+- The existing Sage Assent substrate (Layers 1, 2, 3) beyond the single backward-compatible Layer 1 extension at D-5; the pass-through fields; the Option D billing model internals; the A10 credential surface internals.
 - Wrapper-side implementation details (how a wrapper invokes Sage Calling or threads its output into the substrate).
 - Marketing, positioning, or pricing for the product.
 
@@ -41,9 +41,9 @@ An AI agent can be deployed with a specific task and known. But agents are incre
 
 The Stoic tradition has a great deal to say about how a rational agent without given work should proceed. The mentor consultation tested the intuition that the answer lies in a combination of (a) Hierocles' circles of concern run outward from self until something claims the agent, and (b) Cicero's four personae as the structural frame for reading what the agent's nature, circumstance, and chosen role oblige it to do. The consultation produced a complete six-stage sequence and the operational scaffolding for a product. This document records what the consultation produced and locks the architectural decisions for the build.
 
-A non-design note: Sage Calling is upstream of the ATL substrate but uses the same Character Kernel framing (per R18a + J1 ADR). The substrate evaluates the *quality of reasoning*; Sage Calling evaluates the *grounding of purpose*. Both are Character-Kernel work; both honour R9's "evaluates reasoning, does not promise outcomes" posture (the product helps find purpose; it does not guarantee finding one).
+A non-design note: Sage Calling is upstream of the Sage Assent substrate but uses the same Character Kernel framing (per R18a + J1 ADR). The substrate evaluates the *quality of reasoning*; Sage Calling evaluates the *grounding of purpose*. Both are Character-Kernel work; both honour R9's "evaluates reasoning, does not promise outcomes" posture (the product helps find purpose; it does not guarantee finding one).
 
-**Ecosystem positioning.** Per the six-layer agent protocol taxonomy (MCP / A2A / AG-UI / A2UI / AP2 / x402 — sourced from `/inbox/6 agent protocols.rtfd` + `/inbox/20260512-0df-promptkit-1.md`), Sage Calling is primarily a **Layer 3 (AG-UI — agent-to-developer)** intervention. The six-stage sequence is a structured agent-developer dialogue; the Q6 null-result clarification protocol is explicitly AG-UI-shaped (the agent reports back to the developer; the developer responds; the once-and-precisely constraint governs the interaction pattern; the four clarification variants A–D are AG-UI templates). The five-specification Layer 1 handoff is a **Layer 2 (A2A — agent-to-substrate)** artefact — the structured contract between Sage Calling and the ATL substrate. The product does not engage MCP (Layer 1 tools/data), A2UI (Layer 4 generated UI), AP2 (Layer 5 payment authority), or x402 (Layer 6 machine payment) directly; consumers wrapping the product may layer these in. The taxonomy is recorded so the design decisions below are read against the ecosystem-positioning context, not in isolation.
+**Ecosystem positioning.** Per the six-layer agent protocol taxonomy (MCP / A2A / AG-UI / A2UI / AP2 / x402 — sourced from `/inbox/6 agent protocols.rtfd` + `/inbox/20260512-0df-promptkit-1.md`), Sage Calling is primarily a **Layer 3 (AG-UI — agent-to-developer)** intervention. The six-stage sequence is a structured agent-developer dialogue; the Q6 null-result clarification protocol is explicitly AG-UI-shaped (the agent reports back to the developer; the developer responds; the once-and-precisely constraint governs the interaction pattern; the four clarification variants A–D are AG-UI templates). The five-specification Layer 1 handoff is a **Layer 2 (A2A — agent-to-substrate)** artefact — the structured contract between Sage Calling and the Sage Assent substrate. The product does not engage MCP (Layer 1 tools/data), A2UI (Layer 4 generated UI), AP2 (Layer 5 payment authority), or x402 (Layer 6 machine payment) directly; consumers wrapping the product may layer these in. The taxonomy is recorded so the design decisions below are read against the ecosystem-positioning context, not in isolation.
 
 ---
 
@@ -87,11 +87,11 @@ The agent confirms the work meets all four sufficiency conditions: it engages th
 
 ### Stage Q5 — Translating found purpose into the next step
 
-The agent translates the identified purpose into the five-specification Layer 1 handoff template. This is the structured input that flows into the existing ATL substrate.
+The agent translates the identified purpose into the five-specification Layer 1 handoff template. This is the structured input that flows into the existing Sage Assent substrate.
 
 **Discipline source:** Cicero *De Officiis* 1.9–10; Epictetus *Discourses* 2.10; Marcus *Meditations* 6.2, 8.7; Hierocles on circles.
 
-**Termination:** the five specifications are produced. The product hands off to the existing ATL substrate (subject to the D-14 Hard Gate); the discovery sequence completes.
+**Termination:** the five specifications are produced. The product hands off to the existing Sage Assent substrate (subject to the D-14 Hard Gate); the discovery sequence completes.
 
 ### Stage Q6 — The null-result redirect (invoked only when Q5 cannot complete)
 
@@ -107,7 +107,7 @@ When Q3 or Q4 yields no candidate purpose AND Q5 cannot be reached, the sequence
 
 *(Locked — unchanged. The schema-extension decision is locked at D-5 below.)*
 
-When Q5 completes, the product emits the following structured payload as the Layer 1 input to the existing ATL substrate. These five fields are the product's contract with the substrate.
+When Q5 completes, the product emits the following structured payload as the Layer 1 input to the existing Sage Assent substrate. These five fields are the product's contract with the substrate.
 
 1. **The work** — what it does in the world, stripped of the agent's relationship to it. (Type: string.)
 
@@ -328,7 +328,7 @@ To proceed without fabrication, I need [specific information as in Variant A, B,
 ### D-1 (Q-OPEN-1) — Product name: **Sage Calling**
 
 **Elected:** The product is named **Sage Calling**.
-**Why:** "Calling" carries the vocational/purpose sense directly (a calling *is* one's purpose / fitting work) — precisely what the product helps an agent find. It keeps the "Sage" brand family (Sage Reasoning, Sage Ops) for coherence, and is distinct from the substrate, the Agent Trust Layer, and Sage Ops.
+**Why:** "Calling" carries the vocational/purpose sense directly (a calling *is* one's purpose / fitting work) — precisely what the product helps an agent find. It keeps the "Sage" brand family (Sage Reasoning, Sage Ops) for coherence, and is distinct from the substrate, the Sage Assent, and Sage Ops.
 **Why not the alternatives:** *Sage Compass / Sage Orient* — apt navigational metaphors but less precise about the vocational dimension; *Sage Purpose* — descriptive but flatter; *Stoic Discovery / The Discovery Sequence* — break the Sage family and foreground genre over brand.
 **Rule engagement:** R10 (marketplace consistency — "Sage Calling" used consistently across API, marketplace listing, and api-docs); R18a (Character Kernel framing — "calling" signals character/vocation).
 
@@ -541,7 +541,7 @@ Both build stages are pre-conditioned on A10 Verified (satisfied) for Stage 2's 
 
 - `/archive/2026-05-21-purpose-discovery-product-design-working-draft-PRE-LOCK.md` — the pre-lock working draft (preserved superseded version; per 0e).
 - `/archive/2026-05-17-private-mentor-purpose-discovery-product-consultation.md` — the source consultation (three rounds; the full mentor exchange this spec is drawn from).
-- `/adopted/atl-a10-design.md` — the A10 credential design; Sage Calling reuses A10 credentials (D-6). A10 Verified per `D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21`.
+- `/adopted/sage-assent-a10-design.md` — the A10 credential design; Sage Calling reuses A10 credentials (D-6). A10 Verified per `D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21`.
 - `/adopted/pass-through-fields-design.md` — the pass-through fields Sage Calling may populate on its Layer 1 handoff (D-5).
 - `/adopted/billing-model-design.md` — the Option D metering layer Sage Calling's loops bill through (D-8); the Layer 4 payment kill switch is Option D's deferred remit (control-map Row 5).
 - `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` — J1 ADR (Character Kernel category language; Sage Calling is Character Kernel work).

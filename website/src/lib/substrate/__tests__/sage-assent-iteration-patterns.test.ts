@@ -1,5 +1,5 @@
 /**
- * sage-assent-iteration-patterns.test.ts — Agent Trust Layer Wrapper Component 5 (the
+ * sage-assent-iteration-patterns.test.ts — Sage Assent Wrapper Component 5 (the
  * three iteration patterns) functional tests + invariant checks.
  *
  * Run via: `npx tsx website/src/lib/substrate/__tests__/sage-assent-iteration-patterns.test.ts`

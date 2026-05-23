@@ -1,5 +1,5 @@
 /**
- * agent-mode-service.ts — Layer 3 agent-mode rendering (ATL Wrapper Component 2).
+ * agent-mode-service.ts — Layer 3 agent-mode rendering (Sage Assent Wrapper Component 2).
  *
  * STATUS: Scaffolded → Wired → Verified (2026-05-15, this session). New code,
  * imported only by philosophical-mode-service.ts's renderLayer3Mode dispatch —
@@ -12,9 +12,9 @@
  *     not component", §"Out of the score; in the response shape", §"Gaming
  *     defences", §"Receiving-agent caveats", §"Score-validity flag rules",
  *     §"Reflection component"). The superseded agent-mode spec is the
- *     substantive deliverable-of-the-day; its content is absorbed into the ATL
+ *     substantive deliverable-of-the-day; its content is absorbed into the Sage Assent
  *     Wrapper spec §"Component 2".
- *   - /adopted/substrate-modes/agent-trust-layer-wrapper-spec.md §"Component 2"
+ *   - /adopted/substrate-modes/sage-assent-wrapper-spec.md §"Component 2"
  *     + §"The report the agent hands back to the developer" + §"R-rule
  *     engagement" — the wrapper architecture that contains this rendering.
  *   - /website/src/lib/substrate/score-architecture.ts — the now-Verified score
@@ -45,7 +45,7 @@
  * alone ... byte-stable"). Same (assessment, context) in → byte-identical
  * AgentModeResponse + Markdown out. No clock read, no randomness, no I/O.
  *
- * NOT in scope this session (per the ATL Wrapper Session 3 prompt):
+ * NOT in scope this session (per the Sage Assent Wrapper Session 3 prompt):
  *   - The trajectory-enriched developer hand-back report — it draws on the
  *     WindowSnapshot / AccreditationRecord / AccreditationCard (Components 3+4,
  *     fed by the wrapper, Component 1). Deferred to after spec steps 5–6.
@@ -73,7 +73,7 @@
  *
  * R17e POSTURE — DOES NOT APPLY TO AGENT PROFILES (the load-bearing distinction)
  *
- * Per /adopted/substrate-modes/agent-trust-layer-wrapper-spec.md §"R-rule
+ * Per /adopted/substrate-modes/sage-assent-wrapper-spec.md §"R-rule
  * engagement": R17e does NOT apply to agent profiles — "an agent's
  * reasoning-pattern profile is not an intimate human vulnerability ... R17e
  * exists to protect humans." So this rendering does NOT apply the

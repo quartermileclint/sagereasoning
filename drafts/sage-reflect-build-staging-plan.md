@@ -29,13 +29,13 @@ No auth, no public endpoint, no LLM in the control flow. Everything here is a pu
 - R17 posture (SR-12): full session persistence; 90-day retention; genuine (hard) deletion; minimisation; app-level encryption for the intimate introspective fields. Mirror the Sage Calling `discovery_sessions` posture.
 
 ### A-3 — `evaluated_actions` table migration (NEW — from the 2026-05-22 lock finding)
-- The `evaluated_actions` **table is not yet migrated**: it exists only in DRAFT `trust-layer/schema/trust-layer-schema-REVIEW.sql` (marked DO NOT RUN); the live ATL runs the rolling window **in-memory** from the wrapper's `CarriedProfile`. The `EvaluatedAction` **type** is fully compatible with Sage Reflect's Q4 output (no type change).
+- The `evaluated_actions` **table is not yet migrated**: it exists only in DRAFT `trust-layer/schema/trust-layer-schema-REVIEW.sql` (marked DO NOT RUN); the live Sage Assent runs the rolling window **in-memory** from the wrapper's `CarriedProfile`. The `EvaluatedAction` **type** is fully compatible with Sage Reflect's Q4 output (no type change).
 - Stage A creates `public.evaluated_actions` as an additive, idempotent migration (extract the table DDL from the review schema; `IF NOT EXISTS`; RLS service-role-write/public-read consistent with `agent_accreditation`). This lets Q4 records persist and accumulate across sessions so the rolling window is durable rather than per-process.
 - **Decision to confirm at A kickoff:** persist-via-table (this) vs feed the in-memory aggregator only. The locked design assumes cross-session accumulation, which requires the table. Treat the table creation as Elevated (additive schema; reversible via `DROP TABLE`).
 
 ### A-4 — Sage-Reflect-owned per-domain proximity store (SR-15)
-- Per the founder lock election: Sage Reflect computes per-virtue-domain katorthoma proximity (`phronesis/dikaiosyne/andreia/sophrosyne`) from the per-action `virtue_domains_engaged` + `proximity` it already produces at Q4, applies the KP-04 unity rule (aggregate = lowest domain), and stores it Sage-Reflect-side (the ATL has no field for it).
-- New additive column/table for the per-domain breakdown, keyed by `agent_id`. Known-risk recorded in the design: a future native ATL per-domain field must reconcile with this (rides the Sage Assent rename/enhancement track).
+- Per the founder lock election: Sage Reflect computes per-virtue-domain katorthoma proximity (`phronesis/dikaiosyne/andreia/sophrosyne`) from the per-action `virtue_domains_engaged` + `proximity` it already produces at Q4, applies the KP-04 unity rule (aggregate = lowest domain), and stores it Sage-Reflect-side (Sage Assent has no field for it).
+- New additive column/table for the per-domain breakdown, keyed by `agent_id`. Known-risk recorded in the design: a future native Sage Assent per-domain field must reconcile with this (rides the Sage Assent rename/enhancement track).
 
 ### A-5 — The Sage Assent feed (SR-4, reuse-not-reimplement)
 - Write Q4 kathekon as `EvaluatedAction`-shaped records → call the existing pure aggregator `computeWindowSnapshot(actions: EvaluatedAction[])` → feed `grade-transition-engine` to recompute `agent_accreditation` (grade, proximity, dimensions, direction). Sage Reflect does **not** write `senecan_grade`/`typical_proximity` directly — submit evidence, let the engine decide (preserves hysteresis; no single session moves a grade).
@@ -96,7 +96,7 @@ P0 core sequence (Q1–Q6 + branching + additive/Sage-Assent-fed updates + exit 
 ## Cross-references
 - `/adopted/sage-reflect-product-design.md` (LOCKED) — the design this schedules.
 - `/adopted/purpose-discovery-product-design.md` + the Sage Calling Stage 2 closes — the two-stage go-live pattern this mirrors.
-- `trust-layer/types/{evaluation,accreditation}.ts`; `website/src/lib/substrate/trust-layer/evaluation-window/window-aggregator.ts`; `trust-layer/schema/trust-layer-schema-REVIEW.sql` — the Sage Assent (ATL) reuse surface.
+- `trust-layer/types/{evaluation,accreditation}.ts`; `website/src/lib/substrate/trust-layer/evaluation-window/window-aggregator.ts`; `trust-layer/schema/trust-layer-schema-REVIEW.sql` — the Sage Assent reuse surface.
 - `/adopted/standing-protocol-cache.md`, `/adopted/build-sessions-protocol-cache.md`; `/CLAUDE.md` (tsx test-harness notes).
 - Decision log: `D-SAGE-REFLECT-DESIGN-LOCKED-2026-05-22`; `D-SAGE-REFLECT-DESIGN-DRAFTED-2026-05-21`.
 

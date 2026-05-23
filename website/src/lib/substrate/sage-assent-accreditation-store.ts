@@ -1,11 +1,11 @@
 /**
- * sage-assent-accreditation-store.ts — the ATL badge persistence layer (Component 3).
+ * sage-assent-accreditation-store.ts — the Sage Assent badge persistence layer (Component 3).
  *
  * STATUS: Scaffolded → Wired → Verified (2026-05-15, this session). New code,
  * imported by no route — no production exposure this session.
  *
  * GOVERNING DOCUMENTS:
- *   - /adopted/substrate-modes/agent-trust-layer-wrapper-spec.md — the spec
+ *   - /adopted/substrate-modes/sage-assent-wrapper-spec.md — the spec
  *     (Adopted 2026-05-14). This module builds the persistence half of spec
  *     §"Component 3 — The Badge / Accreditation": the AccreditationRecord ⇄
  *     Supabase round-trip the public verification endpoint queries.
@@ -21,7 +21,7 @@
  *
  * WHAT THIS MODULE IS
  *
- * The badge (Component 3) is the FIRST server-side persistence in the ATL arc.
+ * The badge (Component 3) is the FIRST server-side persistence in the Sage Assent arc.
  * Components 1, 2, 4, 5 are all wrapper-side carriage — pure, deterministic, no
  * database. The badge changes that: the public verification endpoint (spec step
  * 6b) must query SOMETHING, so the AccreditationRecord has to live in Supabase.
@@ -78,7 +78,7 @@
  *   - R18 a–e: the AccreditationRecord this module persists IS the credential
  *     the badge certifies.
  *   - AC8: this module sits in /website/src/lib/substrate/ and persists the
- *     output of the ATL Wrapper, which consumes the translation-sandwich
+ *     output of the Sage Assent Wrapper, which consumes the translation-sandwich
  *     substrate.
  *   - KG1 (Vercel five-rule constraint) — postures, stated up front:
  *       1. No self-calls — this module makes no endpoint-to-endpoint calls; it

@@ -1,11 +1,11 @@
-# Agent Trust Layer Wrapper Specification
+# Sage Assent Wrapper Specification
 
 **Status:** **Adopted 2026-05-14** under `D-FOUR-MODE-SPECS-ADOPTED-2026-05-14` — moved `/drafts/` → `/adopted/substrate-modes/`. **Implementation status:** Designed (per 0a vocabulary) — the wrapper is specified, not built; the build session(s) are deferred. (Decision status `Adopted` and implementation status `Designed` are distinct 0a taxonomies, stated separately per the standing cache's Element 7.)
 **Stream:** founder.
-**Supersedes:** `/archive/2026-05-14_agent-mode-response-spec-superseded.md` — the original "agent mode" spec. Founder direction 2026-05-14: a full re-write, not an addendum. "Agent mode" was mis-framed as a peer of the other three Layer 3 rendering modes (philosophical / standard / private). It is not. It is the **Agent Trust Layer Wrapper** — a larger architectural thing, of which the Layer 3 agent-mode *rendering* is one component. The original agent-mode spec's still-valid content (the score architecture, the gaming defences, the verdict/vector/scalar rendering) is absorbed into this spec as §"Component 2 — the Layer 3 agent-mode rendering"; the original file should be marked superseded with a pointer here.
-**Reconciles with:** the **existing ATL build** at `/trust-layer/` — a substantial offline framework codebase built 3 April 2026 (pre-substrate), "all 5 priorities complete — offline framework code ready for review." This spec connects that existing build to the translation-sandwich substrate and to the founder's expanded ATL Wrapper scope.
-**Companion specs:** `/adopted/substrate-modes/philosophical-mode-response-spec.md`, `/adopted/substrate-modes/standard-mode-response-spec.md`, `/adopted/substrate-modes/private-mode-response-spec.md` — the three human-facing Layer 3 rendering modes. The ATL Wrapper *consumes* a Layer 3 rendering (the agent-mode rendering) the way those three modes *are* renderings — but the wrapper is the larger structure around it.
-**F3 fold-in:** the Layer3Response is structurally a substrate-consultation-mandate producer; in the ATL Wrapper context, the wrapper accumulates these mandate-outputs as the agent's trajectory.
+**Supersedes:** `/archive/2026-05-14_agent-mode-response-spec-superseded.md` — the original "agent mode" spec. Founder direction 2026-05-14: a full re-write, not an addendum. "Agent mode" was mis-framed as a peer of the other three Layer 3 rendering modes (philosophical / standard / private). It is not. It is the **Sage Assent Wrapper** — a larger architectural thing, of which the Layer 3 agent-mode *rendering* is one component. The original agent-mode spec's still-valid content (the score architecture, the gaming defences, the verdict/vector/scalar rendering) is absorbed into this spec as §"Component 2 — the Layer 3 agent-mode rendering"; the original file should be marked superseded with a pointer here.
+**Reconciles with:** the **existing Sage Assent build** at `/trust-layer/` — a substantial offline framework codebase built 3 April 2026 (pre-substrate), "all 5 priorities complete — offline framework code ready for review." This spec connects that existing build to the translation-sandwich substrate and to the founder's expanded Sage Assent Wrapper scope.
+**Companion specs:** `/adopted/substrate-modes/philosophical-mode-response-spec.md`, `/adopted/substrate-modes/standard-mode-response-spec.md`, `/adopted/substrate-modes/private-mode-response-spec.md` — the three human-facing Layer 3 rendering modes. The Sage Assent Wrapper *consumes* a Layer 3 rendering (the agent-mode rendering) the way those three modes *are* renderings — but the wrapper is the larger structure around it.
+**F3 fold-in:** the Layer3Response is structurally a substrate-consultation-mandate producer; in the Sage Assent Wrapper context, the wrapper accumulates these mandate-outputs as the agent's trajectory.
 
 ---
 
@@ -13,18 +13,18 @@
 
 The original agent-mode spec treated "agent mode" as a fourth rendering mode. The founder's 2026-05-14 clarification corrects this:
 
-> "The carried-profile mechanism is what we have previously been calling the Agent Trust Layer Wrapper... along with trajectory awareness it is also a badge that other humans or agents can confirm the profile of an agent... an agent that decides based on the outcomes of other agents can also be wrapped."
+> "The carried-profile mechanism is what we have previously been calling the Sage Assent Wrapper... along with trajectory awareness it is also a badge that other humans or agents can confirm the profile of an agent... an agent that decides based on the outcomes of other agents can also be wrapped."
 
 So the taxonomy is really:
 
 - **Three Layer 3 rendering modes for humans:** philosophical, standard, private
-- **The Agent Trust Layer Wrapper for agents:** a structure that *contains* a Layer 3 agent-mode rendering, plus the carried-profile mechanism, plus the badge, plus trajectory awareness, plus three iteration patterns
+- **The Sage Assent Wrapper for agents:** a structure that *contains* a Layer 3 agent-mode rendering, plus the carried-profile mechanism, plus the badge, plus trajectory awareness, plus three iteration patterns
 
-The wrapper is to an agent what the private mentor is to a human — the continuity-bearing relationship around the per-assessment substrate calls. Private mode surfaces the human's developmental arc from a server-side encrypted profile; the ATL Wrapper surfaces the agent's developmental arc from a wrapper-carried profile. Same Layer 2 JSON as the universal profile-update unit; different storage by consumer privacy need.
+The wrapper is to an agent what the private mentor is to a human — the continuity-bearing relationship around the per-assessment substrate calls. Private mode surfaces the human's developmental arc from a server-side encrypted profile; the Sage Assent Wrapper surfaces the agent's developmental arc from a wrapper-carried profile. Same Layer 2 JSON as the universal profile-update unit; different storage by consumer privacy need.
 
 ---
 
-## The existing ATL build — what is already there
+## The existing Sage Assent build — what is already there
 
 `/trust-layer/` (built 3 April 2026; offline framework code; pre-substrate; pure TypeScript logic, not yet Supabase-integrated or website-integrated):
 
@@ -41,17 +41,17 @@ The wrapper is to an agent what the private mentor is to a human — the continu
 
 **Pending in the existing build (per BUILD-LOG.md):** Supabase integration; batch assessment endpoint (the 55-assessment onboarding orchestrator); accreditation event stream (webhooks for grade changes); LLM integration for the progression tools; integration with `website/src/`.
 
-**The critical reconciliation point:** the existing ATL has its own `EvaluatedAction` type — built before the translation-sandwich substrate existed. It was designed to consume "ReasoningReceipts" from the old bundled engine. The ATL Wrapper spec's central move is to **make the substrate's signed `Layer2Assessment` the source of `EvaluatedAction`** — the carried-profile mechanism is the wrapper accumulating Layer 2 JSON outputs, each mapped to an `EvaluatedAction`, feeding the existing `WindowSnapshot` aggregator.
+**The critical reconciliation point:** the existing Sage Assent has its own `EvaluatedAction` type — built before the translation-sandwich substrate existed. It was designed to consume "ReasoningReceipts" from the old bundled engine. The Sage Assent Wrapper spec's central move is to **make the substrate's signed `Layer2Assessment` the source of `EvaluatedAction`** — the carried-profile mechanism is the wrapper accumulating Layer 2 JSON outputs, each mapped to an `EvaluatedAction`, feeding the existing `WindowSnapshot` aggregator.
 
 ---
 
-## The ATL Wrapper — five components
+## The Sage Assent Wrapper — five components
 
 ### Component 1 — The Wrapper / carried-profile mechanism
 
 The wrapper wraps an agent. Each time the agent consults the substrate, the substrate returns a signed `Layer2Assessment` (the Layer 2 JSON). The wrapper:
 
-1. Maps the `Layer2Assessment` to an `EvaluatedAction` (the existing ATL type — the field mapping is below)
+1. Maps the `Layer2Assessment` to an `EvaluatedAction` (the existing Sage Assent type — the field mapping is below)
 2. Accumulates the `EvaluatedAction` into the agent's carried profile
 3. Carries the accumulated profile back into the agent's subsequent Layer 1 inputs
 
@@ -70,7 +70,7 @@ The wrapper wraps an agent. Each time the agent consults the substrate, the subs
 | `evaluated_at` | substrate response timestamp |
 | `skill_id` | the consumer context / `prose_mode` |
 
-The mapping is clean — the substrate produces everything the existing `EvaluatedAction` needs. The build session writes the mapping function; it is the bridge between the substrate and the existing ATL aggregator.
+The mapping is clean — the substrate produces everything the existing `EvaluatedAction` needs. The build session writes the mapping function; it is the bridge between the substrate and the existing Sage Assent aggregator.
 
 **Storage:** wrapper-side, carried by the agent's wrapper. The substrate holds no server-side agent-profile store (contrast private mode, which is server-side encrypted). This keeps the substrate stateless for agents and the data-governance surface smaller.
 
@@ -87,7 +87,7 @@ Both renderings carry the mandatory wraps (R3 / R19c / R19d / R20a / R18a / R18e
 
 ### Component 3 — The Badge / Accreditation
 
-The wrapper is a badge. Other humans or agents can confirm the profile of a wrapped agent. This **is** the existing ATL's accreditation infrastructure, now fed by the substrate:
+The wrapper is a badge. Other humans or agents can confirm the profile of a wrapped agent. This **is** the existing Sage Assent's accreditation infrastructure, now fed by the substrate:
 
 - `AccreditationRecord` — the persistent credential, computed from the carried profile's `WindowSnapshot`
 - `AccreditationPayload` — the public R4-compliant subset (no internal thresholds or micro-logic exposed)
@@ -98,7 +98,7 @@ R18 engagement: R18a (certification scope language — the badge certifies "obse
 
 ### Component 4 — Trajectory awareness
 
-Over the carried profile. This **is** the existing ATL's window + grade infrastructure:
+Over the carried profile. This **is** the existing Sage Assent's window + grade infrastructure:
 
 - `window-aggregator.ts` — aggregates the accumulated `EvaluatedAction[]` into a `WindowSnapshot` (default window 100 actions)
 - `grade-transition-engine.ts` — evaluates grade transitions with hysteresis
@@ -119,7 +119,7 @@ The carried-profile, aggregated, IS the agent's trajectory. The agent-mode rende
 
 ## Tree-search composition
 
-Added 2026-05-16 under `D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16` §"Decision C". The Wrapper spec's items 1, 2, 3 design pass (`/adopted/atl-items-1-3-design.md`) locked the doc + small helper this section describes.
+Added 2026-05-16 under `D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16` §"Decision C". The Wrapper spec's items 1, 2, 3 design pass (`/adopted/sage-assent-items-1-3-design.md`) locked the doc + small helper this section describes.
 
 ### The per-node contract
 
@@ -199,7 +199,7 @@ Tree-of-Thoughts adds LLM-driven branching to the BFS/beam structure. The substr
 In-process tree search (this section) and multi-agent tree-like behaviour are distinct patterns:
 
 - **In-process tree search** — substrate-as-per-node-evaluator. Sibling nodes share one agent's context. The agent's framework drives the search. The wrapper's carried profile accumulates COMMITTED commitments only; siblings considered but not committed-to are tracked in `carried_candidates` (Decision B), not in the trajectory.
-- **Multi-agent tree-like behaviour** — Anthropic multi-agent orchestration is the runtime substrate. Sibling agents run in INDEPENDENT contexts. The ATL wraps the orchestrator per Pattern 3 (multi-agent orchestration in §"Component 5"): peer agents' `AccreditationPayload`s thread through `peer_agent_assessments`; the orchestrator's own trajectory accumulates its OWN commitments.
+- **Multi-agent tree-like behaviour** — Anthropic multi-agent orchestration is the runtime substrate. Sibling agents run in INDEPENDENT contexts. The Sage Assent wraps the orchestrator per Pattern 3 (multi-agent orchestration in §"Component 5"): peer agents' `AccreditationPayload`s thread through `peer_agent_assessments`; the orchestrator's own trajectory accumulates its OWN commitments.
 
 Choose by whether candidate paths share a single agent's context (in-process tree) or run in independent agent contexts (multi-agent orchestration). The two compose: a multi-agent orchestrator can itself run in-process tree search over its own decision space, and each peer agent's framework can independently run tree search inside its own context.
 
@@ -209,7 +209,7 @@ Choose by whether candidate paths share a single agent's context (in-process tre
 
 This is the part the founder specifically flagged: "we need to understand how it effects layer 1."
 
-Layer 1 is the **open** layer (text → `Layer1Schema`). The ATL Wrapper expansion affects Layer 1's **input schema** — the open contract — without changing Layer 1's job.
+Layer 1 is the **open** layer (text → `Layer1Schema`). The Sage Assent Wrapper expansion affects Layer 1's **input schema** — the open contract — without changing Layer 1's job.
 
 Layer 1's job stays "text → structured features." But the `Layer1Schema` gains **new optional fields** that the wrapper populates and that flow through Layer 1 untouched to Layer 2:
 
@@ -224,7 +224,7 @@ Layer 1's job stays "text → structured features." But the `Layer1Schema` gains
 
 **Because Layer 1 is open, this versions the open contract.** The `Layer1Schema` gaining these fields is a contract change to the open-sourced Layer 1 reference distributed in the plugin. The fields are *optional* (a Layer 1 input without them is still valid — that is the per-response, un-wrapped case), so the change is additive and backward-compatible, but it is still a versioned change to the open contract. The build session coordinates this with the Layer 1 open-source posture (Rule A — licensing gate) and the staging plan.
 
-**Consolidated Layer 1 picture.** The four-mode work surfaced eight Layer 1 input field additions in total — four from the ATL Wrapper (above), four from private mode (`subject_identity_binding`, `reflective_self_report`, `history_window`, `topic_signal`), none from philosophical or standard mode. The consolidated set and the build approach are carried in the Layer 1 code-changes next-session prompt (`/operations/handoffs/founder/2026-05-14-layer1-schema-additions-NEXT-SESSION-PROMPT.md`).
+**Consolidated Layer 1 picture.** The four-mode work surfaced eight Layer 1 input field additions in total — four from the Sage Assent Wrapper (above), four from private mode (`subject_identity_binding`, `reflective_self_report`, `history_window`, `topic_signal`), none from philosophical or standard mode. The consolidated set and the build approach are carried in the Layer 1 code-changes next-session prompt (`/operations/handoffs/founder/2026-05-14-layer1-schema-additions-NEXT-SESSION-PROMPT.md`).
 
 ---
 
@@ -244,9 +244,9 @@ This makes agent mode genuinely dual-audience: the **agent** consumes the machin
 
 ---
 
-## Reconciliation table — existing ATL build vs ATL Wrapper spec
+## Reconciliation table — existing Sage Assent build vs Sage Assent Wrapper spec
 
-| Existing ATL build | ATL Wrapper spec disposition |
+| Existing Sage Assent build | Sage Assent Wrapper spec disposition |
 |---|---|
 | `EvaluatedAction` type | **Kept** — but its source changes from old-engine ReasoningReceipts to substrate `Layer2Assessment` (the mapping table above). The build session writes the mapping function. |
 | `WindowSnapshot` + `window-aggregator.ts` | **Kept as-is** — the carried profile feeds it. This is Component 4 (trajectory awareness). |
@@ -254,7 +254,7 @@ This makes agent mode genuinely dual-audience: the **agent** consumes the machin
 | `AccreditationRecord` / `AccreditationPayload` / `public-endpoint.ts` | **Kept** — this is Component 3 (the badge). Now computed from the substrate-fed carried profile. |
 | `accreditation-card.ts` | **Kept** — the displayable badge. |
 | `authority-mapper.ts` | **Kept** — authority levels + sage-guard integration. Likely engages with the wrapper's enforcement behaviour. |
-| `progression-toolkit/` (9 tools, 7 pathways) | **Kept, but relationship to be clarified** — the progression tools coach an agent toward a higher grade. Whether they are part of the wrapper, or a separate ATL surface the wrapper points to, is an open question. |
+| `progression-toolkit/` (9 tools, 7 pathways) | **Kept, but relationship to be clarified** — the progression tools coach an agent toward a higher grade. Whether they are part of the wrapper, or a separate Sage Assent surface the wrapper points to, is an open question. |
 | The 5-table schema (DRAFT) | **Revisit** — `evaluated_actions` table: does the wrapper-carried profile need server-side persistence at all, or is wrapper-side carriage sufficient? `agent_accreditation` + `grade_history` are needed for the badge (the public endpoint must query something). Build-session schema review. |
 | The Layer 3 agent-mode rendering | **NEW** — does not exist in the 3 April 2026 build (which predates Layer 3). This is Component 2, absorbed from the superseded agent-mode spec. |
 | The three iteration patterns | **NEW** — the existing build has the window/grade infrastructure but not the explicit loop / parallel / orchestration patterns. This is Component 5. |
@@ -281,7 +281,7 @@ This makes agent mode genuinely dual-audience: the **agent** consumes the machin
 
 ## Build sequencing — this is bigger than a mode spec
 
-The ATL Wrapper intersects three things: the existing `/trust-layer/` build (3 April 2026), the substrate build arc (Stage 1 of the staging plan), and Priority 3 of the project instructions ("Agent Trust Layer — Honest Certification (R18 + existing ATL build)"). It is not a single build session.
+The Sage Assent Wrapper intersects three things: the existing `/trust-layer/` build (3 April 2026), the substrate build arc (Stage 1 of the staging plan), and Priority 3 of the project instructions ("Sage Assent — Honest Certification (R18 + existing Sage Assent build)"). It is not a single build session.
 
 Recommended sequencing for the build session(s):
 
@@ -301,12 +301,12 @@ The build session decides risk tiers per change. The Layer 1 open-contract chang
 
 - `/archive/2026-05-14_agent-mode-response-spec-superseded.md` — **superseded by this spec**; its rendering content is Component 2 here
 - `/adopted/substrate-modes/philosophical-mode-response-spec.md`, `/adopted/substrate-modes/standard-mode-response-spec.md`, `/adopted/substrate-modes/private-mode-response-spec.md` — the three human-facing rendering modes
-- `/trust-layer/` — the existing ATL build (all files; BUILD-LOG.md is the overview)
+- `/trust-layer/` — the existing Sage Assent build (all files; BUILD-LOG.md is the overview)
 - `/trust-layer/BUILD-LOG.md` — the 3 April 2026 build record + pending-items list
 - `/trust-layer/types/accreditation.ts` + `/trust-layer/types/evaluation.ts` — the `EvaluatedAction`, `WindowSnapshot`, `AccreditationRecord`, `AccreditationPayload` shapes
 - `/trust-layer/schema/trust-layer-schema-REVIEW.sql` — the DRAFT 5-table schema, pending founder approval
 - `/manifest.md` §R3 / §R4 / §R17e / §R18 (a-e) / §AC1 / §AC9 / §AC10 / §AC11
-- `/adopted/project-instructions-snapshot.md` Priority 3 — "Agent Trust Layer — Honest Certification (R18 + existing ATL build)" — this spec is the bridge between Priority 3 and the substrate build arc
+- `/adopted/project-instructions-snapshot.md` Priority 3 — "Sage Assent — Honest Certification (R18 + existing Sage Assent build)" — this spec is the bridge between Priority 3 and the substrate build arc
 - `/adopted/ADR-stoic-agent-substrate-concept.md` — the substrate architecture; §"Trust-signalable certification (R18)" anticipates exactly this connection
 - `/adopted/substrate-plugin-staging-plan.md` — the substrate build arc; A8 (V3 endpoint relationship design) and the K-category migration intersect the wrapper
 - `/website/src/lib/translation-sandwich/layer2-mechanisms.ts` — the `Layer2Assessment` shape (the EvaluatedAction source)
@@ -316,13 +316,13 @@ The build session decides risk tiers per change. The Layer 1 open-contract chang
 
 ## Open questions deferred to build
 
-1. **Progression toolkit relationship.** Is the 9-tool / 7-pathway progression toolkit part of the wrapper, or a separate ATL coaching surface the wrapper points to?
+1. **Progression toolkit relationship.** Is the 9-tool / 7-pathway progression toolkit part of the wrapper, or a separate Sage Assent coaching surface the wrapper points to?
 2. **Schema disposition.** Does the wrapper-carried profile need server-side persistence (`evaluated_actions` table), or is wrapper-side carriage sufficient? The badge (`agent_accreditation` + `grade_history`) does need server-side persistence — the public endpoint must query something.
 3. **Layer 1 open-contract versioning.** How the optional carried-context fields are versioned into the open Layer 1 reference, coordinated with Rule A (licensing gate).
 4. **Parallel evaluation — profile accumulation.** When an agent evaluates N candidates in parallel, do all N feed the carried profile, or only the chosen one? Philosophically: did the agent "reason" N times, or once?
 5. **Multi-agent orchestration depth.** Agents wrapping agents — is there a depth limit? How does a grade transition in a peer agent propagate to an orchestrator's assessment?
 6. **PR15 — Anthropic multi-agent orchestration.** Evaluate whether Anthropic's multi-agent orchestration primitive (public beta) delivers Component 5 pattern 3 before electing a bespoke build.
-7. **The onboarding 55-assessment framework.** The existing ATL has `OnboardingResult` types and a pending batch-assessment endpoint. How does substrate-based onboarding establish an agent's starting grade?
+7. **The onboarding 55-assessment framework.** The existing Sage Assent has `OnboardingResult` types and a pending batch-assessment endpoint. How does substrate-based onboarding establish an agent's starting grade?
 8. **Identity binding for agents.** Private mode has `subject_identity_binding` (R17e gate). The wrapper needs an agent-identity mechanism — how is `agent_id` established and authenticated? Connects to A10 (per-agent credentials) in the staging plan.
 9. **Adversarial evaluation protocol.** R18d — the evaluation criteria must be tested adversarially. This is its own work item (Priority 3.3d).
 

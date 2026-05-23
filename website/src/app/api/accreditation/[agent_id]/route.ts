@@ -1,5 +1,5 @@
 /**
- * /api/accreditation/[agent_id] — Public Verification Endpoint (ATL Wrapper
+ * /api/accreditation/[agent_id] — Public Verification Endpoint (Sage Assent Wrapper
  * Component 3 — the badge / accreditation, public face).
  *
  * STATUS: Scaffolded → Wired → Verified (2026-05-16, step 6b; POST handler +
@@ -7,10 +7,10 @@
  * BUILD-WIRED-VERIFIED-2026-05-16).
  *
  * GOVERNING DOCUMENTS:
- *   - /adopted/substrate-modes/agent-trust-layer-wrapper-spec.md §"Component 3"
+ *   - /adopted/substrate-modes/sage-assent-wrapper-spec.md §"Component 3"
  *     (the spec, Adopted 2026-05-14). This is the named public surface — the
  *     verifiable credential third parties query.
- *   - /adopted/atl-write-path-design.md — the write-path design (Adopted
+ *   - /adopted/sage-assent-write-path-design.md — the write-path design (Adopted
  *     2026-05-16 under D-ATL-WRITE-PATH-DESIGN-LOCKED-2026-05-16). Decision A
  *     names the POST handler at this route group; Decision C names the auth
  *     gate (pre-A10 stopgap option (1) — feature-flag gated via
@@ -35,7 +35,7 @@
  *
  * WHAT THIS ROUTE IS
  *
- * The public read AND write endpoint for the ATL badge.
+ * The public read AND write endpoint for the Sage Assent badge.
  *
  * READ — GET https://sagereasoning.com/api/accreditation/{agent_id}
  *   A verifier — a person, an agent, an auditor — receives that wrapped
@@ -138,7 +138,7 @@
  *     applied at the write-path build session. GET remains AC7-untouched.
  *     No cookies read or set; no redirects; no session state.
  *   - AC8: this route is the first public substrate-consumer that serves the
- *     ATL Wrapper's credential.
+ *     Sage Assent Wrapper's credential.
  *   - KG1 (Vercel five-rule constraint):
  *       1. No self-calls — the route makes no endpoint-to-endpoint calls.
  *       2. Await all DB reads — the Supabase read inside

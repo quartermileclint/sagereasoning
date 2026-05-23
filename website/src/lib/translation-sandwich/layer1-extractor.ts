@@ -228,7 +228,7 @@ export interface ElementFusionDetected {
 // PLACEHOLDER SCAFFOLDING — pending mode-spec adoption. The four-mode substrate
 // response redesign (D-A6-RESCOPED-TO-FOUR-MODE-REDESIGN-2026-05-14) surfaced
 // eight optional Layer 1 input fields: four for private mode, four for the
-// Agent Trust Layer Wrapper. They are *carried context* — context the wrapper
+// Sage Assent Wrapper. They are *carried context* — context the wrapper
 // or the private-mode service supplies, which flows THROUGH Layer 1 untouched
 // to Layer 2. Layer 1 does NOT extract them; the LLM system prompt is unchanged.
 //
@@ -240,7 +240,7 @@ export interface ElementFusionDetected {
 // PeerAgentAssessment) are intentionally permissive Record<string, unknown>
 // rather than imports of WindowSnapshot / EvaluatedAction / AccreditationPayload
 // from /trust-layer/: that directory is outside website/'s tsconfig root, and
-// the ATL Wrapper build is where the substrate<->trust-layer reconciliation
+// the Sage Assent Wrapper build is where the substrate<->trust-layer reconciliation
 // happens. Locking the shapes here would be premature.
 
 /** PLACEHOLDER — private mode. The authenticated subject's identity reference.
@@ -261,31 +261,31 @@ export interface HistoryWindow {
   limit?: number
 }
 
-/** PLACEHOLDER — ATL Wrapper. The agent's accumulated trajectory (a WindowSnapshot
- *  or raw EvaluatedAction[] from /trust-layer/). Permissive until the ATL Wrapper
+/** PLACEHOLDER — Sage Assent Wrapper. The agent's accumulated trajectory (a WindowSnapshot
+ *  or raw EvaluatedAction[] from /trust-layer/). Permissive until the Sage Assent Wrapper
  *  build reconciles the substrate's Layer2Assessment with the existing
  *  /trust-layer/ EvaluatedAction type.
- *  See /drafts/agent-trust-layer-wrapper-spec.md §"Layer 1 implications". */
+ *  See /adopted/substrate-modes/sage-assent-wrapper-spec.md §"Layer 1 implications". */
 export type CarriedProfile = Record<string, unknown>
 
-/** PLACEHOLDER — ATL Wrapper. Gaming defence: attests the carried_profile came
+/** PLACEHOLDER — Sage Assent Wrapper. Gaming defence: attests the carried_profile came
  *  from the agent's own prior substrate assessments, not injected third-party
- *  content. Final shape pending ATL Wrapper spec adoption.
- *  See /drafts/agent-trust-layer-wrapper-spec.md §"Layer 1 implications". */
+ *  content. Final shape pending Sage Assent Wrapper spec adoption.
+ *  See /adopted/substrate-modes/sage-assent-wrapper-spec.md §"Layer 1 implications". */
 export type ProfileProvenance = Record<string, unknown>
 
-/** PLACEHOLDER — ATL Wrapper. One peer agent's assessment, for multi-agent
+/** PLACEHOLDER — Sage Assent Wrapper. One peer agent's assessment, for multi-agent
  *  orchestration — an AccreditationPayload and/or agent-mode rendering of a peer
- *  agent an orchestrator is deciding based on. Final shape pending ATL Wrapper
+ *  agent an orchestrator is deciding based on. Final shape pending Sage Assent Wrapper
  *  spec adoption.
- *  See /drafts/agent-trust-layer-wrapper-spec.md §"Layer 1 implications". */
+ *  See /adopted/substrate-modes/sage-assent-wrapper-spec.md §"Layer 1 implications". */
 export type PeerAgentAssessment = Record<string, unknown>
 
-/** ATL Wrapper — Decision B (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16,
+/** Sage Assent Wrapper — Decision B (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16,
  *  added 2026-05-16). The wrapper's working set of unchosen-but-still-live
  *  candidates from past parallel evaluations, projected via
  *  toCarriedCandidatesPayload(). Permissive Record<string, unknown> (matches
- *  the existing carried-context pattern) until tighter ATL-spec coupling. */
+ *  the existing carried-context pattern) until tighter Sage Assent-spec coupling. */
 export type CarriedCandidatesField = Record<string, unknown>
 
 // ============================================================================
@@ -483,10 +483,10 @@ export interface Layer1Schema {
    *  (detectTopicSignal / projectProfile). */
   topic_signal?: string | null
 
-  // -- From the ATL Wrapper (4 fields) --
-  // See /drafts/agent-trust-layer-wrapper-spec.md §"Layer 1 implications".
+  // -- From the Sage Assent Wrapper (4 fields) --
+  // See /adopted/substrate-modes/sage-assent-wrapper-spec.md §"Layer 1 implications".
 
-  /** PLACEHOLDER — ATL Wrapper. The agent's accumulated trajectory (the
+  /** PLACEHOLDER — Sage Assent Wrapper. The agent's accumulated trajectory (the
    *  WindowSnapshot, or raw EvaluatedAction[], from /trust-layer/). Lets Layer 2
    *  do trajectory-aware assessment for agents. Parallel to private mode's
    *  subject_identity_binding: server-side encrypted load for humans,
@@ -494,22 +494,22 @@ export interface Layer1Schema {
    *  profile-update unit for both. */
   carried_profile?: CarriedProfile | null
 
-  /** PLACEHOLDER — ATL Wrapper. Gaming defence — attests the carried_profile
+  /** PLACEHOLDER — Sage Assent Wrapper. Gaming defence — attests the carried_profile
    *  came from the agent's own prior substrate assessments, not injected
    *  third-party content. */
   profile_provenance?: ProfileProvenance | null
 
-  /** PLACEHOLDER — ATL Wrapper. For multi-agent orchestration — the
+  /** PLACEHOLDER — Sage Assent Wrapper. For multi-agent orchestration — the
    *  AccreditationPayloads and/or agent-mode renderings of the peer agents an
    *  orchestrator agent is deciding based on. */
   peer_agent_assessments?: PeerAgentAssessment[] | null
 
-  /** PLACEHOLDER — ATL Wrapper. Gaming defence (Form 2) — the agent's declared
+  /** PLACEHOLDER — Sage Assent Wrapper. Gaming defence (Form 2) — the agent's declared
    *  optimisation target, checked against the candidate action for
    *  STATED_OPERATIVE_CONFLICT. */
   objective_function_declaration?: string | null
 
-  /** ATL Wrapper — Decision B (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16).
+  /** Sage Assent Wrapper — Decision B (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16).
    *  The wrapper's working set of unchosen-but-still-live candidates from past
    *  parallel evaluations — populated by toCarriedCandidatesPayload() in
    *  sage-assent-wrapper.ts and threaded into the agent's next substrate call so
@@ -1191,7 +1191,7 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
   // carried_candidates — null | Record<string, unknown> — added 2026-05-16
   // under D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16 §"Decision B".
   // Like the other carried-context fields, OPTIONAL + additive + permissive
-  // (Record<string, unknown>) pending tighter ATL-spec coupling.
+  // (Record<string, unknown>) pending tighter Sage Assent-spec coupling.
   if (root.carried_candidates !== undefined) {
     const v = root.carried_candidates
     result.carried_candidates = v === null ? null : assertObject(v, 'carried_candidates')

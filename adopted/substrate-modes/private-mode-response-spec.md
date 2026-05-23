@@ -74,9 +74,9 @@ Private mode requires these additions to the Layer 1 input schema. Names are pla
 | `history_window` | How far back to draw trajectory + cross-submission data (mirrors the existing interactions-loader's windowDays/limit; default 90 days / 100 rows). |
 | `topic_signal` *(optional)* | The current entry's topic, for the topic-projection logic that `practitioner-context.ts` already implements (`detectTopicSignal` / `projectProfile`) — lets private mode project the profile to the dimensions relevant to this entry rather than loading the full ~7,500-char summary every time. |
 
-For agents, the parallel Layer 1 fields are `carried_profile`, `profile_provenance`, `peer_agent_assessments`, and `objective_function_declaration` — specified in `/adopted/substrate-modes/agent-trust-layer-wrapper-spec.md` §"Layer 1 implications". `subject_identity_binding` (private, human) and `carried_profile` (agent) are the parallel identity/profile-bearing fields — server-side encrypted load for humans, wrapper-carried for agents.
+For agents, the parallel Layer 1 fields are `carried_profile`, `profile_provenance`, `peer_agent_assessments`, and `objective_function_declaration` — specified in `/adopted/substrate-modes/sage-assent-wrapper-spec.md` §"Layer 1 implications". `subject_identity_binding` (private, human) and `carried_profile` (agent) are the parallel identity/profile-bearing fields — server-side encrypted load for humans, wrapper-carried for agents.
 
-The four-mode work surfaced eight Layer 1 input field additions in total — four from private mode (above), four from the ATL Wrapper, none from philosophical or standard mode. The consolidated set and the build approach are carried in the Layer 1 code-changes next-session prompt (`/operations/handoffs/founder/2026-05-14-layer1-schema-additions-NEXT-SESSION-PROMPT.md`).
+The four-mode work surfaced eight Layer 1 input field additions in total — four from private mode (above), four from the Sage Assent Wrapper, none from philosophical or standard mode. The consolidated set and the build approach are carried in the Layer 1 code-changes next-session prompt (`/operations/handoffs/founder/2026-05-14-layer1-schema-additions-NEXT-SESSION-PROMPT.md`).
 
 ---
 
@@ -224,4 +224,4 @@ Note: the example file still carries the standalone "Reflection component" secti
 
 ---
 
-*End of spec. Status: Adopted 2026-05-14 (document); Designed (implementation). Build session deferred — and Critical-tier when it comes (R17f). Authored 2026-05-14 in scoping/exploration session; adopted 2026-05-14 under D-FOUR-MODE-SPECS-ADOPTED-2026-05-14. All four modes of the taxonomy (philosophical / standard / private / the Agent Trust Layer Wrapper) are now specified and adopted.*
+*End of spec. Status: Adopted 2026-05-14 (document); Designed (implementation). Build session deferred — and Critical-tier when it comes (R17f). Authored 2026-05-14 in scoping/exploration session; adopted 2026-05-14 under D-FOUR-MODE-SPECS-ADOPTED-2026-05-14. All four modes of the taxonomy (philosophical / standard / private / the Sage Assent Wrapper) are now specified and adopted.*

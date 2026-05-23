@@ -34,7 +34,7 @@ export const PROJECT_IDENTITY = {
   audiences: {
     human_practitioners: "The website serves human practitioners with daily Stoic practice tools.",
     agent_developers: "The API and skill contracts serve agent developers integrating virtue-based reasoning.",
-    agent_trust_layer: "The Agent Trust Layer extends the moral community to include artificial agents.",
+    sage_assent: "The Sage Assent extends the moral community to include artificial agents.",
   },
   positioning: "The only reasoning API grounded in 2,300 years of Stoic philosophy. Not sentiment analysis. Not ethics scoring. Principled reasoning from primary sources — Marcus Aurelius, Epictetus, Seneca, Cicero.",
 } as const;

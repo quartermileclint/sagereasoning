@@ -1,5 +1,5 @@
 /**
- * agent-mode-service.test.ts — Layer 3 agent-mode rendering (ATL Wrapper
+ * agent-mode-service.test.ts — Layer 3 agent-mode rendering (Sage Assent Wrapper
  * Component 2) functional tests + invariant checks.
  *
  * Run via: `npx tsx website/src/lib/substrate/__tests__/agent-mode-service.test.ts`

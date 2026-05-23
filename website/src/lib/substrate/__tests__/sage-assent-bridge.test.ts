@@ -1,5 +1,5 @@
 /**
- * sage-assent-bridge.test.ts — substrate ↔ Agent Trust Layer bridge functional tests
+ * sage-assent-bridge.test.ts — substrate ↔ Sage Assent bridge functional tests
  * + invariant checks.
  *
  * Run via: `npx tsx website/src/lib/substrate/__tests__/sage-assent-bridge.test.ts`

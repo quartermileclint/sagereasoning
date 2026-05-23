@@ -1,4 +1,4 @@
-# ATL Wrapper — Write-Path Into `agent_accreditation` Design
+# Sage Assent Wrapper — Write-Path Into `agent_accreditation` Design
 
 **Status:** Adopted 2026-05-16 under `D-ATL-WRITE-PATH-DESIGN-LOCKED-2026-05-16`. **Implementation status:** Designed (per 0a vocabulary) — the seven decisions below are specified, not built; the write-path build session is the next sub-session in the post-6b arc.
 **Stream:** founder.
@@ -365,9 +365,9 @@ PR15 consult expected to mirror the design-pass's: `mcp-builder` is a forward po
 - `/operations/handoffs/founder/2026-05-16-write-path-design-pass-close.md` — this session's close.
 - `/operations/handoffs/founder/2026-05-16-kathekon-aligned-alternative-build-close.md` — immediate predecessor session close.
 - `/operations/handoffs/founder/2026-05-15-post-build-brainstorm-close.md` — sequencing source (step 7 of 8 in the post-6b arc).
-- `/adopted/atl-kathekon-aligned-alternative-design.md` — structural template (seven-decision design-pass shape mirrored here).
-- `/adopted/atl-items-1-3-design.md` — earlier structural precedent (Decision A pattern source).
-- `/adopted/substrate-modes/agent-trust-layer-wrapper-spec.md` — the Wrapper spec; especially §"Component 3 — The Badge / Accreditation" + §"R-rule engagement" + §"Open questions".
+- `/adopted/sage-assent-kathekon-aligned-alternative-design.md` — structural template (seven-decision design-pass shape mirrored here).
+- `/adopted/sage-assent-items-1-3-design.md` — earlier structural precedent (Decision A pattern source).
+- `/adopted/substrate-modes/sage-assent-wrapper-spec.md` — the Wrapper spec; especially §"Component 3 — The Badge / Accreditation" + §"R-rule engagement" + §"Open questions".
 - `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` — J1 ADR (Character Kernel category language; preserved by this design — no change at the credential level).
 - `/website/src/lib/substrate/atl-accreditation-store.ts` — the persistence layer (Verified; the write-path's call target).
 - `/website/src/lib/substrate/atl-wrapper.ts` — the wrapper (pure; produces the `CarriedProfile` + `TransitionResult` the write-path consumes).

@@ -6,7 +6,7 @@
 **Date drafted:** 2026-05-21.
 **Source input:** `/inbox/reflect mentor input.rtf` (the clinical-mode build specification; extracted to `/operations/` working text this session).
 **Modelled on:** `/adopted/purpose-discovery-product-design.md` (the Sage Calling design — the immediately preceding product in the cycle).
-**Founder elections that govern this design (2026-05-21):** (1) deliverable = full locked design doc; (2) dependencies = reuse existing infrastructure where possible, rename ATL→Sage Assent later; (3) audience = agent-first, migrate the human reflect surfaces onto this substrate later; (4) scoring = deterministic where possible, SageReasoning translation-sandwich (Layer 1→2→3) where semantic judgement is required.
+**Founder elections that govern this design (2026-05-21):** (1) deliverable = full locked design doc; (2) dependencies = reuse existing infrastructure where possible, rename Sage Assent→Sage Assent later; (3) audience = agent-first, migrate the human reflect surfaces onto this substrate later; (4) scoring = deterministic where possible, SageReasoning translation-sandwich (Layer 1→2→3) where semantic judgement is required.
 
 ---
 
@@ -29,12 +29,12 @@ Sage Reflect is the **fourth and final product** of the **Sage Practice** plugin
 |---|---|---|---|---|
 | 1 | **Sage Calling** | Pre-action (purpose) | Find the fitting work | **Live** (`/api/calling`, deterministic engine, `discovery_sessions`) |
 | 2 | **SageReasoning** | In-action (impression/assent) | Examine the impression, reason it through | **Live** (translation-sandwich substrate behind `/api/reason`; Layer 1→2→3) |
-| 3 | **Sage Assent** (= the **Agent Trust Layer / ATL**) | At-action (impulse → act) | Credential or block the act; hold the agent's persistent profile | **Built** (`trust-layer/`: action scorer, `agent_accreditation`/`evaluated_actions`/`grade_history`, evaluation-window, grade-engine, A10 credentials, badge) |
+| 3 | **Sage Assent** (= the **Sage Assent / Sage Assent**) | At-action (impulse → act) | Credential or block the act; hold the agent's persistent profile | **Built** (`trust-layer/`: action scorer, `agent_accreditation`/`evaluated_actions`/`grade_history`, evaluation-window, grade-engine, A10 credentials, badge) |
 | 4 | **Sage Reflect** | Post-action (continuous attention) | Review what occurred, update the profile, decide if the purpose still fits | **This design** |
 
 The loop closes: Calling → Reasoning → Assent → **Reflect** → (RS-1) back to Reasoning, or (RS-2/RS-3) to Calling. No stage is optional; no stage can be bypassed without breaking the philosophical integrity of the sequence.
 
-> **Naming note (founder election 3, 2026-05-21):** "Sage Assent" is the adopted product name for what the codebase currently calls the **Agent Trust Layer (ATL)**. This design uses "**Sage Assent (ATL)**" throughout. The full rename across code, schema, docs, and the component registry is a **separate governance + code track**, deliberately *not* in scope for this design-only session. This design depends on the ATL **as it exists today**; the rename does not change any dependency.
+> **Naming note (founder election 3, 2026-05-21):** "Sage Assent" is the adopted product name for what the codebase currently calls the **Sage Assent (Sage Assent)**. This design uses "**Sage Assent (Sage Assent)**" throughout. The full rename across code, schema, docs, and the component registry is a **separate governance + code track**, deliberately *not* in scope for this design-only session. This design depends on the Sage Assent **as it exists today**; the rename does not change any dependency.
 
 ---
 
@@ -42,7 +42,7 @@ The loop closes: Calling → Reasoning → Assent → **Reflect** → (RS-1) bac
 
 **In scope (this design):** the full Sage Reflect product specification — trigger conditions, input schema, the six-question reflection sequence, the scoring architecture (deterministic + translation-sandwich), the four fabrication defences, the profile-update logic (reusing Sage Assent's existing engine), the output schema, the schema additions Sage Reflect writes for Sage Calling and SageReasoning, exit-path routing, the locked design decisions, R-rule engagement, risk classification, and the build-priority sequence.
 
-**Out of scope (this design):** any code; the ATL→Sage Assent rename; the build itself; the human-surface migration (deferred per election 3 — designed-for, not built here); Sage Assent feature changes (Sage Reflect couples to it as-is).
+**Out of scope (this design):** any code; the Sage Assent→Sage Assent rename; the build itself; the human-surface migration (deferred per election 3 — designed-for, not built here); Sage Assent feature changes (Sage Reflect couples to it as-is).
 
 **What Sage Reflect is NOT** (boundary conditions, carried from the input spec §14, to prevent scope creep):
 
@@ -73,12 +73,12 @@ Sage Reflect fires deterministically at **session close** when any of these hold
 
 | Trigger | Condition | Source | Available without Sage Assent? |
 |---|---|---|---|
-| **TR-01** | Sage Assent returns a credentialed act and execution is confirmed | Sage Assent (ATL) output | Needs Sage Assent (exists) |
+| **TR-01** | Sage Assent returns a credentialed act and execution is confirmed | Sage Assent (Sage Assent) output | Needs Sage Assent (exists) |
 | **TR-02** | Session closes without a credentialed act but with a completed SageReasoning pass | SageReasoning output | Yes |
-| **TR-03** | Sage Assent returns a *blocked* act (virtue-failure) and the agent has logged the block | Sage Assent (ATL) output | Needs Sage Assent (exists) |
+| **TR-03** | Sage Assent returns a *blocked* act (virtue-failure) and the agent has logged the block | Sage Assent (Sage Assent) output | Needs Sage Assent (exists) |
 | **TR-04** | Developer calls Sage Reflect directly at session close | API call | Yes |
 
-Because Sage Assent (ATL) **exists**, all four triggers are available from the first build — no deferral is needed (this supersedes the earlier "standalone-because-unbuilt" hypothesis, which is moot now that Sage Assent = ATL is confirmed). Sage Reflect does not fire mid-session.
+Because Sage Assent (Sage Assent) **exists**, all four triggers are available from the first build — no deferral is needed (this supersedes the earlier "standalone-because-unbuilt" hypothesis, which is moot now that Sage Assent = Sage Assent is confirmed). Sage Reflect does not fire mid-session.
 
 ---
 
@@ -97,12 +97,12 @@ sage_reflect_input {
     acts_blocked: block_record[]     // Each act blocked by Sage Assent, with reason
     sage_reasoning_passes: integer   // Number of SageReasoning passes completed
   }
-  current_profile: agent_profile     // The Sage Assent (ATL) profile as read at session open
+  current_profile: agent_profile     // The Sage Assent (Sage Assent) profile as read at session open
   session_duration: integer          // Minutes or turns, depending on agent type
 }
 ```
 
-`current_profile` is **the Sage Assent (ATL) agent profile** — `agent_accreditation` + the rolling-window aggregates + the per-causal-layer logs (see Profile-Update Logic). Sage Reflect compares what the session revealed against this profile to determine what changed.
+`current_profile` is **the Sage Assent (Sage Assent) agent profile** — `agent_accreditation` + the rolling-window aggregates + the per-causal-layer logs (see Profile-Update Logic). Sage Reflect compares what the session revealed against this profile to determine what changed.
 
 ---
 
@@ -185,11 +185,11 @@ The fabrication risk here is subtler than in Calling/Reasoning: the agent may fa
 
 ---
 
-## Profile-update logic — reuse Sage Assent (ATL), do not re-implement
+## Profile-update logic — reuse Sage Assent (Sage Assent), do not re-implement
 
 This is the **central reconciliation decision** of the design (founder election 2: reuse where possible). The input spec re-derives Senecan-grade logic, katorthoma proximity, progress dimensions, direction-of-travel, and a "5-session consistency rule." **Sage Assent's existing engine already computes all of these deterministically.** Sage Reflect therefore **feeds** the existing engine; it does not duplicate it.
 
-**What already exists in Sage Assent (ATL) — reused as-is:**
+**What already exists in Sage Assent (Sage Assent) — reused as-is:**
 
 - `agent_accreditation` (the profile of record): `senecan_grade` (5 levels: `pre_progress | grade_3 | grade_2 | grade_1 | sage_ideal`), `typical_proximity` (katorthoma: `reflexive → sage_like`), `authority_level`, the four progress dimensions (`passion_reduction | judgement_quality | disposition_stability | oikeiosis_extension`, each `emerging | developing | established | advanced`), `direction_of_travel` (`improving | stable | regressing`), `passions_persisting` (JSONB array — KG7), the evaluation-window config.
 - `evaluated_actions` — the per-action kathekon records that feed the window.
@@ -205,14 +205,14 @@ This is the **central reconciliation decision** of the design (founder election 
 
 **Vocabulary + cadence reconciliation (input spec → Sage Assent canonical):**
 
-| Input-spec term | Sage Assent (ATL) canonical | Resolution |
+| Input-spec term | Sage Assent (Sage Assent) canonical | Resolution |
 |---|---|---|
 | Senecan grades `grade_3 / grade_2 / grade_1` (3 levels) | `pre_progress / grade_3 / grade_2 / grade_1 / sage_ideal` (5 levels) | **Adopt the 5-level scale.** |
-| Progress dimension `improving / stable / declining` | Dimension *level* `emerging…advanced` **plus** separate `direction_of_travel` `improving/stable/regressing` | **Adopt the ATL split** (level ≠ direction). The spec conflated them. |
-| "5-session consistency rule" | Rolling **action**-window (default 100; recent-20-vs-prior-20; 0.3-rank movement threshold) | **Adopt the ATL window.** Sage Reflect contributes session-close evidence into the action window; the engine's existing trajectory logic is the consistency mechanism. The "5-session" intent (no single session moves the grade) is *already* honoured by the engine's hysteresis. |
-| Katorthoma `reflexive…sage_like`, per-domain (KP-03), aggregate = lowest domain (KP-04, unity thesis) | `typical_proximity reflexive…sage_like` (aggregate only) | **Confirmed at lock (2026-05-22):** the ATL stores a single aggregate `typical_proximity` — there is no per-virtue-domain field (`trust-layer/types/accreditation.ts`; `supabase-agent-accreditation-migration.sql`). Founder election at lock (SR-15): **Sage Reflect computes per-domain proximity itself** from the per-action `virtue_domains_engaged` + `proximity` it already produces at Q4, applies the KP-04 unity rule (aggregate = lowest domain), and stores it Sage-Reflect-side. Known-risk: a future native ATL per-domain field must reconcile with this — flagged for the Sage Assent enhancement/rename track. |
+| Progress dimension `improving / stable / declining` | Dimension *level* `emerging…advanced` **plus** separate `direction_of_travel` `improving/stable/regressing` | **Adopt the Sage Assent split** (level ≠ direction). The spec conflated them. |
+| "5-session consistency rule" | Rolling **action**-window (default 100; recent-20-vs-prior-20; 0.3-rank movement threshold) | **Adopt the Sage Assent window.** Sage Reflect contributes session-close evidence into the action window; the engine's existing trajectory logic is the consistency mechanism. The "5-session" intent (no single session moves the grade) is *already* honoured by the engine's hysteresis. |
+| Katorthoma `reflexive…sage_like`, per-domain (KP-03), aggregate = lowest domain (KP-04, unity thesis) | `typical_proximity reflexive…sage_like` (aggregate only) | **Confirmed at lock (2026-05-22):** the Sage Assent stores a single aggregate `typical_proximity` — there is no per-virtue-domain field (`trust-layer/types/accreditation.ts`; `supabase-agent-accreditation-migration.sql`). Founder election at lock (SR-15): **Sage Reflect computes per-domain proximity itself** from the per-action `virtue_domains_engaged` + `proximity` it already produces at Q4, applies the KP-04 unity rule (aggregate = lowest domain), and stores it Sage-Reflect-side. Known-risk: a future native Sage Assent per-domain field must reconcile with this — flagged for the Sage Assent enhancement/rename track. |
 
-> **Reuse-over-rebuild is recorded as the design's load-bearing decision (SR-4).** Any place the input spec's logic and the ATL's logic disagree, the ATL is canonical; the spec's intent is preserved through the ATL's mechanism.
+> **Reuse-over-rebuild is recorded as the design's load-bearing decision (SR-4).** Any place the input spec's logic and the Sage Assent's logic disagree, the Sage Assent is canonical; the spec's intent is preserved through the Sage Assent's mechanism.
 
 ---
 
@@ -242,7 +242,7 @@ sage_reflect_output {
     direction_of_travel: enum
   }
   senecan_grade: enum                    // from Sage Assent engine (5-level)
-  katorthoma_proximity_by_domain: { phronesis, dikaiosyne, andreia, sophrosyne }  // computed BY Sage Reflect (founder lock 2026-05-22; SR-15): ATL stores aggregate typical_proximity only; Sage Reflect derives per-domain proximity from Q4 evidence + applies KP-04 unity rule (aggregate = lowest domain), stored Sage-Reflect-side
+  katorthoma_proximity_by_domain: { phronesis, dikaiosyne, andreia, sophrosyne }  // computed BY Sage Reflect (founder lock 2026-05-22; SR-15): Sage Assent stores aggregate typical_proximity only; Sage Reflect derives per-domain proximity from Q4 evidence + applies KP-04 unity rule (aggregate = lowest domain), stored Sage-Reflect-side
   scrutiny_flags: flag_record[]          // fabrication risk, pressure-assent, Sage Assent calibration, null-reflection
   developer_note: string | null          // fires when flags require developer attention
   opening_orientation: object            // for the next SageReasoning session (below)
@@ -294,7 +294,7 @@ Sage Calling opens at its Q1 with these learnings already present — it does **
 | **SR-1** | Product name | **Sage Reflect** | Fourth Sage Practice product; post-action discipline. |
 | **SR-2** | Position / cycle | **Stage 4 of Sage Practice**; loops to SageReasoning (RS-1) or Sage Calling (RS-2/3) | Completes the four classical disciplines. |
 | **SR-3** | Firing | **Session-close only**; deterministic triggers TR-01..04 | Mid-session firing collapses into SageReasoning. |
-| **SR-4** | Profile store | **Reuse Sage Assent (ATL)**: feed `evaluated_actions` + the existing window-aggregator/grade-engine; add Sage Reflect-owned additive logs | Founder election 2 (reuse-where-possible); avoids re-implementing deterministic grade logic; preserves hysteresis. **Load-bearing.** |
+| **SR-4** | Profile store | **Reuse Sage Assent (Sage Assent)**: feed `evaluated_actions` + the existing window-aggregator/grade-engine; add Sage Reflect-owned additive logs | Founder election 2 (reuse-where-possible); avoids re-implementing deterministic grade logic; preserves hysteresis. **Load-bearing.** |
 | **SR-5** | Grade/proximity/dimension vocabulary | **Adopt Sage Assent canonical** (5-level grade; level≠direction; rolling action window) | Single source of truth; reconciles spec drift. |
 | **SR-6** | Scoring engine | **Deterministic control flow + translation-sandwich (Sonnet Layer 1) for semantic scoring of Q1–Q4** | Founder election 4; AC1/KG2; Layer 2 keeps judgement deterministic + auditable. |
 | **SR-7** | Fabrication defence | **FD-R1..R4, all deterministic**; FD-R3 mandatory; FD-R1 null-suspicion gates the profile update | R18d adversarial posture applied to the reflection layer. |
@@ -305,7 +305,7 @@ Sage Calling opens at its Q1 with these learnings already present — it does **
 | **SR-12** | Persistence / R17 | **Full session persistence + 90-day retention + genuine (hard) deletion + minimisation + app-level encryption for intimate fields**; mirrors the Sage Calling `discovery_sessions` posture | R17b/c/h/i; this is among the most intimate data the system holds. |
 | **SR-13** | Kill switch + route name | **Global `SAGE_REFLECT_ENABLED` flag (off by default)**; route **`/api/practice/reflect` (LOCKED 2026-05-22)** | Matches the Sage Calling go-live discipline (503 until flipped). Route confirmed at lock; avoids collision with the human `/api/reflect` + `/api/mentor/private/reflect`. |
 | **SR-14** | Authentication | **Reuse A10 `sr_atl_` credentials** (the Sage Assent credential), unscoped, as Sage Calling does | Coherent with the cycle; one credential across the agent's practice. |
-| **SR-15** | Per-virtue-domain proximity (KP-03/04) | **Sage Reflect computes + stores per-domain proximity itself**; ATL stores aggregate only (confirmed by code read 2026-05-22) | Founder election at lock 2026-05-22, overriding the design's defer-to-ATL-enhancement recommendation. Gives KP-03/04 (unity-thesis weakest-link aggregation) a home now rather than waiting on an untimelined ATL enhancement. Known-risk: reconcile with any future native ATL per-domain field. |
+| **SR-15** | Per-virtue-domain proximity (KP-03/04) | **Sage Reflect computes + stores per-domain proximity itself**; Sage Assent stores aggregate only (confirmed by code read 2026-05-22) | Founder election at lock 2026-05-22, overriding the design's defer-to-Sage Assent-enhancement recommendation. Gives KP-03/04 (unity-thesis weakest-link aggregation) a home now rather than waiting on an untimelined Sage Assent enhancement. Known-risk: reconcile with any future native Sage Assent per-domain field. |
 
 > **SR-9 harm-flag carrier (canonical — confirmed 2026-05-23 under `D-TRACK-FOLLOWONS-A-BUILD-2026-05-23`, founder option (a)).** SR-9 (above) names the boundary's *behaviour*; the original lock did not name the exact *carrier field*. The canonical carrier is the **two-signal reading**: the R20a / Zone-3 boundary engages — records the contrary-*kathekon*, surfaces the developer note, and does **NOT** run the six-question sequence — when **either** of the following is present:
 >
@@ -335,7 +335,7 @@ Sage Calling opens at its Q1 with these learnings already present — it does **
 ## Risk classification
 
 - **This design session:** `governance` / **Standard** (documentation only; no code, no schema, no production change).
-- **The eventual build:** **Critical** under 0d-ii — new authenticated public endpoint (AC7), R17 persistence of intimate introspective content, deployment-config flag, and an R20a/Zone-3 boundary check (PR6). Full Critical Change Protocol will apply at build. The build will follow the Sage Calling two-stage pattern: (Stage A) the deterministic engine + store + the additive logs + the Sage Assent feed — **incl. the additive `evaluated_actions` table migration (not yet created — it lives only in the DRAFT review schema; the live ATL runs the window in-memory) and the Sage-Reflect-owned per-domain proximity store (SR-15)** — (Elevated); then (Stage B) the authenticated, metered, kill-switched endpoint + the translation-sandwich scoring wiring + the adversarial suite (Critical).
+- **The eventual build:** **Critical** under 0d-ii — new authenticated public endpoint (AC7), R17 persistence of intimate introspective content, deployment-config flag, and an R20a/Zone-3 boundary check (PR6). Full Critical Change Protocol will apply at build. The build will follow the Sage Calling two-stage pattern: (Stage A) the deterministic engine + store + the additive logs + the Sage Assent feed — **incl. the additive `evaluated_actions` table migration (not yet created — it lives only in the DRAFT review schema; the live Sage Assent runs the window in-memory) and the Sage-Reflect-owned per-domain proximity store (SR-15)** — (Elevated); then (Stage B) the authenticated, metered, kill-switched endpoint + the translation-sandwich scoring wiring + the adversarial suite (Critical).
 
 ---
 
@@ -353,14 +353,14 @@ Sage Calling opens at its Q1 with these learnings already present — it does **
 
 **Resolved at lock (2026-05-22):**
 
-- **Per-virtue-domain katorthoma proximity (KP-03/04, unity thesis) — RESOLVED.** Code read confirmed the ATL stores only an aggregate `typical_proximity` (no per-domain field): `trust-layer/types/accreditation.ts` (`AccreditationRecord`) + `supabase-agent-accreditation-migration.sql`. Founder election at lock: **Sage Reflect computes per-domain proximity itself** and stores it Sage-Reflect-side (SR-15) — *not* deferred to an ATL enhancement. Known-risk flagged for the Sage Assent enhancement/rename track.
-- **`evaluated_actions` shape compatibility — RESOLVED (type level).** The live `EvaluatedAction` type (`website/src/lib/substrate/trust-layer/types/evaluation.ts`) carries `kathekon_quality`, `is_kathekon`, `proximity`, `passions_detected`, `virtue_domains_engaged`, and the oikeiosis fields — Sage Reflect's Q4 output maps onto it with **no type change**, and the aggregator `computeWindowSnapshot(actions: EvaluatedAction[])` is a pure function it can call directly. **Build-scope caveat:** the `evaluated_actions` *table* is not migrated (it exists only in DRAFT `trust-layer/schema/trust-layer-schema-REVIEW.sql`, marked DO NOT RUN; the live ATL runs the window in-memory from the wrapper's `CarriedProfile`). For Q4 records to persist + accumulate across sessions, **Stage A creates the `evaluated_actions` table** (additive migration). *Revisit: Stage A.*
+- **Per-virtue-domain katorthoma proximity (KP-03/04, unity thesis) — RESOLVED.** Code read confirmed the Sage Assent stores only an aggregate `typical_proximity` (no per-domain field): `trust-layer/types/accreditation.ts` (`AccreditationRecord`) + `supabase-agent-accreditation-migration.sql`. Founder election at lock: **Sage Reflect computes per-domain proximity itself** and stores it Sage-Reflect-side (SR-15) — *not* deferred to an Sage Assent enhancement. Known-risk flagged for the Sage Assent enhancement/rename track.
+- **`evaluated_actions` shape compatibility — RESOLVED (type level).** The live `EvaluatedAction` type (`website/src/lib/substrate/trust-layer/types/evaluation.ts`) carries `kathekon_quality`, `is_kathekon`, `proximity`, `passions_detected`, `virtue_domains_engaged`, and the oikeiosis fields — Sage Reflect's Q4 output maps onto it with **no type change**, and the aggregator `computeWindowSnapshot(actions: EvaluatedAction[])` is a pure function it can call directly. **Build-scope caveat:** the `evaluated_actions` *table* is not migrated (it exists only in DRAFT `trust-layer/schema/trust-layer-schema-REVIEW.sql`, marked DO NOT RUN; the live Sage Assent runs the window in-memory from the wrapper's `CarriedProfile`). For Q4 records to persist + accumulate across sessions, **Stage A creates the `evaluated_actions` table** (additive migration). *Revisit: Stage A.*
 - **Route name — RESOLVED (LOCKED).** `/api/practice/reflect` (SR-13); avoids collision with the human `/api/reflect` + `/api/mentor/private/reflect`.
 
 **Carried forward under PR7:**
 
 - **Human-surface migration:** the existing `/api/reflect` + `/api/mentor/private/reflect` migration onto this substrate is designed-for but deferred (election 3). *Revisit: K-category migration track.*
-- **ATL→Sage Assent rename:** cross-cutting code/docs/registry track; not in scope here. The SR-15 per-domain known-risk reconciliation rides this track. *Revisit: dedicated rename session.*
+- **Sage Assent→Sage Assent rename:** cross-cutting code/docs/registry track; not in scope here. The SR-15 per-domain known-risk reconciliation rides this track. *Revisit: dedicated rename session.*
 - **Retention value (90 days):** inherits the Sage Calling default; confirm against the lawyer-engagement track.
 
 ---
@@ -369,11 +369,11 @@ Sage Calling opens at its Q1 with these learnings already present — it does **
 
 - `/inbox/reflect mentor input.rtf` — the source clinical-mode build specification.
 - `/adopted/purpose-discovery-product-design.md` — Sage Calling design (the model for this doc; the preceding cycle stage).
-- `/adopted/atl-a10-design.md`, `/adopted/atl-write-path-design.md`, `/adopted/atl-kathekon-aligned-alternative-design.md`, `/adopted/atl-items-1-3-design.md` — Sage Assent (ATL) design corpus.
-- `trust-layer/` — Sage Assent (ATL) implementation: `accreditation/`, `evaluation-window/`, `grade-engine/`, `card/`, `progression-toolkit/`, `schema/`, `types/`.
+- `/adopted/sage-assent-a10-design.md`, `/adopted/sage-assent-write-path-design.md`, `/adopted/sage-assent-kathekon-aligned-alternative-design.md`, `/adopted/sage-assent-items-1-3-design.md` — Sage Assent (Sage Assent) design corpus.
+- `trust-layer/` — Sage Assent (Sage Assent) implementation: `accreditation/`, `evaluation-window/`, `grade-engine/`, `card/`, `progression-toolkit/`, `schema/`, `types/`.
 - `website/supabase-agent-accreditation-migration.sql` (+ a10 / typical-kathekon-quality / typical-deliberation-breadth migrations) — the agent profile schema.
 - `stoic-brain/` — `passions.json`, `action.json`, `scoring.json`, `progress.json`, `psychology.json` (the taxonomies Sage Reflect scores against).
-- `/adopted/substrate-modes/` — the four Layer-3 modes incl. the Agent Trust Layer Wrapper.
+- `/adopted/substrate-modes/` — the four Layer-3 modes incl. the Sage Assent Wrapper.
 - `/adopted/standing-protocol-cache.md`, `/adopted/build-sessions-protocol-cache.md` — session protocol + build-arc context.
 - `manifest.md` — R0, R3, R4, R5, R9, R10, R17, R18, R19, R20; AC1, AC7; KG1, KG7.
 - Decision-log: `D-SAGE-CALLING-STAGE2-LIVE-VERIFIED-2026-05-21` (the just-closed product); `D-SAGE-REFLECT-DESIGN-DRAFTED-2026-05-21` (this session); `D-SAGE-REFLECT-DESIGN-LOCKED-…` (pending founder lock).

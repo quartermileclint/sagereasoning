@@ -1,12 +1,12 @@
 /**
- * agent-hand-back-report.ts — the Agent Trust Layer Wrapper, the
+ * agent-hand-back-report.ts — the Sage Assent Wrapper, the
  * trajectory-enriched developer hand-back report.
  *
  * STATUS: Scaffolded → Wired → Verified (2026-05-16, this session). New code,
  * imported by no route — no production exposure this session.
  *
  * GOVERNING DOCUMENTS
- *   - /adopted/substrate-modes/agent-trust-layer-wrapper-spec.md — the spec
+ *   - /adopted/substrate-modes/sage-assent-wrapper-spec.md — the spec
  *     (Adopted 2026-05-14). This module builds spec §"The report the agent
  *     hands back to the developer" — the human-readable companion to
  *     Component 2's in-loop machine-readable rendering (renderAgentMode in
@@ -14,7 +14,7 @@
  *   - /operations/decision-log.md — D-HAND-BACK-REPORT-WIRED-VERIFIED-
  *     2026-05-16 (this build; the Step 1 design-decision gate is recorded
  *     there).
- *   - /adopted/atl-items-1-3-design.md — Decision A (deliberation_breadth) +
+ *   - /adopted/sage-assent-items-1-3-design.md — Decision A (deliberation_breadth) +
  *     Decision B (carried_candidates) — both surface in this report.
  *   - /adopted/adr/2026-05-12-substrate-category-character-kernel.md — J1 ADR,
  *     the Character Kernel category language the R18a preamble reuses.
@@ -94,7 +94,7 @@
  *     consumer-side passthrough surface stays at the per-rendering level
  *     (renderAgentMode). The report does not re-wrap.
  *   - AC8: this module sits in /website/src/lib/substrate/ and consumes the
- *     translation-sandwich substrate's ATL outputs.
+ *     translation-sandwich substrate's Sage Assent outputs.
  *   - PR1: single-endpoint proof — the hand-back rendering is proved on one
  *     module + one test file this session. Route wiring is a future session.
  *   - PR2: the test file (__tests__/agent-hand-back-report.test.ts) invokes

@@ -304,7 +304,7 @@ This would be an Elevated-risk manifest amendment. It is flagged here as a gover
 
 Standard mode requires **no new Layer 1 input fields**. It is a per-response rendering on the standard Layer 1 input; the `prose_mode` parameter selects standard mode at Layer 3, with no Layer 1 change. (The Summary Response's LLM rephraser receives the raw input text — but that is the standard Layer 1 input, not a new field.)
 
-The four-mode work surfaced eight Layer 1 input field additions in total — none from standard mode, none from philosophical mode, four from private mode (`subject_identity_binding`, `reflective_self_report`, `history_window`, `topic_signal`), four from the ATL Wrapper (`carried_profile`, `profile_provenance`, `peer_agent_assessments`, `objective_function_declaration`). The consolidated set and the build approach are carried in the Layer 1 code-changes next-session prompt (`/operations/handoffs/founder/2026-05-14-layer1-schema-additions-NEXT-SESSION-PROMPT.md`).
+The four-mode work surfaced eight Layer 1 input field additions in total — none from standard mode, none from philosophical mode, four from private mode (`subject_identity_binding`, `reflective_self_report`, `history_window`, `topic_signal`), four from the Sage Assent Wrapper (`carried_profile`, `profile_provenance`, `peer_agent_assessments`, `objective_function_declaration`). The consolidated set and the build approach are carried in the Layer 1 code-changes next-session prompt (`/operations/handoffs/founder/2026-05-14-layer1-schema-additions-NEXT-SESSION-PROMPT.md`).
 
 ---
 
@@ -343,4 +343,4 @@ Confirmed 2026-05-14: markdown for the text rendering — `#`/`##`/`###` headers
 
 ---
 
-*End of spec. Status: Adopted 2026-05-14 (document); Designed (implementation). Build session deferred. Authored 2026-05-14 in scoping/exploration session; adopted 2026-05-14 under D-FOUR-MODE-SPECS-ADOPTED-2026-05-14. All four modes of the taxonomy are now specified and adopted: philosophical / standard / private / the Agent Trust Layer Wrapper.*
+*End of spec. Status: Adopted 2026-05-14 (document); Designed (implementation). Build session deferred. Authored 2026-05-14 in scoping/exploration session; adopted 2026-05-14 under D-FOUR-MODE-SPECS-ADOPTED-2026-05-14. All four modes of the taxonomy are now specified and adopted: philosophical / standard / private / the Sage Assent Wrapper.*

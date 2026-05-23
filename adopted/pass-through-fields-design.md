@@ -37,7 +37,7 @@ Three downstream surfaces immediately benefit once these fields exist:
 2. **Enterprise-readable accreditation badges** — the `AccreditationPayload` returned by the public GET endpoint (`/api/accreditation/[agent_id]`) can expose typical-class distributions across the agent's evaluation window: "this agent typically performs DRAFT operations on workday with delegated_user identity and human-approved outcome verification" tells a procurement reviewer everything the Agent System Touch Map output would. Honest, observable, R18a-compliant.
 3. **A10's credential surface (session #5 rewrite)** — the A10 design's `credential_audit` table currently captures only issuance + revocation events. With pass-through fields populated on every `EvaluatedAction`, the A10 rewrite can either (i) bring some of these fields onto the credential row itself (e.g., a credential might be scoped to `path_posture: endorsed` only — issued for a specific vendor-blessed framework) or (ii) leave them entirely on `EvaluatedAction` and reference them through the audit chain. The session #5 rewrite makes this call.
 
-A non-design note: the fields' optionality with sensible defaults is load-bearing. The existing substrate consumers (the ATL Wrapper at `/website/src/lib/substrate/atl-wrapper.ts`; the kathekon-aligned scorer at `/website/src/lib/substrate/trust-layer/scoring/kathekon-quality.ts`; the trajectory-enriched hand-back report at `/website/src/lib/substrate/trust-layer/reports/hand-back-report.ts`; etc.) produce `EvaluatedAction`s today without any of these fields. The pass-through fields land as optional with defaults so existing consumers are byte-untouched at the type-system level — no breaking change. Wrappers that want to populate the fields can; wrappers that don't get the defaults.
+A non-design note: the fields' optionality with sensible defaults is load-bearing. The existing substrate consumers (the Sage Assent Wrapper at `/website/src/lib/substrate/atl-wrapper.ts`; the kathekon-aligned scorer at `/website/src/lib/substrate/trust-layer/scoring/kathekon-quality.ts`; the trajectory-enriched hand-back report at `/website/src/lib/substrate/trust-layer/reports/hand-back-report.ts`; etc.) produce `EvaluatedAction`s today without any of these fields. The pass-through fields land as optional with defaults so existing consumers are byte-untouched at the type-system level — no breaking change. Wrappers that want to populate the fields can; wrappers that don't get the defaults.
 
 ---
 
@@ -103,7 +103,7 @@ export type EvaluatedAction = {
 }
 ```
 
-The optionality is load-bearing: existing substrate consumers (ATL Wrapper, kathekon-aligned scorer, hand-back report, etc.) produce `EvaluatedAction`s without this field today; they get `undefined` which the validator normalises to `'unknown'`. Wrappers that supply the field get their value validated against the enum.
+The optionality is load-bearing: existing substrate consumers (Sage Assent Wrapper, kathekon-aligned scorer, hand-back report, etc.) produce `EvaluatedAction`s without this field today; they get `undefined` which the validator normalises to `'unknown'`. Wrappers that supply the field get their value validated against the enum.
 
 The build session adds a validator helper in `/website/src/lib/substrate/trust-layer/validation/pass-through-fields.ts` (NEW):
 
@@ -631,7 +631,7 @@ Expected pass-through fields build session: **~2–3 hr**; **Elevated** risk und
 - `/operations/handoffs/founder/2026-05-17-billing-model-build-close.md` — predecessor close; "Next Session Should" names this design pass
 - `/operations/handoffs/founder/2026-05-16-A10-design-pass-close.md` Part 2 — scoping source (the six pass-through fields were named in the brainstorm here)
 - `/adopted/billing-model-design.md` — structural template for this design's six-decision shape (modelled on its eight-decision shape; Option D's `loop_billing_events.surface` enum named in the Integration section); Decision E's deferred-under-PR7 tiered-per-action billing names `operation_class` as the gating field — this design lands that field
-- `/adopted/atl-a10-design.md` — A10 design Adopted, will be Superseded at session #5 of the new post-6b arc tail; the rewrite incorporates the pass-through fields per the Integration §A10 section
+- `/adopted/sage-assent-a10-design.md` — A10 design Adopted, will be Superseded at session #5 of the new post-6b arc tail; the rewrite incorporates the pass-through fields per the Integration §A10 section
 - `/inbox/20260508-262-promptkit-1.md` — Nate B Jones SaaS Renewal Agent License Prompt Kit; Prompt 1 (Agent System Touch Map) is the canonical source for Decisions A + B + C + D's enum vocabularies; Prompt 2 (Renewal Interrogation) confirms these are the procurement-and-CFO dimensions
 - `/inbox/Related to agent API billing.rtf` — companion essay; the fair-license criteria framing applies across all six decisions ("the unit makes sense"; "the meter is visible"; honest framing of self-reported vs system-confirmed vs external-auditor verification)
 - `/website/src/lib/substrate/trust-layer/types/accreditation.ts` — existing types file; port-mirror banner instructs that changes here propagate to `/trust-layer/types/accreditation.ts`

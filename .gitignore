@@ -8,6 +8,10 @@
 .DS_Store?
 ._*
 
+# FUSE mount shadow files — transient host-side copies created when the workspace
+# edits a file the host holds open. Never commit.
+.fuse_hidden*
+
 # Node.js (for website phase)
 node_modules/
 .next/

@@ -31,7 +31,7 @@
  *       D-ATL-PUBLIC-ACCREDITATION-ENDPOINT-WIRED-VERIFIED-2026-05-16
  *       (the original 6b build) + a hotfix note appended to its files-touched
  *       block recording this refactor.
- *   - /adopted/substrate-modes/agent-trust-layer-wrapper-spec.md §"Component 3"
+ *   - /adopted/substrate-modes/sage-assent-wrapper-spec.md §"Component 3"
  *     (the spec; unchanged).
  *
  * COMPLIANCE

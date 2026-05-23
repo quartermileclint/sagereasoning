@@ -1,5 +1,5 @@
 /**
- * sage-assent-wrapper.test.ts — Agent Trust Layer Wrapper (Components 1 + 4) functional
+ * sage-assent-wrapper.test.ts — Sage Assent Wrapper (Components 1 + 4) functional
  * tests + invariant checks.
  *
  * Run via: `npx tsx website/src/lib/substrate/__tests__/sage-assent-wrapper.test.ts`

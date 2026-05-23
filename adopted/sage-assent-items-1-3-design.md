@@ -1,10 +1,10 @@
-# ATL Wrapper — Items 1, 2, 3 Design
+# Sage Assent Wrapper — Items 1, 2, 3 Design
 
 **Status:** Adopted 2026-05-16 under `D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16`. **Implementation status:** Designed (per 0a vocabulary) — the four decisions below are specified, not built; the items 1–3 build session is the next sub-session in the post-6b arc.
 **Stream:** founder.
 **Governs:** The build spec for the items 1–3 build session — `code-elevated` risk classification expected (additive `EvaluatedAction` / `BridgeContext` / `Layer1Schema` schema changes; new persistent slot on `CarriedProfile`; new helper file; spec section additions). The four decisions below MUST be implemented as specified; the build session has discretion on file paths, helper naming, and test structure within those constraints.
 **Does not govern:** the kathekon-aligned alternative (steps 5–6 of the post-6b arc — separate design pass); the Layer 1 asked-question multiple-choice (own design pass, sequenced for the onboarding-framework); the write-path into `agent_accreditation` (step 7); A10 (per-agent credentials).
-**Sequencing:** step 2 of 8 in the post-6b arc per `/operations/handoffs/founder/2026-05-15-post-build-brainstorm-close.md`. Predecessor: 6b (`D-ATL-PUBLIC-ACCREDITATION-ENDPOINT-WIRED-VERIFIED-2026-05-16` — every ATL Wrapper component Verified end-to-end). Successor: items 1–3 build session.
+**Sequencing:** step 2 of 8 in the post-6b arc per `/operations/handoffs/founder/2026-05-15-post-build-brainstorm-close.md`. Predecessor: 6b (`D-ATL-PUBLIC-ACCREDITATION-ENDPOINT-WIRED-VERIFIED-2026-05-16` — every Sage Assent Wrapper component Verified end-to-end). Successor: items 1–3 build session.
 
 ---
 
@@ -141,7 +141,7 @@ Optional (nullable) → additive + backward-compatible. **This is a versioned ch
 
 ### Why
 
-An agent developer who wants to compose the substrate with a tree-search algorithm (MCTS, BFS, beam search, Tree-of-Thoughts) currently has no documented contract for what the per-node evaluation interface looks like or how to wire it. PR15 frames this: the ATL is the per-node evaluator; tree search stays agent-side or framework-side; we do not reimplement tree search inside the substrate. With Decisions A + B applied, `Layer1Schema` already carries everything a node needs to pass through — what's missing is the doc + ergonomic surface.
+An agent developer who wants to compose the substrate with a tree-search algorithm (MCTS, BFS, beam search, Tree-of-Thoughts) currently has no documented contract for what the per-node evaluation interface looks like or how to wire it. PR15 frames this: the Sage Assent is the per-node evaluator; tree search stays agent-side or framework-side; we do not reimplement tree search inside the substrate. With Decisions A + B applied, `Layer1Schema` already carries everything a node needs to pass through — what's missing is the doc + ergonomic surface.
 
 ### Helper
 
@@ -169,13 +169,13 @@ The helper is thin — most of the work is already in the substrate API. Its val
 
 ### Documentation
 
-New section in `agent-trust-layer-wrapper-spec.md`: "Tree-search composition." Contents:
+New section in `sage-assent-wrapper-spec.md`: "Tree-search composition." Contents:
 
 1. **The per-node contract.** Existing substrate API `(Layer1Schema) => Layer2Assessment` is the per-node evaluator. With Decisions A + B, `Layer1Schema` carries everything a tree-search algorithm needs to thread (the parent's `carried_profile` for trajectory-aware assessment; sibling unchosen candidates via `carried_candidates`).
 2. **Pseudocode — MCTS** (~12 lines). Selection / expansion / simulation / backpropagation; the substrate call sits at the simulation step.
 3. **Pseudocode — BFS** (~8 lines). Per-level expansion; the substrate ranks expansions.
 4. **Pseudocode — Tree-of-Thoughts** (~10 lines). LLM-driven branching with substrate at each thought-evaluation step.
-5. **Composition with Anthropic multi-agent orchestration** (subsection). Distinguishes in-process tree search (substrate-as-per-node-evaluator; this section) from multi-agent tree-like behaviour (Anthropic multi-agent orchestration is the runtime substrate; the ATL wraps the orchestrator per Pattern 3 — see `atl-iteration-patterns.ts` PR15 consult). Both legitimate; different mechanics. Developers should choose based on whether the candidate paths share a single agent's context (in-process tree) or run in independent agent contexts (multi-agent orchestration).
+5. **Composition with Anthropic multi-agent orchestration** (subsection). Distinguishes in-process tree search (substrate-as-per-node-evaluator; this section) from multi-agent tree-like behaviour (Anthropic multi-agent orchestration is the runtime substrate; the Sage Assent wraps the orchestrator per Pattern 3 — see `atl-iteration-patterns.ts` PR15 consult). Both legitimate; different mechanics. Developers should choose based on whether the candidate paths share a single agent's context (in-process tree) or run in independent agent contexts (multi-agent orchestration).
 
 No reference implementations of any algorithm — pseudocode only. Reduces maintenance surface; the algorithms are well-known.
 
@@ -227,10 +227,10 @@ export function defaultCarriedCandidateComparator(
 ## Cross-references
 
 - `/operations/decision-log.md` — `D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16` (this design's adoption record).
-- `/operations/handoffs/founder/2026-05-16-atl-items-1-3-design-pass-close.md` — this session's close.
+- `/operations/handoffs/founder/2026-05-16-sage-assent-items-1-3-design-pass-close.md` — this session's close.
 - `/operations/handoffs/founder/2026-05-15-post-build-brainstorm-close.md` — sequencing source; the brainstorm that confirmed items 1, 2, 3 + the four open design questions per item.
-- `/operations/handoffs/founder/2026-05-16-atl-public-accreditation-endpoint-close.md` — 6b close (every ATL Wrapper component Verified end-to-end).
-- `/adopted/substrate-modes/agent-trust-layer-wrapper-spec.md` — the Wrapper spec; especially §"Component 1 — The Wrapper / carried-profile mechanism" + §"Component 4 — Trajectory awareness" + §"Component 5 — The three iteration patterns" + §"Layer 1 implications" + §"Open questions deferred to build."
+- `/operations/handoffs/founder/2026-05-16-atl-public-accreditation-endpoint-close.md` — 6b close (every Sage Assent Wrapper component Verified end-to-end).
+- `/adopted/substrate-modes/sage-assent-wrapper-spec.md` — the Wrapper spec; especially §"Component 1 — The Wrapper / carried-profile mechanism" + §"Component 4 — Trajectory awareness" + §"Component 5 — The three iteration patterns" + §"Layer 1 implications" + §"Open questions deferred to build."
 - `/website/src/lib/substrate/atl-bridge.ts` — `BridgeContext` (extended for Decision A) + the idempotence rationale forcing Decision A onto `EvaluatedAction`.
 - `/website/src/lib/substrate/atl-iteration-patterns.ts` — Pattern 2's open-question-4 closure (Decision B's separate-slot framing) + the Anthropic multi-agent-orchestration PR15 consult (retained for Decision C).
 - `/website/src/lib/substrate/atl-wrapper.ts` — `CarriedProfile` (extended for Decision B's new slot).

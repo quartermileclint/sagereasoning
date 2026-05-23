@@ -1,11 +1,11 @@
 /**
- * sage-assent-wrapper.ts — the Agent Trust Layer Wrapper (Components 1 + 4).
+ * sage-assent-wrapper.ts — the Sage Assent Wrapper (Components 1 + 4).
  *
  * STATUS: Scaffolded → Wired → Verified (2026-05-15, this session). New code,
  * imported by no route — no production exposure this session.
  *
  * GOVERNING DOCUMENTS:
- *   - /adopted/substrate-modes/agent-trust-layer-wrapper-spec.md — the spec
+ *   - /adopted/substrate-modes/sage-assent-wrapper-spec.md — the spec
  *     (Adopted 2026-05-14). This module builds spec §"Component 1 — The Wrapper
  *     / carried-profile mechanism" and §"Component 4 — Trajectory awareness".
  *   - /operations/decision-log.md — D-ATL-WRAPPER-WIRED-VERIFIED-2026-05-15
@@ -31,7 +31,7 @@
  *
  * It consumes two already-Verified pieces and the ported /trust-layer/ closure:
  *   - sage-assent-bridge.ts — mapLayer2AssessmentToEvaluatedAction (the bridge; the PR1
- *     single-endpoint proof of the substrate↔ATL pattern — this module is its
+ *     single-endpoint proof of the substrate↔Sage Assent pattern — this module is its
  *     next consumer).
  *   - ./trust-layer/ — the 5-file ported closure of computeWindowSnapshot +
  *     evaluateGradeTransition (the existing /trust-layer/ window/grade
@@ -77,13 +77,13 @@
  *     ported grade-transition-engine.ts and are never returned.
  *   - R17e: does NOT apply to agent profiles. An agent's reasoning-pattern
  *     profile is not an intimate human vulnerability — R17e exists to protect
- *     humans (ATL Wrapper spec §"R-rule engagement"; the load-bearing
+ *     humans (Sage Assent Wrapper spec §"R-rule engagement"; the load-bearing
  *     distinction from private mode). This module applies no R17e filter.
  *   - R18 a–e: the carried profile + its WindowSnapshot are the substance the
  *     badge (Component 3, spec step 6) certifies.
  *   - AC8: this module sits in /website/src/lib/substrate/ and consumes the
  *     translation-sandwich Layer 2 output (via the bridge).
- *   - PR1: the bridge was the single-endpoint proof of the substrate↔ATL
+ *   - PR1: the bridge was the single-endpoint proof of the substrate↔Sage Assent
  *     pattern; this wrapper is its next consumer — kept a pure, synchronous,
  *     deterministic accumulator + aggregator.
  *   - PR2: the test file (__tests__/sage-assent-wrapper.test.ts) invokes every exported
@@ -122,9 +122,9 @@ import type {
   DimensionScores,
 } from './trust-layer/types/accreditation'
 
-// Re-export the ported types the wrapper produces/consumes, so downstream ATL
+// Re-export the ported types the wrapper produces/consumes, so downstream Sage Assent
 // consumers (Component 3 the badge — spec step 6; Component 5 the iteration
-// patterns — ATL Wrapper Session 6) import them from one place.
+// patterns — Sage Assent Wrapper Session 6) import them from one place.
 export type {
   EvaluatedAction,
   BridgeContext,
@@ -157,7 +157,7 @@ export type {
 /**
  * The agent's carried profile — the wrapper's accumulating state.
  *
- * This is the "carried profile" the ATL Wrapper spec describes: the wrapper
+ * This is the "carried profile" the Sage Assent Wrapper spec describes: the wrapper
  * accumulating Layer 2 JSON outputs (each mapped to an EvaluatedAction) plus
  * the trajectory infrastructure the existing /trust-layer/ build needs to
  * aggregate them. The caller holds this value and threads it through the
@@ -540,7 +540,7 @@ export interface CarriedCandidatesPayload {
 /**
  * The profile_provenance payload — the Layer 1 gaming-defence attestation that
  * the carried profile came from the agent's OWN prior substrate assessments,
- * not injected third-party content (ATL Wrapper spec §"Layer 1 implications").
+ * not injected third-party content (Sage Assent Wrapper spec §"Layer 1 implications").
  *
  * Each accumulated EvaluatedAction's receipt_id is derived (in the bridge) from
  * a signed Layer2Assessment's Ed25519 signature — so the receipt_id_chain is a

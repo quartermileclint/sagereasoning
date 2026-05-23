@@ -555,7 +555,7 @@
     },
     {
       "id": "doc-trust-framework",
-      "name": "Agent Trust Layer Framework",
+      "name": "Sage Assent Framework",
       "type": "document",
       "subtype": [],
       "status": "verified",
@@ -1115,7 +1115,7 @@
     },
     {
       "id": "engine-trust-layer",
-      "name": "Agent Trust Layer",
+      "name": "Sage Assent",
       "type": "engine",
       "subtype": [
         "inference",

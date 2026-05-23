@@ -10,7 +10,7 @@
  * the seam that finally invokes them.
  *
  * GOVERNING DOCUMENTS:
- *   - /adopted/atl-write-path-design.md — the authoritative spec. Seven design
+ *   - /adopted/sage-assent-write-path-design.md — the authoritative spec. Seven design
  *     decisions A–G locked under D-ATL-WRITE-PATH-DESIGN-LOCKED-2026-05-16.
  *     This module implements Decisions A + B + D + E + F + G (the library
  *     half). Decision A's route half + Decision C's auth gate live in
@@ -90,7 +90,7 @@
  *   - AC7: this module has no auth surface; AC7 engages at the route. The
  *     full Critical Change Protocol applies at the build session as a whole.
  *   - AC8: this module sits in /website/src/lib/substrate/ and persists the
- *     output of the ATL Wrapper, which consumes the translation-sandwich
+ *     output of the Sage Assent Wrapper, which consumes the translation-sandwich
  *     substrate.
  *   - KG1 (Vercel five-rule constraint) — postures:
  *       1. No self-calls — the library makes no endpoint-to-endpoint calls;

@@ -4,7 +4,7 @@
  * STATUS: NEW (2026-05-21, A10 build — D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21).
  *
  * GOVERNING DOCUMENT:
- *   - /adopted/atl-a10-design.md — Decision D (issuance flow + surface),
+ *   - /adopted/sage-assent-a10-design.md — Decision D (issuance flow + surface),
  *     Decision B (per-owner binding), Decision F (revocation), Decision H
  *     (audit trail), Decision 3a (optional per-credential scope params).
  *     Adopted under D-ATL-A10-DESIGN-LOCKED-REWRITE-2026-05-17.

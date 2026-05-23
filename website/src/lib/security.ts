@@ -524,8 +524,8 @@ export function withUsageHeaders(
 }
 
 // =============================================================================
-// A10 — PER-AGENT WRITE CREDENTIALS (ATL write surface)
-// Implements Decisions A + B + D + E + F + H + 3a of /adopted/atl-a10-design.md
+// A10 — PER-AGENT WRITE CREDENTIALS (Sage Assent write surface)
+// Implements Decisions A + B + D + E + F + H + 3a of /adopted/sage-assent-a10-design.md
 // (Adopted under D-ATL-A10-DESIGN-LOCKED-REWRITE-2026-05-17; built
 // D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21).
 //

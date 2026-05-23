@@ -11,9 +11,9 @@
  *     component", §"Component score (kathekon-confirmed path; baseline 55)",
  *     §"Out of the score; in the response shape", §"Score-validity flag
  *     rules"). The superseded agent-mode spec is the substantive
- *     deliverable-of-the-day; its content is absorbed into the ATL Wrapper spec
+ *     deliverable-of-the-day; its content is absorbed into the Sage Assent Wrapper spec
  *     §"Component 2".
- *   - /adopted/substrate-modes/agent-trust-layer-wrapper-spec.md §"Component 2"
+ *   - /adopted/substrate-modes/sage-assent-wrapper-spec.md §"Component 2"
  *     — the Layer 3 agent-mode rendering that consumes this score (built in a
  *     later session; not built here).
  *   - /adopted/substrate-modes/philosophical-mode-response-spec.md §"Score
@@ -40,7 +40,7 @@
  * shape as sage-assent-bridge.ts (the bridge pattern) and philosophical-mode-service.ts
  * (the Layer 3 mode-dispatch pattern). It is the load-bearing dependency for
  * three downstream consumers, all currently blocked on it: the Layer 3
- * agent-mode rendering (ATL Wrapper Component 2), philosophical mode's deferred
+ * agent-mode rendering (Sage Assent Wrapper Component 2), philosophical mode's deferred
  * score sections (D-PHILOSOPHICAL-MODE-BUILD-WIRED-VERIFIED-2026-05-14, PR7),
  * and standard mode's score sections. Build the score once; the three modes
  * each project a subset of it.

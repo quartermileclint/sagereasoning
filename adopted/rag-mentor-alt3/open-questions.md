@@ -334,7 +334,7 @@ Each entry serves PR7's purpose: deferring a decision is itself a decision; the 
 
 **Question:** R18d names adversarial evaluation as a precondition for broad deployment. Phase 1 design does not perform adversarial evaluation.
 
-**Why deferred:** Adversarial evaluation is a Phase-2 / pre-launch work item. Per project instructions Priority 3 (Agent Trust Layer) Phase 3d.
+**Why deferred:** Adversarial evaluation is a Phase-2 / pre-launch work item. Per project instructions Priority 3 (Sage Assent) Phase 3d.
 
 **Revisit condition:** Pre-launch (Phase-2 / Phase-3+); ideally with external review.
 

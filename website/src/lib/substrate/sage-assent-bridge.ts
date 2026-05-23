@@ -1,11 +1,11 @@
 /**
- * sage-assent-bridge.ts — the substrate ↔ Agent Trust Layer bridge.
+ * sage-assent-bridge.ts — the substrate ↔ Sage Assent bridge.
  *
  * STATUS: Scaffolded → Wired → Verified (2026-05-15, this session). New code,
  * imported by no route — no production exposure this session.
  *
  * GOVERNING DOCUMENTS:
- *   - /adopted/substrate-modes/agent-trust-layer-wrapper-spec.md (the spec —
+ *   - /adopted/substrate-modes/sage-assent-wrapper-spec.md (the spec —
  *     Adopted 2026-05-14; this module builds its §"Component 1"
  *     Layer2Assessment → EvaluatedAction mapping table — "the bridge")
  *   - /operations/decision-log.md — D-ATL-BRIDGE-WIRED-VERIFIED-2026-05-15
@@ -15,7 +15,7 @@
  * WHAT THIS MODULE IS
  *
  * The existing /trust-layer/ build (3 April 2026, pre-substrate) was designed
- * to consume "ReasoningReceipts" from the old bundled engine. The ATL Wrapper
+ * to consume "ReasoningReceipts" from the old bundled engine. The Sage Assent Wrapper
  * spec's central reconciliation move is to make the translation-sandwich
  * substrate's signed Layer2Assessment the source of the trust layer's
  * EvaluatedAction instead — so the existing window-aggregator / grade-engine /
@@ -24,11 +24,11 @@
  * This module is THAT bridge: a pure, synchronous, deterministic projection
  * from a Layer2Assessment (+ a BridgeContext carrying the four fields the
  * substrate does not itself hold) to a single EvaluatedAction. It is the PR1
- * single-endpoint proof of the substrate↔ATL bridge pattern — everything else
- * in the ATL arc (the wrapper, the badge, trajectory awareness) depends on
+ * single-endpoint proof of the substrate↔Sage Assent bridge pattern — everything else
+ * in the Sage Assent arc (the wrapper, the badge, trajectory awareness) depends on
  * this mapping existing.
  *
- * THE tsconfig BOUNDARY (resolved 2026-05-15 — ATL Wrapper build, spec step 5)
+ * THE tsconfig BOUNDARY (resolved 2026-05-15 — Sage Assent Wrapper build, spec step 5)
  *
  * /trust-layer/ sits OUTSIDE website/'s tsconfig root. When this bridge was
  * first built it MIRRORED its EvaluatedAction target type (+ two dependency
@@ -63,7 +63,7 @@
  *   - AC8: this module sits in /website/src/lib/substrate/ and consumes the
  *     translation-sandwich Layer 2 output.
  *   - PR1: single-endpoint proof — this one mapping function proves the
- *     substrate↔ATL bridge pattern before the wrapper rolls it out.
+ *     substrate↔Sage Assent bridge pattern before the wrapper rolls it out.
  *   - PR2: build-to-wire-verification immediate — the test file
  *     (__tests__/sage-assent-bridge.test.ts) invokes this function in the same session
  *     this module is written.
@@ -79,14 +79,14 @@ import type { Layer2Assessment } from '@/lib/translation-sandwich/layer2-mechani
 // EvaluatedAction — the MAPPING TARGET, the single-action unit the trust
 // layer's window-aggregator consumes — and its two dependency enums now live
 // in the ported /trust-layer/ closure at website/src/lib/substrate/trust-layer/,
-// INSIDE website/'s tsconfig. The ATL Wrapper build (D-ATL-WRAPPER-WIRED-
+// INSIDE website/'s tsconfig. The Sage Assent Wrapper build (D-ATL-WRAPPER-WIRED-
 // VERIFIED-2026-05-15, spec step 5) ported that closure per the founder's
 // Step 2 election; this module now imports the CANONICAL EvaluatedAction
 // rather than carrying its own mirror — there is one definition in website/src.
 import type { EvaluatedAction } from './trust-layer/types/evaluation'
 
 // Re-exported so the bridge's existing consumers (sage-assent-bridge.test.ts) and
-// downstream ATL modules keep importing these from one place.
+// downstream Sage Assent modules keep importing these from one place.
 export type { EvaluatedAction } from './trust-layer/types/evaluation'
 export type {
   KatorthomaProximityLevel,
@@ -102,7 +102,7 @@ export type {
  *
  * Layer2Assessment is idempotent by design — it carries no identity, no clock,
  * and no signature. These four fields therefore come from the consumer that
- * made the substrate call (in the full ATL Wrapper, that is the wrapper itself
+ * made the substrate call (in the full Sage Assent Wrapper, that is the wrapper itself
  * — spec step 5):
  *
  *   - agent_id     — the wrapped agent's identifier. The spec's mapping table
@@ -174,7 +174,7 @@ export function deriveReceiptId(signature: string): string {
  * produces a byte-identical EvaluatedAction. No clock read, no randomness, no
  * I/O.
  *
- * Field mapping (per the ATL Wrapper spec's Component 1 mapping table + the
+ * Field mapping (per the Sage Assent Wrapper spec's Component 1 mapping table + the
  * Step 2 design-decision gate):
  *
  *   receipt_id             ← deriveReceiptId(context.signature)

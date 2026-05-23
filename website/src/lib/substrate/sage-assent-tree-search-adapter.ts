@@ -6,9 +6,9 @@
  * imported by no route — no production exposure this session.
  *
  * GOVERNING DOCUMENTS:
- *   - /adopted/atl-items-1-3-design.md §"Decision C — Tree-search composition"
+ *   - /adopted/sage-assent-items-1-3-design.md §"Decision C — Tree-search composition"
  *     (Adopted 2026-05-16; the spec this module implements).
- *   - /adopted/substrate-modes/agent-trust-layer-wrapper-spec.md
+ *   - /adopted/substrate-modes/sage-assent-wrapper-spec.md
  *     §"Tree-search composition" (added 2026-05-16 in the same build — the
  *     developer-facing documentation surface).
  *   - /operations/decision-log.md — D-ATL-ITEMS-1-3-DESIGN-LOCKED-2026-05-16

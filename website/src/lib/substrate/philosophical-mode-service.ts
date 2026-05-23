@@ -33,7 +33,7 @@
  *
  * This module is also the PR1 single-endpoint proof of the Layer 3
  * mode-dispatch pattern. `renderLayer3Mode` branches on `mode`; today only
- * 'philosophical' is implemented. Standard / private / ATL-wrapper modes will
+ * 'philosophical' is implemented. Standard / private / Sage Assent-wrapper modes will
  * extend the same switch in subsequent build sessions, reusing this pattern.
  *
  * WHAT THIS MODULE DOES (per the spec's section ordering)
@@ -112,7 +112,7 @@
  *   - AC8: this module sits in /website/src/lib/substrate/ and consumes the
  *     translation-sandwich Layer 2 output + the A5 injection layer.
  *   - PR1: single-endpoint proof — `renderLayer3Mode` is the dispatch pattern;
- *     proven on one mode (philosophical) before standard / private / ATL
+ *     proven on one mode (philosophical) before standard / private / Sage Assent
  *     inherit it.
  *   - PR2: build-to-wire-verification immediate — the test file
  *     (__tests__/philosophical-mode-service.test.ts) invokes `renderLayer3Mode`
@@ -171,7 +171,7 @@ import {
   type RetrievedPassage,
 } from '@/lib/rag/retrieve-passages'
 
-// Agent-mode rendering (ATL Wrapper Component 2) — the 'atl_wrapper' dispatch
+// Agent-mode rendering (Sage Assent Wrapper Component 2) — the 'atl_wrapper' dispatch
 // case delegates to renderAgentMode. The value import is one-directional
 // (philosophical-mode-service.ts → agent-mode-service.ts at runtime);
 // agent-mode-service.ts imports only the Layer3ModeRenderInput TYPE back, which
@@ -198,12 +198,12 @@ import {
 } from '@/lib/substrate/score-architecture'
 
 // ============================================================================
-// MODE-DISPATCH TYPES (PR1 — the pattern standard / private / ATL extend)
+// MODE-DISPATCH TYPES (PR1 — the pattern standard / private / Sage Assent extend)
 // ============================================================================
 
 /** The Layer 3 render modes. 'philosophical' and 'atl_wrapper' are implemented;
  *  the other two are reserved so the dispatch switch is exhaustively typed.
- *  'atl_wrapper' is the Layer 3 agent-mode rendering — ATL Wrapper Component 2;
+ *  'atl_wrapper' is the Layer 3 agent-mode rendering — Sage Assent Wrapper Component 2;
  *  added 2026-05-15 (D-ATL-AGENT-MODE-RENDERING-WIRED-VERIFIED-2026-05-15). */
 export type Layer3RenderMode =
   | 'philosophical'

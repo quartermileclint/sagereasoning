@@ -2,7 +2,7 @@
 -- SageReasoning — A10 Per-Agent Credentials: credential_audit table
 -- Run in: Supabase Dashboard → SQL Editor → New Query
 -- ============================================================
--- Implements Decision H of /adopted/atl-a10-design.md
+-- Implements Decision H of /adopted/sage-assent-a10-design.md
 -- (Adopted under D-ATL-A10-DESIGN-LOCKED-REWRITE-2026-05-17).
 -- Executed at the A10 build session (D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21).
 --

@@ -12,7 +12,7 @@
 
 ### Project Overview
 
-SageReasoning makes principled reasoning accessible to every rational agent — human and artificial. The website serves human practitioners. The API and skill contracts serve agent developers. The Agent Trust Layer extends the moral community to include artificial agents. The Sage Ops stack supports the founder's practice and the company's operations — because the builder must embody what they build.
+SageReasoning makes principled reasoning accessible to every rational agent — human and artificial. The website serves human practitioners. The API and skill contracts serve agent developers. The Sage Assent extends the moral community to include artificial agents. The Sage Ops stack supports the founder's practice and the company's operations — because the builder must embody what they build.
 
 ### End Goal
 
@@ -298,11 +298,11 @@ P0 is complete when:
 
 ---
 
-## Priority 3: Agent Trust Layer — Honest Certification (R18 + existing ATL build)
+## Priority 3: Sage Assent — Honest Certification (R18 + existing Sage Assent build)
 
 3a Certification scope language and badge component (R18a, R18b). 3b Supabase integration, assessment endpoints, LLM wiring. 3c Interoperability architecture (R18c). 3d Adversarial evaluation protocol (R18d).
 
-**Exit criterion:** Badge deployed with scope language. ATL endpoints live with honest disclosures. Schema documented as interoperable. Adversarial evaluation completed with findings incorporated.
+**Exit criterion:** Badge deployed with scope language. Sage Assent endpoints live with honest disclosures. Schema documented as interoperable. Adversarial evaluation completed with findings incorporated.
 
 ---
 
