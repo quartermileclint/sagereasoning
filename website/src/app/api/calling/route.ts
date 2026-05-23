@@ -81,6 +81,7 @@ import {
 } from '@/lib/sage-calling/calling-service'
 
 import { verifyAgentCard, isHttpsUrl, type FetchedCard } from '@/lib/sage-calling/agent-card'
+import type { DiscoveredPurposeRole } from '@/lib/translation-sandwich/layer1-extractor'
 
 import { computeLoopBill } from '@/lib/stripe'
 import {
@@ -235,20 +236,23 @@ async function meterStageCall(loopId: string, apiKeyId: string, agentId: string)
 const AGENT_CARD_FETCH_TIMEOUT_MS = 3000
 
 /**
- * Fetch + verify an optional Agent Card. The verification result feeds ONLY the
- * five-spec chosen-role hint (built later, on approval) — it never substitutes
- * for the agent's own response and is never trusted at face value (D-13/R18d).
- * Failures are non-fatal: a bad/spoofed/unreachable card simply yields no hint.
+ * Fetch + verify an optional Agent Card and RETURN its chosen-role hint (E#1).
+ * A verified card yields 'chosen_role' (the card IS the agent's formal A2A
+ * commitment — the chosen-role persona); an absent/unverified/spoofed card yields
+ * null. The hint feeds ONLY the five-spec assembly (built later, on approval) — it
+ * never substitutes for the agent's own response and is never trusted at face
+ * value (D-13/R18d). Failures are non-fatal: a bad/spoofed/unreachable card simply
+ * yields null and the role defaults downstream (degrade to today's behaviour).
  * The actual fetch happens here (I/O); the verdict logic is the pure
  * verifyAgentCard.
  */
-async function fetchAndVerifyAgentCard(url: string): Promise<void> {
-  // Verification is currently observability-only at the stage-call boundary; the
-  // role hint is consumed on the approval path (build-time of discovered_purpose).
-  // We fetch + verify here so a spoof/poison attempt is logged at session time.
+async function fetchAndVerifyAgentCard(url: string): Promise<DiscoveredPurposeRole | null> {
+  // The verdict is verified at session time so a spoof/poison attempt is logged
+  // here; E#1 persists the returned role hint at session-open (createSession) so
+  // the approval path's discovered_purpose assembly reflects a verified card.
   if (!isHttpsUrl(url)) {
     console.log(JSON.stringify({ kind: 'sage_calling_agent_card', verified: false, reason: 'not_https' }))
-    return
+    return null
   }
   let fetched: FetchedCard
   try {
@@ -269,6 +273,7 @@ async function fetchAndVerifyAgentCard(url: string): Promise<void> {
   const verdict = verifyAgentCard(url, fetched)
   // R4: the verdict is engine-internal; only logged, never surfaced to the agent.
   console.log(JSON.stringify({ kind: 'sage_calling_agent_card', verified: verdict.verified, reason: verdict.reason }))
+  return verdict.role_hint
 }
 
 // ============================================================================
@@ -303,13 +308,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const auth = await verifyCallingToken(request, agent_id)
   if (!auth.ok) return buildCallingUnauthorizedResponse()
 
-  // 5. Optional Agent Card (D-13): fetch + verify (logged; never trusted). The
-  //    declined available_tools is logged as ignored (D-13).
+  // 5. Optional Agent Card (D-13): fetch + verify (logged; never trusted). A
+  //    verified card yields a 'chosen_role' hint, persisted at session-open (E#1,
+  //    cold-open createSession below) so the approval path's five-spec assembly
+  //    reflects it instead of defaulting to 'individual_nature'. The declined
+  //    available_tools is logged as ignored (D-13).
   if (available_tools_present) {
     console.log(JSON.stringify({ kind: 'sage_calling_declined_field', field: 'available_tools' }))
   }
+  let agentCardRoleHint: DiscoveredPurposeRole | null = null
   if (agent_card_url) {
-    await fetchAndVerifyAgentCard(agent_card_url)
+    agentCardRoleHint = await fetchAndVerifyAgentCard(agent_card_url)
   }
 
   // 6. Loop id for metering (AC10 provenance). Header or server-generated.
@@ -326,7 +335,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (response === undefined) {
       if (existing === null) {
         // First call — create + return the cold open (Q1/A). Bind the agent.
-        const created = await createSession(session_id, agent_id)
+        // E#1: persist the verified Agent-Card chosen-role hint (null if none) in
+        // the SAME insert — no extra write, no new failure mode.
+        const created = await createSession(session_id, agent_id, agentCardRoleHint)
         if (!created.ok) return buildCallingServerErrorResponse()
         const meter = await meterStageCall(loopId, auth.credentialId, agent_id)
         if (!meter.ok) return buildCallingServerErrorResponse()

@@ -87,12 +87,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const set = await setGateStatus(session_id, 'approved')
     if (!set.ok) return buildApproveServerErrorResponse()
 
-    // D-5 five-spec assembly — built ONLY here, on the approved path. The
-    // chosen-role hint from a verified Agent Card is logged at session time but
-    // not persisted (no column; no migration this stage), so role defaults to
-    // the agent's individual operational nature here. PR7 follow-on: persist the
-    // verdict to carry the chosen-role hint into this assembly.
-    const discoveredPurpose = buildDiscoveredPurpose(existing.response_history, null)
+    // D-5 five-spec assembly — built ONLY here, on the approved path. E#1: the
+    // chosen-role hint from a VERIFIED Agent Card supplied at session-open (D-13)
+    // is persisted on the session row (agent_card_role_hint) and read here, so
+    // `role` reflects the verified card's chosen-role persona. null — no card,
+    // unverified, spoofed, or a pre-E#1 row — defaults to the agent's individual
+    // operational nature in buildDiscoveredPurpose (the pre-E#1 behaviour).
+    const discoveredPurpose = buildDiscoveredPurpose(existing.response_history, existing.agent_card_role_hint)
 
     return buildApproveSuccessResponse(session_id, 'approve', discoveredPurpose)
   } catch (err) {

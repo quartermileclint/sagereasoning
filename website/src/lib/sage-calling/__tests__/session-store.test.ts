@@ -76,6 +76,41 @@ function assert(label: string, condition: boolean, detail?: string): void {
 }
 
 // ============================================================================
+// ICH — initialSessionInsert with the E#1 Agent-Card chosen-role hint
+// ============================================================================
+{
+  // No hint → the minimised 6-field shape is preserved (the column defaults to
+  // NULL in the DB) — R17i holds for the common no-card case.
+  const noHint = initialSessionInsert('sess-2', 'agent_acme_v1')
+  assert('ICH-1  no hint omits agent_card_role_hint (minimised shape preserved)', !('agent_card_role_hint' in noHint))
+
+  // A null hint (card absent / unverified / spoofed) is treated as no hint —
+  // degrade to today's behaviour; the assembly defaults role downstream.
+  const nullHint = initialSessionInsert('sess-3', 'agent_acme_v1', null)
+  assert('ICH-2  a null hint omits the column (degrade to default)', !('agent_card_role_hint' in nullHint))
+
+  // A verified card's chosen-role hint is folded into the SAME insert.
+  const hinted = initialSessionInsert('sess-4', 'agent_acme_v1', 'chosen_role')
+  assert('ICH-3  a verified chosen_role hint is persisted in the insert', hinted.agent_card_role_hint === 'chosen_role')
+  // Exactly one extra field beyond the minimised six (R17i — one scalar).
+  const hintedKeys = Object.keys(hinted).sort()
+  assert(
+    'ICH-4  hinted insert is the six fields + agent_card_role_hint only',
+    JSON.stringify(hintedKeys) ===
+      JSON.stringify([
+        'agent_card_role_hint',
+        'agent_id',
+        'current_stage',
+        'gate_status',
+        'response_history',
+        'session_id',
+        'signals_detected',
+      ]),
+    hintedKeys.join(','),
+  )
+}
+
+// ============================================================================
 // AP — append helpers: append + immutability
 // ============================================================================
 {

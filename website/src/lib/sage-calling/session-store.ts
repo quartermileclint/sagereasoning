@@ -43,6 +43,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { CallingStage } from './question-library'
 import { ResponseRecord, EpistemicSignal, EngineOutput } from './engine'
+import type { DiscoveredPurposeRole } from '@/lib/translation-sandwich/layer1-extractor'
 
 // ============================================================================
 // TYPES — mirror the discovery_sessions table
@@ -79,6 +80,14 @@ export interface DiscoverySessionRow {
   signals_detected: SelectionAudit[]
   gate_status: GateStatus
   outcome: Outcome | null
+  /**
+   * The chosen-role hint from a VERIFIED Agent Card supplied at session-open
+   * (D-13 / E#1). 'chosen_role' when a card verified; null otherwise (absent /
+   * unverified / spoofed card, or pre-E#1 rows). Read on the approval path and
+   * fed into buildDiscoveredPurpose so `role` reflects the verified card rather
+   * than defaulting to 'individual_nature'.
+   */
+  agent_card_role_hint: DiscoveredPurposeRole | null
   started_at: string
   completed_at: string | null
   created_at: string
@@ -105,10 +114,16 @@ export const RETENTION_WINDOW_DAYS = 90
 // ============================================================================
 
 /** The minimised insert payload for a new session (R17i). Defaults mirror the
- *  table: current_stage 'Q1', empty JSONB arrays, gate_status 'pending'. */
+ *  table: current_stage 'Q1', empty JSONB arrays, gate_status 'pending'.
+ *
+ *  E#1: an optional `agentCardRoleHint` from a VERIFIED Agent Card supplied at
+ *  session-open (D-13) is folded in ONLY when present — the common no-card case
+ *  keeps the minimised 6-field insert (the column defaults to NULL in the DB),
+ *  so R17i minimisation holds and nothing changes for sessions without a card. */
 export function initialSessionInsert(
   session_id: string,
   agent_id: string,
+  agentCardRoleHint: DiscoveredPurposeRole | null = null,
 ): {
   session_id: string
   agent_id: string
@@ -116,8 +131,17 @@ export function initialSessionInsert(
   response_history: ResponseRecord[]
   signals_detected: SelectionAudit[]
   gate_status: GateStatus
+  agent_card_role_hint?: DiscoveredPurposeRole
 } {
-  return {
+  const insert: {
+    session_id: string
+    agent_id: string
+    current_stage: CallingStage
+    response_history: ResponseRecord[]
+    signals_detected: SelectionAudit[]
+    gate_status: GateStatus
+    agent_card_role_hint?: DiscoveredPurposeRole
+  } = {
     session_id,
     agent_id,
     current_stage: 'Q1',
@@ -125,6 +149,10 @@ export function initialSessionInsert(
     signals_detected: [], // KG7 — JS array, written directly
     gate_status: 'pending',
   }
+  if (agentCardRoleHint) {
+    insert.agent_card_role_hint = agentCardRoleHint
+  }
+  return insert
 }
 
 /** Append an answered turn immutably (does not mutate the input array). */
@@ -212,10 +240,14 @@ export async function getSession(session_id: string): Promise<StoreResult<Discov
   }
 }
 
-/** Create a new session row (minimised initial state). */
+/** Create a new session row (minimised initial state).
+ *  E#1: `agentCardRoleHint` (from a verified Agent Card at session-open, D-13) is
+ *  persisted into the same INSERT — no extra write, no new failure mode. Absent /
+ *  null when no card verified, leaving the column NULL (today's behaviour). */
 export async function createSession(
   session_id: string,
   agent_id: string,
+  agentCardRoleHint: DiscoveredPurposeRole | null = null,
 ): Promise<StoreResult<DiscoverySessionRow>> {
   try {
     const admin = getAdminClient()
@@ -223,7 +255,7 @@ export async function createSession(
     // passed directly — the client serialises them to JSONB arrays.
     const { data, error } = await admin
       .from(TABLE)
-      .insert(initialSessionInsert(session_id, agent_id))
+      .insert(initialSessionInsert(session_id, agent_id, agentCardRoleHint))
       .select('*')
       .single()
     if (error) return { ok: false, error: `createSession: ${error.message}` }
