@@ -7301,3 +7301,45 @@ Live: open https://www.sagereasoning.com/private-mentor, send a message → expe
 **Status:** Adopted. Implementation status: the **guard — Verified (production), 2026-05-23** (founder deployed via `git push origin main` after clearing two stale `.git` lock files left by the sandbox commit, and confirmed `/private-mentor` replies normally). The **underlying profile-decrypt failure — Open / unresolved** (profile currently undecryptable; remediation deferred per Open Questions). Cross-references: `server-encryption.ts` (R17b decrypt path); `D-…` encryption-wiring entries; this session's close `/operations/handoffs/founder/2026-05-23-private-mentor-decrypt-500-fix-close.md`.
 
 ---
+
+## 2026-05-23 — D-SAGE-ASSENT-SAGEREASONING-DEPENDENCY-RULE-ADOPTED-2026-05-23
+
+**Decision:** Adopted the **Sage Assent → SageReasoning dependency rule** (the hard, API-enforced dependency: Sage Assent must not credential reasoning that never passed through the substrate — Combination 1 blocked) and the **configuration-honesty documentation requirement** (a no-Reflect configuration must not be marketed as an ongoing Stoic "practice"). Added as manifest rules **R18f** (no credential without examination) and **R19e** (configuration honesty), founder-approved as written. The enforcement seam is pinned by ADR `/adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md`: founder elected **option (a) — server-side Ed25519 signature verification at the credential write boundary**, additive to and after the A10 ownership gate. No code this session; the gate's build is Critical (deferred).
+
+**Reasoning:** Operationalises the 2026-05-23 private-mentor ruling captured in `/drafts/2026-05-23-whole-system-data-room-brief.md` §3. Crux finding, established by direct read of the write path + exhaustive negative greps (PR12): `POST /api/accreditation/[agent_id]` verifies *who* writes (A10 credential ownership via `verifyAgentIdOwnership` → `validateSageAssentWriteToken`) but **trusts the submitted aggregates** — no server-side Ed25519 verification exists (`layer2-signer.ts` signs only; no verify function; `deriveReceiptId` hashes wrapper-side with test-only callers), and `loop_id` is caller-supplied/unverified (never checked against `loop_billing_events`, which the write path never reads). So Combination 1 (Assent without Reasoning) is **not structurally prevented today** — the false-credential door. Option (a) elected because it reuses the existing signing infrastructure + published key (`/api/public-key`), is cryptographic + self-contained, and forecloses Combination 1 directly; the residual aggregate-faithfulness gap is named and deferred (PR7), not conflated with Combination-1 prevention. **PR15 consult:** `.claude/skills/anthropic/` + `/operations/agentic-commerce-findings-downstream-order.md` — no Anthropic-canonical primitive substitutes for a project-internal governance rule + an ADR pinning an internal enforcement seam; findings F1–F4 target other sessions (FPE-5, Stage 4 G3, A5, A12). **PR16 lens:** the rule **strengthens** R18a "Character Kernel" / badge-integrity positioning (a credential that cannot be falsely issued *is* the trust claim); dogfood relevance partial (internal enforcement seam, not `/api/reason`-consultable). **Cache-drift:** manifest rule addition → `/adopted/standing-protocol-cache.md` cross-reference enumeration updated this session (R18f + R19e added 2026-05-23); folded here rather than a separate `D-CACHE-DRIFT-…` entry (single descriptive line, no governing-answer change).
+
+**Files touched:**
+- `manifest.md` — R18f + R19e added (lettered sub-items under R18 / R19), approved as written.
+- `/adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md` — NEW. Provenance finding (Diagnostic-certain), options (a)/(b)/(c) + combinations, elected (a), gate placement (route, after A10 gate, before writer), consequences, revisit conditions, build risk tier (Critical).
+- `/adopted/standing-protocol-cache.md` — cross-reference enumeration line updated (R18f + R19e added 2026-05-23).
+- `/operations/decision-log.md` — this entry.
+- `/operations/handoffs/founder/2026-05-23-P1-sage-assent-dependency-rule-close.md` — NEW session close.
+- (No code, schema, env, or deploy-config touched.)
+
+**Risk classification:** **Standard** under 0d-ii — documentation/governance (manifest rule text + ADR + decision-log + cache cross-reference). AC7 NOT engaged this session (no auth/access/credential code touched). PR6 NOT engaged. The eventual *build* of the option-(a) gate is **Critical** (AC7-adjacent write-surface access-control; full Critical Change Protocol; PR1 + PR2 at build) — out of scope here.
+
+**Rollback path:** Governance only — `git revert` the commit reverses the manifest R18f/R19e additions, the ADR, the cache line, and this entry. No runtime implications (no code/schema/env/deploy). Prior manifest preserved in git history.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -n "No credential without examination" manifest.md   # R18f present as item f under R18
+grep -n "Configuration honesty" manifest.md                # R19e present as item e under R19
+sed -n '1,4p' adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md   # Status: Adopted; option (a)
+```
+Expected: R18f + R19e read as approved; the ADR Status line shows Adopted + elected option (a).
+
+**Open questions / deferred (PR7):**
+- **Build of the option-(a) gate** — Critical; deferred to a build session (implement `verifyLayer2Signature`; extend the write contract to carry signed provenance; wire after the A10 gate; PR1 single-endpoint proof + PR2 invocation test). Revisit condition: founder schedules the build (likely after Priority 2 testing).
+- **Aggregate-faithfulness gap** — option (a) proves a genuine substrate signature exists, not that the aggregate was faithfully computed from signed assessments. Deferred as a separate, larger problem (per-action signatures + server-side recomputation). Revisit: ADR revisit-condition 1.
+- **Disclaimer wording + "Sage Practice" naming-vs-partial-config** — Priority 4.
+- **Sage Reflect design-doc reconciliation** ("no stage is optional / no stage can be bypassed" vs "selective offering is legitimate") — Priority 3 (governance edit to an adopted doc; founder approval required).
+- **Trust-boundary fork** — the provenance check is recommended at the route (trust boundary); in-process library callers stay on the existing trust posture. Revisit if the writer library is exposed to a less-trusted caller (ADR revisit-condition 2).
+
+**Rules served:** R18a, R18b, R18f (new), R19, R19e (new), R0, 0a, 0d-ii, 0f, AC7, AC8, PR7, PR10, PR12, PR15, PR16.
+
+**Diagnostic-certainty (PR10):** **Diagnostic-certain — root cause identified.** The provenance finding (write path trusts submitted aggregates) is established by direct read of the `POST` execution path plus exhaustive negative greps (no server-side verify; `deriveReceiptId` test-only; `loop_billing_events` never read by the write path). Founder acknowledged the finding and elected option (a) at session close.
+
+**Status:** Adopted. Implementation status: the rule — **Adopted** (decision status); the enforcement gate — **Designed** (the ADR specifies option (a); build deferred, Critical). Cross-references: `/drafts/2026-05-23-whole-system-data-room-brief.md` §3; `/adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md`; `D-ATL-WRITE-PATH-BUILD-WIRED-VERIFIED-2026-05-16`; `D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21`; `/operations/handoffs/founder/2026-05-23-selective-offering-data-room-brief-close.md`; `/operations/handoffs/founder/2026-05-23-P1-sage-assent-dependency-enforcement-NEXT-SESSION-PROMPT.md`; this session's close `/operations/handoffs/founder/2026-05-23-P1-sage-assent-dependency-rule-close.md`.
+
+---

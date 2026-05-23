@@ -334,7 +334,7 @@ If the cache and the governance documents diverge, the governance documents are 
 
 - `/CLAUDE.md` — entry-point file for Claude Code sessions (auto-loaded by Claude Code's special handling); created 2026-05-14 under `D-ANTHROPIC-NATIVE-POSTURE-2026-05-14`. Pointer file, not the governing surface itself.
 - `/.claude/skills/anthropic/` — 17 official Anthropic skills installed 2026-05-14; consulted before bespoke election per PR15. See `/.claude/skills/anthropic/README.md` for the full table + update instructions.
-- `/manifest.md` — full manifest (R0–R20, AC1–AC13, KG1–KG7; AC9-AC13 added under ST2 2026-05-12; R17g/h/i + R18e added; R20a perimeter potential-broadening placeholder)
+- `/manifest.md` — full manifest (R0–R20, AC1–AC13, KG1–KG7; AC9-AC13 added under ST2 2026-05-12; R17g/h/i + R18e added; R18f + R19e added 2026-05-23; R20a perimeter potential-broadening placeholder)
 - `/adopted/project-instructions-snapshot.md` — first repo-tracked snapshot of project instructions; created under ST2 2026-05-12; PR15 amended 2026-05-14. Authoritative surface for the operative project instructions; founder paste-syncs into Cowork panel between sessions.
 - `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` — J1 ADR (Character Kernel category label)
 - `/adopted/substrate-plugin-staging-plan.md` — substrate-as-plugin staging plan (amended at ST2; A10-A19 Stage 1 expansion; Stage 3 re-scope on Anthropic Plugin spec + MCP; Stage 4 G4 expanded gating; parallel pre-launch track)
