@@ -520,7 +520,27 @@ ${brainContext}`
   const [projectedContext, legacyContext, storedProfile] = await Promise.all([
     useProjection ? getProjectedPractitionerContext(userId, message) : Promise.resolve(null),
     useProjection ? Promise.resolve(null) : getFullPractitionerContext(userId),
-    useProjection ? loadMentorProfile(userId) : Promise.resolve(null),
+    // Graceful-degrade guard (2026-05-23). This raw loadMentorProfile() call
+    // was the only one of the three NOT wrapped in error handling. When the
+    // encrypted mentor_profiles row fails to decrypt — e.g. a
+    // MENTOR_ENCRYPTION_KEY mismatch surfacing as Decipheriv.final
+    // "Unsupported state or unable to authenticate data" — the unguarded
+    // rejection killed the whole Promise.all (index 2) and 500'd the
+    // conversation at step get_primary_response_mentor. The other two loaders
+    // (getProjectedPractitionerContext / getFullPractitionerContext) already
+    // swallow the identical failure and return null. Match that behaviour:
+    // degrade to no-profile (storedProfile is fully null-guarded downstream via
+    // storedProfile?.profile) instead of crashing. The decrypt failure is still
+    // logged here so the underlying key issue stays visible for the real fix.
+    useProjection
+      ? loadMentorProfile(userId).catch((err) => {
+          console.error(
+            '[founder/hub] mentor profile load failed; degrading to no-profile:',
+            err,
+          )
+          return null
+        })
+      : Promise.resolve(null),
   ])
   const practitionerContext = useProjection ? projectedContext : legacyContext
 
