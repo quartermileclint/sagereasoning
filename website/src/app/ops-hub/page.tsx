@@ -891,7 +891,7 @@ export default function OpsHub() {
                 </div>
 
                 <div style={styles.pipelineStat}>
-                  <span style={styles.pipelineStatLabel}>P3: Agent Trust Layer</span>
+                  <span style={styles.pipelineStatLabel}>P3: Sage Assent</span>
                   <span style={styles.pipelineStatValue}>Scaffolded</span>
                 </div>
               </div>

@@ -12,7 +12,7 @@
  * WHAT THIS ROUTE IS
  *
  * The founder-only admin surface for minting and revoking A10 per-agent write
- * credentials (sr_atl_ tokens). Mirrors the existing /api/admin/api-keys
+ * credentials (sr_assent_ tokens). Mirrors the existing /api/admin/api-keys
  * pattern (Decision D option (b)). NOT on the R20a perimeter (AC5 not engaged;
  * no distress surface).
  *
@@ -65,7 +65,7 @@ const A10_DEFAULTS = {
 //
 // Body:
 //   agent_id                        (required) the agent the credential authorises
-//   purpose                         (required) must be the literal 'atl_write'
+//   purpose                         (required) must be the literal 'sage_assent_write'
 //   label                           (optional) human label; defaults to agent_id
 //   scope_downstream_identity_model (optional) per-credential scope (Decision 3a)
 //   scope_path_posture              (optional) per-credential scope (Decision 3a)
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       label,
       agent_id,
       owner_user_id,
-      purpose: 'atl_write',
+      purpose: 'sage_assent_write',
       tier: A10_DEFAULTS.tier,
       monthly_limit: A10_DEFAULTS.monthly_limit,
       daily_limit: A10_DEFAULTS.daily_limit,
@@ -218,12 +218,12 @@ export async function DELETE(request: NextRequest) {
     )
   }
 
-  // Validate the credential exists, is an atl_write row, and is active.
+  // Validate the credential exists, is an sage_assent_write row, and is active.
   const { data: existing, error: lookupErr } = await supabaseAdmin
     .from('api_keys')
     .select('id, agent_id, is_active, scope_downstream_identity_model, scope_path_posture')
     .eq('id', credential_id)
-    .eq('purpose', 'atl_write')
+    .eq('purpose', 'sage_assent_write')
     .maybeSingle()
 
   if (lookupErr) {
@@ -232,7 +232,7 @@ export async function DELETE(request: NextRequest) {
   }
   if (!existing) {
     return NextResponse.json(
-      { error: 'No atl_write credential found with that id.' },
+      { error: 'No sage_assent_write credential found with that id.' },
       { status: 404 },
     )
   }

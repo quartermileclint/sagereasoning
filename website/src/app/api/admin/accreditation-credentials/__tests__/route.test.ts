@@ -65,11 +65,11 @@ function testMalformedBody(): void {
 }
 
 function testMissingAgentId(): void {
-  const r = validateMintInput({ purpose: 'atl_write' })
+  const r = validateMintInput({ purpose: 'sage_assent_write' })
   assert(!r.ok, 'VMI-3 missing agent_id → not ok')
   if (!r.ok) assert(r.error.includes('agent_id'), 'VMI-4 error names agent_id')
 
-  const blank = validateMintInput({ agent_id: '   ', purpose: 'atl_write' })
+  const blank = validateMintInput({ agent_id: '   ', purpose: 'sage_assent_write' })
   assert(!blank.ok, 'VMI-5 blank agent_id → not ok')
 }
 
@@ -79,11 +79,11 @@ function testWrongPurpose(): void {
 
   const wrong = validateMintInput({ agent_id: 'agent_acme_v1', purpose: 'ecosystem' })
   assert(!wrong.ok, 'VMI-7 purpose=ecosystem → not ok')
-  if (!wrong.ok) assert(wrong.error.includes('atl_write'), 'VMI-8 error names atl_write')
+  if (!wrong.ok) assert(wrong.error.includes('sage_assent_write'), 'VMI-8 error names sage_assent_write')
 }
 
 function testValidMinimal(): void {
-  const r = validateMintInput({ agent_id: 'agent_acme_v1', purpose: 'atl_write' })
+  const r = validateMintInput({ agent_id: 'agent_acme_v1', purpose: 'sage_assent_write' })
   assert(r.ok, 'VMI-9 minimal valid input → ok')
   if (r.ok) {
     assertEqual(r.value.agent_id, 'agent_acme_v1', 'VMI-10 agent_id trimmed/passed through')
@@ -94,14 +94,14 @@ function testValidMinimal(): void {
 }
 
 function testLabelOverride(): void {
-  const r = validateMintInput({ agent_id: 'agent_acme_v1', purpose: 'atl_write', label: 'CI bot' })
+  const r = validateMintInput({ agent_id: 'agent_acme_v1', purpose: 'sage_assent_write', label: 'CI bot' })
   assert(r.ok && r.value.label === 'CI bot', 'VMI-14 explicit label preserved')
 }
 
 function testValidWithScope(): void {
   const r = validateMintInput({
     agent_id: 'agent_acme_v1',
-    purpose: 'atl_write',
+    purpose: 'sage_assent_write',
     scope_downstream_identity_model: 'vendor_framework',
     scope_path_posture: 'endorsed',
   })
@@ -115,14 +115,14 @@ function testValidWithScope(): void {
 function testInvalidScopeEnums(): void {
   const badId = validateMintInput({
     agent_id: 'agent_acme_v1',
-    purpose: 'atl_write',
+    purpose: 'sage_assent_write',
     scope_downstream_identity_model: 'not_a_real_model',
   })
   assert(!badId.ok, 'VMI-18 invalid identity-model enum → not ok')
 
   const badPath = validateMintInput({
     agent_id: 'agent_acme_v1',
-    purpose: 'atl_write',
+    purpose: 'sage_assent_write',
     scope_path_posture: 'not_a_real_posture',
   })
   assert(!badPath.ok, 'VMI-19 invalid path-posture enum → not ok')

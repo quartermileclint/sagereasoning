@@ -8,7 +8,7 @@
  * The accepted body (JSON):
  *   {
  *     session_id: string,        // REQUIRED — server-side session anchor / AC10 provenance
- *     agent_id:   string,        // REQUIRED — the agent the sr_atl_ credential must bind (SR-14)
+ *     agent_id:   string,        // REQUIRED — the agent the sr_assent_ credential must bind (SR-14)
  *     response?:  string,        // the agent's answer to the last surfaced step; ABSENT on the first call
  *     // On the FIRST call (response absent) the session context is REQUIRED:
  *     session_summary?: {

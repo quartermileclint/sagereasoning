@@ -12,12 +12,12 @@
  *
  * GOVERNING DESIGN: /adopted/sage-reflect-product-design.md
  *   SR-13 (route + global SAGE_REFLECT_ENABLED kill switch; 503 until flipped) ·
- *   SR-14 (reuse A10 sr_atl_ creds, UNSCOPED) · SR-9 (Zone-3 boundary at open) ·
+ *   SR-14 (reuse A10 sr_assent_ creds, UNSCOPED) · SR-9 (Zone-3 boundary at open) ·
  *   SR-6 (deterministic control flow + Sonnet Layer-1 Q1–Q4) · SR-4 (Sage Assent feed).
  *
- * AUTH (SR-14, AC7): the SAME A10 per-agent sr_atl_ bearer credential as Sage
+ * AUTH (SR-14, AC7): the SAME A10 per-agent sr_assent_ bearer credential as Sage
  * Calling, UNSCOPED (no CarriedProfile). validateSageAssentWriteToken hashes the token,
- * looks up the ACTIVE atl_write row, and checks it binds the body's agent_id. Every
+ * looks up the ACTIVE sage_assent_write row, and checks it binds the body's agent_id. Every
  * failure collapses to a single 401 (no info leak); the audit log records the reason.
  *
  * KILL SWITCH (SR-13): if SAGE_REFLECT_ENABLED !== 'true' the endpoint returns 503

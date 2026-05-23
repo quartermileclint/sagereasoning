@@ -10,7 +10,7 @@
  * APPROVAL AUTHORITY — ADMIN ONLY (founder-elected 2026-05-21).
  * requireAdmin (the existing ADMIN_USER_ID gate, reused — no new env var) means
  * the approver authenticates with an admin Supabase session. The agent holds only
- * an sr_atl_ bearer token and a Supabase admin session is a different, stronger
+ * an sr_assent_ bearer token and a Supabase admin session is a different, stronger
  * credential it does not possess — so the agent CANNOT self-approve. That is the
  * point of the Hard Gate. A richer per-developer delegated-approval credential is
  * a PR7 follow-on; admin-only is the simplest robust gate for the pre-launch phase
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.admin)
   if (rateLimitError) return rateLimitError
 
-  // 2. Admin gate — the agent (sr_atl_ bearer only) cannot pass this.
+  // 2. Admin gate — the agent (sr_assent_ bearer only) cannot pass this.
   const admin = await requireAdmin(request)
   if (admin.error) return admin.error
 

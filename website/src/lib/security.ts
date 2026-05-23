@@ -532,11 +532,11 @@ export function withUsageHeaders(
 // A10 credentials gate writes to POST /api/accreditation/[agent_id]. They reuse
 // the production-tested opaque-token + SHA-256 + DB-lookup pattern that
 // validateApiKey above uses for sr_live_ ecosystem keys, but with a distinct
-// sr_atl_ prefix and a separate verification path (filtered by purpose).
+// sr_assent_ prefix and a separate verification path (filtered by purpose).
 //
 // Token format (Decision A): opaque random token, server-side lookup. No claims
 // carried in the token; the api_keys row carries them. Tokens are sent as
-// `Authorization: Bearer sr_atl_<key>` only (NOT X-Api-Key — narrows the attack
+// `Authorization: Bearer sr_assent_<key>` only (NOT X-Api-Key — narrows the attack
 // surface and keeps A10 distinct from the sr_live_ ecosystem keys).
 //
 // Expiry (Decision G): A10 credentials have NO expiry. Renewal is
@@ -548,7 +548,7 @@ export function withUsageHeaders(
 // =============================================================================
 
 /** The fixed namespace prefix for A10 write tokens (distinct from sr_live_). */
-export const SAGE_ASSENT_WRITE_TOKEN_PREFIX = 'sr_atl_'
+export const SAGE_ASSENT_WRITE_TOKEN_PREFIX = 'sr_assent_'
 
 /**
  * Discriminated result of validateSageAssentWriteToken.
@@ -571,8 +571,8 @@ export type SageAssentWriteValidationResult =
   | {
       valid: false
       reason:
-        | 'no_token' // missing Authorization header or wrong (non-sr_atl_) prefix
-        | 'invalid_token' // hash lookup returned no active atl_write row (unknown OR revoked)
+        | 'no_token' // missing Authorization header or wrong (non-sr_assent_) prefix
+        | 'invalid_token' // hash lookup returned no active sage_assent_write row (unknown OR revoked)
         | 'wrong_agent' // credential is active but binds a different agent_id
         | 'wrong_scope' // agent_id matches but the supplied CarriedProfile doesn't match the credential's non-null scope columns
     }
@@ -581,7 +581,7 @@ export type SageAssentWriteValidationResult =
  * Generate a new A10 write credential. Returns the raw token (shown to the
  * caller exactly once) and its SHA-256 hash (stored in api_keys.key_hash).
  *
- * Shape: sr_atl_<32 hex chars>. Mirrors generateApiKey's sr_live_ pattern.
+ * Shape: sr_assent_<32 hex chars>. Mirrors generateApiKey's sr_live_ pattern.
  */
 export function generateSageAssentWriteToken(): { raw: string; hash: string } {
   const raw = `${SAGE_ASSENT_WRITE_TOKEN_PREFIX}${randomBytes(16).toString('hex')}`
@@ -599,7 +599,7 @@ export interface SageAssentCredentialRow {
 }
 
 /**
- * PURE decision: given the looked-up active atl_write row (or null), the target
+ * PURE decision: given the looked-up active sage_assent_write row (or null), the target
  * agent_id, and the supplied CarriedProfile subset, decide the validation
  * result. No I/O — the unit-testable core of validateSageAssentWriteToken (factored
  * per PR2; mirrors how this route group factors pure logic into testable units).
@@ -648,8 +648,8 @@ export function evaluateSageAssentWriteRow(
  * Validate an A10 write token against a target agent_id and (optionally) a
  * supplied CarriedProfile for per-credential scope enforcement (Decision E).
  *
- * Prefix-rejects non-sr_atl_ tokens ('no_token'); otherwise hashes, looks up the
- * ACTIVE atl_write row, and delegates the decision to evaluateSageAssentWriteRow.
+ * Prefix-rejects non-sr_assent_ tokens ('no_token'); otherwise hashes, looks up the
+ * ACTIVE sage_assent_write row, and delegates the decision to evaluateSageAssentWriteRow.
  *
  * KG1 rule 2: the Supabase read is awaited; a query error is treated as
  * 'invalid_token' (fail closed), not swallowed-and-allowed.
@@ -670,7 +670,7 @@ export async function validateSageAssentWriteToken(
   // Hash the presented token (same algorithm as the sr_live_ path).
   const keyHash = createHash('sha256').update(rawToken).digest('hex')
 
-  // Look up the active atl_write row by hash (service role, bypasses RLS).
+  // Look up the active sage_assent_write row by hash (service role, bypasses RLS).
   const admin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -682,7 +682,7 @@ export async function validateSageAssentWriteToken(
       'id, agent_id, owner_user_id, scope_downstream_identity_model, scope_path_posture',
     )
     .eq('key_hash', keyHash)
-    .eq('purpose', 'atl_write')
+    .eq('purpose', 'sage_assent_write')
     .eq('is_active', true)
     .maybeSingle()
 

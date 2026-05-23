@@ -41,7 +41,7 @@ import { getProjectContext } from '@/lib/context/project-context'
  *   External agents calling this endpoint will receive SageReasoning's
  *   identity + ethical commitments on every call. This is mild IP exposure
  *   (R4) and may pollute their reasoning context slightly. Accepted per
- *   founder decision on 15 April 2026. Revisit at P3 (Agent Trust Layer)
+ *   founder decision on 15 April 2026. Revisit at P3 (Sage Assent)
  *   when agent-context boundaries are designed more broadly.
  *
  * WHAT BREAKS IF CONTEXT CHANGES:

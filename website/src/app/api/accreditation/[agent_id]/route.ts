@@ -328,8 +328,8 @@ type AuthGateResult =
  *      that blocks ALL writes regardless of credential validity.
  *
  *   2. PER-AGENT TOKEN (Decisions A + E + 3a): the caller must present
- *      `Authorization: Bearer sr_atl_<token>`. validateSageAssentWriteToken (in
- *      security.ts) hashes it, looks up the ACTIVE atl_write row, checks the
+ *      `Authorization: Bearer sr_assent_<token>`. validateSageAssentWriteToken (in
+ *      security.ts) hashes it, looks up the ACTIVE sage_assent_write row, checks the
  *      bound agent_id matches the path, and — when the credential is scoped —
  *      checks the supplied CarriedProfile (downstream_identity_model /
  *      path_posture) matches the credential's scope columns. Any failure →
@@ -384,10 +384,10 @@ async function verifyAgentIdOwnership(
     return { ok: false, reason: 'not_enabled' }
   }
 
-  // 2. Token extraction — Bearer sr_atl_ only (X-Api-Key is NOT accepted for
+  // 2. Token extraction — Bearer sr_assent_ only (X-Api-Key is NOT accepted for
   //    A10 tokens, per Decision A).
   const authHeader = request.headers.get('authorization')
-  if (!authHeader?.startsWith('Bearer sr_atl_')) {
+  if (!authHeader?.startsWith('Bearer sr_assent_')) {
     emit('no_token')
     return { ok: false, reason: 'unauthorized' }
   }

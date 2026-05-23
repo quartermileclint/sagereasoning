@@ -27,7 +27,7 @@ export interface MintInput {
 /**
  * Validate + normalise a mint request body. PURE.
  *
- * Requires a non-empty agent_id and purpose === 'atl_write'. label defaults to
+ * Requires a non-empty agent_id and purpose === 'sage_assent_write'. label defaults to
  * agent_id. Scope params are optional; when present they must be members of the
  * respective enum. Returns the normalised MintInput or a non-leaking error.
  */
@@ -43,8 +43,8 @@ export function validateMintInput(
   if (!agent_id) {
     return { ok: false, error: 'agent_id is required.' }
   }
-  if (b.purpose !== 'atl_write') {
-    return { ok: false, error: "purpose is required and must be 'atl_write'." }
+  if (b.purpose !== 'sage_assent_write') {
+    return { ok: false, error: "purpose is required and must be 'sage_assent_write'." }
   }
 
   const label =

@@ -4,7 +4,7 @@
  * STATUS: NEW (2026-05-21, A10 build — D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21).
  *
  * Covers the security-critical A10 auth-decision logic (Decisions A + E + 3a):
- *   - generateSageAssentWriteToken — sr_atl_ prefix + correct SHA-256 hash + uniqueness.
+ *   - generateSageAssentWriteToken — sr_assent_ prefix + correct SHA-256 hash + uniqueness.
  *   - validateSageAssentWriteToken — the prefix-reject ('no_token') path (returns
  *     before any DB hit, so it is exercised here directly).
  *   - evaluateSageAssentWriteRow — the PURE post-lookup decision across all six cases:
@@ -74,7 +74,7 @@ function row(overrides: Partial<SageAssentCredentialRow> = {}): SageAssentCreden
 
 function testGenerateToken(): void {
   const { raw, hash } = generateSageAssentWriteToken()
-  assert(raw.startsWith(SAGE_ASSENT_WRITE_TOKEN_PREFIX), 'GEN-1 raw token starts with sr_atl_ prefix')
+  assert(raw.startsWith(SAGE_ASSENT_WRITE_TOKEN_PREFIX), 'GEN-1 raw token starts with sr_assent_ prefix')
   assertEqual(
     raw.length,
     SAGE_ASSENT_WRITE_TOKEN_PREFIX.length + 32,

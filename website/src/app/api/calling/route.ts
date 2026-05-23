@@ -8,7 +8,7 @@
  * surface, off by default behind SAGE_CALLING_ENABLED.
  *
  * GOVERNING DESIGN: /adopted/purpose-discovery-product-design.md
- *   D-2 (server-side session, single endpoint) · D-6 (reuse A10 sr_atl_ creds) ·
+ *   D-2 (server-side session, single endpoint) · D-6 (reuse A10 sr_assent_ creds) ·
  *   D-8 (each stage call = one Option D loop; no double-bill on resume) ·
  *   D-12 (post-clarification holding pattern; 24h; new context = new session) ·
  *   D-13 (optional agent_card_url; decline available_tools) ·
@@ -17,13 +17,13 @@
  * REQUEST (JSON):
  *   { session_id, agent_id, response?, agent_card_url? }   // available_tools declined
  *
- * AUTH (D-6, AC7): the SAME A10 per-agent sr_atl_ bearer credential as the
+ * AUTH (D-6, AC7): the SAME A10 per-agent sr_assent_ bearer credential as the
  * accreditation write path. validateSageAssentWriteToken hashes the token, looks up the
- * ACTIVE atl_write row, and checks it binds the supplied agent_id. Every failure
+ * ACTIVE sage_assent_write row, and checks it binds the supplied agent_id. Every failure
  * collapses to a single 401 (no information leak); the audit log records the
  * specific reason. Sage Calling supplies NO CarriedProfile (D-6 "reuse as-is, no
  * discovery scope"), so a SCOPED credential would fail wrong_scope — Sage Calling
- * is used with an unscoped atl_write credential.
+ * is used with an unscoped sage_assent_write credential.
  *
  * KILL SWITCH (D-14): if SAGE_CALLING_ENABLED !== 'true' the whole endpoint
  * returns 503 BEFORE auth — the SUBSTRATE_WRITE_PATH_ENABLED analogue. Unset/"false"
@@ -117,7 +117,7 @@ type CallingAuthResult =
   | { ok: false }
 
 /**
- * Validate the A10 sr_atl_ bearer credential against the body's agent_id (D-6).
+ * Validate the A10 sr_assent_ bearer credential against the body's agent_id (D-6).
  * Emits ONE sage_assent_verify audit event (reusing the accreditation route's shape).
  * Every failure mode returns { ok: false } → the route maps it to a single 401.
  *

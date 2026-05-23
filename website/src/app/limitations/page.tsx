@@ -111,7 +111,7 @@ export default function LimitationsPage() {
             Agent trust certification is not a guarantee
           </h2>
           <p>
-            Our Agent Trust Layer evaluates AI agents&rsquo; reasoning quality against Stoic
+            Sage Assent evaluates AI agents&rsquo; reasoning quality against Stoic
             principles. A trust certification from SageReasoning does not guarantee that
             an agent will behave safely, ethically, or correctly in all situations. It
             indicates how well the agent&rsquo;s reasoning aligns with Stoic virtue at the

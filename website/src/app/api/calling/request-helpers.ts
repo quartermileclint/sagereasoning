@@ -9,7 +9,7 @@
  * The accepted body (JSON):
  *   {
  *     session_id:     string,    // REQUIRED — D-2 server-side session anchor / AC10 provenance
- *     agent_id:       string,    // REQUIRED — the agent identity the sr_atl_ credential must bind (D-6)
+ *     agent_id:       string,    // REQUIRED — the agent identity the sr_assent_ credential must bind (D-6)
  *     response?:      string,    // the agent's answer to the last surfaced question; ABSENT on the first call
  *     agent_card_url?: string,   // OPTIONAL — D-13 verifiable A2A card (https only; fetched + verified by the route)
  *     // available_tools is DECLINED (D-13) — ignored if present (unverifiable; the MCP tool-poisoning vector)
