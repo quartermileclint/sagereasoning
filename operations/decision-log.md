@@ -7195,3 +7195,37 @@ Then run `website/supabase-discovery-sessions-agent-card-role-hint-migration.sql
 **Verification confirmation (appended 2026-05-23):** Founder ran the migration — VERIFY clean (`agent_card_role_hint` = text / nullable / no-default; `discovery_sessions_agent_card_role_hint_check` present; `column_count = 12`); committed + pushed; Vercel green; smoke Steps 1–3 done. Implementation status flips **Wired → Verified (production), 2026-05-23**. E#1 (the one pre-launch Sage Calling follow-on) **CLOSED**. (R0 audit-trail accuracy; Standard-risk governance edit.)
 
 ---
+
+## 2026-05-23 — D-ATL-WRAPPER-CLASSIFICATION-INTERNAL-DISPATCH-2026-05-23
+
+**Decision:** The Layer 3 render-mode discriminant value `'atl_wrapper'` is classified **internal-dispatch** (not wire-contract): it never crosses a wire boundary to an external agent and is not persisted. Therefore a *future* rename of `'atl_wrapper'` opens at **Standard/Elevated** risk under 0d-ii (a mechanical internal rename, the Track C Phase 1 pattern) — **not** the Phase 3 Critical precedent — *as of the current production state*, with an explicit wire-exposure revisit-condition. This entry classifies; it renames nothing.
+
+**Reasoning:** Discharges the standing instruction parked at `D-TRACK-FOLLOWONS-C-PHASE3-EXTERNAL-WIRE-2026-05-23` Open Question 2 — classify the discriminant before any rename attempt, so the rename opens at the correct tier. The crux was that `'atl_wrapper'` is written into a versioned JSON object (`version:'agent-mode-response-v1', mode:'atl_wrapper'`), so the question was whether that JSON crosses a wire to an external agent. **Boundary trace (Diagnostic-certain):** the value is read/matched in exactly one place — the in-process dispatch `switch (input.mode) { case 'atl_wrapper': }` (`philosophical-mode-service.ts:1524`), whose `Layer3ModeRenderInput` is constructed by internal callers, never parsed from a request; `renderLayer3Mode(`/`renderAgentMode(` are called only by substrate lib modules + the two test files (**no `/api` route calls either**); `/api/substrate/layer3` serializes `generateLayer3Response` from `layer3-service.ts` which has zero references to the agent-mode dispatch (and is 503-gated/OFF); `/api/accreditation/[agent_id]` imports only the wrapper's `CarriedProfile`/`TransitionResult` types and emits an R4 `AccreditationPayload`; the `latest_rendering: AgentModeResponse` fields (`sage-assent-iteration-patterns.ts:573,:596`) are Layer-1 *input* builders round-tripping a permissive `Record<string,unknown>[]` schema field — the substrate never validates/dispatches on input `mode`, and that builder reaches no route. **Negatives (PR12, multiple queries):** zero `atl_wrapper`/`agent-mode-response` under `website/public/`; zero in any `.sql`/persisted value. **PR15:** classification work, not a bespoke build — no Anthropic-canonical primitive substitutes for classifying this project's own internal discriminant; agentic-commerce findings F1–F4 do not target the substrate discriminant. **PR16:** internal naming under the Sage Assent / Character Kernel (R18a) umbrella; the classification is positioning-neutral but gates whether the C-arc cleanup can complete; dogfood relevance n/a.
+
+**Files touched:**
+- `/adopted/adr/2026-05-23-atl-wrapper-discriminant-classification.md` — NEW. Parked-1 ADR: the internal-dispatch classification, the boundary-trace evidence (file:line), the consequences (future rename = Standard/Elevated), and the three wire-exposure revisit-conditions.
+- `/operations/decision-log.md` — this entry appended.
+- (No code, schema, or `website/public/` file touched. No rename performed.)
+
+**Risk classification:** **Standard** under 0d-ii — a documentation/governance classification; no code, no schema, no deploy. AC7 not engaged. PR6 not engaged. (The classification's *output* sets the risk tier of a *future* rename; it does not perform one.)
+
+**Rollback path:** Governance only — nothing to roll back. `git revert` the commit reverses the ADR + this entry.
+
+**Verification step (founder-performable):** The verification is the evidence trail itself. To re-confirm the load-bearing negatives independently:
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -rIn "atl_wrapper" website/public ; echo "exit: $?"     # expect: no matches, exit 1
+grep -rIln "atl_wrapper" --include="*.sql" website ; echo "exit: $?"   # expect: no matches, exit 1
+grep -rIn "renderLayer3Mode\|renderAgentMode" website/src/app   # expect: no /api route calls (only layer3-service import + accreditation type-imports)
+```
+Expected: the first two find nothing (the value is in neither the published contract nor any migration); the third shows no route invoking the dispatch. No test suites change (no code behaviour touched).
+
+**Open questions / deferred (PR7):** (1) The `mode:'atl_wrapper'` discriminant **rename** itself remains deferred — now scoped at Standard/Elevated by this classification; electable in a future session. (2) The `trust-layer/` directory rename remains parked (`code-elevated`; grep-compensated verification). (3) Revisit-conditions for this classification are recorded in the ADR (route serializes `AgentModeResponse` externally / value persisted / value published into a contract → re-classify to Critical before renaming).
+
+**Rules served:** R0, R18a, 0a, 0d-ii, 0f, PR7, PR10, PR12, PR15, PR16.
+
+**Diagnostic-certainty (PR10):** **Diagnostic-certain — root cause identified.** The boundary trace is conclusive: every consumer of the discriminant was traced to the route layer and none serializes it externally; the public-contract and persistence negatives are exhaustive across the searched surfaces. The forward-looking caveat is a recorded future-condition, not present-state uncertainty.
+
+**Status:** Adopted. Cross-references: `D-TRACK-FOLLOWONS-C-PHASE3-EXTERNAL-WIRE-2026-05-23` (parent / parking entry); `D-ATL-WRAPPER-WIRED-VERIFIED-2026-05-15`, `D-ATL-AGENT-MODE-RENDERING-WIRED-VERIFIED-2026-05-15` (discriminant provenance); `/adopted/adr/2026-05-23-atl-wrapper-discriminant-classification.md` (this classification's ADR); `/drafts/2026-05-23-track-followons-design-pack.md` §C; this session's close `/operations/handoffs/founder/2026-05-23-parked1-atl-wrapper-classification-close.md`.
+
+---
