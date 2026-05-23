@@ -37,7 +37,7 @@
  * SubstrateScore out. No clock read, no randomness, no I/O, no LLM call.
  *
  * It is the PR1 single-endpoint proof of the SCORE pattern — the same session
- * shape as atl-bridge.ts (the bridge pattern) and philosophical-mode-service.ts
+ * shape as sage-assent-bridge.ts (the bridge pattern) and philosophical-mode-service.ts
  * (the Layer 3 mode-dispatch pattern). It is the load-bearing dependency for
  * three downstream consumers, all currently blocked on it: the Layer 3
  * agent-mode rendering (ATL Wrapper Component 2), philosophical mode's deferred
@@ -46,7 +46,7 @@
  * each project a subset of it.
  *
  * THE ScoreContext (Step 1 survey finding — the honest carry, mirrors
- * atl-bridge.ts's BridgeContext)
+ * sage-assent-bridge.ts's BridgeContext)
  *
  * Two inputs the score needs are NOT on Layer2Assessment and cannot be derived
  * from it:
@@ -156,7 +156,7 @@ export type DeclaredMotivationPassion = 'detected' | 'clean'
 
 /**
  * The caller-supplied context the score needs to complete a SubstrateScore.
- * Mirrors atl-bridge.ts's BridgeContext: the substrate is idempotent and does
+ * Mirrors sage-assent-bridge.ts's BridgeContext: the substrate is idempotent and does
  * not itself hold these inputs, so the consumer that made the substrate call
  * supplies them.
  */

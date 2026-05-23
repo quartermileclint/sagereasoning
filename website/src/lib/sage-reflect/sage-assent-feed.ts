@@ -43,9 +43,9 @@
  *  • PR4: N/A — no LLM; the feed is deterministic plumbing over pure functions.
  *  • PR6: NOT engaged — no R20a / distress surface.
  *
- * TESTABILITY: like atl-accreditation-writer.ts, the orchestrator accepts an
+ * TESTABILITY: like sage-assent-accreditation-writer.ts, the orchestrator accepts an
  * optional `deps` defaulting to the real store + ported pure functions. Tests pass
- * mocks. The module's top-level import of atl-accreditation-store transitively
+ * mocks. The module's top-level import of sage-assent-accreditation-store transitively
  * loads supabase-server.ts, so the test runs with `--env-file=.env.local` (the
  * client is constructed at import but never CALLED under mock deps).
  */
@@ -53,7 +53,7 @@
 import {
   lookupAccreditationRecord,
   upsertAccreditationRecord,
-} from '@/lib/substrate/atl-accreditation-store'
+} from '@/lib/substrate/sage-assent-accreditation-store'
 import { createAccreditationRecord } from '@/lib/substrate/trust-layer/accreditation/accreditation-record'
 import { computeWindowSnapshot } from '@/lib/substrate/trust-layer/evaluation-window/window-aggregator'
 import { evaluateGradeTransition } from '@/lib/substrate/trust-layer/grade-engine/grade-transition-engine'

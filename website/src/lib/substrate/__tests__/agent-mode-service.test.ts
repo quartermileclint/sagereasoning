@@ -3,7 +3,7 @@
  * Component 2) functional tests + invariant checks.
  *
  * Run via: `npx tsx website/src/lib/substrate/__tests__/agent-mode-service.test.ts`
- * (mirrors the A5 / A7 / philosophical-mode / score-architecture / atl-bridge
+ * (mirrors the A5 / A7 / philosophical-mode / score-architecture / sage-assent-bridge
  * verification pattern; no Jest framework dependency).
  *
  * COVERAGE

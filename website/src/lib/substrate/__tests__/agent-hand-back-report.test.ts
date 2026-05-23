@@ -50,7 +50,7 @@ import {
   type BridgeContext,
   type KatorthomaProximityLevel,
   type WindowSnapshot,
-} from '../atl-wrapper'
+} from '../sage-assent-wrapper'
 
 import {
   runSequentialStep,
@@ -58,7 +58,7 @@ import {
   runOrchestrationStep,
   type ParallelCandidate,
   type PeerAgent,
-} from '../atl-iteration-patterns'
+} from '../sage-assent-iteration-patterns'
 
 import { computeWindowSnapshot } from '../trust-layer/evaluation-window/window-aggregator'
 
@@ -115,7 +115,7 @@ function assertAbsent(label: string, haystack: string, needle: string): void {
 
 // ============================================================================
 // Fixtures — minimal valid Layer2Assessment, parameterised. Modelled on the
-// existing atl-iteration-patterns.test.ts fixtures.
+// existing sage-assent-iteration-patterns.test.ts fixtures.
 // ============================================================================
 
 function makeAssessment(opts: {

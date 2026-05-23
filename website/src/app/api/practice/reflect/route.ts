@@ -16,7 +16,7 @@
  *   SR-6 (deterministic control flow + Sonnet Layer-1 Q1–Q4) · SR-4 (Sage Assent feed).
  *
  * AUTH (SR-14, AC7): the SAME A10 per-agent sr_atl_ bearer credential as Sage
- * Calling, UNSCOPED (no CarriedProfile). validateAtlWriteToken hashes the token,
+ * Calling, UNSCOPED (no CarriedProfile). validateSageAssentWriteToken hashes the token,
  * looks up the ACTIVE atl_write row, and checks it binds the body's agent_id. Every
  * failure collapses to a single 401 (no info leak); the audit log records the reason.
  *
@@ -43,10 +43,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
   checkRateLimit,
   RATE_LIMITS,
-  validateAtlWriteToken,
-  logAtlVerifyEvent,
-  ATL_WRITE_TOKEN_PREFIX,
-  type AtlVerifyEvent,
+  validateSageAssentWriteToken,
+  logSageAssentVerifyEvent,
+  SAGE_ASSENT_WRITE_TOKEN_PREFIX,
+  type SageAssentVerifyEvent,
 } from '@/lib/security'
 
 import { computeLoopBill } from '@/lib/stripe'
@@ -94,11 +94,11 @@ async function verifyReflectToken(request: NextRequest, agent_id: string): Promi
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? request.headers.get('x-real-ip') ?? null
 
   const emit = (
-    outcome: AtlVerifyEvent['outcome'],
+    outcome: SageAssentVerifyEvent['outcome'],
     fields: { credential_id?: string | null; scope_downstream_identity_model?: string | null; scope_path_posture?: string | null } = {},
   ): void => {
-    logAtlVerifyEvent({
-      kind: 'atl_verify',
+    logSageAssentVerifyEvent({
+      kind: 'sage_assent_verify',
       agent_id,
       outcome,
       credential_id: fields.credential_id ?? null,
@@ -113,14 +113,14 @@ async function verifyReflectToken(request: NextRequest, agent_id: string): Promi
   }
 
   const authHeader = request.headers.get('authorization')
-  if (!authHeader?.startsWith(`Bearer ${ATL_WRITE_TOKEN_PREFIX}`)) {
+  if (!authHeader?.startsWith(`Bearer ${SAGE_ASSENT_WRITE_TOKEN_PREFIX}`)) {
     emit('no_token')
     return { ok: false }
   }
   const rawToken = authHeader.slice(7).trim()
 
   // SR-14: reuse the credential as-is — UNSCOPED (no CarriedProfile).
-  const result = await validateAtlWriteToken(rawToken, agent_id, undefined)
+  const result = await validateSageAssentWriteToken(rawToken, agent_id, undefined)
   if (!result.valid) {
     emit(result.reason)
     return { ok: false }

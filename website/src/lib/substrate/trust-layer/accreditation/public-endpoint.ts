@@ -11,7 +11,7 @@
  *
  * This file is Component 3 (the badge) — the public verification endpoint
  * handler. handleAccreditationLookup takes an injected lookupFn — the clean
- * persistence seam. atl-accreditation-store.ts's lookupAccreditationRecord
+ * persistence seam. sage-assent-accreditation-store.ts's lookupAccreditationRecord
  * satisfies that seam exactly; the public route (spec step 6b) wires the two
  * together. This session ports the handler as library code; no route consumes
  * it yet (PR1 — the persistence layer reaches Verified first).

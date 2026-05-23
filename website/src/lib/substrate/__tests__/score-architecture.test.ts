@@ -3,7 +3,7 @@
  * + invariant checks.
  *
  * Run via: `npx tsx website/src/lib/substrate/__tests__/score-architecture.test.ts`
- * (mirrors the A5 / A7 / philosophical-mode / atl-bridge verification pattern;
+ * (mirrors the A5 / A7 / philosophical-mode / sage-assent-bridge verification pattern;
  * no Jest framework dependency).
  *
  * COVERAGE

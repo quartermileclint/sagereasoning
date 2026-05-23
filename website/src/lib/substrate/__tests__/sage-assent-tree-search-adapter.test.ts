@@ -1,14 +1,14 @@
 /**
- * atl-tree-search-adapter.test.ts — tree-search composition surface
+ * sage-assent-tree-search-adapter.test.ts — tree-search composition surface
  * functional tests + invariant checks.
  *
  * Run via:
- *   npx tsx website/src/lib/substrate/__tests__/atl-tree-search-adapter.test.ts
+ *   npx tsx website/src/lib/substrate/__tests__/sage-assent-tree-search-adapter.test.ts
  *
  * Plain-assertion script (no Jest); exit code 0 = all pass.
  *
  * PR2 — build-to-wire verification immediate: this file invokes
- * createSubstrateEvaluator in the same session atl-tree-search-adapter.ts is
+ * createSubstrateEvaluator in the same session sage-assent-tree-search-adapter.ts is
  * written.
  *
  * COVERAGE
@@ -29,9 +29,9 @@
  *            function's I/O surface is determined by callSubstrate)
  */
 
-import { createSubstrateEvaluator } from '../atl-tree-search-adapter'
+import { createSubstrateEvaluator } from '../sage-assent-tree-search-adapter'
 
-import type { BridgeContext, EvaluatedAction } from '../atl-bridge'
+import type { BridgeContext, EvaluatedAction } from '../sage-assent-bridge'
 import type { Layer1Schema } from '../../translation-sandwich/layer1-extractor'
 import type { Layer2Assessment } from '../../translation-sandwich/layer2-mechanisms'
 

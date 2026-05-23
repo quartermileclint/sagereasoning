@@ -1,5 +1,5 @@
 /**
- * atl-accreditation-store.ts — the ATL badge persistence layer (Component 3).
+ * sage-assent-accreditation-store.ts — the ATL badge persistence layer (Component 3).
  *
  * STATUS: Scaffolded → Wired → Verified (2026-05-15, this session). New code,
  * imported by no route — no production exposure this session.
@@ -103,7 +103,7 @@
  *   - PR1: this persistence layer is the single-endpoint proof of the
  *     badge-storage pattern; the public route (spec step 6b) is its first
  *     consumer and does not exist until this is Verified.
- *   - PR2: the test file (__tests__/atl-accreditation-store.test.ts) invokes
+ *   - PR2: the test file (__tests__/sage-assent-accreditation-store.test.ts) invokes
  *     every exported function in the same session this module is written — the
  *     pure mappers directly, the lookupFn seam via handleAccreditationLookup
  *     with a fake lookupFn, and a compile-time check that the real

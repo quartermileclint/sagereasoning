@@ -1,11 +1,11 @@
 /**
- * atl-accreditation-writer.ts — the write-path into agent_accreditation.
+ * sage-assent-accreditation-writer.ts — the write-path into agent_accreditation.
  *
  * STATUS: Scaffolded → Wired → Verified (2026-05-16, this session). New code,
  * imported by the new POST handler at /api/accreditation/[agent_id] and
  * callable by wrapper-internal consumers. The persistence layer's three write
  * functions (upsertAccreditationRecord / appendGradeHistory /
- * appendInitialGradeHistory in atl-accreditation-store.ts) have existed and
+ * appendInitialGradeHistory in sage-assent-accreditation-store.ts) have existed and
  * been Verified since 2026-05-15 but were called by nothing. This module is
  * the seam that finally invokes them.
  *
@@ -110,7 +110,7 @@
  *   - PR1 — single-build proof: the library + route + tests land in one
  *     session per the design's expected pattern.
  *   - PR2 — build-to-wire verification immediate: the test file (__tests__/
- *     atl-accreditation-writer.test.ts) invokes both public functions with
+ *     sage-assent-accreditation-writer.test.ts) invokes both public functions with
  *     mock deps, asserting the invocation order, log emission, error
  *     propagation, and grade-changed branch.
  *   - PR4 — model selection: N/A (no LLM call).
@@ -134,11 +134,11 @@ import {
   upsertAccreditationRecord,
   appendGradeHistory,
   appendInitialGradeHistory,
-} from './atl-accreditation-store'
+} from './sage-assent-accreditation-store'
 
 import { proximityToAuthority } from './trust-layer/accreditation/accreditation-record'
 
-import type { CarriedProfile } from './atl-wrapper'
+import type { CarriedProfile } from './sage-assent-wrapper'
 import type { TransitionResult } from './trust-layer/grade-engine/grade-transition-engine'
 import type { GradeChangeEvent } from './trust-layer/types/accreditation'
 
@@ -160,8 +160,8 @@ import type { GradeChangeEvent } from './trust-layer/types/accreditation'
  *     iff call_type === 'update' (they describe the transition; not
  *     meaningful for seed).
  */
-export interface AtlWriteEvent {
-  readonly kind: 'atl_write'
+export interface SageAssentWriteEvent {
+  readonly kind: 'sage_assent_write'
   readonly call_type: 'seed' | 'update'
   readonly agent_id: string
   readonly actions_evaluated: number
@@ -180,11 +180,11 @@ export interface AtlWriteEvent {
  * The single logging helper called at success + failure sites inside
  * seedAccreditation + updateAccreditation. Emits one JSON line per call;
  * Vercel logs captures it. The format is grep-friendly: every line that
- * matches `"kind":"atl_write"` is a write-path event.
+ * matches `"kind":"sage_assent_write"` is a write-path event.
  *
  * Module-internal default — tests substitute via the deps parameter.
  */
-function defaultLogger(event: AtlWriteEvent): void {
+function defaultLogger(event: SageAssentWriteEvent): void {
   console.log(JSON.stringify(event))
 }
 
@@ -214,7 +214,7 @@ export interface AccreditationWriterDeps {
     record: Parameters<typeof appendInitialGradeHistory>[0],
     opts?: Parameters<typeof appendInitialGradeHistory>[1],
   ) => Promise<void>
-  readonly logger: (event: AtlWriteEvent) => void
+  readonly logger: (event: SageAssentWriteEvent) => void
 }
 
 const DEFAULT_DEPS: AccreditationWriterDeps = {
@@ -288,7 +288,7 @@ export async function seedAccreditation(
     await deps.appendInitialGradeHistory(record)
 
     deps.logger({
-      kind: 'atl_write',
+      kind: 'sage_assent_write',
       call_type: 'seed',
       agent_id: profile.agent_id,
       actions_evaluated: record.actions_evaluated,
@@ -300,7 +300,7 @@ export async function seedAccreditation(
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     deps.logger({
-      kind: 'atl_write',
+      kind: 'sage_assent_write',
       call_type: 'seed',
       agent_id: profile.agent_id,
       actions_evaluated: record.actions_evaluated,
@@ -399,7 +399,7 @@ export async function updateAccreditation(
     }
 
     deps.logger({
-      kind: 'atl_write',
+      kind: 'sage_assent_write',
       call_type: 'update',
       agent_id: profile.agent_id,
       actions_evaluated: record.actions_evaluated,
@@ -415,7 +415,7 @@ export async function updateAccreditation(
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     deps.logger({
-      kind: 'atl_write',
+      kind: 'sage_assent_write',
       call_type: 'update',
       agent_id: profile.agent_id,
       actions_evaluated: record.actions_evaluated,

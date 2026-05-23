@@ -18,7 +18,7 @@
  *   { session_id, agent_id, response?, agent_card_url? }   // available_tools declined
  *
  * AUTH (D-6, AC7): the SAME A10 per-agent sr_atl_ bearer credential as the
- * accreditation write path. validateAtlWriteToken hashes the token, looks up the
+ * accreditation write path. validateSageAssentWriteToken hashes the token, looks up the
  * ACTIVE atl_write row, and checks it binds the supplied agent_id. Every failure
  * collapses to a single 401 (no information leak); the audit log records the
  * specific reason. Sage Calling supplies NO CarriedProfile (D-6 "reuse as-is, no
@@ -59,10 +59,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
   checkRateLimit,
   RATE_LIMITS,
-  validateAtlWriteToken,
-  logAtlVerifyEvent,
-  ATL_WRITE_TOKEN_PREFIX,
-  type AtlVerifyEvent,
+  validateSageAssentWriteToken,
+  logSageAssentVerifyEvent,
+  SAGE_ASSENT_WRITE_TOKEN_PREFIX,
+  type SageAssentVerifyEvent,
 } from '@/lib/security'
 
 import {
@@ -118,7 +118,7 @@ type CallingAuthResult =
 
 /**
  * Validate the A10 sr_atl_ bearer credential against the body's agent_id (D-6).
- * Emits ONE atl_verify audit event (reusing the accreditation route's shape).
+ * Emits ONE sage_assent_verify audit event (reusing the accreditation route's shape).
  * Every failure mode returns { ok: false } → the route maps it to a single 401.
  *
  * Sage Calling passes NO CarriedProfile, so a scoped credential fails wrong_scope.
@@ -131,11 +131,11 @@ async function verifyCallingToken(request: NextRequest, agent_id: string): Promi
     null
 
   const emit = (
-    outcome: AtlVerifyEvent['outcome'],
+    outcome: SageAssentVerifyEvent['outcome'],
     fields: { credential_id?: string | null; scope_downstream_identity_model?: string | null; scope_path_posture?: string | null } = {},
   ): void => {
-    logAtlVerifyEvent({
-      kind: 'atl_verify',
+    logSageAssentVerifyEvent({
+      kind: 'sage_assent_verify',
       agent_id,
       outcome,
       credential_id: fields.credential_id ?? null,
@@ -150,14 +150,14 @@ async function verifyCallingToken(request: NextRequest, agent_id: string): Promi
   }
 
   const authHeader = request.headers.get('authorization')
-  if (!authHeader?.startsWith(`Bearer ${ATL_WRITE_TOKEN_PREFIX}`)) {
+  if (!authHeader?.startsWith(`Bearer ${SAGE_ASSENT_WRITE_TOKEN_PREFIX}`)) {
     emit('no_token')
     return { ok: false }
   }
   const rawToken = authHeader.slice(7).trim()
 
   // D-6: reuse the credential as-is — no CarriedProfile / discovery scope.
-  const result = await validateAtlWriteToken(rawToken, agent_id, undefined)
+  const result = await validateSageAssentWriteToken(rawToken, agent_id, undefined)
   if (!result.valid) {
     emit(result.reason)
     return { ok: false }

@@ -512,7 +512,7 @@ export interface Layer1Schema {
   /** ATL Wrapper — Decision B (D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16).
    *  The wrapper's working set of unchosen-but-still-live candidates from past
    *  parallel evaluations — populated by toCarriedCandidatesPayload() in
-   *  atl-wrapper.ts and threaded into the agent's next substrate call so
+   *  sage-assent-wrapper.ts and threaded into the agent's next substrate call so
    *  Layer 2 can see what the agent is still holding under consideration.
    *
    *  This is the 5th wrapper-populated optional field, alongside

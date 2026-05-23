@@ -1,7 +1,7 @@
 /**
  * sage-assent-feed.test.ts — tests for the Sage Assent feed (Stage A, A-5; SR-4).
  *
- * Run (the module transitively imports atl-accreditation-store → supabase-server,
+ * Run (the module transitively imports sage-assent-accreditation-store → supabase-server,
  * which constructs a Supabase client at import; under mock deps it is never CALLED,
  * but the import needs real env, so run with --env-file per /CLAUDE.md):
  *   npx tsx --env-file=.env.local src/lib/sage-reflect/__tests__/sage-assent-feed.test.ts

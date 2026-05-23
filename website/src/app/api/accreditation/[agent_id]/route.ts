@@ -52,7 +52,7 @@
  *   POST handler validates the body, runs the auth gate (pre-A10 stopgap:
  *   feature-flag gated via SUBSTRATE_WRITE_PATH_ENABLED), does a pre-flight
  *   lookup to disambiguate seed vs update vs conflict, then invokes the
- *   atl-accreditation-writer library's seedAccreditation or
+ *   sage-assent-accreditation-writer library's seedAccreditation or
  *   updateAccreditation. Outcomes map to 200 / 401 / 400 / 404 / 409 / 503
  *   per the design's Decision A response envelope. The library writes the
  *   row via the persistence layer's existing upsertAccreditationRecord +
@@ -65,7 +65,7 @@
  *   replaces this with per-agent token verification.
  *
  * THE THREE 6a LIBRARY SEAMS THIS ROUTE CONSUMES
- *   - lookupAccreditationRecord (atl-accreditation-store.ts) — the Supabase
+ *   - lookupAccreditationRecord (sage-assent-accreditation-store.ts) — the Supabase
  *     read; signature matches handleAccreditationLookup's `lookupFn`.
  *   - handleAccreditationLookup (trust-layer/accreditation/public-endpoint.ts)
  *     — validation + lookup + expiry detection + payload build. Returns the
@@ -179,9 +179,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
   checkRateLimit,
   RATE_LIMITS,
-  validateAtlWriteToken,
-  logAtlVerifyEvent,
-  type AtlVerifyEvent,
+  validateSageAssentWriteToken,
+  logSageAssentVerifyEvent,
+  type SageAssentVerifyEvent,
 } from '@/lib/security'
 
 import {
@@ -194,15 +194,15 @@ import {
   isExpired,
 } from '@/lib/substrate/trust-layer/accreditation/accreditation-record'
 
-import { lookupAccreditationRecord } from '@/lib/substrate/atl-accreditation-store'
+import { lookupAccreditationRecord } from '@/lib/substrate/sage-assent-accreditation-store'
 
 import {
   seedAccreditation,
   updateAccreditation,
-} from '@/lib/substrate/atl-accreditation-writer'
+} from '@/lib/substrate/sage-assent-accreditation-writer'
 
-import type { CarriedProfile } from '@/lib/substrate/atl-wrapper'
-import type { TransitionResult } from '@/lib/substrate/atl-wrapper'
+import type { CarriedProfile } from '@/lib/substrate/sage-assent-wrapper'
+import type { TransitionResult } from '@/lib/substrate/sage-assent-wrapper'
 
 import {
   buildAccreditationResponse,
@@ -328,19 +328,19 @@ type AuthGateResult =
  *      that blocks ALL writes regardless of credential validity.
  *
  *   2. PER-AGENT TOKEN (Decisions A + E + 3a): the caller must present
- *      `Authorization: Bearer sr_atl_<token>`. validateAtlWriteToken (in
+ *      `Authorization: Bearer sr_atl_<token>`. validateSageAssentWriteToken (in
  *      security.ts) hashes it, looks up the ACTIVE atl_write row, checks the
  *      bound agent_id matches the path, and — when the credential is scoped —
  *      checks the supplied CarriedProfile (downstream_identity_model /
  *      path_posture) matches the credential's scope columns. Any failure →
  *      `unauthorized` → route returns 401. The route returns a single 401 for
  *      every token failure mode (no information leak); the audit log
- *      (logAtlVerifyEvent) captures the specific reason.
+ *      (logSageAssentVerifyEvent) captures the specific reason.
  *
  * The `carriedProfile` subset is parsed once by the POST handler from
- * body.profile and passed in (avoids a double body-parse). One atl_verify event
+ * body.profile and passed in (avoids a double body-parse). One sage_assent_verify event
  * is emitted per attempt — covering not_enabled, no_token, and every
- * validateAtlWriteToken outcome — with ip + elapsed_ms.
+ * validateSageAssentWriteToken outcome — with ip + elapsed_ms.
  */
 async function verifyAgentIdOwnership(
   request: NextRequest,
@@ -356,15 +356,15 @@ async function verifyAgentIdOwnership(
   const suppliedPath = carriedProfile?.path_posture ?? null
 
   const emit = (
-    outcome: AtlVerifyEvent['outcome'],
+    outcome: SageAssentVerifyEvent['outcome'],
     fields: {
       credential_id?: string | null
       scope_downstream_identity_model?: string | null
       scope_path_posture?: string | null
     } = {},
   ): void => {
-    logAtlVerifyEvent({
-      kind: 'atl_verify',
+    logSageAssentVerifyEvent({
+      kind: 'sage_assent_verify',
       agent_id,
       outcome,
       credential_id: fields.credential_id ?? null,
@@ -394,7 +394,7 @@ async function verifyAgentIdOwnership(
   const rawToken = authHeader.slice(7).trim()
 
   // 3. Delegate verification + scope check to security.ts (Decision E).
-  const result = await validateAtlWriteToken(rawToken, agent_id, carriedProfile)
+  const result = await validateSageAssentWriteToken(rawToken, agent_id, carriedProfile)
   if (!result.valid) {
     emit(result.reason)
     return { ok: false, reason: 'unauthorized' }

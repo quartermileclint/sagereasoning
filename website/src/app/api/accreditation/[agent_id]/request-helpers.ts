@@ -15,7 +15,7 @@
  * Extract the CarriedProfile scope subset (downstream_identity_model +
  * path_posture) from the already-parsed request body, for the auth-gate scope
  * check. Returns undefined when the body or profile is malformed or carries
- * neither field — validateAtlWriteToken then fails closed for any scoped
+ * neither field — validateSageAssentWriteToken then fails closed for any scoped
  * credential.
  */
 export function extractCarriedProfileForAuth(

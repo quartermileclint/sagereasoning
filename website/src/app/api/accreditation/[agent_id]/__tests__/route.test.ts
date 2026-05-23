@@ -32,7 +32,7 @@
  *   - PUT / DELETE / PATCH — return 405 with Allow: 'GET, POST, OPTIONS'.
  *     (POST is REMOVED from the 405 set as of 2026-05-16 — POST is a real
  *     handler tested via the post-deploy URL check + the writer library's
- *     own unit tests in atl-accreditation-writer.test.ts.)
+ *     own unit tests in sage-assent-accreditation-writer.test.ts.)
  *
  * WHAT THIS TEST FILE DOES NOT COVER (Verified by founder's post-deploy URL
  * check per the Critical Change Protocol step 5):
@@ -47,7 +47,7 @@
  *     body validate → lookupAccreditationRecord → seedAccreditation /
  *     updateAccreditation → response). The handler is wired but its
  *     pre-flight lookup hits Supabase; mocking that in a plain-tsx test is
- *     more friction than value. The atl-accreditation-writer.test.ts file
+ *     more friction than value. The sage-assent-accreditation-writer.test.ts file
  *     tests the writer library's persistence-layer invocation contract
  *     exhaustively; the route's responsibility is body validation +
  *     auth-gate-check + outcome → HTTP mapping, all of which are tested

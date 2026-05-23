@@ -57,7 +57,7 @@
  * for the test path. If omitted, the function computes its own WindowSnapshot
  * via the ported computeWindowSnapshot — which stamps a `computed_at` ISO from
  * the system clock (the documented behaviour the ported /trust-layer/
- * functions inherit; see atl-wrapper.ts module-header PURITY PROFILE). For
+ * functions inherit; see sage-assent-wrapper.ts module-header PURITY PROFILE). For
  * session-end production use, supply the snapshot from the preceding
  * computeTrajectory call.
  *
@@ -115,13 +115,13 @@
 import type {
   CarriedProfile,
   CarriedCandidate,
-} from './atl-wrapper'
+} from './sage-assent-wrapper'
 
 import type {
   SequentialStepResult,
   OrchestrationStepResult,
   PeerAgentAssessmentPayload,
-} from './atl-iteration-patterns'
+} from './sage-assent-iteration-patterns'
 
 import { buildAccreditationPayload } from './trust-layer/accreditation/accreditation-record'
 import type { AccreditationPayload } from './trust-layer/types/accreditation'

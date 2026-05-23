@@ -548,10 +548,10 @@ export function withUsageHeaders(
 // =============================================================================
 
 /** The fixed namespace prefix for A10 write tokens (distinct from sr_live_). */
-export const ATL_WRITE_TOKEN_PREFIX = 'sr_atl_'
+export const SAGE_ASSENT_WRITE_TOKEN_PREFIX = 'sr_atl_'
 
 /**
- * Discriminated result of validateAtlWriteToken.
+ * Discriminated result of validateSageAssentWriteToken.
  *
  * On success: the bound credential identifiers + an echo of the credential's
  * scope columns (may be null) so the caller can log them for forensic auditing.
@@ -559,7 +559,7 @@ export const ATL_WRITE_TOKEN_PREFIX = 'sr_atl_'
  * 401 to the caller (no information leak); the audit log (Decision H) captures
  * the specific reason.
  */
-export type AtlWriteValidationResult =
+export type SageAssentWriteValidationResult =
   | {
       valid: true
       credential_id: string
@@ -583,14 +583,14 @@ export type AtlWriteValidationResult =
  *
  * Shape: sr_atl_<32 hex chars>. Mirrors generateApiKey's sr_live_ pattern.
  */
-export function generateAtlWriteToken(): { raw: string; hash: string } {
-  const raw = `${ATL_WRITE_TOKEN_PREFIX}${randomBytes(16).toString('hex')}`
+export function generateSageAssentWriteToken(): { raw: string; hash: string } {
+  const raw = `${SAGE_ASSENT_WRITE_TOKEN_PREFIX}${randomBytes(16).toString('hex')}`
   const hash = createHash('sha256').update(raw).digest('hex')
   return { raw, hash }
 }
 
 /** The minimal api_keys row shape the A10 verification path selects + reasons over. */
-export interface AtlCredentialRow {
+export interface SageAssentCredentialRow {
   id: string
   agent_id: string
   owner_user_id: string
@@ -601,7 +601,7 @@ export interface AtlCredentialRow {
 /**
  * PURE decision: given the looked-up active atl_write row (or null), the target
  * agent_id, and the supplied CarriedProfile subset, decide the validation
- * result. No I/O — the unit-testable core of validateAtlWriteToken (factored
+ * result. No I/O — the unit-testable core of validateSageAssentWriteToken (factored
  * per PR2; mirrors how this route group factors pure logic into testable units).
  *
  * - null row (unknown token OR revoked — the lookup filters is_active=true, so
@@ -611,11 +611,11 @@ export interface AtlCredentialRow {
  *   NULL; strict + fail-closed ('wrong_scope') when set (the supplied value must
  *   match exactly; a missing supplied value against a scoped credential fails).
  */
-export function evaluateAtlWriteRow(
-  row: AtlCredentialRow | null,
+export function evaluateSageAssentWriteRow(
+  row: SageAssentCredentialRow | null,
   agent_id: string,
   carriedProfile?: { downstream_identity_model?: string; path_posture?: string },
-): AtlWriteValidationResult {
+): SageAssentWriteValidationResult {
   if (!row) {
     return { valid: false, reason: 'invalid_token' }
   }
@@ -649,21 +649,21 @@ export function evaluateAtlWriteRow(
  * supplied CarriedProfile for per-credential scope enforcement (Decision E).
  *
  * Prefix-rejects non-sr_atl_ tokens ('no_token'); otherwise hashes, looks up the
- * ACTIVE atl_write row, and delegates the decision to evaluateAtlWriteRow.
+ * ACTIVE atl_write row, and delegates the decision to evaluateSageAssentWriteRow.
  *
  * KG1 rule 2: the Supabase read is awaited; a query error is treated as
  * 'invalid_token' (fail closed), not swallowed-and-allowed.
  */
-export async function validateAtlWriteToken(
+export async function validateSageAssentWriteToken(
   rawToken: string,
   agent_id: string,
   carriedProfile?: {
     downstream_identity_model?: string
     path_posture?: string
   },
-): Promise<AtlWriteValidationResult> {
+): Promise<SageAssentWriteValidationResult> {
   // Prefix check — wrong prefix is treated as no token (no DB hit).
-  if (!rawToken.startsWith(ATL_WRITE_TOKEN_PREFIX)) {
+  if (!rawToken.startsWith(SAGE_ASSENT_WRITE_TOKEN_PREFIX)) {
     return { valid: false, reason: 'no_token' }
   }
 
@@ -691,7 +691,7 @@ export async function validateAtlWriteToken(
     return { valid: false, reason: 'invalid_token' }
   }
 
-  return evaluateAtlWriteRow((row as AtlCredentialRow | null) ?? null, agent_id, carriedProfile)
+  return evaluateSageAssentWriteRow((row as SageAssentCredentialRow | null) ?? null, agent_id, carriedProfile)
 }
 
 /**
@@ -700,13 +700,13 @@ export async function validateAtlWriteToken(
  * which is where all outcomes — including the kill-switch 'not_enabled' and the
  * missing-token 'no_token' — converge and where ip + elapsed_ms are available).
  *
- * grep-friendly: every line matching `"kind":"atl_verify"` is a verification
+ * grep-friendly: every line matching `"kind":"sage_assent_verify"` is a verification
  * event. When outcome='wrong_scope' all four scope fields are populated; when
  * outcome='ok' the credential's scope columns + the matching supplied values are
  * populated.
  */
-export interface AtlVerifyEvent {
-  readonly kind: 'atl_verify'
+export interface SageAssentVerifyEvent {
+  readonly kind: 'sage_assent_verify'
   readonly agent_id: string
   readonly outcome:
     | 'ok'
@@ -726,7 +726,7 @@ export interface AtlVerifyEvent {
 }
 
 /** Emit one verification event to Vercel structured logs (Decision H). */
-export function logAtlVerifyEvent(event: AtlVerifyEvent): void {
+export function logSageAssentVerifyEvent(event: SageAssentVerifyEvent): void {
   console.log(JSON.stringify(event))
 }
 

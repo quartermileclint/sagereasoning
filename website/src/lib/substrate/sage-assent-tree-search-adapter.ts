@@ -1,5 +1,5 @@
 /**
- * atl-tree-search-adapter.ts — composition surface for tree-search algorithms
+ * sage-assent-tree-search-adapter.ts — composition surface for tree-search algorithms
  * (MCTS / BFS / Tree-of-Thoughts / beam search) over the substrate.
  *
  * STATUS: Scaffolded → Wired → Verified (2026-05-16, this session). New code,
@@ -56,7 +56,7 @@
  *   - PR1: PR1 is satisfied by the bridge + wrapper + iteration patterns,
  *     which are the foundations this builds on. The adapter is a thin
  *     composition surface.
- *   - PR2: __tests__/atl-tree-search-adapter.test.ts invokes
+ *   - PR2: __tests__/sage-assent-tree-search-adapter.test.ts invokes
  *     createSubstrateEvaluator in the same session this module is written.
  *   - PR4: N/A — no LLM call inside the module. The caller's callSubstrate
  *     may make one; that selection is the caller's concern (constraints.ts
@@ -69,7 +69,7 @@ import {
   mapLayer2AssessmentToEvaluatedAction,
   type BridgeContext,
   type EvaluatedAction,
-} from './atl-bridge'
+} from './sage-assent-bridge'
 
 import type { Layer1Schema } from '../translation-sandwich/layer1-extractor'
 import type { Layer2Assessment } from '../translation-sandwich/layer2-mechanisms'

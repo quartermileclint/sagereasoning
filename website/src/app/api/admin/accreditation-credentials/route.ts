@@ -45,7 +45,7 @@ import {
   checkRateLimit,
   RATE_LIMITS,
   requireAdmin,
-  generateAtlWriteToken,
+  generateSageAssentWriteToken,
   resolveProfileId,
   corsHeaders,
 } from '@/lib/security'
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Mint the token (raw shown once; only the hash is stored).
-  const { raw, hash } = generateAtlWriteToken()
+  const { raw, hash } = generateSageAssentWriteToken()
   const key_prefix = raw.slice(0, 14)
 
   const { data: credential, error: insertErr } = await supabaseAdmin

@@ -1,5 +1,5 @@
 /**
- * atl-iteration-patterns.ts — the Agent Trust Layer Wrapper, Component 5:
+ * sage-assent-iteration-patterns.ts — the Agent Trust Layer Wrapper, Component 5:
  * the three iteration patterns (sequential loop / parallel evaluation /
  * multi-agent orchestration).
  *
@@ -23,7 +23,7 @@
  * into "a thing that runs an agent's actual decision loop." It is ORCHESTRATION
  * of already-Verified pieces — it adds no net-new assessment logic:
  *
- *   - atl-wrapper.ts   — createCarriedProfile / accumulate / computeTrajectory /
+ *   - sage-assent-wrapper.ts   — createCarriedProfile / accumulate / computeTrajectory /
  *                        toCarriedProfilePayload / toProfileProvenancePayload
  *                        (Components 1 + 4 — the carried-profile mechanism +
  *                        trajectory awareness).
@@ -38,7 +38,7 @@
  *      decides, repeats. runSequentialStep accumulates one EvaluatedAction and,
  *      at the carried profile's grade_check_interval cadence, runs a trajectory
  *      computation; runSequentialLoop folds an ordered list of steps. This is
- *      where the grade-check CADENCE is implemented — atl-wrapper.ts
+ *      where the grade-check CADENCE is implemented — sage-assent-wrapper.ts
  *      deliberately left "how often to run a trajectory computation" to
  *      Component 5.
  *
@@ -78,7 +78,7 @@
  *          stays its own (profile_provenance.source ===
  *          'own_prior_substrate_assessments').
  *
- * PURITY PROFILE (PR1 — this module is the next consumer of atl-wrapper.ts, the
+ * PURITY PROFILE (PR1 — this module is the next consumer of sage-assent-wrapper.ts, the
  * single-endpoint proof of the carried-profile/trajectory pattern; keep the
  * orchestration pure / deterministic):
  *   - evaluateInParallel()      — PURE. renderAgentMode is synchronous +
@@ -88,11 +88,11 @@
  *     runSequentialLoop()         the ported /trust-layer/ functions stamp from
  *     accumulateChosen()          the system clock (computed_at / updated_at /
  *     runOrchestrationStep()      grade_since / last_evaluation), inherited via
- *                                 atl-wrapper.ts's computeTrajectory /
+ *                                 sage-assent-wrapper.ts's computeTrajectory /
  *                                 toCarriedProfilePayload. accumulate() itself
  *                                 is fully pure. The test asserts determinism
  *                                 modulo those timestamp fields — exactly as
- *                                 atl-wrapper.test.ts does.
+ *                                 sage-assent-wrapper.test.ts does.
  *   No function here reads the clock directly, performs I/O, calls an LLM, or
  *   uses randomness. Component 5 is deterministic plumbing over deterministic
  *   plumbing.
@@ -110,10 +110,10 @@
  *     renderings + peer payloads the badge (Component 3, spec step 6) certifies.
  *   - AC8: this module sits in /website/src/lib/substrate/ and orchestrates the
  *     translation-sandwich substrate's ATL pieces.
- *   - PR1: atl-wrapper.ts was the single-endpoint proof of the carried-profile/
+ *   - PR1: sage-assent-wrapper.ts was the single-endpoint proof of the carried-profile/
  *     trajectory pattern; this module is its next consumer — kept pure /
  *     deterministic, no I/O, no LLM call inside the module.
- *   - PR2: the test file (__tests__/atl-iteration-patterns.test.ts) invokes
+ *   - PR2: the test file (__tests__/sage-assent-iteration-patterns.test.ts) invokes
  *     every exported function in the same session this module is written.
  *   - PR4: N/A — no LLM call. Component 5 is deterministic orchestration.
  *   - PR6: NOT engaged — Component 5 does not touch the R20a distress
@@ -142,7 +142,7 @@ import {
   type ProfileProvenancePayload,
   type CarriedCandidatesPayload,
   type BridgeContext,
-} from './atl-wrapper'
+} from './sage-assent-wrapper'
 
 import {
   renderAgentMode,
@@ -169,7 +169,7 @@ export type {
   ProfileProvenancePayload,
   CarriedCandidatesPayload,
   BridgeContext,
-} from './atl-wrapper'
+} from './sage-assent-wrapper'
 export type {
   AgentModeRenderResult,
   AgentModeResponse,

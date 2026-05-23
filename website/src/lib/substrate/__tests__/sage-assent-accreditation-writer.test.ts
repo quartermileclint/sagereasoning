@@ -1,14 +1,14 @@
 /**
- * atl-accreditation-writer.test.ts — write-path library functional tests.
+ * sage-assent-accreditation-writer.test.ts — write-path library functional tests.
  *
  * STATUS: Verified (2026-05-16, this session — write-path build).
  *
  * Run via:
  *   npx tsx --env-file=.env.local \
- *     website/src/lib/substrate/__tests__/atl-accreditation-writer.test.ts
+ *     website/src/lib/substrate/__tests__/sage-assent-accreditation-writer.test.ts
  *
- * The --env-file is required: atl-accreditation-writer.ts imports from
- * atl-accreditation-store.ts, which imports supabase-server.ts, which
+ * The --env-file is required: sage-assent-accreditation-writer.ts imports from
+ * sage-assent-accreditation-store.ts, which imports supabase-server.ts, which
  * constructs a Supabase client at module load. The client is constructed but
  * never CALLED by this test — the writer's public functions accept an
  * optional deps parameter (DI seam), and the tests pass mock implementations
@@ -73,10 +73,10 @@ import {
   seedAccreditation,
   updateAccreditation,
   type AccreditationWriterDeps,
-  type AtlWriteEvent,
-} from '../atl-accreditation-writer'
+  type SageAssentWriteEvent,
+} from '../sage-assent-accreditation-writer'
 
-import { createCarriedProfile, type CarriedProfile } from '../atl-wrapper'
+import { createCarriedProfile, type CarriedProfile } from '../sage-assent-wrapper'
 
 import type {
   AccreditationRecord,
@@ -88,7 +88,7 @@ import type { TransitionResult } from '../trust-layer/grade-engine/grade-transit
 import type {
   AccreditationRowOptions,
   GradeHistoryRowOptions,
-} from '../atl-accreditation-store'
+} from '../sage-assent-accreditation-store'
 
 // ============================================================================
 // Test runner — plain assertions; exit code reports pass/fail
@@ -133,7 +133,7 @@ interface InvocationLog {
 interface MockDeps {
   readonly deps: AccreditationWriterDeps
   readonly invocations: InvocationLog[]
-  readonly events: AtlWriteEvent[]
+  readonly events: SageAssentWriteEvent[]
 }
 
 interface MockOptions {
@@ -144,7 +144,7 @@ interface MockOptions {
 
 function makeMockDeps(opts: MockOptions = {}): MockDeps {
   const invocations: InvocationLog[] = []
-  const events: AtlWriteEvent[] = []
+  const events: SageAssentWriteEvent[] = []
 
   const deps: AccreditationWriterDeps = {
     upsertAccreditationRecord: async (
@@ -168,7 +168,7 @@ function makeMockDeps(opts: MockOptions = {}): MockDeps {
       invocations.push({ fn: 'appendInitial', args: { record, options } })
       if (opts.appendInitialThrows) throw opts.appendInitialThrows
     },
-    logger: (event: AtlWriteEvent): void => {
+    logger: (event: SageAssentWriteEvent): void => {
       invocations.push({ fn: 'log', args: event })
       events.push(event)
     },
@@ -268,7 +268,7 @@ async function main(): Promise<void> {
 
     assertEqual('SEED-2 exactly one log event emitted', mock.events.length, 1)
     const event = mock.events[0]
-    assertEqual('SEED-2 event.kind === atl_write', event.kind, 'atl_write')
+    assertEqual('SEED-2 event.kind === sage_assent_write', event.kind, 'sage_assent_write')
     assertEqual('SEED-2 event.call_type === seed', event.call_type, 'seed')
     assertEqual('SEED-2 event.agent_id matches', event.agent_id, 'agent_test_v1')
     assertEqual('SEED-2 event.outcome === ok', event.outcome, 'ok')
@@ -578,7 +578,7 @@ async function main(): Promise<void> {
   // --------------------------------------------------------------------------
   console.log('')
   console.log(
-    `atl-accreditation-writer.test.ts — ${passCount} passed / ${failCount} failed`,
+    `sage-assent-accreditation-writer.test.ts — ${passCount} passed / ${failCount} failed`,
   )
   if (failCount > 0) {
     console.log('')

@@ -4,16 +4,16 @@
  * STATUS: NEW (2026-05-21, A10 build — D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21).
  *
  * Covers the security-critical A10 auth-decision logic (Decisions A + E + 3a):
- *   - generateAtlWriteToken — sr_atl_ prefix + correct SHA-256 hash + uniqueness.
- *   - validateAtlWriteToken — the prefix-reject ('no_token') path (returns
+ *   - generateSageAssentWriteToken — sr_atl_ prefix + correct SHA-256 hash + uniqueness.
+ *   - validateSageAssentWriteToken — the prefix-reject ('no_token') path (returns
  *     before any DB hit, so it is exercised here directly).
- *   - evaluateAtlWriteRow — the PURE post-lookup decision across all six cases:
+ *   - evaluateSageAssentWriteRow — the PURE post-lookup decision across all six cases:
  *     invalid_token (null row = unknown OR revoked), wrong_agent, wrong_scope
  *     (identity + path, including fail-closed on a scoped credential with no
  *     supplied signal), ok-no-scope, ok-matching-scope.
  *
  * The full Supabase round-trip (hash → api_keys lookup) inside
- * validateAtlWriteToken is verified by the founder's post-deploy smoke tests
+ * validateSageAssentWriteToken is verified by the founder's post-deploy smoke tests
  * (Step 10), consistent with how the write-path build verified its POST handler.
  *
  * Run with (no --env-file needed — these paths construct no Supabase client):
@@ -22,11 +22,11 @@
 
 import { createHash } from 'node:crypto'
 import {
-  generateAtlWriteToken,
-  validateAtlWriteToken,
-  evaluateAtlWriteRow,
-  ATL_WRITE_TOKEN_PREFIX,
-  type AtlCredentialRow,
+  generateSageAssentWriteToken,
+  validateSageAssentWriteToken,
+  evaluateSageAssentWriteRow,
+  SAGE_ASSENT_WRITE_TOKEN_PREFIX,
+  type SageAssentCredentialRow,
 } from '../security'
 
 // ============================================================================
@@ -57,7 +57,7 @@ function assertEqual<T>(actual: T, expected: T, label: string): void {
   assert(ok, label)
 }
 
-function row(overrides: Partial<AtlCredentialRow> = {}): AtlCredentialRow {
+function row(overrides: Partial<SageAssentCredentialRow> = {}): SageAssentCredentialRow {
   return {
     id: 'cred-uuid-1',
     agent_id: 'agent_acme_v1',
@@ -69,15 +69,15 @@ function row(overrides: Partial<AtlCredentialRow> = {}): AtlCredentialRow {
 }
 
 // ============================================================================
-// generateAtlWriteToken
+// generateSageAssentWriteToken
 // ============================================================================
 
 function testGenerateToken(): void {
-  const { raw, hash } = generateAtlWriteToken()
-  assert(raw.startsWith(ATL_WRITE_TOKEN_PREFIX), 'GEN-1 raw token starts with sr_atl_ prefix')
+  const { raw, hash } = generateSageAssentWriteToken()
+  assert(raw.startsWith(SAGE_ASSENT_WRITE_TOKEN_PREFIX), 'GEN-1 raw token starts with sr_atl_ prefix')
   assertEqual(
     raw.length,
-    ATL_WRITE_TOKEN_PREFIX.length + 32,
+    SAGE_ASSENT_WRITE_TOKEN_PREFIX.length + 32,
     'GEN-2 raw token is prefix + 32 hex chars',
   )
   assertEqual(
@@ -85,42 +85,42 @@ function testGenerateToken(): void {
     createHash('sha256').update(raw).digest('hex'),
     'GEN-3 hash is SHA-256 of the raw token',
   )
-  const second = generateAtlWriteToken()
+  const second = generateSageAssentWriteToken()
   assert(second.raw !== raw, 'GEN-4 two mints produce different tokens')
 }
 
 // ============================================================================
-// validateAtlWriteToken — prefix-reject path (no DB)
+// validateSageAssentWriteToken — prefix-reject path (no DB)
 // ============================================================================
 
 async function testPrefixReject(): Promise<void> {
-  const r1 = await validateAtlWriteToken('not_a_token', 'agent_acme_v1')
+  const r1 = await validateSageAssentWriteToken('not_a_token', 'agent_acme_v1')
   assert(!r1.valid && r1.reason === 'no_token', 'PFX-1 non-prefixed token → no_token')
 
-  const r2 = await validateAtlWriteToken('sr_live_deadbeef', 'agent_acme_v1')
+  const r2 = await validateSageAssentWriteToken('sr_live_deadbeef', 'agent_acme_v1')
   assert(!r2.valid && r2.reason === 'no_token', 'PFX-2 sr_live_ token rejected (wrong prefix) → no_token')
 
-  const r3 = await validateAtlWriteToken('', 'agent_acme_v1')
+  const r3 = await validateSageAssentWriteToken('', 'agent_acme_v1')
   assert(!r3.valid && r3.reason === 'no_token', 'PFX-3 empty token → no_token')
 }
 
 // ============================================================================
-// evaluateAtlWriteRow — the pure decision
+// evaluateSageAssentWriteRow — the pure decision
 // ============================================================================
 
 function testInvalidToken(): void {
-  const result = evaluateAtlWriteRow(null, 'agent_acme_v1')
+  const result = evaluateSageAssentWriteRow(null, 'agent_acme_v1')
   assert(!result.valid && result.reason === 'invalid_token', 'INV-1 null row (unknown/revoked) → invalid_token')
 }
 
 function testWrongAgent(): void {
-  const result = evaluateAtlWriteRow(row({ agent_id: 'agent_acme_v1' }), 'agent_other_v1')
+  const result = evaluateSageAssentWriteRow(row({ agent_id: 'agent_acme_v1' }), 'agent_other_v1')
   assert(!result.valid && result.reason === 'wrong_agent', 'WAG-1 agent mismatch → wrong_agent')
 }
 
 function testWrongScope(): void {
   // Identity-model scope mismatch.
-  const idMismatch = evaluateAtlWriteRow(
+  const idMismatch = evaluateSageAssentWriteRow(
     row({ scope_downstream_identity_model: 'vendor_framework' }),
     'agent_acme_v1',
     { downstream_identity_model: 'browser_session' },
@@ -128,7 +128,7 @@ function testWrongScope(): void {
   assert(!idMismatch.valid && idMismatch.reason === 'wrong_scope', 'WSC-1 identity-model mismatch → wrong_scope')
 
   // Path-posture scope mismatch.
-  const pathMismatch = evaluateAtlWriteRow(
+  const pathMismatch = evaluateSageAssentWriteRow(
     row({ scope_path_posture: 'endorsed' }),
     'agent_acme_v1',
     { path_posture: 'unsanctioned' },
@@ -136,7 +136,7 @@ function testWrongScope(): void {
   assert(!pathMismatch.valid && pathMismatch.reason === 'wrong_scope', 'WSC-2 path-posture mismatch → wrong_scope')
 
   // Scoped credential but NO supplied signal → fail closed.
-  const missingSignal = evaluateAtlWriteRow(
+  const missingSignal = evaluateSageAssentWriteRow(
     row({ scope_downstream_identity_model: 'vendor_framework' }),
     'agent_acme_v1',
     undefined,
@@ -145,7 +145,7 @@ function testWrongScope(): void {
 }
 
 function testOkNoScope(): void {
-  const result = evaluateAtlWriteRow(row(), 'agent_acme_v1', undefined)
+  const result = evaluateSageAssentWriteRow(row(), 'agent_acme_v1', undefined)
   assert(result.valid, 'OKNS-1 unscoped credential, matching agent → valid')
   if (result.valid) {
     assertEqual(result.credential_id, 'cred-uuid-1', 'OKNS-2 returns credential_id')
@@ -156,7 +156,7 @@ function testOkNoScope(): void {
 }
 
 function testOkMatchingScope(): void {
-  const result = evaluateAtlWriteRow(
+  const result = evaluateSageAssentWriteRow(
     row({ scope_downstream_identity_model: 'vendor_framework', scope_path_posture: 'endorsed' }),
     'agent_acme_v1',
     { downstream_identity_model: 'vendor_framework', path_posture: 'endorsed' },

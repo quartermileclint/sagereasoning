@@ -13,7 +13,7 @@
  * NOTE — clock read: computeWindowSnapshot stamps `computed_at` from
  *   new Date().toISOString(). This is the ported /trust-layer/ behaviour. It is
  *   the one non-deterministic field the wrapper's Component 4 surface inherits;
- *   atl-wrapper.ts documents this and its test asserts determinism modulo the
+ *   sage-assent-wrapper.ts documents this and its test asserts determinism modulo the
  *   timestamp fields.
  *
  * KEEP IN SYNC: if /trust-layer/evaluation-window/window-aggregator.ts changes,

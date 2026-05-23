@@ -60,7 +60,7 @@
  *     not perform the detection.
  *
  * THE ScoreContext (the honest carry — mirrors score-architecture.ts's own
- * ScoreContext and atl-bridge.ts's BridgeContext)
+ * ScoreContext and sage-assent-bridge.ts's BridgeContext)
  *
  * The rendering must call computeSubstrateScore, which needs a ScoreContext
  * (justification_source REQUIRED; declared_motivation_passion OPTIONAL). With no
@@ -263,7 +263,7 @@ export interface AgentModeOpenQuestion {
  *  obligation structure and what the gaming-defence signals were. */
 export interface AgentModeMetadata {
   /** The primary oikeiosis circle served — relevant_circles[0].circle (the
-   *  Layer 2 engine's "primary circle" convention, same as atl-bridge.ts).
+   *  Layer 2 engine's "primary circle" convention, same as sage-assent-bridge.ts).
    *  Null when no circles were assessed. */
   oikeiosis_circle_served: OikeiosisCircle | null
   /** The pre-classified verdict on the agent's motivation declaration, from the
@@ -398,7 +398,7 @@ function kathekonActionLabel(isKathekon: boolean | null): KathekonActionLabel {
 }
 
 /** The primary oikeiosis circle served — relevant_circles[0].circle (the Layer
- *  2 engine's "primary circle" convention, same as atl-bridge.ts's
+ *  2 engine's "primary circle" convention, same as sage-assent-bridge.ts's
  *  oikeiosis_met / oikeiosis_stage selection). Null when no circles. */
 function oikeiosisCircleServed(
   assessment: Layer2Assessment

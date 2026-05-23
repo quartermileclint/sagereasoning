@@ -166,7 +166,7 @@ export type EvaluatedAction = {
 //
 // Six enum types supporting the EvaluatedAction pass-through fields above
 // (Decisions A + D + E + F) and the CarriedProfile pass-through fields in
-// /website/src/lib/substrate/atl-wrapper.ts (Decisions B + C). All six
+// /website/src/lib/substrate/sage-assent-wrapper.ts (Decisions B + C). All six
 // vocabularies are taken VERBATIM from the Nate B Jones SaaS Renewal Agent
 // License Prompt Kit — Agent System Touch Map (/inbox/20260508-262-promptkit-
 // 1.md). Adopted 2026-05-17 under D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17;

@@ -7,7 +7,7 @@
  *
  * WHY THIS FILE EXISTS HERE
  *   /trust-layer/ sits outside website/'s tsconfig root. The ATL Wrapper
- *   (atl-wrapper.ts) needs the LOGIC of computeWindowSnapshot +
+ *   (sage-assent-wrapper.ts) needs the LOGIC of computeWindowSnapshot +
  *   evaluateGradeTransition — not just their types — so the 5-file dependency
  *   closure of those two functions is ported here, inside website/'s tsconfig,
  *   rather than imported across the boundary. This is the founder-elected

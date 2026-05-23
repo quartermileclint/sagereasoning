@@ -1,13 +1,13 @@
 /**
- * atl-wrapper.test.ts — Agent Trust Layer Wrapper (Components 1 + 4) functional
+ * sage-assent-wrapper.test.ts — Agent Trust Layer Wrapper (Components 1 + 4) functional
  * tests + invariant checks.
  *
- * Run via: `npx tsx website/src/lib/substrate/__tests__/atl-wrapper.test.ts`
- * (mirrors the atl-bridge / score-architecture / agent-mode verification
+ * Run via: `npx tsx website/src/lib/substrate/__tests__/sage-assent-wrapper.test.ts`
+ * (mirrors the sage-assent-bridge / score-architecture / agent-mode verification
  * pattern; no Jest framework dependency).
  *
  * PR2 — build-to-wire verification immediate: this file invokes every exported
- * atl-wrapper function in the same session atl-wrapper.ts is written.
+ * sage-assent-wrapper function in the same session sage-assent-wrapper.ts is written.
  *
  * COVERAGE
  *
@@ -63,7 +63,7 @@ import {
   type BridgeContext,
   type KatorthomaProximityLevel,
   type WindowSnapshot,
-} from '../atl-wrapper'
+} from '../sage-assent-wrapper'
 
 import type { Layer2Assessment } from '../../translation-sandwich/layer2-mechanisms'
 import { validateLayer1Schema } from '../../translation-sandwich/layer1-extractor'
@@ -115,7 +115,7 @@ function assertThrows(label: string, fn: () => unknown): void {
 
 /**
  * Build a minimal valid Layer2Assessment at a given proximity. Modelled on the
- * MINIMAL_ASSESSMENT fixture in atl-bridge.test.ts (a known-valid shape). A
+ * MINIMAL_ASSESSMENT fixture in sage-assent-bridge.test.ts (a known-valid shape). A
  * fresh object is returned each call — important for the no-mutation checks.
  */
 function makeAssessment(opts: {

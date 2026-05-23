@@ -1,5 +1,5 @@
 /**
- * atl-bridge.ts — the substrate ↔ Agent Trust Layer bridge.
+ * sage-assent-bridge.ts — the substrate ↔ Agent Trust Layer bridge.
  *
  * STATUS: Scaffolded → Wired → Verified (2026-05-15, this session). New code,
  * imported by no route — no production exposure this session.
@@ -65,7 +65,7 @@
  *   - PR1: single-endpoint proof — this one mapping function proves the
  *     substrate↔ATL bridge pattern before the wrapper rolls it out.
  *   - PR2: build-to-wire-verification immediate — the test file
- *     (__tests__/atl-bridge.test.ts) invokes this function in the same session
+ *     (__tests__/sage-assent-bridge.test.ts) invokes this function in the same session
  *     this module is written.
  *   - PR4: N/A — no LLM call. The bridge is a deterministic projection.
  *   - PR10: the build follows the Plan → Execute → Verify loop; the Step 2
@@ -85,7 +85,7 @@ import type { Layer2Assessment } from '@/lib/translation-sandwich/layer2-mechani
 // rather than carrying its own mirror — there is one definition in website/src.
 import type { EvaluatedAction } from './trust-layer/types/evaluation'
 
-// Re-exported so the bridge's existing consumers (atl-bridge.test.ts) and
+// Re-exported so the bridge's existing consumers (sage-assent-bridge.test.ts) and
 // downstream ATL modules keep importing these from one place.
 export type { EvaluatedAction } from './trust-layer/types/evaluation'
 export type {

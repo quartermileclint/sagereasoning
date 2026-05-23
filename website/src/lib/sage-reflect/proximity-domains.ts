@@ -2,8 +2,8 @@
  * proximity-domains.ts — SR-15 per-virtue-domain katorthoma proximity (Stage A, A-4).
  *
  * Built at the Sage Reflect build Stage A session. Implements the founder lock
- * election SR-15 in /adopted/sage-reflect-product-design.md: Sage Assent (the
- * ATL) stores only an AGGREGATE typical_proximity — there is no per-virtue-domain
+ * election SR-15 in /adopted/sage-reflect-product-design.md: Sage Assent
+ * stores only an AGGREGATE typical_proximity — there is no per-virtue-domain
  * field — so Sage Reflect computes per-domain proximity ITSELF from the Q4 action
  * evidence and stores it Sage-Reflect-side.
  *
@@ -19,9 +19,9 @@
  *    across the non-null domains — virtue is one; the agent is only as close to
  *    katorthoma as its weakest cardinal domain. All domains null → aggregate null.
  *
- * KNOWN-RISK (recorded at lock): a future native Sage Assent (ATL) per-domain field
- * must reconcile with this Sage-Reflect-side computation — flagged for the ATL→Sage
- * Assent enhancement/rename track. Until then this is the home for KP-03/04.
+ * KNOWN-RISK (recorded at lock): a future native Sage Assent per-domain field
+ * must reconcile with this Sage-Reflect-side computation — flagged for the Sage
+ * Assent enhancement track (SR-15). Until then this is the home for KP-03/04.
  *
  * R4: this is engine-internal; only the resulting proximity levels are surfaced
  * (on the output schema's katorthoma_proximity_by_domain field). The per-action

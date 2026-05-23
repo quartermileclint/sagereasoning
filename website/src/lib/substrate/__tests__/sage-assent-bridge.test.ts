@@ -1,8 +1,8 @@
 /**
- * atl-bridge.test.ts — substrate ↔ Agent Trust Layer bridge functional tests
+ * sage-assent-bridge.test.ts — substrate ↔ Agent Trust Layer bridge functional tests
  * + invariant checks.
  *
- * Run via: `npx tsx website/src/lib/substrate/__tests__/atl-bridge.test.ts`
+ * Run via: `npx tsx website/src/lib/substrate/__tests__/sage-assent-bridge.test.ts`
  * (mirrors the A5 / A7 / philosophical-mode verification pattern; no Jest
  * framework dependency).
  *
@@ -12,7 +12,7 @@
  * import the real /trust-layer/evaluation-window/window-aggregator.ts —
  * /trust-layer/ sits outside website/'s tsconfig root (the load-bearing Step 2
  * finding). Instead: the bridge produces an EvaluatedAction typed against the
- * MIRRORED EvaluatedAction in atl-bridge.ts, and that mirror is a verbatim copy
+ * MIRRORED EvaluatedAction in sage-assent-bridge.ts, and that mirror is a verbatim copy
  * of /trust-layer/types/evaluation.ts's EvaluatedAction. So compile-time
  * assignability to the mirrored type IS shape-validity for
  * computeWindowSnapshot(agentId, EvaluatedAction[], ...). SHAPE-1..3 below
@@ -76,7 +76,7 @@ import {
   RECEIPT_ID_PREFIX,
   type BridgeContext,
   type EvaluatedAction,
-} from '../atl-bridge'
+} from '../sage-assent-bridge'
 
 import type { Layer2Assessment } from '../../translation-sandwich/layer2-mechanisms'
 

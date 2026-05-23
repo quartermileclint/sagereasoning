@@ -1,12 +1,12 @@
 /**
- * atl-accreditation-store.test.ts — ATL badge persistence layer (Component 3)
+ * sage-assent-accreditation-store.test.ts — ATL badge persistence layer (Component 3)
  * functional tests + invariant checks.
  *
  * Run via:
  *   npx tsx --env-file=.env.local \
- *     website/src/lib/substrate/__tests__/atl-accreditation-store.test.ts
+ *     website/src/lib/substrate/__tests__/sage-assent-accreditation-store.test.ts
  *
- * The --env-file is required: atl-accreditation-store.ts imports
+ * The --env-file is required: sage-assent-accreditation-store.ts imports
  * supabase-server.ts, which constructs a Supabase client at module load. The
  * client is constructed but never CALLED by this test — the pure mappers are
  * invoked directly, and the persistence seam is exercised via
@@ -19,7 +19,7 @@
  * fake lookupFn, compile-time-checks that the real lookupAccreditationRecord is
  * assignable to handleAccreditationLookup's lookupFn slot, and confirms the
  * async store functions are present exports — all in the same session
- * atl-accreditation-store.ts is written.
+ * sage-assent-accreditation-store.ts is written.
  *
  * COVERAGE
  *
@@ -101,7 +101,7 @@ import {
   upsertAccreditationRecord,
   appendGradeHistory,
   appendInitialGradeHistory,
-} from '../atl-accreditation-store'
+} from '../sage-assent-accreditation-store'
 
 import {
   createAccreditationRecord,
@@ -494,7 +494,7 @@ async function main(): Promise<void> {
   // Summary
   // --------------------------------------------------------------------------
   console.log('')
-  console.log(`atl-accreditation-store.test.ts — ${passCount} passed / ${failCount} failed`)
+  console.log(`sage-assent-accreditation-store.test.ts — ${passCount} passed / ${failCount} failed`)
   if (failCount > 0) {
     console.log('')
     console.log('FAILURES:')

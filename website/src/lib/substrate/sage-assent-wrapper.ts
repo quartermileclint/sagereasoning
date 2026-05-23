@@ -1,5 +1,5 @@
 /**
- * atl-wrapper.ts — the Agent Trust Layer Wrapper (Components 1 + 4).
+ * sage-assent-wrapper.ts — the Agent Trust Layer Wrapper (Components 1 + 4).
  *
  * STATUS: Scaffolded → Wired → Verified (2026-05-15, this session). New code,
  * imported by no route — no production exposure this session.
@@ -22,7 +22,7 @@
  * Each time a wrapped agent consults the substrate, the substrate returns a
  * signed Layer2Assessment. The wrapper:
  *
- *   1. maps the Layer2Assessment to an EvaluatedAction (via atl-bridge.ts),
+ *   1. maps the Layer2Assessment to an EvaluatedAction (via sage-assent-bridge.ts),
  *   2. accumulates the EvaluatedAction into the agent's carried profile
  *      (Component 1), and
  *   3. aggregates the accumulated profile into trajectory awareness — a
@@ -30,7 +30,7 @@
  *      carried_profile payload to attach to the agent's next Layer 1 input.
  *
  * It consumes two already-Verified pieces and the ported /trust-layer/ closure:
- *   - atl-bridge.ts — mapLayer2AssessmentToEvaluatedAction (the bridge; the PR1
+ *   - sage-assent-bridge.ts — mapLayer2AssessmentToEvaluatedAction (the bridge; the PR1
  *     single-endpoint proof of the substrate↔ATL pattern — this module is its
  *     next consumer).
  *   - ./trust-layer/ — the 5-file ported closure of computeWindowSnapshot +
@@ -86,7 +86,7 @@
  *   - PR1: the bridge was the single-endpoint proof of the substrate↔ATL
  *     pattern; this wrapper is its next consumer — kept a pure, synchronous,
  *     deterministic accumulator + aggregator.
- *   - PR2: the test file (__tests__/atl-wrapper.test.ts) invokes every exported
+ *   - PR2: the test file (__tests__/sage-assent-wrapper.test.ts) invokes every exported
  *     function in the same session this module is written.
  *   - PR4: N/A — no LLM call. The wrapper is deterministic plumbing.
  *   - PR10: the build follows the Plan → Execute → Verify loop; the Step 2
@@ -97,7 +97,7 @@ import {
   mapLayer2AssessmentToEvaluatedAction,
   type BridgeContext,
   type EvaluatedAction,
-} from './atl-bridge'
+} from './sage-assent-bridge'
 
 import type { Layer2Assessment } from '../translation-sandwich/layer2-mechanisms'
 import type { Layer1Schema } from '../translation-sandwich/layer1-extractor'
@@ -128,7 +128,7 @@ import type {
 export type {
   EvaluatedAction,
   BridgeContext,
-} from './atl-bridge'
+} from './sage-assent-bridge'
 export type {
   WindowSnapshot,
   WindowConfig,

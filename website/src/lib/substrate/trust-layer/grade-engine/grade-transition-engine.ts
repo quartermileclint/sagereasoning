@@ -12,7 +12,7 @@
  *
  * NOTE — clock read: evaluateGradeTransition stamps `updated_at` / `grade_since`
  *   on the returned record from new Date().toISOString(). This is the ported
- *   /trust-layer/ behaviour; atl-wrapper.ts documents it and its test asserts
+ *   /trust-layer/ behaviour; sage-assent-wrapper.ts documents it and its test asserts
  *   determinism modulo the timestamp fields.
  *
  * NOTE — R4: UPGRADE_THRESHOLDS / DOWNGRADE_THRESHOLDS are SageReasoning IP.

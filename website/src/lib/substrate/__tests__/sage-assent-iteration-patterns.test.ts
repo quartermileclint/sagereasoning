@@ -1,13 +1,13 @@
 /**
- * atl-iteration-patterns.test.ts — Agent Trust Layer Wrapper Component 5 (the
+ * sage-assent-iteration-patterns.test.ts — Agent Trust Layer Wrapper Component 5 (the
  * three iteration patterns) functional tests + invariant checks.
  *
- * Run via: `npx tsx website/src/lib/substrate/__tests__/atl-iteration-patterns.test.ts`
- * (mirrors the atl-wrapper / atl-bridge / score-architecture verification
+ * Run via: `npx tsx website/src/lib/substrate/__tests__/sage-assent-iteration-patterns.test.ts`
+ * (mirrors the sage-assent-wrapper / sage-assent-bridge / score-architecture verification
  * pattern; no Jest framework dependency).
  *
  * PR2 — build-to-wire verification immediate: this file invokes every exported
- * atl-iteration-patterns function in the same session atl-iteration-patterns.ts
+ * sage-assent-iteration-patterns function in the same session sage-assent-iteration-patterns.ts
  * is written.
  *
  * COVERAGE
@@ -81,7 +81,7 @@ import {
   PEER_AGENT_ASSESSMENT_SCHEMA,
   type ParallelCandidate,
   type PeerAgent,
-} from '../atl-iteration-patterns'
+} from '../sage-assent-iteration-patterns'
 
 import {
   createCarriedProfile,
@@ -91,7 +91,7 @@ import {
   type CarriedProfile,
   type BridgeContext,
   type KatorthomaProximityLevel,
-} from '../atl-wrapper'
+} from '../sage-assent-wrapper'
 
 import { renderAgentMode } from '../agent-mode-service'
 
@@ -143,7 +143,7 @@ function assertThrows(label: string, fn: () => unknown): void {
 
 // ============================================================================
 // Fixtures — minimal valid Layer2Assessment, parameterised. Modelled on the
-// MINIMAL_ASSESSMENT fixture in atl-wrapper.test.ts (a known-valid shape). A
+// MINIMAL_ASSESSMENT fixture in sage-assent-wrapper.test.ts (a known-valid shape). A
 // fresh object is returned each call — important for the no-mutation checks.
 // ============================================================================
 
