@@ -9,7 +9,7 @@
  * COVERAGE
  *
  *   DISPATCH (PR1 / PR2 — the dispatch pattern is invoked here with the new mode)
- *     DSP-1  renderLayer3Mode({ mode: 'atl_wrapper' }) returns a result
+ *     DSP-1  renderLayer3Mode({ mode: 'sage_assent' }) returns a result
  *     DSP-2  the result carries mode / json / markdown
  *     DSP-3  renderLayer3Mode still throws on an unimplemented mode
  *     DSP-4  renderAgentMode (the sync entry point) returns the same JSON
@@ -423,49 +423,49 @@ const CTX_ENGINE_DETECTED: ScoreContext = {
 async function main(): Promise<void> {
   // --- Renders used across the assertions -------------------------------
   const confirmed = await renderLayer3Mode({
-    mode: 'atl_wrapper',
+    mode: 'sage_assent',
     assessment: CONFIRMED,
     consumer_context: CONSUMER_PLAIN,
     score_context: CTX_ENGINE,
   })
   const contrary = await renderLayer3Mode({
-    mode: 'atl_wrapper',
+    mode: 'sage_assent',
     assessment: CONTRARY,
     consumer_context: CONSUMER_PLAIN,
     score_context: CTX_ENGINE,
   })
   const nullRender = await renderLayer3Mode({
-    mode: 'atl_wrapper',
+    mode: 'sage_assent',
     assessment: NULL_ASSESSMENT,
     consumer_context: CONSUMER_PLAIN,
     score_context: CTX_ENGINE,
   })
   const provisional = await renderLayer3Mode({
-    mode: 'atl_wrapper',
+    mode: 'sage_assent',
     assessment: CONFIRMED,
     consumer_context: CONSUMER_PLAIN,
     score_context: CTX_AGENT,
   })
   const minimal = await renderLayer3Mode({
-    mode: 'atl_wrapper',
+    mode: 'sage_assent',
     assessment: MINIMAL,
     consumer_context: CONSUMER_PLAIN,
     score_context: CTX_ENGINE,
   })
   const mentor = await renderLayer3Mode({
-    mode: 'atl_wrapper',
+    mode: 'sage_assent',
     assessment: CONFIRMED,
     consumer_context: CONSUMER_MENTOR,
     score_context: CTX_ENGINE,
   })
   const category = await renderLayer3Mode({
-    mode: 'atl_wrapper',
+    mode: 'sage_assent',
     assessment: CONFIRMED,
     consumer_context: CONSUMER_CATEGORY,
     score_context: CTX_ENGINE,
   })
   const distress = await renderLayer3Mode({
-    mode: 'atl_wrapper',
+    mode: 'sage_assent',
     assessment: DISTRESS,
     consumer_context: CONSUMER_PLAIN,
     score_context: CTX_ENGINE,
@@ -475,7 +475,7 @@ async function main(): Promise<void> {
   assert('DSP-1  renderLayer3Mode returns a result', confirmed != null)
   assert(
     'DSP-2  result carries mode / json / markdown',
-    confirmed.mode === 'atl_wrapper' &&
+    confirmed.mode === 'sage_assent' &&
       typeof confirmed.markdown === 'string' &&
       confirmed.json != null &&
       confirmed.json.version === 'agent-mode-response-v1'
@@ -497,7 +497,7 @@ async function main(): Promise<void> {
     // renderAgentMode (the synchronous entry point) produces the same JSON as
     // the async dispatch path.
     const sync = renderAgentMode({
-      mode: 'atl_wrapper',
+      mode: 'sage_assent',
       assessment: CONFIRMED,
       consumer_context: CONSUMER_PLAIN,
       score_context: CTX_ENGINE,
@@ -686,7 +686,7 @@ async function main(): Promise<void> {
     // No score_context supplied → the renderer defaults to
     // justification_source 'absent' (the honest "no justification" path).
     const noCtx = await renderLayer3Mode({
-      mode: 'atl_wrapper',
+      mode: 'sage_assent',
       assessment: CONFIRMED,
       consumer_context: CONSUMER_PLAIN,
     })
@@ -698,7 +698,7 @@ async function main(): Promise<void> {
   }
   {
     const detected = renderAgentMode({
-      mode: 'atl_wrapper',
+      mode: 'sage_assent',
       assessment: CONFIRMED,
       consumer_context: CONSUMER_PLAIN,
       score_context: CTX_ENGINE_DETECTED,
@@ -709,7 +709,7 @@ async function main(): Promise<void> {
       'detected'
     )
     const clean = renderAgentMode({
-      mode: 'atl_wrapper',
+      mode: 'sage_assent',
       assessment: CONFIRMED,
       consumer_context: CONSUMER_PLAIN,
       score_context: CTX_ENGINE_CLEAN,
@@ -912,13 +912,13 @@ async function main(): Promise<void> {
   // --- INVARIANTS -------------------------------------------------------
   {
     const a = renderAgentMode({
-      mode: 'atl_wrapper',
+      mode: 'sage_assent',
       assessment: CONFIRMED,
       consumer_context: CONSUMER_PLAIN,
       score_context: CTX_ENGINE,
     })
     const b = renderAgentMode({
-      mode: 'atl_wrapper',
+      mode: 'sage_assent',
       assessment: CONFIRMED,
       consumer_context: CONSUMER_PLAIN,
       score_context: CTX_ENGINE,
@@ -937,7 +937,7 @@ async function main(): Promise<void> {
   {
     const snapshot = JSON.stringify(CONFIRMED)
     renderAgentMode({
-      mode: 'atl_wrapper',
+      mode: 'sage_assent',
       assessment: CONFIRMED,
       consumer_context: CONSUMER_PLAIN,
       score_context: CTX_ENGINE,

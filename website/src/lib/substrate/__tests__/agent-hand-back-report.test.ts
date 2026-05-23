@@ -237,9 +237,9 @@ function makeRenderInput(opts: {
   proximity: KatorthomaProximityLevel
   is_kathekon?: boolean | null
   kathekon_quality?: 'strong' | 'moderate' | 'marginal' | 'contrary'
-}): Layer3ModeRenderInput & { mode: 'atl_wrapper' } {
+}): Layer3ModeRenderInput & { mode: 'sage_assent' } {
   return {
-    mode: 'atl_wrapper',
+    mode: 'sage_assent',
     assessment: makeAssessment(opts),
     consumer_context: { consumer: 'api_reason' },
     score_context: { justification_source: 'engine_constructed' },

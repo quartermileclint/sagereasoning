@@ -7229,3 +7229,42 @@ Expected: the first two find nothing (the value is in neither the published cont
 **Status:** Adopted. Cross-references: `D-TRACK-FOLLOWONS-C-PHASE3-EXTERNAL-WIRE-2026-05-23` (parent / parking entry); `D-ATL-WRAPPER-WIRED-VERIFIED-2026-05-15`, `D-ATL-AGENT-MODE-RENDERING-WIRED-VERIFIED-2026-05-15` (discriminant provenance); `/adopted/adr/2026-05-23-atl-wrapper-discriminant-classification.md` (this classification's ADR); `/drafts/2026-05-23-track-followons-design-pack.md` §C; this session's close `/operations/handoffs/founder/2026-05-23-parked1-atl-wrapper-classification-close.md`.
 
 ---
+
+## 2026-05-23 — D-PARKED2-DISCRIMINANT-RENAME-TRUST-LAYER-RETAIN-2026-05-23
+
+**Decision:** Retired the last two parked Track C internals. **Bite 1:** renamed the Layer 3 render-mode discriminant value `'atl_wrapper'` → **`'sage_assent'`** (founder election; AI-recommended `'agent_mode'`, founder overrode — a stylistic call with no correctness / risk / namespace difference). **Bite 2:** elected option **(c) — consciously retain** the `website/src/lib/substrate/trust-layer/` directory name as the one named residual ATL-era token; **no directory rename, no code change.** With both items now dispositioned, the Track C ATL→Sage Assent rename arc is **complete end-to-end** (internal + governance + external/wire + parked internals).
+
+**Reasoning:** Bite 1 was de-risked by `D-ATL-WRAPPER-CLASSIFICATION-INTERNAL-DISPATCH-2026-05-23` (internal-dispatch → Standard/Elevated); at open I re-confirmed all three ADR revisit-conditions remain **unfired** (no `/api` route serializes `AgentModeResponse`; nothing in any `.sql`; nothing in `website/public/`), so the rename stayed Standard/Elevated, and `'sage_assent'` has no collision with the `sage_assent_write` DB scope / `sr_assent_` credential prefix (different namespace; the discriminant is internal-dispatch only). Bite 2 (c) chosen because the website directory is a **verbatim port** of the root `/trust-layer/` source-of-truth codebase: every file carries a KEEP-IN-SYNC banner asserting "the ported directory structure mirrors /trust-layer/ exactly so [relative imports] resolve unchanged." Three `trust-layer` dirs exist (root source-of-truth + this website mirror + a `knowledge-base/` copy). Renaming only the website mirror would force a rewrite of those banners' structural-identity claim for marginal naming benefit; renaming root too is a separate codebase's scope. Retaining the name keeps the verbatim-mirror semantics intact and leaves a single recorded residual token rather than a half-renamed mirror. **PR15 consult:** `.claude/skills/anthropic/` (17 skills) + `/operations/agentic-commerce-findings-downstream-order.md` — no Anthropic-canonical primitive substitutes for renaming/retaining this project's own internal identifiers; F1–F4 do not target these. **PR16 lens:** both dispositions complete the Sage Assent / Character Kernel (R18a) internal-naming cleanup; **positioning-neutral** (the discriminant is internal-dispatch, never surfaced; `trust-layer/` is an internal path, not user/developer-facing copy — the four R18a/R18b public surfaces were already handled in Track C Phase 3); dogfood relevance n/a. **Cache-drift check:** neither cache nor the manifest references the literal discriminant value or the directory path → **no cache update**; `D-CACHE-DRIFT-…` not logged.
+
+**Files touched (bite 1 — value rename only; 6 files, 40 lines, 1:1 substitution, no structural change):**
+- `website/src/lib/substrate/philosophical-mode-service.ts` — the `Layer3RenderMode` union member, the dispatch `case`, the `renderLayer3Mode` overload signature, the exhaustiveness-guard error-message text, and comments.
+- `website/src/lib/substrate/agent-mode-service.ts` — `AgentModeResponse.mode`, `AgentModeRenderResult.mode`, the JSON payload const, the dispatch return, and comments.
+- `website/src/lib/substrate/sage-assent-iteration-patterns.ts` — the `ParallelCandidate.input` intersection type + comments.
+- `website/src/lib/substrate/__tests__/agent-mode-service.test.ts`, `…/sage-assent-iteration-patterns.test.ts`, `…/agent-hand-back-report.test.ts` — fixture `mode` values + assertions.
+- **Untouched by design:** the `version:'agent-mode-response-v1'` schema tag, the `AgentMode*` symbol names, every `D-ATL-*` decision ID, and the entire `trust-layer/` directory (bite 2 = retain). The gitignored `.fuse_hidden*` orphan inodes were excluded from the rename.
+
+**Risk classification:** **Elevated** under 0d-ii (session as a whole; bite 1 is a value rename to existing internal functionality). AC7 **not** engaged (no auth / credential / session / encryption logic). PR6 **not** engaged — the rename does not touch the R20a distress classifier / Zone-2 / Zone-3 logic; the agent-mode renderer *contains* the distress passthrough, but the dispatch-discriminant string is not that logic, and the R20A-1..4 distress assertions stayed green. "No current users" holds.
+
+**Rollback path:** `git revert <commit>` + push → Vercel rebuilds to the pre-rename shape. No schema, no env, no deploy-config, no data; zero live credentials/users → no runtime implications.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsc --noEmit                                                                              # exit 0 (exhaustiveness guard catches an incomplete union edit)
+npx tsx --env-file=.env.local src/lib/substrate/__tests__/agent-mode-service.test.ts          # 63 pass / 0 fail (incl. R20A-1..4 distress)
+npx tsx --env-file=.env.local src/lib/substrate/__tests__/philosophical-mode-service.test.ts  # 43 pass / 0 fail
+npx tsx src/lib/substrate/__tests__/sage-assent-iteration-patterns.test.ts                    # 64 pass / 0 fail
+npx tsx src/lib/substrate/__tests__/agent-hand-back-report.test.ts                            # 54 pass / 0 fail
+grep -rIn "atl_wrapper" src --include="*.ts" | grep -v fuse_hidden ; echo "exit: $?"          # no matches, exit 1
+```
+Expected: tsc 0; 224 assertions green; negative grep clean.
+
+**Open questions / deferred (PR7):** none new. The Track C parked-item backlog is now **empty** — bite 1 renamed, bite 2 dispositioned (retain). `trust-layer/` is a **recorded residual**, revisitable only if the root `/trust-layer/` codebase is itself renamed (then the website mirror follows for structural identity).
+
+**Rules served:** R0, R18a, 0a, 0d-ii, 0f, PR1, PR2, PR7, PR10, PR12, PR15, PR16.
+
+**Diagnostic-certainty (PR10):** **Diagnostic-certain — root cause identified.** Bite 1: the rename is exhaustive — the `tsc` exhaustiveness guard would fail on an incomplete union edit, 224 assertions pass (the distress guard among them), and the negative grep is clean. Bite 2: no change made; the (c) decision is conclusive by election.
+
+**Status:** Adopted. Implementation status: bite 1 discriminant rename — **Verified (in-session: tsc 0 + 224 assertions + negative grep)** → **Verified (production)** on the founder's commit + push + Vercel-green (renames only; byte-identical runtime behaviour). Cross-references: `D-ATL-WRAPPER-CLASSIFICATION-INTERNAL-DISPATCH-2026-05-23` (the classification that de-risked bite 1); `D-TRACK-FOLLOWONS-C-PHASE3-EXTERNAL-WIRE-2026-05-23`, `D-TRACK-FOLLOWONS-C-PHASE1-RENAME-2026-05-23` (the Track C arc this completes); `/adopted/adr/2026-05-23-atl-wrapper-discriminant-classification.md`; `/drafts/2026-05-23-track-followons-design-pack.md` §C; this session's close `/operations/handoffs/founder/2026-05-23-parked2-renames-close.md`.
+
+---

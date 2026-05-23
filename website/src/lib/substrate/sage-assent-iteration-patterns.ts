@@ -345,7 +345,7 @@ export function runSequentialLoop(
 
 /**
  * One candidate decision in a parallel evaluation: the Layer3ModeRenderInput
- * the substrate produced for it (mode 'atl_wrapper'), plus the BridgeContext
+ * the substrate produced for it (mode 'sage_assent'), plus the BridgeContext
  * needed to accumulate it into the carried profile IF it is the one chosen.
  *
  * Added 2026-05-16 under D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16
@@ -359,9 +359,9 @@ export interface ParallelCandidate {
    *  produced it when it called the substrate for this candidate. */
   readonly layer1_input: Layer1Schema
   /** The agent-mode render input for this candidate. mode is fixed to
-   *  'atl_wrapper' — parallel evaluation collects agent-mode renderings.
+   *  'sage_assent' — parallel evaluation collects agent-mode renderings.
    *  The Layer 2 assessment is reached via input.assessment. */
-  readonly input: Layer3ModeRenderInput & { mode: 'atl_wrapper' }
+  readonly input: Layer3ModeRenderInput & { mode: 'sage_assent' }
   /** The BridgeContext for this candidate — used only by accumulateChosen if
    *  this candidate is the one the agent commits to. */
   readonly context: BridgeContext

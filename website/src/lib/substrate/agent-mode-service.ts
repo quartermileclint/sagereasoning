@@ -114,7 +114,7 @@
  *     rollout.
  *   - PR2: build-to-wire-verification immediate — the test file
  *     (__tests__/agent-mode-service.test.ts) invokes renderLayer3Mode with the
- *     'atl_wrapper' mode in the same session this module is written.
+ *     'sage_assent' mode in the same session this module is written.
  *   - PR4: N/A — no LLM call. The rendering is a deterministic projection.
  *   - PR10: the build follows the Plan → Execute → Verify loop; the Step 2
  *     design-decision gate was the Plan step.
@@ -312,7 +312,7 @@ export interface AgentModeResponse {
   /** Schema version. Constant. */
   version: 'agent-mode-response-v1'
   /** The render mode. Constant for this module. */
-  mode: 'atl_wrapper'
+  mode: 'sage_assent'
   /** Section 1 — the six mandatory wraps, verbatim from the injection layer. */
   mandatory_injections: Layer3InjectionSet
   /** Section 2 — the verdict (kathekon gate result + the verdict-to-action
@@ -348,9 +348,9 @@ export interface AgentModeResponse {
 }
 
 /** The result of rendering agent mode — the dispatch's return shape for the
- *  'atl_wrapper' mode. Mirrors philosophical mode's Layer3ModeRenderResult. */
+ *  'sage_assent' mode. Mirrors philosophical mode's Layer3ModeRenderResult. */
 export interface AgentModeRenderResult {
-  mode: 'atl_wrapper'
+  mode: 'sage_assent'
   /** The canonical JSON payload — the in-loop machine-readable rendering. */
   json: AgentModeResponse
   /** The Markdown text rendering — the per-assessment human-readable rendering;
@@ -563,7 +563,7 @@ export function projectAgentModeJSON(
 
   return {
     version: 'agent-mode-response-v1',
-    mode: 'atl_wrapper',
+    mode: 'sage_assent',
     mandatory_injections: injections,
     verdict: {
       kathekon: kathekonActionLabel(score.verdict.is_kathekon),
@@ -910,5 +910,5 @@ export function renderAgentMode(
   // Step 5 — render the per-assessment human-readable Markdown.
   const markdown = renderAgentModeMarkdown(json)
 
-  return { mode: 'atl_wrapper', json, markdown }
+  return { mode: 'sage_assent', json, markdown }
 }

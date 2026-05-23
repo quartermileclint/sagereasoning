@@ -171,7 +171,7 @@ import {
   type RetrievedPassage,
 } from '@/lib/rag/retrieve-passages'
 
-// Agent-mode rendering (Sage Assent Wrapper Component 2) — the 'atl_wrapper' dispatch
+// Agent-mode rendering (Sage Assent Wrapper Component 2) — the 'sage_assent' dispatch
 // case delegates to renderAgentMode. The value import is one-directional
 // (philosophical-mode-service.ts → agent-mode-service.ts at runtime);
 // agent-mode-service.ts imports only the Layer3ModeRenderInput TYPE back, which
@@ -201,13 +201,13 @@ import {
 // MODE-DISPATCH TYPES (PR1 — the pattern standard / private / Sage Assent extend)
 // ============================================================================
 
-/** The Layer 3 render modes. 'philosophical' and 'atl_wrapper' are implemented;
+/** The Layer 3 render modes. 'philosophical' and 'sage_assent' are implemented;
  *  the other two are reserved so the dispatch switch is exhaustively typed.
- *  'atl_wrapper' is the Layer 3 agent-mode rendering — Sage Assent Wrapper Component 2;
+ *  'sage_assent' is the Layer 3 agent-mode rendering — Sage Assent Wrapper Component 2;
  *  added 2026-05-15 (D-ATL-AGENT-MODE-RENDERING-WIRED-VERIFIED-2026-05-15). */
 export type Layer3RenderMode =
   | 'philosophical'
-  | 'atl_wrapper'
+  | 'sage_assent'
   // Reserved — implemented in subsequent build sessions:
   // | 'standard'
   // | 'private'
@@ -242,7 +242,7 @@ export interface Layer3ModeRenderInput {
   /** Optional ScoreContext — the caller-supplied inputs the substrate score
    *  needs but does not itself emit (`justification_source` required;
    *  `declared_motivation_passion` optional). Consumed by the agent-mode
-   *  ('atl_wrapper') renderer; IGNORED by philosophical mode. When absent, the
+   *  ('sage_assent') renderer; IGNORED by philosophical mode. When absent, the
    *  agent-mode renderer defaults to `{ justification_source: 'absent' }` (the
    *  honest "no justification available" path). The wrapper (spec step 5)
    *  becomes the eventual producer; until then the caller supplies it. */
@@ -1486,7 +1486,7 @@ async function renderPhilosophicalMode(
 // THE LAYER 3 MODE-DISPATCH ENTRY POINT (PR1 — single-endpoint proof)
 //
 // This is the dispatch pattern the four-mode build arc is proven on. The switch
-// handles 'philosophical' and 'atl_wrapper'; standard / private extend the same
+// handles 'philosophical' and 'sage_assent'; standard / private extend the same
 // switch in subsequent build sessions. The mandatory-injection layer
 // (layer3-service.ts) is shared by every mode regardless.
 //
@@ -1503,14 +1503,14 @@ async function renderPhilosophicalMode(
 
 /**
  * Render a Layer 3 response in the requested mode. Branches on `mode`;
- * 'philosophical' and 'atl_wrapper' are implemented. Throws on an unimplemented
+ * 'philosophical' and 'sage_assent' are implemented. Throws on an unimplemented
  * mode rather than silently producing nothing.
  */
 export async function renderLayer3Mode(
   input: Layer3ModeRenderInput & { mode: 'philosophical' }
 ): Promise<Layer3ModeRenderResult>
 export async function renderLayer3Mode(
-  input: Layer3ModeRenderInput & { mode: 'atl_wrapper' }
+  input: Layer3ModeRenderInput & { mode: 'sage_assent' }
 ): Promise<AgentModeRenderResult>
 export async function renderLayer3Mode(
   input: Layer3ModeRenderInput
@@ -1521,7 +1521,7 @@ export async function renderLayer3Mode(
   switch (input.mode) {
     case 'philosophical':
       return renderPhilosophicalMode(input)
-    case 'atl_wrapper':
+    case 'sage_assent':
       // renderAgentMode is synchronous + deterministic (no LLM call, no
       // retrieve-passages call); the async wrapper here resolves it
       // immediately. PR1 single-endpoint proof of the agent-mode rendering
@@ -1533,7 +1533,7 @@ export async function renderLayer3Mode(
       const unimplemented: never = input.mode
       throw new Error(
         `Layer 3 render mode '${String(unimplemented)}' is not implemented yet. ` +
-          'Implemented modes: philosophical, atl_wrapper.'
+          'Implemented modes: philosophical, sage_assent.'
       )
     }
   }
