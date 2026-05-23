@@ -88,11 +88,50 @@ git commit -m "Track C Phase 3 (D-TRACK-FOLLOWONS-C-PHASE3-EXTERNAL-WIRE-2026-05
 ```
 Then push. Vercel rebuilds. **Deploy code + run the migration in the same window** (the two must match).
 
-**Step 4 — post-deploy smoke test (prefix accept/reject).** Mint a fresh credential via the admin endpoint (it now writes `purpose='sage_assent_write'`), then:
-- Present the new `sr_assent_…` token to `POST /api/accreditation/{agent_id}` → expect **200** (with the kill-switch enabled as before).
-- Present any `sr_atl_…`-prefixed token → expect **401**.
-- `curl https://www.sagereasoning.com/.well-known/agent-card.json` → `tokenPrefix` reads `sr_assent_`; the extension URI reads `sage-assent-write-auth/v1`.
-- Open `/limitations` and `/ops-hub` → copy reads "Sage Assent".
+**Step 4 — post-deploy smoke test (exact commands).** Two browser checks (no terminal) + a 4-command credential flow. Every expected HTTP status is exact; a result other than the stated one means stop + report.
+
+**4a — agent-card (browser).** Open `https://www.sagereasoning.com/.well-known/agent-card.json`; Cmd+F `tokenPrefix` → reads `sr_assent_`; Cmd+F `sage-assent-write-auth` → present. PASS = both found, and no `sr_atl_`/`atl-write-auth` anywhere.
+
+**4b — public copy (browser).** `https://www.sagereasoning.com/limitations` → the certification section reads "Sage Assent evaluates AI agents'…". `https://www.sagereasoning.com/ops-hub` → pipeline row reads "P3: Sage Assent".
+
+**Get your admin token (for 4c/4f):** sign in at `https://www.sagereasoning.com` → DevTools (Cmd+Opt+I) → Application → Local Storage → `https://www.sagereasoning.com` → the key `sb-…-auth-token` → copy the `access_token` value (long string starting `eyJ…`).
+
+Pre-req: `SUBSTRATE_WRITE_PATH_ENABLED='true'` in Vercel (left on per A10). If 4d/4e return **503**, the flag is unset — set it to `true`, redeploy, retry.
+
+**4c — mint (proves new prefix generation + new scope WRITE).**
+```
+curl -s -w '\nHTTP_STATUS: %{http_code}\n' -X POST \
+  "https://www.sagereasoning.com/api/admin/accreditation-credentials" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" -H "Content-Type: application/json" \
+  -d '{"agent_id":"agent_phase3_smoke_v1","purpose":"sage_assent_write","label":"Phase 3 smoke"}'
+```
+Expect **201**; body has `"token":"sr_assent_…"` and `"credential":{"id":"<uuid>",…}`. Record the token + the id. (409 → that agent already has a credential; use `agent_phase3_smoke_v2`. 401 → token wrong/expired.)
+
+**4d — OLD prefix rejected (proves cutover).**
+```
+curl -s -w '\nHTTP_STATUS: %{http_code}\n' -X POST \
+  "https://www.sagereasoning.com/api/accreditation/agent_phase3_smoke_v1" \
+  -H "Authorization: Bearer sr_atl_00000000000000000000000000000000" \
+  -H "Content-Type: application/json" -d '{}'
+```
+Expect **401**.
+
+**4e — NEW token accepted (proves new prefix + new scope READ round-trip).**
+```
+curl -s -w '\nHTTP_STATUS: %{http_code}\n' -X POST \
+  "https://www.sagereasoning.com/api/accreditation/agent_phase3_smoke_v1" \
+  -H "Authorization: Bearer <MINTED_sr_assent_TOKEN>" \
+  -H "Content-Type: application/json" -d '{}'
+```
+Expect **400** with a message about `'kind'`. **The 400 (not 401) is the pass:** the token cleared the auth gate (new prefix accepted + `sage_assent_write` row found); the 400 is only the endpoint asking for a real write body, which this test deliberately omits. The 4d→401 vs 4e→400 contrast (same call, only the prefix differs) IS the cutover proof.
+
+**4f — cleanup (revoke the smoke credential).**
+```
+curl -s -w '\nHTTP_STATUS: %{http_code}\n' -X DELETE \
+  "https://www.sagereasoning.com/api/admin/accreditation-credentials?id=<CREDENTIAL_ID>" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+Expect **200** `{"revoked":true,…}`.
 
 When Steps 0–4 pass, the implementation status flips **Wired → Verified (production)**.
 
@@ -122,4 +161,14 @@ When Steps 0–4 pass, the implementation status flips **Wired → Verified (pro
 - `/drafts/2026-05-23-track-followons-design-pack.md` §C (deliverable-of-the-day)
 - `website/supabase-api-keys-phase3-scope-rename-migration.sql` (the migration to run)
 
-*End of session close. Stabilised to a known-good state: Phase 3 built across all four external surfaces, `tsc`-clean and green across the affected suites, `D-ATL-*` IDs preserved; production UNCHANGED until you complete the Critical-Change-Protocol gate (zero-credential check → migration → commit/push → smoke tests). After Phase 3 the locked order returns to E#1 (persist the Agent-Card verdict). Your election at next open.*
+## Verification Confirmation (appended 2026-05-23, post-deploy)
+
+Founder completed the full gate + smoke test. **Phase 3 = Verified (production); Track C rename arc CLOSED end-to-end.**
+- Zero-credential gate: 0 active `atl_write` rows (3 revoked tombstones) → clean cutover confirmed safe.
+- Migration: run + VERIFY passed (`remaining_atl_write=0`, `sage_assent_write_rows=3`, new constraint + unique index present, old absent, trigger predicate on new value, trigger attached). First run failed on an AI-caused backfill-before-drop ordering bug (DB unchanged); corrected + re-run clean.
+- Deploy: committed + pushed; Vercel green.
+- Smoke test: agent-card serves `sr_assent_` + `sage-assent-write-auth/v1`; `/limitations` + `/ops-hub` read "Sage Assent"; mint → 201 (`sr_assent_` token); old `sr_atl_` → 401; new token → 400 (auth accepted); revoke → 200.
+
+**Production state now:** code + agent-card + public copy on the `sr_assent_` / `sage_assent_write` / `sage-assent-write-auth/v1` surface; DB migrated; `SUBSTRATE_WRITE_PATH_ENABLED='true'` (write surface Live). All other flags unchanged from the Phase-2 baseline.
+
+*End of session close. Stabilised to a known-good state: Phase 3 Verified across all four external surfaces; Track C rename arc complete (Phases 1+2+3); `D-ATL-*` IDs preserved. Next session: E#1 (persist the Sage Calling Agent-Card verdict) per the locked order, or a parked item — your election at open. Prompt: `/operations/handoffs/founder/2026-05-23-E1-agent-card-verdict-NEXT-SESSION-PROMPT.md`.*
