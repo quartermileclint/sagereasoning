@@ -7192,4 +7192,6 @@ Then run `website/supabase-discovery-sessions-agent-card-role-hint-migration.sql
 
 **Status:** Adopted. Implementation status: E#1 — **Wired** (tsc 0 + suites green in-session) → **Verified (production)** on the founder's migration VERIFY + (optional) runtime smoke. Cross-references: `D-TRACK-FOLLOWONS-C-PHASE3-EXTERNAL-WIRE-2026-05-23`; `D-SAGE-CALLING-STAGE2-ENGINE-STORE-WIRED-VERIFIED-2026-05-21`; `D-PURPOSE-DISCOVERY-DESIGN-LOCKED-2026-05-21` (D-13); `/drafts/2026-05-23-track-followons-design-pack.md` §E; this session's close `/operations/handoffs/founder/2026-05-23-E1-agent-card-verdict-close.md`.
 
+**Verification confirmation (appended 2026-05-23):** Founder ran the migration — VERIFY clean (`agent_card_role_hint` = text / nullable / no-default; `discovery_sessions_agent_card_role_hint_check` present; `column_count = 12`); committed + pushed; Vercel green; smoke Steps 1–3 done. Implementation status flips **Wired → Verified (production), 2026-05-23**. E#1 (the one pre-launch Sage Calling follow-on) **CLOSED**. (R0 audit-trail accuracy; Standard-risk governance edit.)
+
 ---

@@ -70,4 +70,13 @@ When Steps 1–3 pass, the implementation status flips **Wired → Verified (pro
 - `/drafts/2026-05-23-track-followons-design-pack.md` §E (deliverable-of-the-day)
 - `website/supabase-discovery-sessions-agent-card-role-hint-migration.sql` (the migration to run)
 
-*End of session close. Stabilised to a known-good state: E#1 Wired (tsc 0 + suites green); production unchanged pending your migration + commit. The one actionable pre-launch Sage Calling follow-on is built.*
+## Verification Confirmation (appended 2026-05-23, post-deploy)
+
+Founder completed the gate. **E#1 = Verified (production); CLOSED.**
+- Migration: run + VERIFY clean (`agent_card_role_hint` = text / nullable / no-default; `discovery_sessions_agent_card_role_hint_check` present; `column_count = 12`).
+- Deploy: committed + pushed; Vercel green.
+- Smoke: Steps 1–3 done.
+
+**Production state now:** code on the E1 shape (verified Agent-Card chosen-role hint persisted at session-open, read into the five-spec assembly on approval); `discovery_sessions` at 12 columns. All other flags unchanged from the Phase-3 baseline. Implementation status flips **Wired → Verified (production)**.
+
+*End of session close. Stabilised to a known-good state: E#1 Verified (production) and CLOSED — a verified Agent Card's chosen-role hint now carries into the five-spec assembly. Next session: founder elects the next bite (recommended: the parked `mode:'atl_wrapper'` discriminant classification) per `/operations/handoffs/founder/2026-05-23-parked1-atl-wrapper-classification-NEXT-SESSION-PROMPT.md`.*
