@@ -7457,3 +7457,45 @@ Expected: the Combination-1 / S2-neg rows and M-4 read as passing/resolved with 
 **Status:** Adopted. Cross-references: `D-DATA-ROOM-COMBINATION-1-PASSING-2026-05-24`; `D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24`; `/drafts/2026-05-23-whole-system-data-room-brief.md` (§5, §9); `data-room/04_test_brief/test-brief.md`; `data-room/04_test_brief/test-flag-config.md`; `/operations/handoffs/founder/2026-05-24-data-room-combination-1-passing-close.md`; `/operations/handoffs/founder/2026-05-24-whole-system-test-orchestrator-harness-NEXT-SESSION-PROMPT.md`.
 
 ---
+
+## 2026-05-24 — D-WHOLE-SYSTEM-HARNESS-DESIGN-2026-05-24
+
+**Decision:** Designed the **Reading-A orchestrator harness**, defined the **nine-scenario matrix** (L1–L7 + Combination 1/2), and produced the founder-performable **test-environment standup checklist** — and refreshed the stale `test-flag-config.md` to add the provenance-gate flags + the genuine→200 trio. Design + data-room docs only; **no product code, schema, env, or deploy touched**. The orchestrator is **test scaffolding** (plays the agent over HTTP against a TEST env), not server-side seam-wiring (Reading B remains rejected). The build session that follows opens with this spec + checklist and runs the **L7 single-loop proof first** (PR1).
+
+**Reasoning:** Executes the next-session prompt under `D-WHOLE-SYSTEM-TEST-ORCHESTRATOR-READING-A-2026-05-24`. **PR15 consult:** built on the installed `webapp-testing` (Playwright) skill (`.claude/skills/anthropic/`) + the repo's existing plain-`tsx` assertion pattern, not greenfield — so the harness lives under `website/scripts/` (outside `src/`, never bundled), with outputs in `data-room/05_outputs/`. **Two material findings surfaced and folded in (PR13):** (1) `/api/calling`, `/api/accreditation/[agent_id]`, and `/api/practice/reflect` all authenticate with the **same `Bearer sr_assent_` write token** (`SAGE_ASSENT_WRITE_TOKEN_PREFIX='sr_assent_'`) — only `/api/reason` uses the JWT/API-key/plugin-auth model — so the credential is minted **at setup, before the loop**, correcting the prompt's inline "mint mid-loop" ordering; (2) `api_keys`, `loop_billing_events`, and `api_key_usage` are **NOT created by any repo migration** (only `ALTER`ed/referenced), so a naive migration-replay leaves the test project unable to authenticate — the checklist flags this and recommends a **schema-only clone** of production (structure, zero rows). **PR16 lens:** the harness **strengthens** "Character Kernel" positioning (a green whole-system run is the evidence R18f is enforced end-to-end) and is dogfood-relevant (the loop is substrate-consultable via `/api/reason` by construction).
+
+**Files touched:**
+- `data-room/04_test_brief/test-flag-config.md` — added `SUBSTRATE_PROVENANCE_GATE_ENABLED` + `SUBSTRATE_LAYER2_PUBLIC_KEY` rows; new "genuine→200 trio + false-403 trap" section; cross-ref to the genuine→200 recipe.
+- `data-room/04_test_brief/orchestrator-harness-design.md` (NEW) — what the harness is; location decision (`website/scripts/whole-system-harness/`); per-endpoint auth (test env); the endpoint-threading map (S1–S4); the Seam-2 bridge `tsx` step; PR15/PR16 notes; build sequencing.
+- `data-room/04_test_brief/scenario-matrix.md` (NEW) — one scenario per configuration (L1–L7) + Combination 1 (422/403) + Combination 2 (disclaimer); inputs, endpoints, seams, `tsx`-step flag, and pass assertion per row (tied to `03_seam_map/` + test-brief §B).
+- `data-room/04_test_brief/test-env-standup-checklist.md` (NEW) — founder-performable: create test Supabase project; schema-clone vs migration-replay (with the out-of-repo-tables finding); Ed25519 key-pair generation; the full test env-var table; credential minting; run-local/preview-never-production; the genuine→200 positive-control smoke check.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-24-whole-system-harness-design-close.md` (NEW) — session close.
+
+**Risk classification:** **Standard** under 0d-ii. Design + data-room workspace docs + an append-only decision-log entry; no production code, schema, env, or deploy touched. AC7 not engaged. PR6 not engaged. KG1 not engaged this session (the design notes that **if** the built harness imports DB-write modules, KG1 engages **then** — called out in the harness design).
+
+**Rollback path:** Doc-only on `main` — revert these files host-side (`git checkout -- <paths>` before commit, or `git revert <commit>` after). The live provenance gate's own rollback (unset `SUBSTRATE_PROVENANCE_GATE_ENABLED` + redeploy) is unchanged and independent of this session.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/data-room/04_test_brief"
+ls orchestrator-harness-design.md scenario-matrix.md test-env-standup-checklist.md
+grep -l "signed_assessments" *.md          # genuine->200 recipe present in all four
+grep -n "SUBSTRATE_PROVENANCE_GATE_ENABLED" test-flag-config.md test-env-standup-checklist.md
+grep -n "api_keys.*NOT.*repo\|NOT created by any" test-env-standup-checklist.md
+```
+Expected: the three new docs exist; `signed_assessments` appears in the harness design, scenario matrix, standup checklist, and flag-config; the provenance-gate flag is present in the flag-config + checklist; the out-of-repo-tables finding is recorded in the checklist.
+
+**Open questions / deferred (PR7):**
+- **Orchestrator location** — recommended `website/scripts/whole-system-harness/`; founder confirms at build time.
+- **`/api/reason` auth choice** — API key (recommended) vs plugin-auth; decided at build time per whether loop metering is under test.
+- **C2 distress perimeter** — Critical-tier; deferred to a Critical Change Protocol session (mapped, not built).
+- **Combination 2 + the disclaimer text** — blocked on Priority 4 (text not yet written); the scenario row is specified but not runnable until then.
+- **Aggregate-faithfulness (M-6)** — not proven by the genuine→200 path; deferred (ADR revisit-condition 1).
+- **`test-brief.md` left unedited** — settled + committed last session; the new sibling docs reference it (children → parent), so no edit needed.
+
+**Rules served:** 0a, 0c, 0f, 0g, 0h, PR1, PR2, PR7, PR13, PR15, PR16, R18f, R19e.
+
+**Status:** Adopted. Implementation status: the harness — **Designed** (built later, L7 single-loop proof first). Cross-references: `D-WHOLE-SYSTEM-TEST-ORCHESTRATOR-READING-A-2026-05-24`; `D-DATA-ROOM-COMBINATION-1-PASSING-2026-05-24`; `D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24`; `/drafts/2026-05-23-whole-system-data-room-brief.md` (§5, §9); `data-room/04_test_brief/{test-flag-config,orchestrator-harness-design,scenario-matrix,test-env-standup-checklist}.md`; `/operations/handoffs/founder/2026-05-24-data-room-combination-1-passing-close.md`; `/operations/handoffs/founder/2026-05-24-whole-system-harness-design-close.md`.
+
+---
