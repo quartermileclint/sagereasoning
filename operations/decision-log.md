@@ -7430,3 +7430,30 @@ Expected: the Combination-1 / S2-neg rows and M-4 read as passing/resolved with 
 **Status:** Adopted. Cross-references: `D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24`; `D-WHOLE-SYSTEM-DATA-ROOM-BUILD-2026-05-24` (on the `whole-system-data-room` branch + commit `0b32417`); `/operations/handoffs/founder/2026-05-24-sage-assent-provenance-gate-build-close.md`; `data-room/04_test_brief/test-brief.md`; `data-room/99_review/missing-context.md`; `data-room/03_seam_map/seam-map.md`; `/adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md`.
 
 ---
+
+## 2026-05-24 — D-WHOLE-SYSTEM-TEST-ORCHESTRATOR-READING-A-2026-05-24
+
+**Decision:** Adopt **"Reading A"** as the whole-system test approach — build a **data-room test orchestrator** that *plays the agent*: a script/harness that drives the four real product endpoints in sequence over HTTP (threading each output into the next call), driven by Claude-generated scenario inputs, run against a **TEST environment** (separate test Supabase project; no production writes). Coverage: one scenario per confirmed configuration (test-brief A.1, **L1–L7**) plus the two negative configurations (**Combination 1, Combination 2**). This replaces both (i) ad-hoc by-hand manual-loop testing and (ii) **"Reading B"** (new server-side seam-wiring inside the products).
+
+**Reasoning:** By-hand manual testing exercises the products strung together *by a human*, not the seams as wired integrations (several seams — notably Seam 2's `sage-assent-bridge` — are not HTTP-wired). Reading A exercises the real integration at the HTTP boundary, is repeatable + comparable, stays inside the data room, and writes only to a test project (so it needs no production data snapshot or surgical cleanup). It is PR15-aligned (built on `webapp-testing` + sub-agents/scripts per the data-room brief §9, not bespoke), and it doubles as the control-vs-treatment rig for the later "is the agent better with the substrate" comparison (the second-room question raised earlier). **Check #1 (this session, code-read) verified the make-or-break round-trip is viable:** with `SUBSTRATE_LAYER2_SIGNING_ENABLED='true'`, `/api/reason` returns the signed assessment `{ assessment, signature, key_id }` (`website/src/lib/translation-sandwich/parallel-run.ts` L785–812), which is exactly the shape the gate's `validateWriteProvenance` accepts as `provenance: { signed_assessments: [...] }`. So the genuine→200 path is satisfiable by a legitimate caller, not only enforceable against forgeries.
+
+**Files touched:**
+- `operations/decision-log.md` — this entry. (No code built this session — direction only; the orchestrator is built in the next session per the prompt below.)
+
+**Risk classification:** **Standard** under 0d-ii. Governance / direction-setting; no code, schema, env, or deploy touched this session. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** Direction-only; nothing at runtime to roll back. Superseding this approach later is a fresh decision-log entry.
+
+**Verification step (founder-performable):** N/A this session (no build). The next session's single-loop proof (PR1) is where Reading A is first verified in practice.
+
+**Open questions / deferred (PR7):**
+- **Reading B (server-side seam-wiring) — REJECTED, not merely deferred.** Considered; rejected because it is a larger, partly-Critical product build (credential-write-path changes are Critical per PR6/AC7) and may conflict with the "two front-ends, one substrate" design where the agent/plugin is the orchestrator, not the server. Revisit only if a *product* requirement (not a test requirement) calls for server-side chaining.
+- **Controlled-production test run — NOT adopted.** Reading A runs against a test environment, so the production data-snapshot + surgical-cleanup burden is avoided. The one-time cost is standing up the test Supabase project (the next session's prerequisite).
+- **Test-environment standup is the prerequisite** for any orchestrator run: separate test Supabase project + migrations replayed; `SUBSTRATE_LAYER2_SIGNING_ENABLED='true'` with a matching signing/public key pair; `SUBSTRATE_PROVENANCE_GATE_ENABLED='true'` + `SUBSTRATE_LAYER2_PUBLIC_KEY`. The data-room `test-flag-config.md` is stale (predates the provenance gate) and must be updated to list these.
+- **Orchestrator location** (`data-room/` vs `website/`) — a design decision for the next session.
+
+**Rules served:** 0a, 0c, 0f, 0g, 0h, PR1, PR7, PR15, PR16, R18f, R19e.
+
+**Status:** Adopted. Cross-references: `D-DATA-ROOM-COMBINATION-1-PASSING-2026-05-24`; `D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24`; `/drafts/2026-05-23-whole-system-data-room-brief.md` (§5, §9); `data-room/04_test_brief/test-brief.md`; `data-room/04_test_brief/test-flag-config.md`; `/operations/handoffs/founder/2026-05-24-data-room-combination-1-passing-close.md`; `/operations/handoffs/founder/2026-05-24-whole-system-test-orchestrator-harness-NEXT-SESSION-PROMPT.md`.
+
+---
