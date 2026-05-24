@@ -7343,3 +7343,41 @@ Expected: R18f + R19e read as approved; the ADR Status line shows Adopted + elec
 **Status:** Adopted. Implementation status: the rule — **Adopted** (decision status); the enforcement gate — **Designed** (the ADR specifies option (a); build deferred, Critical). Cross-references: `/drafts/2026-05-23-whole-system-data-room-brief.md` §3; `/adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md`; `D-ATL-WRITE-PATH-BUILD-WIRED-VERIFIED-2026-05-16`; `D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21`; `/operations/handoffs/founder/2026-05-23-selective-offering-data-room-brief-close.md`; `/operations/handoffs/founder/2026-05-23-P1-sage-assent-dependency-enforcement-NEXT-SESSION-PROMPT.md`; this session's close `/operations/handoffs/founder/2026-05-23-P1-sage-assent-dependency-rule-close.md`.
 
 ---
+
+## 2026-05-24 — D-WHOLE-SYSTEM-DATA-ROOM-BUILD-2026-05-24
+
+**Decision:** Built the whole-system-test **data room** (Steps 1–6 of the brief) on a dedicated branch `whole-system-data-room` off `main` (`e0278ab`): the skeleton, the baseline anchor, the four-product inventory + authority ranking, the four-seam map, the test flag-config, and the test brief with a 0c verification method per row. Step 7 (the one manual founder-verified loop) and the automated harness are **deferred** to follow-on sessions (founder elected room-only scope at open). No code/schema/env/deploy touched; no production writes.
+
+**Reasoning:** Priority-2 whole-system test per `/drafts/2026-05-23-whole-system-data-room-brief.md`. "Build the room before you write" — inventory the sources, rank their authority, surface conflicts + gaps so the test is **evidence-grounded, not projected** (P0 0h). Grounded in current-authoritative sources only (May decision-log; the four adopted design docs; the code + test suites under `website/src/lib/{substrate,translation-sandwich,sage-reflect,sage-calling}/`; the SQL migrations) — the top-level guides are stale (conflict log C-1/C-2). Founder elected **room-only scope** + **in-repo dedicated-branch** location at open. **PR15 consult:** no Anthropic-canonical primitive substitutes for building a project-internal workspace; `webapp-testing` + the `sage-*` skills serve the manual-loop/harness steps (deferred). **PR16 lens:** the manual loop IS the dogfood run (deferred to Step 7). **Locked context preserved:** R18f/R19e Adopted; the option-(a) gate **Designed-not-built** → the Combination-1 negative test **DOCUMENTS the gap** today (expected, useful per 0h), it does not pass.
+
+**Files touched:**
+- `data-room/` (NEW) — `README.md`; `00_baseline/known-good-state.md`; `02_inventory/product-inventory.md`; `03_seam_map/seam-map.md`; `04_test_brief/{test-flag-config.md, test-brief.md}`; `05_outputs/README.md`; `99_review/{conflict-log.md, missing-context.md}` (9 files).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-24-P2-whole-system-data-room-build-close.md` (NEW) — session close.
+
+**Risk classification:** **Standard** under 0d-ii — non-destructive workspace + documentation, on a branch off `main`. AC7 not engaged. PR6 not engaged. KG1 not engaged (no DB-write code touched). "No current users" holds (founder + test logins only).
+
+**Rollback path:** Governance/workspace only. The room is non-destructive and off `main`; nothing to roll back at runtime. `git revert` (or deleting the branch) reverses the room files. No production env/schema/deploy touched.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+find data-room -type f | sort                                       # 9 files across the 6-folder room
+grep -c "DOCUMENTS THE GAP" data-room/04_test_brief/test-brief.md   # 1 — Combination-1 gap marked
+sed -n '1,8p' data-room/README.md                                   # room purpose + Steps 1–6 built / Step 7 deferred
+```
+Expected: the room tree present; the Combination-1 row marked as documenting the gap; the README states the room is Wired and the manual loop is deferred.
+
+**Open questions / deferred (PR7):**
+- **The manual loop (Step 7) + the automated harness** — follow-on sessions (PR1 single-loop-proof / 0g manual-first, then automate per brief §9).
+- **The Critical build of the option-(a) gate** — turns Combination-1 from *documented gap* into *passing assertion* (founder schedules; full Critical Change Protocol).
+- **Sage Reflect design-doc reconciliation** (conflict C-4) — Priority 3 (governance edit to an adopted doc; founder approval).
+- **Branch landing** — where this branch's decision-log entry + close enter the canonical `main` trail is settled on **merge** of `whole-system-data-room` (founder's call).
+
+**Rules served:** R0, R18f, R19e, 0a, 0c, 0d-ii, 0e, 0f, 0h, PR1, PR15, PR16.
+
+**Diagnostic-certainty (PR10):** N/A — no defect diagnosed; this is a build-the-workspace session. Room coherence verified in-session (9 files; spot-checks green).
+
+**Status:** Adopted. Implementation status: the data room — **Wired** (skeleton + inventory + seam map + test brief populated; manual loop + harness not yet run). Cross-references: `/drafts/2026-05-23-whole-system-data-room-brief.md`; `/operations/handoffs/founder/2026-05-23-P1-sage-assent-dependency-rule-close.md`; `/adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md`; this session's close `/operations/handoffs/founder/2026-05-24-P2-whole-system-data-room-build-close.md`.
+
+---
