@@ -2,7 +2,7 @@
 
 **Purpose:** define what gets tested, what counts as a pass, and **how the founder verifies each result without reading code** (the 0c verification framework). This brief is the input to the manual-loop session (Step 7) and the automated harness.
 
-**Status:** the matrix and verification methods are **defined** here; no test has been *run* yet (room build is Steps 1–6 only). `05_outputs/` stays empty until the manual loop runs.
+**Status:** the matrix and verification methods are **defined** here; the full in-room manual loop has **not** been *run* yet (room build is Steps 1–6 only), so `05_outputs/` stays empty until the manual loop runs. **Exception:** the **Combination-1** negative assertion (A.2 / S2-neg) was **verified in production on 2026-05-24** via the gate build's post-deploy check (R18f enforced; no-provenance → 422, forged → 403), so that row is recorded here as **passing**.
 
 **The 0c verification framework (project instructions 0c) — how a row is verified:**
 
@@ -38,7 +38,7 @@ For each: drive the config end-to-end; confirm correct output **and** honest des
 
 | Combination | Required disposition (per R18f/R19e) | Expected result **TODAY** | 0c verification method |
 |---|---|---|---|
-| **Combination 1 — Sage Assent *without* Sage Reasoning** | **BLOCKED, API-enforced** — a virtue-stamp on reasoning never examined is a false credential | **⚠ DOCUMENTS THE GAP — NOT rejected today.** The option-(a) Ed25519 write-boundary gate is **Designed, not built** (R18f / P1 ADR). So a credential write with no genuine SageReasoning provenance is **currently persisted**, not rejected | API: POST `/api/accreditation/[agent_id]` with a fabricated `accreditation_record` and **no** valid substrate signature, using a valid test `sr_assent_write` token → **today returns 200 (the gap)**. The test **records** this. After the gate is built, the same call must return a rejection (e.g. 422 / `403 no_examination`) — that is when this row flips from *documented gap* to *passing assertion* |
+| **Combination 1 — Sage Assent *without* Sage Reasoning** | **BLOCKED, API-enforced** — a virtue-stamp on reasoning never examined is a false credential | **✅ PASSING — ENFORCED (Live 2026-05-24).** The option-(a) Ed25519 write-boundary gate is **Wired + Verified in production** behind `SUBSTRATE_PROVENANCE_GATE_ENABLED='true'`. A token-authenticated credential write with no genuine SageReasoning provenance is **rejected at the write boundary**, not persisted: no `provenance` field → **422 `bad_provenance`**; forged/tampered provenance → **403 `no_examination`**. No accreditation row is written | API: POST `/api/accreditation/[agent_id]` with a valid test `sr_assent_` write token but **no** `provenance` field → **422 `bad_provenance`**; with a forged/tampered `provenance` → **403 `no_examination`**. Verified in production 2026-05-24 (gate Live). This row is now a **passing assertion** of R18f enforcement — see `D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24` |
 | **Combination 2 — Reasoning + Assent, no Reflect, marketed as a "practice"** | **Documentation-gated** — legitimate use; unsupported *claim* | Disclaimer present | Docs/discovery surfaces: assert the no-practice disclaimer string appears wherever this config is offered |
 
 ### A.3 — The disclaimer itself (Priority 4 output)
@@ -47,7 +47,7 @@ For each: drive the config end-to-end; confirm correct output **and** honest des
 |---|---|---|
 | No-practice disclaimer | Present, plain-language, accurate, across docs / `llms.txt` / `agent-card.json` / limitations page | Once Priority 4 drafts the text: grep/open each surface and assert the disclaimer string is present. (The *text* is not yet written — Priority 4) |
 
-> **Combination 1 is the single most important whole-system assertion** the harness must eventually make — it is the proof that the integrity rule (R18f) is *enforced*, not merely written down. Until the option-(a) gate is built, this row's honest result is **"gap documented, severity: significant"** (see `99_review/missing-context.md` M-4). This is expected and useful per 0h (gaps are the point).
+> **Combination 1 is the single most important whole-system assertion** the harness makes — it is the proof that the integrity rule (R18f) is *enforced*, not merely written down. **As of 2026-05-24 the option-(a) gate is built, Live, and verified in production**, so this row is a **passing assertion** (R18f enforced; no-provenance → 422 `bad_provenance`, forged → 403 `no_examination`). The earlier *"gap documented, severity: significant"* is **resolved** — see `99_review/missing-context.md` M-4 (closed).
 
 ---
 
@@ -57,7 +57,7 @@ For each: drive the config end-to-end; confirm correct output **and** honest des
 |---|---|---|
 | **S1 — Calling five-spec → Layer 1** | Approved-path session yields a `DiscoveredPurpose` with the agent's own words in all five slots; **all five survive into the Layer 1 schema** (no dropped slot); incomplete specs → clarification, no handoff | Run L2 then feed the handoff to `/api/reason`; founder compares the five input slots to what Layer 1 received (AI prints both side by side) |
 | **S2 — signed Layer2Assessment → EvaluatedAction** | A genuine `SignedLayer2Assessment` maps to a well-formed `EvaluatedAction` with `receipt_id` derived from its signature | `npx tsx` the bridge against a real signed assessment; founder confirms the `receipt_id` equals SHA-256(signature) |
-| **S2-neg — Combination 1** | **[documents the gap]** a credential write with no genuine substrate signature is **NOT rejected today** | As Combination 1 above — the headline negative test; records the 200 (gap) |
+| **S2-neg — Combination 1** | **[PASSING]** a credential write with no genuine substrate signature is **rejected at the write boundary** (no `provenance` → 422 `bad_provenance`; forged → 403 `no_examination`) — R18f enforced | As Combination 1 above — the headline negative test; **verified in production 2026-05-24** (422 / 403). Passing |
 | **S3 — Reflect outcome → profile** | A Reflect session updates `agent_accreditation` **via the engine** (grade moves only on evidence + hysteresis, never hand-written); FK-seed fires for a new agent; SR-15 per-domain proximity written | DB: query `agent_accreditation` + `evaluated_actions` for the test agent before/after; founder confirms rows appeared and the grade change matches the engine, not a hand-set value |
 | **S4 — Reflect exit routing → next product** | Each RS class yields the correct `exit_path`; **the exit_path is actually consumed** — "purpose holds" re-enters Reasoning, "purpose complete" re-enters Calling | Loop: run Reflect to each exit; founder confirms the agent actually lands in the next product's entry, not just that the string is correct |
 
@@ -78,7 +78,7 @@ For each: drive the config end-to-end; confirm correct output **and** honest des
 ## D. What "done" looks like for the test (0h criteria 3 + 4)
 
 - **Value demonstrated end-to-end** on at least one use case **per audience** — a human practitioner journey and an agent-developer journey (0h criterion 4). Captured in `05_outputs/`.
-- **The Combination-1 gap documented with severity** (0h criterion 3): **significant** — the integrity rule is written (R18f) but not yet enforced; the fix is the scheduled Critical build of the option-(a) gate.
+- **The Combination-1 assertion now passes** (0h criterion 3): the integrity rule (R18f) is **enforced in production as of 2026-05-24** via the option-(a) gate (Wired + Verified; Live). The earlier *gap (severity: significant)* is **resolved** — M-4 closed in `99_review/missing-context.md`.
 - Each seam marked **pass / fail / gap** honestly; gaps recorded in `99_review/`.
 
-After this brief is exercised: automate the harness (brief §9), and/or schedule the **Critical build** of the option-(a) gate — which turns the Combination-1 row from *documented gap* into *passing assertion*.
+After this brief is exercised: automate the harness (brief §9). The **Critical build of the option-(a) gate is complete** (2026-05-24) — it turned the Combination-1 row from *documented gap* into a *passing assertion* (above). The remaining whole-system work is the manual loop (Step 7) and the automated harness.

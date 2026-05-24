@@ -19,11 +19,14 @@ What we don't yet have. This is precisely what the later build/harness sessions 
 - **Gap:** `00_baseline/` now records the **environment/status** baseline, but there is no **behavioural** baseline — no captured "this is the correct end-to-end output for journey X" to diff future runs against.
 - **Closes in:** the manual-loop session produces the first golden output; the harness pins it.
 
-## M-4 — The dependency rule is Adopted, but its enforcement gate is not built
+## M-4 — The dependency rule is enforced — ✅ RESOLVED (2026-05-24)
 
-- **Status update (since the brief was written):** the configuration rule is now **Adopted** — manifest **R18f** (no credential without examination) + **R19e** (configuration honesty), adopted 2026-05-23 (P1).
-- **Remaining gap:** the **enforcement gate** (option (a) — server-side Ed25519 verification at the credential write boundary) is **Designed, not built** (`/adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md`). So the headline Combination-1 negative test **documents the open gap** today; it does not pass.
-- **Closes in:** the **Critical** build session for the option-(a) gate (founder schedules it). That build turns the Combination-1 test from *documented gap* → *passing assertion*.
+- **Status:** **RESOLVED 2026-05-24.** The configuration rule (manifest **R18f** — no credential without examination — and **R19e** — configuration honesty; Adopted 2026-05-23, P1) is now **enforced in production**.
+- **What closed it:** the **enforcement gate** (option (a) — server-side Ed25519 verification at the credential write boundary, `/adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md`) was built, wired, and verified in the 2026-05-24 Critical build session, then deployed Live behind `SUBSTRATE_PROVENANCE_GATE_ENABLED='true'`. A token-authenticated credential write with no genuine SageReasoning provenance is rejected at the write boundary: no `provenance` field → **422 `bad_provenance`**; forged/tampered provenance → **403 `no_examination`**. Verified in production 2026-05-24.
+- **Effect on the test:** the headline Combination-1 negative test (`04_test_brief/` A.2 / S2-neg) flips from *documented gap* → **passing assertion**.
+- **Rollback note:** enforcement is flag-gated; unsetting `SUBSTRATE_PROVENANCE_GATE_ENABLED` + redeploy returns to pre-gate behaviour (which would re-open this gap). Independent of this data-room session.
+- **Residual (does not re-open M-4):** the *aggregate-faithfulness* limitation remains — see **M-6**. Option (a) proves *a* genuine substrate signature exists, not that the submitted aggregate was faithfully computed from signed assessments. M-4 covers only the no-examination door, which is now closed.
+- **References:** `D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24` (the build, on `main`); `D-DATA-ROOM-COMBINATION-1-PASSING-2026-05-24` (this update); `/operations/handoffs/founder/2026-05-24-sage-assent-provenance-gate-build-close.md`.
 
 ## M-5 — No automated whole-system harness
 

@@ -7393,3 +7393,40 @@ Expected: R18f + R19e read as approved; the ADR Status line shows Adopted + elec
 **Status:** Adopted. Implementation status: the gate — **Verified (production) / Live.** `SUBSTRATE_PROVENANCE_GATE_ENABLED='true'` set in Vercel and confirmed enforcing on **2026-05-24**: a token-authenticated write to `POST /api/accreditation/agent_provtest_v1` with no `provenance` returned **422 `bad_provenance`** in production (nothing written — the gate rejects before the writer). R18f: **enforced (Live)** as of 2026-05-24. Rollback remains one toggle — unset `SUBSTRATE_PROVENANCE_GATE_ENABLED` + redeploy. Cross-references: `/adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md`; `D-SAGE-ASSENT-SAGEREASONING-DEPENDENCY-RULE-ADOPTED-2026-05-23`; `D-ATL-WRITE-PATH-BUILD-WIRED-VERIFIED-2026-05-16`; `D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21`; `/operations/handoffs/founder/2026-05-24-sage-assent-provenance-gate-build-close.md`; predecessor closes `/operations/handoffs/founder/2026-05-23-P1-sage-assent-dependency-rule-close.md` + `/operations/handoffs/founder/2026-05-24-P2-whole-system-data-room-build-close.md`.
 
 ---
+
+## 2026-05-24 — D-DATA-ROOM-COMBINATION-1-PASSING-2026-05-24
+
+**Decision:** Flipped the whole-system data room's headline negative test — **Combination 1 (Sage Assent without SageReasoning)** — from *documented gap* to a **passing assertion**, and marked the corresponding gap record **M-4 resolved**, on the strength of the 2026-05-24 production verification that the option-(a) provenance gate is **Live and enforcing** (no-`provenance` write → 422 `bad_provenance`; forged → 403 `no_examination`).
+
+**Reasoning:** Records, in the data room, the enforcement that `D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24` delivered (R18f now enforced in production). The data room's own build is `D-WHOLE-SYSTEM-DATA-ROOM-BUILD-2026-05-24` (recorded on the `whole-system-data-room` branch + commit `0b32417`, not on `main`); this update was made on `main` per the founder's Pre-condition-1 election, since `main` already carries an identical copy of the data-room files on top of the live gate.
+
+**Files touched:**
+- `data-room/04_test_brief/test-brief.md` — A.2 Combination-1 row and Section-B S2-neg row flipped to **passing**; the contextual note, Section-D "done" bullet, closing paragraph, and top Status line updated for internal consistency.
+- `data-room/99_review/missing-context.md` — **M-4** marked **RESOLVED (2026-05-24)**; aggregate-faithfulness residual explicitly carried to M-6 (does not re-open M-4).
+- `data-room/03_seam_map/seam-map.md` — Seam 2 "Known risk" cell flipped from *Designed, not built* to **CLOSED 2026-05-24**, and "Test must assert" (b) flipped to **PASSING**, for consistency with the test brief.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-24-data-room-combination-1-passing-close.md` (NEW) — session close.
+
+**Risk classification:** **Standard** under 0d-ii. Documentation-only edits to the data-room workspace (a workspace, not a governing document) plus an append-only decision-log entry; no production code, schema, env, or deploy touched. AC7 not engaged. PR6 not engaged. KG1 not engaged.
+
+**Rollback path:** Doc-only on `main` — revert these files host-side (`git checkout -- <paths>` before commit, or `git revert <commit>` after). The live gate's own rollback (unset `SUBSTRATE_PROVENANCE_GATE_ENABLED` + redeploy) is unchanged and independent of this session.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -n "PASSING\|ENFORCED (Live 2026-05-24)" data-room/04_test_brief/test-brief.md
+grep -n "RESOLVED (2026-05-24)" data-room/99_review/missing-context.md
+grep -n "CLOSED 2026-05-24\|\[PASSING\]" data-room/03_seam_map/seam-map.md
+```
+Expected: the Combination-1 / S2-neg rows and M-4 read as passing/resolved with the production-evidence citation. Optional reassurance that the underlying enforcement still holds: re-run the predecessor close's Step 4 production negative check (no-`provenance` write → 422 `bad_provenance`).
+
+**Open questions / deferred (PR7):**
+- The **aggregate-faithfulness** residual (M-6) remains — option (a) proves *a* genuine substrate signature exists, not faithful aggregate computation (ADR revisit-condition 1).
+- `00_baseline/known-good-state.md` was **left unedited by design** — it is the room's frozen, read-only known-good/rollback anchor recording production *before* the gate flip; its item #1 is correct as a historical snapshot. Revisit only if the founder wants a dated "superseded" pointer added.
+- The data-room **manual loop (Step 7 / data-room Step 4)** — the first end-to-end value demonstration per audience (0h criterion 4) — was not run this session; founder's call to schedule.
+
+**Rules served:** R18f, R19e, 0a, 0c, 0f, 0h, PR7.
+
+**Status:** Adopted. Cross-references: `D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24`; `D-WHOLE-SYSTEM-DATA-ROOM-BUILD-2026-05-24` (on the `whole-system-data-room` branch + commit `0b32417`); `/operations/handoffs/founder/2026-05-24-sage-assent-provenance-gate-build-close.md`; `data-room/04_test_brief/test-brief.md`; `data-room/99_review/missing-context.md`; `data-room/03_seam_map/seam-map.md`; `/adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md`.
+
+---
