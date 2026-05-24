@@ -214,6 +214,8 @@ import {
   buildWriteBadRequestResponse,
   buildWriteNotFoundResponse,
   buildWriteConflictResponse,
+  buildWriteNoExaminationResponse,
+  buildWriteBadProvenanceResponse,
   DOCUMENTATION_URL,
 } from './response-builders'
 
@@ -221,6 +223,8 @@ import {
   extractCarriedProfileForAuth,
   extractWriteExtras,
 } from './request-helpers'
+
+import { enforceWriteProvenance } from './provenance-gate'
 
 // =============================================================================
 // HOTFIX NOTE 2026-05-16 — Next.js App Router rejected the original co-located
@@ -532,18 +536,22 @@ function validateWriteBody(
  * Outcomes:
  *   200 — write succeeded
  *   400 — invalid body
- *   401 — auth gate rejected the request (A10-shaped reason)
+ *   401 — auth gate rejected the request (A10-shaped reason; "no permission")
+ *   403 — provenance gate ON + no genuine examination ("no_examination"; R18f)
  *   404 — kind='update' against non-existent row
  *   409 — kind='seed' against existing row
- *   503 — write surface not enabled (pre-A10 stopgap) OR Supabase error
+ *   422 — provenance gate ON + missing/malformed `provenance` block
+ *   503 — write surface not enabled OR provenance verifier misconfigured OR Supabase error
  *
  * The handler:
  *   1. Rate-limit (mirrors the GET's 30 req/min/IP — same RATE_LIMITS.publicAgent).
- *   2. Auth-gate check (verifyAgentIdOwnership; pre-A10: env-flag).
+ *   2. Auth-gate check (verifyAgentIdOwnership; A10 token + kill-switch).
  *   3. Body parse + validate (validateWriteBody).
- *   4. Pre-flight lookup to disambiguate seed/update against the row's existence.
- *   5. Invoke seedAccreditation or updateAccreditation from the writer library.
- *   6. Map outcomes to HTTP status codes.
+ *   4. Provenance gate (enforceWriteProvenance; R18f — gated behind
+ *      SUBSTRATE_PROVENANCE_GATE_ENABLED, OFF by default = byte-identical).
+ *   5. Pre-flight lookup to disambiguate seed/update against the row's existence.
+ *   6. Invoke seedAccreditation or updateAccreditation from the writer library.
+ *   7. Map outcomes to HTTP status codes.
  */
 export async function POST(
   request: NextRequest,
@@ -590,6 +598,36 @@ export async function POST(
     return buildWriteBadRequestResponse(
       "Body field 'profile.agent_id' must match the URL path's agent_id.",
     )
+  }
+
+  // 4c. Provenance gate (R18f — "no credential without examination").
+  //     Placed AFTER the A10 ownership gate (verifyAgentIdOwnership, "who may
+  //     write") and BEFORE the writer invocation ("was there an examination").
+  //     Synchronous (PR3 / KG1) — the decision is complete before any response
+  //     is constructed; no DB read, no self-call. Gated behind
+  //     SUBSTRATE_PROVENANCE_GATE_ENABLED: UNSET → enforced:false → the write
+  //     proceeds exactly as it did before this gate existed (dark-deploy safe).
+  //     When ON: a missing/malformed provenance block → 422; well-formed
+  //     provenance that carries no genuine substrate signature → 403
+  //     no_examination (distinct from 401 "no permission"); a verifier
+  //     misconfiguration → 503.
+  const provenance = enforceWriteProvenance(rawBody)
+  if (!provenance.ok) {
+    console.log(
+      JSON.stringify({
+        kind: 'sage_assent_provenance',
+        agent_id,
+        outcome: provenance.status,
+        timestamp: new Date().toISOString(),
+      }),
+    )
+    if (provenance.status === 'no_examination') {
+      return buildWriteNoExaminationResponse()
+    }
+    if (provenance.status === 'verifier_unavailable') {
+      return buildServerErrorResponse()
+    }
+    return buildWriteBadProvenanceResponse(provenance.message)
   }
 
   // 5. Per-write extras for persistence (loop_id; typical_* ride on the record).

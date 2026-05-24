@@ -361,3 +361,69 @@ export function buildWriteConflictResponse(): NextResponse {
     },
   )
 }
+
+// ============================================================================
+// PROVENANCE-GATE RESPONSE BUILDERS — added under the R18f enforcement build
+// (option (a) — server-side Ed25519 provenance verification at the write
+// boundary). The POST handler calls these when the provenance gate
+// (SUBSTRATE_PROVENANCE_GATE_ENABLED) is ON and the write fails to demonstrate
+// a genuine SageReasoning examination.
+//
+// DISTINCT FROM 401. The 401 buildWriteUnauthorizedResponse means "no
+// permission" (the A10 ownership gate). 403 no_examination means "permitted to
+// write, but no examination was demonstrated" — the audit log separates the two
+// by status code + the body's `error` discriminator, per the ADR §"Where the
+// gate is".
+// ============================================================================
+
+/**
+ * 403 no_examination — the gate is enabled and the caller has a valid write
+ * credential (A10 passed), but the write carried no signed substrate provenance
+ * that verifies against the published key. Combination 1 (Sage Assent without
+ * SageReasoning) is rejected here. Non-leaking, fixed message.
+ */
+export function buildWriteNoExaminationResponse(): NextResponse {
+  return NextResponse.json(
+    {
+      status: 'error',
+      error: 'no_examination',
+      message:
+        'This credential write did not demonstrate a SageReasoning ' +
+        'examination. A Sage Assent credential requires signed substrate ' +
+        'output (R18f).',
+      documentation_url: DOCUMENTATION_URL,
+    },
+    {
+      status: 403,
+      headers: {
+        ...ACCREDITATION_RESPONSE_HEADERS,
+        'Cache-Control': 'no-store',
+      },
+    },
+  )
+}
+
+/**
+ * 422 unprocessable-entity — the gate is enabled and the body is valid JSON of
+ * the right top-level shape, but the `provenance` block is missing or malformed
+ * (wrong shape, empty, non-array, element missing fields). The message names
+ * the specific shape failure so a caller can correct the request — distinct
+ * from 403 (well-formed provenance that simply did not verify).
+ */
+export function buildWriteBadProvenanceResponse(message: string): NextResponse {
+  return NextResponse.json(
+    {
+      status: 'error',
+      error: 'bad_provenance',
+      message,
+      documentation_url: DOCUMENTATION_URL,
+    },
+    {
+      status: 422,
+      headers: {
+        ...ACCREDITATION_RESPONSE_HEADERS,
+        'Cache-Control': 'no-store',
+      },
+    },
+  )
+}

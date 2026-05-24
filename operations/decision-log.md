@@ -7343,3 +7343,53 @@ Expected: R18f + R19e read as approved; the ADR Status line shows Adopted + elec
 **Status:** Adopted. Implementation status: the rule — **Adopted** (decision status); the enforcement gate — **Designed** (the ADR specifies option (a); build deferred, Critical). Cross-references: `/drafts/2026-05-23-whole-system-data-room-brief.md` §3; `/adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md`; `D-ATL-WRITE-PATH-BUILD-WIRED-VERIFIED-2026-05-16`; `D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21`; `/operations/handoffs/founder/2026-05-23-selective-offering-data-room-brief-close.md`; `/operations/handoffs/founder/2026-05-23-P1-sage-assent-dependency-enforcement-NEXT-SESSION-PROMPT.md`; this session's close `/operations/handoffs/founder/2026-05-23-P1-sage-assent-dependency-rule-close.md`.
 
 ---
+
+## 2026-05-24 — D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24
+
+**Decision:** Built the option-(a) enforcement gate adopted in the P1 ADR — server-side Ed25519 signature verification at the Sage Assent credential write boundary (R18f, "no credential without examination"). Implemented `verifyLayer2Signature` (the missing verify half of `signLayer2Assessment`); added the signed-provenance write contract + structural validator; wired a synchronous provenance gate into `POST /api/accreditation/[agent_id]` AFTER the A10 ownership gate and BEFORE the writer, gated behind a new kill-switch env var `SUBSTRATE_PROVENANCE_GATE_ENABLED` (UNSET = behaviour byte-identical to today). Built across two sub-builds in one session: Build A (verify primitive + contract shape, unit-tested in isolation; founder checkpoint) → Build B (gate wiring + tests + Critical Change Protocol). Ships **dark**; the founder flips the flag + verifies as the between-session step.
+
+**Reasoning:** Executes the Adopted option (a) (`D-SAGE-ASSENT-SAGEREASONING-DEPENDENCY-RULE-ADOPTED-2026-05-23`; ADR `/adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md`). The P1 provenance finding (Diagnostic-certain) established that the write path verified *who* writes (A10) but trusted the submitted aggregates — so Combination 1 (Sage Assent without SageReasoning) was not structurally prevented. This gate forecloses it. **PR15 consult:** the verify is the *missing half of an existing primitive* — standard Node `crypto.verify` reusing the project's own canonicaliser (`canonicaliseLayer2Assessment`), the `SignedLayer2Assessment` wire shape, and the published-key env machinery (`SUBSTRATE_LAYER2_PUBLIC_KEY` + `key_id` + the four `PREVIOUS_*` rotation vars) `/api/public-key` already reads. No Anthropic-canonical primitive substitutes for verifying *our* signed shape against *our* key; bespoke (completing our own primitive) is justified and minimal. The verifier reads the published key **directly from env**, NOT by calling `/api/public-key` (an endpoint-to-endpoint self-call would violate KG1 rule 1). `.claude/skills/anthropic/` (incl. `sage-wiring-fix`, `webapp-testing`) offered no substitute; the agentic-commerce findings F1–F4 target other sessions. **PR16 lens:** the gate **strengthens** R18a "Character Kernel"/badge integrity — a credential that cannot be falsely issued *is* the trust claim. Dogfood-relevant.
+
+**Files touched:**
+- `website/src/lib/translation-sandwich/layer2-verifier.ts` (NEW) — `verifyLayer2Signature`; reads the published key from env; handles the A4 rotation-overlap previous key; never throws (typed `{valid:false; reason}`).
+- `website/src/lib/translation-sandwich/__tests__/layer2-verifier.test.ts` (NEW) — 18 plain-assertion `tsx` tests (genuine/current, rotation-previous, expired/unknown key_id, tamper, wrong key, malformed signature, missing/malformed verifier key, uncanonicalisable payload, malformed input).
+- `website/src/app/api/accreditation/[agent_id]/provenance-contract.ts` (NEW) — `WriteProvenance` type + `validateWriteProvenance` (pure structural validator; shape only, no crypto; type-only import of the signer).
+- `website/src/app/api/accreditation/[agent_id]/__tests__/provenance-contract.test.ts` (NEW) — 15 plain-assertion `tsx` tests.
+- `website/src/app/api/accreditation/[agent_id]/provenance-gate.ts` (NEW) — `enforceWriteProvenance` (kill-switch → structural → cryptographic; operator-misconfig routed to `verifier_unavailable`, not `no_examination`).
+- `website/src/app/api/accreditation/[agent_id]/__tests__/provenance-gate.test.ts` (NEW) — 12 plain-assertion `tsx` tests (off/on, bad_provenance, no_examination, verifier_unavailable, valid, multi).
+- `website/src/app/api/accreditation/[agent_id]/route.ts` (MODIFIED) — import + synchronous gate call after A10 gate / before writer (line ~614); 403/422/503 reject branches; POST JSDoc outcomes updated. **No new export added** (Next.js route-export constraint respected).
+- `website/src/app/api/accreditation/[agent_id]/response-builders.ts` (MODIFIED) — `buildWriteNoExaminationResponse` (403) + `buildWriteBadProvenanceResponse` (422).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-24-sage-assent-provenance-gate-build-close.md` (NEW) — session close.
+
+**No schema change.** Verification reads the published key; it writes no new table/column. (An optional audit field for the verified signature would be a separate Elevated schema add — deferred.)
+
+**Risk classification (0d-ii):** **Critical** — access-control gating on the credential *write* surface (AC7-adjacent; deployment-config / env-flag activation). Full Critical Change Protocol applied (below). PR1 single-endpoint proof (the gate proven on this one route before any reuse) + PR2 invocation test (gate asserted CALLED at route.ts:614, not merely defined) satisfied. **PR6 NOT engaged** — no distress / Zone-2 / Zone-3 logic (confirmed). KG1 engaged — DB-write route; the gate is synchronous (no fire-and-forget), every existing DB call still awaited, errors surfaced.
+
+**Critical Change Protocol (0c-ii) — completed visibly in-session before deploy:**
+1. *What changes:* the credential write now requires proof a real SageReasoning examination happened (signed substrate output), not just a valid write token.
+2. *What could break:* with the flag ON, any credential write lacking valid provenance is rejected (403/422). Mitigated by the dark deploy (flag UNSET = inert) + no shipped external consumer.
+3. *Existing sessions:* N/A — "no current users" (founder + test logins only).
+4. *Rollback:* set `SUBSTRATE_PROVENANCE_GATE_ENABLED` UNSET in Vercel → instant return to today's behaviour (no code redeploy); secondary `git revert <commit>` + push.
+5. *Verification:* post-flip, a write without/with-forged provenance → 403/422; dark-deploy confirmed byte-identical via GET unchanged + Vercel green.
+6. *Approval:* founder approved the full plan (deploy dark + flip) specific to the named risks at session close.
+
+**Verification Method Used (0c framework):**
+- API endpoint / gate logic — AI provides `npx tsx` test commands + expected output; founder runs them. 45 assertions across 3 files (18 + 15 + 12), all pass; `tsc --noEmit` whole-project = 0 errors. Build A verified in isolation (route untouched, imported only by tests) at the founder checkpoint. Production end-to-end verified by the founder's post-flip URL check (Critical Change Protocol step 5).
+
+**Founder Verification (between sessions):** commit the listed files (stage by name — never `git add .`, owing to untracked `data-room/` clutter on `main`); push (Vercel deploys dark, byte-identical); confirm Vercel green + GET `/api/accreditation/[agent_id]` unchanged; confirm `SUBSTRATE_LAYER2_PUBLIC_KEY` set; set `SUBSTRATE_PROVENANCE_GATE_ENABLED='true'` + redeploy; verify a no-/forged-provenance write → 403/422. Re-run: `cd website && npx tsx src/lib/translation-sandwich/__tests__/layer2-verifier.test.ts` (18/18); the two accreditation `__tests__` files (15/15, 12/12); `npx tsc --noEmit` (0).
+
+**Diagnostic-certainty (PR10):** N/A for a build (no defect diagnosed). PEV loop followed: Plan = the Critical Change Protocol; Execute = the eight files; Verify = 45 assertions + tsc + PR2 grep, all green in-sandbox.
+
+**Open questions / deferred (PR7):**
+- **Flag flip + post-flip verification** — the founder's between-session step; on success R18f moves to **enforced (Live)** and the data room's Combination-1 negative test flips from *documented gap* → *passing*.
+- **Data-room doc update deferred** — `data-room/04_test_brief/test-brief.md` (A.2 / S2-neg) + `99_review/missing-context.md` (M-4) live on the `whole-system-data-room` branch, not `main`; update when next on that branch or after the gate merges in.
+- **Aggregate-faithfulness gap** — option (a) proves genuine substrate output exists, not faithful aggregate computation. Deferred (ADR revisit-condition 1).
+- **(b) `loop_id` → `loop_billing_events` defense-in-depth** — layer onto (a) later (ADR revisit-condition 4).
+- **Stale Jest-style tests** — `layer2-signer.test.ts` + `layer2-canonical-json.test.ts` use `describe/it/expect` but Jest is not installed (no dep, no config) → they do not run under `npx tsx` or at all; `CLAUDE.md`'s claim that translation-sandwich tests are `tsx` plain-assertion scripts is inaccurate for these two. `route.test.ts` transitively imports `supabase-server.ts` → needs `--env-file=.env.local` (omitted from `CLAUDE.md`'s `--env-file` list). Future cleanup: convert the two to plain-assertion or install Jest; correct `CLAUDE.md`.
+
+**Rules served:** R18f, R18a, R18b, R19, AC7, AC8, KG1, 0a, 0c, 0c-ii, 0d-ii, 0f, PR1, PR2, PR10, PR13, PR15, PR16.
+
+**Status:** Adopted. Implementation status: the gate — **Wired + Verified (sandbox)**; **Live pending the founder's flag-flip + post-flip verification** (this session's between-session step). R18f: **Adopted** (decision) → **enforced (Live)** upon flag flip. Cross-references: `/adopted/adr/2026-05-23-sage-assent-sagereasoning-dependency-enforcement.md`; `D-SAGE-ASSENT-SAGEREASONING-DEPENDENCY-RULE-ADOPTED-2026-05-23`; `D-ATL-WRITE-PATH-BUILD-WIRED-VERIFIED-2026-05-16`; `D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21`; `/operations/handoffs/founder/2026-05-24-sage-assent-provenance-gate-build-close.md`; predecessor closes `/operations/handoffs/founder/2026-05-23-P1-sage-assent-dependency-rule-close.md` + `/operations/handoffs/founder/2026-05-24-P2-whole-system-data-room-build-close.md`.
+
+---
