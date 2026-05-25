@@ -7646,3 +7646,45 @@ Each writes a ledger to `data-room/05_outputs/<scenario>-live-<timestamp>.{json,
 **Verification + post-commit update (2026-05-25, same day):** All four ran green live against the test env — **L1 (5/5), L2-incomplete (4/4), L3, L5** → **Verified**. S3 confirmed in the DB (`agent_accreditation` + `evaluated_actions` rows written via the engine). Three follow-on items resolved this day: (1) **test-env schema gap** — the structure-only clone's `sage_reflect_sessions` lacked the A1 cross-session columns (`complexity`, `calibration_all_correct`); founder applied `supabase-sage-reflect-a1-cross-session-migration.sql` to the **TEST** project (additive/idempotent/reversible; production untouched); the test project now carries A1. (2) **`run-l2.ts` TS7022** inference cycle (stage→answer→resp→current loop) — fixed with explicit `string` annotations; full-project `npx tsc --noEmit` now green. (3) **`run-l5.ts`** `grade_history` verify-query order column corrected `created_at → occurred_at`. Committed + pushed; **Vercel build green** (push triggers a build that type-checks `website/scripts/`; the deployed app is byte-identical — no `src/` change). **Process note (KG candidate, PR5):** verify harness changes with `npx tsc --noEmit` (the pre-commit + Vercel check), not only `npx tsx` (which executes but does not type-check) — a type-only error slipped to the pre-commit hook once. **Next:** L2-complete / L4 / L6 per `/operations/handoffs/founder/2026-05-25-L2complete-L4-L6-finish-testing-NEXT-SESSION-PROMPT.md`.
 
 ---
+
+## 2026-05-25 — D-L2COMPLETE-L4-L6-POSITIVE-SCENARIOS-BUILD-2026-05-25
+
+**Decision:** Built the three DEFERRED positive scenarios on the proven whole-system-harness pattern, completing the positive scenario matrix: **L2-complete** (Sage Calling approved path → five-slot `DiscoveredPurpose`), **L4** (Seam S1 — five slots survive into the Layer 1 schema), **L6** (full suite — S1, S2, S3, S4; loop closes). The approval seam was settled by **founder election of Option A — the pure `tsx` step** (drive `/api/calling` to the Hard Gate, then run the exported pure `buildDiscoveredPurpose()` over the captured response history; prove S1 survival with the real `validateLayer1Schema()`), in preference to Option B (admin `/api/calling/approve` HTTP + plugin-auth Layer-1 thread).
+
+**Reasoning:** Option A needs no admin credential and no new env flags; it mirrors the proven Seam-2 `bridge-step` + the founder-runs-SQL pattern, and the pure functions are sandbox-runnable so the core assertions execute without the dev server. Option B (the real D-14 admin gate end-to-end) is the higher-fidelity follow-up (PR7-deferred). Cross-refs predecessor `D-L1-L5-CLEAN-SCENARIOS-BUILD-2026-05-25`. Three load-bearing claims re-verified by code-read this session (diagnostic-certain): `buildDiscoveredPurpose` exported+pure (`calling-service.ts:232`); `validateLayer1Schema` exported (`layer1-extractor.ts:817`); `/api/calling/approve` is `requireAdmin`-gated. The complete-path driver answers were authored against `engine.ts`'s lexical marker sets to walk Q1→Q2→Q3→Q4→Q5→hard_gate with no diagnostic re-prompt and no Q1→Q5 jump. PR15: extended the existing harness `lib/` + plain-`tsx` assertion pattern — no framework; no Anthropic-canonical primitive substitutes for driving our own endpoints / asserting over our own pure functions.
+
+**Files touched:**
+- `website/scripts/whole-system-harness/lib/calling-driver.ts` (NEW) — adaptive driver to the Hard Gate; `CALLING_COMPLETE_ANSWERS` (authored against the engine markers); faithful `(stage,response)` history reconstruction; `syntheticCompleteHistory()` for the no-network dry-preview.
+- `website/scripts/whole-system-harness/lib/discovered-purpose-asserts.ts` (NEW) — shared five-slot + Layer-1-survival assertions (`assertFiveSlots`, `assertLayer1Survival`, `buildMinimalLayer1Raw`, `renderSlotComparison`).
+- `website/scripts/whole-system-harness/run-l2-complete.ts` (NEW) — L2-complete; drives to `awaiting_approval`; asserts five slots carry the agent's own words (no dropped slot) + the gate body carries no five-spec (D-14).
+- `website/scripts/whole-system-harness/run-l4.ts` (NEW) — L4 / Seam S1; threads the five-spec into a `Layer1Schema`; asserts all five slots survive `validateLayer1Schema`; prints input↔received side-by-side.
+- `website/scripts/whole-system-harness/run-l6.ts` (NEW) — L6 full suite; S1 (build+survival) → S2 (`/api/reason` → genuine credential write 200 + bridge step) → S3 (Reflect → engine-decided profile) → S4 (consume `exit_path`; re-entry returns 200 — loop closes).
+- `website/scripts/whole-system-harness/README.md` — documented the L2-complete / L4 / L6 build + Option A; moved them out of the Deferred set.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-25-L2complete-L4-L6-finish-positive-scenarios-build-close.md` (NEW) — session close.
+
+**Risk classification:** **Standard** under 0d-ii. Test scaffolding under `website/scripts/` — outside `src/`, never bundled, never deployed; runs against the **TEST** environment only. **No production code, schema, env, or deploy touched.** AC7 not engaged. PR6 not engaged. KG1 not engaged (Option A imports only PURE modules — `buildDiscoveredPurpose` / `validateLayer1Schema`; `session-store`'s Supabase admin client is lazy, never constructed at import; the live HTTP writes go through the endpoints, as the prior runners do).
+
+**Rollback path:** Nothing in production to roll back. The new runner + `lib/` files are additive (delete host-side if abandoned). Restore production local dev when all testing is done: `cp website/.env.local.prod-backup-2026-05-24 website/.env.local`.
+
+**Verification step (founder-performable):** Sandbox-verified this session — dry-preview pure cores green (L2-complete 10/10, L4 7/7, L6 build-only 37/37) and full-project `npx tsc --noEmit` EXIT 0. Live (dev server up against the TEST env, `WSH_*` exported; run one at a time):
+```
+cd website
+# L6 seed teardown FIRST (TEST project SQL editor): delete from public.agent_accreditation where agent_id='wsh-test-agent-L7';
+npx tsx scripts/whole-system-harness/run-l2-complete.ts --live   # expect PASS; reaches awaiting_approval; five slots
+npx tsx scripts/whole-system-harness/run-l4.ts --live            # expect PASS; five slots survive Layer 1
+npx tsx --env-file=.env.local scripts/whole-system-harness/run-l6.ts --live  # expect PASS; S1-S4; then run the DB-verify SQL the runner prints
+```
+Each `--live` run writes a ledger to `data-room/05_outputs/`. For L6 S2/S3, confirm the DB rows per the printed SQL.
+
+**Open questions / deferred (PR7):**
+- **Option B** (admin `/api/calling/approve` HTTP + plugin-auth Layer-1 thread) — higher-fidelity follow-up exercising the real D-14 gate end-to-end; revisit when gate-level coverage is wanted.
+- **Combination 2** — blocked on Priority 4 (no-practice disclaimer text). **C2** distress perimeter — Critical-tier, a separate Critical session.
+
+**Rules served:** 0a, 0c, 0g, 0h, PR1, PR2, PR10, PR15, PR16, R18f.
+
+**Status:** Adopted. Implementation status: the L2-complete / L4 / L6 runners + the two new `lib/` modules — **Wired** (sandbox dry-preview green + `tsc --noEmit` clean); **→ Verified** at the founder live runs. Completes the positive scenario coverage (L1–L7) on the proven pattern. Cross-references: `D-L1-L5-CLEAN-SCENARIOS-BUILD-2026-05-25`; `D-L7-SINGLE-LOOP-PROOF-LIVE-VERIFIED-2026-05-25`; `data-room/04_test_brief/scenario-matrix.md`; `/operations/handoffs/founder/2026-05-25-L2complete-L4-L6-finish-positive-scenarios-build-close.md`.
+
+**Verification (2026-05-25, same day — founder live runs):** All three ran green live against the test env — **L2-complete, L4, L6** → **Verified** (was Wired). L6's S2/S3 confirmed in the DB: `agent_accreditation`, `evaluated_actions`, and `grade_history` all returned rows for `wsh-test-agent-L7` (S2 seeded the row after the teardown; the Reflect feed wrote through the engine at S3 — the seam closed). The **positive scenario coverage L1–L7 is now complete**. Still deferred: Combination 2 (Priority 4 disclaimer), C2 distress perimeter (Critical), Option B (admin-gate fidelity follow-up).
+
+---

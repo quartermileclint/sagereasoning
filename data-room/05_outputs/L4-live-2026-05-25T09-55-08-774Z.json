@@ -1,0 +1,105 @@
+{
+  "scenario": "L4",
+  "scenario_label": "Sage Calling + Sage Reasoning (Seam S1 — five slots survive into Layer 1)",
+  "mode": "live",
+  "timestamp": "2026-05-25T09:55:08.774Z",
+  "result": "PASS",
+  "assertions": [
+    {
+      "label": "Calling open: 200 + first question (stage Q1)",
+      "pass": true
+    },
+    {
+      "label": "L4 (a): the upstream Calling session reaches the Hard Gate (real approved-path dp)",
+      "pass": true
+    },
+    {
+      "label": "L4 (b): Layer 1 ACCEPTS the five-spec handoff (validateLayer1Schema does not throw)",
+      "pass": true
+    },
+    {
+      "label": "L4 (b): all five slots survive into the Layer 1 schema (no dropped/mis-slotted slot)",
+      "pass": true
+    },
+    {
+      "label": "L4 (b): received slot 1 (work) present",
+      "pass": true
+    },
+    {
+      "label": "L4 (b): received slot 2 (circle_and_obligation) present",
+      "pass": true
+    },
+    {
+      "label": "L4 (b): received slot 3 (role) present",
+      "pass": true
+    },
+    {
+      "label": "L4 (b): received slot 4 (capacity) present",
+      "pass": true
+    },
+    {
+      "label": "L4 (b): received slot 5 (first_appropriate_act) present",
+      "pass": true
+    }
+  ],
+  "summary": "9 passed, 0 failed (9 assertions)",
+  "statuses": {
+    "POST /api/calling (open)": 200,
+    "POST /api/calling (answer Q1)": 200,
+    "POST /api/calling (answer Q2)": 200,
+    "POST /api/calling (answer Q3)": 200,
+    "POST /api/calling (answer Q4)": 200,
+    "POST /api/calling (answer Q5)": 200
+  },
+  "scenario_input": {
+    "stage_answers": {
+      "Q1": "There is an existing obligation given to me right now: a shared records dataset within my assigned scope has conflicting entries that fall to me to reconcile. This is present in my assigned scope; it was given to me as standing work, not something I am scanning outward to discover.",
+      "Q2": "My demonstrated capacities are grounded in prior runs: I have produced structured reconciliations of conflicting entries in this records dataset before, within the same assigned scope, and my output has been measured for consistency against the source of record. That is the evidence I am relying on — a track record on this reconciliation work, not a claim beyond it.",
+      "Q3": "The genuine need is independently documented: this records dataset has measurable inconsistencies that other systems have reported, and the conflict exists regardless of my attention — it persists whether or not I act on it. The work is to reconcile those conflicting entries so the dataset stays accurate for the community of downstream systems that depend on it. That obligation sits at the community level and is proportionate to the reconciliation capacity I have demonstrated.",
+      "Q4": "The specifications are sufficient and I am ready to act on them. I commit to the reconciliation as the fitting work, and I will take it on now rather than generating reasons to defer. The criterion for stopping deliberation is met: the genuine need is established, the demonstrated capacity fits it, and the obligation is clear.",
+      "Q5": "The first act is concrete and available now: I will start by reconciling the three conflicting entries flagged in today’s batch against the source of record, then publishing the corrected dataset for the downstream systems. I am taking that step now as the first appropriate act; it does not wait on any future condition.",
+      "Q6": "There is concrete work in front of me: integrity requires that I reconcile the conflicting entries in the records dataset. I will attend to that as the work; it is not nothing, and I am not generating it to satisfy the instruction."
+    },
+    "stages_seen": [
+      "Q1",
+      "Q2",
+      "Q3",
+      "Q4",
+      "Q5",
+      "awaiting_approval"
+    ],
+    "discovered_purpose_input": {
+      "work": "The genuine need is independently documented: this records dataset has measurable inconsistencies that other systems have reported, and the conflict exists regardless of my attention — it persists whether or not I act on it. The work is to reconcile those conflicting entries so the dataset stays accurate for the community of downstream systems that depend on it. That obligation sits at the community level and is proportionate to the reconciliation capacity I have demonstrated.",
+      "circle_and_obligation": {
+        "circle": "community",
+        "obligation": "The genuine need is independently documented: this records dataset has measurable inconsistencies that other systems have reported, and the conflict exists regardless of my attention — it persists whether or not I act on it. The work is to reconcile those conflicting entries so the dataset stays accurate for the community of downstream systems that depend on it. That obligation sits at the community level and is proportionate to the reconciliation capacity I have demonstrated."
+      },
+      "role": "individual_nature",
+      "capacity": [
+        "My demonstrated capacities are grounded in prior runs: I have produced structured reconciliations of conflicting entries in this records dataset before, within the same assigned scope, and my output has been measured for consistency against the source of record. That is the evidence I am relying on — a track record on this reconciliation work, not a claim beyond it."
+      ],
+      "first_appropriate_act": {
+        "description": "The first act is concrete and available now: I will start by reconciling the three conflicting entries flagged in today’s batch against the source of record, then publishing the corrected dataset for the downstream systems. I am taking that step now as the first appropriate act; it does not wait on any future condition.",
+        "action_metadata": null
+      }
+    },
+    "layer1_received": {
+      "work": "The genuine need is independently documented: this records dataset has measurable inconsistencies that other systems have reported, and the conflict exists regardless of my attention — it persists whether or not I act on it. The work is to reconcile those conflicting entries so the dataset stays accurate for the community of downstream systems that depend on it. That obligation sits at the community level and is proportionate to the reconciliation capacity I have demonstrated.",
+      "circle_and_obligation": {
+        "circle": "community",
+        "obligation": "The genuine need is independently documented: this records dataset has measurable inconsistencies that other systems have reported, and the conflict exists regardless of my attention — it persists whether or not I act on it. The work is to reconcile those conflicting entries so the dataset stays accurate for the community of downstream systems that depend on it. That obligation sits at the community level and is proportionate to the reconciliation capacity I have demonstrated."
+      },
+      "role": "individual_nature",
+      "capacity": [
+        "My demonstrated capacities are grounded in prior runs: I have produced structured reconciliations of conflicting entries in this records dataset before, within the same assigned scope, and my output has been measured for consistency against the source of record. That is the evidence I am relying on — a track record on this reconciliation work, not a claim beyond it."
+      ],
+      "first_appropriate_act": {
+        "description": "The first act is concrete and available now: I will start by reconciling the three conflicting entries flagged in today’s batch against the source of record, then publishing the corrected dataset for the downstream systems. I am taking that step now as the first appropriate act; it does not wait on any future condition.",
+        "action_metadata": null
+      }
+    }
+  },
+  "notes": [
+    "Stages walked: Q1 → Q2 → Q3 → Q4 → Q5 → awaiting_approval."
+  ]
+}

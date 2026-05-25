@@ -121,12 +121,36 @@ These runners import only `lib/` (no Supabase module), so they run under a plain
   L3 + L5. AGENT-NATIVE answers; a caller may override any step.
 - `lib/capture.ts` — generalised from the L7-only literal to any scenario label.
 
-### Deferred (focused follow-up — approval-seam decision)
-- **L2-complete** (approved path → five-slot `DiscoveredPurpose`), **L4** (Seam S1),
-  **L6** (full suite). All hinge on the five-spec, which is built only by the
-  **admin-only** `POST /api/calling/approve` (`requireAdmin`) and reaches Layer 1 as
-  a `Layer1Schema.discovered_purpose` field on the plugin-auth path — not a plain
-  `/api/reason` body field. Pick the seam approach (admin HTTP route vs. a pure tsx
-  step on `buildDiscoveredPurpose` + `validateLayer1Schema`) before building these.
+## L2-complete / L4 / L6 build (2026-05-25) — positive scenarios completed
+
+Built the three previously-deferred positive scenarios, settling the approval seam
+by **founder election of Option A — the pure `tsx` step** (no admin credential, no
+new env flags):
+
+| Runner | Scenario | Approach | Founder verifies (live) |
+|---|---|---|---|
+| `run-l2-complete.ts` | L2-complete — Calling approved path | drive `/api/calling` → `awaiting_approval`, then pure `buildDiscoveredPurpose()` over the captured history | reaches the Hard Gate + the five slots carry the agent's own words (no dropped slot) |
+| `run-l4.ts` | L4 — Seam S1 | thread the five-spec into a `Layer1Schema`; real `validateLayer1Schema()` | all five slots survive into Layer 1 (input↔received printed side-by-side) |
+| `run-l6.ts` | L6 — full suite (S1–S4) | S1 build+survival → S2 `/api/reason`+genuine write+bridge → S3 Reflect → S4 consume `exit_path` | each seam in sequence; **S4 re-entry returns 200 (loop closes)**; founder runs the printed DB-verify SQL for S2/S3 |
+
+Shared `lib/` added this build: `calling-driver.ts` (adaptive drive to the Hard
+Gate; complete-path answers authored against the `engine.ts` marker sets; faithful
+`(stage,response)` history reconstruction) and `discovered-purpose-asserts.ts`
+(shared five-slot + Layer-1-survival assertions). The pure cores run in dry-preview
+(no network) — sandbox-verified green (L2-complete 10/10, L4 7/7, L6 build-only
+37/37) + `npx tsc --noEmit` clean. The live HTTP runs are the founder's.
+
+Live run (one at a time; dev server up against the test env; `WSH_*` exported):
+```
+cd website
+# L6 seed teardown FIRST (TEST SQL editor): delete from public.agent_accreditation where agent_id='wsh-test-agent-L7';
+npx tsx scripts/whole-system-harness/run-l2-complete.ts --live
+npx tsx scripts/whole-system-harness/run-l4.ts --live
+npx tsx --env-file=.env.local scripts/whole-system-harness/run-l6.ts --live
+```
+
+### Still deferred
+- **Option B** (admin `POST /api/calling/approve` HTTP + plugin-auth Layer-1 thread)
+  — the higher-fidelity follow-up exercising the real D-14 gate end-to-end.
 - **Combination 2** — blocked on Priority 4 (disclaimer text).
 - **C2** (R20a distress perimeter across the loop) — Critical-tier, a separate session.
