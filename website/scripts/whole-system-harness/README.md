@@ -84,4 +84,49 @@ lib/
 - C2 (R20a distress perimeter across the loop) is **Critical-tier** — out of
   scope here; built later under the Critical Change Protocol.
 - Only L6 and L7 use the bridge tsx step. L1–L6 + the two negatives are built
-  later on this proven pattern (PR1).
+  on this proven pattern (PR1) — see below.
+
+## L1–L6 build (2026-05-25)
+
+Built the **clean** positive scenarios as **sibling runners** on the L7 pattern
+(founder "clean scenarios first" election). Each mirrors the run-l7.ts two-mode
+shape: a **dry-preview** default (no env — prints inputs + assertion plan, exits 0;
+used for sandbox import-checks) and a **`--live`** mode the founder runs against the
+standing TEST env.
+
+| Runner | Scenario | Endpoint(s) | LLM cost on live run | Founder verifies |
+|---|---|---|---|---|
+| `run-l1.ts` | L1 — Reasoning alone | `/api/reason` (X-Api-Key) | 1 Sonnet pass | runner asserts 200 + Layer-2 + Layer-3 + disclaimer |
+| `run-l2.ts` | L2 — Calling alone (**incomplete-specs variant only**) | `/api/calling` (Bearer) | none (engine is pure) | runner asserts `null_result` + clarification + NO handoff |
+| `run-l3.ts` | L3 — Reflect alone | `/api/practice/reflect` (Bearer) | ~4–5 Sonnet (Q1–Q4 + cond. Q5) | runner asserts `complete` + thin profile + mirror note |
+| `run-l5.ts` | L5 — Reasoning + Reflect (Seam **S3**) | `/api/reason` → `/api/practice/reflect` | 1 + ~4–5 Sonnet | runner asserts profile read-back; **founder runs the S3 DB-verify SQL** the runner prints |
+
+Live run (one at a time; dev server up against the test env; `WSH_*` exported as for L7):
+```
+cd website
+npx tsx scripts/whole-system-harness/run-l1.ts --live
+npx tsx scripts/whole-system-harness/run-l3.ts --live
+npx tsx scripts/whole-system-harness/run-l2.ts --live
+# L5 (exercise FK-seed: run the teardown SQL in the TEST SQL editor first):
+#   delete from public.agent_accreditation where agent_id='wsh-test-agent-L7';
+npx tsx scripts/whole-system-harness/run-l5.ts --live
+```
+These runners import only `lib/` (no Supabase module), so they run under a plain
+`npx tsx` — `--env-file` is not required (the `WSH_*` come from the shell export).
+
+### Shared lib added this build
+- `lib/http-client.ts` — `postCalling` + `postReflect` (both Bearer `sr_assent_`).
+- `lib/reflect-driver.ts` — **adaptive** Reflect dialogue driver (answers whatever
+  step the engine surfaces — Q1–Q6, FD-R1, RS-4 — looping to `complete`). Shared by
+  L3 + L5. AGENT-NATIVE answers; a caller may override any step.
+- `lib/capture.ts` — generalised from the L7-only literal to any scenario label.
+
+### Deferred (focused follow-up — approval-seam decision)
+- **L2-complete** (approved path → five-slot `DiscoveredPurpose`), **L4** (Seam S1),
+  **L6** (full suite). All hinge on the five-spec, which is built only by the
+  **admin-only** `POST /api/calling/approve` (`requireAdmin`) and reaches Layer 1 as
+  a `Layer1Schema.discovered_purpose` field on the plugin-auth path — not a plain
+  `/api/reason` body field. Pick the seam approach (admin HTTP route vs. a pure tsx
+  step on `buildDiscoveredPurpose` + `validateLayer1Schema`) before building these.
+- **Combination 2** — blocked on Priority 4 (disclaimer text).
+- **C2** (R20a distress perimeter across the loop) — Critical-tier, a separate session.

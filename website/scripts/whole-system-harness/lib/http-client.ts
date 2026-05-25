@@ -6,10 +6,18 @@
  * mode never calls these — it runs the bridge tsx step against a synthetic
  * fixture, so no network and no secrets are involved.
  *
- * Per-endpoint auth (verified by code-read 2026-05-24, diagnostic-certain):
+ * Per-endpoint auth (verified by code-read 2026-05-24 / 2026-05-25, diagnostic-certain):
  *   - POST /api/reason             → header  X-Api-Key: <api key>     (agent-dev surface)
  *   - POST /api/accreditation/[id] → header  Authorization: Bearer sr_assent_<token>
+ *   - POST /api/calling            → header  Authorization: Bearer sr_assent_<token>  (D-6 reuse)
+ *   - POST /api/practice/reflect   → header  Authorization: Bearer sr_assent_<token>  (SR-14 reuse)
  *   - GET  /api/public-key         → no auth (public)
+ *
+ * postCalling / postReflect were added 2026-05-25 for the L1–L6 build (founder
+ * "clean scenarios first" election). Both reuse the SAME A10 sr_assent_ bearer
+ * credential as the accreditation write path — verified against the route files
+ * /api/calling/route.ts (verifyCallingToken) and /api/practice/reflect/route.ts
+ * (verifyReflectToken): both call validateSageAssentWriteToken UNSCOPED.
  *
  * Uses the global fetch built into Node 22 — no dependency added (PR15).
  */
@@ -72,6 +80,54 @@ export function postAccreditation<T = unknown>(
     body,
     { Authorization: `Bearer ${assentToken}` }
   )
+}
+
+/**
+ * POST /api/calling with the sr_assent_ bearer (D-6 reuse, UNSCOPED).
+ *
+ * Body shape (parseCallingBody): { session_id, agent_id, response?, agent_card_url? }.
+ * Omit `response` to open / re-fetch a session; supply it to answer the last
+ * surfaced question. The endpoint is kill-switched behind SAGE_CALLING_ENABLED
+ * (503 when off) — checked BEFORE auth.
+ */
+export function postCalling<T = unknown>(
+  baseUrl: string,
+  assentToken: string,
+  body: {
+    session_id: string
+    agent_id: string
+    response?: string
+    agent_card_url?: string
+  }
+): Promise<HttpResult<T>> {
+  return postJson<T>(`${stripTrailingSlash(baseUrl)}/api/calling`, body, {
+    Authorization: `Bearer ${assentToken}`,
+  })
+}
+
+/**
+ * POST /api/practice/reflect with the sr_assent_ bearer (SR-14 reuse, UNSCOPED).
+ *
+ * Body shape (parseReflectBody): { session_id, agent_id, response?, session_summary?,
+ * safety_signal?, acts_blocked? }. On the FIRST call (no `response`) session_summary
+ * is REQUIRED. Supply `response` to answer the last surfaced step. The endpoint is
+ * kill-switched behind SAGE_REFLECT_ENABLED (503 when off) — checked BEFORE auth.
+ */
+export function postReflect<T = unknown>(
+  baseUrl: string,
+  assentToken: string,
+  body: {
+    session_id: string
+    agent_id: string
+    response?: string
+    session_summary?: unknown
+    safety_signal?: unknown
+    acts_blocked?: unknown
+  }
+): Promise<HttpResult<T>> {
+  return postJson<T>(`${stripTrailingSlash(baseUrl)}/api/practice/reflect`, body, {
+    Authorization: `Bearer ${assentToken}`,
+  })
 }
 
 /** GET /api/public-key (public) — confirm the env serves the TEST key

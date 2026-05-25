@@ -7599,3 +7599,48 @@ Expected: the bridge step prints `20 passed, 0 failed`, `Result: PASS`, and writ
 **Status:** Adopted. Implementation status: L7 harness — **Verified** (agent-native genuine→200 + bridge); Step-7 discrimination demonstrated (Combination-1 negatives). Product-structure position: **unified** (one product/substrate); intake-stem **mode-branch** deferred. Cross-references: `D-L7-SINGLE-LOOP-PROOF-LIVE-VERIFIED-2026-05-25`; `D-L7-SINGLE-LOOP-PROOF-BUILD-2026-05-24`; `D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24`; `data-room/05_outputs/L7-live-2026-05-25T06-39-04-253Z.{json,md}`.
 
 ---
+
+## 2026-05-25 — D-L1-L5-CLEAN-SCENARIOS-BUILD-2026-05-25
+
+**Decision:** Built the **"clean" positive scenarios on the proven L7 pattern** as **sibling runners** (founder election, this session): **L1** (Sage Reasoning alone), **L2-incomplete** (Sage Calling → `null_result`, no handoff), **L3** (Sage Reflect alone), **L5** (Sage Reasoning + Sage Reflect, Seam S3). Extended the harness `lib/`: `http-client.ts` gains `postCalling` + `postReflect`; `capture.ts` generalised from the L7-only literal to any scenario label; new adaptive `lib/reflect-driver.ts` (walks the Reflect dialogue to `complete` on whatever branch the engine takes). **L2-complete, L4, and L6 are DEFERRED** to a focused follow-up pending an approval-seam decision.
+
+**Reasoning:** Founder elected (2026-05-25) **sibling runners** + **clean scenarios first** after two diagnostic-certain findings (code-read) re-shaped the plan: (1) the five-slot `DiscoveredPurpose` that L2-complete/L4 need is built **only** by the admin-only `POST /api/calling/approve` (`requireAdmin`) — a credential the harness does not hold; (2) the five-spec reaches Layer 1 as a field **inside** a `Layer1Schema` on the plugin-auth path, **not** a body field on `/api/reason`'s agent path — so L4 is not a plain HTTP thread. The four clean scenarios are plain HTTP on the proven pattern and need no approval seam. **Limitation:** the harness cannot reach the founder's dev server from the build sandbox (network allowlist) — the runners were built + **import-checked in build-only/dry-preview** here; the **live runs and the `Verified` stamp are the founder's between-session step** (0c verification framework). The Reflect/Calling drivers are **adaptive** (answer whatever step the engine surfaces, incl. re-prompts/FD-R1/RS-4) so a single live run reaches a terminal without a fragile fixed script. PR15: extended the existing `lib/` + plain-`tsx` assertion pattern — no framework, no Anthropic-primitive substitute applicable to test scaffolding.
+
+**Files touched:**
+- `website/scripts/whole-system-harness/run-l1.ts` (NEW) — L1; POST /api/reason; asserts 200 + Layer-2 assessment + Layer-3 prose + evaluative disclaimer.
+- `website/scripts/whole-system-harness/run-l2.ts` (NEW) — L2-incomplete; drives /api/calling to `null_result`; asserts clarification + NO handoff.
+- `website/scripts/whole-system-harness/run-l3.ts` (NEW) — L3; drives /api/practice/reflect to `complete`; asserts thin profile + mirror note.
+- `website/scripts/whole-system-harness/run-l5.ts` (NEW) — L5; /api/reason → Reflect; asserts engine-decided profile read-back; provides S3 DB-verify + teardown SQL for the founder.
+- `website/scripts/whole-system-harness/lib/reflect-driver.ts` (NEW) — adaptive Reflect dialogue driver (shared by L3 + L5).
+- `website/scripts/whole-system-harness/lib/http-client.ts` — added `postCalling` + `postReflect` (Bearer sr_assent_).
+- `website/scripts/whole-system-harness/lib/capture.ts` — generalised `scenario` to any label + `scenario_label` + `statuses` map; filename + markdown header now scenario-driven.
+- `website/scripts/whole-system-harness/README.md` — documented the L1–L6 build + the deferred set.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-25-L1-L5-clean-scenarios-build-close.md` (NEW) — session close.
+
+**Risk classification:** **Standard** under 0d-ii. Test scaffolding under `website/scripts/` — outside `src/`, never bundled, never deployed; runs against the **TEST** environment only. **No production code, schema, env, or deploy touched.** AC7 not engaged. PR6 not engaged. KG1 not engaged (the runners import only pure `lib/` modules + call endpoints over HTTP; they write no DB rows themselves — the test endpoints write to the test project). L7 build-only regression re-confirmed green (20/20) after the `lib/` edits.
+
+**Rollback path:** Nothing in production to roll back. The new runner + `lib/` files are additive (delete host-side if abandoned). The `lib/` edits are backward-compatible (L7 build-only re-verified). Restore production local dev when all testing is done: `cp website/.env.local.prod-backup-2026-05-24 website/.env.local`.
+
+**Verification step (founder-performable):** Dev server up against the test env; `WSH_*` exported (same creds as L7). Then, one at a time:
+```
+cd website
+npx tsx scripts/whole-system-harness/run-l1.ts --live   # expect: 5 passed, 0 failed; Result: PASS
+npx tsx scripts/whole-system-harness/run-l3.ts --live   # expect: PASS (multi-turn; Q1-Q4 make Sonnet calls)
+npx tsx scripts/whole-system-harness/run-l2.ts --live   # expect: PASS (terminates at null_result; engine makes no LLM call)
+# L5: to exercise the FK-seed branch, run the teardown SQL in the TEST SQL editor first:
+#   delete from public.agent_accreditation where agent_id='wsh-test-agent-L7';
+npx tsx scripts/whole-system-harness/run-l5.ts --live   # expect: PASS; then run the S3 DB-verify SQL the runner prints
+```
+Each writes a ledger to `data-room/05_outputs/<scenario>-live-<timestamp>.{json,md}`. For L5's S3, confirm the DB rows in the test project per the printed SQL.
+
+**Open questions / deferred (PR7):**
+- **L2-complete / L4 / L6** — deferred pending the approval-seam decision (admin HTTP approve route vs. a pure `tsx` step on `buildDiscoveredPurpose` + `validateLayer1Schema`). The complete path's five-spec is the only thing blocking them.
+- **Combination 2** — blocked on Priority 4 (disclaimer text). **C2 distress perimeter** — Critical-tier, a separate Critical session.
+- **L1 (f) / no-practice disclaimer** — pending Priority 4 (recorded as a note in the L1 ledger, not failed).
+
+**Rules served:** 0a, 0c, 0g, 0h, PR1, PR2, PR10, PR12, PR13, PR15, PR16, R18f, R19d.
+
+**Status:** Adopted. Implementation status: the L1, L2-incomplete, L3, L5 runners + the `lib/` extensions — **Wired** (built + import-clean in build-only/dry-preview; they reach **Verified** at the founder live run). L7 harness unchanged + re-confirmed (build-only 20/20). Cross-references: `D-L7-AGENT-NATIVE-RERUN-STEP7-COMPLETE-2026-05-25`; `D-L7-SINGLE-LOOP-PROOF-LIVE-VERIFIED-2026-05-25`; `D-WHOLE-SYSTEM-HARNESS-DESIGN-2026-05-24`; `data-room/04_test_brief/scenario-matrix.md`; `/operations/handoffs/founder/2026-05-25-L1-L5-clean-scenarios-build-close.md`.
+
+---

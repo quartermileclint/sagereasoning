@@ -19,7 +19,11 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 export const OUTPUT_DIR = resolve(HERE, '../../../../data-room/05_outputs')
 
 export interface RunLedger {
-  scenario: 'L7'
+  /** Scenario label, e.g. 'L1', 'L2', 'L3', 'L5', 'L7'. Widened from the L7-only
+   *  literal 2026-05-25 for the L1–L6 build (sibling-runner election). */
+  scenario: string
+  /** Human-readable one-liner, e.g. 'Reasoning alone'. Rendered in the markdown. */
+  scenario_label?: string
   mode: 'build-only' | 'live'
   timestamp: string
   result: 'PASS' | 'FAIL'
@@ -29,6 +33,9 @@ export interface RunLedger {
   reason_status?: number
   /** live-only: the /api/accreditation status code */
   accreditation_status?: number
+  /** Generic per-endpoint status map for multi-endpoint scenarios, e.g.
+   *  { 'POST /api/practice/reflect (open)': 200, 'POST … (Q4)': 200 }. */
+  statuses?: Record<string, number>
   /** bridge step output */
   receipt_id?: string
   evaluated_action?: unknown
@@ -41,7 +48,7 @@ export interface RunLedger {
 export function writeLedger(ledger: RunLedger): { jsonPath: string; mdPath: string } {
   mkdirSync(OUTPUT_DIR, { recursive: true })
   const stamp = ledger.timestamp.replace(/[:.]/g, '-')
-  const base = `L7-${ledger.mode}-${stamp}`
+  const base = `${ledger.scenario}-${ledger.mode}-${stamp}`
   const jsonPath = join(OUTPUT_DIR, `${base}.json`)
   const mdPath = join(OUTPUT_DIR, `${base}.md`)
 
@@ -52,9 +59,9 @@ export function writeLedger(ledger: RunLedger): { jsonPath: string; mdPath: stri
 
 function renderMarkdown(l: RunLedger): string {
   const lines: string[] = []
-  lines.push('# L7 Single-Loop Proof — Run Ledger')
+  lines.push(`# ${l.scenario} — Whole-System Run Ledger`)
   lines.push('')
-  lines.push(`- **Scenario:** ${l.scenario} (Reasoning + Assent)`)
+  lines.push(`- **Scenario:** ${l.scenario}${l.scenario_label ? ` (${l.scenario_label})` : ''}`)
   lines.push(`- **Mode:** ${l.mode}`)
   lines.push(`- **Timestamp:** ${l.timestamp}`)
   lines.push(`- **Result:** ${l.result}`)
@@ -62,6 +69,9 @@ function renderMarkdown(l: RunLedger): string {
   if (l.reason_status !== undefined) lines.push(`- **/api/reason status:** ${l.reason_status}`)
   if (l.accreditation_status !== undefined) {
     lines.push(`- **/api/accreditation status:** ${l.accreditation_status}`)
+  }
+  if (l.statuses) {
+    for (const [k, v] of Object.entries(l.statuses)) lines.push(`- **${k} status:** ${v}`)
   }
   if (l.receipt_id) lines.push(`- **Bridge receipt_id:** \`${l.receipt_id}\``)
   lines.push('')
