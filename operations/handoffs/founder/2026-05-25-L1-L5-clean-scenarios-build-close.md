@@ -148,3 +148,18 @@ All four clean scenarios **ran green live** against the test env:
 **Status now:** L1 / L2-incomplete / L3 / L5 — **Verified** (was Wired). L7 — Verified (unchanged). L2-complete / L4 / L6 — Scoped (deferred, approval-seam decision).
 
 *End of verification addendum.*
+
+---
+
+## Post-commit (2026-05-25)
+
+Committed + pushed; **Vercel build green** (the push triggers a build that type-checks `website/scripts/`; the deployed app is byte-identical — no `src/` change, so no behaviour shipped). Two fixes landed in the commit beyond the original build:
+
+- **`run-l2.ts` — pre-commit `tsc` failure (TS7022).** The drive loop had a type-inference cycle (`stage`←`current`, `answer`←`stage`, `resp`'s arg←`answer`, `current`←`resp.body`). Fixed with explicit `string` annotations on `stage`/`answer` (+ a `CallingBody | null` annotation on `current`). Full-project `npx tsc --noEmit` now passes.
+- **`run-l5.ts` — `grade_history` verify SQL** order column corrected `created_at → occurred_at`.
+
+**Lesson (carried into the next session):** verify harness changes with **`npx tsc --noEmit`** (what the pre-commit hook + Vercel run), not only `npx tsx` — `tsx` executes the code but strips types without type-checking, so a type-only error won't show up under it. Logged as a knowledge-gap candidate (PR5).
+
+**Next session:** L2-complete / L4 / L6 — see `/operations/handoffs/founder/2026-05-25-L2complete-L4-L6-finish-testing-NEXT-SESSION-PROMPT.md`.
+
+*End of post-commit note.*
