@@ -7499,3 +7499,103 @@ Expected: the three new docs exist; `signed_assessments` appears in the harness 
 **Status:** Adopted. Implementation status: the harness — **Designed** (built later, L7 single-loop proof first). Cross-references: `D-WHOLE-SYSTEM-TEST-ORCHESTRATOR-READING-A-2026-05-24`; `D-DATA-ROOM-COMBINATION-1-PASSING-2026-05-24`; `D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24`; `/drafts/2026-05-23-whole-system-data-room-brief.md` (§5, §9); `data-room/04_test_brief/{test-flag-config,orchestrator-harness-design,scenario-matrix,test-env-standup-checklist}.md`; `/operations/handoffs/founder/2026-05-24-data-room-combination-1-passing-close.md`; `/operations/handoffs/founder/2026-05-24-whole-system-harness-design-close.md`.
 
 ---
+
+## 2026-05-24 — D-L7-SINGLE-LOOP-PROOF-BUILD-2026-05-24
+
+**Decision:** Built the **L7 single-loop-proof harness** (PR1) under `website/scripts/whole-system-harness/` and ran the **Seam-2 bridge `tsx` step green in build-only mode (20/20 assertions, exit 0)**, capturing the ledger to `data-room/05_outputs/`. Founder elected **build-only** scope at open (test env not yet standing) and the **API-key (`X-Api-Key`)** auth path for `/api/reason`. The live HTTP loop (genuine→200) is founder-deferred; the harness is `tsc`-clean (full project `tsc --noEmit` = 0 errors) and ready to run.
+
+**Reasoning:** Executes the L7 build prompt under `D-WHOLE-SYSTEM-HARNESS-DESIGN-2026-05-24`. **PR1:** prove one configuration (L7 — the genuine→200 centrepiece + the bridge step) before building L1–L6 + the negatives. **PR2:** the bridge step was run AND the whole harness typechecked in the same session it was written. **PR15 consult:** extends the repo's existing plain-`tsx` assertion pattern and **reuses** `createCarriedProfile` (pure; for the live seed write) + the bridge test's `FULL_ASSESSMENT` fixture — not greenfield; no Anthropic-canonical primitive does this project's four-seam HTTP threading. **Two refinements surfaced and folded in (PR13, diagnostic-certain by code-read):** (1) `deriveReceiptId` returns `'rcpt_' + SHA-256(signature)`, **not** a bare SHA-256 as the design docs phrased it — the bridge-step assertion was written to match the real code; (2) the genuine→200 write body is a **complete** `{ kind:'seed', profile: createCarriedProfile(agent_id), provenance: { signed_assessments:[…] } }`, not just `{ provenance }` — because the route runs `validateWriteBody` (needs `kind`+`profile`) before the provenance gate. Both are encoded in the harness + README so the founder's live run does not fail on either.
+
+**Files touched:**
+- `website/scripts/whole-system-harness/run-l7.ts` (NEW) — entry point; build-only + live modes.
+- `website/scripts/whole-system-harness/lib/{assertions,http-client,bridge-step,fixtures,scenario-input,capture}.ts` (NEW) — 6 lib modules.
+- `website/scripts/whole-system-harness/README.md` (NEW) — how to run; live-run env vars; honest limitations.
+- `data-room/05_outputs/L7-build-only-2026-05-24T06-28-57-267Z.{json,md}` (NEW) — the build-only run ledger (20/20 PASS).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-24-L7-single-loop-proof-build-close.md` (NEW) — session close.
+
+**Risk classification:** **Standard** under 0d-ii. Test scaffolding under `website/scripts/` (outside `src/`, never bundled, never deployed); runs against a TEST env only; **no production code, schema, env, or deploy touched**. AC7 not engaged. PR6 not engaged. **KG1 not engaged** — the harness writes no DB rows itself; the bridge step imports only the *pure* `sage-assent-bridge`; the live write happens via the HTTP endpoint, and `createCarriedProfile` (pure, supabase-free) is dynamically imported only in the live path.
+
+**Rollback path:** New, additive files under `website/scripts/whole-system-harness/` + `data-room/05_outputs/` — delete host-side if abandoned (nothing references them). Production is unchanged; the live provenance gate's rollback (unset `SUBSTRATE_PROVENANCE_GATE_ENABLED` + redeploy) is independent of this session. (Side-effect note: the AI's `tsc` run touched the tracked build cache `website/tsconfig.tsbuildinfo`; optional host-side restore `git checkout -- website/tsconfig.tsbuildinfo` — harmless, do not stage.)
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx scripts/whole-system-harness/run-l7.ts        # build-only: 20/20 PASS, exit 0
+npx tsc --noEmit                                       # 0 errors (whole project, incl. harness)
+```
+Expected: the bridge step prints `20 passed, 0 failed`, `Result: PASS`, and writes a ledger under `data-room/05_outputs/`. The deferred **live** run (once the test env is standing) is `npx tsx --env-file=.env.local scripts/whole-system-harness/run-l7.ts --live` with `WSH_BASE_URL`/`WSH_API_KEY`/`WSH_ASSENT_TOKEN`/`WSH_AGENT_ID` set — expect `/api/reason`→200 and the genuine credential write→200.
+
+**Open questions / deferred (PR7):**
+- **L7 assertion (a) genuine→200** — deferred to the founder live run (test env not yet standing per `test-env-standup-checklist.md`).
+- **L7 assertion (b) no-practice disclaimer** — **pending Priority 4** (disclaimer text not written); recorded as pending, not failed.
+- **Aggregate-faithfulness (M-6)** — not proven by the genuine→200 path; deferred (ADR revisit-condition 1).
+- **L1–L6 + Combination 1/2** — built later on this proven pattern; **C2 distress perimeter** stays Critical-tier; **Combination 2** stays blocked on Priority 4.
+
+**Rules served:** 0a, 0c, 0g, 0h, PR1, PR2, PR10, PR13, PR15, PR16, R18f.
+
+**Status:** Adopted. Implementation status: the L7 harness — **Wired** (the Seam-2 bridge `tsx` step is **Verified** in build-only; the full L7 loop reaches **Verified** at the founder live run). Cross-references: `D-WHOLE-SYSTEM-HARNESS-DESIGN-2026-05-24`; `D-WHOLE-SYSTEM-TEST-ORCHESTRATOR-READING-A-2026-05-24`; `D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24`; `data-room/04_test_brief/{orchestrator-harness-design,scenario-matrix,test-flag-config,test-env-standup-checklist}.md`; `data-room/05_outputs/L7-build-only-2026-05-24T06-28-57-267Z.{json,md}`; `/operations/handoffs/founder/2026-05-24-whole-system-harness-design-close.md`; `/operations/handoffs/founder/2026-05-24-L7-single-loop-proof-build-close.md`.
+
+---
+
+## 2026-05-25 — D-L7-SINGLE-LOOP-PROOF-LIVE-VERIFIED-2026-05-25
+
+**Decision:** The **L7 single-loop proof ran green LIVE** against the stood-up test environment — **23/23 assertions, Result: PASS**: `/api/reason` → 200 (signed assessment returned), the **genuine credential write → 200** (the genuine→200 centrepiece), and the Seam-2 bridge `tsx` step verified (`receipt_id === 'rcpt_' + SHA-256(signature)`). The L7 harness is now **Verified** end-to-end. This is the **first 0h-criterion-4 value demonstration** (agent-developer audience): a realistic agent impression (an autonomous coding agent pressured to ship an unsafe payments change) examined by the substrate and threaded into a genuine, signature-verified credential write.
+
+**Reasoning:** Completes `D-L7-SINGLE-LOOP-PROOF-BUILD-2026-05-24` (which left the live run deferred pending test-env standup). The founder stood up the test environment over this session (separate test Supabase project `iwdtrvuphogkwmovhnvz`; production `public` schema cloned structure-only, zero rows, via `supabase db dump`; test Ed25519 key-pair generated and verified as a matched pair via sign+verify; `website/.env.local` switched to the test project with signing/gate/Layer-3 on; two `api_keys` credentials seeded via the new generator). The `/api/public-key` pre-check returned `key_id=substrate-layer2-test`, confirming the env loaded the test key (no "false 403" risk). **Positive control established** — a genuine 200 on this env makes the Combination-1 negatives trustworthy. L7 assertion **(a)** genuine→200 and **(c)** bridge — **PROVEN live**; **(b)** no-practice disclaimer — **pending Priority 4** (recorded, not failed).
+
+**Files touched:**
+- `website/scripts/whole-system-harness/mint-test-credentials.ts` (NEW) — env-free generator: raw `sr_live_`/`sr_assent_` tokens + paste-ready SQL (SHA-256 hashes byte-identical to the validators).
+- `data-room/05_outputs/L7-live-2026-05-25T05-13-42-204Z.{json,md}` (NEW) — the live run ledger (23/23 PASS; reason 200; write 200).
+- `.gitignore` — added `.env.local.*` (env-backup safety; Standard).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-25-L7-live-verification-test-env-standup-close.md` (NEW) — session close.
+- (founder-side, not in repo: the test Supabase project + schema clone + key-pair + seeded credentials; `website/.env.local` carries test config and is gitignored.)
+
+**Risk classification:** **Standard** under 0d-ii. Test scaffolding + a run against a separate TEST Supabase project; **no production code, schema, env, or deploy touched** (the production provenance gate remains Live + independent). AC7 not engaged. PR6 not engaged. KG1 not engaged (the harness writes no DB rows itself; the genuine write goes through the HTTP endpoint against the test project).
+
+**Rollback path:** Nothing in production to roll back. Local dev currently points at the test project; restore production local dev with `cp website/.env.local.prod-backup-2026-05-24 website/.env.local`. Test scaffolding files are additive (delete host-side if abandoned).
+
+**Verification step (founder-performable):** Done this session — the live run printed `23 passed, 0 failed`, `Result: PASS`, with `/api/reason` 200 + credential write 200, captured at `data-room/05_outputs/L7-live-2026-05-25T05-13-42-204Z.md`. Re-runnable any time with the dev server up + the `WSH_*` env vars set.
+
+**Open questions / deferred (PR7):**
+- **L7 (b) no-practice disclaimer** — pending Priority 4.
+- **L1–L6 + Combination 1/2** — built next on this proven pattern (positive control now established); **C2 distress perimeter** stays Critical-tier; **Combination 2** blocked on Priority 4.
+- **Aggregate-faithfulness (M-6)** — not proven by genuine→200; deferred (ADR revisit-condition 1).
+
+**Rules served:** 0a, 0c, 0g, 0h, PR1, PR2, PR10, PR13, PR15, PR16, R18f.
+
+**Status:** Adopted. Implementation status: the L7 harness — **Verified** (live genuine→200 + bridge). Cross-references: `D-L7-SINGLE-LOOP-PROOF-BUILD-2026-05-24`; `D-WHOLE-SYSTEM-HARNESS-DESIGN-2026-05-24`; `D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24`; `data-room/05_outputs/L7-live-2026-05-25T05-13-42-204Z.{json,md}`; `data-room/04_test_brief/test-env-standup-checklist.md`; `/operations/handoffs/founder/2026-05-25-L7-live-verification-test-env-standup-close.md`.
+
+---
+
+## 2026-05-25 — D-L7-AGENT-NATIVE-RERUN-STEP7-COMPLETE-2026-05-25
+
+**Decision:** Re-ran L7 with an **agent-native** impression (inference / objective / reward-weighting / "the judgement it is about to assent to" — no emotion words) → genuine→**200**, 23/23 PASS; the substrate extracted agent-native structures (`phobos` agonia+oknos, `epithumia/philedonia`, `oikeiosis_stage: self_preservation`) — i.e. it judged the agent's *value-weighting of its own continuation*, not a feeling: the genuine **agent-audience value demonstration**. Then ran the **Step-7 negative smoke test** (Combination 1) on the **same** env → no-provenance→**422**, forged→**403** (2/2 PASS). **Step 7 is now fully satisfied — positive control (200) AND discrimination (422/403) on one environment** — so a 403 here is a genuine forgery rejection, not a key mismatch. Also adopted a **product-structure position** from the input-question investigation.
+
+**Reasoning:** Resolves two founder critiques (2026-05-25): (1) the first L7 used a human-framed scenario — corrected; (2) the gate's discrimination had not been shown in this test env — now shown. **Framing investigation finding:** the products' core questions already generalise to agents because the project defines a *passion* as "an assent to a false judgement about value," **not an emotion** (users-guide glossary). Sage Calling + Sage Reflect questions are already agent-native/neutral ("operational" vocabulary); `/api/reason` input is audience-agnostic with output branching by mode (`agent-mode-service` vs `philosophical-mode-service`); the Mentor is human-by-design (its agent equivalent is the substrate + ATL, not a re-framed Mentor); only a handful of three-tier intake-clarification stems leak human framing. **Founder decision:** keep **one product / one substrate** — NOT separate human/agent products and NOT a full user-type rewrite — and fix the narrow misfit by **mode-branching** the ~5 human-framed intake-clarification stems (agent variant + human variant). Recorded as a future work item, not built this session. *PR16 positioning: strengthens the "one Character Kernel reasons for humans AND agents" claim.*
+
+**Files touched:**
+- `website/scripts/whole-system-harness/lib/scenario-input.ts` — rewritten agent-native (human-framed version superseded).
+- `website/scripts/whole-system-harness/smoke-negatives.ts` (NEW) — Step-7 negative smoke (no-provenance→422; forged→403; reuses http-client + the synthetic fixture as the forgery).
+- `data-room/05_outputs/L7-live-2026-05-25T06-39-04-253Z.{json,md}` (NEW) — the agent-native L7 re-run ledger (23/23 PASS).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-25-L7-live-verification-test-env-standup-close.md` — session-completion addendum.
+
+**Risk classification:** **Standard** under 0d-ii. Test scaffolding + runs against the TEST Supabase project; **no production code, schema, env, or deploy touched**. AC7 not engaged. PR6 not engaged. KG1 not engaged (harness writes no DB rows; the teardown `delete` + the credential seeds were founder-run SQL against the test project).
+
+**Rollback path:** Nothing in production. Local dev points at the test project; restore prod local dev with `cp website/.env.local.prod-backup-2026-05-24 website/.env.local`. Test scaffolding is additive.
+
+**Verification step (founder-performable):** Done — L7 re-run 23/23 (`/api/reason` 200, genuine write 200, bridge); negatives 2/2 (422 + 403); all on the standing test env. Ledgers in `data-room/05_outputs/`.
+
+**Open questions / deferred (PR7):**
+- **Mode-branch the ~5 human-framed intake-clarification stems** — adopted direction; future work item (not built).
+- **`is_kathekon: true / strong` on the L7 dilemma** — flagged for a future substrate-quality look (does the verdict align with a "deploy-unsafe-code" inclination?); separate from framing; one run not conclusive.
+- **L1–L6 + full Combination 1/2 build** — next, on the proven pattern; **C2** stays Critical-tier; **Combination 2** blocked on Priority 4.
+- **Aggregate-faithfulness (M-6)** — deferred.
+
+**Rules served:** 0a, 0c, 0f, 0g, 0h, PR1, PR2, PR10, PR13, PR15, PR16, R18a, R18f.
+
+**Status:** Adopted. Implementation status: L7 harness — **Verified** (agent-native genuine→200 + bridge); Step-7 discrimination demonstrated (Combination-1 negatives). Product-structure position: **unified** (one product/substrate); intake-stem **mode-branch** deferred. Cross-references: `D-L7-SINGLE-LOOP-PROOF-LIVE-VERIFIED-2026-05-25`; `D-L7-SINGLE-LOOP-PROOF-BUILD-2026-05-24`; `D-SAGE-ASSENT-PROVENANCE-GATE-BUILD-WIRED-VERIFIED-2026-05-24`; `data-room/05_outputs/L7-live-2026-05-25T06-39-04-253Z.{json,md}`.
+
+---

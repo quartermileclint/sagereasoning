@@ -47,3 +47,6 @@ website/scripts/.translation-sandwich-cache/
 # IDE
 .vscode/
 .idea/
+
+# Local env-file backups (may contain secrets) — never commit
+.env.local.*
