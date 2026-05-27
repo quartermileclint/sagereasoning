@@ -7802,3 +7802,115 @@ Expected: `run-comb2` prints PASS for the canonical disclaimer on all four surfa
 **Status:** Adopted. Implementation status: the four surfaces + `run-comb2.ts` — **Verified** (this is a static-file documentation assertion with no localhost dependency, so the sandbox run is complete verification; founder reproduces via the command above). Completes negative-scenario coverage — Combination 1 (Live 2026-05-24) + Combination 2 (Verified 2026-05-27) both passing. Cross-references: `D-SAGE-PRACTICE-DISTRIBUTION-IDENTITY-ELECTIONS-2026-05-26`; `/adopted/adr/2026-05-26-credential-scope-and-coverage-status.md`; `data-room/04_test_brief/scenario-matrix.md`; `data-room/04_test_brief/test-brief.md`; `/operations/handoffs/founder/2026-05-27-comb2-no-practice-disclaimer-close.md`.
 
 ---
+
+## 2026-05-27 — D-C2-R20A-PERIMETER-DIAGNOSTIC-AND-HARNESS-2026-05-27
+
+**Decision:** Session 2 of the v2 sequence (C2 — the R20a distress perimeter across the loop). Founder elected at open (2026-05-27): **build + compile-verify the C2 harness now; defer the live TEST-env exercise.** Outcome of this session:
+
+1. **Step-1 diagnostic (the headline result), recorded as finding M-7** in `data-room/99_review/missing-context.md`. By code-read, of the four product entries the loop drives, **only `/api/reason` has content-based R20a coverage** (AC5 route guard `enforceDistressCheck∘detectDistressTwoStage`, AC4-invocation-tested, **plus** the A7 substrate gate when the flag is on). `/api/calling` has **none** (deterministic engine; no sandwich; no classifier). `/api/practice/reflect` has its **own SR-9/R20a Zone-3 boundary**, but `checkZone3Boundary` engages only on a **developer-declared** `safety_signal.harm_flagged===true` (or `acts_blocked[category='harm']`) — **not** on content. `/api/accreditation/[agent_id]` carries **no free-text human-distress surface** (a signed-assessment credential record; documented "AC5 NOT engaged" in its own headers). The three uncovered entries are all **agent-facing** (A10-credentialed); the AC5 registry deliberately excludes agent-facing endpoints "because they process agent output, not human distress input" — so their absence from the human-distress perimeter is *consistent with AC5's design*, but means C2's literal cross-cutting property ("distress at any entry is caught") holds for `/api/reason` and is **not** met content-wise on the other three.
+2. **C2 harness built (`run-c2.ts`) + a vetted distress fixture added** (`lib/scenario-input.ts` `C2_DISTRESS_INPUT`, reused verbatim from the project's `r20a-classifier-eval.ts` `expectedSeverity:'acute'` case — non-graphic, human-distress framed). The runner has build-only + live modes (mirrors `run-l1`/`run-l7`); PR1 — it proves `/api/reason` first; it asserts the **honest current behaviour** of the other three (no forced green), and exercises Sage Reflect's actual declared-signal mechanism as a positive control. **Build-only run: 0 assertions / PASS, EXIT 0; `npx tsc --noEmit` whole-project EXIT 0** (sandbox-verified this session).
+3. **CCP for the TEST flag flip drafted (not executed)** — see the CCP block below. The live exercise (TEST-env standup + `SUBSTRATE_R20A_GATE_ENABLED='true'` in TEST + the `--live` run) is **deferred** per the founder's election; honest note: the live run mainly re-confirms `/api/reason`, which A7 marked **Verified 2026-05-13**.
+
+**Reasoning:** The prompt anticipated that C2's first real work is **diagnostic, not assertion** (PR12 — a prompt's framing checked against actual code). The diagnostic confirmed the four product entries are not the AC5 eight, and surfaced the coverage map honestly rather than forcing a green test. Per the prompt, no-coverage entries are logged as findings with severity (0h), not patched — adding content-distress detection to `/api/calling` or `/api/practice/reflect` would be a **perimeter broadening = a separate Critical change under AC5 + PR6 + PR1**, explicitly out of C2's scope. PR15: reused the proven harness `lib/` (`http-client`, `AssertionLedger`, `writeLedger`, `scenario-input`) — no rebuild, no framework. PR3 honoured in the assertion design (the redirect is IN the response body — synchronous). Diagnostic-certainty signals used: **Diagnostic-certain — root cause identified** for the code facts (guard/gate presence by direct read); **Diagnostic-uncertain — pattern level** for whether content-based detection was ever *intended* on the three agent-facing entries (**founder acknowledgement required**).
+
+**Critical Change Protocol (0c-ii) — DRAFTED for the deferred TEST-only flag flip (NOT executed this session):**
+
+1. **What is changing** — In the **TEST env only**, set `SUBSTRATE_R20A_GATE_ENABLED='true'` in `website/.env.local`. Turns on the A7 server-side R20a gate (guards Layer 2 inside the translation sandwich) for the local TEST deployment. Production Vercel env var stays **UNSET** — production untouched.
+2. **What could break** — With the gate on, the A7 path runs the Haiku distress classifier on the Layer-2 path (AC2 ~500ms for borderline inputs — accepted, not optimised away). A mis-wired gate could over-redirect (false positives) or under-redirect. In TEST this affects only local harness runs. On `/api/reason` the route-level guard catches acute distress *before* the sandwich, so A7's Branch 1.7 is defence-in-depth and "should not fire in steady-state `/api/reason` traffic" (route.ts:836-841).
+3. **What happens to existing sessions** — **N/A.** "No current users" (founder + test logins only; build-arc cache). No third-party sessions to invalidate. Production flag stays UNSET.
+4. **Rollback plan** — Unset `SUBSTRATE_R20A_GATE_ENABLED` in `website/.env.local` and restart `npm run dev`. Production was never touched. Restore production local dev: `cp website/.env.local.prod-backup-2026-05-24 website/.env.local`; restart; confirm `/api/public-key` serves the production key again.
+5. **Verification step** — (a) Confirm the boundary FIRST: `GET http://localhost:3000/api/public-key` → `key_id: substrate-layer2-test` (production key here ⇒ STOP, env mis-set). (b) `cd website && npx tsx --env-file=.env.local scripts/whole-system-harness/run-c2.ts --live` → C2-R (a)-(e) PASS; calling/reflect per the honest diagnostic. (c) `npx tsc --noEmit` → EXIT 0. (d) Production-untouched probes (A7 close): `/api/substrate/layer3` → 503; PRODUCTION `/api/public-key` steady-state (previous null; Ed25519).
+6. **Explicit approval** — Before enabling the flag in TEST, founder says "OK / go ahead" specific to: (i) TEST-only flip; (ii) AC2 ~500ms latency accepted; (iii) production `SUBSTRATE_R20A_GATE_ENABLED` stays UNSET; (iv) no production path touched. **Pending — deferred this session.**
+
+**Files touched:**
+- `data-room/99_review/missing-context.md` — appended finding **M-7** (the C2 coverage map + proposed severities).
+- `website/scripts/whole-system-harness/run-c2.ts` (NEW) — the C2 runner; build-only PASS + `tsc --noEmit` EXIT 0.
+- `website/scripts/whole-system-harness/lib/scenario-input.ts` — added `C2_DISTRESS_INPUT` + `C2DistressInput` (additive; vetted non-graphic fixture).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-27-C2-r20a-distress-perimeter-close.md` (NEW) — session close.
+- (optional) `data-room/05_outputs/C2-build-only-*.json|.md` — the build-only ledger (regenerated each run; stage only if wanted on file).
+
+**Risk classification (0d-ii):** The **work executed this session is Standard** (`governance` + additive test scaffolding under `website/scripts/`, never bundled/deployed; a findings-log append; no production code path, schema, env, or deploy touched). `run-c2.ts` does **not** modify the distress classifier, the Zone-2/3 logic, or any wrapper — it *calls* endpoints — so PR6 is **not** engaged by the scaffolding. The **deferred TEST flag flip remains Critical** (env-flag activation + R20a perimeter) — its full CCP is drafted above and engages only when the founder runs the live exercise. AC7 not engaged. KG1 not engaged (`run-c2.ts` imports only `lib/*`; no Supabase chain — runs under plain `npx tsx`).
+
+**Rollback path:** All edits additive/reversible — delete `run-c2.ts`, revert the `scenario-input.ts` + `missing-context.md` additions (host-side). Nothing deployed; no production impact. The TEST flag was not flipped; production `SUBSTRATE_R20A_GATE_ENABLED` remains UNSET in Vercel.
+
+**Verification step (founder-performable):**
+```
+cd website
+npx tsx scripts/whole-system-harness/run-c2.ts   # build-only: 0 assertions, PASS, EXIT 0; writes a ledger
+npx tsc --noEmit                                  # expect EXIT 0
+```
+Live (deferred — only after the TEST-env standup per `data-room/04_test_brief/test-env-standup-checklist.md` with `SUBSTRATE_R20A_GATE_ENABLED='true'`):
+```
+# confirm boundary first:
+#   GET http://localhost:3000/api/public-key  → key_id: substrate-layer2-test  (prod key ⇒ STOP)
+cd website
+npx tsx --env-file=.env.local scripts/whole-system-harness/run-c2.ts --live
+```
+Sandbox-verified this session: build-only PASS + EXIT 0; `npx tsc --noEmit` EXIT 0.
+
+**Open questions (PR7):**
+- **M-7 severities + the resolved-vs-gap call** — the founder sets severity for the `/api/calling` (proposed: significant) and `/api/practice/reflect` (proposed: significant) coverage findings, and decides whether the agent-facing entries should *ever* get content-based R20a coverage (a separate Critical perimeter change). Revisit: founder acknowledgement at/after this close.
+- **Sage Reflect harm-flag carrier contract** — `zone3-boundary.ts` flags the `safety_signal` carrier as a Diagnostic-uncertain (symptom-level) interpretation pending a canonical contract. Revisit: a Sage Reflect spec session.
+- **A7 production activation** (carried from the A7 close, open question #1) — unchanged; out of C2's scope; a separate future Critical change.
+
+**Rules served:** R20a, AC1, AC2, AC4, AC5, 0a, 0c, 0c-ii, 0d-ii, 0h, PR1, PR3, PR6, PR12, PR15.
+
+**Status:** Adopted. Implementation status: M-7 diagnostic **complete**; `run-c2.ts` + `C2_DISTRESS_INPUT` **Scaffolded + build-only Verified** (live run + the `Verified`-on-the-perimeter stamp deferred to the founder's TEST exercise). The TEST flag flip is **drafted (CCP above), not executed**. Production **UNCHANGED**: `/api/reason` byte-identical; provenance gate Live; `/api/substrate/layer3` → 503; `SUBSTRATE_R20A_GATE_ENABLED` UNSET in Vercel. Cross-references: `D-COMB2-NO-PRACTICE-DISCLAIMER-2026-05-27`; `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13`; `data-room/99_review/missing-context.md` (M-7); `data-room/04_test_brief/test-brief.md` (§C2); `/operations/handoffs/founder/2026-05-27-C2-r20a-distress-perimeter-close.md`.
+
+---
+
+## 2026-05-27 — D-R20A-CONFIG-PERIMETER-OPTION-A-2026-05-27
+
+**Decision:** Following the C2 diagnostic (M-7), the founder reframed R20a coverage to the **configuration level** (per mentor-approved flow L1–L7), required the distress output to be **audience-appropriate** (human-user message vs agent-developer notification), and required the design to avoid **double-reporting** across chained configurations. The founder elected **Option A — centralise distress detection at the substrate boundary**: a single authoritative catch at Layer 2, per-consumer rendering at Layer 3 (human crisis redirect vs agent-developer note), non-substrate products (Calling, Reflect-content) routed through that single catch, and a propagated **flow-terminating** distress flag (carrier: the existing `safety_signal`) so each configuration reports exactly once.
+
+**Reasoning:** The per-product view (M-7) hides flow-level gaps — confirmed: the Calling→Reasoning seam carries content as `discovered_purpose` while the route guard classifies only `input` (route.ts:622), so L4/L6 do not reliably catch Calling-origin distress. Option A produces *coverage* (not just disclosure), prevents double-reporting by construction (one catch + propagated flag + flow-termination), and reuses substrate primitives already in flight (A7 Layer-2 gate + A5.4 Layer-3 injection + per-consumer `prose_mode`/A6). Options B (standardise contract + token, keep per-product checks) and C (substrate-only entry, document the rest out-of-perimeter) were considered and not chosen. AI concern stated once (per founder preference) and accepted: Option A is the most build-intensive — multi-session Critical work, each endpoint a PR1 proof — sequenced as future work; does not block Session 3.
+
+**Files touched:**
+- `drafts/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md` (NEW) — the R20a-CFG ADR (the design); **Under review** in `/drafts/adr/` pending founder approval to move to `/adopted/adr/`.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** **Standard** (`governance`) under 0d-ii. A design decision + a draft ADR. **No code / schema / env / deploy.** The implementation is **code-critical when built** (AC5 + PR6 + PR1, per endpoint) — NOT done here. AC7 not engaged. PR6 not engaged by this documentation step.
+
+**Rollback path:** Documentation-only; revert the ADR draft + this entry if the direction is superseded. No production impact. Production `SUBSTRATE_R20A_GATE_ENABLED` remains UNSET.
+
+**Verification step (founder-performable):** Read `drafts/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`; confirm Option A + the per-configuration gap set + the audience contract + the propagation flag match your intent; approve (or amend) before it moves to `/adopted/adr/`.
+
+**Open questions (PR7):** the four ADR verification items (does Layer 2/A7 inspect `discovered_purpose`; is the agent-API human-framed message intended; is a distress flag already carried end-to-end; reconcile the Reflect harm-flag carrier with the A.4 propagation flag). The build sequencing (A.5) is scoped, not yet scheduled.
+
+**Rules served:** R20a, R19, AC2, AC4, AC5, AC8, 0a, 0f, PR1, PR6, PR12, PR16.
+
+**Status:** **Adopted** (decision direction = Option A). Implementation status: **Scoped** (future Critical build). Document status: the ADR is **Under review** in `/drafts/adr/`. Cross-references: `D-C2-R20A-PERIMETER-DIAGNOSTIC-AND-HARNESS-2026-05-27`; `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13`; `data-room/99_review/missing-context.md` (M-7); `drafts/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`.
+
+---
+
+## 2026-05-27 — D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27
+
+**Decision:** The founder **approved the R20a-CFG ADR document** and it was moved from `/drafts/adr/` to **`/adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`** (status → **Accepted**). The founder also **set the build sequence**: the **Option A build comes FIRST**, ahead of the C2 live run and Session 3 (the value-evidence rig). Scope updates recorded for the carried-forward items:
+
+- **C2 live (rescoped):** no longer "confirm today's honest behaviour." After Option A routes Calling + Reflect-content through the single substrate catch, the `run-c2.ts --live` run **verifies the new configuration-level coverage** (distress caught + redirected/notified at each entry per the audience contract). Optionally capture a pre-build baseline run first for before/after evidence.
+- **Session 3 (value-evidence rig):** unchanged in nature; **resequenced to after the Option A arc**.
+- **M-7 severities / resolved-vs-gap call:** Option A converts the M-7 gaps from "document as accepted" into "fix by building coverage." The founder still records the severities for the audit trail, but the disposition is now "being remediated under Option A," not "accepted gap."
+
+**Reasoning:** The founder holds sequencing authority and elected safety-coverage completeness before value demonstration — a coherent ordering (demonstrate value on a system whose distress perimeter is configuration-complete). AI refinement stated once and accepted: the **first** Option A session opens with the ADR's **four read-only verification items** before any Critical code (PR12 — they could change the catch locus or gap set), then designs the single-catch contract + propagation flag; the per-endpoint wiring (Calling, Reflect-content) follows as separate PR1 + CCP sessions. This is not a detour; it is how the order is honoured correctly.
+
+**Files touched:**
+- `adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md` (MOVED from `/drafts/adr/` + status → Accepted).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-27-r20a-config-perimeter-adr-adopted-close.md` (NEW) — the consolidated session close.
+- `operations/handoffs/founder/2026-05-27-OPTION-A-build-session-1-NEXT-SESSION-PROMPT.md` (NEW) — the paste-ready Option A session-1 prompt.
+- `operations/handoffs/founder/2026-05-27-C2-r20a-distress-perimeter-close.md` (MODIFIED — commit block redirected to the consolidated close).
+
+**Risk classification:** **Elevated** (`archive`) under 0d-ii for the `/drafts/ → /adopted/` move (founder-approved; rollback = move back); the rest is **Standard** governance documentation. **No code / schema / env / deploy.** The Option A *implementation* remains **code-critical when built** (AC5 + PR6 + PR1 per endpoint) — not done here. AC7 not engaged.
+
+**Rollback path:** Move the ADR back to `/drafts/adr/` and revert this entry if the adoption is reversed. Documentation-only; no production impact. Production `SUBSTRATE_R20A_GATE_ENABLED` remains UNSET.
+
+**Verification step (founder-performable):** Confirm `adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md` exists with status **Accepted** and `/drafts/adr/` no longer holds it. The next session opens from `operations/handoffs/founder/2026-05-27-OPTION-A-build-session-1-NEXT-SESSION-PROMPT.md`.
+
+**Open questions (PR7):** the four ADR verification items remain open and are the **first work** of the Option A arc. C2-live and Session 3 are carried forward (rescoped above), not scheduled to dates.
+
+**Rules served:** R20a, R19, AC5, AC8, 0a, 0e, 0f, 0h, PR1, PR12.
+
+**Status:** **Adopted.** ADR document = **Accepted** (in `/adopted/adr/`). Sequence = **Option A build → C2 live (rescoped) → Session 3**. Implementation = **Scoped** (Option A arc, code-critical). Cross-references: `D-R20A-CONFIG-PERIMETER-OPTION-A-2026-05-27`; `D-C2-R20A-PERIMETER-DIAGNOSTIC-AND-HARNESS-2026-05-27`; `adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`; `operations/handoffs/founder/2026-05-27-r20a-config-perimeter-adr-adopted-close.md`; `operations/handoffs/founder/2026-05-27-OPTION-A-build-session-1-NEXT-SESSION-PROMPT.md`.
+
+---
