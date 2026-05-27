@@ -122,6 +122,24 @@ export default function LimitationsPage() {
 
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">
+            A configuration without Sage Reflect is not an ongoing practice
+          </h2>
+          <p>
+            This configuration — SageReasoning with Sage Assent, without Sage Reflect —
+            supports virtue-grounded reasoning and credentialing within individual sessions.
+            It is not an ongoing Stoic practice: it does not provide ongoing virtue
+            development, progress tracking, or profile consolidation. Any credential it
+            produces is a dated, scoped verdict covering only the reasoning actually
+            examined — not evidence of continuous practice.
+          </p>
+          <p className="mt-3 text-sage-600 text-sm italic">
+            Rule R19e: Where the products are offered selectively, each configuration is
+            documented for what it supports and does not support.
+          </p>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">
             We are a startup with one founder
           </h2>
           <p>

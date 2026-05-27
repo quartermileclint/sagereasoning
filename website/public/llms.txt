@@ -249,6 +249,12 @@ Agent Card (A2A discovery): https://www.sagereasoning.com/.well-known/agent-card
 - One loop = one wrapper invocation (regardless of internal API call count); wrapper passes X-Loop-Id request header (UUIDv4) or server auto-generates
 - Contact zeus@sagereasoning.com to upgrade
 
+## Configuration Honesty — No-Practice Disclaimer
+
+Where the products are offered selectively, each configuration is documented for what it supports and does not support (Rule R19e). For the Reasoning + Assent configuration without Sage Reflect:
+
+This configuration — SageReasoning with Sage Assent, without Sage Reflect — supports virtue-grounded reasoning and credentialing within individual sessions. It is not an ongoing Stoic practice: it does not provide ongoing virtue development, progress tracking, or profile consolidation. Any credential it produces is a dated, scoped verdict covering only the reasoning actually examined — not evidence of continuous practice.
+
 ## Pass-Through Metadata for Wrappers
 
 Wrappers may attach enterprise-accountability metadata to each evaluation. The substrate validates the values and persists them; it does **not** interpret them for reasoning. Downstream consumers (tiered billing, procurement reviews reading the Accreditation Payload, future MCP integrations) read these fields for audit, compliance, and tiered-billing decisions. Adopted 2026-05-17 per `D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17`; vocabularies taken verbatim from the Nate B Jones SaaS Renewal Agent License Prompt Kit — Agent System Touch Map.

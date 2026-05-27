@@ -129,6 +129,14 @@
             }
           }
         }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/configuration-honesty/v1",
+        "description": "Configuration honesty (R19e). Where the products are offered selectively, each configuration is documented for what it supports and does not support. This entry carries the no-practice disclaimer for the Reasoning + Assent (no Reflect) configuration.",
+        "required": false,
+        "params": {
+          "noPracticeDisclaimer": "This configuration — SageReasoning with Sage Assent, without Sage Reflect — supports virtue-grounded reasoning and credentialing within individual sessions. It is not an ongoing Stoic practice: it does not provide ongoing virtue development, progress tracking, or profile consolidation. Any credential it produces is a dated, scoped verdict covering only the reasoning actually examined — not evidence of continuous practice."
+        }
       }
     ]
   },

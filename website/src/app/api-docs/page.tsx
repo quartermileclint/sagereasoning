@@ -504,6 +504,23 @@ export default function ApiDocsPage() {
           </div>
         </div>
       </div>
+
+      {/* Configuration honesty — no-practice disclaimer (R19e) */}
+      <div className="mt-12 bg-white/60 border border-sage-200 rounded-lg p-8">
+        <h2 className="font-display text-xl font-medium text-sage-800 mb-4">Configuration Honesty</h2>
+        <p className="font-body text-sage-700 mb-4 leading-relaxed">
+          This configuration — SageReasoning with Sage Assent, without Sage Reflect —
+          supports virtue-grounded reasoning and credentialing within individual sessions.
+          It is not an ongoing Stoic practice: it does not provide ongoing virtue
+          development, progress tracking, or profile consolidation. Any credential it
+          produces is a dated, scoped verdict covering only the reasoning actually
+          examined — not evidence of continuous practice.
+        </p>
+        <p className="font-body text-sm text-sage-600 leading-relaxed">
+          Rule R19e (configuration honesty): where the products are offered selectively,
+          each configuration is documented for what it supports and does not support.
+        </p>
+      </div>
     </div>
   )
 }

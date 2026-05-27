@@ -7764,3 +7764,41 @@ Each `--live` run writes a ledger to `data-room/05_outputs/`. For L6 S2/S3, conf
 **Status:** Adopted — MCP-as-keystone; bundle-first; the composite-key identity model; the two settled choices; the ADR created. Cross-references: `D-SAGE-PRACTICE-DIRECTION-COVERAGE-STATUS-2026-05-26`; `/adopted/adr/2026-05-26-credential-scope-and-coverage-status.md`; `/operations/handoffs/founder/2026-05-26-sage-practice-sequence-v2-NEXT-SESSION-PROMPT.md`; `/operations/handoffs/founder/2026-05-26-sage-practice-exploration-close.md`.
 
 ---
+
+## 2026-05-27 — D-COMB2-NO-PRACTICE-DISCLAIMER-2026-05-27
+
+**Decision:** Authored the no-practice disclaimer and placed it verbatim on all four offer/description surfaces (developer docs `website/src/app/api-docs/page.tsx`, `website/public/llms.txt`, `website/public/.well-known/agent-card.json`, `website/src/app/limitations/page.tsx`), completing **Combination 2** — the last negative-scenario coverage gap. The disclaimer's home in the priority stack is **P2 item 2e (honest positioning; R19c/d/e)** — NOT "Priority 4" (P4 is Stripe; the "Priority 4" tag in test-brief A.3 / the scenario matrix was a stale label, now corrected in both). Founder approved the wording and the P2-2e classification 2026-05-27.
+
+**Reasoning:** R19e (configuration honesty, added 2026-05-23) governs: a configuration without Sage Reflect must not be represented as an ongoing Stoic "practice." Wording kept aligned with the K1 ADR's "dated, scoped verdict" honesty principle (a credential covers only the reasoning actually examined). One canonical string placed verbatim on every surface so a single normalised assertion proves presence. PR15: extended the proven whole-system-harness `lib/` + plain-`tsx` assertion pattern (`AssertionLedger` + `writeLedger`); no framework — no Anthropic-canonical primitive substitutes for grepping our own surfaces. This run also resolves L7 assertion (b) (`run-l7.ts`), which shares the disclaimer property.
+
+**Files touched:**
+- `website/src/app/api-docs/page.tsx` — added a "Configuration Honesty" section carrying the canonical disclaimer (R19e).
+- `website/public/llms.txt` — added a "## Configuration Honesty — No-Practice Disclaimer" section.
+- `website/public/.well-known/agent-card.json` — added a `configuration-honesty/v1` extension carrying `noPracticeDisclaimer` (valid JSON; 6 extensions).
+- `website/src/app/limitations/page.tsx` — added an "A configuration without Sage Reflect is not an ongoing practice" section (R19e).
+- `website/scripts/whole-system-harness/run-comb2.ts` (NEW) — Comb-2 documentation assertion; 8/8 PASS; writes a ledger to `data-room/05_outputs/`.
+- `website/scripts/whole-system-harness/run-l7.ts` — flipped assertion (b) note PENDING → RESOLVED (now asserted by `run-comb2.ts`).
+- `data-room/04_test_brief/scenario-matrix.md` — Comb 2 row → PASSING / Verified 2026-05-27.
+- `data-room/04_test_brief/test-brief.md` — §A.2 Comb 2 + §A.3 → Done / Verified 2026-05-27.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-27-comb2-no-practice-disclaimer-close.md` (NEW) — session close.
+
+**Risk classification:** **Standard** (`governance`) under 0d-ii. Additive copy on four surfaces (two `.tsx` content-only edits — no logic / functionality change; one static `.txt`; one additive JSON extension) + test scaffolding under `website/scripts/` (never bundled, never deployed). **No production code path, schema, env, or deploy touched.** AC7 not engaged. PR6 not engaged. KG1 not engaged (`run-comb2.ts` imports only `lib/assertions` + `lib/capture`; no Supabase chain — runs under plain `npx tsx`).
+
+**Rollback path:** All edits additive and reversible — revert the four surface edits, delete `run-comb2.ts`, revert the `run-l7.ts` note (host-side). Nothing deployed; no production impact.
+
+**Verification step (founder-performable):**
+```
+cd website
+npx tsx scripts/whole-system-harness/run-comb2.ts   # expect: 8 passed, 0 failed; EXIT 0
+npx tsc --noEmit                                     # expect: EXIT 0
+```
+Expected: `run-comb2` prints PASS for the canonical disclaimer on all four surfaces and writes a ledger to `data-room/05_outputs/`. Optionally open `/limitations` and `/api-docs` and confirm the wording reads as intended. Sandbox-verified this session: `run-comb2` 8/8 PASS + EXIT 0; `npx tsc --noEmit` EXIT 0; `agent-card.json` parses (6 extensions).
+
+**Open questions:** none. (C2 distress perimeter — Critical-tier — is the next sequence item, a separate Critical session; not part of this row.)
+
+**Rules served:** R18f, R19c, R19d, R19e, 0a, 0c, 0h, PR1, PR2, PR10, PR15.
+
+**Status:** Adopted. Implementation status: the four surfaces + `run-comb2.ts` — **Verified** (this is a static-file documentation assertion with no localhost dependency, so the sandbox run is complete verification; founder reproduces via the command above). Completes negative-scenario coverage — Combination 1 (Live 2026-05-24) + Combination 2 (Verified 2026-05-27) both passing. Cross-references: `D-SAGE-PRACTICE-DISTRIBUTION-IDENTITY-ELECTIONS-2026-05-26`; `/adopted/adr/2026-05-26-credential-scope-and-coverage-status.md`; `data-room/04_test_brief/scenario-matrix.md`; `data-room/04_test_brief/test-brief.md`; `/operations/handoffs/founder/2026-05-27-comb2-no-practice-disclaimer-close.md`.
+
+---

@@ -1,6 +1,6 @@
 # 04 — Scenario Matrix (one scenario per configuration)
 
-**Status:** Designed (0a). The scenarios are *specified* here; they are *run* by the orchestrator harness in later sessions (single-loop proof — L7 — first, per PR1). `05_outputs/` stays empty until a scenario is actually run, **except** Combination 1, whose negative assertion was verified in production 2026-05-24 (see `test-brief.md` A.2).
+**Status:** Designed (0a). The scenarios are *specified* here; they are *run* by the orchestrator harness in later sessions (single-loop proof — L7 — first, per PR1). `05_outputs/` stays empty until a scenario is actually run, **except** Combination 1, whose negative assertion was verified in production 2026-05-24 (see `test-brief.md` A.2), and Combination 2, a documentation assertion Verified 2026-05-27 via `run-comb2.ts`.
 **Reads alongside:** `orchestrator-harness-design.md` (how the harness threads each scenario), `test-brief.md` (§A configurations, §B per-seam pass criteria, §C cross-cutting), `03_seam_map/seam-map.md` (the seams), `test-flag-config.md` (the genuine→200 trio + safety boundary).
 **Tier:** `governance` — Standard risk. Specification only; no code/env/deploy.
 **Date:** 2026-05-24.
@@ -128,7 +128,7 @@ All runs happen against the **test** environment per `test-flag-config.md` — n
 | **Endpoints** | none (docs / discovery surfaces: developer docs, `llms.txt`, `agent-card.json`, limitations page) |
 | **Seams** | none — cross-cutting documentation property |
 | **`tsx` step** | no |
-| **Pass assertion** | the **no-practice disclaimer** string is **present, plain-language, and accurate** wherever this config is offered. **Blocked on Priority 4** writing the disclaimer text (test-brief A.3) — until then this row is *specified but not runnable*. Ties to test-brief A.2 Combination 2 + A.3. |
+| **Pass assertion** | the **no-practice disclaimer** string is **present, plain-language, and accurate** wherever this config is offered. **PASSING — Verified 2026-05-27.** Disclaimer text authored under R19e (founder-approved; recorded under **P2 2e**, not "Priority 4" — P4 is Stripe) and asserted on all four surfaces (developer docs, `llms.txt`, `agent-card.json`, limitations page) by `scripts/whole-system-harness/run-comb2.ts` (8/8 PASS). Resolves L7 assertion (b). Ties to test-brief A.2 Combination 2 + A.3. |
 
 ---
 
@@ -136,7 +136,7 @@ All runs happen against the **test** environment per `test-flag-config.md` — n
 
 - **Build L7 first** (PR1 single-loop proof). It is the only positive scenario that exercises the genuine→200 centrepiece, and it is the **positive control** that makes the Combination-1 negative trustworthy.
 - **Only L6 and L7 need the Seam 2 bridge `tsx` step.** Every other scenario is pure HTTP + (for L5) a DB query.
-- **Combination 2 is blocked on Priority 4** (disclaimer text not yet written). **C2 (distress perimeter, test-brief §C)** is **Critical-tier** and out of scope for the Standard build sessions — mapped, not built here.
+- **Combination 2 is COMPLETE — Verified 2026-05-27.** Disclaimer authored under R19e (recorded under P2 2e) + asserted on all four surfaces by `run-comb2.ts`. **C2 (distress perimeter, test-brief §C)** is **Critical-tier** and out of scope for the Standard build sessions — mapped, not built here (it is Session 2 of the v2 sequence).
 - **Determinism:** keep `TRANSLATION_SANDWICH_PARALLEL_RUN='false'` in the test env for reproducible runs unless a scenario is specifically about parallel-run (per `test-flag-config.md`).
 
 *End of scenario matrix. Nine scenarios specified (L1–L7 + two negatives); L7 is the single-loop proof built first; outputs land in `05_outputs/` as scenarios are run.*

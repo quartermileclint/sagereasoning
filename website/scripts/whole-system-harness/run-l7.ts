@@ -35,8 +35,10 @@
  *
  * L7 assertion coverage:
  *   (a) genuine→200 credential write   — LIVE only (deferred in build-only)
- *   (b) no-practice disclaimer string  — PENDING Priority 4 (text not written);
- *                                         recorded as pending, NOT failed
+ *   (b) no-practice disclaimer string  — RESOLVED 2026-05-27: disclaimer text
+ *                                         authored (R19e) + asserted across all
+ *                                         four surfaces by run-comb2.ts
+ *                                         (L7 shares this property with Comb 2)
  *   (c) bridge: receipt_id === 'rcpt_' + SHA-256(signature) — BOTH modes
  */
 
@@ -166,10 +168,11 @@ async function main(): Promise<void> {
     receiptId = stepResult.evaluatedAction.receipt_id
   }
 
-  // L7 assertion (b): no-practice disclaimer — BLOCKED on Priority 4
+  // L7 assertion (b): no-practice disclaimer — RESOLVED 2026-05-27
   notes.push(
-    'L7 assertion (b) — no-practice disclaimer string — PENDING Priority 4 ' +
-      '(disclaimer text not yet written). Recorded as pending, not failed.'
+    'L7 assertion (b) — no-practice disclaimer string — RESOLVED 2026-05-27: ' +
+      'the disclaimer text is authored (R19e, founder-approved) and asserted on ' +
+      'all four surfaces by run-comb2.ts, which L7 shares this property with.'
   )
 
   const result: 'PASS' | 'FAIL' = ledger.allPassed ? 'PASS' : 'FAIL'
