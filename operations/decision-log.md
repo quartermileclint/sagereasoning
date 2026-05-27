@@ -7688,3 +7688,48 @@ Each `--live` run writes a ledger to `data-room/05_outputs/`. For L6 S2/S3, conf
 **Verification (2026-05-25, same day — founder live runs):** All three ran green live against the test env — **L2-complete, L4, L6** → **Verified** (was Wired). L6's S2/S3 confirmed in the DB: `agent_accreditation`, `evaluated_actions`, and `grade_history` all returned rows for `wsh-test-agent-L7` (S2 seeded the row after the teardown; the Reflect feed wrote through the engine at S3 — the seam closed). The **positive scenario coverage L1–L7 is now complete**. Still deferred: Combination 2 (Priority 4 disclaimer), C2 distress perimeter (Critical), Option B (admin-gate fidelity follow-up).
 
 ---
+
+## 2026-05-26 — D-SAGE-PRACTICE-DIRECTION-COVERAGE-STATUS-2026-05-26
+
+**Decision:** Two items adopted this session, plus recorded findings / recommendations / priorities from an exploration arc (guardrail-as-product, dashboard, accreditation scaling, distribution, and a private-mentor / Stoic-Brain consultation):
+
+1. **"Sage Practice" naming adopted** — the umbrella product encompassing the four products **Sage Calling, SageReasoning, Sage Assent, Sage Reflect**. (Formerly the candidate plugin name; now the suite/product name. Use it this way in the spec and downstream surfaces.)
+2. **Honest toggle/credential design adopted** (from the Stoic-Brain consultation on the toggle-vs-credential-honesty question — "refuse to certify across gaps"): Sage Assent gains a `coverage_status` field — `status: continuous | suspended | resumed_unverified`, `monitored_since`, `gap_present`, `gap_duration`, `credential_basis`. The credential goes **`suspended`** on guardrail-off and **`resumed_unverified`** on return, requiring a **fresh SageReasoning pass** before it is valid again. The credential is a **dated, scoped verdict, not binary pass/fail**. This enforces R18f (no false credential) at the re-entry condition.
+
+**Reasoning:** The exploration was founder-led ("explore", not "build"). Claude-Code mechanics were verified against current docs (PR11) before recommending. The `coverage_status` design **sharpens the 2026-05-25 accreditation-continuity analysis**: the grade/history persist (count-windowed, no time-decay) but the credential's *validity* is now gated — which resolves the toggle gaming vector and aligns with R19 honest positioning and the Session-1 no-practice disclaimer (same honesty principle). The mentor also named the commercial *philodoxia* impression (convenience → adoption → a good worth compromising integrity for) and counselled that the buyers worth having want genuinely virtue-aligned agents, not a displayable credential. PR13 implications were taken explicitly; PR16 substrate consultation is recorded here per the R0 audit trail.
+
+**Findings (recorded; not all adopted):**
+- **F1 — guardrails need hooks, not the anchor file.** Operational guardrails BEFORE execution require deterministic **hooks** (PreToolUse); CLAUDE.md is a soft anchor (steers, ~not a gate) and skills are model-discretion. Anchor = intent, skill = capability, hook = the gate. Verified vs current Claude Code docs.
+- **F2 — products built, distribution layer unproven.** The four products + substrate are substantially built/verified; the *distribution layer* (`mcp/tools`, plugin, hooks, dashboard, SDK) is the less-proven part (registry: mostly `wired`, few `verified`/`live`). `guardrail`, `badge`, `marketplace`, `mcp/tools` routes already exist.
+- **F3 — (adopted; see Decision 2)** the `coverage_status` honest-credential design.
+- **F4 — scaling.** The firehose is `evaluated_actions` (append-only) + window-recompute read-amplification; the dominant ceiling is **inference cost, not storage**. Handle via: decouple the *verdict* (synchronous) from the *accreditation write* (async / eventually-consistent); aggregate-not-raw (per-agent snapshot; archive raw cold); **tiered/portable identity** (carried_profile local; central persistence only for the certified subset); shard by `agent_id`; retention + R17c deletion at scale. "Accreditation for every agent" = a universal *capability* via the portable carried credential; central verifiable persistence only for the opt-in certified subset.
+- **F5 — distribution.** Many channels (REST / discovery files / MCP / SDK / Claude Code plugin / Cowork plugin / standalone skills / hooks guardrail / open-source Layer 1 / badge / marketplace); package at three granularities (**atomic / bundle / platform**). The tested combinations (L4/L5/L6/L7) are valid standalone *bundles*; **Sage Practice (the four-product suite) is the platform-granularity packaging**.
+
+**Recommendations (surfaced; founder elects — NOT adopted decisions):**
+- Treat **MCP (`mcp/tools`) as the keystone** distribution primitive; plugin / hook / dashboard are thin bundles atop it.
+- Layer channels additively (REST → MCP → plugin/skills → badge/marketplace); don't fork.
+- Package atomic + bundle + platform on **one spine** (one substrate / auth / billing / discovery) to keep a solo-founder support load sane.
+- Guardrail default = **advisory / fail-open**, gating *consequential* actions only (selectivity) — controls the inference ceiling and coheres with "cultivate reasoning, not coerce."
+- Target depth/quality buyers, not display-seekers (the mentor's commercial point).
+- Adopt the **scale posture** (portable credential + async write) as the spec's architectural assumption — don't bake in the single-instance design.
+
+**Files touched:**
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-26-sage-practice-exploration-close.md` (NEW) — exploration close.
+- `operations/handoffs/founder/2026-05-26-sage-practice-spec-sequence-NEXT-SESSION-PROMPT.md` (NEW) — supersedes the two 2026-05-25 next-scope/sequence prompts drafted earlier (`2026-05-25-whole-system-next-scope-…` and `2026-05-25-outstanding-sequence-to-guardrail-spec-…`).
+
+**Risk classification:** **Standard** (`governance`) under 0d-ii. Documentation only — exploration findings, a product name, and an adopted *design principle*. **No code / schema / env / deploy this session.** The `coverage_status` field is a *design decision*; its IMPLEMENTATION (a Sage Assent output-schema change) is **code-elevated/critical when built** (it touches the credential surface) and is NOT done here. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** Documentation-only; revert the entry/files if superseded. No production impact.
+
+**Open questions (PR7):**
+- Distribution go-to-market not elected (recommendations only).
+- Sage Practice packaging granularity (atomic / bundle / platform mix) — decide before building any channel.
+- `agent_id` identity model for a real Sage Practice deployment (the load-bearing continuity decision) + credential `expires_at` handling across long gaps — both for the Session-4 spec.
+- Whether `coverage_status` warrants its own ADR when implementation is scheduled.
+
+**Rules served:** R0, R5, R16, R17 (R17c), R18f, R19, PR11, PR13, PR15, PR16.
+
+**Status:** Adopted — (1) Sage Practice naming; (2) the `coverage_status` / `suspended` / `resumed_unverified` honest-credential design (design principle; implementation deferred to its own build session). Findings + recommendations recorded; distribution go-to-market remains founder-elected. Cross-references: `D-L2COMPLETE-L4-L6-POSITIVE-SCENARIOS-BUILD-2026-05-25`; `/operations/handoffs/founder/2026-05-26-sage-practice-exploration-close.md`; `/operations/handoffs/founder/2026-05-26-sage-practice-spec-sequence-NEXT-SESSION-PROMPT.md`.
+
+---
