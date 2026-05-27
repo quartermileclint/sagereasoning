@@ -7733,3 +7733,34 @@ Each `--live` run writes a ledger to `data-room/05_outputs/`. For L6 S2/S3, conf
 **Status:** Adopted — (1) Sage Practice naming; (2) the `coverage_status` / `suspended` / `resumed_unverified` honest-credential design (design principle; implementation deferred to its own build session). Findings + recommendations recorded; distribution go-to-market remains founder-elected. Cross-references: `D-L2COMPLETE-L4-L6-POSITIVE-SCENARIOS-BUILD-2026-05-25`; `/operations/handoffs/founder/2026-05-26-sage-practice-exploration-close.md`; `/operations/handoffs/founder/2026-05-26-sage-practice-spec-sequence-NEXT-SESSION-PROMPT.md`.
 
 ---
+
+## 2026-05-26 — D-SAGE-PRACTICE-DISTRIBUTION-IDENTITY-ELECTIONS-2026-05-26
+
+**Decision:** Founder elected, building on `D-SAGE-PRACTICE-DIRECTION-COVERAGE-STATUS-2026-05-26`:
+
+1. **MCP as the keystone distribution primitive (moves recommendation → elected).** `mcp/tools` is the tool/read surface that makes the products reachable by every client; the **plugin layers the deterministic hook on top**; a standalone authenticated **web dashboard is the client-agnostic read surface** (the Cowork artifact is one embedding of it). Because MCP-as-tools is *discretionary* (model-invoked), credentials earned via MCP-tool consultation are `agent_elected`, never `continuous` — `continuous` requires the hook.
+2. **Bundle-first packaging (moves recommendation → elected).** Lead with the loop bundles (L5 reason→reflect; the full L6 **Sage Practice** suite); atomic products remain available but **disclaimer-gated** (the Combination-2 honesty principle) and not the front door. Pair bundle-first with advisory/selectivity defaults + a minimal-viable-loop onboarding (bundles cost more per run).
+3. **Credential identity model — composite key adopted.** A credential is keyed by `(operator_account, agent_identity)` where `agent_identity = namespace:name@version`. Separates *who operates* from *what the agent is*; covers own agents and trialed downloaded agents cleanly; the portable creator credential is shown **read-only as a reference**, never merged into the trialer's record. Full detail in the new ADR.
+4. **Two design choices settled:** (a) **coarse version granularity** — `@version` is developer-declared or a content-hash of the agent's defining config; a material change forks the identity (or triggers `resumed_unverified`); (b) **trial→adopt** — a trial record carries forward into an own-agent record only when operator + conditions are unchanged, else fork.
+5. **ADR created** — `/adopted/adr/2026-05-26-credential-scope-and-coverage-status.md` unifies the identity model + the `coverage_status` state machine as the keystone the Session-4 Sage Practice spec builds on.
+
+**Reasoning:** The MCP-vs-hook distinction was verified this session against current Claude Code docs (claude-code-guide consultation, PR11): MCP tool invocation is model-discretionary, so deterministic `continuous` coverage requires the client-side hook — hence the `agent_elected` vs `continuous` distinction. The composite-key identity model resolves the trialing scenario the simple `account:name` key breaks, and operator-scoping is an R18d adversarial defence (a downloaded credential cannot be passed off as the trialer's own). It coheres with the elected distribution stack and reuses the portable `carried_profile` + provenance (R18f) from the 2026-05-26 scaling analysis. PR16: this records elections following the substrate consultation; PR13 implications were taken on the coverage_status finding in the predecessor entry.
+
+**Files touched:**
+- `operations/decision-log.md` — this entry.
+- `adopted/adr/2026-05-26-credential-scope-and-coverage-status.md` (NEW) — the ADR.
+- `operations/handoffs/founder/2026-05-26-sage-practice-sequence-v2-NEXT-SESSION-PROMPT.md` (NEW) — supersedes the v1 spec-sequence prompt.
+
+**Risk classification:** **Standard** (`governance`) under 0d-ii. Documentation + an architecture decision record. **No code / schema / env / deploy.** The `coverage_status` field and the composite-key store change are *implementations* that are **code-elevated/critical when built** (they touch the credential surface) — NOT done here. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** Documentation-only; the ADR's revisit conditions govern future change; revert the files if superseded. No production impact.
+
+**Open questions (PR7):**
+- Distribution go-to-market beyond the channel stack (pricing, marketplace targeting) — still founder-elected.
+- The ADR's revisit conditions: a deterministic-MCP-invocation mechanism emerging; version-granularity calibration; multi-tenant operator edge cases.
+
+**Rules served:** R0, R16, R17, R18d, R18f, R19, PR11, PR13, PR15, PR16.
+
+**Status:** Adopted — MCP-as-keystone; bundle-first; the composite-key identity model; the two settled choices; the ADR created. Cross-references: `D-SAGE-PRACTICE-DIRECTION-COVERAGE-STATUS-2026-05-26`; `/adopted/adr/2026-05-26-credential-scope-and-coverage-status.md`; `/operations/handoffs/founder/2026-05-26-sage-practice-sequence-v2-NEXT-SESSION-PROMPT.md`; `/operations/handoffs/founder/2026-05-26-sage-practice-exploration-close.md`.
+
+---
