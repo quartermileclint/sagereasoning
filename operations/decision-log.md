@@ -7970,3 +7970,109 @@ Expected: the design spec exists, opens with "Status: Drafted 2026-05-28", conta
 **Status:** **Adopted** (decision direction = design spec drafted; spec status Drafted / Under review). Implementation status: spec **Designed**; Calling-side catch **Scoped** (next session — Critical); Reflect-content catch **Scoped** (session after); Layer-3 audience rendering **Scoped**; config-level invocation tests **Scoped**. Cross-references: `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27` (the parent ADR adoption); `D-R20A-CONFIG-PERIMETER-OPTION-A-2026-05-27` (the elected direction); `D-C2-R20A-PERIMETER-DIAGNOSTIC-AND-HARNESS-2026-05-27` (the M-7 diagnostic); `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13` (the seed primitive); `/adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`; `/drafts/2026-05-28-r20a-single-catch-contract.md`; `/operations/handoffs/founder/2026-05-28-OPTION-A-session-1-verification-design-close.md`.
 
 ---
+
+## 2026-05-28 — D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28
+
+**Decision:** Session 2 of the Option A build arc (Critical, `code-critical`). Wired the Calling-side R20a substrate-gate catch into `/api/calling` per `/drafts/2026-05-28-r20a-single-catch-contract.md` §5.2. Catch behind new env flag `SUBSTRATE_CALLING_R20A_ENABLED` (default OFF; UNSET in Vercel at session close). Calling becomes the ninth route in the R20a perimeter under AC5's ninth-route protocol via Option α (extend the existing registry `r20a-invocation-guard.test.ts` with a `SUBSTRATE_GATE_ROUTES` block + four substrate-gate-pattern `test.each` assertions). The canonical `SafetySignal` schema from design §4.2 is implemented as the cross-seam carrier shape (exported from `r20a-gate.ts`). A7's `enforceLayer2R20aGate` gained an additive optional `overrideFlag?: boolean` parameter so the Calling activation is decoupled from A7's `SUBSTRATE_R20A_GATE_ENABLED` flag per design spec §5.6 — `parallel-run.ts` unchanged (default behaviour preserved). Production UNCHANGED.
+
+**Reasoning:** Per the Option A arc: Calling is the higher-impact catch (Finding 1 of session 1 — the Calling→Reasoning seam carries `discovered_purpose` content that A7 does not inspect today). PR1 single-endpoint proof discipline applied: Calling is proven before Reflect-content (session 3) and Layer-3 audience rendering (session 4) begin. PR15 honoured at every step — A7 is reused (no new classifier); the existing Reflect carrier-field name `safety_signal` is reused (schema widened per design §4.2); the existing tsx test pattern from `r20a-gate.test.ts` is reused for the new invocation/functional test; the existing registry test pattern from `r20a-invocation-guard.test.ts` is reused for the AC5 ninth-route entry (option α). PR3 (synchronous safety) honoured — the catch is `await`-ed; no fire-and-forget. PR6 (safety-critical changes are Critical) honoured throughout. PR12 (verification before recommendation) honoured — the A7 flag-coupling tension (design spec §5.6 wants decoupled activations; A7 as implemented gated itself behind `SUBSTRATE_R20A_GATE_ENABLED`) was surfaced as Diagnostic-uncertain — pattern level, founder elected Option A (overrideFlag), and the additive parameter resolves the tension with smallest diff. PR16 honoured — strengthens Character Kernel positioning by demonstrating the substrate's safety perimeter operates at the configuration level (not just per-route), substrate-consultable via `/api/reason`'s existing A7 path.
+
+**Critical Change Protocol (0c-ii) — completed in-session before any code:**
+
+1. **What is changing.** Synchronous R20a distress catch added to `/api/calling`'s handler, behind `SUBSTRATE_CALLING_R20A_ENABLED` (default OFF). Reuses A7's `enforceLayer2R20aGate` via in-process call with `overrideFlag: true` (Calling has its own flag check, independent of A7's flag). On REDIRECT: developer-form payload + canonical `safety_signal` emitted; conversation halted; no metering on the loop. On PASS+mild: continue; `safety_signal { flow_terminated: false, severity: 'mild', ... }` attached additively to the outward response. On PASS+none / BYPASSED: continue unchanged (no `safety_signal` field on response — least-surprising wire shape).
+
+2. **What could break.** (a) False-positive redirects mid-conversation — mitigated by flag default OFF, can be flipped OFF in seconds; classifier is the same one validated for `/api/reason`. (b) AC2 ~500ms added latency per Calling turn with `response` text when flag ON — accepted per AC2 budget. (c) Additive `safety_signal` field — strict-validating consumers may reject; mitigated by "no current users" (build-arc cache) and the additive-only posture. (d) AC5 perimeter broadening to ninth route under PR6+AC5 — addressed by ninth-route protocol Option α (registry extension). (e) Mis-placed catch invocation — addressed by placing the catch BEFORE `computeAdvance` in Case B (response-supplied + in-progress) only; documented inline. (f) Test-harness ergonomics — addressed by designing the new test as a pure piece-test (no route-handler import; no Supabase chain), runs with plain `npx tsx`.
+
+3. **What happens to existing sessions.** **N/A** per build-sessions cache "no current users" (founder + test logins only). Production flag UNSET at session close; new path invisible to any traffic.
+
+4. **Rollback plan.** Primary (operational): unset `SUBSTRATE_CALLING_R20A_ENABLED` in Vercel + redeploy (~30s). No action needed at session close — flag stays UNSET. Secondary (code): `git revert HEAD` on `main` + push via GitHub Desktop. Exact commands in the session close.
+
+5. **Verification step.** AC4 functional + invocation test at `website/src/app/api/calling/__tests__/r20a-invocation.test.ts` (44 assertions across INV-1–5 invocation tests + VH-1–4 verdict-handling + FT-1–4 flag tests + DC-1–2 decoupling tests + RB-1–4 response-builder shape tests). Plus `npx tsc --noEmit` whole-project. Plus the extended Jest registry test (executes when F-series Jest-config debt is paid; structurally correct today). **Diagnostic-certain — root cause identified** on the substantive verification; **Diagnostic-uncertain — pattern level** on Jest registry execution (pre-existing F-series infrastructure issue).
+
+6. **Explicit founder approval.** Obtained in-session for: (i) flag default OFF; (ii) AC2 ~500ms latency accepted; (iii) production `SUBSTRATE_CALLING_R20A_ENABLED` stays UNSET; (iv) AC5 ninth-route protocol via Option α (extend existing registry); (v) canonical `SafetySignal` schema from design §4.2 as the carrier; (vi) Option A election on the flag-coupling tension (add `overrideFlag` parameter to A7); (vii) mocked-classifier posture for the functional test (consistent with A7's `r20a-gate.test.ts` pattern).
+
+**Files touched:**
+- `website/src/lib/substrate/r20a-gate.ts` — added `isCallingR20aEnabled()` flag check; added canonical `SafetySignal` interface + `SafetySignalCause` / `SafetySignalSeverity` / `SafetySignalCaughtAt` types per design §4.2; added additive `overrideFlag?: boolean` parameter to `EnforceR20aGateInput` and updated the flag-check branch in `enforceLayer2R20aGate` to honour it (default behaviour preserved for `parallel-run.ts` callers).
+- `website/src/app/api/calling/response-builders.ts` — added `buildCallingDistressRedirectResponse(session_id, severity, suggested_user_message, safetySignal, loopHeaders?)` (the developer-form payload per design §3.1; placeholder `developer_note` text until A6 formalises); added optional `safetySignal?: SafetySignal` parameter to `buildQuestionResponse`, `buildHardGateResponse`, `buildNullResultResponse` (mild-signal pass-through; additive field).
+- `website/src/app/api/calling/route.ts` — imported `enforceLayer2R20aGate`, `isCallingR20aEnabled`, `SafetySignal` from `@/lib/substrate/r20a-gate`; imported `buildCallingDistressRedirectResponse` from `./response-builders`; wired the catch into Case B (response supplied, in-progress session) BEFORE `computeAdvance`, gated behind `isCallingR20aEnabled()`, with `overrideFlag: true`. On REDIRECT: emits the developer-form response + halts; no metering, no persist. On PASS+mild: captures `safety_signal` and attaches to the eventual question/hard-gate/null-result response. On PASS+none / BYPASSED: unchanged.
+- `website/src/lib/__tests__/r20a-invocation-guard.test.ts` — added `SUBSTRATE_GATE_ROUTES = ['src/app/api/calling/route.ts']`; added `REQUIRED_SUBSTRATE_GATE_FUNCTION` / `REQUIRED_SUBSTRATE_GATE_FLAG` / `REQUIRED_SUBSTRATE_GATE_SOURCE` constants; added four `test.each` blocks asserting (a) `enforceLayer2R20aGate` imported from `substrate/r20a-gate`, (b) `isCallingR20aEnabled` imported from same, (c) the call is awaited in the body, (d) the flag check is called in the body. Updated comment + count assertion. Updated header comments to document the two-registry posture.
+- `website/src/app/api/calling/__tests__/r20a-invocation.test.ts` (NEW) — 44-assertion tsx plain-assertion test file mirroring `r20a-gate.test.ts` pattern; covers INV-1–5, VH-1–4, FT-1–4, DC-1–2, RB-1–4.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-28-OPTION-A-session-2-calling-wired-close.md` (NEW; created at Step 7) — session close.
+
+**Risk classification (0d-ii):** **Critical** under PR6 + AC5 (R20a perimeter ninth-route broadening; safety-critical function wiring on a new route). The catch is gated entirely behind `SUBSTRATE_CALLING_R20A_ENABLED` (default OFF; UNSET in Vercel); the new code path is invisible in production at session close. The additive `overrideFlag` parameter on A7 is functionally inert for existing callers. AC7 not engaged (no auth/cookie/session/redirect change). KG1 not engaged for the catch path (no DB writes; the existing metering path is unchanged).
+
+**AC4 invocation-testing record (Critical-tier requirement):**
+
+```
+$ cd website && npx tsx src/app/api/calling/__tests__/r20a-invocation.test.ts
+... [snipped 44 PASS lines + 5 A7 span-emit log lines from reused-gate path] ...
+---
+44/44 pass | 0/44 fail
+EXIT 0
+
+$ npx tsc --noEmit
+[no output; whole-project type-check]
+EXIT 0
+
+$ npx jest src/lib/__tests__/r20a-invocation-guard.test.ts --no-coverage
+FAIL src/lib/__tests__/r20a-invocation-guard.test.ts
+  ● Test suite failed to run — SyntaxError: Cannot use import statement outside a module
+[pre-existing F-series Jest-config debt; not introduced by this session; the
+ file used TypeScript import syntax BEFORE this session's structural edits.
+ Substantive AC4 invocation coverage for /api/calling is satisfied by the
+ tsx test above. The Jest registry edits are forward-looking documentation
+ that activate when the F-series Jest-config debt is paid down.]
+```
+
+Diagnostic-certainty signals (PR10):
+- **Diagnostic-certain — root cause identified** for the Calling-side substantive work: tsx 44/44, tsc EXIT 0, all wiring + verdict + builder shapes verified.
+- **Diagnostic-uncertain — pattern level** for the Jest registry execution: pre-existing F-series stewardship issue. Founder acknowledged in-session that this is a pre-existing infrastructure pattern, not a regression from this session's work.
+
+**PR5 — Knowledge-Gap Carry-Forward:** 0 concepts re-explained this session. No KGs from the existing register engaged (KG1 not engaged because the catch path has no DB writes; KG2 implicit via PR4 model selection — Haiku via A7's classifier, no new selection decision; KG3–KG7 N/A). One **new pattern observation** (candidate, 1st recurrence): "design-spec-vs-implementation flag-coupling tension surfaces only when the design spec is implemented end-to-end (the spec assumed independent flag activation; A7 as implemented bound itself to one flag)." Promotion to PR5 entry awaits a second recurrence; until then it is a candidate entry in `operations/knowledge-gaps.md` (logged at session close).
+
+**Rollback path:** Per CCP Step 4. Operational rollback: unset `SUBSTRATE_CALLING_R20A_ENABLED` in Vercel + redeploy (~30s). Required for rollback only if the flag is ever flipped ON in production. At session close, flag UNSET in Vercel; no rollback action needed for the change to be inert. Code rollback: `git revert <commit-sha> && git push` via GitHub Desktop. The additive `overrideFlag` parameter on A7 is functionally inert for existing callers; reverting the commit removes it without affecting `parallel-run.ts` callers.
+
+**Verification step (founder-performable):**
+
+Confirm the new test passes:
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/app/api/calling/__tests__/r20a-invocation.test.ts
+```
+Expected: `44/44 pass | 0/44 fail`; EXIT 0. Five A7 span-emit log lines from reused-gate path are expected and harmless.
+
+Confirm the whole-project type-check:
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsc --noEmit
+```
+Expected: no output; EXIT 0.
+
+Confirm production state UNCHANGED (no Vercel touch this session):
+- `SUBSTRATE_CALLING_R20A_ENABLED` — UNSET in Vercel (this flag is new; no Vercel action this session)
+- `SUBSTRATE_R20A_GATE_ENABLED` — UNSET in Vercel (unchanged)
+- `/api/reason` behaviour — byte-identical (parallel-run.ts unchanged; A7's `overrideFlag` parameter is additive)
+- `/api/substrate/layer3` — 503 (unchanged)
+
+**Open questions (PR7):**
+- **Functional-test live-Haiku coverage.** The new tsx test exercises verdict-handling via reused-gate (no live classifier call). The "fresh classifier call" path (which is what production Calling would take when the flag is ON) is verified indirectly by A7's existing tests + r20a-classifier-eval.ts. Revisit at the C2 live run (post-Option-A arc) when end-to-end Haiku coverage on Calling is exercised.
+- **Mild-signal threading onto `DiscoveredPurpose` envelope.** Design spec §5.2 names this as the eventual target shape. Out of PR1 single-endpoint scope here. Revisit at session 4 (Layer-3 audience rendering) when the audience contract is wired end-to-end and the DiscoveredPurpose envelope can carry the canonical safety_signal.
+- **A6 — `developer_note` + `suggested_user_message` formalisation.** The new `buildCallingDistressRedirectResponse` uses placeholder text (drawn from `ZONE3_DEVELOPER_NOTE` posture + `redirect_message` pass-through). A6 formalises the wording via the two new `prose_mode` keys (`r20a_developer_note`, `r20a_suggested_user_message`). Revisit at A6 session (sequencing TBD).
+- **F-series Jest-config debt.** The extended `r20a-invocation-guard.test.ts` structural edits are correct but cannot execute under current Jest config (pre-existing). When the F-series remediation runs (AC12 references this), the substrate-gate registry assertions will activate automatically. Revisit at F-series stewardship session.
+- **A.4 cross-seam propagation end-to-end test.** Currently the Calling-side `safety_signal` carrier is emitted on Calling's outward response shape. The end-to-end propagation (Calling → Reasoning → halt) is not yet tested across the seam because Reasoning does not yet read a Calling-emitted `safety_signal`. Revisit at session 4 + session 5 (configuration-level invocation tests).
+
+**Carried-forward backlog (so nothing is forgotten):** Session 3 (Reflect-content R20a catch + propagation — Critical; PR1; CCP); Session 4 (Layer-3 audience rendering + `/api/reason` agent-API fix — Critical); Session 5 (configuration-level invocation tests — extends AC4 to per-flow); C2 live run rescoped (post-Option-A; PR17 live walkthrough); Session 3 value-evidence rig (post-C2-live); M-7 severities at founder's convenience; A7 production activation (separate future Critical).
+
+**Rules served:** R20a, R19, R19c (placeholder honestly named), AC1, AC2 (~500ms accepted), AC4 (functional + invocation), AC5 (ninth-route protocol via option α), AC8 (substrate-gate at translation-sandwich boundary), AC11 (A7's existing span emit covers the new path), AC12 (Jest-config debt acknowledged in verification record), 0a, 0c, 0c-ii (CCP completed), 0d-ii (Critical classification), 0f, 0h, PR1 (single-endpoint proof on /api/calling), PR3 (synchronous; awaited), PR6 (Critical regardless of scope), PR10 (PEV loop with diagnostic-certainty signalling), PR12 (verification before recommendation), PR15 (A7 reused; SafetySignal carrier-name reused; test patterns reused; registry pattern reused — no primitive rebuilt), PR16 (positioning + dogfood).
+
+**Status:** **Adopted.** Implementation status:
+- Calling-side R20a catch (`/api/calling` Case B) — **Wired**, **Verified** at the substantive level (Diagnostic-certain on the 44/44 tsx test + tsc; Diagnostic-uncertain — pattern level on Jest registry execution, F-series infrastructure issue).
+- `SUBSTRATE_CALLING_R20A_ENABLED` env flag — **Scaffolded** (default OFF; UNSET in Vercel; created in `r20a-gate.ts`).
+- Canonical `SafetySignal` schema in `r20a-gate.ts` — **Wired**, **Verified** (used by Calling; widens existing Reflect carrier additively).
+- A7 `overrideFlag` parameter — **Wired**, **Verified** (additive; default behaviour preserved for `parallel-run.ts`).
+- AC5 registry (extended for substrate-gate routes) — **Wired** structurally; execution gated on F-series Jest-config remediation.
+
+Cross-references: `D-R20A-SC1-SINGLE-CATCH-CONTRACT-DRAFTED-2026-05-28` (the design spec this session implements); `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27` (the parent ADR); `D-R20A-CONFIG-PERIMETER-OPTION-A-2026-05-27` (the elected direction); `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13` (the seed primitive reused here); `/drafts/2026-05-28-r20a-single-catch-contract.md` §§2, 3, 4, 5.2, 5.6; `/adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`; `/operations/handoffs/founder/2026-05-28-OPTION-A-session-2-calling-wired-close.md` (created at Step 7).
+
+---

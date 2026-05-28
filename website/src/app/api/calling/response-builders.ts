@@ -25,6 +25,7 @@
 import { NextResponse } from 'next/server'
 import type { GateStatus, Outcome } from '@/lib/sage-calling/session-store'
 import type { DiscoveredPurpose } from '@/lib/translation-sandwich/layer1-extractor'
+import type { SafetySignal } from '@/lib/substrate/r20a-gate'
 
 export const DOCUMENTATION_URL = 'https://sagereasoning.com/limitations'
 
@@ -79,21 +80,42 @@ function build(
 // ============================================================================
 
 /** A surfaced question. `stage` is the sequence position (NOT the variant — R4).
- *  `question` is the only engine output exposed. */
+ *  `question` is the only engine output exposed.
+ *
+ *  Option A (2026-05-28): when the substrate-gate catch detected mild distress
+ *  on the inbound `response` text, `safetySignal` is supplied and attached to
+ *  the outward shape as `safety_signal` (additive; never replaces an existing
+ *  field). Mild signal does NOT halt the conversation — it is an informational
+ *  carrier for downstream stages (the DiscoveredPurpose envelope-threading is
+ *  Session 4 work). */
 export function buildQuestionResponse(
   session_id: string,
   stage: string,
   question: string,
   loopHeaders?: Record<string, string>,
+  safetySignal?: SafetySignal,
 ): NextResponse {
-  return build(200, { status: 'in_progress', session_id, stage, question }, loopHeaders)
+  return build(
+    200,
+    {
+      status: 'in_progress',
+      session_id,
+      stage,
+      question,
+      ...(safetySignal ? { safety_signal: safetySignal } : {}),
+    },
+    loopHeaders,
+  )
 }
 
 /** Q5 complete → the Hard Gate. The five-spec handoff is PAUSED; nothing has
- *  been handed off. No five-spec content is surfaced here (D-14). */
+ *  been handed off. No five-spec content is surfaced here (D-14).
+ *
+ *  Option A: optional `safetySignal` carrier per buildQuestionResponse. */
 export function buildHardGateResponse(
   session_id: string,
   loopHeaders?: Record<string, string>,
+  safetySignal?: SafetySignal,
 ): NextResponse {
   return build(
     200,
@@ -104,18 +126,103 @@ export function buildHardGateResponse(
         'A purpose has been identified. The five-specification handoff into the substrate ' +
         'is paused at the Hard Gate and will NOT fire until an external developer/operator ' +
         'explicitly approves this session. No handoff has occurred.',
+      ...(safetySignal ? { safety_signal: safetySignal } : {}),
     },
     loopHeaders,
   )
 }
 
-/** A genuine null → the developer-facing clarification template (verbatim). */
+/** A genuine null → the developer-facing clarification template (verbatim).
+ *
+ *  Option A: optional `safetySignal` carrier per buildQuestionResponse. */
 export function buildNullResultResponse(
   session_id: string,
   clarification: string,
   loopHeaders?: Record<string, string>,
+  safetySignal?: SafetySignal,
 ): NextResponse {
-  return build(200, { status: 'null_result', session_id, clarification }, loopHeaders)
+  return build(
+    200,
+    {
+      status: 'null_result',
+      session_id,
+      clarification,
+      ...(safetySignal ? { safety_signal: safetySignal } : {}),
+    },
+    loopHeaders,
+  )
+}
+
+// ============================================================================
+// OPTION A — R20a SUBSTRATE-GATE DISTRESS REDIRECT (developer-form payload)
+//
+// Added 2026-05-28 per /drafts/2026-05-28-r20a-single-catch-contract.md
+// §3 (audience contract: agent_developer) + §4 (canonical SafetySignal).
+//
+// When the substrate-gate catch fires REDIRECT (moderate/acute distress
+// detected on the agent's inbound `response`), the Calling conversation
+// halts; Calling's normal engine work does NOT run; no persist; no metering
+// on the loop (the R20a Haiku cost is tracked separately via the existing
+// r20a-cost-tracker). The agent operator receives:
+//
+//   - distress_detected: true
+//   - severity: 'moderate' | 'acute'
+//   - developer_note: standing developer-facing message (this is NOT a
+//                     crisis pathway; route through your own safety/
+//                     escalation process)
+//   - suggested_user_message: the existing human pass-through, surfaced
+//                     separately so the agent MAY relay it through its
+//                     own safety pipeline
+//   - flow_terminated: true (the Calling flow is halted; no further
+//                      turns will advance the engine)
+//   - safety_signal: the canonical cross-seam carrier
+//
+// HONEST LIMITATION (per design §3.5): the exact wording of developer_note
+// and suggested_user_message is A6 design work (the per-consumer prose_mode
+// keys r20a_developer_note + r20a_suggested_user_message). Until A6 runs,
+// this builder uses placeholder text drawn from ZONE3_DEVELOPER_NOTE
+// (developer note) and the substrate's redirect_message (suggested user
+// message). A6 formalises the wording.
+//
+// Rules served: R20a (vulnerable user detection); R19c (honest limitations
+// — placeholder marked); AC2 (~500ms classifier accepted); AC4 (invocation-
+// tested); AC5 (perimeter ninth route); PR1 (single-endpoint proof); PR3
+// (synchronous); PR15 (reuses A7).
+// ============================================================================
+
+/** PLACEHOLDER per design §3.5 — formalised by A6 (r20a_developer_note). */
+const CALLING_R20A_DEVELOPER_NOTE_PLACEHOLDER =
+  'Sage Calling R20a substrate-gate engaged: the agent response on this turn ' +
+  'contained language indicating acute psychological distress in the underlying ' +
+  'user. Sage Calling is not a crisis pathway — it has halted this discovery ' +
+  'session, will NOT advance the engine for this turn, and has deliberately NOT ' +
+  'attempted philosophical reflection on the distress. Route the underlying ' +
+  'user-distress handling through your own safety and escalation process; if ' +
+  'you wish to relay a user-facing message, the suggested_user_message field ' +
+  'below contains a non-engaging crisis pass-through.'
+
+/** Build the developer-form REDIRECT response. */
+export function buildCallingDistressRedirectResponse(
+  session_id: string,
+  severity: 'moderate' | 'acute',
+  suggested_user_message: string,
+  safetySignal: SafetySignal,
+  loopHeaders?: Record<string, string>,
+): NextResponse {
+  return build(
+    200,
+    {
+      status: 'redirected',
+      session_id,
+      distress_detected: true,
+      severity,
+      developer_note: CALLING_R20A_DEVELOPER_NOTE_PLACEHOLDER,
+      suggested_user_message,
+      flow_terminated: true,
+      safety_signal: safetySignal,
+    },
+    loopHeaders,
+  )
 }
 
 /** D-12 holding pattern: re-surface Q6 Variant A (innermost-circle attention).

@@ -83,6 +83,17 @@ import {
 import { verifyAgentCard, isHttpsUrl, type FetchedCard } from '@/lib/sage-calling/agent-card'
 import type { DiscoveredPurposeRole } from '@/lib/translation-sandwich/layer1-extractor'
 
+// Option A build arc, Session 2 (2026-05-28) — substrate-gate R20a catch on
+// /api/calling. Per /drafts/2026-05-28-r20a-single-catch-contract.md §5.2.
+// Imports MUST appear at the top of the file even before they are used in the
+// handler body, so the AC5 ninth-route registry assertion (substrate-gate
+// pattern in r20a-invocation-guard.test.ts) can grep them out of the source.
+import {
+  enforceLayer2R20aGate,
+  isCallingR20aEnabled,
+  type SafetySignal,
+} from '@/lib/substrate/r20a-gate'
+
 import { computeLoopBill } from '@/lib/stripe'
 import {
   recordLoopBilling,
@@ -106,6 +117,7 @@ import {
   buildCallingNotFoundResponse,
   buildCallingConflictResponse,
   buildCallingServerErrorResponse,
+  buildCallingDistressRedirectResponse,
   CALLING_RESPONSE_HEADERS,
 } from './response-builders'
 
@@ -393,6 +405,107 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         : buildHoldingResponse(session_id, holdingPatternQuestion())
     }
 
+    // --------------------------------------------------------------------
+    // OPTION A — R20a SUBSTRATE-GATE CATCH (Session 2, 2026-05-28)
+    // Per /drafts/2026-05-28-r20a-single-catch-contract.md §5.2.
+    //
+    // Runs BEFORE computeAdvance so REDIRECT short-circuits the engine
+    // entirely (no metering, no persist; the substrate's R20a Haiku cost
+    // is tracked separately via r20a-cost-tracker).
+    //
+    // Gated behind SUBSTRATE_CALLING_R20A_ENABLED (default OFF). When
+    // unset, the entire block is skipped — Case B is byte-identical to
+    // pre-Option-A behaviour (PR1 single-endpoint proof; the catch is
+    // off in production until a separate Critical activation session).
+    //
+    // PR3 (synchronous safety): the catch is awaited; no fire-and-forget.
+    // PR15 (reuse, don't rebuild): A7's enforceLayer2R20aGate is the seed;
+    // no new classifier introduced here.
+    //
+    // On REDIRECT: halt. Emit developer-form payload + canonical
+    //   safety_signal { flow_terminated: true, cause: 'distress', ... }.
+    //   No metering (the agent did not receive Calling work; the safety
+    //   redirect is its own response shape).
+    // On PASS + mild (distress_signal=true): continue normal flow; capture
+    //   the canonical safety_signal { flow_terminated: false, severity:
+    //   'mild', ... } for attachment to whichever response the engine
+    //   produces below (question / hard_gate / null_result). The mild
+    //   signal is informational; it does NOT halt the conversation.
+    //   Session 4 carry-forward: threading the mild signal onto the
+    //   eventual DiscoveredPurpose hand-off envelope (the spec §5.2
+    //   target shape) is built when the audience contract is wired
+    //   end-to-end — out of PR1 single-endpoint scope here.
+    // On PASS + none / BYPASSED: no safety_signal field; unchanged.
+    //
+    // Rules served: R20a (vulnerable user detection); AC2 (~500ms classifier
+    //   accepted); AC4 (invocation-tested); AC5 (ninth-route protocol);
+    //   AC8 (substrate-gate at translation-sandwich boundary); PR1 (one
+    //   endpoint at a time); PR3 (synchronous); PR6 (Critical change);
+    //   PR15 (A7 reuse).
+    // --------------------------------------------------------------------
+    let mildSafetySignal: SafetySignal | undefined
+    if (isCallingR20aEnabled()) {
+      // overrideFlag: true — Calling has its own flag check
+      // (isCallingR20aEnabled, above) and is independent of A7's
+      // SUBSTRATE_R20A_GATE_ENABLED flag per design spec §5.6.
+      const gateOutput = await enforceLayer2R20aGate({
+        text: response,
+        sessionId: session_id,
+        overrideFlag: true,
+      })
+
+      if (gateOutput.decision === 'REDIRECT') {
+        const severity =
+          gateOutput.severity === 'acute' || gateOutput.severity === 'moderate'
+            ? gateOutput.severity
+            : 'moderate' // defensive — REDIRECT should only emit at moderate/acute
+        const safetySignal: SafetySignal = {
+          flow_terminated: true,
+          cause: 'distress',
+          severity,
+          caught_at: 'substrate_layer2',
+        }
+        // Log the catch for audit + observability (mirrors A7's span emit).
+        console.log(
+          JSON.stringify({
+            kind: 'sage_calling_r20a_redirect',
+            session_id,
+            severity,
+            span_id: gateOutput.span_id,
+            source: gateOutput.source,
+          }),
+        )
+        // Emit the developer-form payload + safety_signal. No metering.
+        return buildCallingDistressRedirectResponse(
+          session_id,
+          severity,
+          gateOutput.redirect_message ?? '',
+          safetySignal,
+        )
+      }
+
+      if (gateOutput.decision === 'PASS' && gateOutput.distress_signal) {
+        // Mild distress detected; conversation continues but the signal
+        // rides on the outward response shape (additive field).
+        mildSafetySignal = {
+          flow_terminated: false,
+          cause: 'distress',
+          severity: 'mild',
+          caught_at: 'substrate_layer2',
+        }
+        console.log(
+          JSON.stringify({
+            kind: 'sage_calling_r20a_mild_signal',
+            session_id,
+            span_id: gateOutput.span_id,
+            source: gateOutput.source,
+          }),
+        )
+      }
+      // PASS + no distress_signal (severity 'none') OR BYPASSED → fall
+      // through; mildSafetySignal remains undefined; wire shape unchanged.
+    }
+
     // In progress — apply the answer (the endpoint↔engine contract).
     const adv = computeAdvance(existing.response_history, existing.signals_detected, response)
     if (!adv.ok) {
@@ -415,16 +528,25 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!persist.ok) return buildCallingServerErrorResponse()
 
     // Respond by decision kind. R4: never surface variant / rule / signals.
+    // Option A: when mild distress was caught above, the canonical
+    // safety_signal { flow_terminated: false, severity: 'mild', ... } is
+    // attached as an additive field on the response shape.
     const decision = adv.value.decision
     if (decision.kind === 'question') {
-      return buildQuestionResponse(session_id, decision.stage, decision.text, meter.headers)
+      return buildQuestionResponse(
+        session_id,
+        decision.stage,
+        decision.text,
+        meter.headers,
+        mildSafetySignal,
+      )
     }
     if (decision.kind === 'hard_gate') {
       // Hard Gate: persisted awaiting_approval; the handoff does NOT fire here.
-      return buildHardGateResponse(session_id, meter.headers)
+      return buildHardGateResponse(session_id, meter.headers, mildSafetySignal)
     }
     // null_result — emit the verbatim clarification template (D-12).
-    return buildNullResultResponse(session_id, decision.text, meter.headers)
+    return buildNullResultResponse(session_id, decision.text, meter.headers, mildSafetySignal)
   } catch (err) {
     console.error('[api/calling] unexpected error:', err)
     return buildCallingServerErrorResponse()

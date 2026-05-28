@@ -1,22 +1,37 @@
 /**
- * r20a-invocation-guard.test.ts — Automated invocation test for detectDistressTwoStage.
+ * r20a-invocation-guard.test.ts — Automated invocation test for the R20a perimeter.
  *
  * PURPOSE: Prevents the 5-session dead-code gap (SS3) from recurring.
  * detectDistress() was defined on 6 Apr but never called until 11 Apr.
- * This test reads the source files of every human-facing POST route and
- * confirms that detectDistressTwoStage is both imported AND called.
+ * This test reads the source files of every R20a-perimeter route and
+ * confirms the canonical safety function is both imported AND called.
+ *
+ * Two registries (per AC5 + Option A build arc 2026-05-28 spec §5):
+ *
+ *   HUMAN_FACING_POST_ROUTES (the original eight per manifest §AC5):
+ *     route-level pattern → `await enforceDistressCheck(detectDistressTwoStage(...))`
+ *
+ *   SUBSTRATE_GATE_ROUTES (added under D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28):
+ *     substrate-gate pattern → `await enforceLayer2R20aGate({ text, ... })`
+ *     Calling is the first member (ninth route in the R20a perimeter overall).
+ *     The substrate-gate path reuses A7 which internally invokes
+ *     detectDistressTwoStage via SafetyCriticalCallParams — same Haiku
+ *     classifier, different surface call. AC5's intent (the safety function
+ *     runs on the route) is preserved.
  *
  * This is an INVOCATION test, not a FUNCTIONAL test. It verifies the
  * function exists in the execution path — not that it returns correct
  * output. The eval suite (r20a-classifier-eval.ts) handles functional
- * testing against the live API.
+ * testing against the live API; per-route functional tests live under each
+ * route's `__tests__/` folder (e.g. api/calling/__tests__/r20a-invocation.test.ts).
  *
  * No API key required. No network calls. Runs at build time.
  *
  * Run: npx jest r20a-invocation-guard --no-coverage
  *
- * Rules served: R20a (vulnerable user detection and redirection)
- * Knowledge gaps addressed: KG3, KG7 (build-to-wire gap pattern)
+ * Rules served: R20a (vulnerable user detection and redirection); AC4 (invocation
+ * testing); AC5 (perimeter — eight route-level + one substrate-gate = nine).
+ * Knowledge gaps addressed: KG3, KG7 (build-to-wire gap pattern).
  */
 
 import * as fs from 'fs'
@@ -48,6 +63,20 @@ const HUMAN_FACING_POST_ROUTES = [
 ]
 
 // ---------------------------------------------------------------------------
+// Substrate-gate routes — perimeter additions catching distress via the A7
+// substrate gate (enforceLayer2R20aGate). A7 internally invokes
+// detectDistressTwoStage via SafetyCriticalCallParams (Haiku), so the
+// underlying safety classifier is the same; only the surface call pattern
+// differs. Added under the Option A build arc (D-R20A-SC1-...-2026-05-28
+// design spec §5.2); each entry here joins the R20a perimeter as the
+// ninth+ route per AC5's ninth-route protocol.
+// ---------------------------------------------------------------------------
+
+const SUBSTRATE_GATE_ROUTES = [
+  'src/app/api/calling/route.ts',
+]
+
+// ---------------------------------------------------------------------------
 // The function that MUST be present — both import and call
 // ---------------------------------------------------------------------------
 
@@ -57,6 +86,11 @@ const REQUIRED_IMPORT_SOURCE = 'r20a-classifier'
 // Task 3 addition: the safety gate wrapper that enforces synchronous execution
 const REQUIRED_GATE_FUNCTION = 'enforceDistressCheck'
 const REQUIRED_GATE_SOURCE = 'constraints'
+
+// Substrate-gate addition: the A7 entry point reused by Option A perimeter routes
+const REQUIRED_SUBSTRATE_GATE_FUNCTION = 'enforceLayer2R20aGate'
+const REQUIRED_SUBSTRATE_GATE_FLAG = 'isCallingR20aEnabled'
+const REQUIRED_SUBSTRATE_GATE_SOURCE = 'substrate/r20a-gate'
 
 describe('R20a Safety Invocation Guard', () => {
   const websiteRoot = path.resolve(__dirname, '..', '..', '..')
@@ -105,8 +139,11 @@ describe('R20a Safety Invocation Guard', () => {
     // When adding a new human-facing POST endpoint, add it to
     // HUMAN_FACING_POST_ROUTES above.
     //
-    // Current count: 8 routes (as of 18 April 2026)
+    // Current count: 8 route-level routes (as of 18 April 2026) + 1
+    // substrate-gate route (added 2026-05-28 under the Option A build arc;
+    // see SUBSTRATE_GATE_ROUTES) = 9 routes in the R20a perimeter overall.
     expect(HUMAN_FACING_POST_ROUTES.length).toBeGreaterThanOrEqual(8)
+    expect(SUBSTRATE_GATE_ROUTES.length).toBeGreaterThanOrEqual(1)
   })
 
   test('detectDistressTwoStage result is awaited (async safety)', () => {
@@ -154,6 +191,99 @@ describe('R20a Safety Invocation Guard', () => {
       const hasGateCall = /enforceDistressCheck\s*\(\s*detectDistressTwoStage\s*\(/.test(source)
 
       expect(hasGateCall).toBe(true)
+    }
+  )
+
+  // -------------------------------------------------------------------------
+  // SUBSTRATE-GATE ROUTES (Option A build arc, 2026-05-28; ninth+ route)
+  //
+  // Calling and other future substrate-consuming routes catch distress via
+  // enforceLayer2R20aGate (A7) rather than the route-level pattern. The
+  // underlying classifier (detectDistressTwoStage via Haiku) is identical;
+  // the surface call shape is different because A7 sits at the substrate's
+  // Layer 2 boundary, not at the route's edge.
+  //
+  // Each substrate-gate route MUST:
+  //   1. Import enforceLayer2R20aGate from @/lib/substrate/r20a-gate
+  //   2. Import its own substrate-gate flag check (e.g. isCallingR20aEnabled)
+  //      from the same source — so the catch is feature-flagged
+  //   3. Call enforceLayer2R20aGate, awaited (PR3 — synchronous safety)
+  //   4. Gate the call site behind the flag check (so production with the
+  //      flag UNSET is byte-identical to pre-Option-A behaviour)
+  // -------------------------------------------------------------------------
+
+  test.each(SUBSTRATE_GATE_ROUTES)(
+    '%s imports enforceLayer2R20aGate from substrate/r20a-gate (Option A — substrate-gate pattern)',
+    (routePath) => {
+      const fullPath = path.join(websiteRoot, routePath)
+      expect(fs.existsSync(fullPath)).toBe(true)
+
+      const source = fs.readFileSync(fullPath, 'utf-8')
+
+      const hasImport =
+        source.includes('import') &&
+        source.includes(REQUIRED_SUBSTRATE_GATE_FUNCTION) &&
+        source.includes(REQUIRED_SUBSTRATE_GATE_SOURCE)
+
+      expect(hasImport).toBe(true)
+    }
+  )
+
+  test.each(SUBSTRATE_GATE_ROUTES)(
+    '%s imports its substrate-gate feature flag from substrate/r20a-gate (Option A — feature-gated catch)',
+    (routePath) => {
+      const fullPath = path.join(websiteRoot, routePath)
+      const source = fs.readFileSync(fullPath, 'utf-8')
+
+      // Each substrate-gate route names its own feature flag check (mirroring
+      // isSubstrateR20aGateEnabled for A7). The check MUST be imported from
+      // substrate/r20a-gate so the perimeter's flag surface is centralised.
+      const hasFlagImport =
+        source.includes('import') &&
+        source.includes(REQUIRED_SUBSTRATE_GATE_FLAG) &&
+        source.includes(REQUIRED_SUBSTRATE_GATE_SOURCE)
+
+      expect(hasFlagImport).toBe(true)
+    }
+  )
+
+  test.each(SUBSTRATE_GATE_ROUTES)(
+    '%s calls enforceLayer2R20aGate awaited (PR3 — synchronous safety)',
+    (routePath) => {
+      const fullPath = path.join(websiteRoot, routePath)
+      const source = fs.readFileSync(fullPath, 'utf-8')
+
+      const lines = source.split('\n')
+      const nonImportLines = lines.filter(
+        (line) => !line.trim().startsWith('import ')
+      )
+      const bodySource = nonImportLines.join('\n')
+
+      // The function must be CALLED in the body (not merely imported), and
+      // the call must be awaited (PR3 — no fire-and-forget on safety paths).
+      const hasAwaitedCall = /await\s+enforceLayer2R20aGate\s*\(/.test(bodySource)
+
+      expect(hasAwaitedCall).toBe(true)
+    }
+  )
+
+  test.each(SUBSTRATE_GATE_ROUTES)(
+    '%s gates the enforceLayer2R20aGate call behind its substrate-gate flag (feature flag check present)',
+    (routePath) => {
+      const fullPath = path.join(websiteRoot, routePath)
+      const source = fs.readFileSync(fullPath, 'utf-8')
+
+      const lines = source.split('\n')
+      const nonImportLines = lines.filter(
+        (line) => !line.trim().startsWith('import ')
+      )
+      const bodySource = nonImportLines.join('\n')
+
+      // The flag function MUST be CALLED in the body (not just imported).
+      // This guards the production default-OFF posture.
+      const hasFlagCall = new RegExp(`${REQUIRED_SUBSTRATE_GATE_FLAG}\\s*\\(`).test(bodySource)
+
+      expect(hasFlagCall).toBe(true)
     }
   )
 })

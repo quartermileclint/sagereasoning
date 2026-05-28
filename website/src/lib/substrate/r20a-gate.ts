@@ -239,6 +239,86 @@ export function isSubstrateR20aGateEnabled(): boolean {
 }
 
 // ============================================================================
+// OPTION-A SUBSTRATE-GATE FLAG — SUBSTRATE_CALLING_R20A_ENABLED
+//
+// Added 2026-05-28 under the Option A build arc, Session 2 (Calling-side
+// wiring). Per /drafts/2026-05-28-r20a-single-catch-contract.md §5.2.
+//
+// Mirrors isSubstrateR20aGateEnabled's posture: defaults to OFF; checked at
+// every Calling stage call before invoking enforceLayer2R20aGate. When OFF,
+// /api/calling's Case B path is byte-identical to pre-Option-A behaviour;
+// no classifier call, no added latency, no wire-shape change.
+//
+// Production state: SUBSTRATE_CALLING_R20A_ENABLED UNSET in Vercel at session
+// close. Flag remains OFF in production until a separate Critical activation
+// session decides otherwise. The flag is independent of
+// SUBSTRATE_R20A_GATE_ENABLED — Calling can be turned on without affecting
+// the substrate's own A7 path on /api/reason, and vice versa.
+//
+// AC5 perimeter: /api/calling joins the perimeter as the ninth route under
+// the substrate-gate pattern. Registry: r20a-invocation-guard.test.ts
+// SUBSTRATE_GATE_ROUTES.
+//
+// Rules served: R20a, AC2 (~500ms latency budget accepted), AC5 (ninth-route
+// protocol), PR1 (single-endpoint proof on Calling), PR15 (reuses A7 — no
+// new classifier).
+// ============================================================================
+
+export function isCallingR20aEnabled(): boolean {
+  return process.env.SUBSTRATE_CALLING_R20A_ENABLED === 'true'
+}
+
+// ============================================================================
+// CANONICAL SafetySignal SCHEMA (cross-seam propagation carrier)
+//
+// Added 2026-05-28 per design spec §4.2. The carrier name `safety_signal`
+// reuses the existing field at Reflect's developer-input boundary (see
+// website/src/lib/sage-reflect/zone3-boundary.ts); this canonical schema
+// WIDENS that contract along three axes:
+//
+//   - producer set: developer-only (Reflect input) → developer + substrate
+//     (A7 / Calling catch)
+//   - cause vocabulary: 'harm_flagged' boolean → 'harm' | 'distress' union
+//   - semantics: read-once at one boundary → flow-terminating + idempotent
+//     across configurations
+//
+// Reflect's existing SafetySignal { harm_flagged, detail? } maps to this
+// canonical shape:
+//   - harm_flagged: true  → { flow_terminated: true,  cause: 'harm',
+//                             severity: 'n/a',
+//                             caught_at: 'reflect_input_boundary', detail }
+//   - harm_flagged: false → omit (or { flow_terminated: false, cause: 'harm',
+//                                       severity: 'n/a', ... })
+//
+// Substrate-emitted carriers (A7 / Calling catch) use caught_at:
+// 'substrate_layer2'. Halt + idempotency semantics per design §4.4 + §4.5.
+//
+// Rules served: R20a, AC4, AC8, design spec §4.
+// ============================================================================
+
+export type SafetySignalCause = 'distress' | 'harm'
+
+export type SafetySignalSeverity = 'n/a' | 'mild' | 'moderate' | 'acute'
+
+export type SafetySignalCaughtAt =
+  | 'substrate_layer2'
+  | 'reflect_input_boundary'
+  | 'other'
+
+export interface SafetySignal {
+  /** True when the configuration must halt and not re-screen. */
+  flow_terminated: boolean
+  /** What kind of termination this is. */
+  cause: SafetySignalCause
+  /** Distress severity, when cause === 'distress'. Reflect's harm path uses 'n/a'. */
+  severity: SafetySignalSeverity
+  /** Free-text detail for forensics + audit. Never user-facing. */
+  detail?: string
+  /** Where in the configuration the catch fired. AC11 span ID is the canonical link. */
+  caught_at: SafetySignalCaughtAt
+}
+
+// ============================================================================
 // A7.6 — AC11 OPENTELEMETRY SPAN STUB
 //
 // Per /manifest.md §AC11: "All substrate operations are instrumented per
@@ -333,13 +413,35 @@ export interface EnforceR20aGateInput {
   gate?: SafetyGate
   /** Optional session ID for cost tracking via the underlying classifier. */
   sessionId?: string
+  /**
+   * Added 2026-05-28 under the Option A build arc, Session 2 (Calling-side
+   * wiring). Per /drafts/2026-05-28-r20a-single-catch-contract.md §5.6.
+   *
+   * When true, the internal SUBSTRATE_R20A_GATE_ENABLED flag check is
+   * SKIPPED. Callers that have their own per-route flag check (e.g.
+   * isCallingR20aEnabled() on /api/calling) pass true here so their catch
+   * activation is independent of A7's flag on /api/reason.
+   *
+   * Default: false (the function continues to gate itself behind
+   * SUBSTRATE_R20A_GATE_ENABLED as before — preserves existing parallel-
+   * run.ts behaviour unchanged). When true, callers MUST have already
+   * checked their own flag externally; A7 trusts the caller's authorisation.
+   *
+   * Rationale: design spec §5.6 names A7 production activation as a
+   * separate Critical change. Wiring Calling's flag through A7's flag
+   * would couple two Critical activations the design intends to keep
+   * independent. This parameter decouples them additively (no existing
+   * caller changes; new callers opt in).
+   */
+  overrideFlag?: boolean
 }
 
 export async function enforceLayer2R20aGate(
   input: EnforceR20aGateInput
 ): Promise<R20aGateOutput> {
-  // A7.4 — flag-off sentinel.
-  if (!isSubstrateR20aGateEnabled()) {
+  // A7.4 — flag-off sentinel. Skipped when caller opts in via overrideFlag
+  // (caller has its own flag check and has already passed it).
+  if (!input.overrideFlag && !isSubstrateR20aGateEnabled()) {
     return { decision: 'BYPASSED', reason: 'flag_unset' }
   }
 
