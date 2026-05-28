@@ -1,0 +1,47 @@
+{
+  "scenario": "Comb2",
+  "scenario_label": "Reasoning + Assent (no Reflect) — no-practice disclaimer present on all surfaces",
+  "mode": "build-only",
+  "timestamp": "2026-05-27T02:05:44.671Z",
+  "result": "PASS",
+  "assertions": [
+    {
+      "label": "developer docs (api-docs/page.tsx): canonical no-practice disclaimer present",
+      "pass": true
+    },
+    {
+      "label": "developer docs (api-docs/page.tsx): disclaimer non-empty / ASCII anchor present",
+      "pass": true
+    },
+    {
+      "label": "llms.txt: canonical no-practice disclaimer present",
+      "pass": true
+    },
+    {
+      "label": "llms.txt: disclaimer non-empty / ASCII anchor present",
+      "pass": true
+    },
+    {
+      "label": "agent-card.json: canonical no-practice disclaimer present",
+      "pass": true
+    },
+    {
+      "label": "agent-card.json: disclaimer non-empty / ASCII anchor present",
+      "pass": true
+    },
+    {
+      "label": "limitations page (limitations/page.tsx): canonical no-practice disclaimer present",
+      "pass": true
+    },
+    {
+      "label": "limitations page (limitations/page.tsx): disclaimer non-empty / ASCII anchor present",
+      "pass": true
+    }
+  ],
+  "summary": "8 passed, 0 failed (8 assertions)",
+  "notes": [
+    "Combination 2 is a cross-cutting DOCUMENTATION property (scenario-matrix Comb 2; test-brief §A.2/§A.3) — no endpoint drive, no env, no network, no DB.",
+    "Matching normalises dash variants + whitespace so JSX line-wrapping and em-dash-vs-hyphen differences across surfaces do not cause false fails.",
+    "This run ALSO resolves L7 assertion (b) (run-l7.ts) — L7 shares the no-practice disclaimer property with Comb 2."
+  ]
+}

@@ -146,6 +146,26 @@ The founder may reclassify upward at any time. Urgency does not reduce classific
 
 ---
 
+## AI failure modes to watch for at session open (added 2026-05-27)
+
+Patterns the AI has demonstrated in this project and is now required to actively guard against. Read at session open. The right-hand column lists short **redirect phrases the founder can drop into chat at any moment to force re-grounding** — no technical knowledge required.
+
+| Pattern | What it looks like | Founder redirect phrase |
+|---|---|---|
+| **Prescribe-before-grounding** (KG-EX1) | The AI recommends removing / retiring / simplifying / consolidating something — *before* asking what it's for or inspecting read-only. Or it picks a tidy default framing before confirming founder intent. | *"Are you grounding this in my purpose first?"* |
+| **Narrow unit of analysis** (KG-EX1 sub-form) | The AI assesses a per-component property when the founder's concern is the flow / configuration / user-facing whole. Treats per-component findings as the verdict instead of as input. Misses the audience dimension (human user message vs agent developer notification). | *"What's the unit of analysis here?"* |
+| **One-line operational hand-off** (PR17) | The AI defers founder-performed setup (env standup, dashboards, credentials, deployment) to a single line in a close or prompt instead of walking the founder through it live. Pointing at a checklist counts as a one-liner. | *"Are you reducing this to a one-line hand-off?"* |
+
+Two general phrases for when the founder loses the thread:
+- *"Where are we in the arc?"* — forces the AI to recite carried-forward state (current arc; queued items; what's awaiting the founder vs the AI).
+- *"What's queued behind this?"* — forces the AI to surface the backlog (carried-forward + deferred items).
+
+**At session open the AI also narrates, before any substantive work:** where we are in the arc; what's queued; what's awaiting the founder; what's awaiting the AI. This is the founder's primary handhold across sessions (the AI has no persistent memory; the docs are its memory).
+
+**Sources:** PR17 (`D-PR17-ADOPTED-WALKTHROUGH-2026-05-27`); KG-EX1 (`/operations/knowledge-gaps.md` §"Permanent Entries (Beyond KG1–KG7)"); session debrief (`/operations/session-debriefs/2026-05-27_c2-r20a-perimeter-and-meta-debrief.md`).
+
+---
+
 ## Lean templates — Standard + Elevated risk (Sub-sessions A–G)
 
 These apply to all categories except `code-critical`. For `code-critical`, use the full templates per the existing protocol.
@@ -322,7 +342,7 @@ When any of the following changes:
 - Manifest rules (R0–R20, AC1–AC13, KG1–KG7) — AC9–AC13 added under ST2 2026-05-12
 - Session-opening protocol (Parts A, B, C; the 21 elements)
 - Project instructions (this version is per `/adopted/project-instructions-snapshot.md` — first repo-tracked snapshot created 2026-05-12 under ST2; PR15 amended 2026-05-14 under `D-PR15-AMENDED-FROM-ANTHROPIC-NATIVE-2026-05-14`)
-- Process rules (PR1–PR16) — PR10–PR16 added under ST2 2026-05-12; PR15 amended 2026-05-14
+- Process rules (PR1–PR17) — PR10–PR16 added under ST2 2026-05-12; PR15 amended 2026-05-14; PR17 (founder-performed operational steps walked through live, not handed off) added 2026-05-27 under `D-PR17-ADOPTED-WALKTHROUGH-2026-05-27`
 
 …update this cache **in the same session as the governance change**. The update is Standard risk per 0d-ii. Append `D-CACHE-DRIFT-RESOLVED-YYYY-MM-DD` entry to the decision log naming the cache-update step.
 
@@ -342,7 +362,7 @@ If the cache and the governance documents diverge, the governance documents are 
 - `/operations/knowledge-gaps.md` — full knowledge-gaps register
 - `/operations/agentic-commerce-findings-downstream-order.md` — forward-looking findings tracker (F1–F4); consulted at session-open per PR15 operational discipline
 - `/operations/decision-log.md` — append-only decision trail (active log = entries dated 2026-05-01 onwards); entries cross-reference this cache by section name. Earlier entries are in monthly archive files in `/operations/decision-log-archive-YYYY-MM.md` per the quarterly archive policy adopted under `D-DECISION-LOG-ARCHIVE-POLICY-ADOPTED-2026-05-04` (see active log's INDEX header for full archive list + policy)
-- Project instructions: see `/adopted/project-instructions-snapshot.md` for the operative content (PR1–PR16; verification framework 0c; Critical Change Protocol 0c-ii; risk classification 0d-ii; AI signals diagnostic-certainty rows added ST2; PR15 amended 2026-05-14)
+- Project instructions: see `/adopted/project-instructions-snapshot.md` for the operative content (PR1–PR17; verification framework 0c; Critical Change Protocol 0c-ii; risk classification 0d-ii; AI signals diagnostic-certainty rows added ST2; PR15 amended 2026-05-14; PR17 added 2026-05-27)
 
 ---
 

@@ -7914,3 +7914,30 @@ Sandbox-verified this session: build-only PASS + EXIT 0; `npx tsc --noEmit` EXIT
 **Status:** **Adopted.** ADR document = **Accepted** (in `/adopted/adr/`). Sequence = **Option A build → C2 live (rescoped) → Session 3**. Implementation = **Scoped** (Option A arc, code-critical). Cross-references: `D-R20A-CONFIG-PERIMETER-OPTION-A-2026-05-27`; `D-C2-R20A-PERIMETER-DIAGNOSTIC-AND-HARNESS-2026-05-27`; `adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`; `operations/handoffs/founder/2026-05-27-r20a-config-perimeter-adr-adopted-close.md`; `operations/handoffs/founder/2026-05-27-OPTION-A-build-session-1-NEXT-SESSION-PROMPT.md`.
 
 ---
+
+## 2026-05-27 — D-PR17-ADOPTED-WALKTHROUGH-2026-05-27
+
+**Decision:** Adopted **PR17 — Founder-Performed Operational Steps Are Walked Through Live, Not Handed Off** as a standing process rule, at the founder's explicit direction (2026-05-27). Any step the founder must perform outside Cowork's reach (environment standup, credential minting, key generation, env-var config, deployment/Vercel, Supabase dashboard, or anything needing the Code tab / an external dashboard / the founder's machine) is walked through interactively, step by step, in-session — exact clicks, copy-paste values, expected results, a confirmation check per step — and is NOT reduced to a one-line "founder to do X between sessions" hand-off, nor to a bare checklist pointer. Full text in `/adopted/project-instructions-snapshot.md` §PR17.
+
+**Reasoning:** A recurring tendency surfaced this session: the AI reduced founder-performed setup (notably the TEST-env standup for the deferred C2 live run) to pointers / between-session hand-offs. The founder — who has no coding experience — flagged this as exactly the failure mode their preferences are written against, and asked it be made a standing rule so it does not rest on AI memory. PR17 generalises the founder-facing posture of the Critical Change Protocol (0c-ii) to setup/operational steps. The immediate C2-live carry-forward (Option A prompt + consolidated close) was also updated to name the live walkthrough explicitly. This entry is the product of the session's learnings retrospective (founder-requested 2026-05-27); a session-debrief artifact (0b-ii) may be filed on request.
+
+**Files touched:**
+- `adopted/project-instructions-snapshot.md` — appended §PR17; cross-reference range → PR1–PR17.
+- `adopted/standing-protocol-cache.md` — process-rule range → PR1–PR17 (cache-drift resolved in the same session per the cache's update discipline; no separate `D-CACHE-DRIFT` entry — folded here).
+- `operations/handoffs/founder/2026-05-27-OPTION-A-build-session-1-NEXT-SESSION-PROMPT.md` — C2-live carry-forward now names the PR17 live walkthrough.
+- `operations/handoffs/founder/2026-05-27-r20a-config-perimeter-adr-adopted-close.md` — C2-live backlog row updated likewise.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** **Standard** (`governance`) under 0d-ii — a process-rule amendment + cache sync + handoff edits. **No code / schema / env / deploy.** AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** Revert the PR17 block + the cache range edits + the carry-forward edits + this entry. Documentation-only; no production impact.
+
+**Founder action required:** **Paste-sync** the project-instructions panel in Cowork against `/adopted/project-instructions-snapshot.md` so PR17 is live in the operative panel (per the established sync discipline; the snapshot is the repo-tracked surface, the panel is the operative one).
+
+**Verification step (founder-performable):** Confirm `/adopted/project-instructions-snapshot.md` contains a §PR17 block; confirm `/adopted/standing-protocol-cache.md` reads "PR1–PR17". Then paste-sync the Cowork panel.
+
+**Rules served:** PR17 (new), 0c, 0c-ii, 0b-ii; founder preferences (zero-coding-experience, step-by-step, exact instructions).
+
+**Status:** **Adopted.** PR17 is a standing rule (PR1–PR17). Cache synced. Founder paste-sync pending. Cross-references: `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27`; `D-C2-R20A-PERIMETER-DIAGNOSTIC-AND-HARNESS-2026-05-27`; `/adopted/project-instructions-snapshot.md` §PR17; `/adopted/standing-protocol-cache.md`.
+
+---

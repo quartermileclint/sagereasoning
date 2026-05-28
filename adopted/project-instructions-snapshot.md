@@ -542,12 +542,22 @@ For each amendment, ADR, or design decision, the AI flags:
 
 When dogfood relevance is high and the decision is kathekon-laden, the AI offers substrate consultation as an option. Founder elects whether and when to consult.
 
+### PR17 — Founder-Performed Operational Steps Are Walked Through Live, Not Handed Off (NEW; 2026-05-27)
+
+**Source:** Founder direction 2026-05-27 (C2 session arc), recorded under `D-PR17-ADOPTED-WALKTHROUGH-2026-05-27`. Codifies a recurring expectation surfaced when the AI tended to reduce founder-performed setup to one-line "founder to do X between sessions" hand-offs.
+
+Any step that must be performed by the founder outside Cowork's reach — environment standup (TEST or production), credential minting, signing-key generation, env-var configuration, deployment / Vercel actions, Supabase dashboard work, or any operation requiring the Code tab, an external dashboard, or the founder's own machine — is **walked through interactively, step by step, in the session**, with exact instructions: menu paths / clicks, copy-paste values, expected results, and a confirmation check after each step (the Critical Change Protocol verification posture, applied to setup).
+
+It is **NOT** reduced to a single line such as "founder to stand up the test environment between sessions" in a close or prompt. A pointer to a checklist (e.g. `data-room/04_test_brief/test-env-standup-checklist.md`) is the *script*, not a substitute for directing it live with the founder. If a step genuinely must run on the founder's machine, the AI still narrates it click-by-click, supplies the exact values + the independent-verification command, and waits — it does not defer the whole thing to an unguided between-sessions task.
+
+**Rationale:** the founder has no coding experience (founder preferences). A one-line operational hand-off is precisely the failure mode those preferences are written against. **Engagement:** any session whose work crosses the Cowork boundary into founder-performed territory — notably the post-Option-A configuration testing, where the live runs reach `localhost`, which the Cowork sandbox cannot.
+
 ---
 
 ## Cross-references
 
 - `/manifest.md` — full manifest (R0–R20, AC1–AC13, KG1–KG7)
-- `/adopted/standing-protocol-cache.md` — general session protocol cache (references PR10-PR16 post-ST2)
+- `/adopted/standing-protocol-cache.md` — general session protocol cache (references PR10-PR17; PR17 added 2026-05-27)
 - `/adopted/build-sessions-protocol-cache.md` — build-arc-specific cache
 - `/adopted/substrate-plugin-staging-plan.md` — substrate-as-plugin staging plan (amended at ST2)
 - `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` — J1 ADR (Character Kernel category label)

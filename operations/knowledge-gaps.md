@@ -259,3 +259,41 @@ The visibility difference is fixture-driven: F1's Layer 1 output is non-determin
 - **AC4 (Invocation Testing for Safety Functions) — formerly KG3 / KG7 build-to-wire entries, retired 2026-04-25 under DD-2026-04-25-03:** Actively applied. Grep confirmed both Growth loaders are called exactly once in production (`hub/route.ts` `case 'growth':`). Harness run in-session (16/16 assertions passed). No new observation worth logging.
 - **KG6 (Composition Order Constraint):** Same resolution as Tech — persona-prompt → upgrades → context blocks → brain is the established order for this architecture. Not a violation.
 - **KG2, KG4, KG5:** Not relevant this session. (Former KG8, KG9, KG10 retired under the 2026-04-25 reconciliation — see the "Retired content" block above for their new homes.)
+
+---
+
+## Permanent Entries (Beyond KG1–KG7) — Pre-Populated from Structured Extraction (PR5)
+
+The KG1–KG7 slots above match the manifest's Knowledge Gaps Register schema and stay clean. PR5 additionally authorises **pre-population of permanent entries from a structured extraction pass** (e.g. a build-knowledge extraction, an ST2 stress-test triage, a session-debrief). These entries are tracked here, distinct from KG1–KG7, and are read at session open under the same scan protocol.
+
+### KG-EX1 — Prescribe-Before-Grounding (AI failure mode)
+
+**Status:** Permanent entry, **pre-populated 2026-05-27** from the C2 session debrief (`/operations/session-debriefs/2026-05-27_c2-r20a-perimeter-and-meta-debrief.md`) under PR5 pre-population authority. Adopted via `D-PR17-ADOPTED-WALKTHROUGH-2026-05-27` (the same session that produced PR17).
+
+**Why it caused confusion:** Three corrections in a single session, all sharing one root: the AI reached for a recommendation, a framing, or a default *before* confirming the founder's purpose or intent. The founder has no coding experience and cannot reliably catch each recurrence; relying on the founder's pushback as the only safeguard is therefore not a safeguard at all.
+
+**Manifestations observed (single session, three forms):**
+
+1. Suggesting the `whole-system-data-room` git branch be **retired** as "a simpler default" — *before* asking what it was for or inspecting it read-only. (The read-only inspection that would have grounded the advice was only run after founder pushback.)
+2. Framing R20a coverage **per standalone product (M-7)** when the founder's — and the test brief's own — unit of analysis is the **configuration/flow** ("distress entering at any product across the loop"). The per-product framing hid a real gap (Calling→Reasoning seam → `discovered_purpose`, which the route guard does not classify).
+3. Treating "**data-room**" as the git branch when the founder holds it as a **bounded workspace methodology** ("the bounded workspace where the agent gathers the material for one piece of work and makes it legible before anyone asks for a final answer"). Framing the room as "not pulling its weight" read as dismissing a deliberate construct.
+
+A fourth, related manifestation — defaulting to **"founder stands up the env between sessions"** — is now structurally blocked by **PR17** (live walkthroughs, no one-line operational hand-offs).
+
+**Plain-language resolution (carry forward — apply at every code-elevated/critical session open and at each major recommendation):**
+
+1. **Before recommending removing, retiring, simplifying, or consolidating** something the founder set up deliberately: **confirm its purpose first** — ask, or inspect read-only — *then* advise. Do not present a "tidy default" before grounding.
+2. For **coverage / quality / sufficiency questions**: default to the **flow / configuration / user-facing unit of analysis**. Treat per-component findings as input, not verdict. **Surface the audience dimension proactively** (human user message vs agent developer notification).
+3. **Hold the founder's named concepts as methodologies first, mechanics second.** A "data room" is a workspace; a "perimeter" is a design property; an "ADR" is a decision record. Do not let a tooling view (a folder, a branch, a flag) read as a verdict on the concept.
+4. **When a recommendation would create between-session burden on the founder, convert it into an in-session walkthrough** (PR17) rather than a deferred task.
+5. **Treat founder pushback as high-signal evidence**, not as a request to defend. Re-examine genuinely. The founder's instincts have been repeatedly correct against AI defaults.
+
+**Founder redirect phrases (for the founder to use mid-session when something feels off — no technical knowledge required):**
+- *"Where are we in the arc?"* — forces the AI to recite carried-forward state.
+- *"What's the unit of analysis here?"* — catches narrow framing.
+- *"Are you grounding this in my purpose first?"* — catches prescribe-before-grounding.
+- *"Are you reducing this to a one-line hand-off?"* — PR17 trigger.
+
+**When this matters:** Any session in which the AI is about to recommend removing / simplifying / consolidating something the founder set up; choose a framing or unit of analysis for a quality/coverage question; or defer work to the founder. Engage at session open + at each major recommendation. Also see `/adopted/standing-protocol-cache.md` §"AI failure modes to watch for at session open" — the cache surface that brings this to attention every session.
+
+**Observation history:** First observed 2026-05-27 across three distinct manifestations within a single C2 session (sufficient for PR5 pre-population from a structured extraction; recurrence count = 1 session, multi-manifestation). Pre-population to permanent Entry status is the deliberate, founder-elected response.
