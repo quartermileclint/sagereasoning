@@ -7941,3 +7941,32 @@ Sandbox-verified this session: build-only PASS + EXIT 0; `npx tsc --noEmit` EXIT
 **Status:** **Adopted.** PR17 is a standing rule (PR1–PR17). Cache synced. Founder paste-sync pending. Cross-references: `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27`; `D-C2-R20A-PERIMETER-DIAGNOSTIC-AND-HARNESS-2026-05-27`; `/adopted/project-instructions-snapshot.md` §PR17; `/adopted/standing-protocol-cache.md`.
 
 ---
+
+## 2026-05-28 — D-R20A-SC1-SINGLE-CATCH-CONTRACT-DRAFTED-2026-05-28
+
+**Decision:** Session 1 of the Option A build arc opened read-only under the protocol and produced two outputs. First, by code-read, the four ADR verification items were resolved with diagnostic-certainty signals (summarised below) — none changes the catch locus or gap set named in the Accepted ADR, so no ADR amendment is required. Second, the single distress-catch contract + per-consumer Layer-3 rendering (audience contract) + propagated flow-terminating flag (A.4) were specified in a free-standing design doc at `/drafts/2026-05-28-r20a-single-catch-contract.md`. Per-endpoint build order set by the founder: Calling first, then Reflect-content, then Layer-3 audience rendering, then configuration-level invocation tests. Each per-endpoint wiring is a separate future Critical session under PR1 + the full Critical Change Protocol. **No production code, schema, env, or deploy was touched this session.**
+
+**Reasoning:** PR12 — verification before any Critical code. The four code-read findings: (1) A7 inspects only `text: params.input` (parallel-run.ts:582-587), not `discovered_purpose` — Calling-origin distress carried into L4/L6 is unscreened (Diagnostic-certain); (2) `/api/reason`'s `redirect_message` is human-framed (r20a-classifier.ts:263) and returned verbatim on the agent API at route.ts:625 + 846-858 — the audience-form gap A.3 names is confirmed (Diagnostic-certain on mechanism; Diagnostic-uncertain — pattern level on intent; founder treats as gap, not intentional); (3) no seam carries a substrate-emitted distress flag end-to-end today; the only existing `safety_signal` is at Reflect's developer-input boundary; A.4's propagation carrier is net-new as a mechanism while the field name is reusable (Diagnostic-certain); (4) Reflect's `SafetySignal { harm_flagged, detail }` reconciles with A.4 as one mechanism if the canonical schema widens along producer set, cause vocabulary, and halt+idempotency semantics (Diagnostic-certain on path; Diagnostic-uncertain — pattern level on the exact union shape, proposed in §4.2 of the design). The design reuses A7 (Layer-2 gate; the seed), A5.4 (Layer-3 distress injection), the per-consumer `prose_mode` slot from A6, and Reflect's `safety_signal` field — no primitive rebuilt (PR15). One question stated once and accepted (founder direction): an ADR addendum is NOT required for the four findings, so the spec is a free-standing `/drafts/` design doc.
+
+**Files touched:**
+- `drafts/2026-05-28-r20a-single-catch-contract.md` (NEW) — the design spec; cross-references the Accepted ADR.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-28-OPTION-A-session-1-verification-design-close.md` (NEW) — session close.
+
+**Risk classification:** **Standard** (`governance`) under 0d-ii. Documentation + design only; **no code / schema / env / deploy**. The Option A *implementation* remains **code-critical when built** (AC5 + PR6 + PR1, per endpoint) — NOT done here. AC7 not engaged. PR6 not engaged by this design step. PR12 honoured.
+
+**Rollback path:** Documentation-only. Revert the design doc + this entry + the session close if the direction is superseded. No production impact. Production `SUBSTRATE_R20A_GATE_ENABLED` remains UNSET in Vercel.
+
+**Verification step (founder-performable):**
+```
+cat "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/drafts/2026-05-28-r20a-single-catch-contract.md"
+```
+Expected: the design spec exists, opens with "Status: Drafted 2026-05-28", contains §§0–8, and cross-references `/adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md` as its authoritative parent. Confirm §5.1 names Calling first, then Reflect-content. Confirm §1 reproduces the four findings with diagnostic-certainty signals. **No live-system verification required this session** (no production change).
+
+**Open questions (PR7):** Carried forward from the design spec §7: (1) audience selector for plugin-internal calls — revisit at Stage 3 plugin-tools work; (2) `suggested_user_message` presence rule — revisit at the Layer-3 audience-rendering build session (§5.4); (3) does AC5 registry `/api/reflect` cover `/api/practice/reflect`? — revisit at §5.3 build session open; (4) retire internal `distress_signal` on Layer2Assessment once outward `safety_signal` carries the equivalent? — revisit at Session D close; (5) `caught_at` enum extension as new configurations wire — revisit per session.
+
+**Rules served:** R20a, R19, AC2, AC4, AC5, AC8, 0a, 0c, 0f, 0h, PR1, PR3, PR6, PR12, PR15, PR16.
+
+**Status:** **Adopted** (decision direction = design spec drafted; spec status Drafted / Under review). Implementation status: spec **Designed**; Calling-side catch **Scoped** (next session — Critical); Reflect-content catch **Scoped** (session after); Layer-3 audience rendering **Scoped**; config-level invocation tests **Scoped**. Cross-references: `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27` (the parent ADR adoption); `D-R20A-CONFIG-PERIMETER-OPTION-A-2026-05-27` (the elected direction); `D-C2-R20A-PERIMETER-DIAGNOSTIC-AND-HARNESS-2026-05-27` (the M-7 diagnostic); `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13` (the seed primitive); `/adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`; `/drafts/2026-05-28-r20a-single-catch-contract.md`; `/operations/handoffs/founder/2026-05-28-OPTION-A-session-1-verification-design-close.md`.
+
+---
