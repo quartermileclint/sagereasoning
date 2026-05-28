@@ -8076,3 +8076,125 @@ Confirm production state UNCHANGED (no Vercel touch this session):
 Cross-references: `D-R20A-SC1-SINGLE-CATCH-CONTRACT-DRAFTED-2026-05-28` (the design spec this session implements); `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27` (the parent ADR); `D-R20A-CONFIG-PERIMETER-OPTION-A-2026-05-27` (the elected direction); `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13` (the seed primitive reused here); `/drafts/2026-05-28-r20a-single-catch-contract.md` §§2, 3, 4, 5.2, 5.6; `/adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`; `/operations/handoffs/founder/2026-05-28-OPTION-A-session-2-calling-wired-close.md` (created at Step 7).
 
 ---
+
+## 2026-05-28 — D-R20A-OPTIONA-S3-REFLECT-WIRED-2026-05-28
+
+**Decision:** Session 3 of the Option A build arc (Critical, `code-critical`). Wired the Reflect-content R20a substrate-gate catch into `/api/practice/reflect`'s Case B (response-supplied / in-progress session) per `/drafts/2026-05-28-r20a-single-catch-contract.md` §5.3. Catch behind new env flag `SUBSTRATE_REFLECT_R20A_ENABLED` (default OFF; UNSET in Vercel at session close). `/api/practice/reflect` becomes the tenth route in the R20a perimeter under AC5's tenth-route protocol (Calling was ninth in S2). The session-2 `SUBSTRATE_GATE_ROUTES` registry extended from a string[] to a `{ route, flag }[]` shape so per-route flag names (`isCallingR20aEnabled`, `isReflectR20aEnabled`) are asserted per entry; the four session-2 `test.each` blocks now apply to both Calling and Reflect-content. **Option (ii) elected at founder approval item (vi):** a NEW route-level call to the existing `checkZone3Boundary` was added in Case B BEFORE the new content catch — closes a today's silent gap where developer-supplied `safety_signal.harm_flagged: true` / `acts_blocked[category='harm']` on answer turns were parsed but never read (the existing engine-internal Zone-3 only fires at session open). `zone3-boundary.ts` itself is UNCHANGED; only the call site is new. Production UNCHANGED.
+
+**Reasoning:** Per the Option A arc + the design spec §5.3: Reflect-content has a different shape than Calling — Reflect already has a `safety_signal` carrier at its developer-input boundary AND a deterministic Zone-3 boundary check that fires on developer-declared harm at session open. The new content-based catch runs ADDITIVELY on the agent's free-text `response` field at every answer turn that is gated by the per-route flag. PR1 single-endpoint proof discipline applied: Reflect-content is now proven; session 4 (Layer-3 audience rendering + `/api/reason` agent-API fix) opens against two proven non-substrate consumers. PR15 honoured throughout — A7 reused (the additive `overrideFlag: true` parameter from S2 reused; no new classifier introduced); canonical `SafetySignal` schema from S2 reused (no new schema invented); `checkZone3Boundary` and `zone3-boundary.ts` reused (no new harm-flag mechanism); the S2 Calling test pattern reused for the new tsx file; the S2 registry pattern reused for the tenth-route entry (with the SUBSTRATE_GATE_ROUTES shape extended to carry per-route flag names per RS-1's order assertion). PR3 (synchronous) honoured — the content catch is `await`-ed; Zone-3 is pure-sync. PR6 (safety-critical changes are Critical) honoured throughout. PR12 (verification before recommendation) honoured — the design-tension on order-at-the-route (Option (i) conservative vs Option (ii) closes-silent-gap) was surfaced in the CCP at item 2(e) + (vi); founder elected Option (ii); the RS-1 invocation test now protects the order from regression. PR16 honoured — strengthens Character Kernel positioning by demonstrating the substrate's perimeter is configuration-level across Calling AND Reflect-content, substrate-consultable via `/api/reason`'s existing A7 path.
+
+**Critical Change Protocol (0c-ii) — completed in-session before any code:**
+
+1. **What is changing.** Synchronous R20a distress catch added to `/api/practice/reflect`'s Case B handler, behind `SUBSTRATE_REFLECT_R20A_ENABLED` (default OFF). Reuses A7's `enforceLayer2R20aGate` via in-process call with `overrideFlag: true` (Reflect-content has its own flag check, independent of A7's flag AND of Calling's flag). On REDIRECT: developer-form payload (`buildReflectDistressRedirectResponse`, status='redirected') + canonical `safety_signal` emitted; six-question sequence halted; no metering on the loop. On PASS+mild: continue the sequence; `safety_signal { flow_terminated: false, severity: 'mild', ... }` attached additively to whichever of the four in-flow Reflect builders the engine produces (question / fabrication_test / supporting_question / complete). On PASS+none / BYPASSED: continue unchanged (no `safety_signal` field). Additionally — per Option (ii) — a new route-level `checkZone3Boundary` call runs BEFORE the content catch on Case B (answer turns); when engaged, `buildZone3Response` (status='flagged') returns without calling the classifier. Distinct from the substrate-gate redirect: Zone-3 is developer-declared harm, status='flagged'; substrate-gate is substrate-detected distress, status='redirected'.
+
+2. **What could break.** (a) **False-positive redirects mid-sequence** — mitigated by flag default OFF + same classifier (Haiku via A7) already validated for `/api/reason` + Calling. (b) **AC2 ~500ms added latency** per Reflect answer turn that carries free text when flag ON — accepted per AC2 budget. (c) **Additive `safety_signal` field** on outward in-flow response shapes — strict-validating consumers may reject; mitigated by "no current users" (build-arc cache) + additive-only posture. (d) **AC5 perimeter broadening to tenth route** (PR6 + AC5) — addressed by tenth-route protocol extending `SUBSTRATE_GATE_ROUTES` from string[] to `{ route, flag }[]` so per-route flag names are asserted. (e) **Interaction with the existing Zone-3 boundary** — addressed by Option (ii) election: developer-declared harm engages FIRST (cheap, pure-sync, no classifier); content catch engages SECOND only if Zone-3 does not engage. The existing zone3-boundary.ts code is unchanged; only the call site is new. The RS-1 invocation test protects the order from regression. **Note on behaviour change**: Option (ii) closes a today's silent gap — developer-supplied `safety_signal.harm_flagged: true` on an *answer* turn was previously parsed and dropped (engine ignored it); it now engages Zone-3 at the route. This is a known intentional behaviour change disclosed in CCP item (vi) and approved by the founder. (f) **Mis-placed catch invocation** — addressed by placing the catch in Case B only, before `answerReflection`, never on session-open calls (where there is no `response` text). (g) **Test-harness ergonomics** — addressed by designing the new test as a pure piece-test (no route-handler import; no Supabase chain) — runs with plain `npx tsx`.
+
+3. **What happens to existing sessions.** **N/A** per `/adopted/build-sessions-protocol-cache.md` "no current users" (founder + test logins only). Production flag UNSET at session close; new code path invisible to any traffic.
+
+4. **Rollback plan.** Primary (operational): unset `SUBSTRATE_REFLECT_R20A_ENABLED` in Vercel + redeploy (~30s). No action needed at session close — flag stays UNSET. Secondary (code): `git revert <commit-sha>` on `main` + push via GitHub Desktop. Exact commands in the session close. The existing Zone-3 boundary code (`zone3-boundary.ts`) is unchanged regardless of rollback — rollback removes the new route-level call site but leaves the engine-internal Zone-3 path on session open intact. The additive `safetySignal?` parameters on Reflect's existing in-flow builders are functionally inert when undefined — reverting removes them without affecting existing call sites.
+
+5. **Verification step.** AC4 functional + invocation test at `website/src/app/api/practice/reflect/__tests__/r20a-invocation.test.ts` (55 assertions across INV-0–6 invocation tests + VH-1–4 verdict-handling + FT-1–4 flag tests + DC-1–2 decoupling tests + RB-1–4 response-builder shape tests + RS-1–2 Reflect-specific order + Zone-3 boundary tests). Plus `npx tsc --noEmit` whole-project. Plus the extended Jest registry test (executes when F-series Jest-config debt is paid; structurally correct today). **Diagnostic-certain — root cause identified** on the substantive verification; **Diagnostic-uncertain — pattern level** on Jest registry execution (pre-existing F-series infrastructure issue carried forward from S2).
+
+6. **Explicit founder approval.** Obtained in-session for: (i) flag default OFF; (ii) AC2 ~500ms latency accepted; (iii) production `SUBSTRATE_REFLECT_R20A_ENABLED` stays UNSET; (iv) AC5 tenth-route protocol posture (second entry in `SUBSTRATE_GATE_ROUTES`); (v) canonical `SafetySignal` schema (S2) as the carrier re-affirmed; (vi) **Option (ii) on the Zone-3 interaction**: add a route-level `checkZone3Boundary` call on Case B before the content catch; closes a today's silent gap; existing zone3-boundary.ts unchanged; RS-1 test protects the order; (vii) mocked-classifier posture for the functional test (consistent with S2 + A7's pattern).
+
+**Files touched:**
+- `website/src/lib/substrate/r20a-gate.ts` — added `isReflectR20aEnabled()` mirroring `isCallingR20aEnabled()` from S2; reads `process.env.SUBSTRATE_REFLECT_R20A_ENABLED === 'true'`. No other changes; existing S2 additions (overrideFlag, SafetySignal types) reused as-is.
+- `website/src/app/api/practice/reflect/response-builders.ts` — imported `SafetySignal` type from `@/lib/substrate/r20a-gate`; added optional `safetySignal?: SafetySignal` parameter to `buildQuestionResponse`, `buildFabricationTestResponse`, `buildSupportingQuestionResponse`, `buildCompleteResponse` (additive field on each response body when supplied; absent when undefined); added new `buildReflectDistressRedirectResponse(session_id, severity, suggested_user_message, safetySignal, loopHeaders?)` (developer-form payload per design §3.1; placeholder `developer_note` distinct from the Zone-3 developer note — A6 formalises wording).
+- `website/src/app/api/practice/reflect/route.ts` — imported `enforceLayer2R20aGate`, `isReflectR20aEnabled`, `SafetySignal` from `@/lib/substrate/r20a-gate`; imported `checkZone3Boundary` from `@/lib/sage-reflect/zone3-boundary`; imported `buildReflectDistressRedirectResponse` from `./response-builders`. Wired the catch into Case B (response supplied, in-progress session): Step 1 calls `checkZone3Boundary({ safety_signal, acts_blocked })` — returns `buildZone3Response` if engaged (status='flagged'); Step 2 (only if Zone-3 did not engage AND flag is on) calls `enforceLayer2R20aGate({ text: response, sessionId, overrideFlag: true })` — on REDIRECT returns `buildReflectDistressRedirectResponse` (status='redirected'); on PASS+mild captures `mildSafetySignal` and threads it through `respond()` into the in-flow builders; on PASS+none / BYPASSED falls through unchanged. Updated `respond()` to take an optional `mildSafetySignal?: SafetySignal` parameter passed to the four in-flow builders (Zone-3 response and error responses do not carry the substrate signal — it is a different mechanism).
+- `website/src/lib/__tests__/r20a-invocation-guard.test.ts` — replaced `SUBSTRATE_GATE_ROUTES = string[]` with `{ route, flag }[]` shape; added `/api/practice/reflect` as second entry with `isReflectR20aEnabled` flag; replaced the singular `REQUIRED_SUBSTRATE_GATE_FLAG` constant with per-entry `flag` field; updated the four substrate-gate `test.each` blocks to use the object shape (`$route` / `$flag` template tokens; destructure `({ route, flag })`); updated the count assertion (`>= 2`); updated the comment header to document the two-registry posture (8 route-level + 2 substrate-gate = 10 routes in the perimeter overall).
+- `website/src/app/api/practice/reflect/__tests__/r20a-invocation.test.ts` (NEW) — 55-assertion tsx plain-assertion test file mirroring S2's Calling test pattern; covers INV-0–6, VH-1–4, FT-1–4, DC-1–2, RB-1–4, RS-1–2.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-28-OPTION-A-session-3-reflect-wired-close.md` (NEW; created at Step 7) — session close.
+
+**Risk classification (0d-ii):** **Critical** under PR6 + AC5 (R20a perimeter tenth-route broadening; safety-critical function wiring on a new route). The catch is gated entirely behind `SUBSTRATE_REFLECT_R20A_ENABLED` (default OFF; UNSET in Vercel); the new code path is invisible in production at session close. Sub-changes: (a) catch wiring — Critical; full CCP applied. (b) route-level `checkZone3Boundary` call (Option (ii)) — Critical (changes behaviour of developer-supplied `safety_signal` on answer turns; was silently dropped, now engages). (c) `isReflectR20aEnabled` addition to `r20a-gate.ts` — Standard (additive function; no behaviour change to existing exports). (d) `SafetySignal` parameter additions to Reflect's existing response builders — Standard (additive parameters; functionally inert when undefined). (e) New `buildReflectDistressRedirectResponse` builder — Standard (purely additive). (f) Registry test extension (string[] → object[] refactor + tenth-route entry) — Standard (test scaffolding only; never deployed). AC7 not engaged (no auth/cookie/session/redirect change). KG1 not engaged for the catch path (no DB writes; the existing metering path is unchanged). PR17 not engaged (no founder-performed operational step required between sessions beyond the commit + verification commands below).
+
+**AC4 invocation-testing record (Critical-tier requirement):**
+
+```
+$ cd website && npx tsx src/app/api/practice/reflect/__tests__/r20a-invocation.test.ts
+--- r20a-invocation.test.ts (Reflect-content R20a catch) ---
+PASS — INV-0 route.ts exists at .../api/practice/reflect/route.ts
+PASS — INV-1 route.ts imports enforceLayer2R20aGate from substrate/r20a-gate
+PASS — INV-2 route.ts imports isReflectR20aEnabled from substrate/r20a-gate
+PASS — INV-3 route.ts imports buildReflectDistressRedirectResponse
+PASS — INV-4 route.ts body awaits enforceLayer2R20aGate (PR3 — synchronous safety)
+PASS — INV-5 route.ts body calls isReflectR20aEnabled() (flag check, not just import)
+PASS — INV-6 route.ts imports checkZone3Boundary from sage-reflect/zone3-boundary
+... [VH-1..4, FT-1..4, DC-1..2, RB-1..4, RS-1..2 all PASS] ...
+PASS — RS-1c checkZone3Boundary call appears BEFORE await enforceLayer2R20aGate call (Zone-3 first, content catch second per design §5.3)
+---
+55/55 pass | 0/55 fail
+EXIT 0
+
+$ npx tsc --noEmit
+[no output; whole-project type-check]
+EXIT 0
+
+$ npx jest src/lib/__tests__/r20a-invocation-guard.test.ts --no-coverage
+[pre-existing F-series Jest-config debt carried forward from S2 (AC12). The
+ string[] → { route, flag }[] refactor of SUBSTRATE_GATE_ROUTES + the tenth-
+ route entry are structurally correct; execution awaits F-series remediation.
+ Substantive AC4 invocation coverage for /api/practice/reflect is satisfied
+ by the tsx test above.]
+```
+
+Diagnostic-certainty signals (PR10):
+- **Diagnostic-certain — root cause identified** for the Reflect-content substantive work: tsx 55/55, tsc EXIT 0, all wiring + verdict + builder shapes + order assertion verified.
+- **Diagnostic-uncertain — pattern level** for the Jest registry execution: pre-existing F-series stewardship issue (carried forward from S2; AC12 references this). NOT a session-3 regression.
+
+**PR5 — Knowledge-Gap Carry-Forward:** 0 concepts re-explained this session. No KGs from the existing register engaged (KG1 not engaged because the catch path has no DB writes; KG2 implicit via PR4 model selection — Haiku via A7's classifier, no new selection decision; KG3–KG7 N/A). **PR5 candidate observation status:** the design-spec-vs-implementation flag-coupling tension candidate (1st recurrence in S2) did NOT recur in S3 — Reflect-content's `isReflectR20aEnabled` was added cleanly with the established `overrideFlag` pattern, no new tension surfaced. The candidate remains at 1st recurrence per PR5 promotion rules; logged in `operations/knowledge-gaps.md` at session close as a candidate (not yet promoted to permanent entry). **One new pattern observation (candidate, 1st recurrence) introduced THIS session:** "design-spec wording at the route ('X first, Y second') may admit conservative-vs-closes-silent-gap interpretations that only surface when the catch is wired onto an endpoint with an existing harm-signal carrier" — the Option (i) vs Option (ii) tension on the Zone-3 boundary order. Promotion to PR5 entry awaits second recurrence in a future session.
+
+**Rollback path:** Per CCP Step 4. Operational rollback: unset `SUBSTRATE_REFLECT_R20A_ENABLED` in Vercel + redeploy (~30s). Required for rollback only if the flag is ever flipped ON in production. At session close, flag UNSET in Vercel; no rollback action needed for the change to be inert. Code rollback: `git revert <commit-sha> && git push` via GitHub Desktop. The new route-level `checkZone3Boundary` call site (Option (ii)) is added in the same commit; reverting removes it too (returning answer-turn `safety_signal` to its previous silently-dropped state). Existing zone3-boundary.ts behaviour is unchanged regardless.
+
+**Verification step (founder-performable):**
+
+Confirm the new test passes:
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/app/api/practice/reflect/__tests__/r20a-invocation.test.ts
+```
+Expected: `55/55 pass | 0/55 fail`; EXIT 0. Five A7 span-emit log lines from reused-gate path are expected and harmless. One `[stripe.ts] STRIPE_SECRET_KEY is not set...` line is expected and harmless (Stripe is imported transitively but never called by the test).
+
+Confirm the whole-project type-check:
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsc --noEmit
+```
+Expected: no output; EXIT 0.
+
+Confirm the S2 Calling test still passes (regression check):
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/app/api/calling/__tests__/r20a-invocation.test.ts
+```
+Expected: `44/44 pass | 0/44 fail`; EXIT 0.
+
+Confirm production state UNCHANGED (no Vercel touch this session):
+- `SUBSTRATE_REFLECT_R20A_ENABLED` — UNSET in Vercel (this flag is new; no Vercel action this session)
+- `SUBSTRATE_CALLING_R20A_ENABLED` — UNSET in Vercel (unchanged from S2 close)
+- `SUBSTRATE_R20A_GATE_ENABLED` — UNSET in Vercel (unchanged)
+- `/api/reason` behaviour — byte-identical (parallel-run.ts unchanged)
+- `/api/substrate/layer3` — 503 (unchanged)
+
+**Open questions (PR7):**
+- **Functional-test live-Haiku coverage.** The new tsx test exercises verdict-handling via reused-gate (no live classifier call). The "fresh classifier call" path (production behaviour when flag ON) is verified indirectly by A7's existing tests + r20a-classifier-eval.ts. Revisit at the C2 live run (post-Option-A) when end-to-end Haiku coverage on Reflect-content is exercised.
+- **Mild-signal threading onto Sage Assent feed (Seam 4).** Design spec §5.3 names this as the eventual target — Reflect's exit routing should carry the canonical `safety_signal` so downstream Sage Assent sees the mild signal. Out of PR1 single-endpoint scope here. Revisit at session 4 (Layer-3 audience rendering) when the audience contract is wired end-to-end.
+- **A6 — `developer_note` + `suggested_user_message` formalisation for Reflect.** The new `buildReflectDistressRedirectResponse` uses placeholder text distinct from `buildCallingDistressRedirectResponse`'s placeholder. A6 formalises both via the two new `prose_mode` keys (`r20a_developer_note`, `r20a_suggested_user_message`). Revisit at A6 session (sequencing TBD; likely after session 4).
+- **F-series Jest-config debt.** The extended `r20a-invocation-guard.test.ts` structural edits are correct but cannot execute under current Jest config (pre-existing; carried forward from S2). When F-series remediation runs (AC12 references this), the substrate-gate registry assertions activate automatically for both Calling and Reflect-content. Revisit at F-series stewardship session.
+- **A.4 cross-seam propagation end-to-end test on Reflect's Sage Assent feed (Seam 4).** Currently the Reflect-side `safety_signal` carrier rides on the outward response shapes. The end-to-end propagation (Reflect → Sage Assent → no double-emit) is not yet tested across the seam. Revisit at session 5 (configuration-level invocation tests).
+- **Option (ii) interaction with engine-internal Zone-3 at session open.** The route-level Zone-3 call this session adds applies to Case B (answer turns). The engine-internal Zone-3 inside `openReflection` still fires at session open with the same inputs. There is no double-fire because the two are at different lifecycle points (open vs answer); a developer who supplies `safety_signal` on session open AND every subsequent answer turn would see Zone-3 engage at both — by design (each turn is independently inspected). Documented here for forensic clarity; no further action required.
+
+**Carried-forward backlog (so nothing is forgotten):** Session 4 (Layer-3 audience rendering + `/api/reason` agent-API human-framed-message fix — Critical); Session 5 (configuration-level invocation tests across L1–L7 — extends AC4 to per-flow); C2 live run rescoped (post-Option-A; PR17 live walkthrough); Session 3 value-evidence rig (post-C2-live; name-collision noted — value-evidence rig is the FUTURE session-3-equivalent in the post-Option-A sequence); M-7 severities + audit note at founder's convenience (Reflect-content row now closes from "documented gap" to "remediated via Option A"); A7 production activation (separate future Critical); F-series Jest-config debt remediation; A6 placeholder formalisation.
+
+**Rules served:** R20a, R19, R19c (placeholder honestly named), AC1, AC2 (~500ms accepted), AC4 (functional + invocation), AC5 (tenth-route protocol; `SUBSTRATE_GATE_ROUTES` shape refactored to per-route flag), AC8 (substrate-gate at translation-sandwich boundary), AC11 (A7's existing span emit covers the new path), AC12 (Jest-config debt acknowledged in verification record), 0a, 0c, 0c-ii (CCP completed), 0d-ii (Critical classification), 0f, 0h, PR1 (single-endpoint proof on /api/practice/reflect), PR3 (synchronous; awaited), PR6 (Critical regardless of scope), PR10 (PEV loop with diagnostic-certainty signalling), PR12 (verification before recommendation; design tension surfaced in CCP item 2(e) + (vi)), PR15 (A7 reused; SafetySignal carrier reused; Zone-3 boundary reused; test patterns reused; registry pattern reused — no primitive rebuilt), PR16 (positioning + dogfood — Character Kernel positioning strengthened across two non-substrate consumers).
+
+**Status:** **Adopted.** Implementation status:
+- Reflect-content R20a catch (`/api/practice/reflect` Case B) — **Wired**, **Verified** at the substantive level (Diagnostic-certain on the 55/55 tsx test + tsc; Diagnostic-uncertain — pattern level on Jest registry execution, F-series infrastructure issue carried forward).
+- `SUBSTRATE_REFLECT_R20A_ENABLED` env flag — **Scaffolded** (default OFF; UNSET in Vercel; created in `r20a-gate.ts`).
+- Route-level `checkZone3Boundary` call (Option (ii)) — **Wired**, **Verified** (closes today's silent gap on developer-supplied `safety_signal` on answer turns; RS-1 test protects the order).
+- `buildReflectDistressRedirectResponse` + additive `safetySignal?` parameters on Reflect's four in-flow builders — **Wired**, **Verified**.
+- AC5 registry — **Wired** structurally (SUBSTRATE_GATE_ROUTES extended to `{ route, flag }[]`; two entries: Calling + Reflect-content; ten routes in the R20a perimeter overall); execution gated on F-series Jest-config remediation (carried forward from S2).
+
+Cross-references: `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28` (the PR15 model for this session's pattern); `D-R20A-SC1-SINGLE-CATCH-CONTRACT-DRAFTED-2026-05-28` (the design spec this session implements); `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27` (the parent ADR); `D-R20A-CONFIG-PERIMETER-OPTION-A-2026-05-27` (the elected direction); `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13` (the seed primitive); `/drafts/2026-05-28-r20a-single-catch-contract.md` §§3, 4, 5.3, 5.6, 6; `/adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`; `/operations/handoffs/founder/2026-05-28-OPTION-A-session-3-reflect-wired-close.md` (created at Step 7).
+
+---

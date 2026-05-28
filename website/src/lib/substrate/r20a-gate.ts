@@ -269,6 +269,37 @@ export function isCallingR20aEnabled(): boolean {
 }
 
 // ============================================================================
+// OPTION-A SUBSTRATE-GATE FLAG — SUBSTRATE_REFLECT_R20A_ENABLED
+//
+// Added 2026-05-28 under the Option A build arc, Session 3 (Reflect-content
+// wiring). Per /drafts/2026-05-28-r20a-single-catch-contract.md §5.3.
+//
+// Mirrors isCallingR20aEnabled's posture: defaults to OFF; checked at every
+// Reflect-content answer turn before invoking enforceLayer2R20aGate. When OFF,
+// /api/practice/reflect's Case B path is byte-identical to pre-Option-A
+// behaviour; no classifier call, no added latency, no wire-shape change.
+//
+// Production state: SUBSTRATE_REFLECT_R20A_ENABLED UNSET in Vercel at session
+// close. Flag remains OFF in production until a separate Critical activation
+// session decides otherwise. The flag is independent of
+// SUBSTRATE_R20A_GATE_ENABLED (A7) AND of SUBSTRATE_CALLING_R20A_ENABLED
+// (Calling) — Reflect-content can be turned on without affecting the other
+// two surfaces, and vice versa. Per design spec §5.6.
+//
+// AC5 perimeter: /api/practice/reflect joins the perimeter as the tenth route
+// under the substrate-gate pattern. Registry: r20a-invocation-guard.test.ts
+// SUBSTRATE_GATE_ROUTES (second entry; Calling is the first).
+//
+// Rules served: R20a, AC2 (~500ms latency budget accepted), AC5 (tenth-route
+// protocol), PR1 (single-endpoint proof on Reflect-content), PR15 (reuses A7
+// + the SafetySignal carrier — no new classifier; no new schema).
+// ============================================================================
+
+export function isReflectR20aEnabled(): boolean {
+  return process.env.SUBSTRATE_REFLECT_R20A_ENABLED === 'true'
+}
+
+// ============================================================================
 // CANONICAL SafetySignal SCHEMA (cross-seam propagation carrier)
 //
 // Added 2026-05-28 per design spec §4.2. The carrier name `safety_signal`

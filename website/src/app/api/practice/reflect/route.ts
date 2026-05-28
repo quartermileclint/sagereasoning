@@ -70,6 +70,7 @@ import {
   buildSupportingQuestionResponse,
   buildCompleteResponse,
   buildZone3Response,
+  buildReflectDistressRedirectResponse,
   buildReflectFlagDisabledResponse,
   buildReflectUnauthorizedResponse,
   buildReflectBadRequestResponse,
@@ -78,6 +79,23 @@ import {
   buildReflectServerErrorResponse,
   REFLECT_RESPONSE_HEADERS,
 } from './response-builders'
+
+// Option A build arc, Session 3 (2026-05-28) — substrate-gate R20a catch on
+// /api/practice/reflect. Per /drafts/2026-05-28-r20a-single-catch-contract.md
+// §5.3. Imports MUST appear at the top of the file even before they are used
+// in the handler body, so the AC5 tenth-route registry assertion (substrate-
+// gate pattern in r20a-invocation-guard.test.ts) can grep them out of the
+// source.
+import {
+  enforceLayer2R20aGate,
+  isReflectR20aEnabled,
+  type SafetySignal,
+} from '@/lib/substrate/r20a-gate'
+
+// The existing developer-declared harm boundary. Code unchanged; this session
+// adds a new ROUTE-LEVEL call site (Option (ii) — closes a today's silent
+// gap where safety_signal on answer turns was parsed but never read).
+import { checkZone3Boundary } from '@/lib/sage-reflect/zone3-boundary'
 
 /** Metering surface — same Option-D surface as Sage Calling (wrapper-internal). */
 const REFLECT_METERING_SURFACE = 'wrapper_internal' as const
@@ -198,7 +216,11 @@ function makeMeter(loopId: string, apiKeyId: string, agentId: string): MeterFn {
 // SERVICE RESULT → HTTP
 // ============================================================================
 
-function respond(session_id: string, result: ServiceResult): NextResponse {
+function respond(
+  session_id: string,
+  result: ServiceResult,
+  mildSafetySignal?: SafetySignal,
+): NextResponse {
   if (!result.ok) {
     if (result.code === 'not_found') return buildReflectNotFoundResponse()
     if (result.code === 'conflict') return buildReflectConflictResponse('This reflection session has no pending question to answer.')
@@ -209,15 +231,21 @@ function respond(session_id: string, result: ServiceResult): NextResponse {
     return buildReflectServerErrorResponse()
   }
   const { decision, loop_headers } = result.value
+  // Option A: when the substrate-gate caught mild distress on the inbound
+  // response, mildSafetySignal rides additively on the four in-flow builders
+  // (question / fabrication_test / supporting_question / complete). Zone-3
+  // is a different mechanism (developer-declared harm; carries its own
+  // status='flagged' shape) — it does NOT carry the substrate-emitted
+  // safety_signal field, by design.
   switch (decision.kind) {
     case 'question':
-      return buildQuestionResponse(session_id, decision.question, decision.text, decision.subquestions, decision.mandatory_subquestions, loop_headers)
+      return buildQuestionResponse(session_id, decision.question, decision.text, decision.subquestions, decision.mandatory_subquestions, loop_headers, mildSafetySignal)
     case 'fabrication_test':
-      return buildFabricationTestResponse(session_id, decision.text, loop_headers)
+      return buildFabricationTestResponse(session_id, decision.text, loop_headers, mildSafetySignal)
     case 'supporting_question':
-      return buildSupportingQuestionResponse(session_id, decision.ladder_index, decision.text, loop_headers)
+      return buildSupportingQuestionResponse(session_id, decision.ladder_index, decision.text, loop_headers, mildSafetySignal)
     case 'complete':
-      return buildCompleteResponse(session_id, decision, loop_headers)
+      return buildCompleteResponse(session_id, decision, loop_headers, mildSafetySignal)
     case 'zone3_blocked':
       return buildZone3Response(session_id, decision.developer_note, loop_headers)
   }
@@ -283,9 +311,146 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return respond(session_id, { ok: true, value: { decision: peek.decision, billable_cost_cents: 0, loop_headers: {} } })
     }
 
-    // ----- Response supplied: advance the sequence -----
+    // ------------------------------------------------------------------
+    // RESPONSE SUPPLIED — advance the sequence
+    //
+    // OPTION A R20a substrate-gate catch (Session 3, 2026-05-28).
+    // Per /drafts/2026-05-28-r20a-single-catch-contract.md §5.3.
+    //
+    // The catch runs BEFORE answerReflection so REDIRECT short-circuits
+    // the engine entirely (no metering, no persist; the substrate's R20a
+    // Haiku cost is tracked separately via the existing r20a-cost-tracker).
+    //
+    // ORDER AT THE ROUTE (per founder approval item (vi), 2026-05-28; the
+    // RS-1 invocation test asserts this order):
+    //
+    //   1. Existing Zone-3 boundary FIRST — engages on developer-declared
+    //      harm (safety_signal.harm_flagged: true OR an acts_blocked entry
+    //      with category: 'harm'). Today this signal is parsed on every
+    //      turn but silently dropped on answer turns (Option (i) — engine-
+    //      internal Zone-3 only fires at session open). Option (ii) closes
+    //      that gap by calling checkZone3Boundary at the route. If engaged:
+    //      buildZone3Response, status='flagged'. The existing zone3-boundary.ts
+    //      code is UNCHANGED; only the call site is new.
+    //
+    //   2. New content-based catch SECOND — runs ONLY if Zone-3 did not
+    //      engage AND the per-route flag SUBSTRATE_REFLECT_R20A_ENABLED is
+    //      set. The catch inspects the agent's free-text `response` via
+    //      A7's enforceLayer2R20aGate (with overrideFlag: true — Reflect-
+    //      content has its own flag check, independent of A7's flag per
+    //      design spec §5.6).
+    //
+    //   On REDIRECT (moderate/acute): buildReflectDistressRedirectResponse,
+    //   status='redirected'; no metering, no persist. Distinct from Zone-3
+    //   (which is status='flagged' and carries the developer-declared-harm
+    //   shape).
+    //
+    //   On PASS+mild (distress_signal=true): continue normal flow; capture
+    //   the canonical safety_signal { flow_terminated: false, severity:
+    //   'mild', ... } for additive attachment to whichever response the
+    //   engine produces below (question / fabrication_test / supporting /
+    //   complete). The mild signal does NOT halt the six-question sequence.
+    //
+    //   On PASS+none / BYPASSED: no safety_signal field; wire shape unchanged.
+    //
+    // PR3 (synchronous safety): both checks are awaited / pure-sync (Zone-3
+    //   is pure); no fire-and-forget. PR15 (reuse, don't rebuild): A7's
+    //   enforceLayer2R20aGate is the seed; checkZone3Boundary is the existing
+    //   primitive — no new classifier, no new schema.
+    //
+    // Rules served: R20a (vulnerable user detection); AC2 (~500ms classifier
+    //   accepted); AC4 (invocation-tested); AC5 (tenth-route protocol);
+    //   AC8 (substrate-gate at translation-sandwich boundary); PR1 (single-
+    //   endpoint proof); PR3 (synchronous); PR6 (Critical change); PR15 (A7
+    //   reuse + Zone-3 reuse — no primitive rebuilt).
+    // ------------------------------------------------------------------
+
+    // Step 1: existing Zone-3 boundary check — at the route, on answer turns.
+    // Code-path unchanged in zone3-boundary.ts; only the call site is new.
+    const zone3 = checkZone3Boundary({ safety_signal, acts_blocked })
+    if (zone3.engaged) {
+      // Zone-3 engaged. The developer-declared harm signal takes precedence
+      // over substrate content classification. Do NOT call the classifier.
+      // Do NOT meter (no engine work, no persist).
+      console.log(
+        JSON.stringify({
+          kind: 'sage_reflect_zone3_route_engaged',
+          session_id,
+          reason: zone3.reason,
+        }),
+      )
+      // developer_note is guaranteed non-null when engaged === true (see zone3-boundary.ts).
+      return buildZone3Response(session_id, zone3.developer_note ?? '')
+    }
+
+    // Step 2: new content-based catch — runs only if Zone-3 did not engage
+    // AND the per-route flag is on.
+    let mildSafetySignal: SafetySignal | undefined
+    if (isReflectR20aEnabled()) {
+      // overrideFlag: true — Reflect-content has its own flag check
+      // (isReflectR20aEnabled, above) and is independent of A7's
+      // SUBSTRATE_R20A_GATE_ENABLED flag per design spec §5.6.
+      const gateOutput = await enforceLayer2R20aGate({
+        text: response,
+        sessionId: session_id,
+        overrideFlag: true,
+      })
+
+      if (gateOutput.decision === 'REDIRECT') {
+        const severity =
+          gateOutput.severity === 'acute' || gateOutput.severity === 'moderate'
+            ? gateOutput.severity
+            : 'moderate' // defensive — REDIRECT should only emit at moderate/acute
+        const safetySignal: SafetySignal = {
+          flow_terminated: true,
+          cause: 'distress',
+          severity,
+          caught_at: 'substrate_layer2',
+        }
+        // Log the catch for audit + observability (mirrors A7's span emit).
+        console.log(
+          JSON.stringify({
+            kind: 'sage_reflect_r20a_redirect',
+            session_id,
+            severity,
+            span_id: gateOutput.span_id,
+            source: gateOutput.source,
+          }),
+        )
+        // Emit the developer-form payload + safety_signal. No metering.
+        return buildReflectDistressRedirectResponse(
+          session_id,
+          severity,
+          gateOutput.redirect_message ?? '',
+          safetySignal,
+        )
+      }
+
+      if (gateOutput.decision === 'PASS' && gateOutput.distress_signal) {
+        // Mild distress detected; the six-question sequence continues but the
+        // signal rides on the outward response shape (additive field).
+        mildSafetySignal = {
+          flow_terminated: false,
+          cause: 'distress',
+          severity: 'mild',
+          caught_at: 'substrate_layer2',
+        }
+        console.log(
+          JSON.stringify({
+            kind: 'sage_reflect_r20a_mild_signal',
+            session_id,
+            span_id: gateOutput.span_id,
+            source: gateOutput.source,
+          }),
+        )
+      }
+      // PASS + no distress_signal (severity 'none') OR BYPASSED → fall
+      // through; mildSafetySignal remains undefined; wire shape unchanged.
+    }
+
+    // ----- Advance the sequence (engine work; metering; persist) -----
     const result = await answerReflection(session_id, response, undefined, meter)
-    return respond(session_id, result)
+    return respond(session_id, result, mildSafetySignal)
   } catch (err) {
     console.error('[api/practice/reflect] unexpected error:', err)
     return buildReflectServerErrorResponse()
