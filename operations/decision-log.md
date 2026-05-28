@@ -8198,3 +8198,175 @@ Confirm production state UNCHANGED (no Vercel touch this session):
 Cross-references: `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28` (the PR15 model for this session's pattern); `D-R20A-SC1-SINGLE-CATCH-CONTRACT-DRAFTED-2026-05-28` (the design spec this session implements); `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27` (the parent ADR); `D-R20A-CONFIG-PERIMETER-OPTION-A-2026-05-27` (the elected direction); `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13` (the seed primitive); `/drafts/2026-05-28-r20a-single-catch-contract.md` §§3, 4, 5.3, 5.6, 6; `/adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`; `/operations/handoffs/founder/2026-05-28-OPTION-A-session-3-reflect-wired-close.md` (created at Step 7).
 
 ---
+
+## 2026-05-28 — D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28
+
+**Decision:** Layer-3 audience-rendering helper + `ConsumerContext.audience` + two new `prose_mode` keys + `/api/reason` agent-API Finding-2 fix + Calling/Reflect builder thin-wrapper refactor — all **Wired**, all **Verified at the substantive level** (165/165 assertions across three tsx tests + `tsc --noEmit` EXIT 0). Production state at session close: **UNCHANGED** — new flag `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED` UNSET in Vercel (default OFF); all three existing R20a flags remain UNSET. `/api/reason` byte-identical to pre-S4 for all caller types until a future Critical activation session flips the new flag.
+
+**Critical Change Protocol (0c-ii) — full responses drafted visibly in chat at Step 1 of the session; founder approved all eight named items before any code was touched:**
+
+1. **What is changing.** (a) Add audience-correct render helper at `/website/src/lib/substrate/r20a-audience-renderer.ts` (single source of truth for the agent-developer wire shape; takes `R20aGateOutput`-equivalent inputs + an `audience`, returns the right payload). (b) Add `audience?: 'human_user' | 'agent_developer'` field to `ConsumerContext` in `layer3-service.ts` (forward-compat scaffold for Layer-3-calling consumers). (c) Define `R20A_DEVELOPER_NOTE_DEFAULT` formalised prose-mode key (replaces both retired per-surface placeholders). (d) Derive `r20aAudience` in `/api/reason/route.ts` from `auth.user?.id` (truthy → `human_user`; falsy → `agent_developer`). (e) Fix both `/api/reason` redirect branches (route-guard ~line 626; Branch 1.7 ~line 854) — both now call the render helper. (f) Gate the `/api/reason` agent_developer branch behind `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED` (default OFF — `audience` falls back to `'human_user'` when flag is unset). (g) Refactor `buildCallingDistressRedirectResponse` + `buildReflectDistressRedirectResponse` to thin wrappers over the helper; retire `CALLING_R20A_DEVELOPER_NOTE_PLACEHOLDER` + `REFLECT_R20A_DEVELOPER_NOTE_PLACEHOLDER`.
+
+2. **What could break.** (a) `/api/reason` regression on the web path if the audience determination is wrong — mitigated by clean `auth.user?.id` determinant + flag default OFF + AR-1..AR-10 audience-routing tests. (b) Calling + Reflect wire-shape regression — mitigated by RB-Calling-1..12 and RB-Reflect-1..12 structural assertions on the refactored builders. (c) Prose-mode key namespace — the two new R20a keys live as standalone exports (`R20A_DEVELOPER_NOTE_DEFAULT` in the renderer; `r20a_suggested_user_message` is runtime-derived from `gateOutput.redirect_message` per design §3.5), not in the existing `ProseMode` enum which routes prose-generation modes. Resolved at Step 2. (d) AC11 OpenTelemetry coverage — A7's existing span emit on the catch covers the audit trail; the helper is pure-sync and inherits no new span. (e) Future production activation — when the new flag is flipped ON, agent-API callers of `/api/reason` will start receiving a structurally different response body; strict-validating consumers may reject. Mitigated by "no current users" per build-arc cache; activation deferred to a separate future Critical session. (f) Byte-identical regression on Calling + Reflect — the developer_note text DOES change from per-surface placeholder to formalised `R20A_DEVELOPER_NOTE_DEFAULT`; structurally identical otherwise. **Unexpected positive observation at Step 5:** the S2 + S3 `RB-1f` assertions check developer_note via `length > 0` (presence + non-empty), NOT exact text — so they passed unchanged. The byte-identical concern was over-cautious; no test updates were needed for the regression checks. (g) A6 wording quality — founder reviewed and approved the drafted wording in chat before code-write (Step 2 wording surface).
+
+3. **What happens to existing sessions.** **N/A** per `/adopted/build-sessions-protocol-cache.md` "no current users." Only founder + known test logins exist.
+
+4. **Rollback plan.** **Activation rollback (future, if applicable):** set `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED=false` in Vercel + redeploy (~30s); `/api/reason` agent-API returns to today's (buggy) human-framed message immediately. **Code-level rollback:** revert the commit and push (founder verification block below has the exact stage-by-name command). The new helper module is additive; reverting removes it. The Calling + Reflect refactor is internal; reverting restores the two placeholder constants and the byte-identical-to-S2/S3 wire shape. The new `ConsumerContext.audience` field is additive + optional; removing it does not break existing callers (no current call sites use it). The new flag is independent of A7, Calling, and Reflect flags — four independent activations per design §5.6.
+
+5. **Verification step.** AC4 invocation + functional test at `/website/src/app/api/reason/__tests__/r20a-audience-rendering.test.ts` (66 assertions; PR15 model mirroring S2 + S3 tsx pattern). Coverage groups: INV-0..INV-7 (file-grep over `/api/reason/route.ts` for helper imports + call sites + audience derivation + exactly-two-call-sites count); PR-1..PR-3 (R20A_DEVELOPER_NOTE_DEFAULT presence + non-empty + contains key audience-contract phrases); FT-1..FT-5 (flag semantics; case-strict — only literal lowercase `'true'`); AR-1..AR-10 (audience-routing — human_user emits redirect_message-only shape; agent_developer emits developer-form payload with `safety_signal` when supplied); RB-Calling-1..12 + RB-Reflect-1..12 (refactor regression on both builders; structural identity + new formalised `developer_note` text + surface-specific `interaction_type` preserved); SH-1 (single source of truth — Calling.developer_note === Reflect.developer_note). Regression checks: re-ran S2 Calling test (44/44 PASS — no updates required) and S3 Reflect test (55/55 PASS — no updates required). Whole-project type-check `npx tsc --noEmit` EXIT 0.
+
+6. **Founder approval (eight items).** All eight items in CCP item 6 of Step 1 received "OK" via the founder's blanket "ok" reply. The eight items were: (i) render helper in new sibling file `r20a-audience-renderer.ts`; (ii) flag default OFF + name `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED` + UNSET in Vercel at close; (iii) `/api/reason` audience determinant = `auth.user?.id`; (iv) audience assignment per surface (initial set); (v) A6 wording posture Option (a) — initial wording drafted in-session, founder-reviewed at Step 2; (vi) thin-wrapper refactor + "byte-identical" = structural; (vii) four independent flags = four independent activations; (viii) regression-check posture = re-run S2 + S3 tests in-session. Founder reviewed and approved the drafted `R20A_DEVELOPER_NOTE_DEFAULT` wording at Step 2 via AskUserQuestion ("OK as drafted").
+
+**Files touched (S4):**
+
+- `/website/src/lib/substrate/r20a-audience-renderer.ts` — **NEW.** Sibling module to `layer3-service.ts`. Exports the canonical `R20aAudience` type; the formalised `R20A_DEVELOPER_NOTE_DEFAULT` standing string; the two payload shapes (`R20aHumanUserRedirectPayload`, `R20aAgentDeveloperRedirectPayload`); the discriminated union `R20aRedirectPayload`; the input shape `RenderR20aRedirectInput`; the pure-sync `renderR20aRedirectResponse` helper; and `isR20aAudienceRenderingEnabled` env-flag check. ~270 lines.
+- `/website/src/lib/substrate/layer3-service.ts` — **Edited.** Added `R20aAudience` type re-export + added optional `audience?: R20aAudience` field to `ConsumerContext`. Additive; no existing call sites change.
+- `/website/src/app/api/reason/route.ts` — **Edited.** Added imports for `renderR20aRedirectResponse`, `isR20aAudienceRenderingEnabled`, `R20aAudience`. Added `r20aAudience` derivation from `auth.user?.id` (after `isApiKeyAuth` is set). Rewired both redirect branches: route-guard (~line 626; the `enforceDistressCheck` redirect) and Branch 1.7 (~line 854; the A7 `r20a_gate_redirect` pass-through) — both now call the helper with `effectiveAudience` (gated by the new flag with fallback to `'human_user'` when unset).
+- `/website/src/app/api/calling/response-builders.ts` — **Edited.** Added import for `renderR20aRedirectResponse`. Refactored `buildCallingDistressRedirectResponse` to a thin wrapper over the helper. Retired `CALLING_R20A_DEVELOPER_NOTE_PLACEHOLDER` constant. Wire shape structurally identical to S2; `developer_note` text now formalised.
+- `/website/src/app/api/practice/reflect/response-builders.ts` — **Edited.** Same as Calling: import + thin-wrapper refactor of `buildReflectDistressRedirectResponse`. Retired `REFLECT_R20A_DEVELOPER_NOTE_PLACEHOLDER` constant. Wire shape structurally identical to S3; `developer_note` text now formalised.
+- `/website/src/app/api/reason/__tests__/r20a-audience-rendering.test.ts` — **NEW.** 66 assertions across INV / PR / FT / AR / RB-Calling / RB-Reflect / SH groups. tsx plain-assertion script; mirrors S2 + S3 pattern per PR15. Runs via `npx tsx`.
+
+**Risk Classification Record (0d-ii):**
+
+**Critical** under PR6 + AC5 for the substantive change (R20a redirect-rendering surface modified across three routes — `/api/reason`, `/api/calling`, `/api/practice/reflect`; safety-critical function wiring).
+
+Sub-changes:
+
+- New `r20a-audience-renderer.ts` module — Critical (PR6 — adds a function in the R20a safety path).
+- `/api/reason` redirect branch rewiring — Critical (PR6 + AC5 — modifies safety-critical R20a redirect logic on the longest-standing perimeter route).
+- `r20aAudience` derivation from `auth.user?.id` — Standard (reads existing auth signal; no auth-surface change). AC7 NOT engaged.
+- New flag `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED` (default OFF; UNSET in Vercel) — Critical-gated (the flag gates a Critical change; the env-var addition itself is Standard).
+- `ConsumerContext.audience` field addition — Standard (additive optional field; no existing call sites change).
+- Calling + Reflect builder thin-wrapper refactor — Elevated (changes existing emitted-shape internals; structural identity preserved; `developer_note` text formalised).
+- New tsx test — Standard.
+
+AC7 NOT engaged (no auth/cookie/session/redirect change).
+KG1 NOT engaged (no DB writes in the helper path).
+PR17 NOT engaged (no founder-performed operational step required between sessions beyond the commit + verification commands below).
+
+**AC4 invocation-testing record:**
+
+| Assertion group | Coverage | Result |
+|---|---|---|
+| INV-0..INV-7 (S4 test) | File-grep on `/api/reason/route.ts`: helper import + flag import + audience-type import + helper call + flag-check call + `auth.user?.id` derivation pattern + exactly-two-call-sites count | 8/8 PASS |
+| PR-1..PR-3 (S4 test) | `R20A_DEVELOPER_NOTE_DEFAULT` is exported string + non-empty + contains "agent operator" + "not a crisis pathway" + "suggested_user_message" + "substrate" | 6/6 PASS |
+| FT-1..FT-5 (S4 test) | `isR20aAudienceRenderingEnabled` semantics — unset/true/false/1/TRUE (case-strict) | 5/5 PASS |
+| AR-1..AR-10 (S4 test) | Audience routing — `human_user` shape (redirect_message + NO agent-only fields), `agent_developer` shape (status='redirected' + developer_note + suggested_user_message + flow_terminated=true + safety_signal additive) | 18/18 PASS |
+| RB-Calling-1..12 (S4 test) | Refactored Calling builder — structural identity to S2 wire shape + `developer_note === R20A_DEVELOPER_NOTE_DEFAULT` + `interaction_type === 'stoic-purpose-discovery'` (Calling-specific preserved) | 12/12 PASS |
+| RB-Reflect-1..12 (S4 test) | Refactored Reflect builder — structural identity to S3 wire shape + `developer_note === R20A_DEVELOPER_NOTE_DEFAULT` + `interaction_type === 'stoic-post-action-reflection'` (Reflect-specific preserved) | 12/12 PASS |
+| SH-1 (S4 test) | Single source of truth — Calling.developer_note === Reflect.developer_note | 1/1 PASS |
+| S2 Calling regression (`r20a-invocation.test.ts`) | Full S2 test re-run; no updates required (RB-1f checks length, not text) | 44/44 PASS |
+| S3 Reflect regression (`r20a-invocation.test.ts`) | Full S3 test re-run; no updates required (RB-1f checks length, not text) | 55/55 PASS |
+| `npx tsc --noEmit` whole-project | Type-check across `website/` | EXIT 0, no output |
+| **Total** | **All AC4 assertions across S4 + S2 + S3** | **165/165 PASS** |
+
+Diagnostic-certainty signal (PR10):
+
+- **Diagnostic-certain — root cause identified** on the substantive S4 work: render helper Wired + Verified; `/api/reason` two redirect branches rewired + Verified (INV-7 confirms exactly two call sites); Calling + Reflect builders refactored + Verified (RB-Calling-* + RB-Reflect-* + SH-1 all pass); audience contract proven end-to-end across the three R20a-emitting surfaces.
+- **Diagnostic-uncertain — pattern level** carried forward on Jest registry execution (same as S2 + S3; pre-existing F-series AC12 debt; not a S4 regression). NOT a session-4 blocker.
+
+**PR5 — Knowledge-Gap Carry-Forward:**
+
+**0 concepts re-explained this session.** No KGs from the existing register engaged:
+
+- KG1 (Vercel five rules) — N/A (no DB writes in helper path).
+- KG2 (Haiku reliability boundary) — N/A (helper is pure-sync TS; no LLM call).
+- KG3–KG7 — N/A.
+
+**PR5 candidate observation status (carried forward from S2 + S3):**
+
+- **S2 candidate (1st recurrence)** — "design-spec-vs-implementation flag-coupling tension surfaces only when the design spec is implemented end-to-end" — **DID NOT recur in S4.** The new flag `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED` was added cleanly using the established posture (default OFF, UNSET in Vercel, independent of the three existing R20a flags per design §5.6). Remains at 1st recurrence; logged as a candidate in `operations/knowledge-gaps.md`.
+- **S3 candidate (1st recurrence)** — "design-spec wording at the route ('X first, Y second') admits conservative-vs-closes-silent-gap interpretations" — **DID NOT recur in S4.** The `/api/reason` redirect branches did not surface a parallel dual interpretation; the design-spec §3.4 "the two redirect branches in `route.ts` now call the new render helper with the route's `audience`" wording was unambiguous. Remains at 1st recurrence.
+
+**One NEW PR5 candidate observation (1st recurrence) from THIS session:** "regression-check assumptions can be over-cautious when assertions are structural rather than text-exact — verify the existing test posture before assuming bulk test updates." The S2 + S3 `RB-1f` assertions checked `developer_note` via `length > 0` (presence + non-empty), not exact text — so they passed unchanged after the placeholder retirement. My CCP item (vi) named "byte-identical" concern and budgeted for in-session test updates that turned out to be unnecessary. Logged as a candidate; promotion to PR5 entry awaits second recurrence in a future session.
+
+**Open questions (PR7):**
+
+- **A6 wording revision opportunities.** `R20A_DEVELOPER_NOTE_DEFAULT` is the formalised initial wording (founder-approved at Step 2). Revisable after the C2 live run (post-Option-A) or after operational data. Revisit: A6 follow-up session, OR opportunistically when first agent-developer activates the new flag.
+- **`r20a_suggested_user_message` formalisation.** Per design §3.5 + §7 Q2: today the field on the wire is `gateOutput.redirect_message` (runtime-derived from the classifier's existing pass-through). A future A6 refinement could let prose-mode override this with alternative phrasings (e.g., a clinical mode that omits empathetic framing). Out of scope this session. Revisit: A6 follow-up session.
+- **Audience selector for plugin-internal calls.** Per design §3.2 + §7 Q1: future plugin-internal callers default to `'agent_developer'`. Confirm at plugin's first surfacing session. Revisit: Stage 3 plugin-tools work.
+- **F-series Jest-config debt.** Pre-existing AC12 debt; carried forward from S2 + S3; not introduced this session. Revisit: F-series stewardship session.
+- **Cross-seam propagation end-to-end test (L1–L7 flows).** Currently `safety_signal` rides on outward shapes of three surfaces (`/api/calling`, `/api/practice/reflect`, `/api/reason` agent-API when flag is ON). End-to-end propagation across configuration flows (Reflect → Sage Assent → no double-emit, etc.) is session-5 work. Revisit: session 5 (configuration-level invocation tests).
+- **`SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED` production activation.** Separate future Critical session. Until activation, the Finding 2 bug on `/api/reason`'s agent API is preserved (the fix lives in code; activation is deliberate). Revisit: post-Option-A or when first external agent-developer is contracted.
+- **R18 honest certification interaction with the new agent-developer wire shape.** Out of scope this session (deferred per design §7). Revisit: at R18 build session.
+- **`/api/reason` agent-API metering posture under audience rendering ON.** When the flag flips ON, agent-API callers will start receiving the new developer-form payload. The existing Option-D loop-billing path (lines ~534-555 `respond` helper) is preserved unchanged; `isBillable: true` continues to apply on the redirect branches. Revisit: pre-activation review session.
+
+**Carried-forward backlog (so nothing is forgotten):** Session 5 (configuration-level invocation tests across L1–L7 — closes Option A arc); C2 live run rescoped (post-Option-A; PR17 live walkthrough; founder-performed TEST-env standup will be walked through live, not handed off); Session 3 value-evidence rig (post-C2-live; name-collision noted); M-7 severities + audit note at founder's convenience (Calling, Reflect-content, audience-contract, propagation-flag — all four rows now close from "documented gap" to "remediated via Option A"); A7 production activation (separate future Critical); `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED` production activation (separate future Critical); F-series Jest-config debt remediation; A6 wording revision opportunities.
+
+**Founder-performable verification (between sessions):**
+
+Confirm the new tsx test passes:
+
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/app/api/reason/__tests__/r20a-audience-rendering.test.ts
+```
+
+Expected last line: `66/66 pass | 0/66 fail`; EXIT 0. The `npm notice New major version of npm available...` lines printed in-session can be ignored (informational only).
+
+Confirm the S2 Calling regression test still passes:
+
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/app/api/calling/__tests__/r20a-invocation.test.ts
+```
+
+Expected last line: `44/44 pass | 0/44 fail`; EXIT 0.
+
+Confirm the S3 Reflect regression test still passes:
+
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/app/api/practice/reflect/__tests__/r20a-invocation.test.ts
+```
+
+Expected last line: `55/55 pass | 0/55 fail`; EXIT 0.
+
+Confirm the whole-project type-check:
+
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsc --noEmit
+```
+
+Expected: no output. EXIT 0.
+
+Confirm this decision-log entry exists:
+
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -n "D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28" operations/decision-log.md
+```
+
+Expected: a match near the end of the active log, after `D-R20A-OPTIONA-S3-REFLECT-WIRED-2026-05-28`.
+
+Confirm production state UNCHANGED (no Vercel touch this session):
+
+- `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED` — UNSET in Vercel (this flag is new; no Vercel action this session).
+- `SUBSTRATE_REFLECT_R20A_ENABLED` — UNSET in Vercel (unchanged from S3).
+- `SUBSTRATE_CALLING_R20A_ENABLED` — UNSET in Vercel (unchanged from S2).
+- `SUBSTRATE_R20A_GATE_ENABLED` — UNSET in Vercel (unchanged).
+- `/api/reason` behaviour — byte-identical to pre-S4 for ALL caller types (flag default OFF + the route's `effectiveAudience` fallback to `'human_user'` when flag is unset).
+- `/api/substrate/layer3` — 503 (unchanged).
+
+**No live-system action required this session.** Production was not touched.
+
+**Rules served:** R20a (vulnerable user detection — audience-correct rendering across all R20a-emitting surfaces); R19 (honest positioning — formalised wording replaces honest placeholders); R19c (the audience-contract placeholder retirement is itself an R19c-honest step); AC1 (no new LLM call — helper is pure-sync TS); AC2 (no added latency — helper is pure-sync; A7's existing classifier-call latency is unchanged); AC4 (functional + invocation testing across three audience-routing surfaces); AC5 (perimeter unchanged at 10 routes — existing surfaces modified; no new routes); AC7 not engaged (no auth/cookie/session/redirect change); AC8 (helper at translation-sandwich Layer 3 boundary); AC10 (provenance + use_policies forward-compat — additive future fields on agent_developer payload deferred); AC11 (A7's existing span emit covers the audit trail); AC12 (Jest-config debt acknowledged in verification record); 0a (status vocabulary applied — Wired + Verified at substantive level); 0c (verification framework — test commands provided for founder); 0c-ii (Critical Change Protocol completed); 0d-ii (Critical classification); 0f (decision-log entry); 0h (P0 active); PR1 (single-endpoint proof discipline — Calling + Reflect proved the catch contract in S2 + S3; S4 ratifies the audience contract end-to-end across all three R20a-emitting surfaces); PR3 (synchronous — helper is pure-sync; route flow is awaited); PR6 (Critical regardless of scope — safety-critical R20a redirect logic on three routes); PR10 (PEV loop with diagnostic-certainty signalling — Diagnostic-certain on substantive work + Diagnostic-uncertain — pattern level carried forward on Jest registry); PR12 (verification preceded recommendation — Pre-condition 3 read of the auth signal confirmed the design-spec assumption before code edits); PR15 (A7 + canonical SafetySignal + per-surface response-builder pattern + S2/S3 tsx test pattern + ZONE3_DEVELOPER_NOTE wording posture all reused; no primitive rebuilt); PR16 (positioning — Character Kernel positioning strengthened by enforcing the audience contract substrate-wide; dogfood — helper is substrate-consultable for future K-category migration consumers).
+
+**Status:** **Adopted.** Implementation status:
+
+- `renderR20aRedirectResponse` helper at `/website/src/lib/substrate/r20a-audience-renderer.ts` — **Wired**, **Verified** (Diagnostic-certain on 165/165 assertions + `tsc --noEmit` EXIT 0).
+- `R20A_DEVELOPER_NOTE_DEFAULT` formalised prose-mode key text — **Wired**, **Verified** (founder-approved at Step 2 via AskUserQuestion; PR-1..PR-3 assertions pass).
+- `ConsumerContext.audience` field — **Wired**, **Verified** (additive; no existing call sites use it yet; forward-compat for K-category migration).
+- `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED` env flag — **Scaffolded** (default OFF; UNSET in Vercel; created in `r20a-audience-renderer.ts`).
+- `r20aAudience` derivation from `auth.user?.id` at `/api/reason/route.ts` — **Wired**, **Verified** (INV-6 asserts the pattern; INV-7 confirms exactly two render-helper call sites).
+- `/api/reason` two redirect branches rewired — **Wired**, **Verified** (route-guard ~line 626; Branch 1.7 ~line 854; both call the helper with `effectiveAudience`).
+- `/api/reason` Finding-2 fix (agent-API human-framed-message gap) — **Code-Wired**, **Activation deferred to a separate future Critical session**. The fix lives in code; the bug is preserved until `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED` is flipped ON.
+- Calling-side `buildCallingDistressRedirectResponse` thin-wrapper refactor — **Wired**, **Verified** (RB-Calling-1..12 + SH-1; CALLING_R20A_DEVELOPER_NOTE_PLACEHOLDER retired).
+- Reflect-side `buildReflectDistressRedirectResponse` thin-wrapper refactor — **Wired**, **Verified** (RB-Reflect-1..12 + SH-1; REFLECT_R20A_DEVELOPER_NOTE_PLACEHOLDER retired).
+- AC5 perimeter — **Unchanged** at 10 routes (existing surfaces modified; no new routes added).
+- Production state (Vercel) — **UNCHANGED.** `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED` UNSET (new flag); `SUBSTRATE_REFLECT_R20A_ENABLED` UNSET (unchanged from S3); `SUBSTRATE_CALLING_R20A_ENABLED` UNSET (unchanged from S2); `SUBSTRATE_R20A_GATE_ENABLED` UNSET; `/api/reason` byte-identical for ALL caller types; `/api/substrate/layer3` → 503.
+
+Cross-references: `D-R20A-OPTIONA-S3-REFLECT-WIRED-2026-05-28` (the immediate predecessor; S3 Reflect-content catch Verified); `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28` (S2 Calling catch Verified); `D-R20A-SC1-SINGLE-CATCH-CONTRACT-DRAFTED-2026-05-28` (the design spec this session implements — §§3, 3.4, 3.5, 5.4, 6); `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27` (the parent ADR — Accepted); `D-R20A-CONFIG-PERIMETER-OPTION-A-2026-05-27` (the elected direction); `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13` (the seed primitive); `/drafts/2026-05-28-r20a-single-catch-contract.md` §§3, 3.4, 3.5, 5.4, 5.6, 6, 7; `/adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`; `/website/src/lib/substrate/r20a-audience-renderer.ts` (new helper module); `/website/src/lib/substrate/layer3-service.ts` (ConsumerContext.audience added); `/website/src/app/api/reason/route.ts` (two redirect branches rewired + r20aAudience derivation); `/website/src/app/api/calling/response-builders.ts` (thin-wrapper refactor); `/website/src/app/api/practice/reflect/response-builders.ts` (thin-wrapper refactor); `/website/src/app/api/reason/__tests__/r20a-audience-rendering.test.ts` (new tsx test; 66 assertions); `/operations/handoffs/founder/2026-05-28-OPTION-A-session-4-audience-rendering-close.md` (created at Step 7).
+
+---

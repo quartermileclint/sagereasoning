@@ -23,6 +23,13 @@
 import { NextResponse } from 'next/server'
 import type { ReflectDecision } from '@/lib/sage-reflect/reflect-service'
 import type { SafetySignal } from '@/lib/substrate/r20a-gate'
+// S4 (D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28): the
+// distress-redirect builder below is refactored to a thin wrapper over the
+// audience-correct render helper. Per /drafts/2026-05-28-r20a-single-catch-
+// contract.md §3.3 — the helper is the single source of truth for the
+// agent_developer wire shape; the per-surface placeholder constant is retired
+// and the developer_note text is now the formalised R20A_DEVELOPER_NOTE_DEFAULT.
+import { renderR20aRedirectResponse } from '@/lib/substrate/r20a-audience-renderer'
 
 export const DOCUMENTATION_URL = 'https://sagereasoning.com/limitations'
 
@@ -220,8 +227,22 @@ export function buildZone3Response(
 // ============================================================================
 // OPTION A — R20a SUBSTRATE-GATE DISTRESS REDIRECT (developer-form payload)
 //
-// Added 2026-05-28 per /drafts/2026-05-28-r20a-single-catch-contract.md §5.3.
-// Mirrors the Calling-side buildCallingDistressRedirectResponse from session 2.
+// Added 2026-05-28 (S3 — Reflect-content wiring) per /drafts/2026-05-28-r20a-
+// single-catch-contract.md §5.3. Mirrors the Calling-side
+// buildCallingDistressRedirectResponse.
+//
+// S4 REFACTOR (2026-05-28, D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28):
+// This builder is now a thin wrapper over the audience-correct render helper
+// renderR20aRedirectResponse (in /website/src/lib/substrate/r20a-audience-
+// renderer.ts). The helper is the single source of truth for the agent_developer
+// wire shape; this builder only adds Reflect's surface-specific fields
+// (session_id, interaction_type, disclaimer, documentation_url via the build()
+// helper) and standing headers.
+//
+// The per-surface placeholder constant REFLECT_R20A_DEVELOPER_NOTE_PLACEHOLDER
+// is RETIRED; the developer_note text is now sourced from the formalised
+// R20A_DEVELOPER_NOTE_DEFAULT prose-mode key (per design §3.5; A6 wording
+// drafted in S4).
 //
 // When the substrate-gate catch fires REDIRECT (moderate/acute distress
 // detected on the agent's inbound `response`), Reflect's six-question
@@ -230,53 +251,41 @@ export function buildZone3Response(
 // existing r20a-cost-tracker on the substrate side).
 //
 // The agent operator receives:
+//   - status: 'redirected'
 //   - distress_detected: true
 //   - severity: 'moderate' | 'acute'
-//   - developer_note: standing developer-facing message (this is NOT a
-//                     crisis pathway; route through your own safety/
-//                     escalation process)
-//   - suggested_user_message: the substrate's redirect_message, surfaced
-//                     separately so the agent MAY relay it through its
-//                     own safety pipeline
-//   - flow_terminated: true (Reflect's six-question sequence is halted;
-//                      no further turns will advance the engine)
+//   - developer_note: R20A_DEVELOPER_NOTE_DEFAULT (the formalised audience-
+//                     correct standing string from the render helper)
+//   - suggested_user_message: the substrate's existing redirect_message
+//                     (resource-list-included), surfaced separately
+//   - flow_terminated: true
 //   - safety_signal: the canonical cross-seam carrier
+//   - session_id: Reflect-specific
+//   - interaction_type: 'stoic-post-action-reflection' (Reflect-specific via build())
+//   - disclaimer, documentation_url: standing (via build())
 //
-// HONEST LIMITATION (per design §3.5): the exact wording of developer_note
-// and suggested_user_message is A6 design work (the per-consumer prose_mode
-// keys r20a_developer_note + r20a_suggested_user_message). Until A6 runs,
-// this builder uses placeholder text drawn from ZONE3_DEVELOPER_NOTE
-// (developer note) and the substrate's redirect_message (suggested user
-// message). A6 formalises the wording.
+// DISTINCT FROM buildZone3Response: that one handles developer-declared harm
+// (upstream signal that the session itself involved a harmful act; status =
+// 'flagged'). THIS builder handles substrate-detected distress in the agent's
+// conversational content on this turn (status = 'redirected'). They are
+// different mechanisms with different developer-facing semantics; both can
+// engage in the same session (Zone-3 at open via developer signal; substrate-
+// gate at any answer turn).
 //
-// DISTINCT FROM buildZone3Response: that one handles developer-declared
-// harm (an upstream signal that the session itself involved a harmful act).
-// THIS builder handles substrate-detected distress in the agent's
-// conversational content on this turn. They are different mechanisms with
-// different developer-facing semantics; both can engage in the same session
-// (Zone-3 at open via developer signal; substrate-gate at any answer turn).
+// Wire-shape change vs S3: the developer_note text changes from the per-surface
+// placeholder to the shared R20A_DEVELOPER_NOTE_DEFAULT. Structurally
+// identical otherwise (same field set, same types, same status='redirected').
 //
-// Rules served: R20a (vulnerable user detection); R19c (placeholder honestly
-// named); AC2 (~500ms classifier accepted); AC4 (invocation-tested); AC5
-// (perimeter tenth route); PR1 (single-endpoint proof); PR3 (synchronous);
-// PR15 (reuses A7 + the canonical SafetySignal).
+// Rules served: R20a (vulnerable user detection); R19c (placeholder retired —
+// formalised wording in place); AC2 (~500ms classifier accepted); AC4
+// (invocation-tested); AC5 (perimeter unchanged at 10 routes — existing
+// surface modified); PR1 (single-endpoint proof complete); PR3 (synchronous);
+// PR15 (reuses A7 + the canonical SafetySignal + the new render helper — no
+// primitive rebuilt).
 // ============================================================================
 
-/** PLACEHOLDER per design §3.5 — formalised by A6 (r20a_developer_note). */
-const REFLECT_R20A_DEVELOPER_NOTE_PLACEHOLDER =
-  'Sage Reflect R20a substrate-gate engaged: the agent response on this turn ' +
-  'contained language indicating acute psychological distress in the underlying ' +
-  'user. Sage Reflect is not a crisis pathway — it has halted this reflection ' +
-  'sequence, will NOT advance the six-question engine for this turn, and has ' +
-  'deliberately NOT attempted philosophical reflection on the distress. Route ' +
-  'the underlying user-distress handling through your own safety and escalation ' +
-  'process; if you wish to relay a user-facing message, the suggested_user_message ' +
-  'field below contains a non-engaging crisis pass-through. This is distinct from ' +
-  'the developer-declared-harm Zone-3 boundary (status="flagged") and engages on ' +
-  'substrate-detected distress in the agent\'s conversational content, not on a ' +
-  'developer-supplied harm signal.'
-
-/** Build the developer-form REDIRECT response (substrate-gate distress catch). */
+/** Build the developer-form REDIRECT response (substrate-gate distress catch).
+ *  Thin wrapper over the audience-correct render helper. */
 export function buildReflectDistressRedirectResponse(
   session_id: string,
   severity: 'moderate' | 'acute',
@@ -284,17 +293,23 @@ export function buildReflectDistressRedirectResponse(
   safetySignal: SafetySignal,
   loopHeaders?: Record<string, string>,
 ): NextResponse {
+  // Render via the audience-correct helper. The helper returns the
+  // R20aAgentDeveloperRedirectPayload shape (status, distress_detected,
+  // severity, developer_note, suggested_user_message, flow_terminated,
+  // safety_signal). Reflect's session_id is merged in; the build() helper
+  // adds the standing fields (interaction_type, disclaimer, documentation_url)
+  // and standing headers.
+  const payload = renderR20aRedirectResponse({
+    audience: 'agent_developer',
+    severity,
+    redirect_message: suggested_user_message,
+    safetySignal,
+  })
   return build(
     200,
     {
-      status: 'redirected',
       session_id,
-      distress_detected: true,
-      severity,
-      developer_note: REFLECT_R20A_DEVELOPER_NOTE_PLACEHOLDER,
-      suggested_user_message,
-      flow_terminated: true,
-      safety_signal: safetySignal,
+      ...payload,
     },
     loopHeaders,
   )

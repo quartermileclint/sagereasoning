@@ -33,6 +33,18 @@ import {
   issueContinuationToken,
   Tier1SecretMissingError,
 } from '@/lib/translation-sandwich/tier1-token'
+// S4 (D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28): R20a audience-
+// correct rendering for the two redirect branches below. Per
+// /drafts/2026-05-28-r20a-single-catch-contract.md §3.4 — closes the Finding 2
+// gap where /api/reason emits a human-framed crisis pass-through over the
+// agent API path. Gated behind SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED
+// (default OFF; UNSET in Vercel at S4 close); when OFF, /api/reason is
+// byte-identical to pre-S4 behaviour regardless of caller type.
+import {
+  renderR20aRedirectResponse,
+  isR20aAudienceRenderingEnabled,
+  type R20aAudience,
+} from '@/lib/substrate/r20a-audience-renderer'
 // Option D billing (per D-BILLING-MODEL-LOCKED-2026-05-17 + build session 2026-05-MM).
 // Metering wraps every API-key-authenticated request: a loop_id is extracted
 // from X-Loop-Id (or server-generated); per-layer Anthropic cost is read from
@@ -512,6 +524,28 @@ export async function POST(request: NextRequest) {
   //     extended increment_api_usage RPC, and emits the six X-Loop-* headers
   // =============================================================================
   const isApiKeyAuth = apiKey !== null && apiKey.valid === true
+
+  // S4 (D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28): derive the
+  // R20a audience for redirect rendering from the auth signal. Per
+  // /drafts/2026-05-28-r20a-single-catch-contract.md §3.2 audience-assignment
+  // table:
+  //   - auth.user?.id truthy  → 'human_user'      (Supabase JWT / cookie-session
+  //                                                 / sagereasoning.com web tools)
+  //   - auth.user?.id falsy   → 'agent_developer' (API-key OR plugin-auth path)
+  //
+  // The same auth.user?.id signal is already used at line ~721 to gate
+  // getPractitionerContext (web users get personalised context; API callers
+  // don't); reusing it here keeps the audience determination on the same
+  // determinant. Used at both R20a redirect branches below (route-guard
+  // ~line 626; Branch 1.7 ~line 854).
+  //
+  // The agent_developer branch is gated behind
+  // SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED (default OFF). When OFF, the
+  // effective audience falls back to 'human_user' regardless — preserves
+  // byte-identical pre-S4 wire shape until a future Critical activation
+  // session flips the flag.
+  const r20aAudience: R20aAudience = auth.user?.id ? 'human_user' : 'agent_developer'
+
   const loopId: string | null = isApiKeyAuth
     ? (extractLoopId(request) ?? generateLoopId())
     : null
@@ -621,8 +655,28 @@ export async function POST(request: NextRequest) {
     // sees the redirect.
     const gate = await enforceDistressCheck(detectDistressTwoStage(input))
     if (gate.shouldRedirect) {
+      // S4 (D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28): route the
+      // redirect response through the audience-correct render helper. Per
+      // /drafts/2026-05-28-r20a-single-catch-contract.md §3.4 — closes the
+      // Finding 2 gap (today's API path receives the human-framed pass-through).
+      //
+      // Flag-gating posture: SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED gates
+      // the agent_developer branch only. When the flag is UNSET (steady-state
+      // production at S4 close), the effective audience is 'human_user' for
+      // both web AND API callers — byte-identical to pre-S4 wire shape (the
+      // Finding 2 bug is preserved; the fix lives in code; activation is a
+      // future Critical session). When the flag is ON, the route's r20aAudience
+      // (derived from auth.user?.id) drives the form.
+      const effectiveAudience: R20aAudience = isR20aAudienceRenderingEnabled()
+        ? r20aAudience
+        : 'human_user'
+      const redirectPayload = renderR20aRedirectResponse({
+        audience: effectiveAudience,
+        severity: gate.result.severity,
+        redirect_message: gate.result.redirect_message ?? '',
+      })
       return await respond({
-        body: { distress_detected: true, severity: gate.result.severity, redirect_message: gate.result.redirect_message },
+        body: redirectPayload,
         status: 200,
         headers: corsHeaders(),
         isBillable: true,  // Substrate engaged via R20a perimeter — billed at base rate per R9.
@@ -845,12 +899,25 @@ export async function POST(request: NextRequest) {
     // which layer caught the distress signal.
     if (sandwichResult.error === 'r20a_gate_redirect') {
       const gateOutput = sandwichResult.output as Record<string, unknown>
+      // S4 (D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28): same
+      // audience-correct rendering as the route-guard branch above. The
+      // wire shape matches the route-guard branch's shape (modulo audience-
+      // correct form) so clients see consistent redirect behaviour regardless
+      // of which layer caught the distress signal.
+      //
+      // Flag-gating posture identical to the route-guard branch: flag UNSET
+      // → effective audience is 'human_user' (byte-identical to pre-S4); flag
+      // ON → respects r20aAudience derived from auth.user?.id.
+      const effectiveAudience: R20aAudience = isR20aAudienceRenderingEnabled()
+        ? r20aAudience
+        : 'human_user'
+      const redirectPayload = renderR20aRedirectResponse({
+        audience: effectiveAudience,
+        severity: gateOutput.severity as 'none' | 'mild' | 'moderate' | 'acute',
+        redirect_message: String(gateOutput.redirect_message ?? ''),
+      })
       return await respond({
-        body: {
-          distress_detected: true,
-          severity: gateOutput.severity,
-          redirect_message: gateOutput.redirect_message,
-        },
+        body: redirectPayload,
         status: 200,
         headers: corsHeaders(),
         isBillable: true,  // Layer 1 ran (A7 fires after Layer 1) — billed.

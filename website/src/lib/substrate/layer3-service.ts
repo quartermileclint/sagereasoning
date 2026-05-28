@@ -182,13 +182,35 @@ const DEFAULT_USE_POLICIES: ReadonlyArray<UsePolicy> = ['advisory']
 //   - which per-consumer prose template runs (today: only api_reason)
 //   - whether R18a Character Kernel framing is injected
 //   - whether R19d mirror-principle reminder is injected (mentor-flavoured only)
+//   - the audience for R20a redirect rendering (S4 — design spec §3.2)
 // ============================================================================
+
+/**
+ * The two audience forms for R20a distress-redirect rendering. Added 2026-05-28
+ * under the Option A build arc, Session 4 (Layer-3 audience rendering +
+ * /api/reason agent-API fix). Per /drafts/2026-05-28-r20a-single-catch-contract.md
+ * §3.2.
+ *
+ * Re-exported here for callers that already import ConsumerContext and want
+ * to set `audience` alongside the other context fields. The canonical
+ * declaration + the render helper live in `./r20a-audience-renderer.ts`.
+ */
+export type R20aAudience = 'human_user' | 'agent_developer'
 
 export interface ConsumerContext {
   /** Stable identifier for the downstream consumer. Today only 'api_reason'
    *  routes to a real template; other identifiers reserved for K-category
    *  migration (Stage 2) and plugin-originated traffic (Stage 3). */
   consumer: Layer3Consumer
+  /** S4 (2026-05-28) — drives R20a redirect rendering when the substrate's
+   *  catch fires REDIRECT. 'human_user' returns the existing crisis pass-
+   *  through wire shape (sagereasoning.com web tools); 'agent_developer'
+   *  returns the developer-form payload (API surfaces — /api/calling,
+   *  /api/practice/reflect, /api/reason API path). Optional + defaults to
+   *  'agent_developer' on absence (the safest default for unknown callers;
+   *  the human_user wire shape is reserved for explicitly web-authenticated
+   *  surfaces). Per design spec §3.2. */
+  audience?: R20aAudience
   /** When true, A5.6 injects the R18a Character Kernel category language.
    *  Default ON for marketplace listings + plugin-originated traffic;
    *  default OFF for direct human-facing endpoints where the category
