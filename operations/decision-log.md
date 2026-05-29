@@ -8436,3 +8436,34 @@ Expected: the three files exist; the grep matches near the end of the active log
 **Status:** Adopted. The findings document `/drafts/2026-05-28-configuration-audit-thought-experiment-findings.md` remains Under review; its Option I direction is **Superseded by** this entry. Cross-references: `D-CONFIG-AUDIT-FINDINGS-REVIEWED-2026-05-29`; `D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28`; `/drafts/2026-05-29-configuration-audit-thought-experiment-REVIEW.md`; `/drafts/2026-05-29-capability-inventory-skeleton.md`; `/operations/handoffs/founder/2026-05-29-capability-inventory-NEXT-SESSION-PROMPT.md`; `/operations/handoffs/founder/2026-05-29-capability-inventory-direction-close.md`.
 
 ---
+
+## 2026-05-29 — D-CAPABILITY-INVENTORY-FIRST-PASS-2026-05-29
+
+**Decision:** The first-pass 0h capability inventory is filled and adopted as a deliverable (`/drafts/2026-05-29-capability-inventory-first-pass.md`): configurations C1–C7 × dimensions D1–D11 × audience, seeded from `component-registry.json` (note-and-defer; registry left unreconciled), with a ranked gap list ordering what to do next by severity × launch-criticality within P1–P7.
+
+**Reasoning:** Executes `D-CONFIG-AUDIT-DIRECTION-CAPABILITY-INVENTORY-2026-05-29` — assessment, not implementation. Reading live source corrected three stale-registry/skeleton assumptions (genuine deletion is implemented not a 503 stub; `llms.txt`+`agent-card.json` serve; limitations page exists) and surfaced one ranking-topping new finding: `/api/user/delete` omits the R17b intimate mentor store, so genuine deletion is incomplete (legal erasure gap). The ranking answers the open premise question: finishing Option A is gaps #2/#3, not #1 — incomplete deletion (#1, LC#7) outranks it because erasure must be complete the moment any real user exists and is not covered by the "no current users" exemption.
+
+**Files touched:**
+- `drafts/2026-05-29-capability-inventory-first-pass.md` — new; the filled inventory + ranked gap list.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-29-capability-inventory-first-pass-close.md` — session close.
+
+**Risk classification:** Standard under 0d-ii. Assessment + documentation; read code/registry read-only; wrote only a `/drafts/` deliverable + decision-log + close. AC7 not engaged. PR6 not engaged. Critical Change Protocol not engaged.
+
+**Rollback path:** `git rm drafts/2026-05-29-capability-inventory-first-pass.md`; revert this entry and the close. No production change to roll back.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+ls drafts/2026-05-29-capability-inventory-first-pass.md
+grep -n "D-CAPABILITY-INVENTORY-FIRST-PASS-2026-05-29" operations/decision-log.md
+```
+Expected: file exists; grep matches near the end of the active log. Then read the inventory directly (0c — business document: founder reads directly), starting with the "Verification findings" and "Ranked gap list" sections.
+
+**Open questions:** Which gap to work next (founder's call from the ranked list — recommended sequence: #1 complete deletion → #2–#4 finish Option A + human-tool distress coverage → #5 encryption confirm). 0h criterion 1 (founder live-data testing of every "Wired" row) remains outstanding.
+
+**Rules served:** 0a, 0c, 0d-ii, 0f, 0h (exit criterion 4 advanced; criteria 1–3 materially informed), PR12, PR13, PR14 (ten-domain frame supplies the columns), PR15 (reused existing registry + frame; no bespoke build), R17b, R17c, R19, R20a.
+
+**Status:** Adopted (the inventory is adopted as a deliverable; `/drafts/` → `/adopted/` promotion is a later founder-gated step). Cross-references: `D-CONFIG-AUDIT-DIRECTION-CAPABILITY-INVENTORY-2026-05-29`; `D-CONFIG-AUDIT-FINDINGS-REVIEWED-2026-05-29`; `/drafts/2026-05-29-capability-inventory-skeleton.md` (the seed structure, preserved); `/operations/handoffs/founder/2026-05-29-capability-inventory-NEXT-SESSION-PROMPT.md`.
+
+---
