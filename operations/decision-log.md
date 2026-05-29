@@ -8370,3 +8370,69 @@ Confirm production state UNCHANGED (no Vercel touch this session):
 Cross-references: `D-R20A-OPTIONA-S3-REFLECT-WIRED-2026-05-28` (the immediate predecessor; S3 Reflect-content catch Verified); `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28` (S2 Calling catch Verified); `D-R20A-SC1-SINGLE-CATCH-CONTRACT-DRAFTED-2026-05-28` (the design spec this session implements — §§3, 3.4, 3.5, 5.4, 6); `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27` (the parent ADR — Accepted); `D-R20A-CONFIG-PERIMETER-OPTION-A-2026-05-27` (the elected direction); `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13` (the seed primitive); `/drafts/2026-05-28-r20a-single-catch-contract.md` §§3, 3.4, 3.5, 5.4, 5.6, 6, 7; `/adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`; `/website/src/lib/substrate/r20a-audience-renderer.ts` (new helper module); `/website/src/lib/substrate/layer3-service.ts` (ConsumerContext.audience added); `/website/src/app/api/reason/route.ts` (two redirect branches rewired + r20aAudience derivation); `/website/src/app/api/calling/response-builders.ts` (thin-wrapper refactor); `/website/src/app/api/practice/reflect/response-builders.ts` (thin-wrapper refactor); `/website/src/app/api/reason/__tests__/r20a-audience-rendering.test.ts` (new tsx test; 66 assertions); `/operations/handoffs/founder/2026-05-28-OPTION-A-session-4-audience-rendering-close.md` (created at Step 7).
 
 ---
+
+## 2026-05-29 — D-CONFIG-AUDIT-FINDINGS-REVIEWED-2026-05-29
+
+**Decision:** Adversarial, independent review of `/drafts/2026-05-28-configuration-audit-thought-experiment-findings.md` completed and adopted as a deliverable at `/drafts/2026-05-29-configuration-audit-thought-experiment-REVIEW.md`. The review confirms the per-configuration catalog is worth doing but challenges the findings as scoped on four counts: (1) the six-bucket taxonomy is ungrounded in the adopted PR14 ten-domain frame and omits audience as a cross-cutting axis; (2) the four strategic options are not exhaustive (missing V = reuse PR14/R14 existing frame; VI = finish proving R20a operationally first); (3) the PR1 meta-tension is mis-attributed — PR1 does not literally apply; the real tension is the 0h hold-point + evidence-sequencing; (4) the three-phase plan/estimate is optimistic and benchmarked against an Option A that is not itself operationally proven. The review recommends the founder settle a premise-validation/sequencing decision plus the L1–L7 enumeration and a backout tripwire before opening Phase 1.
+
+**Reasoning:** Governance-tier independent check requested per `/operations/handoffs/founder/2026-05-28-CONFIGURATION-AUDIT-REVIEW-NEXT-SESSION-PROMPT.md`; PR12 negative-finding discipline and the standing cache's AI-failure-modes subsection applied throughout. The findings document remains a draft (Under review); this entry adopts only the review deliverable, not any change to the findings or to governance. Builds on the Option A arc entries D-R20A-OPTIONA-S2/S3/S4-...-2026-05-28.
+
+**Files touched:**
+- `/drafts/2026-05-29-configuration-audit-thought-experiment-REVIEW.md` — NEW; the adversarial review (seven sections A–G + recommendations-at-a-glance table + single-sentence net recommendation).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-29-configuration-audit-review-close.md` — NEW; session close.
+
+**Risk classification:** Standard under 0d-ii. Documentation-only review; no code, no governance document modified, no execution; production UNCHANGED. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git rm` the review file and this session-close file, revert the commit, and delete this decision-log entry. The findings document and the in-limbo S5 prompt are untouched.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+ls drafts/2026-05-29-configuration-audit-thought-experiment-REVIEW.md
+grep -n "D-CONFIG-AUDIT-FINDINGS-REVIEWED-2026-05-29" operations/decision-log.md
+```
+Expected: the review file exists; the grep matches near the end of the active log, after `D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28`. Then read the review document directly (0c — business document: founder reads directly).
+
+**Open questions:** The review surfaces five decisions that sit before Phase 1, in addition to the prior AI's Q1–Q4 — Q5 (L1–L7 enumeration; hard pre-condition), Q6 (premise-validation/sequencing: generalise now vs finish proving R20a operationally), Q7 (taxonomy frame: PR14 ten-domain vs the six buckets), Q8 (audience axis: grid vs cube), Q9 (backout tripwire). Q1 (S5 prompt disposition) is shown to be contingent on Q6. Revisit condition: founder's response to the review.
+
+**Rules served:** 0a, 0c, 0d-ii, 0f, 0h, PR12, PR13, PR14, PR15, R19. AC4 / AC5 referenced for context only (not engaged).
+
+**Status:** Adopted. The findings document `/drafts/2026-05-28-configuration-audit-thought-experiment-findings.md` remains **Under review** pending the founder's action on this review. Cross-references: `D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28`; `D-R20A-OPTIONA-S3-REFLECT-WIRED-2026-05-28`; `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28`; `/drafts/2026-05-28-configuration-audit-thought-experiment-findings.md`; `/drafts/2026-05-29-configuration-audit-thought-experiment-REVIEW.md`; `/operations/handoffs/founder/2026-05-29-configuration-audit-review-close.md`.
+
+---
+
+## 2026-05-29 — D-CONFIG-AUDIT-DIRECTION-CAPABILITY-INVENTORY-2026-05-29
+
+**Decision:** Having read the adversarial review (`D-CONFIG-AUDIT-FINDINGS-REVIEWED-2026-05-29`) and an independent thought experiment conducted by the reviewer, the founder approved the direction for the per-configuration product-use work: proceed via a **first-pass 0h capability inventory** (0h exit criterion 4) seeded from the existing `/website/public/component-registry.json` and re-cut as configurations × dimensions × audience, rather than the prior session's verbally-approved Option I (catalog-first three-phase program). The per-dimension deep-dives and finishing the Option A build arc (S5 + C2 live run) become items the inventory's gap-ranking orders — not premises. "AEO" is recorded as **Agent Engine Optimisation** (the agent analogue of SEO: discovery + ranking/selection in agent ecosystems; agent-card.json + llms.txt are table stakes).
+
+**Reasoning:** The founder's per-configuration cataloguing instinct is sound, but (a) it is already mandated as the 0h capability inventory — the hard hold before P1 — and already half-built in `component-registry.json` (191 components carrying `status` (0a), `humanReady`/`agentReady`, `deps`, `blocker`, `rules`); (b) 0h discipline + evidence-sequencing say assess (and prove) before generalising/building — Option A is Wired but not Verified-live, all four R20a flags UNSET, no current users, so a bespoke catalog would rest on an unproven premise and zero usage data; (c) reuse an existing adopted frame over bespoke (PR15 spirit; PR14's ten domains supply the dimension columns; audience is the registry's existing `humanReady`/`agentReady` depth). Supersedes the findings document's Option I. Cross-refs `D-CONFIG-AUDIT-FINDINGS-REVIEWED-2026-05-29` and `/drafts/2026-05-29-configuration-audit-thought-experiment-REVIEW.md`.
+
+**Files touched:**
+- `/operations/handoffs/founder/2026-05-29-capability-inventory-direction-close.md` — NEW; full-session close (supersedes the review-only close).
+- `/drafts/2026-05-29-capability-inventory-skeleton.md` — NEW; the empty inventory cube (rows × dimensions × audience) to fill next session.
+- `/operations/handoffs/founder/2026-05-29-capability-inventory-NEXT-SESSION-PROMPT.md` — NEW; the next-session prompt.
+- `/operations/handoffs/founder/2026-05-29-configuration-audit-review-close.md` — superseding header added (content preserved).
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** Standard under 0d-ii. Direction-setting + documentation; reads code/registry read-only; no code, no production change, no governing document modified. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** Revert the commit and delete this entry; the findings document and the review document are untouched; reverting restores the review-close to its pre-header state.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+ls drafts/2026-05-29-capability-inventory-skeleton.md
+ls operations/handoffs/founder/2026-05-29-capability-inventory-NEXT-SESSION-PROMPT.md
+ls operations/handoffs/founder/2026-05-29-capability-inventory-direction-close.md
+grep -n "D-CONFIG-AUDIT-DIRECTION-CAPABILITY-INVENTORY-2026-05-29" operations/decision-log.md
+```
+Expected: the three files exist; the grep matches near the end of the active log, after `D-CONFIG-AUDIT-FINDINGS-REVIEWED-2026-05-29`. Then read the close, skeleton, and next-session prompt directly (0c — business documents).
+
+**Open questions:** Confirmed at the inventory session's open — L1–L7 configuration rows (seven candidates in the skeleton); dimension columns D1–D11; whether to reconcile the stale registry (v1.5.0 / 2026-05-02; predates Option A) in-pass or note-and-defer (recommend defer). The premise-validation question (is finishing Option A the top priority?) is answered by the inventory's ranking, not pre-decided.
+
+**Rules served:** 0a, 0c, 0d-ii, 0f, 0h (capability inventory = exit criterion 4), PR12, PR13, PR14 (ten-domain frame supplies the columns), PR15 (reuse existing artefact + frame over bespoke), R19. R0 (the direction grounds the next step in examined evidence rather than momentum).
+
+**Status:** Adopted. The findings document `/drafts/2026-05-28-configuration-audit-thought-experiment-findings.md` remains Under review; its Option I direction is **Superseded by** this entry. Cross-references: `D-CONFIG-AUDIT-FINDINGS-REVIEWED-2026-05-29`; `D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28`; `/drafts/2026-05-29-configuration-audit-thought-experiment-REVIEW.md`; `/drafts/2026-05-29-capability-inventory-skeleton.md`; `/operations/handoffs/founder/2026-05-29-capability-inventory-NEXT-SESSION-PROMPT.md`; `/operations/handoffs/founder/2026-05-29-capability-inventory-direction-close.md`.
+
+---
