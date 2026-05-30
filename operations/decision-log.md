@@ -8554,3 +8554,52 @@ Expected last lines: `61/61 pass`, `44/44 pass`, `55/55 pass`, `66/66 pass`; `ts
 **Status:** Adopted. Implementation status: configuration-level invocation tests **Wired + Verified**; the Option A build arc **Complete**. Cross-references: `D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28`; `D-R20A-OPTIONA-S3-REFLECT-WIRED-2026-05-28`; `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28`; `D-R20A-SC1-SINGLE-CATCH-CONTRACT-DRAFTED-2026-05-28`; `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27`; `/drafts/2026-05-28-r20a-single-catch-contract.md` §4.4, §4.5, §4.6, §5.5; `/operations/handoffs/founder/2026-05-30-OPTION-A-session-5-configuration-flows-close.md`.
 
 ---
+
+## 2026-05-30 — D-R20A-C2-LIVE-RUN-VERIFIED-2026-05-30
+
+**Decision:** The agent-path R20a distress catch is **Verified-live** in a TEST environment against real Haiku across the three wired surfaces (`/api/calling`, `/api/practice/reflect`, `/api/reason` agent-API). 34/34 harness assertions PASS. This is the first time the R20a safety functions ran against real Haiku on a real request — moving Option A from "Wired + unit-Verified" to **operationally proven**. **Launch criterion #10's agent leg is closed.** Production was not touched: the run was entirely local (`.env.local` + `localhost`) against a separate TEST Supabase project; all four R20a flags remain UNSET in Vercel.
+
+**Critical Change Protocol (0c-ii) — completed in-session before activation:**
+1. *What changed* — three R20a flags set `true` in the TEST env only (`SUBSTRATE_CALLING_R20A_ENABLED`, `SUBSTRATE_REFLECT_R20A_ENABLED`, `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED`); real Haiku exercised.
+2. *What could break* — false-positive redirect (mitigated by neutral negative control per surface); live Haiku failure (classifier fails-OPEN at the LLM layer per ADR-R20a-01; regex stage + acute fixture cover it; A7 outer wrapper fails-CLOSED on infra throw); negligible isolated test spend.
+3. *Existing sessions* — N/A ("no current users"; TEST env regardless).
+4. *Rollback* — TEST-only; unset flags / stop dev server / tear down test project; no production rollback (production never touched).
+5. *Verification* — the per-surface live runs + production-untouched check.
+6. *Approval* — founder approved specific to the named risks before any flag was set.
+
+**Confirmed flag set (Diagnostic-certain, code-read):** Calling catch gates on `SUBSTRATE_CALLING_R20A_ENABLED` (`overrideFlag:true`, independent of A7); Reflect content catch on `SUBSTRATE_REFLECT_R20A_ENABLED` (`overrideFlag:true`); `/api/reason` agent-developer form on `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED`. `/api/reason`'s route-guard catch on `input` is ALWAYS-ON (route.ts:656) — `SUBSTRATE_R20A_GATE_ENABLED` is NOT required and was left UNSET; the audience flag switches only the output FORM.
+
+**Per-surface live results (real Haiku), on the vetted acute fixture `C2_DISTRESS_INPUT`:** all three surfaces returned `status:'redirected'`, `distress_detected:true`, severity moderate|acute, non-empty `developer_note` (= `R20A_DEVELOPER_NOTE_DEFAULT`), non-empty `suggested_user_message`, `flow_terminated:true`, no engine output leaked. `safety_signal { flow_terminated:true, cause:'distress', caught_at:'substrate_layer2' }` present on Calling + Reflect; **ABSENT on `/api/reason`** (route-guard omits it — Diagnostic-certain asymmetry, route.ts:673-677). Neutral negative control passed unchanged on every surface. Reflect Zone-3 declared-signal regression control → `status:'flagged'` + developer_note. Ledger: `data-room/05_outputs/C2-live-2026-05-30T09-47-17-113Z.{json,md}`.
+
+**Harness:** `website/scripts/whole-system-harness/run-c2.ts` REWRITTEN this session to the Option A expectations (the pre-Option-A version asserted the inverted M-7 "no catch" behaviour; preserved in git history). Additive TEST scaffolding (Standard risk — no production path). Build-only PASS + `tsc --noEmit` EXIT 0 in-sandbox; live 34/34 PASS founder-run.
+
+**Propagation-reality (carried from S5, unchanged):** no end-to-end cross-surface forwarding exists; C2 proves the per-surface catch firing live, not a forwarded chain. K-category migration is the future home for forwarding.
+
+**Production-untouched confirmation:** `GET https://sagereasoning.com/api/public-key` → steady-state (`key_id: substrate-layer2-2026Q2`, `previous:null`, `rotation_overlap_until:null`) — the production key, distinct from the test key (`substrate-layer2-test`), proving the boundary held. `/api/substrate/layer3` → empty body (consistent with 503-disabled). The four R20a flags confirmed still UNSET in Vercel (no Vercel action taken this session).
+
+**Files touched:**
+- `website/scripts/whole-system-harness/run-c2.ts` — REWRITTEN to Option A expectations (additive test scaffolding).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-30-C2-live-run-close.md` — session close.
+
+**Risk classification:** **Critical** under 0d-ii (env-flag activation of the R20a perimeter). PR6 ENGAGED (R20a safety perimeter exercised live). Full CCP completed (above). PR17 ENGAGED (TEST-env standup + live runs walked through interactively, step by step, in-session). AC2 (~500ms two-stage budget) paid live. AC4 (invocation) exercised end-to-end live. AC5 perimeter unchanged at 10 routes. AC7 not engaged (no production auth/session change). The flag activation was TEST-only; production config unchanged.
+
+**Rollback path:** TEST-only — unset the three flags in `website/.env.local` / stop the local dev server / tear down the test project. No production rollback (production never touched). For the committed artefacts: revert this entry + the close + `git checkout` the prior `run-c2.ts` from git history.
+
+**Verification step (founder-performable, re-runnable while the TEST env stands):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+# (dev server running in another tab; .env.local has the three R20a flags + WSH_ vars)
+npx tsx --env-file=.env.local scripts/whole-system-harness/run-c2.ts --live
+```
+Expected: `34 passed, 0 failed`; `Result: PASS`. Build-only sanity (no env, no network): `npx tsx scripts/whole-system-harness/run-c2.ts` → PASS, 0 assertions.
+
+**Diagnostic-certainty signal (PR10):** **Diagnostic-certain — root cause identified** (34/34 live PASS on real Haiku; production-untouched verified by direct fetch + founder Vercel confirmation).
+
+**Open questions / carried forward:** the four R20a production activations (each a separate future Critical session with its own CCP + PR17 walkthrough); end-to-end cross-surface forwarding (K-category); capability-inventory gap #4 (human-tool distress coverage) + gap #5 (intimate-data encryption end-to-end); the `/api/reason` `safety_signal` asymmetry (documented; revisit if a forwarded carrier is built); F-series Jest-config debt; the two R17 governance carry-forwards (stale R17c 503 notes; `mentor_profiles` schema-drift).
+
+**Rules served:** 0a, 0c, 0c-ii, 0d-ii, 0f, R19c, R20a, AC2, AC4, AC5, PR1, PR3, PR6, PR10, PR15, PR17.
+
+**Status:** Adopted. Implementation status: the agent-path R20a catch **Verified-live (TEST)** across the three wired surfaces; launch criterion #10 agent leg **closed**; the four M-7 finding rows → **closure-ready**. Cross-references: `D-R20A-OPTIONA-S5-CONFIGURATION-FLOWS-VERIFIED-2026-05-30`; `D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28`; `D-R20A-OPTIONA-S3-REFLECT-WIRED-2026-05-28`; `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28`; `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27`; `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13`; `/adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`; `data-room/04_test_brief/test-env-standup-checklist.md`; `/operations/handoffs/founder/2026-05-30-C2-live-run-close.md`.
+
+---
