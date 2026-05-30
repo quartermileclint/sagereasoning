@@ -8603,3 +8603,60 @@ Expected: `34 passed, 0 failed`; `Result: PASS`. Build-only sanity (no env, no n
 **Status:** Adopted. Implementation status: the agent-path R20a catch **Verified-live (TEST)** across the three wired surfaces; launch criterion #10 agent leg **closed**; the four M-7 finding rows → **closure-ready**. Cross-references: `D-R20A-OPTIONA-S5-CONFIGURATION-FLOWS-VERIFIED-2026-05-30`; `D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28`; `D-R20A-OPTIONA-S3-REFLECT-WIRED-2026-05-28`; `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28`; `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27`; `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13`; `/adopted/adr/2026-05-27-r20a-configuration-perimeter-and-audience-contract.md`; `data-room/04_test_brief/test-env-standup-checklist.md`; `/operations/handoffs/founder/2026-05-30-C2-live-run-close.md`.
 
 ---
+
+## 2026-05-30 — D-CAPABILITY-GAPS-4-5-ASSESSED-2026-05-30
+
+**Decision:** Capability-inventory gap #4 (human-tool distress coverage, LC#10) and gap #5 (intimate-data encryption end-to-end, LC#7) are **assessed by read-only code-read**. Two coverage maps recorded below with honest severities. **No code changed; production UNCHANGED** (four R20a flags UNSET; `/api/reason` byte-identical). Remediations are named as future sessions, not built here.
+
+**Gap #4 — human-tool distress-coverage map (the four C6 tools):**
+
+| Tool | Route | Distress-checked before LLM? | Coverage | Severity | Certainty |
+|---|---|---|---|---|---|
+| prod-action-scorer | `/api/score` | **Yes** — `enforceDistressCheck(detectDistressTwoStage(action))` (route.ts:151) before `runSageReason` (:201) | `action` only; `context`/`relationships`/`emotional_state` unscreened | minor (field-coverage) | Diagnostic-certain |
+| prod-doc-scorer | `/api/score-document` | **Yes** — on `text` (:114) before `messages.create` (:150) | primary input | none | Diagnostic-certain |
+| prod-scenarios | `/api/score-scenario` | **Yes** — on `response` (:313) before scoring `messages.create` (:350) | user response | none | Diagnostic-certain |
+| **prod-journal** | **`/api/journal`** (page `/journal` :191/:211) | **NO** — no import, no call; writes `journal_entries.reflection_text` plaintext | none | **significant (LC#10)** | Diagnostic-certain |
+| (adjacent) realtime journal | `/api/mentor/journal-feed` | **NO** — writes `realtime_journal_entries` (impression/assent/action) with no distress check | none | **significant (LC#10)** | Diagnostic-certain |
+
+Mitigant on the journal gap: both journal routes are store-only (no responsive LLM output), so the acute "offering philosophy to someone in crisis" harm is lower than on a scorer — but R20a's text ("the mentor and **all human-facing tools** must actively detect … and redirect") and LC#10 ("all human-facing tools include distress detection") are not met for the journal. Founder may reclassify.
+
+**Gap #5 — intimate-data encryption map (R17b, AES-256-GCM via `MENTOR_ENCRYPTION_KEY`).** Primitive is sound (`server-encryption.ts`: AES-256-GCM, 64-hex key enforced, fresh 12-byte IV/call, 16-byte authTag, decrypt server-side only). Per the established design split (raw prose encrypted; distilled/categorical/metadata plaintext-queryable), per-table at write:
+
+| Table | Intimate field(s) | Encrypted at write? | Severity | Certainty |
+|---|---|---|---|---|
+| mentor_profiles | full profile blob | **Yes** — `encryptProfileData` → `encrypted_profile` (mentor-profile-store.ts:228); decrypt server-only (:154) | none | Diagnostic-certain |
+| mentor_baseline_appendix | questions/answers/refinement | **Yes** — `encryptProfileData` → `encrypted_payload` (mentor-appendix-store.ts:90) | none | Diagnostic-certain |
+| sage_reflect_sessions (adjacent) | verbatim responses | **Yes** — `encryptForStorage` → `response_history_ciphertext` (session-store.ts:324) | none | Diagnostic-certain |
+| **realtime_journal_entries** | impression/assent/action (raw verbatim) | **NO** — plaintext insert (journal-feed route :66) | **significant** — raw prose stored plaintext, contradicts the R17b prose-encryption principle the profile/appendix/reflect stores follow | Diagnostic-certain |
+| mentor_interactions | description, mentor_observation, passions_detected (false_judgement) | **NO** — plaintext | **significant** | Diagnostic-certain |
+| mentor_observations_structured | `observation` (distilled prose) | **NO** — plaintext (observation-logger.ts:221) | **significant** | Diagnostic-certain |
+| mentor_journal_refs | `summary` (journal digest) | **NO** — plaintext | significant | Diagnostic-certain |
+| mentor_profile_snapshots | derived metadata (proximity/grade/passions) | **NO** — plaintext (mentor-context-private.ts:412) | minor — same non-sensitive metadata tier as `mentor_profiles`' own plaintext columns; design-consistent | Diagnostic-certain |
+
+Net gap #5: encryption holds on the profile-blob tier + Reflect verbatim; **five named tables write plaintext**, of which `realtime_journal_entries` (raw verbatim) is the clearest deviation, three (interactions/observations/journal_refs) are distilled-but-intimate deviations, and `mentor_profile_snapshots` is metadata-tier (design-consistent).
+
+**Gap #1 overlap (noted, not fixed — and now largely CLOSED):** all five plaintext tables are already covered by `/api/user/delete` per `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29` (Class A + Class B cascade), which was verified-live and deployed 2026-05-30. So the deletion-completeness gap the inventory ranked #1 is **resolved**; the remaining exposure on these tables is encryption-at-rest, not erasure.
+
+**Named follow-up sessions (future; not built this session):**
+1. **R20a distress check on `/api/journal` (+ `/api/mentor/journal-feed`)** — Critical / PR6 + AC5 (perimeter addition: registry entry in `r20a-invocation-guard.test.ts` + `enforceDistressCheck(detectDistressTwoStage(...))` per the AC5 ninth-route protocol). Full CCP.
+2. **R17b encryption-at-write for `realtime_journal_entries`** (and, scoped by severity, `mentor_interactions` / `mentor_observations_structured` / `mentor_journal_refs`) — Critical / R17b + R17f. Full CCP. `mentor_profile_snapshots` excluded (metadata tier).
+
+**Files touched:** `operations/decision-log.md` (this entry); `operations/handoffs/founder/2026-05-30-capability-gaps-4-5-assessment-close.md` (close).
+
+**Risk classification:** **Standard** under 0d-ii — read-only assessment + governance documentation; no code, no production change. PR6 not engaged (no safety-function touched). AC7 not engaged.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+# Gap #4 — which tool routes call the distress check (expect score, score-document, score-scenario; NOT journal/journal-feed):
+grep -rl "detectDistressTwoStage" src/app/api/score src/app/api/score-document src/app/api/score-scenario src/app/api/journal src/app/api/mentor/journal-feed
+# Gap #5 — which write paths encrypt (expect mentor-profile-store + mentor-appendix-store + session-store; NOT observation-logger/journal-feed/context-private):
+grep -rl "encryptProfileData\|encryptForStorage" src/lib src/app/api
+```
+Expected: gap #4 grep lists only `score`, `score-document`, `score-scenario`; gap #5 grep lists `mentor-profile-store.ts`, `mentor-appendix-store.ts`, `sage-reflect/session-store.ts`, `encryption-helpers.ts`, `server-encryption.ts` (no journal/observation/snapshot writer).
+
+**Rules served:** 0a, 0c, 0d-ii, 0f, R17b, R17c, R19, R20a, AC5, PR2, PR10.
+
+**Status:** Adopted. Implementation status: gaps #4 + #5 **assessed** (not remediated). Cross-references: `D-CAPABILITY-INVENTORY-FIRST-PASS-2026-05-29`; `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29`; `D-R20A-C2-LIVE-RUN-VERIFIED-2026-05-30`; `/drafts/2026-05-29-capability-inventory-first-pass.md` (gaps #1/#4/#5).
+
+---
