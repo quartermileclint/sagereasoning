@@ -54,6 +54,17 @@ export async function DELETE(request: NextRequest) {
   // 3. Delete user data in foreign-key-safe order
   // Each deletion is attempted independently so partial failures don't block the rest.
   // Tables that may not exist yet are handled gracefully.
+  //
+  // The R17b intimate mentor store is deleted EXPLICITLY here (belt-and-braces).
+  // Every one of these tables already declares ON DELETE CASCADE to auth.users,
+  // so step 4 (auth.admin.deleteUser) would remove them automatically — but
+  // explicit removal means erasure no longer depends on that cascade and survives
+  // any future FK change. Deleting `mentor_profiles` cascade-removes its nine
+  // profile_id-scoped children (see cascadeClearedViaMentorProfile below), which
+  // are NOT user_id-scoped and therefore cannot be deleted by the .eq('user_id')
+  // pattern used here.
+  // FK-safe order: tables that reference another are listed before the table they
+  // reference (premeditatio/oikeiosis → passion_events → realtime_journal_entries).
   const tablesToDelete = [
     'analytics_events',
     'action_evaluations_v3',
@@ -61,8 +72,31 @@ export async function DELETE(request: NextRequest) {
     'deliberation_chains',
     'journal_entries',
     'baseline_assessments_v3',
+    'premeditatio_entries',      // R17b intimate; → passion_events
+    'oikeiosis_reflections',     // R17b intimate; → passion_events
+    'passion_events',            // R17b intimate; → realtime_journal_entries
+    'realtime_journal_entries',  // R17b intimate
+    'mentor_baseline_appendix',  // R17b intimate (encrypted)
+    'mentor_profiles',           // R17b intimate (encrypted); cascades profile_id-scoped children
+    'founder_hub_entries',       // R17b intimate (founder hub)
     'user_locations',
     'profiles',
+  ]
+
+  // Tables removed transitively by the mentor_profiles delete above. They are
+  // profile_id-scoped (FK → mentor_profiles, ON DELETE CASCADE), so deleting the
+  // parent clears them. Named here only so the compliance audit log honestly
+  // reflects everything that was cleared — not only the explicitly-issued deletes.
+  const cascadeClearedViaMentorProfile = [
+    'mentor_interactions',
+    'mentor_profile_snapshots',
+    'mentor_journal_refs',
+    'mentor_observations_structured',
+    'mentor_passion_map',
+    'mentor_causal_tendencies',
+    'mentor_value_hierarchy',
+    'mentor_oikeiosis_map',
+    'mentor_virtue_profile',
   ]
 
   for (const table of tablesToDelete) {
@@ -88,7 +122,7 @@ export async function DELETE(request: NextRequest) {
     await supabaseAdmin.from('compliance_deletion_log').insert({
       event: 'account_deleted',
       timestamp: new Date().toISOString(),
-      tables_cleared: tablesToDelete,
+      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile],
       errors: deletionErrors.length > 0 ? deletionErrors : null,
     })
   } catch {

@@ -8467,3 +8467,50 @@ Expected: file exists; grep matches near the end of the active log. Then read th
 **Status:** Adopted (the inventory is adopted as a deliverable; `/drafts/` → `/adopted/` promotion is a later founder-gated step). Cross-references: `D-CONFIG-AUDIT-DIRECTION-CAPABILITY-INVENTORY-2026-05-29`; `D-CONFIG-AUDIT-FINDINGS-REVIEWED-2026-05-29`; `/drafts/2026-05-29-capability-inventory-skeleton.md` (the seed structure, preserved); `/operations/handoffs/founder/2026-05-29-capability-inventory-NEXT-SESSION-PROMPT.md`.
 
 ---
+
+## 2026-05-29 — D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29
+
+**Decision:** Gap #1 from the capability inventory was diagnosed and resolved. The diagnosis found that **erasure of the intimate mentor store was already complete via the database cascade** (the inventory's belief that it was "left behind" was wrong in the founder's favour). Per founder election: `/api/user/delete` was extended to remove the intimate store **explicitly** (belt-and-braces, so erasure no longer depends on the `auth.users` cascade) and its compliance audit log was made honest; `/api/user/export` was extended to include the full intimate store, decrypting the two encrypted tables to plaintext for the data subject (GDPR Art 15/20 portability in usable form).
+
+**Diagnosis result (Step 1; "Diagnostic-certain — root cause identified"):** Every personal-data table classifies **A** (direct `ON DELETE CASCADE` to `auth.users`) or **B** (transitive cascade via `mentor_profiles`, FK `ON DELETE CASCADE`). **No Class C (orphaned) tables exist.**
+- Class A: `mentor_profiles`, `mentor_baseline_appendix`, `realtime_journal_entries`, `passion_events`, `premeditatio_entries`, `oikeiosis_reflections`, `founder_hub_entries` (+ the core tables already in the delete array).
+- Class B (cascade via `mentor_profiles`): `mentor_interactions`, `mentor_profile_snapshots`, `mentor_journal_refs`, `mentor_observations_structured`, `mentor_passion_map`, `mentor_causal_tendencies`, `mentor_value_hierarchy`, `mentor_oikeiosis_map`, `mentor_virtue_profile`.
+- `realtime_journal_lag_stats` and the other gap-table aggregations are **VIEWS**, not tables — no deletion needed (confirms the prompt's note).
+
+**Reasoning:** Executes the inventory's top-ranked gap (`D-CAPABILITY-INVENTORY-FIRST-PASS-2026-05-29`, LC#7). The deletion-route belt-and-braces was elected over "leave unchanged" so erasure survives any future FK change and the `compliance_deletion_log.tables_cleared` field honestly names everything cleared (previously listed only 8 of ~24 tables). Plaintext export was elected over ciphertext because Art 20 requires data in a usable form and only the authenticated subject can request their own export. The mentor child tables are `profile_id`-scoped (no `user_id` column), so they are removed via the explicit `mentor_profiles` delete's cascade — not added to the `user_id` delete loop (which would error).
+
+**Files touched:**
+- `website/src/app/api/user/delete/route.ts` — added 7 user-scoped intimate tables to `tablesToDelete` in FK-safe order; added `cascadeClearedViaMentorProfile` list; expanded `tables_cleared` audit field. Additive only.
+- `website/src/app/api/user/export/route.ts` — added the full intimate store (user-scoped + profile-scoped); decrypt-on-access for `mentor_profiles.encrypted_profile` and `mentor_baseline_appendix.encrypted_payload` via the canonical `decryptProfileData` pattern; bumped `format_version` 1.0 → 1.1.
+- `operations/handoffs/founder/2026-05-29-r17-erasure-portability-LIVE-TEST-WALKTHROUGH.md` — new; the PR17 live-test script (seed → count → delete → recount → export).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-29-r17-erasure-portability-close.md` — session close.
+
+**Risk classification (0d-ii):** **Critical** — `/api/user/delete` is data-deletion + service-role access. Critical Change Protocol (0c-ii) completed visibly before the founder approved ("go ahead", specific to the named scoping-column risk). The `/api/user/export` change is Elevated (changes existing user-facing functionality, adds no deletion); session held under the Critical template since deletion was in scope at open. AC7 not engaged. **PR6 not engaged** (data deletion, not the distress classifier). KG1 engaged (DB writes).
+
+**Critical Change Protocol record (0c-ii):**
+1. *What changes* — delete endpoint also explicitly removes the intimate store; export includes it.
+2. *What could break* — wrong scoping column / wrong `.eq()` could delete wrong rows. Mitigation: every added table verified `user_id`-scoped against its migration; each delete `.eq('user_id', userId)`; mentor children handled only via the parent cascade; FK-safe ordering avoids spurious errors; existing independent-delete + error-collection pattern preserved.
+3. *Existing sessions* — N/A (founder + test logins only; no current users).
+4. *Rollback* — additive change; `git revert <sha>` + push + Vercel redeploy.
+5. *Verification* — live test on a throwaway account (walkthrough doc).
+6. *Approval* — founder said "go ahead" to the named risk.
+
+**Verification:**
+- **Static (this session, complete):** `npx tsc --noEmit` in `website/` → EXIT=0, 0 errors. Both routes typecheck against the encryption helpers and Supabase client.
+- **Live — deletion logic (founder-run 2026-05-30, COMPLETE):** verified directly in the Supabase SQL editor against throwaway test user `9e1c4ea3-b1a1-4440-823b-a20727d62099` on the TEST project. Seeded 1 row in each of nine intimate tables; ran the route's exact intimate-store deletes in FK-safe order (`premeditatio_entries`, `oikeiosis_reflections`, `passion_events`, `realtime_journal_entries`, `mentor_baseline_appendix`, `mentor_profiles`). Counts **before = 1** across all nine; **after = 0** across all nine — including the three profile_id-scoped child tables (`mentor_interactions`, `mentor_observations_structured`, `mentor_journal_refs`) cleared only by the `mentor_profiles` cascade. **This proves the changed deletion table-list + FK order + cascade.** It exercised the SQL the route runs, not the HTTP+auth wrapper (unchanged this session). `/api/user/delete` deletion logic → **Verified-live**.
+- **Live — full HTTP endpoint + export route (DEFERRED):** the end-to-end `DELETE`/`GET` via Bearer token was deferred — it requires a running app + token minting, which proved high-friction with no added assurance over the SQL-level proof above. The export change remains **Wired + typecheck-verified** (additive, lower-risk Elevated). Optional future step if a TEST app instance is convenient.
+- TEST-DB schema-drift surfaced during the run (now confirmed, not just suspected): the live `mentor_profile_snapshots` has a NOT-NULL `snapshot_data` column absent from the migration files — the seed omits that table (it is cascade-covered regardless). Reinforces the `mentor_profiles` dual-definition observation below.
+
+**Observations (not in scope to fix this session):**
+- The manifest still describes R17c as "a placeholder 503 currently in place" at three points (lines ~11, ~47, ~53); the route is in fact fully implemented. Documentation drift — flag for a governance pass.
+- Two migrations define `mentor_profiles` with incompatible columns (`supabase/migrations/20260412_hub_isolation.sql` vs `website/supabase-mentor-profiles-migration.sql`); `CREATE TABLE IF NOT EXISTS` means whichever ran first wins. The encrypted (website) definition matches the live read path (`mentor-profile-store.ts`). Schema-drift note for a future reconciliation.
+- `support_decrypt_request` / `support_access_log` use `ON DELETE RESTRICT` on `user_id`: a user with support-decrypt history cannot be auth-deleted until those audit rows are handled (deliberate R17a audit-retention design). A clean test user does not hit this; the erasure-vs-audit-retention tension is a separate legal/design question.
+
+**Open questions:** Deletion logic verified-live (counts recorded above); full HTTP-endpoint + export live test deferred (low value over the SQL proof). Whether to fix the manifest R17c "503 stub" drift and the `mentor_profiles`/`mentor_profile_snapshots` schema-drift in a later governance/registry pass.
+
+**Rules served:** 0a, 0c, 0c-ii, 0d-ii, 0f, R17, R17b, R17c, R17f, KG1, PR1, PR2, PR10, PR15 (reused existing encryption helpers + cascade rather than bespoke), PR17.
+
+**Status:** Adopted. Cross-references: `D-CAPABILITY-INVENTORY-FIRST-PASS-2026-05-29`; `/drafts/2026-05-29-capability-inventory-first-pass.md` (gap #1, #5); `/operations/handoffs/founder/2026-05-29-r17-erasure-portability-LIVE-TEST-WALKTHROUGH.md`; `/operations/handoffs/founder/2026-05-29-r17-erasure-portability-close.md`.
+
+---
