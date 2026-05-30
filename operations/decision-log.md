@@ -8516,3 +8516,41 @@ Expected: file exists; grep matches near the end of the active log. Then read th
 **Status:** Adopted. Cross-references: `D-CAPABILITY-INVENTORY-FIRST-PASS-2026-05-29`; `/drafts/2026-05-29-capability-inventory-first-pass.md` (gap #1, #5); `/operations/handoffs/founder/2026-05-29-r17-erasure-portability-LIVE-TEST-WALKTHROUGH.md`; `/operations/handoffs/founder/2026-05-29-r17-erasure-portability-close.md`.
 
 ---
+
+## 2026-05-30 — D-R20A-OPTIONA-S5-CONFIGURATION-FLOWS-VERIFIED-2026-05-30
+
+**Decision:** The configuration-level R20a invocation tests (AC4 extended from per-route to per-configuration-flow) are written, run, and Verified. **The Option A build arc is COMPLETE.** A single additive multi-flow tsx test (`website/src/app/api/__tests__/r20a-configuration-flows.test.ts`, 61 assertions) proves, per configuration flow, the catch → halt → idempotent-skip → audience-correct-render → no-double-emit contract across the three surfaces with R20a catches wired (FL-REASON `/api/reason`, FL-CALLING `/api/calling`, FL-REFLECT `/api/practice/reflect`), plus a FL-BOUNDARY group pinning the propagation-reality finding. No safety code, route handler, or builder was modified.
+
+**Propagation-reality finding (Pre-condition 3; Diagnostic-certain — root cause identified):** NO end-to-end cross-surface forwarding exists today. The Calling→Reasoning hand-off envelope (`DiscoveredPurpose`) has no `safety_signal` slot; `/api/reason` neither consumes nor emits a `safety_signal` carrier (its halt marker is `flow_terminated` inside the audience payload); each surface emits the carrier only additively on its OWN outward response shape. S5 tests are therefore PROPAGATION-SHAPED per-stage, not a single end-to-end test of a non-existent forwarding mechanism. The one genuinely wired downstream consumer — Reflect's Zone-3 precedence (`checkZone3Boundary` runs before the substrate catch; an upstream developer-declared `harm_flagged` skips the classifier) — is exercised directly (FL-REFLECT-3/4), realising the §4.5 single-emission rule within that surface. End-to-end forwarding is a future K-category migration session.
+
+**Flow-set election (founder, S5 open):** "any configuration that needs it" → scoped to the three wired surfaces + the boundary group. The broader candidate set (mentor/private/reflect, Sage Assent, plugin wrappers) has no catch wired and so no propagation to exercise today; FL-BOUNDARY documents why.
+
+**Files touched:**
+- `website/src/app/api/__tests__/r20a-configuration-flows.test.ts` — NEW; 61-assertion multi-flow tsx test (FL-REASON / FL-CALLING / FL-REFLECT / FL-BOUNDARY / CON groups). Additive only.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-30-OPTION-A-session-5-configuration-flows-close.md` — session close.
+
+**Risk classification:** **Elevated** under 0d-ii. Additive tests against existing safety code; no modification to R20a safety functions, route handlers, or builders. PR6 NOT engaged (no safety-function change). AC5 perimeter unchanged at 10 routes (no eleventh route). AC4 ENGAGED at the deliverable level (per-route → per-configuration-flow). AC7 not engaged. KG1 not engaged (no DB writes).
+
+**Rollback path:** `git rm website/src/app/api/__tests__/r20a-configuration-flows.test.ts` and revert this entry + the close. No production change to roll back — all four R20a flags remain UNSET in Vercel.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/app/api/__tests__/r20a-configuration-flows.test.ts
+npx tsx src/app/api/calling/__tests__/r20a-invocation.test.ts
+npx tsx src/app/api/practice/reflect/__tests__/r20a-invocation.test.ts
+npx tsx src/app/api/reason/__tests__/r20a-audience-rendering.test.ts
+npx tsc --noEmit
+```
+Expected last lines: `61/61 pass`, `44/44 pass`, `55/55 pass`, `66/66 pass`; `tsc` no output, EXIT 0. (Run one at a time; a `[stripe.ts] STRIPE_SECRET_KEY is not set...` informational line may appear and is harmless.)
+
+**Diagnostic-certainty signal (PR10):** **Diagnostic-certain — root cause identified** on the substantive work (61/61 + 165/165 regressions + tsc EXIT 0 = 226 assertions). **Diagnostic-uncertain — pattern level** carried forward on the Jest invocation registry (pre-existing F-series AC12 debt; tsx-only this session per founder election; not an S5 regression).
+
+**Open questions:** None blocking. Carried forward: end-to-end cross-surface forwarding (K-category migration); F-series Jest-config debt remediation; the four R20a production activations (each a separate future Critical session); design §7 Q4 (retire internal `distress_signal` on `Layer2Assessment`).
+
+**Rules served:** 0a, 0c, 0d-ii, 0f, R19c, R20a, AC4, AC5, AC8, PR1, PR2, PR3, PR10, PR15.
+
+**Status:** Adopted. Implementation status: configuration-level invocation tests **Wired + Verified**; the Option A build arc **Complete**. Cross-references: `D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28`; `D-R20A-OPTIONA-S3-REFLECT-WIRED-2026-05-28`; `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28`; `D-R20A-SC1-SINGLE-CATCH-CONTRACT-DRAFTED-2026-05-28`; `D-R20A-ADR-ADOPTED-SEQUENCING-2026-05-27`; `/drafts/2026-05-28-r20a-single-catch-contract.md` §4.4, §4.5, §4.6, §5.5; `/operations/handoffs/founder/2026-05-30-OPTION-A-session-5-configuration-flows-close.md`.
+
+---
