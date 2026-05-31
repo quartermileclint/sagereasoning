@@ -8746,4 +8746,44 @@ Expected: gap #4 grep lists only `score`, `score-document`, `score-scenario`; ga
 
 **Status:** Adopted. Implementation status: journal distress screening **Wired + statically Verified** (tsc EXIT 0; 22/22 across both per-route tests; PR2 call-path confirmed). Not yet deployed; LC#10 closes for the journal on deploy. Cross-references: `D-CAPABILITY-GAPS-4-5-ASSESSED-2026-05-30`; `D-R17B-REALTIME-JOURNAL-ENCRYPTION-2026-05-31`; `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28`; manifest §AC5; `/operations/handoffs/founder/2026-05-31-r20a-journal-distress-check-close.md`.
 
+**Follow-up 2026-05-31 (deployment record):** `D-R20A-JOURNAL-DISTRESS-CHECK-2026-05-31` is now **deployed and live in production** — committed, pushed, Vercel build green (2026-05-31). Implementation status: journal distress screening → **Verified-live (production)**; the optional end-to-end live TEST run was **waived by the founder**. LC#10 ("all human-facing tools include distress detection") is **met for the journal**. Both `/api/journal` and `/api/mentor/journal-feed` screen human free-text through the two-stage distress classifier before storing (always-on; flag-independent). No schema change; reversible via `git revert <sha>` + redeploy. (Recorded at the open of the 2026-05-31 R20a-activation session.)
+
+---
+
+## 2026-05-31 — D-R20A-CALLING-ACTIVATION-2026-05-31
+
+**Decision:** Activated the first of the four R20a production flags — `SUBSTRATE_CALLING_R20A_ENABLED` set to `true` (Production scope only) in Vercel, followed by a redeploy. On `/api/calling` the substrate-side distress catch (`enforceLayer2R20aGate({ … , overrideFlag: true })`, gated by `isCallingR20aEnabled()`) is now ON in production. This is a **configuration change, not code** — no commit to the application, no schema change. It is the first of four independent R20a activations (each its own future Critical session); the three remaining flags (`SUBSTRATE_REFLECT_R20A_ENABLED`, `SUBSTRATE_R20A_GATE_ENABLED`, `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED`) remain **UNSET**.
+
+**Reasoning:** Calling was elected first (founder pick from the AI recommendation) because it has the **smallest blast radius** — `/api/calling` passes `overrideFlag: true`, so its catch is independent of the shared A7 gate flag and of Reflect; activating it touches one route only. It is also the surface the C2 live run exercised most directly, making it the cleanest single-route proof (PR1) of the activation pattern before the larger shared-gate activation in a later session. The catch logic being activated is **byte-identical to the code Verified-live in TEST against real Haiku** (34/34) at `D-R20A-C2-LIVE-RUN-VERIFIED-2026-05-30`. **PR15 — Anthropic-primitive considered:** none applies; this activates the project's own canonical R20a substrate gate (`r20a-gate.ts`), no new dependency. **Model:** Haiku (FastModel) via `SafetyCriticalCallParams`, reused as-is (cache AC1 row "Safety-critical → Haiku"; KG2).
+
+**Files touched:**
+- Vercel environment configuration — `SUBSTRATE_CALLING_R20A_ENABLED = true` (Production only). No repository file changed by the activation itself.
+- `operations/decision-log.md` — this entry + the journal-entry deployment-record follow-up (Step 1).
+- `operations/handoffs/founder/2026-05-31-r20a-calling-activation-close.md` — session close.
+
+**Risk classification (0d-ii):** **Critical** — deployment-configuration change activating a new R20a perimeter surface (PR6 + AC5). The Critical Change Protocol (0c-ii) was completed visibly in chat before any Vercel change; the founder approved "Go ahead" specific to the six named points. PR17 engaged (the Vercel env-var add + redeploy walked through live, click by click). AC2 paid live (the synchronous Haiku check on the activated route). PR3 engaged (the catch is awaited; no fire-and-forget). AC7 not engaged.
+
+**Critical Change Protocol record (0c-ii):**
+1. *What changes* — one env var (`SUBSTRATE_CALLING_R20A_ENABLED`) set to `true` in Vercel; on redeploy, `/api/calling`'s distress catch goes OFF → ON. Configuration, not code.
+2. *What could break* — (a) a false positive could redirect a legitimate `/api/calling` request (conservative classifier; only moderate/acute redirect; no current users); (b) ~500ms added latency on borderline inputs (AC2, accepted per PR3); (c) blast radius is exactly one route — `overrideFlag: true` keeps Calling independent of the A7 gate and Reflect.
+3. *Existing sessions* — none affected; forward-looking request-path check; no stored data touched; no schema change.
+4. *Rollback* — delete `SUBSTRATE_CALLING_R20A_ENABLED` (return to UNSET) in Vercel → Settings → Environment Variables → Remove, then Deployments → latest → Redeploy. Reversible in under a minute; nothing persisted.
+5. *Verification* — env var present under Production with value `true`; redeploy green (both founder-confirmed). Optional live production probe **waived by the founder** (a meaningful probe requires minting a production `sr_assent_` write credential since the catch sits after the auth gate; the catch behaviour rests on C2's live Haiku evidence).
+6. *Approval* — founder said "Go ahead", specific to the six points; elected Production-only scope.
+
+**Verification:**
+- **Config (COMPLETE, founder-confirmed):** `SUBSTRATE_CALLING_R20A_ENABLED = true` listed under Production in Vercel; redeploy shows Ready/green. Flag reader is case-strict (`r20a-gate.ts:268`, `=== 'true'`); value is the exact literal `true`.
+- **Catch behaviour (rests on prior live evidence):** byte-identical to the code Verified-live in TEST against real Haiku (34/34) at `D-R20A-C2-LIVE-RUN-VERIFIED-2026-05-30`. No code changed since.
+- **Live production probe:** **waived by founder** (informed waiver — activation is additive protection with no current users; a clean probe needs a production write credential, which is its own setup).
+
+**Diagnostic-certainty (PR10):** "I'm confident" — the flag is active (config verified, case-strict value confirmed); the catch logic is the C2-live-verified code unchanged. No diagnostic uncertainty; nothing to acknowledge at symptom/pattern level.
+
+**Deployment:** Configuration change applied directly in Vercel (founder-performed, walked through live). The decision-log + close files are committed/pushed by the founder (no application-code commit for the activation). Production now: `SUBSTRATE_CALLING_R20A_ENABLED = true`; the other three R20a flags UNSET; `/api/reason` byte-identical for all non-Calling paths; `/api/substrate/layer3` → 503; `/api/public-key` steady-state (`substrate-layer2-2026Q2`). AC7 not engaged.
+
+**Open questions:** none blocking. Carried forward: the other three R20a activations (one flag per future Critical session); the three plaintext-table encryption batch (`mentor_interactions`, `mentor_observations_structured`, `mentor_journal_refs`, PR1); `/api/score` single-field coverage (minor); the Jest-runner gap; manifest R17c "503 stub" drift; `mentor_profiles` schema-drift (governance pass).
+
+**Rules served:** 0a, 0c, 0c-ii, 0d-ii, 0f, R20a, AC2, AC4, AC5, KG2, PR1, PR3, PR6, PR10, PR15, PR17.
+
+**Status:** Adopted. Implementation status: `/api/calling` R20a catch → **Live (production)**; config-verified, catch behaviour Verified-live (TEST, C2). First of four R20a production activations. Cross-references: `D-R20A-C2-LIVE-RUN-VERIFIED-2026-05-30`; `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28`; `D-R20A-JOURNAL-DISTRESS-CHECK-2026-05-31`; manifest §R20a/§AC5/§AC2; `/operations/handoffs/founder/2026-05-31-r20a-calling-activation-close.md`.
+
 ---
