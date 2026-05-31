@@ -20,7 +20,7 @@ Executed the highest-severity gap-#5 remediation: encrypted the raw verbatim pro
 | Item | Old | New |
 |---|---|---|
 | `realtime_journal_entries` prose at rest | plaintext (significant gap) | **encrypted at write** (R17b) |
-| Encryption-at-write implementation | Scoped | **Verified-live on TEST** (2026-05-31 founder run); production deploy pending "ship" |
+| Encryption-at-write implementation | Scoped | **Verified-live in production** (2026-05-31); TEST + production both confirmed |
 | `journal-encryption.ts` | — | NEW (Verified — 14/14 round-trip + TEST live run) |
 
 ## Verification Method Used (0c Framework)
@@ -64,7 +64,7 @@ Then pick the next Critical remediation (each its own CCP session):
 - `operations/handoffs/founder/2026-05-31-r17b-realtime-journal-encryption-LIVE-TEST-WALKTHROUGH.md`
 - `operations/handoffs/founder/2026-05-31-r17b-realtime-journal-encryption-close.md`
 
-**Production state at session close:** **UNCHANGED.** Vercel: four R20a flags UNSET; `/api/reason` byte-identical; `/api/substrate/layer3` → 503; `/api/public-key` steady-state. **TEST** Supabase (`sagereasoning-test`): migration applied + change Verified-live. **Production** Supabase: **migration NOT yet run**; `entry_ciphertext` / `entry_meta` columns exist only in TEST; the code change ships to production only on your "ship" (production migration first, then push). Until then production behaviour is byte-identical to pre-session. AC7 not engaged.
+**Production state at session close:** **CHANGED — shipped.** Code pushed; Vercel green. Production Supabase migration run; `realtime_journal_entries` prose now encrypted at rest in production and Verified-live (readable in the feed; ciphertext + NULL prose at rest). TEST also Verified-live. Vercel flags: four R20a flags remain UNSET; `/api/reason` byte-identical; `/api/substrate/layer3` → 503; `/api/public-key` steady-state. AC7 not engaged. (Sequencing note: code deployed just ahead of the production migration, so production journal *writes* failed-closed briefly until the migration ran — reads unaffected, no current users; resolved same session. Standing lesson reinforced: run the migration before pushing the dependent code.)
 
 ## Open Questions
 
