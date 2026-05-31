@@ -8660,3 +8660,47 @@ Expected: gap #4 grep lists only `score`, `score-document`, `score-scenario`; ga
 **Status:** Adopted. Implementation status: gaps #4 + #5 **assessed** (not remediated). Cross-references: `D-CAPABILITY-INVENTORY-FIRST-PASS-2026-05-29`; `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29`; `D-R20A-C2-LIVE-RUN-VERIFIED-2026-05-30`; `/drafts/2026-05-29-capability-inventory-first-pass.md` (gaps #1/#4/#5).
 
 ---
+
+## 2026-05-31 — D-R17B-REALTIME-JOURNAL-ENCRYPTION-2026-05-31
+
+**Decision:** The raw verbatim prose of `realtime_journal_entries` (impression / assent / action) is now **encrypted at rest** (R17b, AES-256-GCM, `MENTOR_ENCRYPTION_KEY`), closing the clearest gap-#5 deviation from `D-CAPABILITY-GAPS-4-5-ASSESSED-2026-05-30`. The three prose fields are encrypted as ONE blob into a `entry_ciphertext` TEXT + `entry_meta` JSONB column pair (the `sage-reflect/session-store.ts` precedent); all three readers (POST/GET journal-feed, `/api/user/export`) decrypt server-side; `/api/user/delete` is shape-agnostic (deletes whole rows by `user_id`). **Existing-rows strategy: LEAVE-AND-TOLERATE** (founder election) — old columns kept + made nullable; readers fall back to plaintext for any pre-change row (founder/test only). Proven on this single table (PR1); the three lower-severity plaintext tables (`mentor_interactions`, `mentor_observations_structured`, `mentor_journal_refs`) wait for a later batched session.
+
+**Reasoning ("Diagnostic-certain — root cause identified"):** the assessment named `realtime_journal_entries` plaintext as the highest-severity single gap-#5 row. Root cause is direct: the POST write inserted the three fields as plaintext. The fix encrypts at write and decrypts at every read. **PR15 — Anthropic-primitive considered:** none applies; this is bespoke domain crypto wiring reusing the project's own established `server-encryption.ts` / `encryption-helpers.ts` primitives (already the canonical pattern, ADR-ENCRYPTION-WIRING-01). No new dependency. The verbatim-only encryption split (prose encrypted; queryable timestamps/`lag_hours`/the `realtime_journal_lag_stats` view left plaintext) matches the founder-confirmed Reflect split (2026-05-22); the view was code-read confirmed to read only `event_timestamp` / `created_at`, never the prose columns.
+
+**Files touched:**
+- `website/src/lib/journal-encryption.ts` — NEW. Pure helpers `encryptJournalProse` / `decryptJournalProse` / `resolveJournalProse` (the last handles both encrypted + legacy-plaintext rows and surfaces `_decryption_error` instead of throwing on a bad row). Mirrors `session-store.ts` `encryptPersistedState`/`decryptPersistedState`.
+- `website/src/app/api/mentor/journal-feed/route.ts` — POST encrypts the three fields before insert (`entry_ciphertext` + `entry_meta`, meta a plain object per KG7); POST + GET return decrypted prose via `presentEntry` (response shape byte-identical for the owner; ciphertext/meta stripped).
+- `website/src/app/api/user/export/route.ts` — `realtime_journal_entries` moved out of the plaintext loop into a decrypt-on-access block (Art 20 usable form for the subject); legacy-plaintext fallback.
+- `website/supabase-realtime-journal-encryption-migration.sql` — NEW. Idempotent: adds the column pair; drops NOT NULL on the three prose columns. Includes verification + rollback blocks.
+- `website/src/lib/__tests__/journal-encryption.test.ts` — NEW. Self-contained tsx round-trip + shape + fallback + tamper-detection (14 assertions; run with plain `npx tsx`).
+- `operations/handoffs/founder/2026-05-31-r17b-realtime-journal-encryption-LIVE-TEST-WALKTHROUGH.md` — NEW. The PR17 live-test script.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-31-r17b-realtime-journal-encryption-close.md` — session close.
+
+**Risk classification (0d-ii):** **Critical** — encryption surface (R17b + R17f). Critical Change Protocol (0c-ii) completed visibly before the founder approved ("Go ahead", specific to the named reader-decrypt + lag-stats-view + rollback risks). Schema change to an existing table = Elevated on its own, Critical here as the encryption surface. **PR6 not engaged** (no distress classifier touched). AC7 not engaged. KG1 engaged (DB writes — every Supabase call awaited; admin client per existing route pattern). KG7 engaged (`entry_meta` written as a plain object).
+
+**Critical Change Protocol record (0c-ii):**
+1. *What changes* — the three journal prose fields are encrypted at rest; readers decrypt server-side; on-screen behaviour unchanged.
+2. *What could break* — (a) GET feed would show gibberish if not decrypting — mitigated, decrypts via `presentEntry`; (b) `/api/user/export` would dump ciphertext — mitigated, moved to a decrypt block; (c) `realtime_journal_lag_stats` view — code-read confirmed it reads only timestamps, **unaffected**; (d) `/api/user/delete` — deletes whole rows, **shape-agnostic**; (e) existing plaintext rows — handled by leave-and-tolerate fallback.
+3. *Existing rows / sessions* — founder + test logins only; leave-and-tolerate keeps them readable; no current users.
+4. *Rollback* — `git revert <sha>` + push + Vercel redeploy. Added DB columns are additive and harmless to leave; rows written while live would be ciphertext the reverted code can't read (test rows only — harmless).
+5. *Verification* — TEST-DB live run (the walkthrough doc), founder-performed, walked through step by step (PR17).
+6. *Approval* — founder said "Go ahead", specific to the named risks; elected leave-and-tolerate for existing rows.
+
+**Verification:**
+- **Static (this session, COMPLETE):** `npx tsc --noEmit` in `website/` → **EXIT 0**. Round-trip test `journal-encryption.test.ts` → **14 passed, 0 failed** (round-trip of all three fields; ciphertext ≠ plaintext; `meta` is a plain object / `AES-256-GCM` / version 1; encrypted-shape resolve; legacy-plaintext fallback; tamper → surfaced `_decryption_error`, no throw).
+- **PR2 call-path confirmation (COMPLETE):** `encryptJournalProse(` is invoked at `journal-feed/route.ts:79` (POST execution path); `presentEntry`/`resolveJournalProse` reached at POST return (:104) and GET (:161). Not import-only.
+- **Live (founder-run 2026-05-31, COMPLETE — PASSED):** the five-step TEST-DB walkthrough run on the `sagereasoning-test` project (`iwdtrvuphogkwmovhnvz`) + a local `npm run dev` pointed at TEST via a throwaway `website/.env.development.local` (production `.env.local` untouched; override deleted after). Migration applied (columns added; prose columns → nullable). A new entry written through `/api/mentor/journal-feed` POST returned readable prose with no ciphertext leak; the GET feed round-tripped the same entry to readable text; the at-rest `SELECT` on the newest row showed `entry_ciphertext` = base64 (`ZQf7neCkROJRZVHEzjEPvvu/…`), `jsonb_typeof(entry_meta)` = `object`, `impression`/`assent`/`action` = **NULL**. The pre-existing legacy plaintext row remained readable via the export fallback (leave-and-tolerate confirmed). **Encryption-at-write → Verified-live on TEST.** Production deployment (production migration + push + confirm) remains a separate founder "ship" step.
+- **Test-harness findings (PR5 / T-series, noted not blocking):** (1) the throwaway `.env.development.local` must carry `NEXT_PUBLIC_SUPABASE_ANON_KEY` as a single unbroken line — a wrapped paste caused a first-run `401` at `requireAuth` (login succeeded via the script's own key; the server's env key was corrupt). Recreating the file via a `cat >` heredoc removed the paste-wrap risk. (2) The live-test script's `event_timestamp` must be computed in the past at run time (the route rejects future timestamps); a hardcoded time caused a `400`. Both fixed in `operations/handoffs/founder/journal-encryption-test.py`.
+
+**Diagnostic-certainty (PR10):** "Diagnostic-certain — root cause identified" at the code level (root cause isolated; change addresses it; static verification green). The live end-to-end run is the founder's confirmation step, not a source of diagnostic uncertainty.
+
+**Deployment:** Code committed + pushed this session (see close); **the migration is NOT yet run and the change is NOT yet live**. Production state is UNCHANGED until the founder runs the TEST walkthrough and then elects to ship (run the production migration + confirm). The four R20a flags remain UNSET (untouched).
+
+**Open questions:** none blocking. The three lower-severity plaintext tables remain open for a later batched session (PR1 — batch after this single-table proof is Verified-live). The 2026-05-29 manifest R17c "503 stub" drift and the `mentor_profiles`/`mentor_profile_snapshots` schema-drift carry forward (governance pass).
+
+**Rules served:** 0a, 0c, 0c-ii, 0d-ii, 0f, R17, R17b, R17e, R17f, KG1, KG7, PR1, PR2, PR10, PR15, PR17.
+
+**Status:** Adopted. Implementation status: encryption-at-write **Verified-live on TEST** (2026-05-31 founder run). Production deployment pending the founder "ship" (production migration + push + confirm); production behaviour UNCHANGED until then. Cross-references: `D-CAPABILITY-GAPS-4-5-ASSESSED-2026-05-30`; `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29`; `ADR-ENCRYPTION-WIRING-01`; `/operations/handoffs/founder/2026-05-31-r17b-realtime-journal-encryption-LIVE-TEST-WALKTHROUGH.md`; `/operations/handoffs/founder/2026-05-31-r17b-realtime-journal-encryption-close.md`.
+
+---

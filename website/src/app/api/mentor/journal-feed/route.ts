@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
+import { encryptJournalProse, resolveJournalProse } from '@/lib/journal-encryption'
+
+/**
+ * Strip the at-rest encryption columns from a stored row and surface the
+ * resolved (decrypted, or legacy-plaintext) prose. The response shape is
+ * byte-identical to the pre-encryption shape for the authenticated owner —
+ * `impression` / `assent` / `action` are returned as readable text (R17b).
+ */
+function presentEntry(row: Record<string, unknown>): Record<string, unknown> {
+  const { entry_ciphertext: _c, entry_meta: _m, impression: _i, assent: _a, action: _ac, ...rest } = row
+  const prose = resolveJournalProse(row as Parameters<typeof resolveJournalProse>[0])
+  return { ...rest, impression: prose.impression, assent: prose.assent, action: prose.action }
+}
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -61,13 +74,20 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+    // R17b — encrypt the three verbatim prose fields at rest as one blob.
+    // entry_meta is a PLAIN OBJECT (KG7); never JSON.stringify it.
+    const enc = encryptJournalProse({
+      impression: impression.trim(),
+      assent: assent.trim(),
+      action: action.trim(),
+    })
+
     const { data, error } = await supabase
       .from('realtime_journal_entries')
       .insert({
         user_id: userId,
-        impression: impression.trim(),
-        assent: assent.trim(),
-        action: action.trim(),
+        entry_ciphertext: enc.ciphertext,
+        entry_meta: enc.meta,
         event_timestamp: parsedEventTimestamp,
       })
       .select()
@@ -78,9 +98,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to save journal entry' }, { status: 500 })
     }
 
+    // Return the same shape the client expects — decrypted prose, no ciphertext.
     return NextResponse.json({
       success: true,
-      entry: data,
+      entry: presentEntry(data as Record<string, unknown>),
     })
   } catch (err) {
     console.error('Journal feed API error:', err)
@@ -136,8 +157,11 @@ export async function GET(request: NextRequest) {
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
 
+  // R17b — decrypt each row's prose server-side before returning to the owner.
+  const presentedEntries = (entries || []).map((e) => presentEntry(e as Record<string, unknown>))
+
   return NextResponse.json({
-    entries: entries || [],
+    entries: presentedEntries,
     stats: stats || {
       total_entries: 0,
       avg_lag_hours: null,

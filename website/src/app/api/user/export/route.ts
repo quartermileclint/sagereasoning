@@ -76,7 +76,8 @@ export async function GET(request: NextRequest) {
     { key: 'location', table: 'user_locations', select: '*' },
     { key: 'analytics_events', table: 'analytics_events', select: '*' },
     // R17b intimate mentor store — user_id-scoped, plaintext
-    { key: 'realtime_journal_entries', table: 'realtime_journal_entries', select: '*' },
+    // NOTE: realtime_journal_entries is handled separately below — its prose is
+    // encrypted at rest (R17b) and must be decrypted for the subject (Art 20).
     { key: 'passion_events', table: 'passion_events', select: '*' },
     { key: 'premeditatio_entries', table: 'premeditatio_entries', select: '*' },
     { key: 'oikeiosis_reflections', table: 'oikeiosis_reflections', select: '*' },
@@ -154,6 +155,55 @@ export async function GET(request: NextRequest) {
         } catch (e) {
           return { ...rest, decryption_error: e instanceof Error ? e.message : String(e) }
         }
+      })
+    }
+  }
+
+  // 3b. realtime_journal_entries — R17b encrypted at rest; decrypt for the
+  //     subject (Art 20 usable form). Falls back to the legacy plaintext
+  //     columns for any pre-encryption row (leave-and-tolerate).
+  {
+    const { data, error } = await supabaseAdmin
+      .from('realtime_journal_entries')
+      .select('*')
+      .eq('user_id', userId)
+
+    if (error && !error.message.includes('does not exist')) {
+      exportData.realtime_journal_entries = { error: error.message }
+    } else {
+      const rows = (data || []) as Array<Record<string, unknown>>
+      exportData.realtime_journal_entries = rows.map((row) => {
+        const {
+          entry_ciphertext,
+          entry_meta,
+          impression,
+          assent,
+          action,
+          ...rest
+        } = row
+        if (
+          typeof entry_ciphertext === 'string' &&
+          entry_ciphertext.length > 0 &&
+          entry_meta &&
+          typeof entry_meta === 'object'
+        ) {
+          try {
+            const decoded = decryptStoredField(
+              entry_ciphertext,
+              entry_meta as { iv: string; authTag: string; algorithm: string; version: number }
+            ) as { impression?: string; assent?: string; action?: string }
+            return {
+              ...rest,
+              impression: decoded.impression ?? null,
+              assent: decoded.assent ?? null,
+              action: decoded.action ?? null,
+            }
+          } catch (e) {
+            return { ...rest, decryption_error: e instanceof Error ? e.message : String(e) }
+          }
+        }
+        // Legacy plaintext row (pre-encryption; founder/test only).
+        return { ...rest, impression: impression ?? null, assent: assent ?? null, action: action ?? null }
       })
     }
   }
