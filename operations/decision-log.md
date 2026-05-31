@@ -8867,3 +8867,41 @@ Expected: gap #4 grep lists only `score`, `score-document`, `score-scenario`; ga
 **Status:** Adopted. Implementation status: A7 substrate gate (`SUBSTRATE_R20A_GATE_ENABLED`) → **Live (production)**; **Verified-live in TEST (28/28 real Haiku)**; config-verified. **Completes the four-flag R20a production-activation arc.** Cross-references: `D-R20A-BATCH-ACTIVATION-REFLECT-AUDIENCE-2026-05-31` (the PR7 deferral this resolves); `D-R20A-CALLING-ACTIVATION-2026-05-31`; `D-R20A-C2-LIVE-RUN-VERIFIED-2026-05-30`; `D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13`; manifest §R20a/§AC5/§AC2/§AC7; `/operations/handoffs/founder/2026-05-31-r20a-gate-activation-close.md`.
 
 ---
+
+## 2026-05-31 — D-LAYER3-ACTIVATION-DEFERRED-2026-05-31
+
+**Decision:** After a Critical-tier investigate-and-decide session on `SUBSTRATE_LAYER3_ENABLED`, the founder elected **Option C — defer Layer 3 activation** (do NOT flip the flag). **No code, no config, no schema change; production is byte-identical to session open.** The session's value was the pre-activation code-read, which confirmed that a naive flag flip would (a) deliver no user-facing benefit on `/api/reason` and (b) expose an unauthenticated paid endpoint — so the founder chose not to flip. A clean "we examined it and chose not to flip" is the successful outcome of the pre-activation rigour.
+
+**Reasoning / code-read findings (Diagnostic-certain — re-verified this session):** the single flag `SUBSTRATE_LAYER3_ENABLED` couples two unrelated effects, each with a catch.
+- **Finding 1 — `/api/reason` benefit is illusory (metadata-only).** When ON, `parallel-run.ts:737` runs `applyLayer3Injections(...)` (deterministic — `layer3-service.ts:582`, no `generateProse` call → no LLM call, no latency, no cost) and stores the result in `result.substrate_layer3_response`. But `/api/reason/route.ts` **never reads `substrate_layer3_response`** (grep confirmed: the route references Layer 3 only for `layer3_cost_usd_microcents` cost-tracking and `layer3_throw` error-handling, never the response prose). The injection is computed and discarded. So flipping the flag does **not** surface the A7 gate's mild-severity benefit on `/api/reason`; that would require a separate route code change (have the route read + serve `substrate_layer3_response`).
+- **Finding 2 — `/api/substrate/layer3` is an unauthenticated paid endpoint (the blocker).** When OFF → 503 (`route.ts:85`). When ON → the handler calls `generateLayer3Response` (`route.ts:136`), which **does** call `generateProse` → a real Sonnet call (`layer3-service.ts:663,676`). The handler has **no auth** (PR12 negative-finding discipline applied: grepped `requireAuth|api_key|apiKey|Authorization|Bearer|sr_assent|authenticate|getToken|verifyToken|requireApiKey|x-api-key` over the route dir → **no matches**), and `middleware.ts:48–49` explicitly skips all `/api/` routes (the cookie-auth there only guards page routes in `PROTECTED_ROUTES`). Its intended auth (A10 per-agent credentials) is described in the route's own comments (`route.ts:38–47`) as Stage-3 future work not yet wired. Today the flag being off is the endpoint's only protection. Flipping it would expose an unauthenticated POST that runs Sonnet on arbitrary caller input — a cost/abuse exposure.
+- **Conclusion:** today, neither effect serves the founder — no `/api/reason` benefit, and an exposure on the public endpoint. The A7 gate (activated `D-R20A-GATE-ACTIVATION-2026-05-31`) keeps doing its job; its mild-severity benefit being dormant is documented and harmless (the always-on `/api/reason` route catch already handles moderate/acute). **PR15 — Anthropic-primitive considered:** N/A — no build undertaken this session.
+
+**PR7 — deferred decision (`SUBSTRATE_LAYER3_ENABLED` activation):**
+- *What was considered:* flipping `SUBSTRATE_LAYER3_ENABLED=true` in production (the headline "turn on Layer 3 so the gate's mild benefit surfaces"); and two build alternatives — Option A (wire dual-auth on `/api/substrate/layer3`, then activate) and Option B (a `/api/reason` route change + flag-split to surface the mild benefit while keeping the public endpoint closed).
+- *Why deferred:* a naive flip delivers no user-facing benefit (Finding 1) and opens an unauthenticated paid endpoint (Finding 2 — a blocker); the two build alternatives are real work with no near-term need (no plugin/Stage-3 consumers of the public substrate endpoint exist yet; the mild-severity benefit dormancy is harmless given the always-on route catch). Deferring removes no existing protection.
+- *Condition to revisit:* **either** (a) Stage-3 plugin-originated traffic is ready to consume `/api/substrate/layer3` — at which point Option A (wire endpoint auth first, as its own Critical session) is the path; **or** (b) the founder decides the gate's mild-severity redirection language should reach `/api/reason` practitioners — at which point Option B (route change to read+serve `substrate_layer3_response`, plus a flag-split so the public endpoint stays gated) is the path. Layer 3 activation is its own Critical session regardless.
+
+**Files touched:**
+- `operations/decision-log.md` — this entry. (No code, config, or schema change.)
+- `operations/handoffs/founder/2026-05-31-layer3-activation-deferred-close.md` — session close.
+
+**Risk classification (0d-ii):** **Standard** — governance documentation only (recording a deferral). The session was *scoped* `code-critical` (Critical) because activation was on the table and PR6 would engage (Layer 3 carries the A5.4 R20a deterministic injection — safety-critical); but the **elected outcome changed nothing** — no flag flip, no code, no deploy — so the recorded action is a Standard governance append. The full Critical Change Protocol was **not** reached because no Critical change was made. AC7 not engaged. PR6 considered (not engaged — no safety-critical code touched).
+
+**Verification (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -n "D-LAYER3-ACTIVATION-DEFERRED-2026-05-31" operations/decision-log.md
+# In Vercel: confirm SUBSTRATE_LAYER3_ENABLED is still UNSET (no row), and all four R20a flags still = true (Production).
+```
+Expected: the grep returns this entry header; Vercel shows `SUBSTRATE_LAYER3_ENABLED` absent and the four R20a flags = `true`. `/api/substrate/layer3` still returns 503.
+
+**Diagnostic-certainty (PR10):** "Diagnostic-certain — root cause identified" for both findings — re-verified this session by direct code-read and multi-query grep (PR12). No production change to assert.
+
+**Open questions / queued:** Layer 3 activation (deferred under this PR7 record; revisit conditions above). **Next up by default: the three plaintext-table encryption batch** (`mentor_interactions`, `mentor_observations_structured`, `mentor_journal_refs`, batchable post-PR1 single-table proof). Carried-forward minors: `/api/score` single-field coverage; Jest-runner gap; manifest R17c "503 stub" drift; `mentor_profiles` schema-drift (governance pass). Operational hygiene: delete the throwaway `website/.env.r20a-gate-probe.local` (holds the API key in plaintext; not gitignored) — carried from the gate session.
+
+**Rules served:** 0c, 0d-ii, 0f, R3, R18a, R18e, R19, R19c, R19d, R20a, AC1, AC5, AC7, PR7, PR10, PR12, PR15.
+
+**Status:** Adopted. Implementation status unchanged: `SUBSTRATE_LAYER3_ENABLED` → **deferred (UNSET)**; `/api/substrate/layer3` endpoint → Scaffolded (gated, 503); A5 `applyLayer3Injections` on `/api/reason` → Wired-but-unread (metadata-only, inert). Cross-references: `D-R20A-GATE-ACTIVATION-2026-05-31` (whose Open Questions queued this); `D-A5-LAYER3-SCAFFOLDED-VERIFIED-2026-05-12`; `D-R20A-BATCH-ACTIVATION-REFLECT-AUDIENCE-2026-05-31`; manifest §R3/§R18a/§R18e/§R19/§R20a/§AC1/§AC5/§AC7; `/operations/handoffs/founder/2026-05-31-layer3-activation-deferred-close.md`.
+
+---
