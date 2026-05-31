@@ -8704,3 +8704,46 @@ Expected: gap #4 grep lists only `score`, `score-document`, `score-scenario`; ga
 **Status:** Adopted. Implementation status: encryption-at-write **Verified-live in production** (2026-05-31) — and on TEST. `realtime_journal_entries` prose is now encrypted at rest on the live site. Cross-references: `D-CAPABILITY-GAPS-4-5-ASSESSED-2026-05-30`; `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29`; `ADR-ENCRYPTION-WIRING-01`; `/operations/handoffs/founder/2026-05-31-r17b-realtime-journal-encryption-LIVE-TEST-WALKTHROUGH.md`; `/operations/handoffs/founder/2026-05-31-r17b-realtime-journal-encryption-close.md`.
 
 ---
+
+## 2026-05-31 — D-R20A-JOURNAL-DISTRESS-CHECK-2026-05-31
+
+**Decision:** The two journal routes — `/api/mentor/journal-feed` and `/api/journal` — now screen human free-text through the two-stage distress classifier (regex → Haiku) **before storing**, closing the gap-#4 deviation from `D-CAPABILITY-GAPS-4-5-ASSESSED-2026-05-30` (LC#10 "all human-facing tools include distress detection" was unmet for the journal). Each route uses the canonical always-on route-level pattern `await enforceDistressCheck(detectDistressTwoStage(<text>))`; on moderate/acute distress the route returns `{ distress_detected, severity, redirect_message }` at HTTP 200 and does **not** store the entry. This is the AC5 ninth/tenth-route perimeter addition; both routes added to the authoritative `ROUTES` registry in `r20a-invocation-guard.test.ts`. **Screening scope (founder election):** on journal-feed, all three fields (impression + assent + action) are joined and screened in one call; on journal, `reflection_text` is screened with the `__local__` local-storage sentinel excluded. Additive request-path enforcement; **no schema change**. Flag-independent (the four UNSET R20a substrate flags are untouched and not required by this change).
+
+**Reasoning ("Diagnostic-certain — root cause identified"):** the gap-#4 coverage map named both journal routes as having no distress check (no import, no call). Root cause is direct: neither route invoked the classifier before writing. The fix wires the established eight-route pattern onto each. **PR1 nuance:** not a new architectural pattern (proven on eight routes) — but wired and verified one route (journal-feed) first, then the second, per the single-route-proof discipline. **PR3:** the check is awaited (synchronous), never fire-and-forget; on journal-feed it runs before `encryptJournalProse` so ciphertext is never screened. **PR15 — Anthropic-primitive considered:** none applies; this reuses the project's own canonical R20a classifier (`r20a-classifier.ts` + `constraints.ts` `enforceDistressCheck`), the established safety primitive. No new dependency. **Model:** Haiku (FastModel) via `SafetyCriticalCallParams` — reused as-is, no change (cache AC1 row "Safety-critical → Haiku"; KG2).
+
+**Files touched:**
+- `website/src/app/api/mentor/journal-feed/route.ts` — imports `detectDistressTwoStage` + `enforceDistressCheck`; gate inserted after field/timestamp validation, before `encryptJournalProse` + insert; screens `[impression, assent, action].join`.
+- `website/src/app/api/journal/route.ts` — imports `detectDistressTwoStage` + `enforceDistressCheck`; gate inserted after text-length validation, before the Supabase client/store; screens `reflection_text`; `__local__` sentinel excluded.
+- `website/src/lib/__tests__/r20a-invocation-guard.test.ts` — both journal routes added to `HUMAN_FACING_POST_ROUTES` (AC5 ninth/tenth-route); count comment + the `>= 8` reminder assertion updated to `>= 10`.
+- `website/src/app/api/mentor/journal-feed/__tests__/r20a-invocation.test.ts` — NEW. Per-route invocation + verdict test (11 assertions; plain `npx tsx`).
+- `website/src/app/api/journal/__tests__/r20a-invocation.test.ts` — NEW. Per-route invocation + verdict test, incl. `__local__` exclusion check (11 assertions; plain `npx tsx`).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-31-r20a-journal-distress-check-close.md` — session close.
+
+**Risk classification (0d-ii):** **Critical** — R20a distress perimeter (PR6 + AC5). Critical Change Protocol (0c-ii) completed visibly in chat before code; founder approved "Go ahead", specific to the named risks. **PR6 engaged** (distress classifier perimeter). AC7 not engaged. KG1 engaged (DB writes — every Supabase call awaited; admin client per existing route pattern; the gate adds no new write). No schema change.
+
+**Critical Change Protocol record (0c-ii):**
+1. *What changes* — both journal routes screen the user's free text through the two-stage distress classifier before storing; on moderate/acute they redirect to support instead of saving.
+2. *What could break* — (a) a false positive (the classifier is deliberately conservative) blocks a legitimate journal entry; only moderate/acute classifications block — mild + none store normally; (b) ~500ms added latency on borderline inputs (the synchronous Haiku call, AC2 budget, accepted per PR3); (c) the `__local__` sentinel on `/api/journal` is excluded from screening (no real server-side text); (d) on `/api/mentor/journal-feed` the gate runs before `encryptJournalProse` (never screen ciphertext).
+3. *Existing rows / sessions* — none affected; additive request-path check; founder + test logins only; no schema change.
+4. *Rollback* — `git revert <sha>` + push + Vercel redeploy. Additive; nothing to undo.
+5. *Verification* — `tsc --noEmit` EXIT 0; both per-route tsx tests 11/11; registry updated; optional TEST live run (PR17).
+6. *Approval* — founder said "Go ahead", specific to the named risks; elected to screen all three journal-feed fields joined.
+
+**Verification:**
+- **Static (this session, COMPLETE):** `npx tsc --noEmit` in `website/` → **EXIT 0**. `mentor/journal-feed/__tests__/r20a-invocation.test.ts` → **11/11 pass**; `journal/__tests__/r20a-invocation.test.ts` → **11/11 pass** (both plain `npx tsx`). Each test exercises the redirect decision via the real regex Stage-1 acute path (`detectDistress('I want to die')` → `shouldRedirect=true`) + moderate/mild/none `createSafetyGate` fixtures (moderate→redirect; mild/none→store), and a benign real input (no distress).
+- **PR2 call-path confirmation (COMPLETE):** `await enforceDistressCheck(detectDistressTwoStage(` present in the POST execution path of both routes (`journal/route.ts:54`; `mentor/journal-feed/route.ts:87`). Not import-only.
+- **Guard-test runner gap (honest, pre-existing):** the Jest-style `r20a-invocation-guard.test.ts` has no runner in this repo (the known "Jest config for website directory" backlog item) and cannot run under `tsx` (`describe is not defined`). The authoritative `ROUTES` registry is updated (AC5 requirement met) and `tsc` type-checks the file; the runnable invocation proof is the two per-route tsx tests above. This session does not introduce the runner gap.
+- **Live (optional, founder-performable, PR17):** a TEST-env run — submit a benign journal entry (stores) and a distress-phrasing entry (redirects, not stored). Walked through step by step when elected (not handed off as a one-liner).
+
+**Diagnostic-certainty (PR10):** "Diagnostic-certain — root cause identified" — the missing-check root cause is isolated and addressed; static verification green; the redirect-decision logic is proven. The live Haiku Stage-2 path is the founder's optional confirmation, not a source of diagnostic uncertainty.
+
+**Deployment:** Code is **staged, not shipped** — committed/pushed is the founder's step (commands in the close). Additive request-path change; no migration. Production behaviour unchanged until deploy; the four R20a substrate flags remain UNSET (untouched). On deploy, the journal routes begin screening immediately (always-on; flag-independent).
+
+**Open questions:** none blocking. Carried forward: the `/api/score` single-field coverage (minor — `action` only), the Jest-runner gap, the manifest R17c "503 stub" drift, and `mentor_profiles` schema-drift (governance pass). The two remaining gap-#4/#5 follow-ups (R20a production activation; the three plaintext-table encryption batch) are unchanged — founder's pick next.
+
+**Rules served:** 0a, 0c, 0c-ii, 0d-ii, 0f, R19, R20a, AC2, AC4, AC5, KG1, KG2, PR1, PR2, PR3, PR6, PR10, PR15, PR17.
+
+**Status:** Adopted. Implementation status: journal distress screening **Wired + statically Verified** (tsc EXIT 0; 22/22 across both per-route tests; PR2 call-path confirmed). Not yet deployed; LC#10 closes for the journal on deploy. Cross-references: `D-CAPABILITY-GAPS-4-5-ASSESSED-2026-05-30`; `D-R17B-REALTIME-JOURNAL-ENCRYPTION-2026-05-31`; `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28`; manifest §AC5; `/operations/handoffs/founder/2026-05-31-r20a-journal-distress-check-close.md`.
+
+---

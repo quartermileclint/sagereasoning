@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import { enforceDistressCheck } from '@/lib/constraints'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -40,6 +42,27 @@ export async function POST(request: NextRequest) {
     // Text length validation
     const textErr = validateTextLength(reflection_text, 'Reflection text', TEXT_LIMITS.medium)
     if (textErr) return NextResponse.json({ error: textErr }, { status: 400 })
+
+    // R20a — Vulnerable-user detection (PR6 / AC5 tenth-route perimeter member).
+    // Screen the reflection text through the two-stage distress classifier
+    // (regex → Haiku) BEFORE any store. PR3: the check is awaited (synchronous),
+    // never fire-and-forget. Skip the '__local__' sentinel — local-storage users
+    // keep their text on-device, so there is no real server-side text to screen
+    // and a Haiku call would be wasted. On moderate/acute distress, redirect to
+    // support and do NOT store the entry.
+    if (reflection_text !== '__local__') {
+      const gate = await enforceDistressCheck(detectDistressTwoStage(reflection_text))
+      if (gate.shouldRedirect) {
+        return NextResponse.json(
+          {
+            distress_detected: true,
+            severity: gate.result.severity,
+            redirect_message: gate.result.redirect_message,
+          },
+          { status: 200 }
+        )
+      }
+    }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 

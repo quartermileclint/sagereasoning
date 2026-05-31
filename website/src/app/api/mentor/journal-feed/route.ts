@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
 import { encryptJournalProse, resolveJournalProse } from '@/lib/journal-encryption'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import { enforceDistressCheck } from '@/lib/constraints'
 
 /**
  * Strip the at-rest encryption columns from a stored row and surface the
@@ -70,6 +72,28 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'event_timestamp cannot be in the future' }, { status: 400 })
       }
       parsedEventTimestamp = ts.toISOString()
+    }
+
+    // R20a — Vulnerable-user detection (PR6 / AC5 ninth-route perimeter member).
+    // Screen the combined free-text (impression + assent + action) through the
+    // two-stage distress classifier (regex → Haiku) BEFORE encryption + insert.
+    // PR3: the check is awaited (synchronous) — never screen ciphertext, never
+    // fire-and-forget. On moderate/acute distress, redirect to support and do
+    // NOT store the entry (this is a store-only route; the right action is to
+    // redirect, not persist).
+    const distressText = [impression, assent, action]
+      .map((s) => String(s).trim())
+      .join('\n\n')
+    const gate = await enforceDistressCheck(detectDistressTwoStage(distressText))
+    if (gate.shouldRedirect) {
+      return NextResponse.json(
+        {
+          distress_detected: true,
+          severity: gate.result.severity,
+          redirect_message: gate.result.redirect_message,
+        },
+        { status: 200 }
+      )
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)

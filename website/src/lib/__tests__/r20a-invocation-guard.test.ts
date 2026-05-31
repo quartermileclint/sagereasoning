@@ -60,6 +60,11 @@ const HUMAN_FACING_POST_ROUTES = [
   'src/app/api/reason/route.ts',
   'src/app/api/reflect/route.ts',
   'src/app/api/mentor/private/reflect/route.ts',
+  // gap-#4 remediation (2026-05-31; AC5 ninth/tenth-route protocol) — the two
+  // journal routes accept human free-text and store it; both now screen via
+  // `await enforceDistressCheck(detectDistressTwoStage(...))` before storing.
+  'src/app/api/mentor/journal-feed/route.ts',
+  'src/app/api/journal/route.ts',
 ]
 
 // ---------------------------------------------------------------------------
@@ -154,11 +159,12 @@ describe('R20a Safety Invocation Guard', () => {
     // When adding a new human-facing POST endpoint, add it to
     // HUMAN_FACING_POST_ROUTES above.
     //
-    // Current count: 8 route-level routes (as of 18 April 2026) + 2
-    // substrate-gate routes (Calling added 2026-05-28 under Option A
-    // session 2; Reflect-content added 2026-05-28 under Option A session 3;
-    // see SUBSTRATE_GATE_ROUTES) = 10 routes in the R20a perimeter overall.
-    expect(HUMAN_FACING_POST_ROUTES.length).toBeGreaterThanOrEqual(8)
+    // Current count: 10 route-level routes (8 as of 18 April 2026 + the two
+    // journal routes added 2026-05-31 under the gap-#4 remediation, AC5
+    // ninth/tenth-route protocol) + 2 substrate-gate routes (Calling +
+    // Reflect-content added 2026-05-28 under Option A; see SUBSTRATE_GATE_ROUTES)
+    // = 12 routes in the R20a perimeter overall.
+    expect(HUMAN_FACING_POST_ROUTES.length).toBeGreaterThanOrEqual(10)
     expect(SUBSTRATE_GATE_ROUTES.length).toBeGreaterThanOrEqual(2)
   })
 
