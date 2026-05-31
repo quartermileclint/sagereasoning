@@ -8787,3 +8787,42 @@ Expected: gap #4 grep lists only `score`, `score-document`, `score-scenario`; ga
 **Status:** Adopted. Implementation status: `/api/calling` R20a catch → **Live (production)**; config-verified, catch behaviour Verified-live (TEST, C2). First of four R20a production activations. Cross-references: `D-R20A-C2-LIVE-RUN-VERIFIED-2026-05-30`; `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28`; `D-R20A-JOURNAL-DISTRESS-CHECK-2026-05-31`; manifest §R20a/§AC5/§AC2; `/operations/handoffs/founder/2026-05-31-r20a-calling-activation-close.md`.
 
 ---
+
+## 2026-05-31 — D-R20A-BATCH-ACTIVATION-REFLECT-AUDIENCE-2026-05-31
+
+**Decision:** In the same session as the Calling activation (above), and at the founder's election to continue, activated two further R20a production flags in Vercel (Production scope only, each with its own CCP + Vercel step + verification, ascending blast-radius order): (1) `SUBSTRATE_REFLECT_R20A_ENABLED = true` — the content-based distress catch on `/api/practice/reflect` (independent, `overrideFlag: true`, runs only if the existing Zone-3 boundary check did not engage); (2) `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED = true` — switches `/api/reason`'s redirect output for **agent-developer (API) callers** from the human crisis pass-through to the correct developer-form payload (the "Finding 2" fix; human/web responses byte-identical). The fourth flag, `SUBSTRATE_R20A_GATE_ENABLED` (the shared A7 substrate gate), was **deferred** (see PR7 record below). After this session: **3 of 4 R20a flags live; the A7 gate remains UNSET.**
+
+**Reasoning:** Reflect and Audience-rendering were both **Verified-live in TEST against real Haiku** at `D-R20A-C2-LIVE-RUN-VERIFIED-2026-05-30` (the C2 harness `run-c2.ts` set exactly these two plus Calling; 34/34). Reflect is the same independent per-route pattern as Calling (smallest blast radius). Audience-rendering is an output-shape correctness fix, no new classifier, no latency; its developer-payload form was asserted in C2. Activating both rests on byte-identical, live-verified code. **PR15 — Anthropic-primitive considered:** none applies; both activate the project's own canonical R20a substrate code. **Model:** Haiku (FastModel) via `SafetyCriticalCallParams`, reused (cache AC1; KG2) — applies to the Reflect catch; Audience-rendering makes no LLM call.
+
+**PR7 — deferred decision (A7 gate, `SUBSTRATE_R20A_GATE_ENABLED`):**
+- *What was considered:* activating the shared A7 substrate gate in the same batch.
+- *Why deferred:* (a) it was **not** part of C2's live run — `run-c2.ts` (lines 30–33, 408) explicitly excludes it ("/api/reason route-guard is always-on; the gate flag is not required") — so it is unit/invocation-Verified + `tsc` green but **not Verified-live**; (b) **largest blast radius** — runs inside the shared substrate path (`runSandwichInner`) affecting `/api/reason` and any future substrate consumer, not one isolated route; (c) its headline new effect (mild-severity detection → `distress_signal` → A5.4 Layer-3 prose injection) is **largely inert in current production** because `SUBSTRATE_LAYER3_ENABLED` is UNSET (Layer 3 → 503). `/api/reason` already has an always-on route-level moderate/acute catch on input independent of this flag, so deferring it removes no existing protection.
+- *Condition to revisit:* a discrete future Critical session for the A7 gate, with a live probe or a TEST run that sets `SUBSTRATE_R20A_GATE_ENABLED` specifically (and ideally consideration of Layer 3 activation so the mild-severity benefit surfaces).
+
+**Files touched:**
+- Vercel environment configuration — `SUBSTRATE_REFLECT_R20A_ENABLED = true` and `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED = true` (Production only). No repository file changed by the activations.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-05-31-r20a-calling-activation-close.md` — session close updated to cover the full session (renamed in spirit to the R20a-activation batch close; the filename is retained for continuity).
+
+**Risk classification (0d-ii):** **Critical** — deployment-configuration changes activating R20a perimeter surfaces (PR6 + AC5). A separate Critical Change Protocol (0c-ii) was completed visibly in chat for **each** flag before its Vercel change; the founder approved "Go ahead" per flag, specific to each flag's named risks, and elected Production-only scope each time. PR17 engaged (each Vercel env-var add + redeploy walked through live). AC2 paid live on the Reflect catch; Audience-rendering adds no LLM call. PR3 (Reflect catch awaited). AC7 not engaged.
+
+**Critical Change Protocol records (0c-ii) — one per flag:**
+- *Reflect:* (1) set `SUBSTRATE_REFLECT_R20A_ENABLED=true` (Prod) + redeploy → content catch ON on `/api/practice/reflect`, only if Zone-3 didn't engage. (2) Risks: false positive on that one route (conservative; moderate/acute only; no users); ~500ms borderline latency (AC2); blast radius one route. (3) No existing sessions affected; no schema. (4) Rollback: UNSET + redeploy. (5) Verify: env var present (Prod=true) + redeploy green; catch rests on C2 live evidence. (6) Founder "Go ahead", Production-only.
+- *Audience-rendering:* (1) set `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED=true` (Prod) + redeploy → `/api/reason` API-caller redirect output becomes developer-form. (2) Risks: changes an existing agent-developer-facing redirect output (the intended fix); does nothing unless a redirect fires; web responses byte-identical; no latency. (3) No stored data, no schema. (4) Rollback: UNSET + redeploy. (5) Verify: env var present (Prod=true) + redeploy green; form rests on C2 evidence. (6) Founder "Go ahead", Production-only, noting the output-shape change.
+
+**Verification:**
+- **Config (COMPLETE, founder-confirmed):** both env vars listed under Production = `true`; each redeploy green. Flag readers case-strict (`r20a-gate.ts:299` Reflect; `r20a-audience-renderer.ts:342` Audience).
+- **Behaviour (rests on prior live evidence):** Reflect catch + Audience developer-payload form both Verified-live in TEST against real Haiku at `D-R20A-C2-LIVE-RUN-VERIFIED-2026-05-30` (byte-identical code).
+- **Live production probe:** waived by founder (informed; consistent with the Calling activation and journal change).
+
+**Diagnostic-certainty (PR10):** "I'm confident" for Reflect + Audience — flags active (config verified, case-strict values confirmed), behaviour is the C2-live-verified code unchanged. The A7 gate is explicitly **not** asserted live (deferred; see PR7 record).
+
+**Deployment:** Configuration changes applied directly in Vercel (founder-performed, walked through live). Production now: `SUBSTRATE_CALLING_R20A_ENABLED`, `SUBSTRATE_REFLECT_R20A_ENABLED`, `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED` = `true`; `SUBSTRATE_R20A_GATE_ENABLED` **UNSET**. `/api/reason` byte-identical for human/web callers; API-caller redirect output now developer-form when a redirect fires. `/api/substrate/layer3` → 503; `/api/public-key` steady-state. AC7 not engaged.
+
+**Open questions:** the A7 gate activation (deferred — own session, per PR7 record); the three plaintext-table encryption batch (PR1); the carried-forward minor items (`/api/score` single-field; Jest-runner gap; manifest R17c drift; `mentor_profiles` schema-drift).
+
+**Rules served:** 0a, 0c, 0c-ii, 0d-ii, 0f, R19, R19c, R20a, AC2, AC4, AC5, KG2, PR1, PR3, PR6, PR7, PR10, PR15, PR17.
+
+**Status:** Adopted. Implementation status: `/api/practice/reflect` R20a catch → **Live (production)**; `/api/reason` audience-correct redirect rendering → **Live (production)**; both config-verified, behaviour Verified-live (TEST, C2). A7 gate → deferred (UNSET). Cross-references: `D-R20A-CALLING-ACTIVATION-2026-05-31`; `D-R20A-C2-LIVE-RUN-VERIFIED-2026-05-30`; `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28`; manifest §R20a/§AC5/§AC2; `/operations/handoffs/founder/2026-05-31-r20a-calling-activation-close.md`.
+
+---
