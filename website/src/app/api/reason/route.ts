@@ -76,6 +76,14 @@ import {
   type LoopAccumulator,
 } from '@/lib/loop-cost-tracker'
 
+// A12 (2026-06-03): OpenTelemetry instrumentation + call-grain audit. Both are
+// flag-gated behind SUBSTRATE_OTEL_ENABLED (unset in production → strict no-op).
+import { withSubstrateRootSpan } from '@/lib/substrate/substrate-telemetry'
+import {
+  recordSubstrateAuditEvent,
+  type SeverityBand,
+} from '@/lib/substrate/substrate-audit-writer'
+
 // =============================================================================
 // sage-reason — The Universal Reasoning Layer
 //
@@ -632,6 +640,11 @@ export async function POST(request: NextRequest) {
       })
     : null
 
+  // A12: correlation id for the OTel trace + the audit row. loop_id when present
+  // (API-key path), else a fresh UUID so user-auth runs are still correlatable.
+  // Observability-only; does not affect billing, auth, or the response shape.
+  const correlationId: string = loopId ?? generateLoopId()
+
   try {
     // Local helper that wraps every response branch with Option D metering
     // when loopAccumulator is active (API-key auth path). For user-auth +
@@ -877,7 +890,9 @@ export async function POST(request: NextRequest) {
     // AC4 + AC5 + AC8 + PR1 + PR6 preserved.
     // -------------------------------------------------------------------------
 
-    const sandwichResult = await runSandwich({
+    const sandwichResult = await withSubstrateRootSpan(correlationId, 'api_reason', () => runSandwich({
+      // A12: correlation id stamped on the OTel layer spans + carried to the audit row.
+      correlationId,
       input,
       context,
       domain_context,
@@ -898,7 +913,7 @@ export async function POST(request: NextRequest) {
       // would omit this and A7 would run a fresh classifier call inheriting
       // the AC2 ~500ms budget.
       safetyGate: gate,
-    })
+    }))
 
     // Option D metering — populate loopAccumulator with the per-layer Anthropic
     // cost from SandwichRunResult's microcents fields. 1 microcent = 0.0001
@@ -924,6 +939,37 @@ export async function POST(request: NextRequest) {
         )
       }
     }
+
+    // A12: record one append-only call-grain audit event for this run (DPIA
+    // evidence / behavioural-baseline source / AP2 provenance — AC10 / F4).
+    // No-op when SUBSTRATE_OTEL_ENABLED is unset; isolated (never throws into
+    // the response). Reads ONLY structural fields of sandwichResult — not the
+    // prose output, and not the R20a classifier (PR6 boundary preserved).
+    await recordSubstrateAuditEvent({
+      correlationId,
+      agentId: loopAccumulator?.agentId ?? null,
+      surface: 'api_reason',
+      inputCharCount: typeof input === 'string' ? input.length : 0,
+      modelsUsed:
+        sandwichResult.layer1_latency_ms !== null ||
+        sandwichResult.layer3_latency_ms !== null
+          ? ['claude-sonnet-4-6']
+          : [],
+      facts: {
+        error: sandwichResult.error,
+        tier1TriggerCode: sandwichResult.tier1_trigger?.trigger_code ?? null,
+        layer1LatencyMs: sandwichResult.layer1_latency_ms,
+        layer2LatencyMs: sandwichResult.layer2_latency_ms,
+        layer3LatencyMs: sandwichResult.layer3_latency_ms,
+        layer1CostMicrocents: sandwichResult.layer1_cost_usd_microcents,
+        layer3CostMicrocents: sandwichResult.layer3_cost_usd_microcents,
+        gateSeverity:
+          ((sandwichResult.substrate_r20a_gate_output as { severity?: string } | null)
+            ?.severity as SeverityBand | undefined) ?? null,
+        hasLayer3Response: sandwichResult.substrate_layer3_response !== null,
+        outputPresent: sandwichResult.output !== null,
+      },
+    })
 
     // Branch 1 — Tier 1 force-clarification fired (3A surfacing).
     if (sandwichResult.tier1_trigger !== null && sandwichResult.output) {

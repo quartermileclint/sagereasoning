@@ -9217,3 +9217,53 @@ Expected: 22/22; tsc clean; NONE. **Diagnostic-certainty (PR10):** the test's in
 **Status:** Adopted. Implementation status: **A11b → Verified-live (both LLM seams)**. Unblocks A12 / A15a / A19. Production activation deferred (PR7). Cross-references: `D-A11B-LAYER3-INJECTION-DEFENCE-WIRED-INERT-2026-06-03`, `D-A11B-LAYER1-INJECTION-DEFENCE-WIRED-INERT-2026-06-03` (the seams this verifies); `D-A10-SMOKE-TEST-VERIFIED-LIVE-2026-06-03` (auth + TEST-env pattern mirrored); `/adopted/substrate-plugin-staging-plan.md` §A11b + Stage-1 dependency + Risk 9; `/operations/handoffs/founder/2026-06-03-A11b-combined-flag-on-test-probe-close.md`.
 
 ---
+
+## 2026-06-03 — D-A12-OTEL-INSTRUMENTATION-AUDIT-PROOF-2026-06-03
+
+**Decision:** Build the A12 OpenTelemetry GenAI instrumentation + call-grain audit log as a flag-gated, additive single-endpoint proof on `/api/reason` (PR1). Code is wired and sandbox-verified (25/25 unit assertions; `tsc --noEmit` clean); it is inert in production behind `SUBSTRATE_OTEL_ENABLED` (unset). A12 reaches **Wired (inert; sandbox-verified)** this session; it reaches **Verified-live** after the founder-walked TEST run below.
+
+**Reasoning:** Observability is the load-bearing precondition for A13 (cost-health alerts), A16 (DPIA — the call-grain audit log is the evidence surface), and A19 (per-identity behavioural baselines). Instrumenting one endpoint before Stage 2 broadens exposure proves the telemetry contract while it covers a single consumer (PR1). **PR15 consult:** the OTel GenAI semantic conventions are an open standard, not an Anthropic primitive. Anthropic-native OTel exists in the **Claude Agent SDK / Claude Code runtime** (env-flag-driven, W3C traceparent, GenAI conventions) — but `/api/reason` calls the bare `@anthropic-ai/sdk` directly and does not run inside that runtime, so the native tracing is not available without re-hosting the route in the Agent SDK runtime (rejected as disproportionate for a single-endpoint proof). Bespoke election therefore = the open OTel SDK + GenAI conventions with a thin span layer; justified over (a) the Agent SDK runtime swap and (b) the `claude-api` skill (covers API usage, not observability). `.claude/skills/anthropic/` carries no observability skill. **F4 fold-in (per the findings tracker):** A12 is where AC10 is first implemented — the audit producer emits `provenance` + `use_policies` in an AP2-mandate-compatible shape; AC10's manifest entry gains an AP2-alignment cross-reference (governance edit queued — see open questions). **PR6 boundary:** instrumentation covers Layer 1/2/3 ONLY; it does NOT wrap the R20a distress classifier, the A7 Zone-2 gate, or their wrappers. The audit writer records the distress *decision* by reading already-produced output (read-only), not the classifier path. A12 therefore stays Elevated; no step touched the R20a perimeter, so PR6 did not trip to Critical.
+
+**Files touched:**
+- `supabase/migrations/20260603_a12_substrate_audit_events.sql` — NEW. Append-only, immutable `substrate_audit_events` table (REVOKE UPDATE/DELETE + raise-on-mutation trigger + service-role-only writes + RLS), mirroring the `support_access_log` pattern. Idempotent; rollback block included.
+- `website/src/lib/substrate/substrate-telemetry.ts` — NEW. Thin OTel GenAI span layer (`withSubstrateRootSpan`, `emitLayerSpan`, `withDbSpan`). No-op + non-throwing when flag off; never alters caller result/throws.
+- `website/src/lib/substrate/substrate-audit-writer.ts` — NEW. Masked, isolated audit writer. `maskContext` (structural fields only — never raw text/free-text/intimate data), `deriveDecisionEvent`, `buildProvenance` + `buildUsePolicies` (AP2 shape, F4).
+- `website/src/lib/substrate/substrate-identity-baseline.ts` — NEW. All-time per-`agent_id` cost baseline over `loop_billing_events` (off hot path; consumed by A13/A19). Windowed baselines deferred to A13 (timestamp column confirmation).
+- `website/src/instrumentation.ts` — NEW. Next.js register() hook; strict no-op unless flag on; flag-on registers a NodeTracerProvider + ConsoleSpanExporter via dynamic import (SDK packages never loaded in production).
+- `website/next.config.js` — `experimental.instrumentationHook: true` (inert without the flag).
+- `website/package.json` — added `@opentelemetry/api`, `@opentelemetry/sdk-trace-base`, `@opentelemetry/sdk-trace-node` (new external dependency — the Elevated trigger).
+- `website/src/lib/translation-sandwich/parallel-run.ts` — `SandwichInput.correlationId?` added; `emitLayerSpan` called after L1/L2/L3 latency is recorded (additive; no control-flow change; NOT around the A7 gate).
+- `website/src/app/api/reason/route.ts` — `correlationId` derived (loop_id ?? fresh UUID); `runSandwich` wrapped in `withSubstrateRootSpan`; one isolated `recordSubstrateAuditEvent` call covering all sandwich terminal branches.
+- `website/src/lib/substrate/__tests__/substrate-audit-writer.test.ts` — NEW. 25-assertion tsx unit proof (Supabase-free).
+
+**Risk classification:** Elevated under 0d-ii — instruments existing user-facing functionality + adds a new external dependency. AC7 not engaged (no auth/session/redirect change). **PR6 not engaged** (no R20a-perimeter touch — verified by design + grep). Lean templates + Elevated additions apply.
+
+**Rollback path:** Everything is additive and flag-gated. To disable at runtime: ensure `SUBSTRATE_OTEL_ENABLED` is unset (production default) — instrumentation + audit writer no-op; `/api/reason` is byte-identical. To remove entirely: `git revert` the A12 commit (drops the code, the config hook, and the deps) and run the migration's rollback block (commented at the file foot) to drop `substrate_audit_events`. The table is inert without the flag, so dropping it is optional.
+
+**Verification step (founder-performable — live TEST run, walked below; PR17):** AI side complete this session — `npx tsx src/lib/substrate/__tests__/substrate-audit-writer.test.ts` → 25/25 passed; `npx tsc --noEmit` → 0 errors; PR2 grep confirms invocation on the live path (`route.ts:893` root span, `route.ts:948` audit write, `parallel-run.ts:557/676/753` layer spans). Founder side (between sessions, against TEST Supabase — the live half that reaches `localhost`):
+```
+# 1. Apply the migration to the TEST project (Supabase dashboard → SQL Editor → paste the file → Run)
+#    File: supabase/migrations/20260603_a12_substrate_audit_events.sql
+# 2. Install deps + start dev against TEST (in website/):
+npm install
+SUBSTRATE_OTEL_ENABLED=true npm run dev
+# 3. In a second terminal, make ONE benign /api/reason call (API-key path).
+#    Watch terminal 1: a "substrate.reason" trace with layer1/layer2/layer3 spans prints.
+# 4. In Supabase SQL Editor:
+SELECT decision_event, severity_band, models_used, provenance, use_policies, masked_context
+FROM substrate_audit_events ORDER BY occurred_at DESC LIMIT 1;
+```
+Expected: terminal prints the trace; SQL returns one row with `decision_event='assessment'`, `masked_context` containing ONLY structural fields (`input_char_count` etc. — NO raw input text), and `provenance`/`use_policies` populated. Confirm masking by reading the row's `masked_context` — it must contain no prose. Teardown: stop dev, unset the flag.
+
+**Open questions / deferred (PR7):**
+- **AC10 manifest cross-reference (F4):** add the AP2-alignment note to AC10's manifest entry — a governing-doc edit, deferred pending founder approval (do not edit the manifest without approval).
+- **Production migration + flag activation:** apply the migration to production and/or set `SUBSTRATE_OTEL_ENABLED=true` in Vercel — separate deploy decisions; not needed for the proof. Condition to revisit: after the live TEST run confirms Verified-live, and a production OTel export backend is chosen.
+- **OTel export backend:** ConsoleSpanExporter is the proof exporter; a production backend (Vercel OTel / Grafana / Honeycomb / Datadog — all support the GenAI conventions) is a downstream choice.
+- **Failure-path layer spans + route-level-redirect audit:** the proof emits L1/L2/L3 spans on the success path and audits all sandwich-level outcomes; failure-path spans and the pre-sandwich route-level R20a redirect audit are trivial follow-ons before rollout.
+- **Windowed per-identity baselines (calls/day, last-N-days):** deferred to A13 once `loop_billing_events`' timestamp column is confirmed in-repo.
+
+**Rules served:** 0a, 0c, 0d-ii, 0f, R0, R3, R4, R5, R17, R19c, R19d, AC1, AC7 (named, not engaged), AC10, KG1, KG7, PR1, PR2, PR3, PR6 (boundary preserved, not engaged), PR7, PR10, PR15, PR17, F4.
+
+**Status:** Adopted. Implementation status: **A12 → Wired (inert; sandbox-verified)**; reaches **Verified-live** after the founder-walked TEST run. Unblocks A13 (depends on A12). Cross-references: `D-A11B-COMBINED-FLAG-ON-TEST-PROBE-VERIFIED-LIVE-2026-06-03` (predecessor); `D-A10-SMOKE-TEST-VERIFIED-LIVE-2026-06-03` (identity surface A12 builds on); `/adopted/substrate-plugin-staging-plan.md` §A12; `/operations/agentic-commerce-findings-downstream-order.md` §F4; `/operations/handoffs/founder/2026-06-03-A12-opentelemetry-instrumentation-close.md`.
+
+---

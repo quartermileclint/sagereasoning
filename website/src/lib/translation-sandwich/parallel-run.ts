@@ -40,6 +40,10 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
+// A12 (2026-06-03): OTel layer-span emission. No-op unless SUBSTRATE_OTEL_ENABLED.
+// Covers Layer 1/2/3 ONLY — NOT the A7 R20a gate or its wrappers (PR6 boundary).
+import { emitLayerSpan } from '@/lib/substrate/substrate-telemetry'
+
 import { extractFeatures, type Layer1Schema } from './layer1-extractor'
 import {
   applyMechanisms,
@@ -197,6 +201,13 @@ const SONNET_OUTPUT_USD_PER_MILLION_TOKENS = 15
  */
 export interface SandwichInput {
   input: string
+  /**
+   * A12 (2026-06-03): correlation id — loop_id when present on /api/reason, else
+   * a server-generated reason_id. Stamped on the OTel layer spans + carried to the
+   * audit row so a trace, a loop_billing_events row, and a substrate_audit_events
+   * row share one join key. Optional + observability-only; absence changes nothing.
+   */
+  correlationId?: string
   context?: string
   domain_context?: string
   urgency_context?: string
@@ -541,6 +552,19 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     result.layer1_latency_ms = Date.now() - layer1Start
   }
 
+  // A12: emit the Layer 1 GenAI span (no-op unless SUBSTRATE_OTEL_ENABLED). genAI
+  // is false on the plugin pre-extracted path (no server-side LLM call ran).
+  emitLayerSpan({
+    name: 'substrate.layer1.extract_features',
+    startMs: layer1Start,
+    latencyMs: result.layer1_latency_ms,
+    genAI: params.preExtractedLayer1Schema === undefined,
+    model: 'claude-sonnet-4-6',
+    costMicrocents: result.layer1_cost_usd_microcents,
+    ok: true,
+    correlationId: params.correlationId,
+  })
+
   // ---- A7 substrate R20a gate (D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13) ----
   // Per /adopted/substrate-plugin-staging-plan.md Stage 1 item A7.
   // Per /website/src/lib/substrate/r20a-gate.ts.
@@ -648,6 +672,16 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
   }
   result.layer2_latency_ms = Date.now() - layer2Start
 
+  // A12: emit the Layer 2 deterministic span (internal; no GenAI attributes).
+  emitLayerSpan({
+    name: 'substrate.layer2.apply_mechanisms',
+    startMs: layer2Start,
+    latencyMs: result.layer2_latency_ms,
+    genAI: false,
+    ok: true,
+    correlationId: params.correlationId,
+  })
+
   // ---- Tier 1 SCOPE_AMBIGUITY / TEMPORAL_AMBIGUITY short-circuit (M1-CP4e) ----
   // Per ADR-008 §5 step 5(d)–(e) + ADR-006 §3.10. applyMechanisms returns a
   // discriminated union; when `tier1_trigger` is present, the engine halted at
@@ -713,6 +747,19 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     }
   }
   result.layer3_latency_ms = Date.now() - layer3Start
+
+  // A12: emit the Layer 3 GenAI span (no-op unless SUBSTRATE_OTEL_ENABLED). On the
+  // deterministic-fallback path layer3_cost is null (no LLM cost) — recorded as such.
+  emitLayerSpan({
+    name: 'substrate.layer3.generate_prose',
+    startMs: layer3Start,
+    latencyMs: result.layer3_latency_ms,
+    genAI: true,
+    model: 'claude-sonnet-4-6',
+    costMicrocents: result.layer3_cost_usd_microcents,
+    ok: true,
+    correlationId: params.correlationId,
+  })
 
   // ---- A5 substrate Layer 3 service wiring (D-A5-LAYER3-SCAFFOLDED-VERIFIED-2026-05-12) ----
   // Per /adopted/substrate-plugin-staging-plan.md Stage 1 item A5.
