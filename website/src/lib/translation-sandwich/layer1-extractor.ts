@@ -26,6 +26,17 @@ import { getClient, formatRetrievedPassagesAsBlock } from '@/lib/sage-reason-eng
 import { MODEL_DEEP } from '@/lib/model-config'
 import { extractJSON } from '@/lib/json-utils'
 import type { RetrievedPassage } from '@/lib/rag'
+import {
+  isInjectionDefenceEnabled,
+  detectInjection,
+  shouldReject,
+  fenceUntrusted,
+  scanFreeTextFields,
+  GUARD_INSTRUCTION,
+  type DefenceFlags,
+  type FreeTextFinding,
+  type InjectionDetection,
+} from './injection-defence'
 
 // ============================================================================
 // CONTROLLED VOCABULARIES (R8a) — exported for Layer 2 + harness consumption
@@ -1504,6 +1515,127 @@ export interface LayerTokenUsage {
 export interface ExtractFeaturesResult {
   schema: Layer1Schema
   usage: LayerTokenUsage
+  /**
+   * A11b prompt-injection defence record. Present ONLY when
+   * SUBSTRATE_INJECTION_DEFENCE_ENABLED is on; undefined otherwise (so the
+   * field is additive and callers that ignore it are byte-identical).
+   * For observability (A12 surfaces it); not consumed by Layer 2.
+   */
+  injection_defence?: DefenceFlags
+}
+
+/**
+ * Result of building the Layer 1 user message. Factored out of extractFeatures
+ * (PR2 — pure logic, unit-testable without an LLM call). When defence is OFF the
+ * `userMessage` is byte-identical to the legacy construction.
+ */
+export interface BuildLayer1UserMessageResult {
+  userMessage: string
+  /** Defence record (input + per-context detections); null when defence is OFF. */
+  defence: DefenceFlags | null
+  /** Set when a high-confidence override on the PRIMARY input warrants fail-closed. */
+  rejected: { field: string; patterns: string[] } | null
+}
+
+/**
+ * Build the Layer 1 user message from ExtractInput.
+ *
+ * When `opts.defenceEnabled` is false: reproduces the exact legacy concatenation
+ * (byte-identical — verified by injection-defence.test.ts).
+ *
+ * When true: prepends the GUARD_INSTRUCTION, fences the untrusted input + each
+ * present context field (escaping smuggled markers), runs detectInjection on
+ * each, and — for a high-confidence override on the PRIMARY input — returns a
+ * `rejected` marker so the caller can fail closed. Context fields are fenced +
+ * flagged, never rejected (smaller false-positive blast radius).
+ */
+export function buildLayer1UserMessage(
+  params: ExtractInput,
+  opts: { defenceEnabled: boolean }
+): BuildLayer1UserMessageResult {
+  const input = params.input.trim()
+
+  if (!opts.defenceEnabled) {
+    // ---- Legacy path — MUST stay byte-identical to pre-A11b. ----
+    let userMessage = `Extract Stoic features from the following input.\n\nInput: ${input}`
+    if (params.context?.trim()) {
+      userMessage += `\nContext: ${params.context.trim()}`
+    }
+    if (params.domain_context?.trim()) {
+      userMessage += `\n\nDOMAIN CONTEXT (this extraction is being made in the context of a specific domain):\n${params.domain_context.trim()}`
+    }
+    if (params.practitionerContext) {
+      userMessage += `\n\n${params.practitionerContext}`
+    }
+    if (params.projectContext) {
+      userMessage += `\n\n${params.projectContext}`
+    }
+    if (params.urgency_context?.trim()) {
+      userMessage += `\n\nURGENCY CONTEXT (supplemental — extract urgency_indicators from the agent's text only): ${params.urgency_context.trim()}`
+    }
+    userMessage += '\n\nReturn only the JSON Layer1Schema object.'
+    return { userMessage, defence: null, rejected: null }
+  }
+
+  // ---- Defended path. ----
+  const inputDetection = detectInjection(input)
+  const contexts: Record<string, InjectionDetection> = {}
+
+  // High-confidence override on the PRIMARY input → fail closed.
+  if (shouldReject(inputDetection)) {
+    return {
+      userMessage: '',
+      defence: { input: inputDetection, contexts, freeText: [], action: 'rejected' },
+      rejected: { field: 'input', patterns: inputDetection.patterns },
+    }
+  }
+
+  let userMessage = `${GUARD_INSTRUCTION}\n\nExtract Stoic features from the following input.\n\nInput:\n${fenceUntrusted(input)}`
+
+  const addContext = (key: string, raw: string, render: (fenced: string) => string) => {
+    contexts[key] = detectInjection(raw)
+    userMessage += render(fenceUntrusted(raw))
+  }
+
+  if (params.context?.trim()) {
+    addContext('context', params.context.trim(), (f) => `\nContext:\n${f}`)
+  }
+  if (params.domain_context?.trim()) {
+    addContext(
+      'domain_context',
+      params.domain_context.trim(),
+      (f) => `\n\nDOMAIN CONTEXT (this extraction is being made in the context of a specific domain):\n${f}`
+    )
+  }
+  if (params.practitionerContext) {
+    addContext('practitionerContext', params.practitionerContext, (f) => `\n\n${f}`)
+  }
+  if (params.projectContext) {
+    addContext('projectContext', params.projectContext, (f) => `\n\n${f}`)
+  }
+  if (params.urgency_context?.trim()) {
+    addContext(
+      'urgency_context',
+      params.urgency_context.trim(),
+      (f) => `\n\nURGENCY CONTEXT (supplemental — extract urgency_indicators from the agent's text only):\n${f}`
+    )
+  }
+
+  userMessage += '\n\nReturn only the JSON Layer1Schema object.'
+
+  const anyDetected =
+    inputDetection.detected || Object.values(contexts).some((d) => d.detected)
+
+  return {
+    userMessage,
+    defence: {
+      input: inputDetection,
+      contexts,
+      freeText: [],
+      action: anyDetected ? 'neutralised' : 'none',
+    },
+    rejected: null,
+  }
 }
 
 // ============================================================================
@@ -1545,33 +1677,31 @@ export async function extractFeatures(params: ExtractInput): Promise<ExtractFeat
 
   const client = getClient()
 
-  // Build user message — mirrors runSageReason's composition order (AC6 + KG6).
-  let userMessage = `Extract Stoic features from the following input.\n\nInput: ${params.input.trim()}`
-
-  if (params.context?.trim()) {
-    userMessage += `\nContext: ${params.context.trim()}`
+  // A11b prompt-injection defence (SUBSTRATE_INJECTION_DEFENCE_ENABLED).
+  // When OFF (default), buildLayer1UserMessage reproduces the exact legacy
+  // user message — extractFeatures is byte-identical to pre-A11b. When ON, the
+  // untrusted input + context fields are fenced + flagged, and a high-confidence
+  // override on the primary input fails closed (throw → route bundled fallback).
+  //
+  // SAFETY INVARIANT (PR6): this runs INSIDE extractFeatures, downstream of the
+  // route-level detectDistressTwoStage(input) check; it never touches the raw
+  // input the distress classifier sees. The distress signal cannot be suppressed
+  // by an injection here. injection-defence.test.ts proves this.
+  const defenceEnabled = isInjectionDefenceEnabled()
+  const built = buildLayer1UserMessage(params, { defenceEnabled })
+  if (built.rejected) {
+    console.warn(
+      `layer1-extractor: prompt-injection defence rejected input (fail-closed; ` +
+        `target route /api/reason). Field: ${built.rejected.field}, patterns: ${built.rejected.patterns.join(', ')}.`
+    )
+    throw new Layer1ValidationError(
+      'shape',
+      `extractFeatures: high-confidence prompt-injection override detected in ${built.rejected.field}; ` +
+        `rejected (fail-closed). Patterns: ${built.rejected.patterns.join(', ')}`,
+      built.rejected.field
+    )
   }
-
-  if (params.domain_context?.trim()) {
-    userMessage += `\n\nDOMAIN CONTEXT (this extraction is being made in the context of a specific domain):\n${params.domain_context.trim()}`
-  }
-
-  if (params.practitionerContext) {
-    userMessage += `\n\n${params.practitionerContext}`
-  }
-
-  if (params.projectContext) {
-    userMessage += `\n\n${params.projectContext}`
-  }
-
-  if (params.urgency_context?.trim()) {
-    // Layer 1's urgency_indicators field extracts from the agent's own language.
-    // This supplemental context is exposed to the LLM but the system prompt instructs
-    // it not to echo this into urgency_indicators unless the agent names urgency.
-    userMessage += `\n\nURGENCY CONTEXT (supplemental — extract urgency_indicators from the agent's text only): ${params.urgency_context.trim()}`
-  }
-
-  userMessage += '\n\nReturn only the JSON Layer1Schema object.'
+  const userMessage = built.userMessage
 
   // Build Stoic Brain block (D6 + D7 RAG). Same precedence as runSageReason.
   let stoicBrainBlock = params.stoicBrainContext || ''
@@ -1655,6 +1785,23 @@ export async function extractFeatures(params: ExtractInput): Promise<ExtractFeat
       )
     }
     throw err
+  }
+
+  // A11b free-text output scan (NON-MUTATING — R7 verbatim quotes untouched).
+  // Detects injection content smuggled into Layer 1's free-text fields so it is
+  // visible (A12) before it can reach the Layer 3 prose seam. Only runs when the
+  // defence flag is on, so the OFF path returns { schema, usage } byte-identical.
+  if (defenceEnabled && built.defence) {
+    const freeText: FreeTextFinding[] = scanFreeTextFields(schema)
+    const defence: DefenceFlags = {
+      ...built.defence,
+      freeText,
+      action:
+        built.defence.action === 'none' && freeText.length > 0
+          ? 'neutralised'
+          : built.defence.action,
+    }
+    return { schema, usage, injection_defence: defence }
   }
 
   return { schema, usage }
