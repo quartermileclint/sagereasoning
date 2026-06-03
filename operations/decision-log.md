@@ -9062,3 +9062,23 @@ Expected: 22/22; tsc clean; NONE. **Diagnostic-certainty (PR10):** the test's in
 **Status:** Adopted. Implementation status: `plugin_install` migration → **Verified (TEST)**; admin mint/revoke endpoint → **Wired + Verified-in-sandbox** (validation 29/29; DB flow pending founder smoke tests); A10 Surface-1 check on `/api/reason` → **Wired (behind unset flag) + Verified-in-sandbox**; revocation runbook → **Live (document)**; A10 (overall) → **Wired inert; pending TEST smoke tests + production flag-flip to reach Live.** Production state UNCHANGED. Cross-references: `D-A10-TOKEN-FORMAT-ADR-AND-SCAFFOLD-2026-06-03` (the kickoff this implements); `D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21` (the foundation mechanism mirrored); `/adopted/adr/2026-06-03-a10-token-format.md` (Surface 1); `/adopted/substrate-plugin-staging-plan.md` §A10 + Risk 9; `/operations/runbooks/plugin-install-credential-revocation.md`; `/operations/handoffs/founder/2026-06-03-A10-critical-implementation-close.md`.
 
 ---
+
+## 2026-06-03 — D-A10-SMOKE-TEST-VERIFIED-LIVE-2026-06-03
+
+**Decision:** A10 per-install plugin-auth is **Verified-live** — the founder ran the TEST-environment smoke test (mint → authenticate → revoke → re-call) the same day, and it passed end to end: a per-install `sr_inst_` credential authenticated `/api/reason` (**HTTP 400** `layer1_schema is required` — i.e. past the auth gate), and after revocation (`is_active=false`) the same token was rejected (**HTTP 401** `Plugin authentication failed`). Closes the one verification left open by `D-A10-CRITICAL-IMPL-WIRING-REVOCATION-2026-06-03`.
+
+**Reasoning:** the live Supabase lookup inside `validatePluginInstallToken` + the `is_active=true` universal-revocation filter were the only parts not covered by the in-sandbox unit tests (per the accreditation-route verification boundary). The smoke test exercised exactly those on the live TEST stack. The 400 (not 401) on the authenticate step also confirmed the dev server was reading the TEST database (the credential existed only there) and that `isPluginAuth` correctly classifies a per-install caller (the A2 `layer1_schema` contract applied).
+
+**Test conditions:** local `npm run dev` against the TEST Supabase project (`iwdtrvuphogkwmovhnvz`) via `.env.development.local`, which overrides `.env.local` in Next.js dev — production `.env.local` (`jdbefwkonfbhjquozgxr`) was shadowed and the **production DB was not touched** (founder caught and corrected an initial misread of which env file governs dev). `PLUGIN_INSTALL_AUTH_ENABLED=true` was added to the TEST override **only**, for the duration of the test, then removed (env restored to known-good; `.env*.local` are gitignored). Credential minted by direct SQL `INSERT` into the TEST project; revoked by SQL `UPDATE`. The throwaway token never existed outside TEST.
+
+**Files touched:** none (code unchanged). `.env.development.local` flag added + removed (gitignored; not a repo change). `operations/decision-log.md` — this entry. `operations/handoffs/founder/2026-06-03-A10-critical-implementation-close.md` — Update section appended.
+
+**Risk classification (0d-ii):** Standard — verification record; no code/config/schema change; production untouched (TEST-only smoke test). AC7 not engaged by this entry.
+
+**Production state:** UNCHANGED — `PLUGIN_INSTALL_AUTH_ENABLED` remains UNSET in production; `/api/reason` byte-identical; nothing deployed with the per-install path active. A10's production activation remains a separate future Critical step (migration re-run on production + minted credential + CCP + flag flip).
+
+**Rules served:** 0a, 0c, 0f, R20a (revocation), AC7 (verification), PR1, PR2, PR10, PR17.
+
+**Status:** Adopted. Implementation status: A10 per-install plugin-auth → **Verified-live (TEST)**; unblocks A11b/A12/A13/A15a/A19. Production activation deferred (PR7 — see predecessor entry). Cross-references: `D-A10-CRITICAL-IMPL-WIRING-REVOCATION-2026-06-03` (the build this verifies); `/operations/runbooks/plugin-install-credential-revocation.md`; `/operations/handoffs/founder/2026-06-03-A10-critical-implementation-close.md`.
+
+---

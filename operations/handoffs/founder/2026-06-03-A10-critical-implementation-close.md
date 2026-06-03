@@ -101,3 +101,28 @@ A10's identity work is now built and inert. The one remaining verification is th
 - Test-env checklist (for the smoke-test session): `/data-room/04_test_brief/test-env-standup-checklist.md`
 
 *End of session close. Stabilised to a known-good state — production byte-identical to session open; the per-install path is wired but gated by an unset flag; the migration is Verified on TEST. A10 is one TEST smoke-test away from Verified-live.*
+
+---
+
+## Update — 2026-06-03 (same session): TEST smoke test PASSED → A10 Verified-live
+
+The founder ran the live TEST smoke test the same day. **Result: mint → 400 (authenticated) → revoke → 401 (rejected).** A per-install `sr_inst_` credential authenticated `/api/reason` (HTTP 400 `layer1_schema is required` — past the auth gate); after revocation the same token returned HTTP 401 `Plugin authentication failed`. The live Supabase lookup + `is_active` universal-revocation filter — the one part not covered by the in-sandbox tests — are now confirmed on the live TEST stack.
+
+**Test conditions:** local `npm run dev` against the TEST project (`iwdtrvuphogkwmovhnvz`) via `.env.development.local` (overrides `.env.local` in dev; production DB untouched). The `PLUGIN_INSTALL_AUTH_ENABLED=true` flag was added to the TEST override only and **removed afterward** — `.env.development.local` restored to known-good (gitignored; no repo change). Credential minted/revoked by direct SQL in the TEST project; the throwaway token never left TEST.
+
+**Recorded as:** `D-A10-SMOKE-TEST-VERIFIED-LIVE-2026-06-03` (decision log).
+
+**Revised status:** A10 per-install plugin-auth → **Verified-live (TEST)**. **A11b / A12 / A13 / A15a / A19 are now cleanly unblocked.** The earlier "do the smoke test first" recommendation in *Next Session Should* is satisfied — pick A11b (prompt-injection defence), A12 (instrumentation), or another Stage-1 item at the next session.
+
+**Production state:** still UNCHANGED — `PLUGIN_INSTALL_AUTH_ENABLED` UNSET in production; `/api/reason` byte-identical. Production activation remains a separate future Critical step (migration re-run on production + a minted credential + CCP + flag flip).
+
+**Leftover (optional):** the TEST `api_keys` row `install_smoketest_001` is a revoked tombstone in the TEST project — harmless; delete it any time with `DELETE FROM public.api_keys WHERE install_id = 'install_smoketest_001';` in the TEST SQL Editor if you want it gone.
+
+**To record this update:** commit the two changed files —
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+git add operations/decision-log.md \
+        "operations/handoffs/founder/2026-06-03-A10-critical-implementation-close.md"
+git commit -m "A10 Verified-live: TEST smoke test passed (mint→400→revoke→401). (D-A10-SMOKE-TEST-VERIFIED-LIVE-2026-06-03)"
+```
+Then push via GitHub Desktop. No Vercel behaviour change (docs only).
