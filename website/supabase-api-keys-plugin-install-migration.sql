@@ -90,11 +90,27 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ------------------------------------------------------------
 -- 6. Lookup index for the verification path (hash lookup is already covered by
---    the existing key_hash index; this supports admin per-install listing/revoke).
+--    the existing key_hash index; this supports admin per-install listing/revoke,
+--    INCLUDING revoked tombstones).
 -- ------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS api_keys_plugin_install_install_id_idx
   ON public.api_keys (install_id)
   WHERE purpose = 'plugin_install';
+
+-- ------------------------------------------------------------
+-- 6b. One-active-credential-per-install invariant (design decision, 2026-06-03
+--     A10 Critical implementation; founder election "One active per install").
+--     A PARTIAL UNIQUE index: at most one ACTIVE plugin_install credential may
+--     exist for a given install_id at a time. Revoked tombstones (is_active=false)
+--     are exempt, so an install can be RE-ISSUED after revoke (a new active row +
+--     the old dead one). This gives the admin mint route a clean 409 ("a
+--     credential already exists for this install — revoke it first"), mirroring
+--     the accreditation path's (owner, agent_id) partial-unique-on-active index.
+--     Idempotent via IF NOT EXISTS.
+-- ------------------------------------------------------------
+CREATE UNIQUE INDEX IF NOT EXISTS api_keys_plugin_install_one_active_uniq_idx
+  ON public.api_keys (install_id)
+  WHERE purpose = 'plugin_install' AND is_active = true;
 
 -- ============================================================
 -- 7. VERIFY — paste the output of these back to confirm the migration.
@@ -115,10 +131,14 @@ WHERE conrelid = 'public.api_keys'::regclass
      'api_keys_install_scope_check', 'api_keys_plugin_install_requires_identity')
 ORDER BY conname;
 
--- 7c. Index present
+-- 7c. Indexes present (the listing index AND the one-active-per-install unique
+--     index from step 6b — expect BOTH rows)
 SELECT indexname FROM pg_indexes
 WHERE schemaname = 'public' AND tablename = 'api_keys'
-  AND indexname = 'api_keys_plugin_install_install_id_idx';
+  AND indexname IN
+    ('api_keys_plugin_install_install_id_idx',
+     'api_keys_plugin_install_one_active_uniq_idx')
+ORDER BY indexname;
 
 -- 7d. Purpose CHECK admits 'plugin_install' (expect the widened definition)
 SELECT pg_get_constraintdef(oid) AS purpose_check_def

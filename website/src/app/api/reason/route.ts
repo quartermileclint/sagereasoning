@@ -45,6 +45,19 @@ import {
   isR20aAudienceRenderingEnabled,
   type R20aAudience,
 } from '@/lib/substrate/r20a-audience-renderer'
+// A10 Critical implementation (2026-06-03, staging-plan session 12): per-install
+// plugin-auth credentials (Surface 1 of the Token-Format ADR
+// /adopted/adr/2026-06-03-a10-token-format.md). validatePluginInstallToken does
+// the hash → api_keys lookup with the is_active=true universal revocation check;
+// extractPluginInstallToken pulls the sr_inst_ token from an Authorization:
+// Bearer header. Gated by PLUGIN_INSTALL_AUTH_ENABLED (UNSET in production →
+// this path is inert and /api/reason is byte-identical to today). AC7 ENGAGED
+// at the invocation site; PR6 ENGAGED; PR1 single-endpoint proof (this route).
+import {
+  validatePluginInstallToken,
+  extractPluginInstallToken,
+  type PluginInstallValidationResult,
+} from '@/lib/plugin-install-auth'
 // Option D billing (per D-BILLING-MODEL-LOCKED-2026-05-17 + build session 2026-05-MM).
 // Metering wraps every API-key-authenticated request: a loop_id is extracted
 // from X-Loop-Id (or server-generated); per-layer Anthropic cost is read from
@@ -214,6 +227,23 @@ const VALID_DEPTHS: ReasonDepth[] = ['quick', 'standard', 'deep']
  * variable is documented in /website/.env.example.
  */
 const PLUGIN_AUTH_ENABLED = process.env.PLUGIN_AUTH_ENABLED === 'true'
+
+/**
+ * A10 per-install plugin-auth feature flag (2026-06-03, staging-plan session 12).
+ *
+ * When 'true', /api/reason additionally accepts per-install sr_inst_ tokens
+ * (Authorization: Bearer sr_inst_<key>) via validatePluginInstallToken — the
+ * A10 Surface-1 credential with identity_type / install_id / scope and an
+ * instant universal revocation check (is_active=true lookup filter).
+ *
+ * Default: 'false' (or UNSET, treated as false). When off, this path is skipped
+ * entirely and auth behaviour is byte-identical to the pre-A10 state — the
+ * existing PLUGIN_AUTH_SECRET / X-Plugin-Auth path (gated separately by
+ * PLUGIN_AUTH_ENABLED) is untouched and remains the fallback until the
+ * per-install path is Verified-live and the founder elects to retire the
+ * shared secret. Documented in /website/.env.example.
+ */
+const PLUGIN_INSTALL_AUTH_ENABLED = process.env.PLUGIN_INSTALL_AUTH_ENABLED === 'true'
 
 /**
  * Plugin-auth check (Wired 2026-05-MM under D-A1-INVOCATION-SITE-2026-05-10).
@@ -497,10 +527,54 @@ export async function POST(request: NextRequest) {
     pluginAuth = checkPluginAuth(request)
   }
 
-  if (auth.error && (!apiKey || !apiKey.valid) && (!pluginAuth || !pluginAuth.valid)) {
-    // Prefer plugin-auth's specific 401 if the plugin-auth path was attempted
-    // and produced its own error response; otherwise fall back to the
-    // user-auth 401 (existing behaviour).
+  // A10 per-install plugin-auth (NEW; gated by PLUGIN_INSTALL_AUTH_ENABLED).
+  //
+  // Tried only after user-auth and API-key have failed AND the existing
+  // shared-secret plugin path (if enabled) did not authenticate. When the flag
+  // is UNSET (production), this block is skipped: installAuth stays null and the
+  // failure check below is byte-identical to the pre-A10 logic (the extra
+  // `!installAuth || !installAuth.valid` clause is trivially true for a null
+  // installAuth, and the installAuth-specific 401 branch is unreachable).
+  //
+  // On success the request proceeds with no auth.user — identical to the
+  // shared-secret plugin path: practitionerContext resolves to null and no
+  // Option D metering runs (isApiKeyAuth is false). The credential's
+  // identity_type / install_id / scope live on its api_keys row; the universal
+  // revocation check is the is_active=true lookup filter inside
+  // validatePluginInstallToken (a revoked credential → invalid_token → 401).
+  //
+  // AC7 ENGAGED (auth-surface change at the invocation site). PR6 ENGAGED
+  // (safety-critical auth change). PR1 single-endpoint proof: /api/reason only.
+  let installAuth: PluginInstallValidationResult | null = null
+  if (
+    auth.error &&
+    (!apiKey || !apiKey.valid) &&
+    (!pluginAuth || !pluginAuth.valid) &&
+    PLUGIN_INSTALL_AUTH_ENABLED
+  ) {
+    const installToken = extractPluginInstallToken(request.headers.get('authorization'))
+    installAuth = installToken
+      ? await validatePluginInstallToken(installToken)
+      : { valid: false, reason: 'no_token' }
+  }
+
+  if (
+    auth.error &&
+    (!apiKey || !apiKey.valid) &&
+    (!pluginAuth || !pluginAuth.valid) &&
+    (!installAuth || !installAuth.valid)
+  ) {
+    // Prefer a plugin path's specific 401 if one was attempted; otherwise fall
+    // back to the user-auth 401 (existing behaviour). The per-install path
+    // collapses every failure reason to a single opaque 401 (no info leak); the
+    // specific reason is for the structured audit log only (per the module's
+    // PluginInstallValidationResult contract).
+    if (installAuth && !installAuth.valid) {
+      return NextResponse.json(
+        { error: 'Plugin authentication failed' },
+        { status: 401, headers: corsHeaders() },
+      )
+    }
     if (pluginAuth && !pluginAuth.valid) {
       return pluginAuth.error
     }
@@ -602,7 +676,13 @@ export async function POST(request: NextRequest) {
     // User-auth and API-key paths skip this branch entirely; their existing
     // text-input validation continues unchanged. R20a runs on `input` text
     // for ALL paths (Choice 2(a) of A2 design — preserves AC5 perimeter).
-    const isPluginAuth = pluginAuth !== null && pluginAuth.valid === true
+    // A10 (2026-06-03): a successful per-install auth is also a plugin-auth path
+    // and gets the same A2 body contract (the plugin ran Layer 1 locally and
+    // submits a layer1_schema). When PLUGIN_INSTALL_AUTH_ENABLED is off,
+    // installAuth is null and this is byte-identical to the pre-A10 value.
+    const isPluginAuth =
+      (pluginAuth !== null && pluginAuth.valid === true) ||
+      (installAuth !== null && installAuth.valid === true)
     let preExtractedLayer1Schema: Layer1Schema | undefined
     if (isPluginAuth) {
       const validation = validatePluginRequest(body)
