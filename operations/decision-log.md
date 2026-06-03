@@ -8951,3 +8951,62 @@ Expected: the grep returns this entry header; `.gitignore` shows the two new env
 **Status:** Adopted. Implementation-status movements (founder-Verified-live): R17c genuine deletion (intimate store) → **Verified**; `/api/user/export` portability → **Verified**; R17b `realtime_journal_entries` encryption-at-rest → **Verified**; `/api/reason` + `/api/reflect` human distress catch → **Verified**. Unchanged: agent-path catch (`/api/calling`, `/api/practice/reflect`) remains Wired-dark (reachability-gated); `/api/mentor/private/reflect` catch remains Wired (code-identical, founder-gated, not founder-exercised). Production state UNCHANGED. Cross-references: `D-CAPABILITY-INVENTORY-FIRST-PASS-2026-05-29` (gaps #1/#5 addressed; #2/#3 confirmed reachability-gated); `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29`; `D-R17B-REALTIME-JOURNAL-ENCRYPTION-2026-05-31`; `D-R20A-JOURNAL-DISTRESS-CHECK-2026-05-31`; `D-LAYER3-ACTIVATION-DEFERRED-2026-05-31`; `/operations/handoffs/founder/2026-06-03-0h-criterion1-live-test-script.md`; `/operations/handoffs/founder/2026-06-03-0h-criterion1-live-test-close.md`.
 
 ---
+
+## 2026-06-03 — D-0H-CRITERION1-MET-STAGE1-DEPENDENCY-2026-06-03
+
+**Decision:** P0 0h exit criterion 1 is **founder-determined MET for the substrate Stage-1 dependency.** Per the 2026-06-03 founder call: the human-facing safety + privacy surface is Verified-live (deletion, export, encryption-at-rest, human-path distress catch); the agent-path distress catch is code-identical to the proven human-path catch and reachability-gated (503 kill-switches); the private-mentor distress catch is code-identical and founder-gated. The agent-path live run remains an optional 0h follow-up (not Stage-1-blocking). This unblocks the A10 per-agent-credentials build to proceed.
+
+**Reasoning:** Resolves the open question carried in `D-0H-CRITERION1-LIVE-TEST-2026-06-03` ("does criterion 1 count as met for the Stage-1 dependency on the strength of 5/6 features?"). The founder judges the verification floor sufficient: the two un-exercised paths are code-identical to Verified-live siblings and gated, so no unverified safety-critical logic sits under the A10 work. R0 audit-trail accuracy (0f) requires this call be recorded before A10 design begins.
+
+**Risk classification:** **Standard** under 0d-ii — governance record; no code/config/schema/production change. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** Append-only governance line; reversible by superseding entry if the founder later requires the agent-path live run before Stage-1 continuation.
+
+**Rules served:** 0f, 0h, PR1, PR2.
+
+**Status:** Adopted. Cross-references: `D-0H-CRITERION1-LIVE-TEST-2026-06-03` (the live-test that produced the evidence); `/operations/handoffs/founder/2026-06-03-0h-criterion1-live-test-close.md`; `D-CAPABILITY-INVENTORY-FIRST-PASS-2026-05-29` (gap #1 source).
+
+---
+
+## 2026-06-03 — D-A10-TOKEN-FORMAT-ADR-AND-SCAFFOLD-2026-06-03
+
+**Decision:** A10 (per-install plugin-auth credentials) Stage-1 kickoff — three outcomes: (1) **scope reconciled** against live source; (2) **token-format ADR adopted** by founder election — a **hybrid two-surface model**; (3) **Surface-1 scaffold proven to Verified as library code** (PR1), not wired into any route. No production change.
+
+**Reasoning:** A10 is the identity keystone for the rest of Stage 1 (A11/A12/A13/A15a/A19 depend on it). The delta showed the 2026-05-21 foundation built the opaque-token *mechanism* (mint/revoke/`credential_audit`/scope/kill-switch/orphan auto-revocation) on the **accreditation write path** (`purpose='sage_assent_write'`), while the **plugin-auth surface** (`/api/reason` `checkPluginAuth`) still uses the single shared `PLUGIN_AUTH_SECRET`. A10's gap is to generalise the mechanism to plugin-auth + add `identity_type`/`install_id`/`scope` discrimination + a universal revocation check + the token-format decision. PR15 consult: no Anthropic-canonical primitive dictates a credential format (MCP server auth assumes bearer credentials, leaves issuance to the service) — credential surface stays bespoke, consistent with the closed-Layer-2/3 architecture. PR11/PR13: AP2 mandates *are* W3C VCs (v0.2 April 2026; donated to FIDO Alliance), collapsing two ADR candidates into one axis; AC10 tags are already AP2-mandate-shaped, so a future VC envelope is low-friction.
+
+**Token-format election (founder, "Hybrid"):**
+- **Surface 1 — internal plugin-auth (the A10 target): opaque bearer token, DB-backed.** Per-install `sr_inst_` token, hash in `api_keys` (`purpose='plugin_install'`), carrying `identity_type` (human|agent), `install_id`, `install_scope` (assessment-only|mentor-also|admin). The universal revocation check = the `is_active=true` lookup filter (instant revocation — what JWT/VC cannot give without a separate list). Build now.
+- **Surface 2 — portable carried-profile: W3C-VC/AP2-mandate envelope. DEFERRED under PR7** until a real portable/downloaded-agent consumer exists (K1's trial case; AC10 provenance). Revisit conditions in the ADR.
+
+**Files touched:**
+- `adopted/adr/2026-06-03-a10-token-format.md` — NEW. The Token-Format ADR (Accepted by founder election).
+- `website/src/lib/plugin-install-auth.ts` — NEW. Surface-1 library module: `generatePluginInstallToken` / `evaluatePluginInstallRow` (pure) / `validatePluginInstallToken` / `extractPluginInstallToken`. Imported by NO route.
+- `website/supabase-api-keys-plugin-install-migration.sql` — NEW. AUTHORED, NOT RUN. Additive/idempotent; widens the `purpose` CHECK to admit `plugin_install`; adds `identity_type`/`install_id`/`install_scope` columns + checks + an active-row identity invariant + a lookup index.
+- `website/src/lib/__tests__/plugin-install-auth.test.ts` — NEW. 22 assertions; pure-decision + prefix-reject + Bearer-extraction coverage.
+- `operations/decision-log.md` — this entry + the Step-0 `D-0H-CRITERION1-MET-STAGE1-DEPENDENCY-2026-06-03`.
+
+**Risk classification:** **Standard** under 0d-ii. The scaffold is a **new module not wired into any route** (cache "new module not yet wired = Standard"); the migration is authored-not-run; the ADR + scope work are governance. **AC7 NOT engaged this session** — no authentication invocation site was added or changed; `/api/reason` is byte-identical (grep-confirmed: no route imports the module). PR6 not engaged (no safety-critical code). The route-wiring that replaces `PLUGIN_AUTH_SECRET` is **code-critical (AC7 + PR6)** and is the next session, under the full Critical Change Protocol.
+
+**R20a-perimeter impact assessment (staging-plan Risk 9, AC5):** **No perimeter change this session.** No route, no admin revocation API, and no R20a-perimeter route was added or modified; the four-flag R20a gate and the agent-path routes are untouched. The perimeter-broadening risk materialises only when the A10 admin revocation API + route wiring land (session 12); each such addition is Critical under PR6 + AC5 and carries its own perimeter assessment. Carried forward per PR7 + Risk 9.
+
+**Verification (0c framework; in-session, sandbox):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/lib/__tests__/plugin-install-auth.test.ts     # → 22 passed, 0 failed
+npx tsc --noEmit                                           # → exit 0 (clean)
+grep -rl "plugin-install-auth" src/app/api || echo NONE   # → NONE (no route imports it)
+```
+Expected: 22/22; tsc clean; NONE. **Diagnostic-certainty (PR10):** the test's initial top-level-await failure was *Diagnostic-certain — root cause identified* (tsx → CJS transform; top-level await unsupported) — fixed by an async `main()` wrapper; re-run green.
+
+**Rollback path:** Nothing in production to roll back (design/ADR/inert-library scope). The four new files are reversible by deletion; the migration was never run. Any deployment is a future session under CCP.
+
+**Open questions / deferred (PR7):**
+- Surface 2 (W3C-VC/AP2-mandate portable envelope) deferred until a real portable-agent consumer exists. Revisit per ADR conditions.
+- A revocation **runbook** (mirroring the A4 rotation runbook) is a remaining A10 sub-item — Not started; belongs to the implementation session.
+- `install_id` uniqueness policy (per-install vs global) and whether the admin mint endpoint is extended vs a new one — deferred to the implementation-session design.
+
+**Rules served:** 0a, 0c, 0d-ii, 0f, AC7 (named, not engaged), AC10, R18f, PR1, PR2, PR7, PR10, PR11, PR13, PR15, PR17, Risk 9.
+
+**Status:** Adopted. ADR Accepted. Implementation-status: A10 token format **Decided**; Surface-1 per-install credential logic **Verified (library code)** — not wired, not deployed. Production state UNCHANGED. Cross-references: `D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21` (the foundation mechanism Surface 1 extends); `D-SAGE-PRACTICE-DISTRIBUTION-IDENTITY-ELECTIONS-2026-05-26` (K1 ADR); `/adopted/adr/2026-06-03-a10-token-format.md`; `/adopted/substrate-plugin-staging-plan.md` §A10 + Open-question 1 + Risk 9; `/operations/agentic-commerce-findings-downstream-order.md` §F4.
+
+---
