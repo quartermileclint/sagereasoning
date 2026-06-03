@@ -8905,3 +8905,49 @@ Expected: the grep returns this entry header; Vercel shows `SUBSTRATE_LAYER3_ENA
 **Status:** Adopted. Implementation status unchanged: `SUBSTRATE_LAYER3_ENABLED` → **deferred (UNSET)**; `/api/substrate/layer3` endpoint → Scaffolded (gated, 503); A5 `applyLayer3Injections` on `/api/reason` → Wired-but-unread (metadata-only, inert). Cross-references: `D-R20A-GATE-ACTIVATION-2026-05-31` (whose Open Questions queued this); `D-A5-LAYER3-SCAFFOLDED-VERIFIED-2026-05-12`; `D-R20A-BATCH-ACTIVATION-REFLECT-AUDIENCE-2026-05-31`; manifest §R3/§R18a/§R18e/§R19/§R20a/§AC1/§AC5/§AC7; `/operations/handoffs/founder/2026-05-31-layer3-activation-deferred-close.md`.
 
 ---
+
+## 2026-06-03 — D-0H-CRITERION1-LIVE-TEST-2026-06-03
+
+**Decision:** P0 0h exit criterion 1 (founder exercises every "Wired+" feature with real data) is **advanced substantially** — the founder ran a live TEST-environment verification of the six shipped safety + privacy features and confirmed four Verified-live, one code-identical-but-founder-gated (logged), and one reachability-gated (expected). No code, config, or schema change; production unchanged (verification only).
+
+**Reasoning:** The capability inventory first-pass (`D-CAPABILITY-INVENTORY-FIRST-PASS-2026-05-29`) flagged that every "Wired" row rested on AI code-reads + TEST-harness probes, not founder live-data testing — the one genuinely-outstanding 0h item. This session is the verification floor under the substrate Stage-1 block (ahead of the A10 per-agent-credentials work). Confirming the foundation is real before layering A10 on top follows PR1/PR2 + the 0c verification framework. Results below resolve capability-inventory gap #1 (deletion completeness) and confirm gap #5 (intimate-data encryption) for `realtime_journal_entries`; gaps #2/#3 (agent-path safety) remain reachability-gated as forecast.
+
+**Live-test results (founder-run, TEST Supabase project + `localhost:3000`):**
+- **Feature 1 — Genuine deletion (R17c): Verified-live.** Seeded all 10 intimate tables (1 row each) → `DELETE /api/user/delete` → all 10 tables 0 rows. Erasure covers the complete intimate mentor store. *Note (minor):* the endpoint returned `207 partial_deletion` whose sole error was `user_locations: Could not find the table` — a TEST-schema artifact (that table was absent from the schema clone), not a deletion failure; re-confirm `200` on production where the table exists.
+- **Feature 2 — Export / portability: Verified-live.** `GET /api/user/export` returned all intimate keys (`mentor_profile`, `mentor_baseline_appendix`, `realtime_journal_entries`, `passion_events`, `premeditatio_entries`, `oikeiosis_reflections`, `mentor_interactions`, `mentor_journal_refs`, `mentor_observations_structured`, `mentor_profile_snapshots`, + analytic maps) and the seeded `passion_events` row (`rows: 1`).
+- **Feature 3 — Encryption at rest (R17b): Verified-live.** Entry written via `/api/mentor/journal-feed` stored as ciphertext (`entry_ciphertext` random base64; `entry_meta` `jsonb_typeof = object` — KG7 pass; `impression`/`assent`/`action` NULL) with a `200` readable round-trip.
+- **Feature 4 — Distress catch, human path: Verified-live on the two reachable routes.** `/api/reason` (distress→acute redirect; benign→full reasoning assessment, i.e. discriminates) and `/api/reflect` (distress→acute redirect) both fired synchronously. `/api/mentor/private/reflect` returned `403` — the founder-only authorization gate (`FOUNDER_USER_ID`, route.ts:137) fires before the distress check; the check itself (route.ts:212) is the identical `await enforceDistressCheck(detectDistressTwoStage(...))` pattern proven on the sibling routes. Logged as code-identical, founder-gated (not exercised).
+- **Feature 5 — Distress catch, agent path: reachability-gated (expected).** `POST /api/calling` and `POST /api/practice/reflect` both returned `503` — disabled by the `SAGE_CALLING_ENABLED` / `SAGE_REFLECT_ENABLED` kill-switches in TEST (PR12: a 503 is a disabled route, not a failed catch). Retest when those kill-switches + the `SUBSTRATE_CALLING_R20A_ENABLED` / `SUBSTRATE_REFLECT_R20A_ENABLED` flags are on.
+- **Feature 6 — Journal distress screening: Verified-live.** `/api/journal` (distress→`200` redirect; `journal_entries` stored count `0`) and `/api/mentor/journal-feed` (distress→`200` redirect; `realtime_journal_entries` count held at 2 — distress attempt added nothing). Gate runs before store/encryption.
+
+**Files touched:**
+- `.gitignore` — added `.env*.local` + `.env.development.local` (close a credential-leak gap: the dev-override env file used for TEST was not previously ignored). Standard-risk, additive, protective.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-06-03-0h-criterion1-live-test-script.md` — the consolidated live-test script (AI deliverable, reused for the run).
+- `operations/handoffs/founder/2026-06-03-0h-criterion1-live-test-close.md` — session close.
+- (No code, route, or migration change. `website/.env.development.local` is a founder-created, gitignored TEST-only file — never committed.)
+
+**Risk classification:** **Elevated** under 0d-ii — verification session, no change to product code/config/schema. One Critical *surface* (genuine deletion) was exercised against throwaway TEST users only; the Critical Change Protocol did not engage because nothing was changed. PR6 not engaged (no safety-critical code touched). AC7 not engaged.
+
+**Rollback path:** Nothing to roll back — no production change. The `.gitignore` addition is reversible by removing the two lines. Cleanup: delete throwaway TEST users (A deleted via the endpoint; B to be removed in Supabase → Authentication → Users); stop the local dev server.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -n "D-0H-CRITERION1-LIVE-TEST-2026-06-03" operations/decision-log.md
+grep -n ".env.development.local" .gitignore
+```
+Expected: the grep returns this entry header; `.gitignore` shows the two new env lines. No Vercel/Supabase production change to assert.
+
+**Diagnostic-certainty (PR10):** Feature 1's `207` — *Diagnostic-certain — root cause identified* (missing `user_locations` table in the TEST clone; error message names it). Feature 4.4's `403` — *Diagnostic-certain* (founder-only gate at route.ts:137 precedes the distress check). Feature 5's `503` — *Diagnostic-certain* (kill-switches unset in TEST).
+
+**Open questions / queued:**
+- **0h criterion 1 status:** advanced — five of six features founder-Verified-live or confirmed-by-identical-sibling; agent path (Feature 5) remains to be exercised once its kill-switches/flags are enabled in a TEST env (forecast outcome). The founder judges whether criterion 1 is met for the substrate Stage-1 dependency or whether the agent-path live run is required first.
+- **Minor findings logged (per 0h criterion 3):** (a) `/api/user/delete` `207`-on-missing-`user_locations` in TEST — re-confirm `200` on production (minor; TEST-schema artifact). (b) TEST-clone schema drift — `mentor_profile_snapshots` has NOT-NULL `snapshot_data` + `trigger` without defaults in the clone vs the repo `CREATE TABLE`/migration defaults; relates to the carried-forward `mentor_profiles` schema-drift governance item (minor). (c) Feature 4.4 not exercised (founder-gated) — exercisable by setting `FOUNDER_USER_ID` to a test UUID in a TEST env (minor).
+- Carried forward (unchanged): `/api/score` single-field coverage; Jest-runner gap; manifest R17c "503 stub" drift; `mentor_profiles` schema-drift (governance pass).
+
+**Rules served:** 0a, 0c, 0d-ii, 0f, 0h, R17b, R17c, R19, R20a, AC5, PR1, PR2, PR3, PR10, PR12, PR17.
+
+**Status:** Adopted. Implementation-status movements (founder-Verified-live): R17c genuine deletion (intimate store) → **Verified**; `/api/user/export` portability → **Verified**; R17b `realtime_journal_entries` encryption-at-rest → **Verified**; `/api/reason` + `/api/reflect` human distress catch → **Verified**. Unchanged: agent-path catch (`/api/calling`, `/api/practice/reflect`) remains Wired-dark (reachability-gated); `/api/mentor/private/reflect` catch remains Wired (code-identical, founder-gated, not founder-exercised). Production state UNCHANGED. Cross-references: `D-CAPABILITY-INVENTORY-FIRST-PASS-2026-05-29` (gaps #1/#5 addressed; #2/#3 confirmed reachability-gated); `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29`; `D-R17B-REALTIME-JOURNAL-ENCRYPTION-2026-05-31`; `D-R20A-JOURNAL-DISTRESS-CHECK-2026-05-31`; `D-LAYER3-ACTIVATION-DEFERRED-2026-05-31`; `/operations/handoffs/founder/2026-06-03-0h-criterion1-live-test-script.md`; `/operations/handoffs/founder/2026-06-03-0h-criterion1-live-test-close.md`.
+
+---
