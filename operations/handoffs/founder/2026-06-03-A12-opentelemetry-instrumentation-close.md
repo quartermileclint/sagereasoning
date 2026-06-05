@@ -1,4 +1,4 @@
-# Session Close — 2026-06-03 — A12 OpenTelemetry Instrumentation + Call-Grain Audit — WIRED (inert; sandbox-verified)
+# Session Close — 2026-06-03 — A12 OpenTelemetry Instrumentation + Call-Grain Audit — VERIFIED-LIVE (proof endpoint /api/reason)
 
 **Stream:** founder.
 **Governing frame:** `/adopted/standing-protocol-cache.md` + `/adopted/build-sessions-protocol-cache.md` ("no current users" holds).
@@ -12,15 +12,21 @@ Built the A12 telemetry contract as a flag-gated, additive single-endpoint proof
 
 ## Decisions Made
 - `D-A12-OTEL-INSTRUMENTATION-AUDIT-PROOF-2026-06-03` (Elevated) appended. PR15 bespoke-vs-Agent-SDK-native justification + F4 fold-in recorded; PR6 boundary documented; rollback + founder-walked verification specified.
+- `D-A12-OTEL-INSTRUMENTATION-VERIFIED-LIVE-2026-06-03` (Standard) appended. Founder-walked flag-ON TEST run passed: trace `ce61…` (L1/L2/L3/root spans, GenAI conventions, per-layer costs) + audit row whose `correlation_id` matches the trace, masking intact, AP2 provenance/use_policies present. **A12 → Verified-live on `/api/reason`.**
+
+## Live Verification Result (2026-06-03, founder-performed in this session)
+- **Trace:** `ce61b6a2946b96b6d2052d10dfacf333` — `substrate.reason` (root, OK) → `layer1.extract_features` (sonnet; cost 10413 µc) → `layer2.apply_mechanisms` (deterministic; no GenAI attrs) → `layer3.generate_prose` (sonnet; cost 13308 µc); all `sage.correlation_id=39a4f5c5-…`. Next.js auto-instrumentation also surfaced the real `fetch POST api.anthropic.com/v1/messages` span (free model-call telemetry once a backend is wired).
+- **Audit row:** `correlation_id` matches the trace; `decision_event=assessment`; `provenance`+`use_policies` AP2-shaped; `masked_context` = counts/codes only (`input_char_count:72`, no raw text). Masking confirmed on real data.
+- **No regression:** HTTP 200 normal assessment; no distress redirect; R20a untouched. Production never involved (TEST only).
 
 ## Status Changes
 | Item | Old | New |
 |---|---|---|
-| A12 (instrumentation + audit) | Scoped | **Wired (inert; sandbox-verified)** |
-| `substrate_audit_events` table | — | Designed (migration written; not yet applied to any DB) |
-| OTel deps (`@opentelemetry/*`) | absent | added to `website/package.json` (installed in sandbox; founder runs `npm install`) |
+| A12 (instrumentation + audit) | Scoped | **Verified-live (proof endpoint /api/reason)** |
+| `substrate_audit_events` table | — | Applied to TEST + a row written/verified (production application deferred) |
+| OTel deps (`@opentelemetry/*`) | absent | added + installed; live trace emitted via ConsoleSpanExporter |
 
-A12 reaches **Verified-live** after the founder-walked TEST run below.
+A12 reached **Verified-live** this session — the founder-walked TEST run passed (see Live Verification Result above).
 
 ## Verification Method Used (0c Framework)
 - **AI side (complete this session):** `npx tsx src/lib/substrate/__tests__/substrate-audit-writer.test.ts` → **25/25 passed** (decision-event mapping; masking-contract structural-only + no-canary-leak; AP2 provenance/use_policies shape; telemetry no-op safety flag-off AND flag-on-without-provider). `npx tsc --noEmit` → **0 errors** project-wide. **PR2 grep** confirms invocation on the live path: `route.ts:893` (root span wraps `runSandwich`), `route.ts:948` (audit write), `parallel-run.ts:557/676/753` (L1/L2/L3 spans).

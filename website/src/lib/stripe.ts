@@ -144,6 +144,12 @@ export const COST_HEALTH = {
   // R20a classifier cost monitoring — ADR-R20a-01 D7-b
   // If classifier spend exceeds 20% of mentor-turn cost in any month, reopen ADR.
   R20A_CLASSIFIER_MAX_MENTOR_RATIO: 0.20, // 20% threshold
+  // A13 per-identity cost-anomaly detector (R5: "identity X spending Nx its baseline").
+  // The pure detector in /lib/cost-alerts/cost-alert-detector.ts takes these as
+  // explicit params; the evaluate endpoint passes them in. Single source of truth.
+  PER_IDENTITY_ANOMALY_MULTIPLIER: 2.0,   // alert when an identity's priciest loop >= 2x its other-loop mean
+  PER_IDENTITY_MIN_PRIOR_LOOPS: 5,        // need >= 5 prior loops to form a baseline (false-positive guard)
+  PER_IDENTITY_ABSOLUTE_FLOOR_CENTS: 1,   // ignore loops/baselines below this many cents (near-zero noise guard)
 } as const
 
 

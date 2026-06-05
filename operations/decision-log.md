@@ -9267,3 +9267,104 @@ Expected: terminal prints the trace; SQL returns one row with `decision_event='a
 **Status:** Adopted. Implementation status: **A12 → Wired (inert; sandbox-verified)**; reaches **Verified-live** after the founder-walked TEST run. Unblocks A13 (depends on A12). Cross-references: `D-A11B-COMBINED-FLAG-ON-TEST-PROBE-VERIFIED-LIVE-2026-06-03` (predecessor); `D-A10-SMOKE-TEST-VERIFIED-LIVE-2026-06-03` (identity surface A12 builds on); `/adopted/substrate-plugin-staging-plan.md` §A12; `/operations/agentic-commerce-findings-downstream-order.md` §F4; `/operations/handoffs/founder/2026-06-03-A12-opentelemetry-instrumentation-close.md`.
 
 ---
+
+## 2026-06-03 — D-A12-OTEL-INSTRUMENTATION-VERIFIED-LIVE-2026-06-03
+
+**Decision:** A12 OpenTelemetry instrumentation + call-grain audit is **Verified-live** on `/api/reason`. The founder ran the flag-ON TEST verification (`SUBSTRATE_OTEL_ENABLED=true npm run dev` against the TEST Supabase project, authenticated with a throwaway TEST-user JWT) and confirmed all three proof criteria. This closes the open item from `D-A12-OTEL-INSTRUMENTATION-AUDIT-PROOF-2026-06-03`.
+
+**Reasoning:** PR1 requires a single-endpoint proof to reach Verified before any rollout. The live run did so: the telemetry emitted on the live call path (not just compiled), the audit row wrote with masking intact, and the trace and the row share one correlation id — the end-to-end contract.
+
+**Verification record (founder-performed; live TEST, JWT path — chosen over the API-key path to avoid the Option D billing dependency, per `D-A11B-COMBINED-FLAG-ON-TEST-PROBE-VERIFIED-LIVE-2026-06-03`):**
+- **Trace (ConsoleSpanExporter, TEST):** one trace `ce61b6a2946b96b6d2052d10dfacf333`; spans `substrate.reason` (root, SERVER, status OK) → `substrate.layer1.extract_features` (CLIENT; `gen_ai.provider.name=anthropic`, `gen_ai.request.model=claude-sonnet-4-6`, `sage.cost_microcents=10413`) → `substrate.layer2.apply_mechanisms` (INTERNAL; no GenAI attrs — correct) → `substrate.layer3.generate_prose` (CLIENT; sonnet; `sage.cost_microcents=13308`). All carry `sage.correlation_id=39a4f5c5-0b99-44d8-b437-5550ba32f671`; layer spans nest under the root. **Bonus finding:** Next.js's built-in instrumentation, activated by our provider registration, emitted the real `fetch POST https://api.anthropic.com/v1/messages` span nested in the trace — confirming a production OTel backend would capture model-call spans without extra work.
+- **Audit row (`substrate_audit_events`, TEST):** `correlation_id=39a4f5c5-…` (matches the trace); `decision_event=assessment`; `severity_band=null`; `models_used={claude-sonnet-4-6}`; `provenance={substrate_version:translation-sandwich-v1, producer:sagereasoning.substrate, models, produced_at, layer2_signature_present:false}`; `use_policies={not_medical_or_legal_advice:true, mirror_principle:true, limitations_ref:/limitations, distress_redirect_applies:false}`; `masked_context={input_char_count:72, engine_attribution:translation-sandwich, tier1_trigger_code:null, layer3_fallback_used:false, has_substrate_layer3_response:false}`.
+- **Masking confirmed:** `masked_context` contains only counts/codes — no raw input text or free-text findings (R3 + R17 preserved on real data).
+- **No regression:** the `/api/reason` call returned HTTP 200 with a normal assessment; benign input produced no distress redirect; R20a perimeter untouched (PR6 boundary held).
+
+**Files touched:** none (verification only; no repo change). `operations/decision-log.md` — this entry. `operations/handoffs/founder/2026-06-03-A12-opentelemetry-instrumentation-close.md` — status updated to Verified-live with the live evidence.
+
+**Risk classification:** Standard (verification record + docs). The TEST run set + unset a TEST-only env flag and made live TEST calls; no production change, no repo code/config/schema change beyond docs. AC7 not engaged. PR6 boundary held (no R20a touch).
+
+**Production state:** UNCHANGED — `SUBSTRATE_OTEL_ENABLED` UNSET in production; `experimental.instrumentationHook` enabled but `register()` no-ops without the flag; `substrate_audit_events` applied to TEST only (production application is a deferred deploy decision); `/api/reason` byte-identical. All four R20a flags `true`; `SUBSTRATE_INJECTION_DEFENCE_ENABLED` / `SUBSTRATE_LAYER3_ENABLED` / `PLUGIN_INSTALL_AUTH_ENABLED` UNSET.
+
+**Open questions / deferred (PR7):** unchanged from `D-A12-OTEL-INSTRUMENTATION-AUDIT-PROOF-2026-06-03` — AC10 manifest cross-reference (F4, pending founder approval — governing-doc edit); production migration + flag activation + OTel export backend choice; failure-path spans + route-level-redirect audit; windowed per-identity baselines (A13). Throwaway TEST user deletable at convenience (TEST-only).
+
+**Rules served:** 0a, 0c, 0d-ii, 0f, R0, R3, R4, R5, R17, R19c, R19d, AC1, AC10, KG1, KG7, PR1, PR2, PR6 (boundary preserved), PR10, PR17, F4.
+
+**Status:** Adopted. Implementation status: **A12 → Verified-live (proof endpoint `/api/reason`)**. Unblocks A13. Cross-references: `D-A12-OTEL-INSTRUMENTATION-AUDIT-PROOF-2026-06-03` (the build this verifies); `D-A11B-COMBINED-FLAG-ON-TEST-PROBE-VERIFIED-LIVE-2026-06-03` (JWT-path precedent); `/adopted/substrate-plugin-staging-plan.md` §A12 + §A13; `/operations/handoffs/founder/2026-06-03-A12-opentelemetry-instrumentation-close.md`.
+
+---
+
+## 2026-06-03 — D-A13-COST-HEALTH-ALERTS-D5-PROOF-2026-06-03
+
+**Decision:** A13 (R5 cost-as-health-metric alerts) single-rule proof built + sandbox-verified: the D5 per-identity cost-anomaly detector, flag-gated behind `SUBSTRATE_COST_ALERTS_ENABLED` (unset), delivering via a new admin GET evaluate endpoint + a new `cost_alerts` state table; channel = scheduled-check → Cowork (founder-elected 2026-06-03). Implementation status: **A13 D5 → Wired (inert; sandbox-verified)**. The founder-walked live TEST run takes it to Verified-live.
+
+**Reasoning:** A9 (`D-A9-J6-COST-MONITORING-WIRED-2026-05-14`) already built 3 of R5's 5 detectors as pull-only health fields on `/api/billing/usage-summary` + `cost_health_snapshots`. A13 adds the watching + delivery half that the J6 assessment §5 named as the open gap. D5 is the PR1 single-rule proof: it is the genuinely new detector (D1–D3 already exist) and it exercises the whole new path (A12 `getIdentityCostBaseline` → pure detector → `cost_alerts` upsert → scheduled delivery). Channel = scheduled-check→Cowork chosen over email after PR15 found no email/notification sender in the repo and no Anthropic-canonical primitive for own-substrate-spend alerting (Anthropic usage/cost analytics track Anthropic-account billing, not our per-loop spend); scheduled→Cowork adds no app dependency + no recurring cost (R0 oikeiosis). Endpoint is GET (idempotent via dedup upsert) mirroring `usage-summary` so the founder can trigger it by visiting the URL as admin. Detector triggers on `anthropic_cost_cents` (LLM cost — what R5 governs), not `total_cents` (the customer bill).
+
+**Files touched:**
+- `supabase/migrations/20260603_a13_cost_alerts.sql` — NEW; `cost_alerts` state table (dedup unique index detector+scope+day; RLS service-role-only; NOT append-only — `notified_at` updated on delivery; rollback block).
+- `website/src/lib/cost-alerts/cost-alert-detector.ts` — NEW; PURE D5 detector (thresholds passed in; no stripe/supabase import → unit-testable with plain tsx).
+- `website/src/lib/cost-alerts/__tests__/cost-alert-detector.test.ts` — NEW; 13 assertions (spike trips; flat-normal silent; min-history + floor guards; boundary inclusive).
+- `website/src/app/api/billing/cost-alerts/evaluate/route.ts` — NEW; admin GET (mirrors `usage-summary`), flag-gated; reads `getIdentityCostBaseline` + `anthropic_cost_cents`, runs detector, upserts `cost_alerts`, returns fired alerts.
+- `website/src/lib/stripe.ts` — MODIFIED (additive); `COST_HEALTH` gains `PER_IDENTITY_ANOMALY_MULTIPLIER` (2.0), `PER_IDENTITY_MIN_PRIOR_LOOPS` (5), `PER_IDENTITY_ABSOLUTE_FLOOR_CENTS` (1).
+- `drafts/A13-cost-health-alerts-design.md` — NEW (approved design; produced earlier this session).
+
+**Risk classification:** Elevated under 0d-ii (new endpoint + new table + alerting reads the cost surface). Additive + flag-gated + reversible. AC7 not engaged. PR6 not engaged — `/api/reason` untouched (grep-confirmed zero A13 references); R20a classifier / Zone 2-3 / wrappers not touched.
+
+**Rollback path:** Leave `SUBSTRATE_COST_ALERTS_ENABLED` unset (endpoint → 503, inert) and/or don't create the scheduled task; to remove entirely, `git revert` the commit + run the migration's rollback block (DROP TABLE `cost_alerts`). `/api/reason` unaffected in every case — alerting is observability, never on the request critical path.
+
+**Verification step (AI side, complete this session):**
+- D5 detector unit test **13/13 PASS** (run via a sandbox-local tsx — the repo's `node_modules/esbuild` is the darwin binary, so the Linux sandbox can't use the repo's own tsx; the founder runs the same test on macOS where the repo's tsx works).
+- `tsc --noEmit` project-wide: **0 errors** (incl. the GET refactor).
+- **PR2** build-to-wire grep: the GET handler invokes `getIdentityCostBaseline` (route.ts:103) + `detectPerIdentityAnomaly` (route.ts:131) + upserts `cost_alerts` (route.ts:149); `/api/reason` has zero A13 references.
+- Diagnostic certainty (PR10): **Diagnostic-certain — root cause identified** — the sandbox tsx failure is the esbuild platform-binary mismatch, addressed by sandbox-local tsx; not a defect in A13.
+
+**Verification step (founder-walked, between sessions — reaches localhost, which Cowork cannot):** full click-by-click in the session close §"Founder Verification, Part 2": apply migration to TEST; flag-on dev; seed 6 loops for `agent_id = 'a13-d5-test'` (5 @ `anthropic_cost_cents` 3 + 1 @ 30) using a real TEST `api_key_id`, plus 6 loops for `'a13-d5-normal'` (all @ 3); visit the evaluate endpoint as admin; confirm a `cost_alerts` row for `'a13-d5-test'` (multiple 10x) + the endpoint returns it; confirm `'a13-d5-normal'` yields `alerts_fired: 0` (no false positive). Takes A13 D5 → Verified-live.
+
+**Open questions / deferred (PR7):**
+- D4 (per-call spike) + folding D1–D3 into the scheduled evaluator + cross-detector dedup — after D5 Verified-live (PR1).
+- Production activation: set `SUBSTRATE_COST_ALERTS_ENABLED` + create the Cowork scheduled task against the production endpoint — a separate deploy decision (env-flag activation, Critical-classified under 0d-ii); not in this session.
+- Windowed per-identity baseline (identity now vs its own last-N-days) — needs the `loop_billing_events` timestamp column, unconfirmed in-repo (A12 deferral). D5 proof is timestamp-free (other-loop baseline).
+- PR13 consider-implications: `getIdentityCostBaseline` aggregates `total_cents` (the bill) under a "cost" label; R5 cost-health wants the LLM cost (`anthropic_cost_cents`). D5 triggers on the LLM cost; a follow-on could align the helper's naming or add a cost variant. (Refines A12 — `D-A12-OTEL-INSTRUMENTATION-AUDIT-PROOF-2026-06-03`.)
+- A12 VERIFIED-LIVE governance (the `D-A12-...-VERIFIED-LIVE` entry + updated A12 close) was uncommitted at this session-open; folded into this session's commit.
+
+**Rules served:** R5, R0, AC10, PR1, PR2, PR3, PR10, PR12, PR13, PR15, PR17, KG1, KG7.
+
+**Status:** Adopted. Implementation status: **A13 D5 → Wired (inert; sandbox-verified)**; live TEST run pending → Verified-live. Cross-references: `D-A9-J6-COST-MONITORING-WIRED-2026-05-14` (the detection half A13 extends); `D-A12-OTEL-INSTRUMENTATION-VERIFIED-LIVE-2026-06-03` (`getIdentityCostBaseline` input); `/adopted/substrate-plugin-staging-plan.md` §A13; `/drafts/A13-cost-health-alerts-design.md` (the approved design); `/operations/r5-cost-shape-impact-assessment-2026-05-14.md` §5 (the push-delivery gap A13 fills).
+
+## 2026-06-03 — D-A13-AUTH-MODEL-SERVICE-TOKEN-CORRECTION-2026-06-03
+
+**Decision:** The A13 D5 evaluate endpoint's auth model is changed from the founder-email admin gate (mirrored from `/api/billing/usage-summary`) to a **service token** (`COST_ALERTS_EVAL_TOKEN`, sent as `Authorization: Bearer <token>` or `x-cost-alerts-token`). The A13 D5 close §"Founder Verification, Part 2" is rewritten to the actual established TEST process. A13 D5 remains **Wired (inert; sandbox-verified)**.
+
+**Reasoning:** The founder caught that the A13 close mis-stated the TEST process. Verified against the A10/A11b/A12 closes: live TEST runs use the TEST Supabase project (`iwdtrvuphogkwmovhnvz`) via `.env.development.local` (overrides `.env.local` in dev; production untouched) with a throwaway test login — never `.env.local`, never the founder login. The close wrongly said `.env.local` + founder-email login. Worse, the endpoint's founder-email admin gate was incompatible with BOTH (a) the established test-email TEST login (it would 403) and (b) the founder-elected scheduled-check→Cowork channel (a scheduled job cannot perform an interactive Supabase login). A service token resolves both: the founder triggers by curl and the scheduled task polls, each passing the secret, identically on TEST and production; production stays secret-gated. This is the auth model the chosen channel actually requires.
+
+**Files touched:**
+- `website/src/app/api/billing/cost-alerts/evaluate/route.ts` — MODIFIED; removed `requireAuth` + `ADMIN_EMAILS` gate; added `COST_ALERTS_EVAL_TOKEN` service-token gate (503 if token env unset; 401 if header missing/mismatch); rate-limit retained.
+- `website/.env.example` — MODIFIED (additive); documents `SUBSTRATE_COST_ALERTS_ENABLED` + `COST_ALERTS_EVAL_TOKEN`.
+- `adopted/build-sessions-protocol-cache.md` — MODIFIED; standing TEST-run process note added (see `D-BUILD-CACHE-DRIFT-RESOLVED-2026-06-03-TEST-PROCESS-NOTE`).
+- `operations/handoffs/founder/2026-06-03-A13-cost-health-alerts-D5-proof-close.md` — MODIFIED; §Part 2 rewritten to the corrected TEST process (service token + `.env.development.local`, no founder login).
+
+**Risk classification:** Elevated under 0d-ii. The change is to the access-control DESIGN of a NEW, never-live, flag-gated endpoint (no live auth surface modified; no users; flag unset everywhere) — Elevated not Critical, but named explicitly given access control is sensitive; the founder approved the service-token model before the change (AskUserQuestion, 2026-06-03). AC7 not engaged (no deployment-config/env activation; the new env vars are documented defaults, unset live). PR6 not engaged.
+
+**Rollback path:** `git revert` restores the founder-email gate; or leave `SUBSTRATE_COST_ALERTS_ENABLED` unset (endpoint inert) regardless. `/api/reason` unaffected.
+
+**Verification step (AI side, complete this session):** `tsc --noEmit` 0 errors; D5 unit test 13/13 (detector unchanged); grep confirms `requireAuth`/`ADMIN_EMAILS` removed, `COST_ALERTS_EVAL_TOKEN` gate present, call path intact (`getIdentityCostBaseline` + `detectPerIdentityAnomaly` + `cost_alerts` upsert), `/api/reason` zero A13 references.
+
+**Verification step (founder-walked):** rewritten close §Part 2 — set `SUBSTRATE_COST_ALERTS_ENABLED=true` + `COST_ALERTS_EVAL_TOKEN=<secret>` in `.env.development.local`; `npm run dev`; `curl -H "x-cost-alerts-token: <secret>" "http://localhost:3000/api/billing/cost-alerts/evaluate?agent_id=a13-d5-test"` → alert; `?agent_id=a13-d5-normal` → 0; remove flag+token at teardown.
+
+**Process note:** the Supabase-target / TEST-process confusion recurred a third time (A10 close count 1; here count 3) and is promoted to a standing note in the build cache under PR8.
+
+**Rules served:** R5, R0, PR1, PR2, PR8, PR13, PR15, PR17, KG1.
+
+**Status:** Adopted. Supersedes the **auth-model portion** of `D-A13-COST-HEALTH-ALERTS-D5-PROOF-2026-06-03` (the detector + table + flag-gating + sandbox verification in that entry stand unchanged; only the endpoint auth model + the close's TEST-process instructions are corrected here). Cross-references: `D-A13-COST-HEALTH-ALERTS-D5-PROOF-2026-06-03`; `D-BUILD-CACHE-DRIFT-RESOLVED-2026-06-03-TEST-PROCESS-NOTE`; A10/A11b/A12 founder closes.
+
+## 2026-06-03 — D-BUILD-CACHE-DRIFT-RESOLVED-2026-06-03-TEST-PROCESS-NOTE
+
+**Decision:** Added a standing "TEST-run process" note to `/adopted/build-sessions-protocol-cache.md` §"Founder governing notes": local live-tests run against the TEST Supabase project (`iwdtrvuphogkwmovhnvz`) via `.env.development.local` with a throwaway test login (or an endpoint service token) — never `.env.local`, never the founder login, never production.
+
+**Reasoning:** PR8 — this tacit-knowledge friction recurred a third time (A10 close logged count 1; re-surfaced + corrected at A13). Promoted to process per PR8's third-recurrence rule so future closes stop mis-stating it.
+
+**Risk classification:** Standard (governance/docs).
+
+**Rules served:** PR8, PR5.
+
+**Status:** Adopted. Cross-references: `D-A13-AUTH-MODEL-SERVICE-TOKEN-CORRECTION-2026-06-03`; A10 close (`/operations/handoffs/founder/2026-06-03-A10-critical-implementation-close.md`).

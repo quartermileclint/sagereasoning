@@ -73,6 +73,8 @@ The Stoic Agent Substrate is delivered as a plugin (or plugin family) installabl
 
 Logged via `D-BUILD-CACHE-DRIFT-RESOLVED-2026-05-10-NO-USERS` (lean form). Added in-session per the cache's update discipline below.
 
+**TEST-run process (standing; promoted 2026-06-03 under PR8 after a third recurrence — A10's close logged it at count 1; mis-stated again in the A13 D5 close and corrected by the founder).** Any local live-test (`npm run dev`) runs against the **TEST** Supabase project (`iwdtrvuphogkwmovhnvz`) via **`website/.env.development.local`**, which Next.js loads *ahead of* `.env.local` in dev so the production config is untouched. Test feature-flags and test-only secrets go in `.env.development.local` and are **removed at teardown**. Authenticate with a **throwaway test login** — an API key, a test-email Supabase JWT (e.g. `*@example.com`), or, for token-gated internal endpoints, the endpoint's service token — **never the founder login, never `.env.local`, never production.** This is the standing answer to the recurring "my project or the test project?" question. Source: the A10 / A11b / A12 founder closes. Logged via `D-BUILD-CACHE-DRIFT-RESOLVED-2026-06-03-TEST-PROCESS-NOTE`.
+
 ---
 
 ## Living-state references
