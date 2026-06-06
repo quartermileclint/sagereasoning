@@ -9472,3 +9472,88 @@ Live TEST run (service-token, TEST project, `.env.development.local` — never t
 **Rules served:** R5, R0, PR1, PR2, PR6, PR7, PR10, PR13, PR15, PR17, KG1, KG7.
 
 **Status:** Adopted. Implementation status: **A13 detection → Live (production; activated + verified)**; **A13 automated delivery → Scoped (deferred — mechanism TBD)**. Production state changed (no longer byte-identical to pre-session): `cost_alerts` live (empty); `SUBSTRATE_COST_ALERTS_ENABLED=true` + `COST_ALERTS_EVAL_TOKEN` set in Vercel Production; `/api/reason` byte-identical. Cross-references: `D-A13-COST-HEALTH-ALERTS-COMPLETION-VERIFIED-LIVE-2026-06-06`; `D-A13-COST-HEALTH-ALERTS-COMPLETION-D4-FOLDIN-2026-06-06`; `D-A13-AUTH-MODEL-SERVICE-TOKEN-CORRECTION-2026-06-03`; `/operations/handoffs/founder/2026-06-06-A13-production-activation-close.md`; `/adopted/substrate-plugin-staging-plan.md` §A13; `/manifest.md` §R5.
+
+---
+
+## 2026-06-06 — D-R17C-A15A-STALE-DRIFT-RECONCILED-2026-06-06
+
+**Decision:** Reconciled the stale "R17c 503 placeholder / A15a deletion endpoint to-be-built" documentation drift across the manifest and the staging plan, and produced an honest Stage-1 disposition. The R17c genuine deletion endpoint (`/api/user/delete`) and the R17i portability endpoint (`/api/user/export`) were both Verified-live and deployed to production 2026-05-30 per `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29`; the manifest + staging plan still described them as pending. Founder approved all seven edits (incl. the CR-GDPR-A20 portability sibling). Posture fields left unchanged by design.
+
+**Reasoning:** The 2026-05-29 entry itself flagged the manifest "503 stub" language as drift (KG-EX1 prescribe-before-grounding guard: reconcile docs against the decision log's actual Verified states before building further). A19 was about to be scoped on top of these docs, so the reconcile ran first. Posture fields (`PARTIAL` on the two deletion CRs; `SCOPED` on the portability CR) were deliberately NOT upgraded: full GDPR Art 17 alignment has an open legal question — the erasure-vs-audit-retention tension (`support_access_log` `ON DELETE RESTRICT`) noted in the 2026-05-29 entry, deferred to lawyer review at Stage 1 close — so upgrading to ALIGNED/OPERATIONAL would overclaim compliance, against R18/R19 honest-positioning. The fix corrects the false "503 placeholder" factual claim while keeping the posture honest.
+
+**Stage-1 disposition produced (what is truly left before Stage-1 close — all A10–A19 Verified):**
+- A10, A11b, A12, A13 — Verified-live (A13 also activated in production). Done. (A10/A11b/A12 production activation is a separate deploy choice, not a Stage-1-close gate.)
+- A14 SLOs / error budgets — Scoped (not built).
+- A15a R17c deletion — Verified-live + deployed (this reconcile corrects the docs).
+- A15b SAR (`/api/user/access`) — Scoped (export covers much of the data substance, but no dedicated SAR endpoint).
+- A15c rectification (`/api/user/rectify`) — Scoped.
+- A15d portability (`/api/user/export`) — substantially done (export Verified-live 2026-05-29); contract-completeness + posture confirmation outstanding.
+- A16 privacy governance, A17 regulatory governance — Scoped (lawyer-coupled).
+- A18 onboarding + limitations — Scoped.
+- A19 abuse-detection + rate-limiting — single-detector proof built this session (see the A19 entry below); Verified-live pending the founder TEST pass.
+Net: Stage-1 close is NOT imminent — A14, A15b, A15c, A16, A17, A18, A19 remain, with A16/A17 gated on lawyer engagement.
+
+**Files touched:**
+- `manifest.md` — CR-GDPR-A17-DELETION (L11), CR-AU-PRIVACY-1988 (L47), CR-CCPA-DELETION (L53) notes corrected ("503 placeholder" → Verified-live deletion endpoint, with posture-unchanged rationale); CR-GDPR-A20-PORTABILITY (L29) note corrected (export Verified-live). Posture values unchanged.
+- `adopted/substrate-plugin-staging-plan.md` — §A15a description (L129), shortest-chain sequence (L564), session-estimate table row 17 (L695) all marked DONE 2026-05-30.
+- Backups (prior versions preserved per founder rule): `archive/2026-06-06-R17c-reconcile/manifest.md.backup-2026-06-06-pre-R17c-reconcile`; `archive/2026-06-06-R17c-reconcile/substrate-plugin-staging-plan.md.backup-2026-06-06-pre-R17c-reconcile`.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification (0d-ii):** **Elevated** — in-place edits to two adopted governing documents. Documentation-only; no code, no schema, no production surface. Prior versions backed up before editing. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** restore either file from its `archive/2026-06-06-R17c-reconcile/*.backup-2026-06-06-pre-R17c-reconcile` copy. No production effect.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -nE "R17c.*(503|placeholder|on roadmap)" manifest.md adopted/substrate-plugin-staging-plan.md   # expect: no matches
+grep -c "Verified-live + deployed to production 2026-05-30" manifest.md                                # expect: 3
+```
+Expected: the stale "503 placeholder" R17c lines are gone; the three corrected deletion notes present.
+
+**Founder approval record:** Founder selected "Approve all (incl. A20 sibling)" at the edit-approval gate; posture-unchanged stated up front; backups taken before any edit.
+
+**Open questions:**
+- A15d (portability) contract-completeness + CR-GDPR-A20 posture: is the Verified `/api/user/export` sufficient to call A15d done, or does the staging plan's structured-export contract require more? Revisit at the A15 sub-stage / lawyer engagement.
+- A15b SAR overlap: confirm whether a dedicated `/api/user/access` endpoint is required for Stage-1 close or whether `/api/user/export` satisfies Art 15 access. Revisit at A15b kickoff.
+- `CLAUDE.md` "Production state (as of 2026-05-14)" block remains stale (carried from the A13 close); refresh in a later governance pass.
+
+**Rules served:** R17, R17c, R17i, R18, R19, 0a, 0f, KG-EX1, PR7, PR17.
+
+**Status:** Adopted. Implementation status unchanged by this entry (documentation reconcile only): A15a R17c deletion remains Verified-live; A15d portability remains Verified-live (export). Cross-references: `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29`; `D-A13-PRODUCTION-ACTIVATION-2026-06-06`; `manifest.md` §compliance_register; `adopted/substrate-plugin-staging-plan.md` §A15.
+
+---
+
+## 2026-06-06 — D-A19-ABUSE-DETECTION-VELOCITY-PROOF-2026-06-06
+
+**Decision:** Built the A19 abuse-detection single-detector proof (PR1) — a per-identity request-velocity anomaly detector — as a detection-only evaluator, additive and flag-gated inert. Mirrors the A13 cost-alert pattern exactly: a PURE detector module + a flag-gated service-token endpoint + a service-role-only `abuse_signals` table. Founder elected "Detection-only, inert" (no live-route enforcement this session). Wired + sandbox-verified; reaches Verified-live on the founder TEST pass.
+
+**Reasoning:** Staging plan §A19 (per-identity rate-limit; reverse-engineering probe detection; abuse-response). Detection-before-enforcement mirrors how A13 shipped (detection live, enforcement/delivery deferred) and honours PR1 (prove the pattern on one endpoint, inert, before any surface rollout). PR15 consult: no Anthropic-canonical primitive delivers own-substrate per-identity abuse detection (checked `.claude/skills/anthropic/` — none match; agentic-commerce F1–F4 — none targets A19); bespoke justified, reusing the proven A13 structure rather than inventing one; the existing `checkRateLimit` (security.ts) is IP-based + in-memory + ephemeral, unsuitable as the persistent per-identity surface. Reads the A12 `substrate_audit_events` table (its own migration names it "behavioural-baseline source (A19)") because it carries `occurred_at` + `agent_id`; `loop_billing_events` has no confirmed in-repo timestamp. PR13 (consider-implications) scope note: detection is VELOCITY + STRUCTURAL, never SEMANTIC (masked_context stores structural fields only, never raw text, by R3/R17), so A19 cannot compare prompt wording — a deliberate privacy boundary, not a gap.
+
+**Files touched (all additive / new):**
+- `supabase/migrations/20260606_a19_abuse_signals.sql` — NEW. `abuse_signals` table (mirrors `cost_alerts`: dedup on signal_type+scope+period_date; service-role-only RLS, no policies; idempotent; rollback block).
+- `website/src/lib/abuse-detection/abuse-detector.ts` — NEW. PURE detector (`detectRequestVelocityAnomaly`) + `AbuseSignal` type. No I/O, no config import.
+- `website/src/lib/abuse-detection/abuse-thresholds.ts` — NEW. `ABUSE_DETECTION` thresholds (window 60s; 3× multiplier; min 5 prior windows; floor 5 req). Single source of truth, passed into the pure detector explicitly.
+- `website/src/app/api/abuse/evaluate/route.ts` — NEW. Flag-gated (`SUBSTRATE_ABUSE_DETECTION_ENABLED` unset → 503) service-token (`ABUSE_DETECTION_EVAL_TOKEN`) evaluator. Reads substrate_audit_events, buckets occurred_at into windows, runs the detector, persists to abuse_signals (awaited upsert — KG1). Mirrors `/api/billing/cost-alerts/evaluate`.
+- `website/src/lib/abuse-detection/__tests__/abuse-detector.test.ts` — NEW. 17-assertion plain-tsx unit proof.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification (0d-ii):** **Elevated** — new table (additive, idempotent, reversible) + new flag-gated route; nothing touches existing user-facing functionality (inert behind an UNSET flag; production byte-identical). **PR6 NOT engaged** — the evaluator reads the substrate's already-produced audit rows; it never touches the R20a classifier, Zone 2/3 logic, or any wrapper (boundary checked). AC7 not engaged. KG1 engaged (awaited service-role DB writes). KG7 engaged (details JSONB object).
+
+**Rollback path:** the new files are additive + flag-gated → inert; `git revert` of the uncommitted work removes them. Nothing reaches production until a separate activation session sets the flag + token in Vercel + applies the migration to production. The migration's commented rollback block drops `abuse_signals` if it was applied to TEST.
+
+**Verification (PR10 PEV — Verify step):**
+- **Unit (sandbox, COMPLETE):** `abuse-detector.test.ts` → **17/17 PASS** (clear burst fires; flat-normal silent; just-below-threshold silent; exact-threshold fires; insufficient-history guard; candidate-floor guard; baseline-floor guard; baseline-excludes-busiest-window). Run via tsc-transpile + node (the sandbox is Linux; the repo `node_modules` carries the macOS esbuild binary so `npx tsx` cannot run in-sandbox — a platform artifact, not a code defect; on the founder's Mac `npx tsx` runs normally).
+- **Typecheck (sandbox, COMPLETE):** `npx tsc --noEmit` → exit 0, no errors (covers the endpoint against next/server + supabase + @/lib/security types).
+- **PR2 build-to-wire (COMPLETE):** confirmed by grep — `detectRequestVelocityAnomaly` invoked at route.ts:191, `persistAbuseSignal` at :206, flag gate at :80, token at :93, `substrate_audit_events` reads + `abuse_signals` write all in the execution path (not merely imported).
+- **Diagnostic-certainty:** **Diagnostic-certain** on the detector logic + wiring (proven). The live data-path against a real Supabase (enumerate → read occurred_at → bucket → persist) is **pending the founder TEST pass** — the sandbox cannot reach localhost.
+- **Live TEST pass (founder-walked, between sessions — PR17):** full click-by-click in the session close §"Founder Verification". Apply migration to TEST; set flag + token in `website/.env.development.local`; seed substrate_audit_events for a burst agent + a flat agent; `npm run dev`; service-token GET; confirm an `abuse_signals` row for the burst agent + no false positive for the flat agent; remove the test env at teardown. Takes A19 (request_velocity_anomaly) → Verified-live.
+
+**Open questions:**
+- A19 surface rollout (PR1): once this detector is Verified-live, the `systematic_enumeration` + `rapid_input_variation` detectors (structural, off masked_context) are the additive rollout. Deferred — separate session.
+- Enforcement (rate-limit / revoke on live traffic) is deliberately out of scope (founder elected detection-only); a later activation, same shape as A13's deferred delivery.
+- In production, `substrate_audit_events` is empty until A12 (OTel) is activated (flag unset), so A19 has nothing to evaluate in production until then — fine for a flag-gated inert build proven on TEST.
+
+**Rules served:** R5, R0, R3, R17, AC10, PR1, PR2, PR3, PR6 (boundary checked, not engaged), PR10, PR13, PR15, PR17, KG1, KG7.
+
+**Status:** Adopted. Implementation status: **A19 request_velocity_anomaly → Wired (inert; sandbox-verified)**; → Verified-live on the founder TEST pass. Production UNCHANGED / byte-identical (`SUBSTRATE_ABUSE_DETECTION_ENABLED` + `ABUSE_DETECTION_EVAL_TOKEN` UNSET in production; `abuse_signals` not applied to production). Cross-references: `D-A13-COST-HEALTH-ALERTS-COMPLETION-D4-FOLDIN-2026-06-06` (A13 pattern mirrored); `D-A12-OTEL-INSTRUMENTATION-VERIFIED-LIVE-2026-06-03` (substrate_audit_events surface); `D-R17C-A15A-STALE-DRIFT-RECONCILED-2026-06-06` (same session); `/adopted/substrate-plugin-staging-plan.md` §A19.

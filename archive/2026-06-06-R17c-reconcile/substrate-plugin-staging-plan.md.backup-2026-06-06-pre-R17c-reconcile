@@ -126,7 +126,7 @@ Decomposed from ST2 Phase 2 Domain 1 S2 (REVISE → S2a Standard + S2b Critical)
 **Source:** ST2 Phase 2 Domain 4 P2 (REVISE — phased). Cross-cuts R1 (R17c deletion endpoint bring-forward).
 
 **Phased sequencing:**
-- **A15a** — R17c genuine deletion endpoint (bring-forward from P2 priority 2d). **DONE 2026-05-30** — /api/user/delete implemented, Verified-live and deployed to production (D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29). The earlier "replaces 503 placeholder" framing was stale; no build remains. Critical.
+- **A15a** — R17c genuine deletion endpoint (bring-forward from P2 priority 2d). Replaces 503 placeholder. Critical.
 - **A15b** — R17g access (SAR — GDPR Article 15). Standard contract, Critical surface.
 - **A15c** — R17h rectification (GDPR Article 16). Standard contract, Critical surface.
 - **A15d** — R17i portability (GDPR Article 20). Most complex; structured-export contract; Critical surface.
@@ -561,7 +561,7 @@ The shortest end-to-end chain that determines overall arc length:
 
 ```
 A1 → A3 → A5 → A7 → A9
-  → A10 → A11b → A12 → A13 → A15a (DONE 2026-05-30) → Stage 1 close
+  → A10 → A11b → A12 → A13 → A15a → Stage 1 close
   → K1 → K2 → K3 → K7
   → Tier 2 migrations → Tier 3 migrations
   → B1 → B2 → C1–C5 (on Plugin spec) → D1
@@ -692,7 +692,7 @@ Sessions 1-7 are complete or in-progress (A1, A2, A3, A4 Verified; A5 next). Ind
 | 14 | A11b Verified; A12 OpenTelemetry instrumentation | A11b (complete), A12 (partial) | 3-4 hr | Mixed |
 | 15 | A12 Verified; A13 cost-as-health-metric alerts | A12 (complete), A13 | 3-4 hr | Elevated |
 | 16 | A14 SLOs + error-budget discipline | A14 | 3-4 hr | Standard governance / Elevated implementation |
-| 17 | A15a R17c deletion endpoint (Critical) | A15a (DONE 2026-05-30, Verified-live) | — | Critical (R17) |
+| 17 | A15a R17c deletion endpoint (Critical) | A15a | 3-4 hr | Critical (R17) |
 | 18 | A15b R17g access (SAR) | A15b | 3-4 hr | Critical (R17) |
 | 19 | A15c R17h rectification | A15c | 3-4 hr | Critical (R17) |
 | 20 | A15d R17i portability | A15d | 3-4 hr | Critical (R17) |
