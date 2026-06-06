@@ -1,4 +1,6 @@
-# Session Close — 2026-06-03 — A13 R5 Cost-as-Health Alerts — D5 single-rule proof (Wired; inert; sandbox-verified)
+# Session Close — 2026-06-03 — A13 R5 Cost-as-Health Alerts — D5 single-rule proof (Wired → VERIFIED-LIVE 2026-06-06)
+
+> **Update 2026-06-06:** the founder ran the live TEST verification and it passed — alert fired on the spike identity (`observed_value 30`, `multiple 10`, persisted to `cost_alerts`); no alert on the flat control identity; token-gated TEST run, production untouched. **A13 D5 → Verified-live.** Recorded in `D-A13-COST-HEALTH-ALERTS-D5-VERIFIED-LIVE-2026-06-06`.
 
 **Stream:** founder.
 **Governing frame:** `/adopted/standing-protocol-cache.md` + `/adopted/build-sessions-protocol-cache.md` ("no current users" holds).
@@ -17,7 +19,7 @@ Designed A13 (founder approved the design + elected channel = scheduled-check �
 ## Status Changes
 | Item | Old | New |
 |---|---|---|
-| A13 D5 (per-identity anomaly) | Scoped | **Wired (inert; sandbox-verified)** |
+| A13 D5 (per-identity anomaly) | Scoped | **Verified-live (2026-06-06)** |
 | A13 (overall) | Scoped | **Designed** (D5 Wired; D1–D4 designed, queued behind D5 Verified per PR1) |
 | `cost_alerts` table | — | migration written (TEST apply = founder step in Part 2) |
 | `/api/billing/cost-alerts/evaluate` (GET) | — | Wired, inert behind `SUBSTRATE_COST_ALERTS_ENABLED`; service-token auth (`COST_ALERTS_EVAL_TOKEN`) |

@@ -9368,3 +9368,22 @@ Expected: terminal prints the trace; SQL returns one row with `decision_event='a
 **Rules served:** PR8, PR5.
 
 **Status:** Adopted. Cross-references: `D-A13-AUTH-MODEL-SERVICE-TOKEN-CORRECTION-2026-06-03`; A10 close (`/operations/handoffs/founder/2026-06-03-A10-critical-implementation-close.md`).
+
+## 2026-06-06 — D-A13-COST-HEALTH-ALERTS-D5-VERIFIED-LIVE-2026-06-06
+
+**Decision:** A13 D5 (per-identity cost-anomaly alert) is **Verified-live**. The founder ran the live TEST verification (service-token GET against a local `npm run dev` pointed at the TEST project via `.env.development.local`) and confirmed every proof criterion. This closes the live-verification item from `D-A13-COST-HEALTH-ALERTS-D5-PROOF-2026-06-03` (the build) under the corrected TEST process (`D-A13-AUTH-MODEL-SERVICE-TOKEN-CORRECTION-2026-06-03`). Build was 2026-06-03; live verification 2026-06-06.
+
+**Live verification result (2026-06-06, founder-performed, AI-guided step-by-step per PR17):**
+- Seed (TEST `loop_billing_events`, key `c5f3ac04-…`): `a13-d5-test` = 6 loops, `anthropic_cost_cents` [3×5, 30] (sum 45, max 30); `a13-d5-normal` = 6 loops all 3 (sum 18). Confirmed by aggregate query.
+- **Anomalous identity:** `GET /api/billing/cost-alerts/evaluate?agent_id=a13-d5-test` → `alerts_fired 1`, `alerts_persisted 1`; alert `per_identity_anomaly`, scope `a13-d5-test`, `observed_value 30`, `threshold_value 6`, `multiple 10`; details `prior_loops 5`, `prior_mean_cents 3` — the exact D5 math (other-loop baseline excludes the spike). `bill_baseline_total_cents 70` carried alongside → confirms the cost-vs-bill distinction (PR13): the trigger used `anthropic_cost_cents` (45/max 30), not `total_cents` (70).
+- **Persistence:** a matching `cost_alerts` row was written (dedup key detector+scope+`period_date 2026-06-06`).
+- **No false positive:** `?agent_id=a13-d5-normal` → `alerts_fired 0`, no row.
+- **Auth gate:** token-gated GET (service token in `.env.development.local`); the corrected TEST process (no founder login) worked end-to-end.
+
+**Risk classification:** Standard (governance record of a founder-performed verification; no code change).
+
+**Verification method (0c):** founder-walked live run — the localhost half Cowork cannot reach — guided interactively step-by-step (PR17): migration apply → seed → evaluate → confirm row → no-false-positive control.
+
+**Rules served:** R5, R0, PR1, PR2, PR17, KG1.
+
+**Status:** Adopted. Implementation status: **A13 D5 → Verified-live**. PR1 single-rule proof satisfied. Production unchanged (TEST-only; `SUBSTRATE_COST_ALERTS_ENABLED` + `COST_ALERTS_EVAL_TOKEN` set only in `.env.development.local`, removed at teardown). Unblocks: D4 (per-call spike) + folding D1–D3 into the scheduled evaluator + cross-detector dedup; then Stage-1 close work. Production activation (flag + Cowork scheduled task against the production endpoint) remains a separate deploy decision. Cross-references: `D-A13-COST-HEALTH-ALERTS-D5-PROOF-2026-06-03`; `D-A13-AUTH-MODEL-SERVICE-TOKEN-CORRECTION-2026-06-03`; `/operations/handoffs/founder/2026-06-03-A13-cost-health-alerts-D5-proof-close.md`.
