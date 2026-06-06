@@ -9421,3 +9421,23 @@ Live TEST run (service-token, TEST project, `.env.development.local` — never t
 **Rules served:** R5, R0, PR1, PR2, PR10, PR13, PR15, KG1, KG7.
 
 **Status:** Adopted. Implementation status: **A13 D4 + D1–D3 → Wired (inert; sandbox-verified)**; **A13 (overall) → Wired pending the founder live-TEST pass** (then Verified-live across all five detectors). Production UNCHANGED / byte-identical (`SUBSTRATE_COST_ALERTS_ENABLED` + `COST_ALERTS_EVAL_TOKEN` UNSET in production; additive + flag-gated). Unblocks: A13 production activation (Critical deploy decision); Stage-1 close; A15a / A19. Cross-references: `D-A13-COST-HEALTH-ALERTS-D5-VERIFIED-LIVE-2026-06-06`; `D-A13-COST-HEALTH-ALERTS-D5-PROOF-2026-06-03`; `/operations/handoffs/founder/2026-06-06-A13-completion-D4-foldin-close.md`.
+
+## 2026-06-06 — D-A13-COST-HEALTH-ALERTS-COMPLETION-VERIFIED-LIVE-2026-06-06
+
+**Decision:** A13 is **Verified-live across all five R5 detectors (D1–D5)**. The founder ran the live TEST verification (service-token GET against a local `npm run dev` pointed at the TEST project via `.env.development.local`) and confirmed D4 fires + persists through `cost_alerts`, with all five detectors running and no false positives. Closes the live-verification item from `D-A13-COST-HEALTH-ALERTS-COMPLETION-D4-FOLDIN-2026-06-06` (the build). Build + live verification both 2026-06-06.
+
+**Live verification result (2026-06-06, founder-performed, AI-guided step-by-step per PR17):**
+- Seed (TEST `loop_billing_events`, key `a80f3b9a-…`): six single-loop identities `d4-a`…`d4-e` @ 3¢ + `d4-spike` @ 300¢, atop 9 pre-existing loops (max 2¢; 15 loops total).
+- **Full-sweep evaluate** (`GET /api/billing/cost-alerts/evaluate`, no `agent_id`) → `detectors_run` listed all five; `identities_evaluated 7`; `alerts_fired 1`, `alerts_persisted 1`; the one alert `per_call_spike`, scope `global`, `observed_value 300`, `threshold_value 2.43`, `multiple 247.06` (baseline 1.21¢/loop over 14 other loops — the exact D4 math, candidate excluded; `total_cost_cents 317`).
+- **D4 isolated from D5:** no `per_identity_anomaly` fired (each seeded identity has one loop < the 5-prior-loop minimum) — confirms the spike alert came from D4, not D5.
+- **No false positives:** D1/D2/D3 correctly silent (no qualifying revenue / ops-cap / 7-day-history data); `skipped: []`.
+- **Persistence confirmed by direct SELECT:** one `cost_alerts` row — `per_call_spike` / `global` / `300` / `2.43` / `247.06` / `2026-06-06`.
+- Token-gated GET (service token in `.env.development.local`); no founder login. Teardown completed (env lines removed via terminal; `d4-*` rows + the `per_call_spike` alert deleted).
+
+**Risk classification:** Standard (governance record of a founder-performed verification; no code change).
+
+**Verification method (0c):** founder-walked live run (the localhost half Cowork cannot reach), guided interactively step-by-step (PR17): table-state check → seed → env-via-terminal → dev server → full-sweep evaluate → confirm persisted row → teardown.
+
+**Rules served:** R5, R0, PR1, PR2, PR10, PR13, PR17, KG1.
+
+**Status:** Adopted. Implementation status: **A13 → Verified-live (all five detectors D1–D5)**. A13 detector set complete. Production unchanged (TEST-only; flag + token set only in `.env.development.local`, removed at teardown). Unblocks: **A13 production activation** (Critical — Vercel flag/token + `cost_alerts` migration to production + Cowork scheduled task); Stage-1 close; A15a / A19. Cross-references: `D-A13-COST-HEALTH-ALERTS-COMPLETION-D4-FOLDIN-2026-06-06`; `D-A13-COST-HEALTH-ALERTS-D5-VERIFIED-LIVE-2026-06-06`; `/operations/handoffs/founder/2026-06-06-A13-completion-D4-foldin-close.md`.

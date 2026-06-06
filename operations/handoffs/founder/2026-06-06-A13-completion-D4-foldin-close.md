@@ -1,4 +1,6 @@
-# Session Close — 2026-06-06 — A13 completion: D4 (per-call spike) + D1–D3 fold-in
+# Session Close — 2026-06-06 — A13 completion: D4 (per-call spike) + D1–D3 fold-in (Wired → VERIFIED-LIVE same session)
+
+> **Update 2026-06-06:** the founder ran the live TEST verification in-session and it passed — full-sweep evaluate returned `alerts_fired 1` / `alerts_persisted 1`, the one alert `per_call_spike` (scope `global`, `observed_value 300`, `multiple 247.06`); `detectors_run` listed all five; no `per_identity_anomaly` (D4 isolated from D5); D1/D2/D3 correctly silent; `skipped: []`; persisted `cost_alerts` row confirmed by SELECT; teardown done. **A13 → Verified-live across all five detectors (D1–D5).** Recorded in `D-A13-COST-HEALTH-ALERTS-COMPLETION-VERIFIED-LIVE-2026-06-06`. Remaining founder step: commit the build (Part 1 below) — the live run validated the working tree but did not commit it. Next session: A13 production activation (Critical) — `/operations/handoffs/founder/2026-06-06-A13-production-activation-NEXT-SESSION-PROMPT.md`.
 
 **Stream:** founder.
 **Governing frame:** `/adopted/standing-protocol-cache.md` + `/adopted/build-sessions-protocol-cache.md` ("no current users" holds; standing TEST-run process note applies).
