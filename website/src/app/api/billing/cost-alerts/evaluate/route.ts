@@ -26,11 +26,50 @@
  * regulatory_references: [CR-005]
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { corsHeaders, corsPreflightResponse, RATE_LIMITS, checkRateLimit } from '@/lib/security'
 import { COST_HEALTH } from '@/lib/stripe'
 import { getIdentityCostBaseline } from '@/lib/substrate/substrate-identity-baseline'
-import { detectPerIdentityAnomaly, type CostAlert } from '@/lib/cost-alerts/cost-alert-detector'
+import {
+  detectPerIdentityAnomaly,
+  detectPerCallSpike,
+  detectRevenueCostRatio,
+  detectOpsMonthlyCap,
+  detectRolling7DaySpike,
+  type CostAlert,
+} from '@/lib/cost-alerts/cost-alert-detector'
+
+/**
+ * Persist one fired alert — dedup on (detector_type, scope, period_date) via
+ * upsert. KG1: awaited (no fire-and-forget). Shared by the global detectors
+ * (D4 + D1–D3); the per-identity D5 loop keeps its own inline persist so its
+ * Verified-live path stays byte-identical.
+ */
+async function persistCostAlert(
+  supabaseAdmin: SupabaseClient,
+  alert: CostAlert,
+  periodDate: string
+): Promise<{ persisted: boolean; error?: string }> {
+  const { data, error } = await supabaseAdmin
+    .from('cost_alerts')
+    .upsert(
+      {
+        detector_type: alert.detector_type,
+        scope: alert.scope,
+        severity: alert.severity,
+        period_date: periodDate,
+        observed_value: alert.observed_value,
+        threshold_value: alert.threshold_value,
+        multiple: alert.multiple,
+        message: alert.message,
+        details: alert.details,
+      },
+      { onConflict: 'detector_type,scope,period_date' }
+    )
+    .select('id')
+  if (error) return { persisted: false, error: error.message }
+  return { persisted: !!(data && data.length > 0) }
+}
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -187,10 +226,161 @@ export async function GET(request: NextRequest) {
     if (upserted && upserted.length > 0) persistedCount += 1
   }
 
+  // ── Global detectors (run once per full sweep; NOT on a targeted ?agent_id) ──
+  // D4 (per-call spike) + D1–D3 (revenue:cost ratio, ops cap, rolling 7-day spike)
+  // are account-wide (scope 'global'); the (detector_type, scope, period_date)
+  // dedup yields one alert per detector per UTC day. A targeted ?agent_id=X query
+  // runs only the per-identity detector for X; the scheduled task does a full sweep
+  // (no agent_id), so the global detectors always run there. Each reads its own
+  // faithful cost surface (PR13): D4 per-loop anthropic_cost_cents; D1 revenue vs
+  // LLM cost; D2 Sage Ops cost; D3 daily substrate spend. D1–D3 gather the same
+  // surfaces A9 reads, here, so the evaluator is FRESH and not reliant on the admin
+  // usage-summary endpoint having been polled.
+  const detectorsRun: string[] = ['per_identity_anomaly']
+  if (!requestedAgentId) {
+    detectorsRun.push('per_call_spike', 'revenue_cost_ratio', 'ops_monthly_cap', 'rolling_7day_spike')
+    const globalAlerts: CostAlert[] = []
+
+    // ── D4 — per-call (global) spike over all loops' anthropic_cost_cents ──
+    const { data: allCostRows, error: allCostErr } = await supabaseAdmin
+      .from('loop_billing_events')
+      .select('anthropic_cost_cents')
+    if (allCostErr) {
+      skipped.push({ agent_id: 'global', reason: `per_call_spike query failed: ${allCostErr.message}` })
+    } else if (allCostRows && allCostRows.length > 0) {
+      const allCosts = (allCostRows as Array<{ anthropic_cost_cents: number | null }>).map(
+        (r) => Number(r.anthropic_cost_cents) || 0
+      )
+      const spike = detectPerCallSpike({
+        loopCount: allCosts.length,
+        totalCostCents: allCosts.reduce((s, c) => s + c, 0),
+        maxLoopCostCents: allCosts.reduce((m, c) => (c > m ? c : m), 0),
+        multiplier: COST_HEALTH.PER_CALL_SPIKE_MULTIPLIER,
+        minPriorLoops: COST_HEALTH.PER_CALL_SPIKE_MIN_PRIOR_LOOPS,
+        absoluteFloorCents: COST_HEALTH.PER_CALL_SPIKE_ABSOLUTE_FLOOR_CENTS,
+      })
+      if (spike) globalAlerts.push(spike)
+    }
+
+    // ── D1–D3 — account-health detectors folded in from A9 usage-summary ──
+    try {
+      const gNow = new Date()
+      const gPeriodStart = new Date(gNow.getFullYear(), gNow.getMonth(), 1).toISOString().split('T')[0]
+      const gPeriodEnd = new Date(gNow.getFullYear(), gNow.getMonth() + 1, 0).toISOString().split('T')[0]
+
+      // Revenue this month (payment_events) — D1 numerator.
+      const { data: revenueEvents } = await supabaseAdmin
+        .from('payment_events')
+        .select('amount_cents')
+        .in('event_type', ['checkout.session.completed', 'invoice.paid'])
+        .gte('created_at', `${gPeriodStart}T00:00:00Z`)
+        .lte('created_at', `${gPeriodEnd}T23:59:59Z`)
+      const revenueCents = (revenueEvents || []).reduce(
+        (s: number, r: { amount_cents: number | null }) => s + (r.amount_cents || 0),
+        0
+      )
+
+      // LLM cost this month (substrate path) — D1 denominator + D3 source.
+      const { data: monthCostRows } = await supabaseAdmin
+        .from('translation_sandwich_comparisons')
+        .select('layer1_cost_usd_microcents, layer3_cost_usd_microcents')
+        .gte('created_at', `${gPeriodStart}T00:00:00Z`)
+        .lte('created_at', `${gPeriodEnd}T23:59:59Z`)
+      const llmCostMicrocents = (monthCostRows || []).reduce(
+        (
+          s: number,
+          r: { layer1_cost_usd_microcents: number | null; layer3_cost_usd_microcents: number | null }
+        ) => s + (r.layer1_cost_usd_microcents || 0) + (r.layer3_cost_usd_microcents || 0),
+        0
+      )
+      const llmCostCents = Math.round(llmCostMicrocents / 10000)
+
+      // D1 — revenue:cost ratio.
+      const ratioAlert = detectRevenueCostRatio({
+        revenueCents,
+        llmCostCents,
+        minRatio: COST_HEALTH.MIN_REVENUE_TO_COST_RATIO,
+      })
+      if (ratioAlert) globalAlerts.push(ratioAlert)
+
+      // Ops spend from the current cost_health_snapshots row (A9 maintains it).
+      const { data: snap } = await supabaseAdmin
+        .from('cost_health_snapshots')
+        .select('sage_ops_cost_cents')
+        .eq('period_start', gPeriodStart)
+        .eq('period_end', gPeriodEnd)
+        .single()
+      const opsCostCents = snap?.sage_ops_cost_cents || 0
+
+      // D2 — Sage Ops monthly cap.
+      const opsAlert = detectOpsMonthlyCap({
+        opsCostCents,
+        capCents: COST_HEALTH.SAGE_OPS_MONTHLY_CAP_CENTS,
+      })
+      if (opsAlert) globalAlerts.push(opsAlert)
+
+      // Rolling 7-day daily substrate spend (today vs prior-7-day average).
+      const gToday = new Date(gNow)
+      gToday.setUTCHours(0, 0, 0, 0)
+      const gSevenDaysAgo = new Date(gToday)
+      gSevenDaysAgo.setUTCDate(gToday.getUTCDate() - 7)
+      const { data: windowRows } = await supabaseAdmin
+        .from('translation_sandwich_comparisons')
+        .select('created_at, layer1_cost_usd_microcents, layer3_cost_usd_microcents')
+        .gte('created_at', gSevenDaysAgo.toISOString())
+        .lte('created_at', new Date().toISOString())
+      if (windowRows && windowRows.length > 0) {
+        const dailyCents: Record<string, number> = {}
+        for (const row of windowRows as Array<{
+          created_at: string
+          layer1_cost_usd_microcents: number | null
+          layer3_cost_usd_microcents: number | null
+        }>) {
+          const dayKey = row.created_at.slice(0, 10)
+          dailyCents[dayKey] =
+            (dailyCents[dayKey] || 0) +
+            ((row.layer1_cost_usd_microcents || 0) + (row.layer3_cost_usd_microcents || 0)) / 10000
+        }
+        const todayKey = gToday.toISOString().slice(0, 10)
+        const todayCents = Math.round(dailyCents[todayKey] || 0)
+        const priorDays = Object.entries(dailyCents).filter(([k]) => k !== todayKey)
+        const daysObserved = priorDays.length
+        const priorSum = priorDays.reduce((s, [, v]) => s + v, 0)
+        const priorAvgCents = daysObserved > 0 ? Math.round(priorSum / daysObserved) : 0
+
+        // D3 — rolling 7-day spike.
+        const rollingAlert = detectRolling7DaySpike({
+          todayCents,
+          priorAvgCents,
+          daysObserved,
+          minDaysObserved: COST_HEALTH.ROLLING_AVERAGE_MIN_DAYS_OBSERVED,
+          multiplier: COST_HEALTH.ROLLING_AVERAGE_ALERT_MULTIPLIER,
+        })
+        if (rollingAlert) globalAlerts.push(rollingAlert)
+      }
+    } catch (err) {
+      skipped.push({
+        agent_id: 'global',
+        reason: `D1-D3 evaluation failed: ${err instanceof Error ? err.message : String(err)}`,
+      })
+    }
+
+    // ── Persist every fired global alert (dedup on detector_type+scope+day) ──
+    for (const alert of globalAlerts) {
+      firedAlerts.push(alert)
+      const res = await persistCostAlert(supabaseAdmin, alert, periodDate)
+      if (res.error) {
+        skipped.push({ agent_id: 'global', reason: `${alert.detector_type} persist failed: ${res.error}` })
+      } else if (res.persisted) {
+        persistedCount += 1
+      }
+    }
+  }
+
   return NextResponse.json(
     {
       ok: true,
-      detector: 'per_identity_anomaly',
+      detectors_run: detectorsRun,
       period_date: periodDate,
       identities_evaluated: evaluated.length,
       alerts_fired: firedAlerts.length,

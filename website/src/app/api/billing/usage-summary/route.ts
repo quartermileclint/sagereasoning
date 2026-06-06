@@ -18,6 +18,11 @@ import { createClient } from '@supabase/supabase-js'
 import { requireAuth, corsHeaders, corsPreflightResponse, RATE_LIMITS, checkRateLimit } from '@/lib/security'
 import { COST_HEALTH } from '@/lib/stripe'
 import { getClassifierCostSummary, checkClassifierCostThreshold } from '@/lib/r20a-cost-tracker'
+import {
+  detectRevenueCostRatio,
+  detectOpsMonthlyCap,
+  detectRolling7DaySpike,
+} from '@/lib/cost-alerts/cost-alert-detector'
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -133,21 +138,26 @@ export async function GET(request: NextRequest) {
     : null // Can't compute if no costs
 
   // ── Check alerts ──────────────────────────────────────────────────────
+  // A13 fold-in: the detection logic now lives in the shared pure detectors
+  // (cost-alert-detector.ts) so this endpoint and the cost-alerts evaluator agree
+  // on one source of truth. This endpoint keeps its pull behaviour — it builds its
+  // alert strings from the same canonical messages the evaluator persists to
+  // cost_alerts. Each detector reads its own cost surface (PR13).
   const alerts: string[] = []
 
-  if (ratio !== null && ratio < COST_HEALTH.MIN_REVENUE_TO_COST_RATIO) {
-    alerts.push(
-      `R5 ALERT: Revenue-to-cost ratio is ${ratio.toFixed(2)}x — below the 2.0x minimum threshold. ` +
-      `Revenue: $${(totalRevenueCents / 100).toFixed(2)}, Estimated LLM cost: $${(estimatedLlmCostCents / 100).toFixed(2)}.`
-    )
-  }
+  const d1 = detectRevenueCostRatio({
+    revenueCents: totalRevenueCents,
+    llmCostCents: estimatedLlmCostCents,
+    minRatio: COST_HEALTH.MIN_REVENUE_TO_COST_RATIO,
+  })
+  if (d1) alerts.push(d1.message)
 
   const sageOpsCostCents = snapshot?.sage_ops_cost_cents || 0
-  if (sageOpsCostCents > COST_HEALTH.SAGE_OPS_MONTHLY_CAP_CENTS) {
-    alerts.push(
-      `R5 ALERT: Sage Ops costs ($${(sageOpsCostCents / 100).toFixed(2)}) exceed the $100/month cap.`
-    )
-  }
+  const d2 = detectOpsMonthlyCap({
+    opsCostCents: sageOpsCostCents,
+    capCents: COST_HEALTH.SAGE_OPS_MONTHLY_CAP_CENTS,
+  })
+  if (d2) alerts.push(d2.message)
 
   // ── Rolling 7-day daily-spend alert (A9 Option B, 2026-05-14) ─────────
   // R5 manifest rule: "Cost-as-health-metric alerts trigger at 2x the
@@ -197,17 +207,15 @@ export async function GET(request: NextRequest) {
 
       rollingWindow = { todayCents, avgCents, daysObserved }
 
-      // Cold-start guard: require 3+ days of prior data before firing.
-      if (daysObserved >= 3 && avgCents > 0) {
-        const multiplier = todayCents / avgCents
-        if (multiplier >= COST_HEALTH.ROLLING_AVERAGE_ALERT_MULTIPLIER) {
-          alerts.push(
-            `R5 ALERT: Today's substrate spend ($${(todayCents / 100).toFixed(2)}) is ` +
-            `${multiplier.toFixed(2)}x the rolling 7-day average ($${(avgCents / 100).toFixed(2)}) — ` +
-            `at or above the ${COST_HEALTH.ROLLING_AVERAGE_ALERT_MULTIPLIER.toFixed(1)}x threshold.`
-          )
-        }
-      }
+      // Cold-start guard + threshold now live in the shared D3 detector.
+      const d3 = detectRolling7DaySpike({
+        todayCents,
+        priorAvgCents: avgCents,
+        daysObserved,
+        minDaysObserved: COST_HEALTH.ROLLING_AVERAGE_MIN_DAYS_OBSERVED,
+        multiplier: COST_HEALTH.ROLLING_AVERAGE_ALERT_MULTIPLIER,
+      })
+      if (d3) alerts.push(d3.message)
     }
   } catch (err) {
     console.warn('[usage-summary] rolling-7-day window query failed:', err)

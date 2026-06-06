@@ -141,6 +141,7 @@ export const COST_HEALTH = {
   MIN_REVENUE_TO_COST_RATIO: 2.0,
   SAGE_OPS_MONTHLY_CAP_CENTS: 10000,     // $100
   ROLLING_AVERAGE_ALERT_MULTIPLIER: 2.0,  // Alert if 2x rolling average
+  ROLLING_AVERAGE_MIN_DAYS_OBSERVED: 3,   // D3 cold-start guard: need >= 3 prior days before firing
   // R20a classifier cost monitoring — ADR-R20a-01 D7-b
   // If classifier spend exceeds 20% of mentor-turn cost in any month, reopen ADR.
   R20A_CLASSIFIER_MAX_MENTOR_RATIO: 0.20, // 20% threshold
@@ -150,6 +151,12 @@ export const COST_HEALTH = {
   PER_IDENTITY_ANOMALY_MULTIPLIER: 2.0,   // alert when an identity's priciest loop >= 2x its other-loop mean
   PER_IDENTITY_MIN_PRIOR_LOOPS: 5,        // need >= 5 prior loops to form a baseline (false-positive guard)
   PER_IDENTITY_ABSOLUTE_FLOOR_CENTS: 1,   // ignore loops/baselines below this many cents (near-zero noise guard)
+  // A13 D4 per-call (global) cost spike (R5: "some single call cost Nx the typical call").
+  // Global analogue of the per-identity detector — same shape, evaluated over the
+  // whole loop population so a brand-new identity's first spike is still caught.
+  PER_CALL_SPIKE_MULTIPLIER: 2.0,         // alert when the priciest loop >= 2x the global other-loop mean
+  PER_CALL_SPIKE_MIN_PRIOR_LOOPS: 5,      // need >= 5 prior loops globally to form a baseline
+  PER_CALL_SPIKE_ABSOLUTE_FLOOR_CENTS: 1, // ignore loops/baselines below this many cents (near-zero noise guard)
 } as const
 
 

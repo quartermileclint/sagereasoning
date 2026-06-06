@@ -9387,3 +9387,37 @@ Expected: terminal prints the trace; SQL returns one row with `decision_event='a
 **Rules served:** R5, R0, PR1, PR2, PR17, KG1.
 
 **Status:** Adopted. Implementation status: **A13 D5 → Verified-live**. PR1 single-rule proof satisfied. Production unchanged (TEST-only; `SUBSTRATE_COST_ALERTS_ENABLED` + `COST_ALERTS_EVAL_TOKEN` set only in `.env.development.local`, removed at teardown). Unblocks: D4 (per-call spike) + folding D1–D3 into the scheduled evaluator + cross-detector dedup; then Stage-1 close work. Production activation (flag + Cowork scheduled task against the production endpoint) remains a separate deploy decision. Cross-references: `D-A13-COST-HEALTH-ALERTS-D5-PROOF-2026-06-03`; `D-A13-AUTH-MODEL-SERVICE-TOKEN-CORRECTION-2026-06-03`; `/operations/handoffs/founder/2026-06-03-A13-cost-health-alerts-D5-proof-close.md`.
+
+## 2026-06-06 — D-A13-COST-HEALTH-ALERTS-COMPLETION-D4-FOLDIN-2026-06-06
+
+**Decision:** Completed the A13 detector set so all five R5 cost-health detectors deliver through one channel (`cost_alerts` + the service-token evaluate endpoint). Added **D4** (per-call/global cost spike) as the global analogue of the Verified-live D5, and folded **D1** (revenue:cost ratio), **D2** (Sage Ops $100/mo cap), and **D3** (rolling-7-day spike) out of A9's inline `usage-summary` logic into shared pure detectors — **founder elected Option A (shared module) + "Build it now"** at session open.
+
+**Reasoning:** D5 proved the delivery contract on one rule (`D-A13-COST-HEALTH-ALERTS-D5-VERIFIED-LIVE-2026-06-06`); PR1's surface rollout extends the proven pattern additively. PR15 consult: the existing detector module + A9's logic + `COST_HEALTH` are reused (no bespoke infra; no Anthropic primitive exists for own-spend alerting; no relevant `.claude/skills/anthropic/` pattern). PR13 (consider-implications): the five detectors read different cost surfaces and are NOT unified onto one number — D4/D5 use per-loop `anthropic_cost_cents`, D1 revenue-vs-LLM-cost, D2 Sage Ops cost, D3 daily substrate spend; they share a delivery channel only. Option A chosen over B (stale-snapshot read; unstructured `alert_reason`) and C (evaluator-only, defers convergence) for single-source detection logic with fresh evaluation for the scheduled task.
+
+**Files touched:**
+- `website/src/lib/cost-alerts/cost-alert-detector.ts` — added `detectPerCallSpike` (D4) + `detectRevenueCostRatio` (D1), `detectOpsMonthlyCap` (D2), `detectRolling7DaySpike` (D3); all pure, `scope:'global'`. D5 left byte-identical.
+- `website/src/lib/stripe.ts` — `COST_HEALTH` += `PER_CALL_SPIKE_MULTIPLIER/_MIN_PRIOR_LOOPS/_ABSOLUTE_FLOOR_CENTS` (D4) and `ROLLING_AVERAGE_MIN_DAYS_OBSERVED` (D3 cold-start, was hard-coded 3). Single source of truth for thresholds.
+- `website/src/app/api/billing/cost-alerts/evaluate/route.ts` — global pass (full-sweep only, `!agent_id`) runs D4 + D1–D3, gathers D1–D3 inputs fresh, persists via a shared `persistCostAlert` helper; response `detector` → `detectors_run[]`. D5 per-identity loop + its inline persist byte-identical.
+- `website/src/app/api/billing/usage-summary/route.ts` — three inline threshold blocks swapped for shared-detector calls (keeps pull behaviour, snapshot write, JSON shape, and alert-string wording; D2 string now "$100.00" vs "$100" — cosmetic, admin-only).
+- `website/src/lib/cost-alerts/__tests__/cost-alert-detector.test.ts` — +29 assertions (D4 + D1–D3); 42/42 total.
+
+**Risk classification:** Elevated (`code-elevated`) under 0d-ii. Touches existing admin functionality (`usage-summary`) + extends the evaluate endpoint; additive + flag-gated + reversible. PR6 not engaged (no R20a-perimeter/classifier touch — grep-confirmed `/api/reason` has zero cost-alert refs). AC7 not engaged. No schema change (the `cost_alerts` table already whitelists all five `detector_type`s).
+
+**Rollback path:** All additive + flag-gated. If a detector misbehaves: leave `SUBSTRATE_COST_ALERTS_ENABLED` unset (evaluator → 503) or `git revert` the commit. The `usage-summary` refactor's rollback is `git revert`, returning it to its prior inline behaviour. Alerting is observability — never on the `/api/reason` request path, which is byte-identical.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/lib/cost-alerts/__tests__/cost-alert-detector.test.ts   # expect: 42 passed / 0 failed
+npx tsc --noEmit                                                     # expect: no output (0 errors)
+```
+Live TEST run (service-token, TEST project, `.env.development.local` — never the founder login): see the session close §"Founder Verification, Part 2" (seeds a multi-identity global spike to isolate D4 from D5; conditions D1/D3; confirms `cost_alerts` rows + no false positives). Takes D4 + D1–D3 → Verified-live.
+
+**Open questions:**
+- Shared spike-core helper (D4/D5 share arithmetic) — deferred cleanup (PR7); kept separate to leave the Verified-live D5 path byte-identical.
+- D1/D2 cannot fire until paid revenue (P4 Stripe) / Sage Ops running (P7) exist; wired + unit-proven, awaiting real data to fire live.
+- A9 `usage-summary` still gathers D1–D3 inputs inline (Option A shares the detection logic, not the gathering per the prompt); a later session could share the gathering too.
+
+**Rules served:** R5, R0, PR1, PR2, PR10, PR13, PR15, KG1, KG7.
+
+**Status:** Adopted. Implementation status: **A13 D4 + D1–D3 → Wired (inert; sandbox-verified)**; **A13 (overall) → Wired pending the founder live-TEST pass** (then Verified-live across all five detectors). Production UNCHANGED / byte-identical (`SUBSTRATE_COST_ALERTS_ENABLED` + `COST_ALERTS_EVAL_TOKEN` UNSET in production; additive + flag-gated). Unblocks: A13 production activation (Critical deploy decision); Stage-1 close; A15a / A19. Cross-references: `D-A13-COST-HEALTH-ALERTS-D5-VERIFIED-LIVE-2026-06-06`; `D-A13-COST-HEALTH-ALERTS-D5-PROOF-2026-06-03`; `/operations/handoffs/founder/2026-06-06-A13-completion-D4-foldin-close.md`.
