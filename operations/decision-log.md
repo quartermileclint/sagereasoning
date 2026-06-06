@@ -9441,3 +9441,34 @@ Live TEST run (service-token, TEST project, `.env.development.local` — never t
 **Rules served:** R5, R0, PR1, PR2, PR10, PR13, PR17, KG1.
 
 **Status:** Adopted. Implementation status: **A13 → Verified-live (all five detectors D1–D5)**. A13 detector set complete. Production unchanged (TEST-only; flag + token set only in `.env.development.local`, removed at teardown). Unblocks: **A13 production activation** (Critical — Vercel flag/token + `cost_alerts` migration to production + Cowork scheduled task); Stage-1 close; A15a / A19. Cross-references: `D-A13-COST-HEALTH-ALERTS-COMPLETION-D4-FOLDIN-2026-06-06`; `D-A13-COST-HEALTH-ALERTS-D5-VERIFIED-LIVE-2026-06-06`; `/operations/handoffs/founder/2026-06-06-A13-completion-D4-foldin-close.md`.
+
+## 2026-06-06 — D-A13-PRODUCTION-ACTIVATION-2026-06-06
+
+**Decision:** A13 R5 cost-health alerting is **activated in production** (the detection layer). The `cost_alerts` table was applied to the production Supabase project; `SUBSTRATE_COST_ALERTS_ENABLED=true` and `COST_ALERTS_EVAL_TOKEN` were set in Vercel (Production scope) and a redeploy applied them; the evaluate endpoint (`/api/billing/cost-alerts/evaluate`) is live and founder-verified. Automated daily **delivery** of alerts is **deferred** to a scoped follow-on (see Deferred decision) — detection is live; the founder checks on demand with the service-token curl in the interim.
+
+**What changed (Critical Change Protocol, 0c-ii, completed visibly before any deploy; founder-walked live per PR17):**
+- Production DB: new empty `cost_alerts` table via idempotent migration `supabase/migrations/20260603_a13_cost_alerts.sql` (service-role-only RLS; `IF NOT EXISTS`).
+- Vercel (Production): `SUBSTRATE_COST_ALERTS_ENABLED=true`; `COST_ALERTS_EVAL_TOKEN=<64-hex, stored in Vercel env; not recorded here>`; redeploy → Ready.
+- Endpoint moved from 503 (inert) to 200 (live). `/api/reason` byte-identical (alerting is off the request path — pure observability).
+
+**Verification Method Used (0c framework):**
+- Migration (founder-walked): "Success. No rows returned." + `SELECT count(*) FROM cost_alerts` → 0.
+- Vercel config (founder-walked): two env vars set at Production scope; redeploy green.
+- Endpoint (founder-walked curl): `GET …/cost-alerts/evaluate` with token → **HTTP 200**, `ok:true`, `detectors_run` = all five (`per_identity_anomaly, per_call_spike, revenue_cost_ratio, ops_monthly_cap, rolling_7day_spike`), `identities_evaluated:2`, `alerts_fired:0`, `skipped:[]` — clean against real production data. Gate sanity: same curl **without** token → **HTTP 401**. PR10 Verify: **Diagnostic-certain** — endpoint runs correctly live; the one named worst case (erroring on a production data shape) did not occur.
+
+**Risk Classification Record (0d-ii):** **Critical** (production env-flag activation + deployment-config change + production schema add). The migration component alone is Elevated (additive, idempotent, reversible); the flag/token activation makes the session Critical. PR6 **not engaged** — no R20a / Zone 2/3 / classifier / wrapper touch (boundary checked). AC7 not engaged. This decision-log entry + the session close are Standard (governance/docs).
+
+**Rollback path:** In Vercel, set `SUBSTRATE_COST_ALERTS_ENABLED` to unset/false and redeploy → endpoint returns 503 (inert); `/api/reason` unaffected (alerting is never on the request path). The `cost_alerts` table is a harmless empty table if left; drop it via the migration's commented rollback block if desired. No scheduled task was created (see Deferred decision), so nothing to pause.
+
+**Founder approval record:** Founder gave explicit approval at the Critical Change Protocol gate ("Go ahead"), specific to the named risk (point 2 — endpoint could error on a production data shape; contained off the `/api/reason` path; one-switch rollback). Founder separately elected to **defer** automated delivery (see below).
+
+**Deferred decision (PR7) — automated daily alert delivery mechanism:**
+- **Considered:** (a) the session prompt's design — a Cowork scheduled task that curls the endpoint daily — **invalidated this session** by direct test: the scheduled-task / bash execution sandbox has *allowlisted* network egress that excludes `sagereasoning.com` (and `supabase.co`); it reached `api.anthropic.com` (HTTP 404, i.e. connected) but `example.com` and `www.sagereasoning.com` returned HTTP 000 (connection failed). The only arbitrary-domain tool available there (`web_fetch`) cannot send the service-token header (→ 401). (b) Vercel Cron hitting the endpoint daily server-side (no egress problem) — viable, but a further Critical deployment-config change. (c) Full automation: Vercel Cron trigger + a notification channel (email / Slack). (d) A local scheduled job on the founder's Mac (works, but technical / fragile / against founder preferences).
+- **Why deferred:** detection is live and self-serviceable now; the detectors that need real volume cannot meaningfully fire yet (D1 revenue:cost and D2 Ops cap depend on P4 Stripe revenue / P7 Sage Ops, neither running); building the trigger + notification channel deserves a deliberate, properly-scoped session rather than a rushed tail-end add.
+- **Revisit condition:** when meaningful production traffic / revenue exists (≈ P4 Stripe and/or P7 Sage Ops activation), or whenever the founder elects the follow-on. Target design: Vercel Cron (server-side daily trigger) + a notification channel, or Vercel Cron + a Cowork task that reads `cost_alerts` via a Supabase connector.
+
+**Open questions:** none blocking. Interim cost-health check = the service-token curl (documented in the session close).
+
+**Rules served:** R5, R0, PR1, PR2, PR6, PR7, PR10, PR13, PR15, PR17, KG1, KG7.
+
+**Status:** Adopted. Implementation status: **A13 detection → Live (production; activated + verified)**; **A13 automated delivery → Scoped (deferred — mechanism TBD)**. Production state changed (no longer byte-identical to pre-session): `cost_alerts` live (empty); `SUBSTRATE_COST_ALERTS_ENABLED=true` + `COST_ALERTS_EVAL_TOKEN` set in Vercel Production; `/api/reason` byte-identical. Cross-references: `D-A13-COST-HEALTH-ALERTS-COMPLETION-VERIFIED-LIVE-2026-06-06`; `D-A13-COST-HEALTH-ALERTS-COMPLETION-D4-FOLDIN-2026-06-06`; `D-A13-AUTH-MODEL-SERVICE-TOKEN-CORRECTION-2026-06-03`; `/operations/handoffs/founder/2026-06-06-A13-production-activation-close.md`; `/adopted/substrate-plugin-staging-plan.md` §A13; `/manifest.md` §R5.
