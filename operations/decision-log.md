@@ -10106,3 +10106,52 @@ Expected: 4-row + 7-row column lists; both curls non-404. Founder ran all four 2
 **Rules served:** R17g, R17h, R17, R19, 0a, 0c, 0c-ii, 0d-ii, 0f, PR15, PR17. PR4 N/A (no LLM call). PR6 not engaged. AC7 not engaged.
 
 **Status:** Adopted. Implementation status: `compliance_access_log` / `compliance_rectification_log` → **Live** (production); A15b → **Verified-live**; A15c → **Verified-live**. Closes the "two pending production migrations" item carried in every 2026-06-07 close. No CR-register posture upgraded (`CR-GDPR-A15-ACCESS` / `CR-GDPR-A16-RECTIFICATION` upgrades remain gated on the Stage-1-close lawyer review — R19). Production now: both audit tables Live; `/api/reason` byte-identical; no env-flag/deploy change this session. Cross-references: `D-A15B-SAR-ACCESS-ENDPOINT-BUILT-2026-06-07`, `D-A15C-RECTIFICATION-ENDPOINT-BUILT-2026-06-07`, `D-PROFILE-EXPORT-ACCESS-KEYING-FIX-2026-06-07`; `/operations/pre-launch-bring-forward-plan-2026-06-07.md`; this session's close.
+
+---
+
+## 2026-06-07 — D-PRELAUNCH-S2-OTEL-ACTIVATION-2026-06-07
+
+**Decision:** Activated A12 OpenTelemetry instrumentation + call-grain audit in **production** on `/api/reason` — created the append-only `substrate_audit_events` table in the production Supabase project (`jdbefwkonfbhjquozgxr`, US East / N. Virginia) and set `SUBSTRATE_OTEL_ENABLED=true` for the Vercel **Production** environment + redeployed. Each `/api/reason` run now emits trace spans (ConsoleSpanExporter → Vercel runtime logs) and writes one masked audit row (structural fields only — never raw text).
+
+**Reasoning:** Session 2 of the pre-launch bring-forward plan. A12 was built, Verified-live on TEST (2026-06-03), and deployed inert in production behind the unset flag. The audit table is the durable observability surface that Session 3 (A19 abuse-detection) and Session 5 (A14 SLO/health tracker) read; until OTel is on, both have no data to evaluate. Two decisions settled at open (founder elected both recommendations): (1) instrument `/api/reason` only — PR1 single-endpoint-proof discipline; broadening is a separate Elevated session; (2) defer the production trace backend — PR7; ConsoleSpanExporter → Vercel logs is sufficient, the audit table is what unblocks A19/A14. PR15: no Anthropic-canonical primitive substitutes for a Vercel env-flag flip or a Supabase migration; bespoke N/A.
+
+**Critical Change Protocol record (0c-ii, condensed):**
+1. *What changed:* one new, empty, append-only `substrate_audit_events` table in production + `SUBSTRATE_OTEL_ENABLED=true` (Production) + redeploy.
+2. *What could break:* nothing that alters a user's assessment — instrumentation is additive, flag-gated, no-throw (span/audit-write failures swallowed; response shape unaffected; confirmed in `substrate-telemetry.ts` + A12 close).
+3. *Existing sessions:* unaffected (no auth/session/encryption change; no users yet).
+4. *Rollback:* delete `SUBSTRATE_OTEL_ENABLED` (or set ≠ `true`) + redeploy → production byte-identical; optionally run the commented rollback block in the migration to drop the table. No data lost.
+5. *Verification:* one benign production `/api/reason` call → normal assessment, no redirect; one masked audit row; masking confirmed structural-only.
+6. *Approval:* founder approved both named risks ("OK — go ahead") before any production action.
+
+**Decisions deferred (PR7):** production trace backend (Vercel OTel / Honeycomb / Grafana / Datadog) — revisit when persistent tracing is needed beyond the audit table; broadening instrumentation beyond `/api/reason` — separate Elevated build session; failure-path spans + route-level-redirect audit + windowed baselines (noted at the A12 build close).
+
+**Files touched:**
+- production Supabase (`jdbefwkonfbhjquozgxr`) — `substrate_audit_events` created (14 cols; append-only triggers; RLS; service-role-only writer) from `supabase/migrations/20260603_a12_substrate_audit_events.sql` (migration already committed 2026-06-03; **no code change this session**)
+- Vercel **Production** env — `SUBSTRATE_OTEL_ENABLED` set `true`; redeployed (commit `fd26abe`; build detected `@opentelemetry/sdk-trace-node@1.30.1` + the `instrumentationHook` experiment)
+- `operations/decision-log.md` — this entry
+- `operations/handoffs/founder/2026-06-07-prelaunch-S2-otel-activation-close.md` — session close (NEW)
+
+**Risk classification:** **Critical** under 0d-ii — deployment-configuration change (env flag activating a new surface on the live `/api/reason` request path). The migration half is additive/idempotent (Elevated on its own); the highest category governs → **Critical**; full Critical Change Protocol applied + walked live (PR17). PR6 **not** engaged (A12 instruments Layer 1/2/3 only; it does not touch the R20a distress classifier, the A7 Zone-2 gate, or their wrappers — grep-confirmed in the A12 close). AC7 not engaged. No auth/session/encryption/access-control change.
+
+**Rollback path:** In Vercel, delete `SUBSTRATE_OTEL_ENABLED` (or set to anything but `true`) and redeploy → production byte-identical to pre-activation (strict no-op when off). The audit table is additive/harmless if left in place; to remove it, run the commented rollback block at the bottom of `supabase/migrations/20260603_a12_substrate_audit_events.sql` in the production SQL editor. No code to revert, no data lost (table new).
+
+**Founder-performed verification result (2026-06-07, walked live):**
+- *Migration:* production ref confirmed `jdbefwkonfbhjquozgxr`; "Success. No rows returned."; 14-column table confirmed; `count(*) = 0` before activation.
+- *Flag + redeploy:* `SUBSTRATE_OTEL_ENABLED=true` (Production); Vercel redeploy green; build detected the OTel dependency + `instrumentationHook`.
+- *Production call:* one benign `/api/reason` call via `/admin/test-reason` (standard depth, authenticated session) → normal assessment, **no distress redirect**.
+- *Audit row:* one row; `decision_event=assessment`; `severity_band=none`; `models_used=["claude-sonnet-4-6"]`; `provenance` + `use_policies` AP2-shaped + populated (`layer2_signature_present:true`; `distress_redirect_applies:false`).
+- *Masking (R3 + R17):* `masked_context` = `{input_char_count:73, engine_attribution:"translation-sandwich", tier1_trigger_code:null, layer3_fallback_used:false, has_substrate_layer3_response:false}` — structural fields only; no raw text. **AI-confirmed masking intact** (Diagnostic-certain).
+
+**Verification step (founder-repeatable):**
+```
+-- production Supabase SQL Editor (ref jdbefwkonfbhjquozgxr):
+select decision_event, severity_band, models_used, provenance, use_policies, masked_context, occurred_at
+from public.substrate_audit_events order by occurred_at desc limit 1;
+```
+Expected: latest row `decision_event='assessment'`; `masked_context` structural-only (no raw text).
+
+**Open questions:** None new. PR7 deferrals stand (trace backend; broadening instrumentation; failure-path spans / route-level-redirect audit / windowed baselines).
+
+**Rules served:** AC10, R0, R3, R4, R17, R19c, R19d, 0a, 0c, 0c-ii, 0d-ii, 0f, PR1, PR7, PR15, PR17. PR4 N/A (no model selection written — `/api/reason` models unchanged). PR6 not engaged. AC7 not engaged.
+
+**Status:** Adopted. Implementation status: `substrate_audit_events` → **Live (production)**; `SUBSTRATE_OTEL_ENABLED` → **set `true` (Production)**; A12 (instrumentation + call-grain audit) → **Live (production, /api/reason)**. Closes the "A12 OTel not active in production" deferral; unblocks Session 3 (A19) + Session 5 (A14). Cross-references: `D-A12-OTEL-INSTRUMENTATION-AUDIT-PROOF-2026-06-03`, `D-A12-OTEL-INSTRUMENTATION-VERIFIED-LIVE-2026-06-03`, `D-PRELAUNCH-S1-DATA-RIGHTS-GO-LIVE-2026-06-07`; `/operations/pre-launch-bring-forward-plan-2026-06-07.md`; this session's close.
