@@ -9965,3 +9965,34 @@ Expected: typecheck clean; unit test all-pass. Optional live check: set `R20B_IN
 **Rules served:** R20b, R20, R6d, R19, R19d, AC3 (Zone 2 domain 5 boundary), AC4 (invocation test), 0a, 0c, 0c-ii, 0d-ii, 0f, PR1, PR2, PR3, PR6, PR7 (deferred shared-engine promotion + classifier upgrade), PR10, PR15, PR17. PR4 N/A (no LLM call added).
 
 **Status:** Adopted. Implementation status: `r20b-dependence` detector + coaching injection → **Wired** (built + tsc exit 0 + AC4 invocation grep) → **Verified** on the founder's tsx unit test + optional live check. Production **UNCHANGED** (flag UNSET; LLM prompt byte-identical when flag off; response gains an additive `r20b_dependence: null` diagnostic field). **A18 is complete after this build.** Remaining Stage-1-close items: A16/A17 (lawyer-coupled) + the deferred A14 tracker → the FPE/legal track is now the sole long-pole. Deferred (PR7): promote the detector into the shared `analysePatterns` engine + roll out to the other 7 mentor surfaces (trigger: this proof Verified); LLM-classifier upgrade (trigger: only if the triviality proxy proves inadequate in practice). Cross-references: `D-A18-MIRROR-PROPAGATION-2026-06-07` (predecessor; base this lands on); `/drafts/adr/2026-06-07-r20b-framework-dependence-detection.md`; `manifest.md` R20b/R20/R6d/AC3/AC4; `adopted/substrate-plugin-staging-plan.md` §A18.
+
+---
+
+## 2026-06-07 — D-R19D-ALL-TOOLS
+
+**Decision:** Complete R19d's "the mentor **and all tools**" requirement by propagating the mirror principle from the 8 mentor surfaces to every evaluation/skill scoring surface. Added the evaluation-tool variant (and per-surface tailored variants) to the 6 named scoring/skill surfaces directly, and to the 4 engine-backed scoring routes (`/api/score`, `/api/score-decision`, `/api/score-social`, `/api/score-conversation`) via a new opt-in `applyMirrorPrinciple` parameter on the shared `runSageReason` engine. `/api/reason` and `/api/guardrail` remain deliberately mirror-free (consistent with the A18 mentor exclusion).
+
+**Reasoning:** R19d (manifest line 217) requires the mirror principle in the mentor "and all tools." A18 (`D-A18-MIRROR-PROPAGATION-2026-06-07`) closed the mentor portion (8/8). Grounding this session found the "all tools" reach wider than the operative prompt's 6-surface inventory: 4 further human-facing scoring routes (all in the AC5 R20a perimeter) score a submitted artefact and lacked the principle. Those 4 share `runSageReason`'s default prompts with the deliberately-excluded `/api/reason`, so a constant edit was impossible without contaminating `/api/reason`; the founder elected (across two scope decisions) to extend to all four and to use an opt-in engine parameter rather than per-route prompt duplication. PR15: no Anthropic primitive substitutes for adding a governance paragraph to our own system prompts; engine opt-in chosen over prompt duplication for single-source wording.
+
+**Files touched (12 source + 12 archive backups):**
+- 6 named surfaces — `website/src/app/api/evaluate/route.ts` (DEMO_SYSTEM_PROMPT); `website/src/app/api/score-iterate/route.ts` (INITIAL_SYSTEM_PROMPT); `website/src/lib/deliberation.ts` (buildV3IterationPrompt — score-iterate Mode 2); `website/src/lib/document-scorer.ts` (V3_DOCUMENT_SCORING_PROMPT + V3_POLICY_SCORING_PROMPT — both feed /api/score-document); `website/src/app/api/score-scenario/route.ts` (SCENARIO_PROMPT — age-appropriate, real-people-only variant); `website/src/lib/sage-classify.ts` + `website/src/lib/sage-prioritise.ts` (buildClassifyPrompt / buildPrioritisePrompt — plain-English R8d variant)
+- engine upgrade — `website/src/lib/sage-reason-engine.ts` (MIRROR_PRINCIPLE_EVAL constant + `applyMirrorPrinciple?` opt-in param + guarded system-block push)
+- 4 engine-backed routes — `website/src/app/api/score/route.ts`, `.../score-decision/route.ts`, `.../score-social/route.ts`, `.../score-conversation/route.ts` (each adds `applyMirrorPrinciple: true`)
+- backups — `archive/*.backup-pre-r19d-alltools-2026-06-07` (12 files)
+
+**Risk classification:** **Elevated** under 0d-ii — additive changes to existing live user-facing system prompts plus an additive optional engine parameter. AC7 not engaged. PR6 not engaged (no distress classifier / Zone 2-3 / R20a-wrapper surface touched). The engine change is additive-only and opt-in; non-opting callers (`/api/reason`, `/api/guardrail`) are byte-identical.
+
+**Rollback path:** Per file, restore from its `archive/*.backup-pre-r19d-alltools-2026-06-07`, or revert the commit and push. Pure additive system-prompt text + one optional engine param defaulting to `false`; no schema, flag, or logic to reverse.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+node_modules/.bin/tsc --noEmit
+```
+Expected: no output, exit 0 (already run this session). Plus greps confirming: one mirror paragraph per scoring/skill prompt constant; the four engine-backed routes set `applyMirrorPrinciple: true`; `/api/reason` + `/api/guardrail` set it 0 (byte-identical); all 7 perimeter distress blocks unchanged (`grep -c` = 1 each); diffs purely additive (0 lines removed across all 12 files). Optional live check while signed in: submit to a scoring tool an input that is really about judging another identifiable person — confirm focus returns to self-examination; ordinary self-directed scoring unchanged.
+
+**Open questions:** Whether `/api/reason` (universal reasoning substrate) and `/api/guardrail` (agent guardrail) should themselves carry R19d. Inherited as deliberately mirror-free from the A18 mentor exclusion; not silently changed this session. Revisit condition: founder voice-decision on whether the raw substrate API is a "tool" within R19d's meaning. Separately: `V3_SOCIAL_MEDIA_PROMPT` in `document-scorer.ts` appears to be dead code (defined, imported nowhere) — flagged for a future cleanup pass, not touched this session.
+
+**Rules served:** R19d, R19, R8d, R20d, AC5, 0a, 0c, 0d-ii, 0f, PR1, PR2, PR10, PR13, PR15. PR4 N/A (no LLM call written — prompt-text + opt-in param only). PR6 not engaged.
+
+**Status:** Adopted. Implementation status: R19d mirror principle → **Wired** (built + full tsc exit 0 + additive-only diffs + per-surface greps) → **Verified** on the founder's typecheck. R19d now carried by **18 surfaces** (8 mentor + 6 named scoring/skill + 4 engine-backed scoring), completing R19d's "mentor and all tools" reach across the human-facing + skill product surface, with `/api/reason` + `/api/guardrail` deliberately excluded (open question above). Production **UNCHANGED** until the founder commits + pushes. Cross-references: `D-A18-MIRROR-PROPAGATION-2026-06-07` (the mentor portion this completes), `D-A18C-FRAMEWORK-DEPENDENCE-2026-06-07` (predecessor); `manifest.md` R19d/R19/R8d/R20d/AC5; `/operations/handoffs/founder/2026-06-07-R19D-all-tools-close.md`.

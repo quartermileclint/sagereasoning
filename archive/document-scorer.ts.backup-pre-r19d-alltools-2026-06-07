@@ -191,8 +191,6 @@ Proximity levels:
 - principled: Content reflects stable commitment to truth and fairness; minimal passion
 - sage_like: Content expresses perfected understanding; free from destructive passion; genuinely wise
 
-MIRROR PRINCIPLE (R19d): This evaluation is a mirror for the submitter's own reasoning, not a lens for judging people. Evaluate the content and reasoning of the document — its ideas, arguments, and ethical posture — not the worth of any identifiable person. If the document has been submitted in order to score, diagnose, or pathologise a specific real person (its author, or anyone named in it) rather than to examine the writing itself, confine the assessment to the reasoning in the text and note that using this framework to judge a person without their knowledge and consent is a misapplication, however internally consistent it seems. Never use Stoic or philosophical language to invalidate any real person's feelings or reasoning.
-
 Return ONLY valid JSON — no markdown, no explanation outside the JSON:
 {
   "authorial_control": {
@@ -279,8 +277,6 @@ Who does this policy affect at each social level?
 - Household: How does it affect their family and dependents?
 - Community: How does it affect the broader community?
 - Humanity: Does it uphold universal principles of justice?
-
-MIRROR PRINCIPLE (R19d): This evaluation is a mirror for the submitter's own reasoning, not a lens for judging people. Evaluate the content and reasoning of the policy — its terms, fairness, and ethical posture — not the worth of any identifiable person. If the policy has been submitted in order to score, diagnose, or pathologise a specific real person (its drafter, or anyone named in it) rather than to examine the text itself, confine the assessment to the reasoning in the document and note that using this framework to judge a person without their knowledge and consent is a misapplication, however internally consistent it seems. Never use Stoic or philosophical language to invalidate any real person's feelings or reasoning.
 
 Return ONLY valid JSON:
 {

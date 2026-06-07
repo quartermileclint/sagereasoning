@@ -154,7 +154,6 @@ export async function POST(request: NextRequest) {
       ...layer1,
       practitionerContext,
       projectContext,
-      applyMirrorPrinciple: true, // R19d (D-R19D-ALL-TOOLS 2026-06-07)
     })
 
     // Extract poster and reader passions from the reasoning result

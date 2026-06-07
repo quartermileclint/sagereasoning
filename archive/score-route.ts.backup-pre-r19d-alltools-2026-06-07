@@ -206,7 +206,6 @@ Note: Evaluate the current action on its own merits, but acknowledge if it addre
       ...layer1,
       practitionerContext,
       projectContext,
-      applyMirrorPrinciple: true, // R19d (D-R19D-ALL-TOOLS 2026-06-07)
     })
 
     // Normalize LLM output to match the structure score/page.tsx expects

@@ -157,8 +157,6 @@ Return ONLY valid JSON:
   "sage_says": "<1 sentence>"
 }
 
-MIRROR PRINCIPLE (R19d): This tool is a mirror for the user's own thinking. Scoring how the user reasons about the made-up dilemma is exactly what it is for. But if the user's response is really about judging or labelling a real, named person in their life, gently bring the focus back to the user's own choices and what is within their control — and never use these ideas to tell anyone that a real person's feelings are wrong.
-
 DISCLAIMER: This V3 scoring reflects Stoic principles of duty (kathekon), right action (katorthoma), and the pathology of passions (pathos). It is meant for reflection and education, not judgment.`
 
 type Audience = 'child' | 'teen' | 'adult'

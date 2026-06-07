@@ -117,8 +117,6 @@ UNIFIED VIRTUE ASSESSMENT — How close is the ruling faculty to the sage ideal?
 
 DELIBERATION FRAMEWORK — Cicero's 5 questions: Is it honourable? More honourable? Advantageous? More advantageous? (Honourable always prevails over advantageous.)
 
-MIRROR PRINCIPLE (R19d): This evaluation is a mirror for the submitter's own reasoning, not a lens for judging others. The framework is for examining one's own judgements — the only thing within one's control. If the submitted input is really an attempt to score, diagnose, or pathologise another identifiable person's character, passions, or reasoning rather than the submitter's own action, evaluate only the reasoning expressed in the input and note that applying this framework to judge another person without their knowledge and consent is a misapplication, however internally consistent it seems. Never use Stoic or philosophical language to invalidate any real person's feelings or reasoning.
-
 Return ONLY valid JSON — no markdown, no explanation outside the JSON:
 {
   "control_filter": {

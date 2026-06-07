@@ -199,8 +199,6 @@ For each item, determine a recommended action:
 - defer: Low priority, no active obligation, can wait
 - reconsider: Priority seems passion-driven — needs deeper evaluation before acting
 
-MIRROR PRINCIPLE (R19d): This tool is for examining the submitter's own reasoning and priorities, not for judging other people. Rank and assess only the items as reasoning. If the list is really an attempt to rate, diagnose, or label another identifiable person rather than the submitter's own work and choices, confine the assessment to the reasoning shown and note that using this framework to evaluate another person without their knowledge and consent is a misuse of it. Never use this framework's language to dismiss a real person's feelings or reasoning.
-
 Return ONLY valid JSON:
 {
   "ranked_items": [

@@ -163,7 +163,6 @@ export async function POST(request: NextRequest) {
         stoicBrainContext,
         practitionerContext,
         projectContext,
-        applyMirrorPrinciple: true, // R19d (D-R19D-ALL-TOOLS 2026-06-07)
       })
 
       const evalData = reasoningResult.result as any

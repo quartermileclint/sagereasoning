@@ -56,17 +56,6 @@ export interface ReasonInput {
   /** Override the system prompt entirely (used by mentor-baseline, mentor-journal-week, etc.) */
   systemPromptOverride?: string
   /**
-   * R19d mirror-principle opt-in (D-R19D-ALL-TOOLS, 2026-06-07).
-   * When true, the engine appends the evaluation-tool mirror-principle block
-   * (MIRROR_PRINCIPLE_EVAL) as an extra system message block. Used by the
-   * engine-backed scoring routes (/api/score, /api/score-decision,
-   * /api/score-social, /api/score-conversation) so they carry R19d without
-   * editing the shared default prompts — which /api/reason and /api/guardrail
-   * also use and which are deliberately kept mirror-free. Defaults to false →
-   * byte-identical behaviour for callers that do not opt in.
-   */
-  applyMirrorPrinciple?: boolean
-  /**
    * Optional urgency context (Item 6 — urgency → more scrutiny).
    * When provided, the engine applies additional scrutiny to passion_diagnosis,
    * specifically checking for hasty assent (propeteia) patterns. The output
@@ -371,13 +360,6 @@ Return ONLY valid JSON:
   "disclaimer": "Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations."
 }`
 
-// R19d mirror principle — evaluation-tool variant (D-R19D-ALL-TOOLS 2026-06-07).
-// Opt-in via ReasonInput.applyMirrorPrinciple. Appended as its own system block
-// by the engine-backed scoring routes only (/api/score, /api/score-decision,
-// /api/score-social, /api/score-conversation). /api/reason + /api/guardrail never
-// opt in, so their system prompt stays byte-identical to pre-change.
-const MIRROR_PRINCIPLE_EVAL = `MIRROR PRINCIPLE (R19d): This evaluation is a mirror for the submitter's own reasoning, not a lens for judging others. The framework is for examining one's own judgements — the only thing within one's control. If the submitted input is really an attempt to score, diagnose, or pathologise another identifiable person's character, passions, or reasoning rather than the submitter's own action, evaluate only the reasoning expressed in the input and note that applying this framework to judge another person without their knowledge and consent is a misapplication, however internally consistent it seems. Never use Stoic or philosophical language to invalidate any real person's feelings or reasoning.`
-
 // Map depth to system prompt, max tokens, and model
 const DEPTH_CONFIG: Record<ReasonDepth, { prompt: string; maxTokens: number; model: string }> = {
   quick: { prompt: QUICK_SYSTEM_PROMPT, maxTokens: 3072, model: MODEL_FAST },
@@ -527,13 +509,6 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
   // Block 3: Agent Brain context (tech/growth/support/ops)
   if (params.agentBrainContext) {
     systemMessages.push({ type: 'text', text: params.agentBrainContext })
-  }
-
-  // R19d mirror principle (opt-in; D-R19D-ALL-TOOLS 2026-06-07). Appended as its
-  // own system block only when a caller sets applyMirrorPrinciple. /api/reason and
-  // /api/guardrail never set it, so their system prompt is byte-identical.
-  if (params.applyMirrorPrinciple) {
-    systemMessages.push({ type: 'text', text: MIRROR_PRINCIPLE_EVAL })
   }
 
   // Layer 4: Environmental context injection (non-doctrinal, in user message)
