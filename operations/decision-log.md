@@ -9885,3 +9885,40 @@ Expected: typecheck clean (already run this session, exit 0); `/welcome` renders
 **Rules served:** A3, R3, R8c, R6d, R19, R19d, 0a, 0c, 0d-ii, 0f, PR1, PR15, PR16, PR17.
 
 **Status:** Adopted. Implementation status: A18e (cognitive-accessibility design pass) → **Wired** (built + full typecheck exit 0) → **Verified** on the founder's URL check (website-page row, 0c). Production **UNCHANGED / byte-identical** until the founder commits + deploys. A18 remaining: **A18c** (framework-dependence detection — Elevated→Critical under PR6, its own session) and **mirror-principle propagation** to the practitioner-facing mentor surfaces (Elevated, small). Deferred A18e follow-ups documented: the two practice-name H1 renames (R8c; founder voice-decision); F10 `private-mentor` design-system alignment. Cross-references: `D-A18A-FIRST-RUN-WELCOME-2026-06-07` (predecessor); `reference/a18e-cognitive-accessibility-review-2026-06-07.md`; `manifest.md` A3/R3/R8c; `adopted/substrate-plugin-staging-plan.md` §A18.
+
+---
+
+## 2026-06-07 — D-A18-MIRROR-PROPAGATION-2026-06-07
+
+**Decision:** Propagated the R19d mirror principle from its single proven surface (`/api/mentor/private/reflect`, added under `D-A18B-A18D-LIMITATIONS-MIRROR-ACCESSIBILITY-2026-06-07`) to all remaining mentor system-prompt surfaces — the founder-elected "all 7 mentor surfaces" scope. Added the additive `MIRROR PRINCIPLE (R19d)` paragraph to seven mentor route system prompts: the 4 practitioner-facing surfaces (`mentor-baseline` `BASELINE_SYSTEM_PROMPT`, `mentor-baseline-response` `REFINEMENT_SYSTEM_PROMPT`, `mentor-journal-week` `WEEKLY_JOURNAL_SYSTEM_PROMPT`, public `reflect` `REFLECTION_PROMPT`) and the 3 founder-only private surfaces (`mentor/private/baseline`, `mentor/private/baseline-response`, `mentor/private/journal-week`). The paragraph is the proven canonical text, surface-type adapted: verbatim canonical (reflection-evaluation wording) on public `reflect` to match the proven private/reflect; a question-design variant on the baseline/journal-week surfaces (which generate questions); an analysis variant on the baseline-response surfaces (which produce refinement notes). Every output JSON schema and every step of route logic left byte-identical; `/api/reason` and all R20a/distress surfaces untouched.
+
+**Reasoning:** Closes R19d's mentor-prompt requirement across the product — the cheapest remaining R19d work. R19d's text ("the mentor *and all tools*") is broader than mentor prompts; the founder elected the mentor-surface scope this session, and the scoring/skill "all tools" reach (`evaluate`, `score-iterate`, `score-document`, `score-scenario`, `skill/sage-classify`, `skill/sage-prioritise`) is flagged as a separate deferred follow-up. Single-surface proof (PR1) was already satisfied by the private/reflect proof under D-A18B-A18D; the additive pattern was re-proven on `mentor-baseline` first this session, then extended. Grounded in each route's actual system-prompt constant before editing (no single shared mentor prompt — guards prescribe-before-grounding). PR15: the installed Anthropic skills + the agentic-commerce findings tracker were consulted — no Anthropic-canonical primitive substitutes for editing the founder's own Next.js mentor route prompts; bespoke justified (it is literally propagating proven prompt text). PR16: positioning neutral-to-strengthens (R19 honest-positioning consistency); dogfood N/A.
+
+**Files touched (additive; backups in `archive/*.backup-pre-mirror-2026-06-07`):**
+- `website/src/app/api/mentor-baseline/route.ts` — +R19d paragraph in `BASELINE_SYSTEM_PROMPT` (question-design variant).
+- `website/src/app/api/mentor-baseline-response/route.ts` — +R19d in `REFINEMENT_SYSTEM_PROMPT` (analysis variant).
+- `website/src/app/api/mentor-journal-week/route.ts` — +R19d in `WEEKLY_JOURNAL_SYSTEM_PROMPT` (question-design variant).
+- `website/src/app/api/reflect/route.ts` — +R19d in `REFLECTION_PROMPT` (verbatim canonical; matches private/reflect).
+- `website/src/app/api/mentor/private/baseline/route.ts` — +R19d (question-design variant).
+- `website/src/app/api/mentor/private/baseline-response/route.ts` — +R19d (analysis variant).
+- `website/src/app/api/mentor/private/journal-week/route.ts` — +R19d (question-design variant).
+- `archive/{mentor-baseline,mentor-baseline-response,mentor-journal-week,public-reflect,private-baseline,private-baseline-response,private-journal-week}-route.ts.backup-pre-mirror-2026-06-07` — NEW pre-edit backups (7).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-06-07-A18-mirror-propagation-close.md` — session close.
+
+**Risk classification:** **Elevated** under 0d-ii — changes to existing live user-facing functionality (mentor system prompts), additive only. AC7 not engaged. **PR6 not engaged** — none of the seven surfaces is the distress classifier / Zone 2-3 / R20a wrapper; the R20a distress block in each route (where present, e.g. public reflect) left byte-identical. Critical Change Protocol step 3 (existing sessions) = N/A per the build-arc cache (no current third-party users).
+
+**Rollback path:** Nothing deploys before push. Per file: restore from its `archive/<file>.backup-pre-mirror-2026-06-07`, or revert the commit. All seven were backed up before editing. Pure system-prompt text additions — no schema, flag, or logic change to revert beyond the text.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+node_modules/.bin/tsc --noEmit        # → exit 0 (already run this session)
+# Optional behaviour check (mentor, while signed in): submit a reflection / answer that strays into judging another person;
+# confirm the mentor returns focus to your own reasoning, and ordinary self-focused use is unchanged.
+```
+Expected: typecheck clean (run this session, exit 0). All 8 mentor surfaces now carry exactly one R19d paragraph; output schemas unchanged.
+
+**Rules served:** R19d, R19, R20d, 0a, 0c, 0d-ii, 0f, PR1, PR15, PR16, PR17.
+
+**Status:** Adopted. Implementation status: mirror-principle propagation (7 mentor surfaces) → **Wired** (built + full typecheck exit 0) → **Verified** on the founder's typecheck/behaviour check. Production **UNCHANGED / byte-identical** until the founder commits + deploys. R19d mentor-prompt requirement now complete across the product (8/8 mentor surfaces). A18 remaining: **A18c** (framework-dependence detection — Elevated→Critical under PR6, its own session) — the last A18 build. R19d "all tools" follow-up (6 scoring/skill surfaces) flagged, deferred. Cross-references: `D-A18E-COGNITIVE-ACCESSIBILITY-2026-06-07` (predecessor); `D-A18B-A18D-LIMITATIONS-MIRROR-ACCESSIBILITY-2026-06-07` (the single-surface proof this propagates); `manifest.md` R19d; `adopted/substrate-plugin-staging-plan.md` §A18.

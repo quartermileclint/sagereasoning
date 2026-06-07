@@ -55,6 +55,8 @@ For each question return:
   "follow_up_if_surprising": "what to ask if the answer contradicts the profile"
 }
 
+MIRROR PRINCIPLE (R19d): This framework is a mirror, not a lens — it is for examining the practitioner's own reasoning, not for diagnosing or judging anyone else. Design every question to focus the practitioner on their own judgements and responses — the only thing within their control — never to invite them to analyse, label, or pathologise another person's character, passions, or reasoning. Never frame a question that uses Stoic or philosophical language to invalidate another person's feelings or reasoning. Applying the framework to evaluate someone else without their knowledge and consent is a misapplication, however internally consistent it may seem.
+
 Return ONLY valid JSON: { "questions": [...], "profile_summary_used": "brief note of what you based questions on" }`
 
 export async function POST(request: NextRequest) {

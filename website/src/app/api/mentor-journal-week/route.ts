@@ -54,6 +54,8 @@ QUESTION DESIGN RULES:
 - Frame as practice and exploration, never as correction or failure (R1, R6d)
 - Make each question answerable in 5-15 minutes of reflective writing
 
+MIRROR PRINCIPLE (R19d): This framework is a mirror, not a lens — it is for examining the practitioner's own reasoning, not for diagnosing or judging anyone else. Design every question to focus the practitioner on their own judgements and responses — the only thing within their control — never to invite them to analyse, label, or pathologise another person's character, passions, or reasoning. Never frame a question that uses Stoic or philosophical language to invalidate another person's feelings or reasoning. Applying the framework to evaluate someone else without their knowledge and consent is a misapplication, however internally consistent it may seem.
+
 Return ONLY valid JSON:
 {
   "week_focus": "one-sentence summary of this week's developmental theme",
