@@ -1,12 +1,10 @@
 {
   "_meta": {
     "description": "SageReasoning Compliance Register — maps external regulatory obligations to mandate rules",
-    "version": "CR-2026-Q2-v5",
+    "version": "CR-2026-Q2-v4",
     "created": "2026-04-04",
     "last_pipeline_run": "2026-04-05",
     "next_scheduled_review": "2026-07-06",
-    "last_reconciliation": "2026-06-07",
-    "reconciliation_note": "Reconciled against the authoritative manifest header CR register (/manifest.md YAML front-matter) on 2026-06-07 under A17a (D-A16-A17-PRIVACY-REGULATORY-GOV-2026-06-07). Where the two registers overlap, the manifest header governs. Staleness fixes applied to CR-002, CR-005, CR-009 (delete/export endpoints now live; Art. 50 posture downgraded from COMPLIANT under R19). See /compliance/register-reconciliation-2026-06-07.md. Backup: /archive/compliance_register.json.backup-pre-a17a-reconciliation-2026-06-07.",
     "schema_version": "1.0.0",
     "status_vocabulary": [
       "COMPLIANT",
@@ -44,20 +42,18 @@
       "id": "CR-002",
       "obligation": "EU AI Act — Transparency Obligations",
       "mandate_rules": ["R3", "R4"],
-      "cross_ref": "CR-EU-AIA-A50",
       "external_reference": "Regulation 2024/1689, Art. 50",
-      "effective_date": "2026-08-02",
-      "status": "MONITORING",
+      "effective_date": "2025-08-02",
+      "status": "COMPLIANT",
       "review_cycle": "quarterly",
       "next_review_due": "2026-07-06",
-      "notes": "Article 50 transparency obligations apply from 2 August 2026 (web-checked 2026-06-07). The machine-readable marking requirement (Art. 50(2)) for generative systems already on the market before that date has an AI-Omnibus transition backstop of 2 December 2026. R3 disclaimer + ToS AI-generated-content section are a starting point, but final Art. 50 wording is lawyer-dependent and deferred to the Stage-1-close engagement. Posture DOWNGRADED from COMPLIANT to MONITORING on 2026-06-07 under R19 (honest positioning — do not overclaim alignment before lawyer review). See /compliance/article-50-transparency-posture.md and Lawyer Review Queue LRQ-3. NOTE: the manifest header CR-EU-AIA-A50 still records the date as 2026-12-02 only; correcting it is an Elevated manifest-header edit queued at LRQ-6.",
+      "notes": "Second Draft Code of Practice for Art. 50 (marking/labelling AI-generated content) published March 2026. R3 disclaimer satisfies Art. 50 transparency. API responses identify AI-generated content. No action required at this time — confirm alignment at next review when final Code of Practice is published.",
       "actions": [
-        "Lawyer review of final Art. 50 transparency wording at Stage 1 close (LRQ-3)",
-        "Confirm Layer 3 AI-generated notice + Ed25519 provenance posture meets Art. 50 when final Code of Practice published",
-        "Assess whether machine-readable marking (Art. 50(2)) applies to text-based evaluation outputs by 2 Aug 2026 / 2 Dec 2026 backstop"
+        "Confirm R3 disclaimer text meets final Art. 50 Code of Practice when published",
+        "Monitor whether watermarking/labelling requirements extend to text-based evaluation outputs"
       ],
-      "last_reviewed": "2026-06-07",
-      "reviewed_by": "a17a-reconciliation"
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
     },
     {
       "id": "CR-003",
@@ -98,22 +94,21 @@
       "id": "CR-005",
       "obligation": "Australia — Existing Law (Privacy Act 1988)",
       "mandate_rules": ["R1", "R2"],
-      "cross_ref": "CR-AU-PRIVACY-1988",
       "external_reference": "Privacy Act 1988, APPs 1–13; Privacy and Other Legislation Amendment Act 2024",
       "effective_date": "1988-01-01",
       "status": "MONITORING",
       "review_cycle": "quarterly",
       "next_review_due": "2026-07-06",
-      "notes": "MAJOR CHANGE: Privacy and Other Legislation Amendment Act 2024 passed Dec 2024. Automated decision-making transparency obligations take effect 10 Dec 2026. Businesses using AI to make decisions that could significantly affect individuals must disclose this in privacy policies. Children's Online Privacy Code also due by Dec 2026. UPDATE 2026-06-07: /api/user/delete and /api/user/export endpoints are now implemented + Verified-live + deployed to production (D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29). Manifest CR-AU-PRIVACY-1988 records the deletion/encryption posture as ALIGNED. The remaining OPEN founder action is the APP 1.7 privacy-policy update (NOT closed by this reconciliation). The live privacy policy also still states Supabase region as Singapore — actual region is US East (North Virginia); correct this in the same privacy-policy edit (LRQ-4).",
+      "notes": "MAJOR CHANGE: Privacy and Other Legislation Amendment Act 2024 passed Dec 2024. Automated decision-making transparency obligations take effect 10 Dec 2026. Businesses using AI to make decisions that could significantly affect individuals must disclose this in privacy policies. Children's Online Privacy Code also due by Dec 2026. FOUNDER ACTION REQUIRED: Privacy policy must be updated before Dec 2026 to comply with APP 1.7 automated decision-making transparency. Age verification for under-16 users needs review against Children's Online Privacy Code.",
       "actions": [
-        "PRIORITY (OPEN): Update privacy policy for APP 1.7 automated decision-making transparency before 10 Dec 2026 (LRQ-4)",
-        "Correct Supabase region in privacy policy (Singapore -> US East / North Virginia) in the same edit (LRQ-4)",
+        "PRIORITY: Update privacy policy for APP 1.7 automated decision-making transparency before Dec 2026",
         "Review Children's Online Privacy Code requirements when OAIC publishes draft",
         "Assess whether age verification gate (currently under-16 parental consent) meets Code requirements",
-        "Obtain lawyer review of privacy policy before Dec 2026 deadline (LRQ-4)"
+        "Implement /api/user/export and /api/user/delete endpoints (existing deferred item)",
+        "Obtain lawyer review of privacy policy before Dec 2026 deadline"
       ],
-      "last_reviewed": "2026-06-07",
-      "reviewed_by": "a17a-reconciliation"
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
     },
     {
       "id": "CR-006",
@@ -172,22 +167,21 @@
       "id": "CR-009",
       "obligation": "GDPR — Data Protection (EU users)",
       "mandate_rules": ["R1", "R2"],
-      "cross_ref": ["CR-GDPR-A17-DELETION", "CR-GDPR-A15-ACCESS", "CR-GDPR-A16-RECTIFICATION", "CR-GDPR-A20-PORTABILITY"],
-      "external_reference": "Regulation 2016/679, Art. 5, 6, 9, 15, 16, 17, 20, 22, 35; proposed Digital Omnibus amendments",
+      "external_reference": "Regulation 2016/679, Art. 5, 6, 9, 22, 35; proposed Digital Omnibus amendments",
       "effective_date": "2018-05-25",
-      "status": "PARTIAL",
+      "status": "DEFERRED",
       "review_cycle": "quarterly",
       "next_review_due": "2026-07-06",
-      "notes": "UPDATE 2026-06-07: GDPR data-subject-rights endpoints are now LIVE — /api/user/delete (Art. 17, deployed 2026-05-30), /api/user/export (Art. 20, Verified-live 2026-05-29), /api/user/access (Art. 15) and /api/user/rectify (Art. 16) built 2026-06-07. Status moved DEFERRED -> PARTIAL. A Data Protection Impact Assessment is now drafted (/compliance/dpia-intimate-data.md, A16a). The manifest header carries the per-article postures (CR-GDPR-A17-DELETION PARTIAL; A15/A16 SCOPED; A20-PORTABILITY SCOPED). Remaining for full GDPR posture: lawyer review of the lawful-basis question + erasure-vs-audit-retention tension (LRQ-1, LRQ-2) and the EU-customer plausibility decision. EU Digital Omnibus (legitimate-interest basis for AI) still at proposal stage. No EU marketing at launch.",
+      "notes": "EU Digital Omnibus proposes legitimate interest basis for AI development/operation and new exemption for residual special-category data. If adopted, this may simplify GDPR compliance for SageReasoning's AI processing. GDPR delete/export endpoints remain a deferred item (Security Audit D8). No EU marketing at launch. Status unchanged — implement before EU expansion.",
       "actions": [
-        "Lawyer review: confirm lawful basis for intimate-data processing + Art. 17 erasure-vs-audit-retention tension at Stage 1 close (LRQ-1, LRQ-2)",
-        "Confirm /api/user/export structured-export contract fully meets Art. 20 (A15d)",
         "Monitor Digital Omnibus GDPR amendments progress through EU Parliament",
+        "Implement GDPR delete/export endpoints (Security Audit D8)",
+        "Conduct Data Protection Impact Assessment before EU marketing",
         "Assess Art. 22 applicability to agent evaluation outputs",
-        "EU-customer plausibility decision (gates EAA + EU-facing GDPR scope)"
+        "Evaluate whether legitimate interest basis (if adopted) applies to sage-reason processing"
       ],
-      "last_reviewed": "2026-06-07",
-      "reviewed_by": "a17a-reconciliation"
+      "last_reviewed": "2026-04-04",
+      "reviewed_by": "compliance-pipeline-Q2"
     },
     {
       "id": "CR-010",

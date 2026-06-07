@@ -9996,3 +9996,40 @@ Expected: no output, exit 0 (already run this session). Plus greps confirming: o
 **Rules served:** R19d, R19, R8d, R20d, AC5, 0a, 0c, 0d-ii, 0f, PR1, PR2, PR10, PR13, PR15. PR4 N/A (no LLM call written — prompt-text + opt-in param only). PR6 not engaged.
 
 **Status:** Adopted. Implementation status: R19d mirror principle → **Wired** (built + full tsc exit 0 + additive-only diffs + per-surface greps) → **Verified** on the founder's typecheck. R19d now carried by **18 surfaces** (8 mentor + 6 named scoring/skill + 4 engine-backed scoring), completing R19d's "mentor and all tools" reach across the human-facing + skill product surface, with `/api/reason` + `/api/guardrail` deliberately excluded (open question above). Production **UNCHANGED** until the founder commits + pushes. Cross-references: `D-A18-MIRROR-PROPAGATION-2026-06-07` (the mentor portion this completes), `D-A18C-FRAMEWORK-DEPENDENCE-2026-06-07` (predecessor); `manifest.md` R19d/R19/R8d/R20d/AC5; `/operations/handoffs/founder/2026-06-07-R19D-all-tools-close.md`.
+
+---
+
+## 2026-06-07 — D-A16-A17-PRIVACY-REGULATORY-GOV-2026-06-07
+
+**Decision:** A16a–c (privacy governance) and A17a–c (regulatory governance) drafted in full on current wording in one `governance` pass; every legal-dependent item deferred to the Stage-1-close lawyer engagement via a single Lawyer Review Queue (PR7 — decision deferred; revisit condition = lawyer engagement begins at Stage 1 close). No CR posture upgraded on the strength of these drafts alone (R19).
+
+**Reasoning:** The data-subject-rights machinery is already live in production (`D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29` + A15 series: `/api/user/delete|export|access|rectify`). What was missing was the governance paper layer around it. "Draft now, lawyer later" produces real drafts so the lawyer engagement is a review, not a discovery exercise. Two material findings surfaced: (1) the JSON pipeline register was **stale** (CR-009/CR-005 still listed delete/export as deferred — false since 2026-05-29/30) and **overclaimed** Article 50 (CR-002 = COMPLIANT); reconciled to the authoritative manifest header (CR-002 downgraded to MONITORING under R19). (2) Web check (PR11/PR13) showed the manifest header's Article 50 date ("2026-12-02") is incomplete — Art. 50 applies **2 Aug 2026**; 2 Dec 2026 is the narrower marking backstop. The manifest-header correction is **Elevated** → queued (LRQ-6), not made.
+
+**Files touched:**
+- `compliance/register-reconciliation-2026-06-07.md` — NEW (A17a divergence analysis + applied reconciliation record)
+- `compliance/quarterly-review-cadence.md` — NEW (A17c R14 cadence operationalised; next due 2026-07-06)
+- `compliance/iso-27701-alignment-map.md` — NEW (A16b informal ISO/IEC 27701:2025 map)
+- `compliance/dpia-intimate-data.md` — NEW (A16a DPIA + Mermaid data-flow)
+- `compliance/sub-processor-register.md` — NEW (A16c Anthropic/Supabase/Vercel; DPAs "to confirm")
+- `compliance/article-50-transparency-posture.md` — NEW (A17b current-wording posture)
+- `compliance/lawyer-review-queue.md` — NEW (LRQ-1…7 + posture-upgrade table)
+- `compliance/compliance_register.json` — EDITED (Standard reconciliation: version→v5; CR-002 COMPLIANT→MONITORING; CR-005/CR-009 staleness fixes; cross_ref fields)
+- `archive/compliance_register.json.backup-pre-a17a-reconciliation-2026-06-07` — NEW (pre-edit backup)
+- `operations/handoffs/founder/2026-06-07-A16-A17-privacy-regulatory-governance-close.md` — NEW (close)
+
+**Risk classification:** Standard under 0d-ii — documentation + a Standard `/compliance/` data-file reconciliation edit (backed up to `/archive/`). The two Elevated items (manifest-header Article 50 date; live privacy-policy update) were NOT made — queued (LRQ-6, LRQ-4) for explicit founder approval + `/archive/` backup. AC7 not engaged. PR6 not engaged. No code/schema/env-flag/deploy touched. Manifest header untouched.
+
+**Rollback path:** Any new `/compliance/*.md` is deletable (nothing depends on them). `compliance_register.json` restores from `archive/compliance_register.json.backup-pre-a17a-reconciliation-2026-06-07`. No code, schema, flag, or deploy to reverse.
+
+**Verification step (founder-performable):**
+```
+ls "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/compliance/"*.md
+python3 -c "import json; json.load(open('/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/compliance/compliance_register.json')); print('register JSON valid')"
+```
+Expected: the seven new `.md` files listed; `register JSON valid`. Open `compliance/dpia-intimate-data.md` (GitHub renders the Mermaid data-flow diagram). Confirm `git status` shows `manifest.md` unmodified.
+
+**Open questions:** The seven Lawyer Review Queue items (LRQ-1…7) + the posture-upgrade table are the deferred-decision set (PR7); revisit condition = Stage-1-close lawyer engagement. Two are founder-approval-only, not lawyer (LRQ-6 manifest Article 50 date; LRQ-4 privacy-policy update incl. Supabase region correction) — both Elevated, awaiting explicit founder approval.
+
+**Rules served:** R14, R16, R17, R17b, R17c, R17g, R17h, R17i, R18e, R19, 0a, 0d-ii, 0f, PR7, PR11, PR13, PR15. PR4 N/A (no LLM call written). PR6 not engaged.
+
+**Status:** Adopted. Implementation status of the governance artefacts: **Drafted** (current-wording; lawyer review pending). Production UNCHANGED. Cross-references: `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29`, `D-R19D-ALL-TOOLS-2026-06-07` (predecessor); `manifest.md` R14/R16/R17/R18e/R19 + CR register header; `/adopted/substrate-plugin-staging-plan.md` §A16/§A17; `/compliance/lawyer-review-queue.md`.
