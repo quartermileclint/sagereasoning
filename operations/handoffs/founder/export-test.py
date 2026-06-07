@@ -13,8 +13,8 @@ SUPABASE_URL = "https://iwdtrvuphogkwmovhnvz.supabase.co"
 ANON = ("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6"
         "Iml3ZHRydnVwaG9na3dtb3ZobnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1ODEwND"
         "AsImV4cCI6MjA5NTE1NzA0MH0.uGej_kDDJmzp_egYRcPqvXchhTL-KT-c30x1C21_LKw")
-EMAIL = "test-erasure-A@example.com"
-PASSWORD = "test-erasure-Atest-erasure-A"
+EMAIL = "test-access-a15b@example.com"
+PASSWORD = "testaccessa15b2026"
 APP = "http://localhost:3000"
 
 
@@ -73,3 +73,7 @@ for k in intimate:
 print()
 print("    All intimate tables present:", "YES ✓" if all_present else "NO ✗")
 print("    Total top-level sections in export:", len(export))
+prof = export.get("profile")
+prof_ok = isinstance(prof, list) and len(prof) > 0
+print("    profile section populated (user_id->id keying fix):",
+      f"YES ✓ (rows: {len(prof)})" if prof_ok else "NO ✗ (empty — the keying fix did not take)")

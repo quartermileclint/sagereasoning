@@ -35,11 +35,16 @@ Per the status vocabulary (0a), an endpoint is **Verified** only once you've tes
 
 ## Blocked On
 **Files uncommitted (commit command in Founder Verification below):**
-- `website/src/app/api/user/rectify/route.ts`
-- `website/src/lib/rectifiable-fields.ts`
-- `supabase/migrations/20260607_a15c_compliance_rectification_log.sql`
-- `operations/handoffs/founder/rectify-test.py`
-- `operations/decision-log.md` (one entry appended)
+- `website/src/app/api/user/rectify/route.ts` (A15c)
+- `website/src/lib/rectifiable-fields.ts` (A15c)
+- `supabase/migrations/20260607_a15c_compliance_rectification_log.sql` (A15c)
+- `operations/handoffs/founder/rectify-test.py` (A15c)
+- `website/src/lib/user-data-gathering.ts` (profile-keying fix — D-PROFILE-EXPORT-ACCESS-KEYING-FIX)
+- `website/src/app/api/user/export/route.ts` (profile-keying fix)
+- `operations/handoffs/founder/access-test.py` (profile-populated assertion added)
+- `operations/handoffs/founder/export-test.py` (login repointed + profile-populated assertion)
+- `operations/decision-log.md` (two entries appended: D-A15C… + D-PROFILE-EXPORT-ACCESS-KEYING-FIX…)
+- `operations/knowledge-gaps.md` (Supabase empty-`select` verification candidate added — watch status)
 - `operations/handoffs/founder/2026-06-07-A15c-rectification-endpoint-close.md` (this close)
 
 **Production state at session close:** **UNCHANGED from pre-session.** Nothing deployed. A13 cost-health detection remains Live; all four R20a flags `true`; OTel / injection-defence / Layer3 / plugin-install-auth / abuse-detection flags all UNSET; `/api/reason` byte-identical. No flags, schema, or deploys were touched in production this session. (The new migration runs on TEST first; production is your separate decision after TEST passes.)
@@ -105,16 +110,32 @@ select * from compliance_rectification_log order by rectified_at;
 - *Could not reach the app* → `npm run dev` isn't running in the other window (Step 2).
 - *No 429, or a check says NO ✗* → **stop and tell me** — that's a code issue I own, not something on your end. (If only the 429 fails: you likely didn't restart `npm run dev` after the access-test — see the Step 2 note.)
 
+### Step 6 — verify the profile-keying fix (added this session, D-PROFILE-EXPORT-ACCESS-KEYING-FIX)
+After the rectify test, in the second Terminal:
+```
+python3 export-test.py     # /export is NOT rate-limited — run it first
+```
+**Expected:** `profile section populated: YES ✓ (rows: 1)` plus all intimate tables present. Then **restart `npm run dev`** (fresh rate-limit bucket) and:
+```
+python3 access-test.py     # /access IS rate-limited — restart dev first
+```
+**Expected:** `profile section populated: YES ✓ (rows: 1)` and `ALL CHECKS PASSED ✓`. Before this fix both returned an empty profile section.
+
 ### Then commit + push (only after TEST passes)
 ```
 cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
 git add website/src/app/api/user/rectify/route.ts \
   website/src/lib/rectifiable-fields.ts \
+  website/src/lib/user-data-gathering.ts \
+  website/src/app/api/user/export/route.ts \
   supabase/migrations/20260607_a15c_compliance_rectification_log.sql \
   operations/handoffs/founder/rectify-test.py \
+  operations/handoffs/founder/access-test.py \
+  operations/handoffs/founder/export-test.py \
   operations/decision-log.md \
+  operations/knowledge-gaps.md \
   operations/handoffs/founder/2026-06-07-A15c-rectification-endpoint-close.md
-git commit -m "A15c: GDPR Art 16 rectification endpoint /api/user/rectify — allow-list (display_name/city/country) + immutable before/after audit table + 5/hr rate-limit; reuses A15b harness; /export /access /delete /reason byte-identical. (D-A15C-RECTIFICATION-ENDPOINT-BUILT-2026-06-07)"
+git commit -m "A15c: GDPR Art 16 rectification endpoint /api/user/rectify — allow-list (display_name/city/country) + immutable before/after audit + 5/hr rate-limit; reuses A15b harness. Plus profiles user_id->id keying fix so the profile section populates in /export + /access. /delete /reason byte-identical. (D-A15C-RECTIFICATION-ENDPOINT-BUILT-2026-06-07; D-PROFILE-EXPORT-ACCESS-KEYING-FIX-2026-06-07)"
 ```
 Then push via GitHub Desktop. **Important — production deploy:** the new route will deploy, but rectification logging only works in production once you also run the `compliance_rectification_log` migration (Step 1 SQL) in the **production** Supabase project. Unlike A15b's access log (which silently no-ops if absent), here a missing table makes a *successful correction* return HTTP 207 (correction applied, audit not logged) — so run the production migration **before** relying on the endpoint in production. I can walk you through it.
 
@@ -130,7 +151,7 @@ You elect. The A15 picture after this session:
 - **A19 surface rollout** / deferred Critical activations — unchanged.
 
 ## Open Questions
-- **Confirmed finding (A15b/export — NOT A15c):** `profiles` has no `user_id` column (it's keyed by `id`). The shared `user-data-gathering.ts` helper (used by `/api/user/access`) and the inline copy in `/api/user/export` query `profiles` with `.eq('user_id', …)`, so the **profile section comes back empty** in both the Art 15 access response and the Art 20 export — a GDPR data-completeness gap on a Verified-live surface. Fix = query `profiles` by `id` in both places (a one-line change each). Significant severity (completeness); low live-impact (no real users). Recommended as a focused Elevated fix, or folded into the deferred `/export`→helper consolidation. **Founder to elect when.**
+- **Confirmed finding — NOW FIXED this session (D-PROFILE-EXPORT-ACCESS-KEYING-FIX-2026-06-07):** `profiles` is keyed by `id`, but the `user-data-gathering.ts` helper (`/api/user/access`) and the inline copy in `/api/user/export` queried it with `.eq('user_id', …)`, so the **profile section came back empty** in both the Art 15 access response and the Art 20 export. Founder elected "fix it now"; both now query `profiles` by `id` and are **Verified-on-TEST** (Step 6 passed 2026-06-07 — `export-test.py` + `access-test.py` both report `profile section populated: YES ✓ (rows: 1)`). The deferred `/export`→helper consolidation (to remove the remaining duplication between the two now-identically-fixed paths) is still a future Elevated item.
 - `email` rectification deliberately out of scope for A15c (route email changes via the account/auth flow). Revisit only if a formal Art-16 email-correction path is wanted — it would be its own Critical session with auth/session handling.
 - Audit-table exclusion from Art 15/16 (`substrate_audit_events`/`abuse_signals`/`cost_alerts` — masked, agent_id-keyed) — still a lawyer question; settle alongside A16/A17.
 - The manifest `CR-GDPR-A16-RECTIFICATION` posture edit + the carried §8 governance edits remain pending your approval (not actioned this session).

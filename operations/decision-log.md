@@ -9733,3 +9733,38 @@ Then read `adopted/a15-sar-portability-disposition.md` §7 (requirements-vs-in-p
 **Rules served:** R17, R17b, R17f, R17h, R18, R19, 0a, 0c, 0c-ii, 0d-ii, 0f, KG1, PR1, PR2, PR6, PR10, PR15, PR17.
 
 **Status:** Adopted. Implementation status: A15c (`/api/user/rectify`) → **Verified-on-TEST** (founder TEST run 2026-06-07 passed end-to-end: valid correction HTTP 200 with before/after + `audit_logged:true`; non-allow-listed field 400; rate-limit 429). Verification surfaced a TEST-data gap — the dashboard-created test user `test-access-a15b@example.com` had no `public.profiles` row (first run → 404 "No profile found"); resolved by seeding the row per the whole-system-harness pattern (`insert into public.profiles (id, email, display_name) select … from auth.users`). The route was correct (it looks up `profiles.id = <auth id>`); real signups always have a profiles row via the `handle_new_user` trigger. Production deploy deferred. A15a erasure, A15b access, A15d portability unchanged. Production **UNCHANGED / byte-identical** until the founder deploys. Stage-1 remaining (all A10–A19 Verified): A16, A17 (lawyer-coupled), A18, plus the deferred A14 live-adherence tracker — A15c clears the last non-lawyer A15 build. Cross-references: `D-A15B-SAR-ACCESS-ENDPOINT-BUILT-2026-06-07` (the harness this mirrors); `D-A15-SAR-PORTABILITY-GOVERNANCE-CONFIRM-2026-06-07` §4/§6 (the scope this implements); `manifest.md` R17h; `adopted/substrate-plugin-staging-plan.md` §A15.
+
+---
+
+## 2026-06-07 — D-PROFILE-EXPORT-ACCESS-KEYING-FIX-2026-06-07
+
+**Decision:** Fixed a data-completeness bug surfaced during A15c TEST verification: the `profiles` table is keyed by `id` (= the auth user id), but both the Art 20 export (`/api/user/export`, inline) and the Art 15 access copy (`/api/user/access`, via the shared `user-data-gathering.ts` helper) queried `profiles` with `.eq('user_id', …)`. Since `profiles` has no `user_id` column (confirmed column list: id, email, display_name, created_at, updated_at, country, city, latitude, longitude, show_on_map), that query returned the user's **profile section empty** in both surfaces. Pulled `profiles` out of the generic `user_id`-scoped loop in each file and queried it separately with `.eq('id', userId)`. Founder elected "Fix it now" at the A15c close.
+
+**Reasoning:** GDPR Art 15(3) (copy of personal data) + Art 20 (portability) require the user's core profile — name, email, city, country — to be in the response; an empty profile section is a real completeness gap on a Verified-live surface (`/export` Verified-live 2026-05-29; `/access` Verified-on-TEST 2026-06-07). Root cause is keying, not scope: every other table in both loops is correctly `user_id`-scoped and is unchanged; only `profiles` is keyed by `id` (per `resolveProfileId` in `security.ts` and `update-location`/community usage). The same `profiles`-keying is what caused the A15c test-user 404 — one root, two symptoms. Diagnostic-certain.
+
+**Files touched:**
+- `website/src/lib/user-data-gathering.ts` — `profiles` pulled out of the `user_id` loop into a dedicated `.eq('id', userId)` query (feeds `/api/user/access`).
+- `website/src/app/api/user/export/route.ts` — same fix in the inline data-gathering (feeds `/api/user/export`).
+- `operations/handoffs/founder/access-test.py` — added a "profile section populated" assertion.
+- `operations/handoffs/founder/export-test.py` — repointed login from the consumed `test-erasure-A@example.com` to the stable `test-access-a15b@example.com`; added a "profile section populated" assertion.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification (0d-ii):** **Elevated** — change to existing user-facing functionality on a Verified-live endpoint (`/export`) + the just-Verified `/access` helper. Read-path only; no auth, encryption, deletion, schema, or flag change → not Critical (R17f/PR6 not engaged: rectification/distress surfaces untouched). The only behavioural change is that the `profiles` section is now populated; all other tables byte-identical in output. KG1: the new reads are awaited and errors handled exactly as the surrounding code.
+
+**Rollback path:** revert the two source edits (restore `{ key: 'profile', table: 'profiles' }` to each loop and delete the dedicated block). Before push nothing deploys; after push, revert the commit in GitHub Desktop → push.
+
+**Verification step (founder-performable, TEST first):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website" && npm run dev   # restart for a fresh rate-limit bucket
+# new Terminal:
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/operations/handoffs/founder"
+python3 export-test.py     # expect: profile section populated YES ✓ (rows: 1)
+python3 access-test.py      # expect: profile section populated YES ✓ + ALL CHECKS PASSED
+```
+Expected: both scripts now report `profile section populated: YES ✓ (rows: 1)` (the seeded `test-access-a15b` profile). `/export` is not rate-limited; `/access` is (run it after a `npm run dev` restart).
+
+**Open questions:** The deferred `/export`→`user-data-gathering.ts` consolidation (carried from A15b, PR5 count 1) would remove the remaining duplication between these two now-identically-fixed code paths — still a future Elevated item, not done here.
+
+**Rules served:** R17, R17g, R17i, R18, R19, 0a, 0c, 0d-ii, 0f, KG1, PR2, PR13.
+
+**Status:** Adopted. Implementation status: `/api/user/export` + `/api/user/access` profile section → **Verified-on-TEST** (founder ran `export-test.py` + `access-test.py` 2026-06-07; both report `profile section populated: YES ✓ (rows: 1)`; access-test response-shape + rate-limit 429 also green). Production UNCHANGED / byte-identical until the founder deploys. Cross-references: `D-A15C-RECTIFICATION-ENDPOINT-BUILT-2026-06-07` (surfaced during its TEST run); `D-A15B-SAR-ACCESS-ENDPOINT-BUILT-2026-06-07` (the helper); `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29` (the export build); `manifest.md` R17g/R17i.

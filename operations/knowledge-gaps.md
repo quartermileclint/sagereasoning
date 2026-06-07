@@ -254,6 +254,21 @@ The visibility difference is fixture-driven: F1's Layer 1 output is non-determin
 
 **Status:** Promoted (3rd+ recurrence — load-bearing). Cross-references: `D-M1-CP4e-B-AC13-TIER1-DEPLOYED-2026-05-07` (this promotion); `D-M1-CP4e-A-LAYER-MODULES-ROUTE-HARNESS-AC13-TIER1-IMPLEMENTED-NO-DEPLOY-2026-05-06` (watch-status finding); `D-M1-CP4b-AC14-TIER2-ADR-AMENDMENTS-2026-05-06` (first observation — worked-example fix); `/website/scripts/verify-translation-sandwich.ts` (the harness with the structural pivots applied).
 
+### Candidate pattern (2nd recurrence — watch status) — Supabase SQL-editor empty-table confirm shows no columns (A15b 2026-06-07; A15c 2026-06-07)
+
+**What it looks like:** A founder-verification step that says "run `select * from <new_table>;` → confirm an empty table with columns X, Y, Z" is wrong for the Supabase SQL editor. For an empty table, `select *` returns the message **"Success. No rows returned"** with **no column headers** — so the founder cannot confirm the columns this way, and the instruction reads as a failure when it is actually the healthy result. Appeared in the A15b close (`compliance_access_log`) and recurred verbatim in the A15c close (`compliance_rectification_log`); the A15b ad-hoc fix given in chat was never carried into the artifact or this register — which is exactly why it recurred.
+
+**Proposed resolution (watch status — apply now; promote to permanent on a 3rd recurrence):** In any founder-verification block confirming a newly-created table, (a) state that "Success. No rows returned" on a plain `select *` is the expected healthy result (it proves the table exists and is empty), and (b) use a structure query that returns rows regardless of emptiness:
+```
+select column_name, data_type
+from information_schema.columns
+where table_schema = 'public' and table_name = '<table>'
+order by ordinal_position;
+```
+Expected: one row per column. This belongs in the lean/Critical session-close "Founder Verification" template (table-create step) so future closes inherit it without re-derivation.
+
+**Cross-references:** `D-A15C-RECTIFICATION-ENDPOINT-BUILT-2026-06-07` (this recurrence); `D-A15B-SAR-ACCESS-ENDPOINT-BUILT-2026-06-07` (first surfacing); `/operations/handoffs/founder/2026-06-07-A15c-rectification-endpoint-close.md` Step 1.
+
 ### Stable observations (no action)
 
 - **AC4 (Invocation Testing for Safety Functions) — formerly KG3 / KG7 build-to-wire entries, retired 2026-04-25 under DD-2026-04-25-03:** Actively applied. Grep confirmed both Growth loaders are called exactly once in production (`hub/route.ts` `case 'growth':`). Harness run in-session (16/16 assertions passed). No new observation worth logging.

@@ -64,10 +64,25 @@ export async function GET(request: NextRequest) {
     },
   }
 
+  // profiles is keyed by `id` (= the auth user id), NOT user_id — so it must be
+  // queried separately; querying it by user_id returns an empty profile section.
+  // (D-PROFILE-EXPORT-ACCESS-KEYING-FIX-2026-06-07 — completeness fix for the
+  // Art 20 export + Art 15 access copy.)
+  {
+    const { data, error } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+    if (error && !error.message.includes('does not exist')) {
+      exportData.profile = { error: error.message }
+    } else {
+      exportData.profile = data || []
+    }
+  }
+
   // 2. Query the core user-scoped tables (plaintext)
   // Each query is independent — failures in one table don't block others
   const tables = [
-    { key: 'profile', table: 'profiles', select: '*' },
     { key: 'evaluations', table: 'action_evaluations_v3', select: '*' },
     { key: 'baseline_assessments', table: 'baseline_assessments_v3', select: '*' },
     { key: 'journal_entries', table: 'journal_entries', select: '*' },

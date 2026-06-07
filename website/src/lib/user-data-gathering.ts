@@ -58,9 +58,24 @@ export async function gatherUserPersonalData(
 ): Promise<Record<string, unknown>> {
   const data: Record<string, unknown> = {}
 
+  // profiles is keyed by `id` (= the auth user id), NOT user_id — so it must be
+  // queried separately; querying it by user_id returns an empty profile section.
+  // (D-PROFILE-EXPORT-ACCESS-KEYING-FIX-2026-06-07 — completeness fix for the
+  // Art 15 access copy + Art 20 export.)
+  {
+    const { data: rows, error } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+    if (error && !error.message.includes('does not exist')) {
+      data.profile = { error: error.message }
+    } else {
+      data.profile = rows || []
+    }
+  }
+
   // 1. Core user-scoped tables (plaintext). Each query independent.
   const tables = [
-    { key: 'profile', table: 'profiles' },
     { key: 'evaluations', table: 'action_evaluations_v3' },
     { key: 'baseline_assessments', table: 'baseline_assessments_v3' },
     { key: 'journal_entries', table: 'journal_entries' },

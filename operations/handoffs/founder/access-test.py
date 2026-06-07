@@ -95,6 +95,11 @@ print("\n      Profiling disclosure present (Art 15(1)(h)):",
 
 pd = body.get("personal_data", {})
 print("      personal_data sections returned:", len(pd) if isinstance(pd, dict) else "n/a")
+prof = pd.get("profile") if isinstance(pd, dict) else None
+prof_ok = isinstance(prof, list) and len(prof) > 0
+ok = ok and prof_ok
+print("      profile section populated (user_id->id keying fix):",
+      f"YES ✓ (rows: {len(prof)})" if prof_ok else "NO ✗ (empty — the keying fix did not take)")
 print("\n      Response shape OK:", "YES ✓" if ok else "NO ✗")
 
 # ---------------------------------------------------------------- 4. rate-limit
