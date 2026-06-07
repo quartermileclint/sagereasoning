@@ -9557,3 +9557,25 @@ Expected: the stale "503 placeholder" R17c lines are gone; the three corrected d
 **Rules served:** R5, R0, R3, R17, AC10, PR1, PR2, PR3, PR6 (boundary checked, not engaged), PR10, PR13, PR15, PR17, KG1, KG7.
 
 **Status:** Adopted. Implementation status: **A19 request_velocity_anomaly → Wired (inert; sandbox-verified)**; → Verified-live on the founder TEST pass. Production UNCHANGED / byte-identical (`SUBSTRATE_ABUSE_DETECTION_ENABLED` + `ABUSE_DETECTION_EVAL_TOKEN` UNSET in production; `abuse_signals` not applied to production). Cross-references: `D-A13-COST-HEALTH-ALERTS-COMPLETION-D4-FOLDIN-2026-06-06` (A13 pattern mirrored); `D-A12-OTEL-INSTRUMENTATION-VERIFIED-LIVE-2026-06-03` (substrate_audit_events surface); `D-R17C-A15A-STALE-DRIFT-RECONCILED-2026-06-06` (same session); `/adopted/substrate-plugin-staging-plan.md` §A19.
+
+---
+
+## 2026-06-06 — D-A19-VELOCITY-VERIFIED-LIVE-2026-06-06
+
+**Decision:** A19 `request_velocity_anomaly` is **Verified-live**. The founder ran the live TEST pass (service-token GET against a local `npm run dev` pointed at the TEST project via `.env.development.local`) and it passed end to end: the seeded burst identity (`a19-burst-test`) fired one `request_velocity_anomaly` signal at **10×** (observed 50 in its busiest window vs a baseline of 5/window over 5 prior windows; threshold 15), persisted to `abuse_signals` (`signals_persisted:1`); the flat identity (`a19-flat-test`) was evaluated (`identities_evaluated:2`) and correctly produced **no signal** (no false positive); `skipped:[]`. Gate sanity: no-token GET → HTTP 401. Closes the live-verification item from `D-A19-ABUSE-DETECTION-VELOCITY-PROOF-2026-06-06`.
+
+**Reasoning:** Build + live verification both 2026-06-06. PR10 Verify is now **Diagnostic-certain end-to-end** — the live data path (enumerate distinct `agent_id` → read `occurred_at` → bucket into 60s windows → run the pure detector → persist) is proven against a real Supabase, not just the pure logic. PR1 single-detector proof satisfied; surface rollout (`systematic_enumeration`, `rapid_input_variation`) and enforcement remain deferred.
+
+**PR5 — knowledge-gap candidate (count 1):** tearing down seeded `substrate_audit_events` rows requires `ALTER TABLE … DISABLE TRIGGER trg_sae_no_delete` around the DELETE, then re-enable — the table is append-only (immutability trigger), so a plain DELETE raises `P0001 … append-only; DELETE not permitted`. Surfaced during this session's teardown (the AI's first teardown script used a plain DELETE and failed). Any future verification script that seeds `substrate_audit_events` must include the trigger-disable teardown. The close's teardown + seed scripts were corrected post-run. Promote on recurrence.
+
+**Files touched:**
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-06-06-reconcile-A19-abuse-detection-close.md` — Step 2.2 (terminal heredoc, no editor — avoids the RTF-corruption trap), Step 2.3 (`date_trunc`-anchored seed), Step 2.8 (trigger-disable teardown) corrected; A19 status row + disposition updated to Verified-live.
+
+**Risk classification (0d-ii):** **Standard** (governance/docs; records a status movement; corrects a handoff script). No code/schema/production change. Production UNCHANGED (`SUBSTRATE_ABUSE_DETECTION_ENABLED` + `ABUSE_DETECTION_EVAL_TOKEN` UNSET in production; `abuse_signals` not applied to production; the TEST migration + seed rows were removed at teardown). PR6 not engaged.
+
+**Verification step (founder-performed, COMPLETE):** the live TEST run above (HTTP 200; burst fired 10×; flat silent; persisted; 401 gate). TEST state restored at teardown (`audit_left=0, signals_left=0`; env lines removed; append-only guard re-enabled).
+
+**Rules served:** R5, R0, R3, PR1, PR2, PR5, PR10, PR17, KG1, KG7.
+
+**Status:** Adopted. Implementation status: **A19 `request_velocity_anomaly` → Verified-live**. Stage-1 remaining (all A10–A19 Verified): A14, A15b, A15c, A16, A17, A18 (A16/A17 lawyer-coupled). Cross-references: `D-A19-ABUSE-DETECTION-VELOCITY-PROOF-2026-06-06` (the build this verifies); `D-A12-OTEL-INSTRUMENTATION-VERIFIED-LIVE-2026-06-03` (the `substrate_audit_events` surface); `D-R17C-A15A-STALE-DRIFT-RECONCILED-2026-06-06` (same arc); `/adopted/substrate-plugin-staging-plan.md` §A19.

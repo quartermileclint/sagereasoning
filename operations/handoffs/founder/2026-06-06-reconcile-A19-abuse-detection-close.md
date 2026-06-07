@@ -24,14 +24,14 @@ Two pieces, in the prompt's recommended order (reconcile → A19):
 |---|---|---|
 | manifest/staging-plan R17c "503 placeholder" notes | stale (drift) | **corrected — reflect Verified-live deletion** |
 | manifest CR-GDPR-A20 portability note | stale (SCOPED, "to build") | **corrected — export Verified-live** |
-| A19 `request_velocity_anomaly` detector | not built | **Wired (inert; sandbox-verified)** → Verified-live on your TEST pass |
+| A19 `request_velocity_anomaly` detector | not built | **Verified-live** (founder TEST pass 2026-06-06: 10× burst fired, flat identity silent, persisted) |
 | `abuse_signals` table | absent | **migration written (not yet applied anywhere)** |
 | Production (`/api/reason`, all flags) | — | **UNCHANGED / byte-identical** |
 
 ## Honest Stage-1 disposition (what's truly left before Stage-1 close)
 Stage-1 close needs **all of A10–A19 Verified** (plus lawyer engagement + EU-customer decision + the parallel FPE track).
 - **Done:** A10, A11b, A12, A13 (Verified-live), A15a (R17c deletion), A15d (portability, substantially).
-- **Still to build/confirm:** A14 (SLOs), A15b (SAR), A15c (rectification), A16 + A17 (privacy/regulatory — lawyer-coupled), A18 (onboarding + limitations), **A19** (this session — Verified-live pending your TEST pass).
+- **Still to build/confirm:** A14 (SLOs), A15b (SAR), A15c (rectification), A16 + A17 (privacy/regulatory — lawyer-coupled), A18 (onboarding + limitations). **A19 → Verified-live (founder TEST pass 2026-06-06).**
 - **Plain takeaway:** Stage-1 close is **not imminent** — ~6 items remain, two of them gated on a lawyer. A19 clears one.
 
 ## Verification Method Used (0c framework)
@@ -89,29 +89,36 @@ This runs against the **TEST** Supabase project via `website/.env.development.lo
 
 **Step 2.1 — apply the migration to TEST.** Open the **TEST** Supabase project (`iwdtrvuphogkwmovhnvz`) → **SQL Editor** → paste the entire contents of `supabase/migrations/20260606_a19_abuse_signals.sql` → **Run**. Expect: "Success. No rows returned."
 
-**Step 2.2 — set the TEST env.** Open `website/.env.development.local` (create it if absent — it overrides `.env.local` in dev). Add these two lines (pick any long random string for the token):
+**Step 2.2 — set the TEST env (Terminal only — do NOT open the file in TextEdit; it saves as RTF and corrupts it).** First inspect (changes nothing): `cat website/.env.development.local` — confirm plain `NAME=value` lines (not `{\rtf1…`) and a TEST Supabase URL containing `iwdtrvuphogkwmovhnvz`. Then append the flag + a token via a heredoc (pick any long random string; on your Mac `openssl rand -hex 32` generates one). Paste the whole block at once:
 ```
-SUBSTRATE_ABUSE_DETECTION_ENABLED=true
-ABUSE_DETECTION_EVAL_TOKEN=a19-test-token-pick-any-long-random-string
-```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+cat >> .env.development.local <<'EOF'
 
-**Step 2.3 — seed test data.** In the TEST SQL Editor, run this (a "burst" identity that should fire, and a "flat" identity that must not):
+SUBSTRATE_ABUSE_DETECTION_ENABLED=true
+ABUSE_DETECTION_EVAL_TOKEN=paste-a-long-random-string-here
+EOF
+grep -nE "SUBSTRATE_ABUSE_DETECTION_ENABLED|ABUSE_DETECTION_EVAL_TOKEN" .env.development.local
+```
+The `grep` should print both lines. (Removed at teardown, Step 2.8.)
+
+**Step 2.3 — seed test data (timestamps anchored to clean minute boundaries via `date_trunc`, so the burst lands in exactly one window — more robust than a relative `now() - interval` seed, which can smear the burst across a minute boundary and under-fire).** In the TEST SQL Editor, run:
 ```sql
--- Burst identity: 5 baseline windows (5 events each, 5 distinct minutes) + 1 burst window (50 events in one minute)
+-- Burst identity: 5 baseline windows (5 events each) + 1 burst window (50 events)
 INSERT INTO substrate_audit_events (correlation_id, agent_id, surface, decision_event, occurred_at)
 SELECT gen_random_uuid(), 'a19-burst-test', 'api_reason', 'assessment',
-       now() - (m || ' minutes')::interval - (e || ' seconds')::interval
-FROM generate_series(6,10) AS m, generate_series(1,5) AS e;
+       date_trunc('minute', now()) - interval '20 minutes' + (w || ' minutes')::interval + (e || ' seconds')::interval
+FROM generate_series(0,4) AS w, generate_series(1,5) AS e;
 INSERT INTO substrate_audit_events (correlation_id, agent_id, surface, decision_event, occurred_at)
 SELECT gen_random_uuid(), 'a19-burst-test', 'api_reason', 'assessment',
-       now() - interval '5 minutes' - (e || ' seconds')::interval
+       date_trunc('minute', now()) - interval '20 minutes' + interval '5 minutes' + (e || ' seconds')::interval
 FROM generate_series(1,50) AS e;
 -- Flat identity: 6 windows x 5 events, no burst (false-positive guard)
 INSERT INTO substrate_audit_events (correlation_id, agent_id, surface, decision_event, occurred_at)
 SELECT gen_random_uuid(), 'a19-flat-test', 'api_reason', 'assessment',
-       now() - (m || ' minutes')::interval - (e || ' seconds')::interval
-FROM generate_series(5,10) AS m, generate_series(1,5) AS e;
+       date_trunc('minute', now()) - interval '20 minutes' + (w || ' minutes')::interval + (e || ' seconds')::interval
+FROM generate_series(0,5) AS w, generate_series(1,5) AS e;
 ```
+Confirm: `SELECT agent_id, count(*) FROM substrate_audit_events WHERE agent_id IN ('a19-burst-test','a19-flat-test') GROUP BY agent_id;` → expect `a19-burst-test`=75, `a19-flat-test`=30.
 
 **Step 2.4 — run the app + the detector logic test.** In Terminal:
 ```
@@ -139,14 +146,26 @@ SELECT signal_type, scope, observed_value, threshold_value, multiple
 FROM abuse_signals WHERE scope = 'a19-burst-test';   -- expect: one request_velocity_anomaly row
 ```
 
-**Step 2.8 — teardown** (TEST SQL Editor + the env file):
+**Step 2.8 — teardown.** `substrate_audit_events` is **append-only** (an immutability trigger blocks DELETE), so removing seeded audit rows needs the guard briefly lifted, then re-enabled. In the TEST SQL Editor:
 ```sql
-DELETE FROM abuse_signals WHERE scope IN ('a19-burst-test','a19-flat-test');
-DELETE FROM substrate_audit_events WHERE agent_id IN ('a19-burst-test','a19-flat-test');
-```
-Then delete the two lines from `website/.env.development.local` (or the whole file if you created it just for this). Stop `npm run dev` (Ctrl-C).
+DELETE FROM public.abuse_signals WHERE scope IN ('a19-burst-test','a19-flat-test');
 
-If Step 2.5 fires for the burst identity and stays silent for the flat identity, **A19 `request_velocity_anomaly` → Verified-live.** Tell me next session and I'll record it.
+ALTER TABLE public.substrate_audit_events DISABLE TRIGGER trg_sae_no_delete;
+DELETE FROM public.substrate_audit_events WHERE agent_id IN ('a19-burst-test','a19-flat-test');
+ALTER TABLE public.substrate_audit_events ENABLE TRIGGER trg_sae_no_delete;
+
+SELECT
+  (SELECT count(*) FROM substrate_audit_events WHERE agent_id IN ('a19-burst-test','a19-flat-test')) AS audit_left,
+  (SELECT count(*) FROM abuse_signals       WHERE scope    IN ('a19-burst-test','a19-flat-test')) AS signals_left;  -- expect 0, 0
+```
+Then remove the two env lines (Terminal, no editor) and stop the dev server (Ctrl-C):
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+sed -i '' '/SUBSTRATE_ABUSE_DETECTION_ENABLED/d; /ABUSE_DETECTION_EVAL_TOKEN/d' .env.development.local
+grep -nE "SUBSTRATE_ABUSE_DETECTION_ENABLED|ABUSE_DETECTION_EVAL_TOKEN" .env.development.local   # prints nothing = clean
+```
+
+If Step 2.5 fires for the burst identity and stays silent for the flat identity, **A19 `request_velocity_anomaly` → Verified-live.** (DONE 2026-06-06 — the founder TEST pass passed; recorded in `D-A19-VELOCITY-VERIFIED-LIVE-2026-06-06`.)
 
 ## Next Session Should
 You elect. Natural options:
