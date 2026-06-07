@@ -9844,3 +9844,44 @@ Expected: typecheck clean (already run this session, exit 0); `/welcome` renders
 **Rules served:** R3, R19c, R19d, A1, 0a, 0c, 0d-ii, 0f, PR1, PR15, PR17.
 
 **Status:** Adopted. Implementation status: `/welcome` (A18a) → **Wired** (built + full typecheck exit 0) → **Verified** on the founder's URL check (website-page row, 0c). Production **UNCHANGED / byte-identical** until the founder commits + deploys. A18 remaining: A18c (framework-dependence detection — Elevated→Critical under PR6, its own session), A18e (cognitive-accessibility design pass), and propagation of the mirror principle to the practitioner-facing mentor surfaces. Cross-references: `D-A18B-A18D-LIMITATIONS-MIRROR-ACCESSIBILITY-2026-06-07` (predecessor); `manifest.md` R19c/R19d; `adopted/substrate-plugin-staging-plan.md` §A18.
+
+---
+
+## 2026-06-07 — D-A18E-COGNITIVE-ACCESSIBILITY-2026-06-07
+
+**Decision:** Completed the A18e cognitive-accessibility design pass on the mentor + assessment surfaces (founder-elected at open; founder then elected to action **all three** recommendation bundles). Produced a written review (`reference/a18e-cognitive-accessibility-review-2026-06-07.md`) grading the surfaces against A3 / R8c / R3 / R6d / WCAG 2.1 AA, then implemented seven findings: **F1** contrast — promoted information-bearing base `text-sage-300/400/500` (≈2.4–3.3:1 on white, below the 4.5:1 AA minimum) to `text-sage-600` (≈4.7:1) across 11 Tailwind surfaces, leaving `placeholder:`/`hover:`/`focus:` variants untouched; **F7** disclaimer legibility — resolved by F1 (the R3 disclaimers were rendered in the failing `sage-400`); **F2** status messages — added `role="status"`/`role="alert"` live regions for loading/results/errors (was zero across all surfaces); **F3** error UX — replaced the two native `alert()` pop-ups (score, journal) with the inline, announced error-box pattern baseline already uses; **F4** jargon — removed Greek/Latin leaks from the secondary surfaces ("Loading premeditatio…"/"Loading oikeiosis tracker…" → "Loading…"; scenarios "Kathekon Quality" → "Appropriate-Action Quality" + capitalised the raw quality value); **F5** error copy — rewrote five developer-facing error strings in mentor-baseline as plain, kind, actionable copy; **F6** selection semantics — added `aria-pressed` + a visible tick to the baseline answer options (questions + Q6) so selection is no longer colour-only; **F9** added `role="progressbar"` to the baseline progress bar. The R20a distress-redirect block on the score page was left **byte-identical** (PR6 trip-wire avoided). `/api/reason` untouched.
+
+**Reasoning:** Implements A18e (staging plan §A18; cross-cuts A3) — the design pass the `/accessibility` page (A18d) already flagged as ongoing, "particularly on the more interactive surfaces." Grounded in the actual page source before editing (guards prescribe-before-grounding); the flagship surfaces were found already strong, so the work targeted the cross-cutting consistency + assistive-tech gaps. Two findings (F1 disclaimer contrast → R3 legibility; F4 jargon → R8c) close gaps in the founder's own stated rules. PR15: the installed Anthropic skills (`frontend-design`, `webapp-testing`) + the agentic-commerce findings tracker were consulted — no F-finding targets A18/accessibility, and no Anthropic-canonical primitive substitutes for editing the founder's own Next.js pages; the `design:accessibility-review` (WCAG-audit) methodology was applied to the review. PR16: positioning impact neutral-to-strengthens (honest-positioning / R19 consistency); dogfood relevance N/A (human-facing UI, not substrate-consultable). **Founder scoping note (AI-caused, surfaced for decision):** the two practice-name H1s — "Premeditatio Malorum" and "Oikeiosis Extension" — are also Greek/Latin under R8c, but renaming them spans nav/footer/welcome links and is a product-voice/identity decision, so they were **not** renamed unilaterally; flagged as a founder voice-decision follow-up. F8 (loading reassurance) partly delivered via the F2 status lines; F10 (`private-mentor` inline-styles) left as a documented note (founder-only surface).
+
+**Files touched (additive / cosmetic; backups in `archive/`):**
+- `reference/a18e-cognitive-accessibility-review-2026-06-07.md` — NEW. The A18e review deliverable.
+- `website/src/app/baseline/page.tsx` — F1, F2 (status+alert), F6 (aria-pressed+tick, questions+Q6), F9 (progressbar).
+- `website/src/app/score/page.tsx` — F1, F2 (loading status + role=alert error box), F3 (alert→inline error state), plain loading label. Distress block byte-identical.
+- `website/src/app/dashboard/page.tsx` — F1, F2 (loading status).
+- `website/src/app/scenarios/page.tsx` — F1, F4 (de-jargon).
+- `website/src/app/premeditatio/page.tsx` — F1, F4 (loading text).
+- `website/src/app/oikeiosis/page.tsx` — F1, F4 (loading text).
+- `website/src/app/passion-log/page.tsx` — F1.
+- `website/src/app/score-document/page.tsx` — F1.
+- `website/src/app/score-policy/page.tsx` — F1.
+- `website/src/app/score-social/page.tsx` — F1.
+- `website/src/app/journal/page.tsx` — F1, F3 (alert→inline error state + role=alert box).
+- `website/src/app/mentor-baseline/page.tsx` — F5 (plain error copy), F2 (role=alert on error container). No `text-sage` classes (dark inline-styled page) → no F1 change.
+- `archive/<12 files>.backup-pre-A18e-2026-06-07` — NEW pre-edit backups.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-06-07-A18e-cognitive-accessibility-close.md` — the session close.
+- **`/api/reason`, all `/api/*`, the R20a distress block — UNCHANGED / byte-identical.**
+
+**Risk classification (0d-ii):** **Elevated** — changes to existing user-facing functionality on live pages (the `alert()`→inline-box swaps; the colour-contrast bump). Predominantly additive/cosmetic; no auth, session, encryption, deletion, schema, env-flag, or R20a-perimeter change. AC7 not engaged. **PR6 not engaged** — no distress-classifier / Zone 2-3 / R20a-wrapper surface touched (the score distress block left byte-identical). Critical Change Protocol step 3 (existing sessions) = N/A per the build-arc cache (no current third-party users).
+
+**Rollback path:** All additive/cosmetic and flag-free. Before push, nothing deploys. After push: revert the commit in GitHub Desktop → push; or restore any individual file from its `archive/<file>.backup-pre-A18e-2026-06-07`. The contrast change is a pure colour-class swap; the live-region/aria additions are inert attributes; the error-box swaps fall back to the same failure messages.
+
+**Verification Method Used (0c framework — website-page row):**
+- AI-side (Diagnostic-certain, compile level): full project `node_modules/.bin/tsc --noEmit` → **exit 0, 0 errors**. Post-edit greps confirm: 0 failing base `text-sage-300/400/500` remain across the 11 surfaces (variant-prefixed preserved); `role="status"`/`role="alert"` now present on 7 surfaces (was 0); `aria-pressed` + `role="progressbar"` on baseline; no native `alert()` in score/journal; no jargon leak strings; no developer error strings in mentor-baseline. `tsx` not used (documented sandbox esbuild mismatch).
+- Founder-side (website-page row, 0c): open each URL and confirm content/behaviour (see close).
+
+**Risk Classification Record (0d-ii):** A18e review + 13-file accessibility pass — Elevated (existing user-facing pages; additive/cosmetic). One unit; Elevated.
+
+**Rules served:** A3, R3, R8c, R6d, R19, R19d, 0a, 0c, 0d-ii, 0f, PR1, PR15, PR16, PR17.
+
+**Status:** Adopted. Implementation status: A18e (cognitive-accessibility design pass) → **Wired** (built + full typecheck exit 0) → **Verified** on the founder's URL check (website-page row, 0c). Production **UNCHANGED / byte-identical** until the founder commits + deploys. A18 remaining: **A18c** (framework-dependence detection — Elevated→Critical under PR6, its own session) and **mirror-principle propagation** to the practitioner-facing mentor surfaces (Elevated, small). Deferred A18e follow-ups documented: the two practice-name H1 renames (R8c; founder voice-decision); F10 `private-mentor` design-system alignment. Cross-references: `D-A18A-FIRST-RUN-WELCOME-2026-06-07` (predecessor); `reference/a18e-cognitive-accessibility-review-2026-06-07.md`; `manifest.md` A3/R3/R8c; `adopted/substrate-plugin-staging-plan.md` §A18.

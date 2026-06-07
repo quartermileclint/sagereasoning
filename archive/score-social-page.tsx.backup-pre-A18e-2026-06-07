@@ -178,7 +178,7 @@ export default function ScoreSocialPage() {
                 className="w-full px-4 py-3 border border-sage-300 rounded-lg font-body text-sage-800 focus:outline-none focus:ring-2 focus:ring-sage-400 resize-y"
               />
               <div className="text-right mt-1">
-                <span className="font-body text-xs text-sage-600">{charCount} characters</span>
+                <span className="font-body text-xs text-sage-400">{charCount} characters</span>
               </div>
             </div>
 
@@ -193,7 +193,7 @@ export default function ScoreSocialPage() {
             </button>
 
             {loading && (
-              <p className="font-body text-sage-600 text-sm text-center animate-pulse">
+              <p className="font-body text-sage-500 text-sm text-center animate-pulse">
                 Identifying passions, false judgements, and corrections...
               </p>
             )}
@@ -229,22 +229,22 @@ export default function ScoreSocialPage() {
               >
                 {PROXIMITY_ENGLISH[result.katorthoma_proximity]}
               </span>
-              <p className="font-body text-sage-600 text-sm mt-1">Right Action Proximity</p>
+              <p className="font-body text-sage-500 text-sm mt-1">Right Action Proximity</p>
             </div>
 
             {/* Your draft */}
             <div className="bg-sage-50 rounded-lg p-4">
-              <span className="font-body text-xs text-sage-600 block mb-2">Your draft</span>
+              <span className="font-body text-xs text-sage-400 block mb-2">Your draft</span>
               <p className="font-body text-sage-700 text-sm whitespace-pre-wrap">{text}</p>
             </div>
 
             {/* Poster's Passions */}
             {result.poster_passions.length > 0 && (
               <div className="bg-white border border-sage-200 rounded-lg p-6">
-                <h3 className="font-display text-sm font-medium text-sage-600 uppercase tracking-wider mb-3">
+                <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
                   Your Motivating Passions
                 </h3>
-                <p className="font-body text-xs text-sage-600 mb-3">
+                <p className="font-body text-xs text-sage-500 mb-3">
                   Passions identified in what drove you to write this:
                 </p>
                 <PassionList passions={result.poster_passions} />
@@ -254,10 +254,10 @@ export default function ScoreSocialPage() {
             {/* Reader-Triggered Passions */}
             {result.reader_triggered_passions.length > 0 && (
               <div className="bg-white border border-sage-200 rounded-lg p-6">
-                <h3 className="font-display text-sm font-medium text-sage-600 uppercase tracking-wider mb-3">
+                <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
                   What This Triggers in Readers
                 </h3>
-                <p className="font-body text-xs text-sage-600 mb-3">
+                <p className="font-body text-xs text-sage-500 mb-3">
                   Passions this content is likely to provoke in those who read it:
                 </p>
                 <PassionList passions={result.reader_triggered_passions} />
@@ -267,7 +267,7 @@ export default function ScoreSocialPage() {
             {/* False Judgements */}
             {result.false_judgements.length > 0 && (
               <div className="bg-white border border-sage-200 rounded-lg p-6">
-                <h3 className="font-display text-sm font-medium text-sage-600 uppercase tracking-wider mb-3">
+                <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
                   False Judgements Embedded
                 </h3>
                 <ul className="space-y-2">
@@ -281,10 +281,10 @@ export default function ScoreSocialPage() {
             {/* Corrections */}
             {result.corrections.length > 0 && (
               <div className="bg-sage-50 border border-sage-200 rounded-lg p-6">
-                <h3 className="font-display text-sm font-medium text-sage-600 uppercase tracking-wider mb-3">
+                <h3 className="font-display text-sm font-medium text-sage-400 uppercase tracking-wider mb-3">
                   Correct Judgements
                 </h3>
-                <p className="font-body text-xs text-sage-600 mb-3">
+                <p className="font-body text-xs text-sage-500 mb-3">
                   The Stoic corrections for each false judgement identified:
                 </p>
                 <ul className="space-y-2">
@@ -303,7 +303,7 @@ export default function ScoreSocialPage() {
             )}
 
             {/* Disclaimer (R3) */}
-            <p className="font-body text-xs text-sage-600 text-center italic">
+            <p className="font-body text-xs text-sage-400 text-center italic">
               {DOCUMENT_EVALUATIVE_DISCLAIMER}
             </p>
 
@@ -319,7 +319,7 @@ export default function ScoreSocialPage() {
               >
                 {copied ? '✓ Copied — paste into the mentor conversation' : 'Copy for mentor conversation'}
               </button>
-              <p className="font-body text-xs text-sage-600 text-center max-w-xs">
+              <p className="font-body text-xs text-sage-500 text-center max-w-xs">
                 Copies a readable summary. Paste into the Private Mentor conversation tab to continue discussing this draft.
               </p>
             </div>
@@ -350,14 +350,14 @@ function PassionList({ passions }: { passions: DetectedDocumentPassion[] }) {
               {ROOT_PASSION_ENGLISH[p.root_passion] || p.root_passion}
             </span>
             {p.sub_species && (
-              <span className="font-body text-xs text-sage-600">({p.sub_species})</span>
+              <span className="font-body text-xs text-sage-500">({p.sub_species})</span>
             )}
           </div>
           <p className="font-body text-xs text-sage-600 mb-1">
-            <span className="text-sage-600">Evidence:</span> {p.evidence}
+            <span className="text-sage-400">Evidence:</span> {p.evidence}
           </p>
           <p className="font-body text-xs text-sage-600">
-            <span className="text-sage-600">False judgement:</span> {p.false_judgement}
+            <span className="text-sage-400">False judgement:</span> {p.false_judgement}
           </p>
         </div>
       ))}

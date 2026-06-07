@@ -97,7 +97,6 @@ export default function ScoreActionPage() {
   const [result, setResult] = useState<V3EvaluationResult | null>(null)
   const [distressRedirect, setDistressRedirect] = useState<{ severity: string; redirect_message: string } | null>(null)
   const [saved, setSaved] = useState(false)
-  const [errorMsg, setErrorMsg] = useState('')
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -127,7 +126,6 @@ export default function ScoreActionPage() {
     setResult(null)
     setDistressRedirect(null)
     setSaved(false)
-    setErrorMsg('')
 
     try {
       const response = await authFetch('/api/score', {
@@ -188,7 +186,7 @@ export default function ScoreActionPage() {
         setSaved(true)
       }
     } catch {
-      setErrorMsg('Something went wrong evaluating your action. Please try again in a moment.')
+      alert('Evaluation failed. Please try again.')
     }
 
     setLoading(false)
@@ -234,7 +232,7 @@ export default function ScoreActionPage() {
               className="text-left border-2 border-sage-200 rounded-lg p-6 hover:border-sage-400 transition-colors group"
             >
               <div className="flex items-center gap-3 mb-3">
-                <svg className="w-6 h-6 text-sage-600 group-hover:text-sage-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-sage-500 group-hover:text-sage-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
                 </svg>
                 <span className="font-display text-lg font-medium text-sage-800">Cloud Storage</span>
@@ -242,7 +240,7 @@ export default function ScoreActionPage() {
               <p className="font-body text-sm text-sage-600 mb-3">
                 Your evaluations are saved to your account. Track your philosophical progress over time.
               </p>
-              <ul className="font-body text-xs text-sage-600 space-y-1">
+              <ul className="font-body text-xs text-sage-500 space-y-1">
                 <li>+ Full history on your dashboard</li>
                 <li>+ Track passion reduction over time</li>
                 <li>+ Feeds your progress dimensions</li>
@@ -254,7 +252,7 @@ export default function ScoreActionPage() {
               className="text-left border-2 border-sage-200 rounded-lg p-6 hover:border-sage-400 transition-colors group"
             >
               <div className="flex items-center gap-3 mb-3">
-                <svg className="w-6 h-6 text-sage-600 group-hover:text-sage-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-sage-500 group-hover:text-sage-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
                 <span className="font-display text-lg font-medium text-sage-800">Local Only</span>
@@ -262,7 +260,7 @@ export default function ScoreActionPage() {
               <p className="font-body text-sm text-sage-600 mb-3">
                 Your action descriptions stay on this device only — never stored on our servers.
               </p>
-              <ul className="font-body text-xs text-sage-600 space-y-1">
+              <ul className="font-body text-xs text-sage-500 space-y-1">
                 <li>+ Maximum privacy</li>
                 <li>- Only accessible on this device</li>
                 <li>- Clearing browser data removes entries</li>
@@ -294,7 +292,7 @@ export default function ScoreActionPage() {
 
         {user && storageMode && (
           <div className="flex items-center justify-between pb-2 border-b border-sage-100">
-            <span className="inline-flex items-center gap-1.5 font-body text-xs text-sage-600">
+            <span className="inline-flex items-center gap-1.5 font-body text-xs text-sage-500">
               {storageMode === 'local' ? (
                 <>
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -332,7 +330,7 @@ export default function ScoreActionPage() {
         {/* Optional: Context */}
         <div>
           <label className="block font-display text-sm font-medium text-sage-700 mb-1">
-            Context <span className="text-sage-600 font-normal">(what was the situation?)</span>
+            Context <span className="text-sage-400 font-normal">(what was the situation?)</span>
           </label>
           <textarea
             rows={2}
@@ -346,7 +344,7 @@ export default function ScoreActionPage() {
         {/* V3-specific: Relationships / oikeiosis context */}
         <div>
           <label className="block font-display text-sm font-medium text-sage-700 mb-1">
-            Who is affected? <span className="text-sage-600 font-normal">(your relationships and roles)</span>
+            Who is affected? <span className="text-sage-400 font-normal">(your relationships and roles)</span>
           </label>
           <textarea
             rows={2}
@@ -355,7 +353,7 @@ export default function ScoreActionPage() {
             className="w-full px-4 py-3 border border-sage-300 rounded bg-white font-body text-sage-900 focus:outline-none focus:ring-2 focus:ring-sage-400"
             placeholder="e.g. My colleague (peer), the team (community), the client who was affected..."
           />
-          <p className="font-body text-xs text-sage-600 mt-1">
+          <p className="font-body text-xs text-sage-400 mt-1">
             Circles of concern: self → household → community → humanity → cosmic order
           </p>
         </div>
@@ -363,7 +361,7 @@ export default function ScoreActionPage() {
         {/* V3-specific: Emotional state for passion diagnosis */}
         <div>
           <label className="block font-display text-sm font-medium text-sage-700 mb-1">
-            What were you feeling? <span className="text-sage-600 font-normal">(helps identify passions at work)</span>
+            What were you feeling? <span className="text-sage-400 font-normal">(helps identify passions at work)</span>
           </label>
           <textarea
             rows={2}
@@ -379,27 +377,15 @@ export default function ScoreActionPage() {
           disabled={loading || !action}
           className="w-full py-3 bg-sage-400 text-white font-display text-lg rounded hover:bg-sage-500 transition-colors disabled:opacity-50"
         >
-          {loading ? 'Evaluating your action…' : 'Evaluate This Action'}
+          {loading ? 'Evaluating through 4-stage sequence...' : 'Evaluate This Action'}
         </button>
 
         {!user && (
-          <p className="text-center font-body text-sm text-sage-600">
+          <p className="text-center font-body text-sm text-sage-500">
             <a href="/auth" className="underline text-sage-700">Sign in</a> to save evaluations to your profile.
           </p>
         )}
       </form>
-
-      {/* Loading + error status (announced to assistive technology) */}
-      {loading && (
-        <p role="status" className="text-center font-body text-sm text-sage-600 mb-12">
-          Evaluating your action… this can take a few seconds.
-        </p>
-      )}
-      {errorMsg && (
-        <div role="alert" className="bg-red-50 border border-red-200 text-red-700 rounded p-4 mb-12 font-body text-center">
-          {errorMsg}
-        </div>
-      )}
 
       {/* ─── R20a: Distress Redirect ─── */}
       {distressRedirect && (
@@ -440,7 +426,7 @@ export default function ScoreActionPage() {
 
           {/* Katorthoma Proximity — the primary result */}
           <div className="bg-white/60 border border-sage-200 rounded-lg p-8 text-center">
-            <p className="font-body text-sm text-sage-600 mb-2">Right Action Proximity</p>
+            <p className="font-body text-sm text-sage-500 mb-2">Right Action Proximity</p>
             <div className="inline-flex items-center justify-center w-28 h-28 rounded-full border-4 mb-4" style={{ borderColor: proximityDisplay.color }}>
               <span className="font-display text-4xl" style={{ color: proximityDisplay.color }}>
                 {proximityDisplay.icon}
@@ -462,14 +448,14 @@ export default function ScoreActionPage() {
                       className="w-10 h-2 rounded-full"
                       style={{ backgroundColor: display.color }}
                     />
-                    <span className="font-body text-[10px] text-sage-600">{PROXIMITY_ENGLISH[level.id]}</span>
+                    <span className="font-body text-[10px] text-sage-500">{PROXIMITY_ENGLISH[level.id]}</span>
                   </div>
                 )
               })}
             </div>
 
             {saved && (
-              <p className="mt-4 text-sm text-sage-600 font-body italic">
+              <p className="mt-4 text-sm text-sage-500 font-body italic">
                 Evaluation saved{storageMode === 'local' ? ' to this device' : ' to your profile'}.
               </p>
             )}
@@ -483,21 +469,21 @@ export default function ScoreActionPage() {
             </h3>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <p className="font-display text-xs text-sage-600 mb-2">Within your moral choice</p>
+                <p className="font-display text-xs text-sage-500 mb-2">Within your moral choice</p>
                 <ul className="space-y-1">
                   {result.control_filter.within_prohairesis.map((item, i) => (
                     <li key={i} className="font-body text-sm text-sage-700 flex items-start gap-2">
-                      <span className="text-sage-600 mt-0.5">+</span> {item}
+                      <span className="text-sage-400 mt-0.5">+</span> {item}
                     </li>
                   ))}
                 </ul>
               </div>
               <div>
-                <p className="font-display text-xs text-sage-600 mb-2">Outside your moral choice</p>
+                <p className="font-display text-xs text-sage-500 mb-2">Outside your moral choice</p>
                 <ul className="space-y-1">
                   {result.control_filter.outside_prohairesis.map((item, i) => (
-                    <li key={i} className="font-body text-sm text-sage-600 flex items-start gap-2">
-                      <span className="text-sage-600 mt-0.5">–</span> {item}
+                    <li key={i} className="font-body text-sm text-sage-500 flex items-start gap-2">
+                      <span className="text-sage-300 mt-0.5">–</span> {item}
                     </li>
                   ))}
                 </ul>
@@ -534,7 +520,7 @@ export default function ScoreActionPage() {
             <h3 className="font-display text-base font-medium text-sage-800 mb-3 flex items-center gap-2">
               <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-sage-100 text-sage-600 font-display text-xs">3</span>
               Passions Identified
-              <span className="font-body text-xs text-sage-600 font-normal ml-1">(philosophical self-knowledge)</span>
+              <span className="font-body text-xs text-sage-400 font-normal ml-1">(philosophical self-knowledge)</span>
             </h3>
 
             {result.passion_diagnosis.passions_detected.length === 0 ? (
@@ -544,13 +530,13 @@ export default function ScoreActionPage() {
                 {result.passion_diagnosis.passions_detected.map((passion, i) => (
                   <div key={i} className="flex items-start gap-3 p-3 bg-sage-50/50 rounded">
                     <span className="font-display text-sm font-medium text-sage-700">{passion.name}</span>
-                    <span className="font-body text-xs text-sage-600 mt-0.5">({ROOT_PASSION_ENGLISH[passion.root_passion] || passion.root_passion})</span>
+                    <span className="font-body text-xs text-sage-400 mt-0.5">({ROOT_PASSION_ENGLISH[passion.root_passion] || passion.root_passion})</span>
                   </div>
                 ))}
 
                 {result.passion_diagnosis.false_judgements.length > 0 && (
                   <div className="pt-3 border-t border-sage-100">
-                    <p className="font-display text-xs text-sage-600 mb-2">False judgements identified</p>
+                    <p className="font-display text-xs text-sage-500 mb-2">False judgements identified</p>
                     {result.passion_diagnosis.false_judgements.map((fj, i) => (
                       <p key={i} className="font-body text-sm text-sage-700 mb-1">• {fj}</p>
                     ))}
@@ -593,7 +579,7 @@ export default function ScoreActionPage() {
               <img src="/images/Zeus.PNG" alt="The Sage" className="w-14 h-14 object-contain rounded-full border-2 border-amber-200 bg-amber-50/50 drop-shadow-sm" />
               <div>
                 <p className="font-display text-sm font-medium text-amber-800">Philosophical Reflection</p>
-                <p className="font-body text-xs text-sage-600">Stoic evaluation from the Sage Brain</p>
+                <p className="font-body text-xs text-sage-500">Stoic evaluation from the Sage Brain</p>
               </div>
             </div>
             <p className="font-body text-sage-700 leading-relaxed">{result.philosophical_reflection}</p>
@@ -608,7 +594,7 @@ export default function ScoreActionPage() {
 
           {/* R3: Disclaimer */}
           <div className="pt-4 border-t border-sage-100">
-            <p className="font-body text-xs text-sage-600 italic">
+            <p className="font-body text-xs text-sage-400 italic">
               {EVALUATIVE_DISCLAIMER}
             </p>
           </div>

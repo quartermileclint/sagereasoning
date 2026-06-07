@@ -161,7 +161,7 @@ export default function MentorBaselinePage() {
 
       const data = await res.json()
       if (!res.ok) {
-        setErrorMsg('Something went wrong generating your questions. Please try again in a moment.')
+        setErrorMsg(`Question generation failed: ${data?.error || res.statusText}`)
         setPhase('error')
         return
       }
@@ -173,7 +173,7 @@ export default function MentorBaselinePage() {
         []
 
       if (!Array.isArray(rawQuestions) || rawQuestions.length === 0) {
-        setErrorMsg('We could not load your questions just now. Please try again in a moment.')
+        setErrorMsg('No questions were returned. Please try again, or check the endpoint response shape.')
         setPhase('error')
         return
       }
@@ -199,7 +199,7 @@ export default function MentorBaselinePage() {
       setDraftLoadedAt(freshDraft.generatedAt)
       setPhase('ready')
     } catch (err) {
-      setErrorMsg('We could not reach the server. Please check your connection and try again.')
+      setErrorMsg(`Network error: ${String(err)}`)
       setPhase('error')
     }
   }, [])
@@ -283,7 +283,7 @@ export default function MentorBaselinePage() {
 
       const data = await res.json()
       if (!res.ok) {
-        setErrorMsg('Something went wrong saving your answers. Please try again in a moment.')
+        setErrorMsg(`Submission failed: ${data?.error || res.statusText}`)
         setPhase('error')
         return
       }
@@ -349,7 +349,7 @@ export default function MentorBaselinePage() {
 
       setPhase('complete')
     } catch (err) {
-      setErrorMsg('We could not reach the server. Please check your connection and try again.')
+      setErrorMsg(`Network error: ${String(err)}`)
       setPhase('error')
     }
   }
@@ -395,7 +395,6 @@ export default function MentorBaselinePage() {
       {/* Phase: error */}
       {phase === 'error' && (
         <div
-          role="alert"
           style={{
             padding: 20,
             background: '#3a1a1a',

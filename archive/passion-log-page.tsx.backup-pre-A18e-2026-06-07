@@ -273,7 +273,7 @@ export default function PassionLogPage() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-16">
-        <div className="text-center text-sage-600 font-body">Loading passion log...</div>
+        <div className="text-center text-sage-500 font-body">Loading passion log...</div>
       </div>
     )
   }
@@ -285,7 +285,7 @@ export default function PassionLogPage() {
         <h1 className="font-display text-2xl font-semibold text-sage-900 mb-1">
           Passion Log
         </h1>
-        <p className="font-body text-sage-600">
+        <p className="font-body text-sage-500">
           Track passion events. Build the feedback loop that makes the synkatathesis gap visible.
         </p>
       </div>
@@ -295,13 +295,13 @@ export default function PassionLogPage() {
         <div className="grid grid-cols-4 gap-3 mb-6">
           <div className="bg-white border border-sage-200 rounded-lg p-3 text-center">
             <div className="font-display text-xl font-semibold text-sage-900">{totalEvents}</div>
-            <div className="font-body text-xs text-sage-600">Events</div>
+            <div className="font-body text-xs text-sage-500">Events</div>
           </div>
           <div className="bg-white border border-sage-200 rounded-lg p-3 text-center">
             <div className="font-display text-xl font-semibold text-sage-900">
               {events.filter(e => e.caught_before_assent).length}
             </div>
-            <div className="font-body text-xs text-sage-600">Pre-assent</div>
+            <div className="font-body text-xs text-sage-500">Pre-assent</div>
           </div>
           <div className="bg-white border border-sage-200 rounded-lg p-3 text-center">
             <div className="font-display text-xl font-semibold text-sage-900">
@@ -309,7 +309,7 @@ export default function PassionLogPage() {
                 ? `${accuracy.match_rate_pct}%`
                 : '—'}
             </div>
-            <div className="font-body text-xs text-sage-600">Classifier match</div>
+            <div className="font-body text-xs text-sage-500">Classifier match</div>
           </div>
           <div className="bg-white border border-sage-200 rounded-lg p-3 text-center">
             <div className="font-display text-xl font-semibold text-sage-900">
@@ -317,7 +317,7 @@ export default function PassionLogPage() {
                 ? `${catchRateData[catchRateData.length - 1].pre_assent_catch_rate_pct}%`
                 : '—'}
             </div>
-            <div className="font-body text-xs text-sage-600">Catch rate (latest)</div>
+            <div className="font-body text-xs text-sage-500">Catch rate (latest)</div>
           </div>
         </div>
       )}
@@ -335,7 +335,7 @@ export default function PassionLogPage() {
             className={`flex-1 px-4 py-2 rounded-md font-display text-sm transition-colors ${
               activeView === tab.id
                 ? 'bg-white text-sage-900 shadow-sm'
-                : 'text-sage-600 hover:text-sage-700'
+                : 'text-sage-500 hover:text-sage-700'
             }`}
           >
             {tab.label}
@@ -355,7 +355,7 @@ export default function PassionLogPage() {
               <div className="mb-4">
                 <label className="font-display text-sm font-medium text-sage-600 block mb-2">
                   Passion type
-                  <span className="font-body text-xs text-sage-600 ml-2">Your self-diagnosis</span>
+                  <span className="font-body text-xs text-sage-400 ml-2">Your self-diagnosis</span>
                 </label>
                 <select
                   value={passionType}
@@ -390,7 +390,7 @@ export default function PassionLogPage() {
                   onChange={(e) => setIntensity(parseInt(e.target.value))}
                   className="w-full accent-sage-500"
                 />
-                <div className="flex justify-between font-body text-xs text-sage-600 mt-1">
+                <div className="flex justify-between font-body text-xs text-sage-400 mt-1">
                   <span>Mild</span>
                   <span>Moderate</span>
                   <span>Strong</span>
@@ -411,7 +411,7 @@ export default function PassionLogPage() {
                     className={`flex-1 py-2 px-4 rounded-lg border-2 font-body text-sm transition-colors ${
                       caughtBefore
                         ? 'border-green-500 bg-green-50 text-green-700'
-                        : 'border-sage-200 text-sage-600 hover:border-sage-300'
+                        : 'border-sage-200 text-sage-500 hover:border-sage-300'
                     }`}
                   >
                     Before assent
@@ -422,7 +422,7 @@ export default function PassionLogPage() {
                     className={`flex-1 py-2 px-4 rounded-lg border-2 font-body text-sm transition-colors ${
                       !caughtBefore
                         ? 'border-amber-500 bg-amber-50 text-amber-700'
-                        : 'border-sage-200 text-sage-600 hover:border-sage-300'
+                        : 'border-sage-200 text-sage-500 hover:border-sage-300'
                     }`}
                   >
                     After assent
@@ -434,7 +434,7 @@ export default function PassionLogPage() {
               <div className="mb-4">
                 <label className="font-display text-sm font-medium text-sage-600 block mb-1">
                   False judgement
-                  <span className="font-body text-xs text-sage-600 ml-2">What drove it?</span>
+                  <span className="font-body text-xs text-sage-400 ml-2">What drove it?</span>
                 </label>
                 <textarea
                   value={falseJudgement}
@@ -450,7 +450,7 @@ export default function PassionLogPage() {
               <div className="mb-6">
                 <label className="font-display text-sm font-medium text-sage-600 block mb-1">
                   Description
-                  <span className="font-body text-xs text-sage-600 ml-2">Optional — enables LLM classification</span>
+                  <span className="font-body text-xs text-sage-400 ml-2">Optional — enables LLM classification</span>
                 </label>
                 <textarea
                   value={description}
@@ -489,13 +489,13 @@ export default function PassionLogPage() {
                   <h3 className="font-display text-sm font-medium text-sage-700 mb-3">Engine Classification</h3>
                   <div className="grid grid-cols-2 gap-4 mb-3">
                     <div>
-                      <div className="font-body text-xs text-sage-600 mb-1">Your diagnosis</div>
+                      <div className="font-body text-xs text-sage-400 mb-1">Your diagnosis</div>
                       <div className="font-display text-sm font-medium" style={{ color: getFamilyColor(passionType) }}>
                         {PASSION_LABELS[passionType] || passionType}
                       </div>
                     </div>
                     <div>
-                      <div className="font-body text-xs text-sage-600 mb-1">Engine classification</div>
+                      <div className="font-body text-xs text-sage-400 mb-1">Engine classification</div>
                       <div className="font-display text-sm font-medium" style={{ color: getFamilyColor(classificationResult.classified_type) }}>
                         {PASSION_LABELS[classificationResult.classified_type] || classificationResult.classified_type}
                       </div>
@@ -507,23 +507,23 @@ export default function PassionLogPage() {
                       : 'bg-amber-50 text-amber-700'
                   }`}>
                     {classificationResult.match ? 'Match' : 'Mismatch — diagnostic data'}
-                    <span className="text-sage-600 ml-1">
+                    <span className="text-sage-400 ml-1">
                       ({Math.round(classificationResult.confidence * 100)}% confidence)
                     </span>
                   </div>
-                  <p className="font-body text-xs text-sage-600 mt-2">{classificationResult.reasoning}</p>
+                  <p className="font-body text-xs text-sage-500 mt-2">{classificationResult.reasoning}</p>
                 </div>
               )}
 
               {classifying && (
                 <div className="bg-white border border-sage-200 rounded-lg p-4 mb-4 text-center">
-                  <span className="font-body text-sm text-sage-600">Classifying passion...</span>
+                  <span className="font-body text-sm text-sage-500">Classifying passion...</span>
                 </div>
               )}
 
               <button
                 onClick={resetForm}
-                className="w-full border-2 border-dashed border-sage-200 rounded-lg p-4 text-center font-body text-sm text-sage-600 hover:border-sage-400 hover:text-sage-600 transition-colors"
+                className="w-full border-2 border-dashed border-sage-200 rounded-lg p-4 text-center font-body text-sm text-sage-400 hover:border-sage-400 hover:text-sage-600 transition-colors"
               >
                 + Log new event
               </button>
@@ -534,7 +534,7 @@ export default function PassionLogPage() {
           <div className="space-y-3">
             {events.length === 0 ? (
               <div className="bg-sage-50 border border-sage-200 rounded-lg p-8 text-center">
-                <p className="font-body text-sage-600">
+                <p className="font-body text-sage-500">
                   No passion events logged yet. Start tracking to build the feedback loop.
                 </p>
               </div>
@@ -569,7 +569,7 @@ export default function PassionLogPage() {
                           />
                         ))}
                       </div>
-                      <span className="font-body text-xs text-sage-600">
+                      <span className="font-body text-xs text-sage-400">
                         {formatDate(event.created_at)}
                       </span>
                     </div>
@@ -579,7 +579,7 @@ export default function PassionLogPage() {
                   {/* Classification comparison */}
                   {event.llm_classified_type && (
                     <div className="mt-2 pt-2 border-t border-sage-100 flex items-center gap-2">
-                      <span className="font-body text-xs text-sage-600">Engine:</span>
+                      <span className="font-body text-xs text-sage-400">Engine:</span>
                       <span
                         className="font-body text-xs font-medium"
                         style={{ color: getFamilyColor(event.llm_classified_type) }}
@@ -610,7 +610,7 @@ export default function PassionLogPage() {
           </h2>
           {trends.length === 0 ? (
             <div className="bg-sage-50 border border-sage-200 rounded-lg p-8 text-center">
-              <p className="font-body text-sage-600">
+              <p className="font-body text-sage-500">
                 Not enough data yet. Log passion events to see intensity trends over time.
               </p>
             </div>
@@ -632,7 +632,7 @@ export default function PassionLogPage() {
                     >
                       {PASSION_LABELS[type] || type}
                     </span>
-                    <span className="font-body text-xs text-sage-600">
+                    <span className="font-body text-xs text-sage-400">
                       ({data.reduce((sum, d) => sum + d.event_count, 0)} events)
                     </span>
                   </div>
@@ -649,7 +649,7 @@ export default function PassionLogPage() {
                             minHeight: '4px',
                           }}
                         />
-                        <span className="font-body text-[10px] text-sage-600 mt-1">
+                        <span className="font-body text-[10px] text-sage-400 mt-1">
                           {new Date(week.week_start).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                         </span>
                       </div>
@@ -669,14 +669,14 @@ export default function PassionLogPage() {
             <h2 className="font-display text-lg font-medium text-sage-800">
               Pre-Assent Catch Rate
             </h2>
-            <p className="font-body text-xs text-sage-600 mt-1">
+            <p className="font-body text-xs text-sage-500 mt-1">
               Operational signal: the real proof Gap 2 is working.
               Baseline ~20% — target trajectory: at or above 35% by week 12.
             </p>
           </div>
           {catchRateData.length === 0 ? (
             <div className="bg-sage-50 border border-sage-200 rounded-lg p-8 text-center">
-              <p className="font-body text-sage-600">
+              <p className="font-body text-sage-500">
                 Not enough data yet. Log passion events to see catch rate trends.
               </p>
             </div>
@@ -687,10 +687,10 @@ export default function PassionLogPage() {
                 {catchRateData.map((week) => (
                   <div key={week.week_start}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-body text-xs text-sage-600">
+                      <span className="font-body text-xs text-sage-500">
                         Week of {new Date(week.week_start).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                       </span>
-                      <span className="font-body text-xs text-sage-600">
+                      <span className="font-body text-xs text-sage-500">
                         {week.pre_assent_events}/{week.total_events} events
                       </span>
                     </div>
@@ -727,11 +727,11 @@ export default function PassionLogPage() {
               <div className="flex items-center gap-4 mt-4 pt-3 border-t border-sage-100">
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-px bg-sage-300" />
-                  <span className="font-body text-[10px] text-sage-600">Baseline (20%)</span>
+                  <span className="font-body text-[10px] text-sage-400">Baseline (20%)</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-px bg-sage-400" />
-                  <span className="font-body text-[10px] text-sage-600">Target (35%)</span>
+                  <span className="font-body text-[10px] text-sage-400">Target (35%)</span>
                 </div>
               </div>
             </div>

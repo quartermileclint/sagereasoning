@@ -158,7 +158,7 @@ export default function PremeditatioPage() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-16">
-        <div role="status" className="text-center text-sage-600 font-body">Loading…</div>
+        <div className="text-center text-sage-500 font-body">Loading premeditatio...</div>
       </div>
     )
   }
@@ -171,7 +171,7 @@ export default function PremeditatioPage() {
           <h1 className="font-display text-2xl font-semibold text-sage-900 mb-1">
             Premeditatio Malorum
           </h1>
-          <p className="font-body text-sage-600">
+          <p className="font-body text-sage-500">
             Weekly practice: anticipate what&apos;s ahead, identify the false impression,
             hold the correct judgement in advance.
           </p>
@@ -181,7 +181,7 @@ export default function PremeditatioPage() {
             setShowEngagement(!showEngagement)
             if (!showEngagement && engagement.length === 0) await fetchEngagement()
           }}
-          className="font-body text-sm text-sage-600 hover:text-sage-700 transition-colors"
+          className="font-body text-sm text-sage-500 hover:text-sage-700 transition-colors"
         >
           {showEngagement ? 'Hide stats' : 'Engagement'}
         </button>
@@ -214,7 +214,7 @@ export default function PremeditatioPage() {
         <div className="bg-white border border-sage-200 rounded-lg p-5 mb-6">
           <h3 className="font-display text-sm font-medium text-sage-700 mb-3">Monthly Engagement</h3>
           {engagement.length === 0 ? (
-            <p className="font-body text-sm text-sage-600">No data yet.</p>
+            <p className="font-body text-sm text-sage-500">No data yet.</p>
           ) : (
             <div className="space-y-2">
               {engagement.map((month) => (
@@ -222,7 +222,7 @@ export default function PremeditatioPage() {
                   <span className="font-body text-sm text-sage-600">
                     {new Date(month.month_start).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
                   </span>
-                  <div className="flex items-center gap-4 font-body text-xs text-sage-600">
+                  <div className="flex items-center gap-4 font-body text-xs text-sage-500">
                     <span>{month.responses_count} responses</span>
                     <span>{month.quality_responses} quality</span>
                     <span className={month.behaviours_changed > 0 ? 'text-green-600 font-medium' : ''}>
@@ -260,7 +260,7 @@ export default function PremeditatioPage() {
           <div className="mb-4">
             <label className="font-display text-sm font-medium text-sage-600 block mb-1">
               Anticipated event
-              <span className="font-body text-xs text-sage-600 ml-2">
+              <span className="font-body text-xs text-sage-400 ml-2">
                 A specific upcoming situation — not a general aspiration
               </span>
             </label>
@@ -278,7 +278,7 @@ export default function PremeditatioPage() {
           <div className="mb-4">
             <label className="font-display text-sm font-medium text-sage-600 block mb-1">
               False impression
-              <span className="font-body text-xs text-sage-600 ml-2">
+              <span className="font-body text-xs text-sage-400 ml-2">
                 The false impression most likely to arise
               </span>
             </label>
@@ -296,7 +296,7 @@ export default function PremeditatioPage() {
           <div className="mb-4">
             <label className="font-display text-sm font-medium text-sage-600 block mb-1">
               Correct judgement
-              <span className="font-body text-xs text-sage-600 ml-2">
+              <span className="font-body text-xs text-sage-400 ml-2">
                 The judgement to hold in advance
               </span>
             </label>
@@ -314,7 +314,7 @@ export default function PremeditatioPage() {
           <div className="mb-6">
             <label className="font-display text-sm font-medium text-sage-600 block mb-1">
               Avoidance behaviour tag
-              <span className="font-body text-xs text-sage-600 ml-2">
+              <span className="font-body text-xs text-sage-400 ml-2">
                 Optional — tag a behaviour you&apos;ve been avoiding
               </span>
             </label>
@@ -331,7 +331,7 @@ export default function PremeditatioPage() {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="font-body text-sm text-sage-600 hover:text-sage-600"
+              className="font-body text-sm text-sage-400 hover:text-sage-600"
             >
               Cancel
             </button>
@@ -347,7 +347,7 @@ export default function PremeditatioPage() {
       ) : !isPromptDay && (
         <button
           onClick={() => setShowForm(true)}
-          className="w-full border-2 border-dashed border-sage-200 rounded-lg p-4 text-center font-body text-sm text-sage-600 hover:border-sage-400 hover:text-sage-600 transition-colors mb-6"
+          className="w-full border-2 border-dashed border-sage-200 rounded-lg p-4 text-center font-body text-sm text-sage-400 hover:border-sage-400 hover:text-sage-600 transition-colors mb-6"
         >
           + New premeditatio (off-schedule)
         </button>
@@ -358,13 +358,13 @@ export default function PremeditatioPage() {
         <h2 className="font-display text-lg font-medium text-sage-800">
           Past Entries
           {entries.length > 0 && (
-            <span className="font-body text-sm text-sage-600 ml-2">({entries.length})</span>
+            <span className="font-body text-sm text-sage-400 ml-2">({entries.length})</span>
           )}
         </h2>
 
         {entries.length === 0 ? (
           <div className="bg-sage-50 border border-sage-200 rounded-lg p-8 text-center">
-            <p className="font-body text-sage-600">
+            <p className="font-body text-sage-500">
               No premeditatio entries yet. The weekly prompt arrives on Monday mornings.
             </p>
           </div>
@@ -372,7 +372,7 @@ export default function PremeditatioPage() {
           entries.map((entry) => (
             <div key={entry.id} className="bg-white border border-sage-200 rounded-lg overflow-hidden">
               <div className="px-5 py-3 border-b border-sage-100 flex items-center justify-between">
-                <span className="font-body text-xs text-sage-600">
+                <span className="font-body text-xs text-sage-400">
                   {formatDate(entry.created_at)}
                 </span>
                 <div className="flex items-center gap-2">
@@ -393,7 +393,7 @@ export default function PremeditatioPage() {
                   ) : entry.avoidance_behaviour_tag ? (
                     <button
                       onClick={() => markBehaviourChanged(entry.id)}
-                      className="text-xs font-body px-2 py-0.5 rounded-full border border-sage-200 text-sage-600 hover:border-green-300 hover:text-green-600 transition-colors"
+                      className="text-xs font-body px-2 py-0.5 rounded-full border border-sage-200 text-sage-500 hover:border-green-300 hover:text-green-600 transition-colors"
                     >
                       Mark changed
                     </button>
@@ -403,7 +403,7 @@ export default function PremeditatioPage() {
 
               <div className="divide-y divide-sage-50">
                 <div className="px-5 py-3">
-                  <div className="font-display text-xs font-medium text-sage-600 uppercase tracking-wider mb-1">
+                  <div className="font-display text-xs font-medium text-sage-400 uppercase tracking-wider mb-1">
                     Anticipated Event
                   </div>
                   <p className="font-body text-sm text-sage-800">{entry.anticipated_event}</p>
@@ -415,7 +415,7 @@ export default function PremeditatioPage() {
                   <p className="font-body text-sm text-sage-800">{entry.false_impression}</p>
                 </div>
                 <div className="px-5 py-3">
-                  <div className="font-display text-xs font-medium text-sage-600 uppercase tracking-wider mb-1">
+                  <div className="font-display text-xs font-medium text-sage-400 uppercase tracking-wider mb-1">
                     Correct Judgement
                   </div>
                   <p className="font-body text-sm text-sage-800">{entry.correct_judgement}</p>

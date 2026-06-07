@@ -171,7 +171,7 @@ export default function OikeiosisPage() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-16">
-        <div role="status" className="text-center text-sage-600 font-body">Loading…</div>
+        <div className="text-center text-sage-500 font-body">Loading oikeiosis tracker...</div>
       </div>
     )
   }
@@ -184,7 +184,7 @@ export default function OikeiosisPage() {
           <h1 className="font-display text-2xl font-semibold text-sage-900 mb-1">
             Oikeiosis Extension
           </h1>
-          <p className="font-body text-sage-600">
+          <p className="font-body text-sage-500">
             Quarterly reflection: expanding the circle of concern from self outward.
           </p>
         </div>
@@ -193,7 +193,7 @@ export default function OikeiosisPage() {
             setShowProgression(!showProgression)
             if (!showProgression && progression.length === 0) await fetchProgression()
           }}
-          className="font-body text-sm text-sage-600 hover:text-sage-700 transition-colors"
+          className="font-body text-sm text-sage-500 hover:text-sage-700 transition-colors"
         >
           {showProgression ? 'Hide progression' : 'Stage progression'}
         </button>
@@ -219,7 +219,7 @@ export default function OikeiosisPage() {
                 >
                   {reflections.filter(r => r.stage === s.id).length || ''}
                 </div>
-                <span className="font-body text-[10px] text-sage-600 mt-1">{s.label}</span>
+                <span className="font-body text-[10px] text-sage-500 mt-1">{s.label}</span>
               </div>
               {i < STAGES.length - 1 && (
                 <div className="w-4 h-px bg-sage-200 mx-1" />
@@ -256,7 +256,7 @@ export default function OikeiosisPage() {
         <div className="bg-white border border-sage-200 rounded-lg p-5 mb-6">
           <h3 className="font-display text-sm font-medium text-sage-700 mb-3">Stage Progression</h3>
           {progression.length === 0 ? (
-            <p className="font-body text-sm text-sage-600">No data yet — complete quarterly reflections to see progression.</p>
+            <p className="font-body text-sm text-sage-500">No data yet — complete quarterly reflections to see progression.</p>
           ) : (
             <div className="space-y-3">
               {/* Group by year/quarter */}
@@ -280,7 +280,7 @@ export default function OikeiosisPage() {
                         <div className="font-display text-sm font-medium" style={{ color: STAGE_COLORS[d.stage] }}>
                           {d.action_count}
                         </div>
-                        <div className="font-body text-[10px] text-sage-600">{d.stage}</div>
+                        <div className="font-body text-[10px] text-sage-500">{d.stage}</div>
                         {d.flagged_count > 0 && (
                           <div className="font-body text-[9px] text-amber-600 mt-0.5">
                             {d.flagged_count} flagged
@@ -362,7 +362,7 @@ export default function OikeiosisPage() {
                   style={stage === s.id ? { borderColor: STAGE_COLORS[s.id], color: STAGE_COLORS[s.id] } : undefined}
                 >
                   <div className="font-display text-xs font-medium">{s.label}</div>
-                  <div className="font-body text-[9px] text-sage-600 mt-0.5 leading-tight">{s.description}</div>
+                  <div className="font-body text-[9px] text-sage-400 mt-0.5 leading-tight">{s.description}</div>
                 </button>
               ))}
             </div>
@@ -372,7 +372,7 @@ export default function OikeiosisPage() {
           <div className="mb-4">
             <label className="font-display text-sm font-medium text-sage-600 block mb-1">
               Action taken
-              <span className="font-body text-xs text-sage-600 ml-2">
+              <span className="font-body text-xs text-sage-400 ml-2">
                 Specific actions, not intentions
               </span>
             </label>
@@ -390,7 +390,7 @@ export default function OikeiosisPage() {
           <div className="mb-6">
             <label className="font-display text-sm font-medium text-sage-600 block mb-2">
               Was there reputational return?
-              <span className="font-body text-xs text-sage-600 ml-2">
+              <span className="font-body text-xs text-sage-400 ml-2">
                 Honest assessment — this distinguishes genuine extension from philodoxia
               </span>
             </label>
@@ -411,7 +411,7 @@ export default function OikeiosisPage() {
                         : opt.value === 'no'
                         ? 'border-green-500 bg-green-50 text-green-700'
                         : 'border-sage-400 bg-sage-50 text-sage-700'
-                      : 'border-sage-200 text-sage-600 hover:border-sage-300'
+                      : 'border-sage-200 text-sage-500 hover:border-sage-300'
                   }`}
                 >
                   <div className="font-display text-sm font-medium">{opt.label}</div>
@@ -425,7 +425,7 @@ export default function OikeiosisPage() {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="font-body text-sm text-sage-600 hover:text-sage-600"
+              className="font-body text-sm text-sage-400 hover:text-sage-600"
             >
               Cancel
             </button>
@@ -441,7 +441,7 @@ export default function OikeiosisPage() {
       ) : !isPromptDay && (
         <button
           onClick={() => setShowForm(true)}
-          className="w-full border-2 border-dashed border-sage-200 rounded-lg p-4 text-center font-body text-sm text-sage-600 hover:border-sage-400 hover:text-sage-600 transition-colors mb-6"
+          className="w-full border-2 border-dashed border-sage-200 rounded-lg p-4 text-center font-body text-sm text-sage-400 hover:border-sage-400 hover:text-sage-600 transition-colors mb-6"
         >
           + New quarterly reflection
         </button>
@@ -452,13 +452,13 @@ export default function OikeiosisPage() {
         <h2 className="font-display text-lg font-medium text-sage-800">
           Past Reflections
           {reflections.length > 0 && (
-            <span className="font-body text-sm text-sage-600 ml-2">({reflections.length})</span>
+            <span className="font-body text-sm text-sage-400 ml-2">({reflections.length})</span>
           )}
         </h2>
 
         {reflections.length === 0 ? (
           <div className="bg-sage-50 border border-sage-200 rounded-lg p-8 text-center">
-            <p className="font-body text-sage-600">
+            <p className="font-body text-sage-500">
               No reflections yet. The quarterly prompt arrives on the first Sunday of each quarter.
             </p>
           </div>
@@ -473,7 +473,7 @@ export default function OikeiosisPage() {
                   >
                     {STAGES.find(s => s.id === r.stage)?.label || r.stage}
                   </span>
-                  <span className="font-body text-xs text-sage-600">
+                  <span className="font-body text-xs text-sage-400">
                     Q{r.quarter} {r.year}
                   </span>
                 </div>
