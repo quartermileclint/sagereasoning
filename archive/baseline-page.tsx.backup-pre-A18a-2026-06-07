@@ -344,13 +344,13 @@ export default function BaselineAssessmentPage() {
         {/* CTA */}
         <div className="text-center space-y-4">
           <a
-            href="/welcome"
+            href="/dashboard"
             className="inline-block px-8 py-3 bg-sage-400 text-white font-display text-lg rounded hover:bg-sage-500 transition-colors"
           >
-            Continue
+            Go to Dashboard
           </a>
           <p className="font-body text-sm text-sage-500">
-            Next: a short orientation, then your dashboard.
+            Score your first action to start building on your baseline.
           </p>
         </div>
       </div>

@@ -9807,3 +9807,40 @@ Expected: typecheck clean (already run this session, exit 0); both pages render 
 **Rules served:** R19a, R19b, R19c, R19d, R20b, R20d, 0a, 0c, 0d-ii, 0f, PR1, PR15, PR17.
 
 **Status:** Adopted. Implementation status: `/limitations` R19c+R19d additions + `/accessibility` (A18d) → **Wired** (built + full typecheck clean) → **Verified** on the founder's URL check (website-page row, 0c). Mentor mirror-principle (single-surface, `/api/mentor/private/reflect`) → **Wired** → **Verified** on the founder's reflection-behaviour check. Production **UNCHANGED / byte-identical** until the founder commits + deploys. A18 remaining: A18a (first-run experience), A18c (framework-dependence detection — Elevated→Critical under PR6, its own session), A18e (cognitive-accessibility design pass), and propagation of the mirror principle to the practitioner-facing mentor surfaces. Cross-references: `D-A15C-RECTIFICATION-ENDPOINT-BUILT-2026-06-07` (predecessor); `manifest.md` R19c/R19d/R20d; `adopted/substrate-plugin-staging-plan.md` §A18.
+
+---
+
+## 2026-06-07 — D-A18A-FIRST-RUN-WELCOME-2026-06-07
+
+**Decision:** Built the A18a first-run experience for human practitioners (founder-elected at open): a new static `/welcome` ("Getting Started") orientation page, shown once right after the baseline result and reachable any time from the nav account menu and the footer. Founder elected page-shape = **dedicated `/welcome` + revisit links** (over a dashboard empty-state rework or both); audience = **human practitioners only** (matching A18a's U1 scope; developers keep `/api-docs`).
+
+**Reasoning:** Grounding read (guarding prescribe-before-grounding) found the post-signup flow drops a new user from the baseline result straight onto a near-empty data dashboard whose only orientation is a single "evaluate your first action" prompt; the breadth of the practice (journal, scenarios, reflections, private mentor, premeditatio) is discoverable only via the dense nav/footer. `/welcome` fills that orientation gap — what the tool is for, a few first steps, how to read results, honest expectations. R19c/R19d honest-positioning carried into the page (mirror-not-verdict framing; AI-generated; not a crisis service; links to `/limitations`, `/transparency`, `/accessibility`). PR15: the 17 installed Anthropic skills (`frontend-design`) + the agentic-commerce findings tracker were consulted — no F-finding targets A18a (F2 → Stage 4 marketplace listing); no Anthropic-canonical primitive delivers user-facing onboarding-page content; bespoke justified, reusing the existing `/accessibility` + `/limitations` Next.js/Tailwind page conventions rather than introducing anything new. `/api/reason` untouched / byte-identical.
+
+**Files touched:**
+- `website/src/app/welcome/page.tsx` — NEW. Static orientation page (purpose framing, four first-step cards, how-to-read-results, more-to-explore, honest expectations, CTA).
+- `website/src/app/baseline/page.tsx` — result-screen CTA now hands off to `/welcome` (was `/dashboard`); button label "Continue", subtext "Next: a short orientation, then your dashboard."
+- `website/src/components/NavBar.tsx` — added "Getting Started" → `/welcome` to the signed-in account dropdown.
+- `website/src/app/layout.tsx` — footer Philosophy column: added `/welcome` "Getting Started" link.
+- `archive/baseline-page.tsx.backup-pre-A18a-2026-06-07`, `archive/layout.tsx.backup-pre-A18a-2026-06-07`, `archive/NavBar.tsx.backup-pre-A18a-2026-06-07` — NEW pre-edit backups.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-06-07-A18a-first-run-close.md` — session close.
+
+**Risk classification (0d-ii):** **Mixed.** New `/welcome` page + footer link + nav-dropdown link = Standard (additive). The baseline result CTA redirect change = **Elevated** (change to existing user-facing navigation; additive intent, one-line target swap). AC7 not engaged. **PR6 not engaged** — `/baseline` is not the distress classifier / Zone 2-3 / R20a wrapper surface. Critical Change Protocol step 3 (existing sessions) = N/A (no current third-party users).
+
+**Rollback path:** Nothing deploys before push. `/welcome`: delete the new page + its two links. Baseline / nav / footer: revert the commit, or restore each file from its `archive/*.backup-pre-A18a-2026-06-07`. All three edited files were backed up before editing.
+
+**Verification step (founder-performable):**
+```
+# AI-side this session (Diagnostic-certain at compile level):
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+node_modules/.bin/tsc --noEmit        # → exit 0, 0 errors (full project typecheck)
+# Founder-side (0c website-page row): open each URL and check content
+#   /welcome    → orientation page renders (first-step cards, how-to-read-results, honest-expectations, CTA)
+#   complete (or open) the baseline → its "Continue" button lands on /welcome, not the dashboard
+#   account menu (signed in) + any page footer → "Getting Started" link present and opens /welcome
+```
+Expected: typecheck clean (already run this session, exit 0); `/welcome` renders; baseline hand-off + both revisit links resolve.
+
+**Rules served:** R3, R19c, R19d, A1, 0a, 0c, 0d-ii, 0f, PR1, PR15, PR17.
+
+**Status:** Adopted. Implementation status: `/welcome` (A18a) → **Wired** (built + full typecheck exit 0) → **Verified** on the founder's URL check (website-page row, 0c). Production **UNCHANGED / byte-identical** until the founder commits + deploys. A18 remaining: A18c (framework-dependence detection — Elevated→Critical under PR6, its own session), A18e (cognitive-accessibility design pass), and propagation of the mirror principle to the practitioner-facing mentor surfaces. Cross-references: `D-A18B-A18D-LIMITATIONS-MIRROR-ACCESSIBILITY-2026-06-07` (predecessor); `manifest.md` R19c/R19d; `adopted/substrate-plugin-staging-plan.md` §A18.

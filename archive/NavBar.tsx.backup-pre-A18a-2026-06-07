@@ -117,13 +117,6 @@ export default function NavBar() {
                       <p className="font-body text-xs text-sage-500 truncate">{user.email}</p>
                     </div>
                     <a
-                      href="/welcome"
-                      className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50 transition-colors"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      Getting Started
-                    </a>
-                    <a
                       href="/dashboard"
                       className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50 transition-colors"
                       onClick={() => setMenuOpen(false)}

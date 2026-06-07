@@ -54,7 +54,6 @@ export default function RootLayout({
                 </div>
                 <div>
                   <p className="font-display font-medium mb-2">Philosophy</p>
-                  <a href="/welcome" className="block hover:text-sage-900">Getting Started</a>
                   <a href="/#virtues" className="block hover:text-sage-900">The Four Virtues</a>
                   <a href="/#how-it-works" className="block hover:text-sage-900">How It Works</a>
                   <a href="/methodology" className="block hover:text-sage-900">Methodology</a>
