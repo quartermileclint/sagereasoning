@@ -75,27 +75,6 @@ export default function LimitationsPage() {
 
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">
-            Stoicism emphasises the individual, not the system
-          </h2>
-          <p>
-            Stoicism historically emphasised individual virtue over systemic critique.
-            It has comparatively little to say about collective action, structural
-            injustice, or the value of dissent &mdash; areas where other traditions
-            (political philosophy, liberation ethics, critical theory, and others) offer
-            far more. SageReasoning will help you examine your own judgements and
-            responses; it is not a tool for analysing unjust systems, organising
-            collective change, or deciding when principled dissent is called for. Treat
-            its relative silence on these questions as a real limit of the framework,
-            not as a sign that they do not matter.
-          </p>
-          <p className="mt-3 text-sage-600 text-sm italic">
-            Rule R19c: The framework&rsquo;s known limitations must be documented and
-            accessible.
-          </p>
-        </div>
-
-        <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">
             We cannot assess your full situation
           </h2>
           <p>
@@ -124,27 +103,6 @@ export default function LimitationsPage() {
           <p className="mt-3 text-sage-600 text-sm italic">
             Rule R20d: We specifically discourage applying the passion taxonomy to other
             people&rsquo;s behaviour. It is designed for self-examination only.
-          </p>
-        </div>
-
-        <div>
-          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">
-            A mirror, not a lens
-          </h2>
-          <p>
-            SageReasoning is a mirror, not a lens: it is built for examining your own
-            reasoning, not for diagnosing, judging, or scoring other people. Applying the
-            framework to evaluate someone else&rsquo;s character, passions, or reasoning
-            &mdash; especially without their knowledge and consent &mdash; is a
-            misapplication, however internally consistent the analysis may seem. Using
-            Stoic or philosophical language to invalidate another person&rsquo;s feelings
-            or reasoning is never a legitimate use of this tool. The only reasoning you
-            can rightly assess here is your own.
-          </p>
-          <p className="mt-3 text-sage-600 text-sm italic">
-            Rule R19d: The mirror principle &mdash; the framework is for examining your
-            own reasoning, and the mentor and all tools actively discourage applying it
-            to other people without their knowledge and consent.
           </p>
         </div>
 

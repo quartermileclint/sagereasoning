@@ -63,6 +63,8 @@ export default function RootLayout({
                   <a href="/terms" className="block hover:text-sage-900">Terms of Service</a>
                   <a href="/privacy" className="block hover:text-sage-900">Privacy Policy</a>
                   <a href="/transparency" className="block hover:text-sage-900">AI Transparency</a>
+                  <a href="/limitations" className="block hover:text-sage-900">Limitations</a>
+                  <a href="/accessibility" className="block hover:text-sage-900">Accessibility</a>
                 </div>
               </div>
             </div>

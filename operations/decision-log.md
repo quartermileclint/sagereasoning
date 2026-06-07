@@ -9768,3 +9768,42 @@ Expected: both scripts now report `profile section populated: YES ✓ (rows: 1)`
 **Rules served:** R17, R17g, R17i, R18, R19, 0a, 0c, 0d-ii, 0f, KG1, PR2, PR13.
 
 **Status:** Adopted. Implementation status: `/api/user/export` + `/api/user/access` profile section → **Verified-on-TEST** (founder ran `export-test.py` + `access-test.py` 2026-06-07; both report `profile section populated: YES ✓ (rows: 1)`; access-test response-shape + rate-limit 429 also green). Production UNCHANGED / byte-identical until the founder deploys. Cross-references: `D-A15C-RECTIFICATION-ENDPOINT-BUILT-2026-06-07` (surfaced during its TEST run); `D-A15B-SAR-ACCESS-ENDPOINT-BUILT-2026-06-07` (the helper); `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29` (the export build); `manifest.md` R17g/R17i.
+
+---
+
+## 2026-06-07 — D-A18B-A18D-LIMITATIONS-MIRROR-ACCESSIBILITY-2026-06-07
+
+**Decision:** Built the A18b + A18d Standard slices of the A18 onboarding/honest-positioning pass (founder-elected at open). Four changes: (1) filled two gaps on the **pre-existing** `/limitations` page — added the R19c structural-critique limitation (Stoicism emphasises individual virtue over collective action / structural injustice / dissent) and an explicit R19d "A mirror, not a lens" section generalising the prior narrow R20d passion-taxonomy note to the whole framework; (2) added the R19d mirror-principle as **additive** text to the single canonical mentor reflection prompt (`REFLECTION_PROMPT` in `/api/mentor/private/reflect`) as a single-surface proof (PR1); (3) created the new `/accessibility` statement page (A18d) with honest WCAG 2.1 AA-target positioning (no compliance over-claim); (4) linked both `/limitations` and `/accessibility` from the site footer (neither was discoverable before this session).
+
+**Reasoning:** Implements R19c (limitations documented + accessible), R19d (mirror principle on the page **and** in the mentor), and A18d (accessibility statement). The `/limitations` page already existed (created 2026-05-27); grounded in its actual content before editing and filled only the two genuine gaps — additive, not a rewrite (guards the "prescribe-before-grounding" failure mode). Founder elected **single-surface-now** for the mentor edit (over defer-all / multi-surface). The reflect prompt is `FOUNDER_USER_ID`-gated (founder-only) but is the richest "reflection companion" mentor prompt and the one in live use; the mirror text is additive (no JSON-schema or 4-stage-logic change), so mentor behaviour is byte-identical for ordinary self-reflection and only redirects when a reflection strays into judging another person. Propagation to the practitioner-facing mentor surfaces (mentor-baseline et al.) is the deferred follow-up. PR15: the 17 installed Anthropic skills + the agentic-commerce findings tracker (F1–F4) were consulted — no Anthropic-canonical primitive delivers static honest-positioning page content or Stoic mirror-principle prompt guidance; bespoke is justified and reuses the existing Next.js/Tailwind page conventions (transparency/terms templates) rather than introducing anything new. `/api/reason` untouched / byte-identical.
+
+**Files touched:**
+- `website/src/app/limitations/page.tsx` — +2 additive sections (R19c structural-critique; R19d "A mirror, not a lens").
+- `website/src/app/api/mentor/private/reflect/route.ts` — +1 additive `MIRROR PRINCIPLE (R19d)` paragraph in `REFLECTION_PROMPT` (output schema + 4-stage logic unchanged).
+- `website/src/app/accessibility/page.tsx` — NEW. A18d accessibility statement.
+- `website/src/app/layout.tsx` — footer Legal column: added `/limitations` + `/accessibility` links.
+- `archive/limitations-page.tsx.backup-pre-A18b-2026-06-07` — NEW. Pre-edit backup.
+- `archive/reflect-route.ts.backup-pre-A18b-2026-06-07` — NEW. Pre-edit backup.
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-06-07-A18b-A18d-close.md` — the session close.
+
+**Risk classification (0d-ii):** **Mixed.** Pages + footer-link additions = Standard (additive static content / link adds; no existing behaviour changed). The mentor prompt edit = **Elevated** (change to existing live user-facing functionality), additive only; AC7 not engaged; **PR6 not engaged** — `/api/mentor/private/reflect` is not the distress classifier / Zone 2-3 / R20a wrapper surface. Critical Change Protocol step 3 (existing sessions) = N/A per the build-arc cache (no current third-party users).
+
+**Rollback path:** Before push, nothing deploys. Pages + footer: revert the commit. Mentor edit: restore `website/src/app/api/mentor/private/reflect/route.ts` from `archive/reflect-route.ts.backup-pre-A18b-2026-06-07` (or revert the commit); `/limitations` likewise restorable from its pre-edit backup. Both edited files were backed up before editing.
+
+**Verification step (founder-performable):**
+```
+# AI-side this session (Diagnostic-certain at the compile level):
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+node_modules/.bin/tsc --noEmit        # → exit 0, 0 errors (full project typecheck)
+# Founder-side (0c website-page row): open each URL and check content
+#   /limitations    → new "Stoicism emphasises the individual, not the system" + "A mirror, not a lens" sections present
+#   /accessibility  → new page renders; WCAG 2.1 AA-target + honest-limitations + support@sagereasoning.com contact
+#   any page footer → "Limitations" and "Accessibility" links present under Legal
+# Optional (mentor, founder-only): submit a reflection that strays into judging another person; confirm the mentor returns focus to your own reasoning, and ordinary self-reflection output is unchanged.
+```
+Expected: typecheck clean (already run this session, exit 0); both pages render with the new content; footer links resolve.
+
+**Rules served:** R19a, R19b, R19c, R19d, R20b, R20d, 0a, 0c, 0d-ii, 0f, PR1, PR15, PR17.
+
+**Status:** Adopted. Implementation status: `/limitations` R19c+R19d additions + `/accessibility` (A18d) → **Wired** (built + full typecheck clean) → **Verified** on the founder's URL check (website-page row, 0c). Mentor mirror-principle (single-surface, `/api/mentor/private/reflect`) → **Wired** → **Verified** on the founder's reflection-behaviour check. Production **UNCHANGED / byte-identical** until the founder commits + deploys. A18 remaining: A18a (first-run experience), A18c (framework-dependence detection — Elevated→Critical under PR6, its own session), A18e (cognitive-accessibility design pass), and propagation of the mirror principle to the practitioner-facing mentor surfaces. Cross-references: `D-A15C-RECTIFICATION-ENDPOINT-BUILT-2026-06-07` (predecessor); `manifest.md` R19c/R19d/R20d; `adopted/substrate-plugin-staging-plan.md` §A18.
