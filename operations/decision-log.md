@@ -10033,3 +10033,41 @@ Expected: the seven new `.md` files listed; `register JSON valid`. Open `complia
 **Rules served:** R14, R16, R17, R17b, R17c, R17g, R17h, R17i, R18e, R19, 0a, 0d-ii, 0f, PR7, PR11, PR13, PR15. PR4 N/A (no LLM call written). PR6 not engaged.
 
 **Status:** Adopted. Implementation status of the governance artefacts: **Drafted** (current-wording; lawyer review pending). Production UNCHANGED. Cross-references: `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29`, `D-R19D-ALL-TOOLS-2026-06-07` (predecessor); `manifest.md` R14/R16/R17/R18e/R19 + CR register header; `/adopted/substrate-plugin-staging-plan.md` §A16/§A17; `/compliance/lawyer-review-queue.md`.
+
+---
+
+## 2026-06-07 — D-A16-A17-FOLLOWUP-QUEUED-EDITS
+
+**Decision:** Apply the two founder-approvable accuracy edits queued at the A16/A17 close — LRQ-6 (manifest EU AI Act Article 50 date) and LRQ-4 (live privacy policy) — leaving all lawyer-dependent items queued for Stage-1 close.
+
+**Reasoning:** Both are pure factual corrections that remove known inaccuracies from a governing document and a live user-facing page; neither needs the lawyer (cf. `D-A16-A17-PRIVACY-REGULATORY-GOV-2026-06-07`, which deliberately deferred them for per-edit approval). Founder elected per-edit at session: LRQ-6 extended to all three Article 50 date occurrences incl. rule **R18e**; LRQ-4 applied as drafted incl. the R19 honesty softening "In compliance with" → "In preparation for". No register posture upgraded on the edits alone (R19) — no compliance claim asserted.
+
+**Files touched:**
+- `manifest.md` — `CR-EU-AIA-A50` `note` + `next_review` (→ 2026-08-02), the `change_trigger` Article 50 line, and rule **R18e** corrected to "obligations apply 2026-08-02; machine-readable marking backstop 2026-12-02" (was unqualified "2026-12-02").
+- `website/src/app/privacy/page.tsx` — §4 Supabase region Singapore → US East (North Virginia); **Vercel** added as named hosting/compute sub-processor; §5 ADM transparency strengthened (without-human-review disclosure + human-review/own-judgement/correct-or-delete pathway); "In compliance with" → "In preparation for" (R19); "Last updated" → June 2026.
+- `compliance/compliance_register.json` — CR-002 note pointer updated (manifest header now corrected); CR-005 note + actions updated (region/Vercel done; ADM progressed; final APP 1.7 wording still queued).
+- `compliance/lawyer-review-queue.md` — LRQ-6 marked **RESOLVED**; LRQ-4 marked **PROGRESSED** (facts corrected; final legal wording still queued).
+- `compliance/register-reconciliation-2026-06-07.md` — D7 marked **RESOLVED**.
+- `archive/manifest.md.backup-pre-lrq6-2026-06-07`, `archive/privacy-page.tsx.backup-pre-lrq4-2026-06-07` — pre-edit backups (NEW).
+
+**Risk classification:** **Elevated** under 0d-ii (governing-doc edit + live user-facing page edit; higher set governs). AC7 not engaged. PR6 not engaged (R18e is the Article 50 placeholder, not the distress classifier / Zone logic). No auth/session/encryption/access-control/R20a/data-deletion/deploy-config change → not Critical. Per-edit founder approval obtained for each; `/archive/` backup taken before each.
+
+**Cache discipline:** R18e is rule text, so the standing-protocol-cache update discipline engaged. The cache references R18e by existence only (cross-references line), not by its Article 50 date — no content drift; no cache edit required. Recorded here in lieu of a separate `D-CACHE-DRIFT` entry.
+
+**Rollback path:** LRQ-6 → restore `manifest.md` from `archive/manifest.md.backup-pre-lrq6-2026-06-07`. LRQ-4 → restore `website/src/app/privacy/page.tsx` from `archive/privacy-page.tsx.backup-pre-lrq4-2026-06-07` and redeploy (Vercel rebuild). No schema, flag, or data change to reverse.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website" && node_modules/.bin/tsc --noEmit && echo OK
+grep -c "Singapore" src/app/privacy/page.tsx          # expect 0
+grep -n "Vercel\|US East\|In preparation for" src/app/privacy/page.tsx
+grep -n "obligations apply 2026-08-02" ../manifest.md
+python3 -c "import json; json.load(open('../compliance/compliance_register.json')); print('JSON valid')"
+```
+Expected: `tsc` exit 0 + `OK`; Singapore count `0`; Vercel/US East/§5 lines present; manifest corrected; `JSON valid`. After deploy: open sagereasoning.com/privacy — §4 says US East + names Vercel; §5 strengthened.
+
+**Open questions:** None new. PR7: the remaining LRQ items (LRQ-1/2/3/5/7 + the posture-upgrade table) stay deferred to the Stage-1-close lawyer engagement; LRQ-3 (final Art. 50 wording) and the final APP 1.7 / APP 8 wording remain the lawyer-dependent residue of LRQ-6/LRQ-4.
+
+**Rules served:** R14, R16, R17, R18e, R19, 0a, 0d-ii, 0f, PR7, PR15. PR4 N/A (no LLM call written). PR6 not engaged. PR11/PR13 N/A (no new web check — the 2026-06-07 Article 50 findings stand).
+
+**Status:** Adopted. Implementation: manifest + privacy page **edited (live on next deploy)**; LRQ-6 **Resolved**, LRQ-4 **Progressed**. Cross-references: `D-A16-A17-PRIVACY-REGULATORY-GOV-2026-06-07` (predecessor — queued these two edits); `manifest.md` `CR-EU-AIA-A50` + R18e; `/compliance/lawyer-review-queue.md` LRQ-4/LRQ-6; `/compliance/register-reconciliation-2026-06-07.md` D7; this session's close.

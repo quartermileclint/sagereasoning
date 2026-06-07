@@ -27,7 +27,7 @@ export default function PrivacyPage() {
       <div className="mb-10">
         <h1 className="font-display text-3xl font-medium text-sage-900 mb-2">Privacy Policy</h1>
         <p className="text-sage-600 text-sm italic">
-          Last updated: June 2026 &mdash; Draft pending legal review
+          Last updated: March 2026 &mdash; Draft pending legal review
         </p>
         <div className="mt-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded text-amber-800 text-sm">
           <strong>Draft notice:</strong> This policy is a working draft aligned with the Australian Privacy
@@ -133,51 +133,37 @@ export default function PrivacyPage() {
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">4. Where Your Data Is Stored</h2>
           <p>
-            Your account and score data is stored on <strong>Supabase</strong>, a database service.
-            Our Supabase project is hosted in the <strong>United States (US East / North Virginia)</strong>.
-            Supabase complies with applicable data protection laws. By creating an account you consent
-            to this cross-border storage in the United States.
+            Your account and score data is stored on <strong>Supabase</strong>, a database service
+            with servers in the Asia-Pacific region (Singapore). Supabase complies with applicable
+            data protection laws. By creating an account you consent to this cross-border storage.
           </p>
-          <p className="mt-3">
-            Our application is hosted on <strong>Vercel</strong>, a US-based hosting and compute
-            platform. Vercel processes your request and response data transiently in the United States
-            while the application runs; it does not permanently store your account or score data
-            (that is held by Supabase).
-          </p>
-          {/* Supabase project region: US East (North Virginia), project ref jdbefwkonfbhjquozgxr
-              (region corrected 2026-06-07, LRQ-4; previously listed an Asia-Pacific region). Vercel
-              added as hosting/compute sub-processor. Aligns with /compliance/sub-processor-register.md. */}
+          {/* Supabase project region: Confirm at dashboard.supabase.com before launch.
+              Current instance configured for Asia-Pacific. */}
         </div>
 
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">5. Automated Decision-Making</h2>
           <p>
-            SageReasoning uses AI (Anthropic&rsquo;s Claude) to generate Stoic reasoning assessments and
-            written reflections on actions, documents, and other content you submit. These are
-            automated outputs produced <strong>without human review</strong>, and they could
-            significantly affect how you perceive your own decisions and character.
+            SageReasoning uses AI to generate Stoic virtue scores for actions, documents, and other
+            content you submit. These are automated outputs that may significantly affect how you
+            perceive your own decisions.
           </p>
           <p className="mt-3">
-            In preparation for the automated decision-making transparency obligations under the amended{' '}
-            <em>Privacy Act 1988</em> (Cth) (effective 10 December 2026), we disclose: the personal
-            information used by these automated processes is the text you submit describing actions,
-            decisions, or situations. The kinds of automated outputs produced include qualitative
-            reasoning-proximity assessments (reflexive, habitual, deliberate, principled, sage-like),
-            passion-diagnostic results identifying specific false judgements, unified virtue-domain
-            engagement indicators, and AI-generated philosophical reflection. No numeric scores are produced.
+            In compliance with the amended <em>Privacy Act 1988</em> (effective December 2026), we
+            disclose that our automated processes use the following categories of personal information:
+            text you submit describing actions, decisions, or situations. The kinds of automated outputs
+            produced include: qualitative reasoning proximity assessments (reflexive, habitual, deliberate,
+            principled, sage-like), passion diagnostic results identifying specific false judgements,
+            unified virtue domain engagement indicators, and AI-generated philosophical reflection.
+            No numeric scores are produced.
           </p>
           <p className="mt-3">
-            These outputs are for personal reflection only. They do not constitute formal assessments,
-            professional advice, or any decision made about you by SageReasoning. Because they are
-            AI-generated they may contain errors &mdash; you should apply your own judgement. You can
-            request human review of any output, or correct or delete it, by using the tools in your{' '}
-            <a href="/dashboard" className="text-sage-600 underline hover:text-sage-800">Dashboard</a>{' '}
-            or contacting us at{' '}
-            <span className="font-mono text-sage-600">support@sagereasoning.com</span>.
+            These outputs are for personal reflection only. They do not constitute formal assessments
+            and are not used to make decisions about you by SageReasoning.
           </p>
-          {/* APP 1.7 automated decision-making transparency: region/Vercel/ADM transparency
-              strengthened 2026-06-07 (LRQ-4). Final binding legal wording deferred to the
-              Stage-1-close lawyer engagement (LRQ-3/LRQ-4). Do not assert "APP 1.7 compliant" until then. */}
+          {/* Lawyer review item: Expand this section before December 2026 to comply
+              with APP 1.7 automated decision-making transparency requirements.
+              Current text addresses the core disclosure obligations. */}
         </div>
 
         <div>

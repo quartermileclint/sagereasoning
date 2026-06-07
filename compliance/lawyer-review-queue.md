@@ -26,11 +26,12 @@
 - **Dates:** Art. 50 applies **2 Aug 2026**; marking backstop **2 Dec 2026** for pre-existing generative systems.
 - **Risk if wrong:** Non-compliant or missing transparency notice for EU-facing output after 2 Aug 2026.
 
-## LRQ-4 — Privacy-policy update (live user-facing edit)  ·  Owner: **Both**
+## LRQ-4 — Privacy-policy update (live user-facing edit)  ·  Owner: **Both**  ·  ⏳ PROGRESSED 2026-06-07 (facts corrected; final legal wording still queued)
 - **Source:** `sub-processor-register.md` §Downstream; `compliance_register.json` CR-005.
 - **Items (one edit):** (a) add APP 1.7 automated-decision-making transparency (Australian Privacy Act; due **10 Dec 2026**); (b) correct Supabase region **Singapore → US East (North Virginia)**; (c) add **Vercel** to the named sub-processor list; align descriptions with the sub-processor register.
 - **Current draft posture:** Privacy policy is **live but stale** on region and incomplete on ADM transparency. Edit **not made** (Elevated, founder-approved).
 - **Risk if wrong:** APP 1.7 non-compliance after 10 Dec 2026; an inaccurate published privacy notice (wrong data location) is itself a transparency failure.
+- **Progress (2026-06-07):** Facts corrected + transparency strengthened under `D-A16-A17-FOLLOWUP-QUEUED-EDITS-2026-06-07` (Elevated; backup `/archive/privacy-page.tsx.backup-pre-lrq4-2026-06-07`): (b) Supabase region Singapore → US East (North Virginia) ✅; (c) Vercel added as a named hosting/compute sub-processor ✅; (a) §5 ADM transparency strengthened — outputs disclosed as produced *without human review*, with a human-review / own-judgement / correct-or-delete pathway, and "In compliance with" softened to "In preparation for" (R19) ✅. **Still lawyer-queued:** the final binding APP 1.7 wording and APP 8 cross-border-transfer wording before 10 Dec 2026 — no compliance claim asserted.
 
 ## LRQ-5 — Residual-risk acceptance sign-off (DPIA)  ·  Owner: **Both**
 - **Source:** `dpia-intimate-data.md` §6.
@@ -38,10 +39,11 @@
 - **Current draft posture:** Residual risk documented; **no acceptance declared** (R19 — not pre-empted).
 - **Risk if wrong:** Accepting unacceptable residual risk, or stalling launch by failing to take a defensible acceptance decision.
 
-## LRQ-6 — Manifest-header Article 50 date correction (governing-doc edit)  ·  Owner: **Founder**
+## LRQ-6 — Manifest-header Article 50 date correction (governing-doc edit)  ·  Owner: **Founder**  ·  ✅ RESOLVED 2026-06-07
 - **Source:** `register-reconciliation-2026-06-07.md` D7; `article-50-transparency-posture.md` §1.
 - **Item:** manifest header `CR-EU-AIA-A50` records "Enforcement live 2026-12-02" only. Correct it to: "Applies 2 Aug 2026; machine-readable marking backstop 2 Dec 2026." **Elevated** governing-document edit → explicit founder approval + `/archive/` backup before the change. **No lawyer needed** (factual accuracy), but listed here because it is coupled to LRQ-3.
 - **Risk if wrong:** The unqualified "2026-12-02" understates the obligation timeline by ~4 months and could mislead launch planning.
+- **Resolution (2026-06-07):** Corrected under `D-A16-A17-FOLLOWUP-QUEUED-EDITS-2026-06-07`. Manifest `CR-EU-AIA-A50` `note` + `next_review` (→ 2026-08-02), the `change_trigger` front-matter line, and rule **R18e** all updated to "obligations apply 2026-08-02; machine-readable marking backstop 2026-12-02." Pre-edit backup: `/archive/manifest.md.backup-pre-lrq6-2026-06-07`. No lawyer needed (factual accuracy). LRQ-3 (final Art. 50 wording) remains lawyer-queued.
 
 ## LRQ-7 — Sub-processor DPAs + cross-border transfer mechanism  ·  Owner: **Both**
 - **Source:** `sub-processor-register.md`.
