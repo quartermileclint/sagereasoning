@@ -108,6 +108,9 @@ export const RATE_LIMITS = {
   analytics: { maxRequests: 60, windowSeconds: 60, category: 'analytics' } as RateLimitConfig,
   /** Admin — 30 requests per minute */
   admin: { maxRequests: 30, windowSeconds: 60, category: 'admin' } as RateLimitConfig,
+  /** Data-rights endpoints (GDPR Art 15 access / Art 16 rectification) — 5 requests per hour.
+   *  Deliberately tight: these are infrequent, sensitive, self-service operations. */
+  dataRights: { maxRequests: 5, windowSeconds: 3600, category: 'data-rights' } as RateLimitConfig,
 }
 
 // =============================================================================

@@ -9649,3 +9649,45 @@ Then read `adopted/a15-sar-portability-disposition.md` §7 (requirements-vs-in-p
 **Rules served:** R17, R17b, R17c, R17f, R17g, R17h, R17i, R18, R19, 0a, 0c, 0f, KG-EX1, PR7, PR13, PR15.
 
 **Status:** Adopted. Implementation status (documentation-confirm only — no build this session): A15d portability → **confirmed build-complete** (live `/api/user/export`; posture pending lawyer review); A15b SAR → **Scoped (shrunk)**; A15c rectification → **Scoped**; A15a erasure → Verified-live (unchanged). Production UNCHANGED / byte-identical. Stage-1 remaining (all A10–A19 Verified): A15b, A15c, A16, A17, A18 (A16/A17 lawyer-coupled), plus the deferred A14 tracker. Cross-references: `D-R17C-A15A-STALE-DRIFT-RECONCILED-2026-06-06`; `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29`; `D-A14-SLO-ERROR-BUDGET-POLICY-2026-06-07`; `adopted/a15-sar-portability-disposition.md`; `adopted/substrate-plugin-staging-plan.md` §A15.
+
+---
+
+## 2026-06-07 — D-A15B-SAR-ACCESS-ENDPOINT-BUILT-2026-06-07
+
+**Decision:** Built the GDPR Article 15 (Right of Access / SAR) surface as a dedicated new endpoint `/api/user/access` (Option 1 per the A15b disposition §5 — founder-elected at kickoff). The endpoint reuses the export's data-gathering (factored into a new shared helper `user-data-gathering.ts`; `/api/user/export` left byte-identical per PR1), wraps it with an Article 15(1)(a)–(h) supplementary-information block (`article15-supplementary-info.ts`, sourced from the live `/privacy` page), logs each request to a new `compliance_access_log` table (no raw PII — subject stored as a SHA-256 hash), and rate-limits via a new `RATE_LIMITS.dataRights` config (5/hour). Built + compile/lint-verified this session; TEST functional verification is the founder's between-sessions step; production deploy deferred to the founder.
+
+**Reasoning:** Option 1 over Option 2 because it matches manifest R17g as written (no governing-doc edit), leaves the Verified-live `/api/user/export` byte-identical (lower risk), and keeps the Art 15 access right and the Art 20 portability right as clean, separate surfaces (reads better in lawyer review). PR15: the 17 installed Anthropic skills + the agentic-commerce findings tracker were consulted — no Anthropic-canonical primitive delivers a GDPR SAR response; bespoke is justified and reuses existing infrastructure (export data-gathering, `security.ts` helpers, the `compliance_deletion_log` pattern, the `/privacy` profiling text) rather than re-inventing. PR6: R17 access surface → Critical; the full Critical Change Protocol (0c-ii) was completed visibly and explicit founder approval specific to the named risks was obtained before any code. Implements the shrunk A15b scope set by `D-A15-SAR-PORTABILITY-GOVERNANCE-CONFIRM-2026-06-07`.
+
+**Files touched (additive):**
+- `website/src/app/api/user/access/route.ts` — NEW. The Art 15 endpoint (rate-limit → auth → gather → supplementary block → log → JSON download).
+- `website/src/lib/user-data-gathering.ts` — NEW. Shared data-gathering helper (export logic extracted faithfully; `/export` not modified).
+- `website/src/lib/article15-supplementary-info.ts` — NEW. Static Art 15(1)(a)–(h) block, sourced from `/privacy`.
+- `website/src/lib/security.ts` — EDIT (additive only). New `RATE_LIMITS.dataRights` (5/hour). Existing configs untouched.
+- `supabase/migrations/20260607_a15b_compliance_access_log.sql` — NEW. Request-log table (RLS on, no policies → server-write only; append-only by intent, no trigger; idempotent).
+- `operations/handoffs/founder/access-test.py` — NEW. Founder TEST verification script (mirrors `export-test.py`).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-06-07-A15b-sar-access-endpoint-close.md` — the session close.
+
+**Risk classification (0d-ii):** **Critical** (R17 access surface; R17f + PR6). Full Critical Change Protocol completed in-session before any code; explicit founder approval recorded. Net change is additive (new route, new helpers, new table, additive rate-limit config); `/api/user/export`, `/api/user/delete`, `/api/reason`, and all auth/session behaviour are byte-identical. Critical Change Protocol step 3 (existing sessions) = N/A per the build-arc cache (no current third-party users).
+
+**Verification Method Used (0c framework — API endpoint):**
+- AI-side, this session: `tsc --noEmit` exit 0 (full project typecheck incl. the new files); `eslint` exit 0 on all new/changed files; `requireAuth` return-shape + every import confirmed by read; PR2 build-to-wire — the helper + block are invoked in the route's execution path (confirmed by read, not merely defined). Diagnostic-certain on the compile/wire level.
+- Founder-side, between sessions (TEST first per standing process; never production for the test run): create `compliance_access_log` in the TEST Supabase project; `npm run dev`; `python3 access-test.py`; expect the response to carry `access_metadata` + the Art 15 block + `personal_data`, a row in `compliance_access_log`, and HTTP 429 on the 6th rapid call. Production deploy is the founder's decision after TEST passes.
+
+**Risk Classification Record (0d-ii):** A15b `/api/user/access` build — Critical (R17f + PR6). One change; Critical.
+
+**Rollback path:** All additive + flag-free. Before push: nothing is committed → nothing deploys. After push: revert the commit in GitHub Desktop → push; the new route disappears, everything else byte-identical. The `compliance_access_log` table is harmless if left; `drop table public.compliance_access_log;` removes it.
+
+**PR5 Knowledge-Gap Carry-Forward:** No concepts re-explained this session. KG1 engaged (the access-log DB insert): satisfied — non-blocking insert, no redirect/header/path edge cases. New PR5 candidate (count 1): the data-gathering logic is now duplicated between `/export` (inline) and `user-data-gathering.ts` (helper); a future **Elevated** consolidation should migrate `/export` onto the helper. The carried append-only-teardown candidate (count 1) is deliberately **not** re-triggered — `compliance_access_log` was built without a no-delete trigger specifically to keep TEST teardown clean.
+
+**Open questions (PR13 consider-implications):**
+- *Contradict a prior decision?* No.
+- *Refine a prior decision?* Implements the A15b scope from `D-A15-SAR-PORTABILITY-GOVERNANCE-CONFIRM-2026-06-07`.
+- *Affect work in flight?* No.
+- *Affect future-stage work?* A15c (rectification) can reuse `RATE_LIMITS.dataRights` + the compliance-log pattern; the `/export` ↔ helper consolidation is a future Elevated item.
+- *Affect operational discipline?* Adds `access-test.py` to the founder TEST toolkit.
+- Remaining: audit-table exclusion from Art 15 (`substrate_audit_events`/`abuse_signals`/`cost_alerts` — masked, agent_id-keyed) is still a lawyer question; the manifest `CR-GDPR-A15-ACCESS` posture and the disposition §8 governance edits remain pending founder approval (not actioned this session).
+
+**Rules served:** R17, R17b, R17f, R17g, R18, R19, 0a, 0c, 0c-ii, 0d-ii, 0f, KG1, PR1, PR2, PR6, PR10, PR15, PR17.
+
+**Status:** Adopted. Implementation status: A15b (`/api/user/access`) → **Wired** (built + compile/lint-verified; reaches **Verified** on the founder's TEST run; production deploy deferred). A15a erasure, A15c rectification, A15d portability unchanged. Production **UNCHANGED / byte-identical** until the founder deploys. Cross-references: `D-A15-SAR-PORTABILITY-GOVERNANCE-CONFIRM-2026-06-07`; `adopted/a15-sar-portability-disposition.md` §5/§6; `manifest.md` R17g; `adopted/substrate-plugin-staging-plan.md` §A15.
