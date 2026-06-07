@@ -10071,3 +10071,38 @@ Expected: `tsc` exit 0 + `OK`; Singapore count `0`; Vercel/US East/§5 lines pre
 **Rules served:** R14, R16, R17, R18e, R19, 0a, 0d-ii, 0f, PR7, PR15. PR4 N/A (no LLM call written). PR6 not engaged. PR11/PR13 N/A (no new web check — the 2026-06-07 Article 50 findings stand).
 
 **Status:** Adopted. Implementation: manifest + privacy page **edited (live on next deploy)**; LRQ-6 **Resolved**, LRQ-4 **Progressed**. Cross-references: `D-A16-A17-PRIVACY-REGULATORY-GOV-2026-06-07` (predecessor — queued these two edits); `manifest.md` `CR-EU-AIA-A50` + R18e; `/compliance/lawyer-review-queue.md` LRQ-4/LRQ-6; `/compliance/register-reconciliation-2026-06-07.md` D7; this session's close.
+
+---
+
+## 2026-06-07 — D-PRELAUNCH-S1-DATA-RIGHTS-GO-LIVE-2026-06-07
+
+**Decision:** Created the two GDPR data-rights audit tables — `compliance_access_log` and `compliance_rectification_log` — in the **production** Supabase project (`jdbefwkonfbhjquozgxr`, US East / N. Virginia), bringing the already-deployed `/api/user/access` (Art 15) and `/api/user/rectify` (Art 16) endpoints fully live in production: access-request logging is now active, and a successful rectification now returns a clean HTTP 200 with audit instead of HTTP 207.
+
+**Reasoning:** Session 1 of the pre-launch bring-forward plan. The endpoint code was already deployed (commits `344c310`, `b0279e4`) and Verified-on-TEST; the two audit tables had been created on TEST but deliberately deferred in production "until there were users." Running the two additive migrations closes that gap — the cheapest, lowest-uncertainty pre-launch readiness win, independent of every other bring-forward item. PR15: no Anthropic-canonical primitive substitutes for running a Supabase migration; bespoke N/A.
+
+**Files touched:**
+- production Supabase (`jdbefwkonfbhjquozgxr`) — `compliance_access_log` created (4 cols) from `supabase/migrations/20260607_a15b_compliance_access_log.sql` (migration already committed; no code change this session)
+- production Supabase (`jdbefwkonfbhjquozgxr`) — `compliance_rectification_log` created (7 cols) from `supabase/migrations/20260607_a15c_compliance_rectification_log.sql`
+- `operations/decision-log.md` — this entry
+- `operations/handoffs/founder/2026-06-07-prelaunch-S1-data-rights-go-live-close.md` — session close (NEW)
+
+**Risk classification:** **Elevated** under 0d-ii — additive, idempotent, append-only new tables in the production database; no existing table/policy/auth touched. Run with Critical-Change-Protocol care (0c-ii) as a courtesy (production DB). AC7 not engaged. PR6 not engaged. No code/env-flag/deploy-config change.
+
+**Rollback path:** In the production SQL editor: `drop table if exists public.compliance_access_log;` and `drop table if exists public.compliance_rectification_log;`. Endpoints revert to pre-migration behaviour (access logging no-ops; rectify returns 207). No code to revert, no deploy to undo, no data lost (tables new/empty).
+
+**Verification step (founder-performable):**
+```
+-- in the production Supabase SQL Editor:
+select column_name, data_type from information_schema.columns
+where table_schema='public' and table_name='compliance_access_log' order by ordinal_position;          -- expect 4 rows
+select column_name, data_type from information_schema.columns
+where table_schema='public' and table_name='compliance_rectification_log' order by ordinal_position;    -- expect 7 rows
+-- endpoints live (read-only, no data written):
+curl -s -o /dev/null -w "%{http_code}\n" https://sagereasoning.com/api/user/access            -- expect non-404
+curl -s -o /dev/null -w "%{http_code}\n" -X POST https://sagereasoning.com/api/user/rectify   -- expect non-404
+```
+Expected: 4-row + 7-row column lists; both curls non-404. Founder ran all four 2026-06-07: column checks returned 4 / 7 rows; both endpoints returned 307 (deployed + live; not 404 — consistent with the app's unauthenticated-request handling).
+
+**Rules served:** R17g, R17h, R17, R19, 0a, 0c, 0c-ii, 0d-ii, 0f, PR15, PR17. PR4 N/A (no LLM call). PR6 not engaged. AC7 not engaged.
+
+**Status:** Adopted. Implementation status: `compliance_access_log` / `compliance_rectification_log` → **Live** (production); A15b → **Verified-live**; A15c → **Verified-live**. Closes the "two pending production migrations" item carried in every 2026-06-07 close. No CR-register posture upgraded (`CR-GDPR-A15-ACCESS` / `CR-GDPR-A16-RECTIFICATION` upgrades remain gated on the Stage-1-close lawyer review — R19). Production now: both audit tables Live; `/api/reason` byte-identical; no env-flag/deploy change this session. Cross-references: `D-A15B-SAR-ACCESS-ENDPOINT-BUILT-2026-06-07`, `D-A15C-RECTIFICATION-ENDPOINT-BUILT-2026-06-07`, `D-PROFILE-EXPORT-ACCESS-KEYING-FIX-2026-06-07`; `/operations/pre-launch-bring-forward-plan-2026-06-07.md`; this session's close.
