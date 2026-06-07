@@ -51,13 +51,6 @@ import {
   loadMentorInteractionsAsRecords,
   type InteractionsHubId,
 } from '@/lib/mentor-interactions-loader'
-// A18c (R20b): deterministic framework-dependence detector. Pure, read-only,
-// no LLM. Consumed only on this single-endpoint proof (PR1) until Verified.
-import {
-  detectFrameworkDependence,
-  DEPENDENCE_DEFAULTS,
-  type DependenceSignal,
-} from '@/lib/r20b-dependence'
 import { loadRingFunctions } from '@/lib/sage-mentor-ring-bridge'
 import { extractJSON } from '@/lib/json-utils'
 import { logMentorObservation } from '@/lib/logging/mentor-observation-logger'
@@ -478,49 +471,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ─── R20b — FRAMEWORK-DEPENDENCE DETECTION (A18c) ────────────────────
-    // Flag-gated; OFF by default. When R20B_INDEPENDENCE_COACHING_ENABLED is
-    // 'true', read this practitioner's recent interaction frequency +
-    // triviality and, if the dependence pattern is present, surface an
-    // independence-coaching instruction in the mentor's user message (block
-    // injected below during userMessage assembly). Deterministic, read-only,
-    // synchronous (PR3), non-blocking (try/catch → null). Runs AFTER the R20a
-    // distress gate; does NOT touch the distress classifier / Zone 2-3 /
-    // wrapper (PR6 boundary — ADR 2026-06-07). When the flag is unset the whole
-    // block is skipped and the request is byte-identical to pre-A18c.
-    let dependenceSignal: DependenceSignal | null = null
-    if (process.env.R20B_INDEPENDENCE_COACHING_ENABLED === 'true') {
-      try {
-        const { data: depProfileRow, error: depProfileErr } = await supabaseAdmin
-          .from('mentor_profiles')
-          .select('id')
-          .eq('user_id', auth.user.id)
-          .single()
-        if (depProfileErr) {
-          console.error(
-            '[private/reflect] R20b profile lookup error (non-blocking):',
-            depProfileErr,
-          )
-        }
-        const depProfileId = (depProfileRow as { id?: string } | null)?.id ?? null
-        if (depProfileId) {
-          const depInteractions: InteractionRecord[] =
-            await loadMentorInteractionsAsRecords(
-              depProfileId,
-              PRIVATE_MENTOR_HUB as InteractionsHubId,
-              { windowDays: DEPENDENCE_DEFAULTS.windowDays, limit: 200 },
-            )
-          dependenceSignal = detectFrameworkDependence(depInteractions)
-        }
-      } catch (depErr) {
-        console.error(
-          '[private/reflect] R20b dependence detection error (non-blocking):',
-          depErr,
-        )
-        dependenceSignal = null
-      }
-    }
-
     const mentorKnowledgeBase = getMentorKnowledgeBase()
 
     // Pick whichever profile context the flag selected
@@ -542,14 +492,6 @@ Score my actions and give me the sage perspective.`
     // null otherwise under 2A-skip).
     if (ringSummary) {
       userMessage += `\n\nRECURRING PATTERNS DETECTED ACROSS PRIOR INTERACTIONS:\n${ringSummary}\n\n(These are deterministic aggregations from this practitioner's recent interaction history — diagnostic, not punitive. Reference them where relevant; do not repeat verbatim.)`
-    }
-    // R20b (A18c): independence-coaching instruction — only when the
-    // dependence pattern is present. Diagnostic, not punitive (R6d); an honest
-    // invitation toward self-reliance, never a gate (R19/R20b). When the signal
-    // is absent (or the flag is off) this block is not added and the request is
-    // byte-identical to pre-A18c.
-    if (dependenceSignal?.present) {
-      userMessage += `\n\nINDEPENDENCE SIGNAL (R20b — diagnostic, not punitive): This practitioner's recent usage shows a high-frequency, low-stakes pattern (${dependenceSignal.reason}). Per R20b, gently and warmly affirm — once, in your own voice, only if it fits naturally — that they may be ready to reason through routine decisions on their own (for example, "you're ready to reason through this yourself"). Frame it as a mark of progress and growing self-reliance, not a criticism or a limit. Do not repeat it or labour the point, and never withhold, shorten, or limit the reflection itself.`
     }
     if (baselineAppendixContext) userMessage += `\n\n${baselineAppendixContext}`
     if (mentorObservations) userMessage += `\n\n${mentorObservations}`
@@ -724,11 +666,6 @@ Score my actions and give me the sage perspective.`
       interactions_count: interactionsCount,
       bypass_pattern_cache_used: bypassPatternCache,
       pattern_engine_error: patternEngineError,
-      // A18c (R20b): framework-dependence diagnostics. null when the flag is
-      // off or detection didn't run; otherwise the DependenceSignal.
-      // present=true means the independence-coaching block was injected this
-      // request. Surfaced for founder verification.
-      r20b_dependence: dependenceSignal,
     }
 
     // Log structured observation to the unified pipeline (mentor_observations_structured)
