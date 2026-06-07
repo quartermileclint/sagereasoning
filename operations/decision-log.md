@@ -9614,3 +9614,38 @@ Then read `adopted/slo-error-budget-policy.md` §5 (requirements-vs-in-place che
 **Rules served:** R5, R14, R18, R19, AC2, 0a, 0c, 0f, PR7, PR11, PR13, PR15.
 
 **Status:** Adopted. Implementation status: **A14 (governance) → Verified on founder read** (this deliverable); **A14 (live-adherence tracker) → Scoped (deferred)**. Production UNCHANGED / byte-identical (documentation-only session; no flags, no schema, no deploy). Stage-1 remaining (all A10–A19 Verified): A15b, A15c, A16, A17, A18 (A16/A17 lawyer-coupled) — A14 governance clears the documentation half of one. Cross-references: `D-A12-OTEL-INSTRUMENTATION-VERIFIED-LIVE-2026-06-03` (latency surface); `D-A13-PRODUCTION-ACTIVATION-2026-06-06` (detection-before-activation precedent); `D-A19-VELOCITY-VERIFIED-LIVE-2026-06-06` (predecessor); `/adopted/substrate-plugin-staging-plan.md` §A14; `/adopted/slo-error-budget-policy.md`.
+
+---
+
+## 2026-06-07 — D-A15-SAR-PORTABILITY-GOVERNANCE-CONFIRM-2026-06-07
+
+**Decision:** Ran the A15 governance-confirm pass (read-only inspection of the Verified-live `/api/user/export` + `/api/user/delete` against GDPR Art 15 (SAR), Art 16 (rectification), Art 20 (portability), the staging-plan §A15 contracts, and manifest R17g/h/i). Produced the disposition `/adopted/a15-sar-portability-disposition.md`. Outcome: **A15d (portability) is build-complete** via the live export (remaining = lawyer posture sign-off + optional format ADR); **A15b (SAR) shrinks to a thin add-on** (Art 15 supplementary-information block + request logging + rate-limiting layered on the export's existing data-copy); **A15c (rectification) remains a focused Critical build** (`/api/user/rectify` + correctable-field allow-list + immutable before/after audit table). No dedicated from-scratch SAR/export engine is required.
+
+**Reasoning:** The open question carried from `D-R17C-A15A-STALE-DRIFT-RECONCILED-2026-06-06` (and re-flagged at the A14 close) asked whether `/api/user/export` already satisfies A15b/A15d. By read: the export returns 24 user-scoped tables (intimate store decrypted for the subject) as machine-readable JSON → Art 20 satisfied in substance, Art 15 *data-copy* component satisfied substantially. The gap is Art 15's *supplementary-information* component (purposes, recipients/sub-processors, retention, rights, complaint path, source, and — most materially — Art 15(1)(h) profiling disclosure, since SageReasoning profiles users) plus R17g's procedural requirements (request logging; rate-limiting), none of which the export emits. Art 16 is unaddressed by either endpoint. Honest-gap framing per R18/R19. PR15: no bespoke build this session (read-only governance); when A15b/A15c are built, the export's data-gathering is reused rather than re-invented (existing-infrastructure bias). PR13 consider-implications applied (see Open questions).
+
+**Files touched (additive — one new file):**
+- `adopted/a15-sar-portability-disposition.md` — NEW. The governance deliverable (§0 plain-language summary; §1 what the endpoints do; §2 Art 15 mapping; §3 Art 20 mapping; §4 Art 16; §5 two options to close A15b; §6 precise remaining-build scope; §7 0c requirements-vs-in-place checklist; §8 approval items; §9 cross-references).
+- `operations/decision-log.md` — this entry.
+
+**Risk classification (0d-ii):** **Standard** — documentation only; net-new additive file; no in-place edit to any existing governing doc; no code, schema, flag, or production surface. AC7 not engaged. PR6 not engaged. KGs N/A (no DB writes, no JSONB, no model selection — no LLM calls).
+
+**Rollback path:** delete the one new file (`git rm adopted/a15-sar-portability-disposition.md` before commit, or `git revert` after). No production effect; nothing else touched.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+test -f adopted/a15-sar-portability-disposition.md && echo "deliverable present"
+```
+Then read `adopted/a15-sar-portability-disposition.md` §7 (requirements-vs-in-place checklist). If rows 1, 2, and 9 read **Yes** and rows 3–8 read as the remaining shrunk work, the disposition is **Verified on your read**.
+
+**Open questions (PR13 consider-implications):**
+- *Contradict a prior decision?* No. Refines `D-R17C-A15A-STALE-DRIFT-RECONCILED-2026-06-06`'s two carried open questions by answering them.
+- *Refine a prior decision?* Yes — shrinks the staging-plan §A15 Critical-build scope (A15d build-complete; A15b thin).
+- *Affect work in flight?* No code in flight this session.
+- *Affect future-stage work?* Yes — A15b and A15c kickoffs inherit the scoped definitions in §5/§6; A15b founder-elects Option 1 (dedicated `/api/user/access`) vs Option 2 (augment `/api/user/export` + manifest rename) at kickoff.
+- *Affect operational discipline?* No.
+- Remaining: confirm audit-table exclusion (`substrate_audit_events`/`abuse_signals`/`cost_alerts` — masked/structural, agent_id-keyed) is correct for Art 15 — fair lawyer question, settle at A15b. `CR-GDPR-A20-PORTABILITY` posture edit + staging-plan §A15 annotation are §8 approval items (not actioned).
+
+**Rules served:** R17, R17b, R17c, R17f, R17g, R17h, R17i, R18, R19, 0a, 0c, 0f, KG-EX1, PR7, PR13, PR15.
+
+**Status:** Adopted. Implementation status (documentation-confirm only — no build this session): A15d portability → **confirmed build-complete** (live `/api/user/export`; posture pending lawyer review); A15b SAR → **Scoped (shrunk)**; A15c rectification → **Scoped**; A15a erasure → Verified-live (unchanged). Production UNCHANGED / byte-identical. Stage-1 remaining (all A10–A19 Verified): A15b, A15c, A16, A17, A18 (A16/A17 lawyer-coupled), plus the deferred A14 tracker. Cross-references: `D-R17C-A15A-STALE-DRIFT-RECONCILED-2026-06-06`; `D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29`; `D-A14-SLO-ERROR-BUDGET-POLICY-2026-06-07`; `adopted/a15-sar-portability-disposition.md`; `adopted/substrate-plugin-staging-plan.md` §A15.
