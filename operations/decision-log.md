@@ -9579,3 +9579,38 @@ Expected: the stale "503 placeholder" R17c lines are gone; the three corrected d
 **Rules served:** R5, R0, R3, PR1, PR2, PR5, PR10, PR17, KG1, KG7.
 
 **Status:** Adopted. Implementation status: **A19 `request_velocity_anomaly` → Verified-live**. Stage-1 remaining (all A10–A19 Verified): A14, A15b, A15c, A16, A17, A18 (A16/A17 lawyer-coupled). Cross-references: `D-A19-ABUSE-DETECTION-VELOCITY-PROOF-2026-06-06` (the build this verifies); `D-A12-OTEL-INSTRUMENTATION-VERIFIED-LIVE-2026-06-03` (the `substrate_audit_events` surface); `D-R17C-A15A-STALE-DRIFT-RECONCILED-2026-06-06` (same arc); `/adopted/substrate-plugin-staging-plan.md` §A19.
+
+---
+
+## 2026-06-07 — D-A14-SLO-ERROR-BUDGET-POLICY-2026-06-07
+
+**Decision:** Adopted the A14 SLO & error-budget policy as a standalone governing deliverable (`/adopted/slo-error-budget-policy.md`), satisfying the staging-plan §A14 *governance* scope. Defines per-surface SLOs (latency p95 + success-rate, four tiers), error budgets (request-count + quarterly time-equivalent), and the >50%-burn feature-freeze discipline. The founder elected **governance-only**; the live SLO-adherence tracker (the §A14 *implementation* half) is **deferred** (PR7) — see below.
+
+**Reasoning:** A14's named scope is documentation/discipline; the deliverable is grounded in the project's own architecture (AC2 fixes the R20a classifier at p95 ≤500 ms; staging-plan §A14 examples for `/api/reason` <3 s and `/api/public-key` <100 ms) plus standard SRE error-budget method (PR11: no external consultation needed — stable method + own rules). PR15 consult: no Anthropic-canonical primitive produces project-specific SLO targets/discipline (checked `.claude/skills/anthropic/` — none match; agentic-commerce F1–F4 — none targets A14); the *eventual* tracker will reuse existing infrastructure (A12 OTel surface + the Datadog connector), so the bespoke element is the governance policy itself, which has no primitive equivalent. The deliverable adds an honest §4 "measurability today": only `/api/reason` is instrumented and A12 OTel is UNSET in production, and there is no production traffic — so budgets cannot be burned yet and the discipline formally activates at launch. This honesty is required by R18/R19 and mirrors the A13/A19 detection-before-activation pattern.
+
+**Files touched (additive — one new file):**
+- `adopted/slo-error-budget-policy.md` — NEW. The A14 governance deliverable (§0 plain-language summary; §1 surface SLOs; §2 error budgets; §3 burn discipline; §4 measurability; §5 0c requirements-vs-in-place checklist; §6 review/ownership; §7 cross-references).
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** **Standard** under 0d-ii — documentation only; no code, no schema, no production surface; net-new additive file (no in-place edit to an existing governing doc). AC7 not engaged. PR6 not engaged. KGs N/A (no DB writes, no JSONB, no model selection — no LLM calls).
+
+**Rollback path:** delete the one new file (`git rm adopted/slo-error-budget-policy.md` before commit, or `git revert` after). No production effect; nothing else touched.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+test -f adopted/slo-error-budget-policy.md && echo "deliverable present"
+```
+Then read `adopted/slo-error-budget-policy.md` §5 (requirements-vs-in-place checklist). A14 (governance) reaches **Verified** on that read.
+
+**Deferred decision (PR7) — live SLO-adherence tracker (the A14 implementation half):**
+- **Considered:** building a flag-gated inert tracker computing rolling p95 latencies + success rates per surface off `substrate_audit_events.layer1/2/3_latency_ms`, proven on TEST per PR1 (mirroring A13/A19).
+- **Why deferred:** production has no traffic to measure, and A12 OTel is UNSET in production (only `/api/reason` is instrumented even on TEST), so the tracker would have nothing to read. Building it now would lock in an unproven measurement shape against zero data.
+- **Revisit condition:** when A12 OTel is activated in production and meaningful traffic exists (≈ launch / P6), or whenever the founder elects the follow-on. Target substrate: the A12 OTel surface + the Datadog connector (PR15 — reuse before bespoke).
+
+**Open questions:**
+- Staging-plan §A14 status edit (mark "governance done; implementation deferred"): not done this session — an in-place edit to an adopted governing doc requires explicit founder approval + a prior-version backup (per founder rule). Surfaced in the session close as an approval item.
+
+**Rules served:** R5, R14, R18, R19, AC2, 0a, 0c, 0f, PR7, PR11, PR13, PR15.
+
+**Status:** Adopted. Implementation status: **A14 (governance) → Verified on founder read** (this deliverable); **A14 (live-adherence tracker) → Scoped (deferred)**. Production UNCHANGED / byte-identical (documentation-only session; no flags, no schema, no deploy). Stage-1 remaining (all A10–A19 Verified): A15b, A15c, A16, A17, A18 (A16/A17 lawyer-coupled) — A14 governance clears the documentation half of one. Cross-references: `D-A12-OTEL-INSTRUMENTATION-VERIFIED-LIVE-2026-06-03` (latency surface); `D-A13-PRODUCTION-ACTIVATION-2026-06-06` (detection-before-activation precedent); `D-A19-VELOCITY-VERIFIED-LIVE-2026-06-06` (predecessor); `/adopted/substrate-plugin-staging-plan.md` §A14; `/adopted/slo-error-budget-policy.md`.
