@@ -45,14 +45,26 @@ Bespoke election requires justification in the session's decision-log entry unde
 - **Decision log** (last 3 entries at session-open): `/operations/decision-log.md`
 - **Active build-arc cache**: `/adopted/build-sessions-protocol-cache.md`
 
-## Production state (as of 2026-05-14)
+## Production state (as of 2026-06-08)
 
-- Substrate at A7 Verified
-- `SUBSTRATE_LAYER3_ENABLED` UNSET in Vercel; `/api/substrate/layer3` returns 503
-- `SUBSTRATE_R20A_GATE_ENABLED` UNSET in Vercel
-- `/api/reason` behaviour byte-identical to pre-A7 cutover
-- All four `SUBSTRATE_LAYER2_PREVIOUS_*` env vars UNSET
-- `/api/public-key` serves steady-state shape (Ed25519; `previous: null`; `rotation_overlap_until: null`)
+Refreshed at the Pre-Launch S3 close (`D-PRELAUNCH-S3-ABUSE-DETECTION-ACTIVATION-2026-06-08`); supersedes the 2026-05-14 block (prior version preserved in git history). Production is served at `www.sagereasoning.com` (the apex `sagereasoning.com` 307-redirects to `www`).
+
+**Live in production:**
+- Core distress detection + redirect — the four R20a safety flags `true` (the safety floor)
+- `/api/reason` — Substrate at A7 Verified; behaviour byte-identical to pre-A7 cutover (OTel + audit are additive, no-throw, off the hot path)
+- A12 OpenTelemetry + call-grain audit (S2) — `SUBSTRATE_OTEL_ENABLED=true`; `substrate_audit_events` Live, receiving masked (structural-only) rows on `/api/reason`
+- GDPR data-rights (S1) — `compliance_access_log` + `compliance_rectification_log` Live; `/api/user/access` (A15b) + `/api/user/rectify` (A15c) + `/api/user/delete` (R17c) + `/api/user/export` (R17i) Verified-live
+- A13 cost-health detection — Live
+- **A19 abuse-detection (S3)** — `SUBSTRATE_ABUSE_DETECTION_ENABLED=true` + `ABUSE_DETECTION_EVAL_TOKEN` set (Production); `abuse_signals` Live; `/api/abuse/evaluate` answers (200 with service token, 401 without — was 503). Detection-only (no enforcement). Runs the `request_velocity_anomaly` detector only in production.
+
+**Built but inert in production (flags UNSET):**
+- A19 structural detectors `systematic_enumeration` + `rapid_input_variation` — behind `SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED` (sandbox-verified; production rollout is an S4 flag-flip)
+- A10 per-agent identity + metering — `PLUGIN_INSTALL_AUTH_ENABLED`
+- A11b injection defence — `SUBSTRATE_INJECTION_DEFENCE_ENABLED`
+- Layer 3 per-consumer rendering — `SUBSTRATE_LAYER3_ENABLED` (`/api/substrate/layer3` returns 503)
+- R20a audience-correct rendering — `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED`
+- R20a server-side gate — `SUBSTRATE_R20A_GATE_ENABLED`
+- All four `SUBSTRATE_LAYER2_PREVIOUS_*` env vars UNSET; `/api/public-key` serves steady-state shape (Ed25519; `previous: null`; `rotation_overlap_until: null`)
 
 Verify against `/manifest.md` AC7 disposition + the most-recent session close's "Production state at session close" line before any change to user-facing functionality.
 

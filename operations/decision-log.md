@@ -10155,3 +10155,59 @@ Expected: latest row `decision_event='assessment'`; `masked_context` structural-
 **Rules served:** AC10, R0, R3, R4, R17, R19c, R19d, 0a, 0c, 0c-ii, 0d-ii, 0f, PR1, PR7, PR15, PR17. PR4 N/A (no model selection written — `/api/reason` models unchanged). PR6 not engaged. AC7 not engaged.
 
 **Status:** Adopted. Implementation status: `substrate_audit_events` → **Live (production)**; `SUBSTRATE_OTEL_ENABLED` → **set `true` (Production)**; A12 (instrumentation + call-grain audit) → **Live (production, /api/reason)**. Closes the "A12 OTel not active in production" deferral; unblocks Session 3 (A19) + Session 5 (A14). Cross-references: `D-A12-OTEL-INSTRUMENTATION-AUDIT-PROOF-2026-06-03`, `D-A12-OTEL-INSTRUMENTATION-VERIFIED-LIVE-2026-06-03`, `D-PRELAUNCH-S1-DATA-RIGHTS-GO-LIVE-2026-06-07`; `/operations/pre-launch-bring-forward-plan-2026-06-07.md`; this session's close.
+
+---
+
+## 2026-06-08 — D-PRELAUNCH-S3-ABUSE-DETECTION-ACTIVATION-2026-06-08
+
+**Decision:** Activated A19 abuse-detection in **production** (detection-only) — created the `abuse_signals` table in the production Supabase project (`jdbefwkonfbhjquozgxr`, US East / N. Virginia), set `SUBSTRATE_ABUSE_DETECTION_ENABLED=true` + a new `ABUSE_DETECTION_EVAL_TOKEN` service token for the Vercel **Production** environment, and redeployed. `/api/abuse/evaluate` now evaluates the A12 `substrate_audit_events` data and persists any tripped `request_velocity_anomaly` signal. Built the two remaining structural detectors (`systematic_enumeration` + `rapid_input_variation`) additive + inert behind a new rollout sub-flag (`SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED`, UNSET in production). Refreshed the stale `CLAUDE.md` production-state block to current truth.
+
+**Reasoning:** Session 3 of the pre-launch completion plan (`/operations/pre-launch-completion-plan-2026-06-07.md`). A19's `request_velocity_anomaly` detector was built + Verified-live on TEST (2026-06-06) and deployed inert in production; its data source (`substrate_audit_events`) went Live in production at S2 (2026-06-07), satisfying the dependency. Two decisions settled at open (founder elected both recommendations): (1) dense packing — build the two new detectors inert this session (real additive fill; PR1 keeps them off the live production surface; PR2 invoked + sandbox-proven, not dead code); (2) detection-only — A19 records signals, never blocks/rate-limits/revokes (standing election; enforcement is a separate later decision). PR15: no Anthropic-canonical primitive substitutes for a Vercel flag/token change or a Supabase migration; bespoke N/A; the detector code mirrors the in-repo A13/velocity pattern (no bespoke architecture).
+
+**Critical Change Protocol record (0c-ii, condensed):**
+1. *What changed:* new empty `abuse_signals` table in production + `SUBSTRATE_ABUSE_DETECTION_ENABLED=true` + `ABUSE_DETECTION_EVAL_TOKEN` (Production) + redeploy.
+2. *What could break:* nothing that touches a user's assessment — `/api/abuse/evaluate` is standalone (reads audit, writes signals), not on the `/api/reason` path (grep-confirmed; PR6 boundary). Migration-first removes the only write-error path; bad token → 401; a false-positive is only a recorded row (detection-only; conservative thresholds 3×/≥5 windows/floor 5).
+3. *Existing sessions:* unaffected (no auth/session/encryption change; no users yet).
+4. *Rollback:* unset `SUBSTRATE_ABUSE_DETECTION_ENABLED` + redeploy → 503, byte-identical to pre-activation; token inert without the flag; `abuse_signals` removable via the migration's commented rollback block. No data lost.
+5. *Verification:* one authenticated `/api/abuse/evaluate` call → 200, `signals_fired: 0`; no-token call → 401 (was 503); `abuse_signals` empty.
+6. *Approval:* founder approved both named risks ("ok") before any production action.
+
+**Diagnostic finding (canonical host) — Diagnostic-certain:** the bare verification curl returned 307, not the expected 503. Root cause isolated: the app auth middleware skips `/api/` (does not redirect this route) and the route handler never returns 307 — the 307 is a Vercel **apex → www** domain redirect (`sagereasoning.com` → `www.sagereasoning.com`). Production is served at `www.sagereasoning.com`; all verification curls retarget the `www` host so the service-token header is not dropped on a cross-host redirect. The future scheduled caller (S7 delivery arc) must hit `www.` too.
+
+**Decisions deferred (PR7):** enforcement (rate-limit/revoke/block on live traffic) — separate later Critical decision; production rollout of the two new detectors — S4 2-minute flag-flip of `SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED`; automated signal delivery (`notified_at`) — A13/S7 Vercel-Cron arc; the new detectors' TEST pass — deferred to S4 (founder election this session), bundled with their rollout.
+
+**Files touched:**
+- production Supabase (`jdbefwkonfbhjquozgxr`) — `abuse_signals` created (12 cols; dedup unique index; undelivered index; service-role-only RLS) from `supabase/migrations/20260606_a19_abuse_signals.sql` (migration already committed 2026-06-06; no migration-file change this session)
+- Vercel **Production** env — `SUBSTRATE_ABUSE_DETECTION_ENABLED=true` + `ABUSE_DETECTION_EVAL_TOKEN` (minted by founder; AI never saw it); redeployed
+- `website/src/lib/abuse-detection/abuse-detector.ts` — added `detectSystematicEnumeration` + `detectRapidInputVariation` (pure; structural counts only; R3/R17)
+- `website/src/lib/abuse-detection/abuse-thresholds.ts` — added 5 conservative PROVISIONAL thresholds for the two new detectors
+- `website/src/app/api/abuse/evaluate/route.ts` — wired both new detectors behind `SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED` (UNSET prod); production path byte-identical (reads `occurred_at` only, runs velocity only)
+- `website/src/lib/abuse-detection/__tests__/abuse-detector-structural.test.ts` — 22 unit assertions (NEW)
+- `CLAUDE.md` — production-state block refreshed to 2026-06-08 truth (pointer file; prior version in git history)
+- `operations/decision-log.md` — this entry
+- `operations/handoffs/founder/2026-06-08-prelaunch-S3-abuse-detection-activation-close.md` — session close (NEW)
+
+**Risk classification:** **Critical** under 0d-ii — deployment-configuration change (env flag + service token activating `/api/abuse/evaluate` on the live deployment). The production migration is additive/idempotent (Elevated alone); the two new detectors are additive + inert behind an UNSET sub-flag (Elevated alone); the CLAUDE.md refresh + this entry are Standard; the highest category governs → **Critical**; full Critical Change Protocol applied + walked live (PR17). **PR6 not engaged** — A19 reads the substrate's already-produced `substrate_audit_events` rows (occurred_at + agent_id + structural masked_context); it never touches the R20a distress classifier, the A7 Zone-2 gate, or their wrappers. AC7 not engaged. No auth/session/encryption/access-control change.
+
+**Rollback path:** In Vercel, delete `SUBSTRATE_ABUSE_DETECTION_ENABLED` (or set ≠ `true`) + redeploy → `/api/abuse/evaluate` returns 503, byte-identical to pre-activation. Token inert without the flag (leave or delete). `abuse_signals` removable via the commented rollback block at the bottom of `supabase/migrations/20260606_a19_abuse_signals.sql`. The two new detectors are inert in production (sub-flag unset); `git revert` of the code commit removes them with no production behaviour change. No data lost.
+
+**Founder-performed verification result (2026-06-08, walked live):**
+- *Migration:* production ref confirmed `jdbefwkonfbhjquozgxr`; "Success. No rows returned."; 12-column table confirmed; `count(*) = 0`.
+- *Flag + token + redeploy:* `SUBSTRATE_ABUSE_DETECTION_ENABLED=true` + `ABUSE_DETECTION_EVAL_TOKEN` (Production only); Vercel redeploy green.
+- *Activation:* authenticated `curl` to `https://www.sagereasoning.com/api/abuse/evaluate` → `HTTP:200`, `{"ok":true,"detectors_run":["request_velocity_anomaly"],…,"identities_evaluated":0,"signals_fired":0,…}`; no-token `curl` → `HTTP:401` (flipped from the pre-activation 503); `abuse_signals` `count(*) = 0` (no false positives).
+- *Detector build (sandbox):* new structural unit tests 22/22 PASS; velocity regression 17/17 PASS; `npx tsc --noEmit` exit 0; PR2 invocation confirmed (both new detectors called on the path behind the rollout sub-flag).
+
+**Verification step (founder-repeatable):**
+```
+# production endpoint, authenticated (replace <TOKEN>):
+curl -s -w "\nHTTP:%{http_code}\n" -H "x-abuse-detection-token: <TOKEN>" "https://www.sagereasoning.com/api/abuse/evaluate"   # expect HTTP:200, signals_fired 0
+curl -s -w "\nHTTP:%{http_code}\n" "https://www.sagereasoning.com/api/abuse/evaluate"                                       # expect HTTP:401
+# production Supabase SQL editor (ref jdbefwkonfbhjquozgxr):
+select count(*) from public.abuse_signals;                                                                                  # expect 0
+```
+
+**Open questions:** None new. The two new detectors' TEST pass + production rollout are queued for S4. Enforcement remains a separate later decision.
+
+**Rules served:** R5, R0, R3, R17, R19, AC10, 0a, 0c, 0c-ii, 0d-ii, 0f, PR1, PR2, PR7, PR10, PR15, PR17, KG1, KG7. PR4 N/A (A19 detectors are pure/deterministic — no LLM). PR6 not engaged. AC7 not engaged.
+
+**Status:** Adopted. Implementation status: `abuse_signals` → **Live (production)**; `SUBSTRATE_ABUSE_DETECTION_ENABLED` + `ABUSE_DETECTION_EVAL_TOKEN` → **set (Production)**; A19 `request_velocity_anomaly` → **Live (production)**; `systematic_enumeration` + `rapid_input_variation` → **Wired-inert** (sandbox-verified; TEST pass + production rollout deferred to S4). Closes the S3 spine of the pre-launch completion plan; next is S4 (A11b injection-defence go-live + the A19 rollout sub-flag flip + limitations-page draft + R19d decision). Cross-references: `D-A19-ABUSE-DETECTION-VELOCITY-PROOF-2026-06-06`, `D-A19-VELOCITY-VERIFIED-LIVE-2026-06-06`, `D-PRELAUNCH-S2-OTEL-ACTIVATION-2026-06-07`; `/operations/pre-launch-completion-plan-2026-06-07.md`; this session's close.

@@ -33,4 +33,35 @@ export const ABUSE_DETECTION = {
   /** Ignore the candidate window and the baseline if below this many requests —
    *  a near-zero-noise guard so we never fire on e.g. 6 vs 2 requests/window. */
   REQUEST_VELOCITY_ABSOLUTE_FLOOR_REQUESTS: 5,
+
+  // ──────────────────────────────────────────────────────────────────────
+  // Structural detectors (PR1 surface rollout — gated behind the rollout
+  // sub-flag SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED; UNSET in production).
+  // Read structural masked_context fields ONLY (input_char_count) — never raw
+  // text (R3 / R17). Defaults are PROVISIONAL — retune against real traffic
+  // once usage exists; detection-only, so a missed signal beats a false one.
+  // ──────────────────────────────────────────────────────────────────────
+
+  /** systematic_enumeration — "testing the space, not using it". Need at least
+   *  this many requests from an identity before the breadth measure is
+   *  meaningful (volume floor; a handful of varied requests is normal use). */
+  SYSTEMATIC_ENUMERATION_MIN_REQUESTS: 20,
+
+  /** Fire when the share of DISTINCT input_char_count values is >= this fraction
+   *  of total requests. 0.9 = ~every request a different input size — the
+   *  fingerprint of a methodical sweep, not organic repeated use. PROVISIONAL. */
+  SYSTEMATIC_ENUMERATION_DISTINCT_RATIO: 0.9,
+
+  /** rapid_input_variation — "fuzzing fast". Need at least this many requests in
+   *  the identity's busiest window before the churn measure is meaningful. */
+  RAPID_INPUT_VARIATION_MIN_WINDOW_REQUESTS: 10,
+
+  /** A successive change in input_char_count of >= this many characters counts as
+   *  a "large jump". Below this is treated as ordinary variation. PROVISIONAL. */
+  RAPID_INPUT_VARIATION_DELTA_CHARS: 50,
+
+  /** Fire when the share of successive request pairs that are "large jumps"
+   *  (>= DELTA_CHARS) within the busiest window is >= this fraction. 0.8 = most
+   *  consecutive inputs mutate sharply — automated churn, not human edits. PROVISIONAL. */
+  RAPID_INPUT_VARIATION_RATIO: 0.8,
 } as const

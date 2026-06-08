@@ -38,6 +38,8 @@ import { corsHeaders, corsPreflightResponse, RATE_LIMITS, checkRateLimit } from 
 import { ABUSE_DETECTION } from '@/lib/abuse-detection/abuse-thresholds'
 import {
   detectRequestVelocityAnomaly,
+  detectSystematicEnumeration,
+  detectRapidInputVariation,
   type AbuseSignal,
 } from '@/lib/abuse-detection/abuse-detector'
 
@@ -154,13 +156,36 @@ export async function GET(request: NextRequest) {
   const skipped: Array<{ agent_id: string; reason: string }> = []
   let persistedCount = 0
 
+  // Rollout sub-flag for the two structural detectors. UNSET in production =>
+  // only request_velocity_anomaly runs and only occurred_at is read (byte-
+  // identical to the PR1 velocity proof). Set on TEST to prove the structural
+  // detectors before any production rollout (PR1 surface-rollout discipline).
+  const rolloutEnabled = process.env.SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED === 'true'
+
+  // Push + persist a fired signal — dedup on (signal_type, scope, period_date).
+  // KG1: awaited (no fire-and-forget).
+  const recordFired = async (signal: AbuseSignal, ownerAgentId: string) => {
+    firedSignals.push(signal)
+    const res = await persistAbuseSignal(supabaseAdmin, signal, periodDate)
+    if (res.error) {
+      skipped.push({ agent_id: ownerAgentId, reason: `persist failed: ${res.error}` })
+      return
+    }
+    if (res.persisted) persistedCount += 1
+  }
+
   for (const agentId of agentIds) {
     evaluated.push(agentId)
 
-    // Read this identity's event timestamps from the A12 behavioural surface.
+    // Read this identity's events from the A12 behavioural surface. Production
+    // (rollout sub-flag off) reads occurred_at ONLY — byte-identical to the PR1
+    // velocity proof. With the rollout sub-flag on, also read the structural
+    // masked_context (input_char_count ONLY — never raw text; R3 / R17) for the
+    // two structural detectors.
+    const selectCols = rolloutEnabled ? 'occurred_at, masked_context' : 'occurred_at'
     const { data: eventRows, error: evErr } = await supabaseAdmin
       .from('substrate_audit_events')
-      .select('occurred_at')
+      .select(selectCols)
       .eq('agent_id', agentId)
     if (evErr) {
       skipped.push({ agent_id: agentId, reason: evErr.message })
@@ -172,12 +197,29 @@ export async function GET(request: NextRequest) {
     }
 
     // Bucket timestamps into fixed windows; count requests per active window.
+    // With the rollout sub-flag on, also collect each window's input sizes (in
+    // time order) + the identity's distinct input sizes, for the structural
+    // detectors. input_char_count is a COUNT — never the input text (R3 / R17).
+    // Cast via unknown: the select column list is built at runtime (occurred_at,
+    // or occurred_at + masked_context under the rollout sub-flag), so the typed
+    // Supabase client can't statically parse it. Runtime shape is as declared.
+    type EventRow = { occurred_at: string; masked_context?: { input_char_count?: unknown } }
+    const typedRows = eventRows as unknown as EventRow[]
     const buckets: Record<number, number> = {}
-    for (const row of eventRows as Array<{ occurred_at: string }>) {
+    const bucketEvents: Record<number, Array<{ ms: number; size: number | null }>> = {}
+    const sizeValues: number[] = []
+    for (const row of typedRows) {
       const ms = new Date(row.occurred_at).getTime()
       if (Number.isNaN(ms)) continue
       const bucket = Math.floor(ms / 1000 / windowSeconds)
       buckets[bucket] = (buckets[bucket] || 0) + 1
+      if (rolloutEnabled) {
+        const raw = row.masked_context?.input_char_count
+        const size = typeof raw === 'number' && Number.isFinite(raw) ? raw : null
+        if (size !== null) sizeValues.push(size)
+        const list = bucketEvents[bucket] || (bucketEvents[bucket] = [])
+        list.push({ ms, size })
+      }
     }
     const counts = Object.values(buckets)
     if (counts.length === 0) {
@@ -188,7 +230,8 @@ export async function GET(request: NextRequest) {
     const totalRequests = counts.reduce((s, c) => s + c, 0)
     const maxWindowRequests = counts.reduce((m, c) => (c > m ? c : m), 0)
 
-    const signal = detectRequestVelocityAnomaly({
+    // ── Detector 1: request_velocity_anomaly (always; the production detector) ──
+    const velocitySignal = detectRequestVelocityAnomaly({
       agentId,
       windowCount,
       totalRequests,
@@ -197,24 +240,66 @@ export async function GET(request: NextRequest) {
       minPriorWindows: ABUSE_DETECTION.REQUEST_VELOCITY_MIN_PRIOR_WINDOWS,
       absoluteFloorRequests: ABUSE_DETECTION.REQUEST_VELOCITY_ABSOLUTE_FLOOR_REQUESTS,
     })
-    if (!signal) continue
-
-    signal.details.window_seconds = windowSeconds
-    firedSignals.push(signal)
-
-    // Persist — dedup on (signal_type, scope, period_date). KG1: awaited.
-    const res = await persistAbuseSignal(supabaseAdmin, signal, periodDate)
-    if (res.error) {
-      skipped.push({ agent_id: agentId, reason: `persist failed: ${res.error}` })
-      continue
+    if (velocitySignal) {
+      velocitySignal.details.window_seconds = windowSeconds
+      await recordFired(velocitySignal, agentId)
     }
-    if (res.persisted) persistedCount += 1
+
+    // ── Detectors 2 + 3: structural (rollout sub-flag only; inert in production) ──
+    if (rolloutEnabled) {
+      // Breadth: distinct input sizes across this identity's sized requests.
+      const enumSignal = detectSystematicEnumeration({
+        agentId,
+        totalRequests: sizeValues.length,
+        distinctInputSizes: new Set(sizeValues).size,
+        minRequests: ABUSE_DETECTION.SYSTEMATIC_ENUMERATION_MIN_REQUESTS,
+        distinctRatioThreshold: ABUSE_DETECTION.SYSTEMATIC_ENUMERATION_DISTINCT_RATIO,
+      })
+      if (enumSignal) {
+        enumSignal.details.window_seconds = windowSeconds
+        await recordFired(enumSignal, agentId)
+      }
+
+      // Temporal churn: large successive input-size jumps in the busiest window.
+      const bucketKeys = Object.keys(bucketEvents)
+      const delta = ABUSE_DETECTION.RAPID_INPUT_VARIATION_DELTA_CHARS
+      let largeVariationCount = 0
+      let busiestWindowRequests = 0
+      if (bucketKeys.length > 0) {
+        const busiestKey = bucketKeys.reduce((best, k) =>
+          bucketEvents[+k].length > bucketEvents[+best].length ? k : best
+        )
+        const ordered = [...bucketEvents[+busiestKey]].sort((a, b) => a.ms - b.ms)
+        busiestWindowRequests = ordered.length
+        for (let i = 1; i < ordered.length; i++) {
+          const prev = ordered[i - 1].size
+          const cur = ordered[i].size
+          if (prev !== null && cur !== null && Math.abs(cur - prev) >= delta) {
+            largeVariationCount += 1
+          }
+        }
+      }
+      const varSignal = detectRapidInputVariation({
+        agentId,
+        busiestWindowRequests,
+        largeVariationCount,
+        minWindowRequests: ABUSE_DETECTION.RAPID_INPUT_VARIATION_MIN_WINDOW_REQUESTS,
+        variationRatioThreshold: ABUSE_DETECTION.RAPID_INPUT_VARIATION_RATIO,
+      })
+      if (varSignal) {
+        varSignal.details.window_seconds = windowSeconds
+        varSignal.details.variation_delta_chars = delta
+        await recordFired(varSignal, agentId)
+      }
+    }
   }
 
   return NextResponse.json(
     {
       ok: true,
-      detectors_run: ['request_velocity_anomaly'],
+      detectors_run: rolloutEnabled
+        ? ['request_velocity_anomaly', 'systematic_enumeration', 'rapid_input_variation']
+        : ['request_velocity_anomaly'],
       window_seconds: windowSeconds,
       period_date: periodDate,
       identities_evaluated: evaluated.length,
