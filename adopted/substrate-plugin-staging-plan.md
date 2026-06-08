@@ -83,6 +83,8 @@ Decomposed from ST2 Phase 2 Domain 1 S2 (REVISE → S2a Standard + S2b Critical)
 
 **Risk:** A11a Standard + A11b Critical. **Est. sessions:** A11a 1; A11b 2.
 
+**Status (2026-06-08):** A11b — **LIVE (production)**. `SUBSTRATE_INJECTION_DEFENCE_ENABLED=true` set in Vercel Production + redeployed; TEST-parity adversarial probe re-passed and production benign/adversarial/distress verification passed, with the R20a distress redirect confirmed identical flag-ON vs flag-OFF (the PR6 safety invariant). Both LLM seams (Layer 1 `extractFeatures` + Layer 3 `generateProse`) active. One-flag rollback (unset + redeploy). Ref: `D-PRELAUNCH-S4-INJECTION-DEFENCE-ACTIVATION-2026-06-08`.
+
 #### A12 — OpenTelemetry GenAI semantic conventions + call-grain audit (NEW; Elevated)
 
 **Source:** ST2 Phase 2 Domain 5 O1 (ALLOW). Cross-cuts P1 (DPIA — call-grain audit logging) + S1 (behavioural baselines) + A9 (cost monitoring).
@@ -97,6 +99,8 @@ Decomposed from ST2 Phase 2 Domain 1 S2 (REVISE → S2a Standard + S2b Critical)
 **Stage 1 sequencing:** After A10 (per-agent credentials provide identity for per-identity tracking); before Stage 2.
 **Risk:** Elevated. **Est. sessions:** 1-2.
 
+**Status (2026-06-07):** **LIVE (production)**. `SUBSTRATE_OTEL_ENABLED=true`; `substrate_audit_events` Live, receiving masked (structural-only) rows on `/api/reason` (additive, no-throw, off the hot path). Ref: `D-PRELAUNCH-S2-OTEL-ACTIVATION-2026-06-07`.
+
 #### A13 — R5 cost-as-health-metric alerts (NEW; Elevated)
 
 **Source:** ST2 Phase 2 Domain 5 O2 (ALLOW). Depends on A12.
@@ -109,6 +113,8 @@ Decomposed from ST2 Phase 2 Domain 1 S2 (REVISE → S2a Standard + S2b Critical)
 - Alerts delivered via configured channel (email; later: Slack / PagerDuty)
 
 **Risk:** Elevated. **Est. sessions:** 1.
+
+**Status (2026-06-08):** cost-health **detection LIVE (production)**. Automated alert *delivery* (Vercel Cron running the evaluators on a schedule) is queued for S7 per the pre-launch completion plan; detector thresholds remain provisional pending real traffic/revenue (metrics-gated).
 
 #### A14 — SLOs + error-budget discipline (NEW; Standard governance + Elevated implementation)
 
@@ -127,9 +133,9 @@ Decomposed from ST2 Phase 2 Domain 1 S2 (REVISE → S2a Standard + S2b Critical)
 
 **Phased sequencing:**
 - **A15a** — R17c genuine deletion endpoint (bring-forward from P2 priority 2d). **DONE 2026-05-30** — /api/user/delete implemented, Verified-live and deployed to production (D-R17-ERASURE-PORTABILITY-COMPLETENESS-2026-05-29). The earlier "replaces 503 placeholder" framing was stale; no build remains. Critical.
-- **A15b** — R17g access (SAR — GDPR Article 15). Standard contract, Critical surface.
-- **A15c** — R17h rectification (GDPR Article 16). Standard contract, Critical surface.
-- **A15d** — R17i portability (GDPR Article 20). Most complex; structured-export contract; Critical surface.
+- **A15b** — R17g access (SAR — GDPR Article 15). Standard contract, Critical surface. **Verified-live (production) 2026-06-07** — `/api/user/access`; `compliance_access_log` Live (`D-PRELAUNCH-S1-DATA-RIGHTS-GO-LIVE-2026-06-07`).
+- **A15c** — R17h rectification (GDPR Article 16). Standard contract, Critical surface. **Verified-live (production) 2026-06-07** — `/api/user/rectify`; `compliance_rectification_log` Live (`D-PRELAUNCH-S1-DATA-RIGHTS-GO-LIVE-2026-06-07`).
+- **A15d** — R17i portability (GDPR Article 20). Most complex; structured-export contract; Critical surface. **Verified-live (production) 2026-06-07** — `/api/user/export` (`D-PRELAUNCH-S1-DATA-RIGHTS-GO-LIVE-2026-06-07`).
 
 **Closes:** Phase 1.5 T4-4; Phase 2 R1 + P2.
 **Risk:** Critical per sub-stage. **Est. sessions:** A15a 1; A15b 1; A15c 1; A15d 2. Total 5.
@@ -179,6 +185,8 @@ Decomposed from ST2 Phase 2 Domain 1 S2 (REVISE → S2a Standard + S2b Critical)
 - Abuse-response: rate-limit; revoke; alert
 
 **Risk:** Elevated. **Est. sessions:** 1-2.
+
+**Status (2026-06-08):** `request_velocity_anomaly` detector **LIVE (production)**, detection-only (no rate-limit/revoke enforcement — that remains a separate later decision); `abuse_signals` table Live; `SUBSTRATE_ABUSE_DETECTION_ENABLED=true` + `ABUSE_DETECTION_EVAL_TOKEN` set (Production); `/api/abuse/evaluate` → 200 with service token. Two structural detectors (`systematic_enumeration`, `rapid_input_variation`) built **Wired-inert** behind `SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED` (UNSET in prod; production rollout queued). Ref: `D-PRELAUNCH-S3-ABUSE-DETECTION-ACTIVATION-2026-06-08`.
 
 #### Stage 1 close (NEW gating step)
 
