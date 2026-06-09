@@ -10263,3 +10263,73 @@ curl -s -o /dev/null -w "HTTP:%{http_code}\n" "https://www.sagereasoning.com/lim
 **Rules served:** R7, R8a, R8d, R20a (safety-invariant preservation), R19c, R19d, R19e, R20b, R20d, AC5, AC8, 0a, 0c, 0c-ii, 0d-ii, 0f, PR1, PR2, PR6, PR7, PR10, PR15, PR17. PR4 N/A (deterministic defence — no LLM). AC7 not engaged.
 
 **Status:** Adopted. Implementation status: A11b → **Live (production)** (both LLM seams); `SUBSTRATE_INJECTION_DEFENCE_ENABLED` → **set (Production)**. Closes the S4 spine of the pre-launch completion plan; next is S5 (A10 per-agent identity + metering go-live, and the A19 two-detector rollout as a clean separate step). Cross-references: `D-A11B-COMBINED-FLAG-ON-TEST-PROBE-VERIFIED-LIVE-2026-06-03`, `D-PRELAUNCH-S3-ABUSE-DETECTION-ACTIVATION-2026-06-08`, `D-PRELAUNCH-S2-OTEL-ACTIVATION-2026-06-07`, `D-PRELAUNCH-S1-DATA-RIGHTS-GO-LIVE-2026-06-07`; `/operations/pre-launch-completion-plan-2026-06-07.md`; this session's close.
+
+---
+
+## 2026-06-09 — D-PRELAUNCH-S5-A10-METERING-ACTIVATION-2026-06-09
+
+**Decision:** Activated A10 per-install plugin-auth in **production** — ran the additive `api_keys` plugin-install migration on the production Supabase project (`jdbefwkonfbhjquozgxr`; it was **absent** at open, Verified on TEST since 2026-06-03), then set `PLUGIN_INSTALL_AUTH_ENABLED=true` for the Vercel **Production** environment and redeployed. `/api/reason` now accepts a per-install `sr_inst_` bearer credential as an **additive** auth path (tried last, after Supabase-JWT, API-key, and the shared-secret plugin path), with instant universal revocation. Verified live in production: mint (201) → authenticate (400 `layer1_schema is required`, past the gate) → existing-JWT-caller regression (normal assessment, unchanged) → revoke (200) → re-authenticate (401). As a **clean separate step**, rolled out the two A19 structural detectors (`systematic_enumeration`, `rapid_input_variation`) — set `SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED=true` (Production) + redeploy; `/api/abuse/evaluate` now runs all three detectors, `signals_fired: 0`, `abuse_signals` empty (detection-only). Code-hygiene fill: deleted the dead `V3_SOCIAL_MEDIA_PROMPT` (`website/src/lib/document-scorer.ts`; `tsc` clean). Agent-discovery surface (`llms.txt`, `.well-known/agent-card.json`, `openapi.yaml`) verified served + consistent with the live contract.
+
+**Scope correction (material; surfaced at open under PR12/PR13):** A10 as wired delivers **per-install identity + authentication + instant revocation** — it does **NOT** meter per-install usage on `/api/reason`. The `increment_api_usage` metering/billing path runs only for the commercial API-key (`sr_live_`) path (`isApiKeyAuth === true`); the install path carries `monthly_limit`/`daily_limit` columns (defaults 100/100) but nothing reads or increments them. "Metering" in the A10 label is therefore aspirational. Decision 2's "activate metering now" was re-scoped to "activate the authenticated agent path now" with the founder's explicit approval; per-install usage metering/quota enforcement is recorded as a deferred item (PR7, below).
+
+**Reasoning:** Session 5 of the pre-launch completion plan (`/operations/pre-launch-completion-plan-2026-06-07.md`). A10 was Verified-live on TEST (`D-A10-SMOKE-TEST-VERIFIED-LIVE-2026-06-03`) and deployed inert behind one unset flag. Three decisions settled at open (founder elected all recommendations): (1) A10 is the S5 spine; (2) activate now (re-scoped to auth/identity/revocation per the correction above); (3) run the A19 two-detector rollout as a clean separate step after A10 reached verified-disposition. PR15: no Anthropic-canonical primitive substitutes for a Vercel flag flip or a Supabase migration; bespoke N/A (the credential surface is the bespoke opaque-bearer model justified in the A10 token-format ADR). PR4 N/A (the auth gate is deterministic — no LLM).
+
+**Migration disposition:** the A10 `api_keys` migration (adds `identity_type`/`install_id`/`install_scope`, widens the `purpose` CHECK to admit `plugin_install`, + two partial indexes) was **absent in production** at open (the Step-0 column query returned 0 rows, consistent with the 2026-06-03 "TEST only — not on production, by design" note). It was run on production this session as a clearly-separated **Elevated** step (additive + idempotent) before the flag flip; the verification query then returned the three columns.
+
+**TEST rehearsal:** the flag-ON existing-caller regression (a signed-in session call to `/api/reason` → normal assessment) **passed on TEST** this session — the load-bearing new safety check. The full mint→authenticate→revoke→401 round-trip was already Verified-live on TEST (2026-06-03). A full TEST re-run via the admin endpoint was **blocked by TEST-clone data gaps** (no `ADMIN_USER_ID`; no `profiles` row for the founder's TEST account) — both TEST-environment artifacts, not A10 defects and not present in production. Founder elected to move to production-direct, where the data is intact and the sequence is safe (mint with the flag OFF before flipping; one-flag reversible) and authoritative.
+
+**Critical Change Protocol record (0c-ii; AC7 ENGAGED; PR6 NOT engaged):**
+1. *What changed:* production `api_keys` migration (Elevated, additive) + `PLUGIN_INSTALL_AUTH_ENABLED=true` (Vercel Production) + redeploy. The per-install `sr_inst_` auth path becomes active on `/api/reason`.
+2. *What could break:* the load-bearing risk was the existing JWT/session caller — if restrictive rather than additive, the founder's `/admin/test-reason` page + the human hub pages would fail to authenticate. Confirmed additive by code read (the per-install block runs only after JWT + API-key + shared-secret all fail; a JWT caller short-circuits at path 1 and never reaches it) and by the live regression (4b + the TEST 2b). The per-install call is not metered (scope correction) — no billing-path risk.
+3. *Existing sessions:* unaffected — no change to cookie scope, session validation, JWT handling, or domain redirects (AC7 Session-7b-compatible: additive). No users signed out; no stored sessions invalidated.
+4. *Rollback:* unset `PLUGIN_INSTALL_AUTH_ENABLED` (or set ≠ `true`) + redeploy → `/api/reason` auth byte-identical to flag-OFF (gate is `=== 'true'`); revoke any test credential per the runbook. Migration columns are additive + harmless when unused (no rollback required).
+5. *Verification:* mint (flag OFF) → flag flip + redeploy → authenticate (400, past gate) + existing-caller regression (normal assessment) + revoke (200) → re-authenticate (401). Run live in production.
+6. *Approval:* founder approved the named existing-caller risk **and** the corrected scope (auth/identity/revocation; metering deferred) ("ok") before any production action.
+
+**Diagnostic findings (Diagnostic-certain):** (a) the TEST admin-endpoint mint returned **401** — root cause: `ADMIN_USER_ID` unset in `.env.development.local` (the TEST clone never had it; the 2026-06-03 smoke minted via raw SQL, bypassing `requireAdmin`). Fixed for TEST by setting it to the founder's TEST user id. (b) the TEST mint then returned **500** `No profile found…` — root cause: no `profiles` row for the founder's TEST account (the `handle_new_user` trigger did not populate the clone). Both are TEST-clone data gaps, not A10 defects, and absent in production (the production mint returned 201 first time). Founder acknowledged.
+
+**Decisions deferred (PR7):**
+- **Per-install usage metering + quota enforcement on `/api/reason`** — the install path is authenticated but unmetered/unenforced (the `monthly_limit`/`daily_limit` columns are unread). *Why deferred:* A10's MVP-critical surface is identity + auth + revocation (the agent front door); metering is additive and not required to prove the path works. *Revisit trigger:* the first paid external-agent onboarding, or a launch requirement to cap/bill per-install usage. *Candidate home:* S7 (observability) or its own focused step.
+- **Full TEST round-trip of the A10 admin mint endpoint** — blocked this session by the TEST-clone data gaps; the endpoint's live insert was first exercised in production (mint-before-flip, 201). *Revisit trigger:* if the TEST env is rebuilt with a complete schema (`profiles` trigger + `ADMIN_USER_ID`).
+- **`/api/user/export` → shared `gatherUserPersonalData` helper consolidation** — the export route duplicates gathering but adds R17b decryption for Art-20 portability that the shared helper (used by `/api/user/access`) does not perform; consolidating risks changing the live GDPR export's decrypted output. *Revisit:* its own focused Elevated step with a before/after export-output comparison.
+- Carried: the `component-registry.json` full reconcile (S8 honest inventory); the `/api/reason` + `/api/guardrail` mirror-exclusion (flagged open question).
+
+**Files touched:**
+- production Supabase (`jdbefwkonfbhjquozgxr`) — `api_keys` migration run (`website/supabase-api-keys-plugin-install-migration.sql`, already committed 2026-06-03; no migration-file change this session); one `plugin_install` credential minted + revoked (verification tombstone `install_s5_prodverify`)
+- Vercel **Production** env — `PLUGIN_INSTALL_AUTH_ENABLED=true` + `SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED=true`; redeployed (no repo change for the activations themselves)
+- `website/src/lib/document-scorer.ts` — deleted dead `V3_SOCIAL_MEDIA_PROMPT` (Standard hygiene; `tsc` clean)
+- `operations/decision-log.md` — this entry
+- `operations/handoffs/founder/2026-06-09-prelaunch-S5-a10-metering-activation-close.md` — session close (NEW)
+
+**Risk classification:** **Critical** under 0d-ii — deployment-configuration env-flag activation on the live `/api/reason` auth path. **AC7 ENGAGED** (authentication-surface change; Session-7b-compatible — additive path; no cookie/session/redirect change). **PR6 NOT engaged** — A10 does not touch the R20a distress classifier, the A7 Zone-2 gate, or their wrappers; the R20a distress decision runs on the raw `input` for all auth paths independent of which path authenticated (confirmed by read). The production migration is additive/idempotent (Elevated alone); the A19 rollout flag is a deployment-config flip on a standalone endpoint off the `/api/reason` path, detection-only (lowest-stakes; PR6 not engaged); the V3 deletion + this entry + the close are Standard. Highest category governs → Critical; full Critical Change Protocol applied + walked live (PR17).
+
+**Rollback path:** unset `PLUGIN_INSTALL_AUTH_ENABLED` + redeploy → `/api/reason` auth byte-identical to flag-OFF; revoke any test credential per `/operations/runbooks/plugin-install-credential-revocation.md`. For A19: unset `SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED` + redeploy → velocity-only. The V3 deletion is reversible via `git revert` (code-only, no production behaviour change).
+
+**Founder-performed verification result (2026-06-09, walked live):**
+- *Migration:* production ref confirmed `jdbefwkonfbhjquozgxr`; "Success. No rows returned."; the three columns (`identity_type`, `install_id`, `install_scope`) confirmed present (were 0 at Step 0).
+- *Mint (flag OFF):* `POST /api/admin/plugin-install-credentials` (browser console, admin JWT) → **201** + `sr_inst_` token + `credential.id` (first live exercise of the endpoint's insert path).
+- *Flag flip + redeploy:* `PLUGIN_INSTALL_AUTH_ENABLED=true` (Production only); Vercel redeploy green.
+- *Authenticate (flag ON):* `POST /api/reason` with the `sr_inst_` token → **400** `layer1_schema is required` (past the auth gate; was 401 pre-flip).
+- *Existing-caller regression:* `/admin/test-reason` benign at depth standard → normal assessment, unchanged.
+- *Revoke + re-authenticate:* `DELETE …?id=<credential_id>` → **200** `{revoked:true}`; same token re-presented → **401** `Plugin authentication failed` (universal revocation confirmed).
+- *A19 rollout:* `SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED=true` (Production) + redeploy; `GET /api/abuse/evaluate` (service token) → **200**, `detectors_run: ["request_velocity_anomaly","systematic_enumeration","rapid_input_variation"]`, `signals_fired: 0`, `signals_persisted: 0`; `abuse_signals` empty.
+- *Code hygiene:* `npx tsc --noEmit` → exit 0 (clean).
+
+**Verification step (founder-repeatable):**
+```
+# A10 — production, signed in as admin (browser console on www.sagereasoning.com):
+#   mint via POST /api/admin/plugin-install-credentials -> 201 + sr_inst_ token
+#   POST /api/reason  Authorization: Bearer sr_inst_<token>  body {}  -> 400 (past gate, NOT 401)
+#   DELETE /api/admin/plugin-install-credentials?id=<id>            -> 200
+#   re-POST /api/reason with the same token                         -> 401
+# A19 — production:
+curl -s -w "\nHTTP:%{http_code}\n" -H "x-abuse-detection-token: <TOKEN>" "https://www.sagereasoning.com/api/abuse/evaluate"   # 200, three detectors, signals_fired 0
+# code hygiene:
+cd website && npx tsc --noEmit   # exit 0
+```
+
+**Open questions:** None new. Carried per Decisions deferred above.
+
+**Rules served:** R0, R4, R17, R18f, R19e, AC5, AC7, AC10, 0a, 0c, 0c-ii, 0d-ii, 0f, PR1, PR2, PR7, PR10, PR12, PR13, PR15, PR17, KG1. PR4 N/A (auth gate deterministic — no LLM). PR6 not engaged.
+
+**Status:** Adopted. Implementation status: A10 per-install plugin-auth → **Live (production)** (identity + authentication + revocation; metering deferred); `PLUGIN_INSTALL_AUTH_ENABLED` → **set (Production)**; `api_keys` plugin-install migration → **Live (production)**; A19 `systematic_enumeration` + `rapid_input_variation` → **Live (production)** (detection-only); `SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED` → **set (Production)**; `V3_SOCIAL_MEDIA_PROMPT` → deleted. Closes the S5 spine of the pre-launch completion plan; next is S6 (R20a audience-correct safety rendering — PR6 safety perimeter, its own clean spine). Cross-references: `D-A10-SMOKE-TEST-VERIFIED-LIVE-2026-06-03`, `D-A10-CRITICAL-IMPL-WIRING-REVOCATION-2026-06-03`, `D-PRELAUNCH-S4-INJECTION-DEFENCE-ACTIVATION-2026-06-08`, `D-PRELAUNCH-S3-ABUSE-DETECTION-ACTIVATION-2026-06-08`; `/operations/pre-launch-completion-plan-2026-06-07.md`; `/adopted/adr/2026-06-03-a10-token-format.md`; this session's close.
