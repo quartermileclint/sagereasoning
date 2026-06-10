@@ -1,6 +1,6 @@
 # SageReasoning Project Index
 
-Last updated: 10 June 2026 (dead-pointer fix at the S7b close; 2026-06-10 review rec Tier 4) | Maintained as part of P0 item 0e
+Last updated: 10 June 2026 (S8a close: capability inventory + pre-lawyer readiness statement + Zone-2 audit close + brand/presentation work package added; PROJECT_STATE/tech-guide disposition decided — retire-to-archive, move executes at S8b) | Maintained as part of P0 item 0e
 Prior versions preserved in `/archive/` (most recent: `2026-04-26_INDEX_pre-canonical-patterns-add.md`)
 
 ---
@@ -10,7 +10,8 @@ Prior versions preserved in `/archive/` (most recent: `2026-04-26_INDEX_pre-cano
 INDEX is a **governance navigator** — it tells you where governing documents, archive protocol, and handoff structure live. It does **not** try to track current project status or current technical state. Those change frequently and drift is the recurring failure mode.
 
 **For current project status and production state:** read `/CLAUDE.md` ("Production state" block, rewritten at session closes), the most recent session close in `/operations/handoffs/founder/`, and `/operations/decision-log.md`.
-**Historical snapshots (April 2026; no longer kept live):** `PROJECT_STATE.md`, `summary-tech-guide.md`, and `summary-tech-guide-addendum-context-and-memory.md` at root describe the 20–22 April state and predate the substrate pivot. Their disposition (retire-to-archive vs refresh) is a founder decision carried to S8. *(`TECHNICAL_STATE.md`, previously referenced here, does not exist in the repo — dead pointer removed 2026-06-10.)*
+**Historical snapshots (April 2026; no longer kept live):** `PROJECT_STATE.md`, `summary-tech-guide.md`, and `summary-tech-guide-addendum-context-and-memory.md` at root describe the 20–22 April state and predate the substrate pivot. Disposition decided at S8a (`D-S8A-OPEN-DECISIONS-2026-06-10`): **retire to /archive with pointers**; the move executes at S8b. *(`TECHNICAL_STATE.md`, previously referenced here, does not exist in the repo — dead pointer removed 2026-06-10.)*
+**0h-exit artefacts (2026-06-10, S8a):** `/operations/capability-inventory-2026-06-10.md` · `/operations/pre-lawyer-readiness-statement-2026-06-10.md` (doubles as the lawyer cover note; 0h HELD pending S8b) · `/operations/safety-signal-audits/2026-06-10-zone2-haiku-leg-calibration-audit.md` · `/drafts/2026-06-10-brand-presentation-work-package.md` (under review).
 
 Code directories (`/website/`, `/api/`, `/sage-mentor/`, `/trust-layer/`, etc.) are not listed here to prevent status drift. Their current status lives in `/CLAUDE.md` and the decision log.
 

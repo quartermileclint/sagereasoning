@@ -552,12 +552,20 @@ It is **NOT** reduced to a single line such as "founder to stand up the test env
 
 **Rationale:** the founder has no coding experience (founder preferences). A one-line operational hand-off is precisely the failure mode those preferences are written against. **Engagement:** any session whose work crosses the Cowork boundary into founder-performed territory — notably the post-Option-A configuration testing, where the live runs reach `localhost`, which the Cowork sandbox cannot.
 
+### PR18 — Production-State Blocks Are Close-Time Artifacts (NEW; 2026-06-10)
+
+**Source:** PR8 third-recurrence promotion, elected by the founder at S8a open (2026-06-10), recorded under `D-PR18-ADOPTED-CLOSE-TIME-PRODUCTION-STATE-2026-06-10`. Recurrences cited: 2026-06-07 completion-plan table (corrected at S6); S3–S5 close blocks (corrected at S6); CLAUDE.md post-S5 (found stale again at the 2026-06-10 multidisciplinary review).
+
+Any "production state" summary (the CLAUDE.md block, plan tables, close blocks) is rewritten **only at session close**, only from (a) the decision log and (b) that session's verified observations, and always carries its as-of date. Mid-session documents state flag dispositions only by citing a dated decision-log entry.
+
+**Rationale:** three recurrences of the same drift class — a summary block retyped mid-arc from prose rather than from the decision log — each propagated stale state into subsequent session opens. PR8 promotes the pattern at the third recurrence. **Engagement:** every session close that touches a production-state summary; any mid-session document that needs to state a flag disposition.
+
 ---
 
 ## Cross-references
 
 - `/manifest.md` — full manifest (R0–R20, AC1–AC13, KG1–KG7)
-- `/adopted/standing-protocol-cache.md` — general session protocol cache (references PR10-PR17; PR17 added 2026-05-27)
+- `/adopted/standing-protocol-cache.md` — general session protocol cache (references PR10-PR18; PR17 added 2026-05-27; PR18 added 2026-06-10)
 - `/adopted/build-sessions-protocol-cache.md` — build-arc-specific cache
 - `/adopted/substrate-plugin-staging-plan.md` — substrate-as-plugin staging plan (amended at ST2)
 - `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` — J1 ADR (Character Kernel category label)

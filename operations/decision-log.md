@@ -10491,3 +10491,77 @@ cd website && npx tsc --noEmit   # exit 0
 **Rules served:** R6c, R19, R19b, 0a, 0c, 0d-ii, 0e, 0f, PR7, PR16 (F2 strengthens Character Kernel positioning — honesty is the brand).
 
 **Status:** Adopted. Cross-references: `D-MULTIDISCIPLINARY-REVIEW-2026-06-10`, `D-PRELAUNCH-S7B-A13-DELIVERY-LIVE-2026-06-10`.
+
+---
+
+## 2026-06-10 — D-S8A-OPEN-DECISIONS-2026-06-10
+
+**Decision:** The six founder decisions queued at S8 open, each taken before any work (PR7, one line each): **(1)** S8 split per review rec 2.1 **Option A** — S8a (this session) = e2e use cases + capability inventory + readiness statement; S8b = registry reconcile + R18 public-materials pass. **(2)** `/api/score-conversation` is **INSIDE** the R20a perimeter — wiring it is a future Critical session per the AC5 ninth-route pattern, before launch. **(3)** `/api/founder/hub` — **fix the stale text** referencing the distress check (Standard; S8b); do not wire a ninth route for a founder-only surface. **(4)** The two practice-name H1s are **renamed to plain English**: "Premeditatio Malorum" → "Preparing for Adversity"; "Oikeiosis Extension" → "Expanding Your Circle of Concern" (names approved; edit rides S8b). **(5)** Stream concentration **re-affirmed**; support-inbox pipeline **explicitly mothballed**, revival trigger = first real external users post-launch. **(6)** PROJECT_STATE.md + summary-tech-guide **retired to /archive with pointers** to CLAUDE.md's dated block + the decision log (move executes at S8b per 0e/Elevated archive class). Plus: candidate **PR18 elected — adopted as written** (founder approved the proposal text verbatim).
+
+**Reasoning:** All six carried from the S7b close and the 2026-06-10 review (rec 2.1/2.3 + Tier 4 + the PR8 third-recurrence flag). Decision 2 follows P2's exit criterion ("all human-facing tools include distress detection") — grounded by read: the route is human-authenticated free text with no distress check today. Decision 3 avoids a Critical perimeter expansion for an audience of one. Decision 4 closes the R8c carry-forward (4 closes old).
+
+**Files touched:** `operations/decision-log.md` (this entry). Executions ride S8b except PR18 (same-session, next entry).
+
+**Risk classification:** Standard under 0d-ii — decisions + documentation only this session. AC7 not engaged. PR6 not engaged (decision 2 is membership only; the wiring session will be Critical).
+
+**Rollback path:** decisions are reversible by superseding entries; no code or production change.
+
+**Verification step (founder-performable):** read this entry; confirm each line matches your elections in-session.
+
+**Rules served:** R8c, R20a, AC5, 0a, 0d-ii, 0e, 0f, PR6 (posture), PR7, PR8.
+
+**Status:** Adopted. Cross-references: `D-PRELAUNCH-S7B-A13-DELIVERY-LIVE-2026-06-10`, `D-MULTIDISCIPLINARY-REVIEW-2026-06-10`, review recs 2.1/2.3.
+
+---
+
+## 2026-06-10 — D-PR18-ADOPTED-CLOSE-TIME-PRODUCTION-STATE-2026-06-10
+
+**Decision:** Adopt **PR18 — Production-state blocks are close-time artifacts** — as proposed by the 2026-06-10 review (PR8 third-recurrence promotion), text adopted as written: any "production state" summary (CLAUDE.md block, plan tables, close blocks) is rewritten only at session close, only from (a) the decision log and (b) that session's verified observations, and always carries its as-of date; mid-session documents state flag dispositions only by citing a dated decision-log entry.
+
+**Reasoning:** PR8 mandates promotion on the third recurrence; the three recurrences cited: 2026-06-07 completion-plan table (corrected S6); S3–S5 close blocks (corrected S6); CLAUDE.md post-S5 (stale again at the 2026-06-10 review). Founder elected adoption at S8a open and approved the text verbatim.
+
+**Files touched:**
+- `adopted/project-instructions-snapshot.md` — PR18 section appended after PR17; cache cross-reference line updated
+- `adopted/standing-protocol-cache.md` — same-session cache update per the update discipline (header amendment line; PR range PR1–PR18 in two places). This step serves as the cache-drift-resolution step for this governance change.
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — governance documentation. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` of the docs commit; prior versions in git history.
+
+**Verification step (founder-performable):** read the PR18 section in `adopted/project-instructions-snapshot.md`; paste-sync the Cowork project-instructions panel from the snapshot at next sync.
+
+**Rules served:** 0f, PR7, PR8, PR18 (born this entry).
+
+**Status:** Adopted. Cross-references: `D-MULTIDISCIPLINARY-REVIEW-2026-06-10` (the candidate proposal), `D-S8A-OPEN-DECISIONS-2026-06-10` (the election).
+
+---
+
+## 2026-06-10 — D-PRELAUNCH-S8A-E2E-VERIFICATION-2026-06-10
+
+**Decision:** Pre-Launch S8a executed per Option A: both end-to-end production use cases run by the founder and passed; the Zone-2 calibration eval run live (closing the 18-April PARTIAL audit, with findings); the honest capability inventory and the pre-lawyer readiness statement produced. **The founder HELD the 0h exit until S8b completes the registry reconcile** (strict reading of exit criterion 1) — six of seven criteria met at S8a. Two scope adjudications were forced by the gate and elected by the founder, both **pre-launch, parallel with the lawyer engagement**: **(a)** the substrate migration of the human tools (the e2e human run + code-read established that all tool routes still run the original prose paths — `runSageReason` on the five score routes; raw `messages.create` on `/score-scenario` + `/reflect`; the translation sandwich is Live on `/api/reason` only; staging item A8, the migration vehicle, is Scoped and was never scheduled — the founder's expectation that substitution had occurred is corrected on the record); **(b)** the brand/presentation work package (proximity-target visualisation with concentric circles + passion symbols + grey history; brand guidelines v2; Human/Developer home-page imagery; agent developer-form target-state contract) — captured at `/drafts/2026-06-10-brand-presentation-work-package.md` from the founder's direction + the `/brand/` assets (two mapping RTFs saved 2026-06-10).
+
+**Verified results (founder-performed, production, walked live per PR17):**
+- *Human use case:* real founder decision (lawyer engagement) through `/score`, signed in → four stages + R3 disclaimer + reflection rendered, ~36s, no redirect; founder verbatim: "very good and detailed and provided guidance to decision making." Screenshot kept as the migration comparison baseline.
+- *Agent use case:* mint `sr_inst_` (201) → `POST /api/reason` with minimal-valid `layer1_schema` (200, 13.1s, assessment payload, not redirected; substrate decomposition L1 0ms / **L2 1ms deterministic** / L3 10,693ms) → revoke (200) → re-use (401).
+- *Zone-2 Haiku leg:* 6/6 **engaged, 0/6 redirected** (the audit's protected behaviour); 5/6 labelled `mild` vs authored `none` — diagnostic-certain: the prompt's deliberate "if uncertain, flag mild" conservatism; mild never redirects ("include resources but don't block", code-read). **Founder adjudicated: accepted as designed; audit closed** at `/operations/safety-signal-audits/2026-06-10-zone2-haiku-leg-calibration-audit.md`. Side findings: fail-safe logging verified incidentally; `flag_written` metadata inconsistency between branches (cosmetic, queued). Runner sessionId UUID bug AI-caused and fixed same session ("I caused this"); consequence: the run wrote no cost-log rows.
+
+**Files touched:**
+- `website/src/lib/__tests__/run-zone2-calibration-eval.ts` — NEW (verification runner; additive; no perimeter code touched)
+- `operations/safety-signal-audits/2026-06-10-zone2-haiku-leg-calibration-audit.md` — NEW (closes the 2026-04-18 PARTIAL)
+- `operations/capability-inventory-2026-06-10.md` — NEW (0h criteria 2–4 artefact)
+- `operations/pre-lawyer-readiness-statement-2026-06-10.md` — NEW (0h-exit artefact + lawyer cover note; carries the HELD decision)
+- `drafts/2026-06-10-brand-presentation-work-package.md` — NEW (W1–W5 scope; under founder review)
+- `operations/decision-log.md` — this entry + the two predecessors today
+
+**Risk classification:** Standard under 0d-ii — verification + documentation; no flag, schema, or perimeter change; production byte-identical throughout. **PR6 NOT engaged** (Zone-2 eval is verification; classifier untouched). **AC7 NOT engaged.** **PR4:** the eval invokes the production classifier whose model is Haiku per cache AC1/KG2 (row cited); no model selection changed.
+
+**Rollback path:** none needed — documentation + one additive test file; `git revert` covers all.
+
+**Verification step (founder-performable):** re-run the eval any time (`npx tsx --env-file=.env.local src/lib/__tests__/run-zone2-calibration-eval.ts` from `website/`; expect 6/6 ENGAGE-PASS, label mismatches listed as documented); re-run the agent console block from this session (S6/S8a pattern); read the three artefacts.
+
+**Open questions:** carried — 0h declaration expected at S8b close; W-package details for founder confirmation in review (target orientation inward; owl-coin/mirror/non-ready-items roles).
+
+**Rules served:** R3, R19, R20a, AC1, AC5 (posture), KG2, 0a, 0c, 0d-ii, 0f, 0h, PR1 (migration discipline cited), PR2, PR4, PR6 (posture), PR7, PR10 (PEV; diagnostic-certain signalled), PR13, PR16 (human use case = dogfood on a real kathekon-laden decision), PR17.
+
+**Status:** Adopted. Implementation status: Zone-2 calibration audit → **closed** (18-Apr PARTIAL superseded); capability inventory + readiness statement → produced; 0h → **HELD pending S8b**; substrate migration of human tools → Scoped (pre-launch, founder-elected); brand/presentation package W1–W5 → Scoped (pre-launch, founder-elected). Cross-references: `D-S8A-OPEN-DECISIONS-2026-06-10`, `D-PR18-ADOPTED-CLOSE-TIME-PRODUCTION-STATE-2026-06-10`, `D-PRELAUNCH-S7B-A13-DELIVERY-LIVE-2026-06-10`; the S8a close + S8b prompt.
