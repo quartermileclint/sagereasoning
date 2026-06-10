@@ -1,6 +1,6 @@
 # SageReasoning Project Index
 
-Last updated: 26 April 2026 | Maintained as part of P0 item 0e
+Last updated: 10 June 2026 (dead-pointer fix at the S7b close; 2026-06-10 review rec Tier 4) | Maintained as part of P0 item 0e
 Prior versions preserved in `/archive/` (most recent: `2026-04-26_INDEX_pre-canonical-patterns-add.md`)
 
 ---
@@ -9,10 +9,10 @@ Prior versions preserved in `/archive/` (most recent: `2026-04-26_INDEX_pre-cano
 
 INDEX is a **governance navigator** — it tells you where governing documents, archive protocol, and handoff structure live. It does **not** try to track current project status or current technical state. Those change frequently and drift is the recurring failure mode.
 
-**For current project status:** read `PROJECT_STATE.md` at root.
-**For current technical state:** read `summary-tech-guide.md` + `summary-tech-guide-addendum-context-and-memory.md` at root (both adopted Apr 22 and kept live). `TECHNICAL_STATE.md` is older (Apr 11) and being assessed under D5.
+**For current project status and production state:** read `/CLAUDE.md` ("Production state" block, rewritten at session closes), the most recent session close in `/operations/handoffs/founder/`, and `/operations/decision-log.md`.
+**Historical snapshots (April 2026; no longer kept live):** `PROJECT_STATE.md`, `summary-tech-guide.md`, and `summary-tech-guide-addendum-context-and-memory.md` at root describe the 20–22 April state and predate the substrate pivot. Their disposition (retire-to-archive vs refresh) is a founder decision carried to S8. *(`TECHNICAL_STATE.md`, previously referenced here, does not exist in the repo — dead pointer removed 2026-06-10.)*
 
-Code directories (`/website/`, `/api/`, `/sage-mentor/`, `/trust-layer/`, etc.) are not listed here to prevent status drift. Their current status is part of `PROJECT_STATE.md` and the tech guide.
+Code directories (`/website/`, `/api/`, `/sage-mentor/`, `/trust-layer/`, etc.) are not listed here to prevent status drift. Their current status lives in `/CLAUDE.md` and the decision log.
 
 ---
 
@@ -37,7 +37,7 @@ Code directories (`/website/`, `/api/`, `/sage-mentor/`, `/trust-layer/`, etc.) 
 | `/operations/handoffs/` | Canonical handoff tree — see "Handoff Structure" below. |
 | `/LICENSE` | Proprietary Evaluation-Only licence. |
 
-Root-level files that are **content, not governance** (updated as project evolves): `README.md`, `PROJECT_STATE.md`, `TECHNICAL_STATE.md`, `summary-tech-guide.md`, `summary-tech-guide-addendum-context-and-memory.md`, `users-guide-to-sagereasoning.md`, `SageReasoning_Ecosystem_Map.html`. Read these for project/technical/user state — do not read INDEX for those.
+Root-level files that are **content, not governance**: `README.md` (status section marked historical 2026-06-10), `PROJECT_STATE.md`, `summary-tech-guide.md`, `summary-tech-guide-addendum-context-and-memory.md`, `users-guide-to-sagereasoning.md`, `SageReasoning_Ecosystem_Map.html` — all April-era snapshots except README's top matter. For current state read `/CLAUDE.md` + the decision log, not these.
 
 ---
 
@@ -108,7 +108,7 @@ AI: "Confident" / "Making an assumption" / "Need your input" / "Push back" / "Li
 
 **Before any task:** read `manifest.md` and quote applicable rules by number.
 
-**To find a document not listed here:** check `PROJECT_STATE.md` for current content, the ecosystem map (`SageReasoning_Ecosystem_Map.html`) for the full visual inventory, or grep the repo.
+**To find a document not listed here:** check the ecosystem map (`SageReasoning_Ecosystem_Map.html`) for the visual inventory (April-era), `/CLAUDE.md` + the decision log for current state, or grep the repo.
 
 ---
 

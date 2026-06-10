@@ -1,6 +1,6 @@
 # SageReasoning
 
-**The world's leading reference for Stoic-based reasoning.**
+**A structured Stoic reasoning reference for humans and AI agents.**
 **Website:** [sagereasoning.com](https://sagereasoning.com)
 
 ---
@@ -9,7 +9,7 @@
 
 SageReasoning is a system that encodes 2,000 years of Stoic philosophy into a structured, machine-readable "Stoic Brain" — a single reference point that both humans and AI can use to measure, guide, and improve decisions against the standard of a perfect Stoic sage.
 
-The core idea: give any action, document, conversation, or decision to the Stoic Brain and receive a score (0–100) across the four cardinal virtues of Stoicism — Wisdom, Justice, Courage, and Temperance — along with reasoning and a path toward improvement.
+The core idea: give any action, document, conversation, or decision to the Stoic Brain and receive a qualitative assessment across the four cardinal virtues of Stoicism — Wisdom, Justice, Courage, and Temperance — along with reasoning and a path toward improvement.
 
 **Who it's for:**
 - Humans seeking a Stoic decision-making framework to prompt their actions
@@ -86,8 +86,6 @@ Built with Next.js (a web framework), hosted on Vercel (free), auto-deploys ever
 | Score Detail | `/score/{id}` | Public page showing a scored document's full virtue breakdown (where badge links go) |
 | Review a Policy | `/score-policy` | Score contracts, terms of service, or company policies — justice and temperance weighted more heavily, flags problematic clauses |
 | Social Media Filter | `/score-social` | Score a post before publishing — get publish/revise/reconsider recommendation |
-| Hiring Assessment | `/hiring` | Generate role-specific ethical scenarios for candidates, score their moral reasoning |
-| Coaching Companion | `/therapy` | Stoic therapeutic exercises — practitioners assign, clients journal, virtue feedback returned |
 | Ethical Scenarios | `/scenarios` | Age-appropriate ethical dilemmas (child/teen/adult) with options and scoring |
 
 **Key code files in the website:**
@@ -246,7 +244,9 @@ These files sit in public locations so AI crawlers, search engines, and AI agent
 
 ---
 
-## Current Status (as of 28 March 2026)
+## Current Status (historical — as of 28 March 2026)
+
+> **Note (2026-06-10):** the status tables below reflect 28 March 2026 and predate the substrate pivot (Character Kernel, `/api/reason`, the R20a safety perimeter, GDPR data-rights endpoints, observability). **Current production state is maintained in `/CLAUDE.md` ("Production state" block) and the decision log (`/operations/decision-log.md`)** — not here. The `/hiring` and `/therapy` pages previously listed in this README were removed from production (404, verified 2026-06-10).
 
 ### Live Features
 
@@ -259,8 +259,6 @@ These files sit in public locations so AI crawlers, search engines, and AI agent
 | Score a Document | `/score-document` | ✅ Live |
 | Review a Policy | `/score-policy` | ✅ Live |
 | Social Media Filter | `/score-social` | ✅ Live |
-| Hiring Assessment | `/hiring` | ✅ Live |
-| Coaching Companion | `/therapy` | ✅ Live |
 | Ethical Scenarios | `/scenarios` | ✅ Live |
 | Dashboard | `/dashboard` | ✅ Live |
 | **Stoic Journal** | `/journal` | ✅ Live — deployed 26 March 2026 |
@@ -325,10 +323,10 @@ Run `api/migrations/add-journal-entries-table.sql` in Supabase SQL Editor. ✅ D
 | Decision Scorer | `/api/score-decision` | — | ✅ Live |
 | Conversation Auditor | `/api/score-conversation` | — | ✅ Live |
 | Daily Reflection | `/api/reflect` | — | ✅ Live |
-| Hiring Assessment | `/api/score-hiring` | `/hiring` | ✅ Live |
+| Hiring Assessment | `/api/score-hiring` | — (page removed; 404 as of 2026-06-10) | API only |
 | Policy Reviewer | `/api/score-document` (mode: policy) | `/score-policy` | ✅ Live |
 | Social Media Filter | `/api/score-social` | `/score-social` | ✅ Live |
-| Coaching Companion | `/api/score-therapy` | `/therapy` | ✅ Live |
+| Coaching Companion | `/api/score-therapy` | — (page removed; 404 as of 2026-06-10) | API only |
 | Ethical Scenarios | `/api/score-scenario` | `/scenarios` | ✅ Live |
 
 ---

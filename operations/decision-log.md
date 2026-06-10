@@ -10437,3 +10437,57 @@ cd website && npx tsc --noEmit   # exit 0
 **Rules served:** R19, 0a, 0b, 0c, 0d-ii, 0f, PR5 (KG-EX1 applied), PR7, PR8 (third-recurrence flag), PR11, PR12, PR13, PR14 (ten domains), PR15 (no bespoke build elected), PR16, PR17 (side-effect ownership). PR4 N/A (no LLM call added to the product; no model selected).
 
 **Status:** Adopted (as record). Implementation status of recommendations: not started — Under review, founder elects. Cross-references: `D-PRELAUNCH-S7-A13-DELIVERY-BUILT-DEPLOY-DEFERRED-2026-06-09`, `D-PRELAUNCH-S6-R20A-AUDIENCE-RENDERING-VERIFIED-2026-06-09`; `/operations/pre-launch-completion-plan-2026-06-07.md`; this session's close + the 2026-06-10 next-session prompt.
+
+---
+
+## 2026-06-10 — D-PRELAUNCH-S7B-A13-DELIVERY-LIVE-2026-06-10
+
+**Decision:** Execute the Critical deploy deferred from S7: the A13 automated alert-delivery cron (Vercel Cron `0 8 * * *` → `/api/cron/observability` → both observability evaluators → Slack webhook) and the A14 read-only SLO/health tracker were deployed to production and verified live by the founder. **A13 automated delivery → Live. A14 tracker → Live (provisional).** One in-flight fix was required and is recorded below (`CRON_SELF_BASE_URL`).
+
+**Critical Change Protocol record (0c-ii, all six steps completed visibly in-session):**
+1. *What changed:* daily 08:00 UTC cron runs the cost + abuse evaluators and posts fired signals to Slack; read-only founder-gated SLO page activated. Nothing on the `/api/reason` hot path.
+2. *What could break:* worst case the cron/webhook misconfigures → no Slack message (back to pull-only). A bad `vercel.json` fails the deploy; Vercel keeps serving the prior deployment.
+3. *Existing sessions:* unaffected — no auth/session change; no current users.
+4. *Rollback:* remove `crons` block + redeploy (or Vercel → Cron Jobs → Disable); unset `ALERT_WEBHOOK_URL`; unset `SUBSTRATE_SLO_TRACKER_ENABLED` (A14 → 503); `git revert` removes route + config. R20a flags + `/api/reason` untouched throughout.
+5. *Verification:* see founder-verified results below.
+6. *Approval:* given at S7 (`D-PRELAUNCH-S7-A13-DELIVERY-BUILT-DEPLOY-DEFERRED-2026-06-09`); **re-confirmed by the founder at S7b open, specific to the named risks, before any Vercel action.**
+
+**Founder-performed deploy (walked live, PR17):** Slack incoming webhook created (`SageReasoning Alerts`) → Vercel Root Directory confirmed `website` → env vars set in Production BEFORE the deploying push: `CRON_SECRET` (S7-recorded value, Sensitive), `ALERT_WEBHOOK_URL` (Sensitive), `SUBSTRATE_SLO_TRACKER_ENABLED=true` → commit + push (the S7 build + the 2026-06-10 review record) → Vercel deploy green.
+
+**Founder-verified results (2026-06-10):**
+- (a) Cron registered: Vercel → Settings → Cron Jobs shows `/api/cron/observability` at `0 8 * * *`. ✅
+- (b) Forced-signal test: `curl …?test=1` with `Authorization: Bearer <CRON_SECRET>` → HTTP 200; Slack message received; final state both evaluators evaluated clean ("Cost-health: clear (0 fired) • Abuse: clear (0 fired)"). ✅
+- (c) Negative auth: same curl without header → HTTP 401. ✅
+- (d) A14: `/api/admin/slo-health` with founder JWT → 200, `"provisional":true`, 6 rows, p50/p95 vs SLO targets. ✅
+
+**Incident + fix (PEV Verify step; "I caused this" acknowledged in-session):** the first forced-signal test delivered to Slack but both evaluators reported HTTP 401. **Diagnostic-certain — root cause identified:** the cron route's self-calls used `https://${VERCEL_URL}` (a `*.vercel.app` host); the project's Vercel Deployment Protection is **Standard Protection** (founder-confirmed by read), which walls all `*.vercel.app` URLs behind Vercel Authentication — the 401 came from Vercel's wall, not the evaluators (whose tokens were verified working on the custom domain 2026-06-10 by the review). *Fix:* the S7-built `CRON_SELF_BASE_URL` override was set to `https://www.sagereasoning.com` (Production) + redeploy — config-only, no code change, inside the approved deploy's risk envelope (rollback: unset the var). Re-test passed clean. Secondary finding: the S7b prompt's check (d) ("open the A14 page signed-in in a browser") was wrong — `requireAdmin` reads only the `Authorization: Bearer` header, so a browser page-visit 401s regardless of sign-in; verified instead via the console-fetch snippet (JWT from `sb-*-auth-token` localStorage). Both findings filed in `operations/tech-known-issues.md`.
+
+**Risk classification (0d-ii):** Critical (deployment-configuration activation), executed under the full protocol. **PR6 NOT engaged** (boundary re-checked by read at open: cron touches only the observability evaluators; A14 reads structural latency only). **AC7 NOT engaged** (no auth/cookie/session/redirect change; `CRON_SELF_BASE_URL` is an egress base-URL config, not an auth surface). **PR4 N/A** (no LLM call; no model selected). PR15: no bespoke build — Vercel-native cron + existing evaluators (carried from S7).
+
+**Rollback path:** as protocol step 4 above. Nothing schema-level to undo.
+
+**Open questions:** none new. Carried: per-install metering (PR7); `/api/user/export` consolidation; A14 stays provisional until real traffic; npm vulns (own session).
+
+**Rules served:** R5, R0, AC2, 0a, 0c, 0c-ii, 0d-ii, 0f, PR2, PR3, PR7, PR10, PR17, KG1. PR6 not engaged. AC7 not engaged. PR4 N/A.
+
+**Status:** Adopted. Implementation status: A13 automated delivery → **Live (production-verified)**; A14 SLO tracker → **Live (provisional)**; `CRON_SECRET` + `ALERT_WEBHOOK_URL` + `SUBSTRATE_SLO_TRACKER_ENABLED` + `CRON_SELF_BASE_URL` → set (Production). Cross-references: `D-PRELAUNCH-S7-A13-DELIVERY-BUILT-DEPLOY-DEFERRED-2026-06-09`, `D-MULTIDISCIPLINARY-REVIEW-2026-06-10`; `/operations/pre-launch-completion-plan-2026-06-07.md` (its S7b); this session's close.
+
+---
+
+## 2026-06-10 — D-S7B-RIDE-ALONG-FILLS-F1-F4-2026-06-10
+
+**Decision:** Execute the four review-elected Standard fills riding S7b (review recs 1.2–1.4 + Tier 4): **F1** CLAUDE.md production-state block rewritten (A10/A11b/A19-detectors corrected to Live; A13-delivery/A14 added; dated 2026-06-10; carries the candidate-PR18 close-time discipline). **F2** README honesty fixes (R19b tagline replaced; R6c 0–100 wording removed; `/hiring` + `/therapy` rows removed/annotated as 404; status section retitled historical with a dated pointer to CLAUDE.md + the decision log). **F3** `website/.env.example` rewritten as a complete 58-variable census (names + purpose; secrets as names with generation hints; S7b vars incl. the `CRON_SELF_BASE_URL` lesson documented; prior 6-var version in git history). **F4** `operations/tech-known-issues.md` refreshed (7 current issues; S7b 401 incident filed resolved) + `INDEX.md` dead-pointer fix (`TECHNICAL_STATE.md` reference removed; April snapshots labelled historical; current-state pointers → CLAUDE.md + decision log; PROJECT_STATE/tech-guide retire-vs-refresh disposition carried to S8 as a founder decision).
+
+**Reasoning:** session-packing per the completion plan; none touch the Critical spine. Founder elected all four at open and approved the diffs in-session (incl. the known-issues file per its maintenance contract).
+
+**Files touched:** `CLAUDE.md`, `README.md`, `website/.env.example`, `operations/tech-known-issues.md`, `INDEX.md`, `operations/decision-log.md` (this entry).
+
+**Risk classification:** Standard under 0d-ii — documentation only. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` of the docs commit; prior versions in git history.
+
+**Verification step (founder-performable):** read each file directly (0c: business document → founder reads).
+
+**Rules served:** R6c, R19, R19b, 0a, 0c, 0d-ii, 0e, 0f, PR7, PR16 (F2 strengthens Character Kernel positioning — honesty is the brand).
+
+**Status:** Adopted. Cross-references: `D-MULTIDISCIPLINARY-REVIEW-2026-06-10`, `D-PRELAUNCH-S7B-A13-DELIVERY-LIVE-2026-06-10`.

@@ -45,26 +45,26 @@ Bespoke election requires justification in the session's decision-log entry unde
 - **Decision log** (last 3 entries at session-open): `/operations/decision-log.md`
 - **Active build-arc cache**: `/adopted/build-sessions-protocol-cache.md`
 
-## Production state (as of 2026-06-09)
+## Production state (as of 2026-06-10, S7b close)
 
-Refreshed at the Pre-Launch S3 close (`D-PRELAUNCH-S3-ABUSE-DETECTION-ACTIVATION-2026-06-08`); **corrected at the Pre-Launch S6 close 2026-06-09** (`D-PRELAUNCH-S6-R20A-AUDIENCE-RENDERING-VERIFIED-2026-06-09`) — the two R20a flags (`SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED` + `SUBSTRATE_R20A_GATE_ENABLED`) were mislisted here as inert; they have in fact been Live since 2026-05-31 and were production-verified at S6 (both audience branches observed). The drift originated in the 2026-06-07 completion-plan table and propagated through the S3–S5 blocks. Supersedes the 2026-05-14 block (prior version preserved in git history). Production is served at `www.sagereasoning.com` (the apex `sagereasoning.com` 307-redirects to `www`).
+Refreshed at the Pre-Launch S7b close (`D-PRELAUNCH-S7B-A13-DELIVERY-LIVE-2026-06-10`), incorporating the 2026-06-10 multidisciplinary review's drift corrections (`D-MULTIDISCIPLINARY-REVIEW-2026-06-10` — the prior block still listed A10, A11b, and the A19 structural detectors as inert; all went Live at S4/S5, 2026-06-08/09). Supersedes the 2026-06-09 block (prior version preserved in git history). Per the candidate PR18 discipline: this block is rewritten only at session close, from the decision log + that session's verified observations, and always carries its as-of date. Production is served at `www.sagereasoning.com` (the apex `sagereasoning.com` 307-redirects to `www`).
 
 **Live in production:**
-- Core distress detection + redirect, audience-correct rendering, and the server-side gate — **all four R20a flags `true`** (`SUBSTRATE_CALLING_R20A_ENABLED`, `SUBSTRATE_REFLECT_R20A_ENABLED`, `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED`, `SUBSTRATE_R20A_GATE_ENABLED`) — Live since 2026-05-31; both audience branches production-verified at the S6 close 2026-06-09 (human path → human crisis message; agent path → developer-form payload). The safety floor.
+- Core distress detection + redirect, audience-correct rendering, and the server-side gate — **all four R20a flags `true`** (`SUBSTRATE_CALLING_R20A_ENABLED`, `SUBSTRATE_REFLECT_R20A_ENABLED`, `SUBSTRATE_R20A_AUDIENCE_RENDERING_ENABLED`, `SUBSTRATE_R20A_GATE_ENABLED`) — Live since 2026-05-31; both audience branches production-verified at S6 (human path → human crisis message; agent path → developer-form payload). The safety floor.
 - `/api/reason` — Substrate at A7 Verified; behaviour byte-identical to pre-A7 cutover (OTel + audit are additive, no-throw, off the hot path)
 - A12 OpenTelemetry + call-grain audit (S2) — `SUBSTRATE_OTEL_ENABLED=true`; `substrate_audit_events` Live, receiving masked (structural-only) rows on `/api/reason`
 - GDPR data-rights (S1) — `compliance_access_log` + `compliance_rectification_log` Live; `/api/user/access` (A15b) + `/api/user/rectify` (A15c) + `/api/user/delete` (R17c) + `/api/user/export` (R17i) Verified-live
-- A13 cost-health detection — Live
-- **A19 abuse-detection (S3)** — `SUBSTRATE_ABUSE_DETECTION_ENABLED=true` + `ABUSE_DETECTION_EVAL_TOKEN` set (Production); `abuse_signals` Live; `/api/abuse/evaluate` answers (200 with service token, 401 without — was 503). Detection-only (no enforcement). Runs the `request_velocity_anomaly` detector only in production.
+- A13 cost-health detection — Live; **A13 automated delivery — Live since S7b (2026-06-10)**: daily Vercel Cron `0 8 * * *` → `/api/cron/observability` (CRON_SECRET-gated) runs both evaluators and posts fired signals to Slack (`ALERT_WEBHOOK_URL`). Forced-signal test verified end-to-end (200, both evaluators ok, Slack message received; negative-auth 401). Self-calls route via `CRON_SELF_BASE_URL=https://www.sagereasoning.com` — required because Vercel Deployment Protection (Standard) walls the `*.vercel.app` URLs that `VERCEL_URL` resolves to.
+- **A14 SLO/health tracker — Live (provisional) since S7b**: `/api/admin/slo-health`, `SUBSTRATE_SLO_TRACKER_ENABLED=true`, founder-admin gated (Bearer JWT only — a browser page-visit 401s; use the console-fetch snippet; see tech-known-issues).
+- **A19 abuse-detection (S3 + S5) — all three detectors Live** (`SUBSTRATE_ABUSE_DETECTION_ENABLED=true` + `SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED=true` + `ABUSE_DETECTION_EVAL_TOKEN` set); `abuse_signals` Live; `/api/abuse/evaluate` 200 with service token / 401 without. Detection-only (no enforcement).
+- **A10 per-install plugin auth — Live since S5 (2026-06-09)** (`PLUGIN_INSTALL_AUTH_ENABLED=true`): mint→use→revoke→401 cycle production-verified; per-install metering/quota enforcement deferred (trigger: first paid agent onboard).
+- **A11b injection defence — Live since S4 (2026-06-08)** (`SUBSTRATE_INJECTION_DEFENCE_ENABLED=true`); TEST-parity adversarial probe re-passed in production.
 
-**Built but inert in production (flags UNSET):**
-- A19 structural detectors `systematic_enumeration` + `rapid_input_variation` — behind `SUBSTRATE_ABUSE_DETECTION_ROLLOUT_ENABLED` (sandbox-verified; production rollout is an S4 flag-flip)
-- A10 per-agent identity + metering — `PLUGIN_INSTALL_AUTH_ENABLED`
-- A11b injection defence — `SUBSTRATE_INJECTION_DEFENCE_ENABLED`
-- Layer 3 per-consumer rendering — `SUBSTRATE_LAYER3_ENABLED` (`/api/substrate/layer3` returns 503)
-- All four `SUBSTRATE_LAYER2_PREVIOUS_*` env vars UNSET; `/api/public-key` serves steady-state shape (Ed25519; `previous: null`; `rotation_overlap_until: null`)
-
-*(R20a audience-correct rendering + the R20a server-side gate were previously listed here as inert; corrected to Live above at the S6 close 2026-06-09 — see the dated note under "Production state".)*
+**Built but inert in production (flags UNSET or by decision):**
+- Layer 3 per-consumer rendering — `SUBSTRATE_LAYER3_ENABLED` unset (`/api/substrate/layer3` returns 503). **Decided OUT of launch scope at S7** (internal-only; revisit post-launch).
+- R20b independence-coaching — `R20B_INDEPENDENCE_COACHING_ENABLED` unset (off-perimeter, reviewed at S6).
+- All four `SUBSTRATE_LAYER2_PREVIOUS_*` env vars UNSET; `/api/public-key` serves steady-state shape (Ed25519; `previous: null`; `rotation_overlap_until: null`).
+- Stripe billing — `not_configured` in production (per `/api/health`); activation deliberately deferred (launch-criterion tension recorded for P1).
 
 Verify against `/manifest.md` AC7 disposition + the most-recent session close's "Production state at session close" line before any change to user-facing functionality.
 
