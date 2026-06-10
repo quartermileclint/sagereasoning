@@ -11,7 +11,8 @@
 The founder elected the substrate migration of the human tools pre-launch (S8a), and held the 0h exit in part on brand/presentation consistency (S8b blocker 2). A8 is the staging-plan vehicle (status: Scoped). This session produces the **per-endpoint migration map** — engine substitution AND presentation (W3 target rendering / W4 agent target-state contract) named together per endpoint so each route migrates ONCE. The map is what makes the migration arc a sequence of small, classified, PR1-disciplined sessions instead of a big bang.
 
 ## Pre-conditions
-1. The S8b commit is pushed (close's Founder Verification block); founder spot-check of registry v1.6.0 done or scheduled (0h blocker 1).
+0. **Sequencing (S8b addendum):** the P1 comparison pair (bare leg → harnessed leg → verdict memo, per `D-0H-MAIN-BLOCKER-VALUE-DEMONSTRATION-2026-06-10`) runs BEFORE this session unless the founder elects parallel at open.
+1. The S8b commit is pushed (close's Founder Verification block); founder spot-check of registry v1.6.0 done or scheduled (supporting blocker 1).
 2. Brand Guidelines v2 draft reviewed (`/drafts/2026-06-10-brand-guidelines-v2-draft.md`) — W3/W4 build to it (outward target; flame=Sage; Zeus=apprentice; placeholder list).
 3. The lawyer email is out (wall-clock — does not gate this session).
 

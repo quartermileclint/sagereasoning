@@ -10603,3 +10603,30 @@ Then after push: registry dashboards render v1.6.0 (https://www.sagereasoning.co
 **Rules served:** R18, R18a, R18b, R19, R19e, R20a (posture — text only), 0a, 0c, 0d-ii, 0e, 0f, 0h, PR2, PR7, PR11 (inbox scanned, nothing new; reconcile rests on internal records — stated), PR13 (R18 findings assessed: tier-copy drift contradicted the locked billing decision — corrected; no other prior decision affected), PR16 (honest materials + brand coherence strengthen Character Kernel positioning; dogfood n/a), PR17 (founder walked through every election in-session), PR18 (production-state blocks rewritten only at this close, dated).
 
 **Status:** Adopted. Cross-references: `D-REGISTRY-UPDATE-v1.6.0` (same session), `D-S8A-OPEN-DECISIONS-2026-06-10`, `D-PRELAUNCH-S8A-E2E-VERIFICATION-2026-06-10`, `D-PR18-ADOPTED-CLOSE-TIME-PRODUCTION-STATE-2026-06-10`, `D-BILLING-MODEL-LOCKED-2026-05-17`; the S8b close + the A8 mapping prompt.
+
+---
+
+## 2026-06-10 — D-0H-MAIN-BLOCKER-VALUE-DEMONSTRATION-2026-06-10
+
+**Decision:** The founder names the substantive **main blocker** behind the 0h hold (S8b addendum, in-session): the product's value to a working agent has not yet been demonstrated on a real task. The test: run the **P1 inputs rebuild** (review rec 3.2) twice from the same git baseline — **leg A bare**, then **leg B harnessed under the public contract** (`sr_inst_` mint → `/api/reason` consultations at pre-defined decision points → `/api/guardrail` gates → Sage Assent accreditation record at close) — measuring pre-registered metrics both legs: wall-clock, token cost (session + harness), findings count/quality, **decisions-changed-by-consultation**, errors caught, output quality (founder blind-ish comparative read), artefacts. The comparison is the criterion-4 value demonstration for the agent/developer audience and the public-facing evidence of whether the trust layer works in practice; **the 0h declaration is expected only after the verdict memo exists — either outcome stands** (positive = launch case study; negative = scope correction in R&D, which is what 0h is for). The three previously named blockers stand as supporting (founder verification of the reconcile; brand W1–W4; score-conversation wiring).
+
+**Reasoning:** S8a verified the agent *contract* (mint → 200 → revoke → 401), not the agent *benefit*; 0h criterion 4 requires the value proposition demonstrated per audience; the mission's dogfood line and PR16 require it on ourselves first. Environment constraint verified this session: the Cowork sandbox cannot reach `www.sagereasoning.com` (curl blocked; web_fetch carries no auth headers — the 2026-06-06 PR5 egress finding still holds), so **both legs run in Claude Code on the founder's machine** (same environment/model both legs; Claude Code's cost report also closes the KG5 measurement gap for this run). Product finding logged: a Cowork-resident agent cannot integrate directly today — strengthens the Stage-3 MCP-connector path. Harness flavor: the **public contract**, not the sage-consult mentor bridge (the demonstration must consume what an external developer gets); optional Reflect leg at close, founder elects on the day.
+
+**Files touched:**
+- `drafts/2026-06-10-p1-comparison-test-design.md` — NEW; the pre-registration device (frozen at founder sign-off before leg A; §6 thresholds deliberately founder-set, not AI-set)
+- `operations/handoffs/founder/2026-06-10-P1-comparison-bare-leg-NEXT-SESSION-PROMPT.md` — NEW; leg A (runs in Claude Code; leg B prompt written at leg A close)
+- `operations/pre-lawyer-readiness-statement-2026-06-10.md` — HELD line carries the main blocker (ships to the lawyer regardless)
+- `operations/handoffs/founder/2026-06-10-prelaunch-S8b-close.md` + `CLAUDE.md` + the A8 prompt — consistency touches (0h phrasing; sequencing: comparison pair before A8 unless the founder elects parallel)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documentation and test design only; no flag, schema, or perimeter change. AC7 not engaged. PR6 not engaged. PR4 deferred to the legs (model named at each leg's open; same model both legs mandatory).
+
+**Rollback path:** `git revert` (documents only). The test itself is reversible by superseding entry.
+
+**Verification step (founder-performable):** read the design sheet; confirm §6 carries empty threshold boxes (pre-registration intact); confirm the leg-A prompt says Claude Code prominently.
+
+**Open questions:** §6 thresholds (founder sets at leg-A sign-off); Reflect leg inclusion (founder, on the day); A8 order relative to the pair (founder, at next open).
+
+**Rules served:** R0 (dogfood on ourselves first), R18/R19 (the demonstration IS the honest public claim), 0h (criterion 4 per audience), 0d-ii, 0f, PR4 (deferred, named), PR7, PR10 (pre-registration = the Verify step designed before Execute), PR11 (egress constraint re-verified live this session, stated), PR12 (egress negative finding re-tested before relying on it), PR13 (finding → Cowork integration path implication named), PR16 (dogfood lens applied to the product's own founding claim), PR17 (token minting walked live in leg B), PR18 (close-time blocks updated once, dated).
+
+**Status:** Adopted. Cross-references: `D-PRELAUNCH-S8B-RECONCILE-R18-RIDES-2026-06-10`, `D-PRELAUNCH-S8A-E2E-VERIFICATION-2026-06-10` (the contract verification this completes), review rec 3.2, `/drafts/2026-06-10-p1-comparison-test-design.md`.
