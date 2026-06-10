@@ -10367,3 +10367,73 @@ cd website && npx tsc --noEmit   # exit 0
 **Rules served:** R19, R19c, R20, R20a, R20b, AC5, 0a, 0c, 0c-ii, 0d-ii, 0f, PR6, PR10, PR12, PR13, PR15, PR17. AC7 not engaged. PR4 N/A (no model selected; classifier unchanged).
 
 **Status:** Adopted. Implementation status: R20a audience-correct rendering + R20a server-side gate → **confirmed Live (production)** (no status change — Live since 2026-05-31; this session verified the behaviour and corrected the record). Documentation drift → corrected (`CLAUDE.md`, completion plan, S5 close). The completion plan's bar — "every capability intended for launch Live AND verified in production, both audiences" — is **met for R20a**. Cross-references: `D-PRELAUNCH-S5-A10-METERING-ACTIVATION-2026-06-09`, `D-R20A-BATCH-ACTIVATION-REFLECT-AUDIENCE-2026-05-31`, `D-R20A-GATE-ACTIVATION-2026-05-31`, `D-R20A-C2-LIVE-RUN-VERIFIED-2026-05-30`; `/drafts/2026-05-28-r20a-single-catch-contract.md` §3.2; `/operations/pre-launch-completion-plan-2026-06-07.md` (its S6); this session's close.
+
+---
+
+## 2026-06-09 — D-PRELAUNCH-S7-A13-DELIVERY-BUILT-DEPLOY-DEFERRED
+
+**Decision:** Build the A13 automated alert-delivery mechanism (the deferred "telling" half of A13) as a Vercel Cron + a server-side route + a notification path, plus the A14 read-only SLO/health tracker; verify both by type-check + unit tests; and **defer the founder-performed production deploy** (Slack webhook creation, Vercel env vars, commit/push, cron-registration check, forced-signal verification) to the next session at the founder's election. The Critical deploy was **approved in-session** (Critical Change Protocol step 6) but **not executed** — the founder elected to stop before Step 1 and resume next session.
+
+**Context / mechanism (PR11 + PR15):** The 2026-06-06 A13 close deferred delivery because the Cowork/bash sandbox cannot reach `sagereasoning.com` and `web_fetch` cannot send custom auth headers (the PR5 egress finding). S7 replaces the superseded "Cowork scheduled task" delivery design (A13 design draft §3 Piece-3) with a **Vercel Cron** — confirmed against Vercel's own docs (last-updated 2026-06-02): a `vercel.json` `crons` entry triggers an HTTP GET to the production deployment; secured by `CRON_SECRET` (sent automatically as `Authorization: Bearer …`); daily cadence works on any plan (Hobby caps at once/day, ±59-min timing). PR15 primitive considered = Vercel Cron + the two already-Verified evaluator endpoints + one webhook call; no bespoke scheduler/evaluator built (least-custom path). The cron is idempotent-safe (the evaluators upsert-dedupe per detector+scope+UTC day), satisfying Vercel's best-effort-delivery caveat.
+
+**Founder decisions settled this session:**
+1. S7 spine = A13 automated delivery via Vercel Cron — **yes**.
+2. Notification channel = **Slack incoming webhook** (lowest friction; no new npm dependency; the route also sends a Discord-compatible `content` field so a Discord webhook works without code change).
+3. A14 live SLO/health tracker — **build now**, read-only, provisional; **activate** in the deploy (founder elected `SUBSTRATE_SLO_TRACKER_ENABLED=true`).
+4. Standalone Layer 3 (`/api/substrate/layer3`) — **OUT of launch scope** (internal-only); remains inert (`SUBSTRATE_LAYER3_ENABLED` unset → 503). Settles the carried S7 scope question; recorded per PR7; revisit post-launch.
+
+**Files produced (additive; uncommitted in the working tree):**
+- `website/src/app/api/cron/observability/route.ts` — the daily cron route. CRON_SECRET auth; self-calls both evaluators with their existing service tokens (`x-cost-alerts-token`, `x-abuse-detection-token`); posts to `ALERT_WEBHOOK_URL` on fire / evaluator-error / `?test=1`. Off the `/api/reason` hot path (PR3).
+- `website/src/lib/cron/observability-notify.ts` — pure notify logic (`shouldNotify`, `formatSweepMessage`, `totalFired`).
+- `website/src/lib/cron/__tests__/observability-notify.test.ts` — 14/14 pass (plain `npx tsx`).
+- `website/vercel.json` — `crons` entry: path `/api/cron/observability`, schedule `0 8 * * *` (daily 08:00 UTC).
+- `website/src/app/api/admin/slo-health/route.ts` — A14 read-only tracker. Flag-gated `SUBSTRATE_SLO_TRACKER_ENABLED` (default OFF → 503); founder-admin gated via existing `ADMIN_USER_ID` (no new auth secret); reads `substrate_audit_events` latency for `surface=api_reason`.
+- `website/src/lib/slo/slo-stats.ts` — pure percentile/latency stats + `buildSloHealth` (response labelled `provisional:true`).
+- `website/src/lib/slo/__tests__/slo-stats.test.ts` — 20/20 pass (plain `npx tsx`).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-06-09-prelaunch-S7-observability-completion-close.md` — session close (NEW).
+- `operations/handoffs/founder/2026-06-09-prelaunch-S7b-deploy-NEXT-SESSION-PROMPT.md` — resume prompt (NEW).
+
+**Verification performed this session (AI-side; no production touch):**
+- `npx tsc --noEmit` (full project) → 0 errors.
+- `observability-notify` unit test → 14/14; `slo-stats` unit test → 20/20. (Run via a Linux-only scratch `tsx`; the founder's macOS `node_modules` was deliberately NOT mutated — its native esbuild is darwin-arm64, so a sandbox `npm install` was avoided to protect the founder's local dev environment.)
+- PR2 invocation grep: the cron route imports+calls the notify helpers, self-calls both evaluator URLs, and calls the webhook; `vercel.json` cron path matches the route; the slo route imports+calls `buildSloHealth` and is flag-gated + admin-gated.
+
+**Risk classification (0d-ii):** Work **executed** this session is **Standard** — additive new route/lib files (not yet wired to production) + documentation. The **deferred** step (Vercel Cron activation + env-var/deployment-config change) is **Critical**; it is **approved (step 6) but not executed**. **PR6 NOT engaged** — boundary checked by read: the cron triggers the cost + abuse *observability* evaluators, which never touch the R20a distress classifier, the A7 Zone-2 gate, Zone-3 redirection, or any wrapper; the A14 tracker reads structural latency only (R3/R17). **AC7 NOT engaged** — no auth/cookie/session/domain-redirect change; the cron uses a Vercel-managed secret; the evaluators use existing service tokens; the A14 tracker reuses the existing `ADMIN_USER_ID` gate. **PR4 N/A** — no LLM call added.
+
+**Rollback path:** none needed now — nothing deployed; production byte-identical. After the deferred deploy: remove the `crons` block from `website/vercel.json` + redeploy (or Vercel Settings → Cron Jobs → Disable), and/or unset `ALERT_WEBHOOK_URL`; unset `SUBSTRATE_SLO_TRACKER_ENABLED` reverts the A14 page to 503. The four R20a flags and `/api/reason` are untouched throughout.
+
+**Side effect owned (PR17 / founder prefs):** a 0-byte `.git/index.lock` was left by an in-sandbox `git status` index refresh; the sandbox cannot unlink it ("Operation not permitted"). The founder removes it with `rm -f .git/index.lock` (the first line of the commit block). No other side effect; the founder's `node_modules` and repo were not otherwise mutated.
+
+**Open questions:** Layer 3 launch-scope — **settled OUT** this session. Carried (deferred, unchanged): per-install usage metering/quota enforcement (PR7 — trigger: first paid agent onboard); `/api/user/export` shared-helper consolidation (own Elevated step); `component-registry.json` full reconcile (S8); A14 latency-SLO measurability stays provisional until real traffic exists.
+
+**Rules served:** R5, R0, AC2, AC10, AC11/A12, 0a, 0c, 0c-ii, 0d-ii, 0f, PR1, PR2, PR3, PR7, PR11, PR13, PR15, PR17, KG1. PR6 not engaged. AC7 not engaged. PR4 N/A.
+
+**Status:** Adopted (the build + the four founder decisions). Implementation status: A13 automated delivery → **Built + Verified (TEST/logic); deploy approved, deferred** (production activation pending next session, S7b); A14 SLO tracker → **Built + Verified (TEST/logic); inert in prod until deployed + flag set**. Cross-references: `D-A13-PRODUCTION-ACTIVATION-2026-06-06`, `D-A14-SLO-ERROR-BUDGET-POLICY-2026-06-07`, `D-PRELAUNCH-S6-R20A-AUDIENCE-RENDERING-VERIFIED-2026-06-09`; `/drafts/A13-cost-health-alerts-design.md`; `/adopted/slo-error-budget-policy.md`; this session's close + the S7b resume prompt.
+
+---
+
+## 2026-06-10 — D-MULTIDISCIPLINARY-REVIEW-2026-06-10
+
+**Decision:** Conduct and record an independent multidisciplinary review (Fable, Cowork) of the whole project — directory history, codebase, live website, production Supabase, governance/business/compliance corpus — at the founder's direction. The review is adopted **as a record**; every recommendation in it remains **Under review** pending founder election. No code, flag, schema, or governing document was changed.
+
+**Reasoning:** Founder requested a fresh full-project review with findings, recommended actions, priorities, and a next-session prompt, following the early-June planning pass + S1–S7 arc. Live verification (founder's Chrome; read-only SQL; endpoint fetches) was used over document trust per the S6 lesson. Key findings: production truth verified (R20a/A10/A11b/A12/A19/GDPR live; A13-delivery+A14 built-undeployed; Stripe not_configured); RLS on all 75 tables (April 0h warning resolved); `vulnerability_flag` exists (0 rows); CLAUDE.md production-state block stale again (A10/A11b/A19-rollout listed inert though Live since S4/S5) — third recurrence of the drift class → candidate PR18 raised; /business P1 inputs pre-pivot stale; FPE-1..5 unstarted against the Art-50 2026-08-02 runway; Zone-2 calibration audit open since 18 Apr; README R19b/R6c conflicts (live /hiring //therapy 404 — no live violation). PR11 consultation performed (June-15 Anthropic credit pools; Fable/Mythos tier → AC1 quarterly note); PR13 assessment recorded in the review.
+
+**Files touched:**
+- `operations/reviews/2026-06-10-multidisciplinary-review.md` — findings (NEW)
+- `operations/reviews/2026-06-10-recommended-actions-and-priorities.md` — actions/priorities, all Under review (NEW)
+- `operations/handoffs/founder/2026-06-10-NEXT-SESSION-PROMPT.md` — wraps the queued S7b deploy script + elected fills (NEW)
+- `operations/handoffs/founder/2026-06-10-multidisciplinary-review-close.md` — session close (NEW)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documentation only; review access was read-only (SELECT-only SQL in the production dashboard; page/endpoint GETs). AC7 not engaged. PR6 not engaged (no perimeter code touched; perimeter items surfaced as founder decisions). Side effect owned: two read-only saved queries left in the Supabase SQL editor Private list (founder may delete).
+
+**Rollback path:** none needed — delete the four new files to remove the review record (git-tracked once committed).
+
+**Verification step (founder-performable):** see "Founder Verification" block in the session close (curl statuses + the RLS census query; expected: 200/401/503/404/404 and 0).
+
+**Open questions:** carried to S8 open per the close — score-conversation perimeter membership; founder-hub comment tidy; H1 renames; stream-concentration re-affirmation; S8 split; Stripe criterion tension (P1). Candidate PR18 (production-state blocks are close-time artifacts) awaits founder election.
+
+**Rules served:** R19, 0a, 0b, 0c, 0d-ii, 0f, PR5 (KG-EX1 applied), PR7, PR8 (third-recurrence flag), PR11, PR12, PR13, PR14 (ten domains), PR15 (no bespoke build elected), PR16, PR17 (side-effect ownership). PR4 N/A (no LLM call added to the product; no model selected).
+
+**Status:** Adopted (as record). Implementation status of recommendations: not started — Under review, founder elects. Cross-references: `D-PRELAUNCH-S7-A13-DELIVERY-BUILT-DEPLOY-DEFERRED-2026-06-09`, `D-PRELAUNCH-S6-R20A-AUDIENCE-RENDERING-VERIFIED-2026-06-09`; `/operations/pre-launch-completion-plan-2026-06-07.md`; this session's close + the 2026-06-10 next-session prompt.
