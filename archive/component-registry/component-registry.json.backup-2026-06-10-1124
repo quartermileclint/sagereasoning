@@ -1,12 +1,12 @@
 {
-  "version": "1.6.0",
-  "lastUpdated": "2026-06-10",
-  "totalComponents": 214,
+  "version": "1.5.0",
+  "lastUpdated": "2026-05-02",
+  "totalComponents": 191,
   "statusSummary": {
-    "wired": 124,
-    "live": 48,
-    "verified": 36,
-    "designed": 5,
+    "wired": 148,
+    "verified": 30,
+    "designed": 10,
+    "live": 2,
     "scaffolded": 1
   },
   "components": [
@@ -105,7 +105,7 @@
       "ext": ".md",
       "path": "/operations/Sage_Cofounder_Blueprint.md",
       "desc": "AI cofounder operating as Deliberate agent. Layer 0 context sync, 4 capability tiers. Plans, allocates resources, self-directs at higher authority levels.",
-      "blocker": "Ops activation scoped for P7 (post-launch). Blueprint's own Supabase migration (cost_health_snapshots) remains un-run; the A13 cost-health system (Live since S7b, D-PRELAUNCH-S7B-A13-DELIVERY-LIVE-2026-06-10) independently provides production cost telemetry.",
+      "blocker": "Supabase migration not run (cost_health_snapshots table). Ops activation scoped for P7.",
       "notes": "Blueprint document only (52KB). Ops Brain scaffolded with 2 context channels. Activation scoped for P7.",
       "deps": [
         "claude-api",
@@ -172,8 +172,8 @@
       "ext": ".ts",
       "path": "/sage-mentor/support-agent.ts",
       "desc": "Inner agent with 10 markdown tools. Stimulus-response: receives ticket, drafts response, submits to ring. Starts supervised.",
-      "blocker": "Mothballed: support-inbox pipeline explicitly mothballed at S8a (D-S8A-OPEN-DECISIONS-2026-06-10, decision 5); revival trigger = first real external users post-launch.",
-      "notes": "Support Brain unit-verified (30/30 assertions). Pipeline mothballed at S8a; no work scheduled.",
+      "blocker": "Next: live integration on the support run-loop with real Supabase client + real detectDistressTwoStage classifier (will move status to verified).",
+      "notes": "Support Brain unit-verified (30/30 assertions). Agent itself Designed — implementation plan complete, build not started.",
       "deps": [
         "claude-api",
         "supabase"
@@ -249,12 +249,12 @@
       "name": "API Keys Schema",
       "type": "data",
       "subtype": [],
-      "status": "verified",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".sql",
       "path": "/api/api-keys-schema.sql",
       "desc": "Key management, usage metering, tier enforcement, monthly quotas.",
-      "notes": "Live table in production use: A10 per-install tokens mint/use/revoke against it (verified S5 2026-06-09 + S8a re-run; revocation tombstones observed).",
+      "notes": "SQL exists. Not verified against live DB.",
       "deps": [
         "supabase"
       ],
@@ -513,7 +513,7 @@
       "ext": ".md",
       "path": "/support/inbox/",
       "desc": "YAML frontmatter + message format. Ready for processing.",
-      "notes": "Confirmed wired. Markdown files with structured data. Pipeline mothballed at S8a (D-S8A-OPEN-DECISIONS-2026-06-10, decision 5); revival trigger = first real external users.",
+      "notes": "Confirmed wired. Markdown files with structured data.",
       "deps": [],
       "rules": [
         "R1"
@@ -902,7 +902,7 @@
       "ext": ".md",
       "path": "/README.md",
       "desc": "Project overview. Some deprecated V1 references remain.",
-      "notes": "R19b/R6c honesty fixes landed (F2, D-S7B-RIDE-ALONG-FILLS-F1-F4-2026-06-10): tagline replaced, 0-100 wording removed, 404 rows removed, status section retitled historical.",
+      "notes": "Needs cleanup of V1 references. Minor issue.",
       "deps": [],
       "rules": [],
       "priority": "P6",
@@ -1062,12 +1062,12 @@
       "subtype": [
         "execution"
       ],
-      "status": "verified",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/trust-layer/card/accreditation-card.ts",
       "desc": "Visual credential builder and serialiser. The badge agents earn.",
-      "notes": "Integrated and serving via GET /api/accreditation/[agent_id] (D-ATL-PUBLIC-ACCREDITATION-ENDPOINT-WIRED-VERIFIED-2026-05-16). 'Cannot produce real cards' is historical.",
+      "notes": "Internally complete but isolated. Cannot produce real cards without integration.",
       "deps": [],
       "rules": [
         "R18a",
@@ -1082,7 +1082,7 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "paid_api",
-      "blocker": "Next: badge copy joins the R18 public-materials pass (S8b) + C Phase 3 wire rename."
+      "blocker": "Isolated. Complete internally but not integrated — cannot produce real cards without website integration."
     },
     {
       "id": "engine-agent-assessment",
@@ -1121,12 +1121,12 @@
         "inference",
         "workflow"
       ],
-      "status": "verified",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/trust-layer/",
       "desc": "Full accreditation system. 14 TypeScript modules. Grades, proximity, authority, evaluation windows, progression, 9 sage tools.",
-      "notes": "Wired into the live app through the Sage Assent arc: bridge (D-ATL-BRIDGE-WIRED-VERIFIED-2026-05-15), wrapper + write path + badge persistence (2026-05-15/16), public accreditation endpoint (D-ATL-PUBLIC-ACCREDITATION-ENDPOINT-WIRED-VERIFIED-2026-05-16), provenance gate (2026-05-24), sage-reflect feed. The 2026-04 'zero imports' state is historical.",
+      "notes": "ARCHITECTURALLY ISOLATED. Internally complete (all 14 modules wired to each other) but zero imports from website/src. Cannot function end-to-end.",
       "deps": [
         "claude-api",
         "supabase"
@@ -1145,7 +1145,7 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "paid_api",
-      "blocker": "Next: C Phase 3 external/wire rename (sr_atl_ dual-accept, atl_write scope, agent-card extension URI - Critical, dedicated session, deferred per D-TRACK-FOLLOWONS-C-PHASE2-DOCS-REGISTRY-2026-05-23); per-install metering enforcement carried."
+      "blocker": "Architecturally isolated. Zero imports from website/src. All 14 modules wired to each other but none consumed by the live app."
     },
     {
       "id": "engine-authority-mgr",
@@ -1427,7 +1427,7 @@
       "ext": ".ts",
       "path": "/sage-mentor/pattern-engine.ts",
       "desc": "Temporal pattern recognition: passion clusters, regression warnings, trend analysis.",
-      "notes": "⚠ Superseded by the substrate path for production mentor flows; revisit only if mentor pattern-surfacing returns post-launch. Website callers removed by the pre-alt-3 observer cull (D-PRIVATE-MENTOR-OBSERVER-CULL-2026-04-29); internal sage-mentor cohesion intact. Historical verification per ADR-PE-01 (Sessions 1-6, 2026-04-26) stands.",
+      "notes": "Live integration Verified end-to-end per ADR-PE-01 (Sessions 1-6, 2026-04-26). Pattern-engine output persists in encrypted form and feeds /api/mentor/private/reflect via per-consumer 2A-recompute and /api/founder/hub via 2A-skip. §8 founder-hub switch is the next named step.",
       "deps": [
         "supabase",
         "claude-api"
@@ -1443,7 +1443,7 @@
       "humanReady": "na",
       "agentReady": "na",
       "journey": "internal",
-      "blocker": ""
+      "blocker": "Next: founder-hub per-consumer 2A-recompute switch (ADR-PE-01 §8 — deferred)."
     },
     {
       "id": "engine-proactive",
@@ -1575,7 +1575,7 @@
       "ext": ".ts",
       "path": "/sage-mentor/ring-wrapper.ts",
       "desc": "The core orchestrator: BEFORE (profile, passion, context) > inner agent > AFTER (evaluate, update, surface). Central workflow.",
-      "notes": "Verified across three proof endpoints (mentor-ring, support-agent, founder-hub-ring) per D-RING-1 (2026-04-25) and canonical-MentorProfile migration per D-RING-2-S4C (2026-04-26). Eight callers consume canonical MentorProfile. Post-alt-3: website callers superseded by the substrate path (founder-hub observer cull 2026-04-29); internal sage-mentor cohesion intact (8 refs).",
+      "notes": "Verified across three proof endpoints (mentor-ring, support-agent, founder-hub-ring) per D-RING-1 (2026-04-25) and canonical-MentorProfile migration per D-RING-2-S4C (2026-04-26). Eight callers consume canonical MentorProfile.",
       "deps": [
         "supabase",
         "claude-api"
@@ -1910,7 +1910,7 @@
       "ext": ".md",
       "path": "/manifest.md",
       "desc": "Master governance. 20+ rules. CR-2026-Q2-v4. Read before every task. Governs all decisions.",
-      "notes": "Confirmed wired. Governs all decisions. Amended through ST2 + the pre-launch arc: AC9-AC13, R17g/h/i, R18e/f, R19e, R20a perimeter placeholder (see decision log).",
+      "notes": "Confirmed wired. Governs all decisions.",
       "deps": [],
       "rules": [
         "ALL"
@@ -1986,7 +1986,7 @@
       "ext": ".json/.txt",
       "path": "/website/public/",
       "desc": "llms.txt, agent-card.json, robots.txt, openapi.yaml for agent crawlers. Deployed and actively serving.",
-      "notes": "Live and deployed. Static files actively serving agent crawlers. agent-card reshaped to A2A v1 (D-AGENT-CARD-A2A-V1-RESHAPE-2026-05-14); discovery files verified at S5 (2026-06-09). R18 public-materials pass at S8b.",
+      "notes": "Live and deployed. Static files actively serving agent crawlers.",
       "deps": [],
       "rules": [],
       "priority": "P6",
@@ -2197,10 +2197,10 @@
       "name": "Stripe Checkout Route",
       "type": "infra",
       "subtype": [],
-      "status": "wired",
-      "oldStatus": "designed",
+      "status": "designed",
+      "oldStatus": "",
       "ext": ".ts",
-      "path": "/website/src/app/api/billing/checkout/route.ts",
+      "path": "/website/src/app/api/stripe/checkout/route.ts",
       "desc": "Handles checkout session creation. Processes payment requests.",
       "notes": "",
       "deps": [
@@ -2217,19 +2217,19 @@
       "origin": "",
       "humanReady": "",
       "agentReady": "",
-      "blocker": "Stripe not_configured in production (per /api/health); activation deliberately deferred - launch-criterion tension is a P1 decision (review rec 3.3). Routes built + TEST-verified under D-BILLING-MODEL-BUILD-WIRED-VERIFIED-2026-05-17."
+      "blocker": "P4 (Stripe integration). Route file not yet built; path indicates intended location. Status downgraded from wired to designed per audit 2026-04-28."
     },
     {
       "id": "infra-stripe",
       "name": "Stripe Integration",
       "type": "infra",
       "subtype": [],
-      "status": "wired",
-      "oldStatus": "designed",
+      "status": "designed",
+      "oldStatus": "scoped",
       "ext": ".ts",
-      "path": "/website/src/app/api/billing/",
+      "path": "/website/src/app/api/stripe/",
       "desc": "Payment processing with 4 route handlers: checkout, portal, tidings, webhook. Full Stripe integration.",
-      "notes": "Option D per-loop billing model wired across /api/reason + /api/score-* (17-file build, D-BILLING-MODEL-BUILD-WIRED-VERIFIED-2026-05-17); usage-summary route included. Production keys not configured by decision.",
+      "notes": "Correctly scoped. No code exists. P4 priority.",
       "deps": [
         "stripe"
       ],
@@ -2250,17 +2250,17 @@
       "humanReady": "not-ready",
       "agentReady": "not-ready",
       "journey": "paid_api",
-      "blocker": "Stripe not_configured in production (per /api/health); activation deliberately deferred - launch-criterion tension is a P1 decision (review rec 3.3). Routes built + TEST-verified under D-BILLING-MODEL-BUILD-WIRED-VERIFIED-2026-05-17."
+      "blocker": "P4 (Stripe integration). Stripe integration not yet wired; path indicates intended location. Status downgraded from wired to designed per audit 2026-04-28."
     },
     {
       "id": "stripe-portal",
       "name": "Stripe Portal Route",
       "type": "infra",
       "subtype": [],
-      "status": "wired",
-      "oldStatus": "designed",
+      "status": "designed",
+      "oldStatus": "",
       "ext": ".ts",
-      "path": "/website/src/app/api/billing/portal/route.ts",
+      "path": "/website/src/app/api/stripe/portal/route.ts",
       "desc": "Handles customer portal link generation. Enables subscription management.",
       "notes": "",
       "deps": [
@@ -2277,17 +2277,17 @@
       "origin": "",
       "humanReady": "",
       "agentReady": "",
-      "blocker": "Stripe not_configured in production (per /api/health); activation deliberately deferred - launch-criterion tension is a P1 decision (review rec 3.3). Routes built + TEST-verified under D-BILLING-MODEL-BUILD-WIRED-VERIFIED-2026-05-17."
+      "blocker": "P4 (Stripe integration). Route file not yet built; path indicates intended location. Status downgraded from wired to designed per audit 2026-04-28."
     },
     {
       "id": "stripe-tidings",
       "name": "Stripe Tidings Route",
       "type": "infra",
       "subtype": [],
-      "status": "wired",
-      "oldStatus": "designed",
+      "status": "designed",
+      "oldStatus": "",
       "ext": ".ts",
-      "path": "/website/src/app/api/billing/tidings/route.ts",
+      "path": "/website/src/app/api/stripe/tidings/route.ts",
       "desc": "Handles billing notifications and status updates.",
       "notes": "",
       "deps": [
@@ -2304,17 +2304,17 @@
       "origin": "",
       "humanReady": "",
       "agentReady": "",
-      "blocker": "Stripe not_configured in production (per /api/health); activation deliberately deferred - launch-criterion tension is a P1 decision (review rec 3.3). Routes built + TEST-verified under D-BILLING-MODEL-BUILD-WIRED-VERIFIED-2026-05-17."
+      "blocker": "P4 (Stripe integration). Route file not yet built; path indicates intended location. Status downgraded from wired to designed per audit 2026-04-28."
     },
     {
       "id": "stripe-webhook",
       "name": "Stripe Webhook Handler",
       "type": "infra",
       "subtype": [],
-      "status": "wired",
-      "oldStatus": "designed",
+      "status": "designed",
+      "oldStatus": "",
       "ext": ".ts",
-      "path": "/website/src/app/api/webhooks/stripe/route.ts",
+      "path": "/website/src/app/api/stripe/webhook/route.ts",
       "desc": "Handles Stripe webhook events. Processes payment confirmations and updates.",
       "notes": "",
       "deps": [
@@ -2331,7 +2331,7 @@
       "origin": "",
       "humanReady": "",
       "agentReady": "",
-      "blocker": "Stripe not_configured in production (per /api/health); activation deliberately deferred - launch-criterion tension is a P1 decision (review rec 3.3). Routes built + TEST-verified under D-BILLING-MODEL-BUILD-WIRED-VERIFIED-2026-05-17."
+      "blocker": "P4 (Stripe integration). Route file not yet built; path indicates intended location. Status downgraded from wired to designed per audit 2026-04-28."
     },
     {
       "id": "infra-supabase-auth",
@@ -2390,12 +2390,12 @@
       "name": "55-Day Stoic Journal",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".tsx",
       "path": "/website/src/app/journal/page.tsx",
       "desc": "8-phase journal with daily teachings, source citations, cloud/local storage, client-side AES-256-GCM encryption.",
-      "notes": "Most complete product. Upgrade justified: connects to Supabase, encryption, curriculum engine. Live on production (capability inventory 2026-06-10, S8a).",
+      "notes": "Most complete product. Upgrade justified: connects to Supabase, encryption, curriculum engine.",
       "deps": [
         "supabase"
       ],
@@ -2419,12 +2419,12 @@
       "name": "Action Scorer",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".tsx",
       "path": "/website/src/app/score/page.tsx",
       "desc": "Human interface for scoring an action. Captures action text, context, relationships, emotional state. Calls sage-score tool.",
-      "notes": "Fully functional UI connected to working API. Upgrade justified: real end-to-end flow. Live on production; /score e2e-verified by the founder at S8a (real decision, ~36s, value affirmed).",
+      "notes": "Fully functional UI connected to working API. Upgrade justified: real end-to-end flow.",
       "deps": [
         "supabase",
         "claude-api"
@@ -2449,12 +2449,12 @@
       "name": "Admin Dashboard",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".tsx",
       "path": "/website/src/app/admin/page.tsx",
       "desc": "Internal metrics, analytics events, real-time activity feed.",
-      "notes": "UI structure exists but analytics pipeline not wired to real data. Live on production (Election A1, S8b 2026-06-10; 2026-06-10 review live-verification sweep).",
+      "notes": "UI structure exists but analytics pipeline not wired to real data.",
       "deps": [
         "supabase"
       ],
@@ -2473,12 +2473,12 @@
       "name": "API Documentation",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".tsx",
       "path": "/website/src/app/api-docs/page.tsx",
       "desc": "Interactive OpenAPI documentation with live examples for developers.",
-      "notes": "Connected to OpenAPI spec. Functional for developers. Live on production (Election A1, S8b 2026-06-10; 2026-06-10 review live-verification sweep).",
+      "notes": "Connected to OpenAPI spec. Functional for developers.",
       "deps": [],
       "rules": [
         "R8"
@@ -2498,12 +2498,12 @@
       "name": "Auth (Sign In / Sign Up)",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".tsx",
       "path": "/website/src/app/auth/page.tsx",
       "desc": "Email/password, magic link, privacy consent.",
-      "notes": "Connected to Supabase Auth. JWT tokens functional. Live on production (Election A1, S8b 2026-06-10; 2026-06-10 review live-verification sweep).",
+      "notes": "Connected to Supabase Auth. JWT tokens functional.",
       "deps": [
         "supabase"
       ],
@@ -2524,12 +2524,12 @@
       "name": "Baseline Assessment",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".tsx",
       "path": "/website/src/app/baseline/page.tsx",
       "desc": "5-6 question Stoic baseline assessment with branching Q6. Produces Senecan grade + 4 dimension levels.",
-      "notes": "Functional UI with API connection. Needs real-user testing. Live on production (capability inventory 2026-06-10, S8a).",
+      "notes": "Functional UI with API connection. Needs real-user testing.",
       "deps": [
         "supabase",
         "claude-api"
@@ -2553,12 +2553,12 @@
       "name": "Community Map",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".tsx",
       "path": "/website/src/app/community/page.tsx",
       "desc": "World map of opted-in users. react-simple-maps.",
-      "notes": "UI exists but depends on community data that doesn't exist yet. True scaffolding. Live on production (Election A1, S8b 2026-06-10; 2026-06-10 review live-verification sweep).",
+      "notes": "UI exists but depends on community data that doesn't exist yet. True scaffolding.",
       "deps": [
         "supabase",
         "react-simple-maps"
@@ -2578,12 +2578,12 @@
       "name": "Document Scorer",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".tsx",
       "path": "/website/src/app/score-document/page.tsx",
       "desc": "Human interface for scoring documents/policies against Stoic principles.",
-      "notes": "Functional, connects to sage-audit API. Live on production (capability inventory 2026-06-10, S8a).",
+      "notes": "Functional, connects to sage-audit API.",
       "deps": [
         "claude-api",
         "supabase"
@@ -2606,12 +2606,12 @@
       "name": "Ethical Scenarios",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "designed",
       "ext": ".tsx",
       "path": "/website/src/app/scenarios/page.tsx",
       "desc": "Three-step flow with live LLM evaluation. Load scenarios, evaluate decisions, receive real-time feedback from Claude.",
-      "notes": "Complete React interface with scenario generator integration. Live LLM reasoning via sage-reason, receipt storage. Live on production (capability inventory 2026-06-10, S8a).",
+      "notes": "Complete React interface with scenario generator integration. Live LLM reasoning via sage-reason, receipt storage.",
       "deps": [
         "claude-api"
       ],
@@ -2634,12 +2634,12 @@
       "name": "Landing Page",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".tsx",
       "path": "/website/src/app/page.tsx",
       "desc": "Hero, virtue cards, how-it-works, community link. Public entry point.",
-      "notes": "Complete static page. Functions as intended (no backend needed). Live on production (Election A1, S8b 2026-06-10; 2026-06-10 review live-verification sweep).",
+      "notes": "Complete static page. Functions as intended (no backend needed).",
       "deps": [],
       "rules": [],
       "priority": "P6",
@@ -2654,12 +2654,12 @@
       "name": "Pricing Page",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".tsx",
       "path": "/website/src/app/pricing/page.tsx",
       "desc": "Pricing plans display for humans.",
-      "notes": "Shows pricing but can't process payments. True scaffolding. Live on production (Election A1, S8b 2026-06-10; 2026-06-10 review live-verification sweep).",
+      "notes": "Shows pricing but can't process payments. True scaffolding.",
       "deps": [],
       "rules": [
         "R5"
@@ -2678,12 +2678,12 @@
       "name": "Skills Marketplace",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "designed",
       "ext": ".tsx",
       "path": "/website/src/app/marketplace/page.tsx",
       "desc": "Full React component with SKILL_REGISTRY integration. 16+ skills. Live marketplace for skill discovery and execution.",
-      "notes": "Complete UI with live skill loading, filtering by category, skill details, chaining rules. Connected to marketplace dispatch. Live on production (Election A1, S8b 2026-06-10; 2026-06-10 review live-verification sweep).",
+      "notes": "Complete UI with live skill loading, filtering by category, skill details, chaining rules. Connected to marketplace dispatch.",
       "deps": [
         "supabase"
       ],
@@ -2706,12 +2706,12 @@
       "name": "Social Media Filter",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".tsx",
       "path": "/website/src/app/score-social/page.tsx",
       "desc": "Human interface for filtering social content through Stoic reasoning.",
-      "notes": "Functional, connects to sage-filter API. Live on production (capability inventory 2026-06-10, S8a).",
+      "notes": "Functional, connects to sage-filter API.",
       "deps": [
         "claude-api"
       ],
@@ -2733,12 +2733,12 @@
       "name": "User Dashboard",
       "type": "product",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".tsx",
       "path": "/website/src/app/dashboard/page.tsx",
       "desc": "Progress profile: baseline results, evaluation history, practice calendar with virtue stamps, milestones.",
-      "notes": "UI complete, connected to Supabase evaluation data. Live on production (Election A1, S8b 2026-06-10; 2026-06-10 review live-verification sweep).",
+      "notes": "UI complete, connected to Supabase evaluation data.",
       "deps": [
         "supabase"
       ],
@@ -3206,12 +3206,12 @@
         "evaluation",
         "llm-powered"
       ],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-document/route.ts",
       "desc": "Document quality audit + reasoning assessment. Independent — domain-specific persistence + badge generation.",
-      "notes": "Independent of shared engine (by design). Functional. alt-3 future-phase block: scoped for Phase-3+ migration; bypasses shared engine today and would land independently in the alt-3 consumer pattern. Live on production (capability inventory 2026-06-10).",
+      "notes": "Independent of shared engine (by design). Functional. alt-3 future-phase block: scoped for Phase-3+ migration; bypasses shared engine today and would land independently in the alt-3 consumer pattern.",
       "deps": [
         "claude-api"
       ],
@@ -3228,7 +3228,7 @@
       "humanReady": "partial",
       "agentReady": "partial",
       "journey": "both",
-      "blocker": "Next: A8 substrate migration (founder-elected pre-launch, D-PRELAUNCH-S8A-E2E-VERIFICATION-2026-06-10); prose path serves today. D24 audit found KG1 rule 2 candidate violations (fire-and-forget analytics inserts) - surfaced for founder triage."
+      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). D24 audit found KG1 rule 2 candidate violations (fire-and-forget analytics inserts) — surfaced for founder triage."
     },
     {
       "id": "tool-sage-classify",
@@ -3358,12 +3358,12 @@
         "evaluation",
         "llm-powered"
       ],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-conversation/route.ts",
       "desc": "Conversation analysis. Now wraps sage-reason-engine: calls runSageReason(deep) for overall, keeps custom per-participant breakdown. 216→149 LOC.",
-      "notes": "Functional. Uses deep reasoning mode. Live on production. Perimeter ruling corrected at S8a: this endpoint is INSIDE the R20a perimeter (D-S8A-OPEN-DECISIONS-2026-06-10) - the earlier 'outside the AC5 perimeter' note is superseded.",
+      "notes": "Functional. Uses deep reasoning mode. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern. Note: this endpoint is outside the AC5 R20a perimeter (eight named routes); migration sequencing follows the perimeter routes.",
       "deps": [
         "sage-reason-engine"
       ],
@@ -3380,7 +3380,7 @@
       "humanReady": "partial",
       "agentReady": "partial",
       "journey": "both",
-      "blocker": "R20a distress detection NOT wired on this route. Founder ruled it INSIDE the perimeter (D-S8A-OPEN-DECISIONS-2026-06-10, decision 2); wiring is its own Critical session (AC5 ninth-route pattern) BEFORE launch. Also: A8 substrate migration (prose path serves today)."
+      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29)."
     },
     {
       "id": "tool-sage-decide",
@@ -3390,12 +3390,12 @@
         "evaluation",
         "llm-powered"
       ],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-decision/route.ts",
       "desc": "Option ranker. Now wraps sage-reason-engine: loops runSageReason(standard) per option, keeps custom katorthoma ranking. 260→192 LOC.",
-      "notes": "Functional. Loops reasoning for multi-option comparison. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern. Live on production (capability inventory 2026-06-10).",
+      "notes": "Functional. Loops reasoning for multi-option comparison. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern.",
       "deps": [
         "sage-reason-engine"
       ],
@@ -3413,7 +3413,7 @@
       "humanReady": "partial",
       "agentReady": "partial",
       "journey": "both",
-      "blocker": "Next: A8 substrate migration (founder-elected pre-launch, D-PRELAUNCH-S8A-E2E-VERIFICATION-2026-06-10); prose path serves today. D24 audit found Ops Hub malformed body to this endpoint, missing distress handling on Ops Hub callers, and partial R20a input coverage - surfaced for founder triage."
+      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). D24 audit found Ops Hub malformed body to this endpoint, missing distress handling on Ops Hub callers, and partial R20a input coverage — surfaced for founder triage."
     },
     {
       "id": "tool-sage-diagnose",
@@ -3486,12 +3486,12 @@
         "evaluation",
         "llm-powered"
       ],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-social/route.ts",
       "desc": "Pre-publish content filter. Now wraps sage-reason-engine: calls runSageReason(standard) with social context, post-processes poster vs reader passions. Now generates receipts. 186→173 LOC.",
-      "notes": "Functional with receipt generation added during refactoring. alt-3 future-phase block: scoped for Phase-3+ migration; D11 Layer-3 specification will gain per-consumer projection rules including reader_triggered_passions invitation-language framing per R20d. Live on production (capability inventory 2026-06-10).",
+      "notes": "Functional with receipt generation added during refactoring. alt-3 future-phase block: scoped for Phase-3+ migration; D11 Layer-3 specification will gain per-consumer projection rules including reader_triggered_passions invitation-language framing per R20d.",
       "deps": [
         "sage-reason-engine"
       ],
@@ -3508,7 +3508,7 @@
       "humanReady": "partial",
       "agentReady": "partial",
       "journey": "free_tier",
-      "blocker": "Next: A8 substrate migration (founder-elected pre-launch, D-PRELAUNCH-S8A-E2E-VERIFICATION-2026-06-10); prose path serves today. D24 audit identifies reader_triggered_passions invitation-language framing as a D11 per-consumer projection rule (R20d alignment)."
+      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). D24 audit identifies reader_triggered_passions invitation-language framing as a D11 per-consumer projection rule (R20d alignment)."
     },
     {
       "id": "tool-sage-govern",
@@ -3643,12 +3643,12 @@
         "transformation",
         "llm-powered"
       ],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-iterate/route.ts",
       "desc": "Iterative refinement: submit > feedback > revise > track. Multi-turn transformation.",
-      "notes": "Independent by necessity (chain state). Functional with Supabase. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern; chain state and multi-turn transformation pattern must be preserved by the migration design. Live on production (capability inventory 2026-06-10).",
+      "notes": "Independent by necessity (chain state). Functional with Supabase. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern; chain state and multi-turn transformation pattern must be preserved by the migration design.",
       "deps": [
         "claude-api",
         "supabase"
@@ -3667,7 +3667,7 @@
       "humanReady": "partial",
       "agentReady": "partial",
       "journey": "both",
-      "blocker": "Next: A8 substrate migration (founder-elected pre-launch, D-PRELAUNCH-S8A-E2E-VERIFICATION-2026-06-10); prose path serves today. Independent by necessity (chain state) - migration design must preserve multi-turn transformation pattern."
+      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). Independent by necessity (chain state) — migration design must preserve multi-turn transformation pattern."
     },
     {
       "id": "tool-sage-moderate",
@@ -3866,12 +3866,12 @@
         "evaluation",
         "llm-powered"
       ],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/reason/route.ts",
       "desc": "Universal reasoning layer. Quick (3 mechanisms), Standard (5), Deep (6 + Senecan tracking). Core tool all agents use.",
-      "notes": "Live: the substrate translation sandwich is the sole path on this route since the CP6 cutover (D-M1-CP6-CUTOVER-2026-05-08); A7 R20a gate Verified (2026-05-13); all four R20a flags Live (2026-05-31); A12 OTel + audit additive. Founder e2e on production at S8a: mint -> 200 assessment in 13.1s (L1 0ms / L2 1ms / L3 10.7s) -> revoke -> 401 (D-PRELAUNCH-S8A-E2E-VERIFICATION-2026-06-10).",
+      "notes": "Core tool. Fully functional with Anthropic API. Upgrade justified. alt-3 future-phase block: scoped for Phase-3+ migration; pre-migration snapshot recommended per D24.",
       "deps": [
         "claude-api",
         "stoic-brain-v3"
@@ -3892,7 +3892,7 @@
       "humanReady": "partial",
       "agentReady": "partial",
       "journey": "both",
-      "blocker": "Next: per-install metering/quota enforcement (trigger: first paid agent onboard, carried PR7 decision)."
+      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). Engine entry point with dual-auth pattern (canonical KG4 example); D24 audit names this as one of two endpoints requiring snapshot before Phase-2 pass 1 begins. KG2 (Haiku reliability boundary) is engaged on quick-depth invocations and remains a constraint."
     },
     {
       "id": "tool-sage-reflect",
@@ -3902,12 +3902,12 @@
         "transformation",
         "llm-powered"
       ],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/reflect/route.ts",
       "desc": "End-of-day decision review. Transforms daily actions into patterns + examination prompts.",
-      "notes": "Functional with Anthropic API. Narrative reflection output. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern; not in Phase-1 or Phase-2 scope. Live on production (capability inventory 2026-06-10).",
+      "notes": "Functional with Anthropic API. Narrative reflection output. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern; not in Phase-1 or Phase-2 scope.",
       "deps": [
         "claude-api"
       ],
@@ -3923,7 +3923,7 @@
       "humanReady": "partial",
       "agentReady": "partial",
       "journey": "free_tier",
-      "blocker": "Next: A8 substrate migration (founder-elected pre-launch, D-PRELAUNCH-S8A-E2E-VERIFICATION-2026-06-10) - this route still calls the Anthropic API directly (raw messages.create, older than the score routes; S8a code-read). Carried D24 findings (fire-and-forget on the distress-event log; user_id vs auth.user.id mismatch - R17, Critical under PR6) remain surfaced for the A8/perimeter work."
+      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). Note: this is the public reflect endpoint; the AC-19 load-bearing reflect endpoint is /api/mentor/private/reflect (covered by agent-private-mentor blocker). D24 audit found a fire-and-forget on the safety-relevant distress-event log at this endpoint plus a user_id vs auth.user.id mismatch (R17, Critical under PR6) — both surfaced for founder triage independent of Phase-3+ migration."
     },
     {
       "id": "tool-sage-resolve",
@@ -3996,12 +3996,12 @@
         "llm-powered",
         "simulation"
       ],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score-scenario/route.ts",
       "desc": "Decision scenario generator + scorer. Simulates ethical situations.",
-      "notes": "Functional with Anthropic API. Generates and evaluates scenarios. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern. Live on production (capability inventory 2026-06-10).",
+      "notes": "Functional with Anthropic API. Generates and evaluates scenarios. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern.",
       "deps": [
         "claude-api"
       ],
@@ -4018,7 +4018,7 @@
       "humanReady": "partial",
       "agentReady": "partial",
       "journey": "free_tier",
-      "blocker": "Next: A8 substrate migration (founder-elected pre-launch, D-PRELAUNCH-S8A-E2E-VERIFICATION-2026-06-10); prose path serves today. This route calls the Anthropic API directly (raw messages.create; S8a code-read)."
+      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29)."
     },
     {
       "id": "tool-sage-score",
@@ -4028,12 +4028,12 @@
         "evaluation",
         "llm-powered"
       ],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/score/route.ts",
       "desc": "Pre-action audit. Now wraps sage-reason-engine: builds domain_context from action fields, calls runSageReason(standard). 238→104 LOC.",
-      "notes": "Refactored, functional. Connected to Anthropic via shared engine. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern. Live on production; founder e2e at S8a (real decision, four stages + R3 disclaimer + reflection, ~36s, value affirmed). Metering wired (D-BILLING-MODEL-BUILD-WIRED-VERIFIED-2026-05-17).",
+      "notes": "Refactored, functional. Connected to Anthropic via shared engine. alt-3 future-phase block: scoped for Phase-3+ migration to alt-3 deterministic-engine consumer pattern.",
       "deps": [
         "sage-reason-engine",
         "stoic-brain-v3"
@@ -4053,7 +4053,7 @@
       "humanReady": "partial",
       "agentReady": "partial",
       "journey": "free_tier",
-      "blocker": "Next: A8 substrate migration (founder-elected pre-launch, D-PRELAUNCH-S8A-E2E-VERIFICATION-2026-06-10); prose path serves today. D24 partial-R20a-input-coverage finding carried for the perimeter-wide policy decision."
+      "blocker": "Next: Phase-3+ migration to alt-3 deterministic-engine consumer pattern (per D-RAG-MENTOR-ALT3-ADOPTED-2026-04-29). D24 audit found partial R20a input coverage (distress check on primary input only) — surfaced for perimeter-wide policy decision before per-route fix."
     },
     {
       "id": "tool-compose",
@@ -4181,12 +4181,12 @@
       "subtype": [
         "action"
       ],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/user/delete/route.ts",
       "desc": "Account deletion with cascading deletion and compliance logging. Fully functional per R17c, permanent deletion guaranteed.",
-      "notes": "Complete deletion implementation with compliance audit trail. Confirmation token required. Verified against R17c deletion requirements. Verified-live (R17c) per D-PRELAUNCH-S1-DATA-RIGHTS-GO-LIVE-2026-06-07; compliance audit tables Live in production.",
+      "notes": "Complete deletion implementation with compliance audit trail. Confirmation token required. Verified against R17c deletion requirements.",
       "deps": [
         "supabase"
       ],
@@ -4211,12 +4211,12 @@
         "action",
         "retrieval"
       ],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "scaffolded",
       "ext": ".ts",
       "path": "/website/src/app/api/user/export/route.ts",
       "desc": "GDPR/Privacy Act data export. Queries 8 Supabase tables, returns JSON download. Fully functional.",
-      "notes": "Complete data export implementation. Handles all user data across profiles, evaluations, journal, assessments, chains, analytics. Full compliance. R17i Verified-live per S1 (2026-06-07).",
+      "notes": "Complete data export implementation. Handles all user data across profiles, evaluations, journal, assessments, chains, analytics. Full compliance.",
       "deps": [
         "supabase"
       ],
@@ -4231,8 +4231,7 @@
       "origin": "",
       "humanReady": "ready",
       "agentReady": "partial",
-      "journey": "free_tier",
-      "blocker": "Next: shared-helper consolidation (own Elevated step, carried)."
+      "journey": "free_tier"
     },
     {
       "id": "api-mentor-profile",
@@ -4304,12 +4303,12 @@
       "name": "Server-Side Encryption Module",
       "type": "infra",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "new",
       "ext": ".ts",
       "path": "/website/src/lib/server-encryption.ts",
       "desc": "AES-256-GCM encryption for profile data at rest in Supabase. Key from MENTOR_ENCRYPTION_KEY env var. Complements client-side encryption.ts.",
-      "notes": "Created 9 Apr 2026. Used by mentor-profile-store for R17b compliance. R17b realtime-journal encryption-at-write Verified-live in production 2026-05-31 (AES-256-GCM; D-R17B-REALTIME-JOURNAL-ENCRYPTION-2026-05-31).",
+      "notes": "Created 9 Apr 2026. Used by mentor-profile-store for R17b compliance.",
       "deps": [],
       "rules": [
         "R17b",
@@ -4361,12 +4360,12 @@
       "name": "Health Check Endpoint",
       "type": "api",
       "subtype": [],
-      "status": "live",
-      "oldStatus": "wired",
+      "status": "wired",
+      "oldStatus": "new",
       "ext": ".ts",
       "path": "/website/src/app/api/health/route.ts",
       "desc": "GET /api/health — system health check. Reports status of Supabase, Anthropic, Stripe, and mentor encryption subsystems. No auth required.",
-      "notes": "Created 9 Apr 2026. Returns healthy/degraded based on critical subsystem availability. Live on production (Election A1, S8b 2026-06-10; 2026-06-10 review live-verification sweep).",
+      "notes": "Created 9 Apr 2026. Returns healthy/degraded based on critical subsystem availability.",
       "deps": [],
       "rules": [],
       "priority": "P0",
@@ -4414,12 +4413,12 @@
         "safety",
         "llm"
       ],
-      "status": "live",
-      "oldStatus": "verified",
+      "status": "verified",
+      "oldStatus": "wired",
       "ext": ".ts",
       "path": "/website/src/lib/r20a-classifier.ts",
       "desc": "Two-stage distress detection: regex pattern matching (Stage 1) → Haiku LLM evaluator (Stage 2). Uses branded FastModel type via getFastModel(). Integrated with SafetyCriticalCallParams for compile-time temperature enforcement.",
-      "notes": "⚠ Any prompt change is Critical (PR6), post-launch only. All four R20a flags Live since 2026-05-31; both audience branches production-verified at S6 (2026-06-09); Zone-2 Haiku leg tested at S8a (6/6 engage, 0 redirect; mild-label conservatism founder-adjudicated accepted-as-designed; 2026-04-18 PARTIAL audit closed). ES1 founder-profile eval-suite item carried. Cost tracking via r20a-cost-tracker.ts. Branded type integration verified 18 Apr 2026.",
+      "notes": "⚠ ES1 founder-profile inputs must be in Zone 2 eval suite before P1 transition. Regex stage verified against Zone 2 inputs (6/6 pass, zero false positives). Haiku stage untested (needs live API key). Cost tracking via r20a-cost-tracker.ts. Branded type integration verified 18 Apr 2026.",
       "deps": [
         "claude-api"
       ],
@@ -4580,7 +4579,7 @@
       "ext": ".md",
       "path": "/operations/safety-signal-audits/2026-04-18-zone2-clinical-adjacency.md",
       "desc": "Audit documenting Zone 2 (philosophical self-examination) clinical adjacency testing. Confirms regex stage correctly distinguishes founder's journal language from clinical crisis patterns.",
-      "notes": "6/6 Zone 2 inputs pass (severity: none). Boundary between Zone 2 and Zone 3 confirmed correctly calibrated. Haiku stage testing deferred to when API key available. Produced 18 Apr 2026. 2026-04-18 PARTIAL closed at S8a; successor audit at /operations/safety-signal-audits/2026-06-10-zone2-haiku-leg-calibration-audit.md.",
+      "notes": "6/6 Zone 2 inputs pass (severity: none). Boundary between Zone 2 and Zone 3 confirmed correctly calibrated. Haiku stage testing deferred to when API key available. Produced 18 Apr 2026.",
       "deps": [],
       "rules": [
         "R20"
@@ -5670,698 +5669,6 @@
       "humanReady": "ready",
       "agentReady": "na",
       "blocker": ""
-    },
-    {
-      "id": "substrate-translation-sandwich",
-      "name": "Translation Sandwich (Substrate Core)",
-      "type": "engine",
-      "subtype": [
-        "deterministic",
-        "architecture"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/lib/translation-sandwich/",
-      "desc": "Layer 1 (LLM feature extraction) -> Layer 2 (deterministic canonical engine, signed) -> Layer 3 (prose render). The deterministic substrate core; sole path on /api/reason.",
-      "notes": "Live on /api/reason since the CP6 cutover (D-M1-CP6-CUTOVER-2026-05-08). A1-A4 signing/key management Verified (2026-05-10). S8a observed decomposition: L1 0ms (pre-extracted) / L2 1ms (deterministic) / L3 10.7s. Companion files: layer1-extractor, layer2-mechanisms/canonical-json/signer/verifier, layer3-prose, parallel-run, tier1-token.",
-      "deps": [
-        "claude-api",
-        "supabase"
-      ],
-      "rules": [
-        "R4",
-        "R12",
-        "R18"
-      ],
-      "priority": "P6",
-      "proximity": "",
-      "connects": [
-        "tool-sage-reason",
-        "infra-a11b-injection-defence"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "ready",
-      "journey": "both",
-      "blocker": "Next: A8 mapping session opens the human-tools migration (founder-elected pre-launch)."
-    },
-    {
-      "id": "substrate-agent-mode-service",
-      "name": "Agent Mode Service",
-      "type": "engine",
-      "subtype": [
-        "deterministic"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/lib/substrate/agent-mode-service.ts",
-      "desc": "Agent-audience assessment service over the substrate (pre-computed layer1_schema path).",
-      "notes": "Founder e2e on production at S8a: authenticated POST /api/reason with pre-computed layer1_schema -> 200 assessment (D-PRELAUNCH-S8A-E2E-VERIFICATION-2026-06-10).",
-      "deps": [
-        "claude-api"
-      ],
-      "rules": [
-        "R4",
-        "R18"
-      ],
-      "priority": "P6",
-      "proximity": "",
-      "connects": [
-        "substrate-translation-sandwich",
-        "infra-a10-plugin-auth"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "ready",
-      "journey": "paid_api",
-      "blocker": ""
-    },
-    {
-      "id": "substrate-philosophical-mode-service",
-      "name": "Philosophical Mode Service",
-      "type": "engine",
-      "subtype": [
-        "deterministic"
-      ],
-      "status": "verified",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/lib/substrate/philosophical-mode-service.ts",
-      "desc": "Philosophical-mode rendering service over the substrate (four-mode redesign).",
-      "notes": "Wired-Verified per D-PHILOSOPHICAL-MODE-BUILD-WIRED-VERIFIED-2026-05-14 + D-PHILOSOPHICAL-MODE-SCORE-WIRED-VERIFIED-2026-05-15. Test note: imports supabase-server chain - run tests with --env-file=.env.local.",
-      "deps": [
-        "claude-api"
-      ],
-      "rules": [
-        "R4"
-      ],
-      "priority": "P6",
-      "proximity": "",
-      "connects": [
-        "substrate-translation-sandwich"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
-      "journey": "internal",
-      "blocker": ""
-    },
-    {
-      "id": "substrate-r20a-gate",
-      "name": "R20a Server-Side Gate (A7)",
-      "type": "infra",
-      "subtype": [
-        "safety"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/lib/substrate/r20a-gate.ts",
-      "desc": "Server-side distress gate on the substrate path; synchronous, before response construction (PR3).",
-      "notes": "Live: SUBSTRATE_R20A_GATE_ENABLED=true since 2026-05-31 (D-R20A-GATE-ACTIVATION-2026-05-31); A7 Verified 2026-05-13; S6 production verification both audiences.",
-      "deps": [
-        "claude-api"
-      ],
-      "rules": [
-        "R20"
-      ],
-      "priority": "P2",
-      "proximity": "",
-      "connects": [
-        "infra-r20a-classifier",
-        "substrate-translation-sandwich"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
-      "journey": "both",
-      "blocker": ""
-    },
-    {
-      "id": "substrate-r20a-audience-renderer",
-      "name": "R20a Audience-Correct Renderer",
-      "type": "infra",
-      "subtype": [
-        "safety"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/lib/substrate/r20a-audience-renderer.ts",
-      "desc": "Renders distress redirects per audience: human crisis message vs agent developer-form payload (status redirected, developer_note, suggested_user_message, flow_terminated).",
-      "notes": "Live since 2026-05-31 (D-R20A-BATCH-ACTIVATION-REFLECT-AUDIENCE-2026-05-31); S6 production-verified both branches; S8a re-verified developer form on the Zone-2 eval arc.",
-      "deps": [],
-      "rules": [
-        "R20"
-      ],
-      "priority": "P2",
-      "proximity": "",
-      "connects": [
-        "substrate-r20a-gate"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
-      "journey": "both",
-      "blocker": ""
-    },
-    {
-      "id": "substrate-layer3-service",
-      "name": "Layer 3 Standalone Service (A5)",
-      "type": "tool",
-      "subtype": [
-        "interface"
-      ],
-      "status": "verified",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/app/api/substrate/layer3/route.ts",
-      "desc": "Standalone Layer-3 per-consumer rendering endpoint.",
-      "notes": "Verified (TEST) per D-A5-LAYER3-SCAFFOLDED-VERIFIED-2026-05-12.",
-      "deps": [
-        "claude-api"
-      ],
-      "rules": [
-        "R4"
-      ],
-      "priority": "Post-P6",
-      "proximity": "",
-      "connects": [
-        "substrate-translation-sandwich"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "not-ready",
-      "journey": "internal",
-      "blocker": "Inert in production by decision - OUT of launch scope (S7, D-PRELAUNCH-S7-A13-DELIVERY-BUILT-DEPLOY-DEFERRED-2026-06-09); SUBSTRATE_LAYER3_ENABLED unset -> 503; revisit post-launch."
-    },
-    {
-      "id": "infra-a10-plugin-auth",
-      "name": "A10 Per-Install Plugin Auth",
-      "type": "infra",
-      "subtype": [
-        "security"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/app/api/keys/route.ts",
-      "desc": "Per-install sr_inst_ token lifecycle: mint, authenticate, revoke.",
-      "notes": "Live: PLUGIN_INSTALL_AUTH_ENABLED=true since S5 (D-PRELAUNCH-S5-A10-METERING-ACTIVATION-2026-06-09); smoke-verified 2026-06-03; S8a full cycle mint -> use -> revoke -> 401 re-verified on production.",
-      "deps": [
-        "supabase"
-      ],
-      "rules": [
-        "R4",
-        "R17"
-      ],
-      "priority": "P6",
-      "proximity": "",
-      "connects": [
-        "data-api-keys",
-        "tool-sage-reason"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "ready",
-      "journey": "paid_api",
-      "blocker": "Per-install metering/quota enforcement deferred (trigger: first paid agent onboard, carried PR7 decision)."
-    },
-    {
-      "id": "infra-a11b-injection-defence",
-      "name": "A11b Injection Defence",
-      "type": "infra",
-      "subtype": [
-        "security"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/lib/translation-sandwich/injection-defence.ts",
-      "desc": "Layer-1 + Layer-3 prompt-injection defence on the substrate path.",
-      "notes": "Live: SUBSTRATE_INJECTION_DEFENCE_ENABLED=true since S4 (D-PRELAUNCH-S4-INJECTION-DEFENCE-ACTIVATION-2026-06-08); TEST-parity adversarial probe re-passed in production.",
-      "deps": [],
-      "rules": [
-        "R4",
-        "R20"
-      ],
-      "priority": "P2",
-      "proximity": "",
-      "connects": [
-        "substrate-translation-sandwich"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
-      "journey": "both",
-      "blocker": ""
-    },
-    {
-      "id": "infra-a12-otel-audit",
-      "name": "A12 OTel + Call-Grain Audit",
-      "type": "infra",
-      "subtype": [
-        "observability"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/lib/substrate/substrate-telemetry.ts",
-      "desc": "OpenTelemetry instrumentation + masked (structural-only) call-grain audit rows to substrate_audit_events. Additive, no-throw, off the hot path.",
-      "notes": "Live: SUBSTRATE_OTEL_ENABLED=true since S2 (D-PRELAUNCH-S2-OTEL-ACTIVATION-2026-06-07); masked rows observed in production. Companion: substrate-audit-writer.ts.",
-      "deps": [
-        "supabase"
-      ],
-      "rules": [
-        "R3",
-        "R17"
-      ],
-      "priority": "P6",
-      "proximity": "",
-      "connects": [
-        "substrate-translation-sandwich"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
-      "journey": "internal",
-      "blocker": ""
-    },
-    {
-      "id": "infra-a13-cost-health",
-      "name": "A13 Cost-Health Detection + Delivery",
-      "type": "infra",
-      "subtype": [
-        "observability"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/app/api/cron/observability/route.ts",
-      "desc": "Cost-health evaluators + daily Vercel Cron (0 8 * * *) posting fired signals to Slack (CRON_SECRET-gated; self-calls via CRON_SELF_BASE_URL).",
-      "notes": "Detection Live 2026-06-06 (D-A13-PRODUCTION-ACTIVATION); automated delivery Live since S7b (D-PRELAUNCH-S7B-A13-DELIVERY-LIVE-2026-06-10): forced-signal test 200 + Slack received + negative-auth 401. Companions: /api/billing/cost-alerts/evaluate, lib/cron/observability-notify.",
-      "deps": [
-        "supabase",
-        "vercel"
-      ],
-      "rules": [
-        "R5"
-      ],
-      "priority": "P4",
-      "proximity": "",
-      "connects": [
-        "infra-a19-abuse-detection"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
-      "journey": "internal",
-      "blocker": ""
-    },
-    {
-      "id": "infra-a14-slo-health",
-      "name": "A14 SLO/Health Tracker",
-      "type": "infra",
-      "subtype": [
-        "observability"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/app/api/admin/slo-health/route.ts",
-      "desc": "Read-only SLO/latency tracker over substrate_audit_events (p50/p95 vs targets).",
-      "notes": "Live (provisional - thresholds metrics-gated) since S7b (D-PRELAUNCH-S7B-A13-DELIVERY-LIVE-2026-06-10). Founder-admin gated, Bearer JWT only - a browser page-visit 401s by design (see tech-known-issues). Companion: lib/slo/slo-stats.",
-      "deps": [
-        "supabase"
-      ],
-      "rules": [
-        "R5"
-      ],
-      "priority": "Post-P6",
-      "proximity": "",
-      "connects": [
-        "infra-a12-otel-audit"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
-      "journey": "internal",
-      "blocker": "Provisional until real traffic accumulates SLO truth."
-    },
-    {
-      "id": "infra-a19-abuse-detection",
-      "name": "A19 Abuse Detection (3 Detectors)",
-      "type": "infra",
-      "subtype": [
-        "security"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/app/api/abuse/evaluate/route.ts",
-      "desc": "Velocity + pattern detectors writing abuse_signals; detection-only (no enforcement).",
-      "notes": "Live: all three detectors since S3 + S5 (D-PRELAUNCH-S3-ABUSE-DETECTION-ACTIVATION-2026-06-08, D-PRELAUNCH-S5-A10-METERING-ACTIVATION-2026-06-09); 200 with service token / 401 without.",
-      "deps": [
-        "supabase"
-      ],
-      "rules": [
-        "R4"
-      ],
-      "priority": "P6",
-      "proximity": "",
-      "connects": [
-        "infra-a13-cost-health"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
-      "journey": "internal",
-      "blocker": ""
-    },
-    {
-      "id": "tool-access",
-      "name": "user-access (GDPR Art 15)",
-      "type": "tool",
-      "subtype": [
-        "compliance"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/app/api/user/access/route.ts",
-      "desc": "Subject-access request endpoint; logs to compliance_access_log.",
-      "notes": "A15b Verified-live per D-PRELAUNCH-S1-DATA-RIGHTS-GO-LIVE-2026-06-07; audit table Live in production.",
-      "deps": [
-        "supabase"
-      ],
-      "rules": [
-        "R17"
-      ],
-      "priority": "P2",
-      "proximity": "",
-      "connects": [
-        "tool-export"
-      ],
-      "origin": "",
-      "humanReady": "ready",
-      "agentReady": "na",
-      "journey": "free_tier",
-      "blocker": ""
-    },
-    {
-      "id": "tool-rectify",
-      "name": "user-rectify (GDPR Art 16)",
-      "type": "tool",
-      "subtype": [
-        "compliance"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/app/api/user/rectify/route.ts",
-      "desc": "Rectification endpoint; logs to compliance_rectification_log.",
-      "notes": "A15c Verified-live per D-PRELAUNCH-S1-DATA-RIGHTS-GO-LIVE-2026-06-07; audit table Live in production.",
-      "deps": [
-        "supabase"
-      ],
-      "rules": [
-        "R17"
-      ],
-      "priority": "P2",
-      "proximity": "",
-      "connects": [
-        "tool-access"
-      ],
-      "origin": "",
-      "humanReady": "ready",
-      "agentReady": "na",
-      "journey": "free_tier",
-      "blocker": ""
-    },
-    {
-      "id": "tool-sage-calling",
-      "name": "sage-calling (Purpose Discovery)",
-      "type": "tool",
-      "subtype": [
-        "evaluation",
-        "llm-powered"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/app/api/calling/route.ts",
-      "desc": "Sage Calling public surface + admin Hard-Gate approval route; purpose-discovery product line.",
-      "notes": "Live/Verified on founder post-deploy smoke 2026-05-21 (D-SAGE-CALLING-STAGE2-LIVE-VERIFIED-2026-05-21); gated by SAGE_CALLING_ENABLED (unset -> 503). R20a content catch Live since 2026-05-31 (D-R20A-CALLING-ACTIVATION).",
-      "deps": [
-        "claude-api",
-        "supabase"
-      ],
-      "rules": [
-        "R4",
-        "R20"
-      ],
-      "priority": "P6",
-      "proximity": "",
-      "connects": [
-        "infra-r20a-classifier"
-      ],
-      "origin": "",
-      "humanReady": "partial",
-      "agentReady": "na",
-      "journey": "free_tier",
-      "blocker": ""
-    },
-    {
-      "id": "tool-sage-practice-reflect",
-      "name": "sage-practice-reflect",
-      "type": "tool",
-      "subtype": [
-        "reflective",
-        "llm-powered"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/app/api/practice/reflect/route.ts",
-      "desc": "Sage Reflect endpoint - the fourth Sage Practice product; closes the Calling -> Reasoning -> Assent -> Reflect loop.",
-      "notes": "Live/Verified (gated) since 2026-05-22 (D-SAGE-REFLECT-STAGE-B-METERING-FIX-AND-LIVE-VERIFICATION-2026-05-22); R20a catch Live since 2026-05-31 (D-R20A-BATCH-ACTIVATION-REFLECT-AUDIENCE-2026-05-31).",
-      "deps": [
-        "claude-api",
-        "supabase"
-      ],
-      "rules": [
-        "R4",
-        "R17",
-        "R20"
-      ],
-      "priority": "P6",
-      "proximity": "",
-      "connects": [
-        "infra-r20a-classifier",
-        "infra-server-encryption"
-      ],
-      "origin": "",
-      "humanReady": "partial",
-      "agentReady": "na",
-      "journey": "free_tier",
-      "blocker": ""
-    },
-    {
-      "id": "tool-accreditation-public",
-      "name": "Public Accreditation Endpoint",
-      "type": "tool",
-      "subtype": [
-        "interface"
-      ],
-      "status": "verified",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/app/api/accreditation/[agent_id]/route.ts",
-      "desc": "GET endpoint serving an agent's R4-compliant AccreditationPayload (Sage Assent badge surface).",
-      "notes": "Wired-Verified per D-ATL-PUBLIC-ACCREDITATION-ENDPOINT-WIRED-VERIFIED-2026-05-16; production-deployed.",
-      "deps": [
-        "supabase"
-      ],
-      "rules": [
-        "R4",
-        "R18"
-      ],
-      "priority": "P3",
-      "proximity": "",
-      "connects": [
-        "engine-accred-card",
-        "engine-trust-layer"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "ready",
-      "journey": "paid_api",
-      "blocker": "Badge/scope copy joins the S8b R18 public-materials pass."
-    },
-    {
-      "id": "substrate-sage-assent-wrapper",
-      "name": "Sage Assent Wrapper + Bridge",
-      "type": "engine",
-      "subtype": [
-        "architecture"
-      ],
-      "status": "verified",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/lib/substrate/sage-assent-wrapper.ts",
-      "desc": "Sage Assent wrapper over the substrate: bridge, iteration patterns, accreditation store/writer, hand-back report.",
-      "notes": "Wired-Verified through the Sage Assent arc 2026-05-15/16 (D-ATL-WRAPPER-WIRED-VERIFIED-2026-05-15 + companions). Companion files: sage-assent-bridge, sage-assent-iteration-patterns, sage-assent-accreditation-store/-writer, agent-hand-back-report.",
-      "deps": [
-        "supabase"
-      ],
-      "rules": [
-        "R15",
-        "R18"
-      ],
-      "priority": "P3",
-      "proximity": "",
-      "connects": [
-        "engine-trust-layer",
-        "substrate-translation-sandwich"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "ready",
-      "journey": "paid_api",
-      "blocker": "Next: C Phase 3 external/wire rename (with engine-trust-layer)."
-    },
-    {
-      "id": "tool-public-key",
-      "name": "Public Key Endpoint (Ed25519)",
-      "type": "tool",
-      "subtype": [
-        "interface"
-      ],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/app/api/public-key/route.ts",
-      "desc": "Serves the Layer-2 signing public key (steady-state shape: previous null, rotation_overlap_until null).",
-      "notes": "Live; steady-state shape confirmed at the 2026-06-10 review (section 1). Rotation overlap vars deliberately unset until first rotation.",
-      "deps": [],
-      "rules": [
-        "R18"
-      ],
-      "priority": "P6",
-      "proximity": "",
-      "connects": [
-        "substrate-translation-sandwich"
-      ],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "ready",
-      "journey": "paid_api",
-      "blocker": ""
-    },
-    {
-      "id": "prod-premeditatio",
-      "name": "Preparing for Adversity (Premeditatio)",
-      "type": "product",
-      "subtype": [],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".tsx",
-      "path": "/website/src/app/premeditatio/page.tsx",
-      "desc": "Premeditatio malorum practice tool - adversity preparation.",
-      "notes": "Live on production (capability inventory 2026-06-10). H1 renamed to 'Preparing for Adversity' at S8b (D-S8A-OPEN-DECISIONS-2026-06-10, decision 4).",
-      "deps": [
-        "claude-api"
-      ],
-      "rules": [
-        "R19"
-      ],
-      "priority": "P6",
-      "proximity": "",
-      "connects": [],
-      "origin": "",
-      "humanReady": "partial",
-      "agentReady": "na",
-      "journey": "free_tier",
-      "blocker": ""
-    },
-    {
-      "id": "prod-oikeiosis",
-      "name": "Expanding Your Circle of Concern (Oikeiosis)",
-      "type": "product",
-      "subtype": [],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".tsx",
-      "path": "/website/src/app/oikeiosis/page.tsx",
-      "desc": "Oikeiosis extension practice tool - widening the circle of concern.",
-      "notes": "Live on production (capability inventory 2026-06-10). H1 renamed to 'Expanding Your Circle of Concern' at S8b (D-S8A-OPEN-DECISIONS-2026-06-10, decision 4).",
-      "deps": [
-        "claude-api"
-      ],
-      "rules": [
-        "R0",
-        "R19"
-      ],
-      "priority": "P6",
-      "proximity": "",
-      "connects": [],
-      "origin": "",
-      "humanReady": "partial",
-      "agentReady": "na",
-      "journey": "free_tier",
-      "blocker": ""
-    },
-    {
-      "id": "prod-honest-positioning",
-      "name": "Honest-Positioning Surfaces",
-      "type": "product",
-      "subtype": [],
-      "status": "live",
-      "oldStatus": null,
-      "ext": ".tsx",
-      "path": "/website/src/app/limitations/",
-      "desc": "The R19 surface group: /limitations, /accessibility, /privacy, /terms; R19d mirror principle in tools.",
-      "notes": "Live per the A18 arc (D-A18B-A18D-LIMITATIONS-MIRROR-ACCESSIBILITY-2026-06-07; D-R19D-ALL-TOOLS-2026-06-07). Legal wording is placeholder pending lawyer review, by design (R19).",
-      "deps": [],
-      "rules": [
-        "R19"
-      ],
-      "priority": "P2",
-      "proximity": "",
-      "connects": [],
-      "origin": "",
-      "humanReady": "ready",
-      "agentReady": "na",
-      "journey": "free_tier",
-      "blocker": "Final privacy/ToS/Art-50 wording lawyer-gated - engagement this week (readiness statement is the cover note)."
-    },
-    {
-      "id": "infra-r20b-independence",
-      "name": "R20b Independence Coaching",
-      "type": "infra",
-      "subtype": [
-        "safety"
-      ],
-      "status": "wired",
-      "oldStatus": null,
-      "ext": ".ts",
-      "path": "/website/src/lib/r20b-dependence.ts",
-      "desc": "Framework-dependence detection + independence coaching (pure, deterministic, never-throws); single-endpoint proof on /api/mentor/private/reflect.",
-      "notes": "Wired per A18c (D-A18C-FRAMEWORK-DEPENDENCE-2026-06-07); off the R20a perimeter (PR6 boundary confirmed by ADR).",
-      "deps": [],
-      "rules": [
-        "R20"
-      ],
-      "priority": "Post-P6",
-      "proximity": "",
-      "connects": [],
-      "origin": "",
-      "humanReady": "na",
-      "agentReady": "na",
-      "journey": "internal",
-      "blocker": "Inert by decision - R20B_INDEPENDENCE_COACHING_ENABLED unset; reviewed at S6; revisit post-launch."
     }
   ]
 }

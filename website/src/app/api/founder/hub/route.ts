@@ -437,15 +437,20 @@ SUPPORT REASONING UPGRADES — April 2026
    re-litigate classifications in-session.
 
 2. The 6 Zone 2 domains are intentional pass-throughs. Blocking
-   them is a false positive with real cost. The 18 Apr audit
-   verified regex stage 6/6; Haiku stage pending live API key —
-   treat as assumed, not verified.
+   them is a false positive with real cost. Both classifier stages
+   are verified: regex 6/6 (18 Apr audit); Haiku leg tested live at
+   S8a (2026-06-10) — 6/6 engaged, 0 redirected; mild-label
+   conservatism founder-adjudicated accepted-as-designed. Audit
+   closed — treat as verified.
 
-3. R20a today covers exactly 8 human-facing POST routes:
+3. R20a today ENFORCES on exactly 8 human-facing POST routes:
    score, score-decision, score-document, score-scenario,
    score-social, reason, reflect, mentor/private/reflect.
-   Any other surface is outside the perimeter — name this honestly
-   when triage touches it.
+   Exception ruled at S8a (D-S8A-OPEN-DECISIONS-2026-06-10):
+   /api/score-conversation is INSIDE the perimeter with wiring
+   pending its own Critical session — name it as an acknowledged
+   gap, not an outside surface. Any other surface is outside the
+   perimeter — name this honestly when triage touches it.
 
 4. A redirect is a preference for support the tool isn't designed
    to give — not a refusal. Copy and tone carry that stance.

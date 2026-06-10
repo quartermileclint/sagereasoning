@@ -18,7 +18,7 @@
 | Principled | The Clear Summit | `#5B8C6D` deep green |
 | Sage-Like | The Inner Fire | `#C9A84C` warm gold |
 
-*Assumption (founder to confirm):* progression runs **inward** — Reflexive is the outermost ring, Sage-Like the centre.
+*Confirmed by the founder at S8b (2026-06-10) — the original assumption is REVERSED:* progression runs **outward** — **Reflexive is the innermost ring; Sage-Like is the outermost** (consistent with oikeiosis: the expanding circle). *Also directed at S8b:* the **logos flame (`LOGOS.PNG`) represents the Sage**; **Zeus (`Zeus.PNG`) represents the apprentice/user** (no longer the Sage). The home-page Sage image was swapped Zeus→flame at S8b.
 
 **Passion placement.** When an assessment triggers a passion, that passion's symbol image is placed on the target at the position the assessment indicates. **Previous locations are shown in grey** — the practitioner sees their history on the same target. When a **new proximity is reached**, the respective proximity-card image is also shown.
 
@@ -33,14 +33,14 @@
 **Passion symbols — ready (PNG present):** cracked pottery (Malicious Joy), lentil bowl (Excessive Amusement), sandal (Terror), tunic (Timidity), spilled grain sack (Dread/Astonishment — if grain is the elected symbol over limestone), bread (Panic), milk jug (Pity), cheese (Envy), fish (Jealousy), onion (Burden).
 
 **Passion symbols — mapped in the RTF but no PNG found:** staff (Anger), grapes (Erotic Passion), figs (Longing), olives/olive oil (Love of Pleasure), limestone fragment (Love of Honour; also Dread alternate), wax tablets (Enchantment; Anguish), pallium/cloak (Shame; Grief).
-**Ambiguous:** silver owl coin (Love of Wealth) — `owllogo.PNG` exists but is a logo asset; founder to confirm whether it doubles as the coin symbol or a coin PNG is still to come. `mirror.PNG` and `non ready items.png` exist — founder to confirm their roles.
+**Resolved at S8b (2026-06-10, founder confirmations):** the silver owl coin (Love of Wealth) is **still to come** — `owllogo.PNG` remains the Wisdom virtue logo only; the coin joins the outstanding list above. `mirror.PNG` = **honest self-reflection — a true judgement** (a corrective symbol, not a passion symbol). `non ready items.png` = the **placeholder** for outstanding symbols (W3 builds with placeholders until W5 assets land).
 
 ## 3. Scope items
 
 | # | Item | Type | Slot |
 |---|---|---|---|
-| W1 | **Brand_Guidelines.docx update** — v2 incorporating the proximity cards + colours, the passion-symbol system, the target visualisation, and Human/Developer imagery | Governance/document (AI drafts; founder approves) | Own session or rides S8b |
-| W2 | **Home-page image swap** (Human.PNG / Developer.PNG; assets copied into `website/public/images/`) | code-standard (small) | Rides S8b |
+| W1 | **Brand_Guidelines.docx update** — v2 incorporating the proximity cards + colours, the passion-symbol system, the target visualisation, and Human/Developer imagery | Governance/document (AI drafts; founder approves) | **Rode S8b — draft produced** at `/drafts/2026-06-10-brand-guidelines-v2-draft.md` (Designed; under founder review; converts to .docx on adoption) |
+| W2 | **Home-page image swap** (Human.PNG / Developer.PNG; assets copied into `website/public/images/`) | code-standard (small) | **Rode S8b — executed**: audience cards emoji→images (Humans=Human.PNG; AI Agents+Developers=Developer.PNG) + Sage image Zeus→LOGOS.PNG flame (founder direction in-session); tsc clean; live on next push |
 | W3 | **Assessment target visualisation component** — concentric-circle render, passion placement, grey history, proximity-card reveal; wired into the human tools' results | Design → Build (Elevated where it touches existing tool output) | **Couples with the substrate migration** (founder-elected pre-launch): build the presentation once on the new Layer-3/tool surface, not twice |
 | W4 | **Agent developer-form target-state contract** — structured block + stable asset URLs in the developer-form payload | Design → Build (Elevated; agent contract addition) | Same migration arc as W3 |
 | W5 | **Missing-asset production** (§2 list) | Founder, wall-clock | Parallel; W3/W4 can build with partial coverage + placeholders |

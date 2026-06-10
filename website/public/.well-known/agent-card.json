@@ -137,12 +137,23 @@
         "params": {
           "noPracticeDisclaimer": "This configuration — SageReasoning with Sage Assent, without Sage Reflect — supports virtue-grounded reasoning and credentialing within individual sessions. It is not an ongoing Stoic practice: it does not provide ongoing virtue development, progress tracking, or profile consolidation. Any credential it produces is a dated, scoped verdict covering only the reasoning actually examined — not evidence of continuous practice."
         }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/safety-redirect/v1",
+        "description": "R20a distress-input behaviour. Agent-authenticated calls that contain acute-distress content return HTTP 200 with {status:'redirected', severity, developer_note, suggested_user_message, flow_terminated:true} instead of an assessment. Integrators MUST surface suggested_user_message to the end user verbatim and terminate the flow. Human-session surfaces render a crisis message directly. Contract behaviour, not an error.",
+        "required": false,
+        "params": {
+          "responseShape": {
+            "status": "redirected",
+            "flow_terminated": true
+          }
+        }
       }
     ]
   },
   "authentication": {
     "schemes": ["bearer", "none"],
-    "credentials": "Stoic Brain overview (GET /api/stoic-brain), guardrail documentation (GET /api/guardrail), and baseline scenarios (GET /api/baseline/agent) require no authentication. All scoring endpoints require an API key: Authorization: Bearer sr_live_<key>. Request a free key at zeus@sagereasoning.com. The Sage Assent write surface (POST /api/accreditation/{agent_id}) requires a per-agent write token: Authorization: Bearer sr_assent_<token> — see the sage-assent-write-auth/v1 extension."
+    "credentials": "Stoic Brain overview (GET /api/stoic-brain), guardrail documentation (GET /api/guardrail), and baseline scenarios (GET /api/baseline/agent) require no authentication. All scoring endpoints require an API key: Authorization: Bearer sr_live_<key>. Request a free key at zeus@sagereasoning.com. Production agent integrations use per-install tokens (sr_inst_<32 hex>): mint via session-authenticated POST /api/keys (token shown once), present as Authorization: Bearer sr_inst_<token>, and submit a pre-computed layer1_schema; revoke via DELETE /api/keys (immediate 401). The Sage Assent write surface (POST /api/accreditation/{agent_id}) requires a per-agent write token: Authorization: Bearer sr_assent_<token> — see the sage-assent-write-auth/v1 extension."
   },
   "defaultInputModes": ["application/json"],
   "defaultOutputModes": ["application/json"],
@@ -160,7 +171,7 @@
     {
       "id": "universal-reasoning",
       "name": "Universal Stoic Reasoning (V3)",
-      "description": "Run the full Stoic causal sequence analysis on any decision, action, or situation. Depth-selectable: quick (3 mechanisms), standard (5 mechanisms), deep (6 mechanisms). Returns katorthoma_proximity (reflexive/habitual/deliberate/principled/sage_like), passion_diagnosis with sub-species and false_judgements, control_filter, oikeiosis assessment, and improvement_path.",
+      "description": "Run the full Stoic causal sequence analysis on any decision, action, or situation. Depth-selectable: quick (3 mechanisms), standard (5 mechanisms), deep (6 mechanisms). Returns katorthoma_proximity (reflexive/habitual/deliberate/principled/sage_like), passion_diagnosis with sub-species and false_judgements, control_filter, oikeiosis assessment, and improvement_path. Response shape: translation-sandwich-v1 (deterministic signed assessment + prose render; verify signatures against GET /api/public-key).",
       "tags": ["stoic-philosophy", "ethical-reasoning", "decision-support", "passion-diagnosis", "katorthoma-proximity-assessment", "moral-reasoning"],
       "inputModes": ["application/json"],
       "outputModes": ["application/json"],

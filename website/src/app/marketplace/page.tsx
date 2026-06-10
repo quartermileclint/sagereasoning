@@ -123,6 +123,10 @@ export default function MarketplacePage() {
         <p className="text-xs text-sage-500 mt-3">
           sage-context is always free and unlimited. See <a href="/pricing" className="underline hover:text-sage-700">full pricing</a> for details.
         </p>
+        <p className="text-xs text-sage-500 mt-1">
+          Allowances shown are per-skill evaluation tiers. Substrate access (/api/reason) is governed by
+          the per-loop model — 30 loops/month free (see <a href="/api-docs" className="underline hover:text-sage-700">API docs</a>).
+        </p>
       </div>
 
       {/* Engine callout */}

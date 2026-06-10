@@ -169,7 +169,7 @@ export default function PremeditatioPage() {
       <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="font-display text-2xl font-semibold text-sage-900 mb-1">
-            Premeditatio Malorum
+            Preparing for Adversity
           </h1>
           <p className="font-body text-sage-600">
             Weekly practice: anticipate what&apos;s ahead, identify the false impression,

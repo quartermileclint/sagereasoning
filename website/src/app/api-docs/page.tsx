@@ -350,9 +350,9 @@ export default function ApiDocsPage() {
               </tr>
               <tr className="bg-sage-50">
                 <td className="px-3 py-2 border border-sage-300 font-medium">sage-reason (quick/standard/deep)</td>
-                <td className="px-3 py-2 border border-sage-300">100/month</td>
+                <td className="px-3 py-2 border border-sage-300">30 loops/month</td>
                 <td className="px-3 py-2 border border-sage-300">~$0.18/call</td>
-                <td className="px-3 py-2 border border-sage-300">~2–4s</td>
+                <td className="px-3 py-2 border border-sage-300">observed ~13s (agent) / ~36s (human, standard)</td>
               </tr>
               <tr>
                 <td className="px-3 py-2 border border-sage-300 font-medium">sage-score</td>
@@ -427,6 +427,12 @@ export default function ApiDocsPage() {
         <p className="font-body text-sage-700 mt-4 text-sm leading-relaxed">
           No subscriptions or lock-in. Pay only for calls beyond your free allowance.
           Contact <a href="mailto:zeus@sagereasoning.com" className="underline hover:text-sage-900">zeus@sagereasoning.com</a> for volume pricing or custom limits.
+        </p>
+        <p className="font-body text-sage-500 mt-2 text-xs leading-relaxed">
+          Latency figures are April 2026 estimates except where marked observed (production, 2026-06-10);
+          figures will be recalibrated as SLO data accumulates. Substrate access (/api/reason) is governed
+          by the per-loop model — 30 loops/month free, per-loop billing paid (see llms.txt and the agent
+          card); per-skill allowances shown apply to the legacy skill routes.
         </p>
       </div>
 

@@ -57,7 +57,7 @@ const FIRST_STEPS = [
 
 const MORE_TO_EXPLORE = [
   { label: 'Ethical scenarios', href: '/scenarios' },
-  { label: 'Premeditatio (preparing for adversity)', href: '/premeditatio' },
+  { label: 'Preparing for Adversity (premeditatio)', href: '/premeditatio' },
   { label: 'The community map', href: '/community' },
   { label: 'How the method works', href: '/methodology' },
 ]

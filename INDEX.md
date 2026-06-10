@@ -1,6 +1,6 @@
 # SageReasoning Project Index
 
-Last updated: 10 June 2026 (S8a close: capability inventory + pre-lawyer readiness statement + Zone-2 audit close + brand/presentation work package added; PROJECT_STATE/tech-guide disposition decided — retire-to-archive, move executes at S8b) | Maintained as part of P0 item 0e
+Last updated: 10 June 2026 (S8b: registry reconcile v1.6.0 + R18 public-materials pass + PROJECT_STATE/tech-guide retired to /archive with pointer stubs) | Maintained as part of P0 item 0e
 Prior versions preserved in `/archive/` (most recent: `2026-04-26_INDEX_pre-canonical-patterns-add.md`)
 
 ---
@@ -10,7 +10,7 @@ Prior versions preserved in `/archive/` (most recent: `2026-04-26_INDEX_pre-cano
 INDEX is a **governance navigator** — it tells you where governing documents, archive protocol, and handoff structure live. It does **not** try to track current project status or current technical state. Those change frequently and drift is the recurring failure mode.
 
 **For current project status and production state:** read `/CLAUDE.md` ("Production state" block, rewritten at session closes), the most recent session close in `/operations/handoffs/founder/`, and `/operations/decision-log.md`.
-**Historical snapshots (April 2026; no longer kept live):** `PROJECT_STATE.md`, `summary-tech-guide.md`, and `summary-tech-guide-addendum-context-and-memory.md` at root describe the 20–22 April state and predate the substrate pivot. Disposition decided at S8a (`D-S8A-OPEN-DECISIONS-2026-06-10`): **retire to /archive with pointers**; the move executes at S8b. *(`TECHNICAL_STATE.md`, previously referenced here, does not exist in the repo — dead pointer removed 2026-06-10.)*
+**Historical snapshots (April 2026; retired):** `PROJECT_STATE.md`, `summary-tech-guide.md`, and `summary-tech-guide-addendum-context-and-memory.md` were retired to `/archive/` at S8b (2026-06-10) per `D-S8A-OPEN-DECISIONS-2026-06-10` decision 6 — archived as `2026-04-20_PROJECT_STATE.md`, `2026-04-22_summary-tech-guide.md`, `2026-04-22_summary-tech-guide-addendum-context-and-memory.md`; pointer stubs remain at the root paths. *(`TECHNICAL_STATE.md`, previously referenced here, does not exist in the repo — dead pointer removed 2026-06-10.)*
 **0h-exit artefacts (2026-06-10, S8a):** `/operations/capability-inventory-2026-06-10.md` · `/operations/pre-lawyer-readiness-statement-2026-06-10.md` (doubles as the lawyer cover note; 0h HELD pending S8b) · `/operations/safety-signal-audits/2026-06-10-zone2-haiku-leg-calibration-audit.md` · `/drafts/2026-06-10-brand-presentation-work-package.md` (under review).
 
 Code directories (`/website/`, `/api/`, `/sage-mentor/`, `/trust-layer/`, etc.) are not listed here to prevent status drift. Their current status lives in `/CLAUDE.md` and the decision log.
@@ -38,7 +38,7 @@ Code directories (`/website/`, `/api/`, `/sage-mentor/`, `/trust-layer/`, etc.) 
 | `/operations/handoffs/` | Canonical handoff tree — see "Handoff Structure" below. |
 | `/LICENSE` | Proprietary Evaluation-Only licence. |
 
-Root-level files that are **content, not governance**: `README.md` (status section marked historical 2026-06-10), `PROJECT_STATE.md`, `summary-tech-guide.md`, `summary-tech-guide-addendum-context-and-memory.md`, `users-guide-to-sagereasoning.md`, `SageReasoning_Ecosystem_Map.html` — all April-era snapshots except README's top matter. For current state read `/CLAUDE.md` + the decision log, not these.
+Root-level files that are **content, not governance**: `README.md` (status section marked historical 2026-06-10), `users-guide-to-sagereasoning.md`, `SageReasoning_Ecosystem_Map.html` — April-era snapshots except README's top matter. `PROJECT_STATE.md`, `summary-tech-guide.md`, and `summary-tech-guide-addendum-context-and-memory.md` are now pointer stubs (retired to `/archive/` at S8b). For current state read `/CLAUDE.md` + the decision log, not these.
 
 ---
 

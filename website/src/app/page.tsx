@@ -96,21 +96,21 @@ export default function HomePage() {
             {
               title: 'Humans',
               desc: 'Seeking a Stoic decision-making framework to prompt virtuous action in daily life.',
-              icon: '🏛️',
+              image: '/images/Human.PNG',
             },
             {
               title: 'AI Agents',
               desc: 'Seeking virtue-based internal reasoning grounded in a structured Stoic framework.',
-              icon: '🤖',
+              image: '/images/Developer.PNG',
             },
             {
               title: 'Developers',
               desc: 'Integrating Stoic reasoning into AI systems via a structured API and data reference.',
-              icon: '⚙️',
+              image: '/images/Developer.PNG',
             },
           ].map((client) => (
             <div key={client.title} className="bg-white/60 border border-sage-200 rounded-lg p-8 text-center">
-              <div className="text-4xl mb-4">{client.icon}</div>
+              <img src={client.image} alt={client.title} className="w-24 h-24 mx-auto mb-4 object-contain" />
               <h3 className="font-display text-xl font-semibold text-sage-800 mb-3">{client.title}</h3>
               <p className="font-body text-sage-700 leading-relaxed">{client.desc}</p>
             </div>
@@ -195,12 +195,12 @@ export default function HomePage() {
             Your reasoning is assessed for how closely it approaches the ideal of the perfect Stoic Sage.
           </p>
 
-          {/* Zeus — the ideal of the perfect Sage */}
+          {/* The logos flame — the ideal of the perfect Sage (founder direction, S8b 2026-06-10: Zeus retired from this role) */}
           <div className="flex flex-col items-center mb-10">
             <div className="relative">
               <img
-                src="/images/Zeus.PNG"
-                alt="The Perfect Sage"
+                src="/images/LOGOS.PNG"
+                alt="The logos flame — the Perfect Sage"
                 className="w-40 h-40 object-contain drop-shadow-xl rounded-full border-4 border-amber-200 bg-amber-50/60"
               />
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-amber-100 border border-amber-300 rounded-full px-3 py-0.5">

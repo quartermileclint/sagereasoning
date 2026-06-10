@@ -487,11 +487,11 @@ export function getMcpServerCapabilities(): McpServerCapabilities {
     authentication: {
       type: 'bearer',
       description:
-        'Include "Authorization: Bearer sr_live_<key>" header. Get a free key (100 calls/month) at sagereasoning.com.',
+        'Include "Authorization: Bearer sr_live_<key>" header. Get a free key (free tier: 30 loops/month) at sagereasoning.com.',
     },
     rate_limits: {
-      free_tier: '100 calls/month, rate-limited',
-      paid_tier: 'Volume-based pricing, no rate limit',
+      free_tier: '30 loops/month (≈1/day), rate-limited',
+      paid_tier: 'Per-loop billing: $0.02 base + token-cost overage (see llms.txt)',
     },
     compliance: [
       'R1: No therapeutic or clinical implications',

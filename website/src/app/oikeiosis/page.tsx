@@ -182,7 +182,7 @@ export default function OikeiosisPage() {
       <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="font-display text-2xl font-semibold text-sage-900 mb-1">
-            Oikeiosis Extension
+            Expanding Your Circle of Concern
           </h1>
           <p className="font-body text-sage-600">
             Quarterly reflection: expanding the circle of concern from self outward.
