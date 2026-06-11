@@ -1,0 +1,4 @@
+{
+ "input": "I am about to write into the P1 findings memo the observed-economics findings: the production billing ledger holds 23 loop rows from May 17 to 22, verification traffic only, with mean Anthropic cost about 0.26 cents per loop against the 2 cent base, total billed 50 cents versus 6 cents of model cost, and overage firing on 2 of 23 loops; the May 5 to 7 parallel-run table shows the old bundled path averaging 42.5 seconds while the sandwich layers average 13.4 seconds, near zero, and 14.6 seconds, with per-call sandwich cost near 3.7 cents at that period; the bundled path's cost column was never populated, and 25 of 61 early sandwich runs errored. I will present these as evidence with their caveats: small sample, verification traffic, early-build instability, and the unpopulated comparison column.",
+ "depth": "quick"
+}

@@ -1,6 +1,6 @@
 # P1 Comparison Test — Pre-Registered Design (S8b addendum, 2026-06-10)
 
-**Status:** Draft — under founder review (0e). **This sheet is the pre-registration device: the founder signs it off BEFORE the bare leg runs; after sign-off, the metrics and the task brief are frozen.** Changing them mid-test voids the comparison.
+**Status:** **FROZEN — founder signed off 2026-06-11 17:53 AEST** (leg-A session, before the bare run; §6 thresholds ticked at sign-off: 2 / 50% / $5). **This sheet is the pre-registration device: the founder signs it off BEFORE the bare leg runs; after sign-off, the metrics and the task brief are frozen.** Changing them mid-test voids the comparison.
 **Source:** founder direction in-session, S8b addendum (recorded under `D-0H-MAIN-BLOCKER-VALUE-DEMONSTRATION-2026-06-10`).
 
 ---
@@ -48,7 +48,7 @@ This is the founding claim for the agent-developer audience, 0h criterion 4 ("va
 
 ## 6. Success criteria — **founder sets the thresholds at sign-off** (deliberately not pre-filled by the AI)
 
-- **"Benefit shown" =** at least ☐ ___ material decision(s) changed or error(s) caught by the harness that the bare leg missed, **and** overhead within ☐ ___ % wall-clock and ☐ $___ total harness cost.
+- **"Benefit shown" =** at least ☑ **2** material decision(s) changed or error(s) caught by the harness that the bare leg missed, **and** overhead within ☑ **50** % wall-clock and ☑ $**5** total harness cost. *(Ticked by the founder at sign-off, 2026-06-11 17:53 AEST, before the bare run — recorded verbatim from the founder's message: "2, 50%, $5 signed off".)*
 - **"No benefit" =** anything short of that. **Named in advance:** this outcome stands, is recorded honestly, and redirects scope (task-fit analysis: which decision-point classes, if any, showed value).
 - The verdict memo states the result against these boxes exactly as ticked at sign-off.
 

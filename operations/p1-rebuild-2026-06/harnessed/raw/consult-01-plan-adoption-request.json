@@ -1,0 +1,39 @@
+{
+  "input": "I am about to adopt the task plan for the leg-B harnessed run of the P1 inputs rebuild. The plan: gather the current verified state from the component registry v1.6.0, the capability inventory, the billing model design, the staged scope plan, and observed cost data via two read-only database queries; then write the refreshed P1 inputs pack, the findings memo on what changed since the pre-pivot inputs, and the recommendation set including the investment-case framing and the Stripe criterion tension. I am doing this because the founder's P1 review needs current inputs and the comparison test needs an honest harnessed leg. My main concerns: the accuracy and source-grounding of every figure I write is within my control; the comparison verdict itself is outside my control and I should not steer toward the thresholds. I am cautious about steering the run; the design measures wall-clock time, so there is time pressure to work efficiently, but care comes first. The outputs serve the founder's review session and, downstream, the product's future users.",
+  "depth": "standard",
+  "layer1_schema": {
+    "version": "layer1-schema-v1",
+    "passions_present": [],
+    "control_filter_elements": [
+      {"item": "the accuracy and source-grounding of every figure I write", "agent_named_position": "within"},
+      {"item": "the comparison verdict itself", "agent_named_position": "outside"}
+    ],
+    "oikeiosis_circles_engaged": [
+      {"circle": "household", "evidence": "The outputs serve the founder's review session"},
+      {"circle": "local_community", "evidence": "downstream, the product's future users"}
+    ],
+    "value_categories_at_stake": [],
+    "kathekon_factors": [
+      {"factor_type": "role_obligation", "description": "execute the frozen brief faithfully for the founder's review", "evidence": "the founder's P1 review needs current inputs and the comparison test needs an honest harnessed leg"}
+    ],
+    "urgency_indicators": [
+      {"signal_type": "time_pressure", "evidence": "the design measures wall-clock time, so there is time pressure to work efficiently"}
+    ],
+    "causal_stage_evidence": [
+      {"stage": "synkatathesis", "evidence": "I am about to adopt the task plan"}
+    ],
+    "eupatheia_candidates": [
+      {"shape": "eulabeia", "evidence": "I am cautious about steering the run", "narrative_target": "the comparison run's integrity"}
+    ],
+    "stated_concern_targets": [
+      {"stated_target": "the founder's review session", "for_self_concern": null, "evidence": "The outputs serve the founder's review session"}
+    ],
+    "stated_equanimity_signals": [],
+    "motivation_stated": true,
+    "motivation_evidence": [
+      {"motivation": "because the founder's P1 review needs current inputs and the comparison test needs an honest harnessed leg", "evidence": "I am doing this because the founder's P1 review needs current inputs and the comparison test needs an honest harnessed leg"}
+    ],
+    "element_fusion_detected": {"fused": false, "fused_concerns": null},
+    "ambiguity_notes": []
+  }
+}

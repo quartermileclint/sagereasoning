@@ -1,0 +1,4 @@
+{
+ "input": "I am about to write into the P1 findings memo an error claim against live production configuration: the admin key-mint route hard-codes free-tier defaults of 667 calls monthly, 50 daily, and 20 chain iterations, which override the database schema default of 30 monthly and 1 daily that the March free-tier restructure adopted and marked done, and which contradict the locked billing design stating 30 loops per month and 1 per day for the free tier. The key minted live in this session carries the generous old limits, which is the proof. The claim is grounded in the route source, the schema file, and the live database row. I judge it a real defect worth its own pre-launch fix, discovered only because this run minted and inspected a real credential.",
+ "depth": "quick"
+}

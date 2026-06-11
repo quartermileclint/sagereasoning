@@ -1,0 +1,4 @@
+{
+ "input": "I am about to write into the P1 findings memo two product findings from this run's own evidence: first, credential fragmentation, where the per-install consultation credential is rejected by the guardrail endpoint, which accepts only ecosystem API keys, so an onboarding agent needs two credential classes to run one harnessed loop; second, cost opacity, where the per-install path emits no cost or usage headers because metering binds to API-key identity, so the onboarding funnel's first credential gives a new agent customer no visibility of the meter. Both findings bear on the business plan because the per-install credential is the intended agent onboarding funnel.",
+ "depth": "quick"
+}

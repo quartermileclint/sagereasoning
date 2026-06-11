@@ -1,0 +1,4 @@
+{
+ "input": "I am about to write into the P1 findings memo an error claim against the pre-pivot pack: the business plan document states that subscription models were completely removed and revenue is entirely per-call usage plus voluntary donations, yet it quotes the 10,329 dollars per month Month-12 total from the break-even document, whose own composition includes 490 dollars of Prokoptos subscription revenue, and the plan's own components, 9,117 plus roughly 211 dollars, sum to about 9,328, not 10,329. I judge this an internal contradiction plus an arithmetic carry-over error. Before writing it as an error claim I want to be sure the inference is sound and fairly stated.",
+ "depth": "quick"
+}

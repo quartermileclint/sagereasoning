@@ -10630,3 +10630,66 @@ Then after push: registry dashboards render v1.6.0 (https://www.sagereasoning.co
 **Rules served:** R0 (dogfood on ourselves first), R18/R19 (the demonstration IS the honest public claim), 0h (criterion 4 per audience), 0d-ii, 0f, PR4 (deferred, named), PR7, PR10 (pre-registration = the Verify step designed before Execute), PR11 (egress constraint re-verified live this session, stated), PR12 (egress negative finding re-tested before relying on it), PR13 (finding → Cowork integration path implication named), PR16 (dogfood lens applied to the product's own founding claim), PR17 (token minting walked live in leg B), PR18 (close-time blocks updated once, dated).
 
 **Status:** Adopted. Cross-references: `D-PRELAUNCH-S8B-RECONCILE-R18-RIDES-2026-06-10`, `D-PRELAUNCH-S8A-E2E-VERIFICATION-2026-06-10` (the contract verification this completes), review rec 3.2, `/drafts/2026-06-10-p1-comparison-test-design.md`.
+
+---
+
+## 2026-06-11 — D-P1-COMPARISON-LEG-A-BARE-2026-06-11
+
+**Decision:** P1 comparison **leg A (bare) executed** per its prompt, in Claude Code on the founder's machine, session model Fable 5 (`claude-fable-5` — leg B must match, PR4). **(1) Sign-off:** the founder ticked the design sheet's §6 thresholds **before the bare run** — benefit shown = ≥ **2** material decisions changed / errors caught by the harness that the bare leg missed, AND overhead within **50%** wall-clock AND **$5** total harness cost (founder message verbatim: "2, 50%, $5 signed off", 2026-06-11 17:53 AEST). The sheet is now **FROZEN** (status header + §6 updated in place; no other edit). **(2) Baseline:** opening commit `a3db4c7` (`main`, clean, pushed) — leg B opens from the same hash. **(3) The bare run:** the frozen §2 brief executed with zero SageReasoning API calls, zero sage-* skills, zero mentor consults (production touched only by two read-only DB evidence queries: `loop_billing_events`, `translation_sandwich_comparisons`). Outputs to `/operations/p1-rebuild-2026-06/bare/` only: `p1-inputs-pack.md` (refreshed P1 inputs, source-cited), `findings-memo.md` (**11 findings**, F1–F11), `recommendations.md` (R1–R10 incl. the two judgement items: investment-case reframe to evidence-gated stages; Stripe criterion-2 amendment recommendation), `leg-a-metrics.md`. **(4) Metrics:** open 17:47:25 → deliverables 18:04:40 AEST (~17 min; close-procedure excluded — convention recorded for leg B); **errors caught = 2** (pre-pivot pack's internal subscription contradiction; stale "Designed — not built" header on `/adopted/billing-model-design.md` vs the verified built-and-metering state); session token cost = founder runs `/cost` and fills the metrics row. **(5) Leg B queued:** `/operations/handoffs/founder/2026-06-11-P1-comparison-harnessed-leg-NEXT-SESSION-PROMPT.md` (carries the baseline hash, the frozen brief, the PR17 mint walkthroughs for `sr_inst_` + `sr_assent_`, and a named pre-flight: `/api/guardrail` authenticates via `validateApiKey` (`sr_live_`), not `validatePluginInstallToken` — resolve at leg-B open, walked live).
+
+**Reasoning:** leg A produces the bare baseline the harnessed leg is compared against; without it the comparison has no honest control (`D-0H-MAIN-BLOCKER-VALUE-DEMONSTRATION-2026-06-10`). Pre-registration discipline held: thresholds founder-set before any data existed; the founder does not read leg-A outputs in depth until leg B closes (blind-ish comparative read).
+
+**Files touched:**
+- `drafts/2026-06-10-p1-comparison-test-design.md` — §6 thresholds ticked + status header → FROZEN (the only permitted edit class; sign-off recording)
+- `operations/p1-rebuild-2026-06/bare/` — NEW directory; the four leg-A outputs above
+- `operations/handoffs/founder/2026-06-11-P1-comparison-leg-A-close.md` — NEW; session close
+- `operations/handoffs/founder/2026-06-11-P1-comparison-harnessed-leg-NEXT-SESSION-PROMPT.md` — NEW; leg B
+- `CLAUDE.md` — production-state block 0h line updated at close (PR18)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documents and analysis only; no flag, schema, perimeter, or code change. AC7 not engaged. PR6 not engaged. KG5 engaged (cost via the Claude Code cost report, per the design sheet).
+
+**Rollback path:** `git revert` (documents only).
+
+**Verification step (founder-performable):**
+```
+ls operations/p1-rebuild-2026-06/bare/        # expect the 4 leg-A files
+grep -n "FROZEN" drafts/2026-06-10-p1-comparison-test-design.md   # expect the signed-off header + ticked §6
+```
+Then run `/cost` in this session and fill the token-cost row in `leg-a-metrics.md`. Do NOT read the three content outputs in depth until leg B closes.
+
+**Open questions:** Reflect-leg inclusion in leg B (founder, on the day); the guardrail-auth pre-flight (leg B open); A8 order vs the pair (unchanged).
+
+**Rules served:** R0, R19 (outputs carry honest unit-economics-not-projections discipline), 0a, 0c, 0d-ii, 0f, 0h (main-blocker test, leg 1 of 2), PR2, PR4 (model named; parity mandated), PR7, PR10 (pre-registered Verify held), PR17 (sign-off taken live; leg-B mint walkthroughs written into the prompt, not one-lined), PR18 (production-state untouched mid-session; close-time updates only), KG5.
+
+**Status:** Adopted. Cross-references: `D-0H-MAIN-BLOCKER-VALUE-DEMONSTRATION-2026-06-10`, `D-PRELAUNCH-S8B-RECONCILE-R18-RIDES-2026-06-10`, the frozen design sheet, the leg-A prompt, the leg-B prompt (next).
+
+## 2026-06-11 — D-P1-COMPARISON-LEG-B-HARNESSED-2026-06-11
+
+**Decision:** P1 comparison **leg B (harnessed) executed** per its prompt, in Claude Code on the founder's machine, **session model Fable 5 (`claude-fable-5` — PR4 parity with leg A confirmed at open)**, from baseline `a3db4c7` (`main` had not moved; no worktree needed). The frozen §2 brief ran under the public contract: **12 `/api/reason` consults** at the four decision-point classes (2 on `sr_inst_` with locally-computed `layer1_schema`, 10 on `sr_live_` after the telemetry conflict below), **2 `/api/guardrail` gates** (both `proceed: true`; one transient 500 retried), and the **Sage Assent seed write** (200, carrying all 12 signed Layer-2 assessments as provenance; record Live in `agent_accreditation` keyed `p1-comparison-leg-b-agent`, created 2026-06-11T09:33:33.938Z). Outputs to `/operations/p1-rebuild-2026-06/harnessed/` only: `p1-inputs-pack.md`, `findings-memo.md` (**12 findings**, F1–F12), `recommendations.md` (R1–R10 incl. the two judgement items), `incorporation-log.md` (every consult verbatim: sent → verdict → used/modified/rejected + why), `leg-b-metrics.md` (all §5 rows), `raw/` (full payload+header trail). **Mid-run scope judgement (consulted, #2):** the prompt's two mandates conflict — `sr_inst_` consults vs `X-Loop-*` cost capture (the plugin path is unmetered by design; route source ~line 595) — resolved by switching consults #3+ to the leg's `sr_live_` key; deviation logged; founder did not override. **Metrics headline (measured, not threshold-evaluated):** deliverables wall-clock 74m45s (open 18:16:35 → 19:31:20 AEST; includes ~25 min founder-performed credential phase); harness cost Σ 76¢ billed / 38¢ Anthropic on metered calls (~$0.50 est. total incl. 3 unmetered calls); **decisions changed by consultation: 4** (incl. two unambiguously material: memo §C restructure per consult #7; R2 written at full strength with softening dropped per consult #9's oknos/agonia diagnosis); **errors caught: 2 attributed** (F2 pre-pivot contradiction+arithmetic; **F12 live mint-defaults drift 667/50/20 vs adopted 30/1/1 — found only because the run minted and inspected a real credential**) plus the accreditation **write/read agent_id asymmetry** (POST accepts what GET rejects). **Run-generated product findings:** credential fragmentation (PF-2), per-install cost opacity (F11), guardrail-gate LLM cost unmetered, prompt-pack mint bodies missing `purpose` (PF-1 ×2) + wrong revocation verb for `sr_live_` (PATCH, not DELETE), 422 provenance requirement undocumented in the prompt, one guardrail 500. **Credentials:** all three minted live at open (PR17) and retired at close (founder-performed: 2× DELETE `revoked: true`, 1× PATCH suspend); negative-auth verified 401/401/403 (suspension yields 403 vs revocation's 401 — observation). Reflect leg: not elected (election point passed at revocation).
+
+**Reasoning:** leg B completes the main-blocker comparison pair (`D-0H-MAIN-BLOCKER-VALUE-DEMONSTRATION-2026-06-10`); the harnessed leg had to run the same frozen brief under the real public contract with full incorporation logging so the verdict memo can score benefit and overhead against the frozen 2/50%/$5 boxes either way. Pre-registration held: the thresholds were not steered to mid-run (the §6 sheet stayed closed; metrics report measurements only).
+
+**Files touched:**
+- `operations/p1-rebuild-2026-06/harnessed/` — NEW: the five leg-B outputs + `raw/` trail
+- `operations/handoffs/founder/2026-06-11-P1-comparison-leg-B-close.md` — NEW; session close
+- `operations/handoffs/founder/2026-06-11-P1-comparison-verdict-memo-NEXT-SESSION-PROMPT.md` — NEW; the verdict-memo session
+- `CLAUDE.md` — production-state 0h line updated at close (PR18)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documents + authenticated API consumption under existing Live surfaces; no flag, schema, perimeter, or code change. The only production data writes: one `agent_accreditation` seed row (test agent id, expiring 2026-09-09), 10 `loop_billing_events` rows (real metering of real calls), 12 `substrate_audit_events` rows (by design), 3 credential rows minted-then-retired. AC7 not engaged. PR6 not engaged. KG5 engaged (founder fills `/cost` in `leg-b-metrics.md`).
+
+**Rollback path:** documents — `git revert`. Credentials already retired. The accreditation row is inert, attributable, and expiring; founder may delete it via SQL if elected (not required).
+
+**Verification step (founder-performable):**
+```
+ls operations/p1-rebuild-2026-06/harnessed/        # expect 5 files + raw/
+grep -c "Consult #" operations/p1-rebuild-2026-06/harnessed/incorporation-log.md   # expect ≥ 4 section heads (consults logged 1–12)
+```
+Then run `/cost` in this session and fill the token-cost row in `leg-b-metrics.md` before closing the window (KG5 — unrecoverable later). Do not start the blind-ish comparative read until the verdict-memo session opens.
+
+**Open questions:** verdict-memo session next (founder reads both packs blind-ish; the memo states the result against the frozen boxes exactly as ticked — either outcome stands); whether F12 (mint-defaults drift) gets its own Elevated fix session before P1 or rides R5's pre-onboard gate; A8 order vs the verdict memo (unchanged).
+
+**Rules served:** R0, R5 (overage observed live 10/10 — the prospective ratio held by construction), R18f (provenance-gated write exercised), R19, 0a, 0c, 0d-ii, 0f, 0h (main-blocker test, leg 2 of 2), PR2, PR4 (model parity confirmed at open), PR7, PR10 (pre-registration held), PR17 (mints + revocation walked live, incl. expired-JWT and 400-retry recoveries), PR18 (production-state updated at close only), KG5.
+
+**Status:** Adopted. Cross-references: `D-P1-COMPARISON-LEG-A-BARE-2026-06-11`, `D-0H-MAIN-BLOCKER-VALUE-DEMONSTRATION-2026-06-10`, the frozen design sheet, the leg-B prompt, the verdict-memo prompt (next).

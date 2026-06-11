@@ -1,0 +1,11 @@
+{
+ "action": "Write the leg-B close-procedure documents outside the leg output directory: append the lean decision-log entry, write the session close, update the CLAUDE.md production-state 0h line per PR18 at close time, and write the verdict-memo next-session prompt. All are append-or-edit document writes on the repository, reversible by git revert, performed after the run deliverables and metrics are complete.",
+ "context": "P1 comparison leg B close, step 5. The leg prompt restricts run outputs to the leg directory; close-procedure governance writes are the standing protocol exception and were gated here before writing. Rollback: git revert; nothing deployed.",
+ "threshold": "deliberate",
+ "agent_id": "p1-comparison-leg-b-agent",
+ "risk_class": "standard",
+ "considered_alternatives": [
+  "leave the close documents to the founder to write manually",
+  "write the close inside the leg directory and have the founder move it"
+ ]
+}

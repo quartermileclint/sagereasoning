@@ -1,0 +1,1922 @@
+{
+ "kind": "seed",
+ "profile": {
+  "agent_id": "p1-comparison-leg-b-agent",
+  "evaluated_actions": [],
+  "total_actions_evaluated": 0,
+  "accreditation_record": {
+   "agent_id": "p1-comparison-leg-b-agent",
+   "senecan_grade": "pre_progress",
+   "typical_proximity": "reflexive",
+   "authority_level": "supervised",
+   "dimension_levels": {
+    "passion_reduction": "emerging",
+    "judgement_quality": "emerging",
+    "disposition_stability": "emerging",
+    "oikeiosis_extension": "emerging"
+   },
+   "direction_of_travel": "stable",
+   "evaluation_window_size": 100,
+   "actions_evaluated": 0,
+   "grade_since": "2026-06-11T09:33:33.938Z",
+   "last_evaluation": "2026-06-11T09:33:33.938Z",
+   "passions_persisting": [],
+   "verification_url": "https://sagereasoning.com/accreditation/p1-comparison-leg-b-agent",
+   "expires_at": "2026-09-09T09:33:33.938Z",
+   "disclaimer": "This accreditation evaluates reasoning quality using Stoic philosophical frameworks. It does not guarantee specific outcomes, legal compliance, or fitness for any particular purpose. Ancient reasoning, modern application.",
+   "created_at": "2026-06-11T09:33:33.938Z",
+   "updated_at": "2026-06-11T09:33:33.938Z",
+   "typical_deliberation_breadth": "intuited",
+   "typical_kathekon_quality": "contrary"
+  },
+  "regressing_check_count": 0,
+  "window_config": {
+   "window_size": 100,
+   "grade_check_interval": 20,
+   "minimum_actions_for_grade": 20,
+   "typical_proximity_threshold": 0.6,
+   "dimension_level_threshold": 0.5,
+   "carried_candidates_max": 5
+  },
+  "carried_candidates": []
+ },
+ "provenance": {
+  "signed_assessments": [
+   {
+    "assessment": {
+     "version": "layer2-assessment-v1",
+     "layer1_schema_version": "layer1-schema-v1",
+     "passion_diagnosis": {
+      "passions_detected": [],
+      "false_judgements": [],
+      "correct_judgements": [],
+      "causal_stage_affected": null
+     },
+     "control_filter": {
+      "within_prohairesis": [
+       {
+        "item": "the accuracy and source-grounding of every figure I write",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       }
+      ],
+      "outside_prohairesis": [
+       {
+        "item": "the comparison verdict itself",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       }
+      ],
+      "disambiguation_required": []
+     },
+     "oikeiosis": {
+      "relevant_circles": [
+       {
+        "stage": 2,
+        "circle": "household",
+        "description": "The outputs serve the founder's review session",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": null,
+        "tension": null
+       },
+       {
+        "stage": 3,
+        "circle": "local_community",
+        "description": "downstream, the product's future users",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": null,
+        "tension": null
+       }
+      ],
+      "deliberation_notes": ""
+     },
+     "value_assessment": {
+      "indifferents_at_stake": [],
+      "value_error": null
+     },
+     "kathekon_assessment": {
+      "is_kathekon": null,
+      "quality": "marginal",
+      "justification": "role obligation engaged."
+     },
+     "iterative_refinement": {
+      "senecan_grade": "grade_1",
+      "progress_dimensions": {
+       "passion_reduction": "No passions detected; passion reduction not applicable to this snapshot.",
+       "judgement_quality": "Judgement faculty showing examination \u2014 no clear value errors and no unsignalled prohairesis items.",
+       "disposition_stability": "Disposition under time pressure but no passion distortion.",
+       "oikeiosis_extension": "Multiple inner circles engaged; oikeiosis extension developing."
+      },
+      "direction_of_travel": "single_snapshot",
+      "motivation_classification": null
+     },
+     "katorthoma_proximity": "deliberate",
+     "ruling_faculty_state": "Disengaged \u2014 no passions, no deliberation; ruling faculty at rest.",
+     "virtue_domains_engaged": [
+      "dikaiosyne"
+     ],
+     "improvement_path_structured": {
+      "false_judgement_to_correct": "\"the accuracy and source-grounding of every figure I write\" is within my control.",
+      "mechanism_applies": "control_filter",
+      "corrected_judgement": "\"the accuracy and source-grounding of every figure I write\" is outside prohairesis. Only my judgement, impulse, and response to it are within."
+     },
+     "stage_scores": {
+      "control_filter": "strong",
+      "passion_diagnosis": "not_applied",
+      "oikeiosis": "strong",
+      "value_assessment": "not_applied",
+      "kathekon_assessment": "strong",
+      "iterative_refinement": "adequate"
+     },
+     "hasty_assent_risk": "low",
+     "intake_clarifications": {
+      "soft_clarifications": [],
+      "open_deferrals": [
+       {
+        "trigger_code": "EUPATHEIA_BOUNDARY",
+        "intake_tier": 3,
+        "stem_id": "tier_3:eupatheia_boundary:001",
+        "slot_fills": {
+         "EUPATHEIA_SHAPE": "eulabeia (reverent caution)",
+         "TIME_WINDOW": "recent days",
+         "SITUATIONAL_TRIGGER": "the comparison run's integrity",
+         "EUPATHEIA_DESCRIPTION": "disinclination from what virtue would not endorse, without fear",
+         "PASSION_COUNTERPART_DESCRIPTION": "phobos (fear of an external as a genuine evil)"
+        },
+        "withheld_classification": {
+         "field_path": "passion_diagnosis.eupatheia_confirmation_pending",
+         "withheld_at_position": "post-passion-diagnosis (M1-CP4b extension)",
+         "reason": "Eupatheia confirmation requires longitudinal evidence that the practitioner's calm is not polished surface over passion. The current instance does not provide this evidence."
+        },
+        "status": "open"
+       }
+      ]
+     },
+     "layer1_ambiguity_notes": [],
+     "layer2_ambiguity_notes": [
+      "iterative_refinement: single-snapshot input \u2014 direction_of_travel could not be computed from temporal markers",
+      "kathekon_assessment: marginal \u2014 only one kathekon factor engaged; is_kathekon is undecidable"
+     ]
+    },
+    "signature": "4KWTDFvERiYdALRjFNA1ZxlqIYYKIlA1N8o/C6iAe8KZAFoWItywde/5t1FnvUjrVARnoezlbk5cq7kpHH72BQ==",
+    "key_id": "substrate-layer2-2026Q2"
+   },
+   {
+    "assessment": {
+     "version": "layer2-assessment-v1",
+     "layer1_schema_version": "layer1-schema-v1",
+     "passion_diagnosis": {
+      "passions_detected": [],
+      "false_judgements": [],
+      "correct_judgements": [],
+      "causal_stage_affected": null
+     },
+     "control_filter": {
+      "within_prohairesis": [
+       {
+        "item": "which credential the remaining consults use",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       }
+      ],
+      "outside_prohairesis": [
+       {
+        "item": "the endpoint's header behaviour",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "the founder's written instruction",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       }
+      ],
+      "disambiguation_required": []
+     },
+     "oikeiosis": {
+      "relevant_circles": [
+       {
+        "stage": 2,
+        "circle": "household",
+        "description": "My concern is fidelity: deviating from the founder's written instruction",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": null,
+        "tension": null
+       }
+      ],
+      "deliberation_notes": ""
+     },
+     "value_assessment": {
+      "indifferents_at_stake": [
+       {
+        "name": "wealth",
+        "axia": "moderate",
+        "treated_as": "indifferent",
+        "evidence": "the comparison's cost threshold needs a defensible measured figure",
+        "error": null
+       }
+      ],
+      "value_error": null
+     },
+     "kathekon_assessment": {
+      "is_kathekon": true,
+      "quality": "moderate",
+      "justification": "role obligation engaged; justification offered."
+     },
+     "iterative_refinement": {
+      "senecan_grade": "grade_1",
+      "progress_dimensions": {
+       "passion_reduction": "No passions detected; passion reduction not applicable to this snapshot.",
+       "judgement_quality": "Judgement faculty showing examination \u2014 no clear value errors and no unsignalled prohairesis items.",
+       "disposition_stability": "Stable disposition \u2014 no passions or urgency in evidence.",
+       "oikeiosis_extension": "Concern at household; oikeiosis extends beyond self."
+      },
+      "direction_of_travel": "single_snapshot",
+      "motivation_classification": null
+     },
+     "katorthoma_proximity": "deliberate",
+     "ruling_faculty_state": "Engaged \u2014 ruling faculty active but no dominant pattern.",
+     "virtue_domains_engaged": [
+      "phronesis",
+      "dikaiosyne"
+     ],
+     "improvement_path_structured": {
+      "false_judgement_to_correct": "\"which credential the remaining consults use\" is within my control.",
+      "mechanism_applies": "control_filter",
+      "corrected_judgement": "\"which credential the remaining consults use\" is outside prohairesis. Only my judgement, impulse, and response to it are within."
+     },
+     "stage_scores": {
+      "control_filter": "strong",
+      "passion_diagnosis": "not_applied",
+      "oikeiosis": "strong",
+      "value_assessment": "strong",
+      "kathekon_assessment": "strong",
+      "iterative_refinement": "adequate"
+     },
+     "hasty_assent_risk": "none",
+     "intake_clarifications": {
+      "soft_clarifications": [],
+      "open_deferrals": [
+       {
+        "trigger_code": "EUPATHEIA_BOUNDARY",
+        "intake_tier": 3,
+        "stem_id": "tier_3:eupatheia_boundary:001",
+        "slot_fills": {
+         "EUPATHEIA_SHAPE": "eulabeia (reverent caution)",
+         "TIME_WINDOW": "recent days",
+         "SITUATIONAL_TRIGGER": "fidelity to the founder's design",
+         "EUPATHEIA_DESCRIPTION": "disinclination from what virtue would not endorse, without fear",
+         "PASSION_COUNTERPART_DESCRIPTION": "phobos (fear of an external as a genuine evil)"
+        },
+        "withheld_classification": {
+         "field_path": "passion_diagnosis.eupatheia_confirmation_pending",
+         "withheld_at_position": "post-passion-diagnosis (M1-CP4b extension)",
+         "reason": "Eupatheia confirmation requires longitudinal evidence that the practitioner's calm is not polished surface over passion. The current instance does not provide this evidence."
+        },
+        "status": "open"
+       }
+      ]
+     },
+     "layer1_ambiguity_notes": [
+      "eupatheia_candidates[0].shape: the caution could be eulabeia or the passion oknos (hesitancy about acting)"
+     ],
+     "layer2_ambiguity_notes": [
+      "iterative_refinement: single-snapshot input \u2014 direction_of_travel could not be computed from temporal markers"
+     ]
+    },
+    "signature": "J2JjAD5Q6ZWQ8RdzIcqvsOhvI21P50bnT9OdUoYKGr3ADAbD5MjLhkvPloiScw8UEVXNriIc0r/Y5iI39THUDg==",
+    "key_id": "substrate-layer2-2026Q2"
+   },
+   {
+    "assessment": {
+     "version": "layer2-assessment-v1",
+     "layer1_schema_version": "layer1-schema-v1",
+     "passion_diagnosis": {
+      "passions_detected": [],
+      "false_judgements": [],
+      "correct_judgements": [],
+      "causal_stage_affected": null
+     },
+     "control_filter": {
+      "within_prohairesis": [
+       {
+        "item": "write into the P1 findings memo the finding that the pre-pivot business pack's revenue model is obsolete",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       }
+      ],
+      "outside_prohairesis": [
+       {
+        "item": "the Month-12 projection of 10,329 dollars per month rests on the removed catalog, so it cannot be carried forward even as an anchor",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "every downstream break-even figure inherits it",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       }
+      ],
+      "disambiguation_required": []
+     },
+     "oikeiosis": {
+      "relevant_circles": [
+       {
+        "stage": 3,
+        "circle": "local_community",
+        "description": "I am about to write into the P1 findings memo the finding that the pre-pivot business pack's revenue model is obsolete",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": true,
+        "tension": null
+       }
+      ],
+      "deliberation_notes": ""
+     },
+     "value_assessment": {
+      "indifferents_at_stake": [
+       {
+        "name": "wealth",
+        "axia": "moderate",
+        "treated_as": "indifferent",
+        "evidence": "the Month-12 projection of 10,329 dollars per month rests on the removed catalog, so it cannot be carried forward even as an anchor",
+        "error": null
+       }
+      ],
+      "value_error": null
+     },
+     "kathekon_assessment": {
+      "is_kathekon": true,
+      "quality": "moderate",
+      "justification": "role obligation engaged; justification offered."
+     },
+     "iterative_refinement": {
+      "senecan_grade": "grade_1",
+      "progress_dimensions": {
+       "passion_reduction": "No passions detected; passion reduction not applicable to this snapshot.",
+       "judgement_quality": "Judgement faculty showing examination \u2014 no clear value errors and no unsignalled prohairesis items.",
+       "disposition_stability": "Disposition under time pressure but no passion distortion.",
+       "oikeiosis_extension": "Concern at local_community; oikeiosis extension widening."
+      },
+      "direction_of_travel": "single_snapshot",
+      "motivation_classification": null
+     },
+     "katorthoma_proximity": "deliberate",
+     "ruling_faculty_state": "Engaged \u2014 ruling faculty active but no dominant pattern.",
+     "virtue_domains_engaged": [
+      "phronesis",
+      "dikaiosyne"
+     ],
+     "improvement_path_structured": {
+      "false_judgement_to_correct": "\"write into the P1 findings memo the finding that the pre-pivot business pack's revenue model is obsolete\" is within my control.",
+      "mechanism_applies": "control_filter",
+      "corrected_judgement": "\"write into the P1 findings memo the finding that the pre-pivot business pack's revenue model is obsolete\" is outside prohairesis. Only my judgement, impulse, and response to it are within."
+     },
+     "stage_scores": {
+      "control_filter": "strong",
+      "passion_diagnosis": "not_applied",
+      "oikeiosis": "adequate",
+      "value_assessment": "strong",
+      "kathekon_assessment": "strong",
+      "iterative_refinement": "adequate"
+     },
+     "hasty_assent_risk": "low",
+     "intake_clarifications": {
+      "soft_clarifications": [],
+      "open_deferrals": []
+     },
+     "layer1_ambiguity_notes": [
+      "oikeiosis_circles_engaged: the memo-writing activity could engage political_community (organisational governance) rather than local_community; classified as local_community given the project-team scope, but Layer 2 may reclassify",
+      "causal_stage_evidence: 'I am about to write' could be horme (impulse toward action) or praxis (action already initiated); classified as horme given the prospective framing 'about to'"
+     ],
+     "layer2_ambiguity_notes": [
+      "iterative_refinement: single-snapshot input \u2014 direction_of_travel could not be computed from temporal markers"
+     ]
+    },
+    "signature": "5yKrgCoyen/NXx44WhFO4k3II+04Qf6Yu5pm+XpdiT8BGf32rgpss22361W5R+pkL2mZDfvuWa2gG2sXE+b8Bw==",
+    "key_id": "substrate-layer2-2026Q2"
+   },
+   {
+    "assessment": {
+     "version": "layer2-assessment-v1",
+     "layer1_schema_version": "layer1-schema-v1",
+     "passion_diagnosis": {
+      "passions_detected": [
+       {
+        "id": "passion_0",
+        "name": "Anguish (agonia)",
+        "root_passion": "phobos",
+        "sub_species": "agonia",
+        "false_judgement": "An imminent evil is overtaking me and I cannot avert it.",
+        "correct_judgement": "The imminent event is indifferent. My agitation is the false judgement that virtue depends on its outcome.",
+        "causal_stage_affected": "horme",
+        "evidence": "Before writing it as an error claim I want to be sure the inference is sound and fairly stated."
+       }
+      ],
+      "false_judgements": [
+       "An imminent evil is overtaking me and I cannot avert it."
+      ],
+      "correct_judgements": [
+       "The imminent event is indifferent. My agitation is the false judgement that virtue depends on its outcome."
+      ],
+      "causal_stage_affected": "horme"
+     },
+     "control_filter": {
+      "within_prohairesis": [
+       {
+        "item": "the inference is sound and fairly stated",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "writing it as an error claim",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       }
+      ],
+      "outside_prohairesis": [
+       {
+        "item": "the business plan document states that subscription models were completely removed and revenue is entirely per-call usage plus voluntary donations",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "the plan's own components, 9,117 plus roughly 211 dollars, sum to about 9,328, not 10,329",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       }
+      ],
+      "disambiguation_required": [
+       {
+        "item": "the plan's own components, 9,117 plus roughly 211 dollars, sum to about 9,328, not 10,329",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       }
+      ]
+     },
+     "oikeiosis": {
+      "relevant_circles": [
+       {
+        "stage": 3,
+        "circle": "local_community",
+        "description": "I am about to write into the P1 findings memo an error claim against the pre-pivot pack",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": true,
+        "tension": null
+       }
+      ],
+      "deliberation_notes": ""
+     },
+     "value_assessment": {
+      "indifferents_at_stake": [
+       {
+        "name": "reputation",
+        "axia": "moderate",
+        "treated_as": "good",
+        "evidence": "Before writing it as an error claim I want to be sure the inference is sound and fairly stated.",
+        "error": "Confused reputation (a preferred indifferent) with the genuine good"
+       }
+      ],
+      "value_error": "Confused reputation (a preferred indifferent) with the genuine good"
+     },
+     "kathekon_assessment": {
+      "is_kathekon": true,
+      "quality": "moderate",
+      "justification": "role obligation engaged; justification offered."
+     },
+     "iterative_refinement": {
+      "senecan_grade": "grade_1",
+      "progress_dimensions": {
+       "passion_reduction": "Single passion already moved to impulse or action; reduction work means tracing back to assent and false judgement.",
+       "judgement_quality": "Judgement quality mixed \u2014 some indifferents confused with the genuine good or evil.",
+       "disposition_stability": "Disposition unstable \u2014 passions have moved into impulse or action.",
+       "oikeiosis_extension": "Concern at local_community; oikeiosis extension widening."
+      },
+      "direction_of_travel": "stable",
+      "motivation_classification": null
+     },
+     "katorthoma_proximity": "principled",
+     "ruling_faculty_state": "Unsettled \u2014 multiple ambiguities in interpretation; ruling faculty unable to resolve.",
+     "virtue_domains_engaged": [
+      "phronesis",
+      "dikaiosyne",
+      "andreia"
+     ],
+     "improvement_path_structured": {
+      "false_judgement_to_correct": "An imminent evil is overtaking me and I cannot avert it.",
+      "mechanism_applies": "passion_diagnosis",
+      "corrected_judgement": "The imminent event is indifferent. My agitation is the false judgement that virtue depends on its outcome."
+     },
+     "stage_scores": {
+      "control_filter": "strong",
+      "passion_diagnosis": "adequate",
+      "oikeiosis": "strong",
+      "value_assessment": "strong",
+      "kathekon_assessment": "strong",
+      "iterative_refinement": "strong"
+     },
+     "hasty_assent_risk": "moderate",
+     "intake_clarifications": {
+      "soft_clarifications": [
+       {
+        "trigger_code": "STATED_OPERATIVE_CONFLICT",
+        "intake_tier": 2,
+        "stem_id": "tier_2:stated_operative_conflict:001",
+        "slot_fills": {
+         "STATED_CIRCLE_TARGET": "the inference",
+         "SITUATION": "I am about to write into the P1 findings memo an error claim against the pre-pivot pack",
+         "OPERATIVE_CIRCLE": "local_community"
+        },
+        "scope_of_change": "Refinement of the operative circle and its kathekon assessment if the practitioner confirms which concern is dominant."
+       }
+      ],
+      "open_deferrals": [
+       {
+        "trigger_code": "EUPATHEIA_BOUNDARY",
+        "intake_tier": 3,
+        "stem_id": "tier_3:eupatheia_boundary:001",
+        "slot_fills": {
+         "EUPATHEIA_SHAPE": "eulabeia (reverent caution)",
+         "TIME_WINDOW": "recent days",
+         "SITUATIONAL_TRIGGER": "the error claim against the pre-pivot pack",
+         "EUPATHEIA_DESCRIPTION": "disinclination from what virtue would not endorse, without fear",
+         "PASSION_COUNTERPART_DESCRIPTION": "phobos (fear of an external as a genuine evil)"
+        },
+        "withheld_classification": {
+         "field_path": "passion_diagnosis.eupatheia_confirmation_pending",
+         "withheld_at_position": "post-passion-diagnosis (M1-CP4b extension)",
+         "reason": "Eupatheia confirmation requires longitudinal evidence that the practitioner's calm is not polished surface over passion. The current instance does not provide this evidence."
+        },
+        "status": "open"
+       }
+      ]
+     },
+     "layer1_ambiguity_notes": [
+      "passions_present[0].sub_species: the anxiety about soundness and fairness could map to agonia (anxiety before action) or oknos (reluctance/hesitation to proceed); agonia selected as primary given the imminent-action framing",
+      "eupatheia_candidates[0]: the caution expressed could be genuine eulabeia (rational reverent caution about fairness) or could be phobos-driven hesitation; longitudinal evidence would be needed to confirm; both passions_present and eupatheia_candidates are populated per schema instructions",
+      "causal_stage_evidence: 'I am about to write' could indicate horme (impulse formed, action not yet taken) or praxis (action in progress); horme selected given 'about to' framing"
+     ],
+     "layer2_ambiguity_notes": [
+      "control_filter: 1 item(s) required disambiguation (agent did not signal within/outside)"
+     ]
+    },
+    "signature": "jH1OV8pXn7Fkn27s4KEVUnZeg8nOFWToQmcOJkFMRZcTug50l0nbvi7Ei1zv5Eev8aW7GQuAU026HE3xfxMNDQ==",
+    "key_id": "substrate-layer2-2026Q2"
+   },
+   {
+    "assessment": {
+     "version": "layer2-assessment-v1",
+     "layer1_schema_version": "layer1-schema-v1",
+     "passion_diagnosis": {
+      "passions_detected": [],
+      "false_judgements": [],
+      "correct_judgements": [],
+      "causal_stage_affected": null
+     },
+     "control_filter": {
+      "within_prohairesis": [
+       {
+        "item": "write into the P1 findings memo the observed-economics findings",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "present these as evidence with their caveats",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       }
+      ],
+      "outside_prohairesis": [
+       {
+        "item": "production billing ledger holds 23 loop rows from May 17 to 22",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "bundled path's cost column was never populated",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "25 of 61 early sandwich runs errored",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       }
+      ],
+      "disambiguation_required": []
+     },
+     "oikeiosis": {
+      "relevant_circles": [
+       {
+        "stage": 3,
+        "circle": "local_community",
+        "description": "I am about to write into the P1 findings memo the observed-economics findings",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": true,
+        "tension": null
+       }
+      ],
+      "deliberation_notes": ""
+     },
+     "value_assessment": {
+      "indifferents_at_stake": [],
+      "value_error": null
+     },
+     "kathekon_assessment": {
+      "is_kathekon": true,
+      "quality": "moderate",
+      "justification": "role obligation engaged; justification offered."
+     },
+     "iterative_refinement": {
+      "senecan_grade": "grade_1",
+      "progress_dimensions": {
+       "passion_reduction": "No passions detected; passion reduction not applicable to this snapshot.",
+       "judgement_quality": "Judgement faculty showing examination \u2014 no clear value errors and no unsignalled prohairesis items.",
+       "disposition_stability": "Disposition under time pressure but no passion distortion.",
+       "oikeiosis_extension": "Concern at local_community; oikeiosis extension widening."
+      },
+      "direction_of_travel": "single_snapshot",
+      "motivation_classification": null
+     },
+     "katorthoma_proximity": "deliberate",
+     "ruling_faculty_state": "Engaged \u2014 ruling faculty active but no dominant pattern.",
+     "virtue_domains_engaged": [
+      "dikaiosyne"
+     ],
+     "improvement_path_structured": {
+      "false_judgement_to_correct": "\"write into the P1 findings memo the observed-economics findings\" is within my control.",
+      "mechanism_applies": "control_filter",
+      "corrected_judgement": "\"write into the P1 findings memo the observed-economics findings\" is outside prohairesis. Only my judgement, impulse, and response to it are within."
+     },
+     "stage_scores": {
+      "control_filter": "strong",
+      "passion_diagnosis": "not_applied",
+      "oikeiosis": "strong",
+      "value_assessment": "not_applied",
+      "kathekon_assessment": "strong",
+      "iterative_refinement": "adequate"
+     },
+     "hasty_assent_risk": "low",
+     "intake_clarifications": {
+      "soft_clarifications": [],
+      "open_deferrals": []
+     },
+     "layer1_ambiguity_notes": [
+      "causal_stage_evidence: 'I am about to write into the P1 findings memo' could be evidence for horme (impulse toward action) or praxis (action already initiated); the phrase 'about to' suggests horme is more accurate but the boundary is narrow"
+     ],
+     "layer2_ambiguity_notes": [
+      "iterative_refinement: single-snapshot input \u2014 direction_of_travel could not be computed from temporal markers"
+     ]
+    },
+    "signature": "4dyyYOMk1H0R/kKqaCGW3MTF+ABTS3xED53rXg/Ycy5NcEPKwcOHAEtgvu3q8nZP30ZfmtQXzQgUFxLMnA+TDA==",
+    "key_id": "substrate-layer2-2026Q2"
+   },
+   {
+    "assessment": {
+     "version": "layer2-assessment-v1",
+     "layer1_schema_version": "layer1-schema-v1",
+     "passion_diagnosis": {
+      "passions_detected": [],
+      "false_judgements": [],
+      "correct_judgements": [],
+      "causal_stage_affected": null
+     },
+     "control_filter": {
+      "within_prohairesis": [
+       {
+        "item": "writing the P1 findings memo architecture finding",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       }
+      ],
+      "outside_prohairesis": [
+       {
+        "item": "the business plan must speak per audience",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       },
+       {
+        "item": "the founder has elected the migration as pre-launch work",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "the human practitioner product runs on the original prose paths today",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "the agent developer product runs the full substrate contract today",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       }
+      ],
+      "disambiguation_required": [
+       {
+        "item": "the business plan must speak per audience",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       }
+      ]
+     },
+     "oikeiosis": {
+      "relevant_circles": [
+       {
+        "stage": 3,
+        "circle": "local_community",
+        "description": "the human practitioner product runs on the original prose paths today",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": null,
+        "tension": null
+       },
+       {
+        "stage": 3,
+        "circle": "local_community",
+        "description": "the agent developer product runs the full substrate contract today",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": null,
+        "tension": null
+       }
+      ],
+      "deliberation_notes": ""
+     },
+     "value_assessment": {
+      "indifferents_at_stake": [
+       {
+        "name": "reputation",
+        "axia": "moderate",
+        "treated_as": "indifferent",
+        "evidence": "A single undifferentiated product story would misdescribe what each customer class actually buys at launch",
+        "error": null
+       }
+      ],
+      "value_error": null
+     },
+     "kathekon_assessment": {
+      "is_kathekon": true,
+      "quality": "moderate",
+      "justification": "role obligation engaged; justification offered."
+     },
+     "iterative_refinement": {
+      "senecan_grade": "grade_1",
+      "progress_dimensions": {
+       "passion_reduction": "No passions detected; passion reduction not applicable to this snapshot.",
+       "judgement_quality": "Judgement faculty hesitating \u2014 multiple control-filter items the agent has not signalled clearly.",
+       "disposition_stability": "Disposition under time pressure but no passion distortion.",
+       "oikeiosis_extension": "Multiple inner circles engaged; oikeiosis extension developing."
+      },
+      "direction_of_travel": "single_snapshot",
+      "motivation_classification": null
+     },
+     "katorthoma_proximity": "deliberate",
+     "ruling_faculty_state": "Engaged \u2014 ruling faculty active but no dominant pattern.",
+     "virtue_domains_engaged": [
+      "phronesis",
+      "dikaiosyne"
+     ],
+     "improvement_path_structured": {
+      "false_judgement_to_correct": "\"writing the P1 findings memo architecture finding\" is within my control.",
+      "mechanism_applies": "control_filter",
+      "corrected_judgement": "\"writing the P1 findings memo architecture finding\" is outside prohairesis. Only my judgement, impulse, and response to it are within."
+     },
+     "stage_scores": {
+      "control_filter": "adequate",
+      "passion_diagnosis": "not_applied",
+      "oikeiosis": "adequate",
+      "value_assessment": "strong",
+      "kathekon_assessment": "strong",
+      "iterative_refinement": "adequate"
+     },
+     "hasty_assent_risk": "moderate",
+     "intake_clarifications": {
+      "soft_clarifications": [],
+      "open_deferrals": []
+     },
+     "layer1_ambiguity_notes": [
+      "control_filter_elements: 'the business plan must speak per audience' could be framed as within the agent's control (as a conclusion they are documenting) or as an architectural constraint outside their control; agent_named_position recorded as unspecified",
+      "oikeiosis_circles_engaged: both customer classes (human practitioner, agent developer) could map to local_community or political_community; local_community selected as the closer fit given the product/commercial context rather than civic governance"
+     ],
+     "layer2_ambiguity_notes": [
+      "control_filter: 1 item(s) required disambiguation (agent did not signal within/outside)",
+      "iterative_refinement: single-snapshot input \u2014 direction_of_travel could not be computed from temporal markers"
+     ]
+    },
+    "signature": "d1mgiu+qGwXshxASmQmOWtnRtL07DhzECHbBXMuYaJf8nKZ3vRF4txRbeuHf6EFu2AUsld2iKOd7jhCMxkQXDA==",
+    "key_id": "substrate-layer2-2026Q2"
+   },
+   {
+    "assessment": {
+     "version": "layer2-assessment-v1",
+     "layer1_schema_version": "layer1-schema-v1",
+     "passion_diagnosis": {
+      "passions_detected": [],
+      "false_judgements": [],
+      "correct_judgements": [],
+      "causal_stage_affected": null
+     },
+     "control_filter": {
+      "within_prohairesis": [],
+      "outside_prohairesis": [
+       {
+        "item": "upfront investment figures, 5,674 dollars with 279 dollars monthly fixed costs",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       },
+       {
+        "item": "none of the founder-personal-exposure items are started",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       },
+       {
+        "item": "EU AI Act Article 50 date of 2 August 2026 imposes a schedule the pre-pivot plan never carried",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "June-15 Anthropic credit-pool change sanctioning third-party agents under 20-to-200-dollar monthly caps",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "the founder's own usage costs",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       }
+      ],
+      "disambiguation_required": [
+       {
+        "item": "upfront investment figures, 5,674 dollars with 279 dollars monthly fixed costs",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       },
+       {
+        "item": "none of the founder-personal-exposure items are started",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       },
+       {
+        "item": "the founder's own usage costs",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       }
+      ]
+     },
+     "oikeiosis": {
+      "relevant_circles": [
+       {
+        "stage": 1,
+        "circle": "self_preservation",
+        "description": "none of the founder-personal-exposure items are started",
+        "honourability_grade": 2,
+        "advantageousness_grade": 3,
+        "cicero_verdict": "advantageous_prevails",
+        "obligation_met": null,
+        "tension": null
+       },
+       {
+        "stage": 4,
+        "circle": "political_community",
+        "description": "EU AI Act Article 50 date of 2 August 2026 imposes a schedule the pre-pivot plan never carried",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": null,
+        "tension": null
+       }
+      ],
+      "deliberation_notes": ""
+     },
+     "value_assessment": {
+      "indifferents_at_stake": [
+       {
+        "name": "wealth",
+        "axia": "moderate",
+        "treated_as": "indifferent",
+        "evidence": "upfront investment figures, 5,674 dollars with 279 dollars monthly fixed costs",
+        "error": null
+       },
+       {
+        "name": "wealth",
+        "axia": "moderate",
+        "treated_as": "indifferent",
+        "evidence": "the founder's own usage costs",
+        "error": null
+       }
+      ],
+      "value_error": null
+     },
+     "kathekon_assessment": {
+      "is_kathekon": true,
+      "quality": "moderate",
+      "justification": "role obligation engaged; justification offered."
+     },
+     "iterative_refinement": {
+      "senecan_grade": "grade_1",
+      "progress_dimensions": {
+       "passion_reduction": "No passions detected; passion reduction not applicable to this snapshot.",
+       "judgement_quality": "Judgement faculty hesitating \u2014 multiple control-filter items the agent has not signalled clearly.",
+       "disposition_stability": "Disposition under time pressure but no passion distortion.",
+       "oikeiosis_extension": "Multiple circles engaged including wider community; oikeiosis extension active."
+      },
+      "direction_of_travel": "single_snapshot",
+      "motivation_classification": null
+     },
+     "katorthoma_proximity": "deliberate",
+     "ruling_faculty_state": "Engaged \u2014 ruling faculty active but no dominant pattern.",
+     "virtue_domains_engaged": [
+      "phronesis",
+      "dikaiosyne"
+     ],
+     "improvement_path_structured": null,
+     "stage_scores": {
+      "control_filter": "adequate",
+      "passion_diagnosis": "not_applied",
+      "oikeiosis": "strong",
+      "value_assessment": "strong",
+      "kathekon_assessment": "strong",
+      "iterative_refinement": "adequate"
+     },
+     "hasty_assent_risk": "high",
+     "intake_clarifications": {
+      "soft_clarifications": [],
+      "open_deferrals": []
+     },
+     "layer1_ambiguity_notes": [
+      "control_filter_elements: 'EU AI Act Article 50 date of 2 August 2026 imposes a schedule' is framed as an external constraint (outside), but the agent does not explicitly label it as such \u2014 inferred from 'imposes a schedule the pre-pivot plan never carried'",
+      "causal_stage_evidence: 'I am about to write into the P1 findings memo' could be evidence for horme (impulse toward action) or praxis (action already underway) \u2014 'about to' suggests horme but is borderline"
+     ],
+     "layer2_ambiguity_notes": [
+      "control_filter: 3 item(s) required disambiguation (agent did not signal within/outside)",
+      "iterative_refinement: single-snapshot input \u2014 direction_of_travel could not be computed from temporal markers"
+     ]
+    },
+    "signature": "to/fhnqDeNS5A4UjGVgqkIDN+cKWCyBCanzFWaBYI1fKCao1lh1reDFcoOKgRZFk8US7cVY6xQDuf5LUD0KlCg==",
+    "key_id": "substrate-layer2-2026Q2"
+   },
+   {
+    "assessment": {
+     "version": "layer2-assessment-v1",
+     "layer1_schema_version": "layer1-schema-v1",
+     "passion_diagnosis": {
+      "passions_detected": [],
+      "false_judgements": [],
+      "correct_judgements": [],
+      "causal_stage_affected": null
+     },
+     "control_filter": {
+      "within_prohairesis": [
+       {
+        "item": "writing into the P1 findings memo two product findings",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       }
+      ],
+      "outside_prohairesis": [
+       {
+        "item": "credential fragmentation, where the per-install consultation credential is rejected by the guardrail endpoint",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       },
+       {
+        "item": "cost opacity, where the per-install path emits no cost or usage headers because metering binds to API-key identity",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       },
+       {
+        "item": "the per-install credential is the intended agent onboarding funnel",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       }
+      ],
+      "disambiguation_required": [
+       {
+        "item": "credential fragmentation, where the per-install consultation credential is rejected by the guardrail endpoint",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       },
+       {
+        "item": "cost opacity, where the per-install path emits no cost or usage headers because metering binds to API-key identity",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       },
+       {
+        "item": "the per-install credential is the intended agent onboarding funnel",
+        "agent_named_position": "unspecified",
+        "classification": "outside",
+        "reasoning": "default_outside_for_unspecified"
+       }
+      ]
+     },
+     "oikeiosis": {
+      "relevant_circles": [
+       {
+        "stage": 4,
+        "circle": "political_community",
+        "description": "Both findings bear on the business plan because the per-install credential is the intended agent onboarding funnel.",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": null,
+        "tension": null
+       }
+      ],
+      "deliberation_notes": ""
+     },
+     "value_assessment": {
+      "indifferents_at_stake": [],
+      "value_error": null
+     },
+     "kathekon_assessment": {
+      "is_kathekon": true,
+      "quality": "moderate",
+      "justification": "role obligation engaged; justification offered."
+     },
+     "iterative_refinement": {
+      "senecan_grade": "grade_1",
+      "progress_dimensions": {
+       "passion_reduction": "No passions detected; passion reduction not applicable to this snapshot.",
+       "judgement_quality": "Judgement faculty hesitating \u2014 multiple control-filter items the agent has not signalled clearly.",
+       "disposition_stability": "Disposition under time pressure but no passion distortion.",
+       "oikeiosis_extension": "Concern at political_community; oikeiosis extension widening."
+      },
+      "direction_of_travel": "single_snapshot",
+      "motivation_classification": null
+     },
+     "katorthoma_proximity": "deliberate",
+     "ruling_faculty_state": "Engaged \u2014 ruling faculty active but no dominant pattern.",
+     "virtue_domains_engaged": [
+      "phronesis",
+      "dikaiosyne"
+     ],
+     "improvement_path_structured": {
+      "false_judgement_to_correct": "\"writing into the P1 findings memo two product findings\" is within my control.",
+      "mechanism_applies": "control_filter",
+      "corrected_judgement": "\"writing into the P1 findings memo two product findings\" is outside prohairesis. Only my judgement, impulse, and response to it are within."
+     },
+     "stage_scores": {
+      "control_filter": "strong",
+      "passion_diagnosis": "not_applied",
+      "oikeiosis": "adequate",
+      "value_assessment": "not_applied",
+      "kathekon_assessment": "strong",
+      "iterative_refinement": "adequate"
+     },
+     "hasty_assent_risk": "moderate",
+     "intake_clarifications": {
+      "soft_clarifications": [],
+      "open_deferrals": []
+     },
+     "layer1_ambiguity_notes": [
+      "oikeiosis_circles_engaged: 'business plan' and 'agent onboarding funnel' could engage local_community (the project team) or political_community (the broader commercial ecosystem); political_community selected as best fit given the business-plan framing, but local_community is plausible.",
+      "causal_stage_evidence: 'I am about to write into the P1 findings memo' could be horme (impulse toward action) or praxis (action already underway); horme selected given 'about to' language, but praxis is possible."
+     ],
+     "layer2_ambiguity_notes": [
+      "control_filter: 3 item(s) required disambiguation (agent did not signal within/outside)",
+      "iterative_refinement: single-snapshot input \u2014 direction_of_travel could not be computed from temporal markers"
+     ]
+    },
+    "signature": "7Ukc6ufiZXZD0GmInuGLGjIchuIzPxMAhBAuXxujlgHeMfaS3hC4CteYi8dooo9rg/dVBly8jCEmKTK+L1GoDA==",
+    "key_id": "substrate-layer2-2026Q2"
+   },
+   {
+    "assessment": {
+     "version": "layer2-assessment-v1",
+     "layer1_schema_version": "layer1-schema-v1",
+     "passion_diagnosis": {
+      "passions_detected": [
+       {
+        "id": "passion_0",
+        "name": "Anguish (agonia)",
+        "root_passion": "phobos",
+        "sub_species": "agonia",
+        "false_judgement": "An imminent evil is overtaking me and I cannot avert it.",
+        "correct_judgement": "The imminent event is indifferent. My agitation is the false judgement that virtue depends on its outcome.",
+        "causal_stage_affected": "praxis",
+        "evidence": "The risk I see is that an evidence-gated case may read as unambitious to the founder"
+       },
+       {
+        "id": "passion_1",
+        "name": "Hesitation (oknos)",
+        "root_passion": "phobos",
+        "sub_species": "oknos",
+        "false_judgement": "Action will bring evil; inaction is safer.",
+        "correct_judgement": "The only evil is vice; inaction from fear is itself a vicious failure to act. Right action proceeds from right judgement, not from fear.",
+        "causal_stage_affected": "praxis",
+        "evidence": "The risk I see is that an evidence-gated case may read as unambitious to the founder, who must also weigh personal runway and the lawyer engagement cost already committed"
+       }
+      ],
+      "false_judgements": [
+       "An imminent evil is overtaking me and I cannot avert it.",
+       "Action will bring evil; inaction is safer."
+      ],
+      "correct_judgements": [
+       "The imminent event is indifferent. My agitation is the false judgement that virtue depends on its outcome.",
+       "The only evil is vice; inaction from fear is itself a vicious failure to act. Right action proceeds from right judgement, not from fear."
+      ],
+      "causal_stage_affected": "praxis"
+     },
+     "control_filter": {
+      "within_prohairesis": [
+       {
+        "item": "recommended reframe to stage the investment case on evidence gates rather than projections",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "state observed unit economics as fact, state the cost base as fact",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "gate each further outlay on adoption signals actually observed",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "no month-twelve revenue claims at all",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       }
+      ],
+      "outside_prohairesis": [
+       {
+        "item": "how the evidence-gated case reads to the founder",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "founder's personal runway",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "the lawyer engagement cost already committed",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "no external traffic yet",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       }
+      ],
+      "disambiguation_required": []
+     },
+     "oikeiosis": {
+      "relevant_circles": [
+       {
+        "stage": 1,
+        "circle": "self_preservation",
+        "description": "I am about to write the investment-case recommendation for the P1 review",
+        "honourability_grade": 3,
+        "advantageousness_grade": 3,
+        "cicero_verdict": "both_high_aligned",
+        "obligation_met": true,
+        "tension": null
+       },
+       {
+        "stage": 2,
+        "circle": "household",
+        "description": "the founder, who must also weigh personal runway and the lawyer engagement cost already committed",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": null,
+        "tension": null
+       },
+       {
+        "stage": 4,
+        "circle": "political_community",
+        "description": "I believe honesty about the absence of demand evidence serves the founder better than a projection that inherits the old pack's confidence",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": null,
+        "tension": null
+       }
+      ],
+      "deliberation_notes": ""
+     },
+     "value_assessment": {
+      "indifferents_at_stake": [
+       {
+        "name": "wealth",
+        "axia": "moderate",
+        "treated_as": "indifferent",
+        "evidence": "8,818 dollars monthly net profit at month twelve",
+        "error": null
+       },
+       {
+        "name": "wealth",
+        "axia": "moderate",
+        "treated_as": "indifferent",
+        "evidence": "personal runway and the lawyer engagement cost already committed",
+        "error": null
+       },
+       {
+        "name": "reputation",
+        "axia": "moderate",
+        "treated_as": "indifferent",
+        "evidence": "an evidence-gated case may read as unambitious to the founder",
+        "error": null
+       }
+      ],
+      "value_error": null
+     },
+     "kathekon_assessment": {
+      "is_kathekon": true,
+      "quality": "strong",
+      "justification": "natural relationship engaged; role obligation engaged; justification offered."
+     },
+     "iterative_refinement": {
+      "senecan_grade": "grade_2",
+      "progress_dimensions": {
+       "passion_reduction": "Multiple passions detected (2); reduction work means addressing the most-evidenced passion first while observing the rest.",
+       "judgement_quality": "Judgement faculty showing examination \u2014 no clear value errors and no unsignalled prohairesis items.",
+       "disposition_stability": "Disposition unstable \u2014 passions have moved into impulse or action.",
+       "oikeiosis_extension": "Multiple circles engaged including wider community; oikeiosis extension active."
+      },
+      "direction_of_travel": "single_snapshot",
+      "motivation_classification": "virtue_explicit"
+     },
+     "katorthoma_proximity": "reflexive",
+     "ruling_faculty_state": "Agitated \u2014 multiple passions at present; examination interrupted.",
+     "virtue_domains_engaged": [
+      "phronesis",
+      "dikaiosyne",
+      "andreia"
+     ],
+     "improvement_path_structured": {
+      "false_judgement_to_correct": "An imminent evil is overtaking me and I cannot avert it.",
+      "mechanism_applies": "passion_diagnosis",
+      "corrected_judgement": "The imminent event is indifferent. My agitation is the false judgement that virtue depends on its outcome."
+     },
+     "stage_scores": {
+      "control_filter": "strong",
+      "passion_diagnosis": "adequate",
+      "oikeiosis": "strong",
+      "value_assessment": "strong",
+      "kathekon_assessment": "adequate",
+      "iterative_refinement": "adequate"
+     },
+     "hasty_assent_risk": "low",
+     "intake_clarifications": {
+      "soft_clarifications": [],
+      "open_deferrals": [
+       {
+        "trigger_code": "EUPATHEIA_BOUNDARY",
+        "intake_tier": 3,
+        "stem_id": "tier_3:eupatheia_boundary:001",
+        "slot_fills": {
+         "EUPATHEIA_SHAPE": "boulesis (rational wishing)",
+         "TIME_WINDOW": "recent days",
+         "SITUATIONAL_TRIGGER": "the founder",
+         "EUPATHEIA_DESCRIPTION": "wanting what virtue would have you want, without grasping",
+         "PASSION_COUNTERPART_DESCRIPTION": "epithumia (craving an external as a genuine good)"
+        },
+        "withheld_classification": {
+         "field_path": "passion_diagnosis.eupatheia_confirmation_pending",
+         "withheld_at_position": "post-passion-diagnosis (M1-CP4b extension)",
+         "reason": "Eupatheia confirmation requires longitudinal evidence that the practitioner's calm is not polished surface over passion. The current instance does not provide this evidence."
+        },
+        "status": "open"
+       }
+      ]
+     },
+     "layer1_ambiguity_notes": [
+      "passions_present[1].sub_species: the agent's hesitation about recommending an evidence-gated case could map to oknos (reluctance/shrinking from action) or agonia (distress/anxiety about outcome) \u2014 both are plausible given the phrasing 'the risk I see'",
+      "eupatheia_candidates[0].shape: the boulesis candidate could also be read as a justification_offered (kathekon) rather than a genuine rational wish; longitudinal evidence would be needed to confirm"
+     ],
+     "layer2_ambiguity_notes": [
+      "iterative_refinement: single-snapshot input \u2014 direction_of_travel could not be computed from temporal markers"
+     ]
+    },
+    "signature": "XWLeWtW/avTWngohLAl1VtaiSDX0O9JlUECKSISS+6zUcRExkMCzLiwOO5JeMeuZJHtKcDXd1X/rPbOCm/frAA==",
+    "key_id": "substrate-layer2-2026Q2"
+   },
+   {
+    "assessment": {
+     "version": "layer2-assessment-v1",
+     "layer1_schema_version": "layer1-schema-v1",
+     "passion_diagnosis": {
+      "passions_detected": [],
+      "false_judgements": [],
+      "correct_judgements": [],
+      "causal_stage_affected": null
+     },
+     "control_filter": {
+      "within_prohairesis": [
+       {
+        "item": "writing the Stripe launch-criterion recommendation",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "production has Stripe deliberately not configured",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "the billing mechanism itself is built and metering on every loop",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "the recommendation must present both branches honestly",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       }
+      ],
+      "outside_prohairesis": [
+       {
+        "item": "the founder's to decide",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "the company incorporation",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "founder wall-clock items",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       }
+      ],
+      "disambiguation_required": []
+     },
+     "oikeiosis": {
+      "relevant_circles": [
+       {
+        "stage": 3,
+        "circle": "local_community",
+        "description": "I am writing a recommendation that resolves a founder-named launch criterion, which is the founder's to decide",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": true,
+        "tension": null
+       },
+       {
+        "stage": 4,
+        "circle": "political_community",
+        "description": "activation runbook written and the Stripe account prerequisites, which depend on the company incorporation, tracked as founder wall-clock items",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": null,
+        "tension": null
+       }
+      ],
+      "deliberation_notes": ""
+     },
+     "value_assessment": {
+      "indifferents_at_stake": [
+       {
+        "name": "wealth",
+        "axia": "moderate",
+        "treated_as": "indifferent",
+        "evidence": "activating Stripe pre-launch against zero customers, adds configuration surface and compliance weight with no revenue to meter",
+        "error": null
+       },
+       {
+        "name": "reputation",
+        "axia": "moderate",
+        "treated_as": "good",
+        "evidence": "the recommendation must present both branches honestly",
+        "error": "Confused reputation (a preferred indifferent) with the genuine good"
+       }
+      ],
+      "value_error": "Confused reputation (a preferred indifferent) with the genuine good"
+     },
+     "kathekon_assessment": {
+      "is_kathekon": true,
+      "quality": "moderate",
+      "justification": "role obligation engaged; justification offered."
+     },
+     "iterative_refinement": {
+      "senecan_grade": "grade_1",
+      "progress_dimensions": {
+       "passion_reduction": "No passions detected; passion reduction not applicable to this snapshot.",
+       "judgement_quality": "Judgement quality mixed \u2014 some indifferents confused with the genuine good or evil.",
+       "disposition_stability": "Disposition under time pressure but no passion distortion.",
+       "oikeiosis_extension": "Multiple circles engaged including wider community; oikeiosis extension active."
+      },
+      "direction_of_travel": "stable",
+      "motivation_classification": null
+     },
+     "katorthoma_proximity": "principled",
+     "ruling_faculty_state": "Engaged \u2014 ruling faculty active but no dominant pattern.",
+     "virtue_domains_engaged": [
+      "phronesis",
+      "dikaiosyne"
+     ],
+     "improvement_path_structured": {
+      "false_judgement_to_correct": "\"writing the Stripe launch-criterion recommendation\" is within my control.",
+      "mechanism_applies": "control_filter",
+      "corrected_judgement": "\"writing the Stripe launch-criterion recommendation\" is outside prohairesis. Only my judgement, impulse, and response to it are within."
+     },
+     "stage_scores": {
+      "control_filter": "strong",
+      "passion_diagnosis": "not_applied",
+      "oikeiosis": "adequate",
+      "value_assessment": "strong",
+      "kathekon_assessment": "strong",
+      "iterative_refinement": "strong"
+     },
+     "hasty_assent_risk": "low",
+     "intake_clarifications": {
+      "soft_clarifications": [],
+      "open_deferrals": [
+       {
+        "trigger_code": "EUPATHEIA_BOUNDARY",
+        "intake_tier": 3,
+        "stem_id": "tier_3:eupatheia_boundary:001",
+        "slot_fills": {
+         "EUPATHEIA_SHAPE": "boulesis (rational wishing)",
+         "TIME_WINDOW": "recent days",
+         "SITUATIONAL_TRIGGER": "the founder's decision on launch criterion two",
+         "EUPATHEIA_DESCRIPTION": "wanting what virtue would have you want, without grasping",
+         "PASSION_COUNTERPART_DESCRIPTION": "epithumia (craving an external as a genuine good)"
+        },
+        "withheld_classification": {
+         "field_path": "passion_diagnosis.eupatheia_confirmation_pending",
+         "withheld_at_position": "post-passion-diagnosis (M1-CP4b extension)",
+         "reason": "Eupatheia confirmation requires longitudinal evidence that the practitioner's calm is not polished surface over passion. The current instance does not provide this evidence."
+        },
+        "status": "open"
+       }
+      ]
+     },
+     "layer1_ambiguity_notes": [
+      "eupatheia_candidates[0].shape: 'the recommendation must present both branches honestly' could reflect boulesis (rational wishing toward a good outcome for the founder) or eulabeia (reverent caution about overstepping the advisory role); classified as boulesis because the agent is expressing a positive rational wish about how to act, but eulabeia cannot be ruled out",
+      "oikeiosis_circles_engaged: 'company incorporation' and 'founder wall-clock items' could map to local_community (the founding team) or political_community (the legal/corporate entity); both entries retained with best-fit mapping"
+     ],
+     "layer2_ambiguity_notes": []
+    },
+    "signature": "bhjrJPHzmrgDOg/cUMtibZeJlxto8PCS1o+2q/XoJ+BOhF0LsPIfpU+G38kl4a8U9QQMJjK26M0aklDLlUOyCQ==",
+    "key_id": "substrate-layer2-2026Q2"
+   },
+   {
+    "assessment": {
+     "version": "layer2-assessment-v1",
+     "layer1_schema_version": "layer1-schema-v1",
+     "passion_diagnosis": {
+      "passions_detected": [],
+      "false_judgements": [],
+      "correct_judgements": [],
+      "causal_stage_affected": null
+     },
+     "control_filter": {
+      "within_prohairesis": [
+       {
+        "item": "adopt the rebuilt inputs pack and archive the pre-pivot business documents with supersession stubs",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "reframe the investment case on evidence gates with observed figures only and no month-twelve projections",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "amend launch criterion two so the proven billing mechanism plus an activation runbook replaces pre-launch Stripe activation",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "defer base-rate re-tuning until a real-traffic window",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "fix the credential fragmentation and per-install cost opacity before the first paid onboard",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "tell the product story per audience until the substrate migration completes",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "carry the lawyer engagement, Article 50 runway, and founder-personal-exposure starts as schedule constraints",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "refresh market sizing including the June Anthropic credit-pool change",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "harmonise free-tier limits across credential classes",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "fix the P1 session's reading order and decision list",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       }
+      ],
+      "outside_prohairesis": [
+       {
+        "item": "the three judgement calls \u2014 criterion two, investment-case adoption, archive timing \u2014 explicitly with the founder",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "revenue projections",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       }
+      ],
+      "disambiguation_required": []
+     },
+     "oikeiosis": {
+      "relevant_circles": [
+       {
+        "stage": 1,
+        "circle": "self_preservation",
+        "description": "founder-personal-exposure starts as schedule constraints",
+        "honourability_grade": 3,
+        "advantageousness_grade": 3,
+        "cicero_verdict": "both_high_aligned",
+        "obligation_met": null,
+        "tension": null
+       },
+       {
+        "stage": 4,
+        "circle": "political_community",
+        "description": "carry the lawyer engagement, Article 50 runway, and founder-personal-exposure starts as schedule constraints",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": null,
+        "tension": null
+       }
+      ],
+      "deliberation_notes": ""
+     },
+     "value_assessment": {
+      "indifferents_at_stake": [
+       {
+        "name": "wealth",
+        "axia": "moderate",
+        "treated_as": "indifferent",
+        "evidence": "The set deliberately contains no revenue projections",
+        "error": null
+       },
+       {
+        "name": "reputation",
+        "axia": "moderate",
+        "treated_as": "good",
+        "evidence": "honest about what is evidence versus judgement",
+        "error": "Confused reputation (a preferred indifferent) with the genuine good"
+       }
+      ],
+      "value_error": "Confused reputation (a preferred indifferent) with the genuine good"
+     },
+     "kathekon_assessment": {
+      "is_kathekon": true,
+      "quality": "strong",
+      "justification": "natural relationship engaged; role obligation engaged; justification offered."
+     },
+     "iterative_refinement": {
+      "senecan_grade": "grade_1",
+      "progress_dimensions": {
+       "passion_reduction": "No passions detected; passion reduction not applicable to this snapshot.",
+       "judgement_quality": "Judgement quality mixed \u2014 some indifferents confused with the genuine good or evil.",
+       "disposition_stability": "Disposition under time pressure but no passion distortion.",
+       "oikeiosis_extension": "Multiple circles engaged including wider community; oikeiosis extension active."
+      },
+      "direction_of_travel": "stable",
+      "motivation_classification": null
+     },
+     "katorthoma_proximity": "principled",
+     "ruling_faculty_state": "Unsettled \u2014 multiple ambiguities in interpretation; ruling faculty unable to resolve.",
+     "virtue_domains_engaged": [
+      "phronesis",
+      "dikaiosyne"
+     ],
+     "improvement_path_structured": {
+      "false_judgement_to_correct": "\"adopt the rebuilt inputs pack and archive the pre-pivot business documents with supersession stubs\" is within my control.",
+      "mechanism_applies": "control_filter",
+      "corrected_judgement": "\"adopt the rebuilt inputs pack and archive the pre-pivot business documents with supersession stubs\" is outside prohairesis. Only my judgement, impulse, and response to it are within."
+     },
+     "stage_scores": {
+      "control_filter": "strong",
+      "passion_diagnosis": "not_applied",
+      "oikeiosis": "adequate",
+      "value_assessment": "strong",
+      "kathekon_assessment": "strong",
+      "iterative_refinement": "strong"
+     },
+     "hasty_assent_risk": "low",
+     "intake_clarifications": {
+      "soft_clarifications": [],
+      "open_deferrals": [
+       {
+        "trigger_code": "EUPATHEIA_BOUNDARY",
+        "intake_tier": 3,
+        "stem_id": "tier_3:eupatheia_boundary:001",
+        "slot_fills": {
+         "EUPATHEIA_SHAPE": "boulesis (rational wishing)",
+         "TIME_WINDOW": "recent days",
+         "SITUATIONAL_TRIGGER": "the recommendation set for the P1 review",
+         "EUPATHEIA_DESCRIPTION": "wanting what virtue would have you want, without grasping",
+         "PASSION_COUNTERPART_DESCRIPTION": "epithumia (craving an external as a genuine good)"
+        },
+        "withheld_classification": {
+         "field_path": "passion_diagnosis.eupatheia_confirmation_pending",
+         "withheld_at_position": "post-passion-diagnosis (M1-CP4b extension)",
+         "reason": "Eupatheia confirmation requires longitudinal evidence that the practitioner's calm is not polished surface over passion. The current instance does not provide this evidence."
+        },
+        "status": "open"
+       },
+       {
+        "trigger_code": "EUPATHEIA_BOUNDARY",
+        "intake_tier": 3,
+        "stem_id": "tier_3:eupatheia_boundary:001",
+        "slot_fills": {
+         "EUPATHEIA_SHAPE": "eulabeia (reverent caution)",
+         "TIME_WINDOW": "recent days",
+         "SITUATIONAL_TRIGGER": "the founder's decision authority",
+         "EUPATHEIA_DESCRIPTION": "disinclination from what virtue would not endorse, without fear",
+         "PASSION_COUNTERPART_DESCRIPTION": "phobos (fear of an external as a genuine evil)"
+        },
+        "withheld_classification": {
+         "field_path": "passion_diagnosis.eupatheia_confirmation_pending",
+         "withheld_at_position": "post-passion-diagnosis (M1-CP4b extension)",
+         "reason": "Eupatheia confirmation requires longitudinal evidence that the practitioner's calm is not polished surface over passion. The current instance does not provide this evidence."
+        },
+        "status": "open"
+       }
+      ]
+     },
+     "layer1_ambiguity_notes": [
+      "eupatheia_candidates[0].shape: boulesis is tentative \u2014 the agent's self-check before acting ('is the set complete... honest... free of items that decide what is the founder's to decide') resembles rational wishing oriented toward the good, but could also be read as purely procedural deliberation without eupatheia content",
+      "eupatheia_candidates[1].shape: eulabeia is tentative \u2014 the deliberate restraint from usurping founder decisions resembles reverent caution, but the text is procedural rather than explicitly emotional",
+      "oikeiosis_circles_engaged: 'Article 50 runway' likely refers to a legal/regulatory constraint (possibly UK Companies Act or similar) rather than EU Article 50; the political_community classification is therefore uncertain \u2014 it may be better classified as local_community or self_preservation depending on the actual referent"
+     ],
+     "layer2_ambiguity_notes": []
+    },
+    "signature": "Q51yN7a9lw2dgExpbnDjr8CRzHqOyjFE2SHi/fcWK9dIfLEKfi+HKF9FYF/axAG7fV8Wh+tjisCR9Cr3nlnNDQ==",
+    "key_id": "substrate-layer2-2026Q2"
+   },
+   {
+    "assessment": {
+     "version": "layer2-assessment-v1",
+     "layer1_schema_version": "layer1-schema-v1",
+     "passion_diagnosis": {
+      "passions_detected": [
+       {
+        "id": "passion_0",
+        "name": "Craving (epithumia)",
+        "root_passion": "epithumia",
+        "sub_species": null,
+        "false_judgement": "There is good in some external object I do not have.",
+        "correct_judgement": "Externals are indifferent. The genuine good is virtue alone \u2014 exercised through right judgement, just impulse, and stable character.",
+        "causal_stage_affected": "horme",
+        "evidence": "I am about to write into the P1 findings memo an error claim against live production configuration"
+       }
+      ],
+      "false_judgements": [
+       "There is good in some external object I do not have."
+      ],
+      "correct_judgements": [
+       "Externals are indifferent. The genuine good is virtue alone \u2014 exercised through right judgement, just impulse, and stable character."
+      ],
+      "causal_stage_affected": "horme"
+     },
+     "control_filter": {
+      "within_prohairesis": [
+       {
+        "item": "write into the P1 findings memo an error claim",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       },
+       {
+        "item": "the claim is grounded in the route source, the schema file, and the live database row",
+        "agent_named_position": "within",
+        "classification": "within",
+        "reasoning": "agent_identified_within"
+       }
+      ],
+      "outside_prohairesis": [
+       {
+        "item": "the admin key-mint route hard-codes free-tier defaults of 667 calls monthly, 50 daily, and 20 chain iterations",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       },
+       {
+        "item": "the key minted live in this session carries the generous old limits",
+        "agent_named_position": "outside",
+        "classification": "outside",
+        "reasoning": "agent_identified_outside"
+       }
+      ],
+      "disambiguation_required": []
+     },
+     "oikeiosis": {
+      "relevant_circles": [
+       {
+        "stage": 3,
+        "circle": "local_community",
+        "description": "I am about to write into the P1 findings memo an error claim against live production configuration",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": true,
+        "tension": null
+       },
+       {
+        "stage": 4,
+        "circle": "political_community",
+        "description": "the March free-tier restructure adopted and marked done, and which contradict the locked billing design stating 30 loops per month and 1 per day for the free tier",
+        "honourability_grade": 3,
+        "advantageousness_grade": 2,
+        "cicero_verdict": "honourable_prevails",
+        "obligation_met": null,
+        "tension": null
+       }
+      ],
+      "deliberation_notes": ""
+     },
+     "value_assessment": {
+      "indifferents_at_stake": [
+       {
+        "name": "reputation",
+        "axia": "moderate",
+        "treated_as": "good",
+        "evidence": "I judge it a real defect worth its own pre-launch fix, discovered only because this run minted and inspected a real credential",
+        "error": "Confused reputation (a preferred indifferent) with the genuine good"
+       },
+       {
+        "name": "wealth",
+        "axia": "moderate",
+        "treated_as": "good",
+        "evidence": "the admin key-mint route hard-codes free-tier defaults of 667 calls monthly, 50 daily, and 20 chain iterations, which override the database schema default of 30 monthly and 1 daily",
+        "error": "Confused wealth (a preferred indifferent) with the genuine good"
+       }
+      ],
+      "value_error": "Confused reputation (a preferred indifferent) with the genuine good; Confused wealth (a preferred indifferent) with the genuine good"
+     },
+     "kathekon_assessment": {
+      "is_kathekon": true,
+      "quality": "moderate",
+      "justification": "role obligation engaged; justification offered."
+     },
+     "iterative_refinement": {
+      "senecan_grade": "pre_progress",
+      "progress_dimensions": {
+       "passion_reduction": "Single passion already moved to impulse or action; reduction work means tracing back to assent and false judgement.",
+       "judgement_quality": "Judgement quality mixed \u2014 some indifferents confused with the genuine good or evil.",
+       "disposition_stability": "Disposition unstable \u2014 passions have moved into impulse or action.",
+       "oikeiosis_extension": "Multiple circles engaged including wider community; oikeiosis extension active."
+      },
+      "direction_of_travel": "single_snapshot",
+      "motivation_classification": null
+     },
+     "katorthoma_proximity": "habitual",
+     "ruling_faculty_state": "Engaged \u2014 ruling faculty active but no dominant pattern.",
+     "virtue_domains_engaged": [
+      "phronesis",
+      "dikaiosyne",
+      "sophrosyne"
+     ],
+     "improvement_path_structured": {
+      "false_judgement_to_correct": "There is good in some external object I do not have.",
+      "mechanism_applies": "passion_diagnosis",
+      "corrected_judgement": "Externals are indifferent. The genuine good is virtue alone \u2014 exercised through right judgement, just impulse, and stable character."
+     },
+     "stage_scores": {
+      "control_filter": "strong",
+      "passion_diagnosis": "adequate",
+      "oikeiosis": "strong",
+      "value_assessment": "strong",
+      "kathekon_assessment": "strong",
+      "iterative_refinement": "adequate"
+     },
+     "hasty_assent_risk": "low",
+     "intake_clarifications": {
+      "soft_clarifications": [],
+      "open_deferrals": [
+       {
+        "trigger_code": "EUPATHEIA_BOUNDARY",
+        "intake_tier": 3,
+        "stem_id": "tier_3:eupatheia_boundary:001",
+        "slot_fills": {
+         "EUPATHEIA_SHAPE": "boulesis (rational wishing)",
+         "TIME_WINDOW": "recent days",
+         "SITUATIONAL_TRIGGER": "pre-launch fix for the production configuration defect",
+         "EUPATHEIA_DESCRIPTION": "wanting what virtue would have you want, without grasping",
+         "PASSION_COUNTERPART_DESCRIPTION": "epithumia (craving an external as a genuine good)"
+        },
+        "withheld_classification": {
+         "field_path": "passion_diagnosis.eupatheia_confirmation_pending",
+         "withheld_at_position": "post-passion-diagnosis (M1-CP4b extension)",
+         "reason": "Eupatheia confirmation requires longitudinal evidence that the practitioner's calm is not polished surface over passion. The current instance does not provide this evidence."
+        },
+        "status": "open"
+       }
+      ]
+     },
+     "layer1_ambiguity_notes": [
+      "passions_present[0].sub_species: the drive to document and report could map to philodoxia (desire for recognition of correct judgment) or could be a straightforward boulesis-adjacent impulse with no clear irrational sub-species; sub_species left null pending further evidence",
+      "eupatheia_candidates[0]: the rational wish to see the defect fixed could be boulesis, but the agent's language ('I judge it a real defect worth its own pre-launch fix') is also consistent with a straightforward role-obligation impulse rather than a eupatheia shape; flagged as candidate only"
+     ],
+     "layer2_ambiguity_notes": [
+      "iterative_refinement: single-snapshot input \u2014 direction_of_travel could not be computed from temporal markers"
+     ]
+    },
+    "signature": "3X6pCMuE/l5ybTTbJ9etR1OK5MXYSOUSV48l80sbP/JAVzZ41r5w1dgyHy7jtcUE/N12DkKqfJfzvpRE5aUpCg==",
+    "key_id": "substrate-layer2-2026Q2"
+   }
+  ]
+ }
+}
