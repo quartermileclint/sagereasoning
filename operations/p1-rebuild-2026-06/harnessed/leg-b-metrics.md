@@ -17,7 +17,7 @@ Composition note (for the verdict memo's fairness read): the deliverables window
 
 | Row | Value |
 |---|---|
-| `/cost` figure for this session | **founder runs `/cost` in this window and fills this row before closing** |
+| `/cost` figure for this session | **Filled 2026-06-11 (verdict-memo session, ~22:00 AEST) from the still-open leg-B window (founder-pasted, verdict-memo session):** input 29.4k · output 2.8k · cache read 37.8M · cache write 534.5k · **total 38.4M tokens**. Usage-credits dollar figure showed $0.00 of $100.00 (plan usage, no per-session dollar amount available). *Caveat (recorded honestly): the 2.8k output figure is low relative to a session that wrote five documents — possibly a display/compaction artefact; figures recorded verbatim as supplied (KG5).* |
 
 ## Harness cost (the §5 core telemetry)
 

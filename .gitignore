@@ -52,3 +52,4 @@ website/scripts/.translation-sandwich-cache/
 # Local env-file backups (may contain secrets) — never commit
 .env.local.*
 website/tsconfig.tsbuildinfo
+operations/p1-rebuild-2026-06/transcripts/

@@ -10693,3 +10693,97 @@ Then run `/cost` in this session and fill the token-cost row in `leg-b-metrics.m
 **Rules served:** R0, R5 (overage observed live 10/10 — the prospective ratio held by construction), R18f (provenance-gated write exercised), R19, 0a, 0c, 0d-ii, 0f, 0h (main-blocker test, leg 2 of 2), PR2, PR4 (model parity confirmed at open), PR7, PR10 (pre-registration held), PR17 (mints + revocation walked live, incl. expired-JWT and 400-retry recoveries), PR18 (production-state updated at close only), KG5.
 
 **Status:** Adopted. Cross-references: `D-P1-COMPARISON-LEG-A-BARE-2026-06-11`, `D-0H-MAIN-BLOCKER-VALUE-DEMONSTRATION-2026-06-10`, the frozen design sheet, the leg-B prompt, the verdict-memo prompt (next).
+
+## 2026-06-11 — D-P1-COMPARISON-VERDICT-NO-BENEFIT-2026-06-11
+
+**Decision:** The P1 comparison **verdict memo is written** (`/operations/p1-rebuild-2026-06/verdict-memo.md`) and the frozen §6 boxes are applied exactly as ticked (2 / 50% / $5, AND'd): **Box 1 PASS (2/2** — F12 mint-defaults drift + accreditation write/read asymmetry, counted under the founder's in-session adjudication that contract-exercising catches are "caught by the harness" per the sheet's §4 definition); **Box 2 FAIL (+333%** wall-clock overhead on the deliverables convention; +188% even excluding the founder credential phase; fails under every convention); **Box 3 PASS ($0.76** measured / ~$0.50 est. total). **Conjunction: FAIL → "No benefit" per §6 as the founder pre-named it.** The outcome stands and redirects scope via the memo's task-fit analysis: consultation value concentrated in standard-depth judgement consults (passion diagnoses changing judgement-laden content); 8 of 12 consults were confirmations; the two unique error catches came from exercising the public contract, not consultation verdicts; the overhead is structural (consult density × ~31s latency). Founder quality ratings captured verbatim before any AI side-by-side: **bare 3/5, harnessed 4/5**, harnessed pack founder-preferred. Founder-requested independent verification: all seven load-bearing factual claims across both packs verified against repo source (file:line); completeness is a union — leg A's auxiliary-streams item is absent from leg B. KG5 gap closed late: both `/cost` rows filled this session from the still-open leg windows (leg A 18.9M total tokens; leg B 38.4M), output-token figures recorded verbatim with a display-artefact caveat.
+
+**Reasoning:** the pre-registration is only honest if the boxes are applied as ticked — the memo applies them, notes the measurement caveats without softening, and records the negative result with the same care a pass would have received (the design sheet named this outcome in advance as a useful scope correction made in R&D). Cross-refs: `D-P1-COMPARISON-LEG-A-BARE-2026-06-11`, `D-P1-COMPARISON-LEG-B-HARNESSED-2026-06-11`, `D-0H-MAIN-BLOCKER-VALUE-DEMONSTRATION-2026-06-10`.
+
+**Files touched:**
+- `operations/p1-rebuild-2026-06/verdict-memo.md` — NEW; the verdict
+- `operations/p1-rebuild-2026-06/bare/leg-a-metrics.md` — `/cost` row filled (founder-pasted, dated, caveated)
+- `operations/p1-rebuild-2026-06/harnessed/leg-b-metrics.md` — `/cost` row filled (same)
+- `operations/handoffs/founder/2026-06-11-P1-comparison-verdict-close.md` — NEW; session close
+- `CLAUDE.md` — production-state 0h line updated at close (PR18)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documents only; no production touch of any kind this session. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` (documents only).
+
+**Verification step (founder-performable):**
+```
+grep -n "Conjunction: FAIL" operations/p1-rebuild-2026-06/verdict-memo.md    # expect the §1 verdict line
+grep -n "Filled 2026-06-11" operations/p1-rebuild-2026-06/*/leg-*-metrics.md # expect both /cost rows dated
+```
+Expected: both greps return matches.
+
+**Open questions:** the founder's **0h call** (memo §8 branches 1–3 — the next decision, founder's alone); F12 fix vehicle (own Elevated session vs R5 pre-onboard gate — carried from leg-B close); accreditation seed row disposition (carried); A8 order (carried).
+
+**Rules served:** R0, R19 (negative result recorded at full strength), 0a, 0c, 0d-ii, 0f, 0h (main-blocker evidence complete), PR7, PR10 (pre-registered Verify completed; result against frozen thresholds), PR17 (founder quality read + Box-1 adjudication walked live), PR18 (production-state updated at close only), KG5.
+
+**Status:** Adopted. Cross-references: `D-P1-COMPARISON-LEG-A-BARE-2026-06-11`, `D-P1-COMPARISON-LEG-B-HARNESSED-2026-06-11`, `D-0H-MAIN-BLOCKER-VALUE-DEMONSTRATION-2026-06-10`, the frozen design sheet, the verdict memo.
+
+## 2026-06-11 — D-P1-FORENSIC-EXECUTION-ANALYSIS-2026-06-11
+
+**Decision:** Same-evening founder-directed forensic examination of how the two comparison legs actually operated, producing: `operations/p1-rebuild-2026-06/forensic-execution-analysis.md` (§1–§7) and `operations/p1-rebuild-2026-06/harnessed/consultation-audit-report.md` (the L1-input ↔ L3-prose audit tabulation). Headline root-cause findings: **~65% of leg B's measured window was one-off founder credential provisioning** (33.5-min agent-idle gap + ~16-min interactive retries, from transcript timestamps); like-for-like agent work ≈ 13 min bare vs ~23–25 min harnessed (≈ +80–90%, not the headline +333%); **Layer 2 reasoning = 0–3 ms/consult** — per-consult ~30s is L1+L3 Sonnet translation; the agent dropped local-layer1_schema supply after the mid-run credential switch (10 consults paid avoidable ~16s server-side L1); **founder correction accepted: L3 prose is the after-the-fact audit narrative, not dead weight** — the defects are synchronous hot-path generation and zero server-side retention (boolean only); "quick" depth is a price tier, not a latency tier; reflect never called; zero subagents either leg; nothing looped; no re-score after corrections (loop never closed); scoring stateless yet a real trajectory signal appeared (habitual + epithumia at the final consult). §7 records six reasoning-methodology learnings (affect-regulation not information; the founder's blind 4/5-vs-3/5 verdict maps to the passion-checked rows; opening consult disproportionate; over-consultation signature = deliberate+moderate+no-passions). **The verdict is not amended — boxes stand as ticked.** Founder then directed a Fable-5-max successor arc: `operations/handoffs/founder/2026-06-11-sage-practice-mechanism-correction-NEXT-SESSION-PROMPT.md` (grounding dossier on Sage Practice origins + mentor-evolved intent → fresh analysis → founder-approved build plan → build → standardised benchmark schema draft; hard constraint: mechanisms only, methodology untouchable without mentor confirmation).
+
+**Reasoning:** the founder asked whether the harness operated as intended and for the Box-2 root cause; transcript + payload evidence relocated the fail from "harnessed reasoning is slow" to "provisioning was measured in-window + translation latency has a clean correction path" — material to the 0h call and P1, warranting the deeper successor arc.
+
+**Files touched:**
+- `operations/p1-rebuild-2026-06/forensic-execution-analysis.md` — NEW (incl. §7 learnings; L3 framing corrected in place per founder)
+- `operations/p1-rebuild-2026-06/harnessed/consultation-audit-report.md` — NEW (12-row audit tabulation + full prose)
+- `operations/p1-rebuild-2026-06/transcripts/` — NEW, **gitignored** (2 run transcripts copied by the leg-B window at founder's hand; contain retired credential values; **deletion owed after use**)
+- `.gitignore` — transcripts dir added
+- `operations/handoffs/founder/2026-06-11-sage-practice-mechanism-correction-NEXT-SESSION-PROMPT.md` — NEW (the successor-arc prompt)
+- `operations/handoffs/founder/2026-06-11-P1-comparison-verdict-close.md` — addendum block appended
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documents + read-only evidence (transcripts, payloads, route source). No production touch. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` (documents); `rm` the gitignored transcripts.
+
+**Verification step (founder-performable):**
+```
+grep -n "L-6" operations/p1-rebuild-2026-06/forensic-execution-analysis.md      # expect the §7 learnings
+grep -c "^| " operations/p1-rebuild-2026-06/harnessed/consultation-audit-report.md  # expect ≥ 14 (12 rows + header rows)
+```
+
+**Open questions:** founder's 0h call (unchanged, now better informed); when to run the successor arc; transcript deletion timing (owed).
+
+**Rules served:** R0, R19, 0d-ii, 0f, PR7, PR10 (diagnostic-certain: root cause identified — provisioning-in-window + translation latency; evidence cited), PR16 (dogfood lens: the audit report is itself a positioning artefact), PR17 (transcript export walked live incl. /export failure fallback), KG5.
+
+**Status:** Adopted. Cross-references: `D-P1-COMPARISON-VERDICT-NO-BENEFIT-2026-06-11`, the verdict memo, the forensic analysis, the successor-arc prompt.
+
+## 2026-06-12 — D-SAGE-PRACTICE-GROUNDING-FRESH-ANALYSIS-BUILD-PLAN-2026-06-12
+
+**Decision:** The Sage Practice mechanism-correction arc's Parts 1–3 are complete as documents: (1) **grounding dossier** (`operations/p1-rebuild-2026-06/sage-practice-grounding-dossier.md`) — the practice's origins (four classical disciplines → four products; the examine-impressions loop score→redirect→reiterate→reflect assembled from adopted parts: prior_feedback Note A, AC-15 retrospective re-score, R5 "guard + score + optional iterate", Reflect Q1–Q6), the private-mentor lineage (the human side closes the loop server-side every call: reflection → profile → pattern injection into the next call), the intended operation function-by-function, and the **methodology-vs-mechanism boundary table (B1–B12)** with five parked methodology questions requiring mentor confirmation; (2) **fresh test analysis** (`fresh-test-analysis.md`) — findings **FX-1…FX-17**, every defect mechanism-attributed; headline supersessions of prior *analysis* (verdict untouched): "stateless by design" corrected to **stateless per-instance scoring is designed, stateless practice is not** (Rule 10 names `practitioner_profile (longitudinal)` at `operationalised-rules.md:589`; the eight carried-context Layer1Schema fields are accepted but inert at `layer2-mechanisms.ts:2069-2078`); leg-B's consult density attributed to the frozen sheet's own §4(ii), not the practice design; new defect FX-10 — the Live credential cannot express R19e/K1 configuration honesty (coverage_status adopted as design, unbuilt); (3) **build plan DRAFT** (`mechanism-correction-build-plan.md`) — items **CI-1…CI-15** each carrying FX trace, dossier function, PR15 check, 0d-ii class, rollback, founder verification; sequenced M1–M8 with ride-groups; **STOPPED at the founder approval gate — nothing is built**.
+
+**Reasoning:** the founder-directed successor arc (per `D-P1-FORENSIC-EXECUTION-ANALYSIS-2026-06-11`) requires grounding before correction: the dossier establishes what the mechanisms must deliver, the fresh analysis measures the P1 evidence against it, the plan prices the corrections. PR13 check on material findings: no prior decision contradicted (the two supersessions are analysis-level, authorized by the arc prompt; K1's deferral was deliberate per PR7); refinements recorded (FX-6 statelessness attribution; FX-10); future-stage impact named (Part-5 benchmark dependencies on CI-1/2/3/4/7/13); operational-discipline note — CI-8's Standard-vs-Elevated tension flagged for founder decision at approval.
+
+**Files touched:**
+- `operations/p1-rebuild-2026-06/sage-practice-grounding-dossier.md` — NEW (Part 1)
+- `operations/p1-rebuild-2026-06/fresh-test-analysis.md` — NEW (Part 2)
+- `operations/p1-rebuild-2026-06/mechanism-correction-build-plan.md` — NEW (Part 3, DRAFT — approval-gated)
+- `operations/handoffs/founder/2026-06-12-sage-practice-grounding-close.md` — NEW (session close)
+- `CLAUDE.md` — production-state block as-of refresh at close (PR18; no state change, arc progress noted)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documents and read-only evidence only (repo reads + three read-only Explore subagents; no API call, no query against production, no flag/schema/code change). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` (documents only).
+
+**Verification step (founder-performable):**
+```
+grep -n "B12" operations/p1-rebuild-2026-06/sage-practice-grounding-dossier.md   # expect the boundary table rows
+grep -c "FX-" operations/p1-rebuild-2026-06/fresh-test-analysis.md              # expect ≥ 30 (17 findings + register + cross-refs)
+grep -n "STOP" operations/p1-rebuild-2026-06/mechanism-correction-build-plan.md # expect the approval gate line
+```
+Expected: all three greps return matches.
+
+**Open questions:** founder item-by-item decision on CI-1…CI-15 (the plan's STOP gate — next session's opening business, or in-chat); the five parked methodology questions (mentor-confirmation gate, founder elects if/when); CI-8 risk class election (Standard per arc prompt vs Elevated per cache default); the 0h call (unchanged, founder's — verdict memo §8); transcript deletion still owed (`transcripts/`, gitignored).
+
+**Rules served:** R0, R6, R7 (dossier cites sources throughout), R17/R18/R19 (binding constraints carried into CI-1/CI-5/CI-11), 0a, 0d-ii, 0f, PR7, PR10 (FX-15 explicitly symptom-level; all other findings diagnostic-certain with file:line), PR13 (five questions stated), PR15 (standing check + per-item notes CI-7/CI-9/CI-15), PR16 (per-item positioning + dogfood lines), PR18 (production state at close only).
+
+**Status:** Adopted (Parts 1–2 as record; Part 3 is a DRAFT awaiting founder approval — the plan itself is not adopted by this entry). Cross-references: `D-P1-FORENSIC-EXECUTION-ANALYSIS-2026-06-11`, `D-P1-COMPARISON-VERDICT-NO-BENEFIT-2026-06-11`, the arc prompt (`2026-06-11-sage-practice-mechanism-correction-NEXT-SESSION-PROMPT.md`), the three new documents.
