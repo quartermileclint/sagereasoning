@@ -10787,3 +10787,60 @@ Expected: all three greps return matches.
 **Rules served:** R0, R6, R7 (dossier cites sources throughout), R17/R18/R19 (binding constraints carried into CI-1/CI-5/CI-11), 0a, 0d-ii, 0f, PR7, PR10 (FX-15 explicitly symptom-level; all other findings diagnostic-certain with file:line), PR13 (five questions stated), PR15 (standing check + per-item notes CI-7/CI-9/CI-15), PR16 (per-item positioning + dogfood lines), PR18 (production state at close only).
 
 **Status:** Adopted (Parts 1–2 as record; Part 3 is a DRAFT awaiting founder approval — the plan itself is not adopted by this entry). Cross-references: `D-P1-FORENSIC-EXECUTION-ANALYSIS-2026-06-11`, `D-P1-COMPARISON-VERDICT-NO-BENEFIT-2026-06-11`, the arc prompt (`2026-06-11-sage-practice-mechanism-correction-NEXT-SESSION-PROMPT.md`), the three new documents.
+
+## 2026-06-12 — D-SAGE-PRACTICE-METHODOLOGY-MENTOR-CONSULTATION-2026-06-12
+
+**Decision:** The five parked methodology questions from the grounding dossier §6 were put to the **private mentor** (founder-performed, via the hub — the established methodology-consultation channel; precedents: 2026-05-17 purpose-discovery, 2026-05-26 coverage_status). The consultation is **recorded verbatim** at `operations/p1-rebuild-2026-06/2026-06-12-mentor-consultation-methodology-verdicts.md`. Verdicts: **Q1 (consultation cadence) AMEND** — two-gate rule: one mandatory full examination at task adoption; stake-triggered thereafter via a three-sub-question deterministic self-screen (stake/pre-drawn-conclusion/observer-dependence), with a named suppression-risk signal and depth calibrated to proximity as well as stake; **Q2 (narrative account) AMEND-partially** — the narrative is essential to examination (record that examination occurred), not record-keeping; generation timing/surfacing is mechanical; **a verdict-only (no-narrative) practice is a blocked configuration** (R18f-parallel); **Q3 (reflect firing) AMEND** — for agents, automatic firing at session close is the correct **default** (developer's configuration *is* agent prohairesis), explicit opt-out permitted, the full Q1–Q6 sequence never abbreviated; **Q4 (re-examination after correction) CONFIRM with named requirement** — mandatory, not elective (a correction is a new phantasia owed a new synkatathesis; overcorrection e.g. agonia→oknos passes undetected otherwise), at the **same depth tier as the original examination**; **Q5 (depth ladder) AMEND — quick tier** — add a minimal value classification (passion's object: genuine good / genuine evil / indifferent) before quick may return a verdict; without it quick is a screen, not an examination, and must be credentialed as the lesser claim.
+
+**Reasoning:** the mentor-confirmation gate (arc prompt Part 1 hard constraint) required a founder-elected consultation, recorded — this entry and the verbatim record satisfy it. **Adoption disposition: the five amendments are Under review** — adoption as governing methodology is the founder's election, pending at this entry's writing; on adoption, the dossier boundary table (B3/B4/B6/B7/B10), the build plan (CI-1 design space, CI-4, CI-13, CI-15 + new items), and the Part-5 benchmark schema are amended in a follow-on pass. PR13 on material findings: Q3 and Q4 **supersede the dossier's parked-item posture** (auto-fire and mandatory re-examination were parked as open; the gate has now answered them — supersession by the gate functioning as designed, not contradiction); Q5 amends B3's quick-tier scope **through** the confirmation gate B3 itself named; Q2 hardens CI-1's design space (a never-generate narrative path is methodologically blocked); future-stage impact: benchmark schema + possible manifest rule candidate ("no examination credential without narrative account" — R18f-parallel; founder decision, not authored here).
+
+**Files touched:**
+- `operations/p1-rebuild-2026-06/2026-06-12-mentor-consultation-methodology-verdicts.md` — NEW (verbatim consultation record: prompt + full response + summary table)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documents only (the consultation itself was founder-performed through the existing Live mentor surface; no code/schema/flag/production change by this session). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` (documents only).
+
+**Verification step (founder-performable):**
+```
+grep -n "Summary for the record" operations/p1-rebuild-2026-06/2026-06-12-mentor-consultation-methodology-verdicts.md
+grep -c "AMEND\|CONFIRM" operations/p1-rebuild-2026-06/2026-06-12-mentor-consultation-methodology-verdicts.md
+```
+Expected: the summary-table heading found; the verdict-word count ≥ 10.
+
+**Open questions:** **founder adoption election on the five amendments** (all / subset / hold — the next decision in this thread); on adoption: dossier + build-plan amendment pass (incl. new items: quick-tier value classification; narrative-existence guarantee; reflect default-on integration contract; loop-closure as required step) and their risk classes; whether Q2's blocked-configuration rule becomes a manifest rule candidate (founder).
+
+**Rules served:** R0, R6 (methodology-first — the amendment channel used as designed), R18f/R19e (Q2's blocked-configuration parallel), R20b (Q1 independence precision), 0a (decision taxonomy: record Adopted; amendments Under review), 0d-ii, 0f, PR7, PR13 (stated), PR16 (positioning: all five verdicts strengthen the Character-Kernel examination story; dogfood: the consultation itself is the dogfood channel).
+
+**Status:** Adopted (as the record of the consultation). The five amendments: **Under review — awaiting founder adoption election.** Cross-references: `D-SAGE-PRACTICE-GROUNDING-FRESH-ANALYSIS-BUILD-PLAN-2026-06-12`, the verbatim record, the grounding dossier §6, the build plan.
+
+## 2026-06-12 — D-SAGE-PRACTICE-METHODOLOGY-AMENDMENTS-ADOPTED-2026-06-12
+
+**Decision:** The founder **adopts all five** mentor verdicts from `D-SAGE-PRACTICE-METHODOLOGY-MENTOR-CONSULTATION-2026-06-12` as governing methodology for the Sage Practice (election in-session, recorded): **(Q1)** two-gate consultation cadence — mandatory full examination at task adoption; stake-triggered thereafter via the three-sub-question self-screen, suppression-risk signal named, depth calibrated to proximity as well as stake; **(Q2)** the narrative account is essential to examination — it must exist for every examination; generation timing/surfacing is mechanical; **a verdict-only (no-narrative) configuration is blocked**; **(Q3)** Sage Reflect fires automatically at session close for agents **as the default**, explicit developer opt-out, full Q1–Q6 sequence never abbreviated; **(Q4)** re-examination after an adopted correction is **mandatory**, at the **same depth tier** as the original examination, built as a required sequence step; **(Q5)** the quick tier gains a **minimal value classification** (passion's object: genuine good / genuine evil / indifferent) required before a quick verdict; without it quick is a screen and must be credentialed as the lesser claim. The five entries move **Under review → Adopted**. The grounding dossier (boundary table B3/B4/B6/B7/B10 + parked list) and the build plan (CI-1 design-space narrowing; CI-4 reshaped to required step; CI-13 reshaped to default-on contract; CI-15 content; **new CI-16 quick-tier value classification; new CI-17 narrative-existence guarantee**) are amended in place this session. **The build plan's CI approval gate still stands — adoption of methodology does not approve any build item.**
+
+**Reasoning:** the mentor-confirmation gate has functioned exactly as the arc designed it: founder-elected consultation through the private mentor, recorded verbatim, founder adjudication. Feasibility constraints carried into the amendments (stated in the consultation entry's analysis): the substrate is stateless, so Q3's default lives in the published integration contract + server-side nudge (not server-initiated calls) with metering cost visible at opt-out (R5); Q4's mandate is enforced through the provenance chain (redirection opens a loop; same-depth re-examination closes it; the accreditation write validates closure — R18f-adjacent, Critical-check at build); Q2 rules out never-generate narrative paths in CI-1 (async always-generate satisfies; pure on-demand does not).
+
+**Files touched:**
+- `operations/p1-rebuild-2026-06/sage-practice-grounding-dossier.md` — amendment record + B3/B4/B6/B7/B10 rows + parked list resolved
+- `operations/p1-rebuild-2026-06/mechanism-correction-build-plan.md` — amendment record; CI-1/CI-4/CI-13/CI-15 amended; CI-16 + CI-17 added; sequencing updated; exclusion list updated
+- `operations/handoffs/founder/2026-06-12-sage-practice-grounding-close.md` — same-session addendum
+- `CLAUDE.md` — production-state successor-arc sentence extended (PR18; documents only, no production change)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documents only. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` (documents only); the adoption itself is reversible by a superseding founder election recorded in this log.
+
+**Verification step (founder-performable):**
+```
+grep -n "Amendment record" operations/p1-rebuild-2026-06/sage-practice-grounding-dossier.md operations/p1-rebuild-2026-06/mechanism-correction-build-plan.md
+grep -n "CI-16\|CI-17" operations/p1-rebuild-2026-06/mechanism-correction-build-plan.md | head -5
+```
+Expected: amendment records present in both; CI-16/CI-17 present in the plan.
+
+**Open questions:** CI item-by-item approvals (unchanged — the STOP gate); whether Q2's blocked-configuration rule becomes a manifest rule (R18f-parallel; founder, separate election); Q1's proximity-calibrated depth presupposes CI-5 trajectory persistence (sequencing input, noted in the plan).
+
+**Rules served:** R0, R5 (metering visibility at Q3 opt-out), R6, R17 (CI-1 retention constraints unchanged), R18f (Q2/Q4 parallels), R19e, R20b, 0a (Under review → Adopted), 0d-ii, 0f, PR7, PR13 (stated at the consultation entry), PR16, PR18 (close-time refresh).
+
+**Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-METHODOLOGY-MENTOR-CONSULTATION-2026-06-12`, `D-SAGE-PRACTICE-GROUNDING-FRESH-ANALYSIS-BUILD-PLAN-2026-06-12`, the verbatim consultation record, the amended dossier + build plan.

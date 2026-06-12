@@ -5,6 +5,7 @@
 **Inputs:** `sage-practice-grounding-dossier.md` (boundary table §6, B1–B12) + `fresh-test-analysis.md` (FX-1…FX-17).
 **Gate:** **nothing proceeds until the founder marks an item "approved."** Approval may be partial, amended, or refused per item. Build sessions then take approved items in the named ride-groups, under PR10 PEV, PR1 single-endpoint proof, PR2 same-session wire-verification, 0c-ii for anything Critical, PR17 for every founder-performed step, PR18 at close.
 **Hard constraint honoured:** every item below is **mechanism-side** (dossier §6); the five parked methodology questions are listed at the end and are **not** in this plan.
+**Amendment record (2026-06-12, same day):** the five parked questions were mentor-consulted and **all five verdicts adopted** (`D-SAGE-PRACTICE-METHODOLOGY-AMENDMENTS-ADOPTED-2026-06-12`). Amended in place: CI-1 (design space narrowed per Q2), CI-4 (required step per Q4), CI-13 (default-on contract per Q3), CI-15 (content adopted per Q1); **CI-16 and CI-17 added** (Q5 quick-tier value classification; Q2 narrative-existence guarantee); sequencing + exclusion list updated. **The approval gate below still stands — methodology adoption approves no build item.** Pre-amendment text in git history.
 **PR15 standing check (stated once, applies per item unless noted):** Anthropic-canonical primitives reviewed (Claude Code commands, sub-agents, Skills, MCP servers, SDK patterns, Plugin spec, Cookbook patterns, Outcomes, multi-agent orchestration). None substitutes for changes inside SageReasoning's own Live API surfaces (Next.js routes, Supabase schema, deterministic engine) — bespoke election justified as product-internal code throughout. Where a primitive *does* bear on an item (CI-7, CI-9, CI-15), it is named in the item.
 **0h interaction (named, not presumed):** the founder's 0h call (verdict memo §8) is untouched by this plan. CI-1…CI-3 are what a Branch-2 re-run would exercise; CI-6/CI-7/CI-11/CI-12 serve launch readiness under any branch; nothing here pre-empts the call.
 
@@ -14,7 +15,7 @@
 
 ### CI-1 — Decouple Layer-3 narrative from the consult hot path + retain it server-side
 **Fixes:** FX-13 (B4). **Serves (dossier):** §4.7 the audit narrative. **Largest single latency+cost lever** (forensic §5.1: ~12–20s + ~half the LLM cost per consult).
-**Shape (design freedom for the build session, options from the analysis):** (a) respond-then-generate async, retained against `loop_id`; (b) on-demand generation at audit time from a retained signed assessment; (c) `response_format` flag deferring prose. Whichever is elected: the narrative **remains part of the practice** (methodology-side; only timing/retention move); option (b) requires retaining the signed Layer2Assessment (today nothing but structural facts persists — `reason/route.ts:948-972`).
+**Shape (design freedom for the build session, narrowed per Q2 — adopted 2026-06-12):** the narrative **must exist for every examination** (mentor verdict: it is the record that examination occurred; a verdict-only configuration is blocked). Therefore: **(a) respond-then-generate async, retained against `loop_id`, is the compliant default**; (c) a `response_format` flag may defer prose out of the hot path but never suppress generation; **(b) pure on-demand ("generate only if requested") is out** — a narrative that may never exist fails the requirement. Retaining the signed Layer2Assessment remains needed for audit pairing (today nothing but structural facts persists — `reason/route.ts:948-972`). CI-17 carries the existence-guarantee enforcement/documentation and rides this item.
 **Binding constraints:** R17 intimate-data posture on any retention store (retention limit, genuine deletion, minimisation — SR-12 precedent); R18e Article-50 transparency notice rides the prose wherever it is served; **the R20a Layer-C deterministic injection path must be untouched** — any prose deferral must be structurally unavailable when a distress signal is in play.
 **Risk:** **Elevated** (existing user-facing response path + new schema). **Reclassify Critical per PR6 if implementation touches the distress branch, the A5 wrapper, or any flag activation** — expected implementation avoids all three.
 **PR16:** positioning **strengthens** (auditability becomes a server-backed claim; latency story honest); dogfood **yes** (`/api/reason` consult on the retention-design kathekon is available if elected).
@@ -37,13 +38,13 @@
 **Rollback:** docs revert.
 **Founder verification:** three timed consults (quick/standard/deep, schema supplied, prose deferred) land inside the published envelopes.
 
-### CI-4 — Loop-closure affordance on `/api/reason` (re-examination input + response affordance)
-**Fixes:** FX-8 (B6). **Serves:** §4.4 reiterate → re-examine.
-**Shape:** an optional `prior_feedback` input (the Note-A concept, already canonical vocabulary) carrying the prior loop id + adopted correction; response affordance on redirection-grade outputs ("re-submission with the correction closes the loop"; field, not prose). **No mandate** — the discipline stays elective (parked item (iv) untouched). Re-scores meter as normal consults (R5 economics unchanged).
-**Risk:** **Elevated** (existing route input/response shape). **Rides with:** CI-13 (one "practice-affordance" session).
-**PR16:** positioning **strengthens** (the loop the category claims becomes visible in the contract); dogfood **yes** (this arc itself can exercise it when built).
-**Rollback:** optional field — ignore-on-unset; flag-gated response affordance; `git revert`.
-**Founder verification:** consult → adopt the correction → re-submit with `prior_feedback` → second assessment names the prior loop id in meta; omitting the field reproduces today's behaviour byte-for-byte.
+### CI-4 — Loop closure as a **required** sequence step (re-examination after correction) — *reshaped per Q4 (adopted 2026-06-12)*
+**Fixes:** FX-8 (B6, amended). **Serves:** §4.4 reiterate → re-examine — now **mandatory methodology** ("a correction is a new phantasia owed a new synkatathesis"; elective returns demonstrably don't happen).
+**Shape:** (1) `prior_feedback` input (Note-A vocabulary) carrying the prior loop id + adopted correction; (2) redirection-grade responses mark the examination **open** (structural field); (3) the same-depth rule enforced — the re-examination runs at the original examination's depth tier, not quick-by-default; (4) **provenance-chain enforcement**: the accreditation write validates loop closure — an assessment chain containing adopted-redirections without same-depth re-examinations is flagged (or rejected; build session proposes, founder elects) at the R18f write boundary. The stateless API cannot compel the return call; the credential is where the requirement bites.
+**Risk:** **Elevated** on the reason-route half; the write-boundary validation extends the R18f enforcement seam — **Critical-check at build** (the seam was built Critical; PR6 posture applies if the validation logic is touched rather than extended additively). **Rides with:** CI-13 (practice-affordance session); the write-boundary half may land with M3's accreditation session if that order is approved.
+**PR16:** positioning **strengthens decisively** (the loop the category claims becomes contract-visible and credential-enforced); dogfood **yes**.
+**Rollback:** flag-gated open/close marking and validation (unset = today's behaviour); `git revert`.
+**Founder verification:** consult → redirection received (response marks open) → re-submit with `prior_feedback` at same depth → closure visible in meta; an accreditation write over an unclosed chain shows the flag/rejection; omitting everything reproduces today's behaviour under the unset flag.
 
 ### CI-5 — Agent-path trajectory persistence (activate the designed carriers)
 **Fixes:** FX-6 (B5). **Serves:** §4.8 the profile; Rule 10's longitudinal inputs; the Character-Kernel continuity claim.
@@ -109,13 +110,13 @@
 **Rollback:** `git revert`.
 **Founder verification:** write a TEST record → public GET returns it (today's repro 404s); negative case still 404s for unknown ids.
 
-### CI-13 — Reflect discoverability from the consult/close path
-**Fixes:** FX-9 (B7). **Serves:** §4.5 (TR-02 visibility; the cycle made visible; election stays with the developer — auto-fire remains parked).
-**Shape:** consult responses (and/or the accreditation write response) carry a structural practice-cycle field (e.g. `practice: { reflect_available: true, trigger: 'TR-02', endpoint: '/api/practice/reflect' }`); docs flow shows the close step; R8d outcome-focused wording.
-**Risk:** **Elevated** (response-shape addition on Live routes; additive field). **Rides with:** CI-4.
-**PR16:** positioning **strengthens** (R19e alignment — the configuration story becomes navigable); dogfood **yes**.
-**Rollback:** flag-gated field; `git revert`.
-**Founder verification:** consult response carries the field; reflect call from its hint succeeds on a TEST credential.
+### CI-13 — Reflect as the **default-on** close step (integration contract + opt-out) — *reshaped per Q3 (adopted 2026-06-12)*
+**Fixes:** FX-9 (B7, amended). **Serves:** §4.5 — for agents, **automatic firing at session close is the default** ("the developer's configuration is the agent's disposition"); explicit opt-out; **the full Q1–Q6 sequence, never abbreviated**.
+**Shape:** the substrate is stateless and cannot observe session close, so the default lives where it can bite: (1) the **published integration contract** (docs/llms.txt/agent-card/plugin + skill templates) ships reflect-at-close as the default flow with an explicit named opt-out config; (2) consult and accreditation-write responses carry the structural practice-cycle field (`practice: { reflect_due: 'TR-02', endpoint: '/api/practice/reflect', default: 'auto', opt_out: '<config key>' }`); (3) the opt-out documentation states the metering cost of an auto-fired reflect pass plainly (R5 — auto-fired calls bill; consent must be informed); (4) no server-side abbreviation path is added — the Q1–Q6 sequence ships whole or not at all.
+**Risk:** **Elevated** (response-shape addition on Live routes + contract-default change on published surfaces). **Rides with:** CI-4 (+ CI-15 riding).
+**PR16:** positioning **strengthens** (R19e alignment becomes the shipped default — the "ongoing practice" claim and the default configuration now match); dogfood **yes**.
+**Rollback:** flag-gated field; docs revert restores elective-close as the published default.
+**Founder verification:** consult response carries the field; the docs flow shows reflect-at-close as default with the opt-out named + costed; a reflect call from the hint succeeds on a TEST credential and runs all six questions.
 
 ### CI-14 — Credential consolidation across the practice (design first — **Critical track**)
 **Fixes:** FX-17 (B7/B8; leg-B B-F11; SR-14 intent). **Serves:** §4.1/§4.5 (one credential across the agent's practice).
@@ -125,37 +126,49 @@
 **Rollback (design):** document revert.
 **Founder verification (design):** ADR readable; explicitly states the migration path for existing credentials and the FX-3 regression class it closes.
 
-### CI-15 — Publish the adopted consultation-cadence guidance (docs only)
-**Fixes:** FX-2 (B10 — documentation mechanism only). **Serves:** §4.1.
-**Shape:** developer docs / llms.txt / agent-card integration section states **only already-adopted content**: R5's "guard + score + optional iterate" per consequential invocation (`manifest.md:125`), the gate risk-class→depth mapping, the plugin loop hooks (substrate ADR:119), and the reflect close step (with CI-13's field). **No new cadence rule is authored** — the L-5/L-6-derived standing rule stays parked for mentor confirmation; if the founder later elects that consultation, its output feeds a separate docs amendment.
-**Risk:** **Standard** (documentation). Can ride any session; natural rider on CI-13. R18 honesty check applies to any latency/cost number quoted (post-CI-3 measurements only).
-**PR16:** positioning **strengthens**; dogfood **partial**.
+### CI-15 — Publish the consultation cadence: **the two-gate rule** (docs) — *content adopted per Q1 (2026-06-12)*
+**Fixes:** FX-2 (B10, amended). **Serves:** §4.1 — the cadence is now adopted methodology, not pending guidance.
+**Shape:** developer docs / llms.txt / agent-card integration section publishes the **two-gate rule**: Gate 1 — one mandatory full examination at task adoption (sets the frame; non-negotiable); Gate 2 — stake-triggered thereafter via the three-sub-question deterministic self-screen (*stake in how it lands / drawn to a conclusion before the evidence / would I reason differently unobserved*), any positive → examine at the appropriate depth; plus the **suppression signal** ("a self-screen consistently negative across sessions of genuine complexity is itself a signal requiring examination" — maps to Sage Reflect's FD-R1 null-suspicion); plus the existing R5 guard+score+iterate framing and the gate risk-class→depth mapping. **Note for sequencing:** Q1's "depth calibrated to proximity as well as stake" is publishable as principle now, but operational calibration presupposes a readable trajectory → named CI-5 dependency.
+**Risk:** **Standard** (documentation of adopted methodology). Rides CI-13's session. R18 honesty check applies to any latency/cost number quoted (post-CI-3 measurements only).
+**PR16:** positioning **strengthens** (the practice ships with its own economics lesson encoded); dogfood **yes** — this arc's own sessions can run the self-screen.
 **Rollback:** docs revert.
-**Founder verification:** founder reads the integration section; grep confirms no unadopted cadence claim.
+**Founder verification:** founder reads the integration section; the two gates, three sub-questions, and suppression signal all present verbatim-faithful to the consultation record.
+
+### CI-16 — Quick-tier minimal value classification (NEW — per Q5, adopted 2026-06-12)
+**Fixes:** the Q5 amendment (B3, amended). **Serves:** §4.1/§4.2 — quick becomes "a genuine — if compressed — examination" instead of a triage.
+**Shape:** the engine's quick depth adds one deterministic classification before returning a verdict: *is the object of the operative passion a genuine good, a genuine evil, or an indifferent (selective value noted)?* — a minimal M8 read against the value hierarchy, not the full standard-tier assessment. The gate inherits automatically (standard-risk → quick). **Build-session verification point:** confirm the quick-tier Layer-1 extraction already carries the value features the classification needs (the L1 schema is depth-independent in design; verify before wiring). If the founder ever elects *not* to ship this, the mentor's named alternative applies instead: rename quick to *screening* and credential its outputs as the lesser claim — that alternative is the bigger surface (naming across docs + credential payload) and is not this item.
+**Risk:** **Elevated** (deterministic engine change on Live routes — `/api/reason` quick + `/api/guardrail` standard-risk). PR1: prove on `/api/reason` quick first; the gate inherits second. PR15: bespoke engine change; no Anthropic primitive substitutes.
+**PR16:** positioning **strengthens** ("what distinguishes Stoic examination from generic emotional regulation" becomes true at every tier); dogfood **partial**.
+**Rollback:** flag-gated mechanism step (unset = today's 3-mechanism quick); `git revert`.
+**Founder verification:** a quick consult with a passion present returns the value classification field; the same input pre-flag shows today's shape; a standard-risk gate call carries it; engine determinism test (same input → byte-equal output) passes.
+
+### CI-17 — Narrative-existence guarantee + blocked-configuration enforcement (NEW — per Q2, adopted 2026-06-12)
+**Fixes:** the Q2 amendment (B4, amended). **Serves:** §4.7 — "a verdict without a narrative account is a classification, not an examination."
+**Shape:** rides CI-1. (1) CI-1's implementation guarantees every examination eventually has its narrative generated and retained (async always-generate; deferral flags may move generation, never suppress it); (2) the documentation states the blocked configuration in R19e-adjacent wording ("a verdict-only configuration is not a legitimate practice configuration"), aligned with the existing no-Reflect disclaimer lineage; (3) **manifest rule candidate flagged for separate founder election** (not authored by this item): an R18f-parallel — *no examination credential over verdict-only assessments* — would make the block enforceable at the accreditation write the way R18f enforces examination provenance.
+**Risk:** **Standard** as documentation + a design constraint binding CI-1 (whose Elevated class covers the code); the manifest rule, if elected, is its own governance session.
+**PR16:** positioning **strengthens** (anti-gaming: "the narrative is the fabrication defence at the examination layer"); dogfood **yes**.
+**Rollback:** rides CI-1's flag + docs revert.
+**Founder verification:** after CI-1: an examination consumed with prose deferred still produces a retained narrative server-side (query by loop id); the docs state the blocked configuration.
 
 ## Sequencing (PR1 discipline; ride-groups named)
 
 | Order | Session | Items | Risk envelope | Why this order |
 |---|---|---|---|---|
-| 1 | **M1 — consult-path levers** | CI-1, then CI-2, CI-3 riding | Elevated (Critical guard named in CI-1) | Largest latency/cost lever; everything later verifies faster and cheaper once consults are ~1–2s; Branch-2 re-run (if elected) needs these |
+| 1 | **M1 — consult-path levers** | CI-1 (+ CI-17 riding), then CI-2, CI-3 riding | Elevated (Critical guard named in CI-1) | Largest latency/cost lever; CI-17's existence guarantee binds CI-1's design; Branch-2 re-run (if elected) needs these |
 | 2 | **M2 — mint session** | CI-6 + CI-7 | Elevated + Standard | Pre-P1 funnel fixes; resolves the carried F12-vehicle open question; PR17 walkthrough retires the console workflow |
-| 3 | **M3 — accreditation session** | CI-11 + CI-12 | Elevated (+ additive schema) | Trust-surface honesty (read asymmetry + configuration honesty) serves launch under any 0h branch |
-| 4 | **M4 — gate session** | CI-8 + CI-9 + CI-10 | Standard ×2 + Elevated | Self-contained; CI-9 is diagnostic-first (PR10) |
-| 5 | **M5 — practice affordances** | CI-4 + CI-13 (+ CI-15 riding) | Elevated | Loop closure + reflect visibility; benefits from M1's fast consults for same-session verification |
-| 6 | **M6(+M7) — trajectory persistence** | CI-5 (split schema→activation if needed) | Standard schema + Elevated | The largest build; lands on inert fields + named Stage-A migration; after the funnel is honest and fast |
+| 3 | **M3 — accreditation session** | CI-11 + CI-12 (+ CI-4's write-boundary half if this order holds) | Elevated (+ additive schema; Critical-check at the R18f seam) | Trust-surface honesty (read asymmetry + configuration honesty) serves launch under any 0h branch |
+| 4 | **M4 — gate + quick-tier session** | CI-8 + CI-9 + CI-10 + **CI-16** | Standard ×2 + Elevated ×2 | Self-contained; CI-9 diagnostic-first (PR10); CI-16 proven on `/api/reason` quick first (PR1), gate inherits in-session |
+| 5 | **M5 — practice-completion session** | CI-4 (reason-route half) + CI-13 + CI-15 riding | Elevated | The mandatory loop + default-on reflect + the two-gate cadence docs — the adopted methodology becomes shipped contract; benefits from M1's fast consults for verification |
+| 6 | **M6(+M7) — trajectory persistence** | CI-5 (split schema→activation if needed) | Standard schema + Elevated | The largest build; lands on inert fields + named Stage-A migration; also unlocks Q1's proximity-calibrated depth (CI-15 note) |
 | 7 | **M8 — credential consolidation design** | CI-14 (design only) | Standard (design); build later = Critical | Needs M1–M5 learnings; build is its own Critical track |
 
 **Part-5 benchmark dependencies (for the later schema session):** the benchmark's harnessed-leg efficiency assumptions are CI-1/CI-2/CI-3 (schema supplied; prose decoupled); its loop-closure and reflect legs assume CI-4 and CI-13; credentials pre-provisioned assumes CI-7 (and is measurable outside agent-work regardless); an ambiguous-input consult exercises the AC-13/14 machinery no CI touches (designed-dormant, FX-5).
 
-## Explicitly NOT in this plan (parked — mentor-confirmation gate, founder elects if/when)
+## The former parked list — RESOLVED by mentor consultation + founder adoption (2026-06-12)
 
-1. Any standing rule on **when consultation is philosophically warranted** (L-5/L-6 codification) — dossier §6(i).
-2. **Eliminating** the audit narrative from the practice (deferral ≠ elimination) — §6(ii).
-3. **Auto-firing Reflect** at session close — §6(iii).
-4. **Mandatory re-scores** after redirection — §6(iv).
-5. Any change to **depth's examination-scope mapping** — §6(v).
+All five questions were mentor-consulted (verbatim record in this directory) and the verdicts **adopted** (`D-SAGE-PRACTICE-METHODOLOGY-AMENDMENTS-ADOPTED-2026-06-12`): (1) consultation cadence → the two-gate rule, published via **CI-15**; (2) narrative elimination → **blocked** — existence guaranteed via **CI-1 + CI-17**; (3) reflect firing → **default-on with explicit opt-out** via **CI-13**; (4) re-examination after correction → **mandatory, same depth** via **CI-4**; (5) quick-tier scope → **amended** — minimal value classification via **CI-16**. The mentor-confirmation gate remains in force for any future methodology question.
 
-Also out: anything touching the R20a perimeter, distress classifier, or zone logic (PR6/Critical, separate protocol); the Sage Assent rename track; Stripe activation; the 0h call itself.
+Still out of this plan: anything touching the R20a perimeter, distress classifier, or zone logic (PR6/Critical, separate protocol); the Sage Assent rename track; Stripe activation; the Q2-derived **manifest rule candidate** (R18f-parallel "no examination credential over verdict-only assessments" — flagged in CI-17, its own governance session if the founder elects); the 0h call itself.
 
 ---
 
