@@ -10844,3 +10844,33 @@ Expected: amendment records present in both; CI-16/CI-17 present in the plan.
 **Rules served:** R0, R5 (metering visibility at Q3 opt-out), R6, R17 (CI-1 retention constraints unchanged), R18f (Q2/Q4 parallels), R19e, R20b, 0a (Under review → Adopted), 0d-ii, 0f, PR7, PR13 (stated at the consultation entry), PR16, PR18 (close-time refresh).
 
 **Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-METHODOLOGY-MENTOR-CONSULTATION-2026-06-12`, `D-SAGE-PRACTICE-GROUNDING-FRESH-ANALYSIS-BUILD-PLAN-2026-06-12`, the verbatim consultation record, the amended dossier + build plan.
+
+## 2026-06-12 — D-MECHANISM-CORRECTION-BUILD-PLAN-APPROVED-2026-06-12
+
+**Decision:** The founder **approves the mechanism-correction build plan in full — all items CI-1…CI-17, as amended** (`operations/p1-rebuild-2026-06/mechanism-correction-build-plan.md`), passing the plan's STOP gate. Approval is **as drafted**, which carries the items' own internal gates unchanged: CI-8 at **Standard** as drafted (the named Standard-vs-Elevated tension resolves to the arc prompt's expectation; founder may reclassify upward at any time per 0d-ii); CI-9 approved as a **bounded diagnostic only** (any fix is a new item); CI-14 approved as a **design session only** (any build remains its own Critical track under AC7/PR6); **no production flag activation is approved by this entry** — every activation follows 0c-ii at its own step per the arc prompt's standing exclusion. Sequencing approved as named: **M1 (CI-1 + CI-17, with CI-2 + CI-3 riding) → M2 (CI-6 + CI-7) → M3 (CI-11 + CI-12 + CI-4 write-boundary half) → M4 (CI-8 + CI-9 + CI-10 + CI-16) → M5 (CI-4 reason-route half + CI-13 + CI-15) → M6/M7 (CI-5) → M8 (CI-14 design)**. The build commences at M1 under its own next-session prompt (`operations/handoffs/founder/2026-06-12-mechanism-correction-M1-consult-path-build-NEXT-SESSION-PROMPT.md`, written this session).
+
+**Reasoning:** Parts 1–3 + the mentor consultation + adoption are complete and committed (founder confirmed: commit pushed, **Vercel green** — content-only deploy as expected); the gate's purpose (founder item-by-item control before any build) is served by this recorded election. Per PR7, the approval's nuances (CI-8 class; CI-9 diagnostic-only; CI-14 design-only; activation-by-0c-ii-only) are recorded so blanket approval cannot be later misread as approving more than the plan drafted.
+
+**Files touched:**
+- `operations/p1-rebuild-2026-06/mechanism-correction-build-plan.md` — approval record added at the STOP section
+- `operations/handoffs/founder/2026-06-12-mechanism-correction-M1-consult-path-build-NEXT-SESSION-PROMPT.md` — NEW (the M1 build-session prompt; umbrella queue context + M1 scoped in full)
+- `operations/handoffs/founder/2026-06-12-sage-practice-grounding-close.md` — second addendum (approval + next prompt pointer)
+- `CLAUDE.md` — production-state successor-arc sentence updated (PR18; documents only)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documents only this session. The approved builds carry their own classes per item when their sessions open (Elevated default; Critical where named; schema Standard-additive). AC7 not engaged today. PR6 not engaged today.
+
+**Rollback path:** `git revert` (documents); the approval itself is reversible by a superseding founder election recorded in this log.
+
+**Verification step (founder-performable):**
+```
+grep -n "APPROVED IN FULL" operations/p1-rebuild-2026-06/mechanism-correction-build-plan.md
+ls operations/handoffs/founder/2026-06-12-mechanism-correction-M1-consult-path-build-NEXT-SESSION-PROMPT.md
+```
+Expected: the approval line present; the prompt file exists.
+
+**Open questions:** none new — carried: the 0h call (founder, independent); the Q2-derived manifest rule candidate (separate election, flagged at CI-17); transcript deletion (owed); accreditation seed-row disposition.
+
+**Rules served:** R0, 0a (decision Adopted; implementations remain at their own statuses), 0d-ii, 0f, PR1/PR2/PR10 (engaged by the build sessions this approval opens), PR7, PR17 (founder-performed steps in M1 walked live per the prompt), PR18.
+
+**Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-METHODOLOGY-AMENDMENTS-ADOPTED-2026-06-12`, `D-SAGE-PRACTICE-GROUNDING-FRESH-ANALYSIS-BUILD-PLAN-2026-06-12`, the build plan, the M1 prompt.

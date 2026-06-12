@@ -174,4 +174,6 @@ Still out of this plan: anything touching the R20a perimeter, distress classifie
 
 **STOP.** This plan is presented for item-by-item founder decision. Suggested decision vocabulary per item: **approve / amend (state the amendment) / reject / defer**. The first build session opens only on the items marked approved, in the §Sequencing order unless re-ordered at approval.
 
+> **APPROVED IN FULL — founder, 2026-06-12** (`D-MECHANISM-CORRECTION-BUILD-PLAN-APPROVED-2026-06-12`): all items **CI-1…CI-17 approved as amended**, sequencing M1–M8 as named. Approval carries the items' internal gates unchanged: CI-8 at Standard as drafted; CI-9 diagnostic-only; CI-14 design-only (build = its own Critical track); **no production flag activation approved — each activation follows 0c-ii at its own step**. The build commences at M1: `operations/handoffs/founder/2026-06-12-mechanism-correction-M1-consult-path-build-NEXT-SESSION-PROMPT.md`.
+
 *Plan ends. Cross-references: grounding dossier (boundary table); fresh-test-analysis (FX register); verdict memo §8; forensic §5–§7; K1 ADR; SR-14/SR-12 (sage-reflect design); `D-SAGE-ASSENT-SAGEREASONING-DEPENDENCY-RULE-ADOPTED-2026-05-23` (R18f/R19e lineage); manifest R5/R17/R18/R19; PR1/PR2/PR6/PR10/PR15/PR16/PR17/PR18.*
