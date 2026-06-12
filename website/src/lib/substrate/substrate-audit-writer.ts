@@ -63,6 +63,15 @@ export interface SubstrateRunFacts {
   gateSeverity: SeverityBand | null
   hasLayer3Response: boolean
   outputPresent: boolean
+  /**
+   * M1 CI-1 (2026-06-12): where the Layer-3 narrative was generated for this
+   * run — 'inline' (hot path, today's shape) or 'deferred' (assessment-first;
+   * generation completes post-response, retained in substrate_audit_narratives).
+   * A structural enum, never free text (maskContext contract). OMITTED (not
+   * null-emitted) when SUBSTRATE_L3_DEFER_ENABLED is unset so production audit
+   * rows are unchanged until the founder's own activation step.
+   */
+  narrativeStatus?: 'inline' | 'deferred'
 }
 
 export interface RecordAuditEventParams {
@@ -158,6 +167,11 @@ export function maskContext(
     layer3_fallback_used: decision === 'fallback',
     has_substrate_layer3_response: f.hasLayer3Response,
     engine_attribution: 'translation-sandwich',
+    // M1 CI-1: structural enum; key absent entirely when the flag is unset
+    // (production rows unchanged until activation).
+    ...(f.narrativeStatus !== undefined
+      ? { narrative_status: f.narrativeStatus }
+      : {}),
   }
 }
 

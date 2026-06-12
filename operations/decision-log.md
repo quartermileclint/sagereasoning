@@ -10874,3 +10874,39 @@ Expected: the approval line present; the prompt file exists.
 **Rules served:** R0, 0a (decision Adopted; implementations remain at their own statuses), 0d-ii, 0f, PR1/PR2/PR10 (engaged by the build sessions this approval opens), PR7, PR17 (founder-performed steps in M1 walked live per the prompt), PR18.
 
 **Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-METHODOLOGY-AMENDMENTS-ADOPTED-2026-06-12`, `D-SAGE-PRACTICE-GROUNDING-FRESH-ANALYSIS-BUILD-PLAN-2026-06-12`, the build plan, the M1 prompt.
+
+## 2026-06-13 — D-MECHANISM-CORRECTION-M1-CONSULT-PATH-BUILT-VERIFIED-2026-06-13
+
+**Decision:** M1 (consult-path levers) is built and TEST-Verified under the approved plan (`D-MECHANISM-CORRECTION-BUILD-PLAN-APPROVED-2026-06-12`) and the founder's five in-session design elections (approved in full): flags `SUBSTRATE_L3_DEFER_ENABLED` + `SUBSTRATE_L1_SCHEMA_KEY_PATH_ENABLED` (both UNSET in production — byte-identical, test-asserted); `response_format: 'full' | 'assessment_first'`; generation guarantee = awaited pending row before the response + `waitUntil` completion + `/api/cron/narrative-sweep` backstop (new dependency `@vercel/functions@^3.7.1`; Option-D billing ledger never mutated — deferred L3 cost lands on the narrative row by correlation id); retention store `substrate_audit_narratives` (90-day retention, admin hard-deletion path, R17b app-level encryption ON for assessment + narrative per SR-12 precedent, every examination retained when flag on); structural distress guard (`shouldDeferProse` — a truthy mild `distress_signal` forces today's inline path; no distress branch, A7 gate, A5 wrapper, or classifier file modified).
+
+**Reasoning:** FX-13/FX-3/FX-4 corrections (B4/B1/B3) with the Q2 narrative-existence guarantee (CI-17) binding the design. TEST measurements: deferred consults 3.1–4.3s vs 29.5–33.1s raw+full (87% cut at standard); 11/11 examinations retained across inline/deferred/sweep modes; distress probe → acute redirect in 1.2s with deferral structurally ignored; malformed schema → canonical A2 400.
+
+**Files touched:**
+- `supabase/migrations/20260612_m1_substrate_audit_narratives.sql` — NEW retention table (applied to TEST by the founder, walked; production migration deferred to activation)
+- `website/src/lib/substrate/narrative-retention.ts` — NEW CI-1 core (writers, completion, sweep, purge, deletion)
+- `website/src/lib/translation-sandwich/parallel-run.ts` — `deferProse` + `shouldDeferProse`/`isL3DeferEnabled` + deferred compose path (additive)
+- `website/src/app/api/reason/route.ts` — response_format, retention writes, waitUntil hand-off, CI-2 key-path `layer1_schema`, `meta.layer1_source`/`meta.narrative_status`
+- `website/src/app/api/cron/narrative-sweep/route.ts` — NEW backstop (CRON_SECRET-gated; NO vercel.json entry — rides activation)
+- `website/src/lib/substrate/substrate-audit-writer.ts` — optional `narrativeStatus` audit fact (key absent when flag unset)
+- `website/src/lib/substrate/__tests__/narrative-retention.test.ts` (19) + `website/src/lib/translation-sandwich/__tests__/prose-deferral.test.ts` (26) — NEW
+- `website/package.json` / `package-lock.json` — `@vercel/functions`
+- `operations/p1-rebuild-2026-06/m1-docs-staged-for-activation.md` — NEW staged docs (Q2 sentence verbatim; CI-2 note; R17 disclosure; CI-3 TEST-labelled envelopes) — nothing public changed this session (R18)
+
+**Risk classification:** Elevated under 0d-ii (existing user-facing route + new dependency); schema Standard (idempotent additive, TEST only). Critical guards held: no R20a/A5/auth file modified (verified by diff + AC4-style invocation tests). AC7 not engaged. PR6 boundary preserved.
+
+**Rollback path:** flags unset = today's behaviour (asserted by prose-deferral BI tests); `git revert` for code; `DROP TABLE substrate_audit_narratives` (TEST) per the migration's rollback block.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsc --noEmit
+npx tsx src/lib/substrate/__tests__/narrative-retention.test.ts
+npx tsx src/lib/translation-sandwich/__tests__/prose-deferral.test.ts
+```
+Expected: tsc silent; `19 passed, 0 failed`; `26 passed, 0 failed`.
+
+**Open questions:** the CI-17 manifest-rule candidate (R18f-parallel; separate governance election); activation checklist when founder elects (0c-ii): production migration + both flags + vercel.json cron entry (hourly suggested) + Fluid-compute dashboard check + staged docs application + privacy-page sentence; `layer2-signer.test.ts` + `layer2-canonical-json.test.ts` are Jest-style and do not run under plain tsx (pre-existing; test-ergonomics candidate); retired-key wire shape on /api/reason is 401 not 403 (combined auth branch returns the user-auth error; pre-existing, source-verified).
+
+**Rules served:** PR1 (single endpoint /api/reason), PR2 (same-session wire-verification, TEST), PR10 PEV, PR15 (waitUntil = platform primitive over bespoke queue; bespoke retention justified as product-internal), PR17 (migration + env steps founder-performed, walked), PR18 (close-time production-state rewrite), R17b/c/h/i, R18e, R18f (signed assessment retained), KG1 (awaited writes; no self-calls in sweep), KG7 (plain-object JSONB meta), AC8, B4/B1/B3 (dossier), CI-1/CI-17/CI-2/CI-3.
+
+**Status:** Adopted. Cross-references: `D-MECHANISM-CORRECTION-BUILD-PLAN-APPROVED-2026-06-12`, the M1 prompt, the M1 close (`operations/handoffs/founder/2026-06-13-mechanism-correction-M1-close.md`), `2026-06-12-mentor-consultation-methodology-verdicts.md` (Q2).

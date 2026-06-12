@@ -238,6 +238,29 @@ export interface SandwichInput {
    */
   preExtractedLayer1Schema?: Layer1Schema
   /**
+   * Added 2026-06-12 (M1 CI-1, D-MECHANISM-CORRECTION-BUILD-PLAN-APPROVED-2026-06-12):
+   * request to defer Layer-3 prose generation out of the hot path
+   * (response_format: 'assessment_first' on /api/reason, gated by
+   * SUBSTRATE_L3_DEFER_ENABLED — the route only sets this when the flag is on).
+   *
+   * A REQUEST, not a guarantee: the orchestrator applies the structural
+   * distress guard (M1 election 5) — when the A7 gate attached a mild-severity
+   * distress_signal to the Layer2Assessment, prose generation stays
+   * synchronous and inline exactly as today, and `prose_deferred` comes back
+   * false. Moderate/acute distress never reaches Layer 3 at all (route-level
+   * perimeter + the A7 REDIRECT short-circuit above).
+   *
+   * When deferral is active: generateProse and the A5 injection wrapper are
+   * NOT called; the composed output carries `prose: null`; the bare
+   * Layer2Assessment is exposed on `result.layer2_assessment` so the route can
+   * generate-and-retain after the response (CI-17 existence guarantee:
+   * deferral moves generation, never suppresses it).
+   *
+   * When undefined (the default — every existing caller), behaviour is
+   * byte-identical to the pre-M1 state.
+   */
+  deferProse?: boolean
+  /**
    * Added 2026-05-13 (D-A7-R20A-GATE-SCAFFOLDED-VERIFIED-2026-05-13):
    * SafetyGate token from the route-level R20a perimeter check
    * (constraints.ts §enforceDistressCheck).
@@ -329,6 +352,18 @@ interface SandwichRunResult {
   // generation. REDIRECT short-circuits Layer 2 + Layer 3 and sets
   // result.error='r20a_gate_redirect'.
   substrate_r20a_gate_output: R20aGateOutput | null
+  // Added 2026-06-12 (M1 CI-1) — true when Layer-3 prose generation was
+  // deferred out of the hot path (params.deferProse honoured AND the
+  // structural distress guard passed). The composed output carries
+  // `prose: null`; the route generates-and-retains after the response.
+  // Always false when params.deferProse is undefined (every pre-M1 caller).
+  prose_deferred: boolean
+  // Added 2026-06-12 (M1 CI-1) — the bare (unsigned) Layer2Assessment on the
+  // happy path, for post-response narrative generation + retention
+  // (generateProse takes the bare assessment; output.assessment may be the
+  // signed wrapper). Null on Tier-1 / redirect / throw paths. Internal field —
+  // NOT part of the wire output.
+  layer2_assessment: Layer2Assessment | null
 }
 
 // ============================================================================
@@ -345,6 +380,47 @@ export function sonnetCostMicrocents(inputTokens: number, outputTokens: number):
   const inputMicrocents = inputTokens * SONNET_INPUT_USD_PER_MILLION_TOKENS
   const outputMicrocents = outputTokens * SONNET_OUTPUT_USD_PER_MILLION_TOKENS
   return inputMicrocents + outputMicrocents
+}
+
+// ============================================================================
+// M1 CI-1 (2026-06-12) — prose-deferral flag + the structural distress guard.
+// Defined HERE (not in narrative-retention.ts, which re-exports them) because
+// the orchestrator below is the load-bearing call site and narrative-retention
+// imports from this module (cycle avoidance). Per the founder's M1 elections
+// (D-MECHANISM-CORRECTION-BUILD-PLAN-APPROVED-2026-06-12).
+// ============================================================================
+
+/**
+ * Election 1: SUBSTRATE_L3_DEFER_ENABLED, read at CALL TIME (the A5/A7
+ * pattern — a flag change needs no code change). UNSET (production default) →
+ * deferral structurally unavailable everywhere; behaviour byte-identical.
+ */
+export function isL3DeferEnabled(): boolean {
+  return process.env.SUBSTRATE_L3_DEFER_ENABLED === 'true'
+}
+
+/**
+ * Election 5: may Layer-3 prose generation be deferred out of the hot path?
+ *
+ * The distress guard is STRUCTURAL: a truthy `distress_signal` on the
+ * Layer2Assessment (the A7 PASS + mild-severity attachment) makes deferral
+ * unavailable regardless of what the caller requested — the prose (and, when
+ * SUBSTRATE_LAYER3_ENABLED, its R20A_DISTRESS_PASSTHROUGH injection) stays
+ * synchronous and inline exactly as today. Moderate/acute distress never
+ * reaches Layer 3 at all (route-level perimeter + the A7 REDIRECT
+ * short-circuit) — verified at the M1 session open. This function does not
+ * touch the classifier, the A7 gate, or the A5 wrapper; it reads an
+ * already-attached field. PR6 posture preserved.
+ */
+export function shouldDeferProse(args: {
+  deferRequested: boolean
+  flagEnabled: boolean
+  distressSignal: boolean | undefined
+}): boolean {
+  if (!args.flagEnabled) return false
+  if (!args.deferRequested) return false
+  if (args.distressSignal === true) return false
+  return true
 }
 
 // ============================================================================
@@ -508,6 +584,8 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     tier1_trigger: null,
     substrate_layer3_response: null,
     substrate_r20a_gate_output: null,
+    prose_deferred: false,
+    layer2_assessment: null,
   }
 
   // ---- Layer 1 ----
@@ -715,6 +793,66 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
   // attachDistressSignalToAssessment is called here.
   if (a7GateOutput !== null) {
     layer2Assessment = attachDistressSignalToAssessment(layer2Assessment, a7GateOutput)
+  }
+
+  // ---- M1 CI-1 (2026-06-12): prose-deferral decision ----
+  // The bare assessment is exposed for post-response narrative generation +
+  // retention regardless of deferral (the route's inline-retention path needs
+  // it too — election 4d: every examination retained when the flag is on).
+  result.layer2_assessment = layer2Assessment
+
+  // Election 5 structural distress guard inside shouldDeferProse: a truthy
+  // distress_signal (A7 PASS+mild attachment, line above) forces the inline
+  // synchronous path below — generateProse + the A5 injection wrapper run
+  // exactly as today. isL3DeferEnabled() is defence-in-depth: even a future
+  // caller passing deferProse without the flag cannot defer.
+  const deferralActive = shouldDeferProse({
+    deferRequested: params.deferProse === true,
+    flagEnabled: isL3DeferEnabled(),
+    distressSignal: (layer2Assessment as { distress_signal?: boolean }).distress_signal,
+  })
+
+  if (deferralActive) {
+    result.prose_deferred = true
+
+    // Same A3 signing logic + fail-closed posture as the inline path below
+    // (deliberately duplicated rather than restructuring the inline flow —
+    // the assessment returned immediately must be signed exactly as today).
+    let deferredAssessmentField: Layer2Assessment | SignedLayer2Assessment = layer2Assessment
+    if (SUBSTRATE_LAYER2_SIGNING_ENABLED) {
+      try {
+        deferredAssessmentField = signLayer2Assessment(layer2Assessment)
+      } catch (err) {
+        result.error = 'signing_throw'
+        console.warn(
+          '[parallel-run] Layer 2 signing failed on deferred path (fail-closed; route returns 503):',
+          err instanceof SubstrateSigningKeyMissingError
+            ? err.message
+            : err instanceof Error
+              ? err.message
+              : String(err)
+        )
+        return result
+      }
+    }
+
+    // CI-17: prose: null here is NOT a verdict-only configuration — the route
+    // writes the pending retention row before responding and generation
+    // completes via waitUntil or the narrative-sweep backstop. Deferral moves
+    // generation; it never suppresses it.
+    result.output = {
+      version: 'translation-sandwich-v1',
+      extraction: layer1Schema,
+      assessment: deferredAssessmentField,
+      prose: null,
+      meta: {
+        engine_attribution: 'translation-sandwich',
+        layer1_latency_ms: result.layer1_latency_ms,
+        layer2_latency_ms: result.layer2_latency_ms,
+        layer3_latency_ms: null,
+      },
+    }
+    return result
   }
 
   // ---- Layer 3 (with deterministic fallback) ----
@@ -987,6 +1125,8 @@ export async function runParallelSandwich(params: ParallelRunInput): Promise<voi
         tier1_trigger: null,
         substrate_layer3_response: null,
         substrate_r20a_gate_output: null,
+        prose_deferred: false,
+        layer2_assessment: null,
       }
     } else {
       // 2. Fire the sandwich. Runs concurrently with bundled-depth (which the

@@ -84,6 +84,32 @@ import {
   type SeverityBand,
 } from '@/lib/substrate/substrate-audit-writer'
 
+// M1 CI-1 + CI-17 (2026-06-12, D-MECHANISM-CORRECTION-BUILD-PLAN-APPROVED-2026-06-12):
+// Layer-3 prose deferral (response_format: 'assessment_first') + server-side
+// narrative retention with the existence guarantee. Gated by
+// SUBSTRATE_L3_DEFER_ENABLED (UNSET in production → response_format is ignored,
+// no retention writes, byte-identical behaviour). waitUntil (@vercel/functions —
+// the documented post-response mechanism for Next 14 on Vercel's Node runtime)
+// carries deferred generation; it is best-effort (cancelled on timeout, lost on
+// crash), so the /api/cron/narrative-sweep route is the CI-17 guarantee
+// backstop. The pending retention row is written AWAITED before the response
+// (KG1 rule 2); if that write fails, deferral is withdrawn and generation runs
+// inline — the guarantee never rides on a write that didn't land.
+// Election 5 (Critical guard): the structural distress guard lives in the
+// orchestrator (shouldDeferProse — a truthy mild-severity distress_signal
+// forces today's inline synchronous path). The R20a perimeter at the gate
+// below, the A7 gate, the A5 wrapper, and the classifier are all UNTOUCHED.
+import { waitUntil } from '@vercel/functions'
+import {
+  isL3DeferEnabled,
+  insertPendingNarrative,
+  insertRetainedNarrative,
+  completeNarrative,
+  generateNarrativeForAssessment,
+  type RetainableAssessment,
+} from '@/lib/substrate/narrative-retention'
+import type { Layer3Prose } from '@/lib/translation-sandwich/layer3-prose'
+
 // =============================================================================
 // sage-reason — The Universal Reasoning Layer
 //
@@ -494,6 +520,57 @@ function validatePluginRequest(
 // END A2 validation surface
 // =============================================================================
 
+// =============================================================================
+// M1 CI-2 (2026-06-12) — layer1_schema supply on the API-key auth path
+// =============================================================================
+//
+// Per the open-Layer-1 posture (substrate ADR: "the substrate accepts any
+// Layer1Schema that validates against the documented contract"), the A2
+// validation contract is extended to the API-key path: an `sr_live_` caller MAY
+// supply a pre-computed `layer1_schema` alongside `input` and skip server-side
+// Layer-1 extraction (~13–34s + the L1 Sonnet cost — the FX-3 regression class).
+// Differences from the plugin path: the schema is OPTIONAL here (raw text
+// continues to work exactly as today), and acceptance is gated by
+// SUBSTRATE_L1_SCHEMA_KEY_PATH_ENABLED (UNSET in production → the field is
+// ignored and the path is byte-identical). The original `input` text remains
+// REQUIRED on every path — R20a runs on the text per AC5 (unchanged).
+//
+// Validation delegates to the same canonical validateLayer1Schema with the
+// same 400 semantics as the plugin path (validatePluginRequest above is left
+// untouched — zero regression risk on the plugin contract). AC7 NOT engaged
+// (input validation, not auth). PR1: /api/reason only.
+
+function validateSuppliedLayer1Schema(
+  value: unknown
+): { valid: true; schema: Layer1Schema } | { valid: false; errorBody: Record<string, unknown> } {
+  try {
+    return { valid: true, schema: validateLayer1Schema(value) }
+  } catch (err) {
+    if (err instanceof Layer1ValidationError) {
+      const errorBody: Record<string, unknown> = {
+        error: 'layer1_schema validation failed',
+        category: err.category,
+        detail: err.message,
+      }
+      if (err.field !== undefined) {
+        errorBody.field = err.field
+      }
+      return { valid: false, errorBody }
+    }
+    return {
+      valid: false,
+      errorBody: {
+        error: 'layer1_schema validation failed',
+        detail: err instanceof Error ? err.message : 'Unknown validation error',
+      },
+    }
+  }
+}
+
+// =============================================================================
+// END M1 CI-2 validation helper
+// =============================================================================
+
 export async function POST(request: NextRequest) {
   // Rate limiting
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
@@ -705,6 +782,37 @@ export async function POST(request: NextRequest) {
       preExtractedLayer1Schema = validation.schema
     }
 
+    // M1 CI-2 (2026-06-12): OPTIONAL layer1_schema on the API-key path, gated
+    // by SUBSTRATE_L1_SCHEMA_KEY_PATH_ENABLED. Flag unset (production) → the
+    // field is ignored entirely and this block is byte-identical to today.
+    // Flag on + field present → same canonical validation + 400 semantics as
+    // the plugin path; on success, server-side Layer-1 extraction is skipped
+    // (meta.layer1_source: 'supplied'). Raw-text requests are unchanged.
+    const keyPathSchemaEnabled =
+      process.env.SUBSTRATE_L1_SCHEMA_KEY_PATH_ENABLED === 'true'
+    if (
+      keyPathSchemaEnabled &&
+      isApiKeyAuth &&
+      preExtractedLayer1Schema === undefined &&
+      typeof body === 'object' &&
+      body !== null &&
+      (body as Record<string, unknown>).layer1_schema !== undefined &&
+      (body as Record<string, unknown>).layer1_schema !== null
+    ) {
+      const supplied = validateSuppliedLayer1Schema(
+        (body as Record<string, unknown>).layer1_schema
+      )
+      if (!supplied.valid) {
+        return await respond({
+          body: supplied.errorBody,
+          status: 400,
+          headers: corsHeaders(),
+          isBillable: false, // Pre-substrate validation error — no LLM cost incurred.
+        })
+      }
+      preExtractedLayer1Schema = supplied.schema
+    }
+
     // M1-CP4e (2026-05-06): continuation_token is optional, present on
     // second-turn re-submission after a Tier 1 force-clarification (per
     // ADR-008 §1 + §4). When present, it is validated AFTER the R20a
@@ -716,6 +824,11 @@ export async function POST(request: NextRequest) {
       domain_context,
       urgency_context,
       continuation_token,
+      // M1 CI-1 (2026-06-12): 'full' (default — today's synchronous shape) |
+      // 'assessment_first' (deferral request). Read ONLY when
+      // SUBSTRATE_L3_DEFER_ENABLED is on; ignored entirely otherwise (today's
+      // behaviour for unknown body fields — byte-identity with the flag unset).
+      response_format,
     } = body
 
     // Validate required input
@@ -848,6 +961,26 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // M1 CI-1 (2026-06-12): response_format validation — flag-gated. With the
+    // flag unset the field is never read (byte-identity); with the flag on, an
+    // unknown value 400s honestly rather than silently serving 'full'.
+    const l3DeferEnabled = isL3DeferEnabled()
+    if (
+      l3DeferEnabled &&
+      response_format !== undefined &&
+      response_format !== null &&
+      response_format !== 'full' &&
+      response_format !== 'assessment_first'
+    ) {
+      return await respond({
+        body: { error: "Invalid response_format. Must be one of: full, assessment_first" },
+        status: 400,
+        headers: {},
+        isBillable: false,  // Pre-substrate validation error — no LLM cost incurred.
+      })
+    }
+    const deferRequested = l3DeferEnabled && response_format === 'assessment_first'
+
     // Per-request cache for D6 retrievals (KG1 rule 4 — never module-level).
     const ragCache = new Map<string, RetrieveResult>()
 
@@ -913,6 +1046,11 @@ export async function POST(request: NextRequest) {
       // would omit this and A7 would run a fresh classifier call inheriting
       // the AC2 ~500ms budget.
       safetyGate: gate,
+      // M1 CI-1 (2026-06-12): a REQUEST to defer prose, not a guarantee — the
+      // orchestrator applies the structural distress guard (shouldDeferProse)
+      // and reports the actual outcome on sandwichResult.prose_deferred.
+      // false here (flag unset / 'full') leaves the legacy path untouched.
+      deferProse: deferRequested,
     }))
 
     // Option D metering — populate loopAccumulator with the per-layer Anthropic
@@ -937,6 +1075,112 @@ export async function POST(request: NextRequest) {
           'claude-sonnet-4-6',
           sandwichResult.layer3_cost_usd_microcents / 10000
         )
+      }
+    }
+
+    // ========================================================================
+    // M1 CI-1 + CI-17 (2026-06-12): narrative retention + deferral hand-off.
+    // Election 4d: EVERY examination is retained when the flag is on (inline
+    // and deferred). Runs before the A12 audit write so narrative_status lands
+    // in the audit row. Entirely skipped when SUBSTRATE_L3_DEFER_ENABLED is
+    // unset (production) — byte-identical behaviour.
+    // ========================================================================
+    let narrativeStatus: 'inline' | 'deferred' | undefined
+    if (
+      l3DeferEnabled &&
+      sandwichResult.error === null &&
+      sandwichResult.tier1_trigger === null &&
+      sandwichResult.output !== null &&
+      sandwichResult.layer2_assessment !== null
+    ) {
+      const bareAssessment = sandwichResult.layer2_assessment
+      const composedOutput = sandwichResult.output as Record<string, unknown>
+      // The retained artifact is whatever the wire carries: the signed wrapper
+      // when signing is enabled (the R18f audit-pairing form), bare otherwise.
+      const retainableAssessment = composedOutput.assessment as RetainableAssessment
+      const narrativeAgentId = loopAccumulator?.agentId ?? null
+
+      if (sandwichResult.prose_deferred) {
+        // Deferred path: the pending row is written AWAITED before the
+        // response (KG1 rule 2). Generation then completes via waitUntil;
+        // the narrative-sweep cron is the guarantee backstop.
+        const pending = await insertPendingNarrative({
+          correlationId,
+          agentId: narrativeAgentId,
+          assessment: retainableAssessment,
+        })
+        if (pending.ok) {
+          narrativeStatus = 'deferred'
+          // Election 3 metering posture: the deferred L3 cost lands on the
+          // narrative row against this same correlation/loop id — the
+          // Option-D billing ledger (written once at respond()) is never
+          // mutated. The loop's full cost is reconstructable by join.
+          waitUntil(
+            completeNarrative({
+              correlationId,
+              assessment: bareAssessment,
+              mode: 'deferred',
+            })
+          )
+        } else {
+          // CI-17 existence guarantee: the pending row did not land, so
+          // deferral is withdrawn — generate inline exactly as today.
+          const outcome = await generateNarrativeForAssessment(bareAssessment)
+          if (outcome !== null) {
+            composedOutput.prose = outcome.prose
+            const composedMeta =
+              (composedOutput.meta as Record<string, unknown>) ?? {}
+            composedMeta.layer3_latency_ms = outcome.latencyMs
+            composedOutput.meta = composedMeta
+            sandwichResult.prose_deferred = false
+            narrativeStatus = 'inline'
+            // Billing parity: this L3 call ran BEFORE the response, so its
+            // cost joins the loop accumulator exactly like the orchestrator's
+            // inline path.
+            if (
+              loopAccumulator &&
+              outcome.costMicrocents !== null &&
+              outcome.costMicrocents > 0
+            ) {
+              loopAccumulator.addPrecomputedCall(
+                'claude-sonnet-4-6',
+                outcome.costMicrocents / 10000
+              )
+            }
+            await insertRetainedNarrative({
+              correlationId,
+              agentId: narrativeAgentId,
+              assessment: retainableAssessment,
+              prose: outcome.prose,
+              proseSource: outcome.source,
+              layer3CostMicrocents: outcome.costMicrocents,
+              layer3LatencyMs: outcome.latencyMs,
+            })
+          } else {
+            // Both generation paths threw AND the pending row failed —
+            // surface the same minimal fallback the orchestrator's inline
+            // path would (ADR-004 §9.3 semantics preserved).
+            sandwichResult.error = 'layer3_throw'
+          }
+        }
+      } else {
+        // Inline path ('full' under the flag, or the distress guard forced
+        // inline): the prose was generated in the orchestrator; retain it
+        // one-shot. A failure here never fails the response — the narrative
+        // exists client-side; the retention gap stays visible in logs + A12.
+        const inlineProse = composedOutput.prose as Layer3Prose | null
+        if (inlineProse !== null) {
+          narrativeStatus = 'inline'
+          await insertRetainedNarrative({
+            correlationId,
+            agentId: narrativeAgentId,
+            assessment: retainableAssessment,
+            prose: inlineProse,
+            proseSource: inlineProse.source,
+            layer3CostMicrocents: sandwichResult.layer3_cost_usd_microcents,
+            layer3LatencyMs: sandwichResult.layer3_latency_ms,
+          })
+        }
       }
     }
 
@@ -968,6 +1212,9 @@ export async function POST(request: NextRequest) {
             ?.severity as SeverityBand | undefined) ?? null,
         hasLayer3Response: sandwichResult.substrate_layer3_response !== null,
         outputPresent: sandwichResult.output !== null,
+        // M1 CI-1: structural enum; key omitted entirely when the flag is
+        // unset, so production audit rows are unchanged until activation.
+        ...(narrativeStatus !== undefined ? { narrativeStatus } : {}),
       },
     })
 
@@ -1105,6 +1352,31 @@ export async function POST(request: NextRequest) {
     if (previousTrigger !== null) {
       const meta = (output.meta as Record<string, unknown>) ?? {}
       meta.previous_trigger = previousTrigger
+      output.meta = meta
+    }
+    // M1 CI-1 (2026-06-12): deferred-response affordances. Absent entirely
+    // when SUBSTRATE_L3_DEFER_ENABLED is unset (byte-identity).
+    if (l3DeferEnabled && narrativeStatus !== undefined) {
+      const meta = (output.meta as Record<string, unknown>) ?? {}
+      meta.narrative_status = narrativeStatus
+      output.meta = meta
+      if (sandwichResult.prose_deferred) {
+        // The retrieval pointer: the narrative is being generated and retained
+        // server-side against this id (CI-17 — it WILL exist; waitUntil now,
+        // the narrative-sweep backstop otherwise). The retrieval surface in M1
+        // is the audit query; a public GET is a later session (R17a auth).
+        output.narrative = {
+          status: 'deferred',
+          correlation_id: correlationId,
+        }
+      }
+    }
+    // M1 CI-2 (2026-06-12): Layer-1 source honesty. Absent entirely when
+    // SUBSTRATE_L1_SCHEMA_KEY_PATH_ENABLED is unset (byte-identity).
+    if (keyPathSchemaEnabled) {
+      const meta = (output.meta as Record<string, unknown>) ?? {}
+      meta.layer1_source =
+        preExtractedLayer1Schema !== undefined ? 'supplied' : 'server'
       output.meta = meta
     }
     return await respond({
