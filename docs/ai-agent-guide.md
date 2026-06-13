@@ -168,7 +168,7 @@ When reasoning without calling the API, apply this framework directly:
 
 ## Rate Limits
 
-Free tier keys: 667 calls/month, 50 calls/day. Usage headers are returned on every response:
+Free tier keys: 30 calls/month, 1 call/day (evaluation tier — enough to assess, not to build on). Usage headers are returned on every response:
 - `X-RateLimit-Monthly-Remaining`
 - `X-RateLimit-Daily-Remaining`
 - `X-RateLimit-Monthly-Used`

@@ -366,7 +366,7 @@ The three public endpoints that call the Anthropic API are now gated behind API 
 
 **Key format:** `sr_live_<32 hex chars>` — passed as `Authorization: Bearer sr_live_...`
 
-**Limits (free tier):** 667 calls/month (enforcement cap with 50% contingency = stays within 1,000 actual calls), 50 calls/day burst cap.
+**Limits (free tier):** 30 calls/month, 1 call/day (the adopted evaluation-tier defaults — see `website/src/lib/api-key-defaults.ts`; the earlier 667/month figure was a pre-2026-03 model, retired).
 
 **Files built:**
 

@@ -33,15 +33,17 @@ Rebuild the P1 business-plan-review inputs (stale pre-pivot, per review rec 3.2)
 
 Both mint surfaces are founder-admin gated (`requireAdmin` / `ADMIN_USER_ID`; Bearer **JWT** — a browser page-visit 401s; use the console-fetch pattern from the A14 known-issues note: sign in at `www.sagereasoning.com`, open DevTools on the site, fetch with `Authorization: Bearer <supabase access token>`).
 
+> **[PF-1 correction, 2026-06-13 M2 session]** The two mint bodies below originally omitted their required `purpose` fields and 400'd live (PF-1, incorporation log); they are corrected in place so any future re-run copies working bodies. Pre-amendment text in git history. The CI-7 CLI (`website/scripts/mint-credential.ts`) supersedes hand-composed bodies entirely.
+
 **1a. `sr_inst_` (consultation credential) — POST `/api/admin/plugin-install-credentials`**, JSON body:
 ```json
-{ "identity_type": "agent", "install_id": "p1-comparison-leg-b", "install_scope": "assessment-only", "label": "P1 comparison leg B" }
+{ "purpose": "plugin_install", "identity_type": "agent", "install_id": "p1-comparison-leg-b", "install_scope": "assessment-only", "label": "P1 comparison leg B" }
 ```
 The raw `sr_inst_` token is returned ONCE — the founder pastes it into the session for the run (it is revoked at close; do not commit it anywhere). A 409 means an active credential already exists for that `install_id` — pick a fresh `install_id`.
 
 **1b. `sr_assent_` (accreditation write credential) — POST `/api/admin/accreditation-credentials`**, JSON body:
 ```json
-{ "agent_id": "p1-comparison-leg-b-agent", "label": "P1 comparison leg B assent" }
+{ "purpose": "sage_assent_write", "agent_id": "p1-comparison-leg-b-agent", "label": "P1 comparison leg B assent" }
 ```
 Same shown-once handling.
 
@@ -61,7 +63,7 @@ Write the run's accreditation record via the Sage Assent write path using the `s
 
 ### Step 5 — Revoke, decision log, close, queue the verdict memo
 
-Founder revokes both credentials (DELETE on each mint route, walked live; confirm a post-revocation call 401s). Lean decision-log entry + lean close. Queue the **verdict-memo session** prompt: founder reads both packs blind-ish, rates findings quality, and the memo states the result against the frozen §6 boxes **exactly as ticked** (2 / 50% / $5) — either outcome stands.
+Founder revokes both credentials (walked live; confirm a post-revocation call 401s). *[PF-1 correction, 2026-06-13 M2 session: "DELETE on each mint route" was wrong for one of three surfaces — `sr_inst_`/`sr_assent_` revoke via DELETE, but `sr_live_` keys revoke via PATCH `is_active: false` (no DELETE exists on that surface). The run resolved this live; the CI-7 CLI now encodes the correct per-surface verbs.]* Lean decision-log entry + lean close. Queue the **verdict-memo session** prompt: founder reads both packs blind-ish, rates findings quality, and the memo states the result against the frozen §6 boxes **exactly as ticked** (2 / 50% / $5) — either outcome stands.
 
 ## What is NOT in this session
 

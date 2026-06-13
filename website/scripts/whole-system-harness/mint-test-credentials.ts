@@ -64,10 +64,13 @@ values ('${ownerUuid}', 'harness@test.local')
 on conflict (id) do nothing;
 
 -- 2. API key for /api/reason (purpose defaults to 'ecosystem').
+--    Limits are deliberately generous TEST-only values so harness runs never
+--    trip the caps — NOT the adopted 30/1/1 mint defaults (api-key-defaults.ts),
+--    and deliberately distinct from the retired FX-12 drift triple.
 insert into public.api_keys
   (key_hash, key_prefix, label, tier, monthly_limit, daily_limit, max_chain_iterations, is_active)
 values
-  ('${apiKeyHash}', '${apiKeyPrefix}', 'wsh-l7-apikey', 'free', 667, 50, 20, true);
+  ('${apiKeyHash}', '${apiKeyPrefix}', 'wsh-l7-apikey', 'free', 10000, 1000, 3, true);
 
 -- 3. sr_assent_ write token (purpose 'sage_assent_write', bound to agent_id + owner).
 insert into public.api_keys

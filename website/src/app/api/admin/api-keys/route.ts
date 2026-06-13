@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimit, RATE_LIMITS, getAuthenticatedUser, corsHeaders } from '@/lib/security'
+import { API_KEY_FREE_TIER_DEFAULTS } from '@/lib/api-key-defaults'
 import { randomBytes, createHash } from 'node:crypto'
 
 // Admin user ID — only this user can manage API keys
@@ -83,9 +84,12 @@ export async function GET(request: NextRequest) {
 //   owner_email   (optional) Contact email for quota warnings
 //   agent_id      (optional) Agent identifier (self-reported by the integrator)
 //   tier          (optional, default "free") "free" | "paid"
-//   monthly_limit (optional, default 667) Override the monthly call cap
-//   daily_limit   (optional, default 50)  Override the daily burst cap
-//   max_chain_iterations (optional, default 20) Override iteration cap
+//   monthly_limit (optional, default 30) Override the monthly call cap
+//   daily_limit   (optional, default 1)  Override the daily burst cap
+//   max_chain_iterations (optional, default 1) Override iteration cap
+//
+//   Limit defaults come from API_KEY_FREE_TIER_DEFAULTS (adopted 30/1/1,
+//   matched to api-keys-schema.sql — CI-6 mint-defaults drift fix, FX-12).
 //   notes         (optional) Internal notes (e.g. "Granted for beta testing")
 //
 // Returns:
@@ -109,9 +113,9 @@ export async function POST(request: NextRequest) {
       owner_email,
       agent_id,
       tier = 'free',
-      monthly_limit = 667,
-      daily_limit = 50,
-      max_chain_iterations = 20,
+      monthly_limit = API_KEY_FREE_TIER_DEFAULTS.monthly_limit,
+      daily_limit = API_KEY_FREE_TIER_DEFAULTS.daily_limit,
+      max_chain_iterations = API_KEY_FREE_TIER_DEFAULTS.max_chain_iterations,
       notes,
     } = body
 

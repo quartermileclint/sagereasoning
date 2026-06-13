@@ -16,6 +16,8 @@ Revocation does **not** delete anything. The credential's row stays in the datab
 
 There are two ways to revoke: the **primary** way (the admin API, which also records the audit trail automatically) and the **emergency fallback** (a direct database flip, used only if the API is unavailable, which then needs a manual audit note). Use the primary way whenever possible.
 
+> **Primary surface since 2026-06-13 (M2, CI-7):** the credential CLI wraps the admin API — `cd website && npx tsx scripts/mint-credential.ts revoke install --id <uuid>` (run `... help` for env setup). It lists ids (`list`), refuses cross-class revocations, and preserves the audit write because it calls this same endpoint. The console-fetch patterns below remain valid as the underlying mechanics and the emergency reference.
+
 ---
 
 ## Before you start: what you need
