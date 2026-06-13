@@ -8,6 +8,13 @@ import {
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, validateApiKey, withUsageHeaders, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
+import {
+  createLoopAccumulator,
+  extractLoopId,
+  generateLoopId,
+  finalizeLoopResponse,
+  estimateCallCostCents,
+} from '@/lib/loop-cost-tracker'
 import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
@@ -78,9 +85,30 @@ export async function POST(request: NextRequest) {
   const keyCheck = await validateApiKey(request, 'guardrail')
   if (!keyCheck.valid) return keyCheck.error
 
+  // M4 CI-10 (2026-06-13): gate loop metering. Flag-gated — UNSET in production
+  // = today's behaviour (no loop_billing_events row, no X-Loop-* headers). The
+  // CI-8 meta cost honesty below is NOT flag-gated: it always retires the stale
+  // competitor-anchored $0.0025. KG1: the metering write goes through
+  // finalizeLoopResponse (awaited; no fire-and-forget; no self-call).
+  const ci10LoopMeteringEnabled = process.env.SUBSTRATE_GATE_LOOP_METERING_ENABLED === 'true'
+  const loopId = ci10LoopMeteringEnabled
+    ? (extractLoopId(request) ?? generateLoopId())
+    : null
+
   try {
     const startTime = Date.now()
     const { action, context, threshold = 'deliberate', agent_id, risk_class, urgency_context, considered_alternatives } = await request.json()
+
+    // CI-10: per-request loop accumulator (KG1 rule 4 — closure state, never
+    // module-level). Null when metering is disabled.
+    const loopAccumulator = ci10LoopMeteringEnabled && loopId
+      ? createLoopAccumulator({
+          loopId,
+          apiKeyId: keyCheck.api_key_id,
+          surface: 'api_guardrail',
+          agentId: typeof agent_id === 'string' ? agent_id : null,
+        })
+      : null
 
     if (!action || typeof action !== 'string' || action.trim().length === 0) {
       return NextResponse.json({ error: 'action is required' }, { status: 400 })
@@ -147,6 +175,25 @@ export async function POST(request: NextRequest) {
       stoicBrainContext: getStoicBrainContext(evaluationDepth),
       projectContext,
     })
+
+    // CI-10: record this call's Anthropic cost in the loop accumulator from the
+    // engine's exposed token usage. Absent usage (cache hit — no fresh LLM call)
+    // ⇒ no cost added for this call, which is the honest figure.
+    const gateUsage = reasoningResult.meta.usage
+    if (loopAccumulator && gateUsage) {
+      loopAccumulator.addCall(
+        reasoningResult.meta.ai_model,
+        gateUsage.input_tokens,
+        gateUsage.output_tokens,
+      )
+    }
+    // CI-8: the honest per-call cost for meta.cost_usd — measured from real
+    // token usage when a fresh call happened; null (omitted) on a cache hit.
+    // This unconditionally retires the stale competitor-anchored $0.0025.
+    const measuredCostUsd = gateUsage
+      ? estimateCallCostCents(reasoningResult.meta.ai_model, gateUsage.input_tokens, gateUsage.output_tokens) / 100
+      : null
+    const costBasis = gateUsage ? 'anthropic_usd_measured' : 'cache_hit_no_fresh_call'
 
     const assessmentData = reasoningResult.result as any
     const proximity: KatorthomaProximityLevel = assessmentData.katorthoma_proximity
@@ -259,6 +306,9 @@ export async function POST(request: NextRequest) {
       model: 'claude-haiku-4-5-20251001',
       startTime,
       maxTokens: 512,
+      // CI-8: honest per-call cost (measured) or null on a cache hit, with a
+      // basis note — never the retired competitor-anchored $0.0025.
+      costUsd: measuredCostUsd,
       usage: keyCheck.valid ? {
         monthly_calls_after: keyCheck.monthly_calls_after,
         monthly_limit: keyCheck.monthly_calls_after + keyCheck.monthly_remaining,
@@ -268,7 +318,25 @@ export async function POST(request: NextRequest) {
         next_steps: result.proceed ? ['execute_action'] : ['/api/guardrail'],
         recommended_action: result.recommendation,
       },
+      extra: { cost_basis: costBasis },
     })
+
+    // CI-10: when metering is enabled, persist the loop_billing_events row and
+    // emit X-Loop-* headers (the bill computed from the accumulator). KG1 rule 2:
+    // finalizeLoopResponse awaits the RPC write. Flag UNSET ⇒ today's response
+    // shape exactly (no DB write, no X-Loop headers).
+    if (loopAccumulator && loopId) {
+      return await finalizeLoopResponse({
+        loopId,
+        accumulator: loopAccumulator,
+        apiKeyId: keyCheck.api_key_id,
+        endpoint: 'guardrail',
+        responseBody: envelope,
+        responseStatus: 200,
+        responseHeaders: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck),
+        isBillable: true,
+      })
+    }
 
     return NextResponse.json(envelope, {
       headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck),

@@ -83,12 +83,23 @@ export type ApiResponseEnvelope<T = unknown> = {
  *   sage-diagnose, sage-profile: ~$0.50/call  (half of Crystal Knows est. $1.00)
  *   sage-context: Free (deterministic, no AI call)
  *
- * This function estimates the customer-facing price for response metadata.
- * Actual billing should reference skill-registry.ts prices directly.
+ * This function estimates the customer-facing PRICE (not our cost) for response
+ * metadata. Actual billing should reference skill-registry.ts prices directly.
+ *
+ * M4 CI-8 (2026-06-13): this is the customer-facing price, NOT a measured
+ * per-call cost. Endpoints that carry real per-call metering (Option-D loop
+ * telemetry — currently /api/guardrail under CI-10) MUST pass a measured
+ * `costUsd` override to buildEnvelope so `meta.cost_usd` reports the true
+ * Anthropic cost rather than this competitor-anchored price. FX-14 was the
+ * gate reporting this $0.0025 price as if it were a measured cost; the gate
+ * now overrides. The competitor-anchored constants below remain the honest
+ * *price* for the human-tool routes that intentionally surface price (the
+ * fleet-wide price-vs-cost question is recorded as an open question, not
+ * changed here).
  */
 export function estimateCostUsd(model: string, _maxTokens: number): number {
   if (model.includes('haiku')) {
-    // sage-guard: $0.0025 per call (competitor-anchored)
+    // sage-guard: $0.0025 per call (competitor-anchored CUSTOMER PRICE, not cost)
     return 0.0025
   }
   // Default to sonnet pricing: $0.18 per call (competitor-anchored)
@@ -113,6 +124,15 @@ export type EnvelopeOptions = {
   maxTokens: number
   /** Whether this endpoint is deterministic (no AI call) */
   isDeterministic?: boolean
+  /**
+   * Measured/known per-call cost in USD (M4 CI-8, 2026-06-13). When provided
+   * (including an explicit `null`), `meta.cost_usd` uses this value verbatim
+   * and the competitor-anchored estimateCostUsd is bypassed. Endpoints with
+   * real metering (e.g. /api/guardrail under CI-10) pass the measured Anthropic
+   * cost here; `null` honestly omits the field (paired with a `cost_basis` note
+   * in `extra`). When undefined, the legacy estimate applies (unchanged).
+   */
+  costUsd?: number | null
   /** Composability hints */
   composability?: ComposabilityMeta
   /** Usage info from API key validation (if applicable) */
@@ -141,13 +161,21 @@ export function buildEnvelope(options: EnvelopeOptions): ApiResponseEnvelope {
     startTime,
     maxTokens,
     isDeterministic = false,
+    costUsd: costUsdOverride,
     composability,
     usage,
     extra,
   } = options
 
   const latencyMs = Date.now() - startTime
-  const costUsd = isDeterministic ? null : estimateCostUsd(model, maxTokens)
+  // CI-8: a supplied override (incl. explicit null) wins over the competitor-
+  // anchored estimate. Deterministic endpoints stay null. Otherwise estimate.
+  const costUsd =
+    costUsdOverride !== undefined
+      ? costUsdOverride
+      : isDeterministic
+        ? null
+        : estimateCostUsd(model, maxTokens)
 
   // Build usage metadata with triggers
   let usageMeta: UsageMeta | undefined

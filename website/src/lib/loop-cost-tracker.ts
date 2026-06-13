@@ -156,7 +156,7 @@ export interface LoopAggregateState {
 export interface LoopAccumulator {
   readonly loopId: string
   readonly apiKeyId: string
-  readonly surface: 'api_reason' | 'api_score_iterate' | 'wrapper_internal'
+  readonly surface: 'api_reason' | 'api_score_iterate' | 'wrapper_internal' | 'api_guardrail'
   readonly agentId: string | null
 
   /**
@@ -188,7 +188,7 @@ export interface LoopAccumulator {
 export interface CreateLoopAccumulatorParams {
   loopId: string
   apiKeyId: string
-  surface: 'api_reason' | 'api_score_iterate' | 'wrapper_internal'
+  surface: 'api_reason' | 'api_score_iterate' | 'wrapper_internal' | 'api_guardrail'
   agentId?: string | null
 }
 
@@ -304,7 +304,7 @@ export interface RecordLoopBillingParams {
   apiKeyId: string
   loopId: string
   agentId: string | null
-  surface: 'api_reason' | 'api_score_iterate' | 'wrapper_internal'
+  surface: 'api_reason' | 'api_score_iterate' | 'wrapper_internal' | 'api_guardrail'
 
   // Bill — from stripe.ts's computeLoopBill on the accumulator state.
   baseCents: number

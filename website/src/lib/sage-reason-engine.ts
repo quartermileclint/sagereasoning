@@ -149,6 +149,17 @@ export interface ReasonResult {
     hasty_assent_risk?: 'high' | 'moderate' | 'low' | 'none'
     /** Whether urgency context was applied */
     urgency_applied?: boolean
+    /**
+     * Anthropic token usage for the fresh LLM call(s) this invocation made
+     * (M4 CI-10, 2026-06-13). Additive + optional: present only when a real
+     * client.messages.create happened. ABSENT on a cache hit (no fresh call)
+     * and on the parse-failure structured-error path. When the parse-retry
+     * fired, the counts are the SUM of both calls (both were billed). Callers
+     * that meter (e.g. /api/guardrail's CI-10 loop telemetry) read this to
+     * record true token counts; callers that don't, ignore it (backward
+     * compatible — existing callers are unchanged).
+     */
+    usage?: { input_tokens: number; output_tokens: number }
   }
 }
 
@@ -558,6 +569,12 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
   const latencyMs = Date.now() - startTime
   const responseText = message.content[0].type === 'text' ? message.content[0].text : ''
 
+  // M4 CI-10 (2026-06-13): capture Anthropic token usage for honest metering.
+  // Additive — every Anthropic message carries .usage. Accumulated across the
+  // parse-retry path below (both calls are billed).
+  let usageInputTokens = message.usage.input_tokens
+  let usageOutputTokens = message.usage.output_tokens
+
   // Parse JSON response — with unified retry on failure (F2 + F4 fix)
   // All depths get one retry. Quick escalates Haiku→Sonnet. Standard/deep retry same model.
   // Second failure returns a structured error response, NOT a 500.
@@ -586,6 +603,9 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
       evalData = extractJSON(retryText)
       actualModel = retryModel
       retried = true
+      // CI-10: both calls were billed — sum the retry's tokens onto the total.
+      usageInputTokens += retryMessage.usage.input_tokens
+      usageOutputTokens += retryMessage.usage.output_tokens
     } catch (retryError) {
       // Second failure — return structured error, NOT a 500
       console.error(
@@ -681,6 +701,7 @@ export async function runSageReason(params: ReasonInput): Promise<ReasonResult> 
       stage_scores: stageScores,
       hasty_assent_risk: hastyAssentRisk,
       urgency_applied: !!params.urgency_context?.trim(),
+      usage: { input_tokens: usageInputTokens, output_tokens: usageOutputTokens },
     },
   }
 }
