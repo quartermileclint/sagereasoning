@@ -235,6 +235,13 @@ const DEFAULT_DEPS: AccreditationWriterDeps = {
  */
 export interface AccreditationWriteExtras {
   readonly loop_id?: string | null
+  /** K1 coverage fields (CI-11, 2026-06-13) — server-composed by the caller
+   *  via composeK1InitialCoverage (trust-layer/accreditation/coverage-status.ts)
+   *  and passed straight through to the store's write-time options. NEVER
+   *  taken from the consumer's record. Omitted → NULL columns (legacy shape). */
+  readonly coverage_status?: import('./trust-layer/types/accreditation').CoverageStatus | null
+  readonly monitored_since?: string | null
+  readonly credential_basis?: string | null
 }
 
 // ============================================================================
@@ -284,6 +291,9 @@ export async function seedAccreditation(
     await deps.upsertAccreditationRecord(record, {
       regressing_check_count: profile.regressing_check_count,
       loop_id: extras.loop_id ?? null,
+      coverage_status: extras.coverage_status ?? null,
+      monitored_since: extras.monitored_since ?? null,
+      credential_basis: extras.credential_basis ?? null,
     })
     await deps.appendInitialGradeHistory(record)
 
@@ -373,6 +383,9 @@ export async function updateAccreditation(
     await deps.upsertAccreditationRecord(record, {
       regressing_check_count: profile.regressing_check_count,
       loop_id: extras.loop_id ?? null,
+      coverage_status: extras.coverage_status ?? null,
+      monitored_since: extras.monitored_since ?? null,
+      credential_basis: extras.credential_basis ?? null,
     })
 
     if (transitionResult.grade_changed && transitionResult.trigger !== null) {

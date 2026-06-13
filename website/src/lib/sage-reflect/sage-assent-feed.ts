@@ -55,6 +55,11 @@ import {
   upsertAccreditationRecord,
 } from '@/lib/substrate/sage-assent-accreditation-store'
 import { createAccreditationRecord } from '@/lib/substrate/trust-layer/accreditation/accreditation-record'
+import { composeK1InitialCoverage } from '@/lib/substrate/trust-layer/accreditation/coverage-status'
+import {
+  isAcceptedAgentId,
+  AGENT_ID_FORMAT_MESSAGE,
+} from '@/lib/substrate/trust-layer/accreditation/agent-id-vocabulary'
 import { computeWindowSnapshot } from '@/lib/substrate/trust-layer/evaluation-window/window-aggregator'
 import { evaluateGradeTransition } from '@/lib/substrate/trust-layer/grade-engine/grade-transition-engine'
 import { DEFAULT_WINDOW_CONFIG } from '@/lib/substrate/trust-layer/types/evaluation'
@@ -163,7 +168,12 @@ export interface SageAssentFeedDeps {
 
 const DEFAULT_DEPS: SageAssentFeedDeps = {
   lookupAccreditation: lookupAccreditationRecord,
-  upsertAccreditation: (record) => upsertAccreditationRecord(record),
+  // CI-11 (2026-06-13): the feed path sets the K1 coverage fields with the
+  // same server-side composer the wrapper write uses — evidence here arrives
+  // via the Sage Reflect session-close discipline, still agent-elected
+  // (discretionary submission) per the K1 ADR.
+  upsertAccreditation: (record) =>
+    upsertAccreditationRecord(record, composeK1InitialCoverage(record, 'sage_reflect_feed')),
   persistEvaluatedActions: realPersist,
   getRecentEvaluatedActions: realGetRecent,
   countLifetimeActions: realCount,
@@ -217,6 +227,19 @@ export async function feedSageAssent(
 ): Promise<StoreResult<SageAssentFeedResult>> {
   const { agentId, sessionId, q4 } = params
   const evaluatedAt = params.evaluatedAt ?? new Date().toISOString()
+
+  // CI-12 (2026-06-13): validate the agent_id up front so the feed path cannot
+  // seed an accreditation row the public GET would reject (the FX-11 invariant
+  // — this path is a SECOND write surface besides the POST boundary). The store
+  // chokepoint (upsertAccreditationRecord) enforces this structurally too; this
+  // early guard converts it into a clean StoreResult error rather than a
+  // caught-throw, so the reflect flow degrades gracefully.
+  if (!isAcceptedAgentId(agentId)) {
+    return {
+      ok: false,
+      error: `feedSageAssent: invalid agent_id "${agentId}". ${AGENT_ID_FORMAT_MESSAGE}`,
+    }
+  }
 
   try {
     // 1) Map Q4 → EvaluatedAction[].

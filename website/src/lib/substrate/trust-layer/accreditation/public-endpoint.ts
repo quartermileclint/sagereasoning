@@ -47,6 +47,7 @@ import {
   isValidAgentId,
   isExpired,
 } from './accreditation-record'
+import { AGENT_ID_FORMAT_MESSAGE } from './agent-id-vocabulary'
 
 // ============================================================================
 // REQUEST / RESPONSE TYPES
@@ -80,11 +81,12 @@ export async function handleAccreditationLookup(
   agentId: string,
   lookupFn: (agentId: string) => Promise<import('../types/accreditation').AccreditationRecord | null>
 ): Promise<AccreditationEndpointResponse> {
-  // Validate agent_id format
+  // Validate agent_id format (CI-12: shared vocabulary — the same validator
+  // the write boundary uses, so a written record is always readable here).
   if (!isValidAgentId(agentId)) {
     return {
       status: 'error',
-      message: 'Invalid agent_id format. Expected: agent_{org}_{version}',
+      message: AGENT_ID_FORMAT_MESSAGE,
     }
   }
 

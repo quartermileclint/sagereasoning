@@ -157,6 +157,11 @@ const SAMPLE_PAYLOAD: AccreditationPayload = {
   typical_target_system_vendor: null,
   typical_outcome_verification: null,
   typical_reversibility_signal: null,
+  // Added 2026-06-13 under the mechanism-correction M3 session (CI-11 — K1
+  // coverage-status first slice). Null = pre-slice row shape.
+  coverage_status: null,
+  monitored_since: null,
+  credential_basis: null,
 }
 
 const SAMPLE_RECORD: AccreditationRecord = {

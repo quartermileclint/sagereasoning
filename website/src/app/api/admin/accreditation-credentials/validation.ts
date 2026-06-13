@@ -6,7 +6,17 @@
  * Scope enum vocabularies are verbatim from
  * /website/src/lib/substrate/trust-layer/types/evaluation.ts — they give a clean
  * 400 before the DB CHECK constraints would otherwise reject the insert.
+ *
+ * CI-12 (2026-06-13): agent_id is validated against the shared accreditation
+ * vocabulary (K1 canonical `namespace:name@version` or legacy `agent_*`) so a
+ * credential can never be minted bound to an id the public GET cannot read —
+ * the FX-11 failure class is closed at its origin, the mint surface.
  */
+
+import {
+  isAcceptedAgentId,
+  AGENT_ID_FORMAT_MESSAGE,
+} from '@/lib/substrate/trust-layer/accreditation/agent-id-vocabulary'
 
 export const VALID_IDENTITY_MODELS = [
   'delegated_user', 'service_account', 'vendor_framework',
@@ -42,6 +52,9 @@ export function validateMintInput(
   const agent_id = typeof b.agent_id === 'string' ? b.agent_id.trim() : ''
   if (!agent_id) {
     return { ok: false, error: 'agent_id is required.' }
+  }
+  if (!isAcceptedAgentId(agent_id)) {
+    return { ok: false, error: AGENT_ID_FORMAT_MESSAGE }
   }
   if (b.purpose !== 'sage_assent_write') {
     return { ok: false, error: "purpose is required and must be 'sage_assent_write'." }

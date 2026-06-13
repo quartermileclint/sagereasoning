@@ -220,12 +220,26 @@ export function httpStatusFor(
  * 200 ok — the write succeeded. Body carries no payload (the write returns
  * void from the library); the verifier confirms via a subsequent GET if it
  * needs the persisted shape.
+ *
+ * CI-4 (2026-06-13): when the loop-closure gate is ENABLED (flag mode), the
+ * route passes its analysis and the body gains a `loop_closure` block naming
+ * the chain's closure verdict. Omitted (the flags-unset default) → the body
+ * is BYTE-IDENTICAL to the pre-gate shape.
  */
-export function buildWriteSuccessResponse(): NextResponse {
+export function buildWriteSuccessResponse(
+  loopClosure?: {
+    verdict: string
+    redirections: number
+    closed: number
+    open: number
+    indeterminate: number
+  },
+): NextResponse {
   return NextResponse.json(
     {
       status: 'ok',
       documentation_url: DOCUMENTATION_URL,
+      ...(loopClosure !== undefined ? { loop_closure: loopClosure } : {}),
     },
     {
       status: 200,
@@ -234,6 +248,49 @@ export function buildWriteSuccessResponse(): NextResponse {
         // Don't cache the write response — even a 200 should be re-checked
         // on the next call. Writes are mutating; GET responses can stay
         // cached at 5 min per their own discipline.
+        'Cache-Control': 'no-store',
+      },
+    },
+  )
+}
+
+/**
+ * 422 unprocessable — the loop-closure gate (REJECT mode) refused an
+ * unclosed assessment chain (CI-4, 2026-06-13). Distinct from 403
+ * no_examination (R18f — "was there an examination?"): here the examinations
+ * are genuine but the loop they attest is not closed ("did the corrected
+ * reasoning get re-examined at the same depth?"). The message tells the
+ * caller exactly how to close it; the analysis block quantifies what is open.
+ *
+ * DISAMBIGUATION (shares HTTP 422 with buildWriteBadProvenanceResponse): the
+ * body's `error` field is the discriminator — `'loop_unclosed'` here vs
+ * `'bad_provenance'` there. A client routing on status code alone must read
+ * `error` to tell the two 422s apart; both also carry `status: 'error'`. The
+ * field name `error` is used here (not `reason`) deliberately, to match the
+ * pre-existing 422's discriminator key (bad_provenance) — one convention.
+ */
+export function buildWriteLoopUnclosedResponse(
+  message: string,
+  loopClosure: {
+    verdict: string
+    redirections: number
+    closed: number
+    open: number
+    indeterminate: number
+  },
+): NextResponse {
+  return NextResponse.json(
+    {
+      status: 'error',
+      error: 'loop_unclosed',
+      message,
+      loop_closure: loopClosure,
+      documentation_url: DOCUMENTATION_URL,
+    },
+    {
+      status: 422,
+      headers: {
+        ...ACCREDITATION_RESPONSE_HEADERS,
         'Cache-Control': 'no-store',
       },
     },

@@ -194,6 +194,13 @@ import {
   isExpired,
 } from '@/lib/substrate/trust-layer/accreditation/accreditation-record'
 
+import {
+  isAcceptedAgentId,
+  AGENT_ID_FORMAT_MESSAGE,
+} from '@/lib/substrate/trust-layer/accreditation/agent-id-vocabulary'
+
+import { composeK1InitialCoverage } from '@/lib/substrate/trust-layer/accreditation/coverage-status'
+
 import { lookupAccreditationRecord } from '@/lib/substrate/sage-assent-accreditation-store'
 
 import {
@@ -216,8 +223,11 @@ import {
   buildWriteConflictResponse,
   buildWriteNoExaminationResponse,
   buildWriteBadProvenanceResponse,
+  buildWriteLoopUnclosedResponse,
   DOCUMENTATION_URL,
 } from './response-builders'
+
+import { enforceLoopClosure } from './loop-closure-gate'
 
 import {
   extractCarriedProfileForAuth,
@@ -268,7 +278,7 @@ export async function GET(
       if (!isValidAgentId(agent_id)) {
         return buildAccreditationResponse({
           status: 'error',
-          message: 'Invalid agent_id format. Expected: agent_{org}_{version}',
+          message: AGENT_ID_FORMAT_MESSAGE,
         })
       }
       const record = await lookupAccreditationRecord(agent_id)
@@ -582,6 +592,17 @@ export async function POST(
     return buildWriteUnauthorizedResponse()
   }
 
+  // 3b. agent_id vocabulary check (CI-12, 2026-06-13). The write boundary
+  //     validates the path id against the SAME shared vocabulary the public
+  //     GET uses (K1 canonical `namespace:name@version` or legacy `agent_*`),
+  //     so every record this handler can write is readable through its own
+  //     public read path — the FX-11 asymmetry is structurally closed. Placed
+  //     after the auth gate so the response-code posture toward
+  //     unauthenticated callers is unchanged.
+  if (!isAcceptedAgentId(agent_id)) {
+    return buildWriteBadRequestResponse(AGENT_ID_FORMAT_MESSAGE)
+  }
+
   // 4. Body shape validation (only reached once auth has passed).
   if (!bodyIsValidJson) {
     return buildWriteBadRequestResponse('Request body is not valid JSON.')
@@ -630,8 +651,57 @@ export async function POST(
     return buildWriteBadProvenanceResponse(provenance.message)
   }
 
+  // 4d. Loop-closure gate (CI-4 write-boundary half — the Q4 mentor verdict's
+  //     bite point: "a correction is a new phantasia owed a new
+  //     synkatathesis"). A SEPARATE additive module invoked AFTER the R18f
+  //     provenance gate ("was there an examination?") to answer the next
+  //     question: "did the examination loop close?" Gated behind
+  //     SUBSTRATE_LOOP_CLOSURE_GATE_ENABLED (+ _REJECT for refusal): both
+  //     UNSET by default → enforced:false → behaviour byte-identical.
+  //     Synchronous, no I/O (PR3/KG1); the R18f gate's logic is untouched.
+  const loopClosure = enforceLoopClosure(rawBody)
+  if (!loopClosure.ok) {
+    console.log(
+      JSON.stringify({
+        kind: 'sage_assent_loop_closure',
+        agent_id,
+        outcome: loopClosure.status,
+        analysis: loopClosure.analysis,
+        timestamp: new Date().toISOString(),
+      }),
+    )
+    return buildWriteLoopUnclosedResponse(loopClosure.message, loopClosure.analysis)
+  }
+  if (loopClosure.enforced) {
+    console.log(
+      JSON.stringify({
+        kind: 'sage_assent_loop_closure',
+        agent_id,
+        outcome: 'pass',
+        analysis: loopClosure.analysis,
+        timestamp: new Date().toISOString(),
+      }),
+    )
+  }
+  const loopClosureAnnotation = loopClosure.enforced
+    ? loopClosure.analysis
+    : undefined
+
   // 5. Per-write extras for persistence (loop_id; typical_* ride on the record).
-  const writeExtras = extractWriteExtras(request.headers.get('x-loop-id'), rawBody)
+  //    CI-11 (2026-06-13): the K1 coverage fields are composed SERVER-SIDE here
+  //    — composeK1InitialCoverage is the authority on coverage honesty; any
+  //    coverage values on the consumer's submitted record are ignored. Both
+  //    write kinds are discretionary submission, so the honest initial state
+  //    is 'agent_elected' per the K1 ADR (never 'continuous' without the hook).
+  const writeExtras = {
+    ...extractWriteExtras(request.headers.get('x-loop-id'), rawBody),
+    ...composeK1InitialCoverage(
+      validated.body.kind === 'update'
+        ? validated.body.transition_result.record
+        : validated.body.profile.accreditation_record,
+      'wrapper_write',
+    ),
+  }
 
   // 6. Pre-flight lookup — disambiguates seed vs update vs conflict.
   try {
@@ -657,7 +727,7 @@ export async function POST(
       )
     }
 
-    return buildWriteSuccessResponse()
+    return buildWriteSuccessResponse(loopClosureAnnotation)
   } catch (err) {
     // Any Supabase failure inside lookupAccreditationRecord or the writer
     // library's persistence-layer calls propagates here. Map to 503 with a

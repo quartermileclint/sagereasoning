@@ -125,6 +125,7 @@ import {
 import type {
   AccreditationRecord,
   AuthorityLevel,
+  CoverageStatus,
   DimensionLevel,
   DimensionScores,
   DirectionOfTravel,
@@ -141,6 +142,11 @@ import type {
   OutcomeVerification,
   ReversibilitySignal,
 } from './trust-layer/types/evaluation'
+
+import {
+  isAcceptedAgentId,
+  AGENT_ID_FORMAT_MESSAGE,
+} from './trust-layer/accreditation/agent-id-vocabulary'
 
 // Re-export the domain types a persistence-layer consumer (the spec step 6b
 // route) needs, so it imports them from one place.
@@ -208,6 +214,16 @@ export interface AgentAccreditationRow {
    *  does NOT write loop_billing_events). Store-only; no AccreditationRecord
    *  counterpart. Nullable column added by the same migration. */
   readonly loop_id: string | null
+  /** K1 coverage-status fields (first slice — CI-11, 2026-06-13). Nullable
+   *  columns added by /website/supabase-agent-accreditation-k1-coverage-
+   *  migration.sql. WRITE: taken exclusively from AccreditationRowOptions
+   *  (server-composed via composeK1InitialCoverage — values on a consumer-
+   *  submitted record are ignored). READ: folded into the returned
+   *  AccreditationRecord so the public payload can serve them. NULL on rows
+   *  written before the slice (the honest "coverage unstated" state). */
+  readonly coverage_status: CoverageStatus | null
+  readonly monitored_since: string | null
+  readonly credential_basis: string | null
 }
 
 /** A row of public.grade_history — the append-only grade-change audit trail. */
@@ -243,6 +259,15 @@ export interface AccreditationRowOptions {
    *  route from the X-Loop-Id header; defaults to NULL. Store-only column —
    *  no AccreditationRecord counterpart. */
   readonly loop_id?: string | null
+  /** K1 coverage-status fields (CI-11, 2026-06-13) — the SERVER-SIDE authority
+   *  for the honest coverage values. Callers compose these via
+   *  composeK1InitialCoverage (trust-layer/accreditation/coverage-status.ts);
+   *  the row builder reads them from HERE and never from the record, so a
+   *  consumer-submitted record cannot claim its own coverage. Omitted →
+   *  NULL (legacy-write shape). */
+  readonly coverage_status?: CoverageStatus | null
+  readonly monitored_since?: string | null
+  readonly credential_basis?: string | null
 }
 
 /** Write-time options for a grade_history row's optional audit note. */
@@ -313,6 +338,12 @@ export function accreditationRecordToRow(
     typical_outcome_verification: record.typical_outcome_verification ?? null,
     typical_reversibility_signal: record.typical_reversibility_signal ?? null,
     loop_id: opts.loop_id ?? null,
+    // K1 coverage fields (CI-11) — from OPTS exclusively, never the record:
+    // the write boundary (composeK1InitialCoverage) is the authority on
+    // coverage honesty; a consumer-submitted record's own values are ignored.
+    coverage_status: opts.coverage_status ?? null,
+    monitored_since: opts.monitored_since ?? null,
+    credential_basis: opts.credential_basis ?? null,
   }
 }
 
@@ -374,6 +405,11 @@ export function rowToAccreditationRecord(
     typical_target_system_vendor: row.typical_target_system_vendor ?? undefined,
     typical_outcome_verification: row.typical_outcome_verification ?? undefined,
     typical_reversibility_signal: row.typical_reversibility_signal ?? undefined,
+    // K1 coverage fields (CI-11) — folded in on read so the public payload
+    // can serve them. NULL on pre-slice rows (honest "coverage unstated").
+    coverage_status: row.coverage_status ?? null,
+    monitored_since: row.monitored_since ?? null,
+    credential_basis: row.credential_basis ?? null,
   }
 }
 
@@ -503,6 +539,21 @@ export async function upsertAccreditationRecord(
   record: AccreditationRecord,
   opts: AccreditationRowOptions = {}
 ): Promise<void> {
+  // CI-12 (2026-06-13): the agent_id vocabulary check at the SINGLE write
+  // chokepoint. Every path that writes agent_accreditation flows through here
+  // (the wrapper POST via the writer library — already 400-guarded at the
+  // route; the Sage Reflect feed; any future caller), so the CI-12 invariant
+  // — every writable record is readable through the public GET — holds BY
+  // CONSTRUCTION rather than route-by-route (the founder's drift-proof
+  // election). The public GET validates with the same isAcceptedAgentId, so a
+  // row that cannot be written here is exactly a row that could not be read.
+  if (!isAcceptedAgentId(record.agent_id)) {
+    throw new Error(
+      `upsertAccreditationRecord: refusing to write an unreadable agent_id ` +
+        `"${record.agent_id}". ${AGENT_ID_FORMAT_MESSAGE}`,
+    )
+  }
+
   const row = accreditationRecordToRow(record, opts)
 
   const { error } = await supabaseAdmin

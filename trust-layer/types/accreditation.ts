@@ -82,6 +82,21 @@ export type AuthorityLevel =
 /** Direction of travel — leading indicator of accreditation trajectory */
 export type DirectionOfTravel = 'improving' | 'stable' | 'regressing'
 
+/**
+ * K1 coverage status — the honest-credential state machine value (first
+ * slice). Vocabulary VERBATIM from the K1 ADR
+ * (/adopted/adr/2026-05-26-credential-scope-and-coverage-status.md — carry,
+ * don't re-derive). Added 2026-06-13 under the mechanism-correction M3
+ * accreditation session (CI-11). The full state machine (suspend/resume
+ * transitions) is NOT this slice.
+ */
+export type CoverageStatus =
+  | 'continuous'
+  | 'suspended'
+  | 'resumed_unverified'
+  | 'expired'
+  | 'agent_elected'
+
 /** Root passion identifiers (from passions.json) */
 export type RootPassionId = 'epithumia' | 'hedone' | 'phobos' | 'lupe'
 
@@ -215,6 +230,13 @@ export type AccreditationRecord = {
   readonly typical_target_system_vendor?: TargetSystemVendor
   readonly typical_outcome_verification?: OutcomeVerification
   readonly typical_reversibility_signal?: ReversibilitySignal
+
+  // K1 coverage-status fields (first slice — CI-11, 2026-06-13, port-mirror
+  // sync). SERVER-SET ONLY at the write boundary via composeK1InitialCoverage;
+  // folded in from the row on read. Null on pre-slice rows.
+  readonly coverage_status?: CoverageStatus | null
+  readonly monitored_since?: string | null
+  readonly credential_basis?: string | null
 }
 
 /**
@@ -247,6 +269,14 @@ export type AccreditationPayload = {
   readonly typical_target_system_vendor?: TargetSystemVendor | null
   readonly typical_outcome_verification?: OutcomeVerification | null
   readonly typical_reversibility_signal?: ReversibilitySignal | null
+
+  // K1 coverage-status fields (first slice — CI-11, 2026-06-13, port-mirror
+  // sync). REQUIRED (not optional) to match the website port: buildAccreditation-
+  // Payload assigns all three unconditionally (`record.X ?? null`), so they are
+  // always present — null on pre-slice rows, never undefined.
+  readonly coverage_status: CoverageStatus | null
+  readonly monitored_since: string | null
+  readonly credential_basis: string | null
 }
 
 /**

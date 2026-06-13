@@ -46,6 +46,7 @@ import type {
   GradeChangeEvent,
 } from '../types/accreditation'
 import type { DeliberationBreadth, KathekonQuality } from '../types/evaluation'
+import { isAcceptedAgentId } from './agent-id-vocabulary'
 
 // ============================================================================
 // CONSTANTS
@@ -125,12 +126,12 @@ export type CreateAccreditationOptions = {
   /** Optional override for the seeded typical_deliberation_breadth — the
    *  conservative no-evidence-yet baseline (default 'intuited'). Added
    *  2026-05-16 under D-ATL-ITEMS-1-3-BUILD-WIRED-VERIFIED-2026-05-16
-   *  §"Decision A". */
+   *  §"Decision A". Port-mirror sync restored 2026-06-13 (M3). */
   starting_deliberation_breadth?: DeliberationBreadth
   /** Optional override for the seeded typical_kathekon_quality — the
    *  conservative no-evidence-yet baseline (default 'contrary'). Added
    *  2026-05-16 under D-ATL-KATHEKON-ALIGNED-ALTERNATIVE-BUILD-WIRED-VERIFIED-
-   *  2026-05-16 §"Decision C". */
+   *  2026-05-16 §"Decision C". Port-mirror sync restored 2026-06-13 (M3). */
   starting_kathekon_quality?: KathekonQuality
 }
 
@@ -248,6 +249,13 @@ export function buildAccreditationPayload(
     typical_target_system_vendor: record.typical_target_system_vendor ?? null,
     typical_outcome_verification: record.typical_outcome_verification ?? null,
     typical_reversibility_signal: record.typical_reversibility_signal ?? null,
+    // K1 coverage-status fields (first slice — CI-11, 2026-06-13). R18c-
+    // additive; null on rows written before the slice (the honest "coverage
+    // unstated" state). coverage_status + credential_basis are the R19e
+    // configuration-honesty surface the K1 ADR designed (FX-10 closed).
+    coverage_status: record.coverage_status ?? null,
+    monitored_since: record.monitored_since ?? null,
+    credential_basis: record.credential_basis ?? null,
   }
 }
 
@@ -300,9 +308,14 @@ export const VALID_AUTHORITY_LEVELS: AuthorityLevel[] = [
   'supervised', 'guided', 'spot_checked', 'autonomous', 'full_authority',
 ]
 
-/** Validate an agent_id format */
+/** Validate an agent_id format.
+ *  CI-12 (2026-06-13): delegates to the shared agent-id vocabulary so the
+ *  public read path and the write boundary validate against the SAME set —
+ *  write-accepted ⇒ read-accepted by construction. Accepts the K1 canonical
+ *  `namespace:name@version` form AND the grandfathered legacy `agent_*` form
+ *  (the previous regex, byte-identical). See ./agent-id-vocabulary.ts. */
 export function isValidAgentId(agentId: string): boolean {
-  return /^agent_[a-z0-9_]+$/i.test(agentId)
+  return isAcceptedAgentId(agentId)
 }
 
 /** Check whether an accreditation record has expired */

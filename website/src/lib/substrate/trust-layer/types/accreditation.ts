@@ -122,6 +122,35 @@ export type AuthorityLevel =
 /** Direction of travel — leading indicator of accreditation trajectory */
 export type DirectionOfTravel = 'improving' | 'stable' | 'regressing'
 
+/**
+ * K1 coverage status — the honest-credential state machine value (first
+ * slice). Vocabulary VERBATIM from the K1 ADR
+ * (/adopted/adr/2026-05-26-credential-scope-and-coverage-status.md — carry,
+ * don't re-derive). Added 2026-06-13 under the mechanism-correction M3
+ * accreditation session (CI-11).
+ *
+ *   continuous          — deterministic hook examined every consequential
+ *                         action over the window; the ONLY state that earns a
+ *                         "continuously examined" claim (requires the hook —
+ *                         unreachable from today's write paths)
+ *   suspended           — the guardrail hook is off; prior examination real,
+ *                         current reasoning unexamined
+ *   resumed_unverified  — the hook returned; a fresh pass is required before
+ *                         continuous again
+ *   expired             — a wall-clock backstop crossed without renewal
+ *   agent_elected       — earned via DISCRETIONARY submission (the agent chose
+ *                         which actions to submit); inherently partial; never
+ *                         continuous. The honest label for today's API writes.
+ *
+ * The full state machine (suspend/resume transitions) is NOT this slice.
+ */
+export type CoverageStatus =
+  | 'continuous'
+  | 'suspended'
+  | 'resumed_unverified'
+  | 'expired'
+  | 'agent_elected'
+
 /** Root passion identifiers (from passions.json) */
 export type RootPassionId = 'epithumia' | 'hedone' | 'phobos' | 'lupe'
 
@@ -237,6 +266,21 @@ export type AccreditationRecord = {
   readonly typical_target_system_vendor?: TargetSystemVendor
   readonly typical_outcome_verification?: OutcomeVerification
   readonly typical_reversibility_signal?: ReversibilitySignal
+
+  // ==========================================================================
+  // K1 COVERAGE-STATUS FIELDS (first slice — CI-11, 2026-06-13, per the K1 ADR
+  // /adopted/adr/2026-05-26-credential-scope-and-coverage-status.md).
+  // SERVER-SET ONLY: the write boundary composes these via
+  // composeK1InitialCoverage (accreditation/coverage-status.ts) and supplies
+  // them through the store's write-time OPTIONS — values carried on a
+  // consumer-submitted record are IGNORED at write. On read, the store folds
+  // the row's columns into these fields so the public payload can serve them.
+  // Optional + nullable: rows written before this slice read back null (the
+  // honest "pre-K1, coverage unstated" state). R18c-additive.
+  // ==========================================================================
+  readonly coverage_status?: CoverageStatus | null
+  readonly monitored_since?: string | null
+  readonly credential_basis?: string | null
 }
 
 /**
@@ -280,6 +324,16 @@ export type AccreditationPayload = {
   readonly typical_target_system_vendor: TargetSystemVendor | null
   readonly typical_outcome_verification: OutcomeVerification | null
   readonly typical_reversibility_signal: ReversibilitySignal | null
+
+  /** K1 coverage-status fields (first slice — CI-11, 2026-06-13). Always
+   *  present on the payload; null on rows written before the slice (the
+   *  honest "coverage unstated" state). coverage_status states what kind of
+   *  examination coverage the credential rests on (R19e configuration
+   *  honesty); credential_basis is the K1 auditable scope statement —
+   *  "whose hands, which window, which identity". R18c-additive. */
+  readonly coverage_status: CoverageStatus | null
+  readonly monitored_since: string | null
+  readonly credential_basis: string | null
 }
 
 /**
