@@ -11038,3 +11038,25 @@ Expected: tsc silent; `9`, `20`, `16`, `76` pass / 0 fail.
 **Rules served:** PR1 (single endpoint — `/api/guardrail`), PR2, PR6 (no Critical surface touched), PR10 PEV (CI-9 diagnostic-first + two adversarial workflows), PR15 (bespoke product-internal; no Anthropic primitive substitutes — the loop telemetry + envelope are SageReasoning-internal), PR16 (positioning — honest gate telemetry), PR17 (founder-walked TEST legs pending), PR18 (close-time production-state rewrite), R5 (visible meter / economics), R18/R18a (honest cost telemetry; no false price-as-cost), KG1 (awaited metering write, no fire-and-forget, no self-call, closure-scoped accumulator), KG2/AC1 (model selection unchanged), B9 (dossier), CI-8/CI-9/CI-10, FX-14/FX-15/FX-16; CI-16 deferred.
 
 **Status:** Adopted. Cross-references: `D-MECHANISM-CORRECTION-M3-ACCREDITATION-BUILT-TEST-VERIFIED-2026-06-13`, `D-MECHANISM-CORRECTION-BUILD-PLAN-APPROVED-2026-06-12`, the M4 prompt + close, the M5 prompt (`operations/handoffs/founder/2026-06-13-mechanism-correction-M5-practice-completion-NEXT-SESSION-PROMPT.md`), the CI-9 diagnostic note (`operations/p1-rebuild-2026-06/ci9-gate-latency-diagnostic.md`).
+
+## 2026-06-13 — D-MECHANISM-CORRECTION-CI10-PRODUCTION-ACTIVATION-2026-06-13
+
+**Decision:** CI-10 gate loop metering **activated in PRODUCTION** — a founder-elected 0c-ii Critical step taken same-day, after the M4 close: the `loop_billing_events.surface` CHECK was widened on the production Supabase DB to admit `api_guardrail`, and `SUBSTRATE_GATE_LOOP_METERING_ENABLED=true` was set in Vercel (Production) + redeployed. `/api/guardrail` now writes a `loop_billing_events` row and emits the six `X-Loop-*` headers on every call. **The founder elected to activate despite the AI's recommendation to defer** (keep dark until a paid-agent trigger, per the A10 metering-deferral precedent — Stripe is `not_configured`, so the rows are not invoiced).
+
+**Reasoning:** completes the CI-10 lever in production; the gate's LLM cost now joins the Option-D visible-meter telemetry (R5). The defer recommendation (no invoicing benefit yet; adds a fail-closed dependency to a safety surface) was recorded; the founder accepted the named risks and proceeded.
+
+**Changes (production only — no code change beyond the already-deployed M4 commit):**
+- Production Supabase: `website/supabase-loop-billing-events-guardrail-surface-migration.sql` applied (surface CHECK now lists four surfaces incl. `api_guardrail`). Widening-only; existing rows unaffected.
+- Vercel (Production): `SUBSTRATE_GATE_LOOP_METERING_ENABLED=true` + redeploy.
+
+**Risk classification:** **Critical** (deployment-config: env flag activating a new billing surface + a production billing-table migration) under 0d-ii. Named risks accepted by the founder: (1) the gate now fails **closed (HTTP 500)** if a billing write fails — a *safety* surface's availability now depends on the billing RPC; (2) gate calls now generate billing rows (uninvoiced — Stripe `not_configured`); (3) `X-Loop-Id` reuse across gate calls now returns `400`. No verdict/threshold-path change (live-confirmed — the `result` block was byte-unchanged). PR6/Critical Change Protocol honoured (risks named + explicitly accepted; build-arc no-users note: only founder/test logins).
+
+**Verification (PR17, founder-walked, production):** a founder-minted `sr_live_` key (30/1/1) → POST `https://www.sagereasoning.com/api/guardrail` → **HTTP 200** (which itself proves the awaited write succeeded — a missing/narrow CHECK would have returned 500), six `X-Loop-*` headers present (`x-loop-id 4578937b-3386-4049-9d84-f46c92657a21`, `x-anthropic-cost-cents 1`, `x-loop-cost-cents 2`, `x-loop-internal-calls 1`, overage 0/false), `x-vercel-cache: MISS` (fresh prod call, `server: Vercel`). CI-8 also confirmed live (1¢ measured cost from real usage, never 0.0025). The test key was **revoked** at teardown (PATCH is_active=false). **The verification row (loop `4578937b…`) is test traffic — exclude from billing-tuning samples.**
+
+**Rollback path:** unset `SUBSTRATE_GATE_LOOP_METERING_ENABLED` in Vercel + redeploy → instant revert to inert (no write, no headers, no 500-on-billing). The migration stays (widening is harmless; existing `api_guardrail` rows remain valid). No DB rollback.
+
+**Open questions / watch:** monitor `/api/guardrail` for billing-write `500`s (the fail-closed risk is now live); revisit whether a *safety* gate should bill / fail-closed at all (ties to the CI-9 diagnostic §6.3). Stripe remains `not_configured` (rows accumulate, uninvoiced).
+
+**Rules served:** PR6 + 0c-ii (Critical Change Protocol — founder-elected; risks named + accepted), PR17 (founder-walked production legs), PR18 (production-state refresh), R5 (visible meter), KG1 (awaited write, no fire-and-forget, no self-call), CI-10/FX-16.
+
+**Status:** Adopted. **CI-10 is Live in production.** Cross-references: `D-MECHANISM-CORRECTION-M4-GATE-QUICK-TIER-BUILT-TEST-VERIFIED-2026-06-13`, the M4 close.
