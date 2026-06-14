@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/observability",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/trajectory-retention-sweep",
+      "schedule": "0 8 * * *"
     }
   ]
 }
