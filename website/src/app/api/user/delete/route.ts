@@ -17,6 +17,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { supabaseAdmin } from '@/lib/supabase-server'
+// R17c (CI-5 / M6, 2026-06-14): genuine deletion of the per-consult agent
+// trajectory keyed to the operator (owner_user_id = profiles.id = the auth user
+// id, per resolveProfileId's handle_new_user invariant).
+import { deleteAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessment-history-store'
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -99,6 +103,22 @@ export async function DELETE(request: NextRequest) {
     'mentor_virtue_profile',
   ]
 
+  // R17c — agent_assessment_history (CI-5 / M6) is keyed to owner_user_id
+  // (= profiles.id = this auth user id), NOT user_id, so it cannot ride the
+  // .eq('user_id') loop below. Deleted EXPLICITLY here, BEFORE the profiles row
+  // (whose ON DELETE CASCADE is the FK backstop), so erasure is genuine +
+  // verifiable and survives any future FK change (the route's belt-and-braces
+  // posture). A "does not exist" error is tolerated — the M6 migration is its own
+  // founder-elected step, so the Live delete route must not 207 before it lands.
+  {
+    // The store classifies a not-yet-migrated table as benign success
+    // (isMissingTableError), so only a REAL failure surfaces here (ok:false).
+    const aahDelete = await deleteAssessmentHistoryForOwner(userId)
+    if (!aahDelete.ok) {
+      deletionErrors.push(`agent_assessment_history: ${aahDelete.error}`)
+    }
+  }
+
   for (const table of tablesToDelete) {
     const { error } = await supabaseAdmin
       .from(table)
@@ -122,7 +142,7 @@ export async function DELETE(request: NextRequest) {
     await supabaseAdmin.from('compliance_deletion_log').insert({
       event: 'account_deleted',
       timestamp: new Date().toISOString(),
-      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile],
+      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history'],
       errors: deletionErrors.length > 0 ? deletionErrors : null,
     })
   } catch {

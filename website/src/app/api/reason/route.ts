@@ -127,6 +127,20 @@ import {
   isPracticeCycleHintEnabled,
   PRACTICE_CYCLE_HINT,
 } from '@/lib/practice-cycle-hint'
+// Mechanism-correction M6 (CI-5 schema + write half, 2026-06-14): per-consult
+// agent trajectory persistence. Flag-gated by SUBSTRATE_TRAJECTORY_WRITE_ENABLED;
+// when unset the whole write block (incl. the credential-context lookup) is
+// skipped — byte-identical, zero new DB reads. WRITE-ONLY this half: the engine
+// does NOT read these rows back (determinism untouched); M7 wires the windowed
+// read. The row is projected via the canonical Layer2Assessment→EvaluatedAction
+// bridge (PR15 reuse) and keyed to the consulting credential.
+import {
+  isTrajectoryWriteEnabled,
+  persistAssessmentHistory,
+  resolveCredentialContext,
+} from '@/lib/substrate/agent-assessment-history-store'
+import { mapLayer2AssessmentToEvaluatedAction } from '@/lib/substrate/sage-assent-bridge'
+import { isAcceptedAgentId } from '@/lib/substrate/trust-layer/accreditation/agent-id-vocabulary'
 
 // =============================================================================
 // sage-reason — The Universal Reasoning Layer
@@ -1288,6 +1302,79 @@ export async function POST(request: NextRequest) {
         ...(narrativeStatus !== undefined ? { narrativeStatus } : {}),
       },
     })
+
+    // Mechanism-correction M6 (CI-5 schema + write half, 2026-06-14): persist the
+    // per-consult agent trajectory keyed to the consulting credential. WRITE-ONLY
+    // — the engine does NOT read this back (determinism untouched); M7 wires the
+    // windowed read. Awaited (KG1 rule 2 — no fire-and-forget; Vercel terminates
+    // after the response). Fail-honest: a write failure is logged and the response
+    // proceeds unchanged (the guarantee never rides on a write that didn't land —
+    // the M1 election). Entirely skipped (incl. the credential-context lookup) when
+    // SUBSTRATE_TRAJECTORY_WRITE_ENABLED is unset → byte-identical, zero new reads.
+    // Only a real examination writes a row (assessment produced; no Tier-1
+    // short-circuit, no error); user-JWT consults carry no agent identity → no row.
+    if (
+      isTrajectoryWriteEnabled() &&
+      sandwichResult.error === null &&
+      sandwichResult.tier1_trigger === null &&
+      sandwichResult.layer2_assessment !== null
+    ) {
+      let credentialRef: string | null = null
+      let ownerUserId: string | null = null
+      let declaredAgentId: string | null = null
+
+      if (apiKey && apiKey.valid) {
+        credentialRef = `api_key:${apiKey.api_key_id}`
+        // The sr_live_ credential's operator + declared agent identity live on its
+        // api_keys row (validateApiKey does not surface them). One gated, indexed
+        // PK read — only when the flag is on, so flag-off adds no DB read.
+        const credCtx = await resolveCredentialContext(apiKey.api_key_id)
+        ownerUserId = credCtx.owner_user_id
+        declaredAgentId =
+          credCtx.agent_id !== null && isAcceptedAgentId(credCtx.agent_id)
+            ? credCtx.agent_id
+            : null
+      } else if (installAuth && installAuth.valid) {
+        // A10 per-install path: the operator (owner_user_id) + install_id are on
+        // the validated credential; no declared K1 agent_identity today.
+        credentialRef = `install:${installAuth.install_id}`
+        ownerUserId = installAuth.owner_user_id
+      }
+
+      if (credentialRef !== null) {
+        const evaluatedAction = mapLayer2AssessmentToEvaluatedAction(
+          sandwichResult.layer2_assessment,
+          {
+            // The K1 declared identity when present, else the stable credential
+            // handle (the row stores credential_ref + agent_id as separate
+            // columns; this projected agent_id is not the persisted windowing key
+            // — M7 windows by credential_ref / agent_id columns).
+            agent_id: declaredAgentId ?? credentialRef,
+            evaluated_at: new Date().toISOString(),
+            skill_id: 'api_reason',
+            // receipt_id derives from this; correlation_id is the per-consult
+            // unique handle (no signed-assessment dependency on this path).
+            signature: correlationId,
+            candidates_considered: 1,
+          },
+        )
+        const trajectoryWrite = await persistAssessmentHistory({
+          correlationId,
+          credentialRef,
+          ownerUserId,
+          agentId: declaredAgentId,
+          depthTier: depth,
+          surface: 'api_reason',
+          action: evaluatedAction,
+        })
+        if (!trajectoryWrite.ok) {
+          console.warn(
+            '[/api/reason] trajectory history write failed (response unaffected):',
+            trajectoryWrite.error,
+          )
+        }
+      }
+    }
 
     // Branch 1 — Tier 1 force-clarification fired (3A surfacing).
     if (sandwichResult.tier1_trigger !== null && sandwichResult.output) {

@@ -18,6 +18,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { decryptProfileData, type ServerEncryptedPayload } from '@/lib/server-encryption'
+// R17i (CI-5 / M6, 2026-06-14): export the per-consult agent trajectory keyed to
+// the operator (owner_user_id = profiles.id = the auth user id).
+import { getAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessment-history-store'
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -109,6 +112,23 @@ export async function GET(request: NextRequest) {
       exportData[key] = { error: error.message }
     } else {
       exportData[key] = data || []
+    }
+  }
+
+  // 2b. agent_assessment_history (CI-5 / M6) — keyed to owner_user_id
+  //     (= profiles.id = this auth user id), so it is exported separately from the
+  //     .eq('user_id') loop above. Structural trajectory facts (no encrypted prose
+  //     — that lives in substrate_audit_narratives). A "does not exist" error is
+  //     tolerated: the M6 migration is its own founder-elected step, and the Live
+  //     export route must not break before it lands.
+  {
+    // The store classifies a not-yet-migrated table as benign empty
+    // (isMissingTableError → ok:true, []), so only a REAL failure surfaces here.
+    const aahExport = await getAssessmentHistoryForOwner(userId)
+    if (!aahExport.ok) {
+      exportData.agent_assessment_history = { error: aahExport.error }
+    } else {
+      exportData.agent_assessment_history = aahExport.value
     }
   }
 
