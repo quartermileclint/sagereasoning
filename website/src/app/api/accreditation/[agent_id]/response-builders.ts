@@ -65,6 +65,10 @@ import {
 } from '@/lib/substrate/trust-layer/card/accreditation-card'
 
 import type { AccreditationRecord } from '@/lib/substrate/trust-layer/types/accreditation'
+// Mechanism-correction M5 (CI-13, 2026-06-13): the reflect-at-close practice
+// hint on the accreditation-write success response. Flag-gated; absent when off
+// (byte-identical). See src/lib/practice-cycle-hint.ts.
+import { practiceCycleHintField } from '@/lib/practice-cycle-hint'
 
 // ============================================================================
 // CONSTANTS
@@ -240,6 +244,10 @@ export function buildWriteSuccessResponse(
       status: 'ok',
       documentation_url: DOCUMENTATION_URL,
       ...(loopClosure !== undefined ? { loop_closure: loopClosure } : {}),
+      // M5 CI-13 (2026-06-13): the reflect-at-close practice hint. Absent
+      // entirely when SUBSTRATE_PRACTICE_CYCLE_HINT_ENABLED is unset
+      // (byte-identical to pre-M5).
+      ...practiceCycleHintField(),
     },
     {
       status: 200,

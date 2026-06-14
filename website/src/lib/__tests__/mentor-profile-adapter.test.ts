@@ -13,7 +13,7 @@
  * captures every nuance of the persisted data". The latter is for the
  * live-probe verification at the end of Session 1.
  *
- * Run: npx jest mentor-profile-adapter --no-coverage
+ * Run: npx tsx src/lib/__tests__/mentor-profile-adapter.test.ts
  */
 
 import {
@@ -22,6 +22,15 @@ import {
   type MentorProfileData,
 } from '../mentor-profile-adapter'
 import type { MentorProfile } from '../../../../sage-mentor'
+import { isDeepStrictEqual } from 'node:util'
+
+let passed = 0
+let failed = 0
+const failures: string[] = []
+
+function assert(condition: boolean, label: string): void {
+  if (condition) { passed++ } else { failed++; failures.push(label); console.error('FAIL: ' + label) }
+}
 
 // ---------------------------------------------------------------------------
 // Representative input — covers every field the adapter reads.
@@ -148,174 +157,198 @@ const REQUIRED_DIMENSION_KEYS: Array<keyof MentorProfile['dimensions']> = [
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('frequencyBucketFromCount', () => {
-  it('maps boundary counts to the documented buckets', () => {
-    expect(frequencyBucketFromCount(1)).toBe('rare')
-    expect(frequencyBucketFromCount(2)).toBe('occasional')
-    expect(frequencyBucketFromCount(3)).toBe('occasional')
-    expect(frequencyBucketFromCount(4)).toBe('recurring')
-    expect(frequencyBucketFromCount(6)).toBe('recurring')
-    expect(frequencyBucketFromCount(7)).toBe('persistent')
-    expect(frequencyBucketFromCount(12)).toBe('persistent')
-  })
+// describe('frequencyBucketFromCount')
 
-  it('clamps out-of-range values to the nearest bucket without throwing', () => {
-    expect(frequencyBucketFromCount(0)).toBe('rare')
-    expect(frequencyBucketFromCount(-3)).toBe('rare')
-    expect(frequencyBucketFromCount(99)).toBe('persistent')
-  })
+// it('maps boundary counts to the documented buckets')
+{
+  assert(Object.is(frequencyBucketFromCount(1), 'rare'), 'frequencyBucketFromCount: maps boundary counts — 1 → rare')
+  assert(Object.is(frequencyBucketFromCount(2), 'occasional'), 'frequencyBucketFromCount: maps boundary counts — 2 → occasional')
+  assert(Object.is(frequencyBucketFromCount(3), 'occasional'), 'frequencyBucketFromCount: maps boundary counts — 3 → occasional')
+  assert(Object.is(frequencyBucketFromCount(4), 'recurring'), 'frequencyBucketFromCount: maps boundary counts — 4 → recurring')
+  assert(Object.is(frequencyBucketFromCount(6), 'recurring'), 'frequencyBucketFromCount: maps boundary counts — 6 → recurring')
+  assert(Object.is(frequencyBucketFromCount(7), 'persistent'), 'frequencyBucketFromCount: maps boundary counts — 7 → persistent')
+  assert(Object.is(frequencyBucketFromCount(12), 'persistent'), 'frequencyBucketFromCount: maps boundary counts — 12 → persistent')
+}
 
-  it('survives non-numeric and non-finite input', () => {
-    // @ts-expect-error — testing runtime safety against malformed input
-    expect(frequencyBucketFromCount('not a number')).toBe('rare')
-    expect(frequencyBucketFromCount(NaN)).toBe('rare')
-    expect(frequencyBucketFromCount(Infinity)).toBe('rare')
-  })
+// it('clamps out-of-range values to the nearest bucket without throwing')
+{
+  assert(Object.is(frequencyBucketFromCount(0), 'rare'), 'frequencyBucketFromCount: clamps out-of-range — 0 → rare')
+  assert(Object.is(frequencyBucketFromCount(-3), 'rare'), 'frequencyBucketFromCount: clamps out-of-range — -3 → rare')
+  assert(Object.is(frequencyBucketFromCount(99), 'persistent'), 'frequencyBucketFromCount: clamps out-of-range — 99 → persistent')
+}
+
+// it('survives non-numeric and non-finite input')
+{
+  // @ts-expect-error — testing runtime safety against malformed input
+  assert(Object.is(frequencyBucketFromCount('not a number'), 'rare'), 'frequencyBucketFromCount: survives non-numeric — "not a number" → rare')
+  assert(Object.is(frequencyBucketFromCount(NaN), 'rare'), 'frequencyBucketFromCount: survives non-finite — NaN → rare')
+  assert(Object.is(frequencyBucketFromCount(Infinity), 'rare'), 'frequencyBucketFromCount: survives non-finite — Infinity → rare')
+}
+
+// describe('adaptMentorProfileDataToCanonical')
+
+// beforeAll
+const result: MentorProfile = adaptMentorProfileDataToCanonical(SAMPLE_INPUT, {
+  lastUpdated: '2026-04-25T10:00:00.000Z',
 })
 
-describe('adaptMentorProfileDataToCanonical', () => {
-  let result: MentorProfile
+// it('returns an object with every required top-level key')
+{
+  for (const key of REQUIRED_TOP_LEVEL_KEYS) {
+    assert(key in (result as object), 'adaptMentorProfileDataToCanonical: returns object with every required top-level key — has ' + String(key))
+  }
+}
 
-  beforeAll(() => {
-    result = adaptMentorProfileDataToCanonical(SAMPLE_INPUT, {
-      lastUpdated: '2026-04-25T10:00:00.000Z',
-    })
-  })
+// it('preserves identity fields directly')
+{
+  assert(Object.is(result.user_id, 'sample-user'), 'adaptMentorProfileDataToCanonical: preserves identity fields — user_id')
+  assert(Object.is(result.display_name, 'Sample Practitioner'), 'adaptMentorProfileDataToCanonical: preserves identity fields — display_name')
+}
 
-  it('returns an object with every required top-level key', () => {
-    for (const key of REQUIRED_TOP_LEVEL_KEYS) {
-      expect(result).toHaveProperty(key)
-    }
-  })
+// it('converts passion_map entries with frequency-bucket mapping')
+{
+  assert(Object.is(result.passion_map.length, 3), 'adaptMentorProfileDataToCanonical: converts passion_map — length 3')
+  const persistent = result.passion_map.find((p) => p.passion_id === 'phobos-deadline')
+  const recurring = result.passion_map.find((p) => p.passion_id === 'lupe-loss')
+  const rare = result.passion_map.find((p) => p.passion_id === 'epithumia-status')
+  assert(Object.is(persistent?.frequency, 'persistent'), 'adaptMentorProfileDataToCanonical: converts passion_map — persistent.frequency')
+  assert(Object.is(recurring?.frequency, 'recurring'), 'adaptMentorProfileDataToCanonical: converts passion_map — recurring.frequency')
+  assert(Object.is(rare?.frequency, 'rare'), 'adaptMentorProfileDataToCanonical: converts passion_map — rare.frequency')
+  assert(Object.is(persistent?.false_judgement, 'Missing the deadline would damage my standing.'), 'adaptMentorProfileDataToCanonical: converts passion_map — persistent.false_judgement')
+}
 
-  it('preserves identity fields directly', () => {
-    expect(result.user_id).toBe('sample-user')
-    expect(result.display_name).toBe('Sample Practitioner')
-  })
+// it('derives persisting_passions from recurring/persistent entries only')
+{
+  assert(result.persisting_passions.includes('deadline anxiety'), 'adaptMentorProfileDataToCanonical: derives persisting_passions — contains "deadline anxiety"')
+  assert(result.persisting_passions.includes('financial loss aversion'), 'adaptMentorProfileDataToCanonical: derives persisting_passions — contains "financial loss aversion"')
+  assert(!result.persisting_passions.includes('status seeking'), 'adaptMentorProfileDataToCanonical: derives persisting_passions — does NOT contain "status seeking"')
+}
 
-  it('converts passion_map entries with frequency-bucket mapping', () => {
-    expect(result.passion_map.length).toBe(3)
-    const persistent = result.passion_map.find((p) => p.passion_id === 'phobos-deadline')
-    const recurring = result.passion_map.find((p) => p.passion_id === 'lupe-loss')
-    const rare = result.passion_map.find((p) => p.passion_id === 'epithumia-status')
-    expect(persistent?.frequency).toBe('persistent')
-    expect(recurring?.frequency).toBe('recurring')
-    expect(rare?.frequency).toBe('rare')
-    expect(persistent?.false_judgement).toBe('Missing the deadline would damage my standing.')
-  })
+// it('converts causal_tendencies record into an array with valid failure_points')
+{
+  assert(Object.is(Array.isArray(result.causal_tendencies), true), 'adaptMentorProfileDataToCanonical: converts causal_tendencies — is array')
+  assert(result.causal_tendencies.length >= 1, 'adaptMentorProfileDataToCanonical: converts causal_tendencies — length >= 1')
+  const failurePoints = result.causal_tendencies.map((c) => c.failure_point)
+  assert(failurePoints.includes('phantasia'), 'adaptMentorProfileDataToCanonical: converts causal_tendencies — failure_points contains "phantasia"')
+}
 
-  it('derives persisting_passions from recurring/persistent entries only', () => {
-    expect(result.persisting_passions).toEqual(
-      expect.arrayContaining(['deadline anxiety', 'financial loss aversion']),
-    )
-    expect(result.persisting_passions).not.toContain('status seeking')
-  })
+// it('converts value_hierarchy with declared/observed split and gap_detected flags')
+{
+  assert(Object.is(Array.isArray(result.value_hierarchy), true), 'adaptMentorProfileDataToCanonical: converts value_hierarchy — is array')
+  const familyEntry = result.value_hierarchy.find((v) => v.item === 'family')
+  const gapEntry = result.value_hierarchy.find((v) => v.item === 'professional reputation')
+  assert(Object.is(familyEntry?.gap_detected, false), 'adaptMentorProfileDataToCanonical: converts value_hierarchy — family gap_detected false')
+  assert(Object.is(gapEntry?.gap_detected, true), 'adaptMentorProfileDataToCanonical: converts value_hierarchy — gap gap_detected true')
+  assert(Object.is(gapEntry?.observed_classification, 'genuine good'), 'adaptMentorProfileDataToCanonical: converts value_hierarchy — gap observed_classification "genuine good"')
+}
 
-  it('converts causal_tendencies record into an array with valid failure_points', () => {
-    expect(Array.isArray(result.causal_tendencies)).toBe(true)
-    expect(result.causal_tendencies.length).toBeGreaterThanOrEqual(1)
-    const failurePoints = result.causal_tendencies.map((c) => c.failure_point)
-    expect(failurePoints).toEqual(expect.arrayContaining(['phantasia']))
-  })
+// it('converts oikeiosis_map into an array with valid stages')
+{
+  assert(Object.is(Array.isArray(result.oikeiosis_map), true), 'adaptMentorProfileDataToCanonical: converts oikeiosis_map — is array')
+  const stages = result.oikeiosis_map.map((o) => o.oikeiosis_stage)
+  assert(stages.includes('self_preservation'), 'adaptMentorProfileDataToCanonical: converts oikeiosis_map — stages contains "self_preservation"')
+  assert(stages.includes('household'), 'adaptMentorProfileDataToCanonical: converts oikeiosis_map — stages contains "household"')
+  assert(stages.includes('community'), 'adaptMentorProfileDataToCanonical: converts oikeiosis_map — stages contains "community"')
+}
 
-  it('converts value_hierarchy with declared/observed split and gap_detected flags', () => {
-    expect(Array.isArray(result.value_hierarchy)).toBe(true)
-    const familyEntry = result.value_hierarchy.find((v) => v.item === 'family')
-    const gapEntry = result.value_hierarchy.find((v) => v.item === 'professional reputation')
-    expect(familyEntry?.gap_detected).toBe(false)
-    expect(gapEntry?.gap_detected).toBe(true)
-    expect(gapEntry?.observed_classification).toBe('genuine good')
-  })
+// it('converts virtue_profile into an array with all four virtue domains')
+{
+  assert(Object.is(Array.isArray(result.virtue_profile), true), 'adaptMentorProfileDataToCanonical: converts virtue_profile — is array')
+  const domains = result.virtue_profile.map((v) => v.domain)
+  assert(domains.includes('phronesis'), 'adaptMentorProfileDataToCanonical: converts virtue_profile — domains contains "phronesis"')
+  assert(domains.includes('sophrosyne'), 'adaptMentorProfileDataToCanonical: converts virtue_profile — domains contains "sophrosyne"')
+  assert(domains.includes('andreia'), 'adaptMentorProfileDataToCanonical: converts virtue_profile — domains contains "andreia"')
+  assert(domains.includes('dikaiosyne'), 'adaptMentorProfileDataToCanonical: converts virtue_profile — domains contains "dikaiosyne"')
+}
 
-  it('converts oikeiosis_map into an array with valid stages', () => {
-    expect(Array.isArray(result.oikeiosis_map)).toBe(true)
-    const stages = result.oikeiosis_map.map((o) => o.oikeiosis_stage)
-    expect(stages).toEqual(expect.arrayContaining(['self_preservation', 'household', 'community']))
-  })
+// it('derives senecan_grade and proximity_level from proximity_estimate')
+{
+  assert(Object.is(result.senecan_grade, 'grade_3'), 'adaptMentorProfileDataToCanonical: derives senecan_grade — grade_3')
+  assert(Object.is(result.proximity_level, 'deliberate'), 'adaptMentorProfileDataToCanonical: derives proximity_level — deliberate')
+}
 
-  it('converts virtue_profile into an array with all four virtue domains', () => {
-    expect(Array.isArray(result.virtue_profile)).toBe(true)
-    const domains = result.virtue_profile.map((v) => v.domain)
-    expect(domains).toEqual(
-      expect.arrayContaining(['phronesis', 'sophrosyne', 'andreia', 'dikaiosyne']),
-    )
-  })
+// it('populates dimensions with the documented honest sentinels')
+{
+  for (const key of REQUIRED_DIMENSION_KEYS) {
+    assert(Object.is(result.dimensions[key], 'developing'), 'adaptMentorProfileDataToCanonical: populates dimensions — ' + String(key) + ' === "developing"')
+  }
+}
 
-  it('derives senecan_grade and proximity_level from proximity_estimate', () => {
-    expect(result.senecan_grade).toBe('grade_3')
-    expect(result.proximity_level).toBe('deliberate')
-  })
+// it('uses honest sentinels for sage-only fields not present in MentorProfileData')
+{
+  assert(result.current_prescription === null, 'adaptMentorProfileDataToCanonical: honest sentinels — current_prescription null')
+  assert(Object.is(result.direction_of_travel, 'stable'), 'adaptMentorProfileDataToCanonical: honest sentinels — direction_of_travel "stable"')
+  assert(Object.is(result.interaction_count, 0), 'adaptMentorProfileDataToCanonical: honest sentinels — interaction_count 0')
+  assert(isDeepStrictEqual(result.journal_references, []), 'adaptMentorProfileDataToCanonical: honest sentinels — journal_references []')
+  assert(Object.is(result.last_interaction, '2026-04-25T10:00:00.000Z'), 'adaptMentorProfileDataToCanonical: honest sentinels — last_interaction')
+}
 
-  it('populates dimensions with the documented honest sentinels', () => {
-    for (const key of REQUIRED_DIMENSION_KEYS) {
-      expect(result.dimensions[key]).toBe('developing')
-    }
-  })
+// it('falls back to "not yet recorded" when no lastUpdated meta is provided')
+{
+  const noMeta = adaptMentorProfileDataToCanonical(SAMPLE_INPUT)
+  assert(Object.is(noMeta.last_interaction, 'not yet recorded'), 'adaptMentorProfileDataToCanonical: falls back to "not yet recorded" when no lastUpdated meta')
+}
 
-  it('uses honest sentinels for sage-only fields not present in MentorProfileData', () => {
-    expect(result.current_prescription).toBeNull()
-    expect(result.direction_of_travel).toBe('stable')
-    expect(result.interaction_count).toBe(0)
-    expect(result.journal_references).toEqual([])
-    expect(result.last_interaction).toBe('2026-04-25T10:00:00.000Z')
-  })
+// it('forwards preferred_indifferents from the aggregate field')
+{
+  assert(result.preferred_indifferents.includes('professional reputation'), 'adaptMentorProfileDataToCanonical: forwards preferred_indifferents — contains "professional reputation"')
+  assert(result.preferred_indifferents.includes('project velocity'), 'adaptMentorProfileDataToCanonical: forwards preferred_indifferents — contains "project velocity"')
+  assert(result.preferred_indifferents.includes('recognition'), 'adaptMentorProfileDataToCanonical: forwards preferred_indifferents — contains "recognition"')
+}
 
-  it('falls back to "not yet recorded" when no lastUpdated meta is provided', () => {
-    const noMeta = adaptMentorProfileDataToCanonical(SAMPLE_INPUT)
-    expect(noMeta.last_interaction).toBe('not yet recorded')
-  })
+// it('passes through the seven website-only optional fields (ADR-Ring-2-01 Session 2 — C-α)')
+{
+  // Provenance fields
+  assert(Object.is(result.journal_name, 'Sample Journal'), 'adaptMentorProfileDataToCanonical: passes through website-only — journal_name')
+  assert(Object.is(result.journal_period, '2026-Q1'), 'adaptMentorProfileDataToCanonical: passes through website-only — journal_period')
+  assert(Object.is(result.sections_processed, 4), 'adaptMentorProfileDataToCanonical: passes through website-only — sections_processed')
+  assert(Object.is(result.entries_processed, 28), 'adaptMentorProfileDataToCanonical: passes through website-only — entries_processed')
+  assert(Object.is(result.total_word_count, 12_345), 'adaptMentorProfileDataToCanonical: passes through website-only — total_word_count')
 
-  it('forwards preferred_indifferents from the aggregate field', () => {
-    expect(result.preferred_indifferents).toEqual(
-      expect.arrayContaining(['professional reputation', 'project velocity', 'recognition']),
-    )
-  })
+  // Biographical context
+  assert(result.founder_facts !== undefined, 'adaptMentorProfileDataToCanonical: passes through website-only — founder_facts defined')
+  assert(Object.is(result.founder_facts?.age, 47), 'adaptMentorProfileDataToCanonical: passes through website-only — founder_facts.age')
+  assert(Object.is(result.founder_facts?.years_married, 18), 'adaptMentorProfileDataToCanonical: passes through website-only — founder_facts.years_married')
+  assert(isDeepStrictEqual(result.founder_facts?.children_ages, [12, 9]), 'adaptMentorProfileDataToCanonical: passes through website-only — founder_facts.children_ages')
+  assert(isDeepStrictEqual(result.founder_facts?.additional_context, [
+    'Recently relocated for family reasons.',
+  ]), 'adaptMentorProfileDataToCanonical: passes through website-only — founder_facts.additional_context')
 
-  it('passes through the seven website-only optional fields (ADR-Ring-2-01 Session 2 — C-α)', () => {
-    // Provenance fields
-    expect(result.journal_name).toBe('Sample Journal')
-    expect(result.journal_period).toBe('2026-Q1')
-    expect(result.sections_processed).toBe(4)
-    expect(result.entries_processed).toBe(28)
-    expect(result.total_word_count).toBe(12_345)
+  // Flat proximity description (per ADR §12 Session 2 — not a sub-object)
+  assert(Object.is(result.proximity_estimate_description,
+    'Reasoning is deliberate when calm; reflexive under pressure.'),
+    'adaptMentorProfileDataToCanonical: passes through website-only — proximity_estimate_description')
+}
 
-    // Biographical context
-    expect(result.founder_facts).toBeDefined()
-    expect(result.founder_facts?.age).toBe(47)
-    expect(result.founder_facts?.years_married).toBe(18)
-    expect(result.founder_facts?.children_ages).toEqual([12, 9])
-    expect(result.founder_facts?.additional_context).toEqual([
-      'Recently relocated for family reasons.',
-    ])
+// it('survives a sparse input (empty arrays, missing optional fields) without throwing')
+{
+  const sparse: MentorProfileData = {
+    user_id: 'sparse-user',
+    display_name: 'Sparse',
+    journal_name: '',
+    journal_period: '',
+    sections_processed: 0,
+    entries_processed: 0,
+    total_word_count: 0,
+    passion_map: [],
+    virtue_profile: {},
+    causal_tendencies: { primary_breakdown: '', description: '', specific_breakdowns: {} },
+    value_hierarchy: { explicit_top_values: [], primary_conflict: '', classification_gaps: [] },
+    oikeiosis_map: {},
+    proximity_estimate: { level: '', senecan_grade: '', description: '' },
+    preferred_indifferents_aggregate: [],
+  }
+  const out = adaptMentorProfileDataToCanonical(sparse)
+  assert(isDeepStrictEqual(out.passion_map, []), 'adaptMentorProfileDataToCanonical: survives sparse — passion_map []')
+  assert(isDeepStrictEqual(out.persisting_passions, []), 'adaptMentorProfileDataToCanonical: survives sparse — persisting_passions []')
+  assert(isDeepStrictEqual(out.virtue_profile, []), 'adaptMentorProfileDataToCanonical: survives sparse — virtue_profile []')
+  assert(Object.is(out.proximity_level, 'reflexive'), 'adaptMentorProfileDataToCanonical: survives sparse — proximity_level default "reflexive"')
+  assert(Object.is(out.senecan_grade, 'pre_progress'), 'adaptMentorProfileDataToCanonical: survives sparse — senecan_grade default "pre_progress"')
+}
 
-    // Flat proximity description (per ADR §12 Session 2 — not a sub-object)
-    expect(result.proximity_estimate_description).toBe(
-      'Reasoning is deliberate when calm; reflexive under pressure.',
-    )
-  })
-
-  it('survives a sparse input (empty arrays, missing optional fields) without throwing', () => {
-    const sparse: MentorProfileData = {
-      user_id: 'sparse-user',
-      display_name: 'Sparse',
-      journal_name: '',
-      journal_period: '',
-      sections_processed: 0,
-      entries_processed: 0,
-      total_word_count: 0,
-      passion_map: [],
-      virtue_profile: {},
-      causal_tendencies: { primary_breakdown: '', description: '', specific_breakdowns: {} },
-      value_hierarchy: { explicit_top_values: [], primary_conflict: '', classification_gaps: [] },
-      oikeiosis_map: {},
-      proximity_estimate: { level: '', senecan_grade: '', description: '' },
-      preferred_indifferents_aggregate: [],
-    }
-    const out = adaptMentorProfileDataToCanonical(sparse)
-    expect(out.passion_map).toEqual([])
-    expect(out.persisting_passions).toEqual([])
-    expect(out.virtue_profile).toEqual([])
-    expect(out.proximity_level).toBe('reflexive') // default
-    expect(out.senecan_grade).toBe('pre_progress') // default
-  })
-})
+console.log('\n' + passed + ' passed, ' + failed + ' failed')
+if (failed > 0) {
+  console.error('\nFailures:')
+  for (const f of failures) console.error('  - ' + f)
+  process.exit(1)
+}

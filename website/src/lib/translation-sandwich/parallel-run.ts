@@ -51,6 +51,10 @@ import {
   type Tier1Trigger,
   type Layer2Assessment,
 } from './layer2-mechanisms'
+// Mechanism-correction M5 (CI-4 reason-route half): the loop-closure
+// examination markers the route builds and runSandwichInner attaches inside the
+// signed assessment. See reason-loop-closure.ts.
+import { examinationOpen, type ExaminationMarkers } from './reason-loop-closure'
 import {
   generateProse,
   generateFallbackProse,
@@ -279,6 +283,22 @@ export interface SandwichInput {
    * classifier cost on /api/reason traffic.
    */
   safetyGate?: SafetyGate
+  /**
+   * Added 2026-06-13 (mechanism-correction M5, CI-4 reason-route half;
+   * D-MECHANISM-CORRECTION-BUILD-PLAN-APPROVED-2026-06-12): loop-closure
+   * examination markers. The route builds these (and only passes them) when
+   * SUBSTRATE_REASON_LOOP_CLOSURE_ENABLED is on. runSandwichInner attaches them
+   * to the Layer2Assessment BEFORE signing (both the deferred and inline
+   * paths), so they sit INSIDE the signature and the M3 write-boundary gate can
+   * trust them; it also surfaces a top-level `examination_open` on the composed
+   * output (true when this examination issued a redirection — owes a
+   * re-examination).
+   *
+   * When undefined (the default — flag off, and every existing caller),
+   * behaviour is byte-identical to the pre-M5 state: no markers, no
+   * examination_open.
+   */
+  loopClosure?: ExaminationMarkers
 }
 
 /**
@@ -795,6 +815,21 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     layer2Assessment = attachDistressSignalToAssessment(layer2Assessment, a7GateOutput)
   }
 
+  // ---- M5 CI-4 (2026-06-13): loop-closure examination markers ----
+  // Attach the markers the route built (only present when
+  // SUBSTRATE_REASON_LOOP_CLOSURE_ENABLED is on) BEFORE signing — both the
+  // deferred path (signs at the deferral branch below) and the inline path
+  // (signs before the final compose) sign the marked assessment, so the markers
+  // sit INSIDE the signature and the M3 write-boundary gate can trust them.
+  //
+  // params.loopClosure is already shaped to omit prior_feedback_ref when absent
+  // (buildExaminationMarkers in reason-loop-closure.ts) — never an undefined
+  // value, which the Layer-2 canonicaliser would reject. When undefined (flag
+  // off / legacy caller), the field is never added: byte-identical signing.
+  if (params.loopClosure !== undefined) {
+    layer2Assessment = { ...layer2Assessment, examination: params.loopClosure }
+  }
+
   // ---- M1 CI-1 (2026-06-12): prose-deferral decision ----
   // The bare assessment is exposed for post-response narrative generation +
   // retention regardless of deferral (the route's inline-retention path needs
@@ -845,6 +880,13 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
       extraction: layer1Schema,
       assessment: deferredAssessmentField,
       prose: null,
+      // M5 CI-4 (2026-06-13): present only when the route passed loop-closure
+      // markers (SUBSTRATE_REASON_LOOP_CLOSURE_ENABLED on). True when this
+      // examination issued a redirection (improvement_path_structured non-null)
+      // — i.e. it owes a same-depth re-examination before the loop is closed.
+      ...(params.loopClosure !== undefined && {
+        examination_open: examinationOpen(layer2Assessment),
+      }),
       meta: {
         engine_attribution: 'translation-sandwich',
         layer1_latency_ms: result.layer1_latency_ms,
@@ -996,6 +1038,13 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     extraction: layer1Schema,
     assessment: assessmentField,
     prose: layer3Prose,
+    // M5 CI-4 (2026-06-13): present only when the route passed loop-closure
+    // markers (SUBSTRATE_REASON_LOOP_CLOSURE_ENABLED on). True when this
+    // examination issued a redirection (improvement_path_structured non-null) —
+    // i.e. it owes a same-depth re-examination before the loop is closed.
+    ...(params.loopClosure !== undefined && {
+      examination_open: examinationOpen(layer2Assessment),
+    }),
     meta: {
       engine_attribution: 'translation-sandwich',
       layer1_latency_ms: result.layer1_latency_ms,

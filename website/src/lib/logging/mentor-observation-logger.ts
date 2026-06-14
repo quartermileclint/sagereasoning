@@ -59,7 +59,9 @@ export interface MentorObservationInput {
 
   /**
    * Distilled third-person observation about the founder.
-   * Must be 50–1000 characters.
+   * Must be 50–500 characters (matches the DB CHECK on
+   * mentor_observations_structured.observation; see
+   * supabase/migrations/20260413_logging_refactor_gap4.sql:31).
    * Must NOT contain first-person mentor language ("I noticed", "You should").
    * Good: "Founder avoided naming fear as a passion — possible andreia blind spot."
    * Bad:  "I noticed you seem afraid. You should work on courage."
@@ -141,13 +143,20 @@ export function validateMentorObservation(input: MentorObservationInput): Valida
     errors.push(`Invalid date format: "${input.date}". Expected YYYY-MM-DD.`)
   }
 
-  // Observation length check (50–750 chars)
+  // Observation length check (50–500 chars). The 500 ceiling is the binding
+  // DB CHECK on mentor_observations_structured.observation
+  // (supabase/migrations/20260413_logging_refactor_gap4.sql:31) — the validator
+  // matches it so an over-length observation fails here with a clear message
+  // instead of at the DB insert. (Reconciled 2026-06-13: the code had drifted to
+  // 1000 and the comment to 750, both above the DB cap; a 501–1000 observation
+  // passed validation then failed the insert. The reflect prompt targets a
+  // STRICT 50–250 "one-sentence developmental signal", so 500 is generous.)
   const len = input.observation?.length || 0
   if (len < 50) {
     errors.push(`Observation too short (${len} chars). Minimum 50 characters. Distil the observation into a meaningful developmental signal.`)
   }
-  if (len > 1000) {
-    errors.push(`Observation too long (${len} chars). Maximum 1000 characters. Distil further.`)
+  if (len > 500) {
+    errors.push(`Observation too long (${len} chars). Maximum 500 characters. Distil further.`)
   }
 
   // First-person mentor language check

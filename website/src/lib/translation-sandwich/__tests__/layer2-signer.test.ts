@@ -19,7 +19,7 @@
  *      mutations as expected).
  *   8. key_id field reflects SUBSTRATE_LAYER2_KEY_ID env var.
  *
- * Run: npx jest layer2-signer --no-coverage
+ * Run: npx tsx <this file>
  *
  * Rules served:
  *   - PR1: round-trip + perturbation tests are the verification step the
@@ -42,6 +42,14 @@ import {
 } from '../layer2-signer'
 import { canonicaliseLayer2Assessment } from '../layer2-canonical-json'
 import type { Layer2Assessment } from '../layer2-mechanisms'
+
+let passed = 0
+let failed = 0
+const failures: string[] = []
+
+function assert(condition: boolean, label: string): void {
+  if (condition) { passed++ } else { failed++; failures.push(label); console.error('FAIL: ' + label) }
+}
 
 // ============================================================================
 // FIXTURES
@@ -129,33 +137,35 @@ function generateTestKeypair(): { privatePem: string; publicPem: string } {
 
 const { SIGNING_KEY_ENV_VAR, KEY_ID_ENV_VAR, DEFAULT_KEY_ID } = SUBSTRATE_LAYER2_SIGNER_CONFIG
 
-let savedSigningKey: string | undefined
-let savedKeyId: string | undefined
+// beforeEach: capture prior env values. afterEach: restore them.
+function captureEnv(): { savedSigningKey: string | undefined; savedKeyId: string | undefined } {
+  return {
+    savedSigningKey: process.env[SIGNING_KEY_ENV_VAR],
+    savedKeyId: process.env[KEY_ID_ENV_VAR],
+  }
+}
 
-beforeEach(() => {
-  savedSigningKey = process.env[SIGNING_KEY_ENV_VAR]
-  savedKeyId = process.env[KEY_ID_ENV_VAR]
-})
-
-afterEach(() => {
-  if (savedSigningKey !== undefined) {
-    process.env[SIGNING_KEY_ENV_VAR] = savedSigningKey
+function restoreEnv(saved: { savedSigningKey: string | undefined; savedKeyId: string | undefined }): void {
+  if (saved.savedSigningKey !== undefined) {
+    process.env[SIGNING_KEY_ENV_VAR] = saved.savedSigningKey
   } else {
     delete process.env[SIGNING_KEY_ENV_VAR]
   }
-  if (savedKeyId !== undefined) {
-    process.env[KEY_ID_ENV_VAR] = savedKeyId
+  if (saved.savedKeyId !== undefined) {
+    process.env[KEY_ID_ENV_VAR] = saved.savedKeyId
   } else {
     delete process.env[KEY_ID_ENV_VAR]
   }
-})
+}
 
 // ============================================================================
-// TESTS
+// TESTS — signLayer2Assessment
 // ============================================================================
 
-describe('signLayer2Assessment', () => {
-  it('produces an 88-base64-char (64-byte) Ed25519 signature (test 1)', () => {
+// produces an 88-base64-char (64-byte) Ed25519 signature (test 1)
+{
+  const saved = captureEnv()
+  try {
     const { privatePem } = generateTestKeypair()
     process.env[SIGNING_KEY_ENV_VAR] = privatePem
     process.env[KEY_ID_ENV_VAR] = 'test-key-1'
@@ -163,13 +173,19 @@ describe('signLayer2Assessment', () => {
     const signed = signLayer2Assessment(buildMinimalAssessment())
 
     // 64-byte Ed25519 signature = 88 base64 characters with '==' padding.
-    expect(signed.signature).toHaveLength(88)
-    expect(signed.signature).toMatch(/^[A-Za-z0-9+/]{86}==$/)
+    assert(signed.signature.length === 88, 'signLayer2Assessment: test 1 — signature is 88 base64 chars')
+    assert(/^[A-Za-z0-9+/]{86}==$/.test(signed.signature), 'signLayer2Assessment: test 1 — signature matches base64 86+== pattern')
     // Decoding back to bytes yields exactly 64 bytes.
-    expect(Buffer.from(signed.signature, 'base64')).toHaveLength(64)
-  })
+    assert(Buffer.from(signed.signature, 'base64').length === 64, 'signLayer2Assessment: test 1 — decoded signature is 64 bytes')
+  } finally {
+    restoreEnv(saved)
+  }
+}
 
-  it('signing the same assessment twice produces identical signatures (Ed25519 deterministic) (test 2)', () => {
+// signing the same assessment twice produces identical signatures (Ed25519 deterministic) (test 2)
+{
+  const saved = captureEnv()
+  try {
     const { privatePem } = generateTestKeypair()
     process.env[SIGNING_KEY_ENV_VAR] = privatePem
 
@@ -177,10 +193,16 @@ describe('signLayer2Assessment', () => {
     const signed1 = signLayer2Assessment(assessment)
     const signed2 = signLayer2Assessment(assessment)
 
-    expect(signed1.signature).toBe(signed2.signature)
-  })
+    assert(Object.is(signed1.signature, signed2.signature), 'signLayer2Assessment: test 2 — identical signatures (deterministic)')
+  } finally {
+    restoreEnv(saved)
+  }
+}
 
-  it('crypto.verify against the matching public key succeeds (test 3)', () => {
+// crypto.verify against the matching public key succeeds (test 3)
+{
+  const saved = captureEnv()
+  try {
     const { privatePem, publicPem } = generateTestKeypair()
     process.env[SIGNING_KEY_ENV_VAR] = privatePem
 
@@ -194,10 +216,16 @@ describe('signLayer2Assessment', () => {
       publicPem,
       Buffer.from(signed.signature, 'base64')
     )
-    expect(ok).toBe(true)
-  })
+    assert(Object.is(ok, true), 'signLayer2Assessment: test 3 — verify against matching public key succeeds')
+  } finally {
+    restoreEnv(saved)
+  }
+}
 
-  it('crypto.verify against a different public key fails (test 4)', () => {
+// crypto.verify against a different public key fails (test 4)
+{
+  const saved = captureEnv()
+  try {
     const { privatePem } = generateTestKeypair()
     const { publicPem: differentPublicPem } = generateTestKeypair()
     process.env[SIGNING_KEY_ENV_VAR] = privatePem
@@ -211,24 +239,52 @@ describe('signLayer2Assessment', () => {
       differentPublicPem,
       Buffer.from(signed.signature, 'base64')
     )
-    expect(ok).toBe(false)
-  })
+    assert(Object.is(ok, false), 'signLayer2Assessment: test 4 — verify against different public key fails')
+  } finally {
+    restoreEnv(saved)
+  }
+}
 
-  it('signing without SUBSTRATE_LAYER2_SIGNING_KEY env var throws SubstrateSigningKeyMissingError (test 5)', () => {
+// signing without SUBSTRATE_LAYER2_SIGNING_KEY env var throws SubstrateSigningKeyMissingError (test 5)
+{
+  const saved = captureEnv()
+  try {
     delete process.env[SIGNING_KEY_ENV_VAR]
 
-    expect(() => signLayer2Assessment(buildMinimalAssessment())).toThrow(SubstrateSigningKeyMissingError)
-    expect(() => signLayer2Assessment(buildMinimalAssessment())).toThrow(/is not set/)
-  })
+    let threw1 = false
+    try { signLayer2Assessment(buildMinimalAssessment()) } catch (e) { threw1 = e instanceof SubstrateSigningKeyMissingError }
+    assert(threw1, 'signLayer2Assessment: test 5 — throws SubstrateSigningKeyMissingError when key unset')
 
-  it('signing with malformed SUBSTRATE_LAYER2_SIGNING_KEY throws SubstrateSigningKeyMissingError (test 6)', () => {
+    let threwMsg = false
+    try { signLayer2Assessment(buildMinimalAssessment()) } catch (e) { threwMsg = e instanceof Error && /is not set/.test(e.message) }
+    assert(threwMsg, 'signLayer2Assessment: test 5 — error message matches /is not set/')
+  } finally {
+    restoreEnv(saved)
+  }
+}
+
+// signing with malformed SUBSTRATE_LAYER2_SIGNING_KEY throws SubstrateSigningKeyMissingError (test 6)
+{
+  const saved = captureEnv()
+  try {
     process.env[SIGNING_KEY_ENV_VAR] = 'not-a-pem-key'
 
-    expect(() => signLayer2Assessment(buildMinimalAssessment())).toThrow(SubstrateSigningKeyMissingError)
-    expect(() => signLayer2Assessment(buildMinimalAssessment())).toThrow(/malformed/)
-  })
+    let threw1 = false
+    try { signLayer2Assessment(buildMinimalAssessment()) } catch (e) { threw1 = e instanceof SubstrateSigningKeyMissingError }
+    assert(threw1, 'signLayer2Assessment: test 6 — throws SubstrateSigningKeyMissingError when key malformed')
 
-  it('tampered assessment after signing fails verification (perturbation test 7)', () => {
+    let threwMsg = false
+    try { signLayer2Assessment(buildMinimalAssessment()) } catch (e) { threwMsg = e instanceof Error && /malformed/.test(e.message) }
+    assert(threwMsg, 'signLayer2Assessment: test 6 — error message matches /malformed/')
+  } finally {
+    restoreEnv(saved)
+  }
+}
+
+// tampered assessment after signing fails verification (perturbation test 7)
+{
+  const saved = captureEnv()
+  try {
     const { privatePem, publicPem } = generateTestKeypair()
     process.env[SIGNING_KEY_ENV_VAR] = privatePem
 
@@ -249,7 +305,7 @@ describe('signLayer2Assessment', () => {
       publicPem,
       Buffer.from(signed.signature, 'base64')
     )
-    expect(ok).toBe(false)
+    assert(Object.is(ok, false), 'signLayer2Assessment: test 7 — tampered assessment fails verification')
 
     // And: a one-byte mutation of the canonical bytes (not via the
     // assessment) also fails verification — confirms the signature is over
@@ -262,24 +318,45 @@ describe('signLayer2Assessment', () => {
       publicPem,
       Buffer.from(signed.signature, 'base64')
     )
-    expect(okMutated).toBe(false)
-  })
+    assert(Object.is(okMutated, false), 'signLayer2Assessment: test 7 — one-byte canonical mutation fails verification')
+  } finally {
+    restoreEnv(saved)
+  }
+}
 
-  it('key_id field reflects SUBSTRATE_LAYER2_KEY_ID env var (test 8)', () => {
+// key_id field reflects SUBSTRATE_LAYER2_KEY_ID env var (test 8)
+{
+  const saved = captureEnv()
+  try {
     const { privatePem } = generateTestKeypair()
     process.env[SIGNING_KEY_ENV_VAR] = privatePem
     process.env[KEY_ID_ENV_VAR] = 'substrate-layer2-2026Q9'
 
     const signed = signLayer2Assessment(buildMinimalAssessment())
-    expect(signed.key_id).toBe('substrate-layer2-2026Q9')
-  })
+    assert(Object.is(signed.key_id, 'substrate-layer2-2026Q9'), 'signLayer2Assessment: test 8 — key_id reflects KEY_ID env var')
+  } finally {
+    restoreEnv(saved)
+  }
+}
 
-  it('key_id falls back to default when SUBSTRATE_LAYER2_KEY_ID is unset', () => {
+// key_id falls back to default when SUBSTRATE_LAYER2_KEY_ID is unset
+{
+  const saved = captureEnv()
+  try {
     const { privatePem } = generateTestKeypair()
     process.env[SIGNING_KEY_ENV_VAR] = privatePem
     delete process.env[KEY_ID_ENV_VAR]
 
     const signed = signLayer2Assessment(buildMinimalAssessment())
-    expect(signed.key_id).toBe(DEFAULT_KEY_ID)
-  })
-})
+    assert(Object.is(signed.key_id, DEFAULT_KEY_ID), 'signLayer2Assessment: key_id falls back to default when KEY_ID unset')
+  } finally {
+    restoreEnv(saved)
+  }
+}
+
+console.log('\n' + passed + ' passed, ' + failed + ' failed')
+if (failed > 0) {
+  console.error('\nFailures:')
+  for (const f of failures) console.error('  - ' + f)
+  process.exit(1)
+}

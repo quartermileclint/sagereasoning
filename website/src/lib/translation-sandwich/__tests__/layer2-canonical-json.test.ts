@@ -7,7 +7,7 @@
  * depends on this helper producing the same byte sequence on signer and
  * verifier; these tests assert that contract.
  *
- * Run: npx jest layer2-canonical-json --no-coverage
+ * Run: npx tsx <this file>
  *
  * Rules served:
  *   - PR1: round-trip + invariant tests are the verification step the founder
@@ -33,6 +33,21 @@ import {
   Layer2CanonicalisationError,
 } from '../layer2-canonical-json'
 import type { Layer2Assessment } from '../layer2-mechanisms'
+import { isDeepStrictEqual } from 'node:util'
+
+let passed = 0
+let failed = 0
+const failures: string[] = []
+
+function assert(condition: boolean, label: string): void {
+  if (condition) {
+    passed++
+  } else {
+    failed++
+    failures.push(label)
+    console.error('FAIL: ' + label)
+  }
+}
 
 // ============================================================================
 // FIXTURES
@@ -108,102 +123,179 @@ function buildMinimalAssessment(): Layer2Assessment {
 // TESTS
 // ============================================================================
 
-describe('canonicaliseLayer2Assessment', () => {
-  it('produces stable canonical output for the minimal assessment (test 1)', () => {
-    const assessment = buildMinimalAssessment()
-    const out1 = canonicaliseLayer2Assessment(assessment)
-    const out2 = canonicaliseLayer2Assessment(assessment)
-    expect(out1).toBe(out2)
-    // Sanity: parses back to a valid object structurally equal to the input.
-    expect(JSON.parse(out1)).toEqual(assessment)
-  })
+// canonicaliseLayer2Assessment: produces stable canonical output for the minimal assessment (test 1)
+{
+  const assessment = buildMinimalAssessment()
+  const out1 = canonicaliseLayer2Assessment(assessment)
+  const out2 = canonicaliseLayer2Assessment(assessment)
+  assert(Object.is(out1, out2), 'test 1: produces stable canonical output for the minimal assessment')
+  // Sanity: parses back to a valid object structurally equal to the input.
+  assert(
+    isDeepStrictEqual(JSON.parse(out1), assessment),
+    'test 1: parses back to a structurally equal object'
+  )
+}
 
-  it('produces identical canonical output regardless of input property insertion order (test 2)', () => {
-    const a = buildMinimalAssessment()
-    // Construct a second assessment with the same values but with the property
-    // insertion order reversed at the top level. The nested objects retain
-    // their original insertion order — sufficient to demonstrate that
-    // canonicalisation does not depend on top-level ordering.
-    const b: Layer2Assessment = {
-      layer2_ambiguity_notes: a.layer2_ambiguity_notes,
-      layer1_ambiguity_notes: a.layer1_ambiguity_notes,
-      intake_clarifications: a.intake_clarifications,
-      hasty_assent_risk: a.hasty_assent_risk,
-      stage_scores: a.stage_scores,
-      improvement_path_structured: a.improvement_path_structured,
-      virtue_domains_engaged: a.virtue_domains_engaged,
-      ruling_faculty_state: a.ruling_faculty_state,
-      katorthoma_proximity: a.katorthoma_proximity,
-      iterative_refinement: a.iterative_refinement,
-      kathekon_assessment: a.kathekon_assessment,
-      value_assessment: a.value_assessment,
-      oikeiosis: a.oikeiosis,
-      control_filter: a.control_filter,
-      passion_diagnosis: a.passion_diagnosis,
-      layer1_schema_version: a.layer1_schema_version,
-      version: a.version,
+// canonicaliseLayer2Assessment: produces identical canonical output regardless of input property insertion order (test 2)
+{
+  const a = buildMinimalAssessment()
+  // Construct a second assessment with the same values but with the property
+  // insertion order reversed at the top level. The nested objects retain
+  // their original insertion order — sufficient to demonstrate that
+  // canonicalisation does not depend on top-level ordering.
+  const b: Layer2Assessment = {
+    layer2_ambiguity_notes: a.layer2_ambiguity_notes,
+    layer1_ambiguity_notes: a.layer1_ambiguity_notes,
+    intake_clarifications: a.intake_clarifications,
+    hasty_assent_risk: a.hasty_assent_risk,
+    stage_scores: a.stage_scores,
+    improvement_path_structured: a.improvement_path_structured,
+    virtue_domains_engaged: a.virtue_domains_engaged,
+    ruling_faculty_state: a.ruling_faculty_state,
+    katorthoma_proximity: a.katorthoma_proximity,
+    iterative_refinement: a.iterative_refinement,
+    kathekon_assessment: a.kathekon_assessment,
+    value_assessment: a.value_assessment,
+    oikeiosis: a.oikeiosis,
+    control_filter: a.control_filter,
+    passion_diagnosis: a.passion_diagnosis,
+    layer1_schema_version: a.layer1_schema_version,
+    version: a.version,
+  }
+  assert(
+    Object.is(canonicaliseLayer2Assessment(a), canonicaliseLayer2Assessment(b)),
+    'test 2: identical canonical output regardless of input property insertion order'
+  )
+}
+
+// canonicaliseLayer2Assessment: preserves array order for nested arrays (test 3)
+{
+  const a = buildMinimalAssessment()
+  const withArrays: Layer2Assessment = {
+    ...a,
+    layer1_ambiguity_notes: ['z', 'a', 'm'],
+    virtue_domains_engaged: ['phronesis', 'andreia', 'dikaiosyne'],
+  }
+  const out = canonicaliseLayer2Assessment(withArrays)
+  assert(
+    out.includes('"layer1_ambiguity_notes":["z","a","m"]'),
+    'test 3: preserves array order for layer1_ambiguity_notes'
+  )
+  assert(
+    out.includes('"virtue_domains_engaged":["phronesis","andreia","dikaiosyne"]'),
+    'test 3: preserves array order for virtue_domains_engaged'
+  )
+  // Negative: alphabetised array would have been ["a","m","z"]; the helper
+  // must NOT sort arrays.
+  assert(!out.includes('["a","m","z"]'), 'test 3: does not sort arrays alphabetically')
+}
+
+// canonicaliseLayer2Assessment: throws Layer2CanonicalisationError on NaN (test 4)
+{
+  const tampered = {
+    foo: NaN,
+  } as unknown as Layer2Assessment
+  {
+    let threw = false
+    try {
+      canonicaliseLayer2Assessment(tampered)
+    } catch (e) {
+      threw = e instanceof Layer2CanonicalisationError
     }
-    expect(canonicaliseLayer2Assessment(a)).toBe(canonicaliseLayer2Assessment(b))
-  })
-
-  it('preserves array order for nested arrays (test 3)', () => {
-    const a = buildMinimalAssessment()
-    const withArrays: Layer2Assessment = {
-      ...a,
-      layer1_ambiguity_notes: ['z', 'a', 'm'],
-      virtue_domains_engaged: ['phronesis', 'andreia', 'dikaiosyne'],
+    assert(threw, 'test 4: throws Layer2CanonicalisationError on NaN')
+  }
+  {
+    let threw = false
+    try {
+      canonicaliseLayer2Assessment(tampered)
+    } catch (e) {
+      threw = e instanceof Error && /Non-finite number/.test(e.message)
     }
-    const out = canonicaliseLayer2Assessment(withArrays)
-    expect(out).toContain('"layer1_ambiguity_notes":["z","a","m"]')
-    expect(out).toContain('"virtue_domains_engaged":["phronesis","andreia","dikaiosyne"]')
-    // Negative: alphabetised array would have been ["a","m","z"]; the helper
-    // must NOT sort arrays.
-    expect(out).not.toContain('["a","m","z"]')
-  })
+    assert(threw, 'test 4: NaN error message matches /Non-finite number/')
+  }
+}
 
-  it('throws Layer2CanonicalisationError on NaN (test 4)', () => {
-    const tampered = {
-      foo: NaN,
-    } as unknown as Layer2Assessment
-    expect(() => canonicaliseLayer2Assessment(tampered)).toThrow(Layer2CanonicalisationError)
-    expect(() => canonicaliseLayer2Assessment(tampered)).toThrow(/Non-finite number/)
-  })
+// canonicaliseLayer2Assessment: throws Layer2CanonicalisationError on Infinity (test 5)
+{
+  const positiveInfinity = { foo: Infinity } as unknown as Layer2Assessment
+  const negativeInfinity = { foo: -Infinity } as unknown as Layer2Assessment
+  {
+    let threw = false
+    try {
+      canonicaliseLayer2Assessment(positiveInfinity)
+    } catch (e) {
+      threw = e instanceof Layer2CanonicalisationError
+    }
+    assert(threw, 'test 5: throws Layer2CanonicalisationError on +Infinity')
+  }
+  {
+    let threw = false
+    try {
+      canonicaliseLayer2Assessment(negativeInfinity)
+    } catch (e) {
+      threw = e instanceof Layer2CanonicalisationError
+    }
+    assert(threw, 'test 5: throws Layer2CanonicalisationError on -Infinity')
+  }
+}
 
-  it('throws Layer2CanonicalisationError on Infinity (test 5)', () => {
-    const positiveInfinity = { foo: Infinity } as unknown as Layer2Assessment
-    const negativeInfinity = { foo: -Infinity } as unknown as Layer2Assessment
-    expect(() => canonicaliseLayer2Assessment(positiveInfinity)).toThrow(Layer2CanonicalisationError)
-    expect(() => canonicaliseLayer2Assessment(negativeInfinity)).toThrow(Layer2CanonicalisationError)
-  })
+// canonicaliseLayer2Assessment: throws Layer2CanonicalisationError on undefined property values (test 6)
+{
+  const tampered = {
+    foo: undefined,
+  } as unknown as Layer2Assessment
+  {
+    let threw = false
+    try {
+      canonicaliseLayer2Assessment(tampered)
+    } catch (e) {
+      threw = e instanceof Layer2CanonicalisationError
+    }
+    assert(threw, 'test 6: throws Layer2CanonicalisationError on undefined property values')
+  }
+  {
+    let threw = false
+    try {
+      canonicaliseLayer2Assessment(tampered)
+    } catch (e) {
+      threw = e instanceof Error && /undefined/.test(e.message)
+    }
+    assert(threw, 'test 6: undefined error message matches /undefined/')
+  }
+}
 
-  it('throws Layer2CanonicalisationError on undefined property values (test 6)', () => {
-    const tampered = {
-      foo: undefined,
-    } as unknown as Layer2Assessment
-    expect(() => canonicaliseLayer2Assessment(tampered)).toThrow(Layer2CanonicalisationError)
-    expect(() => canonicaliseLayer2Assessment(tampered)).toThrow(/undefined/)
-  })
+// canonicaliseLayer2Assessment: round-trip stability (test 7)
+{
+  const a = buildMinimalAssessment()
+  const canonical1 = canonicaliseLayer2Assessment(a)
+  const reparsed = JSON.parse(canonical1) as Layer2Assessment
+  const canonical2 = canonicaliseLayer2Assessment(reparsed)
+  assert(
+    Object.is(canonical1, canonical2),
+    'test 7: canonicalising the JSON.parse of canonical output equals canonical output'
+  )
+}
 
-  it('round-trip stability: canonicalising the JSON.parse of canonical output equals canonical output (test 7)', () => {
-    const a = buildMinimalAssessment()
-    const canonical1 = canonicaliseLayer2Assessment(a)
-    const reparsed = JSON.parse(canonical1) as Layer2Assessment
-    const canonical2 = canonicaliseLayer2Assessment(reparsed)
-    expect(canonical1).toBe(canonical2)
-  })
+// canonicaliseLayer2Assessment: normalises -0 to 0
+{
+  const tampered = { foo: -0 } as unknown as Layer2Assessment
+  const out = canonicaliseLayer2Assessment(tampered)
+  // The canonical form of -0 must be the same as 0; otherwise signatures
+  // would differ across signer/verifier where one side received -0 from
+  // arithmetic and the other received 0 from a JSON parse.
+  assert(Object.is(out, '{"foo":0}'), 'normalises -0 to 0')
+}
 
-  it('normalises -0 to 0', () => {
-    const tampered = { foo: -0 } as unknown as Layer2Assessment
-    const out = canonicaliseLayer2Assessment(tampered)
-    // The canonical form of -0 must be the same as 0; otherwise signatures
-    // would differ across signer/verifier where one side received -0 from
-    // arithmetic and the other received 0 from a JSON parse.
-    expect(out).toBe('{"foo":0}')
-  })
+// canonicaliseLayer2Assessment: JSON.stringifies string keys + values to handle escapes
+{
+  const tampered = { 'a"b': 'c\nd' } as unknown as Layer2Assessment
+  const out = canonicaliseLayer2Assessment(tampered)
+  assert(Object.is(out, '{"a\\"b":"c\\nd"}'), 'JSON.stringifies string keys + values to handle escapes')
+}
 
-  it('JSON.stringifies string keys + values to handle escapes', () => {
-    const tampered = { 'a"b': 'c\nd' } as unknown as Layer2Assessment
-    const out = canonicaliseLayer2Assessment(tampered)
-    expect(out).toBe('{"a\\"b":"c\\nd"}')
-  })
-})
+console.log('\n' + passed + ' passed, ' + failed + ' failed')
+if (failed > 0) {
+  console.error('\nFailures:')
+  for (const f of failures) console.error('  - ' + f)
+  process.exit(1)
+}

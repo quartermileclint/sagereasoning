@@ -16,11 +16,19 @@
  * fails. Specific philosophical or wording assertions are out of scope —
  * those belong with the live-probe of the migrated caller.
  *
- * Run: npx jest mentor-profile-summary --no-coverage
+ * Run: npx tsx <this file>
  */
 
 import { buildProfileSummary } from '../mentor-profile-summary'
 import type { MentorProfile } from '../../../../sage-mentor'
+
+let passed = 0
+let failed = 0
+const failures: string[] = []
+
+function assert(condition: boolean, label: string): void {
+  if (condition) { passed++ } else { failed++; failures.push(label); console.error('FAIL: ' + label) }
+}
 
 // ---------------------------------------------------------------------------
 // Representative fixture — a structurally complete canonical MentorProfile.
@@ -208,100 +216,92 @@ const REQUIRED_HEADINGS: string[] = [
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('buildProfileSummary (canonical MentorProfile input)', () => {
-  let summary: string
+// describe('buildProfileSummary (canonical MentorProfile input)')
+// beforeAll: compute the summary once for the populated-profile block.
+const summary: string = buildProfileSummary(SAMPLE_PROFILE)
 
-  beforeAll(() => {
-    summary = buildProfileSummary(SAMPLE_PROFILE)
-  })
+// it('returns a non-empty string')
+assert(Object.is(typeof summary, 'string'), 'canonical input: returns a non-empty string — typeof is string')
+assert(summary.length > 0, 'canonical input: returns a non-empty string — length > 0')
 
-  it('returns a non-empty string', () => {
-    expect(typeof summary).toBe('string')
-    expect(summary.length).toBeGreaterThan(0)
-  })
+// it('contains every required section heading')
+for (const heading of REQUIRED_HEADINGS) {
+  assert(summary.includes(heading), 'canonical input: contains every required section heading — ' + heading)
+}
 
-  it('contains every required section heading', () => {
-    for (const heading of REQUIRED_HEADINGS) {
-      expect(summary).toContain(heading)
-    }
-  })
+// it('renders the practitioner display name in the identity line')
+assert(summary.includes('Sample Practitioner'), 'canonical input: renders the practitioner display name in the identity line')
 
-  it('renders the practitioner display name in the identity line', () => {
-    expect(summary).toContain('Sample Practitioner')
-  })
+// it('renders all canonical proximity fields without the legacy nested path')
+assert(summary.includes('deliberate'), 'canonical input: renders proximity fields — deliberate')
+assert(summary.includes('grade_3'), 'canonical input: renders proximity fields — grade_3')
+assert(summary.includes('Reasoning is deliberate when calm'), 'canonical input: renders proximity fields — estimate description')
+// Legacy `proximity_estimate.<x>` field-access path should not appear in
+// the rewritten output's keys.
+assert(!(/proximity_estimate\./.test(summary)), 'canonical input: no legacy proximity_estimate. nested path')
 
-  it('renders all canonical proximity fields without the legacy nested path', () => {
-    expect(summary).toContain('deliberate')
-    expect(summary).toContain('grade_3')
-    expect(summary).toContain('Reasoning is deliberate when calm')
-    // Legacy `proximity_estimate.<x>` field-access path should not appear in
-    // the rewritten output's keys (these are output-text checks, not type
-    // checks — but a regression that hardcodes the legacy path would surface).
-    expect(summary).not.toMatch(/proximity_estimate\./)
-  })
+// it('renders each passion using the bucket string, not the legacy /12 count')
+assert(summary.includes('persistent'), 'canonical input: passion bucket — persistent')
+assert(summary.includes('recurring'), 'canonical input: passion bucket — recurring')
+assert(summary.includes('occasional'), 'canonical input: passion bucket — occasional')
+// Legacy implementation emitted `frequency: N/12` — must be gone.
+assert(!(/\/12/.test(summary)), 'canonical input: no legacy /12 count')
 
-  it('renders each passion using the bucket string, not the legacy /12 count', () => {
-    expect(summary).toContain('persistent')
-    expect(summary).toContain('recurring')
-    expect(summary).toContain('occasional')
-    // Legacy implementation emitted `frequency: N/12` — must be gone.
-    expect(summary).not.toMatch(/\/12/)
-  })
+// it('renders the founder-facts section when present')
+assert(summary.includes('Age 47'), 'canonical input: founder-facts — Age 47')
+assert(summary.includes('married 18 years'), 'canonical input: founder-facts — married 18 years')
+assert(summary.includes('Recently relocated for family reasons.'), 'canonical input: founder-facts — additional context')
 
-  it('renders the founder-facts section when present', () => {
-    expect(summary).toContain('Age 47')
-    expect(summary).toContain('married 18 years')
-    expect(summary).toContain('Recently relocated for family reasons.')
-  })
+// it('renders top values and classification gaps under VALUE HIERARCHY')
+assert(summary.includes('philosophical practice'), 'canonical input: value hierarchy — philosophical practice')
+assert(summary.includes('family time'), 'canonical input: value hierarchy — family time')
+assert(summary.includes('"professional reputation"'), 'canonical input: value hierarchy — quoted professional reputation')
+assert(summary.includes('declared preferred indifferent'), 'canonical input: value hierarchy — declared preferred indifferent')
+assert(summary.includes('observed genuine good'), 'canonical input: value hierarchy — observed genuine good')
 
-  it('renders top values and classification gaps under VALUE HIERARCHY', () => {
-    expect(summary).toContain('philosophical practice')
-    expect(summary).toContain('family time')
-    expect(summary).toContain('"professional reputation"')
-    expect(summary).toContain('declared preferred indifferent')
-    expect(summary).toContain('observed genuine good')
-  })
+// it('renders all four virtue domains')
+assert(summary.includes('phronesis'), 'canonical input: virtue domain — phronesis')
+assert(summary.includes('dikaiosyne'), 'canonical input: virtue domain — dikaiosyne')
+assert(summary.includes('andreia'), 'canonical input: virtue domain — andreia')
+assert(summary.includes('sophrosyne'), 'canonical input: virtue domain — sophrosyne')
 
-  it('renders all four virtue domains', () => {
-    expect(summary).toContain('phronesis')
-    expect(summary).toContain('dikaiosyne')
-    expect(summary).toContain('andreia')
-    expect(summary).toContain('sophrosyne')
-  })
+// it('renders preferred indifferents from the canonical field name')
+assert(summary.includes('professional reputation'), 'canonical input: preferred indifferents — professional reputation')
+assert(summary.includes('project velocity'), 'canonical input: preferred indifferents — project velocity')
+assert(summary.includes('recognition'), 'canonical input: preferred indifferents — recognition')
 
-  it('renders preferred indifferents from the canonical field name', () => {
-    expect(summary).toContain('professional reputation')
-    expect(summary).toContain('project velocity')
-    expect(summary).toContain('recognition')
-  })
+// it('contains no `undefined` substrings (optional fields handled defensively)')
+assert(!summary.includes('undefined'), 'canonical input: contains no undefined substrings')
 
-  it('contains no `undefined` substrings (optional fields handled defensively)', () => {
-    expect(summary).not.toContain('undefined')
-  })
-})
+// describe('buildProfileSummary — sparse profile (optional fields absent)')
+// it('renders without throwing when website-only optional fields are missing')
+{
+  const sparse: MentorProfile = {
+    ...SAMPLE_PROFILE,
+    journal_name: undefined,
+    journal_period: undefined,
+    sections_processed: undefined,
+    entries_processed: undefined,
+    total_word_count: undefined,
+    founder_facts: undefined,
+    proximity_estimate_description: undefined,
+  }
+  const sparseSummary = buildProfileSummary(sparse)
+  assert(Object.is(typeof sparseSummary, 'string'), 'sparse profile: returns a string')
+  assert(sparseSummary.includes('PRACTITIONER PROFILE:'), 'sparse profile: contains PRACTITIONER PROFILE:')
+  assert(sparseSummary.includes('PROXIMITY ESTIMATE:'), 'sparse profile: contains PROXIMITY ESTIMATE:')
+  // The optional sections should be absent rather than emitting `undefined`.
+  assert(!sparseSummary.includes('undefined'), 'sparse profile: contains no undefined substrings')
+  assert(!sparseSummary.includes('WHO THIS PERSON IS:'), 'sparse profile: omits WHO THIS PERSON IS:')
+  assert(!sparseSummary.includes('Journal:'), 'sparse profile: omits Journal:')
+  assert(!sparseSummary.includes('Scope:'), 'sparse profile: omits Scope:')
+  // Assessment line is optional — should not appear when description absent.
+  assert(!sparseSummary.includes('Assessment:'), 'sparse profile: omits Assessment:')
+}
 
-describe('buildProfileSummary — sparse profile (optional fields absent)', () => {
-  it('renders without throwing when website-only optional fields are missing', () => {
-    const sparse: MentorProfile = {
-      ...SAMPLE_PROFILE,
-      journal_name: undefined,
-      journal_period: undefined,
-      sections_processed: undefined,
-      entries_processed: undefined,
-      total_word_count: undefined,
-      founder_facts: undefined,
-      proximity_estimate_description: undefined,
-    }
-    const summary = buildProfileSummary(sparse)
-    expect(typeof summary).toBe('string')
-    expect(summary).toContain('PRACTITIONER PROFILE:')
-    expect(summary).toContain('PROXIMITY ESTIMATE:')
-    // The optional sections should be absent rather than emitting `undefined`.
-    expect(summary).not.toContain('undefined')
-    expect(summary).not.toContain('WHO THIS PERSON IS:')
-    expect(summary).not.toContain('Journal:')
-    expect(summary).not.toContain('Scope:')
-    // Assessment line is optional — should not appear when description absent.
-    expect(summary).not.toContain('Assessment:')
-  })
-})
+console.log('\n' + passed + ' passed, ' + failed + ' failed')
+if (failed > 0) {
+  console.error('\nFailures:')
+  for (const f of failures) console.error('  - ' + f)
+  process.exit(1)
+}

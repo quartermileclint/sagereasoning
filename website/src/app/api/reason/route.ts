@@ -109,6 +109,24 @@ import {
   type RetainableAssessment,
 } from '@/lib/substrate/narrative-retention'
 import type { Layer3Prose } from '@/lib/translation-sandwich/layer3-prose'
+// Mechanism-correction M5 (CI-4 reason-route half, 2026-06-13): the
+// re-examination affordance. Flag-gated by SUBSTRATE_REASON_LOOP_CLOSURE_ENABLED;
+// when off, prior_feedback is ignored and no markers / examination_open emit
+// (byte-identical). Companion to the M3 write-boundary gate (loop-closure-gate.ts).
+import {
+  isReasonLoopClosureEnabled,
+  parsePriorFeedback,
+  buildExaminationMarkers,
+  composeReExaminationContext,
+  type ExaminationMarkers,
+} from '@/lib/translation-sandwich/reason-loop-closure'
+// Mechanism-correction M5 (CI-13, 2026-06-13): the reflect-at-close practice
+// hint. Flag-gated by SUBSTRATE_PRACTICE_CYCLE_HINT_ENABLED; absent when off
+// (byte-identical). Points at the existing /api/practice/reflect (full Q1–Q6).
+import {
+  isPracticeCycleHintEnabled,
+  PRACTICE_CYCLE_HINT,
+} from '@/lib/practice-cycle-hint'
 
 // =============================================================================
 // sage-reason — The Universal Reasoning Layer
@@ -829,6 +847,11 @@ export async function POST(request: NextRequest) {
       // SUBSTRATE_L3_DEFER_ENABLED is on; ignored entirely otherwise (today's
       // behaviour for unknown body fields — byte-identity with the flag unset).
       response_format,
+      // M5 CI-4 (2026-06-13): the re-examination affordance — { prior_loop_id,
+      // prior_depth_tier, adopted_correction? }. Read ONLY when
+      // SUBSTRATE_REASON_LOOP_CLOSURE_ENABLED is on; ignored entirely otherwise
+      // (byte-identity with the flag unset).
+      prior_feedback,
     } = body
 
     // Validate required input
@@ -950,8 +973,10 @@ export async function POST(request: NextRequest) {
     // when non-null. M1-CP6 cutover (2026-05-08) — was diagnostic-only during parallel-run;
     // is now load-bearing for second-turn meta logging.
 
-    // Validate depth parameter
-    const depth: ReasonDepth = requestedDepth || 'standard'
+    // Validate depth parameter. `let` (not `const`) because the M5 CI-4
+    // same-depth rule (below) carries the prior examination's depth on a
+    // prior_feedback re-submission; the flag-off path never reassigns it.
+    let depth: ReasonDepth = requestedDepth || 'standard'
     if (!VALID_DEPTHS.includes(depth)) {
       return await respond({
         body: { error: `Invalid depth. Must be one of: ${VALID_DEPTHS.join(', ')}` },
@@ -980,6 +1005,46 @@ export async function POST(request: NextRequest) {
       })
     }
     const deferRequested = l3DeferEnabled && response_format === 'assessment_first'
+
+    // M5 CI-4 (2026-06-13): the re-examination affordance — flag-gated. With
+    // SUBSTRATE_REASON_LOOP_CLOSURE_ENABLED unset, prior_feedback is never read
+    // and no markers / examination_open emit (byte-identity — proven by the
+    // CI-4 flag-off test). With it on:
+    //   - a present-but-malformed prior_feedback 400s honestly;
+    //   - a valid prior_feedback CARRIES the original examination's depth (the
+    //     Q4 same-depth rule — re-examine at the original depth, not quick-by-
+    //     default) and links the loop via prior_feedback_ref;
+    //   - every examination carries ref + depth_tier markers (inside the signed
+    //     assessment) so a redirection is closeable by the M3 write boundary.
+    // No new DB write on this route (KG1 not engaged) — response-shape only.
+    const reasonLoopClosureEnabled = isReasonLoopClosureEnabled()
+    let loopClosure: ExaminationMarkers | undefined
+    let effectiveContext = context
+    if (reasonLoopClosureEnabled) {
+      const pf = parsePriorFeedback(prior_feedback)
+      if (!pf.ok) {
+        return await respond({
+          body: { error: pf.error },
+          status: 400,
+          headers: {},
+          isBillable: false,  // Pre-substrate validation error — no LLM cost incurred.
+        })
+      }
+      // Same-depth rule: a re-submission runs at the original examination's
+      // depth tier, not the requested/default depth.
+      if (pf.value !== null) {
+        depth = pf.value.prior_depth_tier
+      }
+      loopClosure = buildExaminationMarkers({
+        ref: correlationId,
+        depthTier: depth,
+        priorFeedback: pf.value,
+      })
+      // Note-A intent: the adopted correction is folded into the examination
+      // context so the re-examination is genuinely informed (no-op when there
+      // is no prior_feedback / no adopted_correction → byte-identical context).
+      effectiveContext = composeReExaminationContext(context, pf.value)
+    }
 
     // Per-request cache for D6 retrievals (KG1 rule 4 — never module-level).
     const ragCache = new Map<string, RetrieveResult>()
@@ -1027,7 +1092,9 @@ export async function POST(request: NextRequest) {
       // A12: correlation id stamped on the OTel layer spans + carried to the audit row.
       correlationId,
       input,
-      context,
+      // M5 CI-4: effectiveContext === context unless the flag is on AND a valid
+      // prior_feedback carried an adopted_correction (then it is folded in).
+      context: effectiveContext,
       domain_context,
       urgency_context,
       stoicBrainContext: layer1.stoicBrainContext,
@@ -1051,6 +1118,10 @@ export async function POST(request: NextRequest) {
       // and reports the actual outcome on sandwichResult.prose_deferred.
       // false here (flag unset / 'full') leaves the legacy path untouched.
       deferProse: deferRequested,
+      // M5 CI-4 (2026-06-13): loop-closure markers — undefined unless the flag
+      // is on (byte-identical when off). runSandwichInner attaches them inside
+      // the signed assessment + surfaces examination_open on the composed output.
+      loopClosure,
     }))
 
     // Option D metering — populate loopAccumulator with the per-layer Anthropic
@@ -1378,6 +1449,12 @@ export async function POST(request: NextRequest) {
       meta.layer1_source =
         preExtractedLayer1Schema !== undefined ? 'supplied' : 'server'
       output.meta = meta
+    }
+    // M5 CI-13 (2026-06-13): the reflect-at-close practice hint on the completed
+    // consult. Absent entirely when SUBSTRATE_PRACTICE_CYCLE_HINT_ENABLED is
+    // unset (byte-identity). Discoverability only — no server-side reflect call.
+    if (isPracticeCycleHintEnabled()) {
+      output.practice = PRACTICE_CYCLE_HINT
     }
     return await respond({
       body: output,

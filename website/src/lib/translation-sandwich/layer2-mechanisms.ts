@@ -384,6 +384,29 @@ export interface Layer2Assessment {
    * See: /manifest.md §R20a
    */
   distress_signal?: boolean
+  /**
+   * Added 2026-06-13 (mechanism-correction M5, CI-4 reason-route half;
+   * D-MECHANISM-CORRECTION-BUILD-PLAN-APPROVED-2026-06-12) — loop-closure
+   * examination markers. The /api/reason route attaches these BEFORE signing
+   * (parallel-run.ts) when SUBSTRATE_REASON_LOOP_CLOSURE_ENABLED is on, so they
+   * sit INSIDE the signature and the M3 write-boundary gate
+   * (accreditation/[agent_id]/loop-closure-gate.ts) can trust them: a
+   * redirection with `ref` at `depth_tier` is closed by a later element whose
+   * `prior_feedback_ref` re-examines it at the same depth or deeper.
+   *
+   * Optional + omitted entirely when the flag is off: the field is absent, so
+   * the canonical signing bytes are byte-identical to pre-M5 (verified by the
+   * CI-4 flag-off byte-identity test). When present, `prior_feedback_ref` is
+   * OMITTED (not set to undefined) on a fresh examination — the Layer-2
+   * canonicaliser throws on undefined values.
+   *
+   * See: /website/src/lib/translation-sandwich/reason-loop-closure.ts
+   */
+  examination?: {
+    ref?: string
+    depth_tier?: string
+    prior_feedback_ref?: string
+  }
 }
 
 // ============================================================================
