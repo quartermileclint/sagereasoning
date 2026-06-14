@@ -23,6 +23,11 @@
  *   • Fail-honest: a failed DELETE is caught and returned in the JSON — NO
  *     fail-closed (contrast CI-10; a cron has no user-facing response to break).
  *
+ * The handler logic + its testable dependency seam live in ./handler.ts — a
+ * Next.js route.ts may export ONLY the method handlers + route-segment config, so
+ * the injectable handler (which the route test drives) cannot live here. This file
+ * is the thin GET wrapper that binds the real purge dep.
+ *
  * NO vercel.json cron entry ships with this build — scheduling is a deployment-
  * configuration change and rides the founder's 0c-ii activation step (scope §4:
  * "0 8 * * *", matching the observability cron). Until then the route exists, is
@@ -33,77 +38,13 @@
  * KG1 (direct import, awaited, no fire-and-forget), PR1, PR3.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import {
-  isTrajectorySweepEnabled,
-  purgeExpiredTrajectory,
-} from '@/lib/substrate/agent-assessment-history-store'
+import { runTrajectoryRetentionSweep } from './handler'
 
 // Always run fresh; never cache a cron invocation.
 export const dynamic = 'force-dynamic'
 // A bounded, indexed DELETE — no LLM work; the default is ample (contrast the
 // narrative-sweep's 60s, sized for Sonnet generations).
 export const maxDuration = 30
-
-/** The purge dependency, injectable for unit tests (the route handler reaches the
- *  DB only through this seam, so the flag-on branch is testable without a Supabase
- *  client). Production GET binds the real, awaited, direct-import store fn. */
-export type SweepDeps = {
-  purge: () => Promise<{ deleted: number; error: string | null }>
-}
-
-const DEFAULT_DEPS: SweepDeps = { purge: purgeExpiredTrajectory }
-
-/**
- * The testable handler. `GET` is a thin wrapper binding the real purge dep; tests
- * call this directly with a fake request + an injected purge, so 503/401/flag-off/
- * flag-on are all exercised with no DB and no network.
- */
-export async function runTrajectoryRetentionSweep(
-  request: NextRequest,
-  deps: SweepDeps = DEFAULT_DEPS,
-): Promise<NextResponse> {
-  // ── Cron auth (identical gate to /api/cron/narrative-sweep + observability) ──
-  const cronSecret = process.env.CRON_SECRET || ''
-  if (!cronSecret) {
-    return NextResponse.json(
-      { error: 'Cron is not configured (CRON_SECRET unset).' },
-      { status: 503 },
-    )
-  }
-  const authHeader = request.headers.get('authorization') || ''
-  if (authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  // ── Flag posture ────────────────────────────────────────────────────────────
-  // Unset ⇒ the sweep is dormant; report honestly and do NO DB work (the route is
-  // strictly inert until the founder elects activation). Rollback = unset.
-  if (!isTrajectorySweepEnabled()) {
-    return NextResponse.json(
-      {
-        ok: true,
-        ran_at: new Date().toISOString(),
-        flag_enabled: false,
-        note: 'SUBSTRATE_TRAJECTORY_SWEEP_ENABLED unset — retention sweep inactive; nothing purged.',
-      },
-      { status: 200 },
-    )
-  }
-
-  // ── Purge (awaited; KG1 — no fire-and-forget) ───────────────────────────────
-  const purge = await deps.purge()
-
-  return NextResponse.json(
-    {
-      ok: true,
-      ran_at: new Date().toISOString(),
-      flag_enabled: true,
-      deleted: purge.deleted,
-      errors: purge.error ? [`purge: ${purge.error}`] : [],
-    },
-    { status: 200 },
-  )
-}
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   return runTrajectoryRetentionSweep(request)

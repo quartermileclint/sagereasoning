@@ -19,7 +19,8 @@
  */
 
 import type { NextRequest } from 'next/server'
-import { GET, runTrajectoryRetentionSweep, type SweepDeps } from '../route'
+import { GET } from '../route'
+import { runTrajectoryRetentionSweep, type SweepDeps } from '../handler'
 
 let passed = 0
 let failed = 0
