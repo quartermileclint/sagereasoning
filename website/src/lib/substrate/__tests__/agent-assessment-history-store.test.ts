@@ -18,10 +18,12 @@ import type { EvaluatedAction } from '../trust-layer/types/evaluation'
 import {
   TRAJECTORY_WRITE_ENV_VAR,
   TRAJECTORY_READ_ENV_VAR,
+  TRAJECTORY_SWEEP_ENV_VAR,
   TRAJECTORY_DEFAULT_WINDOW_DAYS,
   TRAJECTORY_DEFAULT_MAX_INSTANCES,
   isTrajectoryWriteEnabled,
   isTrajectoryReadEnabled,
+  isTrajectorySweepEnabled,
   assessmentHistoryInputToRow,
   assessmentRowToEvaluatedAction,
   persistAssessmentHistory,
@@ -29,6 +31,7 @@ import {
   deleteAssessmentHistoryForOwner,
   getAssessmentHistoryForOwner,
   getTrajectoryWindow,
+  purgeExpiredTrajectory,
   type AssessmentHistoryInput,
   type AssessmentHistoryReadRow,
 } from '../agent-assessment-history-store'
@@ -63,6 +66,8 @@ interface Capture {
   gte?: [string, unknown]
   limit?: number
   maybeSingle?: boolean
+  // Retention-sweep addition (purgeExpiredTrajectory uses `.lt('retain_until', …)`).
+  lt?: [string, unknown]
 }
 
 type Result = { data: unknown; error: unknown }
@@ -94,6 +99,10 @@ class FakeQuery {
   }
   gte(col: string, val: unknown): this {
     this.cap.gte = [col, val]
+    return this
+  }
+  lt(col: string, val: unknown): this {
+    this.cap.lt = [col, val]
     return this
   }
   limit(n: number): this {
@@ -483,6 +492,91 @@ async function main(): Promise<void> {
     const res = await getTrajectoryWindow({ credentialRef: 'api_key:k' }, throwingClient as never)
     assert(!res.ok, 'window: thrown client → ok:false (caught)')
     assert(!res.ok && res.error.includes('threw'), 'window: thrown error labelled')
+  }
+
+  // ==========================================================================
+  // 8. Retention sweep (the M6-P2 gate) — sweep flag + purgeExpiredTrajectory
+  // ==========================================================================
+
+  // 8a. Sweep flag — unset = honest no-op; exact 'true' only (separate from write/read)
+  const priorSweepFlag = process.env[TRAJECTORY_SWEEP_ENV_VAR]
+  delete process.env[TRAJECTORY_SWEEP_ENV_VAR]
+  assert(isTrajectorySweepEnabled() === false, 'sweep flag unset → false (cron no-op)')
+  process.env[TRAJECTORY_SWEEP_ENV_VAR] = 'true'
+  assert(isTrajectorySweepEnabled() === true, "sweep flag 'true' → true")
+  process.env[TRAJECTORY_SWEEP_ENV_VAR] = 'false'
+  assert(isTrajectorySweepEnabled() === false, "sweep flag 'false' → false")
+  process.env[TRAJECTORY_SWEEP_ENV_VAR] = 'TRUE'
+  assert(isTrajectorySweepEnabled() === false, "sweep flag 'TRUE' → false (exact match only)")
+  if (priorSweepFlag === undefined) delete process.env[TRAJECTORY_SWEEP_ENV_VAR]
+  else process.env[TRAJECTORY_SWEEP_ENV_VAR] = priorSweepFlag
+
+  // 8b. Purge — deletes rows past retain_until; universal predicate (no owner narrowing)
+  {
+    const { client, captures } = makeClient(() => ({ data: [{ id: 'a' }, { id: 'b' }, { id: 'c' }], error: null }))
+    const res = await purgeExpiredTrajectory(client as never)
+    assert(res.deleted === 3 && res.error === null, 'purge: returns deleted count, no error')
+    const cap = captures[0]
+    assert(cap.table === 'agent_assessment_history', 'purge: on agent_assessment_history')
+    assert(cap.op === 'delete', 'purge: is a DELETE')
+    assert(cap.select === 'id', 'purge: selects id (awaited count)')
+    // Universal predicate: exactly the retain_until < now() filter, NO owner eq.
+    assert(cap.lt !== undefined && cap.lt[0] === 'retain_until', 'purge: filters retain_until via .lt()')
+    assert(typeof cap.lt![1] === 'string', 'purge: lt bound is an ISO timestamp string')
+    assert(cap.eq.length === 0, 'purge: NO owner narrowing (universal R17 limit — scope §1)')
+  }
+
+  // 8c. Empty table → deleted 0, no error
+  {
+    const { client } = makeClient(() => ({ data: [], error: null }))
+    const res = await purgeExpiredTrajectory(client as never)
+    assert(res.deleted === 0 && res.error === null, 'purge: empty result → deleted 0')
+  }
+
+  // 8d. Missing table (deployment without the migration) → benign no-op
+  {
+    const { client } = makeClient(() => ({ data: null, error: { code: 'PGRST205', message: 'schema cache miss' } }))
+    const res = await purgeExpiredTrajectory(client as never)
+    assert(res.deleted === 0 && res.error === null, 'purge: missing table (PGRST205) → benign { deleted:0, error:null }')
+  }
+  {
+    const { client } = makeClient(() => ({ data: null, error: { code: '42P01', message: 'relation "public.agent_assessment_history" does not exist' } }))
+    const res = await purgeExpiredTrajectory(client as never)
+    assert(res.deleted === 0 && res.error === null, 'purge: missing table (42P01) → benign no-op')
+  }
+
+  // 8e. Real post-migration failure → surfaced as { error } (NOT swallowed; R17c verifiable)
+  {
+    const { client } = makeClient(() => ({ data: null, error: { code: '42501', message: 'permission denied' } }))
+    const res = await purgeExpiredTrajectory(client as never)
+    assert(res.deleted === 0 && res.error !== null && res.error.includes('purgeExpiredTrajectory'), 'purge: real error surfaced + labelled')
+  }
+
+  // 8f. Thrown client → caught, returned as { error } (never throws into the cron)
+  {
+    const res = await purgeExpiredTrajectory(throwingClient as never)
+    assert(res.deleted === 0 && res.error !== null && res.error.includes('threw'), 'purge: thrown client → caught + labelled')
+  }
+
+  // 8g. DEFAULT path (no injected client → getAdminClient) is fail-honest when the
+  //     Supabase env is missing — proves getAdminClient() is resolved INSIDE the
+  //     try (a `= getAdminClient()` default param would throw a 500 here instead).
+  //     The store suite injects clients everywhere, so getAdminClient is otherwise
+  //     never called; with the env removed it throws and MUST be caught.
+  {
+    const priorUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const priorKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY
+    const res = await purgeExpiredTrajectory() // no client → getAdminClient() throws
+    assert(
+      res.deleted === 0 && res.error !== null && res.error.includes('threw'),
+      'purge: default getAdminClient path is fail-honest on missing env (no 500 escape)',
+    )
+    if (priorUrl === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL
+    else process.env.NEXT_PUBLIC_SUPABASE_URL = priorUrl
+    if (priorKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY
+    else process.env.SUPABASE_SERVICE_ROLE_KEY = priorKey
   }
 
   // ==========================================================================

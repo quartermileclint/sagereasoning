@@ -70,6 +70,28 @@ export function isTrajectoryReadEnabled(): boolean {
   return process.env[TRAJECTORY_READ_ENV_VAR] === 'true'
 }
 
+// ============================================================================
+// FLAG (SUBSTRATE_TRAJECTORY_SWEEP_ENABLED) — UNSET = the cron is an honest no-op
+// ============================================================================
+//
+// The retention-sweep kill-switch (trajectory-retention-sweep cron, 2026-06-14).
+// DEDICATED + SEPARATE from the write flag ON PURPOSE: the activation order
+// requires the sweep to be live BEFORE M6-P2 flips SUBSTRATE_TRAJECTORY_WRITE_ENABLED
+// (the sweep is the R17c genuine-deletion gate for the null-owner external-consumer
+// rows the write flag starts creating; see trajectory-retention-sweep-scope.md §3).
+// Reusing the write flag would make the sweep impossible to stand up before P2.
+// UNSET ⇒ the cron returns an honest { flag_enabled: false } 200 and does NO DB
+// work; rollback is "unset the flag" (the route reverts to the no-op 200).
+
+export const TRAJECTORY_SWEEP_ENV_VAR = 'SUBSTRATE_TRAJECTORY_SWEEP_ENABLED'
+
+/** True only when the flag is the exact string 'true'. Unset/other → the cron is
+ *  an honest no-op (no purge, no DB work). Read at call time (mirrors the write/
+ *  read flags); the purge fn below stays flag-free so it is unit-testable. */
+export function isTrajectorySweepEnabled(): boolean {
+  return process.env[TRAJECTORY_SWEEP_ENV_VAR] === 'true'
+}
+
 // D17 prior-state windowing defaults (progression-delta.md §"Window parameters").
 export const TRAJECTORY_DEFAULT_WINDOW_DAYS = 90
 export const TRAJECTORY_DEFAULT_MAX_INSTANCES = 30
@@ -345,6 +367,54 @@ export async function deleteAssessmentHistoryForOwner(
     return { ok: true, value: { deleted: (data as unknown[] | null)?.length ?? 0 } }
   } catch (e) {
     return { ok: false, error: `deleteAssessmentHistoryForOwner threw: ${(e as Error).message}` }
+  }
+}
+
+/**
+ * R17c retention enforcement (the trajectory-retention sweep — the M6-P2 gate).
+ * Genuinely (hard) delete every row past its `retain_until`, on a schedule. ONE
+ * awaited indexed DELETE (`idx_aah_retain_until`). UNIVERSAL predicate — NO owner
+ * narrowing: `retain_until` (90 days, migration:121) is an R17 minimisation limit
+ * that applies to EVERY row, and narrowing to `owner_user_id IS NULL` would let
+ * owner-bearing rows accumulate past 90 days (the scope-doc §1 resolution). For
+ * the null-owner external-consumer rows this sweep is the PRIMARY genuine-deletion
+ * mechanism, not a backstop (owner-bearing rows are also erasable on demand via
+ * the user-JWT data-rights paths). Mirrors purgeExpiredNarratives (narrative-
+ * retention.ts) — the proven M1 precedent — but returns the cron-friendly
+ * { deleted, error } shape, not StoreResult, so the route can spread it directly.
+ *
+ * Missing-table ⇒ { deleted: 0, error: null } (benign, via isMissingTableError) —
+ * the cron must succeed even if pointed at a deployment where the table is absent.
+ * A REAL post-migration failure is surfaced as { error } (the route reports it; no
+ * fail-closed — a failed purge never affects a user-facing response). Injectable
+ * client (store convention) for unit tests; defaults to the lazy admin client.
+ *
+ * FAIL-HONEST RESOLUTION: the admin client is resolved INSIDE the try (NOT via a
+ * `= getAdminClient()` default parameter, which evaluates BEFORE the try and would
+ * let a missing-env throw escape as a 500). getAdminClient() throws when the
+ * Supabase env is absent; a cron must report that in JSON, never fail-closed — so
+ * the throw is caught here. Mirrors purgeExpiredNarratives (narrative-retention.ts).
+ */
+export async function purgeExpiredTrajectory(
+  client?: SupabaseClient,
+): Promise<{ deleted: number; error: string | null }> {
+  try {
+    const db = client ?? getAdminClient()
+    const { data, error } = await db
+      .from(TABLE)
+      .delete()
+      .lt('retain_until', new Date().toISOString())
+      .select('id')
+    if (error) {
+      // Table not migrated on this deployment → nothing to purge, benign no-op.
+      if (isMissingTableError(error as { code?: string; message?: string })) {
+        return { deleted: 0, error: null }
+      }
+      return { deleted: 0, error: `purgeExpiredTrajectory: ${error.message}` }
+    }
+    return { deleted: (data as unknown[] | null)?.length ?? 0, error: null }
+  } catch (e) {
+    return { deleted: 0, error: `purgeExpiredTrajectory threw: ${(e as Error).message}` }
   }
 }
 
