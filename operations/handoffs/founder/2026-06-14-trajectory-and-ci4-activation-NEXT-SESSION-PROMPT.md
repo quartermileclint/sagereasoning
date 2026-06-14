@@ -109,7 +109,7 @@ TEST first: set the flag → a consult accepts a `prior_feedback` input, marks r
 - **Rollback:** unset the flag (no `prior_feedback`/`examination` fields — byte-identical).
 
 ### Step 6b — M3 CI-4 write-boundary gate, **FLAG/DETECT mode only** (`SUBSTRATE_LOOP_CLOSURE_GATE_ENABLED=true`, `SUBSTRATE_LOOP_CLOSURE_GATE_REJECT` UNSET)
-**Only after 6a is live** (the gate reads the markers 6a writes). TEST first: an accreditation write over a chain containing adopted-redirections **without** same-depth re-examinations is **flagged** (`enforced:false` — detected, not rejected); a closed chain passes clean. Then production; verify. The **R18f provenance gate is untouched**.
+**Only after 6a is live** (the gate reads the markers 6a writes). TEST first: an accreditation write over a chain containing adopted-redirections **without** same-depth re-examinations is **flagged** in the 200 response body (`enforced:true`, `ok:true`, `loop_closure.verdict:'unclosed'` — detected, the write **proceeds**, not rejected; **`enforced:false` is the gate-OFF state, NOT detect mode** — corrected 2026-06-14 from code at `loop-closure-gate.ts:309`); a closed chain passes clean (`loop_closure.verdict:'closed'`). Then production; verify. The **R18f provenance gate is untouched**.
 - **Rollback:** unset the flag (`enforced:false`, byte-identical).
 
 ### Step 6c — Reject mode (`SUBSTRATE_LOOP_CLOSURE_GATE_REJECT=true`) — **DEFERRED, its own later step**
@@ -124,7 +124,7 @@ The credential-consolidation **build** (the CI-14 Critical track — its own ses
 Every activation = **unset the flag** (byte-identical). The sweep code + the `vercel.json` cron entry = `git revert`. No schema to unwind (the table pre-exists from M6-P1). A swept row is irreversible but bounded strictly to rows already past their adopted 90-day `retain_until`.
 
 ## Verification (summary — each must pass before the next)
-Step 2: cron `200 {flag_enabled:true, deleted:0}` + `401` no-auth. Step 3 (TEST): 2 rows → overlay `prior_instances≥2`/`low` → fresh `single_snapshot` → byte-identical engine. Step 4 (prod): real row written, response unchanged. Step 5 (prod): overlay surfaces, engine byte-identical. Step 6a: `examination`/`prior_feedback` fields + same-depth carry (signing state confirmed). Step 6b: unclosed chain flagged (`enforced:false`), closed chain clean.
+Step 2: cron `200 {flag_enabled:true, deleted:0}` + `401` no-auth. Step 3 (TEST): 2 rows → overlay `prior_instances≥2`/`low` → fresh `single_snapshot` → byte-identical engine. Step 4 (prod): real row written, response unchanged. Step 5 (prod): overlay surfaces, engine byte-identical. Step 6a: `examination`/`prior_feedback` fields + same-depth carry (signing state confirmed). Step 6b: unclosed chain flagged in the 200 body (`enforced:true`, `loop_closure.verdict:'unclosed'`, write proceeds — `enforced:false` is gate-OFF, not detect mode), closed chain clean (`verdict:'closed'`).
 
 ## Forecast
 Success: the M6/M7 trajectory feature is **Live** (sweep enforcing retention, writes accruing, the honest overlay surfacing — engine byte-identical), and the CI-4 loop-closure affordance is **Live in detect mode**, all in the only safe order. Remaining after this: the optional CI-15 docs-flip; the other carried M1/M3/M4/M5 activations; CI-4 reject mode (6c); the credential-consolidation build (Critical track); parked CI-16; the 0h call.
