@@ -50,6 +50,31 @@ export function isTrajectoryWriteEnabled(): boolean {
 }
 
 // ============================================================================
+// FLAG (SUBSTRATE_TRAJECTORY_READ_ENABLED) — UNSET = byte-identical, no read
+// ============================================================================
+//
+// M7 (CI-5 read half, 2026-06-14). SEPARATE from the M6 write flag so the read
+// can activate only AFTER the write flag has accumulated data. UNSET ⇒ the route
+// never calls getTrajectoryWindow (zero new DB reads) and the response carries no
+// trajectory overlay → byte-identical to pre-M7. The engine NEVER reads these
+// rows (Option A — read-and-overlay): the deterministic Layer2Assessment is
+// untouched; the windowed read is surfaced as an honest response overlay only.
+
+export const TRAJECTORY_READ_ENV_VAR = 'SUBSTRATE_TRAJECTORY_READ_ENABLED'
+
+/** True only when the flag is the exact string 'true'. Unset/other → the route
+ *  performs no windowed read and emits no trajectory overlay (byte-identical to
+ *  pre-M7). Gated at the route (mirrors isTrajectoryWriteEnabled); the reader
+ *  below stays flag-free so it is unit-testable. */
+export function isTrajectoryReadEnabled(): boolean {
+  return process.env[TRAJECTORY_READ_ENV_VAR] === 'true'
+}
+
+// D17 prior-state windowing defaults (progression-delta.md §"Window parameters").
+export const TRAJECTORY_DEFAULT_WINDOW_DAYS = 90
+export const TRAJECTORY_DEFAULT_MAX_INSTANCES = 30
+
+// ============================================================================
 // TYPES
 // ============================================================================
 
@@ -94,6 +119,49 @@ export interface AssessmentHistoryRow {
   candidates_considered: number
 }
 
+/** The columns the M7 windowed read selects — the EvaluatedAction-shaped
+ *  projection plus the identity/time columns the aggregator + overlay need.
+ *  Distinct from AssessmentHistoryRow (the write shape) because the read needs
+ *  created_at (→ evaluated_at) and the identity columns; it does NOT need
+ *  owner_user_id / depth_tier / surface / retain_until. */
+export interface AssessmentHistoryReadRow {
+  correlation_id: string
+  credential_ref: string
+  agent_id: string | null
+  created_at: string
+  receipt_id: string
+  proximity: EvaluatedAction['proximity']
+  is_kathekon: boolean
+  kathekon_quality: EvaluatedAction['kathekon_quality']
+  passions_detected: EvaluatedAction['passions_detected']
+  virtue_domains_engaged: string[]
+  oikeiosis_met: boolean | null
+  oikeiosis_stage: string | null
+  ruling_faculty_state: string
+  skill_id: string
+  candidates_considered: number
+}
+
+/** The result of one windowed trajectory read (M7). `actions` are OLDEST-FIRST
+ *  — exactly what computeWindowSnapshot expects. `earliest`/`latest` are the
+ *  oldest/newest created_at in the returned window, so the overlay can compute a
+ *  CLOCK-FREE evidence span (latest − earliest) that is byte-identical on replay
+ *  for a fixed window (the determinism guard — no now() in the aggregation). */
+export interface TrajectoryWindow {
+  actions: EvaluatedAction[]
+  windowDays: number
+  maxInstances: number
+  earliest: string | null
+  latest: string | null
+}
+
+/** The select column list for the windowed read (one indexed query — KG1
+ *  latency budget; uses idx_aah_credential_time). */
+const TRAJECTORY_SELECT_COLS =
+  'correlation_id, credential_ref, agent_id, created_at, receipt_id, proximity, ' +
+  'is_kathekon, kathekon_quality, passions_detected, virtue_domains_engaged, ' +
+  'oikeiosis_met, oikeiosis_stage, ruling_faculty_state, skill_id, candidates_considered'
+
 // ============================================================================
 // PURE MAPPER (no I/O)
 // ============================================================================
@@ -124,6 +192,34 @@ export function assessmentHistoryInputToRow(
     ruling_faculty_state: a.ruling_faculty_state,
     skill_id: a.skill_id,
     candidates_considered: a.candidates_considered,
+  }
+}
+
+/** Map a stored row back to an EvaluatedAction for the windowed read (M7). PURE.
+ *  KG7: the Array.isArray guards defend against a double-serialised JSONB value
+ *  (a string would otherwise iterate as characters). created_at → evaluated_at.
+ *  The reconstructed agent_id is a label for computeWindowSnapshot only (the
+ *  persisted windowing keys are the credential_ref / agent_id columns); it falls
+ *  back to credential_ref so the snapshot is always labelled. */
+export function assessmentRowToEvaluatedAction(
+  row: AssessmentHistoryReadRow,
+): EvaluatedAction {
+  return {
+    receipt_id: row.receipt_id,
+    agent_id: row.agent_id ?? row.credential_ref,
+    evaluated_at: row.created_at,
+    proximity: row.proximity,
+    is_kathekon: row.is_kathekon,
+    kathekon_quality: row.kathekon_quality,
+    passions_detected: Array.isArray(row.passions_detected) ? row.passions_detected : [],
+    virtue_domains_engaged: Array.isArray(row.virtue_domains_engaged)
+      ? row.virtue_domains_engaged
+      : [],
+    oikeiosis_met: row.oikeiosis_met,
+    oikeiosis_stage: row.oikeiosis_stage,
+    ruling_faculty_state: row.ruling_faculty_state ?? '',
+    skill_id: row.skill_id,
+    candidates_considered: row.candidates_considered,
   }
 }
 
@@ -274,5 +370,84 @@ export async function getAssessmentHistoryForOwner(
     return { ok: true, value: (data as AssessmentHistoryRow[] | null) ?? [] }
   } catch (e) {
     return { ok: false, error: `getAssessmentHistoryForOwner threw: ${(e as Error).message}` }
+  }
+}
+
+// ============================================================================
+// M7 — windowed trajectory read (CI-5 read half). ONE awaited indexed query.
+// ============================================================================
+
+/**
+ * Read the consulting credential's own most-recent assessment history as a
+ * windowed slice (D17 prior-state: default 90 days / last 30, date desc),
+ * reconstructed OLDEST-FIRST as EvaluatedAction[] for computeWindowSnapshot.
+ *
+ * R17a: scoped to the SUBJECT credential's own rows (`credential_ref` equality) —
+ * never a cross-credential read. M7 keys on credential_ref (the universal,
+ * NOT-NULL key); agent_id-keyed windows that would span an operator's other
+ * credentials are deferred to M8 credential-consolidation (where owner-binding
+ * makes them R17a-safe). The current consult's own row is NOT in this window —
+ * the M6 write runs AFTER the assessment, so the window holds prior consults only
+ * (prior_instances excludes the current one).
+ *
+ * KG1: ONE awaited indexed query (idx_aah_credential_time). Errors surfaced as a
+ * discriminated StoreResult — a missing table (pre-migration) is benign-empty so
+ * a flag-on-but-not-yet-migrated deployment never breaks the response.
+ *
+ * Determinism: the window's time filter reads the clock (the I/O boundary —
+ * `nowMs` is injectable for deterministic tests), but the rows returned are fed
+ * to a PURE aggregator in a TOTAL, deterministic order (created_at desc with a
+ * correlation_id tiebreak, reversed to oldest-first). The aggregation itself
+ * (computeTrajectoryOverlay) is a pure function of these rows — no clock, no
+ * randomness — so a fixed window yields a byte-identical overlay on replay.
+ */
+export async function getTrajectoryWindow(
+  opts: {
+    credentialRef: string
+    windowDays?: number
+    maxInstances?: number
+    /** Injectable clock for deterministic tests; defaults to Date.now(). */
+    nowMs?: number
+  },
+  client: SupabaseClient = getAdminClient(),
+): Promise<StoreResult<TrajectoryWindow>> {
+  const windowDays = opts.windowDays ?? TRAJECTORY_DEFAULT_WINDOW_DAYS
+  const maxInstances = opts.maxInstances ?? TRAJECTORY_DEFAULT_MAX_INSTANCES
+  const empty: TrajectoryWindow = {
+    actions: [],
+    windowDays,
+    maxInstances,
+    earliest: null,
+    latest: null,
+  }
+  try {
+    const nowMs = opts.nowMs ?? Date.now()
+    const cutoffIso = new Date(nowMs - windowDays * 86_400_000).toISOString()
+    const { data, error } = await client
+      .from(TABLE)
+      .select(TRAJECTORY_SELECT_COLS)
+      .eq('credential_ref', opts.credentialRef) // R17a — subject credential only
+      .gte('created_at', cutoffIso)
+      .order('created_at', { ascending: false })
+      .order('correlation_id', { ascending: false }) // total, deterministic tiebreak
+      .limit(maxInstances)
+    if (error) {
+      // Table not migrated yet (flag-on but pre-migration) → benign empty window.
+      if (isMissingTableError(error as { code?: string; message?: string })) {
+        return { ok: true, value: empty }
+      }
+      return { ok: false, error: `getTrajectoryWindow: ${error.message}` }
+    }
+    // `unknown` bridge: an explicit column-list select infers GenericStringError[]
+    // in the supabase-js typings; the shape is our row projection at runtime.
+    const rows = (data as unknown as AssessmentHistoryReadRow[] | null) ?? []
+    // DESC result → reverse to oldest-first for the aggregator.
+    const ordered = rows.slice().reverse()
+    const actions = ordered.map(assessmentRowToEvaluatedAction)
+    const earliest = ordered.length > 0 ? ordered[0].created_at : null
+    const latest = ordered.length > 0 ? ordered[ordered.length - 1].created_at : null
+    return { ok: true, value: { actions, windowDays, maxInstances, earliest, latest } }
+  } catch (e) {
+    return { ok: false, error: `getTrajectoryWindow threw: ${(e as Error).message}` }
   }
 }

@@ -17,13 +17,20 @@
 import type { EvaluatedAction } from '../trust-layer/types/evaluation'
 import {
   TRAJECTORY_WRITE_ENV_VAR,
+  TRAJECTORY_READ_ENV_VAR,
+  TRAJECTORY_DEFAULT_WINDOW_DAYS,
+  TRAJECTORY_DEFAULT_MAX_INSTANCES,
   isTrajectoryWriteEnabled,
+  isTrajectoryReadEnabled,
   assessmentHistoryInputToRow,
+  assessmentRowToEvaluatedAction,
   persistAssessmentHistory,
   resolveCredentialContext,
   deleteAssessmentHistoryForOwner,
   getAssessmentHistoryForOwner,
+  getTrajectoryWindow,
   type AssessmentHistoryInput,
+  type AssessmentHistoryReadRow,
 } from '../agent-assessment-history-store'
 
 let passed = 0
@@ -51,6 +58,10 @@ interface Capture {
   select?: string
   eq: Array<[string, unknown]>
   order?: [string, unknown]
+  // M7 reader additions (additive — existing assertions read `order`/`eq`/`select`).
+  orders?: Array<[string, unknown]>
+  gte?: [string, unknown]
+  limit?: number
   maybeSingle?: boolean
 }
 
@@ -78,6 +89,15 @@ class FakeQuery {
   }
   order(col: string, opts: unknown): this {
     this.cap.order = [col, opts]
+    ;(this.cap.orders ??= []).push([col, opts])
+    return this
+  }
+  gte(col: string, val: unknown): this {
+    this.cap.gte = [col, val]
+    return this
+  }
+  limit(n: number): this {
+    this.cap.limit = n
     return this
   }
   maybeSingle(): Promise<Result> {
@@ -326,6 +346,143 @@ async function main(): Promise<void> {
     const { client } = makeClient(() => ({ data: null, error: { code: 'PGRST205', message: 'schema cache miss' } }))
     const res = await getAssessmentHistoryForOwner('owner-uuid', client as never)
     assert(res.ok && res.value.length === 0, 'export: missing table → benign empty (production-safe)')
+  }
+
+  // ==========================================================================
+  // 7. M7 read half (CI-5) — read flag, row→action mapper, windowed reader
+  // ==========================================================================
+
+  // 7a. Read flag — unset = byte-identical (no read, no overlay)
+  const priorReadFlag = process.env[TRAJECTORY_READ_ENV_VAR]
+  delete process.env[TRAJECTORY_READ_ENV_VAR]
+  assert(isTrajectoryReadEnabled() === false, 'read flag unset → false (no read, byte-identical)')
+  process.env[TRAJECTORY_READ_ENV_VAR] = 'true'
+  assert(isTrajectoryReadEnabled() === true, "read flag 'true' → true")
+  process.env[TRAJECTORY_READ_ENV_VAR] = 'TRUE'
+  assert(isTrajectoryReadEnabled() === false, "read flag 'TRUE' → false (exact match only)")
+  if (priorReadFlag === undefined) delete process.env[TRAJECTORY_READ_ENV_VAR]
+  else process.env[TRAJECTORY_READ_ENV_VAR] = priorReadFlag
+
+  // 7b. assessmentRowToEvaluatedAction — created_at→evaluated_at; agent_id fallback; KG7
+  const mkReadRow = (o: Partial<AssessmentHistoryReadRow> = {}): AssessmentHistoryReadRow => ({
+    correlation_id: 'c1',
+    credential_ref: 'api_key:key-123',
+    agent_id: null,
+    created_at: '2026-06-14T00:00:00.000Z',
+    receipt_id: 'r1',
+    proximity: 'deliberate',
+    is_kathekon: true,
+    kathekon_quality: 'strong',
+    passions_detected: [{ root_passion: 'epithumia', sub_species: 'greed' }],
+    virtue_domains_engaged: ['justice'],
+    oikeiosis_met: true,
+    oikeiosis_stage: 'community',
+    ruling_faculty_state: 'assenting',
+    skill_id: 'api_reason',
+    candidates_considered: 1,
+    ...o,
+  })
+  {
+    const act = assessmentRowToEvaluatedAction(mkReadRow())
+    assert(act.evaluated_at === '2026-06-14T00:00:00.000Z', 'row→action: created_at → evaluated_at')
+    assert(act.agent_id === 'api_key:key-123', 'row→action: null agent_id falls back to credential_ref')
+    assert(act.proximity === 'deliberate', 'row→action: proximity')
+    assert(act.skill_id === 'api_reason', 'row→action: skill_id')
+    const declared = assessmentRowToEvaluatedAction(mkReadRow({ agent_id: 'acme:bot@v1' }))
+    assert(declared.agent_id === 'acme:bot@v1', 'row→action: declared agent_id preferred when present')
+    // KG7: a double-serialised JSONB string fails Array.isArray → [] (not char-iterated).
+    const bad = assessmentRowToEvaluatedAction(
+      mkReadRow({ passions_detected: '[{"root_passion":"x"}]' as unknown as EvaluatedAction['passions_detected'] }),
+    )
+    assert(Array.isArray(bad.passions_detected) && bad.passions_detected.length === 0, 'row→action KG7: double-serialised passions → [] (Array.isArray guard)')
+    const badV = assessmentRowToEvaluatedAction(
+      mkReadRow({ virtue_domains_engaged: 'justice' as unknown as string[] }),
+    )
+    assert(Array.isArray(badV.virtue_domains_engaged) && badV.virtue_domains_engaged.length === 0, 'row→action KG7: non-array virtue_domains → []')
+  }
+
+  // 7c. getTrajectoryWindow — query shape (R17a, windowing, ordering, limit) + reconstruction
+  {
+    // DB returns DESC (newest first); the reader reverses to oldest-first.
+    const rowsDesc = [
+      mkReadRow({ correlation_id: 'c2', created_at: '2026-06-14T00:00:00.000Z', proximity: 'principled' }),
+      mkReadRow({ correlation_id: 'c1', created_at: '2026-06-10T00:00:00.000Z', proximity: 'deliberate' }),
+    ]
+    const fixedNow = Date.parse('2026-06-14T12:00:00.000Z')
+    const { client, captures } = makeClient(() => ({ data: rowsDesc, error: null }))
+    const res = await getTrajectoryWindow(
+      { credentialRef: 'api_key:key-123', nowMs: fixedNow },
+      client as never,
+    )
+    assert(res.ok, 'window: ok')
+    if (res.ok) {
+      assert(res.value.actions.length === 2, 'window: 2 actions')
+      // Oldest-first: c1 (2026-06-10) before c2 (2026-06-14).
+      assert(res.value.actions[0].proximity === 'deliberate', 'window: oldest-first [0] = older row')
+      assert(res.value.actions[1].proximity === 'principled', 'window: oldest-first [1] = newer row')
+      assert(res.value.earliest === '2026-06-10T00:00:00.000Z', 'window: earliest = oldest created_at')
+      assert(res.value.latest === '2026-06-14T00:00:00.000Z', 'window: latest = newest created_at')
+      assert(res.value.windowDays === 90 && res.value.maxInstances === 30, 'window: D17 defaults echoed')
+    }
+    const cap = captures[0]
+    assert(cap.table === 'agent_assessment_history', 'window: reads agent_assessment_history')
+    assert(cap.op === 'select', 'window: is a SELECT')
+    // R17a: exactly one eq, and it is credential_ref (never owner/agent).
+    assert(cap.eq.length === 1 && cap.eq[0][0] === 'credential_ref' && cap.eq[0][1] === 'api_key:key-123', 'window R17a: scoped to credential_ref only (subject isolation)')
+    // 90-day cutoff from the injected clock (deterministic boundary).
+    const expectedCutoff = new Date(fixedNow - 90 * 86_400_000).toISOString()
+    assert(cap.gte !== undefined && cap.gte[0] === 'created_at' && cap.gte[1] === expectedCutoff, 'window: 90-day created_at cutoff from injected nowMs (deterministic)')
+    // Total, deterministic order: created_at desc then correlation_id desc.
+    assert(cap.orders !== undefined && cap.orders.length === 2, 'window: two order clauses (total order)')
+    assert(cap.orders![0][0] === 'created_at' && cap.orders![1][0] === 'correlation_id', 'window: order created_at then correlation_id (deterministic tiebreak)')
+    assert(cap.limit === 30, 'window: LIMIT = maxInstances (30)')
+  }
+
+  // 7d. Custom window params honoured
+  {
+    const fixedNow = Date.parse('2026-06-14T00:00:00.000Z')
+    const { client, captures } = makeClient(() => ({ data: [], error: null }))
+    const res = await getTrajectoryWindow(
+      { credentialRef: 'install:abc', windowDays: 30, maxInstances: 10, nowMs: fixedNow },
+      client as never,
+    )
+    assert(res.ok && res.value.actions.length === 0, 'window: empty result → 0 actions')
+    assert(res.ok && res.value.earliest === null && res.value.latest === null, 'window: empty → null earliest/latest')
+    assert(captures[0].limit === 10, 'window: custom maxInstances honoured')
+    const expectedCutoff = new Date(fixedNow - 30 * 86_400_000).toISOString()
+    assert(captures[0].gte![1] === expectedCutoff, 'window: custom windowDays honoured (30d cutoff)')
+    assert(captures[0].eq[0][1] === 'install:abc', 'window: install credential_ref keyed')
+  }
+
+  // 7e. Default constants
+  assert(TRAJECTORY_DEFAULT_WINDOW_DAYS === 90, 'defaults: window 90 days (D17)')
+  assert(TRAJECTORY_DEFAULT_MAX_INSTANCES === 30, 'defaults: 30 instances (D17)')
+
+  // 7f. Missing table (flag-on but pre-migration) → benign empty window
+  {
+    const { client } = makeClient(() => ({ data: null, error: { code: 'PGRST205', message: 'schema cache miss' } }))
+    const res = await getTrajectoryWindow({ credentialRef: 'api_key:k' }, client as never)
+    assert(res.ok && res.value.actions.length === 0, 'window: missing table (PGRST205) → benign empty (read-safe)')
+  }
+  {
+    const { client } = makeClient(() => ({ data: null, error: { code: '42P01', message: 'relation does not exist' } }))
+    const res = await getTrajectoryWindow({ credentialRef: 'api_key:k' }, client as never)
+    assert(res.ok && res.value.actions.length === 0, 'window: missing table (42P01) → benign empty')
+  }
+
+  // 7g. Real error → ok:false (surfaced)
+  {
+    const { client } = makeClient(() => ({ data: null, error: { code: '42703', message: 'undefined column' } }))
+    const res = await getTrajectoryWindow({ credentialRef: 'api_key:k' }, client as never)
+    assert(!res.ok, 'window: real error → ok:false')
+    assert(!res.ok && res.error.includes('getTrajectoryWindow'), 'window: error labelled')
+  }
+
+  // 7h. Thrown client → caught, ok:false (never throws into the response)
+  {
+    const res = await getTrajectoryWindow({ credentialRef: 'api_key:k' }, throwingClient as never)
+    assert(!res.ok, 'window: thrown client → ok:false (caught)')
+    assert(!res.ok && res.error.includes('threw'), 'window: thrown error labelled')
   }
 
   // ==========================================================================

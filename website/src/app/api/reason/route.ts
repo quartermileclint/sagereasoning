@@ -138,7 +138,19 @@ import {
   isTrajectoryWriteEnabled,
   persistAssessmentHistory,
   resolveCredentialContext,
+  // Mechanism-correction M7 (CI-5 read half, 2026-06-14): the windowed read.
+  // Flag-gated by SUBSTRATE_TRAJECTORY_READ_ENABLED (separate from the M6 write
+  // flag — read activates only after write has accumulated data). UNSET → no
+  // read, no overlay (byte-identical). The engine is NOT modified (read-and-
+  // overlay): the deterministic assessment is untouched; the trajectory is
+  // surfaced as an honest response overlay only.
+  isTrajectoryReadEnabled,
+  getTrajectoryWindow,
 } from '@/lib/substrate/agent-assessment-history-store'
+import {
+  computeTrajectoryOverlay,
+  type TrajectoryOverlay,
+} from '@/lib/substrate/trajectory-overlay'
 import { mapLayer2AssessmentToEvaluatedAction } from '@/lib/substrate/sage-assent-bridge'
 import { isAcceptedAgentId } from '@/lib/substrate/trust-layer/accreditation/agent-id-vocabulary'
 
@@ -1303,6 +1315,51 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Mechanism-correction M7 (CI-5 read half, 2026-06-14): read the consulting
+    // credential's OWN windowed assessment history (D17 90d/last-30) and project
+    // it into an honest trajectory overlay, surfaced on the happy-path response
+    // (Branch 3, meta.trajectory). READ-AND-OVERLAY (founder election): the engine
+    // is NOT modified — the deterministic Layer2Assessment is byte-identical
+    // regardless of the trajectory ("supplies evidence, does not move grades
+    // directly"; hysteresis stays the Assent engine's). Determinism: the overlay
+    // is a pure function of the stored window (computeTrajectoryOverlay reads no
+    // clock; the aggregator's computed_at is never surfaced).
+    //
+    // Placed BEFORE the M6 write so the current consult's row is not yet in the
+    // table → prior_instances counts PRIOR consults only. Same happy-path guard as
+    // the M6 write (real examination: assessment produced, no Tier-1, no error) so
+    // redirect/Tier-1/fallback paths read nothing. Entirely skipped (zero new DB
+    // reads, no overlay) when SUBSTRATE_TRAJECTORY_READ_ENABLED is unset →
+    // byte-identical to pre-M7. Awaited (KG1 rule 2 — one indexed windowed query);
+    // fail-honest (a read error is logged; the response proceeds with no overlay).
+    // R17a: scoped to this credential's own rows; user-JWT consults carry no
+    // credential_ref → no overlay (as they write no M6 row).
+    let trajectoryOverlay: TrajectoryOverlay | undefined
+    if (
+      isTrajectoryReadEnabled() &&
+      sandwichResult.error === null &&
+      sandwichResult.tier1_trigger === null &&
+      sandwichResult.layer2_assessment !== null
+    ) {
+      let readCredentialRef: string | null = null
+      if (apiKey && apiKey.valid) {
+        readCredentialRef = `api_key:${apiKey.api_key_id}`
+      } else if (installAuth && installAuth.valid) {
+        readCredentialRef = `install:${installAuth.install_id}`
+      }
+      if (readCredentialRef !== null) {
+        const windowResult = await getTrajectoryWindow({ credentialRef: readCredentialRef })
+        if (windowResult.ok) {
+          trajectoryOverlay = computeTrajectoryOverlay(windowResult.value)
+        } else {
+          console.warn(
+            '[/api/reason] trajectory window read failed (overlay omitted, response unaffected):',
+            windowResult.error,
+          )
+        }
+      }
+    }
+
     // Mechanism-correction M6 (CI-5 schema + write half, 2026-06-14): persist the
     // per-consult agent trajectory keyed to the consulting credential. WRITE-ONLY
     // — the engine does NOT read this back (determinism untouched); M7 wires the
@@ -1542,6 +1599,19 @@ export async function POST(request: NextRequest) {
     // unset (byte-identity). Discoverability only — no server-side reflect call.
     if (isPracticeCycleHintEnabled()) {
       output.practice = PRACTICE_CYCLE_HINT
+    }
+    // M7 CI-5 (2026-06-14): the honest trajectory overlay under meta.trajectory.
+    // Absent entirely when SUBSTRATE_TRAJECTORY_READ_ENABLED is unset
+    // (trajectoryOverlay undefined → byte-identity). prior_instances / window /
+    // confidence_weighted ride alongside the existing layer-latency meta;
+    // sparse-evidence-honest (single_snapshot/low on a fresh or near-fresh
+    // credential). typical_proximity here is CI-15's proximity-calibration input
+    // (the agent applies the published two-gate depth rule — no server-side depth
+    // override; the engine output above is unchanged).
+    if (trajectoryOverlay !== undefined) {
+      const meta = (output.meta as Record<string, unknown>) ?? {}
+      meta.trajectory = trajectoryOverlay
+      output.meta = meta
     }
     return await respond({
       body: output,
