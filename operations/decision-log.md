@@ -11479,8 +11479,24 @@ Expected: as annotated. (tsx tests importing `security.ts` print their summary t
 
 **Rollback path:** unset `SUBSTRATE_CONSUMER_ERASURE_ENABLED` (the route reverts to 503) / `git revert`. No destructive migration (the path adds no schema).
 
-**State at close:** built + adversarially reviewed + **TEST-verified LIVE this session** (PR17 founder-walk on the local dev server against TEST): minted an external_consumer UPC → a consult wrote one null-owner trajectory row → **erase-by-token returned 200 `erased`** (`trajectory_rows_deleted:1`, husk anonymised+revoked) → the trajectory is gone (0) → the token now **401s** on `/api/reason` → re-erase is idempotent (`already_erased`) → an unknown token **404s** → an operator credential **409s**; the mint hardening verified live (a write-class UPC without owner+agent **400s**; a legacy ecosystem mint sets `owner_kind='external_consumer'`, owner null). All TEST creds revoked at teardown; the three TEST flags removed. **PENDING (founder-elected 0c-ii): the prod flag activation ONLY** — `SUBSTRATE_CONSUMER_ERASURE_ENABLED=true` in Vercel; the code ships **dark on push** (flag UNSET ⇒ 503). No production change at the AI's hand.
+**State at close:** built + adversarially reviewed + **TEST-verified LIVE this session** (PR17 founder-walk on the local dev server against TEST): minted an external_consumer UPC → a consult wrote one null-owner trajectory row → **erase-by-token returned 200 `erased`** (`trajectory_rows_deleted:1`, husk anonymised+revoked) → the trajectory is gone (0) → the token now **401s** on `/api/reason` → re-erase is idempotent (`already_erased`) → an unknown token **404s** → an operator credential **409s**; the mint hardening verified live (a write-class UPC without owner+agent **400s**; a legacy ecosystem mint sets `owner_kind='external_consumer'`, owner null). All TEST creds revoked at teardown; the three TEST flags removed. The prod flag was **activated later the same session** (see `D-CI14-UPC-STEP7-CONSUMER-ERASURE-PRODUCTION-ACTIVATION-2026-06-15`) — **Step 7 is now LIVE**. No production change at the AI's hand (the founder set the flag + redeployed).
 
 **Rules served:** Critical (data deletion), AC7-adjacent (mint hardening), PR6, PR15, PR17, PR10 PEV, KG1, KG7, R17/R17c, R18f, R3, R0 (audit immutability), CI-14, SR-14, FX-3, FX-17.
 
 **Status:** Adopted. Cross-references: `adopted/adr/2026-06-14-credential-consolidation.md` (Migration §7), `D-CI14-UPC-STEP6E-INVARIANT-REANCHOR-BUILT-VERIFIED-2026-06-15` (the paired schema work), `D-CI14-UPC-CUTOVER-STEP6-LIVE-2026-06-15`, the design doc (`operations/p1-rebuild-2026-06/ci14-step7-consumer-erasure-design.md`), the completion prompt + this session's close.
+
+---
+
+## 2026-06-15 — D-CI14-UPC-STEP7-CONSUMER-ERASURE-PRODUCTION-ACTIVATION-2026-06-15
+
+**Decision:** Activate Step 7 in production — `SUBSTRATE_CONSUMER_ERASURE_ENABLED=true` set in Vercel + redeployed (Vercel green). `POST /api/credential/erase` is now **LIVE**: the R17c on-demand consumer-erasure-by-token path for `owner_kind='external_consumer'` credentials (genuine deletion of the trajectory + anonymise/revoke the husk + de-personalise the retained billing; scope-guarded on `owner_user_id IS NULL`; rate-limited; honest negatives; no false "deleted"). **This is the final CI-14 step — the consolidation (build + activation + cleanup) is now fully complete.**
+
+**Files touched:** none — an env-var flag flip in Vercel + redeploy (founder-performed). The code deployed dark in the same session's push (`D-CI14-UPC-STEP7-CONSUMER-ERASURE-BUILT-TEST-VERIFIED-2026-06-15`).
+
+**Verification:** TEST-verified end-to-end this session (the founder-walked leg). **Production confirmation (zero-footprint smoke):** a throwaway-token POST to the live route returned the honest **404 `not_found`** (not 503) — proving the flag took effect + the route responds live + the honest-negative path works, with no prod artifacts written/deleted. The full erase behaviour is proven on TEST and the prod code is byte-identical, so the 404 smoke is sufficient.
+
+**Risk classification:** **Critical** under 0d-ii (data deletion). The route fails closed on a real erase failure (500, no false deleted); flag-off = 503; rate-limited (`RATE_LIMITS.dataRights`). The R18f provenance gate / R20a / distress / Layer-2 signing / the UPC auth path are untouched.
+
+**Rollback path:** unset `SUBSTRATE_CONSUMER_ERASURE_ENABLED` in Vercel + redeploy (instant; the route reverts to 503 — byte-identical to dark). No destructive migration (the path adds no schema).
+
+**Status:** Adopted. Cross-references: `D-CI14-UPC-STEP7-CONSUMER-ERASURE-BUILT-TEST-VERIFIED-2026-06-15` (the dark build this activates), `D-CI14-UPC-STEP6E-INVARIANT-REANCHOR-BUILT-VERIFIED-2026-06-15` (6e, also Live), `adopted/adr/2026-06-14-credential-consolidation.md` (Migration §7), this session's completion close.
