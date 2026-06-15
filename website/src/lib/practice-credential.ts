@@ -72,6 +72,28 @@ export function capabilitiesIncludeWriteClass(capabilities: readonly string[]): 
   )
 }
 
+/**
+ * The l1_supply gate decision (M1 CI-2 × CI-14). When the UPC capability model is
+ * live, a credential supplying a precomputed layer1_schema must carry the
+ * l1_supply capability — else /api/reason refuses with 403 (the ADR's "fails
+ * closed (403)"). Returns true ⇒ REFUSE. Flag-off (upcEnabled false), or a
+ * credential validated by a legacy non-UPC path whose capabilities is undefined,
+ * ⇒ false: a byte-identical skip (the preset bundles {consult,l1_supply}, so every
+ * legacy/default-minted credential supplies L1; only a deliberately consult-only
+ * UPC is refused). The route keeps its own apiKey-valid narrowing guard; this
+ * captures the upcEnabled + array + membership decision so it is unit-testable
+ * (closes the L1SUP-1 coverage gap). Behaviour is identical to the prior inline
+ * `isUpcCapabilityAuthEnabled() && Array.isArray(caps) && !caps.includes('l1_supply')`.
+ */
+export function l1SupplyRefused(args: {
+  upcEnabled: boolean
+  capabilities: readonly string[] | null | undefined
+}): boolean {
+  if (!args.upcEnabled) return false
+  if (!Array.isArray(args.capabilities)) return false
+  return !args.capabilities.includes('l1_supply')
+}
+
 /** The new UPC prefix for newly-minted unified practice credentials (cosmetic/diagnostic). */
 export const UNIFIED_PRACTICE_CREDENTIAL_PREFIX = 'sr_prac_'
 

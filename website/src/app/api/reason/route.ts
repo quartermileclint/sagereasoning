@@ -58,7 +58,7 @@ import {
   extractPluginInstallToken,
   type PluginInstallValidationResult,
 } from '@/lib/plugin-install-auth'
-import { isUpcCapabilityAuthEnabled } from '@/lib/practice-credential'
+import { isUpcCapabilityAuthEnabled, l1SupplyRefused } from '@/lib/practice-credential'
 // Option D billing (per D-BILLING-MODEL-LOCKED-2026-05-17 + build session 2026-05-MM).
 // Metering wraps every API-key-authenticated request: a loop_id is extracted
 // from X-Loop-Id (or server-generated); per-layer Anthropic cost is read from
@@ -852,11 +852,12 @@ export async function POST(request: NextRequest) {
       // so every legacy/default-minted credential passes; only a deliberately
       // consult-only UPC is refused here.
       if (
-        isUpcCapabilityAuthEnabled() &&
         apiKey !== null &&
         apiKey.valid === true &&
-        Array.isArray(apiKey.capabilities) &&
-        !apiKey.capabilities.includes('l1_supply')
+        l1SupplyRefused({
+          upcEnabled: isUpcCapabilityAuthEnabled(),
+          capabilities: apiKey.capabilities,
+        })
       ) {
         return await respond({
           body: {

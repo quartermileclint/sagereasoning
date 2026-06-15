@@ -18,6 +18,7 @@ import {
   evaluatePracticeCredentialRow,
   isUpcCapabilityAuthEnabled,
   capabilitiesIncludeWriteClass,
+  l1SupplyRefused,
   WRITE_CLASS_CAPABILITIES,
   type PracticeCredentialRow,
   type PracticeCapability,
@@ -298,6 +299,26 @@ test('write-class: consult-only / l1_supply → false (no owner+agent required)'
 })
 test('write-class: a mixed set with any write member → true', () => {
   assert(capabilitiesIncludeWriteClass(['consult', 'l1_supply', 'calling']), 'mixed incl. calling')
+})
+
+// ── l1SupplyRefused — the M1 CI-2 × CI-14 schema-supply gate (closes L1SUP-1) ──
+test('l1SupplyRefused: flag off → never refuses (byte-identical skip)', () => {
+  assert(!l1SupplyRefused({ upcEnabled: false, capabilities: ['consult'] }), 'consult-only, flag off')
+  assert(!l1SupplyRefused({ upcEnabled: false, capabilities: undefined }), 'undefined caps, flag off')
+  assert(!l1SupplyRefused({ upcEnabled: false, capabilities: [] }), 'empty caps, flag off')
+})
+test('l1SupplyRefused: flag on + capabilities undefined/null → skip (legacy non-UPC path)', () => {
+  assert(!l1SupplyRefused({ upcEnabled: true, capabilities: undefined }), 'undefined ⇒ skip')
+  assert(!l1SupplyRefused({ upcEnabled: true, capabilities: null }), 'null ⇒ skip')
+})
+test('l1SupplyRefused: flag on + l1_supply present → allow (false)', () => {
+  assert(!l1SupplyRefused({ upcEnabled: true, capabilities: ['consult', 'l1_supply'] }), 'consult+l1_supply')
+  assert(!l1SupplyRefused({ upcEnabled: true, capabilities: ['l1_supply'] }), 'l1_supply alone')
+})
+test('l1SupplyRefused: flag on + l1_supply ABSENT → REFUSE (403, fail-closed)', () => {
+  assert(l1SupplyRefused({ upcEnabled: true, capabilities: ['consult'] }), 'consult-only ⇒ 403')
+  assert(l1SupplyRefused({ upcEnabled: true, capabilities: [] }), 'empty set ⇒ 403')
+  assert(l1SupplyRefused({ upcEnabled: true, capabilities: ['accreditation_write', 'calling'] }), 'write-class without l1_supply ⇒ 403')
 })
 
 console.log('')
