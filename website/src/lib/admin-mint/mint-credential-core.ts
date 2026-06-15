@@ -22,13 +22,17 @@
 
 import { validatePluginInstallMintInput } from '../../app/api/admin/plugin-install-credentials/validation'
 import { validateMintInput } from '../../app/api/admin/accreditation-credentials/validation'
+import { PRACTICE_CAPABILITIES } from '../practice-credential'
 
-export type CredentialClass = 'api' | 'install' | 'assent'
+// 'practice' = CI-14 Unified Practice Credential (sr_prac_): one credential carrying
+// a capabilities[] set, minted via the (extended) /api/admin/api-keys route.
+export type CredentialClass = 'api' | 'install' | 'assent' | 'practice'
 
 export const CREDENTIAL_CLASSES: readonly CredentialClass[] = [
   'api',
   'install',
   'assent',
+  'practice',
 ] as const
 
 /** A fully-planned HTTP request — origin supplied by the CLI at execution. */
@@ -70,9 +74,16 @@ COMMANDS
   mint assent   --agent-id <id> [--label <text>]
                 [--identity-model <m>] [--path-posture <p>]
                 Mint an sr_assent_ accreditation write credential
-  revoke api     --id <uuid> [--reason <text>]   (PATCH is_active=false — no DELETE on this surface)
-  revoke install --id <uuid> [--reason <text>]   (DELETE)
-  revoke assent  --id <uuid> [--reason <text>]   (DELETE)
+  mint practice --label <text> --capabilities <c1,c2,...>
+                [--agent-id <id>] [--owner-email <email>]
+                [--owner-kind operator|external_consumer] [--tier free|paid] [--notes <text>]
+                Mint an sr_prac_ Unified Practice Credential (CI-14). --capabilities is a
+                comma-separated subset of: consult,l1_supply,accreditation_write,calling,reflect
+                (write-class members are opt-in; agent-id binds write/calling/reflect)
+  revoke api      --id <uuid> [--reason <text>]   (PATCH is_active=false — no DELETE on this surface)
+  revoke install  --id <uuid> [--reason <text>]   (DELETE)
+  revoke assent   --id <uuid> [--reason <text>]   (DELETE)
+  revoke practice --id <uuid> [--reason <text>]   (PATCH is_active=false — sr_prac_ lives on the api-keys surface)
   help                                   Show this usage
 
 ENVIRONMENT
@@ -184,6 +195,57 @@ function buildApiMintPlan(flags: Record<string, string>): PlanResult {
   return { ok: true, plan: { method: 'POST', path: ADMIN_API_KEYS_PATH, body } }
 }
 
+/**
+ * Mint body for sr_prac_ — a CI-14 Unified Practice Credential. Posts to the
+ * (extended) /api/admin/api-keys route with an explicit capabilities[] set, which
+ * triggers UPC mode there (sr_prac_ prefix, purpose='unified_practice',
+ * owner_kind, credential_provenance). --capabilities is a comma-separated subset
+ * of the closed vocabulary; write-class members (accreditation_write/calling/
+ * reflect) are opt-in. Limits are omitted so the route's CI-6 30/1/1 defaults
+ * remain the single source of truth.
+ */
+function buildPracticeMintPlan(flags: Record<string, string>): PlanResult {
+  const label = flags['label']?.trim()
+  if (!label) {
+    return { ok: false, error: 'mint practice requires --label.' }
+  }
+  const capsRaw = flags['capabilities']?.trim()
+  if (!capsRaw) {
+    return {
+      ok: false,
+      error: `mint practice requires --capabilities (comma-separated subset of ${PRACTICE_CAPABILITIES.join(',')}).`,
+    }
+  }
+  const capabilities = capsRaw.split(',').map((c) => c.trim()).filter(Boolean)
+  const allowed = PRACTICE_CAPABILITIES as readonly string[]
+  const bad = capabilities.filter((c) => !allowed.includes(c))
+  if (capabilities.length === 0 || bad.length > 0) {
+    return {
+      ok: false,
+      error: `--capabilities has invalid member(s) [${bad.join(', ')}]; allowed: ${allowed.join(', ')}.`,
+    }
+  }
+
+  const body: Record<string, unknown> = { label, capabilities }
+  if (flags['agent-id']) body.agent_id = flags['agent-id']
+  if (flags['owner-email']) body.owner_email = flags['owner-email']
+  if (flags['owner-kind'] !== undefined) {
+    if (!['operator', 'external_consumer'].includes(flags['owner-kind'])) {
+      return { ok: false, error: "owner-kind must be 'operator' or 'external_consumer'." }
+    }
+    body.owner_kind = flags['owner-kind']
+  }
+  if (flags['tier'] !== undefined) {
+    if (!['free', 'paid'].includes(flags['tier'])) {
+      return { ok: false, error: 'tier must be "free" or "paid".' }
+    }
+    body.tier = flags['tier']
+  }
+  if (flags['notes']) body.notes = flags['notes']
+
+  return { ok: true, plan: { method: 'POST', path: ADMIN_API_KEYS_PATH, body } }
+}
+
 /** Mint body for sr_inst_ — purpose baked; pre-validated with the route's validator. */
 function buildInstallMintPlan(flags: Record<string, string>): PlanResult {
   const body: Record<string, unknown> = {
@@ -227,6 +289,8 @@ export function buildMintPlan(
       return buildInstallMintPlan(flags)
     case 'assent':
       return buildAssentMintPlan(flags)
+    case 'practice':
+      return buildPracticeMintPlan(flags)
   }
 }
 
@@ -240,9 +304,10 @@ export function buildRevokePlan(
   }
   const reason = flags['reason']?.trim() || 'admin_revocation'
 
-  if (credentialClass === 'api') {
-    // sr_live_ keys have no DELETE — revocation is PATCH is_active=false
-    // (the PF-1 family wrong-verb defect this surface encodes away).
+  if (credentialClass === 'api' || credentialClass === 'practice') {
+    // sr_live_ ecosystem keys AND sr_prac_ UPCs live on the api-keys route and
+    // have no DELETE — revocation is PATCH is_active=false (the universal
+    // revocation flag; the PF-1 family wrong-verb defect this surface encodes away).
     return {
       ok: true,
       plan: {
@@ -274,6 +339,7 @@ export function classFromPrefix(prefix: string): CredentialClass | 'unknown' {
   if (prefix.startsWith('sr_live_')) return 'api'
   if (prefix.startsWith('sr_inst_')) return 'install'
   if (prefix.startsWith('sr_assent_')) return 'assent'
+  if (prefix.startsWith('sr_prac_')) return 'practice'
   return 'unknown'
 }
 

@@ -44,6 +44,7 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { createHash, randomBytes } from 'node:crypto'
+import { isUpcCapabilityAuthEnabled, validatePracticeCredential } from '@/lib/practice-credential'
 
 /** The fixed namespace prefix for A10 per-install tokens (distinct from sr_live_ / sr_assent_). */
 export const PLUGIN_INSTALL_TOKEN_PREFIX = 'sr_inst_'
@@ -156,37 +157,73 @@ export async function validatePluginInstallToken(
   rawToken: string,
   requiredScope?: PluginInstallScope,
 ): Promise<PluginInstallValidationResult> {
-  // Prefix check — wrong prefix is treated as no token (no DB hit).
+  // Prefix check — wrong prefix is treated as no token (no DB hit). This stays
+  // sr_inst_-only: a unified sr_prac_ per-install UPC consults via validateApiKey
+  // (the consult chokepoint), not this path; per-install metering stays deferred.
   if (!rawToken.startsWith(PLUGIN_INSTALL_TOKEN_PREFIX)) {
     return { valid: false, reason: 'no_token' }
   }
 
-  // Hash the presented token (same algorithm as the sr_live_ / sr_assent_ paths).
-  const keyHash = createHash('sha256').update(rawToken).digest('hex')
+  if (!isUpcCapabilityAuthEnabled()) {
+    // ===== FLAG OFF — exact byte-identical legacy body =====
+    // Hash the presented token (same algorithm as the sr_live_ / sr_assent_ paths).
+    const keyHash = createHash('sha256').update(rawToken).digest('hex')
 
-  // Look up the active plugin_install row by hash (service role, bypasses RLS).
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  )
+    // Look up the active plugin_install row by hash (service role, bypasses RLS).
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
 
-  const { data: row, error } = await admin
-    .from('api_keys')
-    .select('id, owner_user_id, identity_type, install_id, install_scope')
-    .eq('key_hash', keyHash)
-    .eq('purpose', 'plugin_install')
-    .eq('is_active', true) // ← universal revocation check
-    .maybeSingle()
+    const { data: row, error } = await admin
+      .from('api_keys')
+      .select('id, owner_user_id, identity_type, install_id, install_scope')
+      .eq('key_hash', keyHash)
+      .eq('purpose', 'plugin_install')
+      .eq('is_active', true) // ← universal revocation check
+      .maybeSingle()
 
-  // A query error is fail-closed (treated as no row → invalid_token).
-  if (error) {
-    return { valid: false, reason: 'invalid_token' }
+    // A query error is fail-closed (treated as no row → invalid_token).
+    if (error) {
+      return { valid: false, reason: 'invalid_token' }
+    }
+
+    return evaluatePluginInstallRow(
+      (row as PluginInstallCredentialRow | null) ?? null,
+      requiredScope,
+    )
   }
 
-  return evaluatePluginInstallRow(
-    (row as PluginInstallCredentialRow | null) ?? null,
-    requiredScope,
-  )
+  // ===== FLAG ON — capability-aware via the validatePracticeCredential chokepoint =====
+  // The consult capability is required (per-install credentials carry {consult,
+  // l1_supply}); the install_scope rank check stays here (the chokepoint does not
+  // own install_scope).
+  const core = await validatePracticeCredential(rawToken, 'consult')
+  if (!core.valid) {
+    // suspended / insufficient_capability / invalid_token all collapse to the
+    // install path's no-information-leak 'invalid_token'.
+    return { valid: false, reason: 'invalid_token' }
+  }
+  const row = core.row
+  if (!row.install_id || !row.identity_type || !row.install_scope) {
+    // Not a per-install credential (a consult-only UPC carries no install_id) —
+    // refuse on this path; its consult surface is validateApiKey.
+    return { valid: false, reason: 'invalid_token' }
+  }
+  if (
+    requiredScope !== undefined &&
+    SCOPE_RANK[row.install_scope as PluginInstallScope] < SCOPE_RANK[requiredScope]
+  ) {
+    return { valid: false, reason: 'insufficient_scope' }
+  }
+  return {
+    valid: true,
+    credential_id: row.id,
+    owner_user_id: row.owner_user_id,
+    identity_type: row.identity_type as PluginIdentityType,
+    install_id: row.install_id,
+    install_scope: row.install_scope as PluginInstallScope,
+  }
 }
 
 /**

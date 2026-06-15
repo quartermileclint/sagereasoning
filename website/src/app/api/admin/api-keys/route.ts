@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimit, RATE_LIMITS, getAuthenticatedUser, corsHeaders } from '@/lib/security'
 import { API_KEY_FREE_TIER_DEFAULTS } from '@/lib/api-key-defaults'
+import {
+  PRACTICE_CAPABILITIES,
+  UNIFIED_PRACTICE_CREDENTIAL_PREFIX,
+} from '@/lib/practice-credential'
 import { randomBytes, createHash } from 'node:crypto'
 
 // Admin user ID — only this user can manage API keys
@@ -117,6 +121,8 @@ export async function POST(request: NextRequest) {
       daily_limit = API_KEY_FREE_TIER_DEFAULTS.daily_limit,
       max_chain_iterations = API_KEY_FREE_TIER_DEFAULTS.max_chain_iterations,
       notes,
+      capabilities, // CI-14 (optional): presence triggers UPC mode (sr_prac_)
+      owner_kind, // CI-14 (optional): 'operator' | 'external_consumer'
     } = body
 
     if (!label || typeof label !== 'string' || label.trim().length === 0) {
@@ -127,16 +133,85 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'tier must be "free" or "paid"' }, { status: 400 })
     }
 
-    // Generate the key
-    const rawKey = generateApiKey()
-    const key_hash = hashKey(rawKey)
-    const key_prefix = keyPrefix(rawKey)
+    // CI-14 UPC mode: when `capabilities` is supplied, mint a Unified Practice
+    // Credential (sr_prac_, purpose='unified_practice', explicit capabilities[],
+    // owner_kind, credential_provenance). ADDITIVE — when `capabilities` is omitted
+    // the mint below is byte-identical to the legacy sr_live_ ecosystem path.
+    const upcMode = capabilities !== undefined
+    let rawKey: string
+    let insertObj: Record<string, unknown>
 
-    const { data: keyRecord, error: insertErr } = await supabaseAdmin
-      .from('api_keys')
-      .insert({
-        key_hash,
-        key_prefix,
+    if (upcMode) {
+      const allowed = PRACTICE_CAPABILITIES as readonly string[]
+      const bad =
+        Array.isArray(capabilities) &&
+        capabilities.filter((c: unknown) => typeof c !== 'string' || !allowed.includes(c))
+      if (!Array.isArray(capabilities) || capabilities.length === 0 || (bad && bad.length > 0)) {
+        return NextResponse.json(
+          {
+            error: `capabilities must be a non-empty subset of ${JSON.stringify(PRACTICE_CAPABILITIES)}`,
+          },
+          { status: 400 },
+        )
+      }
+      if (owner_kind !== undefined && !['operator', 'external_consumer'].includes(owner_kind)) {
+        return NextResponse.json(
+          { error: "owner_kind must be 'operator' or 'external_consumer'" },
+          { status: 400 },
+        )
+      }
+
+      // Resolve the operator owner from owner_email — EXACT single match only (R3:
+      // never mis-promote; 0 or ≥2 matches ⇒ external_consumer, owner_user_id null).
+      let resolvedOwnerId: string | null = null
+      let resolvedOwnerKind: 'operator' | 'external_consumer' =
+        owner_kind === 'external_consumer' ? 'external_consumer' : 'operator'
+
+      if (resolvedOwnerKind === 'operator') {
+        const email = owner_email?.trim()
+        if (email) {
+          const { data: matches } = await supabaseAdmin
+            .from('profiles')
+            .select('id')
+            .ilike('email', email)
+          const uniqueIds = Array.from(
+            new Set((matches ?? []).map((m: { id: string }) => m.id)),
+          )
+          if (uniqueIds.length === 1) {
+            resolvedOwnerId = uniqueIds[0]
+          } else {
+            resolvedOwnerKind = 'external_consumer' // 0 or ≥2 — cannot promote
+          }
+        } else {
+          resolvedOwnerKind = 'external_consumer'
+        }
+      }
+
+      rawKey = `${UNIFIED_PRACTICE_CREDENTIAL_PREFIX}${randomBytes(16).toString('hex')}`
+      insertObj = {
+        key_hash: hashKey(rawKey),
+        key_prefix: keyPrefix(rawKey),
+        label: label.trim(),
+        owner_email: owner_email?.trim() || null,
+        agent_id: agent_id?.trim() || null,
+        owner_user_id: resolvedOwnerId,
+        owner_kind: resolvedOwnerKind,
+        purpose: 'unified_practice',
+        capabilities,
+        credential_provenance: { minted_by: 'admin/api-keys', basis: 'admin_issued_upc' },
+        tier,
+        monthly_limit: Number(monthly_limit),
+        daily_limit: Number(daily_limit),
+        max_chain_iterations: Number(max_chain_iterations),
+        is_active: true,
+        notes: notes?.trim() || null,
+      }
+    } else {
+      // Legacy sr_live_ ecosystem mint — byte-identical to the pre-CI-14 behaviour.
+      rawKey = generateApiKey()
+      insertObj = {
+        key_hash: hashKey(rawKey),
+        key_prefix: keyPrefix(rawKey),
         label: label.trim(),
         owner_email: owner_email?.trim() || null,
         agent_id: agent_id?.trim() || null,
@@ -146,7 +221,12 @@ export async function POST(request: NextRequest) {
         max_chain_iterations: Number(max_chain_iterations),
         is_active: true,
         notes: notes?.trim() || null,
-      })
+      }
+    }
+
+    const { data: keyRecord, error: insertErr } = await supabaseAdmin
+      .from('api_keys')
+      .insert(insertObj)
       .select('id, key_prefix, label, tier, monthly_limit, daily_limit, max_chain_iterations, owner_email, agent_id, is_active, created_at, notes')
       .single()
 

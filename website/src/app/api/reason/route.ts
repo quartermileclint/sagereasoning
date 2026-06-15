@@ -58,6 +58,7 @@ import {
   extractPluginInstallToken,
   type PluginInstallValidationResult,
 } from '@/lib/plugin-install-auth'
+import { isUpcCapabilityAuthEnabled } from '@/lib/practice-credential'
 // Option D billing (per D-BILLING-MODEL-LOCKED-2026-05-17 + build session 2026-05-MM).
 // Metering wraps every API-key-authenticated request: a loop_id is extracted
 // from X-Loop-Id (or server-generated); per-layer Anthropic cost is read from
@@ -843,6 +844,31 @@ export async function POST(request: NextRequest) {
       (body as Record<string, unknown>).layer1_schema !== undefined &&
       (body as Record<string, unknown>).layer1_schema !== null
     ) {
+      // CI-14 l1_supply enforcement (flag-gated): when the UPC capability model is
+      // ON, a credential may supply a precomputed layer1_schema only if it carries
+      // the l1_supply capability — the ADR's "fails closed (403)" promise. Flag-off
+      // (or any credential validated by the legacy path, where capabilities is
+      // undefined) → skipped, byte-identical. The presets bundle {consult,l1_supply}
+      // so every legacy/default-minted credential passes; only a deliberately
+      // consult-only UPC is refused here.
+      if (
+        isUpcCapabilityAuthEnabled() &&
+        apiKey !== null &&
+        apiKey.valid === true &&
+        Array.isArray(apiKey.capabilities) &&
+        !apiKey.capabilities.includes('l1_supply')
+      ) {
+        return await respond({
+          body: {
+            error: 'Insufficient capability',
+            message:
+              'This credential does not grant the l1_supply capability required to supply a precomputed layer1_schema.',
+          },
+          status: 403,
+          headers: corsHeaders(),
+          isBillable: false, // Pre-substrate capability rejection — no LLM cost incurred.
+        })
+      }
       const supplied = validateSuppliedLayer1Schema(
         (body as Record<string, unknown>).layer1_schema
       )

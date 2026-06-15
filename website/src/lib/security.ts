@@ -13,6 +13,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createHash, randomBytes } from 'node:crypto'
+import {
+  isUpcCapabilityAuthEnabled,
+  validatePracticeCredential,
+  UNIFIED_PRACTICE_CREDENTIAL_PREFIX,
+  type PracticeCapability,
+} from '@/lib/practice-credential'
 
 // =============================================================================
 // RATE LIMITING — In-memory IP-based rate limiter
@@ -294,6 +300,15 @@ export type ApiKeyValidationResult = {
   max_chain_iterations: number
   monthly_calls_after: number
   daily_calls_after: number
+  /**
+   * CI-14: the credential's effective capability set, populated ONLY on the UPC
+   * flag-on path (validateApiKeyUpc). Undefined on the legacy flag-off path
+   * (which has no capability concept) — callers must treat undefined as "capability
+   * model not in effect" and fall back to their pre-UPC gating. Lets a surface that
+   * needs a finer capability than 'consult' (e.g. the l1_supply layer1_schema-supply
+   * path on /api/reason) enforce it without a second DB read.
+   */
+  capabilities?: PracticeCapability[]
 } | {
   valid: false
   error: NextResponse
@@ -305,12 +320,22 @@ function hashKey(rawKey: string): string {
 
 function extractRawKey(request: NextRequest): string | null {
   // Accept: Authorization: Bearer sr_live_... OR X-Api-Key: sr_live_...
+  // When the UPC flag is ON, ALSO accept the unified sr_prac_ prefix on the same
+  // two transports (consult/l1_supply are not Authorization-only — constraint 7).
+  // The flag-off branches below are byte-identical to the pre-UPC behaviour.
+  const upc = isUpcCapabilityAuthEnabled()
   const authHeader = request.headers.get('authorization')
   if (authHeader?.startsWith('Bearer sr_live_')) {
     return authHeader.slice(7).trim()
   }
+  if (upc && authHeader?.startsWith(`Bearer ${UNIFIED_PRACTICE_CREDENTIAL_PREFIX}`)) {
+    return authHeader.slice(7).trim()
+  }
   const apiKeyHeader = request.headers.get('x-api-key')
   if (apiKeyHeader?.startsWith('sr_live_')) {
+    return apiKeyHeader.trim()
+  }
+  if (upc && apiKeyHeader?.startsWith(UNIFIED_PRACTICE_CREDENTIAL_PREFIX)) {
     return apiKeyHeader.trim()
   }
   return null
@@ -344,6 +369,15 @@ export async function validateApiKey(
         { status: 401, headers: publicCorsHeaders() }
       ),
     }
+  }
+
+  // UPC capability-aware path (flag ON): delegate the credential AUTH decision to
+  // the single chokepoint (asserts 'consult' — the ecosystem umbrella capability
+  // every consult/score/baseline/guardrail surface shares), then run the SAME
+  // quota/usage metering. Flag OFF falls through to the exact byte-identical
+  // legacy body below.
+  if (isUpcCapabilityAuthEnabled()) {
+    return validateApiKeyUpc(rawKey, endpoint)
   }
 
   const keyHash = hashKey(rawKey)
@@ -459,6 +493,148 @@ export async function validateApiKey(
     max_chain_iterations: keyRecord.max_chain_iterations,
     monthly_calls_after: new_monthly_total,
     daily_calls_after: new_daily_total,
+  }
+}
+
+/**
+ * UPC capability-aware variant of validateApiKey (flag ON only — reached from the
+ * branch in validateApiKey). Delegates the credential AUTH decision to the
+ * validatePracticeCredential chokepoint requiring the 'consult' capability, then
+ * performs the IDENTICAL quota/usage metering and returns the IDENTICAL
+ * ApiKeyValidationResult shape. Preserves the suspended_reason UX affordance (403)
+ * and adds a 403 insufficient_capability for a credential that authenticates but
+ * lacks 'consult'. Not exported — the only caller is validateApiKey.
+ */
+async function validateApiKeyUpc(
+  rawKey: string,
+  endpoint: GatedEndpoint,
+): Promise<ApiKeyValidationResult> {
+  const core = await validatePracticeCredential(rawKey, 'consult')
+  if (!core.valid) {
+    if (core.reason === 'suspended') {
+      return {
+        valid: false,
+        error: NextResponse.json(
+          {
+            error: 'API key suspended',
+            message:
+              core.suspendedReason ||
+              'This API key has been suspended. Contact zeus@sagereasoning.com.',
+          },
+          { status: 403, headers: publicCorsHeaders() },
+        ),
+      }
+    }
+    if (core.reason === 'insufficient_capability') {
+      return {
+        valid: false,
+        error: NextResponse.json(
+          {
+            error: 'Insufficient capability',
+            message:
+              'This credential does not grant the consult capability required by this endpoint.',
+          },
+          { status: 403, headers: publicCorsHeaders() },
+        ),
+      }
+    }
+    // invalid_token (unknown key / query error) → 401. wrong_agent cannot occur
+    // here (no agent_id binding is supplied for the consult capability). wrong_scope
+    // does not arise on real data either — no consult-capable mint path sets the
+    // scope_* columns — but were a row to carry one, evaluatePracticeCredentialRow
+    // would return wrong_scope, which falls through to this same 401 (fail-closed).
+    return {
+      valid: false,
+      error: NextResponse.json(
+        { error: 'Invalid API key', message: 'The provided API key was not recognised.' },
+        { status: 401, headers: publicCorsHeaders() },
+      ),
+    }
+  }
+
+  const row = core.row
+
+  // Atomically increment usage and get new totals (identical to the legacy path).
+  const now = new Date()
+  const year = now.getUTCFullYear()
+  const month = now.getUTCMonth() + 1
+  const day = now.getUTCDate()
+
+  const admin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+
+  const { data: usageRows, error: usageErr } = await admin.rpc('increment_api_usage', {
+    p_api_key_id: row.id,
+    p_year: year,
+    p_month: month,
+    p_day: day,
+    p_endpoint: endpoint,
+  })
+
+  if (usageErr || !usageRows || usageRows.length === 0) {
+    console.error('Usage increment error:', usageErr?.code || 'unknown')
+    // Fail SECURE — deny access when rate-limit tracking is unavailable.
+    return {
+      valid: false,
+      error: NextResponse.json(
+        {
+          error: 'Service temporarily unavailable',
+          message: 'Rate limit system offline. Please retry shortly.',
+        },
+        { status: 503, headers: publicCorsHeaders() },
+      ),
+    }
+  }
+
+  const { new_monthly_total, new_daily_total, monthly_limit, daily_limit } = usageRows[0]
+
+  if (new_monthly_total > monthly_limit) {
+    return {
+      valid: false,
+      error: NextResponse.json(
+        {
+          error: 'Monthly quota exceeded',
+          message: `This API key has reached its monthly limit of ${monthly_limit} calls. Resets on the 1st of next month.`,
+          monthly_calls: new_monthly_total,
+          monthly_limit,
+          upgrade:
+            'Contact zeus@sagereasoning.com to upgrade your API key for unlimited calls.',
+        },
+        { status: 429, headers: publicCorsHeaders() },
+      ),
+    }
+  }
+
+  if (new_daily_total > daily_limit) {
+    return {
+      valid: false,
+      error: NextResponse.json(
+        {
+          error: 'Daily limit exceeded',
+          message: `This API key has reached its daily limit of ${daily_limit} calls. Resets at midnight UTC.`,
+          daily_calls: new_daily_total,
+          daily_limit,
+        },
+        { status: 429, headers: publicCorsHeaders() },
+      ),
+    }
+  }
+
+  return {
+    valid: true,
+    api_key_id: row.id,
+    label: row.label ?? '',
+    tier: row.tier ?? 'free',
+    monthly_remaining: monthly_limit - new_monthly_total,
+    daily_remaining: daily_limit - new_daily_total,
+    max_chain_iterations: row.max_chain_iterations ?? 1,
+    monthly_calls_after: new_monthly_total,
+    daily_calls_after: new_daily_total,
+    // CI-14: surface the effective capability set so finer-grained surfaces (e.g.
+    // the l1_supply layer1_schema-supply path) can enforce without a second read.
+    capabilities: core.capabilities,
   }
 }
 
@@ -664,37 +840,88 @@ export async function validateSageAssentWriteToken(
     downstream_identity_model?: string
     path_posture?: string
   },
+  // UPC (flag ON): the capability this surface requires. Defaults to
+  // 'accreditation_write' (the accreditation write boundary). Sage Calling passes
+  // 'calling'; Sage Reflect passes 'reflect'. IGNORED when the flag is OFF, so an
+  // existing caller that omits it is byte-identical.
+  requiredCapability: PracticeCapability = 'accreditation_write',
 ): Promise<SageAssentWriteValidationResult> {
-  // Prefix check — wrong prefix is treated as no token (no DB hit).
-  if (!rawToken.startsWith(SAGE_ASSENT_WRITE_TOKEN_PREFIX)) {
+  if (!isUpcCapabilityAuthEnabled()) {
+    // ===== FLAG OFF — exact byte-identical legacy body (requiredCapability ignored) =====
+    // Prefix check — wrong prefix is treated as no token (no DB hit).
+    if (!rawToken.startsWith(SAGE_ASSENT_WRITE_TOKEN_PREFIX)) {
+      return { valid: false, reason: 'no_token' }
+    }
+
+    // Hash the presented token (same algorithm as the sr_live_ path).
+    const keyHash = createHash('sha256').update(rawToken).digest('hex')
+
+    // Look up the active sage_assent_write row by hash (service role, bypasses RLS).
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
+
+    const { data: row, error } = await admin
+      .from('api_keys')
+      .select(
+        'id, agent_id, owner_user_id, scope_downstream_identity_model, scope_path_posture',
+      )
+      .eq('key_hash', keyHash)
+      .eq('purpose', 'sage_assent_write')
+      .eq('is_active', true)
+      .maybeSingle()
+
+    // A query error is fail-closed (treated as no row → invalid_token).
+    if (error) {
+      return { valid: false, reason: 'invalid_token' }
+    }
+
+    return evaluateSageAssentWriteRow((row as SageAssentCredentialRow | null) ?? null, agent_id, carriedProfile)
+  }
+
+  // ===== FLAG ON — capability-aware via the validatePracticeCredential chokepoint =====
+  // Accept the legacy write prefix OR the unified sr_prac_ prefix. The per-capability
+  // Authorization-header-only transport narrowing (constraint 7) is enforced at the
+  // call-site (the route's Bearer extraction), not here.
+  if (
+    !rawToken.startsWith(SAGE_ASSENT_WRITE_TOKEN_PREFIX) &&
+    !rawToken.startsWith(UNIFIED_PRACTICE_CREDENTIAL_PREFIX)
+  ) {
     return { valid: false, reason: 'no_token' }
   }
 
-  // Hash the presented token (same algorithm as the sr_live_ path).
-  const keyHash = createHash('sha256').update(rawToken).digest('hex')
+  const core = await validatePracticeCredential(rawToken, requiredCapability, {
+    agent_id,
+    carriedProfile,
+  })
 
-  // Look up the active sage_assent_write row by hash (service role, bypasses RLS).
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  )
-
-  const { data: row, error } = await admin
-    .from('api_keys')
-    .select(
-      'id, agent_id, owner_user_id, scope_downstream_identity_model, scope_path_posture',
-    )
-    .eq('key_hash', keyHash)
-    .eq('purpose', 'sage_assent_write')
-    .eq('is_active', true)
-    .maybeSingle()
-
-  // A query error is fail-closed (treated as no row → invalid_token).
-  if (error) {
-    return { valid: false, reason: 'invalid_token' }
+  if (core.valid) {
+    return {
+      valid: true,
+      credential_id: core.row.id,
+      // accreditation_write credentials always carry owner_user_id (the load-bearing
+      // invariant); the ?? '' is defensive only.
+      owner_user_id: core.row.owner_user_id ?? '',
+      agent_id: core.row.agent_id ?? agent_id,
+      scope_downstream_identity_model: core.row.scope_downstream_identity_model,
+      scope_path_posture: core.row.scope_path_posture,
+    }
   }
 
-  return evaluateSageAssentWriteRow((row as SageAssentCredentialRow | null) ?? null, agent_id, carriedProfile)
+  // Map chokepoint reasons → the assent result shape. 'suspended' and
+  // 'insufficient_capability' collapse to 'invalid_token' (no information leak; the
+  // route 401s every failure regardless), keeping this result type unchanged.
+  switch (core.reason) {
+    case 'wrong_agent':
+      return { valid: false, reason: 'wrong_agent' }
+    case 'wrong_scope':
+      return { valid: false, reason: 'wrong_scope' }
+    case 'no_token':
+      return { valid: false, reason: 'no_token' }
+    default:
+      return { valid: false, reason: 'invalid_token' }
+  }
 }
 
 /**

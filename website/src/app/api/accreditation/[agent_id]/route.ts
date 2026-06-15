@@ -183,6 +183,10 @@ import {
   logSageAssentVerifyEvent,
   type SageAssentVerifyEvent,
 } from '@/lib/security'
+import {
+  isUpcCapabilityAuthEnabled,
+  UNIFIED_PRACTICE_CREDENTIAL_PREFIX,
+} from '@/lib/practice-credential'
 
 import {
   handleAccreditationLookup,
@@ -401,13 +405,22 @@ async function verifyAgentIdOwnership(
   // 2. Token extraction — Bearer sr_assent_ only (X-Api-Key is NOT accepted for
   //    A10 tokens, per Decision A).
   const authHeader = request.headers.get('authorization')
-  if (!authHeader?.startsWith('Bearer sr_assent_')) {
+  // Bearer-only (Decision A / constraint 7). Accept the legacy sr_assent_ prefix
+  // always; accept the unified sr_prac_ prefix only when the UPC flag is ON
+  // (flag-off byte-identical).
+  const assentPrefixOk = !!authHeader?.startsWith('Bearer sr_assent_')
+  const upcPrefixOk =
+    isUpcCapabilityAuthEnabled() &&
+    !!authHeader?.startsWith(`Bearer ${UNIFIED_PRACTICE_CREDENTIAL_PREFIX}`)
+  if (!assentPrefixOk && !upcPrefixOk) {
     emit('no_token')
     return { ok: false, reason: 'unauthorized' }
   }
-  const rawToken = authHeader.slice(7).trim()
+  const rawToken = (authHeader as string).slice(7).trim()
 
-  // 3. Delegate verification + scope check to security.ts (Decision E).
+  // 3. Delegate verification + scope check to security.ts (Decision E). UPC: this
+  //    surface requires 'accreditation_write' (the validator's default; flag-off
+  //    behaviour is byte-identical).
   const result = await validateSageAssentWriteToken(rawToken, agent_id, carriedProfile)
   if (!result.valid) {
     emit(result.reason)

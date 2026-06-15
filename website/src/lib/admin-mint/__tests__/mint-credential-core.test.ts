@@ -185,6 +185,76 @@ console.log('MS — mint assent (sr_assent_)')
   )
 }
 
+// ── MP — mint practice (sr_prac_ Unified Practice Credential, CI-14) ──────────
+console.log('MP — mint practice (sr_prac_)')
+{
+  const noLabel = buildMintPlan('practice', { capabilities: 'consult' })
+  assert('MP-1 label required', !noLabel.ok)
+
+  const noCaps = buildMintPlan('practice', { label: 'UPC' })
+  assert('MP-2 capabilities required', !noCaps.ok)
+
+  const badCap = buildMintPlan('practice', { label: 'UPC', capabilities: 'consult,teleport' })
+  assert('MP-3 invalid capability rejected locally', !badCap.ok && /teleport/.test(badCap.error))
+
+  const full = buildMintPlan('practice', {
+    label: 'Full UPC',
+    capabilities: 'consult,l1_supply,accreditation_write,calling,reflect',
+    'agent-id': 'ns:agent@1',
+    'owner-email': 'op@example.com',
+  })
+  assert(
+    'MP-4 full UPC → POST /api/admin/api-keys with capabilities[] + agent_id + owner_email',
+    full.ok &&
+      full.plan.method === 'POST' &&
+      full.plan.path === '/api/admin/api-keys' &&
+      Array.isArray(full.plan.body?.capabilities) &&
+      (full.plan.body?.capabilities as string[]).length === 5 &&
+      full.plan.body?.agent_id === 'ns:agent@1' &&
+      full.plan.body?.owner_email === 'op@example.com'
+  )
+  assert(
+    'MP-5 limits OMITTED (route 30/1/1 defaults govern — CI-6)',
+    full.ok &&
+      !('monthly_limit' in full.plan.body!) &&
+      !('daily_limit' in full.plan.body!)
+  )
+
+  const badOwnerKind = buildMintPlan('practice', {
+    label: 'x',
+    capabilities: 'consult',
+    'owner-kind': 'wizard',
+  })
+  assert('MP-6 invalid owner-kind rejected locally', !badOwnerKind.ok)
+
+  const consultOnly = buildMintPlan('practice', {
+    label: 'consult UPC',
+    capabilities: 'consult,l1_supply',
+  })
+  assert(
+    'MP-7 consult-only UPC carries no write-class capability',
+    consultOnly.ok &&
+      !(consultOnly.plan.body?.capabilities as string[]).includes('accreditation_write')
+  )
+
+  const rev = buildRevokePlan('practice', { id: FAKE_UUID })
+  assert(
+    'MP-8 revoke practice → PATCH is_active=false on /api/admin/api-keys (no DELETE)',
+    rev.ok &&
+      rev.plan.method === 'PATCH' &&
+      rev.plan.path === '/api/admin/api-keys' &&
+      rev.plan.body?.is_active === false
+  )
+
+  assert('MP-9 classFromPrefix sr_prac_ → practice', classFromPrefix('sr_prac_abc123') === 'practice')
+
+  const parsed = parseCommand(['mint', 'practice', '--label', 'x', '--capabilities', 'consult'])
+  assert(
+    'MP-10 parseCommand accepts the practice class',
+    parsed.ok && parsed.command.credentialClass === 'practice'
+  )
+}
+
 // ── RV — revoke ──────────────────────────────────────────────────────────────
 console.log('RV — revoke (per-surface verbs)')
 {

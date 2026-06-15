@@ -64,6 +64,10 @@ import {
   SAGE_ASSENT_WRITE_TOKEN_PREFIX,
   type SageAssentVerifyEvent,
 } from '@/lib/security'
+import {
+  isUpcCapabilityAuthEnabled,
+  UNIFIED_PRACTICE_CREDENTIAL_PREFIX,
+} from '@/lib/practice-credential'
 
 import {
   getSession,
@@ -163,14 +167,21 @@ async function verifyCallingToken(request: NextRequest, agent_id: string): Promi
   }
 
   const authHeader = request.headers.get('authorization')
-  if (!authHeader?.startsWith(`Bearer ${SAGE_ASSENT_WRITE_TOKEN_PREFIX}`)) {
+  // Bearer-only (constraint 7). Accept the legacy sr_assent_ prefix always; accept
+  // the unified sr_prac_ prefix only when the UPC flag is ON (flag-off byte-identical).
+  const assentPrefixOk = !!authHeader?.startsWith(`Bearer ${SAGE_ASSENT_WRITE_TOKEN_PREFIX}`)
+  const upcPrefixOk =
+    isUpcCapabilityAuthEnabled() &&
+    !!authHeader?.startsWith(`Bearer ${UNIFIED_PRACTICE_CREDENTIAL_PREFIX}`)
+  if (!assentPrefixOk && !upcPrefixOk) {
     emit('no_token')
     return { ok: false }
   }
-  const rawToken = authHeader.slice(7).trim()
+  const rawToken = (authHeader as string).slice(7).trim()
 
-  // D-6: reuse the credential as-is — no CarriedProfile / discovery scope.
-  const result = await validateSageAssentWriteToken(rawToken, agent_id, undefined)
+  // D-6: reuse the credential as-is — no CarriedProfile / discovery scope. UPC: this
+  // surface requires the 'calling' capability (the 4th arg is ignored when flag OFF).
+  const result = await validateSageAssentWriteToken(rawToken, agent_id, undefined, 'calling')
   if (!result.valid) {
     emit(result.reason)
     return { ok: false }
