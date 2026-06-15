@@ -165,6 +165,13 @@ COMMENT ON COLUMN public.substrate_audit_narratives.layer3_cost_usd_microcents I
 -- Rollback block (commented out — uncomment and run to revert)
 -- ============================================================================
 --
+-- PRECONDITION (M1 activation, 2026-06-15): if SUBSTRATE_L3_DEFER_ENABLED is
+--   live, UNSET it in Vercel + redeploy FIRST (so no retention write is in
+--   flight), confirm no new rows are landing, and only THEN run the DROP.
+--   Dropping while the defer flag is on silently loses retention writes — the
+--   route's insertPendingNarrative/insertRetainedNarrative would fail-honest
+--   (ok:false), so the consult still 200s but the CI-17 narrative is lost.
+--
 -- BEGIN;
 --   DROP TABLE IF EXISTS public.substrate_audit_narratives;
 -- COMMIT;

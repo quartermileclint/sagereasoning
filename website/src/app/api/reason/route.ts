@@ -1209,6 +1209,12 @@ export async function POST(request: NextRequest) {
     // unset (production) — byte-identical behaviour.
     // ========================================================================
     let narrativeStatus: 'inline' | 'deferred' | undefined
+    // M1 CI-1 (FH-1, 2026-06-15): tracks whether the INLINE one-shot retention
+    // write actually landed, so the A12 audit row cannot claim retention that
+    // silently failed. Undefined on the deferred-success path ('deferred'
+    // already implies the pending row landed) and when the flag is unset
+    // (omitted from the audit facts → byte-identical).
+    let narrativeRetained: boolean | undefined
     if (
       l3DeferEnabled &&
       sandwichResult.error === null &&
@@ -1270,7 +1276,7 @@ export async function POST(request: NextRequest) {
                 outcome.costMicrocents / 10000
               )
             }
-            await insertRetainedNarrative({
+            const retained = await insertRetainedNarrative({
               correlationId,
               agentId: narrativeAgentId,
               assessment: retainableAssessment,
@@ -1279,6 +1285,9 @@ export async function POST(request: NextRequest) {
               layer3CostMicrocents: outcome.costMicrocents,
               layer3LatencyMs: outcome.latencyMs,
             })
+            // FH-1: the consumer got inline prose, but record honestly whether
+            // the retention row landed — the A12 row is the CI-17 observability.
+            narrativeRetained = retained.ok
           } else {
             // Both generation paths threw AND the pending row failed —
             // surface the same minimal fallback the orchestrator's inline
@@ -1294,7 +1303,7 @@ export async function POST(request: NextRequest) {
         const inlineProse = composedOutput.prose as Layer3Prose | null
         if (inlineProse !== null) {
           narrativeStatus = 'inline'
-          await insertRetainedNarrative({
+          const retained = await insertRetainedNarrative({
             correlationId,
             agentId: narrativeAgentId,
             assessment: retainableAssessment,
@@ -1303,6 +1312,8 @@ export async function POST(request: NextRequest) {
             layer3CostMicrocents: sandwichResult.layer3_cost_usd_microcents,
             layer3LatencyMs: sandwichResult.layer3_latency_ms,
           })
+          // FH-1: record honestly whether the retention row landed.
+          narrativeRetained = retained.ok
         }
       }
     }
@@ -1338,6 +1349,9 @@ export async function POST(request: NextRequest) {
         // M1 CI-1: structural enum; key omitted entirely when the flag is
         // unset, so production audit rows are unchanged until activation.
         ...(narrativeStatus !== undefined ? { narrativeStatus } : {}),
+        // M1 CI-1 (FH-1): whether the inline retention write actually landed —
+        // omitted on the deferred path + when the flag is unset (byte-identical).
+        ...(narrativeRetained !== undefined ? { narrativeRetained } : {}),
       },
     })
 

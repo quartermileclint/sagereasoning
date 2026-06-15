@@ -72,6 +72,16 @@ export interface SubstrateRunFacts {
    * rows are unchanged until the founder's own activation step.
    */
   narrativeStatus?: 'inline' | 'deferred'
+  /**
+   * M1 CI-1 (FH-1, 2026-06-15): whether the one-shot INLINE retention write
+   * actually landed (insertRetainedNarrative ok). OMITTED on the deferred path
+   * (the 'deferred' status already implies the pending row landed) and when
+   * SUBSTRATE_L3_DEFER_ENABLED is unset (production rows unchanged). Set false
+   * when prose was delivered inline but the retention row failed to persist —
+   * so the audit row never claims retention that did not happen and the CI-17
+   * gap stays visible rather than masked as a clean 'inline'.
+   */
+  narrativeRetained?: boolean
 }
 
 export interface RecordAuditEventParams {
@@ -171,6 +181,11 @@ export function maskContext(
     // (production rows unchanged until activation).
     ...(f.narrativeStatus !== undefined
       ? { narrative_status: f.narrativeStatus }
+      : {}),
+    // M1 CI-1 (FH-1): structural boolean; absent on the deferred path + when
+    // the flag is unset. False = inline prose delivered but retention failed.
+    ...(f.narrativeRetained !== undefined
+      ? { narrative_retained: f.narrativeRetained }
       : {}),
   }
 }
