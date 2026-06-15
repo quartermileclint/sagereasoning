@@ -323,6 +323,24 @@ console.log('SM — response summarising')
     inst.token === 'sr_inst_def456' && inst.record.install_id === 'x'
   )
 
+  // SM-4 — CI-14: 'practice' mints via /api/admin/api-keys (the api shape:
+  // { message, api_key, ...keyRecord }), NOT the install/assent { token,
+  // credential } shape. Regression-locks the live-replay-found bug where the
+  // sr_prac_ token was dropped (token null, record {}).
+  const prac = summariseMintResponse('practice', {
+    message: 'created',
+    api_key: 'sr_prac_abc123',
+    id: FAKE_UUID,
+    agent_id: 'legb:upc-replay@v1',
+  })
+  assert(
+    'SM-4 practice: token from api_key (api shape); record kept; message stripped',
+    prac.token === 'sr_prac_abc123' &&
+      prac.record.agent_id === 'legb:upc-replay@v1' &&
+      !('api_key' in prac.record) &&
+      !('message' in prac.record)
+  )
+
   const list = buildListPlan()
   assert(
     'SM-3 list plan → GET /api/admin/api-keys',
@@ -336,6 +354,7 @@ console.log('CP — credential class from key_prefix')
   assert('CP-1 sr_live_ → api', classFromPrefix('sr_live_a1b2c3') === 'api')
   assert('CP-2 sr_inst_ → install', classFromPrefix('sr_inst_d4e5f6') === 'install')
   assert('CP-3 sr_assent_ → assent', classFromPrefix('sr_assent_g7h8') === 'assent')
+  assert('CP-5 sr_prac_ → practice', classFromPrefix('sr_prac_a1b2c3') === 'practice')
   assert('CP-4 anything else → unknown', classFromPrefix('sk-ant-oops') === 'unknown')
 }
 

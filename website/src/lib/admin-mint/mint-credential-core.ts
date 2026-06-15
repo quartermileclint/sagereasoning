@@ -419,7 +419,10 @@ export function summariseMintResponse(
   credentialClass: CredentialClass,
   json: Record<string, unknown>
 ): { token: string | null; record: Record<string, unknown> } {
-  if (credentialClass === 'api') {
+  // 'api' AND 'practice' (CI-14 UPC) both mint via /api/admin/api-keys, which
+  // returns { api_key, ...keyRecord } — NOT the { token, credential } shape the
+  // install/assent admin routes return. Group them (mirrors buildMintPlan).
+  if (credentialClass === 'api' || credentialClass === 'practice') {
     const { api_key, message: _message, ...record } = json
     return { token: typeof api_key === 'string' ? api_key : null, record }
   }

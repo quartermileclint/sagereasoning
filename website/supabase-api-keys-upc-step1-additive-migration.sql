@@ -50,18 +50,31 @@
 -- ============================================================
 
 -- ------------------------------------------------------------
--- 0. INFORMATIONAL pre-check — the existing population by purpose (the values the
---    Step-2 backfill will map). Expectation: every row carries one of the three
---    live values; zero NULL purpose (purpose is NOT NULL until step 4 below).
+-- 0. INFORMATIONAL pre-check (read-only) — TWO statements:
+--   0a. existing population by purpose (the values the Step-2 backfill will map).
+--       Expectation: every row carries one of the three live values; zero NULL
+--       purpose (purpose is NOT NULL until §4 below).
+--   0b. idempotency guard — whether the UPC columns already exist. On a FIRST run
+--       0b returns zero rows; on a re-run it lists the already-added columns. Uses
+--       information_schema so it works BEFORE the columns exist (a direct
+--       `capabilities IS NOT NULL` 42703s on the un-migrated table — fixed
+--       2026-06-15 during the prod cutover, was the original §0 form).
 -- ------------------------------------------------------------
+-- 0a:
 SELECT
   count(*)                                              AS total_rows,
   count(*) FILTER (WHERE purpose = 'ecosystem')         AS ecosystem_rows,
   count(*) FILTER (WHERE purpose = 'sage_assent_write')  AS sage_assent_write_rows,
   count(*) FILTER (WHERE purpose = 'plugin_install')     AS plugin_install_rows,
-  count(*) FILTER (WHERE purpose IS NULL)               AS null_purpose_rows,
-  count(*) FILTER (WHERE capabilities IS NOT NULL)       AS already_has_capabilities
+  count(*) FILTER (WHERE purpose IS NULL)               AS null_purpose_rows
 FROM public.api_keys;
+
+-- 0b:
+SELECT column_name
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'api_keys'
+  AND column_name IN ('capabilities', 'owner_kind', 'credential_provenance')
+ORDER BY column_name;
 
 -- ------------------------------------------------------------
 -- 1. capabilities TEXT[] — the multi-valued capability set.
