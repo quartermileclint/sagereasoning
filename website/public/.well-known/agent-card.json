@@ -148,6 +148,35 @@
             "flow_terminated": true
           }
         }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/consultation-cadence-two-gate/v1",
+        "description": "Adopted consultation cadence for agents integrating the Stoic Brain. Gate 1: one mandatory full examination at task adoption. Gate 2: stake-triggered thereafter via a deterministic three-question self-screen (stake in the outcome / drawn to a conclusion pre-evidence / would reason differently unobserved); any positive fires an examination at the appropriate depth. A self-screen consistently negative across genuinely complex sessions is itself examinable. Depth follows the guardrail risk_class ladder (standard->quick, elevated->standard, critical->deep). See llms.txt 'Consultation Cadence — When to Examine'.",
+        "required": false,
+        "params": {
+          "gate1": "One mandatory full (standard|deep) /api/reason examination at task adoption — non-negotiable; sets the frame (circle of concern, role, capacity, purpose).",
+          "gate2_self_screen": [
+            "Is there something at stake for me in how this output lands?",
+            "Am I drawn toward one conclusion before examining the evidence?",
+            "Would I reason differently about this if no one would know the outcome?"
+          ],
+          "gate2_rule": "Any 'yes' -> examine at the appropriate depth. All three 'no' -> proceed without a formal examination.",
+          "suppression_signal": "A self-screen that consistently returns negative across sessions of genuine complexity is itself examinable (mirrors Sage Reflect's null-result suspicion rule, FD-R1).",
+          "depth_ladder": "standard->quick, elevated->standard, critical->deep"
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/practice-cycle-reflect-default/v1",
+        "description": "Sage Reflect fires automatically at session close by default for agent integrations (TR-02) — the configured disposition of the integration, not a compelled act. The full Q1-Q6 reflection sequence is never abbreviated. Explicit opt-out via the integration config key reflect_at_close set to 'off' (default 'auto'). An auto-fired pass is one metered /api/practice/reflect call per session close, billed per the standard per-loop model; opting out suppresses that cost. Every consult and accreditation-write response carries a structural 'practice' hint pointing at /api/practice/reflect.",
+        "required": false,
+        "params": {
+          "practice": {
+            "reflect_due": "TR-02",
+            "endpoint": "/api/practice/reflect",
+            "default": "auto",
+            "opt_out": "reflect_at_close"
+          }
+        }
       }
     ]
   },

@@ -317,16 +317,25 @@ async function main(): Promise<void> {
   // round-trip
   // --------------------------------------------------------------------------
   {
+    // CI-11 (2026-06-13): a record built by createAccreditationRecord carries no
+    // K1 coverage fields; rowToAccreditationRecord folds the three columns to null
+    // on read, so the canonical round-tripped record always carries them (the live
+    // behaviour). The round-trip is lossless modulo this honest fold-to-null.
+    const K1_NULL = {
+      coverage_status: null,
+      monitored_since: null,
+      credential_basis: null,
+    }
     const fresh = freshRecord()
     assertDeepEqual(
       'RT-1 fresh record round-trips losslessly',
       rowToAccreditationRecord(accreditationRecordToRow(fresh)),
-      fresh
+      { ...fresh, ...K1_NULL }
     )
 
     const rich = richRecord()
     const rebuilt = rowToAccreditationRecord(accreditationRecordToRow(rich))
-    assertDeepEqual('RT-2 rich record round-trips losslessly', rebuilt, rich)
+    assertDeepEqual('RT-2 rich record round-trips losslessly', rebuilt, { ...rich, ...K1_NULL })
     assertDeepEqual('RT-3 persisting-passion objects survive intact', rebuilt.passions_persisting, [SAMPLE_PASSION])
   }
 

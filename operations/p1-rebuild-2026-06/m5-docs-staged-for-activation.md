@@ -38,7 +38,7 @@
 >
 > **Economics.** Each consequential wrapper invocation consumes 2–3 API calls (guard + score + optional iterate) and counts against your monthly allowance; the two-gate cadence is what keeps that cost proportional to genuine stake rather than firing on every impression.
 
-**Note for sequencing (do not ship as a live claim yet):** Q1's "depth calibrated to proximity as well as stake" is published above as a *principle* ("where your trajectory is known"). Its **operational** calibration presupposes a readable longitudinal trajectory, which is **CI-5 (M6)** — not built. Keep the conditional phrasing ("where your trajectory is known") until CI-5 lands; do not promise proximity-calibrated depth as an automatic behaviour.
+**Note for sequencing (status updated 2026-06-15):** Q1's "depth calibrated to proximity as well as stake" is published above as a *principle* ("where your trajectory is known"). **CI-5 has since landed and is LIVE** (M6 trajectory write + M7 read overlay, since 2026-06-14): `/api/reason` now surfaces `typical_proximity` under `meta.trajectory`. **Keep the conditional phrasing ("where your trajectory is known") unchanged** — M7 is read-and-overlay with **no server-side depth override** (`route.ts` documents "the agent applies the published two-gate depth rule — no server-side depth override; the engine output is unchanged"), so proximity-calibrated depth is surfaced as an agent-applied **input**, never an automatic server behaviour (an automatic override would also collide with CI-4's same-depth rule). The canonical content above is correct as written; only this note's rationale is updated to record that the readable trajectory it anticipated now exists.
 
 ### agent-card.json extension object (CI-15)
 
@@ -94,7 +94,8 @@
 
 ### skill-registry.ts / mcp-contracts.ts notes
 
-- `SkillContract` (skill-registry.ts ~lines 17-52): add optional `practice_default?: 'auto' | 'elective'` (set `'auto'`) and `reflect_required?: boolean` documentation fields; each skill's `example_output` carries the `practice` hint object above.
+- `SkillContract` (skill-registry.ts ~lines 17-52): add optional `practice_default?: 'auto' | 'elective'` (set `'auto'`) and `reflect_required?: boolean` documentation fields.
+- The `practice` hint is the reflect-at-close default **for agent integrations**, pointing at the **agent** reflect (`/api/practice/reflect`, SR-13). **Carry it only on the agent-facing skills** (the `sage-reason`/consult family + the agent-facing tools that an integration drives at session close) — **NOT** the human-facing tools. In particular the `sage-reflect` skill (id `sage-reflect`, `endpoint: '/api/reflect'`) is the **human** end-of-day daily-reflection tool (user-JWT auth), distinct by design from the agent SR-13 `/api/practice/reflect`; do **not** stamp the agent practice hint into it or any other human tool's `example_output` (clarified 2026-06-15 pre-activation review — `/api/reflect` ≠ `/api/practice/reflect`, both routes exist and serve different audiences).
 - `MCP_COMPLIANCE_NOTICE` (mcp-contracts.ts ~line 363): append a sentence — "Reflect-at-close is the default close step for agent integrations (opt-out: `reflect_at_close`); the full Q1–Q6 sequence is never abbreviated."
 
 ---
@@ -105,7 +106,7 @@ These docs describe behaviour that the M5 **code** delivers flag-gated. The docs
 
 | Doc section | Paired code (built M5, flag UNSET at push) | Activation flag |
 |---|---|---|
-| CI-13 `practice` field on responses | `practice` hint added in `response-envelope.ts` `buildEnvelope` extra, on `/api/reason` + accreditation-write | `SUBSTRATE_PRACTICE_CYCLE_HINT_ENABLED` |
+| CI-13 `practice` field on responses | `practice` hint added directly on the consult output at `reason/route.ts:1627` (`output.practice = PRACTICE_CYCLE_HINT`) + spread via `practiceCycleHintField()` in the accreditation-write success builder at `accreditation/[agent_id]/response-builders.ts:250` (NOT via `response-envelope.ts` `buildEnvelope` — that path carries no `practice` ref; corrected 2026-06-15 pre-activation review) | `SUBSTRATE_PRACTICE_CYCLE_HINT_ENABLED` |
 | CI-15 two-gate cadence | none (pure documentation of adopted methodology — no code) | none — docs-only |
 | (CI-4 loop closure — separate, not a doc here) | `prior_feedback` input + `examination` markers + `examination_open` on `/api/reason` | `SUBSTRATE_REASON_LOOP_CLOSURE_ENABLED` |
 
