@@ -5,6 +5,7 @@ import { API_KEY_FREE_TIER_DEFAULTS } from '@/lib/api-key-defaults'
 import {
   PRACTICE_CAPABILITIES,
   UNIFIED_PRACTICE_CREDENTIAL_PREFIX,
+  capabilitiesIncludeWriteClass,
 } from '@/lib/practice-credential'
 import { randomBytes, createHash } from 'node:crypto'
 
@@ -187,13 +188,35 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // CI-14 Step-7 honesty fix: a UPC carrying a WRITE-CLASS capability
+      // (accreditation_write/calling/reflect) requires owner+agent — the validator
+      // binds agent_id for all three and the 6e-broadened
+      // api_keys_sage_assent_write_requires_owner_and_agent CHECK enforces it at the DB.
+      // Pre-validate here so the caller gets a clear 400 instead of an opaque insert
+      // 500 once 6e §A is applied. (Consult-only / l1_supply UPCs are unaffected.)
+      // The write-class set is the single source `capabilitiesIncludeWriteClass`, kept
+      // aligned with the 6e DB CHECK (practice-credential.ts).
+      const trimmedAgentId = agent_id?.trim() || null
+      const wantsWriteClass = capabilitiesIncludeWriteClass(capabilities as string[])
+      if (wantsWriteClass && (resolvedOwnerId === null || trimmedAgentId === null)) {
+        return NextResponse.json(
+          {
+            error:
+              'A UPC carrying a write-class capability (accreditation_write, calling, ' +
+              'or reflect) requires both a resolvable owner (owner_email matching exactly ' +
+              'one profile) and a non-empty agent_id.',
+          },
+          { status: 400 },
+        )
+      }
+
       rawKey = `${UNIFIED_PRACTICE_CREDENTIAL_PREFIX}${randomBytes(16).toString('hex')}`
       insertObj = {
         key_hash: hashKey(rawKey),
         key_prefix: keyPrefix(rawKey),
         label: label.trim(),
         owner_email: owner_email?.trim() || null,
-        agent_id: agent_id?.trim() || null,
+        agent_id: trimmedAgentId,
         owner_user_id: resolvedOwnerId,
         owner_kind: resolvedOwnerKind,
         purpose: 'unified_practice',
@@ -207,7 +230,15 @@ export async function POST(request: NextRequest) {
         notes: notes?.trim() || null,
       }
     } else {
-      // Legacy sr_live_ ecosystem mint — byte-identical to the pre-CI-14 behaviour.
+      // Legacy sr_live_ ecosystem mint. CI-14 Step-7 honesty fix: set owner_kind
+      // explicitly to 'external_consumer' (the honest default — the admin ecosystem
+      // mint never resolves owner_user_id, so the row IS a third-party consumer; this
+      // matches the Step-2 backfill classification "null owner ⇒ external_consumer").
+      // Without this the row would inherit the column DEFAULT 'operator' while carrying
+      // a null owner — contradicting the declared owner_kind invariant and leaving the
+      // row un-erasable-on-request by BOTH the user-JWT path (no profiles FK) and the
+      // Step-7 token path (had it keyed on owner_kind). Auth-path-neutral: owner_kind is
+      // never read at validation time (zero refs in practice-credential.ts).
       rawKey = generateApiKey()
       insertObj = {
         key_hash: hashKey(rawKey),
@@ -215,6 +246,7 @@ export async function POST(request: NextRequest) {
         label: label.trim(),
         owner_email: owner_email?.trim() || null,
         agent_id: agent_id?.trim() || null,
+        owner_kind: 'external_consumer',
         tier,
         monthly_limit: Number(monthly_limit),
         daily_limit: Number(daily_limit),
@@ -231,6 +263,21 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (insertErr || !keyRecord) {
+      // CI-14 Step-7: a 23514 check_violation here is almost always the 6e-broadened
+      // owner+agent invariant on a write-class UPC (the pre-validation above should
+      // catch it first; this is the belt for any other constraint path). Surface a
+      // clear 400 instead of an opaque 500.
+      if ((insertErr as { code?: string } | null)?.code === '23514') {
+        return NextResponse.json(
+          {
+            error:
+              'The credential violates a database invariant (e.g. a write-class UPC ' +
+              'without owner+agent). Check capabilities, owner_email, and agent_id.',
+            detail: insertErr?.message,
+          },
+          { status: 400 },
+        )
+      }
       console.error('Failed to create API key:', insertErr)
       return NextResponse.json({ error: 'Failed to create API key' }, { status: 500 })
     }

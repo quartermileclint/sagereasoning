@@ -48,6 +48,30 @@ export const PRACTICE_CAPABILITIES = [
 
 export type PracticeCapability = (typeof PRACTICE_CAPABILITIES)[number]
 
+/**
+ * The WRITE-CLASS capabilities — those that bind agent_id at the write boundary and
+ * therefore REQUIRE owner+agent. This list MUST match the 6e-broadened DB CHECK
+ * `api_keys_sage_assent_write_requires_owner_and_agent`
+ * (capabilities && ARRAY['accreditation_write','calling','reflect']). Changing one
+ * without the other re-opens the opaque-500-vs-clear-400 gap the mint pre-validation
+ * closes.
+ */
+export const WRITE_CLASS_CAPABILITIES: PracticeCapability[] = [
+  'accreditation_write',
+  'calling',
+  'reflect',
+]
+
+/** Does this capability set include any write-class member ⇒ the row must carry
+ *  owner_user_id + agent_id (enforced by the validator at auth time and, post-6e §A,
+ *  by the DB CHECK at mint time). The mint route pre-validates with this so a
+ *  write-class UPC without owner+agent gets a clear 400, not an opaque insert 500. */
+export function capabilitiesIncludeWriteClass(capabilities: readonly string[]): boolean {
+  return capabilities.some((c) =>
+    (WRITE_CLASS_CAPABILITIES as readonly string[]).includes(c),
+  )
+}
+
 /** The new UPC prefix for newly-minted unified practice credentials (cosmetic/diagnostic). */
 export const UNIFIED_PRACTICE_CREDENTIAL_PREFIX = 'sr_prac_'
 

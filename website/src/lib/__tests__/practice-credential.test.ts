@@ -17,6 +17,8 @@ import {
   credentialHasCapability,
   evaluatePracticeCredentialRow,
   isUpcCapabilityAuthEnabled,
+  capabilitiesIncludeWriteClass,
+  WRITE_CLASS_CAPABILITIES,
   type PracticeCredentialRow,
   type PracticeCapability,
 } from '@/lib/practice-credential'
@@ -271,6 +273,31 @@ test('flag: "false" → false (strict === "true")', () => {
   process.env.SUBSTRATE_UPC_CAPABILITY_AUTH_ENABLED = 'false'
   assert(isUpcCapabilityAuthEnabled() === false, 'false')
   delete process.env.SUBSTRATE_UPC_CAPABILITY_AUTH_ENABLED
+})
+
+// ── capabilitiesIncludeWriteClass — must match the 6e §A DB CHECK set ───────────
+// (used by the api-keys UPC mint pre-validation; CI-14 Step 7).
+test('write-class: the set is exactly {accreditation_write, calling, reflect}', () => {
+  assert(
+    WRITE_CLASS_CAPABILITIES.length === 3 &&
+      WRITE_CLASS_CAPABILITIES.includes('accreditation_write') &&
+      WRITE_CLASS_CAPABILITIES.includes('calling') &&
+      WRITE_CLASS_CAPABILITIES.includes('reflect'),
+    'write-class set matches the 6e CHECK overlap array',
+  )
+})
+test('write-class: each member alone → true', () => {
+  assert(capabilitiesIncludeWriteClass(['accreditation_write']), 'accreditation_write')
+  assert(capabilitiesIncludeWriteClass(['calling']), 'calling')
+  assert(capabilitiesIncludeWriteClass(['reflect']), 'reflect')
+})
+test('write-class: consult-only / l1_supply → false (no owner+agent required)', () => {
+  assert(!capabilitiesIncludeWriteClass(['consult']), 'consult only')
+  assert(!capabilitiesIncludeWriteClass(['consult', 'l1_supply']), 'consult+l1_supply')
+  assert(!capabilitiesIncludeWriteClass([]), 'empty set')
+})
+test('write-class: a mixed set with any write member → true', () => {
+  assert(capabilitiesIncludeWriteClass(['consult', 'l1_supply', 'calling']), 'mixed incl. calling')
 })
 
 console.log('')

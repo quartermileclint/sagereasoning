@@ -370,6 +370,39 @@ export async function deleteAssessmentHistoryForOwner(
   }
 }
 
+/** Genuine deletion (R17c) of ONE credential's per-consult history, scoped by the
+ *  stable credential handle (`credential_ref` = 'api_key:<id>' | 'install:<id>').
+ *  The CI-14 Step-7 consumer-erasure-by-token path for `owner_kind='external_consumer'`
+ *  credentials, whose rows carry a NULL owner_user_id and therefore CANNOT ride
+ *  deleteAssessmentHistoryForOwner (the user-JWT path). One awaited hard DELETE.
+ *  Returns the deleted count. Missing-table is benign (the M6 migration is its own
+ *  founder-elected step). Mirrors deleteAssessmentHistoryForOwner exactly, swapping
+ *  the owner scope for the credential scope. */
+export async function deleteAssessmentHistoryForCredential(
+  credentialRef: string,
+  client: SupabaseClient = getAdminClient(),
+): Promise<StoreResult<{ deleted: number }>> {
+  try {
+    const { data, error } = await client
+      .from(TABLE)
+      .delete()
+      .eq('credential_ref', credentialRef)
+      .select('id')
+    if (error) {
+      if (isMissingTableError(error as { code?: string; message?: string })) {
+        return { ok: true, value: { deleted: 0 } }
+      }
+      return { ok: false, error: `deleteAssessmentHistoryForCredential: ${error.message}` }
+    }
+    return { ok: true, value: { deleted: (data as unknown[] | null)?.length ?? 0 } }
+  } catch (e) {
+    return {
+      ok: false,
+      error: `deleteAssessmentHistoryForCredential threw: ${(e as Error).message}`,
+    }
+  }
+}
+
 /**
  * R17c retention enforcement (the trajectory-retention sweep — the M6-P2 gate).
  * Genuinely (hard) delete every row past its `retain_until`, on a schedule. ONE

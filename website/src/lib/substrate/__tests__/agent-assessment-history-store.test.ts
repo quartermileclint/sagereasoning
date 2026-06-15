@@ -29,6 +29,7 @@ import {
   persistAssessmentHistory,
   resolveCredentialContext,
   deleteAssessmentHistoryForOwner,
+  deleteAssessmentHistoryForCredential,
   getAssessmentHistoryForOwner,
   getTrajectoryWindow,
   purgeExpiredTrajectory,
@@ -329,6 +330,32 @@ async function main(): Promise<void> {
     const { client } = makeClient(() => ({ data: null, error: { code: '42P01', message: 'relation "public.agent_assessment_history" does not exist' } }))
     const res = await deleteAssessmentHistoryForOwner('owner-uuid', client as never)
     assert(res.ok && res.value.deleted === 0, 'delete: missing table (42P01) → benign success')
+  }
+
+  // ==========================================================================
+  // 5b. R17c deletion — scoped to the CREDENTIAL (credential_ref) — CI-14 Step 7
+  //     consumer-erasure-by-token path for external_consumer (null-owner) rows.
+  // ==========================================================================
+  {
+    const { client, captures } = makeClient(() => ({ data: [{ id: 1 }, { id: 2 }, { id: 3 }], error: null }))
+    const res = await deleteAssessmentHistoryForCredential('api_key:abc-123', client as never)
+    assert(res.ok && res.value.deleted === 3, 'delete-by-credential: returns deleted count')
+    assert(captures[0].op === 'delete', 'delete-by-credential: is a DELETE')
+    assert(captures[0].table === 'agent_assessment_history', 'delete-by-credential: on agent_assessment_history')
+    assert(
+      captures[0].eq.length === 1 && captures[0].eq[0][0] === 'credential_ref' && captures[0].eq[0][1] === 'api_key:abc-123',
+      'delete-by-credential: scoped to credential_ref (R17a — subject credential only)',
+    )
+  }
+  {
+    const { client } = makeClient(() => ({ data: null, error: { message: 'boom' } }))
+    const res = await deleteAssessmentHistoryForCredential('api_key:abc-123', client as never)
+    assert(!res.ok, 'delete-by-credential: real error → ok:false (R17c stays verifiable)')
+  }
+  {
+    const { client } = makeClient(() => ({ data: null, error: { code: '42P01', message: 'relation "public.agent_assessment_history" does not exist' } }))
+    const res = await deleteAssessmentHistoryForCredential('api_key:abc-123', client as never)
+    assert(res.ok && res.value.deleted === 0, 'delete-by-credential: missing table → benign success')
   }
 
   // ==========================================================================
