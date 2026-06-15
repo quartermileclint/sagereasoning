@@ -477,6 +477,55 @@ export default function ApiDocsPage() {
         ))}
       </div>
 
+      {/* Substrate reasoning (/api/reason) — M1 contract (2026-06-15) */}
+      <div className="mt-12 bg-white/60 border border-sage-200 rounded-lg p-8">
+        <h2 className="font-display text-xl font-medium text-sage-800 mb-4">
+          Substrate Reasoning (<code>/api/reason</code>)
+        </h2>
+        <p className="font-body text-sage-700 mb-4 leading-relaxed">
+          The substrate reasoning endpoint runs the full translation sandwich (Layer&nbsp;1 feature
+          extraction, the deterministic signed Layer&nbsp;2 assessment, and Layer&nbsp;3 prose). It is
+          governed by the per-loop model (see the access tiers above) and supports, beyond the standard
+          request body:
+        </p>
+        <ul className="font-body text-sage-700 mb-4 leading-relaxed list-disc pl-5 space-y-2">
+          <li>
+            <strong>Deferred prose</strong> &mdash; <code>response_format</code> is <code>full</code> (the
+            default, assessment and narrative prose in one response) or <code>assessment_first</code> (the
+            signed assessment, extraction, and meta return immediately; the response carries a
+            <code> narrative</code> object with <code>status: deferred</code> and a <code>correlation_id</code>,
+            plus <code>meta.narrative_status</code>; the narrative is generated asynchronously and retained
+            server-side). Deferral is a request, not a guarantee &mdash; consults carrying a distress signal
+            always return the full synchronous shape.
+          </li>
+          <li>
+            <strong>The narrative must exist</strong> &mdash; a verdict without a narrative account is a
+            classification, not an examination. <code>assessment_first</code> moves generation out of the
+            response path; it never suppresses it. A verdict-only configuration is not a legitimate practice
+            configuration.
+          </li>
+          <li>
+            <strong>Open Layer&nbsp;1</strong> &mdash; supply a <code>layer1_schema</code> that validates
+            against the documented contract to skip server-side Layer&nbsp;1 (<code>meta.layer1_source:
+            supplied</code>, <code>layer1_latency_ms: 0</code>). It is optional on <code>sr_live_</code> and
+            <code> sr_prac_</code>, required on <code>sr_inst_</code>, and requires the <code>l1_supply</code>
+            capability (otherwise 403). Omitting it keeps raw-text behaviour (<code>meta.layer1_source:
+            server</code>); a malformed schema returns 400. The <code>input</code> text is always required
+            &mdash; the safety perimeter runs on the text regardless of who computed the schema.
+          </li>
+          <li>
+            <strong>Retention (R17)</strong> &mdash; retained narratives and their paired signed assessments
+            are stored encrypted at rest, for 90 days, keyed by correlation id; genuine (hard) deletion is
+            available on request.
+          </li>
+        </ul>
+        <p className="font-body text-sage-500 text-xs leading-relaxed">
+          Measured consult latency (TEST environment, 2026-06-12; schema supplied + <code>assessment_first</code>):
+          quick ~3.8s, standard ~4.3s, deep ~3.1s. Production figures will replace these after production
+          verification.
+        </p>
+      </div>
+
       {/* Assessment model reference */}
       <div className="mt-12 bg-white/60 border border-sage-200 rounded-lg p-8">
         <h2 className="font-display text-xl font-medium text-sage-800 mb-4">Assessment Framework</h2>

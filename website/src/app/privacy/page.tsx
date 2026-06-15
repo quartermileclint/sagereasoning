@@ -247,6 +247,14 @@ export default function PrivacyPage() {
             Sage wrapper checkpoint data (reasoning evaluations from sage-guard and sage-score
             calls) follows the same retention policy as standard API call data.
           </p>
+          <p className="mt-3">
+            When you use the reasoning API with an examination credential, the examination
+            record it produces &mdash; the signed assessment and the reasoning narrative
+            derived from your input &mdash; is retained server-side, encrypted at rest, for up
+            to <strong>90 days</strong>, and is genuinely (permanently) deleted on request.
+            This retention is separate from your account score history and exists so that each
+            examination has a durable, auditable account of the reasoning performed.
+          </p>
         </div>
 
         <div>

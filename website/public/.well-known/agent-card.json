@@ -177,6 +177,35 @@
             "opt_out": "reflect_at_close"
           }
         }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/prose-deferral-open-layer1/v1",
+        "description": "Substrate /api/reason consult contract (M1, 2026-06-15). (1) response_format: 'full' (default — assessment + narrative prose in one response) | 'assessment_first' — assessment_first returns the signed assessment + extraction + meta immediately with narrative:{status:'deferred',correlation_id} and meta.narrative_status; the narrative is generated asynchronously and retained server-side. Deferral is a request, not a guarantee: distress-signal consults always return the full synchronous shape. (2) Narrative-existence guarantee (CI-17): the narrative account is the record that examination occurred — a verdict without a narrative account is a classification, not an examination; a verdict-only configuration is not legitimate. Deferral moves generation; it never suppresses it. Retention (R17): every examination's signed assessment + narrative are stored encrypted at rest, 90 days, keyed by correlation id; genuine (hard) deletion on request. (3) Open Layer-1: a layer1_schema validating against the documented contract may be supplied on any auth path — required on sr_inst_, optional on sr_live_/sr_prac_; supplying it skips server Layer-1 (meta.layer1_source:'supplied', layer1_latency_ms:0) and requires the l1_supply capability (else 403); omitting it keeps raw-text behaviour (meta.layer1_source:'server'); a malformed schema returns 400. The input text is always required (the safety perimeter runs on the text).",
+        "required": false,
+        "params": {
+          "response_format": {
+            "values": ["full", "assessment_first"],
+            "default": "full",
+            "deferred_response_shape": { "narrative": { "status": "deferred", "correlation_id": "<uuid>" }, "meta": { "narrative_status": "deferred" } },
+            "distress_override": "distress-signal consults always return the full synchronous shape"
+          },
+          "narrative_retention": {
+            "encrypted_at_rest": true,
+            "retention_days": 90,
+            "deletion_on_request": true,
+            "keyed_by": "correlation_id"
+          },
+          "open_layer1": {
+            "field": "layer1_schema",
+            "required_on": ["sr_inst_"],
+            "optional_on": ["sr_live_", "sr_prac_"],
+            "requires_capability": "l1_supply",
+            "on_missing_capability": 403,
+            "meta_field": "layer1_source",
+            "supplied_skips_server_layer1": true,
+            "malformed_schema": 400
+          }
+        }
       }
     ]
   },

@@ -117,6 +117,16 @@ Returns the `translation-sandwich-v1` shape: `{ version, extraction, assessment,
 
 **Agent integrations (per-install tokens):** production agent integrations authenticate with per-install tokens (`sr_inst_<32 hex>`). Mint: session-authenticated `POST /api/keys` (token shown once). Use: `Authorization: Bearer sr_inst_<token>`; plugin-authenticated calls submit a pre-computed `layer1_schema` (run Layer 1 locally) instead of raw input. Revoke: `DELETE /api/keys` — revoked tokens return 401 immediately. `sr_live_` keys remain valid for raw-input calls.
 
+**Deferred prose (`response_format`):** `response_format` (optional) is `"full"` (default — assessment + narrative prose in one response) or `"assessment_first"` (the signed assessment, extraction, and meta return immediately; the narrative is generated asynchronously and retained server-side; the response carries `narrative: { status: "deferred", correlation_id }` and `meta.narrative_status`). Deferral is a request, not a guarantee — consults carrying a distress signal always return the full synchronous shape.
+
+**The narrative account is the record that examination occurred. A verdict without a narrative account is a classification, not an examination. The narrative must exist. When it is generated and to whom it is surfaced are mechanical questions. Whether it exists is a methodological requirement.** Accordingly, a verdict-only configuration is not a legitimate practice configuration. `response_format: "assessment_first"` defers narrative generation out of the response path — it never suppresses it. Every examination's narrative is generated and retained server-side against the consult's correlation id.
+
+**Retention disclosure (R17):** retained narratives and their paired signed assessments are stored encrypted at rest, for 90 days, keyed by correlation id; genuine (hard) deletion is available on request; retrieval is currently via the audited server-side record (a consumer-facing retrieval endpoint, gated to the subject credential, is planned separately).
+
+**Supplying your own Layer-1 schema (any auth path):** the substrate accepts any `layer1_schema` that validates against the documented contract — on per-install (`sr_inst_`) calls it is required; on API-key (`sr_live_` / `sr_prac_`) calls it is optional. Supplying it skips server-side Layer-1 extraction (the response reports `meta.layer1_source: "supplied"` and `layer1_latency_ms: 0`); omitting it keeps today's raw-text behaviour (`meta.layer1_source: "server"`). Supplying a schema requires the credential to carry the `l1_supply` capability — a credential without it receives 403. A schema that fails validation returns 400 with the field-level validator error. The original `input` text is required on every path — the safety perimeter runs on the text regardless of who computed the schema.
+
+**Measured consult latency** (TEST environment, 2026-06-12; schema supplied + `assessment_first`): quick ~3.8s · standard ~4.3s · deep ~3.1s. Schema supplied + full synchronous narrative: quick ~22.1s · standard ~20.1s · deep ~22.3s. Raw text + full (server Layer 1 + inline narrative): quick ~29.5s · standard ~33.1s · deep ~31.7s. Production figures will replace these labels after production verification.
+
 ### Guardrail — Stoic Risk Gate for AI Agents (V3)
 
 POST https://www.sagereasoning.com/api/guardrail

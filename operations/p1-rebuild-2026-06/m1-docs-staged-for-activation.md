@@ -1,6 +1,6 @@
 # M1 — Docs staged for the founder's activation step (CI-17 wording + CI-2 note + CI-3 envelopes)
 
-**Status:** Staged (NOT applied to any public surface). **Date:** 2026-06-12. **Session:** M1 consult-path build.
+**Status:** **APPLIED 2026-06-15** at the M1 production-activation close (`D-MECHANISM-CORRECTION-M1-CONSULT-PATH-PRODUCTION-ACTIVATION-2026-06-15`) — the CI-17 blocked-config statement, the CI-2 open-Layer-1 contract (extended with the now-live `l1_supply` capability + `sr_prac_`), and the CI-1 `response_format` + R17 retention disclosure landed on `website/public/llms.txt` + `website/public/.well-known/agent-card.json` + a NEW api-docs `/api/reason` subsection; the privacy §9 sentence landed; the **CI-3 latency envelopes kept their TEST label** (production figures pending a measured envelope, R18). **Originally staged:** 2026-06-12 (M1 consult-path build).
 **Why staged:** the public materials describe the live service (R18 lineage — the S8b honesty corrections). With `SUBSTRATE_L3_DEFER_ENABLED` and `SUBSTRATE_L1_SCHEMA_KEY_PATH_ENABLED` UNSET in production, publishing `response_format` / key-path `layer1_schema` / deferral-shaped latency envelopes would claim behaviour production does not serve. These inserts are applied **at the founder's 0c-ii activation step**, alongside the flag flips and the production migration. The CI-3 numbers below carry their environment label until production-verified (R18: production claims only after production verification).
 
 ---
