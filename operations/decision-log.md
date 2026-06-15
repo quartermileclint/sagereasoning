@@ -11582,3 +11582,32 @@ Expected: as annotated. (tsx tests importing `security.ts` print their summary t
 **Rules served:** PR1 (recorded-TEST + DDL TEST-confirmed before prod), PR6 (perimeter untouched), PR10 PEV (+ 7-dim/12-agent adversarial review), PR15 (waitUntil platform primitive; bespoke retention product-internal), PR17 (every prod step founder-walked), PR18 (close-time production-state refresh), R17b/c/h/i (encrypted retention + genuine deletion + 90-day expiry), R18 (docs ride live behaviour; CI-3 TEST-labelled), R18e (Article-50 notice on retained narratives), R18f (audit pairing untouched), KG1 (awaited writes; no self-call in the sweep), KG7 (plain-object JSONB meta), AC1 (models unchanged), AC8, B1/B3/B4 (dossier), CI-1/CI-2/CI-3/CI-17, FX-3/FX-4/FX-13.
 
 **Status:** Adopted. Cross-references: `D-MECHANISM-CORRECTION-M1-CONSULT-PATH-BUILT-VERIFIED-2026-06-13` (the build), the M1 close (2026-06-13), `operations/handoffs/founder/2026-06-15-mechanism-correction-M1-consult-path-activation-NEXT-SESSION-PROMPT.md` (this session's prompt), `D-MECHANISM-CORRECTION-CARRIED-ACTIVATIONS-M3CI11-M5-PRODUCTION-2026-06-15` (predecessor), `operations/p1-rebuild-2026-06/m1-docs-staged-for-activation.md` (applied), this session's close.
+
+---
+
+## 2026-06-16 — D-SAGE-PRACTICE-BENCHMARK-V1-PREREGISTERED-FROZEN-PROVISIONED
+
+**Decision:** Executed Step 0 + Step 1 of the Sage Practice Benchmark v1 run — pre-registered the §8.3 boxes + combination rule (founder-set, before any leg ran), froze the standardised "Meridian vendor-migration" scenario (brief + data pack + sealed answer key), and provisioned the Leg-D `sr_prac_` Unified Practice Credential. No leg has run; no production code/flag/schema/perimeter change.
+
+**Reasoning:** Runs the founder-signed-off design (`drafts/sage-practice-benchmark-v1.md`) as the successor to the A/B "No benefit" verdict (`operations/p1-rebuild-2026-06/verdict-memo.md`) — fires every now-Live practice function on a fair, pre-registered instrument and scores deliverable quality + the full benefit set (trust layer C0 first) before any box. Pre-registration (boxes set + scenario sealed before data exists) is the integrity device; timestamping it here is the dated proof.
+
+**Pre-registered boxes (founder-set 2026-06-16, before any leg; not re-read until Step 4):** Box1 ≥2 examination-driven catches Leg C misses; Box2 (deciding) Leg D ≥ Leg C by ≥1pt OR ≥4/5; Box3 ≤50% agent-work overhead (provisioning excluded); Box4 ≤$5 harness cost; Box5 all "verify-present" categories present+usable; combination = Boxes 1+3+4+5 gates, Box 2 deciding signal.
+
+**Files touched:**
+- `drafts/sage-practice-benchmark-v1.md` — §8.3 boxes filled (pre-registration record); status header → signed-off + scenario-frozen
+- `operations/benchmarks/sage-practice-v1/scenario/{brief,data-pack,answer-key.SEALED}.md` — the FROZEN scenario (planted P1–P5 embedded un-flagged; sealed key never given to a leg)
+- `operations/benchmarks/sage-practice-v1/runs/2026-06-16/leg-c-kickoff.md` + run dirs — Leg-C blind kickoff + both legs' output dirs
+
+**Production action (founder-walked, PR17):** minted one `sr_prac_` UPC via the CI-7 CLI against prod (`sr_prac_8d4b76`, id `0888e271-a1b9-43e6-b92f-fffb06edcaf4`, agent `sagebench:meridian-ops@v1`, caps `{consult,l1_supply,accreditation_write,reflect}`, owner+agent bound); then raised its quota to 100/50/10 (the CI-6 `1/day` default would 429 a multi-consult Leg D — `security.ts:471`) and SQL-verified the capabilities landed. The credential + (later) its consult/trajectory/narrative/accreditation rows are production test artifacts — exclude from billing/trajectory samples; `retain_until`-swept; credential revoked at teardown.
+
+**Risk classification:** Standard under 0d-ii — documents + founder-walked authenticated provisioning under existing Live surfaces. No code/flag/schema/perimeter change (the one DDL-adjacent op was a quota-column data UPDATE on our own test credential). AC7 not engaged (the UPC auth path is unchanged). PR6 not engaged.
+
+**Rollback path:** documents → `git revert`; credential → `revoke practice --id 0888e271-…` (founder-walked) + verify negative-auth 401 at teardown. Nothing touches the Live UPC auth path, R18f, R20a, distress, or Layer-2 signing.
+
+**Verification step (founder-performable):** §8.3 carries the dated pre-registration record; the three scenario files carry `FROZEN 2026-06-16` headers; the credential `UPDATE … RETURNING` row showed caps `{consult,l1_supply,accreditation_write,reflect}` + `owner_user_id` non-null + limits `100/50/10` + `is_active true`.
+
+**Open questions:** Leg C (bare) → Leg D (harnessed) → Step-4 scoring remain; this hub session resumes for Step 4 with the sealed key. The Leg-D kickoff (verified API call templates) is finalized between the legs. The 0h call is downstream of the verdict.
+
+**Rules served:** PR4 (Opus 4.8 both legs), PR17 (founder-walked provisioning), PR18, AC7 (UPC untouched), CI-6/CI-7 (mint defaults + CLI), CI-11/CI-14/CI-17 + M1 (the Live functions the run exercises), R18f (provenance gate untouched), KG5 (token cost via `/cost`).
+
+**Status:** Adopted. Cross-references: `drafts/sage-practice-benchmark-v1.md` (design), `drafts/sage-practice-benefit-inventory.md` (benefit set), `operations/handoffs/founder/2026-06-16-sage-practice-benchmark-v1-NEXT-SESSION-PROMPT.md` (this run's prompt), `operations/p1-rebuild-2026-06/verdict-memo.md` (A/B predecessor), `D-MECHANISM-CORRECTION-M1-CONSULT-PATH-PRODUCTION-ACTIVATION-2026-06-15` (the last Live activation).
