@@ -11637,3 +11637,39 @@ Expected: as annotated. (tsx tests importing `security.ts` print their summary t
 **Rules served:** PR4, PR10 PEV, PR17, PR18, AC1, AC7 (untouched), CI-4/CI-11/CI-13/CI-14/CI-17 + M1 (functions exercised), R17b/c, KG1, KG5.
 
 **Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-BENCHMARK-V1-PREREGISTERED-FROZEN-PROVISIONED` (2026-06-16, Step 0/1), the run artifacts under `operations/benchmarks/sage-practice-v1/runs/2026-06-16/` (`verdict-memo.md`, `forensic-execution-analysis.md`, `memo-comparison-deep.md`, `product-value.md`, `output-review.md`, `leg-d-harnessed-v2/`), `drafts/sage-practice-benchmark-v1.md` (design + §8.5/§8.6), the 2026-06-18 mechanism-corrections handoff.
+
+---
+
+## 2026-06-18 — D-SAGE-PRACTICE-MECHANISM-CORRECTIONS-DIAGNOSIS-PLAN
+
+**Decision:** Diagnosed all six Sage Practice mechanism punch-list items **to root cause, read-only, first-hand-confirmed**; produced a prioritised mechanism-correction plan; **landed the one safe fix** (a reflect-completion schema-drift guard test); **staged the public-contract doc additions** (R18, for founder application); recorded the founder's design elections; and queued the elected Critical builds. No production / flag / auth / perimeter change this session — the Critical items were diagnosed + scoped, not changed.
+
+**Root causes (first-hand confirmed, the load-bearing ones):**
+- **#2 Loop-closure continuation is BROKEN BY CONSTRUCTION** (not merely undocumented). ADR-008 is internally contradictory — §1/§34 ("re-submit input *augmented* with the answer; engine restarts on the augmented input") vs §4.4-step-5 (`sha256(current input) == sha256(original input)`, byte-identical). The code enforces byte-identical (`tier1-token.ts:276-279`) AND uses the validated trigger **only** for `meta.previous_trigger` (`route.ts:1605-1610`) — it is **not** among the `runSandwich({…})` args (`route.ts:1144-1178`), so the engine re-fires the same trigger. No input can both pass the hash and resolve the trigger → no caller can close a Tier-1 force-clarification. Live in prod.
+- **#1 Reflect completion drift = clean post-fix.** All four completion writes (`sage_reflect_sessions`/`evaluated_actions`/`sage_reflect_proximity_domains`/`agent_accreditation`) reconcile against migrations. No remaining drift.
+- **#3a Guardrail model-reporting bug:** `buildEnvelope({ model:'claude-haiku-4-5-20251001' })` (`guardrail/route.ts:306`) is hardcoded but elevated/critical run `MODEL_DEEP` (Sonnet) → `meta.ai_model` lies. **#3b** ~90s = Sonnet generating `maxTokens:8192` single-shot (`sage-reason-engine.ts:396`). **#3c** the gate runs the unsigned non-deterministic `sage-guard` engine, not the signed sandwich (whose pure L2 already emits the `katorthoma_proximity` the verdict thresholds on — port is feasible).
+- **#4** 3/5 load-bearing public shapes absent; **#5** `l1_supply` reuse echoes the prior situation; **#6b** `typical_kathekon_quality:"contrary"` = conservative DB default (consumer-unforgeable, **not a bug**); **#6c** guardrail is correctly not a fact-checker; **#6a** chain-close semantics need specifying before reject-mode 6c.
+
+**Founder elections (2026-06-18):** #2 → **Design A** (typed `clarification_response` answer channel + trigger suppression; keeps the hash binding; amends ADR-008; Critical follow-up session). #3a → **folded into the #3 guardrail session** (the whole guardrail moves at once). #4 → **Both** (docs staged now + thin-SDK follow-up).
+
+**Files touched:**
+- `website/src/lib/sage-reflect/__tests__/reflect-completion-schema-drift.test.ts` — NEW drift-guard (parses the real migration SQL; asserts every completion row-builder column exists in a migration; **9/0**, tsc-clean, **negative-control-proven**). Covers the 3 reflect-owned completion tables (the 503 locus).
+- `operations/benchmarks/sage-practice-v1/mechanism-corrections-plan.md` — NEW prioritised plan (per-item root cause + fix + risk + disposition + elections).
+- `operations/benchmarks/sage-practice-v1/public-contract-docs-staged.md` — NEW R18-faithful staged doc additions (#4/#5/#6b/#6c; EXCLUDES the broken continuation field pending #2).
+- `operations/handoffs/founder/2026-06-18-sage-practice-mechanism-corrections-FOLLOWUP-NEXT-SESSION-PROMPT.md` — NEW follow-up prompt (3 elected builds: Part A loop-closure Design A; Part B guardrail; Part C apply-docs + SDK).
+
+**Risk classification:** **Standard** under 0d-ii for what LANDED (a new test file [code-standard] + staged-doc + plan + prompt; no prod/flag/auth/perimeter touch — R18f/R20a/distress/Layer-2/UPC untouched). The Critical items (#2, #3) were **diagnosed + scoped**, deferred to founder-walked follow-up sessions. AC7 not engaged. PR6 not engaged this session.
+
+**Rollback:** delete the test file / `git revert` the documents. (Nothing live changed.)
+
+**Verification (founder-performable):**
+```
+cd website && npx tsx src/lib/sage-reflect/__tests__/reflect-completion-schema-drift.test.ts
+```
+Expected: `9 pass / 0 fail`. (Negative control: add a bogus column to any `written` set → it FAILs naming the column + the prod impact.)
+
+**Open / next:** the FOLLOW-UP prompt's three elected builds (elect ONE at open): A loop-closure Design A (+ #6a), B guardrail (#3a+3b+3c), C apply staged docs + SDK. The 0h launch call remains the founder's — this corrections arc is the "execution" gating work the benchmark verdict named.
+
+**Rules served:** PR4, PR5, PR6 (named, not engaged), PR10 PEV (Diagnostic-certain on #2/#3a — root cause isolated first-hand), PR17, PR18, R18 (staged docs faithful to live behaviour), AC1, AC7 (untouched), AC13 (#2 perimeter — diagnosed), KG1, KG7.
+
+**Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-BENCHMARK-V1-COMPLETE-REFLECT-FIX-VERDICT` (2026-06-18, the benchmark this corrects from), the mechanism-corrections prompt `operations/handoffs/founder/2026-06-18-sage-practice-mechanism-corrections-NEXT-SESSION-PROMPT.md`, ADR-008 (`adopted/adr/2026-05-06-multi-turn-input-flow-tier-1.md`, the contradiction to amend in Part A).
