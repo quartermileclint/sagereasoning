@@ -182,6 +182,34 @@ Output: a written **Product-Value record** (`product-value.md`) completed **befo
 6. **Either outcome stands** and is recorded honestly (it feeds the 0h call and the task-fit analysis of which decision-point classes showed value) — but it is stated as an integrated finding, not a threshold headline.
 7. **Validity gate:** every Live function in §4/§5 must have fired and been observed, else the run is **void and re-run** — coverage failure is not a result.
 
+### 8.5 Execution forensic + re-grounded comparison (MANDATORY — pre-verdict; added 2026-06-16 after the v1 run)
+
+The v1 run proved **box-scoring + the harnessed leg's self-report are not enough**: the box conjunction buried the true value (the A/B inversion again); the self-report **overstated** the practice's contribution (a guardrail "corroboration" that was really the agent feeding the gate its own figures); and the benchmark's own **instrumentation inflated the harnessed leg's footprint ~10×** (84 tool calls, of which only ~6 were the practice — the rest were mandated source-discovery + raw-capture + a product bug). Two steps are therefore **mandatory, completed before the §8.3 boxes**, alongside §8.1/§8.2:
+
+1. **Execution forensic** (`forensic-execution-analysis.md`) — read the leg **transcripts** + raw artifacts and determine: agents/subagents + tool-call count per leg; **how the agent discovered + called the practice**, and the practice's **isolated footprint** (its API calls / latency / cost, separated from contract-discovery and benchmark instrumentation); a **wall-clock root-cause decomposition** (practice latency vs discovery vs instrumentation vs bugs); whether the **loop/score actually redirected the agent's path** (not merely fired); whether the **profile scored over time**; and whether each Live function **operated as intended**.
+2. **Re-grounded memo comparison** (`memo-comparison-deep.md`) — a granular, section-by-section read of both memos **in light of the forensic**, crediting **both** legs' strengths, attributing each real difference to the practice's operation (or not), and **raw-verifying every "the practice helped" claim** in the incorporation log against the raw request bodies (*who supplied the fact matters*).
+
+**Practice-isolation requirement (validity, binding on Leg D):** the harnessed leg must be run so the **practice's footprint is isolable from the benchmark apparatus**. Contract discovery (reading docs/source to learn the API) and exhaustive raw-capture are **one-time setup / measurement scaffolding** — clocked + counted **separately**, like provisioning (§7) — **NOT** inside the practice's footprint or the Box-3 wall-clock. The kickoff **supplies the verified contract up front** so the timed window is task + practice only; instrumentation is **light** (one consolidated practice log, not one file per call).
+
+**Box-3 (overhead) is computed on the isolated practice footprint**, not the raw harness wall-clock. A run whose overhead is dominated by benchmark instrumentation or a product bug (e.g. the reflect-completion 503, root-caused + fixed 2026-06-16 — the A1 `complexity`/`calibration_all_correct` schema drift) is **re-run** before Box 3 is scored.
+
+---
+
+### 8.6 Testing-process corrections — valid leg comparison (added 2026-06-18 after the v2 root-cause)
+
+The v2 re-run's transcript-timestamp decomposition proved the leg **wall-clock is not a valid measure of practice overhead** and must not drive Box 3 as-is. Of the v2 harnessed leg's 56.3-min span: **43.0 min (76%) was model generation** (Opus 4.8 max-reasoning thinking + writing across ~57 tool-turns + ~424 lines of output), **~6.5 min was real practice API latency** (the two guardrail gates alone were ~91 s + ~95 s server-side), and only **~a few residual minutes was human approval-wait**. The wall-clock therefore measures the *agent's generation latency × turn-count* (which the practice inflates **by design**, since consulting adds turns) far more than the practice's own cost — an apples-to-oranges penalty. Corrections, binding on future runs:
+
+1. **Box 3 (overhead) uses practice-server metrics, not raw wall-clock:** (a) Σ practice **API latency** from `meta.latency_ms` / `layer*_latency_ms` (the real added server time); (b) **API footprint** (call count by type); (c) **$ cost** (Σ `X-Loop-*` / Anthropic). Wall-clock is reported only **decomposed** (generation vs API vs approval), never as the headline overhead.
+2. **Eliminate the approval/idle confound:** run both legs under the **same model mode** and, where possible, a **non-interactive / auto-approved** harness so human-approval idle is zero and identical across legs. If interactive, decompose it out via transcript timestamps.
+3. **Separate agent-generation from practice-server time** (transcript-timestamp decomposition, as done here); report both; never attribute generation latency to the practice.
+4. **Exclude benchmark-instrumentation generation** from agent-work: even "light" logging (the v2 practice-log + metrics ≈ 315 generated lines) is measurement, not task or practice — clock/score it separately.
+5. **Per-call latency comes from the server's `meta.latency_ms`**, not the client round-trip.
+6. **Model-mode note:** max-reasoning multiplies generation latency per turn; with max-reasoning fixed for PR4 parity, the wall-clock gap is largely a model-mode artifact — another reason §8.6.1 governs Box 3.
+
+These join §8.5 (execution forensic + re-grounded comparison + practice-isolation). Together: measure the practice by its **server footprint / latency / cost + the deliverable + the benefit set** — never by a wall-clock the environment dominates.
+
+---
+
 ## 9. Environment, controls, artifact handling
 
 - **Environment:** Claude Code on the founder's machine, **both legs** — the Cowork sandbox cannot reach `www.sagereasoning.com` (re-verified 2026-06-16; web_fetch carries no auth headers). Production public contract (the real surface an external developer uses).

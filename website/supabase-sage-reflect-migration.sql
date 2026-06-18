@@ -74,6 +74,11 @@ CREATE TABLE IF NOT EXISTS public.sage_reflect_sessions (
   scrutiny_flags              jsonb       NOT NULL DEFAULT '[]'::jsonb,
   developer_note              text,
   sage_calling_trigger        jsonb,
+  -- A1 (PR7) cross-session scalars written by persistCompletion (deriveCrossSessionScalars).
+  -- Added to the CREATE 2026-06-16 to fix the drift that 503'd every completion; existing
+  -- deploys are backfilled by supabase-sage-reflect-a1-columns-migration.sql. NULL until completion.
+  complexity                  integer,
+  calibration_all_correct     boolean,
   started_at                  timestamptz NOT NULL DEFAULT now(),
   completed_at                timestamptz,
   created_at                  timestamptz NOT NULL DEFAULT now()

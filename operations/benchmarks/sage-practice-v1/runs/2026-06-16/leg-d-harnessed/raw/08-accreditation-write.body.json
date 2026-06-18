@@ -1,0 +1,1 @@
+{"status":"ok","documentation_url":"https://sagereasoning.com/limitations","loop_closure":{"verdict":"unclosed","redirections":2,"closed":0,"open":2,"indeterminate":0},"practice":{"reflect_due":"TR-02","endpoint":"/api/practice/reflect","default":"auto","opt_out":"reflect_at_close"}}

@@ -1,0 +1,6 @@
+consult-1 (task-adoption): key_id=substrate-layer2-2026Q2 sigBytes=64 canonLen=9516 -> PASS ✓
+consult-1 (task-adoption) (tampered proximity): -> FAIL ✓ (tamper correctly rejected)
+consult-2 (recommend/loop-closure): key_id=substrate-layer2-2026Q2 sigBytes=64 canonLen=10238 -> PASS ✓
+consult-2 (recommend/loop-closure) (tampered proximity): -> FAIL ✓ (tamper correctly rejected)
+
+OVERALL: BOTH VERIFIED + tamper rejected
