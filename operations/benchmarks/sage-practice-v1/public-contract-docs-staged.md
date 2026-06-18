@@ -4,7 +4,7 @@
 **Source of truth (faithful to LIVE behaviour):** the live route/types cited per item + the Benchmark v1 **proven raw bodies** (`leg-d-harnessed-v2/practice-log.md`, all calls returned the stated status against production). **Date:** 2026-06-18.
 **Governing:** R18 (public materials must be faithful to live behaviour). Each addition below is verified against the live code path cited.
 
-> **EXCLUSION (R18 honesty):** the **clarification-continuation** field (Tier-1 force-clarification answer channel) is **NOT** documented here. It is broken by construction (mechanism-correction #2) — there is nothing correct to publish until the fix lands. Document it only after #2 ships. Everything else below works as written.
+> **UPDATE 2026-06-19 — EXCLUSION LIFTED:** the **clarification-continuation** field (Tier-1 force-clarification answer channel) was excluded while it was broken by construction (mechanism-correction #2). **#2 (Part A) is now fixed + LIVE in production (2026-06-19, `D-MECHANISM-CORRECTION-PART-A-CONTINUATION-PRODUCTION-ACTIVATION-2026-06-19`)** — so it is now documented in **§7** below, faithful to the live route (re-verified this session). Everything in this file works as written.
 
 ---
 
@@ -19,6 +19,7 @@
 | `l1_supply` reuse semantics (echo caveat) | ABSENT | — | — | **§5** |
 | `typical_kathekon_quality` conservative-default note (#6b) | ABSENT | — | — | **§1** (read-back note) |
 | Guardrail is-not-a-fact-checker note (#6c) | ABSENT | — | — | **§6** |
+| Clarification-continuation (`clarification_response`, Tier-1 answer channel) | ABSENT | ABSENT | ABSENT | **§7** (now LIVE — was the #2 exclusion) |
 
 ---
 
@@ -151,9 +152,64 @@ Add:
 
 ---
 
+## §7 — Clarification-continuation (Tier-1 force-clarification answer channel) — **#2 fixed + LIVE 2026-06-19; now publishable**
+
+**Live contract (re-verified this session):** ADR-008 §A (Design A); route `route.ts:949-975,1107-1170,1638-1671`; engine `layer2-mechanisms.ts` + `parallel-run.ts:1124-1128`. Activated `D-MECHANISM-CORRECTION-PART-A-CONTINUATION-PRODUCTION-ACTIVATION-2026-06-19`.
+
+**First turn — a Tier-1 force-clarification fires.** When a consult's situation is too ambiguous to assess on one axis (ELEMENT_FUSION — two concerns fused; TEMPORAL_AMBIGUITY — regret-vs-worry undetermined; SCOPE_AMBIGUITY — an unspecified other with no relational circle), `/api/reason` returns **HTTP 200** with a force-clarification shape *instead of* an assessment:
+```json
+{ "version": "translation-sandwich-v1",
+  "clarification_required": true,
+  "intake_tier": 1,
+  "trigger_code": "ELEMENT_FUSION | TEMPORAL_AMBIGUITY | SCOPE_AMBIGUITY",
+  "clarification": {
+    "question_text": "<the single clarifying question>",
+    "stem_id": "<question-template id>",
+    "slot_fills": ["<the elements the question references>"] },
+  "continuation_token": "<opaque token, 30-min expiry>",
+  "evaluation_partial": null,
+  "disclaimer": "…" }
+```
+
+**Second turn — answer the question to close the clarification.** Re-submit:
+```json
+{ "input": "<the ORIGINAL input, byte-for-byte identical to turn 1>",
+  "continuation_token": "<from the turn-1 response>",
+  "clarification_response": "<your answer to question_text>" }
+```
+- **`input` must be byte-identical to turn 1.** The token binds to `sha256(input)`; any change (even whitespace) → **400 `continuation_token_input_mismatch`**. The answer rides its **own** field — do **not** fold it into `input`.
+- **`clarification_response`** (string, ≤ 5000 chars) carries your answer.
+- The engine **suppresses re-firing the answered trigger** and folds the answer into the Layer-1 re-extraction → you get a **full assessment**. A *different* Tier-1 trigger may still fire on the second turn (never the same one twice in a row).
+
+**Structural errors (HTTP 400):**
+
+| condition | error |
+|---|---|
+| `clarification_response` is not a string | `clarification_response must be a string.` |
+| `continuation_token` present, no answer | `clarification_response_required` |
+| `clarification_response` present, no token | `clarification_response_without_token` |
+| `clarification_response` + a supplied `layer1_schema` | `clarification_response_with_supplied_layer1_schema` |
+
+> **Supplied-schema callers (`l1_supply` / plugin):** the answer informs server-side Layer-1 **re-extraction**, which is skipped when you supply your own `layer1_schema`. So a continuation **cannot** combine `clarification_response` with `layer1_schema` (the last 400 above). To resume a force-clarification on the supplied-schema path, **re-submit a disambiguated `layer1_schema`** — the trigger then simply does not fire (no answer field needed).
+
+**Safety (unchanged guarantee):** on the continuation turn the R20a vulnerable-user perimeter runs on **`input` + `clarification_response`** — distress in your answer is caught and redirects, exactly as on a first turn.
+
+**Placement:**
+- **llms.txt** — a new `### Force-clarification & continuation` subsection in the `/api/reason` consult section (after the §4 `prior_feedback` addition): the turn-1 shape, the turn-2 contract, the byte-identical rule, and the 400 table.
+- **api-docs** (`page.tsx`) — add `continuation_token` + `clarification_response` to the `/api/reason` request params and a short "Force-clarification" subsection with the turn-1/turn-2 example.
+- **agent-card.json** — a new 11th `extensions[]` entry (matches the `{ uri, description }` shape of the existing 10):
+```json
+{ "uri": "https://sagereasoning.com/extensions/tier1-clarification-continuation/v1",
+  "description": "Tier-1 force-clarification answer channel (ADR-008 Design A, live 2026-06-19). When a consult is too ambiguous to assess on one axis, /api/reason returns HTTP 200 { clarification_required:true, clarification:{question_text}, continuation_token } instead of an assessment. To resume: re-POST the BYTE-IDENTICAL original input + the continuation_token + clarification_response (your answer, <=5000 chars). The token binds to sha256(input) — any change to input returns 400 continuation_token_input_mismatch; the answer rides clarification_response and is never folded into input. The engine suppresses re-firing the answered trigger and returns a full assessment (a different trigger may still fire — never the same twice). 400s: clarification_response_required (token, no answer); clarification_response_without_token (answer, no token); clarification_response_with_supplied_layer1_schema (answer + a supplied layer1_schema — resolve by re-supplying a disambiguated schema instead, since a supplied schema skips the server re-extraction the answer informs). The R20a vulnerable-user perimeter runs on input + clarification_response on the continuation turn." }
+```
+
+(Verified against the live route this session: force-clarification shape `parallel-run.ts:1122-1134` [`version`/`intake_tier`/`trigger_code`/`clarification.{question_text,stem_id,slot_fills}`/`evaluation_partial`] + the route fills `continuation_token` + `disclaimer` at `route.ts:1638-1671`; the four 400s `route.ts:956,1114,1143,1161` [exact strings]; `clarification_response` ≤ `TEXT_LIMITS.medium` = 5000 `security.ts:202`; byte-identical hash + `continuation_token_input_mismatch` `tier1-token.ts`; R20a coverage of `input + clarification_response` `route.ts:996-1002`. Activated + flag-took-effect smoke-verified, `D-MECHANISM-CORRECTION-PART-A-CONTINUATION-PRODUCTION-ACTIVATION-2026-06-19`.)
+
+---
+
 ## SDK follow-up (founder elected "Both")
 
-The staged docs above close the immediate fidelity gaps. The **structural** fix — so integrators never reconstruct shapes from prose — is a **thin client SDK** that encodes: consult (incl. `assessment_first`, `layer1_schema` reuse, `prior_feedback`), signature verification (the canonical-form footgun in §3), and the accreditation write (the `provenance.signed_assessments` round-trip in §1). Scope: a small TS client + a worked end-to-end example; the canonical shapes are the live types cited above. Tracked as a follow-up session (see the mechanism-corrections follow-up prompt). Not built this session.
+The staged docs above close the immediate fidelity gaps. The **structural** fix — so integrators never reconstruct shapes from prose — is a **thin client SDK** that encodes: consult (incl. `assessment_first`, `layer1_schema` reuse, `prior_feedback`), the **clarification-continuation round-trip** (the byte-identical-input + `clarification_response` two-turn handshake in §7), signature verification (the canonical-form footgun in §3), and the accreditation write (the `provenance.signed_assessments` round-trip in §1). Scope: a small TS client + a worked end-to-end example; the canonical shapes are the live types cited above. Tracked as a follow-up session (see the mechanism-corrections follow-up prompt). Not built this session.
 
 ---
 
