@@ -11,6 +11,85 @@
 
 ---
 
+## AMENDMENT 2026-06-18 (M-Corr Part A) — Clarification-continuation fix (Design A) + loop-closure chain-close semantics
+
+**Status:** Adopted (founder elected "Design A" at the 2026-06-18 mechanism-corrections diagnosis close; built under the FOLLOW-UP Part A session, `code-critical`). **Supersedes** the multi-turn flow shape of §1 + the §4.4-step-5 reading where they conflict. **Does not change** the continuation-token cryptographic mechanic (§4.1–§4.5), the per-trigger detection logic (§3), or the R20a perimeter-preservation commitment (§6) — it *strengthens* §6.
+
+### A.0 Why this amendment exists — the contradiction the original ADR shipped
+
+The original ADR is internally contradictory, and the code faithfully implemented the contradiction:
+
+- **§1 + §10.3** (the founder-confirmed "Option B"): the client re-submits *"the original input **augmented** with the answer"*; the engine *"restarts at Position 1 with the augmented input."*
+- **§4.4 step 5**: validation requires `sha256(input.text) == payload.input_hash` — i.e. the re-submitted `input` must be **byte-identical** to the original.
+
+Augmenting the input changes its hash → these cannot both hold. The code enforces byte-identical (`tier1-token.ts` validation step 5) AND never threads the answered trigger into the engine (`route.ts` extracts `previousTrigger` from the validated token but uses it ONLY for `meta.previous_trigger` — it is not among the `runSandwich({…})` arguments). Net effect, confirmed first-hand at the 2026-06-18 diagnosis: **no caller can close a Tier-1 force-clarification.** Every fire issues a `continuation_token` that can never be redeemed — a side-field answer is ignored and the same trigger re-fires; an answer folded into `input` fails the hash check (400 `continuation_token_input_mismatch`); an answer-only `input` fails the hash check too. The mechanism is **Live in production and unusable by construction.**
+
+### A.1 The resolution — Design A (typed answer channel + trigger suppression)
+
+The contradiction is resolved in favour of **keeping the byte-identical hash binding** (the strong cryptographic property — a token cannot be replayed against a different input) and giving the practitioner's answer its **own typed request field**:
+
+1. **`input` stays byte-identical across both turns.** §4.4 step 5 is **retained as written**. The hash binding is preserved; the §1/§10.3 "augmented input" wording is **superseded** — the input is NOT augmented.
+2. **New typed request field `clarification_response: string`** carries the practitioner's answer on the second turn. It is OPTIONAL and consistent with the existing `clarification.{question_text, slot_fills}` response shape (the request mirror of the response's clarification block).
+3. **The engine suppresses re-firing the *answered* trigger** for this turn and **incorporates the answer into the Layer-1 extraction context** (so the re-extraction is genuinely informed by the answer). A *different* Tier-1 trigger MAY still fire on the second turn (per §1's preserved intent — "if a Tier 1 trigger fires again on the second turn (a different one)… the cycle repeats"); the *same* trigger cannot re-fire after being answered.
+
+This restores the **intent** of §1 (a real answer round-trip that clears the clarification) without the loop-guard fragility of literal input-augmentation (§10.3's unimplemented loop-guard), and keeps the cryptographic binding intact.
+
+### A.2 Flag-gating + byte-identity (dark build)
+
+A new environment flag **`SUBSTRATE_TIER1_CONTINUATION_ENABLED`** (exact string `'true'`; read at call time) gates the entire continuation behaviour:
+
+- **UNSET / other (the default, every environment at build time):** `clarification_response` is never read; no trigger suppression; no context fold; the distress subject text is `input` alone. Behaviour is **byte-identical** to the pre-amendment route — which means today's broken-but-inert behaviour is preserved exactly (a presented token still re-fires; nothing changes).
+- **`'true'`:** the continuation contract is active per A.1 + A.3.
+
+The new field is additive: absent ⇒ today's behaviour. Activation is a founder-elected 0c-ii step (set the flag in Vercel; founder-walked). Rollback = unset the flag + redeploy (byte-identical, flag-off paths test-asserted).
+
+### A.3 Route flow (replaces §5 for the second turn)
+
+The amended second-turn flow, in order (the R20a perimeter ordering of §6 is preserved and **extended** to cover the answer):
+
+1. Body validation: `input` required + length-checked as today. When the flag is on and `clarification_response` is present, it is type-checked (must be a string) + length-checked (`TEXT_LIMITS.medium`).
+2. **R20a distress check — now on `input` + `clarification_response`.** Per §6, every turn runs the full perimeter on the text that will reach the engine. In the original "augmented input" design the answer was PART of `input`, so the perimeter covered it. In Design A the answer is a SEPARATE field, so the distress subject text is `input + "\n\n" + clarification_response` **whenever the flag is on and a non-empty `clarification_response` is present** (token presence not required — all practitioner-authored clarification text runs the perimeter before any engine work or structural rejection). When the flag is off, the distress subject text is `input` alone (byte-identical). A second-turn distress fire takes precedence over the token (redirect, not the engine) exactly as §6 specifies. **This closes the AC5 gap the separate-field design would otherwise open.**
+3. Continuation-token validation per §4.4 (UNCHANGED) → `previousTrigger` on success.
+4. **When the flag is on:** if a token validated (`previousTrigger` set), `clarification_response` is **required** (else HTTP 400 — a continuation without an answer is meaningless); if `clarification_response` is present without a token, HTTP 400 (the answer is only valid when resuming a force-clarification). **If a valid token + answer arrive alongside a supplied `layer1_schema` (the l1_supply / plugin path), HTTP 400 (`clarification_response_with_supplied_layer1_schema`)** — the answer informs server-side Layer-1 RE-EXTRACTION, which a supplied schema bypasses (`runSandwichInner` skips `extractFeatures`); accepting it would drop the answer while still suppressing the trigger, returning a full assessment on the still-ambiguous schema as if it were answered (a false success surfaced by the Part-A pre-activation review, finding **CF-2**). The supplied-schema caller resolves a Tier-1 fire by re-supplying a **disambiguated** schema (the trigger then does not fire), not via `clarification_response`. On the valid token + answer path (no supplied schema): fold the answer into the examination context and pass `tier1SuppressTrigger = previousTrigger` to the engine.
+5. Engine (`runSandwich` → `runSandwichInner`): suppress the answered trigger at its detection position (A.4); the answer reaches the Layer-1 extraction via the folded context.
+
+### A.4 Engine suppression (replaces §3.2/§3.3 short-circuit behaviour on the continuation turn)
+
+Suppression is a deterministic, pure addition at each detection position — a *different* trigger can still fire; the answered one cannot:
+
+- **ELEMENT_FUSION (Layer 1):** `detectTier1Trigger(schema, suppressTrigger?)` returns `null` when `suppressTrigger === 'ELEMENT_FUSION'` (the engine proceeds to Layer 2 even if the re-extracted schema still carries `element_fusion_detected.fused === true`).
+- **TEMPORAL_AMBIGUITY (Position 2) / SCOPE_AMBIGUITY (Position 6):** `applyMechanisms(schema, { suppressTrigger })` skips the Position-2 / Position-6 short-circuit for the suppressed trigger and **continues to a full assessment** (the short-circuit must be threaded INTO `applyMechanisms` — suppressing at the orchestrator level after `applyMechanisms` already halted would leave no assessment to return).
+
+When `suppressTrigger` is `undefined` (every existing caller; the flag-off route), `detectTier1Trigger(schema)` and `applyMechanisms(schema)` are byte-identical to the pre-amendment functions. The answer-into-context fold is a route-level composition (a sibling of the CI-4 `composeReExaminationContext` pattern) so the engine's only continuation concern is the deterministic suppression.
+
+### A.5 Loop-closure chain-close semantics (#6a — the reject-mode-6c prerequisite)
+
+This is the specification the CI-4 loop-closure gate (`loop-closure-gate.ts`, M3) needs before its **reject mode (6c)** can ever be enabled. It is coupled here because it is the same "loop affordance" family as the continuation fix. **No code change to the LIVE CI-4 surface is made in this amendment** — `analyseLoopClosure` already implements the rule below correctly; this section makes the terminal condition explicit and names the activation prerequisite.
+
+Definitions (over a `provenance.signed_assessments` chain, as the gate reads it):
+- **Redirection issued** — an assessment with `improvement_path_structured !== null` (the Rule-5 correction carrier). Surfaced caller-side as `examination_open: true`.
+- **Re-examination** — an assessment carrying `examination.prior_feedback_ref = R` (it re-examines the redirection whose `examination.ref = R`).
+- **A redirection R at depth D is CLOSED** iff a LATER element in the chain carries `prior_feedback_ref === R` at `depth_rank ≥ rank(D)` (the Q4 same-depth rule). A redirection without `ref`/`depth_tier` markers is **INDETERMINATE** (closure unverifiable — every pre-M5 chain).
+- **A CHAIN is terminally CLOSED** (gate verdict `closed`) iff every redirection in it is CLOSED and none is INDETERMINATE. The natural terminal is a re-examination that itself issues **no** redirection — i.e. `selectImprovementPath(...) === null` (a clean assessment: no passion, no high-axia value error, no control-filter mismatch, kathekon appropriate, no oikeiosis tension) → `improvement_path_structured === null` → `examination_open: false`. That terminal re-examination is NOT itself a redirection, so it adds nothing to `open`; the chain closes.
+
+**Why the benchmark "never closed":** `examination_open` answers only "did THIS examination issue a redirection?" — it is NOT a chain-closed signal. A re-examination that closes the prior loop but *itself* finds a further correction (`improvement_path_structured !== null`) reports `examination_open: true`, extending the chain; the chain closes only when a re-examination reaches the clean terminal above. The caller lacked a reliable way to *observe* the terminal and a clear contract that `examination_open: false` on a re-examination IS the close — a **documentation/contract gap**, not a gate defect (the gate computes `closed` correctly today).
+
+**Reject-mode-6c prerequisite (named here so 6c does not 422 legitimate chains):** the CI-4 gate's REJECT mode (`SUBSTRATE_LOOP_CLOSURE_GATE_REJECT`) MUST NOT be enabled until (i) callers can reliably reach the clean terminal above, and (ii) the public adoption docs state plainly that a redirection is closed by re-submitting `prior_feedback` at the same depth and that the chain terminates when a re-examination returns no `improvement_path_structured` / `examination_open: false`. Until both hold, REJECT mode would refuse every redirection-bearing write whose chain cannot demonstrably close (indeterminate ⇒ unclosed by design). The caller-facing terminal-closure signal + the public-doc statement are the follow-on work that unblocks 6c; this amendment specifies the target, it does not enable 6c.
+
+### A.6 Harness (extends §8 Phase 12)
+
+§8 Phase 12 ("second-turn resume") is realised as: a Tier-1 fixture's response is fed back as a second-turn request carrying the SAME `input` (byte-identical — passes the hash check) + a `continuation_token` + a `clarification_response`; with the flag on, the engine produces either a full evaluation or a *different* Tier-1 fire — **never the same trigger twice in a row.** The load-bearing unit assertions added this session are pure: `applyMechanisms(schema, { suppressTrigger })` does NOT short-circuit on the answered trigger's ambiguous schema (and DOES without suppression — negative control); `detectTier1Trigger(schema, 'ELEMENT_FUSION')` returns null on a fused schema (and returns the trigger without suppression); the distress subject text composes `input + clarification_response`; the context fold composes the answer; the flag helper reads the env var.
+
+### A.7 What this amendment does NOT change
+
+- The token mechanic (§4.1–§4.5): unchanged. `input_hash` still binds to the byte-identical original input.
+- AC7: still NOT engaged (no auth/session/cookie surface; the new field is request-body text).
+- The R20a perimeter routes (AC5): no ninth route; the perimeter is *extended* to cover the answer text, never bypassed.
+- The Layer-2 signing algorithm/keys, the M3 write-boundary gate's enforcement, or the per-trigger detection predicates (§3): unchanged.
+- The public materials: nothing public changes until the fix is Live + founder-walked (R18). The clarification-continuation contract is published to the public docs *after* activation (the 2026-06-18 staged-docs file deliberately excluded it pending this fix).
+
+---
+
 ## Context
 
 ### What this ADR resolves
@@ -215,7 +294,7 @@ When the client re-submits with `continuation_token` present in the request body
 3. Recompute the signature over the payload; compare against the supplied signature with `timingSafeEqual`. If mismatch: HTTP 400 with `{ error: "invalid_continuation_token_signature" }`.
 4. Check `expires_at >= now()`. If expired: HTTP 400 with `{ error: "continuation_token_expired", expired_at: <expires_at> }`. Client behaviour: discard the in-flight clarification and start a fresh request.
 5. Compute `sha256(input.text)` from the re-submitted request. Compare to `payload.input_hash`. If mismatch: HTTP 400 with `{ error: "continuation_token_input_mismatch" }`. (This catches accidental client-side input truncation / corruption between turns.)
-6. If all checks pass, the route proceeds to call the engine with the augmented input. The trigger code in the token is logged as the `previous_trigger` in the meta block of the second-turn response, for diagnostics.
+6. If all checks pass, the route proceeds to call the engine with the augmented input. The trigger code in the token is logged as the `previous_trigger` in the meta block of the second-turn response, for diagnostics. *(SUPERSEDED by §A for the continuation turn — the input is NOT augmented; it stays byte-identical (the hash binding above is retained), the answer rides the typed `clarification_response` field, and the engine suppresses the answered trigger. See §A.1/§A.3.)*
 
 #### 4.5 Why HMAC + hash, not a JWT
 
@@ -252,7 +331,7 @@ The full implementation is the work of M1-CP4e under PR6 + AC5 + the Critical Ch
 
 Per AC5: `/api/reason` is one of the eight bound R20a routes. Per PR6 + AC4: any change touching the R20a perimeter is Critical. The Tier 1 mechanic MUST NOT bypass the existing distress check at `/api/reason` line 144.
 
-Concretely:
+Concretely (the "augmented input" phrasing in this subsection is **SUPERSEDED by §A** — under Design A the second-turn `input` is byte-identical and the answer is the separate `clarification_response` field; the perimeter distress-checks `input + clarification_response` per §A.3 step 2, preserving the property below):
 
 - **Every turn through the route runs the full perimeter.** The first turn (initial request) and the second turn (re-submission with continuation_token) both pass the existing `await enforceDistressCheck(detectDistressTwoStage(input))` at line 144 before the engine is called. The augmented input on the second turn is what gets distress-checked.
 - **The continuation token does not bypass the perimeter.** Token validation runs after the distress check (per §5 step 3 — after the perimeter, before the engine).
@@ -282,9 +361,9 @@ New phases / assertions:
 - **Phase 1** extended with `element_fusion_detected` field assertions for F1–F9 (F1–F6 baseline-`fused: false`; F7 `fused: true` with non-empty `fused_concerns`).
 - **Phase 4** extended with Tier 1 trigger expectations per fixture (F1–F6 baseline-no-Tier-1; F7 ELEMENT_FUSION; F8 SCOPE_AMBIGUITY; F9 TEMPORAL_AMBIGUITY).
 - **Phase 6** extended with end-to-end orchestration: Tier 1 fixtures produce force-clarification response shape; non-Tier-1 fixtures produce full-evaluation response shape; the discriminator `clarification_required` is correct in all cases.
-- **Phase 7** extended with R20a perimeter preservation across both turns (turn 1 → distress check → Tier 1 fire; turn 2 → distress check → engine resumes with augmented input).
+- **Phase 7** extended with R20a perimeter preservation across both turns (turn 1 → distress check → Tier 1 fire; turn 2 → distress check → engine resumes with augmented input). *(SUPERSEDED by §A.3/§A.6 — turn 2 is byte-identical `input` + `clarification_response`; the distress check covers `input + clarification_response`.)*
 - **Phase 11 (new)** — continuation-token mechanic: token issued on Tier 1 fire is parseable; re-validates correctly with matching input; rejects with mismatched input; rejects when expired; rejects with tampered signature.
-- **Phase 12 (new)** — second-turn resume: a Tier 1 fixture's response is fed back as a second-turn input (augmented input + continuation token) and the engine produces either a full evaluation or a different Tier 1 fire (never the same trigger twice in a row, per D13's loop-guard implication).
+- **Phase 12 (new)** — second-turn resume: a Tier 1 fixture's response is fed back as a second-turn input (augmented input + continuation token) and the engine produces either a full evaluation or a different Tier 1 fire (never the same trigger twice in a row, per D13's loop-guard implication). *(SUPERSEDED by §A.6 — the realised harness feeds back the SAME (byte-identical) `input` + `continuation_token` + `clarification_response`; suppression guarantees the answered trigger is never re-fired.)*
 
 ### 9. Cleanliness rating
 
@@ -359,7 +438,8 @@ If the founder rejects ADR-008 or requests substantial edits, the draft is revis
 ## Changelog
 
 - **2026-05-06 (initial Adoption, Sub-session M1-CP4d)** — drafted in `/drafts/adr/`, approved verbatim by founder ("approve as drafted"), moved to `/adopted/adr/`. One load-bearing decision surfaced at session open and confirmed: Option B (client-renders-form stateless protocol). Three lower-stakes parameters codified per ADR-007 precedent: HMAC-SHA256 token mechanic; 30-minute expiry; companion ADR-005 + ADR-006 amendments deferred to M1-CP4e. Tier 1 specifies three engine-level triggers (ELEMENT_FUSION at Layer 1; SCOPE_AMBIGUITY at Position 6; TEMPORAL_AMBIGUITY at Position 2) per D13's canonical specification. AC7 not engaged. Failure isolation per ADR-004 §6.3 preserved. R20a perimeter preservation specified at §6 for AC4 invocation testing at M1-CP4e.
+- **2026-06-18 (Amendment, M-Corr Part A — clarification-continuation fix)** — see `## AMENDMENT 2026-06-18` near the top. The Sage Practice Benchmark v1 (2026-06-16) found the Tier-1 continuation **broken by construction** (the §1-vs-§4.4-step-5 contradiction; the validated trigger never threaded into the engine). Founder elected **Design A** at the 2026-06-18 diagnosis close. This amendment resolves the contradiction in favour of a byte-identical `input` (hash binding kept) + a typed `clarification_response` answer channel + deterministic engine suppression of the answered trigger + the answer folded into the Layer-1 extraction context, all behind the dark flag `SUBSTRATE_TIER1_CONTINUATION_ENABLED` (byte-identical when unset). The R20a perimeter (§6) is **extended** to distress-check `input + clarification_response` (closing the AC5 gap the separate-field design opens). A new §A.5 specifies the loop-closure chain-close terminal condition (#6a) and the prerequisite for the CI-4 gate's reject mode (6c) — no code change to the LIVE CI-4 surface; the gate's `analyseLoopClosure` already implements the rule. Built + adversarially reviewed under the FOLLOW-UP Part A `code-critical` session; activation (the Vercel flag) is a founder-walked 0c-ii step; public-doc publication of the continuation contract follows activation (R18).
 
 ---
 
-*End of ADR-008 (draft).*
+*End of ADR-008 (Adopted; amended 2026-06-18).*

@@ -32,6 +32,14 @@ import {
   validateContinuationToken,
   issueContinuationToken,
   Tier1SecretMissingError,
+  // Mechanism-correction Part A (ADR-008 §A, 2026-06-18): the clarification-
+  // continuation fix — flag-gated; byte-identical when SUBSTRATE_TIER1_CONTINUATION_ENABLED
+  // is unset. isTier1ContinuationEnabled gates the whole contract;
+  // composeContinuationDistressText keeps the answer under the R20a perimeter (AC5);
+  // composeClarificationContext folds the answer into the Layer-1 extraction context.
+  isTier1ContinuationEnabled,
+  composeContinuationDistressText,
+  composeClarificationContext,
 } from '@/lib/translation-sandwich/tier1-token'
 // S4 (D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28): R20a audience-
 // correct rendering for the two redirect branches below. Per
@@ -905,6 +913,13 @@ export async function POST(request: NextRequest) {
       // SUBSTRATE_REASON_LOOP_CLOSURE_ENABLED is on; ignored entirely otherwise
       // (byte-identity with the flag unset).
       prior_feedback,
+      // Mechanism-correction Part A (ADR-008 §A, 2026-06-18): the typed answer
+      // channel for a Tier 1 force-clarification continuation. Read ONLY when
+      // SUBSTRATE_TIER1_CONTINUATION_ENABLED is on; ignored entirely otherwise
+      // (byte-identity with the flag unset). Carried alongside a byte-identical
+      // `input` + the `continuation_token` (the input hash binding is preserved
+      // — Design A; the answer is NOT folded into `input`).
+      clarification_response,
     } = body
 
     // Validate required input
@@ -925,17 +940,66 @@ export async function POST(request: NextRequest) {
     const domainErr = validateTextLength(domain_context, 'Domain context', TEXT_LIMITS.medium)
     if (domainErr) return await respond({ body: { error: domainErr }, status: 400, headers: {}, isBillable: false })
 
+    // Mechanism-correction Part A (ADR-008 §A.3 step 1): when the continuation
+    // flag is on and clarification_response is present, type- + length-validate
+    // it before it reaches the distress classifier (below) or the engine.
+    // Flag off → never read (byte-identical; an unknown over-long field is
+    // ignored exactly as today).
+    const tier1ContinuationEnabled = isTier1ContinuationEnabled()
+    if (
+      tier1ContinuationEnabled &&
+      clarification_response !== undefined &&
+      clarification_response !== null
+    ) {
+      if (typeof clarification_response !== 'string') {
+        return await respond({
+          body: { error: 'clarification_response must be a string.' },
+          status: 400,
+          headers: {},
+          isBillable: false,  // Pre-substrate validation error — no LLM cost incurred.
+        })
+      }
+      const clarificationErr = validateTextLength(
+        clarification_response,
+        'Clarification response',
+        TEXT_LIMITS.medium,
+      )
+      if (clarificationErr) {
+        return await respond({
+          body: { error: clarificationErr },
+          status: 400,
+          headers: {},
+          isBillable: false,  // Pre-substrate validation error — no LLM cost incurred.
+        })
+      }
+    }
+
     // R20a — Vulnerable user detection (before any LLM call)
     // enforceDistressCheck() returns a SafetyGate — compile-time proof that
     // the distress classifier has been awaited before any reasoning proceeds.
     //
     // M1-CP4e (2026-05-06): R20a runs on EVERY turn — including second-turn
-    // re-submissions with a continuation_token. The augmented input on the
-    // second turn is what gets distress-checked. The continuation token does
+    // re-submissions with a continuation_token. The continuation token does
     // NOT bypass the perimeter (per ADR-008 §6). A second-turn distress fire
     // takes precedence over the token: the token is discarded; the practitioner
     // sees the redirect.
-    const gate = await enforceDistressCheck(detectDistressTwoStage(input))
+    //
+    // Mechanism-correction Part A (ADR-008 §A.3 step 2): in Design A the
+    // practitioner's answer is the SEPARATE field `clarification_response`, not
+    // an augmented `input`. The perimeter must therefore distress-check
+    // `input + clarification_response` so distress in the answer cannot escape
+    // it (AC5). composeContinuationDistressText returns `input` alone unless the
+    // flag is on AND a non-empty answer is present — so flag-off is byte-
+    // identical. Token presence is NOT required: any practitioner-authored
+    // clarification text runs the perimeter before any engine work or structural
+    // rejection.
+    const distressSubjectText = tier1ContinuationEnabled
+      ? composeContinuationDistressText(
+          input,
+          typeof clarification_response === 'string' ? clarification_response : undefined,
+        )
+      : input
+    const gate = await enforceDistressCheck(detectDistressTwoStage(distressSubjectText))
     if (gate.shouldRedirect) {
       // S4 (D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28): route the
       // redirect response through the audience-correct render helper. Per
@@ -1026,6 +1090,86 @@ export async function POST(request: NextRequest) {
     // when non-null. M1-CP6 cutover (2026-05-08) — was diagnostic-only during parallel-run;
     // is now load-bearing for second-turn meta logging.
 
+    // Mechanism-correction Part A (ADR-008 §A.3 step 4 + §A.4): the
+    // clarification-continuation contract. Flag-gated; byte-identical when off
+    // (tier1SuppressTrigger + clarificationAnswer stay undefined → the engine
+    // suppression + the context fold below are no-ops, and the runSandwich call
+    // is byte-identical).
+    //   - valid token + answer  → suppress the answered trigger (engine) + fold
+    //                             the answer into the examination context.
+    //   - valid token, NO answer → 400 (a continuation without an answer is
+    //                             meaningless — the same trigger would re-fire).
+    //   - answer, NO token       → 400 (the answer is only valid when resuming a
+    //                             force-clarification with its continuation_token).
+    let tier1SuppressTrigger:
+      | 'ELEMENT_FUSION' | 'SCOPE_AMBIGUITY' | 'TEMPORAL_AMBIGUITY' | undefined
+    let clarificationAnswer: string | undefined
+    if (tier1ContinuationEnabled) {
+      const hasAnswer =
+        typeof clarification_response === 'string' && clarification_response.trim() !== ''
+      if (previousTrigger !== null) {
+        if (!hasAnswer) {
+          return await respond({
+            body: {
+              error: 'clarification_response_required',
+              detail:
+                'A continuation_token resumes a force-clarification; provide ' +
+                'clarification_response (your answer to the clarification question) ' +
+                'alongside the original input.',
+            },
+            status: 400,
+            headers: corsHeaders(),
+            isBillable: true,  // Client error post-perimeter — billed at base rate per R9.
+          })
+        }
+        // Mechanism-correction Part A — pre-activation review finding CF-2
+        // (2026-06-18): the clarification answer informs server-side Layer-1
+        // RE-EXTRACTION (it is folded into the extraction context below). A
+        // caller who supplied a precomputed layer1_schema has bypassed
+        // server-side extraction entirely (runSandwichInner skips extractFeatures
+        // when preExtractedLayer1Schema is set — parallel-run.ts ~633), so the
+        // answer would be silently dropped while the trigger is still suppressed
+        // — the engine would return a full assessment on the caller's still-
+        // ambiguous schema AS IF the question were answered (a false success).
+        // Refuse the combination honestly: an l1_supply / plugin caller resolves
+        // a Tier-1 clarification by re-supplying a DISAMBIGUATED layer1_schema
+        // (the trigger then simply does not fire), not via clarification_response.
+        // Distress in the answer was already perimeter-checked above
+        // (composeContinuationDistressText) — this is a structural rejection,
+        // never a safety bypass.
+        if (preExtractedLayer1Schema !== undefined) {
+          return await respond({
+            body: {
+              error: 'clarification_response_with_supplied_layer1_schema',
+              detail:
+                'clarification_response informs server-side Layer-1 re-extraction, ' +
+                'which is bypassed when you supply a precomputed layer1_schema. To ' +
+                'resume a force-clarification on the supplied-schema path, re-submit ' +
+                'a disambiguated layer1_schema instead (the answered trigger then ' +
+                'does not re-fire).',
+            },
+            status: 400,
+            headers: corsHeaders(),
+            isBillable: false,  // Pre-substrate structural error — no engine work performed.
+          })
+        }
+        tier1SuppressTrigger = previousTrigger
+        clarificationAnswer = clarification_response as string
+      } else if (hasAnswer) {
+        return await respond({
+          body: {
+            error: 'clarification_response_without_token',
+            detail:
+              'clarification_response is only valid when resuming a force-clarification ' +
+              'with its continuation_token. Submit a fresh request without it.',
+          },
+          status: 400,
+          headers: corsHeaders(),
+          isBillable: false,  // Pre-substrate structural error — no engine work performed.
+        })
+      }
+    }
+
     // Validate depth parameter. `let` (not `const`) because the M5 CI-4
     // same-depth rule (below) carries the prior examination's depth on a
     // prior_feedback re-submission; the flag-off path never reassigns it.
@@ -1097,6 +1241,14 @@ export async function POST(request: NextRequest) {
       // context so the re-examination is genuinely informed (no-op when there
       // is no prior_feedback / no adopted_correction → byte-identical context).
       effectiveContext = composeReExaminationContext(context, pf.value)
+    }
+    // Mechanism-correction Part A (ADR-008 §A.1 step 3 / §A.4): fold the
+    // clarification answer into the examination context so the second-turn
+    // Layer-1 re-extraction is informed by the answer (composes on top of any
+    // CI-4 fold above). clarificationAnswer is set only on a validated
+    // token + answer continuation; undefined otherwise → byte-identical context.
+    if (clarificationAnswer !== undefined) {
+      effectiveContext = composeClarificationContext(effectiveContext, clarificationAnswer)
     }
 
     // Per-request cache for D6 retrievals (KG1 rule 4 — never module-level).
@@ -1175,6 +1327,15 @@ export async function POST(request: NextRequest) {
       // is on (byte-identical when off). runSandwichInner attaches them inside
       // the signed assessment + surfaces examination_open on the composed output.
       loopClosure,
+      // Mechanism-correction Part A (ADR-008 §A.4): the answered Tier 1 trigger
+      // to suppress on this continuation turn — undefined unless
+      // SUBSTRATE_TIER1_CONTINUATION_ENABLED is on AND a continuation_token
+      // validated (byte-identical engine behaviour when undefined). The answer
+      // itself reaches Layer 1 via effectiveContext (folded above) — guaranteed
+      // because the supplied-schema case (which would skip re-extraction) is
+      // rejected at the continuation block (CF-2), so server-side extraction
+      // always runs on this path.
+      tier1SuppressTrigger,
     }))
 
     // Option D metering — populate loopAccumulator with the per-layer Anthropic

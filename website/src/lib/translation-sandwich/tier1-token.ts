@@ -59,6 +59,20 @@ const TOKEN_VERSION = 1 as const
  *  (Production + Preview + Development) at Sub-session M1-CP4e-B. */
 const SECRET_ENV_VAR = 'TRANSLATION_SANDWICH_TIER1_SECRET'
 
+/**
+ * Env flag for the AC-13 Tier 1 clarification-continuation fix (ADR-008 §A,
+ * 2026-06-18; mechanism-correction Part A). Exact string 'true'; read at call
+ * time (not module load). UNSET/other (the default in every environment at
+ * build time) → the route never reads `clarification_response`, never
+ * suppresses a re-fired trigger, and distress-checks `input` alone — byte-
+ * identical to the pre-Part-A route (today's broken-but-inert continuation
+ * behaviour is preserved exactly). 'true' → the continuation contract is live
+ * (typed answer channel + trigger suppression + answer-into-context fold +
+ * distress coverage of the answer). Activation is a founder-walked 0c-ii step;
+ * rollback = unset + redeploy.
+ */
+const CONTINUATION_ENV_VAR = 'SUBSTRATE_TIER1_CONTINUATION_ENABLED'
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -313,6 +327,66 @@ function validatePayloadShape(parsed: unknown): ContinuationTokenPayload | null 
 }
 
 // ============================================================================
+// CLARIFICATION-CONTINUATION (ADR-008 §A, 2026-06-18 — mechanism-correction Part A)
+// ============================================================================
+
+/**
+ * True only when SUBSTRATE_TIER1_CONTINUATION_ENABLED is the exact string
+ * 'true'. Read at call time. The single switch that gates the whole Design-A
+ * continuation contract on /api/reason (ADR-008 §A.2). Off → byte-identical to
+ * the pre-Part-A route.
+ */
+export function isTier1ContinuationEnabled(): boolean {
+  return process.env[CONTINUATION_ENV_VAR] === 'true'
+}
+
+/**
+ * Compose the distress subject text for the R20a perimeter on a continuation
+ * turn (ADR-008 §A.3 step 2). The practitioner's `clarification_response` is a
+ * SEPARATE field in Design A (the original `input` stays byte-identical to keep
+ * the hash binding), so the perimeter must distress-check `input + answer` —
+ * otherwise distress in the answer would escape the perimeter (AC5).
+ *
+ * Returns `input` unchanged when there is no non-empty answer to fold (the
+ * caller gates this on the flag being on, so flag-off is byte-identical). Pure.
+ */
+export function composeContinuationDistressText(
+  input: string,
+  clarificationResponse: string | undefined,
+): string {
+  if (
+    typeof clarificationResponse !== 'string' ||
+    clarificationResponse.trim() === ''
+  ) {
+    return input
+  }
+  return `${input}\n\n${clarificationResponse}`
+}
+
+/**
+ * Fold the practitioner's clarification answer into the examination context so
+ * the second-turn Layer-1 re-extraction is genuinely informed by the answer
+ * (ADR-008 §A.1 step 3 / §A.4). A sibling of reason-loop-closure.ts's
+ * composeReExaminationContext — same compose pattern, different note. Returns
+ * the base context unchanged when there is no answer to fold. Pure.
+ */
+export function composeClarificationContext(
+  baseContext: string | undefined,
+  clarificationResponse: string | undefined,
+): string | undefined {
+  if (
+    typeof clarificationResponse !== 'string' ||
+    clarificationResponse.trim() === ''
+  ) {
+    return baseContext
+  }
+  const note = `Clarification response (answering a prior force-clarification question): ${clarificationResponse}`
+  return baseContext !== undefined && baseContext.trim() !== ''
+    ? `${baseContext}\n\n${note}`
+    : note
+}
+
+// ============================================================================
 // HARNESS-FACING EXPORTS
 // ============================================================================
 
@@ -322,4 +396,5 @@ export const TIER1_TOKEN_CONFIG = {
   TOKEN_EXPIRY_SECONDS,
   TOKEN_VERSION,
   SECRET_ENV_VAR,
+  CONTINUATION_ENV_VAR,
 } as const

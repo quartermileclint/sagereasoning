@@ -414,9 +414,17 @@ export interface Layer2Assessment {
 // ============================================================================
 
 export interface ApplyOptions {
-  /** Reserved for future use (e.g., per-consumer mechanism weighting overrides).
-   *  CP2 ignores all options; included for forward-compatibility. */
-  reserved?: never
+  /**
+   * AC-13 Tier 1 clarification-continuation suppression (ADR-008 §A.4,
+   * 2026-06-18). When set to the trigger the practitioner has just answered on
+   * a second-turn continuation, the matching Position-2 (TEMPORAL_AMBIGUITY) /
+   * Position-6 (SCOPE_AMBIGUITY) short-circuit is SKIPPED — applyMechanisms
+   * continues to a full assessment rather than re-firing the answered question.
+   * A *different* trigger may still fire; the answered one cannot. Undefined
+   * (every existing caller; the flag-off route) → byte-identical behaviour.
+   * ELEMENT_FUSION is suppressed upstream in detectTier1Trigger (Layer 1).
+   */
+  suppressTrigger?: Tier1TriggerCode
 }
 
 // ============================================================================
@@ -1950,10 +1958,31 @@ function formatConcernsList(concerns: ReadonlyArray<string>): string {
  * Per ADR-006 §3.10 + ADR-008 §3.4 (companion ADR-005 amendment specifies the
  * Layer 1 element_fusion_detected field this function consumes).
  *
+ * Clarification-continuation suppression (ADR-008 §A.4, 2026-06-18): when
+ * `suppressTrigger === 'ELEMENT_FUSION'` (the practitioner has just answered an
+ * ELEMENT_FUSION clarification on a second-turn continuation), this returns null
+ * even on a still-fused schema, so the engine proceeds to Layer 2 instead of
+ * re-asking the same question. The answer reaches the re-extraction via the
+ * route-folded examination context; the suppression is the deterministic
+ * backstop that the answered question is not re-fired. `suppressTrigger`
+ * undefined (every existing caller) → byte-identical behaviour.
+ *
  * @param schema - validated Layer1Schema
- * @returns Tier1Trigger when fusion is detected; null otherwise
+ * @param suppressTrigger - the just-answered trigger to suppress, if any
+ * @returns Tier1Trigger when fusion is detected (and not suppressed); null otherwise
  */
-export function detectTier1Trigger(schema: Layer1Schema): Tier1Trigger | null {
+export function detectTier1Trigger(
+  schema: Layer1Schema,
+  suppressTrigger?: Tier1TriggerCode
+): Tier1Trigger | null {
+  // Suppress a just-answered ELEMENT_FUSION before any fused-schema work: the
+  // continuation has folded the answer into the extraction context; proceed to
+  // Layer 2 rather than re-firing. (The empty-concerns invariant throw below is
+  // a defensive guard for the NORMAL path; on the suppressed path we deliberately
+  // do not re-examine the fusion at all.)
+  if (suppressTrigger === 'ELEMENT_FUSION') {
+    return null
+  }
   if (schema.element_fusion_detected.fused === true) {
     const concerns = schema.element_fusion_detected.fused_concerns
     if (concerns === null || concerns.length === 0) {
@@ -2106,7 +2135,7 @@ function detectScopeAmbiguity(schema: Layer1Schema): Tier1Trigger | null {
  */
 export function applyMechanisms(
   schema: Layer1Schema,
-  _options?: ApplyOptions
+  options?: ApplyOptions
 ): Layer2Assessment | Tier1ShortCircuit {
   // Mechanism 1 — control filter
   const cf = classifyControlFilter(schema.control_filter_elements)
@@ -2117,7 +2146,13 @@ export function applyMechanisms(
   // Position 2 short-circuit (M1-CP4e) — TEMPORAL_AMBIGUITY
   // Per ADR-006 §3.10 + ADR-008 §3.3. Fires when the temporal axis of the
   // practitioner's concern is undetermined (regret vs worry); halts the engine.
-  const temporalTrigger = detectTemporalAmbiguity(schema)
+  // Clarification-continuation suppression (ADR-008 §A.4): a just-answered
+  // TEMPORAL_AMBIGUITY is not re-fired — the mechanism continues to a full
+  // assessment. Undefined suppressTrigger → byte-identical (existing callers).
+  const temporalTrigger =
+    options?.suppressTrigger === 'TEMPORAL_AMBIGUITY'
+      ? null
+      : detectTemporalAmbiguity(schema)
   if (temporalTrigger !== null) {
     return { tier1_trigger: temporalTrigger }
   }
@@ -2132,8 +2167,12 @@ export function applyMechanisms(
   // Position 6 short-circuit (M1-CP4e) — SCOPE_AMBIGUITY
   // Per ADR-006 §3.10 + ADR-008 §3.2. Fires when an action involves an
   // unspecified-other referent and no relational circle is engaged; halts the
-  // engine.
-  const scopeTrigger = detectScopeAmbiguity(schema)
+  // engine. Clarification-continuation suppression (ADR-008 §A.4): a
+  // just-answered SCOPE_AMBIGUITY is not re-fired.
+  const scopeTrigger =
+    options?.suppressTrigger === 'SCOPE_AMBIGUITY'
+      ? null
+      : detectScopeAmbiguity(schema)
   if (scopeTrigger !== null) {
     return { tier1_trigger: scopeTrigger }
   }

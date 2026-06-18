@@ -49,6 +49,7 @@ import {
   applyMechanisms,
   detectTier1Trigger,
   type Tier1Trigger,
+  type Tier1TriggerCode,
   type Layer2Assessment,
 } from './layer2-mechanisms'
 // Mechanism-correction M5 (CI-4 reason-route half): the loop-closure
@@ -299,6 +300,24 @@ export interface SandwichInput {
    * examination_open.
    */
   loopClosure?: ExaminationMarkers
+  /**
+   * AC-13 Tier 1 clarification-continuation suppression (ADR-008 §A.4,
+   * 2026-06-18; mechanism-correction Part A). On a validated second-turn
+   * continuation, the route sets this to the trigger the practitioner has just
+   * answered. runSandwichInner suppresses re-firing it: ELEMENT_FUSION via
+   * detectTier1Trigger(schema, suppressTrigger), TEMPORAL_AMBIGUITY /
+   * SCOPE_AMBIGUITY via applyMechanisms(schema, { suppressTrigger }). The
+   * practitioner's answer itself reaches Layer 1 via the route-folded
+   * examination context (params.context), so the engine's only continuation
+   * concern is the deterministic suppression. A *different* trigger may still
+   * fire; the answered one cannot.
+   *
+   * The route passes this ONLY when SUBSTRATE_TIER1_CONTINUATION_ENABLED is on
+   * AND a continuation_token validated. Undefined (the default — flag off, and
+   * every existing caller) → detectTier1Trigger / applyMechanisms run
+   * byte-identically to the pre-Part-A engine.
+   */
+  tier1SuppressTrigger?: Tier1TriggerCode
 }
 
 /**
@@ -735,7 +754,11 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
   // composes a Tier 1 force-clarification response shape per ADR-008 §2.
   let elementFusionTrigger: Tier1Trigger | null
   try {
-    elementFusionTrigger = detectTier1Trigger(layer1Schema)
+    // ADR-008 §A.4 clarification-continuation suppression: a just-answered
+    // ELEMENT_FUSION is suppressed (returns null) so the engine proceeds to
+    // Layer 2 instead of re-asking. Undefined tier1SuppressTrigger (flag off /
+    // every existing caller) → byte-identical.
+    elementFusionTrigger = detectTier1Trigger(layer1Schema, params.tier1SuppressTrigger)
   } catch (err) {
     // detectTier1Trigger throws only on cross-field invariant violation (which
     // validateLayer1Schema should have caught upstream). Treat as a programming
@@ -761,7 +784,16 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
   const layer2Start = Date.now()
   let layer2Result: Layer2Assessment | { tier1_trigger: Tier1Trigger }
   try {
-    layer2Result = applyMechanisms(layer1Schema)
+    // ADR-008 §A.4 clarification-continuation suppression: a just-answered
+    // TEMPORAL_AMBIGUITY (Position 2) / SCOPE_AMBIGUITY (Position 6) is not
+    // re-fired — applyMechanisms continues to a full assessment. Undefined
+    // tier1SuppressTrigger (flag off / every existing caller) → byte-identical.
+    layer2Result = applyMechanisms(
+      layer1Schema,
+      params.tier1SuppressTrigger !== undefined
+        ? { suppressTrigger: params.tier1SuppressTrigger }
+        : undefined
+    )
   } catch (err) {
     result.layer2_latency_ms = Date.now() - layer2Start
     result.error = 'validation_throw'
