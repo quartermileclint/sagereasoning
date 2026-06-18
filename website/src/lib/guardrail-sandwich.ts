@@ -1,0 +1,353 @@
+/**
+ * guardrail-sandwich.ts — #3b/#3c: port /api/guardrail onto the signed,
+ * deterministic translation-sandwich engine (ADR-009, 2026-06-19).
+ *
+ * The legacy /api/guardrail runs the single-LLM `sage-guard` engine
+ * (runSageReason, temp 0.2, ~90s on a critical gate, is_deterministic:false,
+ * unsigned). This module ports the gate onto the sandwich's THREE pure building
+ * blocks directly — NOT runSandwich (which is /api/reason-shaped: it runs the
+ * A7 perimeter, generates Layer-3 prose, and obligates narrative retention; see
+ * ADR-009 §1):
+ *
+ *    action → extractFeatures(...)          [Layer 1 — ONE bounded LLM call, Sonnet, max_tokens 4000]
+ *           → detectTier1Trigger / applyMechanisms   [Layer 2 — PURE deterministic, no LLM]
+ *           → signLayer2Assessment(...)     [Ed25519 sign — when SUBSTRATE_LAYER2_SIGNING_ENABLED]
+ *           → meetsThreshold / getV3Recommendation over katorthoma_proximity   [PURE rank arithmetic]
+ *
+ * Result: a SIGNED, verdict-reproducible-from-extraction result (same
+ * /api/public-key verifiability as a consult) at ~half the output-token budget
+ * and NO prose generation. meta.is_deterministic stays honestly FALSE (the
+ * endpoint makes one Sonnet Layer-1 AI call; the win is the signed, reproducible
+ * Layer-2 verdict via engine_attribution + signed_assessment, NOT an end-to-end
+ * determinism claim — ADR-009 §4). The verdict/threshold semantics are unchanged
+ * — meetsThreshold/getV3Recommendation are provider-agnostic; only the SOURCE
+ * of `proximity` changes (LLM → deterministic Layer 2).
+ *
+ * BUILT DARK behind SUBSTRATE_GUARDRAIL_SANDWICH_ENABLED (call-time, case-strict
+ * 'true', default OFF). Flag-off ⇒ the route keeps the verbatim legacy path
+ * (this module is never reached). See guardrail/route.ts.
+ *
+ * R20a: this module does NOT run the A7 distress gate — the guardrail stays
+ * OUTSIDE the human-distress perimeter (ADR-009 §6; no ninth-route addition).
+ * The port adds no perimeter regression (the legacy gate has no distress floor
+ * either).
+ */
+
+import {
+  extractFeatures,
+  type LayerTokenUsage,
+  type Layer1Schema,
+} from '@/lib/translation-sandwich/layer1-extractor'
+import {
+  applyMechanisms,
+  detectTier1Trigger,
+  type Layer2Assessment,
+  type Tier1Trigger,
+  type KathekonQuality,
+  type HastyAssentRisk,
+  type StageScores,
+} from '@/lib/translation-sandwich/layer2-mechanisms'
+import {
+  signLayer2Assessment,
+  type SignedLayer2Assessment,
+} from '@/lib/translation-sandwich/layer2-signer'
+import {
+  meetsThreshold,
+  getV3Recommendation,
+  type V3GuardrailResponse,
+} from '@/lib/guardrails'
+import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
+
+// ============================================================================
+// FLAG
+// ============================================================================
+
+/**
+ * Read at CALL TIME (not module load) so the founder can flip the port without
+ * a guardrail redeploy. Case-strict — only literal lowercase 'true' enables.
+ * UNSET (default, production) ⇒ false ⇒ the route runs the legacy sage-guard
+ * path (byte-identical).
+ */
+export function isGuardrailSandwichEnabled(): boolean {
+  return process.env.SUBSTRATE_GUARDRAIL_SANDWICH_ENABLED === 'true'
+}
+
+/**
+ * Signing is gated by the SAME flag /api/reason uses (SUBSTRATE_LAYER2_SIGNING_ENABLED),
+ * read at call time here. Production state has signing ON. When ON the port emits
+ * a signed assessment and fails CLOSED (503) on a signing throw; when OFF it emits
+ * the bare (unsigned) assessment. meta.is_deterministic stays honestly FALSE on
+ * BOTH paths (the route never sets it — the endpoint makes an L1 AI call; signing
+ * toggles only whether the assessment is signed, not determinism).
+ */
+function isLayer2SigningEnabled(): boolean {
+  return process.env.SUBSTRATE_LAYER2_SIGNING_ENABLED === 'true'
+}
+
+// ============================================================================
+// VERDICT FIELDS (the §4 engine-derived response fields — PURE)
+// ============================================================================
+
+export type DeliberationQuality = 'thorough' | 'adequate' | 'hasty' | 'impulsive'
+
+/** The engine-derived guardrail fields, re-derived from the DETERMINISTIC
+ *  Layer-2 assessment (ADR-009 §4). The route layers on the request-side fields
+ *  (threshold, risk_class, evaluation_depth, rollback_path, alternatives). */
+export interface GuardrailVerdictFields {
+  proceed: boolean
+  katorthoma_proximity: KatorthomaProximityLevel
+  recommendation: V3GuardrailResponse['recommendation']
+  passions_detected: V3GuardrailResponse['passions_detected']
+  /** boolean | null — null ("marginal", cannot determine) surfaced HONESTLY,
+   *  not coerced to false (R18; ADR-009 §4). */
+  is_kathekon: boolean | null
+  kathekon_quality: KathekonQuality
+  /** Deterministic synthesis from L2 (kathekon justification + ruling faculty +
+   *  proximity) — NOT LLM prose (R10 content change; ADR-009 §4). */
+  reasoning: string
+  /** Flattened from improvement_path_structured.corrected_judgement; omitted
+   *  when the structured field is null. */
+  improvement_hint?: string
+  hasty_assent_risk: HastyAssentRisk
+  stage_scores: StageScores
+  deliberation_quality: DeliberationQuality
+  /** The L2 corrected judgement, surfaced so the route can derive the
+   *  Critical-only rollback_path note deterministically. */
+  improvement_corrected?: string
+}
+
+/** deliberation_quality — the SAME derivation the legacy route used (route.ts
+ *  ~228-238), now over deterministic L2 inputs. L2 always provides stage_scores
+ *  (the legacy meta.stage_scores was sometimes absent), so this is strictly more
+ *  reliable. */
+export function deriveDeliberationQuality(
+  hastyAssentRisk: HastyAssentRisk,
+  stageScores: StageScores,
+): DeliberationQuality {
+  if (hastyAssentRisk === 'high') return 'impulsive'
+  if (hastyAssentRisk === 'moderate') return 'hasty'
+  const scores = Object.values(stageScores).filter((s) => s !== 'not_applied')
+  if (scores.length === 0) return 'adequate'
+  const strongCount = scores.filter((s) => s === 'strong').length
+  return strongCount === scores.length ? 'thorough' : 'adequate'
+}
+
+/** Deterministic `reasoning` synthesis from the L2 assessment. Honest +
+ *  reproducible; replaces the LLM philosophical_reflection (R10; ADR-009 §4).
+ *  Layer 2 has NO free-narrative field — this composes the structured ones. */
+export function synthesizeReasoning(assessment: Layer2Assessment): string {
+  const k = assessment.kathekon_assessment
+  const kathekonClause =
+    k.is_kathekon === true
+      ? 'the action is appropriate (kathekon)'
+      : k.is_kathekon === false
+        ? 'the action is contrary to kathekon'
+        : 'the action’s appropriateness is indeterminate'
+  const justification = (k.justification || '').trim()
+  const ruling = (assessment.ruling_faculty_state || '').trim()
+  const parts = [
+    `Deterministic virtue assessment — katorthoma proximity: ${assessment.katorthoma_proximity}; ${kathekonClause} (kathekon quality: ${k.quality}).`,
+  ]
+  if (justification) parts.push(justification)
+  if (ruling) parts.push(`Ruling faculty: ${ruling}.`)
+  return parts.join(' ')
+}
+
+/** Project the richer L2 passion entries to the V3 guardrail shape. L2's
+ *  sub_species is PassionSubSpecies|null; V3's is a string — null → 'unspecified'
+ *  (honest: no sub-species identified). */
+export function projectPassions(
+  assessment: Layer2Assessment,
+): V3GuardrailResponse['passions_detected'] {
+  return assessment.passion_diagnosis.passions_detected.map((p) => ({
+    root_passion: p.root_passion,
+    sub_species: p.sub_species ?? 'unspecified',
+    false_judgement: p.false_judgement,
+  }))
+}
+
+/** Re-derive every engine-side guardrail field from the DETERMINISTIC Layer-2
+ *  assessment + the threshold. PURE — no LLM, no I/O. This is the heart of the
+ *  port: a guardrail verdict computed by ordinal-rank arithmetic over the
+ *  deterministic katorthoma_proximity. */
+export function deriveGuardrailVerdict(
+  assessment: Layer2Assessment,
+  threshold: KatorthomaProximityLevel,
+): GuardrailVerdictFields {
+  const proximity = assessment.katorthoma_proximity as KatorthomaProximityLevel
+  const k = assessment.kathekon_assessment
+  const improvement = assessment.improvement_path_structured
+
+  // Rank-arithmetic verdict over the deterministic proximity.
+  let proceed = meetsThreshold(proximity, threshold)
+  let recommendation = getV3Recommendation(proximity, threshold)
+
+  // KATHEKON FLOOR (SD-1, adversarial review 2026-06-19; ADR-009 §4). A verdict
+  // that judges the action CONTRARY to appropriate action (is_kathekon === false,
+  // i.e. kathekon quality 'contrary') must NEVER emit proceed:true — even when
+  // computeProximity's terminal default ('deliberate', the under-specified /
+  // empty-extraction fallback) would pass the threshold. This resolves the
+  // proximity-vs-kathekon incoherence and closes the sparse/empty-extraction
+  // fail-OPEN at the gate (an empty schema yields proximity 'deliberate' AND
+  // kathekon 'contrary'). The floor lives in the PORT layer ONLY —
+  // computeProximity (shared /api/reason determinism) is untouched. Note: this
+  // can only make the verdict MORE conservative, never less.
+  if (k.is_kathekon === false) {
+    proceed = false
+    if (recommendation === 'proceed' || recommendation === 'proceed_with_caution') {
+      recommendation = 'pause_for_review'
+    }
+  }
+
+  return {
+    proceed,
+    katorthoma_proximity: proximity,
+    recommendation,
+    passions_detected: projectPassions(assessment),
+    is_kathekon: k.is_kathekon,
+    kathekon_quality: k.quality,
+    reasoning: synthesizeReasoning(assessment),
+    improvement_hint: improvement ? improvement.corrected_judgement : undefined,
+    hasty_assent_risk: assessment.hasty_assent_risk,
+    stage_scores: assessment.stage_scores,
+    deliberation_quality: deriveDeliberationQuality(
+      assessment.hasty_assent_risk,
+      assessment.stage_scores,
+    ),
+    improvement_corrected: improvement ? improvement.corrected_judgement : undefined,
+  }
+}
+
+// ============================================================================
+// ORCHESTRATOR
+// ============================================================================
+
+export interface GuardrailSandwichParams {
+  /** The action to gate (already trimmed). Maps to Layer-1 `input`. */
+  action: string
+  /** Optional caller context. */
+  context?: string
+  /** Optional urgency context (Layer-1 also extracts urgency from the action). */
+  urgency_context?: string
+  /** Optional domain context — sharpens Layer-1 extraction; does NOT shape the
+   *  deterministic Layer-2 verdict (ADR-009 §4). */
+  domain_context?: string
+  /** The resolved proximity threshold. */
+  threshold: KatorthomaProximityLevel
+}
+
+/** Discriminated outcome of the port. The route branches on `status`. */
+export type GuardrailSandwichOutcome =
+  | {
+      status: 'verdict'
+      verdict: GuardrailVerdictFields
+      /** The Layer-1 extraction (the features Layer 2 reasoned over). Disclosed
+       *  on the wire (R10-2) so a consumer can re-run applyMechanisms over it and
+       *  verify the full action→extraction→assessment chain — parity with
+       *  /api/reason, which also surfaces `extraction`. */
+      extraction: Layer1Schema
+      /** The bare deterministic Layer-2 assessment. Emitted on the wire as the
+       *  bare `assessment` when signing is OFF; when signing is ON the signed
+       *  wrapper below is the verifiable artifact (R10-1). */
+      assessment: Layer2Assessment
+      /** Present only when signing is enabled; the route emits it as
+       *  signed_assessment {assessment, signature, key_id}. */
+      signed: SignedLayer2Assessment | null
+      /** The one LLM call's token usage — for CI-8 cost honesty + CI-10 metering. */
+      usage: LayerTokenUsage
+      layer1_latency_ms: number
+    }
+  | {
+      /** A Tier-1 force-clarification fired. A binary gate never halts to clarify
+       *  (ADR-009 §3) — the route maps this to a CONSERVATIVE pause verdict. */
+      status: 'tier1_pause'
+      trigger: Tier1Trigger
+      usage: LayerTokenUsage
+      layer1_latency_ms: number
+    }
+  | {
+      /** Signing was enabled but threw (key missing/malformed, or a
+       *  canonicalisation error). Fail-CLOSED — the route returns 503; the
+       *  substrate never emits an unsigned assessment when signing is on. */
+      status: 'signing_unavailable'
+    }
+  | {
+      /** Layer-1 extraction (or the deterministic Layer-2, defensively) failed.
+       *  The route returns a CONSERVATIVE fallback verdict — a gate failure must
+       *  never silently "proceed" (ADR-009 §5). */
+      status: 'engine_unavailable'
+      stage: 'layer1' | 'layer2'
+      detail: string
+    }
+
+/**
+ * Run the guardrail through the signed deterministic sandwich. Never throws —
+ * every failure mode is returned as a discriminated outcome the route maps to
+ * a fail-safe HTTP response.
+ */
+export async function runGuardrailSandwich(
+  params: GuardrailSandwichParams,
+): Promise<GuardrailSandwichOutcome> {
+  // ---- Layer 1: ONE bounded LLM extraction (Sonnet, max_tokens 4000) --------
+  const l1Start = Date.now()
+  let schema
+  let usage: LayerTokenUsage
+  try {
+    const extracted = await extractFeatures({
+      input: params.action,
+      context: params.context,
+      domain_context: params.domain_context,
+      urgency_context: params.urgency_context,
+    })
+    schema = extracted.schema
+    usage = extracted.usage
+  } catch (err) {
+    return {
+      status: 'engine_unavailable',
+      stage: 'layer1',
+      detail: err instanceof Error ? err.message : 'layer1_extraction_failed',
+    }
+  }
+  const layer1_latency_ms = Date.now() - l1Start
+
+  // ---- Layer 2: PURE deterministic mechanism application --------------------
+  // Tier-1 force-clarification (ELEMENT_FUSION upstream; TEMPORAL/SCOPE in
+  // applyMechanisms) → a binary gate cannot ask a clarifying question, so the
+  // route maps a trigger to a conservative pause (ADR-009 §3). No suppression
+  // (the gate has no continuation/clarification_response channel).
+  try {
+    const elementFusion = detectTier1Trigger(schema)
+    if (elementFusion) {
+      return { status: 'tier1_pause', trigger: elementFusion, usage, layer1_latency_ms }
+    }
+    const l2 = applyMechanisms(schema)
+    if ('tier1_trigger' in l2) {
+      return { status: 'tier1_pause', trigger: l2.tier1_trigger, usage, layer1_latency_ms }
+    }
+    const assessment: Layer2Assessment = l2
+
+    // ---- Sign (fail-closed when enabled) -----------------------------------
+    let signed: SignedLayer2Assessment | null = null
+    if (isLayer2SigningEnabled()) {
+      try {
+        signed = signLayer2Assessment(assessment)
+      } catch {
+        // Never emit an unsigned assessment when signing is enabled.
+        return { status: 'signing_unavailable' }
+      }
+    }
+
+    // ---- Verdict (pure rank arithmetic over the deterministic proximity) ----
+    const verdict = deriveGuardrailVerdict(assessment, params.threshold)
+    return { status: 'verdict', verdict, extraction: schema, assessment, signed, usage, layer1_latency_ms }
+  } catch (err) {
+    // Defensive: applyMechanisms/detectTier1Trigger are pure and should not throw
+    // on a validated schema; if they do, fail SAFE (conservative pause), never
+    // "proceed".
+    return {
+      status: 'engine_unavailable',
+      stage: 'layer2',
+      detail: err instanceof Error ? err.message : 'layer2_application_failed',
+    }
+  }
+}

@@ -19,6 +19,11 @@ import { extractReceipt, type MechanismId } from '@/lib/reasoning-receipt'
 import { runSageReason } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { getProjectContext } from '@/lib/context/project-context'
+import { MODEL_DEEP } from '@/lib/model-config'
+import {
+  runGuardrailSandwich,
+  isGuardrailSandwichEnabled,
+} from '@/lib/guardrail-sandwich'
 
 /**
  * sage-guard — Binary safety gate for AI agent actions.
@@ -153,6 +158,204 @@ export async function POST(request: NextRequest) {
     const thresholdLevel = (typeof threshold === 'string' && validProximityLevels.includes(threshold as KatorthomaProximityLevel))
       ? (threshold as KatorthomaProximityLevel)
       : 'deliberate'
+
+    // ========================================================================
+    // #3b/#3c (ADR-009, 2026-06-19): port to the signed deterministic sandwich.
+    // SUBSTRATE_GUARDRAIL_SANDWICH_ENABLED UNSET (default, production) ⇒ this
+    // branch is SKIPPED and the verbatim legacy sage-guard path below runs
+    // (byte-identical — test-asserted). Flag ON ⇒ one bounded Layer-1 extraction
+    // (Sonnet, 4000 tok) + free deterministic Layer-2 verdict + Ed25519 signature,
+    // NO Layer-3 prose. The verdict/threshold semantics are unchanged
+    // (meetsThreshold/getV3Recommendation over katorthoma_proximity); only the
+    // SOURCE of proximity changes (LLM → deterministic Layer 2). See
+    // guardrail-sandwich.ts + ADR-009. R20a: no A7 gate here — the guardrail
+    // stays OUTSIDE the human-distress perimeter (ADR-009 §6).
+    // ========================================================================
+    if (isGuardrailSandwichEnabled()) {
+      const sandwichDomainContext = `This is a ${resolvedRiskClass}-risk agent action safety-gate evaluation.`
+      const outcome = await runGuardrailSandwich({
+        action: action.trim(),
+        context: typeof context === 'string' ? context : undefined,
+        urgency_context: typeof urgency_context === 'string' ? urgency_context.trim() : undefined,
+        domain_context: sandwichDomainContext,
+        threshold: thresholdLevel,
+      })
+
+      // Signing fail-CLOSED → 503 (never emit an unsigned assessment when signing
+      // is enabled; mirrors /api/reason). No metering — no verdict produced.
+      if (outcome.status === 'signing_unavailable') {
+        return NextResponse.json(
+          { error: 'substrate_signing_unavailable' },
+          { status: 503, headers: { ...publicCorsHeaders() } },
+        )
+      }
+
+      // Request-side fields — IDENTICAL logic to the legacy path (pure
+      // request-derived; no engine dependence).
+      const consideredAlternativesProvided = Array.isArray(considered_alternatives)
+        ? considered_alternatives.length
+        : undefined
+      let alternativesWarning: string | undefined
+      if (resolvedRiskClass === 'critical' && urgency_context) {
+        if (!considered_alternatives || (Array.isArray(considered_alternatives) && considered_alternatives.length === 0)) {
+          alternativesWarning = 'HASTY ASSENT RISK: This is a Critical action taken under urgency with no alternatives considered. The auth middleware incident pattern applies. Consider what other approaches could achieve the same goal.'
+        } else if (Array.isArray(considered_alternatives) && considered_alternatives.length === 1) {
+          alternativesWarning = 'Only one alternative was considered for a Critical action under urgency. Consider whether additional options exist.'
+        }
+      }
+
+      // The ONE LLM call's usage (the Layer-1 extraction); null on engine failure.
+      let gateUsage: { input_tokens: number; output_tokens: number } | null = null
+      let resultBody: Record<string, unknown>
+
+      if (outcome.status === 'engine_unavailable') {
+        // Layer-1/Layer-2 failure → CONSERVATIVE fallback. A gate NEVER silently
+        // "proceeds" on engine failure (ADR-009 §5). 200, not metered.
+        resultBody = {
+          proceed: false,
+          katorthoma_proximity: null,
+          threshold: thresholdLevel,
+          recommendation: 'pause_for_review',
+          passions_detected: [],
+          reasoning: 'The reasoning engine could not evaluate this action; the gate fails safe (no proceed).',
+          disclaimer: V3_DISCLAIMER,
+          risk_class: resolvedRiskClass,
+          evaluation_depth: 'deterministic',
+          engine_error: outcome.stage === 'layer1' ? 'layer1_unavailable' : 'assessment_unavailable',
+          assessment_status: 'engine_unavailable',
+        }
+      } else if (outcome.status === 'tier1_pause') {
+        // A binary gate cannot ask a clarifying question (ADR-009 §3): a structural
+        // ambiguity maps to a CONSERVATIVE pause, never a "proceed".
+        gateUsage = outcome.usage
+        resultBody = {
+          proceed: false,
+          katorthoma_proximity: null,
+          threshold: thresholdLevel,
+          recommendation: 'pause_for_review',
+          passions_detected: [],
+          reasoning: `The action is structurally ambiguous (${outcome.trigger.trigger_code}); the gate pauses for review rather than evaluating an under-specified action.`,
+          disclaimer: V3_DISCLAIMER,
+          risk_class: resolvedRiskClass,
+          evaluation_depth: 'deterministic',
+          assessment_status: 'ambiguous_pause',
+          clarification_needed: {
+            trigger_code: outcome.trigger.trigger_code,
+            question_text: outcome.trigger.question_text,
+          },
+          considered_alternatives_provided: consideredAlternativesProvided,
+          alternatives_warning: alternativesWarning,
+        }
+      } else {
+        // status === 'verdict' — the deterministic, signed result.
+        gateUsage = outcome.usage
+        const v = outcome.verdict
+        const criticalOverride = !!alternativesWarning && resolvedRiskClass === 'critical'
+        const rollbackPath = resolvedRiskClass === 'critical'
+          ? (v.improvement_corrected || 'No rollback path provided — consider specifying one before proceeding.')
+          : undefined
+        resultBody = {
+          proceed: criticalOverride ? false : v.proceed,
+          katorthoma_proximity: v.katorthoma_proximity,
+          threshold: thresholdLevel,
+          recommendation: criticalOverride ? 'pause_for_review' : v.recommendation,
+          passions_detected: v.passions_detected,
+          is_kathekon: v.is_kathekon,
+          kathekon_quality: v.kathekon_quality,
+          reasoning: v.reasoning,
+          improvement_hint: v.improvement_hint,
+          disclaimer: V3_DISCLAIMER,
+          risk_class: resolvedRiskClass,
+          evaluation_depth: 'deterministic',
+          rollback_path: rollbackPath,
+          deliberation_quality: v.deliberation_quality,
+          hasty_assent_risk: v.hasty_assent_risk,
+          considered_alternatives_provided: consideredAlternativesProvided,
+          alternatives_warning: alternativesWarning,
+          stage_scores: v.stage_scores,
+          // The Layer-1 extraction (R10-2) — parity with /api/reason; lets a
+          // consumer re-run applyMechanisms over it and verify the full
+          // action→extraction→assessment chain.
+          extraction: outcome.extraction,
+          // The verifiable verdict artifact: the signed wrapper when signing is
+          // ON (production), else the bare deterministic assessment (R10-1 —
+          // always emit SOME verifiable artifact, never a verdict with none).
+          ...(outcome.signed
+            ? { signed_assessment: outcome.signed }
+            : { assessment: outcome.assessment }),
+        }
+      }
+
+      // CI-10 metering + CI-8 cost: the ONE LLM call is the Sonnet L1 extraction.
+      let measuredCostUsd: number | null = null
+      let costBasis = 'no_llm_call'
+      if (gateUsage) {
+        if (loopAccumulator) {
+          loopAccumulator.addCall(MODEL_DEEP, gateUsage.input_tokens, gateUsage.output_tokens)
+        }
+        measuredCostUsd = estimateCallCostCents(MODEL_DEEP, gateUsage.input_tokens, gateUsage.output_tokens) / 100
+        costBasis = 'anthropic_usd_measured'
+      }
+
+      // Analytics (KG1: awaited, not fire-and-forget).
+      await supabaseAdmin
+        .from('analytics_events')
+        .insert({
+          event_type: 'guardrail_check_v3',
+          metadata: {
+            agent_id: agent_id || null,
+            proximity: (resultBody.katorthoma_proximity as string | null) ?? null,
+            recommendation: resultBody.recommendation,
+            proceed: resultBody.proceed,
+            threshold: thresholdLevel,
+            risk_class: resolvedRiskClass,
+            evaluation_depth: 'deterministic',
+            engine: 'translation-sandwich',
+          },
+        })
+        .then(() => {})
+
+      const sandwichEnvelope = buildEnvelope({
+        result: resultBody,
+        endpoint: '/api/guardrail',
+        // Honest: the only LLM call is the Sonnet Layer-1 extraction. is_deterministic
+        // stays the envelope default (false) — the endpoint makes an AI call; the
+        // verifiability win is the signed Layer-2 verdict (engine_attribution +
+        // signed_assessment), not an end-to-end determinism claim (ADR-009 §4).
+        model: MODEL_DEEP,
+        startTime,
+        maxTokens: 4000,
+        costUsd: measuredCostUsd,
+        usage: keyCheck.valid ? {
+          monthly_calls_after: keyCheck.monthly_calls_after,
+          monthly_limit: keyCheck.monthly_calls_after + keyCheck.monthly_remaining,
+          monthly_remaining: keyCheck.monthly_remaining,
+        } : undefined,
+        composability: {
+          next_steps: resultBody.proceed ? ['execute_action'] : ['/api/guardrail'],
+          recommended_action: resultBody.recommendation as string,
+        },
+        extra: { cost_basis: costBasis, engine_attribution: 'translation-sandwich' },
+      })
+
+      if (loopAccumulator && loopId) {
+        return await finalizeLoopResponse({
+          loopId,
+          accumulator: loopAccumulator,
+          apiKeyId: keyCheck.api_key_id,
+          endpoint: 'guardrail',
+          responseBody: sandwichEnvelope,
+          responseStatus: 200,
+          responseHeaders: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck),
+          isBillable: gateUsage !== null,
+        })
+      }
+
+      return NextResponse.json(sandwichEnvelope, {
+        headers: withUsageHeaders({ ...publicCorsHeaders() }, keyCheck),
+      })
+    }
+    // ---- end #3b/#3c sandwich-port branch; verbatim legacy sage-guard path follows ----
 
     // Call the shared reasoning engine at risk-appropriate depth
     // Standard actions use quick depth for speed; Critical actions use deep depth for thorough evaluation
@@ -303,7 +506,18 @@ export async function POST(request: NextRequest) {
     const envelope = buildEnvelope({
       result,
       endpoint: '/api/guardrail',
-      model: 'claude-haiku-4-5-20251001',
+      // #3a model-reporting honesty (2026-06-19, R18). Previously hardcoded
+      // 'claude-haiku-4-5-20251001' — a LIE for every elevated/critical gate,
+      // which map risk_class→depth→model as elevated→standard→MODEL_DEEP and
+      // critical→deep→MODEL_DEEP (Sonnet), not Haiku (riskDepthMap above +
+      // DEPTH_CONFIG in sage-reason-engine.ts). The honest cost figure was
+      // already computed from reasoningResult.meta.ai_model (the real model);
+      // only the displayed model lied. reasoningResult.meta.ai_model is a
+      // truthful string on every engine return path incl. cache-hit and the
+      // quick→Sonnet parse-retry escalation. Side-effect-free: buildEnvelope
+      // always receives the explicit costUsd override here, so `model` never
+      // reaches the estimateCostUsd branch — it affects ONLY meta.ai_model.
+      model: reasoningResult.meta.ai_model,
       startTime,
       maxTokens: 512,
       // CI-8: honest per-call cost (measured) or null on a cache hit, with a
