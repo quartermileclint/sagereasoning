@@ -204,8 +204,11 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // The ONE LLM call's usage (the Layer-1 extraction); null on engine failure.
+      // The Layer-1 extraction call's usage; null on engine failure.
       let gateUsage: { input_tokens: number; output_tokens: number } | null = null
+      // The justice-completion bridge's bounded call usage (ADR-010 §3) — present
+      // only when the scope fired on a 'verdict' outcome; metered as a SECOND call.
+      let justiceUsage: { input_tokens: number; output_tokens: number } | null = null
       let resultBody: Record<string, unknown>
 
       if (outcome.status === 'engine_unavailable') {
@@ -249,6 +252,9 @@ export async function POST(request: NextRequest) {
       } else {
         // status === 'verdict' — the deterministic, signed result.
         gateUsage = outcome.usage
+        // The justice-completion bridge (ADR-010 §3) makes a SECOND bounded Sonnet
+        // call when it fires; null when the scope did not fire. Metered below.
+        justiceUsage = outcome.justice_usage
         const v = outcome.verdict
         const criticalOverride = !!alternativesWarning && resolvedRiskClass === 'critical'
         const rollbackPath = resolvedRiskClass === 'critical'
@@ -273,6 +279,11 @@ export async function POST(request: NextRequest) {
           considered_alternatives_provided: consideredAlternativesProvided,
           alternatives_warning: alternativesWarning,
           stage_scores: v.stage_scores,
+          // The justice-completion bridge's disclosed resolution (ADR-010 §3; R10)
+          // — present ONLY when a justice-toward-others dimension was signalled.
+          // Surfaced so the proximity floor is visible, never a hidden override;
+          // the RAW deterministic proximity remains in the signed assessment.
+          ...(v.justice_resolution ? { justice_resolution: v.justice_resolution } : {}),
           // The Layer-1 extraction (R10-2) — parity with /api/reason; lets a
           // consumer re-run applyMechanisms over it and verify the full
           // action→extraction→assessment chain.
@@ -286,7 +297,10 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // CI-10 metering + CI-8 cost: the ONE LLM call is the Sonnet L1 extraction.
+      // CI-10 metering + CI-8 cost: the Sonnet L1 extraction, plus — when the
+      // justice-completion bridge fired (ADR-010 §3) — the SECOND bounded Sonnet
+      // justice call. Both are metered (separate addCall + summed cost) so cost and
+      // call count stay honest.
       let measuredCostUsd: number | null = null
       let costBasis = 'no_llm_call'
       if (gateUsage) {
@@ -294,6 +308,12 @@ export async function POST(request: NextRequest) {
           loopAccumulator.addCall(MODEL_DEEP, gateUsage.input_tokens, gateUsage.output_tokens)
         }
         measuredCostUsd = estimateCallCostCents(MODEL_DEEP, gateUsage.input_tokens, gateUsage.output_tokens) / 100
+        if (justiceUsage) {
+          if (loopAccumulator) {
+            loopAccumulator.addCall(MODEL_DEEP, justiceUsage.input_tokens, justiceUsage.output_tokens)
+          }
+          measuredCostUsd += estimateCallCostCents(MODEL_DEEP, justiceUsage.input_tokens, justiceUsage.output_tokens) / 100
+        }
         costBasis = 'anthropic_usd_measured'
       }
 
@@ -311,6 +331,10 @@ export async function POST(request: NextRequest) {
             risk_class: resolvedRiskClass,
             evaluation_depth: 'deterministic',
             engine: 'translation-sandwich',
+            // Justice-completion bridge observability (ADR-010 §3) — the resolved
+            // obligation when the bridge fired; null otherwise.
+            justice_obligation:
+              (resultBody.justice_resolution as { obligation?: string } | undefined)?.obligation ?? null,
           },
         })
         .then(() => {})

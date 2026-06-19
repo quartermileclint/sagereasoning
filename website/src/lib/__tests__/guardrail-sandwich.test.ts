@@ -38,6 +38,11 @@ import {
   deriveDeliberationQuality,
   synthesizeReasoning,
   projectPassions,
+  justiceCheckScope,
+  applyJusticeFloor,
+  parseJusticeResolution,
+  resolveJusticeObligation,
+  type JusticeResolution,
 } from '@/lib/guardrail-sandwich'
 import {
   meetsThreshold,
@@ -47,6 +52,8 @@ import type {
   Layer2Assessment,
   StageScores,
   HastyAssentRisk,
+  OikeiosisCircleAssessment,
+  OikeiosisCircle,
 } from '@/lib/translation-sandwich/layer2-mechanisms'
 import type { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 
@@ -101,6 +108,28 @@ function makeAssessment(overrides: Partial<Layer2Assessment> = {}): Layer2Assess
     layer2_ambiguity_notes: [],
   }
   return { ...base, ...overrides }
+}
+
+/** Build an oikeiosis circle assessment fixture (the J2 input the bridge keys on). */
+function makeCircle(
+  circle: OikeiosisCircle,
+  obligationMet: boolean | null,
+): OikeiosisCircleAssessment {
+  return {
+    stage: 3,
+    circle,
+    description: 'affected party',
+    honourability_grade: 2,
+    advantageousness_grade: 2,
+    cicero_verdict: 'balanced_neither_decisive',
+    obligation_met: obligationMet,
+    tension: null,
+  }
+}
+
+/** A JusticeResolution fixture. */
+function res(obligation: JusticeResolution['obligation'], source: JusticeResolution['source'] = 'resolved'): JusticeResolution {
+  return { obligation, circle: 'local_community', justification: 'fixture', source }
 }
 
 // ============================================================================
@@ -256,6 +285,252 @@ function runDeliberationTests(): void {
 }
 
 // ============================================================================
+// JS — justice-completion bridge SCOPE predicate (ADR-010 §3; PURE)
+// ============================================================================
+
+function runJusticeScopeTests(): void {
+  // JS-1: an assessment with NO justice-toward-others signal — no circle, no
+  // value_error, and kathekon quality 'marginal' (a single non-other-directed
+  // factor) — does NOT fire. The bridge must not fire on every action (ADR-010 §3).
+  const noJustice = justiceCheckScope(makeAssessment({
+    oikeiosis: { relevant_circles: [], deliberation_notes: 'x' },
+    value_assessment: { indifferents_at_stake: [], value_error: null },
+    kathekon_assessment: { is_kathekon: null, quality: 'marginal', justification: 'one factor.' },
+  }))
+  expectEq('JS-1 no circle + no value_error + marginal kathekon → scope does NOT fire', noJustice.fires, false)
+  expectEq('JS-1b no signals', noJustice.signals.length, 0)
+
+  // JS-2: an identified oikeiosis circle fires (covers J2). This is the U2 shape.
+  const withCircle = justiceCheckScope(makeAssessment({
+    oikeiosis: { relevant_circles: [makeCircle('local_community', null)], deliberation_notes: 'x' },
+  }))
+  expectEq('JS-2a circle identified → fires', withCircle.fires, true)
+  expectTrue('JS-2b reports the oikeiosis_circle_identified signal', withCircle.signals.includes('oikeiosis_circle_identified'))
+  expectTrue('JS-2c reports the obligation_unevaluated signal (obligation_met=null)', withCircle.signals.includes('obligation_unevaluated'))
+  expectEq('JS-2d surfaces the circle for the resolver', withCircle.circles[0], 'local_community')
+
+  // JS-3: a value_error fires (the J3 input) even with no circle.
+  const withValueError = justiceCheckScope(makeAssessment({
+    value_assessment: { indifferents_at_stake: [], value_error: 'Confused reputation with the genuine good' },
+  }))
+  expectEq('JS-3a value_error present → fires', withValueError.fires, true)
+  expectTrue('JS-3b reports the value_error_present signal', withValueError.signals.includes('value_error_present'))
+  expectEq('JS-3c surfaces valueError for the resolver (J3)', withValueError.valueError, 'Confused reputation with the genuine good')
+
+  // JS-4: a circle whose obligation IS evaluated (met=true) still fires on the
+  // circle-identified signal, but does NOT add obligation_unevaluated.
+  const circleEvaluated = justiceCheckScope(makeAssessment({
+    oikeiosis: { relevant_circles: [makeCircle('household', true)], deliberation_notes: 'x' },
+  }))
+  expectEq('JS-4a evaluated circle still fires (party identified)', circleEvaluated.fires, true)
+  expectTrue('JS-4b no obligation_unevaluated signal when obligation_met!=null', !circleEvaluated.signals.includes('obligation_unevaluated'))
+
+  // JS-5: the LEAK-CLOSER (adversarial review JB-SCOPE-UNDERFIRE-1) — a calm action
+  // with an OTHER-DIRECTED kathekon obligation (quality moderate/strong) but NO
+  // circle and NO value_error STILL fires. This is the circle-free calm-injustice
+  // path (a U2 paraphrase that extracts a role/relationship obligation but no
+  // explicit audience). computeProximity can only reach principled/sage_like via
+  // moderate/strong kathekon, so this signal provably covers the full leak class.
+  const noCircle = { relevant_circles: [], deliberation_notes: 'x' }
+  const noVE = { indifferents_at_stake: [], value_error: null }
+  const circleFreeModerate = justiceCheckScope(makeAssessment({
+    oikeiosis: noCircle, value_assessment: noVE,
+    kathekon_assessment: { is_kathekon: true, quality: 'moderate', justification: 'role obligation engaged; justification offered.' },
+  }))
+  expectEq('JS-5a circle-free moderate kathekon → fires (leak-closer)', circleFreeModerate.fires, true)
+  expectTrue('JS-5b reports other_directed_kathekon_obligation', circleFreeModerate.signals.includes('other_directed_kathekon_obligation'))
+  expectEq('JS-5c no circle surfaced (resolver gets the "identified parties" fallback)', circleFreeModerate.circles.length, 0)
+  expectEq('JS-5d strong kathekon, no circle → fires', justiceCheckScope(makeAssessment({
+    oikeiosis: noCircle, value_assessment: noVE,
+    kathekon_assessment: { is_kathekon: true, quality: 'strong', justification: 'x.' },
+  })).fires, true)
+  // JS-5e: contrary kathekon (is_kathekon false) does NOT fire the scope — the
+  // kathekon FLOOR handles that case; the scope's job is the moderate/strong path.
+  expectEq('JS-5e contrary kathekon, no circle → scope does NOT fire (kathekon floor handles it)', justiceCheckScope(makeAssessment({
+    oikeiosis: noCircle, value_assessment: noVE,
+    kathekon_assessment: { is_kathekon: false, quality: 'contrary', justification: 'x.' },
+  })).fires, false)
+}
+
+// ============================================================================
+// FCC — resolver fail-closed contract (the load-bearing safety path)
+// ============================================================================
+
+async function runResolverFailClosedTests(): Promise<void> {
+  // FCC-1: parseJusticeResolution — valid classes → resolved.
+  for (const ob of ['met', 'violated', 'indeterminate'] as const) {
+    const r = parseJusticeResolution(JSON.stringify({ obligation: ob, circle: 'c', justification: 'j' }), 'fallback')
+    expectEq(`FCC-1 valid ${ob} → resolved`, r.obligation, ob)
+    expectEq(`FCC-1 ${ob} source=resolved`, r.source, 'resolved')
+  }
+  // FCC-2: non-JSON → unevaluated/error (fail-closed).
+  const nonJson = parseJusticeResolution('the model refused to answer', 'fallback')
+  expectEq('FCC-2a non-JSON → unevaluated', nonJson.obligation, 'unevaluated')
+  expectEq('FCC-2b non-JSON source=error', nonJson.source, 'error')
+  // FCC-3: out-of-class obligation → unevaluated/error.
+  expectEq('FCC-3 out-of-class ("approve") → unevaluated', parseJusticeResolution(JSON.stringify({ obligation: 'approve' }), 'fallback').obligation, 'unevaluated')
+  // FCC-4: empty string (the missing-content[0] path) → unevaluated/error.
+  expectEq('FCC-4 empty string → unevaluated', parseJusticeResolution('', 'fallback').obligation, 'unevaluated')
+  // FCC-5: an unevaluated parse floors to reflexive (the safety contract end-to-end).
+  expectEq('FCC-5 unevaluated parse → reflexive floor', applyJusticeFloor('principled', nonJson), 'reflexive')
+
+  // FCC-6: resolveJusticeObligation with an injected THROWING create → the
+  // LLM-throw path returns unevaluated/error (never throws, never proceeds).
+  const thrown = await resolveJusticeObligation(
+    { action: 'x', circles: ['local_community'], valueError: null },
+    { _create: async () => { throw new Error('simulated Anthropic 529 overload') } },
+  )
+  expectEq('FCC-6a injected LLM throw → unevaluated', thrown.resolution.obligation, 'unevaluated')
+  expectEq('FCC-6b injected LLM throw → source=error', thrown.resolution.source, 'error')
+  expectEq('FCC-6c injected LLM throw → zero usage', thrown.usage.output_tokens, 0)
+
+  // FCC-7: injected create returning EMPTY text (missing content) → unevaluated;
+  // the circle fallback label is used when no circle was identified.
+  const empty = await resolveJusticeObligation(
+    { action: 'x', circles: [], valueError: null },
+    { _create: async () => ({ text: '', usage: { input_tokens: 5, output_tokens: 0 } }) },
+  )
+  expectEq('FCC-7a empty content → unevaluated', empty.resolution.obligation, 'unevaluated')
+  expectEq('FCC-7b circle fallback → "identified parties"', empty.resolution.circle, 'identified parties')
+
+  // FCC-8: injected create returning a VALID violated JSON → resolved/violated +
+  // usage passthrough (the happy path through the seam).
+  const ok = await resolveJusticeObligation(
+    { action: 'spam', circles: ['local_community'], valueError: null },
+    { _create: async () => ({ text: JSON.stringify({ obligation: 'violated', circle: 'local_community', justification: 'non-consenting recipients used as means' }), usage: { input_tokens: 100, output_tokens: 40 } }) },
+  )
+  expectEq('FCC-8a valid violated JSON → resolved', ok.resolution.obligation, 'violated')
+  expectEq('FCC-8b resolved source=resolved', ok.resolution.source, 'resolved')
+  expectEq('FCC-8c usage passed through from the call', ok.usage.output_tokens, 40)
+}
+
+// ============================================================================
+// JF — justice FLOOR (ADR-010 §1/§3; PURE, MONOTONIC)
+// ============================================================================
+
+function runJusticeFloorTests(): void {
+  // JF-1: met → unchanged (for every proximity).
+  let metOk = true
+  for (const p of ALL_PROX) if (applyJusticeFloor(p, res('met')) !== p) metOk = false
+  expectTrue('JF-1 met → proximity unchanged for all levels', metOk)
+
+  // JF-2: violated → reflexive (always).
+  let violatedOk = true
+  for (const p of ALL_PROX) if (applyJusticeFloor(p, res('violated')) !== 'reflexive') violatedOk = false
+  expectTrue('JF-2 violated → reflexive for all levels', violatedOk)
+
+  // JF-3: unevaluated → reflexive (J1 — fail-closed default).
+  let unevalOk = true
+  for (const p of ALL_PROX) if (applyJusticeFloor(p, res('unevaluated', 'error')) !== 'reflexive') unevalOk = false
+  expectTrue('JF-3 unevaluated → reflexive (J1 fail-closed) for all levels', unevalOk)
+
+  // JF-4: indeterminate → min(proximity, deliberate); never RAISES.
+  expectEq('JF-4a indeterminate caps sage_like → deliberate', applyJusticeFloor('sage_like', res('indeterminate')), 'deliberate')
+  expectEq('JF-4b indeterminate caps principled → deliberate', applyJusticeFloor('principled', res('indeterminate')), 'deliberate')
+  expectEq('JF-4c indeterminate leaves deliberate → deliberate', applyJusticeFloor('deliberate', res('indeterminate')), 'deliberate')
+  expectEq('JF-4d indeterminate leaves habitual (below cap) → habitual', applyJusticeFloor('habitual', res('indeterminate')), 'habitual')
+  expectEq('JF-4e indeterminate leaves reflexive → reflexive', applyJusticeFloor('reflexive', res('indeterminate')), 'reflexive')
+
+  // JF-5: no resolution (null/undefined) → unchanged (byte-identical pre-bridge).
+  let noResOk = true
+  for (const p of ALL_PROX) {
+    if (applyJusticeFloor(p, null) !== p) noResOk = false
+    if (applyJusticeFloor(p, undefined) !== p) noResOk = false
+  }
+  expectTrue('JF-5 no resolution → proximity unchanged (monotonic identity)', noResOk)
+
+  // JF-6: MONOTONIC — the floor NEVER raises the rank for any resolution × level.
+  const RANK: Record<KatorthomaProximityLevel, number> = { reflexive: 0, habitual: 1, deliberate: 2, principled: 3, sage_like: 4 }
+  let monotonic = true
+  for (const ob of ['met', 'violated', 'indeterminate', 'unevaluated'] as const) {
+    for (const p of ALL_PROX) {
+      if (RANK[applyJusticeFloor(p, res(ob, ob === 'unevaluated' ? 'error' : 'resolved'))] > RANK[p]) monotonic = false
+    }
+  }
+  expectTrue('JF-6 floor is monotonic — never raises proximity (never weakens a verdict)', monotonic)
+}
+
+// ============================================================================
+// JB — bridge composed into deriveGuardrailVerdict (the U2-class fix)
+// ============================================================================
+
+function runJusticeBridgeVerdictTests(): void {
+  // JB-1: the U2 SHAPE — a calm 'principled' action at threshold 'principled'
+  // PROCEEDS under the raw engine; a 'violated' justice resolution floors it.
+  const u2Raw = makeAssessment({
+    katorthoma_proximity: 'principled',
+    kathekon_assessment: { is_kathekon: true, quality: 'moderate', justification: 'role obligation engaged.' },
+    oikeiosis: { relevant_circles: [makeCircle('local_community', null)], deliberation_notes: 'x' },
+    virtue_domains_engaged: ['phronesis', 'dikaiosyne'],
+  })
+  // sanity: WITHOUT the bridge (no resolution) this proceeds — the leak.
+  const u2NoBridge = deriveGuardrailVerdict(u2Raw, 'principled')
+  expectEq('JB-1a sanity: U2 shape proceeds WITHOUT the bridge (the leak)', u2NoBridge.proceed, true)
+  expectEq('JB-1b sanity: surfaces principled without the bridge', u2NoBridge.katorthoma_proximity, 'principled')
+  // WITH a violated resolution → reflexive → blocked (the fix).
+  const u2Fixed = deriveGuardrailVerdict(u2Raw, 'principled', res('violated'))
+  expectEq('JB-1c U2 violated → proceed=false (the fix)', u2Fixed.proceed, false)
+  expectEq('JB-1d U2 violated → surfaced proximity floored to reflexive', u2Fixed.katorthoma_proximity, 'reflexive')
+  expectEq('JB-1e U2 violated → recommendation do_not_proceed', u2Fixed.recommendation, 'do_not_proceed')
+  expectTrue('JB-1f justice_resolution surfaced on the verdict', u2Fixed.justice_resolution?.obligation === 'violated')
+
+  // JB-2: met → no change (verdict identical to the raw, plus the disclosed field).
+  const metV = deriveGuardrailVerdict(u2Raw, 'principled', res('met'))
+  expectEq('JB-2a met → proceed unchanged (true)', metV.proceed, true)
+  expectEq('JB-2b met → proximity unchanged (principled)', metV.katorthoma_proximity, 'principled')
+  expectEq('JB-2c met → recommendation unchanged', metV.recommendation, getV3Recommendation('principled', 'principled'))
+  expectEq('JB-2d met → justice_resolution disclosed', metV.justice_resolution?.obligation, 'met')
+
+  // JB-3: indeterminate → capped at deliberate; a principled-threshold action then
+  // blocks; a deliberate-threshold action still proceeds (cap == threshold).
+  const indThrPrincipled = deriveGuardrailVerdict(u2Raw, 'principled', res('indeterminate'))
+  expectEq('JB-3a indeterminate caps proximity → deliberate', indThrPrincipled.katorthoma_proximity, 'deliberate')
+  expectEq('JB-3b indeterminate @ principled threshold → blocked', indThrPrincipled.proceed, false)
+  const indThrDeliberate = deriveGuardrailVerdict(u2Raw, 'deliberate', res('indeterminate'))
+  expectEq('JB-3c indeterminate @ deliberate threshold → proceeds (cap meets threshold)', indThrDeliberate.proceed, true)
+
+  // JB-4: unevaluated (fail-closed) → reflexive → blocked, surfaced honestly.
+  const unevalV = deriveGuardrailVerdict(u2Raw, 'principled', res('unevaluated', 'error'))
+  expectEq('JB-4a unevaluated → proceed=false', unevalV.proceed, false)
+  expectEq('JB-4b unevaluated → reflexive', unevalV.katorthoma_proximity, 'reflexive')
+  expectEq('JB-4c unevaluated surfaced honestly (not coerced to violated)', unevalV.justice_resolution?.obligation, 'unevaluated')
+  expectEq('JB-4d unevaluated source flagged as error', unevalV.justice_resolution?.source, 'error')
+
+  // JB-5: composes with the KATHEKON floor — the more conservative wins. A 'met'
+  // justice resolution does NOT un-block an is_kathekon:false action.
+  const contraryButMet = deriveGuardrailVerdict(
+    makeAssessment({
+      katorthoma_proximity: 'deliberate',
+      kathekon_assessment: { is_kathekon: false, quality: 'contrary', justification: 'contrary.' },
+      oikeiosis: { relevant_circles: [makeCircle('household', true)], deliberation_notes: 'x' },
+    }),
+    'deliberate',
+    res('met'),
+  )
+  expectEq('JB-5a kathekon floor still blocks even when justice=met', contraryButMet.proceed, false)
+  expectEq('JB-5b kathekon floor recommendation ≥ pause', contraryButMet.recommendation, 'pause_for_review')
+
+  // JB-6: NO resolution argument → byte-identical to pre-bridge (no justice_resolution
+  // field, proximity + verdict are the raw rank arithmetic). Guards flag-off identity.
+  const plain = deriveGuardrailVerdict(makeAssessment({ katorthoma_proximity: 'principled' }), 'deliberate')
+  expectEq('JB-6a no-resolution proceed === raw meetsThreshold', plain.proceed, meetsThreshold('principled', 'deliberate'))
+  expectEq('JB-6b no-resolution surfaces the raw proximity', plain.katorthoma_proximity, 'principled')
+  expectEq('JB-6c no-resolution → justice_resolution absent', plain.justice_resolution, undefined)
+
+  // JB-7: reasoning is JUSTICE-AWARE (R10-REASONING-1). On a justice-floored verdict
+  // the reasoning narrates the SURFACED (effective) proximity + the justice clause,
+  // and never asserts the superseded raw 'principled' as the verdict.
+  const u2FixedReasoning = deriveGuardrailVerdict(u2Raw, 'principled', res('violated')).reasoning
+  expectTrue('JB-7a reasoning names the effective proximity (reflexive)', u2FixedReasoning.includes('reflexive'))
+  expectTrue('JB-7b reasoning does NOT assert the superseded raw "proximity: principled"', !u2FixedReasoning.includes('proximity: principled'))
+  expectTrue('JB-7c reasoning includes the justice completion clause (violated)', u2FixedReasoning.toLowerCase().includes('justice completion') && u2FixedReasoning.includes('violated'))
+  // JB-7d: a met resolution leaves the reasoning on the raw proximity but still
+  // discloses the justice completion.
+  const metReasoning = deriveGuardrailVerdict(u2Raw, 'principled', res('met')).reasoning
+  expectTrue('JB-7d met → reasoning narrates principled + discloses met', metReasoning.includes('principled') && metReasoning.toLowerCase().includes('justice completion'))
+}
+
+// ============================================================================
 // INV — route wiring guards (source-grep; flag-OFF byte-identity + #3a intact)
 // ============================================================================
 
@@ -312,25 +587,41 @@ function runRouteWiringTests(): void {
   // INV-10: NO A7 distress gate added to the guardrail route (perimeter unchanged; ADR-009 §6).
   expectTrue('INV-10 no A7 distress gate / detectDistress wired into the guardrail route (perimeter unchanged)',
     !/enforceLayer2R20aGate|detectDistressTwoStage|isSubstrateR20aGateEnabled/.test(body))
+
+  // INV-12: the justice-completion bridge resolution is surfaced on the wire (ADR-010 §3; R10).
+  expectTrue('INV-12 justice_resolution surfaced from the verdict (R10)', /justice_resolution:\s*v\.justice_resolution/.test(body))
+
+  // INV-13: the justice bridge's SECOND bounded LLM call is METERED (cost honesty) —
+  // captured from outcome.justice_usage and added to cost + the loop accumulator.
+  expectTrue('INV-13a justiceUsage captured from outcome.justice_usage', /justiceUsage\s*=\s*outcome\.justice_usage/.test(body))
+  expectTrue('INV-13b justiceUsage cost added to measuredCostUsd', /measuredCostUsd\s*\+=\s*estimateCallCostCents\(MODEL_DEEP,\s*justiceUsage/.test(body))
+
+  // INV-14: the port still calls runGuardrailSandwich (the bridge lives INSIDE it,
+  // flag-on only — flag-off byte-identity is unaffected by the bridge).
+  expectTrue('INV-14 bridge lives inside the flag-on sandwich path (runGuardrailSandwich)', /runGuardrailSandwich\s*\(/.test(body))
 }
 
 // ============================================================================
 // MAIN
 // ============================================================================
 
-function main(): void {
-  console.log('--- guardrail-sandwich.test.ts (#3b/#3c signed-sandwich port, ADR-009) ---')
+async function main(): Promise<void> {
+  console.log('--- guardrail-sandwich.test.ts (#3b/#3c port + ADR-010 justice-completion bridge) ---')
   runFlagTests()
   runVerdictTests()
   runDeliberationTests()
+  runJusticeScopeTests()
+  runJusticeFloorTests()
+  runJusticeBridgeVerdictTests()
+  await runResolverFailClosedTests()
   runRouteWiringTests()
   console.log('---')
   console.log('NOTE: the end-to-end old-vs-new verdict-equivalence battery is LLM-dependent —')
-  console.log('      deferred to the adversarial pre-activation review + activation smoke (R18 TEST-labelled).')
+  console.log('      run separately via scripts/guardrail-verdict-equivalence-battery.ts (the mandatory gate).')
   const total = passCount + failCount
   console.log('---')
   console.log(`${passCount}/${total} pass | ${failCount}/${total} fail`)
   if (failCount > 0) process.exit(1)
 }
 
-main()
+main().catch((e) => { console.error('test harness error:', e); process.exit(1) })

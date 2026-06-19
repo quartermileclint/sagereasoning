@@ -73,8 +73,11 @@ export function normaliseProximityLevel(raw: string): KatorthomaProximityLevel |
   return PROXIMITY_ALIASES[lower] ?? null
 }
 
-/** Ordinal rank for proximity levels — higher is closer to sage */
-const PROXIMITY_RANK: Record<KatorthomaProximityLevel, number> = {
+/** Ordinal rank for proximity levels — higher is closer to sage.
+ *  Exported (2026-06-19, ADR-010 justice-completion bridge) so the guardrail
+ *  port's deterministic justice floor reuses the SAME canonical rank the
+ *  threshold arithmetic uses — one source of truth, no drift (PR15). */
+export const PROXIMITY_RANK: Record<KatorthomaProximityLevel, number> = {
   reflexive: 0,
   habitual: 1,
   deliberate: 2,
