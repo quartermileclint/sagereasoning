@@ -143,20 +143,30 @@ Body:
 }
 ```
 
-Returns:
+Returns (signed deterministic sandwich — Live 2026-06-19):
 ```json
 {
-  "risk_class": "standard",
+  "proceed": true,
   "katorthoma_proximity": "deliberate",
+  "threshold": "deliberate",
   "recommendation": "proceed | proceed_with_caution | pause_for_review | do_not_proceed",
-  "passion_diagnosis": [...],
-  "false_judgements": [...],
+  "is_kathekon": true,
+  "kathekon_quality": "strong | moderate | marginal | contrary",
+  "passions_detected": [...],
   "reasoning": "...",
-  "improvement_hint": "..."
+  "improvement_hint": "...",
+  "risk_class": "standard",
+  "evaluation_depth": "deterministic",
+  "rollback_path": "(critical risk_class only) reminder to specify an undo path",
+  "justice_resolution": { "obligation": "met | violated | indeterminate", "circle": "...", "justification": "...", "source": "..." },
+  "extraction": { "... the Layer-1 features the verdict was computed from ..." },
+  "signed_assessment": { "... Ed25519-signed raw Layer-2 assessment; verify against GET /api/public-key ..." }
 }
 ```
 
-Use this as middleware before executing any consequential action. `risk_class` controls scrutiny level: `standard` applies quick evaluation, `elevated` applies full virtue analysis, `critical` applies deep analysis with emphasis on kathekon.
+Use this as middleware before executing any consequential action. `risk_class` controls scrutiny level: `standard` applies quick evaluation (3 mechanisms), `elevated` applies full virtue analysis (5), `critical` applies deep analysis (6) with emphasis on kathekon and adds a `rollback_path`.
+
+The verdict is computed **deterministically** from `extraction` by a free Layer-2 mechanism pass and then Ed25519-signed (`signed_assessment`; verify against `GET /api/public-key`) — there is no LLM prose render. `evaluation_depth` is the constant `"deterministic"`; only the mechanism count follows `risk_class`. `is_kathekon` may be `null` when the extraction is too sparse to judge — the gate then floors to a conservative non-proceed rather than guessing. `justice_resolution` is present **only** when the action engages a justice-toward-others dimension; its presence means the surfaced `katorthoma_proximity` may have been **floored** below the raw value in the signed assessment (a calmly-reasoned injustice is capped, not rated near-virtuous). Disclosure: a justice-floored verdict is therefore **not reproducible from the signed assessment alone** — the signature proves the deterministic Layer-2 reading; the justice completion is disclosed but unsigned (until a later root correction folds it into the signed proximity). Availability: on a signing outage the gate fails **closed** (HTTP 503); on an engine or justice-resolver outage it returns a conservative pause — never a silent proceed.
 
 GET https://www.sagereasoning.com/api/guardrail — Returns usage documentation (no key required).
 
