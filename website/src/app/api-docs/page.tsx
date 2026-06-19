@@ -518,11 +518,154 @@ export default function ApiDocsPage() {
             are stored encrypted at rest, for 90 days, keyed by correlation id; genuine (hard) deletion is
             available on request.
           </li>
+          <li>
+            <strong>Re-examination (<code>prior_feedback</code>)</strong> &mdash; an optional object
+            <code> {'{ prior_loop_id, prior_depth_tier, adopted_correction? }'}</code> that carries a
+            re-examination back to a prior consult. <code>prior_loop_id</code> is the prior consult&apos;s
+            <code> assessment.examination.ref</code> (its <code>X-Loop-Id</code>); the re-examination carries
+            the prior depth (the same-depth rule). The response surfaces <code>examination_open</code> and
+            places <code>examination.{'{ ref, depth_tier, prior_feedback_ref }'}</code> inside the signed
+            assessment. A malformed <code>prior_feedback</code> returns 400.
+          </li>
+          <li>
+            <strong>Force-clarification &amp; continuation</strong> &mdash; when a situation is too ambiguous
+            to assess on one axis, <code>/api/reason</code> returns HTTP 200 with
+            <code> {'{ clarification_required: true, trigger_code, clarification: { question_text }, continuation_token }'}</code>
+            instead of an assessment. To resume, re-POST the <strong>byte-identical</strong> original
+            <code> input</code> plus the <code>continuation_token</code> and a <code>clarification_response</code>
+            (your answer, &le;5000 chars). See the Force-clarification subsection below.
+          </li>
         </ul>
         <p className="font-body text-sage-500 text-xs leading-relaxed">
           Measured consult latency (TEST environment, 2026-06-12; schema supplied + <code>assessment_first</code>):
           quick ~3.8s, standard ~4.3s, deep ~3.1s. Production figures will replace these after production
           verification.
+        </p>
+
+        <h3 className="font-display text-lg font-medium text-sage-800 mt-8 mb-3">
+          Force-clarification &amp; continuation
+        </h3>
+        <p className="font-body text-sage-700 mb-4 leading-relaxed">
+          When a situation is too ambiguous to assess on one axis &mdash; two concerns fused
+          (<code>ELEMENT_FUSION</code>), regret-vs-worry undetermined (<code>TEMPORAL_AMBIGUITY</code>), or an
+          unspecified other with no relational circle (<code>SCOPE_AMBIGUITY</code>) &mdash;
+          <code> /api/reason</code> returns HTTP 200 with a force-clarification shape instead of an assessment.
+          Answer the question on a second turn to receive a full assessment.
+        </p>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <p className="font-display text-sm font-medium text-sage-600 mb-2">Turn 1 &mdash; response</p>
+            <pre className="bg-sage-800 text-sage-100 rounded p-4 font-mono text-xs overflow-x-auto">{`{
+  "version": "translation-sandwich-v1",
+  "clarification_required": true,
+  "intake_tier": 1,
+  "trigger_code": "ELEMENT_FUSION",
+  "clarification": {
+    "question_text": "...",
+    "stem_id": "...",
+    "slot_fills": ["..."]
+  },
+  "continuation_token": "...",   // 30-min expiry
+  "evaluation_partial": null
+}`}</pre>
+          </div>
+          <div>
+            <p className="font-display text-sm font-medium text-sage-600 mb-2">Turn 2 &mdash; request</p>
+            <pre className="bg-sage-800 text-sage-100 rounded p-4 font-mono text-xs overflow-x-auto">{`{
+  "input": "<ORIGINAL input, byte-identical>",
+  "continuation_token": "<from turn 1>",
+  "clarification_response": "<your answer>"
+}`}</pre>
+          </div>
+        </div>
+        <ul className="font-body text-sage-700 mt-4 leading-relaxed list-disc pl-5 space-y-2">
+          <li>
+            <code>input</code> must be byte-identical to turn 1 &mdash; the token binds to
+            <code> sha256(input)</code>; any change returns 400 <code>continuation_token_input_mismatch</code>.
+            The answer rides <code>clarification_response</code> (&le;5000 chars) and is never folded into
+            <code> input</code>.
+          </li>
+          <li>
+            The engine suppresses re-firing the answered trigger and returns a full assessment; a
+            <em> different</em> Tier-1 trigger may still fire (never the same one twice in a row).
+          </li>
+          <li>
+            400s: <code>clarification_response_required</code> (token, no answer);
+            <code> clarification_response_without_token</code> (answer, no token);
+            <code> clarification_response_with_supplied_layer1_schema</code> (answer + a supplied
+            <code> layer1_schema</code> &mdash; resolve by re-supplying a disambiguated schema instead).
+          </li>
+          <li>
+            Safety: the distress perimeter runs on <code>input</code> + <code>clarification_response</code> on
+            the continuation turn.
+          </li>
+        </ul>
+      </div>
+
+      {/* Accreditation — Verifiable Reasoning Profile (write + read) */}
+      <div className="mt-12 bg-white/60 border border-sage-200 rounded-lg p-8">
+        <h2 className="font-display text-xl font-medium text-sage-800 mb-4">
+          Accreditation &mdash; Verifiable Reasoning Profile (<code>/api/accreditation/{'{agent_id}'}</code>)
+        </h2>
+        <p className="font-body text-sage-700 mb-4 leading-relaxed">
+          An agent can publish a verifiable reasoning profile backed by genuine substrate output. The
+          <strong> write</strong> surface is gated (a credential carrying the <code>accreditation_write</code>
+          capability); the <strong>read</strong> surface is public so any consumer can verify the credential.
+        </p>
+        <div className="mb-4">
+          <p className="font-display text-sm font-medium text-sage-600 mb-2">
+            Write &mdash; POST <code>/api/accreditation/{'{agent_id}'}</code> (Authorization: Bearer sr_prac_&hellip;)
+          </p>
+          <pre className="bg-sage-800 text-sage-100 rounded p-4 font-mono text-xs overflow-x-auto">{`{
+  "kind": "seed",                       // or "update" (+ transition_result)
+  "profile": {
+    "agent_id": "<must equal the path>",
+    "accreditation_record": { ... },
+    "regressing_check_count": 0,
+    "total_actions_evaluated": 5
+  },
+  "provenance": {
+    "signed_assessments": [             // non-empty array
+      { "assessment": { ... },          // a prior consult's assessment.assessment
+        "signature": "<base64>",
+        "key_id": "substrate-layer2-2026Q2" }
+    ]
+  }
+}`}</pre>
+        </div>
+        <ul className="font-body text-sage-700 mb-4 leading-relaxed list-disc pl-5 space-y-2">
+          <li>
+            <strong>Provenance gate (R18f).</strong> <code>provenance.signed_assessments</code> is a non-empty
+            array; each element is taken verbatim from a prior <code>/api/reason</code> consult&apos;s
+            <code> assessment.assessment</code> + its <code>signature</code> + <code>key_id</code>. The gate
+            structurally validates the shape (422 <code>bad_provenance</code>) then requires at least one
+            element to cryptographically verify against <code>GET /api/public-key</code> (forged or absent
+            signature &rarr; 403 <code>no_examination</code>). It proves the writer possesses genuine substrate
+            output; it does <em>not</em> prove the credited aggregate was faithfully computed.
+          </li>
+          <li>
+            <code>seed</code> against an existing agent &rarr; 409; <code>update</code> against a missing one
+            &rarr; 404.
+          </li>
+        </ul>
+        <div className="mb-2">
+          <p className="font-display text-sm font-medium text-sage-600 mb-2">
+            Read-back &mdash; GET <code>/api/accreditation/{'{agent_id}'}</code> (no auth)
+          </p>
+          <pre className="bg-sage-800 text-sage-100 rounded p-4 font-mono text-xs overflow-x-auto">{`{ "status": "ok", "data": {
+  "agent_id": "...", "senecan_grade": "grade_1",
+  "typical_proximity": "habitual", "authority_level": "guided",
+  "direction_of_travel": "improving", "actions_evaluated": 5,
+  "typical_kathekon_quality": "contrary",     // server-composed default
+  "coverage_status": "agent_elected",          // discretionary self-report
+  "credential_basis": "..." } }`}</pre>
+        </div>
+        <p className="font-body text-sm text-sage-600 leading-relaxed">
+          <code>typical_kathekon_quality</code>, <code>coverage_status</code>, and <code>credential_basis</code>
+          are server-composed and consumer-unforgeable &mdash; a writer cannot inflate them by what it submits.
+          A profile carrying no aggregate kathekon quality reads back as the conservative default
+          <code> contrary</code>; <code>coverage_status: agent_elected</code> honestly marks a discretionary,
+          self-reported single-session seed.
         </p>
       </div>
 

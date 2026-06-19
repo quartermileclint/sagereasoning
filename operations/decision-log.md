@@ -11911,3 +11911,38 @@ Verified this session: the prod smoke returned `engine_attribution:"translation-
 **Rules served:** PR6 + AC5 (Critical activation of a Live safety-gate verdict path), PR10 PEV (the smoke surfaced the coverage gap first-hand; the extended battery is the verify step), PR15 (reused the canonical `PROXIMITY_RANK` + the existing extension pattern; battery fixtures reuse the established `expect:block` reproducibility gate), PR17 (the flag flip + key mint + teardown are the founder's 0c-ii — the AI ran the battery + smoke + docs, performed no Vercel/git/Supabase op), PR18 (close-time production-state refresh), R10 (response-shape change published), R18 (the non-reproducibility disclosure published; api-docs faithfully deferred not fabricated), R0/R18/R19 (the gate now measures dikaiosyne, not just apatheia, at the default threshold too), AC1 (Sonnet resolver), KG1 (awaited analytics; no module state).
 
 **Status:** Adopted. Implementation: the #3b/#3c port + §3 bridge are **Live in production**; the §4 root correction remains **Scoped**. Cross-references: `D-MECHANISM-CORRECTION-PART-B-GUARDRAIL-JUSTICE-BRIDGE-BUILT-TEST-VERIFIED` (the build this activates), ADR-009 §Activation, ADR-010 §3/§4, the activation prompt + close, [[deterministic-l2-measures-apatheia-not-dikaiosyne]] + the new battery-coverage memory.
+
+## 2026-06-19 — D-MECHANISM-CORRECTION-PART-C-DOCS-APPLIED-SDK-BUILT
+
+**Decision:** **Applied the staged public-contract docs (§1–§7) to the three live surfaces and built the thin TypeScript client SDK** (founder elected "Both"). The public contract is now self-sufficient for the gaps the Benchmark v1 agent had to read 25 source files to close: §1 accreditation write+read (the `provenance.signed_assessments` round-trip + the consumer-unforgeable read-back fields), §2 the `layer1_schema` object shape, §3 signature verification (the canonical-form footgun + the `public_key_pem` field), §4 `prior_feedback`, §5 the `l1_supply` echo caveat, §6 guardrail-is-not-a-fact-checker, §7 the Tier-1 clarification-continuation contract (Part A, now live) — published to `llms.txt`, the api-docs `page.tsx`, and `agent-card.json` (a new 12th extension `tier1-clarification-continuation/v1`). The **structural** fix — a small `fetch`-based, dependency-free TS client encoding consult / continuation round-trip / signature verification / accreditation round-trip + a worked end-to-end example — landed under `sdk/typescript/` (repo client; **nothing published**, distribution decided separately).
+
+**Reasoning:** the staged docs closed the *fidelity* gap; the SDK closes the *structural* one so integrators never reconstruct shapes from prose (Part C of the mechanism-corrections follow-up; the diagnosis plan §4). Per R18 every shape was re-verified against its cited live path **at apply time** (three parallel Explore agents + first-hand confirmation of the §3 nesting). PR15: no Anthropic primitive types a bespoke REST client — a thin `fetch` client is the right minimal form; the SDK is not an MCP server or an Anthropic-API wrapper.
+
+**R18 re-verification findings (drift handled):** (1) the `layer1_schema` `version` field now accepts `layer1-schema-v1 | -v2 | -v3` (v2 added `carried_candidates`, v3 `discovered_purpose`) — the doc leads with "supply a prior consult's `extraction` verbatim" (the robust path) and notes the version set. (2) The §3 "signature covers `.assessment.assessment`" wording is **correct** for an API consumer — a verification agent's "covers the whole Layer2Assessment" was a signer-vs-response perspective mismatch: the consult response's top-level `assessment` is the `SignedLayer2Assessment = { assessment, signature, key_id }`, and the signature covers the nested `assessment.assessment` (confirmed first-hand at `parallel-run.ts:1044-1047`). All §7 error strings, the 5000-char limit, the 30-min token expiry, and the R20a-on-`input`+`clarification_response` guarantee verified byte-exact. The accreditation 422 (`bad_provenance`, malformed/empty) vs 403 (`no_examination`, forged/absent signature) split confirmed at `provenance-gate.ts:112,140`.
+
+**Files touched:**
+- `website/public/llms.txt` — new `### Accreditation — Verifiable Reasoning Profile` section (§1); `layer1_schema` object shape + echo caveat (§2/§5); new `### Force-clarification & continuation` + `### Verifying signed assessments` subsections (§7/§3); `prior_feedback` block (§4); guardrail not-a-fact-checker note (§6)
+- `website/src/app/api-docs/page.tsx` — Substrate-Reasoning list items for `prior_feedback` + force-clarification; a Force-clarification subsection (turn-1/turn-2 examples); a new Accreditation section (write body + provenance gate + read-back honesty)
+- `website/public/.well-known/agent-card.json` — `request_body_shape` pointer on `sage-assent-write-auth/v1` (§1); NEW 12th extension `tier1-clarification-continuation/v1` (§7); JSON validated, 12 extensions
+- `sdk/typescript/` — `src/canonical-json.ts` (faithful port of the server canonicaliser), `src/types.ts`, `src/client.ts` (`SageReasoningClient`: consult, `continueClarification`, `verifyAssessment`/`verifyConsult`, `writeAccreditation`/`readAccreditation`, `provenanceFrom`), `src/index.ts`, `examples/end-to-end.ts`, `package.json` (`"private": true`), `tsconfig.json`, `README.md`
+
+**Risk classification:** Standard under 0d-ii. R18 doc faithfulness (public content only — nothing auth/perimeter/schema/flag) + `code-standard` for the SDK (a repo client + example; nothing deploys unless published, which is a separate decision). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` the doc commit (the three public surfaces revert to their pre-Part-C content) and/or `rm -rf sdk/typescript` (the SDK is standalone — not imported by the Next app, not in the build graph).
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npm run build                                              # exit 0; /api-docs registered; ✓ Compiled successfully
+node -e "const c=require('./public/.well-known/agent-card.json'); console.log(c.capabilities.extensions.length)"   # 12
+cd ../sdk/typescript && npm install && npm run typecheck    # exit 0
+```
+Verified this session: `npm run build` ✓ Compiled successfully (`/api-docs` in route table); agent-card parses with 12 extensions; the SDK typechecks clean (exit 0) against `@types/node`; a self-contained canonical+crypto round-trip passed (canonical form byte-exact — sorted keys/compact/raw-UTF-8/-0→0; valid Ed25519 signature verifies; tampered assessment rejected).
+
+**Open questions:**
+- The api-docs `/api/guardrail` section is still absent (the deferred Part-B follow-up) — Part C did not add it (out of scope); it remains a founder-elected follow-up.
+- SDK distribution (npm scope, versioning, publish) is deliberately deferred — `package.json` is `"private": true`.
+
+**Rules served:** R18, R10, PR15, PR17, PR18, AC8, KG1.
+
+**Status:** Adopted. Implementation: §1–§7 docs **Live-on-push** (founder commits + pushes, PR17); the SDK is **Verified** (typecheck + crypto round-trip), repo-only. Cross-references: `operations/benchmarks/sage-practice-v1/public-contract-docs-staged.md` (the staged source), `operations/handoffs/founder/2026-06-19-mechanism-correction-PartC-docs-SDK-NEXT-SESSION-PROMPT.md` (this session's prompt), `D-MECHANISM-CORRECTION-PART-A-CONTINUATION-PRODUCTION-ACTIVATION-2026-06-19` (made §7 publishable), the diagnosis plan §4.

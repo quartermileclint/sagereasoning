@@ -1,0 +1,31 @@
+{
+  "name": "@sagereasoning/client",
+  "version": "0.1.0",
+  "description": "Thin TypeScript client for the SageReasoning substrate API (consult, signature verification, accreditation).",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "src", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "example": "tsx examples/end-to-end.ts"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": ["sagereasoning", "stoic", "ai-safety", "guardrail", "agent"],
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "tsx": "^4.7.0",
+    "@types/node": "^20.0.0"
+  }
+}

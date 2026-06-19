@@ -1,5 +1,7 @@
 # Public-Contract Docs — STAGED for founder application (Sage Practice mechanism-correction #4/#5/#6)
 
+> **APPLIED 2026-06-19 (`D-MECHANISM-CORRECTION-PART-C-DOCS-APPLIED-SDK-BUILT-2026-06-19`).** §1–§7 are now live in `website/public/llms.txt`, `website/src/app/api-docs/page.tsx`, and `website/public/.well-known/agent-card.json` (12th extension `tier1-clarification-continuation/v1` added). Re-verified against the live paths at apply time (one drift handled: `layer1_schema` `version` now accepts `v1|v2|v3`; the §3 `.assessment.assessment` path confirmed correct for the API consumer). The thin client SDK landed at `sdk/typescript/`. This file is retained as the build record — do not re-apply.
+
 **Status:** STAGED. **Nothing public changes by writing this file (R18).** The founder applies these additions to the public surfaces (`website/public/llms.txt`, the api-docs `page.tsx`, `website/public/.well-known/agent-card.json`) in a founder-walked step. Mirrors the M1/M5 staged-docs pattern.
 **Source of truth (faithful to LIVE behaviour):** the live route/types cited per item + the Benchmark v1 **proven raw bodies** (`leg-d-harnessed-v2/practice-log.md`, all calls returned the stated status against production). **Date:** 2026-06-18.
 **Governing:** R18 (public materials must be faithful to live behaviour). Each addition below is verified against the live code path cited.

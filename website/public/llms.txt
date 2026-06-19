@@ -125,7 +125,90 @@ Returns the `translation-sandwich-v1` shape: `{ version, extraction, assessment,
 
 **Supplying your own Layer-1 schema (any auth path):** the substrate accepts any `layer1_schema` that validates against the documented contract — on per-install (`sr_inst_`) calls it is required; on API-key (`sr_live_` / `sr_prac_`) calls it is optional. Supplying it skips server-side Layer-1 extraction (the response reports `meta.layer1_source: "supplied"` and `layer1_latency_ms: 0`); omitting it keeps today's raw-text behaviour (`meta.layer1_source: "server"`). Supplying a schema requires the credential to carry the `l1_supply` capability — a credential without it receives 403. A schema that fails validation returns 400 with the field-level validator error. The original `input` text is required on every path — the safety perimeter runs on the text regardless of who computed the schema.
 
+**The `layer1_schema` contract (the object shape):** the simplest valid `layer1_schema` is the `extraction` block returned by any prior consult — capture a consult's `extraction` and supply it back verbatim as `layer1_schema`. For agents computing it locally, the top-level shape is:
+
+```
+{ version: "layer1-schema-v1",   // current accepted: layer1-schema-v1 | -v2 | -v3
+  passions_present: [{ root_passion, sub_species, evidence }],
+  control_filter_elements: [{ item, agent_named_position }],
+  value_categories_at_stake: [{ indifferent, agent_framing, evidence }],
+  oikeiosis_circles_engaged: [{ circle, evidence }],
+  kathekon_factors: [{ factor_type, description, evidence }],
+  urgency_indicators: [...], causal_stage_evidence: [...],
+  eupatheia_candidates: [...], stated_concern_targets: [...],
+  stated_equanimity_signals: [...], motivation_stated: <bool>,
+  motivation_evidence: [...], element_fusion_detected: { fused: <bool>, fused_concerns },
+  ambiguity_notes: [...] }
+```
+
+Field semantics are specified canonically in the Layer-1 schema specification (ADR-005); the safest source is a prior consult's `extraction`. A schema that fails validation returns 400 with the field-level validator error.
+
+**When to supply a prior extraction (the echo caveat):** supplying a prior consult's `extraction` re-runs the deterministic Layer-2 verdict over **that prior situation's features** — it is the cheap path for **re-examining the *same* situation** (0 ms server Layer-1, 0¢). It is **not** a fresh diagnosis of a *new* sub-question: if you supply situation A's extraction while asking about situation B, the verdict reflects A's features (an **echo**), not B. For a genuinely new question, omit `layer1_schema` (let the server extract) or compute a fresh one.
+
 **Measured consult latency** (TEST environment, 2026-06-12; schema supplied + `assessment_first`): quick ~3.8s · standard ~4.3s · deep ~3.1s. Schema supplied + full synchronous narrative: quick ~22.1s · standard ~20.1s · deep ~22.3s. Raw text + full (server Layer 1 + inline narrative): quick ~29.5s · standard ~33.1s · deep ~31.7s. Production figures will replace these labels after production verification.
+
+**Re-examining a prior consult (`prior_feedback`):** an optional object that carries a re-examination back to a prior consult so the examination composes as a closed loop:
+
+```json
+{ "prior_loop_id": "<the prior consult's assessment.examination.ref (== its X-Loop-Id header)>",
+  "prior_depth_tier": "quick | standard | deep",
+  "adopted_correction": "<optional: the correction you adopted from the prior consult>" }
+```
+
+The re-examination **carries the prior depth** (the same-depth rule — a re-examination is not quick-by-default). The response surfaces `examination_open` and places `examination.{ ref, depth_tier, prior_feedback_ref }` **inside the signed assessment** (so the markers compose with the accreditation write-boundary loop-closure gate). A malformed `prior_feedback` returns **400** (`prior_feedback must be an object carrying prior_loop_id and prior_depth_tier.`).
+
+### Force-clarification & continuation (`/api/reason`)
+
+When a situation is too ambiguous to assess on one axis — two concerns fused (`ELEMENT_FUSION`), regret-vs-worry undetermined (`TEMPORAL_AMBIGUITY`), or an unspecified other with no relational circle (`SCOPE_AMBIGUITY`) — `/api/reason` returns **HTTP 200** with a force-clarification shape *instead of* an assessment:
+
+```json
+{ "version": "translation-sandwich-v1",
+  "clarification_required": true,
+  "intake_tier": 1,
+  "trigger_code": "ELEMENT_FUSION | TEMPORAL_AMBIGUITY | SCOPE_AMBIGUITY",
+  "clarification": {
+    "question_text": "<the single clarifying question>",
+    "stem_id": "<question-template id>",
+    "slot_fills": ["<the elements the question references>"] },
+  "continuation_token": "<opaque token, 30-min expiry>",
+  "evaluation_partial": null,
+  "disclaimer": "..." }
+```
+
+**To close the clarification, answer the question on a second turn.** Re-submit:
+
+```json
+{ "input": "<the ORIGINAL input, byte-for-byte identical to turn 1>",
+  "continuation_token": "<from the turn-1 response>",
+  "clarification_response": "<your answer to question_text, <=5000 chars>" }
+```
+
+- **`input` must be byte-identical to turn 1.** The token binds to `sha256(input)`; any change (even whitespace) returns **400 `continuation_token_input_mismatch`**. The answer rides its **own** field — do **not** fold it into `input`.
+- The engine **suppresses re-firing the answered trigger** and folds your answer into the Layer-1 re-extraction → you get a **full assessment**. A *different* Tier-1 trigger may still fire on the second turn (never the same one twice in a row).
+- **Safety (unchanged guarantee):** on the continuation turn the distress perimeter runs on **`input` + `clarification_response`** — distress in your answer is caught and redirects, exactly as on a first turn.
+
+Structural errors (all **HTTP 400**):
+
+| condition | error |
+|---|---|
+| `clarification_response` is not a string | `clarification_response must be a string.` |
+| `continuation_token` present, no answer | `clarification_response_required` |
+| `clarification_response` present, no token | `clarification_response_without_token` |
+| `clarification_response` + a supplied `layer1_schema` | `clarification_response_with_supplied_layer1_schema` |
+
+**Supplied-schema callers (`l1_supply` / plugin):** your answer informs the server-side Layer-1 **re-extraction**, which is skipped when you supply your own `layer1_schema`. So a continuation **cannot** combine `clarification_response` with `layer1_schema` (the last error above). To resume a force-clarification on the supplied-schema path, **re-submit a disambiguated `layer1_schema`** — the trigger then simply does not fire (no answer field needed).
+
+### Verifying signed assessments
+
+`GET https://www.sagereasoning.com/api/public-key` (no auth) returns:
+
+```json
+{ "key_id": "substrate-layer2-2026Q2", "algorithm": "Ed25519",
+  "public_key_pem": "-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----",
+  "issued_at": "...", "rotation_overlap_until": null, "previous": null }
+```
+
+In a consult response the signed envelope is the top-level `assessment` object: `assessment.signature` and `assessment.key_id` cover the **nested `assessment.assessment` object exactly** (the deterministic Layer-2 verdict). The canonical form that verifies is the JSON of `assessment.assessment` with **sorted keys at every level, compact separators (no spaces), and raw UTF-8** (`ensure_ascii=false`); an ASCII-escaped canonicalization does **not** verify. During a key rotation, `previous` carries the prior `{ key_id, public_key_pem, issued_at, retires_at }` and `rotation_overlap_until` the overlap deadline — try the current key first, then `previous` within the overlap window.
 
 ### Guardrail — Stoic Risk Gate for AI Agents (V3)
 
@@ -168,7 +251,60 @@ Use this as middleware before executing any consequential action. `risk_class` c
 
 The verdict is computed **deterministically** from `extraction` by a free Layer-2 mechanism pass and then Ed25519-signed (`signed_assessment`; verify against `GET /api/public-key`) — there is no LLM prose render. `evaluation_depth` is the constant `"deterministic"`; only the mechanism count follows `risk_class`. `is_kathekon` may be `null` when the extraction is too sparse to judge — the gate then floors to a conservative non-proceed rather than guessing. `justice_resolution` is present **only** when the action engages a justice-toward-others dimension; its presence means the surfaced `katorthoma_proximity` may have been **floored** below the raw value in the signed assessment (a calmly-reasoned injustice is capped, not rated near-virtuous). Disclosure: a justice-floored verdict is therefore **not reproducible from the signed assessment alone** — the signature proves the deterministic Layer-2 reading; the justice completion is disclosed but unsigned (until a later root correction folds it into the signed proximity). Availability: on a signing outage the gate fails **closed** (HTTP 503); on an engine or justice-resolver outage it returns a conservative pause — never a silent proceed.
 
+**What the gate evaluates (it is not a fact-checker):** the Sage Risk Gate evaluates the **reasoning over the premises you supply** — it diagnoses passions, value-errors, and proximity in the framing of the action. It does **not** independently verify arithmetic, claims, or external facts in your `context`. Supplying false or incomplete facts yields a verdict over those facts. Verify your inputs before trusting the gate's framing.
+
 GET https://www.sagereasoning.com/api/guardrail — Returns usage documentation (no key required).
+
+### Accreditation — Verifiable Reasoning Profile (write + read)
+
+An agent can publish a verifiable reasoning profile — a credential aggregate backed by genuine substrate output. The **write** surface is gated; the **read** surface is public (no auth) so any consumer can verify the credential.
+
+**Write:** `POST https://www.sagereasoning.com/api/accreditation/{agent_id}` with `Authorization: Bearer sr_prac_<token>` (a credential carrying the `accreditation_write` capability). Body:
+
+```json
+{
+  "kind": "seed",
+  "profile": {
+    "agent_id": "<must equal the {agent_id} in the path>",
+    "accreditation_record": { "...": "the credential aggregate" },
+    "regressing_check_count": 0,
+    "evaluated_actions": [],
+    "total_actions_evaluated": 5,
+    "window_config": { "...": "rolling-window config" },
+    "carried_candidates": []
+  },
+  "provenance": {
+    "signed_assessments": [
+      { "assessment": { "...": "the assessment.assessment block from a prior /api/reason consult" },
+        "signature": "<that consult's base64 signature>",
+        "key_id": "substrate-layer2-2026Q2" }
+    ]
+  }
+}
+```
+
+- **`kind`** is `"seed"` (first credential for the agent) or `"update"` (requires an additional `transition_result` object: `{ grade_changed: <bool>, record: { ... } }`). A `seed` against an existing agent returns **409**; an `update` against a non-existent one returns **404**.
+- **`profile`** is the canonical `CarriedProfile`. The route requires `profile.agent_id` (non-empty string, must equal the path), `profile.accreditation_record` (object), and `profile.regressing_check_count` (number); the rest is the canonical record.
+- **`provenance.signed_assessments`** (the load-bearing R18f gate): a **non-empty array**, each element `{ assessment, signature, key_id }` taken **verbatim from the `assessment.assessment` (the signed Layer-2 verdict), its `signature`, and its `key_id`** of a prior `/api/reason` consult. The gate (i) structurally validates the shape (**422 `bad_provenance`** on malformed / empty) then (ii) **requires at least one element to cryptographically verify** against the published key — a forged or absent signature returns **403 `no_examination`**. This proves the writer possesses genuine substrate output. It does **not** prove the credited aggregate was faithfully computed from those assessments (an honest scope limit).
+
+**200 response:**
+```json
+{ "status": "ok",
+  "documentation_url": "https://sagereasoning.com/limitations",
+  "loop_closure": { "verdict": "unclosed", "redirections": 1, "closed": 0, "open": 1, "indeterminate": 0 },
+  "practice": { "reflect_due": "TR-02", "endpoint": "/api/practice/reflect", "default": "auto", "opt_out": "reflect_at_close" } }
+```
+
+**Public read-back (no auth):** `GET https://www.sagereasoning.com/api/accreditation/{agent_id}` returns the server-composed honest profile:
+```json
+{ "status": "ok", "data": {
+  "agent_id": "...", "senecan_grade": "grade_1", "typical_proximity": "habitual",
+  "authority_level": "guided", "dimension_levels": { "...": "..." }, "direction_of_travel": "improving",
+  "actions_evaluated": 5, "typical_kathekon_quality": "contrary",
+  "coverage_status": "agent_elected", "credential_basis": "...(discretionary submission; single-session...)" } }
+```
+
+**Read-back honesty (consumer-unforgeable):** `typical_kathekon_quality`, `coverage_status`, and `credential_basis` are **server-composed** — a writer cannot inflate them by what it submits. A self-submitted profile that carries no aggregate kathekon quality reads back as the conservative default **`contrary`** (the credential aggregate is distinct from any single consult's `kathekon` quality, which describes that one consult). `coverage_status: "agent_elected"` honestly marks a discretionary, self-reported single-session seed (not third-party-monitored).
 
 ### Score a Document (V3)
 

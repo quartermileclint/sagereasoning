@@ -102,7 +102,8 @@
               "description": "A credential MAY be scoped. When scoped, a write whose CarriedProfile field does not match the credential's scope is rejected (401). An unscoped credential (NULL scope) accepts any value.",
               "downstream_identity_model": ["delegated_user", "service_account", "vendor_framework", "api_key", "browser_session", "mcp_server", "unknown"],
               "path_posture": ["endorsed", "open_api", "ambiguous", "unsanctioned"]
-            }
+            },
+            "request_body_shape": "Body: { kind: 'seed'|'update', profile: CarriedProfile, provenance: { signed_assessments: [{ assessment, signature, key_id }] } } (update also requires transition_result). The route requires profile.agent_id (== path), profile.accreditation_record (object), profile.regressing_check_count (number). provenance.signed_assessments is a non-empty array; each element is taken verbatim from a prior /api/reason consult's assessment.assessment + its signature + key_id. The R18f gate structurally validates the shape (422 bad_provenance on malformed/empty) then requires at least one element to cryptographically verify against GET /api/public-key (forged/absent signature -> 403 no_examination); it does NOT prove the credited aggregate was faithfully computed (honest scope limit). seed-vs-existing -> 409; update-vs-missing -> 404. Public read-back: GET /api/accreditation/{agent_id} (no auth) returns server-composed honest fields — typical_kathekon_quality (conservative default 'contrary'), coverage_status ('agent_elected' for a discretionary single-session seed), and credential_basis are consumer-unforgeable. Full shapes in llms.txt 'Accreditation — Verifiable Reasoning Profile'."
           }
         }
       },
@@ -225,6 +226,24 @@
             "reproducibility": "a justice-floored verdict is disclosed but not reproducible from the signed assessment alone"
           },
           "availability": { "signing_outage": "503 fail-closed", "engine_or_justice_outage": "conservative pause, never a silent proceed" }
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/tier1-clarification-continuation/v1",
+        "description": "Tier-1 force-clarification answer channel (ADR-008 Design A, live 2026-06-19). When a consult is too ambiguous to assess on one axis, /api/reason returns HTTP 200 { clarification_required:true, clarification:{question_text}, continuation_token } instead of an assessment. To resume: re-POST the BYTE-IDENTICAL original input + the continuation_token + clarification_response (your answer, <=5000 chars). The token binds to sha256(input) — any change to input returns 400 continuation_token_input_mismatch; the answer rides clarification_response and is never folded into input. The engine suppresses re-firing the answered trigger and returns a full assessment (a different trigger may still fire — never the same twice). 400s: clarification_response_required (token, no answer); clarification_response_without_token (answer, no token); clarification_response_with_supplied_layer1_schema (answer + a supplied layer1_schema — resolve by re-supplying a disambiguated schema instead, since a supplied schema skips the server re-extraction the answer informs). The R20a vulnerable-user perimeter runs on input + clarification_response on the continuation turn.",
+        "required": false,
+        "params": {
+          "trigger_codes": ["ELEMENT_FUSION", "TEMPORAL_AMBIGUITY", "SCOPE_AMBIGUITY"],
+          "turn1_response_shape": { "version": "translation-sandwich-v1", "clarification_required": true, "intake_tier": 1, "trigger_code": "<one of trigger_codes>", "clarification": { "question_text": "<string>", "stem_id": "<string>", "slot_fills": ["<string>"] }, "continuation_token": "<opaque, 30-min expiry>", "evaluation_partial": null },
+          "turn2_request_shape": { "input": "<byte-identical to turn 1>", "continuation_token": "<from turn 1>", "clarification_response": "<answer, <=5000 chars>" },
+          "errors_400": {
+            "clarification_response must be a string.": "clarification_response is not a string",
+            "clarification_response_required": "continuation_token present, no answer",
+            "clarification_response_without_token": "clarification_response present, no token",
+            "clarification_response_with_supplied_layer1_schema": "clarification_response + a supplied layer1_schema",
+            "continuation_token_input_mismatch": "input changed from turn 1 (token binds to sha256(input))"
+          },
+          "safety": "R20a perimeter runs on input + clarification_response on the continuation turn"
         }
       }
     ]
