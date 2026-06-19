@@ -669,6 +669,93 @@ export default function ApiDocsPage() {
         </p>
       </div>
 
+      {/* Sage Reflect — session-close reflection */}
+      <div className="mt-12 bg-white/60 border border-sage-200 rounded-lg p-8">
+        <h2 className="font-display text-xl font-medium text-sage-800 mb-4">
+          Sage Reflect &mdash; Session-Close Reflection (<code>/api/practice/reflect</code>)
+        </h2>
+        <p className="font-body text-sage-700 mb-4 leading-relaxed">
+          A stateful multi-turn reflection (Q1-Q6, never abbreviated) run at session close. Auth: a
+          credential carrying the <code>reflect</code> capability (Authorization: Bearer only). You
+          <strong> open</strong> a session, then answer each returned question until <code>status:
+          &quot;complete&quot;</code>.
+        </p>
+        <div className="mb-4">
+          <p className="font-display text-sm font-medium text-sage-600 mb-2">
+            Open (first turn) &mdash; <code>session_summary</code> is required and must be an object
+          </p>
+          <pre className="bg-sage-800 text-sage-100 rounded p-4 font-mono text-xs overflow-x-auto">{`{
+  "session_id": "<your unique id>",
+  "agent_id": "<the agent your credential is bound to>",
+  "session_summary": {
+    "purpose_at_open": "<purpose pursued>",
+    "circle_at_open": "self_preservation | household | community | humanity | cosmic",
+    "role_at_open": "<your role>",
+    "capacity_at_open": ["<capacities>"],
+    "sage_reasoning_passes": 0
+  }
+}`}</pre>
+        </div>
+        <div className="mb-4">
+          <p className="font-display text-sm font-medium text-sage-600 mb-2">
+            Answer turns &mdash; send <code>response</code>; <code>session_summary</code> is ignored
+          </p>
+          <pre className="bg-sage-800 text-sage-100 rounded p-4 font-mono text-xs overflow-x-auto">{`{ "session_id": "<same id>", "agent_id": "<same>", "response": "<your answer>" }`}</pre>
+        </div>
+        <div className="mb-2">
+          <p className="font-display text-sm font-medium text-sage-600 mb-2">Responses</p>
+          <pre className="bg-sage-800 text-sage-100 rounded p-4 font-mono text-xs overflow-x-auto">{`// question turn
+{ "status": "in_progress", "step": "Q1..Q6 | verification | supporting",
+  "question": "<verbatim>", "subquestions": [], "mandatory_subquestions": [] }
+
+// completion
+{ "status": "complete", "exit_path": "...", "profile_update_confidence": "normal|high|low",
+  "profile": { "senecan_grade": "...", "typical_proximity": "...",
+               "katorthoma_proximity_by_domain": {}, "dimension_levels": {},
+               "direction_of_travel": "improving|stable|declining|single_snapshot" },
+  "profile_update_framing": { "mandatory_note": "<mirror note — surface verbatim>" } }
+
+// distress on an answer
+{ "status": "redirected", "severity": "moderate|acute",
+  "suggested_user_message": "...", "flow_terminated": true }`}</pre>
+        </div>
+        <p className="font-body text-sm text-sage-600 leading-relaxed">
+          Reflect-at-close is the default for agent integrations (opt out with <code>reflect_at_close:
+          &quot;off&quot;</code>); the full Q1-Q6 sequence is never abbreviated. One metered loop per
+          session-close pass.
+        </p>
+      </div>
+
+      {/* Sage Calling — purpose discovery */}
+      <div className="mt-12 bg-white/60 border border-sage-200 rounded-lg p-8">
+        <h2 className="font-display text-xl font-medium text-sage-800 mb-4">
+          Sage Calling &mdash; Purpose Discovery (<code>/api/calling</code>)
+        </h2>
+        <p className="font-body text-sage-700 mb-4 leading-relaxed">
+          A deterministic Q1-Q6 purpose-discovery sequence. Auth: a credential carrying the
+          <code> calling</code> capability (Authorization: Bearer only). It is <strong>not self-serve</strong>
+          &mdash; a discovered purpose ends in an admin-approval Hard Gate (the operator approves via
+          <code> POST /api/calling/approve</code>; an agent credential cannot approve its own handoff).
+        </p>
+        <div className="mb-4">
+          <p className="font-display text-sm font-medium text-sage-600 mb-2">Request</p>
+          <pre className="bg-sage-800 text-sage-100 rounded p-4 font-mono text-xs overflow-x-auto">{`{ "session_id": "...", "agent_id": "...",
+  "response": "<omit on open; your answer thereafter>",
+  "agent_card_url": "<optional https URL to your agent card>" }`}</pre>
+        </div>
+        <div className="mb-2">
+          <p className="font-display text-sm font-medium text-sage-600 mb-2">Responses (HTTP 200, by status)</p>
+          <pre className="bg-sage-800 text-sage-100 rounded p-4 font-mono text-xs overflow-x-auto">{`in_progress        { "stage": "Q1..Q6", "question": "<verbatim>" }
+awaiting_approval  { "message": "..." }            // Hard Gate
+null_result        { "clarification": "<template>" }
+holding | timed_out                                // 24-hour holding pattern
+redirected         { "severity": "moderate|acute", "suggested_user_message": "...", "flow_terminated": true }`}</pre>
+        </div>
+        <p className="font-body text-sm text-sage-600 leading-relaxed">
+          Errors: 400 (body) / 401 (auth) / 404 (session) / 409 (state) / 503 (disabled or infra).
+        </p>
+      </div>
+
       {/* Assessment model reference */}
       <div className="mt-12 bg-white/60 border border-sage-200 rounded-lg p-8">
         <h2 className="font-display text-xl font-medium text-sage-800 mb-4">Assessment Framework</h2>

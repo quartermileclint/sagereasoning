@@ -25,6 +25,8 @@ All scoring endpoints use qualitative evaluation, not numeric 0-100 scores. The 
 
 AI agents seeking a virtue-based reasoning layer, ethical decision framework, or trust certification can adopt the Stoic Brain as their reasoning infrastructure.
 
+Credential capabilities → surfaces: `consult` → `/api/reason` · `l1_supply` → supplying a precomputed `layer1_schema` · `reflect` → `/api/practice/reflect` · `accreditation_write` → `/api/accreditation/{agent_id}` · `calling` → `/api/calling`. Write-class capabilities (`accreditation_write`, `calling`, `reflect`) are `Authorization: Bearer` only (no `X-Api-Key`).
+
 ### Fetch the Stoic Brain (Conceptual Overview)
 
 GET https://www.sagereasoning.com/api/stoic-brain
@@ -114,6 +116,32 @@ Depth controls which Stoic mechanisms are applied:
 - `deep` (6 mechanisms): + Iterative Refinement (Senecan progress grades, direction of travel) — comprehensive
 
 Returns the `translation-sandwich-v1` shape: `{ version, extraction, assessment, prose }` — `extraction` is the Layer-1 feature schema, `assessment` is the deterministic Layer-2 verdict (Ed25519-signed; identical inputs produce identical assessments — verify against GET /api/public-key), `prose` is the Layer-3 philosophical rendering carrying the V3 vocabulary (katorthoma_proximity, passion_diagnosis, control_filter, oikeiosis). `deep` additionally includes iterative-refinement signals (`senecan_grade`, `progress_dimensions`, `direction_of_travel`).
+
+Full response example (standard depth, `response_format:"full"`):
+```json
+{
+  "version": "translation-sandwich-v1",
+  "extraction": { "version": "layer1-schema-v1", "...": "the validated Layer-1 features" },
+  "assessment": {                       // signed envelope
+    "assessment": {                     // the verdict lives at assessment.assessment
+      "katorthoma_proximity": "deliberate",
+      "passion_diagnosis": { "passions_detected": [ "..." ], "false_judgements": [ "..." ], "correct_judgements": [ "..." ] },
+      "control_filter": { "within_prohairesis": [ "..." ], "outside_prohairesis": [ "..." ] },
+      "oikeiosis": { "...": "..." },
+      "value_assessment": { "indifferents_at_stake": [ "..." ], "value_error": null },
+      "kathekon_assessment": { "is_kathekon": true, "quality": "strong|moderate|marginal|contrary", "justification": "..." },
+      "improvement_path_structured": { "...": "..." },
+      "examination": { "ref": "<loop id>", "depth_tier": "standard", "prior_feedback_ref": "<present only on a re-examination>" }
+    },
+    "signature": "<base64 Ed25519>", "key_id": "substrate-layer2-2026Q2"
+  },
+  "prose": { "philosophical_reflection": "...", "improvement_guidance": "...", "summary": "...", "source": "llm" },
+  "meta": { "layer1_source": "server", "layer1_latency_ms": "<ms>", "narrative_status": "inline" },
+  "disclaimer": "...",
+  "practice": { "reflect_due": "TR-02", "endpoint": "/api/practice/reflect", "default": "auto", "opt_out": "reflect_at_close" }
+}
+```
+The verdict is at `assessment.assessment` (NOT the top-level `assessment`, which is the signed envelope). With `response_format:"assessment_first"`, `prose` is null, `meta.narrative_status` is `"deferred"`, and a top-level `narrative: { "status":"deferred", "correlation_id":"<id>" }` is added.
 
 **Agent integrations (per-install tokens):** production agent integrations authenticate with per-install tokens (`sr_inst_<32 hex>`). Mint: session-authenticated `POST /api/keys` (token shown once). Use: `Authorization: Bearer sr_inst_<token>`; plugin-authenticated calls submit a pre-computed `layer1_schema` (run Layer 1 locally) instead of raw input. Revoke: `DELETE /api/keys` — revoked tokens return 401 immediately. `sr_live_` keys remain valid for raw-input calls.
 
@@ -266,7 +294,21 @@ An agent can publish a verifiable reasoning profile — a credential aggregate b
   "kind": "seed",
   "profile": {
     "agent_id": "<must equal the {agent_id} in the path>",
-    "accreditation_record": { "...": "the credential aggregate" },
+    "accreditation_record": {
+      "senecan_grade": "pre_progress|grade_3|grade_2|grade_1|sage_ideal",
+      "typical_proximity": "reflexive|habitual|deliberate|principled|sage_like",
+      "authority_level": "supervised|guided|spot_checked|autonomous|full_authority",
+      "dimension_levels": {
+        "passion_reduction": "emerging|developing|established|advanced",
+        "judgement_quality": "emerging|developing|established|advanced",
+        "disposition_stability": "emerging|developing|established|advanced",
+        "oikeiosis_extension": "emerging|developing|established|advanced"
+      },
+      "direction_of_travel": "improving|stable|regressing",
+      "actions_evaluated": 1,
+      "typical_deliberation_breadth": "intuited|deliberated|multi_branch_deliberated",
+      "typical_kathekon_quality": "strong|moderate|marginal|contrary"
+    },
     "regressing_check_count": 0,
     "evaluated_actions": [],
     "total_actions_evaluated": 5,
@@ -284,7 +326,7 @@ An agent can publish a verifiable reasoning profile — a credential aggregate b
 ```
 
 - **`kind`** is `"seed"` (first credential for the agent) or `"update"` (requires an additional `transition_result` object: `{ grade_changed: <bool>, record: { ... } }`). A `seed` against an existing agent returns **409**; an `update` against a non-existent one returns **404**.
-- **`profile`** is the canonical `CarriedProfile`. The route requires `profile.agent_id` (non-empty string, must equal the path), `profile.accreditation_record` (object), and `profile.regressing_check_count` (number); the rest is the canonical record.
+- **`profile`** is the canonical `CarriedProfile`. The route requires `profile.agent_id` (non-empty string, must equal the path), `profile.accreditation_record` (object), and `profile.regressing_check_count` (number); the rest is the canonical record. The `accreditation_record` must carry all the fields shown above — in particular `dimension_levels` must be present as an object with its four keys, or the write is rejected with **503** (the store flattens those four keys into columns; a missing object throws before any row is written — the single most common write failure).
 - **`provenance.signed_assessments`** (the load-bearing R18f gate): a **non-empty array**, each element `{ assessment, signature, key_id }` taken **verbatim from the `assessment.assessment` (the signed Layer-2 verdict), its `signature`, and its `key_id`** of a prior `/api/reason` consult. The gate (i) structurally validates the shape (**422 `bad_provenance`** on malformed / empty) then (ii) **requires at least one element to cryptographically verify** against the published key — a forged or absent signature returns **403 `no_examination`**. This proves the writer possesses genuine substrate output. It does **not** prove the credited aggregate was faithfully computed from those assessments (an honest scope limit).
 
 **200 response:**
@@ -471,6 +513,81 @@ A completed SageReasoning pass at session close is a Sage Reflect trigger (TR-02
 **Opt-out (explicit).** Auto-firing is the default; to disable it set the integration config key `reflect_at_close` to `"off"` (default `"auto"`). Opt-out is binary — fire or do not. There is no shortened or partial reflection: a Sage Reflect pass runs the **full Q1–Q6 sequence** whether fired automatically or by hand. (A genuinely brief session that returns clean results quickly is legitimate; shortening the sequence *because* it fired automatically is not.)
 
 **Cost (so consent is informed).** An auto-fired reflect pass is a metered call — one `/api/practice/reflect` invocation per session close, billed per your tier's standard per-loop model (one loop = one wrapper invocation; $0.02 base + LLM-token overage above 50% of base × 2, per the published billing model). If you do not want a reflect pass billed at every session close, set `reflect_at_close: "off"`.
+
+## Sage Reflect — Session-Close Reflection (wire shape)
+
+POST https://www.sagereasoning.com/api/practice/reflect
+Authorization: Bearer <sr_assent_ or sr_prac_ token carrying the `reflect` capability>
+Content-Type: application/json
+
+A STATEFUL multi-turn sequence (Q1–Q6, never abbreviated). OPEN a session, then answer each returned question until `status:"complete"`.
+
+OPEN (first turn) — `session_summary` is REQUIRED and must be an OBJECT:
+```json
+{
+  "session_id": "<your unique id for this reflection>",
+  "agent_id":   "<the agent_id your credential is bound to>",
+  "session_summary": {
+    "purpose_at_open":   "<the purpose you pursued this session>",
+    "circle_at_open":    "self_preservation | household | community | humanity | cosmic",
+    "role_at_open":      "<your role/context>",
+    "capacity_at_open":  ["<capacities brought to bear>"],
+    "sage_reasoning_passes": 0
+  }
+}
+```
+
+ANSWER turns (every turn after the open) — send `response`; `session_summary` is ignored:
+```json
+{ "session_id": "<same id>", "agent_id": "<same>", "response": "<your answer to the last question>" }
+```
+
+RESPONSE — question turn:
+```json
+{ "status":"in_progress", "session_id":"...", "step":"Q1..Q6 | verification | supporting",
+  "question":"<verbatim — render as-is>", "subquestions":["..."], "mandatory_subquestions":["..."],
+  "interaction_type":"stoic-post-action-reflection", "disclaimer":"...", "documentation_url":"..." }
+```
+
+RESPONSE — completion:
+```json
+{ "status":"complete", "session_id":"...", "exit_path":"...", "profile_update_confidence":"normal|high|low",
+  "scrutiny_flags":[{"type":"...","detail":"..."}], "sage_calling_trigger": null,
+  "profile": {
+    "senecan_grade":"pre_progress|grade_3|grade_2|grade_1|sage_ideal",
+    "typical_proximity":"reflexive|habitual|deliberate|principled|sage_like",
+    "katorthoma_proximity_by_domain":{ "phronesis":"...", "dikaiosyne":"...", "andreia":"...", "sophrosyne":"...", "aggregate":"..." },
+    "dimension_levels":{ "passion_reduction":"...", "judgement_quality":"...", "disposition_stability":"...", "oikeiosis_extension":"..." },
+    "direction_of_travel":"improving|stable|declining|single_snapshot", "grade_changed": false },
+  "profile_update_framing": { "mandatory_note":"<mirror note — surface verbatim>" },
+  "interaction_type":"stoic-post-action-reflection", "disclaimer":"...", "documentation_url":"..." }
+```
+
+SAFETY: an answer carrying acute/moderate distress returns `status:"redirected"` with `{ "severity":"moderate|acute", "suggested_user_message":"...", "flow_terminated":true }` — surface `suggested_user_message` verbatim and stop.
+
+Auth requires the `reflect` capability. Cost: one metered loop per session-close pass (Q1–Q4 carry Sonnet extraction; Q5/Q6 base rate). The reflect-at-close default and opt-out are described in "Practice Cycle — Reflect at Session Close" above.
+
+## Sage Calling — Purpose Discovery (multi-stage)
+
+POST https://www.sagereasoning.com/api/calling
+Authorization: Bearer <sr_assent_ or sr_prac_ token carrying the `calling` capability>
+Content-Type: application/json
+
+A deterministic Q1–Q6 purpose-discovery sequence. OPEN with no `response`; then answer each question. NOT self-serve — a discovered purpose ends in an admin-approval Hard Gate (the operator approves via POST /api/calling/approve; an agent credential cannot approve its own handoff).
+
+Request:
+```json
+{ "session_id":"...", "agent_id":"...", "response":"<omit on open; your answer thereafter>", "agent_card_url":"<optional https URL to your agent card>" }
+```
+
+Responses (all HTTP 200, distinguished by `status`):
+- `in_progress`:      `{ "status":"in_progress", "session_id":"...", "stage":"Q1..Q6", "question":"<verbatim>" }`
+- `awaiting_approval`: `{ "status":"awaiting_approval", "session_id":"...", "message":"..." }`   (Hard Gate)
+- `null_result`:      `{ "status":"null_result", "session_id":"...", "clarification":"<template>" }`
+- `holding` / `timed_out`: the 24-hour holding pattern after a null result
+- `redirected`:       `{ "status":"redirected", "severity":"moderate|acute", "suggested_user_message":"...", "flow_terminated":true }`
+
+Errors: 400 (body) / 401 (auth) / 404 (session) / 409 (state) / 503 (disabled or infra). Auth requires the `calling` capability.
 
 ## Adoption Guidance for AI Agents
 

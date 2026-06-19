@@ -344,6 +344,26 @@
       "outputModes": ["application/json"],
       "endpoint": "https://www.sagereasoning.com/api/score-decision",
       "method": "POST"
+    },
+    {
+      "id": "session-close-reflection",
+      "name": "Sage Reflect — Session-Close Reflection",
+      "description": "Stateful Q1–Q6 post-action reflection over a completed session (never abbreviated). OPEN with session_summary (object: purpose_at_open, circle_at_open [self_preservation|household|community|humanity|cosmic], role_at_open, capacity_at_open[], sage_reasoning_passes), then answer each returned question until status:'complete', which returns a profile read-back (senecan_grade, typical_proximity, katorthoma_proximity_by_domain, dimension_levels, direction_of_travel) plus a mandatory mirror note. Requires the 'reflect' capability (sr_assent_ or sr_prac_, Authorization: Bearer only). Full wire shape in llms.txt 'Sage Reflect — Session-Close Reflection'.",
+      "tags": ["reflection", "stoic-practice", "session-close", "trajectory"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"],
+      "endpoint": "https://www.sagereasoning.com/api/practice/reflect",
+      "method": "POST"
+    },
+    {
+      "id": "purpose-discovery",
+      "name": "Sage Calling — Purpose Discovery",
+      "description": "Deterministic Q1–Q6 purpose-discovery sequence ending in an admin-approval Hard Gate (NOT self-serve — the operator approves the handoff via POST /api/calling/approve; an agent credential cannot approve its own). OPEN with session_id + agent_id (no response); then answer each returned question. Responses are HTTP 200 distinguished by status: in_progress / awaiting_approval / null_result / holding / timed_out / redirected. Requires the 'calling' capability (sr_assent_ or sr_prac_, Authorization: Bearer only). Full wire shape in llms.txt 'Sage Calling — Purpose Discovery'.",
+      "tags": ["purpose", "alignment", "discovery", "agent-onboarding"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"],
+      "endpoint": "https://www.sagereasoning.com/api/calling",
+      "method": "POST"
     }
   ]
 }
