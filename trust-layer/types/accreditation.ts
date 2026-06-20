@@ -97,6 +97,19 @@ export type CoverageStatus =
   | 'expired'
   | 'agent_elected'
 
+/**
+ * Examination mode — WHEN the examination fired relative to the agent's
+ * decision. A SEPARATE AXIS from coverage_status (coverage breadth). Server-
+ * composed + consumer-unforgeable. Added 2026-06-20 under the Gate-1
+ * surface-honesty Arc 1 (D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-
+ * DIFFERENTIATION). pre_decision_harness = examined by an operator-issued
+ * harness BEFORE the agent reasoned (an attestation, NOT a cryptographic proof
+ * of timing); post_decision_check = examined AFTER (the honest label for today's
+ * discretionary API write paths). Null is a read-back-only "unstated" state. D3:
+ * do NOT repurpose coverage_status:'continuous' for this timing property.
+ */
+export type ExaminationMode = 'pre_decision_harness' | 'post_decision_check'
+
 /** Root passion identifiers (from passions.json) */
 export type RootPassionId = 'epithumia' | 'hedone' | 'phobos' | 'lupe'
 
@@ -237,6 +250,14 @@ export type AccreditationRecord = {
   readonly coverage_status?: CoverageStatus | null
   readonly monitored_since?: string | null
   readonly credential_basis?: string | null
+
+  /** Examination mode (Gate-1 surface honesty, Arc 1, 2026-06-20) — the
+   *  pre/post-decision TIMING distinction, server-composed via
+   *  composeK1InitialCoverage's harness_enforced write-path (values on a
+   *  consumer-submitted record are ignored). Optional + nullable: rows written
+   *  before this slice read back undefined → the public payload omits the field
+   *  (flag-off byte-identity). R18c-additive. */
+  readonly examination_mode?: ExaminationMode | null
 }
 
 /**
@@ -277,6 +298,13 @@ export type AccreditationPayload = {
   readonly coverage_status: CoverageStatus | null
   readonly monitored_since: string | null
   readonly credential_basis: string | null
+
+  /** Examination mode (Gate-1 surface honesty, Arc 1, 2026-06-20) — present on
+   *  the payload ONLY when the SUBSTRATE_EXAMINATION_MODE_ENABLED feature folded
+   *  it on read; `null` = "examination mode unstated". The sole unforgeable
+   *  distinguisher between the two Gate-1 configurations under Option 2.
+   *  Attestation, not a cryptographic proof of timing. R18c-additive. */
+  readonly examination_mode?: ExaminationMode | null
 }
 
 /**

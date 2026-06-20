@@ -151,6 +151,33 @@ export type CoverageStatus =
   | 'expired'
   | 'agent_elected'
 
+/**
+ * Examination mode — WHEN the examination fired relative to the agent's
+ * decision. A SEPARATE AXIS from coverage_status (which is about coverage
+ * breadth). Server-composed + consumer-unforgeable on the same K1 pattern as
+ * coverage_status. Added 2026-06-20 under the Gate-1 surface-honesty Arc 1
+ * (D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-DIFFERENTIATION).
+ *
+ *   pre_decision_harness — the examination was fired by a harness BEFORE the
+ *                          agent reasoned (Gate 1 performing its designed
+ *                          function). Earned ONLY by an operator-issued harness
+ *                          credential (the marker lives in api_keys.
+ *                          credential_provenance, set at admin mint — a consumer
+ *                          cannot self-issue it). An ATTESTATION rooted in
+ *                          operator issuance + harness-by-construction, NOT a
+ *                          cryptographic proof of timing.
+ *   post_decision_check  — the examination fired AFTER the agent formed its
+ *                          judgement: an honest check feeding developmental
+ *                          progression. The honest label for today's
+ *                          discretionary API write paths (all of them).
+ *
+ * On read, a row written before this slice (or before the flag) reads back
+ * `null` — the honest "examination mode unstated" state. The composer never
+ * emits null; null is a read-back-only state. D3: do NOT repurpose
+ * coverage_status:'continuous' (coverage breadth) for this timing property.
+ */
+export type ExaminationMode = 'pre_decision_harness' | 'post_decision_check'
+
 /** Root passion identifiers (from passions.json) */
 export type RootPassionId = 'epithumia' | 'hedone' | 'phobos' | 'lupe'
 
@@ -281,6 +308,17 @@ export type AccreditationRecord = {
   readonly coverage_status?: CoverageStatus | null
   readonly monitored_since?: string | null
   readonly credential_basis?: string | null
+
+  // ==========================================================================
+  // EXAMINATION-MODE FIELD (Gate-1 surface honesty, Arc 1, 2026-06-20). The
+  // pre/post-decision timing distinction — server-composed via
+  // composeK1InitialCoverage's harness_enforced write-path, carried through the
+  // store's write-time OPTIONS (values on a consumer-submitted record are
+  // IGNORED). Optional + nullable: rows written before this slice / before the
+  // SUBSTRATE_EXAMINATION_MODE_ENABLED flag read back undefined → the public
+  // payload omits the field (flag-off byte-identity). R18c-additive.
+  // ==========================================================================
+  readonly examination_mode?: ExaminationMode | null
 }
 
 /**
@@ -334,6 +372,14 @@ export type AccreditationPayload = {
   readonly coverage_status: CoverageStatus | null
   readonly monitored_since: string | null
   readonly credential_basis: string | null
+
+  /** Examination mode (Gate-1 surface honesty, Arc 1, 2026-06-20) — the
+   *  pre/post-decision timing distinction. Present on the payload ONLY when the
+   *  SUBSTRATE_EXAMINATION_MODE_ENABLED feature has folded it on read; `null`
+   *  means "examination mode unstated" (a row written before the slice). The
+   *  sole unforgeable distinguisher between the two Gate-1 configurations under
+   *  Option 2. ATTESTATION, not a cryptographic proof of timing. R18c-additive. */
+  readonly examination_mode?: ExaminationMode | null
 }
 
 /**

@@ -129,11 +129,13 @@ import type {
   DimensionLevel,
   DimensionScores,
   DirectionOfTravel,
+  ExaminationMode,
   GradeChangeEvent,
   KatorthomaProximityLevel,
   PersistingPassion,
   SenecanGradeId,
 } from './trust-layer/types/accreditation'
+import { isExaminationModeEnabled } from './examination-mode-flag'
 import type {
   DeliberationBreadth,
   KathekonQuality,
@@ -224,6 +226,19 @@ export interface AgentAccreditationRow {
   readonly coverage_status: CoverageStatus | null
   readonly monitored_since: string | null
   readonly credential_basis: string | null
+  /** Examination mode (Gate-1 surface honesty, Arc 1, 2026-06-20). Nullable
+   *  column added by /website/supabase-agent-accreditation-examination-mode-
+   *  migration.sql. WRITE: taken exclusively from AccreditationRowOptions
+   *  (server-composed via composeK1InitialCoverage's harness_enforced path —
+   *  values on a consumer-submitted record are ignored), and only when the
+   *  SUBSTRATE_EXAMINATION_MODE_ENABLED feature is on (flag-off the column key
+   *  is OMITTED from the written row → byte-identical, no PGRST204). READ:
+   *  folded into the AccreditationRecord only when the feature is on. NULL on
+   *  rows written before the slice (the honest "examination mode unstated").
+   *  OPTIONAL on the row shape so the write builder can OMIT the key entirely
+   *  when the feature is off (byte-identical write) and the read can tolerate
+   *  the column being absent before the migration lands. */
+  readonly examination_mode?: ExaminationMode | null
 }
 
 /** A row of public.grade_history — the append-only grade-change audit trail. */
@@ -268,6 +283,12 @@ export interface AccreditationRowOptions {
   readonly coverage_status?: CoverageStatus | null
   readonly monitored_since?: string | null
   readonly credential_basis?: string | null
+  /** Examination mode (Gate-1 surface honesty, Arc 1) — composed SERVER-SIDE
+   *  via composeK1InitialCoverage; the row builder reads it from HERE and never
+   *  from the record. Omitted → not written. Even when supplied, the column is
+   *  written ONLY when the SUBSTRATE_EXAMINATION_MODE_ENABLED feature is on
+   *  (see accreditationRecordToRow's includeExaminationMode parameter). */
+  readonly examination_mode?: ExaminationMode | null
 }
 
 /** Write-time options for a grade_history row's optional audit note. */
@@ -296,7 +317,12 @@ export interface GradeHistoryRowOptions {
  */
 export function accreditationRecordToRow(
   record: AccreditationRecord,
-  opts: AccreditationRowOptions = {}
+  opts: AccreditationRowOptions = {},
+  // Gate-1 surface honesty (Arc 1, 2026-06-20). Default FALSE keeps every
+  // existing caller byte-identical (the examination_mode column key is omitted
+  // from the written row → no PGRST204 before the migration lands). The store's
+  // write chokepoint (upsertAccreditationRecord) passes isExaminationModeEnabled().
+  includeExaminationMode = false,
 ): AgentAccreditationRow {
   return {
     agent_id: record.agent_id,
@@ -344,6 +370,14 @@ export function accreditationRecordToRow(
     coverage_status: opts.coverage_status ?? null,
     monitored_since: opts.monitored_since ?? null,
     credential_basis: opts.credential_basis ?? null,
+    // Gate-1 examination_mode (Arc 1) — from OPTS exclusively (server-composed;
+    // a consumer-submitted record's value is ignored). The column key is
+    // included ONLY when the feature is on; flag-off the spread is empty so the
+    // written row is BYTE-IDENTICAL to pre-Arc-1 and PostgREST never sees an
+    // unknown column before the migration lands (the M3-CI-11 PGRST204 lesson).
+    ...(includeExaminationMode
+      ? { examination_mode: opts.examination_mode ?? null }
+      : {}),
   }
 }
 
@@ -360,7 +394,12 @@ export function accreditationRecordToRow(
  * guard and yield [] rather than iterating characters (the KG7 failure mode).
  */
 export function rowToAccreditationRecord(
-  row: AgentAccreditationRow
+  row: AgentAccreditationRow,
+  // Gate-1 surface honesty (Arc 1, 2026-06-20). Default FALSE keeps every
+  // existing caller byte-identical (the record omits examination_mode →
+  // buildAccreditationPayload omits it → the public payload is unchanged). The
+  // public read seam (lookupAccreditationRecord) passes isExaminationModeEnabled().
+  includeExaminationMode = false,
 ): AccreditationRecord {
   const dimension_levels: DimensionScores = {
     passion_reduction: row.passion_reduction,
@@ -410,6 +449,14 @@ export function rowToAccreditationRecord(
     coverage_status: row.coverage_status ?? null,
     monitored_since: row.monitored_since ?? null,
     credential_basis: row.credential_basis ?? null,
+    // Gate-1 examination_mode (Arc 1) — folded ONLY when the feature is on.
+    // Flag-off the field is omitted from the record entirely → byte-identical
+    // payload. `null` = "examination mode unstated" (a row written before the
+    // slice / before the flag, read under the feature). Robust to the column
+    // being absent (select('*') before the migration) → ?? null.
+    ...(includeExaminationMode
+      ? { examination_mode: row.examination_mode ?? null }
+      : {}),
   }
 }
 
@@ -519,7 +566,10 @@ export async function lookupAccreditationRecord(
 
   if (!data) return null
 
-  return rowToAccreditationRecord(data as AgentAccreditationRow)
+  // Gate-1 surface honesty (Arc 1) — the public read seam folds examination_mode
+  // only when the feature is on (flag-off the field is absent → byte-identical
+  // payload). This is the single read chokepoint the public GET endpoint uses.
+  return rowToAccreditationRecord(data as AgentAccreditationRow, isExaminationModeEnabled())
 }
 
 /**
@@ -554,7 +604,12 @@ export async function upsertAccreditationRecord(
     )
   }
 
-  const row = accreditationRecordToRow(record, opts)
+  // Gate-1 surface honesty (Arc 1) — the SINGLE write chokepoint. Every write
+  // path (the wrapper POST via the writer library; the Sage Reflect feed) flows
+  // through here, so gating the examination_mode column write at this one point
+  // covers them all: flag-off the column key is omitted from the upserted row →
+  // byte-identical write, no PGRST204 before the migration lands.
+  const row = accreditationRecordToRow(record, opts, isExaminationModeEnabled())
 
   const { error } = await supabaseAdmin
     .from('agent_accreditation')

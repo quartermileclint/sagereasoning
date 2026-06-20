@@ -256,6 +256,16 @@ export function buildAccreditationPayload(
     coverage_status: record.coverage_status ?? null,
     monitored_since: record.monitored_since ?? null,
     credential_basis: record.credential_basis ?? null,
+    // Examination mode (Gate-1 surface honesty, Arc 1, 2026-06-20). Included
+    // ONLY when the store's read-fold set the field (i.e. the
+    // SUBSTRATE_EXAMINATION_MODE_ENABLED feature is on). When absent (undefined)
+    // the key is omitted entirely → the public payload is BYTE-IDENTICAL to
+    // pre-Arc-1 (flag-off byte-identity). `null` = "examination mode unstated"
+    // (a row written before this slice, read under the feature). Env-free here —
+    // presence is controlled upstream at the website-only read I/O seam.
+    ...(record.examination_mode !== undefined
+      ? { examination_mode: record.examination_mode }
+      : {}),
   }
 }
 

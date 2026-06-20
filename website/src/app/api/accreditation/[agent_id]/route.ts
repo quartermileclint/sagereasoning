@@ -204,6 +204,10 @@ import {
 } from '@/lib/substrate/trust-layer/accreditation/agent-id-vocabulary'
 
 import { composeK1InitialCoverage } from '@/lib/substrate/trust-layer/accreditation/coverage-status'
+import {
+  isExaminationModeEnabled,
+  readPreDecisionMarker,
+} from '@/lib/substrate/examination-mode-flag'
 
 import { lookupAccreditationRecord } from '@/lib/substrate/sage-assent-accreditation-store'
 
@@ -331,7 +335,17 @@ export async function GET(
  * the gate.
  */
 type AuthGateResult =
-  | { ok: true; claims: { agent_id: string } }
+  | {
+      ok: true
+      claims: { agent_id: string }
+      /** Gate-1 surface honesty (Arc 1, 2026-06-20). TRUE iff the
+       *  SUBSTRATE_EXAMINATION_MODE_ENABLED feature is on AND the authenticated
+       *  credential carries the operator-set pre-decision marker (admin-mint
+       *  only — a consumer cannot self-issue it). Drives the route's choice of
+       *  the harness_enforced write-path. Absent/false → discretionary
+       *  (post-decision) write-path, byte-identical to pre-Arc-1. */
+      examination_marker?: boolean
+    }
   | { ok: false; reason: 'not_enabled' | 'unauthorized' }
 
 /**
@@ -432,7 +446,19 @@ async function verifyAgentIdOwnership(
     scope_downstream_identity_model: result.scope_downstream_identity_model,
     scope_path_posture: result.scope_path_posture,
   })
-  return { ok: true, claims: { agent_id: result.agent_id } }
+
+  // Gate-1 surface honesty (Arc 1, 2026-06-20) — minimal-touch marker read.
+  // The shared credential validators (validateSageAssentWriteToken /
+  // validatePracticeCredential) are left BYTE-IDENTICAL in what they return;
+  // only here, only when the feature is on, do we read the ALREADY-AUTHENTICATED
+  // credential's operator-set pre-decision marker (api_keys.credential_provenance
+  // — set at admin mint; a consumer cannot self-issue it). Fail-closed (false)
+  // on any error. Flag-off: no extra read, examination_marker stays undefined →
+  // the route selects the discretionary write-path exactly as before.
+  const examination_marker = isExaminationModeEnabled()
+    ? await readPreDecisionMarker(result.credential_id)
+    : false
+  return { ok: true, claims: { agent_id: result.agent_id }, examination_marker }
 }
 
 /**
@@ -706,13 +732,26 @@ export async function POST(
   //    coverage values on the consumer's submitted record are ignored. Both
   //    write kinds are discretionary submission, so the honest initial state
   //    is 'agent_elected' per the K1 ADR (never 'continuous' without the hook).
+  // Gate-1 surface honesty (Arc 1, 2026-06-20) — select the write-path. The
+  // harness_enforced path (which stamps examination_mode: pre_decision_harness)
+  // is chosen ONLY when the feature is on AND the authenticated credential
+  // carries the operator-set pre-decision marker (verifyAgentIdOwnership read it
+  // from credential_provenance — admin-mint only). Otherwise the discretionary
+  // 'wrapper_write' path (post_decision_check), byte-identical to pre-Arc-1.
+  // Whether the examination_mode column is actually WRITTEN is gated again at the
+  // store chokepoint (upsertAccreditationRecord) — so flag-off, the spread's
+  // examination_mode is dropped and the persisted row is unchanged.
+  const examinationWritePath =
+    isExaminationModeEnabled() && auth.examination_marker
+      ? 'harness_enforced'
+      : 'wrapper_write'
   const writeExtras = {
     ...extractWriteExtras(request.headers.get('x-loop-id'), rawBody),
     ...composeK1InitialCoverage(
       validated.body.kind === 'update'
         ? validated.body.transition_result.record
         : validated.body.profile.accreditation_record,
-      'wrapper_write',
+      examinationWritePath,
     ),
   }
 

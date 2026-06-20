@@ -228,6 +228,12 @@ export function buildAccreditationPayload(
     coverage_status: record.coverage_status ?? null,
     monitored_since: record.monitored_since ?? null,
     credential_basis: record.credential_basis ?? null,
+    // Examination mode (Gate-1 surface honesty, Arc 1, 2026-06-20, port-mirror
+    // sync). Included ONLY when the store's read-fold set the field; absent →
+    // key omitted → payload byte-identical. `null` = "examination mode unstated".
+    ...(record.examination_mode !== undefined
+      ? { examination_mode: record.examination_mode }
+      : {}),
   }
 }
 

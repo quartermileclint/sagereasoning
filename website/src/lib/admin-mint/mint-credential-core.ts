@@ -77,9 +77,13 @@ COMMANDS
   mint practice --label <text> --capabilities <c1,c2,...>
                 [--agent-id <id>] [--owner-email <email>]
                 [--owner-kind operator|external_consumer] [--tier free|paid] [--notes <text>]
+                [--examination-enforcement pre_decision_harness]
                 Mint an sr_prac_ Unified Practice Credential (CI-14). --capabilities is a
                 comma-separated subset of: consult,l1_supply,accreditation_write,calling,reflect
                 (write-class members are opt-in; agent-id binds write/calling/reflect)
+                --examination-enforcement (Gate-1 Arc 1, operator-only) marks the credential
+                pre-decision-harness so its accreditation writes earn examination_mode:
+                pre_decision_harness. DO NOT use until a genuine pre-decision harness exists.
   revoke api      --id <uuid> [--reason <text>]   (PATCH is_active=false — no DELETE on this surface)
   revoke install  --id <uuid> [--reason <text>]   (DELETE)
   revoke assent   --id <uuid> [--reason <text>]   (DELETE)
@@ -242,6 +246,21 @@ function buildPracticeMintPlan(flags: Record<string, string>): PlanResult {
     body.tier = flags['tier']
   }
   if (flags['notes']) body.notes = flags['notes']
+  // Gate-1 surface honesty (Arc 1, 2026-06-20) — the OPERATOR-ONLY pre-decision
+  // marker. Sets credential_provenance.examination_enforcement='pre_decision_harness'
+  // at the (admin-gated) route, so the credential earns
+  // examination_mode:'pre_decision_harness' on its accreditation writes. Per Arc 1
+  // sequencing this stays UN-ISSUED until a genuine pre-decision harness exists —
+  // do NOT pass this flag until then (it would be an empty claim).
+  if (flags['examination-enforcement'] !== undefined) {
+    if (flags['examination-enforcement'] !== 'pre_decision_harness') {
+      return {
+        ok: false,
+        error: "examination-enforcement, if set, must be 'pre_decision_harness'.",
+      }
+    }
+    body.examination_enforcement = 'pre_decision_harness'
+  }
 
   return { ok: true, plan: { method: 'POST', path: ADMIN_API_KEYS_PATH, body } }
 }

@@ -574,6 +574,52 @@ async function main(): Promise<void> {
   }
 
   // --------------------------------------------------------------------------
+  // W-EXAM-1  seedAccreditation forwards extras.examination_mode into the store
+  //           opts (Gate-1 Arc 1). The route composes the value; the writer must
+  //           NOT drop it on the way to the store (the adversarial-review HIGH
+  //           finding — the route→writer→store wiring blind spot).
+  // --------------------------------------------------------------------------
+  {
+    const profile = freshProfile()
+    const mock = makeMockDeps()
+    await seedAccreditation(profile, mock.deps, { examination_mode: 'pre_decision_harness' })
+    const upsert = mock.invocations.find((i) => i.fn === 'upsert')
+    const opts = (upsert?.args as { options?: AccreditationRowOptions } | undefined)?.options
+    assertEqual('W-EXAM-1 seed forwards examination_mode to store opts', opts?.examination_mode, 'pre_decision_harness')
+  }
+
+  // --------------------------------------------------------------------------
+  // W-EXAM-2  updateAccreditation forwards extras.examination_mode likewise.
+  // --------------------------------------------------------------------------
+  {
+    const profile = freshProfile()
+    const mock = makeMockDeps()
+    await updateAccreditation(
+      profile,
+      noChangeTransition(profile.accreditation_record),
+      mock.deps,
+      { examination_mode: 'post_decision_check' },
+    )
+    const upsert = mock.invocations.find((i) => i.fn === 'upsert')
+    const opts = (upsert?.args as { options?: AccreditationRowOptions } | undefined)?.options
+    assertEqual('W-EXAM-2 update forwards examination_mode to store opts', opts?.examination_mode, 'post_decision_check')
+  }
+
+  // --------------------------------------------------------------------------
+  // W-EXAM-3  Omitted extras → examination_mode defaults to null (the writer
+  //           always forwards a value; the store chokepoint decides whether the
+  //           column is written — byte-identity is the store's job, not here).
+  // --------------------------------------------------------------------------
+  {
+    const profile = freshProfile()
+    const mock = makeMockDeps()
+    await seedAccreditation(profile, mock.deps)
+    const upsert = mock.invocations.find((i) => i.fn === 'upsert')
+    const opts = (upsert?.args as { options?: AccreditationRowOptions } | undefined)?.options
+    assertEqual('W-EXAM-3 seed without extras → examination_mode null', opts?.examination_mode ?? null, null)
+  }
+
+  // --------------------------------------------------------------------------
   // Summary
   // --------------------------------------------------------------------------
   console.log('')

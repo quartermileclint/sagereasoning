@@ -242,6 +242,13 @@ export interface AccreditationWriteExtras {
   readonly coverage_status?: import('./trust-layer/types/accreditation').CoverageStatus | null
   readonly monitored_since?: string | null
   readonly credential_basis?: string | null
+  /** Examination mode (Gate-1 surface honesty, Arc 1, 2026-06-20) — server-
+   *  composed by the caller via composeK1InitialCoverage's harness_enforced path
+   *  and passed straight to the store options. NEVER from the consumer's record.
+   *  Omitted → NULL. Whether the column is actually WRITTEN is gated at the store
+   *  chokepoint (upsertAccreditationRecord) by SUBSTRATE_EXAMINATION_MODE_ENABLED —
+   *  so forwarding it here is byte-identity-safe (flag-off the store drops it). */
+  readonly examination_mode?: import('./trust-layer/types/accreditation').ExaminationMode | null
 }
 
 // ============================================================================
@@ -294,6 +301,11 @@ export async function seedAccreditation(
       coverage_status: extras.coverage_status ?? null,
       monitored_since: extras.monitored_since ?? null,
       credential_basis: extras.credential_basis ?? null,
+      // Gate-1 Arc 1 — forward the server-composed examination_mode so the harness
+      // path actually persists (the store chokepoint gates whether the column is
+      // written; byte-identity-safe flag-off). Without this the field would be
+      // silently dropped between route and store (the adversarial-review HIGH find).
+      examination_mode: extras.examination_mode ?? null,
     })
     await deps.appendInitialGradeHistory(record)
 
@@ -386,6 +398,9 @@ export async function updateAccreditation(
       coverage_status: extras.coverage_status ?? null,
       monitored_since: extras.monitored_since ?? null,
       credential_basis: extras.credential_basis ?? null,
+      // Gate-1 Arc 1 — forward examination_mode (see seedAccreditation note). The
+      // store chokepoint gates the column write; byte-identity-safe flag-off.
+      examination_mode: extras.examination_mode ?? null,
     })
 
     if (transitionResult.grade_changed && transitionResult.trigger !== null) {

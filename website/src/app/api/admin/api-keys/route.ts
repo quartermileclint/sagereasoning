@@ -124,6 +124,7 @@ export async function POST(request: NextRequest) {
       notes,
       capabilities, // CI-14 (optional): presence triggers UPC mode (sr_prac_)
       owner_kind, // CI-14 (optional): 'operator' | 'external_consumer'
+      examination_enforcement, // Gate-1 Arc 1 (optional): 'pre_decision_harness' marker (UPC only)
     } = body
 
     if (!label || typeof label !== 'string' || label.trim().length === 0) {
@@ -158,6 +159,23 @@ export async function POST(request: NextRequest) {
       if (owner_kind !== undefined && !['operator', 'external_consumer'].includes(owner_kind)) {
         return NextResponse.json(
           { error: "owner_kind must be 'operator' or 'external_consumer'" },
+          { status: 400 },
+        )
+      }
+
+      // Gate-1 surface honesty (Arc 1, 2026-06-20) — the operator-only
+      // pre-decision marker. This whole route is admin-gated (requireAdmin), so a
+      // consumer cannot self-issue it: that is the UNFORGEABILITY ROOT for
+      // examination_mode:'pre_decision_harness' on the public accreditation
+      // credential. Accepted ONLY in UPC mode (the accreditation-write credential
+      // type a Gate-1 harness uses). Per Arc 1 sequencing the marker stays
+      // UN-ISSUED until a genuine pre-decision harness exists to earn it.
+      if (
+        examination_enforcement !== undefined &&
+        examination_enforcement !== 'pre_decision_harness'
+      ) {
+        return NextResponse.json(
+          { error: "examination_enforcement, if set, must be 'pre_decision_harness'" },
           { status: 400 },
         )
       }
@@ -221,7 +239,17 @@ export async function POST(request: NextRequest) {
         owner_kind: resolvedOwnerKind,
         purpose: 'unified_practice',
         capabilities,
-        credential_provenance: { minted_by: 'admin/api-keys', basis: 'admin_issued_upc' },
+        // Gate-1 Arc 1 — the optional operator-set pre-decision marker is merged
+        // into provenance ONLY when explicitly supplied at admin mint (admin-gated;
+        // a consumer cannot reach this). readPreDecisionMarker reads exactly this
+        // key (credential_provenance.examination_enforcement === 'pre_decision_harness').
+        credential_provenance: {
+          minted_by: 'admin/api-keys',
+          basis: 'admin_issued_upc',
+          ...(examination_enforcement === 'pre_decision_harness'
+            ? { examination_enforcement: 'pre_decision_harness' }
+            : {}),
+        },
         tier,
         monthly_limit: Number(monthly_limit),
         daily_limit: Number(daily_limit),
