@@ -77,6 +77,8 @@ mode = "ok";
   check("1 happy: frame header present", ctx.includes("Gate 1 — pre-decision examination"));
   check("1 happy: proximity injected", ctx.includes("deliberate"));
   check("1 happy: control-filter injected", ctx.includes("prohairesis"));
+  check("1 happy: circles injected", ctx.includes("wider_community"));
+  check("1 happy: control items render as text (no [object Object])", !ctx.includes("[object Object]"));
   check("1 happy: passions injected", ctx.toLowerCase().includes("phobos"));
   check("1 happy: kathekon injected", ctx.includes("Kathekon"));
   check("1 happy: stdout is ONLY the JSON object", r.out.trim().startsWith("{") && r.out.trim().endsWith("}"));
@@ -136,6 +138,23 @@ mode = "malformed";
   const ctx = ctxOf(r.out);
   check("7 malformed: exit 0 + honest note", r.code === 0 && ctx.includes("UNAVAILABLE"));
   check("7 malformed: no success marker", !existsSync(join(stateDir, "s6.framed")));
+}
+
+// 8 — Unsigned (Layer-2 signing OFF) shape: the verdict sits directly at `assessment` (no signed
+//     envelope, no nested `.assessment`). This is the REAL TEST-server shape, surfaced by the
+//     Slice-1 trajectory proof. The hook MUST still frame from it (regression lock for fix B).
+mode = "raw";
+{
+  const r = await runHook({ session_id: "s7raw", hook_event_name: "UserPromptSubmit", prompt: "Should we publish the post now or hold?" });
+  const ctx = ctxOf(r.out);
+  check("8 unsigned-shape: exit 0", r.code === 0, `code=${r.code} err=${r.err}`);
+  check("8 unsigned-shape: frame header present", ctx.includes("Gate 1 — pre-decision examination"));
+  check("8 unsigned-shape: proximity injected from raw assessment", ctx.includes("deliberate"));
+  check("8 unsigned-shape: control-filter injected", ctx.includes("prohairesis"));
+  check("8 unsigned-shape: circles injected", ctx.includes("wider_community"));
+  check("8 unsigned-shape: no [object Object]", !ctx.includes("[object Object]"));
+  check("8 unsigned-shape: kathekon injected", ctx.includes("Kathekon"));
+  check("8 unsigned-shape: success marker written", existsSync(join(stateDir, "s7raw.framed")));
 }
 
 server.close();

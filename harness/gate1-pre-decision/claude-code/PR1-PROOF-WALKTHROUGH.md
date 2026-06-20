@@ -26,8 +26,11 @@ The standing TEST-run process: local `npm run dev` runs against the **TEST** Sup
   narrative and the call returns **fast** (within the 30s hook timeout). Without it the call still
   works but runs the full ~30s prose path and the hook will fail-open with a "timeout" note instead
   of showing the happy path.
-- TEST must **not** require signing without a key configured (if the smoke test in Step 3 returns a
-  503 signing error, that is the cause — disable the signing requirement on TEST or set its key).
+- Layer-2 signing on TEST can be **ON or OFF** — the hook reads the verdict from either the signed
+  shape (`assessment.assessment`) or the unsigned shape (`assessment`) since the Slice-1 trajectory-proof
+  fix. The only state to avoid is signing *enabled without a key* (`SUBSTRATE_LAYER2_SIGNING_ENABLED=true`
+  but no `SUBSTRATE_LAYER2_SIGNING_KEY`), which 503s. Leaving both unset (the TEST default → the `raw`
+  shape) is fine.
 - Only if you choose an `sr_prac_` credential in Step 1: also set
   `SUBSTRATE_UPC_CAPABILITY_AUTH_ENABLED=true`. **Recommended: use an `sr_live_` key (Step 1) so you
   need neither this flag nor anything beyond `SUBSTRATE_L3_DEFER_ENABLED`.**
@@ -37,6 +40,9 @@ The standing TEST-run process: local `npm run dev` runs against the **TEST** Sup
 ---
 
 ## Step 1 — Mint a throwaway TEST credential
+
+> **Order note:** the mint CLI POSTs to `http://localhost:3000`, so **start the dev server (Step 2)
+> FIRST** — otherwise the mint prints `Target: http://localhost:3000` then `ERROR: fetch failed`.
 
 From `website/`, with your admin auth env set the same way you always mint on TEST
 (`MINT_CLI_ADMIN_EMAIL` + `MINT_CLI_ADMIN_PASSWORD`, or `MINT_CLI_ADMIN_JWT`):
@@ -48,13 +54,17 @@ npx tsx --env-file=.env.development.local scripts/mint-credential.ts \
 ```
 
 This mints an `sr_live_…` key (consult-capable, no UPC flag needed) and **prints the token once.**
-Copy it, then export it in the shell you will launch Claude Code from:
+Capture it **programmatically** in the shell you will launch Claude Code from — copying by hand and
+re-exporting a stale token from a prior session is the classic source of a later 401:
 
 ```
-export SAGE_GATE1_CREDENTIAL=sr_live_paste_the_token_here
+npx tsx --env-file=.env.development.local scripts/mint-credential.ts mint api --label "Gate-1 Slice-1 TEST" 2>&1 | tee /tmp/gate1-mint.out
+export SAGE_GATE1_CREDENTIAL=$(grep -oE 'sr_live_[A-Za-z0-9]{32}' /tmp/gate1-mint.out | head -1)
+echo "exported: ${SAGE_GATE1_CREDENTIAL:0:12}… length ${#SAGE_GATE1_CREDENTIAL}"
 ```
 
-> ☐ **Confirm:** the mint printed a `sr_live_…` token and `echo $SAGE_GATE1_CREDENTIAL` shows it.
+> ☐ **Confirm:** the `exported:` line shows `sr_live_…` and `length 40`. This same shell must be the
+> one you launch Claude Code from (Step 5) — the hook reads `SAGE_GATE1_CREDENTIAL` from that process.
 > *(Alternative, exercises the UPC path: `mint practice --label "Gate-1 Slice-1 TEST" --capabilities consult` → `sr_prac_…`; requires `SUBSTRATE_UPC_CAPABILITY_AUTH_ENABLED=true` on TEST.)*
 
 ---
@@ -81,13 +91,16 @@ curl -s -X POST http://localhost:3000/api/reason \
   -H "Authorization: Bearer $SAGE_GATE1_CREDENTIAL" \
   -H "Content-Type: application/json" \
   -d '{"input":"Should we publish the post now or hold?","depth":"standard","response_format":"assessment_first"}' \
-  | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);console.log('proximity:',j?.assessment?.assessment?.katorthoma_proximity);console.log('narrative_status:',j?.meta?.narrative_status);})"
+  | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);const v=j?.assessment?.assessment??j?.assessment;console.log('proximity:',v?.katorthoma_proximity);console.log('shape:',(j?.assessment&&'signature'in j.assessment)?'signed (signing ON)':'raw (signing OFF)');console.log('narrative_status:',j?.meta?.narrative_status);})"
 ```
 
-> ☐ **Confirm:** it prints a `proximity:` value (e.g. `deliberate`) — i.e. `assessment.assessment` is
-> present. If it prints `undefined`, or you see a 401/403/503, fix that first:
-> 401/403 = credential problem (re-mint / re-export); 503 = signing requirement (see Prerequisites);
-> `undefined` proximity = check the body shape. **Do not proceed until this prints a proximity.**
+> ☐ **Confirm:** it prints a `proximity:` value (e.g. `deliberate`). The `shape:` line reports whether
+> this server signs (`signed`, verdict at `assessment.assessment`) or not (`raw`, verdict at
+> `assessment`) — **both are fine; the hook reads the verdict from either** (signing-agnostic since the
+> Slice-1 trajectory-proof fix). If you instead see `proximity: undefined`, or a 401/403, fix that first:
+> 401/403 = credential problem — re-mint and export the **exact** printed token (a stale export from a
+> prior session is the classic cause; capture it programmatically, see Step 1); `undefined` with HTTP 200
+> = a body-shape drift worth raising. **Do not proceed until this prints a proximity.**
 
 ---
 

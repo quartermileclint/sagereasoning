@@ -17,7 +17,7 @@ your hooks are a contract."*
 
 1. The user submits a task. Claude Code runs the `UserPromptSubmit` hook **before** the model sees it.
 2. The hook POSTs the raw task to `/api/reason` in **framing posture** (`response_format:"assessment_first"`, `quick`/`standard` depth — never `deep`, per ADR-011 D3).
-3. It reads the verdict at `assessment.assessment` and injects the Stoic frame — circles of concern, control-filter, passions-to-watch, kathekon, proximity — as `additionalContext`.
+3. It reads the verdict — signing-agnostic: nested at `assessment.assessment` when the deployment has Layer-2 signing ON, or directly at `assessment` when it's OFF — and injects the Stoic frame (circles of concern, control-filter, passions-to-watch, kathekon, proximity) as `additionalContext`.
 4. The model reasons **from** the examined frame. It never sees the task un-examined.
 
 ## Directory layout
@@ -64,8 +64,9 @@ stored in config or code — it is read from an env var.
 ```
 node harness/gate1-pre-decision/test/logic-harness.mjs
 ```
-Expected: `22 passed, 0 failed`. This proves request construction, frame parsing, the fire-once
-guard, and both fail modes against a local mock. It is **not** the trajectory proof.
+Expected: `32 passed, 0 failed`. This proves request construction, frame parsing (both the signed and
+the unsigned `/api/reason` response shapes, with object-valued control_filter/oikeiosis items), the
+fire-once guard, and both fail modes against a local mock. It is **not** the trajectory proof.
 
 ## Scope boundaries
 

@@ -140,8 +140,12 @@ function renderFrame(verdict) {
   if (circles.length) lines.push(`• Circles of concern engaged (oikeiosis): ${circles.join(", ")}`);
 
   const cf = verdict.control_filter || {};
-  if (arr(cf.within_prohairesis).length) lines.push(`• Within your control (prohairesis): ${arr(cf.within_prohairesis).join("; ")}`);
-  if (arr(cf.outside_prohairesis).length) lines.push(`• Outside your control: ${arr(cf.outside_prohairesis).join("; ")}`);
+  // control_filter items are objects ({item, classification, …}) on the real API, plain strings in
+  // older/mocked shapes — route both through textOf so they never render as "[object Object]".
+  const within = arr(cf.within_prohairesis).map(textOf).filter(Boolean);
+  const outside = arr(cf.outside_prohairesis).map(textOf).filter(Boolean);
+  if (within.length) lines.push(`• Within your control (prohairesis): ${within.join("; ")}`);
+  if (outside.length) lines.push(`• Outside your control: ${outside.join("; ")}`);
 
   const pd = verdict.passion_diagnosis || {};
   const passions = arr(pd.passions_detected).map(passionLabel).filter(Boolean);
@@ -166,9 +170,13 @@ function renderFrame(verdict) {
 
 function pickCircles(oik) {
   if (!oik) return [];
-  const fromAssessed = arr(oik.circles_assessed).map((c) => c?.circle || c?.name || textOf(c)).filter(Boolean);
-  if (fromAssessed.length) return fromAssessed;
-  return arr(oik.oikeiosis_circles_engaged).map((c) => c?.circle || textOf(c)).filter(Boolean);
+  // Real API exposes engaged circles under `relevant_circles`; older/mocked shapes used
+  // `circles_assessed` / `oikeiosis_circles_engaged`. Take the first that yields names.
+  for (const key of ["relevant_circles", "circles_assessed", "oikeiosis_circles_engaged"]) {
+    const got = arr(oik[key]).map((c) => c?.circle || c?.name || textOf(c)).filter(Boolean);
+    if (got.length) return got;
+  }
+  return [];
 }
 function passionLabel(p) {
   if (!p) return "";
@@ -262,10 +270,22 @@ async function main() {
     return fail(cfg, "non-JSON response");
   }
 
-  // The verdict lives at assessment.assessment (the inner object; the outer `assessment`
-  // is the signed envelope). Present in both 'full' and 'assessment_first' shapes.
-  const verdict = body?.assessment?.assessment;
-  if (!verdict || typeof verdict !== "object") return fail(cfg, "no assessment in response");
+  // The verdict is the Layer-2 assessment object; WHERE it sits depends on whether the
+  // deployment has Layer-2 signing ON (SUBSTRATE_LAYER2_SIGNING_ENABLED):
+  //   - signing ON  (production): `assessment` is the SIGNED envelope; the verdict is nested
+  //                               at assessment.assessment (alongside signature/key_id).
+  //   - signing OFF (e.g. a local/unsigned TEST deployment): `assessment` IS the raw verdict.
+  // A framing hook only needs the verdict fields — it does NOT verify the signature — so read
+  // from whichever shape carries `katorthoma_proximity` (the field unique to the verdict; the
+  // signed envelope never carries it). Signed-nested first, raw-direct second.
+  const signedInner = body?.assessment?.assessment;
+  const verdict =
+    signedInner && typeof signedInner === "object" && "katorthoma_proximity" in signedInner
+      ? signedInner
+      : body?.assessment && typeof body.assessment === "object" && "katorthoma_proximity" in body.assessment
+      ? body.assessment
+      : null;
+  if (!verdict) return fail(cfg, "no assessment in response");
 
   emitContext(renderFrame(verdict));
 
