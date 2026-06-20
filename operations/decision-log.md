@@ -12036,3 +12036,38 @@ cd website && npm run build        # api-docs/page.tsx is a build-graph file —
 **Rules served:** R0, R17 (minimisation — operator unattributed), R18/R18f (honest credential; the attestation-not-proof-of-timing limit documented on every public surface, not hidden), R19/R19e (configuration honesty), AC7, PR15, PR17 (live walkthrough), PR18 (close-time production-state), KG1 (fail-closed marker read).
 
 **Status:** Adopted. Implementation: the `examination_mode` extension is **Live** on `Scoped → Designed → Scaffolded → Wired → Verified → Live`. Cross-references: `D-SAGE-PRACTICE-GATE1-ARC1-EXAMINATION-MODE-BUILT-DARK-TEST-VERIFIED`, `D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-DIFFERENTIATION`, `operations/handoffs/founder/2026-06-20-gate1-arc1-examination-mode-ACTIVATION-NEXT-SESSION-PROMPT.md`, `operations/handoffs/founder/2026-06-20-gate1-arc1-examination-mode-ACTIVATION-close.md`, `drafts/sage-practice-examination-mode-docs-staged.md`, `website/supabase-agent-accreditation-examination-mode-migration.sql`.
+
+---
+
+## 2026-06-20 — D-SAGE-PRACTICE-GATE1-ARC2-HARNESS-DESIGN-ADOPTED
+
+**Decision:** The Gate-1 pre-decision harness design is **Adopted as ADR-011** (`adopted/adr/2026-06-20-pre-decision-harness-arc2.md`), with four founder elections locked: (1) **adopt** the design now (not refine); (2) prove the **Claude Code plugin + hook** surface first (PR1 single-surface proof); (3) default fail-mode = **fail-open with an honest log, configurable to strict**; (4) confirm `pre_decision_harness` is earned by an **operator-minted credential** carrying the `examination_enforcement: pre_decision_harness` provenance marker (the Arc-1 unforgeability root). The build is staged into four PR1-respecting `code-critical` slices, Slice 1 first.
+
+**Reasoning:** Arc 1 made the `examination_mode` credential honest and Live but issued `pre_decision_harness` to no one; Arm 1 (`runs/2026-06-20/`) showed a self-directed agent frames *after* deciding, so the only deterministic fix is harness control-flow, available where a developer controls the loop (extends `D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-DIFFERENTIATION`, `D-SAGE-PRACTICE-GATE1-ARC1-EXAMINATION-MODE-ACTIVATION`). PR11 re-confirmed the three load-bearing Anthropic-native primitives current at adoption (UserPromptSubmit hook; plugins bundling hooks+MCP, auto-registering on install; Agent SDK hooks + canUseTool with no pre-loop step → orchestrate in code); PR15 — no bespoke substitute. Exact wire contracts deferred to build (PR11/PR12); the robust command/curl hook path does not depend on the unverified specifics.
+
+**Files touched:**
+- `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` — NEW; ADR-011, the adopted Arc-2 design + the four locked decisions + the staged slices.
+- `drafts/sage-practice-pre-decision-harness-design.md` — status line updated to "Adopted as ADR-011" (content retained as the research basis; non-destructive).
+- `operations/decision-log.md` — this entry.
+- `operations/handoffs/founder/2026-06-20-gate1-arc2-harness-design-staging-close.md` — NEW; session close.
+- `operations/handoffs/founder/2026-06-20-gate1-arc2-slice1-framing-hook-NEXT-SESSION-PROMPT.md` — NEW; Slice 1 prompt.
+
+**Risk classification:** **Standard** under 0d-ii — documents only (ADR + decision log + close + next-session prompt + a non-destructive draft status line). No code/schema/flag/production change. The ADR adoption is a governing-doc change made with **explicit founder approval** (Decision 1); the prior version is preserved (the draft is retained + git history). AC7 not engaged (this entry); PR6 not engaged (this entry). AC7 + PR6 **do** govern the build slices (Slice 3 mints a credential + ships the first non-null harness marker to the Live accreditation read).
+
+**Rollback path:** `git revert` the docs commit removes ADR-011 + the draft status line + this entry + the close + the Slice-1 prompt. Nothing in production is touched.
+
+**Verification step (founder-performable):**
+```
+# Read and confirm the ADR captures the four elections + the staged slices:
+#   adopted/adr/2026-06-20-pre-decision-harness-arc2.md  (§Decision D1–D7; §Staged build)
+# Confirm the draft now points at the ADR:
+#   drafts/sage-practice-pre-decision-harness-design.md  (top status line → "Adopted as ADR-011")
+git -C "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning" status --short
+```
+Expected: the five files above show as modified/new; no other changes.
+
+**Open questions:** none blocking. Carried (not Arc-2 design): the exact `UserPromptSubmit` wire contracts (verified first-hand at Slice 1, PR11/PR12); the `http`-hook-handler question (Slice 1); the SDK second surface (after the Claude Code surface reaches Verified, PR1).
+
+**Rules served:** R0, R18/R18f, R19/R19e, AC1, AC5, AC7 (staged, not this entry), PR1, PR6 (staged), PR11, PR12, PR15, PR16, PR17, KG1, KG2.
+
+**Status:** Adopted (founder decision of record). Implementation: **Scoped** on `Scoped → Designed → Scaffolded → Wired → Verified → Live` (the harness build is staged; nothing built this session). Cross-references: `adopted/adr/2026-06-20-pre-decision-harness-arc2.md`, `D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-DIFFERENTIATION`, `D-SAGE-PRACTICE-GATE1-ARC1-EXAMINATION-MODE-ACTIVATION`, `operations/handoffs/founder/2026-06-20-gate1-arc2-harness-design-staging-close.md`, `operations/handoffs/founder/2026-06-20-gate1-arc2-slice1-framing-hook-NEXT-SESSION-PROMPT.md`, `operations/benchmarks/sage-practice-v1/runs/2026-06-20/arm1-predecision-and-reflect-findings.md`.

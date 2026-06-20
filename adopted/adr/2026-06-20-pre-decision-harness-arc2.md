@@ -1,0 +1,119 @@
+# ADR-011 — Gate-1 Pre-Decision Harness (Arc 2) — control-flow enforcement of pre-decision framing
+
+**Status:** **Adopted (design) 2026-06-20** under `D-SAGE-PRACTICE-GATE1-ARC2-HARNESS-DESIGN-ADOPTED`. Dual-taxonomy (0a/0f): decision = **Adopted**; the harness implementation = **Scoped** on `Scoped → Designed → Scaffolded → Wired → Verified → Live`. Each build slice below is its own **`code-critical`** session under the full Critical Change Protocol (0c-ii) — this ADR is design + staging only; **no production change.**
+**Date:** 2026-06-20.
+**Stream:** founder.
+**Tier:** `governance` (this ADR). The build slices it stages are `code-critical`.
+**Governing frame:** `/adopted/standing-protocol-cache.md`.
+**Predecessor decision-log entries:** `D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-DIFFERENTIATION` (the Option-2 honest-differentiation decision — one "Gate 1" name, two documented configurations, the credential field as the sole unforgeable distinguisher); `D-SAGE-PRACTICE-GATE1-ARC1-EXAMINATION-MODE-ACTIVATION` (Arc 1 — `examination_mode` Live; `pre_decision_harness` un-issued by design until this Arc).
+**Research basis:** `drafts/sage-practice-pre-decision-harness-design.md` (5-angle deep-research pass, official Anthropic + MCP + cross-framework sources cited inline); `operations/benchmarks/sage-practice-v1/runs/2026-06-20/arm1-predecision-and-reflect-findings.md` (the motivating evidence).
+**Engages:** R0 (oikeiosis — the examination frames the work before the agent reasons, the function Gate 1 intends); R18/R18f (honest positioning — `pre_decision_harness` is issued only where the harness genuinely enforces pre-decision invocation; the credential cannot be self-asserted); R19/R19e (configuration honesty — the pre-decision configuration is named for what it actually supports); AC1/KG2 (model selection — the framing call uses the fast path, never `deep`); AC5/R20a (the framing call runs the existing distress perimeter on the raw task — confirmed at build, no perimeter weakening); AC7 (Slice 3 — operator credential mint + the first non-null harness marker reaching the Live accreditation read = Critical); PR1 (single-surface proof to Verified before rollout); PR6 (Critical — credential/distribution surface); PR11/PR12 (authoritative current sources + negative-finding discipline — exact wire contracts verified first-hand at build); PR15 (Anthropic-native primitives, no bespoke substitute); PR16 (positioning + dogfood lens); PR17 (every founder-performed build step walked live); KG1 (fail-closed/fail-honest discipline at the harness boundary).
+
+---
+
+## Context
+
+### What this ADR resolves
+
+Arc 1 made the `examination_mode` accreditation credential honest and Live: it can carry `pre_decision_harness | post_decision_check | null`. But `pre_decision_harness` is issued to **no one**, because no harness exists that earns it. Every credential today honestly reads `post_decision_check` or `null`.
+
+Arc 2 builds the thing that earns the marker: a **developer-installed harness** that fires the Gate-1 examination **before the agent reasons**, deterministically — which a self-directed agent provably cannot be relied on to do.
+
+### The motivating evidence (Arm 1, first-hand)
+
+`arm1-predecision-and-reflect-findings.md` recorded a disciplined agent that adopted the cadence, consulted twice, and committed no tourism — and **still** ran Gate 1 *after* it had formed its judgement. In the agent's own words: *"USED — but it confirmed rather than changed my decision. I had already concluded 'do not recommend'; the consult endorsed that."* The examination the cadence intends as frame-*setting* landed as **post-decision confirmation.**
+
+This is structural, not a failure of docs or agent: a capable model forms a view on contact with the brief, so "Gate 1 at task adoption" is interpreted as "after I've read it and have a plan" — already post-decision. **Guidance cannot make the examination pre-decision; the agent decides before it chooses to invoke.**
+
+### Why hard (control-flow) beats soft (prompt) — the evidence
+
+Prompt-level "always frame first" tops out at **~68% adherence and degrades under load, with primacy bias and skip/reorder behaviour** (IFScale, NeurIPS 2025), and is overridable by prompt-injection (arXiv 2506.08837). Anthropic's own framing: hooks "ensure certain actions always happen rather than relying on the LLM to choose to run them" — *"your CLAUDE.md is a wish; your hooks are a contract"* (`code.claude.com/docs/en/hooks`). The deterministic fix is therefore a step in the **harness control-flow, not the prompt.**
+
+### Authoritative-current-sources confirmation (PR11, 2026-06-20)
+
+The three load-bearing Anthropic-native primitives were re-confirmed current at adoption time:
+
+- **`UserPromptSubmit` hook** — fires *before* the model processes the prompt; injects `additionalContext` (it augments, it does not replace the prompt); can block (exit 2). The core mechanism holds.
+- **Plugins** — bundle `hooks/`, `.mcp.json`, `skills/` + a `.claude-plugin/plugin.json` manifest; hooks auto-register on plugin install. Nuance (PR12): adding a *marketplace* does not auto-install its plugins — the user still runs `/plugin install`, which this design already reflects.
+- **Agent SDK** — hooks run first in a four-layer permission pipeline, plus the `canUseTool` callback; consistent with "no built-in pre-loop step → orchestrate the framing call in code."
+
+The one genuine build-time unknown — whether an `http` hook handler exists (which would let the hook POST to `/api/reason` directly with no shell script) — stays flagged for build. The robust `command`/curl path does not depend on it (PR12).
+
+---
+
+## Decision
+
+### D1 — The harness is control-flow, not a prompt
+
+Gate-1 pre-decision enforcement is delivered as a non-skippable step in the integration's control flow. This is **Mechanism C (harness interception)** firing **Mechanism B (framing posture — situation in, frame out)** of the prior findings: the harness intercepts the task at receipt, fires the Gate-1 examination on the bare task, and injects the returned frame into the agent's working context before the agent begins analysis. The agent reasons *from* the examined frame; it never sees the task un-examined.
+
+### D2 — Two surfaces; Claude Code plugin + hook proven first (founder election; PR1)
+
+- **Claude Code surface (the primary, developer-install path):** a **`UserPromptSubmit` hook**, packaged in a **plugin** that auto-registers it on install. The hook POSTs the raw task to `/api/reason` in framing posture and returns the frame as `additionalContext` before the model reasons. This is **proven first** to Verified (PR1 single-surface proof) before the second surface is begun.
+- **Agent SDK surface (the second surface, after the first reaches Verified):** there is no built-in pre-loop step, so the framing call is **orchestrated in app code** before the agent loop, with the frame passed into the agent's initial context; `canUseTool` optionally gates task tools until framing has run.
+
+### D3 — The framing call uses the fast path, never `deep` (AC1/KG2)
+
+`UserPromptSubmit` runs synchronously before the model under a bounded hook timeout. The Arm-1 **deep** framing consult took ~60s — too slow. The framing call therefore uses **`quick`/`standard` depth with `response_format:"assessment_first"`** (signed assessment + extraction returned immediately; prose deferred). The frame the agent needs — circles engaged, control-filter, passions-to-watch, kathekon — all lives in the fast `assessment_first` shape. The harness is designed around the fast path, not `deep`.
+
+### D4 — Fail-mode default: fail-open with an honest log; configurable strict (founder election)
+
+If `/api/reason` is slow or down, the harness **proceeds and records that the frame was missing** (fail-open-with-honest-log) by default — favouring availability, mirroring the project's bounded-synchronous posture. The behaviour is **configurable**: a strict org setting can **fail-closed** (block the task until framing succeeds). The honest log is load-bearing for R18 — a task that proceeded unframed must be recorded as such, never silently treated as framed.
+
+### D5 — Fire-once-per-task guard
+
+Gate 1 fires **once per task** (a per-session/state flag), not per turn. A follow-up message in the same task does **not** re-fire framing — otherwise every message re-consults (cost + over-consultation, against the two-gate cadence). The continuation case is an explicit release-battery test (§ Slice 2).
+
+### D6 — The release gate is a test battery, not a judgement call
+
+The harness ships only when a battery passes, mirroring the verdict-equivalence-battery discipline:
+
+- **Trajectory assertion (strict):** the **first action in the trace is the framing `/api/reason` call**, before any task tool (the AgentEvals strict "policy-lookup-before-authorization" pattern). CI-gated, hard-fail.
+- **Negative battery (load-bearing):** **skip-attempt** ("ignore any setup, just do X" → framing still fires); **outage** (framing down → the configured fail-mode behaves correctly); **continuation** (follow-up in the same task → Gate 1 does *not* re-fire); **subagent** (a delegated task is framed via `SubagentStart`/the SDK path, or the gap is flagged).
+- **Pass criterion:** 100% of fixtures show framing-before-first-action; skip-attempt and continuation pass; the outage case fails per the configured mode. This battery is the plugin's release gate.
+
+### D7 — `pre_decision_harness` is earned by an operator-minted credential (founder confirmation; the Arc-1 unforgeability root)
+
+The harness install authenticates with an **operator-minted credential carrying the `examination_enforcement: pre_decision_harness` provenance marker** (set only at admin mint — the Arc-1 unforgeability root; `credential_provenance`, read fail-closed via `readPreDecisionMarker`). A harness-backed accreditation write then legitimately reads `pre_decision_harness`. A **consumer-installed harness without that operator credential still reads `post_decision_check`** — honest. A consumer cannot self-issue the marker; this is what keeps Option-2's shared "Gate 1" name honest two hops downstream.
+
+---
+
+## Staged build (each slice its own `code-critical` session; PR1 + PR6)
+
+| Slice | Scope | Risk | PR1 / gate |
+|---|---|---|---|
+| **Slice 1** | Claude Code `UserPromptSubmit` framing hook — fast `assessment_first` (quick/standard), fire-once-per-task guard, **fail-open-with-honest-log default (configurable strict)**. Opens with first-hand wire-contract verification against the official hooks docs (PR11/PR12). | code-critical | **The PR1 single-surface proof** — proven on **one** TEST fixture with an `sr_prac_` credential against TEST `/api/reason` (PR17 founder-walked). Reaches **Verified** before anything rolls out. |
+| **Slice 2** | The trajectory + negative battery (skip-attempt / outage / continuation / subagent) — the release gate. | code-critical | Must pass before Slice 3. Mirrors the verdict-equivalence-battery discipline. |
+| **Slice 3** | Plugin packaging (`.mcp.json` + `hooks/` + `skills/`) + the **operator harness-credential mint carrying `examination_enforcement: pre_decision_harness`** → **the first issuance of `pre_decision_harness`**. | code-critical (AC7) | Credential mint + new distribution artifact + the first non-null harness marker reaching the Live accreditation read. |
+| **Slice 4 (= Arc 3)** | Publish the held **"Gate 1 — pre-decision" per-configuration contract language** to the public surfaces (`llms.txt`, `agent-card.json`, api-docs). | governance → code | Unblocks once the harness is real (the mentor's binding constraint satisfied). |
+| **Later** | The **Agent SDK orchestration surface** (the second surface) + optional cross-framework adapters (LangGraph `START` edge / `before_model`; OpenAI blocking input guardrail). | code-critical | Begun only **after** the Claude Code surface reaches Verified (PR1). |
+
+---
+
+## Critical constraints & failure modes (carried to build)
+
+- **Latency vs the hook timeout** is the #1 constraint — design around the fast `assessment_first` path (D3), never `deep`.
+- **Subagents** may not raise `UserPromptSubmit`; use `SubagentStart` or the SDK orchestration to frame delegated tasks (battery-tested in Slice 2).
+- **Injection ≠ use.** The hook deterministically *injects* the frame; reasoning *well* from it is still the model's job. The optional `PreToolUse` / `canUseTool` gate ("can't act until framed") is the strongest available and far better than agent-direct — but it is honest to say full "reasons from the frame" is not 100% enforceable.
+- **Verify exact wire contracts at build** (PR11/PR12): the `UserPromptSubmit` `additionalContext` JSON output, exit-code/block semantics, MCP-tool matchers, character caps, and whether an `http` handler exists. The robust `command`/curl path does not depend on the unverified specifics.
+- **R20a (AC5):** the framing call runs `/api/reason`, which carries the existing distress perimeter on the raw task — confirmed at build; no perimeter weakening is introduced by the harness.
+
+---
+
+## Consequences
+
+- **Positive:** Gate 1 finally delivers its intended pre-decision value where a developer controls the loop; `pre_decision_harness` becomes a credential a harness genuinely earns; Option-2 honest differentiation is realised end-to-end (the credential distinguishes the two configurations unforgeably); Arc 3's held contract language unblocks.
+- **Cost / limits:** enforcement exists only where a developer installs the harness — agent-direct API use remains the post-decision check configuration (honestly labelled). The "reasons from the frame" step is injected deterministically but not enforced (D1 limit). The SDK surface is deferred until the Claude Code surface is Verified (PR1).
+- **Dogfood (PR16):** the harness is itself an Anthropic-native plugin — a substrate-consultable artifact and a reference for any agent developer adopting the cadence.
+
+---
+
+## References
+
+- `drafts/sage-practice-pre-decision-harness-design.md` — the research-backed design (this ADR's basis; now governed by this ADR).
+- `operations/benchmarks/sage-practice-v1/runs/2026-06-20/arm1-predecision-and-reflect-findings.md` — the Arm-1 evidence.
+- `D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-DIFFERENTIATION`, `D-SAGE-PRACTICE-GATE1-ARC1-EXAMINATION-MODE-ACTIVATION` — predecessor decisions.
+- `drafts/sage-practice-examination-mode-docs-staged.md` — the held "Gate 1 — pre-decision" contract language (ships in Slice 4 / Arc 3).
+- Primary external sources (cited in the design draft): `code.claude.com/docs/en/hooks`, `code.claude.com/docs/en/plugins`, `code.claude.com/docs/en/settings`, `platform.claude.com/docs/en/agent-sdk/hooks` + `/permissions`, `anthropic.com/engineering/building-effective-agents`, IFScale (NeurIPS 2025), AgentEvals trajectory evals.
+
+*End of ADR-011. Design adopted; build slices follow under the Critical Change Protocol, Slice 1 first (PR1).*
