@@ -1,0 +1,17 @@
+{
+  "_comment": "Slice-1 registration of the Gate-1 pre-decision framing hook. Merge the 'hooks' block below into your project's .claude/settings.json (or .claude/settings.local.json for a personal/TEST setup). 'timeout' is in SECONDS (UserPromptSubmit's default is 30s; the hook self-aborts at 28000ms and returns its honest result before this kill). At Slice 3 this same hook is registered via a plugin's hooks/hooks.json using ${CLAUDE_PLUGIN_ROOT} instead of ${CLAUDE_PROJECT_DIR}.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/harness/gate1-pre-decision/claude-code/hooks/framing-hook.mjs"],
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

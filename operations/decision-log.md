@@ -12071,3 +12071,38 @@ Expected: the five files above show as modified/new; no other changes.
 **Rules served:** R0, R18/R18f, R19/R19e, AC1, AC5, AC7 (staged, not this entry), PR1, PR6 (staged), PR11, PR12, PR15, PR16, PR17, KG1, KG2.
 
 **Status:** Adopted (founder decision of record). Implementation: **Scoped** on `Scoped → Designed → Scaffolded → Wired → Verified → Live` (the harness build is staged; nothing built this session). Cross-references: `adopted/adr/2026-06-20-pre-decision-harness-arc2.md`, `D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-DIFFERENTIATION`, `D-SAGE-PRACTICE-GATE1-ARC1-EXAMINATION-MODE-ACTIVATION`, `operations/handoffs/founder/2026-06-20-gate1-arc2-harness-design-staging-close.md`, `operations/handoffs/founder/2026-06-20-gate1-arc2-slice1-framing-hook-NEXT-SESSION-PROMPT.md`, `operations/benchmarks/sage-practice-v1/runs/2026-06-20/arm1-predecision-and-reflect-findings.md`.
+
+---
+
+## 2026-06-20 — D-SAGE-PRACTICE-GATE1-ARC2-SLICE1-FRAMING-HOOK-BUILT-LOGIC-VERIFIED
+
+**Decision:** Built the Gate-1 Arc-2 **Slice-1** Claude Code `UserPromptSubmit` framing hook (ADR-011 Slice 1) — **logic-Verified in-sandbox (22/0)**; the PR1 single-surface trajectory proof is **staged as a founder-walked Claude Code step** (Cowork cannot fire a Claude Code hook or reach the local TEST server). The hook POSTs the raw task to `/api/reason` in framing posture (`response_format:"assessment_first"`, quick/standard depth — never deep), and injects the returned Stoic frame (circles, control-filter, passions-to-watch, kathekon, proximity) as `additionalContext` before the model reasons. Fire-once-per-session guard; **fail-open-with-honest-log default, configurable strict (exit 2)**. **No production / credential / flag / schema change** — a TEST-only developer artifact, not wired into any deployed surface.
+
+**Reasoning:** Realises the PR1 single-surface proof of ADR-011 (`D-SAGE-PRACTICE-GATE1-ARC2-HARNESS-DESIGN-ADOPTED`) under the four locked elections (D1–D5). Wire contracts verified **first-hand** against `code.claude.com/docs/en/hooks` (PR11/PR12), resolving ADR-011's open question: the `http` handler type **does exist** (five types: command/http/mcp_tool/prompt/agent), but `http` can only fail *open* (non-2xx/timeout are non-blocking, cannot block via status) — so it cannot satisfy the configurable-strict mode; the **`command`** path is chosen so one artifact serves both fail modes (PR15 — Anthropic-native primitive considered, bespoke-minimal command hook preferred for the strict requirement). Founder election at open: **tier code-elevated** (down from the staged code-critical — Slice 1 touches no prod/auth/R20a-perimeter/deploy surface; the genuine AC7 triggers arrive at Slice 3) and **build-here + script-the-proof**.
+
+**Files touched (all NEW; `harness/gate1-pre-decision/`):**
+- `claude-code/hooks/framing-hook.mjs` — the hook (Node 18+, no deps): stdin parse, framing POST, `assessment.assessment` → frame render (factual-statement phrasing per the injection-defense doc note), ≤9500-char cap, fire-once marker, both fail modes, catch-all → fail handler.
+- `claude-code/gate1.config.example.json` — config (endpoint/depth/failMode/timeout/credentialEnvVar/fireOnce); credential read from env, never stored.
+- `claude-code/settings.snippet.json` — the `.claude/settings.json` `UserPromptSubmit` registration (exec form, `${CLAUDE_PROJECT_DIR}`, `timeout:30`s).
+- `claude-code/fixtures/slice1-discretionary-task.md` — the one PR1-proof task.
+- `claude-code/PR1-PROOF-WALKTHROUGH.md` — the founder-walked Claude Code proof (PR17: exact commands, expected results, per-step confirmation; reaches trajectory-Verified).
+- `test/mock-reason-server.mjs` + `test/logic-harness.mjs` — local mock + 22-assertion logic proof.
+- `README.md` — surface doc + the verified wire contracts.
+
+**Risk classification:** **Elevated** under 0d-ii (founder reclassified down from the staged code-critical at open — TEST-only artifact, no deployed surface touched). AC7 **not** engaged (no credential mint / no marker issuance — that is Slice 3). PR6 **not** engaged (no distress-classifier / Zone / Layer-2-signing surface). AC5/R20a not weakened — the framing call hits `/api/reason`, which runs the existing distress perimeter on the raw task (confirmed; to be re-confirmed live at the trajectory proof).
+
+**What could break (Elevated):** nothing in production — the hook acts only inside a Claude Code session where a developer has installed it against their own endpoint. Worst case in the founder's TEST proof: a slow/misconfigured TEST `/api/reason` → the hook fail-opens with an honest "unavailable" note (Step 3 smoke test isolates this before the hook).
+
+**Rollback path:** `git revert` the harness commit; remove the `.claude/settings.local.json` hook block. Nothing in production or any credential is touched. The marker/log files live in OS temp (harmless).
+
+**Verification step (founder-performable):**
+```
+node harness/gate1-pre-decision/test/logic-harness.mjs        # expect: 22 passed, 0 failed
+```
+Then the PR1 trajectory proof per `harness/gate1-pre-decision/claude-code/PR1-PROOF-WALKTHROUGH.md` (mint a throwaway TEST credential → start TEST dev server → smoke-test `/api/reason` → register the hook → fresh Claude Code session → submit the fixture → confirm framing-before-first-action + frame-in-first-turn). In-sandbox this session: 22/0 (×2, reproducible); `node --check` clean on all three `.mjs`; both `.json` parse.
+
+**Open questions:** (1) the trajectory proof needs `SUBSTRATE_L3_DEFER_ENABLED=true` on TEST for a clean fast happy path (documented in the walkthrough). (2) fire-once is **session-keyed** (D5's accepted "per-session/state flag"); distinguishing multiple distinct tasks within one session is a Slice-2 refinement. (3) subagent framing via `SubagentStart` is a Slice-2 battery item (`UserPromptSubmit` does not fire for subagents).
+
+**Rules served:** R0, R18/R18f, R19/R19e, AC1, AC5, PR1, PR11, PR12, PR15, PR16, PR17, KG1, KG2.
+
+**Status:** Adopted. Implementation: the framing hook is **Wired**; **logic-Verified in-sandbox**; **Verified (trajectory) awaits the founder-walked Claude Code proof** on `Scoped → Designed → Scaffolded → Wired → Verified → Live`. `pre_decision_harness` stays **un-issued** (first issued at Slice 3). Cross-references: `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (ADR-011 Slice 1), `D-SAGE-PRACTICE-GATE1-ARC2-HARNESS-DESIGN-ADOPTED`, `operations/handoffs/founder/2026-06-20-gate1-arc2-slice1-framing-hook-NEXT-SESSION-PROMPT.md`, `harness/gate1-pre-decision/`.

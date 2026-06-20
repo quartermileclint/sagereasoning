@@ -1,0 +1,8 @@
+{
+  "endpoint": "http://localhost:3000/api/reason",
+  "depth": "standard",
+  "failMode": "open",
+  "timeoutMs": 28000,
+  "credentialEnvVar": "SAGE_GATE1_CREDENTIAL",
+  "fireOnce": true
+}
