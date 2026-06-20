@@ -677,6 +677,20 @@ export default function ApiDocsPage() {
           honest-limit note. Distinct from <code>coverage_status</code>, which is about coverage breadth, not
           timing.
         </p>
+        <p className="font-body text-sm text-sage-600 leading-relaxed mt-3">
+          <strong>Two Gate-1 configurations.</strong> Gate 1 is offered as two documented,
+          distinct configurations that share the name and differ only in <em>when</em> the
+          examination fires. <strong>Gate 1 &mdash; pre-decision</strong> (developer-controlled
+          surfaces &mdash; the Claude Code Gate-1 plugin/hook; an Agent-SDK wrapper is planned):
+          the harness fires the examination before the agent reasons; a write under an
+          operator-issued harness credential reads <code>pre_decision_harness</code> (the marker
+          is earned per-credential, not a claim that any agent has adopted the harness).
+          <strong> Gate 1 &mdash; post-decision (check)</strong> (hosted / discretionary API use):
+          the examination runs after the agent&apos;s judgement as an honest developmental
+          check &mdash; the default, reading <code>post_decision_check</code>. The sole
+          unforgeable distinguisher is <code>examination_mode</code> above; the post-decision
+          check is never presented as pre-decision framing. See the llms.txt note.
+        </p>
       </div>
 
       {/* Sage Reflect — session-close reflection */}

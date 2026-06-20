@@ -12265,3 +12265,33 @@ Prod (this session, founder-walked): operator read `pre_decision_harness`; contr
 **Rules served:** R0, R18/R18f, R19/R19e, AC1, AC7, KG1, PR1, PR6, PR10, PR11, PR12, PR15, PR17, PR18.
 
 **Status:** Adopted. Implementation: the `pre_decision_harness` marker mechanism is **Verified (live, end-to-end)** — first issuance minted, read live on the public payload, differentiation proven against a non-marked control, then smoke-torn-down. The first **standing** issuance is deferred to genuine harness onboarding (Slice 4 / real use). On `Scoped → Designed → Scaffolded → Wired → Verified → Live`. Cross-references: `D-SAGE-PRACTICE-GATE1-ARC2-SLICE3A-SUBAGENT-HOOK-AND-PLUGIN-PACKAGING-BUILT-VERIFIED`, `D-SAGE-PRACTICE-GATE1-ARC1-EXAMINATION-MODE-ACTIVATION`, `D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-DIFFERENTIATION`, `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (ADR-011 §Slice 3 + D7), `sdk/typescript/examples/gate1-3b-walk.ts`, `drafts/sage-practice-examination-mode-docs-staged.md` (the Slice-4 / Arc-3 contract language now unblocked), memory `upc-mint-vs-accreditation-agent-id`.
+
+## 2026-06-21 — D-SAGE-PRACTICE-GATE1-ARC3-SLICE4-CONFIGURATION-CONTRACT-PUBLISHED
+
+**Decision:** Published the held **per-configuration "Gate 1" contract language** — "Gate 1 — pre-decision" (developer-controlled surfaces) vs "Gate 1 — post-decision (check)" (hosted / discretionary API surfaces) — to the three public surfaces (`llms.txt`, `agent-card.json`, api-docs), completing **Option-2 honest differentiation end-to-end** (mechanism → credential → public contract). The two configurations share the "Gate 1" name; the `examination_mode` credential field is named as the sole unforgeable distinguisher. Realises ADR-011 §Slice 4 (= Arc 3). Docs are repo-only this session; they go live on the founder's push (R18).
+
+**Reasoning:** The mentor's binding constraint — do not name "Gate 1 — pre-decision" on a public surface until the harness is real — is now satisfied: `D-SAGE-PRACTICE-GATE1-ARC2-SLICE3B-FIRST-PRE-DECISION-HARNESS-ISSUED-LIVE` proved the marker issuable + readable live (with a non-marked control reading `post_decision_check`). Drafted from `D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-DIFFERENTIATION`; the founder signed off the full draft before any public surface was touched (the R18 governance gate). Built on the live Arc-1 field-semantics + attestation-limit text (`drafts/sage-practice-examination-mode-docs-staged.md` §§1–3, live since 2026-06-20) without duplicating it; the new text cross-references the live HONEST LIMIT note. Three honesty constraints baked in: (1) `pre_decision_harness` presented as the configuration a developer-controlled harness *earns* — no claim of adoption ("does not assert that any particular agent has adopted the harness"; the Agent-SDK wrapper named as "planned"); (2) the post-decision check is never presented as pre-decision framing ("a credential written on a hosted or discretionary path always reads `post_decision_check` (or `null`), never `pre_decision_harness`"); (3) consistent with the attestation-not-a-cryptographic-proof-of-timing note.
+
+**Files touched:**
+- `website/public/llms.txt` — new subsection `### Gate 1 — the two configurations (pre-decision vs post-decision check)` placed after the live examination-mode block, before `### Score a Document (V3)`.
+- `website/public/.well-known/agent-card.json` — new `gate1-configurations/v1` extension (**13 → 14** extensions); JSON re-validated (parse OK).
+- `website/src/app/api-docs/page.tsx` — new "Two Gate-1 configurations" paragraph after the live `examination_mode` read-back note.
+- `operations/decision-log.md` — this entry.
+- `CLAUDE.md` — production-state block refresh (PR18, as-of 2026-06-21).
+- `operations/handoffs/founder/2026-06-21-gate1-arc3-slice4-configuration-contract-published-close.md` — session close.
+
+**Risk classification:** Elevated under 0d-ii — public-facing contract materials (R18). No auth / perimeter / encryption / flag / schema change. AC7 not engaged. PR6 not engaged. Reversible by `git revert` of the docs commit.
+
+**Rollback path:** `git revert` the docs commit (+ redeploy if `page.tsx` shipped). The `examination_mode` field + `SUBSTRATE_EXAMINATION_MODE_ENABLED` flag are untouched (Arc 1).
+
+**Verification step (founder-performable):**
+```
+node -e "const c=JSON.parse(require('fs').readFileSync('website/public/.well-known/agent-card.json','utf8')); console.log(c.capabilities.extensions.length)"   # expect: 14
+( cd website && npm run build )   # expect: Compiled successfully; /api-docs registered; exit 0
+grep -c "Gate 1 — the two configurations" website/public/llms.txt   # expect: 1
+```
+Expected: 14 extensions; build clean; the new llms.txt subsection present once.
+
+**Rules served:** R0, R18/R18f, R19/R19e, PR16, PR18.
+
+**Status:** Adopted. Implementation: the per-configuration contract language is **Verified (in repo); Live on the founder's push** (R18) on `Scoped → Designed → Scaffolded → Wired → Verified → Live`. The Gate-1 surface-honesty arc (Arcs 1–3) is complete end-to-end (mechanism + credential + public contract). Cross-references: `D-SAGE-PRACTICE-GATE1-ARC2-SLICE3B-FIRST-PRE-DECISION-HARNESS-ISSUED-LIVE`, `D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-DIFFERENTIATION`, `D-SAGE-PRACTICE-GATE1-ARC1-EXAMINATION-MODE-ACTIVATION`, `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (ADR-011 §Slice 4), `drafts/sage-practice-examination-mode-docs-staged.md` (§§1–3 live; §"Out of scope" now published), `drafts/D-gate1-surface-honesty-option2-honest-differentiation.md`.

@@ -376,6 +376,47 @@ pre-decision framing by construction. Treat it as you would the rest of the
 credential's provenance: trustworthy to the extent you trust the operator's
 issuance discipline, not as a timing receipt.
 
+### Gate 1 — the two configurations (pre-decision vs post-decision check)
+
+Gate 1 — the mandatory examination at task adoption (see "Consultation Cadence —
+When to Examine" below) — is offered as two documented, distinct configurations.
+They share the name "Gate 1" and differ only in WHEN the examination fires
+relative to the agent's decision. The `examination_mode` credential field above is
+the only thing that distinguishes them on a credential, and it is
+consumer-unforgeable.
+
+  Gate 1 — pre-decision (developer-controlled surfaces).
+    Where a developer controls the integration's control flow, a Gate-1 harness
+    fires the examination on the task BEFORE the agent reasons and injects the
+    returned frame, so the agent reasons from it — Gate 1 performing its designed
+    frame-setting function. The delivered surface is the Claude Code Gate-1
+    plugin/hook; an Agent-SDK wrapper is a planned second surface. A write made
+    under an operator-issued harness credential reads
+    `examination_mode: "pre_decision_harness"`. This configuration is offered for
+    developer-controlled surfaces; the marker is earned per-credential — it states
+    the configuration a given write was made under, and does not assert that any
+    particular agent has adopted the harness.
+
+  Gate 1 — post-decision (check) (hosted / discretionary API surfaces).
+    On direct API use, where the integration's control flow is not ours to gate,
+    the examination runs AFTER the agent has formed its judgement — an honest
+    developmental check that feeds progression, not a pre-decision frame. This is
+    the default for discretionary API use. These writes read
+    `examination_mode: "post_decision_check"`.
+
+Telling them apart. Read `examination_mode` on
+`GET /api/accreditation/{agent_id}` — the sole unforgeable distinguisher between
+the two configurations: it is server-composed, and `pre_decision_harness` is
+reachable only via an operator-issued harness credential that a consumer cannot
+self-issue. It carries the same honest limit as the field itself: an attestation
+rooted in operator issuance + harness construction, not a cryptographic proof of
+timing (see the HONEST LIMIT note above).
+
+No surface presents the post-decision check as pre-decision framing. The two are
+documented as distinct configurations; a credential written on a hosted or
+discretionary path always reads `post_decision_check` (or `null`), never
+`pre_decision_harness`.
+
 ### Score a Document (V3)
 
 POST https://www.sagereasoning.com/api/score-document
