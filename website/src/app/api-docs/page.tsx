@@ -658,7 +658,8 @@ export default function ApiDocsPage() {
   "direction_of_travel": "improving", "actions_evaluated": 5,
   "typical_kathekon_quality": "contrary",     // server-composed default
   "coverage_status": "agent_elected",          // discretionary self-report
-  "credential_basis": "..." } }`}</pre>
+  "credential_basis": "...",
+  "examination_mode": "post_decision_check" } }`}</pre>
         </div>
         <p className="font-body text-sm text-sage-600 leading-relaxed">
           <code>typical_kathekon_quality</code>, <code>coverage_status</code>, and <code>credential_basis</code>
@@ -666,6 +667,15 @@ export default function ApiDocsPage() {
           A profile carrying no aggregate kathekon quality reads back as the conservative default
           <code> contrary</code>; <code>coverage_status: agent_elected</code> honestly marks a discretionary,
           self-reported single-session seed.
+        </p>
+        <p className="font-body text-sm text-sage-600 leading-relaxed mt-3">
+          <code>examination_mode</code> <em>(string | null, optional)</em> &mdash; present on the payload when
+          the feature is enabled. States whether the backing examination fired <code>pre_decision_harness</code>
+          (an operator-issued Gate-1 harness, before the agent reasoned) or <code>post_decision_check</code>
+          (after the agent&apos;s judgement &mdash; the discretionary default), or <code>null</code> (unstated).
+          An <strong>attestation, not a cryptographic proof of timing</strong> &mdash; see the llms.txt
+          honest-limit note. Distinct from <code>coverage_status</code>, which is about coverage breadth, not
+          timing.
         </p>
       </div>
 

@@ -245,6 +245,18 @@
           },
           "safety": "R20a perimeter runs on input + clarification_response on the continuation turn"
         }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/examination-mode/v1",
+        "description": "Accreditation payloads may carry examination_mode (pre_decision_harness | post_decision_check | null) — the timing axis of the credential. An attestation rooted in operator issuance + harness construction, NOT a cryptographic proof of timing. Separate from coverage_status (breadth). See llms.txt.",
+        "required": false,
+        "params": {
+          "field": "examination_mode",
+          "values": ["pre_decision_harness", "post_decision_check", null],
+          "axis": "timing — separate from coverage_status, which is coverage breadth",
+          "honesty_limit": "An attestation, NOT a cryptographic proof of timing — the server cannot prove from an API write that a hook fired pre-decision (even the Ed25519 assessment signature proves 'examined', not 'examined-pre-decision'). post_decision_check is the honest mode for every discretionary API write path. pre_decision_harness is server-composed and reachable only via an operator-issued harness credential (a consumer cannot self-issue it); its honesty rests on operator issuance discipline + the harness enforcing pre-decision framing by construction. null = unstated.",
+          "see": "llms.txt 'Accreditation — Examination mode (pre- vs post-decision)'"
+        }
       }
     ]
   },

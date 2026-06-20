@@ -11999,3 +11999,40 @@ In-sandbox this session: tsc 0; battery 32/0; writer 57/0; route 90/90; coverage
 **Rules served:** R0, R17 (minimisation — operator unattributed), R18/R18f (honest credential; the attestation-not-proof-of-timing limit is documented, not hidden), R19/R19e (configuration honesty), AC7, PR1, PR2, PR10, PR15, PR17 (activation walked live next session), KG1 (fail-closed marker read).
 
 **Status:** Adopted. Implementation: **Verified (dark)** on `Scoped → Designed → Scaffolded → Wired → Verified → Live`; **Live awaits activation**. Cross-references: `D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-DIFFERENTIATION`, `drafts/sage-practice-examination-mode-credential-build-scope.md`, `drafts/sage-practice-examination-mode-docs-staged.md`, `operations/handoffs/founder/2026-06-20-gate1-arc1-examination-mode-close.md`.
+
+## 2026-06-20 — D-SAGE-PRACTICE-GATE1-ARC1-EXAMINATION-MODE-ACTIVATION
+
+**Decision:** Activated the Arc 1 `examination_mode` accreditation-credential field in production — a founder-walked Critical 0c-ii. The `agent_accreditation.examination_mode` migration was applied to production (additive, nullable, idempotent), then `SUBSTRATE_EXAMINATION_MODE_ENABLED=true` was set in Vercel (Production) and redeployed. The public accreditation payload now carries `examination_mode`; with no pre-decision harness issued, every credential reads `post_decision_check` (new discretionary writes) or `null` (rows written before the field). The field-semantics + attestation-limit public docs were applied to `llms.txt`, `agent-card.json` (new `examination-mode/v1` extension — 13 total), and the api-docs page; the per-configuration "Gate 1 — pre-decision" contract language stays held for Arc 3.
+
+**Reasoning:** Activates the dark-built, TEST-Verified Arc 1 extension (`D-SAGE-PRACTICE-GATE1-ARC1-EXAMINATION-MODE-BUILT-DARK-TEST-VERIFIED`) per its activation prompt and the Option-2 honest-differentiation decision (`D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-DIFFERENTIATION`). Inviolable order honoured: migration BEFORE flag (the M1/M3 PGRST204 lesson). Two founder elections this session: (1) **verification depth — STOP** at the light proof (DB NULL read + public-GET field-presence) rather than land a genuine examination-backed `post_decision_check` write, because the write composition is TEST-Verified (32/0) and a fresh production write must clear the live R18f provenance gate (disproportionate for a low-risk additive field, and it would leave a row to clean up); (2) **public docs — APPLY** the field-semantics + attestation-limit tier now (the field is live + served, so documenting it honestly is R18-faithful), **HOLD** the per-configuration contract language until the Arc 2 harness exists (the mentor's binding constraint).
+
+**What changed in production:**
+- **Schema:** `agent_accreditation.examination_mode TEXT` (nullable) + `agent_accreditation_examination_mode_check` CHECK (`IN ('pre_decision_harness','post_decision_check')` OR NULL). Applied via SQL Editor; §0 pre-flight confirmed the column absent; §2 VERIFY confirmed column + constraint present.
+- **Env:** `SUBSTRATE_EXAMINATION_MODE_ENABLED=true` (Vercel Production) + redeploy (green).
+- **Behaviour:** the public GET `/api/accreditation/{agent_id}` now folds `examination_mode` onto `data` (flag-off omitted the key entirely). Existing rows read `null` (verified on `agent_test_v1`). Fresh discretionary writes compose `post_decision_check`; the harness path (`pre_decision_harness`) is unreachable — no operator-issued harness credential exists (marker un-issued by design until Arc 2).
+- **Docs (live on the founder's push, R18):** `website/public/llms.txt` new "Accreditation — Examination mode (pre- vs post-decision)" subsection; `website/public/.well-known/agent-card.json` new `examination-mode/v1` extension (JSON-validated, 13 extensions, values `[pre_decision_harness, post_decision_check, null]`); `website/src/app/api-docs/page.tsx` accreditation read-back note + example field.
+
+**Verification (this session, 0c framework — API + governance):**
+- 3a (DB): `SELECT agent_id, coverage_status, examination_mode FROM agent_accreditation` — all 5 existing rows `examination_mode = NULL` (honest "unstated").
+- 3b (public GET, flag-on end-to-end): `GET /api/accreditation/agent_test_v1` returned `"examination_mode": null` inside `data` — the key's PRESENCE is the flag-took-effect proof (flag-off omits it).
+- `pre_decision_harness` reads from no credential (un-issued by design).
+- `agent-card.json` JSON validity machine-checked (13 extensions; `examination-mode/v1` present).
+- The `post_decision_check` fresh-write path was NOT exercised live (founder election 1) — it rests on the dark-build battery (32/0) + the unchanged store write chokepoint.
+
+**Risk classification:** **Critical** under 0d-ii (accreditation write boundary + public trust credential; AC7 — the public credential read changed; deployment-config env-flag activation). Full Critical Change Protocol completed visibly before each live step; **PR17** (every founder-performed step walked live, one at a time, with a confirmation check after each); PR6 NOT engaged (no R20a/distress/Layer-2-signing surface touched); PR18 (this production-state record rewritten at close, as-of 2026-06-20).
+
+**Rollback:** Unset `SUBSTRATE_EXAMINATION_MODE_ENABLED` in Vercel + redeploy → the field disappears from the payload, byte-identical to pre-activation (flag-off byte-identity is test-asserted). The column may stay (harmless) or be dropped (DROP SQL in the migration footer); rollback is independent of the migration. `git revert` the docs commit removes the public-doc changes.
+
+**Verification step (founder-performable, between sessions):**
+```
+cd website && npm run build        # api-docs/page.tsx is a build-graph file — REQUIRED gate (not just tsc)
+# then, in a browser (public, no auth):
+#   https://www.sagereasoning.com/api/accreditation/agent_test_v1   -> data.examination_mode: null
+#   https://www.sagereasoning.com/.well-known/agent-card.json       -> capabilities.extensions includes examination-mode/v1
+```
+
+**Open questions:** none blocking. Carried (not Arc 1): Arc 2 (the pre-decision harness/plugin — where `pre_decision_harness` is first issued); Arc 3 (the hosted-configuration contract language). The 0h launch call remains the founder's and is unaffected.
+
+**Rules served:** R0, R17 (minimisation — operator unattributed), R18/R18f (honest credential; the attestation-not-proof-of-timing limit documented on every public surface, not hidden), R19/R19e (configuration honesty), AC7, PR15, PR17 (live walkthrough), PR18 (close-time production-state), KG1 (fail-closed marker read).
+
+**Status:** Adopted. Implementation: the `examination_mode` extension is **Live** on `Scoped → Designed → Scaffolded → Wired → Verified → Live`. Cross-references: `D-SAGE-PRACTICE-GATE1-ARC1-EXAMINATION-MODE-BUILT-DARK-TEST-VERIFIED`, `D-SAGE-PRACTICE-GATE1-SURFACE-HONESTY-OPTION2-DIFFERENTIATION`, `operations/handoffs/founder/2026-06-20-gate1-arc1-examination-mode-ACTIVATION-NEXT-SESSION-PROMPT.md`, `operations/handoffs/founder/2026-06-20-gate1-arc1-examination-mode-ACTIVATION-close.md`, `drafts/sage-practice-examination-mode-docs-staged.md`, `website/supabase-agent-accreditation-examination-mode-migration.sql`.

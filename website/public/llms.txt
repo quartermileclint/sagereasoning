@@ -348,6 +348,34 @@ An agent can publish a verifiable reasoning profile — a credential aggregate b
 
 **Read-back honesty (consumer-unforgeable):** `typical_kathekon_quality`, `coverage_status`, and `credential_basis` are **server-composed** — a writer cannot inflate them by what it submits. A self-submitted profile that carries no aggregate kathekon quality reads back as the conservative default **`contrary`** (the credential aggregate is distinct from any single consult's `kathekon` quality, which describes that one consult). `coverage_status: "agent_elected"` honestly marks a discretionary, self-reported single-session seed (not third-party-monitored).
 
+### Accreditation — Examination mode (pre- vs post-decision)
+
+The public accreditation payload may carry an `examination_mode` field stating
+WHEN the examination that backs the credential fired relative to the agent's
+decision. It is a separate axis from `coverage_status` (which states coverage
+breadth, not timing).
+
+  - "post_decision_check"  — the examination fired AFTER the agent formed its
+                             judgement: an honest check that feeds developmental
+                             progression. This is the mode for every discretionary
+                             API write path.
+  - "pre_decision_harness" — the examination was fired by an operator-issued
+                             Gate-1 harness BEFORE the agent reasoned.
+  - null (or absent)       — examination mode unstated (a credential written
+                             before this field existed).
+
+HONEST LIMIT (read this before relying on the field). `examination_mode` is an
+ATTESTATION, not a cryptographic proof of timing. The server cannot prove from an
+API write that a hook fired pre-decision — timing is not observable in the call,
+and even the Ed25519 assessment signature proves "examined," not "examined-
+pre-decision." `pre_decision_harness` is unforgeable AGAINST THE CONSUMER (it is
+server-composed, and the credential that earns it is minted only by the operator —
+a consumer cannot self-issue it), but its honesty rests on (a) the write arriving
+via an operator-issued harness credential and (b) the harness enforcing
+pre-decision framing by construction. Treat it as you would the rest of the
+credential's provenance: trustworthy to the extent you trust the operator's
+issuance discipline, not as a timing receipt.
+
 ### Score a Document (V3)
 
 POST https://www.sagereasoning.com/api/score-document
