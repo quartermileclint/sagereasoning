@@ -12106,3 +12106,44 @@ Then the PR1 trajectory proof per `harness/gate1-pre-decision/claude-code/PR1-PR
 **Rules served:** R0, R18/R18f, R19/R19e, AC1, AC5, PR1, PR11, PR12, PR15, PR16, PR17, KG1, KG2.
 
 **Status:** Adopted. Implementation: the framing hook is **Wired**; **logic-Verified in-sandbox**; **Verified (trajectory) awaits the founder-walked Claude Code proof** on `Scoped → Designed → Scaffolded → Wired → Verified → Live`. `pre_decision_harness` stays **un-issued** (first issued at Slice 3). Cross-references: `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (ADR-011 Slice 1), `D-SAGE-PRACTICE-GATE1-ARC2-HARNESS-DESIGN-ADOPTED`, `operations/handoffs/founder/2026-06-20-gate1-arc2-slice1-framing-hook-NEXT-SESSION-PROMPT.md`, `harness/gate1-pre-decision/`.
+
+## 2026-06-20 — D-SAGE-PRACTICE-GATE1-ARC2-SLICE1-TRAJECTORY-VERIFIED
+
+**Decision:** The Gate-1 Arc-2 **Slice-1** `UserPromptSubmit` framing hook is **trajectory-Verified** via the founder-walked PR1 Claude Code proof (`harness/gate1-pre-decision/claude-code/PR1-PROOF-WALKTHROUGH.md`). On one real discretionary task (the security-incident publish/hold fixture), a fresh Claude Code session confirmed both PR1 assertions: (7a) the framing `/api/reason` call fired **before** the model produced any output (`/tmp/sage-gate1/gate1.log`: `FRAMED session=e072964b… proximity=deliberate` at 07:40:08, written by the pre-inference `UserPromptSubmit` hook); (7b) the injected frame was **present and used** in the model's first turn (quoted verbatim; the model reasoned from the oikeiosis circles to strengthen "hold"). Fire-once held (one `FRAMED` line across fixture + follow-up); fail-open evidenced throughout. **The proof surfaced + fixed three real fidelity bugs the in-sandbox mock had hidden** — all corrected and regression-locked (logic harness 22/0 → **32/0**). **No production / credential / flag / schema change** — the commit touches only `harness/` (a TEST-only developer artifact, outside the Next build graph; Vercel green confirms no build impact).
+
+**Reasoning:** Completes the PR1 single-surface trajectory proof of ADR-011 Slice 1 (`D-SAGE-PRACTICE-GATE1-ARC2-SLICE1-FRAMING-HOOK-BUILT-LOGIC-VERIFIED`) — the one step Cowork could not run (a Claude Code hook only fires inside Claude Code, against the local TEST server). The PR10 PEV loop worked as designed: the trajectory proof against **real** data caught what the mock could not.
+
+**The three fidelity bugs (found by the proof, fixed this session):**
+- **Verdict shape (signing-dependent).** `assessment.assessment` exists only when `SUBSTRATE_LAYER2_SIGNING_ENABLED=true` (signed envelope); the local TEST server runs **unsigned**, so the verdict sits directly at `assessment`. The committed hook read only `assessment.assessment` → fail-open on TEST. **Fix (founder-elected Option B):** read the verdict **signing-agnostically**, discriminating on `katorthoma_proximity` (the field unique to the verdict, never on the envelope) — signed-nested first, raw-direct second. A framing hook does not verify the signature, so this is faithful and more robust for varied developer endpoints; the existing mock test still covers the signed branch.
+- **`[object Object]`.** Real `control_filter` items are objects (`{item, classification, …}`), not strings; the hook `.join()`'d them raw. **Fix:** route through `textOf` (extracts `.item`).
+- **Missing circles.** The real oikeiosis field is `relevant_circles`; the hook looked for `circles_assessed`/`oikeiosis_circles_engaged`. **Fix:** `pickCircles` checks `relevant_circles` first.
+The mock + logic harness were re-aligned to the **real object shapes** (a `raw`/unsigned case + object-valued control_filter/oikeiosis) with two regression assertions added (no `[object Object]`; circles render) → **32/0**. The walkthrough + README were corrected for what was hit live (Step-3 smoke path; mint-needs-dev-server-first ordering; programmatic token capture vs the stale-export trap; the signing-shape note).
+
+**Two operational learnings (saved to memory):**
+- **The 1-call/day rate limit** (30/1/1 mint defaults) — a key's 2nd `/api/reason` consult the same UTC day fails the rate-limit check and returns a fail-secure **401 masked as `requireAuth`'s "Authentication required. Please sign in."** (`security.ts:169`; the route tries `requireAuth` then `validateApiKey` and returns the former's error when both fail). This *exactly* mimics a stale-token / wrong-DB / wrong-shell bug and was the root of a long diagnostic detour — the key was provably active in TEST throughout. Confirm via the `increment_api_usage` RPC (`daily_limit` vs `new_daily_total`); fix by raising the key's limits for multi-call TEST proofs. ([[api-key-1-per-day-limit-masks-as-401]])
+- **Desktop-app hook env.** The founder runs Claude Code as the **macOS desktop app** (`/Applications/Claude.app`; no `claude` CLI on PATH), so hooks do **not** inherit terminal `export`s. The supported fix (verified against current docs, PR11): put the credential in `.claude/settings.local.json` **`"env"`** — Claude Code injects it into hook subprocesses and hot-reloads on the next prompt; the file is gitignored so a TEST token there is never committed (removed at teardown). A fresh conversation in the same project = a clean first-prompt session. ([[claude-code-desktop-app-hook-env]])
+
+**Files touched (committed; `harness/gate1-pre-decision/`):**
+- `claude-code/hooks/framing-hook.mjs` — signing-agnostic verdict extraction; `control_filter` via `textOf`; `pickCircles` reads `relevant_circles`.
+- `test/mock-reason-server.mjs` — real object shapes + a `raw` (unsigned) mode + `assessmentFirstBodyRaw()`.
+- `test/logic-harness.mjs` — unsigned-shape regression case + no-`[object Object]` + circles assertions (**32/0**).
+- `claude-code/PR1-PROOF-WALKTHROUGH.md` — Step-3 smoke path fix; signing prereq; mint-before-server order; programmatic token capture.
+- `README.md` — verdict-read description + harness count (32).
+- **Local-only (gitignored, NOT committed):** `website/.env.development.local` gained `SUBSTRATE_L3_DEFER_ENABLED=true` (TEST fast-path; affects only `assessment_first` calls).
+
+**Risk classification:** **Elevated** under 0d-ii — TEST-only artifact change; no deployed surface, auth, perimeter, schema, or flag touched. AC7 **not** engaged (no credential mint / no `pre_decision_harness` issuance — Slice 3). PR6 not engaged. The TEST-side mutations were diagnostic/cleanup on throwaway credentials (a limit-raise PATCH; the `increment_api_usage` probe; both proof creds revoked at teardown) — no production data.
+
+**Rollback path:** `git revert` the harness commit. No production / credential / flag / schema state to undo (TEST creds already revoked; the local defer flag is removable).
+
+**Verification step (founder-performable):**
+```
+node harness/gate1-pre-decision/test/logic-harness.mjs        # expect: 32 passed, 0 failed
+node --check harness/gate1-pre-decision/claude-code/hooks/framing-hook.mjs
+```
+Trajectory evidence this session: `/tmp/sage-gate1/gate1.log` `FRAMED session=e072964b… proximity=deliberate` (fresh proof conversation) + the model's verbatim frame quote in its first turn; clean-frame render confirmed against the live TEST server (no `[object Object]`; circles + control items as text); harness 32/0 (×2).
+
+**Open questions:** none blocking. Carried to Slice 2: the full negative battery (skip-attempt / outage / continuation / subagent — `UserPromptSubmit` does not fire for subagents, so `SubagentStart` is a battery item); whether a genuinely-new task within one session should re-frame (fire-once is session-keyed by design, D5).
+
+**Rules served:** R0, R18/R18f, AC1, AC5, PR1, PR10, PR11, PR12, PR15, PR17, KG1, KG2.
+
+**Status:** Adopted. Implementation: the framing hook is **Verified (trajectory)** on `Scoped → Designed → Scaffolded → Wired → Verified → Live` — Slice 1 complete. `pre_decision_harness` stays **un-issued** (first issued at Slice 3). Cross-references: `D-SAGE-PRACTICE-GATE1-ARC2-SLICE1-FRAMING-HOOK-BUILT-LOGIC-VERIFIED`, `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (ADR-011), `harness/gate1-pre-decision/`, `operations/handoffs/founder/2026-06-20-gate1-arc2-slice1-trajectory-verified-close.md`, `operations/handoffs/founder/2026-06-20-gate1-arc2-slice2-negative-battery-NEXT-SESSION-PROMPT.md`.
