@@ -1,5 +1,5 @@
 {
-  "_comment": "Slice-1 registration of the Gate-1 pre-decision framing hook. Merge the 'hooks' block below into your project's .claude/settings.json (or .claude/settings.local.json for a personal/TEST setup). 'timeout' is in SECONDS (UserPromptSubmit's default is 30s; the hook self-aborts at 28000ms and returns its honest result before this kill). At Slice 3 this same hook is registered via a plugin's hooks/hooks.json using ${CLAUDE_PLUGIN_ROOT} instead of ${CLAUDE_PROJECT_DIR}.",
+  "_comment": "Registration of the Gate-1 pre-decision framing hook. Merge the 'hooks' block below into your project's .claude/settings.json (or .claude/settings.local.json for a personal/TEST setup). 'timeout' is in SECONDS (the default is 30s; the hook self-aborts at 28000ms and returns its honest result before this kill). UserPromptSubmit frames the TOP-LEVEL agent's task (and CAN block in strict mode). NOTE on subagents: UserPromptSubmit does NOT fire for subagents, and the SubagentStart command-hook stdin does NOT carry the subagent's task text (verified 2026-06-20), so subagent framing is NOT shipped here — the faithful path is a PreToolUse hook matched to the Agent tool (Slice 3). At Slice 3 this hook is registered via a plugin's hooks/hooks.json using ${CLAUDE_PLUGIN_ROOT} instead of ${CLAUDE_PROJECT_DIR}.",
   "hooks": {
     "UserPromptSubmit": [
       {
