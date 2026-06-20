@@ -3,16 +3,19 @@
  * Arc 2.  Governing design: adopted/adr/2026-06-20-pre-decision-harness-arc2.md (ADR-011).
  *
  * WHY THIS MODULE EXISTS
- *   Slice 1 shipped one hook (`UserPromptSubmit`, for the top-level agent). Slice 2 adds a second
- *   hook (`SubagentStart`, for delegated subagents — verified first-hand to carry the subagent's
- *   `prompt`, so it can frame the subagent's actual task). Both hooks do the SAME thing — examine a
- *   task via /api/reason in framing posture and inject the Stoic frame — differing only in:
- *     • the event they read the task from (UserPromptSubmit.prompt vs SubagentStart.prompt),
- *     • the fire-once key (session vs subagent spawn),
- *     • the emitted hookEventName, and
- *     • whether STRICT (fail-closed) is even possible: UserPromptSubmit can block (exit 2);
- *       SubagentStart CANNOT (docs: "Context only … No blocking or decision control"), so the
- *       subagent hook is fail-open ONLY.
+ *   Slice 1 shipped one hook (`UserPromptSubmit`, for the top-level agent). Slice 3 adds a second
+ *   hook (`PreToolUse` matched to the subagent-spawn tool — `Task`/`Agent` — for delegated
+ *   subagents; its `tool_input` carries the subagent's `prompt`, so it can frame the subagent's
+ *   actual task, and it CAN block). Both hooks do the SAME thing — examine a task via /api/reason
+ *   in framing posture and inject the Stoic frame — differing only in:
+ *     • where they read the task from (UserPromptSubmit.prompt vs PreToolUse tool_input.prompt),
+ *     • the fire-once key (session vs per-subagent-spawn),
+ *     • HOW the frame is injected (UserPromptSubmit → additionalContext; PreToolUse → updatedInput,
+ *       prepending the frame to the subagent's prompt so the subagent reasons FROM it), and
+ *     • the emitted hookEventName.
+ *   Both CAN run STRICT (fail-closed, exit 2): PreToolUse blocks the spawn, UserPromptSubmit erases
+ *   the prompt. (This corrects the Slice-2 finding that the only subagent path then known — a
+ *   `SubagentStart` command hook — carries no `prompt` and cannot block. See ADR-011 §Slice 2/3.)
  *   This module is the single source of truth for the shared 90%; each hook is a thin entry point.
  *
  * VERDICT-READ (signing-agnostic, the Slice-1 trajectory-proof fix): the Layer-2 verdict sits at
@@ -26,8 +29,19 @@
 import { existsSync, mkdirSync, writeFileSync, appendFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createHash } from "node:crypto";
 
 export const MAX_CONTEXT_CHARS = 9500; // headroom under Claude Code's 10,000-char additionalContext cap.
+
+// The leading marker every rendered frame (and the UNAVAILABLE note) begins with. The subagent
+// PreToolUse hook uses it as a recursive-loop / already-framed guard: a prompt that already carries
+// this sentinel is NOT re-examined. Keep in sync with renderFrame()'s first line.
+export const FRAME_SENTINEL = "[SageReasoning Gate 1";
+
+// Stable short id for a per-subagent-spawn fire-once marker filename. node:crypto only (no deps).
+export function shortHash(s) {
+  return createHash("sha256").update(String(s == null ? "" : s)).digest("hex").slice(0, 16);
+}
 
 // ---------------------------------------------------------------------------
 // Configuration. Precedence: explicit env override > config file > built-in default.
@@ -266,12 +280,16 @@ export function fail(cfg, reason) {
 
 // ---------------------------------------------------------------------------
 // The shared orchestration. Both hooks call this with the task + a fire-once key.
-//   sessionKey — the fire-once namespace (session_id for the main hook; "sub-<agentId>" for subagents).
+//   sessionKey — the fire-once namespace (session_id for the main hook; "sub-<hash(session|task)>"
+//                for the subagent hook — per-spawn, so each delegated task is framed once).
 //   task       — the text to examine.
 //   logLabel   — the success log token ("FRAMED" | "FRAMED-SUBAGENT").
+//   emit       — OPTIONAL frame-injection strategy emit(cfg, verdict). Default (UserPromptSubmit)
+//                injects the rendered frame as additionalContext. The subagent PreToolUse hook
+//                passes its own emit that prepends the frame to the subagent prompt via updatedInput.
 // Calls process.exit in every path (success, fire-once-skip, or via fail()).
 // ---------------------------------------------------------------------------
-export async function runFraming(cfg, { sessionKey, task, logLabel = "FRAMED" }) {
+export async function runFraming(cfg, { sessionKey, task, logLabel = "FRAMED", emit }) {
   if (!task) return fail(cfg, "empty task prompt");
 
   // Fire-once guard (ADR-011 D5). A follow-up in the same namespace does not re-frame.
@@ -291,7 +309,10 @@ export async function runFraming(cfg, { sessionKey, task, logLabel = "FRAMED" })
   const r = await fetchFrame(cfg, task);
   if (!r.ok) return fail(cfg, r.reason);
 
-  emitContext(cfg, renderFrame(r.verdict));
+  // Inject the frame: default = additionalContext (UserPromptSubmit); subagent hook passes its own
+  // emit (updatedInput.prompt prepend). Neither exits — the shared tail writes the marker + exits 0.
+  if (emit) emit(cfg, r.verdict);
+  else emitContext(cfg, renderFrame(r.verdict));
 
   // Record success so the fire-once guard suppresses re-framing.
   try {

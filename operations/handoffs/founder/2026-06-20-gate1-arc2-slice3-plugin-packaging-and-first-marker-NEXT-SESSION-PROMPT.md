@@ -1,5 +1,11 @@
 # Next-Session Prompt — Gate-1 Arc 2 Slice 3: Plugin packaging + the FIRST `pre_decision_harness`
 
+> **SUPERSEDED BY SPLIT (2026-06-20).** The founder split this Slice 3 into **3a** (subagent hook +
+> plugin packaging — DONE; `D-SAGE-PRACTICE-GATE1-ARC2-SLICE3A-SUBAGENT-HOOK-AND-PLUGIN-PACKAGING-BUILT-VERIFIED`)
+> and **3b** (the operator mint → first `pre_decision_harness`). **For the next session use the 3b prompt:**
+> `operations/handoffs/founder/2026-06-20-gate1-arc2-slice3b-mint-first-marker-NEXT-SESSION-PROMPT.md`.
+> This file is retained as the historical combined spec.
+
 **For the founder. Paste as the first message of a fresh session.**
 
 **Stream:** founder.

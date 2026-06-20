@@ -1,0 +1,19 @@
+{
+  "name": "sage-gate1-pre-decision",
+  "displayName": "SageReasoning — Gate 1 (pre-decision harness)",
+  "version": "0.1.0",
+  "description": "Fires a pre-decision Stoic examination via SageReasoning /api/reason BEFORE the agent — and each delegated subagent — reasons, then injects the examined frame deterministically (control-flow, not prompt guidance). UserPromptSubmit frames the top-level task; PreToolUse frames each subagent spawn. Fail-open with an honest log by default; configurable strict. Requires a SageReasoning practice credential set in the environment (SAGE_GATE1_CREDENTIAL) — never bundled.",
+  "author": {
+    "name": "SageReasoning",
+    "url": "https://www.sagereasoning.com"
+  },
+  "homepage": "https://www.sagereasoning.com",
+  "keywords": [
+    "stoic",
+    "pre-decision",
+    "examination",
+    "governance",
+    "agent-safety",
+    "hooks"
+  ]
+}

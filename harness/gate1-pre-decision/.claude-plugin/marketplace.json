@@ -1,0 +1,18 @@
+{
+  "name": "sagereasoning",
+  "owner": {
+    "name": "SageReasoning",
+    "url": "https://www.sagereasoning.com"
+  },
+  "metadata": {
+    "description": "SageReasoning local plugin marketplace. Add it with `/plugin marketplace add ./harness/gate1-pre-decision` from the repo root (or the absolute path), then install explicitly with `/plugin install sage-gate1-pre-decision@sagereasoning` — adding a marketplace does NOT auto-install (PR12)."
+  },
+  "plugins": [
+    {
+      "name": "sage-gate1-pre-decision",
+      "source": "./claude-code",
+      "description": "Gate 1 pre-decision examination harness — frames the top-level task (UserPromptSubmit) and each delegated subagent (PreToolUse-on-Agent) before the agent reasons, via SageReasoning /api/reason.",
+      "version": "0.1.0"
+    }
+  ]
+}

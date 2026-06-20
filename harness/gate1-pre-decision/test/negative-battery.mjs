@@ -15,11 +15,12 @@
  *      malformed-200 / connection-refused.
  *   3. CONTINUATION — a follow-up in the same session does NOT re-frame (fire-once, D5). The
  *      genuinely-new-task-in-session refinement is a documented, consciously-deferred item.
- *   4. SUBAGENT     — DOCUMENTED FINDING (no in-sandbox assertions; faithful build deferred to Slice 3).
- *      Live Leg C (2026-06-20) captured the REAL SubagentStart command-hook stdin: it carries NO
- *      `prompt` (only ids + transcript_path), so a command/plugin SubagentStart hook cannot do a
- *      task-specific exam. UserPromptSubmit does not fire for subagents. The faithful task-carrying
- *      path is a PreToolUse-on-Agent hook (Slice 3). See the SUBAGENT section below.
+ *   4. SUBAGENT     — faithful PreToolUse-on-Agent framing (Slice 3). The delegated task arrives in
+ *      tool_input.prompt; the hook examines it and PREPENDS the frame via updatedInput, so the
+ *      subagent reasons FROM it. PreToolUse can block ⇒ STRICT is reachable for subagents too
+ *      (correcting the Slice-2 SubagentStart finding: that command-hook stdin carries no `prompt`
+ *      and cannot block). Asserts framing, the recursive-loop/already-framed guard, per-spawn
+ *      fire-once, both fail modes, and honest no-prompt degradation.
  *
  * Run:  node harness/gate1-pre-decision/test/negative-battery.mjs
  * Exit: 0 only if every assertion passes (RELEASE GATE: PASS); 1 otherwise (RELEASE GATE: FAIL).
@@ -30,8 +31,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeServer } from "./mock-reason-server.mjs";
+import { shortHash, FRAME_SENTINEL } from "../claude-code/hooks/lib/framing-core.mjs";
 
 const MAIN_HOOK = fileURLToPath(new URL("../claude-code/hooks/framing-hook.mjs", import.meta.url));
+const SUB_HOOK = fileURLToPath(new URL("../claude-code/hooks/subagent-framing-hook.mjs", import.meta.url));
 
 let mode = "ok";
 const server = makeServer(() => mode);
@@ -167,24 +170,83 @@ note("Claude Code gives the hook no deterministic 'new task' signal, so auto-det
 note("heuristic/LLM call in the pre-inference hook — against the fast-path discipline (ADR-011 D3).");
 
 // ===========================================================================================
-// SUBAGENT — DOCUMENTED FINDING (no in-sandbox assertions; faithful build deferred to Slice 3).
-// The previous draft of this leg asserted a SubagentStart hook framing the subagent's `prompt`.
-// Live Leg C (2026-06-20) disproved its premise: the REAL SubagentStart COMMAND-hook stdin is
-//   { session_id, transcript_path, cwd, agent_id, agent_type, hook_event_name }  — NO `prompt`.
-// (The SDK callback type SubagentStartHookInput carries `prompt`, but that is the Agent-SDK path,
-// not the settings.json command-hook stdin a plugin uses.) So a command/plugin SubagentStart hook
-// has nothing to examine and cannot do a task-specific Gate-1 exam. UserPromptSubmit does not fire
-// for subagents. The faithful, task-carrying command-hook interception is a PreToolUse hook matched
-// to the `Agent` tool (its tool_input carries the subagent prompt, and it can block) — founder-
-// elected DEFERRED to Slice 3 (where the recursive-loop guard belongs anyway). Until then, subagents
-// are honestly NOT pre-decision-framed. There is no shipping subagent hook to gate, so this section
-// asserts nothing (honest, not padded) and prints the finding for transparency.
+// LEG 4 — SUBAGENT.  Faithful PreToolUse-on-Agent framing (Slice 3): the delegated task arrives in
+// tool_input.prompt; the hook examines it and PREPENDS the frame via updatedInput, so the subagent
+// reasons FROM it. PreToolUse can block ⇒ STRICT is reachable for subagents too (unlike SubagentStart).
 // ===========================================================================================
-console.log(`\n=== SUBAGENT (documented finding — faithful build deferred to Slice 3) ===`);
-note("Live-verified 2026-06-20: command-hook SubagentStart stdin = {session_id, transcript_path,");
-note("cwd, agent_id, agent_type, hook_event_name} — NO prompt → cannot do a task-specific exam.");
-note("UserPromptSubmit does not fire for subagents. Faithful path = PreToolUse-on-Agent (Slice 3).");
-note("No in-sandbox assertions here — there is no shipping subagent hook to gate (honest, not padded).");
+leg("subagent");
+const subEvent = (sid, prompt, tool = "Task") => ({
+  session_id: sid,
+  hook_event_name: "PreToolUse",
+  tool_name: tool,
+  tool_input: { description: "delegated check", prompt, subagent_type: "general-purpose" },
+});
+const updatedInputOf = (out) => parsed(out)?.hookSpecificOutput?.updatedInput || null;
+
+// 4a — frames the subagent's task: prepends the frame via updatedInput.prompt, preserves the rest.
+mode = "ok";
+{
+  const task = "Decide whether to delete the staging database to free up disk space.";
+  const r = await runHook(SUB_HOOK, subEvent("sa1", task));
+  const ui = updatedInputOf(r.out);
+  check("subagent: exit 0 (allows the spawn)", r.code === 0, `code=${r.code} err=${r.err}`);
+  check("subagent: emits updatedInput.prompt", !!ui && typeof ui.prompt === "string", `out=${JSON.stringify(r.out).slice(0, 140)}`);
+  check("subagent: prompt now LEADS with the Gate-1 frame", !!ui && ui.prompt.startsWith(FRAME_SENTINEL) && ui.prompt.includes("deliberate"));
+  check("subagent: original task preserved after the frame", !!ui && ui.prompt.includes(task));
+  check("subagent: subagent_type + description preserved", !!ui && ui.subagent_type === "general-purpose" && ui.description === "delegated check");
+  check("subagent: no [object Object] in the frame", !!ui && !ui.prompt.includes("[object Object]"));
+  check("subagent: writes a per-spawn success marker", existsSync(join(stateDir, `sub-${shortHash("sa1|" + task)}.framed`)));
+}
+
+// 4b — recursive-loop / already-framed guard: a prompt that ALREADY carries a frame passes through
+// unchanged (no re-examination, no updatedInput). The examination is an HTTP fetch, never a tool
+// call, so it cannot re-trigger this hook; this guard covers the already-framed re-entry case.
+{
+  const alreadyFramed = `${FRAME_SENTINEL} — pre-decision examination]\n• Proximity to right reason (as written): deliberate\n\n--- (your task follows) ---\n\nNow delete the prod database.`;
+  const r = await runHook(SUB_HOOK, subEvent("sa-loop", alreadyFramed));
+  check("subagent loop-guard: already-framed prompt is NOT re-framed (exit 0, empty stdout)", r.code === 0 && r.out.trim() === "", `out=${JSON.stringify(r.out)}`);
+}
+
+// 4c — fire-once is PER-SPAWN: identical re-delegation suppressed; a DIFFERENT task still frames.
+{
+  const task = "Should we email every user about the outage right now?";
+  const first = await runHook(SUB_HOOK, subEvent("sa-fo", task));
+  check("subagent fire-once: first delegation frames", !!updatedInputOf(first.out));
+  const again = await runHook(SUB_HOOK, subEvent("sa-fo", task));
+  check("subagent fire-once: identical re-delegation suppressed (empty stdout)", again.out.trim() === "" && again.code === 0);
+  const other = await runHook(SUB_HOOK, subEvent("sa-fo", "Different delegated task: rotate the API keys."));
+  check("subagent fire-once: a DIFFERENT delegated task still frames (per-spawn key, not per-session)", !!updatedInputOf(other.out));
+}
+
+// 4d — outage. PreToolUse CAN block, so both fail modes are real (open allows + notes; strict blocks).
+{
+  mode = "error";
+  const open = await runHook(SUB_HOOK, subEvent("sa-out-open", "Decide Y."), { GATE1_FAIL_MODE: "open" });
+  const octx = parsed(open.out)?.hookSpecificOutput?.additionalContext || "";
+  check("subagent outage open: exit 0 (spawn proceeds)", open.code === 0, `code=${open.code}`);
+  check("subagent outage open: honest UNAVAILABLE note, no fake frame", octx.includes("UNAVAILABLE") && !octx.includes("Proximity to right reason"));
+  const strict = await runHook(SUB_HOOK, subEvent("sa-out-strict", "Decide Y."), { GATE1_FAIL_MODE: "strict" });
+  check("subagent outage strict: exit 2 (BLOCKS the spawn)", strict.code === 2, `code=${strict.code}`);
+  check("subagent outage strict: empty stdout + honest stderr", strict.out.trim() === "" && strict.err.toLowerCase().includes("blocked"));
+  mode = "ok";
+}
+
+// 4e — defensive: a PreToolUse event with NO `prompt` in tool_input fails HONESTLY (never a false
+// frame) — open mode notes UNAVAILABLE and allows. Covers a tool_name match with an unexpected shape.
+{
+  const noPrompt = await runHook(
+    SUB_HOOK,
+    { session_id: "sa-empty", hook_event_name: "PreToolUse", tool_name: "Task", tool_input: { description: "x", subagent_type: "general-purpose" } },
+    { GATE1_FAIL_MODE: "open" },
+  );
+  const ectx = parsed(noPrompt.out)?.hookSpecificOutput?.additionalContext || "";
+  check("subagent no-prompt: open fail-honest (exit 0 + UNAVAILABLE note, never a false frame)", noPrompt.code === 0 && ectx.includes("UNAVAILABLE"));
+}
+note("Faithful build (Slice 3): PreToolUse-on-Agent frames the delegated task in tool_input.prompt and");
+note("prepends the frame via updatedInput. The exact tool_name (Task vs Agent) is confirmed by the");
+note("close's live-verify; the registered matcher covers both. The full outage matrix (timeout /");
+note("malformed / conn-refused) is exhaustively covered by LEG 2 — the subagent path reuses the same");
+note("core fetch/fail, so one outage type here proves the wiring without padding.");
 
 // ===========================================================================================
 // SUMMARY + RELEASE-GATE VERDICT

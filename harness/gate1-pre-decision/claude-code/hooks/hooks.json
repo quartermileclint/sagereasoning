@@ -1,0 +1,30 @@
+{
+  "_comment": "Plugin hook registration for sage-gate1-pre-decision. Auto-discovered at the plugin root (hooks/hooks.json) on install — no manifest 'hooks' field needed. Same shape as a settings.json 'hooks' block. Paths use ${CLAUDE_PLUGIN_ROOT} (the plugin's install dir) in EXEC form (command:'node' + args:[path]) so the path is passed as one argument with no quoting (plugins-reference: 'In hook commands, use exec form with args'). 'timeout' is SECONDS; the hooks self-abort at 28000ms (< 30s) and return their honest result first. UserPromptSubmit frames the top-level task (and can block in strict mode). PreToolUse matched to the subagent-spawn tool (Task|Agent) frames each delegated subagent's task (tool_input.prompt) and can block too. The credential is read from the env var SAGE_GATE1_CREDENTIAL (set in your settings 'env' block) — it is NEVER bundled in the plugin. Endpoint/depth/fail-mode default to local; override via GATE1_ENDPOINT / GATE1_DEPTH / GATE1_FAIL_MODE env or a gate1.config.json. See ../README.md.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/framing-hook.mjs"],
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/subagent-framing-hook.mjs"],
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

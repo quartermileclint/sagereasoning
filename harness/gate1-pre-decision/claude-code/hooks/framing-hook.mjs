@@ -13,7 +13,8 @@
  *   — the thing a self-directed agent will not reliably do itself (Arm-1 evidence).
  *
  *   The shared examination/render/fail logic lives in ./lib/framing-core.mjs; this file is the
- *   thin `UserPromptSubmit` entry point. The sibling SubagentStart entry is subagent-framing-hook.mjs.
+ *   thin `UserPromptSubmit` entry point. The sibling subagent entry (a `PreToolUse` hook matched to
+ *   the subagent-spawn tool, Slice 3) is subagent-framing-hook.mjs.
  *
  * WIRE CONTRACT (verified first-hand against code.claude.com/docs/en/hooks, 2026-06-20):
  *   - STDIN  : JSON { session_id, transcript_path, cwd, permission_mode, hook_event_name, prompt }
