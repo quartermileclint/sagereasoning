@@ -69,6 +69,36 @@ const SUMMARY = { purpose_at_open: 'ship triage', circle_at_open: 'community', r
   assert('RH-8  non-array acts_blocked rejected', r.ok === false)
 }
 
+// RH-9 — Slice-5c context_source: optional, absent ⇒ undefined (byte-identical for existing callers).
+{
+  const r = parseReflectBody({ session_id: 's1', agent_id: 'a1', session_summary: SUMMARY })
+  assert('RH-9  absent context_source ⇒ undefined (additive default)', r.ok === true && r.value.context_source === undefined)
+}
+
+// RH-10 — valid context_source on the OPEN call (harness_inferred) is carried.
+{
+  const r = parseReflectBody({ session_id: 's1', agent_id: 'a1', session_summary: SUMMARY, context_source: 'harness_inferred' })
+  assert('RH-10  harness_inferred carried on open', r.ok === true && r.value.context_source === 'harness_inferred')
+}
+
+// RH-11 — valid context_source on an ANSWER call (agent_stated) is carried (harness marks the answer).
+{
+  const r = parseReflectBody({ session_id: 's1', agent_id: 'a1', response: 'verbatim reflection text', context_source: 'agent_stated' })
+  assert('RH-11  agent_stated carried on answer', r.ok === true && r.value.context_source === 'agent_stated')
+}
+
+// RH-12 — invalid context_source enum → error (the open is not opened with an unvalidated marker).
+{
+  const r = parseReflectBody({ session_id: 's1', agent_id: 'a1', session_summary: SUMMARY, context_source: 'made_up' })
+  assert('RH-12  invalid context_source rejected', r.ok === false)
+}
+
+// RH-13 — non-string context_source → error.
+{
+  const r = parseReflectBody({ session_id: 's1', agent_id: 'a1', session_summary: SUMMARY, context_source: 42 })
+  assert('RH-13  non-string context_source rejected', r.ok === false)
+}
+
 console.log(`\n${passCount} pass / ${failCount} fail`)
 if (failCount > 0) { console.log('\nFailures:'); failures.forEach((f) => console.log(`  - ${f}`)); process.exit(1) }
 process.exit(0)

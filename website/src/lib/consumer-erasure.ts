@@ -211,6 +211,16 @@ export async function eraseExternalConsumerCredential(
   const traj = await deleteAssessmentHistoryForCredential(credentialRef, client)
   if (!traj.ok) return { ok: false, error: `trajectory: ${traj.error}` }
 
+  // NOTE on sage_reflect_sessions (Gate-1 Slice-5c follow-up, 2026-06-21): this credential-keyed path
+  // deletes the trajectory (by credential_ref) but does NOT yet delete sage_reflect_sessions rows,
+  // which are keyed by agent_id (not credential_ref) — so a reflect record persisted under this
+  // credential's agent_id is not reached here. Today no production path persists harness reflect rows
+  // (SAGE_GATE1_REFLECT_PERSIST_ENABLED is dark; reflect-persist runs only in torn-down test loops),
+  // and the reflect store's deleteAgentSessions()/sweepExpiredSessions() exist but are unwired. Wiring
+  // reflect-row erasure (resolve the credential's agent_id → deleteAgentSessions) + a retention cron is
+  // the named prerequisite for a STANDING persist activation (ADR-011 Slice-5c build status; harness
+  // README "Reflect-at-close … consent"). Until then this gap is disclosed, not silently handled.
+
   // 2. Anonymise + revoke the credential husk (removes PII; keeps the FK anchor).
   //    The WHERE re-asserts owner_user_id IS NULL — the scope guard enforced
   //    ATOMICALLY at write time (defense-in-depth on invariant 1: the token path can

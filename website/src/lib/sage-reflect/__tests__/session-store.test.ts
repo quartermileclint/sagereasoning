@@ -68,6 +68,18 @@ function assert(label: string, condition: boolean, detail?: string): void {
   // R17i — only the minimised fields (session_id, agent_id, current_step, 5 logs).
   const keys = Object.keys(ins).sort()
   assert('IN-5  R17i minimised key set (8 keys, no extras)', keys.length === 8, `keys=${keys.join(',')}`)
+  // Slice-5c: context_source is OMITTED when not supplied (additive byte-identity — the column DB-defaults to null).
+  assert('IN-5b  context_source absent when not supplied (additive)', !('context_source' in ins))
+}
+
+// IN-6 — Slice-5c: a supplied context_source is included exactly once (the 9th key), value preserved.
+{
+  const ins = initialSessionInsert('sess-cs', 'agent_acme_v1', 'harness_inferred')
+  assert('IN-6  context_source included when supplied', ins.context_source === 'harness_inferred')
+  assert('IN-6b only one extra key vs the minimised set (9 total)', Object.keys(ins).length === 9)
+  // an explicit null/undefined collapses to omitted (DB default null) — never a literal null key.
+  const insNull = initialSessionInsert('sess-cs2', 'agent_acme_v1', null)
+  assert('IN-6c  null context_source ⇒ omitted (DB-defaults to null)', !('context_source' in insNull))
 }
 
 // ============================================================================

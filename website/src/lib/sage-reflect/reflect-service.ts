@@ -180,6 +180,9 @@ export interface OpenInput {
   readonly session_summary: SessionSummary
   readonly safety_signal?: SafetySignal
   readonly acts_blocked?: readonly BlockRecord[]
+  /** Slice-5c: provenance of the supplied session_summary ('agent_stated' | 'harness_inferred').
+   *  Recorded on the session row at create; does not affect the engine (additive metadata). */
+  readonly context_source?: 'agent_stated' | 'harness_inferred'
 }
 
 /**
@@ -200,8 +203,9 @@ export async function openReflection(
   const metered = await meter(0)
   if (!metered.ok) return { ok: false, code: 'server', error: 'metering failed' }
 
-  // Create the session row (audit trail; R0).
-  const created = await deps.createSession(input.session_id, input.agent_id)
+  // Create the session row (audit trail; R0). Slice-5c: record the session_summary provenance
+  // (context_source) so a harness-inferred open is never misread as agent-stated.
+  const created = await deps.createSession(input.session_id, input.agent_id, input.context_source)
   if (!created.ok) return { ok: false, code: 'server', error: created.error }
 
   // SR-9 / R20a Zone-3 boundary — deterministic; BEFORE any reflection (PR6).

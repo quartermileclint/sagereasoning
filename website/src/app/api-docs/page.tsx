@@ -682,9 +682,13 @@ export default function ApiDocsPage() {
           distinct configurations that share the name and differ only in <em>when</em> the
           examination fires. <strong>Gate 1 &mdash; pre-decision</strong> (developer-controlled
           surfaces &mdash; the Claude Code Gate-1 plugin/hook; an Agent-SDK wrapper is planned):
-          the harness fires the examination before the agent reasons; a write under an
+          the harness fires the examination before the agent reasons and <em>injects</em> the
+          frame (deterministic injection &mdash; it does not assert the agent reasons <em>from</em>
+          the frame, which is advisory and may be discounted; the full-loop harness also guards
+          irreversible actions and fires an observed reflection turn). A write under an
           operator-issued harness credential reads <code>pre_decision_harness</code> (the marker
-          is earned per-credential, not a claim that any agent has adopted the harness).
+          is earned per-credential, not a claim that any agent has adopted the harness or reasoned
+          from any frame).
           <strong> Gate 1 &mdash; post-decision (check)</strong> (hosted / discretionary API use):
           the examination runs after the agent&apos;s judgement as an honest developmental
           check &mdash; the default, reading <code>post_decision_check</code>. The sole
@@ -726,6 +730,15 @@ export default function ApiDocsPage() {
           </p>
           <pre className="bg-sage-800 text-sage-100 rounded p-4 font-mono text-xs overflow-x-auto">{`{ "session_id": "<same id>", "agent_id": "<same>", "response": "<your answer>" }`}</pre>
         </div>
+        <p className="font-body text-sm text-sage-600 leading-relaxed mb-4">
+          <code>context_source</code> <em>(string, optional, either call)</em> &mdash;
+          <code> &quot;agent_stated&quot;</code> (default; the agent stated its own context, the
+          human/SDK contract) or <code>&quot;harness_inferred&quot;</code> (a developer-installed
+          Gate-1 full-loop harness opened the reflection at session close and inferred the summary,
+          then persists the agent&apos;s verbatim reflection &mdash; the marker keeps the record from
+          misrepresenting harness-inferred context as agent-stated). Absent &rarr; unmarked (null);
+          an invalid value is a 400.
+        </p>
         <div className="mb-2">
           <p className="font-display text-sm font-medium text-sage-600 mb-2">Responses</p>
           <pre className="bg-sage-800 text-sage-100 rounded p-4 font-mono text-xs overflow-x-auto">{`// question turn

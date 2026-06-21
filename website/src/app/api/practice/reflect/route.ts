@@ -285,7 +285,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
   const parsed = parseReflectBody(rawBody)
   if (!parsed.ok) return buildReflectBadRequestResponse(parsed.message)
-  const { session_id, agent_id, response, session_summary, safety_signal, acts_blocked } = parsed.value
+  const { session_id, agent_id, response, session_summary, safety_signal, acts_blocked, context_source } = parsed.value
 
   // 4. Auth gate (SR-14, AC7) — single 401 on any failure.
   const auth = await verifyReflectToken(request, agent_id)
@@ -305,7 +305,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         // First call — session_summary is guaranteed by the parser here.
         if (!session_summary) return buildReflectBadRequestResponse("Body field 'session_summary' is required to open a reflection session.")
         const result = await openReflection(
-          { session_id, agent_id, session_summary, safety_signal, acts_blocked },
+          { session_id, agent_id, session_summary, safety_signal, acts_blocked, context_source },
           undefined,
           meter,
         )

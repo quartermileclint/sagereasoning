@@ -229,22 +229,46 @@ mode = "ok";
   check("12 H3 state: identical decision dedups (empty stdout)", again.out.trim() === "");
 }
 
-// 13 — H4 accreditation body construction (D-D): kind seed, profile.agent_id == loop agent_id, the
-//      provenance.signed_assessments round-trip (the SIGNED envelope).
+// 13 — H4 accreditation body construction (D-D, INSTRUMENT) on the FIRST Stop: kind seed,
+//      profile.agent_id == loop agent_id, the provenance.signed_assessments round-trip; PLUS the
+//      Slice-5c reflect TURN is a PURE invitation (decision:block, no endpoint/POST/credential — the
+//      channel law) and the first Stop does NOT itself hit /api/practice/reflect.
 {
+  const decOf = (out) => { try { return JSON.parse(out)?.decision || null; } catch { return null; } };
+  const reasonOf = (out) => { try { return JSON.parse(out)?.reason || ""; } catch { return ""; } };
+
   await runHook({ session_id: "h4req", hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: "/p.ts", new_string: "p" } }, { GATE1_PROVENANCE_ENABLED: "true" }, AT_ACTION_HOOK);
   captured = [];
-  await runHook({ session_id: "h4req", hook_event_name: "Stop" }, { SAGE_GATE1_ACCRED_CREDENTIAL: "sr_prac_accred", SAGE_GATE1_AGENT_ID: "ns:loop@v1" }, CLOSE_HOOK);
+  const first = await runHook({ session_id: "h4req", hook_event_name: "Stop" }, { SAGE_GATE1_ACCRED_CREDENTIAL: "sr_prac_accred", SAGE_GATE1_AGENT_ID: "ns:loop@v1" }, CLOSE_HOOK);
   const acc = lastReq("/api/accreditation");
   check("13 H4 accred body: kind seed", !!acc && acc.kind === "seed");
   check("13 H4 accred body: profile.agent_id == the loop agent_id", !!acc && acc.profile && acc.profile.agent_id === "ns:loop@v1");
   check("13 H4 accred body: provenance carries the accumulated SIGNED assessment", !!acc && Array.isArray(acc.provenance?.signed_assessments) && acc.provenance.signed_assessments.length === 1 && !!acc.provenance.signed_assessments[0].signature);
 
-  // 14 — H4 reflect open request (D-C): session_id, agent_id, session_summary (the same H4 run).
-  const ref = lastReq("/api/practice/reflect");
-  check("14 H4 reflect open: carries a reflect session_id", !!ref && typeof ref.session_id === "string" && ref.session_id.includes("reflect-"));
-  check("14 H4 reflect open: carries the agent_id", !!ref && ref.agent_id === "ns:loop@v1");
-  check("14 H4 reflect open: carries a non-empty session_summary", !!ref && typeof ref.session_summary === "string" && ref.session_summary.length > 0);
+  // 13b — channel law: the forced reflect turn is a PURE invitation (no outbound instruction).
+  const reason = reasonOf(first.out);
+  check("13b H4 reflect turn: forces a turn (decision:block)", decOf(first.out) === "block");
+  check("13b H4 reflect turn: invitation to review OWN reasoning, no POST/endpoint/credential",
+    reason.includes("review your own reasoning") && !reason.includes("POST") && !/\/api\//.test(reason) && !reason.toLowerCase().includes("credential"));
+  check("13b H4 reflect turn: the FIRST Stop does NOT hit /api/practice/reflect (channel law)", !lastReq("/api/practice/reflect"));
+
+  // 14 — persistReflection (Slice 5c, INSTRUMENT) on the stop_hook_active turn: OUT-OF-BAND open
+  //      (context_source 'harness_inferred', STRUCTURED session_summary) + the Q1 answer = the agent's
+  //      VERBATIM words (context_source 'agent_stated'). DARK by default; enabled here.
+  captured = [];
+  const verbatim = "On reflection: I judged shipping was urgent; I should have verified the account first.";
+  await runHook(
+    { session_id: "h4req", hook_event_name: "Stop", stop_hook_active: true, last_assistant_message: verbatim },
+    { SAGE_GATE1_ACCRED_CREDENTIAL: "sr_prac_accred", SAGE_GATE1_REFLECT_CREDENTIAL: "sr_prac_reflect", SAGE_GATE1_AGENT_ID: "ns:loop@v1", SAGE_GATE1_REFLECT_PERSIST_ENABLED: "true" },
+    CLOSE_HOOK,
+  );
+  const reflectReqs = captured.filter((c) => c.path.includes("/api/practice/reflect")).map((c) => c.body);
+  check("14 persist: opened a reflect record marked context_source harness_inferred (structured summary)",
+    reflectReqs.length >= 1 && reflectReqs[0].context_source === "harness_inferred" && reflectReqs[0].session_summary && typeof reflectReqs[0].session_summary === "object");
+  check("14 persist: submitted the agent's VERBATIM words as the answer (context_source agent_stated)",
+    reflectReqs.length === 2 && reflectReqs[1].response === verbatim && reflectReqs[1].context_source === "agent_stated");
+  check("14 persist: never authored introspection (answer byte-identical to last_assistant_message)",
+    reflectReqs.length === 2 && reflectReqs[1].response === verbatim);
 }
 
 // 15 — loop-closure MULTI-REDIRECTION (review LOW fix, pure-function proof): a new redirection

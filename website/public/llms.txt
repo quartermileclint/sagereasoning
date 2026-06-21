@@ -359,8 +359,18 @@ breadth, not timing).
                              judgement: an honest check that feeds developmental
                              progression. This is the mode for every discretionary
                              API write path.
-  - "pre_decision_harness" — the examination was fired by an operator-issued
-                             Gate-1 harness BEFORE the agent reasoned.
+  - "pre_decision_harness" — an operator-issued Gate-1 harness fired the
+                             examination and INJECTED the frame into the agent's
+                             context BEFORE the agent reasoned (deterministic
+                             injection by the integration's control flow). Where the
+                             full-loop harness is installed, it ATTESTS, narrowly:
+                             the frame was injected pre-decision; irreversible
+                             actions were guarded; a reflection turn was fired and
+                             the agent's review observed; and the credential rests on
+                             genuinely-accumulated signed assessments (R18f). It does
+                             NOT assert that the agent reasoned FROM the frame (the
+                             frame is advisory — a capable agent may discount it) or
+                             that a sincere Q1–Q6 reflection was completed.
   - null (or absent)       — examination mode unstated (a credential written
                              before this field existed).
 
@@ -371,10 +381,11 @@ and even the Ed25519 assessment signature proves "examined," not "examined-
 pre-decision." `pre_decision_harness` is unforgeable AGAINST THE CONSUMER (it is
 server-composed, and the credential that earns it is minted only by the operator —
 a consumer cannot self-issue it), but its honesty rests on (a) the write arriving
-via an operator-issued harness credential and (b) the harness enforcing
-pre-decision framing by construction. Treat it as you would the rest of the
-credential's provenance: trustworthy to the extent you trust the operator's
-issuance discipline, not as a timing receipt.
+via an operator-issued harness credential and (b) the harness INJECTING the frame
+pre-decision by construction (deterministic injection — NOT a guarantee that the
+agent reasoned from the frame, which is advisory and may be discounted). Treat it
+as you would the rest of the credential's provenance: trustworthy to the extent you
+trust the operator's issuance discipline, not as a timing receipt.
 
 ### Gate 1 — the two configurations (pre-decision vs post-decision check)
 
@@ -387,15 +398,19 @@ consumer-unforgeable.
 
   Gate 1 — pre-decision (developer-controlled surfaces).
     Where a developer controls the integration's control flow, a Gate-1 harness
-    fires the examination on the task BEFORE the agent reasons and injects the
-    returned frame, so the agent reasons from it — Gate 1 performing its designed
-    frame-setting function. The delivered surface is the Claude Code Gate-1
-    plugin/hook; an Agent-SDK wrapper is a planned second surface. A write made
-    under an operator-issued harness credential reads
-    `examination_mode: "pre_decision_harness"`. This configuration is offered for
-    developer-controlled surfaces; the marker is earned per-credential — it states
-    the configuration a given write was made under, and does not assert that any
-    particular agent has adopted the harness.
+    fires the examination on the task BEFORE the agent reasons and INJECTS the
+    returned frame into the agent's context — deterministically, so the frame is
+    present before the agent forms its judgement. What the harness enforces is the
+    INJECTION (and, in the full-loop harness, guarding irreversible actions, firing
+    an observed reflection turn, and accumulating signed assessments); it does NOT
+    enforce that the agent reasons FROM the frame — the injected frame is advisory
+    and a capable agent may discount it (this is desirable agent behaviour, not a
+    failure). The delivered surface is the Claude Code Gate-1 plugin/hook; an
+    Agent-SDK wrapper is a planned second surface. A write made under an
+    operator-issued harness credential reads `examination_mode:
+    "pre_decision_harness"`. The marker is earned per-credential — it states the
+    configuration a given write was made under, and does not assert that any
+    particular agent has adopted the harness or reasoned from any frame.
 
   Gate 1 — post-decision (check) (hosted / discretionary API surfaces).
     On direct API use, where the integration's control flow is not ours to gate,
@@ -610,6 +625,15 @@ ANSWER turns (every turn after the open) — send `response`; `session_summary` 
 ```json
 { "session_id": "<same id>", "agent_id": "<same>", "response": "<your answer to the last question>" }
 ```
+
+OPTIONAL — `context_source` (provenance marker). On either call you may send
+`"context_source": "agent_stated" | "harness_inferred"`. It records who supplied the session context:
+`agent_stated` (the default — the agent stated its own summary, the human/SDK contract) or
+`harness_inferred` (a developer-installed Gate-1 harness OPENED the reflection at session close and
+INFERRED the summary, because it observed the close rather than being told the agent's purpose). A
+full-loop Gate-1 harness uses this to persist the agent's VERBATIM closing reflection without
+fabricating an agent-stated summary — so the record never misrepresents harness-inferred context as
+agent-stated. Absent ⇒ unmarked (null). Validated server-side; an invalid value is a 400.
 
 RESPONSE — question turn:
 ```json

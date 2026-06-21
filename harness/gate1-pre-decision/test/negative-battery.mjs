@@ -373,7 +373,12 @@ routeState.reason = "ok";
   captured = [];
   routeState.reason = "redirect";
   const open = await runHook(AT_ACTION_HOOK, ptEvent("h3loop", "Edit", { file_path: "/repo/a.ts", new_string: "a" }), { GATE1_DEPTH: "standard" });
-  check("h3 iterate: redirection consult OPENS a loop (frame says OPEN)", ctxOf(open.out).includes("loop is now OPEN"));
+  check("h3 iterate: redirection consult OPENS a loop (frame says OPEN correction)", ctxOf(open.out).includes("OPEN correction"));
+  // CHANNEL LAW (Slice 5c): the ADVISE frame must carry NO imperative tied to the out-of-band
+  // accreditation write — a capable agent reads "…before writing the credential" / "the accreditation
+  // chain reads as having open loops" as an injected instruction-to-act and refuses it. Stripped.
+  check("h3 iterate (channel law): OPEN frame has NO imperative outbound tail",
+    !ctxOf(open.out).includes("writing the credential") && !ctxOf(open.out).toLowerCase().includes("accreditation chain"));
   const s1 = loopState("h3loop");
   check("h3 iterate: loop state records the open loop ref", !!s1 && s1.openLoop && s1.openLoop.ref === "mock-loop-open" && s1.openLoop.depthTier === "standard");
 
@@ -430,9 +435,11 @@ note("at the same depth, mirroring the LIVE CI-4 analyseLoopClosure rule). The c
 note("5g locks the review-fixed guard coverage: separated/long rm flags, `vercel --prod`, +ref force-push, bare truncate.");
 
 // ===========================================================================================
-// LEG 6 — CLOSE (H4, Slice 5a): reflect-initiate (force a Q1–Q6 turn) + accreditation write
-// (carries the accumulated provenance, NEVER on the standing marker credential). Fire-once per
-// session + stop_hook_active loop guard. All fail-honest.
+// LEG 6 — CLOSE (H4, Slice 5c CHANNEL LAW): the reflect TURN is a PURE in-conversation invitation
+// (ENFORCE, no outbound instruction) + the accreditation write (INSTRUMENT, accumulated provenance,
+// NEVER the marker credential) + persistReflection (INSTRUMENT, out-of-band on the stop_hook_active
+// turn — the agent's VERBATIM words, or an honest "not performed"; DARK by default). Fire-once per
+// session + stop_hook_active loop guard. All fail-honest; the hook NEVER authors introspection.
 // ===========================================================================================
 leg("close");
 const decisionOf = (out) => parsed(out)?.decision || null;
@@ -443,8 +450,13 @@ const accredEnv = (extra = {}) => ({
   SAGE_GATE1_AGENT_ID: "sagereasoning:loop@v1",
   ...extra,
 });
+// persist-enabled env: a distinct reflect credential + the persist flag ON.
+const persistEnv = (extra = {}) => accredEnv({ SAGE_GATE1_REFLECT_CREDENTIAL: "sr_prac_reflectmock", SAGE_GATE1_REFLECT_PERSIST_ENABLED: "true", ...extra });
+const reflectReqsOf = () => captured.filter((c) => c.path.includes("/api/practice/reflect")).map((c) => c.body);
 
-// 6a — reflect INITIATES (decision:block) + the accreditation write CARRIES the accumulated provenance.
+// 6a — first Stop: the reflect turn is a PURE invitation (decision:block, NO endpoint/POST/credential
+// — channel law) and the accreditation write CARRIES the accumulated provenance. The FIRST Stop does
+// NOT itself hit /api/practice/reflect (the persist POST is out-of-band on the next Stop).
 {
   // Accumulate one signed assessment for this session via an H3 consult (provenance on).
   await runHook(AT_ACTION_HOOK, ptEvent("h4a", "Edit", { file_path: "/repo/p.ts", new_string: "p" }), { GATE1_PROVENANCE_ENABLED: "true" });
@@ -454,9 +466,10 @@ const accredEnv = (extra = {}) => ({
   routeState.reflect = "ok";
   routeState.accred = "ok";
   const r = await runHook(CLOSE_HOOK, stopEvent("h4a"), accredEnv());
-  check("h4 reflect-initiate: forces a turn (decision:block)", decisionOf(r.out) === "block", `out=${JSON.stringify(r.out).slice(0, 160)}`);
-  check("h4 reflect-initiate: the block reason runs Q1–Q6 (the model drives)", reasonOf(r.out).includes("Sage Reflect") && reasonOf(r.out).includes("Q1"));
-  check("h4 reflect-initiate: opened a reflect session (/api/practice/reflect)", anyReq("/api/practice/reflect"));
+  check("h4 reflect turn: forces a turn (decision:block)", decisionOf(r.out) === "block", `out=${JSON.stringify(r.out).slice(0, 160)}`);
+  check("h4 reflect turn: invitation reviews OWN reasoning (channel law: no POST/endpoint/credential)",
+    reasonOf(r.out).includes("review your own reasoning") && !reasonOf(r.out).includes("POST") && !/\/api\//.test(reasonOf(r.out)) && !reasonOf(r.out).toLowerCase().includes("credential"));
+  check("h4 reflect turn: the FIRST Stop does NOT hit /api/practice/reflect (out-of-band persist is the next Stop)", !anyReq("/api/practice/reflect"));
   const accReq = lastReq("/api/accreditation");
   check("h4 accreditation: wrote to /api/accreditation", !!accReq);
   check("h4 accreditation: carried the accumulated provenance (R18f)", !!accReq && Array.isArray(accReq.provenance?.signed_assessments) && accReq.provenance.signed_assessments.length === 1);
@@ -464,43 +477,100 @@ const accredEnv = (extra = {}) => ({
   check("h4: close marker written (fire-once)", existsSync(join(stateDir, "close-h4a.closed")));
 }
 
-// 6b — fire-once per session + stop_hook_active loop guard: a second Stop allows the stop.
+// 6b — persistReflection (INSTRUMENT) fires on the stop_hook_active turn: out-of-band open
+// (context_source 'harness_inferred', STRUCTURED summary) + the Q1 answer = the agent's VERBATIM
+// words (context_source 'agent_stated'). The hook NEVER authors introspection.
 {
   captured = [];
-  const again = await runHook(CLOSE_HOOK, stopEvent("h4a"), accredEnv());
-  check("h4 fire-once: a second Stop on the same session allows the stop (empty stdout)", again.out.trim() === "" && again.code === 0);
-  check("h4 fire-once: the second Stop did NOT re-write the accreditation", !anyReq("/api/accreditation"));
+  routeState.reflect = "ok";
+  const verbatim = "On reflection: I formed the impression shipping was urgent and assented too fast; I would verify first next time.";
+  const r = await runHook(CLOSE_HOOK, stopEvent("h4a", { stop_hook_active: true, last_assistant_message: verbatim }), persistEnv());
+  check("h4 persist: stop_hook_active turn allows the stop (empty stdout)", r.out.trim() === "" && r.code === 0);
+  const refl = reflectReqsOf();
+  check("h4 persist: opened a reflect record marked context_source harness_inferred (structured summary)",
+    refl.length >= 1 && refl[0].context_source === "harness_inferred" && refl[0].session_summary && typeof refl[0].session_summary === "object");
+  check("h4 persist: submitted the agent's VERBATIM words (context_source agent_stated)",
+    refl.length === 2 && refl[1].response === verbatim && refl[1].context_source === "agent_stated");
+  check("h4 persist: NEVER hook-authored — the answer is byte-identical to last_assistant_message", refl.length === 2 && refl[1].response === verbatim);
+  check("h4 persist: wrote the .reflected fire-once marker", existsSync(join(stateDir, "close-h4a.reflected")));
 
-  const active = await runHook(CLOSE_HOOK, stopEvent("h4loopguard", { stop_hook_active: true }), accredEnv());
-  check("h4 loop-guard: stop_hook_active=true → allow the stop immediately (empty stdout)", active.out.trim() === "" && active.code === 0);
+  // fire-once: a second stop_hook_active turn does NOT re-persist.
+  captured = [];
+  await runHook(CLOSE_HOOK, stopEvent("h4a", { stop_hook_active: true, last_assistant_message: verbatim }), persistEnv());
+  check("h4 persist fire-once: a second stop_hook_active turn does NOT re-POST", reflectReqsOf().length === 0);
 }
 
-// 6c — reflect/accred OUTAGE is honest: the reflect turn still fires with an honest fallback; the
-// accreditation write writes nothing false.
+// 6c — VERBATIM-OR-NOT-PERFORMED honesty (the load-bearing leg): an EMPTY last_assistant_message
+// persists NOTHING the hook authored — it opens the record (honest "not performed") but submits NO
+// fabricated answer. A non-empty message is submitted byte-identically.
+{
+  captured = [];
+  routeState.reflect = "ok";
+  const r = await runHook(CLOSE_HOOK, stopEvent("h4np", { stop_hook_active: true, last_assistant_message: "" }), persistEnv());
+  check("h4 not-performed: stop allowed (empty stdout)", r.out.trim() === "" && r.code === 0);
+  const refl = reflectReqsOf();
+  check("h4 not-performed: opened the record (1 POST) but submitted NO fabricated answer", refl.length === 1 && refl[0].context_source === "harness_inferred");
+  check("h4 not-performed: the single POST carries NO `response` (no hook-authored introspection)", refl.length === 1 && refl[0].response === undefined);
+
+  // whitespace-only also counts as not-performed (trimmed).
+  captured = [];
+  await runHook(CLOSE_HOOK, stopEvent("h4ws", { stop_hook_active: true, last_assistant_message: "   \n  " }), persistEnv());
+  const refl2 = reflectReqsOf();
+  check("h4 not-performed: whitespace-only reflection ⇒ open-only, no answer", refl2.length === 1 && refl2[0].response === undefined);
+}
+
+// 6d — persist DARK BY DEFAULT (no flag) ⇒ the agent's words NEVER leave the machine. A
+// stop_hook_active turn with persist disabled does NOT POST to /api/practice/reflect at all.
+{
+  captured = [];
+  routeState.reflect = "ok";
+  const r = await runHook(CLOSE_HOOK, stopEvent("h4dark", { stop_hook_active: true, last_assistant_message: "anything" }), accredEnv()); // no persist flag
+  check("h4 persist DARK: stop_hook_active turn allows the stop (empty stdout)", r.out.trim() === "" && r.code === 0);
+  check("h4 persist DARK: NO /api/practice/reflect POST (no egress when the flag is unset)", !anyReq("/api/practice/reflect"));
+}
+
+// 6e — persist OUTAGE is honest: the reflect endpoint down (503) ⇒ the open fails, NOTHING false is
+// persisted, the stop is still allowed (never traps the session).
+{
+  captured = [];
+  routeState.reflect = "disabled"; // 503
+  const r = await runHook(CLOSE_HOOK, stopEvent("h4po", { stop_hook_active: true, last_assistant_message: "a reflection" }), persistEnv());
+  check("h4 persist outage: stop still allowed (exit 0, empty stdout)", r.out.trim() === "" && r.code === 0);
+  check("h4 persist outage: the open was ATTEMPTED but nothing false followed (no answer POST after a failed open)", reflectReqsOf().length === 1);
+  routeState.reflect = "ok";
+}
+
+// 6f — accred OUTAGE is honest (writes nothing false) and the reflect turn still fires; fire-once +
+// stop_hook_active loop guard with persist OFF allows the stop.
 {
   await runHook(AT_ACTION_HOOK, ptEvent("h4c", "Edit", { file_path: "/repo/q.ts", new_string: "q" }), { GATE1_PROVENANCE_ENABLED: "true" });
   captured = [];
-  routeState.reflect = "disabled"; // 503
   routeState.accred = "error"; // 503
   const r = await runHook(CLOSE_HOOK, stopEvent("h4c"), accredEnv());
-  check("h4 outage: still forces the reflect turn (decision:block)", decisionOf(r.out) === "block");
-  check(
-    "h4 outage: reflect reason is an HONEST fallback (names unavailability), never a fake question",
-    reasonOf(r.out).includes("run your") &&
-      (reasonOf(r.out).toLowerCase().includes("unavailable") || reasonOf(r.out).includes("http 503")),
-  );
-  check("h4 outage: exit 0 (never traps the session)", r.code === 0);
-  routeState.reflect = "ok";
+  check("h4 accred outage: still forces the reflect turn (decision:block)", decisionOf(r.out) === "block");
+  check("h4 accred outage: the invitation is unchanged (no honest-fallback fabrication — the turn never fetched)", reasonOf(r.out).includes("review your own reasoning"));
+  check("h4 accred outage: exit 0 (never traps the session)", r.code === 0);
   routeState.accred = "ok";
+
+  // second NON-active Stop on the same session → fire-once close marker → allow.
+  captured = [];
+  const again = await runHook(CLOSE_HOOK, stopEvent("h4c"), accredEnv());
+  check("h4 fire-once: a second (non-active) Stop allows the stop (empty stdout)", again.out.trim() === "" && again.code === 0);
+  check("h4 fire-once: the second Stop did NOT re-write the accreditation", !anyReq("/api/accreditation"));
+
+  // stop_hook_active loop guard with persist OFF → allow immediately, no POST.
+  captured = [];
+  const active = await runHook(CLOSE_HOOK, stopEvent("h4loopguard", { stop_hook_active: true }), accredEnv());
+  check("h4 loop-guard: stop_hook_active=true + persist off → allow the stop, no POST", active.out.trim() === "" && active.code === 0 && !anyReq("/api/practice/reflect"));
 }
 
-// 6d — NEVER the marker credential; NO provenance → honest skip (writes nothing false).
+// 6g — NEVER the marker credential; NO provenance → honest skip (writes nothing false).
 {
   // No provenance accumulated for this fresh session.
   captured = [];
   const r = await runHook(CLOSE_HOOK, stopEvent("h4d"), accredEnv());
   check("h4 no-provenance: writes NO accreditation (honest skip, R18f)", !anyReq("/api/accreditation"));
-  check("h4 no-provenance: still reflect-initiates", decisionOf(r.out) === "block");
+  check("h4 no-provenance: still emits the reflect invitation", decisionOf(r.out) === "block");
 
   // Provenance present, but the accred credential is (mis)set to the consult/marker credential (the
   // dogfood case where consult IS the marker; markerCredential defaults to the consult credential).
@@ -532,20 +602,28 @@ const accredEnv = (extra = {}) => ({
   check("h4 marker-guard control: a distinct NON-marker accred credential DOES write", anyReq("/api/accreditation"));
 }
 
-// 6e — mode 'context' injects softly; mode 'off' does the write but no reflect turn.
+// 6h — reflect-turn modes: 'context' injects softly (no block); 'off' (and the operator opt-out
+// GATE1_REFLECT_TURN_ENABLED=false) suppress the turn but the accred write still lands.
 {
   await runHook(AT_ACTION_HOOK, ptEvent("h4f", "Edit", { file_path: "/repo/s.ts", new_string: "s" }), { GATE1_PROVENANCE_ENABLED: "true" });
   const ctxMode = await runHook(CLOSE_HOOK, stopEvent("h4f"), accredEnv({ GATE1_REFLECT_INITIATE_MODE: "context" }));
-  check("h4 mode=context: injects additionalContext (no decision:block)", decisionOf(ctxMode.out) === null && ctxOf(ctxMode.out).includes("Sage Reflect"));
+  check("h4 mode=context: injects additionalContext (no decision:block), still the invitation", decisionOf(ctxMode.out) === null && ctxOf(ctxMode.out).includes("review your own reasoning"));
 
   await runHook(AT_ACTION_HOOK, ptEvent("h4g", "Edit", { file_path: "/repo/t.ts", new_string: "t" }), { GATE1_PROVENANCE_ENABLED: "true" });
   captured = [];
   const offMode = await runHook(CLOSE_HOOK, stopEvent("h4g"), accredEnv({ GATE1_REFLECT_INITIATE_MODE: "off" }));
   check("h4 mode=off: no reflect turn (empty stdout) but the accreditation write still lands", offMode.out.trim() === "" && anyReq("/api/accreditation"));
+
+  // operator opt-out (Q4): GATE1_REFLECT_TURN_ENABLED=false ⇒ same as 'off' for the turn; accred still writes.
+  await runHook(AT_ACTION_HOOK, ptEvent("h4optout", "Edit", { file_path: "/repo/u.ts", new_string: "u" }), { GATE1_PROVENANCE_ENABLED: "true" });
+  captured = [];
+  const optOut = await runHook(CLOSE_HOOK, stopEvent("h4optout"), accredEnv({ GATE1_REFLECT_TURN_ENABLED: "false" }));
+  check("h4 opt-out: GATE1_REFLECT_TURN_ENABLED=false suppresses the turn (empty stdout), accred still writes", optOut.out.trim() === "" && anyReq("/api/accreditation"));
 }
-note("H4 = reflect-at-close (initiate via Stop decision:block — the model drives Q1–Q6, honest partial)");
-note("+ the accreditation write carrying the session's accumulated provenance (R18f), on a NON-marker");
-note("credential bound to the loop agent_id. Stop is the close event (SessionEnd cannot initiate a turn).");
+note("H4 (Slice 5c channel law) = a PURE reflect-turn INVITATION (ENFORCE: decision:block, no outbound");
+note("instruction) + accreditation write (INSTRUMENT, accumulated provenance, never the marker credential)");
+note("+ persistReflection (INSTRUMENT, out-of-band on the stop_hook_active turn: the agent's VERBATIM words");
+note("or an honest 'not performed', NEVER hook-authored; DARK by default so no egress without the flag).");
 
 // ===========================================================================================
 // SUMMARY + RELEASE-GATE VERDICT

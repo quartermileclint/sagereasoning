@@ -1,15 +1,17 @@
 # Gate-1 Full-Loop Harness — Claude Code surface (Arc 2/3)
 
-**Status:** Slice 1 (`UserPromptSubmit` framing hook) — trajectory-Verified. Slice 2 (negative-battery
-release gate) — in-sandbox-Verified + live legs founder-walked. Slice 3a (`PreToolUse`-on-`Agent`
-subagent-framing hook + plugin packaging) — in-sandbox-Verified; plugin-install + subagent live-verify
-founder-walked. **H1 + H2 are LIVE in the founder's dogfood install. Slice 5a (this) — the full-loop
-hooks H3 (at-action: guard + score + iterate) and H4 (close: reflect-initiate + accreditation write)
-— BUILT DARK + battery-green (logic 50/0, battery 98/0). They are registered in the plugin's
-`hooks/hooks.json` but NOT installed into any `settings.local.json`; live-fire is the founder-walked
-Slice 5b.**
+**Status:** Slices 1–3 (framing hooks + plugin) — Verified; **H1 + H2 are LIVE** in the founder's
+dogfood install. Slice 5a — H3/H4 built dark. Slice 5b — H1–H4 **live-fired** in a real Claude Code
+loop: the **channel law** was proven (out-of-band hook actions are robust to a resistant agent;
+soft-injected instructions-to-act are correctly refused). **Slice 5c (this) — H3/H4 RE-ARCHITECTED
+onto the channel law** + battery-green (logic 56/0, battery 124/0): the at-action frame's imperative
+outbound tails are stripped (advisory only); the close hook's reflect turn is a **pure in-conversation
+invitation** (no endpoint/POST/credential); reflect-at-close is captured **out-of-band** by
+`persistReflection()`; the public `pre_decision_harness` claim is narrowed to what the channels
+enforce. H3/H4 are registered in the plugin's `hooks/hooks.json` but NOT installed into any
+`settings.local.json`; live-fire is a founder-walked test loop.
 **Governing design:** `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (ADR-011, incl. the
-2026-06-21 full-loop amendment — H1–H4, D-A…D-F).
+2026-06-21 full-loop amendment + the **Slice-5b channel-law amendment** — H1–H4, D-A…D-F).
 **As of:** 2026-06-21.
 
 ## What this is
@@ -27,8 +29,8 @@ contract."*
 |---|---|---|---|
 | **H1** | `UserPromptSubmit` | Gate 1 — frame the **top-level** task before the model sees it (inject as `additionalContext`). | **Live** |
 | **H2** | `PreToolUse` / `Task\|Agent` | Gate 1 — frame **each delegated subagent's** task (prepend to `tool_input.prompt` via `updatedInput`). | **Live** |
-| **H3** | `PreToolUse` / `Bash\|Edit\|Write\|…` | The **R5 at-action cadence**: **guard** (block a `do_not_proceed` on an irreversible action via `/api/guardrail`), **score** (a deduped Gate-2 `/api/reason` consult, injected as `additionalContext`), **iterate** (loop-closure — carry `prior_feedback` at the same depth). | **Built dark (5a)** |
-| **H4** | `Stop` | **Reflect-at-close** (open `/api/practice/reflect`, force the Q1–Q6 turn) + the **accreditation write** (carry the session's accumulated signed assessments; R18f). | **Built dark (5a)** |
+| **H3** | `PreToolUse` / `Bash\|Edit\|Write\|…` | The **R5 at-action cadence**: **guard** (ENFORCE — block a `do_not_proceed` on an irreversible action via `/api/guardrail`), **score** (INSTRUMENT — a deduped Gate-2 `/api/reason` consult; the *fetch* is the sole R18f provenance source; the injected frame is ADVISE-only, no imperative outbound tail), **iterate** (loop-closure — carry `prior_feedback` at the same depth). | **Re-arch (5c)** |
+| **H4** | `Stop` | **Reflect turn** (ENFORCE — force ONE in-conversation review turn; a pure invitation, no endpoint/POST/credential) + **accreditation write** (INSTRUMENT — carry the session's accumulated signed assessments; R18f) + **`persistReflection()`** (INSTRUMENT — POST the agent's VERBATIM reflection out-of-band; **dark by default**; off-machine egress — see disclosure below). | **Re-arch (5c)** |
 
 H1/H2 inject the pre-decision frame. H3/H4 deliver the rest of the dossier's operating model (Gate 2,
 loop-closure, reflect-at-close, the accreditation write) that guidance alone does not reliably trigger.
@@ -52,8 +54,8 @@ harness/gate1-pre-decision/
 │   │   ├── hooks.json                     ← plugin hook registration (H1–H4; ${CLAUDE_PLUGIN_ROOT})
 │   │   ├── framing-hook.mjs               ← H1: UserPromptSubmit (top-level agent)
 │   │   ├── subagent-framing-hook.mjs      ← H2: PreToolUse-on-Agent (delegated subagents) — Slice 3
-│   │   ├── at-action-hook.mjs             ← H3: PreToolUse (guard + score + iterate) — Slice 5a (dark)
-│   │   ├── close-hook.mjs                 ← H4: Stop (reflect-initiate + accreditation write) — Slice 5a (dark)
+│   │   ├── at-action-hook.mjs             ← H3: PreToolUse (guard + score + iterate) — Slice 5c (channel law)
+│   │   ├── close-hook.mjs                 ← H4: Stop (reflect turn + accreditation write + persistReflection) — Slice 5c
 │   │   └── lib/
 │   │       ├── framing-core.mjs           ← shared examine/render/fail core (+ fetchGuardrail, provenance)
 │   │       ├── session-state.mjs          ← provenance log + loop state + decision dedup (H3/H4)
@@ -65,9 +67,9 @@ harness/gate1-pre-decision/
 │   ├── SLICE2-LIVE-LEGS-WALKTHROUGH.md     ← Slice-2 founder-walked live legs (skip-attempt / outage)
 │   └── SLICE3-LIVE-VERIFY-WALKTHROUGH.md   ← Slice-3 founder-walked plugin-install + subagent capture/verify
 └── test/                                  ← OUTSIDE the plugin root (not shipped)
-    ├── mock-reason-server.mjs            ← mocks /api/reason + /api/guardrail + /api/practice/reflect + /api/accreditation
-    ├── logic-harness.mjs                 ← in-sandbox logic proof (50 assertions; incl. H3/H4 + flag-off byte-identity)
-    └── negative-battery.mjs              ← the release gate (skip / outage / continuation / subagent / at-action / close)
+    ├── mock-reason-server.mjs            ← mocks /api/reason + /api/guardrail + /api/practice/reflect (open+answer, context_source) + /api/accreditation
+    ├── logic-harness.mjs                 ← in-sandbox logic proof (56 assertions; incl. H3/H4 channel law + persist + flag-off byte-identity)
+    └── negative-battery.mjs              ← the release gate (skip / outage / continuation / subagent / at-action / close — 124)
 ```
 
 ## Installing as a Claude Code plugin (Slice 3)
@@ -114,8 +116,10 @@ stored in config or code — it is read from an env var.
 | **H4 — accred credential** | `SAGE_GATE1_ACCRED_CREDENTIAL` | — | a **NON-marker** `accreditation_write` credential. **Never the standing `pre_decision_harness` marker** (a write on it would clobber the marker). Unset ⇒ H4 writes nothing (honest skip). |
 | **H4 — marker credential** | `SAGE_GATE1_MARKER_CREDENTIAL` | (= consult credential) | the standing marker token, **named so H4 can refuse it by identity**. Defaults to the consult credential (covers the dogfood). **When the consult and marker credentials genuinely differ, name the marker explicitly at Slice 5b** so the guard protects it. |
 | **H4 — agent id** | `SAGE_GATE1_AGENT_ID` | — | the loop's K1-canonical `namespace:name@version`. Unset ⇒ no accreditation write. |
-| **H4 — reflect credential** | `SAGE_GATE1_REFLECT_CREDENTIAL` | (= accred credential) | needs the `reflect` capability; defaults to the accred credential. |
-| **H4 — reflect mode** | `GATE1_REFLECT_INITIATE_MODE` | `block` | `block` (force the Q1–Q6 turn via Stop `decision:block`) \| `context` (soft `additionalContext`) \| `off` (accred write only). |
+| **H4 — reflect credential** | `SAGE_GATE1_REFLECT_CREDENTIAL` | (= accred credential) | needs the `reflect` capability; defaults to the accred credential. Used **out-of-band** by `persistReflection()`. |
+| **H4 — reflect turn** | `GATE1_REFLECT_TURN_ENABLED` | `true` | the operator opt-out: `false` disables the one-extra in-conversation review turn while **keeping** guard + accred + persist. |
+| **H4 — reflect mode** | `GATE1_REFLECT_INITIATE_MODE` | `block` | `block` (force the in-conversation review turn via Stop `decision:block`) \| `context` (soft `additionalContext`) \| `off` (no turn). The turn is a **pure invitation to review one's own reasoning** — no endpoint/POST/credential (channel law). |
+| **H4 — persist reflection** | `SAGE_GATE1_REFLECT_PERSIST_ENABLED` | `false` | **DARK by default.** When set, H4 POSTs the agent's VERBATIM closing reflection out-of-band to `/api/practice/reflect` (marked `context_source: agent_stated`; the open is marked `harness_inferred`). **This transmits the agent's introspective text off-machine — disclose + consent at install (see below).** Unset ⇒ no egress. |
 
 ## Fail modes (ADR-011 D4) — both honest (KG1 / R18)
 
@@ -162,56 +166,102 @@ practice **zero** times in the bare-into-harness test). H3 + H4 are the determin
   `do_not_proceed`, it **blocks** (`permissionDecision:"deny"`); over-blocking is the safe error. An
   /api/guardrail OUTAGE follows `GATE1_GUARD_FAIL_MODE` (`open` default — allow + honest note; `strict`
   — deny). NOT deduped (a previously-blocked command must re-block on retry).
-- **Score** (broader consequential) — a Gate-2 `/api/reason` consult (`assessment_first`), **deduped
-  per distinct decision** (one consult per file / per command, not before every tool call), injected
-  as `additionalContext`. It **never blocks**. The signed assessment is appended to the session
-  provenance (D-D).
+- **Score** (broader consequential, INSTRUMENT + ADVISE) — a Gate-2 `/api/reason` consult
+  (`assessment_first`), **deduped per distinct decision** (one consult per file / per command, not
+  before every tool call). It **never blocks**. The signed assessment is appended to the session
+  provenance (D-D). **Channel law (Slice 5c):** the consult *fetch* is the **sole R18f provenance
+  source** (the guard returns no signed assessment), so it is credential-critical — never stripped;
+  but the *frame* it injects is **ADVISE-only** (a capable agent may discount it) and its imperative
+  outbound tail (`…before writing the credential` / `…the accreditation chain reads as having open
+  loops`) is **removed** — those referenced the hook's own out-of-band write and a capable agent reads
+  them as injected instructions-to-act and refuses them.
 - **Iterate** (loop-closure, D-B) — when a consult issues a redirection (`improvement_path_structured`),
   it **opens a loop**; the next consult carries `prior_feedback` at the **same depth** and the loop is
   **closed** when a re-examination clears. The closure rule **mirrors the LIVE CI-4
   `analyseLoopClosure`** (`loop-closure.mjs`) so a chain H3 builds reads `closed` at the write boundary.
 
-**H4 — `close-hook.mjs` (Stop).** Fire-once per session (+ the `stop_hook_active` loop guard):
+**H4 — `close-hook.mjs` (Stop).** Three channels (Slice 5c), fire-once per session (+ the
+`stop_hook_active` loop guard):
 
-- **Reflect-initiate** (D-C) — opens `/api/practice/reflect` and **forces one more model turn** so the
-  agent runs its Q1–Q6 reflection. A hook cannot drive a multi-turn exchange, so it **initiates** and
-  the **model drives** (honest partial; the sequence is never abbreviated). Mechanism: a `Stop` hook
-  continues the agent via `{"decision":"block","reason":"…"}` — the `reason` is the model's next
-  instruction. (`context` and `off` modes are configurable.)
-- **Accreditation write** (D-D) — reads the session's **accumulated** signed assessments and POSTs an
-  accreditation seed carrying them, so the credential rests on genuine examination (R18f). It uses a
-  **NON-marker** `accreditation_write` credential bound to the loop's `agent_id` — **never** the
-  standing `pre_decision_harness` marker credential (a write on it would clobber the marker). Two
-  guards refuse it: it must not equal the **named** marker credential (`SAGE_GATE1_MARKER_CREDENTIAL`,
-  defaulting to the consult credential so the dogfood is protected; name it explicitly when consult ≠
-  marker), and it must not equal the consult credential directly (no short-circuit). With no
-  accumulated provenance, or no non-marker credential / agent_id, it **writes nothing and says so** —
-  never a false success.
+- **Reflect turn** (ENFORCE, D-C) — on the first `Stop`, `{"decision":"block","reason":…}` **forces one
+  more in-conversation turn**. The `reason` is a **pure invitation** to review one's own reasoning —
+  **no endpoint, no POST, no credential, no scope expansion**. Reviewing one's own reasoning is within
+  task scope, so a capable agent does not read it as injected scope-expansion (the channel law; the
+  Slice-5b finding that a capable agent refuses an injected *outbound* instruction). The model reviews;
+  the hook never asks it to call anything. `GATE1_REFLECT_TURN_ENABLED=false` (operator opt-out) or
+  `GATE1_REFLECT_INITIATE_MODE=off` suppresses the turn; `context` makes it a soft note.
+- **Accreditation write** (INSTRUMENT, D-D) — out-of-band; reads the session's **accumulated** signed
+  assessments and POSTs an accreditation seed carrying them (R18f). **NON-marker** `accreditation_write`
+  credential bound to the loop's `agent_id` — **never** the standing `pre_decision_harness` marker (a
+  write on it would clobber the marker). Two guards refuse it: it must not equal the **named** marker
+  credential (`SAGE_GATE1_MARKER_CREDENTIAL`, defaulting to the consult credential so the dogfood is
+  protected) nor the consult credential directly (no short-circuit). No provenance / no non-marker
+  credential / no agent_id ⇒ **writes nothing and says so** — never a false success.
+- **`persistReflection()`** (INSTRUMENT, Slice 5c) — out-of-band; on the **`stop_hook_active===true`**
+  turn (the turn *after* the forced reflect turn, when the agent's reflection is in
+  `last_assistant_message`), it POSTs the agent's **VERBATIM** reflection to `/api/practice/reflect`
+  under the reflect credential — the agent is never asked, so the injection defence never fires
+  (channel law). The hook **never authors first-person introspection**: it submits the agent's literal
+  words (`context_source: agent_stated`), or — when there is no reflection — opens the record only and
+  records an honest **"not performed"** (no fabricated answer). The `session_summary` the harness
+  supplies is marked `context_source: harness_inferred` (the harness inferred it; the agent did not
+  state it). **DARK by default** (`SAGE_GATE1_REFLECT_PERSIST_ENABLED` unset ⇒ no egress).
 
 **Fail posture (D-F):** everything fails-open-with-an-honest-log **except** the guard block (which
 blocks a genuine `do_not_proceed`, and fails-open on an OUTAGE by default). No fake frames; no silent
-blocks. **Flag-off byte-identity:** `GATE1_PROVENANCE_ENABLED` is **off by default**, so H1/H2 write no
-provenance and are byte-identical to before Slice 5a (machine-asserted in the logic harness).
+blocks; no fabricated reflection or accreditation. **Flag-off byte-identity:** `GATE1_PROVENANCE_ENABLED`
+and `SAGE_GATE1_REFLECT_PERSIST_ENABLED` are **off by default**, so H1/H2 write no provenance and the
+agent's words never leave the machine (machine-asserted in the logic harness + battery).
+
+## Reflect-at-close — what is persisted, and your consent (Slice 5c, READ BEFORE ENABLING)
+
+When `SAGE_GATE1_REFLECT_PERSIST_ENABLED=true`, the close hook **transmits the agent's closing
+reflection — the verbatim text of the agent's own review turn — off your machine to SageReasoning**
+(`POST /api/practice/reflect` under your reflect credential). This is the one place in the harness
+where the **agent's introspective free-text leaves the local environment**. Specifically:
+
+- The hook reads `last_assistant_message` from the `Stop` event (the agent's review turn) and POSTs it
+  **verbatim** (truncated only at a generous transport cap, never altered or authored). If there is no
+  reflection, it records an honest **"not performed"** — it never writes words the agent did not say.
+- The text is stored by `/api/practice/reflect` **encrypted at rest** (AES-256-GCM, R17b) in the
+  `sage_reflect_sessions` table, with the supplied session context marked `context_source:
+  harness_inferred` so the record never misrepresents the harness's inferred framing as agent-stated.
+- **This is an operator decision.** Enable it only with the **informed consent** of whoever owns the
+  agent whose reasoning is being persisted. The default-off posture means a fresh install transmits
+  nothing; you opt in deliberately.
+
+**Erasure (prerequisite for STANDING activation — not yet wired):** reflect-session rows are deletable
+via the reflect store's genuine-deletion functions (`deleteSession` / `deleteAgentSessions`) and a
+90-day retention window (`sweepExpiredSessions`), but as of Slice 5c **those functions are not yet
+wired into the live erase routes** (`/api/user/delete`, `/api/credential/erase`) or a scheduled
+retention cron. **Do not enable `SAGE_GATE1_REFLECT_PERSIST_ENABLED` for a standing install until that
+wiring lands** (a named follow-up Critical session) — otherwise the "deletable on request" promise is
+not yet honoured by an automated path. A torn-down test loop (as in Slice 5b) is fine: delete the test
+`sage_reflect_sessions` rows by hand at teardown.
 
 ## Run the in-sandbox gate
 
 ```
-node harness/gate1-pre-decision/test/logic-harness.mjs       # expect: 53 passed, 0 failed
-node harness/gate1-pre-decision/test/negative-battery.mjs     # expect: 108 passed, 0 failed — RELEASE GATE: PASS
+node harness/gate1-pre-decision/test/logic-harness.mjs       # expect: 56 passed, 0 failed
+node harness/gate1-pre-decision/test/negative-battery.mjs     # expect: 124 passed, 0 failed — RELEASE GATE: PASS
 ```
 
-The **logic harness** (53) proves request construction + frame parsing (signed/unsigned, object-valued
-fields), fire-once, both fail modes, the **provenance flag-off byte-identity** (H1 writes no provenance
-file when the flag is unset), H3's `prior_feedback`/same-depth construction + dedup/loop state, the
-multi-redirection abandoned-loop behaviour, and H4's accreditation-body + reflect-open construction.
-The **negative battery** (108) is the release gate (ADR-011 D6): skip-attempt (8), outage (28),
-continuation (4), subagent (16), **at-action (30)** — guard-blocks-on-`do_not_proceed`, the
-guard-coverage forms (separated/long `rm`, `vercel --prod`, `+ref` force-push, bare `truncate`),
-consult-fires-on-consequential, dedup, loop-closure carries `prior_feedback` + closes, guard/consult
-outage fail-modes — and **close (22)** — reflect-initiates (`decision:block`), accreditation carries the
-accumulated provenance, fire-once + `stop_hook_active` guard, outage honesty, the never-the-marker-
-credential guard (named-marker + consult, incl. the empty-consult case), and the `context`/`off` modes.
-Both run against the local mock — **not** the live trajectory proof.
+The **logic harness** (56) proves request construction + frame parsing (signed/unsigned, object-valued
+fields), fire-once, both fail modes, the **provenance flag-off byte-identity**, H3's
+`prior_feedback`/same-depth construction + dedup/loop state, the multi-redirection abandoned-loop
+behaviour, H4's accreditation-body, the **channel-law reflect turn** (pure invitation — no
+POST/endpoint/credential; the first Stop does not hit `/api/practice/reflect`), and **persistReflection**
+(out-of-band open marked `harness_inferred` + the agent's VERBATIM answer marked `agent_stated`).
+The **negative battery** (124) is the release gate (ADR-011 D6): skip-attempt (8), outage (28),
+continuation (4), subagent (16), **at-action (31)** — guard-blocks-on-`do_not_proceed`, the
+guard-coverage forms, consult-fires-on-consequential, dedup, loop-closure carries `prior_feedback` +
+closes, the **channel-law check (the OPEN frame has no imperative outbound tail)**, guard/consult outage
+fail-modes — and **close (37)** — the reflect turn is a pure invitation (no POST/endpoint/credential),
+the accreditation write carries the accumulated provenance, **persistReflection** (verbatim
+`agent_stated` answer; **verbatim-or-not-performed** honesty — empty reflection ⇒ open-only, no
+fabricated answer; **dark by default** — no egress without the flag; fire-once via `.reflected`; outage
+honesty), the never-the-marker-credential guard, and the `context`/`off`/opt-out modes. Both run against
+the local mock — **not** the live trajectory proof.
 
 ## Scope boundaries
 
@@ -227,16 +277,21 @@ Both run against the local mock — **not** the live trajectory proof.
     Neither earns its place in Slice 3; both can be added later if a concrete need appears.
 - **Slice 3b (done):** the operator credential mint → the first `pre_decision_harness` marker (live,
   then smoke-torn-down); the standing marker + dogfood install followed.
-- **Slice 5a (this):** **H3 (at-action) + H4 (close) built DARK** + the release-gate extension (logic
-  50/0, battery 98/0) + the close-event wire-contract confirmation. Repo-only — no install, no prod /
-  perimeter / auth / schema / flag / credential change. `git revert` undoes it; nothing is live.
-- **Slice 5b (next, `code-critical`/AC7, founder-walked):** install H3 + H4 in a real loop on a
-  **non-marker** credential; live-verify the four behaviours (a destructive action is blocked; a
-  mid-task consult fires + a loop opens/closes; reflect initiates at close; an accreditation write
-  lands carrying provenance) — and **capture the real `Stop` stdin via `GATE1_DEBUG`** (the close
-  event is unexercised; confirm `decision:block` initiates a turn first-hand, the Slice-2 lesson).
-- **Deferred further:** per-task re-framing within one session; calling for purposeless agents
-  (`SessionStart`, H5); the Agent SDK orchestration surface.
+- **Slice 5a (done):** H3 + H4 built DARK + the release-gate extension. Repo-only.
+- **Slice 5b (done):** H1–H4 **live-fired** in a real Claude Code loop on a non-marker credential, then
+  torn down. Proved the **channel law**: guard-deny + accred-write are honored out-of-band (robust to a
+  resistant agent); the soft-injected reflect-via-outbound-POST instruction was **correctly refused** by
+  a capable agent. Captured the real `Stop` stdin (carries `last_assistant_message`).
+- **Slice 5c (this):** **H3/H4 re-architected onto the channel law** + the honesty fixes — strip the
+  at-action imperative outbound tails (advisory only); the close reflect turn becomes a **pure
+  in-conversation invitation**; add **`persistReflection()`** (out-of-band, dark by default, verbatim-
+  or-not-performed); add the additive **`context_source`** field to `/api/practice/reflect`; **narrow the
+  public `pre_decision_harness` claim** to what the channels enforce. Battery 56/0 + 124/0. The
+  `context_source` field + claim-narrowing are public-surface changes (founder-walked); the hooks stay
+  registered-but-not-installed. Live-fire is a founder-walked test loop (`SLICE5C-LIVE-VERIFY-WALKTHROUGH.md`).
+- **Deferred further:** wiring reflect-row erasure into the live erase routes + a retention cron (the
+  prerequisite for STANDING persist activation); per-task re-framing within one session; calling for
+  purposeless agents (`SessionStart`, H5); the Agent SDK orchestration surface.
 
 ## Wire contracts (verified first-hand, `code.claude.com/docs/en/{hooks,plugins,plugins-reference,plugin-marketplaces}`, 2026-06-20)
 
@@ -260,18 +315,18 @@ matcher `Task|Agent` + the `tool_input.prompt` read stay robust across builds.)
 is blocked via `{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny",
 "permissionDecisionReason":"…"}}`.
 
-**`Stop` (H4 — the close event, D-E; confirmed `code.claude.com/docs/en/hooks`, 2026-06-20):** `Stop`
-fires when the agent finishes responding. Command-hook stdin: `{ session_id, transcript_path, cwd,
-hook_event_name:"Stop", permission_mode?, stop_hook_active }`. A Stop hook **can initiate a model
-turn** by emitting `{"decision":"block","reason":"…"}` (exit 0) — the `reason` is fed to the model as
-its next instruction (this is reflect-initiate's mechanism). The **loop guard** is `stop_hook_active`:
-`true` means a Stop hook already blocked **this** turn, so we allow the stop (plus our own fire-once
-close marker). **`SessionEnd` is NOT used** — it has no decision control (it cannot block, continue, or
-inject context; cleanup-only), so it cannot initiate the reflect turn. The 8-block backstop and
-`CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` are noted but not relied on (fire-once bounds H4 to a single block).
-**This contract is doc-confirmed but the `Stop` event is unexercised — the live raw-stdin capture
-(`GATE1_DEBUG`) + the `decision:block`-initiates-a-turn behaviour are confirmed FIRST-HAND at the
-founder-walked Slice 5b** (the Slice-2 lesson — see below).
+**`Stop` (H4 — the close event, D-E; CONFIRMED FIRST-HAND at the founder-walked Slice 5b, 2026-06-21):**
+`Stop` fires when the agent finishes responding. This desktop build's command-hook stdin carries
+`{ session_id, transcript_path, cwd, hook_event_name:"Stop", stop_hook_active, last_assistant_message,
+effort, background_tasks, session_crons }` — note **`last_assistant_message`** (the agent's closing
+text), which `persistReflection()` reads on the `stop_hook_active===true` turn to capture the agent's
+reflection out-of-band. A Stop hook **can initiate a model turn** by emitting
+`{"decision":"block","reason":"…"}` (exit 0) — confirmed live (the 2nd `Stop` read `stop_hook_active:
+true`). The **loop guard** is `stop_hook_active`: `true` means a Stop hook already blocked **this** turn
+— H4 then runs `persistReflection` (the reflection is now in `last_assistant_message`) and allows the
+stop. **`SessionEnd` is NOT used** — it has no decision control (cleanup-only), so it cannot initiate
+the reflect turn. Fire-once (`.closed` for the close, `.reflected` for the persist) bounds H4 to a
+single block + a single out-of-band POST per session.
 
 **Plugin** (`code.claude.com/docs/en/plugins-reference`): `.claude-plugin/plugin.json` (`name` is the
 only required field); `hooks/hooks.json` is auto-discovered at the plugin root (same shape as a

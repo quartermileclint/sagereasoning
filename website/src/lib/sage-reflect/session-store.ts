@@ -114,6 +114,11 @@ export interface SageReflectSessionRow {
   scrutiny_flags: ScrutinyFlag[]
   developer_note: string | null
   sage_calling_trigger: SageCallingTrigger | null
+  /** Slice-5c (Gate-1 full-loop harness): provenance of the session_summary supplied at open —
+   *  'agent_stated' (the agent stated it) | 'harness_inferred' (a harness inferred it) | null
+   *  (unmarked — the pre-field / unsupplied default). Validated by the route's request-helpers
+   *  (CONTEXT_SOURCES) and the migration CHECK; nullable + additive. */
+  context_source?: 'agent_stated' | 'harness_inferred' | null
   /** A1 (PR7) cross-session scalars, written at completion. Optional + nullable:
    *  pre-A1-migration rows + non-completed rows carry null. */
   complexity?: number | null
@@ -153,10 +158,13 @@ export const RETENTION_WINDOW_DAYS = 90
 // PURE HELPERS (no I/O — unit-testable without a live DB or encryption key)
 // ============================================================================
 
-/** The minimised insert payload for a new reflection session (R17i). */
+/** The minimised insert payload for a new reflection session (R17i). The Slice-5c context_source is
+ *  included ONLY when supplied (additive — omitting it lets the DB default the nullable column to
+ *  null, so a pre-migration table / an unmarked caller is byte-identical). */
 export function initialSessionInsert(
   session_id: string,
   agent_id: string,
+  context_source?: 'agent_stated' | 'harness_inferred' | null,
 ): {
   session_id: string
   agent_id: string
@@ -166,6 +174,7 @@ export function initialSessionInsert(
   horme_pattern_log: HormeLogEntry[]
   kathekon_quality_log: KathekonLogEntry[]
   circle_need_log: CircleNeedLogEntry[]
+  context_source?: 'agent_stated' | 'harness_inferred'
 } {
   return {
     session_id,
@@ -177,6 +186,8 @@ export function initialSessionInsert(
     horme_pattern_log: [],
     kathekon_quality_log: [],
     circle_need_log: [],
+    // Only set the column when an explicit provenance was supplied (otherwise omit ⇒ DB null).
+    ...(context_source ? { context_source } : {}),
   }
 }
 
@@ -444,16 +455,18 @@ export async function getCrossSessionContext(agent_id: string): Promise<CrossSes
   }
 }
 
-/** Create a new reflection-session row (minimised initial state). */
+/** Create a new reflection-session row (minimised initial state). The optional Slice-5c
+ *  context_source records the provenance of the session_summary supplied at open. */
 export async function createSession(
   session_id: string,
   agent_id: string,
+  context_source?: 'agent_stated' | 'harness_inferred' | null,
 ): Promise<StoreResult<SageReflectSessionRow>> {
   try {
     const admin = getAdminClient()
     const { data, error } = await admin
       .from(SESSIONS)
-      .insert(initialSessionInsert(session_id, agent_id)) // KG7 — arrays direct
+      .insert(initialSessionInsert(session_id, agent_id, context_source)) // KG7 — arrays direct
       .select('*')
       .single()
     if (error) return { ok: false, error: `createSession: ${error.message}` }

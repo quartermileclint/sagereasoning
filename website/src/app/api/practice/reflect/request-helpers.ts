@@ -30,6 +30,18 @@ import type { SafetySignal, BlockRecord } from '@/lib/sage-reflect/zone3-boundar
 const CIRCLES = ['self_preservation', 'household', 'community', 'humanity', 'cosmic'] as const
 const BLOCK_CATEGORIES = ['harm', 'policy', 'capability', 'other'] as const
 
+/**
+ * Gate-1 full-loop harness (Slice 5c, ADR-011 channel-law amendment). The PROVENANCE of the
+ * agent-context supplied at OPEN — i.e. whether the `session_summary` was STATED BY THE AGENT
+ * ('agent_stated', the default — the human / SDK contract) or INFERRED BY A HARNESS that observed the
+ * session at close ('harness_inferred'). The Gate-1 close hook fires the agent's reflection turn
+ * IN-CONVERSATION, then persists the agent's VERBATIM reflection out-of-band; it does not have the
+ * agent's stated session context, so it marks the open `harness_inferred` rather than fabricate an
+ * agent-stated summary. Additive + OPTIONAL: absent ⇒ null (no behaviour change for existing callers).
+ */
+export const CONTEXT_SOURCES = ['agent_stated', 'harness_inferred'] as const
+export type ReflectContextSource = (typeof CONTEXT_SOURCES)[number]
+
 export interface ReflectRequest {
   session_id: string
   agent_id: string
@@ -39,6 +51,11 @@ export interface ReflectRequest {
   session_summary?: SessionSummary
   safety_signal?: SafetySignal
   acts_blocked?: readonly BlockRecord[]
+  /** Slice-5c: provenance of the OPEN-call session_summary ('agent_stated' | 'harness_inferred').
+   *  Optional; absent ⇒ undefined (persisted as null — unmarked, the existing default). Validated on
+   *  any call; persisted from the OPEN call onto the session row (the answer-call value is accepted
+   *  for harness callers but only the open value is the session's recorded provenance). */
+  context_source?: ReflectContextSource
 }
 
 export type ParsedReflectBody = { ok: true; value: ReflectRequest } | { ok: false; message: string }
@@ -82,6 +99,14 @@ function parseSafetySignal(raw: unknown): SafetySignal | undefined | { error: st
   if (typeof o.harm_flagged !== 'boolean') return { error: "'safety_signal.harm_flagged' must be a boolean." }
   const detail = typeof o.detail === 'string' ? o.detail : undefined
   return { harm_flagged: o.harm_flagged, detail }
+}
+
+function parseContextSource(raw: unknown): ReflectContextSource | undefined | { error: string } {
+  if (raw === undefined || raw === null) return undefined
+  if (typeof raw !== 'string' || !(CONTEXT_SOURCES as readonly string[]).includes(raw)) {
+    return { error: "'context_source' must be one of: " + CONTEXT_SOURCES.join(', ') + '.' }
+  }
+  return raw as ReflectContextSource
 }
 
 function parseActsBlocked(raw: unknown): readonly BlockRecord[] | undefined | { error: string } {
@@ -145,6 +170,12 @@ export function parseReflectBody(raw: unknown): ParsedReflectBody {
   const blocked = parseActsBlocked(obj.acts_blocked)
   if (blocked && 'error' in blocked) return { ok: false, message: blocked.error }
 
+  // Optional Slice-5c provenance marker (validated on any call; persisted from the open call).
+  const contextSource = parseContextSource(obj.context_source)
+  if (contextSource && typeof contextSource === 'object' && 'error' in contextSource) {
+    return { ok: false, message: contextSource.error }
+  }
+
   return {
     ok: true,
     value: {
@@ -154,6 +185,7 @@ export function parseReflectBody(raw: unknown): ParsedReflectBody {
       session_summary,
       safety_signal: safety as SafetySignal | undefined,
       acts_blocked: blocked as readonly BlockRecord[] | undefined,
+      context_source: contextSource as ReflectContextSource | undefined,
     },
   }
 }

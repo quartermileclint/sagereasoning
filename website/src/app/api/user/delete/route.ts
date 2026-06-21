@@ -119,6 +119,13 @@ export async function DELETE(request: NextRequest) {
     }
   }
 
+  // NOTE on sage_reflect_sessions (Gate-1 Slice-5c follow-up, 2026-06-21): reflect rows are keyed by
+  // agent_id (not user_id), like agent_assessment_history above — so they would need an explicit
+  // delete here too (resolve this user's agent_ids → deleteAgentSessions). That wiring is NOT yet
+  // present (a disclosed named follow-up; the reflect store's deleteAgentSessions/sweepExpiredSessions
+  // exist but are unwired, and no production path persists harness reflect rows today —
+  // SAGE_GATE1_REFLECT_PERSIST_ENABLED is dark). Add it before enabling standing reflect-persistence.
+
   for (const table of tablesToDelete) {
     const { error } = await supabaseAdmin
       .from(table)

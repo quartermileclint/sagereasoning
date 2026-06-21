@@ -183,6 +183,19 @@ Classify every load-bearing step by **channel, not stage**. Design every load-be
 
 **Method:** a 9-agent workflow (4 root-cause lenses → 3 competing architectures → judge → adversarial verify); judge recommended Candidate 1 (enforcement+instrumentation) hardened with Candidate 3's honesty discipline; adversarial verdict SOUND_WITH_FIXES (the fixes = items 1–4). Memory: `[[gate1-harness-channel-law]]`.
 
+### Slice-5c build status (2026-06-21 — BUILT repo-only / dark; founder open questions resolved)
+
+The five open questions were founder-resolved: (1) reflect KEPT (decomposed onto the channel law); (2) off-machine egress shipped with **operator-install-time disclosure + consent**; (3) the additive `context_source` field **approved + built**; (4) the forced-turn opt-out lives in `GATE1_REFLECT_TURN_ENABLED` (default on); (5) the public-claim narrowing **approved**. The re-architecture is now built:
+
+- **ENFORCE/ADVISE (H3/H4, repo-only):** the at-action SCORE frame's imperative outbound tails are stripped (advisory only; the consult *fetch* kept + marked credential-critical as the sole R18f provenance source); the close reflect turn is rewritten to a **pure in-conversation invitation** (no endpoint/POST/credential) gated on `GATE1_REFLECT_TURN_ENABLED`.
+- **INSTRUMENT (H4, repo-only, DARK):** `persistReflection()` POSTs the agent's **verbatim** closing reflection out-of-band on the `stop_hook_active===true` turn (`last_assistant_message`), or records an honest "not performed" — **never** hook-authored; `SAGE_GATE1_REFLECT_PERSIST_ENABLED` default-off ⇒ no egress; fire-once via a `.reflected` marker.
+- **`context_source` (public reflect-contract, its own 0c-ii):** an additive optional `'agent_stated' | 'harness_inferred'` field on `/api/practice/reflect` (request-helpers → openReflection → a nullable `sage_reflect_sessions.context_source` column; absent ⇒ null, byte-identical). The harness marks its inferred open `harness_inferred`. `tsc` 0, `next build` 0; the migration + activation are founder-walked.
+- **Public-claim narrowing (R18, applied):** `llms.txt` / `agent-card.json` / api-docs `pre_decision_harness` now attests narrowly — *frame INJECTED pre-decision + irreversible actions guarded + a reflection turn fired & observed + the credential rests on genuinely-accumulated signed assessments* — and explicitly **NOT** "the agent reasons from the frame" (advisory, may be discounted) nor "a sincere Q1–Q6 completed." This corrects the over-claim flagged above (and the §Consequences "invokes the practice at every stage" line) on the public surfaces in lockstep.
+- **Gates:** `logic-harness` 56/0, `negative-battery` 124/0 (close 37, at-action 31).
+- **Carried (named follow-up, NOT this slice):** wiring reflect-row erasure (`deleteAgentSessions`) into `/api/user/delete` + `/api/credential/erase` + a retention cron — the prerequisite for a STANDING `persistReflection` activation (today's reflect-store genuine-deletion functions are built but unwired). Disclosed in the harness README; until it lands, persist is for torn-down test loops only.
+
+Live-fire is the founder-walked test loop (`claude-code/SLICE5C-LIVE-VERIFY-WALKTHROUGH.md`).
+
 ---
 
 ## References

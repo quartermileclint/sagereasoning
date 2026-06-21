@@ -170,14 +170,21 @@ function renderAtActionFrame(verdict, loopEvent, carriedPrior, abandonedRefs = [
   }
   if (loopEvent === "opened" || loopEvent === "reopened") {
     tail.push(
-      "• A redirection was issued: an examination loop is now OPEN. Re-examine the corrected reasoning at this depth before writing the credential.",
+      // ADVISE channel (Slice-5c channel law): an in-task observation, NOT an imperative tied to an
+      // outbound action. The old tail ("…before writing the credential") referenced the hook's own
+      // out-of-band accreditation write — a capable agent reads that as an injected instruction-to-act
+      // and refuses it. The instrumentation (accred write) happens out-of-band regardless of whether
+      // the agent acts on this line; this is purely a within-task observation the agent may discount.
+      "• A redirection was issued: this reasoning carries an OPEN correction. The corrected reasoning has not yet been re-examined at this depth.",
     );
   } else if (loopEvent === "closed") {
     tail.push("• The open examination loop is now CLOSED (the correction was re-examined and cleared).");
   }
   if (Array.isArray(abandonedRefs) && abandonedRefs.length) {
     tail.push(
-      `• Note: ${abandonedRefs.length} earlier redirection(s) (${abandonedRefs.join(", ")}) were superseded before being re-examined — re-examine them too, or the accreditation chain reads as having open loops.`,
+      // ADVISE channel: in-task observation only; the old tail's "or the accreditation chain reads as
+      // having open loops" referenced the out-of-band write and is stripped (channel law).
+      `• Note: ${abandonedRefs.length} earlier redirection(s) (${abandonedRefs.join(", ")}) were superseded before being re-examined.`,
     );
   }
   return tail.length ? base + "\n" + tail.join("\n") : base;
@@ -307,6 +314,13 @@ async function runConsult(cfg, { sessionId, toolName, action }) {
   const priorFeedback = priorFeedbackFrom(loopState);
   const depth = carriedDepth(loopState, cfg.depth);
 
+  // CREDENTIAL-CRITICAL (Slice-5c INSTRUMENT channel): this consult fetch is the SOLE R18f
+  // provenance source for H4's accreditation write — the guard path (runGuard) returns no signed
+  // assessment, so without this fetch the close-time accreditation rests on no examination. The
+  // INJECTED FRAME this consult produces is ADVISE-only (the agent may discount it), but the FETCH
+  // ITSELF is load-bearing instrumentation: strip the frame's imperative tail (done in
+  // renderAtActionFrame), NEVER the fetch. Keep response_format assessment_first so r.signed carries
+  // the verifiable envelope appendProvenance needs.
   const r = await fetchFrame(cfg, action.text, { depth, priorFeedback: priorFeedback || undefined });
   if (!r.ok) {
     // Outage → fail-open-honest. Do NOT mark fired (a later retry can still consult once recovered).
