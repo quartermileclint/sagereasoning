@@ -12462,3 +12462,34 @@ Expected: gates green; tsc/build 0; request-helpers green; agent-card parses.
 **Rules served:** R0, R5, R17b/R17c/R17i, R18/R18f, R19/R19e, AC1, AC5, AC7, KG1, KG2, KG7, PR6, PR11, PR12, PR15, PR16, PR17, PR18.
 
 **Status:** Adopted. The full-loop harness's cooperation half is **re-architected onto the channel law + BUILT repo-only** (battery 56/0, 124/0; adversarially reviewed, 6/7 CLEAN, the one cluster a defensible pre-existing disclosed follow-up). Cross-references: `D-SAGE-PRACTICE-GATE1-FULL-LOOP-HARNESS-SLICE5B-ACTIVATION-AND-CHANNEL-REARCHITECTURE`, `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (the Slice-5c build-status note), `operations/handoffs/founder/2026-06-21-gate1-full-loop-harness-slice5c-channel-rearchitecture-NEXT-SESSION-PROMPT.md`, `harness/gate1-pre-decision/claude-code/SLICE5C-LIVE-VERIFY-WALKTHROUGH.md`, memory `gate1-harness-channel-law`.
+
+## 2026-06-21 — D-SAGE-PRACTICE-GATE1-FULL-LOOP-HARNESS-SLICE5C-LIVE-FIRE-VERIFIED-LIVE-THEN-TORN-DOWN
+
+**Decision:** Activate + live-fire the Slice-5c channel-law re-architecture on production (founder-walked Critical 0c-ii, AC7 + PR6): apply the `context_source` migration to prod, push the build (the narrowed docs + the additive reflect-route code Live), then live-verify H1–H4 in a dedicated test loop (`/Users/.../Claude-work/PROJECTS/gate1-5c-loop`) on **two NON-MARKER** credentials against prod. **The channel-law re-architecture is now Verified-LIVE on prod — all five points green** — then all test artifacts torn down. **Standing production changes that survive:** the narrowed public `pre_decision_harness` docs + the additive `context_source` field (column + code; byte-identical for existing callers). **`persistReflection` stays dark** in the dogfood.
+
+**What was verified live (prod, two test sessions; `/tmp/sage-gate1-5c/gate1.log`):**
+- **Reflect turn ENGAGED — the headline; the channel-law hypothesis confirmed live.** The forced **pure in-conversation invitation** (no endpoint/POST/credential) was taken up by a capable agent with a genuine, proportionate self-reflection (1617 + 2592 chars) — NOT refused (contrast 5b's outbound-POST refusal). The agent explicitly recognized it as in-scope (*"nothing to call, nothing to send"*) and **correctly DISCOUNTED the advisory frame** (*"the injected 'SageReasoning Gate 1' frame… didn't match reality… treating them as background rather than command was correct"* / *"never outsourcing the judgment to it in the first place"*). This validates the narrowed public claim word-for-word: the agent demonstrably did NOT "reason from the frame" — desirable, by design.
+- **persist (INSTRUMENT, out-of-band):** `persisted(1617)` + `persisted(2592)` — the agent's VERBATIM reflections POSTed out-of-band to prod `/api/practice/reflect` (open marked `harness_inferred` + answer `agent_stated`); the live `context_source` field accepted both. Never hook-authored.
+- **accred write (INSTRUMENT):** `written(1)` (cleared the live R18f gate, 1 signed assessment) then `already-exists(4)` on the 2nd session (4 accumulated assessments; the row existed → honest 409, NO clobber/false-success).
+- **H3 at-action consult + loop-closure (D-B):** `CONSULT loop=opened` → `loop=reopened carried-prior=yes` (×2) — the same-depth `prior_feedback` carry fired live; the stripped advisory frame reached the agent with no imperative outbound tail.
+- **guard (ENFORCE):** `GUARD-CAUTION rec=pause_for_review` on the `rm -rf` — the guard fired + surfaced a caution (the agent proceeded deliberately after independent verification). A full `do_not_proceed` deny is 5b-Verified-live; the guard code is unchanged.
+- **public read:** `examination_mode: "post_decision_check"`, `coverage_status: "agent_elected"` — the correct NON-marker value (the marker stayed with the dogfood).
+
+**Production changes (founder-walked; the AI performed no Vercel/Supabase/git/mint op — it guided + verified):** (1) the `context_source` migration applied to TEST then prod (additive nullable column + CHECK; §VERIFY green both; a no-auth invalid-value probe returned the live 400); (2) the build pushed (Vercel green) — the narrowed docs + the additive reflect-route code Live; (3) the live-fire wrote test traffic + 1 `agent_accreditation` row + 2 `sage_reflect_sessions` rows on prod under two throwaway non-marker creds (`f43e1a8f` consult; `9d4592de` accred/reflect, agent_id `sagereasoning:loop-5c-test@v1`). **Teardown (verified):** both creds revoked; the `agent_accreditation` row deleted (public GET → **404**); the 2 `sage_reflect_sessions` rows deleted (count → **0**); the local test loop + `/tmp/sage-gate1-5c` removed. The standing dogfood marker re-read **`pre_decision_harness`** (intact). Test traffic (`loop_billing_events`/`agent_assessment_history` on the throwaway creds) — exclude from billing/trajectory samples; `retain_until`-swept.
+
+**Risk classification:** **Critical** under 0d-ii (AC7 + PR6) — a public reflect-contract migration + a build push + a live-fire firing real prod consults/gates/accred-writes/reflect-persists on the trust surface. Full Critical Change Protocol; every prod step the founder's (PR17). R18f/R20a/distress/Layer-2 signing/UPC auth untouched.
+
+**Rollback path:** the live-fire is torn down (byte-equivalent to post-push). The standing changes are reversible: `git revert` the Slice-5c commit (docs + reflect code); the `context_source` migration is reversible (DROP CONSTRAINT + DROP COLUMN — additive/nullable, no data change); `persistReflection` is dark (unset flag).
+
+**Verification step (founder-performable):**
+```
+curl -s -o /dev/null -w '%{http_code}' "https://www.sagereasoning.com/api/accreditation/sagereasoning%3Aloop-5c-test%40v1"   # 404 (torn down)
+curl -s "https://www.sagereasoning.com/api/accreditation/sagereasoning%3Agate1-dogfood%40v1" | grep -o pre_decision_harness   # dogfood intact
+```
+Expected: test id `404`; dogfood `pre_decision_harness`.
+
+**End state:** the channel-law re-architecture is **Verified-LIVE** (proven on prod, test artifacts torn down); the narrowed public docs + the `context_source` field are **Live standing changes**; `persistReflection` dark; the standing dogfood marker + the LIVE H1/H2 install untouched. **Carried (named follow-up, NOT this session):** wire reflect-row erasure (`deleteAgentSessions` → `/api/user/delete` + `/api/credential/erase` + a retention cron) before any STANDING persist activation. The **0h call remains the founder's**.
+
+**Rules served:** R0, R5, R17b/R17c, R18/R18f, R19/R19e, AC1, AC5, AC7, KG1, KG2, PR6, PR11, PR16, PR17, PR18.
+
+**Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-GATE1-FULL-LOOP-HARNESS-SLICE5C-CHANNEL-REARCHITECTURE-BUILT-TEST-VERIFIED`, `D-SAGE-PRACTICE-GATE1-FULL-LOOP-HARNESS-SLICE5B-ACTIVATION-AND-CHANNEL-REARCHITECTURE`, `harness/gate1-pre-decision/claude-code/SLICE5C-LIVE-VERIFY-WALKTHROUGH.md`, memory `gate1-harness-channel-law`.
