@@ -110,6 +110,81 @@ The harness install authenticates with an **operator-minted credential carrying 
 
 ---
 
+## Amendment 2026-06-21 — The full-loop harness: minimum 3-hook architecture (Arc 3)
+
+**Status:** Adopted (design). Extends this ADR from the pre-decision frame (D2; Slices 1–4, now Live) to the full intended operating model (`operations/p1-rebuild-2026-06/sage-practice-grounding-dossier.md` §5). The build is a new slice (5) under the Critical Change Protocol; **no production change in this amendment.**
+
+**Why — the bare-into-harness finding (2026-06-21).** A neutral task pasted into the installed environment (`operations/benchmarks/sage-practice-v1/runs/2026-06-21/leg-d-v6-bare/`) confirmed the plugin auto-invokes **only the pre-decision frame**: the hook framed; the (uninstructed but credentialled) agent self-invoked the practice **zero** times (its action log: 2 reads, `mkdir`, 2 writes — no API call, no doc fetch). So delivering the dossier's full model — Gate 2, loop-closure, the at-action gate, reflect-at-close, the accreditation write — requires either standing instructions (~68% adherence, IFScale) or **more hooks** (deterministic). This amendment specifies the deterministic floor.
+
+**The floor: 3 hook events deliver the full task-bearing loop.** The dossier's eight stages collapse onto three events because `PreToolUse` carries five of them:
+
+| Hook | Event | Stage(s) carried (dossier) | Status |
+|---|---|---|---|
+| **H1** | `UserPromptSubmit` | Gate 1 — top-level frame (B10) | **Live** |
+| **H2** | `PreToolUse` matcher `Task\|Agent` | Gate 1 — subagent frame (B10) | **Live** |
+| **H3** | `PreToolUse` matcher `<consequential tools>` | the R5 at-action cadence — guardrail gate (can block, B9) + Gate-2 consult (B10) + loop-closure (B6, via state) | **to build** |
+| **H4** | `Stop` / `SessionEnd` | reflect-at-close (B7) + accreditation write (§4.6) | **to build** |
+| *(H5)* | *`SessionStart`* | *Calling — purposeless agents only (§4.1); outside the core task loop* | *conditional* |
+
+**Minimum = 3 events** (`UserPromptSubmit` + `PreToolUse` + `Stop`/`SessionEnd`), **2 already Live, +2 scripts (H3, H4).** Calling adds a 4th event only if purposeless agents are served.
+
+**Design decisions (carried to build):**
+- **D-A — Gate-2 selectivity (the central tension).** A deterministic hook fires on tool *patterns*, but B10's Gate 2 is a *stake self-screen*, not "every action." Resolution (founder-elected at build): fire the **guardrail block** on a narrow **irreversible-tool set** (where over-blocking is the safe error), and fire the **Gate-2 consult** on a broader **consequential-tool set** but **deduped/throttled** (fire-once-per-distinct-decision via state) so it does not consult before every `Edit`/`Bash`. The stake-screen's *judgement* remains a documented limit — a pattern hook approximates it; it cannot decide "is this genuinely a decision."
+- **D-B — Loop-closure state (B6).** A state file tracks an *open loop* (a consult returned a redirection); the next at-action consult carries `prior_feedback` at the **same depth**; the loop is *closed* when the re-examination clears. Mirror the LIVE CI-4 `analyseLoopClosure` semantics (`loop-closure-gate.ts`) — reuse, do not re-invent (PR15).
+- **D-C — Reflect is initiated, not driven (B7).** H4 fires the reflect *open* + injects "run your Q1–Q6 now"; the **model drives** the six-question sequence (a hook cannot drive a multi-turn interactive exchange). Honest partial; fire-once-per-session; the sequence is **never abbreviated** (B7).
+- **D-D — Accreditation provenance (R18f, §4.6).** The harness **accumulates the session's signed assessments** (state, appended by H1/H3 consults) so H4's accreditation write can carry them (R18f — no credential without examination). The write uses a **non-marker** credential bound to the loop's agent_id — **never** the standing `pre_decision_harness` marker credential (an accreditation write on it would clobber the marker — established 2026-06-21).
+- **D-E — Close-event contract (PR11).** Confirm at build whether `Stop` or `SessionEnd` is the right event and whether it can **initiate a model turn** (required by D-C). The harness work confirmed `UserPromptSubmit` + `PreToolUse`-can-block first-hand; the close event is **unexercised** — capture raw stdin (`GATE1_DEBUG`) before relying on it.
+- **D-F — Fail posture (KG1 / R18, per D4).** Every new hook **fails-open with an honest log** on an outage (like H1/H2) — *except* the guardrail block, which blocks on a genuine `do_not_proceed` verdict (its purpose) but **fails-open on an outage** by default (don't brick the loop on an API hiccup), configurable strict. Never a fake frame; never a silent block.
+
+**Release gate (extends D6).** The negative-battery gains legs for **H3** (guard-blocks-on-`do_not_proceed`; consult-fires-on-consequential; loop-closure-carries-`prior_feedback`; fire-once-per-decision; outage→fail-open) and **H4** (reflect-initiates; accreditation-carries-accumulated-provenance; fire-once-per-session; outage→honest). The logic-harness gains H3/H4 request-construction + state proofs. Both green before any live-fire.
+
+**Staging:**
+- **Slice 5a — build dark (`code-elevated`; repo-only).** H3 + H4 scripts (reuse `framing-core.mjs`), the state files (loop-open, session-provenance, fire-once), the battery + logic-harness extensions. No install, no prod change — mirrors how Slices 1–3a were built repo-only then live-verified at close.
+- **Slice 5b — activate (`code-critical`; founder-walked, PR17).** Install H3 + H4 in a real loop on a **non-marker** credential; live-verify: a destructive action is **blocked** by the guard; a mid-task consult fires and a redirection opens/closes a loop; reflect initiates at session close; an accreditation write lands carrying the session's provenance.
+
+**Consequence.** With H1–H4 the installed environment invokes the practice at *every* stage deterministically — the thing the bare-into-harness test showed it does **not** do today. Full methodological fidelity still layers **state** (D-B, D-D) and **model-driven completion** (D-C) on top; the hooks guarantee the *firing*, not the agent's quality of reasoning from the result (the D1 limit, unchanged). **[CORRECTED by the 2026-06-21 Slice-5b amendment below: this over-claims. The hooks guarantee the firing of the OUT-OF-BAND steps (guard-deny, accred-write) and the forcing of a turn; a capable agent correctly REFUSES the cooperation-dependent injected steps (frame-use, reflect-via-outbound-POST). See "The channel law".]**
+
+---
+
+## Amendment 2026-06-21 (Slice 5b live-fire) — the channel law; H3/H4 re-architecture; corrected scope
+
+**Status:** Adopted (design). The Slice-5b activation live-fired H1–H4 in a real Claude Code desktop loop on a **non-marker** test credential; it both proved the enforcement half and surfaced a fundamental finding that re-architects the cooperation half. The build of the re-architecture is **Slice 5c** (its own `code-critical`, founder-walked session). **No production change in this amendment** — the standing `pre_decision_harness` dogfood marker + the LIVE H1/H2 install were untouched throughout; the Slice-5b test artifacts were torn down.
+
+**What Slice 5b proved (live, a real Claude agent):**
+- **Guard deny — WORKS.** `permissionDecision:"deny"` is honored by the desktop app: a strict-outage guard blocked an `rm -rf`; the target survived. (A real `pause_for_review` verdict on a throwaway → caution, not over-block.)
+- **Accred write — WORKS.** An out-of-band write of 3 signed assessments cleared the R18f gate; the public GET read `examination_mode: post_decision_check` (correct non-marker value); the dogfood marker stayed `pre_decision_harness`.
+- **Consult/frame — fires but is DISCOUNTED** ("background context / manufactured urgency, not instructions").
+- **Reflect-initiate — fires but is REFUSED.** `decision:block` forces the turn and (after a contract-bug fix) the open succeeds, but the agent **refuses to engage even with a clean open** — explicitly because it is asked to make outbound POSTs to a third-party service on an injected instruction. The refusal is **correct, desirable agent behaviour.**
+- **`Stop` stdin wire fact (first-hand, corrects the docs/header):** this desktop build's `Stop` stdin carries `last_assistant_message` (the agent's closing text) alongside `transcript_path`, `effort`, `background_tasks`, `session_crons` — so the hook CAN read what the agent said out-of-band.
+
+**Root cause (4-lens + adversarial-verify workflow; verdict: FUNDAMENTAL, not tunable).** A hook harness has two delivery **channels**, treated oppositely by a capable agent:
+1. **Out-of-band** — the hook *does* it on a credential in its own env (guard-deny, accred-write). The agent is never asked, never sees it ⇒ no injected imperative ⇒ the injection defence never fires ⇒ **robust to a resistant agent.**
+2. **Soft-injected text** — additionalContext frames, a `decision:block` reason instructing the agent to act. A capable agent assigns it lower trust (provenance = environment, not the user) and **actively refuses** an imperative to take consequential **outbound** action with a credential it doesn't hold. A *more* capable agent refuses *harder*.
+
+This sharpens and supersedes the over-statement of **D1**: the agent does not merely fail to *use* injected content — it **actively rejects injected instructions-to-act**, by design.
+
+### The channel law (governing principle)
+Classify every load-bearing step by **channel, not stage**. Design every load-bearing step as **out-of-band**. The frame stays **advisory** (the agent may discount it — desirable; never claim "the agent reasons from the frame"). **Standing do-not-build:** never force the practice via `PreToolUse`-deny-until-you-call-the-API — a capable agent reads holding real work hostage to an outbound call as the same (worse) coercion and refuses it harder.
+
+### The Slice-5c re-architecture — three channels
+- **ENFORCE (hook does it):** H3 guard-deny (unchanged); H4 `decision:block` to force exactly **one in-conversation reflection turn** (no outbound instruction).
+- **INSTRUMENT (hook records out-of-band, own credential, agent never asked):** accred-write (unchanged, incl. the marker-refusal guards); **keep the H1/H3 consult *fetch* as the sole R18f provenance source** — the guard call returns no signed assessment, so this fetch is credential-critical: strip its injected tail, **never** the fetch; **NEW `persistReflection()`** modeled on `writeAccreditation` — on the `stop_hook_active===true` loop-guard turn, read the agent's closing reflection from the `Stop` stdin (`last_assistant_message`, confirmed present) and POST it out-of-band under the hook's reflect credential.
+- **ADVISE (hook offers; agent may discount — desirable):** H1/H2 frames kept; strip the H3 SCORE frame's imperative outbound tail ("…before writing the credential"); rewrite H4's forced-turn reason to a non-imperative, no-endpoint, no-credential, in-conversation invitation to review one's own reasoning (reviewing one's own reasoning is within task scope ⇒ does not trip the scope-expansion defence).
+
+### Honesty contract (load-bearing — the adversarial verifier's catch; verdict SOUND_WITH_FIXES)
+1. **Disclose the off-machine egress.** Relocating the POST to the hook removes the agent's *refusal* but NOT the transmission of the agent's introspective words to the service — this must be **disclosed + consented at operator-install** (the accred analogy doesn't cover it: that's server-produced signed data, not harvested free-text). Confirm `/api/credential/erase` covers reflection rows.
+2. **Don't open reflect until an additive `context_source: 'agent_stated' | 'harness_inferred'` field lands** on `/api/practice/reflect` (its own 0c-ii gate) — else the hook fabricates the agent's stated `session_summary` context (R18). Honest interim: forced-turn-only, no server open.
+3. **Persist the agent's verbatim words or an explicit "reflection not performed (declined)"** — the hook NEVER authors first-person introspection; lock with a negative-battery leg.
+4. **Narrow the public `pre_decision_harness` claim** (llms.txt / agent-card / examination-mode docs) **and correct this ADR's over-claim in lockstep**: attest only *frame injected pre-decision + irreversible actions guarded + a reflection turn fired & observed + the credential rests on genuinely-accumulated signed assessments* — never "the agent reasons from the frame" or "completed a sincere Q1–Q6."
+
+**Deferred:** the MCP-tool surface (PR15: it duplicates the public `/api/reason`, adds a long-lived credential-holding process, and does not solve the zero-self-invocation firing problem — its only useful pieces are already in the re-architecture above).
+
+**Open questions (founder decisions; scope Slice 5c):** (1) reflect IN (decompose) or OUT (drop) of the harness; (2) is install-time consent sufficient for transmitting the agent's introspective text; (3) approve the additive `context_source` reflect-contract field; (4) where the forced-turn opt-out lives; (5) approve narrowing the public claim + this ADR correction.
+
+**Method:** a 9-agent workflow (4 root-cause lenses → 3 competing architectures → judge → adversarial verify); judge recommended Candidate 1 (enforcement+instrumentation) hardened with Candidate 3's honesty discipline; adversarial verdict SOUND_WITH_FIXES (the fixes = items 1–4). Memory: `[[gate1-harness-channel-law]]`.
+
+---
+
 ## References
 
 - `drafts/sage-practice-pre-decision-harness-design.md` — the research-backed design (this ADR's basis; now governed by this ADR).

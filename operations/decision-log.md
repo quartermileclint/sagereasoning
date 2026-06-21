@@ -12377,3 +12377,46 @@ Expected: both gates green; no production source modified.
 **Rules served:** R0, R5, R18/R18f, R19/R19e, AC1, AC5, KG1, KG2, PR1, PR11, PR12, PR15, PR16, PR18.
 
 **Status:** Adopted. Implementation: H3 + H4 are **Verified (in repo) — built dark + battery-green + adversarially reviewed**; not installed, not live (Slice 5b is the `code-critical`/AC7 founder-walked activation). On `Scoped → Designed → Scaffolded → Wired → Verified → Live`. Cross-references: `D-SAGE-PRACTICE-GATE1-STANDING-HARNESS-DOGFOOD-PRE-DECISION-MARKER-LIVE`, `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (ADR-011, the 2026-06-21 full-loop amendment — H1–H4, D-A…D-F, Slice 5a/5b), `operations/p1-rebuild-2026-06/sage-practice-grounding-dossier.md` (§4 the operating model; rows B6/B7/B9/B10), `website/src/app/api/accreditation/[agent_id]/loop-closure-gate.ts` (the mirrored CI-4 rule), `harness/gate1-pre-decision/README.md`.
+
+---
+
+## 2026-06-21 — D-SAGE-PRACTICE-GATE1-FULL-LOOP-HARNESS-SLICE5B-ACTIVATION-AND-CHANNEL-REARCHITECTURE
+
+**Decision:** Live-fire the full-loop harness (H1–H4) in a real Claude Code desktop loop on a non-marker test credential (Slice 5b activation, founder-walked Critical 0c-ii, AC7 + PR6). The walk proved the **channel law** — out-of-band hook actions (guard-deny, accred-write) are robust to a resistant agent; soft-injected instructions-to-act (frame-use, reflect-via-outbound-POST) are correctly REFUSED by a capable agent — which re-architects the cooperation half (captured as the ADR-011 2026-06-21 Slice-5b amendment + a Slice-5c build prompt). All Slice-5b test artifacts torn down; **production byte-equivalent to pre-5b**.
+
+**What was verified live (the four behaviours):**
+- **Guard deny — proven.** `permissionDecision:"deny"` honored by the desktop app: a strict-outage guard blocked an `rm -rf`; the target survived. A real `pause_for_review` on a throwaway → caution (no over-block).
+- **Accred write — proven.** Out-of-band write of 3 signed assessments cleared the live R18f gate; public GET read `examination_mode: post_decision_check` (correct non-marker value); honest `already-exists(2)` on the 2nd walk's retry (no clobber/false-success). The standing dogfood marker stayed `pre_decision_harness`.
+- **Consult + loop — mechanism proven** (consults fire; loop opened/reopened/carried-prior/abandoned), but the agent **discounts** the injected frames ("background context / manufactured urgency").
+- **Reflect-initiate — turn-force proven, content refused.** `decision:block` forces the turn; a reflect-open contract bug (`session_summary` must be a structured object, not a string) was found + patched so the open succeeded with a real Q1 — yet the agent **still refused even a clean open**, explicitly because it is asked to make outbound POSTs to a third-party service on an injected instruction (correct, desirable behaviour). The patch was then **reverted as superseded**.
+
+**Root cause (a 9-agent root-cause/design workflow; verdict FUNDAMENTAL):** a hook harness has two delivery channels — out-of-band (hook acts on its own credential; agent never asked) vs soft-injected text (agent must act on injected content). A capable agent assigns the latter lower trust and actively refuses outbound-action imperatives; a more capable agent refuses harder. **Channel law:** classify every load-bearing step by channel, not stage; design load-bearing steps out-of-band; keep the frame advisory. **Slice-5c re-architecture (ADR amendment):** ENFORCE (guard-deny + a forced in-conversation reflect turn) / INSTRUMENT (accred-write + keep the consult fetch as the sole R18f provenance source + NEW `persistReflection()` reading `last_assistant_message` out-of-band) / ADVISE (frames; strip imperative outbound tails). **Honesty fixes (adversarial verdict SOUND_WITH_FIXES):** disclose+consent the off-machine egress of the agent's words; add a `context_source` field to `/api/practice/reflect` before opening (else fabricated session context); persist verbatim-or-"not-performed" (never hook-authored); narrow the public `pre_decision_harness` claim + correct the ADR over-claim in lockstep. **Standing do-not-build:** never force the practice via `PreToolUse`-deny-until-you-call-the-API. **First-hand wire fact:** this desktop build's `Stop` stdin carries `last_assistant_message` (+ `effort`, `background_tasks`, `session_crons`).
+
+**Files touched (repo; the founder commits):**
+- `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` — the 2026-06-21 Slice-5b amendment (channel law + three-channel re-architecture + honesty fixes) + corrected the prior amendment's over-claim.
+- `operations/handoffs/founder/2026-06-21-gate1-full-loop-harness-slice5c-channel-rearchitecture-NEXT-SESSION-PROMPT.md` (new — the Slice-5c build prompt).
+- `operations/handoffs/founder/2026-06-21-gate1-full-loop-harness-slice5b-activation-close.md` (new — this close).
+- (memory, outside the repo) `gate1-harness-channel-law.md` + the MEMORY.md index line.
+- **No net harness code change** — the reflect-400 patch to `close-hook.mjs` + `logic-harness.mjs` was made for the re-test then **reverted** (superseded); the harness tree is back to `a825a34` (gates re-confirmed 53/0, 108/0).
+
+**Production changes this session (all founder-walked, then torn down):** minted 2 throwaway prod credentials (`sr_live_410782` id `6d7ee4de-c9e2-4ad0-be6b-4c0c9b5a7c2a` consult/guard; `sr_prac_cb9e45` id `fcf53ba1-e352-4dee-bf1f-b3a827902bba` accred/reflect, agent_id `sagereasoning:gate1-loop-test@v1`); the live-fire wrote 1 `agent_accreditation` seed row + test traffic (`loop_billing_events`, `agent_assessment_history` trajectory, A12 audit rows). An inert Vercel-env mistake (harness `GATE1_*`/`SAGE_GATE1_*` vars added to prod + a redeploy) was grep-confirmed inert (no server code reads them) and reverted (vars removed + redeployed green). **Teardown (verified):** both creds revoked; the `agent_accreditation` row for `sagereasoning:gate1-loop-test@v1` deleted (cascade) — public GET now **HTTP 404 `not_found`**; the local test loop + state + guard target removed. **End state = byte-equivalent to pre-5b production**; the standing dogfood marker (re-read **`pre_decision_harness`**) + the LIVE H1/H2 install were untouched throughout. Test traffic — exclude from billing/trajectory samples; trajectory rows `retain_until`-swept.
+
+**Risk classification:** **Critical** under 0d-ii (AC7 + PR6) — credential mint + accreditation write on the trust surface + hooks firing prod consults/gates/writes + a guard denying a tool call in a live loop. Full Critical Change Protocol; every prod step the founder's (PR17); the AI guided + verified, performing no Vercel/Supabase/git/mint operation. R18f/R20a/distress/Layer-2 signing/UPC auth untouched.
+
+**Rollback path:** the activation is already torn down (creds revoked, row deleted, hooks uninstalled) — production byte-equivalent to pre-5b. The repo changes (ADR amendment, Slice-5c prompt, close) are `git revert`-able; the reflect-400 patch is already reverted.
+
+**Verification step (founder-performable):**
+```
+node harness/gate1-pre-decision/test/logic-harness.mjs                                    # 53 passed, 0 failed
+node harness/gate1-pre-decision/test/negative-battery.mjs                                  # 108 passed, 0 failed
+git status --porcelain harness/gate1-pre-decision website/src sdk                          # empty (harness back to a825a34; prod source untouched)
+curl -s https://www.sagereasoning.com/api/accreditation/sagereasoning%3Agate1-dogfood%40v1 | grep -o pre_decision_harness   # dogfood intact
+curl -s -o /dev/null -w '%{http_code}' https://www.sagereasoning.com/api/accreditation/sagereasoning%3Agate1-loop-test%40v1  # 404 (row torn down)
+```
+Expected: gates green; harness + prod source clean; dogfood `pre_decision_harness`; test id `404`.
+
+**Open questions (founder decisions; scope Slice 5c):** reflect in/out of the harness; egress-consent sufficiency; approve the additive `context_source` reflect field; forced-turn opt-out location; approve narrowing the public claim + the ADR correction.
+
+**Rules served:** R0, R5, R18/R18f, R19/R19e, AC1, AC5, AC7, KG1, KG2, PR6, PR11, PR12, PR15, PR16, PR17, PR18.
+
+**Status:** Adopted. The full-loop harness's **enforcement + instrumentation half is Verified-live** (guard-deny + accred-write); the **cooperation half is re-architected (Designed)** onto out-of-band channels per the ADR amendment — build = Slice 5c. Cross-references: `D-SAGE-PRACTICE-GATE1-FULL-LOOP-HARNESS-SLICE5A-BUILT-TEST-VERIFIED`, `D-SAGE-PRACTICE-GATE1-STANDING-HARNESS-DOGFOOD-PRE-DECISION-MARKER-LIVE`, `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (the 2026-06-21 Slice-5b amendment), `operations/handoffs/founder/2026-06-21-gate1-full-loop-harness-slice5c-channel-rearchitecture-NEXT-SESSION-PROMPT.md`, memory `gate1-harness-channel-law`.
