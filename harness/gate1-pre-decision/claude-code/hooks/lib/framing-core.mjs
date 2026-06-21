@@ -30,6 +30,7 @@ import { existsSync, mkdirSync, writeFileSync, appendFileSync, readFileSync } fr
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
+import { appendProvenance } from "./session-state.mjs";
 
 export const MAX_CONTEXT_CHARS = 9500; // headroom under Claude Code's 10,000-char additionalContext cap.
 
@@ -75,8 +76,35 @@ export function loadConfig({ hookDir, eventName, allowStrict = true } = {}) {
     stateDir: process.env.GATE1_STATE_DIR || fileCfg.stateDir || join(tmpdir(), "sage-gate1"),
     fireOnce: parseBool(process.env.GATE1_FIRE_ONCE, parseBool(fileCfg.fireOnce, true)),
     credentialEnvVar: fileCfg.credentialEnvVar || "SAGE_GATE1_CREDENTIAL",
+    // H3 guard (D-A/D-F): the fail-mode for the guardrail BLOCK on an /api/guardrail outage. Default
+    // 'open' (never brick the loop on an API hiccup); 'strict' denies the tool until the gate is
+    // reachable. A genuine do_not_proceed verdict ALWAYS blocks regardless of this — that is the
+    // guard's purpose; this governs only the OUTAGE case (ADR-011 D-F).
+    guardFailMode: (process.env.GATE1_GUARD_FAIL_MODE || fileCfg.guardFailMode) === "strict" ? "strict" : "open",
+    // Slice 5a (ADR-011 D-D): accumulate each consult's SIGNED assessment to the session
+    // provenance log so H4's close-time accreditation write can carry it (R18f). DEFAULT OFF —
+    // unset ⇒ the H1/H2 success path is BYTE-IDENTICAL to pre-Slice-5a (no provenance file is
+    // written). Enabled (with H3/H4) at the founder-walked Slice-5b activation, never in this
+    // dark build. The provenance append never touches stdout/exit/marker/frame even when ON.
+    captureProvenance: parseBool(process.env.GATE1_PROVENANCE_ENABLED, parseBool(fileCfg.captureProvenance, false)),
   };
   cfg.credential = process.env[cfg.credentialEnvVar] || process.env.GATE1_CREDENTIAL || "";
+  // H3 guard endpoint (D-A): explicit override, else config, else derive from the reason endpoint
+  // (…/api/reason → …/api/guardrail) so a single GATE1_ENDPOINT configures both.
+  cfg.guardEndpoint =
+    process.env.GATE1_GUARDRAIL_ENDPOINT || fileCfg.guardEndpoint || deriveSibling(cfg.endpoint, "guardrail");
+  // H3 guard-set definition (D-A). irreversiblePatterns: Bash commands matching ANY of these (case-
+  // insensitive) route to the guardrail BLOCK (over-blocking is the safe error on irreversible work).
+  // guardTools: tool_names that ALWAYS guard regardless of content (e.g. a deploy MCP tool). Both
+  // override-able via env (comma/newline list) or gate1.config.json; sensible defaults below.
+  cfg.irreversiblePatterns =
+    parsePatternList(process.env.GATE1_IRREVERSIBLE_PATTERNS) ||
+    (Array.isArray(fileCfg.irreversiblePatterns) ? fileCfg.irreversiblePatterns : null) ||
+    DEFAULT_IRREVERSIBLE_PATTERNS;
+  cfg.guardTools =
+    parsePatternList(process.env.GATE1_GUARD_TOOLS) ||
+    (Array.isArray(fileCfg.guardTools) ? fileCfg.guardTools : null) ||
+    [];
   if (cfg.depth === "deep") cfg.depth = "standard"; // hard guard: ADR-011 D3 — never deep in a pre-prompt hook.
   if (!allowStrict) cfg.failMode = "open"; // SubagentStart can't block ⇒ strict is impossible; force open.
   else if (cfg.failMode !== "strict") cfg.failMode = "open";
@@ -87,6 +115,70 @@ export function parseBool(v, dflt) {
   if (v === undefined || v === null || v === "") return dflt;
   if (typeof v === "boolean") return v;
   return String(v).toLowerCase() === "true" || String(v) === "1";
+}
+
+// Derive a sibling API endpoint from the reason endpoint: …/api/reason → …/api/<name>. Falls back
+// to a localhost default if the base does not contain /api/reason. Pure string op; never throws.
+export function deriveSibling(reasonEndpoint, name) {
+  const base = String(reasonEndpoint || "");
+  if (base.includes("/api/reason")) return base.replace("/api/reason", `/api/${name}`);
+  return `http://localhost:3000/api/${name}`;
+}
+
+// Parse a comma/newline-separated env override into a string list, or null if unset/empty.
+export function parsePatternList(v) {
+  if (typeof v !== "string" || v.trim() === "") return null;
+  const out = v
+    .split(/[\n,]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return out.length ? out : null;
+}
+
+// The default irreversible-action regex source strings (D-A). Conservative + narrow: each names a
+// destructive or hard-to-undo operation where the safe error is to OVER-block. Matched case-
+// insensitively against the Bash command text. Tunable via GATE1_IRREVERSIBLE_PATTERNS / config.
+//
+// IMPORTANT (Slice-5a review fix): flags are matched ORDER-INDEPENDENTLY via lookaheads, and a
+// `--flag` alternative is NEVER anchored with a leading `\b` (a `\b` cannot match before a `-`, so
+// `\b--prod` is a DEAD alternative — the bug that let `vercel --prod` slip past). Add a guard-leg
+// fixture to the negative battery for any new destructive form so coverage stays locked.
+export const DEFAULT_IRREVERSIBLE_PATTERNS = [
+  // rm recursive+force in ANY flag order/form: rm -rf, -fr, -r -f, -f -r, --recursive --force,
+  // mixed (-r --force). Two lookaheads require BOTH a recursive flag and a force flag anywhere.
+  "\\brm\\b(?=.*(?:-[a-z]*r|--recursive))(?=.*(?:-[a-z]*f|--force))",
+  "\\bdrop\\s+(table|database|schema|index)\\b",
+  "\\bdelete\\s+from\\b",
+  // truncate WITH or WITHOUT the literal 'table' (valid destructive SQL in several dialects).
+  "\\btruncate\\s+(table\\s+)?[\"`\\w]",
+  // git force-push: --force / --force-with-lease / -f / the `+<ref>` refspec form (git push origin +main).
+  "git\\s+push\\b.*(--force|-f\\b|\\s\\+[\\w/.])",
+  "git\\s+reset\\s+--hard\\b",
+  "git\\s+clean\\s+-[a-z]*f",
+  // vercel destructive/deploy — `--prod` is anchored with a TRAILING \\b only (no leading \\b).
+  "\\bvercel\\b.*(\\bdeploy\\b|--prod\\b|\\brm\\b|\\bremove\\b)",
+  "\\bnetlify\\b.*\\bdeploy\\b",
+  "supabase\\s+db\\s+(push|reset)\\b",
+  "\\bkubectl\\s+delete\\b",
+  "\\bterraform\\s+(apply|destroy)\\b",
+  "\\bdocker\\s+(rm|rmi|system\\s+prune)\\b",
+  "\\bmkfs\\b",
+  "\\bdd\\s+if=",
+  ">\\s*/dev/sd",
+  "\\b(shutdown|reboot|halt)\\b",
+];
+
+// Compile the irreversible patterns once; an invalid regex is skipped (never crashes the hook).
+export function compileIrreversible(patterns) {
+  const out = [];
+  for (const p of patterns || []) {
+    try {
+      out.push(new RegExp(p, "i"));
+    } catch {
+      /* skip a malformed pattern */
+    }
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------------
@@ -224,17 +316,47 @@ export function extractVerdict(body) {
   return null;
 }
 
+// Extract the SIGNED assessment envelope ({ assessment, signature, key_id }) for D-D provenance.
+// Present only when the deployment signs Layer-2 (production); an unsigned deployment (verdict
+// directly at `assessment`, no signature/key_id) returns null and contributes no provenance —
+// H4 then honestly writes no accreditation (R18f needs a verifiable assessment). Never throws.
+export function extractSignedAssessment(body) {
+  const a = body?.assessment;
+  if (
+    a &&
+    typeof a === "object" &&
+    typeof a.signature === "string" &&
+    a.signature.length > 0 &&
+    typeof a.key_id === "string" &&
+    a.key_id.length > 0 &&
+    a.assessment &&
+    typeof a.assessment === "object"
+  ) {
+    return { assessment: a.assessment, signature: a.signature, key_id: a.key_id };
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // The framing fetch. Returns { ok:true, verdict } or { ok:false, reason }.
 // Never throws — every failure is a structured reason routed through the fail handler.
 // ---------------------------------------------------------------------------
-export async function fetchFrame(cfg, task) {
+export async function fetchFrame(cfg, task, opts = {}) {
+  // opts (all optional; H1/H2 pass none → byte-identical request):
+  //   depth         — override cfg.depth (H3's same-depth loop carry, D-B). Never 'deep' (D3 guard).
+  //   priorFeedback — the SDK PriorFeedback block for a re-examination (the iterate step, D-B).
+  //   context       — extra situational context string.
+  let depth = typeof opts.depth === "string" ? opts.depth : cfg.depth;
+  if (depth === "deep") depth = "standard"; // ADR-011 D3: never deep in a pre-action hook.
+  const reqBody = { input: task, depth, response_format: "assessment_first" };
+  if (typeof opts.context === "string" && opts.context) reqBody.context = opts.context;
+  if (opts.priorFeedback && typeof opts.priorFeedback === "object") reqBody.prior_feedback = opts.priorFeedback;
   let res;
   try {
     res = await fetch(cfg.endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${cfg.credential}` },
-      body: JSON.stringify({ input: task, depth: cfg.depth, response_format: "assessment_first" }),
+      body: JSON.stringify(reqBody),
       signal: AbortSignal.timeout(cfg.timeoutMs),
     });
   } catch (e) {
@@ -252,7 +374,57 @@ export async function fetchFrame(cfg, task) {
   }
   const verdict = extractVerdict(body);
   if (!verdict) return { ok: false, reason: "no assessment in response" };
-  return { ok: true, verdict };
+  // `signed` is ADDITIVE (D-D provenance): the signed envelope when the deployment signs Layer-2,
+  // else null. H1/H2 ignore it; H3 + the shared provenance step use it. `body` is returned too so
+  // callers (H3) can read response-level fields (e.g. examination_open) without a second parse.
+  return { ok: true, verdict, signed: extractSignedAssessment(body), body };
+}
+
+// ---------------------------------------------------------------------------
+// The guardrail fetch (H3's guard role, ADR-011 D-A). Sibling of fetchFrame: POSTs an action to
+// /api/guardrail and returns the gate verdict. Never throws — every failure is a structured reason.
+// The response is the standard envelope ({ result, meta }); the gate fields live on `.result`.
+// ---------------------------------------------------------------------------
+export async function fetchGuardrail(cfg, action, { context, riskClass } = {}) {
+  let res;
+  try {
+    res = await fetch(cfg.guardEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${cfg.credential}` },
+      body: JSON.stringify({
+        action,
+        ...(context ? { context } : {}),
+        ...(riskClass ? { risk_class: riskClass } : {}),
+      }),
+      signal: AbortSignal.timeout(cfg.timeoutMs),
+    });
+  } catch (e) {
+    return {
+      ok: false,
+      reason: e && e.name === "TimeoutError" ? `timeout after ${cfg.timeoutMs}ms` : `request failed: ${e?.message || e}`,
+    };
+  }
+  if (!res.ok) return { ok: false, reason: `http ${res.status}` };
+  let body;
+  try {
+    body = await res.json();
+  } catch {
+    return { ok: false, reason: "non-JSON response" };
+  }
+  // The gate fields sit on `.result` (buildEnvelope shape); be defensive if a deployment returns
+  // them flat. We never invent a verdict — an unrecognised shape is a structured failure.
+  const result = body && typeof body === "object" && body.result && typeof body.result === "object" ? body.result : body;
+  if (!result || typeof result !== "object" || typeof result.recommendation !== "string") {
+    return { ok: false, reason: "no guardrail verdict in response" };
+  }
+  return {
+    ok: true,
+    recommendation: result.recommendation, // proceed | proceed_with_caution | pause_for_review | do_not_proceed
+    proceed: result.proceed === true,
+    proximity: result.katorthoma_proximity ?? null,
+    reasoning: typeof result.reasoning === "string" ? result.reasoning : "",
+    improvementHint: typeof result.improvement_hint === "string" ? result.improvement_hint : "",
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -308,6 +480,14 @@ export async function runFraming(cfg, { sessionKey, task, logLabel = "FRAMED", e
 
   const r = await fetchFrame(cfg, task);
   if (!r.ok) return fail(cfg, r.reason);
+
+  // D-D provenance (flag-gated; GATE1_PROVENANCE_ENABLED default off ⇒ H1/H2 byte-identical, no
+  // file written). Append THIS consult's SIGNED assessment to the session provenance log so H4's
+  // close-time accreditation write can carry it (R18f — no credential without examination). Keyed
+  // on sessionKey, which is the real session_id for the top-level hook (H4 reads by session_id);
+  // a subagent's provenance keys under its sub-<hash> (a documented secondary-coverage limit). This
+  // is a side-effect-only append — it never touches stdout/exit/marker/frame, and never throws.
+  if (cfg.captureProvenance && r.signed) appendProvenance(cfg, sessionKey, r.signed);
 
   // Inject the frame: default = additionalContext (UserPromptSubmit); subagent hook passes its own
   // emit (updatedInput.prompt prepend). Neither exits — the shared tail writes the marker + exits 0.

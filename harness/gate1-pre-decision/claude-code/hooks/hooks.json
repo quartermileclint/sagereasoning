@@ -1,5 +1,5 @@
 {
-  "_comment": "Plugin hook registration for sage-gate1-pre-decision. Auto-discovered at the plugin root (hooks/hooks.json) on install — no manifest 'hooks' field needed. Same shape as a settings.json 'hooks' block. Paths use ${CLAUDE_PLUGIN_ROOT} (the plugin's install dir) in EXEC form (command:'node' + args:[path]) so the path is passed as one argument with no quoting (plugins-reference: 'In hook commands, use exec form with args'). 'timeout' is SECONDS; the hooks self-abort at 28000ms (< 30s) and return their honest result first. UserPromptSubmit frames the top-level task (and can block in strict mode). PreToolUse matched to the subagent-spawn tool (Task|Agent) frames each delegated subagent's task (tool_input.prompt) and can block too. The credential is read from the env var SAGE_GATE1_CREDENTIAL (set in your settings 'env' block) — it is NEVER bundled in the plugin. Endpoint/depth/fail-mode default to local; override via GATE1_ENDPOINT / GATE1_DEPTH / GATE1_FAIL_MODE env or a gate1.config.json. See ../README.md.",
+  "_comment": "Plugin hook registration for sage-gate1-pre-decision (the FULL-LOOP harness, H1–H4). Auto-discovered at the plugin root (hooks/hooks.json) on install — no manifest 'hooks' field needed. Same shape as a settings.json 'hooks' block. Paths use ${CLAUDE_PLUGIN_ROOT} (the plugin's install dir) in EXEC form (command:'node' + args:[path]) so the path is passed as one argument with no quoting (plugins-reference: 'In hook commands, use exec form with args'). 'timeout' is SECONDS; the hooks self-abort at 28000ms (< 30s) and return their honest result first. H1 (UserPromptSubmit) frames the top-level task. H2 (PreToolUse matcher Task|Agent) frames each delegated subagent's task. H3 (PreToolUse matcher Bash|Edit|Write|MultiEdit|NotebookEdit) is the R5 at-action cadence — guard (block on do_not_proceed) + Gate-2 consult (deduped) + loop-closure. H4 (Stop) is reflect-at-close + the accreditation write. H1/H2 are LIVE in the founder's dogfood install; H3/H4 are BUILT DARK (Slice 5a) and registered here so a future /plugin install picks them up — they are NOT installed into any settings.local.json until the founder-walked Slice 5b. The consult credential is read from SAGE_GATE1_CREDENTIAL; H4's accreditation write uses a SEPARATE non-marker credential SAGE_GATE1_ACCRED_CREDENTIAL (never the standing marker) + SAGE_GATE1_AGENT_ID. See ../README.md.",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -21,6 +21,29 @@
             "type": "command",
             "command": "node",
             "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/subagent-framing-hook.mjs"],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/at-action-hook.mjs"],
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/close-hook.mjs"],
             "timeout": 30
           }
         ]

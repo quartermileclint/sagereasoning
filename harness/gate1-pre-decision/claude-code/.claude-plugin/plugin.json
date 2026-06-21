@@ -1,8 +1,8 @@
 {
   "name": "sage-gate1-pre-decision",
-  "displayName": "SageReasoning — Gate 1 (pre-decision harness)",
-  "version": "0.1.0",
-  "description": "Fires a pre-decision Stoic examination via SageReasoning /api/reason BEFORE the agent — and each delegated subagent — reasons, then injects the examined frame deterministically (control-flow, not prompt guidance). UserPromptSubmit frames the top-level task; PreToolUse frames each subagent spawn. Fail-open with an honest log by default; configurable strict. Requires a SageReasoning practice credential set in the environment (SAGE_GATE1_CREDENTIAL) — never bundled.",
+  "displayName": "SageReasoning — Gate 1 (full-loop harness)",
+  "version": "0.2.0",
+  "description": "Deterministically invokes the SageReasoning practice across the whole task loop (control-flow, not prompt guidance). H1 (UserPromptSubmit) + H2 (PreToolUse/Task|Agent) fire the pre-decision Stoic frame before the agent and each subagent reasons. H3 (PreToolUse/Bash|Edit|Write…) is the at-action R5 cadence — a guardrail that blocks a do_not_proceed on irreversible actions, a deduped Gate-2 consult, and loop-closure. H4 (Stop) initiates reflect-at-close and writes the session's accreditation provenance. Fail-open with an honest log by default (the guard blocks a genuine do_not_proceed; configurable strict). Consult credential from SAGE_GATE1_CREDENTIAL; H4's accreditation write uses a separate non-marker SAGE_GATE1_ACCRED_CREDENTIAL + SAGE_GATE1_AGENT_ID — never bundled. (H1/H2 live; H3/H4 built dark, activated at install.)",
   "author": {
     "name": "SageReasoning",
     "url": "https://www.sagereasoning.com"

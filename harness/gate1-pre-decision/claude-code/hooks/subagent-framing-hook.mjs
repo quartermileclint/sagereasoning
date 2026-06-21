@@ -24,10 +24,11 @@
  *   - STDIN  : { session_id, transcript_path, cwd, permission_mode, hook_event_name:"PreToolUse",
  *               tool_name, tool_input }.  For the subagent-spawn tool, `tool_input` carries the task
  *               at `.prompt` (alongside `.description`, `.subagent_type`).
- *               The exact tool_name (Task vs Agent) is confirmed by the close's live-verify; the
- *               registered matcher ("Task|Agent") covers both, and this hook reads `tool_input.prompt`
- *               either way. If `tool_input.prompt` is absent, the hook fails honestly (never a false
- *               frame) — the live-verify would surface a different field name to adjust.
+ *               Live-verified 2026-06-21: the real tool_name is `Agent` (NOT `Task`) and the task
+ *               sits at `tool_input.prompt`; `updatedInput` is applied (the subagent's transcript
+ *               shows its prompt leads with the frame). The matcher `Task|Agent` is kept for
+ *               portability to builds that use `Task`, and this hook reads `tool_input.prompt` either
+ *               way. If `tool_input.prompt` is absent, the hook fails honestly (never a false frame).
  *   - STDOUT : on exit 0, the JSON object
  *               {"hookSpecificOutput":{"hookEventName":"PreToolUse","updatedInput":{…prompt prepended}}}
  *              replaces the tool input so the subagent's prompt now leads with the examined frame.

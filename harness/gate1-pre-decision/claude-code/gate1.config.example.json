@@ -1,8 +1,24 @@
 {
+  "_comment": "Copy to gate1.config.json (next to /hooks) to override the built-in defaults. Precedence: explicit env override > this file > built-in default. Credentials are NEVER stored here — they are read from env (SAGE_GATE1_CREDENTIAL for consults; SAGE_GATE1_ACCRED_CREDENTIAL + SAGE_GATE1_AGENT_ID for H4's accreditation write — a NON-marker credential, never the standing pre_decision_harness marker). H4 refuses to write on the marker: name it via SAGE_GATE1_MARKER_CREDENTIAL (defaults to the consult credential, covering the dogfood) so the guard refuses it by identity — name it explicitly at Slice 5b when consult ≠ marker. H4's reflect/accred endpoints derive from `endpoint` (…/api/reason → …/api/practice/reflect, …/api/accreditation) unless GATE1_REFLECT_ENDPOINT / GATE1_ACCRED_ENDPOINT are set. H3/H4 are BUILT DARK in Slice 5a — these fields take effect only once the hooks are installed at the founder-walked Slice 5b.",
   "endpoint": "http://localhost:3000/api/reason",
   "depth": "standard",
   "failMode": "open",
   "timeoutMs": 28000,
   "credentialEnvVar": "SAGE_GATE1_CREDENTIAL",
-  "fireOnce": true
+  "fireOnce": true,
+
+  "_h3_comment": "H3 at-action hook (the guard/score/iterate cadence). captureProvenance accumulates each consult's signed assessment for H4's accreditation write (D-D) — DEFAULT OFF so H1/H2 stay byte-identical; set GATE1_PROVENANCE_ENABLED=true (with H3/H4) at activation. guardFailMode governs ONLY the guardrail OUTAGE (a genuine do_not_proceed always blocks). irreversiblePatterns/guardTools define the guard subset (D-A).",
+  "captureProvenance": false,
+  "guardFailMode": "open",
+  "guardTools": [],
+  "irreversiblePatterns": [
+    "rm\\s+-[a-z]*r[a-z]*f",
+    "\\bdrop\\s+(table|database|schema|index)\\b",
+    "\\bdelete\\s+from\\b",
+    "git\\s+push\\b.*(--force|-f\\b)",
+    "git\\s+reset\\s+--hard\\b",
+    "\\bvercel\\b.*\\b(deploy|--prod|rm|remove)\\b",
+    "supabase\\s+db\\s+(push|reset)\\b",
+    "\\bterraform\\s+(apply|destroy)\\b"
+  ]
 }

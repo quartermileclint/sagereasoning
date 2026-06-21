@@ -26,7 +26,7 @@
  * Exit: 0 only if every assertion passes (RELEASE GATE: PASS); 1 otherwise (RELEASE GATE: FAIL).
  */
 import { spawn } from "node:child_process";
-import { mkdtempSync, existsSync } from "node:fs";
+import { mkdtempSync, existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -35,14 +35,52 @@ import { shortHash, FRAME_SENTINEL } from "../claude-code/hooks/lib/framing-core
 
 const MAIN_HOOK = fileURLToPath(new URL("../claude-code/hooks/framing-hook.mjs", import.meta.url));
 const SUB_HOOK = fileURLToPath(new URL("../claude-code/hooks/subagent-framing-hook.mjs", import.meta.url));
+const AT_ACTION_HOOK = fileURLToPath(new URL("../claude-code/hooks/at-action-hook.mjs", import.meta.url));
+const CLOSE_HOOK = fileURLToPath(new URL("../claude-code/hooks/close-hook.mjs", import.meta.url));
 
-let mode = "ok";
-const server = makeServer(() => mode);
+let mode = "ok"; // drives /api/reason for the Slice-1/2/3 legs (back-compat).
+// Per-route state for the H3/H4 legs: reason (overrides `mode` when set), guard, reflect, accred.
+const routeState = { reason: null, guard: "proceed", reflect: "ok", accred: "ok" };
+// Captured request bodies (parent process; children POST to the mock via HTTP) — used to assert the
+// H3 prior_feedback construction (D-B) and the H4 accreditation provenance round-trip (D-D).
+let captured = [];
+const server = makeServer(() => mode, {
+  getRouteState: () => ({
+    reason: routeState.reason || mode,
+    guard: routeState.guard,
+    reflect: routeState.reflect,
+    accred: routeState.accred,
+  }),
+  onRequest: (path, body) => captured.push({ path, body }),
+});
 await new Promise((r) => server.listen(0, r));
 const port = server.address().port;
 const endpoint = `http://127.0.0.1:${port}/api/reason`;
 const DEAD_ENDPOINT = "http://127.0.0.1:1/api/reason"; // refuses connections → exercises "request failed"
 const stateDir = mkdtempSync(join(tmpdir(), "gate1-battery-"));
+
+// --- state-file readers (the battery runs in the parent; state lands under stateDir) -------------
+function provenanceLines(sessionId) {
+  const p = join(stateDir, `${sessionId}.provenance.jsonl`);
+  if (!existsSync(p)) return [];
+  return readFileSync(p, "utf8").split("\n").map((l) => l.trim()).filter(Boolean);
+}
+function loopState(sessionId) {
+  const p = join(stateDir, `${sessionId}.loop.json`);
+  if (!existsSync(p)) return null;
+  try {
+    return JSON.parse(readFileSync(p, "utf8"));
+  } catch {
+    return null;
+  }
+}
+function lastReq(pathFragment) {
+  for (let i = captured.length - 1; i >= 0; i--) if (captured[i].path.includes(pathFragment)) return captured[i].body;
+  return null;
+}
+function anyReq(pathFragment) {
+  return captured.some((c) => c.path.includes(pathFragment));
+}
 
 // --- assertion bookkeeping, grouped by leg -------------------------------------------------
 const legs = new Map(); // legName -> {pass, fail}
@@ -66,12 +104,25 @@ function note(text) {
   console.log(`  NOTE  ${text}`);
 }
 
+// Build a HERMETIC child env: strip every inherited GATE1_* / SAGE_GATE1_* var so the battery never
+// depends on (or leaks) the founder's LIVE dogfood install (which sets SAGE_GATE1_CREDENTIAL /
+// GATE1_ENDPOINT / GATE1_STATE_DIR). loadConfig reads SAGE_GATE1_CREDENTIAL first, so the founder's
+// real credential would otherwise shadow the mock token (this is the bug the marker-guard leg caught).
+function cleanEnv() {
+  const e = {};
+  for (const [k, v] of Object.entries(process.env)) {
+    if (k.startsWith("GATE1_") || k.startsWith("SAGE_GATE1_")) continue;
+    e[k] = v;
+  }
+  return e;
+}
 function runHook(hookPath, event, extraEnv = {}) {
   return new Promise((resolve) => {
     const ps = spawn(process.execPath, [hookPath], {
       env: {
-        ...process.env,
+        ...cleanEnv(),
         GATE1_ENDPOINT: endpoint,
+        SAGE_GATE1_CREDENTIAL: "sr_prac_mocktoken", // primary var loadConfig reads (over GATE1_CREDENTIAL)
         GATE1_CREDENTIAL: "sr_prac_mocktoken",
         GATE1_STATE_DIR: stateDir,
         ...extraEnv,
@@ -243,10 +294,258 @@ mode = "ok";
   check("subagent no-prompt: open fail-honest (exit 0 + UNAVAILABLE note, never a false frame)", noPrompt.code === 0 && ectx.includes("UNAVAILABLE"));
 }
 note("Faithful build (Slice 3): PreToolUse-on-Agent frames the delegated task in tool_input.prompt and");
-note("prepends the frame via updatedInput. The exact tool_name (Task vs Agent) is confirmed by the");
-note("close's live-verify; the registered matcher covers both. The full outage matrix (timeout /");
+note("prepends the frame via updatedInput. Live-verified 2026-06-21: real tool_name=Agent, updatedInput");
+note("applied (subagent prompt leads with the frame); matcher Task|Agent kept for portability. Outage matrix");
 note("malformed / conn-refused) is exhaustively covered by LEG 2 — the subagent path reuses the same");
 note("core fetch/fail, so one outage type here proves the wiring without padding.");
+
+// ===========================================================================================
+// LEG 5 — AT-ACTION (H3, Slice 5a): guard (block on do_not_proceed) + score (consult, deduped,
+// provenance) + iterate (loop-closure carries prior_feedback at the same depth). All fail-open
+// EXCEPT the guard block (which blocks on a genuine do_not_proceed; fails-open on an outage).
+// ===========================================================================================
+leg("at-action");
+const permOf = (out) => parsed(out)?.hookSpecificOutput?.permissionDecision || null;
+const ptEvent = (sid, tool, toolInput) => ({
+  session_id: sid,
+  hook_event_name: "PreToolUse",
+  tool_name: tool,
+  tool_input: toolInput,
+});
+
+// 5a — CONSULT fires on a consequential tool (Edit), injects the Gate-2 frame, appends provenance,
+// and dedups a repeat of the SAME decision (a different decision still consults).
+mode = "ok";
+routeState.reason = "ok";
+{
+  captured = [];
+  const ev = ptEvent("h3a", "Edit", { file_path: "/repo/x.ts", new_string: "const y = compute();" });
+  const r = await runHook(AT_ACTION_HOOK, ev, { GATE1_PROVENANCE_ENABLED: "true" });
+  const ctx = ctxOf(r.out);
+  check("h3 consult: exit 0 (never blocks a non-irreversible action)", r.code === 0 && permOf(r.out) === null, `code=${r.code} err=${r.err}`);
+  check("h3 consult: injects the at-action Gate-2 frame", ctx.includes("Gate 2 — at-action examination") && ctx.includes("deliberate"));
+  check("h3 consult: no [object Object]", !ctx.includes("[object Object]"));
+  check("h3 consult: hit /api/reason (not the guardrail)", anyReq("/api/reason") && !anyReq("/api/guardrail"));
+  check("h3 consult: appended 1 provenance line (D-D)", provenanceLines("h3a").length === 1);
+
+  const again = await runHook(AT_ACTION_HOOK, ev, { GATE1_PROVENANCE_ENABLED: "true" });
+  check("h3 consult: identical decision deduped (empty stdout, no re-consult)", again.out.trim() === "" && again.code === 0);
+  check("h3 consult: dedup did NOT append a 2nd provenance line", provenanceLines("h3a").length === 1);
+
+  const other = await runHook(AT_ACTION_HOOK, ptEvent("h3a", "Edit", { file_path: "/repo/other.ts", new_string: "x" }), { GATE1_PROVENANCE_ENABLED: "true" });
+  check("h3 consult: a DIFFERENT decision still frames (per-decision dedup)", ctxOf(other.out).includes("Gate 2 — at-action"));
+}
+
+// 5b — GUARD blocks on a do_not_proceed verdict for an irreversible Bash command.
+{
+  routeState.guard = "do_not_proceed";
+  const block = await runHook(AT_ACTION_HOOK, ptEvent("h3g", "Bash", { command: "rm -rf /repo/dist" }));
+  check("h3 guard: irreversible Bash + do_not_proceed → permissionDecision deny (BLOCK)", permOf(block.out) === "deny", `out=${JSON.stringify(block.out).slice(0, 160)}`);
+  check("h3 guard: deny reason names do_not_proceed", (parsed(block.out)?.hookSpecificOutput?.permissionDecisionReason || "").includes("do_not_proceed"));
+
+  routeState.guard = "proceed";
+  const ok = await runHook(AT_ACTION_HOOK, ptEvent("h3g2", "Bash", { command: "rm -rf /repo/dist" }));
+  check("h3 guard: same irreversible Bash + proceed → allowed (no deny)", permOf(ok.out) === null && ok.code === 0);
+}
+
+// 5c — GUARD outage honors the guard fail-mode (D-F): open allows+notes, strict blocks.
+{
+  routeState.guard = "error";
+  const open = await runHook(AT_ACTION_HOOK, ptEvent("h3go", "Bash", { command: "drop table users" }), { GATE1_GUARD_FAIL_MODE: "open" });
+  check("h3 guard outage open: allowed (no deny) + honest UNAVAILABLE note", permOf(open.out) === null && ctxOf(open.out).includes("UNAVAILABLE") && !ctxOf(open.out).includes("Proximity to right reason"));
+  const strict = await runHook(AT_ACTION_HOOK, ptEvent("h3gs", "Bash", { command: "drop table users" }), { GATE1_GUARD_FAIL_MODE: "strict" });
+  check("h3 guard outage strict: permissionDecision deny (blocks)", permOf(strict.out) === "deny" && (parsed(strict.out)?.hookSpecificOutput?.permissionDecisionReason || "").toLowerCase().includes("strict"));
+  routeState.guard = "proceed";
+}
+
+// 5d — a NON-irreversible Bash routes to CONSULT (score), not the guard.
+{
+  captured = [];
+  routeState.reason = "ok";
+  const r = await runHook(AT_ACTION_HOOK, ptEvent("h3c", "Bash", { command: "ls -la /repo" }));
+  check("h3 routing: benign Bash → consult (not guard)", anyReq("/api/reason") && !anyReq("/api/guardrail") && permOf(r.out) === null);
+  check("h3 routing: benign Bash consult injects the Gate-2 frame", ctxOf(r.out).includes("Gate 2 — at-action"));
+}
+
+// 5e — ITERATE (loop-closure, D-B): a redirection OPENS a loop; the next consult carries
+// prior_feedback at the SAME depth; a clearing re-examination CLOSES it.
+{
+  captured = [];
+  routeState.reason = "redirect";
+  const open = await runHook(AT_ACTION_HOOK, ptEvent("h3loop", "Edit", { file_path: "/repo/a.ts", new_string: "a" }), { GATE1_DEPTH: "standard" });
+  check("h3 iterate: redirection consult OPENS a loop (frame says OPEN)", ctxOf(open.out).includes("loop is now OPEN"));
+  const s1 = loopState("h3loop");
+  check("h3 iterate: loop state records the open loop ref", !!s1 && s1.openLoop && s1.openLoop.ref === "mock-loop-open" && s1.openLoop.depthTier === "standard");
+
+  captured = [];
+  routeState.reason = "clear";
+  const close = await runHook(AT_ACTION_HOOK, ptEvent("h3loop", "Edit", { file_path: "/repo/b.ts", new_string: "b" }), { GATE1_DEPTH: "standard" });
+  const reasonReq = lastReq("/api/reason");
+  check("h3 iterate: the next consult CARRIES prior_feedback (same loop id)", !!reasonReq && reasonReq.prior_feedback && reasonReq.prior_feedback.prior_loop_id === "mock-loop-open");
+  check("h3 iterate: prior_feedback carries the SAME depth tier (Q4 same-depth rule)", !!reasonReq && reasonReq.prior_feedback.prior_depth_tier === "standard" && reasonReq.depth === "standard");
+  check("h3 iterate: a clearing re-examination CLOSES the loop (frame says CLOSED)", ctxOf(close.out).includes("loop is now CLOSED"));
+  const s2 = loopState("h3loop");
+  check("h3 iterate: loop state shows no open loop after closure", !!s2 && s2.openLoop === null && s2.closedRefs.includes("mock-loop-open"));
+}
+
+// 5f — CONSULT outage fails OPEN-honest and does NOT mark the decision fired (retry allowed).
+{
+  routeState.reason = "error";
+  const out = await runHook(AT_ACTION_HOOK, ptEvent("h3retry", "Edit", { file_path: "/repo/c.ts", new_string: "c" }));
+  check("h3 consult outage: allowed (exit 0) + honest UNAVAILABLE note, no fake frame", out.code === 0 && permOf(out.out) === null && ctxOf(out.out).includes("UNAVAILABLE") && !ctxOf(out.out).includes("Proximity to right reason"));
+  routeState.reason = "ok";
+  const retry = await runHook(AT_ACTION_HOOK, ptEvent("h3retry", "Edit", { file_path: "/repo/c.ts", new_string: "c" }));
+  check("h3 consult outage: the SAME decision re-consults after recovery (no premature dedup)", ctxOf(retry.out).includes("Gate 2 — at-action"));
+  routeState.reason = "ok";
+}
+// 5g — GUARD COVERAGE (review fix): the idiomatic destructive forms the original patterns MISSED
+// (separated/long rm flags, `vercel --prod` boundary bug, refspec force-push, bare truncate) now
+// route to the BLOCKING guard. A miss here is a fail-open hole (the unsafe direction, ADR-011 D-A).
+{
+  routeState.guard = "do_not_proceed";
+  const mustGuard = [
+    "rm -r -f /repo/dist",
+    "rm --recursive --force /data",
+    "rm -f -r dist",
+    "vercel --prod",
+    "git push origin +main",
+    "truncate accounts;",
+  ];
+  for (const cmd of mustGuard) {
+    const r = await runHook(AT_ACTION_HOOK, ptEvent("h3cov-" + shortHash(cmd), "Bash", { command: cmd }));
+    check(`h3 guard coverage: "${cmd}" routes to the guard + blocks (deny)`, permOf(r.out) === "deny", `out=${JSON.stringify(r.out).slice(0, 110)}`);
+  }
+  // A benign command that merely MENTIONS a verb must NOT route to the guard (no over-block beyond
+  // the conservative posture): `git push origin main` (no force) → consult, not guard.
+  routeState.guard = "do_not_proceed";
+  routeState.reason = "ok";
+  captured = [];
+  const benign = await runHook(AT_ACTION_HOOK, ptEvent("h3cov-benign", "Bash", { command: "git push origin main" }));
+  check("h3 guard coverage: benign `git push origin main` → consult (not the blocking guard)", permOf(benign.out) === null && anyReq("/api/reason") && !anyReq("/api/guardrail"));
+  routeState.guard = "proceed";
+}
+note("H3 = the R5 at-action cadence: guard (block on do_not_proceed, fail-open on outage) + score");
+note("(consult, deduped per decision, provenance for D-D) + iterate (loop-closure carries prior_feedback");
+note("at the same depth, mirroring the LIVE CI-4 analyseLoopClosure rule). The consult NEVER blocks.");
+note("5g locks the review-fixed guard coverage: separated/long rm flags, `vercel --prod`, +ref force-push, bare truncate.");
+
+// ===========================================================================================
+// LEG 6 — CLOSE (H4, Slice 5a): reflect-initiate (force a Q1–Q6 turn) + accreditation write
+// (carries the accumulated provenance, NEVER on the standing marker credential). Fire-once per
+// session + stop_hook_active loop guard. All fail-honest.
+// ===========================================================================================
+leg("close");
+const decisionOf = (out) => parsed(out)?.decision || null;
+const reasonOf = (out) => parsed(out)?.reason || "";
+const stopEvent = (sid, extra = {}) => ({ session_id: sid, hook_event_name: "Stop", ...extra });
+const accredEnv = (extra = {}) => ({
+  SAGE_GATE1_ACCRED_CREDENTIAL: "sr_prac_accredmock",
+  SAGE_GATE1_AGENT_ID: "sagereasoning:loop@v1",
+  ...extra,
+});
+
+// 6a — reflect INITIATES (decision:block) + the accreditation write CARRIES the accumulated provenance.
+{
+  // Accumulate one signed assessment for this session via an H3 consult (provenance on).
+  await runHook(AT_ACTION_HOOK, ptEvent("h4a", "Edit", { file_path: "/repo/p.ts", new_string: "p" }), { GATE1_PROVENANCE_ENABLED: "true" });
+  check("h4 setup: provenance accumulated for the session", provenanceLines("h4a").length === 1);
+
+  captured = [];
+  routeState.reflect = "ok";
+  routeState.accred = "ok";
+  const r = await runHook(CLOSE_HOOK, stopEvent("h4a"), accredEnv());
+  check("h4 reflect-initiate: forces a turn (decision:block)", decisionOf(r.out) === "block", `out=${JSON.stringify(r.out).slice(0, 160)}`);
+  check("h4 reflect-initiate: the block reason runs Q1–Q6 (the model drives)", reasonOf(r.out).includes("Sage Reflect") && reasonOf(r.out).includes("Q1"));
+  check("h4 reflect-initiate: opened a reflect session (/api/practice/reflect)", anyReq("/api/practice/reflect"));
+  const accReq = lastReq("/api/accreditation");
+  check("h4 accreditation: wrote to /api/accreditation", !!accReq);
+  check("h4 accreditation: carried the accumulated provenance (R18f)", !!accReq && Array.isArray(accReq.provenance?.signed_assessments) && accReq.provenance.signed_assessments.length === 1);
+  check("h4 accreditation: provenance is the SIGNED envelope", !!accReq && !!accReq.provenance.signed_assessments[0].signature && !!accReq.provenance.signed_assessments[0].key_id);
+  check("h4: close marker written (fire-once)", existsSync(join(stateDir, "close-h4a.closed")));
+}
+
+// 6b — fire-once per session + stop_hook_active loop guard: a second Stop allows the stop.
+{
+  captured = [];
+  const again = await runHook(CLOSE_HOOK, stopEvent("h4a"), accredEnv());
+  check("h4 fire-once: a second Stop on the same session allows the stop (empty stdout)", again.out.trim() === "" && again.code === 0);
+  check("h4 fire-once: the second Stop did NOT re-write the accreditation", !anyReq("/api/accreditation"));
+
+  const active = await runHook(CLOSE_HOOK, stopEvent("h4loopguard", { stop_hook_active: true }), accredEnv());
+  check("h4 loop-guard: stop_hook_active=true → allow the stop immediately (empty stdout)", active.out.trim() === "" && active.code === 0);
+}
+
+// 6c — reflect/accred OUTAGE is honest: the reflect turn still fires with an honest fallback; the
+// accreditation write writes nothing false.
+{
+  await runHook(AT_ACTION_HOOK, ptEvent("h4c", "Edit", { file_path: "/repo/q.ts", new_string: "q" }), { GATE1_PROVENANCE_ENABLED: "true" });
+  captured = [];
+  routeState.reflect = "disabled"; // 503
+  routeState.accred = "error"; // 503
+  const r = await runHook(CLOSE_HOOK, stopEvent("h4c"), accredEnv());
+  check("h4 outage: still forces the reflect turn (decision:block)", decisionOf(r.out) === "block");
+  check(
+    "h4 outage: reflect reason is an HONEST fallback (names unavailability), never a fake question",
+    reasonOf(r.out).includes("run your") &&
+      (reasonOf(r.out).toLowerCase().includes("unavailable") || reasonOf(r.out).includes("http 503")),
+  );
+  check("h4 outage: exit 0 (never traps the session)", r.code === 0);
+  routeState.reflect = "ok";
+  routeState.accred = "ok";
+}
+
+// 6d — NEVER the marker credential; NO provenance → honest skip (writes nothing false).
+{
+  // No provenance accumulated for this fresh session.
+  captured = [];
+  const r = await runHook(CLOSE_HOOK, stopEvent("h4d"), accredEnv());
+  check("h4 no-provenance: writes NO accreditation (honest skip, R18f)", !anyReq("/api/accreditation"));
+  check("h4 no-provenance: still reflect-initiates", decisionOf(r.out) === "block");
+
+  // Provenance present, but the accred credential is (mis)set to the consult/marker credential (the
+  // dogfood case where consult IS the marker; markerCredential defaults to the consult credential).
+  await runHook(AT_ACTION_HOOK, ptEvent("h4e", "Edit", { file_path: "/repo/r.ts", new_string: "r" }), { GATE1_PROVENANCE_ENABLED: "true" });
+  captured = [];
+  await runHook(CLOSE_HOOK, stopEvent("h4e"), { SAGE_GATE1_ACCRED_CREDENTIAL: "sr_prac_mocktoken", SAGE_GATE1_AGENT_ID: "sagereasoning:loop@v1" });
+  check("h4 marker-guard (dogfood: accred == consult): refuses to write", !anyReq("/api/accreditation"));
+
+  // Review fix — guard by NAMED marker identity, independent of the consult credential:
+  // (general case) a DISTINCT non-marker consult + the marker pasted into the accred slot + the
+  // marker NAMED via SAGE_GATE1_MARKER_CREDENTIAL → refused (the consult≠marker case the original
+  // accred==consult guard MISSED).
+  await runHook(AT_ACTION_HOOK, ptEvent("h4mk1", "Edit", { file_path: "/repo/m1.ts", new_string: "m" }), { GATE1_PROVENANCE_ENABLED: "true", SAGE_GATE1_CREDENTIAL: "sr_prac_consultX", GATE1_CREDENTIAL: "sr_prac_consultX" });
+  captured = [];
+  await runHook(CLOSE_HOOK, stopEvent("h4mk1"), { SAGE_GATE1_CREDENTIAL: "sr_prac_consultX", GATE1_CREDENTIAL: "sr_prac_consultX", SAGE_GATE1_ACCRED_CREDENTIAL: "sr_prac_MARKERX", SAGE_GATE1_MARKER_CREDENTIAL: "sr_prac_MARKERX", SAGE_GATE1_AGENT_ID: "sagereasoning:loop@v1" });
+  check("h4 marker-guard (named marker, distinct consult): refuses the marker in the accred slot", !anyReq("/api/accreditation"));
+
+  // (empty-consult bypass the review found) consult unset (cfg.credential==='') + the marker in the
+  // accred slot + the marker NAMED → STILL refused (the guard has no `cfg.credential &&` short-circuit).
+  await runHook(AT_ACTION_HOOK, ptEvent("h4mk2", "Edit", { file_path: "/repo/m2.ts", new_string: "m" }), { GATE1_PROVENANCE_ENABLED: "true" });
+  captured = [];
+  await runHook(CLOSE_HOOK, stopEvent("h4mk2"), { SAGE_GATE1_CREDENTIAL: "", GATE1_CREDENTIAL: "", SAGE_GATE1_ACCRED_CREDENTIAL: "sr_prac_MARKERX", SAGE_GATE1_MARKER_CREDENTIAL: "sr_prac_MARKERX", SAGE_GATE1_AGENT_ID: "sagereasoning:loop@v1" });
+  check("h4 marker-guard (empty consult, named marker): still refuses (no short-circuit disables it)", !anyReq("/api/accreditation"));
+
+  // Control: a genuinely DISTINCT non-marker accred credential (≠ consult, ≠ named marker) DOES write.
+  await runHook(AT_ACTION_HOOK, ptEvent("h4ok", "Edit", { file_path: "/repo/ok.ts", new_string: "o" }), { GATE1_PROVENANCE_ENABLED: "true", SAGE_GATE1_CREDENTIAL: "sr_prac_consultX", GATE1_CREDENTIAL: "sr_prac_consultX" });
+  captured = [];
+  await runHook(CLOSE_HOOK, stopEvent("h4ok"), { SAGE_GATE1_CREDENTIAL: "sr_prac_consultX", GATE1_CREDENTIAL: "sr_prac_consultX", SAGE_GATE1_ACCRED_CREDENTIAL: "sr_prac_nonmarker", SAGE_GATE1_MARKER_CREDENTIAL: "sr_prac_MARKERX", SAGE_GATE1_AGENT_ID: "sagereasoning:loop@v1" });
+  check("h4 marker-guard control: a distinct NON-marker accred credential DOES write", anyReq("/api/accreditation"));
+}
+
+// 6e — mode 'context' injects softly; mode 'off' does the write but no reflect turn.
+{
+  await runHook(AT_ACTION_HOOK, ptEvent("h4f", "Edit", { file_path: "/repo/s.ts", new_string: "s" }), { GATE1_PROVENANCE_ENABLED: "true" });
+  const ctxMode = await runHook(CLOSE_HOOK, stopEvent("h4f"), accredEnv({ GATE1_REFLECT_INITIATE_MODE: "context" }));
+  check("h4 mode=context: injects additionalContext (no decision:block)", decisionOf(ctxMode.out) === null && ctxOf(ctxMode.out).includes("Sage Reflect"));
+
+  await runHook(AT_ACTION_HOOK, ptEvent("h4g", "Edit", { file_path: "/repo/t.ts", new_string: "t" }), { GATE1_PROVENANCE_ENABLED: "true" });
+  captured = [];
+  const offMode = await runHook(CLOSE_HOOK, stopEvent("h4g"), accredEnv({ GATE1_REFLECT_INITIATE_MODE: "off" }));
+  check("h4 mode=off: no reflect turn (empty stdout) but the accreditation write still lands", offMode.out.trim() === "" && anyReq("/api/accreditation"));
+}
+note("H4 = reflect-at-close (initiate via Stop decision:block — the model drives Q1–Q6, honest partial)");
+note("+ the accreditation write carrying the session's accumulated provenance (R18f), on a NON-marker");
+note("credential bound to the loop agent_id. Stop is the close event (SessionEnd cannot initiate a turn).");
 
 // ===========================================================================================
 // SUMMARY + RELEASE-GATE VERDICT
