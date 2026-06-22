@@ -12493,3 +12493,53 @@ Expected: test id `404`; dogfood `pre_decision_harness`.
 **Rules served:** R0, R5, R17b/R17c, R18/R18f, R19/R19e, AC1, AC5, AC7, KG1, KG2, PR6, PR11, PR16, PR17, PR18.
 
 **Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-GATE1-FULL-LOOP-HARNESS-SLICE5C-CHANNEL-REARCHITECTURE-BUILT-TEST-VERIFIED`, `D-SAGE-PRACTICE-GATE1-FULL-LOOP-HARNESS-SLICE5B-ACTIVATION-AND-CHANNEL-REARCHITECTURE`, `harness/gate1-pre-decision/claude-code/SLICE5C-LIVE-VERIFY-WALKTHROUGH.md`, memory `gate1-harness-channel-law`.
+
+---
+
+## 2026-06-22 — D-SAGE-PRACTICE-GATE1-FULLLOOP-CORRECTION-GATE-PHASE-S1S3-BUILT-S6-AUTHORED
+
+**Decision:** Execute the **Gate phase** of the channel-routed full-loop correction (`operations/p1-rebuild-2026-06/gate1-fullloop-correction-build-plan.md` §S1–S3 + author §S6) — **repo-only / dark; NO production / perimeter / auth / schema / flag / credential change; AC7 NOT engaged** (the live-fire is the carried Critical S6 gate run). The bare full-hook run (`runs/2026-06-21/leg-d-v6-bare/2026-06-22-rerun/`) showed the harness **fires** the practice at every loop stage but **binds nothing and earns no trust credential** (over-fires on tool patterns; the load-bearing consult is advisory; the install starved the binding paths). Built the three Gate-phase corrections + authored the value-gate benchmark that gates everything else.
+
+**Reasoning:** the diagnosis (§1) is that the harness conflated "the hook FIRES the practice" with "the practice OPERATES and BINDS." The dispositive cause of the missing credential was **`GATE1_PROVENANCE_ENABLED` unset + no ACCRED credential** (the write path was never provisioned), NOT loop abandonment (§1.4). Corrections target the **mechanism**, never the Stoic methodology (dossier §6). Three founder elections taken at open via AskUserQuestion (all as recommended): **(1) derive `captureProvenance` from write-path presence** (no egress until provisioned); **(2) `sage_examine` declared surface PRIMARY + denylist-auto floor** (S5 intent, carried); **(3) guard-on-retry with S4, irreversible set only** (carried). Step-0 (PR11) re-confirmed first-hand: the live `seedAccreditation` persists the grade **VERBATIM** (so a real-looking seed would be a fabrication → keep the conservative truthful seed, §3.3); the provenance append is gated on `captureProvenance && r.signed`; `permissionDecision:"deny"` is the binding guard primitive.
+
+**Built (dark, battery-green):**
+- **S1 targeting (`at-action-hook.mjs` + `framing-core.mjs`):** **Bash dropped from the auto-CONSULT (SCORE) trigger** (the floor now fires only on Write/Edit/MultiEdit/NotebookEdit + configured tools — the `date`/`ls`/metadata-`Bash` over-fire fixed at root); a **denylist-AND-NOT-destructive housekeeping classifier** (`READ_ONLY_VERBS`/`GIT_READONLY_SUBCMDS`/`hasDestructiveToken`/`hasOverwriteRedirect`/`isHousekeeping`); the **guard irreversible set broadened** (`find … -delete`, `find -exec rm`, `… | xargs rm`, and overwrite-redirect-to-a-real-path structurally via `hasOverwriteRedirect`; `git push --force` already covered). A default-off `GATE1_CONSULT_BASH` opt-in re-admits non-housekeeping Bash to the advisory floor (housekeeping still suppressed).
+- **S2 materialization (`framing-core.loadConfig` + `close-hook.loadCloseConfig` + `sage-on` SKILL.md):** `captureProvenance` **derives** from write-path presence (`deriveCaptureProvenance`: explicit `GATE1_PROVENANCE_ENABLED` > config-file > `accredCredential && agentId`); the write-path inputs read in the SHARED core so H3 derives identically to H4; **H1/H2 dark-dogfood byte-identity preserved** (no write path ⇒ derive false). `sage-on` now provisions/reports the write path with a **loud install-validation echo** (PROVISIONED / NOT-PROVISIONED with the three honest-skip reasons / MISCONFIGURED if the accred credential equals the consult/marker credential); never invents a credential, never uses the marker.
+- **S3 honest accreditation (`close-hook.writeAccreditation`):** keep the **conservative truthful seed** (§3.3); carry the **real accumulated signed chain** (R18f); surface the DETECT `analyseLoopClosure` verdict **honestly** by reading `body.loop_closure` from the 200 (a reversible un-reconsulted loop reads `unclosed` — the truth, never forged). Does not claim the server computes the grade.
+
+**Authored (§S6 — the value GATE):** `operations/benchmarks/sage-practice-v1/2026-06-22-S6-value-gate-benchmark-spec.md` — a **capability × scenario × arm matrix** (capability PRIMARY, because every prior run was Opus-4.8-max, the hardest case). Designed via a 4-agent workflow + a high-effort adversarial critique (**GO-WITH-FIXES**); all 6 blockers folded: capability is a **2-D control** (budget axis Opus-max/low + class axis Opus-low/Sonnet/Haiku, effort-matched — not a 1-D ordinal); the borderline class authored as a **family** with a **held-out calibration set** (anti-train-on-test) + three freeze guards (sealed dispositive-fact sweep / bare-Opus closeness / weak-tier headroom); the blinding re-scoped to **arm-blinding, not arm-inference** (harness attribution = the within-tier cross-arm Δ); **M5 decomposed** into `materialisation-given-provenance` (flat — the capability-independent claim) + `provenance-accrual-rate` (NOT flat — a finding); a **mandatory agentic scenario class** added (the binding arm's enforced channel has no surface area in a memo); a **negative-value outcome branch** + a scenario-validity gate + a pre-registered effect-size/power floor.
+
+**Adversarial review (S1–S3, 6-dim / 25-agent / per-finding verify):** **10 confirmed** (2 HIGH + 1 MEDIUM + 2 LOW + 5 NIT); the **3 fix-now FIXED + locked this session** — the `git branch -D` housekeeping misclassification (mutating-flag guard + dropped `reflog`/`symbolic-ref`); `hasOverwriteRedirect` missing `1>`/`>|` (regex) AND false-positiving on quoted/comparison `>` (strip quoted-strings-to-a-placeholder + arithmetic/test bodies — the HIGH over-block); plus the trivial whitespace-flag `deriveCaptureProvenance` trim. **Folded (named follow-ups, not defects):** append `>>`-to-real-path treated housekeeping (conscious — append is non-clobbering, not irreversible); config-file `captureProvenance` tier test coverage; the seed's extra verbatim fields (verified conservative-floor: `intuited`/`contrary`/`supervised`/`stable`/`0`); the `sage-on` echo duplicating the close-hook marker-default logic (drift risk, currently correct).
+
+**Verified:** `logic-harness` **61/0**; `negative-battery` **166/0** (RELEASE GATE PASS); 27+ classifier edge-cases + all review-fix cases pass standalone; every `.mjs` `node --check` clean; H1/H2 entry hooks byte-unchanged at the file level; NO website TS touched (`tsc`/`npm run build` unaffected).
+
+**Files touched:**
+- `harness/gate1-pre-decision/claude-code/hooks/lib/framing-core.mjs` — S1 classifier/guard-broadening helpers + S2 derive/write-path reads + the 3 review fixes
+- `harness/gate1-pre-decision/claude-code/hooks/at-action-hook.mjs` — Bash-dropped-from-SCORE routing + guard redirect
+- `harness/gate1-pre-decision/claude-code/hooks/close-hook.mjs` — write-path read dedup + truthful-seed comment + honest loop-closure surfacing
+- `.claude/skills/sage-on/SKILL.md` — write-path provisioning + the loud install-validation echo
+- `harness/gate1-pre-decision/test/{negative-battery.mjs,logic-harness.mjs,mock-reason-server.mjs}` — S1/S2/S3 legs + the review regression locks
+- `operations/benchmarks/sage-practice-v1/2026-06-22-S6-value-gate-benchmark-spec.md` — the value-gate benchmark spec + runbook (NEW)
+
+**Risk classification:** Elevated under 0d-ii (changes to existing harness hook behaviour; repo-only/dark; no prod call, no live-fire, no mint). AC7 NOT engaged (the live-fire is the carried Critical S6 gate run). PR6 not engaged.
+
+**Rollback path:** `git revert` the gate-phase commit (hook fixes + `sage-on` provisioning + the benchmark spec). Nothing installed/live; the standing dogfood marker + the LIVE H1/H2 install untouched; `sage-off` removes any hooks if installed for testing.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+node harness/gate1-pre-decision/test/logic-harness.mjs    | grep -E "passed, [0-9]+ failed"
+node harness/gate1-pre-decision/test/negative-battery.mjs  | grep -E "RELEASE GATE|^[0-9]+ passed"
+```
+Expected: `61 passed, 0 failed`; `166 passed, 0 failed` + `RELEASE GATE: PASS ✓`.
+
+**Carried (all founder-walked):**
+- **The S6 GATE RUN (`code-critical`, the deciding step):** run the capability × scenario × arm matrix with the fixes installed (`sage-on` now provisions the write path) on a non-marker `@`-class credential per the spec §10 run-prep checklist; **characterise WHERE value appears** (do NOT gate on Opus alone); set the honest public claim to the region found. Gates the ceiling phase.
+- **Ceiling phase (conditional on S6):** S4 (loop-closure re-channel + guard-on-retry, irreversible set only) + S5 (`sage_examine` declared surface).
+- **S7 (`code-critical`):** wire reflect-row erasure into `/api/user/delete` + `/api/credential/erase` + a retention cron, BEFORE any standing `SAGE_GATE1_REFLECT_PERSIST_ENABLED`.
+
+**Open questions:** none blocking (the folded review NITs are named follow-ups above; no revisit condition gates the carried work).
+
+**Rules served:** R5, R10, R18/R18f, AC1, KG1, PR6, PR11, PR15, PR16, PR17, PR18.
+
+**Status:** Adopted. Cross-references: `operations/p1-rebuild-2026-06/gate1-fullloop-correction-build-plan.md`, `operations/handoffs/founder/2026-06-22-gate1-fullloop-correction-build-NEXT-SESSION-PROMPT.md`, `operations/benchmarks/sage-practice-v1/2026-06-22-S6-value-gate-benchmark-spec.md`, `D-SAGE-PRACTICE-GATE1-FULL-LOOP-HARNESS-SLICE5C-LIVE-FIRE-VERIFIED-LIVE-THEN-TORN-DOWN`, memory `gate1-harness-channel-law`.

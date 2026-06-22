@@ -64,11 +64,11 @@ function loadCloseConfig() {
   const cfg = loadConfig({ hookDir: HOOK_DIR, eventName: "Stop", allowStrict: true });
   cfg.reflectEndpoint = process.env.GATE1_REFLECT_ENDPOINT || deriveSibling(cfg.endpoint, "practice/reflect");
   cfg.accredEndpoint = process.env.GATE1_ACCRED_ENDPOINT || deriveSibling(cfg.endpoint, "accreditation");
-  cfg.agentId = (process.env.SAGE_GATE1_AGENT_ID || "").trim();
-  // The accreditation write credential — DISTINCT from cfg.credential (the consult credential, which
-  // in the dogfood IS the standing marker credential). It must carry accreditation_write and be a
-  // NON-marker credential. Unset ⇒ no write (honest skip). NEVER falls back to cfg.credential.
-  cfg.accredCredential = (process.env.SAGE_GATE1_ACCRED_CREDENTIAL || "").trim();
+  // cfg.agentId + cfg.accredCredential are read in the shared loadConfig (so H3 derives
+  // captureProvenance from the same write-path inputs, founder election #2). The accred credential is
+  // DISTINCT from cfg.credential (the consult credential, which in the dogfood IS the standing marker
+  // credential): it must carry accreditation_write + be a NON-marker credential, unset ⇒ no write
+  // (honest skip), and it NEVER falls back to cfg.credential (the marker-refusal guards below).
   // The standing pre_decision_harness MARKER credential, named so the write guard can refuse it by
   // identity (a marker sr_prac_ token is indistinguishable from a non-marker one by VALUE alone).
   // DEFAULTS to the consult credential (in the dogfood the consult credential IS the marker), so the
@@ -156,8 +156,13 @@ async function writeAccreditation(cfg, sessionId) {
   const nowIso = new Date().toISOString();
   const expiresIso = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
   const url = `${cfg.accredEndpoint.replace(/\/+$/, "")}/${encodeURIComponent(cfg.agentId)}`;
-  // A minimal, server-composed seed record. coverage_status / examination_mode on the submitted
-  // record are IGNORED (the server composes them); the load-bearing part is provenance.signed_assessments.
+  // A minimal, CONSERVATIVE-TRUTHFUL seed record (S3 / build-plan §3.3). The grade fields below are
+  // persisted VERBATIM by the server's seedAccreditation (only coverage_status / monitored_since /
+  // credential_basis / examination_mode are server-composed), so a real-looking grade here would be a
+  // FABRICATION. The honest seed states no windowed evaluation occurred (senecan_grade pre_progress,
+  // actions_evaluated 0, typical_proximity reflexive, dimension_levels emerging); the LOAD-BEARING
+  // attestation is the genuine accumulated provenance.signed_assessments (R18f). The harness does NOT
+  // claim the server computes the grade — it submits a truthful floor and the real signed chain.
   const body = {
     kind: "seed",
     profile: {
@@ -219,6 +224,23 @@ async function writeAccreditation(cfg, sessionId) {
   }
   if (res.status === 409) return `already-exists(${signed.length})`; // a row already exists — honest, not an error.
   if (!res.ok) return `http-${res.status}`;
+  // S3 (build-plan §3.3): surface the LIVE write-boundary loop-closure verdict HONESTLY. In DETECT
+  // mode the server runs analyseLoopClosure over the signed chain and annotates `loop_closure` on the
+  // 200 (it cannot reject). Read it back and report it as-is — a reversible loop that was never
+  // re-consulted reads `unclosed`, which is the truth (the harness does not force closure on the
+  // discounted ADVISE channel; only guard-on-retry on the irreversible set re-examines, §3.2).
+  let loopVerdict = null;
+  try {
+    const body = await res.json();
+    if (body && typeof body === "object" && body.loop_closure && typeof body.loop_closure === "object") {
+      loopVerdict = body.loop_closure;
+    }
+  } catch {
+    /* a non-JSON / bodiless 200 is still a successful write — just no closure annotation to surface */
+  }
+  if (loopVerdict && typeof loopVerdict.verdict === "string") {
+    return `written(${signed.length},loop=${loopVerdict.verdict}[open:${loopVerdict.open ?? "?"}])`;
+  }
   return `written(${signed.length})`;
 }
 

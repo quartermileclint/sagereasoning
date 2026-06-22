@@ -67,6 +67,15 @@ export function loadConfig({ hookDir, eventName, allowStrict = true } = {}) {
     fileCfg = {};
   }
 
+  // S2 provisioning (build-plan §S2 + founder election #2 "derive from write-path presence",
+  // 2026-06-22): the accreditation write-path inputs are read HERE, in the shared core, so H3 (and
+  // H1/H2) derive captureProvenance the same way H4 reads them — capture only once the operator has
+  // provisioned the write path. H1/H2 read them too but only for the derive (no behaviour change
+  // when unset). The accred credential must be a NON-marker accreditation_write credential bound to
+  // a K1-canonical agent_id; close-hook adds the marker-refusal guards on top of these.
+  const accredCredential = (process.env.SAGE_GATE1_ACCRED_CREDENTIAL || "").trim();
+  const agentId = (process.env.SAGE_GATE1_AGENT_ID || "").trim();
+
   const cfg = {
     eventName: eventName || "UserPromptSubmit",
     endpoint: process.env.GATE1_ENDPOINT || fileCfg.endpoint || "http://localhost:3000/api/reason",
@@ -76,17 +85,34 @@ export function loadConfig({ hookDir, eventName, allowStrict = true } = {}) {
     stateDir: process.env.GATE1_STATE_DIR || fileCfg.stateDir || join(tmpdir(), "sage-gate1"),
     fireOnce: parseBool(process.env.GATE1_FIRE_ONCE, parseBool(fileCfg.fireOnce, true)),
     credentialEnvVar: fileCfg.credentialEnvVar || "SAGE_GATE1_CREDENTIAL",
+    // The write-path inputs (read above; surfaced on cfg so the close hook reuses them).
+    accredCredential,
+    agentId,
     // H3 guard (D-A/D-F): the fail-mode for the guardrail BLOCK on an /api/guardrail outage. Default
     // 'open' (never brick the loop on an API hiccup); 'strict' denies the tool until the gate is
     // reachable. A genuine do_not_proceed verdict ALWAYS blocks regardless of this — that is the
     // guard's purpose; this governs only the OUTAGE case (ADR-011 D-F).
     guardFailMode: (process.env.GATE1_GUARD_FAIL_MODE || fileCfg.guardFailMode) === "strict" ? "strict" : "open",
-    // Slice 5a (ADR-011 D-D): accumulate each consult's SIGNED assessment to the session
-    // provenance log so H4's close-time accreditation write can carry it (R18f). DEFAULT OFF —
-    // unset ⇒ the H1/H2 success path is BYTE-IDENTICAL to pre-Slice-5a (no provenance file is
-    // written). Enabled (with H3/H4) at the founder-walked Slice-5b activation, never in this
-    // dark build. The provenance append never touches stdout/exit/marker/frame even when ON.
-    captureProvenance: parseBool(process.env.GATE1_PROVENANCE_ENABLED, parseBool(fileCfg.captureProvenance, false)),
+    // D-D provenance capture (Slice 5a) — WHEN to accumulate each consult's SIGNED assessment to the
+    // session provenance log so H4's close-time accreditation write can carry it (R18f).
+    // Precedence (founder election #2 "derive", 2026-06-22): explicit GATE1_PROVENANCE_ENABLED >
+    // config-file captureProvenance > DERIVE. DERIVE = ON iff the write path is provisioned (a
+    // non-marker accred credential AND a K1-canonical agent_id are BOTH set). So: the dark dogfood
+    // (H1/H2, no write path) stays BYTE-IDENTICAL (derive ⇒ false ⇒ no provenance file written), and
+    // a provisioned H3/H4 install captures automatically (no separate flag to forget — that unset
+    // flag was the §1.4 dispositive cause of the missing credential). Never accumulates provenance it
+    // has no credential to write. The append never touches stdout/exit/marker/frame even when ON.
+    captureProvenance: deriveCaptureProvenance(
+      process.env.GATE1_PROVENANCE_ENABLED,
+      fileCfg.captureProvenance,
+      accredCredential,
+      agentId,
+    ),
+    // S1 targeting (build-plan §3.1 + §S2): the auto-CONSULT (SCORE) floor never fires on Bash by
+    // default — a Bash wire payload carries no intent, so firing on the tool TYPE consulted before
+    // `date`/`ls` (the over-fire). GATE1_CONSULT_BASH=true opts the NON-housekeeping Bash back into
+    // the advisory floor (read-only housekeeping stays suppressed via the denylist either way).
+    consultBash: parseBool(process.env.GATE1_CONSULT_BASH, parseBool(fileCfg.consultBash, false)),
   };
   cfg.credential = process.env[cfg.credentialEnvVar] || process.env.GATE1_CREDENTIAL || "";
   // H3 guard endpoint (D-A): explicit override, else config, else derive from the reason endpoint
@@ -115,6 +141,18 @@ export function parseBool(v, dflt) {
   if (v === undefined || v === null || v === "") return dflt;
   if (typeof v === "boolean") return v;
   return String(v).toLowerCase() === "true" || String(v) === "1";
+}
+
+// captureProvenance precedence (founder election #2, 2026-06-22): an explicit env flag wins; else a
+// config-file value; else DERIVE from the write-path presence (ON only when BOTH a non-marker accred
+// credential AND a K1-canonical agent_id are set — the operator has provisioned the write path).
+// PURE. The dark dogfood sets neither ⇒ derive false ⇒ H1/H2 byte-identical.
+export function deriveCaptureProvenance(envFlag, fileFlag, accredCredential, agentId) {
+  // .trim() the env flag's empty-test so a whitespace-only GATE1_PROVENANCE_ENABLED (=" ") falls
+  // through to file/derive instead of being read as an explicit false (review NIT, byte-identity).
+  if (envFlag !== undefined && envFlag !== null && String(envFlag).trim() !== "") return parseBool(envFlag, false);
+  if (fileFlag !== undefined && fileFlag !== null) return parseBool(fileFlag, false);
+  return !!accredCredential && !!agentId;
 }
 
 // Derive a sibling API endpoint from the reason endpoint: …/api/reason → …/api/<name>. Falls back
@@ -149,6 +187,14 @@ export const DEFAULT_IRREVERSIBLE_PATTERNS = [
   "\\brm\\b(?=.*(?:-[a-z]*r|--recursive))(?=.*(?:-[a-z]*f|--force))",
   "\\bdrop\\s+(table|database|schema|index)\\b",
   "\\bdelete\\s+from\\b",
+  // S1 broadening (build-plan §3.1) — destructive forms the original set MISSED because they carry
+  // no -rf: `find … -delete`, `find … -exec rm …`, and `… | xargs rm` (the recursive+force `rm`
+  // lookaheads above don't fire on a bare `rm` reached via xargs/-exec). `git push --force` is
+  // already covered by the git-push pattern below; redirection-overwrite to a real path is handled
+  // structurally in at-action-hook.isGuardAction (hasOverwriteRedirect), not as a fragile regex.
+  "\\bfind\\b.*\\s-delete\\b",
+  "\\bfind\\b.*-exec\\b.*\\brm\\b",
+  "\\bxargs\\b.*\\brm\\b",
   // truncate WITH or WITHOUT the literal 'table' (valid destructive SQL in several dialects).
   "\\btruncate\\s+(table\\s+)?[\"`\\w]",
   // git force-push: --force / --force-with-lease / -f / the `+<ref>` refspec form (git push origin +main).
@@ -179,6 +225,90 @@ export function compileIrreversible(patterns) {
     }
   }
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// S1 TARGETING helpers (build-plan §3.1) — the "denylist-AND-NOT-destructive" classifier the
+// at-action hook uses to (a) keep the over-fire offenders (`date`/`ls`/`wc`) off the consult floor
+// and (b) feed the broadened guard. PURE; never throw. The guiding rule (§3.1): a command is only
+// HOUSEKEEPING (safe to silently allow, never auto-consult) if a read-only verb leads EVERY segment
+// AND no destructive token is present — `find … -delete`, `grep … | xargs rm`, `cmd > prod.db` all
+// start with read-only verbs but are destructive, so a verb-prefix match alone would wrongly suppress.
+// ---------------------------------------------------------------------------
+
+// Unambiguously read-only / metadata verbs. Deliberately CONSERVATIVE: anything not here is treated
+// as non-housekeeping (consults under the GATE1_CONSULT_BASH opt-in; silently allowed by default).
+// Ambiguous tools that can mutate in-place (sed -i, awk, tee, mv, npm, make, python …) are OMITTED.
+export const READ_ONLY_VERBS = new Set([
+  "date", "ls", "pwd", "echo", "cat", "head", "tail", "wc", "grep", "egrep", "fgrep", "rg", "ag",
+  "which", "whoami", "id", "env", "printenv", "stat", "file", "du", "df", "ps", "uname", "hostname",
+  "uptime", "basename", "dirname", "realpath", "readlink", "sort", "uniq", "cut", "column", "type",
+  "command", "history", "sleep", "seq", "printf", "true", "false", "test", "diff", "cmp", "wait",
+]);
+
+// Read-only `git` subcommands (git is a two-token verb; `git push`/`reset --hard`/`clean -f` are not).
+// `reflog`/`symbolic-ref` are EXCLUDED — they mutate via sub-subcommands (`reflog expire/delete`,
+// `symbolic-ref HEAD <ref>`) with no flag the mutating-flag guard below would catch. `branch`/`tag`
+// stay but are housekeeping ONLY without a mutating flag (review HIGH: `git branch -D` deletes a ref).
+export const GIT_READONLY_SUBCMDS = new Set([
+  "status", "log", "diff", "show", "branch", "tag", "rev-parse", "describe", "blame", "ls-files",
+  "ls-tree", "shortlog", "cat-file", "rev-list", "whatchanged", "name-rev",
+]);
+// A git flag that turns a read-only subcommand mutating (delete/rename/copy/prune/force/edit a ref).
+const GIT_MUTATING_FLAG_RE = /(?:^|\s)(?:-d|-D|--delete|-m|-M|--move|-c|-C|--copy|--prune|--edit|-f|--force)\b/;
+
+// An overwrite-redirect to a REAL path (clobbers the target ⇒ destructive, build-plan §3.1). Matches
+// `>`, the explicit-stdout `1>`, and the noclobber-override `>|` (review MEDIUM); EXCLUDES `>>`
+// (append), `>&`/`&>` (fd duplication), fd≥2 prefixes (`2>file` = stderr log), and the /dev sinks.
+const OVERWRITE_REDIRECT_RE =
+  /(?<![<>&\d])(?:1>|>\||>)(?![>&|])\s*(?!\/dev\/(?:null|stdout|stderr)\b)[\w./~$@+-]/;
+export function hasOverwriteRedirect(cmd) {
+  try {
+    // Neutralise contexts where a `>` is NOT a redirect, so it does not route benign Bash to the guard
+    // (review HIGH/LOW false-positive: `echo "a > b"`, `[ $a \> $b ]`, `$((x>y))`). Quoted strings are
+    // replaced with a WORD-CHAR placeholder (not a space) so a quoted redirect TARGET is preserved —
+    // `echo x > "out.txt"` ⇒ `echo x > Q` still matches (guarded), while `echo "a>b"` ⇒ `echo Q` does
+    // not. $((…)) arithmetic and [ … ]/[[ … ]] test bodies (where `>` is a comparison) are blanked.
+    let c = String(cmd == null ? "" : cmd)
+      .replace(/'[^']*'/g, "Q")
+      .replace(/"[^"]*"/g, "Q")
+      .replace(/\$\(\([^)]*\)\)/g, " ")
+      .replace(/\[\[[^\]]*\]\]/g, " ")
+      .replace(/\[[^\]]*\]/g, " ");
+    return OVERWRITE_REDIRECT_RE.test(c);
+  } catch {
+    return false; // a RegExp engine without lookbehind ⇒ treat as no-redirect (the guard's other patterns still fire)
+  }
+}
+
+// A destructive token anywhere in the command (the §3.1 set) OR an overwrite-redirect. PURE.
+const DESTRUCTIVE_TOKEN_RE = /(?:\brm\b|--?delete\b|-exec\b|\bxargs\b|\bdd\b|:>|\bmkfs\b|\bshred\b)/i;
+export function hasDestructiveToken(cmd) {
+  const c = String(cmd == null ? "" : cmd);
+  return DESTRUCTIVE_TOKEN_RE.test(c) || hasOverwriteRedirect(c);
+}
+
+// True iff EVERY pipeline/sequence segment leads with a read-only verb (and the command carries no
+// destructive token). A `VAR=val` prefix is skipped; a leading `sudo` ⇒ never housekeeping. PURE.
+export function isHousekeeping(cmd) {
+  const c = String(cmd == null ? "" : cmd).trim();
+  if (!c) return false;
+  if (hasDestructiveToken(c)) return false; // read-only verb but destructive ⇒ NOT housekeeping
+  const segments = c.split(/(?:\|\||&&|;|\||\n)/).map((s) => s.trim()).filter(Boolean);
+  if (segments.length === 0) return false;
+  return segments.every(isReadOnlySegment);
+}
+function isReadOnlySegment(seg) {
+  const tokens = seg.split(/\s+/).filter(Boolean);
+  let i = 0;
+  while (i < tokens.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[i])) i++; // skip VAR=val prefixes
+  const verb = tokens[i];
+  if (!verb || verb === "sudo") return false; // sudo (or an empty segment) ⇒ not housekeeping
+  if (verb === "git") {
+    // read-only subcommand AND no mutating flag (so `git branch -D foo` / `git tag -d` are NOT housekeeping).
+    return GIT_READONLY_SUBCMDS.has(tokens[i + 1] || "") && !GIT_MUTATING_FLAG_RE.test(seg);
+  }
+  return READ_ONLY_VERBS.has(verb);
 }
 
 // ---------------------------------------------------------------------------

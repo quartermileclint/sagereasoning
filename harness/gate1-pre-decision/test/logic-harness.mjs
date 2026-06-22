@@ -218,15 +218,44 @@ mode = "ok";
   routeState.reason = "ok";
 }
 
-// 12 — H3 state proofs: loop file + provenance written; an identical decision dedups.
+// 12 — H3 state proofs: loop file + provenance written; an identical decision dedups. Uses a
+//      file-mutation tool (Edit), since S1 (2026-06-22) dropped Bash from the auto-CONSULT trigger.
 {
   routeState.reason = "ok";
-  const ev = { session_id: "h3st", hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "echo hi" } };
+  const ev = { session_id: "h3st", hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: "/repo/state.ts", new_string: "x" } };
   await runHook(ev, { GATE1_PROVENANCE_ENABLED: "true" }, AT_ACTION_HOOK);
   check("12 H3 state: loop state file exists for the session", existsSync(join(stateDir, "h3st.loop.json")));
   check("12 H3 state: provenance appended (flag on)", existsSync(join(stateDir, "h3st.provenance.jsonl")));
   const again = await runHook(ev, { GATE1_PROVENANCE_ENABLED: "true" }, AT_ACTION_HOOK);
   check("12 H3 state: identical decision dedups (empty stdout)", again.out.trim() === "");
+}
+
+// 12b — S1 TARGETING (2026-06-22): Bash is DROPPED from the auto-CONSULT trigger (over-fire fix). A
+//       benign Bash (`date`) consults NOTHING and is allowed silently; a Write/Edit still consults.
+{
+  routeState.reason = "ok";
+  captured = [];
+  const benignBash = await runHook({ session_id: "s1bash", hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: "date" } }, {}, AT_ACTION_HOOK);
+  check("12b S1: benign Bash (`date`) → no consult, no guard (silently allowed)", benignBash.out.trim() === "" && benignBash.code === 0 && !lastReq("/api/reason") && !lastReq("/api/guardrail"));
+  captured = [];
+  const write = await runHook({ session_id: "s1write", hook_event_name: "PreToolUse", tool_name: "Write", tool_input: { file_path: "/repo/new.ts", content: "y" } }, {}, AT_ACTION_HOOK);
+  check("12b S1: a Write still consults (file-mutation floor intact)", ctxOf(write.out).includes("Gate 2 — at-action") && !!lastReq("/api/reason"));
+}
+
+// 12c — S2 DERIVE (2026-06-22, founder election #2): captureProvenance derives from the write-path
+//       presence — ON only when BOTH SAGE_GATE1_ACCRED_CREDENTIAL and SAGE_GATE1_AGENT_ID are set
+//       (no explicit GATE1_PROVENANCE_ENABLED), OFF otherwise. The explicit flag still overrides.
+{
+  routeState.reason = "ok";
+  // derive ON: both write-path inputs present, no explicit flag ⇒ provenance accumulates.
+  await runHook({ session_id: "s2on", hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: "/repo/d.ts", new_string: "d" } }, { SAGE_GATE1_ACCRED_CREDENTIAL: "sr_prac_accred", SAGE_GATE1_AGENT_ID: "ns:loop@v1" }, AT_ACTION_HOOK);
+  check("12c S2 derive ON: write-path provisioned ⇒ provenance file written (no explicit flag)", existsSync(join(stateDir, "s2on.provenance.jsonl")));
+  // derive OFF: only the agent_id present (no accred credential) ⇒ NOT provisioned ⇒ no provenance.
+  await runHook({ session_id: "s2off", hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: "/repo/e.ts", new_string: "e" } }, { SAGE_GATE1_AGENT_ID: "ns:loop@v1" }, AT_ACTION_HOOK);
+  check("12c S2 derive OFF: half-provisioned (no accred credential) ⇒ NO provenance file", !existsSync(join(stateDir, "s2off.provenance.jsonl")));
+  // derive OFF: neither input ⇒ byte-identical to the dark dogfood (H1/H2 path proven in case 9).
+  await runHook({ session_id: "s2none", hook_event_name: "PreToolUse", tool_name: "Edit", tool_input: { file_path: "/repo/f.ts", new_string: "f" } }, {}, AT_ACTION_HOOK);
+  check("12c S2 derive OFF: no write path ⇒ NO provenance file (dark byte-identity)", !existsSync(join(stateDir, "s2none.provenance.jsonl")));
 }
 
 // 13 — H4 accreditation body construction (D-D, INSTRUMENT) on the FIRST Stop: kind seed,

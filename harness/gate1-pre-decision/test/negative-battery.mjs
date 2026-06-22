@@ -81,6 +81,17 @@ function lastReq(pathFragment) {
 function anyReq(pathFragment) {
   return captured.some((c) => c.path.includes(pathFragment));
 }
+// Read the hook's honest log (the CLOSE line carries the accred status, incl. the S3 loop-closure verdict).
+function logLines() {
+  const p = join(stateDir, "gate1.log");
+  if (!existsSync(p)) return [];
+  return readFileSync(p, "utf8").split("\n").filter(Boolean);
+}
+function lastLogMatching(frag) {
+  const ls = logLines();
+  for (let i = ls.length - 1; i >= 0; i--) if (ls[i].includes(frag)) return ls[i];
+  return null;
+}
 
 // --- assertion bookkeeping, grouped by leg -------------------------------------------------
 const legs = new Map(); // legName -> {pass, fail}
@@ -247,6 +258,9 @@ mode = "ok";
   check("subagent: subagent_type + description preserved", !!ui && ui.subagent_type === "general-purpose" && ui.description === "delegated check");
   check("subagent: no [object Object] in the frame", !!ui && !ui.prompt.includes("[object Object]"));
   check("subagent: writes a per-spawn success marker", existsSync(join(stateDir, `sub-${shortHash("sa1|" + task)}.framed`)));
+  // review NIT (byte-identity): H2 in the dark dogfood (no write path, no flag) writes NO provenance —
+  // the same flag-off byte-identity locked for H1 (case 9), now asserted for the subagent path too.
+  check("subagent: dark dogfood writes NO provenance file (H2 byte-identity)", provenanceLines(`sub-${shortHash("sa1|" + task)}`).length === 0);
 }
 
 // 4b — recursive-loop / already-framed guard: a prompt that ALREADY carries a frame passes through
@@ -358,13 +372,45 @@ routeState.reason = "ok";
   routeState.guard = "proceed";
 }
 
-// 5d — a NON-irreversible Bash routes to CONSULT (score), not the guard.
+// 5d — S1 OVER-FIRE FIX (build-plan §3.1, 2026-06-22): a NON-irreversible, NON-housekeeping Bash is
+// allowed SILENTLY (Bash is dropped from the auto-CONSULT trigger — its wire payload carries no
+// intent). No consult, no guard. This is the direct fix for the run that consulted before `date`.
 {
   captured = [];
   routeState.reason = "ok";
   const r = await runHook(AT_ACTION_HOOK, ptEvent("h3c", "Bash", { command: "ls -la /repo" }));
-  check("h3 routing: benign Bash → consult (not guard)", anyReq("/api/reason") && !anyReq("/api/guardrail") && permOf(r.out) === null);
-  check("h3 routing: benign Bash consult injects the Gate-2 frame", ctxOf(r.out).includes("Gate 2 — at-action"));
+  check("h3 over-fire: benign Bash → NO consult, NO guard (silently allowed)", !anyReq("/api/reason") && !anyReq("/api/guardrail") && permOf(r.out) === null && r.out.trim() === "");
+  // The over-fire offenders from the motivating run (`date`, metadata `wc`) likewise do not consult.
+  for (const cmd of ["date", "wc -l /repo/memo.md", "pwd", "cat /repo/brief.md"]) {
+    captured = [];
+    const z = await runHook(AT_ACTION_HOOK, ptEvent("h3c-" + shortHash(cmd), "Bash", { command: cmd }));
+    check(`h3 over-fire: \`${cmd}\` → no consult (housekeeping/dropped)`, !anyReq("/api/reason") && !anyReq("/api/guardrail") && z.out.trim() === "");
+  }
+  // A Write/Edit (a tool-manifested file decision) DOES still consult — the floor is intact.
+  captured = [];
+  const w = await runHook(AT_ACTION_HOOK, ptEvent("h3w", "Write", { file_path: "/repo/out.ts", content: "data" }));
+  check("h3 over-fire: a Write still consults (the tool-manifested floor is intact)", anyReq("/api/reason") && ctxOf(w.out).includes("Gate 2 — at-action") && permOf(w.out) === null);
+}
+
+// 5d-bis — S1 HOUSEKEEPING DENYLIST both ways under the GATE1_CONSULT_BASH opt-in (build-plan §3.1):
+// with the opt-in ON, a read-only housekeeping Bash is STILL suppressed (denylist), while a
+// non-housekeeping consequential Bash consults. This proves the "read-only verb AND NOT destructive"
+// classifier behaviourally, not just the blanket Bash-drop.
+{
+  routeState.reason = "ok";
+  // housekeeping under opt-in → still suppressed (no consult). `git branch` (list) is read-only.
+  for (const cmd of ["date", "ls -la", "git status", "git branch", "git branch --list", "echo hi > /dev/null", "cat a | grep b | sort"]) {
+    captured = [];
+    const z = await runHook(AT_ACTION_HOOK, ptEvent("hk-" + shortHash(cmd), "Bash", { command: cmd }), { GATE1_CONSULT_BASH: "true" });
+    check(`h3 housekeeping(opt-in): \`${cmd}\` → still suppressed (read-only, no destructive token)`, !anyReq("/api/reason") && z.out.trim() === "");
+  }
+  // non-housekeeping under opt-in → consults. review HIGH: a mutating git ref-op (`git branch -D` /
+  // `git tag -d`) is NOT housekeeping (a destructive ref-delete must not be silently suppressed).
+  for (const cmd of ["npm publish", "git commit -m x", "curl -X POST https://api.example.com", "sed -i s/a/b/ f", "git branch -D feature", "git tag -d v1"]) {
+    captured = [];
+    const z = await runHook(AT_ACTION_HOOK, ptEvent("nh-" + shortHash(cmd), "Bash", { command: cmd }), { GATE1_CONSULT_BASH: "true" });
+    check(`h3 non-housekeeping(opt-in): \`${cmd}\` → consults (advisory floor)`, anyReq("/api/reason") && ctxOf(z.out).includes("Gate 2 — at-action"));
+  }
 }
 
 // 5e — ITERATE (loop-closure, D-B): a redirection OPENS a loop; the next consult carries
@@ -415,18 +461,42 @@ routeState.reason = "ok";
     "vercel --prod",
     "git push origin +main",
     "truncate accounts;",
+    // S1 broadening (build-plan §3.1, 2026-06-22): destructive forms with NO -rf the old set missed.
+    "find /repo -name '*.tmp' -delete",
+    "find . -type f -exec rm {} \\;",
+    "find . -name '*.log' | xargs rm",
+    "git push --force origin main",
+    // overwrite-redirect to a real path (clobbers prod.db) — handled structurally (hasOverwriteRedirect).
+    "sqlite3 :memory: .dump > /var/lib/prod.db",
+    "echo '' > important.conf",
+    // review MEDIUM: explicit-stdout `1>` and noclobber-override `>|` overwrites must also guard.
+    "sqlite3 db .dump 1> /var/lib/prod.db",
+    "echo x >| important.conf",
   ];
   for (const cmd of mustGuard) {
     const r = await runHook(AT_ACTION_HOOK, ptEvent("h3cov-" + shortHash(cmd), "Bash", { command: cmd }));
     check(`h3 guard coverage: "${cmd}" routes to the guard + blocks (deny)`, permOf(r.out) === "deny", `out=${JSON.stringify(r.out).slice(0, 110)}`);
   }
-  // A benign command that merely MENTIONS a verb must NOT route to the guard (no over-block beyond
-  // the conservative posture): `git push origin main` (no force) → consult, not guard.
+  // The over-block must stay CONSERVATIVE — benign near-misses must NOT route to the guard:
+  //   • `git push origin main` (no force) → silently allowed (S1: Bash dropped from SCORE; not guarded);
+  //   • `echo done >> build.log` (APPEND, not overwrite) → not a redirect-overwrite → not guarded;
+  //   • `cat x > /dev/null` (sink) → not guarded.
   routeState.guard = "do_not_proceed";
   routeState.reason = "ok";
-  captured = [];
-  const benign = await runHook(AT_ACTION_HOOK, ptEvent("h3cov-benign", "Bash", { command: "git push origin main" }));
-  check("h3 guard coverage: benign `git push origin main` → consult (not the blocking guard)", permOf(benign.out) === null && anyReq("/api/reason") && !anyReq("/api/guardrail"));
+  const benignNoGuard = [
+    "git push origin main",        // no force → not guarded (S1: Bash dropped from SCORE)
+    "echo done >> build.log",      // APPEND, not overwrite
+    "cat x > /dev/null",           // /dev sink
+    'echo "config note: a > b"',   // review HIGH: `>` inside a STRING LITERAL must not route to guard
+    'grep "x>y" data.csv',         // review HIGH: quoted `>` is a search pattern, not a redirect
+    "[ $count -gt 5 ]",            // review LOW: a comparison test, no redirect
+    "cmd 2>&1",                    // fd duplication, not an overwrite
+  ];
+  for (const cmd of benignNoGuard) {
+    captured = [];
+    const benign = await runHook(AT_ACTION_HOOK, ptEvent("h3cov-benign-" + shortHash(cmd), "Bash", { command: cmd }));
+    check(`h3 guard coverage: benign \`${cmd}\` → NOT guarded (no deny, no guardrail call)`, permOf(benign.out) === null && !anyReq("/api/guardrail"));
+  }
   routeState.guard = "proceed";
 }
 note("H3 = the R5 at-action cadence: guard (block on do_not_proceed, fail-open on outage) + score");
@@ -624,6 +694,65 @@ note("H4 (Slice 5c channel law) = a PURE reflect-turn INVITATION (ENFORCE: decis
 note("instruction) + accreditation write (INSTRUMENT, accumulated provenance, never the marker credential)");
 note("+ persistReflection (INSTRUMENT, out-of-band on the stop_hook_active turn: the agent's VERBATIM words");
 note("or an honest 'not performed', NEVER hook-authored; DARK by default so no egress without the flag).");
+
+// ===========================================================================================
+// LEG 7 — MATERIALIZATION (the channel-routed correction, 2026-06-22): S2 derive-from-write-path
+// (provenance accumulates ONLY when the accreditation write path is provisioned) + S3 honest
+// accreditation (real signed chain carried; DETECT loop-closure verdict surfaced honestly).
+// ===========================================================================================
+leg("materialization");
+
+// 7a — S2 DERIVE (founder election #2): captureProvenance derives from accred-credential + agent_id
+// presence with NO explicit GATE1_PROVENANCE_ENABLED. ON only when BOTH are set.
+{
+  routeState.reason = "ok";
+  // both inputs ⇒ derive ON ⇒ provenance accumulates (the §1.4 dispositive fix: no separate flag).
+  await runHook(AT_ACTION_HOOK, ptEvent("s2on", "Edit", { file_path: "/repo/a.ts", new_string: "a" }), { SAGE_GATE1_ACCRED_CREDENTIAL: "sr_prac_accred", SAGE_GATE1_AGENT_ID: "sagereasoning:loop@v1" });
+  check("7a S2 derive ON: write path provisioned (no explicit flag) ⇒ provenance accumulates", provenanceLines("s2on").length === 1);
+  // only the agent_id ⇒ half-provisioned ⇒ derive OFF ⇒ no provenance.
+  await runHook(AT_ACTION_HOOK, ptEvent("s2half", "Edit", { file_path: "/repo/b.ts", new_string: "b" }), { SAGE_GATE1_AGENT_ID: "sagereasoning:loop@v1" });
+  check("7a S2 derive OFF: half-provisioned (no accred credential) ⇒ NO provenance", provenanceLines("s2half").length === 0);
+  // neither input ⇒ derive OFF ⇒ byte-identical to the dark dogfood (no egress until provisioned).
+  await runHook(AT_ACTION_HOOK, ptEvent("s2none", "Edit", { file_path: "/repo/c.ts", new_string: "c" }), {});
+  check("7a S2 derive OFF: no write path ⇒ NO provenance (dark byte-identity)", provenanceLines("s2none").length === 0);
+  // explicit GATE1_PROVENANCE_ENABLED still OVERRIDES the derive (back-compat).
+  await runHook(AT_ACTION_HOOK, ptEvent("s2force", "Edit", { file_path: "/repo/d.ts", new_string: "d" }), { GATE1_PROVENANCE_ENABLED: "true" });
+  check("7a S2 explicit flag overrides derive: GATE1_PROVENANCE_ENABLED=true ⇒ accumulates with no write path", provenanceLines("s2force").length === 1);
+  // review NIT: a WHITESPACE-only flag is NOT an explicit value — it falls through to the derive, so a
+  // PROVISIONED write path still captures (the trimmed empty-test). Was a silent capture-OFF footgun.
+  await runHook(AT_ACTION_HOOK, ptEvent("s2ws", "Edit", { file_path: "/repo/w.ts", new_string: "w" }), { GATE1_PROVENANCE_ENABLED: " ", SAGE_GATE1_ACCRED_CREDENTIAL: "sr_prac_accred", SAGE_GATE1_AGENT_ID: "sagereasoning:loop@v1" });
+  check("7a S2 whitespace flag falls through to derive: provisioned ⇒ still accumulates", provenanceLines("s2ws").length === 1);
+}
+
+// 7b — S3 HONEST ACCREDITATION: the write carries the REAL accumulated signed chain (the conservative
+// truthful seed), and the DETECT loop-closure verdict is surfaced HONESTLY in the close log.
+{
+  // accumulate provenance via derive (write path provisioned), then close with an UNCLOSED chain.
+  await runHook(AT_ACTION_HOOK, ptEvent("s3u", "Edit", { file_path: "/repo/u.ts", new_string: "u" }), { SAGE_GATE1_ACCRED_CREDENTIAL: "sr_prac_accred", SAGE_GATE1_AGENT_ID: "sagereasoning:loop@v1" });
+  check("7b S3 setup: provenance accumulated (derive)", provenanceLines("s3u").length === 1);
+  captured = [];
+  routeState.accred = "unclosed";
+  await runHook(CLOSE_HOOK, stopEvent("s3u"), accredEnv());
+  const acc = lastReq("/api/accreditation");
+  check("7b S3: the write carries the conservative TRUTHFUL seed (pre_progress, actions_evaluated 0)",
+    !!acc && acc.profile.accreditation_record.senecan_grade === "pre_progress" && acc.profile.accreditation_record.actions_evaluated === 0 && acc.profile.total_actions_evaluated === 0);
+  check("7b S3: the write carries the REAL accumulated SIGNED chain (R18f)",
+    !!acc && Array.isArray(acc.provenance?.signed_assessments) && acc.provenance.signed_assessments.length === 1 && !!acc.provenance.signed_assessments[0].signature);
+  check("7b S3: the DETECT loop-closure verdict is surfaced HONESTLY in the close log (unclosed)",
+    !!lastLogMatching("loop=unclosed"));
+
+  // a CLOSED chain surfaces honestly too.
+  await runHook(AT_ACTION_HOOK, ptEvent("s3c", "Edit", { file_path: "/repo/cl.ts", new_string: "cl" }), { SAGE_GATE1_ACCRED_CREDENTIAL: "sr_prac_accred", SAGE_GATE1_AGENT_ID: "sagereasoning:loop@v1" });
+  captured = [];
+  routeState.accred = "closed";
+  await runHook(CLOSE_HOOK, stopEvent("s3c"), accredEnv());
+  check("7b S3: a CLOSED chain surfaces loop=closed honestly", !!lastLogMatching("loop=closed"));
+  routeState.accred = "ok";
+}
+note("LEG 7 (the 2026-06-22 channel-routed correction): S2 derive-from-write-path (no provenance");
+note("egress until the operator provisions a non-marker accred credential + agent_id) + S3 honest");
+note("accreditation (real signed chain + conservative truthful seed; the DETECT loop-closure verdict");
+note("surfaced as-is — a reversible loop never re-consulted reads 'unclosed', the truth, not 'closed').");
 
 // ===========================================================================================
 // SUMMARY + RELEASE-GATE VERDICT

@@ -1,0 +1,32 @@
+# sage-on — Enable the SageReasoning Gate-1 hooks (turn the practice ON)
+
+**Trigger:** The founder says "sage on", "/sage-on", "turn on the sage hooks", "turn on the harness", "enable the gate-1 hooks", "put the hooks back", or any variant asking to restore the SageReasoning Gate-1 hooks.
+
+---
+
+## What this skill does
+
+Merges the saved hooks block from `.claude/gate1-hooks-block.json` back into `.claude/settings.local.json`, so the SageReasoning Gate-1 hooks fire again for conversations rooted at this project. The consult credential + every other setting are left as-is. Hooks hot-reload in this desktop build, so it takes effect without a restart. Reverse with **/sage-off**.
+
+It also **reports the trust-record write path** and (when the founder provides them) **provisions it** — the missing piece the 2026-06-22 channel-routed correction (build-plan §S2) fixes. The full loop only *materialises a credential* when the accreditation **write path** is provisioned: a **non-marker** `SAGE_GATE1_ACCRED_CREDENTIAL` (carrying `accreditation_write`) bound to a **K1-canonical** `SAGE_GATE1_AGENT_ID` (`namespace:name@version`). With both set, provenance capture **derives ON** automatically (founder election #2 "derive from write-path presence" — no separate `GATE1_PROVENANCE_ENABLED` needed; its absence was the dispositive cause of the earlier missing credential). With either unset, the hook honestly **skips the write** and this skill says so loudly.
+
+## Procedure (the agent follows this)
+
+1. **Read** `.claude/gate1-hooks-block.json`. If it is missing or has no `hooks` object → report "No saved hooks block found at .claude/gate1-hooks-block.json; nothing to restore" and STOP.
+2. **Read** `.claude/settings.local.json`. If it **already** has a top-level `"hooks"` block → report "Sage is already on" (optionally re-sync it to the backup if they differ) and STOP unless the founder asked to overwrite.
+3. **Insert** the saved hooks block into `.claude/settings.local.json` with an Edit — place `"hooks": { … },` immediately **before** the `"env": {` line (it sits between `"permissions": { … },` and `"env": {`). Use the Edit tool (string match) so the rest of the file (`permissions`, `env`) stays byte-for-byte unchanged; drop the backup file's `_comment` field when inserting (settings JSON has no comments). Mind the trailing comma so the result is valid JSON.
+4. **Provision the trust-record write path (only if the founder asks to, or supplies the inputs).** This is the S2 materialisation step — *skip it and just report status (step 5) if the founder only wants the hooks back.* When provisioning:
+   - Add **`SAGE_GATE1_AGENT_ID`** (a **K1-canonical** `namespace:name@version`, e.g. `sagereasoning:my-loop@v1`) and **`SAGE_GATE1_ACCRED_CREDENTIAL`** (a **non-marker** `accreditation_write` credential the founder provides) to the `env` block with an Edit. **Never invent a credential** — the founder pastes it; **never** use the standing dogfood marker / consult credential (`SAGE_GATE1_CREDENTIAL`) — the hook auto-refuses a write on it, and provisioning it here is the exact misconfiguration the validation echo flags.
+   - Do **NOT** add `GATE1_PROVENANCE_ENABLED` — under the "derive" election, capture turns ON automatically from the two keys above. (Setting it `true` would force capture even with no write path; setting it `false` would disable a provisioned path. Leave it unset unless the founder explicitly wants to override.)
+5. **Validate + echo the write-path status (loud).** Run:
+   `node -e "const c=JSON.parse(require('fs').readFileSync('.claude/settings.local.json','utf8'));const h=c.hooks||{},e=c.env||{};const accred=(e.SAGE_GATE1_ACCRED_CREDENTIAL||'').trim(),aid=(e.SAGE_GATE1_AGENT_ID||'').trim(),consult=(e.SAGE_GATE1_CREDENTIAL||'').trim(),marker=(e.SAGE_GATE1_MARKER_CREDENTIAL||consult).trim();console.log('ON — UserPromptSubmit:',(h.UserPromptSubmit||[]).length,'| PreToolUse matchers:',JSON.stringify((h.PreToolUse||[]).map(b=>b.matcher)),'| Stop:',(h.Stop||[]).length);const skips=[];if(!accred)skips.push('no-accred-credential');if(!aid)skips.push('no-agent-id');const clash=accred&&(accred===consult||accred===marker);console.log('TRUST-RECORD WRITE PATH:',clash?('MISCONFIGURED — accred credential equals the consult/marker credential; the hook will REFUSE the write. Set a DISTINCT non-marker accreditation_write credential.'):(skips.length?('NOT PROVISIONED — honest-skip reason(s): '+skips.join(', ')+'. No credential will be written; set SAGE_GATE1_ACCRED_CREDENTIAL [non-marker accreditation_write] + SAGE_GATE1_AGENT_ID [K1-canonical] to materialise it.'):'PROVISIONED — provenance capture derives ON; the accreditation write will land (a session with zero accumulated signed assessments still honestly skips with no-provenance).'))"`
+   Confirm the expected hooks are registered **and** read the `TRUST-RECORD WRITE PATH:` line aloud to the founder.
+6. **Report** which hooks were enabled + the trust-record write-path status (from step 5) + the live-cost reminder + that it hot-reloads.
+
+## Implications to remind the founder of when enabling
+- **H3** runs the **guard** on consequential **Bash** (it can DENY an irreversible command — `rm -rf`, `find … -delete`, `… | xargs rm`, force-push, `vercel --prod`, `drop table`, `cmd > realfile`… — on a `do_not_proceed` verdict) and fires a metered `/api/reason` **consult** on every **Write/Edit/MultiEdit/NotebookEdit** (deduped per distinct decision; cost + ~seconds latency). **Bash no longer auto-consults** (the over-fire fix, S1) — set `"GATE1_CONSULT_BASH": "true"` in env to opt non-housekeeping Bash back into the advisory floor.
+- **H4** forces a "review your reasoning" turn at every session close (mute with `"GATE1_REFLECT_TURN_ENABLED": "false"` in env).
+- **Trust-record write (the credential the loop earns):** lands **only** when the write path is provisioned (step 4) **and** at least one signed assessment accumulated this session. The honest-skip reasons are `no-provenance` (no examination accumulated) / `no-accred-credential` / `no-agent-id`. The dogfood marker credential is auto-refused by the accred guard. Reflect-at-close egress stays **dark** unless `SAGE_GATE1_REFLECT_PERSIST_ENABLED` + a reflect credential are also set (a separate, disclosed standing step — S7).
+
+## Notes
+- The backup carries NO secret (the consult credential + any accred credential live in the settings `env` block, not the hooks block). Whatever hooks `/sage-off` last saved are what `/sage-on` restores.

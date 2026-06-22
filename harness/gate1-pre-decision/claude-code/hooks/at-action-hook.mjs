@@ -48,6 +48,8 @@ import {
   honestLog,
   shortHash,
   compileIrreversible,
+  hasOverwriteRedirect,
+  isHousekeeping,
   MAX_CONTEXT_CHARS,
 } from "./lib/framing-core.mjs";
 import {
@@ -141,11 +143,14 @@ function describeAction(toolName, toolInput) {
 }
 
 // Is this action in the GUARD set (irreversible → guardrail can block)? Either the tool is in the
-// explicit guardTools list, or it is a Bash command matching an irreversible pattern.
+// explicit guardTools list, or it is a Bash command matching an irreversible pattern, or (S1
+// broadening, build-plan §3.1) a Bash command with an overwrite-redirect to a real path (clobbers
+// its target). Over-block is the safe error on the guard set.
 function isGuardAction(cfg, toolName, action, compiled) {
   if (cfg.guardTools.includes(toolName)) return true;
   if (toolName === "Bash" && action.bashCommand) {
-    return compiled.some((re) => re.test(action.bashCommand));
+    if (compiled.some((re) => re.test(action.bashCommand))) return true;
+    if (hasOverwriteRedirect(action.bashCommand)) return true;
   }
   return false;
 }
@@ -228,9 +233,31 @@ async function main() {
 
   if (guard) {
     await runGuard(cfg, { sessionId, toolName, action });
-  } else {
-    await runConsult(cfg, { sessionId, toolName, action });
+    return;
   }
+
+  // S1 targeting (build-plan §3.1): the auto-CONSULT (SCORE) floor catches TOOL-MANIFESTED file
+  // decisions (Write/Edit/MultiEdit/NotebookEdit + any configured consult tool) — NOT Bash. A Bash
+  // wire payload carries no intent, so firing on the tool TYPE consulted before `date`/`ls` (the
+  // over-fire). A non-guard Bash is therefore allowed SILENTLY by default; the housekeeping
+  // classifier labels the skip, and GATE1_CONSULT_BASH=true opts the NON-housekeeping Bash back into
+  // the advisory floor (read-only housekeeping stays suppressed). Reasoning decisions that no tool
+  // manifests ride the declared `sage_examine` surface (S5), never a tool pattern.
+  if (toolName === "Bash") {
+    const housekeeping = isHousekeeping(action.bashCommand);
+    if (cfg.consultBash && !housekeeping) {
+      await runConsult(cfg, { sessionId, toolName, action });
+      return;
+    }
+    honestLog(
+      cfg,
+      `AT-ACTION-SKIP-BASH session=${sanitizeLog(sessionId)} reason=${housekeeping ? "housekeeping" : "bash-dropped-from-score"}`,
+    );
+    allowSilently();
+    return;
+  }
+
+  await runConsult(cfg, { sessionId, toolName, action });
 }
 
 // ---------------------------------------------------------------------------

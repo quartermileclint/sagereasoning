@@ -169,6 +169,14 @@ export function makeServer(getMode, opts = {}) {
       if (path.startsWith("/api/accreditation")) {
         if (accredMode === "exists") return json(409, { status: "error", message: "already exists" });
         if (accredMode === "error") return json(503, { status: "error", message: "service unavailable" });
+        // S3 (build-plan §3.3): DETECT mode annotates `loop_closure` on the 200 success. `unclosed`
+        // mirrors the live gate over a chain whose reversible redirection was never re-consulted.
+        if (accredMode === "unclosed") {
+          return json(200, { status: "ok", loop_closure: { verdict: "unclosed", redirections: 1, closed: 0, open: 1, indeterminate: 0 } });
+        }
+        if (accredMode === "closed") {
+          return json(200, { status: "ok", loop_closure: { verdict: "closed", redirections: 1, closed: 1, open: 0, indeterminate: 0 } });
+        }
         return json(200, { status: "ok" });
       }
 
