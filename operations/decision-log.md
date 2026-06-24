@@ -12615,6 +12615,30 @@ Expected: `61 passed, 0 failed`; `166 passed, 0 failed` + `RELEASE GATE: PASS �
 
 ---
 
+## 2026-06-24 — D-AI-FAILURE-MODE-METHOD-BEFORE-PURPOSE-GENERALISED
+
+**Decision:** Generalise **KG-EX1** (prescribe-before-grounding) to its **root** — *method / scope / frame chosen before the founder's purpose + success criterion is grounded* — and sync the standing-protocol-cache AI-failure-modes surface. A founder-prompted cross-session analysis found **one recurring root behind ≥5 instances (15 Apr → 24 Jun)**, **two of them in test design (P1, S6) AFTER KG-EX1 already existed** — establishing that surface-specific naming does not generalise (each recurrence wears a new costume: a verification query → a skill scope → a diagnostic's unit → a benchmark's axis). Added the test/method resolution (state the *construct under test* + *success criterion in the thing's own terms* + *purpose hypothesis* **before** the method; the **instrument-vs-intervention** gate; the **vacuous-pass** gate) + three founder redirect phrases.
+
+**Reasoning:** the S6 → measurement reframe (`D-SAGE-PRACTICE-REFRAME-MEASUREMENT-INSTRUMENT-AND-S6-RECHARACTERISED`) was the 5th instance; the founder recognised the drift as recurring and asked for the common cause. Determined: a **measure tested as an intervention** reads a structurally-guaranteed false "no benefit" — and the deeper root (method-before-purpose) is the *same* failure that produced the `sage-registry-update` skill mis-scope (28 Apr), the C2 per-product diagnostic mis-frame (27 May), and the CCP-Q6 vacuous verification test (15 Apr, *"the test proved nothing"*). The **recurrence-despite-capture is itself the lesson**: guard the root, not the surface — a per-surface row would only teach the root a new costume.
+
+**Files touched:**
+- `operations/knowledge-gaps.md` — KG-EX1 generalised (a recurrence+generalization block; resolution point 6; 3 new redirect phrases; observation-history update).
+- `adopted/standing-protocol-cache.md` — a new **"Method/test/frame before purpose"** row in the AI-failure-modes table + the Sources line updated (the cache-sync — satisfies the cache same-session update discipline for a KG-EX1 source change).
+- memory `method-before-purpose-test-drift` (+ MEMORY.md index).
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** **Standard** under 0d-ii — documentation / governance amendment (a permanent KG entry + its cache surface). No code/schema/flag/perimeter/credential change. AC7 not engaged. PR6 not engaged. This is a **`D-CACHE-DRIFT`-class** amendment (the cache updated in the same session as the KG-EX1 source change).
+
+**Rollback:** `git revert` this commit (the KG-EX1 + cache + memory + log changes); nothing standing changes.
+
+**Verification (founder-performable):** read `operations/knowledge-gaps.md` §"Permanent Entries" KG-EX1 (the recurrence block + resolution point 6) + the cache AI-failure-modes table (the new row + the three redirect phrases) — confirm the root framing matches intent. No commands.
+
+**Rules served:** PR5, PR17, KG-EX1.
+
+**Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-REFRAME-MEASUREMENT-INSTRUMENT-AND-S6-RECHARACTERISED` (the 5th instance / the prompting session), `D-PR17-ADOPTED-WALKTHROUGH-2026-05-27` (KG-EX1 origin), `operations/knowledge-gaps.md` (KG-EX1), `adopted/standing-protocol-cache.md` (the AI-failure-modes surface), memory `method-before-purpose-test-drift`, memory `sage-practice-measurement-instrument-reframe`.
+
+---
+
 ## 2026-06-24 — D-SAGE-PRACTICE-SCORING-VALIDITY-BATTERY-BUILT-RUN-SECTION4-SCOPED
 
 **Decision:** Built + ran the **scoring-validity battery** — the engine-fidelity gate the ADR-012 reframe named as the critical path — and **scoped the ADR-010 §4 engine root-fix** as the carried `code-critical` successor. The battery is repo-only (`website/scripts/scoring-validity-battery.ts` + `…-fixtures.ts`): it drives the **deterministic Layer-2 scorer** (`applyMechanisms` → `computeProximity`) plus the calling + reflection engines on **hand-authored, faithful / maximally-favourable-to-the-engine** quality-graded fixtures, and "scores the scoring" against the three validity checks — (a) worse-scores-worse, (b) four-stage, (c) adversarial/gaming. **No engine change this session** (the §4 fix is its own future Critical session). **No production / schema / flag / credential change.**
@@ -12657,3 +12681,49 @@ Expected: `Controls: all OK (7/7)`; the apatheia band reads `2/2 … mean oversc
 **Rules served:** R0, R18, R18f, R19, AC8, PR11, PR15, PR18.
 
 **Status:** Adopted. Cross-references: `operations/benchmarks/sage-practice-v1/2026-06-24-scoring-validity-battery-results.md`, `operations/benchmarks/sage-practice-v1/2026-06-24-adr010-section4-engine-fix-scope.md`, `adopted/adr/2026-06-24-sage-practice-measurement-instrument-reframe.md` (ADR-012 — origin), `adopted/adr/2026-06-19-stoic-fidelity-dikaiosyne-weighting.md` (ADR-010 §4 — the scoped fix), `D-SAGE-PRACTICE-REFRAME-MEASUREMENT-INSTRUMENT-AND-S6-RECHARACTERISED` (predecessor), memory `sage-practice-measurement-instrument-reframe`, memory `deterministic-l2-measures-apatheia-not-dikaiosyne`.
+
+---
+
+## 2026-06-25 — D-SAGE-PRACTICE-ADR010-SECTION4-ENGINE-FIX-BUILT-DARK-TEST-VERIFIED
+
+**Decision:** Built the **ADR-010 §4 root correction** — native dikaiosyne weighting in the shared deterministic engine `computeProximity` (per-domain proximity + the KP-04 unity-thesis minimum + obligation-resolution as a required oikeiosis field, Change-2 **route 2a**) + the **D4** `hasDeliberation`-proxy fix — **DARK, flag-gated behind the NEW `SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED` (default OFF ⇒ byte-identical to pre-§4, test-asserted)**. Battery both directions green (apatheia +3.0→+0.0; gamed-by-kathekon-count closed 3/3; over-strictness PASS 0/8 + 1 disclosed ceiling at LOCUS-1; grave assent-proceeds 6→0). **Two adversarial passes:** Pass 1 pre-activation review (ultracode, 33 agents); Pass 2 fold-verification (5 agents, ran the code, prompted by the user) — `all_hold:true, any_refuted:[]`, but it **caught that Pass 1's andreia "examined-before-acting" fold introduced an UNSAFE under-strictness bypass** (a rash destructive act + an unrelated synkatathesis bypassed the floor), now **REVERTED to the conservative floor** (any carried-out grave act → reflexive; no bypass) + a disclosed over-strictness ceiling (OS3) + a no-bypass control (P4c); the sound fix (urgency→stage data-model link) is an activation prerequisite. **Activation is a separate founder-walked 0c-ii; the guardrail justice bridge does NOT retire until a LOCUS-2 coverage-equivalence proof.** Production byte-equivalent; **AC7 NOT engaged** (no mint/Supabase/Vercel/git op).
+
+**Reasoning:** Per ADR-012 the deterministic scoring engine's fidelity is the product's critical path (the honest practice-mode profile claim, logos-mode, and the model-creator/weights signal all sit on it); the predecessor scoring-validity battery quantified the standing ADR-010 apatheia-not-dikaiosyne gap (+3.0 ranks) + four further defects. This session fixes the engine natively so a worse decision earns a worse score and lets the (non-deterministic, LLM) §3 justice bridge retire. Founder elections at open (AskUserQuestion): **2a** (the principled route — and the ONLY route that can satisfy Step-4's joint gate, since at LOCUS-1 the gamed injustice P5a and the legitimate sage C2 are identical without an argued obligation field) + the **full repo-only build**. Cross-references `D-SAGE-PRACTICE-SCORING-VALIDITY-BATTERY-BUILT-RUN-SECTION4-SCOPED` (predecessor), ADR-010 (the design), ADR-012 (why the engine is the critical path).
+
+**Files touched:**
+- `website/src/lib/translation-sandwich/layer1-extractor.ts` — NEW optional `OikeiosisCircleEngaged.obligation_assessment {status: met|violated|indeterminate, justification}` + `ObligationAssessment`/`ObligationStatus` types + `OBLIGATION_STATUSES` + validator (tolerates absence; shape/enum-checks when present). The Layer-1 LLM PROMPT is UNCHANGED (the prompt change is deferred to activation/LOCUS-2).
+- `website/src/lib/translation-sandwich/layer2-mechanisms.ts` — `isProximityDikaiosyneEnabled()`; `ApplyOptions.dikaiosyneWeighting`; `computeProximityBase` (the pre-§4 5-branch logic verbatim, hasDeliberation parameterised); `weakestProximity`/`PROXIMITY_RANK`; `hasGenuineDeliberation` (D4); `obligationToProximity`/`computeDikaiosyneFloor`/`computeAndreiaFloor`/`computeSophrosyneFloor`; the flag-on `computeProximity` (base floored by the engaged domains, min-fold) returning `{proximity, floors}`; `assessOikeiosis` surfaces per-circle `obligation_assessment` flag-on; `Layer2Assessment.proximity_floors` + `OikeiosisCircleAssessment.obligation_assessment` OPTIONAL output fields (omitted flag-off); `applyMechanisms` wiring. Adversarial-review fold: `computeAndreiaFloor` gated on examined-before-acting (synkatathesis present) so a good carried-out irreversible act is not over-floored; `// J3` comment clarified.
+- `website/src/lib/translation-sandwich/__tests__/proximity-dikaiosyne.test.ts` — NEW, 42/0 (flag-off byte-identity incl. additive-field-inert + env-default; per-domain logic; multi-circle; the andreia conservative floor + no-bypass control; idempotency).
+- `website/src/lib/translation-sandwich/__tests__/layer1-schema-additions.test.ts` — +9 `obligation_assessment` validator cases (OA-1…9); 59/0.
+- `website/scripts/scoring-validity-fixtures.ts` — P1a/P1c/C2 faithful extractions gain argued-met obligations (over-strictness); NEW OS1 (indeterminate-argued), OS2 (irreversible withheld), OS3 (irreversible carried-out-examined), P5d (lying-met LOCUS-1 ceiling), P5e (role-only circle-free LOCUS-1 ceiling); `locus1_ceiling` field.
+- `website/scripts/scoring-validity-battery.ts` — rewritten to run BOTH flag states (baseline→post-fix) + report both validity directions + the over-strictness LOCUS-1-conditional caveat + the disclosed residuals.
+- `adopted/adr/2026-06-19-stoic-fidelity-dikaiosyne-weighting.md` — §4 build record + bridge-retirement gate + changelog.
+- `operations/benchmarks/sage-practice-v1/2026-06-25-adr010-section4-engine-fix-build-results.md` (NEW); `…/2026-06-24-adr010-section4-engine-fix-scope.md` (reconciliation note).
+- `operations/handoffs/founder/2026-06-25-adr010-section4-engine-fix-CLOSE.md` (NEW); `operations/handoffs/founder/2026-06-25-adr010-section4-activation-and-locus2-battery-NEXT-SESSION-PROMPT.md` (NEW).
+- `CLAUDE.md` (PR18 production-state refresh).
+
+**Risk classification:** **Critical** under 0d-ii — changes the shared `/api/reason` deterministic engine (`computeProximity`), consumed by the consult tool, trust-layer accreditation, reflect Q4, and the deterministic assent core. **But built DARK + flag-gated; the flag is UNSET everywhere ⇒ production byte-equivalent (flag-off byte-identity test-asserted across the signer/canonical/verifier surfaces).** AC7 NOT engaged this session (no live-fire/mint/deploy). PR6 engaged (the change is to shared determinism) — discharged via the full Critical Change Protocol (dark build + both-direction battery + adversarial review; activation deferred to a founder-walked 0c-ii).
+
+**Critical Change Protocol (0c-ii):** (1) **What changes** — `computeProximity` gains per-domain scoring + native dikaiosyne/obligation floors, flag-gated. (2) **What could break** — consult/accreditation/assent proximity drops on other-affecting actions (intended); over-strictness on good actions (the LOCUS-1 over-strictness gate PASSes 0/8 + 1 disclosed ceiling OS3; the LOCUS-2 over-strictness direction is the activation prerequisite — the Layer-1 prompt must emit `obligation_assessment` or every good action that engages a circle / names a natural_relationship floors to reflexive); the andreia carried-out case is conservatively over-floored at LOCUS-1 (OS3 ceiling; the unsafe examined-gate bypass was reverted — the sound urgency→stage fix is an activation prerequisite); the shared env flag also activates the Live `/api/guardrail` gate (monotonic-safe, no fail-open; an untested both-flags-on interaction → activation checklist). (3) **Existing sessions** — flag-off byte-identical; only-founder/test logins (build-cache no-users note). (4) **Rollback** — unset the flag + redeploy (byte-identical); `git revert` the build. (5) **Verification** — the scoring-validity battery (both directions) + 42/0 + 59/0 + 255 existing assertions + tsc/build 0 + TWO adversarial passes (the 33-agent pre-activation review + the 5-agent fold-verification that caught + closed the andreia bypass). (6) **Founder approval** — the founder approved route 2a + the full build at open; the flag flip + the Layer-1 prompt change + bridge retirement are deferred founder-walked steps.
+
+**Rollback path:** `SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED` is UNSET (no-op until set); `git revert` the build commit removes it entirely. No schema/flag/credential change shipped.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx scripts/scoring-validity-battery.ts        # baseline +3.0 → post-fix +0.0; over-strictness PASS 0/8 (+1 ceiling OS3); gaming closed 3/3; assent 6→0
+npx tsx src/lib/translation-sandwich/__tests__/proximity-dikaiosyne.test.ts      # 42 passed, 0 failed
+npx tsx src/lib/translation-sandwich/__tests__/layer1-schema-additions.test.ts   # 59 pass / 0 fail
+npx tsc --noEmit -p tsconfig.json && npm run build  # exit 0; ✓ Compiled successfully
+```
+Expected: as annotated. Flag-off byte-identity: the battery's `MACHINE_BASELINE` reproduces the predecessor (apatheia +3.0).
+
+**Open questions / carried (all founder-walked):**
+- **The §4 activation (0c-ii):** land the Layer-1 `obligation_assessment` prompt change → run the full-sandwich LOCUS-2 verdict-equivalence battery (the over-strictness direction on real extractions + role-framed-injustice circle-surfacing) → set the flag + redeploy + a live `/api/reason` smoke + publish the R18 contract (incl. the D3 epistemic-accuracy scoping bound). Prompt: `2026-06-25-adr010-section4-activation-and-locus2-battery-NEXT-SESSION-PROMPT.md`.
+- **Bridge retirement (Step 8) is GATED** on the LOCUS-2 coverage-equivalence proof (the role-only circle-free injustice class, P5e, must be demonstrably covered) — do NOT retire the §3 bridge before then.
+- **Named follow-ups:** the broader `hasDeliberation`/`ruling_faculty_state` proxy re-examination; attaching the urgency signal to its own causal stage (so the andreia floor requires the praxis to BE the grave act); the guardrail-consumer decoupling election (explicit option vs shared env default).
+- **After activation + the gaming-robustness bar:** the `sage-on`/`sage-off` → `practice-on`/`practice-off` rename; then logos-mode + the model-creator/weights signal (future).
+
+**Rules served:** R0, R10, R18, R18f, R19, AC1, AC5, AC8, PR6, PR11, PR15, PR17, PR18, KG1.
+
+**Status:** Adopted. Cross-references: `operations/benchmarks/sage-practice-v1/2026-06-25-adr010-section4-engine-fix-build-results.md`, `…/2026-06-24-adr010-section4-engine-fix-scope.md`, `…/2026-06-24-scoring-validity-battery-results.md`, `adopted/adr/2026-06-19-stoic-fidelity-dikaiosyne-weighting.md` (ADR-010 §4 build record), `adopted/adr/2026-06-24-sage-practice-measurement-instrument-reframe.md` (ADR-012), `D-SAGE-PRACTICE-SCORING-VALIDITY-BATTERY-BUILT-RUN-SECTION4-SCOPED` (predecessor), memory `deterministic-l2-measures-apatheia-not-dikaiosyne`.

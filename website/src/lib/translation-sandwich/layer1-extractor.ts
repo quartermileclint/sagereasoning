@@ -147,10 +147,43 @@ export interface ControlFilterElement {
   agent_named_position: AgentNamedPosition
 }
 
+/**
+ * ADR-010 §4 Change 2 (route 2a, the richer extraction contract). Layer 1's
+ * explicit assessment of whether the obligation owed to an oikeiosis circle is
+ * met, violated, or genuinely indeterminate — the field the deterministic
+ * dikaiosyne domain (computeProximity, flag-on) resolves the obligation from.
+ *
+ * `justification` is REQUIRED-in-substance for `met` / `indeterminate` (mentor
+ * J2: "indeterminate must be argued, not defaulted"). Layer 2 treats a `met` or
+ * `indeterminate` with an empty justification as effectively UNEVALUATED.
+ *
+ * OPTIONAL + additive: when Layer 1 does not assess a circle's obligation the
+ * field is absent ⇒ the dikaiosyne domain reads the obligation as UNEVALUATED ⇒
+ * (flag-on) floors `reflexive` (J1: an unexamined obligation reads reflexive).
+ * The Layer-1 LLM does NOT yet populate this field — the extractor prompt change
+ * is the LOCUS-2 work deferred to the §4 full-sandwich battery / activation; for
+ * now the field is supplied on hand-authored fixtures (LOCUS 1) and flows through
+ * untouched. Flag-off (SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED unset) ⇒ Layer 2
+ * never reads it ⇒ byte-identical.
+ */
+export type ObligationStatus = 'met' | 'violated' | 'indeterminate'
+
+export interface ObligationAssessment {
+  status: ObligationStatus
+  /** Why the obligation is met / violated / genuinely-indeterminate. Required in
+   *  substance for `met`/`indeterminate` (J2); an empty string is treated by
+   *  Layer 2 as unevaluated. */
+  justification: string
+}
+
 export interface OikeiosisCircleEngaged {
   circle: OikeiosisCircle
   /** Verbatim quote naming the parties or relationships at this circle level. */
   evidence: string
+  /** ADR-010 §4 Change 2 (2a) — OPTIONAL explicit obligation assessment for this
+   *  circle. Absent ⇒ unevaluated. Read only by computeProximity's dikaiosyne
+   *  domain when SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED is on; ignored flag-off. */
+  obligation_assessment?: ObligationAssessment | null
 }
 
 export interface ValueCategoryAtStake {
@@ -628,6 +661,13 @@ const CIRCLES: ReadonlyArray<OikeiosisCircle> = [
   'cosmopolis',
 ]
 
+// ADR-010 §4 (2a) — obligation-assessment status vocabulary (R8a controlled set).
+const OBLIGATION_STATUSES: ReadonlyArray<ObligationStatus> = [
+  'met',
+  'violated',
+  'indeterminate',
+]
+
 const INDIFFERENTS: ReadonlyArray<Indifferent> = [
   'life',
   'health',
@@ -890,10 +930,32 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
     'oikeiosis_circles_engaged'
   ).map((entry, i) => {
     const o = assertObject(entry, `oikeiosis_circles_engaged[${i}]`)
-    return {
+    const circle: OikeiosisCircleEngaged = {
       circle: assertEnum(o.circle, CIRCLES, `oikeiosis_circles_engaged[${i}].circle`),
       evidence: assertString(o.evidence, `oikeiosis_circles_engaged[${i}].evidence`),
     }
+    // ADR-010 §4 (2a) — optional obligation_assessment. Absent/null ⇒ omit
+    // (unevaluated). When present, validate shape so a malformed extraction is
+    // caught at the boundary, not silently mis-scored. Additive: existing v1/v2/v3
+    // schemas without the field remain valid (forward-compat, same as carried_candidates).
+    if (o.obligation_assessment !== undefined && o.obligation_assessment !== null) {
+      const oa = assertObject(
+        o.obligation_assessment,
+        `oikeiosis_circles_engaged[${i}].obligation_assessment`
+      )
+      circle.obligation_assessment = {
+        status: assertEnum(
+          oa.status,
+          OBLIGATION_STATUSES,
+          `oikeiosis_circles_engaged[${i}].obligation_assessment.status`
+        ),
+        justification: assertString(
+          oa.justification,
+          `oikeiosis_circles_engaged[${i}].obligation_assessment.justification`
+        ),
+      }
+    }
+    return circle
   })
 
   // value_categories_at_stake

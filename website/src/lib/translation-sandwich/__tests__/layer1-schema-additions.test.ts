@@ -525,6 +525,59 @@ assertThrowsValidation('DP-13 discovered_purpose non-object (string) throws', ()
 }
 
 // ============================================================================
+// OA — obligation_assessment validation (ADR-010 §4 / 2a; adversarial-review fold).
+//   The new OikeiosisCircleEngaged.obligation_assessment field is validated on the
+//   LIVE /api/reason boundary (validateLayer1Schema). Additive/optional: absent or
+//   null both validate (forward-compat); when present, status is enum-checked and
+//   justification must be a string.
+// ============================================================================
+{
+  const withCircle = (oa: unknown): Record<string, unknown> => ({
+    ...buildMinimalRaw(),
+    oikeiosis_circles_engaged: [
+      oa === undefined
+        ? { circle: 'local_community', evidence: 'the affected' }
+        : { circle: 'local_community', evidence: 'the affected', obligation_assessment: oa },
+    ],
+  })
+
+  assertNoThrow('OA-1 circle WITHOUT obligation_assessment validates (forward-compat)', () =>
+    validateLayer1Schema(withCircle(undefined))
+  )
+  assertNoThrow('OA-2 obligation_assessment null validates (treated as unevaluated)', () =>
+    validateLayer1Schema(withCircle(null))
+  )
+  {
+    const r = validateLayer1Schema(
+      withCircle({ status: 'met', justification: 'honoured what is owed' })
+    )
+    assertEqual(
+      'OA-3 valid met obligation_assessment passes through',
+      r.oikeiosis_circles_engaged[0].obligation_assessment?.status,
+      'met'
+    )
+  }
+  assertNoThrow('OA-4 violated + justification validates', () =>
+    validateLayer1Schema(withCircle({ status: 'violated', justification: 'wronged them' }))
+  )
+  assertNoThrow('OA-5 indeterminate + justification validates', () =>
+    validateLayer1Schema(withCircle({ status: 'indeterminate', justification: 'unclear' }))
+  )
+  assertThrowsValidation('OA-6 invalid status enum throws', () =>
+    validateLayer1Schema(withCircle({ status: 'partially_met', justification: 'x' }))
+  )
+  assertThrowsValidation('OA-7 non-string justification throws', () =>
+    validateLayer1Schema(withCircle({ status: 'met', justification: 42 }))
+  )
+  assertThrowsValidation('OA-8 missing justification throws', () =>
+    validateLayer1Schema(withCircle({ status: 'met' }))
+  )
+  assertThrowsValidation('OA-9 non-object obligation_assessment throws', () =>
+    validateLayer1Schema(withCircle('met'))
+  )
+}
+
+// ============================================================================
 // Report
 // ============================================================================
 

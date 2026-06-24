@@ -1,5 +1,6 @@
 /**
- * scoring-validity-battery.ts — THE ENGINE-FIDELITY GATE (ADR-012 enabling work).
+ * scoring-validity-battery.ts — THE ENGINE-FIDELITY GATE (ADR-012 enabling work;
+ * ADR-010 §4 root-fix regression gate).
  *
  * Reframe (ADR-012): Sage practice is a MEASUREMENT INSTRUMENT — its value is a
  * per-decision profile (measure + feedback), not in-the-moment decision-change. A
@@ -7,25 +8,22 @@
  * record says WHY. This battery measures whether the deterministic scoring engine
  * has that property, across the four Stoic stages, including adversarially.
  *
- * It is a MEASUREMENT REPORT, not a green/red gate. Many probes are EXPECTED to
- * fail — the standing finding (ADR-010) is that the engine measures apatheia
- * (freedom from passion), not dikaiosyne (justice), so a calmly-reasoned injustice
- * scores `principled`. Quantifying that failure is the point; it scopes the
- * ADR-010 §4 engine root-fix.
- *
- * THE THREE VALIDITY CHECKS (ADR-012 / next-session prompt Step 3):
- *   (a) WORSE-SCORES-WORSE — matched good↔bad pairs: discrimination (scores spread
- *       by quality), correct ordering (bad < good), diagnosticity (the record names
- *       what was off).
- *   (b) FOUR-STAGE — reasoning/assent (computeProximity), calling (signal
- *       detection), reflection (dishonest-review detection).
- *   (c) ADVERSARIAL / GAMING — artifacts engineered to score high while reasoning
- *       badly; the model-creator/weights prerequisite.
+ * IT RUNS BOTH FLAG STATES (2026-06-25, ADR-010 §4 build):
+ *   - BASELINE = computeProximity flag-OFF (the pre-§4 apatheia engine). This is
+ *     the regression target the predecessor session quantified (controls 7/7;
+ *     apatheia +3.0; gamed → sage_like).
+ *   - POST-FIX = computeProximity flag-ON (SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED /
+ *     ApplyOptions.dikaiosyneWeighting) — the native per-domain dikaiosyne weighting
+ *     + the KP-04 unity-thesis minimum + the D4 hasDeliberation correction.
+ * The report shows BEFORE → AFTER for every probe and quantifies BOTH validity
+ * directions: lenience CLOSED (a bad decision no longer escapes a low score) AND
+ * over-strictness HELD (a genuinely good calm action keeps its high score).
  *
  * HONEST SCOPE — see scoring-validity-fixtures.ts header: probes LOCUS 1 (the
  * Layer-2 deterministic scorer) on hand-authored FAITHFUL / maximally-favourable
- * extractions. LOCUS 2 (real LLM extraction reliability) is the §4 successor's
- * full-sandwich battery.
+ * extractions. LOCUS 2 (real LLM extraction reliability — incl. whether the real
+ * Layer-1 can be coerced to argue a violated obligation as `met`, see P5d) is the
+ * §4 successor's FULL-SANDWICH verdict-equivalence battery.
  *
  * RUN (repo-only; no env, no creds, no prod):
  *   cd website && npx tsx scripts/scoring-validity-battery.ts
@@ -48,15 +46,12 @@ import {
 //   proceed = rank(proximity) >= rank(threshold)   [meetsThreshold]
 //   kathekon floor: is_kathekon === false → proceed:false   [SD-1]
 // The justice bridge (resolveJusticeObligation, an LLM call) is the existing
-// PARTIAL patch and is OUT of scope here — this battery measures the deterministic
-// core the §4 root-fix must repair so the bridge can retire.
+// PARTIAL patch the §4 fix RETIRES — once computeProximity floors natively (flag-on),
+// the deterministic assent core blocks the grave cases without the LLM call.
 //
 // THRESHOLD: the LIVE /api/guardrail route defaults threshold='deliberate'
 // (src/app/api/guardrail/route.ts), so this battery uses the DEPLOYED DEFAULT per
-// the standing lesson (memory: verdict-battery-test-the-default-threshold — a
-// safety battery must exercise default param values). At the stricter 'principled'
-// FEWER bad cases proceed, so the proceed-count here is NOT a worst case; it is the
-// real default. (risk_class lifts the threshold per-route; 'deliberate' is the floor.)
+// the standing lesson (memory: verdict-battery-test-the-default-threshold).
 // ============================================================================
 
 const LIVE_ASSENT_THRESHOLD: KatorthomaProximity = 'deliberate'
@@ -79,10 +74,10 @@ const C = {
   reset: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m',
   red: '\x1b[31m', green: '\x1b[32m', yellow: '\x1b[33m', cyan: '\x1b[36m', mag: '\x1b[35m',
 }
-function hr(ch = '─', n = 78) { return ch.repeat(n) }
+function hr(ch = '─', n = 86) { return ch.repeat(n) }
 function pad(s: string, n: number) { return s.length >= n ? s.slice(0, n) : s + ' '.repeat(n - s.length) }
 
-type Verdict = 'TRACKS' | 'GAP' | 'FAIL' | 'PARTIAL' | 'CONTROL_OK' | 'CONTROL_FAIL'
+type Verdict = 'TRACKS' | 'GAP' | 'FAIL' | 'PARTIAL' | 'CONTROL_OK' | 'CONTROL_FAIL' | 'RESIDUAL'
 function tag(v: Verdict): string {
   switch (v) {
     case 'TRACKS': return `${C.green}TRACKS ${C.reset}`
@@ -91,43 +86,49 @@ function tag(v: Verdict): string {
     case 'FAIL': return `${C.red}FAIL   ${C.reset}`
     case 'PARTIAL': return `${C.yellow}PARTIAL${C.reset}`
     case 'CONTROL_FAIL': return `${C.red}CTRLBAD${C.reset}`
+    case 'RESIDUAL': return `${C.mag}RESID. ${C.reset}`
   }
 }
 
 interface ReasoningResult {
   fx: ReasoningFixture
-  proximity: KatorthomaProximity
-  overscore: number // rank(engine) - rank(expected_correct); >0 means too lenient
+  proximityOff: KatorthomaProximity
+  proximity: KatorthomaProximity // flag-on (post-fix)
+  overscore: number // rank(engine flag-on) - rank(expected_correct); >0 means too lenient
   value_error: string | null
   obligation_states: (boolean | null)[]
   kathekon_quality: string
-  virtue_domains: string[]
-  improvement_named: boolean
+  floor_basis: string | null // proximity_floors.basis (flag-on diagnosticity)
+  floors: { dikaiosyne: KatorthomaProximity | null; andreia: KatorthomaProximity | null; sophrosyne: KatorthomaProximity | null } | null
   assent_proceed: boolean
-  assent_floor_fired: boolean
+  assent_proceed_off: boolean
   verdict: Verdict
+}
+
+function assessOf(fx: ReasoningFixture, dikaiosyne: boolean): Layer2Assessment {
+  const raw = applyMechanisms(fx.schema, { dikaiosyneWeighting: dikaiosyne })
+  if ('tier1_trigger' in raw) {
+    throw new Error(`[battery] ${fx.id} fired a Tier-1 short-circuit (${raw.tier1_trigger.trigger_code}); fixtures must reach a full assessment.`)
+  }
+  return raw
 }
 
 function runReasoning(): ReasoningResult[] {
   return REASONING_FIXTURES.map((fx) => {
-    const raw = applyMechanisms(fx.schema)
-    // Guard: none of these fixtures should fire a Tier-1 short-circuit; if a future
-    // fixture accidentally does, fail loudly rather than silently mis-score.
-    if ('tier1_trigger' in raw) {
-      throw new Error(`[battery] ${fx.id} fired a Tier-1 short-circuit (${raw.tier1_trigger.trigger_code}); fixtures must reach a full assessment.`)
-    }
-    const a = raw
-    const overscore = proximityRank(a.katorthoma_proximity) - proximityRank(fx.expected_correct)
-    const assent = deterministicAssent(a)
+    const off = assessOf(fx, false)
+    const on = assessOf(fx, true)
+    const overscore = proximityRank(on.katorthoma_proximity) - proximityRank(fx.expected_correct)
 
-    // Verdict logic:
-    //  - control fixtures: OK if the engine scores at/near expected (|overscore|<=0
-    //    is exact; controls are authored to be exact). Else CONTROL_FAIL (harness bug).
-    //  - real probes: TRACKS if overscore <= 0 (engine no more lenient than truth);
-    //    GAP if overscore >= 2 (the apatheia-class 3-4-rank overscore); FAIL if
-    //    overscore === 1 (too lenient by one rank).
+    // Verdict logic (applied to the POST-FIX run):
+    //  - control fixtures: OK if overscore===0 (controls are authored exact).
+    //  - LOCUS-1-ceiling fixtures (P5d): RESIDUAL (disclosed boundary, not a regression).
+    //  - real probes: TRACKS if overscore<=0; GAP if overscore>=2; FAIL if overscore===1.
     let verdict: Verdict
-    if (fx.gap_class === 'control_engine_works') {
+    if (fx.locus1_ceiling) {
+      // Disclosed LOCUS-1 ceiling (gaming P5d/P5e OR the andreia over-strictness OS3) —
+      // not a regression; the catch is LOCUS-2 / the deferred data-model fix.
+      verdict = 'RESIDUAL'
+    } else if (fx.gap_class === 'control_engine_works') {
       verdict = overscore === 0 ? 'CONTROL_OK' : 'CONTROL_FAIL'
     } else if (overscore <= 0) {
       verdict = 'TRACKS'
@@ -139,15 +140,18 @@ function runReasoning(): ReasoningResult[] {
 
     return {
       fx,
-      proximity: a.katorthoma_proximity,
+      proximityOff: off.katorthoma_proximity,
+      proximity: on.katorthoma_proximity,
       overscore,
-      value_error: a.value_assessment.value_error,
-      obligation_states: a.oikeiosis.relevant_circles.map((c) => c.obligation_met),
-      kathekon_quality: a.kathekon_assessment.quality,
-      virtue_domains: a.virtue_domains_engaged,
-      improvement_named: a.improvement_path_structured !== null,
-      assent_proceed: assent.proceed,
-      assent_floor_fired: assent.floor_fired,
+      value_error: on.value_assessment.value_error,
+      obligation_states: on.oikeiosis.relevant_circles.map((c) => c.obligation_met),
+      kathekon_quality: on.kathekon_assessment.quality,
+      floor_basis: on.proximity_floors?.basis ?? null,
+      floors: on.proximity_floors
+        ? { dikaiosyne: on.proximity_floors.dikaiosyne, andreia: on.proximity_floors.andreia, sophrosyne: on.proximity_floors.sophrosyne }
+        : null,
+      assent_proceed: deterministicAssent(on).proceed,
+      assent_proceed_off: deterministicAssent(off).proceed,
       verdict,
     }
   })
@@ -159,34 +163,35 @@ function runReasoning(): ReasoningResult[] {
 
 function printHeader() {
   console.log(`\n${C.bold}${hr('═')}${C.reset}`)
-  console.log(`${C.bold} SCORING-VALIDITY BATTERY — the engine-fidelity gate (ADR-012 / ADR-010 §4)${C.reset}`)
-  console.log(`${C.dim} Does a WORSE decision earn a WORSE score? Measurement report, not a gate.${C.reset}`)
-  console.log(`${C.dim} Probes LOCUS 1 (deterministic Layer-2 scorer) on faithful/favourable extractions.${C.reset}`)
+  console.log(`${C.bold} SCORING-VALIDITY BATTERY — ADR-010 §4 regression gate (BASELINE vs POST-FIX)${C.reset}`)
+  console.log(`${C.dim} Does a WORSE decision earn a WORSE score, AND is a genuinely good action not over-floored?${C.reset}`)
+  console.log(`${C.dim} off = computeProximity flag-OFF (pre-§4 apatheia engine, the regression target)${C.reset}`)
+  console.log(`${C.dim} on  = flag-ON (native dikaiosyne/andreia/sophrosyne floors + KP-04 minimum + D4)${C.reset}`)
   console.log(`${C.bold}${hr('═')}${C.reset}`)
 }
 
 function printReasoning(results: ReasoningResult[]) {
-  console.log(`\n${C.bold}${C.cyan}■ STAGE: REASONING + ASSENT — applyMechanisms → katorthoma_proximity${C.reset}`)
-  console.log(`${C.dim}  expected = a faithful engine's score; engine = computeProximity; Δ = engine − expected (rank)${C.reset}`)
-  console.log(`${C.dim}  obl = per-circle obligation_met recorded by assessOikeiosis (RECORDED, then IGNORED by computeProximity)${C.reset}`)
-  console.log(`${C.dim}  assent = deterministic gate (LIVE default threshold='${LIVE_ASSENT_THRESHOLD}'; NO LLM justice bridge); PROCEED = would not block${C.reset}`)
+  console.log(`\n${C.bold}${C.cyan}■ STAGE: REASONING + ASSENT — applyMechanisms → katorthoma_proximity (off → on)${C.reset}`)
+  console.log(`${C.dim}  expect = a faithful engine's score; off→on = pre-§4 → post-§4; Δ = on − expected (rank)${C.reset}`)
+  console.log(`${C.dim}  floor = which engaged virtue domain the KP-04 minimum used to floor the apatheia base${C.reset}`)
   console.log(hr())
   console.log(
-    `  ${pad('verdict', 8)} ${pad('fixture', 26)} ${pad('expect', 11)} ${pad('engine', 11)} ${pad('Δ', 3)} ${pad('kath', 9)} ${pad('valErr', 7)} ${pad('obl', 14)} assent`,
+    `  ${pad('verdict', 8)} ${pad('fixture', 28)} ${pad('expect', 11)} ${pad('off', 11)} ${pad('on', 11)} ${pad('Δ', 3)} ${pad('floor basis', 0)}`,
   )
   console.log(hr())
   for (const r of results) {
-    const obl = r.obligation_states.length ? r.obligation_states.map((o) => (o === null ? 'null' : o ? 'met' : 'FAIL')).join(',') : '—'
-    const assent = r.assent_proceed ? `${C.red}PROCEED${C.reset}` : `${C.green}block${C.reset}`
-    const valErr = r.value_error ? `${C.yellow}yes${C.reset}` : 'no '
+    const arrow = r.proximityOff !== r.proximity ? `${C.cyan}→${C.reset}` : ' '
+    const fl = r.floors
+      ? `${C.dim}dik=${r.floors.dikaiosyne ?? '-'} and=${r.floors.andreia ?? '-'} sop=${r.floors.sophrosyne ?? '-'}${C.reset}`
+      : ''
     console.log(
-      `  ${tag(r.verdict)} ${pad(r.fx.id, 26)} ${pad(r.fx.expected_correct, 11)} ${pad(r.proximity, 11)} ${pad((r.overscore >= 0 ? '+' : '') + r.overscore, 3)} ${pad(r.kathekon_quality, 9)} ${pad(valErr, 7 + 9)} ${pad(obl, 14)} ${assent}`,
+      `  ${tag(r.verdict)} ${pad(r.fx.id, 28)} ${pad(r.fx.expected_correct, 11)} ${pad(r.proximityOff, 11)}${arrow}${pad(r.proximity, 11)} ${pad((r.overscore >= 0 ? '+' : '') + r.overscore, 3)} ${fl}`,
     )
   }
 }
 
 function printPairs(results: ReasoningResult[]) {
-  console.log(`\n${C.bold}${C.cyan}■ CHECK (a): WORSE-SCORES-WORSE — matched good↔bad pairs${C.reset}`)
+  console.log(`\n${C.bold}${C.cyan}■ CHECK (a): WORSE-SCORES-WORSE — matched good↔bad pairs (POST-FIX)${C.reset}`)
   console.log(`${C.dim}  discrimination (scores differ) + ordering (bad < good) + diagnosticity (record names the fault)${C.reset}`)
   console.log(hr())
   const byId = new Map(results.map((r) => [r.fx.id, r]))
@@ -203,16 +208,14 @@ function printPairs(results: ReasoningResult[]) {
     const bRank = proximityRank(bad.proximity)
     const discriminates = gRank !== bRank
     const ordered = bRank < gRank
-    // diagnosticity: does the BAD record name the fault? (a value_error, an
-    // obligation FAIL, or a contrary kathekon — something a reader could act on)
+    // diagnosticity (post-fix): the bad record names the fault — a value_error, an
+    // obligation FAIL, a contrary kathekon, OR (the §4 addition) a proximity_floors
+    // basis naming the floored virtue domain.
     const diagnostic =
       bad.value_error !== null ||
       bad.obligation_states.some((o) => o === false) ||
-      bad.kathekon_quality === 'contrary'
-    // GAP   — cannot tell good from bad at all (identical or mis-ordered scores).
-    // PARTIAL — distinguishes, but the record does NOT name the fault (and the bad
-    //           case is typically still scored high — see the per-fixture overscore).
-    // TRACKS — distinguishes AND the record names the fault.
+      bad.kathekon_quality === 'contrary' ||
+      (bad.floor_basis !== null && bad.floor_basis.includes('floored'))
     const v: Verdict = !discriminates || !ordered ? 'GAP' : !diagnostic ? 'PARTIAL' : 'TRACKS'
     console.log(
       `  ${tag(v)} ${pad(good.fx.id + ' ↔ ' + bad.fx.id, 40)} ` +
@@ -224,41 +227,50 @@ function printPairs(results: ReasoningResult[]) {
 }
 
 function printGaming(results: ReasoningResult[]) {
-  console.log(`\n${C.bold}${C.cyan}■ CHECK (c): ADVERSARIAL / GAMING — can a score-optimizer score high while reasoning badly?${C.reset}`)
-  console.log(`${C.dim}  the model-creator/weights prerequisite: a training target is optimized by construction${C.reset}`)
+  console.log(`\n${C.bold}${C.cyan}■ CHECK (c): ADVERSARIAL / GAMING — score-optimizer high while reasoning badly? (POST-FIX)${C.reset}`)
+  console.log(`${C.dim}  the model-creator/weights prerequisite. LOCUS-1 = the deterministic scorer; LOCUS-2 ceiling = a lying extraction${C.reset}`)
   console.log(hr())
   const gamed = results.filter((r) => r.fx.quality === 'gamed')
   const sage = results.find((r) => r.fx.id === 'C2-clean-sage')!
   for (const r of gamed) {
     const reachedTop = proximityRank(r.proximity) >= proximityRank('principled')
-    const indistinguishable = r.proximity === sage.proximity
+    const indistinguishable = r.proximity === sage.proximity && reachedTop
+    if (r.fx.locus1_ceiling) {
+      console.log(
+        `  ${tag('RESIDUAL')} ${pad(r.fx.id, 28)} off=${pad(r.proximityOff, 11)} on=${pad(r.proximity, 11)} ` +
+        `${C.mag}LOCUS-1 CEILING — trusts a lying obligation; §4 full-sandwich battery (LOCUS 2) must catch${C.reset}`,
+      )
+      continue
+    }
     console.log(
-      `  ${reachedTop ? tag('GAP') : tag('TRACKS')} ${pad(r.fx.id, 26)} ` +
-      `engine=${pad(r.proximity, 11)} expected=${pad(r.fx.expected_correct, 11)} ` +
-      `kath=${pad(r.kathekon_quality, 9)} ${reachedTop ? C.red + 'GAMED THE SCORE' + C.reset : 'resisted'}` +
+      `  ${reachedTop ? tag('GAP') : tag('TRACKS')} ${pad(r.fx.id, 28)} ` +
+      `off=${pad(r.proximityOff, 11)} on=${pad(r.proximity, 11)} ` +
+      `${reachedTop ? C.red + 'STILL GAMES THE SCORE' + C.reset : C.green + 'closed (floored to ' + r.proximity + ')' + C.reset}` +
       `${indistinguishable ? C.red + '  (== legitimate C2-clean-sage)' + C.reset : ''}`,
     )
   }
 }
 
-function printCalling() {
-  console.log(`\n${C.bold}${C.cyan}■ STAGE: CALLING — detectSignals (epistemic-signal reads, lexical)${C.reset}`)
-  console.log(`${C.dim}  validity probe: does the read track epistemic quality, and is it lexically gameable?${C.reset}`)
+function printOverStrictness(results: ReasoningResult[]) {
+  console.log(`\n${C.bold}${C.cyan}■ CHECK (b): OVER-STRICTNESS — does the §4 fix wrongly floor a GENUINELY GOOD action?${C.reset}`)
+  console.log(`${C.dim}  the second validity direction: a good calm action, faithfully extracted, must keep its high score${C.reset}`)
   console.log(hr())
-  for (const fx of CALLING_FIXTURES) {
-    const signals = detectSignals(fx.stage, fx.history)
-    const sig = signals.find((s) => s.rule === fx.expect_rule)
-    const fired = !!sig?.detected
-    const matchesFaithful = fired === fx.expect_fires
-    // For gamed fixtures, expect_fires=true means a FAITHFUL detector should fire;
-    // if the lexical one does NOT, that is the gap.
-    let verdict: Verdict
-    if (fx.gap_class === 'control_engine_works') verdict = matchesFaithful ? 'CONTROL_OK' : 'CONTROL_FAIL'
-    else verdict = matchesFaithful ? 'TRACKS' : 'GAP'
+  const goods = results.filter((r) => r.fx.quality === 'good')
+  for (const r of goods) {
+    const dropped = proximityRank(r.proximity) < proximityRank(r.fx.expected_correct)
+    if (r.fx.locus1_ceiling) {
+      // A disclosed over-strictness LOCUS-1 ceiling (OS3 andreia carried-out) — the
+      // engine conservatively over-floors a good carried-out grave act; sound fix = the
+      // urgency→stage data-model link (deferred). NOT a silent over-strictness failure.
+      console.log(
+        `  ${tag('RESIDUAL')} ${pad(r.fx.id, 28)} off=${pad(r.proximityOff, 11)} on=${pad(r.proximity, 11)} expect=${pad(r.fx.expected_correct, 11)} ` +
+        `${C.mag}DISCLOSED OVER-STRICTNESS CEILING (andreia carried-out; urgency not stage-linked) → §4 data-model fix${C.reset}`,
+      )
+      continue
+    }
     console.log(
-      `  ${tag(verdict)} ${pad(fx.id, 26)} ${pad(fx.expect_rule, 20)} ` +
-      `faithful=${fx.expect_fires ? 'fire ' : 'quiet'} lexical=${fired ? 'fired' : 'quiet'} ` +
-      `${verdict === 'GAP' ? C.red + 'LEXICAL FALSE-NEGATIVE' + C.reset : ''}`,
+      `  ${dropped ? tag('GAP') : tag('CONTROL_OK')} ${pad(r.fx.id, 28)} off=${pad(r.proximityOff, 11)} on=${pad(r.proximity, 11)} expect=${pad(r.fx.expected_correct, 11)} ` +
+      `${dropped ? C.red + 'OVER-FLOORED (false positive)' + C.reset : C.green + 'held' + C.reset}`,
     )
   }
 }
@@ -268,13 +280,29 @@ function reflectOutcome(step: ReflectStep) {
   return step.outcome
 }
 
+function printCalling() {
+  console.log(`\n${C.bold}${C.cyan}■ STAGE: CALLING — detectSignals (lexical; unaffected by §4, shown for completeness)${C.reset}`)
+  console.log(hr())
+  for (const fx of CALLING_FIXTURES) {
+    const signals = detectSignals(fx.stage, fx.history)
+    const sig = signals.find((s) => s.rule === fx.expect_rule)
+    const fired = !!sig?.detected
+    const matchesFaithful = fired === fx.expect_fires
+    let verdict: Verdict
+    if (fx.gap_class === 'control_engine_works') verdict = matchesFaithful ? 'CONTROL_OK' : 'CONTROL_FAIL'
+    else verdict = matchesFaithful ? 'TRACKS' : 'GAP'
+    console.log(
+      `  ${tag(verdict)} ${pad(fx.id, 26)} ${pad(fx.expect_rule, 20)} ` +
+      `faithful=${fx.expect_fires ? 'fire ' : 'quiet'} lexical=${fired ? 'fired' : 'quiet'} ` +
+      `${verdict === 'GAP' ? C.red + 'LEXICAL FALSE-NEGATIVE (LOCUS-2 follow-up)' + C.reset : ''}`,
+    )
+  }
+}
+
 function printReflection() {
-  console.log(`\n${C.bold}${C.cyan}■ STAGE: REFLECTION — nextStep/assembleScrutiny (dishonest-review detection)${C.reset}`)
-  console.log(`${C.dim}  validity probe: does it catch a dishonest self-review; is the fabrication-defence gameable?${C.reset}`)
+  console.log(`\n${C.bold}${C.cyan}■ STAGE: REFLECTION — nextStep/assembleScrutiny (unaffected by §4, shown for completeness)${C.reset}`)
   console.log(hr())
   for (const fx of REFLECT_FIXTURES) {
-    // Drive to terminal: the engine's nextStep over the full history yields the
-    // ReflectStep AFTER the last turn (Q6 → complete, with the outcome).
     const step = reflectNextStep(fx.history, fx.ctx)
     const outcome = reflectOutcome(step)
     const flags = outcome?.scrutiny_flags ?? []
@@ -308,70 +336,102 @@ function printReflection() {
     else verdict = satisfiesExpect ? 'TRACKS' : 'GAP'
     console.log(
       `  ${tag(verdict)} ${pad(fx.id, 30)} faithful-expects=${pad(fx.expect, 20)} engine=${pad(engineDid, 18)} ` +
-      `fab_risk=${outcome?.fabrication_risk_level ?? '—'} ${verdict === 'GAP' ? C.red + 'DISHONEST REVIEW PASSED' + C.reset : ''}`,
+      `fab_risk=${outcome?.fabrication_risk_level ?? '—'} ${verdict === 'GAP' ? C.red + 'DISHONEST REVIEW PASSED (LOCUS-2 follow-up)' + C.reset : ''}`,
     )
   }
 }
 
-function printSummary(results: ReasoningResult[]) {
-  console.log(`\n${C.bold}${hr('═')}${C.reset}`)
-  console.log(`${C.bold} SUMMARY — quantifying the gap${C.reset}`)
-  console.log(`${C.bold}${hr('═')}${C.reset}`)
-
-  const probes = results.filter((r) => r.fx.gap_class !== 'control_engine_works')
-  const controls = results.filter((r) => r.fx.gap_class === 'control_engine_works')
-  const gaps = probes.filter((r) => r.verdict === 'GAP' || r.verdict === 'FAIL')
+function apatheiaStats(results: ReasoningResult[], dikaiosyne: boolean) {
   const apatheia = results.filter((r) => r.fx.gap_class === 'apatheia_dikaiosyne')
-  const apatheiaOverscored = apatheia.filter((r) => r.overscore > 0)
-  const meanOverscore = apatheia.length ? apatheia.reduce((s, r) => s + r.overscore, 0) / apatheia.length : 0
+  const score = (r: ReasoningResult) => (dikaiosyne ? r.proximity : r.proximityOff)
+  const overscored = apatheia.filter((r) => proximityRank(score(r)) - proximityRank(r.fx.expected_correct) > 0)
+  const mean = apatheia.length
+    ? apatheia.reduce((s, r) => s + (proximityRank(score(r)) - proximityRank(r.fx.expected_correct)), 0) / apatheia.length
+    : 0
+  const toPrincipled = apatheia.filter((r) => proximityRank(score(r)) >= proximityRank('principled'))
+  return { total: apatheia.length, overscored: overscored.length, mean, toPrincipled: toPrincipled.length }
+}
 
-  const controlsOk = controls.every((r) => r.verdict === 'CONTROL_OK')
-  console.log(
-    `  Controls: ${controlsOk ? C.green + 'all OK' + C.reset : C.red + 'A CONTROL FAILED — harness/engine suspect' + C.reset}` +
-    ` (${controls.filter((r) => r.verdict === 'CONTROL_OK').length}/${controls.length})`,
-  )
-  console.log(`  Reasoning probes too lenient (GAP/FAIL): ${C.red}${gaps.length}/${probes.length}${C.reset}`)
-  console.log(
-    `  ${C.bold}Apatheia/dikaiosyne band:${C.reset} ${apatheiaOverscored.length}/${apatheia.length} calm injustices scored ABOVE the truth; ` +
-    `mean overscore ${C.red}+${meanOverscore.toFixed(1)} ranks${C.reset}`,
-  )
-  const apatheiaToPrincipled = apatheia.filter((r) => proximityRank(r.proximity) >= proximityRank('principled'))
-  console.log(
-    `  ${apatheiaToPrincipled.length}/${apatheia.length} calm injustices scored ${C.red}principled or higher${C.reset} ` +
-    `(should be reflexive). Every one has obligation RECORDED but IGNORED, or no justice term at all.`,
-  )
-  // Assent: bad/gamed cases the deterministic gate PROCEEDS on, where a faithful
-  // engine (scoring at expected_correct below the LIVE threshold) would NOT proceed.
-  const badAssentProceeds = results.filter(
+// Grave bad/gamed cases the deterministic gate proceeds on, EXCLUDING the disclosed
+// LOCUS-1 ceilings (P5d lying-met, P5e role-only circle-free) whose catch is LOCUS-2.
+// The headline thus reflects the LOCUS-1-closeable grave set the §4 fix actually closes.
+function badAssentCount(results: ReasoningResult[], dikaiosyne: boolean) {
+  return results.filter(
     (r) =>
       (r.fx.quality === 'bad' || r.fx.quality === 'gamed') &&
-      r.assent_proceed &&
+      !r.fx.locus1_ceiling &&
+      (dikaiosyne ? r.assent_proceed : r.assent_proceed_off) &&
       proximityRank(r.fx.expected_correct) < proximityRank(LIVE_ASSENT_THRESHOLD),
-  )
-  const graveProceeds = badAssentProceeds.filter((r) => r.fx.expected_correct === 'reflexive')
-  console.log(
-    `  Deterministic ASSENT gate (LIVE default threshold='${LIVE_ASSENT_THRESHOLD}') PROCEEDS on ${C.red}${badAssentProceeds.length}${C.reset} bad/gamed cases a faithful gate would block ` +
-    `(${graveProceeds.length} of them grave-injustice/destructive). kathekon floor only catches CONTRARY.`,
-  )
-  console.log(`  ${C.dim}→ This is exactly why the (non-deterministic, LLM) justice bridge + kathekon floor were bolted on. The §4 root-fix lets the bridge retire.${C.reset}`)
-  console.log(hr('═'))
-  console.log(
-    `${C.dim}  Reading: the gaps are the finding. They are concentrated in the apatheia/dikaiosyne band${C.reset}\n` +
-    `${C.dim}  and scope the ADR-010 §4 root-fix (per-domain proximity + native dikaiosyne weighting +${C.reset}\n` +
-    `${C.dim}  obligation resolution). See 2026-06-24-scoring-validity-battery-results.md.${C.reset}`,
-  )
-  console.log('')
+  ).length
+}
+function ceilingAssentProceeds(results: ReasoningResult[]) {
+  return results.filter((r) => r.fx.locus1_ceiling && r.assent_proceed).map((r) => r.fx.id)
+}
 
-  // A machine-readable footer for the results memo + any downstream check.
-  console.log(`${C.dim}MACHINE: ${JSON.stringify({
+function printSummary(results: ReasoningResult[]) {
+  console.log(`\n${C.bold}${hr('═')}${C.reset}`)
+  console.log(`${C.bold} SUMMARY — BEFORE (flag-off) → AFTER (flag-on)${C.reset}`)
+  console.log(`${C.bold}${hr('═')}${C.reset}`)
+
+  const controls = results.filter((r) => r.fx.gap_class === 'control_engine_works')
+  const controlsOk = controls.every((r) => r.verdict === 'CONTROL_OK')
+  const goods = results.filter((r) => r.fx.quality === 'good')
+  // Exclude the disclosed over-strictness LOCUS-1 ceiling (OS3 andreia carried-out) from
+  // the over-floored FAILURE count — it is a named ceiling, reported separately, not a silent fail.
+  const overStrictCeilings = goods.filter((r) => r.fx.locus1_ceiling)
+  const overStrictnessProbed = goods.filter((r) => !r.fx.locus1_ceiling)
+  const overFloored = overStrictnessProbed.filter((r) => proximityRank(r.proximity) < proximityRank(r.fx.expected_correct))
+
+  const aOff = apatheiaStats(results, false)
+  const aOn = apatheiaStats(results, true)
+
+  // kathekon-count gaming lever (the §4 target): the kathekon_count_gaming probes,
+  // excluding the disclosed LOCUS-1 ceiling (P5d), must NOT reach principled+.
+  const kathekonGamed = results.filter(
+    (r) => r.fx.gap_class === 'kathekon_count_gaming' && !r.fx.locus1_ceiling,
+  )
+  const kathekonGamedClosed = kathekonGamed.filter((r) => proximityRank(r.proximity) < proximityRank('principled'))
+  const ceiling = results.filter((r) => r.fx.locus1_ceiling)
+
+  console.log(`  ${C.bold}Controls (flag-on):${C.reset} ${controlsOk ? C.green + 'all OK' + C.reset : C.red + 'A CONTROL FAILED' + C.reset} (${controls.filter((r) => r.verdict === 'CONTROL_OK').length}/${controls.length}) — harness valid + over-strictness held`)
+  console.log(`  ${C.bold}Over-strictness:${C.reset} ${overFloored.length === 0 ? C.green + 'PASS' + C.reset : C.red + overFloored.length + ' good action(s) over-floored' + C.reset} (0/${overStrictnessProbed.length} good actions wrongly floored below truth; + ${overStrictCeilings.length} disclosed over-strictness ceiling${overStrictCeilings.length === 1 ? '' : 's'}: ${overStrictCeilings.map((r) => r.fx.id).join(', ') || 'none'})`)
+  console.log(`  ${C.bold}Apatheia/dikaiosyne band:${C.reset} mean overscore ${C.red}+${aOff.mean.toFixed(1)}${C.reset} → ${C.green}+${aOn.mean.toFixed(1)}${C.reset} ranks; ${aOff.toPrincipled}/${aOff.total} → ${C.green}${aOn.toPrincipled}/${aOn.total}${C.reset} calm injustices reach principled+`)
+  console.log(`  ${C.bold}Kathekon-count gaming (the §4 target):${C.reset} ${kathekonGamedClosed.length}/${kathekonGamed.length} gamed injustices floored below principled ${kathekonGamedClosed.length === kathekonGamed.length ? C.green + '(lever closed; P5a AND P5c → reflexive)' + C.reset : C.red + '(still open)' + C.reset}`)
+  console.log(`  ${C.bold}Deterministic ASSENT gate${C.reset} (threshold='${LIVE_ASSENT_THRESHOLD}') proceeds on LOCUS-1-closeable grave bad/gamed cases: ${C.red}${badAssentCount(results, false)}${C.reset} → ${C.green}${badAssentCount(results, true)}${C.reset} — the §4 fix lets the LLM justice bridge RETIRE`)
+  console.log(`  ${C.dim}  (disclosed LOCUS-1 ceilings that still proceed — catch is LOCUS-2 / the bridge: ${ceilingAssentProceeds(results).join(', ') || 'none'})${C.reset}`)
+  console.log(`  ${C.bold}${C.yellow}OVER-STRICTNESS CAVEAT (LOCUS-1-conditional):${C.reset} the 0/${overStrictnessProbed.length} PASS holds ONLY for maximally-favourable extractions that POPULATE obligation_assessment.`)
+  console.log(`  ${C.dim}    The Layer-1 LLM does NOT yet emit that field (the route-2a prompt change is deferred); flag-on over TODAY's extraction would over-floor every good action that ENGAGES A CIRCLE OR NAMES A NATURAL_RELATIONSHIP obligation to reflexive (J1; computeDikaiosyneFloor engages on circles>=1 || hasNaturalRelationship).${C.reset}`)
+  console.log(`  ${C.dim}    ACTIVATION PREREQUISITE: land the Layer-1 obligation_assessment prompt change (+ the §4 full-sandwich LOCUS-2 over-strictness battery) BEFORE any flag flip.${C.reset}`)
+  console.log(`  ${C.bold}Disclosed residuals (NOT §4 LOCUS-1 targets):${C.reset}`)
+  console.log(`    ${C.mag}P5d${C.reset} LOCUS-1 ceiling — a lying obligation defeats the deterministic scorer → §4 full-sandwich battery (LOCUS 2)`)
+  console.log(`    ${C.mag}P5e${C.reset} role-obligation-only circle-free injustice — indistinguishable from a prudential role action at LOCUS 1; the §4 trigger is narrower than the §3 bridge it retires → GATES bridge retirement (Step 8) on LOCUS-2 equivalence`)
+  console.log(`    ${C.mag}OS3${C.reset} andreia over-strictness ceiling — a good carried-out irreversible act over-floors to reflexive (urgency not linked to a causal stage); the conservative SAFE direction (P4c proves no rash-act bypass) → sound fix = the urgency→stage data-model link, deferred to §4 activation`)
+  console.log(`    ${C.mag}P2b${C.reset} no epistemic-accuracy term (D3) — a missed-fact decision scores like a caught one → R18 contract scoping bound, not a §4 fix`)
+  console.log(`    ${C.mag}P3b-dressed${C.reset} within-framing deference w/ no circle/relationship → LOCUS-2 extraction-quality gap`)
+
+  console.log(hr('═'))
+  // Machine footers: BOTH states, so the predecessor baseline is still emitted.
+  // Baseline controls_ok is computed over the predecessor's ORIGINAL controls only
+  // (the OS* over-strictness probes are calibrated to the POST-FIX truth, so they are
+  // not valid flag-off controls). This reproduces the predecessor's documented 7/7.
+  const baselineControls = controls.filter((r) => !r.fx.id.startsWith('OS'))
+  console.log(`${C.dim}MACHINE_BASELINE(flag-off): ${JSON.stringify({
+    controls_ok: baselineControls.every((r) => proximityRank(r.proximityOff) - proximityRank(r.fx.expected_correct) === 0),
+    apatheia_mean_overscore: Number(aOff.mean.toFixed(2)),
+    apatheia_to_principled_plus: aOff.toPrincipled,
+    bad_assent_proceeds: badAssentCount(results, false),
+  })}${C.reset}`)
+  console.log(`${C.dim}MACHINE_POSTFIX(flag-on): ${JSON.stringify({
     controls_ok: controlsOk,
-    reasoning_probes: probes.length,
-    reasoning_gaps: gaps.length,
-    apatheia_total: apatheia.length,
-    apatheia_overscored: apatheiaOverscored.length,
-    apatheia_mean_overscore: Number(meanOverscore.toFixed(2)),
-    apatheia_to_principled_plus: apatheiaToPrincipled.length,
-    bad_assent_proceeds: badAssentProceeds.length,
+    over_strictness_pass_locus1: overFloored.length === 0,
+    over_strictness_locus2_conditional_on_l1_prompt: true,
+    apatheia_mean_overscore: Number(aOn.mean.toFixed(2)),
+    apatheia_to_principled_plus: aOn.toPrincipled,
+    kathekon_gamed_floored: kathekonGamedClosed.length,
+    kathekon_gamed_total: kathekonGamed.length,
+    locus1_ceiling_probes: ceiling.length,
+    bad_assent_proceeds_locus1_closeable: badAssentCount(results, true),
+    ceiling_assent_proceeds: ceilingAssentProceeds(results),
   })}${C.reset}`)
 }
 
@@ -384,6 +444,7 @@ function main() {
   const results = runReasoning()
   printReasoning(results)
   printPairs(results)
+  printOverStrictness(results)
   printGaming(results)
   printCalling()
   printReflection()

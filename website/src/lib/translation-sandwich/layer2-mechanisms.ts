@@ -49,6 +49,9 @@ import type {
   EupatheiaShape,
   // Added 2026-05-06 (M1-CP4e) — for §3.10 Tier 1 ELEMENT_FUSION detection
   ElementFusionDetected,
+  // Added 2026-06-25 (ADR-010 §4, 2a) — per-circle obligation assessment + courage signals
+  ObligationAssessment,
+  ObligationStatus,
 } from './layer1-extractor'
 
 // Re-export Layer 1 vocabularies that Layer 3 + harness will consume.
@@ -62,6 +65,9 @@ export type {
   AgentNamedPosition,
   // Added 2026-05-06 (M1-CP4e) — re-exported for orchestrator + harness consumption
   ElementFusionDetected,
+  // Added 2026-06-25 (ADR-010 §4, 2a)
+  ObligationAssessment,
+  ObligationStatus,
 }
 
 // ============================================================================
@@ -185,8 +191,20 @@ export interface OikeiosisCircleAssessment {
   honourability_grade: 1 | 2 | 3
   advantageousness_grade: 1 | 2 | 3
   cicero_verdict: CiceroVerdict
+  /** Legacy lexical obligation read (FULFILMENT/FAILURE language scan). Retained
+   *  for backward compatibility + display; NOT the §4 dikaiosyne resolution input. */
   obligation_met: boolean | null
   tension: string | null
+  /**
+   * ADR-010 §4 (2a) — the explicit per-circle obligation assessment from Layer 1,
+   * passed through so the dikaiosyne domain's resolution is VISIBLE + reproducible
+   * from the signed assessment (the bridge's contribution, now native). Present
+   * ONLY when SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED is on (the field is OMITTED
+   * entirely flag-off ⇒ canonical bytes byte-identical to pre-§4 — same pattern as
+   * Layer2Assessment.examination/distress_signal). null when Layer 1 supplied no
+   * assessment for this circle (unevaluated).
+   */
+  obligation_assessment?: ObligationAssessment | null
 }
 
 export interface Oikeiosis {
@@ -407,6 +425,27 @@ export interface Layer2Assessment {
     depth_tier?: string
     prior_feedback_ref?: string
   }
+  /**
+   * Added 2026-06-25 (ADR-010 §4 root correction — native dikaiosyne weighting).
+   * The per-domain proximity breakdown + the floors the unity-thesis minimum rule
+   * applied to produce katorthoma_proximity. Present ONLY when
+   * SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED is on (OMITTED entirely flag-off ⇒
+   * canonical signing bytes byte-identical to pre-§4 — the established optional-field
+   * pattern). Makes the aggregate REPRODUCIBLE from the signed assessment (base +
+   * recorded floors → min) and DIAGNOSTIC (`basis` names which domain floored and
+   * why — closing the worse-scores-worse "record does not name the fault" gap).
+   *
+   * `base` = the pre-§4 (apatheia) reading; the engaged-domain floors lower it via
+   * the KP-04 weakest-link rule. `aggregate` === katorthoma_proximity.
+   */
+  proximity_floors?: {
+    base: KatorthomaProximity
+    dikaiosyne: KatorthomaProximity | null
+    andreia: KatorthomaProximity | null
+    sophrosyne: KatorthomaProximity | null
+    aggregate: KatorthomaProximity
+    basis: string
+  }
 }
 
 // ============================================================================
@@ -425,6 +464,19 @@ export interface ApplyOptions {
    * ELEMENT_FUSION is suppressed upstream in detectTier1Trigger (Layer 1).
    */
   suppressTrigger?: Tier1TriggerCode
+  /**
+   * ADR-010 §4 root correction (2026-06-25). When true, computeProximity applies
+   * the native dikaiosyne/andreia/sophrosyne domain floors (the KP-04 minimum-domain
+   * rule) and assessOikeiosis surfaces the per-circle obligation_assessment; the
+   * Layer2Assessment gains the flag-on optional fields (proximity_floors +
+   * oikeiosis.relevant_circles[].obligation_assessment). When UNDEFINED, the value
+   * defaults to the env flag SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED === 'true' so a
+   * single Vercel flip activates the shared engine for every consumer without
+   * touching call sites; tests/the battery pass an explicit boolean for
+   * env-independent determinism. false / unset ⇒ computeProximity + the assessment
+   * shape are byte-identical to pre-§4 (test-asserted).
+   */
+  dikaiosyneWeighting?: boolean
 }
 
 // ============================================================================
@@ -940,7 +992,11 @@ function bumpGrade(g: 1 | 2 | 3): 1 | 2 | 3 {
 function assessOikeiosis(
   circles: OikeiosisCircleEngaged[],
   kathekonFactors: KathekonFactor[],
-  indifferents: ValueCategoryAtStake[]
+  indifferents: ValueCategoryAtStake[],
+  // ADR-010 §4 (2a). When true, the per-circle obligation_assessment from Layer 1
+  // is surfaced on each OikeiosisCircleAssessment so the dikaiosyne resolution is
+  // visible + reproducible. Default false ⇒ field OMITTED ⇒ byte-identical.
+  dikaiosyne = false
 ): Oikeiosis {
   const hasNaturalRelationship = kathekonFactors.some(
     (f) => f.factor_type === 'natural_relationship'
@@ -958,7 +1014,7 @@ function assessOikeiosis(
     if (hasRoleObligation) h = bumpGrade(h)
     if (hasHighAxia) a = bumpGrade(a)
 
-    assessments.push({
+    const assessment: OikeiosisCircleAssessment = {
       stage: CIRCLE_STAGE_NUMBER[ce.circle],
       circle: ce.circle,
       description: ce.evidence,
@@ -967,7 +1023,13 @@ function assessOikeiosis(
       cicero_verdict: ciceroResolve(h, a),
       obligation_met: computeObligationMet(ce),
       tension: computeTension(ce, circles),
-    })
+    }
+    // Flag-on only: attach the explicit obligation assessment (null when Layer 1
+    // supplied none). Flag-off ⇒ the key is never added ⇒ byte-identical.
+    if (dikaiosyne) {
+      assessment.obligation_assessment = ce.obligation_assessment ?? null
+    }
+    assessments.push(assessment)
   }
 
   // Stable sort by stage ascending (no ties of stage because each circle is
@@ -1248,12 +1310,53 @@ function assessIterativeRefinement(
 // DERIVED FIELDS — proximity (per ADR-006 §3.7.1)
 // ============================================================================
 
-function computeProximity(
+// ============================================================================
+// ADR-010 §4 ROOT CORRECTION — native dikaiosyne weighting (per-domain proximity
+// + the KP-04 unity-thesis minimum rule). Closes the apatheia-not-dikaiosyne gap:
+// a calmly-reasoned injustice can no longer score above its weakest virtue domain.
+// Built per `operations/benchmarks/sage-practice-v1/2026-06-24-adr010-section4-
+// engine-fix-scope.md`; the mentor record `…/2026-06-19-mentor-consultation-
+// guardrail-fidelity.md` is the reasoning. Flag-gated (default off ⇒ byte-identical);
+// activation is a founder-walked 0c-ii. When this floors natively, the guardrail
+// justice bridge (guardrail-sandwich.ts) retires (ADR-010 §3 expiry).
+// ============================================================================
+
+/** Env default for the §4 per-domain dikaiosyne weighting. Read ONLY when the
+ *  caller passes no explicit ApplyOptions.dikaiosyneWeighting, so a single Vercel
+ *  flip activates the shared engine for every consumer without touching call sites;
+ *  tests + the battery pass an explicit boolean for env-independent determinism.
+ *  Flag-off (unset / not exactly 'true') ⇒ computeProximity + the assessment shape
+ *  are byte-identical to pre-§4 (test-asserted). */
+export function isProximityDikaiosyneEnabled(): boolean {
+  return process.env.SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED === 'true'
+}
+
+const PROXIMITY_RANK: Record<KatorthomaProximity, number> = {
+  reflexive: 0,
+  habitual: 1,
+  deliberate: 2,
+  principled: 3,
+  sage_like: 4,
+}
+
+/** Weakest-link (lowest rank) over a non-empty set — the KP-04 unity-thesis fold.
+ *  Mirrors the proximity-domains.ts `weakest()` PATTERN (re-implemented locally
+ *  over the substrate's KatorthomaProximity rather than importing the trust-layer
+ *  type across the tsconfig boundary). */
+function weakestProximity(levels: KatorthomaProximity[]): KatorthomaProximity {
+  return levels.reduce((lo, l) => (PROXIMITY_RANK[l] < PROXIMITY_RANK[lo] ? l : lo))
+}
+
+/** The pre-§4 (apatheia) proximity reading — the EXACT legacy 5-branch logic, with
+ *  hasDeliberation passed explicitly so the flag-on path can supply the D4-corrected
+ *  (filler-excluded) signal. Called with hasDeliberation = oik.deliberation_notes.length>0
+ *  it is byte-identical to the pre-§4 computeProximity. */
+function computeProximityBase(
   passions: PassionDiagnosis,
   cf: ControlFilter,
-  oik: Oikeiosis,
   va: ValueAssessment,
-  kathekon: KathekonAssessment
+  kathekon: KathekonAssessment,
+  hasDeliberation: boolean
 ): KatorthomaProximity {
   const passionCount = passions.passions_detected.length
   const lateStage = passions.passions_detected.some(
@@ -1263,7 +1366,6 @@ function computeProximity(
   const within = cf.within_prohairesis.length
   const outside = cf.outside_prohairesis.length
   const valueErrors = va.indifferents_at_stake.filter((i) => i.error !== null).length
-  const hasDeliberation = oik.deliberation_notes.length > 0
 
   // sage_like
   if (
@@ -1304,6 +1406,214 @@ function computeProximity(
   }
 
   return 'deliberate'
+}
+
+/** D4 fix (flag-on): genuine deliberation = a SUBSTANTIVE oikeiosis note — a
+ *  cross-circle tension or a balanced Cicero verdict — NOT the "No circles engaged
+ *  in this snapshot" filler that the legacy proxy (deliberation_notes.length>0)
+ *  counted, which floated an impulsive no-circle praxis action up from reflexive.
+ *  Narrow by design: only the proximity computation reads this; ruling_faculty_state
+ *  is untouched this session (the broader proxy re-examination is a named follow-up). */
+function hasGenuineDeliberation(oik: Oikeiosis): boolean {
+  return oik.relevant_circles.some(
+    (c) => c.tension !== null || c.cicero_verdict === 'balanced_neither_decisive'
+  )
+}
+
+/** dikaiosyne resolution for a single circle's obligation. Resolves the CONSEQUENCE
+ *  of the mentor's J1/J2/J3 from the route-2a extraction's reported status; the
+ *  mentor's deterministic J3 DETECTION ("the engine must detect a preferred
+ *  indifferent pursued at the cost of an obligation to another") is intentionally
+ *  deferred to the Layer-1 extraction (LOCUS 2) under route 2a — `case 'violated'`
+ *  here is the extraction's REPORTED violation, not an engine-side value-error scan. */
+function obligationToProximity(oa: ObligationAssessment | null): KatorthomaProximity {
+  if (!oa) return 'reflexive' // J1: an unevaluated obligation reads reflexive (not a penalty — an accurate reading)
+  switch (oa.status) {
+    case 'violated':
+      return 'reflexive' // J3 (consequence of an extraction-reported violation)
+    case 'indeterminate':
+      // J2: indeterminate must be ARGUED, not defaulted — an argued indeterminate
+      // caps dikaiosyne at deliberate; an empty justification is treated as unevaluated.
+      return oa.justification.trim().length > 0 ? 'deliberate' : 'reflexive'
+    case 'met':
+      // An argued met removes the dikaiosyne floor (top sentinel ⇒ the min-fold is set
+      // by the other domains); an unargued "met" is treated as unevaluated (gameable-floor guard).
+      return oa.justification.trim().length > 0 ? 'sage_like' : 'reflexive'
+  }
+}
+
+/** dikaiosyne domain proximity (Change 2 / 2a). null ⇒ not engaged (no constraint).
+ *  Engaged when a circle is surfaced OR a natural_relationship obligation is claimed.
+ *  A relationship claimed with NO identified party is an unresolved justice domain →
+ *  reflexive (this is what catches the circle-free gamed injustice that is otherwise
+ *  identical to the legitimate sage at Layer 2). */
+function computeDikaiosyneFloor(
+  circles: OikeiosisCircleAssessment[],
+  hasNaturalRelationship: boolean
+): KatorthomaProximity | null {
+  const engaged = circles.length >= 1 || hasNaturalRelationship
+  if (!engaged) return null
+  if (circles.length === 0) return 'reflexive' // unidentified affected party ⇒ obligation necessarily unresolved
+  return weakestProximity(
+    circles.map((c) => obligationToProximity(c.obligation_assessment ?? null))
+  )
+}
+
+/** andreia domain proximity (Change 1; closes D5). null ⇒ not engaged. A genuinely
+ *  grave / irreversible action CARRIED OUT (a praxis-stage action) — or a fear-passion
+ *  acted on — is deficient courage (rashness) → reflexive. A grave step WITHHELD (no
+ *  praxis stage) ⇒ courage exercised ⇒ no floor.
+ *
+ *  CONSERVATIVE LOCUS-1 reading (the honest limit). `urgency_indicators` are NOT
+ *  linked to a causal stage in the data model, so the engine cannot tell, at LOCUS 1,
+ *  WHETHER the carried-out praxis is the grave act, nor whether the irreversibility was
+ *  "treated as decisive" (examined before acting). The two failure modes are symmetric
+ *  and both stem from that one gap:
+ *    - an UNDER-strictness bypass — gating on "any synkatathesis stage present" lets a
+ *      rash destructive act through whenever an UNRELATED synkatathesis is extracted
+ *      (e.g. "I considered a coffee first, then ran rm -rf"); a FAITHFUL extraction can
+ *      reach it, and it flips the assent gate to PROCEED. UNSAFE — rejected.
+ *    - an OVER-strictness ceiling — flooring any carried-out grave act over-floors a
+ *      genuinely-good, examined, necessary irreversible act (and a withheld grave step
+ *      accompanied by an unrelated benign praxis). SAFE direction — chosen.
+ *  We take the SAFE (conservative) reading: floor any carried-out grave act. The
+ *  over-floor of a good carried-out irreversible act is a DISCLOSED LOCUS-1 ceiling
+ *  (battery OS3; symmetric with the dikaiosyne P5d/P5e ceilings). The SOUND fix — bind
+ *  the urgency signal to its causal stage so the floor requires the GRAVE praxis itself
+ *  to be carried out un-examined — is a data-model change deferred to the §4 activation /
+ *  LOCUS-2 work (alongside the Layer-1 prompt change). (Adversarial-review folds
+ *  2026-06-25: the first review flagged the over-floor; the examination-gate fix for it
+ *  introduced the under-strictness bypass; the fold-verification caught the bypass; this
+ *  is the reverted safe baseline + the disclosed ceiling.) */
+function computeAndreiaFloor(
+  passions: PassionDiagnosis,
+  urgency: UrgencyIndicator[],
+  stages: CausalStageEvidence[]
+): KatorthomaProximity | null {
+  const hasGrave = urgency.some(
+    (u) => u.signal_type === 'irreversibility_language' || u.signal_type === 'finality_language'
+  )
+  const hasPhobos = passions.passions_detected.some((p) => p.root_passion === 'phobos')
+  if (!hasGrave && !hasPhobos) return null
+  const actedAtPraxis = stages.some((s) => s.stage === 'praxis')
+  const phobosActed = passions.passions_detected.some(
+    (p) =>
+      p.root_passion === 'phobos' &&
+      (p.causal_stage_affected === 'praxis' || p.causal_stage_affected === 'horme')
+  )
+  // Conservative: any grave/irreversible act carried out at praxis → reflexive (no
+  // synkatathesis escape — that would let a rash act bypass via an unrelated pause).
+  if (hasGrave && actedAtPraxis) return 'reflexive'
+  if (phobosActed) return 'reflexive' // acted from fear
+  return null // grave step withheld (no praxis) → courage exercised
+}
+
+/** sophrosyne domain proximity (Change 1). null ⇒ not engaged. A disordered impulse
+ *  (epithumia/hedone) acted out at horme/praxis is intemperance → reflexive. An
+ *  impulse examined before acting ⇒ no floor. */
+function computeSophrosyneFloor(passions: PassionDiagnosis): KatorthomaProximity | null {
+  const detected = passions.passions_detected.filter(
+    (p) => p.root_passion === 'epithumia' || p.root_passion === 'hedone'
+  )
+  if (detected.length === 0) return null
+  const acted = detected.some(
+    (p) => p.causal_stage_affected === 'praxis' || p.causal_stage_affected === 'horme'
+  )
+  return acted ? 'reflexive' : null
+}
+
+export interface ProximityFloors {
+  base: KatorthomaProximity
+  dikaiosyne: KatorthomaProximity | null
+  andreia: KatorthomaProximity | null
+  sophrosyne: KatorthomaProximity | null
+  aggregate: KatorthomaProximity
+  basis: string
+}
+
+function describeProximityBasis(
+  base: KatorthomaProximity,
+  floors: {
+    dikaiosyne: KatorthomaProximity | null
+    andreia: KatorthomaProximity | null
+    sophrosyne: KatorthomaProximity | null
+  },
+  aggregate: KatorthomaProximity
+): string {
+  const limiting: string[] = []
+  for (const [name, level] of [
+    ['dikaiosyne', floors.dikaiosyne],
+    ['andreia', floors.andreia],
+    ['sophrosyne', floors.sophrosyne],
+  ] as const) {
+    if (
+      level !== null &&
+      PROXIMITY_RANK[level] === PROXIMITY_RANK[aggregate] &&
+      PROXIMITY_RANK[level] < PROXIMITY_RANK[base]
+    ) {
+      limiting.push(`${name}=${level}`)
+    }
+  }
+  return limiting.length === 0
+    ? `aggregate set by the base (apatheia) reading '${base}'; no engaged virtue domain floored below it`
+    : `unity-thesis minimum: base '${base}' floored to '${aggregate}' by ${limiting.join(', ')}`
+}
+
+/**
+ * Aggregate katorthoma proximity. Flag-off ⇒ the pre-§4 base reading, byte-identical.
+ * Flag-on ⇒ the KP-04 unity-thesis minimum across the engaged virtue domains: the
+ * apatheia base is FLOORED by the dikaiosyne / andreia / sophrosyne domain readings
+ * (the min can only lower, never raise — strong domains do not compensate for a weak
+ * one). Returns the floors breakdown flag-on (for proximity_floors), null flag-off.
+ */
+function computeProximity(
+  passions: PassionDiagnosis,
+  cf: ControlFilter,
+  oik: Oikeiosis,
+  va: ValueAssessment,
+  kathekon: KathekonAssessment,
+  // ADR-010 §4 flag-on inputs (ignored flag-off):
+  kathekonFactors: KathekonFactor[],
+  urgency: UrgencyIndicator[],
+  stages: CausalStageEvidence[],
+  dikaiosyne: boolean
+): { proximity: KatorthomaProximity; floors: ProximityFloors | null } {
+  if (!dikaiosyne) {
+    const base = computeProximityBase(
+      passions,
+      cf,
+      va,
+      kathekon,
+      oik.deliberation_notes.length > 0
+    )
+    return { proximity: base, floors: null }
+  }
+
+  const base = computeProximityBase(passions, cf, va, kathekon, hasGenuineDeliberation(oik))
+  const hasNaturalRelationship = kathekonFactors.some(
+    (f) => f.factor_type === 'natural_relationship'
+  )
+  const dik = computeDikaiosyneFloor(oik.relevant_circles, hasNaturalRelationship)
+  const and = computeAndreiaFloor(passions, urgency, stages)
+  const sop = computeSophrosyneFloor(passions)
+
+  const engaged: KatorthomaProximity[] = [base]
+  if (dik !== null) engaged.push(dik)
+  if (and !== null) engaged.push(and)
+  if (sop !== null) engaged.push(sop)
+  const aggregate = weakestProximity(engaged)
+
+  return {
+    proximity: aggregate,
+    floors: {
+      base,
+      dikaiosyne: dik,
+      andreia: and,
+      sophrosyne: sop,
+      aggregate,
+      basis: describeProximityBasis(base, { dikaiosyne: dik, andreia: and, sophrosyne: sop }, aggregate),
+    },
+  }
 }
 
 // ============================================================================
@@ -2137,6 +2447,11 @@ export function applyMechanisms(
   schema: Layer1Schema,
   options?: ApplyOptions
 ): Layer2Assessment | Tier1ShortCircuit {
+  // ADR-010 §4 — resolve the dikaiosyne-weighting flag once. Explicit option wins;
+  // otherwise the env default (a single Vercel flip activates the shared engine).
+  // false ⇒ every §4 path is byte-identical to pre-§4 (test-asserted).
+  const dikaiosyne = options?.dikaiosyneWeighting ?? isProximityDikaiosyneEnabled()
+
   // Mechanism 1 — control filter
   const cf = classifyControlFilter(schema.control_filter_elements)
 
@@ -2157,11 +2472,12 @@ export function applyMechanisms(
     return { tier1_trigger: temporalTrigger }
   }
 
-  // Mechanism 3 — oikeiosis
+  // Mechanism 3 — oikeiosis (flag-on: surfaces per-circle obligation_assessment)
   const oik = assessOikeiosis(
     schema.oikeiosis_circles_engaged,
     schema.kathekon_factors,
-    schema.value_categories_at_stake
+    schema.value_categories_at_stake,
+    dikaiosyne
   )
 
   // Position 6 short-circuit (M1-CP4e) — SCOPE_AMBIGUITY
@@ -2203,8 +2519,19 @@ export function applyMechanisms(
     evidenceQuotes
   )
 
-  // Derived fields
-  const proximity = computeProximity(pd, cf, oik, va, kathekon)
+  // Derived fields — proximity (flag-on: per-domain minimum + the floors breakdown)
+  const proximityResult = computeProximity(
+    pd,
+    cf,
+    oik,
+    va,
+    kathekon,
+    schema.kathekon_factors,
+    schema.urgency_indicators,
+    schema.causal_stage_evidence,
+    dikaiosyne
+  )
+  const proximity = proximityResult.proximity
   const rulingFacultyState = computeRulingFacultyState(
     pd,
     schema.ambiguity_notes.length,
@@ -2239,7 +2566,7 @@ export function applyMechanisms(
   // Layer 2 ambiguity notes
   const layer2Ambiguity = composeLayer2AmbiguityNotes(cf, pd, irWithMotivation, kathekon)
 
-  return {
+  const assessment: Layer2Assessment = {
     version: 'layer2-assessment-v1',
     layer1_schema_version: 'layer1-schema-v1',
     passion_diagnosis: pd,
@@ -2258,6 +2585,15 @@ export function applyMechanisms(
     layer1_ambiguity_notes: schema.ambiguity_notes.slice(),
     layer2_ambiguity_notes: layer2Ambiguity,
   }
+
+  // ADR-010 §4 — flag-on only: attach the per-domain floors breakdown so the
+  // aggregate is reproducible-from-signed-assessment + diagnostic. OMITTED flag-off
+  // (proximityResult.floors === null) ⇒ canonical bytes byte-identical to pre-§4.
+  if (proximityResult.floors !== null) {
+    assessment.proximity_floors = proximityResult.floors
+  }
+
+  return assessment
 }
 
 // ============================================================================
