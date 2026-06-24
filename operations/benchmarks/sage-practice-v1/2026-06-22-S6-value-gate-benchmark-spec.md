@@ -7,6 +7,22 @@
 
 ---
 
+> ## ── 2026-06-24 FRAMING ADDENDUM (read first) ──
+> **This spec's primary axis — decision-change (`binding − bare`, M1–M4) — is RECHARACTERISED per ADR-012** (`adopted/adr/2026-06-24-sage-practice-measurement-instrument-reframe.md`; decision-log `D-SAGE-PRACTICE-REFRAME-MEASUREMENT-INSTRUMENT-AND-S6-RECHARACTERISED`).
+>
+> The Phase-2 freeze pre-tests found the borderline **pressure-quarantine decision-value lever empty across two counterable levers** (authority/identity + sunk-cost; **16 bare runs, 0 yields**) — capable agents, down to Haiku 4.5, quarantine pressure unaided, so the advisory adds no observable decision-change. Under the adopted reframe that is a **measurement success, not a null**: Sage practice is a **four-stage measurement instrument** (calling / reasoning / assent / reflection) whose value is a per-decision **profile**, not decision-change. (Decision-change is *logos-mode*'s property — forcing alignment — a separate, future toggle.)
+>
+> **Consequences for this runbook:**
+> - The **`bare/advisory/binding × decision-quality` matrix is DEFERRED** (it measures logos/enforcement value with practice/advisory mechanics).
+> - The **scenario set (§2 + the `scenario/` dirs) and the capability axis (§1.1) SURVIVE as VALIDITY PROBES** — repurposed to test whether the *scoring* faithfully tracks decision quality (does a *worse* decision score *worse*?), not whether the advisory changes decisions.
+> - **M5 (trust-record materialisation, §4.1) is PROMOTED** from a split side-metric to the primary, capability-independent claim.
+> - The next work is a **scoring-validity battery** (worse-scores-worse aimed at the apatheia/dikaiosyne gap; across all four stages; **adversarial gaming-robustness**), gated on / feeding the **ADR-010 §4** engine root-fix (now *enabling work*, not cleanup).
+>
+> **Everything below is retained** as the historical decision-change design *and* the still-valid scenario-authoring discipline + freeze-guard method. The §2.4 guards, the §2.6 quarantine rubric, and the scenario packages remain correct as authored — **only their *role* changes** (validity probes, not arms in a decision-change matrix).
+> ## ── end addendum ──
+
+---
+
 ## §0 — Why this benchmark, and why on the right axis
 
 Every prior Sage-practice run was **Opus 4.8 at max reasoning on a stark scenario** (the Meridian brief, whose call is settled by one or two *dispositive checkable facts* — a US-residency breach of an EU commitment for ~35% of ARR; a $40k arithmetic omission). On that single combination the harness **fires the practice at every loop stage but changes nothing** — a frontier model catches the planted facts unaided, so the practice confirms. **That is the correct, expected result, not a failure** (`runs/2026-06-21/leg-d-v6-bare/2026-06-22-rerun/assessment.md`).

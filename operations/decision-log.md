@@ -12580,3 +12580,80 @@ Expected: `61 passed, 0 failed`; `166 passed, 0 failed` + `RELEASE GATE: PASS �
 **Rules served:** R5, R10, R18, R18f, R20a, AC5, AC7, KG1, PR6, PR11, PR15, PR16, PR17, PR18.
 
 **Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-GATE1-FULLLOOP-CORRECTION-GATE-PHASE-S1S3-BUILT-S6-AUTHORED` (predecessor), `operations/benchmarks/sage-practice-v1/2026-06-22-S6-value-gate-benchmark-spec.md` (the runbook), `operations/benchmarks/sage-practice-v1/2026-06-23-S6-phase1-scenario-set-freeze-status.md`, `operations/benchmarks/sage-practice-v1/2026-06-23-S6-run-ledger.md`, `operations/handoffs/founder/2026-06-23-gate1-S6-phase1-CLOSE.md`, memory `gate1-harness-channel-law`, memory `gate1-smoke-guard-via-direct-probe`.
+
+---
+
+## 2026-06-24 — D-SAGE-PRACTICE-REFRAME-MEASUREMENT-INSTRUMENT-AND-S6-RECHARACTERISED
+
+**Decision:** Adopt the reframe of Sage practice as a **measurement instrument** (**ADR-012**, `adopted/adr/2026-06-24-sage-practice-measurement-instrument-reframe.md`): the practice is the full **four-stage Stoic cycle** (calling → reasoning → assent → reflection) whose value is a **per-decision character/reasoning PROFILE** (measure + feedback), **NOT** in-the-moment decision-change. Two modes map onto the ADR-011 channel law — **practice-mode = MEASURE** (examine + score + record; advisory; the record binds out-of-band) and **logos-mode = ENFORCE** (force the decision to align with the score; future). Three uses on the same instrument at escalating trust in the score — **developer-refine < logos-enforce < model-creator-refines-weights** — **all gated on the deterministic scoring engine's fidelity**, which is therefore the project's **critical path**; **ADR-010 §4 (the apatheia→dikaiosyne root fix) is reclassified from cleanup to enabling work.** The **S6 decision-change matrix is recharacterised** (the scenario set + capability axis survive as *validity probes*; M5 trust-record promoted to the primary claim); the next work is a **scoring-validity battery** (scoped next session). **No production change.**
+
+**Origin (this session — S6 Phase-2 freeze pre-tests):** the borderline **pressure-quarantine** decision-value lever read **empty across two counterable pressure levers** — authority/identity (`borderline-cal`/Cobalt) and a diagnostic **sunk-cost** (`sunkcost-cal`/Calder, authored this session out-of-repo): **16 bare runs (14 weak-tier proxy + 2 clean Opus-max), zero yields**, the sunk-cost runs naming the fallacy unprompted. Mechanism: the advisory frame's "surface + set aside the pressure" move is the *same* move a capable model already performs on *detectable* pressure → redundant; the only place an advisory could add decision-value is *sub-detection* pressure, untested + hard to construct. The subagent proxy was **bare-validated once** (Cobalt bare-Haiku matched the proxy). A contamination vector was caught (a repo-context Opus-max run recognised the benchmark → `g2-opusmax-r2` VOID; **clean-context protocol** noted for any future bare arm — run in an empty scratch project, no repo/benchmark visibility). Read as decision-change this is a null; the founder's reframe shows it is a **measurement success** — the instrument faithfully read high decision-quality, which is what a measurement instrument should do.
+
+**The four-stage sharpening (founder, this session):** the practice is not just the assent question — it is the whole Stoic toolset (calling/reasoning/assent/reflection). Calling + reflection are stages a capable agent does *not* reliably do unaided, so the practice genuinely *adds* there; and the borderline tests only exercised reasoning + assent on a memo, i.e. one quarter of the instrument. The model-creator/weights use was adopted as the highest-value (and most dangerous — Goodhart: a gameable virtue-scorer trains *serene fluent vice that scores as virtue*) rung of the ladder; **do not make the weights claim publicly until the adversarial bar is cleared** (pre-0h, nothing is claimed).
+
+**Files touched:**
+- `adopted/adr/2026-06-24-sage-practice-measurement-instrument-reframe.md` — **NEW ADR-012** (design-of-record).
+- `operations/benchmarks/sage-practice-v1/2026-06-22-S6-value-gate-benchmark-spec.md` — **framing note** at the top (matrix recharacterised → validity probes; M5 promoted; scenarios/guards retained as authored, only their *role* changes).
+- `operations/decision-log.md` — this entry.
+- (session-wrap) the close + the next-session prompt (scope + run the validity battery) + `CLAUDE.md` (PR18) + memory `sage-practice-measurement-instrument-reframe`.
+
+**Risk classification:** **Standard** under 0d-ii (documentation / decision-of-record; no code/schema/flag/perimeter/credential change). **AC7 NOT engaged.** PR6 NOT engaged. The session *opened* `code-critical` for a screening matrix that was **superseded before any critical action** — no mint, no Supabase/Vercel/git op, **production byte-equivalent to session open**.
+
+**Rollback:** `git revert` the capture commit (ADR-012 + this entry + the S6 framing note); nothing standing changes.
+
+**Verification (founder-performable):** read ADR-012 + this entry + the S6 framing note; confirm the four-stage framing, the practice/logos = measure/enforce mapping, the three-use ladder, and "engine fidelity is the critical path" match intent. No commands — documentation only.
+
+**Open questions / carried:**
+- **Next session:** scope + build/run the **scoring-validity battery** — (a) worse-scores-worse, aimed at the apatheia/dikaiosyne gap; (b) across all four stages; (c) adversarial gaming-robustness — repo-only at first; relate to / feed **ADR-010 §4**.
+- **After that:** the `sage-on`/`sage-off` → `practice-on`/`practice-off` rename (its own small step).
+- **Future, gated on a validated engine:** logos-mode (enforce) + the model-creator/weights signal (the latter also gated on the adversarial bar).
+- **Scratch teardown (close-time):** this session's diagnostic artifacts — `s6-phase2-scratch/` (the founder's bare-run files, in-repo, untracked) + the out-of-repo `…/PROJECTS/s6-phase2-scratch/sunkcost-cal/` — keep-as-diagnostic vs remove is a founder call; **do not commit the in-repo scratch.**
+
+**Rules served:** R0, R18, R18f, R19, AC8, PR16, PR18.
+
+**Status:** Adopted. Cross-references: `adopted/adr/2026-06-24-sage-practice-measurement-instrument-reframe.md` (ADR-012), `adopted/adr/2026-06-19-stoic-fidelity-dikaiosyne-weighting.md` (ADR-010 §4 — now enabling work), `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (ADR-011 — the channel law), `operations/benchmarks/sage-practice-v1/2026-06-22-S6-value-gate-benchmark-spec.md` (recharacterised), `D-SAGE-PRACTICE-GATE1-S6-PHASE1-SCENARIOS-AUTHORED-WRITE-PATH-PROVISIONED-PER-TIER-SMOKE-VERIFIED-THEN-TORN-DOWN` (predecessor), memory `sage-practice-measurement-instrument-reframe`, memory `gate1-harness-channel-law`, memory `deterministic-l2-measures-apatheia-not-dikaiosyne`.
+
+---
+
+## 2026-06-24 — D-SAGE-PRACTICE-SCORING-VALIDITY-BATTERY-BUILT-RUN-SECTION4-SCOPED
+
+**Decision:** Built + ran the **scoring-validity battery** — the engine-fidelity gate the ADR-012 reframe named as the critical path — and **scoped the ADR-010 §4 engine root-fix** as the carried `code-critical` successor. The battery is repo-only (`website/scripts/scoring-validity-battery.ts` + `…-fixtures.ts`): it drives the **deterministic Layer-2 scorer** (`applyMechanisms` → `computeProximity`) plus the calling + reflection engines on **hand-authored, faithful / maximally-favourable-to-the-engine** quality-graded fixtures, and "scores the scoring" against the three validity checks — (a) worse-scores-worse, (b) four-stage, (c) adversarial/gaming. **No engine change this session** (the §4 fix is its own future Critical session). **No production / schema / flag / credential change.**
+
+**Reasoning:** Per ADR-012 the profile claim (practice-mode), logos-mode, and the model-creator/weights signal all sit on the deterministic engine's validity, so the gate on the honest claim is "does a *worse* decision score *worse*." The battery quantifies the standing ADR-010 finding (apatheia ≠ dikaiosyne) and any others, and turns ADR-010 §4 from adopted-design into an actionable build spec. Expected to *fail* on the calm-injustice band — that failure is the measurement.
+
+**Findings (adversarially-reviewed final run; controls 7/7 OK — the harness is wired to the real engine):**
+- **D1 / headline — apatheia ≠ dikaiosyne:** 2/2 calm injustices scored `principled` (truth `reflexive`), **mean overscore +3.0 ranks**; `computeProximity` has no justice term and never reads the per-circle `obligation_met` that `assessOikeiosis` records. P1b reproduces ADR-010's first-hand U2 extraction on every load-bearing field.
+- **D2 — kathekon-count gaming:** 4/4 score-optimized artifacts reached `principled`+; **3 reached `sage_like`, indistinguishable from the legitimate C2-clean-sage**. P5c (victim *surfaced*) also → `sage_like`, proving the lever is the kathekon factor-type COUNT + within-framing + no-value-error, not victim-omission (the circle is never read). The model-creator/weights danger, demonstrated.
+- **D3 (scoping bound) — no epistemic-accuracy term:** caught-vs-missed dispositive fact score IDENTICALLY (`principled`). The engine measures reasoning temperament + justice structure, not factual correctness — a bound on the "decision quality" claim.
+- **D4 — `hasDeliberation` proxy unsound:** the `"No circles engaged"` empty-note sets `hasDeliberation=true`, blocking `reflexive`/`habitual`; an impulsive praxis action floats to `deliberate` (+2). Separable correctness bug.
+- **D5 — no courage/irreversibility term:** a calm destructive irreversible assent → `principled`; the deterministic assent gate (live `deliberate` threshold) **PROCEEDS on 5 grave cases** the LLM justice bridge + kathekon floor were bolted on to catch.
+- **Calling/Reflection:** 2 lexical false-negatives (marker-free over-claim; asserted-vs-evidenced independence); the reflection fabrication-defence is gameable by supplying any account (R4 passes).
+
+**Adversarial review:** a 10-agent workflow (`scoring-validity-adversarial-review`; 5 faithfulness + 4 claim-verifiers + 1 critic; ~1.5M subagent tokens) **independently reproduced the run + verified every claim against the source.** Verdict: the apatheia headline is **sound, code-grounded, not a strawman**. Three folds applied: added **P5c** (victim-surfaced) converting the strongest objection (P5a's +4 "inflated by omission") into a *stronger* finding (omission is score-irrelevant); switched the assent verdict to the **live `deliberate` default** (standing lesson `verdict-battery-test-the-default-threshold`); reclassified P4b out of the apatheia band (→ D5). Named residuals (not fixed): calling coverage thin (2 of 6 stages), over-strictness/false-positive direction unprobed, LOCUS-2 (extraction reliability) deferred to the §4 full-sandwich battery.
+
+**Files touched:**
+- `website/scripts/scoring-validity-fixtures.ts` — **NEW** the graded artifact set (Layer1Schema + calling + reflect fixtures, each with quality grade, expected-correct proximity, faithfulness note).
+- `website/scripts/scoring-validity-battery.ts` — **NEW** the runner + the three validity checks + the measurement report.
+- `operations/benchmarks/sage-practice-v1/2026-06-24-scoring-validity-battery-results.md` — **NEW** the results memo (quantified gaps + the adversarial-review fold + honest limits).
+- `operations/benchmarks/sage-practice-v1/2026-06-24-adr010-section4-engine-fix-scope.md` — **NEW** the §4 build spec (per-domain proximity + native dikaiosyne weighting + obligation resolution; Changes 1–3; the full-sandwich battery + the gaming-robustness bar).
+- `operations/decision-log.md` — this entry.
+- (session-wrap) the close + `CLAUDE.md` (PR18) + memory.
+
+**Risk classification:** **Elevated** under 0d-ii (`code-elevated` — repo-only test harness + synthetic fixtures against existing engine modules; no change to engine/route behaviour). **AC7 NOT engaged.** PR6 NOT engaged. No production / schema / flag / credential change; no live-fire, no mint. The two new files are scripts outside the Next build graph; `tsc` clean; the battery is pure-deterministic (no LLM, no env, no creds).
+
+**Rollback:** `git revert` the battery commit (the two scripts + the three docs); nothing prod/live, no flag/schema/credential.
+
+**Verification (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx scripts/scoring-validity-battery.ts
+```
+Expected: `Controls: all OK (7/7)`; the apatheia band reads `2/2 … mean overscore +3.0 ranks`; the `MACHINE:` footer `{"controls_ok":true,…,"apatheia_mean_overscore":3,…,"bad_assent_proceeds":5}`.
+
+**Open questions / carried:**
+- **Carried `code-critical` successor:** the **ADR-010 §4 engine root-fix** per `2026-06-24-adr010-section4-engine-fix-scope.md` — per-domain proximity + native dikaiosyne weighting + obligation resolution in `computeProximity`; shared `/api/reason` determinism → its own fixtures/idempotency + **full-sandwich verdict-equivalence battery (where LOCUS 2 is measured + the over-strictness direction added)** + adversarial review; retire the guardrail justice bridge when it lands. D4 (`hasDeliberation`) is a separable low-risk first slice.
+- **After §4 + the gaming-robustness bar:** the `sage-on`/`sage-off` → `practice-on`/`practice-off` rename (its own small step), then logos-mode + the model-creator/weights signal (future, the weights claim gated on the adversarial bar).
+
+**Rules served:** R0, R18, R18f, R19, AC8, PR11, PR15, PR18.
+
+**Status:** Adopted. Cross-references: `operations/benchmarks/sage-practice-v1/2026-06-24-scoring-validity-battery-results.md`, `operations/benchmarks/sage-practice-v1/2026-06-24-adr010-section4-engine-fix-scope.md`, `adopted/adr/2026-06-24-sage-practice-measurement-instrument-reframe.md` (ADR-012 — origin), `adopted/adr/2026-06-19-stoic-fidelity-dikaiosyne-weighting.md` (ADR-010 §4 — the scoped fix), `D-SAGE-PRACTICE-REFRAME-MEASUREMENT-INSTRUMENT-AND-S6-RECHARACTERISED` (predecessor), memory `sage-practice-measurement-instrument-reframe`, memory `deterministic-l2-measures-apatheia-not-dikaiosyne`.
