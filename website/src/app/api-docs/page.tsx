@@ -528,6 +528,28 @@ export default function ApiDocsPage() {
             assessment. A malformed <code>prior_feedback</code> returns 400.
           </li>
           <li>
+            <strong>Dikaiosyne weighting (justice in the proximity)</strong> &mdash; <code>katorthoma_proximity</code>
+            is the <strong>minimum across the engaged cardinal-virtue domains</strong> (the unity thesis &mdash; a
+            strong domain does not compensate for a weak one), so a calmly-reasoned injustice scores
+            <code> reflexive</code>, not near-virtuous. The signed <code>assessment.assessment</code> carries
+            <code> proximity_floors {'{ base, dikaiosyne, andreia, sophrosyne, aggregate, basis }'}</code> &mdash;
+            <code> base</code> (the disposition/apatheia reading) floored by the per-domain readings
+            (<code>null</code> = that domain was not engaged); <code>aggregate</code> ===
+            <code> katorthoma_proximity</code>. When an oikeiosis circle is engaged, each
+            <code> oikeiosis.relevant_circles[]</code> entry carries an
+            <code> obligation_assessment {'{ status: met|violated|indeterminate, justification }'}</code> that
+            resolves the dikaiosyne domain (violated &rarr; <code>reflexive</code>; indeterminate &rarr; capped at
+            <code> deliberate</code>; met &rarr; no floor). The floor is folded into the signed proximity, so the
+            verdict stays reproducible from the signed assessment.
+          </li>
+          <li>
+            <strong>What the profile measures (it is not a fact-checker)</strong> &mdash; the assessment reads
+            <em> how</em> a decision was reasoned (its passion, value, and justice structure), <strong>not whether
+            the decision was factually correct</strong>. It does not independently verify arithmetic, claims, or
+            external facts in your <code>input</code>/<code>context</code>; supplying false or incomplete facts
+            yields a profile computed over those facts.
+          </li>
+          <li>
             <strong>Force-clarification &amp; continuation</strong> &mdash; when a situation is too ambiguous
             to assess on one axis, <code>/api/reason</code> returns HTTP 200 with
             <code> {'{ clarification_required: true, trigger_code, clarification: { question_text }, continuation_token }'}</code>

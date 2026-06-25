@@ -42,7 +42,7 @@ import {
 import { proximityRank } from './scoring-validity-fixtures'
 
 const LIVE_ASSENT_THRESHOLD: KatorthomaProximity = 'deliberate'
-const REPRO_RUNS = 3
+const REPRO_RUNS = Number(process.env.LOCUS2_REPRO_RUNS) || 3
 
 type FixtureClass = 'good' | 'bad' | 'ceiling' | 'borderline'
 interface Fixture {

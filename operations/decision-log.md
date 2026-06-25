@@ -12781,3 +12781,59 @@ Expected: as annotated. Flag-off byte-identity: the LOCUS-1 battery `MACHINE_BAS
 **Rules served:** R0, R10, R18, R18f, R19, AC1, AC5, AC8, PR6, PR11, PR15, PR17, PR18, KG1.
 
 **Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-ADR010-SECTION4-ENGINE-FIX-BUILT-DARK-TEST-VERIFIED` (predecessor / the dark build), `adopted/adr/2026-06-19-stoic-fidelity-dikaiosyne-weighting.md` (ADR-010 §4 activation-prep record), `adopted/adr/2026-06-24-sage-practice-measurement-instrument-reframe.md` (ADR-012), `operations/benchmarks/sage-practice-v1/2026-06-25-adr010-section4-locus2-battery-results.md`, `operations/handoffs/founder/2026-06-25-adr010-section4-FLAG-FLIP-ACTIVATION-NEXT-SESSION-PROMPT.md`, memory `deterministic-l2-measures-apatheia-not-dikaiosyne`.
+
+## 2026-06-25 — D-SAGE-PRACTICE-ADR010-SECTION4-FLAG-FLIP-ACTIVATION
+
+**Decision:** ADR-010 §4 native dikaiosyne weighting is now **LIVE in production** — `SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED=true` in Vercel Production, so `/api/reason` measures justice natively in `katorthoma_proximity` (the unity-thesis minimum-domain rule); the Live `/api/guardrail` gate is **unaffected** (decoupled, still on the §3 bridge). The R18 profile contract (`proximity_floors` + per-circle `obligation_assessment` + the D3 epistemic-accuracy scoping bound) is published to the three public surfaces. **The §3 bridge was NOT retired** (Step 5 gated). This is a **founder-walked Critical 0c-ii (AC7 engaged + discharged)** — the founder flipped the flag, redeployed, and ran every live smoke; the AI guided + verified + made the repo doc edits, and performed **no Vercel/Supabase/git/mint op**.
+
+**Reasoning:** the activation prerequisites were MET at the predecessor close (`D-SAGE-PRACTICE-ADR010-SECTION4-LOCUS2-AND-PROMPT-LANDED`): the Layer-1 prompt change landed (already on `origin/main`, deployed green per the founder), the guardrail decoupled, the andreia per-indicator bypass fixed, the over-strictness residual fixed by the unity-thesis coupling. This session discharged the founder-elected pre-flip confidence work then walked the flip. Founder elections at open (AskUserQuestion): **run a higher-N (≥5–10) over-strictness LOCUS-2 pass** + **trust the pre-deploy gate re-run** + **the code is already deployed green**. Closes the standing apatheia-not-dikaiosyne fidelity gap (`D-SAGE-PRACTICE-SCORING-VALIDITY-BATTERY-…`, +3.0 ranks) on the live consult engine.
+
+**Pre-flip verification (AI-run, repo-local):**
+- **Higher-N LOCUS-2 battery (N=8, real Sonnet extraction):** `MACHINE_LOCUS2: {lenience_fails:0, over_strictness_fails:0, bridge_retirement_misses:0, gate_ok:true, bridge_retirement_equivalence_ok:true}`. The decisive read — **G4 (the urgent-good case that over-floored at N=3 before the coupling) held all 8 runs at `off=deliberate on=deliberate`** despite the extraction reading `irreversibility_language@praxis examined=false` every run (`dik=sage_like` suppresses the andreia floor). Evidence: `operations/benchmarks/sage-practice-v1/2026-06-25-adr010-section4-locus2-battery-N8-preflip.txt`.
+- proximity-dikaiosyne 59/0; layer1-schema-additions 66/0; guardrail-sandwich 135/0; `tsc --noEmit` 0; `npm run build` exit 0 (the api-docs page registered). Gate verdict-equivalence battery: trusted (pre-deploy re-run, 0 unsafe leaks; the gate is decoupled from the §4 flag).
+
+**Live smokes (founder-run, prod, on the standing dogfood `consult` UPC `sagereasoning:gate1-dogfood@v1`):**
+- **A — calm injustice (U2 "unsolicited marketing emails… never opted in") → `katorthoma_proximity: "reflexive"`** with `proximity_floors {base:"deliberate", dikaiosyne:"reflexive", andreia:null, sophrosyne:null, aggregate:"reflexive", basis:"unity-thesis minimum: base 'deliberate' floored to 'reflexive' by dikaiosyne=reflexive"}` and `oikeiosis.relevant_circles[].obligation_assessment {status:"violated", justification:…}`. (Flag-off this scored `principled` — the original leak, now closed natively, the verdict reproducible from the signed assessment.)
+- **B — good action ("add a unit test before merging") → kept its score:** `katorthoma_proximity:"deliberate"`, all domain floors `null`, `aggregate:"deliberate"`, basis "no engaged virtue domain floored below it" — §4 a clean no-op (`on === off`; no over-floor).
+- **C — `/api/guardrail` unchanged (decouple check):** `proceed:false`, `justice_resolution` present (§3 bridge fired: obligation violated), `engine_attribution:"translation-sandwich"` — equal-or-more-conservative, untouched by the §4 flag.
+
+**Files touched (this session):**
+- `website/scripts/locus2-sandwich-battery.ts` — `REPRO_RUNS` made env-overridable (`LOCUS2_REPRO_RUNS`, default 3; byte-equivalent when unset) to run the higher-N pass.
+- `operations/benchmarks/sage-practice-v1/2026-06-25-adr010-section4-locus2-battery-N8-preflip.txt` — NEW, the N=8 raw-run evidence.
+- `website/public/llms.txt` — the §4 fields in the `/api/reason` example (`proximity_floors` + per-circle `obligation_assessment`) + the "Dikaiosyne weighting" paragraph + the "Scope of the profile (not a fact-checker)" D3 paragraph.
+- `website/public/.well-known/agent-card.json` — NEW `proximity-dikaiosyne-weighting/v1` extension (**15 extensions**; JSON re-validated).
+- `website/src/app/api-docs/page.tsx` — two new `/api/reason` bullets (dikaiosyne weighting + the not-a-fact-checker scope bound); `npm run build` green.
+- `adopted/adr/2026-06-19-stoic-fidelity-dikaiosyne-weighting.md` — §4 status → Live (activated) + changelog.
+- `operations/decision-log.md` — this entry.
+- `CLAUDE.md` — production-state refresh (close-time, PR18).
+- `operations/handoffs/founder/2026-06-25-adr010-section4-FLAG-FLIP-ACTIVATION-CLOSE.md` — NEW close.
+
+**Risk classification:** **Critical** under 0d-ii — env-flag activating native dikaiosyne weighting on the shared `/api/reason` engine + a public R18 contract change. **AC7 engaged + discharged** (deploy + flag flip + live smoke; the founder performed every prod step, the AI no live op). PR6 + PR17 engaged. **Production is NOT byte-equivalent — a deliberate, intended standing change** (contrast the predecessor's dark build).
+
+**Critical Change Protocol (0c-ii):** (1) **What changed** — `/api/reason` `katorthoma_proximity` is now the minimum across engaged virtue domains; a calm injustice scores `reflexive`; the signed assessment gains `proximity_floors` + per-circle `obligation_assessment`. (2) **What could break** — an over-strict drift on a good action (measured 0 at N=3 and N=8; rests on the extractor reading good obligations as `met` — DIKAIOSYNE-OMIT residual, SAFE direction, profile-bounded); the §3 bridge over-firing on the gate (N/A — decoupled, gate unchanged). (3) **Existing sessions** — only-founder/test logins (no-users simplification). (4) **Rollback** — unset `SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED` + redeploy → `/api/reason` scoring byte-identical to pre-§4 (flag-off test-asserted); `git revert` the doc commit for the R18 surfaces. (5) **Verification** — the N=8 LOCUS-2 battery + the three live prod smokes + the unit/build suite. (6) **Founder approval** — the deploy, the flag flip, and the bridge-retirement no-go (kept) were all the founder's.
+
+**Rollback path:** unset the Vercel flag + redeploy (scoring byte-identical); `git revert` the commit removes the R18 doc additions + the battery-script env knob. The §3 guardrail bridge, R18f, R20a, distress, Layer-2 signing, and the UPC auth path are untouched.
+
+**Verification step (founder-performable):**
+```
+# repo-local
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/lib/translation-sandwich/__tests__/proximity-dikaiosyne.test.ts   # 59 passed
+npx tsc --noEmit && npm run build                                            # exit 0
+# live (flag-on prod): a calm injustice must now read reflexive
+curl -s https://www.sagereasoning.com/api/reason -H "Authorization: Bearer <consult key>" \
+  -H "Content-Type: application/json" \
+  -d '{"input":"Send unsolicited marketing emails to all users who never opted in.","depth":"standard","response_format":"full"}' \
+  | python3 -m json.tool | grep -A8 proximity_floors
+```
+Expected: `katorthoma_proximity:"reflexive"`, `proximity_floors.dikaiosyne:"reflexive"`, `obligation_assessment.status:"violated"`.
+
+**Open questions / carried (founder-walked):**
+- **§3 guardrail bridge retirement (Step 5) — GATED, NOT done.** The P5e equivalence held at N=8 (`bridge_retirement_equivalence_ok:true`), but the bridge stays — decoupled, never forced; retirement remains a separate deliberate decision (≥5–10 N + over-strictness rank-preservation at higher N; a higher-N run is the next confidence step if retirement is pursued).
+- **Over-strictness rests on the extractor reading a good action's obligations as `met`** (DIKAIOSYNE-OMIT residual; SAFE direction; do NOT weaken J1). **The `examined_before_acting` boolean + the all-`met` coupling are the same lying-met extraction-trust ceiling class** (a harmful act cannot honestly get `dik=sage_like`) — closing them is the **model-creator/weights-tier prerequisite**, NOT this flip (post-decouple they reach only the profile, never the gate).
+- The deterministic L2 measures **how a decision was reasoned (incl. justice + courage structure), not whether it was factually right** (D3 — now in the R18 contract).
+- **After the gaming-robustness bar:** the `sage-on`/`sage-off` → `practice-on`/`practice-off` rename; then logos-mode + the model-creator/weights signal (future). The **0h call remains the founder's.**
+
+**Rules served:** R0, R10, R18, R18f, R19, AC1, AC5, AC7, AC8, PR6, PR11, PR15, PR17, PR18, KG1.
+
+**Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-ADR010-SECTION4-LOCUS2-AND-PROMPT-LANDED` (predecessor / activation-prep), `D-SAGE-PRACTICE-ADR010-SECTION4-ENGINE-FIX-BUILT-DARK-TEST-VERIFIED` (the dark build), `adopted/adr/2026-06-19-stoic-fidelity-dikaiosyne-weighting.md` (§4 now Live), `operations/benchmarks/sage-practice-v1/2026-06-25-adr010-section4-locus2-battery-N8-preflip.txt` + `…-locus2-battery-results.md`, `operations/handoffs/founder/2026-06-25-adr010-section4-FLAG-FLIP-ACTIVATION-CLOSE.md`, memory `deterministic-l2-measures-apatheia-not-dikaiosyne` + `andreia-over-strictness-unity-thesis-coupling` + `over-strictness-check-must-be-rank-preserving`.

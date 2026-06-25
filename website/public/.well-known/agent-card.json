@@ -209,6 +209,25 @@
         }
       },
       {
+        "uri": "https://sagereasoning.com/extensions/proximity-dikaiosyne-weighting/v1",
+        "description": "Substrate /api/reason proximity contract (ADR-010 §4, Live 2026-06-25). katorthoma_proximity is the MINIMUM across the engaged cardinal-virtue domains (the unity thesis — a strong domain does not compensate for a weak one), so a calmly-reasoned injustice scores 'reflexive', not near-virtuous. The signed assessment.assessment carries proximity_floors {base, dikaiosyne, andreia, sophrosyne, aggregate, basis}: 'base' is the disposition/apatheia reading, floored by the dikaiosyne/andreia/sophrosyne domain readings (null = that domain was not engaged); 'aggregate' === katorthoma_proximity. When an oikeiosis circle is engaged, each oikeiosis.relevant_circles[] entry carries obligation_assessment {status: met|violated|indeterminate, justification} — the explicit what-is-owed reading that resolves the dikaiosyne domain (violated -> reflexive; indeterminate -> capped at deliberate; met -> no floor). The floor is folded into the signed proximity, so the verdict stays reproducible from the signed assessment (verify against GET /api/public-key) — unlike the /api/guardrail §3 justice bridge. SCOPE (D3): the profile measures HOW a decision was reasoned — its passion, value, and justice structure — NOT whether the decision was factually correct; it does not verify arithmetic, claims, or external facts in input/context.",
+        "required": false,
+        "params": {
+          "proximity_floors": {
+            "fields": ["base", "dikaiosyne", "andreia", "sophrosyne", "aggregate", "basis"],
+            "rule": "aggregate = minimum across the engaged virtue domains (unity-thesis minimum-domain rule); null domain = not engaged",
+            "location": "assessment.assessment.proximity_floors (inside the signed verdict)"
+          },
+          "obligation_assessment": {
+            "location": "assessment.assessment.oikeiosis.relevant_circles[].obligation_assessment",
+            "fields": ["status (met|violated|indeterminate)", "justification"],
+            "effect_on_dikaiosyne": "violated -> reflexive; indeterminate -> capped at deliberate; met -> no floor"
+          },
+          "reproducibility": "the dikaiosyne floor is folded into the signed proximity — fully reproducible from the signed assessment (contrast the /api/guardrail §3 bridge, whose justice completion is disclosed but unsigned)",
+          "scope_bound_d3": "measures how a decision was reasoned (passion/value/justice structure), NOT whether it was factually correct; not a fact-checker"
+        }
+      },
+      {
         "uri": "https://sagereasoning.com/extensions/guardrail-signed-sandwich/v1",
         "description": "Guardrail /api/guardrail response contract (ADR-009 + ADR-010 §3, Live 2026-06-19). The verdict is computed deterministically from a disclosed Layer-1 extraction by a free Layer-2 mechanism pass and Ed25519-signed (no LLM prose render): the response carries the bare verdict fields plus 'extraction' (the features the verdict was computed from — re-run the mechanisms to verify the action->extraction->assessment chain) and 'signed_assessment' (the signed raw Layer-2 assessment; verify against GET /api/public-key). Field notes: 'evaluation_depth' is the constant 'deterministic' (only the mechanism count follows risk_class: standard=3, elevated=5, critical=6); 'is_kathekon' may be null when the extraction is too sparse to judge, in which case the gate floors to a conservative non-proceed; 'rollback_path' is a structural reminder present only for critical risk_class. Justice completion (ADR-010 §3): 'justice_resolution' {obligation: met|violated|indeterminate, circle, justification, source} is present ONLY when the action engages a justice-toward-others dimension; its presence means the surfaced katorthoma_proximity may have been floored below the raw value in the signed assessment (a calmly-reasoned injustice is capped, not rated near-virtuous). Disclosure (R18): a justice-floored verdict is NOT reproducible from the signed assessment alone — the signature proves the deterministic Layer-2 reading; the justice completion is disclosed but unsigned (until the root correction folds it into the signed proximity). Availability: a signing outage fails the gate CLOSED (HTTP 503); an engine or justice-resolver outage returns a conservative pause — never a silent proceed.",
         "required": false,

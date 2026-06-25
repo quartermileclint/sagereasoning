@@ -127,11 +127,12 @@ Full response example (standard depth, `response_format:"full"`):
       "katorthoma_proximity": "deliberate",
       "passion_diagnosis": { "passions_detected": [ "..." ], "false_judgements": [ "..." ], "correct_judgements": [ "..." ] },
       "control_filter": { "within_prohairesis": [ "..." ], "outside_prohairesis": [ "..." ] },
-      "oikeiosis": { "...": "..." },
+      "oikeiosis": { "relevant_circles": [ { "circle": "local_community", "obligation_assessment": { "status": "met|violated|indeterminate", "justification": "..." } } ], "deliberation_notes": "..." },
       "value_assessment": { "indifferents_at_stake": [ "..." ], "value_error": null },
       "kathekon_assessment": { "is_kathekon": true, "quality": "strong|moderate|marginal|contrary", "justification": "..." },
       "improvement_path_structured": { "...": "..." },
-      "examination": { "ref": "<loop id>", "depth_tier": "standard", "prior_feedback_ref": "<present only on a re-examination>" }
+      "examination": { "ref": "<loop id>", "depth_tier": "standard", "prior_feedback_ref": "<present only on a re-examination>" },
+      "proximity_floors": { "base": "deliberate", "dikaiosyne": "reflexive", "andreia": null, "sophrosyne": null, "aggregate": "reflexive", "basis": "unity-thesis minimum: base floored by the weakest engaged virtue domain" }
     },
     "signature": "<base64 Ed25519>", "key_id": "substrate-layer2-2026Q2"
   },
@@ -142,6 +143,10 @@ Full response example (standard depth, `response_format:"full"`):
 }
 ```
 The verdict is at `assessment.assessment` (NOT the top-level `assessment`, which is the signed envelope). With `response_format:"assessment_first"`, `prose` is null, `meta.narrative_status` is `"deferred"`, and a top-level `narrative: { "status":"deferred", "correlation_id":"<id>" }` is added.
+
+**Dikaiosyne weighting (justice in the proximity).** `katorthoma_proximity` is the **minimum across the engaged cardinal-virtue domains** (the unity thesis — a strong domain does not compensate for a weak one): a calmly-reasoned action whose justice toward an affected party is violated is floored, so a calm injustice scores `reflexive`, not near-virtuous. The signed `assessment.assessment` carries `proximity_floors` showing the breakdown — `base` (the disposition/apatheia reading) floored by the `dikaiosyne` / `andreia` / `sophrosyne` domain readings (`null` = that domain was not engaged for this action); `aggregate` === `katorthoma_proximity`. When an oikeiosis circle is engaged, each `oikeiosis.relevant_circles[]` entry carries an `obligation_assessment { status: "met"|"violated"|"indeterminate", justification }` — the explicit what-is-owed reading that resolves the dikaiosyne domain (violated → `reflexive`; indeterminate → capped at `deliberate`; met → no floor). Because the floor is folded into the signed proximity, the verdict remains fully reproducible from the signed assessment.
+
+**Scope of the profile (read before relying on it — it is not a fact-checker).** The assessment measures *how a decision was reasoned* — its passion, value, and justice structure — **not whether the decision was factually correct.** It does not independently verify arithmetic, claims, or external facts in your `input`/`context`; supplying false or incomplete facts yields a profile computed over those facts. Verify your inputs before trusting the framing.
 
 **Agent integrations (per-install tokens):** production agent integrations authenticate with per-install tokens (`sr_inst_<32 hex>`). Mint: session-authenticated `POST /api/keys` (token shown once). Use: `Authorization: Bearer sr_inst_<token>`; plugin-authenticated calls submit a pre-computed `layer1_schema` (run Layer 1 locally) instead of raw input. Revoke: `DELETE /api/keys` — revoked tokens return 401 immediately. `sr_live_` keys remain valid for raw-input calls.
 
