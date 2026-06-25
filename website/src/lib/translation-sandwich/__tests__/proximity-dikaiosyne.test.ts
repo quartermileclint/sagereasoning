@@ -18,12 +18,25 @@
  *      argued caps at deliberate; an UNARGUED met is treated as unevaluated; a
  *      natural_relationship claimed with NO circle (unidentified party) floors to
  *      reflexive (the circle-free gamed-injustice leak).
- *   4. ANDREIA (Change 1 / D5) — a grave/irreversible action CARRIED OUT (praxis)
- *      floors to reflexive; the same irreversibility WITHHELD does not floor.
+ *   4. ANDREIA (Change 1 / D5) — UN-ENRICHED (no urgency.stage): the conservative
+ *      fallback — any grave/irreversible act carried out at praxis floors to
+ *      reflexive; the same irreversibility WITHHELD does not floor.
+ *   4b. ANDREIA ENRICHED stage-link (the OS3 sound fix, 2026-06-25) — per-grave-
+ *      indicator urgency.stage + examined_before_acting: a carried-out (stage=praxis)
+ *      grave act floors ONLY when its gravity was NOT weighed (examined_before_acting
+ *      !== true); examined → no floor (OS3 case-a); withheld (stage!=praxis) +
+ *      unrelated praxis → no floor (OS3 case-b). NO-BYPASS: examination is read from
+ *      the grave indicator, never a global synkatathesis scan — a rash act + an
+ *      unrelated synkatathesis STILL floors (the reverted-bypass class stays closed).
  *   5. SOPHROSYNE (Change 1) — a disordered impulse acted out at praxis floors to
  *      reflexive; an impulse examined before acting does not.
  *   6. D4 — the "No circles engaged" filler no longer counts as deliberation
  *      (an impulsive no-circle praxis action is not floated up off the filler).
+ *   4c. UNITY-THESIS courage↔justice COUPLING (the OS3 / urgent-good-act over-strictness
+ *      fix) — a carried-out grave act that HONOURS justice toward every affected party
+ *      (dik=sage_like) is courage, not rashness → andreia SUPPRESSED. Safety: a violated
+ *      (dik=reflexive) or indeterminate (dik=deliberate) obligation does NOT suppress;
+ *      a self-regarding rash act (dik=null) does NOT suppress → both still floor.
  *   7. KP-04 MINIMUM — the aggregate is the weakest engaged domain; strong domains
  *      do not compensate; proximity_floors records base + per-domain + basis.
  *   8. IDEMPOTENCY — same schema → byte-identical output in both flag states.
@@ -244,12 +257,15 @@ const destructivePause = base({
 assert(prox(destructivePause, on, 'pause on') === 'principled', 'andreia: irreversibility WITHHELD (no praxis) → no floor')
 assert(full(applyMechanisms(destructivePause, on), 'pause-floor').proximity_floors?.andreia === null, 'andreia: null when grave step withheld')
 
-// Adversarial-review FOLD-VERIFICATION (2026-06-25): the andreia floor is the CONSERVATIVE
-// reading — any carried-out grave/irreversible act floors. The earlier "examined-before-acting
-// = any synkatathesis present" escape was REVERTED because it let a rash act bypass via an
-// UNRELATED synkatathesis (a faithful-reachable under-strictness hole). Consequence: a good
-// EXAMINED carried-out irreversible act is OVER-floored at LOCUS 1 — a disclosed ceiling whose
-// sound fix is the urgency→stage data-model link (deferred). And the no-bypass control:
+// UNITY-THESIS courage↔justice COUPLING (the OS3 over-strictness FIX, 2026-06-25 activation
+// session). A carried-out grave/irreversible act that HONOURS what is owed to every affected
+// party (dikaiosyne fully met ⇒ dik === 'sage_like') is courage under pressure, not rashness —
+// the andreia floor is SUPPRESSED. This RESOLVES the OS3 ceiling (a good examined irreversible
+// act no longer over-floors) AND the LOCUS-2 G4 urgent-protective case, WITHOUT loosening the
+// gameable examined boolean: a HARMFUL act cannot get dik=sage_like on a faithful extraction,
+// and a SELF-REGARDING rash act has no circle (dik=null). Here: household:met → dik=sage_like →
+// the (otherwise conservative, un-enriched) andreia floor is suppressed → the good act KEEPS its
+// high score. (Was the disclosed OS3 ceiling; now resolved.)
 const destructiveCarriedOutExamined = base({
   control_filter_elements: [{ item: 'whether I run the cutover', agent_named_position: 'within' }],
   urgency_indicators: [{ signal_type: 'irreversibility_language', evidence: 'cannot be undone' }],
@@ -264,8 +280,9 @@ const destructiveCarriedOutExamined = base({
     { stage: 'praxis', evidence: 'then I run the cutover' },
   ],
 })
-assert(full(applyMechanisms(destructiveCarriedOutExamined, on), 'examined-floor').proximity_floors?.andreia === 'reflexive', 'andreia: a carried-out irreversible act floors (conservative; even when examined) — the disclosed over-strictness ceiling')
-assert(prox(destructiveCarriedOutExamined, on, 'examined') === 'reflexive', 'andreia: good carried-out irreversible act OVER-floors at LOCUS-1 (disclosed ceiling; sound fix = urgency→stage link)')
+assert(full(applyMechanisms(destructiveCarriedOutExamined, on), 'examined-floor').proximity_floors?.andreia === null, 'unity-thesis coupling: a met-obligation grave act → andreia SUPPRESSED (dik=sage_like ⇒ courage, not rashness; OS3 resolved)')
+assert(prox(destructiveCarriedOutExamined, on, 'examined') !== 'reflexive', 'unity-thesis coupling: a justice-honouring carried-out irreversible act KEEPS its high score (no over-floor)')
+assert(full(applyMechanisms(destructiveCarriedOutExamined, on), 'examined-dik').proximity_floors?.dikaiosyne === 'sage_like', 'unity-thesis coupling: the suppression condition is dik=sage_like (all obligations met-argued)')
 // NO-BYPASS control: a rash destructive act + an UNRELATED synkatathesis must STILL floor.
 const rashPlusUnrelatedSynkatathesis = base({
   control_filter_elements: [{ item: 'whether I run it', agent_named_position: 'within' }],
@@ -283,6 +300,143 @@ assert(full(applyMechanisms(rashPlusUnrelatedSynkatathesis, on), 'no-bypass').pr
 assert(prox(rashPlusUnrelatedSynkatathesis, on, 'no-bypass-prox') === 'reflexive', 'andreia: the unrelated-synkatathesis bypass is closed (rash act → reflexive)')
 // A grave step WITHHELD (no praxis stage at all) still does NOT floor — courage exercised.
 assert(full(applyMechanisms(destructivePause, on), 'withheld-only').proximity_floors?.andreia === null, 'andreia: grave step withheld (no praxis) → no floor')
+
+// ============================================================================
+// 4b. ANDREIA ENRICHED stage-link (the OS3 SOUND FIX, 2026-06-25) — urgency.stage +
+//     examined_before_acting on the grave indicator. Examination is read PER GRAVE
+//     INDICATOR (never a global synkatathesis scan) → the no-bypass guarantee holds.
+// ============================================================================
+const strongKathekon = [
+  { factor_type: 'natural_relationship' as const, description: 'n', evidence: 'the team depends on me' },
+  { factor_type: 'role_obligation' as const, description: 'r', evidence: 'my role is the migration' },
+  { factor_type: 'justification_offered' as const, description: 'j', evidence: 'necessary + safe' },
+]
+// (a) Examined-the-GRAVE-act (stage=praxis, examined=true) → NO andreia floor; a good
+//     examined irreversible act keeps its high score (the OS3 case-(a) over-floor is fixed).
+const examinedGraveAct = base({
+  control_filter_elements: [{ item: 'whether to run the irreversible cutover', agent_named_position: 'within' }],
+  oikeiosis_circles_engaged: [{ circle: 'household', evidence: 'the team', obligation_assessment: { status: 'met', justification: 'verified the backup and consulted the team before acting' } }],
+  kathekon_factors: strongKathekon,
+  urgency_indicators: [{ signal_type: 'irreversibility_language', evidence: 'cannot be undone', stage: 'praxis', examined_before_acting: true }],
+  causal_stage_evidence: [
+    { stage: 'synkatathesis', evidence: 'I confirm the backup and weigh the cutover before assenting' },
+    { stage: 'praxis', evidence: 'then I run the cutover' },
+  ],
+})
+{
+  const a = full(applyMechanisms(examinedGraveAct, on), 'examined-enriched')
+  assert(a.proximity_floors?.andreia === null, 'andreia ENRICHED: examined-the-grave-act (stage=praxis, examined=true) → no floor (OS3 case-a fixed)')
+  assert(a.proximity_floors?.aggregate === a.proximity_floors?.base, 'andreia ENRICHED: examined grave act → aggregate == base (no over-floor below the apatheia reading)')
+  assert(a.katorthoma_proximity !== 'reflexive', 'andreia ENRICHED: a good examined irreversible act is NOT floored to reflexive')
+}
+// (b) Un-examined carried-out grave act (stage=praxis, examined absent) → reflexive (rash).
+const unexaminedGraveAct = base({
+  control_filter_elements: [{ item: 'whether to run it', agent_named_position: 'within' }],
+  urgency_indicators: [{ signal_type: 'irreversibility_language', evidence: 'deletes the only copy', stage: 'praxis' }],
+  causal_stage_evidence: [{ stage: 'praxis', evidence: 'I run rm -rf' }],
+})
+assert(full(applyMechanisms(unexaminedGraveAct, on), 'unexamined-enriched').proximity_floors?.andreia === 'reflexive', 'andreia ENRICHED: carried-out grave act, examination absent → reflexive (rash)')
+// (b2) examined_before_acting EXPLICITLY false → reflexive (same as absent).
+const unexaminedFalse = base({ ...unexaminedGraveAct, urgency_indicators: [{ signal_type: 'irreversibility_language', evidence: 'deletes the only copy', stage: 'praxis', examined_before_acting: false }] })
+assert(full(applyMechanisms(unexaminedFalse, on), 'unexamined-false').proximity_floors?.andreia === 'reflexive', 'andreia ENRICHED: examined_before_acting:false → reflexive')
+// (c) Withheld grave act (stage=synkatathesis) + an UNRELATED benign praxis → NO floor
+//     (OS3 case-(b) over-floor is fixed — the per-indicator stage sees the grave act was not done).
+const withheldEnriched = base({
+  control_filter_elements: [{ item: 'whether to delete the archive', agent_named_position: 'within' }],
+  oikeiosis_circles_engaged: [{ circle: 'household', evidence: 'the team', obligation_assessment: { status: 'met', justification: 'team consulted; I held off the deletion' } }],
+  kathekon_factors: strongKathekon,
+  urgency_indicators: [{ signal_type: 'irreversibility_language', evidence: 'cannot be undone', stage: 'synkatathesis' }],
+  causal_stage_evidence: [
+    { stage: 'synkatathesis', evidence: 'I weigh the deletion and hold off' },
+    { stage: 'praxis', evidence: 'I update the README instead' },
+  ],
+})
+assert(full(applyMechanisms(withheldEnriched, on), 'withheld-enriched').proximity_floors?.andreia === null, 'andreia ENRICHED: grave act withheld (stage=synkatathesis) + unrelated benign praxis → no floor (OS3 case-b fixed)')
+// (d) ENRICHED NO-BYPASS control — the load-bearing safety test. A rash grave act
+//     (stage=praxis, examined absent) + an UNRELATED synkatathesis MUST still floor:
+//     examination is read from the GRAVE indicator, never the global synkatathesis scan.
+const rashEnrichedPlusUnrelated = base({
+  control_filter_elements: [{ item: 'whether to run it', agent_named_position: 'within' }],
+  urgency_indicators: [{ signal_type: 'irreversibility_language', evidence: 'deletes the only copy', stage: 'praxis' }],
+  kathekon_factors: [{ factor_type: 'role_obligation', description: 'r', evidence: 'unblock the deploy' }],
+  causal_stage_evidence: [
+    { stage: 'synkatathesis', evidence: 'I considered whether to grab a coffee first' },
+    { stage: 'praxis', evidence: 'I run rm -rf on the only copy' },
+  ],
+})
+assert(full(applyMechanisms(rashEnrichedPlusUnrelated, on), 'no-bypass-enriched').proximity_floors?.andreia === 'reflexive', 'andreia ENRICHED NO-BYPASS: rash grave act (examined absent) + unrelated synkatathesis → STILL reflexive')
+assert(prox(rashEnrichedPlusUnrelated, on, 'no-bypass-enriched-prox') === 'reflexive', 'andreia ENRICHED NO-BYPASS: aggregate reflexive (the unrelated-synkatathesis bypass stays closed)')
+// (e) Mixed grave acts — an un-examined carried-out one floors even if another was examined.
+const mixedGraveActs = base({
+  control_filter_elements: [{ item: 'whether to purge', agent_named_position: 'within' }],
+  urgency_indicators: [
+    { signal_type: 'irreversibility_language', evidence: 'archived the records', stage: 'praxis', examined_before_acting: true },
+    { signal_type: 'finality_language', evidence: 'permanently purged the originals', stage: 'praxis' },
+  ],
+  causal_stage_evidence: [{ stage: 'praxis', evidence: 'I did both' }],
+})
+assert(full(applyMechanisms(mixedGraveActs, on), 'mixed-grave').proximity_floors?.andreia === 'reflexive', 'andreia ENRICHED: among two grave acts, an un-examined carried-out one floors even if another was examined')
+// (f) FLAG-OFF byte-identity with the new urgency fields present — Layer 2 never reads
+//     urgency.stage / examined_before_acting flag-off ⇒ output identical with/without them.
+const urgencyPlain = base({ ...unexaminedGraveAct, urgency_indicators: [{ signal_type: 'irreversibility_language', evidence: 'deletes the only copy' }] })
+assert(
+  JSON.stringify(full(applyMechanisms(unexaminedGraveAct, off), 'enr-off')) ===
+    JSON.stringify(full(applyMechanisms(urgencyPlain, off), 'plain-off')),
+  'flag-off byte-identity: urgency.stage / examined_before_acting are inert (Layer 2 ignores them)'
+)
+// (g) MIXED-STAGE NO-BYPASS control (the 2026-06-25 pre-activation-review catch,
+//     ANDREIA-MIXED-STAGE-BYPASS-1). A rash carried-out grave indicator with NO stage
+//     + an UNRELATED DECOY grave indicator that carries a non-praxis stage + a praxis in
+//     causal_stage_evidence must STILL floor. The earlier global `enriched` switch let
+//     the decoy's stage flip the function to the per-indicator path, which then SKIPPED
+//     the stage-less rash act → bypass. The per-indicator conservative reading closes it.
+const rashStagelessPlusStagedDecoy = base({
+  control_filter_elements: [{ item: 'whether to run it', agent_named_position: 'within' }],
+  urgency_indicators: [
+    { signal_type: 'irreversibility_language', evidence: 'rm -rf deletes the only copy' }, // the rash act — NO stage
+    { signal_type: 'finality_language', evidence: 'we might one day decommission the cluster', stage: 'phantasia' }, // decoy
+  ],
+  kathekon_factors: [{ factor_type: 'role_obligation', description: 'r', evidence: 'unblock the deploy' }],
+  causal_stage_evidence: [{ stage: 'praxis', evidence: 'I run rm -rf on the only copy' }],
+})
+assert(full(applyMechanisms(rashStagelessPlusStagedDecoy, on), 'mixed-stage-nobypass').proximity_floors?.andreia === 'reflexive', 'andreia NO-BYPASS: a stage-less rash grave act + a non-praxis decoy + a praxis stage → STILL reflexive (the global-enriched bypass is closed)')
+assert(prox(rashStagelessPlusStagedDecoy, on, 'mixed-stage-prox') === 'reflexive', 'andreia NO-BYPASS: aggregate reflexive (the decoy stage does not flip the rash act past the floor)')
+// (g2) a stage-less grave indicator that is genuinely WITHHELD (no praxis anywhere) → no floor.
+const stagelessWithheld = base({
+  control_filter_elements: [{ item: 'whether to delete', agent_named_position: 'within' }],
+  urgency_indicators: [{ signal_type: 'irreversibility_language', evidence: 'cannot be undone' }], // stage-less
+  causal_stage_evidence: [{ stage: 'synkatathesis', evidence: 'I weigh it and hold off' }], // no praxis
+})
+assert(full(applyMechanisms(stagelessWithheld, on), 'stageless-withheld').proximity_floors?.andreia === null, 'andreia: a stage-less grave indicator with NO praxis evidence → no floor (nothing carried out)')
+// (h) DISCLOSED GAMEABLE CEILING (ANDREIA-BYPASS-2). A rash carried-out grave act whose
+//     extraction ASSERTS examined_before_acting=true escapes the floor — the single-boolean
+//     Goodhart surface. This test PINS the disclosed ceiling so it is visible + tracked; the
+//     corroboration fix (tie examination to THIS act) is the model-creator-tier follow-up.
+//     Post-decouple this reaches only the /api/reason PROFILE, never the Live gate.
+const gamedExamined = base({
+  control_filter_elements: [{ item: 'whether to run it', agent_named_position: 'within' }],
+  urgency_indicators: [{ signal_type: 'irreversibility_language', evidence: 'rm -rf, no recovery', stage: 'praxis', examined_before_acting: true }],
+  causal_stage_evidence: [{ stage: 'praxis', evidence: 'I run rm -rf' }],
+})
+assert(full(applyMechanisms(gamedExamined, on), 'gamed-examined').proximity_floors?.andreia === null, 'andreia DISCLOSED CEILING: an asserted examined_before_acting=true lifts the floor (the single-boolean Goodhart surface; corroboration is the model-creator-tier follow-up)')
+// (i) COUPLING SAFETY — the unity-thesis suppression fires ONLY on dik=sage_like (all met).
+//     A carried-out grave act whose obligation is VIOLATED is NOT suppressed → still floors.
+const graveViolated = base({
+  control_filter_elements: [{ item: 'whether to run it', agent_named_position: 'within' }],
+  urgency_indicators: [{ signal_type: 'irreversibility_language', evidence: 'wipes the shared data', stage: 'praxis', examined_before_acting: true }],
+  oikeiosis_circles_engaged: [{ circle: 'local_community', evidence: 'the affected team', obligation_assessment: { status: 'violated', justification: 'destroyed data they were owed' } }],
+  causal_stage_evidence: [{ stage: 'praxis', evidence: 'I wipe it' }],
+})
+assert(prox(graveViolated, on, 'grave-violated') === 'reflexive', 'unity-thesis coupling SAFETY: a violated-obligation grave act is NOT suppressed (dik=reflexive) → floors (even with examined=true)')
+// (j) COUPLING SAFETY — an INDETERMINATE obligation (dik=deliberate, NOT sage_like) does not
+//     suppress the andreia floor: a rash carried-out grave act with an unresolved obligation floors.
+const graveIndeterminate = base({
+  control_filter_elements: [{ item: 'whether to run it', agent_named_position: 'within' }],
+  urgency_indicators: [{ signal_type: 'irreversibility_language', evidence: 'cannot be undone', stage: 'praxis' }],
+  oikeiosis_circles_engaged: [{ circle: 'local_community', evidence: 'the affected', obligation_assessment: { status: 'indeterminate', justification: 'genuinely unclear who is harmed' } }],
+  causal_stage_evidence: [{ stage: 'praxis', evidence: 'I run it' }],
+})
+assert(full(applyMechanisms(graveIndeterminate, on), 'grave-indet').proximity_floors?.andreia === 'reflexive', 'unity-thesis coupling SAFETY: an indeterminate obligation (dik=deliberate) does NOT suppress the andreia floor (only dik=sage_like does)')
 
 // ============================================================================
 // 5b. MULTI-CIRCLE dikaiosyne — the weakest circle floors (completeness-critic fold)

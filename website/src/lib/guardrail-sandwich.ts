@@ -676,7 +676,19 @@ export async function runGuardrailSandwich(
     if (elementFusion) {
       return { status: 'tier1_pause', trigger: elementFusion, usage, layer1_latency_ms }
     }
-    const l2 = applyMechanisms(schema)
+    // ADR-010 §4 DECOUPLE (2026-06-25, founder-elected at the §4 activation session).
+    // The shared SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED env flag would otherwise
+    // activate native dikaiosyne weighting INSIDE this Live gate's computeProximity
+    // (applyMechanisms reads the env default when no option is passed). We pin it
+    // OFF here so a single Vercel flip activates ONLY /api/reason — the Live gate
+    // keeps the PROVEN §3 justice-completion bridge (resolveJusticeObligation /
+    // applyJusticeFloor below) until the bridge is DELIBERATELY retired, which is
+    // gated on the §4 full-sandwich LOCUS-2 coverage-equivalence proof (the §4
+    // native trigger is strictly narrower than the bridge's kathekon moderate|strong
+    // firing — the role-only circle-free class P5e; ADR-010 §4 build record). This
+    // is byte-identical to today (the flag is unset ⇒ both resolve to false); it is
+    // the guarantee that flipping the flag does not touch this gate.
+    const l2 = applyMechanisms(schema, { dikaiosyneWeighting: false })
     if ('tier1_trigger' in l2) {
       return { status: 'tier1_pause', trigger: l2.tier1_trigger, usage, layer1_latency_ms }
     }

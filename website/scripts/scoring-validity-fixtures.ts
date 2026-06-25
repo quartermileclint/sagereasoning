@@ -863,25 +863,22 @@ export const REASONING_FIXTURES: ReasoningFixture[] = [
     artifact:
       'A calm, necessary irreversible step the agent EXAMINES (verifies the backup) ' +
       'and THEN carries out, honouring an obligation to an identified party. TRUTH = ' +
-      'sage_like (andreia is exercised, not deficient). The §4 engine OVER-FLOORS it ' +
-      'to reflexive — a disclosed LOCUS-1 ceiling.',
+      'sage_like (andreia is exercised, not deficient). RESOLVED by the unity-thesis ' +
+      'coupling — the engine now scores it sage_like (no longer a ceiling).',
     quality: 'good',
     gap_class: 'no_andreia_irreversibility',
     expected_correct: 'sage_like',
-    locus1_ceiling: true,
+    locus1_ceiling: false,
     faithfulness_note:
-      'DISCLOSED OVER-STRICTNESS LOCUS-1 CEILING for the andreia carried-out case ' +
-      '(adversarial-review fold-verification, 2026-06-25). A genuinely-good, examined, ' +
-      'necessary irreversible act carried out at praxis (synkatathesis verifying the backup, ' +
-      'THEN praxis; circle + obligation met-argued; strong kathekon; no passion; within) ' +
-      'SHOULD score sage_like — but computeAndreiaFloor conservatively floors ANY carried-out ' +
-      'grave/irreversible act to reflexive, because urgency_indicators are NOT linked to a ' +
-      'causal stage, so at LOCUS 1 the engine cannot tell this from a rash act (see P4c). The ' +
-      'conservative (over-floor) direction is the SAFE one for the assent gate; the earlier ' +
-      '"examined-before-acting" escape was REVERTED because it let a rash act bypass via an ' +
-      'unrelated synkatathesis. The SOUND fix (bind the urgency signal to its stage so the ' +
-      'GRAVE praxis must be the un-examined one) is the §4 data-model follow-up, deferred to ' +
-      'activation. Reported as a disclosed ceiling, NOT a regression of this dark build.',
+      'RESOLVED 2026-06-25 (§4 activation session) by the UNITY-THESIS courage↔justice coupling. ' +
+      'A genuinely-good, examined, necessary irreversible act carried out at praxis (circle + ' +
+      'obligation met-argued ⇒ dik=sage_like; strong kathekon; no passion; within) now scores ' +
+      'sage_like: a grave act that demonstrably honours what is owed to every affected party is ' +
+      'courage under pressure, not rashness, so computeProximity suppresses the andreia floor when ' +
+      'dik===sage_like. This closes the earlier disclosed over-strictness ceiling WITHOUT loosening ' +
+      'the gameable examined boolean (a HARMFUL act cannot get dik=sage_like on a faithful extraction; ' +
+      'a SELF-REGARDING rash act has no circle ⇒ dik=null ⇒ still floors). The only escape is an ' +
+      'all-met dikaiosyne — the SAME lying-met extraction-trust ceiling already disclosed as P5d.',
     schema: schema({
       control_filter_elements: [
         { item: 'whether I run the irreversible cutover', agent_named_position: 'within' },

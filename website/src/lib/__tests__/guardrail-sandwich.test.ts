@@ -535,6 +535,7 @@ function runJusticeBridgeVerdictTests(): void {
 // ============================================================================
 
 const ROUTE_PATH = path.resolve(__dirname, '..', '..', 'app', 'api', 'guardrail', 'route.ts')
+const SANDWICH_PATH = path.resolve(__dirname, '..', 'guardrail-sandwich.ts')
 
 function loadRouteBody(): string {
   const source = fs.readFileSync(ROUTE_PATH, 'utf-8')
@@ -599,6 +600,27 @@ function runRouteWiringTests(): void {
   // INV-14: the port still calls runGuardrailSandwich (the bridge lives INSIDE it,
   // flag-on only — flag-off byte-identity is unaffected by the bridge).
   expectTrue('INV-14 bridge lives inside the flag-on sandwich path (runGuardrailSandwich)', /runGuardrailSandwich\s*\(/.test(body))
+
+  // INV-15 (ADR-010 §4 DECOUPLE, 2026-06-25): the gate PINS the §4 native dikaiosyne
+  // weighting OFF (applyMechanisms(schema, { dikaiosyneWeighting: false })) so the
+  // shared SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED flip activates ONLY /api/reason; the
+  // Live gate keeps the §3 bridge until a LOCUS-2-gated retirement. Must NOT call the
+  // bare applyMechanisms(schema) — that would read the env default and re-couple.
+  const sandwich = fs.readFileSync(SANDWICH_PATH, 'utf-8')
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('//') && !line.trim().startsWith('*'))
+    .join('\n')
+  expectTrue('INV-15a guardrail pins dikaiosyneWeighting: false (decoupled from the §4 flag)',
+    /applyMechanisms\(\s*schema\s*,\s*\{\s*dikaiosyneWeighting:\s*false\s*\}\s*\)/.test(sandwich))
+  expectTrue('INV-15b guardrail does NOT call bare applyMechanisms(schema) (would re-couple to the env default)',
+    !/applyMechanisms\(\s*schema\s*\)/.test(sandwich))
+  // INV-15c (count parity — robust against a FUTURE second re-coupling call that INV-15a/b
+  // would false-pass): EVERY applyMechanisms call in the gate file must be the pinned-false
+  // form. allCalls counts call sites only (the import `applyMechanisms,` has no paren).
+  const allMechCalls = (sandwich.match(/applyMechanisms\s*\(/g) || []).length
+  const pinnedFalseCalls = (sandwich.match(/applyMechanisms\(\s*schema\s*,\s*\{\s*dikaiosyneWeighting:\s*false\s*\}\s*\)/g) || []).length
+  expectTrue('INV-15c every applyMechanisms call in the gate is pinned dikaiosyneWeighting:false (count parity)',
+    allMechCalls > 0 && allMechCalls === pinnedFalseCalls)
 }
 
 // ============================================================================

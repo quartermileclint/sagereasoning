@@ -160,11 +160,12 @@ export interface ControlFilterElement {
  * OPTIONAL + additive: when Layer 1 does not assess a circle's obligation the
  * field is absent ⇒ the dikaiosyne domain reads the obligation as UNEVALUATED ⇒
  * (flag-on) floors `reflexive` (J1: an unexamined obligation reads reflexive).
- * The Layer-1 LLM does NOT yet populate this field — the extractor prompt change
- * is the LOCUS-2 work deferred to the §4 full-sandwich battery / activation; for
- * now the field is supplied on hand-authored fixtures (LOCUS 1) and flows through
- * untouched. Flag-off (SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED unset) ⇒ Layer 2
- * never reads it ⇒ byte-identical.
+ * The Layer-1 LLM now POPULATES this field — the extractor prompt was extended at
+ * the §4 activation session (2026-06-25), and the full-sandwich LOCUS-2 battery
+ * confirmed the real Sonnet extraction emits it (met-argued for good actions,
+ * violated for injustices incl. role-framed ones). Flag-off
+ * (SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED unset) ⇒ Layer 2 never reads it ⇒
+ * byte-identical.
  */
 export type ObligationStatus = 'met' | 'violated' | 'indeterminate'
 
@@ -204,6 +205,33 @@ export interface KathekonFactor {
 export interface UrgencyIndicator {
   signal_type: UrgencySignalType
   evidence: string
+  /**
+   * ADR-010 §4 andreia stage-link (2026-06-25, the OS3 sound fix). OPTIONAL. The
+   * causal stage at which THIS urgency signal's act sits in the chain — where the
+   * act it describes is in the causal sequence. For a grave (irreversibility /
+   * finality) signal it disambiguates a CARRIED-OUT irreversible act (`praxis`)
+   * from a contemplated/withheld one (an earlier stage). Read only by
+   * computeProximity's andreia domain (flag-on, SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED);
+   * absent ⇒ the conservative LOCUS-1 fallback (any grave act + a praxis stage
+   * anywhere → reflexive — the safe over-strict direction). Flag-off ⇒ never read ⇒
+   * byte-identical. Additive/forward-compat: existing extractions without it remain
+   * valid (same pattern as obligation_assessment).
+   */
+  stage?: CausalStage | null
+  /**
+   * ADR-010 §4 andreia stage-link (2026-06-25). OPTIONAL; meaningful ONLY for a
+   * grave (irreversibility / finality) signal carried out at praxis. `true` ONLY
+   * when the input shows the agent weighed the gravity of THIS irreversible act
+   * specifically before carrying it out (courage: the gravity was faced). Absent /
+   * null / false ⇒ treated as un-examined (the conservative SAFE default → a
+   * carried-out grave act floors `reflexive`, rashness). Tied to THE GRAVE ACT,
+   * NEVER a global synkatathesis scan — an unrelated assent elsewhere ("considered
+   * coffee first, then ran rm -rf") cannot lift the floor (the no-bypass guarantee;
+   * the reverted-2026-06-25 under-strictness bypass class). A LYING `true` is a
+   * disclosed LOCUS-2 extraction-quality ceiling — and post-decouple it reaches only
+   * the /api/reason PROFILE, never the Live gate (the §3 bridge stays on the gate).
+   */
+  examined_before_acting?: boolean | null
 }
 
 export interface CausalStageEvidence {
@@ -798,6 +826,20 @@ function assertNumber(value: unknown, path: string): number {
   return value
 }
 
+/** Added 2026-06-25 (ADR-010 §4 andreia stage-link) — used by the optional
+ *  urgency_indicators.examined_before_acting validation. */
+function assertBoolean(value: unknown, path: string): boolean {
+  if (typeof value !== 'boolean') {
+    throw new Layer1ValidationError(
+      'shape',
+      `Expected boolean at ${path}, got ${typeof value}`,
+      path,
+      value
+    )
+  }
+  return value
+}
+
 function assertEnum<T extends string>(
   value: unknown,
   valid: ReadonlyArray<T>,
@@ -1002,7 +1044,7 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
     'urgency_indicators'
   ).map((entry, i) => {
     const o = assertObject(entry, `urgency_indicators[${i}]`)
-    return {
+    const indicator: UrgencyIndicator = {
       signal_type: assertEnum(
         o.signal_type,
         URGENCY_SIGNAL_TYPES,
@@ -1010,6 +1052,20 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
       ),
       evidence: assertString(o.evidence, `urgency_indicators[${i}].evidence`),
     }
+    // ADR-010 §4 andreia stage-link — optional stage + examined_before_acting.
+    // Absent/null ⇒ omit (the conservative LOCUS-1 fallback). When present, validate
+    // shape so a malformed extraction is caught at the boundary, not silently
+    // mis-scored. Additive/forward-compat (same as obligation_assessment).
+    if (o.stage !== undefined && o.stage !== null) {
+      indicator.stage = assertEnum(o.stage, CAUSAL_STAGES, `urgency_indicators[${i}].stage`)
+    }
+    if (o.examined_before_acting !== undefined && o.examined_before_acting !== null) {
+      indicator.examined_before_acting = assertBoolean(
+        o.examined_before_acting,
+        `urgency_indicators[${i}].examined_before_acting`
+      )
+    }
+    return indicator
   })
 
   // causal_stage_evidence
@@ -1376,6 +1432,8 @@ export function validateLayer1Schema(parsed: unknown): Layer1Schema {
 
 const LAYER1_SYSTEM_PROMPT = `You are Layer 1 of the SageReasoning translation-sandwich engine. Your role is FEATURE EXTRACTION ONLY. You do not assess, judge, recommend, or generate prose. You extract structured features from the input text and return them as JSON conforming exactly to Layer1Schema.
 
+TWO NARROW EXCEPTIONS: categories 3 and 6 ask you to record a bounded STRUCTURED reading grounded in the text — the obligation owed to each affected circle (met / violated / indeterminate, with a justification) and whether a grave act's gravity was weighed before it was carried out. These are structured features the deterministic engine consumes; they are NOT a verdict on the whole action (Layer 2 computes the verdict). Every other category remains pure extraction.
+
 Your output drives a deterministic Stoic mechanism engine (Layer 2). The quality of the engine's assessment depends on the fidelity of your extraction.
 
 EXTRACTION CONTRACT
@@ -1405,9 +1463,17 @@ CATEGORIES
    - agent_named_position: how the agent frames it — "within" their control, "outside" their control, or "unspecified" if the agent does not signal either.
    Layer 2 decides the canonical classification using a rules table; you record only the agent's framing.
 
-3. oikeiosis_circles_engaged — circles the input touches.
+3. oikeiosis_circles_engaged — circles of concern the input touches (the parties whose rational nature is engaged by the action).
    - Circle: self_preservation | household | local_community | political_community | cosmopolis.
    - Evidence: verbatim quote naming the parties or relationships.
+   - obligation_assessment (OPTIONAL object; extract it whenever the action AFFECTS this circle's members): your structured reading of whether the action HONOURS, VIOLATES, or leaves GENUINELY-UNCLEAR what is owed to that circle. This is not a verdict on the whole action — it is a reading of the justice owed to these specific parties.
+     • status: met | violated | indeterminate.
+       - met: the action honours what is owed to this circle (the parties' legitimate claims are respected). Use ONLY with a substantive justification — never as a default.
+       - violated: the action overrides or disregards what is owed to NON-CONSENTING members of this circle — using them as a means, ignoring a claim they have not waived, or imposing a cost they did not consent to. The agent's calm, good intentions, or role framing do NOT turn a violation into "met".
+       - indeterminate: you genuinely cannot tell from the input whether the obligation is met or violated. Give the argument for why it is unresolved (indeterminate must be ARGUED, not used as a hedge).
+     • justification: one or two sentences, grounded in the input, naming WHAT is owed to this circle and why the action meets / violates / leaves-unclear it. REQUIRED in substance for met and indeterminate; an empty justification is treated downstream as unevaluated.
+   CRITICAL — surface the AFFECTED parties' circle even when the action is framed as a role obligation, a policy, or "just doing the job". An action the agent frames as "my job" / "the policy" / "what I was told" that affects non-consenting third parties STILL engages those parties' circle: extract the circle of the AFFECTED parties (the recipients, the users, the community), not only the agent's own role. A role framing is not a substitute for the affected party, and it does not by itself make the obligation "met".
+   Do NOT rubber-stamp "met". If the action serves the agent's objective at the expense of parties who did not consent, that is "violated", however calmly it is described. When you cannot tell, use "indeterminate" with an argument — not "met".
    Multiple circles allowed.
 
 4. value_categories_at_stake — preferred indifferents named in the input.
@@ -1421,9 +1487,11 @@ CATEGORIES
    - Description: one phrase.
    - Evidence.
 
-6. urgency_indicators — language patterns from the agent suggesting time pressure.
+6. urgency_indicators — language patterns from the agent suggesting time pressure or irreversibility.
    - signal_type: time_pressure | imminent_deadline | finality_language | irreversibility_language.
    - Evidence.
+   - stage (OPTIONAL; extract for finality_language / irreversibility_language signals): the causal stage at which the irreversible/final ACT sits — phantasia | synkatathesis | horme | praxis. Use "praxis" when the input shows the irreversible act was ALREADY CARRIED OUT (done); use an earlier stage when it is only being contemplated, or was withheld / not done.
+   - examined_before_acting (OPTIONAL boolean; meaningful ONLY for a finality/irreversibility signal carried out at praxis): true ONLY when the input shows the agent weighed the gravity of THIS irreversible act specifically before carrying it out — faced what it meant and proceeded deliberately. Set false (or omit) when the act was done rashly or impulsively, or when the only deliberation in the text is about something OTHER than this irreversible act. Deliberation about an unrelated matter does NOT count as examining the grave act.
    Extract urgency from the agent's own words. Do not infer urgency from the supplemental urgency_context parameter unless the agent's text itself names it.
 
 7. causal_stage_evidence — textual evidence supporting placement at causal stages.
@@ -1494,7 +1562,7 @@ Return ONLY valid JSON conforming to Layer1Schema. No markdown. No commentary ou
     {"item": "...", "agent_named_position": "outside"}
   ],
   "oikeiosis_circles_engaged": [
-    {"circle": "household", "evidence": "..."}
+    {"circle": "household", "evidence": "...", "obligation_assessment": {"status": "met", "justification": "what is owed to this circle and why the action honours it"}}
   ],
   "value_categories_at_stake": [
     {"indifferent": "reputation", "agent_framing": "good", "evidence": "..."}
@@ -1503,7 +1571,7 @@ Return ONLY valid JSON conforming to Layer1Schema. No markdown. No commentary ou
     {"factor_type": "role_obligation", "description": "...", "evidence": "..."}
   ],
   "urgency_indicators": [
-    {"signal_type": "time_pressure", "evidence": "..."}
+    {"signal_type": "irreversibility_language", "evidence": "...", "stage": "praxis", "examined_before_acting": false}
   ],
   "causal_stage_evidence": [
     {"stage": "synkatathesis", "evidence": "..."}

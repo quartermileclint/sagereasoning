@@ -578,6 +578,43 @@ assertThrowsValidation('DP-13 discovered_purpose non-object (string) throws', ()
 }
 
 // ============================================================================
+// UA — urgency_indicators andreia stage-link validation (ADR-010 §4 / OS3 sound fix).
+//   The new optional UrgencyIndicator.stage (CausalStage) + examined_before_acting
+//   (boolean) are validated on the LIVE boundary. Additive/optional: absent both
+//   validate (the conservative fallback); when present, stage is enum-checked and
+//   examined_before_acting must be a boolean.
+// ============================================================================
+{
+  const withUrgency = (u: Record<string, unknown>): Record<string, unknown> => ({
+    ...buildMinimalRaw(),
+    urgency_indicators: [u],
+  })
+
+  assertNoThrow('UA-1 urgency WITHOUT stage/examined validates (forward-compat, conservative fallback)', () =>
+    validateLayer1Schema(withUrgency({ signal_type: 'irreversibility_language', evidence: 'cannot undo' }))
+  )
+  {
+    const r = validateLayer1Schema(
+      withUrgency({ signal_type: 'irreversibility_language', evidence: 'cannot undo', stage: 'praxis', examined_before_acting: true })
+    )
+    assertEqual('UA-2 valid stage passes through', r.urgency_indicators[0].stage, 'praxis')
+    assertEqual('UA-3 valid examined_before_acting passes through', r.urgency_indicators[0].examined_before_acting, true)
+  }
+  assertNoThrow('UA-4 stage null + examined null validate (omitted ⇒ fallback)', () =>
+    validateLayer1Schema(withUrgency({ signal_type: 'finality_language', evidence: 'permanent', stage: null, examined_before_acting: null }))
+  )
+  assertNoThrow('UA-5 examined_before_acting:false validates', () =>
+    validateLayer1Schema(withUrgency({ signal_type: 'irreversibility_language', evidence: 'x', stage: 'praxis', examined_before_acting: false }))
+  )
+  assertThrowsValidation('UA-6 invalid stage enum throws', () =>
+    validateLayer1Schema(withUrgency({ signal_type: 'irreversibility_language', evidence: 'x', stage: 'praxis_done' }))
+  )
+  assertThrowsValidation('UA-7 non-boolean examined_before_acting throws', () =>
+    validateLayer1Schema(withUrgency({ signal_type: 'irreversibility_language', evidence: 'x', stage: 'praxis', examined_before_acting: 'yes' }))
+  )
+}
+
+// ============================================================================
 // Report
 // ============================================================================
 

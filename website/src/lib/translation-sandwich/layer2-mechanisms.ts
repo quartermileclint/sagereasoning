@@ -1460,52 +1460,81 @@ function computeDikaiosyneFloor(
 }
 
 /** andreia domain proximity (Change 1; closes D5). null ⇒ not engaged. A genuinely
- *  grave / irreversible action CARRIED OUT (a praxis-stage action) — or a fear-passion
- *  acted on — is deficient courage (rashness) → reflexive. A grave step WITHHELD (no
- *  praxis stage) ⇒ courage exercised ⇒ no floor.
+ *  grave / irreversible action CARRIED OUT un-examined (rashness) — or a fear-passion
+ *  acted on — is deficient courage → reflexive. A grave step WITHHELD, or one whose
+ *  gravity was weighed before acting (courage exercised), ⇒ no floor.
  *
- *  CONSERVATIVE LOCUS-1 reading (the honest limit). `urgency_indicators` are NOT
- *  linked to a causal stage in the data model, so the engine cannot tell, at LOCUS 1,
- *  WHETHER the carried-out praxis is the grave act, nor whether the irreversibility was
- *  "treated as decisive" (examined before acting). The two failure modes are symmetric
- *  and both stem from that one gap:
- *    - an UNDER-strictness bypass — gating on "any synkatathesis stage present" lets a
- *      rash destructive act through whenever an UNRELATED synkatathesis is extracted
- *      (e.g. "I considered a coffee first, then ran rm -rf"); a FAITHFUL extraction can
- *      reach it, and it flips the assent gate to PROCEED. UNSAFE — rejected.
- *    - an OVER-strictness ceiling — flooring any carried-out grave act over-floors a
- *      genuinely-good, examined, necessary irreversible act (and a withheld grave step
- *      accompanied by an unrelated benign praxis). SAFE direction — chosen.
- *  We take the SAFE (conservative) reading: floor any carried-out grave act. The
- *  over-floor of a good carried-out irreversible act is a DISCLOSED LOCUS-1 ceiling
- *  (battery OS3; symmetric with the dikaiosyne P5d/P5e ceilings). The SOUND fix — bind
- *  the urgency signal to its causal stage so the floor requires the GRAVE praxis itself
- *  to be carried out un-examined — is a data-model change deferred to the §4 activation /
- *  LOCUS-2 work (alongside the Layer-1 prompt change). (Adversarial-review folds
- *  2026-06-25: the first review flagged the over-floor; the examination-gate fix for it
- *  introduced the under-strictness bypass; the fold-verification caught the bypass; this
- *  is the reverted safe baseline + the disclosed ceiling.) */
+ *  The floor is decided PER GRAVE INDICATOR (the OS3 sound fix, 2026-06-25; the
+ *  per-indicator decision REPLACES the earlier global enriched/fallback switch that
+ *  the adversarial review found bypassable — see the no-bypass note below):
+ *    - A grave indicator with an EXPLICIT `stage`:
+ *        • stage !== 'praxis' (contemplated/withheld) → no floor from it (fixes the OS3
+ *          "unrelated benign praxis floors a withheld grave act" over-strictness).
+ *        • stage === 'praxis' AND `examined_before_acting === true` (gravity weighed
+ *          before acting) → no floor from it (courage exercised; the OS3 case-(a) fix).
+ *        • stage === 'praxis' AND examination not affirmed → reflexive (rash).
+ *    - A grave indicator with NO `stage` (stage-LESS): we cannot tell whether THIS
+ *      grave act was carried out or withheld, so we read it CONSERVATIVELY — if ANY
+ *      praxis act is evidenced in causal_stage_evidence, it MAY be the carried-out
+ *      grave act → reflexive. The extractor must emit an explicit non-praxis stage to
+ *      lift this (the route-2a richness contract).
+ *
+ *  THE LOAD-BEARING NO-BYPASS GUARANTEE. Examination is read FROM THE GRAVE INDICATOR
+ *  ITSELF — NEVER a global synkatathesis scan — so an unrelated assent ("considered
+ *  coffee first, then ran rm -rf") cannot lift the floor (the 2026-06-25 fold-
+ *  verification class). AND a stage-LESS rash grave indicator is read conservatively
+ *  per-indicator, so an unrelated *decoy* grave indicator that happens to carry a
+ *  non-praxis stage cannot flip the rash act past the floor (the 2026-06-25
+ *  pre-activation-review class — ANDREIA-MIXED-STAGE-BYPASS; the earlier global
+ *  `enriched` switch had this hole). A grave indicator only escapes the floor by its
+ *  OWN explicit (withheld stage) OR (praxis + examined) evidence.
+ *
+ *  Disclosed ceiling: a LYING `examined_before_acting: true` on a rash carried-out act
+ *  lifts the floor (the boolean is a single LLM-emitted signal). This is a LOCUS-2
+ *  extraction-quality / Goodhart ceiling — and post-decouple it reaches only the
+ *  /api/reason PROFILE, never the Live gate (the §3 bridge stays on the gate). Closing
+ *  it (require corroboration tying the examination to THIS act) is a named follow-up
+ *  gating the model-creator/weights tier, NOT this session's /api/reason activation.
+ *  The un-enriched case (no grave indicator carries a `stage`) is byte-identical to the
+ *  pre-2026-06-25 baseline by construction (every grave indicator takes the stage-less
+ *  conservative path → any grave act + a praxis stage anywhere → reflexive), preserving
+ *  the LOCUS-1 P4b/P4c controls. */
 function computeAndreiaFloor(
   passions: PassionDiagnosis,
   urgency: UrgencyIndicator[],
   stages: CausalStageEvidence[]
 ): KatorthomaProximity | null {
-  const hasGrave = urgency.some(
+  const graveIndicators = urgency.filter(
     (u) => u.signal_type === 'irreversibility_language' || u.signal_type === 'finality_language'
   )
   const hasPhobos = passions.passions_detected.some((p) => p.root_passion === 'phobos')
-  if (!hasGrave && !hasPhobos) return null
-  const actedAtPraxis = stages.some((s) => s.stage === 'praxis')
+  if (graveIndicators.length === 0 && !hasPhobos) return null
+
+  // Acting FROM a fear-passion at impulse/action is deficient courage (unchanged).
   const phobosActed = passions.passions_detected.some(
     (p) =>
       p.root_passion === 'phobos' &&
       (p.causal_stage_affected === 'praxis' || p.causal_stage_affected === 'horme')
   )
-  // Conservative: any grave/irreversible act carried out at praxis → reflexive (no
-  // synkatathesis escape — that would let a rash act bypass via an unrelated pause).
-  if (hasGrave && actedAtPraxis) return 'reflexive'
-  if (phobosActed) return 'reflexive' // acted from fear
-  return null // grave step withheld (no praxis) → courage exercised
+  if (phobosActed) return 'reflexive'
+
+  if (graveIndicators.length === 0) return null
+
+  const actedAtPraxis = stages.some((s) => s.stage === 'praxis')
+  // PER-INDICATOR decision — a grave act floors only on its OWN evidence; no grave
+  // indicator's escape depends on any OTHER indicator (the no-bypass guarantee).
+  for (const g of graveIndicators) {
+    if (g.stage == null) {
+      // Stage-LESS: cannot tell carried-out vs withheld → conservative (the safe
+      // direction). If any praxis is evidenced, this grave act may be it → floor.
+      if (actedAtPraxis) return 'reflexive'
+      continue
+    }
+    if (g.stage !== 'praxis') continue // explicitly contemplated/withheld → no floor
+    if (g.examined_before_acting === true) continue // gravity weighed before acting → courage
+    return 'reflexive' // carried-out grave act, un-examined → rash
+  }
+  return null
 }
 
 /** sophrosyne domain proximity (Change 1). null ⇒ not engaged. A disordered impulse
@@ -1540,23 +1569,24 @@ function describeProximityBasis(
   },
   aggregate: KatorthomaProximity
 ): string {
-  const limiting: string[] = []
+  const limiting: string[] = [] // strictly floored the base BELOW the apatheia reading
+  const coLimiting: string[] = [] // pins the aggregate at exactly the base level (constrains, does not lower)
   for (const [name, level] of [
     ['dikaiosyne', floors.dikaiosyne],
     ['andreia', floors.andreia],
     ['sophrosyne', floors.sophrosyne],
   ] as const) {
-    if (
-      level !== null &&
-      PROXIMITY_RANK[level] === PROXIMITY_RANK[aggregate] &&
-      PROXIMITY_RANK[level] < PROXIMITY_RANK[base]
-    ) {
-      limiting.push(`${name}=${level}`)
-    }
+    if (level === null || PROXIMITY_RANK[level] !== PROXIMITY_RANK[aggregate]) continue
+    if (PROXIMITY_RANK[level] < PROXIMITY_RANK[base]) limiting.push(`${name}=${level}`)
+    else if (PROXIMITY_RANK[aggregate] === PROXIMITY_RANK[base]) coLimiting.push(`${name}=${level}`)
   }
-  return limiting.length === 0
-    ? `aggregate set by the base (apatheia) reading '${base}'; no engaged virtue domain floored below it`
-    : `unity-thesis minimum: base '${base}' floored to '${aggregate}' by ${limiting.join(', ')}`
+  if (limiting.length > 0) {
+    return `unity-thesis minimum: base '${base}' floored to '${aggregate}' by ${limiting.join(', ')}`
+  }
+  if (coLimiting.length > 0) {
+    return `aggregate '${aggregate}' equals the base (apatheia) reading; co-limiting engaged domain(s) at the same level: ${coLimiting.join(', ')}`
+  }
+  return `aggregate set by the base (apatheia) reading '${base}'; no engaged virtue domain floored below it`
 }
 
 /**
@@ -1594,8 +1624,24 @@ function computeProximity(
     (f) => f.factor_type === 'natural_relationship'
   )
   const dik = computeDikaiosyneFloor(oik.relevant_circles, hasNaturalRelationship)
-  const and = computeAndreiaFloor(passions, urgency, stages)
+  let and = computeAndreiaFloor(passions, urgency, stages)
   const sop = computeSophrosyneFloor(passions)
+
+  // UNITY-THESIS courage↔justice coupling (the OS3 / urgent-good-act over-strictness fix,
+  // 2026-06-25 activation session). A carried-out grave/irreversible act that demonstrably
+  // HONOURS what is owed to EVERY affected party (dikaiosyne fully met ⇒ dik === 'sage_like')
+  // is courage under pressure, NOT rashness — the andreia floor does not fire. Rationale: the
+  // unity thesis (the basis of §4) holds the virtues as one; an act that perfectly serves
+  // justice toward the affected is not deficient in courage. This closes the andreia over-
+  // strictness on JUSTIFIED-URGENT irreversible acts (LOCUS-1 OS3; the LOCUS-2 G4 "immediately
+  // rotated leaked creds to protect customers" case, which the conservative floor over-floored
+  // because the extraction read the urgency as un-examined). SAFETY: this is the SAME extraction-
+  // trust ceiling as the disclosed lying-`met` dikaiosyne ceiling (P5d) — a genuinely HARMFUL
+  // grave act cannot get dik === 'sage_like' on a faithful extraction (its obligations read
+  // violated/unresolved), so it still floors; a SELF-REGARDING rash act has no engaged circle
+  // (dik === null, not 'sage_like') so it still floors (D5 preserved). No NEW gaming class: the
+  // only escape is an all-`met`-argued dikaiosyne, already disclosed as the lying-met ceiling.
+  if (and === 'reflexive' && dik === 'sage_like') and = null
 
   const engaged: KatorthomaProximity[] = [base]
   if (dik !== null) engaged.push(dik)

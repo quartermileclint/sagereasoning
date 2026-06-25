@@ -399,13 +399,13 @@ function printSummary(results: ReasoningResult[]) {
   console.log(`  ${C.bold}Kathekon-count gaming (the §4 target):${C.reset} ${kathekonGamedClosed.length}/${kathekonGamed.length} gamed injustices floored below principled ${kathekonGamedClosed.length === kathekonGamed.length ? C.green + '(lever closed; P5a AND P5c → reflexive)' + C.reset : C.red + '(still open)' + C.reset}`)
   console.log(`  ${C.bold}Deterministic ASSENT gate${C.reset} (threshold='${LIVE_ASSENT_THRESHOLD}') proceeds on LOCUS-1-closeable grave bad/gamed cases: ${C.red}${badAssentCount(results, false)}${C.reset} → ${C.green}${badAssentCount(results, true)}${C.reset} — the §4 fix lets the LLM justice bridge RETIRE`)
   console.log(`  ${C.dim}  (disclosed LOCUS-1 ceilings that still proceed — catch is LOCUS-2 / the bridge: ${ceilingAssentProceeds(results).join(', ') || 'none'})${C.reset}`)
-  console.log(`  ${C.bold}${C.yellow}OVER-STRICTNESS CAVEAT (LOCUS-1-conditional):${C.reset} the 0/${overStrictnessProbed.length} PASS holds ONLY for maximally-favourable extractions that POPULATE obligation_assessment.`)
-  console.log(`  ${C.dim}    The Layer-1 LLM does NOT yet emit that field (the route-2a prompt change is deferred); flag-on over TODAY's extraction would over-floor every good action that ENGAGES A CIRCLE OR NAMES A NATURAL_RELATIONSHIP obligation to reflexive (J1; computeDikaiosyneFloor engages on circles>=1 || hasNaturalRelationship).${C.reset}`)
-  console.log(`  ${C.dim}    ACTIVATION PREREQUISITE: land the Layer-1 obligation_assessment prompt change (+ the §4 full-sandwich LOCUS-2 over-strictness battery) BEFORE any flag flip.${C.reset}`)
+  console.log(`  ${C.bold}${C.yellow}OVER-STRICTNESS (LOCUS 1):${C.reset} the 0/${overStrictnessProbed.length} PASS is on maximally-favourable hand-authored extractions that POPULATE obligation_assessment.`)
+  console.log(`  ${C.dim}    The Layer-1 prompt change LANDED 2026-06-25 (§4 activation session); the full-sandwich LOCUS-2 battery (scripts/locus2-sandwich-battery.ts) confirmed the REAL Sonnet extraction emits obligation_assessment + the andreia stage-link — the dikaiosyne direction is clean and the over-strictness PASS holds on real extractions (see the LOCUS-2 results memo).${C.reset}`)
+  console.log(`  ${C.dim}    The andreia urgent-good-act over-floor (LOCUS-2 G4) is RESOLVED by the unity-thesis courage↔justice coupling (a dik=sage_like grave act is courage, not rashness).${C.reset}`)
   console.log(`  ${C.bold}Disclosed residuals (NOT §4 LOCUS-1 targets):${C.reset}`)
   console.log(`    ${C.mag}P5d${C.reset} LOCUS-1 ceiling — a lying obligation defeats the deterministic scorer → §4 full-sandwich battery (LOCUS 2)`)
   console.log(`    ${C.mag}P5e${C.reset} role-obligation-only circle-free injustice — indistinguishable from a prudential role action at LOCUS 1; the §4 trigger is narrower than the §3 bridge it retires → GATES bridge retirement (Step 8) on LOCUS-2 equivalence`)
-  console.log(`    ${C.mag}OS3${C.reset} andreia over-strictness ceiling — a good carried-out irreversible act over-floors to reflexive (urgency not linked to a causal stage); the conservative SAFE direction (P4c proves no rash-act bypass) → sound fix = the urgency→stage data-model link, deferred to §4 activation`)
+  console.log(`    ${C.green}OS3 RESOLVED${C.reset} the andreia over-strictness ceiling (a good carried-out irreversible act) is CLOSED by the unity-thesis coupling: a grave act honouring justice toward every affected party (dik=sage_like) is courage, not rashness → andreia suppressed; OS3 now scores sage_like. Self-regarding/violated grave acts (dik=null/reflexive) still floor (D5); the no-bypass control P4c holds.`)
   console.log(`    ${C.mag}P2b${C.reset} no epistemic-accuracy term (D3) — a missed-fact decision scores like a caught one → R18 contract scoping bound, not a §4 fix`)
   console.log(`    ${C.mag}P3b-dressed${C.reset} within-framing deference w/ no circle/relationship → LOCUS-2 extraction-quality gap`)
 
@@ -424,7 +424,7 @@ function printSummary(results: ReasoningResult[]) {
   console.log(`${C.dim}MACHINE_POSTFIX(flag-on): ${JSON.stringify({
     controls_ok: controlsOk,
     over_strictness_pass_locus1: overFloored.length === 0,
-    over_strictness_locus2_conditional_on_l1_prompt: true,
+    over_strictness_locus2_measured: '2026-06-25 — Layer-1 prompt landed; LOCUS-2 battery cleared the dikaiosyne direction; andreia urgent-good case resolved by the unity-thesis coupling',
     apatheia_mean_overscore: Number(aOn.mean.toFixed(2)),
     apatheia_to_principled_plus: aOn.toPrincipled,
     kathekon_gamed_floored: kathekonGamedClosed.length,
