@@ -120,9 +120,14 @@ async function sandwichVerdict(f: Fixture): Promise<Outcome> {
   if (o.status === 'verdict') {
     const notes: string[] = []
     if (o.verdict.is_kathekon === false) notes.push('kathekon floor (is_kathekon=false)')
-    if (o.verdict.justice_resolution) {
-      notes.push(`justice=${o.verdict.justice_resolution.obligation} [${o.verdict.justice_resolution.circle}]`)
-    }
+    // ADR-010 §3 bridge RETIRED (2026-06-26): the justice floor is now NATIVE in the
+    // signed proximity (proximity_floors.dikaiosyne), not a separate justice_resolution.
+    const dik = o.assessment.proximity_floors?.dikaiosyne
+    if (dik) notes.push(`dikaiosyne=${dik}`)
+    const violated = o.assessment.oikeiosis.relevant_circles
+      .filter((c) => c.obligation_assessment?.status === 'violated')
+      .map((c) => c.circle)
+    if (violated.length) notes.push(`obligation_violated [${violated.join(', ')}]`)
     return { engine: 'sandwich', proximity: o.verdict.katorthoma_proximity, proceed: o.verdict.proceed, recommendation: o.verdict.recommendation, note: notes.length ? notes.join('; ') : undefined }
   }
   if (o.status === 'tier1_pause') return { engine: 'sandwich', proximity: 'TIER1', proceed: false, recommendation: 'pause_for_review', note: `tier1 ${o.trigger.trigger_code} → conservative pause` }

@@ -1317,8 +1317,10 @@ function assessIterativeRefinement(
 // Built per `operations/benchmarks/sage-practice-v1/2026-06-24-adr010-section4-
 // engine-fix-scope.md`; the mentor record `…/2026-06-19-mentor-consultation-
 // guardrail-fidelity.md` is the reasoning. Flag-gated (default off ⇒ byte-identical);
-// activation is a founder-walked 0c-ii. When this floors natively, the guardrail
-// justice bridge (guardrail-sandwich.ts) retires (ADR-010 §3 expiry).
+// activation is a founder-walked 0c-ii. This floors natively, so the guardrail
+// justice bridge (guardrail-sandwich.ts) was RETIRED 2026-06-26 — the gate calls
+// applyMechanisms({ dikaiosyneWeighting: true }) and floors dikaiosyne natively in
+// the signed proximity (ADR-010 §3 "Expiry" executed).
 // ============================================================================
 
 /** Env default for the §4 per-domain dikaiosyne weighting. Read ONLY when the

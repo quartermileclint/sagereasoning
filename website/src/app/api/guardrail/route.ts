@@ -204,11 +204,13 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // The Layer-1 extraction call's usage; null on engine failure.
+      // The Layer-1 extraction call's usage; null on engine failure. The gate now
+      // makes a SINGLE LLM call (Layer-1 only) — the §3 justice bridge's second
+      // bounded Sonnet call is retired (ADR-010 §3 expiry, 2026-06-26).
       let gateUsage: { input_tokens: number; output_tokens: number } | null = null
-      // The justice-completion bridge's bounded call usage (ADR-010 §3) — present
-      // only when the scope fired on a 'verdict' outcome; metered as a SECOND call.
-      let justiceUsage: { input_tokens: number; output_tokens: number } | null = null
+      // The §4 native dikaiosyne domain floor (proximity_floors.dikaiosyne) for
+      // analytics observability — null when no oikeiosis circle was engaged.
+      let dikaiosyneFloor: string | null = null
       let resultBody: Record<string, unknown>
 
       if (outcome.status === 'engine_unavailable') {
@@ -252,9 +254,9 @@ export async function POST(request: NextRequest) {
       } else {
         // status === 'verdict' — the deterministic, signed result.
         gateUsage = outcome.usage
-        // The justice-completion bridge (ADR-010 §3) makes a SECOND bounded Sonnet
-        // call when it fires; null when the scope did not fire. Metered below.
-        justiceUsage = outcome.justice_usage
+        // §4 native dikaiosyne floor for analytics (reproducible from the signed
+        // assessment's proximity_floors; the §3 bridge's separate resolution is gone).
+        dikaiosyneFloor = outcome.assessment.proximity_floors?.dikaiosyne ?? null
         const v = outcome.verdict
         const criticalOverride = !!alternativesWarning && resolvedRiskClass === 'critical'
         const rollbackPath = resolvedRiskClass === 'critical'
@@ -279,11 +281,12 @@ export async function POST(request: NextRequest) {
           considered_alternatives_provided: consideredAlternativesProvided,
           alternatives_warning: alternativesWarning,
           stage_scores: v.stage_scores,
-          // The justice-completion bridge's disclosed resolution (ADR-010 §3; R10)
-          // — present ONLY when a justice-toward-others dimension was signalled.
-          // Surfaced so the proximity floor is visible, never a hidden override;
-          // the RAW deterministic proximity remains in the signed assessment.
-          ...(v.justice_resolution ? { justice_resolution: v.justice_resolution } : {}),
+          // §4 native dikaiosyne weighting (ADR-010 §4): when the action engages a
+          // justice-toward-others dimension, the dikaiosyne floor is folded into the
+          // SIGNED proximity (proximity_floors.dikaiosyne + per-circle
+          // obligation_assessment in the assessment below), so a justice-floored
+          // verdict is FULLY REPRODUCIBLE from the signed assessment. The §3 bridge's
+          // separate, unsigned justice_resolution field is retired.
           // The Layer-1 extraction (R10-2) — parity with /api/reason; lets a
           // consumer re-run applyMechanisms over it and verify the full
           // action→extraction→assessment chain.
@@ -297,10 +300,9 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // CI-10 metering + CI-8 cost: the Sonnet L1 extraction, plus — when the
-      // justice-completion bridge fired (ADR-010 §3) — the SECOND bounded Sonnet
-      // justice call. Both are metered (separate addCall + summed cost) so cost and
-      // call count stay honest.
+      // CI-10 metering + CI-8 cost: the single Sonnet L1 extraction. The §3 justice
+      // bridge's second bounded Sonnet call is retired (ADR-010 §3 expiry), so the
+      // gate now meters exactly one LLM call.
       let measuredCostUsd: number | null = null
       let costBasis = 'no_llm_call'
       if (gateUsage) {
@@ -308,12 +310,6 @@ export async function POST(request: NextRequest) {
           loopAccumulator.addCall(MODEL_DEEP, gateUsage.input_tokens, gateUsage.output_tokens)
         }
         measuredCostUsd = estimateCallCostCents(MODEL_DEEP, gateUsage.input_tokens, gateUsage.output_tokens) / 100
-        if (justiceUsage) {
-          if (loopAccumulator) {
-            loopAccumulator.addCall(MODEL_DEEP, justiceUsage.input_tokens, justiceUsage.output_tokens)
-          }
-          measuredCostUsd += estimateCallCostCents(MODEL_DEEP, justiceUsage.input_tokens, justiceUsage.output_tokens) / 100
-        }
         costBasis = 'anthropic_usd_measured'
       }
 
@@ -331,10 +327,9 @@ export async function POST(request: NextRequest) {
             risk_class: resolvedRiskClass,
             evaluation_depth: 'deterministic',
             engine: 'translation-sandwich',
-            // Justice-completion bridge observability (ADR-010 §3) — the resolved
-            // obligation when the bridge fired; null otherwise.
-            justice_obligation:
-              (resultBody.justice_resolution as { obligation?: string } | undefined)?.obligation ?? null,
+            // §4 native dikaiosyne observability — the dikaiosyne domain floor from
+            // proximity_floors (reproducible); null when no circle was engaged.
+            dikaiosyne_floor: dikaiosyneFloor,
           },
         })
         .then(() => {})
@@ -623,9 +618,8 @@ export async function GET(request: NextRequest) {
           risk_class: 'The resolved risk classification (standard | elevated | critical)',
           evaluation_depth: "Constant 'deterministic' — the verdict is computed from the Layer-1 extraction by a free mechanism pass, not an LLM. Only the mechanism count follows risk_class (standard=3, elevated=5, critical=6)",
           rollback_path: '(Critical only) Structural reminder to specify how to undo the action if it causes harm',
-          justice_resolution: 'OPTIONAL { obligation: met | violated | indeterminate, circle, justification, source } — present only when the action engages a justice-toward-others dimension; its presence means katorthoma_proximity may have been floored below the raw value in signed_assessment (a calmly-reasoned injustice is capped, not rated near-virtuous). A justice-floored verdict is disclosed but NOT reproducible from the signed assessment alone',
           extraction: 'The Layer-1 features the verdict was computed from — re-run the mechanisms over this to verify the action→extraction→assessment chain',
-          signed_assessment: 'The Ed25519-signed raw Layer-2 assessment (verify against GET /api/public-key). On a signing outage the gate fails closed with HTTP 503; on an engine or justice-resolver outage it returns a conservative pause, never a silent proceed',
+          signed_assessment: "The Ed25519-signed raw Layer-2 assessment (verify against GET /api/public-key). Dikaiosyne is weighted NATIVELY (ADR-010 §4): when the action engages a justice-toward-others dimension, katorthoma_proximity is the unity-thesis minimum across the engaged virtue domains (a calmly-reasoned injustice floors to 'reflexive', not near-virtuous), and the assessment carries proximity_floors {base, dikaiosyne, andreia, sophrosyne, aggregate, basis} + per-circle oikeiosis.relevant_circles[].obligation_assessment {status, justification} — so a justice-floored verdict is FULLY REPRODUCIBLE from the signed assessment (the earlier §3 LLM justice bridge was retired 2026-06-26). On a signing outage the gate fails closed with HTTP 503; on an engine outage it returns a conservative pause, never a silent proceed",
         },
       },
       example_integration: `
