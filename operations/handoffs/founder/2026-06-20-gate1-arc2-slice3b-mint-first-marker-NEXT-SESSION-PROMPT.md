@@ -26,10 +26,13 @@ first time. This makes Option-2's shared "Gate 1" name honest two hops downstrea
 
 ## Pre-conditions — read first
 
-1. **Slice 3a's live-verify is walked** (`harness/gate1-pre-decision/claude-code/SLICE3-LIVE-VERIFY-WALKTHROUGH.md`).
-   3b issues the marker "in good conscience" only once the harness is **trajectory-proven live** — the
-   subagent hook fires + frames, and the `/plugin install` registers. **Record the confirmed
-   `tool_name`** (Task vs Agent) from that walk. If not yet done, do it first (TEST-only).
+1. **Slice 3a's live-verify is walked** — **DONE 2026-06-21 (Leg A, PASS).** The harness is
+   **trajectory-proven live**: the subagent hook fires + frames a delegated task, the real
+   **`tool_name` is `Agent`**, and `updatedInput` is applied (the subagent's own transcript shows its
+   prompt leads with the Gate-1 frame). The `/plugin install` path could NOT be exercised (`/plugin`
+   is absent in the founder's desktop build), so the hooks were verified via the standalone
+   `.claude/settings.local.json` registration and the plugin packaging stays
+   in-sandbox-structurally-validated. (Detail: the Slice-3a decision-log entry's "Live-verified" note.)
 2. **Arc 1 is Live:** `SUBSTRATE_EXAMINATION_MODE_ENABLED=true` in prod; the public GET
    `/api/accreditation/{agent_id}` already folds `examination_mode` (`post_decision_check` on new
    discretionary writes, `null` on pre-field rows). `pre_decision_harness` is reachable ONLY via the

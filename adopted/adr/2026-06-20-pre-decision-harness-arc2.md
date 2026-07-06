@@ -198,6 +198,20 @@ Live-fire is the founder-walked test loop (`claude-code/SLICE5C-LIVE-VERIFY-WALK
 
 ---
 
+## Amendment 2026-06-22 — channel-routed correction + value-first sequencing (governed by the correction build plan)
+
+**Status:** Adopted (design). A full-hook **bare/uninstructed** run (`operations/benchmarks/sage-practice-v1/runs/2026-06-21/leg-d-v6-bare/2026-06-22-rerun/`) showed H1–H4 **fire** the whole loop on an uninstructed agent, yet the harness still misses its purpose: it targets on **tool patterns** (consulted before `date`), puts the load-bearing consult on the **ADVISE** channel (discounted → loops 0-closed/3-abandoned), and the install **starved the binding paths** (`GATE1_PROVENANCE_ENABLED` unset, no ACCRED credential/agent_id → `accred=no-provenance`, no credential). A 13-agent root-cause→design→verify workflow (all four adversarial skeptics returned holds=False/high on the first synthesis) produced the correction.
+
+**The correction is governed by `operations/p1-rebuild-2026-06/gate1-fullloop-correction-build-plan.md`** ("Channel-Routed Full-Loop Harness"), which **supersedes the conflicting parts of the 2026-06-21 3-hook amendment (D-A…D-F)**. Headlines:
+- **Targeting:** the **GUARD** (irreversible-action allowlist, can deny) is the primary "fire on a real decision" mechanism — the only correct tool-pattern use, and it binds. The consult stops firing on tool TYPE (housekeeping **denylist-AND-NOT-destructive** filter; Gate 2 moves to an agent-**declared** `sage_examine` surface — the only path to a tool-less reasoning decision, honest ~68%). The auto path is **structurally blind** to the value-bearing reasoning decisions — state it, don't claim Gate-2 coverage.
+- **Binding:** nothing load-bearing on ADVISE; **reversible loops stay honestly UNCLOSED** unless re-consulted (don't over-claim closure); only **guard-on-retry** (irreversible set) forces re-examination; closure is **computed at the live write boundary** (`analyseLoopClosure`).
+- **Materialization:** default capture ON when H3/H4 run; **`sage-on` provisions the write path**; **keep a conservative truthful seed** (`pre_progress`/0) and carry the **real signed chain** in `provenance.signed_assessments` (the server stores the seed grade *verbatim* — never claim it computes the grade).
+- **Value-first sequencing (the dispositive re-sequence):** **prove decision-value on a BORDERLINE scenario (3-arm) BEFORE building the ceiling slices.** If no delta even on a borderline case, the honest product value is the **verifiable trust record**, not decision-sharpening — narrow the claim accordingly. Zero delta on a *stark* scenario is correct, not a failure.
+
+**Build:** `operations/handoffs/founder/2026-06-22-gate1-fullloop-correction-build-NEXT-SESSION-PROMPT.md` (Gate phase: S1 targeting + S2 provisioning + S3 honest accreditation + author S6 value benchmark; S4/S5 conditional on S6; S7 the Critical erasure prerequisite).
+
+---
+
 ## References
 
 - `drafts/sage-practice-pre-decision-harness-design.md` — the research-backed design (this ADR's basis; now governed by this ADR).

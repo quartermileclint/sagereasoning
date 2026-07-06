@@ -154,6 +154,7 @@ Patterns the AI has demonstrated in this project and is now required to actively
 |---|---|---|
 | **Prescribe-before-grounding** (KG-EX1) | The AI recommends removing / retiring / simplifying / consolidating something — *before* asking what it's for or inspecting read-only. Or it picks a tidy default framing before confirming founder intent. | *"Are you grounding this in my purpose first?"* |
 | **Narrow unit of analysis** (KG-EX1 sub-form) | The AI assesses a per-component property when the founder's concern is the flow / configuration / user-facing whole. Treats per-component findings as the verdict instead of as input. Misses the audience dimension (human user message vs agent developer notification). | *"What's the unit of analysis here?"* |
+| **Method/test/frame before purpose** (KG-EX1 root — recurred ≥5× Apr→Jun, incl. the P1 & S6 benchmarks *after* this table existed) | The AI picks a **test method, benchmark axis, skill scope, diagnostic unit, or verification query** before grounding what the thing is *for* + what observable proves it. Most expensive form: **testing a *measure* as an *intervention*** — a comparative "does it beat baseline" benchmark on something whose value is measurement/fidelity, which reads a structurally-guaranteed false "no benefit." | *"What's the purpose + the observable, before the method?"* · *"Are we testing this as an instrument or an intervention?"* · *"If it passes, could it have passed while broken?"* |
 | **One-line operational hand-off** (PR17) | The AI defers founder-performed setup (env standup, dashboards, credentials, deployment) to a single line in a close or prompt instead of walking the founder through it live. Pointing at a checklist counts as a one-liner. | *"Are you reducing this to a one-line hand-off?"* |
 
 Two general phrases for when the founder loses the thread:
@@ -162,7 +163,7 @@ Two general phrases for when the founder loses the thread:
 
 **At session open the AI also narrates, before any substantive work:** where we are in the arc; what's queued; what's awaiting the founder; what's awaiting the AI. This is the founder's primary handhold across sessions (the AI has no persistent memory; the docs are its memory).
 
-**Sources:** PR17 (`D-PR17-ADOPTED-WALKTHROUGH-2026-05-27`); KG-EX1 (`/operations/knowledge-gaps.md` §"Permanent Entries (Beyond KG1–KG7)"); session debrief (`/operations/session-debriefs/2026-05-27_c2-r20a-perimeter-and-meta-debrief.md`).
+**Sources:** PR17 (`D-PR17-ADOPTED-WALKTHROUGH-2026-05-27`); KG-EX1 (`/operations/knowledge-gaps.md` §"Permanent Entries (Beyond KG1–KG7)"); session debrief (`/operations/session-debriefs/2026-05-27_c2-r20a-perimeter-and-meta-debrief.md`); the **2026-06-24 generalization** of KG-EX1 to the root *method-before-purpose* failure (`D-AI-FAILURE-MODE-METHOD-BEFORE-PURPOSE-GENERALISED-2026-06-24`) — the "Method/test/frame before purpose" row + the instrument-vs-intervention redirect.
 
 ---
 

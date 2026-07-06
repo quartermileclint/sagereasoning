@@ -1,0 +1,61 @@
+{
+  "_comment": "Backup of the SageReasoning Gate-1 hooks block for .claude/settings.local.json. This is the canonical 'ON' state used by the /sage-on and /sage-off skills. Contains NO credential (the SAGE_GATE1_CREDENTIAL lives in the settings 'env' block, not here). /sage-off refreshes this file with whatever hooks are currently installed before removing them; /sage-on merges this 'hooks' object back in. Hooks: H1 UserPromptSubmit (top-level framing), H2 PreToolUse Task|Agent (subagent framing), H3 PreToolUse Bash|Edit|Write|MultiEdit|NotebookEdit (at-action: guard + consult + loop-closure), H4 Stop (reflect turn + accred + persistReflection).",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/harness/gate1-pre-decision/claude-code/hooks/framing-hook.mjs"
+            ],
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/harness/gate1-pre-decision/claude-code/hooks/subagent-framing-hook.mjs"
+            ],
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/harness/gate1-pre-decision/claude-code/hooks/at-action-hook.mjs"
+            ],
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/harness/gate1-pre-decision/claude-code/hooks/close-hook.mjs"
+            ],
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,2 @@
+GET https://www.sagereasoning.com/.well-known/agent-card.json
+(no auth; public documentation fetch)

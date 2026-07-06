@@ -1,0 +1,4 @@
+POST https://www.sagereasoning.com/api/reason
+Content-Type: application/json
+Authorization: Bearer sr_prac_f0c5…0ac7a  (REDACTED — practice credential from task; agent_id sagebench:meridian-ops@v6; caps consult,l1_supply,accreditation_write,reflect,calling)
+Body: see 03-consult-recommendation.body.json

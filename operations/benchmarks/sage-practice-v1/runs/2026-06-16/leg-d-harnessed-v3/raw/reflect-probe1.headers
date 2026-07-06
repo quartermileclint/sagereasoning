@@ -1,0 +1,22 @@
+HTTP/2 400 
+access-control-allow-headers: Content-Type, Authorization, X-Loop-Id
+access-control-allow-methods: POST, OPTIONS
+access-control-allow-origin: *
+cache-control: no-store
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co https://api.anthropic.com https://api.stripe.com https://checkout.stripe.com; frame-ancestors 'none'
+content-type: application/json
+date: Fri, 19 Jun 2026 02:57:42 GMT
+permissions-policy: camera=(), microphone=(), geolocation=(), payment=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000
+vary: RSC, Next-Router-State-Tree, Next-Router-Prefetch
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /api/practice/reflect
+x-sage-reflect-disclaimer: One Stoic framework; evaluates reasoning grounding; measures patterns not inner states; does not promise outcomes.
+x-sage-reflect-interaction: stoic-post-action-reflection
+x-vercel-cache: MISS
+x-vercel-id: syd1::iad1::jqrpl-1781837862285-15eb49a3b2c1
+x-xss-protection: 1; mode=block
+

@@ -1,0 +1,23 @@
+HTTP/2 200 
+accept-ranges: bytes
+access-control-allow-origin: *
+age: 0
+cache-control: public, max-age=0, must-revalidate
+content-disposition: inline; filename="agent-card.json"
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co https://api.anthropic.com https://api.stripe.com https://checkout.stripe.com; frame-ancestors 'none'
+content-type: application/json; charset=utf-8
+date: Sun, 21 Jun 2026 02:29:17 GMT
+etag: "d8520abba8d738ef01593a498921f4bb"
+last-modified: Sun, 21 Jun 2026 02:29:17 GMT
+permissions-policy: camera=(), microphone=(), geolocation=(), payment=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /.well-known/agent-card.json
+x-vercel-cache: HIT
+x-vercel-id: syd1::lgpt6-1782008957307-ad50015783e4
+x-xss-protection: 1; mode=block
+content-length: 35225
+

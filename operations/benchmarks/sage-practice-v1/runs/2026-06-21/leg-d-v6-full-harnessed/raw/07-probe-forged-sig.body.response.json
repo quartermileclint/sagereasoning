@@ -1,0 +1,1 @@
+{"status":"error","error":"no_examination","message":"This credential write did not demonstrate a SageReasoning examination. A Sage Assent credential requires signed substrate output (R18f).","documentation_url":"https://sagereasoning.com/limitations"}

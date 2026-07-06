@@ -1,0 +1,23 @@
+HTTP/2 200 
+accept-ranges: bytes
+access-control-allow-origin: *
+age: 7725
+cache-control: public, max-age=0, must-revalidate
+content-disposition: inline; filename="llms.txt"
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co https://api.anthropic.com https://api.stripe.com https://checkout.stripe.com; frame-ancestors 'none'
+content-type: text/plain; charset=utf-8
+date: Sun, 21 Jun 2026 02:29:15 GMT
+etag: "1ae90baf20b8338223cc6ff85a847ed5"
+last-modified: Sun, 21 Jun 2026 00:20:30 GMT
+permissions-policy: camera=(), microphone=(), geolocation=(), payment=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /llms.txt
+x-vercel-cache: HIT
+x-vercel-id: syd1::gqt5b-1782008955942-edeeea3a4c95
+x-xss-protection: 1; mode=block
+content-length: 50340
+

@@ -1,0 +1,4 @@
+POST https://www.sagereasoning.com/api/accreditation/sagebench:meridian-ops@v6
+Content-Type: application/json
+Authorization: Bearer sr_prac_f0c5…0ac7a  (REDACTED — practice credential, accreditation_write capability)
+Body: see 05-accreditation-write.body.json  (kind=seed; provenance=2 signed assessments from loops 57506a1c + dacab0ab)

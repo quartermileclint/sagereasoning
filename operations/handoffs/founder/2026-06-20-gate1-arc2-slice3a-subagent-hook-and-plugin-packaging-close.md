@@ -41,13 +41,28 @@ hook was then unregistered; settings restored byte-for-byte.) The matcher `Task|
 possible tool names and the hook reads `tool_input.prompt` either way, so the build is robust to the
 one unknown the live-verify pins down.
 
+## Update — Live-verify (2026-06-21): Leg A PASS, end-to-end
+
+The founder walked Leg A via the **standalone-hooks path** — `/plugin` is unavailable in the desktop
+build, so the plugin-*install* mechanism could not be exercised; the two hooks were registered in
+`.claude/settings.local.json` (`${CLAUDE_PROJECT_DIR}` paths) instead. **Result: PASS.** A fresh
+conversation framed the top-level task and the model scoped a destructive "delete the staging
+database" request into a hard-constrained **read-only investigator** subagent, citing Gate 1. The
+**subagent hook fired** (`gate1.log`: `FRAMED-SUBAGENT … proximity=deliberate`); the captured
+`PreToolUse` stdin confirms the real **`tool_name` is `Agent`** (the matcher `Task|Agent` covered it;
+`Task`-alone would have missed) with the task at `tool_input.prompt`; and **`updatedInput` was
+applied** — the subagent's own transcript shows its received prompt LEADS with the Gate-1 frame. The
+subagent `PreToolUse`-on-`Agent` hook is therefore **Verified (trajectory)**. The plugin packaging
+stays in-sandbox-structurally-validated; its `/plugin install` is a deferred live step (needs a build
+exposing `/plugin`).
+
 ## Decisions Made
 - `D-SAGE-PRACTICE-GATE1-ARC2-SLICE3A-SUBAGENT-HOOK-AND-PLUGIN-PACKAGING-BUILT-VERIFIED` appended.
 
 ## Status Changes
 | Item | Old | New |
 |---|---|---|
-| Subagent framing (`PreToolUse`-on-`Agent`) | documented finding (deferred) | **built; in-sandbox-Verified** (live-verify at close) |
+| Subagent framing (`PreToolUse`-on-`Agent`) | documented finding (deferred) | **Verified (trajectory)** — Leg A live-walked 2026-06-21 (`tool_name=Agent`; `updatedInput` applied) |
 | Negative battery | 40/0 | **56/0** (subagent leg = 16 real assertions) |
 | Claude Code plugin packaging | not started | **built + structure-VALID** (`/plugin install` founder-walked) |
 | Logic harness | 32/0 | 32/0 (core refactor behaviour-preserving) |
@@ -74,12 +89,15 @@ carried into that prompt with the exact mint command.
 - `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (dated Slice-3a note)
 - `operations/decision-log.md` (entry) + this close + the Slice-3b prompt
 
-**Live-verify still owed** (founder, at close — `claude-code/SLICE3-LIVE-VERIFY-WALKTHROUGH.md`):
-mint a throwaway TEST key + raise its limits; install the plugin (`/plugin install
-sage-gate1-pre-decision@sagereasoning`); in a fresh conversation, delegate to a subagent; confirm
-`gate1.log` shows `FRAMED-SUBAGENT`, `PreToolUse-stdin.json` shows the real `tool_name` +
-`tool_input.prompt`, and the subagent received the frame; teardown (revoke key, uninstall, `rm -rf
-/tmp/sage-gate1`). **Record the confirmed `tool_name`** — it tightens the matcher comment + the 3b prompt.
+**Live-verify DONE (2026-06-21):** Leg A passed end-to-end via the standalone-hooks path (`/plugin`
+unavailable in the desktop build). Subagent hook fires; **`tool_name=Agent`** confirmed first-hand;
+`updatedInput` applied (the subagent's prompt leads with the frame). The plugin-install step is
+deferred (needs a `/plugin`-capable build).
+
+**Teardown still owed** (the AI can do the settings cleanup — no secret; the founder revokes the key):
+remove the `env` + `hooks` blocks from `.claude/settings.local.json` (gitignored, never committed);
+revoke the throwaway TEST key (`npx tsx --env-file=.env.development.local scripts/mint-credential.ts
+revoke api --id <uuid>`); `rm -rf /tmp/sage-gate1`.
 
 **Production state at session close:** **byte-unchanged.** Changes touch only `harness/`, the ADR, and
 operations docs — all outside the Next build graph. No Vercel env / Supabase / flag / schema /

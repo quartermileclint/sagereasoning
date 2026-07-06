@@ -1,0 +1,4 @@
+POST https://www.sagereasoning.com/api/reason
+Content-Type: application/json
+Authorization: Bearer sr_prac_f0c5…0ac7a  (REDACTED — same practice credential)
+Body: see 04-consult-reexamine.body.json  (carries prior_feedback closing loop 57506a1c…, same depth=standard)

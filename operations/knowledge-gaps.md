@@ -295,6 +295,14 @@ The KG1–KG7 slots above match the manifest's Knowledge Gaps Register schema an
 
 A fourth, related manifestation — defaulting to **"founder stands up the env between sessions"** — is now structurally blocked by **PR17** (live walkthroughs, no one-line operational hand-offs).
 
+**Recurrence + generalization (2026-06-24 — guard the root, not the surface):** the same root recurred in **test / evaluation / benchmark design** — and **twice *after* this entry already existed**, proving that naming the symptom in one surface's language does not prevent the next costume. Full lineage:
+- **15 Apr — CCP-R17a-01 Q6** (a verification query): the method was structurally incapable of testing its stated purpose — an `UPDATE … WHERE log_id = gen_random_uuid()` on an empty table fires no per-row trigger → *"the test proved nothing"* (a **vacuous pass**; corrected to static catalog checks).
+- **28 Apr — `sage-registry-update`** (manifestation 1's sibling): the skill's scope *"answered the wrong question"* vs the founder's actual end-goal.
+- **27 May — C2** (manifestation 2 above): a *"partially mis-framed diagnostic"* — per-product unit when the purpose was per-flow.
+- **10–11 Jun — the P1 bare-vs-harnessed "value demonstration"** and **22 Jun → 24 Jun — the S6 value-gate matrix**: both tested **decision-change / "does the harness beat bare"** (an *intervention*-effect frame) when the practice's value is **measurement / fidelity** (an *instrument*). A measure tested for *effect* reads a structurally-guaranteed false *"no benefit."* Reframed under ADR-012.
+
+**The root (one failure, many costumes):** the work was **framed / scoped / methodised *before* being grounded in the founder's actual purpose + success criterion.** The surface changes each time — a verification query → a skill scope → a diagnostic's unit → a benchmark's axis — which is why each recurrence does not *feel* like the same mistake and slips past a surface-specific guard. **Do not patch this with another per-surface row — that just teaches the root a new costume.** Guard at the root: purpose + success-criterion *before* method.
+
 **Plain-language resolution (carry forward — apply at every code-elevated/critical session open and at each major recommendation):**
 
 1. **Before recommending removing, retiring, simplifying, or consolidating** something the founder set up deliberately: **confirm its purpose first** — ask, or inspect read-only — *then* advise. Do not present a "tidy default" before grounding.
@@ -302,13 +310,17 @@ A fourth, related manifestation — defaulting to **"founder stands up the env b
 3. **Hold the founder's named concepts as methodologies first, mechanics second.** A "data room" is a workspace; a "perimeter" is a design property; an "ADR" is a decision record. Do not let a tooling view (a folder, a branch, a flag) read as a verdict on the concept.
 4. **When a recommendation would create between-session burden on the founder, convert it into an in-session walkthrough** (PR17) rather than a deferred task.
 5. **Treat founder pushback as high-signal evidence**, not as a request to defend. Re-examine genuinely. The founder's instincts have been repeatedly correct against AI defaults.
+6. **Before choosing any method — and especially before designing a TEST / EVALUATION / BENCHMARK / VERIFICATION — state the *construct under test*, the *success criterion in the thing's own terms*, and the *purpose hypothesis*, and confirm them with the founder *before* building.** Two gates: **(a) instrument vs intervention** — if the thing's value is *measurement / fidelity* (a profile, a score, an observability tool), its success criterion is *fidelity*, and a comparative-outcome benchmark ("does it beat baseline") is the wrong shape and will read a false null — stop and redesign; **(b) the vacuous-pass check** — *if this test passes, could it have passed while the thing was broken?* (the CCP-Q6 trap).
 
 **Founder redirect phrases (for the founder to use mid-session when something feels off — no technical knowledge required):**
 - *"Where are we in the arc?"* — forces the AI to recite carried-forward state.
 - *"What's the unit of analysis here?"* — catches narrow framing.
 - *"Are you grounding this in my purpose first?"* — catches prescribe-before-grounding.
 - *"Are you reducing this to a one-line hand-off?"* — PR17 trigger.
+- *"What's the purpose, and what observable proves it — before you pick the method?"* — the root catch (grounds method/test/scope in purpose).
+- *"Are we testing this as an instrument or an intervention?"* — catches a measure tested for effect (a measure's success is fidelity, not beating a baseline).
+- *"If it passes, could it have passed while broken?"* — catches a vacuous test.
 
 **When this matters:** Any session in which the AI is about to recommend removing / simplifying / consolidating something the founder set up; choose a framing or unit of analysis for a quality/coverage question; or defer work to the founder. Engage at session open + at each major recommendation. Also see `/adopted/standing-protocol-cache.md` §"AI failure modes to watch for at session open" — the cache surface that brings this to attention every session.
 
-**Observation history:** First observed 2026-05-27 across three distinct manifestations within a single C2 session (sufficient for PR5 pre-population from a structured extraction; recurrence count = 1 session, multi-manifestation). Pre-population to permanent Entry status is the deliberate, founder-elected response.
+**Observation history:** First observed 2026-05-27 across three distinct manifestations within a single C2 session (sufficient for PR5 pre-population from a structured extraction; recurrence count = 1 session, multi-manifestation). Pre-population to permanent Entry status is the deliberate, founder-elected response. **Generalised 2026-06-24** (`D-AI-FAILURE-MODE-METHOD-BEFORE-PURPOSE-GENERALISED-2026-06-24`): a cross-session analysis (founder-prompted) found the same root across **≥5 instances spanning 15 Apr → 24 Jun**, including **twice in test design (P1, S6) *after* this entry already existed** — establishing it as a persistent, multi-surface root failure (method/scope/frame before purpose), not a single-session pattern. The recurrence-despite-capture is itself the lesson: surface-specific naming does not generalise; the guard must sit at the root.

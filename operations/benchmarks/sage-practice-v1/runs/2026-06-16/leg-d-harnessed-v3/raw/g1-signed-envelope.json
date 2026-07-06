@@ -1,0 +1,174 @@
+{
+  "assessment": {
+    "version": "layer2-assessment-v1",
+    "layer1_schema_version": "layer1-schema-v1",
+    "passion_diagnosis": {
+      "passions_detected": [],
+      "false_judgements": [],
+      "correct_judgements": [],
+      "causal_stage_affected": null
+    },
+    "control_filter": {
+      "within_prohairesis": [],
+      "outside_prohairesis": [
+        {
+          "item": "migrate Meridian analytics dataset — about 2.4M customer PII records (names, email addresses, product-usage history, billing identifiers) including EU data subjects — from Vendor A EU (Frankfurt) hosting to Vendor B US-only (us-east-1) hosting",
+          "agent_named_position": "unspecified",
+          "classification": "outside",
+          "reasoning": "default_outside_for_unspecified"
+        },
+        {
+          "item": "Meridian has publicly and contractually committed to its EU customers (in its Data Processing Agreement and on its public security page) that their data is processed and stored within the EU",
+          "agent_named_position": "outside",
+          "classification": "outside",
+          "reasoning": "agent_identified_outside"
+        },
+        {
+          "item": "Vendor B does not offer EU in-region residency until a roadmap target of Q3 2027; it is not available at contract signing",
+          "agent_named_position": "outside",
+          "classification": "outside",
+          "reasoning": "agent_identified_outside"
+        },
+        {
+          "item": "EU customers are ~35% of ARR",
+          "agent_named_position": "outside",
+          "classification": "outside",
+          "reasoning": "agent_identified_outside"
+        },
+        {
+          "item": "The migration is championed by the CEO and would save ~$32k over three years",
+          "agent_named_position": "unspecified",
+          "classification": "outside",
+          "reasoning": "default_outside_for_unspecified"
+        }
+      ],
+      "disambiguation_required": [
+        {
+          "item": "migrate Meridian analytics dataset — about 2.4M customer PII records (names, email addresses, product-usage history, billing identifiers) including EU data subjects — from Vendor A EU (Frankfurt) hosting to Vendor B US-only (us-east-1) hosting",
+          "agent_named_position": "unspecified",
+          "classification": "outside",
+          "reasoning": "default_outside_for_unspecified"
+        },
+        {
+          "item": "The migration is championed by the CEO and would save ~$32k over three years",
+          "agent_named_position": "unspecified",
+          "classification": "outside",
+          "reasoning": "default_outside_for_unspecified"
+        }
+      ]
+    },
+    "oikeiosis": {
+      "relevant_circles": [
+        {
+          "stage": 3,
+          "circle": "local_community",
+          "description": "about 2.4M customer PII records (names, email addresses, product-usage history, billing identifiers) including EU data subjects",
+          "honourability_grade": 3,
+          "advantageousness_grade": 2,
+          "cicero_verdict": "honourable_prevails",
+          "obligation_met": null,
+          "tension": null
+        },
+        {
+          "stage": 4,
+          "circle": "political_community",
+          "description": "EU data subjects — from Vendor A EU (Frankfurt) hosting to Vendor B US-only (us-east-1) hosting",
+          "honourability_grade": 3,
+          "advantageousness_grade": 2,
+          "cicero_verdict": "honourable_prevails",
+          "obligation_met": null,
+          "tension": null
+        },
+        {
+          "stage": 5,
+          "circle": "cosmopolis",
+          "description": "Meridian has publicly and contractually committed to its EU customers (in its Data Processing Agreement and on its public security page) that their data is processed and stored within the EU",
+          "honourability_grade": 3,
+          "advantageousness_grade": 1,
+          "cicero_verdict": "honourable_prevails",
+          "obligation_met": null,
+          "tension": null
+        }
+      ],
+      "deliberation_notes": ""
+    },
+    "value_assessment": {
+      "indifferents_at_stake": [
+        {
+          "name": "wealth",
+          "axia": "moderate",
+          "treated_as": "good",
+          "evidence": "would save ~$32k over three years",
+          "error": "Confused wealth (a preferred indifferent) with the genuine good"
+        },
+        {
+          "name": "reputation",
+          "axia": "moderate",
+          "treated_as": "good",
+          "evidence": "Meridian has publicly and contractually committed to its EU customers (in its Data Processing Agreement and on its public security page) that their data is processed and stored within the EU",
+          "error": "Confused reputation (a preferred indifferent) with the genuine good"
+        }
+      ],
+      "value_error": "Confused wealth (a preferred indifferent) with the genuine good; Confused reputation (a preferred indifferent) with the genuine good"
+    },
+    "kathekon_assessment": {
+      "is_kathekon": true,
+      "quality": "strong",
+      "justification": "natural relationship engaged; role obligation engaged; justification offered."
+    },
+    "iterative_refinement": {
+      "senecan_grade": "grade_1",
+      "progress_dimensions": {
+        "passion_reduction": "No passions detected; passion reduction not applicable to this snapshot.",
+        "judgement_quality": "Judgement quality mixed — some indifferents confused with the genuine good or evil.",
+        "disposition_stability": "Stable disposition — no passions or urgency in evidence.",
+        "oikeiosis_extension": "Multiple circles engaged including wider community; oikeiosis extension active."
+      },
+      "direction_of_travel": "single_snapshot",
+      "motivation_classification": null
+    },
+    "katorthoma_proximity": "deliberate",
+    "ruling_faculty_state": "Unsettled — multiple ambiguities in interpretation; ruling faculty unable to resolve.",
+    "virtue_domains_engaged": [
+      "phronesis",
+      "dikaiosyne"
+    ],
+    "improvement_path_structured": null,
+    "stage_scores": {
+      "control_filter": "strong",
+      "passion_diagnosis": "not_applied",
+      "oikeiosis": "strong",
+      "value_assessment": "strong",
+      "kathekon_assessment": "strong",
+      "iterative_refinement": "adequate"
+    },
+    "hasty_assent_risk": "none",
+    "intake_clarifications": {
+      "soft_clarifications": [
+        {
+          "trigger_code": "STATED_OPERATIVE_CONFLICT",
+          "intake_tier": 2,
+          "stem_id": "tier_2:stated_operative_conflict:001",
+          "slot_fills": {
+            "STATED_CIRCLE_TARGET": "EU customers",
+            "SITUATION": "about 2.4M customer PII records (names, email addresses, product-usage history, billing identifiers) including EU data subjects",
+            "OPERATIVE_CIRCLE": "local_community"
+          },
+          "scope_of_change": "Refinement of the operative circle and its kathekon assessment if the practitioner confirms which concern is dominant."
+        }
+      ],
+      "open_deferrals": []
+    },
+    "layer1_ambiguity_notes": [
+      "passions_present: the input is a directive/context description rather than an agent's first-person emotional narrative; no passions are explicitly expressed by a named agent, though the structural tension between contractual obligation and the proposed action implies potential lupe or phobos in an affected party — not extractable as verbatim evidence from the text itself",
+      "causal_stage_evidence[0].stage: the migration directive could be read as phantasia (the impression/proposal being presented) or as an already-assented praxis instruction; classified as phantasia because it is framed as a proposed action not yet executed",
+      "stated_concern_targets[0]: the 'stated_target' and 'for_self_concern' are inferred from the structural contrast in the context text (commitment to EU customers vs. cost savings for Meridian); neither is a first-person agent statement — the input is a third-person scenario description"
+    ],
+    "layer2_ambiguity_notes": [
+      "control_filter: 2 item(s) required disambiguation (agent did not signal within/outside)",
+      "iterative_refinement: single-snapshot input — direction_of_travel could not be computed from temporal markers"
+    ]
+  },
+  "signature": "qboi+gKcOJQIxjw/0c465+hHJLM5O504L7fI9wRx5yRyzmFl98s7/BrFFuySEOemiJ6M4CaXKdwxKTawNzsqDw==",
+  "key_id": "substrate-layer2-2026Q2"
+}

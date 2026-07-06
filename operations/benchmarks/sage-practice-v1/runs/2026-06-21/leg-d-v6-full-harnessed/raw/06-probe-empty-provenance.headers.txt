@@ -1,0 +1,22 @@
+HTTP/2 422 
+access-control-allow-headers: Content-Type, Authorization
+access-control-allow-methods: GET, OPTIONS
+access-control-allow-origin: *
+cache-control: no-store
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co https://api.anthropic.com https://api.stripe.com https://checkout.stripe.com; frame-ancestors 'none'
+content-type: application/json
+date: Sun, 21 Jun 2026 03:07:50 GMT
+permissions-policy: camera=(), microphone=(), geolocation=(), payment=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000
+vary: RSC, Next-Router-State-Tree, Next-Router-Prefetch
+x-accreditation-disclaimer: Evaluates reasoning quality. Does not promise outcomes.
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-matched-path: /api/accreditation/[agent_id]
+x-sagereasoning-version: 2.0
+x-vercel-cache: MISS
+x-vercel-id: syd1::iad1::24tlp-1782011270233-6da8b4f9a3ba
+x-xss-protection: 1; mode=block
+

@@ -1,0 +1,393 @@
+{
+  "name": "SageReasoning Stoic Brain",
+  "description": "A Stoic philosophy reasoning engine for humans and AI agents. Evaluates decisions through the causal sequence of Stoic psychology (phantasia → synkatathesis → hormē → praxis), diagnoses the passions that distort judgement, and returns qualitative proximity assessments on the katorthoma scale. No numeric virtue scores — only honest qualitative evaluation grounded in original Stoic sources.",
+  "url": "https://www.sagereasoning.com",
+  "version": "3.0.0",
+  "provider": {
+    "organization": "SageReasoning",
+    "url": "https://www.sagereasoning.com"
+  },
+  "documentationUrl": "https://www.sagereasoning.com/api-docs",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false,
+    "extensions": [
+      {
+        "uri": "https://sagereasoning.com/extensions/access-tiers/v1",
+        "description": "SageReasoning tiered access policy — free + paid tier limits and pricing.",
+        "required": false,
+        "params": {
+          "free": {
+            "description": "Evaluation tier — 30 loops per month (≈1 per day), 1 deliberation iteration per chain, 1 baseline assessment + 1 retake per month per agent identity. One loop = one wrapper invocation (X-Loop-Id-correlated).",
+            "monthlyLoopLimit": 30,
+            "dailyLoopLimit": 1,
+            "maxChainIterations": 1
+          },
+          "paid": {
+            "description": "Production tier — configurable loop limits; up to 3 deliberation iterations per chain; per-loop billing at $0.02 base + LLM-token-cost overage above 50% of base × 2 multiplier (R5 2x ratio enforced by construction per D-BILLING-MODEL-LOCKED-2026-05-17). Every response carries X-Loop-Id, X-Loop-Cost-Cents, X-Anthropic-Cost-Cents, X-Overage-Fired, X-Overage-Cents, X-Loop-Internal-Calls headers.",
+            "billingModel": "per_loop",
+            "loopBaseRateCents": 2,
+            "overageTriggerRatio": 0.5,
+            "overageRateMultiplier": 2.0,
+            "contact": "zeus@sagereasoning.com"
+          }
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/rate-limits/v1",
+        "description": "SageReasoning per-IP rate limits applied on top of tier limits.",
+        "required": false,
+        "params": {
+          "publicAgent": {
+            "maxRequests": 15,
+            "windowSeconds": 60,
+            "description": "15 requests per minute per IP (rate limit applies on top of tier limits)"
+          }
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/pass-through-metadata/v1",
+        "description": "Wrapper-supplied enterprise-accountability metadata. The substrate validates and persists; it does NOT interpret these for reasoning. Downstream consumers (tiered billing, procurement reviews reading the Accreditation Payload, future MCP integrations) read for audit, compliance, and tiered-billing decisions. All fields optional with sensible defaults; unrecognised values soft-fall-back to the default with a warning log. Vocabularies taken verbatim from the Nate B Jones SaaS Renewal Agent License Prompt Kit — Agent System Touch Map. Adopted 2026-05-17 per D-PASS-THROUGH-FIELDS-LOCKED-2026-05-17.",
+        "required": false,
+        "params": {
+          "perEvaluation": {
+            "description": "Five optional fields on EvaluatedAction.",
+            "operation_class": {
+              "values": ["read", "search", "summarize", "draft", "recommend", "write", "approve", "execute", "delete", "unknown"],
+              "default": "unknown"
+            },
+            "target_system_vendor": {
+              "values": ["salesforce", "microsoft", "servicenow", "sap", "workday", "zendesk", "hubspot", "atlassian", "other", "none"],
+              "default": "none"
+            },
+            "target_system_detail": {
+              "type": "string",
+              "maxLength": 100,
+              "note": "Free-form sub-system identifier (e.g., 'opportunities', 'outlook.calendar'). NO PII."
+            },
+            "outcome_verification": {
+              "values": ["self_reported", "system_confirmed", "external_auditor", "not_applicable"],
+              "default": "self_reported"
+            },
+            "reversibility_signal": {
+              "values": ["reversible", "partially_reversible", "irreversible", "unknown"],
+              "default": "unknown"
+            }
+          },
+          "perAgentPosture": {
+            "description": "Two optional fields on CarriedProfile.",
+            "downstream_identity_model": {
+              "values": ["delegated_user", "service_account", "vendor_framework", "api_key", "browser_session", "mcp_server", "unknown"],
+              "default": "unknown"
+            },
+            "path_posture": {
+              "values": ["endorsed", "open_api", "ambiguous", "unsanctioned"],
+              "default": "ambiguous"
+            }
+          }
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/sage-assent-write-auth/v1",
+        "description": "Authentication for the Sage Assent WRITE surface (POST /api/accreditation/{agent_id}). The public GET verification endpoint requires no auth; only the write surface requires this credential. Writes are gated by per-agent opaque bearer tokens (prefix sr_assent_) bound to a specific agent_id and optionally scoped to a downstream_identity_model and/or path_posture. Present as: Authorization: Bearer sr_assent_<token>. Tokens are issued out-of-band by the substrate operator (contact zeus@sagereasoning.com) and shown once; renewal is revoke-and-reissue. A global operator kill-switch may additionally gate the surface (503 when disabled). Adopted under D-ATL-A10-BUILD-WIRED-VERIFIED-2026-05-21.",
+        "required": false,
+        "params": {
+          "writeSurface": {
+            "endpoint": "POST https://www.sagereasoning.com/api/accreditation/{agent_id}",
+            "scheme": "bearer",
+            "tokenPrefix": "sr_assent_",
+            "header": "Authorization: Bearer sr_assent_<token>",
+            "scoping": {
+              "description": "A credential MAY be scoped. When scoped, a write whose CarriedProfile field does not match the credential's scope is rejected (401). An unscoped credential (NULL scope) accepts any value.",
+              "downstream_identity_model": ["delegated_user", "service_account", "vendor_framework", "api_key", "browser_session", "mcp_server", "unknown"],
+              "path_posture": ["endorsed", "open_api", "ambiguous", "unsanctioned"]
+            },
+            "request_body_shape": "Body: { kind: 'seed'|'update', profile: CarriedProfile, provenance: { signed_assessments: [{ assessment, signature, key_id }] } } (update also requires transition_result). The route requires profile.agent_id (== path), profile.accreditation_record (object), profile.regressing_check_count (number). provenance.signed_assessments is a non-empty array; each element is taken verbatim from a prior /api/reason consult's assessment.assessment + its signature + key_id. The R18f gate structurally validates the shape (422 bad_provenance on malformed/empty) then requires at least one element to cryptographically verify against GET /api/public-key (forged/absent signature -> 403 no_examination); it does NOT prove the credited aggregate was faithfully computed (honest scope limit). seed-vs-existing -> 409; update-vs-missing -> 404. Public read-back: GET /api/accreditation/{agent_id} (no auth) returns server-composed honest fields — typical_kathekon_quality (conservative default 'contrary'), coverage_status ('agent_elected' for a discretionary single-session seed), and credential_basis are consumer-unforgeable. Full shapes in llms.txt 'Accreditation — Verifiable Reasoning Profile'."
+          }
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/quick-start/v1",
+        "description": "SageReasoning recommended onboarding sequence + example request.",
+        "required": false,
+        "params": {
+          "steps": [
+            "1. Fetch the Stoic Brain: GET https://www.sagereasoning.com/api/stoic-brain",
+            "2. Take the Foundational Alignment Check (free): GET then POST to /api/assessment/foundational with your 11 self-assessment responses",
+            "3. Review your results — consider the full assessment (paid): POST to /api/assessment/full for all 37 assessments across 7 phases",
+            "4. Before any consequential action, check the guardrail: POST to /api/guardrail with your proposed action and risk_class",
+            "5. For complex decisions, use the deliberation chain: POST to /api/score-iterate",
+            "6. Aim for 'deliberate' or higher katorthoma_proximity in your decisions"
+          ],
+          "exampleRequest": {
+            "endpoint": "POST https://www.sagereasoning.com/api/guardrail",
+            "body": {
+              "action": "Send automated follow-up emails to users who haven't responded",
+              "context": "Users signed up but didn't explicitly opt in to follow-up communications",
+              "risk_class": "elevated",
+              "agent_id": "your-agent-id"
+            }
+          }
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/configuration-honesty/v1",
+        "description": "Configuration honesty (R19e). Where the products are offered selectively, each configuration is documented for what it supports and does not support. This entry carries the no-practice disclaimer for the Reasoning + Assent (no Reflect) configuration.",
+        "required": false,
+        "params": {
+          "noPracticeDisclaimer": "This configuration — SageReasoning with Sage Assent, without Sage Reflect — supports virtue-grounded reasoning and credentialing within individual sessions. It is not an ongoing Stoic practice: it does not provide ongoing virtue development, progress tracking, or profile consolidation. Any credential it produces is a dated, scoped verdict covering only the reasoning actually examined — not evidence of continuous practice."
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/safety-redirect/v1",
+        "description": "R20a distress-input behaviour. Agent-authenticated calls that contain acute-distress content return HTTP 200 with {status:'redirected', severity, developer_note, suggested_user_message, flow_terminated:true} instead of an assessment. Integrators MUST surface suggested_user_message to the end user verbatim and terminate the flow. Human-session surfaces render a crisis message directly. Contract behaviour, not an error.",
+        "required": false,
+        "params": {
+          "responseShape": {
+            "status": "redirected",
+            "flow_terminated": true
+          }
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/consultation-cadence-two-gate/v1",
+        "description": "Adopted consultation cadence for agents integrating the Stoic Brain. Gate 1: one mandatory full examination at task adoption. Gate 2: stake-triggered thereafter via a deterministic three-question self-screen (stake in the outcome / drawn to a conclusion pre-evidence / would reason differently unobserved); any positive fires an examination at the appropriate depth. A self-screen consistently negative across genuinely complex sessions is itself examinable. Depth follows the guardrail risk_class ladder (standard->quick, elevated->standard, critical->deep). See llms.txt 'Consultation Cadence — When to Examine'.",
+        "required": false,
+        "params": {
+          "gate1": "One mandatory full (standard|deep) /api/reason examination at task adoption — non-negotiable; sets the frame (circle of concern, role, capacity, purpose).",
+          "gate2_self_screen": [
+            "Is there something at stake for me in how this output lands?",
+            "Am I drawn toward one conclusion before examining the evidence?",
+            "Would I reason differently about this if no one would know the outcome?"
+          ],
+          "gate2_rule": "Any 'yes' -> examine at the appropriate depth. All three 'no' -> proceed without a formal examination.",
+          "suppression_signal": "A self-screen that consistently returns negative across sessions of genuine complexity is itself examinable (mirrors Sage Reflect's null-result suspicion rule, FD-R1).",
+          "depth_ladder": "standard->quick, elevated->standard, critical->deep"
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/practice-cycle-reflect-default/v1",
+        "description": "Sage Reflect fires automatically at session close by default for agent integrations (TR-02) — the configured disposition of the integration, not a compelled act. The full Q1-Q6 reflection sequence is never abbreviated. Explicit opt-out via the integration config key reflect_at_close set to 'off' (default 'auto'). An auto-fired pass is one metered /api/practice/reflect call per session close, billed per the standard per-loop model; opting out suppresses that cost. Every consult and accreditation-write response carries a structural 'practice' hint pointing at /api/practice/reflect.",
+        "required": false,
+        "params": {
+          "practice": {
+            "reflect_due": "TR-02",
+            "endpoint": "/api/practice/reflect",
+            "default": "auto",
+            "opt_out": "reflect_at_close"
+          }
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/prose-deferral-open-layer1/v1",
+        "description": "Substrate /api/reason consult contract (M1, 2026-06-15). (1) response_format: 'full' (default — assessment + narrative prose in one response) | 'assessment_first' — assessment_first returns the signed assessment + extraction + meta immediately with narrative:{status:'deferred',correlation_id} and meta.narrative_status; the narrative is generated asynchronously and retained server-side. Deferral is a request, not a guarantee: distress-signal consults always return the full synchronous shape. (2) Narrative-existence guarantee (CI-17): the narrative account is the record that examination occurred — a verdict without a narrative account is a classification, not an examination; a verdict-only configuration is not legitimate. Deferral moves generation; it never suppresses it. Retention (R17): every examination's signed assessment + narrative are stored encrypted at rest, 90 days, keyed by correlation id; genuine (hard) deletion on request. (3) Open Layer-1: a layer1_schema validating against the documented contract may be supplied on any auth path — required on sr_inst_, optional on sr_live_/sr_prac_; supplying it skips server Layer-1 (meta.layer1_source:'supplied', layer1_latency_ms:0) and requires the l1_supply capability (else 403); omitting it keeps raw-text behaviour (meta.layer1_source:'server'); a malformed schema returns 400. The input text is always required (the safety perimeter runs on the text).",
+        "required": false,
+        "params": {
+          "response_format": {
+            "values": ["full", "assessment_first"],
+            "default": "full",
+            "deferred_response_shape": { "narrative": { "status": "deferred", "correlation_id": "<uuid>" }, "meta": { "narrative_status": "deferred" } },
+            "distress_override": "distress-signal consults always return the full synchronous shape"
+          },
+          "narrative_retention": {
+            "encrypted_at_rest": true,
+            "retention_days": 90,
+            "deletion_on_request": true,
+            "keyed_by": "correlation_id"
+          },
+          "open_layer1": {
+            "field": "layer1_schema",
+            "required_on": ["sr_inst_"],
+            "optional_on": ["sr_live_", "sr_prac_"],
+            "requires_capability": "l1_supply",
+            "on_missing_capability": 403,
+            "meta_field": "layer1_source",
+            "supplied_skips_server_layer1": true,
+            "malformed_schema": 400
+          }
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/guardrail-signed-sandwich/v1",
+        "description": "Guardrail /api/guardrail response contract (ADR-009 + ADR-010 §3, Live 2026-06-19). The verdict is computed deterministically from a disclosed Layer-1 extraction by a free Layer-2 mechanism pass and Ed25519-signed (no LLM prose render): the response carries the bare verdict fields plus 'extraction' (the features the verdict was computed from — re-run the mechanisms to verify the action->extraction->assessment chain) and 'signed_assessment' (the signed raw Layer-2 assessment; verify against GET /api/public-key). Field notes: 'evaluation_depth' is the constant 'deterministic' (only the mechanism count follows risk_class: standard=3, elevated=5, critical=6); 'is_kathekon' may be null when the extraction is too sparse to judge, in which case the gate floors to a conservative non-proceed; 'rollback_path' is a structural reminder present only for critical risk_class. Justice completion (ADR-010 §3): 'justice_resolution' {obligation: met|violated|indeterminate, circle, justification, source} is present ONLY when the action engages a justice-toward-others dimension; its presence means the surfaced katorthoma_proximity may have been floored below the raw value in the signed assessment (a calmly-reasoned injustice is capped, not rated near-virtuous). Disclosure (R18): a justice-floored verdict is NOT reproducible from the signed assessment alone — the signature proves the deterministic Layer-2 reading; the justice completion is disclosed but unsigned (until the root correction folds it into the signed proximity). Availability: a signing outage fails the gate CLOSED (HTTP 503); an engine or justice-resolver outage returns a conservative pause — never a silent proceed.",
+        "required": false,
+        "params": {
+          "verifiable_artifacts": {
+            "extraction": "the Layer-1 features the verdict was computed from",
+            "signed_assessment": "Ed25519-signed raw Layer-2 assessment; verify against GET /api/public-key"
+          },
+          "evaluation_depth": { "value": "deterministic", "mechanism_count_by_risk_class": { "standard": 3, "elevated": 5, "critical": 6 } },
+          "is_kathekon": { "type": "boolean|null", "null_means": "extraction too sparse to judge; gate floors to a conservative non-proceed" },
+          "justice_resolution": {
+            "present_when": "the action engages a justice-toward-others dimension",
+            "fields": ["obligation (met|violated|indeterminate)", "circle", "justification", "source"],
+            "effect": "surfaced katorthoma_proximity may be floored below the signed raw value",
+            "reproducibility": "a justice-floored verdict is disclosed but not reproducible from the signed assessment alone"
+          },
+          "availability": { "signing_outage": "503 fail-closed", "engine_or_justice_outage": "conservative pause, never a silent proceed" }
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/tier1-clarification-continuation/v1",
+        "description": "Tier-1 force-clarification answer channel (ADR-008 Design A, live 2026-06-19). When a consult is too ambiguous to assess on one axis, /api/reason returns HTTP 200 { clarification_required:true, clarification:{question_text}, continuation_token } instead of an assessment. To resume: re-POST the BYTE-IDENTICAL original input + the continuation_token + clarification_response (your answer, <=5000 chars). The token binds to sha256(input) — any change to input returns 400 continuation_token_input_mismatch; the answer rides clarification_response and is never folded into input. The engine suppresses re-firing the answered trigger and returns a full assessment (a different trigger may still fire — never the same twice). 400s: clarification_response_required (token, no answer); clarification_response_without_token (answer, no token); clarification_response_with_supplied_layer1_schema (answer + a supplied layer1_schema — resolve by re-supplying a disambiguated schema instead, since a supplied schema skips the server re-extraction the answer informs). The R20a vulnerable-user perimeter runs on input + clarification_response on the continuation turn.",
+        "required": false,
+        "params": {
+          "trigger_codes": ["ELEMENT_FUSION", "TEMPORAL_AMBIGUITY", "SCOPE_AMBIGUITY"],
+          "turn1_response_shape": { "version": "translation-sandwich-v1", "clarification_required": true, "intake_tier": 1, "trigger_code": "<one of trigger_codes>", "clarification": { "question_text": "<string>", "stem_id": "<string>", "slot_fills": ["<string>"] }, "continuation_token": "<opaque, 30-min expiry>", "evaluation_partial": null },
+          "turn2_request_shape": { "input": "<byte-identical to turn 1>", "continuation_token": "<from turn 1>", "clarification_response": "<answer, <=5000 chars>" },
+          "errors_400": {
+            "clarification_response must be a string.": "clarification_response is not a string",
+            "clarification_response_required": "continuation_token present, no answer",
+            "clarification_response_without_token": "clarification_response present, no token",
+            "clarification_response_with_supplied_layer1_schema": "clarification_response + a supplied layer1_schema",
+            "continuation_token_input_mismatch": "input changed from turn 1 (token binds to sha256(input))"
+          },
+          "safety": "R20a perimeter runs on input + clarification_response on the continuation turn"
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/examination-mode/v1",
+        "description": "Accreditation payloads may carry examination_mode (pre_decision_harness | post_decision_check | null) — the timing axis of the credential. An attestation rooted in operator issuance + harness construction, NOT a cryptographic proof of timing. Separate from coverage_status (breadth). See llms.txt.",
+        "required": false,
+        "params": {
+          "field": "examination_mode",
+          "values": ["pre_decision_harness", "post_decision_check", null],
+          "axis": "timing — separate from coverage_status, which is coverage breadth",
+          "honesty_limit": "An attestation, NOT a cryptographic proof of timing — the server cannot prove from an API write that a hook fired pre-decision (even the Ed25519 assessment signature proves 'examined', not 'examined-pre-decision'). post_decision_check is the honest mode for every discretionary API write path. pre_decision_harness is server-composed and reachable only via an operator-issued harness credential (a consumer cannot self-issue it); its honesty rests on operator issuance discipline + the harness enforcing pre-decision framing by construction. null = unstated.",
+          "see": "llms.txt 'Accreditation — Examination mode (pre- vs post-decision)'"
+        }
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/gate1-configurations/v1",
+        "description": "Gate 1 (mandatory examination at task adoption) is offered as two documented, distinct configurations differing only in WHEN the examination fires relative to the agent's decision. 'Gate 1 — pre-decision' (developer-controlled surfaces): a Gate-1 harness fires the examination before the agent reasons and injects the frame; a write under an operator-issued harness credential reads examination_mode: pre_decision_harness (earned per-credential — not a claim that any agent has adopted the harness). 'Gate 1 — post-decision (check)' (hosted/discretionary API surfaces): the examination runs after the agent's judgement as an honest developmental check; reads post_decision_check (the default). The sole unforgeable distinguisher is examination_mode on GET /api/accreditation/{agent_id}. No surface presents the post-decision check as pre-decision framing. See llms.txt.",
+        "required": false,
+        "params": {
+          "pre_decision": "Developer-controlled surfaces (Claude Code Gate-1 plugin/hook delivered; Agent-SDK wrapper planned): the harness fires the Gate-1 examination before the agent reasons and injects the frame. examination_mode: pre_decision_harness, earned per-credential via an operator-issued harness credential (consumer-unforgeable). The marker states the configuration a write was made under, not that any agent has adopted the harness.",
+          "post_decision_check": "Hosted/discretionary API surfaces: the examination runs after the agent's judgement — an honest developmental check, not a pre-decision frame. examination_mode: post_decision_check. The default for discretionary API use.",
+          "distinguisher": "examination_mode on GET /api/accreditation/{agent_id} — the sole unforgeable distinguisher (server-composed; pre_decision_harness reachable only via an operator-issued credential). Same honest limit as examination-mode/v1: an attestation, not a cryptographic proof of timing.",
+          "binding_constraint": "No surface presents the post-decision check as pre-decision framing; a hosted/discretionary write always reads post_decision_check or null, never pre_decision_harness.",
+          "see": "llms.txt 'Gate 1 — the two configurations (pre-decision vs post-decision check)'"
+        }
+      }
+    ]
+  },
+  "authentication": {
+    "schemes": ["bearer", "none"],
+    "credentials": "Stoic Brain overview (GET /api/stoic-brain), guardrail documentation (GET /api/guardrail), and baseline scenarios (GET /api/baseline/agent) require no authentication. All scoring endpoints require an API key: Authorization: Bearer sr_live_<key>. Request a free key at zeus@sagereasoning.com. Production agent integrations use per-install tokens (sr_inst_<32 hex>): mint via session-authenticated POST /api/keys (token shown once), present as Authorization: Bearer sr_inst_<token>, and submit a pre-computed layer1_schema; revoke via DELETE /api/keys (immediate 401). The Sage Assent write surface (POST /api/accreditation/{agent_id}) requires a per-agent write token: Authorization: Bearer sr_assent_<token> — see the sage-assent-write-auth/v1 extension."
+  },
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["application/json"],
+  "skills": [
+    {
+      "id": "stoic-brain-data",
+      "name": "Stoic Brain Reference Data",
+      "description": "Load the Stoic philosophical framework overview: dichotomy of control (eph' hēmin / ouk eph' hēmin), four root passions and their sub-species, five oikeiosis circles, katorthoma proximity scale definitions, and primary source references. Open to all agents, no authentication required.",
+      "tags": ["stoic-philosophy", "ethics", "reference-data", "philosophy"],
+      "inputModes": [],
+      "outputModes": ["application/json"],
+      "endpoint": "https://www.sagereasoning.com/api/stoic-brain",
+      "method": "GET"
+    },
+    {
+      "id": "universal-reasoning",
+      "name": "Universal Stoic Reasoning (V3)",
+      "description": "Run the full Stoic causal sequence analysis on any decision, action, or situation. Depth-selectable: quick (3 mechanisms), standard (5 mechanisms), deep (6 mechanisms). Returns katorthoma_proximity (reflexive/habitual/deliberate/principled/sage_like), passion_diagnosis with sub-species and false_judgements, control_filter, oikeiosis assessment, and improvement_path. Response shape: translation-sandwich-v1 (deterministic signed assessment + prose render; verify signatures against GET /api/public-key).",
+      "tags": ["stoic-philosophy", "ethical-reasoning", "decision-support", "passion-diagnosis", "katorthoma-proximity-assessment", "moral-reasoning"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"],
+      "endpoint": "https://www.sagereasoning.com/api/reason",
+      "method": "POST"
+    },
+    {
+      "id": "action-scoring",
+      "name": "Action Evaluation (V3)",
+      "description": "Evaluate a single action through Stoic virtue principles. Returns katorthoma_proximity, passion_diagnosis (including sub-species and false_judgements for each passion detected), oikeiosis assessment, value_assessment (preferred indifferents at stake), kathekon_assessment (is_kathekon, quality, justification), and improvement_path.",
+      "tags": ["ethical-reasoning", "action-evaluation", "passion-diagnosis", "false-judgement-identification", "virtue"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"],
+      "endpoint": "https://www.sagereasoning.com/api/score",
+      "method": "POST"
+    },
+    {
+      "id": "guardrail-middleware",
+      "name": "Virtue Guardrail Gate (V3)",
+      "description": "Pre-action Stoic risk gate. Submit a proposed action and risk_class (standard/elevated/critical) — returns proceed, katorthoma_proximity, recommendation (proceed/proceed_with_caution/pause_for_review/do_not_proceed), is_kathekon (boolean|null), kathekon_quality, passions_detected, and reasoning. Use as middleware before executing any consequential action. risk_class controls scrutiny depth: standard=quick (3 mechanisms), elevated=full (5), critical=deep (6, adds rollback_path). Response shape: guardrail-signed-sandwich/v1 — the verdict is computed deterministically from a disclosed Layer-1 extraction and Ed25519-signed (signed_assessment; verify against GET /api/public-key); evaluation_depth is the constant 'deterministic'; justice_resolution, when present, signals the surfaced proximity was floored for a justice-toward-others obligation (a justice-floored verdict is disclosed but not reproducible from the signed assessment alone). See the guardrail-signed-sandwich/v1 extension.",
+      "tags": ["AI-safety", "guardrails", "agent-alignment", "decision-support", "ethical-reasoning"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"],
+      "endpoint": "https://www.sagereasoning.com/api/guardrail",
+      "method": "POST"
+    },
+    {
+      "id": "deliberation-chain",
+      "name": "Iterative Deliberation Engine",
+      "description": "Start a deliberation chain: evaluate an action, receive sage feedback, revise, and re-evaluate with tracked history. Returns chain_id, full V3 evaluation, and score_delta (proximity change from previous iteration) on each iteration. Free tier: 1 iteration. Paid tier: up to 3 iterations per chain.",
+      "tags": ["ethical-reasoning", "deliberation", "decision-making", "iterative-reasoning"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"],
+      "endpoint": "https://www.sagereasoning.com/api/score-iterate",
+      "method": "POST"
+    },
+    {
+      "id": "foundational-assessment",
+      "name": "Foundational Alignment Check (Free)",
+      "description": "Structured self-assessment across 11 prompts (Phases 1-2: Self-Observation + Classification). Returns passion patterns identified, katorthoma_proximity per phase, prokoptos trajectory, and assessment notes. Free tier: 1/day.",
+      "tags": ["self-assessment", "passion-diagnosis", "prokoptos", "stoic-philosophy"],
+      "inputModes": [],
+      "outputModes": ["application/json"],
+      "endpoint": "https://www.sagereasoning.com/api/assessment/foundational",
+      "method": "GET"
+    },
+    {
+      "id": "full-assessment",
+      "name": "Complete Virtue Alignment Assessment (Paid)",
+      "description": "Full 37-assessment evaluation across 7 phases. Returns individual virtue domain analysis (phronesis/dikaiosyne/andreia/sophrosyne), oikeiosis extension assessment, improvement directions per domain, and comprehensive alignment profile. Requires paid API key.",
+      "tags": ["virtue-assessment", "oikeiosis-mapping", "prohairesis", "philosophy"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"],
+      "endpoint": "https://www.sagereasoning.com/api/assessment/full",
+      "method": "POST"
+    },
+    {
+      "id": "agent-baseline",
+      "name": "Agent Virtue Baseline (Quick)",
+      "description": "Quick baseline via 4 ethical scenarios. Returns per-scenario katorthoma_proximity, passion patterns, aggregate assessment, strongest virtue domain, and growth area.",
+      "tags": ["agent-alignment", "AI-safety", "virtue-assessment", "ethical-reasoning"],
+      "inputModes": [],
+      "outputModes": ["application/json"],
+      "endpoint": "https://www.sagereasoning.com/api/baseline/agent",
+      "method": "GET"
+    },
+    {
+      "id": "decision-scoring",
+      "name": "Decision Comparison (V3)",
+      "description": "Submit 2-5 decision options and receive a Stoic-evaluated comparison: each option's katorthoma_proximity, passion_diagnosis, kathekon_assessment, and stoic_insight. Options ranked by proximity level. Recommended option identified.",
+      "tags": ["decision-making", "decision-support", "ethical-reasoning", "comparison"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"],
+      "endpoint": "https://www.sagereasoning.com/api/score-decision",
+      "method": "POST"
+    },
+    {
+      "id": "session-close-reflection",
+      "name": "Sage Reflect — Session-Close Reflection",
+      "description": "Stateful Q1–Q6 post-action reflection over a completed session (never abbreviated). OPEN with session_summary (object: purpose_at_open, circle_at_open [self_preservation|household|community|humanity|cosmic], role_at_open, capacity_at_open[], sage_reasoning_passes), then answer each returned question until status:'complete', which returns a profile read-back (senecan_grade, typical_proximity, katorthoma_proximity_by_domain, dimension_levels, direction_of_travel) plus a mandatory mirror note. Requires the 'reflect' capability (sr_assent_ or sr_prac_, Authorization: Bearer only). Full wire shape in llms.txt 'Sage Reflect — Session-Close Reflection'.",
+      "tags": ["reflection", "stoic-practice", "session-close", "trajectory"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"],
+      "endpoint": "https://www.sagereasoning.com/api/practice/reflect",
+      "method": "POST"
+    },
+    {
+      "id": "purpose-discovery",
+      "name": "Sage Calling — Purpose Discovery",
+      "description": "Deterministic Q1–Q6 purpose-discovery sequence ending in an admin-approval Hard Gate (NOT self-serve — the operator approves the handoff via POST /api/calling/approve; an agent credential cannot approve its own). OPEN with session_id + agent_id (no response); then answer each returned question. Responses are HTTP 200 distinguished by status: in_progress / awaiting_approval / null_result / holding / timed_out / redirected. Requires the 'calling' capability (sr_assent_ or sr_prac_, Authorization: Bearer only). Full wire shape in llms.txt 'Sage Calling — Purpose Discovery'.",
+      "tags": ["purpose", "alignment", "discovery", "agent-onboarding"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"],
+      "endpoint": "https://www.sagereasoning.com/api/calling",
+      "method": "POST"
+    }
+  ]
+}
