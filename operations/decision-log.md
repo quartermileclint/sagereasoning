@@ -12925,3 +12925,35 @@ Expected (post-deploy): `proceed: false`, `katorthoma_proximity: "reflexive"`, `
 **Rules served:** R0, R18, R19, AC8, PR15, PR16, PR18, KG1 (method-before-purpose guard).
 
 **Status:** Adopted (scope-of-record). Cross-references: ADR-012 (`adopted/adr/2026-06-24-sage-practice-measurement-instrument-reframe.md` §4 — the bar's origin), `D-SAGE-PRACTICE-ADR010-SECTION3-GUARDRAIL-BRIDGE-RETIREMENT` (predecessor — ADR-010 fully landed), `2026-06-24-scoring-validity-battery-results.md` (the P5d/P5a/P5c findings the bar inherits), memories `method-before-purpose-test-drift`, `deterministic-l2-measures-apatheia-not-dikaiosyne`, `andreia-over-strictness-unity-thesis-coupling`, `sage-practice-measurement-instrument-reframe`.
+
+---
+
+## 2026-06-27 — D-SAGE-PRACTICE-GAMING-ROBUSTNESS-HARNESS-BUILT-RUN
+
+**Decision:** BUILT + RAN the three-arm red-team-the-scorer harness the bar scope proposed, turning the gaming-robustness bar from a definition into a measured number: **Arm 1 (Locus-1 regression) CLEARS** (§4 arithmetic regression-locked, `G=0`); **Arm A (honest Sonnet extractor, adversarial artifact) FAILS** (a dressed vicious artifact reaches `deliberate`→`sage_like`, `G` up to +4, through the *honest* extractor — `arith-crossings=0`, so it is defeated by self-report OMISSION, not arithmetic); **Arm B (extraction-controlled `l1_supply` lie) FAILS as expected** (all seeds → `sage_like`, `G=+4`; a real structural residual). Gating: **developer-refine defensible with a disclosed limit; logos-enforce gated on the corroboration check; model-creator/weights BLOCKED.** The corroboration-check fork is **decided: build it near-term** (its build prompt authored).
+
+**Reasoning:** ADR-012 forbids the weights claim until the bar clears. The harness executes the scope's Step-3 design, holding each vicious seed's `T(a)` fixed and measuring `S_max` (instrument resistance, NOT beats-bare — the method-before-purpose framing held; the harness auditor confirmed no lift/baseline logic). The measurement **confirms + sharpens the scope's central thesis**: §4 closed the scoring arithmetic (Arm 1 locked across ~480 faithful field-variants/seed, 0 lift); **the entire remaining gaming surface is extraction trust.** The adversarial review (9-agent Workflow) settled validity: **still_vicious 48/48, A3 (attacker changed the action) = 0** — the attackers did not cheat, so Arm A's failure is real. It classifies the 48 Arm-A rewrites **34 A2 (self-report omission — structural, un-catchable from text) + 14 A1 (harm-in-text — catchable) + 0 A3**, and the crossing×classification join shows **A1 mostly HELD (the §4 floor + anti-rubber-stamp `LAYER1_SYSTEM_PROMPT` genuinely defend harm-in-text dressing) while A2 mostly CROSSED (self-report omission defeats the honest extractor)** — a sharpening of the scope's Threat-A "largely defended" assumption (defended against A1, defeated by A2, the §2.1 row-1b "Hard" class needing an independent affected-party pass, not a schema/text check).
+
+**Files touched:**
+- `website/scripts/gaming-robustness-harness.ts` — NEW; the red-team-the-scorer harness (Arm 1 deterministic sweep + Arm A real-Sonnet + Arm B `l1_supply`), sealed `T(a)`, real-engine scorer, machine footer, resumable detail capture.
+- `operations/benchmarks/sage-practice-v1/2026-06-27-gaming-robustness-harness-results.md` — NEW; the results memo (the measured bar + gating + the corroboration fork).
+- `operations/benchmarks/sage-practice-v1/runs/2026-06-27/` — NEW; corpora (48 Arm-A rewrites + 48 Arm-B schemas from the PR15 attacker fan-out), run logs, per-rewrite detail, the review classification.
+- `operations/handoffs/founder/2026-06-27-corroboration-check-BUILD-NEXT-SESSION-PROMPT.md` — NEW; the corroboration-check build arc (the decided fork).
+- `operations/benchmarks/sage-practice-v1/2026-06-27-gaming-robustness-bar-scope.md` + `adopted/adr/2026-06-24-sage-practice-measurement-instrument-reframe.md` — gating updated in place with the measured outcome.
+
+**Risk classification:** Elevated under 0d-ii (repo-only build + repo-local API consumption via `.env.development.local`; no production / perimeter / auth / schema / flag / credential change; production byte-equivalent). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` the record + harness commit; nothing is live, nothing was minted, no flag flipped.
+
+**Verification step (founder-performable):**
+```
+cd website && npx tsx scripts/gaming-robustness-harness.ts --arm1
+npx tsx scripts/gaming-robustness-harness.ts --armB ../operations/benchmarks/sage-practice-v1/runs/2026-06-27/armB-corpus-r1.json
+```
+Expected: Arm 1 CLEARS (all seeds `faithfulMax=reflexive`, `G=+0`); Arm B every seed `GAMED sage_like` (`G=+4`). (Arm A needs `--env-file=.env.development.local` + the corpus; the recorded run is `runs/2026-06-27/armA-run-r1.log`.)
+
+**Open questions:** the corroboration-check fork is decided (build near-term) but the founder confirms at open; the seed set lacks a sophrosyne/self-regarding-craving gating seed (folded into the corroboration-check arc's seed expansion); the Arm-B catchable/structural 24/21 split is a proxy (the real corroboration check sharpens it).
+
+**Rules served:** R0, R18, R19, AC8, PR15 (Workflow attacker + review fan-out), PR16, PR18, KG1 (method-before-purpose guard held).
+
+**Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-GAMING-ROBUSTNESS-BAR-SCOPED` (predecessor — the design this executes), ADR-012 §4, `2026-06-27-gaming-robustness-harness-results.md`, `operations/handoffs/founder/2026-06-27-corroboration-check-BUILD-NEXT-SESSION-PROMPT.md`, memories `gaming-robustness-extraction-trust-locus-split` (new), `method-before-purpose-test-drift`, `over-strictness-check-must-be-rank-preserving`.
