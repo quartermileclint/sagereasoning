@@ -12,6 +12,9 @@
  *        itself so any future drift on either side fails here.
  *   RT — the admin mint route carries no literal 667 (the FX-12 drift triple
  *        667/50/20 is gone) and defaults from the shared constant.
+ *   ST — the SELF-SERVICE mint route (/api/keys) inserts from the shared
+ *        constant (folded 2026-07-07, closing the carried M2 100/100/1 vs
+ *        30/1/1 decision) and the terms-page free-tier copy matches.
  *
  * The live mint behaviour (route returns 30/1/1 on a TEST mint) is exercised
  * in the M2 founder-walked TEST leg — deliberately NOT mocked here.
@@ -94,6 +97,41 @@ assert(
     /max_chain_iterations\s*=\s*API_KEY_FREE_TIER_DEFAULTS\.max_chain_iterations/.test(
       routeSrc
     )
+)
+
+// ── ST — self-service mint route + public copy (folded 2026-07-07) ──────────
+const selfServicePath = fileURLToPath(
+  new URL('../../app/api/keys/route.ts', import.meta.url)
+)
+const selfServiceSrc = readFileSync(selfServicePath, 'utf8')
+
+console.log('ST — self-service mint route (app/api/keys/route.ts) + terms copy')
+assert(
+  'ST-1 no drifted literal insert limits (monthly_limit: 100 / daily_limit: 100)',
+  !/monthly_limit:\s*100\b/.test(selfServiceSrc) &&
+    !/daily_limit:\s*100\b/.test(selfServiceSrc)
+)
+assert(
+  'ST-2 route imports the shared defaults constant',
+  selfServiceSrc.includes("from '@/lib/api-key-defaults'")
+)
+assert(
+  'ST-3 all three insert limits read from the constant',
+  /monthly_limit:\s*API_KEY_FREE_TIER_DEFAULTS\.monthly_limit/.test(selfServiceSrc) &&
+    /daily_limit:\s*API_KEY_FREE_TIER_DEFAULTS\.daily_limit/.test(selfServiceSrc) &&
+    /max_chain_iterations:\s*API_KEY_FREE_TIER_DEFAULTS\.max_chain_iterations/.test(
+      selfServiceSrc
+    )
+)
+const termsSrc = readFileSync(
+  fileURLToPath(new URL('../../app/terms/page.tsx', import.meta.url)),
+  'utf8'
+)
+assert(
+  'ST-4 terms-page free-tier copy matches the adopted monthly limit',
+  termsSrc.includes(
+    `${API_KEY_FREE_TIER_DEFAULTS.monthly_limit} calls per month`
+  ) && !termsSrc.includes('100 calls per month')
 )
 
 console.log(`\n${passCount} passed, ${failCount} failed`)

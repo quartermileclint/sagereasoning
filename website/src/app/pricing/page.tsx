@@ -18,7 +18,7 @@ const developerTiers = [
     label: 'sage-reason (quick / standard / deep)',
     description: 'Core reasoning engine — 3, 5, or 6 mechanisms',
     price: '~$0.18/call',
-    freeTier: '100 calls/month',
+    freeTier: '30 calls/month',
     speed: '~2–4s',
   },
   {
@@ -26,7 +26,7 @@ const developerTiers = [
     label: 'sage-score',
     description: 'Pre-action decision audit with structured reasoning',
     price: '~$0.18/call',
-    freeTier: '100 calls/month',
+    freeTier: '30 calls/month',
     speed: '~2s',
   },
   {
@@ -42,7 +42,7 @@ const developerTiers = [
     label: 'Evaluation skills',
     description: 'sage-decide, sage-audit, sage-converse, sage-scenario, sage-reflect, sage-classify, sage-prioritise, sage-moderate',
     price: '~$0.18/call',
-    freeTier: '100 calls/month',
+    freeTier: '30 calls/month',
     speed: '~2–3s',
   },
   {

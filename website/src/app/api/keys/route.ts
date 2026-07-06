@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { randomBytes, createHash } from 'node:crypto'
 import { checkRateLimit, RATE_LIMITS, requireAuth, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { API_KEY_FREE_TIER_DEFAULTS } from '@/lib/api-key-defaults'
 
 /**
  * GET /api/keys — List the authenticated user's API keys
@@ -134,9 +135,13 @@ export async function POST(request: NextRequest) {
         label: label.trim(),
         tier: 'free',
         is_active: true,
-        monthly_limit: 100,
-        daily_limit: 100, // No daily cap for free tier (rate limiting handles burst)
-        max_chain_iterations: 1,
+        // 2026-07-07: folded to the adopted free-tier defaults (30/1/1 —
+        // API_KEY_FREE_TIER_DEFAULTS, CI-6), closing the carried M2 decision.
+        // This surface previously minted 100/100/1, contradicting the admin
+        // mint, the schema DEFAULTs, and the marketplace/api-docs copy.
+        monthly_limit: API_KEY_FREE_TIER_DEFAULTS.monthly_limit,
+        daily_limit: API_KEY_FREE_TIER_DEFAULTS.daily_limit,
+        max_chain_iterations: API_KEY_FREE_TIER_DEFAULTS.max_chain_iterations,
       })
       .select('id, label, tier, monthly_limit, daily_limit, max_chain_iterations, created_at')
       .single()

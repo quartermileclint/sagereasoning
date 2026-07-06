@@ -29,7 +29,7 @@ Each wrapped skill invocation consumes **2-3 API calls**:
 | sage-score | POST /api/score or /api/reason | ~$0.18 | Yes |
 | sage-iterate | POST /api/score-iterate | ~$0.18 | Optional |
 
-Free tier (100 calls/month) supports ~33-50 wrapped skill invocations.
+Free tier (30 calls/month, 1/day) supports ~10-15 wrapped skill invocations.
 
 ## Wrapper Pattern (Pseudocode)
 
@@ -109,7 +109,7 @@ Headers:
   Content-Type: application/json
 ```
 
-Get a free API key (100 calls/month) at sagereasoning.com or contact
+Get a free API key (30 calls/month) at sagereasoning.com or contact
 zeus@sagereasoning.com.
 
 ## OpenBrain Integration Pattern

@@ -60,7 +60,7 @@ export async function GET() {
           ['sage-score', 'sage-guard', 'sage-iterate', 'sage-audit', 'sage-converse', 'sage-scenario', 'sage-context', 'sage-diagnose', 'sage-profile'].includes(s.id)
         ).length,
       },
-      pricing_note: 'All skills use per-call pricing. Free tier: 100 calls/month across all endpoints. Wrappers consume 2-3 calls per invocation.',
+      pricing_note: 'All skills use per-call pricing. Free tier: 30 calls/month (1/day) across all endpoints. Wrappers consume 2-3 calls per invocation.',
     },
     endpoint: '/api/marketplace',
     model: 'none',

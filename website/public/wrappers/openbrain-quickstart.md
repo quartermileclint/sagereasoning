@@ -18,7 +18,7 @@ SageReasoning adds a reasoning quality layer on top:
 ## Prerequisites
 
 - An OpenBrain stack (Supabase/Postgres + embeddings + capture pipeline)
-- A SageReasoning API key (free: 100 calls/month)
+- A SageReasoning API key (free: 30 calls/month)
 
 Get your key at [sagereasoning.com](https://sagereasoning.com) or email
 zeus@sagereasoning.com.

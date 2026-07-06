@@ -197,7 +197,7 @@ export default function TermsPage() {
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">9. Free Tier</h2>
           <p>
-            Free API access provides 100 calls per month with rate limiting. The free tier
+            Free API access provides 30 calls per month (one call per day) with rate limiting. The free tier
             provides full evaluation output on all endpoints &mdash; the distinction between
             free and paid is volume, not capability. Free tier access may be modified or
             discontinued with 30 days notice.
