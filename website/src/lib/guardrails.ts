@@ -167,8 +167,9 @@ const DISTRESS_PATTERNS: { pattern: RegExp; indicator: string; severity: 'mild' 
  * CRISIS_RESOURCES — Hardcoded support line numbers.
  *
  * VERIFICATION SCHEDULE:
- *   Last verified:        17 April 2026 (all 5 numbers confirmed current)
- *   Next verification due: 30 June 2026 (quarterly — per distress-signal-taxonomy.md)
+ *   Last verified:        7 July 2026 (7 lines current; the 6 Jul labelling caveat
+ *                         resolved — see change log 7 Jul 2026)
+ *   Next verification due: 31 December 2026 (per distress-signal-taxonomy.md)
  *   Verification method:   Check each number against the organisation's official website.
  *   Owner:                 Founder (Clinton)
  *
@@ -176,6 +177,24 @@ const DISTRESS_PATTERNS: { pattern: RegExp; indicator: string; severity: 'mild' 
  *   17 Apr 2026 — US line name updated from "National Suicide Prevention Lifeline"
  *                 to "988 Suicide & Crisis Lifeline" (official rebrand July 2022).
  *                 All 5 numbers verified current against official sources.
+ *   6 Jul 2026 — Scheduled verification run. All 5 phone lines re-confirmed current
+ *                against official sources: Lifeline AU 13 11 14, Beyond Blue AU
+ *                1300 22 4636, US 988 (call/text/chat), Crisis Text Line 741741,
+ *                Samaritans UK 116 123. FLAGGED (not changed — safety-critical,
+ *                needs founder approval per R20a/PR6): the "Crisis Text Line
+ *                (US/UK/CA)" label overstates coverage. "Text HOME to 741741" works
+ *                in the US only; in the UK text SHOUT to 85258, in Canada text
+ *                CONNECT to 686868. (support-brain-compiled.ts already lists these
+ *                country numbers correctly.)
+ *   7 Jul 2026 — Founder-approved fix of the 6 Jul flag: "Crisis Text Line" relabelled
+ *                US-only; added Shout (UK) "Text SHOUT to 85258" (verified current,
+ *                giveusashout.org, 24/7) and 988 Suicide Crisis Helpline (CA)
+ *                "Call or text 988" (Canada's all-ages national line since Nov 2023).
+ *                CA 988 chosen over the flag's suggested 686868 because "Text CONNECT
+ *                to 686868" is Kids Help Phone (ages 5–29, youth-scoped) — 988 is the
+ *                official all-ages service (verified against canada.ca + the Mental
+ *                Health Commission of Canada). support-brain-compiled.ts lists UK
+ *                85258 consistently; it carries no CA entry (unchanged this pass).
  *
  * If any number changes: edit here, redeploy, update the verification date.
  * See audit finding F6 (17 April 2026).
@@ -186,8 +205,10 @@ const CRISIS_RESOURCES = {
     { name: 'Lifeline (AU)', contact: '13 11 14', available: '24/7' },
     { name: 'Beyond Blue (AU)', contact: '1300 22 4636', available: '24/7' },
     { name: '988 Suicide & Crisis Lifeline (US)', contact: '988', available: '24/7' },
-    { name: 'Crisis Text Line (US/UK/CA)', contact: 'Text HOME to 741741', available: '24/7' },
+    { name: 'Crisis Text Line (US)', contact: 'Text HOME to 741741', available: '24/7' },
     { name: 'Samaritans (UK)', contact: '116 123', available: '24/7' },
+    { name: 'Shout (UK)', contact: 'Text SHOUT to 85258', available: '24/7' },
+    { name: '988 Suicide Crisis Helpline (CA)', contact: 'Call or text 988', available: '24/7' },
   ],
   closing: 'SageReasoning is a philosophical reasoning tool, not a mental health service. A trained professional can provide the support you deserve.',
 }
