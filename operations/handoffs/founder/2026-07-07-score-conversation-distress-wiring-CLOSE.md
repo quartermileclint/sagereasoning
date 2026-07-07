@@ -89,4 +89,20 @@ Expected: EITHER the normal envelope **plus** `result.support_resources { severi
 ## Orchestration Reminder
 After Part D goes green, the foundation stands complete: every S8b supporting blocker is closed (a — founder reconcile spot-check, b — W1–W4 brand pass, remain the founder's own items), and the founder requests the **new build plan** (the corroboration-check fork, decided build-near-term 2026-06-27, is weighed inside it per the 2026-07-07 scope election). The **0h call remains the founder's**.
 
-*End of session close. Build dark, gates green, activation walkthrough ready — nothing live changed this session.*
+---
+
+## ACTIVATION ADDENDUM (same session, 2026-07-07) — Part D EXECUTED, ALL GREEN
+
+The founder walked Part D live in-session (`D-R20A-SCORE-CONVERSATION-ELEVENTH-ROUTE-ACTIVATION-LIVE`; AC7 engaged + discharged; the AI performed no push/deploy/flag/live op):
+
+1. **Push:** commit `3de9572` (+ Session 1's commits) pushed; Vercel green — Session 1's crisis-line list + 30/1/1 copy went live; the R20a code deployed inert.
+2. **Flag:** `SUBSTRATE_SCORE_CONVERSATION_R20A_ENABLED=true` set in Vercel Production; redeployed Ready.
+3. **Smokes (browser console, Bearer-JWT `probe()` — the route auths via `Authorization: Bearer` only; the first bare fetch honestly 401'd, which is the designed auth posture, not a failure):
+   - **Acute** → `{distress_detected: true, severity: 'acute', redirect_message}` with the FULL 7-line list (incl. `Shout (UK): Text SHOUT to 85258` + `988 Suicide Crisis Helpline (CA)`); no score fields. Also discharges Session 1's carried crisis-list live smoke.
+   - **Benign** → normal envelope (`katorthoma_proximity: 'habitual'`, 50.6s); no distress fields.
+   - **Mild** → evaluation proceeded (`'deliberate'`, 3 passions) WITH `result.support_resources {severity: 'mild', message}`; 72.4s (the mild-escalation Haiku pass ran, kept mild). The designed non-blocking shape.
+4. **Records flipped:** readiness-statement blocker (3) + deferral struck done; activation decision-log entry appended; CLAUDE.md Session-2 refresh → LIVE + the fifth-flag Live-list bullet; the spent prompt marked SPENT.
+
+**Production state at TRUE session close: the R20a eleventh route is LIVE** — production is intentionally NOT byte-equivalent (the safety floor extends to `/api/score-conversation`). Rollback = unset the flag + redeploy. **The S8b 0h-exit blocker list is fully discharged at the build level; the foundation stands complete.** Remaining founder carries: the `sr_prac_7d0a66ff…` revocation; the `/terms`/`/pricing` spot-check; then request the **new build plan**.
+
+*End of session close (superseding the pre-activation closing line: the build went dark → live in one founder-walked session).*

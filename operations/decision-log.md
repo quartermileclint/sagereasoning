@@ -13001,3 +13001,22 @@ Expected: Arm 1 CLEARS (all seeds `faithfulMax=reflexive`, `G=+0`); Arm B every 
 **Rules served:** R20a, AC2, AC4, AC5 (eleventh-route protocol — all four merge requirements met), PR3, PR6, PR15 (shared classifier/renderer/resources reused; nothing re-implemented), PR17 (activation walkthrough authored, not one-lined), PR18, KG1, KG2.
 
 **Status:** Adopted. Cross-references: `D-FOUNDATION-COMPLETION-SESSION1-RECORD-CATCHUP-CRISIS-LINES-KEY-DEFAULTS` (predecessor); `D-S8A-OPEN-DECISIONS-2026-06-10` (the perimeter ruling); `D-PRELAUNCH-S8B-RECONCILE-R18-RIDES-2026-06-10` (blocker (c)); `operations/handoffs/founder/2026-07-07-score-conversation-distress-wiring-NEXT-SESSION-PROMPT.md` (the governing prompt); `operations/handoffs/founder/2026-07-07-score-conversation-distress-wiring-CLOSE.md` (the close + activation walkthrough).
+
+## 2026-07-07 — D-R20A-SCORE-CONVERSATION-ELEVENTH-ROUTE-ACTIVATION-LIVE
+
+**Decision:** The `/api/score-conversation` R20a distress wiring is **ACTIVATED + Verified-LIVE in production** — a founder-walked Critical 0c-ii (AC7 engaged + discharged; PR17 — the walkthrough ran live in-session): the founder pushed (`3de9572` + Session 1's three commits + the records commit `3895750`; Vercel green), set **`SUBSTRATE_SCORE_CONVERSATION_R20A_ENABLED=true`** in Vercel Production, redeployed, and ran the three live smokes from a signed-in browser console (Bearer-JWT `probe()` helper — the route authenticates via `Authorization: Bearer` only, never cookies; the first bare-fetch attempt honestly 401'd). **The AI performed no push/deploy/flag/live op.** This closes **S8b 0h-exit supporting blocker (c)** — the last human free-text route is inside the enforced R20a perimeter; **the S8b supporting-blocker list is now fully discharged at the build level** (blockers (a) founder reconcile spot-check and (b) W1–W4 brand consistency remain the founder's own criterion-1 items).
+
+**Live smoke evidence (all three green, founder-run 2026-07-07):**
+- **Acute probe** → `{distress_detected: true, severity: 'acute', redirect_message}` carrying the **full 7-line resource list** (Lifeline AU, Beyond Blue AU, 988 US, Crisis Text Line US, Samaritans UK, **Shout UK 85258**, **988 CA**) + the closing; no score fields; no developer-form keys. (This also discharges Session 1's carried live smoke — the corrected crisis-line list renders on the live surface.)
+- **Benign probe** → the normal score envelope (`result.overall.katorthoma_proximity: 'habitual'`, `meta.ai_model: 'claude-sonnet-4-6'`, latency 50.6s); no distress fields, no fold.
+- **Mild probe** → the evaluation proceeded (`katorthoma_proximity: 'deliberate'`, 3 passions detected) **with `result.support_resources {severity: 'mild', message}`** riding additively; latency 72.4s vs the benign 50.6s — consistent with the mild-escalation Haiku pass running and legitimately keeping mild. The designed non-blocking shape.
+
+**Production is NOT byte-equivalent — a deliberate, intended standing change** (the safety floor extends to the eleventh route). **Rollback:** unset `SUBSTRATE_SCORE_CONVERSATION_R20A_ENABLED` + redeploy (the route is byte-identical flag-off, test-asserted).
+
+**Records flipped with this entry:** the pre-lawyer readiness statement (blocker (3) + the named deferral struck **done 2026-07-07**); the CLAUDE.md production state (Session-2 refresh → LIVE; the Live list gains the fifth R20a flag); the session close (activation addendum); the spent NEXT-SESSION prompt marked SPENT.
+
+**Carried (founder-walked, non-blocking):** the `sr_prac_7d0a66ff…` benchmark-credential revocation (Session-1 carry; mint CLI + prod admin JWT per memory `prod-mint-needs-prod-admin-jwt`); the Session-1 `/terms` + `/pricing` copy spot-check. **Named follow-ups (unchanged from the build entry):** the always-on `format` length validation; the shared-classifier mild-mutes-stage-2 property on sibling routes. **The foundation now stands complete — the next move is the founder's request for the new build plan.** The **0h call remains the founder's.**
+
+**Rules served:** R20a, AC5, AC7 (engaged + discharged), PR6, PR17, PR18.
+
+**Status:** Adopted. Cross-references: `D-R20A-SCORE-CONVERSATION-ELEVENTH-ROUTE-BUILT-DARK-TEST-VERIFIED` (the build, same day); `D-PRELAUNCH-S8B-RECONCILE-R18-RIDES-2026-06-10` (blocker (c) origin); `operations/handoffs/founder/2026-07-07-score-conversation-distress-wiring-CLOSE.md` (§Part D + activation addendum).

@@ -1,5 +1,7 @@
 # Next-Session Prompt — /api/score-conversation Distress Wiring (Foundation Completion, Session 2)
 
+> **SPENT — executed in full 2026-07-07** (Parts A–C: built dark + reviewed + gates green; Part D: founder-walked activation, live smokes all green — the wiring is LIVE). See `2026-07-07-score-conversation-distress-wiring-CLOSE.md` + `D-R20A-SCORE-CONVERSATION-ELEVENTH-ROUTE-{BUILT-DARK-TEST-VERIFIED,ACTIVATION-LIVE}`.
+
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)
 
 **Stream:** founder.
