@@ -13020,3 +13020,19 @@ Expected: Arm 1 CLEARS (all seeds `faithfulMax=reflexive`, `G=+0`); Arm B every 
 **Rules served:** R20a, AC5, AC7 (engaged + discharged), PR6, PR17, PR18.
 
 **Status:** Adopted. Cross-references: `D-R20A-SCORE-CONVERSATION-ELEVENTH-ROUTE-BUILT-DARK-TEST-VERIFIED` (the build, same day); `D-PRELAUNCH-S8B-RECONCILE-R18-RIDES-2026-06-10` (blocker (c) origin); `operations/handoffs/founder/2026-07-07-score-conversation-distress-wiring-CLOSE.md` (§Part D + activation addendum).
+
+## 2026-07-07 — D-CREDENTIAL-HYGIENE-BENCHMARK-LEFTOVERS-REVOKED
+
+**Decision:** The Session-1 carried revocation of `sr_prac_7d0a66ff…` (Leg D v3 benchmark credential) is **closed with a record correction**: the live CLI `list` against production showed it **already REVOKED** (`id=e3a3b7eb-8710-49b1-ae3a-38747288bcb4`, "Sage Practice Benchmark v1 — Leg D v3 (post-fix)") — the v4-kickoff/Session-1 "still active" description was stale against the ground truth. While walking it, the list surfaced **four dormant-but-active leftover credentials** (`used:0` all); the founder elected to revoke all four and performed the revocations via the mint CLI's class-guarded verbs (admin routes; audited surfaces; the AI performed no live op): **(1)** `sr_prac_f0c5da` "leg-d v6 full harnessed" (`e2726b38-…`, benchmark arc superseded by ADR-012); **(2)** `sr_prac_69cdfa` "arm1 contract-only v5" (`70c98ef2-…`, gaming-robustness Arm-1 run complete); **(3)** `sr_assent_3396` "provenance gate test" (`0ded6d33-…`, stale R18f test credential); **(4)** `sr_live_f7405d` "Option D verification test key" (`f87d2532-…`, paid-tier test key). Verified by re-list (all four read REVOKED); shell env unset after (`MINT_CLI_ADMIN_JWT`/`MINT_CLI_BASE_URL` — the export-leak lesson).
+
+**Deliberately KEPT active:** `sr_prac_7e9b11` — the standing Gate-1 dogfood UPC (`322b0eb7…`, the Live `pre_decision_harness` marker credential); `sr_live_be9492` — the founder's "P0 Hold Point Testing" key.
+
+**Risk classification:** Standard under 0d-ii (production data-only credential deactivation via the existing admin surfaces, founder-performed; no code/schema/flag/perimeter change). AC7 not engaged (no auth-surface change — revocation is the designed lifecycle op). PR6 not engaged.
+
+**Rollback path:** none needed — revocation is the intended terminal state for test/benchmark credentials; the api-keys-surface revocations are PATCH `is_active=false` (reversible by an admin PATCH if ever genuinely needed); the assent revoke is the designed DELETE.
+
+**Verification step (founder-performable):** `npx tsx scripts/mint-credential.ts list` (prod env per the CLI header) → the four ids above read REVOKED; `322b0eb7…` + `6e0951e2…` remain active.
+
+**Rules served:** R0 (audited revocation surfaces), R17 posture (dormant-credential hygiene), PR10 (record corrected against first-hand ground truth), PR17 (founder-walked live).
+
+**Status:** Adopted. Cross-references: `D-R20A-SCORE-CONVERSATION-ELEVENTH-ROUTE-ACTIVATION-LIVE` (same-day predecessor; carried this item); `D-FOUNDATION-COMPLETION-SESSION1-RECORD-CATCHUP-CRISIS-LINES-KEY-DEFAULTS` (the carry's origin); memory `human-routes-bearer-jwt-console-smoke` + `mint-cli-env-file-export-leak` (method).
