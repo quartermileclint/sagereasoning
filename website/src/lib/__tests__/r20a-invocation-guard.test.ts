@@ -73,6 +73,41 @@ const HUMAN_FACING_POST_ROUTES = [
   // `await enforceDistressCheck(detectDistressTwoStage(...))` before storing.
   'src/app/api/mentor/journal-feed/route.ts',
   'src/app/api/journal/route.ts',
+  // Foundation Completion Session 2 (2026-07-07; AC5 eleventh-route protocol;
+  // closes the S8b 0h-exit blocker (c) — the S8a "inside-perimeter exception"):
+  // score-conversation joins the route-level pattern FLAG-GATED behind
+  // SUBSTRATE_SCORE_CONVERSATION_R20A_ENABLED (dark until the founder-walked
+  // activation; flag-off is byte-identical). The AC5-mandated call pattern is
+  // asserted below like every other route-level entry; the flag posture is
+  // asserted in FLAG_GATED_ROUTE_LEVEL_ROUTES + the per-route test at
+  // src/app/api/score-conversation/__tests__/r20a-invocation.test.ts.
+  'src/app/api/score-conversation/route.ts',
+]
+
+// ---------------------------------------------------------------------------
+// Flag-gated route-level routes — route-level-pattern perimeter members whose
+// check is additionally gated behind a per-route feature flag (dark-build
+// posture; the flag defaults OFF and activation is a founder-walked Critical
+// step). Each entry pairs the route with the exported flag-check function it
+// must import AND call — mirroring the SUBSTRATE_GATE_ROUTES flag assertions.
+// The flag lives with its mechanism (see src/lib/score-conversation-r20a.ts).
+// ---------------------------------------------------------------------------
+
+interface FlagGatedRouteLevelEntry {
+  /** Route source path relative to website/ root. */
+  readonly route: string
+  /** The exported flag-check function name the route imports + calls. */
+  readonly flag: string
+  /** The module (import-path fragment) the flag is imported from. */
+  readonly flagSource: string
+}
+
+const FLAG_GATED_ROUTE_LEVEL_ROUTES: readonly FlagGatedRouteLevelEntry[] = [
+  {
+    route: 'src/app/api/score-conversation/route.ts',
+    flag: 'isScoreConversationR20aEnabled',
+    flagSource: 'score-conversation-r20a',
+  },
 ]
 
 // ---------------------------------------------------------------------------
@@ -171,12 +206,13 @@ for (const routePath of HUMAN_FACING_POST_ROUTES) {
   // When adding a new human-facing POST endpoint, add it to
   // HUMAN_FACING_POST_ROUTES above.
   //
-  // Current count: 10 route-level routes (8 as of 18 April 2026 + the two
+  // Current count: 11 route-level routes (8 as of 18 April 2026 + the two
   // journal routes added 2026-05-31 under the gap-#4 remediation, AC5
-  // ninth/tenth-route protocol) + 2 substrate-gate routes (Calling +
-  // Reflect-content added 2026-05-28 under Option A; see SUBSTRATE_GATE_ROUTES)
-  // = 12 routes in the R20a perimeter overall.
-  assert(HUMAN_FACING_POST_ROUTES.length >= 10, `${label} (>=10 route-level)`)
+  // ninth/tenth-route protocol + score-conversation added 2026-07-07 under
+  // the AC5 eleventh-route protocol, flag-gated dark) + 2 substrate-gate
+  // routes (Calling + Reflect-content added 2026-05-28 under Option A; see
+  // SUBSTRATE_GATE_ROUTES) = 13 routes in the R20a perimeter overall.
+  assert(HUMAN_FACING_POST_ROUTES.length >= 11, `${label} (>=11 route-level)`)
   assert(SUBSTRATE_GATE_ROUTES.length >= 2, `${label} (>=2 substrate-gate)`)
 }
 
@@ -315,6 +351,49 @@ for (const { route, flag } of SUBSTRATE_GATE_ROUTES) {
   // The flag function MUST be CALLED in the body (not just imported).
   // This guards the production default-OFF posture.
   const hasFlagCall = new RegExp(`${flag}\\s*\\(`).test(bodySource)
+
+  assert(hasFlagCall === true, label)
+}
+
+// -------------------------------------------------------------------------
+// FLAG-GATED ROUTE-LEVEL ROUTES (2026-07-07; AC5 eleventh-route protocol)
+//
+// These perimeter members carry the full route-level pattern (asserted by
+// the HUMAN_FACING_POST_ROUTES blocks above) AND gate it behind a per-route
+// feature flag for the dark-build posture. Each MUST:
+//   1. Import its flag-check function from the named module
+//   2. Call the flag check in the route body (not just import it)
+// The flag semantics themselves (unset/false/'1' → OFF; 'true' → ON) are
+// asserted in the per-route test under the route's __tests__/ folder.
+// -------------------------------------------------------------------------
+
+for (const { route, flag, flagSource } of FLAG_GATED_ROUTE_LEVEL_ROUTES) {
+  const label = `R20a Safety Invocation Guard: ${route} imports its route-level feature flag ${flag} from ${flagSource}`
+  const fullPath = path.join(websiteRoot, route)
+  assert(fs.existsSync(fullPath) === true, `${label} (file exists)`)
+
+  const source = fs.readFileSync(fullPath, 'utf-8')
+
+  const hasFlagImport =
+    source.includes('import') &&
+    source.includes(flag) &&
+    source.includes(flagSource)
+
+  assert(hasFlagImport === true, label)
+}
+
+for (const { route, flag } of FLAG_GATED_ROUTE_LEVEL_ROUTES) {
+  const label = `R20a Safety Invocation Guard: ${route} calls its route-level feature flag ${flag} in the body (flag check, not just import)`
+  const fullPath = path.join(websiteRoot, route)
+  const source = fs.readFileSync(fullPath, 'utf-8')
+
+  const lines = source.split('\n')
+  const nonImportLines = lines.filter(
+    (line) => !line.trim().startsWith('import ')
+  )
+  const bodySource = nonImportLines.join('\n')
+
+  const hasFlagCall = new RegExp(`${flag}\\s*\\(\\s*\\)`).test(bodySource)
 
   assert(hasFlagCall === true, label)
 }

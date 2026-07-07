@@ -9,6 +9,16 @@ import { getPractitionerContext } from '@/lib/context/practitioner-context'
 import { getProjectContext } from '@/lib/context/project-context'
 import { type RetrieveResult } from '@/lib/rag'
 import { loadLayer1WithFallback } from '@/lib/rag/load-layer1-with-fallback'
+import { detectDistressTwoStage } from '@/lib/r20a-classifier'
+import { enforceDistressCheck } from '@/lib/constraints'
+import { renderR20aRedirectResponse } from '@/lib/substrate/r20a-audience-renderer'
+import {
+  isScoreConversationR20aEnabled,
+  composeConversationDistressSubject,
+  escalateMildDistress,
+  buildMildSupportResources,
+  type MildSupportResources,
+} from '@/lib/score-conversation-r20a'
 
 /**
  * sage-converse — Evaluate a conversation for Stoic virtue and dynamics.
@@ -21,6 +31,16 @@ import { loadLayer1WithFallback } from '@/lib/rag/load-layer1-with-fallback'
  *   - Truncates long conversations to 6000 words
  *   - Splits scoring into overall conversation + per-participant receipts
  *   - Analyzes virtue engagement across multiple participants
+ *
+ * R20a (2026-07-07, Foundation Completion Session 2): the two-stage distress
+ * check runs over the submitted free text (conversation + context + format,
+ * each field capped at 15,000 chars) before any context load or LLM call,
+ * FLAG-GATED behind SUBSTRATE_SCORE_CONVERSATION_R20A_ENABLED (default OFF ⇒
+ * byte-identical). Moderate/acute → human-audience crisis redirect; stage-1
+ * mild → the mild-escalation check (stage 2 runs anyway, more severe wins);
+ * final mild → additive `support_resources` fold, evaluation proceeds.
+ * Closes the S8b 0h-exit blocker (c) (the S8a "inside-perimeter exception").
+ * Helpers + recorded elections: src/lib/score-conversation-r20a.ts.
  *
  * ---------------------------------------------------------------------------
  * CONTEXT LAYERS WIRED HERE:
@@ -105,6 +125,66 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // ------------------------------------------------------------------------
+    // R20a — Vulnerable user detection (before any context load or LLM call).
+    //
+    // Foundation Completion Session 2 (2026-07-07): closes the S8b 0h-exit
+    // blocker (c) — this was the last human-facing free-text route with no
+    // distress check (the S8a "inside-perimeter exception",
+    // D-S8A-OPEN-DECISIONS-2026-06-10 decision 2).
+    //
+    // FLAG-GATED behind SUBSTRATE_SCORE_CONVERSATION_R20A_ENABLED (default
+    // OFF). When UNSET, this entire block is skipped and the route is
+    // byte-identical to pre-wiring behaviour — no classifier call, no added
+    // latency, no wire-shape change. Activation is a founder-walked Critical
+    // step (flag + redeploy + live smoke); rollback = unset the flag.
+    //
+    // The check subject is the submitted free text (conversation + context +
+    // format), each field capped at 15,000 chars (TEXT_LIMITS.long posture)
+    // — see score-conversation-r20a.ts for the recorded elections + the
+    // adversarial-review folds. The 6000-word truncation below is engine-only.
+    //
+    // On moderate/acute → the HUMAN-audience crisis rendering (this is a
+    // human tool route; cookie-session auth only — never the developer-form
+    // payload). On a stage-1 'mild' → the mild-escalation check (the shared
+    // stage-2 evaluator runs anyway; the more severe result wins, never a
+    // downgrade — review finding F3: a third party's mild language in the
+    // pasted transcript must not mute the Haiku look at the submitter's own
+    // regex-missed distress). On (final) mild → proceed, with the crisis
+    // resources folded into the result as the additive `support_resources`
+    // field. Stage-2 (Haiku) outage fails open WITH alert + marker row per
+    // ADR-R20a-01 D6-c inside detectDistressTwoStage (and fail-open-to-mild
+    // inside escalateMildDistress); the stage-1 regex floor always runs.
+    //
+    // Rules served: R20a; AC2 (~500ms borderline latency accepted); AC4
+    // (invocation-tested); AC5 (eleventh route-level perimeter entry — the
+    // mandated `await enforceDistressCheck(detectDistressTwoStage(...))`
+    // pattern); PR3 (awaited, never fire-and-forget); PR6 (Critical); PR15
+    // (reuses the shared classifier + renderer; nothing re-implemented).
+    // ------------------------------------------------------------------------
+    let mildSupportResources: MildSupportResources | undefined
+    if (isScoreConversationR20aEnabled()) {
+      const distressSubject = composeConversationDistressSubject({ conversation, context, format })
+      const gate = await enforceDistressCheck(detectDistressTwoStage(distressSubject))
+      let effectiveDistress = gate.result
+      if (!gate.shouldRedirect && gate.result.severity === 'mild') {
+        effectiveDistress = await escalateMildDistress(distressSubject, gate.result)
+      }
+      if (effectiveDistress.redirect_message !== null) {
+        return NextResponse.json(
+          renderR20aRedirectResponse({
+            audience: 'human_user',
+            severity: effectiveDistress.severity,
+            redirect_message: effectiveDistress.redirect_message,
+          }),
+          { status: 200, headers: corsHeaders() }
+        )
+      }
+      if (effectiveDistress.severity === 'mild') {
+        mildSupportResources = buildMildSupportResources()
+      }
+    }
+
     // Truncate long conversations
     const truncated = conversation.trim().split(/\s+/).slice(0, 6000).join(' ')
 
@@ -174,6 +254,10 @@ export async function POST(request: NextRequest) {
       reasoning_receipt: overallReceipt,
       participant_receipts: [],
       scored_at: new Date().toISOString(),
+      // R20a mild fold — additive; present ONLY when the flag is on AND the
+      // check returned severity 'mild' (flag-off and benign inputs are
+      // byte-identical: the spread of an absent field adds nothing).
+      ...(mildSupportResources !== undefined ? { support_resources: mildSupportResources } : {}),
     }
 
     // Analytics
