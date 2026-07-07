@@ -1,5 +1,7 @@
 # Next-Session Prompt — Corroboration Check — LIVE BATTERY COMPLETION (the carried S0a verification step)
 
+> **SPENT — executed 2026-07-08 (`D-TRUST-LAYER-S0A-CORROBORATION-CHECK-LIVE-BATTERY-GREEN`). The battery completed GREEN in every gated direction (101 runs, 100 completed — the 1 error the known BL2 diagnostic; over-strictness 0, lenience 0, monotonicity 0; A2 17/34 disclosed). The activation prompt it conditionally authorised exists: `2026-07-08-corroboration-check-activation-NEXT-SESSION-PROMPT.md`. Kept for the record.**
+
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)
 
 **Stream:** founder.
