@@ -53,6 +53,16 @@ import type {
   ObligationAssessment,
   ObligationStatus,
 } from './layer1-extractor'
+// Added 2026-07-07 (corroboration check — bar §4.1 / Trust Layer S0a). The check
+// itself lives in corroboration-check.ts (pure, standalone-invokable); this module
+// only computes the report flag-on and applies its monotone domain-floor overrides.
+import {
+  corroborateExtraction,
+  isCorroborationCheckEnabled,
+  type CorroborationReport,
+} from './corroboration-check'
+
+export type { CorroborationReport }
 
 // Re-export Layer 1 vocabularies that Layer 3 + harness will consume.
 export type {
@@ -446,6 +456,22 @@ export interface Layer2Assessment {
     aggregate: KatorthomaProximity
     basis: string
   }
+  /**
+   * Added 2026-07-07 (corroboration check — gaming-robustness bar §4.1 / Trust
+   * Layer S0a). The deterministic corroboration report cross-referencing the
+   * extraction's self-report claims against the verbatim action text. Present
+   * ONLY when the corroboration option is supplied AND the check is enabled
+   * (OMITTED entirely otherwise ⇒ canonical signing bytes byte-identical — the
+   * established optional-field pattern). The extraction's CLAIMED values stay
+   * verbatim in `oikeiosis` / the schema; a contradiction is recorded here and
+   * applied as a monotone domain floor (visible in `proximity_floors.basis`) —
+   * record-and-floor, never rewrite-the-extraction. Every marker carries the
+   * verbatim matched span, so the finding is auditable from the signed
+   * assessment alone. The per-field `finding` vocabulary (corroborated /
+   * uncorroborated / contradicted) is the Trust Layer S3 combiner's routing
+   * input (mentor answer A1).
+   */
+  corroboration?: CorroborationReport
 }
 
 // ============================================================================
@@ -477,6 +503,28 @@ export interface ApplyOptions {
    * shape are byte-identical to pre-§4 (test-asserted).
    */
   dikaiosyneWeighting?: boolean
+  /**
+   * Corroboration check (2026-07-07, gaming-robustness bar §4.1 / Trust Layer
+   * S0a). Supplies the VERBATIM action text so the deterministic corroboration
+   * check (corroboration-check.ts) can cross-reference the extraction's
+   * self-report claims (obligation `met`/`indeterminate`; `examined_before_acting`)
+   * against the text and floor the dikaiosyne/andreia domains on a grounded
+   * contradiction — the catchable half of the extraction-trust gaming surface.
+   *
+   * The check RUNS only when BOTH (a) this option is present AND its `enabled`
+   * resolves true (`enabled ?? SUBSTRATE_CORROBORATION_CHECK_ENABLED === 'true'`),
+   * and (b) dikaiosyne weighting resolves true (the overrides act through the §4
+   * domain floors — the check is a §4-native extension). Option absent (every
+   * existing caller) and/or flag unset ⇒ NO report is computed, NO field is
+   * attached, and the assessment is byte-identical (test-asserted). Overrides are
+   * MONOTONE (floor-only): the check can never raise a score.
+   */
+  corroboration?: {
+    /** The verbatim action/input text the extraction purports to describe. */
+    actionText: string
+    /** Explicit override for tests/batteries; defaults to the env flag. */
+    enabled?: boolean
+  }
 }
 
 // ============================================================================
@@ -1608,7 +1656,10 @@ function computeProximity(
   kathekonFactors: KathekonFactor[],
   urgency: UrgencyIndicator[],
   stages: CausalStageEvidence[],
-  dikaiosyne: boolean
+  dikaiosyne: boolean,
+  // Corroboration check (2026-07-07, bar §4.1 / Trust Layer S0a). null ⇒ the
+  // check did not run (option absent / flag off) ⇒ byte-identical §4 behaviour.
+  corroboration: CorroborationReport | null = null
 ): { proximity: KatorthomaProximity; floors: ProximityFloors | null } {
   if (!dikaiosyne) {
     const base = computeProximityBase(
@@ -1625,7 +1676,7 @@ function computeProximity(
   const hasNaturalRelationship = kathekonFactors.some(
     (f) => f.factor_type === 'natural_relationship'
   )
-  const dik = computeDikaiosyneFloor(oik.relevant_circles, hasNaturalRelationship)
+  let dik = computeDikaiosyneFloor(oik.relevant_circles, hasNaturalRelationship)
   let and = computeAndreiaFloor(passions, urgency, stages)
   const sop = computeSophrosyneFloor(passions)
 
@@ -1645,12 +1696,47 @@ function computeProximity(
   // only escape is an all-`met`-argued dikaiosyne, already disclosed as the lying-met ceiling.
   if (and === 'reflexive' && dik === 'sage_like') and = null
 
+  // CORROBORATION OVERRIDES (2026-07-07, bar §4.1 / Trust Layer S0a) — applied
+  // AFTER the native floors + the unity coupling, MONOTONE (floor-only, to
+  // 'reflexive'; the check can never raise a score). Fires ONLY on a positive
+  // grounded contradiction (rank-preserving posture — silence never overrides):
+  //   - dikaiosyne_override: the action text shows a non-consented cost that NO
+  //     extracted circle carries as violated (the claimed-met / met-on-a-
+  //     different-circle / victim-omitted-with-harm-in-text routes).
+  //   - andreia_override: an `examined_before_acting: true` on a carried-out
+  //     grave act whose evidence is fabricated OR whose text admits the act was
+  //     un-verified with no concrete verification evidence.
+  // NOTE the coupling deliberately does NOT lift a corroboration-driven andreia
+  // floor: the unity-thesis suppression presumes a FAITHFUL extraction, and a
+  // corroboration contradiction is positive evidence the extraction is not
+  // faithful — the conservative reading stands.
+  const corroNotes: string[] = []
+  if (corroboration) {
+    if (corroboration.dikaiosyne_override === 'floor_reflexive') {
+      dik = 'reflexive'
+      corroNotes.push(
+        "corroboration: the action text shows a non-consented cost no extracted circle carries as violated → dikaiosyne floored to 'reflexive'"
+      )
+    }
+    if (corroboration.andreia_override === 'treat_unexamined') {
+      and = 'reflexive'
+      corroNotes.push(
+        "corroboration: the 'examined_before_acting' claim on a carried-out grave act is uncorroborated/contradicted → andreia floored to 'reflexive'"
+      )
+    }
+  }
+
   const engaged: KatorthomaProximity[] = [base]
   if (dik !== null) engaged.push(dik)
   if (and !== null) engaged.push(and)
   if (sop !== null) engaged.push(sop)
   const aggregate = weakestProximity(engaged)
 
+  const nativeBasis = describeProximityBasis(
+    base,
+    { dikaiosyne: dik, andreia: and, sophrosyne: sop },
+    aggregate
+  )
   return {
     proximity: aggregate,
     floors: {
@@ -1659,7 +1745,7 @@ function computeProximity(
       andreia: and,
       sophrosyne: sop,
       aggregate,
-      basis: describeProximityBasis(base, { dikaiosyne: dik, andreia: and, sophrosyne: sop }, aggregate),
+      basis: corroNotes.length > 0 ? `${nativeBasis} | ${corroNotes.join('; ')}` : nativeBasis,
     },
   }
 }
@@ -2500,6 +2586,18 @@ export function applyMechanisms(
   // false ⇒ every §4 path is byte-identical to pre-§4 (test-asserted).
   const dikaiosyne = options?.dikaiosyneWeighting ?? isProximityDikaiosyneEnabled()
 
+  // Corroboration check (2026-07-07, bar §4.1 / Trust Layer S0a) — runs only when
+  // the caller supplied the action text AND the check is enabled AND dikaiosyne
+  // weighting is on (the overrides act through the §4 domain floors). Option
+  // absent (every existing caller) / flag unset ⇒ report null ⇒ byte-identical.
+  const corroborationOn =
+    dikaiosyne &&
+    options?.corroboration !== undefined &&
+    (options.corroboration.enabled ?? isCorroborationCheckEnabled())
+  const corroborationReport: CorroborationReport | null = corroborationOn
+    ? corroborateExtraction(schema, options!.corroboration!.actionText)
+    : null
+
   // Mechanism 1 — control filter
   const cf = classifyControlFilter(schema.control_filter_elements)
 
@@ -2567,7 +2665,8 @@ export function applyMechanisms(
     evidenceQuotes
   )
 
-  // Derived fields — proximity (flag-on: per-domain minimum + the floors breakdown)
+  // Derived fields — proximity (flag-on: per-domain minimum + the floors breakdown;
+  // corroboration report threaded when the check ran — null ⇒ byte-identical §4)
   const proximityResult = computeProximity(
     pd,
     cf,
@@ -2577,7 +2676,8 @@ export function applyMechanisms(
     schema.kathekon_factors,
     schema.urgency_indicators,
     schema.causal_stage_evidence,
-    dikaiosyne
+    dikaiosyne,
+    corroborationReport
   )
   const proximity = proximityResult.proximity
   const rulingFacultyState = computeRulingFacultyState(
@@ -2639,6 +2739,14 @@ export function applyMechanisms(
   // (proximityResult.floors === null) ⇒ canonical bytes byte-identical to pre-§4.
   if (proximityResult.floors !== null) {
     assessment.proximity_floors = proximityResult.floors
+  }
+
+  // Corroboration check — attached ONLY when the check ran (OMITTED otherwise ⇒
+  // canonical bytes byte-identical — the established optional-field pattern).
+  // Record-and-floor, never rewrite-the-extraction: the claimed values stay
+  // verbatim in `oikeiosis`; the report + the floors carry the contradiction.
+  if (corroborationReport !== null) {
+    assessment.corroboration = corroborationReport
   }
 
   return assessment

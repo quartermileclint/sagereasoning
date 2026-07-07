@@ -52,6 +52,9 @@ import {
   type Tier1TriggerCode,
   type Layer2Assessment,
 } from './layer2-mechanisms'
+// Corroboration check (2026-07-07, bar §4.1 / Trust Layer S0a) — flag read only;
+// the check itself runs inside applyMechanisms when the option is attached.
+import { isCorroborationCheckEnabled } from './corroboration-check'
 // Mechanism-correction M5 (CI-4 reason-route half): the loop-closure
 // examination markers the route builds and runSandwichInner attaches inside the
 // signed assessment. See reason-loop-closure.ts.
@@ -788,10 +791,21 @@ async function runSandwichInner(params: SandwichInput): Promise<SandwichRunResul
     // TEMPORAL_AMBIGUITY (Position 2) / SCOPE_AMBIGUITY (Position 6) is not
     // re-fired — applyMechanisms continues to a full assessment. Undefined
     // tier1SuppressTrigger (flag off / every existing caller) → byte-identical.
+    //
+    // Corroboration check (2026-07-07, bar §4.1 / Trust Layer S0a): when
+    // SUBSTRATE_CORROBORATION_CHECK_ENABLED is set, the verbatim input text is
+    // supplied so the deterministic check can cross-reference the extraction's
+    // self-report claims against it (works identically on the l1_supply path —
+    // the input text is always required, so the check reads (schema, text)
+    // downstream of extraction). Flag UNSET (production today) ⇒ the option is
+    // NOT attached ⇒ byte-identical (test-asserted).
+    const corroborationOpt = isCorroborationCheckEnabled()
+      ? { corroboration: { actionText: params.input } }
+      : undefined
     layer2Result = applyMechanisms(
       layer1Schema,
-      params.tier1SuppressTrigger !== undefined
-        ? { suppressTrigger: params.tier1SuppressTrigger }
+      params.tier1SuppressTrigger !== undefined || corroborationOpt !== undefined
+        ? { suppressTrigger: params.tier1SuppressTrigger, ...corroborationOpt }
         : undefined
     )
   } catch (err) {

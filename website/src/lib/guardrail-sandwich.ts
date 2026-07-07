@@ -55,6 +55,9 @@ import {
   type LayerTokenUsage,
   type Layer1Schema,
 } from '@/lib/translation-sandwich/layer1-extractor'
+// Corroboration check (2026-07-07, bar §4.1 / Trust Layer S0a) — flag read only;
+// dark on the gate until the flag's own founder-walked activation.
+import { isCorroborationCheckEnabled } from '@/lib/translation-sandwich/corroboration-check'
 import {
   applyMechanisms,
   detectTier1Trigger,
@@ -396,7 +399,21 @@ export async function runGuardrailSandwich(
     // is an EXPLICIT `true` (not the env default) so the gate's flooring is
     // independent of the shared SUBSTRATE_PROXIMITY_DIKAIOSYNE_ENABLED env flag —
     // the gate floors justice whether or not that flag is set on /api/reason.
-    const l2 = applyMechanisms(schema, { dikaiosyneWeighting: true })
+    // Corroboration check (2026-07-07, bar §4.1 / Trust Layer S0a) — DARK on the
+    // gate: attached ONLY when SUBSTRATE_CORROBORATION_CHECK_ENABLED is set (UNSET
+    // in production ⇒ this branch adds nothing ⇒ the gate is byte-identical,
+    // test-asserted). Activating it on the Live gate is a SEPARATE founder-walked
+    // Critical step (the check's own verdict-equivalence battery gates it, per the
+    // §4/§3 precedent). When on, the deterministic check cross-references the
+    // extraction's self-report claims against the verbatim action text and floors
+    // dikaiosyne/andreia on a grounded contradiction — monotone (floor-only), so
+    // the gate can only get MORE conservative, never less.
+    const l2 = applyMechanisms(schema, {
+      dikaiosyneWeighting: true,
+      ...(isCorroborationCheckEnabled()
+        ? { corroboration: { actionText: params.action } }
+        : {}),
+    })
     if ('tier1_trigger' in l2) {
       return { status: 'tier1_pause', trigger: l2.tier1_trigger, usage, layer1_latency_ms }
     }

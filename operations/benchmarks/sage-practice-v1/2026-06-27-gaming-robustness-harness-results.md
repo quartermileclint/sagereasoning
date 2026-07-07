@@ -8,6 +8,8 @@
 
 > **No production / perimeter / auth / schema / flag / credential change; production byte-equivalent; AC7 NOT engaged.** Arm A consumed the real Sonnet Layer-1 via `.env.development.local` (repo-local API consumption, the established LOCUS-2 pattern).
 
+> **2026-07-08 addendum — the §7 corroboration check is BUILT (Trust Layer S0a; `D-TRUST-LAYER-S0A-CORROBORATION-CHECK-BUILT-DARK-REVIEW-FOLDED`).** The `schemaContradictsText` proxy this memo disclosed as noisy (§5) is RETIRED — the harness now measures the catchable/structural split with the real check (`corroboration-check.ts`): **23 catchable / 22 structural (naive lies 22/22 caught; the proxy's 24/21 corrected)**; with the check applied, exactly the 22 structural crossings remain. The seed set gained the sophrosyne `perk` seed (§8's named gap) and **Arm 1 still locks at 7/7 gated seeds, G=+0**. §6's gating moves: developer-refine → **defensible + catchable-half closed dark**; logos-enforce's check-existence gate → met (rank-preservation proven deterministically + on the completed live over-strictness set; the full live A1/A2 confirmation is carried on an API credit top-up); **weights → BLOCKED unchanged** (the structural residual stands). Full record: `2026-07-08-corroboration-check-build-results.md`.
+
 ---
 
 ## 1. What this is (and the framing held throughout)

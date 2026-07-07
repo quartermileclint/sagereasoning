@@ -360,22 +360,27 @@ function runRouteWiringTests(): void {
   expectTrue('INV-13a no justiceUsage metering remains in the route', !/justiceUsage/.test(body))
   expectTrue('INV-13b no outcome.justice_usage reference remains in the route', !/justice_usage/.test(body))
 
-  // INV-15 (ADR-010 §3 RETIREMENT / §4 RE-COUPLE, 2026-06-26): the gate now calls
-  // applyMechanisms with `dikaiosyneWeighting: true` (re-coupled to the §4 native
-  // engine), NOT the pinned `false` (the prior decouple) and NOT the bare form (which
-  // would read the env default). A calmly-reasoned injustice floors NATIVELY in the
-  // signed proximity.
+  // INV-15 (ADR-010 §3 RETIREMENT / §4 RE-COUPLE, 2026-06-26; corroboration option
+  // added 2026-07-07): the gate calls applyMechanisms with `dikaiosyneWeighting:
+  // true` pinned as the FIRST property (re-coupled to the §4 native engine), NOT
+  // the pinned `false` (the prior decouple) and NOT the bare form (which would
+  // read the env default). A calmly-reasoned injustice floors NATIVELY in the
+  // signed proximity. The 2026-07-07 corroboration option may ride alongside —
+  // flag-gated via isCorroborationCheckEnabled(), asserted dark by the
+  // corroboration-check suite (INV 10.2/10.3) — so the regex anchors on the
+  // pinned-true opening rather than the exact closing brace.
+  const PINNED_TRUE_CALL = /applyMechanisms\(\s*schema\s*,\s*\{\s*dikaiosyneWeighting:\s*true\s*[,}]/g
   const sandwich = loadCodeBody(SANDWICH_PATH)
-  expectTrue('INV-15a guardrail calls applyMechanisms(schema, { dikaiosyneWeighting: true }) (re-coupled to §4 native)',
-    /applyMechanisms\(\s*schema\s*,\s*\{\s*dikaiosyneWeighting:\s*true\s*\}\s*\)/.test(sandwich))
+  expectTrue('INV-15a guardrail calls applyMechanisms(schema, { dikaiosyneWeighting: true, … }) (re-coupled to §4 native)',
+    new RegExp(PINNED_TRUE_CALL.source).test(sandwich))
   expectTrue('INV-15b guardrail no longer pins dikaiosyneWeighting: false (bridge retired)',
-    !/applyMechanisms\(\s*schema\s*,\s*\{\s*dikaiosyneWeighting:\s*false\s*\}\s*\)/.test(sandwich))
+    !/dikaiosyneWeighting:\s*false/.test(sandwich))
   expectTrue('INV-15c guardrail does NOT call bare applyMechanisms(schema) (would read the env default)',
     !/applyMechanisms\(\s*schema\s*\)/.test(sandwich))
   // INV-15d (count parity — robust against a FUTURE second call): EVERY applyMechanisms
-  // call site in the gate file must be the dikaiosyneWeighting:true form.
+  // call site in the gate file must be the pinned dikaiosyneWeighting:true form.
   const allMechCalls = (sandwich.match(/applyMechanisms\s*\(/g) || []).length
-  const trueCalls = (sandwich.match(/applyMechanisms\(\s*schema\s*,\s*\{\s*dikaiosyneWeighting:\s*true\s*\}\s*\)/g) || []).length
+  const trueCalls = (sandwich.match(PINNED_TRUE_CALL) || []).length
   expectTrue('INV-15d every applyMechanisms call in the gate is pinned dikaiosyneWeighting:true (count parity)',
     allMechCalls > 0 && allMechCalls === trueCalls)
 
