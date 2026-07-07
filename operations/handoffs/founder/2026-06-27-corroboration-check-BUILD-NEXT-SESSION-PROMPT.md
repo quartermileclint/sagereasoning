@@ -1,5 +1,7 @@
 # Next-Session Prompt — Corroboration Check — BUILD (the catchable-half extraction-trust fidelity arc)
 
+> **2026-07-07 addendum — this prompt is now Phase-0 Slice S0a of the ADOPTED Sage Trust Layer build plan** (`operations/trust-layer-2026-07/trust-layer-build-plan.md`, `D-TRUST-LAYER-BUILD-PLAN-ADOPTED`). The fork this prompt asks the founder to confirm at open is **confirmed by the plan adoption** (build near-term stands). Two additions from the plan context: (1) mentor answer A1 keys the multi-source confidence weights on this check landing (deterministic primary on corroborated obligation fields post-corroboration) — record the check's output fields with that consumer in mind; (2) mentor answer A9 case-2 keys delegation-chain responsibility on "would the corroboration check have flagged it" — the check must be invokable as a standalone evaluation over an (extraction, action-text) pair, not only inline in the sandwich. Mentor verbatim: `operations/trust-layer-2026-07/2026-07-07-mentor-nine-answers-verbatim.md`.
+
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)
 
 **Stream:** founder.

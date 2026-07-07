@@ -1,0 +1,44 @@
+Harness
+
+I see a lot of people confused about what harnesses are and do, and I see even more people try to explain it in abstract, vague terms. I want to try to break it down to its simplest components.
+
+First, an LLM is a program that takes as input a prompt and a set of tool definitions, and outputs either some text or a tool call.
+
+A tool definition is something like read_file, write_file or run_command. They usually take arguments, such as the name of the file.
+
+An agent harness is a program that runs a loop. It starts by prompting the LLM and then reads its response. If the LLM response is a tool call, it will run that tool call and prompt the LLM back with the result of the tool call. If the LLM response is just text, the loop terminates.
+
+Here's some pseudo-code for the most basic agent harness:
+
+tool_definitions = get_tool_definitions()
+prompt = "build claude no mistakes make it good"
+context = [tool_definitions, prompt]
+
+while (true) {
+    response = callLLM(context)
+    context.append(response)
+
+    if (response.is_tool_call()) {
+        context.append(run_tool(response.tool_call))
+    } else {
+        break
+    }
+}
+
+
+This is it. This is the core of claude caude, opencode, codex, etc.
+
+Of course they're much more complicated than this as they involve managing context, managing tools, managing system prompts, running and validating tool calls, recovering from errors, orchestrating sub-agents, and many other things I don't understand either.
+
+A harness is all the deterministic code that surrounds the LLM, and there are 7 layers that the industry is recognizing at the moment:
+
+Execution, Tooling, Context, Lifecycle, Observability, Verification, and Governance. At the moment it's nothing more and nothing less. Its confusing when people are trying to come up with their own definition when this is all laid out by companies like langchain and anthropic
+
+Here’s a concise description of each harness component in an AI agent system:
+	•	Execution – The runtime that coordinates the agent’s reasoning and actions. It manages task flow, planning, parallelism, retries, state transitions, and orchestration between models and services.
+	•	Tooling – The interfaces that allow the agent to interact with external capabilities such as APIs, databases, code execution, web search, file systems, or other agents. It defines what the agent can do beyond text generation.
+	•	Context – The information available to the agent while making decisions. This includes prompts, conversation history, memory, retrieved documents (RAG), user preferences, environment state, and intermediate reasoning artifacts.
+	•	Lifecycle – The management of an agent from creation to completion. It covers initialization, authentication, configuration, execution, pausing, resuming, checkpointing, updating, scaling, and graceful termination.
+	•	Observability – The ability to inspect and understand agent behaviour. It includes logging, traces, metrics, event streams, performance monitoring, cost tracking, debugging, and audit records.
+	•	Verification – The processes that assess whether the agent’s outputs or planned actions are correct, safe, and aligned with requirements. Examples include validation rules, self-checks, policy evaluation, simulation, testing, formal constraints, and human approval.
+	•	Governance – The policies and controls that ensure agents operate responsibly and within organisational requirements. This includes identity, permissions, compliance, security, provenance, risk management, ethical rules, accountability, and auditability.
