@@ -1,3 +1,5 @@
+> **SPENT 2026-07-08** — executed as `D-TRUST-LAYER-S2-EVIDENCE-WEIGHTING-BUILT-REVIEW-FOLDED`. Built the pure A5 confidence-tier lib (`confidence-tiers.ts`) + A2 domain-distance/zero-floor lib (`evidence-weighting.ts`); battery 87/0; S1 regression 75/0; tsc/build 0. Adversarial review completed (4-dim Workflow, 7 agents, 0 errors): 3 findings, 2 refuted (both pre-empted first-hand — the A2 fail-open closed by a discriminated union; the both-zero boundary folded), 1 surviving LOW (doc drift) fixed. No schema/prod/flag/wiring — pure lib. Close: `2026-07-08-trust-layer-S2-evidence-weighting-CLOSE.md`. Next: S3 (`2026-07-08-trust-layer-S3-combiner-NEXT-SESSION-PROMPT.md`).
+
 # Next-Session Prompt — Trust Layer S2: evidence weighting + verdict confidence (the deterministic weighting lib)
 
 **Stream:** founder.

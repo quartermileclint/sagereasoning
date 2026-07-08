@@ -13,6 +13,9 @@ export * from './trust-decay'
 export * from './trust-transition'
 export * from './trust-aggregate'
 export * from './derive-trust-events'
+// S2 — evidence weighting + verdict confidence (mentor A2 + A5; pure lib S3/S4 consume).
+export * from './confidence-tiers'
+export * from './evidence-weighting'
 export * from './trust-core-flag'
 export { emitAccreditationTrustEvents, emitReflectTrustEvent } from './emission-hooks'
 export {
