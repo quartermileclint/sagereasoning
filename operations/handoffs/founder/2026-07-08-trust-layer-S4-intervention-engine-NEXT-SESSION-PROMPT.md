@@ -1,3 +1,5 @@
+> **⛔ SPENT — executed 2026-07-08** under `D-TRUST-LAYER-S4-INTERVENTION-ENGINE-MEASURE-BUILT-REVIEW-FOLDED`. The intervention engine + the A4 transparency ledger are built (`intervention-engine.ts` + `transparency-ledger.ts`, battery 417/0). Reviewed first-hand on the initial account-limit, then an independent Workflow re-review completed fully (9 agents, 0 errors) — both CLEAN of correctness/safety defects; 5/6 dimensions clean, 2 docstring-precision nits folded + a seam battery case. MEASURE mode; ENFORCE is S11. Close: `operations/handoffs/founder/2026-07-08-trust-layer-S4-intervention-engine-CLOSE.md`. **Next is S5** — `operations/handoffs/founder/2026-07-08-trust-layer-S5-profiles-collaboration-record-NEXT-SESSION-PROMPT.md`. Retained for the record only.
+
 # Next-Session Prompt — Trust Layer S4: the intervention policy engine (MEASURE mode) + transparency tracking
 
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)

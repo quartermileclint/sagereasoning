@@ -19,6 +19,10 @@ export * from './evidence-weighting'
 // S3 — the multi-source combiner (mentor A1 + spec 6; pure lib, LLM second-reader
 // injected/dark). Critical at wiring.
 export * from './combiner'
+// S4 — the intervention policy engine (mentor spec 7 + A8) + the A4 transparency
+// ledger (pure lib, MEASURE mode — log-and-continue only; ENFORCE is S11).
+export * from './intervention-engine'
+export * from './transparency-ledger'
 export * from './trust-core-flag'
 export { emitAccreditationTrustEvents, emitReflectTrustEvent } from './emission-hooks'
 export {
