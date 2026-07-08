@@ -543,6 +543,20 @@ export default function ApiDocsPage() {
             verdict stays reproducible from the signed assessment.
           </li>
           <li>
+            <strong>Corroboration check (extraction-trust)</strong> &mdash; every assessment carries a
+            deterministic <code>corroboration</code> report inside the signed <code>assessment.assessment</code>:
+            the extraction&apos;s self-report claims (a circle&apos;s <code>obligation_assessment</code> of
+            <code> met</code>/<code>indeterminate</code>; an <code>examined_before_acting</code> claim on a grave
+            act) are cross-referenced against the verbatim submitted text. Per-claim findings use the vocabulary
+            <code> corroborated | uncorroborated | contradicted</code>, each carrying the verbatim grounding
+            spans (<code>markers[].quote</code>). Record-and-floor and <strong>monotone</strong>: claimed statuses
+            stay verbatim, and a grounded contradiction can only floor the verdict (never raise it);
+            <code> proximity_floors.basis</code> names corroboration when it drove the floor. Scope: it
+            corroborates self-report claims against the submitted text &mdash; it is not a fact-checker, and a
+            harm omitted from the text entirely is not catchable. The <code>/api/guardrail</code> gate runs the
+            same check over its <code>action</code> text.
+          </li>
+          <li>
             <strong>What the profile measures (it is not a fact-checker)</strong> &mdash; the assessment reads
             <em> how</em> a decision was reasoned (its passion, value, and justice structure), <strong>not whether
             the decision was factually correct</strong>. It does not independently verify arithmetic, claims, or

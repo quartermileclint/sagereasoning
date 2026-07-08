@@ -1,5 +1,7 @@
 # Next-Session Prompt — Corroboration Check — LIVE-GATE ACTIVATION (founder-walked Critical)
 
+> **SPENT — executed 2026-07-08** (`D-TRUST-LAYER-S0A-CORROBORATION-CHECK-LIVE-GATE-ACTIVATION`). The flip is LIVE on both surfaces; all smokes green; R18 docs applied (E1 document / E2 same-session, as elected). See `operations/handoffs/founder/2026-07-08-corroboration-check-activation-CLOSE.md` and the results memo §8 addendum.
+
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)
 
 **Stream:** founder.

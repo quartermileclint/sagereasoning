@@ -18,6 +18,11 @@
  *      test — confirms canonical-JSON discipline catches single-byte
  *      mutations as expected).
  *   8. key_id field reflects SUBSTRATE_LAYER2_KEY_ID env var.
+ *   9. A corroboration-bearing assessment (the flag-on optional
+ *      `corroboration` field, Trust Layer S0a) signs, verifies, is present in
+ *      the canonical bytes, round-trips stably, and is tamper-evident —
+ *      folded at the 2026-07-08 activation session to close the disclosed
+ *      first-hand-only coverage gap.
  *
  * Run: npx tsx <this file>
  *
@@ -42,6 +47,7 @@ import {
 } from '../layer2-signer'
 import { canonicaliseLayer2Assessment } from '../layer2-canonical-json'
 import type { Layer2Assessment } from '../layer2-mechanisms'
+import type { CorroborationReport } from '../corroboration-check'
 
 let passed = 0
 let failed = 0
@@ -117,6 +123,34 @@ function buildMinimalAssessment(): Layer2Assessment {
     },
     layer1_ambiguity_notes: [],
     layer2_ambiguity_notes: [],
+  }
+}
+
+/**
+ * Realistic flag-on corroboration report (a contradicted obligation_met claim
+ * with a grounded non-consent marker) — the shape applyMechanisms attaches when
+ * SUBSTRATE_CORROBORATION_CHECK_ENABLED is set. Flag-off the key is omitted
+ * entirely, so the existing eight tests remain the flag-off coverage.
+ */
+function buildCorroborationReport(): CorroborationReport {
+  return {
+    version: 'corroboration-check-v1',
+    findings: [
+      {
+        claim: 'obligation_met',
+        subject: 'local_community',
+        index: 0,
+        finding: 'contradicted',
+        markers: [{ marker_class: 'non_consent', quote: 'they never opted in' }],
+        rationale:
+          'claimed met while a grounded non-consent predicate stands in the text and no extracted circle carries the violation',
+      },
+    ],
+    text_harm_markers: [{ marker_class: 'non_consent', quote: 'they never opted in' }],
+    counter_evidence: [],
+    dikaiosyne_override: 'floor_reflexive',
+    andreia_override: 'none',
+    any_contradiction: true,
   }
 }
 
@@ -334,6 +368,66 @@ function restoreEnv(saved: { savedSigningKey: string | undefined; savedKeyId: st
 
     const signed = signLayer2Assessment(buildMinimalAssessment())
     assert(Object.is(signed.key_id, 'substrate-layer2-2026Q9'), 'signLayer2Assessment: test 8 — key_id reflects KEY_ID env var')
+  } finally {
+    restoreEnv(saved)
+  }
+}
+
+// corroboration-bearing assessment signs, verifies, rides inside the canonical
+// bytes, round-trips stably, and is tamper-evident (test 9 — 2026-07-08
+// activation-session fold; closes the disclosed first-hand-only coverage gap
+// on the flag-on `corroboration` field)
+{
+  const saved = captureEnv()
+  try {
+    const { privatePem, publicPem } = generateTestKeypair()
+    process.env[SIGNING_KEY_ENV_VAR] = privatePem
+
+    const assessment: Layer2Assessment = {
+      ...buildMinimalAssessment(),
+      corroboration: buildCorroborationReport(),
+    }
+    const signed = signLayer2Assessment(assessment)
+
+    const canonical = canonicaliseLayer2Assessment(signed.assessment)
+    assert(
+      canonical.includes('"corroboration":') && canonical.includes('"any_contradiction":true'),
+      'signLayer2Assessment: test 9 — corroboration field present in the canonical (signed) bytes'
+    )
+
+    const ok = verify(
+      null,
+      Buffer.from(canonical, 'utf8'),
+      publicPem,
+      Buffer.from(signed.signature, 'base64')
+    )
+    assert(Object.is(ok, true), 'signLayer2Assessment: test 9 — corroboration-bearing assessment verifies against matching public key')
+
+    // Round-trip stability with the optional field present.
+    const reparsed = JSON.parse(canonical) as Layer2Assessment
+    assert(
+      Object.is(canonicaliseLayer2Assessment(reparsed), canonical),
+      'signLayer2Assessment: test 9 — canonical round-trip stable with corroboration present'
+    )
+
+    // Tamper INSIDE the corroboration report — verification must fail. The
+    // report is tamper-evident: it rides inside the signed bytes, not as a
+    // disclosed-but-unsigned side field.
+    const tampered: Layer2Assessment = {
+      ...signed.assessment,
+      corroboration: {
+        ...signed.assessment.corroboration!,
+        any_contradiction: false,
+        dikaiosyne_override: 'none',
+      },
+    }
+    const okTampered = verify(
+      null,
+      Buffer.from(canonicaliseLayer2Assessment(tampered), 'utf8'),
+      publicPem,
+      Buffer.from(signed.signature, 'base64')
+    )
+    assert(Object.is(okTampered, false), 'signLayer2Assessment: test 9 — tampering inside the corroboration report fails verification')
   } finally {
     restoreEnv(saved)
   }
