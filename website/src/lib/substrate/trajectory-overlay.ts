@@ -40,12 +40,13 @@
  * R18e (honest on sparse evidence). No I/O, no env reads.
  */
 
-import type {
-  KatorthomaProximityLevel,
-  DirectionOfTravel,
-} from './trust-layer/types/accreditation'
+import type { KatorthomaProximityLevel } from './trust-layer/types/accreditation'
 import { computeWindowSnapshot } from './trust-layer/evaluation-window/window-aggregator'
 import type { TrajectoryWindow } from './agent-assessment-history-store'
+import {
+  toCanonicalDirectionOfTravel,
+  type CanonicalDirectionOfTravel,
+} from './direction-of-travel'
 
 export type TrajectoryEvidence = 'single_snapshot' | 'windowed'
 export type TrajectoryConfidence = 'low' | 'medium' | 'high'
@@ -64,11 +65,12 @@ export interface TrajectoryOverlay {
   evidence: TrajectoryEvidence
   /** D17 / AC-17 confidence band — low/medium/high. */
   confidence_weighted: TrajectoryConfidence
-  /** Aggregator direction of travel ('improving' | 'stable' | 'regressing').
-   *  Honest by construction: 'stable' until ≥10 actions exist. (D17's vocabulary
-   *  says 'declining'; the reused trust-layer aggregator says 'regressing' — same
-   *  signal, the aggregator's term is kept since the component is reused as-is.) */
-  direction_of_travel: DirectionOfTravel
+  /** Direction of travel in the CANONICAL engine/D17 vocabulary
+   *  ('improving' | 'stable' | 'declining') — the reused aggregator's
+   *  'regressing' is mapped at this boundary (ADR-013 §Vocabulary, S0b E1/E2
+   *  2026-07-08; the aggregator itself stays untouched). Honest by
+   *  construction: 'stable' until ≥10 actions exist. */
+  direction_of_travel: CanonicalDirectionOfTravel
   /** The proximity level the credential is "typically" at across the window. */
   typical_proximity: KatorthomaProximityLevel
   /** Count of window actions at each proximity level (fixed-key record). */
@@ -113,7 +115,7 @@ export function computeTrajectoryOverlay(window: TrajectoryWindow): TrajectoryOv
     max_instances: maxInstances,
     evidence: priorInstances < 2 ? 'single_snapshot' : 'windowed',
     confidence_weighted: deriveConfidence(priorInstances, evidenceSpanDays),
-    direction_of_travel: snapshot.direction_of_travel,
+    direction_of_travel: toCanonicalDirectionOfTravel(snapshot.direction_of_travel),
     typical_proximity: snapshot.typical_proximity,
     proximity_distribution: snapshot.proximity_distribution,
     kathekon_compliance_rate: snapshot.kathekon_compliance_rate,

@@ -785,7 +785,7 @@ export default function ApiDocsPage() {
 { "status": "complete", "exit_path": "...", "profile_update_confidence": "normal|high|low",
   "profile": { "senecan_grade": "...", "typical_proximity": "...",
                "katorthoma_proximity_by_domain": {}, "dimension_levels": {},
-               "direction_of_travel": "improving|stable|declining|single_snapshot" },
+               "direction_of_travel": "improving|stable|declining" },
   "profile_update_framing": { "mandatory_note": "<mirror note — surface verbatim>" } }
 
 // distress on an answer

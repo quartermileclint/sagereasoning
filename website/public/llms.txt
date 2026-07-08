@@ -658,7 +658,7 @@ RESPONSE — completion:
     "typical_proximity":"reflexive|habitual|deliberate|principled|sage_like",
     "katorthoma_proximity_by_domain":{ "phronesis":"...", "dikaiosyne":"...", "andreia":"...", "sophrosyne":"...", "aggregate":"..." },
     "dimension_levels":{ "passion_reduction":"...", "judgement_quality":"...", "disposition_stability":"...", "oikeiosis_extension":"..." },
-    "direction_of_travel":"improving|stable|declining|single_snapshot", "grade_changed": false },
+    "direction_of_travel":"improving|stable|declining", "grade_changed": false },
   "profile_update_framing": { "mandatory_note":"<mirror note — surface verbatim>" },
   "interaction_type":"stoic-post-action-reflection", "disclaimer":"...", "documentation_url":"..." }
 ```

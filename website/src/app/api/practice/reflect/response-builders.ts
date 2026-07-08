@@ -23,6 +23,14 @@
 import { NextResponse } from 'next/server'
 import type { ReflectDecision } from '@/lib/sage-reflect/reflect-service'
 import type { SafetySignal } from '@/lib/substrate/r20a-gate'
+// Trust Layer S0b (ADR-013 §Vocabulary, 2026-07-08): the completion profile's
+// direction_of_travel is sourced from the trust-layer AccreditationRecord
+// ('improving'|'stable'|'regressing') but the WIRE emits the canonical
+// engine/D17 vocabulary ('improving'|'stable'|'declining') — which is what the
+// public docs (llms.txt / api-docs) have documented for this surface all
+// along. The mapping happens here at the boundary; the record/store vocabulary
+// is untouched.
+import { toCanonicalDirectionOfTravel } from '@/lib/substrate/direction-of-travel'
 // S4 (D-R20A-OPTIONA-S4-AUDIENCE-RENDERING-WIRED-2026-05-28): the
 // distress-redirect builder below is refactored to a thin wrapper over the
 // audience-correct render helper. Per /drafts/2026-05-28-r20a-single-catch-
@@ -186,7 +194,7 @@ export function buildCompleteResponse(
             typical_proximity: feed.typical_proximity,
             katorthoma_proximity_by_domain: feed.per_domain_proximity,
             dimension_levels: feed.dimension_levels,
-            direction_of_travel: feed.direction_of_travel,
+            direction_of_travel: toCanonicalDirectionOfTravel(feed.direction_of_travel),
             grade_changed: feed.grade_changed,
           }
         : null,

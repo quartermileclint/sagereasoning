@@ -130,7 +130,10 @@ const iso = (offsetDays: number): string => new Date(base + offsetDays * DAY).to
 }
 
 // ============================================================================
-// 4. direction_of_travel — aggregator honesty (stable until ≥10; then real)
+// 4. direction_of_travel — aggregator honesty (stable until ≥10; then real),
+//    emitted in the CANONICAL engine/D17 vocabulary (ADR-013 §Vocabulary,
+//    S0b 2026-07-08: the aggregator's 'regressing' maps to 'declining' at the
+//    overlay boundary; the overlay must NEVER emit 'regressing').
 // ============================================================================
 
 {
@@ -142,10 +145,19 @@ const iso = (offsetDays: number): string => new Date(base + offsetDays * DAY).to
   const up = computeTrajectoryOverlay(win(rising, iso(0), iso(70)))
   assert(up.direction_of_travel === 'improving', '12 rising: improving')
 
-  // 12 falling: first 6 deliberate, last 6 reflexive → regressing.
+  // 12 falling: first 6 deliberate, last 6 reflexive → 'declining' on the wire
+  // (the aggregator reads 'regressing' internally; the boundary maps it).
   const falling = [...repeat('deliberate', 6), ...repeat('reflexive', 6)]
   const down = computeTrajectoryOverlay(win(falling, iso(0), iso(70)))
-  assert(down.direction_of_travel === 'regressing', '12 falling: regressing')
+  assert(down.direction_of_travel === 'declining', '12 falling: declining (canonical)')
+
+  // Vocabulary lock: the legacy aggregator term never reaches the wire.
+  for (const o of [fewStable, up, down]) {
+    assert(
+      (o.direction_of_travel as string) !== 'regressing',
+      'vocabulary lock: overlay never emits regressing',
+    )
+  }
 }
 
 // ============================================================================
