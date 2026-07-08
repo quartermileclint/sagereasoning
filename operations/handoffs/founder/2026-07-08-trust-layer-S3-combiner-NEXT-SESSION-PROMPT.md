@@ -1,3 +1,5 @@
+> **⛔ SPENT — executed 2026-07-08** under `D-TRUST-LAYER-S3-COMBINER-BUILT-REVIEW-FOLDED`. The combiner is built (`combiner.ts`, battery 106/0, review-folded). Close: `operations/handoffs/founder/2026-07-08-trust-layer-S3-combiner-CLOSE.md`. **Next is S4** — `operations/handoffs/founder/2026-07-08-trust-layer-S4-intervention-engine-NEXT-SESSION-PROMPT.md`. Retained for the record only.
+
 # Next-Session Prompt — Trust Layer S3: the multi-source combiner (mentor A1)
 
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)

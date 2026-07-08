@@ -16,6 +16,9 @@ export * from './derive-trust-events'
 // S2 — evidence weighting + verdict confidence (mentor A2 + A5; pure lib S3/S4 consume).
 export * from './confidence-tiers'
 export * from './evidence-weighting'
+// S3 — the multi-source combiner (mentor A1 + spec 6; pure lib, LLM second-reader
+// injected/dark). Critical at wiring.
+export * from './combiner'
 export * from './trust-core-flag'
 export { emitAccreditationTrustEvents, emitReflectTrustEvent } from './emission-hooks'
 export {
