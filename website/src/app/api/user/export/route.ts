@@ -21,6 +21,9 @@ import { decryptProfileData, type ServerEncryptedPayload } from '@/lib/server-en
 // R17i (CI-5 / M6, 2026-06-14): export the per-consult agent trajectory keyed to
 // the operator (owner_user_id = profiles.id = the auth user id).
 import { getAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessment-history-store'
+// Trust Layer S1 (2026-07-08) — portability (R17i) of the operator's trust events
+// + state. Missing-table-benign (the migration is its own founder-walked step).
+import { getTrustDataForOwner } from '@/lib/substrate/trust-core/trust-core-store'
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -129,6 +132,20 @@ export async function GET(request: NextRequest) {
       exportData.agent_assessment_history = { error: aahExport.error }
     } else {
       exportData.agent_assessment_history = aahExport.value
+    }
+  }
+
+  // 2c. Trust Layer S1 (R17i) — the operator's trust events + materialised state,
+  //     keyed by owner_user_id. Structural facts (no encrypted prose). Missing-table
+  //     benign, so the Live export route does not break before the migration lands.
+  {
+    const trustExport = await getTrustDataForOwner(userId)
+    if (!trustExport.ok) {
+      exportData.agent_trust_events = { error: trustExport.error }
+      exportData.agent_trust_state = { error: trustExport.error }
+    } else {
+      exportData.agent_trust_events = trustExport.value.events
+      exportData.agent_trust_state = trustExport.value.state
     }
   }
 

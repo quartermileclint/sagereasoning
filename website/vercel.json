@@ -12,6 +12,10 @@
     {
       "path": "/api/cron/narrative-sweep",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/trust-core-retention-sweep",
+      "schedule": "0 8 * * *"
     }
   ]
 }

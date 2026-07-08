@@ -21,6 +21,9 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 // trajectory keyed to the operator (owner_user_id = profiles.id = the auth user
 // id, per resolveProfileId's handle_new_user invariant).
 import { deleteAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessment-history-store'
+// Trust Layer S1 (2026-07-08) — genuine deletion (R17c) of the operator's trust
+// events + state. Missing-table-benign (the migration is its own founder-walked step).
+import { deleteTrustDataForOwner } from '@/lib/substrate/trust-core/trust-core-store'
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -119,6 +122,16 @@ export async function DELETE(request: NextRequest) {
     }
   }
 
+  // Trust Layer S1 (R17c) — genuine deletion of the operator's trust events +
+  // materialised state, keyed by owner_user_id like agent_assessment_history.
+  // Missing-table-benign, so the Live route does not 207 before the migration lands.
+  {
+    const trustDelete = await deleteTrustDataForOwner(userId)
+    if (!trustDelete.ok) {
+      deletionErrors.push(`agent_trust_*: ${trustDelete.error}`)
+    }
+  }
+
   // NOTE on sage_reflect_sessions (Gate-1 Slice-5c follow-up, 2026-06-21): reflect rows are keyed by
   // agent_id (not user_id), like agent_assessment_history above — so they would need an explicit
   // delete here too (resolve this user's agent_ids → deleteAgentSessions). That wiring is NOT yet
@@ -149,7 +162,7 @@ export async function DELETE(request: NextRequest) {
     await supabaseAdmin.from('compliance_deletion_log').insert({
       event: 'account_deleted',
       timestamp: new Date().toISOString(),
-      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history'],
+      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history', 'agent_trust_events', 'agent_trust_state'],
       errors: deletionErrors.length > 0 ? deletionErrors : null,
     })
   } catch {

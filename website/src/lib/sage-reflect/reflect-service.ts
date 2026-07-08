@@ -59,6 +59,11 @@ import {
 } from './reflect-extractor'
 import { checkZone3Boundary, zone3KathekonRecord, type SafetySignal, type BlockRecord } from './zone3-boundary'
 import { feedSageAssent as realFeedSageAssent, type SageAssentFeedResult, type FeedParams } from './sage-assent-feed'
+// Trust Layer S1 (2026-07-08) — measure-mode reflect-completed-honest emission.
+// DARK behind SUBSTRATE_TRUST_CORE_ENABLED (the helper no-ops when off); awaited +
+// fail-honest (never throws to this service). A side-effect only — it does NOT
+// change answerReflection's return value, so the reflect response is byte-identical.
+import { emitReflectTrustEvent } from '@/lib/substrate/trust-core/emission-hooks'
 
 // ============================================================================
 // MIRROR PRINCIPLE (SR-8 / R19d) — mandatory on every completion output
@@ -261,6 +266,10 @@ export async function answerReflection(
   response: string,
   deps: ReflectServiceDeps = defaultDeps(),
   meter: MeterFn = NOOP_METER,
+  /** Trust Layer S1: the reflect credential (from verifyReflectToken), threaded in
+   *  so a reflect-completed-honest trust event can denormalise owner/credential for
+   *  data rights. Optional + additive — existing callers are unaffected. */
+  opts: { credentialId?: string } = {},
 ): Promise<ServiceResult> {
   // Load + decrypt the resumable state.
   const sessionRes = await deps.getSession(session_id)
@@ -381,6 +390,20 @@ export async function answerReflection(
   if (next.kind === 'complete') {
     const persisted = await deps.persistCompletion(session_id, nextState, next.outcome)
     if (!persisted.ok) return { ok: false, code: 'server', error: persisted.error }
+
+    // Trust Layer S1 (measure mode) — record a reflect-completed-honest trust event
+    // (the deriver emits ONLY on an honest completion: context_source=agent_stated
+    // + fabrication_risk != high). Side-effect only; flag-gated + fail-honest;
+    // does NOT alter the return below (byte-identical reflect response flag-off).
+    // The trailing .catch is defense-in-depth (the helper already never throws).
+    await emitReflectTrustEvent({
+      agentId: row.agent_id,
+      credentialId: opts.credentialId ?? null,
+      sessionId: session_id,
+      fabricationRiskLevel: next.outcome.fabrication_risk_level,
+      contextSource: row.context_source ?? null,
+      now: new Date(),
+    }).catch(() => {})
 
     // Feed the Q4 kathekon evidence into Sage Assent (the engine decides the grade).
     let feed: SageAssentFeedResult | null = null

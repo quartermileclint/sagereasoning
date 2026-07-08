@@ -244,6 +244,7 @@ export async function runConsumerErasure(
     timestamp: new Date().toISOString(),
     tables_cleared: [
       `agent_assessment_history (credential-scoped: ${credentialRef}; ${result.value.trajectory_deleted} rows)`,
+      `agent_trust_events + agent_trust_state (credential-scoped: ${credentialRef}; ${result.value.trust_deleted} rows)`,
     ],
     errors: result.value.warnings.length > 0 ? result.value.warnings : null,
   })
@@ -254,6 +255,7 @@ export async function runConsumerErasure(
       credential_ref: credentialRef,
       owner_kind: target.owner_kind,
       trajectory_rows_deleted: result.value.trajectory_deleted,
+      trust_rows_deleted: result.value.trust_deleted,
       billing_rows_depersonalised: result.value.billing_depersonalised,
       credential: 'anonymised_and_revoked',
       retained_by_law: RETAINED_BY_LAW,

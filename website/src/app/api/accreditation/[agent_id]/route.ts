@@ -243,6 +243,10 @@ import {
 } from './request-helpers'
 
 import { enforceWriteProvenance } from './provenance-gate'
+// Trust Layer S1 (2026-07-08) — measure-mode trust-event emission. DARK behind
+// SUBSTRATE_TRUST_CORE_ENABLED (the helper no-ops when off); awaited + fail-honest
+// (never throws to this write path).
+import { emitAccreditationTrustEvents } from '@/lib/substrate/trust-core/emission-hooks'
 
 // =============================================================================
 // HOTFIX NOTE 2026-05-16 — Next.js App Router rejected the original co-located
@@ -338,6 +342,11 @@ type AuthGateResult =
   | {
       ok: true
       claims: { agent_id: string }
+      /** The authenticated credential's api_keys id — threaded out additively
+       *  (Trust Layer S1, 2026-07-08) so the trust-core emission can denormalise
+       *  owner + credential onto its events for the data-rights paths. Does not
+       *  change the auth decision or any existing field. */
+      credential_id: string
       /** Gate-1 surface honesty (Arc 1, 2026-06-20). TRUE iff the
        *  SUBSTRATE_EXAMINATION_MODE_ENABLED feature is on AND the authenticated
        *  credential carries the operator-set pre-decision marker (admin-mint
@@ -458,7 +467,12 @@ async function verifyAgentIdOwnership(
   const examination_marker = isExaminationModeEnabled()
     ? await readPreDecisionMarker(result.credential_id)
     : false
-  return { ok: true, claims: { agent_id: result.agent_id }, examination_marker }
+  return {
+    ok: true,
+    claims: { agent_id: result.agent_id },
+    credential_id: result.credential_id,
+    examination_marker,
+  }
 }
 
 /**
@@ -778,6 +792,20 @@ export async function POST(
         writeExtras,
       )
     }
+
+    // Trust Layer S1 (measure mode) — record trust events from this R18f-verified
+    // write. Awaited so a fail-honest error is logged in-request, but the helper
+    // NEVER throws (measure mode: a trust-write failure must not fail the write)
+    // and no-ops entirely when SUBSTRATE_TRUST_CORE_ENABLED is off (byte-identical).
+    // The trailing .catch is defense-in-depth: this call sits inside the writer
+    // try, so even a future refactor that let the helper throw must not turn a
+    // successful write into a 503.
+    await emitAccreditationTrustEvents({
+      agentId: agent_id,
+      credentialId: auth.credential_id,
+      provenanceEnforced: provenance.enforced,
+      rawBody,
+    }).catch(() => {})
 
     return buildWriteSuccessResponse(loopClosureAnnotation)
   } catch (err) {

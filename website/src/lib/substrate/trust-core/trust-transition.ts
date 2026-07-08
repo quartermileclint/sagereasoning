@@ -1,0 +1,207 @@
+/**
+ * trust-transition.ts — mentor spec 3 trust dynamics: the deterministic
+ * event → earned-state transition.
+ *
+ * Each typed event has a fixed effect on the per-domain earned trust level. The
+ * transition is HYSTERESIS-bounded (a single positive event raises the level by
+ * at most one proximity rank — "stability of disposition outranks episodic
+ * credential quality") and CATEGORICAL (R6c — ordinal proximity steps, never a
+ * numeric score). The proportional MAGNITUDE the mentor describes ("∝ domain
+ * match × coverage continuity", "∝ gap duration × domain relevance") is refined
+ * by S2's evidence weighting / confidence tiers / domain distance; S1 realises
+ * the DIRECTION + the floor/cap/latch semantics that are spec-3's own remit, and
+ * records the raw signal in the event payload for S2 to weight. The S2 seam is
+ * marked below.
+ *
+ * DECAY REALISATION INVARIANT: any event that CHANGES the earned level first
+ * realises accrued A3 decay up to the event's occurred_at, then applies its
+ * effect, and sets last_domain_activity_at = occurred_at. So the stored
+ * earned_level is always "as of last_domain_activity_at", and the read path's
+ * lazy decay never double-counts. Events that do NOT change the level
+ * (reflect-completed-honest = modulate; delegation-reflection-case-3 = flag) do
+ * NOT realise decay or reset the activity clock — they touch only the reflect
+ * timestamp / nothing.
+ *
+ * Pure — no I/O, no env. `now` (= event.occurredAt) is used only for the
+ * realise-decay step.
+ */
+
+import type { KatorthomaProximity } from '@/lib/translation-sandwich/layer2-mechanisms'
+import type {
+  EarnedDomainState,
+  TrustEvent,
+  TrustEventEffect,
+  TrustEventType,
+} from './types'
+import { PROXIMITY_RANK, rankToProximity } from './constants'
+import { decayEarnedRank } from './trust-decay'
+
+/** event_type → coarse effect class (the single source of truth for direction). */
+export const EVENT_EFFECT: Record<TrustEventType, TrustEventEffect> = {
+  'credential-completed': 'increase',
+  'reflect-completed-honest': 'modulate',
+  'justice-surface-transparently-handled': 'clear-cap-and-increase',
+  'justice-surface-unevaluated': 'cap',
+  'justice-surface-indeterminate': 'cap',
+  'justice-surface-violated': 'decrease',
+  'credential-suspended-revoked': 'decrease',
+  'passion-unflagged-by-self-screen': 'decrease',
+  'orchestrator-proceeds-under-habitual-flag': 'decrease',
+  'delegation-reflection-case-1': 'decrease',
+  'delegation-reflection-case-2': 'decrease',
+  'delegation-reflection-case-3': 'flag',
+}
+
+/**
+ * Fold ONE trust event into a domain's earned state. Deterministic + pure.
+ * Returns a NEW EarnedDomainState (does not mutate `prior`).
+ */
+export function applyTrustEvent(
+  prior: EarnedDomainState,
+  event: TrustEvent,
+): EarnedDomainState {
+  const effect = EVENT_EFFECT[event.eventType]
+
+  // --- modulate (reflect-completed-honest): set the reflect timestamp only. No
+  //     earned-level change, no activity-clock reset (reflect is not domain
+  //     activity — it slows decay across all domains via the read path). ---
+  if (effect === 'modulate') {
+    return { ...prior, reflectLastHonestAt: event.occurredAt }
+  }
+
+  // --- flag (delegation-reflection-case-3, A9 case-3): record only. The A9
+  //     uncatchable-justice-failure case is a developmental FLAG on the
+  //     orchestrator, NOT a trust reduction. No state change. ---
+  if (effect === 'flag') {
+    return { ...prior }
+  }
+
+  // All remaining effects change the earned level → realise accrued decay up to
+  // the event, then apply the effect from the decayed position.
+  const decayed = decayEarnedRank({
+    earnedLevel: prior.earnedLevel,
+    profilePrior: prior.profilePrior,
+    lastDomainActivityAt: prior.lastDomainActivityAt,
+    volatility: prior.volatility,
+    reflectLastHonestAt: prior.reflectLastHonestAt,
+    now: new Date(event.occurredAt),
+  })
+  const fromRank = decayed.rank
+
+  let newRank = fromRank
+  let justiceFloorActive = prior.justiceFloorActive
+  let coverageStatus = prior.coverageStatus
+
+  switch (effect) {
+    case 'increase': {
+      // credential-completed: rise toward the demonstrated proximity, at most one
+      // rank per event (hysteresis), and ONLY on continuous coverage (a gapped
+      // credential is recorded but does not raise the level — S2 refines the
+      // proportional magnitude by domain distance + coverage continuity).
+      const demonstratedRank =
+        event.payload.demonstratedProximity !== undefined
+          ? PROXIMITY_RANK[event.payload.demonstratedProximity]
+          : null
+      const continuous = event.payload.coverageContinuous === true
+      if (continuous && demonstratedRank !== null && demonstratedRank > fromRank) {
+        newRank = Math.min(demonstratedRank, fromRank + 1)
+      }
+      if (event.payload.coverageStatus !== undefined) {
+        coverageStatus = event.payload.coverageStatus
+      }
+      break
+    }
+    case 'clear-cap-and-increase': {
+      // justice-surface-transparently-handled — the highest single positive event
+      // (mentor spec 3): CLEARS the justice latch (a demonstrated evaluation) AND
+      // raises the level one rank (capped at the demonstrated proximity if given).
+      justiceFloorActive = false
+      const demonstratedRank =
+        event.payload.demonstratedProximity !== undefined
+          ? PROXIMITY_RANK[event.payload.demonstratedProximity]
+          : PROXIMITY_RANK.sage_like
+      newRank = Math.min(demonstratedRank, fromRank + 1)
+      break
+    }
+    case 'cap': {
+      // justice-surface-unevaluated / -indeterminate: latch the deliberate cap
+      // (applied on read) until a demonstrated evaluation clears it. The stored
+      // earned level is unchanged; the cap bites at read time.
+      justiceFloorActive = true
+      newRank = fromRank
+      break
+    }
+    case 'decrease': {
+      // justice-surface-violated → hard floor to reflexive (rank 0); the other
+      // decrease events step down one rank (S2 refines magnitude by gap duration
+      // × domain relevance). A trust-reducing EVENT may push BELOW the prior
+      // (positive evidence of deterioration, distinct from decay).
+      if (event.eventType === 'justice-surface-violated') {
+        newRank = PROXIMITY_RANK.reflexive
+      } else {
+        newRank = Math.max(PROXIMITY_RANK.reflexive, fromRank - 1)
+      }
+      break
+    }
+  }
+
+  // The floor rank is never enforced UP here — a decrease below the prior stands
+  // (it is evidence, not decay). Bound to the valid rank range.
+  newRank = Math.max(PROXIMITY_RANK.reflexive, Math.min(PROXIMITY_RANK.sage_like, newRank))
+
+  return {
+    ...prior,
+    earnedLevel: rankToProximity(newRank) as KatorthomaProximity,
+    lastDomainActivityAt: event.occurredAt,
+    justiceFloorActive,
+    coverageStatus,
+  }
+}
+
+/**
+ * Fold an ordered sequence of events into per-domain earned states — the pure
+ * replay used by the battery + the store's rebuild path. Reflect events (NULL
+ * virtue_domain) modulate ALL of the agent's domain states (agent-wide);
+ * delegation-reflection-case-2 (oversight + dikaiosyne) is fanned by the caller
+ * into two per-domain events, so here it targets whatever virtue_domain the event
+ * carries.
+ *
+ * `seed` supplies initial states (e.g. profile prior / volatility) per domain;
+ * a domain absent from `seed` is initialised at the default prior on first touch.
+ */
+export function foldTrustEvents(
+  events: TrustEvent[],
+  seed: (domain: string) => EarnedDomainState,
+): Map<string, EarnedDomainState> {
+  const states = new Map<string, EarnedDomainState>()
+  const ordered = [...events].sort(
+    (a, b) => Date.parse(a.occurredAt) - Date.parse(b.occurredAt),
+  )
+
+  for (const event of events.length ? ordered : []) {
+    if (event.virtueDomain === null) {
+      // Agent-wide (reflect): fold into every existing domain state.
+      for (const [domain, state] of states) {
+        states.set(domain, applyTrustEvent(state, event))
+      }
+      // Also stash the reflect signal so a domain FIRST touched later inherits it.
+      const pseudo = states.get('__reflect_seed__') ?? seed('__reflect_seed__')
+      states.set('__reflect_seed__', applyTrustEvent(pseudo, event))
+      continue
+    }
+    const domain = event.virtueDomain
+    let state = states.get(domain)
+    if (!state) {
+      state = seed(domain)
+      // Inherit the agent-wide reflect timestamp seen so far, if any.
+      const reflectSeed = states.get('__reflect_seed__')
+      if (reflectSeed?.reflectLastHonestAt) {
+        state = { ...state, reflectLastHonestAt: reflectSeed.reflectLastHonestAt }
+      }
+    }
+    states.set(domain, applyTrustEvent(state, event))
+  }
+
+  states.delete('__reflect_seed__')
+  return states
+}

@@ -460,7 +460,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // ----- Advance the sequence (engine work; metering; persist) -----
-    const result = await answerReflection(session_id, response, undefined, meter)
+    // Trust Layer S1: pass the reflect credential so an honest completion emits a
+    // trust event with owner/credential for data rights (measure mode, flag-gated).
+    const result = await answerReflection(session_id, response, undefined, meter, {
+      credentialId: auth.credentialId,
+    })
     return respond(session_id, result, mildSafetySignal)
   } catch (err) {
     console.error('[api/practice/reflect] unexpected error:', err)
