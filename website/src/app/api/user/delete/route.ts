@@ -24,6 +24,7 @@ import { deleteAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessmen
 // Trust Layer S1 (2026-07-08) — genuine deletion (R17c) of the operator's trust
 // events + state. Missing-table-benign (the migration is its own founder-walked step).
 import { deleteTrustDataForOwner } from '@/lib/substrate/trust-core/trust-core-store'
+import { deleteCollaborationDataForOwner } from '@/lib/substrate/trust-core/collaboration-store'
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -132,6 +133,16 @@ export async function DELETE(request: NextRequest) {
     }
   }
 
+  // Trust Layer S5 (R17c) — genuine deletion of the operator's collaboration
+  // records, keyed by owner_user_id. Always-on (erasure cannot be flag-gated),
+  // missing-table-benign so the Live route does not 207 before the migration lands.
+  {
+    const collabDelete = await deleteCollaborationDataForOwner(userId)
+    if (!collabDelete.ok) {
+      deletionErrors.push(`collaboration_records: ${collabDelete.error}`)
+    }
+  }
+
   // NOTE on sage_reflect_sessions (Gate-1 Slice-5c follow-up, 2026-06-21): reflect rows are keyed by
   // agent_id (not user_id), like agent_assessment_history above — so they would need an explicit
   // delete here too (resolve this user's agent_ids → deleteAgentSessions). That wiring is NOT yet
@@ -162,7 +173,7 @@ export async function DELETE(request: NextRequest) {
     await supabaseAdmin.from('compliance_deletion_log').insert({
       event: 'account_deleted',
       timestamp: new Date().toISOString(),
-      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history', 'agent_trust_events', 'agent_trust_state'],
+      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history', 'agent_trust_events', 'agent_trust_state', 'collaboration_records'],
       errors: deletionErrors.length > 0 ? deletionErrors : null,
     })
   } catch {

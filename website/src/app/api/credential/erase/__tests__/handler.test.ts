@@ -81,7 +81,7 @@ function makeDeps(over: Partial<EraseDeps>): Spy {
     },
     erase: async (): Promise<StoreResult<ErasureResult>> => {
       calls.erase++
-      return { ok: true, value: { trajectory_deleted: 2, trust_deleted: 0, billing_depersonalised: 1, warnings: [] } }
+      return { ok: true, value: { trajectory_deleted: 2, trust_deleted: 0, collaboration_deleted: 0, billing_depersonalised: 1, warnings: [] } }
     },
     logCompliance: async () => {
       calls.log++

@@ -9,14 +9,44 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isTrustCoreSweepEnabled } from '@/lib/substrate/trust-core/trust-core-flag'
 import { purgeExpiredTrustCore } from '@/lib/substrate/trust-core/trust-core-store'
+import { purgeExpiredCollaboration } from '@/lib/substrate/trust-core/collaboration-store'
 
 /** The purge dependency, injectable for tests (the handler reaches the DB only
- *  through this seam). Production GET binds the real, awaited store fn. */
+ *  through this seam). Production GET binds the real, awaited store fns — sweeping
+ *  ALL trust-core tables: agent_trust_events + agent_trust_state (S1) AND
+ *  collaboration_records (S5). */
 export type TrustSweepDeps = {
-  purge: () => Promise<{ deleted: number; events: number; state: number; error: string | null }>
+  purge: () => Promise<{
+    deleted: number
+    events: number
+    state: number
+    collaboration: number
+    error: string | null
+  }>
 }
 
-export const DEFAULT_DEPS: TrustSweepDeps = { purge: purgeExpiredTrustCore }
+/** Sweep both the S1 trust-core tables and the S5 collaboration table; combine the
+ *  cron-friendly shape. Fail-honest — a purge error from either surfaces in `error`,
+ *  never fail-closed. */
+async function purgeAllTrustCore(): Promise<{
+  deleted: number
+  events: number
+  state: number
+  collaboration: number
+  error: string | null
+}> {
+  const tc = await purgeExpiredTrustCore()
+  const collab = await purgeExpiredCollaboration()
+  return {
+    deleted: tc.deleted + collab.deleted,
+    events: tc.events,
+    state: tc.state,
+    collaboration: collab.deleted,
+    error: tc.error ?? collab.error,
+  }
+}
+
+export const DEFAULT_DEPS: TrustSweepDeps = { purge: purgeAllTrustCore }
 
 export async function runTrustCoreRetentionSweep(
   request: NextRequest,
@@ -60,6 +90,7 @@ export async function runTrustCoreRetentionSweep(
       deleted: purge.deleted,
       events_deleted: purge.events,
       state_deleted: purge.state,
+      collaboration_deleted: purge.collaboration,
       errors: purge.error ? [`purge: ${purge.error}`] : [],
     },
     { status: 200 },

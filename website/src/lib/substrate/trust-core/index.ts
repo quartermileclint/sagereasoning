@@ -23,6 +23,11 @@ export * from './combiner'
 // ledger (pure lib, MEASURE mode — log-and-continue only; ENFORCE is S11).
 export * from './intervention-engine'
 export * from './transparency-ledger'
+// S5 — the four-layer discernment protocol: the three pure-lib profile schemas +
+// the collaboration record (pure composition lib; MEASURE mode). The collaboration
+// record persists (collaboration-store.ts); profiles are pure-lib (founder election).
+export * from './profiles'
+export * from './collaboration-record'
 export * from './trust-core-flag'
 export { emitAccreditationTrustEvents, emitReflectTrustEvent } from './emission-hooks'
 export {
@@ -34,3 +39,14 @@ export {
   purgeExpiredTrustCore,
   type StoreResult,
 } from './trust-core-store'
+export {
+  openCollaborationRecord,
+  readCollaborationRecord,
+  recordAuthorityBoundary,
+  recordL4AuditResult,
+  updateCollaborationRecord,
+  deleteCollaborationDataForOwner,
+  deleteCollaborationDataForCredential,
+  getCollaborationDataForOwner,
+  purgeExpiredCollaboration,
+} from './collaboration-store'

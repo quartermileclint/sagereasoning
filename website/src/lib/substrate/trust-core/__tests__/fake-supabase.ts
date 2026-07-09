@@ -26,13 +26,16 @@ type Filter = { kind: 'eq' | 'lt'; col: string; val: unknown }
 
 export interface FakeSupabase {
   client: SupabaseClient
-  tables: { agent_trust_events: Row[]; agent_trust_state: Row[] }
+  tables: { agent_trust_events: Row[]; agent_trust_state: Row[]; collaboration_records: Row[] }
 }
 
 export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupabase {
   const tables: Record<string, Row[]> = {
     agent_trust_events: [],
     agent_trust_state: [],
+    // Trust Layer S5 — the collaboration record (added 2026-07-09). Lets the S5
+    // battery exercise the collaboration-store CRUD + data-rights + purge.
+    collaboration_records: [],
   }
   let idCounter = 0
   const missing = opts?.missingTables === true
@@ -120,6 +123,19 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
             if (this.table === 'agent_trust_events' && r.correlation_id != null) {
               const key = eventKey(r)
               if (rows.some((ex) => eventKey(ex) === key)) {
+                return { data: null, error: { code: '23505', message: 'duplicate key' } }
+              }
+            }
+            // collaboration_records: enforce uq_cr_orchestrator_task so the
+            // idempotent-open path (duplicate → 23505 → benign) is genuinely tested.
+            if (this.table === 'collaboration_records') {
+              if (
+                rows.some(
+                  (ex) =>
+                    ex.orchestrator_agent_id === r.orchestrator_agent_id &&
+                    ex.task_ref === r.task_ref,
+                )
+              ) {
                 return { data: null, error: { code: '23505', message: 'duplicate key' } }
               }
             }

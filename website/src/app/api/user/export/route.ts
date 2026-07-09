@@ -24,6 +24,7 @@ import { getAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessment-h
 // Trust Layer S1 (2026-07-08) — portability (R17i) of the operator's trust events
 // + state. Missing-table-benign (the migration is its own founder-walked step).
 import { getTrustDataForOwner } from '@/lib/substrate/trust-core/trust-core-store'
+import { getCollaborationDataForOwner } from '@/lib/substrate/trust-core/collaboration-store'
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -146,6 +147,17 @@ export async function GET(request: NextRequest) {
     } else {
       exportData.agent_trust_events = trustExport.value.events
       exportData.agent_trust_state = trustExport.value.state
+    }
+  }
+
+  // 2d. Trust Layer S5 (R17i) — the operator's collaboration records, keyed by
+  //     owner_user_id. Structural facts (no encrypted prose). Missing-table benign.
+  {
+    const collabExport = await getCollaborationDataForOwner(userId)
+    if (!collabExport.ok) {
+      exportData.collaboration_records = { error: collabExport.error }
+    } else {
+      exportData.collaboration_records = collabExport.value
     }
   }
 

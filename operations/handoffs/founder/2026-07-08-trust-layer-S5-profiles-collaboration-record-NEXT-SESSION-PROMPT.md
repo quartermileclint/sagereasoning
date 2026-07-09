@@ -1,5 +1,7 @@
 # Next-Session Prompt — Trust Layer S5: profile schemas + the collaboration record
 
+> **SPENT — executed 2026-07-09** (`D-TRUST-LAYER-S5-PROFILES-COLLABORATION-RECORD-BUILT-MIGRATED-REVIEW-FOLDED`). Founder elections: profiles PURE-LIB (not persisted); migration TEST → PROD-inert this session. Built DARK + battery-verified (87/0) + 6-dim Workflow reviewed (6 confirmed low/nit findings folded) + migrated on TEST and PRODUCTION (prod-inert). Close: `operations/handoffs/founder/2026-07-09-trust-layer-S5-profiles-collaboration-record-CLOSE.md`. Successor: S6 (the L1–L3 discernment engine) — `operations/handoffs/founder/2026-07-09-trust-layer-S6-discernment-engine-NEXT-SESSION-PROMPT.md`.
+
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)
 
 **Stream:** founder.

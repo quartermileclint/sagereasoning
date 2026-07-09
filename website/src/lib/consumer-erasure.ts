@@ -44,6 +44,7 @@ import {
 // Trust Layer S1 (2026-07-08) — genuine deletion (R17c) of a consumer credential's
 // trust events + state, by credential_ref. Missing-table-benign.
 import { deleteTrustDataForCredential } from './substrate/trust-core/trust-core-store'
+import { deleteCollaborationDataForCredential } from './substrate/trust-core/collaboration-store'
 
 // ============================================================================
 // FLAG (SUBSTRATE_CONSUMER_ERASURE_ENABLED) — UNSET ⇒ the route is dark (503)
@@ -186,6 +187,9 @@ export interface ErasureResult {
   /** Trust Layer S1 (R17c): trust events + state rows hard-deleted for this
    *  credential (agent_trust_events + agent_trust_state). */
   trust_deleted: number
+  /** Trust Layer S5 (R17c): collaboration_records rows hard-deleted for this
+   *  credential. */
+  collaboration_deleted: number
   billing_depersonalised: number
   /** Non-fatal issues (e.g. the best-effort billing de-personalisation) — the
    *  personal data is gone regardless; these are surfaced for the audit record. */
@@ -222,6 +226,12 @@ export async function eraseExternalConsumerCredential(
   //     verifiable). Missing-table-benign until the migration lands.
   const trust = await deleteTrustDataForCredential(credentialRef, client)
   if (!trust.ok) return { ok: false, error: `trust: ${trust.error}` }
+
+  // 1c. Genuine deletion of this credential's collaboration records (Trust Layer S5,
+  //     R17c critical — a fail is ok:false so erasure stays verifiable).
+  //     Missing-table-benign until the migration lands.
+  const collab = await deleteCollaborationDataForCredential(credentialRef, client)
+  if (!collab.ok) return { ok: false, error: `collaboration: ${collab.error}` }
 
   // NOTE on sage_reflect_sessions (Gate-1 Slice-5c follow-up, 2026-06-21): this credential-keyed path
   // deletes the trajectory (by credential_ref) but does NOT yet delete sage_reflect_sessions rows,
@@ -299,6 +309,7 @@ export async function eraseExternalConsumerCredential(
     value: {
       trajectory_deleted: traj.value.deleted,
       trust_deleted: trust.value.events + trust.value.state,
+      collaboration_deleted: collab.value,
       billing_depersonalised,
       warnings,
     },
