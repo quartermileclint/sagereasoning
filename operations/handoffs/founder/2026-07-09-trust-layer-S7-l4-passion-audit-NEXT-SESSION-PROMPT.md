@@ -1,5 +1,7 @@
 # Next-Session Prompt — Trust Layer S7: the out-of-band L4 passion audit
 
+> **STATUS: SPENT — executed 2026-07-09→10.** S7 is built DARK + battery-verified + review-folded (`D-TRUST-LAYER-S7-L4-PASSION-AUDIT-BUILT-DARK-REVIEW-FOLDED`). See the close: `operations/handoffs/founder/2026-07-10-trust-layer-S7-l4-passion-audit-CLOSE.md`. Successor: `2026-07-10-trust-layer-S8-reference-harness-NEXT-SESSION-PROMPT.md`.
+
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)
 
 **Stream:** founder.

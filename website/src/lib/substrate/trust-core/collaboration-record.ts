@@ -603,13 +603,21 @@ export function canSetAuthorityBoundary(
  * Write-once guard for the L4 audit result (A7 readable-not-modifiable). The result
  * is written ONCE by the out-of-band audit; a second, different write is forbidden.
  * Idempotent re-write of the identical result is allowed. Pure.
+ *
+ * The identity check is ORDER-INDEPENDENT (`stableStringify`) — the stored value is
+ * re-read from a jsonb column, and Postgres does NOT preserve object key order, so a
+ * byte-order comparison against a freshly-resolved result would wrongly refuse an
+ * IDENTICAL re-write after a storage round-trip (the S7-review MEDIUM). This matches
+ * the DB write-once trigger, whose `IS DISTINCT FROM` on an array-free jsonb object is
+ * itself key-order-independent. A DIFFERENT result is still refused (the safe
+ * direction is preserved — the guard never lets a mutation through).
  */
 export function canSetL4AuditResult(
   record: CollaborationRecord,
   next: L4AuditResult,
 ): { allowed: boolean; reason: string } {
   if (record.l4AuditResult === null) return { allowed: true, reason: 'L4 result not yet written' }
-  const same = JSON.stringify(record.l4AuditResult) === JSON.stringify(next)
+  const same = stableStringify(record.l4AuditResult) === stableStringify(next)
   return same
     ? { allowed: true, reason: 'idempotent re-write of the identical L4 result' }
     : {
@@ -624,6 +632,26 @@ function sameSet(a: string[], b: string[]): boolean {
   if (a.length !== b.length) return false
   const sb = new Set(b)
   return a.every((x) => sb.has(x))
+}
+
+/**
+ * Order-independent structural serializer: sorts object keys recursively (preserving
+ * array order). Used by canSetL4AuditResult so a value re-read from jsonb (whose key
+ * order Postgres does not preserve) compares equal to the same value freshly resolved.
+ * Pure.
+ */
+function stableStringify(v: unknown): string {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v) ?? 'null'
+  if (Array.isArray(v)) return '[' + v.map(stableStringify).join(',') + ']'
+  const obj = v as Record<string, unknown>
+  return (
+    '{' +
+    Object.keys(obj)
+      .sort()
+      .map((k) => JSON.stringify(k) + ':' + stableStringify(obj[k]))
+      .join(',') +
+    '}'
+  )
 }
 
 /** Validate a collaboration record's structural shape (defensive; the store reads

@@ -286,6 +286,44 @@ export async function readTrustProfile(
   }
 }
 
+/**
+ * Read an agent's honest Sage Reflect record — the count + most-recent timestamp of
+ * its `reflect-completed-honest` events (agent-wide; honest BY CONSTRUCTION —
+ * deriveReflectEvent only emits them for honest completions: context_source
+ * 'agent_stated' + fabrication_risk != high). The S7 L4 trust-tier derivation (mentor
+ * A7 "a strong Sage Reflect history and a demonstrated pattern of honest
+ * self-diagnosis") consumes this. Additive read — no existing S1 behaviour changed.
+ * Fail-honest; counts in JS (no DB count option) so the in-memory fake works. The
+ * recency window is applied later by the pure deriver (deriveL4TrustTier), not here.
+ */
+export async function readHonestReflectSummary(
+  agentId: string,
+  client: SupabaseClient = getAdminClient(),
+): Promise<StoreResult<{ honestReflectCount: number; latestHonestReflectAt: string | null }>> {
+  try {
+    const { data, error } = await client
+      .from(EVENTS_TABLE)
+      .select('occurred_at')
+      .eq('agent_id', agentId)
+      .eq('event_type', 'reflect-completed-honest')
+    if (error) {
+      if (isMissingTableError(error as { code?: string; message?: string })) {
+        return { ok: true, value: { honestReflectCount: 0, latestHonestReflectAt: null } }
+      }
+      return { ok: false, error: `readHonestReflectSummary: ${error.message}` }
+    }
+    const rows = (data ?? []) as { occurred_at: string }[]
+    let latest: string | null = null
+    for (const r of rows) {
+      // ISO-8601 timestamps compare lexicographically in chronological order.
+      if (r.occurred_at && (latest === null || r.occurred_at > latest)) latest = r.occurred_at
+    }
+    return { ok: true, value: { honestReflectCount: rows.length, latestHonestReflectAt: latest } }
+  } catch (e) {
+    return { ok: false, error: `readHonestReflectSummary threw: ${(e as Error).message}` }
+  }
+}
+
 function emptyProfile(agentId: string): TrustProfile {
   return {
     schema: 'agent-trust-profile-v1',

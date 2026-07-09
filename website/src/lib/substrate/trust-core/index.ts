@@ -33,11 +33,18 @@ export * from './collaboration-record'
 // seam; MEASURE mode). Consumes S5 profiles + the S2/S4 libs; opens a collaboration
 // record + sets the A9 authority boundary at selection (flag-gated). ENFORCE is S11.
 export * from './discernment-engine'
+// S7 — the out-of-band L4 passion audit (mentor A7; pure core + an injectable trace
+// extractor seam + a flag-gated fail-honest write-once store write; MEASURE mode).
+// Runs the deterministic engine on the ORCHESTRATOR's reasoning trace (never
+// self-report), resolves the disposition, writes the readable-not-modifiable
+// l4_audit_result, and gates finalization on the disposition. Closes Phase 2.
+export * from './l4-passion-audit'
 export * from './trust-core-flag'
 export { emitAccreditationTrustEvents, emitReflectTrustEvent } from './emission-hooks'
 export {
   emitTrustEvents,
   readTrustProfile,
+  readHonestReflectSummary,
   deleteTrustDataForOwner,
   deleteTrustDataForCredential,
   getTrustDataForOwner,
