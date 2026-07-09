@@ -1,5 +1,7 @@
 # Next-Session Prompt — Trust Layer S6: the four-layer discernment engine (L1–L3)
 
+> **SPENT — executed 2026-07-09.** S6 is built + battery-verified (84/0) + review-folded (16-agent Workflow; the headline justice-gate fail-open closed). See the close `operations/handoffs/founder/2026-07-09-trust-layer-S6-discernment-engine-CLOSE.md` + `D-TRUST-LAYER-S6-DISCERNMENT-ENGINE-BUILT-REVIEW-FOLDED`. **Next: S7** — `operations/handoffs/founder/2026-07-09-trust-layer-S7-l4-passion-audit-NEXT-SESSION-PROMPT.md`.
+
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)
 
 **Stream:** founder.

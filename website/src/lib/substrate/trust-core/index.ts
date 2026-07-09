@@ -28,6 +28,11 @@ export * from './transparency-ledger'
 // record persists (collaboration-store.ts); profiles are pure-lib (founder election).
 export * from './profiles'
 export * from './collaboration-record'
+// S6 — the four-layer discernment engine (L1 honestum gate · L2 fit · L3 axia; mentor
+// discernment protocol + A2/A5/A6; pure deterministic core + an injectable extraction
+// seam; MEASURE mode). Consumes S5 profiles + the S2/S4 libs; opens a collaboration
+// record + sets the A9 authority boundary at selection (flag-gated). ENFORCE is S11.
+export * from './discernment-engine'
 export * from './trust-core-flag'
 export { emitAccreditationTrustEvents, emitReflectTrustEvent } from './emission-hooks'
 export {
