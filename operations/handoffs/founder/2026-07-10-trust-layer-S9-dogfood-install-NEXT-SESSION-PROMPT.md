@@ -16,6 +16,7 @@ S8 built the seven-layer reference harness — the first live consumer of the S1
 
 ## Pre-conditions (confirm at open)
 
+0. **GATE — the pre-activation safety audit has RUN and returned a go.** `operations/handoffs/founder/2026-07-10-trust-layer-PREACTIVATION-SAFETY-AUDIT-NEXT-SESSION-PROMPT.md` (a fresh-model, independent audit of the S0b→S8 composite: the always-on data-rights surface, flag-off byte-identity, flag-on fail-honesty, the prod-inert schema, the never-independently-reviewed S1 engine, and claims-vs-reality). **S9 sets `SUBSTRATE_TRUST_CORE_ENABLED` — do not run it on an un-audited composite.** Any `blocks_flag_flip` finding must be folded first; any `fix-before-S10` finding (e.g. the reflect-artifact / honest-claims-envelope asymmetry) is carried, not blocking.
 1. The S8 commit is pushed (Vercel green) — the route exists and answers 503 flag-off (a founder-run smoke proves the dark posture live: `curl -s -X POST https://www.sagereasoning.com/api/practice/discernment -H 'Content-Type: application/json' -d '{}' | head` → the honest 503 naming the flag).
 2. The batteries are green at open: `logic-harness` 91/0, `negative-battery` 230/0, `s8-harness-integration` 145/0, S1–S7 regressions.
 3. The account/session budget can carry an adversarial review Workflow (or plan first-hand per the §4 precedent).
