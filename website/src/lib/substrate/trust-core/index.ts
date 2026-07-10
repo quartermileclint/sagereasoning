@@ -39,6 +39,13 @@ export * from './discernment-engine'
 // self-report), resolves the disposition, writes the readable-not-modifiable
 // l4_audit_result, and gates finalization on the disposition. Closes Phase 2.
 export * from './l4-passion-audit'
+// S8 — the reference-harness seams: the REAL extraction implementations (the
+// live Sonnet Layer-1 machinery behind the S6/S7 injectable seams) + the
+// integration turnkeys a live harness calls (spawn discernment + L4 audit,
+// the trust-verdict read, the hand-back A8/A9 event wiring). MEASURE mode;
+// flag-gated end-to-end; the dark /api/practice/discernment route consumes.
+export * from './harness-extractors'
+export * from './harness-integration'
 export * from './trust-core-flag'
 export { emitAccreditationTrustEvents, emitReflectTrustEvent } from './emission-hooks'
 export {

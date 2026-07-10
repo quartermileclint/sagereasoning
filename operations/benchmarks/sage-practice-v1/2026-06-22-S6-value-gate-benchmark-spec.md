@@ -291,7 +291,7 @@ D3 measures the call's *pressure-independence*, not "the harness told it to" —
 
 1. **Author the scenario families** (§2.3): ≥3 borderline briefs (graded levers) + Stark-2 + ≥1 agentic brief; reserve ≥1 calibration sibling per class. Each ships a sealed key + a **sealed dispositive-fact sweep** `[B3]`.
 2. **Run the three freeze guards** (§2.4) on calibration siblings; freeze only on pass. Calibration briefs are never matrix cells `[B4]`.
-3. **Provision the binding-capture arm** via `sage-on` (§S2): a non-marker `accreditation_write` credential (NEVER the dogfood marker) + a K1-canonical `SAGE_GATE1_AGENT_ID` per (capability × scenario) cell; confirm the **install-validation echo** reads `PROVISIONED` before each binding run.
+3. **Provision the binding-capture arm** via `practice-on` (formerly `sage-on`; renamed at Trust Layer S8, 2026-07-10) (§S2): a non-marker `accreditation_write` credential (NEVER the dogfood marker) + a K1-canonical `SAGE_GATE1_AGENT_ID` per (capability × scenario) cell; confirm the **install-validation echo** reads `PROVISIONED` before each binding run.
 4. **Per-tier enforced-channel smoke** (§6) on the agentic scenario before the binding cells.
 5. **Run the screening half-matrix** (§3.4) as a green-light; then the full matrix in run order (§3.3); fill the run-ledger every close.
 6. **Score:** objective metrics vs the sealed key (unblinded scorer); M4 by two blind raters on `transcript.blind.md`; compute the within-tier cross-arm deltas; apply the §8 decision rule + power floor; map to §8.1.

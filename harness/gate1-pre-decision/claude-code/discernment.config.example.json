@@ -1,0 +1,53 @@
+{
+  "_comment": "S8 discernment provisioning (Trust Layer — ADR-013 §4/§6). Copy to discernment.config.json (same directory; or point SAGE_GATE1_DISCERNMENT_CONFIG at a path) and fill in the operator's taxonomy. PRESENCE of a parseable config + the consult credential = the discernment surface is ON (the S2 derive-from-provisioning precedent; SAGE_GATE1_DISCERNMENT_ENABLED=false force-disables). The server side stays DARK until SUBSTRATE_TRUST_CORE_ENABLED is set — un-flipped, the hooks fail open with honest logs and zero spend. All discernment/L4/intervention outputs are MEASURE (advisory); ENFORCE is S11.",
+  "_credential_binding": "REQUIRED: the CONSULT credential (SAGE_GATE1_CREDENTIAL) that carries the spawn + hand-back POSTs must be minted with its agent_id EQUAL to orchestrator_profile.agentId below. The server 403s any other credential (it must never write another agent's delegation record). A NULL-agent or mismatched consult credential makes every spawn 403 — the frame still injects (fail-open) but NO collaboration record, L4 audit, or trust event is ever produced; look for 'DISCERN-OUTAGE … http 403' in gate1.log. This is separate from SAGE_GATE1_ACCRED_CREDENTIAL + SAGE_GATE1_AGENT_ID, which govern the H4 accreditation write path.",
+  "orchestrator_profile": {
+    "schema": "trust-orchestrator-profile-v1",
+    "agentId": "example:orchestrator@v1",
+    "currentKathekonta": ["serve the operator's task honestly", "delegate within scope"],
+    "examinationCapacity": {
+      "corroborationCheckAvailable": true,
+      "canReExamine": true,
+      "maxDepth": "standard"
+    },
+    "circle": ["requesting-user", "repository", "wider-community"],
+    "selectionPatterns": []
+  },
+  "deployer_config": {
+    "function_type_profiles": {
+      "code-exploration": { "domain_weights": { "phronesis": 3, "dikaiosyne": 1, "andreia": 0, "sophrosyne": 1 } },
+      "general-delegation": { "domain_weights": { "phronesis": 2, "dikaiosyne": 2, "andreia": 1, "sophrosyne": 1 } }
+    }
+  },
+  "candidates": {
+    "Explore": {
+      "candidate_ref": "explore-agent",
+      "profile": {
+        "schema": "trust-candidate-profile-v1",
+        "agentId": "example:explore@v1",
+        "role": "read-only code exploration",
+        "capabilityScope": ["code-exploration"],
+        "credentialCoverage": [],
+        "outputFormat": { "emitsSignedTrace": false, "emitsStructuredVerdict": true, "statesUncertainty": true },
+        "purpose": "search and summarize the repository for the requesting user",
+        "priorInteraction": null
+      }
+    },
+    "general-purpose": {
+      "candidate_ref": "general-agent",
+      "profile": null
+    }
+  },
+  "task_defaults": {
+    "function_type_by_subagent_type": {
+      "Explore": "code-exploration",
+      "*": "general-delegation"
+    },
+    "circles_served": ["requesting-user", "repository"],
+    "conditions": ["repo-local"],
+    "output_requirements": ["structured summary"],
+    "justice_surface": { "present": false, "non_consenting_circles": [] }
+  },
+  "timeout_ms": 60000,
+  "trace_max_chars": 8000
+}

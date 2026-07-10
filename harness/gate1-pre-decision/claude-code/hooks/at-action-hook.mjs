@@ -19,6 +19,11 @@
  *   ITERATE (loop-closure, D-B)    — if a prior consult OPENED a loop (a redirection), the next
  *          consult carries `prior_feedback` at the SAME depth (mirrors the LIVE CI-4 closure rule);
  *          the loop is marked CLOSED when a re-examination clears. State only — never a gate.
+ *   TRUST-READ (S8, Verification layer, ADVISE) — once per session, alongside a successful consult,
+ *          the caller's standing trust verdict (S1 profile → S3 aggregate → S4 MEASURE
+ *          recommendation) is read from the dark /api/practice/discernment route and appended as a
+ *          compact advisory observation. MEASURE — log-and-continue; NEVER blocks; un-provisioned ⇒
+ *          byte-identical to pre-S8; outage ⇒ honest log, no lines.
  *
  * FAIL POSTURE (ADR-011 D-F / KG1 / R18): EVERYTHING fails-open-with-an-honest-log EXCEPT the guard
  *   block (which blocks on a genuine do_not_proceed — its purpose — and fails-open on an OUTAGE by
@@ -65,8 +70,56 @@ import {
   priorFeedbackFrom,
   carriedDepth,
 } from "./lib/loop-closure.mjs";
+import {
+  loadDiscernmentConfig,
+  discernmentEnabled,
+  fetchTrustVerdict,
+  renderTrustAdvisory,
+} from "./lib/discernment.mjs";
+import { existsSync, writeFileSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 
 const HOOK_DIR = dirname(fileURLToPath(import.meta.url)); // …/claude-code/hooks
+
+// ---------------------------------------------------------------------------
+// S8 — the standing trust-verdict read (Verification layer, ADVISE channel).
+// Once per session, alongside a successful consult, GET the caller's own trust
+// verdict from the dark /api/practice/discernment route (S1 profile → S3
+// weighted aggregate → S4 MEASURE recommendation) and append it as a compact
+// advisory observation — log-and-continue; it NEVER blocks (MEASURE; ENFORCE is
+// S11). Un-provisioned ⇒ returns "" fast (H3 byte-identical to pre-S8).
+// Fail-open: an outage logs honestly and appends nothing.
+// ---------------------------------------------------------------------------
+function trustReadMarkerPath(cfg, sessionId) {
+  return join(cfg.stateDir, `${sanitizeLog(sessionId)}.trustread`);
+}
+async function maybeTrustAdvisory(cfg, sessionId) {
+  const dcfg = loadDiscernmentConfig(cfg, HOOK_DIR);
+  if (!discernmentEnabled(cfg, dcfg)) return "";
+  try {
+    if (cfg.fireOnce && existsSync(trustReadMarkerPath(cfg, sessionId))) return "";
+  } catch {
+    /* cannot check → read once */
+  }
+  const r = await fetchTrustVerdict(cfg, dcfg);
+  if (!r.ok) {
+    honestLog(cfg, `TRUST-READ-OUTAGE session=${sanitizeLog(sessionId)} reason="${r.reason}"`);
+    return ""; // fail-open: no advisory lines; never a fabricated record.
+  }
+  try {
+    mkdirSync(cfg.stateDir, { recursive: true });
+    writeFileSync(trustReadMarkerPath(cfg, sessionId), `${new Date().toISOString()} read\n`);
+  } catch {
+    /* marker best-effort — worst case one extra read next decision */
+  }
+  const agg = r.verdict.aggregate;
+  honestLog(
+    cfg,
+    `TRUST-READ session=${sanitizeLog(sessionId)} aggregate=${agg && agg.level ? agg.level : "none"} ` +
+      `rec=${r.verdict.recommendation ? `${r.verdict.recommendation.action}/${r.verdict.recommendation.followUp}` : "none"} mode=measure`,
+  );
+  return renderTrustAdvisory(r.verdict);
+}
 
 // ---------------------------------------------------------------------------
 // STDOUT emit helpers — the ONLY thing ever printed is one of these JSON objects.
@@ -367,8 +420,12 @@ async function runConsult(cfg, { sessionId, toolName, action }) {
   const { state: nextState, event: loopEvent } = advanceLoopState(loopState, classified, adoptedCorrection);
   writeLoopState(cfg, sessionId, nextState);
 
+  // S8: the standing trust-verdict advisory (once per session; ADVISE — MEASURE;
+  // "" when un-provisioned ⇒ the injected context is byte-identical to pre-S8).
+  const trustAdvisory = await maybeTrustAdvisory(cfg, sessionId);
+
   // Inject the at-action frame (redirection + proximity + loop status + any abandoned loops). Never blocks.
-  emitAllowWithContext(renderAtActionFrame(r.verdict, loopEvent, priorFeedback, nextState.abandonedRefs));
+  emitAllowWithContext(renderAtActionFrame(r.verdict, loopEvent, priorFeedback, nextState.abandonedRefs) + trustAdvisory);
   markDecisionFired(cfg, decisionKey, `${toolName} ${loopEvent}`);
   honestLog(
     cfg,

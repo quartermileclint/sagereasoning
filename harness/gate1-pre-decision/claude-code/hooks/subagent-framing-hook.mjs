@@ -13,6 +13,16 @@
  *   contact with the brief" into "frame before the subagent reasons" — the same value the
  *   UserPromptSubmit hook delivers for the top-level agent, now for delegated work.
  *
+ * S8 EXTENSION (Trust Layer — ADR-013 §4/§6): when the discernment surface is PROVISIONED
+ *   (discernment.config.json + credential; see lib/discernment.mjs), the hook ALSO runs the
+ *   spawn-time four-layer discernment + the out-of-band L4 passion audit via the dark
+ *   /api/practice/discernment route (INSTRUMENT channel — the hook does it on its own credential),
+ *   prepends the returned A9 AUTHORITY-BOUNDARY scope statement to the delegated prompt
+ *   (deterministic injection), writes the spawn record the hand-back hook (H5) reads, and appends
+ *   the discernment/L4 outcome + signed extraction artifacts to the observability JSONL. MEASURE:
+ *   the recommendation never blocks or swaps the spawn; a discernment outage fails open with an
+ *   honest log. Un-provisioned ⇒ this hook is byte-identical to its pre-S8 behaviour.
+ *
  * WHY PreToolUse-on-Agent (the Slice-2 correction)
  *   `UserPromptSubmit` does NOT fire for subagents. The `SubagentStart` COMMAND-hook stdin carries
  *   NO `prompt` (verified live 2026-06-20: { session_id, transcript_path, cwd, agent_id, agent_type,
@@ -48,6 +58,7 @@
 
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { existsSync } from "node:fs";
 import {
   loadConfig,
   readStdin,
@@ -57,10 +68,143 @@ import {
   renderFrame,
   honestLog,
   shortHash,
+  markerPath,
   FRAME_SENTINEL,
 } from "./lib/framing-core.mjs";
+import {
+  loadDiscernmentConfig,
+  discernmentEnabled,
+  readTranscriptTail,
+  buildSpawnPayload,
+  fetchDiscernment,
+  readSpawnRecord,
+  writeSpawnRecord,
+  writeSpawnAlias,
+  appendObservability,
+  makeSpanRef,
+} from "./lib/discernment.mjs";
 
 const HOOK_DIR = dirname(fileURLToPath(import.meta.url)); // …/claude-code/hooks
+
+// ---------------------------------------------------------------------------
+// S8 — spawn-time discernment + the out-of-band L4 audit (Verification layer).
+// Channel law: the POST is INSTRUMENT (the hook does it on its own credential;
+// no agent is asked); the returned AUTHORITY BOUNDARY is injected
+// deterministically into the delegated prompt; the RECOMMENDATION is ADVISE
+// (MEASURE — it never blocks or swaps the spawn; the orchestrator selected).
+// Un-provisioned (no discernment.config.json / no credential) ⇒ returns "" fast
+// and H2 stays BYTE-IDENTICAL to pre-S8 (battery-asserted). Fail-open honest:
+// a discernment outage never blocks the spawn — the frame still injects.
+// ---------------------------------------------------------------------------
+async function runSpawnDiscernmentStep(cfg, event, { spawnKey, task, toolInput }) {
+  const dcfg = loadDiscernmentConfig(cfg, HOOK_DIR);
+  if (!discernmentEnabled(cfg, dcfg)) return "";
+
+  // If the FRAME already fired for this spawn (the .framed marker), the emit below
+  // will never run again — a discernment call could not deliver its boundary, so it
+  // would be pure cost. Skip (review fold F2 — no wasted extraction fan-out).
+  try {
+    if (cfg.fireOnce && existsSync(markerPath(cfg, spawnKey))) return "";
+  } catch {
+    /* cannot check → proceed (bounded by the spawn-record guard below) */
+  }
+
+  // Fire-once per spawn: the spawn record doubles as the marker. A record whose
+  // boundary was NOT yet delivered (a prior frame outage) returns the STORED
+  // boundary so the retry emit can still deliver it — no second discernment POST.
+  const existing = readSpawnRecord(cfg, spawnKey);
+  if (existing) {
+    if (existing.boundary_delivered !== true && typeof existing.boundary_injection === "string") {
+      return existing.boundary_injection;
+    }
+    return "";
+  }
+
+  const sessionId = event.session_id || "no-session";
+  const subagentType = typeof toolInput.subagent_type === "string" ? toolInput.subagent_type : "";
+  // The out-of-band trace (A7): the harness reads the transcript's trailing
+  // assistant text — never an account the orchestrator is asked to give. An
+  // unreadable transcript yields "" and the server holds honestly (audit-unavailable).
+  const trace = readTranscriptTail(event.transcript_path, dcfg.traceMaxChars);
+  const payload = buildSpawnPayload(dcfg, { taskRef: spawnKey, subagentType, taskText: task, trace });
+
+  const t0 = Date.now();
+  const r = await fetchDiscernment(cfg, dcfg, payload);
+  if (!r.ok) {
+    honestLog(cfg, `DISCERN-OUTAGE session=${shortHash(sessionId)} spawn=${spawnKey} reason="${r.reason}"`);
+    return ""; // fail-open: the frame still injects; nothing false recorded.
+  }
+
+  const result = r.body.result || {};
+  const rec = result.discernment && result.discernment.recommendation ? result.discernment.recommendation : {};
+  const l4 = result.l4 || null;
+  const boundary = typeof result.boundaryInjection === "string" ? result.boundaryInjection : "";
+  const justicePresent = payload.task_profile.justiceSurface.present === true;
+
+  // Lifecycle record for the hand-back hook (H5) — what this spawn knew. `briefed`
+  // is FALSE here (review fold F2): the boundary has not reached the sub-agent yet —
+  // the emit marks briefed/boundary_delivered only after actual delivery, so a frame
+  // outage can never leave a falsely-briefed A9 record (the lenient-case-1 bias).
+  writeSpawnRecord(cfg, spawnKey, {
+    task_ref: spawnKey,
+    session_id: sessionId,
+    subagent_type: subagentType,
+    chosen_candidate_ref: result.chosen ? result.chosen.candidateRef : null,
+    justice_present: justicePresent,
+    boundary_injection: boundary,
+    boundary_has_justice_note: boundary.includes("Justice surface"),
+    boundary_delivered: false,
+    briefed: false,
+    l4_finalization: l4 && l4.outcome ? l4.outcome.finalization : null,
+    // Tamper-evidence (review fold F1): the L4 commit note surfaces a write-once
+    // refusal — a pre-existing (possibly self-supplied) L4 record is VISIBLE here.
+    l4_commit_written: l4 && l4.commit ? l4.commit.written === true : false,
+    l4_commit_note: l4 && l4.commit && typeof l4.commit.note === "string" ? l4.commit.note : null,
+    created_at: new Date().toISOString(),
+  });
+
+  // Observability (durable provenance; OTel-GenAI-shaped span ref — design-for).
+  appendObservability(
+    cfg,
+    sessionId,
+    "discernment-spawn",
+    {
+      task_ref: spawnKey,
+      subagent_type: subagentType,
+      recommendation: rec.recommendedAgentRef ?? null,
+      chosen: result.chosen ?? null,
+      selection_committed: result.selection ? result.selection.committed === true : false,
+      l4_status: l4 && l4.outcome ? l4.outcome.status : null,
+      l4_finalization: l4 && l4.outcome ? l4.outcome.finalization : null,
+      l4_commit_written: l4 && l4.commit ? l4.commit.written === true : false,
+      l4_commit_note: l4 && l4.commit && typeof l4.commit.note === "string" ? l4.commit.note : null,
+      l4_artifacts: Array.isArray(r.body.l4_artifacts) ? r.body.l4_artifacts : [],
+      mode: "measure",
+    },
+    makeSpanRef("sage_practice.discernment.spawn", t0, Date.now()),
+  );
+
+  honestLog(
+    cfg,
+    `DISCERN session=${shortHash(sessionId)} spawn=${spawnKey} rec=${rec.recommendedAgentRef || "none"} ` +
+      `chosen=${result.chosen ? result.chosen.candidateRef : "?"} l4=${l4 && l4.outcome ? l4.outcome.finalization : "?"} ` +
+      `l4commit=${l4 && l4.commit && l4.commit.written === true ? "written" : "not-written"} mode=measure`,
+  );
+  return boundary;
+}
+
+// Mark the boundary DELIVERED (and the sub-agent BRIEFED when the justice note rode
+// it) — called from inside the emit, i.e. only after the injected prompt actually
+// carried the boundary (review fold F2). Fails soft.
+function markBoundaryDelivered(cfg, spawnKey) {
+  const record = readSpawnRecord(cfg, spawnKey);
+  if (!record) return;
+  writeSpawnRecord(cfg, spawnKey, {
+    ...record,
+    boundary_delivered: true,
+    briefed: record.justice_present === true && record.boundary_has_justice_note === true,
+  });
+}
 
 async function main() {
   // PreToolUse CAN block (exit 2), so STRICT mode is reachable for subagents too (allowStrict: true).
@@ -89,11 +233,17 @@ async function main() {
   // of the same task within the same session is not re-consulted). Keyed on session + task text.
   const sessionKey = "sub-" + shortHash(`${event.session_id || "no-session"}|${task}`);
 
-  // Emit strategy: prepend the frame to the subagent's prompt via PreToolUse updatedInput, so the
-  // subagent reasons FROM the examined frame. Other tool_input fields (subagent_type, description)
-  // are preserved.
+  // S8: spawn-time discernment + L4 audit (Verification layer). Returns the A9
+  // authority-boundary block to prepend, or "" (un-provisioned / outage / already
+  // fired) — in which case the emit below is BYTE-IDENTICAL to pre-S8.
+  const boundaryBlock = await runSpawnDiscernmentStep(cfg, event, { spawnKey: sessionKey, task, toolInput });
+
+  // Emit strategy: prepend the (optional) A9 authority boundary + the frame to the subagent's
+  // prompt via PreToolUse updatedInput, so the subagent reasons FROM the examined frame within its
+  // attenuated scope. Other tool_input fields (subagent_type, description) are preserved.
   const emit = (_cfg, verdict) => {
-    const framed = renderFrame(verdict) + "\n\n--- (your task follows) ---\n\n" + task;
+    const prefix = boundaryBlock ? boundaryBlock + "\n\n" : "";
+    const framed = prefix + renderFrame(verdict) + "\n\n--- (your task follows) ---\n\n" + task;
     process.stdout.write(
       JSON.stringify({
         hookSpecificOutput: {
@@ -102,6 +252,13 @@ async function main() {
         },
       }),
     );
+    // The boundary has now actually reached the delegated prompt — only NOW may the
+    // spawn record claim delivery/briefing (review fold F2).
+    if (boundaryBlock) markBoundaryDelivered(cfg, sessionKey);
+    // Alias the EXACT prompt the sub-agent will receive → this spawn key, so H5
+    // resolves the record by lookup instead of re-deriving it from orchestrator-
+    // controlled task text (review fold G2). No-ops when no spawn record exists.
+    writeSpawnAlias(cfg, event.session_id || "no-session", framed, sessionKey);
   };
 
   await runFraming(cfg, { sessionKey, task, logLabel: "FRAMED-SUBAGENT", emit });

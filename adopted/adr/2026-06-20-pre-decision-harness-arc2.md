@@ -212,6 +212,19 @@ Live-fire is the founder-walked test loop (`claude-code/SLICE5C-LIVE-VERIFY-WALK
 
 ---
 
+## Amendment 2026-07-10 — Trust Layer S8: the seven-layer generalization + the practice-on/off rename
+
+**Status:** Adopted (design + repo-only/dark build). Trust Layer S8 (`D-TRUST-LAYER-S8-REFERENCE-HARNESS-BUILT-DARK-REVIEW-FOLDED`; governing design ADR-013 §4/§6) **generalized this harness onto the seven-layer anatomy** (Execution · Tooling · Context · Lifecycle · Observability · Verification · Governance — the channel-law classification of every step now lives in `harness/gate1-pre-decision/SEVEN-LAYERS.md`, the S8 gate deliverable) and wired the S1–S7 trust core in as the Verification + Governance layers:
+
+- **H2 extended:** when provisioned by `discernment.config.json` (+ the consult credential — the S2 derive precedent), the subagent hook runs the spawn-time four-layer discernment + the out-of-band L4 passion audit via the DARK `/api/practice/discernment` route (INSTRUMENT), prepends the returned **A9 authority-boundary** scope statement to the delegated prompt (deterministic injection; the sub-agent's compliance is advisory until S11), and records the outcome + the signed L4 extraction artifacts in the observability JSONL. The orchestrator's reasoning trace is the **transcript tail the harness reads** — never a self-report (A7). MEASURE: the recommendation never blocks or swaps a spawn.
+- **H3 extended:** a once-per-session standing **trust-verdict advisory** (S1 profile → S3 weighted aggregate → S4 measure-mode recommendation) appended to the consult context (ADVISE; log-and-continue; never blocks).
+- **H5 (new, `PostToolUse` matcher `Task|Agent`):** the **delegation hand-back** — POSTs the sub-spawn's accumulated signed artifacts for A9 justice-failure classification (server re-verifies; R18f-parallel) + the A8/A9 trust-event emission. INSTRUMENT; never alters the tool result.
+- **Un-provisioned byte-identity:** without the discernment config, H1–H5 behave byte-identically to the pre-S8 harness (battery-asserted). Server-side, everything is DARK behind `SUBSTRATE_TRUST_CORE_ENABLED`. Kill-switches documented in `harness/gate1-pre-decision/KILL-SWITCHES.md` (five layers; **credential revoke is the real one**).
+- **The `practice-on` / `practice-off` rename (ADR-012's named rename):** the `/sage-on` and `/sage-off` skills are renamed to **`/practice-on`** and **`/practice-off`** (the practice = MEASURE framing); the old names remain as non-acting deprecation pointer stubs. Where this ADR's earlier text says "sage-on provisions the write path", read **practice-on**. The backup file keeps its name (`.claude/gate1-hooks-block.json`).
+- Release gates after S8: `logic-harness` **91/0**; `negative-battery` **230/0** (the new `s8-discernment` leg 64).
+
+---
+
 ## References
 
 - `drafts/sage-practice-pre-decision-harness-design.md` — the research-backed design (this ADR's basis; now governed by this ADR).

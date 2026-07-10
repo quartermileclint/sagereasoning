@@ -1,5 +1,5 @@
 {
-  "_comment": "Plugin hook registration for sage-gate1-pre-decision (the FULL-LOOP harness, H1–H4). Auto-discovered at the plugin root (hooks/hooks.json) on install — no manifest 'hooks' field needed. Same shape as a settings.json 'hooks' block. Paths use ${CLAUDE_PLUGIN_ROOT} (the plugin's install dir) in EXEC form (command:'node' + args:[path]) so the path is passed as one argument with no quoting (plugins-reference: 'In hook commands, use exec form with args'). 'timeout' is SECONDS; the hooks self-abort at 28000ms (< 30s) and return their honest result first. H1 (UserPromptSubmit) frames the top-level task. H2 (PreToolUse matcher Task|Agent) frames each delegated subagent's task. H3 (PreToolUse matcher Bash|Edit|Write|MultiEdit|NotebookEdit) is the R5 at-action cadence — guard (block on do_not_proceed) + Gate-2 consult (deduped) + loop-closure. H4 (Stop) is reflect-at-close + the accreditation write. H1/H2 are LIVE in the founder's dogfood install; H3/H4 are BUILT DARK (Slice 5a) and registered here so a future /plugin install picks them up — they are NOT installed into any settings.local.json until the founder-walked Slice 5b. The consult credential is read from SAGE_GATE1_CREDENTIAL; H4's accreditation write uses a SEPARATE non-marker credential SAGE_GATE1_ACCRED_CREDENTIAL (never the standing marker) + SAGE_GATE1_AGENT_ID. See ../README.md.",
+  "_comment": "Plugin hook registration for the SageReasoning seven-layer reference harness (H1–H5; Trust Layer S8 generalized the Gate-1 full-loop harness onto the seven-layer anatomy — see ../SEVEN-LAYERS.md for the channel-law classification). Auto-discovered at the plugin root (hooks/hooks.json) on install. Paths use ${CLAUDE_PLUGIN_ROOT} in EXEC form. 'timeout' is SECONDS; the hooks self-abort under their own budgets and return their honest result first. H1 (UserPromptSubmit) frames the top-level task. H2 (PreToolUse matcher Task|Agent) frames each delegated subagent's task AND — when the discernment surface is provisioned (discernment.config.json; see lib/discernment.mjs) — runs the spawn-time four-layer discernment + out-of-band L4 audit via the dark /api/practice/discernment route and prepends the A9 authority boundary (its timeout is 120s to cover the discernment budget; un-provisioned installs finish in the old ~28s envelope). H3 (PreToolUse matcher Bash|Edit|Write|MultiEdit|NotebookEdit) is the R5 at-action cadence — guard + Gate-2 consult (deduped) + loop-closure + the once-per-session trust-verdict advisory (S8). H4 (Stop) is reflect-at-close + the accreditation write. H5 (PostToolUse matcher Task|Agent) is the S8 delegation hand-back — POSTs the sub-spawn's signed artifacts for A9 justice-failure classification + the A8/A9 trust-event emission (INSTRUMENT; never alters the tool result). The consult credential is read from SAGE_GATE1_CREDENTIAL; H4's accreditation write uses a SEPARATE non-marker credential SAGE_GATE1_ACCRED_CREDENTIAL (never the standing marker) + SAGE_GATE1_AGENT_ID. All S8 surfaces are DARK until SUBSTRATE_TRUST_CORE_ENABLED is set server-side (the route answers 503; the hooks fail open honestly). See ../README.md + ../KILL-SWITCHES.md.",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -21,7 +21,7 @@
             "type": "command",
             "command": "node",
             "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/subagent-framing-hook.mjs"],
-            "timeout": 30
+            "timeout": 120
           }
         ]
       },
@@ -32,6 +32,19 @@
             "type": "command",
             "command": "node",
             "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/at-action-hook.mjs"],
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/handback-hook.mjs"],
             "timeout": 30
           }
         ]

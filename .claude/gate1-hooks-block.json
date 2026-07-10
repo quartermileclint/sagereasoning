@@ -1,5 +1,5 @@
 {
-  "_comment": "Backup of the SageReasoning Gate-1 hooks block for .claude/settings.local.json. This is the canonical 'ON' state used by the /sage-on and /sage-off skills. Contains NO credential (the SAGE_GATE1_CREDENTIAL lives in the settings 'env' block, not here). /sage-off refreshes this file with whatever hooks are currently installed before removing them; /sage-on merges this 'hooks' object back in. Hooks: H1 UserPromptSubmit (top-level framing), H2 PreToolUse Task|Agent (subagent framing), H3 PreToolUse Bash|Edit|Write|MultiEdit|NotebookEdit (at-action: guard + consult + loop-closure), H4 Stop (reflect turn + accred + persistReflection).",
+  "_comment": "Backup of the SageReasoning practice hooks block for .claude/settings.local.json. This is the canonical 'ON' state used by the /practice-on and /practice-off skills (renamed at Trust Layer S8 from /sage-on and /sage-off, which remain as deprecated pointer stubs). Contains NO credential (the SAGE_GATE1_CREDENTIAL lives in the settings 'env' block, not here). /practice-off refreshes this file with whatever hooks are currently installed before removing them; /practice-on merges this 'hooks' object back in. Hooks: H1 UserPromptSubmit (top-level framing), H2 PreToolUse Task|Agent (subagent framing + S8 spawn-time discernment/L4 when provisioned — 120s timeout to cover the discernment budget), H3 PreToolUse Bash|Edit|Write|MultiEdit|NotebookEdit (at-action: guard + consult + loop-closure + S8 trust-verdict advisory), H4 Stop (reflect turn + accred + persistReflection), H5 PostToolUse Task|Agent (S8 delegation hand-back — A9 justice-failure classification + A8/A9 trust events). The S8 surfaces are DARK until SUBSTRATE_TRUST_CORE_ENABLED is set server-side AND discernment.config.json is provisioned; un-provisioned installs behave exactly as the pre-S8 H1-H4 harness.",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -25,7 +25,7 @@
             "args": [
               "${CLAUDE_PROJECT_DIR}/harness/gate1-pre-decision/claude-code/hooks/subagent-framing-hook.mjs"
             ],
-            "timeout": 30
+            "timeout": 120
           }
         ]
       },
@@ -37,6 +37,21 @@
             "command": "node",
             "args": [
               "${CLAUDE_PROJECT_DIR}/harness/gate1-pre-decision/claude-code/hooks/at-action-hook.mjs"
+            ],
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/harness/gate1-pre-decision/claude-code/hooks/handback-hook.mjs"
             ],
             "timeout": 30
           }

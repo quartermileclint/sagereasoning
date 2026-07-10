@@ -1,0 +1,46 @@
+# Next-Session Prompt — Trust Layer S9: the founder-walked dogfood install + instrument-fidelity validation
+
+**For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)
+
+**Stream:** founder.
+**Tier:** **`code-critical` 0c-ii, founder-walked (PR17/AC7).** Every live step — the credential rotation/mint, the TEST flag set, any Vercel/Supabase op, the hook install, the smokes — is the founder's; the AI guides + verifies and performs no mint/deploy/flag/install op. The full Critical Change Protocol applies (what changes / what could break / rollback / verification / explicit approval per named risk).
+**Governing frame:** /adopted/standing-protocol-cache.md + /adopted/build-sessions-protocol-cache.md.
+**Design-of-record:** ADR-013 §6 (`adopted/adr/2026-07-08-sage-trust-layer.md`) + ADR-011 incl. the 2026-07-10 S8 amendment (`adopted/adr/2026-06-20-pre-decision-harness-arc2.md`).
+**Plan of record:** `operations/trust-layer-2026-07/trust-layer-build-plan.md` §S9.
+**Predecessor close:** `operations/handoffs/founder/2026-07-10-trust-layer-S8-reference-harness-CLOSE.md`.
+**Predecessor decision-log entries:** `D-TRUST-LAYER-S8-REFERENCE-HARNESS-BUILT-DARK-REVIEW-FOLDED` + `D-TRUST-LAYER-S8-INDEPENDENT-REREVIEW-FOLDED`.
+
+## Why this session matters
+
+S8 built the seven-layer reference harness — the first live consumer of the S1–S7 trust core — entirely dark: the `/api/practice/discernment` route 503s (`SUBSTRATE_TRUST_CORE_ENABLED` unset), the hooks are not installed, and no trust record has ever accumulated from a real loop. S9 is where the instrument goes ON in the founder's own loop (the PR16 dogfood; election 1's reference integration) and where the **instrument-fidelity validation batteries** (never beats-bare — KG-EX1) run against REAL accumulated records: worse-reasoning-scores-worse on trust aggregation, A3 decay fixtures, the delegation cases 1/2/3 producing the specified reflections, discernment selecting per the protocol on the configured candidate set, and L4 catching seeded pre-formed preferences. The dogfood records are also the accumulation S10's public read surface presupposes.
+
+## Pre-conditions (confirm at open)
+
+1. The S8 commit is pushed (Vercel green) — the route exists and answers 503 flag-off (a founder-run smoke proves the dark posture live: `curl -s -X POST https://www.sagereasoning.com/api/practice/discernment -H 'Content-Type: application/json' -d '{}' | head` → the honest 503 naming the flag).
+2. The batteries are green at open: `logic-harness` 91/0, `negative-battery` 230/0, `s8-harness-integration` 145/0, S1–S7 regressions.
+3. The account/session budget can carry an adversarial review Workflow (or plan first-hand per the §4 precedent).
+
+## The founder elections this session must take (AskUserQuestion at open)
+
+1. **Credential rotation + isolation (the F1 residual — read the S8 close first).** The standing dogfood consult credential in `settings.local.json` is the REVOKED leg-d token (memory `gate1-dogfood-credential-stale-token`) — a fresh mint is required regardless. The NEW election: does the DISCERNMENT surface share the loop's consult credential (simple; but the A7 server-boundary residual stands — the audited agent can read the env, so it could in principle pre-empt its own L4 audit; tamper-EVIDENT via the l4_commit_note but not prevented) or take a **separate credential the agent's env never carries** (stronger; needs a wrapper-script env source — more install work)? Recommendation: separate if cheap, else shared + the tamper-evidence watch, with the hook-authenticated channel as the named structural closure.
+2. **TEST-first or straight-to-prod for the flag-on walk.** `SUBSTRATE_TRUST_CORE_ENABLED=true` on TEST first (the S1 close's carried optional flag-on TEST walk — recommended: the first real spawn discernment + L4 write + trust events land on TEST) → then the prod flag as its own smaller flip, or straight to prod per the 3b precedent.
+3. **Loop metering.** The discernment surface consumes Sonnet flag-on with NO loop_billing_events row (the S8 disclosed follow-up — the `surface` CHECK needs widening, a founder-walked migration per the CI-10 precedent). Widen + wire now, or accept-and-track for the dogfood period?
+4. **Reflect-persist.** Standing `SAGE_GATE1_REFLECT_PERSIST_ENABLED` stays OFF unless the founder elects it — in which case the Gate-1 S7 reflect-row erasure wiring (`/api/user/delete` + `/api/credential/erase` + a retention cron) becomes in-scope FIRST (the standing prerequisite).
+
+## Procedure (founder-walked; the AI guides + verifies)
+
+1. **Reads** — the two caches, the S8 close, ADR-011's S8 amendment, `SEVEN-LAYERS.md`, `KILL-SWITCHES.md`, the practice-on skill.
+2. **Elections** (above) via AskUserQuestion.
+3. **Mint + rotate (founder):** a fresh standing loop UPC (consult [+ discernment per election 1]; a K1-canonical agent id for the loop); update `settings.local.json` env; revoke the stale token's replacement path per the hygiene precedent. NEVER the marker credential in the accred slot. **HARD REQUIREMENT (review fold G1):** the **consult** credential that carries the discernment POSTs must be minted with its **`agent_id` equal to `orchestrator_profile.agentId`** in `discernment.config.json` — the server 403s any other credential (it must never write another agent's delegation record). A NULL-agent or mismatched consult credential ⇒ every spawn 403s, the frame still injects, and the trust surface **silently never runs**; the outage log now names the reason (`http 403 — forbidden: the credential must be bound to orchestrator_agent_id`). Verify this before the flag-on walk.
+4. **Provision:** copy `discernment.config.example.json` → `discernment.config.json` and fill the founder's real taxonomy (the loop's actual subagent types); provision the accreditation write path (non-marker `accreditation_write` credential + `SAGE_GATE1_AGENT_ID` — a *different* credential from the consult one above).
+5. **Flag-on walk (founder, per election 2):** set `SUBSTRATE_TRUST_CORE_ENABLED=true` (TEST first recommended) → `/practice-on` (expect the echo: hooks incl. PostToolUse + `TRUST-RECORD WRITE PATH: PROVISIONED`) → a REAL session with a subagent spawn → verify first-hand: the boundary prepended in the spawn (the sub-agent transcript), the `discernment-spawn` observability record (l4_commit_written true; the OTel-shaped span), the collaboration record row (authority_boundary set; l4_audit_result written; status finalized/escalated), the trust-verdict advisory on a consult, the hand-back record, and — after an honest close — the S1 trust events + `readTrustProfile` showing real accumulation.
+6. **Instrument-fidelity batteries (§S9, KG-EX1 — never beats-bare):** worse-reasoning-scores-worse on the accumulated aggregation; A3 decay on fixtures; delegation cases 1/2/3 → the specified reflections (drive `closeDelegation` with constructed verified artifacts on TEST); discernment selects per the protocol on the configured candidate set; L4 catches a seeded pre-formed preference (a trace naming the preference before the assessment). Adversarial review per slice (Workflow fan-out; refuters on every load-bearing claim; budget-check first).
+7. **Records:** Critical close + decision log + CLAUDE.md PR18 refresh + mark this prompt SPENT + author the S10 prompt.
+
+## Rollback
+`/practice-off` (hooks out, hot-reload); unset `SUBSTRATE_TRUST_CORE_ENABLED` (the route back to 503; emission stops; byte-identical flag-off, test-asserted); revoke any minted credential (the REAL kill switch); the trust rows are `retain_until`-swept or hand-deleted via the data-rights routes. No schema change this session unless election 3 widens the billing CHECK (its own reversible migration).
+
+## Forecast
+Ends with the seven-layer harness LIVE in the founder's loop on a fresh credential, real trust records accumulating under MEASURE, and the instrument-fidelity validation green — the accumulation S10 (the public trust-record read surface) reads from. Then S11 — the founder-walked ENFORCE activation (the logos gate). Weights BLOCKED; the 0h call remains the founder's.
+
+End of prompt.

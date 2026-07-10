@@ -39,8 +39,9 @@ const AT_ACTION_HOOK = fileURLToPath(new URL("../claude-code/hooks/at-action-hoo
 const CLOSE_HOOK = fileURLToPath(new URL("../claude-code/hooks/close-hook.mjs", import.meta.url));
 
 let mode = "ok"; // drives /api/reason for the Slice-1/2/3 legs (back-compat).
-// Per-route state for the H3/H4 legs: reason (overrides `mode` when set), guard, reflect, accred.
-const routeState = { reason: null, guard: "proceed", reflect: "ok", accred: "ok" };
+// Per-route state for the H3/H4/H5 legs: reason (overrides `mode` when set), guard, reflect,
+// accred, discern (the S8 /api/practice/discernment seam).
+const routeState = { reason: null, guard: "proceed", reflect: "ok", accred: "ok", discern: "ok" };
 // Captured request bodies (parent process; children POST to the mock via HTTP) — used to assert the
 // H3 prior_feedback construction (D-B) and the H4 accreditation provenance round-trip (D-D).
 let captured = [];
@@ -50,8 +51,9 @@ const server = makeServer(() => mode, {
     guard: routeState.guard,
     reflect: routeState.reflect,
     accred: routeState.accred,
+    discern: routeState.discern,
   }),
-  onRequest: (path, body) => captured.push({ path, body }),
+  onRequest: (path, body, method) => captured.push({ path, body, method }),
 });
 await new Promise((r) => server.listen(0, r));
 const port = server.address().port;
@@ -753,6 +755,363 @@ note("LEG 7 (the 2026-06-22 channel-routed correction): S2 derive-from-write-pat
 note("egress until the operator provisions a non-marker accred credential + agent_id) + S3 honest");
 note("accreditation (real signed chain + conservative truthful seed; the DETECT loop-closure verdict");
 note("surfaced as-is — a reversible loop never re-consulted reads 'unclosed', the truth, not 'closed').");
+
+// ===========================================================================================
+// LEG 8 — S8 SEVEN-LAYER GENERALIZATION (Trust Layer): the spawn-time discernment + L4 call
+// (H2), the delegation hand-back (H5), and the trust-verdict ADVISE surface (H3), all against
+// the mock /api/practice/discernment. Channel-law + byte-identity assertions throughout:
+// un-provisioned installs are BYTE-IDENTICAL to the pre-S8 harness; every S8 failure is
+// fail-open-honest (a spawn is never blocked; nothing false is recorded).
+// ===========================================================================================
+leg("s8-discernment");
+const HANDBACK_HOOK = fileURLToPath(new URL("../claude-code/hooks/handback-hook.mjs", import.meta.url));
+import { writeFileSync as writeFileSyncS8, readdirSync } from "node:fs";
+import { stripInjectedPrefix } from "../claude-code/hooks/lib/discernment.mjs";
+
+// The tmp discernment provisioning (config + transcript fixture).
+const s8Dir = mkdtempSync(join(tmpdir(), "gate1-s8-"));
+const s8ConfigPath = join(s8Dir, "discernment.config.json");
+writeFileSyncS8(
+  s8ConfigPath,
+  JSON.stringify({
+    orchestrator_profile: {
+      schema: "trust-orchestrator-profile-v1",
+      agentId: "sagereasoning:orch@v1",
+      currentKathekonta: ["serve the task honestly"],
+      examinationCapacity: { corroborationCheckAvailable: true, canReExamine: true, maxDepth: "standard" },
+      circle: ["requesting-user", "repository"],
+      selectionPatterns: [],
+    },
+    deployer_config: {
+      function_type_profiles: {
+        "code-exploration": { domain_weights: { phronesis: 3, dikaiosyne: 1, andreia: 0, sophrosyne: 1 } },
+        "general-delegation": { domain_weights: { phronesis: 2, dikaiosyne: 2, andreia: 1, sophrosyne: 1 } },
+      },
+    },
+    candidates: {
+      Explore: { candidate_ref: "explore-agent", profile: null },
+      "general-purpose": { candidate_ref: "general-agent", profile: null },
+    },
+    task_defaults: {
+      function_type_by_subagent_type: { Explore: "code-exploration", "*": "general-delegation" },
+      circles_served: ["requesting-user"],
+      conditions: [],
+      output_requirements: [],
+      justice_surface: { present: false, non_consenting_circles: [] },
+    },
+    timeout_ms: 5000,
+  }),
+);
+const s8TranscriptPath = join(s8Dir, "transcript.jsonl");
+writeFileSyncS8(
+  s8TranscriptPath,
+  [
+    JSON.stringify({ type: "user", message: { role: "user", content: [{ type: "text", text: "please check the repo" }] } }),
+    JSON.stringify({ type: "assistant", message: { role: "assistant", content: [{ type: "text", text: "I weighed the two explorers and will delegate the search now." }] } }),
+  ].join("\n") + "\n",
+);
+const s8Env = { SAGE_GATE1_DISCERNMENT_CONFIG: s8ConfigPath };
+const discernReqs = (method) =>
+  captured.filter((c) => c.path.includes("/api/practice/discernment") && (!method || c.method === method));
+const obsRecords = (sessionId) => {
+  const p = join(stateDir, `${sessionId}.observability.jsonl`);
+  if (!existsSync(p)) return [];
+  return readFileSync(p, "utf8").trim().split("\n").filter(Boolean).map((l) => {
+    try {
+      return JSON.parse(l);
+    } catch {
+      return {};
+    }
+  });
+};
+
+// 8a — UN-PROVISIONED BYTE-IDENTITY: without the config, H2 emits exactly the pre-S8 shape —
+// no boundary, no discernment request, no spawn record. (The existing legs 1–7 also ran
+// un-provisioned and passed unchanged — this pins the absence explicitly.)
+{
+  captured = [];
+  const task = "Summarize the repo layout.";
+  const r = await runHook(SUB_HOOK, subEvent("s8a", task));
+  const ui = updatedInputOf(r.out);
+  check("8a un-provisioned: prompt leads with the FRAME (no boundary prefix)", !!ui && ui.prompt.startsWith(FRAME_SENTINEL));
+  check("8a un-provisioned: no authority-boundary text injected", !!ui && !ui.prompt.includes("authority boundary"));
+  check("8a un-provisioned: NO discernment request made", discernReqs().length === 0);
+  check("8a un-provisioned: NO spawn record written", !existsSync(join(stateDir, `sub-${shortHash("s8a|" + task)}.spawn.json`)));
+}
+
+// 8b — PROVISIONED SPAWN: the discernment POST is constructed from the config + this spawn's
+// facts (task profile from the subagent_type mapping; the out-of-band trace from the TRANSCRIPT;
+// the chosen candidate = the one the orchestrator actually named), the A9 boundary is PREPENDED
+// before the frame, the spawn record + observability JSONL land.
+{
+  captured = [];
+  routeState.discern = "ok";
+  const task = "Find every caller of validatePracticeCredential.";
+  const ev = { ...subEvent("s8b", task), transcript_path: s8TranscriptPath };
+  ev.tool_input.subagent_type = "Explore";
+  const r = await runHook(SUB_HOOK, ev, s8Env);
+  const ui = updatedInputOf(r.out);
+  const spawnKey = `sub-${shortHash("s8b|" + task)}`;
+  const post = discernReqs("POST").map((c) => c.body).find((b) => b.phase === "spawn");
+  check("8b spawn: exit 0 (never blocks)", r.code === 0, `code=${r.code} err=${r.err}`);
+  check("8b spawn: discernment POST fired", !!post);
+  check("8b spawn: task profile mapped from subagent_type", !!post && post.task_profile.functionType === "code-exploration");
+  check("8b spawn: candidates composed from the config", !!post && Array.isArray(post.candidates) && post.candidates.length === 2);
+  check("8b spawn: the OUT-OF-BAND trace comes from the transcript (never self-report)",
+    !!post && typeof post.reasoning_trace.trace === "string" && post.reasoning_trace.trace.includes("I weighed the two explorers"));
+  check("8b spawn: the chosen candidate is the one the orchestrator NAMED (MEASURE — advisory recommendation)",
+    !!post && post.chosen_candidate_ref === "explore-agent");
+  check("8b spawn: orchestrator agent id from the config", !!post && post.orchestrator_agent_id === "sagereasoning:orch@v1");
+  check("8b spawn: the A9 boundary is PREPENDED before the frame",
+    !!ui && ui.prompt.startsWith("[SageReasoning — delegated authority boundary (A9)]") && ui.prompt.includes(FRAME_SENTINEL));
+  check("8b spawn: the original task still follows the injected block", !!ui && ui.prompt.includes(task));
+  check("8b spawn: spawn record written (Lifecycle layer)", existsSync(join(stateDir, `${spawnKey}.spawn.json`)));
+  const spawnRecord8b = JSON.parse(readFileSync(join(stateDir, `${spawnKey}.spawn.json`), "utf8"));
+  check("8b spawn: boundary marked DELIVERED only after the emit (review fold F2)", spawnRecord8b.boundary_delivered === true);
+  check("8b spawn: briefed stays false without a justice surface", spawnRecord8b.briefed === false);
+  check("8b spawn: the L4 commit note is recorded (tamper-evidence — review fold F1)", spawnRecord8b.l4_commit_written === true && typeof spawnRecord8b.l4_commit_note === "string");
+  const obs = obsRecords("s8b");
+  const spawnRec = obs.find((o) => o.type === "discernment-spawn");
+  check("8b spawn: observability record with the L4 outcome + artifacts", !!spawnRec && spawnRec.l4_finalization === "may-finalize" && Array.isArray(spawnRec.l4_artifacts) && spawnRec.l4_artifacts.length === 1);
+  check("8b spawn: OTel-GenAI-SHAPED span ref on the record (design-for)",
+    !!spawnRec && /^[0-9a-f]{32}$/.test(spawnRec.otel?.trace_id || "") && /^[0-9a-f]{16}$/.test(spawnRec.otel?.span_id || "") && spawnRec.otel?.attributes?.["gen_ai.operation.name"] === "sage_practice.discernment.spawn");
+  check("8b spawn: MEASURE recorded", !!spawnRec && spawnRec.mode === "measure");
+  check("8b spawn: honest DISCERN log line", !!lastLogMatching("DISCERN ") && lastLogMatching("DISCERN ").includes("mode=measure"));
+
+  // fire-once: an identical re-spawn does not re-consult the discernment surface.
+  captured = [];
+  await runHook(SUB_HOOK, ev, s8Env);
+  check("8b spawn: fire-once per spawn (no second discernment POST)", discernReqs("POST").length === 0);
+}
+
+// 8c — DISCERNMENT OUTAGE / DARK: fail-open — the FRAME still injects (a spawn is never blocked);
+// an honest DISCERN-OUTAGE line lands; no spawn record is written (nothing false).
+{
+  for (const [modeName, label] of [["error", "outage"], ["disabled", "dark-503"]]) {
+    captured = [];
+    routeState.discern = modeName;
+    const task = `Review the config loader (${modeName}).`;
+    const ev = { ...subEvent(`s8c-${modeName}`, task), transcript_path: s8TranscriptPath };
+    const r = await runHook(SUB_HOOK, ev, s8Env);
+    const ui = updatedInputOf(r.out);
+    check(`8c ${label}: frame still injected (fail-open; spawn never blocked)`, !!ui && ui.prompt.includes(FRAME_SENTINEL) && ui.prompt.includes(task));
+    check(`8c ${label}: no boundary injected`, !!ui && !ui.prompt.includes("authority boundary"));
+    check(`8c ${label}: honest DISCERN-OUTAGE log`, !!lastLogMatching("DISCERN-OUTAGE"));
+    check(`8c ${label}: no spawn record (nothing false)`, !existsSync(join(stateDir, `sub-${shortHash(`s8c-${modeName}|` + task)}.spawn.json`)));
+  }
+  routeState.discern = "ok";
+}
+
+// 8d — HAND-BACK (H5): with a spawn record + accumulated signed artifacts, the hook POSTs the
+// hand-back carrying the sub-spawn's signed chain + the briefed/identified flags; fire-once;
+// no spawn record ⇒ silent no-op; no artifacts ⇒ honest skip (never a fabricated failure).
+{
+  captured = [];
+  const task = "Find every caller of validatePracticeCredential.";
+  const spawnKey = `sub-${shortHash("s8b|" + task)}`; // the 8b spawn (record exists)
+  // Seed the sub-spawn's provenance (what H2's frame consult would have appended when provisioned).
+  writeFileSyncS8(
+    join(stateDir, `${spawnKey}.provenance.jsonl`),
+    JSON.stringify({ assessment: { katorthoma_proximity: "deliberate" }, signature: "mock-sub-sig", key_id: "mock-key" }) + "\n",
+  );
+  // The hand-back sees the FRAMED prompt (updatedInput applied) — the hook strips the injected
+  // prefix to recover the raw task and the SAME spawn key.
+  const framedPrompt = "[SageReasoning — delegated authority boundary (A9)]\nstuff\n\n[SageReasoning Gate 1 — x]\n\n--- (your task follows) ---\n\n" + task;
+  const hbEvent = {
+    session_id: "s8b",
+    hook_event_name: "PostToolUse",
+    tool_name: "Agent",
+    tool_input: { prompt: framedPrompt, subagent_type: "Explore" },
+    tool_response: { ok: true },
+  };
+  const r = await runHook(HANDBACK_HOOK, hbEvent, s8Env);
+  const post = discernReqs("POST").map((c) => c.body).find((b) => b.phase === "hand_back");
+  check("8d hand-back: exit 0", r.code === 0, `code=${r.code} err=${r.err}`);
+  check("8d hand-back: POST fired with the recovered spawn key", !!post && post.task_ref === spawnKey);
+  check("8d hand-back: carries the sub-spawn's SIGNED artifacts (R18f-parallel)",
+    !!post && Array.isArray(post.justice_failure?.signed_assessments) && post.justice_failure.signed_assessments.length === 1);
+  check("8d hand-back: the identified/briefed flags come from the SPAWN record",
+    !!post && post.justice_failure.surface_identified_at_selection === false && post.justice_failure.sub_agent_briefed === false);
+  check("8d hand-back: honest HANDBACK log with the server's classification", !!lastLogMatching("HANDBACK ") && lastLogMatching("HANDBACK ").includes("case=case-2-catchable-not-run"));
+  const obs = obsRecords("s8b");
+  check("8d hand-back: observability record", obs.some((o) => o.type === "delegation-handback" && o.delegation_events_emitted === 2));
+
+  // fire-once.
+  captured = [];
+  await runHook(HANDBACK_HOOK, hbEvent, s8Env);
+  check("8d hand-back: fire-once (no second POST)", discernReqs("POST").length === 0);
+
+  // no spawn record ⇒ silent no-op.
+  captured = [];
+  const r2 = await runHook(HANDBACK_HOOK, { ...hbEvent, session_id: "s8d-none", tool_input: { prompt: "unrelated task" } }, s8Env);
+  check("8d hand-back: no spawn record ⇒ silent no-op", r2.code === 0 && discernReqs().length === 0);
+
+  // spawn record but NO signed artifacts ⇒ honest skip (never a fabricated failure).
+  captured = [];
+  const task3 = "Another delegated task.";
+  const key3 = `sub-${shortHash("s8d3|" + task3)}`;
+  writeFileSyncS8(join(stateDir, `${key3}.spawn.json`), JSON.stringify({ task_ref: key3, justice_present: false, briefed: false }));
+  const r3 = await runHook(HANDBACK_HOOK, { ...hbEvent, session_id: "s8d3", tool_input: { prompt: task3 } }, s8Env);
+  check("8d hand-back: no artifacts ⇒ honest skip, no POST", r3.code === 0 && discernReqs().length === 0 && !!lastLogMatching("HANDBACK-SKIP"));
+
+  // un-provisioned ⇒ byte-identical no-op even with a spawn record present.
+  captured = [];
+  const r4 = await runHook(HANDBACK_HOOK, hbEvent, {});
+  check("8d hand-back: un-provisioned ⇒ no-op (byte-identity)", r4.code === 0 && discernReqs().length === 0);
+}
+
+// 8e — TRUST-READ (H3, ADVISE): once per session alongside a successful consult, the standing
+// trust verdict is appended as an advisory observation; outage ⇒ honest log + no lines;
+// un-provisioned ⇒ the injected context is byte-identical to pre-S8.
+{
+  captured = [];
+  routeState.reason = "ok";
+  routeState.discern = "ok";
+  const r = await runHook(AT_ACTION_HOOK, ptEvent("s8e", "Edit", { file_path: "/repo/x.ts", new_string: "x" }), s8Env);
+  const ctx = ctxOf(r.out);
+  check("8e trust-read: GET fired", discernReqs("GET").length === 1);
+  check("8e trust-read: advisory appended to the consult context", ctx.includes("Standing trust record (MEASURE"));
+  check("8e trust-read: the S4 recommendation surfaced as log-and-continue", ctx.includes("proceed/log") && ctx.includes("not enforced"));
+  check("8e trust-read: honest TRUST-READ log", !!lastLogMatching("TRUST-READ ") && lastLogMatching("TRUST-READ ").includes("mode=measure"));
+  // once per session: a second decision does not re-read.
+  captured = [];
+  await runHook(AT_ACTION_HOOK, ptEvent("s8e", "Edit", { file_path: "/repo/y.ts", new_string: "y" }), s8Env);
+  check("8e trust-read: once per session (no second GET)", discernReqs("GET").length === 0);
+  // outage ⇒ no advisory lines, honest log, consult unaffected.
+  captured = [];
+  routeState.discern = "error";
+  const r2 = await runHook(AT_ACTION_HOOK, ptEvent("s8e2", "Edit", { file_path: "/repo/z.ts", new_string: "z" }), s8Env);
+  const ctx2 = ctxOf(r2.out);
+  check("8e trust-read outage: consult frame intact, no advisory", ctx2.includes("Gate 2") && !ctx2.includes("Standing trust record"));
+  check("8e trust-read outage: honest TRUST-READ-OUTAGE log", !!lastLogMatching("TRUST-READ-OUTAGE"));
+  routeState.discern = "ok";
+  // un-provisioned byte-identity: no GET, no advisory.
+  captured = [];
+  const r3 = await runHook(AT_ACTION_HOOK, ptEvent("s8e3", "Edit", { file_path: "/repo/w.ts", new_string: "w" }), {});
+  check("8e trust-read un-provisioned: no GET + no advisory (byte-identity)", discernReqs().length === 0 && !ctxOf(r3.out).includes("Standing trust record"));
+}
+// 8f — BRIEFED-ONLY-ON-DELIVERY (review fold F2): a frame outage AFTER a successful discernment
+// leaves the boundary STORED but boundary_delivered:false (no falsely-briefed A9 record — the
+// lenient-case-1 bias is impossible); the retry delivers the STORED boundary with NO second
+// discernment POST, and only then marks delivered.
+{
+  captured = [];
+  routeState.discern = "ok";
+  routeState.reason = "error"; // the frame fetch fails AFTER the discernment succeeds
+  const task = "Audit the retention sweep configuration.";
+  const key = `sub-${shortHash("s8f|" + task)}`;
+  const ev = { ...subEvent("s8f", task), transcript_path: s8TranscriptPath };
+  await runHook(SUB_HOOK, ev, s8Env);
+  const rec1 = JSON.parse(readFileSync(join(stateDir, `${key}.spawn.json`), "utf8"));
+  check("8f frame-outage: discernment record exists with the boundary STORED", typeof rec1.boundary_injection === "string" && rec1.boundary_injection.includes("authority boundary"));
+  check("8f frame-outage: boundary NOT marked delivered (no falsely-briefed record)", rec1.boundary_delivered === false && rec1.briefed === false);
+  // Recovery: the frame comes back; the retry must deliver the STORED boundary without re-consulting.
+  captured = [];
+  routeState.reason = "ok";
+  const r2 = await runHook(SUB_HOOK, ev, s8Env);
+  const ui2 = updatedInputOf(r2.out);
+  check("8f retry: the STORED boundary is delivered (no second discernment POST)", discernReqs("POST").length === 0 && !!ui2 && ui2.prompt.startsWith("[SageReasoning — delegated authority boundary (A9)]"));
+  const rec2 = JSON.parse(readFileSync(join(stateDir, `${key}.spawn.json`), "utf8"));
+  check("8f retry: delivery marked only after the emit", rec2.boundary_delivered === true);
+  routeState.reason = null;
+}
+
+// 8g — NO WASTED FAN-OUT (review fold F2): a spawn whose FRAME already fired (the .framed marker
+// exists) can never receive an injection again — the discernment POST is skipped entirely.
+{
+  captured = [];
+  const task = "Summarize the deploy scripts.";
+  const key = `sub-${shortHash("s8g|" + task)}`;
+  writeFileSyncS8(join(stateDir, `${key}.framed`), "framed\n");
+  await runHook(SUB_HOOK, { ...subEvent("s8g", task), transcript_path: s8TranscriptPath }, s8Env);
+  check("8g already-framed spawn: NO discernment POST (no cost without a deliverable boundary)", discernReqs().length === 0);
+  check("8g already-framed spawn: no spawn record fabricated", !existsSync(join(stateDir, `${key}.spawn.json`)));
+}
+
+// 8h — SEPARATOR-PROOF KEY RECOVERY (review fold G2): a delegated task whose OWN text
+// contains the injected TASK_SEPARATOR sentinel used to make H5 re-derive a DIFFERENT spawn
+// key (lastIndexOf lands inside the task body) → the delegation was silently never closed,
+// and an orchestrator could suppress its own A9 trust reduction by embedding the sentinel.
+// H2 now writes a spawn ALIAS keyed on the exact prompt it emitted; H5 resolves by lookup.
+{
+  captured = [];
+  routeState.discern = "ok";
+  routeState.reason = "ok";
+  const nastyTask = `Update the docs so the delegated prompt reads:\n\n--- (your task follows) ---\n\nand then verify it.`;
+  const spawnKey = `sub-${shortHash("s8h|" + nastyTask)}`;
+  const ev = { ...subEvent("s8h", nastyTask), transcript_path: s8TranscriptPath };
+  const r = await runHook(SUB_HOOK, ev, s8Env);
+  const ui = updatedInputOf(r.out);
+  check("8h separator-task: H2 spawn record written under the RAW-task key", existsSync(join(stateDir, `${spawnKey}.spawn.json`)));
+  check("8h separator-task: the emitted prompt carries the boundary + the task verbatim", !!ui && ui.prompt.includes(nastyTask));
+  // Sanity: the LEGACY derivation genuinely diverges (this is the defect being closed).
+  const legacyKey = `sub-${shortHash("s8h|" + stripInjectedPrefix(ui.prompt))}`;
+  check("8h separator-task: the legacy text derivation DOES diverge (the defect is real)", legacyKey !== spawnKey);
+  // Seed provenance so the hand-back has artifacts to send.
+  writeFileSyncS8(
+    join(stateDir, `${spawnKey}.provenance.jsonl`),
+    JSON.stringify({ assessment: {}, signature: "mock-sep-sig", key_id: "mock-key" }) + "\n",
+  );
+  captured = [];
+  const hb = await runHook(
+    HANDBACK_HOOK,
+    { session_id: "s8h", hook_event_name: "PostToolUse", tool_name: "Agent", tool_input: { prompt: ui.prompt }, tool_response: { ok: true } },
+    s8Env,
+  );
+  const post = discernReqs("POST").map((c) => c.body).find((b) => b.phase === "hand_back");
+  check("8h separator-task: H5 still resolves the SAME spawn key (alias lookup)", hb.code === 0 && !!post && post.task_ref === spawnKey);
+  check("8h separator-task: the delegation is closed (A8/A9 events reachable — suppression closed)", !!post && post.justice_failure.signed_assessments.length === 1);
+}
+
+// 8i — the ALIAS is only written for a real spawn record (never for an un-provisioned spawn),
+// and the IDENTITY path still resolves an unframed prompt (a frame outage leaves no alias).
+{
+  captured = [];
+  const task = "A plain delegated task.";
+  const key = `sub-${shortHash("s8i|" + task)}`;
+  // Un-provisioned spawn ⇒ no record ⇒ no alias file anywhere for this session.
+  await runHook(SUB_HOOK, subEvent("s8i", task), {});
+  const aliasFiles = readdirSync(stateDir).filter((f) => f.startsWith("s8i-") && f.endsWith(".spawnalias"));
+  check("8i un-provisioned: no spawn alias written", aliasFiles.length === 0);
+  // Provisioned + frame outage (no emit ⇒ no alias): H5 resolves by IDENTITY on the raw prompt.
+  routeState.discern = "ok";
+  routeState.reason = "error";
+  const task2 = "A task whose frame call fails.";
+  const key2 = `sub-${shortHash("s8i2|" + task2)}`;
+  await runHook(SUB_HOOK, { ...subEvent("s8i2", task2), transcript_path: s8TranscriptPath }, s8Env);
+  check("8i frame-outage: spawn record exists, no alias (emit never ran)", existsSync(join(stateDir, `${key2}.spawn.json`)) && readdirSync(stateDir).filter((f) => f.startsWith("s8i2-") && f.endsWith(".spawnalias")).length === 0);
+  routeState.reason = "ok";
+  writeFileSyncS8(join(stateDir, `${key2}.provenance.jsonl`), JSON.stringify({ assessment: {}, signature: "s", key_id: "k" }) + "\n");
+  captured = [];
+  const hb2 = await runHook(
+    HANDBACK_HOOK,
+    { session_id: "s8i2", hook_event_name: "PostToolUse", tool_name: "Agent", tool_input: { prompt: task2 }, tool_response: { ok: true } },
+    s8Env,
+  );
+  const post2 = discernReqs("POST").map((c) => c.body).find((b) => b.phase === "hand_back");
+  check("8i frame-outage: H5 resolves by IDENTITY on the unframed prompt", hb2.code === 0 && !!post2 && post2.task_ref === key2);
+}
+
+// 8j — the 403 diagnostic (review fold G1): a mis-bound consult credential must surface the
+// server's honest note in the outage log, not a bare "http 403".
+{
+  captured = [];
+  routeState.discern = "forbidden";
+  const task = "A task under a mis-bound credential.";
+  const r = await runHook(SUB_HOOK, { ...subEvent("s8j", task), transcript_path: s8TranscriptPath }, s8Env);
+  const ui = updatedInputOf(r.out);
+  check("8j mis-bound credential: spawn still framed (fail-open)", !!ui && ui.prompt.includes(FRAME_SENTINEL));
+  const line = lastLogMatching("DISCERN-OUTAGE");
+  check("8j mis-bound credential: the honest 403 NOTE reaches the log (not a bare http 403)",
+    !!line && line.includes("http 403") && line.includes("bound to orchestrator_agent_id"));
+  routeState.discern = "ok";
+}
+
+note("LEG 8 (Trust Layer S8): the seven-layer generalization — spawn-time discernment + L4 (H2,");
+note("boundary prepended, out-of-band transcript trace, MEASURE), the delegation hand-back (H5,");
+note("R18f-parallel artifacts, fire-once), the trust-verdict ADVISE surface (H3, once per session),");
+note("byte-identity for every un-provisioned install, briefed-only-on-delivery (F2), and the");
+note("l4-commit tamper-evidence record (F1). All failures fail-open-honest.");
 
 // ===========================================================================================
 // SUMMARY + RELEASE-GATE VERDICT

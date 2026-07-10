@@ -6,14 +6,15 @@
  * proof runs against TEST in Claude Code (see PR1-PROOF-WALKTHROUGH.md / SLICE3-LIVE-VERIFY).
  *
  * ROUTES (by request path):
- *   POST /api/reason            — the assessment_first consult (Slice 1/2/3 + H3 score/iterate).
- *   POST /api/guardrail         — the at-action gate verdict (H3 guard).
- *   POST /api/practice/reflect  — the reflect open (H4 reflect-initiate).
- *   POST /api/accreditation/…   — the accreditation write (H4 D-D).
+ *   POST /api/reason                 — the assessment_first consult (Slice 1/2/3 + H3 score/iterate).
+ *   POST /api/guardrail              — the at-action gate verdict (H3 guard).
+ *   POST /api/practice/reflect       — the reflect open (H4 reflect-initiate).
+ *   POST /api/accreditation/…        — the accreditation write (H4 D-D).
+ *   POST+GET /api/practice/discernment — the S8 spawn/hand-back/trust-verdict seam (H2/H5/H3).
  *
  * MODES — the single getMode() (back-compat: drives /api/reason) plus opts.getRouteState() which
- * returns { reason, guard, reflect, accred } to drive each route independently. opts.onRequest(path,
- * body) captures each request body for assertions.
+ * returns { reason, guard, reflect, accred, discern } to drive each route independently.
+ * opts.onRequest(path, body, method) captures each request for assertions.
  *
  * /api/reason modes:   "ok" (signed) | "raw" (unsigned) | "error" | "malformed" | "hang" |
  *                      "redirect" (signed; non-empty improvement_path ⇒ a redirection opens a loop) |
@@ -107,6 +108,74 @@ function guardrailBody(mode) {
   };
 }
 
+// The S8 spawn outcome (a faithful subset of SpawnDiscernmentOutcome — camelCase, as the
+// TS object serializes). The boundary block mirrors renderAuthorityBoundaryInjection's shape.
+function discernSpawnBody(body) {
+  const chosen = typeof body.chosen_candidate_ref === "string" ? body.chosen_candidate_ref : "explore-agent";
+  return {
+    schema: "practice-discernment-response-v1",
+    mode: "measure",
+    result: {
+      schema: "trust-spawn-discernment-outcome-v1",
+      dark: false,
+      discernment: {
+        recommendation: { recommendedAgentRef: "explore-agent", recommendedAgentId: null, mustExamineFirst: [], noEligibleCandidate: false, reason: "mock" },
+      },
+      chosen: { candidateRef: chosen, agentId: null },
+      boundaryInjection:
+        "[SageReasoning — delegated authority boundary (A9)]\n" +
+        "This delegated task carries an attenuated authority boundary, set by the orchestrator at selection:\n" +
+        "• Action scope: code-exploration — this task's function only, not the orchestrator's capability ceiling.\n" +
+        "• Circle scope: requesting-user — only these parties/circles are in scope to be affected.\n" +
+        "Work exceeding either boundary is outside this delegation: surface it and hand it back to the orchestrator rather than expanding scope — expanded scope cannot be self-authorized.",
+      selection: { committed: true, opened: true, boundarySet: true, note: "mock" },
+      l4: {
+        trustTier: "lower",
+        outcome: { status: "audited", finalization: "may-finalize" },
+        commit: { committed: true, written: true, statusSet: "finalized", mode: "measure", note: "mock" },
+      },
+      mode: "measure",
+      basis: "mock spawn outcome",
+    },
+    l4_artifacts: [{ kind: "l4-trace-extraction", traceRef: "l4:mock-key:deadbeef", signed: { assessment: {}, signature: "mock-l4-sig", key_id: "mock-key" } }],
+    anthropic_usage: { input_tokens: 10, output_tokens: 5, calls: 2 },
+    note: "mock",
+  };
+}
+
+function discernHandBackBody() {
+  return {
+    schema: "practice-discernment-response-v1",
+    mode: "measure",
+    result: {
+      schema: "trust-close-delegation-outcome-v1",
+      dark: false,
+      recordFound: true,
+      justiceCase: "case-2-catchable-not-run",
+      delegationEventsEmitted: 2,
+      habitualEventEmitted: false,
+      mode: "measure",
+      basis: "mock hand-back",
+    },
+  };
+}
+
+function discernVerdictBody() {
+  return {
+    schema: "practice-discernment-response-v1",
+    mode: "measure",
+    result: {
+      schema: "trust-verdict-v1",
+      dark: false,
+      profile: null,
+      aggregate: { level: "deliberate", limitingDomain: "dikaiosyne", resolution: "combined", anyConflict: false, anyJusticeCapped: false, coverageGaps: [], aggregateConfidenceWeight: 0.5, basis: "mock" },
+      recommendation: { action: "proceed", followUp: "log", tableRow: "deliberate-no-justice", mode: "measure", enforced: false, humanOverridable: true },
+      mode: "measure",
+      basis: "mock verdict",
+    },
+  };
+}
+
 export function makeServer(getMode, opts = {}) {
   const getRouteState = typeof opts.getRouteState === "function" ? opts.getRouteState : null;
   const onRequest = typeof opts.onRequest === "function" ? opts.onRequest : null;
@@ -119,12 +188,14 @@ export function makeServer(getMode, opts = {}) {
     const guardMode = state.guard || "proceed";
     const reflectMode = state.reflect || "ok";
     const accredMode = state.accred || "ok";
+    const discernMode = state.discern || "ok";
 
     // hang on the relevant route → never respond (exercises the client timeout/abort).
     if (
       (path.startsWith("/api/reason") && reasonMode === "hang") ||
       (path.startsWith("/api/guardrail") && guardMode === "hang") ||
       (path.startsWith("/api/practice/reflect") && reflectMode === "hang") ||
+      (path.startsWith("/api/practice/discernment") && discernMode === "hang") ||
       (path.startsWith("/api/accreditation") && accredMode === "hang")
     ) {
       return;
@@ -141,7 +212,7 @@ export function makeServer(getMode, opts = {}) {
       }
       if (onRequest) {
         try {
-          onRequest(path, body);
+          onRequest(path, body, req.method);
         } catch {
           /* capture must never break the mock */
         }
@@ -150,6 +221,22 @@ export function makeServer(getMode, opts = {}) {
         res.writeHead(status, { "content-type": "application/json" });
         res.end(JSON.stringify(obj));
       };
+
+      // ---- /api/practice/discernment (S8 — H2 spawn / H5 hand-back / H3 trust read) ----
+      if (path.startsWith("/api/practice/discernment")) {
+        if (discernMode === "disabled") {
+          return json(503, { error: "trust core not enabled", note: "SUBSTRATE_TRUST_CORE_ENABLED is not set" });
+        }
+        // The real 403 shape (F3 scope guard) — the hook must surface its `note`, not a bare "http 403".
+        if (discernMode === "forbidden") {
+          return json(403, { error: "forbidden", note: "the credential must be bound to orchestrator_agent_id" });
+        }
+        if (discernMode === "error") return json(503, { error: "service error" });
+        if (discernMode === "malformed") return json(200, { ok: true }); // no result
+        if (req.method === "GET") return json(200, discernVerdictBody());
+        if (body.phase === "hand_back") return json(200, discernHandBackBody());
+        return json(200, discernSpawnBody(body));
+      }
 
       // ---- /api/guardrail (H3 guard) ----
       if (path.startsWith("/api/guardrail")) {

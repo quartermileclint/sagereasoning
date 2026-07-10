@@ -316,6 +316,135 @@ mode = "ok";
   check("15 multi-loop: re-examining R2 CLOSES it; R1 stays abandoned (honest, not forged)", adv.event === "closed" && adv.state.openLoop === null && adv.state.closedRefs.includes("R2") && adv.state.abandonedRefs.includes("R1"));
 }
 
+// 16 — S8 discernment PURE helpers (Trust Layer; lib/discernment.mjs). Config parsing +
+//      derive-from-provisioning, the injected-prefix strip (the hand-back key recovery), the
+//      spawn-payload composition, the transcript-tail out-of-band read, the ADVISE rendering,
+//      and the OTel-shaped span-ref shape (design-for; nothing published).
+{
+  const {
+    loadDiscernmentConfig,
+    discernmentEnabled,
+    stripInjectedPrefix,
+    TASK_SEPARATOR,
+    buildSpawnPayload,
+    readTranscriptTail,
+    renderTrustAdvisory,
+    makeSpanRef,
+  } = await import("../claude-code/hooks/lib/discernment.mjs");
+  const { writeFileSync } = await import("node:fs");
+
+  // Config: absent → null (un-provisioned); malformed → null; missing blocks → null.
+  const cfgStub = { credential: "sr_prac_x", endpoint, stateDir };
+  check("16 config: absent file → null", loadDiscernmentConfig(cfgStub, join(stateDir, "nowhere")) === null);
+  const badPath = join(stateDir, "bad-discernment.json");
+  writeFileSync(badPath, "{not json");
+  process.env.SAGE_GATE1_DISCERNMENT_CONFIG = badPath;
+  check("16 config: malformed file → null (never crashes a hook)", loadDiscernmentConfig(cfgStub, null) === null);
+  const partialPath = join(stateDir, "partial-discernment.json");
+  writeFileSync(partialPath, JSON.stringify({ orchestrator_profile: { agentId: "a" } }));
+  process.env.SAGE_GATE1_DISCERNMENT_CONFIG = partialPath;
+  check("16 config: missing required blocks → null", loadDiscernmentConfig(cfgStub, null) === null);
+  const goodPath = join(stateDir, "good-discernment.json");
+  const goodCfg = {
+    orchestrator_profile: { schema: "trust-orchestrator-profile-v1", agentId: "ns:o@v1" },
+    deployer_config: { function_type_profiles: {} },
+    candidates: { Explore: { candidate_ref: "explore-agent", profile: null } },
+    task_defaults: { function_type_by_subagent_type: { Explore: "code-exploration", "*": "general-delegation" }, circles_served: ["requesting-user"] },
+  };
+  writeFileSync(goodPath, JSON.stringify(goodCfg));
+  process.env.SAGE_GATE1_DISCERNMENT_CONFIG = goodPath;
+  const dcfg = loadDiscernmentConfig(cfgStub, null);
+  check("16 config: parseable + complete → provisioned object", !!dcfg && dcfg.orchestratorProfile.agentId === "ns:o@v1");
+  // Derive-from-provisioning: config + credential ⇒ ON; no credential ⇒ OFF; env false force-disables.
+  check("16 derive: config + credential ⇒ ON", discernmentEnabled(cfgStub, dcfg) === true);
+  check("16 derive: no credential ⇒ OFF", discernmentEnabled({ ...cfgStub, credential: "" }, dcfg) === false);
+  check("16 derive: no config ⇒ OFF", discernmentEnabled(cfgStub, null) === false);
+  process.env.SAGE_GATE1_DISCERNMENT_ENABLED = "false";
+  check("16 derive: explicit env false force-disables", discernmentEnabled(cfgStub, dcfg) === false);
+  delete process.env.SAGE_GATE1_DISCERNMENT_ENABLED;
+  delete process.env.SAGE_GATE1_DISCERNMENT_CONFIG;
+
+  // stripInjectedPrefix: the LEGACY FALLBACK. No separator → unchanged; one separator → the tail.
+  check("16 strip: no separator → unchanged", stripInjectedPrefix("  bare task  ") === "bare task");
+  check("16 strip: separator → the raw task tail", stripInjectedPrefix(`boundary\n\nframe\n\n${TASK_SEPARATOR}\n\nthe task`) === "the task");
+  // DOCUMENTED LIMIT, not a desirable property (review fold G2): with a SECOND separator —
+  // i.e. a task whose own text carries the sentinel — lastIndexOf drops the intervening body.
+  // This is exactly why the spawn key is NO LONGER derived from this function on the primary
+  // path (H2 writes an alias; H5 resolves by lookup). Pinned so the limit stays visible.
+  check(
+    "16 strip: LIMIT — a separator inside the task body loses the head (why resolveSpawnKey exists)",
+    stripInjectedPrefix(`a\n\n${TASK_SEPARATOR}\n\nb\n\n${TASK_SEPARATOR}\n\nfinal task`) === "final task",
+  );
+
+  // resolveSpawnKey (review fold G2): identity → alias → legacy fallback; never re-derives the
+  // key from orchestrator-controlled text when an alias exists.
+  {
+    const { resolveSpawnKey, writeSpawnAlias, writeSpawnRecord } = await import("../claude-code/hooks/lib/discernment.mjs");
+    const { shortHash } = await import("../claude-code/hooks/lib/framing-core.mjs");
+    const c = { stateDir };
+    const nasty = `Docs must read:\n\n${TASK_SEPARATOR}\n\nthen verify.`;
+    const key = "sub-" + shortHash(`sess-r|${nasty}`);
+    check("16 resolve: no record → null", resolveSpawnKey(c, "sess-r", nasty) === null);
+    writeSpawnRecord(c, key, { task_ref: key });
+    // IDENTITY: the unframed prompt (a frame outage) resolves directly.
+    const byIdentity = resolveSpawnKey(c, "sess-r", nasty);
+    check("16 resolve: IDENTITY on the unframed prompt", !!byIdentity && byIdentity.key === key && byIdentity.via === "identity");
+    // ALIAS: the framed prompt (whose LAST separator sits inside the task) resolves exactly.
+    const framed = `[boundary]\n\n[frame]\n\n${TASK_SEPARATOR}\n\n${nasty}`;
+    check("16 resolve: framed prompt UNRESOLVED before the alias is written", resolveSpawnKey(c, "sess-r", framed) === null);
+    writeSpawnAlias(c, "sess-r", framed, key);
+    const byAlias = resolveSpawnKey(c, "sess-r", framed);
+    check("16 resolve: ALIAS resolves the separator-carrying task (suppression closed)", !!byAlias && byAlias.key === key && byAlias.via === "alias");
+    // The legacy derivation on that same prompt genuinely diverges — the defect the alias closes.
+    const legacy = "sub-" + shortHash(`sess-r|${stripInjectedPrefix(framed)}`);
+    check("16 resolve: the legacy derivation DOES diverge (non-vacuous)", legacy !== key);
+    // An alias is never written for a spawn with no record.
+    check("16 resolve: writeSpawnAlias no-ops without a spawn record", writeSpawnAlias(c, "sess-r", "other", "sub-nonexistent") === false);
+  }
+
+  // buildSpawnPayload: type mapping (exact + '*'), candidate composition, chosen ref, justice default.
+  const p1 = buildSpawnPayload(dcfg, { taskRef: "t1", subagentType: "Explore", taskText: "x", trace: "tr" });
+  check("16 payload: exact subagent_type maps the function type", p1.task_profile.functionType === "code-exploration");
+  check("16 payload: the chosen candidate is the spawned type's", p1.chosen_candidate_ref === "explore-agent");
+  check("16 payload: the out-of-band trace rides verbatim", p1.reasoning_trace.trace === "tr");
+  check("16 payload: justice surface defaults honest-absent", p1.task_profile.justiceSurface.present === false);
+  const p2 = buildSpawnPayload(dcfg, { taskRef: "t2", subagentType: "unknown-type", taskText: "x", trace: "" });
+  check("16 payload: unknown subagent_type falls to '*'", p2.task_profile.functionType === "general-delegation");
+  check("16 payload: unknown type → no chosen ref (recommendation-only)", p2.chosen_candidate_ref === undefined && p2.reasoning_trace.chosen_candidate_ref === null);
+
+  // readTranscriptTail: trailing assistant text; missing file → "" (the server then holds honestly).
+  const trPath = join(stateDir, "tr.jsonl");
+  writeFileSync(
+    trPath,
+    [
+      JSON.stringify({ type: "user", message: { role: "user", content: [{ type: "text", text: "hi" }] } }),
+      JSON.stringify({ type: "assistant", message: { role: "assistant", content: [{ type: "text", text: "first thought" }] } }),
+      "not json",
+      JSON.stringify({ type: "assistant", message: { role: "assistant", content: [{ type: "text", text: "second thought before spawning" }] } }),
+    ].join("\n"),
+  );
+  const tail = readTranscriptTail(trPath, 8000);
+  check("16 transcript: trailing assistant text extracted (out-of-band)", tail.includes("second thought before spawning") && tail.includes("first thought") && !tail.includes("hi"));
+  check("16 transcript: maxChars keeps the NEAREST reasoning", readTranscriptTail(trPath, 30).includes("second thought") && !readTranscriptTail(trPath, 30).includes("first thought"));
+  check("16 transcript: missing file → empty trace (server holds honestly)", readTranscriptTail(join(stateDir, "no.jsonl")) === "");
+
+  // renderTrustAdvisory: dark → ""; verdict → MEASURE-honest lines.
+  check("16 advisory: dark verdict → empty", renderTrustAdvisory({ dark: true }) === "");
+  const adv = renderTrustAdvisory({
+    dark: false,
+    aggregate: { level: "deliberate", limitingDomain: "dikaiosyne", anyJusticeCapped: false },
+    recommendation: { action: "proceed", followUp: "log", tableRow: "deliberate-no-justice" },
+  });
+  check("16 advisory: names MEASURE + binds nothing", adv.includes("MEASURE") && adv.includes("binds nothing") && adv.includes("not enforced"));
+  const advSparse = renderTrustAdvisory({ dark: false, aggregate: { level: null }, recommendation: null });
+  check("16 advisory: sparse record stated honestly", advSparse.includes("no evaluated cardinal-domain evidence"));
+
+  // makeSpanRef: W3C-trace-context-shaped ids + OTel GenAI semconv-shaped attribute names.
+  const span = makeSpanRef("sage_practice.test");
+  check("16 otel: 32-hex trace id + 16-hex span id + gen_ai attributes",
+    /^[0-9a-f]{32}$/.test(span.trace_id) && /^[0-9a-f]{16}$/.test(span.span_id) && span.attributes["gen_ai.operation.name"] === "sage_practice.test");
+}
+
 server.close();
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail === 0 ? 0 : 1);

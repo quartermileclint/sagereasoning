@@ -1,18 +1,22 @@
-# Gate-1 Full-Loop Harness — Claude Code surface (Arc 2/3)
+# The Seven-Layer Reference Harness — Claude Code surface (Gate-1 Arcs 2/3 → Trust Layer S8)
 
-**Status:** Slices 1–3 (framing hooks + plugin) — Verified; **H1 + H2 are LIVE** in the founder's
-dogfood install. Slice 5a — H3/H4 built dark. Slice 5b — H1–H4 **live-fired** in a real Claude Code
-loop: the **channel law** was proven (out-of-band hook actions are robust to a resistant agent;
-soft-injected instructions-to-act are correctly refused). **Slice 5c (this) — H3/H4 RE-ARCHITECTED
-onto the channel law** + battery-green (logic 56/0, battery 124/0): the at-action frame's imperative
-outbound tails are stripped (advisory only); the close hook's reflect turn is a **pure in-conversation
-invitation** (no endpoint/POST/credential); reflect-at-close is captured **out-of-band** by
-`persistReflection()`; the public `pre_decision_harness` claim is narrowed to what the channels
-enforce. H3/H4 are registered in the plugin's `hooks/hooks.json` but NOT installed into any
-`settings.local.json`; live-fire is a founder-walked test loop.
-**Governing design:** `adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (ADR-011, incl. the
-2026-06-21 full-loop amendment + the **Slice-5b channel-law amendment** — H1–H4, D-A…D-F).
-**As of:** 2026-06-21.
+**Status:** Slices 1–5c (H1–H4, the Gate-1 full-loop harness) — built + live-fired; the channel law
+proven (out-of-band hook actions are robust to a resistant agent; soft-injected instructions-to-act
+are correctly refused). **Trust Layer S8 (2026-07-10) GENERALIZED the harness onto the seven-layer
+anatomy** (Execution · Tooling · Context · Lifecycle · Observability · Verification · Governance —
+see `SEVEN-LAYERS.md` for the channel-law classification of every step) and wired the S1–S7 trust
+core in: **H2** gains the spawn-time four-layer discernment + the out-of-band L4 passion audit
+(A9 authority boundary prepended to the delegated prompt); **H3** gains the once-per-session
+trust-verdict advisory (S1→S3→S4, MEASURE); **H5** (new, `PostToolUse Task|Agent`) is the
+delegation hand-back (A9 justice-failure classification + the A8/A9 trust events). All S8 surfaces
+are **provisioned by `discernment.config.json`** (un-provisioned installs behave byte-identically to
+the pre-S8 H1–H4 harness) and **DARK server-side** until `SUBSTRATE_TRUST_CORE_ENABLED` is set (the
+route answers 503; the hooks fail open honestly; zero spend). MEASURE throughout — nothing S8 added
+binds; **ENFORCE is S11**. Batteries: logic 91/0, negative-battery 230/0.
+**Governing design:** `adopted/adr/2026-07-08-sage-trust-layer.md` (ADR-013 §4/§6) +
+`adopted/adr/2026-06-20-pre-decision-harness-arc2.md` (ADR-011, incl. the channel-law amendment +
+the 2026-07-10 S8 amendment). Kill-switches: `KILL-SWITCHES.md` (credential revoke is the real one).
+**As of:** 2026-07-10.
 
 ## What this is
 
@@ -31,6 +35,15 @@ contract."*
 | **H2** | `PreToolUse` / `Task\|Agent` | Gate 1 — frame **each delegated subagent's** task (prepend to `tool_input.prompt` via `updatedInput`). | **Live** |
 | **H3** | `PreToolUse` / `Bash\|Edit\|Write\|…` | The **R5 at-action cadence**: **guard** (ENFORCE — block a `do_not_proceed` on an irreversible action via `/api/guardrail`), **score** (INSTRUMENT — a deduped Gate-2 `/api/reason` consult; the *fetch* is the sole R18f provenance source; the injected frame is ADVISE-only, no imperative outbound tail), **iterate** (loop-closure — carry `prior_feedback` at the same depth). | **Re-arch (5c)** |
 | **H4** | `Stop` | **Reflect turn** (ENFORCE — force ONE in-conversation review turn; a pure invitation, no endpoint/POST/credential) + **accreditation write** (INSTRUMENT — carry the session's accumulated signed assessments; R18f) + **`persistReflection()`** (INSTRUMENT — POST the agent's VERBATIM reflection out-of-band; **dark by default**; off-machine egress — see disclosure below). | **Re-arch (5c)** |
+| **H5** | `PostToolUse` / `Task\|Agent` | **S8 delegation hand-back** (INSTRUMENT): POST the sub-spawn's accumulated SIGNED artifacts to the dark `/api/practice/discernment` route for A9 justice-failure classification (capacity-proportional; server re-verifies — R18f-parallel) + the A8/A9 trust-event emission. Never alters the tool result; fires only when the spawn ran discernment. | **S8 (dark)** |
+
+**S8 additions inside H2/H3** (provisioned by `discernment.config.json`; see `SEVEN-LAYERS.md`):
+H2 runs the spawn-time **four-layer discernment** over the configured candidate set + the
+**out-of-band L4 passion audit** on the orchestrator's transcript-tail trace (never self-report —
+A7), opens the collaboration record + sets the **A9 authority boundary** server-side, and
+**prepends the boundary scope statement** to the delegated prompt; H3 appends the once-per-session
+**standing trust verdict** (S1 profile → S3 weighted aggregate → S4 MEASURE recommendation) as an
+advisory observation. All MEASURE; every outage fails open with an honest log.
 
 H1/H2 inject the pre-decision frame. H3/H4 deliver the rest of the dossier's operating model (Gate 2,
 loop-closure, reflect-at-close, the accreditation write) that guidance alone does not reliably trigger.
@@ -47,29 +60,34 @@ loop-closure, reflect-at-close, the accreditation write) that guidance alone doe
 ```
 harness/gate1-pre-decision/
 ├── README.md                              ← this file
+├── SEVEN-LAYERS.md                        ← S8: the seven-layer channel-law classification (the gate deliverable)
+├── KILL-SWITCHES.md                       ← S8: the five kill-switch layers (credential revoke = the real one)
 ├── .claude-plugin/marketplace.json        ← local marketplace listing the plugin (Slice 3)
 ├── claude-code/                           ← THE PLUGIN ROOT (copied to cache on /plugin install)
 │   ├── .claude-plugin/plugin.json         ← plugin manifest (Slice 3)
 │   ├── hooks/
-│   │   ├── hooks.json                     ← plugin hook registration (H1–H4; ${CLAUDE_PLUGIN_ROOT})
+│   │   ├── hooks.json                     ← plugin hook registration (H1–H5; ${CLAUDE_PLUGIN_ROOT})
 │   │   ├── framing-hook.mjs               ← H1: UserPromptSubmit (top-level agent)
-│   │   ├── subagent-framing-hook.mjs      ← H2: PreToolUse-on-Agent (delegated subagents) — Slice 3
-│   │   ├── at-action-hook.mjs             ← H3: PreToolUse (guard + score + iterate) — Slice 5c (channel law)
+│   │   ├── subagent-framing-hook.mjs      ← H2: PreToolUse-on-Agent (subagent framing + S8 spawn discernment/L4)
+│   │   ├── at-action-hook.mjs             ← H3: PreToolUse (guard + score + iterate + S8 trust-verdict advisory)
 │   │   ├── close-hook.mjs                 ← H4: Stop (reflect turn + accreditation write + persistReflection) — Slice 5c
+│   │   ├── handback-hook.mjs              ← H5: PostToolUse-on-Agent (S8 delegation hand-back — A8/A9 events)
 │   │   └── lib/
 │   │       ├── framing-core.mjs           ← shared examine/render/fail core (+ fetchGuardrail, provenance)
 │   │       ├── session-state.mjs          ← provenance log + loop state + decision dedup (H3/H4)
-│   │       └── loop-closure.mjs           ← the same-depth closure rule (mirrors the LIVE CI-4 gate)
+│   │       ├── loop-closure.mjs           ← the same-depth closure rule (mirrors the LIVE CI-4 gate)
+│   │       └── discernment.mjs            ← S8: config/derive, transcript-tail trace, spawn payload, observability JSONL + OTel-shaped spans
 │   ├── gate1.config.example.json          ← copy to gate1.config.json to override defaults
+│   ├── discernment.config.example.json    ← S8: copy to discernment.config.json to provision the discernment surfaces
 │   ├── settings.snippet.json              ← standalone .claude/settings.json registration (non-plugin)
 │   ├── fixtures/slice1-discretionary-task.md
 │   ├── PR1-PROOF-WALKTHROUGH.md            ← Slice-1 founder-walked proof
 │   ├── SLICE2-LIVE-LEGS-WALKTHROUGH.md     ← Slice-2 founder-walked live legs (skip-attempt / outage)
 │   └── SLICE3-LIVE-VERIFY-WALKTHROUGH.md   ← Slice-3 founder-walked plugin-install + subagent capture/verify
 └── test/                                  ← OUTSIDE the plugin root (not shipped)
-    ├── mock-reason-server.mjs            ← mocks /api/reason + /api/guardrail + /api/practice/reflect (open+answer, context_source) + /api/accreditation
-    ├── logic-harness.mjs                 ← in-sandbox logic proof (56 assertions; incl. H3/H4 channel law + persist + flag-off byte-identity)
-    └── negative-battery.mjs              ← the release gate (skip / outage / continuation / subagent / at-action / close — 124)
+    ├── mock-reason-server.mjs            ← mocks /api/reason + /api/guardrail + /api/practice/reflect + /api/accreditation + /api/practice/discernment (S8)
+    ├── logic-harness.mjs                 ← in-sandbox logic proof (91 assertions; incl. the S8 pure helpers + the G2 resolveSpawnKey pins)
+    └── negative-battery.mjs              ← the release gate (skip / outage / continuation / subagent / at-action / close / materialization / s8-discernment — 230)
 ```
 
 ## Installing as a Claude Code plugin (Slice 3)
@@ -120,6 +138,10 @@ stored in config or code — it is read from an env var.
 | **H4 — reflect turn** | `GATE1_REFLECT_TURN_ENABLED` | `true` | the operator opt-out: `false` disables the one-extra in-conversation review turn while **keeping** guard + accred + persist. |
 | **H4 — reflect mode** | `GATE1_REFLECT_INITIATE_MODE` | `block` | `block` (force the in-conversation review turn via Stop `decision:block`) \| `context` (soft `additionalContext`) \| `off` (no turn). The turn is a **pure invitation to review one's own reasoning** — no endpoint/POST/credential (channel law). |
 | **H4 — persist reflection** | `SAGE_GATE1_REFLECT_PERSIST_ENABLED` | `false` | **DARK by default.** When set, H4 POSTs the agent's VERBATIM closing reflection out-of-band to `/api/practice/reflect` (marked `context_source: agent_stated`; the open is marked `harness_inferred`). **This transmits the agent's introspective text off-machine — disclose + consent at install (see below).** Unset ⇒ no egress. |
+| **S8 — discernment config** | `SAGE_GATE1_DISCERNMENT_CONFIG` | `claude-code/discernment.config.json` | the operator's discernment provisioning (orchestrator/candidate profiles + the A2 taxonomy — see `discernment.config.example.json`). **File absent/malformed ⇒ every S8 surface is OFF and H1–H5 are byte-identical to the pre-S8 harness.** |
+| **S8 — consult-credential binding** | (the credential's own `agent_id`) | — | **REQUIRED for the S8 POST surfaces.** The discernment spawn + hand-back POSTs ride the **consult** credential (`SAGE_GATE1_CREDENTIAL`), and the server refuses (**403**) unless that credential's `agent_id` **equals `orchestrator_profile.agentId` in `discernment.config.json`**. A NULL-agent or mismatched consult credential ⇒ every spawn 403s, the hook fails open (the frame still injects), and **no collaboration record / L4 audit / trust event is ever produced** — visible only as a `DISCERN-OUTAGE … http 403 — forbidden: the credential must be bound to orchestrator_agent_id` line in `gate1.log`. (The H3 trust-verdict GET is scoped to the credential's own agent and is unaffected.) Mint the loop's consult credential bound to the same K1-canonical agent id you put in the config. |
+| **S8 — discernment switch** | `SAGE_GATE1_DISCERNMENT_ENABLED` | (derive) | explicit override of the derive-from-provisioning: `false` kills the S8 surfaces even when the config is present. |
+| **S8 — server flag** | `SUBSTRATE_TRUST_CORE_ENABLED` (server-side) | unset | the whole `/api/practice/discernment` surface is **DARK** until this is set in the deployment — the route answers an honest 503; the hooks fail open; zero spend. |
 
 ## Fail modes (ADR-011 D4) — both honest (KG1 / R18)
 
@@ -242,8 +264,8 @@ not yet honoured by an automated path. A torn-down test loop (as in Slice 5b) is
 ## Run the in-sandbox gate
 
 ```
-node harness/gate1-pre-decision/test/logic-harness.mjs       # expect: 56 passed, 0 failed
-node harness/gate1-pre-decision/test/negative-battery.mjs     # expect: 124 passed, 0 failed — RELEASE GATE: PASS
+node harness/gate1-pre-decision/test/logic-harness.mjs       # expect: 91 passed, 0 failed
+node harness/gate1-pre-decision/test/negative-battery.mjs     # expect: 230 passed, 0 failed — RELEASE GATE: PASS
 ```
 
 The **logic harness** (56) proves request construction + frame parsing (signed/unsigned, object-valued
@@ -260,8 +282,14 @@ fail-modes — and **close (37)** — the reflect turn is a pure invitation (no 
 the accreditation write carries the accumulated provenance, **persistReflection** (verbatim
 `agent_stated` answer; **verbatim-or-not-performed** honesty — empty reflection ⇒ open-only, no
 fabricated answer; **dark by default** — no egress without the flag; fire-once via `.reflected`; outage
-honesty), the never-the-marker-credential guard, and the `context`/`off`/opt-out modes. Both run against
-the local mock — **not** the live trajectory proof.
+honesty), the never-the-marker-credential guard, and the `context`/`off`/opt-out modes. The S8 leg
+(**s8-discernment**, 64) covers the seven-layer additions: un-provisioned byte-identity, the spawn
+discernment POST construction (task-profile mapping, config candidates, the out-of-band transcript
+trace, the named-chosen candidate), the A9 boundary prepend, the observability JSONL + OTel-shaped
+span refs, discernment outage/dark fail-open, the H5 hand-back (R18f artifacts, spawn-record flags,
+fire-once, honest skips), and the H3 trust-verdict advisory (once per session; outage honesty). The
+logic harness case 16 (24) proves the S8 pure helpers. Both run against the local mock — **not** the
+live trajectory proof.
 
 ## Scope boundaries
 

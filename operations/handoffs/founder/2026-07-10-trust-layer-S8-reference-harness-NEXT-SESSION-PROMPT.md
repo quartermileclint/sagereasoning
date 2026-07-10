@@ -1,5 +1,7 @@
 # Next-Session Prompt — Trust Layer S8: the seven-layer reference harness (the first live consumer)
 
+> **SPENT 2026-07-10** — executed under `D-TRUST-LAYER-S8-REFERENCE-HARNESS-BUILT-DARK-REVIEW-FOLDED`. Close: `operations/handoffs/founder/2026-07-10-trust-layer-S8-reference-harness-CLOSE.md`. Successor: `operations/handoffs/founder/2026-07-10-trust-layer-S9-dogfood-install-NEXT-SESSION-PROMPT.md`. Retained for the record; do not re-run.
+
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)
 
 **Stream:** founder.
