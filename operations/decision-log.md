@@ -13630,3 +13630,116 @@ npx tsc --noEmit && npm run build                                    # both 0
 **Rules served:** R18, R18f (the demonstrated-evidence cap restores the R18f-parallel doctrine on the justice path), KG1 (fail-honest seams hardened: abort-not-overwrite + loud loss), KG-EX1 (instrument-fidelity — the pins assert the instrument, not an intervention), PR5, PR15 (Workflow review), PR18.
 
 **Status:** Adopted. Cross-references: `D-TRUST-LAYER-PREACTIVATION-SAFETY-AUDIT` (the mandate); the fold prompt `operations/handoffs/founder/2026-07-11-trust-layer-preflip-fold-NEXT-SESSION-PROMPT.md` (SPENT); ADR-013 §3 row 3 (the binding spec-3 reading recorded above); the amended S9 prompt (now unblocked).
+
+
+## 2026-07-11 — D-TRUST-LAYER-HARNESS-COMPLETED-STATE-SUMMARY
+
+**Decision:** a founder-facing summary of the harness's projected S11 end-state is authored at `operations/trust-layer-2026-07/2026-07-11-trust-layer-harness-completed-state-summary.md` — the key elements (H1–H5 hooks, the server-side trust core S1–S8, credentials, config), who uses it and the install/start/stop procedures (incl. the five kill-switch layers), the completed-state capability set bounded by the ADR-013 §8 honest-claims envelope, agentic-AI and robotics applications, and the opportunities it opens.
+
+**Reasoning:** founder request post-fold-commit. Grounded by a 4-reader Workflow over the harness's own surfaces (README/SEVEN-LAYERS/KILL-SWITCHES, the practice-on/off skills + config, ADR-013 §2/3/4/6/8 + the build plan S9–S11, the research findings) so names, commands, and claims come from the files, not memory. Honesty discipline: every capability tagged LIVE / BUILT-DARK / PLANNED; the what-a-trust-record-does-NOT-attest list carried verbatim-faithful; weights BLOCKED restated; the robotics section explicitly marked forward-looking analysis (the research corpus contains no robotics content — reader-verified absent); nothing pre-approves any activation.
+
+**Files touched:**
+- `operations/trust-layer-2026-07/2026-07-11-trust-layer-harness-completed-state-summary.md` — NEW (the summary)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documentation only; internal surface (not published; R18 public-surface discipline untouched). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` or delete the file.
+
+**Verification step (founder-performable):**
+```
+open operations/trust-layer-2026-07/2026-07-11-trust-layer-harness-completed-state-summary.md
+```
+Expected: the summary reads correctly; every status tag matches the §7 table (S1–S8 BUILT-DARK, S9–S11 PLANNED, engine/data-rights LIVE).
+
+**Rules served:** R18 (honest-claims envelope carried into the summary), PR15 (Workflow readers), PR18 (status tags dated as-of 2026-07-11, not baked as timeless).
+
+**Status:** Adopted. Cross-references: `D-TRUST-LAYER-PREFLIP-FOLD` (predecessor same-day); ADR-013 §8; `trust-layer-build-plan.md`.
+
+
+## 2026-07-11 — D-PRACTICE-TOOLS-HARNESS-MENTOR-BRIEFING
+
+**Decision:** a founder briefing is authored at `operations/trust-layer-2026-07/2026-07-11-practice-tools-harness-mentor-briefing.md` — (1) the Sage Calling / Sage Assent / Sage Reflect ↔ harness relationship (assent = the harness's destination + emission point #1 + the `examination_mode` fingerprint; reflect = emission point #2 + the S4 remediation channel + the `feedSageAssent` coupling; calling = doctrine-adjacent, unwired); (2) the mentor-approved practice-stage loops inventoried with realization status — the five 2026-06-12 methodology verdicts (verbatim-faithful) + the nine-answers trust-layer loops; (3) seven gaps (G1–G7) not yet realized in the harness, framed as questions for the founder's next mentor consultation, reduced to three questions of principle (calling's standing loop; the full-reflect-sequence vs channel-law tension; the tool-class Gate-2 trigger + the suppression watch).
+
+**Reasoning:** founder request, to bring the unused loops + the calling stage to the mentor. Grounded first-hand in the verbatim verdicts record (`operations/p1-rebuild-2026-06/2026-06-12-mentor-consultation-methodology-verdicts.md`) + ADR-012 §1 + the S1 event vocabulary. Two load-bearing groundings: the mentor's Q1 verdict already ties Gate 1 to "Sage Calling's function from the session" (the calling question builds on the mentor's own language); and `passion-unflagged-by-self-screen` exists in the S1 vocabulary DEFINED-but-unemitted — the suppression-watch loop has a waiting slot (types.ts). Honesty: Q3's "sequence never abbreviated" vs the harness's single forced turn is presented as the open tension it is, incl. the channel-law evidence for why the fuller form was not built; CI-16 presented as parked with the gate-re-architecture successor question, not adjudicated.
+
+**Files touched:**
+- `operations/trust-layer-2026-07/2026-07-11-practice-tools-harness-mentor-briefing.md` — NEW
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documentation only; internal briefing; no methodology is amended (amendments remain the mentor-consultation + founder-election path). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` or delete the file.
+
+**Verification step (founder-performable):**
+```
+open operations/trust-layer-2026-07/2026-07-11-practice-tools-harness-mentor-briefing.md
+```
+Expected: Part 2's verdict table matches the verbatim record; Part 3 lists G1–G7; the three questions of principle read as ready-to-paste consultation material.
+
+**Rules served:** R18 (claims bounded; the mentor quoted verbatim, never paraphrased-as-verdict), PR5, PR18.
+
+**Status:** Adopted. Cross-references: `D-SAGE-PRACTICE-METHODOLOGY-AMENDMENTS-ADOPTED-2026-06-12`; `D-TRUST-LAYER-HARNESS-COMPLETED-STATE-SUMMARY` (predecessor same-day); ADR-012; ADR-013.
+
+
+## 2026-07-11 — D-MENTOR-CONSULTATION-CALLING-REFLECTION-GATE2-RECORDED
+
+**Decision:** the mentor consultation on the three questions of principle + the seven harness gaps (G1–G7) from the practice-tools briefing has RUN and is **captured verbatim** at `operations/trust-layer-2026-07/2026-07-11-mentor-consultation-calling-reflection-gate2-verbatim.md` (both responses complete + a build-verdict digest). **This entry adopts the RECORD only** — per the 2026-06-12 precedent, adoption of the build verdicts as governing methodology / plan amendments is a **separate founder election, pending**. Nothing is amended yet: ADR-012/ADR-013, the S1 event vocabulary, the harness, and the build plan are untouched.
+
+**The build verdicts (digest; full table in the record §4):** G1 — SessionStart calling gate REQUIRED (hard gate) for purposeless agents; calling-at-spawn as a scoped purpose-ACKNOWLEDGEMENT into the collaboration record (full calling only for un-profiled candidates); calling records as the primary S2/S5 profile-seeding mechanism; NEW trust event `calling-completed` with an asymmetric update (mismatch-flag ⇒ +dikaiosyne; null when no mismatch possible). G2 — the single forced turn + verbatim persist = a legitimate SCREENED reflection; NEW event `reflect-screened-honest` (quarter-rate decay modulation); the full Q1–Q6 conducted BY THE HARNESS out-of-band AGAINST THE VERBATIM PERSIST (the L4 principle applied to reflection — resolves the channel-law tension). G3 — tool-class trigger = faithful suppression-resistant OUTER gate; add the three-sub-question structured elicitation on fire, examined deterministically; the trigger must read the causal signature, never output content. G4 — the `passion-unflagged-by-self-screen` emitter = the reflect service (Q4 × signed-assessments cross-check; 3-part standard incl. sub-species); distinct NEW event `self-screen-absent`. G5 — depth calibrated per domain from `readTrustVerdict` (reflexive ⇒ DEEP required — conflicts with the harness's D3 never-deep pin, an election to revisit; mid-session recalibration on trust-reducing events). G6 — S11 line-item: unclosed correction loops ⇒ do-not-proceed until closed (A8 bound) + the trust-record update held pending. G7 — discharged iff quick runs value classification.
+
+**Same-day G7 verification (first-hand, code-level — record §3):** the condition is **DISCHARGED on the credential-bearing surfaces** — neither `extractFeatures` (layer1-extractor.ts:1799) nor `applyMechanisms` (layer2-mechanisms.ts:2580) takes a depth parameter; value classification (`TreatedAs`:124, `axia`:227, `indifferents_at_stake`:234) runs on every sandwich invocation incl. the ported gate; `DEPTH_MECHANISMS` belongs to the legacy prose engine only (depth-constants.ts → sage-reason-engine.ts), which carries no credential. Honest limit: code-level read; the end-to-end pin (a quick-depth consult's signed assessment carrying `indifferents_at_stake`) is named for the S9 batteries. CI-16 can close on the founder's election.
+
+**Build-impact notes surfaced for the election (not performed):** three NEW event types (`calling-completed`, `reflect-screened-honest`, `self-screen-absent`) ⇒ the `agent_trust_events` event-type CHECK needs a founder-walked widening migration + engine/EVENT_EFFECT rows + decay-constant addition (quarter-rate); an out-of-band Q1–Q6-against-persist runner in the reflect service (gated on the reflect-persist erasure wiring, which remains the standing prerequisite); an H0/SessionStart calling hook; the H3 elicitation extension; the G5 depth-calibration change incl. revisiting D3; the G6 items into the S11 activation scope. These are candidate plan amendments (likely riders on S9/S10/S11 or a new slice) — sequencing is the founder's.
+
+**Files touched:**
+- `operations/trust-layer-2026-07/2026-07-11-mentor-consultation-calling-reflection-gate2-verbatim.md` — NEW (the verbatim record + digest + G7 verification)
+- `operations/trust-layer-2026-07/2026-07-11-practice-tools-harness-mentor-briefing.md` — header annotated CONSULTATION HELD
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documents + a read-only code verification. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` the records commit.
+
+**Verification step (founder-performable):**
+```
+grep -n "export async function extractFeatures" website/src/lib/translation-sandwich/layer1-extractor.ts
+grep -n "export function applyMechanisms" website/src/lib/translation-sandwich/layer2-mechanisms.ts
+```
+Expected: neither signature takes a depth parameter (the G7 discharge basis).
+
+**Open questions:** the adoption election (which verdicts become governing methodology + where they slot in the plan — riders vs a new slice); the D3 never-deep pin vs the G5 reflexive⇒deep rule.
+
+**Rules served:** R18 (verbatim capture; verdicts not adopted silently), PR5, PR15, PR18.
+
+**Status:** Adopted (as record). Cross-references: `D-PRACTICE-TOOLS-HARNESS-MENTOR-BRIEFING` (the framing); `D-SAGE-PRACTICE-METHODOLOGY-AMENDMENTS-ADOPTED-2026-06-12` (the precedent + the five verdicts these build on); ADR-012; ADR-013; `D-TRUST-LAYER-PREACTIVATION-SAFETY-AUDIT` (the audit register, separate).
+
+
+## 2026-07-11 — D-MENTOR-VERDICTS-CALLING-REFLECTION-GATE2-ADOPTED
+
+**Decision:** the 2026-07-11 mentor consultation's build verdicts (the three principles + G1–G7) are **ADOPTED IN FULL as governing methodology, with the recommended sequencing** (founder election, this session): **S9 runs on the current build UNCHANGED first** (a clean instrument-fidelity baseline, so the extensions are measurable rather than confounded) → **NEW slice S9b — the practice-completion slice** (calling gate + screened reflection + the out-of-band Q1–Q6-against-persist + Gate-2 elicitation + depth calibration + the three-event schema widening as its founder-walked step) → S10 → S11 (which gains the G6 binding line-items). **CI-16 is CLOSED** under the G7 verification. The verbatim record is now a **binding specification** alongside the 2026-07-07 nine answers (verbatim wins over every digest).
+
+**Encoded at (this session's edits):**
+- `adopted/adr/2026-07-08-sage-trust-layer.md` — **NEW §11** (the binding amendment: the three-event vocabulary extension incl. the quarter-rate screened decay constant; the calling-stage architecture incl. purpose-misrepresentation as an oversight-domain trust-reducing event; the screened-reflection category + the out-of-band full-sequence rule; the Gate-2 outer-gate + elicitation architecture with the causal-signature-never-content calibration; the G4 emitter spec; the G5 depth-calibration table incl. the RE-OPENED harness D3 never-deep election; the G6 S11 items; the CI-16 closure).
+- `operations/trust-layer-2026-07/trust-layer-build-plan.md` — the 2026-07-11 amendment record; S9 amended (clean-baseline + the G7 end-to-end pin); **S9b inserted** (full scope; `code-elevated → code-critical` at the schema widening; the reflect-persist erasure wiring in-scope); S11 amended (G6: unclosed-loop do-not-proceed + the held-pending trust-record update); the sequence now ~14 sessions.
+- `operations/p1-rebuild-2026-06/mechanism-correction-build-plan.md` — CI-16 annotated **CLOSED** (the last open mechanism-correction item other than the executed set; the 2026-06-12 five-verdict register is now fully discharged or superseded into the trust-layer plan).
+- `operations/handoffs/founder/2026-07-10-trust-layer-S9-dogfood-install-NEXT-SESSION-PROMPT.md` — the G7 end-to-end battery pin added (step 6); the records step now authors the S9b prompt and pins "S9 runs unchanged" (step 7).
+- `operations/trust-layer-2026-07/2026-07-11-mentor-consultation-calling-reflection-gate2-verbatim.md` — status flipped to ADOPTED/binding.
+
+**What this adoption does NOT do:** no code, schema, flag, credential, or install change — every S9b build item remains its own session with its own 0d-ii tier + founder-walked 0c-ii where marked (the CHECK-widening migration, the SessionStart hook install, the persist activation each named). The reflect-persist erasure wiring remains the standing prerequisite, now in S9b's scope. ENFORCE remains S11; weights BLOCKED; the 0h call remains the founder's.
+
+**Risk classification:** Standard under 0d-ii — governance/documents only (ADR + plan amendments + annotations). AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` the adoption commit — ADR-013 §11, the plan amendments, the CI-16 annotation, and the prompt edits revert together; the verbatim record's §1–§3 (the consultation itself) is unaffected as record.
+
+**Verification step (founder-performable):**
+```
+grep -n "## 11." adopted/adr/2026-07-08-sage-trust-layer.md
+grep -n "S9b" operations/trust-layer-2026-07/trust-layer-build-plan.md | head -5
+grep -n "CLOSED 2026-07-11" operations/p1-rebuild-2026-06/mechanism-correction-build-plan.md
+```
+Expected: the §11 amendment present; S9b in the phases + sequence; CI-16 carries the closure annotation.
+
+**Rules served:** R18 (verbatim-wins rule extended to the new record; no capability claimed beyond the envelope), PR15, PR18. The mentor-confirmation gate for methodology change: satisfied by the recorded consultation + this founder election (the 2026-06-12 precedent followed exactly).
+
+**Status:** Adopted. Cross-references: `D-MENTOR-CONSULTATION-CALLING-REFLECTION-GATE2-RECORDED` (the record this adopts); `D-SAGE-PRACTICE-METHODOLOGY-AMENDMENTS-ADOPTED-2026-06-12` (the precedent; its Q5/CI-16 item closes here); `D-TRUST-LAYER-BUILD-PLAN-ADOPTED-2026-07-07` (the plan this amends); ADR-012 (the four-stage instrument the calling/reflection verdicts complete); ADR-013 §11.
