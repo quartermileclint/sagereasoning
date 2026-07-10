@@ -1,5 +1,7 @@
 # Next-Session Prompt — Trust Layer PRE-FLIP FOLD (run between the safety audit and S9)
 
+> **SPENT 2026-07-11** — executed same-day (`D-TRUST-LAYER-PREFLIP-FOLD`). PA-1+PA-9 folded at the root (S1 battery 97/0; the 4-dimension adversarial review completed fully — ratchet CLOSED on every reachable path); PA-3/PA-4/PA-7/PA-8/C-3 folded + pinned; the S9 prompt amended per PA-2. Close: `operations/handoffs/founder/2026-07-11-trust-layer-preflip-fold-CLOSE.md`. **S9 is unblocked** once the fold commit is pushed.
+
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)
 
 **Stream:** founder.

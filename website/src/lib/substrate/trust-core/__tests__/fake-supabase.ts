@@ -27,6 +27,14 @@ type Filter = { kind: 'eq' | 'lt'; col: string; val: unknown }
 export interface FakeSupabase {
   client: SupabaseClient
   tables: { agent_trust_events: Row[]; agent_trust_state: Row[]; collaboration_records: Row[] }
+  /** PA-3 pin (2026-07-11): arm a ONE-SHOT error on the next matching op — lets
+   *  the battery inject a TRANSIENT (non-missing-table) failure, which the
+   *  missingTables switch cannot express. Fires once, then clears. */
+  failNext: (
+    op: 'select' | 'upsert' | 'insert' | 'update' | 'delete',
+    table: string,
+    error: { code?: string; message: string },
+  ) => void
 }
 
 export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupabase {
@@ -40,6 +48,11 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
   let idCounter = 0
   const missing = opts?.missingTables === true
   const MISSING = { data: null as unknown, error: { code: '42P01', message: 'relation does not exist' } }
+  let armedFailure: {
+    op: 'select' | 'upsert' | 'insert' | 'update' | 'delete'
+    table: string
+    error: { code?: string; message: string }
+  } | null = null
 
   function eventKey(r: Row): string {
     return `${String(r.correlation_id)}|${String(r.event_type)}|${r.virtue_domain ?? '__agent_wide__'}`
@@ -113,6 +126,11 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
 
     private run(): { data: unknown; error: unknown } {
       if (missing) return MISSING
+      if (armedFailure && armedFailure.op === this.op && armedFailure.table === this.table) {
+        const e = armedFailure.error
+        armedFailure = null // one-shot
+        return { data: null, error: e }
+      }
       const rows = tables[this.table]
       switch (this.op) {
         case 'insert': {
@@ -198,5 +216,8 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
   return {
     client,
     tables: tables as FakeSupabase['tables'],
+    failNext: (op, table, error) => {
+      armedFailure = { op, table, error }
+    },
   }
 }

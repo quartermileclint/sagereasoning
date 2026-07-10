@@ -105,7 +105,10 @@ export function deriveCredentialAndJusticeEvents(
   }
 
   // --- one justice-surface event (dikaiosyne) = the WORST justice outcome across
-  //     the verified assessments. ---
+  //     the verified assessments. PA-1 fold (2026-07-11 pre-activation audit): a
+  //     met outcome carries the CONSERVATIVE demonstratedProximity so the engine's
+  //     clear-cap-and-increase rise is capped by demonstrated evidence — without
+  //     it the engine treated every met write as an unconditional +1 ratchet. ---
   const justice = deriveWorstJusticeOutcome(verified.map((v) => v.assessment))
   if (justice !== null) {
     events.push({
@@ -114,7 +117,13 @@ export function deriveCredentialAndJusticeEvents(
       eventType: justice.eventType,
       artifactKind: 'signed_layer2_assessment',
       artifactRef,
-      payload: { obligationStatus: justice.obligationStatus, keyId: verified[0].keyId },
+      payload: {
+        obligationStatus: justice.obligationStatus,
+        ...(justice.demonstratedProximity !== undefined
+          ? { demonstratedProximity: justice.demonstratedProximity }
+          : {}),
+        keyId: verified[0].keyId,
+      },
       occurredAt: input.now.toISOString(),
       correlationId: input.correlationId,
       ownerUserId: input.ownerUserId,
@@ -132,6 +141,11 @@ type JusticeOutcome = {
     | 'justice-surface-indeterminate'
     | 'justice-surface-transparently-handled'
   obligationStatus: 'violated' | 'unevaluated' | 'indeterminate' | 'met'
+  /** met only (PA-1): the WEAKEST katorthoma_proximity across the verified
+   *  assessments that demonstrated the met obligation — conservative, resisting
+   *  gaming by one strong assessment (the deriver-header doctrine, now applied
+   *  to the justice path exactly as the credential path applies it). */
+  demonstratedProximity?: KatorthomaProximity
 }
 
 /**
@@ -147,6 +161,7 @@ export function deriveWorstJusticeOutcome(
   let sawUnevaluated = false
   let sawIndeterminate = false
   let sawMet = false
+  let metDemonstrated: KatorthomaProximity | null = null
 
   for (const a of assessments) {
     const circles = a.oikeiosis?.relevant_circles ?? []
@@ -154,13 +169,33 @@ export function deriveWorstJusticeOutcome(
       .map((c) => c.obligation_assessment?.status)
       .filter((s): s is 'met' | 'violated' | 'indeterminate' => s != null)
 
+    const dikaiosyneEngaged = a.virtue_domains_engaged.includes('dikaiosyne')
+
     if (statuses.includes('violated')) sawViolated = true
     if (statuses.includes('indeterminate')) sawIndeterminate = true
-    if (statuses.includes('met')) sawMet = true
+
+    // PA-4 fold (2026-07-11): met CREDITS dikaiosyne (the transparently-handled
+    // rise), so it requires dikaiosyne to have been ENGAGED by the assessment —
+    // the same gate 'unevaluated' already had. Without it a phronesis-only
+    // assessment with a met circle minted dikaiosyne-positive evidence the agent
+    // never demonstrated. violated/indeterminate stay UNGATED — the conservative
+    // direction (a violated obligation is dikaiosyne evidence whichever domains
+    // the extraction tagged). DISCLOSED ASYMMETRY (fold review, 2026-07-11): an
+    // ungated indeterminate can SET the read-cap latch on an oddly-tagged
+    // extraction, while a met under the SAME odd tagging cannot clear it — the
+    // agent stays capped (the safe direction: trust reads lower, never higher)
+    // until a genuinely dikaiosyne-engaged met evaluation lands. An S2/S9
+    // refinement candidate; watch in the S9 instrument-fidelity batteries.
+    if (dikaiosyneEngaged && statuses.includes('met')) {
+      sawMet = true
+      const p = a.katorthoma_proximity
+      if (metDemonstrated === null || PROXIMITY_RANK[p] < PROXIMITY_RANK[metDemonstrated]) {
+        metDemonstrated = p
+      }
+    }
 
     // Unevaluated: dikaiosyne engaged but NO circle carried an obligation
     // assessment at all — the obligation was never evaluated.
-    const dikaiosyneEngaged = a.virtue_domains_engaged.includes('dikaiosyne')
     if (dikaiosyneEngaged && statuses.length === 0) sawUnevaluated = true
   }
 
@@ -169,8 +204,12 @@ export function deriveWorstJusticeOutcome(
     return { eventType: 'justice-surface-unevaluated', obligationStatus: 'unevaluated' }
   if (sawIndeterminate)
     return { eventType: 'justice-surface-indeterminate', obligationStatus: 'indeterminate' }
-  if (sawMet)
-    return { eventType: 'justice-surface-transparently-handled', obligationStatus: 'met' }
+  if (sawMet && metDemonstrated !== null)
+    return {
+      eventType: 'justice-surface-transparently-handled',
+      obligationStatus: 'met',
+      demonstratedProximity: metDemonstrated,
+    }
   return null
 }
 

@@ -61,10 +61,10 @@ function extRow(over: Partial<ErasureCredentialRow>): ErasureCredentialRow {
 
 interface Spy {
   deps: EraseDeps
-  calls: { authenticateAdmin: number; lookupByToken: string[]; lookupById: string[]; erase: number; log: number }
+  calls: { authenticateAdmin: number; lookupByToken: string[]; lookupById: string[]; erase: number; log: number; logEntries: unknown[] }
 }
 function makeDeps(over: Partial<EraseDeps>): Spy {
-  const calls = { authenticateAdmin: 0, lookupByToken: [] as string[], lookupById: [] as string[], erase: 0, log: 0 }
+  const calls = { authenticateAdmin: 0, lookupByToken: [] as string[], lookupById: [] as string[], erase: 0, log: 0, logEntries: [] as unknown[] }
   const deps: EraseDeps = {
     isEnabled: () => true,
     authenticateAdmin: async () => {
@@ -81,10 +81,13 @@ function makeDeps(over: Partial<EraseDeps>): Spy {
     },
     erase: async (): Promise<StoreResult<ErasureResult>> => {
       calls.erase++
-      return { ok: true, value: { trajectory_deleted: 2, trust_deleted: 0, collaboration_deleted: 0, billing_depersonalised: 1, warnings: [] } }
+      // collaboration_deleted non-zero (PA-8 pin, 2026-07-11) so the response +
+      // compliance-log assertions discriminate a dropped count from a zero.
+      return { ok: true, value: { trajectory_deleted: 2, trust_deleted: 0, collaboration_deleted: 3, billing_depersonalised: 1, warnings: [] } }
     },
-    logCompliance: async () => {
+    logCompliance: async (entry: unknown) => {
       calls.log++
+      calls.logEntries.push(entry)
     },
     ...over,
   }
@@ -197,6 +200,12 @@ async function main(): Promise<void> {
     assert(body.status === 'erased', '200 body status erased')
     assert(body.credential_ref === 'api_key:cred-1', 'erased body carries credential_ref')
     assert(body.trajectory_rows_deleted === 2 && body.billing_rows_depersonalised === 1, 'erased body reports counts')
+    // PA-8 pins (2026-07-11 pre-activation audit): the collaboration_records
+    // deletion (which always happened) is now REPORTED — in the response count
+    // and in the compliance ledger's tables_cleared.
+    assert(body.collaboration_rows_deleted === 3, 'PA-8: erased body reports the collaboration_records count')
+    const logged = JSON.stringify(calls.logEntries[0] ?? {})
+    assert(logged.includes('collaboration_records') && logged.includes('3 rows'), 'PA-8: compliance tables_cleared names collaboration_records with its count')
     assert(body.credential === 'anonymised_and_revoked', 'erased body states the husk was anonymised+revoked')
     assert(Array.isArray(body.retained_by_law) && body.retained_by_law.length >= 1, 'erased body lists retained-by-law children (honest)')
     assert(calls.erase === 1 && calls.log === 1, 'erasable → erase once + compliance logged once')

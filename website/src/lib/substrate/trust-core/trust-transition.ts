@@ -114,13 +114,27 @@ export function applyTrustEvent(
     case 'clear-cap-and-increase': {
       // justice-surface-transparently-handled — the highest single positive event
       // (mentor spec 3): CLEARS the justice latch (a demonstrated evaluation) AND
-      // raises the level one rank (capped at the demonstrated proximity if given).
+      // rises toward the demonstrated proximity, at most one rank (hysteresis),
+      // RISE-ONLY. "Highest single positive event" is realised as ORDERING — this
+      // event does everything credential-completed's rise does PLUS clears the
+      // latch — never as an uncapped rise.
+      //
+      // PA-1/PA-9 fold (2026-07-11 pre-activation audit): demonstratedProximity
+      // is REQUIRED for a rise — absent ⇒ the latch clears but the level HOLDS
+      // (conservative; the pre-fold default of sage_like made every met-obligation
+      // write an unconditional +1 ratchet to the top). And a demonstrated
+      // proximity at/below the current rank never lowers it (a positive event
+      // must not decrease — PA-9's latent 3-rank drop). Coverage continuity is
+      // deliberately NOT gated here: spec-3 attaches "∝ coverage continuity" to
+      // credential-completed; S2 owns the proportional weighting.
       justiceFloorActive = false
       const demonstratedRank =
         event.payload.demonstratedProximity !== undefined
           ? PROXIMITY_RANK[event.payload.demonstratedProximity]
-          : PROXIMITY_RANK.sage_like
-      newRank = Math.min(demonstratedRank, fromRank + 1)
+          : null
+      if (demonstratedRank !== null && demonstratedRank > fromRank) {
+        newRank = Math.min(demonstratedRank, fromRank + 1)
+      }
       break
     }
     case 'cap': {
@@ -160,7 +174,10 @@ export function applyTrustEvent(
 
 /**
  * Fold an ordered sequence of events into per-domain earned states — the pure
- * replay used by the battery + the store's rebuild path. Reflect events (NULL
+ * replay used by the battery. (C-3, 2026-07-11: NO store rebuild function exists
+ * yet — after a fold divergence the materialised agent_trust_state is repaired by
+ * hand-running this replay over the agent_trust_events ledger; the ledger is
+ * authoritative.) Reflect events (NULL
  * virtue_domain) modulate ALL of the agent's domain states (agent-wide);
  * delegation-reflection-case-2 (oversight + dikaiosyne) is fanned by the caller
  * into two per-domain events, so here it targets whatever virtue_domain the event

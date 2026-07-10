@@ -13597,3 +13597,36 @@ Expected: the battery green; the justice event payload carries only `obligationS
 **Rules served:** R17c, R18, R18f, KG1, KG-EX1 (instrument-vs-intervention — the audit tags weigh instrument-corruption, not just route breakage), PR5, PR15 (Workflow fan-out), PR18.
 
 **Status:** Adopted. Cross-references: the audit prompt (`operations/handoffs/founder/2026-07-10-trust-layer-PREACTIVATION-SAFETY-AUDIT-NEXT-SESSION-PROMPT.md`, SPENT); `D-TRUST-LAYER-S8-REFERENCE-HARNESS-BUILT-DARK-REVIEW-FOLDED` + `D-TRUST-LAYER-S8-INDEPENDENT-REREVIEW-FOLDED` (predecessors); ADR-013 §8 (the envelope PA-6 narrows); the S9 prompt (gated on the fold + amended per PA-2).
+
+
+## 2026-07-11 — D-TRUST-LAYER-PREFLIP-FOLD
+
+**Decision:** the pre-activation audit's two `blocks_flag_flip` conditions are DISCHARGED at the build level — **PA-1 (the S1 engine's uncapped justice-met ratchet) + PA-9 (the latent rise-inversion) are folded at the root**, the riders **PA-3/PA-4/PA-7/PA-8 + C-3 are folded**, and **the S9 prompt is amended per PA-2** (the paired `SUBSTRATE_TRUST_CORE_SWEEP_ENABLED` set + the gate-discharge note + the rollback dependency). **S9 is unblocked.** `code-elevated`, repo-only, DARK — no flag / schema / mint / deploy; production byte-equivalent until the founder's push, and flag-off thereafter (the touched code paths execute only flag-on, except the erase-handler reporting fold, which is additive).
+
+**The PA-1/PA-9 fold (the blocker):** `deriveWorstJusticeOutcome` now returns the CONSERVATIVE weakest `katorthoma_proximity` across the met-demonstrating assessments and the justice event payload carries it (`derive-trust-events.ts`); the engine's `clear-cap-and-increase` branch clears the latch unconditionally but rises ONLY when `demonstratedProximity` is present AND above the current rank, capped +1 (`trust-transition.ts` — the old missing-field default of `sage_like` is gone; missing ⇒ latch clears, level HOLDS). Spec-3's "highest single positive event" is realised as ORDERING (everything `credential-completed`'s rise does PLUS the latch clear), never an uncapped rise. **Deliberate election recorded:** coverage continuity is NOT gated on this branch — spec-3 attaches "∝ coverage continuity" to `credential-completed`; S2 owns proportional weighting.
+
+**The riders:** PA-4 — `sawMet` gated per-assessment on dikaiosyne engagement (violated/indeterminate deliberately ungated — conservative; the resulting set/clear asymmetry is disclosed in-code, see PA-11 below). PA-3 — `foldDomainEvent` now inspects the state-read error and ABORTS the fold on a real failure (no more habitual-seed upsert-overwrite — the silent backward reset closed); the upsert + reflect-update errors are checked + logged. PA-7 — every returned `ok:false` path in `emitTrustEvents` now logs (`events lost` / state-behind), matching the stated log-and-continue contract. PA-8 — `/api/credential/erase` now reports `collaboration_rows_deleted` + names `collaboration_records` in the compliance `tables_cleared`. C-3 — the `foldTrustEvents` docstring no longer claims a nonexistent store rebuild path.
+
+**Verified:** S1 battery **97/0** (75 → 97: the proximity-less/at-current/PA-9 engine pins, the PA-4 both-direction pins, the weakest-met payload pins, the exact two-write audit-scenario e2e ratchet pin capping at `deliberate`, the PA-3 discriminating no-overwrite pin, the three PA-7 log pins); erase-handler **40/0** (+2 PA-8 pins); S2–S8 regressions unchanged (87/106/417/87/84/122/145 all 0); consumer-erasure 25/0; `tsc` 0; `npm run build` 0. `fake-supabase.ts` gained a one-shot `failNext` transient-error injection (the audit's noted fake-client gap closed).
+
+**Adversarial review (COMPLETED FULLY — 4 dimensions, 4 agents, 0 errors, ~880k tokens):** the core verdict — **the PA-1 ratchet is CLOSED on every reachable path** (induction over every effect branch; six attack-sequence families all held; the deriver confirmed the sole producer; pin adequacy verified by re-deriving the PRE-fold arithmetic per pin — every pin except the disclosed at-current semantics-lock genuinely discriminates); no mentor-ordering inversion; the legitimate rise + latch-clear intact; worse-scores-worse holds. **5 findings (2 LOW, 2 NIT, 1 LOW records), ALL resolved in-session:** the two NITs folded (the at-current pin honestly re-labelled a semantics lock; the two unpinned log paths pinned — surfacing a real test-harness race: concurrent `console.error` stub/restore across interleaved async test blocks clobbers captures; fixed by serializing the stub windows into one block, 94/3 → 97/0); the records LOW folded (the S9 prompt's PA-2 wording de-ambiguated — null-owner/null-credential **trust** rows, NOT `sage_reflect_sessions`); the two substantive LOWs adjudicated as **carried register items**: **PA-10** (stale-artifact replay — sustains a level AT once-demonstrated proximity, defeats decay/latch freshness, never exceeds the cap) and **PA-11** (the PA-4 latch set/clear asymmetry — safe direction, disclosed in-code, S2/S9 refinement). Register updated in the audit report §9 fold addendum.
+
+**Files touched:** `website/src/lib/substrate/trust-core/{derive-trust-events,trust-transition,trust-core-store}.ts`; `website/src/lib/substrate/trust-core/__tests__/{trust-core.test,fake-supabase}.ts`; `website/src/app/api/credential/erase/{handler,__tests__/handler.test}.ts`; `operations/handoffs/founder/2026-07-10-trust-layer-S9-dogfood-install-NEXT-SESSION-PROMPT.md` (the PA-2 amendment + gate discharge); `operations/trust-layer-2026-07/2026-07-11-preactivation-safety-audit-report.md` (§9 fold addendum); this entry; the close; `CLAUDE.md` (PR18 refresh).
+
+**Risk classification:** Elevated (`code-elevated`) under 0d-ii — changes to existing engine/store files, nothing live flag-off; the erase-handler change is an additive reporting field on an already-performed deletion. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` the fold commit. The flag stays unset throughout; flag-off behaviour is unaffected.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/lib/substrate/trust-core/__tests__/trust-core.test.ts    # 97 passed, 0 failed
+npx tsx src/app/api/credential/erase/__tests__/handler.test.ts       # 40 passed, 0 failed (Ctrl-C after the summary — known keepalive hang)
+npx tsc --noEmit && npm run build                                    # both 0
+```
+
+**Open questions:** none blocking. PA-10/PA-11 carried on the `fix_before_s10` register (audit report §9 addendum) for S10's R18 sign-off.
+
+**Rules served:** R18, R18f (the demonstrated-evidence cap restores the R18f-parallel doctrine on the justice path), KG1 (fail-honest seams hardened: abort-not-overwrite + loud loss), KG-EX1 (instrument-fidelity — the pins assert the instrument, not an intervention), PR5, PR15 (Workflow review), PR18.
+
+**Status:** Adopted. Cross-references: `D-TRUST-LAYER-PREACTIVATION-SAFETY-AUDIT` (the mandate); the fold prompt `operations/handoffs/founder/2026-07-11-trust-layer-preflip-fold-NEXT-SESSION-PROMPT.md` (SPENT); ADR-013 §3 row 3 (the binding spec-3 reading recorded above); the amended S9 prompt (now unblocked).

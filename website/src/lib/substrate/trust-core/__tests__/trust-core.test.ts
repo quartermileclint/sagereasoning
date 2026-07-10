@@ -182,12 +182,46 @@ function ev(o: Partial<TrustEvent>): TrustEvent {
   assert(eff.justiceCapped, 'transition: justiceCapped surfaced')
 })()
 
-// transparently-handled CLEARS the latch and raises +1.
+// transparently-handled CLEARS the latch and raises +1 (demonstrated ABOVE current).
 ;(() => {
   let s: EarnedDomainState = { ...initialEarnedDomainState({ profilePrior: 'habitual' }), earnedLevel: 'deliberate' as KatorthomaProximity, justiceFloorActive: true, lastDomainActivityAt: T0 }
   s = applyTrustEvent(s, ev({ virtueDomain: 'dikaiosyne', eventType: 'justice-surface-transparently-handled', payload: { demonstratedProximity: 'principled' }, occurredAt: T0 }))
   assert(!s.justiceFloorActive, 'transition: transparently-handled clears the latch')
   eq(s.earnedLevel, 'principled', 'transition: transparently-handled raises +1')
+})()
+
+// PA-1 pin (2026-07-11 pre-activation audit): a transparently-handled event
+// WITHOUT demonstratedProximity — the pre-fold live payload shape — clears the
+// latch but NEVER rises (the old default-to-sage_like made it an unconditional
+// +1 ratchet; the folded semantics are conservative: no demonstrated evidence,
+// no rise).
+;(() => {
+  let s: EarnedDomainState = { ...initialEarnedDomainState({ profilePrior: 'habitual' }), earnedLevel: 'deliberate' as KatorthomaProximity, justiceFloorActive: true, lastDomainActivityAt: T0 }
+  s = applyTrustEvent(s, ev({ virtueDomain: 'dikaiosyne', eventType: 'justice-surface-transparently-handled', payload: { obligationStatus: 'met' }, occurredAt: T0 }))
+  assert(!s.justiceFloorActive, 'PA-1: proximity-less met event still clears the latch')
+  eq(s.earnedLevel, 'deliberate', 'PA-1: proximity-less met event does NOT rise (no sage_like default)')
+})()
+
+// PA-1 semantics lock: demonstrated AT the current rank ⇒ latch clears, level
+// holds. (Review note 2026-07-11: NOT a pre-fold discriminator — the old
+// min(demonstrated, from+1) also held here; the discriminating pins are the
+// proximity-less, PA-9, and e2e-ratchet cases. Kept to lock the folded
+// at-current semantics against future drift.)
+;(() => {
+  let s: EarnedDomainState = { ...initialEarnedDomainState({ profilePrior: 'habitual' }), earnedLevel: 'deliberate' as KatorthomaProximity, justiceFloorActive: true, lastDomainActivityAt: T0 }
+  s = applyTrustEvent(s, ev({ virtueDomain: 'dikaiosyne', eventType: 'justice-surface-transparently-handled', payload: { demonstratedProximity: 'deliberate' }, occurredAt: T0 }))
+  assert(!s.justiceFloorActive, 'PA-1: at-current met event clears the latch')
+  eq(s.earnedLevel, 'deliberate', 'PA-1: at-current met event does not rise')
+})()
+
+// PA-9 pin (rides PA-1): demonstrated BELOW the current rank on a POSITIVE event
+// ⇒ the level NEVER drops (the latent 3-rank inversion the audit found armed by
+// supplying the field); the latch still clears.
+;(() => {
+  let s: EarnedDomainState = { ...initialEarnedDomainState({ profilePrior: 'habitual' }), earnedLevel: 'sage_like' as KatorthomaProximity, justiceFloorActive: true, lastDomainActivityAt: T0 }
+  s = applyTrustEvent(s, ev({ virtueDomain: 'dikaiosyne', eventType: 'justice-surface-transparently-handled', payload: { demonstratedProximity: 'habitual' }, occurredAt: T0 }))
+  eq(s.earnedLevel, 'sage_like', 'PA-9: a positive event with weak demonstrated proximity never LOWERS the level')
+  assert(!s.justiceFloorActive, 'PA-9: the latch still clears (rise-only guard does not block the clear)')
 })()
 
 // violated → reflexive, BELOW the prior (trust-reducing evidence, not decay).
@@ -346,6 +380,53 @@ const verifyFail = () => ({ valid: false as const, reason: 'bad_signature' })
   eq(deriveWorstJusticeOutcome([mkSigned('deliberate', ['dikaiosyne'], [{ status: 'indeterminate' }]).assessment])?.eventType, 'justice-surface-indeterminate', 'justice: indeterminate mapping')
 })()
 
+// PA-4 pin (2026-07-11): met CREDITS dikaiosyne so it requires dikaiosyne engaged
+// — a phronesis-only assessment with a met circle mints NO justice event; the
+// violated/indeterminate directions stay UNGATED (conservative).
+;(() => {
+  eq(deriveWorstJusticeOutcome([mkSigned('deliberate', ['phronesis'], [{ status: 'met' }]).assessment]), null, 'PA-4: met circle WITHOUT dikaiosyne engaged ⇒ NO justice event (no un-demonstrated credit)')
+  eq(deriveWorstJusticeOutcome([mkSigned('deliberate', ['phronesis'], [{ status: 'violated' }]).assessment])?.eventType, 'justice-surface-violated', 'PA-4: violated circle WITHOUT dikaiosyne engaged STILL yields violated (conservative direction ungated)')
+})()
+
+// PA-1 pin: the met outcome carries the WEAKEST proximity across the
+// met-demonstrating (dikaiosyne-engaged) assessments — the conservative cap the
+// engine's rise now requires.
+;(() => {
+  const out = deriveWorstJusticeOutcome([
+    mkSigned('sage_like', ['dikaiosyne'], [{ status: 'met' }]).assessment,
+    mkSigned('deliberate', ['dikaiosyne'], [{ status: 'met' }]).assessment,
+  ])
+  eq(out?.eventType, 'justice-surface-transparently-handled', 'PA-1: met outcome derived')
+  eq(out?.demonstratedProximity, 'deliberate', 'PA-1: met outcome carries the WEAKEST met-assessment proximity')
+  // And the derived EVENT payload carries it through.
+  const events = deriveCredentialAndJusticeEvents({
+    agentId: 'ns:a@v1', ownerUserId: null, credentialRef: null,
+    signedAssessments: [mkSigned('deliberate', ['dikaiosyne'], [{ status: 'met' }])],
+    now: at(T0), correlationId: 'pa1-payload', verify: verifyOk,
+  })
+  const j = events.find((e) => e.eventType === 'justice-surface-transparently-handled')
+  eq(j?.payload.demonstratedProximity, 'deliberate', 'PA-1: the live justice event payload carries demonstratedProximity')
+})()
+
+// PA-1 END-TO-END ratchet pin (the audit scenario): an agent at the habitual
+// prior submits TWO ordinary deliberate-grade met-obligation writes. Pre-fold this
+// reached sage_like (habitual → deliberate+principled via write 1, → sage_like via
+// write 2). Post-fold dikaiosyne must cap at the demonstrated 'deliberate'.
+;(() => {
+  const write = (corr: string, occurredAt: string): TrustEvent[] =>
+    deriveCredentialAndJusticeEvents({
+      agentId: 'ns:ratchet@v1', ownerUserId: null, credentialRef: null,
+      signedAssessments: [mkSigned('deliberate', ['phronesis', 'dikaiosyne'], [{ status: 'met' }])],
+      now: at(occurredAt), correlationId: corr, verify: verifyOk,
+    })
+  const events = [...write('rw1', T0), ...write('rw2', plusMonths(T0, 1))]
+  const states = foldTrustEvents(events, () => initialEarnedDomainState({ profilePrior: 'habitual' }))
+  const dik = states.get('dikaiosyne')!
+  eq(dik.earnedLevel, 'deliberate', 'PA-1 e2e: two deliberate-grade met writes cap dikaiosyne at deliberate (NOT sage_like)')
+  assert(!dik.justiceFloorActive, 'PA-1 e2e: the latch is clear (genuine met evaluations)')
+  assert(rank(dik.earnedLevel) < rank('sage_like'), 'PA-1 e2e: the ratchet is closed')
+})()
+
 // Reflect honesty gate.
 ;(() => {
   const honest = deriveReflectEvent({ agentId: 'ns:a@v1', ownerUserId: null, credentialRef: null, sessionId: 's1', fabricationRiskLevel: 'low', contextSource: 'agent_stated', now: at(T0), correlationId: 'r1' })
@@ -443,6 +524,69 @@ import { makeFakeSupabase } from './fake-supabase'
   assert(purge.events >= 1, 'store: purge removed the expired event')
   assert(fake.tables.agent_trust_events.some((r) => r.id === 'e-new'), 'store: purge kept the live event')
   assert(!fake.tables.agent_trust_events.some((r) => r.id === 'e-old'), 'store: purge removed the expired event row')
+})()
+
+// PA-3 + PA-7 pins (2026-07-11 pre-activation audit + fold review). ONE
+// sequential block: these pins stub console.error, and the store test blocks
+// interleave at await points — concurrent stub/restore pairs clobber each other
+// and the captured logs leak (found when the first split-block version raced).
+;(async () => {
+  // --- PA-3: a TRANSIENT error on the fold's agent_trust_state read must ABORT
+  // the fold — never fall through to the seed branch and upsert-overwrite the
+  // earned state backward. Fixture chosen so the two failure modes DISCRIMINATE:
+  // earned 'principled' (3) — a seed-overwrite would land 'deliberate'
+  // (habitual seed + 1), an abort keeps 'principled'. ---
+  {
+    const fake = makeFakeSupabase()
+    const cred = (corr: string, occurredAt: string): TrustEvent =>
+      ev({ agentId: 'ns:pa3@v1', virtueDomain: 'phronesis', payload: { demonstratedProximity: 'sage_like', coverageContinuous: true }, occurredAt, correlationId: corr })
+    await emitTrustEvents([cred('pa3-1', T0)], fake.client) // habitual → deliberate
+    await emitTrustEvents([cred('pa3-2', plusMonths(T0, 0.1))], fake.client) // → principled
+
+    fake.failNext('select', 'agent_trust_state', { message: 'transient network error' })
+    const logs: string[] = []
+    const orig = console.error
+    console.error = (...a: unknown[]) => { logs.push(a.map(String).join(' ')) }
+    const r = await emitTrustEvents([cred('pa3-3', plusMonths(T0, 0.2))], fake.client)
+    console.error = orig
+
+    assert(r.ok, 'PA-3: emit stays ok on a fold read error (ledger written; fold skipped, never thrown)')
+    const row = fake.tables.agent_trust_state.find((x) => x.agent_id === 'ns:pa3@v1' && x.virtue_domain === 'phronesis')
+    eq(row?.earned_level, 'principled', 'PA-3: transient read error does NOT reset earned state (no habitual-seed overwrite)')
+    assert(logs.some((l) => l.includes('fold skipped')), 'PA-3: the skipped fold is LOGGED (state-behind, loud)')
+  }
+
+  // --- PA-7: a RETURNED (non-thrown) store failure — e.g. a CHECK violation —
+  // surfaces ok:false AND a log line; it never throws to the caller. ---
+  {
+    const fake = makeFakeSupabase()
+    fake.failNext('insert', 'agent_trust_events', { code: '23514', message: 'violates check constraint' })
+    const logs: string[] = []
+    const orig = console.error
+    console.error = (...a: unknown[]) => { logs.push(a.map(String).join(' ')) }
+    const r = await emitTrustEvents([ev({ correlationId: 'pa7-1' })], fake.client)
+    console.error = orig
+    assert(!r.ok, 'PA-7: a real insert failure surfaces ok:false (fail-honest)')
+    assert(logs.some((l) => l.includes('events lost')), 'PA-7: the dropped events are LOGGED (log-and-continue, never silent)')
+  }
+
+  // --- PA-7 (fold-review nit): the two remaining new log paths — a failed state
+  // UPSERT (fold) and a failed reflect UPDATE — are logged as state-behind and
+  // never throw. ---
+  {
+    const fake = makeFakeSupabase()
+    fake.failNext('upsert', 'agent_trust_state', { message: 'transient upsert error' })
+    const logs: string[] = []
+    const orig = console.error
+    console.error = (...a: unknown[]) => { logs.push(a.map(String).join(' ')) }
+    const r1 = await emitTrustEvents([ev({ agentId: 'ns:pa7b@v1', virtueDomain: 'phronesis', payload: { demonstratedProximity: 'sage_like', coverageContinuous: true }, occurredAt: T0, correlationId: 'pa7b-1' })], fake.client)
+    fake.failNext('update', 'agent_trust_state', { message: 'transient update error' })
+    const r2 = await emitTrustEvents([ev({ agentId: 'ns:pa7b@v1', virtueDomain: null, eventType: 'reflect-completed-honest', artifactKind: 'reflect_completion', artifactRef: 'reflect:pa7b', occurredAt: plusMonths(T0, 0.1), correlationId: 'pa7b-2' })], fake.client)
+    console.error = orig
+    assert(r1.ok && r2.ok, 'PA-7: upsert/update failures never fail the emit (ledger written; state-behind)')
+    assert(logs.some((l) => l.includes('state upsert failed')), 'PA-7: a failed fold upsert is LOGGED (state-behind, loud)')
+    assert(logs.some((l) => l.includes('applyReflectAcrossDomains')), 'PA-7: a failed reflect update is LOGGED (state-behind, loud)')
+  }
 })()
 
 ;(async () => {

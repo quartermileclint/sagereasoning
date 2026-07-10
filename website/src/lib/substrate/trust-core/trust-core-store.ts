@@ -133,7 +133,17 @@ export async function emitTrustEvents(
     let written = 0
     for (const event of events) {
       const inserted = await insertEvent(event, client)
-      if (!inserted.ok) return inserted
+      if (!inserted.ok) {
+        // PA-7 fold (2026-07-11): a RETURNED (non-thrown) store failure must be
+        // LOUD — the header's log-and-continue contract's "log" half. The batch
+        // stops here (this event + the rest are lost); the caller's live write
+        // is unaffected (measure mode).
+        console.error(
+          `[trust-core] emitTrustEvents: insert failed at ${event.eventType} — events lost:`,
+          inserted.error,
+        )
+        return inserted
+      }
       if (!inserted.value.inserted) continue // duplicate — state already folded
       written++
       if (event.virtueDomain === null) {
@@ -144,7 +154,9 @@ export async function emitTrustEvents(
     }
     return { ok: true, value: { written } }
   } catch (e) {
-    return { ok: false, error: `emitTrustEvents threw: ${(e as Error).message}` }
+    const error = `emitTrustEvents threw: ${(e as Error).message}`
+    console.error('[trust-core] ' + error) // PA-7: loud, never silent
+    return { ok: false, error }
   }
 }
 
@@ -171,12 +183,29 @@ async function insertEvent(
  *  the agent's latest reflect timestamp so decay modulation is correct. */
 async function foldDomainEvent(event: TrustEvent, client: SupabaseClient): Promise<void> {
   const domain = event.virtueDomain as VirtueTrustDomain
-  const { data: existing } = await client
+  const { data: existing, error: readError } = await client
     .from(STATE_TABLE)
     .select('*')
     .eq('agent_id', event.agentId)
     .eq('virtue_domain', domain)
     .maybeSingle()
+
+  if (readError) {
+    // PA-3 fold (2026-07-11 pre-activation audit): a REAL read error must ABORT
+    // the fold — falling through to the seed branch would upsert-overwrite the
+    // agent's earned state with a fresh habitual/high-volatility prior (a silent
+    // BACKWARD reset, a different direction than the disclosed state-behind
+    // class). The ledger insert already succeeded, so the worst case is
+    // state-behind — logged, repairable by replaying the ledger. Missing-table
+    // stays benign-quiet (schema-drift class; the insert no-ops the same way).
+    if (!isMissingTableError(readError as { code?: string; message?: string })) {
+      console.error(
+        `[trust-core] foldDomainEvent(${event.eventType}/${domain}): state read failed — fold skipped (state-behind):`,
+        (readError as { message?: string }).message,
+      )
+    }
+    return
+  }
 
   let prior: EarnedDomainState
   if (existing) {
@@ -211,7 +240,17 @@ async function foldDomainEvent(event: TrustEvent, client: SupabaseClient): Promi
     updated_at: new Date().toISOString(),
     retain_until: retainUntil,
   }
-  await client.from(STATE_TABLE).upsert(row, { onConflict: 'agent_id,virtue_domain' })
+  const { error: upsertError } = await client
+    .from(STATE_TABLE)
+    .upsert(row, { onConflict: 'agent_id,virtue_domain' })
+  if (upsertError && !isMissingTableError(upsertError as { code?: string; message?: string })) {
+    // PA-3/PA-7 (2026-07-11): a failed state write is state-behind — log it
+    // (never throw; the ledger stays authoritative).
+    console.error(
+      `[trust-core] foldDomainEvent(${event.eventType}/${domain}): state upsert failed (state-behind):`,
+      (upsertError as { message?: string }).message,
+    )
+  }
 }
 
 /** Reflect event: set reflect_last_honest_at across the agent's existing domain
@@ -222,7 +261,7 @@ async function applyReflectAcrossDomains(
   client: SupabaseClient,
 ): Promise<void> {
   const retainUntil = new Date(Date.parse(event.occurredAt) + RETENTION_MS).toISOString()
-  await client
+  const { error } = await client
     .from(STATE_TABLE)
     .update({
       reflect_last_honest_at: event.occurredAt,
@@ -230,6 +269,13 @@ async function applyReflectAcrossDomains(
       updated_at: new Date().toISOString(),
     })
     .eq('agent_id', event.agentId)
+  if (error && !isMissingTableError(error as { code?: string; message?: string })) {
+    // PA-7 (2026-07-11): state-behind must be loud, never silent.
+    console.error(
+      '[trust-core] applyReflectAcrossDomains: update failed (state-behind):',
+      (error as { message?: string }).message,
+    )
+  }
 }
 
 /** The agent's latest honest-reflect timestamp from the ledger (for seeding a new
