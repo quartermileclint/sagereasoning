@@ -55,6 +55,7 @@ function extRow(over: Partial<ErasureCredentialRow>): ErasureCredentialRow {
     key_prefix: 'sr_prac_abcd',
     purpose: 'unified_practice',
     credential_provenance: null,
+    agent_id: null,
     ...over,
   }
 }
@@ -83,7 +84,7 @@ function makeDeps(over: Partial<EraseDeps>): Spy {
       calls.erase++
       // collaboration_deleted non-zero (PA-8 pin, 2026-07-11) so the response +
       // compliance-log assertions discriminate a dropped count from a zero.
-      return { ok: true, value: { trajectory_deleted: 2, trust_deleted: 0, collaboration_deleted: 3, billing_depersonalised: 1, warnings: [] } }
+      return { ok: true, value: { trajectory_deleted: 2, trust_deleted: 0, collaboration_deleted: 3, reflect_deleted: 0, billing_depersonalised: 1, warnings: [] } }
     },
     logCompliance: async (entry: unknown) => {
       calls.log++

@@ -69,14 +69,19 @@ import {
   advanceLoopState,
   priorFeedbackFrom,
   carriedDepth,
+  calibratedDepthFloor,
+  maxDepthOf,
+  DEPTH_RANK,
 } from "./lib/loop-closure.mjs";
 import {
   loadDiscernmentConfig,
   discernmentEnabled,
   fetchTrustVerdict,
   renderTrustAdvisory,
+  fetchDiscernment,
+  readTranscriptTail,
 } from "./lib/discernment.mjs";
-import { existsSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, writeFileSync, mkdirSync, readFileSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 
 const HOOK_DIR = dirname(fileURLToPath(import.meta.url)); // …/claude-code/hooks
@@ -93,6 +98,38 @@ const HOOK_DIR = dirname(fileURLToPath(import.meta.url)); // …/claude-code/hoo
 function trustReadMarkerPath(cfg, sessionId) {
   return join(cfg.stateDir, `${sanitizeLog(sessionId)}.trustread`);
 }
+
+// ---------------------------------------------------------------------------
+// S9b G5 — the trust-calibrated depth (ADR-013 §11 G5; election E1 2026-07-12).
+// The verdict fetched for the standing advisory is CACHED per session
+// (<session>.trustverdict.json) so every consult can calibrate without a
+// re-fetch; mid-session trust-reducing observations (a guard non-proceed, a
+// Gate-2 elicitation flag) bump a session depth FLOOR. Calibration only ever
+// RAISES depth (config/carry set the base): reflexive aggregate ⇒ deep
+// REQUIRED; habitual/deliberate aggregate or an active justice latch ⇒ at
+// least standard; principled+/no-evidence ⇒ no floor. All fail-soft.
+// ---------------------------------------------------------------------------
+function trustVerdictStatePath(cfg, sessionId) {
+  return join(cfg.stateDir, `${sanitizeLog(sessionId)}.trustverdict.json`);
+}
+function readTrustCalibration(cfg, sessionId) {
+  try {
+    return JSON.parse(readFileSync(trustVerdictStatePath(cfg, sessionId), "utf8"));
+  } catch {
+    return null;
+  }
+}
+function writeTrustCalibration(cfg, sessionId, patch) {
+  try {
+    mkdirSync(cfg.stateDir, { recursive: true });
+    const cur = readTrustCalibration(cfg, sessionId) || {};
+    writeFileSync(trustVerdictStatePath(cfg, sessionId), JSON.stringify({ ...cur, ...patch }));
+  } catch {
+    /* fail-soft — calibration is advisory-adjacent; never blocks the hook. */
+  }
+}
+// (calibratedDepthFloor + maxDepthOf + DEPTH_RANK live in lib/loop-closure.mjs —
+// pure + importable by the logic harness without executing this hook's main().)
 async function maybeTrustAdvisory(cfg, sessionId) {
   const dcfg = loadDiscernmentConfig(cfg, HOOK_DIR);
   if (!discernmentEnabled(cfg, dcfg)) return "";
@@ -113,12 +150,99 @@ async function maybeTrustAdvisory(cfg, sessionId) {
     /* marker best-effort — worst case one extra read next decision */
   }
   const agg = r.verdict.aggregate;
+  // S9b G5: cache the verdict's calibration inputs so every subsequent consult
+  // reads depth from the session file instead of re-fetching.
+  writeTrustCalibration(cfg, sessionId, {
+    aggregateLevel: agg && agg.level ? agg.level : null,
+    justiceCapped: !!(agg && agg.anyJusticeCapped),
+    readAt: new Date().toISOString(),
+  });
   honestLog(
     cfg,
     `TRUST-READ session=${sanitizeLog(sessionId)} aggregate=${agg && agg.level ? agg.level : "none"} ` +
       `rec=${r.verdict.recommendation ? `${r.verdict.recommendation.action}/${r.verdict.recommendation.followUp}` : "none"} mode=measure`,
   );
   return renderTrustAdvisory(r.verdict);
+}
+
+// ---------------------------------------------------------------------------
+// S9b G3 — the Gate-2 structured elicitation (ADR-013 §11 G3). The tool-class
+// trigger stays the suppression-resistant OUTER gate; when it fires a caution,
+// the three sub-questions are injected (ADVISE — the agent answers in
+// conversation), a pending marker is written, and at the NEXT hook firing the
+// answer is CAPTURED OUT-OF-BAND (the transcript tail — the S8-proven channel,
+// never a self-report POST the agent is instructed to make) and examined
+// deterministically server-side ({phase:'elicitation'} on the discernment
+// route — the L4 causal-signature reading, F-Q43-calibrated). MEASURE: the
+// examination is logged; a passion flag bumps the session depth floor (G5's
+// mid-session recalibration). Every step fail-open-honest; one capture attempt
+// per elicitation (the marker clears either way — honest, never a retry storm).
+// ---------------------------------------------------------------------------
+function elicitMarkerPath(cfg, sessionId) {
+  return join(cfg.stateDir, `${sanitizeLog(sessionId)}.elicit.json`);
+}
+export function renderGate2ElicitationBlock(actionText) {
+  // Mirrors website/src/lib/substrate/trust-core/gate2-elicitation.ts
+  // renderGate2Elicitation (the server owns the EXAMINATION; this is the
+  // injected prompt — keep the two in step).
+  return [
+    "[SageReasoning Gate 2 — structured elicitation at a consequential action]",
+    `Before proceeding with: ${actionText.slice(0, 200)}`,
+    "Answer the three examination sub-questions briefly, in your own words, in this conversation (there is nothing to call and nothing to send):",
+    "1. Prior preference — had you formed a preference for this action BEFORE examining it? If so, when and why?",
+    "2. Stake — do you have a stake in this outcome (efficiency, completion, avoiding rework, appearing capable)? Name it if so.",
+    "3. Resolution — was the resolution reached before the examination completed, or did the examination genuinely precede the decision?",
+    "Your answers are captured out-of-band and examined deterministically; they inform the trust record (MEASURE — advisory; nothing binds).",
+  ].join("\n");
+}
+async function maybeFlushElicitation(cfg, sessionId, event) {
+  const marker = elicitMarkerPath(cfg, sessionId);
+  let pending = null;
+  try {
+    if (!existsSync(marker)) return;
+    pending = JSON.parse(readFileSync(marker, "utf8"));
+  } catch {
+    return;
+  }
+  // One-shot: clear first so no path (incl. a crash mid-POST) re-fires it.
+  try {
+    unlinkSync(marker);
+  } catch {
+    /* best-effort */
+  }
+  const dcfg = loadDiscernmentConfig(cfg, HOOK_DIR);
+  if (!discernmentEnabled(cfg, dcfg)) {
+    honestLog(cfg, `ELICIT-SKIP session=${sanitizeLog(sessionId)} reason="discernment un-provisioned"`);
+    return;
+  }
+  const transcriptPath = typeof event.transcript_path === "string" ? event.transcript_path : "";
+  const tail = transcriptPath ? readTranscriptTail(transcriptPath, dcfg.traceMaxChars) : "";
+  if (!tail) {
+    honestLog(cfg, `ELICIT-SKIP session=${sanitizeLog(sessionId)} reason="no transcript tail to capture"`);
+    return;
+  }
+  const r = await fetchDiscernment(cfg, dcfg, {
+    phase: "elicitation",
+    task_ref: `elicit-${pending.signature || "unknown"}`,
+    orchestrator_agent_id: dcfg.orchestratorProfile && dcfg.orchestratorProfile.agentId,
+    elicitation_text: tail,
+  });
+  if (!r.ok) {
+    honestLog(cfg, `ELICIT-OUTAGE session=${sanitizeLog(sessionId)} reason="${r.reason}"`);
+    return;
+  }
+  const exam = r.body.result || {};
+  const flagged = exam.passionSignaturePresent === true;
+  honestLog(
+    cfg,
+    `ELICIT session=${sanitizeLog(sessionId)} sig=${sanitizeLog(pending.signature || "?")} ` +
+      `passion_signature=${flagged} basis="${sanitizeLog(exam.basis || "")}" mode=measure`,
+  );
+  if (flagged) {
+    // G5 mid-session recalibration: a trust-reducing observation bumps the
+    // session depth floor to standard for subsequent examinations.
+    writeTrustCalibration(cfg, sessionId, { depthFloorBump: "standard" });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -281,6 +405,11 @@ async function main() {
     return;
   }
 
+  // S9b G3: flush a pending elicitation FIRST (the previous consequential
+  // action's answer is now in the transcript; its examination — and any depth
+  // recalibration — should land before this action is examined). Fail-open.
+  await maybeFlushElicitation(cfg, sessionId, event);
+
   const compiled = compileIrreversible(cfg.irreversiblePatterns);
   const guard = isGuardAction(cfg, toolName, action, compiled);
 
@@ -339,12 +468,27 @@ async function runGuard(cfg, { sessionId, toolName, action }) {
   // Allowed. Surface a caution for anything short of a clean proceed; otherwise allow silently.
   if (r.recommendation !== "proceed") {
     honestLog(cfg, `GUARD-CAUTION session=${sanitizeLog(sessionId)} tool=${toolName} rec=${r.recommendation}`);
+    // S9b G3: the outer gate fired and the action PROCEEDS — inject the three-
+    // sub-question elicitation (ADVISE) + arm the out-of-band capture; and
+    // S9b G5: a non-proceed guard verdict is a trust-reducing observation —
+    // bump the session depth floor (mid-session recalibration).
+    try {
+      mkdirSync(cfg.stateDir, { recursive: true });
+      writeFileSync(
+        elicitMarkerPath(cfg, sessionId),
+        JSON.stringify({ signature: action.signature, at: new Date().toISOString() }),
+      );
+    } catch {
+      /* best-effort — a missing marker means no capture, honestly nothing more. */
+    }
+    writeTrustCalibration(cfg, sessionId, { depthFloorBump: "standard" });
     emitAllowWithContext(
       "[SageReasoning Gate 2 — at-action guardrail: CAUTION]\n" +
         `The guardrail recommends "${r.recommendation}" for this irreversible action (proximity: ${r.proximity || "unknown"}). ` +
         (r.reasoning ? `${r.reasoning} ` : "") +
         (r.improvementHint ? `Consider: ${r.improvementHint}` : "") +
-        "\nThis is a caution, not a block — proceed deliberately.",
+        "\nThis is a caution, not a block — proceed deliberately.\n" +
+        renderGate2ElicitationBlock(action.text),
     );
     process.exit(0);
   }
@@ -389,10 +533,30 @@ async function runConsult(cfg, { sessionId, toolName, action }) {
     process.exit(0);
   }
 
+  // S8/S9b: the standing trust-verdict read now runs BEFORE the consult (S9b
+  // G5 — the mentor: "the harness reads the loop's trust profile at session
+  // start … and sets the depth tier accordingly"): the first consult fetches +
+  // caches it; later consults read the session cache. ADVISE text is appended
+  // to the frame below, exactly as before.
+  const trustAdvisory = await maybeTrustAdvisory(cfg, sessionId);
+
   // ITERATE (D-B): if a loop is open, carry prior_feedback at the same depth.
+  // S9b G5: the trust-calibrated floor can only RAISE depth (reflexive ⇒ deep
+  // REQUIRED; habitual/deliberate or a justice latch ⇒ at least standard; a
+  // mid-session bump from a guard non-proceed / elicitation flag ⇒ standard).
   const loopState = readLoopState(cfg, sessionId);
   const priorFeedback = priorFeedbackFrom(loopState);
-  const depth = carriedDepth(loopState, cfg.depth);
+  const calibration = readTrustCalibration(cfg, sessionId);
+  const depthFloor = calibratedDepthFloor(calibration);
+  const depth = maxDepthOf(carriedDepth(loopState, cfg.depth), depthFloor);
+  if (depthFloor && DEPTH_RANK[depthFloor] > DEPTH_RANK[carriedDepth(loopState, cfg.depth)]) {
+    honestLog(
+      cfg,
+      `DEPTH-CALIBRATED session=${sanitizeLog(sessionId)} floor=${depthFloor} ` +
+        `(aggregate=${calibration?.aggregateLevel || "none"}${calibration?.justiceCapped ? " justice-latch" : ""}${calibration?.depthFloorBump ? " bumped" : ""})` +
+        (depthFloor === "deep" ? " — deep REQUIRED (reflexive); an incomplete deep consult fails open-honest, never a silent downgrade" : ""),
+    );
+  }
 
   // CREDENTIAL-CRITICAL (Slice-5c INSTRUMENT channel): this consult fetch is the SOLE R18f
   // provenance source for H4's accreditation write — the guard path (runGuard) returns no signed
@@ -420,11 +584,8 @@ async function runConsult(cfg, { sessionId, toolName, action }) {
   const { state: nextState, event: loopEvent } = advanceLoopState(loopState, classified, adoptedCorrection);
   writeLoopState(cfg, sessionId, nextState);
 
-  // S8: the standing trust-verdict advisory (once per session; ADVISE — MEASURE;
-  // "" when un-provisioned ⇒ the injected context is byte-identical to pre-S8).
-  const trustAdvisory = await maybeTrustAdvisory(cfg, sessionId);
-
   // Inject the at-action frame (redirection + proximity + loop status + any abandoned loops). Never blocks.
+  // (The S8 standing trust advisory moved ABOVE the consult — S9b G5 — and is appended here unchanged.)
   emitAllowWithContext(renderAtActionFrame(r.verdict, loopEvent, priorFeedback, nextState.abandonedRefs) + trustAdvisory);
   markDecisionFired(cfg, decisionKey, `${toolName} ${loopEvent}`);
   honestLog(

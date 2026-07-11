@@ -65,6 +65,21 @@ export const MONTH_MS = 30 * 24 * 60 * 60 * 1000
 export const REFLECT_MODULATION_FACTOR = 2
 
 /**
+ * S9b G2 (the 2026-07-11 mentor verdicts, binding): a SCREENED reflection
+ * "modulates at a quarter of the base decay rate — it contributes to the decay
+ * modulator but less than a full reflection", where the full reflection's
+ * maximum modulation is a HALVING of the base rate.
+ *
+ * Arithmetic of record: full modulation removes 1/2 of the base decay rate
+ * (rate × 0.5 ⇒ onset × 2 = REFLECT_MODULATION_FACTOR). Screened modulation
+ * removes 1/4 of the base decay rate (rate × 0.75 ⇒ onset × 4/3). The onset
+ * multiplier is therefore 4/3 — strictly less modulation than full (2), strictly
+ * more than none (1). When BOTH signals are active the FULL factor wins (the
+ * mentor's cap: maximum modulation is the halving; the factors never stack).
+ */
+export const SCREENED_REFLECT_MODULATION_FACTOR = 4 / 3
+
+/**
  * How recent an honest reflect completion must be to count as an "active
  * reflection practice" for decay modulation. The mentor fixes the modulation
  * magnitude (half-rate) but not this window; 180 days is a documented default

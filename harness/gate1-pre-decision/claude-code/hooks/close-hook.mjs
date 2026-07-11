@@ -322,12 +322,26 @@ async function persistReflection(cfg, sessionId, lastAssistantMessage) {
   const reflectSessionId = `reflect-${sessionId}`;
   const verbatim = typeof lastAssistantMessage === "string" ? lastAssistantMessage.trim() : "";
 
+  // S9b G4 — the suppression-watch inputs: the session's SIGNED assessments (the
+  // at-action screen's own record; Ed25519-re-verified server-side) + whether a
+  // screen ran at all. Capped at 32 (the server's bound). Absent provenance ⇒
+  // screen_ran:false — honest; the reflect service's cross-check then reads
+  // self-screen-absent, never passion-unflagged.
+  let screenEvidence = null;
+  try {
+    const signed = readProvenance(cfg, sessionId) || [];
+    screenEvidence = { screen_ran: signed.length > 0, signed_assessments: signed.slice(0, 32) };
+  } catch {
+    /* best-effort — no evidence supplied is the honest degraded form. */
+  }
+
   // 1. Open the reflect record. session_summary is HARNESS-INFERRED (declared via context_source).
   const open = await postReflect(cfg, {
     session_id: reflectSessionId,
     agent_id: cfg.agentId,
     session_summary: HARNESS_INFERRED_SUMMARY,
     context_source: "harness_inferred",
+    ...(screenEvidence ? { screen_evidence: screenEvidence } : {}),
   });
   if (!open.ok) return `open-${open.status}`; // honest: nothing persisted, nothing false written.
 

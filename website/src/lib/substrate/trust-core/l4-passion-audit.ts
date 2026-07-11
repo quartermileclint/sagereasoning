@@ -211,11 +211,19 @@ const EMPTY_MAPPING_CONTEXT: L4MappingContext = {
  *     lupe: e.g. phthonos-envy toward a candidate, fear of a bad outcome), which biases
  *     the selection just as an appetitive stake does (the S7-review false-negative fold).
  *   Q4.3 resolutionBeforeComplete — the trace's causal chain reached a COMMITMENT /
- *     ACTION stage (horme / praxis — a resolution) OR a grave (finality /
- *     irreversibility) urgency signal was NOT examined before acting
- *     (examined_before_acting !== true — absent / null / false all read as un-examined,
- *     matching the sibling andreia domain's conservative safe default) — a resolution
- *     reached before completing the remaining examination.
+ *     ACTION stage (horme / praxis) WITHOUT a preceding ASSENT/DELIBERATION stage
+ *     (synkatathesis) in the chain — resolution BEFORE the assessment completed,
+ *     read as causal ORDER, never output content (S9b F-Q43 calibration: the
+ *     pre-S9b predicate fired on ANY horme/praxis stage, which every faithful
+ *     mid-work trace narrating intended action carries — zero discrimination on
+ *     the operative input class, S9 findings register item 1; the mentor's G3
+ *     frame: "impression received without examination, assent granted without
+ *     deliberation" is the signature, and a trace that shows weighing before
+ *     committing is the examination HAPPENING, not being skipped). The grave arm
+ *     is UNCHANGED: a finality/irreversibility urgency signal NOT examined before
+ *     acting (examined_before_acting !== true — absent/null/false all read as
+ *     un-examined, the sibling andreia domain's conservative safe default) still
+ *     fires regardless of stage structure.
  */
 export function mapTraceFeaturesToL4Signals(
   features: L4TraceFeatures,
@@ -239,7 +247,18 @@ export function mapTraceFeaturesToL4Signals(
     (hasDesire && features.motivationStated) ||
     (hasDesire && ctx.priorInteractionWithChosen)
 
-  const reachedCommitment = features.causalStages.some((s) => s === 'horme' || s === 'praxis')
+  // S9b F-Q43 calibration: commitment fires ONLY without a PRECEDING assent /
+  // deliberation stage — the causal signature is the ORDER, not mere presence
+  // (review fold, 2026-07-12: a presence check would read [praxis,
+  // synkatathesis] — commit first, rationalize after, the genuine "assent
+  // granted without deliberation" signature — as clean). causalStages follows
+  // the extraction's evidence order; assent negates only when it appears
+  // BEFORE the first commitment stage.
+  const firstCommitmentIdx = features.causalStages.findIndex((s) => s === 'horme' || s === 'praxis')
+  const assentBeforeCommitment =
+    firstCommitmentIdx >= 0 &&
+    features.causalStages.slice(0, firstCommitmentIdx).includes('synkatathesis')
+  const reachedCommitment = firstCommitmentIdx >= 0 && !assentBeforeCommitment
   const graveUnexamined = features.urgency.some(
     (u) =>
       (u.signalType === 'finality_language' || u.signalType === 'irreversibility_language') &&

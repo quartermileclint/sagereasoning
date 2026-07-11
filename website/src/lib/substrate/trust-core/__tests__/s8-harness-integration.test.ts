@@ -1159,7 +1159,11 @@ async function section7(): Promise<void> {
   eq(ok.status, 200, '7.10 spawn happy → 200')
   const okBody = (await ok.json()) as { mode?: string; note?: string; result?: { basis?: string } }
   eq(okBody.mode, 'measure', '7.11 response mode measure')
-  assert((okBody.note ?? '').includes('Loop metering'), '7.12 disclosed metering follow-up note')
+  // S9b election 2 CLOSED the S8 metering follow-up: the note no longer discloses
+  // an unmetered surface (metering now runs behind SUBSTRATE_DISCERNMENT_METERING_
+  // ENABLED — the CI-10 pattern); the MEASURE line stays.
+  assert((okBody.note ?? '').includes('MEASURE'), '7.12 MEASURE note retained')
+  assert(!(okBody.note ?? '').includes('named follow-up'), '7.12b the metering follow-up disclosure is gone (closed at S9b)')
   eq(deps.spawnCalls, 1, '7.13 spawn invoked once')
 
   // hand_back happy path → 200; empty hand_back → 400.

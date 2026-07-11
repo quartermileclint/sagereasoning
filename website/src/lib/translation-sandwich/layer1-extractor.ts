@@ -647,7 +647,7 @@ const ROOT_PASSIONS: ReadonlyArray<RootPassion> = [
   'lupe',
 ]
 
-const SUB_SPECIES: ReadonlyArray<PassionSubSpecies> = [
+export const SUB_SPECIES: ReadonlyArray<PassionSubSpecies> = [
   // epithumia
   'orge',
   'eros',

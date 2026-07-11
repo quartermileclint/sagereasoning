@@ -63,7 +63,15 @@ import { feedSageAssent as realFeedSageAssent, type SageAssentFeedResult, type F
 // DARK behind SUBSTRATE_TRUST_CORE_ENABLED (the helper no-ops when off); awaited +
 // fail-honest (never throws to this service). A side-effect only — it does NOT
 // change answerReflection's return value, so the reflect response is byte-identical.
-import { emitReflectTrustEvent } from '@/lib/substrate/trust-core/emission-hooks'
+// S9b adds two siblings on the same posture: emitScreenedReflectTrustEvent (G2 —
+// the Q1 verbatim landing on an agent_stated session) and
+// emitSuppressionWatchEvents (G4 — the completion-time Q4 × signed-assessments
+// cross-check). All flag-gated + fail-honest; responses stay byte-identical.
+import {
+  emitReflectTrustEvent,
+  emitScreenedReflectTrustEvent,
+  emitSuppressionWatchEvents,
+} from '@/lib/substrate/trust-core/emission-hooks'
 
 // ============================================================================
 // MIRROR PRINCIPLE (SR-8 / R19d) — mandatory on every completion output
@@ -188,6 +196,13 @@ export interface OpenInput {
   /** Slice-5c: provenance of the supplied session_summary ('agent_stated' | 'harness_inferred').
    *  Recorded on the session row at create; does not affect the engine (additive metadata). */
   readonly context_source?: 'agent_stated' | 'harness_inferred'
+  /** S9b G4 (additive): the session's self-screen evidence, folded into the
+   *  encrypted state for the completion-time suppression-watch cross-check.
+   *  Absent ⇒ no cross-check (byte-identical for existing callers). */
+  readonly screen_evidence?: {
+    readonly screen_ran: boolean
+    readonly signed_assessments: readonly unknown[]
+  }
 }
 
 /**
@@ -201,7 +216,14 @@ export async function openReflection(
   deps: ReflectServiceDeps = defaultDeps(),
   meter: MeterFn = NOOP_METER,
 ): Promise<ServiceResult> {
-  const state: ReflectPersistedState = { session_summary: input.session_summary, turns: [] }
+  const state: ReflectPersistedState = {
+    session_summary: input.session_summary,
+    turns: [],
+    // S9b G4: fold the (validated, opaque) screen evidence into the encrypted
+    // state so the completion-time cross-check can read it. Key omitted when
+    // absent — pre-S9b blobs and non-supplying callers stay byte-identical.
+    ...(input.screen_evidence !== undefined ? { screen_evidence: input.screen_evidence } : {}),
+  }
 
   // Meter the open stage call (base; opening makes no Sonnet call). BEFORE any
   // persist so a billing failure is safely retryable (nothing created yet).
@@ -268,8 +290,12 @@ export async function answerReflection(
   meter: MeterFn = NOOP_METER,
   /** Trust Layer S1: the reflect credential (from verifyReflectToken), threaded in
    *  so a reflect-completed-honest trust event can denormalise owner/credential for
-   *  data rights. Optional + additive — existing callers are unaffected. */
-  opts: { credentialId?: string } = {},
+   *  data rights. Optional + additive — existing callers are unaffected.
+   *  S9b G2: answerContextSource is THIS answer's declared provenance (the route's
+   *  per-call context_source) — 'agent_stated' on a Q1 answer marks the persisted
+   *  VERBATIM as the agent's own words (the screened credential's key), recorded
+   *  on the state as verbatim_provenance. */
+  opts: { credentialId?: string; answerContextSource?: 'agent_stated' | 'harness_inferred' } = {},
 ): Promise<ServiceResult> {
   // Load + decrypt the resumable state.
   const sessionRes = await deps.getSession(session_id)
@@ -384,7 +410,20 @@ export async function answerReflection(
 
   const nextTurns: ReflectTurn[] = [...turns, newTurn]
   const next = nextStep(nextTurns, ctx)
-  const nextState: ReflectPersistedState = { session_summary: state.session_summary, turns: nextTurns }
+  // S9b G2: a Q1 answer declared agent_stated marks the persisted verbatim's
+  // provenance (distinct from the row's OPEN-call context_source — the harness
+  // flow opens harness_inferred and marks only the verbatim agent_stated).
+  const verbatimProvenance =
+    newTurn.step === 'Q1' && opts.answerContextSource === 'agent_stated'
+      ? ('agent_stated' as const)
+      : state.verbatim_provenance
+  const nextState: ReflectPersistedState = {
+    session_summary: state.session_summary,
+    turns: nextTurns,
+    // S9b G4: preserve the screen evidence across the state round-trip.
+    ...(state.screen_evidence !== undefined ? { screen_evidence: state.screen_evidence } : {}),
+    ...(verbatimProvenance !== undefined ? { verbatim_provenance: verbatimProvenance } : {}),
+  }
 
   // ----- Terminal: persist completion + feed Sage Assent (SR-4) -----
   if (next.kind === 'complete') {
@@ -401,9 +440,41 @@ export async function answerReflection(
       credentialId: opts.credentialId ?? null,
       sessionId: session_id,
       fabricationRiskLevel: next.outcome.fabrication_risk_level,
-      contextSource: row.context_source ?? null,
+      // S9b G2: honesty keys on the VERBATIM's provenance when recorded (the
+      // harness flow opens harness_inferred but persists the agent's own words
+      // — the out-of-band Q1–Q6 pass over that verbatim IS the honest full
+      // examination); pre-S9b sessions fall back to the row's open provenance.
+      contextSource:
+        verbatimProvenance === 'agent_stated' ? 'agent_stated' : (row.context_source ?? null),
       now: new Date(),
     }).catch(() => {})
+
+    // S9b G4 (measure mode) — the suppression watch: reflect Q4's surfaced
+    // passions × the session's signed assessments (supplied at open, Ed25519-
+    // re-verified in the deriver). Emits passion-unflagged-by-self-screen /
+    // self-screen-absent per the 3-part standard. Same posture: side-effect
+    // only, flag-gated, fail-honest, response byte-identical.
+    const q4ForWatch = nextTurns.find((t) => t.step === 'Q4')
+    const q4Passions =
+      q4ForWatch && q4ForWatch.step === 'Q4'
+        ? q4ForWatch.assessment.actions.flatMap((a) =>
+            a.passions_detected.map((p) => ({
+              rootPassion: p.root_passion,
+              subSpecies: p.sub_species,
+            })),
+          )
+        : []
+    if (state.screen_evidence !== undefined) {
+      await emitSuppressionWatchEvents({
+        agentId: row.agent_id,
+        credentialId: opts.credentialId ?? null,
+        sessionId: session_id,
+        q4Passions,
+        sessionAssessments: [...state.screen_evidence.signed_assessments],
+        screenRanDeclared: state.screen_evidence.screen_ran,
+        now: new Date(),
+      }).catch(() => {})
+    }
 
     // Feed the Q4 kathekon evidence into Sage Assent (the engine decides the grade).
     let feed: SageAssentFeedResult | null = null
@@ -427,6 +498,26 @@ export async function answerReflection(
   // ----- Non-terminal: persist progress + surface the next step -----
   const persisted = await deps.persistProgress(session_id, stepIdOf(next), nextState)
   if (!persisted.ok) return { ok: false, code: 'server', error: persisted.error }
+
+  // S9b G2 (measure mode) — the AGENT-STATED Q1 verbatim just LANDED: the
+  // screened-reflection persist. Emit reflect-screened-honest (quarter-rate
+  // decay modulation; never the full credential's weight). Keys on the ANSWER's
+  // declared provenance (verbatim_provenance), NOT the row's open context_source
+  // — the harness flow opens harness_inferred and marks only the verbatim
+  // agent_stated (gating on the row would make this event unreachable on the
+  // live flow — the vacuous-pass class). After the persist so the event's
+  // artifact (the session row's verbatim) exists; Q1 is never terminal so this
+  // branch is the single landing point. Flag-gated + fail-honest.
+  if (newTurn.step === 'Q1' && verbatimProvenance === 'agent_stated') {
+    await emitScreenedReflectTrustEvent({
+      agentId: row.agent_id,
+      credentialId: opts.credentialId ?? null,
+      sessionId: session_id,
+      contextSource: 'agent_stated',
+      verbatimLength: response.length,
+      now: new Date(),
+    }).catch(() => {})
+  }
 
   if (next.kind === 'question') {
     return {

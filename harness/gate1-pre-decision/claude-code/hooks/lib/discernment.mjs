@@ -275,6 +275,56 @@ export async function fetchTrustVerdict(cfg, dcfg, timeoutMs = 10000) {
 }
 
 // ---------------------------------------------------------------------------
+// S9b G1a — the calling gate (ADR-013 §11; the 2026-07-11 mentor verdicts).
+// "At session start, read the agent's profile for a declared purpose. If
+// present, proceed to the opening examination with the declared purpose as the
+// orientation frame. If absent, route to a calling session before any task
+// frame is loaded." The declared purpose lives on the orchestrator profile
+// (discernment.config.json orchestrator_profile.purpose — the operator-authored
+// declaration; GATE1_DECLARED_PURPOSE overrides for a session-scoped one).
+// MODE: GATE1_CALLING_GATE_MODE 'measure' (default — log + inject the calling
+// elicitation as ADVISE; the S9b posture: nothing new binds before S11) or
+// 'enforce' (the mentor's HARD gate — H1 blocks the prompt until a purpose is
+// declared; the S11 activation arm, dark until then).
+// ---------------------------------------------------------------------------
+export function resolveDeclaredPurpose(dcfg) {
+  const envPurpose = (process.env.GATE1_DECLARED_PURPOSE || "").trim();
+  if (envPurpose) return { declared: envPurpose, source: "env" };
+  const p = dcfg && dcfg.orchestratorProfile && typeof dcfg.orchestratorProfile.purpose === "string"
+    ? dcfg.orchestratorProfile.purpose.trim()
+    : "";
+  if (p) return { declared: p, source: "config" };
+  return { declared: null, source: null };
+}
+
+export function callingGateMode() {
+  return (process.env.GATE1_CALLING_GATE_MODE || "").trim().toLowerCase() === "enforce"
+    ? "enforce"
+    : "measure";
+}
+
+/** The calling elicitation for a PURPOSELESS session (the circular-examination
+ *  problem: the examination needs a purpose prior to + independent of the task).
+ *  In-conversation review shape — nothing to call, nothing to send. */
+export function renderCallingElicitation() {
+  return [
+    "[SageReasoning Calling — no declared purpose for this session]",
+    "This session opened with no declared purpose, so the pre-decision examination has no orientation frame prior to and independent of the task (the examination would otherwise be circular — deriving its purpose from the very task it examines).",
+    "Before substantive work, state in this conversation (there is nothing to call and nothing to send): your role this session, the circle of concern you primarily serve, and the function types you are authorised to perform.",
+    "Operators: declare a standing purpose in discernment.config.json (orchestrator_profile.purpose) or GATE1_DECLARED_PURPOSE.",
+  ].join("\n");
+}
+
+/** The purpose orientation line prepended to the H1 frame when a purpose IS
+ *  declared — the calling stage's orientation frame for the opening examination. */
+export function renderPurposeOrientation(declared, source) {
+  return (
+    `[SageReasoning Calling — declared purpose (${source})]\n` +
+    `This session's examination is oriented against the declared purpose: ${declared}\n`
+  );
+}
+
+// ---------------------------------------------------------------------------
 // THE ADVISE RENDERING (H3). Compact, factual, MEASURE-honest — an observation
 // the agent may discount (the channel law), never an instruction to act.
 // ---------------------------------------------------------------------------

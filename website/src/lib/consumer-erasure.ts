@@ -45,6 +45,7 @@ import {
 // trust events + state, by credential_ref. Missing-table-benign.
 import { deleteTrustDataForCredential } from './substrate/trust-core/trust-core-store'
 import { deleteCollaborationDataForCredential } from './substrate/trust-core/collaboration-store'
+import { deleteAgentSessions } from './sage-reflect/session-store'
 
 // ============================================================================
 // FLAG (SUBSTRATE_CONSUMER_ERASURE_ENABLED) — UNSET ⇒ the route is dark (503)
@@ -90,7 +91,7 @@ export const CONSUMER_ERASURE_MARKER = 'consumer_erasure'
 /** The columns the lookup selects — the scope-guard inputs + the provenance to merge. */
 const ERASURE_SELECT =
   'id, owner_user_id, owner_kind, is_active, suspended_reason, key_prefix, ' +
-  'purpose, credential_provenance'
+  'purpose, credential_provenance, agent_id'
 
 /** The looked-up credential row (the subset the erasure path needs). */
 export interface ErasureCredentialRow {
@@ -102,6 +103,9 @@ export interface ErasureCredentialRow {
   key_prefix: string | null
   purpose: string | null
   credential_provenance: Record<string, unknown> | null
+  /** S9b G2: the bound agent identity — the key for the agent-scoped reflect
+   *  deletion (read BEFORE the anonymise step nulls it). */
+  agent_id: string | null
 }
 
 // ============================================================================
@@ -190,6 +194,9 @@ export interface ErasureResult {
   /** Trust Layer S5 (R17c): collaboration_records rows hard-deleted for this
    *  credential. */
   collaboration_deleted: number
+  /** S9b G2 (R17c): sage_reflect_sessions rows hard-deleted for the credential's
+   *  agent identity (agent-keyed — the disclosed shared-identity scope). */
+  reflect_deleted: number
   billing_depersonalised: number
   /** Non-fatal issues (e.g. the best-effort billing de-personalisation) — the
    *  personal data is gone regardless; these are surfaced for the audit record. */
@@ -211,7 +218,7 @@ export interface ErasureResult {
  * KG7: credential_provenance (jsonb) is passed as the merged object directly.
  */
 export async function eraseExternalConsumerCredential(
-  row: Pick<ErasureCredentialRow, 'id' | 'credential_provenance'>,
+  row: Pick<ErasureCredentialRow, 'id' | 'credential_provenance' | 'agent_id'>,
   client: SupabaseClient = getAdminClient(),
 ): Promise<StoreResult<ErasureResult>> {
   const warnings: string[] = []
@@ -233,15 +240,22 @@ export async function eraseExternalConsumerCredential(
   const collab = await deleteCollaborationDataForCredential(credentialRef, client)
   if (!collab.ok) return { ok: false, error: `collaboration: ${collab.error}` }
 
-  // NOTE on sage_reflect_sessions (Gate-1 Slice-5c follow-up, 2026-06-21): this credential-keyed path
-  // deletes the trajectory (by credential_ref) but does NOT yet delete sage_reflect_sessions rows,
-  // which are keyed by agent_id (not credential_ref) — so a reflect record persisted under this
-  // credential's agent_id is not reached here. Today no production path persists harness reflect rows
-  // (SAGE_GATE1_REFLECT_PERSIST_ENABLED is dark; reflect-persist runs only in torn-down test loops),
-  // and the reflect store's deleteAgentSessions()/sweepExpiredSessions() exist but are unwired. Wiring
-  // reflect-row erasure (resolve the credential's agent_id → deleteAgentSessions) + a retention cron is
-  // the named prerequisite for a STANDING persist activation (ADR-011 Slice-5c build status; harness
-  // README "Reflect-at-close … consent"). Until then this gap is disclosed, not silently handled.
+  // 1d. S9b G2 (R17c — closes the Gate-1 Slice-5c named follow-up, 2026-07-11):
+  //     genuine deletion of the credential's agent-keyed reflect sessions.
+  //     HONEST SCOPE (disclosed): sage_reflect_sessions rows key on agent_id, not
+  //     credential_ref — this deletes the reflect record of the AGENT IDENTITY the
+  //     erased credential is bound to. Where several credentials share one
+  //     agent_id (e.g. a loop identity), the shared identity's reflect rows go
+  //     with the first erasure — the conservative direction for a deletion right
+  //     (more is deleted, never less). Erase-by-token only reaches
+  //     owner_user_id IS NULL credentials, so operator rows are never touched.
+  //     A null agent_id (already-anonymised husk) has nothing to reach — 0 rows.
+  let reflect_deleted = 0
+  if (row.agent_id !== null && row.agent_id !== undefined && row.agent_id !== '') {
+    const reflect = await deleteAgentSessions(row.agent_id)
+    if (!reflect.ok) return { ok: false, error: `reflect: ${reflect.error}` }
+    reflect_deleted = reflect.value.deleted
+  }
 
   // 2. Anonymise + revoke the credential husk (removes PII; keeps the FK anchor).
   //    The WHERE re-asserts owner_user_id IS NULL — the scope guard enforced
@@ -310,6 +324,7 @@ export async function eraseExternalConsumerCredential(
       trajectory_deleted: traj.value.deleted,
       trust_deleted: trust.value.events + trust.value.state,
       collaboration_deleted: collab.value,
+      reflect_deleted,
       billing_depersonalised,
       warnings,
     },

@@ -445,6 +445,31 @@ mode = "ok";
     /^[0-9a-f]{32}$/.test(span.trace_id) && /^[0-9a-f]{16}$/.test(span.span_id) && span.attributes["gen_ai.operation.name"] === "sage_practice.test");
 }
 
+// ── 17. S9b pure fns: server truncation, depth calibration, calling gate ──
+{
+  const { truncateForServer, MAX_SERVER_INPUT_CHARS } = await import("../claude-code/hooks/lib/framing-core.mjs");
+  const short = "a".repeat(100);
+  check("17 truncate: short text untouched", truncateForServer(short) === short);
+  const long = "b".repeat(6000);
+  const t = truncateForServer(long);
+  check("17 truncate: capped under the 5000 server limit", t.length < 5000 && t.startsWith("b".repeat(MAX_SERVER_INPUT_CHARS)));
+  check("17 truncate: carries the honest marker", t.includes("[truncated by the harness"));
+
+  const { calibratedDepthFloor } = await import("../claude-code/hooks/lib/loop-closure.mjs");
+  check("17 depth: no calibration → no floor", calibratedDepthFloor(null) === null);
+  check("17 depth: reflexive aggregate → deep REQUIRED (G5)", calibratedDepthFloor({ aggregateLevel: "reflexive" }) === "deep");
+  check("17 depth: deliberate aggregate → standard floor", calibratedDepthFloor({ aggregateLevel: "deliberate" }) === "standard");
+  check("17 depth: principled aggregate → no floor (config governs)", calibratedDepthFloor({ aggregateLevel: "principled" }) === null);
+  check("17 depth: justice latch → at least standard", calibratedDepthFloor({ aggregateLevel: "principled", justiceCapped: true }) === "standard");
+  check("17 depth: mid-session bump honoured", calibratedDepthFloor({ aggregateLevel: "sage_like", depthFloorBump: "standard" }) === "standard");
+
+  const { resolveDeclaredPurpose, renderCallingElicitation, renderPurposeOrientation } = await import("../claude-code/hooks/lib/discernment.mjs");
+  check("17 calling: config purpose resolves", resolveDeclaredPurpose({ orchestratorProfile: { purpose: "serve" } }).declared === "serve");
+  check("17 calling: no purpose resolves null", resolveDeclaredPurpose({ orchestratorProfile: {} }).declared === null);
+  check("17 calling: elicitation is review-shaped (nothing to call/send)", renderCallingElicitation().includes("nothing to call and nothing to send"));
+  check("17 calling: orientation names the purpose", renderPurposeOrientation("serve x", "config").includes("serve x"));
+}
+
 server.close();
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail === 0 ? 0 : 1);

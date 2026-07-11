@@ -56,6 +56,16 @@ export interface ReflectRequest {
    *  any call; persisted from the OPEN call onto the session row (the answer-call value is accepted
    *  for harness callers but only the open value is the session's recorded provenance). */
   context_source?: ReflectContextSource
+  /** S9b G4 (additive, OPEN-call only): the session's self-screen evidence — whether a screen
+   *  (at-action examination) ran, and the session's signed assessments for the completion-time
+   *  suppression-watch cross-check. Assessments are opaque here; the trust-core deriver re-verifies
+   *  each (Ed25519) — a FABRICATED assessment earns nothing and suppresses nothing. DISCLOSED
+   *  RESIDUAL (the PA-10 stale-artifact-replay class, fix_before_s10): a GENUINE signed assessment
+   *  replayed from another session can suppress the cross-check — the verifier binds no
+   *  session/agent/time; and the whole surface is self-report-gated (the A2 omission class: an
+   *  agent that omits screen_evidence entirely draws no cross-check at all). MEASURE-bounded.
+   *  Absent ⇒ no cross-check (byte-identical for existing callers). */
+  screen_evidence?: { screen_ran: boolean; signed_assessments: readonly unknown[] }
 }
 
 export type ParsedReflectBody = { ok: true; value: ReflectRequest } | { ok: false; message: string }
@@ -176,6 +186,31 @@ export function parseReflectBody(raw: unknown): ParsedReflectBody {
     return { ok: false, message: contextSource.error }
   }
 
+  // Optional S9b G4 screen evidence (validated shape; assessments stay opaque —
+  // the trust-core deriver Ed25519-verifies each at completion; capped at 32,
+  // the S8 G5 signed-assessments bound).
+  let screen_evidence: { screen_ran: boolean; signed_assessments: readonly unknown[] } | undefined
+  if (obj.screen_evidence !== undefined && obj.screen_evidence !== null) {
+    const se = obj.screen_evidence
+    if (typeof se !== 'object' || Array.isArray(se)) {
+      return { ok: false, message: "Body field 'screen_evidence' must be an object when present." }
+    }
+    const seObj = se as Record<string, unknown>
+    if (typeof seObj.screen_ran !== 'boolean') {
+      return { ok: false, message: "'screen_evidence.screen_ran' must be a boolean." }
+    }
+    if (!Array.isArray(seObj.signed_assessments)) {
+      return { ok: false, message: "'screen_evidence.signed_assessments' must be an array." }
+    }
+    if (seObj.signed_assessments.length > 32) {
+      return { ok: false, message: "'screen_evidence.signed_assessments' must carry at most 32 entries." }
+    }
+    screen_evidence = {
+      screen_ran: seObj.screen_ran,
+      signed_assessments: seObj.signed_assessments,
+    }
+  }
+
   return {
     ok: true,
     value: {
@@ -186,6 +221,7 @@ export function parseReflectBody(raw: unknown): ParsedReflectBody {
       safety_signal: safety as SafetySignal | undefined,
       acts_blocked: blocked as readonly BlockRecord[] | undefined,
       context_source: contextSource as ReflectContextSource | undefined,
+      screen_evidence,
     },
   }
 }

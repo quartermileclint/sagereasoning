@@ -57,14 +57,23 @@
  * Flag-on, a spawn call makes 1 (L4 trace) + up-to-N (profiled candidates)
  * bounded Sonnet Layer-1 calls. Honest usage totals ride the response
  * (`anthropic_usage`). LOOP METERING IS A NAMED FOLLOW-UP: the
- * loop_billing_events `surface` CHECK vocabulary needs a founder-walked widening
- * (the CI-10 precedent) before this surface can write billing rows — scheduled
- * with the S9 install 0c-ii. Until then the surface stays DARK (503 ⇒ zero spend).
+ * loop_billing_events metering (S9b election 2, closing the S8/S9 named
+ * follow-up): the POST phases meter behind SUBSTRATE_DISCERNMENT_METERING_ENABLED
+ * — the flag is set together with the S9b §D surface-CHECK widening migration
+ * (the CI-10 pattern; flag unset ⇒ no billing write, byte-identical).
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { createHash } from 'crypto'
 
 import { corsHeaders } from '@/lib/security'
+import { computeLoopBill } from '@/lib/stripe'
+import {
+  buildLoopHeaders,
+  estimateCallCostCents,
+  recordLoopBilling,
+} from '@/lib/loop-cost-tracker'
+import { MODEL_DEEP } from '@/lib/model-config'
 import {
   validatePracticeCredential,
   type PracticeCapability,
@@ -87,6 +96,13 @@ import {
   type L4ExtractionArtifact,
   type RealL4TraceExtractor,
 } from '@/lib/substrate/trust-core/harness-extractors'
+import {
+  extractFeatures,
+  type ExtractInput,
+  type Layer1Schema,
+  type LayerTokenUsage,
+} from '@/lib/translation-sandwich/layer1-extractor'
+import { examineElicitation } from '@/lib/substrate/trust-core/gate2-elicitation'
 import { isTrustCoreEnabled } from '@/lib/substrate/trust-core/trust-core-flag'
 import {
   validateCandidateProfile,
@@ -121,6 +137,9 @@ export interface DiscernmentRouteDeps {
   spawn(args: SpawnDiscernmentArgs): Promise<SpawnDiscernmentOutcome>
   handBack(args: CloseDelegationArgs): Promise<CloseDelegationOutcome>
   trustVerdict(agentId: string): Promise<TrustVerdict>
+  /** S9b G3 (optional — defaults to the live Layer-1): the elicitation-answer
+   *  extraction for the deterministic Gate-2 examination. */
+  elicit?(params: ExtractInput): Promise<{ schema: Layer1Schema; usage: LayerTokenUsage }>
 }
 
 function liveExtractorSet(): HarnessExtractorSet {
@@ -164,8 +183,97 @@ const DEFAULT_DEPS: DiscernmentRouteDeps = {
 // Response helpers (honest, non-leaking — the reflect/erase posture)
 // ════════════════════════════════════════════════════════════════════════════
 
-function json(body: unknown, status: number): NextResponse {
-  return NextResponse.json(body, { status, headers: corsHeaders() })
+function json(
+  body: unknown,
+  status: number,
+  extraHeaders: Record<string, string> = {},
+): NextResponse {
+  return NextResponse.json(body, { status, headers: { ...corsHeaders(), ...extraHeaders } })
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// Loop metering (S9b election 2 — closes the S8/S9 named follow-up).
+//
+// FLAG-GATED (SUBSTRATE_DISCERNMENT_METERING_ENABLED, the CI-10 pattern):
+// unset ⇒ no billing write, byte-identical responses — because the
+// loop_billing_events surface CHECK admits 'api_practice_discernment' only
+// after the S9b §D widening; metering ahead of the migration would 503 every
+// POST. The founder sets the flag WITH the migration in the same walk.
+//
+// Scope: the two POST phases (spawn carries the real Sonnet extraction cost;
+// hand_back is signature re-verification only ⇒ base rate). The GET trust-
+// verdict read stays unmetered (a read surface — the public-accreditation-GET
+// posture). Loop id is DETERMINISTIC per (phase, orchestrator, task_ref) so a
+// retried POST dedupes (duplicate_loop_id ⇒ no-op, the D-8 rule).
+// Fail posture: flag on + a non-duplicate RPC failure ⇒ 503 (fail-closed, the
+// calling/reflect sibling posture; the harness hook logs DISCERN-OUTAGE and
+// fails open-honest in the loop).
+// ════════════════════════════════════════════════════════════════════════════
+
+export function isDiscernmentMeteringEnabled(): boolean {
+  return process.env.SUBSTRATE_DISCERNMENT_METERING_ENABLED === 'true'
+}
+
+type MeterOutcome = { ok: true; headers: Record<string, string> } | { ok: false }
+
+async function meterDiscernmentStage(
+  input: {
+    apiKeyId: string
+    agentId: string
+    phase: 'spawn' | 'hand_back' | 'elicitation'
+    taskRef: string
+    usage: { input_tokens: number; output_tokens: number; calls: number }
+  },
+  enabled: () => boolean = isDiscernmentMeteringEnabled,
+  record: typeof recordLoopBilling = recordLoopBilling,
+): Promise<MeterOutcome> {
+  if (!enabled()) return { ok: true, headers: {} }
+
+  const anthropicCostCents = estimateCallCostCents(
+    MODEL_DEEP,
+    input.usage.input_tokens,
+    input.usage.output_tokens,
+  )
+  const bill = computeLoopBill(anthropicCostCents)
+  const loopId =
+    'discern-' +
+    input.phase +
+    '-' +
+    createHash('sha256').update(input.agentId + '|' + input.taskRef).digest('hex').slice(0, 24)
+  const now = new Date()
+  const persist = await record({
+    apiKeyId: input.apiKeyId,
+    loopId,
+    agentId: input.agentId,
+    surface: 'api_practice_discernment',
+    baseCents: bill.base_cents,
+    thresholdCents: bill.threshold_cents,
+    overageCents: bill.overage_cents,
+    overageFired: bill.overage_fired,
+    totalCents: bill.total_cents,
+    anthropicCostCents,
+    internalCalls: input.usage.calls,
+    totalInputTokens: input.usage.input_tokens,
+    totalOutputTokens: input.usage.output_tokens,
+    modelsUsed: input.usage.calls > 0 ? [MODEL_DEEP] : [],
+    endpoint: 'other',
+    year: now.getUTCFullYear(),
+    month: now.getUTCMonth() + 1,
+    day: now.getUTCDate(),
+  })
+
+  const headers = buildLoopHeaders({
+    loopId,
+    overageFired: bill.overage_fired,
+    overageCents: bill.overage_cents,
+    totalCents: bill.total_cents,
+  })
+  if (!persist.ok) {
+    if (persist.error.kind === 'duplicate_loop_id') return { ok: true, headers }
+    console.error('[discernment] metering RPC failed:', persist.error.message)
+    return { ok: false }
+  }
+  return { ok: true, headers }
 }
 
 function flagDisabled(): NextResponse {
@@ -363,8 +471,8 @@ export async function runDiscernmentPost(
   }
   if (!isRecord(body)) return badRequest(['request body must be a JSON object'])
   const phase = body.phase
-  if (phase !== 'spawn' && phase !== 'hand_back') {
-    return badRequest(["phase must be 'spawn' or 'hand_back'"])
+  if (phase !== 'spawn' && phase !== 'hand_back' && phase !== 'elicitation') {
+    return badRequest(["phase must be 'spawn', 'hand_back' or 'elicitation'"])
   }
   const taskRef = typeof body.task_ref === 'string' ? body.task_ref.trim() : ''
   const orchestratorAgentId =
@@ -438,6 +546,17 @@ export async function runDiscernmentPost(
         extractors: extractorSet.extractors,
       })
 
+      // S9b: meter the stage (real Sonnet cost) — flag-gated; 503 on a billing
+      // failure (fail-closed; the work is idempotent to retry via the loop-id).
+      const metered = await meterDiscernmentStage({
+        apiKeyId: auth.credentialId,
+        agentId: orchestratorAgentId,
+        phase: 'spawn',
+        taskRef,
+        usage: extractorSet.usage(),
+      })
+      if (!metered.ok) return json({ error: 'billing unavailable' }, 503)
+
       return json(
         {
           schema: 'practice-discernment-response-v1',
@@ -447,11 +566,56 @@ export async function runDiscernmentPost(
           // (its observability JSONL); the L4AuditResult's traceRef names them.
           l4_artifacts: extractorSet.artifacts(),
           anthropic_usage: extractorSet.usage(),
-          note:
-            'MEASURE — advisory; nothing binds (ENFORCE is S11). Loop metering for this ' +
-            'surface is a named follow-up (loop_billing_events surface-CHECK widening).',
+          note: 'MEASURE — advisory; nothing binds (ENFORCE is S11).',
         },
         200,
+        metered.headers,
+      )
+    }
+
+    // S9b G3 — phase === 'elicitation': the deterministic Gate-2 examination of a
+    // captured elicitation answer (the causal-signature reading; MEASURE —
+    // recorded + surfaced, binds nothing). One bounded Sonnet extraction.
+    if (phase === 'elicitation') {
+      const text = typeof body.elicitation_text === 'string' ? body.elicitation_text : ''
+      if (text.trim() === '') {
+        return badRequest(['elicitation_text must be a non-empty string (the captured out-of-band answer)'])
+      }
+      if (text.length > MAX_TRACE_CHARS) {
+        return badRequest([`elicitation_text exceeds ${MAX_TRACE_CHARS} chars (it is an extraction input)`])
+      }
+      const elicit = deps.elicit ?? extractFeatures
+      const extraction = await elicit({
+        input: text,
+        context:
+          'This text is an agent’s answer to the Gate-2 three-sub-question elicitation at a ' +
+          'consequential action (prior preference / stake / resolution-before-assessment). Extract ' +
+          'features from the reasoning it describes.',
+      })
+      const examination = examineElicitation(extraction.schema)
+      const usage = {
+        input_tokens: extraction.usage.input_tokens,
+        output_tokens: extraction.usage.output_tokens,
+        calls: 1,
+      }
+      const metered = await meterDiscernmentStage({
+        apiKeyId: auth.credentialId,
+        agentId: orchestratorAgentId,
+        phase: 'elicitation',
+        taskRef,
+        usage,
+      })
+      if (!metered.ok) return json({ error: 'billing unavailable' }, 503)
+      return json(
+        {
+          schema: 'practice-discernment-response-v1',
+          mode: 'measure',
+          result: examination,
+          anthropic_usage: usage,
+          note: 'MEASURE — advisory; the examination is recorded, nothing binds (ENFORCE is S11).',
+        },
+        200,
+        metered.headers,
       )
     }
 
@@ -515,9 +679,19 @@ export async function runDiscernmentPost(
       justiceFailure,
       habitualDecision,
     })
+    // S9b: meter the hand-back stage (no LLM — base rate); flag-gated.
+    const metered = await meterDiscernmentStage({
+      apiKeyId: auth.credentialId,
+      agentId: orchestratorAgentId,
+      phase: 'hand_back',
+      taskRef,
+      usage: { input_tokens: 0, output_tokens: 0, calls: 0 },
+    })
+    if (!metered.ok) return json({ error: 'billing unavailable' }, 503)
     return json(
       { schema: 'practice-discernment-response-v1', mode: 'measure', result: outcome },
       200,
+      metered.headers,
     )
   } catch (e) {
     // Vague 503 with the specific reason server-side only (R4 — the reflect posture).

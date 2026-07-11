@@ -68,10 +68,40 @@ export type TrustEventType =
   | 'delegation-reflection-case-1'
   | 'delegation-reflection-case-2'
   | 'delegation-reflection-case-3'
+  // S9b (ADR-013 §11, the 2026-07-11 mentor verdicts — verbatim record wins).
+  // DARK until the S9b founder-walked CHECK-widening migration lands.
+  //   calling-completed — G1d: ASYMMETRIC update (the 'calling' effect class):
+  //     an agent-stated mismatch-flag raises dikaiosyne (+1-capped, demonstrated
+  //     ceiling 'deliberate'); no-mismatch-where-possible is record-only (S2
+  //     declaration-tier evidence; NO level change, NO activity-clock reset);
+  //     no-mismatch-where-impossible is a NULL event (the deriver emits nothing).
+  //   reflect-screened-honest — G2: the harness's forced single review turn +
+  //     verbatim out-of-band persist, credentialed at depth 'screened'; decay
+  //     modulation at a QUARTER of the base rate (SCREENED_REFLECT_MODULATION_
+  //     FACTOR), never the full credential's weight.
+  //   self-screen-absent — G4: the session ran with NO self-screen (distinct from
+  //     passion-unflagged-by-self-screen, where the screen ran and missed);
+  //     record-only ('flag') on the oversight domain. NOTE (PA-6 standing note):
+  //     none of the three can RAISE oversight — the A7 AND-guard's premise
+  //     (oversight is increase-unreachable) is preserved by construction.
+  | 'calling-completed'
+  | 'reflect-screened-honest'
+  | 'self-screen-absent'
 
 /** The verifiable examination artifact backing a trust event (the R18f-parallel
- *  proof). */
-export type ArtifactKind = 'signed_layer2_assessment' | 'reflect_completion'
+ *  proof). S9b adds:
+ *    calling_record — a SERVER-persisted calling/acknowledgement row (a
+ *      collaboration_records purpose_acknowledgement, or a completed+approved
+ *      discovery_sessions calling session). Server-authored — never a
+ *      client-claimed declaration.
+ *    reflect_screened_persist — the agent_stated verbatim persist on a
+ *      sage_reflect_sessions row (the G2 screened reflection; honestly NOT named
+ *      'reflect_completion' — a screened persist is not a completed sequence). */
+export type ArtifactKind =
+  | 'signed_layer2_assessment'
+  | 'reflect_completion'
+  | 'calling_record'
+  | 'reflect_screened_persist'
 
 /** The coarse effect class an event has on the earned level. Derived from
  *  event_type by the engine; not stored (single source of truth = event_type). */
@@ -81,7 +111,9 @@ export type TrustEventEffect =
   | 'cap' // latch the justice cap at deliberate
   | 'clear-cap-and-increase' // clear the justice latch + raise (transparently-handled)
   | 'modulate' // reflect: set the reflect timestamp; no level change
-  | 'flag' // record only; no level change (A9 case 3)
+  | 'flag' // record only; no level change (A9 case 3; self-screen-absent)
+  | 'modulate-screened' // screened reflect: set the SCREENED timestamp only (quarter-rate modulation)
+  | 'calling' // calling-completed: the G1d ASYMMETRIC branch (see trust-transition.ts)
 
 /** One trust event (the ledger row shape, camelCase). */
 export interface TrustEvent {
@@ -113,6 +145,28 @@ export interface TrustEventPayload {
   /** reflect-completed-honest: the honesty signals. */
   fabricationRiskLevel?: 'low' | 'moderate' | 'high'
   contextSource?: 'agent_stated' | 'harness_inferred' | null
+  /** reflect-screened-honest (G2): the depth marker — always 'screened'. */
+  reflectDepth?: 'screened'
+  /** calling-completed (G1d): the four mentor-specified fields + provenance. */
+  declaredPurpose?: string
+  functionTypeScope?: string[]
+  circleOfConcernLevel?: string | null
+  mismatchFlagsRaised?: string[]
+  /** Whether mismatches were structurally possible (a profiled candidate + a
+   *  declared function type existed to compare). where-impossible ⇒ the deriver
+   *  emits NOTHING (the mentor's null-event arm) — this field only ever appears
+   *  true on an emitted event. */
+  mismatchPossible?: boolean
+  /** WHO produced the acknowledgement: 'harness_computed' (the deterministic
+   *  server/harness fit-check) or 'agent_stated' (the agent's own flagging). The
+   *  'calling' effect's dikaiosyne INCREASE arm requires agent_stated — the agent
+   *  is never credited for the harness's work (the never-self-report doctrine,
+   *  inverted). */
+  acknowledgementSource?: 'harness_computed' | 'agent_stated'
+  /** passion-unflagged-by-self-screen (G4): the sub-species identified (the
+   *  3-part standard requires sub-species, never bare root). */
+  passionSubSpecies?: string
+  passionRoot?: string
   /** signing key id, session id, etc. — free additional context. */
   [key: string]: unknown
 }
@@ -130,6 +184,9 @@ export interface EarnedDomainState {
   lastDomainActivityAt: string | null
   /** ISO or null (agent-wide reflect signal, denormalised onto the domain row). */
   reflectLastHonestAt: string | null
+  /** ISO or null (S9b G2 — the agent-wide SCREENED-reflect signal; quarter-rate
+   *  decay modulation; the FULL reflect signal above wins when both are active). */
+  reflectLastScreenedAt?: string | null
   justiceFloorActive: boolean
   coverageStatus: CoverageStatus | null
 }
@@ -146,6 +203,7 @@ export function initialEarnedDomainState(opts?: {
     volatility: opts?.volatility ?? 'high',
     lastDomainActivityAt: null,
     reflectLastHonestAt: null,
+    reflectLastScreenedAt: null,
     justiceFloorActive: false,
     coverageStatus: null,
   }

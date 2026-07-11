@@ -10,39 +10,47 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isTrustCoreSweepEnabled } from '@/lib/substrate/trust-core/trust-core-flag'
 import { purgeExpiredTrustCore } from '@/lib/substrate/trust-core/trust-core-store'
 import { purgeExpiredCollaboration } from '@/lib/substrate/trust-core/collaboration-store'
+import { sweepExpiredSessions } from '@/lib/sage-reflect/session-store'
 
 /** The purge dependency, injectable for tests (the handler reaches the DB only
  *  through this seam). Production GET binds the real, awaited store fns — sweeping
- *  ALL trust-core tables: agent_trust_events + agent_trust_state (S1) AND
- *  collaboration_records (S5). */
+ *  ALL trust-core tables: agent_trust_events + agent_trust_state (S1),
+ *  collaboration_records (S5), AND sage_reflect_sessions (S9b G2 — the reflect
+ *  retention enforcer the standing persist activation was gated on; SR-12's
+ *  sweepExpiredSessions, finally scheduled). */
 export type TrustSweepDeps = {
   purge: () => Promise<{
     deleted: number
     events: number
     state: number
     collaboration: number
+    reflect: number
     error: string | null
   }>
 }
 
-/** Sweep both the S1 trust-core tables and the S5 collaboration table; combine the
- *  cron-friendly shape. Fail-honest — a purge error from either surfaces in `error`,
- *  never fail-closed. */
+/** Sweep the S1 trust-core tables, the S5 collaboration table, and the reflect
+ *  sessions (S9b); combine the cron-friendly shape. Fail-honest — a purge error
+ *  from any surfaces in `error`, never fail-closed. */
 async function purgeAllTrustCore(): Promise<{
   deleted: number
   events: number
   state: number
   collaboration: number
+  reflect: number
   error: string | null
 }> {
   const tc = await purgeExpiredTrustCore()
   const collab = await purgeExpiredCollaboration()
+  const reflect = await sweepExpiredSessions()
+  const reflectDeleted = reflect.ok ? reflect.value.deleted : 0
   return {
-    deleted: tc.deleted + collab.deleted,
+    deleted: tc.deleted + collab.deleted + reflectDeleted,
     events: tc.events,
     state: tc.state,
     collaboration: collab.deleted,
-    error: tc.error ?? collab.error,
+    reflect: reflectDeleted,
+    error: tc.error ?? collab.error ?? (reflect.ok ? null : reflect.error),
   }
 }
 
@@ -91,6 +99,7 @@ export async function runTrustCoreRetentionSweep(
       events_deleted: purge.events,
       state_deleted: purge.state,
       collaboration_deleted: purge.collaboration,
+      reflect_deleted: purge.reflect,
       errors: purge.error ? [`purge: ${purge.error}`] : [],
     },
     { status: 200 },

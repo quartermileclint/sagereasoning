@@ -138,6 +138,12 @@ function runHook(hookPath, event, extraEnv = {}) {
         SAGE_GATE1_CREDENTIAL: "sr_prac_mocktoken", // primary var loadConfig reads (over GATE1_CREDENTIAL)
         GATE1_CREDENTIAL: "sr_prac_mocktoken",
         GATE1_STATE_DIR: stateDir,
+        // Hermeticity must pin FILE-PATH fallbacks too, not just env vars: discernment.mjs falls
+        // back to <hookDir>/../discernment.config.json, and since S9 committed the REAL dogfood
+        // config at that path, the working tree would otherwise silently provision every
+        // "un-provisioned" leg. Point the default at a guaranteed-absent file; provisioned legs
+        // override via extraEnv (s8Env).
+        SAGE_GATE1_DISCERNMENT_CONFIG: join(stateDir, "no-such-discernment.config.json"),
         ...extraEnv,
       },
     });

@@ -4,6 +4,7 @@
   "orchestrator_profile": {
     "schema": "trust-orchestrator-profile-v1",
     "agentId": "example:orchestrator@v1",
+    "purpose": "OPTIONAL but recommended (S9b G1a calling gate): the loop's declared standing purpose — orients every session's opening examination; absent, the harness logs CALLING-GATE purposeless and injects the calling elicitation (measure mode).",
     "currentKathekonta": ["serve the operator's task honestly", "delegate within scope"],
     "examinationCapacity": {
       "corroborationCheckAvailable": true,

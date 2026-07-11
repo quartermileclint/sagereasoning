@@ -64,7 +64,7 @@ export type EraseDeps = {
   lookupByToken: (rawToken: string) => Promise<ErasureLookup>
   lookupById: (id: string) => Promise<ErasureLookup>
   erase: (
-    row: Pick<ErasureCredentialRow, 'id' | 'credential_provenance'>,
+    row: Pick<ErasureCredentialRow, 'id' | 'credential_provenance' | 'agent_id'>,
   ) => Promise<StoreResult<ErasureResult>>
   logCompliance: (record: Record<string, unknown>) => Promise<void>
 }
@@ -218,6 +218,9 @@ export async function runConsumerErasure(
   const result = await deps.erase({
     id: target.id,
     credential_provenance: target.credential_provenance,
+    // S9b G2: the bound agent identity — read here, BEFORE erase anonymises it
+    // (the key for the agent-scoped reflect deletion).
+    agent_id: target.agent_id,
   })
 
   if (!result.ok) {
@@ -248,6 +251,8 @@ export async function runConsumerErasure(
       // PA-8 fold (2026-07-11 pre-activation audit): the deletion always happened
       // (consumer-erasure step 1c) but the compliance record under-reported it.
       `collaboration_records (credential-scoped: ${credentialRef}; ${result.value.collaboration_deleted} rows)`,
+      // S9b G2: reflect rows are AGENT-keyed (the disclosed shared-identity scope).
+      `sage_reflect_sessions (agent-scoped via the credential; ${result.value.reflect_deleted} rows)`,
     ],
     errors: result.value.warnings.length > 0 ? result.value.warnings : null,
   })
@@ -260,6 +265,7 @@ export async function runConsumerErasure(
       trajectory_rows_deleted: result.value.trajectory_deleted,
       trust_rows_deleted: result.value.trust_deleted,
       collaboration_rows_deleted: result.value.collaboration_deleted,
+      reflect_rows_deleted: result.value.reflect_deleted,
       billing_rows_depersonalised: result.value.billing_depersonalised,
       credential: 'anonymised_and_revoked',
       retained_by_law: RETAINED_BY_LAW,

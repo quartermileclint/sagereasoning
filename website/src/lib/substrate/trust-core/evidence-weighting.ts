@@ -209,20 +209,28 @@ export function credentialCanContribute(
 // The three evidence tiers (spec 2)
 // ════════════════════════════════════════════════════════════════════════════
 
-/** Evidence source tier (spec 2): credential > behavioural condition-matched > prior. */
+/** Evidence source tier (spec 2 + S9b G1c): credential > behavioural
+ *  condition-matched > declaration > profile-prior. The DECLARATION tier is the
+ *  2026-07-11 mentor verdict's purpose-declaration evidence — "at the lowest
+ *  confidence tier among trust-relevant evidence — below credential evidence and
+ *  behavioural evidence, above nothing", and ABOVE the operator-authored profile
+ *  prior ("the live calling record is … more trust-relevant than a config
+ *  value"). */
 export type EvidenceTier =
   | 'credential'
   | 'behavioural-condition-matched'
+  | 'declaration'
   | 'profile-prior'
 
 /**
  * Monotone tier weights. DERIVED (the mentor fixes the ORDERING credential >
- * behavioural > profile-prior, not these magnitudes). Strictly decreasing.
- * Tunable pending S3/S9.
+ * behavioural > declaration > profile-prior, not these magnitudes). Strictly
+ * decreasing. Tunable pending S3/S9.
  */
 export const EVIDENCE_TIER_WEIGHT: Record<EvidenceTier, number> = {
   credential: 1.0,
   'behavioural-condition-matched': 0.6,
+  declaration: 0.4,
   'profile-prior': 0.25,
 }
 
@@ -287,11 +295,11 @@ export interface CredentialEvidenceInput extends EvidenceInputBase {
 }
 
 /**
- * A non-credential evidence source (behavioural condition-matched / profile prior)
- * — not function-scoped, so no A2 transfer applies.
+ * A non-credential evidence source (behavioural condition-matched / declaration /
+ * profile prior) — not function-scoped, so no A2 transfer applies.
  */
 export interface NonCredentialEvidenceInput extends EvidenceInputBase {
-  tier: 'behavioural-condition-matched' | 'profile-prior'
+  tier: 'behavioural-condition-matched' | 'declaration' | 'profile-prior'
 }
 
 export type EvidenceInput = CredentialEvidenceInput | NonCredentialEvidenceInput

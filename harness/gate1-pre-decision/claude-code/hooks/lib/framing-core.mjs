@@ -34,6 +34,22 @@ import { appendProvenance } from "./session-state.mjs";
 
 export const MAX_CONTEXT_CHARS = 9500; // headroom under Claude Code's 10,000-char additionalContext cap.
 
+// S9b (F-S9 register item 4): the server caps free-text inputs at 5000 chars
+// (TEXT_LIMITS.medium on /api/reason `input` + /api/guardrail `action`). 4800
+// leaves headroom for the truncation marker. HEAD-anchored: the opening of a
+// task/command carries the intent; the alternative (no truncation) was an
+// honest 400 and NO examination at all — observed live on H1 (S9b open) and on
+// the S9 guard (findings register item 4).
+export const MAX_SERVER_INPUT_CHARS = 4800;
+export function truncateForServer(text) {
+  const s = String(text ?? "");
+  if (s.length <= MAX_SERVER_INPUT_CHARS) return s;
+  return (
+    s.slice(0, MAX_SERVER_INPUT_CHARS) +
+    `\n[truncated by the harness at ${MAX_SERVER_INPUT_CHARS} chars — the server caps this field at 5000]`
+  );
+}
+
 // The leading marker every rendered frame (and the UNAVAILABLE note) begins with. The subagent
 // PreToolUse hook uses it as a recursive-loop / already-framed guard: a prompt that already carries
 // this sentinel is NOT re-examined. Keep in sync with renderFrame()'s first line.
@@ -79,7 +95,7 @@ export function loadConfig({ hookDir, eventName, allowStrict = true } = {}) {
   const cfg = {
     eventName: eventName || "UserPromptSubmit",
     endpoint: process.env.GATE1_ENDPOINT || fileCfg.endpoint || "http://localhost:3000/api/reason",
-    depth: process.env.GATE1_DEPTH || fileCfg.depth || "standard", // quick | standard (never deep — D3)
+    depth: process.env.GATE1_DEPTH || fileCfg.depth || "standard", // quick | standard | deep (S9b G5 — the D3 never-deep election is RESOLVED per ADR-013 §11: deep is reachable, and REQUIRED when the trust profile reads reflexive)
     failMode: process.env.GATE1_FAIL_MODE || fileCfg.failMode || "open", // open | strict
     timeoutMs: Number(process.env.GATE1_TIMEOUT_MS || fileCfg.timeoutMs || 28000), // < the 30s hook timeout
     stateDir: process.env.GATE1_STATE_DIR || fileCfg.stateDir || join(tmpdir(), "sage-gate1"),
@@ -131,7 +147,10 @@ export function loadConfig({ hookDir, eventName, allowStrict = true } = {}) {
     parsePatternList(process.env.GATE1_GUARD_TOOLS) ||
     (Array.isArray(fileCfg.guardTools) ? fileCfg.guardTools : null) ||
     [];
-  if (cfg.depth === "deep") cfg.depth = "standard"; // hard guard: ADR-011 D3 — never deep in a pre-prompt hook.
+  // S9b G5 (E1 adopted): the ADR-011 D3 deep-clamp is REMOVED — the mentor's depth
+  // calibration (ADR-013 §11 G5) requires deep when a domain reads reflexive. A deep
+  // consult that cannot complete inside the hook budget fails OPEN-HONEST (UNFRAMED
+  // logged — never a silent downgrade to a shallower examination than required).
   if (!allowStrict) cfg.failMode = "open"; // SubagentStart can't block ⇒ strict is impossible; force open.
   else if (cfg.failMode !== "strict") cfg.failMode = "open";
   return cfg;
@@ -473,12 +492,18 @@ export function extractSignedAssessment(body) {
 // ---------------------------------------------------------------------------
 export async function fetchFrame(cfg, task, opts = {}) {
   // opts (all optional; H1/H2 pass none → byte-identical request):
-  //   depth         — override cfg.depth (H3's same-depth loop carry, D-B). Never 'deep' (D3 guard).
+  //   depth         — override cfg.depth (H3's same-depth loop carry D-B + the S9b G5
+  //                   trust-calibrated depth; 'deep' is REACHABLE — the ADR-011 D3
+  //                   clamp is removed per ADR-013 §11 G5, election E1 2026-07-12).
   //   priorFeedback — the SDK PriorFeedback block for a re-examination (the iterate step, D-B).
   //   context       — extra situational context string.
-  let depth = typeof opts.depth === "string" ? opts.depth : cfg.depth;
-  if (depth === "deep") depth = "standard"; // ADR-011 D3: never deep in a pre-action hook.
-  const reqBody = { input: task, depth, response_format: "assessment_first" };
+  const depth = typeof opts.depth === "string" ? opts.depth : cfg.depth;
+  // S9b (F-S9 register item 4 + the H1 http-400 observed live at S9b open): the server
+  // caps `input` at 5000 chars (TEXT_LIMITS.medium) — an over-long task drew an honest
+  // 400 and the frame was lost entirely. Truncate HEAD-anchored with a loud marker:
+  // a truncated frame examines the task's opening statement; an untruncated over-long
+  // POST examines nothing.
+  const reqBody = { input: truncateForServer(task), depth, response_format: "assessment_first" };
   if (typeof opts.context === "string" && opts.context) reqBody.context = opts.context;
   if (opts.priorFeedback && typeof opts.priorFeedback === "object") reqBody.prior_feedback = opts.priorFeedback;
   let res;
@@ -522,7 +547,10 @@ export async function fetchGuardrail(cfg, action, { context, riskClass } = {}) {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${cfg.credential}` },
       body: JSON.stringify({
-        action,
+        // S9b: cap at the server's 5000-char action limit (the S9 register-item-4
+        // class: an over-long heredoc drew http 400 ⇒ unguarded-honest; a truncated
+        // action is guarded on its operative opening instead).
+        action: truncateForServer(action),
         ...(context ? { context } : {}),
         ...(riskClass ? { risk_class: riskClass } : {}),
       }),
@@ -591,7 +619,11 @@ export function fail(cfg, reason) {
 //                passes its own emit that prepends the frame to the subagent prompt via updatedInput.
 // Calls process.exit in every path (success, fire-once-skip, or via fail()).
 // ---------------------------------------------------------------------------
-export async function runFraming(cfg, { sessionKey, task, logLabel = "FRAMED", emit }) {
+export async function runFraming(cfg, { sessionKey, task, logLabel = "FRAMED", emit, preface = "" }) {
+  // `preface` (S9b G1a, additive — H1/H2 pass none ⇒ byte-identical): a calling-
+  // stage block prepended to the injected frame (the declared-purpose orientation
+  // or the purposeless-session elicitation). ADVISE channel; clipped with the
+  // frame by emitContext's MAX_CONTEXT_CHARS.
   if (!task) return fail(cfg, "empty task prompt");
 
   // Fire-once guard (ADR-011 D5). A follow-up in the same namespace does not re-frame.
@@ -622,7 +654,7 @@ export async function runFraming(cfg, { sessionKey, task, logLabel = "FRAMED", e
   // Inject the frame: default = additionalContext (UserPromptSubmit); subagent hook passes its own
   // emit (updatedInput.prompt prepend). Neither exits — the shared tail writes the marker + exits 0.
   if (emit) emit(cfg, r.verdict);
-  else emitContext(cfg, renderFrame(r.verdict));
+  else emitContext(cfg, (preface ? preface + "\n" : "") + renderFrame(r.verdict));
 
   // Record success so the fire-once guard suppresses re-framing.
   try {

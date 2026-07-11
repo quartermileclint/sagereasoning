@@ -100,6 +100,15 @@ import {
 // adds a new ROUTE-LEVEL call site (Option (ii) — closes a today's silent
 // gap where safety_signal on answer turns was parsed but never read).
 import { checkZone3Boundary } from '@/lib/sage-reflect/zone3-boundary'
+// S9b G2 — the out-of-band Q1–Q6 examination against the verbatim persist.
+// DARK behind SUBSTRATE_REFLECT_SCREENED_EXAM_ENABLED (unset ⇒ nothing is
+// scheduled — byte-identical); scheduled via waitUntil (the M1 deferral
+// precedent — Fluid Compute ON in production).
+import { waitUntil } from '@vercel/functions'
+import {
+  isScreenedExamEnabled,
+  maybeRunScreenedExamination,
+} from '@/lib/sage-reflect/screened-examination'
 
 /** Metering surface — same Option-D surface as Sage Calling (wrapper-internal). */
 const REFLECT_METERING_SURFACE = 'wrapper_internal' as const
@@ -285,7 +294,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
   const parsed = parseReflectBody(rawBody)
   if (!parsed.ok) return buildReflectBadRequestResponse(parsed.message)
-  const { session_id, agent_id, response, session_summary, safety_signal, acts_blocked, context_source } = parsed.value
+  const { session_id, agent_id, response, session_summary, safety_signal, acts_blocked, context_source, screen_evidence } = parsed.value
 
   // 4. Auth gate (SR-14, AC7) — single 401 on any failure.
   const auth = await verifyReflectToken(request, agent_id)
@@ -305,7 +314,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         // First call — session_summary is guaranteed by the parser here.
         if (!session_summary) return buildReflectBadRequestResponse("Body field 'session_summary' is required to open a reflection session.")
         const result = await openReflection(
-          { session_id, agent_id, session_summary, safety_signal, acts_blocked, context_source },
+          { session_id, agent_id, session_summary, safety_signal, acts_blocked, context_source, screen_evidence },
           undefined,
           meter,
         )
@@ -464,7 +473,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // trust event with owner/credential for data rights (measure mode, flag-gated).
     const result = await answerReflection(session_id, response, undefined, meter, {
       credentialId: auth.credentialId,
+      // S9b G2: this answer's declared provenance — 'agent_stated' on the Q1
+      // verbatim marks the persisted words as the agent's own (the screened
+      // credential's key; the row's context_source keeps the OPEN semantics).
+      answerContextSource: context_source,
     })
+
+    // S9b G2 — schedule the out-of-band Q1–Q6 examination. Flag-gated (unset ⇒
+    // nothing runs, no extra read); the exam SELF-CONDITIONS (it runs only when
+    // this answer was the Q1 verbatim landing on an agent_stated session —
+    // anything else exits on one light read). Out-of-band via waitUntil; the
+    // response below is untouched either way.
+    if (isScreenedExamEnabled() && result.ok && result.value.decision.kind !== 'complete') {
+      waitUntil(
+        maybeRunScreenedExamination({
+          session_id,
+          verbatim: response,
+          credentialId: auth.credentialId,
+          agentId: agent_id,
+        }),
+      )
+    }
     return respond(session_id, result, mildSafetySignal)
   } catch (err) {
     console.error('[api/practice/reflect] unexpected error:', err)

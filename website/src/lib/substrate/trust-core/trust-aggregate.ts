@@ -42,6 +42,7 @@ export function computeEffectiveDomain(
     lastDomainActivityAt: state.lastDomainActivityAt,
     volatility: state.volatility,
     reflectLastHonestAt: state.reflectLastHonestAt,
+    reflectLastScreenedAt: state.reflectLastScreenedAt ?? null,
     now,
   })
 

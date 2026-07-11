@@ -25,6 +25,7 @@ import { deleteAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessmen
 // events + state. Missing-table-benign (the migration is its own founder-walked step).
 import { deleteTrustDataForOwner } from '@/lib/substrate/trust-core/trust-core-store'
 import { deleteCollaborationDataForOwner } from '@/lib/substrate/trust-core/collaboration-store'
+import { deleteAgentSessions } from '@/lib/sage-reflect/session-store'
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -143,12 +144,29 @@ export async function DELETE(request: NextRequest) {
     }
   }
 
-  // NOTE on sage_reflect_sessions (Gate-1 Slice-5c follow-up, 2026-06-21): reflect rows are keyed by
-  // agent_id (not user_id), like agent_assessment_history above — so they would need an explicit
-  // delete here too (resolve this user's agent_ids → deleteAgentSessions). That wiring is NOT yet
-  // present (a disclosed named follow-up; the reflect store's deleteAgentSessions/sweepExpiredSessions
-  // exist but are unwired, and no production path persists harness reflect rows today —
-  // SAGE_GATE1_REFLECT_PERSIST_ENABLED is dark). Add it before enabling standing reflect-persistence.
+  // S9b G2 (R17c — closes the Gate-1 Slice-5c named follow-up, 2026-07-11):
+  // sage_reflect_sessions rows are keyed by agent_id, so resolve this user's
+  // credential-bound agent_ids from api_keys and hard-delete each agent's reflect
+  // sessions. This is the standing prerequisite the reflect-persist activation was
+  // gated on. Fail-collected like the siblings above.
+  {
+    const { data: keyRows, error: keysError } = await supabaseAdmin
+      .from('api_keys')
+      .select('agent_id')
+      .eq('owner_user_id', userId)
+      .not('agent_id', 'is', null)
+    if (keysError) {
+      deletionErrors.push(`sage_reflect_sessions (agent resolution): ${keysError.message}`)
+    } else {
+      const agentIds = [...new Set(((keyRows ?? []) as { agent_id: string }[]).map((r) => r.agent_id))]
+      for (const agentId of agentIds) {
+        const reflectDelete = await deleteAgentSessions(agentId)
+        if (!reflectDelete.ok) {
+          deletionErrors.push(`sage_reflect_sessions (${agentId}): ${reflectDelete.error}`)
+        }
+      }
+    }
+  }
 
   for (const table of tablesToDelete) {
     const { error } = await supabaseAdmin
@@ -173,7 +191,7 @@ export async function DELETE(request: NextRequest) {
     await supabaseAdmin.from('compliance_deletion_log').insert({
       event: 'account_deleted',
       timestamp: new Date().toISOString(),
-      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history', 'agent_trust_events', 'agent_trust_state', 'collaboration_records'],
+      tables_cleared: [...tablesToDelete, ...cascadeClearedViaMentorProfile, 'agent_assessment_history', 'agent_trust_events', 'agent_trust_state', 'collaboration_records', 'sage_reflect_sessions'],
       errors: deletionErrors.length > 0 ? deletionErrors : null,
     })
   } catch {

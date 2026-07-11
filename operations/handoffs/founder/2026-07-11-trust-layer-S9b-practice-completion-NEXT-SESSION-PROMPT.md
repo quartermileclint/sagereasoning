@@ -1,3 +1,5 @@
+> **SPENT — executed 2026-07-12.** Close: `operations/handoffs/founder/2026-07-12-trust-layer-S9b-practice-completion-CLOSE.md` (`D-TRUST-LAYER-S9B-PRACTICE-COMPLETION-BUILT-REVIEW-FOLDED`). The founder walk (migration + flags + capability + persist) is CARRIED in the close §Founder Walk. Do not re-run.
+
 # Next-Session Prompt — Trust Layer S9b: the practice-completion slice (calling gate + screened reflection + Gate-2 elicitation + depth calibration)
 
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)

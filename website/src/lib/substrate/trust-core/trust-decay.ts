@@ -29,6 +29,7 @@ import {
   PROXIMITY_RANK,
   REFLECT_ACTIVE_WINDOW_MS,
   REFLECT_MODULATION_FACTOR,
+  SCREENED_REFLECT_MODULATION_FACTOR,
 } from './constants'
 
 export interface DecayInput {
@@ -41,6 +42,9 @@ export interface DecayInput {
   volatility: Volatility
   /** ISO timestamp of the last honest reflect completion, or null. */
   reflectLastHonestAt: string | null
+  /** ISO timestamp of the last SCREENED reflect persist, or null (S9b G2 —
+   *  quarter-rate modulation; the full signal above wins when both are active). */
+  reflectLastScreenedAt?: string | null
   now: Date
 }
 
@@ -51,6 +55,9 @@ export interface DecayResult {
   stepsApplied: number
   /** True when an active reflect practice slowed the decay. */
   reflectModulated: boolean
+  /** True when the modulation applied was the SCREENED quarter-rate factor (a
+   *  screened persist was active and no full reflect was — S9b G2). */
+  screenedModulated?: boolean
 }
 
 /**
@@ -99,9 +106,17 @@ export function decayEarnedRank(input: DecayInput): DecayResult {
   }
 
   const reflectActive = isReflectActive(input.reflectLastHonestAt, input.now)
-  const onsetMonths =
-    DECAY_ONSET_MONTHS[input.volatility] *
-    (reflectActive ? REFLECT_MODULATION_FACTOR : 1)
+  // S9b G2: a screened persist modulates at the QUARTER rate (onset × 4/3), but
+  // only when no FULL reflect is active — the full factor wins, never stacks
+  // (the mentor's cap: maximum modulation is the halving).
+  const screenedActive =
+    !reflectActive && isReflectActive(input.reflectLastScreenedAt ?? null, input.now)
+  const modulationFactor = reflectActive
+    ? REFLECT_MODULATION_FACTOR
+    : screenedActive
+      ? SCREENED_REFLECT_MODULATION_FACTOR
+      : 1
+  const onsetMonths = DECAY_ONSET_MONTHS[input.volatility] * modulationFactor
   const onsetMs = onsetMonths * MONTH_MS
 
   // Below the onset ⇒ no decline yet. At/after the onset ⇒ one rank per
@@ -112,6 +127,7 @@ export function decayEarnedRank(input: DecayInput): DecayResult {
   return {
     rank: decayedRank,
     stepsApplied: earnedRank - decayedRank,
-    reflectModulated: reflectActive,
+    reflectModulated: reflectActive || screenedActive,
+    screenedModulated: screenedActive,
   }
 }

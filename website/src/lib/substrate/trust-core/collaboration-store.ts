@@ -29,6 +29,7 @@ import type {
   HabitualStableFlag,
   JusticeFailureReflection,
   L4AuditResult,
+  PurposeAcknowledgement,
 } from './collaboration-record'
 import type { TransparencyDeficit } from './transparency-ledger'
 
@@ -222,6 +223,42 @@ export function recordAuthorityBoundary(
 ): Promise<StoreResult<void>> {
   // Canonicalize (circle scope sorted) so the DB write-once comparison is order-stable.
   return patchByKey(orchestratorAgentId, taskRef, { authority_boundary: canonicalAuthorityBoundary(boundary) }, client)
+}
+
+/** S9b G1b — write the spawn purpose-acknowledgement (a mutable JSONB column,
+ *  written once at spawn open by the selection seam). DEPLOY-ORDER SAFETY
+ *  (review fold, 2026-07-12): this deliberately does NOT ride patchByKey —
+ *  patchByKey's missing-table-benign fold treats PostgREST's PGRST204
+ *  unknown-COLUMN error as ok too (its message ends "…in the schema cache",
+ *  matching isMissingTableError's regex — the disclosed A-3 class), which would
+ *  FALSE-SUCCEED the ack pre-§E and mint ackPersisted:true with no persisted
+ *  artifact (the R18f-parallel gate would then lean on the event-type CHECK
+ *  alone, logging a doomed calling-event attempt every live spawn). Here ANY
+ *  error — missing table, missing column, trigger — reads ok:false: the ack
+ *  either persisted or it did not; it never pretends. */
+export async function recordPurposeAcknowledgement(
+  orchestratorAgentId: string,
+  taskRef: string,
+  ack: PurposeAcknowledgement,
+  client: SupabaseClient = getAdminClient(),
+): Promise<StoreResult<void>> {
+  try {
+    const { error } = await client
+      .from(TABLE)
+      .update({
+        purpose_acknowledgement: ack,
+        updated_at: new Date().toISOString(),
+        retain_until: retainUntilIso(),
+      })
+      .eq('orchestrator_agent_id', orchestratorAgentId)
+      .eq('task_ref', taskRef)
+    if (error) {
+      return { ok: false, error: `recordPurposeAcknowledgement: ${error.message}` }
+    }
+    return { ok: true, value: undefined }
+  } catch (e) {
+    return { ok: false, error: `recordPurposeAcknowledgement threw: ${(e as Error).message}` }
+  }
 }
 
 /** A7 — write the L4 audit result (write-once / readable-not-modifiable at the DB). */

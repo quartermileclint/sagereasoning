@@ -37,7 +37,14 @@
 
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadConfig, readStdin, runFraming, fail, maybeDebugDump } from "./lib/framing-core.mjs";
+import { loadConfig, readStdin, runFraming, fail, maybeDebugDump, honestLog } from "./lib/framing-core.mjs";
+import {
+  loadDiscernmentConfig,
+  resolveDeclaredPurpose,
+  callingGateMode,
+  renderCallingElicitation,
+  renderPurposeOrientation,
+} from "./lib/discernment.mjs";
 
 const HOOK_DIR = dirname(fileURLToPath(import.meta.url)); // …/claude-code/hooks
 
@@ -57,7 +64,40 @@ async function main() {
   const sessionKey = event.session_id || "no-session";
   const task = typeof event.prompt === "string" ? event.prompt.trim() : "";
 
-  await runFraming(cfg, { sessionKey, task, logLabel: "FRAMED" });
+  // ── S9b G1a — the calling gate (ADR-013 §11): a declared purpose orients the
+  // opening examination; a purposeless session is the circular-examination
+  // problem. MEASURE (default): log + inject the calling elicitation as ADVISE.
+  // ENFORCE (GATE1_CALLING_GATE_MODE=enforce — the S11 activation arm, dark
+  // until then): the mentor's HARD gate — block the prompt (exit 2) until a
+  // purpose is declared. Fail-soft: a gate error never breaks the framing. ──
+  let preface = "";
+  try {
+    const dcfg = loadDiscernmentConfig(cfg, HOOK_DIR);
+    // UN-PROVISIONED BYTE-IDENTITY (the S8 standing invariant, battery-asserted):
+    // with no discernment config AND no explicit calling-gate configuration, the
+    // gate does not engage at all — a pre-S8 install's H1 stays byte-identical.
+    const explicitlyConfigured =
+      !!(process.env.GATE1_CALLING_GATE_MODE || "").trim() ||
+      !!(process.env.GATE1_DECLARED_PURPOSE || "").trim();
+    if (dcfg || explicitlyConfigured) {
+      const purpose = resolveDeclaredPurpose(dcfg);
+      if (purpose.declared) {
+        preface = renderPurposeOrientation(purpose.declared, purpose.source);
+      } else {
+        const mode = callingGateMode();
+        honestLog(cfg, `CALLING-GATE session=${sessionKey} purposeless mode=${mode}`);
+        if (mode === "enforce") {
+          process.stderr.write(renderCallingElicitation());
+          process.exit(2); // the hard gate — no task frame before a purpose exists (G1a; S11-armed).
+        }
+        preface = renderCallingElicitation();
+      }
+    }
+  } catch {
+    /* the calling gate must never break the frame — fall through unprefaced. */
+  }
+
+  await runFraming(cfg, { sessionKey, task, logLabel: "FRAMED", preface });
 }
 
 // Catch-all: any unexpected error still resolves through the fail handler (honest + mode-correct),

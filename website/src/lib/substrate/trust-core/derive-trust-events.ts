@@ -22,6 +22,7 @@
 import {
   verifyLayer2Signature,
 } from '@/lib/translation-sandwich/layer2-verifier'
+import { SUB_SPECIES } from '@/lib/translation-sandwich/layer1-extractor'
 import type { SignedLayer2Assessment } from '@/lib/translation-sandwich/layer2-signer'
 import type {
   KatorthomaProximity,
@@ -211,6 +212,269 @@ export function deriveWorstJusticeOutcome(
       demonstratedProximity: metDemonstrated,
     }
   return null
+}
+
+// ============================================================================
+// S9b derivers (ADR-013 §11 — the 2026-07-11 mentor verdicts; verbatim wins).
+// All three event types are DARK until the S9b CHECK-widening migration lands:
+// pre-migration the insert is rejected by the event-type CHECK and emitTrustEvents
+// surfaces it as a loud store failure — no silent fabrication either way.
+// ============================================================================
+
+export interface CallingEventInput {
+  agentId: string
+  ownerUserId: string | null
+  credentialRef: string | null
+  /** WHERE the calling debt was discharged: a scoped spawn acknowledgement
+   *  (collaboration record) or a full calling session (discovery_sessions). */
+  source: 'spawn_acknowledgement' | 'calling_session'
+  /** The SERVER-persisted record backing the event (R18f-parallel): a
+   *  `collab:<record_id>` or `calling:<session_id>` handle. The deriver refuses
+   *  to emit without one — a declaration with no server record is not evidence. */
+  artifactRef: string
+  declaredPurpose: string
+  functionTypeScope: string[]
+  circleOfConcernLevel: string | null
+  mismatchFlagsRaised: string[]
+  /** Whether a mismatch was STRUCTURALLY possible (a profiled candidate + a
+   *  declared function type existed to compare). The mentor's third arm:
+   *  no-mismatch-where-IMPOSSIBLE is a null event — nothing is emitted. */
+  mismatchPossible: boolean
+  /** Who produced the acknowledgement. Only 'agent_stated' mismatch flags can
+   *  drive the dikaiosyne increase arm (the engine enforces this too — belt and
+   *  braces); 'harness_computed' is always record-only. */
+  acknowledgementSource: 'harness_computed' | 'agent_stated'
+  now: Date
+  correlationId: string
+}
+
+/**
+ * Derive a calling-completed event (G1d). Returns null on the mentor's null arm
+ * (no mismatch where none was possible) and on a missing server artifact.
+ *
+ * The increase arm's demonstrated ceiling is FIXED at 'deliberate': flagging an
+ * obligation boundary rather than proceeding is deliberate-grade justice
+ * behaviour — a declaration-tier act can lift dikaiosyne at most to deliberate,
+ * never into the examination-demonstrated bands (principled/sage-like).
+ */
+export function deriveCallingEvent(input: CallingEventInput): TrustEvent | null {
+  if (input.artifactRef.trim() === '') return null // R18f-parallel: no record ⇒ no event.
+  const flagged = input.mismatchFlagsRaised.length > 0
+  if (!flagged && !input.mismatchPossible) return null // ARM 3 — the null event.
+
+  const agentStatedMismatch = flagged && input.acknowledgementSource === 'agent_stated'
+  return {
+    agentId: input.agentId,
+    virtueDomain: 'dikaiosyne',
+    eventType: 'calling-completed',
+    artifactKind: 'calling_record',
+    artifactRef: input.artifactRef,
+    payload: {
+      declaredPurpose: input.declaredPurpose,
+      functionTypeScope: input.functionTypeScope,
+      circleOfConcernLevel: input.circleOfConcernLevel,
+      mismatchFlagsRaised: input.mismatchFlagsRaised,
+      mismatchPossible: input.mismatchPossible,
+      acknowledgementSource: input.acknowledgementSource,
+      callingSource: input.source,
+      // Only the agent-stated mismatch arm carries demonstrated evidence (the
+      // engine's 'calling' branch reads it; ceiling deliberate by construction).
+      ...(agentStatedMismatch ? { demonstratedProximity: 'deliberate' as const } : {}),
+    },
+    occurredAt: input.now.toISOString(),
+    correlationId: input.correlationId,
+    ownerUserId: input.ownerUserId,
+    credentialRef: input.credentialRef,
+  }
+}
+
+export interface ScreenedReflectInput {
+  agentId: string
+  ownerUserId: string | null
+  credentialRef: string | null
+  sessionId: string
+  contextSource: 'agent_stated' | 'harness_inferred' | null
+  /** The persisted verbatim's length — 0/absent ⇒ no event (an empty persist is
+   *  not a screened reflection). */
+  verbatimLength: number
+  now: Date
+  correlationId: string
+}
+
+/**
+ * Derive a reflect-screened-honest event (G2): the harness's forced single
+ * review turn, verbatim-persisted out-of-band, credentialed at depth 'screened'.
+ * Honest ⇔ the persisted words are the AGENT's own (context_source =
+ * agent_stated) and non-empty. Agent-wide (null domain) — quarter-rate decay
+ * modulation via the 'modulate-screened' effect; NEVER the full credential's
+ * weight (the full credential is earned by the out-of-band Q1–Q6 pass, which
+ * emits reflect-completed-honest through the existing completion deriver).
+ */
+export function deriveScreenedReflectEvent(input: ScreenedReflectInput): TrustEvent | null {
+  if (input.contextSource !== 'agent_stated') return null
+  if (!Number.isFinite(input.verbatimLength) || input.verbatimLength <= 0) return null
+
+  return {
+    agentId: input.agentId,
+    virtueDomain: null,
+    eventType: 'reflect-screened-honest',
+    artifactKind: 'reflect_screened_persist',
+    artifactRef: `reflect:${input.sessionId}`,
+    payload: {
+      reflectDepth: 'screened',
+      contextSource: input.contextSource,
+      verbatimLength: input.verbatimLength,
+    },
+    occurredAt: input.now.toISOString(),
+    correlationId: input.correlationId,
+    ownerUserId: input.ownerUserId,
+    credentialRef: input.credentialRef,
+  }
+}
+
+/** One passion the agent surfaced in reflect Q4 (root + sub-species; the 3-part
+ *  standard requires SUB-species — bare roots never meet it). */
+export interface SurfacedPassion {
+  rootPassion: string
+  subSpecies: string
+}
+
+export interface SuppressionWatchInput {
+  agentId: string
+  ownerUserId: string | null
+  credentialRef: string | null
+  sessionId: string
+  /** Passions surfaced by the agent across the reflect Q4 kathekon entries. */
+  q4Passions: SurfacedPassion[]
+  /** The session's signed assessments (what the examination engine found DURING
+   *  the session). Re-verified here (R18f-parallel) — unverified artifacts count
+   *  as absent evidence, never as a screen. */
+  sessionAssessments: SignedLayer2Assessment[]
+  /** Whether the caller declares a self-screen ran during the session. A claimed
+   *  screen with ZERO verified assessments is treated as ABSENT (conservative —
+   *  claimed-but-unevidenced). */
+  screenRanDeclared: boolean
+  now: Date
+  correlationId: string
+  verify?: VerifyFn
+}
+
+/** The deterministic root→domain mapping for the passion-unflagged decrease —
+ *  the L4 valence split (appetitive → sophrosyne; aversive → andreia), the
+ *  codebase's own precedent (l4-passion-audit Q4.2). v1 fixed; S10-tunable. */
+export function passionRootToDomain(root: string): 'sophrosyne' | 'andreia' {
+  return root === 'phobos' || root === 'lupe' ? 'andreia' : 'sophrosyne'
+}
+
+/**
+ * G4 — the suppression watch, emitted by the reflect service at completion.
+ * Implements the mentor's 3-part standard exactly:
+ *   1. ABOVE-NOISE PATTERN: the same sub-species surfaced on ≥2 distinct Q4
+ *      entries (never a single phrase/instance).
+ *   2. SCREEN RAN AND MISSED: verified signed assessments exist for the session
+ *      and NONE carries the sub-species. No verified assessments (or the screen
+ *      declared absent) ⇒ self-screen-absent instead — "different events with
+ *      different trust implications".
+ *   3. SUB-SPECIES IDENTIFIED: root-only surfacings never emit.
+ * Returns [] when nothing meets the standard.
+ */
+export function deriveSuppressionWatchEvents(input: SuppressionWatchInput): TrustEvent[] {
+  const verify = input.verify ?? (verifyLayer2Signature as unknown as VerifyFn)
+
+  // Sub-species surfaced in Q4, counted for the above-noise pattern (condition 1
+  // + 3). Root-only entries (empty sub-species) are dropped. VOCABULARY GATE
+  // (review fold, 2026-07-12): the Q4 extractor emits FREE-FORM sub-species
+  // strings while the signed assessments carry the CONTROLLED PassionSubSpecies
+  // vocabulary — comparing across vocabularies would read a screen-CAUGHT
+  // passion ("impatience" vs the assessment's "orge") as MISSED and over-fire
+  // the decrease. Part 3 of the standard therefore requires the surfaced
+  // sub-species to be IN the controlled vocabulary; a non-vocabulary surfacing
+  // cannot be cross-checked honestly and never emits (under-fire — the safe
+  // direction; disclosed).
+  const controlled = new Set<string>(SUB_SPECIES.map((s) => s.toLowerCase()))
+  const counts = new Map<string, { root: string; subSpecies: string; count: number }>()
+  for (const p of input.q4Passions) {
+    const sub = p.subSpecies.trim().toLowerCase()
+    if (sub === '') continue
+    if (!controlled.has(sub)) continue // outside the controlled vocabulary — un-cross-checkable.
+    const key = sub
+    const cur = counts.get(key)
+    if (cur) cur.count++
+    else counts.set(key, { root: p.rootPassion.trim().toLowerCase(), subSpecies: sub, count: 1 })
+  }
+  const aboveNoise = [...counts.values()].filter((c) => c.count >= 2)
+  if (aboveNoise.length === 0) return []
+
+  // Verify the session's assessments (R18f-parallel).
+  const verified: SignedLayer2Assessment['assessment'][] = []
+  for (const signed of input.sessionAssessments) {
+    const res = verify(signed, input.now)
+    if (res.valid) verified.push(signed.assessment)
+  }
+
+  const screenRan = input.screenRanDeclared && verified.length > 0
+  if (!screenRan) {
+    // Condition-2 alternate branch: passions surfaced but NO screen evidence —
+    // self-screen-absent (record-only 'flag' on oversight; can never raise it).
+    return [
+      {
+        agentId: input.agentId,
+        virtueDomain: 'oversight',
+        eventType: 'self-screen-absent',
+        artifactKind: 'reflect_completion',
+        artifactRef: `reflect:${input.sessionId}`,
+        payload: {
+          passionsSurfacedCount: aboveNoise.length,
+          screenRanDeclared: input.screenRanDeclared,
+          verifiedAssessments: verified.length,
+        },
+        occurredAt: input.now.toISOString(),
+        correlationId: input.correlationId,
+        ownerUserId: input.ownerUserId,
+        credentialRef: input.credentialRef,
+      },
+    ]
+  }
+
+  // The sub-species the engine DID flag during the session (screen-caught).
+  const flaggedSubSpecies = new Set<string>()
+  for (const a of verified) {
+    const entries =
+      (a as { passion_diagnosis?: { passions_detected?: { sub_species?: string | null }[] } })
+        .passion_diagnosis?.passions_detected ?? []
+    for (const e of entries) {
+      if (typeof e.sub_species === 'string' && e.sub_species.trim() !== '') {
+        flaggedSubSpecies.add(e.sub_species.trim().toLowerCase())
+      }
+    }
+  }
+
+  // DISCLOSED (review, 2026-07-12; safe direction): distinct unflagged passions
+  // mapping to the SAME domain collapse to one decrease per session at the store
+  // (the idempotency index keys on (correlation_id, event_type, virtue_domain))
+  // — under-penalizing, never over. S2 reads the per-passion payloads regardless.
+  const events: TrustEvent[] = []
+  for (const p of aboveNoise) {
+    if (flaggedSubSpecies.has(p.subSpecies)) continue // the screen caught it — no event.
+    events.push({
+      agentId: input.agentId,
+      virtueDomain: passionRootToDomain(p.root),
+      eventType: 'passion-unflagged-by-self-screen',
+      artifactKind: 'reflect_completion',
+      artifactRef: `reflect:${input.sessionId}`,
+      payload: {
+        passionRoot: p.root,
+        passionSubSpecies: p.subSpecies,
+        occurrenceCount: p.count,
+        verifiedAssessments: verified.length,
+      },
+      occurredAt: input.now.toISOString(),
+      correlationId: input.correlationId,
+      ownerUserId: input.ownerUserId,
+      credentialRef: input.credentialRef,
+    })
+  }
+  return events
 }
 
 export interface ReflectInput {

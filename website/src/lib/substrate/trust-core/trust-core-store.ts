@@ -81,6 +81,9 @@ interface TrustStateRow {
   volatility_rating: EarnedDomainState['volatility']
   last_domain_activity_at: string | null
   reflect_last_honest_at: string | null
+  /** S9b G2 — nullable + OPTIONAL: the column exists only after the S9b
+   *  CHECK-widening migration; pre-migration rows simply have no key. */
+  reflect_last_screened_at?: string | null
   justice_floor_active: boolean
   coverage_status: EarnedDomainState['coverageStatus']
   updated_at: string
@@ -94,6 +97,7 @@ function rowToEarnedState(row: TrustStateRow): EarnedDomainState {
     volatility: row.volatility_rating,
     lastDomainActivityAt: row.last_domain_activity_at,
     reflectLastHonestAt: row.reflect_last_honest_at,
+    reflectLastScreenedAt: row.reflect_last_screened_at ?? null,
     justiceFloorActive: row.justice_floor_active,
     coverageStatus: row.coverage_status,
   }
@@ -216,7 +220,16 @@ async function foldDomainEvent(event: TrustEvent, client: SupabaseClient): Promi
       profilePrior: 'habitual',
       volatility: 'high',
       lastDomainActivityAt: null,
-      reflectLastHonestAt: await resolveReflectLastHonestAt(event.agentId, client),
+      reflectLastHonestAt: await resolveLatestReflectAt(
+        event.agentId,
+        'reflect-completed-honest',
+        client,
+      ),
+      reflectLastScreenedAt: await resolveLatestReflectAt(
+        event.agentId,
+        'reflect-screened-honest',
+        client,
+      ),
       justiceFloorActive: false,
       coverageStatus: null,
     }
@@ -235,6 +248,14 @@ async function foldDomainEvent(event: TrustEvent, client: SupabaseClient): Promi
     volatility_rating: next.volatility,
     last_domain_activity_at: next.lastDomainActivityAt,
     reflect_last_honest_at: next.reflectLastHonestAt,
+    // S9b deploy-order safety (the build-dark-migrate-later lesson, applied to a
+    // LIVE-flag surface): the screened column is written ONLY when a value
+    // exists. Pre-migration no reflect-screened-honest event can be inserted
+    // (the event-type CHECK rejects it), so the value is always null then and
+    // the upsert never names an unknown column (no PGRST204 fold regression).
+    ...(next.reflectLastScreenedAt != null
+      ? { reflect_last_screened_at: next.reflectLastScreenedAt }
+      : {}),
     justice_floor_active: next.justiceFloorActive,
     coverage_status: next.coverageStatus,
     updated_at: new Date().toISOString(),
@@ -253,18 +274,24 @@ async function foldDomainEvent(event: TrustEvent, client: SupabaseClient): Promi
   }
 }
 
-/** Reflect event: set reflect_last_honest_at across the agent's existing domain
- *  rows (agent-wide decay modulation). A domain row created LATER inherits it via
- *  resolveReflectLastHonestAt on seed. */
+/** Reflect event (agent-wide, null domain): set the matching reflect timestamp
+ *  across the agent's existing domain rows (agent-wide decay modulation). S9b:
+ *  reflect-screened-honest targets reflect_last_screened_at (quarter-rate);
+ *  reflect-completed-honest targets reflect_last_honest_at (half-rate). A domain
+ *  row created LATER inherits both via the seed resolvers. */
 async function applyReflectAcrossDomains(
   event: TrustEvent,
   client: SupabaseClient,
 ): Promise<void> {
   const retainUntil = new Date(Date.parse(event.occurredAt) + RETENTION_MS).toISOString()
+  const timestampColumn =
+    event.eventType === 'reflect-screened-honest'
+      ? 'reflect_last_screened_at'
+      : 'reflect_last_honest_at'
   const { error } = await client
     .from(STATE_TABLE)
     .update({
-      reflect_last_honest_at: event.occurredAt,
+      [timestampColumn]: event.occurredAt,
       retain_until: retainUntil,
       updated_at: new Date().toISOString(),
     })
@@ -278,10 +305,12 @@ async function applyReflectAcrossDomains(
   }
 }
 
-/** The agent's latest honest-reflect timestamp from the ledger (for seeding a new
- *  domain row's decay modulation). Read-only; null on any miss/error. */
-async function resolveReflectLastHonestAt(
+/** The agent's latest reflect timestamp of the given type from the ledger (for
+ *  seeding a new domain row's decay modulation — full or screened, S9b).
+ *  Read-only; null on any miss/error. */
+async function resolveLatestReflectAt(
   agentId: string,
+  eventType: 'reflect-completed-honest' | 'reflect-screened-honest',
   client: SupabaseClient,
 ): Promise<string | null> {
   try {
@@ -289,7 +318,7 @@ async function resolveReflectLastHonestAt(
       .from(EVENTS_TABLE)
       .select('occurred_at')
       .eq('agent_id', agentId)
-      .eq('event_type', 'reflect-completed-honest')
+      .eq('event_type', eventType)
       .order('occurred_at', { ascending: false })
       .limit(1)
       .maybeSingle()

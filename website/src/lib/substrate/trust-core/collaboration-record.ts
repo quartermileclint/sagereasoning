@@ -114,6 +114,100 @@ export function validateAuthorityBoundary(
   }
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// S9b G1b — the scoped purpose-acknowledgement at spawn (ADR-013 §11; the
+// 2026-07-11 mentor verdicts, verbatim wins): "receive delegation scope, confirm
+// function-type fit, flag mismatches, write the acknowledgement to the
+// collaboration record." v1 is HARNESS-COMPUTED (the deterministic fit-check the
+// server derives from the task + the chosen candidate's declared scope) — the
+// channel law: a sub-agent cannot make out-of-band acknowledgements, so the
+// computed check is the mechanism and acknowledgement_source records the
+// provenance honestly. The dikaiosyne-increase arm of calling-completed requires
+// agent_stated flags (the engine + deriver both enforce it) — the agent is never
+// credited for the harness's work.
+// ════════════════════════════════════════════════════════════════════════════
+
+export interface PurposeAcknowledgement {
+  schema: 'trust-purpose-acknowledgement-v1'
+  /** The delegation scope as received (the calling debt's object). */
+  scopeReceived: {
+    functionType: FunctionType
+    circleScope: OikeiosisCircle[]
+  }
+  /** The fit verdict: 'fit' (functionType within the declared capabilityScope),
+   *  'mismatch' (outside it — flags raised), 'unassessable' (un-profiled
+   *  candidate — the A6 full-calling path; no comparison space exists). */
+  functionTypeFit: 'fit' | 'mismatch' | 'unassessable'
+  mismatchFlags: string[]
+  /** Whether a mismatch was STRUCTURALLY possible (the mentor's null-event arm
+   *  keys on this being false with no flags). */
+  mismatchPossible: boolean
+  acknowledgementSource: 'harness_computed' | 'agent_stated'
+  /** The candidate the acknowledgement is FOR (record handle even when no
+   *  agentId is known). */
+  candidateRef: string | null
+  candidateAgentId: string | null
+  /** The candidate's declared purpose (the G1d event's declaredPurpose field;
+   *  empty string when un-profiled). */
+  declaredPurpose: string
+  computedAt: string
+}
+
+/**
+ * Compute the spawn purpose-acknowledgement deterministically. Pure. An
+ * un-profiled candidate (profile null) yields 'unassessable' with
+ * mismatchPossible=false — the deriver's null arm; the A6 path (a full calling
+ * session) is that candidate's route to a calling record, never this ack.
+ */
+export function computePurposeAcknowledgement(args: {
+  task: TaskProfile
+  candidateRef: string | null
+  candidateProfile: {
+    agentId?: string
+    capabilityScope: FunctionType[]
+    purpose: string
+  } | null
+  now: Date
+}): PurposeAcknowledgement {
+  const scopeReceived = {
+    functionType: args.task.functionType,
+    circleScope: [...args.task.circlesServed],
+  }
+  if (args.candidateProfile === null) {
+    return {
+      schema: 'trust-purpose-acknowledgement-v1',
+      scopeReceived,
+      functionTypeFit: 'unassessable',
+      mismatchFlags: [],
+      mismatchPossible: false,
+      acknowledgementSource: 'harness_computed',
+      candidateRef: args.candidateRef,
+      candidateAgentId: null,
+      declaredPurpose: '',
+      computedAt: args.now.toISOString(),
+    }
+  }
+  const declaredScope = args.candidateProfile.capabilityScope.map((f) => f.trim().toLowerCase())
+  const wanted = args.task.functionType.trim().toLowerCase()
+  const fit = declaredScope.includes(wanted)
+  return {
+    schema: 'trust-purpose-acknowledgement-v1',
+    scopeReceived,
+    functionTypeFit: fit ? 'fit' : 'mismatch',
+    mismatchFlags: fit
+      ? []
+      : [
+          `function-type-outside-declared-scope: task requires '${args.task.functionType}', candidate declares [${args.candidateProfile.capabilityScope.join(', ')}]`,
+        ],
+    mismatchPossible: true,
+    acknowledgementSource: 'harness_computed',
+    candidateRef: args.candidateRef,
+    candidateAgentId: args.candidateProfile.agentId ?? null,
+    declaredPurpose: args.candidateProfile.purpose,
+    computedAt: args.now.toISOString(),
+  }
+}
+
 /** Derive the authority boundary from a task profile — the boundary IS the task
  *  definition (action scope = the task's function type; circle scope = the task's
  *  circles), never the orchestrator's ceiling. Circle scope is canonicalized (sorted)

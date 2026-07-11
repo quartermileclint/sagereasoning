@@ -64,10 +64,12 @@ import {
 import {
   buildJusticeFailureReflection,
   classifyJusticeFailureCase,
+  computePurposeAcknowledgement,
   deriveDelegationReflectionEvents,
   type AuthorityBoundary,
   type JusticeFailureCase,
 } from './collaboration-record'
+import { deriveCallingEvent } from './derive-trust-events'
 import { readCollaborationRecord, updateCollaborationRecord } from './collaboration-store'
 import { emitTrustEvents, readTrustProfile } from './trust-core-store'
 import { isTrustCoreEnabled } from './trust-core-flag'
@@ -306,6 +308,23 @@ export async function runSpawnDiscernment(args: SpawnDiscernmentArgs): Promise<S
     //    record stores — one canonical scope statement).
     const boundaryInjection = renderAuthorityBoundaryInjection(discernment.authorityBoundary, args.input.task)
 
+    // 3b. S9b G1b — the scoped purpose-acknowledgement at spawn: the deterministic
+    //     function-type fit-check of the CHOSEN candidate against the delegation
+    //     scope (harness_computed — the channel-law-honest v1; an un-profiled
+    //     candidate reads 'unassessable', the A6 full-calling path).
+    const purposeAcknowledgement = computePurposeAcknowledgement({
+      task: args.input.task,
+      candidateRef: chosenRef ?? null,
+      candidateProfile: chosenInput?.profile
+        ? {
+            agentId: chosenInput.profile.agentId,
+            capabilityScope: chosenInput.profile.capabilityScope,
+            purpose: chosenInput.profile.purpose,
+          }
+        : null,
+      now: args.now ?? new Date(),
+    })
+
     // 4. Open the collaboration record + set the A9 boundary (S6's commit seam —
     //    flag-gated + fail-honest inside; refuses on an attenuation anomaly).
     const selection = await openDiscernmentSelection({
@@ -315,8 +334,42 @@ export async function runSpawnDiscernment(args: SpawnDiscernmentArgs): Promise<S
       orchestratorAgentId: args.input.orchestrator.agentId,
       ownerUserId: args.ownerUserId ?? null,
       credentialRef: args.credentialRef ?? null,
+      purposeAcknowledgement,
       client: args.client,
     })
+
+    // 4b. S9b G1d — derive + emit the calling-completed event (MEASURE; R18f-
+    //     parallel: gated on the acknowledgement having PERSISTED to the
+    //     collaboration record — the server-side artifact; artifact_ref is the
+    //     record's natural key). The deriver's arms: harness_computed ⇒ record-
+    //     only in the engine; where-impossible ⇒ nothing emitted. Fail-honest —
+    //     an emission failure never disturbs the spawn outcome.
+    if (selection.ackPersisted) {
+      const callingEvent = deriveCallingEvent({
+        agentId: purposeAcknowledgement.candidateAgentId ?? chosenRef ?? '',
+        ownerUserId: args.ownerUserId ?? null,
+        credentialRef: args.credentialRef ?? null,
+        source: 'spawn_acknowledgement',
+        artifactRef: `collab:${args.input.orchestrator.agentId}|${args.taskRef}`,
+        declaredPurpose: purposeAcknowledgement.declaredPurpose,
+        functionTypeScope: [purposeAcknowledgement.scopeReceived.functionType],
+        // The FULL received circle scope (joined) — never a fake single-level
+        // precision (review nit, 2026-07-12: [0] of a sorted set was just the
+        // alphabetically-first circle).
+        circleOfConcernLevel:
+          purposeAcknowledgement.scopeReceived.circleScope.length > 0
+            ? purposeAcknowledgement.scopeReceived.circleScope.join('+')
+            : null,
+        mismatchFlagsRaised: purposeAcknowledgement.mismatchFlags,
+        mismatchPossible: purposeAcknowledgement.mismatchPossible,
+        acknowledgementSource: purposeAcknowledgement.acknowledgementSource,
+        now: args.now ?? new Date(),
+        correlationId: `calling:${args.input.orchestrator.agentId}|${args.taskRef}`,
+      })
+      if (callingEvent !== null && callingEvent.agentId !== '') {
+        await emitTrustEvents([callingEvent], args.client).catch(() => {})
+      }
+    }
 
     // 5. The out-of-band L4 audit (S7's turnkey) — the extractor is constructed with
     //    the mapping context derived from the profiles + the chosen candidate.

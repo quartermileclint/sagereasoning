@@ -155,6 +155,48 @@ export function carriedDepth(state, configuredDepth) {
   return openRank >= cfgRank ? s.openLoop.depthTier : configuredDepth;
 }
 
+/** The deeper of two depth tiers (null/undefined = no constraint). PURE. */
+export function maxDepthOf(a, b) {
+  if (!b) return a;
+  if (!a) return b;
+  return (DEPTH_RANK[b] || 0) > (DEPTH_RANK[a] || 0) ? b : a;
+}
+
+/**
+ * S9b G5 — the trust-calibrated depth FLOOR (ADR-013 §11 G5; election E1
+ * 2026-07-12). Reads the cached per-session trust calibration ({aggregateLevel,
+ * justiceCapped, depthFloorBump}) and returns the MINIMUM depth the next consult
+ * must run at, or null (no constraint — config/carry govern).
+ *
+ * DISCLOSED v1 DEVIATIONS from the mentor's per-domain table (review fold,
+ * 2026-07-12; S10 refinement candidates): (1) calibration keys on the AGGREGATE
+ * (minimum-domain) level, not per-domain — at depth-selection time the hook
+ * cannot know which domains the action will engage, and the aggregate is the
+ * CONSERVATIVE reading (a weak domain floors everything; over-examination,
+ * never under); (2) the mentor's deliberate⇒quick carve-out ("quick permitted
+ * with a strong recent credential record and no justice surface") is not taken
+ * — deliberate floors to standard unconditionally (again the conservative
+ * direction; the carve-out needs the per-domain credential read).
+ * Only ever RAISES:
+ *   reflexive aggregate            → deep REQUIRED (the mentor's hard line);
+ *   habitual / deliberate aggregate → standard;
+ *   an active justice latch        → at least standard (never quick);
+ *   a mid-session bump (a guard non-proceed / a Gate-2 elicitation flag)
+ *                                  → at least the bumped tier.
+ *   principled / sage-like / none  → no floor.
+ * PURE.
+ */
+export function calibratedDepthFloor(cal) {
+  if (!cal) return null;
+  let floor = null;
+  const level = cal.aggregateLevel || null;
+  if (level === "reflexive") floor = "deep";
+  else if (level === "habitual" || level === "deliberate") floor = "standard";
+  if (cal.justiceCapped) floor = maxDepthOf(floor, "standard");
+  if (cal.depthFloorBump) floor = maxDepthOf(floor, cal.depthFloorBump);
+  return floor;
+}
+
 export function normaliseState(state) {
   const s = state && typeof state === "object" ? state : {};
   return {

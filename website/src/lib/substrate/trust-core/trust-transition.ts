@@ -50,6 +50,12 @@ export const EVENT_EFFECT: Record<TrustEventType, TrustEventEffect> = {
   'delegation-reflection-case-1': 'decrease',
   'delegation-reflection-case-2': 'decrease',
   'delegation-reflection-case-3': 'flag',
+  // S9b (ADR-013 §11). None of these can raise the oversight domain (PA-6 guard):
+  // 'calling' raises only dikaiosyne (and only on the agent-stated mismatch arm);
+  // the other two never raise anything.
+  'calling-completed': 'calling',
+  'reflect-screened-honest': 'modulate-screened',
+  'self-screen-absent': 'flag',
 }
 
 /**
@@ -69,11 +75,43 @@ export function applyTrustEvent(
     return { ...prior, reflectLastHonestAt: event.occurredAt }
   }
 
-  // --- flag (delegation-reflection-case-3, A9 case-3): record only. The A9
-  //     uncatchable-justice-failure case is a developmental FLAG on the
-  //     orchestrator, NOT a trust reduction. No state change. ---
+  // --- modulate-screened (reflect-screened-honest, S9b G2): set the SCREENED
+  //     timestamp only — the quarter-rate decay modulator. Same non-activity
+  //     semantics as full modulate: no level change, no clock reset. ---
+  if (effect === 'modulate-screened') {
+    return { ...prior, reflectLastScreenedAt: event.occurredAt }
+  }
+
+  // --- flag (delegation-reflection-case-3, A9 case-3; self-screen-absent, S9b
+  //     G4): record only. No state change. ---
   if (effect === 'flag') {
     return { ...prior }
+  }
+
+  // --- calling (calling-completed, S9b G1d — the mentor's ASYMMETRIC update):
+  //     ARM 1 (increase): an AGENT-STATED mismatch-flag is dikaiosyne-positive
+  //       evidence ("the agent identified an obligation boundary and flagged it
+  //       rather than proceeding") — handled below via the shared increase
+  //       machinery (realise decay → +1-capped rise toward demonstratedProximity,
+  //       which the deriver caps at 'deliberate': a declaration-tier act can
+  //       never demonstrate principled/sage-like justice). Genuine domain
+  //       activity ⇒ the activity clock resets.
+  //     ARM 2 (record-only): a no-mismatch-where-possible event, or a
+  //       harness-COMPUTED mismatch (the agent is never credited for the
+  //       harness's work), is S2 declaration-tier evidence in the LEDGER only —
+  //       NO level change and NO activity-clock reset (a declaration must not
+  //       be able to freeze decay — the PA-10 replay lesson applied forward).
+  //     ARM 3 (null): no-mismatch-where-impossible never reaches the engine —
+  //       the deriver emits nothing (battery-pinned there).
+  if (effect === 'calling') {
+    const agentStatedMismatch =
+      event.payload.acknowledgementSource === 'agent_stated' &&
+      Array.isArray(event.payload.mismatchFlagsRaised) &&
+      event.payload.mismatchFlagsRaised.length > 0
+    if (!agentStatedMismatch) {
+      return { ...prior } // ARM 2 — record-only; the ledger row is the evidence.
+    }
+    // ARM 1 falls through to the shared decay-realise + increase path below.
   }
 
   // All remaining effects change the earned level → realise accrued decay up to
@@ -84,6 +122,7 @@ export function applyTrustEvent(
     lastDomainActivityAt: prior.lastDomainActivityAt,
     volatility: prior.volatility,
     reflectLastHonestAt: prior.reflectLastHonestAt,
+    reflectLastScreenedAt: prior.reflectLastScreenedAt ?? null,
     now: new Date(event.occurredAt),
   })
   const fromRank = decayed.rank
@@ -93,6 +132,22 @@ export function applyTrustEvent(
   let coverageStatus = prior.coverageStatus
 
   switch (effect) {
+    case 'calling': {
+      // ARM 1 only (the guard above returned for every other arm): an
+      // agent-stated mismatch-flag rises like a credential — +1-capped toward
+      // the demonstrated proximity, which the DERIVER fixes at 'deliberate'
+      // (flagging an obligation boundary is deliberate-grade justice behaviour;
+      // it can lift dikaiosyne AT MOST to deliberate, never above — the
+      // declaration tier stays structurally below the examination tiers).
+      const demonstratedRank =
+        event.payload.demonstratedProximity !== undefined
+          ? PROXIMITY_RANK[event.payload.demonstratedProximity]
+          : null
+      if (demonstratedRank !== null && demonstratedRank > fromRank) {
+        newRank = Math.min(demonstratedRank, fromRank + 1)
+      }
+      break
+    }
     case 'increase': {
       // credential-completed: rise toward the demonstrated proximity, at most one
       // rank per event (hysteresis), and ONLY on continuous coverage (a gapped
@@ -210,10 +265,14 @@ export function foldTrustEvents(
     let state = states.get(domain)
     if (!state) {
       state = seed(domain)
-      // Inherit the agent-wide reflect timestamp seen so far, if any.
+      // Inherit the agent-wide reflect timestamps seen so far, if any (full +
+      // screened — S9b G2 adds the screened signal, same agent-wide semantics).
       const reflectSeed = states.get('__reflect_seed__')
       if (reflectSeed?.reflectLastHonestAt) {
         state = { ...state, reflectLastHonestAt: reflectSeed.reflectLastHonestAt }
+      }
+      if (reflectSeed?.reflectLastScreenedAt) {
+        state = { ...state, reflectLastScreenedAt: reflectSeed.reflectLastScreenedAt }
       }
     }
     states.set(domain, applyTrustEvent(state, event))

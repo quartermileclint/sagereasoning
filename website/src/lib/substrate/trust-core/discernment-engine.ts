@@ -106,8 +106,13 @@ import {
   newCollaborationRecord,
   type AttenuationCheck,
   type AuthorityBoundary,
+  type PurposeAcknowledgement,
 } from './collaboration-record'
-import { openCollaborationRecord, recordAuthorityBoundary } from './collaboration-store'
+import {
+  openCollaborationRecord,
+  recordAuthorityBoundary,
+  recordPurposeAcknowledgement,
+} from './collaboration-store'
 import { isTrustCoreEnabled } from './trust-core-flag'
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -1118,6 +1123,11 @@ export interface SelectionCommitResult {
   committed: boolean
   opened: boolean
   boundarySet: boolean
+  /** S9b G1b (additive): true ⇔ the spawn purpose-acknowledgement landed on the
+   *  record. False/absent pre-migration (unknown column ⇒ ack-not-persisted,
+   *  record + boundary unaffected — deploy-order-safe) or when none was supplied.
+   *  The calling-completed emission gates on this. */
+  ackPersisted?: boolean
   note: string
   error?: string
 }
@@ -1139,6 +1149,10 @@ export async function openDiscernmentSelection(args: {
   orchestratorAgentId: string
   ownerUserId?: string | null
   credentialRef?: string | null
+  /** S9b G1b: the deterministic spawn purpose-acknowledgement (computed by the
+   *  caller from the task + the chosen candidate's declared scope). Persisted
+   *  best-effort AFTER the record + boundary stand. */
+  purposeAcknowledgement?: PurposeAcknowledgement | null
   client?: SupabaseClient
 }): Promise<SelectionCommitResult> {
   // Flag-gate (caller-gate, matching collaboration-store's contract). Flag-off ⇒ a
@@ -1191,10 +1205,33 @@ export async function openDiscernmentSelection(args: {
       return { committed: false, opened: open.value.opened, boundarySet: false, note: 'authority-boundary write failed (fail-honest)', error: boundary.error }
     }
 
+    // S9b G1b — persist the spawn purpose-acknowledgement (best-effort AFTER the
+    // record + boundary stand: an ack failure — incl. the pre-migration unknown
+    // column — never degrades the committed selection; it reads ackPersisted:false
+    // and the calling-completed emission stays off, honestly).
+    let ackPersisted = false
+    if (args.purposeAcknowledgement) {
+      const ack = await recordPurposeAcknowledgement(
+        args.orchestratorAgentId,
+        args.taskRef,
+        args.purposeAcknowledgement,
+        args.client,
+      )
+      if (ack.ok) {
+        ackPersisted = true
+      } else {
+        console.error(
+          '[discernment] purpose-acknowledgement write failed (ack-not-persisted; record + boundary stand):',
+          ack.error,
+        )
+      }
+    }
+
     return {
       committed: true,
       opened: open.value.opened,
       boundarySet: true,
+      ackPersisted,
       note:
         `collaboration record opened + A9 authority boundary set (action-scope='${args.result.authorityBoundary.actionScope}', ` +
         `${args.result.authorityBoundary.circleScope.length} circle(s)); l4_audit_result left null for S7`,

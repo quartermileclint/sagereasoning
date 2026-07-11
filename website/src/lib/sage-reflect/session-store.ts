@@ -326,6 +326,22 @@ export const EMPTY_CROSS_SESSION_CONTEXT: CrossSessionContext = {
 export interface ReflectPersistedState {
   readonly session_summary: SessionSummary
   readonly turns: readonly ReflectTurn[]
+  /** S9b G4 (additive, OPTIONAL — pre-S9b blobs simply lack the key, which reads
+   *  as undefined ⇒ no suppression-watch cross-check ⇒ byte-identical outcomes):
+   *  the session's self-screen evidence, supplied at OPEN by a harness caller.
+   *  signed_assessments are stored OPAQUE here and re-verified (Ed25519) by the
+   *  deriver at completion — an unverified artifact counts as absent evidence. */
+  readonly screen_evidence?: {
+    readonly screen_ran: boolean
+    readonly signed_assessments: readonly unknown[]
+  }
+  /** S9b G2 (additive, OPTIONAL): the provenance of the persisted VERBATIM (the
+   *  Q1 answer) — distinct from the row's context_source, which records the
+   *  OPEN-call summary's provenance (the harness flow deliberately opens
+   *  harness_inferred and marks only the verbatim agent_stated — Slice-5c).
+   *  'agent_stated' here is what the screened credential + the out-of-band
+   *  examination key on. */
+  readonly verbatim_provenance?: 'agent_stated' | 'harness_inferred'
 }
 
 /** R17b — encrypt the resumable session state (intimate free text + the structured

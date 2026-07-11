@@ -107,6 +107,7 @@ function row(over: Partial<ErasureCredentialRow>): ErasureCredentialRow {
     key_prefix: 'sr_prac_abcd',
     purpose: 'unified_practice',
     credential_provenance: null,
+    agent_id: null,
     ...over,
   }
 }
@@ -159,7 +160,7 @@ async function main(): Promise<void> {
       return { data: null, error: null }
     })
     const res = await eraseExternalConsumerCredential(
-      { id: 'cred-1', credential_provenance: { minted_by: 'admin/api-keys' } },
+      { id: 'cred-1', credential_provenance: { minted_by: 'admin/api-keys' }, agent_id: null },
       client as never,
     )
     assert(res.ok, 'erase: happy path → ok:true')
@@ -200,7 +201,7 @@ async function main(): Promise<void> {
       if (table === 'agent_assessment_history') return { data: null, error: { message: 'db down' } }
       return { data: null, error: null }
     })
-    const res = await eraseExternalConsumerCredential({ id: 'cred-1', credential_provenance: null }, client as never)
+    const res = await eraseExternalConsumerCredential({ id: 'cred-1', credential_provenance: null, agent_id: null }, client as never)
     assert(!res.ok, 'erase: trajectory failure → ok:false (R17c — no false deleted)')
     assert(!captures.some((c) => c.table === 'api_keys'), 'erase: trajectory failure → api_keys NOT touched (no partial anonymise)')
   }
@@ -211,7 +212,7 @@ async function main(): Promise<void> {
       if (table === 'api_keys') return { data: null, error: { message: 'update denied' } }
       return { data: null, error: null }
     })
-    const res = await eraseExternalConsumerCredential({ id: 'cred-1', credential_provenance: null }, client as never)
+    const res = await eraseExternalConsumerCredential({ id: 'cred-1', credential_provenance: null, agent_id: null }, client as never)
     assert(!res.ok && /anonymise/.test((res as { error: string }).error), 'erase: anonymise DB error → ok:false, surfaced')
   }
   // Atomic scope guard: the owner-null UPDATE matches 0 rows (row gained an owner / is
@@ -222,7 +223,7 @@ async function main(): Promise<void> {
       if (table === 'api_keys') return { data: [], error: null } // 0 rows matched owner-null
       return { data: null, error: null }
     })
-    const res = await eraseExternalConsumerCredential({ id: 'cred-1', credential_provenance: null }, client as never)
+    const res = await eraseExternalConsumerCredential({ id: 'cred-1', credential_provenance: null, agent_id: null }, client as never)
     assert(!res.ok && /not found as an erasable/.test((res as { error: string }).error),
       'erase: owner-null guard matches 0 rows → ok:false (no false erased)')
   }
@@ -234,7 +235,7 @@ async function main(): Promise<void> {
       if (table === 'loop_billing_events') return { data: null, error: { message: 'no such table' } }
       return { data: null, error: null }
     })
-    const res = await eraseExternalConsumerCredential({ id: 'cred-1', credential_provenance: null }, client as never)
+    const res = await eraseExternalConsumerCredential({ id: 'cred-1', credential_provenance: null, agent_id: null }, client as never)
     assert(res.ok, 'erase: billing failure → STILL ok:true (best-effort; personal data already gone)')
     if (res.ok) {
       assert(res.value.trajectory_deleted === 1, 'erase: billing failure → trajectory still reported deleted')
