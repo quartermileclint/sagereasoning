@@ -1,5 +1,7 @@
 # Next-Session Prompt — Trust Layer S9: the founder-walked dogfood install + instrument-fidelity validation
 
+> **SPENT — executed 2026-07-11.** The session ran to completion: TEST-first walk (four TEST-parity gaps found + fixed), the standing prod install (fresh agent-bound credentials on `sagereasoning:s9-loop@v1`), both trust flags live in production, the full chain verified on TEST and prod, the instrument-fidelity battery 38/0, two calibration findings recorded (L4 Q4.3 no-discrimination on faithful traces; confession-framing extraction variance). See `2026-07-11-trust-layer-S9-dogfood-install-CLOSE.md` + the decision-log entry. Successor: `2026-07-11-trust-layer-S9b-practice-completion-NEXT-SESSION-PROMPT.md`.
+
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)
 
 **Stream:** founder.

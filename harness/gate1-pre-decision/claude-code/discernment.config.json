@@ -1,0 +1,75 @@
+{
+  "_comment": "S9 dogfood provisioning (Trust Layer, 2026-07-11 install — founder loop on the sagereasoning repo). Copied from discernment.config.example.json and filled with this loop's real taxonomy. The consult credential (SAGE_GATE1_CREDENTIAL) MUST be minted agent_id-bound to orchestrator_profile.agentId below (the G1 hard requirement) or every spawn 403s and the trust surface silently never runs.",
+  "orchestrator_profile": {
+    "schema": "trust-orchestrator-profile-v1",
+    "agentId": "sagereasoning:s9-loop@v1",
+    "currentKathekonta": [
+      "serve the founder's session task honestly",
+      "delegate within the repository and session scope",
+      "verify before claiming; report outcomes faithfully"
+    ],
+    "examinationCapacity": {
+      "corroborationCheckAvailable": true,
+      "canReExamine": true,
+      "maxDepth": "standard"
+    },
+    "circle": ["requesting-user", "repository", "production-users", "wider-community"],
+    "selectionPatterns": []
+  },
+  "deployer_config": {
+    "function_type_profiles": {
+      "code-exploration": { "domain_weights": { "phronesis": 3, "dikaiosyne": 1, "andreia": 0, "sophrosyne": 1 } },
+      "planning": { "domain_weights": { "phronesis": 3, "dikaiosyne": 1, "andreia": 1, "sophrosyne": 1 } },
+      "general-delegation": { "domain_weights": { "phronesis": 2, "dikaiosyne": 2, "andreia": 1, "sophrosyne": 1 } }
+    }
+  },
+  "candidates": {
+    "Explore": {
+      "candidate_ref": "explore-agent",
+      "profile": {
+        "schema": "trust-candidate-profile-v1",
+        "agentId": "sagereasoning:explore-subagent@v1",
+        "role": "read-only code and document exploration",
+        "capabilityScope": ["code-exploration"],
+        "credentialCoverage": [],
+        "outputFormat": { "emitsSignedTrace": false, "emitsStructuredVerdict": true, "statesUncertainty": true },
+        "purpose": "search and summarize the repository for the requesting user",
+        "priorInteraction": null
+      }
+    },
+    "Plan": {
+      "candidate_ref": "plan-agent",
+      "profile": {
+        "schema": "trust-candidate-profile-v1",
+        "agentId": "sagereasoning:plan-subagent@v1",
+        "role": "read-only implementation planning",
+        "capabilityScope": ["planning", "code-exploration"],
+        "credentialCoverage": [],
+        "outputFormat": { "emitsSignedTrace": false, "emitsStructuredVerdict": true, "statesUncertainty": true },
+        "purpose": "design implementation plans over the repository for the requesting user",
+        "priorInteraction": null
+      }
+    },
+    "general-purpose": {
+      "candidate_ref": "general-agent",
+      "profile": null
+    },
+    "claude": {
+      "candidate_ref": "claude-agent",
+      "profile": null
+    }
+  },
+  "task_defaults": {
+    "function_type_by_subagent_type": {
+      "Explore": "code-exploration",
+      "Plan": "planning",
+      "*": "general-delegation"
+    },
+    "circles_served": ["requesting-user", "repository"],
+    "conditions": ["repo-local"],
+    "output_requirements": ["structured summary"],
+    "justice_surface": { "present": false, "non_consenting_circles": [] }
+  },
+  "timeout_ms": 100000,
+  "trace_max_chars": 8000
+}
