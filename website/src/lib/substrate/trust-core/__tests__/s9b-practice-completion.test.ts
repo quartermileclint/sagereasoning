@@ -29,6 +29,7 @@ import type { TrustEvent } from '../types'
 import { initialEarnedDomainState } from '../types'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { createHash } from 'node:crypto'
 import {
   REFLECT_MODULATION_FACTOR,
   SCREENED_REFLECT_MODULATION_FACTOR,
@@ -488,6 +489,25 @@ assertEq(EVENT_EFFECT['self-screen-absent'], 'flag', 'EVENT_EFFECT: self-screen-
 
   const integration = src('lib/substrate/trust-core/harness-integration.ts')
   assert(integration.includes('if (selection.ackPersisted)'), 'wiring: the calling emission gates on the PERSISTED acknowledgement (R18f-parallel)')
+
+  // S9b LIVE-SMOKE fold (2026-07-12): loop_id is a UUID column, so both new
+  // metering sites MUST derive a UUID-shaped loop id — a free-form string 503s
+  // the RPC (caught in the founder walk's elicitation smoke). Pin both call
+  // sites use deterministicLoopId, never a raw template string.
+  const disc = src('app/api/practice/discernment/handler.ts')
+  assert(disc.includes('deterministicLoopId(') && !/loopId\s*=\s*['"`]discern-/.test(disc), 'wiring: discernment metering uses a UUID-shaped deterministic loop id')
+  const oob = src('lib/sage-reflect/screened-examination.ts')
+  assert(oob.includes('deterministicLoopId(') && !/loopId\s*=\s*[`]reflect-oob-\$/.test(oob), 'wiring: the OOB reflect meter uses a UUID-shaped deterministic loop id')
+  // deterministicLoopId itself formats a sha256 into the 8-4-4-4-12 UUID layout
+  // (source-grepped, not imported — importing loop-cost-tracker pulls the
+  // stripe/supabase chain which needs env the bare battery does not load; the
+  // shape is the load-bearing property). A local re-derivation confirms the
+  // format is a valid UUID for a non-UUID seed.
+  const lct = src('lib/loop-cost-tracker.ts')
+  assert(/export function deterministicLoopId/.test(lct) && /slice\(0, 8\)[\s\S]{0,120}slice\(20, 32\)/.test(lct), 'deterministicLoopId: formats sha256 into 8-4-4-4-12 UUID layout')
+  const h = createHash('sha256').update('discern|spawn|a:b@v1|task').digest('hex')
+  const uuid = `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`
+  assert(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(uuid), 'deterministicLoopId derivation: non-UUID seed → valid UUID shape')
 
   const store = src('lib/substrate/trust-core/collaboration-store.ts')
   // The exact pre-fold call form must never return (the docstring may MENTION

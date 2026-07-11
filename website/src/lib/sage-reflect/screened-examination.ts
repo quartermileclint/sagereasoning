@@ -30,7 +30,7 @@
  */
 
 import { computeLoopBill } from '@/lib/stripe'
-import { buildLoopHeaders, recordLoopBilling } from '@/lib/loop-cost-tracker'
+import { buildLoopHeaders, deterministicLoopId, recordLoopBilling } from '@/lib/loop-cost-tracker'
 import { answerReflection, type MeterFn } from './reflect-service'
 import { getSession, decryptPersistedState } from './session-store'
 
@@ -49,7 +49,10 @@ function makeOobMeter(sessionId: string, turnIndex: number, apiKeyId: string, ag
   return async (costCents: number) => {
     const cents = Math.round(costCents)
     const bill = computeLoopBill(cents)
-    const loopId = `reflect-oob-${sessionId}-${turnIndex}`
+    // A DETERMINISTIC loop id in valid UUID shape (loop_id is a UUID column; a
+    // free-form string 503s the RPC — S9b fix). Per-turn seed ⇒ a re-run of the
+    // same OOB turn dedups.
+    const loopId = deterministicLoopId(`reflect-oob|${sessionId}|${turnIndex}`)
     const now = new Date()
     const persist = await recordLoopBilling({
       apiKeyId,

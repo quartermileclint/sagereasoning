@@ -13786,4 +13786,6 @@ Expected: the §11 amendment present; S9b in the phases + sequence; CI-16 carrie
 
 **Rules served:** PR15 (reuse: the reflect engine drives the OOB exam; L4 signals drive the elicitation; CI-10/M1 patterns), PR17, PR18, KG1, KG7, KG-EX1 (instrument-fidelity batteries), AC5 (no new human-facing perimeter route), AC7 (carried to the walk), R18f-parallel throughout, PA-6 (re-audited in-change).
 
+**Walk addendum (2026-07-12):** the founder walk ran green (migration TEST+PROD, both flags, the `reflect` capability widening, the persist flip); the Step-7a elicitation smoke caught a real defect — both new metering sites built a free-form-string `loop_id` but the column is UUID, so the RPC 503'd (fail-closed, no data harm). Fixed at the root: `deterministicLoopId` (sha256→8-4-4-4-12) at both sites; regression-pinned (S9b battery 84/0); `tsc`/`build` clean. Requires a follow-up commit + redeploy, then re-run 7a.
+
 **Status:** Adopted. Cross-references: `D-TRUST-LAYER-S9-DOGFOOD-INSTALL-LIVE`, `D-MENTOR-VERDICTS-CALLING-REFLECTION-GATE2-ADOPTED`, ADR-013 §11, `operations/handoffs/founder/2026-07-12-trust-layer-S9b-practice-completion-CLOSE.md`.

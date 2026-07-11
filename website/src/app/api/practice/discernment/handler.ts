@@ -64,12 +64,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createHash } from 'crypto'
 
 import { corsHeaders } from '@/lib/security'
 import { computeLoopBill } from '@/lib/stripe'
 import {
   buildLoopHeaders,
+  deterministicLoopId,
   estimateCallCostCents,
   recordLoopBilling,
 } from '@/lib/loop-cost-tracker'
@@ -235,11 +235,10 @@ async function meterDiscernmentStage(
     input.usage.output_tokens,
   )
   const bill = computeLoopBill(anthropicCostCents)
-  const loopId =
-    'discern-' +
-    input.phase +
-    '-' +
-    createHash('sha256').update(input.agentId + '|' + input.taskRef).digest('hex').slice(0, 24)
+  // A DETERMINISTIC loop id in valid UUID shape (loop_id is a UUID column — a
+  // free-form string 503s the RPC; S9b fix). Same (phase, agent, task) ⇒ same
+  // id ⇒ a retried POST collides on the UNIQUE index ⇒ duplicate_loop_id no-op.
+  const loopId = deterministicLoopId(`discern|${input.phase}|${input.agentId}|${input.taskRef}`)
   const now = new Date()
   const persist = await record({
     apiKeyId: input.apiKeyId,

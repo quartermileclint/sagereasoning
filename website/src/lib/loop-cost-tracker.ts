@@ -44,9 +44,25 @@
  * regulatory_references: [CR-005, CR-010, CR-011, CR-012]
  */
 
+import { createHash } from 'crypto'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { computeLoopBill } from '@/lib/stripe'
+
+/**
+ * A DETERMINISTIC loop id in valid UUID shape, derived from a seed. loop_id is a
+ * UUID column (option-d-billing-schema.sql), so a metering surface that wants
+ * retry-dedup (a retried POST re-billing the same logical stage must collide on
+ * the UNIQUE (api_key_id, loop_id) → duplicate_loop_id no-op) CANNOT use a
+ * free-form string — Postgres rejects the cast and the RPC 503s. This formats a
+ * sha256 of the seed into the 8-4-4-4-12 layout the UUID type accepts (not an
+ * RFC-versioned UUID — the type does not require version/variant bits, only the
+ * hex layout). Same-seed ⇒ same id ⇒ the dedup the caller wants. S9b fix.
+ */
+export function deterministicLoopId(seed: string): string {
+  const h = createHash('sha256').update(seed).digest('hex')
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`
+}
 
 // =============================================================================
 // PRICING CONSTANTS — update when Anthropic pricing changes
