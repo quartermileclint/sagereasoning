@@ -13924,3 +13924,29 @@ Batteries this session: kathekon-engagement **66/0** (new) · false-hold-capture
 **Rules served:** PR17 (the founder-walked migration + flag activation scripted, carried), AC7 (engages at the carried migration), PR6 (Critical schema), KG1 (the capture is fail-soft, never breaks the hook), KG-EX1 (instrument-fidelity — the battery proves the predicate DISCRIMINATES [non-vacuity], never beats-bare; the instrument measures, it does not intervene), R18 (honest-claims — the overclaim folds; the report presents readiness as the founder's call, not the instrument's verdict), R17 (retention + the deferred data-rights rider disclosed), PR15 (reused the live `deriveWorstJusticeOutcome`/`PROXIMITY_RANK` rather than re-implementing; the Workflow fan-out for the review).
 
 **Status:** Adopted. Cross-references: `D-TRUST-LAYER-S11-ENFORCE-GATE-MENTOR-DEFERRED`, ADR-013 §7 + §11, the build plan §S11, `operations/trust-layer-2026-07/2026-07-12-mentor-consultation-s11-enforce-gate-verdict-verbatim.md`, the observation-period prompt, the return-with-record prompt.
+
+## 2026-07-12 — D-TRUST-LAYER-HARNESS-STATE-SUMMARY-UPDATED-POST-ENFORCE
+
+**Decision:** Revised the founder-facing trust-layer harness state summary (`operations/trust-layer-2026-07/2026-07-11-trust-layer-harness-completed-state-summary.md`) to read true as of 2026-07-12 — **S1–S10 + S9b LIVE under MEASURE** in the dogfood loop, the **S10 public read surface LIVE**, the false-hold observation instrument **BUILT** (migration applied to prod but inert; the 7-day clock pending the founder's capture flag), and **S11 ENFORCE DEFERRED — readiness-gated** — and recast its forward-looking §4/§6 around the post-enforce end-state (what the layer offers once it *binds*, not just measures), **honestly conditioned** on the four-part readiness standard clearing AND the flip working as intended.
+
+**Reasoning:** The summary was written 2026-07-11 while S1–S8 were built-dark and S9–S11 planned; S9 (dogfood-live), S9b, the S10 walk, the S11 mentor deferral, and the observation instrument have since landed. It is the clearest single founder-facing statement of what the trust layer is and offers, so it must be accurate today and articulate — sharply but conditionally — the payoff of the enforcing turn. The binding S11 shape follows the verbatim verdict (verbatim wins over any digest).
+
+**Files touched:**
+- `operations/trust-layer-2026-07/2026-07-11-trust-layer-harness-completed-state-summary.md` — header/status recast (new `[LIVE-MEASURE]`/`[DEFERRED]` tags + the conditionality flag + expanded sources); §1 (S10 live; record accumulating live in the loop); §2a (hook install ON + a new S9b-additions paragraph); §2b (trust core S1–S8 → LIVE-MEASURE; discernment route live); §2c (the `sagereasoning:s9-loop@v1` identity); §3 (dogfood live; kill-switch #3 corrected — the flag is SET, not today's 503 state); §4 recast (the staged, G6(a)-qualified binding shape + the named enforcement-claim bounds, conditioned); §5 (Art 12/14 honesty); §6 (the measures→binds turn, actionable graduated autonomy, the readiness discipline as a credibility asset); §7 (build-state table fully current + the four-part readiness standard); cross-references.
+
+**Risk classification:** Standard under 0d-ii. Documentation-only edit to one summary file; no code / flag / schema / mint / deploy. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` the records commit (a single file). No production surface touched; production byte-equivalent.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+git diff --stat operations/trust-layer-2026-07/2026-07-11-trust-layer-harness-completed-state-summary.md
+```
+Expected: one file changed; the summary now dated 2026-07-12, §7 shows S1–S10 + S9b LIVE-MEASURE / S10 LIVE / observation instrument BUILT-inert / S11 DEFERRED, and §4/§6 describe the post-enforce end-state as conditional.
+
+**Fidelity check:** verified the recast against `CLAUDE.md`'s Live list + the verbatim S11 verdict — every `[LIVE]`/`[LIVE-MEASURE]`/`[DEFERRED]` tag accurate; the enforce shape matches the verdict (staged; G6(a) kathekon-engagement-qualified; calling-gate-with-engine; aggregate-keyed depth v1; PA-5/PA-10/A2-decrease as named enforcement-claim bounds; the four-part readiness standard); nothing stated as binding-today (the irreversible-action guard remains the sole binding control); the post-enforce capabilities explicitly conditioned (the readiness review clears AND the flip works; assent re-confirmed at flip time, PR7). No code-level claims-vs-code pass run — the summary tracks the governing documents (ADR-013, the verdict, the build plan, the closes), all read directly this session.
+
+**Rules served:** PR18 (a founder-facing state artifact, revised at close from the log + verified observations, carrying its as-of date), R18 (honest-claims — the conditionality + the enforcement-claim bounds stated; nothing over-claimed as binding), PR7 (the assent-re-confirmed-at-flip-time term surfaced), R20c (human-override supremacy named as a binding term of the eventual flip), KG-EX1 (the measures-not-intervenes framing preserved throughout).
+
+**Status:** Adopted. Cross-references: the summary doc; ADR-013 §7/§8/§11; the build plan §S9b/§S10/§S11; `operations/trust-layer-2026-07/2026-07-12-mentor-consultation-s11-enforce-gate-verdict-verbatim.md`; `D-TRUST-LAYER-S9-DOGFOOD-INSTALL-LIVE`, `D-TRUST-LAYER-S10-READ-SURFACE-BUILT-DARK`, `D-TRUST-LAYER-S11-ENFORCE-GATE-MENTOR-DEFERRED`, `D-TRUST-LAYER-S11-OBSERVATION-INSTRUMENT-BUILT-DARK-REVIEW-FOLDED`.
