@@ -1,3 +1,7 @@
+> **⚠️ SPENT-ON-DEFERRAL (2026-07-12, `D-TRUST-LAYER-S11-ENFORCE-GATE-MENTOR-DEFERRED`).** This prompt was opened; the gate was put to the private mentor and **deferred on counsel, adopted in full**. The examination that licenses the enforce assent is not complete on one day's live MEASURE. **Do not re-run this prompt to flip.** The gating work is now the observation period: `operations/handoffs/founder/2026-07-12-trust-layer-S11-observation-period-NEXT-SESSION-PROMPT.md` (the false-hold instrument + the 7-day live record). This prompt's scope + elections survive as the *binding shape of the eventual flip* (staged, G6-qualified, enforcement-claim bounds named) and are encoded in ADR-013 §11 + the build plan §S11; the binding verdict is `2026-07-12-mentor-consultation-s11-enforce-gate-verdict-verbatim.md` (verbatim wins). Return to the flip only after the readiness standard is met.
+
+---
+
 # Next-Session Prompt — Trust Layer S11: the ENFORCE activation (the logos gate)
 
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)
