@@ -64,6 +64,7 @@ import {
   decisionAlreadyFired,
   markDecisionFired,
 } from "./lib/session-state.mjs";
+import { appendFalseHoldRecord, buildFalseHoldRecord } from "./lib/false-hold-capture.mjs";
 import {
   classifyConsult,
   advanceLoopState,
@@ -583,6 +584,27 @@ async function runConsult(cfg, { sessionId, toolName, action }) {
   const adoptedCorrection = priorFeedback ? undefined : action.text.slice(0, 160);
   const { state: nextState, event: loopEvent } = advanceLoopState(loopState, classified, adoptedCorrection);
   writeLoopState(cfg, sessionId, nextState);
+
+  // S11 observation period (ADR-013 §7/§11 — the false-hold labelling instrument): capture THIS
+  // at-action verdict's kathekon signals + the loop event to the durable false-hold record, for the
+  // TS predicate (assessKathekonEngagement) to classify (false_positive vs correct_hold) over the
+  // 7-day live distribution. Flag-gated (GATE1_FALSE_HOLD_CAPTURE, default off ⇒ byte-identical),
+  // fail-soft; never touches stdout/exit/frame. CONSULT path ONLY — the guard path (runGuard) is the
+  // already-proven irreversible deny, not the measure-mode intervention the S11 flip binds. MEASURE.
+  if (cfg.falseHoldCapture) {
+    appendFalseHoldRecord(
+      cfg,
+      buildFalseHoldRecord({
+        verdict: r.verdict,
+        sessionId,
+        tool: toolName,
+        depth,
+        loopEvent,
+        actionText: action.text,
+        carriedPrior: !!priorFeedback,
+      }),
+    );
+  }
 
   // Inject the at-action frame (redirection + proximity + loop status + any abandoned loops). Never blocks.
   // (The S8 standing trust advisory moved ABOVE the consult — S9b G5 — and is appended here unchanged.)

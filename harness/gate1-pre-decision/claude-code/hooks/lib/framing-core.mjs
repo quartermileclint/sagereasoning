@@ -129,6 +129,14 @@ export function loadConfig({ hookDir, eventName, allowStrict = true } = {}) {
     // `date`/`ls` (the over-fire). GATE1_CONSULT_BASH=true opts the NON-housekeeping Bash back into
     // the advisory floor (read-only housekeeping stays suppressed via the denylist either way).
     consultBash: parseBool(process.env.GATE1_CONSULT_BASH, parseBool(fileCfg.consultBash, false)),
+    // S11 observation period (ADR-013 §7/§11 — the false-hold labelling instrument): when ON, the
+    // at-action CONSULT additionally appends this verdict's kathekon-engagement signals + loop event
+    // to <stateDir>/false-hold-record.jsonl — the durable 7-day accumulation the TS predicate
+    // (assessKathekonEngagement) classifies (false_positive vs correct_hold). Default OFF ⇒ H3 is
+    // byte-identical to pre-S11 (no capture, no file). Additive + fail-soft; never touches
+    // stdout/exit/frame; MEASURE-only (labels nothing, binds nothing). Turn ON only for the
+    // observation period, with a DURABLE GATE1_STATE_DIR (the default /tmp is lost on reboot).
+    falseHoldCapture: parseBool(process.env.GATE1_FALSE_HOLD_CAPTURE, parseBool(fileCfg.falseHoldCapture, false)),
   };
   cfg.credential = process.env[cfg.credentialEnvVar] || process.env.GATE1_CREDENTIAL || "";
   // H3 guard endpoint (D-A): explicit override, else config, else derive from the reason endpoint

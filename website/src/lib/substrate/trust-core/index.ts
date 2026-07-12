@@ -13,6 +13,10 @@ export * from './trust-decay'
 export * from './trust-transition'
 export * from './trust-aggregate'
 export * from './derive-trust-events'
+// S11 observation period — the canonical Q3 kathekon-engagement predicate (the
+// shared function the eventual S11 G6(a) qualification binds on) + the false-hold
+// classifier the observation instrument uses. Pure; MEASURE — labels, binds nothing.
+export * from './kathekon-engagement'
 // S2 — evidence weighting + verdict confidence (mentor A2 + A5; pure lib S3/S4 consume).
 export * from './confidence-tiers'
 export * from './evidence-weighting'
