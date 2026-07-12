@@ -731,6 +731,20 @@ export default function ApiDocsPage() {
           unforgeable distinguisher is <code>examination_mode</code> above; the post-decision
           check is never presented as pre-decision framing. See the llms.txt note.
         </p>
+        <p className="font-body text-sm text-sage-600 leading-relaxed mt-3">
+          <strong>Trust record (public read).</strong> GET <code>/api/trust-record/{'{agent_id}'}</code> returns
+          the agent&apos;s standing per-domain trust levels + the minimum-domain aggregate + confidence +
+          coverage, composed live from server-side, consumer-unforgeable trust events (decay realized at
+          read; the justice latch surfaced; reflect history modulate-only &mdash; it cannot raise any level).
+          Every response carries the honest-claims envelope &mdash; what the record attests (signed
+          examination artifacts exist for the examination-derived events; how decisions were reasoned as
+          narrated and extracted; decay/coverage honestly marked) and what it does not (factual
+          correctness; harms omitted from the submitted text; freshness beyond the artifact record; future
+          behaviour; training-signal fitness). MEASURE mode: advisory, never binding; human override is
+          absolute (R20c). 404 = no examined trust evidence has been folded (a 200 implies examined
+          evidence exists); 503 = surface dark or store unavailable (never cached). See the llms.txt
+          &quot;Trust Record&quot; section for the full contract.
+        </p>
       </div>
 
       {/* Sage Reflect — session-close reflection */}

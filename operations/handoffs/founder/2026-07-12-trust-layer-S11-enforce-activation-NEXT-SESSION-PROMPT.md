@@ -13,7 +13,7 @@ ADR-012's logos-enforce **activation condition is DISCHARGED** (the corroboratio
 
 1. **The S10 founder walk is DONE** (the S10 close §Founder Walk: `SUBSTRATE_TRUST_READ_SURFACE_ENABLED=true` + redeploy; live smokes green — the s9-loop record 200 with envelope, unknown-agent 404; the staged R18 docs applied + pushed; agent-card 17 extensions). If not, RUN IT FIRST.
 2. Batteries at the S10 standing counts (S10 **106/0** · emission-hooks 15/0 · S9b 86/0 · S8 146/0 · S1 97 · S2 87 · S3 106 · S4 417 · S5 87 · S6 84 · S7 122 · hooks 104/0 + 230/0 · the reflect/erasure suites per the S10 close).
-3. Read the S10 R18 sign-off memo (`operations/trust-layer-2026-07/2026-07-12-s10-r18-signoff-memo.md`) — its CARRIED items are this session's decision inputs.
+3. Read the S10 R18 sign-off memo (`operations/trust-layer-2026-07/2026-07-12-s10-r18-signoff-memo.md`) — its CARRIED items are this session's decision inputs — AND the standing register's S10 addendum (`operations/trust-layer-2026-07/2026-07-11-preactivation-safety-audit-report.md`, end of file), which now carries **`reflect-store owner-scoping`**: the item BLOCKS any external multi-tenant onboarding until the owner-scoping schema step (covering the export §2e rider AND the S9b delete leg together) lands; any onboarding review consults that register first.
 
 ## Scope (build plan §S11 + ADR-013 §11 G6)
 
