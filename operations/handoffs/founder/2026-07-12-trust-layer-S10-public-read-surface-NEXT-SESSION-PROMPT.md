@@ -1,3 +1,5 @@
+> **SPENT — executed 2026-07-12.** The S10 session ran to close: `D-TRUST-LAYER-S10-READ-SURFACE-BUILT-DARK`; close at `operations/handoffs/founder/2026-07-12-trust-layer-S10-public-read-surface-CLOSE.md`; the founder walk (flag + staged docs) is carried there. Successor: `operations/handoffs/founder/2026-07-12-trust-layer-S11-enforce-activation-NEXT-SESSION-PROMPT.md`.
+
 # Next-Session Prompt — Trust Layer S10: the public trust-record read surface (native, interop-shaped)
 
 **For the founder. Paste as the first message of a fresh session.** (Rename the date prefix to the actual session date.)

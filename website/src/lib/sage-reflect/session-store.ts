@@ -619,6 +619,47 @@ export async function deleteAgentSessions(agent_id: string): Promise<StoreResult
 }
 
 /**
+ * R17i portability (Trust Layer S10 rider, 2026-07-12 — closes the S9b carried
+ * "/api/user/export reflect rows" item): read ALL of an agent's reflect-session
+ * rows in export form — plaintext columns as stored, with the R17b-encrypted
+ * response history DECRYPTED for the data subject (the export route's Art-20
+ * "usable form" precedent for the intimate mentor store), and the raw
+ * ciphertext/meta columns dropped. A per-row decrypt failure degrades to an
+ * honest marker, never a fabricated history and never a failed export.
+ * Missing-table tolerated by the CALLER (mirrors the export route's posture).
+ */
+export async function getAgentSessionsForExport(
+  agent_id: string,
+): Promise<StoreResult<Array<Record<string, unknown>>>> {
+  try {
+    const admin = getAdminClient()
+    const { data, error } = await admin.from(SESSIONS).select('*').eq('agent_id', agent_id)
+    if (error) return { ok: false, error: `getAgentSessionsForExport: ${error.message}` }
+    const rows = (data ?? []) as SageReflectSessionRow[]
+    const exported = rows.map((row) => {
+      const { response_history_ciphertext, response_history_meta, ...plain } = row
+      let response_history: unknown = null
+      if (response_history_ciphertext && response_history_meta) {
+        try {
+          response_history = decryptPersistedState({
+            ciphertext: response_history_ciphertext,
+            meta: response_history_meta,
+          })
+        } catch (e) {
+          response_history = {
+            error: `decryption failed (fail-honest): ${(e as Error).message}`,
+          }
+        }
+      }
+      return { ...plain, response_history }
+    })
+    return { ok: true, value: exported }
+  } catch (e) {
+    return { ok: false, error: `getAgentSessionsForExport threw: ${(e as Error).message}` }
+  }
+}
+
+/**
  * SR-12 retention sweep — hard DELETE rows whose created_at is older than the
  * window. The cutoff is computed via the pure computeRetentionCutoffIso.
  */

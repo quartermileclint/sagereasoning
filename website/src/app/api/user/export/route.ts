@@ -25,6 +25,9 @@ import { getAssessmentHistoryForOwner } from '@/lib/substrate/agent-assessment-h
 // + state. Missing-table-benign (the migration is its own founder-walked step).
 import { getTrustDataForOwner } from '@/lib/substrate/trust-core/trust-core-store'
 import { getCollaborationDataForOwner } from '@/lib/substrate/trust-core/collaboration-store'
+// Trust Layer S10 rider (R17i, 2026-07-12) — portability of the operator's agents'
+// reflect sessions (agent_id-keyed; owner→agent_ids resolution mirrors /api/user/delete).
+import { getAgentSessionsForExport } from '@/lib/sage-reflect/session-store'
 
 export async function OPTIONS() {
   return corsPreflightResponse()
@@ -158,6 +161,45 @@ export async function GET(request: NextRequest) {
       exportData.collaboration_records = { error: collabExport.error }
     } else {
       exportData.collaboration_records = collabExport.value
+    }
+  }
+
+  // 2e. Trust Layer S10 rider (R17i, 2026-07-12) — the operator's agents' reflect
+  //     sessions. sage_reflect_sessions is keyed by agent_id, so resolve this
+  //     user's credential-bound agent_ids from api_keys (the /api/user/delete S9b
+  //     precedent, same scoping) and export each agent's rows with the R17b
+  //     response history DECRYPTED for the data subject (Art 20 usable form —
+  //     the intimate-mentor-store precedent below). Fail-collected per agent;
+  //     a decrypt failure degrades to an honest per-row marker in the store.
+  //     DISCLOSED BOUNDARY (S10 review, carried): sage_reflect_sessions carries
+  //     no owner column and agent_id is NOT owner-unique (the UPC uniqueness is
+  //     the (owner, agent) PAIR), so if two owners ever hold the same agent_id
+  //     this export — like the shipped delete precedent above it — is scoped by
+  //     agent_id alone. Zero exposure today (pre-0h, single operator); the
+  //     owner-scoping schema step is a named register item gating any external
+  //     multi-tenant onboarding.
+  {
+    const { data: keyRows, error: keysError } = await supabaseAdmin
+      .from('api_keys')
+      .select('agent_id')
+      .eq('owner_user_id', userId)
+      .not('agent_id', 'is', null)
+    if (keysError) {
+      exportData.sage_reflect_sessions = { error: `agent resolution: ${keysError.message}` }
+    } else {
+      const agentIds = [...new Set(((keyRows ?? []) as { agent_id: string }[]).map((r) => r.agent_id))]
+      const reflectSessions: Record<string, unknown> = {}
+      for (const agentId of agentIds) {
+        const sessions = await getAgentSessionsForExport(agentId)
+        if (!sessions.ok) {
+          // Missing-table benign (pre-migration environments): mirror the 2a loop.
+          if (sessions.error.includes('does not exist')) continue
+          reflectSessions[agentId] = { error: sessions.error }
+        } else if (sessions.value.length > 0) {
+          reflectSessions[agentId] = sessions.value
+        }
+      }
+      exportData.sage_reflect_sessions = reflectSessions
     }
   }
 

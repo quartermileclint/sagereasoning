@@ -334,11 +334,22 @@ async function resolveLatestReflectAt(
 // ============================================================================
 
 /** Read an agent's full trust profile (decayed + capped + aggregated, lazy-on-read
- *  E3). `now` injected for determinism in tests. Fail-honest. */
+ *  E3). `now` injected for determinism in tests. Fail-honest.
+ *
+ *  `opts.strictMissingTable` (S10 fold, 2026-07-12 — the S10-ABUSE-1 finding; the
+ *  A-3 regex class in a NEW direction): the missing-table-benign fold is correct
+ *  for the data-rights paths (Live before the migration), but on the PUBLIC read
+ *  surface — where the table must exist — a transient PostgREST schema-cache
+ *  error matching the regex would read as a benign EMPTY profile and be served as
+ *  a definitive, publicly-cached 404 ("no trust events have been folded") — a
+ *  false public claim. Strict mode surfaces the failure as ok:false so the
+ *  handler answers 503 no-store instead. Default false ⇒ every existing caller
+ *  byte-identical. */
 export async function readTrustProfile(
   agentId: string,
   now: Date = new Date(),
   client: SupabaseClient = getAdminClient(),
+  opts?: { strictMissingTable?: boolean },
 ): Promise<StoreResult<TrustProfile>> {
   try {
     const { data, error } = await client
@@ -346,7 +357,10 @@ export async function readTrustProfile(
       .select('*')
       .eq('agent_id', agentId)
     if (error) {
-      if (isMissingTableError(error as { code?: string; message?: string })) {
+      if (
+        !opts?.strictMissingTable &&
+        isMissingTableError(error as { code?: string; message?: string })
+      ) {
         return { ok: true, value: emptyProfile(agentId) }
       }
       return { ok: false, error: `readTrustProfile: ${error.message}` }
@@ -370,17 +384,30 @@ export async function readTrustProfile(
  * self-diagnosis") consumes this. Additive read — no existing S1 behaviour changed.
  * Fail-honest; counts in JS (no DB count option) so the in-memory fake works. The
  * recency window is applied later by the pure deriver (deriveL4TrustTier), not here.
+ *
+ * Bounded (S10 fold, 2026-07-12 — the S10-ABUSE-2 finding): the read is now
+ * capped at HONEST_REFLECT_SUMMARY_ROW_CAP newest rows (order desc ⇒ the latest
+ * timestamp is always inside the window), so a public unauthenticated GET can
+ * never trigger an unbounded per-agent row fetch. At the cap the count
+ * UNDER-reports (the safe direction) and `capped` is set so consumers can say so
+ * honestly; the S7 L4 tier threshold (≥3) is far below the cap — unaffected.
  */
+export const HONEST_REFLECT_SUMMARY_ROW_CAP = 500
+
 export async function readHonestReflectSummary(
   agentId: string,
   client: SupabaseClient = getAdminClient(),
-): Promise<StoreResult<{ honestReflectCount: number; latestHonestReflectAt: string | null }>> {
+): Promise<
+  StoreResult<{ honestReflectCount: number; latestHonestReflectAt: string | null; capped?: boolean }>
+> {
   try {
     const { data, error } = await client
       .from(EVENTS_TABLE)
       .select('occurred_at')
       .eq('agent_id', agentId)
       .eq('event_type', 'reflect-completed-honest')
+      .order('occurred_at', { ascending: false })
+      .limit(HONEST_REFLECT_SUMMARY_ROW_CAP)
     if (error) {
       if (isMissingTableError(error as { code?: string; message?: string })) {
         return { ok: true, value: { honestReflectCount: 0, latestHonestReflectAt: null } }
@@ -393,7 +420,14 @@ export async function readHonestReflectSummary(
       // ISO-8601 timestamps compare lexicographically in chronological order.
       if (r.occurred_at && (latest === null || r.occurred_at > latest)) latest = r.occurred_at
     }
-    return { ok: true, value: { honestReflectCount: rows.length, latestHonestReflectAt: latest } }
+    return {
+      ok: true,
+      value: {
+        honestReflectCount: rows.length,
+        latestHonestReflectAt: latest,
+        capped: rows.length >= HONEST_REFLECT_SUMMARY_ROW_CAP,
+      },
+    }
   } catch (e) {
     return { ok: false, error: `readHonestReflectSummary threw: ${(e as Error).message}` }
   }

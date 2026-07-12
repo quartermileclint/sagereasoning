@@ -506,6 +506,12 @@ export async function readTrustVerdict(
     taskHasJusticeSurface?: boolean
     now?: Date
     client?: SupabaseClient
+    /** S10 fold (2026-07-12, S10-ABUSE-1): the PUBLIC read surface sets this so a
+     *  missing-table-shaped store error (incl. a transient PostgREST schema-cache
+     *  stale) surfaces as a profile-read FAILURE (⇒ 503 no-store) instead of a
+     *  benign empty profile (⇒ a false, cacheable public 404). Default off ⇒ the
+     *  harness/data-rights callers are byte-identical. */
+    strictStore?: boolean
   },
 ): Promise<TrustVerdict> {
   const base: TrustVerdict = {
@@ -521,7 +527,9 @@ export async function readTrustVerdict(
     return { ...base, dark: true, basis: DARK_BASIS }
   }
   try {
-    const profileRes = await readTrustProfile(agentId, opts?.now ?? new Date(), opts?.client)
+    const profileRes = await readTrustProfile(agentId, opts?.now ?? new Date(), opts?.client, {
+      strictMissingTable: opts?.strictStore === true,
+    })
     if (!profileRes.ok) {
       return { ...base, basis: `trust profile read failed (fail-honest): ${profileRes.error}` }
     }

@@ -13786,6 +13786,49 @@ Expected: the §11 amendment present; S9b in the phases + sequence; CI-16 carrie
 
 **Rules served:** PR15 (reuse: the reflect engine drives the OOB exam; L4 signals drive the elicitation; CI-10/M1 patterns), PR17, PR18, KG1, KG7, KG-EX1 (instrument-fidelity batteries), AC5 (no new human-facing perimeter route), AC7 (carried to the walk), R18f-parallel throughout, PA-6 (re-audited in-change).
 
-**Walk addendum (2026-07-12):** the founder walk ran green (migration TEST+PROD, both flags, the `reflect` capability widening, the persist flip); the Step-7a elicitation smoke caught a real defect — both new metering sites built a free-form-string `loop_id` but the column is UUID, so the RPC 503'd (fail-closed, no data harm). Fixed at the root: `deterministicLoopId` (sha256→8-4-4-4-12) at both sites; regression-pinned (S9b battery 84/0); `tsc`/`build` clean. Requires a follow-up commit + redeploy, then re-run 7a.
+**Walk addendum (2026-07-12):** the founder walk ran green (migration TEST+PROD, both flags, the `reflect` capability widening, the persist flip); the Step-7a elicitation smoke caught a real defect — both new metering sites built a free-form-string `loop_id` but the column is UUID, so the RPC 503'd (fail-closed, no data harm). Fixed at the root: `deterministicLoopId` (sha256→8-4-4-4-12) at both sites; regression-pinned (S9b battery 84/0); `tsc`/`build` clean. Two follow-up commits landed the metering folds: (1) a **deterministic UUID loop id** (`deterministicLoopId`, sha256→8-4-4-4-12) at both new metering sites — `loop_id` is a UUID column, a free-form string 503'd the RPC; (2) **integer coercion of the float Anthropic cost** at the discernment call site + defensively in `recordLoopBilling` — the RPC's cost params are INTEGER, an un-rounded float 503'd it (the SQL probe passed on the integer defaults; the real call adds the float). **WALK DISCHARGED:** re-smoke HTTP 200, `x-loop-cost-cents:2` on the `api_practice_discernment` surface, `result.signals` clean, `mode:measure`. Production now intentionally NOT byte-equivalent — the S9b standing changes are live. S9b battery 86/0. Requires a final records commit (this addendum + close + CLAUDE.md).
 
 **Status:** Adopted. Cross-references: `D-TRUST-LAYER-S9-DOGFOOD-INSTALL-LIVE`, `D-MENTOR-VERDICTS-CALLING-REFLECTION-GATE2-ADOPTED`, ADR-013 §11, `operations/handoffs/founder/2026-07-12-trust-layer-S9b-practice-completion-CLOSE.md`.
+
+## 2026-07-12 — D-TRUST-LAYER-S10-READ-SURFACE-BUILT-DARK
+
+**Decision:** Trust Layer S10 is BUILT DARK + review-folded: the public trust-record read surface `GET /api/trust-record/{agent_id}` (public-unauthenticated, accreditation-GET posture — founder election E1) behind the NEW `SUBSTRATE_TRUST_READ_SURFACE_ENABLED` (UNSET ⇒ honest 503, zero DB work); the `fix_before_s10` register is fully dispositioned in the R18 sign-off memo (PA-6 + F-1 + R17i-export CLOSED; PA-5 + PA-10 disclosed-on-surface + carried; the rest carried with named targets); ADR-013 §8 carries the dated PA-6 narrowing; the R18 docs are STAGED for the founder-walked activation.
+
+**Reasoning:** the build plan §S10 + ADR-013 §8 (the surface publishes INSIDE the honest-claims envelope, verbatim + battery-locked). Elections (AskUserQuestion): E1 new public route; E2 PA-10 disclose + carry to S2-wiring (the mentor-A5 recency-tier closure over an ad-hoc live-deriver age bound); E3 riders = F-1 emission-hooks test + the R17i export fold (PA-5 API-path hardening declined → S11). PR15: maximal reuse — the surface composes `readTrustVerdict` (S1 decay → S3 weighted aggregate; the S4 recommendation deliberately NOT served) + `readHonestReflectSummary`; zero LLM calls; state-fold only (no event-ledger exposure — R17e-adjacent conservatism).
+
+**Files touched:**
+- `website/src/lib/substrate/trust-core/trust-core-flag.ts` — +`isTrustReadSurfaceEnabled` (additive)
+- `website/src/lib/substrate/trust-core/trust-record-payload.ts` — NEW pure composer + `TRUST_RECORD_ENVELOPE` (the §8 envelope, PA-6-narrowed + PA-10-disclosed, battery-locked)
+- `website/src/app/api/trust-record/[agent_id]/{handler,route}.ts` — NEW (thin route + injectable-deps handler; AC5 recorded decision in both headers; 503-dark/400/404/200 with the ENV-1 evidence-gated 404)
+- `website/src/lib/substrate/trust-core/trust-core-store.ts` — review folds: `readTrustProfile` `opts.strictMissingTable` (default off, byte-identical callers) + `readHonestReflectSummary` bounded (cap 500, desc, `capped` flag)
+- `website/src/lib/substrate/trust-core/harness-integration.ts` — `readTrustVerdict` `opts.strictStore` threading (default off)
+- `website/src/lib/sage-reflect/session-store.ts` — +`getAgentSessionsForExport` (R17i rider; decrypt-for-subject, ciphertext dropped, honest per-row failure)
+- `website/src/app/api/user/export/route.ts` — §2e reflect-sessions export fold (ALWAYS-ON intended; the agent_id-scoping boundary disclosed in-code)
+- `website/src/lib/substrate/trust-core/__tests__/s10-trust-record-surface.test.ts` — NEW battery **106/0**
+- `website/src/lib/substrate/trust-core/__tests__/emission-hooks.test.ts` — NEW (F-1 closure) **15/0**
+- `adopted/adr/2026-07-08-sage-trust-layer.md` — §8 dated amendment (PA-6 narrowing + PA-10 disclosure)
+- `operations/trust-layer-2026-07/2026-07-12-s10-r18-signoff-memo.md` — NEW (the register gate; §9 review addendum)
+- `operations/trust-layer-2026-07/2026-07-12-s10-docs-staged-for-activation.md` — NEW (staged llms.txt/agent-card-17th-extension/api-docs; applied ONLY at the walk)
+- `operations/handoffs/founder/2026-07-12-trust-layer-S11-enforce-activation-NEXT-SESSION-PROMPT.md` — NEW
+
+**Adversarial review:** wave 1 (6-dim Workflow, Fable) died 5/6 on the session limit; the completed abuse-surface dimension returned 2 findings, first-hand confirmed + FOLDED (S10-ABUSE-1 strict-store threading — the A-3 regex class would have served a transient PostgREST schema-cache stale as a false, publicly-cached 404; S10-ABUSE-2 bounded reflect read). **The Opus relaunch (the prompt's §4 fallback) COMPLETED FULLY — 17 agents, 0 errors, ~3.86M tokens: 6/6 dimensions, fold-verification CLEAN, 4 confirmed (ALL LOW) folded/dispositioned** (S10-ENV-1 evidence-gated 404 — a declaration-class seeded row must not surface a 200 implying examined evidence, folded at the root + pinned S4-30..34; the export-rider cross-tenant boundary — NEW carried register item "reflect-store owner-scoping", shared root with the SHIPPED S9b delete precedent, zero live exposure pre-0h, gates external multi-tenant onboarding; BATT-1 → the export smoke is REQUIRED at the walk; S10-RECORDS-1 stale count corrected), **7 refuted** on record. The in-build battery also caught + fixed the ByteString header defect (em-dash in a header value crashes every response; ASCII-pinned).
+
+**Risk classification:** `code-elevated` under 0d-ii (new route file dark + additive lib/store changes + the always-on R17i export fold — Elevated: change to existing user-facing functionality). **The ACTIVATION is `code-critical`** (new public surface + env flag; AC7 + PR6 + PR17) — CARRIED to the founder walk in the close; NOT performed this session. AC5 untouched (re-check performed + recorded: agent-facing GET, no free-text human input, outside the perimeter; the discernment S8 recorded decision re-confirmed). No mint/deploy/flag/schema op this session; production byte-equivalent until the founder's push (on push the only always-on live delta is the §2e export fold + comments).
+
+**Rollback path:** `git revert` the build commit (flag unset ⇒ the route 503s dark; nothing else live); post-activation rollback = unset `SUBSTRATE_TRUST_READ_SURFACE_ENABLED` + redeploy (flag-off 503 battery-asserted) + `git revert` the docs commit.
+
+**Verification step (founder-performable):**
+```
+cd website
+npx tsx src/lib/substrate/trust-core/__tests__/s10-trust-record-surface.test.ts
+npx tsx src/lib/substrate/trust-core/__tests__/emission-hooks.test.ts
+npx tsx src/lib/substrate/trust-core/__tests__/trust-core.test.ts
+npm run build
+```
+Expected: 106/0 · 15/0 · 97/0 · Compiled successfully with `ƒ /api/trust-record/[agent_id]` registered.
+
+**Open questions:** carried per the memo — PA-5 structural (S11), PA-10/PA-11 (S2-wiring), the NEW reflect-store owner-scoping item (external-tenant gate), G5 per-domain refinement (S11), F-CONF (extractor calibration), seeding-engine wiring (revisit condition), the A2-decrease-surface decision (S11).
+
+**Rules served:** R18/R18a (the envelope + sign-off memo), R18f-parallel (the surface serves only artifact-derived state), R17i (export fold), R17e-adjacent (state-fold-only), R20c (stated on the surface), AC5 (re-check recorded), KG1, KG-EX1 (the published-claim honesty is the unit of analysis), PR7 (carried items recorded), PR10 (PEV, Diagnostic-certain on all folds), PR15, PR17 (walk scripted step-by-step in the close), PR18.
+
+**Status:** Adopted. Cross-references: `D-TRUST-LAYER-S9B-PRACTICE-COMPLETION-BUILT-REVIEW-FOLDED`, `D-TRUST-LAYER-PREACTIVATION-SAFETY-AUDIT`, ADR-013 §8 (amended) + §11, `operations/trust-layer-2026-07/2026-07-12-s10-r18-signoff-memo.md`, `operations/handoffs/founder/2026-07-12-trust-layer-S10-public-read-surface-CLOSE.md`.
