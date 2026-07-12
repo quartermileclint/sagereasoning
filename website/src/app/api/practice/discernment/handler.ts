@@ -229,10 +229,12 @@ async function meterDiscernmentStage(
 ): Promise<MeterOutcome> {
   if (!enabled()) return { ok: true, headers: {} }
 
-  const anthropicCostCents = estimateCallCostCents(
-    MODEL_DEEP,
-    input.usage.input_tokens,
-    input.usage.output_tokens,
+  // Math.round: estimateCallCostCents returns a 4-decimal FLOAT, but the billing
+  // RPC's cost params are INTEGER — an un-rounded float 503s the RPC (the reflect
+  // route rounds for the same reason; S9b live-smoke fix). recordLoopBilling now
+  // also rounds defensively, but rounding here keeps the value integer end-to-end.
+  const anthropicCostCents = Math.round(
+    estimateCallCostCents(MODEL_DEEP, input.usage.input_tokens, input.usage.output_tokens),
   )
   const bill = computeLoopBill(anthropicCostCents)
   // A DETERMINISTIC loop id in valid UUID shape (loop_id is a UUID column — a

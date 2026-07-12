@@ -361,6 +361,11 @@ export async function recordLoopBilling(
 ): Promise<RecordLoopBillingResult> {
   const admin = getAdminClient()
 
+  // DEFENSIVE INTEGER COERCION (S9b live-smoke fix): every cost/token param maps
+  // to an INTEGER RPC param; a non-integer float 503s the RPC (Postgres rejects
+  // the cast). Callers are expected to pass integers, but rounding here guarantees
+  // it for all callers and closes the class (a no-op on already-integer values).
+  const asInt = (n: number) => Math.round(Number(n) || 0)
   const { data, error } = await admin.rpc('increment_api_usage', {
     // Existing params (preserved).
     p_api_key_id: params.apiKeyId,
@@ -372,16 +377,16 @@ export async function recordLoopBilling(
     // Option D params.
     p_loop_id: params.loopId,
     p_surface: params.surface,
-    p_anthropic_cost_cents: params.anthropicCostCents,
-    p_base_cents: params.baseCents,
-    p_threshold_cents: params.thresholdCents,
-    p_overage_cents: params.overageCents,
+    p_anthropic_cost_cents: asInt(params.anthropicCostCents),
+    p_base_cents: asInt(params.baseCents),
+    p_threshold_cents: asInt(params.thresholdCents),
+    p_overage_cents: asInt(params.overageCents),
     p_overage_fired: params.overageFired,
-    p_total_cents: params.totalCents,
-    p_internal_calls: params.internalCalls,
+    p_total_cents: asInt(params.totalCents),
+    p_internal_calls: asInt(params.internalCalls),
     p_models_used: params.modelsUsed,
-    p_total_input_tokens: params.totalInputTokens,
-    p_total_output_tokens: params.totalOutputTokens,
+    p_total_input_tokens: asInt(params.totalInputTokens),
+    p_total_output_tokens: asInt(params.totalOutputTokens),
     p_agent_id: params.agentId,
   })
 

@@ -498,6 +498,12 @@ assertEq(EVENT_EFFECT['self-screen-absent'], 'flag', 'EVENT_EFFECT: self-screen-
   assert(disc.includes('deterministicLoopId(') && !/loopId\s*=\s*['"`]discern-/.test(disc), 'wiring: discernment metering uses a UUID-shaped deterministic loop id')
   const oob = src('lib/sage-reflect/screened-examination.ts')
   assert(oob.includes('deterministicLoopId(') && !/loopId\s*=\s*[`]reflect-oob-\$/.test(oob), 'wiring: the OOB reflect meter uses a UUID-shaped deterministic loop id')
+  // S9b live-smoke fix: the cost passed to the billing RPC must be an INTEGER
+  // (the RPC's cent params are INTEGER; a float 503s). Pin the handler rounds the
+  // float cost, AND recordLoopBilling coerces defensively (closes the class).
+  assert(/Math\.round\(\s*estimateCallCostCents/.test(disc), 'wiring: discernment metering rounds the float cost before the RPC')
+  const lct2 = src('lib/loop-cost-tracker.ts')
+  assert(/asInt\(params\.anthropicCostCents\)/.test(lct2) && /p_total_cents: asInt/.test(lct2), 'wiring: recordLoopBilling coerces cent params to integers (defensive; RPC integer contract)')
   // deterministicLoopId itself formats a sha256 into the 8-4-4-4-12 UUID layout
   // (source-grepped, not imported — importing loop-cost-tracker pulls the
   // stripe/supabase chain which needs env the bare battery does not load; the
