@@ -108,10 +108,25 @@ git commit -m "records: D-REMAINING-PRINCIPLES-HUMAN-HALVES-7-10-BUILT-REVIEW-FO
 ```
 Then push via GitHub Desktop. **Apply the migrations BEFORE the deploy takes live traffic** (see the runbook above). Vercel: the human pages/routes + additive data-rights coverage go live on push; `/api/reason` is byte-identical.
 
+## Post-close — deploy done + PR 3 (revise affordance)
+
+**PRs 1 & 2 are LIVE (2026-07-13, founder-walked).** Both migrations applied + §VERIFY green on **TEST and Production** (`reserve_clause_entries`: 7 cols / RLS / 5 policies; `premeditatio_entries`: 8 cols all nullable / 2 CHECK constraints). Three commits pushed, **Vercel green ×3**. Live smokes all passed: premeditatio "Prepare a disposition" + weekly reflection; `/hupexairesis`; the `/welcome` link. `/api/reason` byte-identical — the observation window stays clean.
+
+**PR 3 — revise / edit-in-place affordance (founder-requested; built + first-hand reviewed; code-only deploy carried).** A pure code change (NO migration — the columns exist): flagged entries on both tools get a **Revise** button, a flagged submit keeps the form populated + points at that row (revise = update-in-place, no re-entry, no duplicate), via a new content-edit `PATCH` on each route (POST refactored to shared validators, behaviour preserved — diff-verified). Files: `premeditatio/route.ts` + `premeditatio/page.tsx`, `hupexairesis/route.ts` + `hupexairesis/page.tsx`. Verified: boundary 353/0 + 368/0, tsc 0, `next build` ✓. Reviewed first-hand (the multi-agent pass died on an expired OAuth token; 0 defects; POST preservation diff-grounded). **Deploy = one code commit + push (no migration):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+git add website/src/app/api/mentor/premeditatio/route.ts website/src/app/premeditatio/page.tsx \
+        website/src/app/api/mentor/hupexairesis/route.ts website/src/app/hupexairesis/page.tsx
+git commit -m "revise-in-place: edit flagged premeditatio + reserve-clause entries (shared validators + content-edit PATCH), POST preserved"
+```
+Smokes: flag an entry on each tool → Revise → it updates in place (no duplicate). Rollback: `git revert` (no schema).
+
+**Close-time follow-up:** refresh the `CLAUDE.md` "Live in production" list to record the two tools as Live (both under MEASURE-neutral human surface) once PR 3 is also pushed.
+
 ## Cross-references
 - `operations/trust-layer-2026-07/2026-07-13-remaining-stoic-principles-build-plan.md` (§3/§4/§5/§8)
 - `operations/trust-layer-2026-07/2026-07-13-mentor-consultation-remaining-principles-decision-points-verdict-verbatim.md` (D6)
 - `operations/handoffs/founder/2026-07-13-remaining-principles-FIRST-BUILD-NEXT-SESSION-PROMPT.md` (this session's prompt)
 - Decision-log entry `D-REMAINING-PRINCIPLES-HUMAN-HALVES-7-10-BUILT-REVIEW-FOLDED`
 
-*End of close. Two measurement-neutral human tools built and verified; the window stays clean; the founder-walked deploy carries.*
+*End of close. Two measurement-neutral human tools built, verified, and LIVE; a revise affordance carried; the window stays clean.*
