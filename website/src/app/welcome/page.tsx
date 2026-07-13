@@ -58,6 +58,7 @@ const FIRST_STEPS = [
 const MORE_TO_EXPLORE = [
   { label: 'Ethical scenarios', href: '/scenarios' },
   { label: 'Preparing for Adversity (premeditatio)', href: '/premeditatio' },
+  { label: 'The Reserve Clause (hupexairesis)', href: '/hupexairesis' },
   { label: 'The community map', href: '/community' },
   { label: 'How the method works', href: '/methodology' },
 ]

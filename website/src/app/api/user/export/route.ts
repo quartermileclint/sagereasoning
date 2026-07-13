@@ -107,6 +107,8 @@ export async function GET(request: NextRequest) {
     { key: 'premeditatio_entries', table: 'premeditatio_entries', select: '*' },
     { key: 'oikeiosis_reflections', table: 'oikeiosis_reflections', select: '*' },
     { key: 'founder_hub_entries', table: 'founder_hub_entries', select: '*' },
+    // Remaining Principles #10-human — the reserve-clause practitioner tool.
+    { key: 'reserve_clause_entries', table: 'reserve_clause_entries', select: '*' },
   ]
 
   for (const { key, table, select } of tables) {

@@ -88,6 +88,8 @@ export async function gatherUserPersonalData(
     { key: 'premeditatio_entries', table: 'premeditatio_entries' },
     { key: 'oikeiosis_reflections', table: 'oikeiosis_reflections' },
     { key: 'founder_hub_entries', table: 'founder_hub_entries' },
+    // Remaining Principles #10-human — the reserve-clause practitioner tool.
+    { key: 'reserve_clause_entries', table: 'reserve_clause_entries' },
   ]
 
   for (const { key, table } of tables) {
