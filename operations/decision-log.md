@@ -13974,8 +13974,56 @@ Expected: one file changed; the summary now dated 2026-07-12, §7 shows S1–S10
 
 **Method / verification:** code-grounded + adversarially verified — Workflow `wf_68f22d1e-857` (7 agents, 0 errors, ~1.66M tokens; 5 read-only groundings + classification + a skeptic refutation pass; verdict **SOUND_WITH_FIXES**, all fixes folded). Two stale/latent items corrected: CLAUDE.md's 2026-07-07 "dogfood install toggled OFF" note is stale (the full H1–H5 harness is ON, consistent with the running instrument); `#12 logos` stays window-safe only under a read-only-import constraint on `stoic-brain.ts` (which `/api/reason` imports).
 
-**Open / carried:** (1) the **first generative build session** = #7-human premeditatio enhancement + #10-human reserve-clause prompt (window-safe, byte-identity-gated deploy — the next-session prompt); (2) the **D2 justice-arm narrowing** (`code-elevated`, report-side, before the return-with-record session); (3) confirm `SUBSTRATE_REFLECT_SCREENED_EXAM_ENABLED` (D4); (4) pin the frozen-capture-set hash at window open (§5). The 7-day observation clock + the return-with-record session are unchanged; the S11 flip remains DEFERRED, readiness-gated.
+**Open / carried:** (1) the **first generative build session** = #7-human premeditatio enhancement + #10-human reserve-clause prompt (window-safe, byte-identity-gated deploy — the next-session prompt); (2) the **D2 justice-arm narrowing** (`code-elevated`, report-side, before the return-with-record session); (3) `SUBSTRATE_REFLECT_SCREENED_EXAM_ENABLED` **confirmed ON (D4 ✓, 2026-07-13, Vercel Production)** — reflect #2/#3 branch-only/test-agent, no prod deploy of `/api/practice/reflect` during the window; (4) pin the frozen-capture-set hash at window open (§5). The 7-day observation clock + the return-with-record session are unchanged; the S11 flip remains DEFERRED, readiness-gated.
 
 **Rules served:** PR15 (Workflow fan-out; reuse-not-reimplement — the classification rides the live `assessKathekonEngagement`/`deriveWorstJusticeOutcome`/capture rather than re-deriving), R18 (honest bounds — weights/training claims remain BLOCKED; the plan's every claim is grounded or flagged), PR7 (decisions deferred are documented — the six forks were resolved by the mentor, none left open), KG-EX1 (the instrument is frozen during the measurement; the human surface is a different surface), PR17/AC7 (the founder-walked deploy discipline named for every downstream build), PR18 (this close + the state-block posture; production byte-equivalent so no Live-list change).
 
 **Status:** Adopted. Cross-references: `operations/trust-layer-2026-07/2026-07-13-remaining-stoic-principles-build-plan.md`; the verbatim mentor record; `D-TRUST-LAYER-S11-OBSERVATION-INSTRUMENT-BUILT-DARK-REVIEW-FOLDED`, `D-TRUST-LAYER-S11-ENFORCE-GATE-MENTOR-DEFERRED`; ADR-013 §7/§11; the build plan §S11; `operations/handoffs/founder/2026-07-12-trust-layer-S11-return-with-record-NEXT-SESSION-PROMPT.md`; ADR-012 (the measure/enforce framing); the survey source `inbox/Mentor answer to remaining principles question.rtf`.
+
+---
+
+## 2026-07-13 — D-REMAINING-PRINCIPLES-HUMAN-HALVES-7-10-BUILT-REVIEW-FOLDED
+
+**Decision:** Build the first two generative human-surface tools of the Remaining-Principles phase — **#7-human** (the premeditatio "Prepare a disposition" exercise, extending the LIVE `/premeditatio`) and **#10-human** (the net-new `/hupexairesis` reserve-clause tool) — as two standalone, boundary-verified PRs to ship DURING the false-hold observation window (mentor D6). Repo-only this session; the two founder-walked migrations + the byte-identity-gated deploy are CARRIED (the AI performed no Supabase/Vercel/git op — it guided, built the repo edits, and verified).
+
+**Reasoning:** mentor verdict D6 (2026-07-13, binding) — ship the human halves of the two SPLIT items now, as standalone PRs with no shared imports with the agent halves, the clean file boundary **battery-verified BEFORE shipping** (the S10-ENV-1 lesson: verify the boundary before, not after). The human practitioner surface should not wait for the agent infrastructure. Both tools are measurement-neutral: a website deploy leaves `/api/reason` byte-identical and the false-hold capture is hook-sourced/client-side, so the 7-day assessment is undisturbed (build plan §5). The agent halves (#7 pre-task disposition input; #10 reserve-clause Layer-2 field) are HELD for the flip. Design fork resolved at open (AskUserQuestion): PR2 = a net-new standalone page (no existing human decision/assent flow exists to host it; the standalone premeditatio/oikeiosis family pattern is the cleanest boundary).
+
+**Files touched:**
+PR1 (#7-human premeditatio enhancement):
+- `website/supabase-premeditatio-prepared-disposition-migration.sql` — NEW (additive nullable columns `entry_kind`/`within_control`/`outside_control`/`virtue_domain`/`virtue_response`/`prepared_disposition` + relax NOT NULL on `false_impression`/`correct_judgement`; idempotent, reversible; two idempotent CHECK constraints)
+- `website/src/app/api/mentor/premeditatio/route.ts` — POST branches on `entry_kind` (weekly path preserved; prepared_disposition added + validated); quality-gate labels made mode-neutral
+- `website/src/app/premeditatio/page.tsx` — mode toggle + prepared-disposition form + dual-mode feed
+- `website/src/app/api/mentor/premeditatio/__tests__/human-practitioner-boundary.test.ts` — NEW (import-boundary guard; 353/0)
+PR2 (#10-human reserve-clause):
+- `website/supabase-reserve-clause-migration.sql` — NEW (`reserve_clause_entries` table + RLS + index)
+- `website/src/app/api/mentor/hupexairesis/route.ts` — NEW (POST/GET; requireAuth + service-role + `.eq('user_id')`; fail-open LLM "separates action from outcome" gate)
+- `website/src/app/hupexairesis/page.tsx` + `layout.tsx` — NEW (the reserve-clause tool)
+- `website/src/app/api/mentor/hupexairesis/__tests__/human-practitioner-boundary.test.ts` — NEW (guards route+page+layout; 368/0)
+- `website/src/lib/user-data-gathering.ts`, `website/src/app/api/user/export/route.ts`, `website/src/app/api/user/delete/route.ts` — additive, missing-table-benign `reserve_clause_entries` data-rights coverage (R17c/R17i; the S1/S9b always-on precedent)
+- `website/src/app/welcome/page.tsx` — discovery link (`MORE_TO_EXPLORE`)
+- `operations/decision-log.md` — this entry; + `operations/handoffs/founder/2026-07-13-remaining-principles-human-halves-CLOSE.md` (session close)
+
+**Risk classification:** **Elevated** overall (code-elevated changes to LIVE user-facing pages/routes + `schema`) with **ONE Critical-classified edit under 0d-ii**: the `/api/user/delete` `reserve_clause_entries` addition (data-deletion functionality). **AC7/PR17 engage** at the two founder-walked migrations, the Critical delete edit, and the deploy — the AI performs no Supabase/Vercel/git op. Production byte-equivalent until the founder's push; on push the always-on deltas are the additive data-rights coverage (missing-table-benign) + the human-surface pages/routes. **NOT in the /api/reason import graph or the frozen capture set** (git-guard: NONE), so the observation window is undisturbed.
+
+**Rollback path:** `git revert` each PR independently (they share no runtime imports). Migrations reversible: `DROP TABLE public.reserve_clause_entries;` / the DROP-column + re-assert block at the premeditatio migration foot.
+
+**Deploy order (founder-walked — CRITICAL): migration BEFORE code, per PR.** The new premeditatio route writes `entry_kind` (+ the new columns) on EVERY insert, so deploying the code before the premeditatio migration would 400 every live premeditatio insert (the build-dark-migrate-later-breaks-writes class, in reverse). Order: apply the migration (TEST → prod, run §VERIFY) → then push the code. The data-rights edits are missing-table-benign either way.
+
+**Verification step (founder-performable):**
+```
+cd website
+node_modules/.bin/tsx src/app/api/mentor/premeditatio/__tests__/human-practitioner-boundary.test.ts   # 353/0
+node_modules/.bin/tsx src/app/api/mentor/hupexairesis/__tests__/human-practitioner-boundary.test.ts    # 368/0
+node_modules/.bin/tsc --noEmit -p tsconfig.json                                                        # exit 0
+npm run build                                                                                          # ✓ Compiled; /api/mentor/hupexairesis + /hupexairesis registered
+git status --short | grep -iE "api/reason|translation-sandwich|/substrate/|trust-core|kathekon-engagement|false-hold|harness/gate1" || echo NONE
+```
+Expected: boundary tests 353/0 + 368/0; tsc 0; build ✓; the guard prints NONE.
+
+**Method / verification:** adversarial review Workflow `wf_2072486e-fd6` (7 agents, 0 errors, ~1.51M tokens; 6 dimensions, find → adversarially-verify each finding) — **1 finding raised, 0 CONFIRMED, 1 REFUTED** (a boundary-test completeness nit: `hupexairesis/layout.tsx` unguarded — FOLDED anyway; both boundary tests now guard route+page(+layout)). tsc/build/boundary batteries all green.
+
+**Open / carried:** (1) the founder-walked deploy of both PRs (migration-first order, byte-identity check, push); (2) the **R20a perimeter question** — the `/api/mentor/*` practitioner tools sit OUTSIDE the distress perimeter by existing precedent (premeditatio/oikeiosis/passion-log all do); whether the family (incl. the new reserve-clause) should join is a separate founder call (Critical/AC5 if pursued; importing the substrate R20a gate would itself breach the plan's `@/lib/substrate/*` boundary); (3) the successor window-safe tool (#9 view-from-above + #13, or the D2 justice-arm narrowing) at the founder's tempo. The 7-day observation clock is undisturbed; S11 remains DEFERRED, readiness-gated.
+
+**Rules served:** D6 (mentor verdict — human halves shipped during the window, standalone, boundary-verified-before-not-after); PR15 (Workflow fan-out; reuse-not-reimplement — extends the live premeditatio/oikeiosis pattern, no bespoke); R17c/R17i (data-rights coverage for the new PII table); PR17/AC7 (founder-walked migrations + the Critical delete edit + deploy); KG1 (DB writes on the new routes); the build-dark-migrate-later-breaks-writes lesson (deploy order); R18 (honest bounds — no claim the tools touch the instrument; weights BLOCKED); PR18 (this close; production byte-equivalent, no Live-list change until deploy).
+
+**Status:** Adopted. Cross-references: `D-REMAINING-PRINCIPLES-BUILD-PLAN-ADOPTED`; the mentor D6 verbatim record `operations/trust-layer-2026-07/2026-07-13-mentor-consultation-remaining-principles-decision-points-verdict-verbatim.md`; the build plan §3/§4/§5/§8; `operations/handoffs/founder/2026-07-13-remaining-principles-human-halves-CLOSE.md`.
