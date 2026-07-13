@@ -9,6 +9,128 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 const VALID_VIRTUE_DOMAINS = ['wisdom', 'justice', 'courage', 'temperance'] as const
 
+type PremeditKind = 'weekly_reflection' | 'prepared_disposition'
+
+interface PremeditRow {
+  entry_kind: PremeditKind
+  anticipated_event: string
+  false_impression: string | null
+  correct_judgement: string | null
+  within_control: string | null
+  outside_control: string | null
+  virtue_domain: string | null
+  virtue_response: string | null
+  prepared_disposition: string | null
+  avoidance_behaviour_tag: string | null
+}
+
+type ParsedContent =
+  | { ok: false; error: string }
+  | { ok: true; kind: PremeditKind; row: PremeditRow; gateArgs: [string, string, string] }
+
+/**
+ * Validate the content fields for either exercise mode and, on success, return
+ * the column values (trimmed; the other mode's fields nulled) plus the
+ * quality-gate arguments. Shared by POST (insert) and the PATCH content-edit /
+ * revise path (update), so the two never drift.
+ */
+function parsePremeditatioContent(body: Record<string, unknown>): ParsedContent {
+  const kind: PremeditKind =
+    body.entry_kind === 'prepared_disposition' ? 'prepared_disposition' : 'weekly_reflection'
+  const anticipated_event = body.anticipated_event as string | undefined
+  const false_impression = body.false_impression as string | undefined
+  const correct_judgement = body.correct_judgement as string | undefined
+  const avoidance_behaviour_tag = body.avoidance_behaviour_tag as string | undefined
+  const within_control = body.within_control as string | undefined
+  const outside_control = body.outside_control as string | undefined
+  const virtue_domain = body.virtue_domain as string | undefined
+  const virtue_response = body.virtue_response as string | undefined
+  const prepared_disposition = body.prepared_disposition as string | undefined
+
+  if (!anticipated_event?.trim()) return { ok: false, error: 'Required field: anticipated_event' }
+
+  if (kind === 'weekly_reflection') {
+    if (!false_impression?.trim() || !correct_judgement?.trim()) {
+      return {
+        ok: false,
+        error: 'Required fields: anticipated_event, false_impression, correct_judgement',
+      }
+    }
+  } else {
+    if (
+      !within_control?.trim() ||
+      !outside_control?.trim() ||
+      !virtue_response?.trim() ||
+      !prepared_disposition?.trim()
+    ) {
+      return {
+        ok: false,
+        error:
+          'Required fields: anticipated_event, within_control, outside_control, virtue_response, prepared_disposition',
+      }
+    }
+    if (
+      virtue_domain !== undefined &&
+      virtue_domain !== null &&
+      virtue_domain !== '' &&
+      !(VALID_VIRTUE_DOMAINS as readonly string[]).includes(virtue_domain)
+    ) {
+      return { ok: false, error: `virtue_domain must be one of: ${VALID_VIRTUE_DOMAINS.join(', ')}` }
+    }
+  }
+
+  const lengthChecks: ReadonlyArray<readonly [string, unknown]> =
+    kind === 'weekly_reflection'
+      ? [
+          ['Anticipated event', anticipated_event],
+          ['False impression', false_impression],
+          ['Correct judgement', correct_judgement],
+        ]
+      : [
+          ['Anticipated event', anticipated_event],
+          ['What is up to me', within_control],
+          ['What is not up to me', outside_control],
+          ['Virtue response', virtue_response],
+          ['Prepared disposition', prepared_disposition],
+        ]
+  for (const [field, value] of lengthChecks) {
+    const err = validateTextLength(value as string | undefined, field, TEXT_LIMITS.medium)
+    if (err) return { ok: false, error: err }
+  }
+
+  const isWeekly = kind === 'weekly_reflection'
+  return {
+    ok: true,
+    kind,
+    row: {
+      entry_kind: kind,
+      anticipated_event: anticipated_event.trim(),
+      false_impression: isWeekly ? (false_impression as string).trim() : null,
+      correct_judgement: isWeekly ? (correct_judgement as string).trim() : null,
+      within_control: isWeekly ? null : (within_control as string).trim(),
+      outside_control: isWeekly ? null : (outside_control as string).trim(),
+      virtue_domain: isWeekly ? null : virtue_domain?.trim() || null,
+      virtue_response: isWeekly ? null : (virtue_response as string).trim(),
+      prepared_disposition: isWeekly ? null : (prepared_disposition as string).trim(),
+      avoidance_behaviour_tag: isWeekly ? avoidance_behaviour_tag?.trim() || null : null,
+    },
+    gateArgs: isWeekly
+      ? [anticipated_event, false_impression as string, correct_judgement as string]
+      : [anticipated_event, within_control as string, prepared_disposition as string],
+  }
+}
+
+function qualityGateBlock(kind: PremeditKind, isGeneric: boolean) {
+  const genericMessage =
+    kind === 'weekly_reflection'
+      ? 'This response was flagged as generic. A premeditatio must name a specific anticipated event, not a general aspiration. Consider revising.'
+      : 'This response was flagged as generic. A prepared disposition must be anchored to a specific future scenario, not a general aspiration. Consider revising.'
+  return {
+    is_generic: isGeneric,
+    message: isGeneric ? genericMessage : 'Quality gate passed — response is specific and concrete.',
+  }
+}
+
 /**
  * POST /api/mentor/premeditatio
  *
@@ -43,90 +165,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const {
-      entry_kind,
-      anticipated_event,
-      false_impression,
-      correct_judgement,
-      linked_passion_event_id,
-      avoidance_behaviour_tag,
-      within_control,
-      outside_control,
-      virtue_domain,
-      virtue_response,
-      prepared_disposition,
-    } = body
 
-    // Mode select. A NULL/absent entry_kind is the original weekly reflection.
-    const kind = entry_kind === 'prepared_disposition' ? 'prepared_disposition' : 'weekly_reflection'
+    const parsed = parsePremeditatioContent(body)
+    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
-    // Every entry names a specific anticipated event (both modes).
-    if (!anticipated_event?.trim()) {
-      return NextResponse.json({ error: 'Required field: anticipated_event' }, { status: 400 })
-    }
-
-    if (kind === 'weekly_reflection') {
-      if (!false_impression?.trim() || !correct_judgement?.trim()) {
-        return NextResponse.json(
-          { error: 'Required fields: anticipated_event, false_impression, correct_judgement' },
-          { status: 400 }
-        )
-      }
-    } else {
-      // prepared_disposition
-      if (
-        !within_control?.trim() ||
-        !outside_control?.trim() ||
-        !virtue_response?.trim() ||
-        !prepared_disposition?.trim()
-      ) {
-        return NextResponse.json(
-          {
-            error:
-              'Required fields: anticipated_event, within_control, outside_control, virtue_response, prepared_disposition',
-          },
-          { status: 400 }
-        )
-      }
-      if (
-        virtue_domain !== undefined &&
-        virtue_domain !== null &&
-        virtue_domain !== '' &&
-        !VALID_VIRTUE_DOMAINS.includes(virtue_domain)
-      ) {
-        return NextResponse.json(
-          { error: `virtue_domain must be one of: ${VALID_VIRTUE_DOMAINS.join(', ')}` },
-          { status: 400 }
-        )
-      }
-    }
-
-    // Text length validation — only the fields the chosen mode provides.
-    const lengthChecks: ReadonlyArray<readonly [string, unknown]> =
-      kind === 'weekly_reflection'
-        ? [
-            ['Anticipated event', anticipated_event],
-            ['False impression', false_impression],
-            ['Correct judgement', correct_judgement],
-          ]
-        : [
-            ['Anticipated event', anticipated_event],
-            ['What is up to me', within_control],
-            ['What is not up to me', outside_control],
-            ['Virtue response', virtue_response],
-            ['Prepared disposition', prepared_disposition],
-          ]
-    for (const [field, value] of lengthChecks) {
-      const err = validateTextLength(value as string | undefined, field, TEXT_LIMITS.medium)
-      if (err) return NextResponse.json({ error: err }, { status: 400 })
-    }
-
-    // Quality gate keys on anticipated_event specificity (both modes); the other
-    // two arguments are supporting context only.
-    const isGeneric =
-      kind === 'weekly_reflection'
-        ? await checkQualityGate(anticipated_event, false_impression, correct_judgement)
-        : await checkQualityGate(anticipated_event, within_control, prepared_disposition)
+    const isGeneric = await checkQualityGate(...parsed.gateArgs)
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
@@ -134,19 +177,9 @@ export async function POST(request: NextRequest) {
       .from('premeditatio_entries')
       .insert({
         user_id: userId,
-        entry_kind: kind,
-        anticipated_event: anticipated_event.trim(),
-        false_impression: kind === 'weekly_reflection' ? false_impression.trim() : null,
-        correct_judgement: kind === 'weekly_reflection' ? correct_judgement.trim() : null,
-        within_control: kind === 'prepared_disposition' ? within_control.trim() : null,
-        outside_control: kind === 'prepared_disposition' ? outside_control.trim() : null,
-        virtue_domain: kind === 'prepared_disposition' ? virtue_domain?.trim() || null : null,
-        virtue_response: kind === 'prepared_disposition' ? virtue_response.trim() : null,
-        prepared_disposition: kind === 'prepared_disposition' ? prepared_disposition.trim() : null,
+        ...parsed.row,
         is_generic: isGeneric,
-        linked_passion_event_id: linked_passion_event_id || null,
-        avoidance_behaviour_tag:
-          kind === 'weekly_reflection' ? avoidance_behaviour_tag?.trim() || null : null,
+        linked_passion_event_id: body.linked_passion_event_id || null,
         behaviour_changed: false,
         prompt_sent_at: new Date().toISOString(),
       })
@@ -158,18 +191,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to save premeditatio entry' }, { status: 500 })
     }
 
-    const genericMessage =
-      kind === 'weekly_reflection'
-        ? 'This response was flagged as generic. A premeditatio must name a specific anticipated event, not a general aspiration. Consider revising.'
-        : 'This response was flagged as generic. A prepared disposition must be anchored to a specific future scenario, not a general aspiration. Consider revising.'
-
     return NextResponse.json({
       success: true,
       entry: data,
-      quality_gate: {
-        is_generic: isGeneric,
-        message: isGeneric ? genericMessage : 'Quality gate passed — response is specific and concrete.',
-      },
+      quality_gate: qualityGateBlock(parsed.kind, isGeneric),
     })
   } catch (err) {
     console.error('Premeditatio API error:', err)
@@ -180,8 +205,13 @@ export async function POST(request: NextRequest) {
 /**
  * PATCH /api/mentor/premeditatio
  *
- * Update a premeditatio entry — primarily for marking behaviour_changed.
- * Body: { id, behaviour_changed: true }
+ * Two shapes, both requiring `id` and scoped to the authenticated user:
+ *   1. Content edit / revise — the body carries `anticipated_event` (+ the
+ *      content fields for the entry's `entry_kind`). Re-validates + re-runs the
+ *      quality gate and updates the row (used to revise a flagged-generic entry
+ *      in place, without re-entering everything or creating a duplicate).
+ *   2. Metadata-only — the body carries `behaviour_changed` and/or
+ *      `linked_passion_event_id` (e.g. the "Mark changed" button).
  */
 export async function PATCH(request: NextRequest) {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
@@ -193,7 +223,7 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { id, behaviour_changed, linked_passion_event_id } = body
+    const { id } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Entry id is required' }, { status: 400 })
@@ -201,6 +231,35 @@ export async function PATCH(request: NextRequest) {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+    // Content edit / revise — present when the body carries the content fields.
+    if (body.anticipated_event !== undefined) {
+      const parsed = parsePremeditatioContent(body)
+      if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
+
+      const isGeneric = await checkQualityGate(...parsed.gateArgs)
+
+      const { data, error } = await supabase
+        .from('premeditatio_entries')
+        .update({ ...parsed.row, is_generic: isGeneric })
+        .eq('id', id)
+        .eq('user_id', userId)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Premeditatio content-edit error:', error)
+        return NextResponse.json({ error: 'Failed to update entry' }, { status: 500 })
+      }
+
+      return NextResponse.json({
+        success: true,
+        entry: data,
+        quality_gate: qualityGateBlock(parsed.kind, isGeneric),
+      })
+    }
+
+    // Metadata-only update (behaviour_changed / linked_passion_event_id).
+    const { behaviour_changed, linked_passion_event_id } = body
     const updateData: Record<string, unknown> = {}
     if (behaviour_changed !== undefined) updateData.behaviour_changed = behaviour_changed
     if (linked_passion_event_id !== undefined) updateData.linked_passion_event_id = linked_passion_event_id

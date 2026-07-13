@@ -7,6 +7,49 @@ import { getClient } from '@/lib/sage-reason-engine'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
+type ParsedReserve =
+  | { ok: false; error: string }
+  | { ok: true; action_context: string | null; outcome_pursued: string; prepared_response: string }
+
+/**
+ * Validate the reserve-clause content fields (shared by POST and the PATCH
+ * content-edit / revise path, so the two never drift).
+ */
+function parseReserveContent(body: Record<string, unknown>): ParsedReserve {
+  const outcome_pursued = body.outcome_pursued as string | undefined
+  const prepared_response = body.prepared_response as string | undefined
+  const action_context = body.action_context as string | undefined
+
+  if (!outcome_pursued?.trim() || !prepared_response?.trim()) {
+    return { ok: false, error: 'Required fields: outcome_pursued, prepared_response' }
+  }
+
+  for (const [field, value] of [
+    ['Outcome pursued', outcome_pursued],
+    ['Prepared response', prepared_response],
+    ['Action context', action_context],
+  ] as const) {
+    const err = validateTextLength(value, field, TEXT_LIMITS.medium)
+    if (err) return { ok: false, error: err }
+  }
+
+  return {
+    ok: true,
+    action_context: action_context?.trim() || null,
+    outcome_pursued: outcome_pursued.trim(),
+    prepared_response: prepared_response.trim(),
+  }
+}
+
+function separationBlock(separates: boolean) {
+  return {
+    separates_action_from_outcome: separates,
+    message: separates
+      ? 'Quality gate passed — your prepared response holds the outcome lightly and keeps your commitment on the action.'
+      : 'Your prepared response does not yet separate the action from the outcome — it reads as another way of insisting on the outcome. A practitioner who cannot name a genuine response to the outcome NOT occurring has not yet made the reservation. Consider revising.',
+  }
+}
+
 /**
  * POST /api/mentor/hupexairesis
  *
@@ -25,9 +68,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
  *   action_context    (optional) — the decision/action at hand
  *
  * Quality gate: an LLM check flags a prepared_response that does NOT genuinely
- * separate the action from the outcome (e.g. merely restates the desired outcome,
- * or gives a non-answer). "A practitioner who cannot answer the question has not
- * yet separated the action from the outcome."
+ * separate the action from the outcome.
  */
 export async function POST(request: NextRequest) {
   const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
@@ -39,28 +80,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { outcome_pursued, prepared_response, action_context } = body
 
-    // Validate required fields
-    if (!outcome_pursued?.trim() || !prepared_response?.trim()) {
-      return NextResponse.json(
-        { error: 'Required fields: outcome_pursued, prepared_response' },
-        { status: 400 }
-      )
-    }
+    const parsed = parseReserveContent(body)
+    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
-    // Text length validation
-    for (const [field, value] of [
-      ['Outcome pursued', outcome_pursued],
-      ['Prepared response', prepared_response],
-      ['Action context', action_context],
-    ] as const) {
-      const err = validateTextLength(value, field, TEXT_LIMITS.medium)
-      if (err) return NextResponse.json({ error: err }, { status: 400 })
-    }
-
-    // Quality gate: does the prepared response genuinely separate action from outcome?
-    const separates = await checkSeparation(outcome_pursued, prepared_response)
+    const separates = await checkSeparation(parsed.outcome_pursued, parsed.prepared_response)
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
@@ -68,9 +92,9 @@ export async function POST(request: NextRequest) {
       .from('reserve_clause_entries')
       .insert({
         user_id: userId,
-        action_context: action_context?.trim() || null,
-        outcome_pursued: outcome_pursued.trim(),
-        prepared_response: prepared_response.trim(),
+        action_context: parsed.action_context,
+        outcome_pursued: parsed.outcome_pursued,
+        prepared_response: parsed.prepared_response,
         separates_action_from_outcome: separates,
       })
       .select()
@@ -84,15 +108,71 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       entry: data,
-      quality_gate: {
-        separates_action_from_outcome: separates,
-        message: separates
-          ? 'Quality gate passed — your prepared response holds the outcome lightly and keeps your commitment on the action.'
-          : 'Your prepared response does not yet separate the action from the outcome — it reads as another way of insisting on the outcome. A practitioner who cannot name a genuine response to the outcome NOT occurring has not yet made the reservation. Consider revising.',
-      },
+      quality_gate: separationBlock(separates),
     })
   } catch (err) {
     console.error('Reserve clause API error:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+/**
+ * PATCH /api/mentor/hupexairesis
+ *
+ * Content edit / revise an existing reserve-clause entry — re-validates + re-runs
+ * the separation gate and updates the row in place (used to revise an entry the
+ * gate flagged, without re-entering everything or creating a duplicate).
+ * Body: { id, outcome_pursued, prepared_response, action_context? }. Scoped to
+ * the authenticated user.
+ */
+export async function PATCH(request: NextRequest) {
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  if (rateLimitError) return rateLimitError
+
+  const auth = await requireAuth(request)
+  if (auth.error) return auth.error
+  const userId = auth.user.id
+
+  try {
+    const body = await request.json()
+    const { id } = body
+
+    if (!id) {
+      return NextResponse.json({ error: 'Entry id is required' }, { status: 400 })
+    }
+
+    const parsed = parseReserveContent(body)
+    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
+
+    const separates = await checkSeparation(parsed.outcome_pursued, parsed.prepared_response)
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    const { data, error } = await supabase
+      .from('reserve_clause_entries')
+      .update({
+        action_context: parsed.action_context,
+        outcome_pursued: parsed.outcome_pursued,
+        prepared_response: parsed.prepared_response,
+        separates_action_from_outcome: separates,
+      })
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Reserve clause update error:', error)
+      return NextResponse.json({ error: 'Failed to update entry' }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      success: true,
+      entry: data,
+      quality_gate: separationBlock(separates),
+    })
+  } catch (err) {
+    console.error('Reserve clause PATCH error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

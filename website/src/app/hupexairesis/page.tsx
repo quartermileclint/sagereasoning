@@ -13,6 +13,10 @@ import type { User } from '@supabase/supabase-js'
  * It surfaces the difference between commitment-to-the-action (up to us) and
  * commitment-to-the-outcome (not up to us).
  *
+ * Entries flagged by the gate (the response still insists on the outcome) can be
+ * revised IN PLACE (an edit updates the same row rather than re-entering or
+ * duplicating).
+ *
  * Human-only. It POSTs to /api/mentor/hupexairesis; it never touches /api/reason,
  * the signed assessment, or the substrate engine.
  */
@@ -33,6 +37,8 @@ export default function HupexairesisPage() {
 
   // Form state
   const [showForm, setShowForm] = useState(false)
+  // When set, the form is REVISING an existing entry (PATCH) rather than creating one.
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [actionContext, setActionContext] = useState('')
   const [outcomePursued, setOutcomePursued] = useState('')
   const [preparedResponse, setPreparedResponse] = useState('')
@@ -41,6 +47,8 @@ export default function HupexairesisPage() {
     type: 'success' | 'error' | 'warning'
     text: string
   } | null>(null)
+
+  const isEditing = editingId !== null
 
   useEffect(() => {
     async function load() {
@@ -65,9 +73,26 @@ export default function HupexairesisPage() {
   }, [])
 
   function resetForm() {
+    setEditingId(null)
     setActionContext('')
     setOutcomePursued('')
     setPreparedResponse('')
+  }
+
+  function openNewForm() {
+    resetForm()
+    setSubmitResult(null)
+    setShowForm(true)
+  }
+
+  function startEdit(entry: ReserveEntry) {
+    setActionContext(entry.action_context || '')
+    setOutcomePursued(entry.outcome_pursued || '')
+    setPreparedResponse(entry.prepared_response || '')
+    setEditingId(entry.id)
+    setSubmitResult(null)
+    setShowForm(true)
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const formValid = outcomePursued.trim() && preparedResponse.trim()
@@ -79,25 +104,37 @@ export default function HupexairesisPage() {
     setSubmitResult(null)
 
     try {
-      const res = await authFetch('/api/mentor/hupexairesis', {
-        method: 'POST',
-        body: JSON.stringify({
-          outcome_pursued: outcomePursued.trim(),
-          prepared_response: preparedResponse.trim(),
-          action_context: actionContext.trim() || undefined,
-        }),
-      })
+      const content = {
+        outcome_pursued: outcomePursued.trim(),
+        prepared_response: preparedResponse.trim(),
+        action_context: actionContext.trim() || undefined,
+      }
+
+      const res = editingId
+        ? await authFetch('/api/mentor/hupexairesis', {
+            method: 'PATCH',
+            body: JSON.stringify({ id: editingId, ...content }),
+          })
+        : await authFetch('/api/mentor/hupexairesis', {
+            method: 'POST',
+            body: JSON.stringify(content),
+          })
 
       if (res.ok) {
         const data = await res.json()
         if (data.quality_gate?.separates_action_from_outcome === false) {
+          // Keep the form open + populated so it can be revised in place. Point
+          // editingId at the row (just-created on POST, or the same on PATCH) so
+          // the next submit updates it rather than creating a duplicate.
+          if (data.entry?.id) setEditingId(data.entry.id)
           setSubmitResult({ type: 'warning', text: data.quality_gate.message })
+          await fetchEntries()
         } else {
           setSubmitResult({ type: 'success', text: 'Reserve clause recorded.' })
+          resetForm()
+          setShowForm(false)
+          await fetchEntries()
         }
-        resetForm()
-        setShowForm(false)
-        await fetchEntries()
       } else {
         const err = await res.json()
         setSubmitResult({ type: 'error', text: err.error || 'Failed to save' })
@@ -151,7 +188,7 @@ export default function HupexairesisPage() {
       {showForm ? (
         <form onSubmit={handleSubmit} className="bg-white border border-sage-200 rounded-lg p-6 mb-6">
           <h2 className="font-display text-lg font-medium text-sage-800 mb-4">
-            Add the Reservation
+            {isEditing ? 'Revise the Reservation' : 'Add the Reservation'}
           </h2>
 
           {/* Action context (optional) */}
@@ -210,7 +247,10 @@ export default function HupexairesisPage() {
           <div className="flex items-center justify-between">
             <button
               type="button"
-              onClick={() => setShowForm(false)}
+              onClick={() => {
+                resetForm()
+                setShowForm(false)
+              }}
               className="font-body text-sm text-sage-600 hover:text-sage-600"
             >
               Cancel
@@ -220,13 +260,13 @@ export default function HupexairesisPage() {
               disabled={!formValid || submitting}
               className="px-6 py-2 bg-sage-500 text-white font-display text-sm rounded hover:bg-sage-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Saving...' : 'Save Reserve Clause'}
+              {submitting ? 'Saving...' : isEditing ? 'Save changes' : 'Save Reserve Clause'}
             </button>
           </div>
         </form>
       ) : (
         <button
-          onClick={() => setShowForm(true)}
+          onClick={openNewForm}
           className="w-full border-2 border-dashed border-sage-200 rounded-lg p-4 text-center font-body text-sm text-sage-600 hover:border-sage-400 hover:text-sage-600 transition-colors mb-6"
         >
           + Add a reserve clause
@@ -264,9 +304,17 @@ export default function HupexairesisPage() {
                   )}
                 </div>
                 {entry.separates_action_from_outcome === false && (
-                  <span className="text-xs font-body px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
-                    Outcome still attached — revise
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-body px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+                      Outcome still attached
+                    </span>
+                    <button
+                      onClick={() => startEdit(entry)}
+                      className="text-xs font-body px-2 py-0.5 rounded-full border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
+                    >
+                      Revise
+                    </button>
+                  </div>
                 )}
               </div>
 

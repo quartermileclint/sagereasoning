@@ -18,9 +18,11 @@ import type { User } from '@supabase/supabase-js'
  *    identify the virtue the scenario calls for, and record a prepared disposition
  *    ("not a plan; a disposition") the later reflection can return to.
  *
+ * Entries flagged generic by the quality gate can be revised IN PLACE (an edit
+ * updates the same row rather than re-entering everything or creating a duplicate).
+ *
  * Both modes POST to /api/mentor/premeditatio (a human-only route; it never touches
- * /api/reason, the signed assessment, or the substrate engine). A quality gate flags
- * generic responses.
+ * /api/reason, the signed assessment, or the substrate engine).
  */
 
 const VIRTUE_DOMAINS = [
@@ -70,6 +72,8 @@ export default function PremeditatioPage() {
 
   // Form state
   const [showForm, setShowForm] = useState(false)
+  // When set, the form is REVISING an existing entry (PATCH) rather than creating one.
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [anticipatedEvent, setAnticipatedEvent] = useState('')
   // Weekly-reflection fields
   const [falseImpression, setFalseImpression] = useState('')
@@ -87,6 +91,8 @@ export default function PremeditatioPage() {
     type: 'success' | 'error' | 'warning'
     text: string
   } | null>(null)
+
+  const isEditing = editingId !== null
 
   useEffect(() => {
     async function load() {
@@ -119,6 +125,7 @@ export default function PremeditatioPage() {
   }, [])
 
   function resetForm() {
+    setEditingId(null)
     setAnticipatedEvent('')
     setFalseImpression('')
     setCorrectJudgement('')
@@ -128,6 +135,29 @@ export default function PremeditatioPage() {
     setVirtueDomain('')
     setVirtueResponse('')
     setPreparedDisposition('')
+  }
+
+  function openNewForm() {
+    resetForm()
+    setSubmitResult(null)
+    setShowForm(true)
+  }
+
+  function startEdit(entry: PremeditEntry) {
+    setMode(entry.entry_kind === 'prepared_disposition' ? 'prepared' : 'weekly')
+    setAnticipatedEvent(entry.anticipated_event || '')
+    setFalseImpression(entry.false_impression || '')
+    setCorrectJudgement(entry.correct_judgement || '')
+    setAvoidanceTag(entry.avoidance_behaviour_tag || '')
+    setWithinControl(entry.within_control || '')
+    setOutsideControl(entry.outside_control || '')
+    setVirtueDomain(entry.virtue_domain || '')
+    setVirtueResponse(entry.virtue_response || '')
+    setPreparedDisposition(entry.prepared_disposition || '')
+    setEditingId(entry.id)
+    setSubmitResult(null)
+    setShowForm(true)
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const weeklyValid =
@@ -147,7 +177,7 @@ export default function PremeditatioPage() {
     setSubmitResult(null)
 
     try {
-      const payload =
+      const content =
         mode === 'weekly'
           ? {
               entry_kind: 'weekly_reflection',
@@ -166,15 +196,25 @@ export default function PremeditatioPage() {
               prepared_disposition: preparedDisposition.trim(),
             }
 
-      const res = await authFetch('/api/mentor/premeditatio', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      })
+      const res = editingId
+        ? await authFetch('/api/mentor/premeditatio', {
+            method: 'PATCH',
+            body: JSON.stringify({ id: editingId, ...content }),
+          })
+        : await authFetch('/api/mentor/premeditatio', {
+            method: 'POST',
+            body: JSON.stringify(content),
+          })
 
       if (res.ok) {
         const data = await res.json()
         if (data.quality_gate?.is_generic) {
+          // Keep the form open + populated so it can be revised in place. Point
+          // editingId at the row (just-created on POST, or the same on PATCH) so
+          // the next submit updates it rather than creating a duplicate.
+          if (data.entry?.id) setEditingId(data.entry.id)
           setSubmitResult({ type: 'warning', text: data.quality_gate.message })
+          await fetchEntries()
         } else {
           setSubmitResult({
             type: 'success',
@@ -183,10 +223,10 @@ export default function PremeditatioPage() {
                 ? 'Premeditatio recorded. Quality gate passed.'
                 : 'Prepared disposition recorded. Quality gate passed.',
           })
+          resetForm()
+          setShowForm(false)
+          await fetchEntries()
         }
-        resetForm()
-        setShowForm(false)
-        await fetchEntries()
       } else {
         const err = await res.json()
         setSubmitResult({ type: 'error', text: err.error || 'Failed to save' })
@@ -219,7 +259,7 @@ export default function PremeditatioPage() {
   const isPromptDay = new Date().getDay() === 1
 
   function switchMode(next: Mode) {
-    if (next === mode) return
+    if (next === mode || isEditing) return
     setMode(next)
     setSubmitResult(null)
   }
@@ -232,8 +272,7 @@ export default function PremeditatioPage() {
     )
   }
 
-  const tabBase =
-    'px-4 py-1.5 rounded-md font-display text-sm transition-colors'
+  const tabBase = 'px-4 py-1.5 rounded-md font-display text-sm transition-colors'
   const tabActive = 'bg-sage-500 text-white'
   const tabInactive = 'text-sage-600 hover:text-sage-700'
 
@@ -262,21 +301,23 @@ export default function PremeditatioPage() {
         </button>
       </div>
 
-      {/* Mode toggle */}
+      {/* Mode toggle (locked while revising an existing entry) */}
       <div className="inline-flex items-center rounded-lg border border-sage-200 bg-white p-0.5 mb-6" role="tablist" aria-label="Exercise mode">
         <button
           role="tab"
           aria-selected={mode === 'weekly'}
+          disabled={isEditing}
           onClick={() => switchMode('weekly')}
-          className={`${tabBase} ${mode === 'weekly' ? tabActive : tabInactive}`}
+          className={`${tabBase} ${mode === 'weekly' ? tabActive : tabInactive} ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Weekly reflection
         </button>
         <button
           role="tab"
           aria-selected={mode === 'prepared'}
+          disabled={isEditing}
           onClick={() => switchMode('prepared')}
-          className={`${tabBase} ${mode === 'prepared' ? tabActive : tabInactive}`}
+          className={`${tabBase} ${mode === 'prepared' ? tabActive : tabInactive} ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Prepare a disposition
         </button>
@@ -295,7 +336,7 @@ export default function PremeditatioPage() {
               </p>
             </div>
             <button
-              onClick={() => setShowForm(true)}
+              onClick={openNewForm}
               className="px-4 py-2 bg-amber-600 text-white font-display text-sm rounded hover:bg-amber-700 transition-colors"
             >
               Respond
@@ -350,7 +391,7 @@ export default function PremeditatioPage() {
           {mode === 'weekly' ? (
             <>
               <h2 className="font-display text-lg font-medium text-sage-800 mb-4">
-                This Week&apos;s Premeditatio
+                {isEditing ? 'Revise Your Premeditatio' : 'This Week’s Premeditatio'}
               </h2>
 
               {/* Anticipated event */}
@@ -427,7 +468,7 @@ export default function PremeditatioPage() {
           ) : (
             <>
               <h2 className="font-display text-lg font-medium text-sage-800 mb-1">
-                Prepare a Disposition
+                {isEditing ? 'Revise Your Prepared Disposition' : 'Prepare a Disposition'}
               </h2>
               <p className="font-body text-xs text-sage-600 mb-4">
                 The result is not a plan. It is a prepared disposition — the stance you have
@@ -542,6 +583,7 @@ export default function PremeditatioPage() {
             <button
               type="button"
               onClick={() => {
+                resetForm()
                 setShowForm(false)
               }}
               className="font-body text-sm text-sage-600 hover:text-sage-600"
@@ -555,6 +597,8 @@ export default function PremeditatioPage() {
             >
               {submitting
                 ? 'Saving...'
+                : isEditing
+                ? 'Save changes'
                 : mode === 'weekly'
                 ? 'Submit Premeditatio'
                 : 'Save Prepared Disposition'}
@@ -563,7 +607,7 @@ export default function PremeditatioPage() {
         </form>
       ) : !(mode === 'weekly' && isPromptDay) && (
         <button
-          onClick={() => setShowForm(true)}
+          onClick={openNewForm}
           className="w-full border-2 border-dashed border-sage-200 rounded-lg p-4 text-center font-body text-sm text-sage-600 hover:border-sage-400 hover:text-sage-600 transition-colors mb-6"
         >
           {mode === 'weekly' ? '+ New premeditatio (off-schedule)' : '+ Prepare a disposition'}
@@ -605,9 +649,17 @@ export default function PremeditatioPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {entry.is_generic && (
-                      <span className="text-xs font-body px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
-                        Generic — revise
-                      </span>
+                      <>
+                        <span className="text-xs font-body px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+                          Generic
+                        </span>
+                        <button
+                          onClick={() => startEdit(entry)}
+                          className="text-xs font-body px-2 py-0.5 rounded-full border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
+                        >
+                          Revise
+                        </button>
+                      </>
                     )}
                     {entry.avoidance_behaviour_tag && (
                       <span className="text-xs font-body px-2 py-0.5 rounded-full bg-sage-100 text-sage-600">
