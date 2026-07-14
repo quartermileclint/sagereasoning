@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-14. **Stream:** founder. **Tier:** `code-elevated` + `schema`. **Decision code:** `D-REMAINING-PRINCIPLES-OIKEIOSIS-CIRCLE-EXTENSION-6-15-BUILT-REVIEW-FOLDED`.
 **Opened under:** `STANDING-SESSION-OPENER-grounded-foundations.md`. **Governed by:** the build plan §3(#6/#15)/§4/§5/§8 + mentor **D6**. **Session prompt:** `operations/handoffs/founder/2026-07-14-remaining-principles-oikeiosis-circle-extension-6-15-NEXT-SESSION-PROMPT.md`.
-**Status:** BUILT + review-folded, repo-only. **The AI deployed nothing** — the migration, push, and live smoke are the founder-walked steps (PR17/AC7). **Production byte-equivalent until the founder's push; the 7-day observation window is undisturbed.**
+**Status:** BUILT + review-folded + **DEPLOYED — LIVE 2026-07-14**. The migration (TEST→prod), push, and live smoke were **founder-walked** (PR17/AC7); the AI performed no Supabase/Vercel/git op. **The byte-identity gate returned NONE at push — the 7-day observation window is undisturbed.**
 
 ---
 
@@ -43,7 +43,18 @@ Enhanced the **live `/oikeiosis`** surface with the **circle-extension PRACTICE*
 
 ---
 
-## Founder-walked deploy (CARRIED — do this next)
+## Founder-walked deploy — **DISCHARGED 2026-07-14 ✅**
+
+Walked in the load-bearing order (**migration BEFORE code**) and verified at every step:
+
+- **Migration applied TEST → PRODUCTION**, §VERIFY green on **both**: 10 columns in order (the 5 content fields NOT NULL; the two #15 fields nullable) · `relrowsecurity = true` · the 5 RLS policies · the 3 CHECK constraints. **FK confirmed on prod:** `circle_extension_entries_user_id_fkey → auth.users`, `confdeltype = 'c'` (ON DELETE CASCADE — the R17c backstop atop the explicit `/api/user/delete` coverage).
+- **Byte-identity gate at push: NONE** — `/api/reason` + the frozen capture set untouched ⇒ the 7-day false-hold observation window is **undisturbed**.
+- **Code pushed** (build files staged explicitly; the unrelated `environmental-context.json` scan change kept out).
+- **Two-tab live smoke PASSED** — the new **circle-extension practice** (incl. the #15 cosmopolitan obligation check firing at the fourth circle, and revise-in-place) **and** the preserved **quarterly-reflection diagnostic** (the no-regression check that mattered).
+
+**`/oikeiosis`'s circle-extension practice is LIVE.** Production is intentionally **not** byte-equivalent — a deliberate standing change on the human-practitioner surface only; `/api/reason`, the signed assessment, the trust core, R18f/R20a/distress/Layer-2 signing/UPC auth are all untouched.
+
+*(Original deploy instructions, retained for the record — the order that was followed.)*
 
 **Order is load-bearing: migration BEFORE code** (the route reads/writes the table on every request; code-first would 500 every insert).
 
