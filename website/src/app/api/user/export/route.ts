@@ -109,6 +109,8 @@ export async function GET(request: NextRequest) {
     { key: 'founder_hub_entries', table: 'founder_hub_entries', select: '*' },
     // Remaining Principles #10-human — the reserve-clause practitioner tool.
     { key: 'reserve_clause_entries', table: 'reserve_clause_entries', select: '*' },
+    // Remaining Principles #9 + #13 — the view-from-above practitioner tool.
+    { key: 'view_from_above_entries', table: 'view_from_above_entries', select: '*' },
   ]
 
   for (const { key, table, select } of tables) {

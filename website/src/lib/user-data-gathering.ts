@@ -90,6 +90,8 @@ export async function gatherUserPersonalData(
     { key: 'founder_hub_entries', table: 'founder_hub_entries' },
     // Remaining Principles #10-human — the reserve-clause practitioner tool.
     { key: 'reserve_clause_entries', table: 'reserve_clause_entries' },
+    // Remaining Principles #9 + #13 — the view-from-above practitioner tool.
+    { key: 'view_from_above_entries', table: 'view_from_above_entries' },
   ]
 
   for (const { key, table } of tables) {
