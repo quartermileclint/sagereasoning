@@ -96,6 +96,8 @@ export async function gatherUserPersonalData(
     { key: 'morning_preparation_entries', table: 'morning_preparation_entries' },
     // Remaining Principles #6 + #15 — the circle-extension practice (on /oikeiosis).
     { key: 'circle_extension_entries', table: 'circle_extension_entries' },
+    // Remaining Principles #14 — the sage-compass decision-support tool.
+    { key: 'sage_compass_entries', table: 'sage_compass_entries' },
   ]
 
   for (const { key, table } of tables) {

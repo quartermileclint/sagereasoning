@@ -115,6 +115,8 @@ export async function GET(request: NextRequest) {
     { key: 'morning_preparation_entries', table: 'morning_preparation_entries', select: '*' },
     // Remaining Principles #6 + #15 — the circle-extension practice (on /oikeiosis).
     { key: 'circle_extension_entries', table: 'circle_extension_entries', select: '*' },
+    // Remaining Principles #14 — the sage-compass decision-support tool.
+    { key: 'sage_compass_entries', table: 'sage_compass_entries', select: '*' },
   ]
 
   for (const { key, table, select } of tables) {

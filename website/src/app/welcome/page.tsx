@@ -62,6 +62,7 @@ const MORE_TO_EXPLORE = [
   { label: 'The View From Above', href: '/view-from-above' },
   { label: 'Morning Preparation', href: '/morning' },
   { label: 'Expanding Your Circle of Concern (oikeiosis)', href: '/oikeiosis' },
+  { label: 'The Sage Compass', href: '/sage-compass' },
   { label: 'The community map', href: '/community' },
   { label: 'How the method works', href: '/methodology' },
 ]
