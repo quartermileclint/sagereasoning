@@ -92,6 +92,8 @@ export async function gatherUserPersonalData(
     { key: 'reserve_clause_entries', table: 'reserve_clause_entries' },
     // Remaining Principles #9 + #13 — the view-from-above practitioner tool.
     { key: 'view_from_above_entries', table: 'view_from_above_entries' },
+    // Remaining Principles #8 — the morning-preparation practitioner tool.
+    { key: 'morning_preparation_entries', table: 'morning_preparation_entries' },
   ]
 
   for (const { key, table } of tables) {

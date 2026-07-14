@@ -83,6 +83,7 @@ export async function DELETE(request: NextRequest) {
     'baseline_assessments_v3',
     'reserve_clause_entries',    // R17b intimate — Remaining Principles #10-human (FK-independent of the others)
     'view_from_above_entries',   // R17b intimate — Remaining Principles #9 + #13 (FK-independent of the others)
+    'morning_preparation_entries', // R17b intimate — Remaining Principles #8 (FK-independent of the others)
     'premeditatio_entries',      // R17b intimate; → passion_events
     'oikeiosis_reflections',     // R17b intimate; → passion_events
     'passion_events',            // R17b intimate; → realtime_journal_entries
