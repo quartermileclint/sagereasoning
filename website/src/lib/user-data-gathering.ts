@@ -94,6 +94,8 @@ export async function gatherUserPersonalData(
     { key: 'view_from_above_entries', table: 'view_from_above_entries' },
     // Remaining Principles #8 — the morning-preparation practitioner tool.
     { key: 'morning_preparation_entries', table: 'morning_preparation_entries' },
+    // Remaining Principles #6 + #15 — the circle-extension practice (on /oikeiosis).
+    { key: 'circle_extension_entries', table: 'circle_extension_entries' },
   ]
 
   for (const { key, table } of tables) {

@@ -113,6 +113,8 @@ export async function GET(request: NextRequest) {
     { key: 'view_from_above_entries', table: 'view_from_above_entries', select: '*' },
     // Remaining Principles #8 — the morning-preparation practitioner tool.
     { key: 'morning_preparation_entries', table: 'morning_preparation_entries', select: '*' },
+    // Remaining Principles #6 + #15 — the circle-extension practice (on /oikeiosis).
+    { key: 'circle_extension_entries', table: 'circle_extension_entries', select: '*' },
   ]
 
   for (const { key, table, select } of tables) {
