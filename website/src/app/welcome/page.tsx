@@ -108,6 +108,28 @@ export default function WelcomePage() {
           </p>
         </div>
 
+        {/* Start with why — the logos foundational module (#12).
+            Placed here deliberately, and NOT in "More to explore": it is not one
+            more tool, it is the prerequisite orientation the tools assume. */}
+        <div className="bg-sage-100/60 border border-sage-200 rounded-lg p-6">
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">
+            Start with why
+          </h2>
+          <p className="text-sage-700">
+            Every practice here descends from a single claim: that virtue is grounded in{' '}
+            <strong>reason</strong> — not in social convention, not in divine command, not
+            in felt preference. You can use the tools without knowing that. But they will
+            work as techniques rather than as one practice, and the difference shows over
+            time. If you read one thing before you begin, read this.
+          </p>
+          <a
+            href="/logos"
+            className="mt-4 inline-block px-4 py-2 bg-sage-400 text-white font-display text-sm rounded hover:bg-sage-500 transition-colors"
+          >
+            Logos — why the practices cohere
+          </a>
+        </div>
+
         {/* Where to start */}
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-5">
