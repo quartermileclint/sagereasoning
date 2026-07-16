@@ -1,4 +1,4 @@
-# Session Close — 2026-07-16 — Remaining Principles: the logos teaching module (#12) — BUILT, REVIEWED, AWAITING FOUNDER-WALKED DEPLOY
+# Session Close — 2026-07-16 — Remaining Principles: the logos teaching module (#12) — BUILT, REVIEWED, LIVE
 
 **Stream:** founder.
 **Governing frame:** `/adopted/standing-protocol-cache.md` (opened under `STANDING-SESSION-OPENER-grounded-foundations.md`).
@@ -19,10 +19,10 @@
 
 | Item | Old | New |
 |---|---|---|
-| `/logos` page + layout | — | **Built** (awaiting founder-walked deploy) |
-| `src/lib/logos-teaching.ts` content module | — | **Built** |
-| `/welcome` "Start with why" entry-point callout | — | **Built** |
-| Remaining Principles Bucket A | 8 of 9 encodings shipped (6 surfaces) | **9 of 9 encodings built, delivered as 7 surfaces — Bucket A COMPLETE** |
+| `/logos` page + layout | — | **Live** (deploy discharged 2026-07-16) |
+| `src/lib/logos-teaching.ts` content module | — | **Live** |
+| `/welcome` "Start with why" entry-point callout | — | **Live** |
+| Remaining Principles Bucket A | 8 of 9 encodings shipped (6 surfaces) | **9 of 9 encodings SHIPPED, delivered as 7 surfaces — Bucket A COMPLETE & LIVE** |
 
 ## Three things this session found that the prompt did not carry
 
@@ -58,9 +58,11 @@ Boundary test **232/0** (150/0 at first close; hardened at the re-review). Load-
 
 ## Production state at session close
 
-**Production is unchanged — nothing is deployed.** `/api/reason`, the signed assessment, the trust core, the Gate-1 hooks, the frozen capture set, R18f / R20a / distress / Layer-2 signing / UPC auth are **all untouched**. **The 7-day false-hold observation clock is undisturbed.** **S11 (ENFORCE) remains DEFERRED, readiness-gated. Weights BLOCKED.** The 0h call remains the founder's.
+**DEPLOY DISCHARGED 2026-07-16 (founder-walked, PR17/AC7 — the AI performed no git/Vercel op):** byte-identity gate **NONE** at push (extended regex) → staged explicitly (16 files) → pushed via GitHub Desktop → **Vercel green → live smoke PASSED** (`/logos` renders with the flame, the claim, the three steps, the virtue cards, and the eight derivations; the tool links resolve; `/welcome` shows "Start with why" above "Where to start"). **`/logos` is LIVE.**
 
-## The founder-walked deploy (PR17/AC7 — the AI performed no git/Vercel op)
+**Production is intentionally NOT byte-equivalent** — a deliberate standing change on the **human-practitioner surface only**. `/api/reason`, the signed assessment, the trust core, the Gate-1 hooks, the frozen capture set, R18f / R20a / distress / Layer-2 signing / UPC auth are **all untouched**. **The 7-day false-hold observation clock is undisturbed.** **S11 (ENFORCE) remains DEFERRED, readiness-gated. Weights BLOCKED.** The 0h call remains the founder's.
+
+## The founder-walked deploy (as run — PR17/AC7; kept for the record)
 
 The working tree carries **12 unrelated files that must NOT be staged** (earlier-session records, the build plan, `.claude/settings.local.json.bak`, `environmental-context.json`). **Stage explicitly; never `git add .`**
 
