@@ -14592,3 +14592,36 @@ Expected: **401** both; both paths ignored; the grep returns only `.claude/setti
 **Rules served:** PR7 (the failure reported plainly, including the AI's own), PR10 ("I caused this"), PR17, PR18, R0, KG-EX1, AC7 (named — the revokes were founder-walked), 0d-ii.
 
 **Status:** Adopted. Cross-references: `D-TRUST-LAYER-S9-DOGFOOD-INSTALL-LIVE` (minted the two credentials), `D-TRUST-LAYER-S9B-PRACTICE-COMPLETION-BUILT-REVIEW-FOLDED` (`849f830` — the walk-fold commit that added the `.bak`), `D-TRUST-LAYER-S0A-CORROBORATION-CHECK-LIVE-GATE-ACTIVATION` (the leg-d redaction + rotation precedent), `D-TRUST-LAYER-S11-F2-MENTOR-RULING-EXCLUSION-CLAUSE-GOVERNS-ADOPTED` (the session this surfaced in), `D-REGISTRY-RA1-FREETEXT-AUDIT-AND-F2-INSTRUMENT-VACUITY-2026-07-17` (RA-1-F3 — the sibling guard-class finding).
+
+---
+
+## 2026-07-18 — D-AGENT-EXTENSION-MENTOR-COMPONENT-REVIEW-CAPTURED-SCOPED-2026-07-18
+
+**Decision:** the mentor's component-registry review naming the five components "where the agent-extension work lives" (D17 → sage-iterate → sage-practice-reflect agent variant → R20b agent variant → D13 trigger review; *"Assessment without longitudinal tracking is a snapshot. Practice requires a trajectory."*) is **CAPTURED as a verbatim record**, and an **agent-extension design session is SCOPED** (prompt authored). Nothing is built or elected this session; every disposition is the design session's founder election.
+
+**Reasoning:** the mentor answered from the registry rows (v1.7.0), several of which understate the trust-layer arc — a first-hand grounding pass (this session) confirmed parts of the list are **already live for agents**: the M6/M7 trajectory overlay realises D17's windowing/composite direction on the agent path (`trajectory-overlay.ts:51-128` carries the D17/AC-17 bands); CI-4 loop-closure is the live agent re-examination affordance; `/api/practice/reflect` is already agent-facing with S9b screened examination. The genuine gaps: D17's per-mechanism delta signals on the agent path; folding iteration/chain history into a longitudinal profile (an A8 design-review input, as the mentor frames it); cross-session recurring-pattern read-back; an agent-specific R20b detector (keyed beyond the mandated two-gate cadence); an agent-surface trigger class for D13 (where the bare-tool-payload candidate converges with S11a's extraction question). Cross-cutting: the two live longitudinal stores key on different identity axes (trajectory `credential_ref` vs trust state `agent_id`; the mentor's words name A10 `install_id` — a third) — the canonical key is a design decision the prompt surfaces as a founder election. Designing without this reconciliation would duplicate live machinery (PR15) or fork the longitudinal record. Method note: the grounding Workflow died whole on the account spend limit (6/6 agents); grounding was completed **first-hand** per the §4 precedent — every anchor in the prompt was personally read.
+
+**Files touched:**
+- `operations/agent-extension-2026-07/2026-07-17-mentor-json-components-review-verbatim.md` — NEW; the verbatim mentor record (§1 verbatim wins over every digest)
+- `operations/handoffs/founder/2026-07-18-agent-extension-design-NEXT-SESSION-PROMPT.md` — NEW; the scoped design session (grounded current-state table with first-hand anchors; the four founder-election forks: per-item disposition, identity axis, sequencing vs S11a/RA-1-F1, ADR-vs-design-doc; constraints: ADR-013 §8 envelope, MEASURE-only, the R13 starved-input caution, PR15/PR16)
+- `inbox/mentor feedback on json components for agents.rtf` — the source, committed alongside (inbox-source precedent)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii — documents only; no code / schema / flag / credential / production change. AC7 not engaged. PR6 not engaged. Byte-identity gate: NONE — no file in any measured surface's graph touched.
+
+**Rollback path:** `git revert` the records commit. The mentor's response itself stands as received regardless; only the capture + scope are revertable.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+grep -c "Practice requires a trajectory" operations/agent-extension-2026-07/2026-07-17-mentor-json-components-review-verbatim.md   # ≥1
+head -5 operations/handoffs/founder/2026-07-18-agent-extension-design-NEXT-SESSION-PROMPT.md
+git status --short -- website/src harness/ website/supabase*   # empty except pre-existing environmental-context.json
+```
+Expected: the verbatim line present; the prompt header reads `governance`/documents-only; no code changes.
+
+**Open questions:** all deferred to the design session's elections (per-item disposition; identity axis; Phase-2-vs-Phase-3 sequencing vs S11a/RA-1-F1; ADR vs design doc). The sibling inbox file `Mentor feedback on website pages.rtf` (2026-07-17) is captured nowhere yet — its own session's input, not this arc's.
+
+**Rules served:** PR7, PR11 (inbox scan — this session's source), PR15, PR16, PR18, KG-EX1 (grounding before prescription — the reconciliation-first shape), 0d-ii.
+
+**Status:** Adopted. Cross-references: `operations/agent-extension-2026-07/2026-07-17-mentor-json-components-review-verbatim.md` (verbatim wins), `operations/handoffs/founder/2026-07-18-agent-extension-design-NEXT-SESSION-PROMPT.md`, ADR-012 (measurement-instrument reframe), ADR-013 §8 (honest-claims envelope), `D-TRUST-LAYER-S11-F2-MENTOR-RULING-EXCLUSION-CLAUSE-GOVERNS-ADOPTED` (the R13 starved-input caution the design inherits), `D-MECHANISM-CORRECTION-TRAJECTORY-B1-ACTIVATION-2026-06-14` (the live D17-for-agents machinery).
