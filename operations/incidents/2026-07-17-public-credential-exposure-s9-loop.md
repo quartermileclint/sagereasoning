@@ -52,18 +52,53 @@ A first sweep for `sr_(live|prac|inst|assent)_[a-f0-9]{6,}` returned **27 tracke
 | 6 | Full-length-token sweep of the tracked tree + confirmation that the other `.claude` file and the leg-d redaction are clean | ✅ **DONE** (§2) |
 | 7 | Public-surface check — `GET /api/accreditation/sagereasoning:s9-loop@v1` (`post_decision_check` / `agent_elected` / `monitored_since 2026-07-11`) and `GET /api/trust-record/...` (`dikaiosyne deliberate`, `justice_capped true`, `honest_reflect_count 9` — the 9th is this session's own reflect at 11:52). **Consistent with our own activity; no evident foreign writes.** Weak signal — an aggregate surface would not clearly show a third party's writes. | ✅ done, **bounded** |
 
+## 4b. THE ABUSE CHECK — RUN 2026-07-17. **NO EVIDENCE OF COMPROMISE.**
+
+Founder-run in the Supabase SQL Editor (read-only); AI-interpreted. **Two independent surfaces, both clean, and they cross-corroborate.**
+
+**Billing (`loop_billing_events`, hourly, 2026-07-12 09:00+10 → close): ~465 calls / ~553¢ (~$5.53).**
+- **No foreign `agent_id`** — only `sagereasoning:s9-loop@v1` and `null`. **The `null`s are explained, not unexplained:** the harness's `fetchFrame` sends `{input, depth, response_format}` and **never sends `agent_id`**, so `null` IS the harness's own consult signature; `s9-loop@v1` is the discernment path (which does send `orchestrator_agent_id`). The two-value pattern is exactly what our code produces.
+- **No unexpected `surface`** — only `api_reason`, `api_guardrail`, `api_practice_discernment`, `wrapper_internal`. No `api_score_iterate`, no `agent_baseline`.
+- **No overnight activity.** Everything 05:00–23:00 Brisbane across all 6 days — the classic scraper/bot signature is absent.
+- **`api_practice_discernment` + `wrapper_internal` are near-unforgeable** (they require the founder's `discernment.config.json`, an agent-bound credential, AND a real subagent spawn) and appear in **every substantial hour**.
+- Volume correlates with the frozen buffer's per-day shape (07-14 heavy 104 calls/50 records; 07-15 light 25/1).
+
+**Trust ledger (`agent_trust_events`): the decisive one — the accred key writes the PUBLIC record, and A2 could not clear it (an accreditation write is not a metered loop).**
+- **Only TWO examination-derived events exist, BOTH at the S9 install `2026-07-11 05:45:29.674+00`** (artifact `signed:substrate-layer2-2026Q2`), i.e. **BEFORE the exposure window opened (2026-07-12 09:13)**. ⇒ **ZERO accreditation writes occurred during the entire exposure window, by us or anyone. The public record was never written to.**
+- All 23 remaining rows are reflect events (`virtue_domain: null`, `artifact_ref: reflect:reflect-<session-uuid>`) — **all ours**; the latest (`reflect-d796acf1-…`, 2026-07-17 11:52 UTC = 21:52 Brisbane) is **this session's own reflect at this session's own id**.
+- **Every ledger event falls inside an hour the billing table independently shows activity** (all 23 checked; e.g. 07-13 20:09 UTC = 07-14 06:09 Brisbane → the billing table's 07-14 06:00 row). Two tables, same story.
+
+**HONEST BOUND (do not overstate this):** this is a **consistency check, not proof of absence**. An attacker mimicking our exact pattern — same `agent_id`, same surfaces, inside the founder's hours — would be invisible to it. What can be said: **no positive indicator of compromise, and several signals that would catch an unsophisticated one are clean.** Given `sr_prac_` is a distinctive prefix and scrapers are fast, five days without a single overnight call is materially reassuring.
+
+**Not run (judged marginal after the above):** `api_key_usage` per-endpoint counters (A2's `surface` array is the better version of the same test); `agent_assessment_history` (A2 covers the consult path); `credential_audit` (an exposed consult/accred token cannot mint, so it could only echo our own ops). The `agent_accreditation` row query **errored on a guessed column** (`total_actions_evaluated` does not exist) — re-run as `select * from agent_accreditation where agent_id = 'sagereasoning:s9-loop@v1';` if wanted; the public GET already showed the row consistent (`post_decision_check` / `agent_elected` / `monitored_since 2026-07-11`).
+
+**⚠ A finding that improves S11a — the cap's ground is now QUERIED, not inferred, and it is NARROWER than this record first stated.** `justice_capped: true` rests on **ONE** `justice-surface-unevaluated` event (the S9 install, 2026-07-11) — **not on a stream from the 130 observation records.** The at-action consults **never became trust events**: emission fires only on accreditation writes (`emitAccreditationTrustEvents`, gated on `provenanceEnforced`). **S11a's cap review is therefore ONE event to examine, not a stream.** Register **D1** updated accordingly.
+
+**Disposition: the record is CLEAN ⇒ re-mint on the SAME identity `sagereasoning:s9-loop@v1`** (a split to `@v2` would fragment the record that is itself the subject of S11a's cap review, and there is no polluted-record reason to split).
+
+## 4c. RE-MINT — DONE 2026-07-17 (founder-walked, PR17)
+
+The abuse check (§4b) came back clean, so the identity was **reused rather than split** — `sagereasoning:s9-loop@v1` is the subject of S11a's cap review (D1) and a split to `@v2` would have fragmented the very record that review examines.
+
+| Role | Credential id | Capabilities | Binding |
+|---|---|---|---|
+| **consult** | **`33bef3d4-018d-4313-bcfd-65a75132155c`** | `consult` | agent-bound; owner-less ⇒ `external_consumer` (reproduces the S9 posture, disclosed there) |
+| **accred** | **`1ffe14f6-0f07-4296-b340-c3bdfbbc7ce2`** | `accreditation_write`, `reflect` | agent-bound **and** owner-bound (mandatory — the 6e §A CHECK fires on the write-class overlap) |
+
+**Superseding (for row attribution across the generations):** consult `09e83b4d…` → **`33bef3d4…`** · accred `e715520b…` → **`1ffe14f6…`**. Any `loop_billing_events` / `agent_assessment_history` / `agent_trust_events` row keyed to the **old** ids is **pre-2026-07-17** and belongs to the exposed generation; §4b establishes those are all ours.
+
+**Limits raised by SQL to 5000 monthly / 200 daily** — **the mint cannot do this.** `buildPracticeMintPlan` sends only `{label, capabilities, agent_id?, owner_email?, owner_kind?, tier?, notes?, examination_enforcement?}` and the flag parser does **not** reject unknown flags, so `--daily`/`--monthly` are **silently dropped** and the CI-6 server defaults (30 monthly / **1 daily**) apply. At `daily_limit = 1` the harness's *second* Write of the day 401s as *"Please sign in"* — an auth-bug-shaped failure that isn't one (standing memory: `api-key-1-per-day-limit-masks-as-401`).
+
+**Install:** tokens read via `read -rs` (never echoed to screen or shell history), passed to the writer by env var (never in the command line), backup written to `~`, **never inside the repo**. Verified without printing secrets: both installed, distinct, **7** env keys, all four hooks, valid JSON, capture flag still **UNSET**, and **no full-length token anywhere in the tracked tree**.
+
+**State after the re-mint:** the harness is **live again** (frames + guard). **The observation clock remains STOPPED** — re-minting restores the practice, not the measurement; any part-(3) re-measurement needs a NEW window (register **P6**).
+
+**Residual, benign:** `.claude/settings.local.json.bak` remains **on disk** (now untracked + covered by the `.gitignore` glob) holding the **revoked** tokens — inert, and recommended for deletion as the artifact that caused this.
+
 ## 5. Remediation — OUTSTANDING (founder)
 
-1. **`git rm --cached .claude/settings.local.json.bak`** — the `.gitignore` glob does **not** untrack an already-tracked file. Must ride the next commit.
-2. **DB-level abuse check** (Supabase; the AI performs no Supabase op) — for the two credential refs, **since 2026-07-12 09:13 +1000**:
-   ```sql
-   -- usage on the exposed credentials during the window
-   select * from api_key_usage       where api_key_id in ('09e83b4d-...','e715520b-...') and created_at >= '2026-07-12';
-   select * from loop_billing_events where credential_ref like 'api_key:09e83b4d%' or credential_ref like 'api_key:e715520b%';
-   -- any accreditation writes we don't recognise
-   select * from agent_accreditation where agent_id = 'sagereasoning:s9-loop@v1';
-   ```
-   Bots scrape GitHub for key patterns continuously and `sr_prac_` is distinctive — **assume harvested, verify not used.**
+1. **`git rm --cached .claude/settings.local.json.bak`** — the `.gitignore` glob does **not** untrack an already-tracked file. Must ride the next commit. *(Done at the 2026-07-17 records commit if the close's block was followed.)*
+2. **DB-level abuse check** (Supabase; the AI performs no Supabase op). **CORRECTED 2026-07-17 — the first version of this SQL was wrong on both tables** (written from memory, not from the schema; the same fault this incident is about): `api_key_usage` is a **monthly aggregate** (`year`/`month`/`total_calls`/`daily_calls`) with **no per-call `created_at`**, and `loop_billing_events` keys on **`api_key_id` (UUID)**, not `credential_ref` (that column belongs to `agent_assessment_history`). The correct queries are in the close's §9 walkthrough and the S11a-adjacent runbook; the discriminating signal is **temporal** — `loop_billing_events.created_at` clustered outside the founder's working sessions — not raw totals, because our own dogfood use is heavy and swamps the counters. Bots scrape GitHub for key patterns continuously and `sr_prac_` is distinctive — **assume harvested, verify not used.**
 3. **Decide whether to re-mint.** The harness is currently **dead** (honest 401s on every action). The observation clock is stopped and the window is closed, so nothing is being lost by leaving it off. If re-minted: **the new tokens must never reach `settings.local.json.bak`** — the glob now prevents it, but the `.bak` is written by `/practice-off`, so **that skill needs checking** (see follow-up F3).
 4. **History is NOT scrubbed and will not be.** `849f830` retains both tokens on a public repo permanently; rewriting pushed `main` is invasive and does not reach forks, clones, or caches. **Revocation is the remedy.** Recorded as accepted.
 

@@ -51,13 +51,29 @@ Per the 2026-07-12 verdict — **do not re-derive this; it is settled**:
 
 | # | Item | Status |
 |---|---|---|
-| **D1** | **The public `justice_capped: true` on `sagereasoning:s9-loop@v1`** — latched by `justice-surface-unevaluated` events from the same circle-free artifact; **cannot clear** on this action class (clearing needs a circle carrying `status:'met'`). *"A permanent cap on an agent whose actions had no identified affected parties is a live signal on a live surface."* **S11a closing condition (R14):** *"Do not close the narrowing session with the arm fixed and the cap unreviewed."* | **OPEN — S11a, hard gate.** |
+| **D1** | **The public `justice_capped: true` on `sagereasoning:s9-loop@v1`.** **GROUND NOW QUERIED (2026-07-17, was "inferred") — and it is narrower than first recorded:** the ledger holds **exactly TWO** examination-derived events, both at the **S9 install, `2026-07-11 05:45:29.674+00`**, artifact `signed:substrate-layer2-2026Q2` — `credential-completed` + **one** `justice-surface-unevaluated`. **The cap rests on that single event, NOT on a stream from the 130 observation records** — the at-action consults never became trust events (emission fires only on accreditation writes, `emitAccreditationTrustEvents` gated on `provenanceEnforced`). Every other ledger row is a reflect event (`virtue_domain: null`, `artifact_ref: reflect:reflect-<session-uuid>`) — modulate-only, cannot latch. **Consequence for S11a: the cap review is ONE event to examine, not a stream.** The clearing bound is unchanged — clearing needs `justice-surface-transparently-handled` ⇒ a circle carrying `status:'met'` ⇒ impossible on this action class. *"A permanent cap on an agent whose actions had no identified affected parties is a live signal on a live surface."* **S11a closing condition (R14):** *"Do not close the narrowing session with the arm fixed and the cap unreviewed."* | **OPEN — S11a, hard gate.** Ground established; disposition outstanding. |
 | **D2** | **The two "engaged" definitions** — `computeVirtueDomains` (`circles ≥ 1 \|\| is_kathekon !== null`) vs `computeDikaiosyneFloor` (`circles ≥ 1 \|\| hasNaturalRelationship`). **R3: the newer, more precise one governs.** Whether the older tag is reconciled at the root or left divergent is undecided. | **OPEN.** |
 | **D3** | **`derive-trust-events.ts` is LIVE** (trust core ON in production under MEASURE since 2026-07-11). Any narrowing at the **reducer** — as opposed to the predicate — changes live trust-event emission ⇒ **`code-critical` + founder-walked (AC7)**. The predicate (`kathekon-engagement.ts`) is report-time only ⇒ `code-elevated`. **Same root, different tiers.** | **Standing constraint.** |
 
 ---
 
+## E. Identity + credential generations (for row attribution)
+
+The subject of every trust/accreditation row below is **`sagereasoning:s9-loop@v1`** — one identity, two credential generations. **Attribute rows by generation before drawing any conclusion from them.**
+
+| Gen | Role | id | Status |
+|---|---|---|---|
+| 1 (S9, 2026-07-11) | consult | `09e83b4d…` | **REVOKED 2026-07-17** — public-exposure incident |
+| 1 (S9, 2026-07-11) | accred | `e715520b…` | **REVOKED 2026-07-17** — public-exposure incident |
+| 2 (2026-07-17) | consult | **`33bef3d4-018d-4313-bcfd-65a75132155c`** | **LIVE** — 5000/200 |
+| 2 (2026-07-17) | accred | **`1ffe14f6-0f07-4296-b340-c3bdfbbc7ce2`** | **LIVE** — 5000/200, owner+agent bound |
+
+**Gen-1 rows are all pre-2026-07-17 and are established as ours** — the abuse check (incident §4b) cleared both the billing surface and the trust ledger across the full 5d13h exposure window, on two independently-corroborating tables. **The identity was deliberately NOT split to `@v2`:** it is the subject of **D1**'s cap review, and splitting would have fragmented the record that review examines. **Incident record:** `operations/incidents/2026-07-17-public-credential-exposure-s9-loop.md`.
+
+---
+
 ## Change log
 - **2026-07-17** — created (mentor R15). Seeded A/P1–P6, B/B1–B3, C, D/D1–D3 from the 2026-07-12 and 2026-07-17 binding verdicts. Standing state: **readiness NOT met; flip does not proceed.**
+- **2026-07-17 (same day, post-incident)** — **D1's ground QUERIED, not inferred, and narrowed:** the public `justice_capped` rests on **ONE** `justice-surface-unevaluated` event (S9 install, `2026-07-11 05:45:29.674+00`, artifact `signed:substrate-layer2-2026Q2`) — **not** a stream from the 130 observation records, because at-action consults never become trust events (emission fires only on accreditation writes). **S11a's cap review is one event, not a stream.** Added **§E** (credential generations) after the public-credential-exposure incident: gen-1 revoked, gen-2 live, identity deliberately preserved.
 
 *Append entries with a date + the binding source. If an item is discharged, mark it and say where — do not delete it; the point of this file is that nothing here gets rediscovered from scratch.*
