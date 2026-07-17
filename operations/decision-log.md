@@ -14402,3 +14402,193 @@ Expected: `1.7.0 2026-07-17 304 {'wired': 129, 'scaffolded': 3, 'verified': 55, 
 **Rules served:** PR7 (gap closed; negative results and my own near-miss reported), PR2, PR18, R0, KG-EX1.
 
 **Status:** Adopted. Cross-references: `D-REGISTRY-UPDATE-v1.7.0` + its status-audit ADDENDUM, `D-REGISTRY-RA1-REFRESH-AND-DOC-NOTES-2026-07-17`, `D-TRUST-LAYER-S11-OBSERVATION-INSTRUMENT-BUILT-DARK-REVIEW-FOLDED`, `D-TRUST-LAYER-S11-ENFORCE-GATE-MENTOR-DEFERRED`, `D-SAGE-PRACTICE-ADR010-SECTION3-GUARDRAIL-BRIDGE-RETIREMENT`, `operations/handoffs/founder/2026-07-12-trust-layer-S11-return-with-record-NEXT-SESSION-PROMPT.md` (**the session this finding gates**).
+
+---
+
+## 2026-07-17 — D-TRUST-LAYER-S11-F2-MENTOR-BRIEFING-AUTHORED-HELD
+
+**Decision:** RA-1-F2 was **re-verified first-hand and materially corrected**, a **non-leading mentor briefing** was authored (`operations/trust-layer-2026-07/2026-07-17-F2-mentor-briefing.md`), and the return-with-record session is **HELD**. **Nothing was implemented** — the arm's definition is a question of principle and the mentor's verdicts bind verbatim. The briefing reframes the question away from the finding's binary: **the mentor's Q3 gave an inclusion clause (the four arms) and an exclusion clause (*"G6(a) does not bind when… a verdict that found contrary to appropriate action with no kathekon factors detected"*), and on this engine both fire on the same record.** Which governs is the mentor's to say.
+
+**Reasoning:** the finding reproduced in every mechanical particular, but re-verifying it (constraint 3 of the session prompt) **falsified four of its claims and surfaced two larger ones**. Re-verification, not the finding, is what earned this session's content.
+
+**What was verified first-hand (frozen snapshot 2026-07-17T11:24:03Z, 125 records; buffer live — 117 when raised → 125 at snapshot; the instrument logged this investigation while it ran):** `dikaiosyne` 125/125 · zero circles 124/125 · `subSpeciesPassions` empty 125/125 · `proximity: deliberate` 125/125 · `is_kathekon:false/"contrary"` 123/125 · tools **`Edit` 63 / `Write` 62 — all file writes** · depth `standard` ×125 · loop `reopened` 111 / `opened` 13 / **`closed` 1**. Report: **124 holds · 0 false positives · `MET`**, all via the justice-surface arm.
+
+**The mechanism (source-verified):** `computeVirtueDomains` tags `dikaiosyne` on `circles ≥ 1 || is_kathekon !== null` — non-null **when it is `false`**; `selectImprovementPath` priority 4 (`is_kathekon === false`) *creates* the hold. So one field both creates the hold and satisfies the test for calling it correct. `obligationStatuses: []` genuinely means **zero circles** (checked, not assumed: `oikeiosis` is a required `Layer2Assessment` field; `extractVerdict` strips nothing).
+
+**FOUR CORRECTIONS to the finding of record — each against the AI's own interest:**
+1. **"Structurally unreachable" is too strong.** `false_positive` IS reachable at exactly one kathekon factor (`marginal` ⇒ `is_kathekon: null` ⇒ dikaiosyne untagged). It went unreached because `marginal` occurred **0** times. It is unreachable *only whenever the engine returns `contrary`*.
+2. **The §3 precedent does NOT "mirror" a circle-requirement — it inverts it.** ADR-010:50's other half: the first build **dropped** the tag (the AI's own candidate narrowing) and it **UNDER-fired** on a *circle-free* calm injustice; the fix was a **broader** trigger. Firing directions also invert (bridge: firing = more conservative; Arm 1: firing = more binding). **Non-dispositive either way.**
+3. **"Parts (1), (2) and (4) are unaffected" is FALSE.** Part (1): 4.91/7 days on one action class. Part (2): **one** evaluated domain (live record: `unevaluated_cardinal_domains: ["phronesis","andreia","sophrosyne"]`, `confidence_weight: 0.42`) — precisely the mentor's *"a trust record with one evaluated domain … is not a record that can tell you…"*.
+4. **U2 had a circle** (`local_community`) — it satisfies J2 on its face and is not this case.
+
+**TWO FINDINGS LARGER THAN F2 ITSELF:**
+- **(A) Q2's staging premise may rest on the same question — the biggest item.** The mentor staged the **do-not-proceed class first** on *"a benign action that engages no kathekon factors cannot trigger a do-not-proceed row … a structural false-positive floor of zero."* The table contains `Deliberate + justice surface unevaluated → do not proceed + escalate`. Running the project's own `recommendIntervention` over the 125 records: **Arm 1's reading ⇒ 124 `do-not-proceed`, 1 pause; `justiceSurface:'none'` (the §4 reading) ⇒ 125 `proceed`.** Same records, complete inversion. **Honest bound:** a *reconstruction* (at-action signals → S4); the live advisory reads the trust state and reports `proceed/log`; which input the flip uses is an open design question. NOT a claim that enforce would deny 124/125.
+- **(B) The engine holds two definitions of "engaged".** `computeVirtueDomains` (`circles ≥ 1 || is_kathekon !== null`) vs **`computeDikaiosyneFloor`** (ADR-010 §4, the mentor's own Change 2, live) — `circles ≥ 1 || hasNaturalRelationship` ⇒ **`null`, not engaged**. `proximity: deliberate` ×125 is the engine's own testimony: had §4 held a justice surface with an unevaluated obligation it would have floored to `reflexive`. It did not. §4 demonstrably works — the one real-circle record capped at `deliberate`, exactly as specified.
+
+**Two further reasons part (3) may be unmeasurable regardless of the ruling:** the ratio's **denominator cannot be populated** (capture is CONSULT-path only at `at-action-hook.mjs:595` inside `runConsult`; `runGuard` — the `rm -rf`/force-push class — writes no record; Bash is not consulted); and the mentor's **tolerance condition is unavailable** (*"if … the correction loop closes quickly"* — closed **1/125**).
+
+**SEPARATE LIVE FINDING (needs its own disposition; not S11-gated):** the public trust-record surface publishes `"justice_capped": true` for `sagereasoning:s9-loop@v1` **today**, latched by `justice-surface-unevaluated` events from the same circle-free artifact; the latch **cannot clear** on this action class (clearing requires a circle carrying `status:'met'`). Verified by unauthenticated GET; the cap's *ground* is inferred, not queried from the event ledger. **Two-edged:** if a justice surface is present the cap is correct; if not, a public surface reports a permanent justice cap on an agent whose actions had no affected parties.
+
+**Method (ultracode):** a 6-agent Workflow (`wf_b11d7df7-6cf`; 0 errors, ~1.46M tokens) — steelman-A / steelman-B / reject-the-binary / verbatim-audit / mechanism-verify, then a balance critic. It **changed the deliverable**: it caught that the prompt's own framing (*"the extractor reflexively tagging dikaiosyne"*) **is already Position B**; that **"vacuous"/"unreachable" are conclusions, not descriptions**; that **both sides claim A6** (so it decides nothing and belongs on both); that **vacuity ≠ falsity** (the finding slides from "uninformative" to "these holds were false" — the briefing refuses the inference); and that **both readings converge on "do not flip"**, so presenting a binary as determining readiness was the central leading risk. It also caught steelman-A **fabricating file:line anchors** while claiming first-hand reads (arguments usable, citations not) — no citation entered the briefing unverified. The Q2 do-not-proceed number was flagged single-source-and-unverified and was **re-run first-hand with a disconfirming control** before being stated.
+
+**Honest disclosure carried INTO the briefing (evidence of the AI's prior):** `kathekon-engagement.ts:121-123` reads *"belt and braces **if the justice arm is ever narrowed**"* — the instrument's author anticipated this exact narrowing at build time, before any data existed. The mentor is told to weigh the framing in that light. The candidate narrowing is disclosed as the AI's, explicitly not built, and the strongest argument **against** it (the A2 omission class shares the zero-circle wire signature ⇒ narrowing would classify the disclosed irreducible residual as noise) is carried in full.
+
+**Also corrected:** the finding's §2.4 (*"why the S11 review missed it"*) overstates. The return-with-record prompt §33 — written 2026-07-12, the same day — **already carried the VALIDITY CAVEAT**, naming the mechanism, the *"correct_holds can be INFLATED … the dangerous direction"* warning, and the same candidate refinement, scheduling the decision for the return session. F2's real contribution: the effect is **total, not partial**, the sample is not representative, and **the return session's report would have printed MET before the scheduled question was ever weighed**.
+
+**Files touched:**
+- `operations/trust-layer-2026-07/2026-07-17-F2-mentor-briefing.md` — NEW; the outbound briefing (frozen snapshot; both clauses; both steelmen; four self-corrections; §9 the Q2 staging premise; six dispositions beyond the binary)
+- `operations/handoffs/founder/2026-07-12-trust-layer-S11-return-with-record-NEXT-SESSION-PROMPT.md` — dated in-place **HELD** banner (not a rewrite); parts (1)/(2) named as failing independently
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii. Documents + a briefing only; **no code / schema / flag / credential / ingest**. AC7 not engaged; PR6 not engaged; Critical Change Protocol not engaged. Production byte-equivalent. Extended byte-identity gate: **NONE — safe**. Buffer untouched (125); **no ingest ran** (`--dry-run` only, verified offline at the source before running: the ingest is gated at `false-hold-observation-report.ts:344`).
+
+**Rollback path:** `git revert` the records commit — documents only.
+
+**Verification step (founder-performable):**
+```
+cd /Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning
+wc -l ~/.sage-gate1/false-hold-record.jsonl                    # buffer live, append-only, no ingest
+git status --short -- website/src harness/ website/supabase*   # no code/schema/flag changed
+cd website && npx tsx scripts/false-hold-observation-report.ts \
+  --records ~/.sage-gate1/false-hold-record.jsonl --dry-run    # part (3) reads MET; all via justice-surface
+curl -s https://www.sagereasoning.com/api/trust-record/sagereasoning:s9-loop@v1 | grep justice_capped
+```
+Expected: buffer ≥125 and growing; no code changes; report `false-positive rate among holds: 0.0%`, `correct-hold arms: justice-surface=<n>`; the live GET shows `"justice_capped": true`.
+
+**Founder elections (AskUserQuestion, at close):**
+1. **CLAUDE.md — "Apply the surgical correction now."** Done: line 52's two stale clauses corrected in place (the flag is SET since 2026-07-12; the carried step is DONE, with the window + record count). **The two neighbouring TRUE claims were deliberately preserved** — the `agent_hold_observations` table **is** still empty and inert (no ingest has run) and **production is still byte-equivalent** (the capture writes a local JSONL, not production). The edit carries an inline note that it is a PR18 close-time correction and what the line previously read.
+2. **The two larger findings — "Both wait for the mentor."** Neither is scoped this session: the Q2 staging premise only binds at the flip (deferred), and the `justice_capped` publication is on the founder's own dogfood agent with no external users. The mentor's ruling likely settles the root of both; scoping now risks building against an answer that changes. **Both remain recorded as open questions below.**
+
+**Open questions:**
+- **The mentor's ruling** on which Q3 clause governs — gates part (3), and (per §9) bears on the adopted Q2 staging premise. Revisit: on the mentor's reply.
+- **The Q2 staging premise** (*"the do-not-proceed class … has a structural false-positive floor of zero"*) — **HELD for the mentor** per election 2. Revisit: on the reply, and mandatorily before any S11 flip.
+- **The live `justice_capped: true` publication** — **HELD for the mentor** per election 2; needs its own R18-honesty disposition (independent of S11) if the ruling does not settle it. Zero external exposure (founder's own dogfood agent).
+- **The false-hold capture's denominator** (guard-path actions unrecorded; Bash not consulted) — a design question for any re-measurement of part (3).
+
+**Rules served:** PR7, PR15 (Workflow/subagent fan-out over bespoke), PR17, PR18, R0, R18, KG-EX1 (method-before-purpose: the question was reframed from the AI's binary to the mentor's own clause conflict), 0d-ii.
+
+**Status:** Adopted. Cross-references: `D-REGISTRY-RA1-FREETEXT-AUDIT-AND-F2-INSTRUMENT-VACUITY-2026-07-17`, `D-TRUST-LAYER-S11-ENFORCE-GATE-MENTOR-DEFERRED`, `D-TRUST-LAYER-S11-OBSERVATION-INSTRUMENT-BUILT-DARK-REVIEW-FOLDED`, `operations/trust-layer-2026-07/2026-07-12-mentor-consultation-s11-enforce-gate-verdict-verbatim.md` (**binding; verbatim wins**), `operations/benchmarks/sage-practice-v1/2026-06-19-mentor-consultation-guardrail-fidelity.md`, `adopted/adr/2026-06-19-stoic-fidelity-dikaiosyne-weighting.md`, `adopted/adr/2026-07-08-sage-trust-layer.md` (L1 Q1.2, A2, A6), `operations/trust-layer-2026-07/2026-07-17-RA1-F2-s11-observation-instrument-vacuity-finding.md` (**read with the four corrections above**).
+
+---
+
+## 2026-07-17 — D-TRUST-LAYER-S11-F2-MENTOR-RULING-EXCLUSION-CLAUSE-GOVERNS-ADOPTED
+
+**Decision:** the mentor's ruling on RA-1-F2 is **ADOPTED IN FULL** (founder, AskUserQuestion). **THE EXCLUSION CLAUSE GOVERNS: Arm 1 requires narrowing; the readiness standard is NOT met; the flip does not proceed.** The verbatim record (`operations/trust-layer-2026-07/2026-07-17-mentor-consultation-F2-exclusion-clause-verdict-verbatim.md`) is now a **BINDING SPECIFICATION** alongside the 2026-07-07 nine answers, the 2026-07-11 verdicts, and the 2026-07-12 S11 verdict — **verbatim wins over every digest.**
+
+**Reasoning:** the Q3 kathekon-engagement threshold carries **two clauses** — an inclusion clause (the four arms) and an **exclusion clause** (*"G6(a) does not bind when… a verdict that found contrary to appropriate action with no kathekon factors detected"*) — and on this engine **both fire on the same record**. The mentor: *"When they conflict on the same record, the exclusion clause is the more specific instruction — it names the exact engine emission, character for character. **Specific governs general.**"*
+
+**The ruling (R1–R10; digest — verbatim §1 governs):**
+- **R1** a `dikaiosyne` tag resting solely on `is_kathekon === false` with **no circle identified** is **NOT** "a justice surface present" ⇒ **Arm 1 requires narrowing** (the candidate — require ≥1 identified circle — named *"the natural reading of the exclusion clause"*).
+- **R2** the **2026-06-19 Scope premise does not carry forward**: *"When a specification rests on an empirical premise and the implementation falsifies that premise, the specification does not automatically carry forward… Honouring the literal tag honours the letter of the specification while defeating its purpose."* (The mentor's own prior endorsement of *"dikaiosyne tagged as engaged"* is withdrawn in effect.)
+- **R3** where `computeVirtueDomains` and **ADR-010 §4's `computeDikaiosyneFloor`** disagree on "engaged", **the newer, more precise definition governs**: *"The floor's silence on 124 records is evidence, not absence of evidence."*
+- **R4** the **A2 omission class** — the strongest pro-Arm-1 argument, which the briefing carried at full strength — is *"a real concern"* but **does not license a broad predicate**: *"The omission class is a Layer 1 failure. The predicate is a measurement instrument. Fixing the instrument to compensate for the extraction failure produces a number that means neither thing clearly."* **Remedy = fix the extraction.**
+- **R5** **Q2's staging premise is PRESERVED** by the ruling (explicitly *"not a reason to adopt the ruling; a consequence consistent with it"*) — but the consequence is named: had Arm 1 governed, **124/125 records would route `do-not-proceed + escalate`** — *"the do-not-proceed class firing on the action class it was staged first to avoid firing on."*
+- **R6** **THE READINESS STANDARD IS NOT MET. THE FLIP DOES NOT PROCEED.** Parts (1)+(2) fail independently; **part (3) may be unmeasurable on this capture set** *"regardless of the ruling"* — the dangerous actions are on the **guard path, which writes no record**, so the denominator cannot be populated from consult-path data.
+- **R7** the public **`justice_capped: true`** publication rests on the same predicate: *"A permanent justice cap on an agent whose actions had no identified affected parties is not a correct public signal… This is a live consequence and should be addressed in the narrowing session, **not deferred**."*
+- **R8** the **§9 input question** (at-action verdict vs accumulated trust state — they diverge on this action class) *"should be resolved before the flip is reconsidered… It is the question of what the decision table is actually reading when it fires."* — **a flip prerequisite.**
+- **R9** the instrument is **NOT broken**: *"It measured what it was told to measure. The question was whether that measurement was the right one."*
+- **R10** the briefing's **four self-corrections accepted** as accurate; the willingness to surface them against interest named *"the right epistemic posture."*
+
+**Founder elections (AskUserQuestion):**
+1. **ADOPT IN FULL.** R1–R10 bind.
+2. **STOP THE CLOCK; LIFT THE OBSERVATION FREEZE.** The window's purpose (part 3 *as specified*) is discharged by R6. The buffer is **frozen + archived at 130 records** (`operations/trust-layer-2026-07/runs/2026-07-17/false-hold-record-FROZEN-2026-07-17.jsonl`; `2026-07-12T13:15:47Z → 2026-07-17T12:09:07Z`; dikaiosyne 130/130 · zero circles 129/130 · `contrary` 128/130 · `Edit` 66 / `Write` 64, all file writes · loop `closed` **1**). **`GATE1_FALSE_HOLD_CAPTURE` to be unset — a FOUNDER-WALKED step** (the AI performs no flag change). **The freeze lift removes the OBSERVATION constraint, not the PRODUCTION one** — the trust core is Live under MEASURE since 2026-07-11, so any edit reaching `derive-trust-events.ts` / the §4 engine / `layer1-extractor.ts` stays `code-critical` + founder-walked (AC7). Any future part-(3) measurement needs a **NEW window** (narrowed predicate + representative distribution + a populated denominator).
+
+**Supersedes:** the founder's earlier same-session election to defer both larger findings ("both wait for the mentor") — the mentor ruled on both (**R7** in scope now, *"not deferred"*; **R5** preserves Q2). And the **return-with-record session is SUPERSEDED, not held** (its premise is discharged; banner applied in place, diagnostic content retained as record).
+
+**THE SUPPLEMENTARY RULING (same-day, relayed after the above; binding on the same terms; verbatim §1b wins) — R11–R15:**
+- **R11 — the narrowing is SPECIFIED:** *"Arm 1 requires at least one identified circle."* **This CLOSES the open question this session had left for the founder** (≥1 circle vs §4's `circles >= 1 || hasNaturalRelationship`). The mentor is specific; verbatim wins. The disjunct is moot on this distribution (0 kathekon factors ⇒ no natural relationship; that route is already covered by Arm 3 via §4's floor to `reflexive`).
+- **R12 — THE ORDER IS RULED; the extraction question is a CONDITIONAL GATE ON the narrowing:** *"first, does the extraction need work before the arm is narrowed, or can they proceed in parallel? **If the extraction is known to be reliable on the action classes in scope, narrow the arm. If the extraction is uncertain, the extraction question is prior.**"* **This SUPERSEDES the S11a prompt's original ordering** (narrowing at Step 3, extraction review in parallel at Step 4) — the prompt was restructured in-session: the gate is now Step 2 and may block the narrowing. **On the evidence the extraction is UNCERTAIN** (129/130 zero circles; 100% file writes; *starved* vs *mis-sited* unseparated) ⇒ the conditional routes to *"the extraction question is prior"*, and **deferring the narrowing is a licensed S11a outcome, not a failure.**
+- **R13 — the A2 concern answered, not dismissed:** *"The resolution is not to resist the narrowing. It is to be clear about what the narrowing does and does not fix… **If Layer 1 is not identifying affected parties when they are genuinely present, the narrowing produces a clean number on a starved input.**"* The blindness must be **visible in the battery**, never implicit.
+- **R14 — the cap is a CLOSING CONDITION on S11a**, sequenced **after** the narrowing + re-run: *"Do not close the narrowing session with the arm fixed and the cap unreviewed."*
+- **R15 — the §9 input question → the open-questions register, before that session closes:** *"it should not be discovered again from scratch at that point."* **No standalone register existed** (the `fix_before_s10` list is buried in an audit report §4; the decision log is ~14.5k lines — precisely the risk named). **Created THIS session** rather than deferred to S11a (strictly safer, and it serves the stated purpose): `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` — standing, short by design, seeded with **P1** (the §9 divergence) plus the other flip prerequisites (P2 narrowing · P3 extraction gate · P4 the four-part standard NOT MET · P5 the unpopulated denominator · P6 a NEW window), the **B1–B3 named enforcement-claim bounds**, the **C** binding flip shape, and the **D1–D3** live consequences. **The session that reconsiders the flip MUST read it.**
+
+**Files touched:**
+- `operations/trust-layer-2026-07/2026-07-17-mentor-consultation-F2-exclusion-clause-verdict-verbatim.md` — NEW; the binding record (§1 verbatim ruling; **§1b verbatim supplementary ruling**; §1c what §1b changes [R11–R15]; §2 digest; §3 what the ruling does NOT do; §4 the founder's elections)
+- `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` — **NEW; the standing register the mentor's R15 required** (no such surface existed)
+- `operations/trust-layer-2026-07/runs/2026-07-17/false-hold-record-FROZEN-2026-07-17.jsonl` — NEW; the frozen evidence (130 records)
+- `adopted/adr/2026-07-08-sage-trust-layer.md` — §7 **2026-07-17 amendment** (the ruling encoded, (a)–(i))
+- `operations/trust-layer-2026-07/trust-layer-build-plan.md` — §S11 marked standard-not-met + **NEW slice S11a** (narrowing + extraction review + trust-record cap)
+- `operations/handoffs/founder/2026-07-12-trust-layer-S11-return-with-record-NEXT-SESSION-PROMPT.md` — **SUPERSEDED** banner
+- `operations/handoffs/founder/2026-07-17-trust-layer-S11a-arm-narrowing-NEXT-SESSION-PROMPT.md` — NEW; the successor
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** Standard under 0d-ii. Documents + an archived evidence file; **no code / schema / flag / credential / ingest changed this session**. AC7 not engaged (the clock-stop is the founder's local config step, surfaced not performed). Production byte-equivalent. Byte-identity gate: **NONE — safe**.
+
+**Rollback path:** `git revert` the records commit — documents + one archived JSONL. The verbatim record itself stands as record regardless (the consultation happened); only the *adoption* is revertable.
+
+**Verification step (founder-performable):**
+```
+cd /Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning
+wc -l operations/trust-layer-2026-07/runs/2026-07-17/false-hold-record-FROZEN-2026-07-17.jsonl   # 130
+git status --short -- website/src harness/ website/supabase*                                     # no code/schema/flag
+grep -c "THE EXCLUSION CLAUSE GOVERNS" operations/trust-layer-2026-07/2026-07-17-mentor-consultation-F2-exclusion-clause-verdict-verbatim.md
+python3 -c "import json;d=json.load(open('.claude/settings.local.json'));print(d['env'].get('GATE1_FALSE_HOLD_CAPTURE','UNSET'))"   # founder step: expect UNSET once walked
+```
+Expected: 130 records; no code changes; the ruling present; the capture flag `UNSET`.
+
+**✅ THE CARRIED STEP IS DISCHARGED IN-SESSION (2026-07-17).** The founder unset `GATE1_FALSE_HOLD_CAPTURE` (PR17 — the AI supplied the command and verified, performing no flag change). **AI-verified first-hand:** flag **UNSET** · `GATE1_STATE_DIR` kept · **7** env keys (was 8) · all four hooks intact (`UserPromptSubmit`/`PreToolUse`/`PostToolUse`/`Stop`) · valid JSON · **and no config-file fallback can re-enable it** — `discernment.config.json` carries no `falseHoldCapture`, so `parseBool(process.env.GATE1_FALSE_HOLD_CAPTURE, parseBool(fileCfg.falseHoldCapture, false))` resolves **false** (checked *before* advising removal; an env-only reading would have been wrong had the config set it). **The clock is stopped.** The live buffer reached **136** before the stop vs the **frozen 130** — the frozen file is the evidence of record; the extra 6 are post-freeze session artifacts and carry no weight. `settings.local.json` is gitignored ⇒ nothing to commit; not a production op. **NO CARRIED STEPS REMAIN from this session.**
+
+**Open questions:**
+- **The narrowing's location — the session's first fork.** `kathekon-engagement.ts`'s justice arm **delegates to `deriveWorstJusticeOutcome`** by design (*"'justice surface present' here means exactly what the engine means by it"*). Narrowing the predicate alone (elevated, repo-only) leaves the **live** reducer emitting the same `justice-surface-unevaluated` events — which is what keeps R7's public cap latched. Narrowing at the reducer closes R7 at the root but is **`code-critical` + founder-walked**. Same root, opposite directions. **Surface at S11a open; do not pick silently.**
+- **What the narrowed arm should be.** The mentor names ≥1 circle as "the natural reading" — but that is **the AI's own prior candidate**, and **R3 arguably points instead at §4's own test** (`circles >= 1 || hasNaturalRelationship`), which makes the two definitions agree rather than inventing a third. Founder's election at S11a.
+- **The extraction: starved vs mis-sited.** R4 says fix the extraction; but the alternative reading is that a tool-call payload (a filesystem path) genuinely has no party/role/purpose, so `contrary` is arithmetic — **the project already made this argument when it dropped Bash from the consult**. Opposite remedies; separate them with evidence.
+- **The §9 input question** — a flip prerequisite (R8); its own design step, not S11a.
+- **A part-(3) re-measurement** — needs a NEW window; not designed.
+- **RA-1-F3** (the byte-identity guard's false-positive/false-negative classes) — still open.
+
+**Rules served:** PR7, PR15, PR17 (the clock-stop surfaced as founder-walked, not performed), PR18, R0, R18, KG-EX1, 0d-ii, AC7 (named for the S11a Critical arm).
+
+**Status:** Adopted. Cross-references: `D-TRUST-LAYER-S11-F2-MENTOR-BRIEFING-AUTHORED-HELD`, `D-TRUST-LAYER-S11-ENFORCE-GATE-MENTOR-DEFERRED`, `D-TRUST-LAYER-S11-OBSERVATION-INSTRUMENT-BUILT-DARK-REVIEW-FOLDED`, `D-REGISTRY-RA1-FREETEXT-AUDIT-AND-F2-INSTRUMENT-VACUITY-2026-07-17`, `operations/trust-layer-2026-07/2026-07-17-mentor-consultation-F2-exclusion-clause-verdict-verbatim.md` (**BINDING; verbatim wins**), `operations/trust-layer-2026-07/2026-07-17-F2-mentor-briefing.md`, `adopted/adr/2026-07-08-sage-trust-layer.md` §7 (2026-07-17 amendment), `operations/trust-layer-2026-07/trust-layer-build-plan.md` §S11/§S11a, `operations/handoffs/founder/2026-07-17-trust-layer-S11a-arm-narrowing-NEXT-SESSION-PROMPT.md`.
+
+---
+
+## 2026-07-17 — D-INCIDENT-PUBLIC-CREDENTIAL-EXPOSURE-S9-LOOP-2026-07-17
+
+**Decision:** a **live credential exposure in the PUBLIC repository** was found, contained, and recorded. **Both exposed production credentials are REVOKED (founder-walked) and independently verified 401.** The repo hole is closed (`.gitignore` glob). **Incident record: `operations/incidents/2026-07-17-public-credential-exposure-s9-loop.md`.**
+
+**What was exposed:** `.claude/settings.local.json.bak` — **tracked, at HEAD, on public `main`** (`github.com/quartermileclint/sagereasoning`) — carrying two live `sr_prac_` UPCs for `sagereasoning:s9-loop@v1` in cleartext: `SAGE_GATE1_CREDENTIAL` (`sr_prac_2068e…`, id `09e83b4d…`, `consult`) and `SAGE_GATE1_ACCRED_CREDENTIAL` (`sr_prac_eb2cb…`, id `e715520b…`, `accreditation_write`+`reflect`). **Window: `849f830` 2026-07-12 09:13 +1000 → 2026-07-17 ≈ 5d 13h**, pushed (verified: `849f830` is an ancestor of `origin/main`). **Reach:** Sonnet spend on `/api/reason` + **writes to the PUBLIC trust/accreditation record**. **Cannot:** mint, deploy, touch Vercel/Supabase, or read other agents' data.
+
+**Scope — precisely bounded (the first sweep overstated it):** a `sr_*_[a-f0-9]{6,}` sweep hit **27 tracked files** and looked systemic; **26 were FALSE POSITIVES** (redacted record refs like `sr_live_410782` satisfy a 6-hex prefix). Re-swept for **full-length tokens** (`sr_*_` + 30+ chars): **exactly ONE tracked file** carries a real token. `.claude/gate1-hooks-block.json` has no `env` block; `leg-d sage-call.sh` reads `sr_prac_7d0a66ff-REDACTED` (**the 2026-07-07 redaction held**); `website/src` hits are fixtures. **Two credentials, one file, one commit.**
+
+**Root causes (four, compounding):**
+- **(0) The mechanism:** `849f830` **ADDED** the `.bak` ad-hoc during the S9b walk; that close's verification used **`git add -A`**, sweeping it in with legitimate changes. **No skill creates it** — `/practice-off` backs up `gate1-hooks-block.json` and **explicitly documents that it carries no secret** (verified true). **The skills were right; the blanket add was not.**
+- **(1) The ignore rule was exact-name, not a glob.** The founder's **global** gitignore has `**/.claude/settings.local.json` — that name ONLY; **the repo's `.gitignore` had no `.claude` entry at all**. So the live file was ignored while **every variant (`.bak`, `.pre-*`) was not**. The protection looked total and was one character wide.
+- **(2) No secret tripwire exists** — not in the repo, CI, or any session's verification block. The `.gitignore` already had a *"Local env-file backups (may contain secrets) — never commit"* section (`.env.local.*`); the concept existed and was never extended.
+- **(3) The AI nearly doubled it.** Advising the clock-stop, the AI told the founder to `cp` a backup named `settings.local.json.pre-clock-stop-<ts>` — **a name the global ignore does not match** — containing both credentials, into a repo the founder was about to `git add`. The AI verified the flag's **parse semantics** meticulously (the `parseBool` fallback chain; `discernment.config.json`) and **never checked the ignore rule for the file it was creating.** Caught only by reading the final `git status` properly.
+- **(3b) It was VISIBLE the whole time.** The `.bak` has appeared in **every session's `git status` since 2026-07-12** and was listed by name in multiple closes under *"Files remaining uncommitted."* **It was in THIS session's opening git status** and the AI classified it as pre-existing noise without asking why a `.bak` of a credential-bearing settings file was tracked. **The exposure never hid; it was reported repeatedly and read past.**
+
+**The shape:** (1) and (3) are the same failure the mentor's ruling was about — *a frame accepted without checking* (a specification resting on an empirical premise nobody rechecked) — reproduced twice by the AI **in the session documenting it**, and a fourth time on the mint-CLI syntax (guessed `--class`; the real interface is positional — `revoke practice --id <uuid>` — and the default `MINT_CLI_BASE_URL` is `localhost:3000`, so a syntactically-valid guess would have silently missed production).
+
+**Remediation DONE:** both credentials revoked (founder-walked, PR17 — the AI performed no revoke); **revocation verified first-hand** by negative-auth probe → **both HTTP 401** `{"error":"Plugin authentication failed"}` on live `/api/reason`; the harness independently confirmed it by degrading to fail-open-honest (`http 403`/`401` UNAVAILABLE frames — the designed posture, observed live); the AI's near-miss backup **moved out of the repo** to `~/sage-settings-backup-pre-clock-stop-20260717.json`; **`.gitignore` fixed** with a **glob** `.claude/settings.local.json*` + an inline incident note; the full-token sweep run; the public surfaces checked (`accreditation` → `post_decision_check`/`agent_elected`; `trust-record` → `dikaiosyne deliberate`, `justice_capped true`, `honest_reflect_count 9` = this session's own reflect) — **consistent with our own activity, no evident foreign writes** (weak signal, disclosed).
+
+**Remediation OUTSTANDING (founder):** **(1)** `git rm --cached .claude/settings.local.json.bak` — the glob does not untrack an already-tracked file; must ride the next commit. **(2)** the DB-level abuse check (Supabase; the AI performs no Supabase op) on `api_key_usage` / `loop_billing_events` / `agent_accreditation` for the two ids since 2026-07-12 — **assume harvested, verify not used** (bots scrape GitHub for key patterns; `sr_prac_` is distinctive). **(3)** decide whether to re-mint (the harness is currently dead on honest 401s; the clock is stopped, so nothing is being lost). **(4) History is NOT scrubbed and will not be** — `849f830` retains both tokens on a public repo permanently; rewriting pushed `main` is invasive and does not reach forks/clones/caches. **Revocation is the remedy. Accepted and recorded.**
+
+**Named follow-ups:** **F1** enable GitHub secret scanning + push protection (free on public repos) with `sr_(live|prac|inst|assent)_` as a custom pattern. **F2** a repo-side pre-commit/CI tripwire that matches the **FULL token length** — this session's own sweep proves a short prefix cries wolf (26/27 false positives) and gets ignored, the same "guard that trains you to ignore it" failure as **RA-1-F3**. **F3** stop using `git add -A` in close verification blocks; enumerate paths (this session's close does). **F4** the RA-1-F3 class is now confirmed general: **the project's guards are substring/name-based and wrong in both directions** — the byte-identity guard (false-positive on filenames, false-negative on `r20a-classifier.ts`) and the ignore rule (exact-name only). **Guards must match the real thing, not a name resembling it.** **F5** `gate1-dogfood@v1` (`322b0eb7…`) is a different identity, **not** exposed here, still active, raw token unrecoverable — noted for completeness.
+
+**What went right:** revocation IS the documented kill switch — two commands, immediate, 401-verified within a minute. The **CI-14 capability model bounded the blast radius** (scoped UPCs, agent-bound, 200/5000, no mint/deploy/DB reach). The harness **failed open honestly** the moment the keys died. The **leg-d redaction precedent held** — which is why this is two credentials and not three.
+
+**Files touched:**
+- `operations/incidents/2026-07-17-public-credential-exposure-s9-loop.md` — NEW; the incident record
+- `.gitignore` — `.claude/settings.local.json*` glob + inline note (under the existing secrets section)
+- `operations/decision-log.md` — this entry
+
+**Risk classification:** the FINDING is a **credential exposure (HIGH)**; the AI's actions were Standard — a `.gitignore` edit, a file move out of the repo, read-only probes, and documents. **The revocations were founder-performed (PR17/AC7); the AI performed no mint/revoke/Supabase/Vercel/git op.** No code/schema/flag changed. Byte-identity gate: NONE.
+
+**Rollback path:** `git revert` the records commit (documents + a `.gitignore` line). **The revocations are NOT rollback-able and must not be** — re-minting is a fresh mint, never a restore.
+
+**Verification step (founder-performable):**
+```
+cd /Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning
+# both credentials must 401 (paste each token from the .bak BEFORE it is untracked)
+curl -s -o /dev/null -w "%{http_code}\n" -X POST https://www.sagereasoning.com/api/reason \
+  -H "Content-Type: application/json" -H "Authorization: Bearer <token>" -d '{"input":"probe","depth":"quick"}'
+# the glob now covers variants
+git check-ignore -v .claude/settings.local.json.bak .claude/settings.local.json.pre-test
+# exactly one tracked file holds a full-length token (until it is untracked)
+git grep -lE "sr_(live|prac|inst|assent)_[A-Za-z0-9]{30,}" -- .
+```
+Expected: **401** both; both paths ignored; the grep returns only `.claude/settings.local.json.bak` (and nothing at all once `git rm --cached` lands).
+
+**Rules served:** PR7 (the failure reported plainly, including the AI's own), PR10 ("I caused this"), PR17, PR18, R0, KG-EX1, AC7 (named — the revokes were founder-walked), 0d-ii.
+
+**Status:** Adopted. Cross-references: `D-TRUST-LAYER-S9-DOGFOOD-INSTALL-LIVE` (minted the two credentials), `D-TRUST-LAYER-S9B-PRACTICE-COMPLETION-BUILT-REVIEW-FOLDED` (`849f830` — the walk-fold commit that added the `.bak`), `D-TRUST-LAYER-S0A-CORROBORATION-CHECK-LIVE-GATE-ACTIVATION` (the leg-d redaction + rotation precedent), `D-TRUST-LAYER-S11-F2-MENTOR-RULING-EXCLUSION-CLAUSE-GOVERNS-ADOPTED` (the session this surfaced in), `D-REGISTRY-RA1-FREETEXT-AUDIT-AND-F2-INSTRUMENT-VACUITY-2026-07-17` (RA-1-F3 — the sibling guard-class finding).

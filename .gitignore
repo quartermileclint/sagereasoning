@@ -51,5 +51,15 @@ website/scripts/.translation-sandwich-cache/
 
 # Local env-file backups (may contain secrets) — never commit
 .env.local.*
+
+# Local Claude Code harness settings — CONTAIN LIVE CREDENTIALS in their `env` block
+# (SAGE_GATE1_CREDENTIAL / SAGE_GATE1_ACCRED_CREDENTIAL). Added 2026-07-17 after a live
+# incident: the founder's GLOBAL gitignore matched the EXACT name `**/.claude/settings.local.json`
+# only, so `.bak` and other variants were never ignored — `.claude/settings.local.json.bak` was
+# tracked and pushed to a PUBLIC repo at 849f830 (2026-07-12) with two live sr_prac_ credentials
+# in cleartext; both were revoked 2026-07-17. The glob below covers every variant.
+# See: D-INCIDENT-PUBLIC-CREDENTIAL-EXPOSURE-S9-LOOP-2026-07-17
+.claude/settings.local.json*
+
 website/tsconfig.tsbuildinfo
 operations/p1-rebuild-2026-06/transcripts/
