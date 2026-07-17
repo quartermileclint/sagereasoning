@@ -293,7 +293,9 @@ Safety-critical functions in scope include: `detectDistress`, the two-stage dist
 
 ### AC5 — R20a Enforcement Perimeter
 
-The R20a vulnerable-user protections apply to exactly the following eight human-facing POST routes, as enumerated in `r20a-invocation-guard.test.ts`:
+The R20a vulnerable-user protections apply to exactly the following **thirteen** routes, as enumerated in `r20a-invocation-guard.test.ts` — **eleven route-level** (the `await enforceDistressCheck(detectDistressTwoStage(...))` pattern) plus **two substrate-gate** (the `enforceLayer2R20aGate` pattern, which reuses A7 and internally invokes the same Haiku classifier):
+
+**Route-level (11):**
 
 1. `/api/score`
 2. `/api/score-decision`
@@ -303,10 +305,20 @@ The R20a vulnerable-user protections apply to exactly the following eight human-
 6. `/api/reason`
 7. `/api/reflect`
 8. `/api/mentor/private/reflect`
+9. `/api/journal` *(added 2026-05-31, gap-#4 remediation — AC5 ninth-route protocol)*
+10. `/api/mentor/journal-feed` *(added 2026-05-31 — AC5 tenth-route protocol)*
+11. `/api/score-conversation` *(added 2026-07-07 — AC5 eleventh-route protocol; `SUBSTRATE_SCORE_CONVERSATION_R20A_ENABLED` Live)*
+
+**Substrate-gate (2):**
+
+12. `/api/calling` *(added 2026-05-28 under `D-R20A-OPTIONA-S2-CALLING-WIRED-2026-05-28` — the first substrate-gate member)*
+13. `/api/practice/reflect` *(added 2026-05-28 under Option A)*
 
 Any other surface is outside the perimeter and must be named honestly when triage touches it.
 
-Adding a ninth route to the perimeter requires, before merge:
+> **Count correction (2026-07-17, RA-1 — `D-REGISTRY-RA1-REFRESH-AND-DOC-NOTES-2026-07-17`).** This section previously read *"exactly the following eight human-facing POST routes, as enumerated in `r20a-invocation-guard.test.ts`"* and listed only routes 1–8 — **contradicting the very test it cites**, whose registries have enumerated 13 since the 2026-07-07 eleventh-route activation (the test asserts `>=11` route-level and `>=2` substrate-gate; it runs 92/0). The governing safety document therefore understated the live perimeter by five routes. The routes themselves were correctly wired and Live throughout — this is a documentation-count correction, not a perimeter change. **Named follow-up (RA-2, which edits that file):** the test's own header docstring is stale in the same way (*"eight route-level + one substrate-gate = nine"*).
+
+Adding a further route to the perimeter requires, before merge:
 
 1. Registry entry in `r20a-invocation-guard.test.ts`
 2. Import of `detectDistressTwoStage` and `enforceDistressCheck`

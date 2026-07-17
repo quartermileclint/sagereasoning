@@ -18,6 +18,16 @@
 
 ---
 
+## Amendment note (added 2026-07-17 under `D-REGISTRY-RA1-REFRESH-AND-DOC-NOTES-2026-07-17`)
+
+**The passion recalibration this taxonomy needs — the widening beyond `philodoxia` — is a pre-Phase-2 dependency, scheduled before Phase-2 build begins, not carried alongside it.**
+
+Recorded verbatim in intent from the mentor's component-registry assessment (2026-07-16). The taxonomy as adopted leans on `philodoxia` as its worked anchor (see the Phase-1 worked-example anchors in D8's "Honest disclosure"); the mentor's instruction is that the sub-species set be recalibrated against the practitioner population *before* any Phase-2 mechanism is built against it, because every retrievable chunk in the D5 index is tagged from this controlled vocabulary — so a taxonomy corrected *after* the index is built forces a re-tag rather than a revision.
+
+Status: **named dependency, not yet scheduled to a date.** It does not block Phase-1 adoption (this deliverable remains Adopted as-is); it blocks Phase-2 commencement. Cross-references: `operations/registry-assessment-2026-07/2026-07-17-mentor-assessment-reconciled-build-plan.md` §1c; the companion notes on D8 (version authority) and D11 (R20d sage-filter alignment) — the three together are the alt-3 pre-Phase-2 dependency set.
+
+---
+
 ## Plain-language summary
 
 Stoic philosophy classifies destructive emotional states (`pathē`, plural; `pathos`, singular — translated as "passions") into four root types arranged on a 2×2 matrix of temporal orientation (present / future) and evaluative perception (apparent good / apparent evil). Each root passion has named sub-species — orge (anger), philodoxia (love of honour), penthos (grief), agonia (agonised dread), and others. The Stoics also identified three rational good feelings (`eupatheiai`) that replace specific passions: chara (rational gladness) replaces hedone, boulesis (rational wish) replaces epithumia, eulabeia (rational caution) replaces phobos.

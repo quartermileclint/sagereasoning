@@ -67,10 +67,15 @@
  *     API-key path), so the human crisis message renders, never the
  *     developer-form payload.
  *
- * Production state at build close: SUBSTRATE_SCORE_CONVERSATION_R20A_ENABLED
- * UNSET in Vercel. Activation is a founder-walked Critical step (Part D of
- * the 2026-07-07 next-session prompt): set the flag + redeploy + live
- * smoke. Rollback = unset the flag + redeploy (byte-identical).
+ * Production state: LIVE since 2026-07-07 — SUBSTRATE_SCORE_CONVERSATION_R20A_ENABLED
+ * is SET in Vercel Production (`D-R20A-SCORE-CONVERSATION-ELEVENTH-ROUTE-ACTIVATION-LIVE`;
+ * founder-walked Critical activation, AC7 engaged + discharged). All three
+ * live smokes green: acute → the full 7-line crisis redirect with no score
+ * fields; benign → the normal envelope, no distress fields; mild → the
+ * evaluation proceeded WITH `result.support_resources {severity:'mild'}`
+ * riding additively. This closed the S8b 0h-exit supporting blocker (c) —
+ * the S8a "inside-perimeter exception" no longer exists.
+ * Rollback = unset the flag + redeploy (byte-identical flag-off, test-asserted).
  *
  * Rules served: R20a (vulnerable user detection and redirection); AC2
  * (~500ms borderline-classifier latency accepted); AC4 (invocation-tested —

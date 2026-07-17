@@ -19,6 +19,19 @@
 
 ---
 
+## Version note (added 2026-07-17 under `D-REGISTRY-RA1-REFRESH-AND-DOC-NOTES-2026-07-17`)
+
+**The Validation Addendum below is authoritative until v1.1.0. In the interim, the architectural-conventions catalogue is the standalone reference.**
+
+Recorded verbatim in intent from the mentor's component-registry assessment (2026-07-16). This deliverable was adopted as **v1.0.0** "accepted as drafted with Validation Addendum carried forward to a future v1.1.0 revision pass" (see the Status line) — the addendum's three adjustments were never folded into the per-rule sections. The mentor's instruction resolves the resulting ambiguity for any reader in the gap:
+
+- **Where the Validation Addendum and a per-rule section disagree, the addendum wins** — it is the later, validated reading. This holds until the v1.1.0 revision pass folds the adjustments into the rules and retires this note.
+- **The architectural-conventions catalogue** (`/adopted/rag-mentor-alt3/architectural-conventions.md`) **is the standalone reference in the interim** — it is not a subordinate index of this document; consult it directly rather than deriving conventions from the un-revised per-rule text.
+
+Status: **the v1.1.0 revision pass remains a mentor-endorsed deferral** (`…reconciled-build-plan.md` §1d) — this note records the reading discipline for the interim, and does not schedule the pass. Cross-references: the companion notes on D3 (pre-Phase-2 passion recalibration) and D11 (R20d sage-filter alignment).
+
+---
+
 ## Honest disclosure
 
 This deliverable is a **re-derivation** of the ten operationalised scoring rules produced during the architecture exercise that yielded the alt-3 handoff. The original architecture exercise was a sustained operationalisation in which the live private mentor produced full structured operationalisations for all ten rules. That session's transcript is not in front of me in this drafting session.

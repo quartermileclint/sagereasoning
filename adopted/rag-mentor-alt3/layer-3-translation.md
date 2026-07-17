@@ -20,6 +20,16 @@
 
 ---
 
+## Amendment note (added 2026-07-17 under `D-REGISTRY-RA1-REFRESH-AND-DOC-NOTES-2026-07-17`)
+
+**The sage-filter R20d alignment — the second-person passion-attribution prohibition — is a named pre-Phase-2 dependency requiring its own session.**
+
+Recorded verbatim in intent from the mentor's component-registry assessment (2026-07-16). This deliverable already states the prohibition (Glossary, "Mirror principle (R19d)": *"second-person passion attribution is prohibited (R20d)"*) and already carries the `/api/score-social` invitation-language requirement per the D24 audit. The mentor's instruction is that **`tool-sage-filter` be brought into alignment with that prohibition in a dedicated session** — the alignment is not a Layer-3 prose refinement that can ride an adjacent build, because it touches what the filter surface is permitted to assert about a *reader* rather than about the practitioner's own reasoning.
+
+Status: **named dependency with its own session, not yet dated.** It is a mentor-endorsed deferral in the sense that it is not pulled forward (`…reconciled-build-plan.md` §1d — "R20d sage-filter alignment (own named session)"), but it is a **pre-Phase-2 dependency**: it must close before Phase-2 build begins. It does not block Phase-1 adoption; this deliverable remains Adopted as-is. Cross-references: the companion notes on D3 (pre-Phase-2 passion recalibration) and D8 (version authority) — the three together are the alt-3 pre-Phase-2 dependency set; `tool-sage-filter` in the registry; RA-5 group (b), which sizes the filter's readiness.
+
+---
+
 ## Plain-language summary
 
 Layer 3 is Claude's second translation task: the deterministic engine has produced a structured evaluation (10 mechanism outputs plus the composite proximity), and Layer 3 turns that structure into prose the practitioner reads. The architectural commitment AC-12 is strict: **Layer 3 is translation, not synthesis.** Claude paraphrases the engine's structured output into conversational language. Claude does not add Stoic inference. Claude does not classify a passion the engine did not detect. Claude does not assess a virtue the engine did not assess.
