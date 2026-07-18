@@ -253,10 +253,10 @@ import { emitAccreditationTrustEvents } from '@/lib/substrate/trust-core/emissio
 // response computed AFTER the writer — it can never affect the write outcome;
 // the never-throws wrapper yields undefined on any internal error (fail-soft).
 import {
+  buildLoopFoldIdentity,
   computeLoopFoldAnnotation,
   isLoopFoldEnabled,
 } from '@/lib/substrate/trust-core/loop-fold'
-import { resolveLongitudinalIdentity } from '@/lib/substrate/longitudinal-identity'
 import { resolveCredentialContext } from '@/lib/substrate/agent-assessment-history-store'
 
 // =============================================================================
@@ -838,30 +838,36 @@ export async function POST(
     // AE-2 — compute the MEASURE-only loop-fold annotation from the SUBMITTED
     // provenance chain (the only server-readable home of the signed CI-4
     // markers). After the writer on purpose: the fold can never affect the
-    // write outcome. The wrapper never throws (undefined ⇒ block absent).
-    // Identity per ADR-014 §4: the CREDENTIAL's declared (owner, agent) —
-    // resolveLongitudinalIdentity refuses an agent-keyed read without owner
-    // scope (the cross-tenant guard).
-    const loopFoldAnnotation =
-      foldCredentialContext !== undefined
-        ? computeLoopFoldAnnotation(
-            (rawBody as { provenance?: { signed_assessments?: unknown } })
-              ?.provenance?.signed_assessments,
-            {
-              identity: resolveLongitudinalIdentity({
-                credentialRef: `api_key:${auth.credential_id}`,
-                ownerUserId: foldCredentialContext.owner_user_id,
-                // Fall back to the PATH agent_id (which the auth gate already
-                // verified this credential is scoped to) so a transient
-                // resolver error cannot mislabel an agent-bound credential as
-                // undeclared (review fold F1). Owner has no such fallback —
-                // an unresolved owner honestly refuses the pair join.
-                agentId: foldCredentialContext.agent_id ?? agent_id,
-              }),
-              now: new Date(),
-            },
-          )
-        : undefined
+    // write outcome. computeLoopFoldAnnotation never throws (undefined ⇒
+    // block absent); the try/catch here is defense-in-depth (independent-
+    // review fold) so that even the identity-construction ARGUMENT — built via
+    // buildLoopFoldIdentity, itself pure and unit-tested — can never propagate
+    // an exception into the outer 503 catch on a write that already
+    // succeeded. Identity per ADR-014 §4: the CREDENTIAL's declared
+    // (owner, agent) — resolveLongitudinalIdentity refuses an agent-keyed
+    // read without owner scope (the cross-tenant guard).
+    let loopFoldAnnotation: ReturnType<typeof computeLoopFoldAnnotation>
+    try {
+      loopFoldAnnotation =
+        foldCredentialContext !== undefined
+          ? computeLoopFoldAnnotation(
+              (rawBody as { provenance?: { signed_assessments?: unknown } })
+                ?.provenance?.signed_assessments,
+              {
+                identity: buildLoopFoldIdentity({
+                  credentialId: auth.credential_id,
+                  ownerUserId: foldCredentialContext.owner_user_id,
+                  agentId: foldCredentialContext.agent_id,
+                  pathAgentId: agent_id,
+                }),
+                now: new Date(),
+              },
+            )
+          : undefined
+    } catch (e) {
+      console.error('[loop-fold] identity/fold construction error:', (e as Error).message)
+      loopFoldAnnotation = undefined
+    }
 
     return buildWriteSuccessResponse(loopClosureAnnotation, loopFoldAnnotation)
   } catch (err) {

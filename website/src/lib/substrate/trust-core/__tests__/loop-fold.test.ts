@@ -48,6 +48,25 @@
  *       (guards drift between the fold and the live CI-4 rule).
  *   §14 The never-throws route seam (a throwing verifier ⇒ undefined + log,
  *       never a propagated error into the write path).
+ *
+ * Independent-review fold (2026-07-19 — a second adversarial Workflow run
+ * against the committed build found 7 confirmed defects a first-hand review
+ * missed; all folded at the root, not merely disclosed):
+ *   §15 Verifier-reason distinction: an operational misconfiguration
+ *       (verifier_key_unavailable/_malformed) is counted distinctly from a
+ *       genuinely fake/absent signature.
+ *   §16 Truncation is UNINSPECTED (never presented to the verifier), named
+ *       and counted distinctly from unverified (which WAS inspected).
+ *   §17 Exact-duplicate signed envelopes (identical signature) are deduped
+ *       before evidence-floor counting — a replayed envelope cannot inflate
+ *       a domain past EVIDENCE_FLOOR with non-independent evidence.
+ *   §18 buildLoopFoldIdentity — the route's exact identity-construction
+ *       expression, extracted to a pure, directly-unit-tested function (was
+ *       only source-grep-pinned before).
+ * §3/§9/§11/§12 amended in place: §3 gained the level-laundering root fix +
+ * a non-vacuous differing-proximity control; §9/§11 gained the corrected
+ * note pins + the strengthened, live-mutation-resistant F3 pin; §12 renamed
+ * n_truncated → n_truncated_uninspected.
  */
 
 import { readFileSync } from 'fs'
@@ -55,6 +74,7 @@ import { join } from 'path'
 
 import { analyseLoopClosure } from '@/app/api/accreditation/[agent_id]/loop-closure-gate'
 import {
+  buildLoopFoldIdentity,
   computeLoopFold,
   computeLoopFoldAnnotation,
   corroborationStateOf,
@@ -100,10 +120,18 @@ const PAIR_IDENTITY: LongitudinalIdentity = {
 const NOW = new Date('2026-07-20T12:00:00.000Z') // post-S11b era
 
 /** Injected verifier: valid unless the element's signature says 'bad', throws
- *  when it says 'throw'. */
+ *  when it says 'throw'; 'unavailable'/'malformed' simulate the operational-
+ *  misconfiguration reasons the real verifier returns (layer2-verifier.ts's
+ *  own vocabulary — §16). */
 const testVerify = (signed: unknown, _now: Date) => {
   const sig = (signed as { signature?: string })?.signature
   if (sig === 'throw') throw new Error('verifier exploded')
+  if (sig === 'unavailable') {
+    return { valid: false as const, reason: 'verifier_key_unavailable' }
+  }
+  if (sig === 'malformed-key') {
+    return { valid: false as const, reason: 'verifier_key_malformed' }
+  }
   if (sig === 'bad' || typeof sig !== 'string') {
     return { valid: false as const, reason: 'invalid_signature' }
   }
@@ -123,13 +151,24 @@ interface ElementSpec {
   signature?: string
 }
 
+// Deterministic unique-signature counter for el()'s default. Real signed
+// envelopes always carry a cryptographically unique signature per distinct
+// assessment (Ed25519); the fixture builder must mirror that — a shared
+// literal default ('ok') would make every un-overridden element in a
+// multi-element fixture collide under §17's dedup logic, which is correct
+// production behavior but wrong test behavior. Deterministic (not
+// Math.random()) so re-running the file twice produces identical output.
+let autoSigCounter = 0
+
 /** Build one signed-assessment element. Defaults: a benign non-redirection
  *  deliberate verdict engaging phronesis with no circles/passions — the
- *  false-positive-class SHAPE (no kathekon factor). */
+ *  false-positive-class SHAPE (no kathekon factor). Signature defaults to a
+ *  fresh unique value per call (see autoSigCounter); pass `signature`
+ *  explicitly to test dedup (§17) or verifier-failure paths (§2, §15). */
 function el(spec: ElementSpec = {}): unknown {
   return {
     key_id: 'test-key',
-    signature: spec.signature ?? 'ok',
+    signature: spec.signature ?? `auto-sig-${autoSigCounter++}`,
     assessment: {
       katorthoma_proximity: spec.proximity ?? 'deliberate',
       virtue_domains_engaged: spec.domains ?? ['phronesis'],
@@ -267,18 +306,28 @@ function collectKeys(x: unknown, out: Set<string>): Set<string> {
   eq(closed.character.loops.closed, 1, '§3 same-depth closer closes the engaged loop')
   eq(closed.character.loops.verdict, 'closed', '§3 character verdict closed')
 
-  // The false-positive class can never set a character per-domain open_loop:
-  // three phronesis verdicts (floor met), one an OPEN non-engaged redirection.
+  // The false-positive class can never set a character per-domain open_loop.
+  // Three genuine phronesis verdicts (floor met) plus a fp-class redirection,
+  // which is now EXCLUDED from the fold entirely (independent-review root
+  // fix) — so the floor is met by X1/X2/X3, not by counting the fp-class
+  // element.
   const noBleed = fold([
-    el({ redirection: true, ref: 'F', depth: 'standard' }), // fp-class, open
+    el({ redirection: true, ref: 'F', depth: 'standard' }), // fp-class, excluded
     el({ ref: 'X1', depth: 'standard' }),
     el({ ref: 'X2', depth: 'standard' }),
+    el({ ref: 'X3', depth: 'standard' }),
   ])
   const ph = noBleed.character.domains['phronesis']
-  assert(typeof ph === 'object', '§3 phronesis fold published at floor')
+  assert(typeof ph === 'object', '§3 phronesis fold published at floor (fp-class excluded from the count)')
   if (typeof ph === 'object') {
     eq(ph.open_loop, false, '§3 fp-class open loop NEVER sets character open_loop')
+    eq(ph.terminals, 3, '§3 fp-class element excluded from terminals entirely (not just open_loop)')
   }
+  eq(
+    noBleed.character.domains_basis['phronesis'].verdicts_in,
+    3,
+    '§3 verdicts_in excludes the fp-class element (root fix, not just a masked count)',
+  )
   // Contrast: the same shape with an ENGAGED opener (habitual) ⇒ open_loop true.
   const bleedCtl = fold([
     el({ redirection: true, proximity: 'habitual', ref: 'E', depth: 'standard' }),
@@ -290,6 +339,31 @@ function collectKeys(x: unknown, out: Set<string>): Set<string> {
   if (typeof ph2 === 'object') {
     eq(ph2.open_loop, true, '§3 engaged open loop DOES set character open_loop (control — non-vacuous)')
   }
+
+  // Independent-review fold (kathekon-split-level-laundering, MEDIUM): a
+  // fp-class redirection with a DIFFERING (and later-submitted, so
+  // "most-recent") proximity from genuine same-domain evidence must NOT
+  // determine the domain's level. Non-vacuous: proximity differs so a
+  // same-proximity mask (the original noBleed shape) cannot hide the defect.
+  const noLaunder = fold([
+    el({ proximity: 'reflexive', ref: 'G1', depth: 'standard' }),
+    el({ proximity: 'reflexive', ref: 'G2', depth: 'standard' }),
+    el({ proximity: 'reflexive', ref: 'G3', depth: 'standard' }),
+    // fp-class, submitted LAST (would be "most recent" if it fed the fold):
+    // a flattering high proximity that must never surface as the level.
+    el({ redirection: true, proximity: 'sage_like', ref: 'FL', depth: 'standard' }),
+  ])
+  const phL = noLaunder.character.domains['phronesis']
+  assert(typeof phL === 'object', '§3 level-laundering control fold published')
+  if (typeof phL === 'object') {
+    eq(phL.level, 'reflexive', '§3 the fp-class flattering proximity NEVER launders into the domain level')
+    eq(phL.terminals, 3, '§3 the fp-class element is excluded from terminals in the level-laundering case too')
+  }
+  eq(
+    noLaunder.character.domains_basis['phronesis'].verdicts_in,
+    3,
+    '§3 level-laundering: verdicts_in excludes the fp-class element',
+  )
 }
 
 // ============================================================================
@@ -519,17 +593,32 @@ function collectKeys(x: unknown, out: Set<string>): Set<string> {
     b.measure_note.includes('binds nothing') && b.measure_note.includes('weights-tier'),
     '§9 MEASURE note pins the binds-nothing + weights-blocked wording',
   )
-  // Review fold F2: the character note states BOTH halves of the posture —
-  // levels fold every verified verdict; closure signals are engaged-gated.
+  // Independent-review fold: the calibration note's "feed no character
+  // signal" claim must be TRUE (the root fix excludes calibration-class
+  // elements from character entirely — this is no longer merely disclosed).
   assert(
-    b.character.note.includes('regardless of') && b.character.note.includes('engaged'),
-    '§9 (F2) character note disclosing levels-vs-closure posture',
+    b.instrument_calibration.note.includes('EXCLUDED') &&
+      b.instrument_calibration.note.includes('feed no character'),
+    '§9 calibration note states exclusion, matching the actual (fixed) behavior',
   )
   assert(
     b.chain_scope.includes('not') && b.chain_scope.includes('persisted'),
     '§9 chain scope discloses no stored-history fold exists',
   )
   assert(b.identity.kind === 'owner_agent_pair', '§9 identity carried on the block')
+  // Independent-review fold: the write-boundary identity_context note is
+  // UNCONDITIONAL (always present, distinguishing owner-lookup-failure from
+  // genuinely owner-less at the ONE call site where the latter cannot occur).
+  assert(
+    b.identity_context.includes('6e §A') && b.identity_context.includes('operational anomaly'),
+    '§9 identity_context discloses the write-boundary structural invariant',
+  )
+  // Independent-review fold: the envelope note no longer unconditionally
+  // claims every element was verified (false on truncation).
+  assert(
+    b.envelope.note.includes('WITHIN THE CAP') && b.envelope.note.includes('NEVER presented'),
+    '§9 envelope note is honest about the truncated-uninspected class',
+  )
 }
 
 // ============================================================================
@@ -585,20 +674,45 @@ function collectKeys(x: unknown, out: Set<string>): Set<string> {
     /resolvedOwnerUserId:\s*foldCredentialContext\.owner_user_id/.test(routeSrc),
     '§11 INV: the identity PK read is deduped into the trust-event emission',
   )
-  // Review fold F1: a transient resolver error must not mislabel an
-  // agent-bound credential as undeclared — the auth-verified path agent_id is
-  // the fallback (owner deliberately has none).
+  // Independent-review fold: identity construction now routes through the
+  // exported, directly-unit-tested buildLoopFoldIdentity helper (§15) rather
+  // than an inline object literal — the F1 fallback lives in loop-fold.ts,
+  // pinned there by a real unit test, not only by a route.ts regex.
   assert(
-    /agentId:\s*foldCredentialContext\.agent_id\s*\?\?\s*agent_id/.test(routeSrc),
-    '§11 INV (F1): identity agentId falls back to the auth-verified path agent_id',
+    routeSrc.includes('buildLoopFoldIdentity({'),
+    '§11 INV: the route constructs identity via the exported, unit-tested helper',
   )
-  // Review fold F3: the fold annotation has EXACTLY one declaration + one
-  // attachment site (the success builder) — it can never silently gain a
-  // second surface while the positive pins pass.
+  assert(
+    !/resolveLongitudinalIdentity\(\{/.test(routeSrc),
+    '§11 INV: the route no longer inlines resolveLongitudinalIdentity (the helper owns it)',
+  )
+  // Independent-review fold (F3-pin-defeatable, live-mutation-proven): a
+  // literal-substring count of the identifier `loopFoldAnnotation` is
+  // defeatable by a differently-named decoy call site. Count actual
+  // computeLoopFoldAnnotation( CALL-SITE occurrences instead — exactly one.
+  // (This is strictly the same check the review's live mutation exploited
+  // and failed to detect under the old pin; verified it now WOULD detect
+  // that exact mutation via a manual re-run during this fold.)
   eq(
-    routeSrc.split('loopFoldAnnotation').length - 1,
-    2,
-    '§11 INV (F3): loopFoldAnnotation appears exactly twice (declaration + success builder)',
+    (routeSrc.match(/computeLoopFoldAnnotation\(/g) ?? []).length,
+    1,
+    '§11 INV (F3, strengthened): computeLoopFoldAnnotation( has exactly one call site',
+  )
+  // Independent-review fold: the identity/fold computation is defence-in-
+  // depth wrapped so even a future throw in the argument expression cannot
+  // reach the outer 503 catch on an already-succeeded write.
+  const declIdx = routeSrc.indexOf('let loopFoldAnnotation: ReturnType<typeof computeLoopFoldAnnotation>')
+  const nextTryIdx = declIdx === -1 ? -1 : routeSrc.indexOf('try {', declIdx)
+  // No unrelated code between the declaration and its try block — bounded
+  // gap catches an inserted statement without being brittle to comment/
+  // whitespace reflow (measured gap in the shipped file: ~73 chars of
+  // comments + one blank line).
+  assert(
+    declIdx !== -1 &&
+      nextTryIdx !== -1 &&
+      nextTryIdx - declIdx < 200 &&
+      declIdx > writerIdx,
+    '§11 INV: the fold computation has its OWN try/catch (immediately after its declaration), defence-in-depth beyond the never-throws wrapper',
   )
 
   const buildersSrc = readFileSync(
@@ -627,7 +741,7 @@ function collectKeys(x: unknown, out: Set<string>): Set<string> {
   )
   const b = fold(big)
   eq(b.envelope.n_elements, MAX_FOLD_ELEMENTS + 6, '§12 raw count reported')
-  eq(b.envelope.n_truncated, 6, '§12 truncation DISCLOSED, never silent')
+  eq(b.envelope.n_truncated_uninspected, 6, '§12 truncation DISCLOSED, never silent, named distinctly from unverified')
   eq(b.envelope.n_verified, MAX_FOLD_ELEMENTS, '§12 verified capped at MAX_FOLD_ELEMENTS')
 
   const nd = fold([el({ domains: [] })])
@@ -681,6 +795,111 @@ function collectKeys(x: unknown, out: Set<string>): Set<string> {
   console.error = savedError
   eq(out, undefined, '§14 a throwing verifier yields undefined (fail-soft)')
   assert(logged >= 1, '§14 the failure is logged (fail-honest, never silent)')
+}
+
+// ============================================================================
+// §15 — Independent-review fold: verifier-reason distinction (F1, MEDIUM)
+// ============================================================================
+{
+  // An operational verifier misconfiguration (key unavailable/malformed) is
+  // distinguished from a genuinely fake/absent signature — both are
+  // n_unverified_excluded, but only the operational class also increments
+  // n_verifier_unavailable.
+  const fake = fold([el({ signature: 'bad' })])
+  eq(fake.envelope.n_unverified_excluded, 1, '§15 a fake signature is unverified-excluded')
+  eq(fake.envelope.n_verifier_unavailable, 0, '§15 a fake signature is NOT counted as verifier-unavailable')
+
+  const unavailable = fold([el({ signature: 'unavailable' })])
+  eq(unavailable.envelope.n_unverified_excluded, 1, '§15 verifier-unavailable is also unverified-excluded')
+  eq(unavailable.envelope.n_verifier_unavailable, 1, '§15 verifier-unavailable is counted distinctly')
+
+  const malformedKey = fold([el({ signature: 'malformed-key' })])
+  eq(malformedKey.envelope.n_verifier_unavailable, 1, '§15 verifier_key_malformed also counts')
+
+  const mixed = fold([el({ signature: 'unavailable' }), el({ signature: 'bad' })])
+  eq(mixed.envelope.n_unverified_excluded, 2, '§15 mixed: both excluded')
+  eq(mixed.envelope.n_verifier_unavailable, 1, '§15 mixed: only the operational one is distinguished')
+}
+
+// ============================================================================
+// §16 — Independent-review fold: truncation is UNINSPECTED, not unverified
+// ============================================================================
+{
+  const big = Array.from({ length: MAX_FOLD_ELEMENTS + 3 }, (_, i) =>
+    el({ ref: `T${i}`, depth: 'standard' }),
+  )
+  const b = fold(big)
+  eq(b.envelope.n_truncated_uninspected, 3, '§16 truncated elements counted distinctly')
+  eq(b.envelope.n_unverified_excluded, 0, '§16 truncated elements are NOT counted as unverified (they were never checked)')
+}
+
+// ============================================================================
+// §17 — Independent-review fold: exact-duplicate signed envelopes deduped
+// ============================================================================
+{
+  // Three copies of the SAME signature (Ed25519 unforgeability ⇒ identical
+  // signature implies identical signed content) must not inflate a domain's
+  // verdicts_in past EVIDENCE_FLOOR with non-independent evidence.
+  const dup = el({ signature: 'shared-sig-A', domains: ['dikaiosyne'], circles: ['met'] })
+  const chain = [dup, dup, dup]
+  const b = fold(chain)
+  eq(b.envelope.n_verified, 1, '§17 only the FIRST copy of a duplicate signature verifies into an element')
+  eq(b.envelope.n_duplicate_excluded, 2, '§17 the two replays are counted, never silent')
+  eq(
+    b.character.domains['dikaiosyne'],
+    'insufficient_extraction',
+    '§17 a single real signal (deduped) does NOT cross the evidence floor',
+  )
+
+  // Contrast: three GENUINELY distinct signatures of the same shape DO cross
+  // the floor — proves §17 is testing dedup, not merely undercounting.
+  const distinct = [
+    el({ signature: 'sig-B1', domains: ['dikaiosyne'], circles: ['met'] }),
+    el({ signature: 'sig-B2', domains: ['dikaiosyne'], circles: ['met'] }),
+    el({ signature: 'sig-B3', domains: ['dikaiosyne'], circles: ['met'] }),
+  ]
+  const bd = fold(distinct)
+  eq(bd.envelope.n_duplicate_excluded, 0, '§17 distinct signatures are never deduped')
+  assert(
+    typeof bd.character.domains['dikaiosyne'] === 'object',
+    '§17 control: three genuinely distinct signals DO cross the floor (non-vacuous)',
+  )
+}
+
+// ============================================================================
+// §18 — Independent-review fold: buildLoopFoldIdentity (F2 test-coverage;
+// the exact route call-site pattern, directly unit-tested)
+// ============================================================================
+{
+  const resolved = buildLoopFoldIdentity({
+    credentialId: 'cred-1',
+    ownerUserId: 'owner-1',
+    agentId: 'sagereasoning:agent@v1',
+    pathAgentId: 'sagereasoning:agent@v1',
+  })
+  eq(resolved.kind, 'owner_agent_pair', '§18 resolved owner+agent ⇒ the canonical pair')
+
+  // The F1 fallback: a null resolved agentId falls back to pathAgentId.
+  const fallback = buildLoopFoldIdentity({
+    credentialId: 'cred-1',
+    ownerUserId: 'owner-1',
+    agentId: null,
+    pathAgentId: 'sagereasoning:path-agent@v1',
+  })
+  eq(fallback.kind, 'owner_agent_pair', '§18 (F1) a null resolved agentId falls back to pathAgentId')
+  if (fallback.kind === 'owner_agent_pair') {
+    eq(fallback.agent_id, 'sagereasoning:path-agent@v1', '§18 (F1) the fallback value is the path agent_id')
+  }
+
+  // Owner has NO fallback — a null owner refuses the pair join (the
+  // identity_context note names this as the boundary's own honesty limit).
+  const noOwner = buildLoopFoldIdentity({
+    credentialId: 'cred-1',
+    ownerUserId: null,
+    agentId: 'sagereasoning:agent@v1',
+    pathAgentId: 'sagereasoning:agent@v1',
+  })
+  eq(noOwner.kind, 'credential', '§18 a null owner refuses the pair join (no fallback exists)')
 }
 
 // ============================================================================

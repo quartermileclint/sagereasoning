@@ -115,7 +115,10 @@ import {
 import { assessConfidence, type CorroborationState } from './confidence-tiers'
 import { PROXIMITY_RANK } from './constants'
 import type { VirtueTrustDomain } from './types'
-import type { LongitudinalIdentity } from '../longitudinal-identity'
+import {
+  resolveLongitudinalIdentity,
+  type LongitudinalIdentity,
+} from '../longitudinal-identity'
 import {
   assignRegimeEra,
   EVIDENCE_FLOOR,
@@ -201,8 +204,27 @@ export interface LoopFoldEnvelopeReport {
   n_elements: number
   n_verified: number
   n_unverified_excluded: number
+  /** Independent-review fold: the subset of n_unverified_excluded whose
+   *  verifier reason was an OPERATIONAL misconfiguration
+   *  (verifier_key_unavailable / verifier_key_malformed — layer2-verifier.ts's
+   *  own vocabulary), distinct from a genuinely absent/fake signature. A
+   *  non-zero count here means the verifier itself may be misconfigured, not
+   *  that the submitter presented nothing real. */
+  n_verifier_unavailable: number
   n_malformed_excluded: number
-  n_truncated: number
+  /** Independent-review fold: elements past MAX_FOLD_ELEMENTS were NEVER
+   *  presented to the verifier — distinct from n_unverified_excluded (which
+   *  WAS inspected and failed). Cap-before-verify is the cost bound (Ed25519
+   *  verification is per-element CPU; capping AFTER verifying would let an
+   *  unbounded-length submission force unbounded CPU); this field makes that
+   *  bound's cost honest rather than silent. */
+  n_truncated_uninspected: number
+  /** Independent-review fold: exact-duplicate signed envelopes (identical
+   *  signature — Ed25519 unforgeability means an identical signature implies
+   *  identical signed content) are excluded from the verdict-building input so
+   *  a replayed envelope cannot inflate a domain's evidence count past
+   *  EVIDENCE_FLOOR with non-independent evidence. Counted, never silent. */
+  n_duplicate_excluded: number
   note: string
 }
 
@@ -214,6 +236,11 @@ export interface LoopFoldBlock {
    *  credential is owner+agent-bound by the 6e §A invariant, so the pair
    *  resolves whenever the store row carries both). */
   identity: LongitudinalIdentity
+  /** Independent-review fold: UNCONDITIONAL disclosure of the write
+   *  boundary's own structural invariant, so a reader can tell "the owner
+   *  lookup failed" apart from "this credential is genuinely owner-less"
+   *  without the fold having to (it cannot) distinguish the two internally. */
+  identity_context: string
   /** The fold covers the SUBMITTED chain only — no server store persists the
    *  markers (disclosed; the row-widening is a named schema decision). */
   chain_scope: string
@@ -257,6 +284,16 @@ export const LOOP_FOLD_VOCABULARY_NOTE =
   'chain; the domain’s basis counts distinguish thin history from absence. ' +
   'It is never a defaulted level.'
 
+export const LOOP_FOLD_IDENTITY_CONTEXT_NOTE =
+  'At the accreditation write boundary a write-class credential structurally ' +
+  'always carries both an owner and an agent identity (the 6e §A DB ' +
+  'invariant on api_keys_sage_assent_write_requires_owner_and_agent). If ' +
+  '`identity.kind` reads "credential" on THIS block, the owner lookup ' +
+  'FAILED at fold time (an operational anomaly, never a fail-closed refusal ' +
+  'of a write) — it is NOT the genuinely owner-less case that ' +
+  'longitudinal-identity.ts documents for consult-class credentials, which ' +
+  'cannot occur at this boundary.'
+
 export const LOOP_FOLD_CHAIN_SCOPE_NOTE =
   'Scope: the provenance chain submitted with THIS write. The CI-4 ' +
   'examination markers are signed inside each assessment and are not ' +
@@ -285,21 +322,28 @@ export const LOOP_FOLD_REPLAY_BOUND =
   'timestamp); the fold cannot distinguish fresh from replayed evidence.'
 
 export const LOOP_FOLD_CHARACTER_NOTE =
-  'Closure signals count ONLY loops whose opening verdict engaged a kathekon ' +
-  'factor (the canonical Q3 predicate — justice surface with ≥1 circle / ' +
-  'violated obligation / proximity ≤ habitual / sub-species passion). ' +
-  'Domain LEVELS fold every verified verdict’s proximity regardless of ' +
-  'engagement (the trust core’s own posture toward demonstrated evidence); ' +
-  'only the CLOSURE signals are engaged-gated. Domain folds inherit the ' +
-  'combiner’s semantics: supersession by explicit ref links, the Q4 ' +
-  'same-depth closure rule, per-domain isolation, and conflict ⇒ pause with ' +
-  'the conservative minimum — never an average.'
+  'Every verified element that is NOT a kathekon-non-engaged redirection ' +
+  '(neither closure counts nor domain levels) feeds this side: an ordinary ' +
+  '(non-redirection) verdict always feeds domain levels; a redirection feeds ' +
+  'domain levels AND closure signals only when its opening verdict engaged a ' +
+  'kathekon factor (the canonical Q3 predicate — justice surface with ≥1 ' +
+  'circle / violated obligation / proximity ≤ habitual / sub-species ' +
+  'passion). A kathekon-non-engaged redirection — the measured false-positive ' +
+  'hold class — is excluded from BOTH closure and domain-level input (see ' +
+  'instrument_calibration): it cannot set an open loop and cannot set a ' +
+  'domain’s level. Domain folds otherwise inherit the combiner’s semantics: ' +
+  'supersession by explicit ref links, the Q4 same-depth closure rule, ' +
+  'per-domain isolation, and conflict ⇒ pause with the conservative minimum ' +
+  '— never an average.'
 
 export const LOOP_FOLD_CALIBRATION_NOTE =
   'Loops whose opening verdict engaged NO kathekon factor — the measured ' +
   'false-positive hold class ("contrary; no kathekon factors detected"). ' +
-  'These are data about the instrument’s calibration, never about the ' +
-  'agent’s character; they feed no character signal and no closure rate.'
+  'These are EXCLUDED from character (both the closure signal and the ' +
+  'domain-level fold — independent-review fold, ADR-014 §3.2\'s plain-text ' +
+  'guard made structural): they are data about the instrument’s ' +
+  'calibration, never about the agent’s character, and feed no character ' +
+  'signal and no closure rate.'
 
 export const LOOP_FOLD_MEASURE_NOTE =
   'MEASURE-only: this block binds nothing — it is not an intervention input, ' +
@@ -309,9 +353,15 @@ export const LOOP_FOLD_MEASURE_NOTE =
   'use is blocked.'
 
 export const LOOP_FOLD_ENVELOPE_NOTE =
-  'Every element was Ed25519 re-verified at fold time; unverified or ' +
-  'malformed elements are excluded and counted. Signed CI-4 loops only — ' +
-  'unsigned V3 deliberation chains never enter this record.'
+  'Signed CI-4 loops only — unsigned V3 deliberation chains never enter ' +
+  'this record. Every element WITHIN THE CAP (n_verified + ' +
+  'n_unverified_excluded + n_malformed_excluded + n_duplicate_excluded) was ' +
+  'Ed25519 re-verified at fold time; elements past the cap ' +
+  '(n_truncated_uninspected) were NEVER presented to the verifier — cap-' +
+  'before-verify bounds cost (independent-review fold: this claim was ' +
+  'previously stated unconditionally, which was false on truncation). A ' +
+  'non-zero n_verifier_unavailable means the verifier itself may be ' +
+  'misconfigured, not that the submitter presented nothing real.'
 
 // ============================================================================
 // EXTRACTION HELPERS (defensive — the chain is caller-supplied)
@@ -436,19 +486,45 @@ export function computeLoopFold(
   const boundaries = opts.boundaries ?? SETTLED_REGIME_BOUNDARIES
 
   const raw: unknown[] = Array.isArray(signedAssessments) ? signedAssessments : []
-  const nTruncated = Math.max(0, raw.length - MAX_FOLD_ELEMENTS)
+  // Cap-before-verify bounds the per-element Ed25519 CPU cost (verify-then-cap
+  // would let an unbounded submission force unbounded verification work).
+  // Independent-review fold: this class is now named distinctly from
+  // n_unverified_excluded (which WAS inspected and failed) — see
+  // n_truncated_uninspected.
+  const nTruncatedUninspected = Math.max(0, raw.length - MAX_FOLD_ELEMENTS)
   const capped = raw.slice(0, MAX_FOLD_ELEMENTS)
 
   // --- 1. Per-element re-verification (envelope scope, structural). ---
   let nUnverified = 0
+  let nVerifierUnavailable = 0
   let nMalformed = 0
+  let nDuplicate = 0
+  // Independent-review fold: exact-duplicate signed envelopes (identical
+  // signature) are excluded so a replayed envelope cannot inflate a domain's
+  // evidence count past EVIDENCE_FLOOR with non-independent evidence.
+  const seenSignatures = new Set<string>()
   const elements: FoldElement[] = []
   for (let i = 0; i < capped.length; i++) {
     const el = capped[i]
     const res = verify(el, opts.now)
     if (!res.valid) {
       nUnverified++
+      // Independent-review fold: an operational verifier misconfiguration
+      // (the key is unavailable/malformed) is distinguished from a
+      // genuinely fake/absent/expired signature — the two are not the same
+      // finding for an operator watching this surface.
+      if (res.reason === 'verifier_key_unavailable' || res.reason === 'verifier_key_malformed') {
+        nVerifierUnavailable++
+      }
       continue
+    }
+    const signature = (el as SignedLayer2Assessment).signature
+    if (typeof signature === 'string') {
+      if (seenSignatures.has(signature)) {
+        nDuplicate++
+        continue
+      }
+      seenSignatures.add(signature)
     }
     const assessment = (el as SignedLayer2Assessment).assessment
     const proximity = assessment?.katorthoma_proximity
@@ -497,14 +573,17 @@ export function computeLoopFold(
   )
 
   // --- 4. The per-domain fold via combineVerificationResults (the dark S3
-  //        lib, wired). Every verified element's level enters its engaged
-  //        domains (the S1 deriver's own posture — demonstrated evidence is
-  //        counted regardless of engagement); ONLY engaged redirections carry
-  //        issuedRedirection, so the character openLoop can never be fed by
-  //        the false-positive class. ---
+  //        lib, wired). Independent-review fold (root fix, not just
+  //        disclosure): a kathekon-non-engaged redirection (the calibration
+  //        class) is EXCLUDED from the verdict-building input entirely — it
+  //        can set neither a domain's level NOR its closure signal, matching
+  //        ADR-014 §3.2's plain-text guard ("never agent character data").
+  //        An ordinary (non-redirection) verdict, or an engaged redirection,
+  //        still feeds its domains. ---
   const verdicts: VerificationVerdict[] = []
   let nNoDomain = 0
   for (const el of elements) {
+    if (isCalibrationLoop(el)) continue
     if (el.domains.length === 0) {
       nNoDomain++
       continue
@@ -565,14 +644,17 @@ export function computeLoopFold(
     schema: 'agent-loop-fold-v1',
     vocabulary_note: LOOP_FOLD_VOCABULARY_NOTE,
     identity: opts.identity,
+    identity_context: LOOP_FOLD_IDENTITY_CONTEXT_NOTE,
     chain_scope: LOOP_FOLD_CHAIN_SCOPE_NOTE,
     envelope: {
       scope: 'signed_ci4_loops_only',
       n_elements: raw.length,
       n_verified: elements.length,
       n_unverified_excluded: nUnverified,
+      n_verifier_unavailable: nVerifierUnavailable,
       n_malformed_excluded: nMalformed,
-      n_truncated: nTruncated,
+      n_duplicate_excluded: nDuplicate,
+      n_truncated_uninspected: nTruncatedUninspected,
       note: LOOP_FOLD_ENVELOPE_NOTE,
     },
     ordering: {
@@ -617,4 +699,37 @@ export function computeLoopFoldAnnotation(
     console.error('[loop-fold] computeLoopFold error:', (e as Error).message)
     return undefined
   }
+}
+
+// ============================================================================
+// ROUTE IDENTITY SEAM (independent-review fold — F2/test-coverage)
+// ============================================================================
+
+export interface LoopFoldIdentityInput {
+  credentialId: string
+  /** resolveCredentialContext's result — nullable on any resolver error. */
+  ownerUserId: string | null
+  agentId: string | null
+  /** The auth-verified path agent_id this credential is scoped to. */
+  pathAgentId: string
+}
+
+/**
+ * Build the LongitudinalIdentity for the loop-fold's ONE call site (the
+ * accreditation write boundary). PURE — extracted from route.ts so the exact
+ * expression the route uses is directly unit-testable (not merely
+ * source-grep-pinned; independent-review finding). Applies the F1 fallback:
+ * agentId falls back to the auth-verified path agent_id (owner has no such
+ * fallback — an unresolved owner honestly refuses the pair join; see
+ * identity_context on the block for why the two cases cannot be told apart
+ * here).
+ */
+export function buildLoopFoldIdentity(
+  input: LoopFoldIdentityInput,
+): LongitudinalIdentity {
+  return resolveLongitudinalIdentity({
+    credentialRef: `api_key:${input.credentialId}`,
+    ownerUserId: input.ownerUserId,
+    agentId: input.agentId ?? input.pathAgentId,
+  })
 }
