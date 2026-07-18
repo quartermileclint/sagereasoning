@@ -64,3 +64,12 @@ WHERE agent_id = 'sagereasoning:s9-loop@v1' AND virtue_domain = 'dikaiosyne';
 ---
 
 *Walk record ends. On completion, D1 in `S11-FLIP-PREREQUISITES-REGISTER.md` moves to CORRECTED (stable) and the S11a disclose-and-carry disposition is discharged.*
+
+---
+
+## ✅ WALK DISCHARGED — 2026-07-18 (founder-performed; the AI guided + verified, ran no git/Vercel/Supabase op)
+
+- **B:** commit `b2ae8d5` on `origin/main`; Vercel green; the narrowed reducer verified present on the pushed tree (`derive-trust-events.ts:208`) BEFORE any SQL ran.
+- **C1:** 1 row, `justice_floor_active = true` (pre-state as expected). **C2:** rollback saved, not run. **C3:** forward UPDATE run; post-SELECT read `justice_floor_active = false`.
+- **D1/D2:** public GET verified first-hand — `justice_capped: false`; basis "minimum-domain rule across 1 evaluated domain(s): dikaiosyne=deliberate; weighted by source confidence (min weight 0.420)"; the earned level correctly retained at `deliberate`.
+- **D3 (pending observation):** the re-latch watch at the next gen-2 close-write — record the GET result in the register D1.

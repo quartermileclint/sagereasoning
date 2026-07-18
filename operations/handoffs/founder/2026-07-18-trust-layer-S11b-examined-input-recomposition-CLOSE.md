@@ -96,3 +96,9 @@ Then push via GitHub Desktop → **Vercel green** → walk `2026-07-18-S11b-part
 ---
 
 *End of session close. The examination now reads the work itself: the same tool class that spent five days reading "contrary — no kathekon factors detected" spent this session reading circles, narrated intent, and role obligations — and closed two loops. What remains is yours: push, deploy, one row.*
+
+---
+
+## POST-CLOSE ADDENDUM — 2026-07-18: the Part-3 walk is DISCHARGED (founder-walked `code-critical` 0c-ii; AC7 + PR17)
+
+The founder performed every live step; the AI guided + verified first-hand and ran no git/Vercel/Supabase op. **Production is now intentionally NOT byte-equivalent — two deliberate standing changes:** (1) commit **`b2ae8d5`** deployed (Vercel green) — the **narrowed reducer is LIVE** on the accreditation emission path (zero-circle assessments no longer derive `justice-surface-unevaluated`; the J2 circle-present class still does), verified present on `origin/main` **before** the SQL ran (the ordering guard held); (2) the **`justice_floor_active` latch on (`sagereasoning:s9-loop@v1`, dikaiosyne) is CLEARED** — pre-state SELECT 1 row/true → rollback saved unrun → forward UPDATE → post-SELECT false. **§VERIFY green end-to-end:** the public GET reads **`justice_capped: false`**, basis "minimum-domain rule across 1 evaluated domain(s): dikaiosyne=deliberate; weighted by source confidence (min weight 0.420)" — the incorrect public signal R7 named is corrected, stably; the earned level correctly retained. **Pending observation:** the re-latch watch at the next gen-2 close-write (register D1). Rollback remains as specified in the walk doc (git revert + the saved restoring UPDATE, together). The register D1 + the walk doc carry the discharge record; AE-1's pre-condition is now fully MET (the S11b commit is pushed). **The S11 flip remains REFUSED; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's.**
