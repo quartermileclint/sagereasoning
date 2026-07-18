@@ -514,6 +514,13 @@ export default function ApiDocsPage() {
             &mdash; the safety perimeter runs on the text regardless of who computed the schema.
           </li>
           <li>
+            <strong>Trajectory overlay &amp; practice delta</strong> &mdash; credential-bearing consults
+            carry a <code>meta.trajectory</code> overlay (the presenting credential&rsquo;s windowed history)
+            with a <code>meta.trajectory.delta</code> block (<code>agent-trajectory-delta-v1</code>):
+            per-mechanism, evidence-floored, evaluative-never-predictive practice deltas. Read-and-describe
+            &mdash; the signed assessment is unchanged. MEASURE-only; weights-tier use is blocked.
+          </li>
+          <li>
             <strong>Retention (R17)</strong> &mdash; retained narratives and their paired signed assessments
             are stored encrypted at rest, for 90 days, keyed by correlation id; genuine (hard) deletion is
             available on request.
