@@ -155,11 +155,18 @@ import {
   // surfaced as an honest response overlay only.
   isTrajectoryReadEnabled,
   getTrajectoryWindow,
+  // AE-1 (ADR-014 §3.1, 2026-07-18): the practice-delta projection. Flag-gated
+  // by SUBSTRATE_TRAJECTORY_DELTA_ENABLED; UNSET → no delta block, no
+  // layer1_source write stamp, no extra select column (byte-identical). The
+  // delta consumes the SAME M7 window (no second windowed query — KG1).
+  isTrajectoryDeltaEnabled,
 } from '@/lib/substrate/agent-assessment-history-store'
 import {
   computeTrajectoryOverlay,
   type TrajectoryOverlay,
 } from '@/lib/substrate/trajectory-overlay'
+import { computeTrajectoryDelta } from '@/lib/substrate/trajectory-delta'
+import { resolveLongitudinalIdentity } from '@/lib/substrate/longitudinal-identity'
 import { mapLayer2AssessmentToEvaluatedAction } from '@/lib/substrate/sage-assent-bridge'
 import { isAcceptedAgentId } from '@/lib/substrate/trust-layer/accreditation/agent-id-vocabulary'
 
@@ -1537,6 +1544,12 @@ export async function POST(request: NextRequest) {
     // R17a: scoped to this credential's own rows; user-JWT consults carry no
     // credential_ref → no overlay (as they write no M6 row).
     let trajectoryOverlay: TrajectoryOverlay | undefined
+    // AE-1 (KG1): when the delta block resolves the credential context, the M6
+    // write block below REUSES it instead of issuing a second PK read. Null
+    // whenever the delta path did not run (any flag off / non-api_key auth) —
+    // the write block then behaves exactly as pre-AE-1.
+    let sharedCredCtx: { owner_user_id: string | null; agent_id: string | null } | null =
+      null
     if (
       isTrajectoryReadEnabled() &&
       sandwichResult.error === null &&
@@ -1553,6 +1566,46 @@ export async function POST(request: NextRequest) {
         const windowResult = await getTrajectoryWindow({ credentialRef: readCredentialRef })
         if (windowResult.ok) {
           trajectoryOverlay = computeTrajectoryOverlay(windowResult.value)
+          // AE-1 (ADR-014 §3.1): the practice-delta block, attached ONLY when
+          // SUBSTRATE_TRAJECTORY_DELTA_ENABLED is on (absent ⇒ the overlay is
+          // byte-identical to M7). Reuses the SAME window (no second windowed
+          // query); adds ONE flag-gated indexed PK read (resolveCredentialContext
+          // — the M6 write path's own precedent) so the identity module can
+          // resolve the canonical (owner_user_id, agent_id) pair. Pure + MEASURE:
+          // the block recommends nothing and the engine assessment is untouched.
+          // Fail-honest: a context/compute failure omits the delta, never the
+          // response (mirrors the overlay posture).
+          if (isTrajectoryDeltaEnabled()) {
+            try {
+              let deltaOwnerUserId: string | null = null
+              let deltaAgentId: string | null = null
+              if (apiKey && apiKey.valid) {
+                sharedCredCtx = await resolveCredentialContext(apiKey.api_key_id)
+                deltaOwnerUserId = sharedCredCtx.owner_user_id
+                deltaAgentId =
+                  sharedCredCtx.agent_id !== null && isAcceptedAgentId(sharedCredCtx.agent_id)
+                    ? sharedCredCtx.agent_id
+                    : null
+              } else if (installAuth && installAuth.valid) {
+                deltaOwnerUserId = installAuth.owner_user_id
+              }
+              trajectoryOverlay.delta = computeTrajectoryDelta(windowResult.value, {
+                identity: resolveLongitudinalIdentity({
+                  credentialRef: readCredentialRef,
+                  ownerUserId: deltaOwnerUserId,
+                  agentId: deltaAgentId,
+                }),
+                layer1Sources: windowResult.value.readRows?.map(
+                  (r) => r.layer1_source ?? null,
+                ),
+              })
+            } catch (deltaErr) {
+              console.warn(
+                '[/api/reason] trajectory delta computation failed (delta omitted, response unaffected):',
+                deltaErr instanceof Error ? deltaErr.message : deltaErr,
+              )
+            }
+          }
         } else {
           console.warn(
             '[/api/reason] trajectory window read failed (overlay omitted, response unaffected):',
@@ -1587,7 +1640,10 @@ export async function POST(request: NextRequest) {
         // The sr_live_ credential's operator + declared agent identity live on its
         // api_keys row (validateApiKey does not surface them). One gated, indexed
         // PK read — only when the flag is on, so flag-off adds no DB read.
-        const credCtx = await resolveCredentialContext(apiKey.api_key_id)
+        // AE-1 (KG1): when the delta block already resolved this consult's
+        // context, reuse it — never two PK reads for one consult.
+        const credCtx =
+          sharedCredCtx ?? (await resolveCredentialContext(apiKey.api_key_id))
         ownerUserId = credCtx.owner_user_id
         declaredAgentId =
           credCtx.agent_id !== null && isAcceptedAgentId(credCtx.agent_id)
@@ -1625,6 +1681,22 @@ export async function POST(request: NextRequest) {
           depthTier: depth,
           surface: 'api_reason',
           action: evaluatedAction,
+          // AE-1 (election E-AE1-1): the Layer-1 provenance stamp — passed ONLY
+          // when SUBSTRATE_TRAJECTORY_DELTA_ENABLED is on (the activation walk
+          // applies the layer1_source migration BEFORE the flag; flag-off sends
+          // no such column key, so a pre-migration deployment cannot PGRST204).
+          // TRUE provenance, not meta.layer1_source's flag-gated emission:
+          // preExtractedLayer1Schema is set on BOTH supplied paths — the plugin
+          // path (which supplies its schema regardless of the key-path flag)
+          // and the flag-gated key path — and whenever it is set, server-side
+          // Layer-1 extraction was skipped. 'supplied' iff set.
+          ...(isTrajectoryDeltaEnabled()
+            ? {
+                layer1Source: (preExtractedLayer1Schema !== undefined
+                  ? 'supplied'
+                  : 'server') as 'supplied' | 'server',
+              }
+            : {}),
         })
         if (!trajectoryWrite.ok) {
           console.warn(

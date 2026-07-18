@@ -92,6 +92,33 @@ export function isTrajectorySweepEnabled(): boolean {
   return process.env[TRAJECTORY_SWEEP_ENV_VAR] === 'true'
 }
 
+// ============================================================================
+// FLAG (SUBSTRATE_TRAJECTORY_DELTA_ENABLED) — UNSET = byte-identical, no delta
+// ============================================================================
+//
+// AE-1 (ADR-014 §3.1, 2026-07-18). Gates THREE seams as one unit: (a) the
+// layer1_source column in the windowed-read select (the column exists only
+// after the founder-walked migration — the activation walk applies the
+// migration BEFORE the flag, so flag-off never queries it); (b) the write-side
+// layer1_source stamp (the route passes the field only flag-on, so a flag-off
+// write row carries no unknown column key — the PGRST204
+// build-dark-migrate-later class is structurally avoided); (c) the
+// meta.trajectory.delta response projection. UNSET ⇒ all three absent ⇒
+// byte-identical to pre-AE-1. NOTE: the delta consumes the M7 window, so
+// activation requires SUBSTRATE_TRAJECTORY_READ_ENABLED to already be on —
+// this flag alone changes nothing.
+
+export const TRAJECTORY_DELTA_ENV_VAR = 'SUBSTRATE_TRAJECTORY_DELTA_ENABLED'
+
+/** True only when the flag is the exact string 'true'. Unset/other → no delta
+ *  select-column, no write stamp, no response block (byte-identical). Read at
+ *  call time (mirrors the sibling flags); the pure delta module itself
+ *  (trajectory-delta.ts) reads no env — gating happens at the store/route
+ *  seams so the computation stays unit-testable. */
+export function isTrajectoryDeltaEnabled(): boolean {
+  return process.env[TRAJECTORY_DELTA_ENV_VAR] === 'true'
+}
+
 // D17 prior-state windowing defaults (progression-delta.md §"Window parameters").
 export const TRAJECTORY_DEFAULT_WINDOW_DAYS = 90
 export const TRAJECTORY_DEFAULT_MAX_INSTANCES = 30
@@ -118,6 +145,14 @@ export interface AssessmentHistoryInput {
   depthTier: string | null
   surface: string
   action: EvaluatedAction
+  /** AE-1 (election E-AE1-1): the Layer-1 provenance of THIS consult
+   *  ('supplied' = caller-provided l1_supply extraction; 'server' =
+   *  server-side extraction). OPTIONAL — the route passes it ONLY when
+   *  SUBSTRATE_TRAJECTORY_DELTA_ENABLED is on (and the migration has landed);
+   *  absent ⇒ the insert row carries NO layer1_source key, so a flag-off
+   *  deployment never sends an unknown column (the PGRST204
+   *  build-dark-migrate-later class). */
+  layer1Source?: 'supplied' | 'server'
 }
 
 /** The flat agent_assessment_history row shape (mirrors the migration). */
@@ -139,13 +174,20 @@ export interface AssessmentHistoryRow {
   ruling_faculty_state: string
   skill_id: string
   candidates_considered: number
+  /** AE-1: present ONLY when the input supplied it (see AssessmentHistoryInput
+   *  — flag-gated at the route). Optional so a flag-off insert row is
+   *  byte-identical to pre-AE-1 (no unknown column key sent). */
+  layer1_source?: 'supplied' | 'server'
 }
 
 /** The columns the M7 windowed read selects — the EvaluatedAction-shaped
  *  projection plus the identity/time columns the aggregator + overlay need.
  *  Distinct from AssessmentHistoryRow (the write shape) because the read needs
  *  created_at (→ evaluated_at) and the identity columns; it does NOT need
- *  owner_user_id / depth_tier / surface / retain_until. */
+ *  owner_user_id / surface / retain_until. AE-1 additions: depth_tier
+ *  (persisted since M6; now read — AE-3's future input) and, flag-gated,
+ *  layer1_source (the provenance-mix input; optional — absent when the delta
+ *  flag is off, since the column may predate the migration). */
 export interface AssessmentHistoryReadRow {
   correlation_id: string
   credential_ref: string
@@ -162,6 +204,8 @@ export interface AssessmentHistoryReadRow {
   ruling_faculty_state: string
   skill_id: string
   candidates_considered: number
+  depth_tier: string | null
+  layer1_source?: 'supplied' | 'server' | null
 }
 
 /** The result of one windowed trajectory read (M7). `actions` are OLDEST-FIRST
@@ -175,14 +219,33 @@ export interface TrajectoryWindow {
   maxInstances: number
   earliest: string | null
   latest: string | null
+  /** AE-1: the raw read rows, OLDEST-FIRST, index-aligned with `actions` —
+   *  the seam for consumers needing columns EvaluatedAction does not carry
+   *  (depth_tier for AE-3; layer1_source for the delta provenance mix).
+   *  OPTIONAL so existing constructors/tests are unaffected; the overlay
+   *  ignores it (its output is byte-identical). */
+  readRows?: AssessmentHistoryReadRow[]
 }
 
 /** The select column list for the windowed read (one indexed query — KG1
- *  latency budget; uses idx_aah_credential_time). */
+ *  latency budget; uses idx_aah_credential_time). AE-1 added depth_tier (a
+ *  since-M6 persisted column — safe unconditionally). */
 const TRAJECTORY_SELECT_COLS =
   'correlation_id, credential_ref, agent_id, created_at, receipt_id, proximity, ' +
   'is_kathekon, kathekon_quality, passions_detected, virtue_domains_engaged, ' +
-  'oikeiosis_met, oikeiosis_stage, ruling_faculty_state, skill_id, candidates_considered'
+  'oikeiosis_met, oikeiosis_stage, ruling_faculty_state, skill_id, candidates_considered, ' +
+  'depth_tier'
+
+/** AE-1: the windowed-read select, with layer1_source included ONLY flag-on
+ *  (the column exists only after the founder-walked migration; the activation
+ *  walk orders migration-BEFORE-flag. Flipping the flag pre-migration does not
+ *  500 — the read fails honest and the route omits the overlay — but the walk
+ *  doc forbids that order). Exported for the battery's byte-identity pin. */
+export function trajectorySelectCols(): string {
+  return isTrajectoryDeltaEnabled()
+    ? TRAJECTORY_SELECT_COLS + ', layer1_source'
+    : TRAJECTORY_SELECT_COLS
+}
 
 // ============================================================================
 // PURE MAPPER (no I/O)
@@ -191,7 +254,10 @@ const TRAJECTORY_SELECT_COLS =
 /** Map an AssessmentHistoryInput to an insert row. PURE.
  *  KG7: passions_detected is passed as the array directly; virtue_domains_engaged
  *  is spread into a fresh JS array (Postgres text[]). created_at / retain_until /
- *  id are server defaults — not set here. */
+ *  id are server defaults — not set here. AE-1: the layer1_source KEY is present
+ *  IFF the input supplied it (flag-gated at the route) — an absent key means
+ *  PostgREST never sees the column name, so a pre-migration deployment cannot
+ *  hit PGRST204 (the build-dark-migrate-later class). */
 export function assessmentHistoryInputToRow(
   input: AssessmentHistoryInput,
 ): AssessmentHistoryRow {
@@ -214,6 +280,9 @@ export function assessmentHistoryInputToRow(
     ruling_faculty_state: a.ruling_faculty_state,
     skill_id: a.skill_id,
     candidates_considered: a.candidates_considered,
+    ...(input.layer1Source !== undefined
+      ? { layer1_source: input.layer1Source }
+      : {}),
   }
 }
 
@@ -283,8 +352,18 @@ const PG_UNIQUE_VIOLATION = '23505'
  *  and is surfaced as ok:false (R17c genuine deletion stays verifiable). */
 function isMissingTableError(error: { code?: string; message?: string } | null): boolean {
   if (!error) return false
-  if (error.code === '42P01' || error.code === 'PGRST205') return true
+  // AE-1 hardening (the standing missing-table-benign lesson): a missing
+  // COLUMN is NEVER benign. Postgres undefined_column (42703, "column ... does
+  // not exist") and PostgREST's PGRST204 ("Could not find the '...' column of
+  // '...' in the schema cache") would otherwise match the table-ish regexes
+  // below and FALSE-BENIGN — the windowed read would serve an EMPTY window
+  // (a silent fresh-start lie on the overlay) instead of surfacing ok:false
+  // (fail-honest: the route logs and omits the overlay). This matters for the
+  // flag-before-migration misordering on the flag-gated layer1_source select.
+  if (error.code === '42703' || error.code === 'PGRST204') return false
   const msg = error.message ?? ''
+  if (/column/i.test(msg)) return false
+  if (error.code === '42P01' || error.code === 'PGRST205') return true
   return /does not exist|could not find the table|schema cache/i.test(msg)
 }
 
@@ -528,7 +607,7 @@ export async function getTrajectoryWindow(
     const cutoffIso = new Date(nowMs - windowDays * 86_400_000).toISOString()
     const { data, error } = await client
       .from(TABLE)
-      .select(TRAJECTORY_SELECT_COLS)
+      .select(trajectorySelectCols())
       .eq('credential_ref', opts.credentialRef) // R17a — subject credential only
       .gte('created_at', cutoffIso)
       .order('created_at', { ascending: false })
@@ -549,7 +628,19 @@ export async function getTrajectoryWindow(
     const actions = ordered.map(assessmentRowToEvaluatedAction)
     const earliest = ordered.length > 0 ? ordered[0].created_at : null
     const latest = ordered.length > 0 ? ordered[ordered.length - 1].created_at : null
-    return { ok: true, value: { actions, windowDays, maxInstances, earliest, latest } }
+    return {
+      ok: true,
+      value: {
+        actions,
+        windowDays,
+        maxInstances,
+        earliest,
+        latest,
+        // AE-1: the raw rows ride along, index-aligned with `actions`, for the
+        // delta projection's depth_tier / layer1_source consumers.
+        readRows: ordered,
+      },
+    }
   } catch (e) {
     return { ok: false, error: `getTrajectoryWindow threw: ${(e as Error).message}` }
   }

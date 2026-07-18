@@ -416,6 +416,7 @@ async function main(): Promise<void> {
     ruling_faculty_state: 'assenting',
     skill_id: 'api_reason',
     candidates_considered: 1,
+    depth_tier: null, // AE-1: depth_tier joined the read projection (AE-3 seam)
     ...o,
   })
   {

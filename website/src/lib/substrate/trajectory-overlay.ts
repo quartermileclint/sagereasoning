@@ -43,6 +43,7 @@
 import type { KatorthomaProximityLevel } from './trust-layer/types/accreditation'
 import { computeWindowSnapshot } from './trust-layer/evaluation-window/window-aggregator'
 import type { TrajectoryWindow } from './agent-assessment-history-store'
+import type { TrajectoryDeltaBlock } from './trajectory-delta'
 import {
   toCanonicalDirectionOfTravel,
   type CanonicalDirectionOfTravel,
@@ -84,6 +85,13 @@ export interface TrajectoryOverlay {
   /** Always 'lower_bound' — is_kathekon=false is the union of not-appropriate OR
    *  undecidable (M6 bridge narrowing), so the rate floors rather than measures. */
   kathekon_rate_basis: 'lower_bound'
+  /** AE-1 (ADR-014 §3.1): the per-mechanism practice-delta block — PRESENT ONLY
+   *  when SUBSTRATE_TRAJECTORY_DELTA_ENABLED is on (the route attaches it);
+   *  absent ⇒ this overlay is byte-identical to agent-trajectory-overlay-v1 as
+   *  shipped at M7 (the schema tag is unchanged because the addition is purely
+   *  additive-optional). Computed by the ONE shared delta module
+   *  (trajectory-delta.ts) — never a second derivation. */
+  delta?: TrajectoryDeltaBlock
 }
 
 const MS_PER_DAY = 86_400_000
