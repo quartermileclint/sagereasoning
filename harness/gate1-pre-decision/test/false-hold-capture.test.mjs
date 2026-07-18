@@ -114,8 +114,19 @@ console.log("\n§1 — the pure projection + record builder + fail-soft append")
     actionText: "x".repeat(400),
     carriedPrior: true,
     nowIso: "2026-07-12T00:00:00.000Z",
+    inputClass: "composed",
+    regime: "at-action-v2-composed",
+    composedChars: 4321,
   });
-  check("§1.11 record schema v1", rec.schema === "false-hold-record-v1");
+  check("§1.11 record schema v2 (S11b — regime-marked)", rec.schema === "false-hold-record-v2");
+  check("§1.11b record carries the ADR-014 regime mark + input class", rec.extractionRegime === "at-action-v2-composed" && rec.inputClass === "composed" && rec.composedChars === 4321);
+  check(
+    "§1.11c v2 fields default honestly when absent (never fabricated)",
+    (() => {
+      const r2 = buildFalseHoldRecord({ verdict: fpVerdict, sessionId: "s", tool: "Edit", depth: "standard", loopEvent: "opened", actionText: "a", carriedPrior: false, nowIso: "2026-07-12T00:00:00.000Z" });
+      return r2.inputClass === "unknown" && r2.extractionRegime === "unknown" && r2.composedChars === null;
+    })(),
+  );
   check("§1.12 record capturedAt honored", rec.capturedAt === "2026-07-12T00:00:00.000Z");
   check("§1.13 record session sanitized", rec.session === "sess_one");
   check("§1.14 record loopEvent + tool + depth", rec.loopEvent === "opened" && rec.tool === "Edit" && rec.depth === "standard");
@@ -138,7 +149,7 @@ console.log("\n§1 — the pure projection + record builder + fail-soft append")
   const dir = mkdtempSync(join(tmpdir(), "fhc-unit-"));
   const okWrite = appendFalseHoldRecord({ stateDir: dir }, rec);
   const readBack = existsSync(falseHoldRecordPath({ stateDir: dir })) ? readFileSync(falseHoldRecordPath({ stateDir: dir }), "utf8") : "";
-  check("§1.20 append round-trips one JSONL line", okWrite === true && readBack.trim().split("\n").length === 1 && JSON.parse(readBack.trim()).schema === "false-hold-record-v1");
+  check("§1.20 append round-trips one JSONL line", okWrite === true && readBack.trim().split("\n").length === 1 && JSON.parse(readBack.trim()).schema === "false-hold-record-v2");
 }
 
 // ============================================================================

@@ -375,7 +375,14 @@ const verifyFail = () => ({ valid: false as const, reason: 'bad_signature' })
 // Worst-justice-outcome mapping (violated > unevaluated > indeterminate > met).
 ;(() => {
   eq(deriveWorstJusticeOutcome([mkSigned('deliberate', ['dikaiosyne'], [{ status: 'met' }, { status: 'violated' }]).assessment])?.eventType, 'justice-surface-violated', 'justice: violated wins over met')
-  eq(deriveWorstJusticeOutcome([mkSigned('deliberate', ['dikaiosyne'], []).assessment])?.eventType, 'justice-surface-unevaluated', 'justice: dikaiosyne engaged + no obligation ⇒ unevaluated')
+  // S11b NARROWING (R11, 2026-07-18) — this pin MOVED: a dikaiosyne tag with
+  // ZERO identified circles is no longer a justice surface (the F2 exclusion
+  // clause; pre-narrowing this derived justice-surface-unevaluated and latched
+  // the public s9-loop cap off ordinary file writes).
+  eq(deriveWorstJusticeOutcome([mkSigned('deliberate', ['dikaiosyne'], []).assessment]), null, 'S11b: dikaiosyne engaged + ZERO circles ⇒ NO justice event (narrowed)')
+  // …while a circle IDENTIFIED but never evaluated (the U2/J2 marketing-email
+  // class) STILL derives unevaluated — the class ADR-010 exists for.
+  eq(deriveWorstJusticeOutcome([mkSigned('deliberate', ['dikaiosyne'], [{}]).assessment])?.eventType, 'justice-surface-unevaluated', 'S11b: circle present + no assessment ⇒ unevaluated (J2 KEPT)')
   eq(deriveWorstJusticeOutcome([mkSigned('deliberate', ['phronesis'], []).assessment]), null, 'justice: no dikaiosyne + no obligation ⇒ no justice event')
   eq(deriveWorstJusticeOutcome([mkSigned('deliberate', ['dikaiosyne'], [{ status: 'indeterminate' }]).assessment])?.eventType, 'justice-surface-indeterminate', 'justice: indeterminate mapping')
 })()
@@ -457,8 +464,9 @@ import { makeFakeSupabase } from './fake-supabase'
   const fake = makeFakeSupabase()
   const batch = deriveCredentialAndJusticeEvents({
     agentId: 'ns:a@v1', ownerUserId: 'owner-1', credentialRef: 'api_key:k',
-    // dikaiosyne engaged + NO circle obligation ⇒ justice-surface-unevaluated.
-    signedAssessments: [mkSigned('principled', ['phronesis', 'dikaiosyne'], [])],
+    // dikaiosyne engaged + a circle IDENTIFIED but never evaluated (the J2 form
+    // — S11b: the zero-circle form no longer derives) ⇒ justice-surface-unevaluated.
+    signedAssessments: [mkSigned('principled', ['phronesis', 'dikaiosyne'], [{}])],
     now: at(T0), correlationId: 'w1', verify: verifyOk,
   })
   const r1 = await emitTrustEvents(batch, fake.client)

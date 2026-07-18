@@ -46,6 +46,7 @@ import {
   classifyObservation,
   isHoldLoopEvent,
   HOLD_LOOP_EVENTS,
+  NARROWED_ARM_BOUNDS,
   type KathekonEngagementSignals,
 } from '../kathekon-engagement'
 
@@ -86,11 +87,19 @@ console.log('\n§1 — the four Q3 arms, independent')
   check('§1.1 met justice surface ⇒ justiceSurfacePresent + engaged', eMet.justiceSurfacePresent && eMet.engaged)
   check('§1.1 met is not read as a violation', !eMet.violatedObligation)
 
-  // Arm 1 — unevaluated justice surface (the marketing-email class: dikaiosyne
-  // engaged but no obligation evaluated) is STILL a justice surface present.
-  const uneval = sig({ virtueDomainsEngaged: ['dikaiosyne'], obligationStatuses: [] })
-  const eUneval = assessKathekonEngagement(uneval)
-  check('§1.2 unevaluated justice surface ⇒ justiceSurfacePresent + engaged', eUneval.justiceSurfacePresent && eUneval.engaged)
+  // Arm 1 NARROWED (R11, S11b 2026-07-18): a dikaiosyne tag with ZERO identified
+  // circles is NOT a justice surface — the exclusion clause governs. This pin
+  // INVERTED at the narrowing (it previously asserted engaged — the RA-1-F2
+  // vacuity class, 129/130 of the frozen window).
+  const zeroCircle = sig({ virtueDomainsEngaged: ['dikaiosyne'], obligationStatuses: [] })
+  const eZero = assessKathekonEngagement(zeroCircle)
+  check('§1.2 zero-circle dikaiosyne tag ⇒ NOT a justice surface (R11 narrowed)', !eZero.justiceSurfacePresent && !eZero.engaged)
+
+  // …while unevaluated WITH an identified circle (the U2/J2 marketing-email
+  // class: a circle identified, its obligation never evaluated) STILL fires.
+  const unevalWithCircle = sig({ virtueDomainsEngaged: ['dikaiosyne'], obligationStatuses: [null] })
+  const eUneval = assessKathekonEngagement(unevalWithCircle)
+  check('§1.2b circle-present unevaluated (U2/J2) ⇒ justiceSurfacePresent + engaged (KEPT)', eUneval.justiceSurfacePresent && eUneval.engaged)
 
   // Arm 2 — a violated obligation.
   const violated = sig({ virtueDomainsEngaged: ['dikaiosyne'], obligationStatuses: ['violated'] })
@@ -160,7 +169,9 @@ console.log('\n§3 — the non-vacuity proof (positive controls ⇒ correct_hold
   // Each arm independently produces a correct hold when it opens a loop.
   const armHolds: { label: string; s: KathekonEngagementSignals }[] = [
     { label: 'justice-met', s: sig({ virtueDomainsEngaged: ['dikaiosyne'], obligationStatuses: ['met'] }) },
-    { label: 'justice-unevaluated', s: sig({ virtueDomainsEngaged: ['dikaiosyne'], obligationStatuses: [] }) },
+    // R11: the unevaluated positive control now carries an IDENTIFIED circle
+    // (the zero-circle form moved to the false-positive side — §7.1).
+    { label: 'justice-unevaluated-with-circle (J2)', s: sig({ virtueDomainsEngaged: ['dikaiosyne'], obligationStatuses: [null] }) },
     { label: 'reflexive-proximity', s: sig({ proximity: 'reflexive' }) },
     { label: 'habitual-proximity', s: sig({ proximity: 'habitual' }) },
     { label: 'sub-species-passion', s: sig({ subSpeciesPassions: ['oknos'] }) },
@@ -248,7 +259,11 @@ console.log('\n§5 — the adapter + the agreement-with-engine pin')
   for (const fixture of [
     assess('deliberate', ['dikaiosyne'], ['violated'], []),
     assess('deliberate', ['dikaiosyne'], ['met'], []),
+    // Zero circles: after the S11b twin narrowing (predicate + reducer) BOTH
+    // sides read no-justice-surface — the agreement pin proves they moved together.
     assess('deliberate', ['dikaiosyne'], [], []),
+    // Circle present, no assessment (J2): BOTH sides read unevaluated-present.
+    assess('deliberate', ['dikaiosyne'], [null], []),
     assess('deliberate', ['phronesis'], ['met'], []), // met but NOT dikaiosyne-engaged ⇒ no justice surface
     assess('deliberate', ['phronesis'], [], []),
   ]) {
@@ -291,6 +306,58 @@ console.log('\n§6 — boundary / robustness')
   // A hold with mixed arms: reflexive proximity AND a violated obligation ⇒ engaged, both arms named.
   const both = assessKathekonEngagement(sig({ proximity: 'reflexive', virtueDomainsEngaged: ['dikaiosyne'], obligationStatuses: ['violated'] }))
   check('§6.8 mixed arms both fire', both.proximityAtOrBelowHabitual && both.violatedObligation && both.justiceSurfacePresent && both.engaged)
+}
+
+// ============================================================================
+console.log('\n§7 — the R11 narrowing, both directions + the R13 visibility')
+// ============================================================================
+{
+  // §7.1 THE NARROWED DIRECTION — the live-129 class: dikaiosyne tagged (the
+  // computeVirtueDomains is_kathekon!==null tag), ZERO circles, deliberate.
+  // Pre-narrowing this read correct_hold (the RA-1-F2 vacuity); now false_positive.
+  const live129 = sig({ virtueDomainsEngaged: ['phronesis', 'dikaiosyne'], obligationStatuses: [] })
+  const c1 = classifyObservation(live129, 'opened')
+  check('§7.1 dikaiosyne-tagged zero-circle OPEN ⇒ false_positive (the live-129 class, narrowed)',
+    c1.classification === 'false_positive' && !c1.engagement.justiceSurfacePresent)
+
+  // §7.2 THE KEPT DIRECTION — a circle identified, obligation never evaluated
+  // (U2/J2). The narrowing removes ONLY the zero-circle case.
+  const j2 = sig({ virtueDomainsEngaged: ['dikaiosyne'], obligationStatuses: [null] })
+  check('§7.2 circle-present unevaluated OPEN ⇒ correct_hold (U2/J2 KEPT)',
+    classifyObservation(j2, 'opened').classification === 'correct_hold')
+
+  // §7.3 violated / met / indeterminate all inherently carry a circle — unchanged.
+  for (const st of ['violated', 'met', 'indeterminate'] as const) {
+    check(`§7.3 ${st} OPEN ⇒ correct_hold (inherently circle-carrying)`,
+      classifyObservation(sig({ virtueDomainsEngaged: ['dikaiosyne'], obligationStatuses: [st] }), 'opened').classification === 'correct_hold')
+  }
+
+  // §7.4 R13 — the bounds ride EVERY output, hold or not, and name the classes.
+  for (const [label, cls] of [['hold', c1], ['not-a-hold', classifyObservation(live129, 'none')]] as const) {
+    check(`§7.4 bounds present on ${label} output (R13 visibility)`,
+      !!cls.bounds && cls.bounds === NARROWED_ARM_BOUNDS)
+  }
+  check('§7.5 the A2 bound names the omission class + the indistinguishability',
+    NARROWED_ARM_BOUNDS.a2Omission.includes('omitted') &&
+    NARROWED_ARM_BOUNDS.a2Omission.includes('cannot distinguish') &&
+    NARROWED_ARM_BOUNDS.a2Omission.includes('survives the S11b input recomposition'))
+  check('§7.6 the mention-conversion bound is disclosed (the S11b battery C-class finding)',
+    NARROWED_ARM_BOUNDS.mentionConversion.includes('QUOTED/mentioned') &&
+    NARROWED_ARM_BOUNDS.mentionConversion.includes('correct_hold'))
+
+  // §7.7 THE A2 BLINDNESS AS A PINNED FACT: a genuinely party-less act and an
+  // omitted-harm narration produce the SAME wire signals — so the narrowed arm
+  // returns IDENTICAL classifications for both. This is the structural residual,
+  // demonstrated, not implied. (The two fixtures are one object shape on purpose:
+  // there is nothing on the wire to tell them apart.)
+  const partyLessAct = sig({ virtueDomainsEngaged: ['phronesis', 'dikaiosyne'], obligationStatuses: [] })
+  const omittedHarmNarration = sig({ virtueDomainsEngaged: ['phronesis', 'dikaiosyne'], obligationStatuses: [] })
+  const r1 = classifyObservation(partyLessAct, 'opened')
+  const r2 = classifyObservation(omittedHarmNarration, 'opened')
+  check('§7.7 A2: party-less and omission-class holds are INDISTINGUISHABLE (both false_positive)',
+    r1.classification === 'false_positive' &&
+    r2.classification === 'false_positive' &&
+    JSON.stringify(r1) === JSON.stringify(r2))
 }
 
 // ── restore env + report ────────────────────────────────────────────────────

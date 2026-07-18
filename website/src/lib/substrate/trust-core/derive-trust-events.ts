@@ -195,9 +195,17 @@ export function deriveWorstJusticeOutcome(
       }
     }
 
-    // Unevaluated: dikaiosyne engaged but NO circle carried an obligation
-    // assessment at all — the obligation was never evaluated.
-    if (dikaiosyneEngaged && statuses.length === 0) sawUnevaluated = true
+    // Unevaluated (NARROWED S11b 2026-07-18, per R11 + the register D1/D3): a
+    // justice surface requires AT LEAST ONE IDENTIFIED CIRCLE. The zero-circle
+    // case — a dikaiosyne tag resting solely on is_kathekon===false (the
+    // computeVirtueDomains `is_kathekon !== null` tag, which fires on
+    // essentially every examined action) — is NOT a justice surface (the F2
+    // exclusion-clause ruling) and no longer emits justice-surface-unevaluated;
+    // pre-narrowing it latched a public deliberate cap off ordinary file writes
+    // (the s9-loop cap, corrected in the same S11b walk). The branch STILL
+    // fires when circles EXIST but none carries an obligation_assessment — the
+    // U2/J2 marketing-email class the whole ADR-010 arc exists for.
+    if (dikaiosyneEngaged && circles.length >= 1 && statuses.length === 0) sawUnevaluated = true
   }
 
   if (sawViolated) return { eventType: 'justice-surface-violated', obligationStatus: 'violated' }

@@ -470,6 +470,174 @@ mode = "ok";
   check("17 calling: orientation names the purpose", renderPurposeOrientation("serve x", "config").includes("serve x"));
 }
 
+// ── 18. S11b — the examined-input recomposition (composer purity + hook wire) ──
+// The S11a diagnosis: the at-action input was starved by composition (Write
+// content discarded; Edit truncated to 200 chars). These legs pin the remedy:
+// composed input carries intent + payload; the sensitive-path denylist and
+// token redaction hold at the WIRE (the captured POST body — what actually
+// egresses); dedup is payload-content-hashed (E3); the lean knob (E4) is v1
+// byte-identical; capture records carry the ADR-014 regime mark.
+{
+  const AC = await import("../claude-code/hooks/lib/action-composer.mjs");
+  const { writeFileSync: wfs, mkdtempSync: mkd, readFileSync: rfs } = await import("node:fs");
+
+  // The regime version-mark is settled ONCE here (ADR-014).
+  check("18 regime: composed mark", AC.EXTRACTION_REGIME_COMPOSED === "at-action-v2-composed");
+  check("18 regime: lean mark", AC.EXTRACTION_REGIME_LEAN === "at-action-v1-lean");
+
+  // Denylist — mandatory, precise, append-only.
+  check("18 denylist: .env.local", AC.isSensitivePath("/repo/.env.local"));
+  check("18 denylist: .env.development.local", AC.isSensitivePath("/repo/website/.env.development.local"));
+  check("18 denylist: settings.local.json.bak (the 2026-07-17 incident class)", AC.isSensitivePath("/u/p/.claude/settings.local.json.bak"));
+  check("18 denylist: id_rsa under .ssh", AC.isSensitivePath("/home/u/.ssh/id_rsa"));
+  check("18 denylist: .pem", AC.isSensitivePath("/certs/server.pem"));
+  check("18 denylist: AWS credentials", AC.isSensitivePath("/home/u/.aws/credentials"));
+  check("18 denylist: precision — practice-credential.ts is NOT sensitive (RA-1-F3)", !AC.isSensitivePath("/repo/website/src/lib/practice-credential.ts"));
+  check("18 denylist: precision — environmental-context.json is NOT sensitive", !AC.isSensitivePath("/repo/website/src/data/environmental-context.json"));
+  check(
+    "18 denylist: additions EXTEND, defaults survive (append-only)",
+    AC.isSensitivePath("/x/custom-vault.cfg", ["custom-vault\\.cfg$"]) && AC.isSensitivePath("/repo/.env", ["custom-vault\\.cfg$"]),
+  );
+  check("18 denylist: a malformed addition is skipped, defaults still apply", AC.isSensitivePath("/repo/.env", ["("]) === true);
+
+  // Redaction — applied to every composed part before egress.
+  check("18 redact: sr_ credential", AC.redactSecrets("x sr_prac_abc123def y") === "x [redacted:sr-credential] y");
+  check("18 redact: jwt", AC.redactSecrets("t eyJhbGciOiJIUzI1NiIs.eyJzdWIiOiIx.dozjgNryP4J3 z").includes("[redacted:jwt]"));
+  check("18 redact: bearer value", /bearer \[redacted\]/i.test(AC.redactSecrets("Authorization: Bearer abc.def.ghi")));
+  check("18 redact: a full git SHA (40 hex) SURVIVES — documented trade", AC.redactSecrets("commit 0123456789abcdef0123456789abcdef01234567").includes("0123456789abcdef"));
+  check("18 redact: 64-hex key material is caught", AC.redactSecrets("k ".concat("ab".repeat(32))).includes("[redacted:hex]"));
+
+  // Frame-quote stripping — the contamination-loop guard on the intent channel.
+  check(
+    "18 strip: paragraphs quoting a harness frame are dropped",
+    AC.stripFrameBlocks("I will update the terms.\n\n[SageReasoning Gate 2 — at-action examination]\n• circles: local_community\n\nThen verify.") ===
+      "I will update the terms.\n\nThen verify.",
+  );
+
+  // Composition shape + the ≤4800 budget (truncation-safe INSIDE the composer).
+  const big = AC.composeAction({ toolName: "Write", toolInput: { file_path: "/r/big.md", content: "P".repeat(60000) }, transcriptPath: "", mode: "composed" });
+  check("18 budget: a 60k-char Write composes to ≤ 4800", big.text.length <= 4800, `len=${big.text.length}`);
+  check("18 budget: head/tail excerpt marked honestly", big.text.includes("[middle omitted:"));
+  const e1 = AC.composeAction({ toolName: "Edit", toolInput: { file_path: "/r/a.ts", old_string: "OLDPART", new_string: "NEWPART" }, transcriptPath: "", mode: "composed" });
+  check("18 compose: Edit carries BOTH sides of the change", e1.text.includes("[BEFORE]") && e1.text.includes("OLDPART") && e1.text.includes("[AFTER]") && e1.text.includes("NEWPART"));
+  check("18 compose: summary is the v1 lean line (display/state unchanged)", e1.summary === "Edit the file /r/a.ts — applying this change: NEWPART");
+  // E3 dedup: the signature hashes the PAYLOAD only — never the intent.
+  const e1b = AC.composeAction({ toolName: "Edit", toolInput: { file_path: "/r/a.ts", old_string: "OLDPART", new_string: "NEWPART" }, transcriptPath: "", mode: "composed", readTail: () => "totally different narration now" });
+  check("18 dedup: intent growth does NOT change the signature", e1.signature === e1b.signature);
+  const e1c = AC.composeAction({ toolName: "Edit", toolInput: { file_path: "/r/a.ts", old_string: "OLDPART", new_string: "CHANGED" }, transcriptPath: "", mode: "composed" });
+  check("18 dedup: a materially distinct edit IS a new decision", e1.signature !== e1c.signature);
+  // E4 lean mode: v1 byte-identical text + path-based signature; item-5 bare mark.
+  const lean1 = AC.composeAction({ toolName: "Write", toolInput: { file_path: "/r/n.md", content: "Some content." }, mode: "lean" });
+  check("18 lean: v1 byte-identical text", lean1.text === "Write (create/overwrite) the file /r/n.md (13 chars)");
+  check("18 lean: v1 path-based signature", lean1.signature === "Write:/r/n.md");
+  check("18 lean: marked bare_tool_payload + regime v1 (item-5)", lean1.bare === true && lean1.inputClass === "bare_tool_payload" && lean1.regime === "at-action-v1-lean");
+  // Review fold (HIGH, 2026-07-18): a SENSITIVE-path Edit is fully content-free —
+  // the v1 lean string carried up to 200 chars of new_string, which for the
+  // incident file class was content egress. Text AND summary drop the snippet.
+  const sensEdit = AC.composeAction({
+    toolName: "Edit",
+    toolInput: { file_path: "/u/p/.claude/settings.local.json", old_string: "{}", new_string: '{"env":{"SAGE_GATE1_CREDENTIAL":"sr_prac_tok99abc"}}' },
+    mode: "composed",
+  });
+  check("18 fold: sensitive Edit text is the path line ONLY (no snippet)", sensEdit.text === "Edit the file /u/p/.claude/settings.local.json" && sensEdit.bare === true);
+  check("18 fold: sensitive Edit SUMMARY is content-free too (local surfaces)", sensEdit.summary === "Edit the file /u/p/.claude/settings.local.json");
+  check("18 fold: sensitive Edit egresses no token anywhere", !JSON.stringify(sensEdit).includes("sr_prac_tok99abc"));
+  // Review fold: lean-MODE Edit text is redacted before egress (an improvement
+  // over v1 — the local summary keeps the raw v1 snippet).
+  const leanEdit = AC.composeAction({ toolName: "Edit", toolInput: { file_path: "/r/notes.ts", old_string: "a", new_string: "key sr_prac_tok99abc here" }, mode: "lean" });
+  check("18 fold: lean-mode Edit POSTable text is redacted", leanEdit.text.includes("[redacted:sr-credential]") && !leanEdit.text.includes("sr_prac_tok99abc"));
+  check("18 fold: lean-mode Edit summary keeps the v1 snippet locally", leanEdit.summary.includes("sr_prac_tok99abc"));
+  // Bash: text redacted for egress; RAW command preserved for the local guard.
+  const b1 = AC.composeAction({ toolName: "Bash", toolInput: { command: "curl -H 'Authorization: Bearer sr_prac_abc123def'" }, mode: "composed" });
+  // (The sr- and bearer-value rules compose: the token is redacted by the first,
+  // the bearer value collapsed by the second — the egress text carries a
+  // [redacted…] marker and never the token; the RAW command still reaches the
+  // local guard patterns.)
+  check("18 bash: egress text redacted, raw command preserved for the guard", !b1.text.includes("sr_prac_abc123def") && b1.text.includes("[redacted") && b1.bashCommand.includes("sr_prac_abc123def"));
+
+  // ── WIRE legs (the spawned hook against the mock server — what actually egresses) ──
+  const s11bTr = join(stateDir, "s11b-tr.jsonl");
+  wfs(
+    s11bTr,
+    [
+      JSON.stringify({ type: "assistant", message: { role: "assistant", content: [{ type: "text", text: "I will update the refunds page so subscribers keep their refund window." }] } }),
+      JSON.stringify({ type: "assistant", message: { role: "assistant", content: [{ type: "text", text: "[SageReasoning Gate 2 — at-action examination]\n• Circles: local_community" }] } }),
+    ].join("\n"),
+  );
+  const hermetic = { SAGE_GATE1_DISCERNMENT_ENABLED: "false" };
+  mode = "ok";
+  captured = [];
+  const w1 = await runHook(
+    { session_id: "s18a", hook_event_name: "PreToolUse", tool_name: "Write", tool_input: { file_path: "/repo/refunds.md", content: "Subscribers keep a 30-day refund window." }, transcript_path: s11bTr },
+    hermetic,
+    AT_ACTION_HOOK,
+  );
+  const wb1 = lastReq("/api/reason");
+  check("18 wire: composed input carries the file CONTENT (the starvation closed)", !!wb1 && wb1.input.includes("Subscribers keep a 30-day refund window."));
+  check("18 wire: composed input carries the narrated INTENT", !!wb1 && wb1.input.includes("refunds page"));
+  check("18 wire: harness-frame quotes stripped from the intent (no feedback loop)", !!wb1 && !wb1.input.includes("[SageReasoning"));
+  check("18 wire: the at-action frame still injects", ctxOf(w1.out).includes("Gate 2 — at-action"));
+  captured = [];
+  await runHook(
+    { session_id: "s18a", hook_event_name: "PreToolUse", tool_name: "Write", tool_input: { file_path: "/repo/refunds.md", content: "Entirely different content, second decision." }, transcript_path: s11bTr },
+    hermetic,
+    AT_ACTION_HOOK,
+  );
+  check("18 wire: distinct content on the SAME file re-consults (E3)", lastReq("/api/reason") !== null);
+  captured = [];
+  const w3 = await runHook(
+    { session_id: "s18a", hook_event_name: "PreToolUse", tool_name: "Write", tool_input: { file_path: "/repo/refunds.md", content: "Entirely different content, second decision." }, transcript_path: s11bTr },
+    hermetic,
+    AT_ACTION_HOOK,
+  );
+  check("18 wire: an IDENTICAL retry dedups silently", lastReq("/api/reason") === null && w3.out.trim() === "");
+  // Sensitive path: content NEVER egresses; lean composition; the item-5 T2-soft ask.
+  captured = [];
+  const secretContent = "API_TOKEN=sr_live_secret99abc";
+  const sv = await runHook(
+    { session_id: "s18b", hook_event_name: "PreToolUse", tool_name: "Write", tool_input: { file_path: "/repo/.env.local", content: secretContent }, transcript_path: s11bTr },
+    hermetic,
+    AT_ACTION_HOOK,
+  );
+  const sb = lastReq("/api/reason");
+  check("18 wire: sensitive path — content NEVER egresses (denylist at the wire)", !!sb && !JSON.stringify(sb).includes("API_TOKEN") && !JSON.stringify(sb).includes("secret99"));
+  check("18 wire: sensitive path — lean composition egresses", !!sb && sb.input === `Write (create/overwrite) the file /repo/.env.local (${secretContent.length} chars)`);
+  check("18 wire: sensitive path — intent withheld too (full lean)", !!sb && !sb.input.includes("refunds page"));
+  check("18 wire: bare-input T2-SOFT ask injected, never a halt (item-5)", ctxOf(sv.out).includes("bare tool payload") && ctxOf(sv.out).includes("not a halt") && !sv.out.includes("permissionDecision"));
+  // Redaction at the wire: a token inside a NON-sensitive file.
+  captured = [];
+  await runHook(
+    { session_id: "s18c", hook_event_name: "PreToolUse", tool_name: "Write", tool_input: { file_path: "/repo/notes.md", content: "the key is sr_prac_abc123def456 ok" }, transcript_path: "" },
+    hermetic,
+    AT_ACTION_HOOK,
+  );
+  const rb = lastReq("/api/reason");
+  check("18 wire: a token in composed content is REDACTED before egress", !!rb && rb.input.includes("[redacted:sr-credential]") && !JSON.stringify(rb).includes("sr_prac_abc123def456"));
+  // The E4 lean knob at the wire: v1 byte-identical input.
+  captured = [];
+  const lk = await runHook(
+    { session_id: "s18d", hook_event_name: "PreToolUse", tool_name: "Write", tool_input: { file_path: "/repo/notes2.md", content: "Some content." }, transcript_path: s11bTr },
+    { ...hermetic, GATE1_ACTION_TEXT_MODE: "lean" },
+    AT_ACTION_HOOK,
+  );
+  const lb = lastReq("/api/reason");
+  check("18 wire: lean knob → v1 byte-identical input", !!lb && lb.input === "Write (create/overwrite) the file /repo/notes2.md (13 chars)");
+  check("18 wire: lean mode fires the bare note (the settled regime includes the ask)", ctxOf(lk.out).includes("bare tool payload"));
+  // Capture record v2: the regime mark + input class flow into the durable record.
+  const capDir = mkd(join(tmpdir(), "s11b-cap-"));
+  await runHook(
+    { session_id: "s18e", hook_event_name: "PreToolUse", tool_name: "Write", tool_input: { file_path: "/repo/cap.md", content: "Content that names the users this affects." }, transcript_path: s11bTr },
+    { ...hermetic, GATE1_FALSE_HOLD_CAPTURE: "true", GATE1_STATE_DIR: capDir },
+    AT_ACTION_HOOK,
+  );
+  const capRec = JSON.parse(rfs(join(capDir, "false-hold-record.jsonl"), "utf8").trim().split("\n")[0]);
+  check("18 capture: schema v2", capRec.schema === "false-hold-record-v2");
+  check("18 capture: extraction-regime mark (ADR-014)", capRec.extractionRegime === "at-action-v2-composed");
+  check("18 capture: inputClass composed", capRec.inputClass === "composed");
+  check("18 capture: preview stays the LEAN summary (PII-light)", capRec.actionPreview.startsWith("Write (create/overwrite) the file /repo/cap.md"));
+  check("18 capture: composedChars recorded", typeof capRec.composedChars === "number" && capRec.composedChars > 100);
+}
+
 server.close();
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail === 0 ? 0 : 1);

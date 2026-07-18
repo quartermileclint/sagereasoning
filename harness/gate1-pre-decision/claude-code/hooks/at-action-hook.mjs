@@ -65,6 +65,7 @@ import {
   markDecisionFired,
 } from "./lib/session-state.mjs";
 import { appendFalseHoldRecord, buildFalseHoldRecord } from "./lib/false-hold-capture.mjs";
+import { composeAction, renderBareInputNote } from "./lib/action-composer.mjs";
 import {
   classifyConsult,
   advanceLoopState,
@@ -272,52 +273,35 @@ function allowSilently() {
 }
 
 // ---------------------------------------------------------------------------
-// Derive a human-readable ACTION description from a tool call (what we examine), plus a stable
-// DECISION SIGNATURE for the fire-once-per-distinct-decision dedup (D-A). For file edits the
-// signature is the file path (repeated edits to one file = one decision); for Bash it is a hash of
-// the command (an identical re-run dedups; a different command is a new decision).
+// Derive the examined ACTION from a tool call. S11b (2026-07-18): the derivation
+// moved to lib/action-composer.mjs — the S11a diagnosis found the old inline
+// composition STARVED the examination (Write content discarded; Edit truncated
+// to 200 chars). The composer returns { text (examined, composed v2 by
+// default), summary (the v1 lean one-liner — every display/state consumer
+// below keeps reading THIS, so those surfaces are unchanged), signature (E3:
+// payload-content-hash in composed mode — a materially distinct edit is a new
+// decision), inputClass/regime (the ADR-014 extraction-regime mark), bare (the
+// item-5 T2-soft ask) }. The mandatory sensitive-path denylist + token
+// redaction (election E2) are applied INSIDE the composer, before any consumer
+// of action.text can egress it.
+//
+// SCOPE — the four consumers of action.text (S11b scope statement 8):
+//   (i)  fetchFrame (runConsult)        — the recomposition's target; composed.
+//   (ii) fetchGuardrail (runGuard)      — the DENY-capable channel; for Bash the
+//        text is the full command (redacted) as before; a configured file-tool
+//        guardTool would send the composed text (same egress class, same
+//        denylist — applied before composition).
+//   (iii) renderGate2ElicitationBlock   — now shows action.summary (unchanged UX).
+//   (iv) loop-state adoptedCorrection   — now action.summary (unchanged bytes).
 // ---------------------------------------------------------------------------
-function describeAction(toolName, toolInput) {
-  const ti = toolInput && typeof toolInput === "object" ? toolInput : {};
-  switch (toolName) {
-    case "Bash": {
-      const cmd = typeof ti.command === "string" ? ti.command.trim() : "";
-      if (!cmd) return null;
-      return { text: `Run this shell command: ${cmd}`, signature: `Bash:${shortHash(cmd)}`, bashCommand: cmd };
-    }
-    case "Edit":
-    case "MultiEdit": {
-      const fp = typeof ti.file_path === "string" ? ti.file_path : "";
-      if (!fp) return null;
-      const snippet = typeof ti.new_string === "string" ? ti.new_string.slice(0, 200) : "";
-      return {
-        text: `Edit the file ${fp}${snippet ? ` — applying this change: ${snippet}` : ""}`,
-        signature: `${toolName}:${fp}`,
-        bashCommand: null,
-      };
-    }
-    case "Write": {
-      const fp = typeof ti.file_path === "string" ? ti.file_path : "";
-      if (!fp) return null;
-      const len = typeof ti.content === "string" ? ti.content.length : 0;
-      return { text: `Write (create/overwrite) the file ${fp} (${len} chars)`, signature: `Write:${fp}`, bashCommand: null };
-    }
-    case "NotebookEdit": {
-      const fp = typeof ti.notebook_path === "string" ? ti.notebook_path : "";
-      if (!fp) return null;
-      return { text: `Edit notebook cell in ${fp}`, signature: `NotebookEdit:${fp}`, bashCommand: null };
-    }
-    default: {
-      // Unknown consequential tool (e.g. an MCP tool in guardTools). Describe generically.
-      let blob = "";
-      try {
-        blob = JSON.stringify(ti).slice(0, 300);
-      } catch {
-        blob = "";
-      }
-      return { text: `Invoke tool ${toolName}${blob ? ` with ${blob}` : ""}`, signature: `${toolName}:${shortHash(blob)}`, bashCommand: null };
-    }
-  }
+function describeAction(cfg, toolName, toolInput, transcriptPath) {
+  return composeAction({
+    toolName,
+    toolInput,
+    transcriptPath,
+    mode: cfg.actionTextMode,
+    sensitiveAdditions: cfg.sensitivePathAdditions,
+  });
 }
 
 // Is this action in the GUARD set (irreversible → guardrail can block)? Either the tool is in the
@@ -398,7 +382,12 @@ async function main() {
     return;
   }
 
-  const action = describeAction(toolName, event.tool_input);
+  const action = describeAction(
+    cfg,
+    toolName,
+    event.tool_input,
+    typeof event.transcript_path === "string" ? event.transcript_path : "",
+  );
   if (!action) {
     // No examinable action (e.g. a tool_input with no command/path). Fail-open-honest: allow.
     honestLog(cfg, `AT-ACTION-SKIP tool=${toolName} reason="no examinable action in tool_input"`);
@@ -489,7 +478,7 @@ async function runGuard(cfg, { sessionId, toolName, action }) {
         (r.reasoning ? `${r.reasoning} ` : "") +
         (r.improvementHint ? `Consider: ${r.improvementHint}` : "") +
         "\nThis is a caution, not a block — proceed deliberately.\n" +
-        renderGate2ElicitationBlock(action.text),
+        renderGate2ElicitationBlock(action.summary),
     );
     process.exit(0);
   }
@@ -581,7 +570,7 @@ async function runConsult(cfg, { sessionId, toolName, action }) {
   // D-B: classify this consult + advance the rolling loop state, mirroring the CI-4 closure rule.
   const fallbackRef = `h3-${shortHash(decisionKey)}`;
   const classified = classifyConsult(r.verdict, depth, fallbackRef);
-  const adoptedCorrection = priorFeedback ? undefined : action.text.slice(0, 160);
+  const adoptedCorrection = priorFeedback ? undefined : action.summary.slice(0, 160);
   const { state: nextState, event: loopEvent } = advanceLoopState(loopState, classified, adoptedCorrection);
   writeLoopState(cfg, sessionId, nextState);
 
@@ -600,19 +589,32 @@ async function runConsult(cfg, { sessionId, toolName, action }) {
         tool: toolName,
         depth,
         loopEvent,
-        actionText: action.text,
+        // S11b: the preview stays the LEAN summary (PII-light, identifies the
+        // action); the composed examined text is characterised by inputClass +
+        // extractionRegime + composedChars (the ADR-014 regime mark — delta
+        // computations must never compare across a regime boundary).
+        actionText: action.summary,
         carriedPrior: !!priorFeedback,
+        inputClass: action.inputClass,
+        regime: action.regime,
+        composedChars: action.text.length,
       }),
     );
   }
 
   // Inject the at-action frame (redirection + proximity + loop status + any abandoned loops). Never blocks.
-  // (The S8 standing trust advisory moved ABOVE the consult — S9b G5 — and is appended here unchanged.)
-  emitAllowWithContext(renderAtActionFrame(r.verdict, loopEvent, priorFeedback, nextState.abandonedRefs) + trustAdvisory);
+  // (The S8 standing trust advisory moved ABOVE the consult — S9b G5 — and is appended here unchanged.
+  //  S11b item-5: a bare tool payload additionally carries the T2-SOFT ask — an observation inviting
+  //  the agent to narrate affected parties in-conversation; NEVER a halt on this surface.)
+  emitAllowWithContext(
+    renderAtActionFrame(r.verdict, loopEvent, priorFeedback, nextState.abandonedRefs) +
+      (action.bare ? "\n" + renderBareInputNote() : "") +
+      trustAdvisory,
+  );
   markDecisionFired(cfg, decisionKey, `${toolName} ${loopEvent}`);
   honestLog(
     cfg,
-    `CONSULT session=${sanitizeLog(sessionId)} tool=${toolName} depth=${depth} loop=${loopEvent} proximity=${r.verdict.katorthoma_proximity || "?"}${priorFeedback ? " carried-prior=yes" : ""}`,
+    `CONSULT session=${sanitizeLog(sessionId)} tool=${toolName} depth=${depth} loop=${loopEvent} proximity=${r.verdict.katorthoma_proximity || "?"}${priorFeedback ? " carried-prior=yes" : ""} class=${action.inputClass} regime=${action.regime}`,
   );
   process.exit(0);
 }

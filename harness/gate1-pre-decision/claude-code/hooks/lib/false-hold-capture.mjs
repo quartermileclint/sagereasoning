@@ -80,19 +80,28 @@ export function kathekonSignalsFromVerdict(verdict) {
  * and a truncated action preview (for the day-7 human cross-check — the founder's
  * own loop; capped at 160 chars). Never quotes the full verdict (PII-light).
  */
-export function buildFalseHoldRecord({ verdict, sessionId, tool, depth, loopEvent, actionText, carriedPrior, nowIso }) {
+export function buildFalseHoldRecord({ verdict, sessionId, tool, depth, loopEvent, actionText, carriedPrior, nowIso, inputClass, regime, composedChars }) {
   const ka =
     verdict && typeof verdict === "object" && verdict.kathekon_assessment && typeof verdict.kathekon_assessment === "object"
       ? verdict.kathekon_assessment
       : {};
   return {
-    schema: "false-hold-record-v1",
+    // v2 (S11b, 2026-07-18): + inputClass / extractionRegime / composedChars —
+    // the ADR-014 extraction-regime version-mark + the item-5 input-class marker
+    // (anti-laundering: downstream longitudinal reads see the input class per
+    // row, and delta computations refuse to compare across a regime boundary).
+    // v1 records (the frozen 2026-07-17 buffer) predate these fields; the report
+    // accepts both schemas.
+    schema: "false-hold-record-v2",
     capturedAt: typeof nowIso === "string" && nowIso ? nowIso : new Date().toISOString(),
     session: sanitize(sessionId),
     tool: typeof tool === "string" ? tool : "",
     depth: typeof depth === "string" ? depth : "",
     loopEvent: typeof loopEvent === "string" ? loopEvent : "none",
     actionPreview: typeof actionText === "string" ? actionText.slice(0, 160) : "",
+    inputClass: typeof inputClass === "string" ? inputClass : "unknown",
+    extractionRegime: typeof regime === "string" ? regime : "unknown",
+    composedChars: Number.isFinite(composedChars) ? composedChars : null,
     signals: kathekonSignalsFromVerdict(verdict),
     // is_kathekon / quality are the SYMPTOM of the false-positive class, not a Q3
     // arm — captured for the human cross-check + context, NOT read by the predicate.

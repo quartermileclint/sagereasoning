@@ -56,7 +56,11 @@ export interface KathekonEngagementSignals {
 export interface KathekonEngagement {
   /** The predicate result: at least one of the four arms fired. */
   engaged: boolean
-  /** Arm 1 — the examination engaged a justice surface (deriveWorstJusticeOutcome !== null). */
+  /** Arm 1 — NARROWED per R11 (the 2026-07-17 F2 verdict §1b, landed S11b
+   *  2026-07-18 on the recomposed input per R12): the examination engaged a
+   *  justice surface AND identified ≥1 circle. A dikaiosyne tag resting solely
+   *  on is_kathekon===false with zero circles is NOT a justice surface (the
+   *  exclusion clause governs). */
   justiceSurfacePresent: boolean
   /** Arm 2 — a violated obligation (a sub-signal of justiceSurfacePresent; listed distinctly by the mentor). */
   violatedObligation: boolean
@@ -98,7 +102,17 @@ export function assessKathekonEngagement(signals: KathekonEngagementSignals): Ka
       // three it does read (defensive optional reads at every access).
     } as unknown as Parameters<typeof deriveWorstJusticeOutcome>[0][number],
   ])
-  const justiceSurfacePresent = justice !== null
+  // THE R11 NARROWING (2026-07-17 verdict §1b, verbatim: "Arm 1 requires at
+  // least one identified circle"; landed S11b 2026-07-18 after the R12 gate
+  // routed extraction-first). The circle count is the obligationStatuses length
+  // — one entry per identified circle, null for a circle without an assessment
+  // — so the gate narrows EXACTLY the zero-circle case: violated / indeterminate
+  // / met inherently carry a circle, and unevaluated-WITH-a-circle (the U2/J2
+  // marketing-email class — a circle identified, its obligation never
+  // evaluated) STILL fires. The gate is stated here, on the predicate the flip
+  // binds on, independent of the reducer's own S11b narrowing (belt and braces).
+  const circleCount = (signals.obligationStatuses ?? []).length
+  const justiceSurfacePresent = justice !== null && circleCount >= 1
   const violatedObligation = justice?.obligationStatus === 'violated'
 
   // Arm 3 — proximity at habitual or below.
@@ -118,9 +132,12 @@ export function assessKathekonEngagement(signals: KathekonEngagementSignals): Ka
   if (proximityAtOrBelowHabitual) firedArms.push('proximity<=habitual')
   if (subSpeciesPassion) firedArms.push('sub-species-passion')
 
-  // violatedObligation is subsumed by justiceSurfacePresent, but is kept in the OR
-  // explicitly (the mentor lists it as a distinct arm) — belt and braces if the
-  // justice arm is ever narrowed.
+  // violatedObligation stays in the OR explicitly (the mentor lists it as a
+  // distinct arm). The anticipated narrowing HAS now happened (R11, S11b
+  // 2026-07-18) — and violated remains subsumed under the narrowed arm too (a
+  // violated status can only come from an identified circle, so it always
+  // satisfies the ≥1-circle gate); the explicit OR keeps the mentor's four-arm
+  // enumeration literal in code.
   const engaged =
     justiceSurfacePresent || violatedObligation || proximityAtOrBelowHabitual || subSpeciesPassion
 
@@ -179,10 +196,32 @@ export function isHoldLoopEvent(loopEvent: string | null | undefined): boolean {
 /** The three classifications a captured at-action examination can take. */
 export type HoldClassification = 'false_positive' | 'correct_hold' | 'not_a_hold'
 
+/**
+ * The DISCLOSED BOUNDS on the narrowed Arm 1's output (R13: the blindness must
+ * be VISIBLE — "stated on every output of the narrowed arm", never implicit).
+ * Carried verbatim on every classification result.
+ */
+export const NARROWED_ARM_BOUNDS = {
+  /** R13 / A2 — structural; SURVIVES the S11b input recomposition. */
+  a2Omission:
+    'A2 omission (structural): a harm omitted from the narration and payload produces no circle — ' +
+    'the same wire signature as a genuinely party-less act. The narrowed Arm 1 cannot distinguish ' +
+    'them; an omission-class hold reads false_positive. This bound survives the S11b input ' +
+    'recomposition and is not closeable by any text-based fix.',
+  /** Measured — the S11b composition battery (2026-07-18), C-class 6/6 runs. */
+  mentionConversion:
+    'Mention-conversion (measured, S11b battery 2026-07-18): Layer 1 converts QUOTED/mentioned ' +
+    'party language into circles (6/6 runs on the mention-without-affect fixtures), so a ' +
+    'mention-carrying edit can read correct_hold. Named follow-up: a Layer-1 prompt re-check, its ' +
+    'own Critical step.',
+} as const
+
 export interface ObservationClassification {
   isHold: boolean
   engagement: KathekonEngagement
   classification: HoldClassification
+  /** R13 — the narrowed arm's disclosed bounds, on EVERY output. */
+  bounds: typeof NARROWED_ARM_BOUNDS
 }
 
 /**
@@ -204,5 +243,5 @@ export function classifyObservation(
     : engagement.engaged
       ? 'correct_hold'
       : 'false_positive'
-  return { isHold, engagement, classification }
+  return { isHold, engagement, classification, bounds: NARROWED_ARM_BOUNDS }
 }

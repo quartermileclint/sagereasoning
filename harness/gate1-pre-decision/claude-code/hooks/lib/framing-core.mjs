@@ -137,6 +137,21 @@ export function loadConfig({ hookDir, eventName, allowStrict = true } = {}) {
     // stdout/exit/frame; MEASURE-only (labels nothing, binds nothing). Turn ON only for the
     // observation period, with a DURABLE GATE1_STATE_DIR (the default /tmp is lost on reboot).
     falseHoldCapture: parseBool(process.env.GATE1_FALSE_HOLD_CAPTURE, parseBool(fileCfg.falseHoldCapture, false)),
+    // S11b (2026-07-18, elections E1–E4): the at-action examined-input composition
+    // mode. "composed" (DEFAULT — the extraction-regime remedy for the S11a
+    // starved-by-composition diagnosis: intent + bounded payload, denylist +
+    // redaction, payload-content-hash dedup) | "lean" (the v1 path+count
+    // composition, retained for the P6 A/B leg). Read ONLY by the at-action hook
+    // (H3) — H1/H2 behaviour is untouched by this field.
+    actionTextMode:
+      (process.env.GATE1_ACTION_TEXT_MODE || fileCfg.actionTextMode) === "lean" ? "lean" : "composed",
+    // S11b egress control: operator ADDITIONS to the mandatory sensitive-path
+    // denylist (action-composer.mjs DEFAULT_SENSITIVE_PATH_PATTERNS). APPEND-ONLY
+    // — the defaults always apply; these extend, never replace.
+    sensitivePathAdditions:
+      parsePatternList(process.env.GATE1_SENSITIVE_PATHS) ||
+      (Array.isArray(fileCfg.sensitivePaths) ? fileCfg.sensitivePaths : null) ||
+      [],
   };
   cfg.credential = process.env[cfg.credentialEnvVar] || process.env.GATE1_CREDENTIAL || "";
   // H3 guard endpoint (D-A): explicit override, else config, else derive from the reason endpoint

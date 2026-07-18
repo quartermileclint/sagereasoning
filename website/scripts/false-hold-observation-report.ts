@@ -89,7 +89,10 @@ function isValidRecord(x: unknown): x is FalseHoldRecord {
   return (
     !!r &&
     typeof r === 'object' &&
-    r.schema === 'false-hold-record-v1' &&
+    // v1 = the frozen 2026-07-17 buffer; v2 (S11b) adds inputClass /
+    // extractionRegime / composedChars — both parse; the regime split below
+    // keeps them from being compared as one distribution (ADR-014).
+    (r.schema === 'false-hold-record-v1' || r.schema === 'false-hold-record-v2') &&
     typeof r.capturedAt === 'string' &&
     // Guard the DB constraints at the door (review fold, 2026-07-12): loop_event
     // against the table's CHECK enum, and captured_at against the TIMESTAMPTZ cast,
@@ -193,6 +196,10 @@ async function ingest(rows: Classified[]) {
     else console.log(`  --reingest: cleared existing rows for ${agentId} before re-insert.`)
   }
 
+  // S11b note (2026-07-18): v2 record fields (inputClass / extractionRegime /
+  // composedChars) are NOT ingested — agent_hold_observations predates them and
+  // a column addition is its own founder-walked schema step. The in-memory
+  // report (incl. the per-regime split) reads them regardless.
   const dbRows = rows.map((r) => ({
     agent_id: agentId,
     owner_user_id: ownerUserId,
@@ -322,6 +329,35 @@ async function main() {
     if (r.subSpeciesPassion) armCounts['sub-species-passion'] = (armCounts['sub-species-passion'] || 0) + 1
   }
   console.log(`  correct-hold arms: ${Object.keys(armCounts).length ? Object.entries(armCounts).map(([k, v]) => `${k}=${v}`).join(', ') : '(none — every hold this window was a false positive)'}`)
+
+  // ADR-014 regime discipline: NEVER present mixed extraction regimes as one
+  // distribution — an instrument change must not masquerade as agent change.
+  // v1 records predate the mark and are attributed to the lean regime.
+  const regimeOf = (r: FalseHoldRecord & { extractionRegime?: string }) =>
+    typeof r.extractionRegime === 'string' && r.extractionRegime !== 'unknown'
+      ? r.extractionRegime
+      : 'at-action-v1-lean (pre-mark)'
+  const regimes = new Map<string, { n: number; fps: number; corrects: number }>()
+  for (const r of rows) {
+    const key = regimeOf(r)
+    const cur = regimes.get(key) ?? { n: 0, fps: 0, corrects: 0 }
+    cur.n++
+    if (r.isHold && r.classification === 'false_positive') cur.fps++
+    if (r.isHold && r.classification === 'correct_hold') cur.corrects++
+    regimes.set(key, cur)
+  }
+  if (regimes.size > 1) {
+    console.log('\n  ⚠ MIXED EXTRACTION REGIMES — the tallies above span an instrument change and must NOT be read as one distribution (ADR-014). Per-regime split:')
+  }
+  for (const [k, v] of regimes) {
+    console.log(`    regime ${k}: n=${v.n} false_positive=${v.fps} correct=${v.corrects}`)
+  }
+
+  // R13 — the narrowed arm's disclosed bounds, stated ON the output.
+  const { NARROWED_ARM_BOUNDS } = await import('../src/lib/substrate/trust-core/kathekon-engagement')
+  console.log('\n── Bounds on the narrowed Arm 1 (R13 — stated on every output) ────')
+  console.log(`  • ${NARROWED_ARM_BOUNDS.a2Omission}`)
+  console.log(`  • ${NARROWED_ARM_BOUNDS.mentionConversion}`)
 
   // Part 2 — four-domain coverage (records proxy + trust-state read).
   console.log('\n── Part 2 — four-domain coverage + confidence ─────────────────────')
