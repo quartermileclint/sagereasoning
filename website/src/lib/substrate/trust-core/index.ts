@@ -50,6 +50,12 @@ export * from './l4-passion-audit'
 // flag-gated end-to-end; the dark /api/practice/discernment route consumes.
 export * from './harness-extractors'
 export * from './harness-integration'
+// AE-2 (ADR-014 §3.2) — the CI-4 signed-loop fold: wires the S3
+// combineVerificationResults into the accreditation write boundary's verified
+// provenance chain (the only server-readable home of the signed CI-4 markers).
+// Kathekon-engagement-classified (character vs instrument-calibration split);
+// MEASURE-only; DARK behind SUBSTRATE_LOOP_FOLD_ENABLED.
+export * from './loop-fold'
 export * from './trust-core-flag'
 export { emitAccreditationTrustEvents, emitReflectTrustEvent } from './emission-hooks'
 export {

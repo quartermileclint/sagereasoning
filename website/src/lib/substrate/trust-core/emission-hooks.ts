@@ -49,6 +49,11 @@ export interface AccreditationEmissionInput {
   provenanceEnforced: boolean
   rawBody: unknown
   now?: Date
+  /** AE-2 dedup: when the route already resolved the credential's owner (the
+   *  loop-fold flag's identity read), pass it here to skip this module's own
+   *  resolveCredentialContext PK read. `undefined` ⇒ resolve internally
+   *  (byte-identical to pre-AE-2); `null` is a RESOLVED owner-less result. */
+  resolvedOwnerUserId?: string | null
 }
 
 /**
@@ -67,7 +72,10 @@ export async function emitAccreditationTrustEvents(
     if (signedAssessments.length === 0) return
 
     const now = input.now ?? new Date()
-    const { owner_user_id } = await resolveCredentialContext(input.credentialId)
+    const owner_user_id =
+      input.resolvedOwnerUserId !== undefined
+        ? input.resolvedOwnerUserId
+        : (await resolveCredentialContext(input.credentialId)).owner_user_id
     const credentialRef = `api_key:${input.credentialId}`
 
     // Deterministic idempotency key: a content hash of the write's signatures, so

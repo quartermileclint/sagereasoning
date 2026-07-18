@@ -229,6 +229,11 @@ export function httpStatusFor(
  * route passes its analysis and the body gains a `loop_closure` block naming
  * the chain's closure verdict. Omitted (the flags-unset default) → the body
  * is BYTE-IDENTICAL to the pre-gate shape.
+ *
+ * AE-2 (2026-07-18): when SUBSTRATE_LOOP_FOLD_ENABLED is on, the route passes
+ * the computed loop-fold block and the body gains a `loop_fold` field
+ * (MEASURE-only annotation — see trust-core/loop-fold.ts). Omitted (the
+ * flag-unset default) → byte-identical to the pre-AE-2 shape.
  */
 export function buildWriteSuccessResponse(
   loopClosure?: {
@@ -238,12 +243,14 @@ export function buildWriteSuccessResponse(
     open: number
     indeterminate: number
   },
+  loopFold?: object,
 ): NextResponse {
   return NextResponse.json(
     {
       status: 'ok',
       documentation_url: DOCUMENTATION_URL,
       ...(loopClosure !== undefined ? { loop_closure: loopClosure } : {}),
+      ...(loopFold !== undefined ? { loop_fold: loopFold } : {}),
       // M5 CI-13 (2026-06-13): the reflect-at-close practice hint. Absent
       // entirely when SUBSTRATE_PRACTICE_CYCLE_HINT_ENABLED is unset
       // (byte-identical to pre-M5).

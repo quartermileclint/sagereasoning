@@ -327,6 +327,19 @@ function sortBoundaries(
   )
 }
 
+/** The shared era-assignment read (AE-2 — ADR-014 §4's one-record rule: regime
+ *  handling is SHARED machinery, never re-derived per surface). Assign one ISO
+ *  timestamp to its extraction-regime era against the settled boundaries:
+ *  the era label, or 'boundary_band' when the timestamp falls inside a
+ *  boundary's one-day uncertainty band. Pure. */
+export function assignRegimeEra(
+  iso: string,
+  boundaries: readonly RegimeBoundary[] = SETTLED_REGIME_BOUNDARIES,
+): { era: string } | { era: 'boundary_band' } {
+  const a = assignEra(iso, sortBoundaries(boundaries))
+  return a.kind === 'band' ? { era: 'boundary_band' } : { era: a.era }
+}
+
 interface Segmentation {
   segmentRows: EvaluatedAction[]
   /** layer1_source values aligned with segmentRows. */

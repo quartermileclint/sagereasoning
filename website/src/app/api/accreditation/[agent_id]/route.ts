@@ -247,6 +247,17 @@ import { enforceWriteProvenance } from './provenance-gate'
 // SUBSTRATE_TRUST_CORE_ENABLED (the helper no-ops when off); awaited + fail-honest
 // (never throws to this write path).
 import { emitAccreditationTrustEvents } from '@/lib/substrate/trust-core/emission-hooks'
+// AE-2 (2026-07-18) — the CI-4 signed-loop fold. DARK behind
+// SUBSTRATE_LOOP_FOLD_ENABLED: flag-off ⇒ no identity read, no computation, no
+// response field (byte-identical). MEASURE-only: an annotation on the SUCCESS
+// response computed AFTER the writer — it can never affect the write outcome;
+// the never-throws wrapper yields undefined on any internal error (fail-soft).
+import {
+  computeLoopFoldAnnotation,
+  isLoopFoldEnabled,
+} from '@/lib/substrate/trust-core/loop-fold'
+import { resolveLongitudinalIdentity } from '@/lib/substrate/longitudinal-identity'
+import { resolveCredentialContext } from '@/lib/substrate/agent-assessment-history-store'
 
 // =============================================================================
 // HOTFIX NOTE 2026-05-16 — Next.js App Router rejected the original co-located
@@ -793,6 +804,20 @@ export async function POST(
       )
     }
 
+    // AE-2 (2026-07-18) — the flag-gated identity resolve for the loop fold.
+    // ONE PK read on api_keys, only when SUBSTRATE_LOOP_FOLD_ENABLED is on;
+    // its result is ALSO passed into the trust-event emission below so the two
+    // features never duplicate the read (the AE-1 dedup discipline). Flag-off
+    // ⇒ undefined ⇒ no read, and the emission resolves internally exactly as
+    // before (byte-identical). Fail-honest: resolveCredentialContext returns
+    // nulls on any error, so the fold still runs with the identity it has.
+    const foldCredentialContext = isLoopFoldEnabled()
+      ? await resolveCredentialContext(auth.credential_id).catch(() => ({
+          owner_user_id: null as string | null,
+          agent_id: null as string | null,
+        }))
+      : undefined
+
     // Trust Layer S1 (measure mode) — record trust events from this R18f-verified
     // write. Awaited so a fail-honest error is logged in-request, but the helper
     // NEVER throws (measure mode: a trust-write failure must not fail the write)
@@ -805,9 +830,40 @@ export async function POST(
       credentialId: auth.credential_id,
       provenanceEnforced: provenance.enforced,
       rawBody,
+      ...(foldCredentialContext !== undefined
+        ? { resolvedOwnerUserId: foldCredentialContext.owner_user_id }
+        : {}),
     }).catch(() => {})
 
-    return buildWriteSuccessResponse(loopClosureAnnotation)
+    // AE-2 — compute the MEASURE-only loop-fold annotation from the SUBMITTED
+    // provenance chain (the only server-readable home of the signed CI-4
+    // markers). After the writer on purpose: the fold can never affect the
+    // write outcome. The wrapper never throws (undefined ⇒ block absent).
+    // Identity per ADR-014 §4: the CREDENTIAL's declared (owner, agent) —
+    // resolveLongitudinalIdentity refuses an agent-keyed read without owner
+    // scope (the cross-tenant guard).
+    const loopFoldAnnotation =
+      foldCredentialContext !== undefined
+        ? computeLoopFoldAnnotation(
+            (rawBody as { provenance?: { signed_assessments?: unknown } })
+              ?.provenance?.signed_assessments,
+            {
+              identity: resolveLongitudinalIdentity({
+                credentialRef: `api_key:${auth.credential_id}`,
+                ownerUserId: foldCredentialContext.owner_user_id,
+                // Fall back to the PATH agent_id (which the auth gate already
+                // verified this credential is scoped to) so a transient
+                // resolver error cannot mislabel an agent-bound credential as
+                // undeclared (review fold F1). Owner has no such fallback —
+                // an unresolved owner honestly refuses the pair join.
+                agentId: foldCredentialContext.agent_id ?? agent_id,
+              }),
+              now: new Date(),
+            },
+          )
+        : undefined
+
+    return buildWriteSuccessResponse(loopClosureAnnotation, loopFoldAnnotation)
   } catch (err) {
     // Any Supabase failure inside lookupAccreditationRecord or the writer
     // library's persistence-layer calls propagates here. Map to 503 with a
