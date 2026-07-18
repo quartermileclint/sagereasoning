@@ -14661,3 +14661,42 @@ Expected: the guards present; the AE-1 prompt header reads `code-elevated`/dark 
 **Rules served:** PR7, PR15 (extend-never-duplicate is the ADR's spine), PR16 (positioning: the trajectory-as-product line strengthened; dogfood: the session's own writes produced live specimens), PR18, KG-EX1 (reconciliation before prescription), R6c/R6d, R17a/R17b, 0d-ii.
 
 **Status:** Adopted. Cross-references: ADR-014, `D-AGENT-EXTENSION-MENTOR-COMPONENT-REVIEW-CAPTURED-SCOPED-2026-07-18` (predecessor), `D-TRUST-LAYER-S11-F2-MENTOR-RULING-EXCLUSION-CLAUSE-GOVERNS-ADOPTED` (R12/R13 inherited), ADR-012, ADR-013 §2/§8, `operations/handoffs/founder/2026-07-18-agent-extension-AE1-delta-layer-NEXT-SESSION-PROMPT.md`.
+
+## 2026-07-18 — D-TRUST-LAYER-S11A-EXTRACTION-PRIOR-NARROWING-DEFERRED-CAP-REVIEWED
+
+**Decision:** S11a ran the mentor-ruled R12 extraction gate FIRST and it ruled **"the extraction question is prior"** (founder election 1): the Arm-1 narrowing (R11 content — ≥1 identified circle — unchanged, not re-litigated) is **DEFERRED to S11b**, because the examined input is **starved by composition at the harness site** (Diagnostic-certain — root cause identified: `describeAction` sends a `Write` as path + char count with the **content discarded entirely**, an `Edit` as the first 200 chars of `new_string`; the consult POSTs that one line — `at-action-hook.mjs:280-321`; all 64 Write buffer previews consistent, 24 full-match/40 prefix-verified under the 160-char preview cap, zero anomalies). This resolves the predecessor's starved-vs-mis-sited fork: NOT mis-sited (the Write payload HAS content; the hook drops it), NOT a Layer-1 defect (the prompt is faithful; circles surface when composed text carries parties — with honest bounds: the idx-104 zero-information Write read `moderate` [extraction noise on one-liners, the window's only closed loop], and 4 party-word snippets got zero circles [mention ≠ affect]). **The R14 cap review is DISCHARGED on current ground** (founder election 2: **disclose-and-carry; the durable fix rides S11b**): the public GET re-verified live (`justice_capped: true`, 1 evaluated domain, 0.42); the cap rests on ONE S9-install `justice-surface-unevaluated` event (register D1, queried ground); a data-only latch clear is UNSTABLE — the re-latch chain verified first-hand at source (route:803 R18f-gated emission with content-hash idempotency ⇒ new assessments emit new events → `derive-trust-events.ts:200` → `trust-transition.ts:196` latches) — so the reducer narrowing + state correction land once, founder-walked (AC7), inside S11b. R7's "not deferred" reconciled head-on in the diagnosis §5. **P1 (§9 input question) confirmed registered** (R15). **ADR-014 consequence:** AE-1's hard pre-condition ("S11a has settled the extraction regime") **moves to S11b**; the item-5 bare-tool-payload trigger's fire-rate diagnostic was superseded by direct source reading — the trigger rides S11b as a remedy component; the regime version-mark requirement carried into S11b Part 1 (dated notes on the AE-1 + S11b prompts). **Nothing narrowed, nothing flipped: deferring the narrowing behind the extraction work item is the session prompt's named SUCCESS outcome.**
+
+**Reasoning:** R12 verbatim — *"If the extraction is uncertain, the extraction question is prior"* — and the finding is stronger than uncertain: narrowing now would produce exactly R13's *"clean number on a starved input"* (bounded reconstruction over the frozen 130: the narrowed arm reads 128 false_positive / 1 correct_hold — a number measuring the harness's input composition, not the examination). The canonical report `--dry-run` over the frozen buffer records the current arm's official reading (129 holds / 0 false-positive / "MET (0 ≤ 129)") — the artifact the ruling found uninformative, now on record from the tool itself.
+
+**Files touched:**
+- `operations/trust-layer-2026-07/2026-07-18-S11a-extraction-gate-diagnosis.md` — NEW; the diagnosis of record (gate ruling applied; evidence; cap review §5; elections §7; review folds)
+- `operations/handoffs/founder/2026-07-18-trust-layer-S11b-examined-input-recomposition-NEXT-SESSION-PROMPT.md` — NEW; the extraction work item (recomposition + narrowing + reducer/cap fix; the mandatory sensitive-path denylist [review HIGH]; N≥3 validation with mention-without-affect negatives; dedup + consumers scope; ADR-014 regime version-mark + item-5 trigger)
+- `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` — P3 answered at diagnosis level; P2 deferred behind P3; D1 reviewed + dispositioned; P1's 124/125 figures re-attributed to the briefing's 125-snapshot (review fold); changelog
+- `operations/trust-layer-2026-07/trust-layer-build-plan.md` — §S11a dated outcome blockquote
+- `operations/handoffs/founder/2026-07-18-agent-extension-AE1-delta-layer-NEXT-SESSION-PROMPT.md` — dated pre-condition note (the regime-settlement gate moves to S11b)
+- `operations/decision-log.md` — this entry
+- `operations/handoffs/founder/2026-07-18-trust-layer-S11a-extraction-gate-CLOSE.md` — NEW; session close
+
+**Risk classification:** Standard under 0d-ii — documents only. The session OPENED `code-elevated` with a `code-critical` arm; **neither was engaged**: no code, schema, flag, credential, mint, deploy, or DB write; the report ran `--dry-run` offline; `agent_hold_observations` remains empty; production byte-equivalent. AC7 not engaged. PR6 not engaged. KG1 N/A (no DB writes).
+
+**Rollback path:** `git revert` the records commit. The two founder elections would need re-electing if re-litigated; the binding 2026-07-17 verdict stands regardless.
+
+**Verification step (founder-performable):**
+```
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
+# the gate outcome + cap disposition are recorded
+grep -c "STARVED BY COMPOSITION" operations/trust-layer-2026-07/2026-07-18-S11a-extraction-gate-diagnosis.md   # >=1
+grep -c "DISCLOSE-AND-CARRY" operations/trust-layer-2026-07/2026-07-18-S11a-extraction-gate-diagnosis.md      # >=1
+# no code/schema/flag change from this session
+# (expected: ONLY the pre-existing " M website/src/data/environmental-context.json" — another stream, present at session open)
+git status --short -- website/src harness/ website/supabase* website/scripts .claude
+# batteries green on unchanged code (spot-check the release gate)
+cd website && node ../harness/gate1-pre-decision/test/negative-battery.mjs 2>&1 | tail -2   # RELEASE GATE: PASS
+```
+Expected: the records present; no code paths modified; the release gate passes.
+
+**Open questions:** none held by this session — both forks were elected. Carried: everything in `S11-FLIP-PREREQUISITES-REGISTER.md` (P1 own step; P2/P3 → S11b; P5/P6 after S11b; D1 durable fix inside S11b).
+
+**Rules served:** PR7, PR15 (Workflow fan-out review; §4 precedent first-hand completion on the spend limit), PR18, KG-EX1 (the gate judged instrument-vs-input before any fix was framed), R14/R12/R13/R15 (mentor, binding), R17b (egress consequence carried to S11b), 0d-ii.
+
+**Status:** Adopted. Cross-references: `D-TRUST-LAYER-S11-F2-MENTOR-RULING-EXCLUSION-CLAUSE-GOVERNS-ADOPTED` (the binding ruling this session executes), `D-AGENT-EXTENSION-DESIGN-OF-RECORD-ADR014-ADOPTED-2026-07-18` (the sequencing consequence), the S11a session prompt, the diagnosis of record, the S11b prompt.

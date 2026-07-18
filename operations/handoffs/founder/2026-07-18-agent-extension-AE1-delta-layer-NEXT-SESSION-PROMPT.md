@@ -1,5 +1,7 @@
 # Next-Session Prompt — AE-1: the practice-delta layer (items 1+3's shared module + the `meta.trajectory` delta projection)
 
+> **⚠ PRE-CONDITION UPDATE (2026-07-18, post-S11a — `D-TRUST-LAYER-S11A-EXTRACTION-PRIOR-NARROWING-DEFERRED-CAP-REVIEWED`):** S11a RAN but did **NOT** settle the extraction regime — its R12 gate ruled the extraction question **prior** (Diagnostic-certain: the examined input is starved by composition at the harness site) and the regime settlement moved to **S11b** (`operations/handoffs/founder/2026-07-18-trust-layer-S11b-examined-input-recomposition-NEXT-SESSION-PROMPT.md`). **Read pre-condition 1 below as: "S11b has run and the extraction regime is settled + version-marked." If S11b has not landed, STOP — this session is mis-sequenced.** The S11a diagnosis of record: `operations/trust-layer-2026-07/2026-07-18-S11a-extraction-gate-diagnosis.md`.
+
 **Stream:** founder (agent-extension).
 **Tier:** `code-elevated` — repo-only, dark, flag-gated, additive. **Two named `code-critical` arms live OUTSIDE this session:** (a) any schema element the in-session elections produce (the `layer1_source` provenance column; any row widening) is its own founder-walked 0c-ii; (b) the activation (flag flip on `/api/reason`'s response shape) is its own founder-walked 0c-ii with the R18 docs. The AI performs no Supabase/Vercel/git/mint op.
 **Governing frame:** `/adopted/standing-protocol-cache.md` + `/adopted/build-sessions-protocol-cache.md` (substrate build session); open under `STANDING-SESSION-OPENER-grounded-foundations.md`.
