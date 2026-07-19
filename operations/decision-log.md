@@ -14952,3 +14952,71 @@ npx tsc --noEmit && npm run build                                        # 0 / �
 **INDEPENDENT-REVIEW ADDENDUM (same session, founder-requested):** the first-hand review above was completed by the same session that wrote the code — a self-review, not independent verification. A fresh Workflow (`wf_95e8d22f-7a8`, 20 agents, ~5.05M tokens) was launched to audit the identical diff without trusting the first-hand "CLEAN" claims. **It found what the self-review missed: a HIGH defect.** `isSelfRegardingLoop` (`loop-fold.ts`) did NOT gate on `!engagement.engaged` first — the exact discipline `kathekon-engagement.ts`'s own docstring for `selfCircleOnlySuppression` warned consumers to observe. Consequence: a redirection engaged via Arm 2/3/4 on a self-only circle set with ≥1 non-dikaiosyne domain was double-counted into BOTH `character.loops` and `self_regarding.loops` for the same single loop — breaking the three-way partition's claimed mutual exclusivity. Three independent finder dimensions converged on it from different angles; confirmed by live repro AND mutation testing. **Fixed at the root** (the gate added, mirroring `isCalibrationLoop`'s already-correct pattern). The pre-fix test comments (§8.4d, §19.6) had *asserted* the gate existed without a fixture capable of detecting its absence (§19.6's redirection was `domains:['dikaiosyne']`-only, so the domain condition was trivially false regardless of the gate) — corrected, with genuinely non-vacuous multi-domain pins added (§19.6b/c/d, all three engagement arms). A second, LOW finding was also folded: the report script's ~40-line bracket/legacy-compat classification logic had zero battery coverage — closed with a new subprocess-driven battery (`website/scripts/__tests__/false-hold-observation-report.test.ts`, 11/0). Three other findings were reviewed and REFUTED (a non-reproducible flaky run; Arm-2-on-self-only-violated, which is the designed conservative direction; unvalidated-circle-name permissiveness, a disclosed Layer-1-scope matter). **Batteries after the fold:** loop-fold 172→**179/0**; new report battery **11/0**; kathekon 105/0 unchanged; all others (logic-harness 155/0, negative-battery 230/0 RELEASE GATE, trust-core 98/0, s3-combiner 106/0, emission-hooks 15/0, tsc 0, build ✓) re-confirmed green. **Lesson:** a same-session first-hand review shares the author's blind spots — I documented the `!engaged`-gate discipline in one file and violated it in the consumer, and my own "split-correctness: CLEAN" verdict missed it. A genuinely independent, freshly-launched review caught it auditing the same diff. Saved to memory (`independent-rereview-catches-self-review-blind-spots`).
 
 **Status:** Adopted; the predicate + fold are Verified (dark/additive) AND independently re-reviewed with the one confirmed HIGH defect fixed at the root. Cross-references: `D-MENTOR-CONSULTATION-DIKAIOSYNE-SELF-CIRCLE-ADOPTED-2026-07-19`, the narrowing-session prompt + close, `D-AGENT-EXTENSION-AE2-ACTIVATION-LIVE-2026-07-19`, register items D1/D3/**D4**.
+
+---
+
+## 2026-07-19 — D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19
+
+**Decision:** the Agent-Organization + Evidence Program build plan (`operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md`, v2) is ADOPTED as the plan of record, as-is. Adoption approves the SEQUENCE (P0–P9); it pre-approves NO live op — every mint/install/flag/schema/deploy remains its own founder-walked 0c-ii step at its named tier.
+
+**Reasoning:** amalgamates the founder's four org questions (roster gaps → per-agent permissions/budgets → a founder console) with the project's own stalled evidence gaps (the stale 2026-06-11 0h value verdict; the S11 readiness standard's unmet parts 1–3; the un-measured Layer-1 extraction question) into one program on a single insight — staffing the startup with sage-practice-harnessed agents can generate the readiness-evidence distribution the standard lacks, BOUNDED by §1a (surface-conditional + the internal-staff qualitative bound) and GATED by §2 (attended-only default; a hard floor on the proactive envelope). Drafted first-hand, then independently critiqued (`wf_e55e52e4-d7c`, 23 findings, all confirmed) and folded to v2 before adoption — the P3 discipline (independent review) dogfooded on the plan itself.
+
+**Files touched:**
+- `operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md` — status DRAFT v2 → Adopted.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** Standard (`governance`) under 0d-ii. Documents only; NO code/flag/schema/mint/deploy. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` the records commit — the plan reverts to DRAFT; no live state depends on adoption.
+
+**Verification step (founder-performable):**
+```
+grep -c "ADOPTED as the plan of record" operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md
+```
+Expected: `1`.
+
+**Open questions:** §1a's "representative distribution" qualitative bound (internal-staff self-reference) is a DISCLOSED open question for the eventual S11 mentor re-examination — named, not resolved by this plan.
+
+**Rules served:** Rule B (holistic second pass, re-applied at §7); PR17 (every live op founder-walked); KG-EX1 (instrument fidelity — the plan's own critique before adoption); the independent-review discipline (P3, dogfooded on this plan).
+
+**Status:** Adopted. Cross-references: the plan file; the brainstorm-approved list (in-session, 2026-07-19); the P0 prompt (`operations/handoffs/founder/2026-07-19-s9-loop-consult-credential-refresh-NEXT-SESSION-PROMPT.md`, already authored); `D-KATHEKON-DIKAIOSYNE-SELF-CIRCLE-NARROWING-BUILT-REVIEW-FOLDED-2026-07-19` (the predecessor stream this program runs alongside, not in place of).
+
+---
+
+## 2026-07-19 — D-S9-LOOP-CONSULT-CREDENTIAL-DIAGNOSED-HEALTHY-NO-REFRESH-2026-07-19
+
+**Decision:** the P0 s9-loop consult-credential "refresh" (the Agent-Org build plan's first step) ran as a **diagnosis** and returned **no refresh needed — the credential is healthy (DB-verified).** The intermittent framing is NOT a credential problem: the settings consult token is valid, its limits are correct (5000/200) and well under, and the dominant failure is a server-side **transient DB-layer fail-secure under load, masked to HTTP 401 by the route.** **NO mint / revoke / SQL / deploy performed.** A differently-scoped infrastructure follow-up is handed off.
+
+**Reasoning (settled after a founder-run DB lookup — see the arc note):**
+- **The route masks all auth failures to 401.** `/api/reason` runs `requireAuth` (user-JWT) first, then `validateApiKey` as fallback; on total failure the fallthrough returns `auth.error` (the requireAuth 401), NEVER `apiKey.error` (`route.ts:706–726`). So `validateApiKey`'s `invalid_token`-401, quota-429, suspended-403, and usage-RPC-503 ALL flatten into a single **401** (body: generic "Please sign in"). **Memory `api-key-1-per-day-limit-masks-as-401` is CORRECT about this** — quota DOES surface as 401 at `/api/reason` via the masking. (A mid-session claim that that memory was "outdated" was itself an error; corrected here.)
+- **Because the 401 is ambiguous, the DB `list` was the only disambiguator.** Founder-run `mint-credential.ts list` (prod): the settings token `sr_prac_0ba814…` hashes to id **`33bef3d4…`** (register §E gen-2 consult row) — limits **5000/mo, 200/day**, monthly usage **623/5000 (13%)**; accred `sr_prac_18c213…` = `1ffe14f6…`, 5000/200, used 70. **Quota ruled out:** monthly 623/5000, and daily successful consults peak ~57 (07-18) far below the 200/day cap (the ~50–57/day ceiling is the SUCCESS count under a high transient-failure rate, not a limit).
+- **So the 401s are transient DB-layer fail-secures under load.** `gate1.log` (gen-2 era): the SAME token produced **256 successful CONSULT + 22 FRAMED events** (+623 recorded calls) — valid and recognized; a valid token can't intermittently become "unknown," and quota/suspension are ruled out, so the residual **131 401s are transient credential-lookup query errors → `invalid_token` → 401** (and the usage-RPC fail → 503 → also masked) under the dogfood's burst of heavy 13–20s composed consults. Time-correlated clusters (07-19: ~35 consecutive successes 01:16–01:39; 401 clusters 00:11–00:19 + 05:28+) point at shared DB contention. (Observed live: the Gate-2 hook 401'd on this session's own Edits throughout.)
+- **The 2026-07-18 record "the raw token no longer hashes to `33bef3d4…`" is CORRECTED:** it hashes to exactly that row (623 successful calls recorded on it); that day had 57 successes alongside its 101 401s. The accred/reflect path (`sr_prac_18c213…`) is healthy — close-writes land, reflects persist.
+- Full log failure profile (all-time): **131 401 (transient fail-secure, masked) · 45 timeout@28s (S11b composed-consult latency, fail-open-honest) · 20 429 (the 30/min IP rate-limiter, pre-auth, not masked) · 17 503 (post-auth engine errors) · 20 no-assessment · 1 403.** None is fixed by a fresh credential (same limits, same DB fail-secures).
+
+**Diagnostic arc (instrument-fidelity note — the reasoning was not clean):** three successive diagnoses preceded the settled one — (1) quota/rate ceiling (offered before reading the enforcement code); (2) transient-infra-not-quota (offered with false confidence "401 ≠ quota", on a partial read that missed the route masking); (3) re-opened-quota (correctly surfaced that the route masks quota→401, but over-corrected on the ~50–57/day success ceiling, mis-read as a quota cap). The founder-run DB `list` settled it as **(2)-was-right: healthy credential, transient fail-secure.** The lookup was named in the P0 prompt's Step 1 and should have been the first move; the churn cost two extra decision-cycles but **no live op ran.** Lesson saved to memory (`gate1-consult-401-is-transient-fail-secure`).
+
+**Founder decisions (AskUserQuestion, three turns):** turn 1 (initial quota framing) → "mint gen-3"; turn 2 (AI corrected to transient-infra) → "document + hand off (no live op)"; turn 3 (AI re-corrected: route masks quota→401, so quota re-plausible) → **"run the read-only `list` lookup"** — which settled it: healthy credential, no refresh. The AI reversed its own framing twice before any live op ran.
+
+**Files touched (documents only):**
+- `operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md` — §E note + changelog: gen-2 consult DIAGNOSED HEALTHY; the 2026-07-18 stale-token reading corrected; no rotation performed.
+- `operations/handoffs/founder/2026-07-19-consult-lookup-resilience-and-latency-NEXT-SESSION-PROMPT.md` — the handed-off follow-up.
+- `operations/handoffs/founder/2026-07-19-s9-loop-consult-credential-refresh-CLOSE.md` — this session's close.
+- `operations/decision-log.md` — this entry.
+- memory: new `gate1-consult-401-is-transient-fail-secure` (route-masking + DB-disambiguation + this session's arc). `api-key-1-per-day-limit-masks-as-401` is CORRECT and untouched.
+
+**Risk classification:** Standard (`governance`) under 0d-ii. Documents only; NO code / flag / schema / mint / revoke / deploy / DB change. AC7 not engaged. **Production byte-equivalent.**
+
+**Rollback path:** `git revert` the records commit — no live state depends on these documents.
+
+**Verification step (founder-performable):**
+```
+grep -c "DIAGNOSED HEALTHY" operations/trust-layer-2026-07/S11-FLIP-PREREQUISITES-REGISTER.md
+```
+Expected: `≥1`.
+
+**Handed-off follow-up (differently scoped, NOT a credential op):** (a) **server-side credential-lookup resilience** — retry-once (or a brief backoff) on a transient query error in `validatePracticeCredential` before fail-closing to `invalid_token`/401, so transient DB contention degrades gracefully instead of surfacing as a spurious auth failure (it makes the SAME auth decision, more resiliently — no auth-decision change ⇒ `code-elevated`, not Critical); (b) **composed-consult latency** — the `GATE1_ACTION_TEXT_MODE=lean` knob and/or raising the 28s at-action hook timeout, to cut the S11b 13–20s extraction latency that both drives the DB-contention window and produces the 28s timeouts. Both are `code-elevated`/config.
+
+**Rules served:** PR17 (no live op without a founder walk — none ran); KG1 (the fail-secure posture is honest, but its 401 surfacing is diagnostically ambiguous — the follow-up names it); KG-EX1 (instrument fidelity — the harness's own failure mode correctly characterised; a standing mis-diagnosis reversed); the "report outcomes faithfully" standard (the session's premise was partly mis-targeted and is recorded as such). **S11 flip REFUSED; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's.**
+
+**Status:** Complete (diagnosis; no refresh needed; credential DB-verified healthy — 5000/200, 623/5000 used). Cross-references: the P0 prompt (`…-s9-loop-consult-credential-refresh-NEXT-SESSION-PROMPT.md`); `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19` (this was its P0); register §E; `D-KATHEKON-DIKAIOSYNE-SELF-CIRCLE-NARROWING-BUILT-REVIEW-FOLDED-2026-07-19` (the session whose dogfood surfaced the intermittent framing).
