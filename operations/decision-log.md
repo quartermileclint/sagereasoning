@@ -14872,3 +14872,51 @@ npx tsc --noEmit && npm run build                                        # 0 / �
 **Rules served:** PR10/PEV-loop (diagnostic-certain re-verification via live mutation, matching the project's own "Diagnostic-certain — root cause identified" AI-signal standard), R13 (evidence floors now genuinely non-gameable by replay, not just disclosed), ADR-014 §3.2/§5 (the calibration guarantee is now structural, not aspirational), KG-EX1 (a second independent pass caught what a first-hand review, however careful, could not see in its own blind spot — the value of genuine independence over self-review). **The S11 flip remains REFUSED; MEASURE throughout; ENFORCE is S11; weights BLOCKED; the 0h call remains the founder's.**
 
 **Status:** Adopted; the implementation is Verified (dark, corrected). Cross-references: `D-AGENT-EXTENSION-AE2-CI4-LOOP-FOLD-BUILT-DARK-REVIEW-FOLDED-2026-07-19` (the original build this entry corrects), ADR-014 §3.2/§4/§5, the AE-2 activation prompt (unaffected in shape, its expected-output smoke should be re-read against the new fields).
+
+---
+
+## D-AGENT-EXTENSION-AE2-ACTIVATION-LIVE-2026-07-19
+
+**Decision:** the AE-2 `loop_fold` MEASURE surface is LIVE in production. `SUBSTRATE_LOOP_FOLD_ENABLED=true` in Vercel Production (founder-walked `code-critical` 0c-ii; AC7 + PR6 + PR17). The accreditation write 200 now carries the additive `loop_fold` block (schema `agent-loop-fold-v1`). **Production intentionally NOT byte-equivalent** — a deliberate standing change. Rollback = unset the flag + redeploy (byte-identical flag-off, battery-asserted).
+
+**Walk (every live op the founder's):** `79b0677` (the independent-review fold, loop-fold **132/0**) deployed green DARK first; then the flag flip + redeploy green. The AI guided + verified, performed no Vercel/git op.
+
+**Pre-condition honesty note:** at session open HEAD was `679d343` (pre-fold; loop-fold measured 104/0 — stale). The founder committed + pushed the re-review fold as `79b0677` mid-session; its commit *message* is a stale copy still reading "104/0" (cosmetic — the tree content is the corrected 132/0 build; `loop-fold.ts` +161, `route.ts` +56, `INDEPENDENT-REREVIEW` entry present). Batteries re-verified on the actual HEAD: loop-fold **132/0** · s3-combiner 106/0 · kathekon 79/0 · route **90/90** · `tsc` 0.
+
+**Live smoke (founder-walked, throwaway UPCs `consult,accreditation_write`, owner+agent bound — the s9-loop consult token is stale and the s9-loop accred credential lacks `consult`):** on `sagereasoning:ae2-smoke2@v1` the full `loop_fold` block was captured and verified field-by-field — `schema:"agent-loop-fold-v1"`, `envelope.n_verified:1`/`n_verifier_unavailable:0`/`n_duplicate_excluded:0`, `ordering.occurred_at_basis:"submission_order"`, `identity.kind:"owner_agent_pair"` (6e §A held), all refusal/PA-10/measure notes + both `bounds` clauses; a kathekon-engaged redirection routed to `character.loops.open:1` with `instrument_calibration` a separate empty bucket — **the corrected split verified live in the direction the independent re-review fixed.** `regime.write_era:"boundary_band"` (not the prompt's anticipated `post-s11b-recomposition`) is correct/honest — the writes stamped in the last hour of the S11b boundary day (UTC), so `assignRegimeEra` conservatively refuses post-boundary attribution (same behaviour AE-1's activation hit). Flag-took-effect proof: `loop_fold` present on the write 200 (absent flag-off).
+
+**The calibration finding (drove the mentor consultation):** a heavier batch probe (8 self-regarding instrumental-gap consults, daily raised to 30) never populated `instrument_calibration` — all 8 drew a redirection engaging `dikaiosyne` via ONE circle at `deliberate`; a diagnostic re-run showed the circle is **`self_preservation`** with obligation **`indeterminate`** on all 7 successful consults. ⇒ the calibration cell is near-unreachable through the consult path (Layer-1 attaches `self_preservation` to essentially every decision), unit-locked at 132/0. See `D-MENTOR-CONSULTATION-DIKAIOSYNE-SELF-CIRCLE-ADOPTED-2026-07-19`.
+
+**Founder's calls:** keep AE-2 live as MEASURE (not roll back — binds nothing, mechanism proven, routes correctly whatever the predicate gives); **R18 docs DEFERRED** (do not publicly document the `loop_fold` split while its semantics are about to be re-specified by the mentor verdict).
+
+**Risk classification:** Critical (`code-critical`) 0c-ii — env-flag activating a new field on a live route's response. AC7 engaged + discharged (founder-walked). PR6 + PR17.
+
+**Rollback:** unset `SUBSTRATE_LOOP_FOLD_ENABLED` + redeploy (byte-identical, battery-asserted). No schema.
+
+**Rules served:** ADR-014 §3.2/§4/§5/§6/§7 (AE-2), ADR-013 §8 (envelope), PR17 (founder-walked live ops), R18 (docs deferral is itself an R18 posture call). **The S11 flip remains REFUSED; MEASURE throughout; ENFORCE is S11; weights BLOCKED; the 0h call remains the founder's.**
+
+**Status:** Adopted; Live (MEASURE). Cross-references: the AE-2 activation prompt + close (`operations/handoffs/founder/2026-07-19-agent-extension-AE2-activation-{NEXT-SESSION-PROMPT,CLOSE}.md`), `D-AGENT-EXTENSION-AE2-INDEPENDENT-REREVIEW-FOLDED-2026-07-19` (the pushed build), `D-MENTOR-CONSULTATION-DIKAIOSYNE-SELF-CIRCLE-ADOPTED-2026-07-19`.
+
+---
+
+## D-MENTOR-CONSULTATION-DIKAIOSYNE-SELF-CIRCLE-ADOPTED-2026-07-19
+
+**Decision:** the private mentor's verdict on `dikaiosyne` and the self-preservation circle is ADOPTED AS BINDING SPECIFICATION (founder, 2026-07-19). Verbatim record canonical: `operations/trust-layer-2026-07/2026-07-19-mentor-consultation-dikaiosyne-self-circle-verbatim.md` — verbatim wins over any paraphrase.
+
+**The ruling:** `dikaiosyne` (justice) is other-directed. The **`self_preservation` circle, standing alone with no other identified party, is NOT a justice surface.** The kathekon-engagement predicate's **justice-surface arm (Arm 1) should require ≥1 circle BEYOND `self_preservation`** — a circle containing another rational agent whose good is genuinely at stake (a further narrowing of the R11/S11b Arm-1 work). Self-regarding action is governed by `phronesis`/`sophrosyne`, not `dikaiosyne` (the unity thesis does not make the virtues co-extensive — different trigger conditions). An `"indeterminate"` obligation on the self-circle is the trigger misfiring, not a real-but-unresolvable duty. The **A2-omission class is an EXTRACTION responsibility, not predicate breadth** — an omitted harm is a real party absent from the representation; fix extraction, do not broaden the predicate.
+
+**Provenance:** the AE-2 activation smoke found that Layer-1 attaches `self_preservation` to essentially every consult, so the "justice surface with ≥1 circle" arm fires universally (the `instrument_calibration` cell is near-unreachable through consults). The finding was put to the mentor; the verdict was adopted in full.
+
+**Reach:** `assessKathekonEngagement` (`website/src/lib/substrate/trust-core/kathekon-engagement.ts`) is the SHARED predicate — the ruling narrows the AE-2 `loop_fold` (LIVE, MEASURE), the S11 enforce gate's G6(a) qualification, and the false-hold labelling instrument (the frozen 130-record buffer). The AE-2 fold's headline split currently mis-classifies the dominant self-only consult-path case (they engage `dikaiosyne`→`character` where the ruling says they should not satisfy the justice arm); it is MEASURE-only so nothing consumes it — a fidelity refinement, no harm.
+
+**Design depth flagged by the mentor (for the build):** once `self_preservation` alone stops satisfying the justice arm, a genuinely-`phronesis` self-regarding redirection must be classified deliberately in the `loop_fold` split (character-`phronesis` vs `instrument_calibration`) — not a one-line change.
+
+**Adopted-but-not-yet-built:** the narrowing is a separate `code-elevated` build session (`operations/handoffs/founder/2026-07-19-kathekon-dikaiosyne-self-circle-narrowing-NEXT-SESSION-PROMPT.md`) — re-verify AE-2 + the S11 gate path + re-classify the frozen false-hold buffer under the corrected predicate; land an ADR amendment. The verbatim record is its binding spec.
+
+**Risk classification:** Governance (`governance`) rider on the activation session — documents only; NO code/flag/schema change this session. AC7 not engaged for the adoption itself.
+
+**Rollback:** the adoption is a record; the verbatim consultation stands as record regardless. `git revert` the records commit to withdraw the decision-log/verbatim/prompt (the mentor's answer, once given, remains historical).
+
+**Rules served:** the project's mentor-verdict-as-binding-specification convention (ADR-013 §11 lineage), Stoic-fidelity lineage (apatheia-not-dikaiosyne → ADR-010 dikaiosyne weighting → this self-circle boundary), R13 (the A2-omission bound reframed as extraction responsibility). **The S11 flip remains REFUSED; MEASURE throughout; ENFORCE is S11; weights BLOCKED; the 0h call remains the founder's.**
+
+**Status:** Adopted (binding). Cross-references: the verbatim record, the narrowing-session prompt, `D-AGENT-EXTENSION-AE2-ACTIVATION-LIVE-2026-07-19`, the AE-2 activation close.
