@@ -67,6 +67,19 @@
  * a non-vacuous differing-proximity control; §9/§11 gained the corrected
  * note pins + the strengthened, live-mutation-resistant F3 pin; §12 renamed
  * n_truncated → n_truncated_uninspected.
+ *
+ * v2 (2026-07-19 — the self-circle mentor ruling; the kathekon split
+ * re-specified; schema agent-loop-fold-v2):
+ *   §19 The three-way split: self-regarding prudential redirections (justice
+ *       suppressed ONLY by the beyond-self requirement + ≥1 non-dikaiosyne
+ *       domain) land in the NEW `self_regarding` bucket — their non-dikaiosyne
+ *       LEVELS feed character, their closure counts never merge into
+ *       character.loops, and they are NOT instrument_calibration; the
+ *       dikaiosyne-evidence rule (level contribution requires beyond-self OR
+ *       violated; exclusions counted); the misfire class unchanged; note +
+ *       bounds pins. Fixture circles now carry NAMES (mirroring the required
+ *       OikeiosisCircleAssessment.circle field; default = an other-party
+ *       circle so every pre-v2 pin keeps its meaning).
  */
 
 import { readFileSync } from 'fs'
@@ -138,6 +151,13 @@ const testVerify = (signed: unknown, _now: Date) => {
   return { valid: true as const, key_id: 'test-key' }
 }
 
+/** One fixture circle: a bare string = an obligation status on the DEFAULT
+ *  other-party circle ('local_community' — preserves every pre-v2 pin's
+ *  meaning); null = a circle with no assessment (same default name); an
+ *  object = explicit {circle, status} for the v2 self-circle / name-less
+ *  cases ({circle: null} models a malformed name-less circle). */
+type CircleSpec = string | null | { circle?: string | null; status?: string | null }
+
 interface ElementSpec {
   proximity?: string
   domains?: string[]
@@ -145,7 +165,7 @@ interface ElementSpec {
   depth?: string
   prior?: string
   redirection?: boolean
-  circles?: (string | null)[]
+  circles?: CircleSpec[]
   passions?: string[]
   corroboration?: CorroborationReport
   signature?: string
@@ -183,9 +203,14 @@ function el(spec: ElementSpec = {}): unknown {
           }
         : {}),
       oikeiosis: {
-        relevant_circles: (spec.circles ?? []).map((status) =>
-          status === null ? {} : { obligation_assessment: { status } },
-        ),
+        relevant_circles: (spec.circles ?? []).map((c) => {
+          const entry =
+            c !== null && typeof c === 'object' ? c : { circle: 'local_community', status: c }
+          return {
+            ...(typeof entry.circle === 'string' ? { circle: entry.circle } : {}),
+            ...(entry.status ? { obligation_assessment: { status: entry.status } } : {}),
+          }
+        }),
       },
       passion_diagnosis: {
         passions_detected: (spec.passions ?? []).map((sub) => ({
@@ -577,7 +602,7 @@ function collectKeys(x: unknown, out: Set<string>): Set<string> {
 // ============================================================================
 {
   const b = fold([])
-  eq(b.schema, 'agent-loop-fold-v1', '§9 schema tag')
+  eq(b.schema, 'agent-loop-fold-v2', '§9 schema tag (v2 — the 2026-07-19 split re-specification)')
   eq(b.vocabulary_note, LOOP_FOLD_VOCABULARY_NOTE, '§9 vocabulary note locked')
   assert(
     b.vocabulary_note.includes('past tense') && b.vocabulary_note.includes('predicts nothing'),
@@ -900,6 +925,275 @@ function collectKeys(x: unknown, out: Set<string>): Set<string> {
     pathAgentId: 'sagereasoning:agent@v1',
   })
   eq(noOwner.kind, 'credential', '§18 a null owner refuses the pair join (no fallback exists)')
+}
+
+// ============================================================================
+// §19 — v2: the three-way split (the 2026-07-19 self-circle mentor ruling)
+// ============================================================================
+{
+  /** The calibration-probe class, verbatim from the AE-2 activation smoke:
+   *  a redirection engaging phronesis + dikaiosyne via exactly ONE circle =
+   *  self_preservation at indeterminate, deliberate proximity. */
+  const selfProbe = (ref: string, over: Partial<ElementSpec> = {}): unknown =>
+    el({
+      redirection: true,
+      domains: ['phronesis', 'dikaiosyne'],
+      circles: [{ circle: 'self_preservation', status: 'indeterminate' }],
+      ref,
+      depth: 'standard',
+      ...over,
+    })
+
+  // §19.1 — the probe class lands in self_regarding, NOT character, NOT
+  // calibration (the mentor: genuine prudential correction, not a justice
+  // hold, not instrument noise).
+  const b1 = fold([selfProbe('S1')])
+  eq(b1.self_regarding.loops.redirections, 1, '§19.1 self-regarding prudential loop lands in self_regarding')
+  eq(b1.self_regarding.loops.open, 1, '§19.1 its closure is computed by the same live rule')
+  eq(b1.character.loops.redirections, 0, '§19.1 it never feeds character closure')
+  eq(b1.instrument_calibration.loops.redirections, 0, '§19.1 it is NOT instrument noise')
+
+  // §19.2 — its NON-dikaiosyne levels feed character; its dikaiosyne level is
+  // excluded + counted (the dikaiosyne-evidence rule).
+  const b2 = fold([
+    selfProbe('S1'),
+    el({ ref: 'X1', depth: 'standard' }),
+    el({ ref: 'X2', depth: 'standard' }),
+  ])
+  eq(b2.character.domains_basis['phronesis'].verdicts_in, 3, '§19.2 the self-regarding loop\'s phronesis level feeds character')
+  assert(typeof b2.character.domains['phronesis'] === 'object', '§19.2 phronesis publishes at floor')
+  if (typeof b2.character.domains['phronesis'] === 'object') {
+    eq(
+      (b2.character.domains['phronesis'] as { open_loop: boolean }).open_loop,
+      false,
+      '§19.2 the self-regarding loop sets NO cell-level open_loop (closure stays engaged-gated)',
+    )
+  }
+  eq(b2.character.n_dikaiosyne_level_excluded, 1, '§19.2 its dikaiosyne level is excluded + counted')
+  assert(!('dikaiosyne' in b2.character.domains), '§19.2 no dikaiosyne cell is fabricated from self-only evidence')
+
+  // §19.3 — a dikaiosyne-ONLY self-only redirection carries nothing but the
+  // corrected mis-attribution ⇒ instrument_calibration (excluded entirely).
+  const b3 = fold([
+    el({
+      redirection: true,
+      domains: ['dikaiosyne'],
+      circles: [{ circle: 'self_preservation', status: 'indeterminate' }],
+      ref: 'S2',
+      depth: 'standard',
+    }),
+  ])
+  eq(b3.instrument_calibration.loops.redirections, 1, '§19.3 dikaiosyne-only self-only redirection ⇒ calibration')
+  eq(b3.self_regarding.loops.redirections, 0, '§19.3 it does NOT qualify as self-regarding-prudential')
+  eq(b3.character.n_dikaiosyne_level_excluded, 0, '§19.3 calibration exclusion precedes the level loop (no double count)')
+
+  // §19.4 — the original misfire class (zero circles, "contrary; no factors")
+  // is UNCHANGED: calibration, nothing else.
+  const b4 = fold([el({ redirection: true, ref: 'F', depth: 'standard' })])
+  eq(b4.instrument_calibration.loops.redirections, 1, '§19.4 the zero-circle misfire class stays calibration')
+  eq(b4.self_regarding.loops.redirections, 0, '§19.4 it is not self-regarding (no circle at all)')
+
+  // §19.5 — a self-regarding loop CLOSES via the live same-depth rule, in its
+  // own bucket; the character chain stays clean of it.
+  const b5 = fold([
+    selfProbe('S1'),
+    el({ ref: 'S1c', depth: 'standard', prior: 'S1' }),
+  ])
+  eq(b5.self_regarding.loops.closed, 1, '§19.5 same-depth closer closes the self-regarding loop (live rule)')
+  eq(b5.self_regarding.loops.verdict, 'closed', '§19.5 self_regarding verdict closed')
+  eq(b5.character.loops.redirections, 0, '§19.5 character closure counts stay clean of the class')
+
+  // §19.6 — violated-on-self: Arm 2 engages ⇒ CHARACTER, and the dikaiosyne
+  // level is KEPT (adverse justice evidence is never dropped — the
+  // conservative direction). NOTE (independent-review fold): this fixture is
+  // domains:['dikaiosyne']-ONLY, so isSelfRegardingLoop's domain condition
+  // (`some(d => d !== 'dikaiosyne')`) is false REGARDLESS of any !engaged
+  // gate — this test alone CANNOT detect a missing gate (the exact vacuity
+  // the independent adversarial re-review found: the original comment here
+  // claimed "the split gates on !engaged first" but nothing exercised that
+  // claim). §19.6 still stands as a valid dikaiosyne-only-domain check;
+  // §19.6b below is the genuinely non-vacuous multi-domain pin.
+  const violatedSelf = (ref: string): unknown =>
+    el({
+      domains: ['dikaiosyne'],
+      circles: [{ circle: 'self_preservation', status: 'violated' }],
+      ref,
+      depth: 'standard',
+    })
+  const b6 = fold([
+    el({
+      redirection: true,
+      domains: ['dikaiosyne'],
+      circles: [{ circle: 'self_preservation', status: 'violated' }],
+      ref: 'V1',
+      depth: 'standard',
+    }),
+    violatedSelf('V2'),
+    violatedSelf('V3'),
+  ])
+  eq(b6.character.loops.redirections, 1, '§19.6 violated-on-self redirection routes to character (engaged via Arm 2)')
+  eq(b6.self_regarding.loops.redirections, 0, '§19.6 it is not self_regarding (engagement stands)')
+  eq(b6.character.n_dikaiosyne_level_excluded, 0, '§19.6 violated dikaiosyne levels are NEVER dropped')
+  assert(typeof b6.character.domains['dikaiosyne'] === 'object', '§19.6 the adverse dikaiosyne fold publishes')
+
+  // §19.6b — INDEPENDENT-REVIEW FOLD (HIGH, confirmed by live repro +
+  // mutation testing): the genuinely non-vacuous version of §19.6 — a SECOND
+  // non-dikaiosyne domain (phronesis) is tagged alongside the self-only
+  // violated circle, so PRE-FIX this element satisfied BOTH isEngagedLoop
+  // (violatedObligation ⇒ engaged) AND isSelfRegardingLoop (the domain
+  // condition now true) — double-counted into character.loops AND
+  // self_regarding.loops simultaneously for the SAME single redirection.
+  // isSelfRegardingLoop now gates on !engagement.engaged FIRST (mirroring
+  // isCalibrationLoop's existing pattern and kathekon-engagement.ts's own
+  // documented consumer contract), so an engaged loop can NEVER also land in
+  // self_regarding — the three-way partition is mutually exclusive.
+  const b6b = fold([
+    el({
+      redirection: true,
+      domains: ['dikaiosyne', 'phronesis'],
+      circles: [{ circle: 'self_preservation', status: 'violated' }],
+      ref: 'V1B',
+      depth: 'standard',
+    }),
+  ])
+  eq(b6b.character.loops.redirections, 1, '§19.6b (non-vacuous) violated-on-self + 2nd domain ⇒ character (Arm 2 engaged)')
+  eq(b6b.self_regarding.loops.redirections, 0, '§19.6b (non-vacuous) the SAME element is NOT also counted in self_regarding — no double count')
+  eq(b6b.instrument_calibration.loops.redirections, 0, '§19.6b (non-vacuous) and not calibration either — exactly one bucket')
+
+  // §19.6c — the same non-vacuous shape via Arm 3 (proximity ≤ habitual) and
+  // Arm 4 (sub-species passion), the other two arms the review's live repro
+  // exercised — confirming the gate holds for every engagement arm, not just
+  // Arm 2.
+  const b6c = fold([
+    el({
+      redirection: true,
+      proximity: 'habitual',
+      domains: ['dikaiosyne', 'phronesis'],
+      circles: [{ circle: 'self_preservation', status: 'indeterminate' }],
+      ref: 'V1C',
+      depth: 'quick',
+    }),
+  ])
+  eq(b6c.character.loops.redirections, 1, '§19.6c Arm 3 (habitual) + self-only + 2nd domain ⇒ character only')
+  eq(b6c.self_regarding.loops.redirections, 0, '§19.6c not double-counted into self_regarding')
+
+  const b6d = fold([
+    el({
+      redirection: true,
+      domains: ['dikaiosyne', 'sophrosyne'],
+      circles: [{ circle: 'self_preservation', status: 'indeterminate' }],
+      passions: ['epithumia/philarguria'],
+      ref: 'V1D',
+      depth: 'standard',
+    }),
+  ])
+  eq(b6d.character.loops.redirections, 1, '§19.6d Arm 4 (sub-species passion) + self-only + 2nd domain ⇒ character only')
+  eq(b6d.self_regarding.loops.redirections, 0, '§19.6d not double-counted into self_regarding')
+
+  // §19.7 — ordinary (non-redirection) self-only verdicts: phronesis feeds,
+  // dikaiosyne excluded + counted per element (consistency within the
+  // ruling's class — not a redirection-only patch).
+  const ordinarySelf = (ref: string): unknown =>
+    el({
+      domains: ['phronesis', 'dikaiosyne'],
+      circles: [{ circle: 'self_preservation', status: 'indeterminate' }],
+      ref,
+      depth: 'standard',
+    })
+  const b7 = fold([ordinarySelf('O1'), ordinarySelf('O2'), ordinarySelf('O3')])
+  eq(b7.character.domains_basis['phronesis'].verdicts_in, 3, '§19.7 ordinary self-only verdicts feed phronesis')
+  eq(b7.character.n_dikaiosyne_level_excluded, 3, '§19.7 each ordinary self-only dikaiosyne tag is excluded + counted')
+  assert(!('dikaiosyne' in b7.character.domains), '§19.7 no dikaiosyne cell from self-only ordinary evidence')
+
+  // §19.8 — the zero-circle dikaiosyne tag on ORDINARY verdicts is excluded by
+  // the same rule (no identified other party a fortiori).
+  const zeroCircleDik = (ref: string): unknown =>
+    el({ domains: ['phronesis', 'dikaiosyne'], ref, depth: 'standard' })
+  const b8 = fold([zeroCircleDik('Z1'), zeroCircleDik('Z2'), zeroCircleDik('Z3')])
+  eq(b8.character.n_dikaiosyne_level_excluded, 3, '§19.8 zero-circle dikaiosyne tags excluded from levels + counted')
+  assert(typeof b8.character.domains['phronesis'] === 'object', '§19.8 the genuine phronesis evidence still publishes')
+
+  // §19.8b — CONTRAST (non-vacuity): the same shape with a beyond-self circle
+  // publishes a dikaiosyne cell and excludes nothing.
+  const otherCircleDik = (ref: string): unknown =>
+    el({ domains: ['dikaiosyne'], circles: [{ circle: 'local_community', status: 'met' }], ref, depth: 'standard' })
+  const b8b = fold([otherCircleDik('W1'), otherCircleDik('W2'), otherCircleDik('W3')])
+  eq(b8b.character.n_dikaiosyne_level_excluded, 0, '§19.8b beyond-self dikaiosyne evidence is never excluded')
+  assert(typeof b8b.character.domains['dikaiosyne'] === 'object', '§19.8b the other-directed dikaiosyne fold publishes (control)')
+
+  // §19.9 — a MIXED (self + beyond-self) redirection is ENGAGED ⇒ character
+  // (the kept direction at the fold level).
+  const b9 = fold([
+    el({
+      redirection: true,
+      domains: ['dikaiosyne'],
+      circles: [
+        { circle: 'self_preservation', status: 'indeterminate' },
+        { circle: 'household', status: null },
+      ],
+      ref: 'M1',
+      depth: 'standard',
+    }),
+  ])
+  eq(b9.character.loops.redirections, 1, '§19.9 self+household redirection is engaged ⇒ character')
+  eq(b9.self_regarding.loops.redirections, 0, '§19.9 mixed circles are not self-only')
+
+  // §19.10 — note + bounds pins (R13 on the block).
+  const b10 = fold([])
+  assert(
+    b10.self_regarding.note.includes('phronesis and sophrosyne') &&
+      b10.self_regarding.note.includes('never merged'),
+    '§19.10 self_regarding note states the ruling + the closure isolation',
+  )
+  assert(
+    b10.character.note.includes('DIKAIOSYNE-EVIDENCE') &&
+      b10.character.note.includes('n_dikaiosyne_level_excluded'),
+    '§19.10 character note names the dikaiosyne-evidence rule + its count',
+  )
+  assert(
+    b10.instrument_calibration.note.includes('self-regarding-prudential'),
+    '§19.10 calibration note names the class it now excludes',
+  )
+  eq(
+    b10.bounds.selfCircleExclusion,
+    NARROWED_ARM_BOUNDS.selfCircleExclusion,
+    '§19.10 the selfCircleExclusion bound rides the block verbatim',
+  )
+
+  // §19.11 — a name-less (malformed) circle never qualifies as self-only OR
+  // beyond-self: the redirection falls to calibration (unknown identity is
+  // never guessed) and the dikaiosyne level is excluded.
+  const b11 = fold([
+    el({
+      redirection: true,
+      domains: ['phronesis', 'dikaiosyne'],
+      circles: [{ circle: null, status: 'indeterminate' }],
+      ref: 'U1',
+      depth: 'standard',
+    }),
+  ])
+  eq(b11.instrument_calibration.loops.redirections, 1, '§19.11 unknown-identity circle ⇒ calibration (never guessed into a class)')
+  eq(b11.self_regarding.loops.redirections, 0, '§19.11 unknown identity is not confirmed self-only')
+
+  // §19.12 — VIOLATED-ON-UNKNOWN-CIRCLE (first-hand review): adverse justice
+  // evidence engages Arm 2 regardless of circle identity ⇒ CHARACTER, and the
+  // dikaiosyne level is KEPT (violatedObligation ⇒ eligible). Unknown identity
+  // never demotes an adverse reading to calibration.
+  const b12 = fold([
+    el({
+      redirection: true,
+      domains: ['dikaiosyne'],
+      circles: [{ circle: null, status: 'violated' }],
+      ref: 'VU1',
+      depth: 'standard',
+    }),
+    el({ domains: ['dikaiosyne'], circles: [{ circle: null, status: 'violated' }], ref: 'VU2', depth: 'standard' }),
+    el({ domains: ['dikaiosyne'], circles: [{ circle: null, status: 'violated' }], ref: 'VU3', depth: 'standard' }),
+  ])
+  eq(b12.character.loops.redirections, 1, '§19.12 violated-on-unknown redirection ⇒ character (Arm 2 engaged)')
+  eq(b12.instrument_calibration.loops.redirections, 0, '§19.12 adverse evidence is never calibration')
+  eq(b12.character.n_dikaiosyne_level_excluded, 0, '§19.12 violated dikaiosyne levels are kept even on unknown circles')
+  assert(typeof b12.character.domains['dikaiosyne'] === 'object', '§19.12 the adverse dikaiosyne fold publishes')
 }
 
 // ============================================================================

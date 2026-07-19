@@ -631,7 +631,7 @@ mode = "ok";
     AT_ACTION_HOOK,
   );
   const capRec = JSON.parse(rfs(join(capDir, "false-hold-record.jsonl"), "utf8").trim().split("\n")[0]);
-  check("18 capture: schema v2", capRec.schema === "false-hold-record-v2");
+  check("18 capture: schema v3 (2026-07-19 — circle identity captured)", capRec.schema === "false-hold-record-v3");
   check("18 capture: extraction-regime mark (ADR-014)", capRec.extractionRegime === "at-action-v2-composed");
   check("18 capture: inputClass composed", capRec.inputClass === "composed");
   check("18 capture: preview stays the LEAN summary (PII-light)", capRec.actionPreview.startsWith("Write (create/overwrite) the file /repo/cap.md"));

@@ -65,6 +65,11 @@ const stateDir = process.env.GATE1_STATE_DIR || join(tmpdir(), 'sage-gate1')
 const recordsPath = argVal('records', join(stateDir, 'false-hold-record.jsonl'))!
 
 // ── record shape (mirrors harness false-hold-capture.mjs buildFalseHoldRecord) ─
+/** The raw captured signal shape: v3 records carry `circles` (the 2026-07-19
+ *  self-circle narrowing's identity field); v1/v2 records predate it. */
+interface RawCapturedSignals extends Omit<KathekonEngagementSignals, 'circles'> {
+  circles?: (string | null)[]
+}
 interface FalseHoldRecord {
   schema: string
   capturedAt: string
@@ -73,9 +78,36 @@ interface FalseHoldRecord {
   depth: string
   loopEvent: string
   actionPreview: string
-  signals: KathekonEngagementSignals
+  signals: RawCapturedSignals
   kathekon: { isKathekon: boolean | null; quality: string | null }
   carriedPrior: boolean
+}
+
+/**
+ * Normalize captured signals to the predicate's shape. Legacy v1/v2 records
+ * carry no circle names ⇒ every circle entry gets an honest `null` identity
+ * (the predicate treats unknown-identity strictly — it never satisfies the
+ * beyond-self requirement; NARROWED_ARM_BOUNDS.selfCircleExclusion). The
+ * BRACKET below re-reads those records under the legacy-compat assumption so
+ * the printed rate never silently certifies one reading of unknowable data.
+ */
+function normalizeSignals(s: RawCapturedSignals): KathekonEngagementSignals {
+  return {
+    ...s,
+    circles: Array.isArray(s.circles)
+      ? s.circles
+      : (s.obligationStatuses ?? []).map(() => null),
+  }
+}
+
+/** The legacy-compat reading: substitute each unknown-identity circle with a
+ *  beyond-self placeholder, ONLY to compute the bracket's other end (never
+ *  stored, never the canonical classification). */
+function legacyCompatSignals(s: KathekonEngagementSignals): KathekonEngagementSignals {
+  return {
+    ...s,
+    circles: s.circles.map((c) => c ?? 'legacy-unknown-counted-beyond-self'),
+  }
 }
 
 function recordHash(r: FalseHoldRecord): string {
@@ -90,9 +122,13 @@ function isValidRecord(x: unknown): x is FalseHoldRecord {
     !!r &&
     typeof r === 'object' &&
     // v1 = the frozen 2026-07-17 buffer; v2 (S11b) adds inputClass /
-    // extractionRegime / composedChars — both parse; the regime split below
-    // keeps them from being compared as one distribution (ADR-014).
-    (r.schema === 'false-hold-record-v1' || r.schema === 'false-hold-record-v2') &&
+    // extractionRegime / composedChars; v3 (2026-07-19, the self-circle
+    // narrowing) adds signals.circles. All three parse; the regime split below
+    // keeps them from being compared as one distribution (ADR-014), and the
+    // bracket below keeps circle-less records from being certified one way.
+    (r.schema === 'false-hold-record-v1' ||
+      r.schema === 'false-hold-record-v2' ||
+      r.schema === 'false-hold-record-v3') &&
     typeof r.capturedAt === 'string' &&
     // Guard the DB constraints at the door (review fold, 2026-07-12): loop_event
     // against the table's CHECK enum, and captured_at against the TIMESTAMPTZ cast,
@@ -105,7 +141,10 @@ function isValidRecord(x: unknown): x is FalseHoldRecord {
     typeof r.signals.proximity === 'string' &&
     Array.isArray(r.signals.virtueDomainsEngaged) &&
     Array.isArray(r.signals.obligationStatuses) &&
-    Array.isArray(r.signals.subSpeciesPassions)
+    Array.isArray(r.signals.subSpeciesPassions) &&
+    // v3 must carry the circles field it introduced (a v3 record without it is
+    // malformed, not legacy).
+    (r.schema !== 'false-hold-record-v3' || Array.isArray(r.signals.circles))
   )
 }
 
@@ -145,11 +184,25 @@ interface Classified extends FalseHoldRecord {
   proximityAtOrBelowHabitual: boolean
   subSpeciesPassion: boolean
   classification: 'false_positive' | 'correct_hold' | 'not_a_hold'
+  /** ≥1 circle whose identity the capture never recorded (legacy v1/v2). */
+  circleIdentityUnknown: boolean
+  /** The legacy-compat reading (unknown circles counted beyond-self) — the
+   *  bracket's other end. Equals `classification` except where the unknown
+   *  identity was DECISIVE. */
+  classificationLegacyCompat: 'false_positive' | 'correct_hold' | 'not_a_hold'
 }
 
 function classifyAll(records: FalseHoldRecord[]): Classified[] {
   return records.map((r) => {
-    const c = classifyObservation(r.signals, r.loopEvent)
+    const signals = normalizeSignals(r.signals)
+    // The CANONICAL classification (strict: unknown-identity circles never
+    // satisfy the beyond-self requirement) — this is what is stored.
+    const c = classifyObservation(signals, r.loopEvent)
+    // The bracket's other end, computed ONLY for records with unknown circle
+    // identity (for all others it is identical by construction).
+    const compat = c.engagement.circleIdentityUnknown
+      ? classifyObservation(legacyCompatSignals(signals), r.loopEvent)
+      : c
     return {
       ...r,
       hash: recordHash(r),
@@ -160,6 +213,8 @@ function classifyAll(records: FalseHoldRecord[]): Classified[] {
       proximityAtOrBelowHabitual: c.engagement.proximityAtOrBelowHabitual,
       subSpeciesPassion: c.engagement.subSpeciesPassion,
       classification: c.classification,
+      circleIdentityUnknown: c.engagement.circleIdentityUnknown,
+      classificationLegacyCompat: compat.classification,
     }
   })
 }
@@ -199,7 +254,10 @@ async function ingest(rows: Classified[]) {
   // S11b note (2026-07-18): v2 record fields (inputClass / extractionRegime /
   // composedChars) are NOT ingested — agent_hold_observations predates them and
   // a column addition is its own founder-walked schema step. The in-memory
-  // report (incl. the per-regime split) reads them regardless.
+  // report (incl. the per-regime split) reads them regardless. Same for the v3
+  // circles field (2026-07-19): the STRICT classification is what is stored;
+  // the circle names themselves await the same schema decision. After a
+  // predicate refinement, --reingest refreshes stored classifications.
   const dbRows = rows.map((r) => ({
     agent_id: agentId,
     owner_user_id: ownerUserId,
@@ -320,6 +378,24 @@ async function main() {
   const target = fps.length <= corrects.length
   console.log(`  mentor's target (false ≤ correct): ${target ? 'MET' : 'NOT MET'}  (${fps.length} ${target ? '≤' : '>'} ${corrects.length})` +
     (holds.length < 5 ? '   [small sample — a rate over few holds is not yet meaningful]' : ''))
+
+  // THE LEGACY BRACKET (2026-07-19 self-circle narrowing): legacy v1/v2 records
+  // carry no circle names, so the beyond-self requirement cannot be evaluated
+  // on them. The canonical (stored) reading is STRICT — unknown identity never
+  // satisfies the arm. The bracket's other end counts unknown circles as
+  // beyond-self. The true corrected rate lies between the two; NEITHER is
+  // certified for legacy records (a new v3 window measures, it does not guess).
+  const unknownDecisive = holds.filter(
+    (r) => r.circleIdentityUnknown && r.classificationLegacyCompat !== r.classification,
+  )
+  if (holds.some((r) => r.circleIdentityUnknown)) {
+    const fpsCompat = holds.filter((r) => r.classificationLegacyCompat === 'false_positive')
+    const correctsCompat = holds.filter((r) => r.classificationLegacyCompat === 'correct_hold')
+    console.log(`  ⚠ LEGACY BRACKET — ${holds.filter((r) => r.circleIdentityUnknown).length} hold(s) predate circle-identity capture (v1/v2):`)
+    console.log(`    strict reading (canonical, stored):        false=${fps.length} correct=${corrects.length}`)
+    console.log(`    legacy-compat reading (unknown≡beyond-self): false=${fpsCompat.length} correct=${correctsCompat.length}`)
+    console.log(`    records where the unknown identity is DECISIVE: ${unknownDecisive.length}`)
+  }
   // Which arms carried the correct holds (diagnostic — the non-vacuity of the split live).
   const armCounts: Record<string, number> = {}
   for (const r of corrects) {
@@ -353,11 +429,14 @@ async function main() {
     console.log(`    regime ${k}: n=${v.n} false_positive=${v.fps} correct=${v.corrects}`)
   }
 
-  // R13 — the narrowed arm's disclosed bounds, stated ON the output.
+  // R13 — the narrowed arm's disclosed bounds, stated ON the output. Iterate
+  // the whole set so a future bound (like 2026-07-19's selfCircleExclusion)
+  // can never be silently omitted from the printed report.
   const { NARROWED_ARM_BOUNDS } = await import('../src/lib/substrate/trust-core/kathekon-engagement')
   console.log('\n── Bounds on the narrowed Arm 1 (R13 — stated on every output) ────')
-  console.log(`  • ${NARROWED_ARM_BOUNDS.a2Omission}`)
-  console.log(`  • ${NARROWED_ARM_BOUNDS.mentionConversion}`)
+  for (const bound of Object.values(NARROWED_ARM_BOUNDS)) {
+    console.log(`  • ${bound}`)
+  }
 
   // Part 2 — four-domain coverage (records proxy + trust-state read).
   console.log('\n── Part 2 — four-domain coverage + confidence ─────────────────────')

@@ -68,6 +68,16 @@ export function kathekonSignalsFromVerdict(verdict) {
         ? c.obligation_assessment.status
         : null,
     ),
+    // v3 (the 2026-07-19 self-circle narrowing): the circle NAME, index-aligned
+    // with obligationStatuses (same source array). The narrowed Arm 1 reads
+    // circle IDENTITY (≥1 circle beyond self_preservation); v1/v2 records lack
+    // this field, so the TS report null-fills them and BRACKETS their
+    // classification instead of certifying one reading. Live verdicts always
+    // carry the name (OikeiosisCircleAssessment.circle is required); null =
+    // honest unknown, never guessed.
+    circles: circles.map((c) =>
+      c && typeof c.circle === "string" && c.circle.trim() !== "" ? c.circle : null,
+    ),
     subSpeciesPassions: passions
       .map((p) => (p && typeof p.sub_species === "string" && p.sub_species.trim() !== "" ? p.sub_species : null))
       .filter((s) => s !== null),
@@ -90,9 +100,11 @@ export function buildFalseHoldRecord({ verdict, sessionId, tool, depth, loopEven
     // the ADR-014 extraction-regime version-mark + the item-5 input-class marker
     // (anti-laundering: downstream longitudinal reads see the input class per
     // row, and delta computations refuse to compare across a regime boundary).
-    // v1 records (the frozen 2026-07-17 buffer) predate these fields; the report
-    // accepts both schemas.
-    schema: "false-hold-record-v2",
+    // v3 (2026-07-19, the self-circle narrowing): + signals.circles (the
+    // per-circle NAME the narrowed Arm 1 reads). v1 records (the frozen
+    // 2026-07-17 buffer) and v2 records predate their respective fields; the
+    // report accepts all three schemas and brackets circle-less records.
+    schema: "false-hold-record-v3",
     capturedAt: typeof nowIso === "string" && nowIso ? nowIso : new Date().toISOString(),
     session: sanitize(sessionId),
     tool: typeof tool === "string" ? tool : "",

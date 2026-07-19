@@ -20,16 +20,37 @@
  *      never enter the fold, so the S10-narrowed envelope (exactly one
  *      disclosed exception: reflect) does not silently gain a second.
  *   2. The KATHEKON-ENGAGEMENT CLASSIFICATION of every loop (ADR-014 §3.2's
- *      binding guard): each redirection-bearing element's OPENING VERDICT is
- *      classified through the canonical shared Q3 predicate
+ *      binding guard, RE-SPECIFIED 2026-07-19 per the self-circle mentor
+ *      ruling — schema v2): each redirection-bearing element's OPENING VERDICT
+ *      is classified through the canonical shared Q3 predicate
  *      (`assessKathekonEngagement` via `kathekonSignalsFromAssessment` —
  *      kathekon-engagement.ts, the exact function the eventual S11 G6(a) flip
- *      binds on; reused, never re-implemented). Only kathekon-ENGAGED loops
- *      feed a closure signal (`character`); non-engaged redirection loops —
- *      the measured false-positive hold class ("contrary; no kathekon factors
- *      detected") — surface separately as `instrument_calibration`, NEVER as
- *      agent character data. The false-hold class cannot launder into
- *      character by construction.
+ *      binds on; reused, never re-implemented). THE SPLIT IS NOW THREE-WAY:
+ *        • kathekon-ENGAGED loops feed `character` (closure + domain levels);
+ *        • SELF-REGARDING PRUDENTIAL loops — the mentor's re-classified class:
+ *          the justice arm was suppressed ONLY by the other-directedness
+ *          requirement (all identified circles = self_preservation) AND the
+ *          verdict genuinely engaged ≥1 non-dikaiosyne domain — feed their
+ *          NON-dikaiosyne domain LEVELS into character (genuine phronesis/
+ *          sophrosyne evidence; mentor: "self-regarding action is governed by
+ *          phronesis and sophrosyne") while their closure signals surface
+ *          DESCRIPTIVELY in their own `self_regarding` bucket (they are not
+ *          kathekon-bindable holds, so they never feed `character.loops`; and
+ *          they are not instrument noise, so they never feed
+ *          `instrument_calibration`);
+ *        • the remaining non-engaged redirection loops — the measured
+ *          false-positive hold class ("contrary; no kathekon factors
+ *          detected") — surface ONLY as `instrument_calibration`, NEVER as
+ *          agent character data. The false-hold class cannot launder into
+ *          character by construction.
+ *      THE DIKAIOSYNE-EVIDENCE RULE (same ruling): a verdict contributes a
+ *      dikaiosyne domain LEVEL only when its own justice signature is
+ *      other-directed (≥1 identified circle beyond self_preservation) OR it
+ *      carries a violated obligation (adverse justice evidence is never
+ *      dropped — the conservative direction). A dikaiosyne tag on a self-only
+ *      or zero-circle verdict is the corrected mis-attribution; folding it as
+ *      justice evidence would re-introduce what the ruling removed. Exclusions
+ *      are counted (`character.n_dikaiosyne_level_excluded`), never silent.
  *   3. The per-domain fold via `combineVerificationResults` (wiring the
  *      existing dark lib, never re-implementing): within-chain supersession by
  *      explicit ref links + the Q4 same-depth closure rule (both via the live
@@ -229,7 +250,16 @@ export interface LoopFoldEnvelopeReport {
 }
 
 export interface LoopFoldBlock {
-  schema: 'agent-loop-fold-v1'
+  /** v2 (2026-07-19): the kathekon split re-specified per the self-circle
+   *  mentor ruling — the `self_regarding` bucket added, the calibration class
+   *  narrowed, the dikaiosyne-evidence rule applied to domain levels. v1
+   *  blocks (2026-07-19 pre-narrowing) routed self-only prudential loops into
+   *  character via the pre-narrowing justice arm; readers comparing blocks
+   *  across the schema change must treat the split's movement as INSTRUMENT
+   *  re-specification, never agent change (the same discipline `regime`
+   *  states for extraction eras). R18 docs deliberately deferred until this
+   *  re-specification (activation close, founder call 4). */
+  schema: 'agent-loop-fold-v2'
   vocabulary_note: string
   /** The canonical identity the fold is scoped to (resolved at the route via
    *  resolveLongitudinalIdentity — ADR-014 §4; at this write boundary the
@@ -255,15 +285,33 @@ export interface LoopFoldBlock {
     attribution: string
   }
   replay_bound: string
-  /** Kathekon-ENGAGED loops + their per-domain folds — the character side. */
+  /** Kathekon-ENGAGED loops + the per-domain folds — the character side.
+   *  Domain levels are also fed by ordinary (non-redirection) verdicts and by
+   *  self-regarding prudential redirections' non-dikaiosyne domains (v2). */
   character: {
     loops: LoopClosureCounts
     domains: Record<string, LoopDomainFold | 'insufficient_extraction'>
     domains_basis: Record<string, LoopDomainBasis>
+    /** v2 — the dikaiosyne-evidence rule's exclusion count: (element, domain)
+     *  pushes skipped because the verdict's justice signature was not
+     *  other-directed (self-only or zero-circle) and carried no violated
+     *  obligation. Counted, never silent (the no-silent-caps rule). */
+    n_dikaiosyne_level_excluded: number
     note: string
   }
-  /** Non-engaged redirection loops — the measured false-positive hold class.
-   *  Instrument data, never character data. */
+  /** v2 (the 2026-07-19 mentor ruling's re-classified class) — self-regarding
+   *  prudential redirection loops: justice suppressed ONLY by the beyond-self
+   *  requirement, ≥1 non-dikaiosyne domain genuinely engaged. Their closure
+   *  counts live HERE (descriptive; not kathekon-bindable holds, so never
+   *  merged into character.loops); their non-dikaiosyne domain LEVELS feed
+   *  character.domains (genuine prudential evidence). */
+  self_regarding: {
+    loops: LoopClosureCounts
+    note: string
+  }
+  /** Non-engaged redirection loops that are NOT self-regarding-prudential —
+   *  the measured false-positive hold class. Instrument data, never character
+   *  data. */
   instrument_calibration: {
     loops: LoopClosureCounts
     note: string
@@ -322,22 +370,39 @@ export const LOOP_FOLD_REPLAY_BOUND =
   'timestamp); the fold cannot distinguish fresh from replayed evidence.'
 
 export const LOOP_FOLD_CHARACTER_NOTE =
-  'Every verified element that is NOT a kathekon-non-engaged redirection ' +
-  '(neither closure counts nor domain levels) feeds this side: an ordinary ' +
-  '(non-redirection) verdict always feeds domain levels; a redirection feeds ' +
-  'domain levels AND closure signals only when its opening verdict engaged a ' +
-  'kathekon factor (the canonical Q3 predicate — justice surface with ≥1 ' +
-  'circle / violated obligation / proximity ≤ habitual / sub-species ' +
-  'passion). A kathekon-non-engaged redirection — the measured false-positive ' +
-  'hold class — is excluded from BOTH closure and domain-level input (see ' +
-  'instrument_calibration): it cannot set an open loop and cannot set a ' +
-  'domain’s level. Domain folds otherwise inherit the combiner’s semantics: ' +
-  'supersession by explicit ref links, the Q4 same-depth closure rule, ' +
-  'per-domain isolation, and conflict ⇒ pause with the conservative minimum ' +
-  '— never an average.'
+  'Domain levels are fed by: ordinary (non-redirection) verdicts; ' +
+  'kathekon-ENGAGED redirections (the canonical Q3 predicate — justice ' +
+  'surface with ≥1 circle beyond self_preservation / violated obligation / ' +
+  'proximity ≤ habitual / sub-species passion); and self-regarding prudential ' +
+  'redirections’ NON-dikaiosyne domains (see self_regarding). Closure counts ' +
+  'here are engaged-loops-only. A kathekon-non-engaged redirection that is ' +
+  'not self-regarding-prudential — the measured false-positive hold class — ' +
+  'feeds NOTHING here (see instrument_calibration). THE DIKAIOSYNE-EVIDENCE ' +
+  'RULE (mentor ruling 2026-07-19): a verdict contributes a dikaiosyne level ' +
+  'only when its justice signature identifies ≥1 circle beyond ' +
+  'self_preservation OR carries a violated obligation (adverse evidence is ' +
+  'never dropped); self-only and zero-circle dikaiosyne tags are the ' +
+  'corrected mis-attribution and are excluded + counted ' +
+  '(n_dikaiosyne_level_excluded). Domain folds otherwise inherit the ' +
+  'combiner’s semantics: supersession by explicit ref links, the Q4 ' +
+  'same-depth closure rule, per-domain isolation, and conflict ⇒ pause with ' +
+  'the conservative minimum — never an average.'
+
+export const LOOP_FOLD_SELF_REGARDING_NOTE =
+  'Self-regarding prudential loops (mentor ruling 2026-07-19, binding): the ' +
+  'opening verdict’s justice arm was suppressed ONLY by the ' +
+  'other-directedness requirement (every identified circle is ' +
+  'self_preservation) and ≥1 non-dikaiosyne domain was genuinely engaged. ' +
+  'Per the ruling, self-regarding action is governed by phronesis and ' +
+  'sophrosyne — so these are genuine prudential corrections, NOT instrument ' +
+  'noise: their non-dikaiosyne domain LEVELS feed character.domains. But ' +
+  'they are not kathekon-bindable holds (no kathekon factor engaged), so ' +
+  'their closure counts surface HERE, descriptively, and are never merged ' +
+  'into character.loops — the closure signal stays engaged-gated.'
 
 export const LOOP_FOLD_CALIBRATION_NOTE =
-  'Loops whose opening verdict engaged NO kathekon factor — the measured ' +
+  'Loops whose opening verdict engaged NO kathekon factor AND does not ' +
+  'qualify as self-regarding-prudential (see self_regarding) — the measured ' +
   'false-positive hold class ("contrary; no kathekon factors detected"). ' +
   'These are EXCLUDED from character (both the closure signal and the ' +
   'domain-level fold — independent-review fold, ADR-014 §3.2\'s plain-text ' +
@@ -557,16 +622,48 @@ export function computeLoopFold(
     })
   }
 
-  // --- 2. The kathekon split (ADR-014 §3.2's binding guard). A loop is
-  //        ENGAGED iff its OPENING verdict engaged a kathekon factor. ---
+  // --- 2. The kathekon split (ADR-014 §3.2's binding guard; RE-SPECIFIED
+  //        2026-07-19 — the self-circle mentor ruling, three-way). A loop is
+  //        ENGAGED iff its OPENING verdict engaged a kathekon factor.
+  //        SELF-REGARDING-PRUDENTIAL iff not engaged, the justice arm was
+  //        suppressed ONLY by the beyond-self requirement
+  //        (selfCircleOnlySuppression — every identified circle is
+  //        self_preservation; unknown-identity circles never qualify), AND ≥1
+  //        non-dikaiosyne domain was genuinely engaged (a dikaiosyne-only
+  //        self-only redirection carries nothing but the corrected
+  //        mis-attribution — it stays instrument noise). CALIBRATION = the
+  //        remainder: the measured false-positive hold class. ---
+  // Independent-review fold (2026-07-19, HIGH — the same-session first-hand
+  // review missed this): isSelfRegardingLoop MUST gate on !engaged FIRST,
+  // exactly as kathekon-engagement.ts's own docstring for
+  // selfCircleOnlySuppression warns ("it can be true while `engaged` is true
+  // via another arm (e.g. violated-on-self fires Arm 2) — consumers splitting
+  // on it (the loop-fold) must gate on !engaged FIRST"). Without the gate, a
+  // redirection engaged via Arm 2/3/4 (violated obligation / proximity ≤
+  // habitual / sub-species passion) on a self-only circle set, carrying ≥1
+  // non-dikaiosyne domain, satisfied BOTH isEngagedLoop and
+  // isSelfRegardingLoop — the SAME loop was fed to TWO separate
+  // analyseLoopClosure projections and double-counted into character.loops
+  // AND self_regarding.loops simultaneously, breaking the three-way
+  // partition's mutual exclusivity the design (and the docstrings) claimed.
+  // Live-reproduced by the independent adversarial re-review; caught here at
+  // the root, not merely disclosed.
   const isEngagedLoop = (el: FoldElement): boolean =>
     el.redirection && el.engagement.engaged
+  const isSelfRegardingLoop = (el: FoldElement): boolean =>
+    el.redirection &&
+    !el.engagement.engaged &&
+    el.engagement.selfCircleOnlySuppression === true &&
+    el.domains.some((d) => d !== 'dikaiosyne')
   const isCalibrationLoop = (el: FoldElement): boolean =>
-    el.redirection && !el.engagement.engaged
+    el.redirection && !el.engagement.engaged && !isSelfRegardingLoop(el)
 
   // --- 3. Chain-level closure counts per class, via the live rule. ---
   const characterLoops = closureCounts(
     analyseLoopClosure(closureProjection(elements, isEngagedLoop)),
+  )
+  const selfRegardingLoops = closureCounts(
+    analyseLoopClosure(closureProjection(elements, isSelfRegardingLoop)),
   )
   const calibrationLoops = closureCounts(
     analyseLoopClosure(closureProjection(elements, isCalibrationLoop)),
@@ -582,6 +679,7 @@ export function computeLoopFold(
   //        still feeds its domains. ---
   const verdicts: VerificationVerdict[] = []
   let nNoDomain = 0
+  let nDikaiosyneLevelExcluded = 0
   for (const el of elements) {
     if (isCalibrationLoop(el)) continue
     if (el.domains.length === 0) {
@@ -594,7 +692,21 @@ export function computeLoopFold(
       corroboration: corroborationStateOf(el.assessment.corroboration),
       recency: 'recent', // no per-element time exists; disclosed in `ordering`
     })
+    // v2 — THE DIKAIOSYNE-EVIDENCE RULE (mentor ruling 2026-07-19): a
+    // dikaiosyne LEVEL contribution requires an other-directed justice
+    // signature (≥1 identified circle beyond self_preservation) OR a violated
+    // obligation (adverse evidence is never dropped — the conservative
+    // direction). Self-only, zero-circle, and unknown-identity signatures are
+    // excluded + counted. Applies to EVERY verdict class that feeds levels
+    // (ordinary, engaged, self-regarding) — consistency within the ruling's
+    // class, not a redirection-only patch.
+    const dikaiosyneEligible =
+      el.engagement.beyondSelfCircleCount >= 1 || el.engagement.violatedObligation
     for (const domain of el.domains) {
+      if (domain === 'dikaiosyne' && !dikaiosyneEligible) {
+        nDikaiosyneLevelExcluded++
+        continue
+      }
       verdicts.push({
         sessionId: CHAIN_SESSION_ID,
         domain,
@@ -641,7 +753,7 @@ export function computeLoopFold(
 
   // --- 6. Assemble. ---
   return {
-    schema: 'agent-loop-fold-v1',
+    schema: 'agent-loop-fold-v2',
     vocabulary_note: LOOP_FOLD_VOCABULARY_NOTE,
     identity: opts.identity,
     identity_context: LOOP_FOLD_IDENTITY_CONTEXT_NOTE,
@@ -671,7 +783,12 @@ export function computeLoopFold(
       loops: characterLoops,
       domains,
       domains_basis: domainsBasis,
+      n_dikaiosyne_level_excluded: nDikaiosyneLevelExcluded,
       note: LOOP_FOLD_CHARACTER_NOTE,
+    },
+    self_regarding: {
+      loops: selfRegardingLoops,
+      note: LOOP_FOLD_SELF_REGARDING_NOTE,
     },
     instrument_calibration: {
       loops: calibrationLoops,

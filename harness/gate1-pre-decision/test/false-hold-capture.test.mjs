@@ -62,9 +62,10 @@ console.log("\n§1 — the pure projection + record builder + fail-soft append")
   check("§1.1 false-positive verdict ⇒ proximity deliberate", fp.proximity === "deliberate");
   check("§1.2 false-positive verdict ⇒ phronesis-only", eqArr(fp.virtueDomainsEngaged, ["phronesis"]));
   check("§1.3 false-positive verdict ⇒ no obligations", eqArr(fp.obligationStatuses, []));
+  check("§1.3b false-positive verdict ⇒ no circles (v3 field present, empty)", eqArr(fp.circles, []));
   check("§1.4 false-positive verdict ⇒ no sub-species", eqArr(fp.subSpeciesPassions, []));
 
-  // The violated positive control.
+  // The violated positive control (name-less circle ⇒ null identity, honest).
   const violated = kathekonSignalsFromVerdict({
     katorthoma_proximity: "deliberate",
     virtue_domains_engaged: ["dikaiosyne"],
@@ -72,6 +73,20 @@ console.log("\n§1 — the pure projection + record builder + fail-soft append")
     passion_diagnosis: { passions_detected: [] },
   });
   check("§1.5 violated verdict ⇒ obligationStatuses [violated]", eqArr(violated.obligationStatuses, ["violated"]));
+  check("§1.5b name-less circle ⇒ circles [null] (unknown, never guessed)", eqArr(violated.circles, [null]));
+
+  // v3 (the 2026-07-19 self-circle narrowing): circle NAMES project
+  // index-aligned with statuses — the probe class's live shape.
+  const selfOnly = kathekonSignalsFromVerdict({
+    katorthoma_proximity: "deliberate",
+    virtue_domains_engaged: ["phronesis", "dikaiosyne"],
+    oikeiosis: {
+      relevant_circles: [{ circle: "self_preservation", obligation_assessment: { status: "indeterminate" } }],
+    },
+    passion_diagnosis: { passions_detected: [] },
+  });
+  check("§1.5c v3: self-circle NAME projected, aligned with its status",
+    eqArr(selfOnly.circles, ["self_preservation"]) && eqArr(selfOnly.obligationStatuses, ["indeterminate"]));
 
   // Sub-species passion projection + null filtering.
   const passion = kathekonSignalsFromVerdict({
@@ -96,12 +111,13 @@ console.log("\n§1 — the pure projection + record builder + fail-soft append")
   });
   check("§1.7 missing virtue_domains_engaged ⇒ []", eqArr(mockLike.virtueDomainsEngaged, []));
   check("§1.8 circles without obligation_assessment ⇒ [null, null]", eqArr(mockLike.obligationStatuses, [null, null]));
+  check("§1.8b v3: mock circle NAMES projected", eqArr(mockLike.circles, ["wider_community", "rational_beings"]));
   check("§1.9 mock sub-species agonia projected", eqArr(mockLike.subSpeciesPassions, ["agonia"]));
 
   // Degenerate / defensive inputs never throw.
   check("§1.10 null verdict ⇒ empty signals", (() => {
     const s = kathekonSignalsFromVerdict(null);
-    return s.proximity === null && eqArr(s.virtueDomainsEngaged, []) && eqArr(s.obligationStatuses, []) && eqArr(s.subSpeciesPassions, []);
+    return s.proximity === null && eqArr(s.virtueDomainsEngaged, []) && eqArr(s.obligationStatuses, []) && eqArr(s.circles, []) && eqArr(s.subSpeciesPassions, []);
   })());
 
   // buildFalseHoldRecord shape.
@@ -118,7 +134,7 @@ console.log("\n§1 — the pure projection + record builder + fail-soft append")
     regime: "at-action-v2-composed",
     composedChars: 4321,
   });
-  check("§1.11 record schema v2 (S11b — regime-marked)", rec.schema === "false-hold-record-v2");
+  check("§1.11 record schema v3 (2026-07-19 — circle identity captured)", rec.schema === "false-hold-record-v3");
   check("§1.11b record carries the ADR-014 regime mark + input class", rec.extractionRegime === "at-action-v2-composed" && rec.inputClass === "composed" && rec.composedChars === 4321);
   check(
     "§1.11c v2 fields default honestly when absent (never fabricated)",
@@ -149,7 +165,7 @@ console.log("\n§1 — the pure projection + record builder + fail-soft append")
   const dir = mkdtempSync(join(tmpdir(), "fhc-unit-"));
   const okWrite = appendFalseHoldRecord({ stateDir: dir }, rec);
   const readBack = existsSync(falseHoldRecordPath({ stateDir: dir })) ? readFileSync(falseHoldRecordPath({ stateDir: dir }), "utf8") : "";
-  check("§1.20 append round-trips one JSONL line", okWrite === true && readBack.trim().split("\n").length === 1 && JSON.parse(readBack.trim()).schema === "false-hold-record-v2");
+  check("§1.20 append round-trips one JSONL line", okWrite === true && readBack.trim().split("\n").length === 1 && JSON.parse(readBack.trim()).schema === "false-hold-record-v3");
 }
 
 // ============================================================================
@@ -215,6 +231,7 @@ function runAtAction(endpoint, stateDir, event, extraEnv = {}) {
     check("§2.6 record loopEvent=opened (a hold)", recOn.loopEvent === "opened");
     check("§2.7 record proximity from mock verdict", recOn.signals.proximity === "deliberate");
     check("§2.8 record captured the mock sub-species (agonia)", eqArr(recOn.signals.subSpeciesPassions, ["agonia"]));
+    check("§2.8b v3: record captured the mock circle NAMES end-to-end", eqArr(recOn.signals.circles, ["wider_community", "rational_beings"]));
     check("§2.9 record kathekon symptom (is_kathekon=false, marginal)", recOn.kathekon.isKathekon === false && recOn.kathekon.quality === "marginal");
     check("§2.10 record tool=Write", recOn.tool === "Write");
   }
