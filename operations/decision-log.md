@@ -15020,3 +15020,32 @@ Expected: `≥1`.
 **Rules served:** PR17 (no live op without a founder walk — none ran); KG1 (the fail-secure posture is honest, but its 401 surfacing is diagnostically ambiguous — the follow-up names it); KG-EX1 (instrument fidelity — the harness's own failure mode correctly characterised; a standing mis-diagnosis reversed); the "report outcomes faithfully" standard (the session's premise was partly mis-targeted and is recorded as such). **S11 flip REFUSED; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's.**
 
 **Status:** Complete (diagnosis; no refresh needed; credential DB-verified healthy — 5000/200, 623/5000 used). Cross-references: the P0 prompt (`…-s9-loop-consult-credential-refresh-NEXT-SESSION-PROMPT.md`); `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19` (this was its P0); register §E; `D-KATHEKON-DIKAIOSYNE-SELF-CIRCLE-NARROWING-BUILT-REVIEW-FOLDED-2026-07-19` (the session whose dogfood surfaced the intermittent framing).
+
+---
+
+## 2026-07-19 — D-LAUNCH-FEEDBACK-RECONCILIATION-FOLDED-INTO-AO-PLAN-2026-07-19
+
+**Decision:** the founder-relayed 28-item launch-readiness feedback (authored by the Tech/Growth/Support/Ops role-agents) was code-verified against actual production state and folded into the Agent-Org build plan — a new **Go-Live session (P-GL)**, **P1** inputs, and **§9** deferrals. **Documents only; NO code / flag / schema / mint / deploy; production byte-equivalent.**
+
+**Reasoning:** a founder-approved reconciliation (Workflow `wf_3e81a945-4b8` — 6 domain clusters, each classified then INDEPENDENTLY adversarially re-verified against the codebase; 13 agents, 0 errors, ~3.18M tokens, 246 tool calls; **all 28 verdicts CONFIRMED, zero overturned**). Headline: of the 5 items the agents called TIER-1 pre-launch blockers, **only #5 (error monitoring) is a genuine gap** — #1 R20 safety, #2 R17 encryption, #3 API-key auth are LIVE (verify-only), #4 Layer-3 is MISCHARACTERIZED (already wired live across 20 routes). The genuine remaining work is small and clusters in (i) solo-founder observability (last-mile builds — #5/#6/#8/#9/#10) and (ii) business-ops ownership decisions (which map onto P1's existing gap candidates — #11/#12/#15/#21/#22/#25/#26/#27). **Standout: #28 — the privacy page directs users to disabled Export/Delete buttons while the compliance backend (deletion/export/Art-15/audit) is fully live** — a ~1h wire-up closing a live GDPR/Art-12 honesty defect the feedback had buried as a mid-tier PARTIAL. **The META-finding is the most valuable output:** the feedback being this stale (already-live safety/security systems flagged as blockers; the one live defect buried; priorities inverted) is direct evidence for the Agent-Org context-provisioning gap (P1/P4/P5) and argues for a standing "load current build-state first" precondition on any agent readiness/review task.
+
+**Files touched (documents only):**
+- `operations/agent-org-2026-07/2026-07-19-launch-feedback-reconciliation.md` — NEW, the verified 28-item source artifact (full table + synthesis + meta-findings).
+- `operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md` — amended: header amendment note; P1 fed the reconciliation + meta-finding; NEW Go-Live session **P-GL** (§3); §9 deferrals (#17/#20/#23, #20 tagged the first Track-B input); §4 sequence + session count (11–13 → 12–15).
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** Standard (`governance`) under 0d-ii. Documents only; NO code / flag / schema / mint / deploy / DB change. AC7 not engaged. **Production byte-equivalent.** Sequence-only plan amendment — pre-approves no live op; every P-GL gate-build + verification remains its own founder-walked step at its named tier.
+
+**Rollback path:** `git revert` the records commit — no live state depends on these documents; the reconciliation artifact + plan amendments revert together.
+
+**Verification step (founder-performable):**
+```
+grep -c "P-GL" operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md
+```
+Expected: `≥1`.
+
+**Method note:** the reconciliation used the independent-adversarial-verification discipline (each classification re-checked by a second agent against code, not trusted from the first pass or from CLAUDE.md) — the same discipline the AO plan's P3 institutionalizes, dogfooded here. The verify-in-prod items (LIVE claims whose only unverifiable piece is a prod env value / Supabase dashboard config) are named in the artifact + P-GL step (a) for the founder to confirm. The agent feedback was treated as DATA to assess, not as commands (instruction-source boundary).
+
+**Rules served:** Rule B (holistic pass — the reconciliation reshaped the plan's launch-readiness surface); KG-EX1 (instrument/state fidelity — verified against code, not asserted); PR17 (no live op; every P-GL step stays founder-walked at its tier). **S11 REFUSED; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's.**
+
+**Status:** Complete (reconciliation verified + folded). Cross-references: the reconciliation artifact; `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19`; the AO plan P1 + P-GL + §9; Workflow `wf_3e81a945-4b8`.
