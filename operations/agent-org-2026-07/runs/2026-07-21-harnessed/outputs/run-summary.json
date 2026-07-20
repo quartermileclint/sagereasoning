@@ -1,0 +1,10 @@
+{
+  "base_url": "https://www.sagereasoning.com",
+  "agent_id": "sagereasoning:p2-leg-b@v1",
+  "consult_401_total": 0,
+  "consult_401_resolved_on_retry": 0,
+  "signed_assessments_collected": 2,
+  "accreditation_write_status": 200,
+  "accreditation_readback_status": 200,
+  "run_completed_at": "2026-07-20T18:36:13.285Z"
+}

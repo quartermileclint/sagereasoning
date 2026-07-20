@@ -1,0 +1,37 @@
+{
+  "status": 200,
+  "body": {
+    "status": "ok",
+    "data": {
+      "agent_id": "sagereasoning:p2-leg-b@v1",
+      "senecan_grade": "pre_progress",
+      "typical_proximity": "reflexive",
+      "authority_level": "supervised",
+      "dimension_levels": {
+        "passion_reduction": "emerging",
+        "judgement_quality": "emerging",
+        "disposition_stability": "emerging",
+        "oikeiosis_extension": "emerging"
+      },
+      "direction_of_travel": "stable",
+      "evaluation_window": "last 100 actions",
+      "actions_evaluated": 0,
+      "grade_since": "2026-07-20T18:36:13.285+00:00",
+      "last_evaluation": "2026-07-20T18:36:13.285+00:00",
+      "passions_persisting": [],
+      "verification_url": "https://sagereasoning.com/accreditation/sagereasoning:p2-leg-b@v1",
+      "disclaimer": "This accreditation evaluates reasoning quality using Stoic philosophical frameworks. It does not guarantee specific outcomes, legal compliance, or fitness for any particular purpose. Ancient reasoning, modern application.",
+      "typical_deliberation_breadth": "intuited",
+      "typical_kathekon_quality": "contrary",
+      "typical_operation_class": null,
+      "typical_target_system_vendor": null,
+      "typical_outcome_verification": null,
+      "typical_reversibility_signal": null,
+      "coverage_status": "agent_elected",
+      "monitored_since": "2026-07-20T18:36:13.285+00:00",
+      "credential_basis": "examined under unattributed operator from 2026-07-20T18:36:13.285Z to 2026-07-20T18:36:13.285Z (window self-reported by submitter); identity sagereasoning:p2-leg-b@v1; coverage: agent_elected (discretionary submission; single-session credentialing per R19e)",
+      "examination_mode": "post_decision_check"
+    },
+    "documentation_url": "https://sagereasoning.com/limitations"
+  }
+}
