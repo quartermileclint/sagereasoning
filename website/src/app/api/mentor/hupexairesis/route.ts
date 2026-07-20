@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getClient } from '@/lib/sage-reason-engine'
+import { isLlmOutage } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -112,6 +114,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (err) {
     console.error('Reserve clause API error:', err)
+    logRouteError({ route: '/api/mentor/hupexairesis', method: 'POST', error: err, statusCode: 500 })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -173,6 +176,7 @@ export async function PATCH(request: NextRequest) {
     })
   } catch (err) {
     console.error('Reserve clause PATCH error:', err)
+    logRouteError({ route: '/api/mentor/hupexairesis', method: 'PATCH', error: err, statusCode: 500 })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -267,6 +271,14 @@ Does the prepared response separate the action from the outcome?`,
     return separates
   } catch (err) {
     console.error('Reserve clause separation gate failed:', err)
+    logRouteError({
+      route: '/api/mentor/hupexairesis',
+      method: 'POST',
+      error: err,
+      statusCode: 200,
+      isLlmOutage: isLlmOutage(err),
+      context: { gate: 'separation-gate', fail_open: true },
+    })
     // Fail open — don't block the entry if the gate itself fails
     return true
   }

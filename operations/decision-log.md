@@ -15115,3 +15115,35 @@ Expected: tsc exit 0; `35 passed, 0 failed`. (Full `npm run build` also green: `
 **Rules served:** KG1 (fail-soft/missing-table-benign DB writes; `waitUntil` post-response scheduling, never fire-and-forget on the hot path); KG-EX1 / method-before-purpose (grounded each surface against code before editing; #9 verified the service-role-only access before recommending RLS); PR17 (every prod op founder-walked). **S11 REFUSED; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's.**
 
 **Status:** Adopted (builds complete + build-green; activation founder-walked). Cross-references: `D-LAUNCH-FEEDBACK-RECONCILIATION-FOLDED-INTO-AO-PLAN-2026-07-19`; `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19`; the go/no-go checklist; the P-GL next-session prompt.
+
+---
+
+## 2026-07-20 — D-AGENT-ORG-P-GL-FINISH-MENTOR-WIRING-AND-CHECKLIST-CLOSED-2026-07-20
+
+**Decision:** P-GL finish session. Extended #5/#10 (route-error logging + honest LLM-outage degradation) into all 7 mentor LLM-calling routes, then walked the founder live through every remaining founder-only activation step (the 2 migrations, the #9 RLS lockdown, all 5 R20a flags, and the remaining Part-A/#13/#28 confirmations). Every Section A/B item on the go-live readiness checklist is now ✅ VERIFIED-LIVE against production; only Section D (org-ownership decisions, routed to P1) remains open before the founder's 0h call.
+
+**Reasoning:** picked up `2026-07-20-P-GL-finish-tail-NEXT-SESSION-PROMPT.md`. The prompt described wiring #5/#10 into "the remaining mentor LLM routes" as mechanical — a one-line drop-in matching the pattern already used on `/api/score`/`/api/evaluate`/`/api/reflect`. Reading the actual code before editing (per KG-EX1/method-before-purpose) showed this was only true for 2 of 7: `passion-classify` and `private/reflect` let an uncaught LLM error fall through to a raw 500 (the genuine #10 target). The other 5 (`morning`, `premeditatio`, `hupexairesis`, `view-from-above`, `sage-compass`) wrap their classifier calls in an inner catch that deliberately **fails open** — a reviewed, documented design (a gate outage must never block a practitioner's entry). Wiring #10's 503 into those would have silently reversed a shipped, adversarially-reviewed safety property. Split accordingly: #10 wired only where structurally correct (2 routes); #5 wired everywhere (all 7, both outer catches and the 5 fail-open routes' inner gate catches) as pure observability with zero behaviour change. All measurement-neutrality boundary tests (the 5 `human-practitioner-boundary.test.ts` suites) and the R20a perimeter/config-flow suites re-run clean — no regression. For the remaining founder-only steps, PR17 was honored throughout (walked through live with exact commands/expected outputs, not handed off as a checklist pointer): both migrations verified column-by-column; the RLS lockdown surfaced a real finding (`translation_sandwich_comparisons` + `translation_sandwich_cost_tracker` had full anon/authenticated grants — closed) and a real gap (`cost_health_snapshots` doesn't exist in prod at all — confirmed fail-honest via 3 call sites, named as a non-blocking follow-up, not fixed in-session as out of scope); 3 of 5 R20a flags were unreadable ("sensitive" in Vercel) so the founder re-set + redeployed all 4 non-`SCORE_CONVERSATION` flags to remove the ambiguity outright; an initial instruction to verify `SUBSTRATE_REFLECT_R20A_ENABLED` via the human Reflect page was traced against the code and found wrong (that flag gates the separate agent-only `/api/practice/reflect`, not the human page, whose distress check is unconditional) and corrected in-session before the founder acted on it.
+
+**Files touched:**
+- `website/src/app/api/mentor/{morning,premeditatio,hupexairesis,view-from-above,sage-compass}/route.ts` — #5 wired at both outer catches and the inner fail-open gate catch (context: `{gate, fail_open:true}`); #10 deliberately NOT wired (would contradict the reviewed fail-open design).
+- `website/src/app/api/mentor/{passion-classify,private/reflect}/route.ts` — #5 + #10 wired at the outer catch (the genuine uncaught-LLM-error targets), mirroring the `/api/reflect` pattern.
+- `operations/agent-org-2026-07/go-live-readiness-checklist.md` — every Section A/B row updated to ✅ VERIFIED-LIVE with the session's evidence; the go/no-go summary rewritten to reflect closure.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** Elevated (`code-elevated`) for the 7-file mentor wiring (existing user-facing functionality). The 2 migrations, the #9 RLS `ENABLE ROW LEVEL SECURITY`+`REVOKE`, and all Vercel env-flag changes were founder-performed (PR17) — the AI guided + verified, performed no prod DB/dashboard op itself. AC7 not engaged by the AI. Production is NOT byte-equivalent to session-open — this was the intended, founder-walked activation of the prior session's prepared surface.
+
+**Rollback path:** the mentor-route wiring is additive (error logging) or a straightforward revert (the 2 outer-catch 503s) — `git revert` the commit. The RLS lockdown's rollback is recorded in §B2's captured grants (§E of the lockdown SQL). The 2 migrations carry their own DROP-based rollback blocks. The R20a flag re-sets have no rollback need (they restate the already-intended `true` value).
+
+**Verification step (founder-performable):**
+```
+cd website && npx tsc --noEmit && npm run build
+npx tsx src/app/api/mentor/morning/__tests__/human-practitioner-boundary.test.ts
+npx tsx src/lib/__tests__/r20a-invocation-guard.test.ts
+```
+Expected: tsc exit 0; build `✓ Compiled successfully`; both battery outputs `passed, 0 failed`.
+
+**Open questions:** Section D (support-inbox monitoring, incident/rollback owner) is the only checklist section left open before 0h — routed to AO P1, a founder-ownership decision, not a build. The `cost_health_snapshots` missing-table finding needs its own scoped migration session (non-blocking; fails honest, never crashes).
+
+**Rules served:** KG-EX1 / method-before-purpose (the mentor-route split — reading code before applying a described-as-mechanical pattern); PR17 (every prod op walked through live with exact commands, never a one-line hand-off — the RLS lockdown, the 2 migrations, and the flag re-sets were each narrated step by step); PR10 (the wrong Reflect-page instruction was caught, named, and corrected in the same session before the founder acted on it). **S11 REFUSED; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's.**
+
+**Status:** Adopted. Cross-references: `D-AGENT-ORG-P-GL-GOLIVE-CHECKLIST-AND-GATE-BUILDS-2026-07-20`; the go/no-go checklist (now closed except Section D); `operations/handoffs/founder/2026-07-20-P-GL-finish-tail-NEXT-SESSION-PROMPT.md`.

@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getClient } from '@/lib/sage-reason-engine'
+import { isLlmOutage } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -198,6 +200,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (err) {
     console.error('Premeditatio API error:', err)
+    logRouteError({ route: '/api/mentor/premeditatio', method: 'POST', error: err, statusCode: 500 })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -280,6 +283,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ success: true, entry: data })
   } catch (err) {
     console.error('Premeditatio PATCH error:', err)
+    logRouteError({ route: '/api/mentor/premeditatio', method: 'PATCH', error: err, statusCode: 500 })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -387,6 +391,14 @@ Is this generic or specific?`,
     return result.is_generic === true
   } catch (err) {
     console.error('Quality gate check failed:', err)
+    logRouteError({
+      route: '/api/mentor/premeditatio',
+      method: 'POST',
+      error: err,
+      statusCode: 200,
+      isLlmOutage: isLlmOutage(err),
+      context: { gate: 'quality-gate', fail_open: true },
+    })
     // Fail open — don't block the entry if the quality gate itself fails
     return false
   }

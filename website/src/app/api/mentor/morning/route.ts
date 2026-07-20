@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getClient } from '@/lib/sage-reason-engine'
+import { isLlmOutage } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -141,6 +143,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (err) {
     console.error('Morning preparation API error:', err)
+    logRouteError({ route: '/api/mentor/morning', method: 'POST', error: err, statusCode: 500 })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -206,6 +209,7 @@ export async function PATCH(request: NextRequest) {
     })
   } catch (err) {
     console.error('Morning preparation PATCH error:', err)
+    logRouteError({ route: '/api/mentor/morning', method: 'PATCH', error: err, statusCode: 500 })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -307,6 +311,14 @@ Classify the prepared virtue response.`,
     return preparation
   } catch (err) {
     console.error('Morning preparation gate failed:', err)
+    logRouteError({
+      route: '/api/mentor/morning',
+      method: 'POST',
+      error: err,
+      statusCode: 200,
+      isLlmOutage: isLlmOutage(err),
+      context: { gate: 'preparation-gate', fail_open: true },
+    })
     // Fail open — don't block the entry if the gate itself fails
     return 'prepared'
   }

@@ -62,6 +62,8 @@ import { loadRingFunctions } from '@/lib/sage-mentor-ring-bridge'
 import { extractJSON } from '@/lib/json-utils'
 import { logMentorObservation } from '@/lib/logging/mentor-observation-logger'
 import type { ObservationCategory, ConfidenceLevel } from '@/lib/logging/mentor-observation-logger'
+import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 
 // =============================================================================
 // PRIVATE mentor reflect — Founder-only daily reflection
@@ -855,6 +857,15 @@ Score my actions and give me the sage perspective.`
     })
   } catch (error) {
     console.error('Private reflect API error:', error)
+    const outage = isLlmOutage(error)
+    logRouteError({
+      route: '/api/mentor/private/reflect',
+      method: 'POST',
+      error,
+      statusCode: outage ? 503 : 500,
+      isLlmOutage: outage,
+    })
+    if (outage) return llmOutageResponse()
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

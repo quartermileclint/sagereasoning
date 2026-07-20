@@ -4,6 +4,8 @@ import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMI
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getClient } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
+import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -127,6 +129,15 @@ Classify this passion event.`,
     })
   } catch (err) {
     console.error('Passion classify API error:', err)
+    const outage = isLlmOutage(err)
+    logRouteError({
+      route: '/api/mentor/passion-classify',
+      method: 'POST',
+      error: err,
+      statusCode: outage ? 503 : 500,
+      isLlmOutage: outage,
+    })
+    if (outage) return llmOutageResponse()
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
