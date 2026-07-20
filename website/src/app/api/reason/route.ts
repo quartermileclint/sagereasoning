@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+// #5 + #10 (P-GL): log prod errors + degrade honestly on an LLM outage at the
+// outer catch-all (the sandwich's own typed-error degradation is upstream).
+import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 import { timingSafeEqual } from 'node:crypto'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateApiKey, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { type ReasonDepth, EVALUATIVE_DISCLAIMER } from '@/lib/sage-reason-engine'
@@ -1896,6 +1900,14 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('sage-reason API error:', error)
     const message = error instanceof Error ? error.message : 'Internal server error'
+    const outage = isLlmOutage(error)
+    logRouteError({ route: '/api/reason', method: 'POST', error, statusCode: outage ? 503 : 500, isLlmOutage: outage })
+    if (outage) {
+      const outageHeaders = loopAccumulator && loopId && apiKey && apiKey.valid
+        ? { ...buildLoopHeaders({ loopId, state: loopAccumulator.getState() }) }
+        : undefined
+      return llmOutageResponse(outageHeaders)
+    }
     // Catch-all 500 — emit X-Loop-* headers if metering was set up but skip the
     // ledger write (uncertain whether the failure was customer-side or server-side;
     // fail-open on the bill rather than charging for a server error).

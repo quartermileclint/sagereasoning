@@ -1,4 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
+// #5 + #10 (P-GL): log prod errors + degrade honestly on an LLM outage.
+import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
@@ -273,6 +276,9 @@ Score my actions and give me the sage perspective.`
     })
   } catch (error) {
     console.error('Reflection API error:', error)
+    const outage = isLlmOutage(error)
+    logRouteError({ route: '/api/reflect', method: 'POST', error, statusCode: outage ? 503 : 500, isLlmOutage: outage })
+    if (outage) return llmOutageResponse()
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

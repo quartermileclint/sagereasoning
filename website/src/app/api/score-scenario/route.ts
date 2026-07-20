@@ -1,4 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
+// #5 + #10 (P-GL): log prod errors + degrade honestly on an LLM outage.
+import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
@@ -266,6 +269,9 @@ Return the JSON scenario with options.`
     })
   } catch (error) {
     console.error('Scenario generation error:', error)
+    const outage = isLlmOutage(error)
+    logRouteError({ route: '/api/score-scenario', method: 'POST', error, statusCode: outage ? 503 : 500, isLlmOutage: outage, context: { phase: 'generation' } })
+    if (outage) return llmOutageResponse()
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -439,6 +445,9 @@ Score this response. Return the JSON.`
     })
   } catch (error) {
     console.error('Scenario score API error:', error)
+    const outage = isLlmOutage(error)
+    logRouteError({ route: '/api/score-scenario', method: 'POST', error, statusCode: outage ? 503 : 500, isLlmOutage: outage, context: { phase: 'scoring' } })
+    if (outage) return llmOutageResponse()
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

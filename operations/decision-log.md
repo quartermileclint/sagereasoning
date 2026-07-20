@@ -15077,3 +15077,41 @@ Expected: `≥1`.
 **Rules served:** Rule B (holistic pass — read across five source classes before concluding); KG-EX1 / method-before-purpose (grounded the architecture question before recommending any roster change); PR15 (consulted existing skills — `sage-wiring-fix` — before treating any gap as unaddressed); §1a + §2 of the AO plan honored throughout (no proactive-envelope recommendation exceeds the hard floor).
 
 **Status:** Adopted (as analysis — activates nothing). Cross-references: `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19`; `D-LAUNCH-FEEDBACK-RECONCILIATION-FOLDED-INTO-AO-PLAN-2026-07-19`; the P1 next-session prompt; the P1 deliverable.
+
+---
+
+## 2026-07-20 — D-AGENT-ORG-P-GL-GOLIVE-CHECKLIST-AND-GATE-BUILDS-2026-07-20
+
+**Decision:** P-GL (the launch go/no-go session) delivered: the consolidated go/no-go readiness checklist (launch-feedback item #16) is authored, the highest-ROI gate-build #28 is built + build-green, and the observability gate-builds (#5/#6/#8/#10) plus the #9 RLS lockdown SQL are built/prepared — all with every production op (deploy, the 2 migrations, the RLS REVOKE) left founder-walked. Production is byte-equivalent until the founder acts.
+
+**Reasoning:** executes AO plan §3-P-GL on the code-verified 28-item reconciliation (`D-LAUNCH-FEEDBACK-RECONCILIATION-FOLDED-INTO-AO-PLAN-2026-07-19`), which found only #5 a genuine TIER-1 gap and #28 the one live user-facing honesty defect (the privacy page directed users to disabled Export/Delete buttons). The founder elected "continue now — everything buildable" (AskUserQuestion), so the session built the whole buildable surface in one pass while keeping all prod-touching steps founder-walked. **#28:** the two dashboard buttons wired to the LIVE `/api/user/export` (JSON blob download) + `/api/user/delete` (accessible confirm modal requiring a typed `DELETE`; honest 200/207 handling — never claims full success on a partial); the privacy copy needed no edit (it already directs users to the buttons, so wiring makes it true). **#6:** `/api/health` upgraded from config-presence to real DB + Anthropic reachability probes (catches an invalid/expired key or a DB outage that previously reported "healthy"), timeout-bounded + 10s-cached, 503-on-degraded; `mentor_encryption: active` preserved so Part A #2 still works. **#5 + #8:** two append-only, service-role-only, **missing-table-benign** fail-soft writers (`lib/observability-store.ts`) → `route_errors` + `throttle_events`, wired into 9 route catch blocks and all 5 × 429 sites in `security.ts` (IP stored as a SHA-256 hash); they activate simply by applying their migrations — no flag. **#10:** `lib/llm-outage.ts` classifies an upstream Anthropic outage (duck-typed, with a precision guard that a bare `status:500` doesn't trip) and returns a retriable 503 instead of a raw 500, wired into 9 consumer routes preserving `X-Loop-*` headers. **#9:** the RLS inventory + lockdown SQL authored (query-first → REVOKE → re-verify); code-side clearance verified — all 3 no-RLS tables are accessed only via the service-role client (bypasses RLS), so lockdown is safe.
+
+**Files touched:**
+- `website/src/app/dashboard/page.tsx` — #28: wired Export/Delete buttons + confirm modal + honest outcome handling.
+- `website/src/app/api/health/route.ts` — #6: real DB + Anthropic reachability probes (timeout-bounded, cached, 503-on-degraded).
+- `website/src/lib/observability-store.ts` — NEW: `recordRouteError`/`logRouteError` (#5) + `recordThrottleEvent`/`logThrottleEvent` (#8), fail-soft + missing-table-benign.
+- `website/src/lib/llm-outage.ts` — NEW: `isLlmOutage` classifier + `llmOutageResponse` (#10).
+- `website/src/lib/security.ts` — #8: `logThrottleEvent` at all 5 × 429 sites (IP + legacy/UPC monthly/daily).
+- `website/src/app/api/{score,score-scenario,score-conversation,score-decision,score-social,evaluate,reflect,score-iterate,reason}/route.ts` — #5+#10: error logging + honest 503 in the outer catch blocks.
+- `website/src/lib/__tests__/llm-outage.test.ts` — NEW: 35/0 battery (classifier + response + observability helpers).
+- `website/supabase-route-errors-migration.sql` — NEW (#5, founder-walked to apply).
+- `website/supabase-throttle-events-migration.sql` — NEW (#8, founder-walked to apply).
+- `website/supabase-rls-audit-and-lockdown.sql` — NEW (#9, founder-walked, query-first).
+- `operations/agent-org-2026-07/go-live-readiness-checklist.md` — NEW: item #16, the go/no-go artifact.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** Elevated (`code-elevated`) under 0d-ii for the builds (existing user-facing functionality + new modules); the #9 RLS lockdown is a `code-critical` access-control sub-step but **no prod op was performed** — the SQL is authored for a founder-walked run. AC7 not engaged this session (no flag flip / mint / deploy / DB op). PR17 engaged (the deploy, the 2 migrations, the RLS REVOKE, and the Part-A verifications are all founder-walked hand-offs). Production byte-equivalent until the founder's push + migrations.
+
+**Rollback path:** each gate-build is additive + independently `git revert`-able. The observability writers are missing-table-benign (inert until their migrations land); the migrations carry their own rollback blocks; #9's RLS change records the pre-REVOKE grants in §B for restoration. #28/#6/#10 are byte-reversible via revert; on deploy they change behaviour additively (buttons work; health returns real status; outages return 503).
+
+**Verification step (founder-performable):**
+```
+cd website && npx tsc --noEmit && npx tsx src/lib/__tests__/llm-outage.test.ts
+```
+Expected: tsc exit 0; `35 passed, 0 failed`. (Full `npm run build` also green: `✓ Compiled successfully`, 141/141 pages.)
+
+**Open questions:** #13 (magic-link-suffices vs a password-reset UI) is a founder decision, not yet made. Part A prod confirmations (5 checks) are pending the founder. The mentor-route LLM surfaces were left for a mechanical follow-up (the `logRouteError`/`llmOutageResponse` helpers are a one-line drop-in) — the core user-facing scoring routes were wired this session.
+
+**Rules served:** KG1 (fail-soft/missing-table-benign DB writes; `waitUntil` post-response scheduling, never fire-and-forget on the hot path); KG-EX1 / method-before-purpose (grounded each surface against code before editing; #9 verified the service-role-only access before recommending RLS); PR17 (every prod op founder-walked). **S11 REFUSED; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's.**
+
+**Status:** Adopted (builds complete + build-green; activation founder-walked). Cross-references: `D-LAUNCH-FEEDBACK-RECONCILIATION-FOLDED-INTO-AO-PLAN-2026-07-19`; `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19`; the go/no-go checklist; the P-GL next-session prompt.

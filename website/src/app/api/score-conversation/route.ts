@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+// #5 + #10 (P-GL): log prod errors + degrade honestly on an LLM outage.
+import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
@@ -290,6 +293,9 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Conversation score API error:', error)
+    const outage = isLlmOutage(error)
+    logRouteError({ route: '/api/score-conversation', method: 'POST', error, statusCode: outage ? 503 : 500, isLlmOutage: outage })
+    if (outage) return llmOutageResponse()
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

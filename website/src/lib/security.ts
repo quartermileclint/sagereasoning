@@ -19,6 +19,9 @@ import {
   UNIFIED_PRACTICE_CREDENTIAL_PREFIX,
   type PracticeCapability,
 } from '@/lib/practice-credential'
+// #8 (P-GL, 2026-07-20) — rate-limit visibility: log a throttle event at each
+// 429 return point. Fail-soft + missing-table-benign (see observability-store.ts).
+import { logThrottleEvent } from '@/lib/observability-store'
 
 // =============================================================================
 // RATE LIMITING — In-memory IP-based rate limiter
@@ -88,6 +91,13 @@ export function checkRateLimit(
 
   if (entry.count > config.maxRequests) {
     const retryAfter = Math.ceil((entry.resetAt - now) / 1000)
+    logThrottleEvent({
+      category: config.category,
+      limiter: 'ip',
+      ip,
+      limitValue: config.maxRequests,
+      windowSeconds: config.windowSeconds,
+    })
     return NextResponse.json(
       { error: 'Too many requests. Please try again later.' },
       {
@@ -454,6 +464,7 @@ export async function validateApiKey(
 
   // Check monthly cap (enforcement cap already includes 50% contingency)
   if (new_monthly_total > monthly_limit) {
+    logThrottleEvent({ category: 'api-key-quota', limiter: 'api_key_monthly', credentialRef: keyRecord.id, endpoint, limitValue: monthly_limit })
     return {
       valid: false,
       error: NextResponse.json(
@@ -471,6 +482,7 @@ export async function validateApiKey(
 
   // Check daily burst cap
   if (new_daily_total > daily_limit) {
+    logThrottleEvent({ category: 'api-key-quota', limiter: 'api_key_daily', credentialRef: keyRecord.id, endpoint, limitValue: daily_limit })
     return {
       valid: false,
       error: NextResponse.json(
@@ -593,6 +605,7 @@ async function validateApiKeyUpc(
   const { new_monthly_total, new_daily_total, monthly_limit, daily_limit } = usageRows[0]
 
   if (new_monthly_total > monthly_limit) {
+    logThrottleEvent({ category: 'api-key-quota', limiter: 'api_key_monthly', credentialRef: row.id, endpoint, limitValue: monthly_limit })
     return {
       valid: false,
       error: NextResponse.json(
@@ -610,6 +623,7 @@ async function validateApiKeyUpc(
   }
 
   if (new_daily_total > daily_limit) {
+    logThrottleEvent({ category: 'api-key-quota', limiter: 'api_key_daily', credentialRef: row.id, endpoint, limitValue: daily_limit })
     return {
       valid: false,
       error: NextResponse.json(

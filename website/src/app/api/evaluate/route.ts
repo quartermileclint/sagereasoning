@@ -1,4 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
+// #5 + #10 (P-GL): log prod errors + degrade honestly on an LLM outage.
+import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, validateTextLength, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
 import { buildEnvelope } from '@/lib/response-envelope'
@@ -233,6 +236,9 @@ Return only the JSON evaluation object.`
       },
     }).then(() => {}) // Fire-and-forget
 
+    const outage = isLlmOutage(error)
+    logRouteError({ route: '/api/evaluate', method: 'POST', error, statusCode: outage ? 503 : 500, isLlmOutage: outage })
+    if (outage) return llmOutageResponse()
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

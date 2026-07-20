@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+// #5 + #10 (P-GL): log prod errors + degrade honestly on an LLM outage.
+import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { KatorthomaProximityLevel } from '@/lib/stoic-brain'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
@@ -268,6 +271,9 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Decision score API error:', error)
+    const outage = isLlmOutage(error)
+    logRouteError({ route: '/api/score-decision', method: 'POST', error, statusCode: outage ? 503 : 500, isLlmOutage: outage })
+    if (outage) return llmOutageResponse()
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

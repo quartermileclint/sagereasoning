@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS, corsHeaders, corsPreflightResponse } from '@/lib/security'
+// #5 + #10 (P-GL): log prod errors + degrade honestly on an LLM outage.
+import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 import { buildEnvelope } from '@/lib/response-envelope'
 import { MODEL_FAST } from '@/lib/model-config'
 import { runSageReason } from '@/lib/sage-reason-engine'
@@ -230,6 +233,9 @@ Note: Evaluate the current action on its own merits, but acknowledge if it addre
     return NextResponse.json(envelope, { headers: corsHeaders() })
   } catch (error) {
     console.error('Score API error:', error)
+    const outage = isLlmOutage(error)
+    logRouteError({ route: '/api/score', method: 'POST', error, statusCode: outage ? 503 : 500, isLlmOutage: outage })
+    if (outage) return llmOutageResponse()
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

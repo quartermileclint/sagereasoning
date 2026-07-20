@@ -81,6 +81,13 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [evaluations, setEvaluations] = useState<V3ActionEvaluation[]>([])
   const [baselineStatus, setBaselineStatus] = useState<BaselineStatus | null>(null)
+  // ── #28 data-rights UI (P-GL, 2026-07-20): wire the Export/Delete controls to the
+  // LIVE /api/user/export + /api/user/delete endpoints (auth via Bearer JWT). ──
+  const [exporting, setExporting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [dataNotice, setDataNotice] = useState<{ type: 'error' | 'info'; text: string } | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -113,6 +120,72 @@ export default function DashboardPage() {
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     window.location.href = '/'
+  }
+
+  // ── #28: Export my data — GET /api/user/export returns a JSON file attachment. ──
+  const handleExportData = async () => {
+    setDataNotice(null)
+    setExporting(true)
+    try {
+      const res = await authFetch('/api/user/export')
+      if (!res.ok) {
+        throw new Error(
+          res.status === 401
+            ? 'Your session has expired. Please sign in again, then retry.'
+            : 'Your export could not be completed. Please try again, or email support@sagereasoning.com.'
+        )
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `sagereasoning-data-export-${new Date().toISOString().slice(0, 10)}.json`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      setDataNotice({ type: 'info', text: 'Your data export has downloaded.' })
+    } catch (err) {
+      setDataNotice({ type: 'error', text: err instanceof Error ? err.message : 'Your export could not be completed.' })
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  // ── #28: Delete my account — DELETE /api/user/delete { confirm: 'DELETE' }.
+  // 200 = fully deleted (session now dead → sign out + redirect); 207 = partial
+  // (report honestly, never claim full success); anything else = a genuine failure. ──
+  const handleDeleteAccount = async () => {
+    setDataNotice(null)
+    setDeleting(true)
+    try {
+      const res = await authFetch('/api/user/delete', {
+        method: 'DELETE',
+        body: JSON.stringify({ confirm: 'DELETE' }),
+      })
+      if (res.status === 200) {
+        await supabase.auth.signOut().catch(() => {})
+        window.location.href = '/?account_deleted=1'
+        return
+      }
+      const body = (await res.json().catch(() => ({}))) as { message?: string; error?: string }
+      if (res.status === 207) {
+        setShowDeleteModal(false)
+        setDeleteConfirmText('')
+        setDataNotice({
+          type: 'error',
+          text: body.message || 'Account deletion partially completed. Please contact support@sagereasoning.com.',
+        })
+        setDeleting(false)
+        return
+      }
+      throw new Error(body.error || body.message || 'Deletion could not be completed. Please try again, or email support@sagereasoning.com.')
+    } catch (err) {
+      setShowDeleteModal(false)
+      setDeleteConfirmText('')
+      setDataNotice({ type: 'error', text: err instanceof Error ? err.message : 'Deletion could not be completed.' })
+      setDeleting(false)
+    }
   }
 
   if (loading) {
@@ -411,31 +484,37 @@ export default function DashboardPage() {
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <button
-            disabled
-            title="Data export is coming soon"
-            className="flex items-center gap-2 px-4 py-2.5 border border-sage-300 text-sage-600 font-display text-sm rounded cursor-not-allowed opacity-60"
+            onClick={handleExportData}
+            disabled={exporting}
+            className="flex items-center gap-2 px-4 py-2.5 border border-sage-300 text-sage-700 font-display text-sm rounded hover:bg-sage-100 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Export my data
-            <span className="text-xs font-body italic">(coming soon)</span>
+            {exporting ? 'Preparing your export…' : 'Export my data'}
           </button>
 
           <button
-            disabled
-            title="Account deletion is coming soon"
-            className="flex items-center gap-2 px-4 py-2.5 border border-red-200 text-red-400 font-display text-sm rounded cursor-not-allowed opacity-60"
+            onClick={() => { setDataNotice(null); setDeleteConfirmText(''); setShowDeleteModal(true) }}
+            className="flex items-center gap-2 px-4 py-2.5 border border-red-300 text-red-600 font-display text-sm rounded hover:bg-red-50 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
             Delete my account
-            <span className="text-xs font-body italic">(coming soon)</span>
           </button>
         </div>
+        {dataNotice && (
+          <p
+            role="status"
+            aria-live="polite"
+            className={`font-body text-sm mt-3 ${dataNotice.type === 'error' ? 'text-red-600' : 'text-sage-700'}`}
+          >
+            {dataNotice.text}
+          </p>
+        )}
         <p className="font-body text-xs text-sage-600 mt-3 italic">
           Need help now? Email{' '}
           <a href="mailto:support@sagereasoning.com"
@@ -443,6 +522,56 @@ export default function DashboardPage() {
           {' '}and we will handle your request manually.
         </p>
       </div>
+
+      {/* ── #28: Delete-account confirmation modal ── */}
+      {showDeleteModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-account-title"
+          onKeyDown={(e) => { if (e.key === 'Escape' && !deleting) { setShowDeleteModal(false); setDeleteConfirmText('') } }}
+        >
+          <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-6">
+            <h3 id="delete-account-title" className="font-display text-lg font-semibold text-sage-800 mb-2">
+              Delete your account?
+            </h3>
+            <p className="font-body text-sm text-sage-600 leading-relaxed mb-3">
+              This permanently deletes your account and all associated data — your baseline,
+              evaluations, journal, and private reflections. <strong>This cannot be undone.</strong>
+            </p>
+            <p className="font-body text-sm text-sage-600 leading-relaxed mb-4">
+              To confirm, type <span className="font-mono font-semibold text-sage-800">DELETE</span> below.
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              autoFocus
+              aria-label="Type DELETE to confirm account deletion"
+              placeholder="DELETE"
+              disabled={deleting}
+              className="w-full px-3 py-2 border border-sage-300 rounded font-body text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-red-300 disabled:opacity-60"
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => { setShowDeleteModal(false); setDeleteConfirmText('') }}
+                disabled={deleting}
+                className="px-4 py-2 border border-sage-300 text-sage-600 font-display text-sm rounded hover:bg-sage-100 transition-colors disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleting || deleteConfirmText !== 'DELETE'}
+                className="px-4 py-2 bg-red-600 text-white font-display text-sm rounded hover:bg-red-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {deleting ? 'Deleting…' : 'Delete my account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

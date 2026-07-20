@@ -1,4 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
+// #5 + #10 (P-GL): log prod errors + degrade honestly on an LLM outage.
+import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
+import { logRouteError } from '@/lib/observability-store'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimit, RATE_LIMITS, validateApiKey, withUsageHeaders, validateTextLength, TEXT_LIMITS, publicCorsHeaders, publicCorsPreflightResponse } from '@/lib/security'
@@ -711,6 +714,9 @@ Evaluate the revised action. Return only the JSON evaluation object.`
     })
   } catch (error) {
     console.error('Score-iterate API error:', error)
+    const outage = isLlmOutage(error)
+    logRouteError({ route: '/api/score-iterate', method: 'POST', error, statusCode: outage ? 503 : 500, isLlmOutage: outage })
+    if (outage) return llmOutageResponse({ ...buildLoopHeaders({ loopId }) })
     // Catch-all 500 — emit X-Loop-* headers (we have an accumulator) but skip
     // the ledger write (uncertain whether the failure was customer-side or
     // server-side; matches /api/reason catch-block posture).
