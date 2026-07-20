@@ -15260,3 +15260,34 @@ Expected: `≥1`.
 **Rules served:** the cache's own update discipline; PR18 (this is itself a governance-surface change, not a production-state block, so PR18 does not apply here — noted to avoid conflating the two close-time-artifact disciplines).
 
 **Status:** Adopted. Cross-references: `D-PR19-ADOPTED-INDEPENDENT-REVIEW-REQUIRED-2026-07-21`.
+
+---
+
+## 2026-07-21 — D-P5-PERMISSIONS-MATRIX-TECH-OPS-ROWS-SIGNED-2026-07-21
+
+**Decision:** the AO program's per-agent permissions matrix (`operations/agent-org-2026-07/P5-permissions-matrix.md`) is drafted, and its Tech and Ops rows are founder-signed as drafted (AskUserQuestion, no adjustments). The credential ledger (`operations/agent-org-2026-07/credential-ledger.md`) is stood up empty, and `harness/gate1-pre-decision/KILL-SWITCHES.md` Layer 4 is extended to point at it for per-org-agent credential ids. Growth and Support rows are explicitly deferred (not blank-by-omission); Mentor is explicitly excluded from this rollout.
+
+**Reasoning:** executes plan §3-P5 (`operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md`), which the v2 fold made the ordering anchor for P4 — P4's first mint for a given agent's role is now gated on that role's matrix row being founder-signed (SEQ-3/PROACT-1). Tech (P1 rank 1) and Ops (P1 rank 2) were drafted this session per P1's ranked order (`operations/agent-org-2026-07/P1-agent-roster-gap-analysis.md` §5); Growth's needs plausibly differ from the Tech/Ops template in ways this session had no grounds to reason through without inventing them; Support was deliberately not drafted because P1 argues its urgent gap is better solved outside P4 entirely (the ring-mount question), and drafting a Gate-1 row here would risk manufacturing a path P1 itself argues against defaulting to.
+
+**Files touched:**
+- `operations/agent-org-2026-07/P5-permissions-matrix.md` — NEW. Schema (§1), the §2 hard-floor restatement, Tech/Ops rows drafted in full (capabilities, spend envelopes, external-account answers, attended-only defaults with named-not-approved future candidates), Growth/Support/Mentor rows named and reasoned rather than silently skipped, the founder sign-off record (§6, both rows SIGNED 2026-07-21).
+- `operations/agent-org-2026-07/credential-ledger.md` — NEW. Stood up empty (no mint has occurred); row format drawn from the S11 register §E precedent (format only — this program's own, separate ledger per plan §5's PROACT-4 fold).
+- `harness/gate1-pre-decision/KILL-SWITCHES.md` — Layer 4 extended with a per-org-agent note pointing at the new ledger as the single source of truth for credential ids (avoids duplicating ids across two files).
+
+**Risk classification:** **Elevated** under 0d-ii — not the general `governance`→Standard default. Per the plan's own PROACT-3 fold: a document that is the effective access-control policy for autonomous agent action is not a documents-only artifact under 0d-ii, even before any provisioning occurs. No code / schema / flag / mint / deploy / DB change this session. AC7 not engaged. PR6 not engaged — no auth/session/encryption/access-control change was itself *made*; a policy for a future one was drafted and signed.
+
+**Rollback path:** `git revert` the records commit — the matrix, the ledger, and the KILL-SWITCHES.md extension revert together. Nothing live depends on any of it; P4's first mint (Tech or Ops) has not yet happened.
+
+**Verification step (founder-performable):**
+```
+grep -c "SIGNED, 2026-07-21" operations/agent-org-2026-07/P5-permissions-matrix.md
+grep -c "none yet" operations/agent-org-2026-07/credential-ledger.md
+grep -c "credential-ledger.md" harness/gate1-pre-decision/KILL-SWITCHES.md
+```
+Expected: `2`; `1`; `≥1`.
+
+**Open questions:** none blocking. Growth's row is deferred to its own future matrix-revision session (not scheduled); Support's row is deferred pending the founder's separate ring-vs-Gate1 decision for Support (P1 §4.2, not this program's to resolve unilaterally).
+
+**Rules served:** PR17 (the sign-off ran as an explicit AskUserQuestion exchange in this session, not a one-line hand-off — Step 5's own instruction); §2's hard floor (restated in the matrix itself, §2, so it reads correctly standalone); §2's attended-only default (both signed rows carry it explicitly, with named-not-approved future candidates rather than silence); PROACT-4 (the ledger's scope decided now, not deferred, per plan §5).
+
+**Status:** Adopted. Cross-references: `operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md` §3-P4, §3-P5, §5; `operations/agent-org-2026-07/P1-agent-roster-gap-analysis.md` §5; `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19`; `operations/handoffs/founder/2026-07-21-P5-permissions-matrix-NEXT-SESSION-PROMPT.md`.
