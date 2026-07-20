@@ -15049,3 +15049,31 @@ Expected: `≥1`.
 **Rules served:** Rule B (holistic pass — the reconciliation reshaped the plan's launch-readiness surface); KG-EX1 (instrument/state fidelity — verified against code, not asserted); PR17 (no live op; every P-GL step stays founder-walked at its tier). **S11 REFUSED; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's.**
 
 **Status:** Complete (reconciliation verified + folded). Cross-references: the reconciliation artifact; `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19`; the AO plan P1 + P-GL + §9; Workflow `wf_3e81a945-4b8`.
+
+---
+
+## 2026-07-20 — D-AGENT-ORG-P1-ROSTER-GAP-ANALYSIS-COMPLETE-2026-07-20
+
+**Decision:** P1 (agent-roster review + sole-founder gap analysis, the AO program's root session) is complete. The gap map, roster recommendations, ranked P4 order, and per-agent E1 surfacing are recorded at `operations/agent-org-2026-07/P1-agent-roster-gap-analysis.md`. This is analysis only — it recommends; it activates nothing.
+
+**Reasoning:** grounded in the AO plan §3-P1 gap candidates, the already-verified 28-item launch-feedback reconciliation (folded in per the plan's instruction), the five roster source documents, all four wiring-fix handoff/close pairs (support, tech, growth, ops), and a direct repo check confirming mentor has no such pair. The headline finding is architectural: the five Sage agents (mentor, support, tech, growth, ops) run on an older "ring" architecture (`sage-mentor/ring-wrapper.ts`, local markdown files, authority-level promotion) that is entirely separate from the Gate-1/UPC/trust-core architecture P4 will provision — finishing one does not finish the other. A second concrete finding: the Support Agent Manual's claim that its system is "already deployed and running" is false for the automated run-loop specifically — `processInboxItemWithGuard` was designed and unit-verified in April 2026 but was never given a caller (the mount session stopped explicitly for lack of one), and no session since has built one (confirmed via `git log`, last touch 2026-04-20). No genuinely new agent role is recommended; every named gap (legal, finance, security-ops, escalation, email vendor, migration strategy) routes to a founder-plus-Ops tracking task or a founder-plus-external-professional decision. Ranked P4 order: Tech (1), Ops (2), Growth (3), Support (4, org-urgency and evidence-fit explicitly diverge here), Mentor excluded (it is the product, not a staffing gap).
+
+**Files touched:**
+- `operations/agent-org-2026-07/P1-agent-roster-gap-analysis.md` — NEW, the full gap map + recommendations + ranked order + E1 surfacing + the light R18 rider findings.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** Standard (`governance`) under 0d-ii. Documents only; NO code / flag / schema / mint / deploy / DB change. AC7 not engaged. PR6 not engaged. Production byte-equivalent.
+
+**Rollback path:** `git revert` the records commit — the deliverable and this entry revert together; no live state depends on either.
+
+**Verification step (founder-performable):**
+```
+grep -c "unowned\|gap map" operations/agent-org-2026-07/P1-agent-roster-gap-analysis.md
+```
+Expected: `≥1`.
+
+**Open questions:** whether Ops C1 (the cost/spend feed channel) has actually been promoted to Verified since its blocking migration landed in production — the gap-map names this as needing confirmation at the next Ops-touching session, not resolved here. §1a's internal-staff representativeness bound remains untouched, per the plan's own scope.
+
+**Rules served:** Rule B (holistic pass — read across five source classes before concluding); KG-EX1 / method-before-purpose (grounded the architecture question before recommending any roster change); PR15 (consulted existing skills — `sage-wiring-fix` — before treating any gap as unaddressed); §1a + §2 of the AO plan honored throughout (no proactive-envelope recommendation exceeds the hard floor).
+
+**Status:** Adopted (as analysis — activates nothing). Cross-references: `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19`; `D-LAUNCH-FEEDBACK-RECONCILIATION-FOLDED-INTO-AO-PLAN-2026-07-19`; the P1 next-session prompt; the P1 deliverable.
