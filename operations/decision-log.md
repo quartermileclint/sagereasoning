@@ -15205,3 +15205,58 @@ Expected: tsc exit 0; build `✓ Compiled successfully`; both battery outputs `p
 **Rules served:** PR17 (every credential mint/revoke walked live, exact commands, no one-line hand-off — including two in-session corrections when the wrong credential class and a non-canonical agent_id were caught before they compounded); the P1-comparison discipline (pre-consult positions recorded before verdicts, per the anti-self-grading device; no shared context between legs; frozen thresholds applied as pre-registered, not relaxed post-hoc); §8 task-fit discipline (characterising WHERE signal appeared rather than gating the whole verdict on the single "catches" metric, while still reporting that metric's honest failure as the headline); **PR10 (self-correction — the model-tier deviation was surfaced, disclosed, and corrected into the record the same day, before the founder treated the result as settled).** **S11 REFUSED; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's — this memo informs it, never makes it, and should not be treated as settled evidence until the model-controlled repeat runs.**
 
 **Status:** Adopted with a same-day erratum; **the P2 arc remains open pending the Fable-5 repeat.** Cross-references: `operations/agent-org-2026-07/2026-07-20-P2-spec-freeze.md`; `operations/handoffs/founder/2026-07-20-P2-bare-arm-CLOSE.md`; `operations/agent-org-2026-07/runs/2026-07-20-bare/leg-a-metrics.md`; `operations/agent-org-2026-07/runs/verdict-memo-2026-07-21.md`; `operations/handoffs/founder/2026-07-21-interim-and-P2-Fable5-rerun-standing-note.md`.
+
+---
+
+## 2026-07-21 — D-PR19-ADOPTED-INDEPENDENT-REVIEW-REQUIRED-2026-07-21
+
+**Decision:** PR19 ("Independent Adversarial Review Is Required, Not Optional") is ADOPTED as a process-rule amendment to `/adopted/project-instructions-snapshot.md` (founder-approved as drafted). Any session materially changing trust-core/predicate/fold/engine surfaces, or drafting a build plan with live-op or org-safety consequences, closes only after a genuinely independent review (a fresh Workflow given the artifact itself, never the first review's conclusions) or an explicit founder waiver. The spend-limit-outage first-hand fallback is codified, with a re-run now REQUIRED — not merely recommended — before any downstream Critical activation or a plan's Adopted status is treated as final.
+
+**Reasoning:** executes P3 of the Agent-Organization + Evidence Program build plan (`operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md` §3-P3), grounded in three same-day 2026-07-19 instances where a genuinely independent re-review caught real defects a same-session first-hand review had called clean: `D-KATHEKON-DIKAIOSYNE-SELF-CIRCLE-NARROWING-BUILT-REVIEW-FOLDED-2026-07-19` (a HIGH double-counting defect), `D-AGENT-EXTENSION-AE2-INDEPENDENT-REREVIEW-FOLDED-2026-07-19` (7 confirmed defects incl. a genuine spec-infidelity), and `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19` (23 confirmed, 0 refuted, on this very plan). The mandatory-re-run stance (over the prior informal "can follow the limit reset") is a deliberate strengthening the founder approved, reasoned from those instances' hit rate.
+
+**Files touched:**
+- `adopted/project-instructions-snapshot.md` — PR19 entry added after PR18; cross-references line updated to PR1–PR19.
+- `operations/review-harness/independent-review-workflow-template.md` — NEW. The reusable template: independence rule, dimension-based fan-out shape (seeded from the three grounding runs), adjudication discipline, the spend-limit fallback procedure, the index-alignment post-processing pitfall (a `results.filter(Boolean)` before a positional `flatMap` mislabeled findings when a parallel dimension errored — this program's own build-plan critique hit it), and a minimal invocation checklist.
+- `adopted/standing-protocol-cache.md` — same-session update (see `D-CACHE-DRIFT-RESOLVED-2026-07-21` below).
+
+**Risk classification:** the project-instructions snapshot's own update discipline (line 6: "any amendment to project instructions … is Elevated under 0d-ii") governs this amendment — **Elevated**, not the general `governance`→Standard default. Documents only; no code/schema/flag/mint/deploy. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` the records commit — PR19 reverts out of the snapshot, the template file is removed, the cache reverts to citing PR1–PR18.
+
+**Verification step (founder-performable):**
+```
+grep -c "PR19 — Independent Adversarial Review Is Required" adopted/project-instructions-snapshot.md
+ls operations/review-harness/independent-review-workflow-template.md
+```
+Expected: `1`; the file exists.
+
+**Open questions:** the founder still needs to paste-sync the amended project-instructions snapshot into the Cowork panel (per the snapshot's own update discipline, line 6) — this is a founder step outside this session's reach, named here rather than silently assumed.
+
+**Rules served:** PR19 (this entry is its own first citation); Rule B / KG-EX1 (the rule exists because self-review shares the reviewer's blind spots — now proven three times in one day); PR17 (the amendment itself required explicit founder sign-off, obtained via AskUserQuestion before treating it as Adopted, not silently adopted).
+
+**Status:** Adopted. Cross-references: `operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md` §3-P3, §7, §8; `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19`; `D-KATHEKON-DIKAIOSYNE-SELF-CIRCLE-NARROWING-BUILT-REVIEW-FOLDED-2026-07-19`; `D-AGENT-EXTENSION-AE2-INDEPENDENT-REREVIEW-FOLDED-2026-07-19`; `operations/review-harness/independent-review-workflow-template.md`.
+
+---
+
+## 2026-07-21 — D-CACHE-DRIFT-RESOLVED-2026-07-21
+
+**Decision:** `/adopted/standing-protocol-cache.md` updated in the same session as the PR19 amendment, per the cache's own update discipline.
+
+**Reasoning:** PR19 changes the process-rule range the cache tracks (PR1–PR18 → PR1–PR19); the update-discipline section requires a same-session cache update whenever process rules change, logged via a `D-CACHE-DRIFT-…` entry.
+
+**Files touched:**
+- `adopted/standing-protocol-cache.md` — status-line amendment note added (2026-07-21, PR19); the update-discipline section's process-rules bullet extended to PR19; the cross-references section's project-instructions line and the new review-harness template pointer added.
+
+**Risk classification:** Standard under 0d-ii (cache maintenance, per the cache's own update-discipline classification). AC7 not engaged.
+
+**Rollback path:** `git revert` the records commit alongside the PR19 commit (same commit, if bundled).
+
+**Verification step (founder-performable):**
+```
+grep -c "PR1–PR19" adopted/standing-protocol-cache.md
+```
+Expected: `≥1`.
+
+**Rules served:** the cache's own update discipline; PR18 (this is itself a governance-surface change, not a production-state block, so PR18 does not apply here — noted to avoid conflating the two close-time-artifact disciplines).
+
+**Status:** Adopted. Cross-references: `D-PR19-ADOPTED-INDEPENDENT-REVIEW-REQUIRED-2026-07-21`.

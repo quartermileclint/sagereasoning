@@ -560,12 +560,28 @@ Any "production state" summary (the CLAUDE.md block, plan tables, close blocks) 
 
 **Rationale:** three recurrences of the same drift class — a summary block retyped mid-arc from prose rather than from the decision log — each propagated stale state into subsequent session opens. PR8 promotes the pattern at the third recurrence. **Engagement:** every session close that touches a production-state summary; any mid-session document that needs to state a flag disposition.
 
+### PR19 — Independent Adversarial Review Is Required, Not Optional (NEW; 2026-07-21)
+
+**Source:** the Agent-Organization + Evidence Program build plan's P3 election (`operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md` §3-P3, adopted under `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19`), recorded under `D-PR19-ADOPTED-INDEPENDENT-REVIEW-REQUIRED-2026-07-21`. Recurrences cited, all 2026-07-19: `D-KATHEKON-DIKAIOSYNE-SELF-CIRCLE-NARROWING-BUILT-REVIEW-FOLDED-2026-07-19` (a same-session first-hand review called the self-circle-narrowing build clean; a freshly-launched independent Workflow, given the diff alone, found a HIGH double-counting defect the self-review's author had documented the discipline against in one file and violated in the very next); `D-AGENT-EXTENSION-AE2-INDEPENDENT-REREVIEW-FOLDED-2026-07-19` (a first-hand review of the AE-2 loop-fold called the core logic clean; an independent re-run after an account spend-limit reset found 7 confirmed defects, including a genuine spec-infidelity the first pass missed entirely); and `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19` itself (a first-hand draft of this very build plan was independently critiqued and returned 23 confirmed findings, none refuted, before adoption). Same pattern, three independent domains, one day.
+
+**Rule:** any session materially changing trust-core / predicate / fold / engine surfaces, **and** any session drafting a build plan carrying live-op or org-safety consequences, closes only after one of:
+1. an **independently-launched review** — a fresh Workflow given the code or document itself, with **no visibility into the first review's conclusions or summary** (a review handed "here is what we already believe is fine" is not independent and does not satisfy this rule); or
+2. an **explicit founder waiver**, recorded at close, naming what was NOT independently reviewed.
+
+**The spend-limit fallback (codified, not merely practiced):** when the launched review dies wholesale on an account spend/session limit, the standing precedent (§4, invoked repeatedly through 2026-07) applies: complete the review **first-hand** across every dead dimension, **disclose the single-perspective limitation explicitly at close**, and — this is the part the founder decided should bind, not merely be recommended, precisely because two of the three grounding instances above show the eventual independent re-run catching real defects the first-hand pass missed — **an independent re-run is REQUIRED before the reviewed artifact is treated as verified for the purpose of any subsequent live-op activation gate** (a Critical 0c-ii flag flip, mint, or deploy that depends on the artifact's correctness) or, for a governance document, **before its Adopted status is treated as final for an irreversible downstream commitment**. The requirement does not block the session's own close — the close records the disclosed limitation and the re-run as a carried, named follow-up — but it does gate whatever comes next that depends on the artifact being genuinely sound.
+
+**A named implementation pitfall for any review-workflow's post-processing:** never key downstream aggregation off an array's POSITION once any upstream `filter`/error-drop could have changed which branch sits at which index. The `D-AGENT-ORG-EVIDENCE-BUILD-PLAN-ADOPTED-2026-07-19` critique's own post-processing hit exactly this — a `results.filter(Boolean)` applied before a positional `flatMap`, so when one parallel dimension errored and dropped out, a different dimension's findings were mislabeled with its name. Caught during adjudication by re-attributing findings by content, not by the corrupted positional field. Re-attribute by identity/content, never by position, whenever a branch can independently fail.
+
+**Reusable template:** `operations/review-harness/independent-review-workflow-template.md`, seeded from the three 2026-07-19 runs.
+
+**Rationale:** the founder's redirect-phrase discipline (the standing-cache table of AI-failure-mode redirects) exists because self-assessment shares the assessor's own blind spots — a lesson this project has now paid for at method-before-purpose scale (KG-EX1) and, with this rule's grounding instances, at code-review scale too. A first-hand review under a forced outage is a legitimate stopgap (§4), not a substitute for genuine independence; PR19 makes the substitute temporary and the real thing mandatory before anything downstream leans on it. **Engagement:** any session touching trust-core/predicate/fold/engine surfaces; any session drafting a build plan with live-op or org-safety consequences; any session that would otherwise treat a same-session first-hand review as sufficient grounds to proceed to activation.
+
 ---
 
 ## Cross-references
 
 - `/manifest.md` — full manifest (R0–R20, AC1–AC13, KG1–KG7)
-- `/adopted/standing-protocol-cache.md` — general session protocol cache (references PR10-PR18; PR17 added 2026-05-27; PR18 added 2026-06-10)
+- `/adopted/standing-protocol-cache.md` — general session protocol cache (references PR10-PR19; PR17 added 2026-05-27; PR18 added 2026-06-10; PR19 added 2026-07-21)
 - `/adopted/build-sessions-protocol-cache.md` — build-arc-specific cache
 - `/adopted/substrate-plugin-staging-plan.md` — substrate-as-plugin staging plan (amended at ST2)
 - `/adopted/adr/2026-05-12-substrate-category-character-kernel.md` — J1 ADR (Character Kernel category label)
