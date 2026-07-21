@@ -77,10 +77,12 @@ COMMANDS
   mint practice --label <text> --capabilities <c1,c2,...>
                 [--agent-id <id>] [--owner-email <email>]
                 [--owner-kind operator|external_consumer] [--tier free|paid] [--notes <text>]
+                [--monthly <n>] [--daily <n>] [--chain <n>]
                 [--examination-enforcement pre_decision_harness]
                 Mint an sr_prac_ Unified Practice Credential (CI-14). --capabilities is a
                 comma-separated subset of: consult,l1_supply,accreditation_write,calling,reflect
                 (write-class members are opt-in; agent-id binds write/calling/reflect)
+                (omitted limits use the adopted 30/1/1 server defaults — CI-6, same as mint api)
                 --examination-enforcement (Gate-1 Arc 1, operator-only) marks the credential
                 pre-decision-harness so its accreditation writes earn examination_mode:
                 pre_decision_harness. DO NOT use until a genuine pre-decision harness exists.
@@ -246,6 +248,31 @@ function buildPracticeMintPlan(flags: Record<string, string>): PlanResult {
     body.tier = flags['tier']
   }
   if (flags['notes']) body.notes = flags['notes']
+
+  // Limits are OMITTED unless explicitly flagged, so the route's adopted
+  // 30/1/1 defaults (API_KEY_FREE_TIER_DEFAULTS — CI-6) stay the single
+  // source of truth. Mirrors buildApiMintPlan's loop above — before this fix
+  // (2026-07-21, P4 agent-1 session), mint practice silently ignored these
+  // three flags and always landed on 30/1/1 regardless of what was passed,
+  // even though the route itself (POST /api/admin/api-keys) already accepts
+  // monthly_limit/daily_limit/max_chain_iterations overrides on the UPC-mode
+  // path identically to the legacy sr_live_ path — this was a CLI-only gap.
+  const limitFlags: Array<[flag: string, field: string]> = [
+    ['monthly', 'monthly_limit'],
+    ['daily', 'daily_limit'],
+    ['chain', 'max_chain_iterations'],
+  ]
+  for (const [flag, field] of limitFlags) {
+    const raw = flags[flag]
+    if (raw !== undefined) {
+      const n = Number(raw)
+      if (!Number.isInteger(n) || n < 1) {
+        return { ok: false, error: `--${flag} must be a positive integer.` }
+      }
+      body[field] = n
+    }
+  }
+
   // Gate-1 surface honesty (Arc 1, 2026-06-20) — the OPERATOR-ONLY pre-decision
   // marker. Sets credential_provenance.examination_enforcement='pre_decision_harness'
   // at the (admin-gated) route, so the credential earns

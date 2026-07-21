@@ -253,6 +253,52 @@ console.log('MP — mint practice (sr_prac_)')
     'MP-10 parseCommand accepts the practice class',
     parsed.ok && parsed.command.credentialClass === 'practice'
   )
+
+  // MP-11..14 (2026-07-21, P4 agent-1 session): before this fix, mint practice
+  // silently DROPPED --monthly/--daily/--chain — every practice mint landed on
+  // the route's 30/1/1 default regardless of what was passed, with no error.
+  // Mirrors MA's equivalent api coverage above.
+  const withLimits = buildMintPlan('practice', {
+    label: 'org-tech consult',
+    capabilities: 'consult',
+    monthly: '150',
+    daily: '15',
+    chain: '3',
+  })
+  assert(
+    'MP-11 explicit --monthly/--daily/--chain pass through as integers',
+    withLimits.ok &&
+      withLimits.plan.body?.monthly_limit === 150 &&
+      withLimits.plan.body?.daily_limit === 15 &&
+      withLimits.plan.body?.max_chain_iterations === 3
+  )
+
+  const partialLimits = buildMintPlan('practice', {
+    label: 'x',
+    capabilities: 'consult',
+    monthly: '150',
+  })
+  assert(
+    'MP-12 partial limits: only the flagged field is set, others stay omitted',
+    partialLimits.ok &&
+      partialLimits.plan.body?.monthly_limit === 150 &&
+      !('daily_limit' in partialLimits.plan.body!) &&
+      !('max_chain_iterations' in partialLimits.plan.body!)
+  )
+
+  const badLimit = buildMintPlan('practice', {
+    label: 'x',
+    capabilities: 'consult',
+    monthly: 'not-a-number',
+  })
+  assert('MP-13 non-integer --monthly rejected locally', !badLimit.ok)
+
+  const zeroLimit = buildMintPlan('practice', {
+    label: 'x',
+    capabilities: 'consult',
+    daily: '0',
+  })
+  assert('MP-14 --daily 0 rejected locally (must be a positive integer)', !zeroLimit.ok)
 }
 
 // ── RV — revoke ──────────────────────────────────────────────────────────────
