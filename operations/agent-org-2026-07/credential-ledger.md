@@ -15,6 +15,8 @@
 | Tech | `sagereasoning:org-tech@v1` | consult | `45fc0147…` | `[consult]` | 150/15/1 | LIVE | 2026-07-21 — P4 agent-1 (prod) |
 | Tech | `sagereasoning:org-tech@v1` | write | `c941830c…` | `[accreditation_write, calling, reflect]` | 150/15/1 | LIVE | 2026-07-21 — P4 agent-1 (prod) |
 | Tech | `sagereasoning:org-tech@v1` | consult | `3c4495b0…` | `[consult]` | 150/15/1 | REVOKED — mint-planning error: minted with `--owner-email` set, which resolved a non-null `owner_user_id` and collided with the write credential's own `(owner_user_id, agent_id)` uniqueness index (`api_keys_upc_owner_agent_active_uniq`). Re-minted owner-less (see the row above) to match the s9-loop precedent, per which only the write credential is owner-bound. | 2026-07-21 — P4 agent-1 (prod), superseded same session |
+| Ops | `sagereasoning:org-ops@v1` | consult | `854e12ac…` | `[consult]` | 120/10/1 | LIVE | 2026-07-21 — P4 agent-2 (prod) |
+| Ops | `sagereasoning:org-ops@v1` | write | `6c26d372…` | `[accreditation_write, calling, reflect]` | 120/10/1 | LIVE | 2026-07-21 — P4 agent-2 (prod) |
 
 **TEST proof artifact (not a standing Tech credential — noted for completeness, not a ledger row for this identity's live state):** a throwaway `sr_prac_` consult credential (id `b1229d04…`) was minted on TEST during this session purely to prove the fixed CLI actually applies `--monthly`/`--daily` overrides (it did — 150/15 confirmed). Revoked same session once its purpose was served; never carried real traffic.
 
