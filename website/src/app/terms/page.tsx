@@ -275,7 +275,9 @@ export default function TermsPage() {
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">15. Contact</h2>
           <p>
             Questions about these Terms may be directed to:{' '}
-            {/* Pre-launch: Confirm support@sagereasoning.com is configured and monitored. */}
+            {/* Known gap as of 2026-07-22: support@sagereasoning.com is not watched on a regular
+                cadence. Tracked as an explicitly open item — see item #11 in
+                operations/agent-org-2026-07/go-live-readiness-checklist.md. */}
             <span className="text-sage-600 font-mono">support@sagereasoning.com</span>
           </p>
         </div>
