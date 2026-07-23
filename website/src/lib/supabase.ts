@@ -5,6 +5,13 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+// SessionStorage key AuthRedirect.tsx sets right before handing off to
+// /auth/reset-password on a genuine PASSWORD_RECOVERY event. That page
+// requires this marker before trusting an ambient getSession() result, so
+// an unrelated already-signed-in session (e.g. on a shared device) can't
+// also reach the set-new-password form.
+export const PASSWORD_RECOVERY_MARKER_KEY = 'sage_password_recovery_pending'
+
 // Sync auth state to a cookie so server-side middleware can verify sessions.
 // The createClient stores tokens in localStorage (browser-only), but Next.js
 // middleware runs on the server and can only read cookies. This bridge ensures

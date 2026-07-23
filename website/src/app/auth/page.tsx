@@ -129,6 +129,30 @@ export default function AuthPage() {
     setLoading(false)
   }
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Enter your email above first, then click "Forgot your password?"')
+      return
+    }
+    setLoading(true)
+    setError('')
+    setMessage('')
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      })
+      if (error) {
+        setError(error.message)
+      } else {
+        setMessage('Check your email for a link to set a new password.')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleSubmit = mode === 'signin' ? handleSignIn : mode === 'signup' ? handleSignUp : handleMagicLink
 
   // While checking for existing session, show a brief loading state
@@ -251,6 +275,11 @@ export default function AuthPage() {
               Prefer passwordless?{' '}
               <button onClick={() => { setMode('magic'); setError(''); setMessage('') }} className="text-sage-800 underline">
                 Use magic link
+              </button>
+            </p>
+            <p>
+              <button onClick={handleForgotPassword} disabled={loading} className="text-sage-800 underline disabled:opacity-50">
+                Forgot your password?
               </button>
             </p>
           </>
