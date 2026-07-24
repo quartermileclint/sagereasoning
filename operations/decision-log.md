@@ -15671,3 +15671,178 @@ Once ~1 hour has passed since the Supabase email-limit was hit:
 **Rules served:** PR18 (this entry is written from verified, live observations at close, not speculation); PR7 (the one remaining open item — the untested in-app reset path — is named with an explicit revisit condition, not silently dropped); the standing cache's "one-line operational hand-off" guard (the retest steps are spelled out in full).
 
 **Status:** Adopted. Cross-references: `operations/handoffs/founder/2026-07-22-cost-health-snapshots-migration-CLOSE.md`; `operations/handoffs/founder/2026-07-22-password-reset-flow-build-CLOSE.md`; `D-COST-HEALTH-SNAPSHOTS-SCHEMA-APPLIED-2026-07-22`; `D-PASSWORD-RESET-FLOW-BUILT-REVIEW-FOLDED-2026-07-22`; `operations/agent-org-2026-07/go-live-readiness-checklist.md` (both rows + both posture-summary paragraphs).
+
+## 2026-07-23 — D-BRAND-ASSETS-AUDIT-AND-PAGE-MAPPING-PROPOSAL-2026-07-23
+
+**Decision:** Noted the existence of `website/Brand/Brand_Guidelines.docx` (added 2026-07-23) and 26 new image files in `website/public/images/` (added 2026-06-09 through 2026-07-23) in `/CLAUDE.md`, and produced a full audit + page-mapping proposal for all 26 images against the live website — `operations/brand-2026-07/2026-07-23-brand-assets-audit-and-page-mapping-proposal.md`. **This is a proposal, not a build** — no website page was edited this session.
+
+**Reasoning:** the founder asked for two things — (1) update the governing docs to note the new assets, (2) review the guideline against the live site and report back recommended changes, using all images where applicable. Grounded the analysis in the guideline's own text (`textutil`-extracted), an older, informative staging copy at the repo-root `brand/` directory (two RTF files — `passion logos.rtf` and `proximity cards and colours.rtf` — carrying per-image reasoning and exact colour values the current docx text doesn't fully restate), the canonical `stoic-brain/passions.json` taxonomy (cross-verifying every passion-image mapping against the site's own Greek `id`s, not just the guideline's English labels), and a direct grep of the live site's current image usage (confirming which pre-existing assets are already correctly wired, and finding one live gap: the home page's "AI Agents" audience card wrongly reuses `Developer.PNG` instead of a dedicated image).
+
+**All 26 new images were successfully mapped** (satisfying the founder's "using all of them if possible" instruction) across three groups: (A) the five "Stages of Practice" images (Storm/Crossroads/Worn Path/Clear Summit/Inner Fire) pair 1:1 with the site's existing Katorthoma Proximity Levels, per `proximity cards and colours.rtf`'s exact colour values — rendered today on `page.tsx` (fullest), `score/page.tsx`, and `community/page.tsx`; (B) 19 "Passion Logos" map 1:1 to `/passion-log`'s 20-item sub-species taxonomy (cross-verified against `passions.json`), with one honest gap disclosed (Grief/`penthos` has no assigned image — an earlier draft had proposed the pallium cloak for it, but the final guideline assigns that image to Shame instead) and two mappings flagged medium-high-confidence rather than certain (`wax scribbled.PNG`→`agonia`, `onion.PNG`→`achos` — the guideline's English labels for these two diverge from `passions.json`'s own English names for the same Greek concepts, resolved by the future-fear vs. present-objectless-weight distinction in each passion's canonical definition, but not a stated 1:1 source the way the other 17 are); (C) `agent.PNG` (closing the Developer.PNG-duplication gap) and `mirror.PNG` (illustrating `/methodology`'s existing "not a measure of your worth as a person" line).
+
+**Deliberately not done this session:** no website page was edited (the request was to report recommended changes, not build them); the colour-palette/typography/iconography/voice-tone sections of the guideline were not actioned (general design-system guidance, flagged as a separate, larger undertaking); the two flagged passion mappings and the Grief/`penthos` gap were surfaced for founder confirmation, not silently resolved one way or the other.
+
+**Files touched:**
+- `operations/brand-2026-07/2026-07-23-brand-assets-audit-and-page-mapping-proposal.md` — NEW. The full audit + mapping proposal (all five sections: proximity-level mapping, passion-logo mapping, single-purpose images, non-recommendations, cross-references).
+- `/CLAUDE.md` — new "## Brand assets" section added (pointer to the guideline location + a summary of the new-images audit + a link to the proposal doc).
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** Standard under 0d-ii. Documentation and analysis only — no code, schema, auth, flag, or deploy touched; no website page edited. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` this commit — reverts the new proposal doc and the CLAUDE.md addition together; nothing else changed.
+
+**Verification step (founder-performable):**
+```
+cat "operations/brand-2026-07/2026-07-23-brand-assets-audit-and-page-mapping-proposal.md" | head -30
+grep -A6 "## Brand assets" /CLAUDE.md
+```
+Expected: the proposal's opening sections + the CLAUDE.md pointer note, both readable.
+
+**Open questions:**
+- The two flagged passion mappings (`wax scribbled`→`agonia`, `onion`→`achos`) need a quick founder confirmation before any future session wires them.
+- The Grief/`penthos` taxonomy gap (no image exists) needs a founder decision — commission a 20th image later, or leave that one entry icon-less by design.
+- The proximity-level colour change (§2 of the proposal) is a real, visible change to the site's most-used colours (`sage_like` moves from dark green to warm gold) — needs explicit founder sign-off before a future build session ships it, not a silent swap.
+- Whether/when to execute the proposal is entirely the founder's call — no next-session prompt was authored for it, since the founder asked for a report, not a scheduled build.
+
+**Rules served:** the standing cache's "method-before-purpose" guard (every mapping grounded in the guideline's own text + the canonical `passions.json` + a live grep of current usage, not assumed); PR7 (three open items named above with explicit revisit conditions, not dropped silently); the AI failure-mode table's "prescribe-before-grounding" guard (recommendations are a proposal for founder review, not executed unilaterally).
+
+**Status:** Adopted. Cross-references: `operations/brand-2026-07/2026-07-23-brand-assets-audit-and-page-mapping-proposal.md`; `website/Brand/Brand_Guidelines.docx`; `brand/passion logos.rtf`, `brand/proximity cards and colours.rtf`; `stoic-brain/passions.json`.
+
+## 2026-07-23 — D-BRAND-ASSETS-PROPOSAL-CORRECTED-AND-EXTENDED-2026-07-23
+
+**Decision:** Revised `operations/brand-2026-07/2026-07-23-brand-assets-audit-and-page-mapping-proposal.md` per founder correction, same day as the original. Two errors fixed, one placeholder policy set, two extensions added.
+
+**Reasoning — corrections:** (1) the original proposal wrongly paired the Five Stages of Practice images 1:1 with the per-action Katorthoma Proximity Levels, because the source RTF pairs them by colour. The founder clarified these are separate concepts — the Stages describe "the practitioner's overall condition across time," not a per-action score — so the images belong on the dashboard (not the score sections), while the colour values are still shared and should be reused. Grepping the dashboard surfaced two existing, unconnected candidates for "condition across time" (the evaluation-history `directionOfTravel`/"Proximity Distribution" section, and the one-time Senecan-grade baseline-assessment section) — the proposal now names both, leans toward the evaluation-history one with reasoning, and leaves the final call to the founder rather than picking silently. (2) `onion.PNG` was wrongly inferred as `achos`; the founder corrected it to `penthos` (Grief). `wax scribbled.PNG → agonia` was independently confirmed correct.
+
+**Reasoning — new elements:** `achos` (Anxiety/Distress) has no image yet — the founder is commissioning a "millstone" from the designer. The proposal now specifies a placeholder-image policy (a plain, honestly-marked pending-image state, swapped for the real path in the same shared lookup table once it arrives) so no page silently omits or breaks on the one currently-unfilled passion slot. A new image-glossary page is proposed (no such route exists today, confirmed against the full `app/` directory listing) bringing every logo/stage/passion image together with its meaning in one place, deliberately specified to draw from the same shared lookup tables the rest of the proposal recommends centralizing (not a seventh hardcoded copy). The passion-image mapping is extended past `/passion-log` to five more live pages found by direct grep to already render the same sub-species taxonomy (`score`, `scenarios`, `score-document`, `score-social`, `score-policy`), plus four specific journal days (30–33, `journal-content.ts` Phase 5) that name a full root passion's sub-species by name in their teaching text.
+
+**A finding surfaced in the course of this correction, not asked for but material:** the site currently runs **three independently hardcoded, mutually inconsistent colour palettes** for the same five proximity levels (`page.tsx`/`score.tsx`/`community.tsx` share one; `dashboard.tsx`'s own "Proximity Distribution" section uses a second; the new brand guideline is a third — only `deliberate`'s hex value happens to agree across all three). Recorded as a consolidation recommendation, not fixed this session.
+
+**Files touched:**
+- `operations/brand-2026-07/2026-07-23-brand-assets-audit-and-page-mapping-proposal.md` — substantially revised (new §0 changelog; §2 split into per-action colours vs. the separate Five Stages placement question; §3 corrected + extended to 6 rendering pages + 4 journal days; new §5 image-glossary proposal).
+- `/CLAUDE.md` — the "Brand assets" section's summary paragraph updated to match.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** Standard under 0d-ii. Documentation and analysis only, same as the entry this corrects — no code, schema, auth, flag, or deploy touched; no website page edited. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` this commit — the prior (superseded) version of the proposal + CLAUDE.md summary would be restored; the original decision-log entry stays in place as the historical record, per this project's append-only-and-correct convention (not overwritten in place).
+
+**Open questions carried into the proposal itself (not resolved here):**
+- Which dashboard section (evaluation-history trajectory vs. Senecan-grade baseline) the Five Stages attach to.
+- Sign-off on adopting the new proximity colour palette site-wide (a real, visible change to `sage_like` in particular).
+- Whether/when the millstone image for `achos` arrives, and swapping the placeholder for it.
+
+**Rules served:** PR7 (every open item above carries an explicit revisit condition); PR18-style honesty (this entry names the specific errors in the entry it corrects rather than quietly rewriting history); the standing cache's "method-before-purpose" guard (both extensions — journal days, sibling scoring pages — were grounded in a direct grep/read before being added, not assumed from the pattern already found).
+
+**Status:** Adopted. Cross-references: `D-BRAND-ASSETS-AUDIT-AND-PAGE-MAPPING-PROPOSAL-2026-07-23` (the entry this corrects); `operations/brand-2026-07/2026-07-23-brand-assets-audit-and-page-mapping-proposal.md`; `website/src/lib/journal-content.ts`; `website/src/app/dashboard/page.tsx`; `website/src/lib/stoic-brain.ts`.
+
+## 2026-07-24 — D-BRAND-STAGE-COLOUR-AND-CROSSING-MECHANISM-RESOLVED-2026-07-24
+
+**Decision:** The two open founder decisions §2 of the brand-assets proposal carried forward are now resolved. (1) The five brand-guideline colour values (`#4A5568`/`#8B6F47`/`#B2AC88`/`#5B8C6D`/`#C9A84C` for Reflexive/Habitual/Deliberate/Principled/Sage-like) are ADOPTED as the single canonical proximity-colour palette, replacing the two independently-hardcoded ad hoc schemes found on `page.tsx`/`score.tsx`/`community.tsx` and on `dashboard.tsx`. (2) The Five Stages of Practice images are confirmed to key off the same 5-level proximity taxonomy as the per-action score, but represent a practitioner's *aggregate, current* stage rather than any single evaluation — "when a practitioner crosses into a stage we show the respective stage image with background page colour the respective colour number" (founder, verbatim).
+
+**Reasoning:** the founder's own phrasing ("crosses into a stage") decisively resolves the prior version's two-candidate dashboard question on structural grounds, not merely a lean: the Senecan-grade baseline section uses a different, non-matching four-category taxonomy (`grade_1`/`grade_2`/`grade_3`/`pre_progress`), so it cannot be what a proximity-level-named "stage" refers to — the mechanism must attach to the evaluation-history side of the dashboard (`directionOfTravel`/"Proximity Distribution"), extended with an aggregate "current stage" computation. A cross-check of `website/src/lib/milestones.ts` found existing prior art worth reusing rather than reinventing — a `category: 'proximity'` milestone family (`first_deliberate`/`first_principled`/`consistent_deliberate`) already proves "reaching a proximity level" is a first-class, triggerable event in this codebase — but flagged one structural mismatch, not silently glossed over: that existing milestone set only celebrates forward achievements (no `first_reflexive`/`first_habitual`), whereas the guideline's own framing of the Five Stages calls for honest recognition across the whole range including the difficult ones ("The Storm" is one of the five, not an omission) — so the stage-crossing indicator is recommended as its own, symmetric mechanism, not bolted onto the achievement-only milestone semantics.
+
+**Files touched:**
+- `operations/brand-2026-07/2026-07-23-brand-assets-audit-and-page-mapping-proposal.md` — §2 rewritten (2.1 colour palette adopted; 2.2 the crossing mechanism + dashboard-section resolution + the milestone prior-art note + the persisting-vs-transient background question flagged as still open; 2.3 a small milestone-icon follow-up note; 2.4 the pre-existing drift table, now superseded); stale §-number cross-references elsewhere in the doc corrected; the closing paragraph's "open questions" list updated to drop the two now-resolved items and keep the three genuinely still-open ones.
+- `/CLAUDE.md` — the "Brand assets" pointer paragraph updated to state the resolution and the adopted hex values directly, so a future session doesn't need to open the full proposal doc just to learn the palette is settled.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** Standard under 0d-ii. Documentation only — still a proposal, no website code changed. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` this commit — restores the proposal doc's prior (two-candidate, not-yet-decided) state; the entry this builds on stays in place as the historical record.
+
+**Open questions carried forward (unchanged in kind, narrowed in number):**
+- Persisting page-background tint (for as long as the practitioner remains in that stage) vs. a transient crossing banner that fades — read as persisting in the proposal, flagged for founder confirmation before a build session commits to one UI pattern over the other.
+- The exact "aggregate current stage" computation rule (dominant proximity level vs. most-recent-window) — an implementation detail for the eventual build session.
+- Whether the existing milestone icons (`passion_reduction`'s "Quieting the Storm," `first_deliberate`, `first_principled`, etc.) should switch to the new Stage/passion imagery once wired elsewhere — named, not required.
+- The `achos` placeholder swap, still pending the commissioned "millstone" image.
+
+**Rules served:** the standing cache's "method-before-purpose" guard (the dashboard-section question was resolved by checking which taxonomy the founder's own wording structurally matches, not by picking the section that seemed more likely); PR7 (every remaining open item carries an explicit next step); PR18-style honesty (the doc's own closing paragraph is kept current rather than left stating a now-false "still open" list).
+
+**Status:** Adopted. Cross-references: `D-BRAND-ASSETS-PROPOSAL-CORRECTED-AND-EXTENDED-2026-07-23`; `operations/brand-2026-07/2026-07-23-brand-assets-audit-and-page-mapping-proposal.md`; `website/src/lib/milestones.ts`; `website/src/app/dashboard/page.tsx`.
+
+## 2026-07-24 — D-BRAND-STAGE-PAGES-FINAL-MECHANISM-2026-07-24
+
+**Decision:** Sharpened same-day: the Five Stages of Practice mechanism (§2.2 of the brand-assets proposal) is **five new, dedicated pages** — one per stage — each background-tinted to that stage's adopted colour and **revealed when the practitioner crosses the matching milestone**, not a persistent dashboard-section indicator built on an aggregate "current stage" computation as the prior same-day entry proposed. Founder, verbatim: "the background colour is just for the page that reveals the stage image, we will create one page for each stage and reveal it when milestone are crossed."
+
+**Reasoning:** this supersedes the immediately prior entry's dashboard-section resolution, not because that reasoning was wrong on its own terms (the taxonomy-matching argument for ruling out the Senecan-grade section still holds), but because the founder's fuller design — dedicated pages, milestone-gated — makes the "which dashboard section" question moot entirely; there is no dashboard section, only five standalone routes. This also directly resolves what the immediately-prior entry had flagged as an open structural question (reuse the existing achievement-only milestone framework, or build a separate mechanism) — **the founder's own answer is to extend `milestones.ts` directly**, adding one new milestone per stage (Reflexive and Habitual need genuinely new entries; the framework currently only names forward achievements). Two implementation questions were surfaced, not resolved, rather than guessed at: whether each stage's milestone fires on a single qualifying evaluation (matching the existing `first_deliberate`/`first_principled` pattern) or a sustained/aggregate one (matching `consistent_deliberate`'s 5-in-a-row bar); and whether a stage's page is locked or merely inert before its milestone is earned.
+
+**Files touched:**
+- `operations/brand-2026-07/2026-07-23-brand-assets-audit-and-page-mapping-proposal.md` — §2.2 rewritten around the five-pages/milestone-gated design (dropping the aggregate-computation/dashboard-section content it superseded); §2.3's milestone-icon note re-anchored to the concrete new milestones now sitting alongside the existing ones; §5's image-glossary description clarified as a distinct concern from the five earned stage pages (both worth having, not the same build); the closing paragraph's open-questions list replaced to match; stale internal cross-references fixed throughout.
+- `/CLAUDE.md` — the "Brand assets" pointer's Five-Stages summary rewritten to state the final five-pages/milestone-gated mechanism directly, so a future session reads the settled design without needing the full proposal doc.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** Standard under 0d-ii. Documentation only — still a proposal, no website code, milestone definition, or route created this session. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` this commit — restores the proposal doc's and CLAUDE.md's prior (dashboard-section) description; the two entries this supersedes stay in place as the historical record of how the design arrived here, per this project's append-and-correct convention.
+
+**Open questions carried forward into the proposal (unchanged in kind from the immediately prior entry, reworded to match the new design):**
+- Single-evaluation vs. sustained/aggregate trigger for each of the five new stage milestones.
+- Locked vs. visitable-but-inert page access before a stage's milestone is earned.
+- Whether the existing `first_deliberate`/`first_principled` milestone icons should switch to the matching Stage image now that they'll sit beside the five new stage-reveal milestones.
+- The `achos` placeholder swap, still pending the commissioned "millstone" image.
+
+**Rules served:** PR18-style honesty (this entry states plainly that it supersedes the immediately prior same-day entry's dashboard-section resolution, rather than silently overwriting it); PR7 (four open items, each with an explicit next step); the standing cache's "method-before-purpose" guard (the milestone-icon and page-access questions are surfaced as genuine open decisions, not answered by assumption).
+
+**Status:** Adopted. Cross-references: `D-BRAND-STAGE-COLOUR-AND-CROSSING-MECHANISM-RESOLVED-2026-07-24` (the entry this supersedes); `operations/brand-2026-07/2026-07-23-brand-assets-audit-and-page-mapping-proposal.md`; `website/src/lib/milestones.ts`.
+
+## 2026-07-24 — D-NAVIGATION-AUDIT-HEADER-FOOTER-GAPS-2026-07-24
+
+**Decision:** Audited both site navigation surfaces (`website/src/components/NavBar.tsx`, the header; and the inline `<footer>` in `website/src/app/layout.tsx` — distinct from `SupportFooter.tsx`, the unrelated R20a crisis-resource strip) against every live route under `website/src/app/`. **Twelve pages are genuinely orphaned** — no header link, no footer link, and (repo-wide-grep-confirmed, not assumed) no internal link from any other page either: `/passion-log` (the founder's original example), all six Remaining Principles tools (`/view-from-above`, `/morning`, `/hupexairesis`, `/premeditatio`, `/sage-compass`, `/oikeiosis`), `/logos` (per its own stated purpose, meant to be a new practitioner's *first* stop — the most consequential single omission found), `/marketplace` (a genuinely public product page), and three auth-gated personal-history views (`/journal-feed`, `/reflections`, `/mentor-baseline`). Full findings + recommendations: `operations/brand-2026-07/2026-07-24-navigation-audit-header-footer-gaps.md`.
+
+**Reasoning:** the founder noticed `/passion-log`'s absence while discussing its passion-icon imagery (the prior same-day brand-assets work) and asked for a review of what else needs adding to the header/footer. Rather than treating this as one isolated omission, checked every route systematically, and — critically — verified reachability repo-wide before calling anything orphaned, since a page absent from the header/footer might still be reachable via an internal secondary link (the pattern already confirmed correct for `/mentor-index`, linked from `/private-mentor` per its own header comment). This distinction mattered in practice: `/baseline` looked orphaned at first pass but is in fact linked from `dashboard/page.tsx`'s own CTA (§2 of the audit, lower priority than the twelve genuine orphans); `/mentor-index`, `/founder-hub`, and `/admin` are confirmed correctly excluded by design, not oversights.
+
+**Grouping, not a flat list:** the seven practice-tool pages (`/passion-log` + the six Remaining Principles tools) share a coherent identity — personal Stoic practice exercises — distinct from the header's existing "Tools" dropdown (evaluation instruments for a specific artifact: documents/policies/social posts/scenarios). Recommended a new, sibling "Practice" dropdown in the header and a matching fourth footer column, rather than folding seven unrelated-feeling items into the existing "Tools" grouping. The remaining orphans (`/logos`, `/marketplace`, `/journal-feed`, `/reflections`, `/mentor-baseline`, `/baseline`) don't share enough of a common thread for their own section and got targeted point-fix recommendations instead — including applying the *already-proven* `/mentor-index`-style hub-to-sub-tool link pattern to `/mentor-baseline`, which has the identical shape (a dedicated sub-tool reachable only from within its own closed loop) but was missing the fix `/mentor-index` already has.
+
+**Files touched:**
+- `operations/brand-2026-07/2026-07-24-navigation-audit-header-footer-gaps.md` — NEW. The full audit (six sections: orphaned pages grouped by kind; reachable-but-not-persistent; confirmed-correctly-excluded; minor asymmetries; recommendations per §5.1–5.4; non-recommendations).
+- `/CLAUDE.md` — a new paragraph appended to the existing "Brand assets" section, pointing at the audit and naming the twelve orphaned pages + the confirmed exclusions, so a future session doesn't need to open the full doc just to know the headline count and names.
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** Standard under 0d-ii. Documentation and analysis only — no website code, no `NavBar.tsx`/`layout.tsx` edit, this session. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` this commit — removes the new audit doc and the CLAUDE.md paragraph; nothing else changed.
+
+**Verification step (founder-performable):**
+```
+cat "operations/brand-2026-07/2026-07-24-navigation-audit-header-footer-gaps.md" | head -40
+grep -A3 "spun off from noticing" /CLAUDE.md
+```
+Expected: the audit's opening sections + the CLAUDE.md paragraph, both readable.
+
+**Open questions:**
+- Whether to build the recommended "Practice" dropdown/footer column, the targeted point-fixes, or both, and in what order — entirely the founder's call; no next-session prompt authored, since this was requested as a report, matching the brand-assets proposal's own precedent.
+- Whether `/logos`'s fix should extend beyond mere nav reachability into `/welcome`'s own page content (surfacing it as the practitioner's actual first stop, not just a discoverable link) — named as page-content work outside this nav-only audit's scope, not resolved here.
+- Whether the Remaining Principles pages should also cross-link to each other (a related, separate question) — named, not assumed.
+
+**Rules served:** the standing cache's "method-before-purpose" guard (reachability was verified by grep, not assumed from the header/footer check alone — the exact discipline that caught `/baseline` was not actually orphaned); PR7 (three open items above, each with a clear next step); the AI failure-mode table's "narrow unit of analysis" guard (grouped the seven practice-tool pages as one coherent nav-design decision rather than treating each as an independent point-fix).
+
+**Status:** Adopted. Cross-references: `operations/brand-2026-07/2026-07-24-navigation-audit-header-footer-gaps.md`; `operations/brand-2026-07/2026-07-23-brand-assets-audit-and-page-mapping-proposal.md` (the session this grew out of); `website/src/components/NavBar.tsx`; `website/src/app/layout.tsx`; `website/src/components/SupportFooter.tsx` (named to prevent future confusion between the two "footers").
+
+## 2026-07-24 — D-GROUNDING-DOCUMENT-AGENT-ORG-STATUS-UPDATE-2026-07-24
+
+**Decision:** Added a new "Agent-Organization + Evidence Program — status (as of 2026-07-24)" section to `/CLAUDE.md`, closing a genuine grounding gap: the entire Agent-Organization + Evidence Program (P1 through Section D closure — six sessions, five decision-log entries, three org-agent identities provisioned, a go-live checklist closed to one honest open item) had never been reflected in CLAUDE.md at all, confirmed by grep before writing anything (zero matches for "Agent-Organization," "agent-org-2026-07," "go-live-readiness," "P4 agent," or "Section D" in the existing file). Only the brand-assets and navigation-audit work — a downstream offshoot of that program — had been added, by this same conversation, in isolation from the program that generated it.
+
+**Reasoning:** the founder asked for the grounding document updated with current status, recently completed sessions since the last update, and prepared prompts awaiting commencement — a request that (correctly) treats CLAUDE.md as the actual entry-point reference future sessions open under, not merely a place to log the most recent thread in isolation. Rather than bolt this onto the existing, topically-unrelated giant "Production state" trust-layer refresh block (a different program's own historical narrative, with its own long-established dated-refresh convention), the new section was placed immediately before "Brand assets" — logically upstream of it, since the brand/navigation proposals are themselves a Section-D-session offshoot, not a separate thread.
+
+**What the new section covers, verified against the actual git log and decision-log entries rather than reconstructed from memory:** the P1–P5/P4 org-agent rollout (Tech/Ops/Growth signed+live; Support deliberately deferred, its urgent gap resolved separately); P-GL Sections A/B fully verified-live, Section D closed to the one honestly-still-open item (#11, support-channel monitoring); `cost_health_snapshots` fully closed (schema + a real seeded row + the founder-hub Ops persona confirmed reading it honestly); the password-reset flow (built same-session as a dead-end fix, deployed, primary path live-confirmed, secondary path pending an external rate-limit retest); the `ADMIN_EMAILS`/`FOUNDER_USER_ID` two-gate admin-identity fact, worth not re-deriving; and the two prepared-but-not-yet-started prompts (Resend provisioning; the brand+navigation six-phase build) named explicitly as "awaiting commencement," per the founder's own phrasing.
+
+**Files touched:**
+- `/CLAUDE.md` — new section inserted (verified by direct git-log/decision-log/close-file reads for every fact stated, not reconstructed from conversational memory alone — e.g. the final `cost_health_snapshots`/password-reset state required reading `D-EVENING-CLOSE-BOTH-THREADS-VERIFIED-LIVE-2026-07-22-23`, since the two predecessor closes it superseded had left both items only partially resolved).
+- `operations/decision-log.md` — this entry.
+
+**Risk classification:** Standard under 0d-ii. Documentation only — no code, schema, auth, flag, or deploy touched. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` this commit — removes the new CLAUDE.md section; nothing else changed.
+
+**Verification step (founder-performable):**
+```
+grep -A3 "Agent-Organization + Evidence Program — status" /CLAUDE.md
+```
+Expected: the new section's opening lines, readable.
+
+**Open questions:** none new — the section states, rather than resolves, the program's existing open items (§11's honest gap; the in-app password-reset retest; the two prepared prompts' own timing, entirely the founder's call).
+
+**Rules served:** PR18 (this update is written from verified git-log/decision-log/close-file observations, not reconstructed from memory); the standing cache's "method-before-purpose" guard (confirmed the gap existed via grep before writing anything, rather than assuming CLAUDE.md needed a routine refresh); PR7 is not engaged (nothing new deferred by this entry — it documents, it doesn't decide).
+
+**Status:** Adopted. Cross-references: `operations/agent-org-2026-07/P1-agent-roster-gap-analysis.md`; `operations/agent-org-2026-07/go-live-readiness-checklist.md`; `D-COST-HEALTH-SNAPSHOTS-SCHEMA-APPLIED-2026-07-22`; `D-PASSWORD-RESET-FLOW-BUILT-REVIEW-FOLDED-2026-07-22`; `D-EVENING-CLOSE-BOTH-THREADS-VERIFIED-LIVE-2026-07-22-23`; `D-SECTION-D-SUPPORT-CHANNEL-AND-ORG-DECISIONS-CLOSED-2026-07-22`; `operations/handoffs/founder/2026-07-22-resend-email-provisioning-NEXT-SESSION-PROMPT.md`; `operations/handoffs/founder/2026-07-24-brand-and-navigation-amendments-BUILD-NEXT-SESSION-PROMPT.md`.
