@@ -19,11 +19,18 @@ export default function AuthPage() {
   const [checkingSession, setCheckingSession] = useState(true)
 
   // Get the redirect destination if the user was sent here by middleware
-  // (e.g. they tried to visit /private-mentor without being signed in)
+  // (e.g. they tried to visit /private-mentor without being signed in).
+  // AUTH-2 fix (2026-07-25): the value is attacker-suppliable via the URL, so
+  // only same-origin PATHS are accepted — a leading '/' not followed by '/'
+  // or '\' (rejects protocol-relative //evil.com and the /\evil.com browser
+  // normalisation trick, plus absolute http(s):// URLs). The middleware only
+  // ever sets a pathname, so no legitimate caller is affected; anything else
+  // falls back to /dashboard instead of becoming an open redirect.
   const getRedirectTarget = (): string => {
     if (typeof window === 'undefined') return '/dashboard'
     const params = new URLSearchParams(window.location.search)
-    return params.get('redirect') || '/dashboard'
+    const target = params.get('redirect') || '/dashboard'
+    return /^\/(?![/\\])/.test(target) ? target : '/dashboard'
   }
 
   // Check for an existing valid session on page load.

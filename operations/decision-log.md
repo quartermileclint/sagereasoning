@@ -15846,3 +15846,62 @@ Expected: the new section's opening lines, readable.
 **Rules served:** PR18 (this update is written from verified git-log/decision-log/close-file observations, not reconstructed from memory); the standing cache's "method-before-purpose" guard (confirmed the gap existed via grep before writing anything, rather than assuming CLAUDE.md needed a routine refresh); PR7 is not engaged (nothing new deferred by this entry — it documents, it doesn't decide).
 
 **Status:** Adopted. Cross-references: `operations/agent-org-2026-07/P1-agent-roster-gap-analysis.md`; `operations/agent-org-2026-07/go-live-readiness-checklist.md`; `D-COST-HEALTH-SNAPSHOTS-SCHEMA-APPLIED-2026-07-22`; `D-PASSWORD-RESET-FLOW-BUILT-REVIEW-FOLDED-2026-07-22`; `D-EVENING-CLOSE-BOTH-THREADS-VERIFIED-LIVE-2026-07-22-23`; `D-SECTION-D-SUPPORT-CHANNEL-AND-ORG-DECISIONS-CLOSED-2026-07-22`; `operations/handoffs/founder/2026-07-22-resend-email-provisioning-NEXT-SESSION-PROMPT.md`; `operations/handoffs/founder/2026-07-24-brand-and-navigation-amendments-BUILD-NEXT-SESSION-PROMPT.md`.
+
+## 2026-07-25 — D-FABLE5-AUDIT-SESSIONS-2026-07-19-TO-24-2026-07-25
+
+**Decision:** a full Fable-5 audit of every session since 2026-07-19 (the lesser-model period) is complete and recorded at `operations/2026-07-25-fable5-audit-of-sessions-2026-07-19-to-24.md`. Same session, beforehand: the standing session opener was rewritten to current ground truth (prior version archived at `archive/2026-07-13_STANDING-SESSION-OPENER-grounded-foundations.md`). The audit's queue outputs: the P2 Fable-5 rerun prompt (`2026-07-25-P2-fable5-rerun-NEXT-SESSION-PROMPT.md`, folding the dropped validity threats) and the AE-1/S11b retroactive independent-review prompt (`2026-07-25-AE1-S11b-retroactive-independent-reviews-NEXT-SESSION-PROMPT.md`). CLAUDE.md's Agent-Org section corrected (the "P1–P5 closed/settled" line wrongly swept the open P2 into settled; the awaiting-commencement list gains the P2 rerun, the AE-1/S11b reviews, and the previously-orphaned consult-lookup prompt).
+
+**Reasoning (headline findings; full detail in the report):** (1) the founder's adversarial-review concern is confirmed and quantified — every independent re-run of a spend-limit-killed review found real defects the first-hand pass missed (2/2 on code since 07-19), while the P-GL gate builds (~1,000 lines, live same evening) received NO adversarial review of any kind, against the session's own reflection's advice, which nothing captured; (2) the lesser-model code quality is otherwise genuinely good (the P-GL surface survives Fable-level adversarial reading; standing lessons correctly applied) — the one shipped defect is AUTH-1 in the password-reset flow, found by this audit in code a completed 18-agent Sonnet Workflow had passed (fixed same session, see the companion entry); (3) dropped items: the four AE-2 smoke credentials have no revocation record anywhere (CRED-1 — founder check handed off); the Next.js security action item was dropped twice (deployed 14.2.35 vs a 15.5.18/16.2.6+ baseline; 14.x not in the 20-July patched set); the inter-agent-handoff-protocol resolve-before-P4 precondition was silently bypassed; three session-reflection findings (the P-GL security-review recommendation; the P2 answer-key + status-log validity threats) never reached any tracked artifact; `route_errors`/`throttle_events` retention is declared but unenforced (no sweep); the mentor's website-page feedback targets LIVE pages (`/limitations`, `/welcome` misdescribe the alt-3 architecture) and sat unprocessed since 07-17; (4) the 20 extracted session reflections are genuine and repeatedly valuable — the process gap is that the reflect turn fires after the close is written, so its findings go nowhere (recommendation: a mandatory reflect-harvest step + opener check); further process recommendations: widen PR19 to auth/security/perimeter code, mandatory model+effort trailers (10/21 commits since 07-19 have none), memory-first triage, retention-parity rule for new `retain_until` tables.
+
+**Method:** commit-by-commit model attribution; full diff inventory since `79b0677` (2,799 insertions/43 files); first-hand Fable review of every load-bearing surface; three independent verification agents (mentor-route wiring + all batteries — llm-outage 35/0, r20a-guard 92/0, six boundary suites green, tsc 0; password-reset fix hunt; deferral sweep), ~955k agent tokens, 0 errors; all 20 Sage Reflect close-turns extracted from local transcripts and analysed.
+
+**Files touched:** the audit report (NEW); the rewritten opener + archived prior version; the two next-session prompts (NEW); CLAUDE.md (three corrections); `operations/decision-log.md` (this entry).
+
+**Risk classification:** Standard (`governance`) under 0d-ii for the audit/records; read-only against production. AC7 not engaged by this entry's scope (the companion AUTH entry covers the Critical code change). PR19 posture: the audit itself used genuinely independent verification agents.
+
+**Rollback path:** `git revert` the records commit — documents only.
+
+**Verification step (founder-performable):**
+```
+head -30 operations/2026-07-25-fable5-audit-of-sessions-2026-07-19-to-24.md
+grep -c "P2 (the bare-vs-harnessed value benchmark) remains OPEN" CLAUDE.md
+```
+Expected: the report's header + executive summary; `1`.
+
+**Open questions (handed off, tracked):** CRED-1 (founder: `mint-credential.ts list | grep ae2-smoke` → revoke any active); the Next.js exposure assessment (own session); the observability retention sweep (C-1); the process adoptions (reflect-harvest, PR19 widening, model trailers — one governance session); the mentor live-page amendments (prompt to author or scoped session); PROTO-1 (retire-or-activate the inter-agent-handoff protocol, founder decision); the in-app reset retest (doubles as the AUTH-1 smoke).
+
+**Rules served:** PR19 (independent verification agents, not self-review); PR18 (every claim verified against code/git, not close-file assertions); the method-before-purpose guard (model attribution + diff inventory before any judgement); PR7 (every dropped item re-entered with a tracked home). **S11 remains REFUSED; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's.**
+
+**Status:** Adopted. Cross-references: the audit report; `D-AUTH-RESET-TRUST-AND-REDIRECT-FIXES-2026-07-25` (companion); `D-PR19-ADOPTED-INDEPENDENT-REVIEW-REQUIRED-2026-07-21`; `D-AGENT-ORG-P2-LEG-B-HARNESSED-RUN-2026-07-21` (erratum); the two new next-session prompts; `operations/handoffs/founder/2026-07-25-fable5-audit-and-auth-fixes-CLOSE.md`.
+
+---
+
+## 2026-07-25 — D-AUTH-RESET-TRUST-AND-REDIRECT-FIXES-2026-07-25
+
+**Decision:** four client-side auth/UI fixes are built, verified (tsc 0; `npm run build` ✓, both touched pages registered), and ready for the founder's deploy — implementing the audit's AUTH-1/AUTH-2 findings plus two approved riders. Full Critical Change Protocol run: six-point disclosure presented, founder approved "Fixes + 2 riders" via AskUserQuestion before any code was written.
+
+**The fixes:**
+1. **AUTH-1 (`website/src/app/auth/reset-password/page.tsx`):** the reset form no longer trusts a bare `SIGNED_IN` event — only `PASSWORD_RECOVERY` (its 2 auth-js emission sites are hash/OTP-driven) or the marker-gated `getSession()` hand-off unlock the form. Closes two deterministic borrowed-device takeover vectors traced to the installed `@supabase/auth-js` 2.99.3 source: the `visibilitychange` re-emit and the cross-tab `BroadcastChannel` rebroadcast of `SIGNED_IN` for any ambient session (the audit found the prior 18-agent Sonnet review's MEDIUM fix only half-present). Fail direction if the library contract ever changed: the honest "No active reset link" (fail-closed).
+2. **AUTH-2 (`website/src/app/auth/page.tsx`):** `?redirect=` validated to same-origin paths (`/^\/(?![/\\])/` — rejects protocol-relative `//host`, the `/\` normalisation trick, and absolute URLs; falls back to `/dashboard`). Closes a pre-existing open redirect (introduced `44fc844`); the middleware only ever sets pathnames, so no legitimate caller changes.
+3. **Rider (a) (`website/src/components/AuthRedirect.tsx`):** error-hash detection now parses real hash params and matches `error` OR `error_code` OR `error_description` (auth-js's own three error forms) — an `error_code=`-only GoTrue redirect no longer reproduces the silent dead-end.
+4. **Rider (b) / C-6 (`website/src/app/private-mentor/page.tsx`):** the reflect submit is `res.ok`-gated after the R20a distress branch — an outage 503/500 now renders an honest "NOT recorded, your text is still here" message instead of the false "recorded and analyzed" success; the textarea is deliberately not cleared on failure. Non-JSON error bodies land in the pre-existing honest catch/toast.
+
+**Risk classification:** **Critical** under 0d-ii (auth/session code) — AC7 + PR6 engaged; disclosure + explicit founder approval preceded implementation; the AI performed no deploy/push/live op (PR17 — commit/push/smokes are the founder's). Client-code-only: no server, schema, flag, credential, or R20a-perimeter change; the distress branch ordering in private-mentor is preserved above the new gate. Review basis: the fixes implement this same session's Fable-tier adversarial findings (the audit's independent agent traced both vectors to library source); a further independent Workflow was offered in the disclosure and not elected for a ~40-line narrowing diff.
+
+**Rollback path:** `git revert` the commit — restores the exact prior behaviour, nothing worse; no config to unwind.
+
+**Verification step (founder-performable, post-deploy):**
+```
+1. AUTH-1 negative smoke: while signed in, open /auth/reset-password directly → "No active reset link";
+   switch to another tab and back → the form must STILL NOT appear.
+2. In-app retest (closes the lapsed item + the AUTH-1 positive path): /auth → "Forgot your password?"
+   → email link → the real set-new-password form appears → set + sign in with the new password.
+3. AUTH-2: visit /auth?redirect=//example.com while signed in → must land on /dashboard, never example.com.
+4. Expired-link path: reuse an already-used reset link → lands on /auth (no silent dead-end).
+```
+
+**Open questions:** the deploy + the four smokes above are pending (founder-walked); the remaining low-severity hardenings stay named-not-done (marker expiry timestamp; redirect-reason surfacing on /auth; the pre-existing `handleSignIn`/`handleSignUp`/`handleMagicLink` bare-await gap; the Supabase "Secure password change" project-side toggle worth considering).
+
+**Rules served:** 0c-ii (six-point disclosure + explicit approval before auth code); PR17 (no live op by the AI); PR10-adjacent honesty (the fix corrects a prior session's reviewed-and-passed claim, named plainly); KG-EX1 (both vectors verified against installed library source, not asserted). **S11 remains REFUSED; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's.**
+
+**Status:** Adopted (built + build-verified; deploy + live smokes pending, founder-walked). Cross-references: `D-FABLE5-AUDIT-SESSIONS-2026-07-19-TO-24-2026-07-25`; `D-PASSWORD-RESET-FLOW-BUILT-REVIEW-FOLDED-2026-07-22` (the build this corrects); `operations/2026-07-25-fable5-audit-of-sessions-2026-07-19-to-24.md` §3.3; `operations/handoffs/founder/2026-07-25-fable5-audit-and-auth-fixes-CLOSE.md`.

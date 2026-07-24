@@ -50,7 +50,7 @@ Build the **first two window-safe human-surface tools** — `operations/handoffs
 ## Founder actions (operational — not build)
 
 1. **Commit** this session's documents (see the commit command relayed in chat / below).
-2. **Confirm** `SUBSTRATE_REFLECT_SCREENED_EXAM_ENABLED` state (D4) — reads ON from the S9b walk, so #2/#3 default to branch-only.
+2. **Confirmed ✓ (2026-07-13):** `SUBSTRATE_REFLECT_SCREENED_EXAM_ENABLED = true` in Vercel Production — so reflect #2/#3 are **branch-only / test-agent**; no prod deploy of `/api/practice/reflect` during the window (D4 resolved).
 3. **Pin** the frozen-capture-set hash at window open (§5), so any human-tool deploy is provably measurement-neutral.
 
 ## Blocked On (this session's commit set — documents only, uncommitted)

@@ -17,40 +17,23 @@
 | `adopted/standing-protocol-cache.md` | Referenced PR1–PR18 | References PR1–PR19; new cross-reference to the review-harness template |
 
 ## Next Session Should
-This was a standalone, self-contained session per the plan's own P3 scope (§3-P3: "not assumed to ride P1"). Nothing is queued as an immediate next step from P3 itself. The AO plan's other tracks (P1/P2/P4 etc.) continue on their own cadence in parallel sessions, per `operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md`.
+This was a standalone, self-contained session per the plan's own P3 scope (§3-P3: "not assumed to ride P1"); it needed no successor of its own. With P1 and P3 now both closed and the P2 Fable-5 repeat correctly held until 2026-07-25 08:00 (per the standing note), the next open interim task on the plan's own critical path is **P5 — the per-agent permissions matrix** (§3-P5): it is now the ordering anchor for P4 (P4's first mint is gated on ≥1 signed matrix row), depends only on P1 (done), and is parallel-safe with the held P2 thread. Prompt authored: `operations/handoffs/founder/2026-07-21-P5-permissions-matrix-NEXT-SESSION-PROMPT.md`.
 
 ## Blocked On
-**Files remaining uncommitted:**
-- `adopted/project-instructions-snapshot.md`
-- `adopted/standing-protocol-cache.md`
-- `operations/review-harness/independent-review-workflow-template.md`
-- `operations/decision-log.md`
-- `operations/handoffs/founder/2026-07-21-P3-independent-review-institutionalization-CLOSE.md`
+**Files remaining uncommitted:** none — committed as `bbfb7e8` ("Adopt PR19…") and pushed, founder-confirmed.
 
-**Production state at session close (as of 2026-07-21):** documents-only session; no code/schema/flag/credential/deploy change. Production remains exactly as described in the most recent prior close (`operations/handoffs/founder/2026-07-20-P-GL-finish-CLOSE.md` plus the interim P2 standing note dated 2026-07-21) — this session touched none of it.
+**Production state at session close (as of 2026-07-21):** documents-only session; no code/schema/flag/credential change, so there was nothing for a deploy to affect either way — the founder reports Vercel green post-push, consistent with a records-only commit. Production remains exactly as described in the most recent prior production-affecting close (`operations/handoffs/founder/2026-07-20-P-GL-finish-CLOSE.md` plus the interim P2 standing note dated 2026-07-21) — this session touched none of that state.
 
 ## Open Questions
-- The founder still needs to paste-sync the amended project-instructions snapshot into the Cowork panel (per the snapshot's own update discipline, line 6) — a founder-performed step outside this session's reach (PR17), named explicitly rather than folded into a one-line hand-off.
+- None outstanding for P3 itself. The founder has confirmed the project-instructions snapshot was paste-synced into the Cowork panel per the snapshot's own update discipline (line 6) — that step is now closed, not carried.
 
 ## Founder Verification
-```
-cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning"
-git add adopted/project-instructions-snapshot.md adopted/standing-protocol-cache.md operations/review-harness/independent-review-workflow-template.md operations/decision-log.md operations/handoffs/founder/2026-07-21-P3-independent-review-institutionalization-CLOSE.md
-git commit -m "Adopt PR19: require independent adversarial review, not optional first-hand fallback
-
-Institutionalizes the discipline validated three times on 2026-07-19 (kathekon
-self-circle re-review, AE-2 loop-fold re-review, and this program's own
-build-plan critique). Adds a reusable review-workflow template and codifies
-the spend-limit-outage fallback with a mandatory (not merely recommended)
-independent re-run before any downstream reliance.
-
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
-```
-Then push via GitHub Desktop. No Vercel redeploy expected or required — no code/flag/schema touched.
+Done — committed as `bbfb7e8` and pushed (founder-performed, confirmed in chat); Vercel reports green. No further action needed for this session's changes.
 
 ## Cross-references
 - `operations/handoffs/founder/2026-07-21-P3-independent-review-institutionalization-NEXT-SESSION-PROMPT.md` (this session's prompt)
-- `operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md` §3-P3, §7, §8
+- `operations/handoffs/founder/2026-07-21-P5-permissions-matrix-NEXT-SESSION-PROMPT.md` (next session)
+- `operations/agent-org-2026-07/agent-org-and-evidence-build-plan.md` §3-P3, §3-P5, §7, §8
 - `D-PR19-ADOPTED-INDEPENDENT-REVIEW-REQUIRED-2026-07-21`
 - `D-CACHE-DRIFT-RESOLVED-2026-07-21`
 - `operations/review-harness/independent-review-workflow-template.md`

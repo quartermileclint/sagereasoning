@@ -22,14 +22,22 @@ export default function AuthRedirect() {
     // #error=access_denied&error_code=otp_expired) — no onAuthStateChange
     // event ever fires for this. Send the user somewhere actionable
     // instead of leaving a raw, unexplained error sitting in the URL bar.
-    if (hash.includes('error=') && !hash.includes('access_token')) {
+    // Parsed as real params (2026-07-25): auth-js itself treats a URL as
+    // carrying an error when ANY of error / error_code / error_description
+    // is present — a GoTrue redirect can arrive with only error_code=, which
+    // a bare substring check on "error=" missed (reproducing the silent
+    // dead-end for that subclass).
+    const hashParams = new URLSearchParams(hash.slice(1))
+    const hasAuthError =
+      hashParams.has('error') || hashParams.has('error_code') || hashParams.has('error_description')
+    if (hasAuthError && !hashParams.has('access_token')) {
       window.location.href = '/auth'
       return
     }
 
     // Only run past this point if there are hash params (tokens from a
     // Supabase auth email link)
-    if (!hash.includes('access_token')) return
+    if (!hashParams.has('access_token')) return
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'PASSWORD_RECOVERY' && session) {

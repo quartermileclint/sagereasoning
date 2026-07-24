@@ -119,10 +119,15 @@ git commit -m "P4 agent 1: Tech's calling + live credential provisioning — wor
 Then push via GitHub Desktop. **Do NOT** `git add .` — the pre-existing unrelated uncommitted files listed under Blocked On above are not this session's to stage.
 
 **Step B — Verify Tech's credentials are live (read-only, no risk):**
+
+**Correction (found post-close, same day):** the command below was originally given as `npx tsx --env-file=.env.development.local scripts/mint-credential.ts list`, which is wrong — that targets `localhost:3000` (the TEST-oriented default, and the local dev server used for the TEST leg was already stopped) using TEST-only admin credentials, neither of which can see Tech's real PROD credentials. Corrected to target production directly, same pattern as the mint commands:
 ```bash
-cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
-npx tsx --env-file=.env.development.local scripts/mint-credential.ts list | grep org-tech
+cd /Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website
+
+MINT_CLI_BASE_URL=https://www.sagereasoning.com MINT_CLI_ADMIN_JWT=<YOUR_JWT> \
+npx tsx scripts/mint-credential.ts list | grep org-tech
 ```
+(Get a fresh JWT from your logged-in www.sagereasoning.com admin session the same way as during the mint, in case the earlier one expired.)
 Expected: three lines — one `REVOKED` (the corrected mis-mint), two `active` at `150/mo 15/day`.
 
 **Step C — (optional, your own time) try the GUI worktree session again fresh, if you want to keep investigating:**

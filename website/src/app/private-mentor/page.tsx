@@ -262,6 +262,28 @@ export default function PrivateMentorPage() {
         return;
       }
 
+      // Honest failure surfacing (C-6 fix, 2026-07-25): an error response
+      // (the #10 outage 503, or a 500) must never fall through to the
+      // success fallback below — pre-fix, any error body rendered "Your
+      // reflection has been recorded and analyzed" while nothing was
+      // recorded. Checked AFTER the distress branch so an R20a redirect is
+      // honoured regardless of status; the textarea is deliberately NOT
+      // cleared, so the user's reflection text is not lost on a failure.
+      if (!res.ok) {
+        const outage = data?.error === 'ai_temporarily_unavailable';
+        const failMsg: Message = {
+          id: `msg-${Date.now()}-error`,
+          type: 'insight',
+          content: outage
+            ? 'The mentor is temporarily unavailable, and this reflection was NOT recorded. Your text is still here — please try again in a moment.'
+            : 'Something went wrong and this reflection was NOT recorded. Your text is still here — please try again.',
+          timestamp: formatTime(),
+        };
+        setMessages((prev) => [...prev, failMsg]);
+        setIsLoading(false);
+        return;
+      }
+
       // Extract the rich response from the private reflect endpoint
       const result = data?.result || data;
       const content = result?.sage_perspective

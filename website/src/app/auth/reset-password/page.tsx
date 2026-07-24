@@ -12,9 +12,14 @@ import { supabase, PASSWORD_RECOVERY_MARKER_KEY } from '@/lib/supabase'
  *      homepage — the session is already established by the time this
  *      page loads, with no hash tokens of its own.
  *
- * Either way, a live session on this page (nothing else in the app links
- * here during normal navigation) is treated as "in a password-recovery
- * flow" and the reset form is shown.
+ * Either way the form is GATED (AUTH-1 fix, 2026-07-25): Case 2 requires
+ * the one-time hand-off marker AuthRedirect sets; Case 1 requires a genuine
+ * PASSWORD_RECOVERY event. A bare ambient session — or a SIGNED_IN re-emit
+ * (auth-js re-fires SIGNED_IN on tab visibilitychange and rebroadcasts it
+ * cross-tab via BroadcastChannel, for ANY valid stored session) — never
+ * unlocks the form. Trusting SIGNED_IN here allowed a borrowed-device
+ * password takeover: open this page signed-in, switch tabs and back, and
+ * the form appeared with no recovery link involved.
  */
 export default function ResetPasswordPage() {
   const [checking, setChecking] = useState(true)
@@ -44,12 +49,17 @@ export default function ResetPasswordPage() {
     })
 
     // Case 1 — recovery tokens are in this page's own URL hash (arrived
-    // directly via the in-app "Forgot your password?" link). The event
-    // itself is the proof of a genuine recovery/sign-in happening right
-    // now, so no marker check is needed here.
+    // directly via the in-app "Forgot your password?" link). ONLY
+    // PASSWORD_RECOVERY is trusted: its two emission sites in auth-js are
+    // both hash/OTP-verification driven (a recovery-type link sets
+    // redirectType='recovery', which emits PASSWORD_RECOVERY, never
+    // SIGNED_IN). SIGNED_IN is deliberately NOT accepted — it has ~12
+    // emission sites, including a visibilitychange re-emit and a cross-tab
+    // BroadcastChannel rebroadcast for any ambient stored session, which
+    // made it a marker-free bypass of the Case-2 gate (AUTH-1, 2026-07-25).
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return
-      if ((event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') && session) {
+      if (event === 'PASSWORD_RECOVERY' && session) {
         sessionStorage.removeItem(PASSWORD_RECOVERY_MARKER_KEY)
         setHasSession(true)
         setChecking(false)
