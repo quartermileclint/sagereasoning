@@ -46,3 +46,11 @@ Documents + a destroyed scratch directory only. `git revert` the records commit 
 Success = three bare outputs scored against sealed keys with model/effort logged, and a leg-B prompt ready. Then leg B (founder-walked credentials), then the verdict session (frozen thresholds; Limitations section mandatory).
 
 End of prompt.
+
+---
+
+## AMENDMENT 2026-07-25 (run-time, by the leg-A session itself) — Step 3's subagent mechanism is EMPIRICALLY INVALID; Step 2's prescribed name superseded
+
+The leg-A session STOPPED at the validity gate before any scenario ran. A no-tools probe subagent proved that Agent-tool subagents spawned from this repo-rooted session receive the **full project CLAUDE.md + memory index** (~219k tokens; the probe quoted CLAUDE.md's first line back verbatim) — i.e., "no repo visibility" (README §Run discipline, binding) is structurally unsatisfiable via subagents, however minimal the task prompt. This is the S6 contamination class that voided a run in June. Model inheritance (the one thing Step 3 told us to verify) was fine — `claude-fable-5` confirmed — but that was never the only validity condition. The machine has no `claude` CLI (re-checked), so there is no programmatic clean-spawn path.
+
+**Operative replacement:** the scenario runs are **founder-opened fresh conversations in a neutral scratch project**, per `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-a/FOUNDER-RUN-INSTRUCTIONS.md` (exact paste-prompts, post-task model attribution, collection procedure). The scratch directory was also renamed from the Step-2 prescription to `/Users/clintonaitkenhead/Claude-work/PROJECTS/ops-briefs-20260725/` — the prescribed `p2-bare-scratch-*` name itself carried two leak terms, and a project root's name is visible to the agents rooted in it. **The leg-B prompt must inherit both corrections** (no repo-rooted subagents for scenario work; neutral scratch naming). Everything else in this prompt stands. Record: `D-AGENT-ORG-P2-RERUN-LEG-A-MECHANICS-STOP-2026-07-25`; memory `subagent-context-carries-claudemd`.

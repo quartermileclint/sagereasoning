@@ -15936,3 +15936,67 @@ Expected: 7 player files + 9 sealed files; the grep returns nothing (exit 1).
 **Rules served:** PR15 (Anthropic-native Agent-tool fan-out; no bespoke build), PR19-adjacent (independent multi-role review of the instrument before it is relied on), PR17 (nothing founder-performed handed off as a one-liner — leg B's walk is specified in the arc prompt), PR18, KG-EX1 (instrument-not-intervention guard held; the packages measure, they do not steer), KG2/KG5 (model + metering caveats named in the metrics template).
 
 **Status:** Adopted. Cross-references: `operations/handoffs/founder/2026-07-25-P2-fable5-rerun-NEXT-SESSION-PROMPT.md`; `operations/agent-org-2026-07/2026-07-20-P2-spec-freeze.md` (thresholds unchanged); `operations/agent-org-2026-07/runs/verdict-memo-2026-07-21.md` (erratum + finding 4); `operations/2026-07-25-fable5-audit-of-sessions-2026-07-19-to-24.md` §6.7; `D-FABLE5-AUDIT-SESSIONS-2026-07-19-TO-24-2026-07-25`.
+
+## 2026-07-25 — D-AGENT-ORG-P2-RERUN-LEG-A-MECHANICS-STOP-2026-07-25
+
+**Decision:** Leg A (bare) STOPPED at the validity gate before any scenario ran — the leg-A prompt's prescribed mechanism (repo-rooted subagent invocations) is empirically contaminated and is replaced by founder-opened fresh conversations in a neutral scratch project; leg A remains IN PROGRESS, blocked on the founder performing the three runs.
+
+**Reasoning:** A no-tools probe subagent proved Agent-tool subagents receive the full project CLAUDE.md + memory index (~219k tokens; CLAUDE.md's first line quoted back verbatim; token count is harness-side corroboration) — the S6 contamination class that voided a June run, and a structural violation of the binding "no repo visibility" run discipline (`runs/2026-07-25-rerun/README.md` §2). Model inheritance itself was confirmed (`claude-fable-5`), but that was never the only validity condition. No `claude` CLI exists on this machine (re-verified), so no programmatic clean-spawn path exists; proceeding anyway would repeat the invalid-conditions class this rerun exists to correct (arc prompt Step 0.1's own rule, generalized). Model gate, pre-conditions, and build-state checks all passed first (health `healthy`; `origin/main`=`1d74cd5` clean; `bcf8667`/`a506916` ancestors; sweeps PASS; leg-B flags named: corroboration check, §4 dikaiosyne, AE-1, AE-2 all Live).
+
+**Files touched:**
+- `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-a/FOUNDER-RUN-INSTRUCTIONS.md` — NEW: the founder-performed run procedure (exact paste-prompts per scenario, post-task model attribution, collection/scoring procedure, honest-notes seeds)
+- `operations/handoffs/founder/2026-07-25-P2-rerun-legA-bare-NEXT-SESSION-PROMPT.md` — AMENDMENT 2026-07-25 appended (Step 3 mechanism invalid; Step 2 name superseded; leg B inherits both corrections)
+- `.claude/settings.local.json` — practice hooks toggled OFF for the run window then RESTORED same session (skill-governed; backup deep-equal-verified before removal; post-restore echo: all five hooks registered, TRUST-RECORD WRITE PATH PROVISIONED); net-zero at session end
+- Scratch (outside repo, uncommitted): `/Users/clintonaitkenhead/Claude-work/PROJECTS/ops-briefs-20260725/` — the 7 player files, per-scenario grouping, no git/.claude/CLAUDE.md; both leak-grep passes zero hits; renamed from the prescribed `p2-bare-scratch-*` (the name itself carried leak terms `p2`/`bare` and a project root's name is agent-visible)
+- Memory: `subagent-context-carries-claudemd.md` + MEMORY.md index line
+
+**Risk classification:** Standard under 0d-ii — documents, a local reversible settings bracket (restored + validated same session), and an out-of-repo scratch directory; no production surface touched; no mint; AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `rm -rf /Users/clintonaitkenhead/Claude-work/PROJECTS/ops-briefs-20260725`; `git revert` the records commit. The practice-hooks state is already restored.
+
+**Verification step (founder-performable):**
+```
+node -e "const c=JSON.parse(require('fs').readFileSync('.claude/settings.local.json','utf8'));console.log('hooks:',!!c.hooks,'env keys:',Object.keys(c.env||{}).length)"
+find /Users/clintonaitkenhead/Claude-work/PROJECTS/ops-briefs-20260725 -type f | wc -l
+```
+Expected: `hooks: true env keys: 7`; `7`.
+
+**Open questions:**
+- Leg A completion is blocked on the founder running the three conversations per `leg-a/FOUNDER-RUN-INSTRUCTIONS.md`, then telling the orchestrating session "runs done" (collection, sealed-key scoring, `leg-a-metrics.md`, the leg close, and the leg-B prompt follow from there).
+
+**Rules served:** PR17 (the founder-performed runs get a live walk + a self-contained instructions doc, not a one-liner), PR18, KG2 (model gate: `claude-fable-5`, high effort, subagent inheritance probe-confirmed), KG-EX1 (validity-before-progress held — the observable was checked before the method was trusted), PR10 (Diagnostic-certain: probe evidence with harness-side corroboration).
+
+**Status:** Adopted. Cross-references: `D-AGENT-ORG-P2-RERUN-SCENARIO-REFRESH-2026-07-25`; `operations/handoffs/founder/2026-07-25-P2-rerun-legA-bare-NEXT-SESSION-PROMPT.md` (incl. its 2026-07-25 amendment); `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-a/FOUNDER-RUN-INSTRUCTIONS.md`; memory `subagent-context-carries-claudemd`; memory `gate1-smoke-guard-via-direct-probe` (the S6 fresh-conversation precedent).
+
+## 2026-07-25 — D-AGENT-ORG-P2-RERUN-LEG-A-BARE-2026-07-25
+
+**Decision:** Leg A (bare) of the P2 Fable-5 rerun is COMPLETE. The three fresh scenarios ran the same day as the mechanics stop, as founder-opened fresh conversations in the neutral scratch project, under **harness-attested `claude-fable-5` / effort `high`** on all three performing sessions (app `get_session` metadata, corroborated 3/3 by in-band post-task self-report). Scored against the sealed keys: **S1 CAUGHT (full, 2 bonus signals) · S2 FULL CATCH (3 bonus signals) · S3 STRONG (10/10 judgement items CAUGHT; no automatic-Weak; C1–C3 shown)**.
+
+**Reasoning:** the first cleanly model-controlled bare leg since 2026-06-11 (the 07-20 leg was erratum'd Sonnet-5-low-effort). Run discipline held end-to-end: opening prompts verified verbatim from the app's session transcripts; sealed files never entered the scratch context; leak greps zero-hit on the handed-over copies; scoring orchestrator-side after all runs with the sweeps' "key governs" rule and every arguable call quoted key-verbatim. One disclosed attribution wrinkle: the app metadata says effort `high` while all three agents self-reported an in-band `reasoning_effort: 40` tag — mapping unverifiable from here, so **leg B's pre-condition is selector-constancy** (identical app model/effort settings), which keeps the A-vs-B comparison matched regardless of the mapping.
+
+**Files touched:**
+- `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-a/outputs/{s1,s2,s3}/` — the five collected artifacts (verbatim from the runs)
+- `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-a/leg-a-metrics.md` — the mandatory metrics file, `model:`/`effort:` first, honest-notes seeded
+- `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-a/leg-a-scoring.md` — per-criterion scoring record with verbatim key quotes on arguable calls
+- `operations/handoffs/founder/2026-07-25-P2-rerun-legB-harnessed-NEXT-SESSION-PROMPT.md` — NEW: leg B, carrying the run discipline + mint walk + both leg-A mechanics corrections
+- `CLAUDE.md` — arc pointer updated (leg A complete → leg B next)
+- Scratch `/Users/clintonaitkenhead/Claude-work/PROJECTS/ops-briefs-20260725/` destroyed after collection (guard CAUTION acknowledged; all outputs verified copied first)
+
+**Risk classification:** Standard under 0d-ii — documents + a destroyed out-of-repo scratch; no production surface, no mint, no flag. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` the records commit (the run itself is history — the app's session records `local_47323768…`/`local_b57f99f8…`/`local_25601d94…` are the primary evidence and survive a revert).
+
+**Verification step (founder-performable):**
+```
+ls operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-a/outputs/s1 operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-a/outputs/s2 operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-a/outputs/s3
+head -12 operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-a/leg-a-metrics.md
+```
+Expected: 1 + 1 + 3 output files; the metrics header shows `leg: A (bare)` with `model:`/`effort:` populated first.
+
+**Open questions:**
+- The `high` ↔ `reasoning_effort: 40` mapping (bounded by the leg-B selector-constancy pre-condition; belongs in the verdict memo's Limitations).
+- Single-scorer limitation (same model family as performers; mitigated by the independently-authored keys + verbatim-quoted arguable calls; belongs in Limitations).
+
+**Rules served:** KG2 (model attribution, harness-side), KG5 (no per-call metering on a bare run — stated, not fabricated), PR17 (founder walked the runs live per the instructions doc), PR18, PR10 (Diagnostic-certain on attribution: server-side records over self-report).
+
+**Status:** Adopted. Cross-references: `D-AGENT-ORG-P2-RERUN-LEG-A-MECHANICS-STOP-2026-07-25`; `D-AGENT-ORG-P2-RERUN-SCENARIO-REFRESH-2026-07-25`; `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-a/leg-a-scoring.md`; `operations/handoffs/founder/2026-07-25-P2-rerun-legA-bare-CLOSE.md`; `operations/handoffs/founder/2026-07-25-P2-rerun-legB-harnessed-NEXT-SESSION-PROMPT.md`.
