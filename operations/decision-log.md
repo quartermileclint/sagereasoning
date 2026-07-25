@@ -15905,3 +15905,34 @@ Expected: the report's header + executive summary; `1`.
 **Rules served:** 0c-ii (six-point disclosure + explicit approval before auth code); PR17 (no live op by the AI); PR10-adjacent honesty (the fix corrects a prior session's reviewed-and-passed claim, named plainly); KG-EX1 (both vectors verified against installed library source, not asserted). **S11 remains REFUSED; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's.**
 
 **Status:** Adopted (built + build-verified; deploy + live smokes pending, founder-walked). Cross-references: `D-FABLE5-AUDIT-SESSIONS-2026-07-19-TO-24-2026-07-25`; `D-PASSWORD-RESET-FLOW-BUILT-REVIEW-FOLDED-2026-07-22` (the build this corrects); `operations/2026-07-25-fable5-audit-of-sessions-2026-07-19-to-24.md` §3.3; `operations/handoffs/founder/2026-07-25-fable5-audit-and-auth-fixes-CLOSE.md`.
+
+## 2026-07-25 — D-AGENT-ORG-P2-RERUN-SCENARIO-REFRESH-2026-07-25
+
+**Decision:** The P2 Fable-5 rerun arc is COMMENCED — session 1 (spec/scenario refresh) is complete: the model gate passed (this session ran genuinely on Fable 5, `claude-fable-5`, high reasoning effort — stated at open per the rerun prompt's Step 0.1), the build-state precondition re-confirmed live, and three FRESH sealed scenario packages authored, independently keyed, and independently swept under the full §6.7 role-separation discipline (brief author ≠ answer-key writer ≠ sweep reviewer — nine distinct agent invocations). All three sweeps returned PASS WITH REQUIRED EDITS; every specified edit was applied verbatim (S1: one sealed-side scorer-note fix; S2: a real-calendar weekday defect in two player files + two sealed-side scorer-convergence clarifications; S3: three answer-key fixes incl. a verdict-rule computability gap + one adopt-and-document note). Final mechanical leak-grep over all seven player files: zero hits.
+
+**Reasoning:** The 2026-07-20/21 P2 run executed both legs under Sonnet 5 at low effort (same-day erratum) and its scenarios are contaminated for any new bare run; the arc prompt (`2026-07-25-P2-fable5-rerun-NEXT-SESSION-PROMPT.md`) mandates fresh briefs against the same three mechanism-classes with the audit §6.7 fixes. S2's new package fixes the finding-4 design gap at the root: the unsupported "independently reviewed … and cleared" claim now sits as plain declarative fact INSIDE the outbound artifact the performer finalizes, contradicted by three independent work-record entries — the exact shape that cleanly exercises the corroboration check. S3 is a deliberately imperfect synthetic package (shuffled/contradictory/retracted/ambiguous log entries, all enumerated sealed-side) with a candid Realism-limits section feeding the verdict memo's now-mandatory Limitations section.
+
+**Files touched:**
+- `operations/agent-org-2026-07/runs/2026-07-25-rerun/` — NEW package (18 files): README (run discipline incl. the S2 artifact-text gating instruction), metrics-template (mandatory `model:`/`effort:` fields per Step 0.2), `scenarios/` (7 player-facing files: S1 Rowanmere night-shift justice-floor brief; S2 Torvane/Ellsworth safety-change corroboration brief + draft note + work record; S3 Coldspur cold-chain-telemetry general task brief + original inventory + status log), `sealed/` (3 author-notes + 3 independent answer keys + 3 independent sweeps).
+- `operations/handoffs/founder/2026-07-25-P2-rerun-legA-bare-NEXT-SESSION-PROMPT.md` — NEW: the leg-A session prompt (model gate first; clean scratch context; one fresh subagent per scenario; model/effort logged; close before leg B).
+- `operations/decision-log.md` — this entry.
+- `CLAUDE.md` — the awaiting-commencement queue's P2 line updated to in-progress.
+
+**Risk classification:** Standard under 0d-ii — documents only; no code / schema / flag / credential / deploy / live-op change; production byte-equivalent. AC7 not engaged. PR6 not engaged. The AI performed no mint or live op (leg B's mints are founder-walked, later in the arc).
+
+**Rollback path:** `git revert` the records commit. No downstream session has consumed the packages yet.
+
+**Verification step (founder-performable):**
+```
+ls operations/agent-org-2026-07/runs/2026-07-25-rerun/scenarios/*/ operations/agent-org-2026-07/runs/2026-07-25-rerun/sealed/
+grep -rinE "benchmark|harness|\bbare\b|\bleg\b|compar|SageReasoning" operations/agent-org-2026-07/runs/2026-07-25-rerun/scenarios/
+```
+Expected: 7 player files + 9 sealed files; the grep returns nothing (exit 1).
+
+**Open questions:**
+- **S3 fictional-vs-real election (founder can override before leg A runs):** the spec-freeze §3 sketch gestured at refreshing "the AO program's own state"; this session elected a fully FICTIONAL project (Coldspur) instead — reasoning: freshness is mandatory, leak control is cleaner, and §6.7(c) explicitly contemplates synthetic context with disclosed realism limits. The departure in flavor is flagged rather than silently inherited; if the founder prefers a sanitized-real S3, re-author before leg A.
+- CRED-1 (ae2-smoke revocation check) and the four AUTH post-deploy smokes remain outstanding from the predecessor close (founder-walked; unrelated to this arc).
+
+**Rules served:** PR15 (Anthropic-native Agent-tool fan-out; no bespoke build), PR19-adjacent (independent multi-role review of the instrument before it is relied on), PR17 (nothing founder-performed handed off as a one-liner — leg B's walk is specified in the arc prompt), PR18, KG-EX1 (instrument-not-intervention guard held; the packages measure, they do not steer), KG2/KG5 (model + metering caveats named in the metrics template).
+
+**Status:** Adopted. Cross-references: `operations/handoffs/founder/2026-07-25-P2-fable5-rerun-NEXT-SESSION-PROMPT.md`; `operations/agent-org-2026-07/2026-07-20-P2-spec-freeze.md` (thresholds unchanged); `operations/agent-org-2026-07/runs/verdict-memo-2026-07-21.md` (erratum + finding 4); `operations/2026-07-25-fable5-audit-of-sessions-2026-07-19-to-24.md` §6.7; `D-FABLE5-AUDIT-SESSIONS-2026-07-19-TO-24-2026-07-25`.
