@@ -11,13 +11,7 @@ import {
   type V3DocumentEvaluation,
   type DetectedDocumentPassion,
 } from '@/lib/document-scorer'
-
-const ROOT_PASSION_ENGLISH: Record<string, string> = {
-  craving: 'Craving',
-  irrational_pleasure: 'Irrational Pleasure',
-  fear: 'Fear',
-  distress: 'Distress',
-}
+import { ROOT_PASSION_ENGLISH, PASSION_IMAGE_MAP } from '@/lib/brand-display'
 
 export default function ScoreDocumentPage() {
   const [title, setTitle] = useState('')
@@ -365,6 +359,13 @@ function PassionList({ passions }: { passions: DetectedDocumentPassion[] }) {
       {passions.map((p, i) => (
         <div key={i} className="bg-sage-50 rounded p-3">
           <div className="flex items-center gap-2 mb-1">
+            {p.sub_species && PASSION_IMAGE_MAP[p.sub_species] && (
+              <img
+                src={PASSION_IMAGE_MAP[p.sub_species]}
+                alt={p.sub_species}
+                className="w-6 h-6 object-contain flex-shrink-0"
+              />
+            )}
             <span className="font-display text-xs font-medium text-sage-700">
               {ROOT_PASSION_ENGLISH[p.root_passion] || p.root_passion}
             </span>

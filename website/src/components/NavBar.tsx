@@ -9,6 +9,7 @@ export default function NavBar() {
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
   const [toolsOpen, setToolsOpen] = useState(false)
+  const [practiceOpen, setPracticeOpen] = useState(false)
 
   useEffect(() => {
     // Check current session
@@ -64,6 +65,31 @@ export default function NavBar() {
               </>
             )}
           </div>
+          <div className="relative">
+            <button
+              onClick={() => setPracticeOpen(!practiceOpen)}
+              className="text-sage-700 hover:text-sage-900 transition-colors flex items-center gap-1"
+            >
+              Practice
+              <svg className="w-3 h-3 text-sage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {practiceOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setPracticeOpen(false)} />
+                <div className="absolute right-0 mt-2 w-56 bg-white border border-sage-200 rounded-lg shadow-lg z-50 py-1">
+                  <a href="/view-from-above" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setPracticeOpen(false)}>View from Above</a>
+                  <a href="/morning" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setPracticeOpen(false)}>Morning Preparation</a>
+                  <a href="/hupexairesis" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setPracticeOpen(false)}>Reserve Clause</a>
+                  <a href="/premeditatio" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setPracticeOpen(false)}>Premeditatio</a>
+                  <a href="/sage-compass" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setPracticeOpen(false)}>Sage Compass</a>
+                  <a href="/oikeiosis" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setPracticeOpen(false)}>Circle of Concern</a>
+                  <a href="/passion-log" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50" onClick={() => setPracticeOpen(false)}>Passion Log</a>
+                </div>
+              </>
+            )}
+          </div>
           <a href="/journal" className="text-sage-700 hover:text-sage-900 transition-colors">Journal</a>
           <a href="/community" className="text-sage-700 hover:text-sage-900 transition-colors">Community</a>
           <a href="/dashboard" className="text-sage-700 hover:text-sage-900 transition-colors">Dashboard</a>
@@ -88,6 +114,8 @@ export default function NavBar() {
               <a href="/ops-hub" className="block px-4 py-2 font-body text-sm text-sage-700 hover:bg-sage-50">Sage Ops Hub</a>
             </div>
           </div>
+          <a href="/methodology" className="text-sage-700 hover:text-sage-900 transition-colors">Methodology</a>
+          <a href="/marketplace" className="text-sage-700 hover:text-sage-900 transition-colors">Marketplace</a>
           <a href="/api-docs" className="text-sage-700 hover:text-sage-900 transition-colors">API</a>
           <a href="/pricing" className="text-sage-700 hover:text-sage-900 transition-colors">Pricing</a>
 

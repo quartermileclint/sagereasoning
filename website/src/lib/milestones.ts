@@ -20,6 +20,7 @@
  */
 
 import type { KatorthomaProximityLevel, SenecanGradeId } from './stoic-brain'
+import { STAGE_DISPLAY } from './brand-display'
 
 export interface MilestoneDefinition {
   id: string
@@ -28,6 +29,8 @@ export interface MilestoneDefinition {
   icon: string
   category: 'baseline' | 'proximity' | 'passion' | 'oikeiosis' | 'grade' | 'journal' | 'practice'
   quote?: string
+  /** For the five Stage-of-Practice milestones — links through to /stages/<pageSlug> (brand-2026-07 proposal §2.2) */
+  pageSlug?: string
 }
 
 export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
@@ -65,6 +68,58 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     icon: '/images/sagelogo.PNG',
     category: 'proximity',
     quote: 'Progress comes from working on yourself daily.',
+  },
+
+  // ─── The Five Stages of Practice ───
+  // Source: brand-2026-07 proposal §2.2 (founder decision 2026-07-24).
+  // Each milestone is honest recognition that an evaluation read at that
+  // proximity level — not an achievement (Storm/Worn Path) or a failure
+  // (any of the five). R1/R6c/R9: qualitative, non-punitive, no outcome
+  // promise. Single-evaluation trigger, per founder election.
+  {
+    id: 'stage_the_storm',
+    name: STAGE_DISPLAY[0].name,
+    description: `Recognised — an evaluation read as Reflexive: ${STAGE_DISPLAY[0].description.toLowerCase()}`,
+    icon: STAGE_DISPLAY[0].image,
+    category: 'proximity',
+    quote: 'The impression struck before reason could speak — that is where the work begins.',
+    pageSlug: STAGE_DISPLAY[0].slug,
+  },
+  {
+    id: 'stage_the_worn_path',
+    name: STAGE_DISPLAY[1].name,
+    description: `Recognised — an evaluation read as Habitual: ${STAGE_DISPLAY[1].description.toLowerCase()}`,
+    icon: STAGE_DISPLAY[1].image,
+    category: 'proximity',
+    quote: 'A path worn by habit is not yet a path chosen by reason.',
+    pageSlug: STAGE_DISPLAY[1].slug,
+  },
+  {
+    id: 'stage_the_crossroads',
+    name: STAGE_DISPLAY[2].name,
+    description: `Recognised — an evaluation read as Deliberate: ${STAGE_DISPLAY[2].description.toLowerCase()}`,
+    icon: STAGE_DISPLAY[2].image,
+    category: 'proximity',
+    quote: 'At the crossroads, the choice is finally your own.',
+    pageSlug: STAGE_DISPLAY[2].slug,
+  },
+  {
+    id: 'stage_the_clear_summit',
+    name: STAGE_DISPLAY[3].name,
+    description: `Recognised — an evaluation read as Principled: ${STAGE_DISPLAY[3].description.toLowerCase()}`,
+    icon: STAGE_DISPLAY[3].image,
+    category: 'proximity',
+    quote: 'From the summit, the false judgements below are easier to see.',
+    pageSlug: STAGE_DISPLAY[3].slug,
+  },
+  {
+    id: 'stage_the_inner_fire',
+    name: STAGE_DISPLAY[4].name,
+    description: `Recognised — an evaluation read as Sage-Like: ${STAGE_DISPLAY[4].description.toLowerCase()}`,
+    icon: STAGE_DISPLAY[4].image,
+    category: 'proximity',
+    quote: 'The fire that no longer needs fuel from outside itself.',
+    pageSlug: STAGE_DISPLAY[4].slug,
   },
 
   // ─── Passion milestones ───
@@ -281,6 +336,22 @@ export function checkNewMilestones(data: V3MilestoneCheckData): string[] {
     const recent5 = data.evaluations.slice(0, 5)
     const allDeliberateOrHigher = recent5.every(e => PROXIMITY_RANK[e.katorthoma_proximity] >= 2)
     if (allDeliberateOrHigher) award('consistent_deliberate')
+  }
+
+  // ─── The Five Stages of Practice ───
+  // Single-evaluation trigger, exact level match (founder election, 2026-07-26 —
+  // recognition of having been AT that specific stage, not "this or better").
+  const STAGE_MILESTONE_BY_LEVEL: Record<KatorthomaProximityLevel, string> = {
+    reflexive: 'stage_the_storm',
+    habitual: 'stage_the_worn_path',
+    deliberate: 'stage_the_crossroads',
+    principled: 'stage_the_clear_summit',
+    sage_like: 'stage_the_inner_fire',
+  }
+  for (const level of Object.keys(STAGE_MILESTONE_BY_LEVEL) as KatorthomaProximityLevel[]) {
+    if (data.evaluations.some(e => e.katorthoma_proximity === level)) {
+      award(STAGE_MILESTONE_BY_LEVEL[level])
+    }
   }
 
   // ─── Passion milestones ───

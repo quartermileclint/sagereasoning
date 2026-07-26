@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/analytics'
 import { PHASES, TOTAL_JOURNAL_DAYS, getJournalEntry, getPhaseForDay } from '@/lib/journal-content'
+import { findPassionSubSpecies } from '@/lib/stoic-brain'
+import { PASSION_IMAGE_MAP } from '@/lib/brand-display'
 import type { User } from '@supabase/supabase-js'
 import { authFetch } from '@/lib/auth-fetch'
 
@@ -398,12 +400,20 @@ export default function JournalPage() {
             )}
           </p>
         </div>
-        <button
-          onClick={() => setShowCurriculum(!showCurriculum)}
-          className="font-body text-sm text-sage-600 hover:text-sage-700 transition-colors"
-        >
-          {showCurriculum ? 'Hide map' : 'View curriculum'}
-        </button>
+        <div className="flex items-center gap-4">
+          <a
+            href="/journal-feed"
+            className="font-body text-sm text-sage-600 hover:text-sage-700 transition-colors"
+          >
+            View live feed
+          </a>
+          <button
+            onClick={() => setShowCurriculum(!showCurriculum)}
+            className="font-body text-sm text-sage-600 hover:text-sage-700 transition-colors"
+          >
+            {showCurriculum ? 'Hide map' : 'View curriculum'}
+          </button>
+        </div>
       </div>
 
       {/* Progress bar */}
@@ -541,6 +551,20 @@ export default function JournalPage() {
             <div className="px-6 py-5 bg-sage-50/50 border-b border-sage-100">
               <div className="font-display text-xs font-medium text-sage-600 uppercase tracking-wider mb-2">Read</div>
               <p className="font-body text-sage-800 leading-relaxed">{entry.teaching}</p>
+              {entry.subSpecies && entry.subSpecies.length > 0 && (
+                <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-sage-100">
+                  {entry.subSpecies.map((id) => {
+                    const found = findPassionSubSpecies(id)
+                    if (!PASSION_IMAGE_MAP[id] || !found) return null
+                    return (
+                      <div key={id} className="flex flex-col items-center w-16 text-center">
+                        <img src={PASSION_IMAGE_MAP[id]} alt={found.subSpecies.name} className="w-10 h-10 object-contain" />
+                        <span className="font-body text-[10px] text-sage-600 mt-1">{found.subSpecies.name}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
 
             {/* REFLECT section */}

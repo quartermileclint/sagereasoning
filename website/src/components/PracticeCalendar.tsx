@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { VIRTUE_DISPLAY } from '@/lib/stoic-brain'
+import { PROXIMITY_COLORS } from '@/lib/brand-display'
 
 interface DayActivity {
   type: 'action' | 'reflection'
@@ -38,14 +39,9 @@ const PROXIMITY_LABELS: Record<string, string> = {
   sage_like: 'Sage-Like',
 }
 
-// Proximity color coding
-const PROXIMITY_COLORS: Record<string, string> = {
-  reflexive: '#9CA3AF',
-  habitual: '#78716C',
-  deliberate: '#92400E',
-  principled: '#92400E',
-  sage_like: '#D97706',
-}
+// PROXIMITY_COLORS is now imported from stoic-brain.ts — the single canonical
+// palette (brand-2026-07 proposal §2.1/§2.4). Previously an independent copy
+// (whose principled/deliberate values were, in fact, identical by accident).
 
 // Virtue metadata for quick lookup
 const VIRTUE_MAP = Object.fromEntries(VIRTUE_DISPLAY.map(v => [v.id, v]))

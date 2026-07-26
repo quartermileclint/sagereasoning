@@ -1,4 +1,5 @@
 import { VIRTUE_DISPLAY } from '@/lib/stoic-brain'
+import { PROXIMITY_COLORS } from '@/lib/brand-display'
 import AuthRedirect from '@/components/AuthRedirect'
 
 const jsonLd = {
@@ -101,7 +102,7 @@ export default function HomePage() {
             {
               title: 'AI Agents',
               desc: 'Seeking virtue-based internal reasoning grounded in a structured Stoic framework.',
-              image: '/images/Developer.PNG',
+              image: '/images/agent.PNG',
             },
             {
               title: 'Developers',
@@ -211,11 +212,11 @@ export default function HomePage() {
 
           <div className="space-y-3">
             {[
-              { id: 'sage_like', label: 'Sage-like', color: '#4d6040', description: 'Extraordinary philosophical depth — identifies all relevant passions, false judgements, and virtue domains with precision' },
-              { id: 'principled', label: 'Principled', color: '#7d9468', description: 'Strong philosophical reasoning — correctly identifies most passions and applies the 4-stage evaluation with only minor gaps' },
-              { id: 'deliberate', label: 'Deliberate', color: '#B2AC88', description: 'Adequate self-awareness — recognises some passions and applies basic Stoic framework, but misses subtleties' },
-              { id: 'habitual', label: 'Habitual', color: '#c4843a', description: 'Minimal philosophical engagement — relies on surface-level reflection without genuine passion diagnosis' },
-              { id: 'reflexive', label: 'Reflexive', color: '#9e3a3a', description: 'No meaningful self-examination — no awareness of passions, false judgements, or prohairesis' },
+              { id: 'sage_like', label: 'Sage-like', color: PROXIMITY_COLORS.sage_like, description: 'Extraordinary philosophical depth — identifies all relevant passions, false judgements, and virtue domains with precision' },
+              { id: 'principled', label: 'Principled', color: PROXIMITY_COLORS.principled, description: 'Strong philosophical reasoning — correctly identifies most passions and applies the 4-stage evaluation with only minor gaps' },
+              { id: 'deliberate', label: 'Deliberate', color: PROXIMITY_COLORS.deliberate, description: 'Adequate self-awareness — recognises some passions and applies basic Stoic framework, but misses subtleties' },
+              { id: 'habitual', label: 'Habitual', color: PROXIMITY_COLORS.habitual, description: 'Minimal philosophical engagement — relies on surface-level reflection without genuine passion diagnosis' },
+              { id: 'reflexive', label: 'Reflexive', color: PROXIMITY_COLORS.reflexive, description: 'No meaningful self-examination — no awareness of passions, false judgements, or prohairesis' },
             ].map((level) => (
               <div key={level.id} className="flex items-center gap-4 bg-white/60 border border-sage-200 rounded-lg p-4">
                 <div

@@ -16,6 +16,7 @@ import {
 import PracticeCalendar from '@/components/PracticeCalendar'
 import MilestonesDisplay from '@/components/MilestonesDisplay'
 import type { User } from '@supabase/supabase-js'
+import { PROXIMITY_COLORS } from '@/lib/brand-display'
 import type { KatorthomaProximityLevel, OikeiosisStageId, SenecanGradeId } from '@/lib/stoic-brain'
 
 // ─── V3 Dashboard Types ───
@@ -61,13 +62,8 @@ const PROXIMITY_ENGLISH: Record<KatorthomaProximityLevel, string> = {
   sage_like: 'Sage-Like',
 }
 
-const PROXIMITY_COLORS: Record<KatorthomaProximityLevel, string> = {
-  reflexive: '#DC2626',
-  habitual: '#B45309',
-  deliberate: '#CA8A04',
-  principled: '#65A30D',
-  sage_like: '#059669',
-}
+// PROXIMITY_COLORS is now imported from stoic-brain.ts — the single canonical
+// palette (brand-2026-07 proposal §2.1/§2.4). Previously an independent copy.
 
 const GRADE_COLORS: Record<string, string> = {
   pre_progress: '#B45309',
@@ -220,12 +216,20 @@ export default function DashboardPage() {
           <h1 className="font-display text-3xl font-medium text-sage-800">Your Progress Profile</h1>
           <p className="font-body text-sage-600 mt-1">{user?.email}</p>
         </div>
-        <button
-          onClick={handleSignOut}
-          className="px-4 py-2 border border-sage-300 text-sage-600 font-display text-sm rounded hover:bg-sage-100 transition-colors"
-        >
-          Sign Out
-        </button>
+        <div className="flex items-center gap-3">
+          <a
+            href="/reflections"
+            className="px-4 py-2 border border-sage-300 text-sage-600 font-display text-sm rounded hover:bg-sage-100 transition-colors"
+          >
+            Saved Reflections
+          </a>
+          <button
+            onClick={handleSignOut}
+            className="px-4 py-2 border border-sage-300 text-sage-600 font-display text-sm rounded hover:bg-sage-100 transition-colors"
+          >
+            Sign Out
+          </button>
+        </div>
       </div>
 
       {/* Baseline prompt for users without one */}

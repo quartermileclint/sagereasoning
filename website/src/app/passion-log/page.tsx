@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { authFetch } from '@/lib/auth-fetch'
+import { PASSION_IMAGE_MAP } from '@/lib/brand-display'
 import type { User } from '@supabase/supabase-js'
 
 /**
@@ -357,23 +358,32 @@ export default function PassionLogPage() {
                   Passion type
                   <span className="font-body text-xs text-sage-600 ml-2">Your self-diagnosis</span>
                 </label>
-                <select
-                  value={passionType}
-                  onChange={(e) => setPassionType(e.target.value)}
-                  className="w-full border border-sage-200 rounded-lg p-3 font-body text-sm text-sage-800 focus:outline-none focus:ring-2 focus:ring-sage-300 bg-white"
-                  required
-                >
-                  <option value="">Select passion type...</option>
-                  {Object.entries(PASSION_FAMILIES).map(([family, data]) => (
-                    <optgroup key={family} label={data.label}>
-                      {data.types.map((type) => (
-                        <option key={type} value={type}>
-                          {PASSION_LABELS[type] || type}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
+                <div className="flex items-center gap-3">
+                  <select
+                    value={passionType}
+                    onChange={(e) => setPassionType(e.target.value)}
+                    className="w-full border border-sage-200 rounded-lg p-3 font-body text-sm text-sage-800 focus:outline-none focus:ring-2 focus:ring-sage-300 bg-white"
+                    required
+                  >
+                    <option value="">Select passion type...</option>
+                    {Object.entries(PASSION_FAMILIES).map(([family, data]) => (
+                      <optgroup key={family} label={data.label}>
+                        {data.types.map((type) => (
+                          <option key={type} value={type}>
+                            {PASSION_LABELS[type] || type}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                  {passionType && PASSION_IMAGE_MAP[passionType] && (
+                    <img
+                      src={PASSION_IMAGE_MAP[passionType]}
+                      alt={PASSION_LABELS[passionType] || passionType}
+                      className="w-10 h-10 object-contain flex-shrink-0"
+                    />
+                  )}
+                </div>
               </div>
 
               {/* Intensity */}
@@ -490,14 +500,24 @@ export default function PassionLogPage() {
                   <div className="grid grid-cols-2 gap-4 mb-3">
                     <div>
                       <div className="font-body text-xs text-sage-600 mb-1">Your diagnosis</div>
-                      <div className="font-display text-sm font-medium" style={{ color: getFamilyColor(passionType) }}>
-                        {PASSION_LABELS[passionType] || passionType}
+                      <div className="flex items-center gap-2">
+                        {PASSION_IMAGE_MAP[passionType] && (
+                          <img src={PASSION_IMAGE_MAP[passionType]} alt={passionType} className="w-6 h-6 object-contain flex-shrink-0" />
+                        )}
+                        <div className="font-display text-sm font-medium" style={{ color: getFamilyColor(passionType) }}>
+                          {PASSION_LABELS[passionType] || passionType}
+                        </div>
                       </div>
                     </div>
                     <div>
                       <div className="font-body text-xs text-sage-600 mb-1">Engine classification</div>
-                      <div className="font-display text-sm font-medium" style={{ color: getFamilyColor(classificationResult.classified_type) }}>
-                        {PASSION_LABELS[classificationResult.classified_type] || classificationResult.classified_type}
+                      <div className="flex items-center gap-2">
+                        {PASSION_IMAGE_MAP[classificationResult.classified_type] && (
+                          <img src={PASSION_IMAGE_MAP[classificationResult.classified_type]} alt={classificationResult.classified_type} className="w-6 h-6 object-contain flex-shrink-0" />
+                        )}
+                        <div className="font-display text-sm font-medium" style={{ color: getFamilyColor(classificationResult.classified_type) }}>
+                          {PASSION_LABELS[classificationResult.classified_type] || classificationResult.classified_type}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -543,6 +563,9 @@ export default function PassionLogPage() {
                 <div key={event.id} className="bg-white border border-sage-200 rounded-lg p-4">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
+                      {PASSION_IMAGE_MAP[event.passion_type] && (
+                        <img src={PASSION_IMAGE_MAP[event.passion_type]} alt={event.passion_type} className="w-6 h-6 object-contain flex-shrink-0" />
+                      )}
                       <span
                         className="font-display text-sm font-medium"
                         style={{ color: getFamilyColor(event.passion_type) }}
@@ -580,6 +603,9 @@ export default function PassionLogPage() {
                   {event.llm_classified_type && (
                     <div className="mt-2 pt-2 border-t border-sage-100 flex items-center gap-2">
                       <span className="font-body text-xs text-sage-600">Engine:</span>
+                      {PASSION_IMAGE_MAP[event.llm_classified_type] && (
+                        <img src={PASSION_IMAGE_MAP[event.llm_classified_type]} alt={event.llm_classified_type} className="w-5 h-5 object-contain flex-shrink-0" />
+                      )}
                       <span
                         className="font-body text-xs font-medium"
                         style={{ color: getFamilyColor(event.llm_classified_type) }}
@@ -626,6 +652,9 @@ export default function PassionLogPage() {
               ).map(([type, data]) => (
                 <div key={type} className="mb-6 last:mb-0">
                   <div className="flex items-center gap-2 mb-2">
+                    {PASSION_IMAGE_MAP[type] && (
+                      <img src={PASSION_IMAGE_MAP[type]} alt={type} className="w-6 h-6 object-contain flex-shrink-0" />
+                    )}
                     <span
                       className="font-display text-sm font-medium"
                       style={{ color: getFamilyColor(type) }}

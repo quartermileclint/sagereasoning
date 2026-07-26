@@ -10,6 +10,7 @@ import {
   EVALUATIVE_DISCLAIMER,
   type KatorthomaProximityLevel,
 } from '@/lib/stoic-brain'
+import { PROXIMITY_COLORS, ROOT_PASSION_ENGLISH, PASSION_IMAGE_MAP } from '@/lib/brand-display'
 import type { User } from '@supabase/supabase-js'
 
 // ─── V3 Result Types (derived from scoring.json outputs) ───
@@ -48,29 +49,23 @@ interface V3EvaluationResult {
 type StorageMode = 'cloud' | 'local' | null
 
 // Proximity level display config — derived from scoring.json levels
+// Colours are the canonical PROXIMITY_COLORS (stoic-brain.ts) — see brand-2026-07 proposal §2.1/§2.4
 const PROXIMITY_DISPLAY: Record<KatorthomaProximityLevel, { color: string; icon: string }> = {
-  reflexive: { color: '#9e3a3a', icon: '○' },
-  habitual: { color: '#c4843a', icon: '◔' },
-  deliberate: { color: '#B2AC88', icon: '◑' },
-  principled: { color: '#7d9468', icon: '◕' },
-  sage_like: { color: '#4d6040', icon: '●' },
+  reflexive: { color: PROXIMITY_COLORS.reflexive, icon: '○' },
+  habitual: { color: PROXIMITY_COLORS.habitual, icon: '◔' },
+  deliberate: { color: PROXIMITY_COLORS.deliberate, icon: '◑' },
+  principled: { color: PROXIMITY_COLORS.principled, icon: '◕' },
+  sage_like: { color: PROXIMITY_COLORS.sage_like, icon: '●' },
 }
 
 // Kathekon quality display
 // R8c: English-only labels for user-facing display
+// Colours mirror the parallel proximity tier (strong~sage_like, moderate~principled, marginal~deliberate, contrary~reflexive)
 const KATHEKON_DISPLAY: Record<string, { label: string; color: string }> = {
-  strong: { label: 'Strong Appropriate Action', color: '#4d6040' },
-  moderate: { label: 'Moderate Appropriate Action', color: '#7d9468' },
-  marginal: { label: 'Marginal Appropriate Action', color: '#B2AC88' },
-  contrary: { label: 'Contrary to Appropriate Action', color: '#9e3a3a' },
-}
-
-// R8c: Map root passion IDs (Greek, R8a data layer) to English display names
-const ROOT_PASSION_ENGLISH: Record<string, string> = {
-  epithumia: 'Craving',
-  hedone: 'Irrational Pleasure',
-  phobos: 'Fear',
-  lupe: 'Distress',
+  strong: { label: 'Strong Appropriate Action', color: PROXIMITY_COLORS.sage_like },
+  moderate: { label: 'Moderate Appropriate Action', color: PROXIMITY_COLORS.principled },
+  marginal: { label: 'Marginal Appropriate Action', color: PROXIMITY_COLORS.deliberate },
+  contrary: { label: 'Contrary to Appropriate Action', color: PROXIMITY_COLORS.reflexive },
 }
 
 // R8c: English-only proximity level names (data layer uses Greek/technical)
@@ -543,6 +538,13 @@ export default function ScoreActionPage() {
               <div className="space-y-3">
                 {result.passion_diagnosis.passions_detected.map((passion, i) => (
                   <div key={i} className="flex items-start gap-3 p-3 bg-sage-50/50 rounded">
+                    {PASSION_IMAGE_MAP[passion.id] && (
+                      <img
+                        src={PASSION_IMAGE_MAP[passion.id]}
+                        alt={passion.name}
+                        className="w-8 h-8 object-contain flex-shrink-0"
+                      />
+                    )}
                     <span className="font-display text-sm font-medium text-sage-700">{passion.name}</span>
                     <span className="font-body text-xs text-sage-600 mt-0.5">({ROOT_PASSION_ENGLISH[passion.root_passion] || passion.root_passion})</span>
                   </div>

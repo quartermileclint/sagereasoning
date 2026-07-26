@@ -45,19 +45,36 @@ export default function RootLayout({
                   <a href="/score-social" className="block hover:text-sage-900">Social Filter</a>
                   <a href="/scenarios" className="block hover:text-sage-900">Scenarios</a>
                   <a href="/journal" className="block hover:text-sage-900">Journal</a>
+                  <a href="/journal-feed" className="block hover:text-sage-900">Live Journal Feed</a>
                   <a href="/community" className="block hover:text-sage-900">Community</a>
                   <a href="/dashboard" className="block hover:text-sage-900">Dashboard</a>
+                  <a href="/marketplace" className="block hover:text-sage-900">Skill Marketplace</a>
                   <a href="/private-mentor" className="block hover:text-sage-900">Private Mentor Hub</a>
                   <a href="/mentor-hub" className="block hover:text-sage-900">Mentor Hub</a>
                   <a href="/ops-hub" className="block hover:text-sage-900">Sage Ops Hub</a>
                   <a href="/api-docs" className="block hover:text-sage-900">API Docs</a>
                 </div>
                 <div>
+                  <p className="font-display font-medium mb-2">Practice</p>
+                  <a href="/view-from-above" className="block hover:text-sage-900">View from Above</a>
+                  <a href="/morning" className="block hover:text-sage-900">Morning Preparation</a>
+                  <a href="/hupexairesis" className="block hover:text-sage-900">Reserve Clause</a>
+                  <a href="/premeditatio" className="block hover:text-sage-900">Premeditatio</a>
+                  <a href="/sage-compass" className="block hover:text-sage-900">Sage Compass</a>
+                  <a href="/oikeiosis" className="block hover:text-sage-900">Circle of Concern</a>
+                  <a href="/passion-log" className="block hover:text-sage-900">Passion Log</a>
+                  <a href="/reflections" className="block hover:text-sage-900">Reflections</a>
+                  <a href="/baseline" className="block hover:text-sage-900">Baseline Assessment</a>
+                </div>
+                <div>
                   <p className="font-display font-medium mb-2">Philosophy</p>
                   <a href="/welcome" className="block hover:text-sage-900">Getting Started</a>
+                  <a href="/logos" className="block hover:text-sage-900">Logos</a>
                   <a href="/#virtues" className="block hover:text-sage-900">The Four Virtues</a>
                   <a href="/#how-it-works" className="block hover:text-sage-900">How It Works</a>
                   <a href="/methodology" className="block hover:text-sage-900">Methodology</a>
+                  <a href="/glossary" className="block hover:text-sage-900">Image Glossary</a>
+                  <a href="/pricing" className="block hover:text-sage-900">Pricing</a>
                 </div>
                 <div>
                   <p className="font-display font-medium mb-2">Legal</p>

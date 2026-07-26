@@ -15,6 +15,7 @@
  */
 
 import type { KatorthomaProximityLevel } from './stoic-brain'
+import { PROXIMITY_COLORS as CANONICAL_PROXIMITY_COLORS } from './brand-display'
 
 // ─── V3 Document Evaluation Types ───
 
@@ -103,13 +104,9 @@ export interface V3SocialMediaEvaluation {
 
 // ─── Proximity Display Helpers ───
 
-export const PROXIMITY_COLORS: Record<KatorthomaProximityLevel, string> = {
-  reflexive: '#9b2226',
-  habitual: '#bc6c25',
-  deliberate: '#b08d57',
-  principled: '#40916c',
-  sage_like: '#2d6a4f',
-}
+// Re-exported from stoic-brain.ts — the single canonical proximity palette
+// (brand-2026-07 proposal §2.1/§2.4). Previously an independent copy here.
+export const PROXIMITY_COLORS = CANONICAL_PROXIMITY_COLORS
 
 export const PROXIMITY_BG: Record<KatorthomaProximityLevel, string> = {
   reflexive: 'bg-red-50 border-red-200',

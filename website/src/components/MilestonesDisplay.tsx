@@ -132,6 +132,16 @@ export default function MilestonesDisplay({ userId }: MilestonesDisplayProps) {
               ) : (
                 <p className="font-display text-xs text-sage-400 mt-2">Not yet earned</p>
               )}
+              {MILESTONE_MAP[selectedMilestone].pageSlug && (
+                <a
+                  href={`/stages/${MILESTONE_MAP[selectedMilestone].pageSlug}`}
+                  className="inline-block mt-3 font-display text-xs text-sage-600 underline hover:text-sage-800"
+                >
+                  {earnedIds.has(selectedMilestone)
+                    ? `Visit ${MILESTONE_MAP[selectedMilestone].name} →`
+                    : `View ${MILESTONE_MAP[selectedMilestone].name} →`}
+                </a>
+              )}
             </div>
           </div>
         </div>

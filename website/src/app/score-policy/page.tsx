@@ -11,13 +11,7 @@ import {
   type DetectedDocumentPassion,
   type FlaggedClause,
 } from '@/lib/document-scorer'
-
-const ROOT_PASSION_ENGLISH: Record<string, string> = {
-  craving: 'Craving',
-  irrational_pleasure: 'Irrational Pleasure',
-  fear: 'Fear',
-  distress: 'Distress',
-}
+import { ROOT_PASSION_ENGLISH, PASSION_IMAGE_MAP } from '@/lib/brand-display'
 
 const severityColors: Record<string, string> = {
   high: 'bg-red-100 border-red-300 text-red-800',
@@ -234,11 +228,20 @@ export default function ScorePolicyPage() {
                 </h3>
                 <div className="space-y-2">
                   {result.passions_detected.authorial_passions.map((p: DetectedDocumentPassion, i: number) => (
-                    <div key={i} className="bg-sage-50 rounded p-3">
-                      <span className="font-display text-xs font-medium text-sage-700">
-                        {ROOT_PASSION_ENGLISH[p.root_passion] || p.root_passion}
-                      </span>
-                      <p className="font-body text-xs text-sage-600 mt-1">{p.evidence}</p>
+                    <div key={i} className="bg-sage-50 rounded p-3 flex items-start gap-2">
+                      {p.sub_species && PASSION_IMAGE_MAP[p.sub_species] && (
+                        <img
+                          src={PASSION_IMAGE_MAP[p.sub_species]}
+                          alt={p.sub_species}
+                          className="w-6 h-6 object-contain flex-shrink-0"
+                        />
+                      )}
+                      <div>
+                        <span className="font-display text-xs font-medium text-sage-700">
+                          {ROOT_PASSION_ENGLISH[p.root_passion] || p.root_passion}
+                        </span>
+                        <p className="font-body text-xs text-sage-600 mt-1">{p.evidence}</p>
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -26,6 +26,8 @@ export interface JournalEntry {
   question: string
   /** Which virtue domain this entry primarily engages, if any */
   virtue?: 'wisdom' | 'justice' | 'courage' | 'temperance'
+  /** Sub-species passion ids this entry names/enumerates by name (brand-2026-07 proposal §3.2) — used to render the matching passion-logo images alongside the teaching text */
+  subSpecies?: string[]
   /** V3 source file this concept derives from (R7 traceability) */
   sourceFile: string
   /** Primary source citation (R7) */
@@ -502,6 +504,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
       'The first root passion is craving: an irrational reaching toward something in the future that appears good but is not genuinely good. It has six recognised forms: anger (craving revenge on someone who seems to have wronged you), erotic obsession (craving based on appearance rather than virtue), longing (craving for something absent), love of pleasure (craving bodily pleasure as an end in itself), love of wealth (craving money as an end), and love of honour (craving reputation as an end). Each one mistakes a preferred indifferent or outright illusion for a genuine good.',
     question:
       'Look at the six forms of craving: revenge, obsession, longing, pleasure-seeking, wealth-seeking, and reputation-seeking. Which one has the strongest grip on you? Write about a specific recent instance where this form of craving drove your behaviour. What was the false judgement underneath — what did you treat as genuinely good that is actually indifferent?',
+    subSpecies: ['orge', 'eros', 'pothos', 'philedonia', 'philoplousia', 'philodoxia'],
     sourceFile: 'passions.json',
     sourceCitation: 'Stobaeus Eclogae 2.90-91; DL Lives 7.113',
   },
@@ -514,6 +517,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
       'The second root passion is irrational pleasure: elation at something present that appears good but is not genuinely good. It differs from craving in that it concerns the present, not the future. It has three recognised forms: enchantment (being captivated through the senses, losing rational perspective), malicious joy (taking pleasure in another person\'s misfortune), and excessive amusement (a pleasure that dissolves seriousness and clear thinking). Irrational pleasure is seductive because it feels rewarding. But notice: the pleasure comes from a false judgement. You are celebrating something that is not genuinely good.',
     question:
       'Think about what gives you pleasure. Can you identify an instance of irrational pleasure — a moment when you felt satisfaction or delight that, on reflection, was based on a false judgement? Perhaps pleasure at someone else\'s failure, or enchantment with something that was actually pulling you away from virtue. What was the false judgement that made it feel good?',
+    subSpecies: ['kelesis', 'epichairekakia', 'terpsis'],
     sourceFile: 'passions.json',
     sourceCitation: 'Stobaeus Eclogae 2.90; DL Lives 7.114',
   },
@@ -527,6 +531,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
     question:
       'Look at the six forms of fear: paralysing terror, avoidance of effort, reputation-anxiety, dread of the unfamiliar, overwhelm, and worry about uncertain outcomes. Which one most frequently drives your behaviour? Write about a specific situation where this form of fear caused you to avoid something you knew was right. What would you have done without the false judgement?',
     virtue: 'courage',
+    subSpecies: ['deima', 'oknos', 'aischyne', 'thambos', 'thorybos', 'agonia'],
     sourceFile: 'passions.json',
     sourceCitation: 'Stobaeus Eclogae 2.90; DL Lives 7.112',
   },
@@ -539,6 +544,7 @@ export const JOURNAL_ENTRIES: JournalEntry[] = [
       'The fourth root passion is distress: an irrational contraction of the soul at something present that appears evil but is not genuinely evil. It has five recognised forms: pity (distress at another\'s suffering — note that this misidentifies an indifferent as evil, which is not the same as genuine compassion), envy (distress that another has what you want), jealousy (distress that someone possesses what you believe should be yours), grief (distress at loss), and anxiety (a weighing-down of the mind without a clear object). Distress is often the hardest passion to examine because it feels justified by the situation.',
     question:
       'Identify a form of distress you experienced recently: pity, envy, jealousy, grief, or anxiety. Now examine the judgement underneath it. What did you believe was genuinely evil — what felt like a real loss or real harm? Was it a genuine evil (damage to character) or a dispreferred indifferent (something painful but not actually destructive of who you are)? Write about the distinction.',
+    subSpecies: ['eleos', 'phthonos', 'zelotypia', 'penthos', 'achos'],
     sourceFile: 'passions.json',
     sourceCitation: 'Stobaeus Eclogae 2.90-91; DL Lives 7.111',
   },

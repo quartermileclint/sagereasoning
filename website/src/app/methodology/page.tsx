@@ -154,12 +154,15 @@ export default function MethodologyPage() {
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">What scores don&rsquo;t measure</h2>
           <p>Stoic virtue scoring is explicitly not:</p>
-          <ul className="list-disc pl-6 mt-2 space-y-1 text-sage-700">
+          <div className="flex items-start gap-4 mt-3">
+            <img src="/images/mirror.PNG" alt="Mirror — a measure of the reasoning, not of your worth as a person" className="w-14 h-14 object-contain flex-shrink-0" />
+            <ul className="list-disc pl-6 space-y-1 text-sage-700">
             <li>A measure of your worth as a person</li>
             <li>A measure of your intelligence or competence</li>
             <li>A personality assessment or psychological profile</li>
             <li>A measure of outcomes (a Stoically virtuous action may still result in a poor outcome — that is not within our control)</li>
-          </ul>
+            </ul>
+          </div>
           <p className="mt-3">
             The Stoics held that virtue is entirely within our control, and that outcomes are not.
             A proximity level of &ldquo;habitual&rdquo; on one action does not mean you are a bad person &mdash; it means there

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } = require('react-simple-maps')
 import { supabase } from '@/lib/supabase'
+import { PROXIMITY_COLORS } from '@/lib/brand-display'
 import type { User } from '@supabase/supabase-js'
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
@@ -133,18 +134,18 @@ export default function CommunityPage() {
 
   const tierColor = (alignment: string) => {
     switch (alignment) {
-      case 'sage_like': return '#4d6040'
-      case 'principled': return '#7d9468'
-      case 'deliberate': return '#B2AC88'
-      case 'habitual': return '#c4843a'
-      case 'reflexive': return '#9e3a3a'
+      case 'sage_like': return PROXIMITY_COLORS.sage_like
+      case 'principled': return PROXIMITY_COLORS.principled
+      case 'deliberate': return PROXIMITY_COLORS.deliberate
+      case 'habitual': return PROXIMITY_COLORS.habitual
+      case 'reflexive': return PROXIMITY_COLORS.reflexive
       // V1 fallbacks for legacy data
-      case 'Sage': return '#4d6040'
-      case 'Progressing': return '#7d9468'
-      case 'Aware': return '#B2AC88'
-      case 'Misaligned': return '#c4843a'
-      case 'Contrary': return '#9e3a3a'
-      default: return '#7d9468'
+      case 'Sage': return PROXIMITY_COLORS.sage_like
+      case 'Progressing': return PROXIMITY_COLORS.principled
+      case 'Aware': return PROXIMITY_COLORS.deliberate
+      case 'Misaligned': return PROXIMITY_COLORS.habitual
+      case 'Contrary': return PROXIMITY_COLORS.reflexive
+      default: return PROXIMITY_COLORS.principled
     }
   }
 
@@ -252,8 +253,8 @@ export default function CommunityPage() {
                 {/* User's own pin highlight */}
                 {user && userLocation?.show_on_map && userLocation.latitude && userLocation.longitude && (
                   <Marker coordinates={[userLocation.longitude, userLocation.latitude]}>
-                    <circle r={11} fill="none" stroke="#4d6040" strokeWidth={2} strokeDasharray="3,2" />
-                    <circle r={6} fill="#4d6040" />
+                    <circle r={11} fill="none" stroke={PROXIMITY_COLORS.sage_like} strokeWidth={2} strokeDasharray="3,2" />
+                    <circle r={6} fill={PROXIMITY_COLORS.sage_like} />
                     <text textAnchor="middle" y={2} fontSize={6} fill="white" style={{ pointerEvents: 'none' }}>★</text>
                   </Marker>
                 )}
