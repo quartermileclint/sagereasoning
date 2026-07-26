@@ -15204,6 +15204,8 @@ Expected: tsc exit 0; build `✓ Compiled successfully`; both battery outputs `p
 
 **Rules served:** PR17 (every credential mint/revoke walked live, exact commands, no one-line hand-off — including two in-session corrections when the wrong credential class and a non-canonical agent_id were caught before they compounded); the P1-comparison discipline (pre-consult positions recorded before verdicts, per the anti-self-grading device; no shared context between legs; frozen thresholds applied as pre-registered, not relaxed post-hoc); §8 task-fit discipline (characterising WHERE signal appeared rather than gating the whole verdict on the single "catches" metric, while still reporting that metric's honest failure as the headline); **PR10 (self-correction — the model-tier deviation was surfaced, disclosed, and corrected into the record the same day, before the founder treated the result as settled).** **S11 REFUSED; MEASURE throughout; weights BLOCKED; the 0h call remains the founder's — this memo informs it, never makes it, and should not be treated as settled evidence until the model-controlled repeat runs.**
 
+**Forward pointer (added 2026-07-26):** the Fable-5 repeat has run. This entry **informed but did not settle** the question; it is complemented and superseded as a data point by `D-AGENT-ORG-P2-RERUN-VERDICT-2026-07-26` (`operations/agent-org-2026-07/runs/2026-07-25-rerun/verdict-memo.md`) — the first cleanly model-controlled repeat since 2026-06-11, which reached the same headline verdict on the controlled subset S1+S2.
+
 **Status:** Adopted with a same-day erratum; **the P2 arc remains open pending the Fable-5 repeat.** Cross-references: `operations/agent-org-2026-07/2026-07-20-P2-spec-freeze.md`; `operations/handoffs/founder/2026-07-20-P2-bare-arm-CLOSE.md`; `operations/agent-org-2026-07/runs/2026-07-20-bare/leg-a-metrics.md`; `operations/agent-org-2026-07/runs/verdict-memo-2026-07-21.md`; `operations/handoffs/founder/2026-07-21-interim-and-P2-Fable5-rerun-standing-note.md`.
 
 ---
@@ -16043,3 +16045,41 @@ Expected: `119`; the metrics header leads with `model: MIXED — NOT UNIFORM` na
 **Rules served:** KG2 (model attribution from server-side session records, not self-report), KG5, PR17 (founder walked every mint and revoke live; the runs got a self-contained instructions doc), PR18, PR10 (Diagnostic-certain on the model break: harness metadata corroborating the founder's own observation), KG-EX1 (the confound was surfaced and put to the founder as a scope decision rather than silently absorbed into a tidier result).
 
 **Status:** Adopted. Cross-references: `D-AGENT-ORG-P2-RERUN-LEG-A-BARE-2026-07-25`; `D-AGENT-ORG-P2-RERUN-LEG-A-MECHANICS-STOP-2026-07-25`; `D-AGENT-ORG-P2-RERUN-SCENARIO-REFRESH-2026-07-25`; `operations/agent-org-2026-07/2026-07-20-P2-spec-freeze.md` §4 (frozen thresholds); `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-b/leg-b-scoring.md`; `operations/handoffs/founder/2026-07-26-P2-rerun-VERDICT-NEXT-SESSION-PROMPT.md`; performing sessions `local_b1a134c7…` (S1) · `local_9d4762d9…` (S2) · `local_33a4ca37…` (S3, Opus 5).
+
+---
+
+## 2026-07-26 — D-AGENT-ORG-P2-RERUN-VERDICT-2026-07-26
+
+**Decision:** the P2 bare-vs-harnessed value benchmark **closes with "No benefit shown"** under the frozen 2026-07-20 thresholds, applied as pre-registered to the model-controlled subset **S1+S2**: Box 1 (material catches the bare leg missed) **≤1 and non-net** against a bar of 2; Box 2 (wall-clock) **FAIL at +558%** — 822s harnessed against 125s bare — against a +50% ceiling; Box 3 (cost) **PASS at $0.32 metered / $0.64 billed** against $5. AND'd, the conjunction fails. **This is the first cleanly model-controlled repeat since 2026-06-11** (Fable 5 / effort `high` on both legs of S1 and S2), and the result did not move despite a substantially more capable build. Verdict memo: `operations/agent-org-2026-07/runs/2026-07-25-rerun/verdict-memo.md`. **The memo informs the 0h call; it does not make it.**
+
+**Reasoning:** the thresholds were frozen at founder sign-off before leg A ran and are neither re-derived nor relaxed here. S3 is excluded from the boxes by the founder's recorded election (`D-AGENT-ORG-P2-RERUN-LEG-B-HARNESSED-2026-07-26`) because its leg B fell back to `claude-opus-5` against leg A's `claude-fable-5`; the exclusion is safe because the wall-clock box fails under **every** treatment of S3 — +558% excluded, +502% as run, +218% if leg B's S3 had matched leg A's exactly, +158% even at zero S3 time. The Box-1 call is recorded under both readings: strictly ≤1 (S2 produced zero — both legs caught the planted claim unaided, the harnessed leg *before* consulting, "Change of position: none" recorded twice), and under the 2026-06-11 founder adjudication that contract-exercising catches count, arguably 2 (the 5,000-character cap collision). **Both readings land on the same verdict because Box 2 decides it** — structurally identical to 2026-06-11, where Box 1 passed and +333% decided. The memo's load-bearing non-net finding (leg B added a go/no-go gate and rollback trigger; leg A independently produced a 30-day notice policy, a hardship channel, and renewal-last site sequencing) was **re-verified first-hand against both outputs** this session rather than accepted from the scoring file. Sealed-key tiers are identical across legs on all three scenarios — the harness moved no tier, under two independent scorers against independently-authored keys. Three findings are carried as findings, not caveats: **S2's mechanism discriminated correctly** (`political_community` obligation `violated` on the false-claim framing, `met` on the corrected text) **while changing no decision** — measurement fidelity demonstrated, decision-change none, which is ADR-012's own claim; the **5,000-character `input` cap collides with protocol rule 1c** (S1 tightened its own deliverable to 4,800 characters to fit the instrument; S3 split three documents into 18 verbatim chunks, the largest driver of its cost and latency) — a named follow-up, no session authored; and the **surfaced-but-not-acted-on framing gap** on S1, where the instrument flagged worker consent twice and the agent added machinery rather than changing how it reasoned. Zero transient 401s in 36 calls, so the overhead is the protocol's own call pattern, not auth retries. The mandatory Limitations section (§6, ten items) covers the S3 break and its undiagnosed safeguard trigger, the unresolved `high` ↔ `reasoning_effort: 40` mapping, n=2 with both scenarios single-decision-point, the split-scorer condition, the contestable S1 criterion-2 call in *both* legs, the anti-signalling cost of the uniform outbound-artifact rule, the non-blind harnessed arm, synthetic-artifact realism per the sealed author notes, S1's non-identical permission mode, and the absence of any downstream verifier — the condition under which the accreditation record's value would actually be exercised.
+
+**Files touched:**
+- `operations/agent-org-2026-07/runs/2026-07-25-rerun/verdict-memo.md` — new; the verdict, the recomputed arithmetic, the task-fit analysis, Limitations, and the founder's branches
+- `operations/agent-org-2026-07/runs/verdict-memo-2026-07-21.md` — forward pointer added to the erratum ("informed but did not settle")
+- `operations/handoffs/founder/2026-07-21-P2-harnessed-arm-CLOSE.md` — same forward pointer
+- `operations/decision-log.md` — forward pointer on `D-AGENT-ORG-P2-LEG-B-HARNESSED-RUN-2026-07-21`; this entry
+- `CLAUDE.md` — arc pointer updated: P2 closed
+- `operations/handoffs/founder/2026-07-26-P2-rerun-VERDICT-CLOSE.md` — new
+
+**Risk classification:** Standard under 0d-ii. Documents only — no mint, flag, schema, deploy, credential, or live op; both throwaway credentials were revoked at the leg-B teardown and both scratch contexts destroyed. AC7 not engaged. PR6 not engaged.
+
+**Rollback path:** `git revert` the records commit. Nothing live depends on this memo; the underlying run artifacts are already committed and unchanged.
+
+**Verification step (founder-performable):**
+```
+grep -c "" operations/agent-org-2026-07/runs/2026-07-25-rerun/verdict-memo.md
+grep -n "Limitations" operations/agent-org-2026-07/runs/2026-07-25-rerun/verdict-memo.md | head -3
+grep -rl "FORWARD POINTER (added 2026-07-26)" operations/agent-org-2026-07/runs/verdict-memo-2026-07-21.md operations/handoffs/founder/2026-07-21-P2-harnessed-arm-CLOSE.md
+```
+Expected: a non-zero line count; a `## 6. Limitations` heading present; both erratum'd files listed.
+
+**Open questions:**
+- **The 0h call is the founder's and is now the live question**, with a model-controlled result rather than an erratum'd one. Three branches are set out in the memo §7 (accept and close P2; hold for one bounded successor test — downstream-verifier, reduced-density, or a model-controlled S3 re-run; or treat the result as bearing on the benchmark's own observable). This memo recommends nothing about thresholds, including for any successor test.
+- The 5,000-character `input` cap versus protocol rule 1c — a named engineering follow-up, unscoped.
+- The S3 safeguard trigger remains undiagnosed (carried from the leg-B close).
+- Carried, unrelated to this arc: CRED-1 (ae2-smoke revocation check) and the four AUTH post-deploy smokes.
+
+**Rules served:** PR18, PR17 (the live ops were founder-walked at the legs, not this session), KG2, KG5, KG-EX1 (the "method/test/frame before purpose" row — the memo names, without using it to soften the verdict, that this arc has now twice measured a measurement instrument against a decision-change bar the founder knowingly re-confirmed post-reframe).
+
+**Status:** Adopted. Cross-references: `D-AGENT-ORG-P2-RERUN-LEG-B-HARNESSED-2026-07-26`; `D-AGENT-ORG-P2-RERUN-LEG-A-BARE-2026-07-25`; `D-AGENT-ORG-P2-RERUN-SCENARIO-REFRESH-2026-07-25`; `D-AGENT-ORG-P2-LEG-B-HARNESSED-RUN-2026-07-21` (erratum'd, pointed forward); `D-P1-COMPARISON-VERDICT-NO-BENEFIT-2026-06-11`; `operations/agent-org-2026-07/2026-07-20-P2-spec-freeze.md` §4; `adopted/adr/2026-06-24-sage-practice-measurement-instrument-reframe.md`.

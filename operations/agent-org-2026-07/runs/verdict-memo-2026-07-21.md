@@ -16,6 +16,8 @@
 
 **This does not reverse the "no benefit" verdict as recorded** — the incorporation log's finding (0 substantive decisions changed) stands as an observation of what actually happened in this specific run. What it does is **remove this run's standing as a clean, comparable data point against the 2026-06-11 precedent, and against any future run**, until repeated under the frozen model. See the carried next-session prompt for the planned repeat.
 
+> **FORWARD POINTER (added 2026-07-26).** The planned repeat has run. **This memo informed but did not settle the question; it is complemented and superseded as a data point by `operations/agent-org-2026-07/runs/2026-07-25-rerun/verdict-memo.md`** — the first cleanly model-controlled repeat since 2026-06-11 (Fable 5 / effort `high` on both legs of S1 and S2; S3's leg B fell back to Opus 5 and is excluded from the boxes by founder election). That run reaches the same headline verdict — **no benefit shown under the frozen thresholds** — on a controlled basis this one could not provide, and its finding 4 above (S2 did not cleanly exercise the corroboration check) was fixed in the rerun's scenario design and the mechanism then discriminated correctly while changing no decision.
+
 ## Result against the frozen boxes, as ticked (Sonnet 5, low effort — NOT the frozen Fable-5 subject; see erratum above)
 
 | Box | Threshold | Result | Met? |

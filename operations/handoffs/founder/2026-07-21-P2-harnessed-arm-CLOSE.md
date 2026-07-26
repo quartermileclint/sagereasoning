@@ -19,6 +19,8 @@
 
 **Both legs ran under Sonnet 5 at low reasoning effort (a token/usage-limit constraint at the time), not Fable 5 — the model the frozen spec (§2) and the program plan (§3-P2) both named specifically to hold the model-tier variable constant against the 2026-06-11 precedent.** This was discovered and disclosed the same day, before the founder acted on the memo as a settled result. Consequence: the "no benefit" verdict stands as a record of what happened in *this* run, but this run no longer functions as a clean, model-controlled comparison point against the 2026-06-11 verdict or against any future run. The verdict memo now carries the full erratum + its reasoning; this close does not restate it in full. **P2 is NOT closed as a settled arc-in-full** — see "What's carried" below, revised from the original close.
 
+> **FORWARD POINTER (added 2026-07-26).** The repeat has run and P2 now closes on it. This leg **informed but did not settle** the question; it is complemented and superseded as a data point by the 2026-07-25/26 Fable-5 rerun (`operations/agent-org-2026-07/runs/2026-07-25-rerun/verdict-memo.md`; `D-AGENT-ORG-P2-RERUN-VERDICT-2026-07-26`), which reached the same headline verdict under genuine model control on S1+S2.
+
 ## What's carried
 
 **A repeat of P2's leg A + leg B, under Fable 5 (the frozen model), is warranted and carried — Fable 5 is unavailable until Saturday 2026-07-25, 8am.** Next-session prompt authored for the interim + the standing return-to-this note: `operations/handoffs/founder/2026-07-21-interim-and-P2-Fable5-rerun-standing-note.md`. The memo's S2 scenario-design finding (the corroboration check wasn't cleanly exercised) should be folded into the repeat's scenario briefs, not just noted.
