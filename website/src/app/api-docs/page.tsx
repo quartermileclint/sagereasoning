@@ -550,18 +550,32 @@ export default function ApiDocsPage() {
             verdict stays reproducible from the signed assessment.
           </li>
           <li>
+            <strong>Field limits</strong> &mdash; <code>input</code>, <code>context</code>, and
+            <code> domain_context</code> are each capped at 5,000 characters
+            (<code>TEXT_LIMITS.medium</code>); <code>/api/guardrail</code>&apos;s <code>action</code>
+            and <code>context</code> share the same cap. An oversized field returns HTTP 400 before
+            any engine call, at no cost. If your document is longer, see
+            <strong> Corroboration check</strong> below &mdash; truncating or chunking it to fit
+            changes what the check can see.
+          </li>
+          <li>
             <strong>Corroboration check (extraction-trust)</strong> &mdash; every assessment carries a
             deterministic <code>corroboration</code> report inside the signed <code>assessment.assessment</code>:
             the extraction&apos;s self-report claims (a circle&apos;s <code>obligation_assessment</code> of
             <code> met</code>/<code>indeterminate</code>; an <code>examined_before_acting</code> claim on a grave
-            act) are cross-referenced against the verbatim submitted text. Per-claim findings use the vocabulary
+            act) are cross-referenced against the verbatim text carried in <code>input</code> when the request
+            reaches the endpoint. Per-claim findings use the vocabulary
             <code> corroborated | uncorroborated | contradicted</code>, each carrying the verbatim grounding
             spans (<code>markers[].quote</code>). Record-and-floor and <strong>monotone</strong>: claimed statuses
             stay verbatim, and a grounded contradiction can only floor the verdict (never raise it);
-            <code> proximity_floors.basis</code> names corroboration when it drove the floor. Scope: it
-            corroborates self-report claims against the submitted text &mdash; it is not a fact-checker, and a
-            harm omitted from the text entirely is not catchable. The <code>/api/guardrail</code> gate runs the
-            same check over its <code>action</code> text.
+            <code> proximity_floors.basis</code> names corroboration when it drove the floor. Scope: it sees only
+            the text that reaches it in <code>input</code> (capped at 5,000 characters &mdash; see
+            <strong> Field limits</strong> above). It is not a fact-checker, and its blind spot has two routes,
+            not one: a harm your self-report omits from the text entirely, and a harm your text does state but
+            that never arrived, because a longer document was truncated or chunked to fit the limit before this
+            endpoint saw it &mdash; both leave an unwarranted <code>met</code>/<code>indeterminate</code> claim
+            unchallenged, and only the first requires deception. The <code>/api/guardrail</code> gate runs the
+            same check over its <code>action</code> text, under the same limit.
           </li>
           <li>
             <strong>What the profile measures (it is not a fact-checker)</strong> &mdash; the assessment reads

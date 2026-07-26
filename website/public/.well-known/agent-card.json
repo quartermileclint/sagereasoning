@@ -229,7 +229,7 @@
       },
       {
         "uri": "https://sagereasoning.com/extensions/corroboration-check/v1",
-        "description": "Substrate extraction-trust corroboration check (Trust Layer S0a, Live 2026-07-08). Every /api/reason assessment and /api/guardrail verdict carries a deterministic 'corroboration' report inside the signed assessment.assessment: the extraction's self-report claims (a circle's obligation_assessment of met/indeterminate; an examined_before_acting claim on a grave act) are cross-referenced against the verbatim submitted text. Per-claim findings use the vocabulary corroborated|uncorroborated|contradicted; every finding carries the verbatim grounding spans (markers[].quote). Record-and-floor: claimed statuses stay verbatim, and a grounded contradiction floors the affected virtue domain (dikaiosyne_override: floor_reflexive; andreia_override: treat_unexamined) — monotone (floor-only), so a verdict can only become MORE conservative, never less; proximity_floors.basis names corroboration when it drove the floor. SCOPE: corroborates self-report claims against the submitted text only — it does NOT verify facts about the world and cannot catch a harm omitted from the text entirely (the disclosed structural residual).",
+        "description": "Substrate extraction-trust corroboration check (Trust Layer S0a, Live 2026-07-08). Every /api/reason assessment and /api/guardrail verdict carries a deterministic 'corroboration' report inside the signed assessment.assessment: the extraction's self-report claims (a circle's obligation_assessment of met/indeterminate; an examined_before_acting claim on a grave act) are cross-referenced against the verbatim text carried in `input` when the request reaches the endpoint — capped at 5,000 characters (TEXT_LIMITS.medium; the same cap applies to `context` and `domain_context` on /api/reason and to `action`/`context` on /api/guardrail); an oversized field returns HTTP 400 before any engine cost. Per-claim findings use the vocabulary corroborated|uncorroborated|contradicted; every finding carries the verbatim grounding spans (markers[].quote). Record-and-floor: claimed statuses stay verbatim, and a grounded contradiction floors the affected virtue domain (dikaiosyne_override: floor_reflexive; andreia_override: treat_unexamined) — monotone (floor-only), so a verdict can only become MORE conservative, never less; proximity_floors.basis names corroboration when it drove the floor. SCOPE: the check sees only the text that reaches it in `input`. It does NOT verify facts about the world, and its blind spot has two distinct routes, not one — a harm the self-report omits from the text entirely, and a harm the text does state but that never arrived because a longer document was truncated or chunked to fit the 5,000-character limit before this endpoint saw it. Both produce the identical unchallenged claim; only the first requires deception.",
         "required": false,
         "params": {
           "report": {
@@ -238,7 +238,12 @@
           },
           "findings_vocabulary": "corroborated | uncorroborated | contradicted (per claim; markers carry verbatim text spans)",
           "semantics": "record-and-floor: claimed statuses stay verbatim; a grounded contradiction floors the affected domain — monotone floor-only (never less conservative); proximity_floors.basis names corroboration when it drove the floor",
-          "scope": "cross-references self-report claims against the submitted text; not a fact-checker; cannot catch a harm omitted from the text (disclosed structural residual)"
+          "field_limits": {
+            "reason_endpoint": "input, context, domain_context: 5000 chars each (TEXT_LIMITS.medium)",
+            "guardrail_endpoint": "action, context: 5000 chars each (same TEXT_LIMITS.medium)",
+            "on_exceed": "HTTP 400, isBillable:false, no engine call incurred"
+          },
+          "scope": "cross-references self-report claims against the text that reaches this endpoint in `input`/`action` (capped at 5000 chars — see field_limits); not a fact-checker; the blind spot has two routes — a harm the self-report omits from the text, and a harm present in the sender's document but truncated/chunked away before this endpoint saw it (disclosed structural residual, either way; only the first requires deception)"
         }
       },
       {
