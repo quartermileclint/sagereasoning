@@ -16381,3 +16381,62 @@ Incidentally corroborating the drift diagnosis: `examined_life` requires ≥7 ro
 **Rules served:** PR18 (live-verified state recorded at the point of verification), R0 (append-only; prior entries not rewritten), PR10.
 
 **Status:** Adopted. Cross-references: `D-PRACTICE-REMINDERS-HUMAN-PHASE0-MILESTONE-WIRING-BUILT`, `D-ACTION-EVALUATIONS-V3-SCHEMA-DRIFT-FIXED`.
+
+---
+
+## 2026-07-27 — D-PRACTICE-REMINDERS-HUMAN-PHASE1-SEQUENCE-TRIGGER-BUILT
+
+**Decision:** Built Phase 1 of the human practice-reminders plan (§6) — the **sequence trigger**, the mentor's "default path before enough practitioner context exists to personalise it". A brand-new practitioner now lands on the dashboard and is told, in the mentor's own order and in doorbell language, what to do first; a long-standing one sees which practices they have not yet met. Founder elected Phase 1 over the competing R17 data-rights item at open (AskUserQuestion); R17 is scheduled as its own founder-walked Critical step before any external onboarding.
+
+**Reasoning:** Phase 1 is the plan's own next step and gates on nothing. Until now the dashboard had no "what to do next" element and never named the seven practice tools, `/welcome` explicitly disclaimed any order, and the whole practice region sat behind an `evaluations.length > 0` gate — so the practitioner the sequence exists for saw nothing at all.
+
+**Files touched:**
+- `website/src/lib/practice-sequence.ts` — NEW. **Zero-import** (not even `import type`): the sequence, the stage↔practice mapping, every user-visible string, and the pure `foldPracticeStatuses` / `nextInSequence` helpers.
+- `website/src/app/api/mentor/practice-status/route.ts` — NEW. `GET`, user-JWT, **read-only**, no LLM call; ten indexed per-user reads folded through the pure lib.
+- `website/src/components/PracticeSequenceModule.tsx` — NEW. The dashboard "Your practice" module.
+- `website/src/lib/__tests__/practice-sequence.test.ts` — NEW, 211 assertions.
+- `website/src/app/api/mentor/practice-status/__tests__/human-practitioner-boundary.test.ts` — NEW, 445 assertions.
+- `website/src/app/dashboard/page.tsx` — mounts the module **above** the `evaluations.length > 0` gate.
+- `website/src/app/welcome/page.tsx` — the ordered default path (election E2), the freedom note softened not deleted, `/passion-log` restored via the sequence section, `/glossary` added, the five Stage tiles now link to their pages.
+
+**The zero-import decision, and a correction to the session prompt.** The prompt asserted that importing `brand-display` into `/welcome` (or into anything it imports) "fails the guard". **It does not** — mutation-verified: adding that import to `practice-sequence.ts` and running the logos suite yields 249 passed, 0 failed. `stoic-brain` is allowlisted rather than forbidden there, and although that suite's symbol allowlist *does* also run on one-hop helpers (LOGOS-BT-6 — a claim this session's own first draft got wrong in the other direction and has corrected), it never fires, because the hop-one specifier is `brand-display` and the `brand-display → stoic-brain` edge sits at hop two. The design decision is unchanged and the module is zero-import — but it rests on plan §11, which binds regardless, not on a guard that would have waved it through. The new suite now enforces §11 directly.
+
+**Two honesty rules carry the feature, and both fail toward silence:** a practice whose read failed is `unavailable` with `met: null`, **never** `false` — telling a practitioner they have not done something they may well have done is a fabricated status, not a blank one; and `next_in_sequence` is withheld as `indeterminate` when an unavailable step precedes any unmet one, rather than pointing one practice too far along. Both live in the pure fold so they are unit-tested rather than reachable only through a live database (the Phase 0 `milestone-check-data.ts` precedent).
+
+**Risk classification:** Elevated under 0d-ii (existing user-facing pages; one new route). No schema, flag, auth-model, credential or deploy-config change. AC7/PR6 not engaged. KG1 observed — the route writes nothing. All eight `human-practitioner-boundary` suites re-run green, including the logos suite's repo-global git byte-identity guard, so the observation window's measured set is untouched.
+
+**Verification (all green):** `practice-sequence` **211/0** · `practice-status` boundary **445/0** · six sibling boundary suites unchanged · logos **249/0** · `milestone-check-data` 60/0 · `action-evaluations-v3-schema-drift` 51/0 · `tsc --noEmit` 0 · `npm run build` 0 (`ƒ /api/mentor/practice-status` registered). Browser: `/welcome` renders the ordered sequence with the pairing shown as `·`, all five stage links and all seven sequence links resolve, console clean; route 401s unauthenticated and with a bogus Bearer; `/dashboard` 307s signed out.
+
+**Mutation testing: 35 mutations, 34 caught, 1 designed survival.** The survivor is the logos-guard finding above (caught by this session's own suite). Every mutation was verified to have actually applied before its result was trusted — the Phase 0 lesson that a mutation can silently land on the wrong occurrence and report a false clean.
+
+**Adversarial review (PR19).** An independent 6-dimension Workflow ran: **27 findings raised, 19 verified (7 CONFIRMED — all low/nit — and 12 refuted); 8 verifiers were killed by the account monthly spend limit.** Three of those 8 duplicated already-confirmed findings; the remaining five were **adjudicated first-hand** per PR19's codified fallback, and all five held. **All twelve surviving findings are folded, and each fold was re-verified with the review's own mutation:**
+1. `/welcome`'s STAGES array carried a comment claiming its slugs were pinned by the unit suite. They were not — a slug mutation passed **783 assertions across all three suites**. This diff created the exposure by turning the tiles into `/stages/<slug>` links; a stale slug renders "Unknown stage." at HTTP 200, not a 404. Pinned now (G2-1/G2-2), comment corrected.
+2. **A vacuous pin, the Phase 0 lesson recurring exactly:** every two-timestamp fixture placed the later value second, so a "last wins" mutant passed all 193 assertions. Mirror fixtures added.
+3. The `!Number.isFinite(tb)` branch had **zero coverage** — inverting it survived the suite. Covered.
+4. 11 of 14 copy constants were pinned only as "non-empty string", so `'Not yet'` → `'Incomplete'` passed (the banlist has `completion`, not `incomplete`). All 14 now pinned verbatim.
+5. The boundary suite's one-hop traversal had no non-vacuity floor — disabling it dropped **152 of 341 assertions while still reporting 0 failed**. Floor added.
+6. The schema pin covered only the 8 practice tables, missing both `RHYTHM_TABLES` — while its own label invoked the `action_evaluations_v3` drift lesson and failed to cover `action_evaluations_v3`. `RHYTHM_TABLES` moved into the pure lib so the pin can reach it; now all 10.
+7. A comment asserted `journal_entries` "is declared in no repo migration". **False** — it is declared at `api/migrations/add-journal-entries-table.sql`; the search had been scoped to `website/supabase-*.sql`. Corrected in both files, and the pin now searches both migration directories.
+8. The forbidden-import scanner was defeated by a whitespace-free import (`import{X}from'y'`) — a scanner a formatter can defeat is not a guard. Pattern fixed, self-tested.
+9. `PracticeSequenceModule.tsx` was guarded by **no boundary suite at all**. Added to `TARGET_FILES`.
+10. **Rate-limit coupling to the measured surface:** `checkRateLimit` keys buckets by IP *within a category store*, and `/api/reason` — the surface the observation window measures — uses `RATE_LIMITS.scoring`. The new route used the same bucket, so ordinary dashboard browsing could throttle the instrument. Moved to `analytics` (a separate store). A dedicated bucket would be cleaner but `RATE_LIMITS` lives in `security.ts`, which **is** in the `/api/reason` import graph and must stay untouched while the window runs.
+11. A **total** read outage returns HTTP 200, so `loadFailed` never fired and the copy written for exactly that case was unreachable; the practitioner got a stateless list with no explanation. Outage now derived from the payload too.
+12. The one-hop-allowlist claim in two file headers was wrong (see above). Corrected.
+
+**Honest limit:** 8 of the review's verifiers died on the spend limit and were completed first-hand — single-perspective for those five findings. An independent re-run remains worthwhile after the limit resets, as it did for Phase 0.
+
+**Named follow-ups (not built):** `/api/milestones` and `/api/baseline` both still use the `scoring` bucket and both fire on a dashboard mount — the same coupling as finding 10, pre-existing and out of scope here. `oikeiosis_reflections` is indexed `(user_id, year, quarter)` not `created_at`, so that one read sorts rather than scanning an index — negligible on a quarterly table. No behavioural test exists for the component or the route handler (the honest-state contract's last mile is pinned structurally, not behaviourally).
+
+**Rollback path:** `git revert` the session commit — one new pure lib, one new read-only route, one new component, two changed pages, two new suites. No schema, no flag, no migration, nothing awarded to un-award.
+
+**Verification step (founder-performable):**
+```
+cd website && npx tsx src/lib/__tests__/practice-sequence.test.ts && npx tsx src/app/api/mentor/practice-status/__tests__/human-practitioner-boundary.test.ts && npx tsc --noEmit && npm run build
+```
+Expected: `211 passed, 0 failed`; `445 passed, 0 failed`; tsc exit 0; build exit 0.
+
+After deploy, signed in: load `/dashboard`. A "Your practice" module should render above the evaluations region — for every practitioner, including one with no evaluations — naming the next practice with its doorbell line. Then load `/welcome`: "Where to start" should read as an ordered default with the freedom note intact, and the five Stage tiles should link through.
+
+**Rules served:** R1/R6c/R9 (all copy qualitative, non-promissory, doorbell-voiced), R17 (no new personal-data surface; the standing `milestones` gap named, not widened), KG1, PR10, PR18, PR19 (independent review required; spend-limit fallback exercised and disclosed).
+
+**Status:** Adopted. Cross-references: `D-PRACTICE-REMINDERS-HUMAN-PHASE0-MILESTONE-WIRING-BUILT`, `D-PHASE0-AND-SCHEMA-DRIFT-LIVE-VERIFIED`, `operations/reminders-2026-07/2026-07-26-practice-reminders-HUMAN-build-plan.md` §6.

@@ -84,6 +84,27 @@ Each phase is independently shippable; stopping at any phase boundary is a legit
 
 ## §6 Phase 1 — Sequence trigger
 
+> **STATUS: BUILT + VERIFIED 2026-07-27** (`D-PRACTICE-REMINDERS-HUMAN-PHASE1-SEQUENCE-TRIGGER-BUILT`;
+> close: `operations/handoffs/founder/2026-07-27-practice-reminders-human-phase1-sequence-trigger-CLOSE.md`).
+> Live on the founder's push — no flag, no schema. Corrections to this section, recorded rather than absorbed:
+> 1. **This section's import guidance was unsafe, and the session prompt's version of it was factually wrong.**
+>    §6 says the new lib "imports at most the proximity-level *type* via the `brand-display.ts` precedent". That
+>    would put `stoic-brain` at hop TWO from `/welcome`, past the logos guard's one-hop reach. The prompt claimed
+>    such a chain "fails the guard"; **mutation-verified, it does not** — 249 passed, 0 failed. The lib is
+>    therefore **zero-import**, and the proximity-level union is declared locally (the `/sage-compass` precedent).
+>    What binds is §11, not the guard.
+> 2. **`/logos` cannot be a tracked step.** It is a reading with no row anywhere, so it is carried as step 0 with
+>    `tracked: false` and is skipped by `next_in_sequence` — otherwise "next" would pin to the prerequisite forever.
+> 3. **`/oikeiosis` needs TWO source tables** (`oikeiosis_reflections` + `circle_extension_entries`) — the quarterly
+>    diagnostic and the circle-extension practice are separate routes writing separate tables, and either is a
+>    genuine use of that page.
+> 4. **The route reads 10 tables, not 9** — the 8 practice sources plus the two daily-rhythm tables.
+>
+> Two findings surfaced and named as follow-ups: the new route was initially sharing `/api/reason`'s IP-keyed
+> rate-limit bucket (fixed here; `/api/milestones` and `/api/baseline` still do, pre-existing); and no behavioural
+> test exists for the component or the route handler.
+
+
 **New lib `website/src/lib/practice-sequence.ts`** (pure, human-side; imports at most the proximity-level *type* via the `brand-display.ts` precedent — **never** an edit to `stoic-brain.ts`, which is byte-identity-guarded):
 - `PRACTICE_SEQUENCE` — the canonical ordered steps: step 0 `/logos` (the prerequisite orientation; already fronted by `/welcome`'s "Start with why"), then `/morning` → `/passion-log` → `/view-from-above` + `/oikeiosis` (paired) → `/premeditatio` → `/hupexairesis` → `/sage-compass`. Each step: `{id, name, href, doorbell}` where `doorbell` is a one-line pre-authored prompt-to-begin (constraint 1 language).
 - `STAGE_PRACTICES` — the §1 stage↔tools mapping keyed by proximity level, with The Inner Fire mapping to *no* tools plus the mentor's "no longer needs the scaffolding in the same way" line.

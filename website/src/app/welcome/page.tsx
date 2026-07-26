@@ -17,11 +17,16 @@
  */
 
 import type { Metadata } from 'next'
+// practice-sequence.ts is a ZERO-IMPORT module — see its header. /welcome is a
+// guarded TARGET_FILES entry of the logos boundary test, which follows only ONE
+// hop, so anything that module imported would sit outside the guard's reach.
+// It imports nothing, at any depth, which is what makes this import safe.
+import { PRACTICE_SEQUENCE, WELCOME_SEQUENCE_COPY } from '@/lib/practice-sequence'
 
 export const metadata: Metadata = {
   title: 'Getting Started — SageReasoning',
   description:
-    'A short orientation for new practitioners: what SageReasoning is for, a few things worth trying first, how to read your results, and what to expect honestly.',
+    'A short orientation for new practitioners: what SageReasoning is for, the order the practices are usually met in, how to read your results, and what to expect honestly.',
 }
 
 const FIRST_STEPS = [
@@ -55,17 +60,40 @@ const FIRST_STEPS = [
   },
 ]
 
+// The seven practice tools moved OUT of this list and into their own ordered
+// section below (election E2) — listing them alphabetically as "more to explore"
+// was the un-ordered presentation the mentor's sequence replaces. `/passion-log`
+// was missing from this list entirely and is now in the sequence where it belongs.
 const MORE_TO_EXPLORE = [
   { label: 'Ethical scenarios', href: '/scenarios' },
-  { label: 'Preparing for Adversity (premeditatio)', href: '/premeditatio' },
-  { label: 'The Reserve Clause (hupexairesis)', href: '/hupexairesis' },
-  { label: 'The View From Above', href: '/view-from-above' },
-  { label: 'Morning Preparation', href: '/morning' },
-  { label: 'Expanding Your Circle of Concern (oikeiosis)', href: '/oikeiosis' },
-  { label: 'The Sage Compass', href: '/sage-compass' },
+  { label: 'The image glossary', href: '/glossary' },
   { label: 'The community map', href: '/community' },
   { label: 'How the method works', href: '/methodology' },
 ]
+
+// The Five Stages of Practice. Names and slugs are literal here on purpose —
+// /welcome is inside the logos boundary-test target set, so it must not import
+// brand-display (the one-hop stoic-brain rule noted below).
+//
+// The slugs are load-bearing: each tile links to /stages/<slug>, and a stale one
+// renders "Unknown stage." at HTTP 200 rather than a 404 — a silent dead end on
+// the orientation page a new practitioner is sent to. They ARE pinned against
+// the canonical STAGE_DISPLAY, by G2-1/G2-2 in
+// src/lib/__tests__/practice-sequence.test.ts, which reads this array's source.
+// An earlier version of this comment claimed that pin existed when it did not;
+// the adversarial review demonstrated a slug mutation passing 783 assertions.
+const STAGES = [
+  { name: 'The Storm', slug: 'the-storm', src: '/images/The Storm.PNG' },
+  { name: 'The Worn Path', slug: 'the-worn-path', src: '/images/The Worn Path.PNG' },
+  { name: 'The Crossroads', slug: 'the-crossroads', src: '/images/The Crossroads.PNG' },
+  { name: 'The Clear Summit', slug: 'the-clear-summit', src: '/images/The Clear Summit.PNG' },
+  { name: 'The Inner Fire', slug: 'the-inner-fire', src: '/images/The Inner Fire.PNG' },
+]
+
+// The seven practices, in the order they are usually met. `/logos` is excluded
+// here because it already has its own "Start with why" card above — it is the
+// prerequisite orientation, not one more tool in the list.
+const SEQUENCE_STEPS = PRACTICE_SEQUENCE.filter((s) => s.tracked)
 
 export default function WelcomePage() {
   return (
@@ -80,9 +108,9 @@ export default function WelcomePage() {
         <p className="text-sage-700 leading-relaxed">
           You now have a place to examine your own judgments, grow in character, and
           practise reasoning a little more like the Stoic sage. This page is a short
-          orientation: what the tool is for, a few things worth trying first, and how to
-          read what you get back. You can return here any time from the account menu or
-          the footer.
+          orientation: what the tool is for, the order the practices are usually met in,
+          and how to read what you get back. You can return here any time from the account
+          menu or the footer.
         </p>
       </div>
 
@@ -140,15 +168,15 @@ export default function WelcomePage() {
           </a>
         </div>
 
-        {/* Where to start */}
+        {/* Where to start — the ordered default path (founder election E2).
+            The freedom note is SOFTENED, not deleted: the order is a default,
+            not a rule, and nothing is locked. */}
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-5">
-            Where to start
+            {WELCOME_SEQUENCE_COPY.heading}
           </h2>
-          <p className="mb-6 text-sage-700">
-            There is no single right order. If you are not sure, scoring an action is the
-            most direct way to feel what SageReasoning does.
-          </p>
+          <p className="mb-4 text-sage-700">{WELCOME_SEQUENCE_COPY.intro}</p>
+          <p className="mb-6 text-sage-700">{WELCOME_SEQUENCE_COPY.prerequisiteNote}</p>
           <div className="grid sm:grid-cols-2 gap-5">
             {FIRST_STEPS.map((step) => (
               <div
@@ -172,6 +200,59 @@ export default function WelcomePage() {
           </div>
         </div>
 
+        {/* The daily rhythm — the two things that recur alongside the sequence
+            rather than sitting inside it. */}
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">
+            {WELCOME_SEQUENCE_COPY.dailyRhythmHeading}
+          </h2>
+          <p className="text-sage-700">{WELCOME_SEQUENCE_COPY.dailyRhythm}</p>
+        </div>
+
+        {/* The practices, in sequence. The order is the one a practitioner is
+            usually introduced to them in — it removes the friction of choosing
+            where to begin without removing any of the work. */}
+        <div>
+          <h2 className="font-display text-xl font-semibold text-sage-800 mb-5">
+            {WELCOME_SEQUENCE_COPY.toolsHeading}
+          </h2>
+          <ol className="space-y-4">
+            {SEQUENCE_STEPS.map((step, i) => {
+              // Two practices share a step number where they are met together.
+              const paired = SEQUENCE_STEPS[i - 1]?.step === step.step
+              return (
+                <li key={step.id} className="flex gap-4">
+                  <span
+                    className={`font-display text-sm font-semibold w-6 shrink-0 pt-0.5 ${
+                      paired ? 'text-transparent' : 'text-sage-400'
+                    }`}
+                    aria-hidden={paired}
+                  >
+                    {paired ? '·' : step.step}
+                  </span>
+                  <div>
+                    <a
+                      href={step.href}
+                      className="font-display text-base font-semibold text-sage-800 underline decoration-sage-300 hover:decoration-sage-600"
+                    >
+                      {step.name}
+                    </a>
+                    {/* On its own line, not trailing the link inline: an inline
+                        span separated only by a margin runs straight into the
+                        link name for a screen reader ("…Concernmet alongside…"). */}
+                    {paired && (
+                      <p className="font-body text-xs text-sage-500 italic">
+                        met alongside the one above
+                      </p>
+                    )}
+                    <p className="text-sm text-sage-700 mt-0.5">{step.doorbell}</p>
+                  </div>
+                </li>
+              )
+            })}
+          </ol>
+        </div>
+
         {/* How to read your results */}
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">
@@ -183,23 +264,25 @@ export default function WelcomePage() {
             from <em>reflexive</em> (little self-examination) through to <em>sage-like</em>{' '}
             (rare philosophical depth). Each level has a Stage of Practice:
           </p>
-          {/* The Five Stages of Practice — literal paths (see the boundary note above). */}
+          {/* The Five Stages of Practice — literal paths (see the boundary note above).
+              Each links to its own Stage page, which sets out what that stage is and
+              which practices meet a practitioner there. */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 my-6">
-            {[
-              { name: 'The Storm', src: '/images/The Storm.PNG' },
-              { name: 'The Worn Path', src: '/images/The Worn Path.PNG' },
-              { name: 'The Crossroads', src: '/images/The Crossroads.PNG' },
-              { name: 'The Clear Summit', src: '/images/The Clear Summit.PNG' },
-              { name: 'The Inner Fire', src: '/images/The Inner Fire.PNG' },
-            ].map((stage) => (
-              <div key={stage.name} className="text-center">
+            {STAGES.map((stage) => (
+              <a
+                key={stage.slug}
+                href={`/stages/${stage.slug}`}
+                className="text-center group"
+              >
                 <img
                   src={stage.src}
                   alt={`${stage.name} — Stage of Practice`}
                   className="w-full h-auto drop-shadow-sm"
                 />
-                <p className="text-xs text-sage-600 mt-1 font-display">{stage.name}</p>
-              </div>
+                <p className="text-xs text-sage-600 mt-1 font-display group-hover:text-sage-800 group-hover:underline">
+                  {stage.name}
+                </p>
+              </a>
             ))}
           </div>
           <p>

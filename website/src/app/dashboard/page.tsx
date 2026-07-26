@@ -15,6 +15,7 @@ import {
 } from '@/lib/baseline-assessment'
 import PracticeCalendar from '@/components/PracticeCalendar'
 import MilestonesDisplay from '@/components/MilestonesDisplay'
+import PracticeSequenceModule from '@/components/PracticeSequenceModule'
 import type { User } from '@supabase/supabase-js'
 import { PROXIMITY_COLORS } from '@/lib/brand-display'
 import type { KatorthomaProximityLevel, OikeiosisStageId, SenecanGradeId } from '@/lib/stoic-brain'
@@ -351,6 +352,16 @@ export default function DashboardPage() {
               </p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Phase 1 — the SEQUENCE trigger. Mounted ABOVE the `evaluations.length > 0`
+          gate below, deliberately: that gate is why a brand-new practitioner
+          previously saw nothing here at all, and the sequence exists precisely for
+          the practitioner who has not started yet. */}
+      {user && (
+        <div className="mb-8">
+          <PracticeSequenceModule userId={user.id} />
         </div>
       )}
 
