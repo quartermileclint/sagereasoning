@@ -16341,3 +16341,34 @@ Expected: `1` (or more). If it is still `0`, the on-screen error banner and the 
 **Rules served:** R1/R6c/R9 (the new failure copy is plain and non-promissory), PR10 (root cause, not symptom), KG1, KG7, AC4, PR18.
 
 **Status:** Adopted. Cross-references: `D-PRACTICE-REMINDERS-HUMAN-PHASE0-MILESTONE-WIRING-BUILT` (which surfaced this as finding 1); `D-SAGE-PRACTICE-BENCHMARK-V1-COMPLETE-REFLECT-FIX-VERDICT` (the 2026-06-18 sibling drift).
+
+---
+
+## 2026-07-26 — D-PHASE0-AND-SCHEMA-DRIFT-LIVE-VERIFIED (addendum)
+
+**Decision:** Records the live production verification that discharges the residual caveats carried by `D-PRACTICE-REMINDERS-HUMAN-PHASE0-MILESTONE-WIRING-BUILT` and `D-ACTION-EVALUATIONS-V3-SCHEMA-DRIFT-FIXED`. Both were written honestly flagging that they rested on an unverified assumption about the live schema. **Both are now confirmed live.** Append-only per R0 — this does not rewrite either entry.
+
+**Founder-run, on production, after deploy (Vercel green):** scored one action, then queried:
+
+| check | result |
+|---|---|
+| evaluations saved | **1** |
+| milestones awarded | **8** |
+| most recent evaluation | `I was not listening to my daughters suggestions when hanging [deliberate]` |
+
+**What each discharges:**
+1. **The schema hypothesis is confirmed.** Production matches `supabase-v3-migration.sql`: `action` is the real column, `action_description` was never on that table. The third hypothesis (production having `action_description` and no `action`) is eliminated by observation — the insert succeeded and the text is populated. The residual-uncertainty paragraph of `D-ACTION-EVALUATIONS-V3-SCHEMA-DRIFT-FIXED` is closed; the founder's `information_schema` column list is no longer needed.
+2. **The write path is live.** First human action evaluation persisted since the table was created — the four-month silent-failure window is closed.
+3. **Phase 0's award path is live.** 8 milestones awarded from a standing start. Awarding was structurally impossible for every user before today, so this is the first non-zero `milestones` row-set in the product's history. A count this high from a single `deliberate` evaluation indicates the retroactive catch-up is also working — the milestones are being recognised from stored baseline/journal history, not only from the action just scored, which is what the dashboard catch-up POST and the newly-populated journal check-data were built to do.
+
+**Standing consequence:** the two follow-ups named in the Phase 0 entry are unaffected and remain open — the `milestones` table is still absent from all R17 data-rights paths (**now materially urgent: the table holds real per-user data as of today**, where before it was empty for everyone), and `oikeiosis_context` is still never written so the two oikeiosis milestones remain unearnable.
+
+**Method note (process, worth keeping):** the drift was found by a review dimension asking "do the claims match the code?" over files the session was not otherwise changing, and it was determinative — Phase 0 was correct but would have appeared broken, because it had nothing to award from. Had the review been scoped only to the diff, Phase 0 would have shipped looking like a failure. Second note: the founder could not run the supplied verification because it was given as a `psql -c` shell command while they work in the Supabase SQL editor. **Verification steps for this founder should be bare SQL, in a `sql`-tagged block, not a shell wrapper.**
+
+**Risk classification:** `governance`, Standard under 0d-ii. Records only; no code, schema, flag or deploy change. AC7/PR6 not engaged.
+
+**Rollback path:** `git revert` the records commit. Documents only; nothing live depends on this entry.
+
+**Rules served:** PR18 (live-verified state recorded at the point of verification), R0 (append-only; prior entries not rewritten), PR10.
+
+**Status:** Adopted. Cross-references: `D-PRACTICE-REMINDERS-HUMAN-PHASE0-MILESTONE-WIRING-BUILT`, `D-ACTION-EVALUATIONS-V3-SCHEMA-DRIFT-FIXED`.
