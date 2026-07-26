@@ -1,0 +1,29 @@
+HTTP/2 200 
+access-control-allow-headers: Content-Type, Authorization, X-Api-Key
+access-control-allow-methods: GET, POST, OPTIONS
+access-control-allow-origin: https://sagereasoning.com, https://www.sagereasoning.com, https://sagereasoning.com
+cache-control: public, max-age=0, must-revalidate
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co https://api.anthropic.com https://api.stripe.com https://checkout.stripe.com; frame-ancestors 'none'
+content-type: application/json
+date: Sat, 25 Jul 2026 23:34:23 GMT
+permissions-policy: camera=(), microphone=(), geolocation=(), payment=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000
+vary: RSC, Next-Router-State-Tree, Next-Router-Prefetch
+x-anthropic-cost-cents: 3
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-loop-cost-cents: 6
+x-loop-id: 81fe2405-fda9-4240-bdbb-268b1e2e2f8d
+x-loop-internal-calls: 1
+x-matched-path: /api/guardrail
+x-overage-cents: 4
+x-overage-fired: true
+x-ratelimit-daily-remaining: 54
+x-ratelimit-monthly-remaining: 94
+x-ratelimit-monthly-used: 6
+x-vercel-cache: MISS
+x-vercel-id: syd1::iad1::5nr5p-1785022434167-4babbe8e347d
+x-xss-protection: 1; mode=block
+

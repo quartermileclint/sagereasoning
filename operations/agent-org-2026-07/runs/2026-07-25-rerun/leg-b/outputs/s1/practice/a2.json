@@ -1,0 +1,317 @@
+{
+  "assessment": {
+    "version": "layer2-assessment-v1",
+    "layer1_schema_version": "layer1-schema-v1",
+    "passion_diagnosis": {
+      "passions_detected": [
+        {
+          "id": "passion_0",
+          "name": "Anguish (agonia)",
+          "root_passion": "phobos",
+          "sub_species": "agonia",
+          "false_judgement": "An imminent evil is overtaking me and I cannot avert it.",
+          "correct_judgement": "The imminent event is indifferent. My agitation is the false judgement that virtue depends on its outcome.",
+          "causal_stage_affected": "praxis",
+          "evidence": "Full-flex rosters hit them three ways at once: weekly-varying start times they cannot commute to, shift lengths that break second-job and childcare arrangements, and a 15–20% cut in take-home pay in low-occupancy weeks."
+        },
+        {
+          "id": "passion_1",
+          "name": "Anguish (agonia)",
+          "root_passion": "phobos",
+          "sub_species": "agonia",
+          "false_judgement": "An imminent evil is overtaking me and I cannot avert it.",
+          "correct_judgement": "The imminent event is indifferent. My agitation is the false judgement that virtue depends on its outcome.",
+          "causal_stage_affected": "praxis",
+          "evidence": "HR has not run a formal attrition read, so full rollout bets the three largest contracts — 40% of revenue, repricing in January — on an unmeasured risk concentrated in our most experienced crews."
+        },
+        {
+          "id": "passion_2",
+          "name": "Hesitation (oknos)",
+          "root_passion": "phobos",
+          "sub_species": "oknos",
+          "false_judgement": "Action will bring evil; inaction is safer.",
+          "correct_judgement": "The only evil is vice; inaction from fear is itself a vicious failure to act. Right action proceeds from right judgement, not from fear.",
+          "causal_stage_affected": "praxis",
+          "evidence": "Why not hold? The pilot's core result is real — 9% labor cost reduction, flat inspection scores — and we have lost two contracts to price in fourteen months. Standing still is the riskiest option on the table."
+        }
+      ],
+      "false_judgements": [
+        "An imminent evil is overtaking me and I cannot avert it.",
+        "An imminent evil is overtaking me and I cannot avert it.",
+        "Action will bring evil; inaction is safer."
+      ],
+      "correct_judgements": [
+        "The imminent event is indifferent. My agitation is the false judgement that virtue depends on its outcome.",
+        "The imminent event is indifferent. My agitation is the false judgement that virtue depends on its outcome.",
+        "The only evil is vice; inaction from fear is itself a vicious failure to act. Right action proceeds from right judgement, not from fear."
+      ],
+      "causal_stage_affected": "praxis"
+    },
+    "control_filter": {
+      "within_prohairesis": [
+        {
+          "item": "enable the six-hour minimum-hours floor network-wide",
+          "agent_named_position": "within",
+          "classification": "within",
+          "reasoning": "agent_identified_within"
+        },
+        {
+          "item": "anchor start times within one hour of the current 11:00pm start at transit-constrained satellite sites",
+          "agent_named_position": "within",
+          "classification": "within",
+          "reasoning": "agent_identified_within"
+        },
+        {
+          "item": "sequence urban-first with a hard HR gate before satellite sites convert",
+          "agent_named_position": "within",
+          "classification": "within",
+          "reasoning": "agent_identified_within"
+        },
+        {
+          "item": "renewal pricing finalized on realized run-rate savings",
+          "agent_named_position": "within",
+          "classification": "within",
+          "reasoning": "agent_identified_within"
+        }
+      ],
+      "outside_prohairesis": [
+        {
+          "item": "HR has not run a formal attrition read",
+          "agent_named_position": "outside",
+          "classification": "outside",
+          "reasoning": "agent_identified_outside"
+        },
+        {
+          "item": "If even 20–25 of those veterans walk in December",
+          "agent_named_position": "outside",
+          "classification": "outside",
+          "reasoning": "agent_identified_outside"
+        },
+        {
+          "item": "inspection scores must hold",
+          "agent_named_position": "outside",
+          "classification": "outside",
+          "reasoning": "agent_identified_outside"
+        },
+        {
+          "item": "the last regional bus arriving only around the current start time",
+          "agent_named_position": "outside",
+          "classification": "outside",
+          "reasoning": "agent_identified_outside"
+        }
+      ],
+      "disambiguation_required": []
+    },
+    "oikeiosis": {
+      "relevant_circles": [
+        {
+          "stage": 1,
+          "circle": "self_preservation",
+          "description": "we have lost two contracts to price in fourteen months. Standing still is the riskiest option on the table.",
+          "honourability_grade": 3,
+          "advantageousness_grade": 3,
+          "cicero_verdict": "both_high_aligned",
+          "obligation_met": null,
+          "tension": null,
+          "obligation_assessment": {
+            "status": "met",
+            "justification": "The organisation owes itself institutional continuity; the memo explicitly addresses the risk of inaction and frames the modified rollout as the version that preserves the firm's viability. The obligation to the organisation's own survival is acknowledged and addressed through the floored savings strategy."
+          }
+        },
+        {
+          "stage": 2,
+          "circle": "household",
+          "description": "six-year median tenure, daytime second jobs and childcare built around the fixed 11–7 shift, and a last regional bus arriving only around the current start time",
+          "honourability_grade": 3,
+          "advantageousness_grade": 3,
+          "cicero_verdict": "both_high_aligned",
+          "obligation_met": null,
+          "tension": null,
+          "obligation_assessment": {
+            "status": "indeterminate",
+            "justification": "The ~140 night cleaners have structured their domestic lives (childcare, second jobs, transit) around the fixed shift; the memo acknowledges this and proposes mitigations (floor, anchored start times, HR pulse, rollback trigger), but the workers have not consented to any change and the mitigations are partial — a 15–20% pay cut in low-occupancy weeks remains possible even with the floor. Whether the mitigations are sufficient to honour what is owed to these workers' household arrangements cannot be determined from the memo alone."
+          }
+        },
+        {
+          "stage": 3,
+          "circle": "local_community",
+          "description": "we cover medical buildings and distribution centers with new hires in the exact window when inspection scores must hold",
+          "honourability_grade": 3,
+          "advantageousness_grade": 3,
+          "cicero_verdict": "both_high_aligned",
+          "obligation_met": null,
+          "tension": "Tension between local_community and self_preservation",
+          "obligation_assessment": {
+            "status": "indeterminate",
+            "justification": "Medical buildings and distribution centres served by the cleaning crews represent a local community obligation; the memo acknowledges the risk of inspection score degradation if experienced crews depart, and the rollback trigger is designed to protect service quality, but whether that protection is adequate for non-consenting building occupants and clients is not determinable from the memo."
+          }
+        },
+        {
+          "stage": 4,
+          "circle": "political_community",
+          "description": "Whitfield gets what the renewals actually need: a running, network-wide dynamic scheduling program and a savings number that exceeds what draft pricing assumes — without gambling inspection scores or crew continuity during the renewal window.",
+          "honourability_grade": 3,
+          "advantageousness_grade": 3,
+          "cicero_verdict": "both_high_aligned",
+          "obligation_met": null,
+          "tension": null,
+          "obligation_assessment": {
+            "status": "indeterminate",
+            "justification": "The memo frames the recommendation partly in terms of contract clients (Whitfield and renewal counterparties) who are members of the broader commercial-political community; the obligation to deliver on contracted service levels is addressed by the mitigations, but whether the modified rollout fully honours those commitments depends on empirical outcomes not yet known."
+          }
+        }
+      ],
+      "deliberation_notes": "Tension between local_community and self_preservation"
+    },
+    "value_assessment": {
+      "indifferents_at_stake": [
+        {
+          "name": "wealth",
+          "axia": "moderate",
+          "treated_as": "good",
+          "evidence": "Price the January renewals against the floored savings of roughly $250,000 a year — not the $410,000 full-flex projection.",
+          "error": "Confused wealth (a preferred indifferent) with the genuine good"
+        },
+        {
+          "name": "wealth",
+          "axia": "moderate",
+          "treated_as": "good",
+          "evidence": "a 15–20% cut in take-home pay in low-occupancy weeks",
+          "error": "Confused wealth (a preferred indifferent) with the genuine good"
+        },
+        {
+          "name": "reputation",
+          "axia": "moderate",
+          "treated_as": "good",
+          "evidence": "inspection scores must hold",
+          "error": "Confused reputation (a preferred indifferent) with the genuine good"
+        },
+        {
+          "name": "health",
+          "axia": "high",
+          "treated_as": "good",
+          "evidence": "we cover medical buildings and distribution centers with new hires in the exact window when inspection scores must hold",
+          "error": "Confused health (a preferred indifferent) with the genuine good"
+        }
+      ],
+      "value_error": "Confused wealth (a preferred indifferent) with the genuine good; Confused wealth (a preferred indifferent) with the genuine good; Confused reputation (a preferred indifferent) with the genuine good; Confused health (a preferred indifferent) with the genuine good"
+    },
+    "kathekon_assessment": {
+      "is_kathekon": true,
+      "quality": "strong",
+      "justification": "natural relationship engaged; role obligation engaged; justification offered."
+    },
+    "iterative_refinement": {
+      "senecan_grade": "pre_progress",
+      "progress_dimensions": {
+        "passion_reduction": "Multiple passions detected (3); reduction work means addressing the most-evidenced passion first while observing the rest.",
+        "judgement_quality": "Judgement quality compromised — multiple value confusions present.",
+        "disposition_stability": "Disposition unstable — passions have moved into impulse or action.",
+        "oikeiosis_extension": "Multiple circles engaged including wider community; oikeiosis extension active."
+      },
+      "direction_of_travel": "stable",
+      "motivation_classification": "virtue_explicit"
+    },
+    "katorthoma_proximity": "reflexive",
+    "ruling_faculty_state": "Overwhelmed — multiple passions under time pressure; ruling faculty agitated.",
+    "virtue_domains_engaged": [
+      "phronesis",
+      "dikaiosyne",
+      "andreia"
+    ],
+    "improvement_path_structured": {
+      "false_judgement_to_correct": "An imminent evil is overtaking me and I cannot avert it.",
+      "mechanism_applies": "passion_diagnosis",
+      "corrected_judgement": "The imminent event is indifferent. My agitation is the false judgement that virtue depends on its outcome."
+    },
+    "stage_scores": {
+      "control_filter": "strong",
+      "passion_diagnosis": "adequate",
+      "oikeiosis": "adequate",
+      "value_assessment": "strong",
+      "kathekon_assessment": "strong",
+      "iterative_refinement": "strong"
+    },
+    "hasty_assent_risk": "low",
+    "intake_clarifications": {
+      "soft_clarifications": [
+        {
+          "trigger_code": "STATED_OPERATIVE_CONFLICT",
+          "intake_tier": 2,
+          "stem_id": "tier_2:stated_operative_conflict:001",
+          "slot_fills": {
+            "STATED_CIRCLE_TARGET": "the workforce",
+            "SITUATION": "we have lost two contracts to price in fourteen months. Standing still is the riskiest option on the table.",
+            "OPERATIVE_CIRCLE": "self_preservation"
+          },
+          "scope_of_change": "Refinement of the operative circle and its kathekon assessment if the practitioner confirms which concern is dominant."
+        }
+      ],
+      "open_deferrals": []
+    },
+    "layer1_ambiguity_notes": [
+      "passions_present[1].sub_species: the anxiety about unmeasured attrition risk could be classified as agonia (anxiety about an uncertain future evil) or phobos without sub-species; agonia selected as the closest fit given the explicit uncertainty framing.",
+      "passions_present[2].sub_species: the reluctance to hold (stand still) could be oknos (shrinking from a course of action) or agonia; oknos selected because the agent is shrinking from inaction rather than expressing generalised anxiety.",
+      "urgency_indicators[2].examined_before_acting: the memo deliberates extensively about the rollout decision but the irreversible act flagged (veteran attrition) is a projected consequence, not an act already carried out; examined_before_acting is set false because the deliberation is about the rollout policy, not about the irreversible consequence itself.",
+      "urgency_indicators[3].examined_before_acting: 'Standing still is the riskiest option' is a synkatathesis-stage conclusion, not a praxis-stage irreversible act already carried out; examined_before_acting is set true because the agent explicitly weighed the gravity of inaction before concluding against it.",
+      "oikeiosis_circles_engaged: the ~140 night cleaners are framed throughout as an affected third-party population whose household arrangements are at stake, but the memo is authored by Operations Advisory to the Executive Team — the affected workers are not party to this deliberation and have not consented to any change, which bears on the obligation_assessment for the household circle."
+    ],
+    "layer2_ambiguity_notes": [],
+    "proximity_floors": {
+      "base": "deliberate",
+      "dikaiosyne": "deliberate",
+      "andreia": "reflexive",
+      "sophrosyne": null,
+      "aggregate": "reflexive",
+      "basis": "unity-thesis minimum: base 'deliberate' floored to 'reflexive' by andreia=reflexive"
+    },
+    "corroboration": {
+      "version": "corroboration-check-v1",
+      "findings": [
+        {
+          "claim": "obligation_met",
+          "subject": "self_preservation",
+          "index": 0,
+          "finding": "uncorroborated",
+          "markers": [],
+          "rationale": "no contradiction and no positive support for the claimed 'met' — the claim stands (silence is not contradiction; rank-preserving posture)"
+        },
+        {
+          "claim": "obligation_indeterminate",
+          "subject": "household",
+          "index": 1,
+          "finding": "uncorroborated",
+          "markers": [],
+          "rationale": "no contradiction and no positive support for the claimed 'indeterminate' — the claim stands (silence is not contradiction; rank-preserving posture)"
+        },
+        {
+          "claim": "obligation_indeterminate",
+          "subject": "local_community",
+          "index": 2,
+          "finding": "uncorroborated",
+          "markers": [],
+          "rationale": "no contradiction and no positive support for the claimed 'indeterminate' — the claim stands (silence is not contradiction; rank-preserving posture)"
+        },
+        {
+          "claim": "obligation_indeterminate",
+          "subject": "political_community",
+          "index": 3,
+          "finding": "uncorroborated",
+          "markers": [],
+          "rationale": "no contradiction and no positive support for the claimed 'indeterminate' — the claim stands (silence is not contradiction; rank-preserving posture)"
+        }
+      ],
+      "text_harm_markers": [],
+      "counter_evidence": [],
+      "dikaiosyne_override": "none",
+      "andreia_override": "none",
+      "any_contradiction": false
+    },
+    "examination": {
+      "ref": "4b2aa8be-e8f8-4ed2-a211-5708581bb6b3",
+      "depth_tier": "standard"
+    }
+  },
+  "signature": "sresum6wsh1YqYguTYLLcDeM+FhJy7QMRZmXOLcnchCMp607err0uHZHIEX5Mes9jiWyNnJkIgOE7Abb+FzoCA==",
+  "key_id": "substrate-layer2-2026Q2"
+}

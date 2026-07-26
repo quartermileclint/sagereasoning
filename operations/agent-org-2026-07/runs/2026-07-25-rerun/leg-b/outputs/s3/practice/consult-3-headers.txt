@@ -1,0 +1,23 @@
+HTTP/2 400 
+cache-control: public, max-age=0, must-revalidate
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co https://api.anthropic.com https://api.stripe.com https://checkout.stripe.com; frame-ancestors 'none'
+content-type: application/json
+date: Sat, 25 Jul 2026 23:54:11 GMT
+permissions-policy: camera=(), microphone=(), geolocation=(), payment=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000
+vary: RSC, Next-Router-State-Tree, Next-Router-Prefetch
+x-anthropic-cost-cents: 0
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-loop-cost-cents: 0
+x-loop-id: 21bbb0cf-7cf5-483a-a296-bcdea9a9d22c
+x-loop-internal-calls: 0
+x-matched-path: /api/reason
+x-overage-cents: 0
+x-overage-fired: false
+x-vercel-cache: MISS
+x-vercel-id: syd1::iad1::j44kb-1785023650111-89422f8e1b98
+x-xss-protection: 1; mode=block
+

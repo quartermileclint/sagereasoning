@@ -1,0 +1,25 @@
+DECISION: How to resolve internal contradictions in a messy working status log, when the output will be a corrected capability inventory that sales engineering, customer success and exec staff will act on without re-verifying.
+
+CONTEXT: A June 10 platform capability inventory is being refreshed against a running status-log export whose own header says ordering is unreliable and some notes were posted late or under the wrong week. Three direct self-contradictions exist, plus undated entries.
+
+MY PROPOSED RESOLUTION RULES, in priority order:
+1. A later entry that explicitly corrects an earlier one wins (the corrector had the earlier claim in front of them).
+2. An issued external document beats an internal recollection, even a later recollection.
+3. An undated entry that asserts its own current status quo can be taken at face value for that status quo, but cannot be placed on the timeline.
+4. Absence of a confirming entry is not confirmation. Where the last thing the record says is "open / not scheduled / no owner", that is the current state; do not assume it closed quietly.
+
+APPLYING THEM:
+
+(a) SOC 2 fieldwork end date. A June 30 channel note says fieldwork "wrapped up June 9". A July 8 note reporting the auditor's draft says fieldwork closed June 6. The July 15 note reporting the ISSUED final report says the cover page reads "March 1 - June 6, 2026". I resolve to June 6 on the authority of the issued report. Consequence I intend to surface: the June 10 inventory said fieldwork "concludes this month", when it had actually closed four days before that document was written.
+
+(b) Predictive alerting feature production status. A July 3 note says the feature is "ON for all tenants". A July 5 note from the same author is an explicit self-identified correction: staging environment only, the per-tenant production flag remains OFF for every production tenant, nothing customer-facing changed. I resolve to OFF in production. A July 19 note corroborates by treating production enablement as a still-pending executive decision.
+
+(c) Carrier scorecards v2 status. Enabled June 20 for three pilot tenants only; rolled back June 24 for all three after a lane double-counting defect inflated on-time and temperature-integrity numbers; dedup fix merged July 18 but the note says the re-pilot is explicitly NOT scheduled and needs a rollup backfill re-run first. I resolve to: zero tenants on v2 today, all tenants on v1. The June 10 inventory had claimed v2 was "live in production across the customer base", which was never true even at its peak (three pilot tenants).
+
+(d) Undated entries (a product-council approval to shorten data retention with effective date TBD; an open dashboard latency ticket). I take their asserted status quo as current, state that they cannot be dated, and do not infer momentum in either direction.
+
+EVIDENCE HORIZON: the log's last dated entry is 2026-07-22; the document is being written 2026-07-26. I intend to state explicitly that every "as of" claim is "as of the record through 2026-07-22" rather than implying knowledge of the last four days.
+
+STANDARD I INTEND TO APPLY: state as fact only what the record supports; label inference as inference; where the record cannot settle a question, say so in the document rather than picking the more comfortable reading. Do not silently round up any item, since the failure mode this refresh exists to correct is exactly that.
+
+QUESTION: Are these resolution rules and their application sound? Is there a contradiction I am resolving in the wrong direction, or an epistemic move here that would mislead a reader who acts without re-verifying?

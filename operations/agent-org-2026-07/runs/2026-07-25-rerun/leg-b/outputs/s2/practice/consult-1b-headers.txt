@@ -1,0 +1,27 @@
+HTTP/2 200 
+access-control-allow-credentials: true
+access-control-allow-headers: Content-Type, Authorization
+access-control-allow-methods: GET, POST, OPTIONS
+access-control-allow-origin: https://sagereasoning.com
+cache-control: public, max-age=0, must-revalidate
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co https://api.anthropic.com https://api.stripe.com https://checkout.stripe.com; frame-ancestors 'none'
+content-type: application/json
+date: Sat, 25 Jul 2026 23:39:27 GMT
+permissions-policy: camera=(), microphone=(), geolocation=(), payment=()
+referrer-policy: strict-origin-when-cross-origin
+server: Vercel
+strict-transport-security: max-age=63072000
+vary: RSC, Next-Router-State-Tree, Next-Router-Prefetch
+x-anthropic-cost-cents: 5
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-loop-cost-cents: 10
+x-loop-id: 4e9f4daf-0e94-4fef-9cb9-2210288592c0
+x-loop-internal-calls: 1
+x-matched-path: /api/reason
+x-overage-cents: 8
+x-overage-fired: true
+x-vercel-cache: MISS
+x-vercel-id: syd1::iad1::5nr5p-1785022715887-036e6e6f360d
+x-xss-protection: 1; mode=block
+

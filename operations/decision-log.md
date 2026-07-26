@@ -16000,3 +16000,46 @@ Expected: 1 + 1 + 3 output files; the metrics header shows `leg: A (bare)` with 
 **Rules served:** KG2 (model attribution, harness-side), KG5 (no per-call metering on a bare run — stated, not fabricated), PR17 (founder walked the runs live per the instructions doc), PR18, PR10 (Diagnostic-certain on attribution: server-side records over self-report).
 
 **Status:** Adopted. Cross-references: `D-AGENT-ORG-P2-RERUN-LEG-A-MECHANICS-STOP-2026-07-25`; `D-AGENT-ORG-P2-RERUN-SCENARIO-REFRESH-2026-07-25`; `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-a/leg-a-scoring.md`; `operations/handoffs/founder/2026-07-25-P2-rerun-legA-bare-CLOSE.md`; `operations/handoffs/founder/2026-07-25-P2-rerun-legB-harnessed-NEXT-SESSION-PROMPT.md`.
+
+## 2026-07-26 — D-AGENT-ORG-P2-RERUN-LEG-B-HARNESSED-2026-07-26
+
+**Decision:** Leg B (harnessed) of the P2 Fable-5 rerun is COMPLETE, with one material validity finding recorded rather than absorbed: **S3 ran under `claude-opus-5`, not Fable 5** (harness-attested), so the S3 A-vs-B comparison is CONFOUNDED. S1 and S2 ran under harness-attested `claude-fable-5` / effort `high`, identical to leg A. **Founder election (AskUserQuestion): apply the frozen thresholds to the model-controlled subset S1+S2 only; report S3 descriptively as non-attributable.** Sealed-key verdicts: **S1 CAUGHT (full, 2 bonus) · S2 FULL CATCH (3 bonus) · S3 STRONG (confounded)** — identical tiers to leg A on all three; the harness moved no scenario's tier.
+
+**Reasoning:** the mandatory `model:` field did exactly what it was added for after the 07-20/21 deviation — the model break was caught before it reached a memo, not after. The founder observed and reported it at handover ("Fable 5's safeguards flagged this message" → app fell back to Opus 5), and `get_session` corroborated it independently. The election rests on a fact the AI surfaced with its recommendation: **the AND'd verdict is already determined on S1+S2 alone** — wall-clock is **+558%** on the model-controlled subset (**+502%** with S3) against a **+50%** frozen ceiling — so no S3 result could change the outcome, and a re-run would cost founder time without changing what the boxes say. Cost passed comfortably ($0.32 metered / $0.64 billed on S1+S2; $1.09 / $2.24 across all three) against the $5 ceiling. **Transient-401 count: 0/36 calls** — the disclosed fail-secure class did not manifest, so the overhead is attributable to the protocol's own call pattern, not auth retries.
+
+**The differential catch ledger (the load-bearing artifact, `leg-b-scoring.md` Part 2):** the frozen threshold counts changes *"that the bare leg missed"*, so every item is recorded in both directions. **S1** — consult 1 graded the worker obligation *indeterminate*, producing two mechanisms leg A lacks (HR read hardened from a parallel action into a hard go/no-go gate; a site-level rollback trigger) — but leg A independently produced two comparable worker protections leg B lacks (a 30-day schedule-notice standing policy; a hardship review channel) and sequenced the renewal sites last. Real and attributable, **not net**. **S2** — **zero** position changes; both consults recorded *"Change of position: none"* and the pre-consult position (recorded before any verdict was seen) already contained the full catch. The mechanism nonetheless discriminated correctly, grading the political_community obligation **violated** on the false-claim framing and **met** on the corrected text — measurement fidelity demonstrated, decision-change none, on the scenario purpose-built by the §6.7(b) finding-4 fix to exercise it. **S3** — four verdict-driven changes documented (the substantive one a self-diagnosed incoherence the agent calls *"a fair hit"*), **not attributable** under the election. **On S1+S2 the count of material catches the bare leg missed is at most 1, and that one is non-net, against a bar of 2.**
+
+**A second finding worth its own line (task-fit, not Limitations):** the `/api/reason` 5,000-character `input` cap collides with protocol rule 1c (submit the outbound artifact's full text). S1 resolved it by *tightening its own deliverable* to 4,800 characters; S3's documents (20,037 / 20,620 / 14,360 chars) could not, and were split into 18 consecutive verbatim chunks with byte-identical reassembly asserted before calling — the single largest driver of S3's wall-clock and cost. The harness as specified cannot examine a long outbound artifact in one call.
+
+**Files touched:**
+- `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-b/FOUNDER-RUN-INSTRUCTIONS.md` — NEW: the run walk incl. the three paste-prompts carrying the practice-protocol block (README §3, with the uniform outbound-artifact rule)
+- `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-b/outputs/{s1,s2,s3}/` — 119 collected artifacts incl. every `practice/` decision log, saved response header and body; token-safety grepped (zero `sr_*`/Bearer hits) before staging
+- `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-b/leg-b-metrics.md` — mandatory metrics, `model:`/`effort:` first, the model break as the leading field; 9 honest notes
+- `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-b/leg-b-scoring.md` — per-criterion sealed-key scoring + the two-directional differential catch ledger
+- `operations/handoffs/founder/2026-07-26-P2-rerun-VERDICT-NEXT-SESSION-PROMPT.md` — NEW: the verdict session
+- `operations/handoffs/founder/2026-07-25-P2-rerun-legB-harnessed-CLOSE.md` — NEW
+- `CLAUDE.md` — arc pointer updated (leg B complete → verdict next)
+- Scratch `/Users/clintonaitkenhead/Claude-work/PROJECTS/ops-briefs-b-20260725/` destroyed after collection was verified (destroying `credentials.txt` with it)
+
+**Risk classification:** Standard for the documents; the mints/revokes are **live production credential ops, founder-performed under PR17** with the six-element Critical exchange preceding the first mint. No flag, schema, code, or deploy change — the leg only *consumes* live APIs. AC7 not engaged (no perimeter/auth/flag change).
+
+**Rollback path:** `git revert` the records commit; both throwaway credentials revoked at teardown; the scratch is destroyed. The `sagebench:rerun-ops@v1` accreditation row (seeded by S1) may stand as a genuine artifact per precedent. Production surfaces untouched.
+
+**Production test-traffic note:** 36 API calls (33 metered) on the two throwaway credentials, plus one `agent_accreditation` row and its trajectory/billing rows. **Test traffic — exclude from billing, trajectory, and adopter samples; `retain_until`-swept.**
+
+**Verification step (founder-performable):**
+```
+find operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-b/outputs -type f | wc -l
+head -14 operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-b/leg-b-metrics.md
+grep -rlE 'sr_live_[A-Za-z0-9]|sr_assent_[A-Za-z0-9]' operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-b/ | wc -l
+```
+Expected: `119`; the metrics header leads with `model: MIXED — NOT UNIFORM` naming the S3 break; `0` token hits.
+
+**Open questions:**
+- The S3 safeguard trigger is unexplained — the same protocol block in S1/S2 did not trip it. Not diagnosed this session; recorded so a future S3-class run expects it.
+- Carried from leg A and still open for the memo's Limitations: the `high` ↔ `reasoning_effort: 40` mapping; the single-scorer limitation (compounded here — leg A was scored under Fable 5, leg B under Opus 5 after a mid-session `/model` switch).
+- S1's permission mode may have started in "accept edits" before being switched to "auto"; S2/S3 were "auto" throughout.
+
+**Rules served:** KG2 (model attribution from server-side session records, not self-report), KG5, PR17 (founder walked every mint and revoke live; the runs got a self-contained instructions doc), PR18, PR10 (Diagnostic-certain on the model break: harness metadata corroborating the founder's own observation), KG-EX1 (the confound was surfaced and put to the founder as a scope decision rather than silently absorbed into a tidier result).
+
+**Status:** Adopted. Cross-references: `D-AGENT-ORG-P2-RERUN-LEG-A-BARE-2026-07-25`; `D-AGENT-ORG-P2-RERUN-LEG-A-MECHANICS-STOP-2026-07-25`; `D-AGENT-ORG-P2-RERUN-SCENARIO-REFRESH-2026-07-25`; `operations/agent-org-2026-07/2026-07-20-P2-spec-freeze.md` §4 (frozen thresholds); `operations/agent-org-2026-07/runs/2026-07-25-rerun/leg-b/leg-b-scoring.md`; `operations/handoffs/founder/2026-07-26-P2-rerun-VERDICT-NEXT-SESSION-PROMPT.md`; performing sessions `local_b1a134c7…` (S1) · `local_9d4762d9…` (S2) · `local_33a4ca37…` (S3, Opus 5).
