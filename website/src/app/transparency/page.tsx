@@ -44,6 +44,19 @@ export default function TransparencyPage() {
             their sub-virtues, preferred and dispreferred indifferents, and scoring
             criteria. It is derived from original Stoic texts, all in the public domain.
           </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5">
+            {[
+              { name: 'Wisdom', src: '/images/owllogo.PNG' },
+              { name: 'Justice', src: '/images/scaleslogo.PNG' },
+              { name: 'Courage', src: '/images/lionlogo.PNG' },
+              { name: 'Temperance', src: '/images/lotuslogo.PNG.png' },
+            ].map((virtue) => (
+              <div key={virtue.name} className="text-center">
+                <img src={virtue.src} alt={virtue.name} className="w-full max-w-[150px] h-auto mx-auto" />
+                <p className="font-display text-xs text-sage-600 mt-1">{virtue.name}</p>
+              </div>
+            ))}
+          </div>
           <p className="mt-3">
             A conceptual overview of the Stoic Brain (virtue names, sub-virtue names, tier definitions)
             is publicly available for evaluation. Detailed scoring weights, formulas, and criteria are

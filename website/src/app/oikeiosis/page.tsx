@@ -381,6 +381,14 @@ export default function OikeiosisPage() {
           The practice of drawing the wider circles inward — treating those far off as closely as
           those near — and the quarterly reflection that measures where your concern has reached.
         </p>
+        {/* Justice (the scales) — the virtue the circles serve. Literal <img> +
+            literal path only: this page is boundary-guarded and must not import
+            brand-display (one-hop stoic-brain rule). */}
+        <img
+          src="/images/scaleslogo.PNG"
+          alt="Justice (dikaiosyne) — the scales"
+          className="w-full max-w-[240px] h-auto mt-4 drop-shadow-md"
+        />
       </div>
 
       {/* Mode toggle */}

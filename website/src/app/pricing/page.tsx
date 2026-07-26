@@ -91,6 +91,11 @@ export default function PricingPage() {
           <h2 className="font-display text-2xl font-semibold text-sage-900 mb-1">
             For Humans
           </h2>
+          <img
+            src="/images/owllogo.PNG"
+            alt="Wisdom (phronesis) — the owl"
+            className="w-full max-w-[200px] h-auto mx-auto my-3 drop-shadow-md"
+          />
           <p className="font-body text-sage-600">
             Wisdom should be shared freely. Every feature is yours — no restrictions.
           </p>

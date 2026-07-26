@@ -93,6 +93,16 @@ export default function WelcomePage() {
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">
             A mirror, not a verdict
           </h2>
+          {/* Brand imagery standard: message-bearing images render width-driven
+              (w-full max-w-sm h-auto) so they fill an iPhone-width viewport,
+              never letterboxed in a small square box. Literal <img> + literal
+              path here — /welcome is inside the logos boundary-test target set,
+              so it must not import brand-display (one-hop stoic-brain rule). */}
+          <img
+            src="/images/mirror.PNG"
+            alt="The Mirror — SageReasoning's hand-drawn emblem of examined reasoning"
+            className="w-full max-w-sm h-auto mx-auto mb-5 drop-shadow-md"
+          />
           <p>
             SageReasoning holds up a mirror to your <em>own</em> reasoning. When you score
             an action or reflect with the mentor, the aim is to help you see your judgments,
@@ -171,7 +181,29 @@ export default function WelcomePage() {
             Results are <strong>qualitative, not a score out of ten</strong>. Your reasoning
             is described by how closely it approaches the ideal of the perfect Stoic sage —
             from <em>reflexive</em> (little self-examination) through to <em>sage-like</em>{' '}
-            (rare philosophical depth). The point of the levels is direction, not ranking:
+            (rare philosophical depth). Each level has a Stage of Practice:
+          </p>
+          {/* The Five Stages of Practice — literal paths (see the boundary note above). */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 my-6">
+            {[
+              { name: 'The Storm', src: '/images/The Storm.PNG' },
+              { name: 'The Worn Path', src: '/images/The Worn Path.PNG' },
+              { name: 'The Crossroads', src: '/images/The Crossroads.PNG' },
+              { name: 'The Clear Summit', src: '/images/The Clear Summit.PNG' },
+              { name: 'The Inner Fire', src: '/images/The Inner Fire.PNG' },
+            ].map((stage) => (
+              <div key={stage.name} className="text-center">
+                <img
+                  src={stage.src}
+                  alt={`${stage.name} — Stage of Practice`}
+                  className="w-full h-auto drop-shadow-sm"
+                />
+                <p className="text-xs text-sage-600 mt-1 font-display">{stage.name}</p>
+              </div>
+            ))}
+          </div>
+          <p>
+            The point of the levels is direction, not ranking:
             they show where to look next. Any passions the tool names — frustration, craving
             for recognition, anxiety — are offered as <strong>diagnostic, not punitive</strong>.
             Naming them is how Stoic practice begins to loosen their grip. If you want the

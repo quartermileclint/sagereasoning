@@ -1,5 +1,5 @@
 import { VIRTUE_DISPLAY } from '@/lib/stoic-brain'
-import { PROXIMITY_COLORS } from '@/lib/brand-display'
+import { PROXIMITY_COLORS, STAGE_DISPLAY } from '@/lib/brand-display'
 import AuthRedirect from '@/components/AuthRedirect'
 
 const jsonLd = {
@@ -59,7 +59,7 @@ export default function HomePage() {
           style={{ backgroundImage: 'url(/images/Background.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}
         />
         <div className="relative max-w-6xl mx-auto px-6 py-24 md:py-36 text-center">
-          <img src="/images/sagelogo.PNG" alt="Sage leaf" className="w-36 h-36 mx-auto mb-8 drop-shadow-lg object-contain" />
+          <img src="/images/sagelogo.PNG" alt="Sage leaf" className="w-44 sm:w-52 h-auto mx-auto mb-8 drop-shadow-lg" />
           <h1 className="font-display text-4xl md:text-5xl font-medium text-sage-900 mb-4">
             sagereasoning
           </h1>
@@ -111,7 +111,7 @@ export default function HomePage() {
             },
           ].map((client) => (
             <div key={client.title} className="bg-white/60 border border-sage-200 rounded-lg p-8 text-center">
-              <img src={client.image} alt={client.title} className="w-24 h-24 mx-auto mb-4 object-contain" />
+              <img src={client.image} alt={client.title} className="w-full max-w-[240px] h-auto mx-auto mb-4" />
               <h3 className="font-display text-xl font-semibold text-sage-800 mb-3">{client.title}</h3>
               <p className="font-body text-sage-700 leading-relaxed">{client.desc}</p>
             </div>
@@ -132,14 +132,11 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {VIRTUE_DISPLAY.map((virtue) => (
               <div key={virtue.id} className="bg-white/80 border border-sage-200 rounded-lg p-6 text-center">
-                {/* Fixed-size container ensures all logos appear the same size regardless of source dimensions */}
-                <div className="w-40 h-40 mx-auto mb-4 flex items-center justify-center">
-                  <img
-                    src={virtue.icon}
-                    alt={virtue.name}
-                    className="w-40 h-40 object-contain drop-shadow-md"
-                  />
-                </div>
+                <img
+                  src={virtue.icon}
+                  alt={virtue.name}
+                  className="w-full max-w-[260px] h-auto mx-auto mb-4 drop-shadow-md"
+                />
                 <h3 className="font-display text-lg font-semibold text-sage-800">{virtue.name}</h3>
                 <p className="font-display text-sm italic text-sage-600 mb-2">{virtue.greek}</p>
                 <p className="font-body text-sm text-sage-700 leading-relaxed mb-3">{virtue.description}</p>
@@ -202,7 +199,7 @@ export default function HomePage() {
               <img
                 src="/images/LOGOS.PNG"
                 alt="The logos flame — the Perfect Sage"
-                className="w-40 h-40 object-contain drop-shadow-xl rounded-full border-4 border-amber-200 bg-amber-50/60"
+                className="w-56 h-56 sm:w-64 sm:h-64 object-contain drop-shadow-xl rounded-full border-4 border-amber-200 bg-amber-50/60"
               />
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-amber-100 border border-amber-300 rounded-full px-3 py-0.5">
                 <span className="font-display text-xs text-amber-800 whitespace-nowrap">The Perfect Sage</span>
@@ -217,8 +214,17 @@ export default function HomePage() {
               { id: 'deliberate', label: 'Deliberate', color: PROXIMITY_COLORS.deliberate, description: 'Adequate self-awareness — recognises some passions and applies basic Stoic framework, but misses subtleties' },
               { id: 'habitual', label: 'Habitual', color: PROXIMITY_COLORS.habitual, description: 'Minimal philosophical engagement — relies on surface-level reflection without genuine passion diagnosis' },
               { id: 'reflexive', label: 'Reflexive', color: PROXIMITY_COLORS.reflexive, description: 'No meaningful self-examination — no awareness of passions, false judgements, or prohairesis' },
-            ].map((level) => (
+            ].map((level) => {
+              const stage = STAGE_DISPLAY.find((s) => s.id === level.id)
+              return (
               <div key={level.id} className="flex items-center gap-4 bg-white/60 border border-sage-200 rounded-lg p-4">
+                {stage && (
+                  <img
+                    src={stage.image}
+                    alt={`${stage.name} — Stage of Practice`}
+                    className="w-20 sm:w-24 h-auto flex-shrink-0 drop-shadow-sm"
+                  />
+                )}
                 <div
                   className="w-4 h-4 rounded-full flex-shrink-0"
                   style={{ backgroundColor: level.color }}
@@ -226,10 +232,14 @@ export default function HomePage() {
                 <div className="flex-1">
                   <span className="font-display font-medium text-sage-800">{level.label}</span>
                   <span className="font-body text-sage-600 ml-2 text-sm font-mono">({level.id})</span>
+                  {stage && (
+                    <span className="block font-display text-sm italic text-sage-600">{stage.name}</span>
+                  )}
                 </div>
                 <p className="font-body text-sm text-sage-700 hidden md:block">{level.description}</p>
               </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>

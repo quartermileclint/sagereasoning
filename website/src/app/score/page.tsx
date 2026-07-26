@@ -10,7 +10,7 @@ import {
   EVALUATIVE_DISCLAIMER,
   type KatorthomaProximityLevel,
 } from '@/lib/stoic-brain'
-import { PROXIMITY_COLORS, ROOT_PASSION_ENGLISH, PASSION_IMAGE_MAP } from '@/lib/brand-display'
+import { PROXIMITY_COLORS, ROOT_PASSION_ENGLISH, PASSION_IMAGE_MAP, getStageDisplay } from '@/lib/brand-display'
 import type { User } from '@supabase/supabase-js'
 
 // ─── V3 Result Types (derived from scoring.json outputs) ───
@@ -422,6 +422,11 @@ export default function ScoreActionPage() {
           {/* R19 interpretive scaffolding — frame results as data, not verdict */}
           <div className="bg-sage-50/60 border border-sage-200 rounded-lg px-6 py-5">
             <h3 className="font-display text-sm font-medium text-sage-700 mb-2">Before you read</h3>
+            <img
+              src="/images/mirror.PNG"
+              alt="Mirror — useful for noticing, not for judging"
+              className="w-full max-w-[220px] h-auto mx-auto mb-3 drop-shadow-sm"
+            />
             <p className="font-body text-sm text-sage-600 leading-relaxed">
               Stoic philosophy treats passions — craving, distress, fear, irrational pleasure — as
               judgements that can be examined, not character flaws that define you. If the evaluation
@@ -445,6 +450,16 @@ export default function ScoreActionPage() {
               {PROXIMITY_ENGLISH[result.virtue_quality.katorthoma_proximity]}
             </h2>
             <p className="font-body text-sage-600 text-sm max-w-md mx-auto">{proximityLevel.description}</p>
+
+            {/* The matching Stage of Practice — the result's own image, iPhone-width */}
+            <img
+              src={getStageDisplay(result.virtue_quality.katorthoma_proximity).image}
+              alt={`${getStageDisplay(result.virtue_quality.katorthoma_proximity).name} — Stage of Practice`}
+              className="w-full max-w-sm h-auto mx-auto mt-6 drop-shadow-md"
+            />
+            <p className="font-display text-base italic mt-2" style={{ color: getStageDisplay(result.virtue_quality.katorthoma_proximity).color }}>
+              {getStageDisplay(result.virtue_quality.katorthoma_proximity).name}
+            </p>
 
             {/* Proximity scale visualization */}
             <div className="flex items-center justify-center gap-1 mt-6 pt-4 border-t border-sage-100">
@@ -542,7 +557,7 @@ export default function ScoreActionPage() {
                       <img
                         src={PASSION_IMAGE_MAP[passion.id]}
                         alt={passion.name}
-                        className="w-8 h-8 object-contain flex-shrink-0"
+                        className="w-16 h-auto flex-shrink-0"
                       />
                     )}
                     <span className="font-display text-sm font-medium text-sage-700">{passion.name}</span>
@@ -592,7 +607,7 @@ export default function ScoreActionPage() {
           {/* Philosophical Reflection + Improvement Path */}
           <div className="bg-white/60 border border-sage-200 rounded-lg p-8 space-y-4">
             <div className="flex items-center gap-3 pb-3 border-b border-sage-100">
-              <img src="/images/Zeus.PNG" alt="The Sage" className="w-14 h-14 object-contain rounded-full border-2 border-amber-200 bg-amber-50/50 drop-shadow-sm" />
+              <img src="/images/Zeus.PNG" alt="The Sage" className="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-full border-2 border-amber-200 bg-amber-50/50 drop-shadow-sm" />
               <div>
                 <p className="font-display text-sm font-medium text-amber-800">Philosophical Reflection</p>
                 <p className="font-body text-xs text-sage-600">Stoic evaluation from the Sage Brain</p>

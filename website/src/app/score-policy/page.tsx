@@ -233,7 +233,7 @@ export default function ScorePolicyPage() {
                         <img
                           src={PASSION_IMAGE_MAP[p.sub_species]}
                           alt={p.sub_species}
-                          className="w-6 h-6 object-contain flex-shrink-0"
+                          className="w-14 h-auto flex-shrink-0"
                         />
                       )}
                       <div>

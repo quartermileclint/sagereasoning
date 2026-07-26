@@ -82,6 +82,11 @@ export default function MarketplacePage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-16 font-body text-sage-800">
       <div className="mb-12">
+        <img
+          src="/images/sagelogo.PNG"
+          alt="SageReasoning — the sage-reason engine"
+          className="w-32 sm:w-40 h-auto mb-4 drop-shadow-md"
+        />
         <h1 className="font-display text-3xl font-medium text-sage-900 mb-3">Skill Marketplace</h1>
         <p className="text-sage-600 max-w-2xl">
           Domain-specific reasoning evaluation tools built on the sage-reason engine.

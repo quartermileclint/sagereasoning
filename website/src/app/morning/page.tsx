@@ -176,6 +176,22 @@ export default function MorningPreparationPage() {
           which are most likely to pull a hasty assent; and the response you want ready when they
           come. The morning declares the intention; the evening will ask whether it held.
         </p>
+        {/* The four virtues the prepared response draws on. Literal <img> + literal
+            paths only — this page is boundary-guarded and must not import
+            brand-display (its one-hop stoic-brain type import trips the guard). */}
+        <div className="grid grid-cols-4 gap-3 mt-5 max-w-md">
+          {[
+            { name: 'Wisdom', src: '/images/owllogo.PNG' },
+            { name: 'Justice', src: '/images/scaleslogo.PNG' },
+            { name: 'Courage', src: '/images/lionlogo.PNG' },
+            { name: 'Temperance', src: '/images/lotuslogo.PNG.png' },
+          ].map((v) => (
+            <div key={v.name} className="text-center">
+              <img src={v.src} alt={v.name} className="w-full h-auto" />
+              <p className="font-body text-[10px] text-sage-500 mt-1">{v.name}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Submit result message */}

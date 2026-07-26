@@ -557,8 +557,8 @@ export default function JournalPage() {
                     const found = findPassionSubSpecies(id)
                     if (!PASSION_IMAGE_MAP[id] || !found) return null
                     return (
-                      <div key={id} className="flex flex-col items-center w-16 text-center">
-                        <img src={PASSION_IMAGE_MAP[id]} alt={found.subSpecies.name} className="w-10 h-10 object-contain" />
+                      <div key={id} className="flex flex-col items-center w-24 text-center">
+                        <img src={PASSION_IMAGE_MAP[id]} alt={found.subSpecies.name} className="w-full h-auto" />
                         <span className="font-body text-[10px] text-sage-600 mt-1">{found.subSpecies.name}</span>
                       </div>
                     )

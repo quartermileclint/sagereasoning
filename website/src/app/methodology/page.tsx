@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { VIRTUE_DISPLAY } from '@/lib/stoic-brain'
+import { STAGE_DISPLAY } from '@/lib/brand-display'
 
 export const metadata: Metadata = {
   title: 'Methodology — SageReasoning',
@@ -66,10 +67,8 @@ export default function MethodologyPage() {
             {VIRTUE_DISPLAY.map((virtue) => (
               <div key={virtue.id}
                    className="flex items-start gap-4 bg-white/60 border border-sage-200 rounded-lg p-4">
-                <div className="flex-shrink-0 w-12 h-12">
-                  <img src={virtue.icon} alt={virtue.name}
-                       className="w-12 h-12 object-contain" />
-                </div>
+                <img src={virtue.icon} alt={virtue.name}
+                     className="w-20 sm:w-24 h-auto flex-shrink-0" />
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-display font-semibold text-sage-800">{virtue.name}</span>
@@ -88,8 +87,22 @@ export default function MethodologyPage() {
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">Proximity levels</h2>
           <p className="mb-4">
-            V3 evaluates your reasoning through a four-stage philosophical sequence and assigns a proximity level, measuring how close your thinking aligns with the Stoic sage ideal:
+            V3 evaluates your reasoning through a four-stage philosophical sequence and assigns a proximity level, measuring how close your thinking aligns with the Stoic sage ideal.
+            Each level has a Stage of Practice:
           </p>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
+            {STAGE_DISPLAY.map((stage) => (
+              <div key={stage.id} className="text-center">
+                <img
+                  src={stage.image}
+                  alt={`${stage.name} — Stage of Practice`}
+                  className="w-full h-auto drop-shadow-sm"
+                />
+                <p className="font-display text-xs mt-1" style={{ color: stage.color }}>{stage.name}</p>
+                <p className="font-mono text-[10px] text-sage-500">{stage.id}</p>
+              </div>
+            ))}
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
@@ -154,8 +167,8 @@ export default function MethodologyPage() {
         <div>
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">What scores don&rsquo;t measure</h2>
           <p>Stoic virtue scoring is explicitly not:</p>
-          <div className="flex items-start gap-4 mt-3">
-            <img src="/images/mirror.PNG" alt="Mirror — a measure of the reasoning, not of your worth as a person" className="w-14 h-14 object-contain flex-shrink-0" />
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mt-3">
+            <img src="/images/mirror.PNG" alt="Mirror — a measure of the reasoning, not of your worth as a person" className="w-full max-w-[280px] sm:w-48 h-auto flex-shrink-0" />
             <ul className="list-disc pl-6 space-y-1 text-sage-700">
             <li>A measure of your worth as a person</li>
             <li>A measure of your intelligence or competence</li>

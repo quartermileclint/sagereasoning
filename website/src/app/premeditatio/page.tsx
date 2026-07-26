@@ -289,6 +289,14 @@ export default function PremeditatioPage() {
               ? 'Weekly practice: anticipate what’s ahead, identify the false impression, hold the correct judgement in advance.'
               : 'Prepare a disposition: name an adversity, separate what is up to you from what is not, and settle in advance the virtue it calls for.'}
           </p>
+          {/* Courage (the lion) — the virtue this practice trains. Literal <img> +
+              literal path only: this page is boundary-guarded and must not import
+              brand-display (one-hop stoic-brain rule). */}
+          <img
+            src="/images/lionlogo.PNG"
+            alt="Courage (andreia) — the lion"
+            className="w-full max-w-[240px] h-auto mt-4 drop-shadow-md"
+          />
         </div>
         <button
           onClick={async () => {

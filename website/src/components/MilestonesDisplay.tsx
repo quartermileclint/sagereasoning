@@ -79,7 +79,7 @@ export default function MilestonesDisplay({ userId }: MilestonesDisplayProps) {
               <img
                 src={milestone.icon}
                 alt={milestone.name}
-                className={`w-14 h-14 mb-2 transition-all duration-500 drop-shadow-sm ${
+                className={`w-16 h-auto mb-2 transition-all duration-500 drop-shadow-sm ${
                   isEarned ? '' : 'grayscale opacity-25'
                 }`}
               />
@@ -107,7 +107,7 @@ export default function MilestonesDisplay({ userId }: MilestonesDisplayProps) {
             <img
               src={MILESTONE_MAP[selectedMilestone].icon}
               alt={MILESTONE_MAP[selectedMilestone].name}
-              className={`w-16 h-16 flex-shrink-0 drop-shadow-md ${
+              className={`w-24 sm:w-28 h-auto flex-shrink-0 drop-shadow-md ${
                 earnedIds.has(selectedMilestone) ? '' : 'grayscale opacity-40'
               }`}
             />

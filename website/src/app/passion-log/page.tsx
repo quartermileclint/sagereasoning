@@ -380,7 +380,7 @@ export default function PassionLogPage() {
                     <img
                       src={PASSION_IMAGE_MAP[passionType]}
                       alt={PASSION_LABELS[passionType] || passionType}
-                      className="w-10 h-10 object-contain flex-shrink-0"
+                      className="w-24 h-auto flex-shrink-0"
                     />
                   )}
                 </div>
@@ -502,7 +502,7 @@ export default function PassionLogPage() {
                       <div className="font-body text-xs text-sage-600 mb-1">Your diagnosis</div>
                       <div className="flex items-center gap-2">
                         {PASSION_IMAGE_MAP[passionType] && (
-                          <img src={PASSION_IMAGE_MAP[passionType]} alt={passionType} className="w-6 h-6 object-contain flex-shrink-0" />
+                          <img src={PASSION_IMAGE_MAP[passionType]} alt={passionType} className="w-12 h-auto flex-shrink-0" />
                         )}
                         <div className="font-display text-sm font-medium" style={{ color: getFamilyColor(passionType) }}>
                           {PASSION_LABELS[passionType] || passionType}
@@ -513,7 +513,7 @@ export default function PassionLogPage() {
                       <div className="font-body text-xs text-sage-600 mb-1">Engine classification</div>
                       <div className="flex items-center gap-2">
                         {PASSION_IMAGE_MAP[classificationResult.classified_type] && (
-                          <img src={PASSION_IMAGE_MAP[classificationResult.classified_type]} alt={classificationResult.classified_type} className="w-6 h-6 object-contain flex-shrink-0" />
+                          <img src={PASSION_IMAGE_MAP[classificationResult.classified_type]} alt={classificationResult.classified_type} className="w-12 h-auto flex-shrink-0" />
                         )}
                         <div className="font-display text-sm font-medium" style={{ color: getFamilyColor(classificationResult.classified_type) }}>
                           {PASSION_LABELS[classificationResult.classified_type] || classificationResult.classified_type}
@@ -564,7 +564,7 @@ export default function PassionLogPage() {
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
                       {PASSION_IMAGE_MAP[event.passion_type] && (
-                        <img src={PASSION_IMAGE_MAP[event.passion_type]} alt={event.passion_type} className="w-6 h-6 object-contain flex-shrink-0" />
+                        <img src={PASSION_IMAGE_MAP[event.passion_type]} alt={event.passion_type} className="w-12 h-auto flex-shrink-0" />
                       )}
                       <span
                         className="font-display text-sm font-medium"
@@ -604,7 +604,7 @@ export default function PassionLogPage() {
                     <div className="mt-2 pt-2 border-t border-sage-100 flex items-center gap-2">
                       <span className="font-body text-xs text-sage-600">Engine:</span>
                       {PASSION_IMAGE_MAP[event.llm_classified_type] && (
-                        <img src={PASSION_IMAGE_MAP[event.llm_classified_type]} alt={event.llm_classified_type} className="w-5 h-5 object-contain flex-shrink-0" />
+                        <img src={PASSION_IMAGE_MAP[event.llm_classified_type]} alt={event.llm_classified_type} className="w-10 h-auto flex-shrink-0" />
                       )}
                       <span
                         className="font-body text-xs font-medium"
@@ -653,7 +653,7 @@ export default function PassionLogPage() {
                 <div key={type} className="mb-6 last:mb-0">
                   <div className="flex items-center gap-2 mb-2">
                     {PASSION_IMAGE_MAP[type] && (
-                      <img src={PASSION_IMAGE_MAP[type]} alt={type} className="w-6 h-6 object-contain flex-shrink-0" />
+                      <img src={PASSION_IMAGE_MAP[type]} alt={type} className="w-12 h-auto flex-shrink-0" />
                     )}
                     <span
                       className="font-display text-sm font-medium"

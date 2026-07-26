@@ -556,9 +556,16 @@ export default function PrivateMentorPage() {
       <div style={styles.main}>
         {/* HEADER */}
         <div style={styles.mainHeader}>
-          <div>
-            <div style={styles.viewTitle}>{getViewTitle(currentView)}</div>
-            <div style={styles.viewSubtitle}>{getViewSubtitle(currentView)}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <img
+              src="/images/Zeus.PNG"
+              alt="The Sage Mentor"
+              style={{ width: '56px', height: 'auto', borderRadius: '10px', flexShrink: 0 }}
+            />
+            <div>
+              <div style={styles.viewTitle}>{getViewTitle(currentView)}</div>
+              <div style={styles.viewSubtitle}>{getViewSubtitle(currentView)}</div>
+            </div>
           </div>
           {currentView === 'conversation' && (
             <div style={styles.headerActions}>
@@ -1156,7 +1163,11 @@ function TimelineView({ canvasRef }: { canvasRef: React.RefObject<HTMLCanvasElem
 function PatternsView() {
   return (
     <div style={styles.ritualCard}>
-      <div style={styles.ritualIcon}>✦</div>
+      <img
+        src="/images/mirror.PNG"
+        alt="The Mirror"
+        style={{ width: '100%', maxWidth: '240px', height: 'auto', display: 'block', margin: '0 auto 10px' }}
+      />
       <div style={styles.ritualTitle}>Weekly Pattern Mirror</div>
       <div style={styles.ritualSource}>Synthesised from the past 7 days of interactions, decisions, and session bridge data</div>
       <div style={{ fontSize: '13px', lineHeight: '1.7', color: 'var(--text)', marginTop: '16px' }}>

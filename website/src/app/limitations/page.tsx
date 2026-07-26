@@ -131,6 +131,11 @@ export default function LimitationsPage() {
           <h2 className="font-display text-xl font-semibold text-sage-800 mb-3">
             A mirror, not a lens
           </h2>
+          <img
+            src="/images/mirror.PNG"
+            alt="The Mirror — for examining your own reasoning, not other people's"
+            className="w-full max-w-sm h-auto mx-auto mb-5 drop-shadow-md"
+          />
           <p>
             SageReasoning is a mirror, not a lens: it is built for examining your own
             reasoning, not for diagnosing, judging, or scoring other people. Applying the

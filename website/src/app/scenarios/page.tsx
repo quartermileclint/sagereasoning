@@ -489,7 +489,7 @@ export default function ScenariosPage() {
                       <img
                         src={PASSION_IMAGE_MAP[p.sub_species]}
                         alt={p.sub_species}
-                        className="w-8 h-8 object-contain flex-shrink-0"
+                        className="w-16 h-auto flex-shrink-0"
                       />
                     )}
                     <div>

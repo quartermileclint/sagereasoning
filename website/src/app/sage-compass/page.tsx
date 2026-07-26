@@ -245,6 +245,14 @@ export default function SageCompassPage() {
           complete expression would actually look like here, and mark the distance between
           that and the action you are considering.
         </p>
+        {/* The logos flame — the bearing the compass steers by. Literal <img> +
+            literal path only: this page is boundary-guarded and must not import
+            brand-display (one-hop stoic-brain rule). */}
+        <img
+          src="/images/LOGOS.PNG"
+          alt="The logos flame — the sage as a bearing, not a destination"
+          className="w-full max-w-[240px] h-auto mt-4 drop-shadow-md"
+        />
         <p className="font-body text-sm text-sage-500 mt-3">
           The distance is not a verdict. It is an orientation — you can see the direction of
           travel even when the destination is far. Where the{' '}
@@ -333,6 +341,17 @@ export default function SageCompassPage() {
                         : 'border-sage-200 hover:border-sage-400'
                     }`}
                   >
+                    <img
+                      src={
+                        opt.value === 'wisdom' ? '/images/owllogo.PNG'
+                        : opt.value === 'justice' ? '/images/scaleslogo.PNG'
+                        : opt.value === 'courage' ? '/images/lionlogo.PNG'
+                        : '/images/lotuslogo.PNG.png'
+                      }
+                      alt=""
+                      aria-hidden="true"
+                      className="w-16 h-auto mb-2"
+                    />
                     <div className="font-display text-sm font-medium text-sage-800">
                       {opt.label}{' '}
                       <span className="font-body text-xs text-sage-500 italic">{opt.greek}</span>

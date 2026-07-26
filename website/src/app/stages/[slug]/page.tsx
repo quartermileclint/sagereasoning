@@ -38,10 +38,12 @@ export default function StagePage() {
       style={{ backgroundColor: `${stage.color}1a` }}
     >
       <div className="max-w-xl w-full text-center">
+        {/* Width-driven (not a square box): the portrait art fills an
+            iPhone-width viewport instead of letterboxing at ~157px. */}
         <img
           src={stage.image}
           alt={stage.name}
-          className="w-56 h-56 object-contain mx-auto mb-8 drop-shadow-xl"
+          className="w-full max-w-sm h-auto mx-auto mb-8 drop-shadow-xl"
         />
         <h1
           className="font-display text-3xl md:text-4xl font-medium mb-4"

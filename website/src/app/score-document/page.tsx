@@ -363,7 +363,7 @@ function PassionList({ passions }: { passions: DetectedDocumentPassion[] }) {
               <img
                 src={PASSION_IMAGE_MAP[p.sub_species]}
                 alt={p.sub_species}
-                className="w-6 h-6 object-contain flex-shrink-0"
+                className="w-14 h-auto flex-shrink-0"
               />
             )}
             <span className="font-display text-xs font-medium text-sage-700">

@@ -61,14 +61,14 @@ export default function GlossaryPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {VIRTUE_DISPLAY.map(v => (
             <div key={v.id} className="bg-white/60 border border-sage-200 rounded-lg p-5 text-center">
-              <img src={v.icon} alt={v.name} className="w-16 h-16 object-contain mx-auto mb-3" />
+              <img src={v.icon} alt={v.name} className="w-full max-w-[200px] h-auto mx-auto mb-3" />
               <h3 className="font-display text-sm font-medium text-sage-800">{v.name}</h3>
               <p className="font-body text-xs text-sage-600 mt-1">{v.description}</p>
             </div>
           ))}
           {PERSONA_LOGOS.map(p => (
             <div key={p.id} className="bg-white/60 border border-sage-200 rounded-lg p-5 text-center">
-              <img src={p.image} alt={p.name} className="w-16 h-16 object-contain mx-auto mb-3" />
+              <img src={p.image} alt={p.name} className="w-full max-w-[200px] h-auto mx-auto mb-3" />
               <h3 className="font-display text-sm font-medium text-sage-800">{p.name}</h3>
               <p className="font-body text-xs text-sage-600 mt-1">{p.description}</p>
             </div>
@@ -89,7 +89,7 @@ export default function GlossaryPage() {
               className="rounded-lg p-4 text-center border border-sage-200"
               style={{ backgroundColor: `${s.color}15` }}
             >
-              <img src={s.image} alt={s.name} className="w-20 h-20 object-contain mx-auto mb-3" />
+              <img src={s.image} alt={s.name} className="w-full h-auto mx-auto mb-3" />
               <h3 className="font-display text-sm font-medium" style={{ color: s.color }}>{s.name}</h3>
               <p className="font-body text-xs text-sage-600 mt-1">{s.description}</p>
             </div>
@@ -100,8 +100,8 @@ export default function GlossaryPage() {
       {/* ─── Mirror ─── */}
       <section className="mb-16">
         <h2 className="font-display text-2xl text-sage-800 mb-6 text-center">Mirror</h2>
-        <div className="flex items-center gap-6 bg-white/60 border border-sage-200 rounded-lg p-6 max-w-2xl mx-auto">
-          <img src="/images/mirror.PNG" alt="Mirror" className="w-20 h-20 object-contain flex-shrink-0" />
+        <div className="flex flex-col sm:flex-row items-center gap-6 bg-white/60 border border-sage-200 rounded-lg p-6 max-w-2xl mx-auto">
+          <img src="/images/mirror.PNG" alt="Mirror" className="w-full max-w-[280px] sm:w-56 h-auto flex-shrink-0" />
           <p className="font-body text-sm text-sage-700 leading-relaxed">
             Represents the principle that the evaluation scores what the reasoning is, not what the
             person is worth — an honest self-reflection, not a measure of your worth as a person.
@@ -124,7 +124,7 @@ export default function GlossaryPage() {
                 {root.sub_species.map(sub => (
                   <div key={sub.id} className="bg-white/60 border border-sage-200 rounded-lg p-3 text-center">
                     {PASSION_IMAGE_MAP[sub.id] && (
-                      <img src={PASSION_IMAGE_MAP[sub.id]} alt={sub.name} className="w-14 h-14 object-contain mx-auto mb-2" />
+                      <img src={PASSION_IMAGE_MAP[sub.id]} alt={sub.name} className="w-full h-auto mx-auto mb-2" />
                     )}
                     <h4 className="font-display text-xs font-medium text-sage-800">{sub.name}</h4>
                     <p className="font-body text-[10px] text-sage-600 mt-1 leading-snug">{sub.description}</p>

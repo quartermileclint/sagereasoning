@@ -134,7 +134,7 @@ export default function LogosPage() {
                     src={virtue.icon}
                     alt=""
                     aria-hidden="true"
-                    className="w-9 h-9 object-contain flex-shrink-0"
+                    className="w-16 sm:w-20 h-auto flex-shrink-0"
                   />
                   <div>
                     <div className="font-display text-sm font-semibold text-sage-800">
