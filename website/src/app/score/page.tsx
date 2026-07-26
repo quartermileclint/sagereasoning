@@ -162,9 +162,14 @@ export default function ScoreActionPage() {
 
       // Save result
       if (user && storageMode === 'cloud') {
+        // Column names must match `website/supabase-v3-migration.sql` exactly.
+        // Until 2026-07-26 this wrote `action_description` and `evaluated_by`,
+        // neither of which exists on this table — so EVERY save since 2026-03-21
+        // failed with PGRST204 and the error was discarded (see below).
+        // `schema-drift.test.ts` now pins every key here against the migration.
         const { error } = await supabase.from('action_evaluations_v3').insert({
           user_id: user.id,
-          action_description: action,
+          action,
           context,
           relationships,
           emotional_state: emotionalState,
@@ -176,8 +181,18 @@ export default function ScoreActionPage() {
           ruling_faculty_state: evalResult.virtue_quality.ruling_faculty_state,
           philosophical_reflection: evalResult.philosophical_reflection,
           improvement_path: evalResult.improvement_path,
-          evaluated_by: 'claude-api-v3',
         })
+        if (error) {
+          // Fail LOUD. This branch did not exist before 2026-07-26: the insert
+          // error was discarded and `saved` simply stayed false, so a total
+          // save failure was indistinguishable from a slow render. That is why
+          // a broken write path went unnoticed for four months.
+          console.error('Failed to save evaluation:', error)
+          setErrorMsg(
+            'Your evaluation was completed, but could not be saved to your record. ' +
+            'It is shown below. Please try again in a moment — if it keeps happening, the details are in the browser console.'
+          )
+        }
         if (!error) {
           setSaved(true)
           // Phase 0 — check for newly earned milestones now that the evaluation

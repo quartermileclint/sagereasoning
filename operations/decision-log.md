@@ -16304,3 +16304,40 @@ select count(*) from public.action_evaluations_v3;
 **Rules served:** R1/R6c/R9 (the new empty/error copy is qualitative and non-promissory), R17 (the gap named, not silently created), KG1, PR10 (Diagnostic-certain on both defects), PR18, PR19 (independent review required; spend-limit fallback exercised and disclosed).
 
 **Status:** Adopted. Cross-references: `D-PRACTICE-REMINDERS-COUNSEL-ANALYSED-PLANS-AUTHORED`; `operations/reminders-2026-07/2026-07-26-practice-reminders-HUMAN-build-plan.md` §5; `operations/handoffs/founder/2026-07-26-practice-reminders-human-phase0-milestone-wiring-CLOSE.md`.
+
+---
+
+## 2026-07-26 — D-ACTION-EVALUATIONS-V3-SCHEMA-DRIFT-FIXED
+
+**Decision:** Fixed the `action_evaluations_v3` write path. The founder's production check returned **`count = 0`** — no human action evaluation had ever been saved — confirming the drift named as finding 1 of `D-PRACTICE-REMINDERS-HUMAN-PHASE0-MILESTONE-WIRING-BUILT` within an hour of that deploy.
+
+**Root cause (Diagnostic-certain):** `score/page.tsx` inserted two columns that exist on no schema for that table — **`action_description`** and **`evaluated_by`** — while never supplying **`action`**, which the migration declares `NOT NULL`. Every save since 2026-03-21 (`86456ee`, "Phase 3: Full MVP website") failed with PGRST204. The error was discarded: `if (!error) setSaved(true)` with **no else branch**, so a completely broken write path was indistinguishable from a slow render. `/api/practice-calendar` was selecting the same non-existent column, so the practice calendar was failing too.
+
+**Why it stayed hidden for four months:** the evaluation itself renders from the API response and looks correct; only the absent "saved" confirmation signalled failure, and nothing logged. This is the SAME CLASS as the 2026-06-18 Sage Reflect completion 503 (an A1/PR7 column drift present in no migration, latent because the path was never exercised) — which is why that fix shipped a schema-drift guard. This path had none.
+
+**Files touched:**
+- `website/src/app/score/page.tsx` — `action_description` → `action`; `evaluated_by` dropped (no such column; `ai_model` already carries a default). **The insert error is now surfaced** to the practitioner and `console.error`-logged, instead of discarded.
+- `website/src/app/api/practice-calendar/route.ts` — select and read `action`, not `action_description`.
+- `website/src/lib/__tests__/action-evaluations-v3-schema-drift.test.ts` — NEW, 51 assertions. Parses the CREATE TABLE column list from the migration and asserts every column the insert writes and every column the three readers select actually exists; plus the loud-failure pins. The sibling of `reflect-completion-schema-drift.test.ts`, for the human action-evaluation path.
+
+**Consequence:** `action_evaluations_v3` is empty, so no evaluation-driven milestone could ever have fired — Phase 0's wiring was correct but had nothing to award from. Once saves land, the dashboard list, the practice calendar, the Stage milestones and the evaluation-driven milestones all begin working from real data. **Existing practice history is not recoverable** — those evaluations were never persisted.
+
+**Risk classification:** Elevated under 0d-ii (existing user-facing write path). No schema change — the fix conforms the CODE to the migration, which is the schema of record. No flag, auth, credential or deploy-config change. AC7/PR6 not engaged.
+
+**Verification:** schema-drift guard **51/0**, mutation-verified against the real historical bug (reintroducing `action_description` in the insert fails exactly WRITE-4 and WRITE-5; removing the loud-failure branch fails LOUD-1; reintroducing the bad calendar select fails READ) · `milestone-check-data` 60/0 · `tsc` 0 · `npm run build` 0 · all seven boundary suites green. **Method note:** the first mutation run reported a false clean because the mutation silently applied to the wrong occurrence — a mutation test is only meaningful once you verify the mutation actually landed.
+
+**Residual uncertainty, stated:** the founder supplied the row count but not the `information_schema` column list, so this fix rests on production matching its own migration. Under that hypothesis, and under "production has both columns", the fix is correct. Under the remaining hypothesis (production has `action_description` and no `action`) it would fail — but now **loudly and diagnosably**, which is itself the improvement. The column list should be pasted to confirm.
+
+**Named follow-up (unchanged):** `oikeiosis_context` is still never written by the insert, so `oikeiosis_community` / `oikeiosis_humanity` remain unearnable. Deliberately not folded into a hotfix for a broken save path — it changes what is persisted and is its own decision.
+
+**Rollback path:** `git revert` the commit. Reverting restores a write path that saves nothing, so it should only be done if the column names prove wrong — in which case correct them forward rather than reverting.
+
+**Verification step (founder-performable):** after deploy, score an action. Expect the "saved" confirmation and no error banner. Then:
+```
+select count(*) from public.action_evaluations_v3;
+```
+Expected: `1` (or more). If it is still `0`, the on-screen error banner and the browser console now carry the exact PostgREST error — paste it.
+
+**Rules served:** R1/R6c/R9 (the new failure copy is plain and non-promissory), PR10 (root cause, not symptom), KG1, KG7, AC4, PR18.
+
+**Status:** Adopted. Cross-references: `D-PRACTICE-REMINDERS-HUMAN-PHASE0-MILESTONE-WIRING-BUILT` (which surfaced this as finding 1); `D-SAGE-PRACTICE-BENCHMARK-V1-COMPLETE-REFLECT-FIX-VERDICT` (the 2026-06-18 sibling drift).

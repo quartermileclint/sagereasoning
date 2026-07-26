@@ -70,7 +70,9 @@ export async function GET(request: NextRequest) {
   const [actionsRes, reflectionsRes, journalRes] = await Promise.all([
     supabase
       .from('action_evaluations_v3')
-      .select('id, action_description, katorthoma_proximity, virtue_domains_engaged, passions_detected, created_at')
+      // `action`, not `action_description` — the latter does not exist on this
+      // table (see supabase-v3-migration.sql), so this select had been failing.
+      .select('id, action, katorthoma_proximity, virtue_domains_engaged, passions_detected, created_at')
       .eq('user_id', userId)
       .gte('created_at', startDate)
       .lt('created_at', endDate)
@@ -125,7 +127,7 @@ export async function GET(request: NextRequest) {
       days[day].proximities.push(action.katorthoma_proximity)
       days[day].activities.push({
         type: 'action',
-        description: action.action_description?.slice(0, 80),
+        description: action.action?.slice(0, 80),
         katorthoma_proximity: action.katorthoma_proximity,
         virtue_domains_engaged: domains,
       })
