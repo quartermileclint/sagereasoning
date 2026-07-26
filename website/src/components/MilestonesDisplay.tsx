@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { MILESTONE_DEFINITIONS, MILESTONE_MAP } from '@/lib/milestones'
+import { authFetch } from '@/lib/auth-fetch'
 
 interface EarnedMilestone {
   milestone_id: string
@@ -15,19 +16,52 @@ interface MilestonesDisplayProps {
 export default function MilestonesDisplay({ userId }: MilestonesDisplayProps) {
   const [earned, setEarned] = useState<EarnedMilestone[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadFailed, setLoadFailed] = useState(false)
   const [selectedMilestone, setSelectedMilestone] = useState<string | null>(null)
+  // Guards the award+read pair against React Strict Mode's deliberate double-invoke
+  // in development (which would otherwise spend 4 of the shared 15/min rate budget
+  // per mount). Keyed on userId so a genuine user change still re-runs.
+  const ranForUser = useRef<string | null>(null)
 
   useEffect(() => {
-    async function fetchMilestones() {
+    if (ranForUser.current === userId) return
+    ranForUser.current = userId
+
+    async function awardThenFetch() {
       setLoading(true)
-      const res = await fetch(`/api/milestones?user_id=${userId}`)
-      if (res.ok) {
-        const data = await res.json()
-        setEarned(data.milestones || [])
+      setLoadFailed(false)
+
+      // Award first, read second — deliberately sequential. The POST is what
+      // actually grants milestones (Phase 0: nothing called it before), and a
+      // parallel or fire-and-forget POST would usually lose the race against
+      // this GET, leaving a freshly-earned milestone invisible until reload.
+      // A failure here is tolerated: showing the already-earned record is still
+      // better than showing nothing.
+      try {
+        await authFetch('/api/milestones', { method: 'POST' })
+      } catch {
+        // Non-fatal — fall through to the read.
       }
+
+      // authFetch, never a bare fetch: /api/milestones authenticates via
+      // `Authorization: Bearer` ONLY. A headerless fetch 401s unconditionally —
+      // which is exactly what this component did before Phase 0, silently
+      // rendering an empty grid that was indistinguishable from a new user's.
+      try {
+        const res = await authFetch('/api/milestones')
+        if (res.ok) {
+          const data = await res.json()
+          setEarned(data.milestones || [])
+        } else {
+          setLoadFailed(true)
+        }
+      } catch {
+        setLoadFailed(true)
+      }
+
       setLoading(false)
     }
-    fetchMilestones()
+    awardThenFetch()
   }, [userId])
 
   const earnedIds = new Set(earned.map(m => m.milestone_id))
@@ -48,10 +82,15 @@ export default function MilestonesDisplay({ userId }: MilestonesDisplayProps) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="font-display text-xl font-medium text-sage-800">Virtue Milestones</h2>
+          {/* Honest states: a failed read must not render as "none earned" — the
+              two were indistinguishable before Phase 0, which is how the silent
+              401 survived unnoticed. */}
           <p className="font-body text-sm text-sage-500 mt-1">
-            {earnedCount > 0
-              ? `${earnedCount} of ${totalCount} milestones earned`
-              : 'Milestones mark demonstrated understanding of stoic virtue'}
+            {loadFailed
+              ? 'Your milestones could not be loaded just now. Refresh to try again.'
+              : earnedCount > 0
+                ? `${earnedCount} of ${totalCount} milestones earned`
+                : 'Milestones mark demonstrated understanding of stoic virtue'}
           </p>
         </div>
       </div>

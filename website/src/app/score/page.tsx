@@ -178,7 +178,16 @@ export default function ScoreActionPage() {
           improvement_path: evalResult.improvement_path,
           evaluated_by: 'claude-api-v3',
         })
-        if (!error) setSaved(true)
+        if (!error) {
+          setSaved(true)
+          // Phase 0 — check for newly earned milestones now that the evaluation
+          // is stored. Cloud branch only (local mode persists no server row, so
+          // there is nothing new to check), gated on a successful insert, and
+          // fire-and-forget with its own catch: a milestone failure must never
+          // surface as "Something went wrong evaluating your action" via the
+          // outer catch, nor extend the evaluation spinner.
+          authFetch('/api/milestones', { method: 'POST' }).catch(() => {})
+        }
       } else if (user && storageMode === 'local') {
         setSaved(true)
       }

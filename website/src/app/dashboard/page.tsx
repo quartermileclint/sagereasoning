@@ -108,6 +108,17 @@ export default function DashboardPage() {
       setBaselineStatus(baselineRes)
       setLoading(false)
 
+      // Phase 0 — retroactive milestone catch-up for practitioners whose
+      // MilestonesDisplay never mounts. That component owns the award+read pair
+      // for everyone it renders for, but it sits inside the `evaluations.length
+      // > 0` branch below, so a practitioner with a baseline or journal entries
+      // and no evaluations would never have their earned milestones recorded.
+      // Fire-and-forget with its own catch: load() has no error boundary, and an
+      // unhandled rejection here would strand the page on "Loading your profile".
+      if (!evalsRes.data || evalsRes.data.length === 0) {
+        authFetch('/api/milestones', { method: 'POST' }).catch(() => {})
+      }
+
       trackEvent({ event_type: 'dashboard_view' })
     }
     load()

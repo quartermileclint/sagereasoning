@@ -16252,3 +16252,55 @@ Expected: the two plan files; the grep returns only the route file itself and th
 **Rules served:** R19d (the mirror image now accompanies the mirror principle where it is stated), R8c (alt text and captions English-first), R1/R6c/R9 (Stage imagery presented as recognition, never achievement), PR18 (production state untouched at close).
 
 **Status:** Adopted. Cross-references: `D-BRAND-AND-NAVIGATION-AMENDMENTS-BUILT` (the predecessor pass this extends); `operations/brand-2026-07/2026-07-23-brand-assets-audit-and-page-mapping-proposal.md`; `operations/handoffs/founder/2026-07-26-brand-imagery-prominence-pass-CLOSE.md`.
+
+---
+
+## 2026-07-26 — D-PRACTICE-REMINDERS-HUMAN-PHASE0-MILESTONE-WIRING-BUILT
+
+**Decision:** Wired milestone awarding end to end (human practice-reminders plan §5, Phase 0) — `POST /api/milestones` now has callers, its check-data is complete, and the read path authenticates. Two independent defects were found, not one: awarding never ran (no caller anywhere in the app), **and** the GET was called with a bare `fetch` while the route accepts `Authorization: Bearer` only, so it 401'd unconditionally. Either alone renders an all-grey grid, and the broken state was indistinguishable from an honest new-user state — which is why both survived unnoticed.
+
+**Reasoning:** Phase 0 is the stage-crossing trigger's prerequisite (Phase 3) and an independently worthwhile latent-defect fix. The check-data assembly was extracted to a new pure module so the arithmetic is directly unit-testable rather than only source-grep-pinned (the AE-2 `buildLoopFoldIdentity` precedent).
+
+**Files touched:**
+- `website/src/lib/milestone-check-data.ts` — NEW. Pure, I/O-free assembly of `V3MilestoneCheckData`: `maxConsecutiveGapDays`, `isJournalPhase1Complete`, `buildV3MilestoneCheckData`. Imports types only; no Supabase, clock, env or `stoic-brain` specifier, so its test runs bare.
+- `website/src/app/api/milestones/route.ts` — journal query added as a fifth parallel leg; assembly routed through the pure builder; `.single()` → `.maybeSingle()` on baseline so a genuine error is distinguishable from "no baseline yet"; fail-honest early return (`check_data_incomplete`) when a source query errors; `award_failed` on an insert failure.
+- `website/src/components/MilestonesDisplay.tsx` — `authFetch` replaces the bare `fetch`; awards (POST) before reading (GET) so a fresh award is visible immediately; the dead `?user_id=` param dropped; a `loadFailed` state so a failed read no longer renders as "none earned"; a `useRef` guard against the Strict Mode double-invoke.
+- `website/src/app/score/page.tsx` — fire-and-forget POST after a successful `action_evaluations_v3` insert (cloud branch only, own `.catch`, below the R20a early return).
+- `website/src/app/dashboard/page.tsx` — retroactive catch-up POST for practitioners whose `MilestonesDisplay` never mounts (the `evaluations.length > 0` gate), placed after `setLoading(false)`.
+- `website/src/lib/__tests__/milestone-check-data.test.ts` — NEW, 60 assertions.
+- `website/.claude/launch.json` — NEW. Dev-server config for the preview harness; no effect on the app or build output.
+
+**Deviation from the plan, stated rather than absorbed:** plan §5 item 3 asked for `daysSinceLastAction` to mean "days since the most recent evaluation as of now". Implemented instead as the **maximum gap between consecutive evaluations**. Days-since-now would award `returning_practitioner` ("Returned after 7+ days away **and evaluated an action**") to a practitioner who has *not* returned, and would fire for every lapsed user on the new dashboard catch-up call. Max-gap honours both clauses, is monotone, and is what makes the retroactive catch-up work — the most-recent-pair reading misses a historic return entirely. The plan also names the milestone `practice_return`; no such id exists (`returning_practitioner` and `journal_return` are the real ids). Journal Phase 1 keys on `day_number` 1–7, not `phase_number`, because `POST /api/journal` writes `phase_number || 1` unvalidated.
+
+**Risk classification:** Elevated under 0d-ii (existing user-facing functionality; existing route). No schema, flag, auth-model, credential or deploy-config change. AC7/PR6 not engaged. KG1 observed (the only write is the pre-existing idempotent upsert). Seven `human-practitioner-boundary` suites re-run green, so the observation window's measured set is untouched.
+
+**Verification (all green):** `milestone-check-data.test.ts` **60/0** · `tsc --noEmit` 0 · `npm run build` 0 (`ƒ /api/milestones` registered) · boundary suites 232/466/466/466/527/327/451, all 0 failed · dev-server probe: GET and POST both 401 unauthenticated (route alive, Bearer-only — empirically reproducing the original defect), `/dashboard` and `/score` 307 to `/auth`, no console or server errors.
+
+**Adversarial review:** the independent Workflow (8 dimensions + per-finding refuters + a completeness critic) **died whole — all 9 agents errored on the account monthly spend limit**. Per PR19's codified fallback the review was **completed first-hand**, including the mutation-testing dimension run mechanically. **Nine mutations applied, suite re-run, reverted; one originally SURVIVED** — a "return the first gap instead of the max" mutant passed all 53 assertions, because every fixture happened to place the largest gap first. Closed with GAP-4b/4c/4d (maximum in the middle, at the end, and two qualifying gaps). A second real defect was found by hand: `new Date(null).getTime()` is `0` and **finite**, so the `Number.isFinite` filter alone let a null `created_at` (nullable on `action_evaluations_v3`) fabricate a ~20,000-day gap and falsely award `returning_practitioner` — closed with a `typeof t === 'string'` guard, pinned, and mutation-verified. Final: 9/9 mutations caught, 60/0. **Honest limit: single-perspective. An independent re-run should follow the limit reset — the standing lesson is that an independent re-review finds what a self-review cannot.**
+
+**Two findings surfaced, both out of scope and both recorded as follow-ups:**
+1. **`action_evaluations_v3` column drift (determinative, unresolved).** `score/page.tsx` inserts `action_description`, which **no repo SQL declares on that table** (the migration declares `action TEXT NOT NULL`); `practice-calendar` reads `action_description`, `dashboard` reads `action`. All three cannot be correct against one table unless production carries both via an ALTER absent from the repo. If production lacks `action_description`, every human score save has been failing silently (the insert error is swallowed) — which would mean the table is empty and ~12 evaluation-driven milestones are unreachable regardless of this wiring. **Not resolvable from the repo; the founder's post-deploy check settles it.**
+2. **Phase 0 activates a latent R17 gap.** The `milestones` table appears in none of `/api/user/delete`, `/api/user/export`, or `user-data-gathering.ts`, while every sibling practice table does. Harmless while the table was empty for everyone; it now holds real per-user data. Zero exposure pre-0h (the `reflect-store owner-scoping` precedent), but data deletion is **Critical** under 0d-ii, so it needs its own founder-walked step and should gate external onboarding.
+
+**Also corrected:** there are **25** milestone definitions, not 24 as the plan §2.1 and `D-PRACTICE-REMINDERS-COUNSEL-ANALYSED-PLANS-AUTHORED` both state (20 pre-existing + the five brand-build `stage_*`). Pinned in the suite.
+
+**Named follow-ups (not built):** `earned.add(id)` inside `checkNewMilestones`' `award()` helper (no duplicate is producible today, so it is hardening, not a fix); `oikeiosis_community` / `oikeiosis_humanity` remain unearnable because `oikeiosis_context` is never written by the score insert — a write-side change, deliberately outside Phase 0; the route's `action_evaluations_v3` query has no `.limit()` (an unbounded per-user scan, now on every dashboard mount).
+
+**Rollback path:** `git revert` the session commit — callers, route, component and a new pure module; no schema, no flag, no migration. Milestone rows awarded before a revert are data the record genuinely supports and may stand; deleting them would be a founder-walked data step, not assumed.
+
+**Verification step (founder-performable):**
+```
+cd website && npx tsx src/lib/__tests__/milestone-check-data.test.ts && npx tsc --noEmit && npm run build
+```
+Expected: `60 passed, 0 failed`; tsc exit 0; build exit 0.
+
+Then, after push, on the live site: load `/dashboard` — previously-earned-by-history milestones should appear in colour with an earned date. Score an action — the save must still confirm as saved. **If the milestone grid stays entirely grey AND no evaluations are listed, that is finding 1 above, not a wiring failure** — settle it with, in the Supabase SQL editor against production (read-only):
+```
+select column_name, is_nullable from information_schema.columns
+where table_name = 'action_evaluations_v3' order by ordinal_position;
+select count(*) from public.action_evaluations_v3;
+```
+
+**Rules served:** R1/R6c/R9 (the new empty/error copy is qualitative and non-promissory), R17 (the gap named, not silently created), KG1, PR10 (Diagnostic-certain on both defects), PR18, PR19 (independent review required; spend-limit fallback exercised and disclosed).
+
+**Status:** Adopted. Cross-references: `D-PRACTICE-REMINDERS-COUNSEL-ANALYSED-PLANS-AUTHORED`; `operations/reminders-2026-07/2026-07-26-practice-reminders-HUMAN-build-plan.md` §5; `operations/handoffs/founder/2026-07-26-practice-reminders-human-phase0-milestone-wiring-CLOSE.md`.

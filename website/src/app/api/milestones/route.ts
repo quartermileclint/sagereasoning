@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { checkNewMilestones, type V3MilestoneCheckData } from '@/lib/milestones'
+import { checkNewMilestones } from '@/lib/milestones'
+import { buildV3MilestoneCheckData } from '@/lib/milestone-check-data'
 import { checkRateLimit, RATE_LIMITS, requireAuth } from '@/lib/security'
 
 /**
@@ -9,7 +10,17 @@ import { checkRateLimit, RATE_LIMITS, requireAuth } from '@/lib/security'
  *
  * POST /api/milestones
  * Checks for newly earned milestones and awards them.
- * Called after evaluating an action or completing a reflection.
+ * Called after evaluating an action (score flow) and on dashboard load
+ * (retroactive catch-up from stored history). Idempotent — awarding upserts
+ * on the UNIQUE(user_id, milestone_id) constraint and `checkNewMilestones`
+ * filters against already-earned ids, so a repeat call is a no-op.
+ *
+ * Both handlers authenticate via `Authorization: Bearer <supabase-jwt>` only
+ * (`getAuthenticatedUser` accepts no other credential source). Callers must
+ * use `authFetch`, never a bare `fetch` — a bare fetch 401s silently.
+ *
+ * Phase 0 of the human practice-reminders build plan
+ * (operations/reminders-2026-07/2026-07-26-practice-reminders-HUMAN-build-plan.md §5).
  */
 
 export async function GET(request: NextRequest) {
@@ -48,6 +59,7 @@ export async function POST(request: NextRequest) {
     evalsRes,
     reflectionsRes,
     baselineV3Res,
+    journalRes,
   ] = await Promise.all([
     supabaseAdmin.from('milestones').select('milestone_id').eq('user_id', userId),
     // V3 evaluations
@@ -58,39 +70,58 @@ export async function POST(request: NextRequest) {
     supabaseAdmin.from('reflections')
       .select('id')
       .eq('user_id', userId),
-    // V3 baseline
+    // V3 baseline. `maybeSingle` (not `single`) so that "no baseline yet" is a
+    // null row rather than a PGRST116 error — which lets a genuine query failure
+    // below be distinguished from the ordinary no-baseline case.
     supabaseAdmin.from('baseline_assessments_v3')
       .select('senecan_grade')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single(),
+      .maybeSingle(),
+    // Journal entries. Row existence IS completion — there is no status flag, and
+    // UNIQUE(user_id, day_number) guarantees one row per day. Local-storage users
+    // are deliberately NOT filtered out: they still get a row (with
+    // reflection_text = '__local__') precisely so their practice is recorded.
+    // `reflection_text` is intimate, R20a-screened prose and is never selected here.
+    supabaseAdmin.from('journal_entries')
+      .select('day_number, created_at')
+      .eq('user_id', userId),
   ])
 
+  // Fail honest, never silently under-award. A load-bearing query that errors would
+  // otherwise degrade to an empty array and quietly withhold milestones the record
+  // supports — the same false-benign class as the reflect-completion schema drift
+  // (2026-06-18) and the AE-2 `isMissingTableError` finding. `milestones` itself is
+  // excluded: an unreadable earned-list would risk re-awarding, so it is fatal too.
+  const loadBearing: Array<[string, { error: unknown } ]> = [
+    ['milestones', earnedRes],
+    ['action_evaluations_v3', evalsRes],
+    ['reflections', reflectionsRes],
+    ['baseline_assessments_v3', baselineV3Res],
+    ['journal_entries', journalRes],
+  ]
+  const failed = loadBearing.filter(([, res]) => res.error).map(([name]) => name)
+  if (failed.length > 0) {
+    console.error('Milestone check-data incomplete; refusing to award. Failed sources:', failed,
+      loadBearing.filter(([, res]) => res.error).map(([, res]) => res.error))
+    return NextResponse.json({
+      new_milestones: [],
+      all_milestones: (earnedRes.data || []).map(m => m.milestone_id),
+      check_data_incomplete: failed,
+    })
+  }
+
   const earnedMilestoneIds = (earnedRes.data || []).map(m => m.milestone_id)
-  const evaluations = evalsRes.data || []
-  const reflectionCount = (reflectionsRes.data || []).length
-  const hasBaseline = !!baselineV3Res.data
-  const senecanGrade = baselineV3Res.data?.senecan_grade
 
-  // Calculate days since last action
-  let daysSinceLastAction: number | null = null
-  if (evaluations.length >= 2) {
-    const latestDate = new Date(evaluations[0].created_at)
-    const previousDate = new Date(evaluations[1].created_at)
-    daysSinceLastAction = Math.floor(
-      (latestDate.getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24)
-    )
-  }
-
-  const checkData: V3MilestoneCheckData = {
+  const checkData = buildV3MilestoneCheckData({
     earnedMilestoneIds,
-    hasBaseline,
-    senecanGrade,
-    evaluations,
-    reflectionCount,
-    daysSinceLastAction,
-  }
+    hasBaseline: !!baselineV3Res.data,
+    senecanGrade: baselineV3Res.data?.senecan_grade,
+    evaluations: evalsRes.data || [],
+    reflectionCount: (reflectionsRes.data || []).length,
+    journalEntries: journalRes.data || [],
+  })
 
   const newMilestoneIds = checkNewMilestones(checkData)
 
@@ -109,8 +140,14 @@ export async function POST(request: NextRequest) {
     .upsert(inserts, { onConflict: 'user_id,milestone_id' })
 
   if (insertError) {
+    // Honest: report that the award attempt failed rather than returning a bare
+    // empty list, which a caller cannot distinguish from "nothing new to award".
     console.error('Failed to insert milestones:', insertError)
-    return NextResponse.json({ new_milestones: [], all_milestones: earnedMilestoneIds })
+    return NextResponse.json({
+      new_milestones: [],
+      all_milestones: earnedMilestoneIds,
+      award_failed: true,
+    })
   }
 
   return NextResponse.json({

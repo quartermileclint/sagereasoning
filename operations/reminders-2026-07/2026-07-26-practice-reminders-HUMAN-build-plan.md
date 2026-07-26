@@ -52,6 +52,27 @@ Each phase is independently shippable; stopping at any phase boundary is a legit
 
 ## §5 Phase 0 — Wire milestone awarding (prerequisite + latent-defect fix)
 
+> **STATUS: BUILT + VERIFIED 2026-07-26** (`D-PRACTICE-REMINDERS-HUMAN-PHASE0-MILESTONE-WIRING-BUILT`;
+> close: `operations/handoffs/founder/2026-07-26-practice-reminders-human-phase0-milestone-wiring-CLOSE.md`).
+> Live on the founder's push — no flag, no schema. Three corrections to this section, recorded rather than absorbed:
+> 1. **A SECOND defect was found.** Awarding never ran *and* the read path never authenticated —
+>    `MilestonesDisplay` used a bare `fetch` while the route accepts `Authorization: Bearer` only, so the GET
+>    401'd unconditionally. Either alone yields an all-grey grid, and the broken state was indistinguishable
+>    from an honest new-user state. Both are fixed.
+> 2. **Item 3 was NOT implemented as written.** `daysSinceLastAction` is the **maximum gap between consecutive
+>    evaluations**, not "days since the most recent evaluation as of now". Days-since-now would award
+>    `returning_practitioner` ("Returned after 7+ days away **and evaluated an action**") to someone who has not
+>    returned, and would fire for every lapsed user on the new catch-up call. Max-gap honours both clauses and is
+>    what makes the retroactive catch-up work. Also: the milestone this section calls `practice_return` does not
+>    exist — the ids are `returning_practitioner` and `journal_return`.
+> 3. **§2.1's "24 milestones" is wrong — there are 25** (20 pre-existing + the five brand-build `stage_*`).
+>
+> Two findings surfaced and deferred, both recorded in the decision-log entry: an unresolved
+> `action_evaluations_v3` `action` / `action_description` column drift that may mean human score saves have been
+> failing silently (determinative for whether evaluation-driven milestones can fire at all); and the fact that
+> Phase 0 activates a latent R17 gap — the `milestones` table is in none of the data-rights export/delete paths,
+> which is Critical under 0d-ii and needs its own founder-walked step.
+
 **Problem (Diagnostic-certain, verified §2.1):** awarding never runs. **Build:**
 1. Call `POST /api/milestones` (fire-and-forget, idempotent — the route upserts on conflict `user_id,milestone_id`) from: (a) the score flow after a successful `action_evaluations_v3` insert (`score/page.tsx:165` area); (b) dashboard load (catch-up for existing history — awards retroactively from stored data, which is honest: the record already supports them).
 2. Populate the journal fields in the route's check-data (`journalEntriesCompleted`, `journalPhase1Complete`, `daysSinceLastJournalEntry` from `journal_entries`) so the five journal milestones + `journal_return` become reachable.
