@@ -16143,3 +16143,19 @@ Expected: the probe prints `REPRODUCED.` and the four-case table (A/C floor, B/D
 **Rules served:** R18 (the honest-scope gap closed on its own terms, independent of the cap decision), PR17 (explicit chat sign-off obtained before any public surface was touched), PR18, PR19 (still not engaged — no engine or predicate change was built).
 
 **Status:** Adopted. Cross-references: `D-REASON-INPUT-CAP-VS-CORROBORATION-SCOPED`; `operations/benchmarks/sage-practice-v1/2026-07-26-input-cap-vs-corroboration-scope.md` §5, §7; `operations/handoffs/founder/2026-07-26-corroboration-disclosure-correction-NEXT-SESSION-PROMPT.md`; `decision-log.md:13023` (the house precedent for the register).
+
+## 2026-07-26 — D-CORROBORATION-DISCLOSURE-LIVE-VERIFIED
+
+**Decision:** live-verified (not merely repo-verified) that the correction landed in `D-CORROBORATION-DISCLOSURE-CORRECTION-APPLIED` is actually served from production, closing the gap the predecessor close named ("repo-green is not the same claim as live-correct").
+
+**Reasoning:** the predecessor session's build + unit-suite + fragment-probe verification confirmed the committed tree was correct; nothing in that session curled `www.sagereasoning.com`. A five-point `curl` check against the live surfaces closes that gap directly rather than leaving it silently assumed.
+
+**Verification (founder-performable, ran this session):** `curl -s https://www.sagereasoning.com/llms.txt | grep -A2 "Field limits"` → the new paragraph, verbatim; `grep "what the request actually sends"` → present (the reworded headline); `curl -s https://www.sagereasoning.com/.well-known/agent-card.json` → `extensions: 18` (unchanged) and `field_limits` present; `curl -s https://www.sagereasoning.com/api-docs | grep -o "Field limits"` → present. All five checks matched expectation exactly.
+
+**Risk classification:** Standard under 0d-ii — read-only verification of an already-pushed, already-green change; no code, flag, schema, or perimeter touched. AC7 not engaged.
+
+**Rollback path:** none required (no change made beyond this record).
+
+**Rules served:** PR18 (this is a close-time verification, recorded honestly rather than assumed).
+
+**Status:** Adopted. Cross-references: `D-CORROBORATION-DISCLOSURE-CORRECTION-APPLIED`; `operations/handoffs/founder/2026-07-26-corroboration-disclosure-live-verify-NEXT-SESSION-PROMPT.md`.
