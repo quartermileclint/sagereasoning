@@ -12,7 +12,9 @@ import {
 } from '@/lib/stoic-brain'
 import { PROXIMITY_COLORS, ROOT_PASSION_ENGLISH, PASSION_IMAGE_MAP, getStageDisplay } from '@/lib/brand-display'
 import { resolveScoreEvaluation } from '@/lib/practice-sequence'
+import { resolveNewlyEarnedStage, type StageCrossingResolution } from '@/lib/stage-crossing'
 import SuggestedPracticeCard from '@/components/SuggestedPracticeCard'
+import StageCrossingCard from '@/components/StageCrossingCard'
 import type { User } from '@supabase/supabase-js'
 
 // ─── V3 Result Types (derived from scoring.json outputs) ───
@@ -95,6 +97,14 @@ export default function ScoreActionPage() {
   const [distressRedirect, setDistressRedirect] = useState<{ severity: string; redirect_message: string } | null>(null)
   const [saved, setSaved] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  // Practice reminders, human plan Phase 3 (the stage-crossing trigger) — the
+  // earn moment. Populated ONLY from THIS page's own award call's response
+  // (see practice-sequence.ts's Phase 3 section header: this page's POST to
+  // /api/milestones already existed [Phase 0] and typically lands BEFORE any
+  // dashboard visit, so it is usually THIS surface, not the dashboard's, that
+  // observes an ordinary going-forward crossing — hence the same resolution
+  // and the same card are mounted here too, not only on the dashboard).
+  const [stageCrossing, setStageCrossing] = useState<StageCrossingResolution | null>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -125,6 +135,14 @@ export default function ScoreActionPage() {
     setDistressRedirect(null)
     setSaved(false)
     setErrorMsg('')
+    // Phase 3 — found by adversarial review: without this reset, a SECOND
+    // evaluation in the same visit re-rendered the card from the FIRST
+    // evaluation's stage crossing. `StageCrossingCard` unmounts/remounts as
+    // `result` cycles null->populated (resetting its internal `dismissed`
+    // state), but its `stage` prop kept pointing at whatever crossing was
+    // last observed — the exact stale-suggestion-card bug class an earlier
+    // phase in this arc already found and fixed once, reproduced here.
+    setStageCrossing(null)
 
     try {
       const response = await authFetch('/api/score', {
@@ -203,7 +221,30 @@ export default function ScoreActionPage() {
           // fire-and-forget with its own catch: a milestone failure must never
           // surface as "Something went wrong evaluating your action" via the
           // outer catch, nor extend the evaluation spinner.
-          authFetch('/api/milestones', { method: 'POST' }).catch(() => {})
+          //
+          // Phase 3 — the response is read (not merely fired) because it is
+          // Phase 0's newly-earned list, and this call is usually the FIRST one
+          // to observe an ordinary going-forward stage crossing (see the
+          // stageCrossing declaration above). Still fire-and-forget in every
+          // failure direction: a rejected fetch, a non-OK response, or an
+          // unparseable body all fall through to silence, never to errorMsg.
+          //
+          // The mentor's simultaneous-crossing verdict (2026-07-27) requires the
+          // practitioner's MOST RECENT evaluation's level as the current-condition
+          // signal — never the highest of whatever `new_milestones` reports. On
+          // THIS page, the just-submitted evaluation IS that most-recent
+          // evaluation: `evalResult` (the local const above, not the `result`
+          // React state, which would risk a stale read from this closure).
+          authFetch('/api/milestones', { method: 'POST' })
+            .then(async (res) => {
+              if (!res.ok) return
+              const data = await res.json().catch(() => null)
+              const resolution = data?.new_milestones
+                ? resolveNewlyEarnedStage(data.new_milestones, evalResult.virtue_quality.katorthoma_proximity)
+                : null
+              if (resolution) setStageCrossing(resolution)
+            })
+            .catch(() => {})
         }
       } else if (user && storageMode === 'local') {
         setSaved(true)
@@ -658,6 +699,10 @@ export default function ScoreActionPage() {
               </div>
             )}
           </div>
+
+          {/* Practice reminders, human plan Phase 3 — the stage-crossing earn
+              moment, when THIS evaluation is the one that crosses it. */}
+          {stageCrossing && <StageCrossingCard stage={stageCrossing.stage} isPlural={stageCrossing.isPlural} />}
 
           {/* R3: Disclaimer */}
           <div className="pt-4 border-t border-sage-100">

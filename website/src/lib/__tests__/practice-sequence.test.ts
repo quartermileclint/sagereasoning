@@ -76,6 +76,16 @@ import {
   resolveSageCompass,
   resolveScoreEvaluation,
   type SuggestedPractice,
+  // Phase 3 — the stage-crossing trigger.
+  STAGE_CROSSING_LEAD,
+  STAGE_CROSSING_TAIL,
+  STAGE_CROSSING_ORIENTATION_LINE,
+  STAGE_CROSSING_COPY,
+  STAGE_CROSSING_PLURALITY_LEAD,
+  composeStageCrossingLine,
+  composePluralStageCrossingLine,
+  composeStagePageLinkLabel,
+  stagePracticesBySlug,
 } from '../practice-sequence'
 import * as practiceSequenceModule from '../practice-sequence'
 // The CANONICAL stage vocabulary. Imported here ON PURPOSE — see note D above.
@@ -627,6 +637,17 @@ const ALL_COPY = [
   PATTERN_SUGGESTION_LINE,
   SCORE_SUGGESTION_LINE,
   composeDisclosureLine('Penthos (grief)', 'Agonia (anxiety)', 'Preparing for Adversity'),
+  // Phase 3 — the stage-crossing trigger. The composed line varies only the
+  // stage name; sweeping it once with a representative name is sufficient (the
+  // fixed lead/tail/orientation strings are the actual surface a banned word
+  // could hide in).
+  composeStageCrossingLine('The Worn Path'),
+  STAGE_CROSSING_ORIENTATION_LINE,
+  ...STAGE_PRACTICES.map((s) => s.note ?? ''), // re-swept deliberately: Phase 3 renders these too
+  ...Object.values(STAGE_CROSSING_COPY),
+  composeStagePageLinkLabel('The Worn Path'),
+  // The mentor's simultaneous-crossing verdict (2026-07-27) — the plural form.
+  composePluralStageCrossingLine('The Worn Path'),
 ].join(' ').toLowerCase()
 
 // The sweep-covers-new-copy meta-pin (the Phase 4 lesson: a guard that looks
@@ -636,6 +657,14 @@ const ALL_COPY = [
 assert(
   ALL_COPY.includes('suited to examining it further'),
   'H0: the Phase 2 suggestion copy is inside the gamification sweep (meta-pin)'
+)
+assert(
+  ALL_COPY.includes('something has shifted in how you are meeting difficulty'),
+  'H0b: the Phase 3 stage-crossing copy is inside the gamification sweep (meta-pin)'
+)
+assert(
+  ALL_COPY.includes('your practice has moved through more than one condition'),
+  'H0c: the simultaneous-crossing plurality copy is inside the gamification sweep (meta-pin)'
 )
 
 for (const banned of ['streak', 'badge', 'points', 'leaderboard', 'level up', 'completion', 'completed', '100%', 'you have unlocked', 'congratulations', 'well done']) {
@@ -1498,6 +1527,138 @@ assertEqual(
       basis: 'passion:aischyne',
     },
     'K19: the aischyne row, exact — the log revisited with the mirror principle in view'
+  )
+}
+
+// ─── L. Phase 3 — the stage-crossing trigger (Step M vetted mapping) ───
+//
+// THE BINDING SOURCE is the same verbatim Step M record as section K. Three
+// verdicts govern this section (see practice-sequence.ts's Phase 3 header):
+// the card names the stage as a condition, never a grade; no prerequisite
+// gating; the single-signal orientation line applies to EVERY crossing in
+// this system, not only an edge case.
+
+// L1 — the fixed halves and the composed form, per stage, exact.
+assertEqual(STAGE_CROSSING_LEAD, 'Something has shifted in how you are meeting difficulty.', 'L1a: the lead line, verbatim (Step M)')
+assertEqual(STAGE_CROSSING_TAIL, 'These practices meet you where you now are.', 'L1b: the tail line, verbatim (Step M)')
+
+const expectedCrossingLines: Record<string, string> = {
+  'The Storm': 'Something has shifted in how you are meeting difficulty. This is The Storm. These practices meet you where you now are.',
+  'The Worn Path': 'Something has shifted in how you are meeting difficulty. This is The Worn Path. These practices meet you where you now are.',
+  'The Crossroads': 'Something has shifted in how you are meeting difficulty. This is The Crossroads. These practices meet you where you now are.',
+  'The Clear Summit': 'Something has shifted in how you are meeting difficulty. This is The Clear Summit. These practices meet you where you now are.',
+  'The Inner Fire': 'Something has shifted in how you are meeting difficulty. This is The Inner Fire. These practices meet you where you now are.',
+}
+for (const stage of STAGE_PRACTICES) {
+  assertEqual(
+    composeStageCrossingLine(stage.stageName),
+    expectedCrossingLines[stage.stageName],
+    `L2[${stage.level}]: composeStageCrossingLine('${stage.stageName}') composes the exact vetted sentence — "This is ⟨Stage Name⟩", never "You have reached ⟨Stage Name⟩"`
+  )
+}
+assert(
+  !Object.values(expectedCrossingLines).some((l) => /you have reached|you reached|congratulations|well done/i.test(l)),
+  'L3: none of the five composed lines contain achievement/grade language — the card names a condition, never a verdict'
+)
+
+// L4 — the orientation line, verbatim, and its uniform, structural application
+// (fires only when the crossing carries at least one practice — see the
+// practice-sequence.ts header for why The Inner Fire is the deliberate
+// exception, carried by the caller checking practices.length, not by a branch
+// inside this string).
+assertEqual(
+  STAGE_CROSSING_ORIENTATION_LINE,
+  'This practice builds on the passion log — if that is not yet familiar, begin there first.',
+  'L4: the single-signal orientation line, verbatim (Step M verdict 3), sentence-cased for standalone rendering'
+)
+assert(STAGE_CROSSING_ORIENTATION_LINE.trim().endsWith('.'), 'L5: the orientation line is a complete sentence')
+
+// L6 — the stage-page link label, composed, per stage — the same "Visit ⟨name⟩
+// →" form MilestonesDisplay already uses for an earned milestone.
+for (const stage of STAGE_PRACTICES) {
+  assertEqual(
+    composeStagePageLinkLabel(stage.stageName),
+    `Visit ${stage.stageName} →`,
+    `L6[${stage.level}]: composeStagePageLinkLabel composes "Visit ${stage.stageName} →"`
+  )
+}
+
+// L7 — the card copy object, verbatim, every key.
+assertEqual(STAGE_CROSSING_COPY, { dismissLabel: 'Dismiss' }, 'L7: the stage-crossing card copy, verbatim — every key')
+
+// L8 — stagePracticesBySlug: the join MilestonesDisplay and stage-crossing.ts
+// both rely on, both directions.
+for (const stage of STAGE_PRACTICES) {
+  assertEqual(stagePracticesBySlug(stage.stageSlug), stage, `L8[${stage.level}]: stagePracticesBySlug('${stage.stageSlug}') resolves to exactly this stage's entry`)
+}
+assertEqual(stagePracticesBySlug('not-a-real-slug'), null, 'L9: an unknown slug returns null, never a default stage')
+assertEqual(stagePracticesBySlug(''), null, 'L10: an empty slug returns null')
+
+// L11 — the orientation line's own reference target ("the passion log") is a
+// real, tracked practice — if `/passion-log` were ever renamed this line would
+// point at a page that no longer exists under that name, silently.
+assert(
+  PRACTICE_SEQUENCE.some((s) => s.id === 'passion-log' && s.href === '/passion-log'),
+  'L11: the orientation line\'s referent (the passion log) still resolves to a real, tracked step at /passion-log'
+)
+
+// ─── L12–L16 — the mentor's simultaneous-crossing verdict (2026-07-27) ───
+//
+// operations/reminders-2026-07/2026-07-27-phase3-tiebreak-mentor-verdict-
+// verbatim.md, binding. Replaces the original "highest rank wins" reading
+// with: disclose the plurality, and name the CURRENT (most-recent-evaluation)
+// condition, never the historical high point.
+
+assertEqual(
+  STAGE_CROSSING_PLURALITY_LEAD,
+  'Your practice has moved through more than one condition.',
+  'L12: the plurality-disclosure lead, verbatim (the mentor\'s own SHORT proposal, elected over the longer alternative)'
+)
+
+const expectedPluralLines: Record<string, string> = {
+  'The Storm': 'Your practice has moved through more than one condition. Where it stands now is The Storm. These practices meet you where you now are.',
+  'The Worn Path': 'Your practice has moved through more than one condition. Where it stands now is The Worn Path. These practices meet you where you now are.',
+  'The Crossroads': 'Your practice has moved through more than one condition. Where it stands now is The Crossroads. These practices meet you where you now are.',
+  'The Clear Summit': 'Your practice has moved through more than one condition. Where it stands now is The Clear Summit. These practices meet you where you now are.',
+  'The Inner Fire': 'Your practice has moved through more than one condition. Where it stands now is The Inner Fire. These practices meet you where you now are.',
+}
+for (const stage of STAGE_PRACTICES) {
+  assertEqual(
+    composePluralStageCrossingLine(stage.stageName),
+    expectedPluralLines[stage.stageName],
+    `L13[${stage.level}]: composePluralStageCrossingLine('${stage.stageName}') composes the exact mentor-proposed sentence`
+  )
+}
+
+// L14 — the plurality copy is descriptive, not evaluative: the mentor was
+// explicit that it "names the fact of plurality without saying whether the
+// movement was upward, downward, or lateral." No directional or achievement
+// language anywhere in the composed lines.
+assert(
+  !Object.values(expectedPluralLines).some((l) =>
+    /you have reached|congratulations|well done|good job|improved|declined|upward|downward|progress|regressed/i.test(l)
+  ),
+  'L14: none of the five plural composed lines contain directional or evaluative language — the plurality is a fact about history, not a verdict on it'
+)
+
+// L15 — the two forms (single vs plural) genuinely differ in wording, per
+// stage — a copy-paste that made them identical would defeat the whole point
+// of disclosing the plurality.
+for (const stage of STAGE_PRACTICES) {
+  assert(
+    composeStageCrossingLine(stage.stageName) !== composePluralStageCrossingLine(stage.stageName),
+    `L15[${stage.level}]: the single-crossing and plural forms are genuinely different sentences`
+  )
+}
+
+// L16 — both forms share the exact same tail ("These practices meet you
+// where you now are.") — the practices-oriented close is common ground
+// regardless of how the headline names the condition.
+for (const stage of STAGE_PRACTICES) {
+  assert(
+    composeStageCrossingLine(stage.stageName).endsWith(STAGE_CROSSING_TAIL) &&
+      composePluralStageCrossingLine(stage.stageName).endsWith(STAGE_CROSSING_TAIL),
+    `L16[${stage.level}]: both forms end in the same pinned tail`
   )
 }
 

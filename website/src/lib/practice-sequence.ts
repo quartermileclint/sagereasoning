@@ -1305,3 +1305,190 @@ export function resolveSageCompass(input: {
   }
   return null
 }
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Phase 3 — the STAGE-CROSSING trigger (Step M vetted, 2026-07-27)
+// ═════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Practice reminders, human plan Phase 3 (plan §8): "the stage crossing is the
+ * natural moment to name the next tool, because the practitioner's condition
+ * has created the readiness for it."
+ *
+ * THE BINDING SOURCE IS THE VERBATIM STEP M RECORD (see the Phase 2 section
+ * header above) — three verdicts govern what is built here:
+ *
+ *  1. THE CARD NAMES THE STAGE, as a description of a condition, never a
+ *     grade: "Something has shifted in how you are meeting difficulty. This is
+ *     ⟨Stage Name⟩. These practices meet you where you now are." The plan's
+ *     original omit-the-name draft was reversed: "the practitioner can see
+ *     their stage elsewhere in the product. Omitting it from the card does not
+ *     protect them from the information; it only makes the card feel
+ *     incomplete."
+ *
+ *  2. NO PREREQUISITE GATING. "A stage-triggered suggestion should not be held
+ *     back until its prerequisite is met" — the stage signal is trusted, and
+ *     the practitioner decides.
+ *
+ *  3. THE SINGLE-SIGNAL ORIENTATION LINE IS THE RULE HERE, NOT THE EXCEPTION.
+ *     The mentor framed this as a carve-out for a stage determined "by a
+ *     single strong signal rather than a pattern": *"this practice builds on
+ *     the passion log — if that is not yet familiar, begin there first."*
+ *     Every `stage_*` milestone in THIS system fires on a SINGLE evaluation at
+ *     the exact level (Phase 0, founder-elected), so the mentor's premise that
+ *     "a practitioner whose signals indicate The Worn Path has, by definition,
+ *     the prior practice" does not hold here — the carve-out is universal in
+ *     this build, not an edge case.
+ *
+ * WHAT COUNTS AS "NEWLY EARNED", AND WHY NO CLIENT-SIDE STORE IS NEEDED.
+ * `POST /api/milestones` (Phase 0) is idempotent — `checkNewMilestones` filters
+ * against already-earned ids — so a given `stage_*` id can appear in a
+ * `new_milestones` response AT MOST ONCE, ever, on whichever caller's request
+ * happens to be the one that crosses it from unearned to earned. That fact is
+ * the whole mechanism behind "dismissible, never repeated": the session
+ * prompt's own choice between "localStorage" and "a milestones-read
+ * derivation" resolves to the latter, because it needs no new state and cannot
+ * drift out of sync with the server's own record. `resolveNewlyEarnedStage`
+ * (`@/lib/stage-crossing` — deliberately NOT in this zero-import file, since it
+ * must read milestone ids from `milestones.ts`) turns a `new_milestones` list
+ * into at most one `StageCrossingResolution` to show.
+ *
+ * THE SIMULTANEOUS-CROSSING QUESTION IS NOW SETTLED BY A BOUND MENTOR VERDICT
+ * (2026-07-27, `operations/reminders-2026-07/2026-07-27-phase3-tiebreak-
+ * mentor-verdict-verbatim.md`), replacing this file's original "highest rank
+ * wins" extrapolation. The original build showed the highest-ranked crossing
+ * when a retroactive catch-up earned several `stage_*` ids at once, reasoning
+ * by extension from Phase 2's "one suggestion, never a menu" — but that
+ * extension was never a verdict, and a targeted consultation rejected it
+ * outright: "the highest-ranked crossing does not name a current condition.
+ * It names a historical high point… It is not a mirror. It is a trophy."
+ * Lowest-rank was rejected too (the mirrored failure), and silence was
+ * rejected as "withholding orientation from the practitioners who have earned
+ * the most context." **The adopted answer: disclose the plurality, and name
+ * the stage matching the practitioner's MOST RECENT EVALUATION — never the
+ * highest ever reached** ("the most recent evaluation is the best available
+ * signal for current condition. The highest ever reached is a historical fact
+ * about range."). `resolveNewlyEarnedStage` now REQUIRES that signal as a
+ * second parameter; see `stage-crossing.ts`'s own header for the full
+ * mechanism, including the further-conservative build decision that the named
+ * stage must also be among today's genuinely-new crossings, or the resolver
+ * returns null rather than a stale claim.
+ *
+ * A FOUND RACE, AND THE FIX (a build decision inside the verdicts' bounds,
+ * recorded in the decision-log entry): `score/page.tsx` already POSTs to
+ * `/api/milestones` after every evaluation and discards the response. In the
+ * ordinary flow that POST lands BEFORE any dashboard visit, so by the time
+ * MilestonesDisplay's own POST call runs, a same-session crossing is already
+ * earned and `new_milestones` on ITS OWN response would be empty — a
+ * dashboard-only rendering would essentially never fire outside the
+ * retroactive-catchup case. The fix is not a hand-off between the two pages
+ * (sessionStorage would work but adds state this design otherwise needs none
+ * of): both surfaces independently resolve their OWN `new_milestones`
+ * response and render the same card, so whichever request happens to observe
+ * the crossing shows it — the score result view for the ordinary going-forward
+ * case, the dashboard for the retroactive-catchup case.
+ *
+ * A DISCLOSED RESIDUAL OF THAT SAME FIX (found by adversarial review, traced
+ * to the route's own read-decide-write, NOT transactional): if the two
+ * surfaces' POSTs land genuinely concurrently — a fast score→dashboard
+ * navigation, or two open tabs — BOTH can read the pre-crossing earned state
+ * before either write commits, so both can independently return the same
+ * `stage_*` id as "new" and both render the card. The database stays correct
+ * either way (the award upsert is idempotent), so the only user-visible
+ * consequence is the same crossing possibly shown, and independently
+ * dismissed, on two surfaces rather than one. Narrower and lower-impact than
+ * a repeat on ONE surface would be (which the design otherwise fully
+ * prevents), and not fixed here — a genuine fix needs either a transactional
+ * read-decide-write in the route or a cross-tab signal, both bigger changes
+ * than this phase's scope. RECONFIRMED, not merely carried forward: on being
+ * asked to act on this and the partial-failure visual residual below at the
+ * founder's own discretion, the explicit recommendation was to leave both
+ * exactly as disclosed — the fix in each case costs more (a live, already-
+ * shipped route's write path; or silently dropping the one-shot notification
+ * on a subsequent successful read) than the low-severity problem it would
+ * solve. Declining to "fix" a disclosed, accepted trade-off is itself a
+ * considered engineering judgement, not an omission.
+ *
+ * THE ORIENTATION LINE FIRES ONLY WHEN THERE IS A PRACTICE TO ORIENT TOWARD
+ * (`practices.length > 0`). The Inner Fire crossing has none, and its own note
+ * already says the opposite of "begin with the passion log" — appending the
+ * orientation line there would contradict the stage's own copy. Disclosed,
+ * accepted redundancy: The Storm's own practices already include the passion
+ * log, so its card names it as both an offered practice and the thing the
+ * (fixed, mentor-worded) orientation line points back to — harmless, and
+ * changing the wording to avoid it would deviate from the verbatim line the
+ * plan restates unchanged for "EVERY crossing".
+ *
+ * COPY DISCIPLINE, as Phase 2: every user-visible line is pre-authored HERE and
+ * pinned verbatim. `composeStageCrossingLine` and `composeStagePageLinkLabel`
+ * are the two composed forms (the stage name is the only variable in each),
+ * assembled from pinned constants so the unit suite can hold the exact
+ * composition to an expected string per stage.
+ */
+
+export const STAGE_CROSSING_LEAD = 'Something has shifted in how you are meeting difficulty.'
+export const STAGE_CROSSING_TAIL = 'These practices meet you where you now are.'
+
+/** "Something has shifted in how you are meeting difficulty. This is ⟨Stage
+ *  Name⟩. These practices meet you where you now are." — verbatim Step M.
+ *  For a SINGLE crossing only — see `composePluralStageCrossingLine` for the
+ *  simultaneous-crossing form (the mentor verdict below scopes this original
+ *  wording to the single case; it is otherwise untouched by that verdict). */
+export function composeStageCrossingLine(stageName: string): string {
+  return `${STAGE_CROSSING_LEAD} This is ${stageName}. ${STAGE_CROSSING_TAIL}`
+}
+
+/**
+ * The PLURAL form, for when `StageCrossingResolution.isPlural` is true — a
+ * retroactive catch-up found more than one newly-earned stage crossing at
+ * once. Verbatim the mentor's own SHORT proposal (2026-07-27, the
+ * simultaneous-crossing verdict — see the section header above), elected over
+ * their offered longer alternative (which prepends this same plurality
+ * sentence to the original `composeStageCrossingLine` wording rather than
+ * replacing it): the mentor's own reasoning — *"the phrase 'where it stands
+ * now' does the work the original card's 'something has shifted' was
+ * doing"* — reads as a stated preference for the tighter form, with the
+ * longer one offered as a compatibility fallback ("if the build team prefers
+ * it"), not a first choice. Recorded as a build decision inside the verdict's
+ * bounds: the longer form remains equally legitimate and equally cited in the
+ * verbatim record, should the founder prefer it later — a two-constant swap.
+ */
+export const STAGE_CROSSING_PLURALITY_LEAD = 'Your practice has moved through more than one condition.'
+
+/** "Your practice has moved through more than one condition. Where it stands
+ *  now is ⟨Stage Name⟩. These practices meet you where you now are." */
+export function composePluralStageCrossingLine(stageName: string): string {
+  return `${STAGE_CROSSING_PLURALITY_LEAD} Where it stands now is ${stageName}. ${STAGE_CROSSING_TAIL}`
+}
+
+/**
+ * Mentor verbatim (Step M, verdict 3), sentence-cased for standalone
+ * rendering — the source quotes it lowercase mid-sentence ("the form would be
+ * something like: *this practice…*"), which is a citation register, not a
+ * rendering instruction. Applied uniformly to every crossing that carries at
+ * least one practice, rather than only to a single-strong-signal edge case
+ * (see the section header) — the words themselves are NOT altered from the
+ * verbatim record.
+ */
+export const STAGE_CROSSING_ORIENTATION_LINE =
+  'This practice builds on the passion log — if that is not yet familiar, begin there first.'
+
+export const STAGE_CROSSING_COPY = {
+  dismissLabel: 'Dismiss',
+} as const
+
+/** "Visit ⟨Stage Name⟩ →" — the same form MilestonesDisplay already uses for
+ *  an earned milestone's Stage-page link. */
+export function composeStagePageLinkLabel(stageName: string): string {
+  return `Visit ${stageName} →`
+}
+
+/**
+ * slug → StagePractices. Exists alongside `stagePracticesFor` (level-keyed)
+ * because two callers already have a SLUG rather than a level: `/stages/<slug>`
+ * itself, and `@/lib/stage-crossing`'s resolution from a milestone id (which
+ * carries `pageSlug`, per `milestones.ts`, not a proximity level).
+ */
+export function stagePracticesBySlug(slug: string): StagePractices | null {
+  return STAGE_PRACTICES.find((s) => s.stageSlug === slug) ?? null
+}

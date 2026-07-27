@@ -29,6 +29,13 @@
  *
  * NOT COVERED: the route's own DB fan-out (needs env + a live Supabase); covered by
  * the founder's browser walkthrough.
+ *
+ * REVISED (2026-07-27, Phase 3 — the stage-crossing trigger): INV-2 loosened
+ * from an exact-adjacent-substring match to a bounded-span regex, because
+ * score/page.tsx's milestone POST call now reads its response (via .then, to
+ * resolve a newly-earned stage) rather than firing it and discarding the
+ * result. The invariant itself — no rejection from this call reaches the
+ * outer evaluation catch — is unchanged and still asserted.
  */
 
 import * as fs from 'fs'
@@ -332,9 +339,31 @@ assert(
     /authFetch\('\/api\/milestones',\s*\{\s*method:\s*'POST'\s*\}\)/.test(scoreSrc),
     'INV-1: the score flow POSTs /api/milestones'
   )
+  // Phase 3 (the stage-crossing trigger, 2026-07-27) changed this call's
+  // SHAPE: the response is now READ (via .then, to resolve a newly-earned
+  // stage) rather than merely fired. The safety property this pin checks is
+  // unchanged — no rejection reaches the outer evaluation catch — so it now
+  // looks for a terminal .catch(() => {}) within a bounded span after the
+  // call, rather than requiring it immediately adjacent. The span is
+  // measured directly against the shipped file (406 chars as of the
+  // simultaneous-crossing mentor-verdict fold, up from 314 chars at the
+  // original Phase 3 build — re-measured, not left stale, each time the
+  // surrounding comment grows) with headroom — tight enough to still fail if
+  // the .catch is dropped or moved far away (INV-2b below proves this),
+  // loose enough to survive a small comment edit.
   assert(
-    scoreSrc.includes("authFetch('/api/milestones', { method: 'POST' }).catch("),
-    'INV-2: the score-flow POST carries its own catch (never the outer evaluation catch)'
+    /authFetch\('\/api\/milestones',\s*\{\s*method:\s*'POST'\s*\}\)[\s\S]{0,550}?\.catch\(\(\)\s*=>\s*\{\}\)/.test(scoreSrc),
+    'INV-2: the score-flow POST chain terminates in its own .catch(() => {}) — never the outer evaluation catch — even though Phase 3 now reads the response via .then() first'
+  )
+  // INV-2b — non-vacuity companion, matching the file's own INV-9-for-INV-6
+  // pattern: INV-2's regex must actually fail when the guard it checks is
+  // genuinely absent, or a typo'd pattern would render it permanently,
+  // silently green.
+  assert(
+    !/authFetch\('\/api\/milestones',\s*\{\s*method:\s*'POST'\s*\}\)[\s\S]{0,550}?\.catch\(\(\)\s*=>\s*\{\}\)/.test(
+      "authFetch('/api/milestones', { method: 'POST' }).then(async (res) => { if (!res.ok) return })"
+    ),
+    'INV-2b: the INV-2 regex genuinely fails on a call with no terminal .catch (non-vacuity)'
   )
   const insertIdx = scoreSrc.indexOf("from('action_evaluations_v3').insert")
   const postIdx = scoreSrc.indexOf("authFetch('/api/milestones'")

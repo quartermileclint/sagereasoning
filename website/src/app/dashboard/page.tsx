@@ -442,8 +442,20 @@ export default function DashboardPage() {
           {/* Practice Calendar */}
           {user && <PracticeCalendar userId={user.id} />}
 
-          {/* Milestones */}
-          {user && <MilestonesDisplay userId={user.id} />}
+          {/* Milestones. mostRecentProximity: `evaluations` is already sorted
+              newest-first (the query above orders `created_at` descending),
+              so evaluations[0] is exactly the current-condition signal the
+              mentor's simultaneous-crossing verdict (2026-07-27) requires —
+              passed down rather than re-fetched inside MilestonesDisplay
+              (data this page already has in hand). This branch only renders
+              when evaluations.length > 0, so evaluations[0] is always
+              defined here; `?? null` is defensive, not load-bearing. */}
+          {user && (
+            <MilestonesDisplay
+              userId={user.id}
+              mostRecentProximity={evaluations[0]?.katorthoma_proximity ?? null}
+            />
+          )}
 
           {/* Recent evaluations */}
           <div className="bg-white/60 border border-sage-200 rounded-lg p-8">

@@ -3,7 +3,7 @@
 **Stream:** founder (website build).
 **Governing frame:** `/adopted/standing-protocol-cache.md`.
 **Authored:** 2026-07-26, from the mentor consultation `inbox/mentor discussion about reminders for humans and agents.rtf` (verbatim source — commit with this plan) analysed against the verified current state.
-**Status:** Authored; the four scope elections below were made by the founder 2026-07-26 (AskUserQuestion). Build sessions commence on the founder's go. **Step M (mentor consultation, §10) gates the *content* of Phases 2–3 going live; Phases 0–1 carry only mentor-verbatim content and are not gated on it.**
+**Status:** Authored; the four scope elections below were made by the founder 2026-07-26 (AskUserQuestion). Build sessions commence on the founder's go. **Step M (mentor consultation, §10) gates the *content* of Phases 2–3 going live; Phases 0–1 carry only mentor-verbatim content and are not gated on it.** **UPDATED 2026-07-27: all five phases (0/1/2/3/4) are now BUILT + VERIFIED — this plan is COMPLETE.** Live on the founder's push. What remains: the companion agent plan (its own, separately-elected next step per E4), the R17 `milestones` data-rights gap (the arc's oldest carried item, Critical), and independent-review re-runs for Phases 0 and 1 (spend-limit casualties; Phase 3's own review ran independently from the outset).
 **Companion:** `2026-07-26-practice-reminders-AGENT-build-plan.md` (same source counsel; sequenced after this plan ships, per election E4).
 
 ---
@@ -207,7 +207,56 @@ Each phase is independently shippable; stopping at any phase boundary is a legit
 
 ## §8 Phase 3 — Stage-crossing trigger
 
-> **STATUS: CONTENT VETTED 2026-07-27 — Step M answered; Phase 3 is unblocked**
+> **STATUS: BUILT + VERIFIED 2026-07-27** (`D-PRACTICE-REMINDERS-HUMAN-PHASE3-STAGE-CROSSING-BUILT`;
+> close: `operations/handoffs/founder/2026-07-27-practice-reminders-human-phase3-stage-crossing-CLOSE.md`).
+> Live on the founder's push — no flag, no schema. **This completes the human plan** — Phases 0, 1,
+> 2 and 4 were already built; item 4 below (the cadence-banner restyle) was found ALREADY DONE by
+> Phase 4's own session, so item 1-3 are this session's actual build. Corrections and build
+> decisions, recorded rather than absorbed:
+> 1. **A found mechanical defect, fixed before shipping:** `score/page.tsx` already POSTs to
+>    `/api/milestones` after every evaluation and discards the response (Phase 0). Since that POST
+>    almost always lands BEFORE any dashboard visit, a dashboard-only card (item 1's literal framing)
+>    would have found the crossing already earned on MilestonesDisplay's own POST and shown nothing —
+>    firing only in the retroactive-catchup case, never the ordinary going-forward one. Fixed by
+>    mounting the same card on BOTH the score-result view and the dashboard, each independently
+>    resolving its own `new_milestones` response; whichever observes the crossing first shows it.
+> 2. **No client-side store was added** for "dismissible, never repeated" — the POST response's
+>    idempotency (a `stage_*` id can appear in `new_milestones` at most once, ever) already makes it
+>    true, permanently, across devices, which is the more robust of the two options this section's
+>    own successor prompt named ("localStorage vs a milestones-read derivation").
+> 3. **RESOLVED same-day by a targeted mentor consultation.** The multi-crossing tie-break
+>    ("highest rank wins") was flagged by adversarial review as an open question — the verbatim
+>    record never addressed the scenario where a retroactive catch-up earns several stage_* ids at
+>    once, and it is not rare (fires for most returning practitioners' first post-deploy visit). Put
+>    to the mentor (`operations/reminders-2026-07/2026-07-27-phase3-tiebreak-mentor-briefing.md` /
+>    `…-verdict-verbatim.md`, binding): highest-rank rejected ("not a mirror. It is a trophy"),
+>    lowest-rank rejected (the mirrored failure), silence rejected ("withholding orientation from
+>    the practitioners who have earned the most context"). **Adopted: disclose the plurality, and
+>    name the stage matching the practitioner's MOST RECENT EVALUATION — never the highest ever
+>    reached.** Built and verified same-day (`D-PRACTICE-REMINDERS-HUMAN-PHASE3-TIEBREAK-MENTOR-VERDICT-ADOPTED-AND-BUILT`)
+>    — `resolveNewlyEarnedStage` now requires the current-condition signal as a second parameter, and
+>    the card shows *"Your practice has moved through more than one condition. Where it stands now
+>    is ⟨X⟩…"* when more than one crossing was newly earned at once.
+> 4. **`StagePracticesList` was extracted mid-session** (not originally planned) after adversarial
+>    review found the original inline "no prerequisite gating" render in `MilestonesDisplay` was
+>    guarded only by a source-text pin a plausible refactor could defeat. The extraction makes the
+>    property true by construction (the component's props carry no earned/selection concept at all);
+>    both `MilestonesDisplay` and `/stages/<slug>` now delegate to it.
+>
+> **One review pass, genuinely independent.** The Workflow tool's opt-in gate wasn't met this
+> session, so the review ran as 4 parallel independent `Agent` calls rather than a Workflow — still
+> four fresh contexts blind to the build's own reasoning, and it found real defects: one HIGH
+> (`newlyEarnedStage` never reset between evaluations on `/score` — the THIRD time this exact
+> stale-suggestion-card bug class has appeared in this arc, after two prior fixes in Phase 2), one
+> MEDIUM-HIGH (the gating-guard fragility that motivated the `StagePracticesList` extraction), one
+> MEDIUM fixed (a single-fixture render-test gap), plus the open question above and two smaller
+> disclosed-not-fixed residuals (a narrow concurrent-POST race; a low-severity dashboard partial-
+> failure visual inconsistency). All folded into the same build session and re-verified —
+> see the decision-log entry for the full account.
+>
+> *(The block below is the pre-build vetting record, retained for the arc's history.)*
+>
+> **CONTENT VETTED 2026-07-27 — Step M answered; Phase 3 is unblocked**
 > (`D-PRACTICE-REMINDERS-STEP-M-MENTOR-VERDICTS-ADOPTED-2026-07-27`; verbatim record wins). Three
 > verdicts bind this phase's build:
 > 1. **The card NAMES the stage** — the earn-moment copy is REVISED to: *"Something has shifted in

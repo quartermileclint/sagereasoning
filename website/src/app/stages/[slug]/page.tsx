@@ -2,6 +2,8 @@
 
 import { useParams } from 'next/navigation'
 import { STAGE_DISPLAY } from '@/lib/brand-display'
+import { stagePracticesBySlug } from '@/lib/practice-sequence'
+import StagePracticesList from '@/components/StagePracticesList'
 
 /**
  * The Five Stages of Practice — one dedicated page per stage.
@@ -18,6 +20,14 @@ import { STAGE_DISPLAY } from '@/lib/brand-display'
  *
  * R1/R9: the Storm and the Worn Path describe difficult states — worded here,
  * as in milestones.ts, as honest recognition, not achievement-or-failure.
+ *
+ * PRACTICE REMINDERS, HUMAN PLAN PHASE 3 (build plan §8, item 2): each stage
+ * now names the practices its condition calls for ("view from above +
+ * oikeiosis"; "premeditatio + hupexairesis"; …), with the same doorbell lines
+ * the sequence module and the score-page/dashboard earn card use — one locked
+ * source (`STAGE_PRACTICES` in `practice-sequence.ts`), rendered wherever a
+ * stage is named. The Inner Fire has no practices; its own mentor line renders
+ * in their place, matching `STAGE_PRACTICES`' practices-XOR-note invariant.
  */
 export default function StagePage() {
   const params = useParams()
@@ -31,6 +41,8 @@ export default function StagePage() {
       </div>
     )
   }
+
+  const stagePractices = stagePracticesBySlug(slug)
 
   return (
     <div
@@ -58,6 +70,21 @@ export default function StagePage() {
           The Five Stages are not a fixed ladder — practice does not move in one direction,
           and recognising where you stand today says nothing about tomorrow.
         </p>
+
+        {stagePractices && stagePractices.practices.length > 0 && (
+          <div className="mt-10 pt-8 border-t text-left" style={{ borderColor: `${stage.color}40` }}>
+            <h2 className="font-display text-lg font-medium mb-5 text-center" style={{ color: stage.color }}>
+              Practices for this stage
+            </h2>
+            <StagePracticesList stagePractices={stagePractices} variant="full" />
+          </div>
+        )}
+
+        {stagePractices && stagePractices.practices.length === 0 && stagePractices.note && (
+          <div className="mt-10 pt-8 border-t" style={{ borderColor: `${stage.color}40` }}>
+            <StagePracticesList stagePractices={stagePractices} variant="full" />
+          </div>
+        )}
       </div>
     </div>
   )
