@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
 import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
+import { resolveViewFromAbove } from '@/lib/practice-sequence'
 import { getClient } from '@/lib/sage-reason-engine'
 import { isLlmOutage } from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
@@ -152,10 +153,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to save view from above entry' }, { status: 500 })
     }
 
+    // Phase 2 (the in-session trigger, Step M): additive — the field is absent
+    // when no vetted row fires (honest silence, never filler).
+    const suggested = resolveViewFromAbove(quality)
+
     return NextResponse.json({
       success: true,
       entry: data,
       quality_gate: calibrationBlock(quality),
+      ...(suggested ? { suggested_practice: suggested } : {}),
     })
   } catch (err) {
     console.error('View from above API error:', err)
@@ -218,10 +224,14 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to update entry' }, { status: 500 })
     }
 
+    // Phase 2: a revision is a save — the suggestion recomputes with the gate.
+    const suggested = resolveViewFromAbove(quality)
+
     return NextResponse.json({
       success: true,
       entry: data,
       quality_gate: calibrationBlock(quality),
+      ...(suggested ? { suggested_practice: suggested } : {}),
     })
   } catch (err) {
     console.error('View from above PATCH error:', err)

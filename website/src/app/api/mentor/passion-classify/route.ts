@@ -6,6 +6,11 @@ import { getClient } from '@/lib/sage-reason-engine'
 import { getStoicBrainContext } from '@/lib/context/stoic-brain-loader'
 import { isLlmOutage, llmOutageResponse } from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
+import {
+  PATTERN_CONSECUTIVE_MISSES,
+  resolvePassionClassification,
+  type SuggestedPractice,
+} from '@/lib/practice-sequence'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -55,7 +60,11 @@ export async function POST(request: NextRequest) {
       if (event_id) {
         await updatePassionEventClassification(userId, event_id, cached)
       }
-      return NextResponse.json({ ...cached, cached: true })
+      // The suggestion is computed FRESH per event, never cached — the cache
+      // key is (description, user_diagnosis), which is not user- or
+      // event-specific, while the pattern row reads this user's history.
+      const suggested = event_id ? await computeSuggestedPractice(userId, event_id, cached.classified_type) : null
+      return NextResponse.json({ ...cached, cached: true, ...(suggested ? { suggested_practice: suggested } : {}) })
     }
 
     // Load Stoic passion context for the classifier
@@ -122,10 +131,18 @@ Classify this passion event.`,
       await updatePassionEventClassification(userId, event_id, classification)
     }
 
+    // Phase 2 (the in-session trigger, Step M 6b): the ENGINE's reading drives
+    // the suggestion, so THIS response — where the engine's reading first
+    // exists — carries the full resolution (sub-species row first, the pattern
+    // row only when the entry-specific resolution yields nothing). The client
+    // replaces the save response's pattern-only suggestion with this one.
+    const suggested = event_id ? await computeSuggestedPractice(userId, event_id, classification.classified_type) : null
+
     return NextResponse.json({
       ...classification,
       cached: false,
       latency_ms: latencyMs,
+      ...(suggested ? { suggested_practice: suggested } : {}),
     })
   } catch (err) {
     console.error('Passion classify API error:', err)
@@ -139,6 +156,56 @@ Classify this passion event.`,
     })
     if (outage) return llmOutageResponse()
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+/**
+ * Phase 2 (the in-session trigger): resolve the suggestion for a just-saved,
+ * just-classified passion event, per the locked mapping in practice-sequence.
+ *
+ * The practitioner's reading is taken from the STORED row (the record, not the
+ * request echo); agreement is decided inside the resolver by deterministic id
+ * equality — the classifier's own `match` claim is never an input. Anchored to
+ * a persisted event only: without an event there is no entry for the
+ * suggestion to answer.
+ *
+ * Fail-soft toward silence: any read failure returns null. A suggestion is an
+ * affordance; its honest null is absence.
+ */
+async function computeSuggestedPractice(
+  userId: string,
+  eventId: string,
+  classifiedType: string
+): Promise<SuggestedPractice | null> {
+  try {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const { data: event } = await supabase
+      .from('passion_events')
+      .select('passion_type, caught_before_assent, created_at')
+      .eq('id', eventId)
+      .eq('user_id', userId)
+      .single()
+    if (!event) return null
+    const { data: prior } = await supabase
+      .from('passion_events')
+      .select('caught_before_assent')
+      .eq('user_id', userId)
+      .neq('id', eventId)
+      .lt('created_at', event.created_at)
+      .order('created_at', { ascending: false })
+      .limit(PATTERN_CONSECUTIVE_MISSES - 1)
+    return resolvePassionClassification({
+      practitionerReading: event.passion_type,
+      engineReading: classifiedType,
+      recentCaughtBeforeAssent: [
+        event.caught_before_assent as boolean,
+        // Raw pass-through: a null/unknown stored value breaks the pattern
+        // (fails toward silence) rather than being coerced into a miss.
+        ...(prior ?? []).map((r) => r.caught_before_assent as boolean),
+      ],
+    })
+  } catch {
+    return null
   }
 }
 

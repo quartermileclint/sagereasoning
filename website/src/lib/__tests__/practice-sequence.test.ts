@@ -50,9 +50,42 @@ import {
   MORNING_PRACTICE_ID,
   EVENING_RHYTHM_KEYS,
   type DailyRhythmInput,
+  // Phase 2 — the in-session trigger.
+  PASSION_SUGGESTION_TABLE,
+  PASSION_DISPLAY_LABELS,
+  PATTERN_CONSECUTIVE_MISSES,
+  PATTERN_SUGGESTION_LINE,
+  SCORE_SUGGESTION_LINE,
+  SUGGESTION_TAIL_STANDARD,
+  SUGGESTION_TAIL_DISCLOSURE,
+  VIEW_FROM_ABOVE_SUGGESTION_ROWS,
+  PREMEDITATIO_SUGGESTION_ROWS,
+  OIKEIOSIS_SUGGESTION_ROWS,
+  HUPEXAIRESIS_SUGGESTION_ROWS,
+  MORNING_SUGGESTION_ROWS,
+  SAGE_COMPASS_VAGUE_ROWS,
+  SAGE_COMPASS_FAR_ROWS,
+  composeStandardLine,
+  composeDisclosureLine,
+  resolvePassionLogPattern,
+  resolvePassionClassification,
+  resolveViewFromAbove,
+  resolvePremeditatio,
+  resolveOikeiosisQuarterly,
+  resolveHupexairesis,
+  resolveSageCompass,
+  resolveScoreEvaluation,
+  type SuggestedPractice,
 } from '../practice-sequence'
+import * as practiceSequenceModule from '../practice-sequence'
 // The CANONICAL stage vocabulary. Imported here ON PURPOSE — see note D above.
 import { STAGE_DISPLAY } from '../brand-display'
+// The CANONICAL passion + virtue vocabularies, same rationale: the lib may not
+// import stoic-brain (plan §11), so it declares local copies — and THIS test is
+// where each copy is held to the original. stoic-brain.ts is a zero-import pure
+// data module, safe to load here; importing it in a test edits nothing (the
+// logos suite's byte-identity guard checks file CONTENT, not importers).
+import { ROOT_PASSIONS, VIRTUE_DISPLAY } from '../stoic-brain'
 
 let passed = 0
 let failed = 0
@@ -572,7 +605,38 @@ const ALL_COPY = [
   ...Object.values(WELCOME_SEQUENCE_COPY),
   ...Object.values(DAILY_RHYTHM_COPY),
   ...STAGE_PRACTICES.map((s) => s.note ?? ''),
+  // Phase 2 — every user-visible suggestion surface, including the COMPOSED
+  // forms as they actually render (the standard line per firing passion row,
+  // and a representative disclosure line). silenceReason strings are excluded
+  // deliberately: they are build-record text, rendered nowhere.
+  ...PASSION_SUGGESTION_TABLE.flatMap((r) => [
+    r.basisPhrase ?? '',
+    r.practicePhrase ?? '',
+    r.target !== null && r.basisPhrase && r.practicePhrase
+      ? composeStandardLine(r.basisPhrase, r.practicePhrase)
+      : '',
+  ]),
+  ...Object.values(PASSION_DISPLAY_LABELS),
+  ...VIEW_FROM_ABOVE_SUGGESTION_ROWS.map((r) => r.line ?? ''),
+  ...PREMEDITATIO_SUGGESTION_ROWS.map((r) => r.line ?? ''),
+  ...OIKEIOSIS_SUGGESTION_ROWS.map((r) => r.line ?? ''),
+  ...HUPEXAIRESIS_SUGGESTION_ROWS.map((r) => r.line ?? ''),
+  ...MORNING_SUGGESTION_ROWS.map((r) => r.line ?? ''),
+  ...SAGE_COMPASS_VAGUE_ROWS.map((r) => r.line),
+  ...SAGE_COMPASS_FAR_ROWS.map((r) => r.line),
+  PATTERN_SUGGESTION_LINE,
+  SCORE_SUGGESTION_LINE,
+  composeDisclosureLine('Penthos (grief)', 'Agonia (anxiety)', 'Preparing for Adversity'),
 ].join(' ').toLowerCase()
+
+// The sweep-covers-new-copy meta-pin (the Phase 4 lesson: a guard that looks
+// like it covers the feature and does not is worse than no guard). If the
+// Phase 2 copy ever leaves ALL_COPY, this fails before any banned word can
+// slip through unswept.
+assert(
+  ALL_COPY.includes('suited to examining it further'),
+  'H0: the Phase 2 suggestion copy is inside the gamification sweep (meta-pin)'
+)
 
 for (const banned of ['streak', 'badge', 'points', 'leaderboard', 'level up', 'completion', 'completed', '100%', 'you have unlocked', 'congratulations', 'well done']) {
   assert(!ALL_COPY.includes(banned), `H1: no gamification language — '${banned}' must not appear in any user-visible string`)
@@ -920,6 +984,521 @@ for (const [key, value] of Object.entries(DAILY_RHYTHM_COPY)) {
 for (const href of [DAILY_RHYTHM_COPY.morningHref, DAILY_RHYTHM_COPY.eveningHref]) {
   const pageFile = path.join(websiteRoot, 'src/app', href.replace(/^\//, ''), 'page.tsx')
   assert(fs.existsSync(pageFile), `J6[${href}]: resolves to a real page — a typo'd href ships as a doorbell that opens onto a 404`)
+}
+
+// ─── K. Phase 2 — the in-session trigger (Step M vetted mapping) ───
+//
+// THE BINDING SOURCE for every expected value here is the VERBATIM record
+// (operations/reminders-2026-07/2026-07-27-step-M-mentor-verdicts-verbatim.md),
+// not plan §7's summary table. Silence rows are asserted as decisions, not
+// left as untested gaps — "the silence rows are doing important work."
+
+// K1 — the table covers exactly the canonical 20 sub-species, once each.
+const CANONICAL_PASSION_FAMILIES = ROOT_PASSIONS.filter((r) =>
+  ['epithumia', 'phobos', 'lupe', 'hedone'].includes(r.id)
+)
+const CANONICAL_SUB_SPECIES = CANONICAL_PASSION_FAMILIES.flatMap((r) =>
+  r.sub_species.map((s) => (typeof s === 'string' ? s : s.id))
+)
+assertEqual(CANONICAL_PASSION_FAMILIES.length, 4, 'K1a: the canonical taxonomy has the four root passion families')
+assertEqual(
+  [...PASSION_SUGGESTION_TABLE.map((r) => r.passion)].sort(),
+  [...CANONICAL_SUB_SPECIES].sort(),
+  'K1b: the mapping covers EXACTLY the canonical sub-species ids — no invented passion, none missing (anti-drift pin on the local copy)'
+)
+assert(
+  new Set(PASSION_SUGGESTION_TABLE.map((r) => r.passion)).size === PASSION_SUGGESTION_TABLE.length,
+  'K1c: one row per sub-species — the resolver can never face two rows for one reading'
+)
+
+// K2 — each row's family matches the canonical taxonomy's placement.
+for (const row of PASSION_SUGGESTION_TABLE) {
+  const canonicalFamily = CANONICAL_PASSION_FAMILIES.find((r) =>
+    r.sub_species.some((s) => (typeof s === 'string' ? s : s.id) === row.passion)
+  )
+  assert(
+    canonicalFamily?.id === row.family,
+    `K2[${row.passion}]: family '${row.family}' matches the canonical taxonomy ('${canonicalFamily?.id}')`
+  )
+}
+
+// K3 — the vetted targets, row by row (Step M).
+const passionTarget = (id: string) => PASSION_SUGGESTION_TABLE.find((r) => r.passion === id)?.target
+assertEqual(passionTarget('agonia'), 'premeditatio', 'K3a: agonia → premeditatio (anchor A1, confirmed — "both are future-facing")')
+assertEqual(passionTarget('oknos'), 'premeditatio', 'K3b: oknos → premeditatio (confirmed extension)')
+assertEqual(passionTarget('deima'), 'morning', 'K3c: deima → morning preparation (acute; "premeditatio … requires some distance from the impression")')
+assertEqual(passionTarget('thorybos'), 'morning', 'K3d: thorybos → morning preparation (acute)')
+assertEqual(passionTarget('thambos'), null, 'K3e: thambos → SILENCE ("silence is preferable to a weak suggestion")')
+assertEqual(passionTarget('aischyne'), 'passion-log', 'K3f: aischyne → the log revisited with the mirror principle (premeditatio DECLINED for shame; the mentor\'s first-named target elected)')
+for (const id of ['penthos', 'achos', 'eleos']) {
+  assertEqual(passionTarget(id), 'view-from-above', `K3g[${id}]: lupe (narrowed-frame distress) → view from above`)
+}
+for (const id of ['phthonos', 'zelotypia']) {
+  assertEqual(passionTarget(id), 'oikeiosis', `K3h[${id}]: lupe (comparison-borne) → oikeiosis — the mentor-directed split`)
+}
+for (const id of ['philodoxia', 'orge', 'pothos', 'philedonia', 'philoplousia', 'eros']) {
+  assertEqual(passionTarget(id), 'hupexairesis', `K3i[${id}]: any epithumia sub-species → hupexairesis ("the mapping is principled")`)
+}
+for (const id of ['kelesis', 'epichairekakia', 'terpsis']) {
+  assertEqual(passionTarget(id), null, `K3j[${id}]: the hedone family is DECLINED — honest silence`)
+}
+
+// K4 — structural: a row fires XOR it is a recorded silence decision.
+for (const row of PASSION_SUGGESTION_TABLE) {
+  const fires = row.target !== null
+  assert(
+    fires === (row.basisPhrase !== null) && fires === (row.practicePhrase !== null),
+    `K4a[${row.passion}]: line parts present exactly when the row fires`
+  )
+  assert(
+    fires === (row.silenceReason === null),
+    `K4b[${row.passion}]: a silence row carries its reason — a decision, not a gap`
+  )
+  if (fires) {
+    assert(
+      practiceById(row.target as string) !== null,
+      `K4c[${row.passion}]: target '${row.target}' is a real practice in the sequence`
+    )
+  }
+}
+
+// K5 — the disclosure labels: keys are the canonical 20; values are VERBATIM
+// the labels the practitioner chose from on the /passion-log form, so the
+// disclosure reflects their naming back in the words they named it with.
+assertEqual(
+  Object.keys(PASSION_DISPLAY_LABELS).sort(),
+  [...CANONICAL_SUB_SPECIES].sort(),
+  'K5a: PASSION_DISPLAY_LABELS covers exactly the canonical sub-species'
+)
+{
+  const logPageSrc = fs.readFileSync(path.join(websiteRoot, 'src', 'app', 'passion-log', 'page.tsx'), 'utf-8')
+  const labelsBlock = logPageSrc.slice(
+    logPageSrc.indexOf('const PASSION_LABELS'),
+    logPageSrc.indexOf('}', logPageSrc.indexOf('const PASSION_LABELS'))
+  )
+  assert(labelsBlock.length > 0, 'K5b: /passion-log declares PASSION_LABELS (if this fails, the page map was renamed and this pin needs updating)')
+  for (const [id, label] of Object.entries(PASSION_DISPLAY_LABELS)) {
+    assert(
+      labelsBlock.includes(`${id}: '${label}'`),
+      `K5c[${id}]: the lib label '${label}' matches the form label on /passion-log verbatim`
+    )
+  }
+}
+
+// K6 — the 6b branches (the verdict's own four cases + fail-toward-silence).
+{
+  const agree = resolvePassionClassification({ practitionerReading: 'agonia', engineReading: 'agonia' })
+  assertEqual(
+    agree,
+    {
+      practice_id: 'premeditatio',
+      href: '/premeditatio',
+      line: 'This entry showed agonia — dread of what might happen. Preparing for Adversity is suited to examining it further.',
+      basis: 'passion:agonia',
+    },
+    'K6a: AGREEMENT + engine fires → the STANDARD form, exact'
+  )
+
+  const disagree = resolvePassionClassification({ practitionerReading: 'penthos', engineReading: 'agonia' })
+  assertEqual(
+    disagree,
+    {
+      practice_id: 'premeditatio',
+      href: '/premeditatio',
+      line: 'You named this as Penthos (grief). The engine read it as Agonia (anxiety). Preparing for Adversity is suited to examining the difference.',
+      basis: 'passion:agonia',
+    },
+    'K6b: DISAGREEMENT + engine fires → the DISCLOSURE form, exact — the practitioner\'s reading visible, never silently overruled'
+  )
+
+  assert(
+    resolvePassionClassification({ practitionerReading: 'agonia', engineReading: 'thambos' }) === null,
+    'K6c: DISAGREEMENT + engine fires NOTHING → silence, even though the practitioner\'s reading would have fired — the engine\'s reading governs, and the disagreement itself is never a trigger'
+  )
+  assert(
+    resolvePassionClassification({ practitionerReading: 'thambos', engineReading: 'thambos' }) === null,
+    'K6d: agreement on a silence row → silence'
+  )
+  assert(
+    resolvePassionClassification({ practitionerReading: 'agonia', engineReading: 'anxiety' }) === null,
+    'K6e: an out-of-vocabulary engine reading is NOT a diagnosis — fail toward silence, never toward a guessed suggestion'
+  )
+  // The engine's reading drives the row even when the PRACTITIONER's reading is
+  // the out-of-vocabulary one (labels fall back to the raw id — honest, and
+  // unreachable in practice since the route validates the vocabulary).
+  const rawFallback = resolvePassionClassification({ practitionerReading: 'not-a-passion', engineReading: 'agonia' })
+  assert(
+    rawFallback !== null && rawFallback.line.includes('not-a-passion'),
+    'K6f: an unknown practitioner reading falls back to the raw id in the disclosure line rather than fabricating a label'
+  )
+  // Deterministic equality is the ONLY agreement decider: the resolver takes no
+  // `match` input (structural — TypeScript), so the classifier's own claim
+  // cannot flip the form. Same ids → standard; different ids → disclosure.
+  const sameIds = resolvePassionClassification({ practitionerReading: 'orge', engineReading: 'orge' })
+  assert(
+    sameIds !== null && sameIds.line.startsWith('This entry showed'),
+    'K6g: identical ids → standard form (equality is the decider, not the classifier\'s match claim)'
+  )
+}
+
+// K7 — row 5, the PATTERN rule: three consecutive misses, never fewer, never
+// a single instance ("a single failure … is normal").
+assertEqual(PATTERN_CONSECUTIVE_MISSES, 3, 'K7a: the pattern window is three consecutive entries')
+{
+  const fires = resolvePassionLogPattern([false, false, false])
+  assertEqual(
+    fires,
+    { practice_id: 'morning', href: '/morning', line: PATTERN_SUGGESTION_LINE, basis: 'passion-pattern:not-caught' },
+    'K7b: three consecutive not-caught → morning preparation, exact'
+  )
+  assert(resolvePassionLogPattern([false]) === null, 'K7c: a single miss is normal — no suggestion')
+  assert(resolvePassionLogPattern([false, false]) === null, 'K7d: two entries are not the pattern')
+  assert(resolvePassionLogPattern([false, false, true]) === null, 'K7e: a catch inside the window breaks the pattern')
+  assert(resolvePassionLogPattern([true, false, false]) === null, 'K7f: the entry just saved was caught — no pattern')
+  assert(
+    resolvePassionLogPattern([false, false, false, true, true])?.basis === 'passion-pattern:not-caught',
+    'K7g: only the newest three are consulted — older catches do not undo the pattern'
+  )
+  assert(
+    resolvePassionLogPattern([false, undefined as unknown as boolean, false]) === null,
+    'K7h: an unreadable value in the window fails toward silence, never toward a claimed pattern'
+  )
+}
+
+// K8 — precedence inside one resolution: the entry-specific row first, the
+// pattern only when the entry-specific resolution yields nothing.
+{
+  const both = resolvePassionClassification({
+    practitionerReading: 'agonia',
+    engineReading: 'agonia',
+    recentCaughtBeforeAssent: [false, false, false],
+  })
+  assert(both?.basis === 'passion:agonia', 'K8a: sub-species row outranks the pattern row — ONE suggestion, the entry\'s own diagnosis first')
+  const patternOnly = resolvePassionClassification({
+    practitionerReading: 'thambos',
+    engineReading: 'thambos',
+    recentCaughtBeforeAssent: [false, false, false],
+  })
+  assert(patternOnly?.basis === 'passion-pattern:not-caught', 'K8b: an engine silence row does not suppress the pattern row — it keys on the catch history, not the classification')
+  assert(
+    resolvePassionClassification({
+      practitionerReading: 'thambos',
+      engineReading: 'thambos',
+      recentCaughtBeforeAssent: [true, false, false],
+    }) === null,
+    'K8c: silence row + no pattern → silence'
+  )
+}
+
+// K9 — rows 6 + 7, view from above.
+{
+  const minimised = resolveViewFromAbove('minimised')
+  assertEqual(
+    minimised,
+    {
+      practice_id: 'passion-log',
+      href: '/passion-log',
+      line: 'This entry showed the concern read smaller rather than seen in proportion. The Passion Log is suited to examining it further.',
+      basis: 'view-from-above:minimised',
+    },
+    'K9a: minimised → the passion log, exact (row 6 confirmed)'
+  )
+  assert(resolveViewFromAbove('unchanged') === null, 'K9b: unchanged → SILENCE (row 7 — "the goal is not to produce movement"; repeated-unchanged is stage-crossing data)')
+  assert(resolveViewFromAbove('calibrated') === null, 'K9c: calibrated → silence (no vetted row)')
+  assert(resolveViewFromAbove('recalibrated') === null, 'K9d: an unknown/drifted value fails toward silence')
+  assert(
+    VIEW_FROM_ABOVE_SUGGESTION_ROWS.some((r) => r.signal === 'unchanged' && r.silenceReason !== null) &&
+      VIEW_FROM_ABOVE_SUGGESTION_ROWS.some((r) => r.signal === 'calibrated' && r.silenceReason !== null),
+    'K9e: both silence outcomes are EXPLICIT rows carrying their reasons'
+  )
+}
+
+// K10 — row 8, premeditatio.
+{
+  const generic = resolvePremeditatio(true)
+  assertEqual(
+    generic,
+    {
+      practice_id: 'passion-log',
+      href: '/passion-log',
+      line: 'This entry showed the difficulty held in the abstract rather than named. The Passion Log is suited to examining it further.',
+      basis: 'premeditatio:generic',
+    },
+    'K10a: a generic preparation → the passion log, exact (row 8 confirmed — the log asks for the specificity the entry lacked)'
+  )
+  assert(resolvePremeditatio(false) === null, 'K10b: a specific preparation → silence (no vetted row)')
+}
+
+// K11 — row 9, the quarterly oikeiosis philodoxia flag.
+{
+  const flagged = resolveOikeiosisQuarterly(true)
+  assertEqual(
+    flagged,
+    {
+      practice_id: 'passion-log',
+      href: '/passion-log',
+      line: 'This entry showed philodoxia — the extension carrying a return of standing with it. The Passion Log is suited to examining it further.',
+      basis: 'oikeiosis:philodoxia_flagged',
+    },
+    'K11a: philodoxia flagged → the passion log, exact (row 9 confirmed — examine the contamination specifically)'
+  )
+  assert(resolveOikeiosisQuarterly(false) === null, 'K11b: not flagged → silence')
+}
+
+// K12 — row 10, REVISED at Step M: morning preparation, NOT view-from-above.
+{
+  const notSeparated = resolveHupexairesis(false)
+  assertEqual(
+    notSeparated,
+    {
+      practice_id: 'morning',
+      href: '/morning',
+      line: 'This entry showed the action and its outcome held as one thing. Morning Preparation is suited to examining it further.',
+      basis: 'hupexairesis:not_separated',
+    },
+    'K12a: action/outcome not separated → MORNING PREPARATION — the REVISED row 10 (a control-filter failure, not a proportion failure)'
+  )
+  assert(notSeparated?.practice_id !== ('view-from-above' as string), 'K12b: the pre-vetting draft target (view-from-above) is NOT used — the revision is live')
+  assert(resolveHupexairesis(true) === null, 'K12c: separated → silence')
+}
+
+// K13 — rows 11 + 12, the sage compass.
+{
+  for (const row of SAGE_COMPASS_VAGUE_ROWS) {
+    const got = resolveSageCompass({ expressionQuality: 'vague', distanceReading: null, virtueEngaged: row.virtue })
+    assertEqual(
+      got,
+      { practice_id: 'logos', href: row.href, line: row.line, basis: `sage-compass:vague:${row.virtue}` },
+      `K13a[${row.virtue}]: vague expression → the logos foundation, linked to the NAMED virtue's section (row 11 design note)`
+    )
+  }
+  const farExpected: Record<string, string> = {
+    justice: 'oikeiosis',
+    temperance: 'passion-log',
+    courage: 'premeditatio',
+    wisdom: 'morning',
+  }
+  for (const [virtue, target] of Object.entries(farExpected)) {
+    const got = resolveSageCompass({ expressionQuality: 'concrete', distanceReading: 'far', virtueEngaged: virtue })
+    assert(got?.practice_id === target, `K13b[${virtue}]: distance marked far → ${target} (row 12 — wisdom "the best available fit")`)
+    assert(got !== null && got.basis === `sage-compass:far:${virtue}`, `K13c[${virtue}]: far-row basis key`)
+  }
+  assert(
+    resolveSageCompass({ expressionQuality: 'vague', distanceReading: 'far', virtueEngaged: 'justice' })?.practice_id === 'logos',
+    'K13d: PRECEDENCE — vague expression outranks far distance; a distance marked from a bearing still in outline rests on the unexamined expression'
+  )
+  assert(
+    resolveSageCompass({ expressionQuality: 'concrete', distanceReading: 'close', virtueEngaged: 'justice' }) === null,
+    'K13e: close → silence (only far is a vetted row)'
+  )
+  assert(
+    resolveSageCompass({ expressionQuality: 'concrete', distanceReading: 'some_way', virtueEngaged: 'justice' }) === null,
+    'K13f: some_way → silence'
+  )
+  assert(
+    resolveSageCompass({ expressionQuality: 'concrete', distanceReading: null, virtueEngaged: 'justice' }) === null,
+    'K13g: no distance marked → silence (the reading is optional, practitioner-selected capture)'
+  )
+  assert(
+    resolveSageCompass({ expressionQuality: 'oddly-drifted', distanceReading: 'far', virtueEngaged: 'justice' }) === null,
+    'K13h: an unknown expression quality fails toward silence — the far row requires a CONCRETE reading, not merely a non-vague one'
+  )
+  assert(
+    resolveSageCompass({ expressionQuality: 'vague', distanceReading: null, virtueEngaged: 'prudence' }) === null,
+    'K13i: an unknown virtue fails toward silence'
+  )
+
+  // The anchors: every vague-row fragment is a canonical virtue id, and /logos
+  // actually renders those ids as section anchors (both directions).
+  const virtueIds = VIRTUE_DISPLAY.map((v) => v.id)
+  const logosSrc = fs.readFileSync(path.join(websiteRoot, 'src', 'app', 'logos', 'page.tsx'), 'utf-8')
+  const unityGrid = logosSrc.slice(logosSrc.indexOf('VIRTUE_DISPLAY.map'))
+  assert(
+    /id=\{virtue\.id\}/.test(unityGrid),
+    'K13j: /logos renders the per-virtue anchors (id={virtue.id}) on the unity-of-virtue grid — without this, every row-11 link opens the page top and the design note is silently unmet'
+  )
+  for (const row of SAGE_COMPASS_VAGUE_ROWS) {
+    const fragment = row.href.split('#')[1]
+    assert(
+      virtueIds.includes(fragment as (typeof virtueIds)[number]),
+      `K13k[${row.virtue}]: the anchor '#${fragment}' is a canonical VIRTUE_DISPLAY id`
+    )
+  }
+  assertEqual(
+    SAGE_COMPASS_VAGUE_ROWS.map((r) => r.virtue).sort(),
+    ['courage', 'justice', 'temperance', 'wisdom'],
+    'K13l: the vague rows cover exactly the compass\'s four virtues'
+  )
+  assertEqual(
+    SAGE_COMPASS_FAR_ROWS.map((r) => r.virtue).sort(),
+    ['courage', 'justice', 'temperance', 'wisdom'],
+    'K13m: the far rows cover exactly the compass\'s four virtues'
+  )
+}
+
+// K14 — row 13, the action evaluation.
+{
+  assert(resolveScoreEvaluation(0) === null, 'K14a: no passions detected → silence')
+  const one = resolveScoreEvaluation(1)
+  assertEqual(
+    one,
+    { practice_id: 'passion-log', href: '/passion-log', line: SCORE_SUGGESTION_LINE, basis: 'score:passions-detected' },
+    'K14b: passions detected → the passion log, exact (row 13 confirmed)'
+  )
+  assert(resolveScoreEvaluation(3)?.practice_id === 'passion-log', 'K14c: count above one fires the same single row')
+  assert(resolveScoreEvaluation(Number.NaN) === null, 'K14d: an unreadable count fails toward silence')
+  assert(resolveScoreEvaluation(-1) === null, 'K14e: a negative count fails toward silence')
+}
+
+// K15 — row 14, the morning tool: BOTH rows silence; NO resolver exists; the
+// morning route is deliberately untouched by Phase 2.
+{
+  assert(
+    MORNING_SUGGESTION_ROWS.every((r) => r.target === null && r.line === null && r.silenceReason !== null),
+    'K15a: every morning row is an explicit silence decision (row 14 + the DEFERRED anchor A2)'
+  )
+  assertEqual(
+    MORNING_SUGGESTION_ROWS.map((r) => r.signal).sort(),
+    ['prepared', 'vague'],
+    'K15b: the morning rows cover the gate\'s whole vocabulary'
+  )
+  assert(
+    !Object.keys(practiceSequenceModule).some((k) => /^resolveMorning/i.test(k)),
+    'K15c: no morning resolver export exists — a suggestion surface for a tool whose every row is silence would be dead machinery inviting a future row A2 explicitly defers'
+  )
+}
+
+// K16 — the one-suggestion invariant + response-shape lock.
+{
+  const samples: (SuggestedPractice | null)[] = [
+    resolvePassionClassification({ practitionerReading: 'agonia', engineReading: 'agonia' }),
+    resolvePassionClassification({ practitionerReading: 'penthos', engineReading: 'agonia' }),
+    resolvePassionLogPattern([false, false, false]),
+    resolveViewFromAbove('minimised'),
+    resolvePremeditatio(true),
+    resolveOikeiosisQuarterly(true),
+    resolveHupexairesis(false),
+    resolveSageCompass({ expressionQuality: 'vague', distanceReading: null, virtueEngaged: 'justice' }),
+    resolveSageCompass({ expressionQuality: 'concrete', distanceReading: 'far', virtueEngaged: 'courage' }),
+    resolveScoreEvaluation(2),
+  ]
+  for (const s of samples) {
+    assert(s !== null, 'K16a: sample resolution fires (fixture sanity)')
+    if (s) {
+      assertEqual(
+        Object.keys(s).sort(),
+        ['basis', 'href', 'line', 'practice_id'],
+        'K16b: a suggestion is exactly {practice_id, href, line, basis} — never a menu, never a second suggestion smuggled in an extra field'
+      )
+      assert(s.line.length > 0 && !s.line.includes('undefined') && !s.line.includes('null'), 'K16c: the line is a complete sentence with no unfilled slot')
+    }
+  }
+}
+
+// K17 — every firing href opens onto a real page (fragments stripped), and
+// every target is a real tracked practice or the prerequisite reading.
+{
+  const firingHrefs = new Set<string>()
+  for (const row of PASSION_SUGGESTION_TABLE) {
+    if (row.target) firingHrefs.add(practiceById(row.target)!.href)
+  }
+  for (const rows of [VIEW_FROM_ABOVE_SUGGESTION_ROWS, PREMEDITATIO_SUGGESTION_ROWS, OIKEIOSIS_SUGGESTION_ROWS, HUPEXAIRESIS_SUGGESTION_ROWS]) {
+    for (const row of rows) if (row.target) firingHrefs.add(practiceById(row.target)!.href)
+  }
+  for (const row of SAGE_COMPASS_VAGUE_ROWS) firingHrefs.add(row.href)
+  for (const row of SAGE_COMPASS_FAR_ROWS) firingHrefs.add(practiceById(row.target)!.href)
+  firingHrefs.add('/morning') // the pattern row
+  firingHrefs.add('/passion-log') // the score row
+  for (const href of firingHrefs) {
+    const pageFile = path.join(websiteRoot, 'src/app', href.split('#')[0].replace(/^\//, ''), 'page.tsx')
+    assert(fs.existsSync(pageFile), `K17[${href}]: resolves to a real page — a typo'd href ships as a doorbell that opens onto a 404`)
+  }
+}
+
+// K18 — the VERBATIM whole-table pins (the J4 precedent: constraint-1 copy
+// gets the strongest available pin; changing any string requires changing
+// this test too, deliberately).
+assertEqual(SUGGESTION_TAIL_STANDARD, 'is suited to examining it further.', 'K18a: the standard tail, verbatim')
+assertEqual(SUGGESTION_TAIL_DISCLOSURE, 'is suited to examining the difference.', 'K18b: the disclosure tail, verbatim (the 6b verdict\'s own phrase)')
+assertEqual(
+  composeStandardLine('agonia — dread of what might happen', 'Preparing for Adversity'),
+  'This entry showed agonia — dread of what might happen. Preparing for Adversity is suited to examining it further.',
+  'K18c: the standard form composes exactly — "this is what I found … and then stops"'
+)
+assertEqual(
+  composeDisclosureLine('Penthos (grief)', 'Agonia (anxiety)', 'Preparing for Adversity'),
+  'You named this as Penthos (grief). The engine read it as Agonia (anxiety). Preparing for Adversity is suited to examining the difference.',
+  'K18d: the disclosure form composes exactly — both readings visible, the practice reframed as examining the gap'
+)
+assertEqual(
+  PATTERN_SUGGESTION_LINE,
+  'This entry, and the two before it, showed the impression assented to before it was caught. Morning Preparation is suited to examining it further.',
+  'K18e: the pattern line, verbatim — it names the window honestly and stops'
+)
+assertEqual(
+  SCORE_SUGGESTION_LINE,
+  'This evaluation showed passions present in the reasoning. The Passion Log is suited to examining them further.',
+  'K18f: the score line, verbatim'
+)
+assertEqual(
+  PASSION_SUGGESTION_TABLE.filter((r) => r.target !== null).map((r) => `${r.basisPhrase}|${r.practicePhrase}`),
+  [
+    'agonia — dread of what might happen|Preparing for Adversity',
+    'oknos — shrinking from an action still ahead|Preparing for Adversity',
+    'deima — terror in the moment|Morning Preparation',
+    'thorybos — inner turmoil in the moment|Morning Preparation',
+    "aischyne — shame before others' judgement|This log, revisited with the mirror principle in view,",
+    'penthos — grief|The View From Above',
+    'achos — distress pressing close|The View From Above',
+    'eleos — pity|The View From Above',
+    "phthonos — envy at another's good|Expanding Your Circle of Concern",
+    'zelotypia — jealousy|Expanding Your Circle of Concern',
+    'philodoxia — craving for standing|The Reserve Clause',
+    'orge — anger|The Reserve Clause',
+    'pothos — longing|The Reserve Clause',
+    'philedonia — craving for pleasure|The Reserve Clause',
+    'philoplousia — craving for wealth|The Reserve Clause',
+    'eros — consuming desire|The Reserve Clause',
+  ],
+  'K18g: every passion basis + practice phrase, verbatim, in table order'
+)
+assertEqual(
+  SAGE_COMPASS_VAGUE_ROWS.map((r) => r.line),
+  [
+    'This entry showed the expression of wisdom still in outline. The logos foundation on wisdom is suited to grounding it.',
+    'This entry showed the expression of justice still in outline. The logos foundation on justice is suited to grounding it.',
+    'This entry showed the expression of courage still in outline. The logos foundation on courage is suited to grounding it.',
+    'This entry showed the expression of temperance still in outline. The logos foundation on temperance is suited to grounding it.',
+  ],
+  'K18h: the four re-grounding lines, verbatim'
+)
+assertEqual(
+  SAGE_COMPASS_FAR_ROWS.map((r) => r.line),
+  [
+    'This entry marked the distance from justice as far. Expanding Your Circle of Concern is suited to examining it further.',
+    'This entry marked the distance from temperance as far. The Passion Log is suited to examining it further.',
+    'This entry marked the distance from courage as far. Preparing for Adversity is suited to examining it further.',
+    'This entry marked the distance from wisdom as far. Morning Preparation is suited to examining it further.',
+  ],
+  'K18i: the four far-distance lines, verbatim — "marked" reflects the practitioner\'s own selection back; the distance is never a verdict'
+)
+
+// K19 — the aischyne same-tool row renders as an invitation, not a navigation
+// loop: its target IS the passion log, which the card treats as link-free when
+// the practitioner is already there (asserted in the card's render suite; here
+// we pin the data that makes it reachable).
+{
+  const aischyne = resolvePassionClassification({ practitionerReading: 'aischyne', engineReading: 'aischyne' })
+  assertEqual(
+    aischyne,
+    {
+      practice_id: 'passion-log',
+      href: '/passion-log',
+      line: 'This entry showed aischyne — shame before others\' judgement. This log, revisited with the mirror principle in view, is suited to examining it further.',
+      basis: 'passion:aischyne',
+    },
+    'K19: the aischyne row, exact — the log revisited with the mirror principle in view'
+  )
 }
 
 /** Run a probe expected to FAIL, with its console noise suppressed, and report

@@ -137,6 +137,21 @@ for (const rel of TARGET_FILES) {
   }
 }
 
+// ─── Phase 2 non-wiring pin (the in-session trigger, Step M row 14) ───
+//
+// The morning tool's every vetted row is SILENCE ("a second suggestion on top
+// of [the retry prompt] would be noise") and anchor A2 is a DEFERRED anchor —
+// "the tool should not be changed to fit the mapping." The route therefore
+// deliberately carries NO suggestion machinery; this pin keeps that silence a
+// decision rather than letting it decay into a wired suggestion unnoticed.
+{
+  const src = fs.readFileSync(path.join(websiteRoot, 'src/app/api/mentor/morning/route.ts'), 'utf-8')
+  assert(
+    !src.includes('suggested_practice') && !src.includes('practice-sequence'),
+    'morning route: deliberately suggestion-free — every vetted row is silence (Step M row 14; A2 deferred)'
+  )
+}
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed')
 if (failed > 0) {
   console.error('\nFailures:')

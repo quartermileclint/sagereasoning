@@ -44,7 +44,7 @@
  * accompanying test, so a local copy cannot silently drift.
  *
  * WHAT THIS FILE IS NOT. No I/O, no clock, no env, no React, no DB client. It is
- * data plus three pure functions. `PRACTICE_SOURCE_TABLES` holds table NAMES as
+ * data plus pure functions. `PRACTICE_SOURCE_TABLES` holds table NAMES as
  * plain strings — a string is not an import, and keeping the names beside the
  * steps is what lets the test pin that every tracked step has a source and every
  * source belongs to a step.
@@ -774,3 +774,534 @@ export const WELCOME_SEQUENCE_COPY = {
     'Alongside the sequence, two things recur: score an action as one arises, and keep the journal in the evening. The morning declares the intention; the evening looks at whether it held.',
   toolsHeading: 'The practices, in sequence',
 } as const
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Phase 2 — the IN-SESSION trigger (the mentor-vetted mapping, Step M 2026-07-27)
+// ═════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Practice reminders, human plan Phase 2 (plan §7): "the suggestion emerges
+ * from the diagnosis, not from a schedule."
+ *
+ * THE BINDING SOURCE IS THE VERBATIM STEP M RECORD —
+ * `operations/reminders-2026-07/2026-07-27-step-M-mentor-verdicts-verbatim.md`.
+ * It wins over plan §7's table and over every comment in this section.
+ *
+ * WHAT THIS SECTION IS. One locked mapping from each tool's STORED
+ * classification to AT MOST ONE suggested next practice, with every silence
+ * row explicit. Both governing design choices are mentor-CONFIRMED: one
+ * suggestion, never a menu ("a menu converts the suggestion into a choice
+ * exercise"), and honest silence over filler ("the silence is itself
+ * information"). The silence rows below are therefore rows, not gaps — "the
+ * silence rows are doing important work … they are what prevents the system
+ * from feeling supervised."
+ *
+ * COPY DISCIPLINE. Every user-visible line is pre-authored HERE and pinned
+ * verbatim by the unit suite. The one composed form is the 6b DISCLOSURE line,
+ * assembled by a pure function from the pinned template and the pinned label
+ * map — never authored at runtime, never by an LLM. Each line names what was
+ * found and which practice suits examining it, and then STOPS (plan §1
+ * constraint 5): no conclusion, no feeling, no verdict.
+ *
+ * WHOSE READING GOVERNS (the Step M 6b verdict, binding): THE ENGINE'S, with
+ * disclosure on disagreement. Where practitioner and engine disagree AND the
+ * engine's reading fires a suggestion, the line takes the disclosure form —
+ * the practitioner's reading made visible, never silently overruled. Agreement
+ * → the standard form. The engine's reading fires nothing → silence, whatever
+ * the practitioner's reading would have fired. The disagreement itself is
+ * NEVER a trigger. Agreement is decided by DETERMINISTIC id equality here —
+ * never by the classifier's own LLM-authored `match` claim.
+ *
+ * FAIL TOWARD SILENCE. An unknown or drifted signal value never fires a row;
+ * a missing engine reading is not a diagnosis. A suggestion is an affordance,
+ * and its honest null is absence — the same rule as `met: null` above.
+ *
+ * NOTHING IS PERSISTED. A suggestion is a response field and a rendering,
+ * computed at the save moment (in-session) and gone on reload. It is not a
+ * column, not a score, not an input to anything.
+ */
+
+/** The shape each save response may additively carry — at most one. */
+export interface SuggestedPractice {
+  /** The suggested practice ('logos' on the re-grounding rows). */
+  practice_id: PracticeId
+  /** Where the doorbell opens. May carry a `#section` anchor for /logos. */
+  href: string
+  /** The full pre-authored (or disclosure-composed) line. */
+  line: string
+  /** The machine row key, e.g. 'passion:agonia' — provenance, not prose. */
+  basis: string
+}
+
+// ─── The two line forms (Step M; §7 mechanism + the 6b verdict) ───
+
+/**
+ * The standard form: "This entry showed ⟨basis⟩. ⟨Practice⟩ is suited to
+ * examining it further." Standard lines are FULLY pre-authored per row below;
+ * these two functions exist so the composed 6b form and the handful of
+ * uniform-tail rows share one pinned tail each, and the unit suite can hold
+ * every composition to an exact expected string.
+ */
+export const SUGGESTION_TAIL_STANDARD = 'is suited to examining it further.'
+export const SUGGESTION_TAIL_DISCLOSURE = 'is suited to examining the difference.'
+
+export function composeStandardLine(basisPhrase: string, practicePhrase: string): string {
+  return `This entry showed ${basisPhrase}. ${practicePhrase} ${SUGGESTION_TAIL_STANDARD}`
+}
+
+/**
+ * The 6b disclosure form, mentor verbatim shape: "You named this as
+ * ⟨practitioner's reading⟩. The engine read it as ⟨engine's reading⟩.
+ * ⟨Practice⟩ is suited to examining the difference." — the practitioner's
+ * reading made visible, the engine's reading made visible, and the practice
+ * reframed as an examination of the gap, never a correction.
+ */
+export function composeDisclosureLine(
+  practitionerLabel: string,
+  engineLabel: string,
+  practicePhrase: string
+): string {
+  return `You named this as ${practitionerLabel}. The engine read it as ${engineLabel}. ${practicePhrase} ${SUGGESTION_TAIL_DISCLOSURE}`
+}
+
+// ─── The passion vocabulary, locally declared (see the file header) ───
+
+export type PassionFamily = 'epithumia' | 'phobos' | 'lupe' | 'hedone'
+
+/**
+ * Display labels for the 6b disclosure line — VERBATIM the labels the
+ * practitioner chose from on the passion-log form (`/passion-log`'s own
+ * PASSION_LABELS), so the disclosure reflects their naming back in the very
+ * words they named it with. The unit suite pins this map against the page
+ * source and its keys against the canonical `ROOT_PASSIONS` sub-species ids.
+ */
+export const PASSION_DISPLAY_LABELS: Readonly<Record<string, string>> = {
+  philodoxia: 'Philodoxia (love of honour)',
+  orge: 'Orge (anger)',
+  pothos: 'Pothos (longing)',
+  philedonia: 'Philedonia (love of pleasure)',
+  philoplousia: 'Philoplousia (love of wealth)',
+  eros: 'Eros (erotic love)',
+  agonia: 'Agonia (anxiety)',
+  oknos: 'Oknos (hesitation/avoidance)',
+  aischyne: 'Aischyne (shame)',
+  deima: 'Deima (terror)',
+  thambos: 'Thambos (shock)',
+  thorybos: 'Thorybos (inner turmoil)',
+  penthos: 'Penthos (grief)',
+  phthonos: 'Phthonos (envy)',
+  zelotypia: 'Zelotypia (jealousy)',
+  eleos: 'Eleos (pity)',
+  achos: 'Achos (distress)',
+  kelesis: 'Kelesis (enchantment)',
+  epichairekakia: 'Epichairekakia (malicious joy)',
+  terpsis: 'Terpsis (delight in wrong)',
+}
+
+// ─── The passion-log mapping (Step M rows 1–4 + the family verdicts) ───
+
+export interface PassionSuggestionRow {
+  passion: string
+  family: PassionFamily
+  /** null = an explicit honest-silence row, never a missing one. */
+  target: PracticeId | null
+  /** Pre-authored ⟨basis⟩ phrase — what this entry showed. */
+  basisPhrase: string | null
+  /** Pre-authored ⟨Practice⟩ phrase for the line's second sentence. */
+  practicePhrase: string | null
+  /** The verdict grounding a silence row, recorded so the row reads as a decision. */
+  silenceReason: string | null
+}
+
+/**
+ * The vetted per-sub-species mapping. The phobos generalisation was an
+ * OVERREACH (Step M): "do not generalise to the whole phobos family."
+ *
+ *  · agonia + oknos → premeditatio (both anticipatory; the anchor + the sound
+ *    extension). deima + thorybos → morning preparation (acute, present-tense;
+ *    "premeditatio … requires some distance from the impression"; morning prep
+ *    is the closest available proxy for the control filter). thambos →
+ *    SILENCE. aischyne → this log revisited with the mirror principle in view
+ *    (shame is evaluative, not anticipatory; premeditatio declined; the
+ *    mentor's first-named, more principled target — a build decision inside
+ *    the verdict's bounds, rendered as an invitation line without a
+ *    navigation link, since it points at the page the practitioner is on).
+ *  · lupe splits: penthos, achos, eleos → view from above (narrowed-frame
+ *    distress); phthonos, zelotypia → oikeiosis (comparison-borne — "treating
+ *    their good as a threat").
+ *  · ANY epithumia sub-species → hupexairesis ("craving is precisely where
+ *    equanimity becomes contingent on an outcome").
+ *  · The hedone family is DECLINED — honest silence ("if no practice fits
+ *    cleanly, silence is preferable").
+ */
+export const PASSION_SUGGESTION_TABLE: readonly PassionSuggestionRow[] = [
+  // Phobos — differentiated, per the verdict.
+  { passion: 'agonia', family: 'phobos', target: 'premeditatio', basisPhrase: 'agonia — dread of what might happen', practicePhrase: 'Preparing for Adversity', silenceReason: null },
+  { passion: 'oknos', family: 'phobos', target: 'premeditatio', basisPhrase: 'oknos — shrinking from an action still ahead', practicePhrase: 'Preparing for Adversity', silenceReason: null },
+  { passion: 'deima', family: 'phobos', target: 'morning', basisPhrase: 'deima — terror in the moment', practicePhrase: 'Morning Preparation', silenceReason: null },
+  { passion: 'thorybos', family: 'phobos', target: 'morning', basisPhrase: 'thorybos — inner turmoil in the moment', practicePhrase: 'Morning Preparation', silenceReason: null },
+  { passion: 'thambos', family: 'phobos', target: null, basisPhrase: null, practicePhrase: null, silenceReason: 'Mentor-directed: "silence is preferable to a weak suggestion."' },
+  // The practicePhrase carries its own closing comma: it is an appositive
+  // ("This log, revisited …, is suited …"), and the composer joins phrases
+  // mechanically — the K19 verbatim pin is what caught this.
+  { passion: 'aischyne', family: 'phobos', target: 'passion-log', basisPhrase: "aischyne — shame before others' judgement", practicePhrase: 'This log, revisited with the mirror principle in view,', silenceReason: null },
+  // Lupe — split, per the verdict.
+  { passion: 'penthos', family: 'lupe', target: 'view-from-above', basisPhrase: 'penthos — grief', practicePhrase: 'The View From Above', silenceReason: null },
+  { passion: 'achos', family: 'lupe', target: 'view-from-above', basisPhrase: 'achos — distress pressing close', practicePhrase: 'The View From Above', silenceReason: null },
+  { passion: 'eleos', family: 'lupe', target: 'view-from-above', basisPhrase: 'eleos — pity', practicePhrase: 'The View From Above', silenceReason: null },
+  { passion: 'phthonos', family: 'lupe', target: 'oikeiosis', basisPhrase: "phthonos — envy at another's good", practicePhrase: 'Expanding Your Circle of Concern', silenceReason: null },
+  { passion: 'zelotypia', family: 'lupe', target: 'oikeiosis', basisPhrase: 'zelotypia — jealousy', practicePhrase: 'Expanding Your Circle of Concern', silenceReason: null },
+  // Epithumia — the whole family, per the verdict.
+  { passion: 'philodoxia', family: 'epithumia', target: 'hupexairesis', basisPhrase: 'philodoxia — craving for standing', practicePhrase: 'The Reserve Clause', silenceReason: null },
+  { passion: 'orge', family: 'epithumia', target: 'hupexairesis', basisPhrase: 'orge — anger', practicePhrase: 'The Reserve Clause', silenceReason: null },
+  { passion: 'pothos', family: 'epithumia', target: 'hupexairesis', basisPhrase: 'pothos — longing', practicePhrase: 'The Reserve Clause', silenceReason: null },
+  { passion: 'philedonia', family: 'epithumia', target: 'hupexairesis', basisPhrase: 'philedonia — craving for pleasure', practicePhrase: 'The Reserve Clause', silenceReason: null },
+  { passion: 'philoplousia', family: 'epithumia', target: 'hupexairesis', basisPhrase: 'philoplousia — craving for wealth', practicePhrase: 'The Reserve Clause', silenceReason: null },
+  { passion: 'eros', family: 'epithumia', target: 'hupexairesis', basisPhrase: 'eros — consuming desire', practicePhrase: 'The Reserve Clause', silenceReason: null },
+  // Hedone — DECLINED, honest silence.
+  { passion: 'kelesis', family: 'hedone', target: null, basisPhrase: null, practicePhrase: null, silenceReason: 'The hedone row is DECLINED: "if no practice fits cleanly, silence is preferable."' },
+  { passion: 'epichairekakia', family: 'hedone', target: null, basisPhrase: null, practicePhrase: null, silenceReason: 'The hedone row is DECLINED: "if no practice fits cleanly, silence is preferable."' },
+  { passion: 'terpsis', family: 'hedone', target: null, basisPhrase: null, practicePhrase: null, silenceReason: 'The hedone row is DECLINED: "if no practice fits cleanly, silence is preferable."' },
+]
+
+function passionRowFor(passionId: string): PassionSuggestionRow | null {
+  return PASSION_SUGGESTION_TABLE.find((r) => r.passion === passionId) ?? null
+}
+
+// ─── Row 5 — the repeated-not-caught PATTERN (never a single instance) ───
+
+/**
+ * "This row should fire on a pattern, not on a single instance. A single
+ * failure to catch an impression before assent is normal." (Step M.)
+ *
+ * The window is ORDINAL, not calendar: this entry and the two immediately
+ * before it, all not caught before assent — three consecutive misses. An
+ * ordinal window satisfies the pattern-not-instance principle with no date
+ * arithmetic at all (and so none of the local-day hazards the rest of this
+ * file has to defend against). Fewer than three entries total is never a
+ * pattern.
+ */
+export const PATTERN_CONSECUTIVE_MISSES = 3
+
+export const PATTERN_SUGGESTION_LINE =
+  'This entry, and the two before it, showed the impression assented to before it was caught. Morning Preparation is suited to examining it further.'
+
+/**
+ * @param recentCaughtBeforeAssent newest first, INCLUDING the entry just
+ * saved. Only the first PATTERN_CONSECUTIVE_MISSES values are consulted.
+ */
+export function resolvePassionLogPattern(
+  recentCaughtBeforeAssent: readonly boolean[]
+): SuggestedPractice | null {
+  if (recentCaughtBeforeAssent.length < PATTERN_CONSECUTIVE_MISSES) return null
+  const window = recentCaughtBeforeAssent.slice(0, PATTERN_CONSECUTIVE_MISSES)
+  if (window.some((caught) => caught !== false)) return null
+  return {
+    practice_id: 'morning',
+    href: '/morning',
+    line: PATTERN_SUGGESTION_LINE,
+    basis: 'passion-pattern:not-caught',
+  }
+}
+
+// ─── The passion-log resolution (6b + precedence, one call) ───
+
+/**
+ * Resolve the passion-log suggestion once the ENGINE's reading exists.
+ *
+ * PRECEDENCE (one suggestion, structural): the sub-species row answers THIS
+ * entry's diagnosis and goes first; the pattern row (row 5) answers only when
+ * the entry-specific resolution yields nothing — it keys on the catch history,
+ * not the classification, so an engine silence row does not suppress it.
+ *
+ * THE 6b BRANCHES: agreement → standard form; disagreement where the engine's
+ * row fires → disclosure form; the engine's row fires nothing → silence (the
+ * disagreement itself is never a trigger). An engine reading outside the
+ * vocabulary is treated as NO reading — fail toward silence, never toward a
+ * guessed suggestion. Agreement is deterministic id equality, never the
+ * classifier's own `match` claim.
+ */
+export function resolvePassionClassification(input: {
+  practitionerReading: string
+  engineReading: string
+  /** Newest first, including the saved entry — enables the row-5 fallback. */
+  recentCaughtBeforeAssent?: readonly boolean[]
+}): SuggestedPractice | null {
+  const engineRow = passionRowFor(input.engineReading)
+  if (engineRow && engineRow.target !== null) {
+    const step = practiceById(engineRow.target)
+    if (!step) return null
+    const agree = input.practitionerReading === input.engineReading
+    const line = agree
+      ? composeStandardLine(engineRow.basisPhrase as string, engineRow.practicePhrase as string)
+      : composeDisclosureLine(
+          PASSION_DISPLAY_LABELS[input.practitionerReading] ?? input.practitionerReading,
+          PASSION_DISPLAY_LABELS[input.engineReading] ?? input.engineReading,
+          engineRow.practicePhrase as string
+        )
+    return { practice_id: engineRow.target, href: step.href, line, basis: `passion:${engineRow.passion}` }
+  }
+  return input.recentCaughtBeforeAssent
+    ? resolvePassionLogPattern(input.recentCaughtBeforeAssent)
+    : null
+}
+
+// ─── The single-signal tools (rows 6–10, 13, 14) ───
+
+export interface ToolSuggestionRow {
+  /** The stored signal value this row answers. */
+  signal: string
+  target: PracticeId | null
+  /** The FULLY pre-authored line; null exactly on the silence rows. */
+  line: string | null
+  silenceReason: string | null
+}
+
+function fromToolRow(
+  rows: readonly ToolSuggestionRow[],
+  signal: string,
+  basisPrefix: string
+): SuggestedPractice | null {
+  const row = rows.find((r) => r.signal === signal)
+  if (!row || row.target === null || row.line === null) return null
+  const step = practiceById(row.target)
+  if (!step) return null
+  return { practice_id: row.target, href: step.href, line: row.line, basis: `${basisPrefix}:${row.signal}` }
+}
+
+/** Rows 6 + 7 — the view-from-above calibration reading. */
+export const VIEW_FROM_ABOVE_SUGGESTION_ROWS: readonly ToolSuggestionRow[] = [
+  {
+    signal: 'minimised',
+    target: 'passion-log',
+    line: 'This entry showed the concern read smaller rather than seen in proportion. The Passion Log is suited to examining it further.',
+    silenceReason: null,
+  },
+  {
+    signal: 'unchanged',
+    target: null,
+    line: null,
+    silenceReason:
+      'Mentor row 7: "suggesting another practice immediately risks the impression that the goal is to produce movement rather than to examine honestly." Repeated-unchanged is stage-crossing data, not in-session.',
+  },
+  {
+    signal: 'calibrated',
+    target: null,
+    line: null,
+    silenceReason: 'No vetted row — the mapping fires only where the verdict named a suggestion.',
+  },
+]
+
+export function resolveViewFromAbove(calibrationQuality: string): SuggestedPractice | null {
+  return fromToolRow(VIEW_FROM_ABOVE_SUGGESTION_ROWS, calibrationQuality, 'view-from-above')
+}
+
+/** Row 8 — a generic preparation lacks the specific feared outcome. */
+export const PREMEDITATIO_SUGGESTION_ROWS: readonly ToolSuggestionRow[] = [
+  {
+    signal: 'generic',
+    target: 'passion-log',
+    line: 'This entry showed the difficulty held in the abstract rather than named. The Passion Log is suited to examining it further.',
+    silenceReason: null,
+  },
+  {
+    signal: 'specific',
+    target: null,
+    line: null,
+    silenceReason: 'No vetted row — the mapping fires only where the verdict named a suggestion.',
+  },
+]
+
+export function resolvePremeditatio(isGeneric: boolean): SuggestedPractice | null {
+  return fromToolRow(PREMEDITATIO_SUGGESTION_ROWS, isGeneric ? 'generic' : 'specific', 'premeditatio')
+}
+
+/** Row 9 — the quarterly reflection's philodoxia flag. */
+export const OIKEIOSIS_SUGGESTION_ROWS: readonly ToolSuggestionRow[] = [
+  {
+    signal: 'philodoxia_flagged',
+    target: 'passion-log',
+    line: 'This entry showed philodoxia — the extension carrying a return of standing with it. The Passion Log is suited to examining it further.',
+    silenceReason: null,
+  },
+  {
+    signal: 'not_flagged',
+    target: null,
+    line: null,
+    silenceReason: 'No vetted row — the mapping fires only where the verdict named a suggestion.',
+  },
+]
+
+export function resolveOikeiosisQuarterly(philodoxiaFlagged: boolean): SuggestedPractice | null {
+  return fromToolRow(
+    OIKEIOSIS_SUGGESTION_ROWS,
+    philodoxiaFlagged ? 'philodoxia_flagged' : 'not_flagged',
+    'oikeiosis'
+  )
+}
+
+/** Row 10 — REVISED at Step M: morning preparation, not view-from-above. */
+export const HUPEXAIRESIS_SUGGESTION_ROWS: readonly ToolSuggestionRow[] = [
+  {
+    signal: 'not_separated',
+    target: 'morning',
+    line: 'This entry showed the action and its outcome held as one thing. Morning Preparation is suited to examining it further.',
+    silenceReason: null,
+  },
+  {
+    signal: 'separated',
+    target: null,
+    line: null,
+    silenceReason: 'No vetted row — the mapping fires only where the verdict named a suggestion.',
+  },
+]
+
+export function resolveHupexairesis(separatesActionFromOutcome: boolean): SuggestedPractice | null {
+  return fromToolRow(
+    HUPEXAIRESIS_SUGGESTION_ROWS,
+    separatesActionFromOutcome ? 'separated' : 'not_separated',
+    'hupexairesis'
+  )
+}
+
+/** Row 13 — an action evaluation that detected passions. */
+export const SCORE_SUGGESTION_LINE =
+  'This evaluation showed passions present in the reasoning. The Passion Log is suited to examining them further.'
+
+export function resolveScoreEvaluation(passionsDetectedCount: number): SuggestedPractice | null {
+  if (!Number.isFinite(passionsDetectedCount) || passionsDetectedCount < 1) return null
+  return {
+    practice_id: 'passion-log',
+    href: '/passion-log',
+    line: SCORE_SUGGESTION_LINE,
+    basis: 'score:passions-detected',
+  }
+}
+
+/**
+ * Row 14 — the morning tool. BOTH rows are silence, so NO resolver exists and
+ * the morning route is deliberately untouched by Phase 2: a vague preparation
+ * already has the retry prompt ("a second suggestion on top of it would be
+ * noise"), and anchor A2 is a DEFERRED anchor — "the tool should not be
+ * changed to fit the mapping; the mapping should wait for the tool to develop
+ * naturally." These rows exist so the vetted table is encoded whole.
+ */
+export const MORNING_SUGGESTION_ROWS: readonly ToolSuggestionRow[] = [
+  {
+    signal: 'vague',
+    target: null,
+    line: null,
+    silenceReason: 'Mentor row 14: the retry prompt already addresses vagueness; "a second suggestion on top of it would be noise."',
+  },
+  {
+    signal: 'prepared',
+    target: null,
+    line: null,
+    silenceReason: 'No vetted row — and anchor A2 (morning → oikeiosis) is DEFERRED: the gate is not enriched to serve it.',
+  },
+]
+
+// ─── Rows 11 + 12 — the sage compass ───
+
+export type CompassVirtue = 'wisdom' | 'justice' | 'courage' | 'temperance'
+
+/**
+ * Row 11's design note (Step M): "this suggestion should link directly to the
+ * relevant section of the logos foundation for the virtue named, not to the
+ * foundation as a whole." The anchors are the canonical VIRTUE_DISPLAY ids
+ * rendered as section ids on /logos's unity-of-virtue grid; the unit suite
+ * pins both directions (the ids against the canonical vocabulary, and the
+ * anchors against the page actually rendering them).
+ */
+export interface CompassVagueRow {
+  virtue: CompassVirtue
+  href: string
+  line: string
+}
+
+export const SAGE_COMPASS_VAGUE_ROWS: readonly CompassVagueRow[] = [
+  {
+    virtue: 'wisdom',
+    href: '/logos#phronesis',
+    line: 'This entry showed the expression of wisdom still in outline. The logos foundation on wisdom is suited to grounding it.',
+  },
+  {
+    virtue: 'justice',
+    href: '/logos#dikaiosyne',
+    line: 'This entry showed the expression of justice still in outline. The logos foundation on justice is suited to grounding it.',
+  },
+  {
+    virtue: 'courage',
+    href: '/logos#andreia',
+    line: 'This entry showed the expression of courage still in outline. The logos foundation on courage is suited to grounding it.',
+  },
+  {
+    virtue: 'temperance',
+    href: '/logos#sophrosyne',
+    line: 'This entry showed the expression of temperance still in outline. The logos foundation on temperance is suited to grounding it.',
+  },
+]
+
+/**
+ * Row 12 — the practitioner MARKED the distance far (their own selected
+ * reading, reflected back as their marking; the distance is never computed,
+ * never graded — the #14 constraint stands untouched). Wisdom's mapping is
+ * PARTIALLY confirmed ("the best available fit"); a more targeted phronesis
+ * suggestion may become possible later.
+ */
+export interface CompassFarRow {
+  virtue: CompassVirtue
+  target: PracticeId
+  line: string
+}
+
+export const SAGE_COMPASS_FAR_ROWS: readonly CompassFarRow[] = [
+  {
+    virtue: 'justice',
+    target: 'oikeiosis',
+    line: 'This entry marked the distance from justice as far. Expanding Your Circle of Concern is suited to examining it further.',
+  },
+  {
+    virtue: 'temperance',
+    target: 'passion-log',
+    line: 'This entry marked the distance from temperance as far. The Passion Log is suited to examining it further.',
+  },
+  {
+    virtue: 'courage',
+    target: 'premeditatio',
+    line: 'This entry marked the distance from courage as far. Preparing for Adversity is suited to examining it further.',
+  },
+  {
+    virtue: 'wisdom',
+    target: 'morning',
+    line: 'This entry marked the distance from wisdom as far. Morning Preparation is suited to examining it further.',
+  },
+]
+
+/**
+ * PRECEDENCE (a build decision inside the verdicts' bounds): the
+ * vague-expression row outranks the far-distance row — a distance marked from
+ * a bearing still in outline rests on the unexamined expression, so the
+ * foundational gap answers first. The far row fires only when the expression
+ * was read CONCRETE (an unknown or drifted quality value fails toward
+ * silence, not toward the distance row).
+ */
+export function resolveSageCompass(input: {
+  expressionQuality: string
+  distanceReading: string | null
+  virtueEngaged: string
+}): SuggestedPractice | null {
+  if (input.expressionQuality === 'vague') {
+    const row = SAGE_COMPASS_VAGUE_ROWS.find((r) => r.virtue === input.virtueEngaged)
+    if (!row) return null
+    return { practice_id: 'logos', href: row.href, line: row.line, basis: `sage-compass:vague:${row.virtue}` }
+  }
+  if (input.expressionQuality === 'concrete' && input.distanceReading === 'far') {
+    const row = SAGE_COMPASS_FAR_ROWS.find((r) => r.virtue === input.virtueEngaged)
+    if (!row) return null
+    const step = practiceById(row.target)
+    if (!step) return null
+    return { practice_id: row.target, href: step.href, line: row.line, basis: `sage-compass:far:${row.virtue}` }
+  }
+  return null
+}

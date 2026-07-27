@@ -142,6 +142,61 @@ for (const rel of TARGET_FILES) {
   }
 }
 
+// ─── Phase 2 wiring pins (the in-session trigger, Step M) ───
+{
+  const quarterlySrc = fs.readFileSync(path.join(websiteRoot, 'src/app/api/mentor/oikeiosis/route.ts'), 'utf-8')
+  const extensionSrc = fs.readFileSync(path.join(websiteRoot, 'src/app/api/mentor/oikeiosis/extension/route.ts'), 'utf-8')
+  assert(
+    /import \{ resolveOikeiosisQuarterly \} from '@\/lib\/practice-sequence'/.test(quarterlySrc),
+    'quarterly route: the suggestion resolver is imported from @/lib/practice-sequence (the locked mapping), not re-implemented'
+  )
+  assert(
+    (quarterlySrc.match(/\.\.\.\(suggested \? \{ suggested_practice: suggested \} : \{\}\)/g) ?? []).length === 1,
+    'quarterly route: suggested_practice is conditionally spread exactly once — absent field = honest silence'
+  )
+  assert(!quarterlySrc.includes('suggested_practice: null'), 'quarterly route: never suggested_practice: null — silence is an ABSENT field')
+  // The EXTENSION route is gate-free and carries NO vetted row (Step M) — it
+  // must stay suggestion-free, so a silence decision cannot decay into a
+  // wired suggestion without this pin being changed deliberately.
+  assert(
+    !extensionSrc.includes('suggested_practice') && !extensionSrc.includes('practice-sequence'),
+    'extension route: gate-free, no vetted row — deliberately suggestion-free (Step M)'
+  )
+  // Never persisted (BD-12): strip every known-good spread occurrence, then
+  // require zero remaining mentions of suggested_practice in the QUARTERLY
+  // route (would catch a stray field written directly into a DB call). Found
+  // by the independent adversarial review: passion-log had this pin, the
+  // other five did not.
+  assert(
+    !/suggested_practice\s*:/.test(
+      quarterlySrc.replace(/\.\.\.\(suggested \? \{ suggested_practice: suggested \} : \{\}\)/g, '')
+    ),
+    'quarterly route: suggested_practice appears ONLY in the conditional response spread — never in an insert payload'
+  )
+}
+
+// ─── Stale-suggestion regression lock (independent adversarial review) ───
+//
+// An independent review found that `suggestion` state was cleared ONLY inside
+// handleSubmit; the quarterly form (unlike the other five wired pages) has no
+// resetForm()/startEdit() at all — "Reflect", "Cancel", and "+ New quarterly
+// reflection" each toggle showForm inline, and none cleared the suggestion.
+// Fixed by clearing it in all three inline handlers; pinned here so a future
+// edit to any of them cannot silently drop it.
+{
+  const pageSrc = fs.readFileSync(path.join(websiteRoot, 'src/app/oikeiosis/page.tsx'), 'utf-8')
+  const clearAndOpen = (pageSrc.match(/\{ setSuggestion\(null\); setShowForm\(true\) \}/g) ?? []).length
+  const clearAndClose = (pageSrc.match(/\{ setSuggestion\(null\); setShowForm\(false\) \}/g) ?? []).length
+  assert(
+    clearAndOpen === 2,
+    `page: BOTH quarterly-form-opening triggers ("Reflect" + "+ New quarterly reflection") clear the stale suggestion before opening (found ${clearAndOpen}, expected 2)`
+  )
+  assert(
+    clearAndClose === 1,
+    `page: the quarterly-form Cancel button clears the stale suggestion (found ${clearAndClose}, expected 1)`
+  )
+}
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed')
 if (failed > 0) {
   console.error('\nFailures:')

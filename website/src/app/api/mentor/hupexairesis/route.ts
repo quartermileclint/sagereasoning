@@ -5,6 +5,7 @@ import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getClient } from '@/lib/sage-reason-engine'
 import { isLlmOutage } from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
+import { resolveHupexairesis } from '@/lib/practice-sequence'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -107,10 +108,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to save reserve clause entry' }, { status: 500 })
     }
 
+    // Phase 2 (the in-session trigger, Step M): additive — absent when no
+    // vetted row fires (honest silence, never filler).
+    const suggested = resolveHupexairesis(separates)
+
     return NextResponse.json({
       success: true,
       entry: data,
       quality_gate: separationBlock(separates),
+      ...(suggested ? { suggested_practice: suggested } : {}),
     })
   } catch (err) {
     console.error('Reserve clause API error:', err)
@@ -169,10 +175,14 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to update entry' }, { status: 500 })
     }
 
+    // Phase 2: a revision is a save — the suggestion recomputes with the gate.
+    const suggested = resolveHupexairesis(separates)
+
     return NextResponse.json({
       success: true,
       entry: data,
       quality_gate: separationBlock(separates),
+      ...(suggested ? { suggested_practice: suggested } : {}),
     })
   } catch (err) {
     console.error('Reserve clause PATCH error:', err)

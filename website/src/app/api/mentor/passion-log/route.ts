@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
+import {
+  PATTERN_CONSECUTIVE_MISSES,
+  resolvePassionLogPattern,
+  type SuggestedPractice,
+} from '@/lib/practice-sequence'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -104,9 +109,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to save passion event' }, { status: 500 })
     }
 
+    // Phase 2 (the in-session trigger, Step M): at SAVE time only the PATTERN
+    // row can answer — the engine's reading does not exist yet (classification
+    // is a second round-trip), and the 6b verdict makes the ENGINE's reading
+    // the driver of every sub-species row. The classify response carries the
+    // full resolution and supersedes this one on the client.
+    //
+    // Additive + fail-soft: a failed read yields silence (the honest null for
+    // an affordance), never an error and never a claimed pattern — a short or
+    // unreadable window cannot satisfy resolvePassionLogPattern.
+    let suggested: SuggestedPractice | null = null
+    try {
+      const { data: prior } = await supabase
+        .from('passion_events')
+        .select('caught_before_assent')
+        .eq('user_id', userId)
+        .neq('id', data.id)
+        .lt('created_at', data.created_at)
+        .order('created_at', { ascending: false })
+        .limit(PATTERN_CONSECUTIVE_MISSES - 1)
+      suggested = resolvePassionLogPattern([
+        caught_before_assent,
+        // Raw pass-through: a null/unknown stored value breaks the pattern
+        // (fails toward silence) rather than being coerced into a miss.
+        ...(prior ?? []).map((r) => r.caught_before_assent as boolean),
+      ])
+    } catch {
+      suggested = null
+    }
+
     return NextResponse.json({
       success: true,
       event: data,
+      ...(suggested ? { suggested_practice: suggested } : {}),
     })
   } catch (err) {
     console.error('Passion log API error:', err)

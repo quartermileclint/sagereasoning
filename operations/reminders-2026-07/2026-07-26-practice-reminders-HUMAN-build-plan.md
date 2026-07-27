@@ -119,7 +119,37 @@ Each phase is independently shippable; stopping at any phase boundary is a legit
 
 ## §7 Phase 2 — In-session trigger
 
-> **STATUS: CONTENT VETTED 2026-07-27 — Step M answered; the table below is the MENTOR-VETTED
+> **STATUS: BUILT + VERIFIED 2026-07-27** (`D-PRACTICE-REMINDERS-HUMAN-PHASE2-IN-SESSION-TRIGGER-BUILT`;
+> close: `operations/handoffs/founder/2026-07-27-practice-reminders-human-phase2-in-session-suggestions-CLOSE.md`).
+> Live on the founder's push — no flag, no schema. Every vetted row below is implemented, every
+> silence row as an explicit honest-null entry, all copy verbatim-pinned (unit 602/0; 19/19
+> mutations killed across two rounds). Build decisions inside the verdicts' bounds, recorded in
+> the decision-log entry: the aischyne target is the log-revisited-with-mirror-framing option
+> (rendered link-free on the log itself); the row-5 window is ORDINAL — three consecutive
+> not-caught (no date arithmetic); row 13 attaches at the score RESULT render, client-side (no
+> server save route exists); the engine-driven passion resolution rides the passion-classify
+> response (the only moment the engine's reading exists — an entry saved without a description is
+> never classified, so only the pattern row can answer it, disclosed as a bound of 6b's "the
+> engine's reading governs"); `/logos` gained the four per-virtue anchors row 11 requires. The
+> morning route and the oikeiosis-extension route are deliberately untouched (silence-only), and
+> both silences are boundary-suite-pinned.
+>
+> **Two review passes, one build.** Pass 1 (first-hand, forced by an account spend-limit outage
+> on the 4-agent Workflow) found + folded one defect. **Pass 2 — the founder switched the session
+> model to Sonnet 5 specifically to obtain a genuinely independent check — completed fully (11
+> agents, 0 errors) and found 6 MORE, all confirmed, 0 refuted**
+> (`D-PRACTICE-REMINDERS-HUMAN-PHASE2-INDEPENDENT-REVIEW-FOLDED`): a stale-suggestion state bug on
+> five of the six wired pages (the suggestion card survived Cancel/new-entry/revise-a-different-
+> entry, mis-attributed to an entry no longer on screen — `passion-log`'s own reset already handled
+> this, the other five did not); a test-coverage asymmetry (5 of 6 DB-writing routes lacked
+> passion-log's strong never-persisted regression pin); and the already-disclosed score-page
+> wiring gap, actually closed with a new test. All seven fixed and regression-locked; 6 new
+> mutations killed. The third corroborating instance of the standing lesson that an independent
+> review catches a same-session self-review's blind spots.
+>
+> *(The block below is the pre-build vetting record, retained for the arc's history.)*
+>
+> **CONTENT VETTED 2026-07-27 — Step M answered; the table below is the MENTOR-VETTED
 > mapping, superseding the draft** (`D-PRACTICE-REMINDERS-STEP-M-MENTOR-VERDICTS-ADOPTED-2026-07-27`;
 > verbatim record, which wins over this table on any divergence:
 > `operations/reminders-2026-07/2026-07-27-step-M-mentor-verdicts-verbatim.md`). Phase 2 is now

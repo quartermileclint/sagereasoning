@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase'
 import { authFetch } from '@/lib/auth-fetch'
 import type { User } from '@supabase/supabase-js'
 import CadenceBanner from '@/components/CadenceBanner'
+import SuggestedPracticeCard from '@/components/SuggestedPracticeCard'
+import type { SuggestedPractice } from '@/lib/practice-sequence'
 
 /**
  * Expanding Your Circle of Concern — the oikeiosis surface.
@@ -132,6 +134,10 @@ export default function OikeiosisPage() {
     type: 'success' | 'error' | 'warning'
     text: string
   } | null>(null)
+  // Phase 2 (the in-session trigger, quarterly reflection only — the
+  // circle-extension practice is gate-free and carries no vetted row): at most
+  // one suggestion per save; absent field ⇒ nothing renders (honest silence).
+  const [suggestion, setSuggestion] = useState<SuggestedPractice | null>(null)
 
   // ─── Circle-extension practice (#6 + #15) — new ────────────────────────────
   const [extensions, setExtensions] = useState<CircleExtensionEntry[]>([])
@@ -195,6 +201,7 @@ export default function OikeiosisPage() {
     if (!stage || !actionDescription.trim() || submitting) return
     setSubmitting(true)
     setSubmitResult(null)
+    setSuggestion(null)
 
     try {
       const res = await authFetch('/api/mentor/oikeiosis', {
@@ -210,6 +217,7 @@ export default function OikeiosisPage() {
 
       if (res.ok) {
         const data = await res.json()
+        setSuggestion(data.suggested_practice ?? null)
         if (data.philodoxia_warning) {
           setSubmitResult({ type: 'warning', text: data.philodoxia_warning })
         } else {
@@ -777,7 +785,7 @@ export default function OikeiosisPage() {
               className="mb-6"
             >
               <button
-                onClick={() => setShowForm(true)}
+                onClick={() => { setSuggestion(null); setShowForm(true) }}
                 className="px-4 py-2 bg-sage-500 text-white font-display text-sm rounded hover:bg-sage-600 transition-colors"
               >
                 Reflect
@@ -840,6 +848,13 @@ export default function OikeiosisPage() {
                 : 'bg-red-50 text-red-700 border border-red-200'
             }`}>
               {submitResult.text}
+            </div>
+          )}
+
+          {/* Phase 2: the in-session suggestion — absent field, nothing renders. */}
+          {suggestion && (
+            <div className="mb-6">
+              <SuggestedPracticeCard suggestion={suggestion} currentPracticeId="oikeiosis" />
             </div>
           )}
 
@@ -958,7 +973,7 @@ export default function OikeiosisPage() {
               <div className="flex items-center justify-between">
                 <button
                   type="button"
-                  onClick={() => setShowForm(false)}
+                  onClick={() => { setSuggestion(null); setShowForm(false) }}
                   className="font-body text-sm text-sage-600 hover:text-sage-600"
                 >
                   Cancel
@@ -974,7 +989,7 @@ export default function OikeiosisPage() {
             </form>
           ) : !isPromptDay && (
             <button
-              onClick={() => setShowForm(true)}
+              onClick={() => { setSuggestion(null); setShowForm(true) }}
               className="w-full border-2 border-dashed border-sage-200 rounded-lg p-4 text-center font-body text-sm text-sage-600 hover:border-sage-400 hover:text-sage-600 transition-colors mb-6"
             >
               + New quarterly reflection

@@ -11,6 +11,8 @@ import {
   type KatorthomaProximityLevel,
 } from '@/lib/stoic-brain'
 import { PROXIMITY_COLORS, ROOT_PASSION_ENGLISH, PASSION_IMAGE_MAP, getStageDisplay } from '@/lib/brand-display'
+import { resolveScoreEvaluation } from '@/lib/practice-sequence'
+import SuggestedPracticeCard from '@/components/SuggestedPracticeCard'
 import type { User } from '@supabase/supabase-js'
 
 // ─── V3 Result Types (derived from scoring.json outputs) ───
@@ -597,6 +599,16 @@ export default function ScoreActionPage() {
                     ))}
                   </div>
                 )}
+
+                {/* Phase 2 (the in-session trigger, Step M row 13): the
+                    suggestion responds to THIS diagnosis, so it is computed
+                    client-side from the shared locked mapping at result render
+                    — the save is a client-side insert with no server route to
+                    carry a response field. Display-only; nothing persisted. */}
+                {(() => {
+                  const suggested = resolveScoreEvaluation(result.passion_diagnosis.passions_detected.length)
+                  return suggested ? <SuggestedPracticeCard suggestion={suggested} /> : null
+                })()}
               </div>
             )}
           </div>

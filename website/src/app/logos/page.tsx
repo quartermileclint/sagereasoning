@@ -128,7 +128,8 @@ export default function LogosPage() {
               {VIRTUE_DISPLAY.map((virtue) => (
                 <div
                   key={virtue.id}
-                  className="flex items-center gap-3 bg-sage-50/70 border border-sage-200 rounded-lg p-3"
+                  id={virtue.id}
+                  className="flex items-center gap-3 bg-sage-50/70 border border-sage-200 rounded-lg p-3 scroll-mt-24"
                 >
                   <img
                     src={virtue.icon}

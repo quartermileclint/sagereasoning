@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, RATE_LIMITS, requireAuth, validateTextLength, TEXT_LIMITS } from '@/lib/security'
+import { resolveOikeiosisQuarterly } from '@/lib/practice-sequence'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -88,12 +89,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to save reflection' }, { status: 500 })
     }
 
+    // Phase 2 (the in-session trigger, Step M row 9): additive — absent when
+    // the flag did not fire (honest silence, never filler).
+    const suggested = resolveOikeiosisQuarterly(philodoxiaFlagged)
+
     return NextResponse.json({
       success: true,
       reflection: data,
       philodoxia_warning: philodoxiaFlagged
         ? 'This action was flagged for philodoxia review — reputational return detected. Examine whether the action extended genuine concern or served reputation.'
         : null,
+      ...(suggested ? { suggested_practice: suggested } : {}),
     })
   } catch (err) {
     console.error('Oikeiosis API error:', err)

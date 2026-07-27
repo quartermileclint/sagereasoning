@@ -135,6 +135,57 @@ for (const rel of TARGET_FILES) {
   }
 }
 
+// ─── Phase 2 wiring pins (the in-session trigger, Step M) ───
+{
+  const src = fs.readFileSync(path.join(websiteRoot, 'src/app/api/mentor/premeditatio/route.ts'), 'utf-8')
+  assert(
+    /import \{ resolvePremeditatio \} from '@\/lib\/practice-sequence'/.test(src),
+    'route: the suggestion resolver is imported from @/lib/practice-sequence (the locked mapping), not re-implemented'
+  )
+  assert(
+    (src.match(/\.\.\.\(suggested \? \{ suggested_practice: suggested \} : \{\}\)/g) ?? []).length === 2,
+    'route: suggested_practice is conditionally spread on the POST and the content-edit PATCH — absent field = honest silence'
+  )
+  assert(!src.includes('suggested_practice: null'), 'route: never suggested_practice: null — silence is an ABSENT field')
+  // The metadata-only PATCH branch carries no gate and therefore no suggestion:
+  // its return stays exactly { success: true, entry: data }.
+  assert(
+    /return NextResponse\.json\(\{ success: true, entry: data \}\)/.test(src),
+    'route: the metadata-only PATCH branch remains suggestion-free (no re-diagnosis, no suggestion)'
+  )
+  // Never persisted (BD-12): strip every known-good spread occurrence, then
+  // require zero remaining mentions of suggested_practice (would catch a
+  // stray field written directly into a DB call). Found by the independent
+  // adversarial review: passion-log had this pin, the other five did not.
+  assert(
+    !/suggested_practice\s*:/.test(
+      src.replace(/\.\.\.\(suggested \? \{ suggested_practice: suggested \} : \{\}\)/g, '')
+    ),
+    'route: suggested_practice appears ONLY in the conditional response spread — never in an insert/update payload'
+  )
+}
+
+// ─── Stale-suggestion regression lock (independent adversarial review) ───
+//
+// An independent review found that `suggestion` state was cleared ONLY inside
+// handleSubmit — resetForm() and startEdit() left a stale, mis-attributed
+// suggestion on screen after Cancel, "+ New" (weekly or prepared-disposition),
+// or revising a DIFFERENT past entry. Fixed by adding setSuggestion(null) to
+// both functions; pinned here so a future edit cannot silently drop it.
+{
+  const pageSrc = fs.readFileSync(path.join(websiteRoot, 'src/app/premeditatio/page.tsx'), 'utf-8')
+  const resetFormBody = pageSrc.slice(pageSrc.indexOf('function resetForm()'), pageSrc.indexOf('function openNewForm()'))
+  const startEditBody = pageSrc.slice(pageSrc.indexOf('function startEdit('), pageSrc.indexOf('const weeklyValid ='))
+  assert(
+    resetFormBody.includes('setSuggestion(null)'),
+    'page: resetForm() clears the stale suggestion — a suggestion answers ONE entry, and must not survive a reset to a blank form'
+  )
+  assert(
+    startEditBody.includes('setSuggestion(null)'),
+    'page: startEdit() clears the stale suggestion — it does not route through resetForm, so revising a DIFFERENT entry must clear it independently'
+  )
+}
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed')
 if (failed > 0) {
   console.error('\nFailures:')

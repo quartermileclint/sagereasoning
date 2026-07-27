@@ -5,6 +5,7 @@ import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getClient } from '@/lib/sage-reason-engine'
 import { isLlmOutage } from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
+import { resolveSageCompass } from '@/lib/practice-sequence'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -232,10 +233,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to save sage-compass entry' }, { status: 500 })
     }
 
+    // Phase 2 (the in-session trigger, Step M rows 11+12): a pure LOOKUP over
+    // the stored values — the distance is never classified (the #14 constraint
+    // stands untouched; the far row keys on the practitioner's own SELECTED
+    // reading and reflects it back as their marking).
+    const suggested = resolveSageCompass({
+      expressionQuality: quality,
+      distanceReading: parsed.distance_reading,
+      virtueEngaged: parsed.virtue_engaged,
+    })
+
     return NextResponse.json({
       success: true,
       entry: data,
       quality_gate: expressionBlock(quality),
+      ...(suggested ? { suggested_practice: suggested } : {}),
     })
   } catch (err) {
     console.error('Sage compass API error:', err)
@@ -315,10 +327,18 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Entry not found' }, { status: 404 })
     }
 
+    // Phase 2: a revision is a save — the suggestion recomputes with the gate.
+    const suggested = resolveSageCompass({
+      expressionQuality: quality,
+      distanceReading: parsed.distance_reading,
+      virtueEngaged: parsed.virtue_engaged,
+    })
+
     return NextResponse.json({
       success: true,
       entry: data,
       quality_gate: expressionBlock(quality),
+      ...(suggested ? { suggested_practice: suggested } : {}),
     })
   } catch (err) {
     console.error('Sage compass PATCH error:', err)

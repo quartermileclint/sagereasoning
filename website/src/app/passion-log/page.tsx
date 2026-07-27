@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { authFetch } from '@/lib/auth-fetch'
 import { PASSION_IMAGE_MAP } from '@/lib/brand-display'
+import SuggestedPracticeCard from '@/components/SuggestedPracticeCard'
+import type { SuggestedPractice } from '@/lib/practice-sequence'
 import type { User } from '@supabase/supabase-js'
 
 /**
@@ -133,6 +135,10 @@ export default function PassionLogPage() {
     match: boolean
     reasoning: string
   } | null>(null)
+  // Phase 2 (the in-session trigger): at most ONE suggestion per entry. The
+  // save response may carry the pattern row; the classify response carries the
+  // full resolution and replaces it wholesale (see handleSubmit).
+  const [suggestion, setSuggestion] = useState<SuggestedPractice | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -193,6 +199,7 @@ export default function PassionLogPage() {
     setSubmitting(true)
     setSubmitMessage(null)
     setClassificationResult(null)
+    setSuggestion(null)
 
     try {
       const res = await authFetch('/api/mentor/passion-log', {
@@ -209,6 +216,9 @@ export default function PassionLogPage() {
       if (res.ok) {
         const data = await res.json()
         setSubmitMessage({ type: 'success', text: 'Passion event logged.' })
+        // The save response can carry only the PATTERN suggestion (no engine
+        // reading exists yet).
+        setSuggestion(data.suggested_practice ?? null)
 
         // Now classify if there's a description
         if (description.trim()) {
@@ -225,6 +235,12 @@ export default function PassionLogPage() {
             if (classifyRes.ok) {
               const classData = await classifyRes.json()
               setClassificationResult(classData)
+              // The classify response carries the FULL resolution (the
+              // engine's sub-species row first, the pattern row as fallback)
+              // and REPLACES the save response's suggestion wholesale — one
+              // suggestion per entry, resolved in one place. On classify
+              // failure the save-time suggestion stands (the catch below).
+              setSuggestion(classData.suggested_practice ?? null)
             }
           } catch {
             // Non-fatal — classification is supplementary
@@ -251,6 +267,7 @@ export default function PassionLogPage() {
     setFalseJudgement('')
     setDescription('')
     setClassificationResult(null)
+    setSuggestion(null)
     setSubmitMessage(null)
     setShowForm(true)
   }
@@ -538,6 +555,13 @@ export default function PassionLogPage() {
               {classifying && (
                 <div className="bg-white border border-sage-200 rounded-lg p-4 mb-4 text-center">
                   <span className="font-body text-sm text-sage-600">Classifying passion...</span>
+                </div>
+              )}
+
+              {/* Phase 2: the in-session suggestion — absent field, nothing renders. */}
+              {suggestion && (
+                <div className="mb-4">
+                  <SuggestedPracticeCard suggestion={suggestion} currentPracticeId="passion-log" />
                 </div>
               )}
 

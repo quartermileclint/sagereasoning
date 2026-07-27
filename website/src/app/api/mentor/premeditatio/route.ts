@@ -5,6 +5,7 @@ import { MODEL_FAST, cacheKey, cacheGet, cacheSet } from '@/lib/model-config'
 import { getClient } from '@/lib/sage-reason-engine'
 import { isLlmOutage } from '@/lib/llm-outage'
 import { logRouteError } from '@/lib/observability-store'
+import { resolvePremeditatio } from '@/lib/practice-sequence'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -193,10 +194,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to save premeditatio entry' }, { status: 500 })
     }
 
+    // Phase 2 (the in-session trigger, Step M): additive — absent when no
+    // vetted row fires (honest silence, never filler).
+    const suggested = resolvePremeditatio(isGeneric)
+
     return NextResponse.json({
       success: true,
       entry: data,
       quality_gate: qualityGateBlock(parsed.kind, isGeneric),
+      ...(suggested ? { suggested_practice: suggested } : {}),
     })
   } catch (err) {
     console.error('Premeditatio API error:', err)
@@ -254,10 +260,15 @@ export async function PATCH(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to update entry' }, { status: 500 })
       }
 
+      // Phase 2: a revision is a save — recompute with the gate. The
+      // metadata-only branch below carries no gate and so no suggestion.
+      const suggested = resolvePremeditatio(isGeneric)
+
       return NextResponse.json({
         success: true,
         entry: data,
         quality_gate: qualityGateBlock(parsed.kind, isGeneric),
+        ...(suggested ? { suggested_practice: suggested } : {}),
       })
     }
 

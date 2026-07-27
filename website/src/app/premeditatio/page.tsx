@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase'
 import { authFetch } from '@/lib/auth-fetch'
 import type { User } from '@supabase/supabase-js'
 import CadenceBanner from '@/components/CadenceBanner'
+import SuggestedPracticeCard from '@/components/SuggestedPracticeCard'
+import type { SuggestedPractice } from '@/lib/practice-sequence'
 
 /**
  * Premeditatio — "Preparing for Adversity"
@@ -92,6 +94,9 @@ export default function PremeditatioPage() {
     type: 'success' | 'error' | 'warning'
     text: string
   } | null>(null)
+  // Phase 2 (the in-session trigger): at most one suggestion per save; absent
+  // field ⇒ nothing renders (honest silence).
+  const [suggestion, setSuggestion] = useState<SuggestedPractice | null>(null)
 
   const isEditing = editingId !== null
 
@@ -136,6 +141,12 @@ export default function PremeditatioPage() {
     setVirtueDomain('')
     setVirtueResponse('')
     setPreparedDisposition('')
+    // A suggestion is a response to THIS entry's diagnosis (Phase 2) — leaving
+    // it standing once the form moves to a different or blank entry is a
+    // stale, mis-attributed claim. Found by an independent adversarial review
+    // after the first-hand review missed it; passion-log's resetForm already
+    // did this, the other five wired pages did not.
+    setSuggestion(null)
   }
 
   function openNewForm() {
@@ -157,6 +168,9 @@ export default function PremeditatioPage() {
     setPreparedDisposition(entry.prepared_disposition || '')
     setEditingId(entry.id)
     setSubmitResult(null)
+    // startEdit does not route through resetForm — a suggestion still
+    // attached to the entry just left must not follow onto a different entry.
+    setSuggestion(null)
     setShowForm(true)
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -176,6 +190,7 @@ export default function PremeditatioPage() {
     if (!formValid || submitting) return
     setSubmitting(true)
     setSubmitResult(null)
+    setSuggestion(null)
 
     try {
       const content =
@@ -209,6 +224,7 @@ export default function PremeditatioPage() {
 
       if (res.ok) {
         const data = await res.json()
+        setSuggestion(data.suggested_practice ?? null)
         if (data.quality_gate?.is_generic) {
           // Keep the form open + populated so it can be revised in place. Point
           // editingId at the row (just-created on POST, or the same on PATCH) so
@@ -390,6 +406,13 @@ export default function PremeditatioPage() {
             : 'bg-red-50 text-red-700 border border-red-200'
         }`}>
           {submitResult.text}
+        </div>
+      )}
+
+      {/* Phase 2: the in-session suggestion — absent field, nothing renders. */}
+      {suggestion && (
+        <div className="mb-6">
+          <SuggestedPracticeCard suggestion={suggestion} currentPracticeId="premeditatio" />
         </div>
       )}
 
