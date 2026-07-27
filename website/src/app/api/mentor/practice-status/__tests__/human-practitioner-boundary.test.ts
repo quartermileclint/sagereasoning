@@ -70,6 +70,12 @@ const TARGET_FILES = [
   // guarded by NO suite at all until the adversarial review pointed that out —
   // an unguarded shipped file is exactly how a forbidden import arrives later.
   'src/components/PracticeSequenceModule.tsx',
+  // Phase 4 — the daily rhythm. Added here for the same reason: both ship, both
+  // sit in the practice surface, and an unguarded file is where a forbidden
+  // import arrives later. CadenceBanner is also imported by /premeditatio and
+  // /oikeiosis, so it now sits in three guarded graphs at once.
+  'src/components/DailyRhythmStrip.tsx',
+  'src/components/CadenceBanner.tsx',
 ]
 
 // The module that must import NOTHING (see the header, guard 1).
@@ -344,6 +350,62 @@ assert(
       )
     }
     assert(sawGet, `${ROUTE_FILE}: exports a GET handler`)
+  }
+}
+
+// ─── C2. The route → client response contract ───
+//
+// There is NO compile-time edge between the two sides. The route builds its body
+// as an untyped object literal, and the client declares every field optional and
+// CASTS the payload rather than validating it — so renaming a key on either side
+// is silent. The adversarial review proved it: renaming `rhythm` to
+// `rhythm_sources` in the route made the entire Phase 4 strip vanish for every
+// practitioner while `tsc --noEmit` exited 0 and all ten suites stayed green
+// (358/0, 43/0, and all eight boundary suites). The failure is invisible because
+// an absent key degrades to rendering nothing, which is byte-identical to the
+// deliberate loading state.
+//
+// The gap is inherited rather than introduced — `next_in_sequence` and
+// `next_basis` have been equally unpinned since Phase 1 — so all four keys are
+// pinned here, at both ends.
+{
+  const routeSrc = fs.readFileSync(path.join(websiteRoot, ROUTE_FILE), 'utf-8')
+  const clientRel = 'src/components/PracticeSequenceModule.tsx'
+  const clientSrc = fs.readFileSync(path.join(websiteRoot, clientRel), 'utf-8')
+
+  const RESPONSE_KEYS = ['practices', 'next_in_sequence', 'next_basis', 'rhythm']
+
+  // The route's JSON body, isolated so a mention elsewhere in the file cannot
+  // satisfy the assertion.
+  const bodyMatch = routeSrc.match(/return NextResponse\.json\(\{([\s\S]*?)\}\)/)
+  assert(!!bodyMatch, `C2-BODY: ${ROUTE_FILE} returns a NextResponse.json({...}) body this test can inspect`)
+  const body = bodyMatch ? bodyMatch[1] : ''
+
+  // Parse the body's KEY NAMES, rather than grepping for each name anywhere in
+  // it. A first attempt did the latter and was defeated by the very mutation it
+  // was written to catch: renaming the key to `rhythm_sources: rhythm` leaves the
+  // word `rhythm` in the body as the VALUE, so a substring test still passed.
+  // Splitting into entries and taking the part before ':' reads the key itself.
+  const bodyKeys = body
+    .split('\n')
+    .map((l) => l.replace(/\/\/.*$/, '').trim())
+    .join(' ')
+    .split(',')
+    .map((entry) => entry.split(':')[0].trim())
+    .filter((k) => /^[A-Za-z_$][\w$]*$/.test(k))
+
+  const gotKeys = JSON.stringify([...bodyKeys].sort())
+  const wantKeys = JSON.stringify([...RESPONSE_KEYS].sort())
+  assert(
+    gotKeys === wantKeys,
+    `C2-ROUTE: the response body's keys are exactly ${RESPONSE_KEYS.join(', ')} — renaming or dropping one deletes the feature silently, with tsc and every suite still green (got ${gotKeys})`
+  )
+
+  for (const key of RESPONSE_KEYS) {
+    assert(
+      new RegExp(`\\b${key}\\b`).test(clientSrc),
+      `C2-CLIENT[${key}]: ${clientRel} reads '${key}' — both ends are pinned, because pinning one end alone still permits a silent divergence`
+    )
   }
 }
 

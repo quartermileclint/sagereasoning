@@ -2,14 +2,24 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { authFetch } from '@/lib/auth-fetch'
-import { PRACTICE_SEQUENCE, PRACTICE_MODULE_COPY } from '@/lib/practice-sequence'
+import { PRACTICE_SEQUENCE, PRACTICE_MODULE_COPY, foldDailyRhythm } from '@/lib/practice-sequence'
+import DailyRhythmStrip from './DailyRhythmStrip'
 
 /**
- * PracticeSequenceModule — the dashboard's "Your practice" module.
+ * PracticeSequenceModule — the dashboard's "Your practice" module, and (since
+ * Phase 4) the host of the daily rhythm strip above it.
  *
  * Practice reminders, human plan Phase 1 — the SEQUENCE trigger
  * (`operations/reminders-2026-07/2026-07-26-practice-reminders-HUMAN-build-plan.md` §6):
  * "the default path before enough practitioner context exists to personalise it."
+ *
+ * WHY PHASE 4 RENDERS FROM HERE rather than as its own dashboard mount: the
+ * rhythm needs exactly the data this component already fetches — the route
+ * returns the practice statuses and the `rhythm` block in one response. A second
+ * component would mean a second call to the same route on every dashboard mount,
+ * doubling this feature's consumption of a shared rate-limit bucket to fetch
+ * bytes already in hand. So this component owns the fetch and `DailyRhythmStrip`
+ * is presentational, receiving the fold as a prop.
  *
  * RENDERS FOR EVERY SIGNED-IN PRACTITIONER, including one with zero evaluations —
  * it is mounted ABOVE the dashboard's `evaluations.length > 0` gate. That gate is
@@ -38,10 +48,17 @@ interface PracticeStatus {
   last_used_at: string | null
 }
 
+interface RhythmSource {
+  status: 'ok' | 'unavailable'
+  last_used_at: string | null
+}
+
 interface StatusResponse {
   practices?: PracticeStatus[]
   next_in_sequence?: string | null
   next_basis?: 'first_unmet' | 'all_met' | 'indeterminate'
+  /** Phase 4 — the daily-rhythm sources, keyed by rhythm key. */
+  rhythm?: Record<string, RhythmSource>
 }
 
 interface PracticeSequenceModuleProps {
@@ -107,8 +124,30 @@ export default function PracticeSequenceModule({ userId }: PracticeSequenceModul
 
   const prerequisite = PRACTICE_SEQUENCE.find((s) => !s.tracked)
 
+  // Phase 4 — the daily rhythm. Folded HERE, on the client, and this placement is
+  // the requirement rather than a convenience: "today" has to mean the
+  // practitioner's today, and the server knows only UTC. A UTC day rolls at a
+  // moment that is not local midnight, which fails in both hemispheres — WEST of
+  // Greenwich a 9pm entry is already tomorrow, so the pole flips to "not yet" as
+  // they finish; EAST of Greenwich the date does not roll until mid-morning, so
+  // the pole stays "done" into a day on which nothing has been done. `new Date()`
+  // here is the browser's local clock, which is the only clock that answers the
+  // question being asked.
+  //
+  // Gated on `!loading` so the first render — the one that also runs during
+  // hydration — is the loading state on both server and client, with no clock
+  // read in it and so no mismatch. The strip is absent, rather than empty, until
+  // the data it describes exists.
+  const rhythmFold =
+    !loading && status?.practices && status?.rhythm
+      ? foldDailyRhythm({ practices: status.practices, rhythm: status.rhythm }, new Date())
+      : null
+
   return (
-    <div className="bg-white/60 border border-sage-200 rounded-lg p-8">
+    <div className="space-y-8">
+      {rhythmFold && <DailyRhythmStrip fold={rhythmFold} />}
+
+      <div className="bg-white/60 border border-sage-200 rounded-lg p-8">
       <h2 className="font-display text-xl font-medium text-sage-800 mb-2">
         {PRACTICE_MODULE_COPY.heading}
       </h2>
@@ -198,6 +237,7 @@ export default function PracticeSequenceModule({ userId }: PracticeSequenceModul
           {PRACTICE_MODULE_COPY.allMet}
         </p>
       )}
+      </div>
     </div>
   )
 }

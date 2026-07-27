@@ -155,11 +155,50 @@ Each phase is independently shippable; stopping at any phase boundary is a legit
 
 ## §9 Phase 4 — The daily rhythm (in-product, per E1)
 
+> **STATUS: BUILT + VERIFIED 2026-07-27** (`D-PRACTICE-REMINDERS-HUMAN-PHASE4-DAILY-RHYTHM-BUILT`;
+> close: `operations/handoffs/founder/2026-07-27-step-M-briefing-and-phase4-daily-rhythm-CLOSE.md`).
+> Live on the founder's push — no flag, no schema. Corrections to this section, recorded rather
+> than absorbed:
+> 1. **The evening pole was unreadable as specified.** §9 says "journal or reflection", but the
+>    route read only `journal_entries` and `action_evaluations_v3` — the `reflections` table was
+>    read by nothing. A practitioner who had reflected but not journalled would have been told,
+>    wrongly, that the evening review was not done. `reflections` is now a rhythm source.
+> 2. **No human page writes `reflections`.** `/api/reflections` is GET-only and `/reflections` is
+>    a read-only history view; rows arrive via `/api/reflect` (the API skill) and
+>    `/api/mentor/private/reflect`. So the table rightly COUNTS toward the pole, but the pole
+>    LINKS to `/journal` — the only surface a practitioner at a browser can write on. The strip
+>    says so rather than leaving the link quietly under-describing what qualifies.
+> 3. **"Today" cannot be computed server-side.** The local day boundary is the practitioner's, so
+>    the fold takes the clock as a parameter and the component supplies it. The lib stays
+>    clock-free (its boundary suite bans `Date.now(`).
+> 4. **The returning line ships as a DRAFT** pending Step M. §10 says Step M does not gate this
+>    phase, yet its item 4 is this phase's copy; shipping the line as revisable resolves that
+>    rather than pretending the tension is not there.
+>
+> Also added, closing a gap the Phase 1 close named: a **behavioural render test** for the strip
+> (`src/components/__tests__/daily-rhythm-strip.test.tsx`), because the honesty rules this feature
+> turns on are *rendering* rules and a fold test cannot see them.
+
 A dashboard rhythm strip (and nothing louder): **Morning preparation** — done / not yet today; **Evening review** (journal or reflection) — done / not yet today; the Monday and quarterly banners folded in visually. States, not commands; the doorbell line appears only for the not-yet state (*"It is time for morning preparation"* is the mentor's own sanctioned example). **Returning-after-absence:** when every practice table is idle ≥ 14 days, one gentle line (draft, Step M vets): *"It has been a while. The practice is here when you turn toward it — begin with whatever is nearest."* No guilt framing, no lapsed-streak framing — the mentor is explicit that reminders cannot fix the false-judgement lapse, so the line invites and stops.
 
 **Tier:** `code-elevated`. **Verify:** rhythm states against seeded rows for today/yesterday; absence line threshold unit-tested; build/tsc.
 
 ## §10 Step M — the mentor consultation (one consultation, per E3)
+
+> **STATUS: BRIEFING AUTHORED 2026-07-27, awaiting the founder's send** —
+> `operations/reminders-2026-07/2026-07-27-step-M-mentor-briefing.md`. It covers all five items
+> below and adds two questions the build surfaced that this section did not anticipate:
+> **(6a)** anchor A2 (morning preparation → oikeiosis) **cannot be implemented as given** — the
+> morning gate records only `prepared|vague`, so the externals-vs-obligations distinction it keys
+> on does not exist; and **(6b)** the passion log stores **two** classifications of every event
+> (the practitioner's own and the engine's, plus whether they agree), so "a phobos sub-species
+> suggests premeditatio" is ambiguous about whose reading governs — a question about whose
+> judgement the tool defers to, which is the doorbell boundary in another guise.
+>
+> Also surfaced for the mentor: the stage list the counsel gives (Storm → Crossroads → Worn Path →
+> Clear Summit) does not ascend the proximity ladder (Storm → Worn Path → Crossroads → Clear
+> Summit), so a practitioner on the ladder's second rung would be handed premeditatio and
+> hupexairesis — the two practices the counsel calls hardest — before the two it calls easier.
 
 Founder-run against the private mentor, briefing authored from this plan + the agent plan when scheduled. **Items:** (1) the §7 human mapping table (confirm/correct every Proposed row; the two anchors restated); (2) the agent mapping table (companion plan §5); (3) the §1 stage/sequence non-linearity reading; (4) the §9 returning-practitioner line + the §8 earn-moment copy; (5) the named morning-gate limitation (§7). **Outputs are binding** (verbatim record committed, tables updated, decision-log entry) per the project's mentor-verdict convention. **Gates:** Phase 2 and Phase 3 *content* activation. Does **not** gate Phases 0, 1, 4 (mentor-verbatim or copy-only content).
 

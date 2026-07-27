@@ -16440,3 +16440,53 @@ After deploy, signed in: load `/dashboard`. A "Your practice" module should rend
 **Rules served:** R1/R6c/R9 (all copy qualitative, non-promissory, doorbell-voiced), R17 (no new personal-data surface; the standing `milestones` gap named, not widened), KG1, PR10, PR18, PR19 (independent review required; spend-limit fallback exercised and disclosed).
 
 **Status:** Adopted. Cross-references: `D-PRACTICE-REMINDERS-HUMAN-PHASE0-MILESTONE-WIRING-BUILT`, `D-PHASE0-AND-SCHEMA-DRIFT-LIVE-VERIFIED`, `operations/reminders-2026-07/2026-07-26-practice-reminders-HUMAN-build-plan.md` §6.
+
+---
+
+## 2026-07-27 — D-STEP-M-BRIEFING-AUTHORED-AND-PHASE4-DAILY-RHYTHM-BUILT
+
+**Decision:** Two deliverables. (1) The **Step M mentor briefing is authored** (`operations/reminders-2026-07/2026-07-27-step-M-mentor-briefing.md`) — the consultation that gates the content of human-plan Phases 2–3 and agent-plan A1–A2, covering all five §10 items plus two questions the build surfaced that neither plan anticipated. (2) **Phase 4, the daily rhythm, is built and verified** — a dashboard strip carrying a morning and an evening pole as states, with the doorbell line appearing only for the not-yet state, a returning-after-absence line, and the two existing cadence banners folded onto one shared visual component.
+
+**Reasoning:** Phases 2 and 3 were blocked on a consultation nobody had drafted the questions for; Phase 4 was the one remaining phase blocked on nothing. Authoring the briefing unblocks two phases at the cost of a document, and Phase 4 completes the mentor's *daily* cadence counsel (Seneca's evening examination in `De Ira` — "a daily rhythm, not an occasional one") in the register the counsel requires: states, not commands.
+
+**What the briefing adds beyond the plan's five items:** anchor A2 (morning preparation → oikeiosis) **cannot be implemented as given** — the morning gate records only `prepared|vague`, so the externals-vs-obligations distinction it keys on does not exist, and the build did not fake it; and the passion log stores **two** classifications of every event (the practitioner's own and the engine's, plus whether they agree), so "a phobos sub-species suggests premeditatio" is ambiguous about whose reading governs. Also surfaced: the counsel's stage list (Storm → Crossroads → Worn Path → Clear Summit) does not ascend the proximity ladder (Storm → Worn Path → Crossroads → Clear Summit), so a practitioner on the ladder's second rung would be handed the two practices the counsel calls hardest before the two it calls easier.
+
+**Files touched:**
+- `operations/reminders-2026-07/2026-07-27-step-M-mentor-briefing.md` — NEW; the founder-sendable briefing.
+- `website/src/lib/practice-sequence.ts` — `reflections` added to `RHYTHM_TABLES`; the pure `foldDailyRhythm` (clock injected); `DAILY_RHYTHM_COPY`; `RETURNING_ABSENCE_DAYS`.
+- `website/src/components/DailyRhythmStrip.tsx` — NEW; presentational, three renderings.
+- `website/src/components/CadenceBanner.tsx` — NEW; the one shared cadence form.
+- `website/src/components/PracticeSequenceModule.tsx` — hosts the strip; folds on the client so "today" is the practitioner's.
+- `website/src/app/premeditatio/page.tsx`, `website/src/app/oikeiosis/page.tsx` — banners restyled; cadence conditions and handlers byte-identical.
+- `website/src/components/__tests__/daily-rhythm-strip.test.tsx` — NEW behavioural render test (closes the gap the Phase 1 close named).
+- `website/tsconfig.rendertest.json` — NEW; `jsx: react-jsx` for that test only, inert for `next build`.
+- `website/src/lib/__tests__/practice-sequence.test.ts`, `website/src/app/api/mentor/practice-status/__tests__/human-practitioner-boundary.test.ts` — pins.
+- `operations/reminders-2026-07/2026-07-26-practice-reminders-HUMAN-build-plan.md` — §9 and §10 status blocks.
+
+**Corrections recorded rather than absorbed:** the evening pole was **unreadable as specified** — §9 says "journal or reflection" but nothing read `reflections`, so a practitioner who reflected but did not journal was told the evening review was not done; **no page available to an ordinary practitioner writes `reflections`** (`/api/reflections` is GET-only; `/private-mentor` does but is founder-gated), so the pole counts that table and links to `/journal`, and says so; and **"today" cannot be computed server-side**, so the fold takes the clock as a parameter and the lib stays clock-free.
+
+**Risk classification:** Elevated under 0d-ii (changes to existing user-facing functionality). No schema, flag, auth-model or deploy-config change. AC7/PR6 not engaged. Measurement neutrality preserved — no file in the `/api/reason` or `/api/guardrail` import graph was edited; the logos suite's repo-global byte-identity guard passes.
+
+**Rollback path:** `git revert` the session commit. One documents-only deliverable, one added table name, two new components, one changed component, two restyled pages, test updates. No migration to reverse.
+
+**Verification step (founder-performable):**
+```bash
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/lib/__tests__/practice-sequence.test.ts && TZ=UTC npx tsx src/lib/__tests__/practice-sequence.test.ts && npx tsx --tsconfig tsconfig.rendertest.json src/components/__tests__/daily-rhythm-strip.test.tsx && npx tsc --noEmit && npm run build
+```
+Expected: `367 passed, 0 failed` twice; `53 passed, 0 failed`; tsc exit 0; build exit 0.
+
+**Adversarial review (PR19):** an independent 4-dimension Workflow with a per-dimension refuter pass **completed fully — 8 agents, 0 errors, ~2.57M tokens**. Every dimension returned findings; all confirmed ones are folded. The headline was a **vacuous pin**: the local-day comparison — the fold's central property — was untested under `TZ=UTC`, where a local-day and a UTC-day comparison are mathematically identical, so reintroducing exactly the bug the design prevents scored 358/0. It was caught only because the author's machine is UTC+10; CI and Vercel default to UTC. Section I now pins its own timezone on both sides of Greenwich and asserts the zone took effect. Also folded: `DAILY_RHYTHM_COPY` sat outside the gamification guard entirely (`doneLabel → '2 of 2 completed today'` passed); a non-empty-string loop was standing in for a copy pin on the primary constraint (`eveningDoorbell` could be rewritten to name a conclusion and a feeling, and passed); the missing-source completeness clause was unpinned; the route→client `rhythm` key had no pin at either end (renaming it deleted the feature with tsc 0 and all ten suites green); `days_absent` was pinned only against visible text and only in the returning branch; and the not-yet branch's href was unpinned.
+
+**Mutation testing:** 19 Phase-4 mutations, 19 caught, 0 survived, 0 no-ops — each verified to have actually applied. Then all nine of the review's own mutations re-run against the folds: **9 caught**. One initially read as surviving and was a **false survival** — shell escaping ate the `${...}` interpolation, so the mutation injected nothing; re-applied correctly, it was caught. One further mutation exposed a genuine weakness in a fold's own pin (a key-name grep satisfied by the value in `rhythm_sources: rhythm`), now parsing keys rather than substrings.
+
+**Open questions:**
+- **The doorbell can point at a door that refuses.** `/api/journal`'s pace gate compares **UTC** dates (`route.ts:91-92`) while the strip compares local ones, so in UTC+10 the evening doorbell rings while the journal returns 429 for roughly the first ten hours of each local day. Verified first-hand. Pre-existing in that route; Phase 4 makes it visible. The fix is a product decision — does "one entry per day" mean the practitioner's day or the server's? — so it is recorded, not silently changed.
+- **The journal is a finite curriculum.** 55 days, insert-only; past day 55 the evening pole reads not-yet permanently for anyone without `/private-mentor` access. Nil exposure pre-0h. Needs a decision about what the evening review *is* once the curriculum ends.
+- Unchanged and now the oldest item in this arc: **R17** — the `milestones` table is absent from the data-rights delete/export paths. Critical under 0d-ii, founder-walked, gates external onboarding.
+- `/api/milestones` and `/api/baseline` still share `/api/reason`'s IP-keyed rate-limit bucket and both fire on a dashboard mount.
+- The returning line and the mapping tables ship as drafts pending Step M.
+
+**Rules served:** R1/R6c/R9 (all copy qualitative, doorbell-voiced, verbatim-pinned), R17 (no new personal-data surface; the standing `milestones` gap named, not widened), KG1, PR10, PR17, PR18, PR19 (independent review required; completed fully this time, no fallback needed).
+
+**Status:** Adopted. Cross-references: `D-PRACTICE-REMINDERS-HUMAN-PHASE1-SEQUENCE-TRIGGER-BUILT`, `D-PRACTICE-REMINDERS-HUMAN-PHASE0-MILESTONE-WIRING-BUILT`, `operations/reminders-2026-07/2026-07-26-practice-reminders-HUMAN-build-plan.md` §9/§10, `operations/reminders-2026-07/2026-07-27-step-M-mentor-briefing.md`.

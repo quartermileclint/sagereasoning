@@ -224,17 +224,36 @@ export const PRACTICE_SOURCE_TABLES: Readonly<Record<string, readonly string[]>>
 }
 
 /**
- * The daily-rhythm surfaces. NOT sequence steps — the journal and the action
- * evaluation recur alongside the sequence rather than sitting inside it, which
- * is how `/welcome` names them.
+ * The daily-rhythm surfaces. NOT sequence steps — the journal, the reflection
+ * and the action evaluation recur alongside the sequence rather than sitting
+ * inside it, which is how `/welcome` names them.
  *
  * Declared HERE rather than in the route so the schema-existence pin can reach
  * them. They were previously route-local, and so sat outside every pin — while
  * the pin's own label invoked the `action_evaluations_v3` drift lesson and then
  * failed to cover `action_evaluations_v3`. Found by the adversarial review.
+ *
+ * `reflections` was added for Phase 4 (the daily rhythm). The evening pole is
+ * "journal OR reflection" per plan §9, and before this the route read only
+ * `journal_entries` — so a practitioner who had reflected but not journalled
+ * would have been told, wrongly, that they had not done the evening review.
+ *
+ * ONE HONEST ASYMMETRY, verified 2026-07-27 and recorded rather than smoothed
+ * over: no page available to an ORDINARY practitioner writes `reflections`.
+ * `/api/reflections` is GET-only and `/reflections` is a read-only history view;
+ * rows arrive via `/api/reflect` (the API skill surface) and
+ * `/api/mentor/private/reflect`. The latter IS reachable from a browser, at
+ * `/private-mentor` — but it is FOUNDER_USER_ID-gated, so for everyone else the
+ * claim holds without qualification. (The unqualified phrasing was corrected
+ * after the adversarial review pointed out the founder-only exception.)
+ *
+ * The table is therefore right to COUNT toward the evening pole — a row in it
+ * genuinely is an evening review — but the pole must LINK to `/journal`, the
+ * only surface an ordinary practitioner at a browser can record one on.
  */
 export const RHYTHM_TABLES: Readonly<Record<string, string>> = {
   journal: 'journal_entries',
+  reflections: 'reflections',
   evaluations: 'action_evaluations_v3',
 }
 
@@ -433,6 +452,215 @@ export function foldPracticeStatuses(
   return { practices, next_in_sequence: next, next_basis: basis }
 }
 
+// ─── The daily rhythm (Phase 4) — pure, with the clock INJECTED ───
+
+/**
+ * What evidences each pole.
+ *
+ * The morning pole is the `morning` practice, read from the sequence fold the
+ * route already returns. The evening pole is "journal OR reflection" (plan §9)
+ * — either is a genuine evening review, so a row in either satisfies it.
+ *
+ * `evaluations` (`action_evaluations_v3`) is deliberately NOT an evening key.
+ * Scoring an action happens when an action arises, not as an evening
+ * examination; plan §9 names the evening pole as the journal or the reflection
+ * and nothing else. It IS counted for the absence check below, because someone
+ * who scored an action yesterday is plainly not absent.
+ *
+ * These are RHYTHM KEYS, not table names — they index the `rhythm` block of the
+ * route's response, which is the shape the client actually holds.
+ */
+export const MORNING_PRACTICE_ID: PracticeId = 'morning'
+export const EVENING_RHYTHM_KEYS: readonly string[] = ['journal', 'reflections']
+
+/**
+ * Days of total silence across EVERY practice surface before the returning line
+ * is offered. Two weeks: long enough that it is not commenting on a busy week,
+ * short enough to still be a turning-toward rather than an epitaph.
+ */
+export const RETURNING_ABSENCE_DAYS = 14
+
+export type RhythmPoleId = 'morning' | 'evening'
+
+/**
+ * Three states, and `unknown` is load-bearing. A pole whose read failed shows NO
+ * state at all — never "not yet". Telling a practitioner they have not done the
+ * evening review when the table simply would not answer is a fabricated status,
+ * and it is the one failure that would make this strip feel like a supervisor.
+ * Same rule as the sequence module's `met: null`; both fail toward silence.
+ */
+export type RhythmState = 'done_today' | 'not_yet_today' | 'unknown'
+
+export interface RhythmPole {
+  id: RhythmPoleId
+  state: RhythmState
+  last_used_at: string | null
+}
+
+export interface DailyRhythmFold {
+  poles: RhythmPole[]
+  /** True only when every surface has been silent for RETURNING_ABSENCE_DAYS+. */
+  returning: boolean
+  /**
+   * Exposed so the threshold is directly testable. **Deliberately not rendered
+   * anywhere** — a day count is exactly the lapsed-streak framing plan §11
+   * forbids, and the mentor was explicit that a reminder cannot repair the
+   * false-judgement lapse it would be scolding about.
+   */
+  days_absent: number | null
+}
+
+/**
+ * The UTC-ms of a moment's LOCAL calendar date at midnight.
+ *
+ * Why not compare UTC dates: "today" has to mean the practitioner's today. A UTC
+ * comparison rolls the day at a moment that is not local midnight, and it fails
+ * in BOTH hemispheres, in opposite directions:
+ *
+ *   WEST of Greenwich, an entry written at 9pm local is already tomorrow in UTC,
+ *   so the evening pole would flip to "not yet" at the very moment they finished
+ *   the evening review.
+ *
+ *   EAST of Greenwich, the UTC date does not roll until mid-morning local, so a
+ *   pole would stay "done" into the next local day and the doorbell would go
+ *   silent on a morning the practice had not yet been done.
+ *
+ * (An earlier version of this comment named only the east, and named it for the
+ * west's failure. The adversarial review caught it; the code was right either
+ * way, since a local comparison is correct in both.)
+ *
+ * `getFullYear/getMonth/getDate` read local components; the `Date.UTC` wrapper
+ * turns them into a value that subtracts to exact whole days regardless of any
+ * DST shift in between — and never constructs a local midnight, which is what
+ * breaks in zones whose DST transition lands at midnight.
+ */
+function localMidnightUtcMs(d: Date): number {
+  return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())
+}
+
+function localDayDiff(from: Date, to: Date): number {
+  return Math.round((localMidnightUtcMs(to) - localMidnightUtcMs(from)) / 86_400_000)
+}
+
+/** One source's contribution: did it answer, and when was it last used. */
+interface RhythmSource {
+  status: 'ok' | 'unavailable'
+  last_used_at: string | null
+}
+
+/**
+ * Reduce a set of sources to a single reading. `complete` is false if ANY source
+ * is missing or unavailable — a source we asked for and did not get back is a
+ * failure, not an empty result, and the answer might have been in exactly the
+ * one that failed.
+ */
+function reduceSources(sources: readonly (RhythmSource | undefined)[]): {
+  complete: boolean
+  latest: string | null
+} {
+  const present = sources.filter((s): s is RhythmSource => !!s)
+  const complete =
+    sources.length > 0 && present.length === sources.length && present.every((s) => s.status === 'ok')
+  const latest = present.reduce<string | null>((acc, s) => laterOf(acc, s.last_used_at), null)
+  return { complete, latest }
+}
+
+/** The state of one pole, given its reduced sources and the current moment. */
+function poleState(
+  id: RhythmPoleId,
+  reduced: { complete: boolean; latest: string | null },
+  now: Date
+): RhythmPole {
+  if (!reduced.complete) return { id, state: 'unknown', last_used_at: null }
+
+  // Never having done it at all is an honest "not yet today" — it is, after all,
+  // not done today. Only an unreadable value is unknown.
+  if (reduced.latest === null) return { id, state: 'not_yet_today', last_used_at: null }
+
+  const t = Date.parse(reduced.latest)
+  if (!Number.isFinite(t)) return { id, state: 'unknown', last_used_at: null }
+
+  const sameDay = localMidnightUtcMs(new Date(t)) === localMidnightUtcMs(now)
+  return { id, state: sameDay ? 'done_today' : 'not_yet_today', last_used_at: reduced.latest }
+}
+
+/**
+ * The input this fold consumes is exactly the route's own response — the folded
+ * per-practice statuses and the `rhythm` block — rather than the raw per-table
+ * reads.
+ *
+ * That is deliberate. The response IS what the client holds, so folding from it
+ * needs no new field on the route and leaves one fold rather than two parallel
+ * ones drifting apart. For the absence check the folded practice statuses are
+ * equivalent to the raw tables anyway: a practice is `unavailable` if any of its
+ * tables failed (the contagious rule), so "every practice answered" and "every
+ * table answered" are the same claim.
+ */
+export interface DailyRhythmInput {
+  /**
+   * Typed to the three fields this fold actually reads, rather than to the full
+   * `PracticeStatus`. The route's own fold satisfies it structurally, and so
+   * does the client's narrower view of the same payload — so neither caller
+   * needs a cast, and the signature does not overstate what is consumed.
+   */
+  practices: readonly { id: string; status: 'ok' | 'unavailable'; last_used_at: string | null }[]
+  rhythm: Readonly<Record<string, RhythmSource>>
+}
+
+/**
+ * Turn the route's response into the two poles of the daily rhythm, plus the
+ * returning-after-absence signal.
+ *
+ * PURE, and the clock is a PARAMETER. This module must stay clock-free — its
+ * boundary suite bans `Date.now(` outright — and injecting `now` is also what
+ * makes "today" and the 14-day threshold testable without stubbing globals or
+ * waiting for midnight.
+ *
+ * THREE HONESTY RULES, all failing toward silence:
+ *
+ *  1. A pole with any unavailable or missing source is `unknown`, never
+ *     `not_yet_today`.
+ *  2. A pole whose latest timestamp will not parse is `unknown` too — a value
+ *     we cannot read is not evidence that nothing happened.
+ *  3. The returning line requires COMPLETE knowledge of every surface AND at
+ *     least one past entry somewhere. A practitioner who has never done
+ *     anything is new, not returning, and telling them "it has been a while"
+ *     on their first visit would be both false and discouraging.
+ */
+export function foldDailyRhythm(input: DailyRhythmInput, now: Date): DailyRhythmFold {
+  const practiceById = new Map(input.practices.map((p) => [p.id, p]))
+
+  const morning = practiceById.get(MORNING_PRACTICE_ID)
+  const poles: RhythmPole[] = [
+    poleState('morning', reduceSources([morning]), now),
+    poleState('evening', reduceSources(EVENING_RHYTHM_KEYS.map((k) => input.rhythm[k])), now),
+  ]
+
+  // Every surface the practitioner could have touched: every TRACKED practice
+  // plus every rhythm key. Untracked steps are excluded because `/logos` is a
+  // reading with no row anywhere — it can never evidence activity, and counting
+  // it as a missing source would make the absence check permanently incomplete
+  // and the returning line unreachable.
+  const activitySources: (RhythmSource | undefined)[] = [
+    ...TRACKED_PRACTICE_SEQUENCE.map((s) => practiceById.get(s.id)),
+    ...Object.keys(RHYTHM_TABLES).map((k) => input.rhythm[k]),
+  ]
+  const activity = reduceSources(activitySources)
+
+  let returning = false
+  let daysAbsent: number | null = null
+
+  if (activity.complete && activity.latest !== null) {
+    const t = Date.parse(activity.latest)
+    if (Number.isFinite(t)) {
+      daysAbsent = localDayDiff(new Date(t), now)
+      returning = daysAbsent >= RETURNING_ABSENCE_DAYS
+    }
+  }
+
+  return { poles, returning, days_absent: daysAbsent }
+}
+
 // ─── Pre-authored copy (pinned as exported values, never as source substrings) ───
 
 /**
@@ -454,6 +682,66 @@ export const PRACTICE_MODULE_COPY = {
     'You have met every practice here at least once. Return to whichever one the day asks for.',
   loadFailed:
     'Your practice status could not be loaded just now. The practices themselves are all still open below.',
+} as const
+
+/**
+ * The dashboard's daily rhythm strip (Phase 4) — the school model's DAILY
+ * cadence, which the mentor grounded in Seneca's evening examination in
+ * `De Ira`: "before sleep, review the day's actions, ask where you fell short,
+ * where you did well, what you would do differently. This was a daily rhythm,
+ * not an occasional one."
+ *
+ * STATES, NOT COMMANDS. A pole that is done shows only that it is done; the
+ * doorbell line appears for the not-yet state ALONE. `morningDoorbell` is the
+ * mentor's own sanctioned example, verbatim: "*it is time for morning
+ * preparation* is not doing the practice — it is removing the friction of
+ * remembering to begin. The alarm is a doorbell, not a door."
+ *
+ * `eveningDoorbell` invites the looking-back and stops there. It deliberately
+ * does not say what to look for — naming where you fell short would be the
+ * alarm reaching the conclusion the examination is meant to reach.
+ *
+ * `eveningVia` exists because of a real asymmetry: the evening pole is
+ * satisfied by the journal OR a reflection, but only the journal has a page a
+ * practitioner can write on (see RHYTHM_TABLES). Saying so is more honest than
+ * a link that silently under-describes what counts.
+ */
+export const DAILY_RHYTHM_COPY = {
+  heading: 'Today',
+  intro: 'The two poles of the daily rhythm. Where a thing is done, it simply says so.',
+  morningLabel: 'Morning preparation',
+  morningDoorbell: 'It is time for morning preparation.',
+  morningHref: '/morning',
+  eveningLabel: 'Evening review',
+  eveningDoorbell: 'Before sleep, look back over the day.',
+  eveningHref: '/journal',
+  eveningVia: 'The journal or a reflection — either one is the evening review.',
+  doneLabel: 'Done today',
+  openLabel: 'Open',
+  /**
+   * Shown when a pole could not be read. Added after the adversarial review
+   * found two things: the intro's "where a thing is done, it simply says so"
+   * silently turns the unknown state's deliberate silence into a NEGATIVE claim
+   * (nothing said ⇒ not done), and the sibling module's outage banner provably
+   * cannot cover this case — its `allUnavailable` derives only from the tracked
+   * PRACTICE tables, none of which are the rhythm tables, so a rhythm-only read
+   * failure leaves it silent.
+   *
+   * It names the outage and stops. It does not guess at what the practitioner
+   * did, which is the whole reason the state is blank in the first place.
+   */
+  unavailableNote: 'One of these could not be read just now, so it is left blank rather than guessed at.',
+  /**
+   * Shown once when every surface has been silent for RETURNING_ABSENCE_DAYS+.
+   * It invites and stops. No guilt, no count of days missed, no broken streak —
+   * the mentor was explicit that an absence may be the false-judgement lapse,
+   * which "is not a discovery an alarm can deliver", and a line that scolds
+   * would be the alarm presuming to diagnose which lapse this was.
+   *
+   * DRAFT pending Step M (plan §10 item 4).
+   */
+  returning:
+    'It has been a while. The practice is here when you turn toward it — begin with whatever is nearest.',
 } as const
 
 /**

@@ -43,6 +43,13 @@ import {
   practiceById,
   stagePracticesFor,
   foldPracticeStatuses,
+  // Phase 4 — the daily rhythm.
+  foldDailyRhythm,
+  DAILY_RHYTHM_COPY,
+  RETURNING_ABSENCE_DAYS,
+  MORNING_PRACTICE_ID,
+  EVENING_RHYTHM_KEYS,
+  type DailyRhythmInput,
 } from '../practice-sequence'
 // The CANONICAL stage vocabulary. Imported here ON PURPOSE — see note D above.
 import { STAGE_DISPLAY } from '../brand-display'
@@ -160,7 +167,7 @@ const ALL_TABLES_READ = [
   ...Object.values(PRACTICE_SOURCE_TABLES).flat(),
   ...Object.values(RHYTHM_TABLES),
 ]
-assert(ALL_TABLES_READ.length === 10, `C6-COUNT: the route reads 10 tables (got ${ALL_TABLES_READ.length}) — 8 practice sources + 2 rhythm`)
+assert(ALL_TABLES_READ.length === 11, `C6-COUNT: the route reads 11 tables (got ${ALL_TABLES_READ.length}) — 8 practice sources + 3 rhythm`)
 for (const table of ALL_TABLES_READ) {
   assert(
     new RegExp(`CREATE TABLE (IF NOT EXISTS )?(public\\.)?${table}\\b`).test(migrationSql),
@@ -173,8 +180,12 @@ assert(
 )
 assertEqual(
   Object.values(RHYTHM_TABLES),
-  ['journal_entries', 'action_evaluations_v3'],
-  'C8: the daily-rhythm tables are the journal and the action evaluation — not sequence steps, but read by the same route and so covered by C6'
+  ['journal_entries', 'reflections', 'action_evaluations_v3'],
+  'C8: the daily-rhythm tables are the journal, the reflection and the action evaluation — not sequence steps, but read by the same route and so covered by C6'
+)
+assert(
+  Object.prototype.hasOwnProperty.call(RHYTHM_TABLES, 'reflections'),
+  'C8b: `reflections` is a rhythm source. Phase 4 (plan §9) makes the evening pole "journal OR reflection"; without this table a practitioner who reflected but did not journal would be told, wrongly, that the evening review was not done'
 )
 
 // ─── D. The stage ↔ practice mapping, held to the canonical vocabulary ───
@@ -546,10 +557,20 @@ for (const stage of STAGE_PRACTICES) {
 
 // ─── H. No gamification (plan §11) ───
 
+// EVERY user-visible string surface belongs in here. DAILY_RHYTHM_COPY was
+// missing until the adversarial review found it: the Phase 4 copy sat outside
+// H1/H2/H3 entirely, and its own J5 banlist was strictly weaker (it checks the
+// phrase 'you have completed', which a bare 'completed' does not match). Proven
+// by mutation — `doneLabel: 'Done today'` → `'2 of 2 completed today'` scored
+// 358 passed, 0 failed. That single string is simultaneously N-of-M framing and
+// completion framing, both named in plan §11, and it would have rendered on the
+// dashboard for any practitioner with both poles done. A guard that looks like
+// it covers the feature and does not is worse than no guard.
 const ALL_COPY = [
   ...PRACTICE_SEQUENCE.map((s) => `${s.name} ${s.doorbell}`),
   ...Object.values(PRACTICE_MODULE_COPY),
   ...Object.values(WELCOME_SEQUENCE_COPY),
+  ...Object.values(DAILY_RHYTHM_COPY),
   ...STAGE_PRACTICES.map((s) => s.note ?? ''),
 ].join(' ').toLowerCase()
 
@@ -560,6 +581,346 @@ assert(!/\b\d+\s*%/.test(ALL_COPY), 'H2: no percentages in any user-visible stri
 assert(!/\b\d+\s+of\s+\d+\b/.test(ALL_COPY), 'H3: no "N of M" completion framing')
 
 // ─── Self-test: the assertion machinery is live ───
+
+// ─── I. Phase 4 — the daily rhythm fold ───
+//
+// The clock is INJECTED, so every case below is deterministic and none of them
+// needs a stubbed global or a particular time of day to run.
+//
+// TIMEZONE NOTE: fixtures are built with the LOCAL `Date` constructor and
+// serialised through `toISOString()`. Parsed back and read with local getters
+// they return the same local wall-clock time, so these assertions hold in any
+// timezone the suite is run in — which matters, because the thing under test is
+// precisely a local-day comparison.
+
+const at = (y: number, m: number, d: number, h = 12) => new Date(y, m - 1, d, h).toISOString()
+const NOW = new Date(2026, 6, 27, 10, 0, 0) // local 2026-07-27, 10am
+
+const OK = (ts: string | null) => ({ status: 'ok' as const, last_used_at: ts })
+const DOWN = { status: 'unavailable' as const, last_used_at: null }
+
+/**
+ * All practices ok and silent since `ts`, unless overridden.
+ *
+ * Built from PRACTICE_SEQUENCE, not TRACKED_PRACTICE_SEQUENCE, so the fixture
+ * MATCHES THE ROUTE. `foldPracticeStatuses` does not omit untracked steps — it
+ * short-circuits them to `{status:'ok', met:null, last_used_at:null}` — and the
+ * route returns that array verbatim, so the client always holds 8 entries
+ * including `logos`. The earlier fixture had 7 and no logos entry, which made
+ * I17 pass for a fixture-specific reason and told a maintainer a consequence
+ * that could not occur. Found by the adversarial review.
+ */
+function rhythmInput(over: {
+  practices?: Record<string, { status: 'ok' | 'unavailable'; last_used_at: string | null }>
+  rhythm?: Record<string, { status: 'ok' | 'unavailable'; last_used_at: string | null }>
+  base?: string | null
+} = {}): DailyRhythmInput {
+  const base = over.base === undefined ? null : over.base
+  const practices = PRACTICE_SEQUENCE.map((s) => ({
+    id: s.id,
+    ...(over.practices?.[s.id] ?? (s.tracked ? OK(base) : OK(null))),
+  }))
+  const rhythm: Record<string, { status: 'ok' | 'unavailable'; last_used_at: string | null }> = {}
+  for (const key of Object.keys(RHYTHM_TABLES)) rhythm[key] = over.rhythm?.[key] ?? OK(base)
+  return { practices, rhythm }
+}
+
+const poleOf = (f: ReturnType<typeof foldDailyRhythm>, id: 'morning' | 'evening') =>
+  f.poles.find((p) => p.id === id)!
+
+// --- Wiring pins. Both of these failure modes are SILENT: the pole would simply
+// --- be `unknown` forever, which renders as nothing at all and so looks fine.
+assert(
+  TRACKED_PRACTICE_SEQUENCE.some((s) => s.id === MORNING_PRACTICE_ID),
+  'I0a: MORNING_PRACTICE_ID names a TRACKED practice — otherwise the morning pole has no source and is permanently unknown, which renders as silence and hides itself'
+)
+assert(
+  EVENING_RHYTHM_KEYS.every((k) => Object.prototype.hasOwnProperty.call(RHYTHM_TABLES, k)),
+  'I0b: every EVENING_RHYTHM_KEY is a real rhythm key — a renamed key would orphan the evening pole into permanent unknown'
+)
+assertEqual(
+  [...EVENING_RHYTHM_KEYS],
+  ['journal', 'reflections'],
+  'I0c: the evening pole is journal OR reflection (plan §9)'
+)
+assert(
+  !EVENING_RHYTHM_KEYS.includes('evaluations'),
+  'I0d: scoring an action is NOT the evening review — it happens when an action arises. It still counts for the absence check, but it must not satisfy the evening pole'
+)
+
+// --- Basic states.
+{
+  const f = foldDailyRhythm(rhythmInput({ base: at(2026, 7, 27, 8) }), NOW)
+  assertEqual(poleOf(f, 'morning').state, 'done_today', 'I1a: an entry earlier today reads as done today')
+  assertEqual(poleOf(f, 'evening').state, 'done_today', 'I1b: likewise the evening pole')
+}
+{
+  const f = foldDailyRhythm(rhythmInput({ base: at(2026, 7, 26, 20) }), NOW)
+  assertEqual(poleOf(f, 'morning').state, 'not_yet_today', 'I2a: yesterday is not today')
+  assertEqual(poleOf(f, 'evening').state, 'not_yet_today', 'I2b: likewise the evening pole')
+}
+{
+  const f = foldDailyRhythm(rhythmInput({ base: null }), NOW)
+  assertEqual(poleOf(f, 'morning').state, 'not_yet_today', 'I3a: never done at all is an honest "not yet today" — it is, after all, not done today')
+  assertEqual(poleOf(f, 'morning').last_used_at, null, 'I3b: and carries no timestamp')
+}
+
+// --- The unknown state, in every direction that can produce it.
+{
+  const f = foldDailyRhythm(rhythmInput({ base: at(2026, 7, 26), practices: { morning: DOWN } }), NOW)
+  assertEqual(poleOf(f, 'morning').state, 'unknown', 'I4: a failed morning read is unknown, never "not yet" — telling a practitioner they skipped something they may have done is a fabricated status')
+}
+{
+  const f = foldDailyRhythm(rhythmInput({ base: at(2026, 7, 26), rhythm: { journal: DOWN } }), NOW)
+  assertEqual(poleOf(f, 'evening').state, 'unknown', 'I5: unavailable is contagious within the evening pole — journal down')
+}
+{
+  // The MIRROR of I5. Without it, a fold that checked only the first source
+  // would pass I5 and still be broken.
+  const f = foldDailyRhythm(rhythmInput({ base: at(2026, 7, 26), rhythm: { reflections: DOWN } }), NOW)
+  assertEqual(poleOf(f, 'evening').state, 'unknown', 'I6: unavailable is contagious within the evening pole — reflections down (the mirror of I5)')
+}
+{
+  const f = foldDailyRhythm(rhythmInput({ base: at(2026, 7, 26), rhythm: { journal: OK('not-a-date') , reflections: OK(null) } }), NOW)
+  assertEqual(poleOf(f, 'evening').state, 'unknown', 'I7: an unreadable timestamp is unknown — a value we cannot parse is not evidence that nothing happened')
+}
+
+// --- A source that is ABSENT, not merely unavailable. The sibling fold pins this
+// --- (E2-16/E2-17: "a MISSING read is unavailable, not an implied zero") and this
+// --- one did not, because rhythmInput always populates every key. The adversarial
+// --- review proved the gap: deleting the `present.length === sources.length`
+// --- clause from reduceSources scored 358 passed / 0 failed. Reachable in
+// --- practice — the client casts the payload without validating it, so a rolled
+// --- back route, or any future route emitting a partial rhythm block, hands this
+// --- fold an absent key.
+{
+  const input = rhythmInput({ base: at(2026, 7, 27, 9) })
+  const rhythm = { ...input.rhythm } as Record<string, { status: 'ok' | 'unavailable'; last_used_at: string | null }>
+  delete rhythm.reflections // a pre-Phase-4-shaped payload
+  const f = foldDailyRhythm({ practices: input.practices, rhythm }, NOW)
+  assertEqual(poleOf(f, 'evening').state, 'unknown', 'I7b: an ABSENT rhythm key makes the pole unknown — never a state invented from the keys that happened to arrive')
+}
+{
+  const input = rhythmInput({ base: at(2026, 7, 27, 9) })
+  const f = foldDailyRhythm(
+    { practices: input.practices.filter((p) => p.id !== 'morning'), rhythm: input.rhythm },
+    NOW
+  )
+  assertEqual(poleOf(f, 'morning').state, 'unknown', 'I7c: an ABSENT morning practice makes that pole unknown')
+  assert(!f.returning, 'I7d: and an absent practice withholds the returning line — the missing source might have held recent activity')
+  assertEqual(f.days_absent, null, 'I7e: and leaves days absent unknowable rather than guessed')
+}
+
+// --- I0d asserts over the CONSTANT. This asserts over the BEHAVIOUR, because a
+// --- label that says "must not satisfy the evening pole" should be pinned by
+// --- something that would notice if it did.
+{
+  const f = foldDailyRhythm(
+    rhythmInput({
+      base: null,
+      rhythm: { journal: OK(null), reflections: OK(null), evaluations: OK(at(2026, 7, 27, 12, )) },
+    }),
+    NOW
+  )
+  assertEqual(poleOf(f, 'evening').state, 'not_yet_today', 'I0e: scoring an action TODAY does not make the evening review done — the dashboard must not claim the evening examination happened at lunchtime')
+}
+
+// --- Journal OR reflection, in BOTH directions. This pair is the whole point of
+// --- Phase 4's table change: before it, the second case was impossible to satisfy.
+{
+  const f = foldDailyRhythm(
+    rhythmInput({ base: null, rhythm: { journal: OK(at(2026, 7, 27, 21)), reflections: OK(null) } }),
+    NOW
+  )
+  assertEqual(poleOf(f, 'evening').state, 'done_today', 'I8: the journal alone satisfies the evening pole')
+}
+{
+  const f = foldDailyRhythm(
+    rhythmInput({ base: null, rhythm: { journal: OK(null), reflections: OK(at(2026, 7, 27, 21)) } }),
+    NOW
+  )
+  assertEqual(poleOf(f, 'evening').state, 'done_today', 'I9: a REFLECTION alone satisfies the evening pole — the regression Phase 4 exists to fix; before `reflections` was a rhythm source this case reported "not yet"')
+}
+
+// --- Order independence, written as an explicit MIRROR PAIR.
+// --- The Phase 1 lesson, recurring: two fixtures that both put the later value
+// --- in the same position let a "last wins" mutant pass everything.
+{
+  const older = at(2026, 7, 24)
+  const today = at(2026, 7, 27, 9)
+  const a = foldDailyRhythm(rhythmInput({ base: null, rhythm: { journal: OK(today), reflections: OK(older) } }), NOW)
+  const b = foldDailyRhythm(rhythmInput({ base: null, rhythm: { journal: OK(older), reflections: OK(today) } }), NOW)
+  assertEqual(poleOf(a, 'evening').state, 'done_today', 'I10a: later value FIRST — the pole takes the later of its sources')
+  assertEqual(poleOf(b, 'evening').state, 'done_today', 'I10b: later value SECOND — the mirror, so a positional bug cannot hide')
+  assertEqual(poleOf(a, 'evening').last_used_at, today, 'I10c: and reports the later timestamp, order-independently (first)')
+  assertEqual(poleOf(b, 'evening').last_used_at, today, 'I10d: and reports the later timestamp, order-independently (second)')
+}
+
+// --- The local-day boundary. The named requirement: an entry must read as
+// --- "today" for the practitioner who wrote it, on THEIR calendar.
+//
+// THIS BLOCK PINS ITS OWN TIMEZONE, and that is the whole point of it.
+// Found by adversarial review: under `TZ=UTC` a local-day comparison and a UTC-day
+// comparison are MATHEMATICALLY IDENTICAL, so every assertion here passes even
+// after reintroducing the exact bug the design exists to prevent — mutating
+// `localMidnightUtcMs` to use `getUTCFullYear/getUTCMonth/getUTCDate` scored
+// 358 passed, 0 failed under TZ=UTC. The suite only caught it because the
+// author's machine happens to be UTC+10; CI containers and Vercel builds default
+// to UTC, so the pin would have gone quietly vacuous the moment it left this Mac.
+//
+// So the zone is set explicitly, BOTH SIDES of Greenwich are exercised (the two
+// hemispheres fail a UTC comparison in opposite directions — one flips to
+// "not yet" mid-evening, the other stays "done" into the next local morning),
+// and the block asserts that the zone actually took effect rather than trusting
+// that it did.
+{
+  const originalTz = process.env.TZ
+
+  for (const [zone, expectedSign] of [
+    ['Australia/Brisbane', 'east (+10)'],
+    ['America/Los_Angeles', 'west (−7/−8)'],
+  ] as const) {
+    process.env.TZ = zone
+    const offset = new Date(2026, 6, 27).getTimezoneOffset()
+    assert(offset !== 0, `I11-TZ[${zone}]: the timezone actually took effect (offset ${offset}, ${expectedSign}) — if this ever reads 0 the assertions below are vacuous`)
+
+    // Built HERE, after the zone is set, so the fixtures are local to it.
+    const evening = (ts: string) => rhythmInput({ base: ts })
+
+    const f1 = foldDailyRhythm(evening(at(2026, 7, 27, 21)), new Date(2026, 6, 27, 23, 30))
+    assertEqual(poleOf(f1, 'evening').state, 'done_today', `I11a[${zone}]: a 9pm LOCAL entry still reads as today at 11:30pm local`)
+
+    const f2 = foldDailyRhythm(evening(at(2026, 7, 27, 23)), new Date(2026, 6, 28, 0, 30))
+    assertEqual(poleOf(f2, 'evening').state, 'not_yet_today', `I11b[${zone}]: and rolls over at LOCAL midnight, not UTC midnight`)
+
+    const f3 = foldDailyRhythm(evening(at(2026, 7, 27, 8)), new Date(2026, 6, 27, 18, 0))
+    assertEqual(poleOf(f3, 'evening').state, 'done_today', `I11c[${zone}]: an 8am entry is still today at 6pm — the case that discriminates in BOTH hemispheres, because a UTC comparison puts the entry and the moment on different UTC dates either way`)
+  }
+
+  if (originalTz === undefined) delete process.env.TZ
+  else process.env.TZ = originalTz
+}
+
+// --- Returning after absence.
+{
+  const f = foldDailyRhythm(rhythmInput({ base: at(2026, 7, 13) }), NOW)
+  assertEqual(f.days_absent, 14, 'I12a: days absent counts local calendar days')
+  assert(f.returning, 'I12b: exactly at the threshold, the returning line is offered')
+}
+{
+  const f = foldDailyRhythm(rhythmInput({ base: at(2026, 7, 14) }), NOW)
+  assertEqual(f.days_absent, 13, 'I13a: one day short of the threshold')
+  assert(!f.returning, 'I13b: and the line is withheld — the boundary is tested from BOTH sides')
+}
+{
+  const f = foldDailyRhythm(rhythmInput({ base: null }), NOW)
+  assert(!f.returning, 'I14a: a practitioner who has never done anything is NEW, not returning — "it has been a while" on a first visit would be false and discouraging')
+  assertEqual(f.days_absent, null, 'I14b: and there is no absence to measure')
+}
+{
+  const f = foldDailyRhythm(rhythmInput({ base: at(2026, 7, 1), practices: { 'sage-compass': DOWN } }), NOW)
+  assert(!f.returning, 'I15a: one unavailable surface withholds the returning line — the missing table might have held recent activity')
+  assertEqual(f.days_absent, null, 'I15b: and days absent is unknowable, not guessed')
+}
+{
+  // Long-silent practices, but a recent action evaluation. `evaluations` is not
+  // an evening source, but it IS activity — someone who scored an action
+  // yesterday is plainly not absent.
+  const f = foldDailyRhythm(
+    rhythmInput({ base: at(2026, 7, 1), rhythm: { evaluations: OK(at(2026, 7, 26)) } }),
+    NOW
+  )
+  assert(!f.returning, 'I16: a recent action evaluation counts as activity for the absence check even though it does not satisfy the evening pole')
+}
+{
+  // The untracked prerequisite is excluded from the activity scan. Its earlier
+  // rationale was wrong twice over — `/logos` DOES appear in the practice
+  // statuses, and with status 'ok', so merely including it would be harmless
+  // today. The exclusion is nonetheless load-bearing, and this pins the reason
+  // it is: `/logos` is a reading with no row anywhere, so it can never evidence
+  // activity, and the moment the sibling fold reports it as anything other than
+  // 'ok' an activity scan that included it would be permanently incomplete and
+  // the returning line permanently unreachable. The fixture below makes exactly
+  // that case, so the pin is non-vacuous rather than an artefact.
+  const base = rhythmInput({ base: at(2026, 7, 1) })
+  const withUnknownLogos = {
+    practices: base.practices.map((p) => (p.id === 'logos' ? { ...p, status: 'unavailable' as const } : p)),
+    rhythm: base.rhythm,
+  }
+  assert(
+    foldDailyRhythm(withUnknownLogos, NOW).returning,
+    'I17: an untracked step is excluded from the activity scan even when IT is unreadable — a reading can never evidence activity, so it must never be able to withhold the returning line'
+  )
+  assert(
+    foldDailyRhythm(base, NOW).returning,
+    'I17b: and the ordinary production-shaped payload (8 practices, logos ok) still reaches the returning line'
+  )
+}
+
+// ─── J. Phase 4 copy, pinned as EXPORTED VALUES ───
+
+assertEqual(RETURNING_ABSENCE_DAYS, 14, 'J1: the absence threshold is two weeks (plan §9)')
+assertEqual(
+  DAILY_RHYTHM_COPY.morningDoorbell,
+  'It is time for morning preparation.',
+  'J2: the morning doorbell is the mentor\'s own sanctioned example, verbatim — "it is time for morning preparation is not doing the practice — it is removing the friction of remembering to begin"'
+)
+assert(
+  DAILY_RHYTHM_COPY.returning.includes('begin with whatever is nearest'),
+  'J3: the returning line invites and stops, leaving the choosing to the practitioner (DRAFT pending Step M)'
+)
+// A VERBATIM whole-object pin, replacing a per-key non-empty-string loop.
+//
+// The loop was not a copy pin, and the adversarial review proved it: rewriting
+// eveningDoorbell to 'Before sleep, name where you fell short and feel the
+// weight of it.' scored 358 passed / 0 failed. That rewrite tells the
+// practitioner both what to conclude and how to feel — the exact violation of
+// constraint 1 that this file's own docstring says the string is written to
+// avoid. The render suite cannot catch it either, because every assertion there
+// compares against DAILY_RHYTHM_COPY by REFERENCE and so follows any change.
+//
+// This file already carries the lesson at F14: "a non-empty-string assertion is
+// not a copy pin." Constraint 1 is the change's primary binding constraint, so
+// its copy gets the strongest available pin — changing any of these strings now
+// requires changing this test too, deliberately.
+assertEqual(
+  { ...DAILY_RHYTHM_COPY },
+  {
+    heading: 'Today',
+    intro: 'The two poles of the daily rhythm. Where a thing is done, it simply says so.',
+    morningLabel: 'Morning preparation',
+    morningDoorbell: 'It is time for morning preparation.',
+    morningHref: '/morning',
+    eveningLabel: 'Evening review',
+    eveningDoorbell: 'Before sleep, look back over the day.',
+    eveningHref: '/journal',
+    eveningVia: 'The journal or a reflection — either one is the evening review.',
+    doneLabel: 'Done today',
+    openLabel: 'Open',
+    unavailableNote: 'One of these could not be read just now, so it is left blank rather than guessed at.',
+    returning:
+      'It has been a while. The practice is here when you turn toward it — begin with whatever is nearest.',
+  },
+  'J4: DAILY_RHYTHM_COPY verbatim — every doorbell invites a beginning and then STOPS; none names a conclusion, a feeling, or a verdict (plan §1 constraint 1)'
+)
+
+// No gamification (plan §11), asserted over the copy itself rather than trusting
+// the components to abstain.
+const FORBIDDEN_COPY = ['streak', '%', 'congrat', 'well done', 'keep it up', 'you have completed', 'points', 'badge']
+for (const [key, value] of Object.entries(DAILY_RHYTHM_COPY)) {
+  for (const bad of FORBIDDEN_COPY) {
+    assert(
+      !String(value).toLowerCase().includes(bad),
+      `J5[${key}]: no gamification vocabulary — '${bad}' would make this a score rather than a mirror`
+    )
+  }
+}
+
+// Both rhythm hrefs must open onto a real page.
+for (const href of [DAILY_RHYTHM_COPY.morningHref, DAILY_RHYTHM_COPY.eveningHref]) {
+  const pageFile = path.join(websiteRoot, 'src/app', href.replace(/^\//, ''), 'page.tsx')
+  assert(fs.existsSync(pageFile), `J6[${href}]: resolves to a real page — a typo'd href ships as a doorbell that opens onto a 404`)
+}
 
 /** Run a probe expected to FAIL, with its console noise suppressed, and report
  *  whether it did. Keeps deliberate self-test failures out of the run output,

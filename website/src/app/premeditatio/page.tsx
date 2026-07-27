@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { authFetch } from '@/lib/auth-fetch'
 import type { User } from '@supabase/supabase-js'
+import CadenceBanner from '@/components/CadenceBanner'
 
 /**
  * Premeditatio — "Preparing for Adversity"
@@ -331,26 +332,25 @@ export default function PremeditatioPage() {
         </button>
       </div>
 
-      {/* Monday prompt banner (weekly mode only) */}
+      {/* Monday prompt banner (weekly mode only).
+          Practice reminders Phase 4 (plan §9): folded onto the shared
+          CadenceBanner so every cadence prompt in the product looks the same.
+          RESTYLE ONLY — the condition below, `isPromptDay`, and `openNewForm`
+          are all untouched, so when this appears and what it does are unchanged. */}
       {mode === 'weekly' && isPromptDay && !showForm && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="font-display text-sm font-medium text-amber-800">
-                Monday — Premeditatio prompt
-              </span>
-              <p className="font-body text-xs text-amber-600 mt-1">
-                What specific situation lies ahead this week? Name it. Prepare for it.
-              </p>
-            </div>
-            <button
-              onClick={openNewForm}
-              className="px-4 py-2 bg-amber-600 text-white font-display text-sm rounded hover:bg-amber-700 transition-colors"
-            >
-              Respond
-            </button>
-          </div>
-        </div>
+        <CadenceBanner
+          tone="amber"
+          title="Monday — Premeditatio prompt"
+          line="What specific situation lies ahead this week? Name it. Prepare for it."
+          className="mb-6"
+        >
+          <button
+            onClick={openNewForm}
+            className="px-4 py-2 bg-amber-600 text-white font-display text-sm rounded hover:bg-amber-700 transition-colors"
+          >
+            Respond
+          </button>
+        </CadenceBanner>
       )}
 
       {/* Engagement stats */}

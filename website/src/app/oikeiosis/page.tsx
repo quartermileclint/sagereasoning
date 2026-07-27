@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { authFetch } from '@/lib/auth-fetch'
 import type { User } from '@supabase/supabase-js'
+import CadenceBanner from '@/components/CadenceBanner'
 
 /**
  * Expanding Your Circle of Concern — the oikeiosis surface.
@@ -764,26 +765,24 @@ export default function OikeiosisPage() {
             </div>
           </div>
 
-          {/* Quarterly prompt banner */}
+          {/* Quarterly prompt banner.
+              Practice reminders Phase 4 (plan §9): folded onto the shared
+              CadenceBanner so every cadence prompt in the product looks the same.
+              RESTYLE ONLY — `isQuarterlyPromptDay()` and the handler below are
+              untouched, so when this appears and what it does are unchanged. */}
           {isPromptDay && !showForm && (
-            <div className="bg-sage-50 border border-sage-300 rounded-lg p-4 mb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-display text-sm font-medium text-sage-800">
-                    Quarterly reflection — Q{getCurrentQuarter()} {getCurrentYear()}
-                  </span>
-                  <p className="font-body text-xs text-sage-600 mt-1">
-                    What actions have you taken this quarter that extended concern beyond the household circle?
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="px-4 py-2 bg-sage-500 text-white font-display text-sm rounded hover:bg-sage-600 transition-colors"
-                >
-                  Reflect
-                </button>
-              </div>
-            </div>
+            <CadenceBanner
+              title={`Quarterly reflection — Q${getCurrentQuarter()} ${getCurrentYear()}`}
+              line="What actions have you taken this quarter that extended concern beyond the household circle?"
+              className="mb-6"
+            >
+              <button
+                onClick={() => setShowForm(true)}
+                className="px-4 py-2 bg-sage-500 text-white font-display text-sm rounded hover:bg-sage-600 transition-colors"
+              >
+                Reflect
+              </button>
+            </CadenceBanner>
           )}
 
           {/* Stage progression view */}
