@@ -867,7 +867,7 @@ assertEqual(
 )
 assert(
   DAILY_RHYTHM_COPY.returning.includes('begin with whatever is nearest'),
-  'J3: the returning line invites and stops, leaving the choosing to the practitioner (DRAFT pending Step M)'
+  'J3: the returning line invites and stops, leaving the choosing to the practitioner — MENTOR-CONFIRMED as drafted (Step M, 2026-07-27; "the practitioner knows themselves better than the system does at the moment of return")'
 )
 // A VERBATIM whole-object pin, replacing a per-key non-empty-string loop.
 //

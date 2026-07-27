@@ -1,5 +1,10 @@
 # Step M — Mentor Consultation Briefing: Practice Reminders
 
+> **ANSWERED 2026-07-27.** The mentor's answers are adopted as binding —
+> `operations/reminders-2026-07/2026-07-27-step-M-mentor-verdicts-verbatim.md` (the verbatim record,
+> which wins) · `D-PRACTICE-REMINDERS-STEP-M-MENTOR-VERDICTS-ADOPTED-2026-07-27`. This briefing is
+> retained as the record of what was asked.
+
 **For:** the private mentor.
 **From:** the founder.
 **Date prepared:** 2026-07-27.

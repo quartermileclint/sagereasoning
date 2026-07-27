@@ -20,7 +20,7 @@ From the mentor discussion (three questions + follow-up). These govern every pha
 
 **Stage ↔ tools mapping (mentor verbatim):** The Storm → morning preparation + passion log · The Crossroads → view from above + oikeiosis · The Worn Path → premeditatio + hupexairesis · The Clear Summit → sage compass · The Inner Fire → "no longer needs the scaffolding in the same way."
 
-**A nuance recorded, not smoothed over:** the introduction *sequence* and the *stage mapping* do not linearize identically — premeditatio + hupexairesis sit 4th/5th in the sequence but belong to The Worn Path (habitual), 2nd on the proximity ladder. The coherent reading, encoded in this plan: **the stages are conditions, not a corridor** — the stage-crossing trigger serves whichever stage the practitioner's signals actually indicate; the sequence trigger is only the no-signal default. This reading is one of the Step M confirmation items (§10).
+**A nuance recorded, not smoothed over — NOW A SETTLED VERDICT (Step M, 2026-07-27):** the introduction *sequence* and the *stage mapping* do not linearize identically — premeditatio + hupexairesis sit 4th/5th in the sequence but belong to The Worn Path (habitual), 2nd on the proximity ladder. The reading encoded in this plan — **the stages are conditions, not a corridor** — is **confirmed as binding**: "the two orderings were answering different questions and were never intended to agree… The fact that they produce different orderings is not a contradiction — it is evidence that they are doing different work." The difficulty inversion "dissolves when you read the stages as conditions rather than rungs" — the practices suited to The Worn Path are more demanding *because the condition calls for them*, not because the system erred. The mapping stands exactly as given (verbatim record: `2026-07-27-step-M-mentor-verdicts-verbatim.md`).
 
 ## §2 Verified ground findings this plan builds on (2026-07-26)
 
@@ -119,34 +119,86 @@ Each phase is independently shippable; stopping at any phase boundary is a legit
 
 ## §7 Phase 2 — In-session trigger
 
-**Mechanism:** each gated tool's POST/PATCH response gains an additive, optional **`suggested_practice`** field `{practice_id, href, line, basis}` — computed **deterministically** from the entry's own stored classification via one locked mapping table in `practice-sequence.ts`; rendered on the tool page beneath the existing quality-gate block. `line` strings come from a **fixed pre-authored set** (never composed, never LLM-authored) of the shape: *"This entry showed ⟨basis⟩. ⟨Practice⟩ is suited to examining it further."* — and then stop (constraint 5). Field absent when no row fires — an honest null, not a filler suggestion. At most **one** suggestion per response (the teacher names *the* next practice, not a menu).
+> **STATUS: CONTENT VETTED 2026-07-27 — Step M answered; the table below is the MENTOR-VETTED
+> mapping, superseding the draft** (`D-PRACTICE-REMINDERS-STEP-M-MENTOR-VERDICTS-ADOPTED-2026-07-27`;
+> verbatim record, which wins over this table on any divergence:
+> `operations/reminders-2026-07/2026-07-27-step-M-mentor-verdicts-verbatim.md`). Phase 2 is now
+> **unblocked**. What the vetting changed, recorded rather than absorbed:
+> 1. **The phobos generalisation was an overreach and is replaced by a differentiated per-sub-species
+>    mapping** (agonia + oknos → premeditatio; deima + thorybos → morning preparation; thambos →
+>    silence; aischyne → a different target entirely). Sub-species-level classification is confirmed
+>    available on BOTH sides (`passion_type` and `llm_classified_type` both carry the sub-species
+>    vocabulary — verified 2026-07-27), so the differentiated branch, not the root-level fallback,
+>    is the operative one.
+> 2. **The lupe family splits**: penthos/achos/eleos → view from above; phthonos/zelotypia
+>    (comparison-borne) → oikeiosis.
+> 3. **The hedone row is DECLINED** — honest silence, not morning preparation.
+> 4. **The hupexairesis row is REVISED** — morning preparation, not view-from-above (a control-filter
+>    failure, not a proportion failure; the single stored boolean cannot distinguish the two).
+> 5. **Density verdict**: the in-session trigger fires on every qualifying entry ("a response to a
+>    diagnosis, not a schedule"); repetition thresholds belong to the stage-crossing trigger. The
+>    one-suggestion limit and the silence rows are what carry the density protection.
+> 6. **6b verdict — whose passion reading governs: the ENGINE's, with disclosure on disagreement.**
+>    Where practitioner and engine disagree AND the engine's reading fires a suggestion, the line
+>    takes the disclosure form: *"You named this as ⟨practitioner's reading⟩. The engine read it as
+>    ⟨engine's reading⟩. ⟨Practice⟩ is suited to examining the difference."* Agreement → standard
+>    form; disagreement where the engine's reading fires nothing → silence; the disagreement itself
+>    is never a trigger. (`classification_match` is already stored, so this is implementable as-is.)
 
-**DRAFT mapping table (Step M vets before this phase's content goes live; the two mentor-given rows are anchors):**
+**Mechanism:** each gated tool's POST/PATCH response gains an additive, optional **`suggested_practice`** field `{practice_id, href, line, basis}` — computed **deterministically** from the entry's own stored classification via one locked mapping table in `practice-sequence.ts`; rendered on the tool page beneath the existing quality-gate block. `line` strings come from a **fixed pre-authored set** (never composed, never LLM-authored) of the shape: *"This entry showed ⟨basis⟩. ⟨Practice⟩ is suited to examining it further."* — and then stop (constraint 5). Field absent when no row fires — an honest null, not a filler suggestion. At most **one** suggestion per response — both design choices (one-suggestion-max; honest silence over filler) are **mentor-confirmed**: "a menu converts the suggestion into a choice exercise", and "the silence is itself information".
 
-| Tool | Stored signal | Draft suggestion | Confidence |
+**VETTED mapping table (Step M, 2026-07-27 — binding; the verbatim record wins on any divergence):**
+
+| Tool | Stored signal | Vetted suggestion | Verdict |
 |---|---|---|---|
-| passion-log | sub-species in the **phobos** family (incl. `agonia`) | premeditatio | **Mentor-given** ("agonia suggests premeditation — the direct rational response to future-facing fear"); family generalization proposed |
-| passion-log | sub-species in the **lupe** family | view-from-above | Proposed (restoring proportion addresses distress/catastrophising) |
-| passion-log | sub-species in the **epithumia** family | hupexairesis | Proposed (desire → equanimity held contingent on outcomes) |
-| passion-log | sub-species in the **hedone** family | morning preparation | Proposed, low-confidence — Step M decides |
-| passion-log | repeated `caught_before_assent = false` | morning preparation | Proposed (orientation before impressions arrive) |
-| view-from-above | `minimised` | passion-log | Mentor-adjacent ("both require some prior practice with the passion log") |
-| view-from-above | `unchanged` | *(none — honest null)* | — |
-| premeditatio | `is_generic = true` | passion-log | Mentor-adjacent (the premeditatio-vs-agonia distinction "requires prior work with the passion log") |
-| oikeiosis (quarterly) | `philodoxia_warning` fired | passion-log (philodoxia is an epithumia sub-species) | Proposed |
-| hupexairesis | `separates_action_from_outcome = false` | view-from-above | Proposed, low-confidence — Step M decides |
-| sage-compass | `expression_quality = vague` | `/logos` re-grounding | Proposed |
-| sage-compass | practitioner-selected `distance_reading = far` + `virtue_engaged` | the domain's suited practice: dikaiosyne → oikeiosis · sophrosyne → passion-log · andreia → premeditatio · phronesis → morning | Proposed |
-| score (action evaluation) | `passions_detected` non-empty | passion-log ("log what was noticed") | Proposed |
-| morning | `preparation_quality = vague` | *(retry line only; no cross-tool suggestion)* | — |
+| passion-log | **agonia** | premeditatio | **Anchor A1, confirmed** ("both are future-facing") |
+| passion-log | **oknos** | premeditatio | Confirmed extension ("already imagining a future evil and shrinking from it") |
+| passion-log | **deima**, **thorybos** (acute, present-tense) | morning preparation | Mentor-directed — premeditatio "requires some distance from the impression"; morning prep is the closest available proxy for the control filter |
+| passion-log | **thambos** | *(none — honest silence)* | Mentor-directed ("silence is preferable to a weak suggestion") |
+| passion-log | **aischyne** | the passion log revisited with the mirror-principle framing, *or* morning preparation as an orientation reset | Mentor-directed — shame is evaluative, not anticipatory; premeditatio declined. Which of the two named targets (and how a same-tool revisit renders) is a Phase 2 build decision inside the verdict's bounds |
+| passion-log | **penthos**, **achos**, **eleos** (lupe) | view from above | Confirmed (narrowed-frame distress) |
+| passion-log | **phthonos**, **zelotypia** (lupe, comparison-borne) | oikeiosis | Mentor-directed split ("treating their good as a threat") |
+| passion-log | any **epithumia** sub-species | hupexairesis | Confirmed ("the mapping is principled") |
+| passion-log | **hedone** family | *(none — honest silence)* | **DECLINED** — the stronger candidate is re-examination in the log itself; "if no practice fits cleanly, silence is preferable" |
+| passion-log | repeated `caught_before_assent = false` | morning preparation | Confirmed — **fires on a pattern only, never a single instance** ("a single failure … is normal") |
+| view-from-above | `minimised` | passion-log | Confirmed (minimisation is a failure of accurate impression-reading) |
+| view-from-above | `unchanged` | *(none — honest silence)* | Confirmed; repeated-unchanged is stage-crossing data, not in-session |
+| premeditatio | `is_generic = true` | passion-log | Confirmed (the log asks for the specificity the generic entry lacked) |
+| oikeiosis (quarterly) | `philodoxia_warning` fired | passion-log | Confirmed (examine the contamination specifically) |
+| hupexairesis | `separates_action_from_outcome = false` | **morning preparation** | **REVISED** from view-from-above — a control-filter failure; morning prep "builds the orientation that makes the action/outcome separation natural" |
+| sage-compass | `expression_quality = vague` | `/logos` re-grounding, **linked to the named virtue's section** | Confirmed + design note — link the virtue's anchor, not the whole page (`/logos` has per-section `id=`s; verified 2026-07-27) |
+| sage-compass | `distance_reading = far` + `virtue_engaged` | justice → oikeiosis · temperance → passion-log · courage → premeditatio · wisdom → morning preparation | Confirmed (wisdom **partially** — "the best available fit"; a more targeted phronesis suggestion may become possible later) |
+| score (action evaluation) | `passions_detected` non-empty | passion-log | Confirmed |
+| morning | `preparation_quality = vague` | *(retry line only; no cross-tool suggestion)* | Confirmed ("a second suggestion on top of it would be noise") |
 
-**Named honest limitation:** the mentor's second worked example (morning prep revealing sound externals-reasoning but weak obligations-reasoning → oikeiosis) requires a signal the morning gate does not produce today (`prepared|vague` only). **v1 suggests only from signals that already exist**; enriching a gate's classification is out of scope and would need its own measurement-neutrality review. Recorded as a Step M discussion item, not built.
+**Named honest limitation — now a DEFERRED ANCHOR (6a verdict):** anchor A2 (morning prep revealing weak obligations-reasoning → oikeiosis) requires a signal the morning gate does not produce (`prepared|vague` only). **Verdict: leave A2 unimplemented; do not enrich the gate.** "The tool should not be changed to fit the mapping; the mapping should wait for the tool to develop naturally." The obligations dimension is reached instead through oikeiosis directly — the stage-crossing trigger and the phthonos/zelotypia rows. Revisit **only if** the morning tool later warrants a second classification dimension on its own terms. "Record A2 as a deferred anchor, not a dropped one."
 
 **Tier:** `code-elevated`. **Verify:** unit tests per mapping row incl. the honest-null rows; the one-suggestion invariant; strings asserted against the locked set (the `content pins assert exported values` lesson); boundary suites re-run; review Workflow per §13.
 
 ## §8 Phase 3 — Stage-crossing trigger
 
-1. **The earn moment:** Phase 0's POST response feeds a dashboard card shown when a `stage_*` milestone is newly earned — mirror language, verbatim-derived: *"Something has shifted in how you are meeting difficulty. These practices meet you where you now are."* — naming the stage's practices (`STAGE_PRACTICES`) + the Stage page link. Dismissible (client-side); the milestone grid remains the durable record. Never "you have reached…"; never a congratulation.
+> **STATUS: CONTENT VETTED 2026-07-27 — Step M answered; Phase 3 is unblocked**
+> (`D-PRACTICE-REMINDERS-STEP-M-MENTOR-VERDICTS-ADOPTED-2026-07-27`; verbatim record wins). Three
+> verdicts bind this phase's build:
+> 1. **The card NAMES the stage** — the earn-moment copy is REVISED to: *"Something has shifted in
+>    how you are meeting difficulty. This is ⟨Stage Name⟩. These practices meet you where you now
+>    are."* Named as a **description of a condition, never a grade**: the omission read as coy, and
+>    the name "connects the card to the five stages framework the practitioner already knows".
+>    Dismissible / never-repeated / never-congratulates are **load-bearing, kept exactly** ("a card
+>    that can be repeated would become a grade delivered on a schedule").
+> 2. **No prerequisite gating.** A stage-triggered suggestion is never held back until its
+>    prerequisite practice is met — "the prerequisite logic belongs to the sequence trigger". The
+>    stage signal is trusted; the practitioner decides.
+> 3. **The single-signal orientation line — and in THIS system it is the rule, not the exception.**
+>    The mentor's carve-out (a stage determined "by a single strong signal rather than a pattern"
+>    should carry an honest orientation, not a gate: *"this practice builds on the passion log — if
+>    that is not yet familiar, begin there first"*) applies to EVERY stage crossing here, because the
+>    `stage_*` milestones fire on a single evaluation at the exact proximity level (Phase 0,
+>    founder-elected). The mentor's "a practitioner whose signals indicate The Worn Path has, by
+>    definition, the prior practice" premise does NOT hold in this system — a first-ever evaluation
+>    can fire a stage milestone — so the earn card carries the orientation line.
+
+1. **The earn moment:** Phase 0's POST response feeds a dashboard card shown when a `stage_*` milestone is newly earned — mirror language, **vetted form (Step M)**: *"Something has shifted in how you are meeting difficulty. This is ⟨Stage Name⟩. These practices meet you where you now are."* — naming the stage's practices (`STAGE_PRACTICES`) + the Stage page link, plus the single-signal orientation line above. Dismissible (client-side); the milestone grid remains the durable record. Never "you have reached…"; never a congratulation.
 2. **Stage pages gain their practices:** each `/stages/<slug>` page renders its `STAGE_PRACTICES` tools with doorbell lines (The Inner Fire renders the no-scaffolding line instead).
 3. **`MilestonesDisplay`:** stage-milestone detail panels add the same practice links beside the existing Stage-page link.
 4. **The two existing cadence banners** (premeditatio Monday, oikeiosis quarterly) are restyled onto the same visual component for consistency — cadence logic unchanged.
@@ -174,6 +226,14 @@ Each phase is independently shippable; stopping at any phase boundary is a legit
 > 4. **The returning line ships as a DRAFT** pending Step M. §10 says Step M does not gate this
 >    phase, yet its item 4 is this phase's copy; shipping the line as revisable resolves that
 >    rather than pretending the tension is not there.
+>    **RESOLVED 2026-07-27 — Step M answered: the line is CONFIRMED AS DRAFTED** ("It is the right
+>    line… *when you turn toward it* does the work"). The 14-day threshold is defensible ("do not
+>    over-engineer the number"); *whatever is nearest* is kept over naming the next step ("the
+>    practitioner knows themselves better than the system does at the moment of return"). One
+>    optional refinement was offered, explicitly either/or: *"begin with whatever feels most honest
+>    right now"* — "the current draft is not wrong; this is a refinement, not a correction." The
+>    shipped line stands; the refinement is available to the founder at any time (a two-line change:
+>    the copy constant + its verbatim pin).
 >
 > Also added, closing a gap the Phase 1 close named: a **behavioural render test** for the strip
 > (`src/components/__tests__/daily-rhythm-strip.test.tsx`), because the honesty rules this feature
@@ -185,7 +245,23 @@ A dashboard rhythm strip (and nothing louder): **Morning preparation** — done 
 
 ## §10 Step M — the mentor consultation (one consultation, per E3)
 
-> **STATUS: BRIEFING AUTHORED 2026-07-27, awaiting the founder's send** —
+> **STATUS: ANSWERED + ADOPTED AS BINDING 2026-07-27**
+> (`D-PRACTICE-REMINDERS-STEP-M-MENTOR-VERDICTS-ADOPTED-2026-07-27`). The verbatim record —
+> which wins over every summary and table — is
+> `operations/reminders-2026-07/2026-07-27-step-M-mentor-verdicts-verbatim.md`; the founder-pasted
+> source is `inbox/mentor consultation briefing answers - practice reminders.rtf` (committed).
+> **The gate on Phases 2 and 3 content, and on agent plan A1/A2 content, is DISCHARGED.**
+> Verdict summary: §7's table is vetted in place (differentiated phobos mapping; lupe split;
+> hedone declined; hupexairesis row → morning prep); §1's conditions-not-corridor reading
+> confirmed; §8's card names the stage + carries the single-signal orientation line, prerequisites
+> never gate; §9's returning line confirmed as drafted (optional refinement recorded); A2 is a
+> **deferred anchor** (do not enrich the morning gate); the passion-reading question resolves to
+> **the engine's reading with disclosure on disagreement**; the agent table reorders **B2 before
+> B1** and takes a **question form, not a destination form** (companion plan §4).
+>
+> *(The block below is the pre-answer record, retained for the arc's history.)*
+>
+> **BRIEFING AUTHORED 2026-07-27, awaiting the founder's send** —
 > `operations/reminders-2026-07/2026-07-27-step-M-mentor-briefing.md`. It covers all five items
 > below and adds two questions the build surfaced that this section did not anticipate:
 > **(6a)** anchor A2 (morning preparation → oikeiosis) **cannot be implemented as given** — the

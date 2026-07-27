@@ -16490,3 +16490,45 @@ Expected: `367 passed, 0 failed` twice; `53 passed, 0 failed`; tsc exit 0; build
 **Rules served:** R1/R6c/R9 (all copy qualitative, doorbell-voiced, verbatim-pinned), R17 (no new personal-data surface; the standing `milestones` gap named, not widened), KG1, PR10, PR17, PR18, PR19 (independent review required; completed fully this time, no fallback needed).
 
 **Status:** Adopted. Cross-references: `D-PRACTICE-REMINDERS-HUMAN-PHASE1-SEQUENCE-TRIGGER-BUILT`, `D-PRACTICE-REMINDERS-HUMAN-PHASE0-MILESTONE-WIRING-BUILT`, `operations/reminders-2026-07/2026-07-26-practice-reminders-HUMAN-build-plan.md` §9/§10, `operations/reminders-2026-07/2026-07-27-step-M-mentor-briefing.md`.
+
+---
+
+## 2026-07-27 — D-PRACTICE-REMINDERS-STEP-M-MENTOR-VERDICTS-ADOPTED
+
+**Decision:** The mentor's answers to the Step M briefing are **adopted in full as binding** per the project's mentor-verdict convention. The verbatim record is `operations/reminders-2026-07/2026-07-27-step-M-mentor-verdicts-verbatim.md` (source: `inbox/mentor consultation briefing answers - practice reminders.rtf`, founder-pasted, committed) — **the verbatim text wins over every summary and table.** The Step M gate on Phase 2 and Phase 3 content, and on agent plan A1/A2 content, is **discharged**. Both plans' tables are updated in place to the vetted versions.
+
+**The verdicts, summarised (the record wins on any divergence):**
+1. **Human table (§7):** one-suggestion-max and honest-silence both confirmed as design principles. The phobos generalisation was an **overreach** → a differentiated per-sub-species mapping (agonia + oknos → premeditatio; deima + thorybos → morning preparation; thambos → silence; aischyne → the log revisited with mirror framing or morning preparation — premeditatio declined for shame). The **lupe family splits** (penthos/achos/eleos → view from above; phthonos/zelotypia → oikeiosis). The **hedone row is declined** (silence). The **hupexairesis row is revised** to morning preparation (a control-filter failure, not a proportion failure). Row 5 fires **on a pattern only**. Row 11 links **the named virtue's `/logos` section**, not the whole page. Rows 6/7/8/9/12/13/14 confirmed (wisdom → morning prep only partially — "best available fit"). **Density:** the in-session trigger fires on every qualifying entry ("a response to a diagnosis, not a schedule"); repetition thresholds belong to stage-crossing.
+2. **Agent table:** **precedence reversed — B2 (obligations) before B1 (unclosed loop)**: "dikaiosyne is not subordinate to procedural completeness." **Agent suggestions take a QUESTION form, not the human destination form** — *"This record shows ⟨what was found⟩. Before proceeding: is this the reasoning this action warrants?"* — two response templates, one shared signal mapping (the agent "is already standing at the door with its hand on the handle"). B1 narrowed to genuinely-unclosed loops; B5 gains a 2–3-consecutive-session threshold; B6 confirmed as the *minimal* analog, ideally fired at the session-opening moment (the H1 calling gate); B7's silence protected.
+3. **Stages:** the **conditions-not-corridor reading is CONFIRMED** — "the two orderings were answering different questions and were never intended to agree"; the mapping stands as given; the difficulty inversion is an artefact of reading a condition map as a difficulty map. **Prerequisites never gate** a stage-triggered suggestion — but the mentor's single-strong-signal exception (an honest orientation line: *"this practice builds on the passion log — if that is not yet familiar, begin there first"*) **is the rule in this system**, because every `stage_*` milestone fires on a single exact-level evaluation; the Phase 3 card carries the line.
+4. **Copy:** the returning line **confirmed as drafted** (14 days defensible; "whatever is nearest" kept; an optional either/or refinement — "begin with whatever feels most honest right now" — recorded, founder-electable). The stage-crossing card is **revised to NAME the stage** — *"Something has shifted in how you are meeting difficulty. This is ⟨Stage Name⟩. These practices meet you where you now are."* — a description of a condition, never a grade; dismissible/never-repeated/never-congratulates are load-bearing and kept exactly.
+5. **6a:** **A2 is a deferred anchor, not dropped** — leave unimplemented; do NOT enrich the morning gate ("the tool should not be changed to fit the mapping"); revisit only if the tool warrants a second dimension on its own terms.
+6. **6b:** suggestions are driven by **the engine's reading, with disclosure on disagreement**: *"You named this as ⟨X⟩. The engine read it as ⟨Y⟩. ⟨Practice⟩ is suited to examining the difference."* Agreement → standard form; disagreement where the engine's reading fires nothing → silence; the disagreement itself is never a trigger. (`classification_match` is already stored; sub-species classification confirmed on both sides — the differentiated mappings are implementable as-is.)
+
+**Files touched:**
+- `operations/reminders-2026-07/2026-07-27-step-M-mentor-verdicts-verbatim.md` — NEW; the canonical binding record.
+- `inbox/mentor consultation briefing answers - practice reminders.rtf` — committed as the raw source.
+- `operations/reminders-2026-07/2026-07-26-practice-reminders-HUMAN-build-plan.md` — §1 (reading settled), §7 (vetted table replaces the draft; A2 deferred-anchor; 6b form), §8 (card names the stage; no gating; orientation line), §9 (returning line confirmed; refinement recorded), §10 (ANSWERED + ADOPTED).
+- `operations/reminders-2026-07/2026-07-26-practice-reminders-AGENT-build-plan.md` — §4 (vetted reordered table; question form), §8 (Step M discharged).
+- `website/src/lib/practice-sequence.ts` — comments only: the returning-line DRAFT caveat → mentor-confirmed; the STAGE_PRACTICES pending-confirmation note → settled verdict. **No copy or behaviour change — the J4 verbatim pin is the proof.**
+- `website/src/lib/__tests__/practice-sequence.test.ts` — the J3 label's DRAFT caveat → confirmed.
+
+**Risk classification:** Standard under 0d-ii (documents + comment-only code edits; no behaviour change — suite counts identical pre/post: 367/367/53 and all eight boundary suites unchanged incl. logos 249/0, so the measured set is untouched). AC7/PR6 not engaged.
+
+**Rollback path:** `git revert` the commit. The adoption itself stands as record; reverting restores the draft tables (the verbatim record file would need re-adding to re-adopt).
+
+**Verification step (founder-performable):**
+```bash
+cd "/Users/clintonaitkenhead/Claude-work/PROJECTS/sagereasoning/website"
+npx tsx src/lib/__tests__/practice-sequence.test.ts && npx tsx src/app/api/mentor/practice-status/__tests__/human-practitioner-boundary.test.ts && npx tsc --noEmit
+```
+Expected: `367 passed, 0 failed`; `626 passed, 0 failed`; tsc exit 0.
+
+**Open questions:**
+- The optional returning-line refinement ("whatever feels most honest right now") — founder-electable any time; the shipped line is the confirmed primary.
+- Phase 2 build decisions inside the verdicts' bounds: the aischyne target choice (log-revisited vs morning prep) and how a same-tool revisit renders; the row-5 repetition window; the row-11 virtue-anchor ids.
+- A1 sequencing (agent plan): Step M no longer gates it; E4's "after the human plan ships" reading is the founder's call at commencement.
+
+**Rules served:** PR7 (mentor verdicts adopted at the moment of application), PR18, R1/R6c/R9 (copy verdicts recorded verbatim), KG1 N/A (no DB writes).
+
+**Status:** Adopted. Cross-references: `D-STEP-M-BRIEFING-AUTHORED-AND-PHASE4-DAILY-RHYTHM-BUILT`, `operations/reminders-2026-07/2026-07-27-step-M-mentor-verdicts-verbatim.md`, both build plans.

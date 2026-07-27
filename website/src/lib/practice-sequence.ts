@@ -284,8 +284,14 @@ export interface StagePractices {
  * introduction sequence but belong to The Worn Path, 2nd on the proximity
  * ladder. The stages are CONDITIONS, not a corridor. The sequence is only the
  * no-signal default; the stage mapping serves whichever stage the practitioner's
- * signals actually indicate. This reading is a Step M confirmation item (§10) —
- * it is the plan's stated interpretation, not a settled mentor verdict.
+ * signals actually indicate.
+ *
+ * THIS READING IS NOW A SETTLED, BINDING MENTOR VERDICT (Step M, 2026-07-27;
+ * verbatim record `operations/reminders-2026-07/2026-07-27-step-M-mentor-
+ * verdicts-verbatim.md`): "the two orderings were answering different questions
+ * and were never intended to agree" — the mapping stands exactly as given, and
+ * the apparent difficulty inversion "dissolves when you read the stages as
+ * conditions rather than rungs."
  */
 export const STAGE_PRACTICES: readonly StagePractices[] = [
   {
@@ -738,7 +744,15 @@ export const DAILY_RHYTHM_COPY = {
    * which "is not a discovery an alarm can deliver", and a line that scolds
    * would be the alarm presuming to diagnose which lapse this was.
    *
-   * DRAFT pending Step M (plan §10 item 4).
+   * MENTOR-CONFIRMED AS DRAFTED (Step M, 2026-07-27; verbatim record
+   * `operations/reminders-2026-07/2026-07-27-step-M-mentor-verdicts-verbatim.md`):
+   * "It is the right line" — "the phrase *when you turn toward it* does the
+   * work"; the 14-day threshold is defensible ("do not over-engineer the
+   * number"); "whatever is nearest" is kept because "the practitioner knows
+   * themselves better than the system does at the moment of return". One
+   * optional refinement was offered, explicitly either/or: "begin with whatever
+   * feels most honest right now" — the founder may elect it any time (change
+   * this constant + its verbatim pin together).
    */
   returning:
     'It has been a while. The practice is here when you turn toward it — begin with whatever is nearest.',

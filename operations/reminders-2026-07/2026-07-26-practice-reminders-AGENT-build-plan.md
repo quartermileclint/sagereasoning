@@ -44,20 +44,45 @@ The same five constraints as the human plan §1 bind here, with the agent-side r
 
 **New pure lib `website/src/lib/substrate/practice-suggestion.ts`:**
 - **Input:** a typed snapshot of blocks **already computed for the response at the attach point** — the current assessment's signals (`examination_open`, kathekon quality, per-circle `obligation_assessment`, engaged domains), the trajectory `delta` if present, the `loop_fold` if present. **No new DB reads, no LLM call** — the composer is a pure function of what the response already carries.
-- **Output:** an optional `suggestion` object `{schema:'agent-practice-suggestion/v1', practice, basis, line, endpoint_hint?}` where `practice` is one of a small locked vocabulary of **agent examination practices** and `line` comes from a **fixed pre-authored string set** (never composed, never predictive): *"The record showed ⟨basis⟩. ⟨Practice⟩ is the examination suited to it."* — then stops.
+- **Output:** an optional `suggestion` object `{schema:'agent-practice-suggestion/v1', practice, basis, line, endpoint_hint?}` where `practice` is one of a small locked vocabulary of **agent examination practices** and `line` comes from a **fixed pre-authored string set** (never composed, never predictive) in the **QUESTION form the Step M verdict directs for agents** (superseding this plan's original destination form): *"This record shows ⟨basis⟩. Before proceeding: is this the reasoning this action warrants?"* — naming the gap and asking, never naming the practice as a destination; the `practice`/`endpoint_hint` fields still carry the machine-readable target, but the rendered `line` prompts the agent's own examination rather than compliance. Then stops.
 - **One suggestion max** per response (the teacher names *the* next practice, not a menu), selected by a fixed precedence order; **honest null** (field absent) when no basis clears its evidence floor.
 
-**DRAFT signal → practice mapping (Step M vets; precedence top-down):**
+**VETTED signal → practice mapping (Step M, 2026-07-27 — binding; precedence top-down as REORDERED by the verdict; verbatim record `2026-07-27-step-M-mentor-verdicts-verbatim.md` wins):**
 
-| Measured signal (already served today) | Suggested practice | Confidence |
-|---|---|---|
-| `examination_open` on this assessment / `loop_fold.character.loops.open > 0` | `reexamine_same_depth` — close the loop via `prior_feedback` at the original depth (the CI-4 affordance, already binding on depth) | Mentor-adjacent (the correction loop is the practice) |
-| Engaged-circle `obligation_assessment` violated/indeterminate, or `first_circle_obligation_trend` declining, or dikaiosyne the weak domain | `examine_obligations` — name the affected circles explicitly in the next examination | **Mentor-given analog** (weak obligations-reasoning → oikeiosis) |
-| `sub_species_frequency_deltas` `recurring`/`new` in the **phobos** family, or phobos-class in `passions_persisted_in_window` | `premeditatio_examination` — a pre-action deep examination of the feared outcome class before the next such act | **Mentor-given analog** (agonia → premeditatio, "the direct rational response to future-facing fear") |
-| Persisting **epithumia**-family sub-species | `reserve_clause_examination` — examine where the intended outcome has become the condition of equanimity | Proposed |
-| Any `dimension_trends` entry declining (floor cleared) | `deepen_examination` — take the next same-class decision at standard/deep depth (the documented depth-follows-scrutiny ladder) | Proposed |
-| Self-only circle pattern / absent purpose context | `calling_purpose` — `/api/calling` (the agent's morning-preparation analog: orientation before impressions) | Proposed |
-| *(none of the above)* | *(no suggestion field; the live `reflect_due` default already covers the close)* | — |
+> **The Step M verdicts that reshape this table:**
+> 1. **Precedence REVERSED: B2 (obligations) now outranks B1 (unclosed loop).** "Dikaiosyne — giving
+>    each their due — is not subordinate to procedural completeness. An agent that finishes its own
+>    internal examination while leaving an obligation to another party unaddressed has prioritised
+>    its own reasoning hygiene over its actual duty."
+> 2. **The suggestion takes a QUESTION form for agents, not the human destination form** — the most
+>    important verdict in the consultation. The agent "is already standing at the door with its hand
+>    on the handle", so a named practice risks the suggestion doing the reasoning. Vetted shape:
+>    *"This record shows ⟨what was found⟩. Before proceeding: is this the reasoning this action
+>    warrants?"* — it "names the gap and asks whether the agent's own reasoning has addressed it",
+>    and it works mid-task (no exit into a full exercise). **Two response templates, one shared
+>    signal mapping** — the signal→basis rows below are shared with the human table's logic; only
+>    the rendered form differs by practitioner type.
+> 3. **B1 narrowed**: fire only on a loop *genuinely* not closed — not on one that produced a result
+>    and merely lacks formal closure (a record-keeping gap, not a reasoning gap) — if the
+>    classification can distinguish them.
+> 4. **B5 gains a threshold**: a sustained decline across **2–3 consecutive sessions**, never a
+>    single-session dip ("if it fires on any decline… the agent will learn to treat it as noise").
+> 5. **B6 placement**: a fair analog only as the *minimal* version of morning preparation. The
+>    architecture HAS a session-opening moment — the H1 calling gate at SessionStart — which is the
+>    stronger analog and where this should ideally fire; mid-task B6 is the best available
+>    approximation and stays as fallback.
+> 6. **B7's silence is confirmed and PROTECTED** "against any future pressure to add a default
+>    suggestion for completeness."
+
+| # | Measured signal (already served today) | Suggested examination (rendered in the QUESTION form) | Verdict |
+|---|---|---|---|
+| **B2** | Engaged-circle `obligation_assessment` violated/indeterminate, or `first_circle_obligation_trend` declining, or dikaiosyne the weak domain | `examine_obligations` — name the affected circles explicitly in the next examination | **Mentor-given analog, now FIRST in precedence** |
+| **B1** | `examination_open` on this assessment / `loop_fold.character.loops.open > 0` — **genuinely unclosed only** (see note 3) | `reexamine_same_depth` — close the loop via `prior_feedback` at the original depth (the CI-4 affordance) | Confirmed, second in precedence; the closure-class distinction is a build item |
+| **B3** | `sub_species_frequency_deltas` `recurring`/`new` in the **phobos** family, or phobos-class in `passions_persisted_in_window` | `premeditatio_examination` — examine the feared outcome class before the next such act | **Mentor-given analog** (agonia → premeditatio) |
+| **B4** | Persisting **epithumia**-family sub-species | `reserve_clause_examination` — examine where the intended outcome has become the condition of equanimity | **Confirmed** ("the framing is precise") |
+| **B5** | A `dimension_trends` decline **sustained across 2–3 consecutive sessions** (never one dip) | `deepen_examination` — take the next same-class decision at standard/deep depth | Confirmed **with the threshold** (note 4) |
+| **B6** | Self-only circle pattern / absent purpose context | `calling_purpose` — `/api/calling`; ideally fired at the session-opening moment (the H1 calling gate), mid-task as fallback | Confirmed as the **minimal** analog (note 5) |
+| **B7** | *(none of the above)* | *(no suggestion field; the live `reflect_due` default already covers the close)* | Confirmed — **protected silence** (note 6) |
 
 **Attach points (both additive, flag-gated, absent-when-off):** `/api/reason` happy path and the accreditation write 200 — as an optional `suggestion` member **inside the existing `practice` block** (the CI-13 carrier; the hint's current four fields are byte-identical when the new flag is off). **Deliberately NOT attached:** the delta/fold blocks (their no-recommendation contracts stand untouched), `GET /api/trust-record` (S10 withholding stands), `/api/guardrail` (the gate stays lean; a future election), `/api/practice/discernment` (already carries the S4 measure recommendation — different animal, unchanged).
 
@@ -89,7 +114,7 @@ The same five constraints as the human plan §1 bind here, with the agent-side r
 
 ## §8 Sequencing, sizing, risk
 
-**Gated on:** the human plan shipped (election E4) **and** Step M (the shared mentor consultation vets the §4 mapping + precedence + strings; human plan §10). Order: **A1 → A2 → A3** (A1/A2 are independent dark builds and may swap; A3 activates whatever is built). Estimates: A1 ~1 session · A2 ~1 · A3 ~0.5–1 + the founder-walked activation. Risk: A1/A2 `code-elevated` (dark, byte-identical flag-off); A3 **`code-critical`** (env-flag activation of new response surface content; full Critical Change Protocol; nothing in this plan pre-approves it). PR19 independent review before either build is treated as verified.
+**Gated on:** the human plan shipped (election E4) **and** Step M — **the Step M gate is DISCHARGED 2026-07-27** (`D-PRACTICE-REMINDERS-STEP-M-MENTOR-VERDICTS-ADOPTED-2026-07-27`; the §4 mapping, precedence and string form are now the VETTED versions above — B2 before B1; the question form; the B5 threshold). The human-plan-shipped condition: Phases 0/1/4 are live, Phases 2–3 now unblocked; the founder sequences whether A1 waits for them (E4's "after this plan ships" reading is the founder's call at commencement). Order: **A1 → A2 → A3** (A1/A2 are independent dark builds and may swap; A3 activates whatever is built). Estimates: A1 ~1 session · A2 ~1 · A3 ~0.5–1 + the founder-walked activation. Risk: A1/A2 `code-elevated` (dark, byte-identical flag-off); A3 **`code-critical`** (env-flag activation of new response surface content; full Critical Change Protocol; nothing in this plan pre-approves it). PR19 independent review before either build is treated as verified.
 
 ## §9 Out of scope (recorded)
 
