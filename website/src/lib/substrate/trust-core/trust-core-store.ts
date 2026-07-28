@@ -25,6 +25,8 @@ import type { EarnedDomainState, TrustEvent, TrustProfile } from './types'
 import { applyTrustEvent } from './trust-transition'
 import { computeTrustProfile } from './trust-aggregate'
 import type { VirtueTrustDomain } from './types'
+import { PROXIMITY_RANK } from './constants'
+import type { SessionDomainObservation } from './intervention-engine'
 
 // ============================================================================
 // SHARED PLUMBING (mirrors agent-assessment-history-store.ts)
@@ -430,6 +432,142 @@ export async function readHonestReflectSummary(
     }
   } catch (e) {
     return { ok: false, error: `readHonestReflectSummary threw: ${(e as Error).message}` }
+  }
+}
+
+/**
+ * A2 (practice reminders, agent Phase A2, 2026-07-28) — a bounded, AGENT-SCOPED
+ * read of `credential-completed` events for the S4 developmental-flag scan
+ * (`evaluateDevelopmentalFlags`, intervention-engine.ts §E). One row per engaged
+ * cardinal virtue domain per accreditation write (`deriveCredentialAndJusticeEvents`),
+ * sharing one `correlation_id` per write — the accreditation write IS the
+ * `SessionDomainObservation.sessionId` unit (the 2026-07-28 mentor verdict Item 6:
+ * "the accreditation write is the moment the agent submits its accumulated signed
+ * examination chain… the more reliable boundary because it is externally triggered
+ * and formally recorded").
+ *
+ * PR19 REVIEW FOLD (2026-07-28) — A DISCLOSED, OUT-OF-SESSION-SCOPE RESIDUAL.
+ * Each observation's identity rests on `correlation_id`, produced upstream by
+ * emitAccreditationTrustEvents (emission-hooks.ts, PRE-EXISTING S1 code, NOT
+ * touched this session) as a sha256 digest of the WRITE's signatures joined in
+ * SUBMITTED (unsorted) array order. A resubmission carrying the identical
+ * evidence in a different array order therefore produces a DIFFERENT
+ * correlation_id, bypassing the (correlation_id, event_type, virtue_domain)
+ * unique-index dedup and potentially double-counting one write as two
+ * observations here (inflating a streak). This is a genuine, CONFIRMED,
+ * currently-live-in-production defect in existing S1 emission infrastructure —
+ * not something this session introduced or can fix within its stated
+ * code-elevated, dark-build scope (emission-hooks.ts is a live, flag-on
+ * production file outside this session's file list). Flagged to the founder as
+ * its own follow-up (a one-line root-cause fix: sort the signatures before
+ * hashing); disclosed here so a reader of THIS function understands the
+ * observation identity is not yet airtight against reordered retries.
+ *
+ * SCOPED BY agent_id, NOT credential_ref. This mirrors readTrustProfile's own
+ * agent_id-scoped precedent for the S1 folded state (the SAME key
+ * evaluateDevelopmentalFlags's domain concept already matches) — deliberately NOT
+ * the M7 trajectory window's credential_ref scope, whose own docstring
+ * (agent-assessment-history-store.ts, getTrajectoryWindow) explicitly defers
+ * agent_id-keyed windows "to M8 credential-consolidation (where owner-binding
+ * makes them R17a-safe)". Re-opening that deferred boundary is out of scope here;
+ * this read is a DIFFERENT, coarser-cardinality surface (one row per engaged
+ * domain per accreditation WRITE, not per consult) that the S1 fold already
+ * treats as agent-scoped by design.
+ *
+ * Bounded: capped at DEVELOPMENTAL_OBSERVATION_ROW_CAP newest rows (order desc),
+ * enough to reconstruct roughly the agent's ten most recent accreditation writes
+ * across up to four cardinal domains each — comfortable margin over the
+ * DEVELOPMENTAL_CONSISTENCY_THRESHOLD=3 streak the S4 engine detects, while
+ * remaining a small, single, indexed query (mirrors readHonestReflectSummary's
+ * cap precedent — the S10-ABUSE-2 lesson: always cap a read that scales with an
+ * agent's lifetime history).
+ *
+ * Malformed rows (missing domain/correlation_id, or a level outside the
+ * KatorthomaProximity vocabulary) are SKIPPED, never guessed — a partial
+ * developmental read is honest; a fabricated one is not. Missing-table-benign +
+ * fail-honest, mirroring every other trust-core-store read.
+ *
+ * PR19 review fold (2026-07-28) — THE LICENSED-FALLBACK DISCLOSURE. This feed's
+ * consumer, evaluateDevelopmentalFlags (intervention-engine.ts, S4, unmodified
+ * this session), detects a 3-CONSECUTIVE 'deliberate' STREAK per domain
+ * (DEVELOPMENTAL_CONSISTENCY_THRESHOLD=3). That is NOT the mentor's first-choice
+ * design — the 2026-07-28 verbatim record (Item 6) recommends a PLATEAU test
+ * instead ("deliberate-level reasoning in at least three of the four most recent
+ * accreditation writes in a domain, with no single write showing reflexive-level
+ * reasoning"), explicitly because a streak "is brittle — one strong session
+ * breaks it and resets the count." The verdict licenses the streak ONLY
+ * conditionally: "If the engine cannot currently compute this, three consecutive
+ * is an acceptable approximation — but note it as a known limitation and flag it
+ * for revision when the storage change makes richer evidence available." This IS
+ * that note. The condition for revisiting it is ALREADY MET by this function's
+ * own design: DEVELOPMENTAL_OBSERVATION_ROW_CAP=40 retrieves comfortably more
+ * than the plateau test needs (~10 writes × 4 domains) — computing the plateau
+ * (4-of-most-recent, no-reflexive) is a NAMED FOLLOW-UP, to be built at the CALL
+ * SITE (this function or its caller), never as a silent edit to the shared,
+ * battery-locked S4 engine file.
+ */
+export const DEVELOPMENTAL_OBSERVATION_ROW_CAP = 40
+
+function isKatorthomaProximityValue(v: unknown): v is keyof typeof PROXIMITY_RANK {
+  return typeof v === 'string' && Object.prototype.hasOwnProperty.call(PROXIMITY_RANK, v)
+}
+
+export async function readDevelopmentalObservations(
+  agentId: string,
+  client: SupabaseClient = getAdminClient(),
+): Promise<StoreResult<SessionDomainObservation[]>> {
+  try {
+    const { data, error } = await client
+      .from(EVENTS_TABLE)
+      .select('virtue_domain, payload, occurred_at, correlation_id, created_at, id')
+      .eq('agent_id', agentId)
+      .eq('event_type', 'credential-completed')
+      // PR19 review fold (2026-07-28): occurred_at alone has no tiebreak, so two
+      // writes landing on the identical millisecond have an UNSPECIFIED relative
+      // order absent a secondary key — Postgres gives no stability guarantee
+      // across separate query executions. created_at (the ledger-write time,
+      // always distinct per insert) and id (the row PK, always unique) are
+      // deterministic fallbacks, in that order, so repeated reads of unchanged
+      // data always return the same order and evaluateDevelopmentalFlags's own
+      // stable re-sort deterministically preserves it. Neither needs to reach
+      // SessionDomainObservation — this is ordering-only.
+      .order('occurred_at', { ascending: false })
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(DEVELOPMENTAL_OBSERVATION_ROW_CAP)
+    if (error) {
+      if (isMissingTableError(error as { code?: string; message?: string })) {
+        return { ok: true, value: [] }
+      }
+      return { ok: false, error: `readDevelopmentalObservations: ${error.message}` }
+    }
+    const rows = (data ?? []) as {
+      virtue_domain: string | null
+      payload: Record<string, unknown> | null
+      occurred_at: string | null
+      correlation_id: string | null
+    }[]
+    const observations: SessionDomainObservation[] = []
+    for (const row of rows) {
+      const level = row.payload?.demonstratedProximity
+      if (
+        row.virtue_domain === null ||
+        row.correlation_id === null ||
+        row.occurred_at === null ||
+        !isKatorthomaProximityValue(level)
+      ) {
+        continue // malformed / incomplete row — skip, never guess
+      }
+      observations.push({
+        sessionId: row.correlation_id,
+        domain: row.virtue_domain as VirtueTrustDomain,
+        level,
+        occurredAt: row.occurred_at,
+      })
+    }
+    return { ok: true, value: observations }
+  } catch (e) {
+    return { ok: false, error: `readDevelopmentalObservations threw: ${(e as Error).message}` }
   }
 }
 

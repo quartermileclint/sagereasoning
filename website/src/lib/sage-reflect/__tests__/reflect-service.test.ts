@@ -90,6 +90,9 @@ function makeDeps(crossOverride?: (agent_id: string) => Promise<CrossSessionCont
     persistZone3Block: async (sid, state, log, note): Promise<StoreResult<void>> => { writeState(sid, state, { current_step: 'complete', completed_at: 'now', developer_note: note, kathekon_quality_log: log }); return { ok: true, value: undefined } },
     getCrossSessionContext: crossOverride ?? (async () => ({ prior_sessions: [], sage_assent_agreement_streak: 0 })),
     feedSageAssent: async (params): Promise<StoreResult<SageAssentFeedResult>> => { feedCalls.push(params); return { ok: true, value: MOCK_FEED } },
+    // A2 (practice reminders): unreached in these tests (SUBSTRATE_REFLECT_
+    // DEVELOPMENTAL_ENABLED is unset in this env), but required structurally.
+    readDevelopmentalObservations: async () => ({ ok: true, value: [] }),
   }
   return { deps, store, feedCalls }
 }

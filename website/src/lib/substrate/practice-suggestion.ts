@@ -154,6 +154,7 @@ import type {
 } from '@/lib/translation-sandwich/layer1-extractor'
 import type { TrajectoryDeltaBlock } from './trajectory-delta'
 import type { LoopFoldBlock } from './trust-core/loop-fold'
+import type { PersistingPassion } from './trust-layer/types/accreditation'
 import { PROXIMITY_RANK } from './trust-core/constants'
 import {
   assessKathekonEngagement,
@@ -162,7 +163,7 @@ import {
 } from './trust-core/kathekon-engagement'
 
 // ============================================================================
-// FLAG
+// FLAG (A1 — /api/reason + the accreditation write)
 // ============================================================================
 
 export const PRACTICE_SUGGESTION_ENV_VAR = 'SUBSTRATE_PRACTICE_SUGGESTION_ENABLED'
@@ -171,6 +172,18 @@ export const PRACTICE_SUGGESTION_ENV_VAR = 'SUBSTRATE_PRACTICE_SUGGESTION_ENABLE
  *  `suggestion` member is added anywhere (byte-identical to pre-A1). */
 export function isPracticeSuggestionEnabled(): boolean {
   return process.env[PRACTICE_SUGGESTION_ENV_VAR] === 'true'
+}
+
+// ============================================================================
+// FLAG (A2 — the reflect completion's developmental read-back + suggestion)
+// ============================================================================
+
+export const REFLECT_DEVELOPMENTAL_ENV_VAR = 'SUBSTRATE_REFLECT_DEVELOPMENTAL_ENABLED'
+
+/** SEPARATE from A1's flag (plan §5 — "so the two surfaces can activate
+ *  independently"). True only when the flag is the exact string 'true'. */
+export function isReflectDevelopmentalEnabled(): boolean {
+  return process.env[REFLECT_DEVELOPMENTAL_ENV_VAR] === 'true'
 }
 
 // ============================================================================
@@ -440,6 +453,29 @@ export interface PracticeSuggestionSnapshot {
   delta?: TrajectoryDeltaBlock
   /** The accreditation write's loop_fold (AE-2) when served. */
   loopFold?: LoopFoldBlock
+  /**
+   * A2 (2026-07-28) — an ALTERNATE, HONEST source for the persisting-passion
+   * legs, for a surface (the reflect completion) that has no `delta` block at
+   * all. Drawn from `AccreditationRecord.passions_persisting` — the Sage Assent
+   * engine's OWN rolling-window computation (default 100 actions), a DIFFERENT
+   * window than AE-1's 90-day/last-30 delta, but the SAME `PersistingPassion`
+   * type and closely analogous semantics ("passions that persist across the
+   * evaluation window"). Zero new DB read: it rides the `feedSageAssent` call
+   * the reflect completion already makes.
+   *
+   * PER-LEG FIDELITY MAPPING (BD-A2-2's explicit condition — record it here,
+   * where a reader auditing a firing basis will find it): `persistingOfFamily`
+   * consults this ONLY when `s.delta` is absent (never overrides a real delta
+   * block), so it can feed the persisting legs (agonia_persisting,
+   * oknos_persisting, acute_fear_pattern, aischyne_pattern,
+   * philodoxia_persisting, epithumia_persisting, comparison_persisting).
+   * `b3AnticipatoryFrequency` (the recurring/new legs, which need a between-
+   * halves comparison this record does not carry), every B2 leg (needs a
+   * signed assessment, a delta trend, or a fold — none available at reflect
+   * completion), and B6 (needs `examinationOpen`'s own assessment) stay
+   * correctly silent — B7's protected silence, not a gap.
+   */
+  persistingPassions?: PersistingPassion[]
 }
 
 // ============================================================================
@@ -747,7 +783,10 @@ function persistingOfFamily(
   code: PracticeSuggestionBasisCode,
   subSpeciesFilter?: (subSpecies: string) => boolean,
 ): PracticeSuggestionBasis | undefined {
-  const persisted = s.delta?.passions_persisted_in_window
+  // A2: s.persistingPassions is consulted ONLY when s.delta is absent — a real
+  // delta block (even 'insufficient_extraction') is always authoritative where
+  // both exist. See the field's own docstring for the per-leg fidelity mapping.
+  const persisted = s.delta?.passions_persisted_in_window ?? s.persistingPassions
   if (persisted === undefined || persisted === 'insufficient_extraction') return undefined
   if (!Array.isArray(persisted)) return undefined
   const hit = persisted.find(
@@ -881,6 +920,30 @@ export function practiceSuggestionFor(
     return composePracticeSuggestion(snapshot)
   } catch (e) {
     console.error('[practice-suggestion] compose error (response unaffected):', (e as Error).message)
+    return undefined
+  }
+}
+
+/**
+ * A2's OWN seam helper — reads SUBSTRATE_REFLECT_DEVELOPMENTAL_ENABLED (NOT
+ * A1's flag), so the reflect completion's `suggestion` and A1's `practice.
+ * suggestion` activate independently (plan §5). Otherwise identical to
+ * practiceSuggestionFor: the SAME pure composer, the SAME never-throws
+ * boundary (the reflect completion's call sits after persistCompletion has
+ * already succeeded — a throw here must not fail a request whose real work
+ * is done).
+ */
+export function practiceSuggestionForReflect(
+  snapshot: PracticeSuggestionSnapshot,
+): PracticeSuggestion | undefined {
+  if (!isReflectDevelopmentalEnabled()) return undefined
+  try {
+    return composePracticeSuggestion(snapshot)
+  } catch (e) {
+    console.error(
+      '[practice-suggestion] reflect compose error (response unaffected):',
+      (e as Error).message,
+    )
     return undefined
   }
 }

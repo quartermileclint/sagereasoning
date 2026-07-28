@@ -174,7 +174,7 @@ export function buildCompleteResponse(
   loopHeaders?: Record<string, string>,
   safetySignal?: SafetySignal,
 ): NextResponse {
-  const { outcome, feed, mirror_note } = decision
+  const { outcome, feed, mirror_note, developmental_priorities, suggestion } = decision
   return build(
     200,
     {
@@ -201,6 +201,14 @@ export function buildCompleteResponse(
       // R19d — mirror principle, mandatory, always present.
       profile_update_framing: { mandatory_note: mirror_note },
       ...(safetySignal ? { safety_signal: safetySignal } : {}),
+      // Practice reminders, agent Phase A2 (2026-07-28): additive, flag-gated
+      // (SUBSTRATE_REFLECT_DEVELOPMENTAL_ENABLED), absent-not-null when the
+      // service found nothing to serve (the composer's B7 protected-silence
+      // discipline, carried onto this wire).
+      ...(developmental_priorities !== undefined
+        ? { developmental_priorities }
+        : {}),
+      ...(suggestion !== undefined ? { suggestion } : {}),
     },
     loopHeaders,
   )

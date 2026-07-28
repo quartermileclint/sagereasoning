@@ -64,8 +64,10 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
     private filters: Filter[] = []
     private single = false
     private onConflict: string | null = null
-    private orderCol: string | null = null
-    private orderAsc = true
+    /** A2 (2026-07-28): chained .order() calls accumulate as primary + tiebreak
+     *  columns, in call order — mirrors real PostgREST multi-column ordering.
+     *  Backward-compatible: a single .order() call behaves exactly as before. */
+    private orders: { col: string; asc: boolean }[] = []
     private limitN: number | null = null
 
     constructor(private table: string) {}
@@ -103,8 +105,7 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
       return this
     }
     order(col: string, cfg?: { ascending?: boolean }) {
-      this.orderCol = col
-      this.orderAsc = cfg?.ascending !== false
+      this.orders.push({ col, asc: cfg?.ascending !== false })
       return this
     }
     limit(n: number) {
@@ -186,12 +187,16 @@ export function makeFakeSupabase(opts?: { missingTables?: boolean }): FakeSupaba
         case 'select':
         default: {
           let out = rows.filter((r) => this.match(r))
-          if (this.orderCol) {
-            const col = this.orderCol
+          if (this.orders.length > 0) {
+            const orders = this.orders
             out = [...out].sort((a, b) => {
-              const av = String(a[col] ?? '')
-              const bv = String(b[col] ?? '')
-              return this.orderAsc ? av.localeCompare(bv) : bv.localeCompare(av)
+              for (const { col, asc } of orders) {
+                const av = String(a[col] ?? '')
+                const bv = String(b[col] ?? '')
+                const cmp = av.localeCompare(bv)
+                if (cmp !== 0) return asc ? cmp : -cmp
+              }
+              return 0
             })
           }
           if (this.limitN != null) out = out.slice(0, this.limitN)

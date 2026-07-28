@@ -147,6 +147,16 @@ function makeDeps(existing: AccreditationRecord | null) {
     const finalUpsert = m.upserts[m.upserts.length - 1]
     assert('FLOW-8  result grade == final upserted record grade (engine-decided)',
       res.value.senecan_grade === finalUpsert.senecan_grade && res.value.typical_proximity === finalUpsert.typical_proximity)
+    // PR19 review fold (2026-07-28): the practice-reminders A2 addition threading
+    // passions_persisting through to the caller had ZERO test coverage anywhere
+    // in the repo — this pins field-identity against the REAL engine's resulting
+    // record (not a hand-built mock), closing that gap at its root, dedicated
+    // test file.
+    assert(
+      'FLOW-9  passions_persisting == the final upserted record\'s passions_persisting (exact identity, not merely non-undefined)',
+      JSON.stringify(res.value.passions_persisting) === JSON.stringify(finalUpsert.passions_persisting),
+      `result=${JSON.stringify(res.value.passions_persisting)} record=${JSON.stringify(finalUpsert.passions_persisting)}`,
+    )
   }
 }
 

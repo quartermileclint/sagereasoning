@@ -69,6 +69,7 @@ import type {
   DimensionScores,
   DirectionOfTravel,
   KatorthomaProximityLevel,
+  PersistingPassion,
   SenecanGradeId,
 } from '@/lib/substrate/trust-layer/types/accreditation'
 
@@ -195,6 +196,16 @@ export interface SageAssentFeedResult {
   readonly direction_of_travel: DirectionOfTravel
   /** SR-15 — the per-virtue-domain proximity Sage Reflect computed + stored. */
   readonly per_domain_proximity: PerDomainProximity
+  /**
+   * A2 (practice reminders, agent Phase A2, 2026-07-28) — read back from the
+   * engine's resulting record, ZERO new DB read (transition.record already
+   * carries it; this only threads it through to the caller). Feeds the
+   * reflect-completion grade-changed suggestion attach's honest
+   * `persistingPassions` snapshot field (practice-suggestion.ts) — internal
+   * use only; NOT itself surfaced on the completion wire response (R4).
+   * OPTIONAL so no existing mock `SageAssentFeedResult` fixture needs updating.
+   */
+  readonly passions_persisting?: readonly PersistingPassion[]
 }
 
 // ============================================================================
@@ -287,6 +298,7 @@ export async function feedSageAssent(
         dimension_levels: transition.record.dimension_levels,
         direction_of_travel: transition.record.direction_of_travel,
         per_domain_proximity: perDomain,
+        passions_persisting: transition.record.passions_persisting,
       },
     }
   } catch (e) {

@@ -72,6 +72,28 @@ import {
   emitScreenedReflectTrustEvent,
   emitSuppressionWatchEvents,
 } from '@/lib/substrate/trust-core/emission-hooks'
+// Trust Layer practice reminders, agent Phase A2 (2026-07-28) — the reflect
+// completion's developmental read-back + grade-changed suggestion. DARK behind
+// SUBSTRATE_REFLECT_DEVELOPMENTAL_ENABLED (isReflectDevelopmentalEnabled),
+// checked here so the bounded read is SKIPPED ENTIRELY flag-off (zero new DB
+// work) — the same discipline as the S1 emission calls above, but this read's
+// RESULT affects the response, so (unlike those side-effect-only hooks) it goes
+// through the DI seam (readDevelopmentalObservations below), mirroring
+// feedSageAssent's own testability precedent.
+import {
+  isReflectDevelopmentalEnabled,
+  practiceSuggestionForReflect,
+  type PracticeSuggestion,
+} from '@/lib/substrate/practice-suggestion'
+import {
+  evaluateDevelopmentalFlags,
+  type DevelopmentalFlag,
+  type SessionDomainObservation,
+} from '@/lib/substrate/trust-core/intervention-engine'
+import {
+  readDevelopmentalObservations as realReadDevelopmentalObservations,
+  type StoreResult as TrustCoreStoreResult,
+} from '@/lib/substrate/trust-core/trust-core-store'
 
 // ============================================================================
 // MIRROR PRINCIPLE (SR-8 / R19d) — mandatory on every completion output
@@ -124,6 +146,17 @@ export type ReflectDecision =
       readonly outcome: ReflectOutcome
       readonly feed: SageAssentFeedResult | null
       readonly mirror_note: string
+      /** A2 — the S4 developmental-flag read-back (results-level only: domain +
+       *  note, R4). Absent flag-off OR when no domain's recent accreditation-
+       *  write history clears the streak (honest omission, never an empty
+       *  array — matches A1's field-absent-not-null discipline). */
+      readonly developmental_priorities?: readonly { domain: string; note: string }[]
+      /** A2 — at most one advisory suggestion, attached ONLY at the
+       *  grade-changed moment (feed.grade_changed === true), from the SAME
+       *  composer + locked vocabulary A1 uses. Absent flag-off, absent when
+       *  the grade did not change, absent when no basis clears its evidence
+       *  floor (B7's protected silence). */
+      readonly suggestion?: PracticeSuggestion
     }
   | { readonly kind: 'zone3_blocked'; readonly developer_note: string }
 
@@ -168,6 +201,15 @@ export interface ReflectServiceDeps {
   /** A1 (PR7) — cross-session context read; fails closed to empty (never 503). */
   readonly getCrossSessionContext: (agent_id: string) => Promise<CrossSessionContext>
   readonly feedSageAssent: (params: FeedParams) => Promise<StoreResult<SageAssentFeedResult>>
+  /** A2 — the bounded, agent-scoped credential-completed read for the S4
+   *  developmental-flag scan. Its RESULT affects the response (unlike the
+   *  side-effect-only emission hooks above), so — mirroring feedSageAssent —
+   *  it is injectable for tests. Only called when isReflectDevelopmentalEnabled()
+   *  is true (checked at the call site, not here — the read is skipped
+   *  entirely flag-off). */
+  readonly readDevelopmentalObservations: (
+    agentId: string,
+  ) => Promise<TrustCoreStoreResult<SessionDomainObservation[]>>
 }
 
 function defaultDeps(): ReflectServiceDeps {
@@ -180,6 +222,7 @@ function defaultDeps(): ReflectServiceDeps {
     persistZone3Block: realPersistZone3Block,
     getCrossSessionContext: realGetCrossSessionContext,
     feedSageAssent: realFeedSageAssent,
+    readDevelopmentalObservations: realReadDevelopmentalObservations,
   }
 }
 
@@ -485,10 +528,68 @@ export async function answerReflection(
       feed = feedRes.value
     }
 
+    // A2 (practice reminders, agent Phase A2, 2026-07-28) — the developmental
+    // read-back + the grade-changed suggestion attach. DARK behind
+    // SUBSTRATE_REFLECT_DEVELOPMENTAL_ENABLED: the read below is SKIPPED
+    // ENTIRELY when off (zero new DB work), and both fields stay undefined —
+    // byte-identical to pre-A2. Fail-honest throughout: a read/compose error
+    // never fails a completion whose real work (persistCompletion, the S1
+    // emissions, the Sage Assent feed) has already succeeded — it only omits
+    // the additive field, matching A1's never-fail-a-committed-write posture.
+    let developmentalPriorities: { domain: string; note: string }[] | undefined
+    let suggestion: PracticeSuggestion | undefined
+    if (isReflectDevelopmentalEnabled()) {
+      try {
+        const obsRes = await deps.readDevelopmentalObservations(row.agent_id)
+        if (obsRes.ok && obsRes.value.length > 0) {
+          // Uses the S4 engine's 3-consecutive streak — a mentor-licensed
+          // FALLBACK for Item 6's actual plateau recommendation, not the
+          // recommendation itself; see readDevelopmentalObservations's own
+          // docstring (trust-core-store.ts) for the full disclosure + the
+          // named follow-up.
+          const flags: DevelopmentalFlag[] = evaluateDevelopmentalFlags(obsRes.value)
+          if (flags.length > 0) {
+            developmentalPriorities = flags.map((f) => ({ domain: f.domain, note: f.note }))
+          }
+        } else if (!obsRes.ok) {
+          console.error(
+            '[sage-reflect] A2 developmental observation read failed (field omitted, response unaffected):',
+            obsRes.error,
+          )
+        }
+      } catch (e) {
+        console.error(
+          '[sage-reflect] A2 developmental read threw (field omitted, response unaffected):',
+          (e as Error).message,
+        )
+      }
+
+      // The grade-changed moment (mentor Item 7, 2026-07-28): the grade change
+      // is the TRIGGER only — the suggestion composer re-reads the fresh
+      // record (here, feed's own passions_persisting), never a grade-keyed
+      // mapping. Honestly narrow at this seam (see practiceSuggestionSnapshot's
+      // persistingPassions field docstring for the per-leg fidelity mapping):
+      // only the persisting-passion legs can fire — B7's protected silence
+      // covers every other basis, which is correct, not a gap.
+      if (feed?.grade_changed === true) {
+        suggestion = practiceSuggestionForReflect({
+          persistingPassions:
+            feed.passions_persisting !== undefined ? [...feed.passions_persisting] : undefined,
+        })
+      }
+    }
+
     return {
       ok: true,
       value: {
-        decision: { kind: 'complete', outcome: next.outcome, feed, mirror_note: MIRROR_NOTE },
+        decision: {
+          kind: 'complete',
+          outcome: next.outcome,
+          feed,
+          mirror_note: MIRROR_NOTE,
+          ...(developmentalPriorities !== undefined ? { developmental_priorities: developmentalPriorities } : {}),
+          ...(suggestion !== undefined ? { suggestion } : {}),
+        },
         billable_cost_cents: cost,
         loop_headers: metered.headers,
       },
