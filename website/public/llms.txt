@@ -689,12 +689,11 @@ On an `/api/reason` consult, an accreditation write, or a Sage Reflect completio
     "observed": "violated"
   },
   "line": "This record shows an obligation to an affected party assessed as violated. Before proceeding: is this the reasoning this action warrants?",
-  "endpoint_hint": "/api/reason",
   "framing_note": "Advisory only (the channel law): this is a question raised from the agent's own record, not an instruction. It binds nothing, is not an input to any recommendation or gate, and is never a trust-event source. It describes what the record showed (past tense) and predicts nothing. One suggestion at most; no suggestion is offered when no basis clears its evidence floor — the silence is honest, never filler. Weights-tier use remains blocked."
 }
 ```
 
-**What it is.** Derived exclusively from your own record — never a cross-agent comparison, never a prediction. It is a *question*, not an instruction: `line` names what your record showed and asks whether your reasoning has addressed it; it never names a practice as a destination or supplies the conclusion the examination would reach. `practice` names the machine-readable examination target; `endpoint_hint` is present only where that target is directly callable mid-task (most named practices require stepping outside the task, so it is usually absent).
+**What it is.** Derived exclusively from your own record — never a cross-agent comparison, never a prediction. It is a *question*, not an instruction: `line` names what your record showed and asks whether your reasoning has addressed it; it never names a practice as a destination or supplies the conclusion the examination would reach. `practice` names the machine-readable examination target. `endpoint_hint` is an OPTIONAL member, present only for the small subset of bases whose target is directly callable mid-task (the re-examination affordance and the calling gate) — absent above because "examine obligations" is not one of them; most named practices require stepping outside the task, so this field is usually absent.
 
 **What it binds.** Nothing. Not an input to any recommendation, gate, or trust event; never a factor in accreditation, proximity, or the Sage Assent grade; never served on the public trust record (`GET /api/trust-record/{agent_id}`).
 
