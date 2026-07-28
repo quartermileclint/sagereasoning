@@ -57,6 +57,12 @@
  *     record cannot evidence. NAMED FOLLOW-UP: persisting the markers
  *     (row-widening, its own founder-walked schema step, already named as an
  *     A8-review input) would make the class distinguishable and re-open this.
+ *     THE CLOSURE PRINCIPLE IS SETTLED IN ADVANCE (2026-07-28 record, Item 8):
+ *     formal closure requires explicit re-examination of the SAME decision
+ *     that was redirected — adjacent competence in the class is never closure
+ *     ("the bar is the specific decision, not the class") — so when the
+ *     markers are persisted, the distinction to encode is same-decision
+ *     re-encounter, not same-class quality.
  *  BD-1b — B1 IS KATHEKON-GATED. `examination_open` alone is the measured
  *     FALSE-POSITIVE hold class: the frozen 130-record observation buffer
  *     classified 129 false_positive / 0 correct_hold under the narrowed
@@ -111,6 +117,22 @@
  *     dikaiosyne reading to sit at or below `deliberate`. Conservative — the
  *     silence direction the mentor protects.
  *
+ * THE SECOND CONSULTATION (2026-07-28) — verbatim record
+ * operations/reminders-2026-07/2026-07-28-mentor-verdicts-agent-suggestions-verbatim.md,
+ * binding alongside Step M and, where it speaks, the later and more specific
+ * ruling. It CONFIRMED BD-1b in the letter ("the kathekon qualification [is]
+ * not a refinement but a structural necessity"), CONFIRMED the machine-readable
+ * `practice`/`endpoint_hint` fields staying alongside the question line ("the
+ * doorbell boundary is maintained by the question form of the rendered line,
+ * not by withholding the lookup result"), reviewed all eleven record clauses
+ * (7–10 revised to plain-language sub-species naming), resolved BD-6's named
+ * follow-up (the mapping in the constants block below), and settled the Item 8
+ * closure principle noted under BD-1a. Three further build decisions came out
+ * of the fold: BD-7 (the acute-fear question-form fork — at
+ * SUGGESTION_QUESTION_PROHAIRESIS), BD-8 (the philodoxia/general craving
+ * split — at b4EpithumiaPersisting), BD-9 (the oknos mechanical tails + the
+ * passion-tier micro-ordering — at the oknos lines and CANDIDATE_ORDER).
+ *
  * PURE COMPOSER. `composePracticeSuggestion` reads NO env, makes NO DB read and
  * NO LLM call: it is a function of blocks the response has ALREADY computed at
  * the attach point. The flag is read at the seam helper below
@@ -124,7 +146,12 @@
  */
 
 import type { KatorthomaProximity, Layer2Assessment } from '@/lib/translation-sandwich/layer2-mechanisms'
-import type { PhobosSubSpecies, RootPassion } from '@/lib/translation-sandwich/layer1-extractor'
+import type {
+  EpithumiaSubSpecies,
+  LupeSubSpecies,
+  PhobosSubSpecies,
+  RootPassion,
+} from '@/lib/translation-sandwich/layer1-extractor'
 import type { TrajectoryDeltaBlock } from './trajectory-delta'
 import type { LoopFoldBlock } from './trust-core/loop-fold'
 import { PROXIMITY_RANK } from './trust-core/constants'
@@ -162,6 +189,13 @@ export type PracticeSuggestionPractice =
   | 'premeditatio_examination'
   | 'reserve_clause_examination'
   | 'deepen_examination'
+  /** 2026-07-28 verdicts, Item 1: the acute-fear route — orient the agent
+   *  toward the control-filter reading it ALREADY HOLDS (the assessment
+   *  computes prohairesis on every consult), "rather than toward a separate
+   *  practice". Deliberately NOT `calling_purpose` — "purpose-declaration
+   *  addresses the absence of declared purpose, not the presence of acute
+   *  fear." No endpoint: nothing to call; the reading is in hand. */
+  | 'control_filter_examination'
   | 'calling_purpose'
 
 /** The locked basis vocabulary — one code per firing signal. */
@@ -174,19 +208,58 @@ export type PracticeSuggestionBasisCode =
   | 'dikaiosyne_weakest_domain_chain'
   // B1 — the genuinely-open, kathekon-engaged correction loop
   | 'examination_open_kathekon_engaged'
-  // B3 — fear-class (the two ANTICIPATORY sub-species only — BD-6)
-  | 'phobos_recurring'
-  | 'phobos_new'
-  | 'phobos_persisting'
-  // B4 — craving-class
+  // B3 — the ANTICIPATORY fear sub-species (BD-6), now named PER SUB-SPECIES
+  // per the 2026-07-28 Item 5 ruling ("name the sub-species… in plain
+  // language"; family-level naming "is softening the reflection").
+  | 'agonia_recurring'
+  | 'agonia_new'
+  | 'agonia_persisting'
+  | 'oknos_recurring'
+  | 'oknos_new'
+  | 'oknos_persisting'
+  // 2026-07-28 Item 1 — the formerly-silent phobos routes: acute fear
+  // (deima/thorybos) → the control-filter question; aischyne → re-examination
+  // with the mirror-principle clause. thambos stays SILENT (confirmed —
+  // "silence is preferable to a weak suggestion").
+  | 'acute_fear_pattern'
+  | 'aischyne_pattern'
+  // B4 — craving-class, split per Item 5: philodoxia gets its vetted specific
+  // line; every other epithumia sub-species the vetted general-contingency
+  // line (see BD-8).
+  | 'philodoxia_persisting'
   | 'epithumia_persisting'
+  // 2026-07-28 Item 2 — the lupe comparison pair (phthonos/zelotypia), an
+  // oikeiosis failure routed to the obligations examination. penthos/achos/
+  // eleos and the whole hedone family stay SILENT (confirmed).
+  | 'comparison_persisting'
   // B6 — the minimal calling analog
   | 'self_only_circles'
 
 /** The question clause every rendered line ends with, verbatim from the Step M
- *  verdict's proposed shape. Battery-pinned on every line. */
+ *  verdict's proposed shape. Battery-pinned on every line (one exception below). */
 export const SUGGESTION_QUESTION =
   'Before proceeding: is this the reasoning this action warrants?'
+
+/**
+ * The SECOND vetted question form — 2026-07-28 Item 5, mentor-verbatim, used by
+ * `acute_fear_pattern` ONLY (battery-pinned both directions): "for acute fear
+ * the more useful examination is not whether the reasoning was warranted but
+ * what the agent actually controls."
+ *
+ * BD-7 — THE MENTOR'S FORK, DECIDED BY THE TRUTHFULNESS DISCIPLINE. The mentor
+ * offered two defensible forms and left the choice to the build team
+ * ("consistency of question form" vs "precision of prompt"). The
+ * standard-question alternative's record clause asserts the record "has not
+ * examined [the situation] for what is within your prohairesis" — but the
+ * extraction computes the control filter on EVERY consult, so that clause can
+ * be false of the very record that fired the pattern. Every rendered line must
+ * be literally true of the record (the A1 discipline), which decides the fork:
+ * the departing-question form, whose clause claims only what the window showed.
+ * The alternative is preserved in the verbatim record if a later consultation
+ * re-weighs the criterion.
+ */
+export const SUGGESTION_QUESTION_PROHAIRESIS =
+  'Before proceeding: what within this situation is actually within your prohairesis?'
 
 /**
  * The rendered lines — a FIXED pre-authored set, never composed from record
@@ -218,18 +291,59 @@ export const SUGGESTION_LINES: Record<PracticeSuggestionBasisCode, string> = {
     'This record shows an examination that engaged a kathekon factor and ' +
     'issued a redirection that is not yet closed. ' +
     SUGGESTION_QUESTION,
-  phobos_recurring:
-    'This record shows a fear-class passion recurring across this window. ' +
+  // The agonia trio — 2026-07-28 Item 5 revised forms, mentor-verbatim
+  // ("a fear of a future outcome" = agonia named in plain language).
+  agonia_recurring:
+    'This record shows a fear of a future outcome recurring across this window. ' +
     SUGGESTION_QUESTION,
-  phobos_new:
-    'This record shows a fear-class passion appearing in this window that the ' +
-    'earlier half did not show. ' +
+  agonia_new:
+    'This record shows a fear of a future outcome appearing in this window ' +
+    'that the earlier half did not show. ' +
     SUGGESTION_QUESTION,
-  phobos_persisting:
-    'This record shows a fear-class passion persisting across this window. ' +
+  agonia_persisting:
+    'This record shows a fear of a future outcome persisting across this window. ' +
+    SUGGESTION_QUESTION,
+  // The oknos trio — the mentor's parallel form ("a pattern of shrinking from
+  // action" = oknos in plain language), given verbatim for the recurring
+  // variant; the new/persisting variants compose that vetted clause with the
+  // already-vetted line-8/line-9 tails (BD-9 — mechanical composition of
+  // vetted parts, no new content authored).
+  oknos_recurring:
+    'This record shows a pattern of shrinking from action recurring across ' +
+    'this window. ' +
+    SUGGESTION_QUESTION,
+  oknos_new:
+    'This record shows a pattern of shrinking from action appearing in this ' +
+    'window that the earlier half did not show. ' +
+    SUGGESTION_QUESTION,
+  oknos_persisting:
+    'This record shows a pattern of shrinking from action persisting across ' +
+    'this window. ' +
+    SUGGESTION_QUESTION,
+  // Acute fear — 2026-07-28 Item 1/Item 5, mentor-verbatim, the ONE line on
+  // the second vetted question (BD-7).
+  acute_fear_pattern:
+    'This record shows acute fear-class reasoning. ' + SUGGESTION_QUESTION_PROHAIRESIS,
+  // Aischyne — 2026-07-28 Item 1/Item 5, mentor-verbatim ("the record clause
+  // must name the assent specifically, not just the passion family").
+  aischyne_pattern:
+    'This record shows reasoning shaped by anticipated judgement of its ' +
+    "output rather than by the action's rightness. " +
+    SUGGESTION_QUESTION,
+  // The craving split — 2026-07-28 Item 5, both mentor-verbatim (BD-8).
+  philodoxia_persisting:
+    'This record shows a persisting orientation toward reputation or ' +
+    'recognition across this window. ' +
     SUGGESTION_QUESTION,
   epithumia_persisting:
-    'This record shows a craving-class passion persisting across this window. ' +
+    'This record shows reasoning in which equanimity has become contingent on ' +
+    'a specific outcome across this window. ' +
+    SUGGESTION_QUESTION,
+  // The lupe comparison pair — 2026-07-28 Item 2, mentor-verbatim ("closer to
+  // the mirror than 'this record shows an envy-class pattern'").
+  comparison_persisting:
+    "This record shows reasoning that treated another party's standing as a " +
+    'condition of its own. ' +
     SUGGESTION_QUESTION,
   self_only_circles:
     'This record shows reasoning that identified no circle of concern beyond ' +
@@ -246,10 +360,17 @@ const BASIS_PRACTICE: Record<PracticeSuggestionBasisCode, PracticeSuggestionPrac
   dikaiosyne_weakest_domain: 'examine_obligations',
   dikaiosyne_weakest_domain_chain: 'examine_obligations',
   examination_open_kathekon_engaged: 'reexamine_same_depth',
-  phobos_recurring: 'premeditatio_examination',
-  phobos_new: 'premeditatio_examination',
-  phobos_persisting: 'premeditatio_examination',
+  agonia_recurring: 'premeditatio_examination',
+  agonia_new: 'premeditatio_examination',
+  agonia_persisting: 'premeditatio_examination',
+  oknos_recurring: 'premeditatio_examination',
+  oknos_new: 'premeditatio_examination',
+  oknos_persisting: 'premeditatio_examination',
+  acute_fear_pattern: 'control_filter_examination',
+  aischyne_pattern: 'reexamine_same_depth',
+  philodoxia_persisting: 'reserve_clause_examination',
   epithumia_persisting: 'reserve_clause_examination',
+  comparison_persisting: 'examine_obligations',
   self_only_circles: 'calling_purpose',
 }
 
@@ -263,6 +384,10 @@ const BASIS_PRACTICE: Record<PracticeSuggestionBasisCode, PracticeSuggestionPrac
  */
 const BASIS_ENDPOINT: Partial<Record<PracticeSuggestionBasisCode, string>> = {
   examination_open_kathekon_engaged: '/api/reason',
+  // 2026-07-28 Item 1: aischyne routes to the re-examination affordance —
+  // "it asks the agent to return to the decision at the depth it was first
+  // examined" — which IS callable (the CI-4 prior_feedback path).
+  aischyne_pattern: '/api/reason',
   self_only_circles: '/api/calling',
 }
 
@@ -351,6 +476,7 @@ function atOrBelowCeiling(level: KatorthomaProximity): boolean {
  *  (the SELF_PRESERVATION_CIRCLE pattern). */
 const PHOBOS: RootPassion = 'phobos'
 const EPITHUMIA: RootPassion = 'epithumia'
+const LUPE: RootPassion = 'lupe'
 
 /**
  * BD-6 — B3 IS SUB-SPECIES-DIFFERENTIATED, NOT FAMILY-WIDE.
@@ -372,22 +498,33 @@ const EPITHUMIA: RootPassion = 'epithumia'
  * differentiated mapping. This matches the human half of the same programme,
  * which already ships it (practice-sequence.ts PASSION_SUGGESTION_TABLE).
  *
- * THE OTHER FOUR ARE SILENT IN V1, not re-targeted. The human table sends
- * deima/thorybos → morning preparation and aischyne → the passion log revisited
- * with the mirror principle; the agent vocabulary has no analog for either, and
- * inventing one would be exactly the unlicensed extension the record warns
- * against. Silence is the protected direction. NAMED FOLLOW-UP: whether an agent
- * analog for the acute (control-filter) and evaluative (mirror-principle) classes
- * should exist is a question for the next mentor consultation, not for this build.
+ * THE FOLLOW-UP WAS ANSWERED (2026-07-28 consultation — the second verbatim
+ * record, which now governs this mapping). The formerly-silent four resolve:
+ * deima/thorybos → the control-filter question line (`control_filter_examination`
+ * — NOT calling_purpose: "purpose-declaration addresses the absence of declared
+ * purpose, not the presence of acute fear"); aischyne → `reexamine_same_depth`
+ * with the mirror-principle clause ("the equivalent assent is the one that
+ * converted anticipated judgement of its output into the operative motive");
+ * thambos → SILENCE, confirmed unchanged. The same record adds the lupe
+ * comparison pair (phthonos/zelotypia → examine_obligations — "both failures of
+ * oikeiosis"), confirms penthos/achos/eleos and the whole hedone family SILENT,
+ * and directs per-sub-species plain-language naming of every rendered clause
+ * ("a clause that names the family when the sub-species is known is softening
+ * the reflection").
  *
- * Caught by the PR19 independent review; the §4 mapping table in the build plan
- * says "the phobos family", which the verbatim record supersedes.
+ * Originally caught by the PR19 independent review; the §4 mapping table in the
+ * build plan carries the correction; BOTH verbatim records win over both.
  */
-const PREMEDITATIO_PHOBOS_SUB_SPECIES: readonly PhobosSubSpecies[] = ['agonia', 'oknos']
-
-function isPremeditatioPhobos(subSpecies: string): boolean {
-  return (PREMEDITATIO_PHOBOS_SUB_SPECIES as readonly string[]).includes(subSpecies)
-}
+const AGONIA: PhobosSubSpecies = 'agonia'
+const OKNOS: PhobosSubSpecies = 'oknos'
+/** Acute, present-tense fear — routed to the control-filter question (Item 1). */
+const ACUTE_PHOBOS: readonly PhobosSubSpecies[] = ['deima', 'thorybos']
+const AISCHYNE: PhobosSubSpecies = 'aischyne'
+// thambos: NO detector — mentor-confirmed silence, twice.
+/** The comparison-borne lupe pair (Item 2) — the other three lupe sub-species
+ *  (penthos/achos/eleos) have NO detector: mentor-confirmed silence. */
+const COMPARISON_LUPE: readonly LupeSubSpecies[] = ['phthonos', 'zelotypia']
+const PHILODOXIA: EpithumiaSubSpecies = 'philodoxia'
 
 /** The sub-species half of a root-qualified delta key ('phobos/agonia' → 'agonia'). */
 function subSpeciesOfKey(key: string): string {
@@ -509,39 +646,100 @@ const b1OpenExamination: Candidate = (s) => {
 /** B3, leg 1 — a fear-class sub-species recurring or newly present across the
  *  window's compared halves. Floored: the whole record can read
  *  `insufficient_extraction`. */
-const b3PhobosRecurring: Candidate = (s) => {
+/** A recurring/new hit in the frequency deltas for the given root + sub-species
+ *  set. Floored: `insufficient_extraction` (and any malformed shape) is never a
+ *  basis. Deterministic: keys sorted, first hit wins. */
+function frequencyHit(
+  s: PracticeSuggestionSnapshot,
+  root: RootPassion,
+  subs: readonly string[],
+): { key: string; value: 'recurring' | 'new' } | undefined {
   const deltas = s.delta?.sub_species_frequency_deltas
   if (deltas === undefined || deltas === 'insufficient_extraction') return undefined
   if (typeof deltas !== 'object' || deltas === null) return undefined
-  // BD-6: sub-species-differentiated, not family-wide.
   const keys = Object.keys(deltas)
-    .filter((k) => rootOfKey(k) === PHOBOS && isPremeditatioPhobos(subSpeciesOfKey(k)))
+    .filter((k) => rootOfKey(k) === root && subs.includes(subSpeciesOfKey(k)))
     .filter((k) => deltas[k] === 'recurring' || deltas[k] === 'new')
     .sort()
   if (keys.length === 0) return undefined
-  const key = keys[0]
-  const value = deltas[key]
-  // The line must be TRUE of the record: 'new' (absent in the baseline half,
-  // present in the current half) is NOT 'recurring'. Two codes, two lines.
-  return {
-    code: value === 'new' ? 'phobos_new' : 'phobos_recurring',
-    signal: 'meta.trajectory.delta.sub_species_frequency_deltas',
-    observed: `${key}=${value}`,
-  }
+  return { key: keys[0], value: deltas[keys[0]] as 'recurring' | 'new' }
 }
 
-/** B3, leg 2 — a fear-class passion among those the window certified as
- *  persisting, narrowed to the two anticipatory sub-species (BD-6). */
-const b3PhobosPersisting: Candidate = (s) =>
-  persistingOfFamily(s, PHOBOS, 'phobos_persisting', isPremeditatioPhobos)
+const FREQ_SIGNAL = 'meta.trajectory.delta.sub_species_frequency_deltas'
 
-/** B4 — a craving-class passion persisting across the window (the vetted row is
- *  PERSISTING only; the frequency-delta leg is deliberately not extended here).
- *  NO sub-species predicate: the record confirms the WHOLE epithumia family
- *  ("craving is precisely where equanimity becomes contingent on an outcome"),
- *  so BD-6's narrowing must not leak into this leg through the shared helper. */
+/** B3, leg 1 — the anticipatory sub-species in the frequency deltas, named PER
+ *  SUB-SPECIES (Item 5: the mirror requires accuracy — 'new' is not
+ *  'recurring', agonia is not oknos; each (sub × variant) has its own line). */
+const b3AnticipatoryFrequency: Candidate = (s) => {
+  const rows: readonly [PhobosSubSpecies, PracticeSuggestionBasisCode, PracticeSuggestionBasisCode][] = [
+    [AGONIA, 'agonia_recurring', 'agonia_new'],
+    [OKNOS, 'oknos_recurring', 'oknos_new'],
+  ]
+  for (const [sub, recurringCode, newCode] of rows) {
+    const hit = frequencyHit(s, PHOBOS, [sub])
+    if (hit !== undefined) {
+      return {
+        code: hit.value === 'new' ? newCode : recurringCode,
+        signal: FREQ_SIGNAL,
+        observed: `${hit.key}=${hit.value}`,
+      }
+    }
+  }
+  return undefined
+}
+
+/** B3, leg 2 — the anticipatory sub-species among the window's persisting
+ *  passions, per sub-species. */
+const b3AnticipatoryPersisting: Candidate = (s) =>
+  persistingOfFamily(s, PHOBOS, 'agonia_persisting', (x) => x === AGONIA) ??
+  persistingOfFamily(s, PHOBOS, 'oknos_persisting', (x) => x === OKNOS)
+
+/** Acute fear (deima/thorybos) — Item 1: the control-filter question, one code
+ *  for both legs (the mentor's clause carries no window/variant framing, so it
+ *  is true under recurrence, first appearance, or persistence; the observed
+ *  field carries the exact detail). */
+const acuteFearPattern: Candidate = (s) => {
+  const hit = frequencyHit(s, PHOBOS, ACUTE_PHOBOS)
+  if (hit !== undefined) {
+    return { code: 'acute_fear_pattern', signal: FREQ_SIGNAL, observed: `${hit.key}=${hit.value}` }
+  }
+  return persistingOfFamily(s, PHOBOS, 'acute_fear_pattern', (x) =>
+    (ACUTE_PHOBOS as readonly string[]).includes(x),
+  )
+}
+
+/** Aischyne — Item 1: the mirror-principle clause + the re-examination
+ *  affordance; one code for both legs (same no-variant-framing reasoning). */
+const aischynePattern: Candidate = (s) => {
+  const hit = frequencyHit(s, PHOBOS, [AISCHYNE])
+  if (hit !== undefined) {
+    return { code: 'aischyne_pattern', signal: FREQ_SIGNAL, observed: `${hit.key}=${hit.value}` }
+  }
+  return persistingOfFamily(s, PHOBOS, 'aischyne_pattern', (x) => x === AISCHYNE)
+}
+
+/** B4, split per Item 5 (BD-8): philodoxia carries its vetted specific line… */
+const b4PhilodoxiaPersisting: Candidate = (s) =>
+  persistingOfFamily(s, EPITHUMIA, 'philodoxia_persisting', (x) => x === PHILODOXIA)
+
+/** …and every OTHER epithumia sub-species the vetted general-contingency line —
+ *  which is true of any craving ("craving is precisely where equanimity becomes
+ *  contingent on an outcome", the confirmed B4 framing). Plain-language names
+ *  for orge/eros/pothos/philedonia/philoplousia await vetted copy — a KNOWN
+ *  LIMITATION per Item 5's own note, recorded in the build record. The vetted
+ *  row remains PERSISTING only; the frequency-delta leg is deliberately not
+ *  extended. */
 const b4EpithumiaPersisting: Candidate = (s) =>
-  persistingOfFamily(s, EPITHUMIA, 'epithumia_persisting')
+  persistingOfFamily(s, EPITHUMIA, 'epithumia_persisting', (x) => x !== PHILODOXIA)
+
+/** The lupe comparison pair — Item 2: "a persisting phthonos or zelotypia
+ *  pattern … should fire an obligations-examination suggestion." PERSISTING
+ *  leg only (the ruling's own word); the frequency-delta leg is not extended
+ *  without vetting. penthos/achos/eleos: no detector — confirmed silence. */
+const comparisonPersisting: Candidate = (s) =>
+  persistingOfFamily(s, LUPE, 'comparison_persisting', (x) =>
+    (COMPARISON_LUPE as readonly string[]).includes(x),
+  )
 
 function persistingOfFamily(
   s: PracticeSuggestionSnapshot,
@@ -604,11 +802,21 @@ const CANDIDATE_ORDER: readonly Candidate[] = [
   b2WeakDomainChain,
   // B1 — the genuinely-open, kathekon-engaged loop.
   b1OpenExamination,
-  // B3 — fear-class.
-  b3PhobosRecurring,
-  b3PhobosPersisting,
-  // B4 — craving-class.
+  // B3 — the anticipatory fear cluster (agonia, oknos → premeditatio-class).
+  b3AnticipatoryFrequency,
+  b3AnticipatoryPersisting,
+  // The 2026-07-28 phobos additions: acute fear, then aischyne. Micro-ordering
+  // within the passion tier (anticipatory → acute → aischyne → craving →
+  // comparison) follows the two records' own discussion order; the mentor fixed
+  // the TIER order (B2 → B1 → B3 → B4 → B6), not the order among these
+  // pattern rows — recorded as BD-9, low-stakes since at most one fires.
+  acuteFearPattern,
+  aischynePattern,
+  // B4 — craving-class: the specific vetted line first, then the general.
+  b4PhilodoxiaPersisting,
   b4EpithumiaPersisting,
+  // The lupe comparison pair (Item 2).
+  comparisonPersisting,
   // B5 — SILENT in v1 (BD-2): no detector exists.
   // B6 — the minimal calling analog.
   b6SelfOnlyCircles,

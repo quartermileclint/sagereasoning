@@ -47,6 +47,7 @@ import {
   PRACTICE_SUGGESTION_FRAMING_NOTE,
   SUGGESTION_LINES,
   SUGGESTION_QUESTION,
+  SUGGESTION_QUESTION_PROHAIRESIS,
   type PracticeSuggestionBasisCode,
   type PracticeSuggestionSnapshot,
 } from '../practice-suggestion'
@@ -294,17 +295,28 @@ const ALL_CODES: PracticeSuggestionBasisCode[] = [
   'dikaiosyne_weakest_domain',
   'dikaiosyne_weakest_domain_chain',
   'examination_open_kathekon_engaged',
-  'phobos_recurring',
-  'phobos_new',
-  'phobos_persisting',
+  'agonia_recurring',
+  'agonia_new',
+  'agonia_persisting',
+  'oknos_recurring',
+  'oknos_new',
+  'oknos_persisting',
+  'acute_fear_pattern',
+  'aischyne_pattern',
+  'philodoxia_persisting',
   'epithumia_persisting',
+  'comparison_persisting',
   'self_only_circles',
 ]
 
-/** BD-6 — the record's differentiated phobos mapping. Only these two are
- *  licensed to reach premeditatio; the other four are SILENT in v1. */
-const PREMEDITATIO_PHOBOS = ['agonia', 'oknos']
-const DECLINED_PHOBOS = ['deima', 'thorybos', 'thambos', 'aischyne']
+/** The 2026-07-28 differentiated mapping (both verbatim records binding):
+ *  agonia/oknos → premeditatio-class, per sub-species; deima/thorybos → the
+ *  control-filter question; aischyne → re-examination; thambos → SILENCE;
+ *  phthonos/zelotypia → obligations; penthos/achos/eleos + all hedone →
+ *  SILENCE. */
+const ANTICIPATORY_PHOBOS = ['agonia', 'oknos']
+const ACUTE_PHOBOS_SUBS = ['deima', 'thorybos']
+const SILENT_LUPE = ['penthos', 'achos', 'eleos']
 
 const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'utf8')
 
@@ -392,10 +404,32 @@ const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'u
     'Before proceeding: is this the reasoning this action warrants?',
     '§2 the question clause is the Step M verdict’s proposed shape, verbatim',
   )
+  // 2026-07-28 Item 5: acute_fear_pattern carries the SECOND vetted question
+  // (mentor-verbatim); every other line the standard one. Both directions
+  // pinned: acute never ends with the standard question, and no other code
+  // ever ends with the prohairesis question.
+  eq(
+    SUGGESTION_QUESTION_PROHAIRESIS,
+    'Before proceeding: what within this situation is actually within your prohairesis?',
+    '§2 the prohairesis question is the 2026-07-28 Item 5 wording, verbatim',
+  )
+  const questionFor = (code: PracticeSuggestionBasisCode): string =>
+    code === 'acute_fear_pattern' ? SUGGESTION_QUESTION_PROHAIRESIS : SUGGESTION_QUESTION
+  assert(
+    !SUGGESTION_LINES.acute_fear_pattern.endsWith(SUGGESTION_QUESTION),
+    '§2 acute_fear_pattern does NOT use the standard question (BD-7)',
+  )
+  for (const code of ALL_CODES) {
+    if (code === 'acute_fear_pattern') continue
+    assert(
+      !SUGGESTION_LINES[code].endsWith(SUGGESTION_QUESTION_PROHAIRESIS),
+      `§2 ${code} does not borrow the prohairesis question (acute-only, both directions)`,
+    )
+  }
   for (const code of ALL_CODES) {
     const line = SUGGESTION_LINES[code]
     assert(typeof line === 'string' && line.length > 0, `§2 ${code} has a line`)
-    assert(line.endsWith(SUGGESTION_QUESTION), `§2 ${code} ends with the question clause verbatim`)
+    assert(line.endsWith(questionFor(code)), `§2 ${code} ends with its vetted question clause verbatim`)
     assert(line.startsWith('This record shows '), `§2 ${code} opens with the record clause`)
     // THE QUESTION-FORM VERDICT, mechanically: the line never names a practice
     // as a destination. The machine-readable `practice` field carries it.
@@ -431,7 +465,7 @@ const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'u
   // clause with a directive, now fails regardless of vocabulary.
   for (const code of ALL_CODES) {
     const line = SUGGESTION_LINES[code]
-    const head = line.slice(0, line.length - SUGGESTION_QUESTION.length).trim()
+    const head = line.slice(0, line.length - questionFor(code).length).trim()
     assert(head.endsWith('.'), `§2 ${code}: the record clause is a complete sentence`)
     eq(
       (head.match(/\./g) ?? []).length,
@@ -441,6 +475,68 @@ const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'u
     assert(!/[?!]/.test(head), `§2 ${code}: the record clause asks nothing and exclaims nothing`)
     // The question is the ONLY question in the line.
     eq((line.match(/\?/g) ?? []).length, 1, `§2 ${code}: exactly one question mark, at the end`)
+  }
+
+  // 2026-07-28 Item 5 — the mentor-verbatim lines locked as EXPORTED VALUES
+  // (the strongest lock: a comment or identifier cannot satisfy these).
+  eq(
+    SUGGESTION_LINES.agonia_recurring,
+    'This record shows a fear of a future outcome recurring across this window. ' + SUGGESTION_QUESTION,
+    '§2 agonia_recurring is the Item 5 revised line 7, verbatim',
+  )
+  eq(
+    SUGGESTION_LINES.agonia_new,
+    'This record shows a fear of a future outcome appearing in this window that the earlier half did not show. ' +
+      SUGGESTION_QUESTION,
+    '§2 agonia_new is the Item 5 revised line 8, verbatim',
+  )
+  eq(
+    SUGGESTION_LINES.agonia_persisting,
+    'This record shows a fear of a future outcome persisting across this window. ' + SUGGESTION_QUESTION,
+    '§2 agonia_persisting is the Item 5 revised line 9, verbatim',
+  )
+  eq(
+    SUGGESTION_LINES.oknos_recurring,
+    'This record shows a pattern of shrinking from action recurring across this window. ' + SUGGESTION_QUESTION,
+    '§2 oknos_recurring is the Item 5 parallel form, verbatim',
+  )
+  eq(
+    SUGGESTION_LINES.acute_fear_pattern,
+    'This record shows acute fear-class reasoning. ' + SUGGESTION_QUESTION_PROHAIRESIS,
+    '§2 acute_fear_pattern is the Item 5 new copy, verbatim (BD-7 form A)',
+  )
+  eq(
+    SUGGESTION_LINES.aischyne_pattern,
+    "This record shows reasoning shaped by anticipated judgement of its output rather than by the action's rightness. " +
+      SUGGESTION_QUESTION,
+    '§2 aischyne_pattern is the Item 5 new copy, verbatim',
+  )
+  eq(
+    SUGGESTION_LINES.philodoxia_persisting,
+    'This record shows a persisting orientation toward reputation or recognition across this window. ' +
+      SUGGESTION_QUESTION,
+    '§2 philodoxia_persisting is the Item 5 refined line 10 (philodoxia), verbatim',
+  )
+  eq(
+    SUGGESTION_LINES.epithumia_persisting,
+    'This record shows reasoning in which equanimity has become contingent on a specific outcome across this window. ' +
+      SUGGESTION_QUESTION,
+    '§2 epithumia_persisting is the Item 5 general-contingency form, verbatim (BD-8)',
+  )
+  eq(
+    SUGGESTION_LINES.comparison_persisting,
+    "This record shows reasoning that treated another party's standing as a condition of its own. " +
+      SUGGESTION_QUESTION,
+    '§2 comparison_persisting is the Item 2 refined clause, verbatim',
+  )
+  // The oknos trio is genuinely per-sub-species: never the agonia wording.
+  for (const variant of ['recurring', 'new', 'persisting'] as const) {
+    assert(
+      SUGGESTION_LINES[`oknos_${variant}`] !== SUGGESTION_LINES[`agonia_${variant}`] &&
+        SUGGESTION_LINES[`oknos_${variant}`].includes('shrinking from action') &&
+        SUGGESTION_LINES[`agonia_${variant}`].includes('fear of a future outcome'),
+      `§2 the ${variant} lines name their sub-species distinctly (Item 5: the mirror requires accuracy)`,
+    )
   }
 }
 
@@ -501,8 +597,76 @@ const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'u
         ],
       }),
     }),
-    'phobos_recurring',
+    'agonia_recurring',
     '§3 B3 outranks B4',
+  )
+  // The 2026-07-28 passion-tier micro-ordering (BD-9): anticipatory → acute →
+  // aischyne → craving → comparison, each rung shown to outrank the next.
+  eq(
+    codeOf({
+      delta: delta({
+        sub_species_frequency_deltas: { 'phobos/agonia': 'recurring', 'phobos/deima': 'recurring' },
+      }),
+    }),
+    'agonia_recurring',
+    '§3 anticipatory outranks acute',
+  )
+  eq(
+    codeOf({
+      delta: delta({
+        sub_species_frequency_deltas: { 'phobos/deima': 'recurring', 'phobos/aischyne': 'recurring' },
+      }),
+    }),
+    'acute_fear_pattern',
+    '§3 acute outranks aischyne',
+  )
+  eq(
+    codeOf({
+      delta: delta({
+        sub_species_frequency_deltas: { 'phobos/aischyne': 'recurring' },
+        passions_persisted_in_window: [
+          { root_passion: 'epithumia', sub_species: 'philodoxia', occurrence_count: 4, occurrence_rate: 0.4 },
+        ],
+      }),
+    }),
+    'aischyne_pattern',
+    '§3 aischyne outranks the craving rows',
+  )
+  eq(
+    codeOf({
+      delta: delta({
+        passions_persisted_in_window: [
+          { root_passion: 'epithumia', sub_species: 'philodoxia', occurrence_count: 4, occurrence_rate: 0.4 },
+          { root_passion: 'epithumia', sub_species: 'orge', occurrence_count: 4, occurrence_rate: 0.4 },
+        ],
+      }),
+    }),
+    'philodoxia_persisting',
+    '§3 the specific philodoxia row outranks the general craving row',
+  )
+  eq(
+    codeOf({
+      delta: delta({
+        passions_persisted_in_window: [
+          { root_passion: 'epithumia', sub_species: 'orge', occurrence_count: 4, occurrence_rate: 0.4 },
+          { root_passion: 'lupe', sub_species: 'phthonos', occurrence_count: 4, occurrence_rate: 0.4 },
+        ],
+      }),
+    }),
+    'epithumia_persisting',
+    '§3 craving outranks the comparison row',
+  )
+  eq(
+    codeOf({
+      assessment: assessment({ circles: [{ circle: 'self_preservation' }] }),
+      delta: delta({
+        passions_persisted_in_window: [
+          { root_passion: 'lupe', sub_species: 'zelotypia', occurrence_count: 4, occurrence_rate: 0.4 },
+        ],
+      }),
+    }),
+    'comparison_persisting',
+    '§3 the comparison row outranks B6',
   )
   // B4 outranks B6.
   eq(
@@ -920,92 +1084,207 @@ const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'u
 }
 
 // ============================================================================
-// §6 — B3 / B4 families
+// §6 — The passion-family mappings (2026-07-28 verdicts: per-sub-species)
 // ============================================================================
 {
-  // The line must be TRUE of the record: 'new' is not 'recurring'.
+  // The line must be TRUE of the record: 'new' is not 'recurring', and each
+  // anticipatory sub-species carries its own plain-language clause.
   eq(
     codeOf({ delta: delta({ sub_species_frequency_deltas: { 'phobos/agonia': 'recurring' } }) }),
-    'phobos_recurring',
-    `§6 phobos 'recurring' fires the recurring basis`,
+    'agonia_recurring',
+    `§6 agonia 'recurring' fires its own basis`,
   )
   eq(
     codeOf({ delta: delta({ sub_species_frequency_deltas: { 'phobos/agonia': 'new' } }) }),
-    'phobos_new',
-    `§6 phobos 'new' fires the DISTINCT new basis (the line must not say "recurring")`,
+    'agonia_new',
+    `§6 agonia 'new' fires the DISTINCT new basis`,
+  )
+  eq(
+    codeOf({ delta: delta({ sub_species_frequency_deltas: { 'phobos/oknos': 'recurring' } }) }),
+    'oknos_recurring',
+    `§6 oknos 'recurring' fires the OKNOS basis, not agonia's`,
+  )
+  eq(
+    codeOf({ delta: delta({ sub_species_frequency_deltas: { 'phobos/oknos': 'new' } }) }),
+    'oknos_new',
+    `§6 oknos 'new' fires the oknos new basis`,
   )
   assert(
-    !SUGGESTION_LINES.phobos_new.includes('recurring'),
-    '§6 the new-basis line does not claim recurrence',
+    !SUGGESTION_LINES.agonia_new.includes('recurring') &&
+      !SUGGESTION_LINES.oknos_new.includes('recurring'),
+    '§6 the new-basis lines do not claim recurrence',
   )
   for (const v of ['fading', 'stable'] as const) {
-    eq(
-      codeOf({ delta: delta({ sub_species_frequency_deltas: { 'phobos/agonia': v } }) }),
-      null,
-      `§6 phobos '${v}' is no basis`,
+    for (const sub of ANTICIPATORY_PHOBOS) {
+      eq(
+        codeOf({ delta: delta({ sub_species_frequency_deltas: { [`phobos/${sub}`]: v } }) }),
+        null,
+        `§6 ${sub} '${v}' is no basis`,
+      )
+    }
+  }
+
+  // Persisting legs, per sub-species.
+  eq(
+    codeOf({
+      delta: delta({
+        passions_persisted_in_window: [
+          { root_passion: 'phobos', sub_species: 'agonia', occurrence_count: 5, occurrence_rate: 0.5 },
+        ],
+      }),
+    }),
+    'agonia_persisting',
+    '§6 a persisting agonia fires its own basis',
+  )
+  eq(
+    codeOf({
+      delta: delta({
+        passions_persisted_in_window: [
+          { root_passion: 'phobos', sub_species: 'oknos', occurrence_count: 5, occurrence_rate: 0.5 },
+        ],
+      }),
+    }),
+    'oknos_persisting',
+    '§6 a persisting oknos fires its own basis',
+  )
+
+  // ACUTE FEAR (Item 1): deima/thorybos → the control-filter question, on
+  // BOTH legs, one code — and the control_filter_examination target, never
+  // premeditatio (the record's whole point).
+  for (const sub of ACUTE_PHOBOS_SUBS) {
+    const freq = composePracticeSuggestion({
+      delta: delta({ sub_species_frequency_deltas: { [`phobos/${sub}`]: 'recurring' } }),
+    })
+    eq(freq?.basis.code, 'acute_fear_pattern', `§6 ${sub} recurring fires the acute basis`)
+    eq(freq?.practice, 'control_filter_examination', `§6 ${sub} targets the control filter, NOT premeditatio`)
+    assert(!('endpoint_hint' in (freq as object)), `§6 ${sub}: the control-filter reading is in hand — no endpoint`)
+    const pers = composePracticeSuggestion({
+      delta: delta({
+        passions_persisted_in_window: [
+          { root_passion: 'phobos', sub_species: sub, occurrence_count: 5, occurrence_rate: 0.5 },
+        ],
+      }),
+    })
+    eq(pers?.basis.code, 'acute_fear_pattern', `§6 persisting ${sub} fires the acute basis`)
+    assert(
+      pers !== undefined && pers.line.endsWith(SUGGESTION_QUESTION_PROHAIRESIS),
+      `§6 ${sub}: the acute line asks the prohairesis question (BD-7)`,
     )
   }
 
-  // BD-6 — THE DIFFERENTIATED PHOBOS MAPPING. The binding record: "do not
-  // generalise to the whole phobos family… agonia and oknos are the intended
-  // targets and the generalisation to all phobos is an overreach."
-  for (const sub of PREMEDITATIO_PHOBOS) {
-    assert(
-      codeOf({ delta: delta({ sub_species_frequency_deltas: { [`phobos/${sub}`]: 'recurring' } }) }) !== null,
-      `§6 BD-6: '${sub}' IS a licensed premeditatio target (frequency leg)`,
-    )
-    assert(
-      codeOf({
-        delta: delta({
-          passions_persisted_in_window: [
-            { root_passion: 'phobos', sub_species: sub, occurrence_count: 5, occurrence_rate: 0.5 },
-          ],
-        }),
-      }) !== null,
-      `§6 BD-6: '${sub}' IS a licensed premeditatio target (persisting leg)`,
+  // AISCHYNE (Item 1): the mirror-principle clause + the re-examination
+  // affordance, both legs.
+  const aischyneFreq = composePracticeSuggestion({
+    delta: delta({ sub_species_frequency_deltas: { 'phobos/aischyne': 'recurring' } }),
+  })
+  eq(aischyneFreq?.basis.code, 'aischyne_pattern', '§6 recurring aischyne fires its basis')
+  eq(aischyneFreq?.practice, 'reexamine_same_depth', '§6 aischyne targets the re-examination affordance')
+  eq(aischyneFreq?.endpoint_hint, '/api/reason', '§6 aischyne hints the CI-4 endpoint')
+  eq(
+    codeOf({
+      delta: delta({
+        passions_persisted_in_window: [
+          { root_passion: 'phobos', sub_species: 'aischyne', occurrence_count: 5, occurrence_rate: 0.5 },
+        ],
+      }),
+    }),
+    'aischyne_pattern',
+    '§6 persisting aischyne fires its basis',
+  )
+
+  // THAMBOS: mentor-confirmed silence, twice — both legs.
+  eq(
+    codeOf({ delta: delta({ sub_species_frequency_deltas: { 'phobos/thambos': 'recurring' } }) }),
+    null,
+    '§6 thambos recurring is SILENT ("silence is preferable to a weak suggestion")',
+  )
+  eq(
+    codeOf({
+      delta: delta({
+        passions_persisted_in_window: [
+          { root_passion: 'phobos', sub_species: 'thambos', occurrence_count: 5, occurrence_rate: 0.5 },
+        ],
+      }),
+    }),
+    null,
+    '§6 persisting thambos is SILENT',
+  )
+
+  // THE CRAVING SPLIT (Item 5 / BD-8): philodoxia carries its specific vetted
+  // line; every other epithumia sub-species the general-contingency line; the
+  // whole family still targets the reserve-clause examination.
+  const philo = composePracticeSuggestion({
+    delta: delta({
+      passions_persisted_in_window: [
+        { root_passion: 'epithumia', sub_species: 'philodoxia', occurrence_count: 5, occurrence_rate: 0.5 },
+      ],
+    }),
+  })
+  eq(philo?.basis.code, 'philodoxia_persisting', '§6 persisting philodoxia fires its SPECIFIC basis')
+  eq(philo?.practice, 'reserve_clause_examination', '§6 philodoxia still targets the reserve clause')
+  for (const sub of ['orge', 'eros', 'pothos', 'philedonia', 'philoplousia']) {
+    const general = composePracticeSuggestion({
+      delta: delta({
+        passions_persisted_in_window: [
+          { root_passion: 'epithumia', sub_species: sub, occurrence_count: 5, occurrence_rate: 0.5 },
+        ],
+      }),
+    })
+    eq(general?.basis.code, 'epithumia_persisting', `§6 persisting ${sub} fires the general-contingency basis`)
+    eq(general?.practice, 'reserve_clause_examination', `§6 ${sub} targets the reserve clause`)
+  }
+
+  // THE LUPE COMPARISON PAIR (Item 2): phthonos/zelotypia → examine_obligations,
+  // PERSISTING leg only; the other three lupe sub-species are silent.
+  for (const sub of ['phthonos', 'zelotypia']) {
+    const comp = composePracticeSuggestion({
+      delta: delta({
+        passions_persisted_in_window: [
+          { root_passion: 'lupe', sub_species: sub, occurrence_count: 5, occurrence_rate: 0.5 },
+        ],
+      }),
+    })
+    eq(comp?.basis.code, 'comparison_persisting', `§6 persisting ${sub} fires the comparison basis`)
+    eq(comp?.practice, 'examine_obligations', `§6 ${sub} targets the obligations examination (the oikeiosis analog)`)
+    // The persisting-only scope: the frequency leg is NOT extended without vetting.
+    eq(
+      codeOf({ delta: delta({ sub_species_frequency_deltas: { [`lupe/${sub}`]: 'recurring' } }) }),
+      null,
+      `§6 ${sub} recurring (frequency leg) is no basis — the ruling's word is "persisting"`,
     )
   }
-  for (const sub of DECLINED_PHOBOS) {
-    eq(
-      codeOf({ delta: delta({ sub_species_frequency_deltas: { [`phobos/${sub}`]: 'recurring' } }) }),
-      null,
-      `§6 BD-6: '${sub}' is SILENT — premeditatio is not its practice (frequency leg)`,
-    )
+  for (const sub of SILENT_LUPE) {
     eq(
       codeOf({
         delta: delta({
           passions_persisted_in_window: [
-            { root_passion: 'phobos', sub_species: sub, occurrence_count: 5, occurrence_rate: 0.5 },
+            { root_passion: 'lupe', sub_species: sub, occurrence_count: 5, occurrence_rate: 0.5 },
           ],
         }),
       }),
       null,
-      `§6 BD-6: '${sub}' is SILENT (persisting leg)`,
+      `§6 persisting ${sub} is SILENT (view from above has no agent analog)`,
     )
   }
-  // The narrowing must NOT leak into B4 through the shared helper: the record
-  // confirms the WHOLE epithumia family.
-  for (const sub of ['orge', 'philodoxia', 'eros', 'pothos']) {
-    eq(
-      codeOf({
-        delta: delta({
-          passions_persisted_in_window: [
-            { root_passion: 'epithumia', sub_species: sub, occurrence_count: 5, occurrence_rate: 0.5 },
-          ],
-        }),
+
+  // HEDONE: the whole family silent, both legs (mentor-confirmed).
+  eq(
+    codeOf({ delta: delta({ sub_species_frequency_deltas: { 'hedone/terpsis': 'recurring' } }) }),
+    null,
+    '§6 hedone recurring is SILENT',
+  )
+  eq(
+    codeOf({
+      delta: delta({
+        passions_persisted_in_window: [
+          { root_passion: 'hedone', sub_species: 'terpsis', occurrence_count: 5, occurrence_rate: 0.5 },
+        ],
       }),
-      'epithumia_persisting',
-      `§6 BD-6 does not leak into B4: epithumia '${sub}' still fires`,
-    )
-  }
-  // Other families never fire B3 off the frequency deltas.
-  for (const root of ['lupe', 'epithumia', 'hedone']) {
-    eq(
-      codeOf({ delta: delta({ sub_species_frequency_deltas: { [`${root}/x`]: 'recurring' } }) }),
-      null,
-      `§6 '${root}' recurring does not fire B3 (family read off the key prefix)`,
-    )
-  }
+    }),
+    null,
+    '§6 persisting hedone is SILENT (a judgement-correction, not a practice)',
+  )
+
   // A prefix that merely STARTS WITH the family name is not the family.
   eq(
     codeOf({ delta: delta({ sub_species_frequency_deltas: { 'phobos_x/agonia': 'recurring' } }) }),
@@ -1017,43 +1296,6 @@ const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'u
     null,
     '§6 a floored frequency record is skipped',
   )
-
-  // Persisting passions.
-  eq(
-    codeOf({
-      delta: delta({
-        passions_persisted_in_window: [
-          { root_passion: 'phobos', sub_species: 'agonia', occurrence_count: 5, occurrence_rate: 0.5 },
-        ],
-      }),
-    }),
-    'phobos_persisting',
-    '§6 a persisting phobos fires B3',
-  )
-  eq(
-    codeOf({
-      delta: delta({
-        passions_persisted_in_window: [
-          { root_passion: 'epithumia', sub_species: 'orge', occurrence_count: 5, occurrence_rate: 0.5 },
-        ],
-      }),
-    }),
-    'epithumia_persisting',
-    '§6 a persisting epithumia fires B4',
-  )
-  for (const root of ['lupe', 'hedone'] as const) {
-    eq(
-      codeOf({
-        delta: delta({
-          passions_persisted_in_window: [
-            { root_passion: root, sub_species: 'x', occurrence_count: 5, occurrence_rate: 0.5 },
-          ],
-        }),
-      }),
-      null,
-      `§6 a persisting '${root}' fires neither B3 nor B4 (not in the vetted table)`,
-    )
-  }
   eq(
     codeOf({ delta: delta({ passions_persisted_in_window: 'insufficient_extraction' }) }),
     null,
@@ -1097,9 +1339,16 @@ const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'u
     { loopFold: fold({ domains: { dikaiosyne: domainFold('habitual'), phronesis: domainFold('principled') } }) },
     { assessment: ENGAGED_NO_JUSTICE, examinationOpen: true },
     { delta: delta({ sub_species_frequency_deltas: { 'phobos/agonia': 'recurring' } }) },
-    { delta: delta({ sub_species_frequency_deltas: { 'phobos/oknos': 'new' } }) },
+    { delta: delta({ sub_species_frequency_deltas: { 'phobos/agonia': 'new' } }) },
     { delta: delta({ passions_persisted_in_window: [{ root_passion: 'phobos', sub_species: 'agonia', occurrence_count: 5, occurrence_rate: 0.5 }] }) },
+    { delta: delta({ sub_species_frequency_deltas: { 'phobos/oknos': 'recurring' } }) },
+    { delta: delta({ sub_species_frequency_deltas: { 'phobos/oknos': 'new' } }) },
+    { delta: delta({ passions_persisted_in_window: [{ root_passion: 'phobos', sub_species: 'oknos', occurrence_count: 5, occurrence_rate: 0.5 }] }) },
+    { delta: delta({ sub_species_frequency_deltas: { 'phobos/thorybos': 'recurring' } }) },
+    { delta: delta({ sub_species_frequency_deltas: { 'phobos/aischyne': 'recurring' } }) },
+    { delta: delta({ passions_persisted_in_window: [{ root_passion: 'epithumia', sub_species: 'philodoxia', occurrence_count: 5, occurrence_rate: 0.5 }] }) },
     { delta: delta({ passions_persisted_in_window: [{ root_passion: 'epithumia', sub_species: 'orge', occurrence_count: 5, occurrence_rate: 0.5 }] }) },
+    { delta: delta({ passions_persisted_in_window: [{ root_passion: 'lupe', sub_species: 'zelotypia', occurrence_count: 5, occurrence_rate: 0.5 }] }) },
     { assessment: assessment({ circles: [{ circle: 'self_preservation' }] }) },
   ]
   for (const s of snapshots) {
@@ -1111,7 +1360,15 @@ const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'u
     !emitted.has('deepen_examination'),
     '§7 BD-2: no path emits deepen_examination (the B5 row is deferred, not live)',
   )
-  eq(emitted.size, 5, '§7 the sweep reaches five of the six locked practices (B5 deferred)')
+  eq(
+    emitted.size,
+    6,
+    '§7 the sweep reaches six of the seven locked practices (B5/deepen_examination deferred)',
+  )
+  assert(
+    emitted.has('control_filter_examination'),
+    '§7 the acute route reaches its own practice (2026-07-28 Item 1)',
+  )
   // Every locked basis code is reachable — no dead branch.
   const reached = new Set(snapshots.map((s) => codeOf(s)))
   for (const code of ALL_CODES) {
@@ -1182,8 +1439,23 @@ const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'u
       { loopFold: fold({ domains: { dikaiosyne: domainFold('habitual'), phronesis: domainFold('principled') } }) },
     ],
     ['examination_open_kathekon_engaged', { assessment: ENGAGED_NO_JUSTICE, examinationOpen: true }],
-    ['phobos_recurring', { delta: delta({ sub_species_frequency_deltas: { 'phobos/agonia': 'recurring' } }) }],
-    ['phobos_new', { delta: delta({ sub_species_frequency_deltas: { 'phobos/oknos': 'new' } }) }],
+    ['agonia_recurring', { delta: delta({ sub_species_frequency_deltas: { 'phobos/agonia': 'recurring' } }) }],
+    ['oknos_new', { delta: delta({ sub_species_frequency_deltas: { 'phobos/oknos': 'new' } }) }],
+    ['acute_fear_pattern', { delta: delta({ sub_species_frequency_deltas: { 'phobos/deima': 'recurring' } }) }],
+    [
+      'aischyne_pattern',
+      { delta: delta({ sub_species_frequency_deltas: { 'phobos/aischyne': 'recurring' } }) },
+    ],
+    [
+      'comparison_persisting',
+      {
+        delta: delta({
+          passions_persisted_in_window: [
+            { root_passion: 'lupe', sub_species: 'phthonos', occurrence_count: 5, occurrence_rate: 0.5 },
+          ],
+        }),
+      },
+    ],
     ['self_only_circles', { assessment: assessment({ circles: [{ circle: 'self_preservation' }] }) }],
   ]
   for (const [code, snap] of BASIS_SNAPSHOTS) {
