@@ -258,6 +258,11 @@ import {
   isLoopFoldEnabled,
 } from '@/lib/substrate/trust-core/loop-fold'
 import { resolveCredentialContext } from '@/lib/substrate/agent-assessment-history-store'
+// Practice reminders, agent Phase A1 (2026-07-28) — the practice-suggestion
+// composer. Flag-gated by SUBSTRATE_PRACTICE_SUGGESTION_ENABLED; UNSET ⇒ no
+// suggestion member (byte-identical). Pure: composed from the fold this
+// response already carries. Advisory by the channel law; binds nothing.
+import { practiceSuggestionFor } from '@/lib/substrate/practice-suggestion'
 
 // =============================================================================
 // HOTFIX NOTE 2026-05-16 — Next.js App Router rejected the original co-located
@@ -869,7 +874,24 @@ export async function POST(
       loopFoldAnnotation = undefined
     }
 
-    return buildWriteSuccessResponse(loopClosureAnnotation, loopFoldAnnotation)
+    // Practice reminders A1 (2026-07-28): at most ONE practice suggestion,
+    // composed PURELY from the fold this response already carries (no new read,
+    // no LLM call). Flag-gated inside practiceSuggestionFor; undefined when the
+    // flag is off ⇒ the 200 body is byte-identical.
+    //
+    // This surface deliberately has a NARROW live basis: there is no single
+    // "current assessment" at a chain write, and BD-1a keeps the fold's open
+    // loops silent (the submitted-chain scope cannot distinguish a genuinely
+    // dropped loop from one closed in a consult that was not submitted). B2's
+    // weak-domain leg is what can fire here. Honest silence otherwise is B7
+    // working as specified — not a gap to be filled.
+    const practiceSuggestion = practiceSuggestionFor({ loopFold: loopFoldAnnotation })
+
+    return buildWriteSuccessResponse(
+      loopClosureAnnotation,
+      loopFoldAnnotation,
+      practiceSuggestion,
+    )
   } catch (err) {
     // Any Supabase failure inside lookupAccreditationRecord or the writer
     // library's persistence-layer calls propagates here. Map to 503 with a

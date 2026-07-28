@@ -69,6 +69,11 @@ import type { AccreditationRecord } from '@/lib/substrate/trust-layer/types/accr
 // hint on the accreditation-write success response. Flag-gated; absent when off
 // (byte-identical). See src/lib/practice-cycle-hint.ts.
 import { practiceCycleHintField } from '@/lib/practice-cycle-hint'
+// Practice reminders A1 (2026-07-28): the optional practice suggestion, composed
+// by the route from the AE-2 loop fold. Flag-gated at the composer's own seam
+// helper; undefined here (the flag-unset default) ⇒ the `practice` field is the
+// byte-identical CI-13 shape. See src/lib/substrate/practice-suggestion.ts.
+import type { PracticeSuggestion } from '@/lib/substrate/practice-suggestion'
 
 // ============================================================================
 // CONSTANTS
@@ -244,17 +249,27 @@ export function buildWriteSuccessResponse(
     indeterminate: number
   },
   loopFold?: object,
+  suggestion?: PracticeSuggestion,
 ): NextResponse {
+  // M5 CI-13 (2026-06-13): the reflect-at-close practice hint. Absent entirely
+  // when SUBSTRATE_PRACTICE_CYCLE_HINT_ENABLED is unset (byte-identical to
+  // pre-M5).
+  //
+  // A1 (2026-07-28): when a suggestion composed AND the hint is being served,
+  // the practice block gains the `suggestion` member (BD-3 — the suggestion
+  // rides only an emitted carrier). With `suggestion` undefined (the A1
+  // flag-unset default, and also whenever no basis fired — B7's protected
+  // silence) the field spreads EXACTLY as before: byte-identical.
+  const practiceField = practiceCycleHintField()
   return NextResponse.json(
     {
       status: 'ok',
       documentation_url: DOCUMENTATION_URL,
       ...(loopClosure !== undefined ? { loop_closure: loopClosure } : {}),
       ...(loopFold !== undefined ? { loop_fold: loopFold } : {}),
-      // M5 CI-13 (2026-06-13): the reflect-at-close practice hint. Absent
-      // entirely when SUBSTRATE_PRACTICE_CYCLE_HINT_ENABLED is unset
-      // (byte-identical to pre-M5).
-      ...practiceCycleHintField(),
+      ...(practiceField.practice !== undefined && suggestion !== undefined
+        ? { practice: { ...practiceField.practice, suggestion } }
+        : practiceField),
     },
     {
       status: 200,

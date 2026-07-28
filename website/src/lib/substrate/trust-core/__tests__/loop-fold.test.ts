@@ -691,9 +691,46 @@ function collectKeys(x: unknown, out: Set<string>): Set<string> {
     writerIdx !== -1 && foldIdx !== -1 && foldIdx > writerIdx,
     '§11 INV: the fold is computed AFTER the writer (never affects the write outcome)',
   )
+  // The fold reaches the SUCCESS builder and no other response builder.
+  // Formatting-robust (2026-07-28): this was an exact single-line string match
+  // until the A1 practice-suggestion build legitimately reformatted the call to
+  // three arguments across multiple lines. An INV pin must protect the
+  // PROPERTY, not the whitespace — a pin that breaks on a reformat is a pin
+  // that gets "fixed" by weakening it. Both halves of the original claim are
+  // kept: the fold IS passed to the success builder, and it is passed to
+  // nothing else.
   assert(
-    routeSrc.includes('buildWriteSuccessResponse(loopClosureAnnotation, loopFoldAnnotation)'),
-    '§11 INV: the fold is attached ONLY via the success-response builder',
+    /buildWriteSuccessResponse\(\s*loopClosureAnnotation,\s*loopFoldAnnotation\b/.test(routeSrc),
+    '§11 INV: the fold is attached via the success-response builder',
+  )
+  // The "only" half. NOTE (PR19 review): a `[^)]*` argument span stops at the
+  // FIRST ')', so a leaked argument sitting after a nested call — e.g.
+  // buildX(foo(), loopFoldAnnotation) — would escape it. The span is therefore
+  // taken to the end of the LINE (calls here are single-line), and, belt and
+  // braces, every mention of loopFoldAnnotation anywhere in the file is required
+  // to be either its own declaration/assignment or the success-builder call.
+  const otherBuilderCalls = routeSrc.match(/build(?!WriteSuccessResponse)[A-Za-z]*Response\(.*/g) ?? []
+  assert(
+    !otherBuilderCalls.some((call) => call.includes('loopFoldAnnotation')),
+    '§11 INV: …and via NO other response builder (the "only" half)',
+  )
+  const foldMentions = routeSrc
+    .split('\n')
+    .filter((l) => l.includes('loopFoldAnnotation'))
+    .map((l) => l.trim())
+  const ALLOWED_FOLD_MENTIONS = [
+    /^let loopFoldAnnotation\b/,
+    /^loopFoldAnnotation =/,
+    /^loopFoldAnnotation,$/, // the success-builder argument
+    /^\/\//,
+    // A1 (2026-07-28): the practice-suggestion composer reads the fold that was
+    // already computed — a pure, MEASURE-only consumer, not a response builder.
+    /^const practiceSuggestion = practiceSuggestionFor\(\{ loopFold: loopFoldAnnotation \}\)$/,
+  ]
+  const disallowed = foldMentions.filter((l) => !ALLOWED_FOLD_MENTIONS.some((re) => re.test(l)))
+  assert(
+    disallowed.length === 0,
+    `§11 INV: every loopFoldAnnotation mention is a declaration, an assignment, the success-builder argument, or the named A1 consumer (offending: ${disallowed.join(' | ')})`,
   )
   assert(
     /resolvedOwnerUserId:\s*foldCredentialContext\.owner_user_id/.test(routeSrc),

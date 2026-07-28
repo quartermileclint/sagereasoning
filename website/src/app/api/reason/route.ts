@@ -169,6 +169,12 @@ import {
   computeTrajectoryOverlay,
   type TrajectoryOverlay,
 } from '@/lib/substrate/trajectory-overlay'
+// Practice reminders, agent Phase A1 (2026-07-28): the practice-suggestion
+// composer. Flag-gated by SUBSTRATE_PRACTICE_SUGGESTION_ENABLED; UNSET → no
+// suggestion member, and the `practice` block stays the byte-identical CI-13
+// constant. Pure — no DB read, no LLM call: composed from blocks this response
+// has already computed. MEASURE-only, advisory by the channel law.
+import { practiceSuggestionFor } from '@/lib/substrate/practice-suggestion'
 import { computeTrajectoryDelta } from '@/lib/substrate/trajectory-delta'
 import { resolveLongitudinalIdentity } from '@/lib/substrate/longitudinal-identity'
 import { mapLayer2AssessmentToEvaluatedAction } from '@/lib/substrate/sage-assent-bridge'
@@ -1890,6 +1896,31 @@ export async function POST(request: NextRequest) {
       const meta = (output.meta as Record<string, unknown>) ?? {}
       meta.trajectory = trajectoryOverlay
       output.meta = meta
+    }
+    // Practice reminders A1 (2026-07-28): at most ONE practice suggestion,
+    // composed from what this response already carries (the assessment, the
+    // CI-4 examination_open signal, the AE-1 delta) and served as a member of
+    // the CI-13 `practice` block.
+    //
+    // BD-3: the suggestion rides only an EMITTED practice block, so the CI-13
+    // flag stays the carrier's master switch. Placed AFTER the trajectory attach
+    // so the reading order matches the response order; the delta is taken from
+    // the `trajectoryOverlay` VARIABLE, not re-read from `output`.
+    //
+    // BYTE-IDENTITY: flag-off, practiceSuggestionFor returns undefined and this
+    // block does nothing at all — `output.practice` remains the very same frozen
+    // PRACTICE_CYCLE_HINT reference assigned above. Flag-on, a NEW object is
+    // spread (never a mutation of the shared module-level constant).
+    if (output.practice !== undefined) {
+      const suggestion = practiceSuggestionFor({
+        assessment: output.assessment,
+        examinationOpen:
+          typeof output.examination_open === 'boolean' ? output.examination_open : undefined,
+        delta: trajectoryOverlay?.delta,
+      })
+      if (suggestion !== undefined) {
+        output.practice = { ...PRACTICE_CYCLE_HINT, suggestion }
+      }
     }
     return await respond({
       body: output,
