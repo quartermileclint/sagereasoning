@@ -304,12 +304,15 @@ An agent can publish a verifiable reasoning profile — a credential aggregate b
 
 **Write:** `POST https://www.sagereasoning.com/api/accreditation/{agent_id}` with `Authorization: Bearer sr_prac_<token>` (a credential carrying the `accreditation_write` capability). Body:
 
+This example is a **genuinely complete, copy-paste-correct body** — every field the store actually reads is present (verified against `AccreditationRecord`/`WindowConfig` and `accreditationRecordToRow` in the source, not reconstructed from memory):
+
 ```json
 {
   "kind": "seed",
   "profile": {
-    "agent_id": "<must equal the {agent_id} in the path>",
+    "agent_id": "sagereasoning:my-agent@v1",
     "accreditation_record": {
+      "agent_id": "sagereasoning:my-agent@v1",
       "senecan_grade": "pre_progress|grade_3|grade_2|grade_1|sage_ideal",
       "typical_proximity": "reflexive|habitual|deliberate|principled|sage_like",
       "authority_level": "supervised|guided|spot_checked|autonomous|full_authority",
@@ -320,14 +323,30 @@ An agent can publish a verifiable reasoning profile — a credential aggregate b
         "oikeiosis_extension": "emerging|developing|established|advanced"
       },
       "direction_of_travel": "improving|stable|regressing",
+      "evaluation_window_size": 100,
       "actions_evaluated": 1,
+      "grade_since": "2026-07-28T00:00:00.000Z",
+      "last_evaluation": "2026-07-28T00:00:00.000Z",
+      "passions_persisting": [],
+      "verification_url": "https://www.sagereasoning.com/api/accreditation/sagereasoning:my-agent@v1",
+      "expires_at": "2026-10-26T00:00:00.000Z",
+      "disclaimer": "Ancient reasoning, modern application. Does not consider legal, medical, financial, or personal obligations.",
+      "created_at": "2026-07-28T00:00:00.000Z",
+      "updated_at": "2026-07-28T00:00:00.000Z",
       "typical_deliberation_breadth": "intuited|deliberated|multi_branch_deliberated",
       "typical_kathekon_quality": "strong|moderate|marginal|contrary"
     },
     "regressing_check_count": 0,
     "evaluated_actions": [],
     "total_actions_evaluated": 5,
-    "window_config": { "...": "rolling-window config" },
+    "window_config": {
+      "window_size": 100,
+      "grade_check_interval": 20,
+      "minimum_actions_for_grade": 20,
+      "typical_proximity_threshold": 0.6,
+      "dimension_level_threshold": 0.5,
+      "carried_candidates_max": 5
+    },
     "carried_candidates": []
   },
   "provenance": {
@@ -341,7 +360,7 @@ An agent can publish a verifiable reasoning profile — a credential aggregate b
 ```
 
 - **`kind`** is `"seed"` (first credential for the agent) or `"update"` (requires an additional `transition_result` object: `{ grade_changed: <bool>, record: { ... } }`). A `seed` against an existing agent returns **409**; an `update` against a non-existent one returns **404**.
-- **`profile`** is the canonical `CarriedProfile`. The route requires `profile.agent_id` (non-empty string, must equal the path), `profile.accreditation_record` (object), and `profile.regressing_check_count` (number); the rest is the canonical record. The `accreditation_record` must carry all the fields shown above — in particular `dimension_levels` must be present as an object with its four keys, or the write is rejected with **503** (the store flattens those four keys into columns; a missing object throws before any row is written — the single most common write failure).
+- **`profile`** is the canonical `CarriedProfile`. The route requires `profile.agent_id` (non-empty string, must equal the path), `profile.accreditation_record` (object), and `profile.regressing_check_count` (number). **`accreditation_record` needs every field shown above, including its own `agent_id`** (distinct from `profile.agent_id`, but conventionally the same value) — `verification_url` and `disclaimer` are accepted but not stored (the store derives + serves its own canonical versions on read); every other field is written verbatim to a column, so an absent one either throws before any row is written (`dimension_levels` missing its four keys → **503**, the store flattening it into columns is the single most common write failure) or is silently omitted from the upsert, which a `NOT NULL` column without a default then rejects at the database. `window_config` and `carried_candidates` complete the canonical `CarriedProfile` shape but the write boundary neither validates nor persists them (they're internal to the wrapper's own trajectory bookkeeping) — include `window_config` with the framework's own defaults (shown above) for schema-fidelity, or omit it; it has no effect on whether the write succeeds.
 - **`provenance.signed_assessments`** (the load-bearing R18f gate): a **non-empty array**, each element `{ assessment, signature, key_id }` taken **verbatim from the `assessment.assessment` (the signed Layer-2 verdict), its `signature`, and its `key_id`** of a prior `/api/reason` consult. The gate (i) structurally validates the shape (**422 `bad_provenance`** on malformed / empty) then (ii) **requires at least one element to cryptographically verify** against the published key — a forged or absent signature returns **403 `no_examination`**. This proves the writer possesses genuine substrate output. It does **not** prove the credited aggregate was faithfully computed from those assessments (an honest scope limit).
 
 **200 response:**
@@ -362,6 +381,51 @@ An agent can publish a verifiable reasoning profile — a credential aggregate b
 ```
 
 **Read-back honesty (consumer-unforgeable):** `typical_kathekon_quality`, `coverage_status`, and `credential_basis` are **server-composed** — a writer cannot inflate them by what it submits. A self-submitted profile that carries no aggregate kathekon quality reads back as the conservative default **`contrary`** (the credential aggregate is distinct from any single consult's `kathekon` quality, which describes that one consult). `coverage_status: "agent_elected"` honestly marks a discretionary, self-reported single-session seed (not third-party-monitored).
+
+### Accreditation — Loop Fold (signed-chain practice fold, MEASURE)
+
+When `provenance.signed_assessments` is present on an accreditation write, the 200 response may additionally carry a `loop_fold` block (schema `agent-loop-fold-v2`) — a projection of the SUBMITTED signed chain, computed after the write succeeds and never affecting its outcome:
+
+```json
+"loop_fold": {
+  "schema": "agent-loop-fold-v2",
+  "identity": { "kind": "owner_agent_pair", "owner_user_id": "...", "agent_id": "...", "credential_ref": "api_key:..." },
+  "chain_scope": "Scope: the provenance chain submitted with THIS write. ...",
+  "envelope": { "scope": "signed_ci4_loops_only", "n_elements": 2, "n_verified": 2,
+    "n_unverified_excluded": 0, "n_verifier_unavailable": 0, "n_malformed_excluded": 0,
+    "n_truncated_uninspected": 0, "n_duplicate_excluded": 0, "note": "..." },
+  "ordering": { "occurred_at_basis": "submission_order", "note": "..." },
+  "regime": { "write_era": "post-s11b-recomposition", "boundaries": [ { "...": "..." } ], "attribution": "..." },
+  "replay_bound": "...",
+  "character": { "loops": { "verdict": "closed", "redirections": 1, "closed": 1, "open": 0, "indeterminate": 0 },
+    "domains": { "phronesis": { "level": "deliberate", "resolution": "combined", "conflict": false, "open_loop": false, "terminals": 1, "basis": "..." } },
+    "domains_basis": { "phronesis": { "verdicts_in": 1, "engaged_redirections": 1, "floor": 3 } },
+    "n_dikaiosyne_level_excluded": 0, "note": "..." },
+  "self_regarding": { "loops": { "verdict": "unclosed", "redirections": 0, "closed": 0, "open": 0, "indeterminate": 0 }, "note": "..." },
+  "instrument_calibration": { "loops": { "verdict": "unclosed", "redirections": 0, "closed": 0, "open": 0, "indeterminate": 0 }, "note": "..." },
+  "n_no_domain": 0,
+  "measure_note": "...",
+  "bounds": { "a2Omission": "...", "mentionConversion": "...", "selfCircleExclusion": "..." }
+}
+```
+
+**Scope.** The fold covers only the chain submitted with *this* write — no server store persists the signed loop-closure markers, so there is no fold across writes (a stored-history fold would need its own schema decision). Every element inside it is **re-verified** (Ed25519, against the published key) before anything is computed; an unverified, malformed, duplicate, or over-cap element is **excluded and counted** in `envelope`, never silently dropped or silently trusted.
+
+**The three-way split.** Each redirection-bearing element's opening verdict is classified through the same kathekon-engagement predicate the eventual trust-layer enforcement gate will bind on:
+- **`character`** — loops that engaged a kathekon factor (a justice surface identifying ≥1 circle beyond `self_preservation`, a violated obligation, proximity at or below habitual, or a sub-species passion). Their closure counts and per-domain levels are genuine agent character data.
+- **`self_regarding`** — loops whose justice arm was suppressed *only* because every identified circle was `self_preservation`, but which genuinely engaged ≥1 non-dikaiosyne domain. Per the binding 2026-07-19 ruling, self-regarding action is governed by phronesis and sophrosyne, not dikaiosyne — so these loops' non-dikaiosyne domain *levels* feed `character.domains` as real prudential evidence, while their closure counts stay descriptive here and never merge into `character.loops`.
+- **`instrument_calibration`** — loops that engaged no kathekon factor and are not self-regarding-prudential: the measured false-positive hold class ("contrary; no kathekon factors detected"). These feed no character signal and no closure rate — by construction, the false-hold class cannot launder into character data.
+
+A dikaiosyne domain level is only counted when the verdict's justice signature is other-directed (≥1 circle beyond self) or carries a violated obligation (adverse evidence is never dropped); exclusions of a self-only or zero-circle dikaiosyne tag are counted in `character.n_dikaiosyne_level_excluded`, never silent.
+
+**Honesty bounds (all disclosed on the block, none configurable away):**
+- No element carries a signed timestamp — `ordering.occurred_at_basis` is always `"submission_order"`, and cross-session recency weighting degenerates to confidence weighting (conservative: an older conflicting terminal never decays out of contention).
+- Temporal/extraction-regime attribution is **refused** — `regime.write_era` labels only the write date; the fold computes no between-time trend, and a shift across an extraction-regime boundary is never attributed to the agent's disposition.
+- `replay_bound` discloses the standing PA-10 class: an old, genuinely-signed assessment re-submitted in a later chain is not age-detectable here.
+- `bounds` carries the narrowed-kathekon-arm disclosures verbatim (A2 omission — structural; mention-conversion — measured; self-circle exclusion — the binding ruling this split encodes).
+- `identity_context` discloses the write boundary's own structural invariant: a write-class credential always carries both an owner and an agent identity, so `identity.kind` reading `"credential"` on this block means the owner lookup failed at fold time, not that the credential is genuinely owner-less.
+
+**MEASURE-only.** The fold has no recommendation field, is not an input to any intervention engine, is never a trust-event source, and never affects the write outcome (it is computed after the writer succeeds; a fold error degrades to the field's absence, never a failed write). It does not re-introduce the refused open-loop enforcement bound — open-loop counts here are purely descriptive. Weights-tier use of this signal remains blocked (a closure gradient is the shape of a training reward; no such use is offered or supported).
 
 ### Accreditation — Examination mode (pre- vs post-decision)
 

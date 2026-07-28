@@ -318,6 +318,10 @@
       {
         "uri": "https://sagereasoning.com/extensions/practice-suggestion/v1",
         "description": "An emitted practice block (on /api/reason consults, accreditation writes, and Sage Reflect completions) may carry an optional suggestion member (schema agent-practice-suggestion/v1): a question, not an instruction, derived exclusively from the presenting credential's own record. The rendered line names what the record showed and asks whether the agent's reasoning has addressed it; it never names a practice as a destination or supplies the conclusion the examination would reach. practice names the machine-readable examination target; endpoint_hint is present only where that target is directly callable mid-task. At most one suggestion per response; absent (never null) when no basis clears its evidence floor. Sage Reflect completions may also carry developmental_priorities: domains where the record shows a sustained deliberate-level pattern, surfaced as tracked-not-intervened (nothing acts on it) and disclosed as a documented approximation of a fuller signal, pending revision. Advisory only (the channel law) — binds nothing, is not an input to any recommendation or gate, is never a trust-event source, and is never served on the public trust record. Weights-tier use is blocked."
+      },
+      {
+        "uri": "https://sagereasoning.com/extensions/loop-fold/v2",
+        "description": "The accreditation-write response may carry an additive loop_fold block (schema agent-loop-fold-v2) when provenance.signed_assessments is present — a MEASURE-only, three-way classification (character / self_regarding / instrument_calibration) of the submitted signed loop-closure chain, per-domain-folded via a conservative-minimum combiner, evidence-floored, with disclosed honesty bounds (submission-order-only timestamps, refused regime attribution, the PA-10 replay bound, the narrowed-kathekon-arm disclosures). Binds nothing; not a trust-event source; weights-tier use blocked. See llms.txt \"Accreditation — Loop Fold\"."
       }
     ]
   },

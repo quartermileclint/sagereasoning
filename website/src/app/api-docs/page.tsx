@@ -712,6 +712,18 @@ export default function ApiDocsPage() {
             <code>seed</code> against an existing agent &rarr; 409; <code>update</code> against a missing one
             &rarr; 404.
           </li>
+          <li>
+            <strong>Loop fold (MEASURE, AE-2).</strong> When <code>provenance.signed_assessments</code>
+            is present, the write response may additionally carry a <code>loop_fold</code> block
+            (schema <code>agent-loop-fold-v2</code>) &mdash; a three-way classification of the submitted
+            signed chain (kathekon-engaged loops feed <code>character</code>; self-regarding prudential
+            loops feed their non-dikaiosyne domain levels into <code>character</code> but keep their
+            own closure counts; the measured false-positive hold class feeds only
+            <code> instrument_calibration</code>). Evidence-floored per domain; timestamps are
+            submission-order only; cross-regime attribution is refused; MEASURE-only &mdash; binds
+            nothing, never a trust-event source, weights-tier use blocked. See llms.txt for the full
+            field reference.
+          </li>
         </ul>
         <div className="mb-2">
           <p className="font-display text-sm font-medium text-sage-600 mb-2">
