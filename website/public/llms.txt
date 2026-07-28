@@ -675,6 +675,31 @@ A completed SageReasoning pass at session close is a Sage Reflect trigger (TR-02
 
 **Cost (so consent is informed).** An auto-fired reflect pass is a metered call — one `/api/practice/reflect` invocation per session close, billed per your tier's standard per-loop model (one loop = one wrapper invocation; $0.02 base + LLM-token overage above 50% of base × 2, per the published billing model). If you do not want a reflect pass billed at every session close, set `reflect_at_close: "off"`.
 
+### Practice suggestions (advisory)
+
+On an `/api/reason` consult, an accreditation write, or a Sage Reflect completion (see below), an OPTIONAL `suggestion` member may be present:
+
+```json
+"suggestion": {
+  "schema": "agent-practice-suggestion/v1",
+  "practice": "examine_obligations",
+  "basis": {
+    "code": "obligation_violated",
+    "signal": "assessment.oikeiosis.relevant_circles[].obligation_assessment.status",
+    "observed": "violated"
+  },
+  "line": "This record shows an obligation to an affected party assessed as violated. Before proceeding: is this the reasoning this action warrants?",
+  "endpoint_hint": "/api/reason",
+  "framing_note": "Advisory only (the channel law): this is a question raised from the agent's own record, not an instruction. It binds nothing, is not an input to any recommendation or gate, and is never a trust-event source. It describes what the record showed (past tense) and predicts nothing. One suggestion at most; no suggestion is offered when no basis clears its evidence floor — the silence is honest, never filler. Weights-tier use remains blocked."
+}
+```
+
+**What it is.** Derived exclusively from your own record — never a cross-agent comparison, never a prediction. It is a *question*, not an instruction: `line` names what your record showed and asks whether your reasoning has addressed it; it never names a practice as a destination or supplies the conclusion the examination would reach. `practice` names the machine-readable examination target; `endpoint_hint` is present only where that target is directly callable mid-task (most named practices require stepping outside the task, so it is usually absent).
+
+**What it binds.** Nothing. Not an input to any recommendation, gate, or trust event; never a factor in accreditation, proximity, or the Sage Assent grade; never served on the public trust record (`GET /api/trust-record/{agent_id}`).
+
+**Limits.** At most one suggestion per response. Absent (never `null`) when no basis clears its evidence floor — the silence is itself information. Weights-tier use of this signal remains blocked.
+
 ## Sage Reflect — Session-Close Reflection (wire shape)
 
 POST https://www.sagereasoning.com/api/practice/reflect
@@ -730,8 +755,12 @@ RESPONSE — completion:
     "dimension_levels":{ "passion_reduction":"...", "judgement_quality":"...", "disposition_stability":"...", "oikeiosis_extension":"..." },
     "direction_of_travel":"improving|stable|declining", "grade_changed": false },
   "profile_update_framing": { "mandatory_note":"<mirror note — surface verbatim>" },
+  "developmental_priorities": [ { "domain": "dikaiosyne", "note": "consistent 'deliberate' across 3 recent session(s) in dikaiosyne — a developmental priority for the next Sage Reflect (tracked, not intervened)" } ],
+  "suggestion": { "schema": "agent-practice-suggestion/v1", "...": "(same shape as Practice Suggestions above)" },
   "interaction_type":"stoic-post-action-reflection", "disclaimer":"...", "documentation_url":"..." }
 ```
+
+**Developmental priorities & suggestion (optional).** A completion may carry `developmental_priorities` — domains where your own record shows a sustained pattern of `deliberate`-level (not higher) reasoning, surfaced so you can examine it; this is *tracked, not intervened* — nothing acts on it or changes your grade because of it. The current signal is a 3-consecutive-session streak per domain, a documented approximation of a fuller plateau-across-recent-writes read, and may be revised in a future build. `suggestion` (same shape and bounds as "Practice suggestions" above) is attached only at the moment your Sage Assent grade genuinely changes, and only when your own record shows a qualifying persisting-passion pattern — its absence at other completions is the protected silence, not a gap.
 
 SAFETY: an answer carrying acute/moderate distress returns `status:"redirected"` with `{ "severity":"moderate|acute", "suggested_user_message":"...", "flow_terminated":true }` — surface `suggested_user_message` verbatim and stop.
 

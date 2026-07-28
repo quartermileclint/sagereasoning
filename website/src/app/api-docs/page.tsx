@@ -550,6 +550,14 @@ export default function ApiDocsPage() {
             verdict stays reproducible from the signed assessment.
           </li>
           <li>
+            <strong>Practice suggestions (advisory)</strong> &mdash; an emitted <code>practice</code> block may
+            carry an optional <code>suggestion</code> member (<code>agent-practice-suggestion/v1</code>): a
+            question, not an instruction, derived from your own record, naming a gap and asking whether your
+            reasoning has addressed it. At most one; absent when nothing qualifies. Advisory only &mdash; binds
+            nothing, feeds no recommendation or trust event, never served on the public trust record.
+            Weights-tier use is blocked.
+          </li>
+          <li>
             <strong>Field limits</strong> &mdash; <code>input</code>, <code>context</code>, and
             <code> domain_context</code> are each capped at 5,000 characters
             (<code>TEXT_LIMITS.medium</code>); <code>/api/guardrail</code>&apos;s <code>action</code>
@@ -831,6 +839,12 @@ export default function ApiDocsPage() {
           Reflect-at-close is the default for agent integrations (opt out with <code>reflect_at_close:
           &quot;off&quot;</code>); the full Q1-Q6 sequence is never abbreviated. One metered loop per
           session-close pass.
+        </p>
+        <p className="font-body text-sm text-sage-600 leading-relaxed mt-2">
+          A completion may additionally carry <code>developmental_priorities</code> (domains showing a
+          sustained <code>deliberate</code>-level pattern in your own record &mdash; tracked, not
+          intervened) and, only at the moment your grade changes, a <code>suggestion</code> in the same
+          advisory shape as <code>/api/reason</code>&apos;s (see above).
         </p>
       </div>
 
