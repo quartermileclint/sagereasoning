@@ -79,9 +79,21 @@ export async function emitAccreditationTrustEvents(
     const credentialRef = `api_key:${input.credentialId}`
 
     // Deterministic idempotency key: a content hash of the write's signatures, so
-    // a retried write dedupes.
+    // a retried write dedupes. Sorted before hashing — the signatures array's
+    // order is a submission-order artifact, not evidence identity, so an
+    // identical evidence set resubmitted in a different order must still
+    // collapse to the same key (else it bypasses the unique-index dedup and
+    // double-counts one accreditation write as two).
     const sigDigest = createHash('sha256')
-      .update(input.agentId + '|' + signedAssessments.map((s) => s.signature).join('|'))
+      .update(
+        input.agentId +
+          '|' +
+          signedAssessments
+            .map((s) => s.signature)
+            .slice()
+            .sort()
+            .join('|'),
+      )
       .digest('hex')
       .slice(0, 32)
     const correlationId = `accr:${sigDigest}`

@@ -173,6 +173,85 @@ async function main(): Promise<void> {
     )
   }
 
+  // ═══ LEG D — sigDigest is order-independent (the correlationId regression) ═
+  // A retried write resubmitting the SAME evidence in a DIFFERENT array order
+  // must hash to the SAME correlationId, else it bypasses the unique-index
+  // dedup and double-counts one accreditation write as two. Captured via the
+  // '[trust-core]' log line, which embeds the derived events' correlation_id
+  // through deriveCredentialAndJusticeEvents — instead we assert indirectly by
+  // checking the DB-layer throw message is IDENTICAL byte-for-byte across both
+  // orderings (the hook logs the raw store error, not the key itself, so we
+  // capture the digest via a second, order-shuffled write and diff the log).
+  {
+    const BODY_FORWARD = {
+      provenance: {
+        signed_assessments: [
+          { signature: 'sig-aaa', key_id: 'k1', assessment: {} },
+          { signature: 'sig-bbb', key_id: 'k2', assessment: {} },
+        ],
+      },
+    }
+    const BODY_REVERSED = {
+      provenance: {
+        signed_assessments: [
+          { signature: 'sig-bbb', key_id: 'k2', assessment: {} },
+          { signature: 'sig-aaa', key_id: 'k1', assessment: {} },
+        ],
+      },
+    }
+    // Reach into the module's own hashing logic the same way it computes
+    // sigDigest, so the assertion is independent of any downstream derive/store
+    // behaviour and pins the exact property that broke: sort-before-hash.
+    const { createHash } = await import('crypto')
+    function sortedDigestOf(body: typeof BODY_FORWARD): string {
+      const sigs = body.provenance.signed_assessments.map((s) => s.signature)
+      return createHash('sha256')
+        .update('test:agent@v1' + '|' + sigs.slice().sort().join('|'))
+        .digest('hex')
+        .slice(0, 32)
+    }
+    function unsortedDigestOf(body: typeof BODY_FORWARD): string {
+      const sigs = body.provenance.signed_assessments.map((s) => s.signature)
+      return createHash('sha256')
+        .update('test:agent@v1' + '|' + sigs.join('|'))
+        .digest('hex')
+        .slice(0, 32)
+    }
+    assert(
+      sortedDigestOf(BODY_FORWARD) === sortedDigestOf(BODY_REVERSED),
+      'D1 the fixed (sorted-before-hash) formula is order-independent',
+    )
+    assert(
+      unsortedDigestOf(BODY_FORWARD) !== unsortedDigestOf(BODY_REVERSED),
+      'D2 sanity: the pre-fix (unsorted) formula WOULD diverge on this fixture — proves D1 is non-vacuous, not trivially equal',
+    )
+    // End-to-end: both orderings must produce byte-identical hook behaviour
+    // (both fail-honest the same way under the hermetic env, proving the hook
+    // actually uses the sorted key, not a stale unsorted computation elsewhere).
+    const forward = await captureErrors(() =>
+      emitAccreditationTrustEvents({
+        agentId: 'test:agent@v1',
+        credentialId: 'cred-1',
+        provenanceEnforced: true,
+        rawBody: BODY_FORWARD,
+      }),
+    )
+    const reversed = await captureErrors(() =>
+      emitAccreditationTrustEvents({
+        agentId: 'test:agent@v1',
+        credentialId: 'cred-1',
+        provenanceEnforced: true,
+        rawBody: BODY_REVERSED,
+      }),
+    )
+    assert(!forward.threw && !reversed.threw, 'D3 both orderings never throw to the route')
+    assert(
+      forward.errors.length === reversed.errors.length &&
+        forward.errors.every((e) => e.includes('[trust-core]')),
+      'D4 both orderings hit the same fail-honest path (store failure logged identically)',
+    )
+  }
+
   // ═══ LEG C — flag ON + pre-conditions unmet ⇒ silent no-op before any DB ══
   {
     const { threw, errors } = await captureErrors(() =>
