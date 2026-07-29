@@ -120,6 +120,30 @@ export function isSensitivePath(fp, additions = []) {
   return compileSensitivePatterns(additions).some((re) => re.test(p));
 }
 
+// Independent-review fold (HIGH, 2026-07-29): the sensitive-path denylist was
+// applied only inside the Edit/MultiEdit/Write branches of composeAction — the
+// `default` branch (any unrecognised tool, e.g. an MCP tool added to
+// guardTools) serialized its params and redacted only TOKEN-SHAPED strings,
+// so a sensitive path's raw CONTENT (e.g. an MCP write to .aws/credentials)
+// egressed unfiltered. Checked against each top-level string/array-of-string
+// value of the tool input (not the serialized blob — several denylist
+// patterns are `$`-anchored and would never match a path embedded inside
+// surrounding JSON text). One level deep only: an unknown tool's exact param
+// shape is unknowable in general, so this is a best-effort defensive check,
+// not a completeness guarantee (matching the module's own disclosed A2 bound).
+export function toolInputHasSensitivePath(ti, additions = []) {
+  if (!ti || typeof ti !== "object") return false;
+  for (const v of Object.values(ti)) {
+    if (typeof v === "string" && isSensitivePath(v, additions)) return true;
+    if (Array.isArray(v)) {
+      for (const item of v) {
+        if (typeof item === "string" && isSensitivePath(item, additions)) return true;
+      }
+    }
+  }
+  return false;
+}
+
 // ---------------------------------------------------------------------------
 // Token redaction (election E2). Applied to every composed part before it can
 // egress. Redaction only ever alters the EXAMINED text — never the file, never
@@ -269,9 +293,9 @@ function composedEditText(fp, ti, intent) {
     intent || "(no narration captured)",
     "The change being applied:",
     "[BEFORE]",
-    redactSecrets(boundedHead(oldSrc, EDIT_OLD_MAX_CHARS)) || "(empty)",
+    boundedHead(redactSecrets(oldSrc), EDIT_OLD_MAX_CHARS) || "(empty)",
     "[AFTER]",
-    redactSecrets(boundedHead(newSrc, EDIT_NEW_MAX_CHARS)) || "(empty)",
+    boundedHead(redactSecrets(newSrc), EDIT_NEW_MAX_CHARS) || "(empty)",
   ].join("\n");
 }
 function composedWriteText(fp, ti, intent) {
@@ -281,7 +305,7 @@ function composedWriteText(fp, ti, intent) {
     "Intent (the agent's own narration preceding this action):",
     intent || "(no narration captured)",
     `The content being written${content.length > WRITE_HEAD_MAX_CHARS + WRITE_TAIL_MAX_CHARS ? " (head/tail excerpt)" : ""}:`,
-    redactSecrets(boundedHeadTail(content, WRITE_HEAD_MAX_CHARS, WRITE_TAIL_MAX_CHARS)),
+    boundedHeadTail(redactSecrets(content), WRITE_HEAD_MAX_CHARS, WRITE_TAIL_MAX_CHARS),
   ].join("\n");
 }
 
@@ -394,6 +418,13 @@ export function composeAction({ toolName, toolInput, transcriptPath, mode = "com
         blob = JSON.stringify(ti).slice(0, 300);
       } catch {
         blob = "";
+      }
+      // Independent-review fold (HIGH, 2026-07-29): a sensitive path in an
+      // unrecognised tool's params now falls back to the bare projection
+      // (path/content withheld entirely), mirroring the Edit/Write fallback.
+      if (toolInputHasSensitivePath(ti, sensitiveAdditions)) {
+        const bareText = `Invoke tool ${toolName} (sensitive path detected in params; content withheld)`;
+        return { text: bareText, summary: bareText, signature: `${toolName}:${shortHash(blob)}`, bashCommand: null, inputClass: "bare_tool_payload", regime, bare: true };
       }
       const text = `Invoke tool ${toolName}${blob ? ` with ${redactSecrets(blob)}` : ""}`;
       return { text, summary: text, signature: `${toolName}:${shortHash(blob)}`, bashCommand: null, inputClass: "tool_payload", regime, bare: false };

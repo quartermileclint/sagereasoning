@@ -507,6 +507,96 @@ mode = "ok";
   check("18 redact: a full git SHA (40 hex) SURVIVES — documented trade", AC.redactSecrets("commit 0123456789abcdef0123456789abcdef01234567").includes("0123456789abcdef"));
   check("18 redact: 64-hex key material is caught", AC.redactSecrets("k ".concat("ab".repeat(32))).includes("[redacted:hex]"));
 
+  // Independent-review fold (HIGH, 2026-07-29): the sensitive-path denylist
+  // was only applied inside the Edit/MultiEdit/Write branches — an unknown
+  // (e.g. MCP) tool's params carrying a sensitive path egressed raw content
+  // via the `default` branch's JSON.stringify + token-shape redaction alone.
+  check(
+    "18 sensitive-path (unknown tool): a top-level sensitive path is detected",
+    AC.toolInputHasSensitivePath({ file_path: "/repo/.aws/credentials", content: "aws_secret_access_key=X" }),
+  );
+  check(
+    "18 sensitive-path (unknown tool): a sensitive path inside an array value is detected",
+    AC.toolInputHasSensitivePath({ paths: ["/repo/README.md", "/home/u/.ssh/id_rsa"] }),
+  );
+  check(
+    "18 sensitive-path (unknown tool): an ordinary tool input is NOT flagged",
+    !AC.toolInputHasSensitivePath({ file_path: "/repo/website/src/lib/practice-credential.ts", content: "export const x = 1;" }),
+  );
+  {
+    const mcpSensitive = AC.composeAction({
+      toolName: "mcp__filesystem__write_secret_file",
+      toolInput: { file_path: "/repo/.aws/credentials", content: "aws_secret_access_key=PLAINTEXTSECRETVALUE1234" },
+      transcriptPath: "",
+      mode: "composed",
+    });
+    check(
+      "18 compose (unknown tool, sensitive path): secret content genuinely absent from text AND summary",
+      !mcpSensitive.text.includes("PLAINTEXTSECRETVALUE1234") && !mcpSensitive.summary.includes("PLAINTEXTSECRETVALUE1234"),
+    );
+    check("18 compose (unknown tool, sensitive path): marked bare_tool_payload", mcpSensitive.bare === true && mcpSensitive.inputClass === "bare_tool_payload");
+    const mcpOrdinary = AC.composeAction({
+      toolName: "mcp__filesystem__write_file",
+      toolInput: { file_path: "/repo/README.md", content: "hello" },
+      transcriptPath: "",
+      mode: "composed",
+    });
+    check(
+      "18 compose (unknown tool, ordinary path): unaffected — still projects params",
+      mcpOrdinary.bare === false && mcpOrdinary.inputClass === "tool_payload" && mcpOrdinary.text.includes("README.md"),
+    );
+  }
+
+  // Independent-review fold (HIGH, 2026-07-29): composedEditText/composedWriteText
+  // truncated BEFORE redacting, so a secret straddling the truncation boundary
+  // could leak in fragment form if the surviving fragment fell below a
+  // pattern's minimum length. Now redact-then-truncate throughout (matching
+  // intentFromTranscript's pre-existing, already-correct order).
+  //
+  // The fixture must be genuinely non-vacuous: a naive same-alphabet filler
+  // (e.g. "x".repeat(N)) merges with the secret into ONE contiguous
+  // base64-alphabet run, so the FULL pre-truncation string already matches
+  // the redaction pattern regardless of ordering — proving nothing (the exact
+  // mistake the "P".repeat(60000) fixture above made). Here the filler is
+  // punctuated (word-boundary spaces) and a explicit ". " sits immediately
+  // before the secret, so the secret is the ONLY thing that can match — its
+  // presence/absence in the output is a clean signal of redaction order.
+  {
+    const secret = "kQ2mZpN9xR7vT3wL8bC1dF6gH0jK4aS5eU9iO2yPxY1zA3bC5dE7fG9hJ2kL4mN6oP"; // 67 base64-alphabet chars, isolated — matches the b64 pattern on its own
+    const survivingFragmentChars = 25; // well under the b64 (64) and hex (48) minimums
+    const fillerCore = "ordinary line of source code, nothing sensitive here";
+    function fillerOfLength(maxChars, tailChars) {
+      const targetLen = maxChars - tailChars - 2; // reserve 2 for the ". " boundary
+      let f = "";
+      while (f.length < targetLen) f += fillerCore + " ";
+      return f.slice(0, targetLen) + ". ";
+    }
+
+    const editFiller = fillerOfLength(AC.EDIT_NEW_MAX_CHARS, survivingFragmentChars);
+    const straddling = AC.composeAction({
+      toolName: "Edit",
+      toolInput: { file_path: "/r/a.ts", old_string: "old", new_string: editFiller + secret },
+      transcriptPath: "",
+      mode: "composed",
+    });
+    check(
+      "18 compose (Edit): a secret straddling the truncation boundary is redacted whole, never leaked as an unredacted fragment",
+      !straddling.text.includes(secret.slice(0, survivingFragmentChars)) && straddling.text.includes("[redacted:b64]"),
+    );
+
+    const writeFiller = fillerOfLength(AC.WRITE_HEAD_MAX_CHARS, survivingFragmentChars);
+    const writeStraddling = AC.composeAction({
+      toolName: "Write",
+      toolInput: { file_path: "/r/b.md", content: writeFiller + secret + " and more ordinary content after it, well past the head budget so the write genuinely truncates.".repeat(20) },
+      transcriptPath: "",
+      mode: "composed",
+    });
+    check(
+      "18 compose (Write): a secret straddling the head-truncation boundary is redacted whole, never leaked as an unredacted fragment",
+      !writeStraddling.text.includes(secret.slice(0, survivingFragmentChars)) && writeStraddling.text.includes("[redacted:b64]"),
+    );
+  }
+
   // Frame-quote stripping — the contamination-loop guard on the intent channel.
   check(
     "18 strip: paragraphs quoting a harness frame are dropped",
@@ -515,7 +605,14 @@ mode = "ok";
   );
 
   // Composition shape + the ≤4800 budget (truncation-safe INSIDE the composer).
-  const big = AC.composeAction({ toolName: "Write", toolInput: { file_path: "/r/big.md", content: "P".repeat(60000) }, transcriptPath: "", mode: "composed" });
+  // NOT a repeated single character: "P".repeat(N) is itself base64-alphabet-
+  // shaped, so the 2026-07-29 redact-before-truncate fold (independent review,
+  // action-composer.mjs) collapses it to a short [redacted:b64] placeholder
+  // BEFORE truncation ever runs, leaving nothing to truncate — a real fixture
+  // defect the fold surfaced, not a regression in the fold itself. Punctuated
+  // code-shaped content can never form a ≥64-char run of pure base64-alphabet
+  // characters, so it genuinely exercises truncation independent of redaction.
+  const big = AC.composeAction({ toolName: "Write", toolInput: { file_path: "/r/big.md", content: "function example() {\n  return 42;\n}\n\n".repeat(2000) }, transcriptPath: "", mode: "composed" });
   check("18 budget: a 60k-char Write composes to ≤ 4800", big.text.length <= 4800, `len=${big.text.length}`);
   check("18 budget: head/tail excerpt marked honestly", big.text.includes("[middle omitted:"));
   const e1 = AC.composeAction({ toolName: "Edit", toolInput: { file_path: "/r/a.ts", old_string: "OLDPART", new_string: "NEWPART" }, transcriptPath: "", mode: "composed" });
