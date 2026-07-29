@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { authFetch } from '@/lib/auth-fetch'
 import { trackEvent } from '@/lib/analytics'
@@ -85,8 +85,18 @@ export default function DashboardPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [dataNotice, setDataNotice] = useState<{ type: 'error' | 'info'; text: string } | null>(null)
+  const hasLoaded = useRef(false)
 
   useEffect(() => {
+    // Independent-review fold (MEDIUM, 2026-07-29): this effect lacked the
+    // StrictMode double-invoke guard MilestonesDisplay.tsx added for exactly
+    // this purpose — React Strict Mode's deliberate double-invoke would fire
+    // this dev-only twice per mount, double-POSTing /api/milestones (the
+    // route is idempotent, so no data-integrity risk, but it wastes rate
+    // budget and double-fires trackEvent/the Supabase queries).
+    if (hasLoaded.current) return
+    hasLoaded.current = true
+
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {

@@ -328,6 +328,113 @@ assert(
   `E2E-11: there are 25 milestone definitions (got ${MILESTONE_DEFINITIONS.length})`
 )
 
+// Independent-review fold (MEDIUM, 2026-07-29): consistent_deliberate and
+// passion_reduction are the two predicates milestone-check-data.ts's own
+// docstring names as depending on the DESC-sort contract BLD-8 guarantees —
+// but until now nothing exercised checkNewMilestones' actual CONSUMPTION of
+// that order (only that the builder sorts correctly). A `.slice(0,5)` →
+// `.slice(-5)` mutant, or an inverted comparison, would have passed every
+// prior assertion in this suite. Each pair below mirrors the other (a
+// distractor at one end vs. the other) so an order-reversal OR a
+// comparison-direction mutant is caught regardless of which way it's wrong.
+
+{
+  // consistent_deliberate: the 5 MOST RECENT evaluations are all deliberate+,
+  // despite an older reflexive distractor — must fire.
+  const ids = checkNewMilestones(
+    buildV3MilestoneCheckData({
+      earnedMilestoneIds: [],
+      hasBaseline: false,
+      evaluations: [
+        evalRow(day(1), { katorthoma_proximity: 'reflexive' }), // oldest — distractor
+        evalRow(day(2), { katorthoma_proximity: 'deliberate' }),
+        evalRow(day(3), { katorthoma_proximity: 'deliberate' }),
+        evalRow(day(4), { katorthoma_proximity: 'deliberate' }),
+        evalRow(day(5), { katorthoma_proximity: 'deliberate' }),
+        evalRow(day(6), { katorthoma_proximity: 'deliberate' }), // newest
+      ],
+      reflectionCount: 0,
+      journalEntries: [],
+    })
+  )
+  assert(
+    ids.includes('consistent_deliberate'),
+    'E2E-12: consistent_deliberate fires on the 5 MOST RECENT evaluations, ignoring an older distractor (defeats a slice(-5) mutant)',
+  )
+}
+{
+  // Mirror of E2E-12: the distractor is now the MOST RECENT evaluation, and
+  // the 5 deliberate+ evaluations are the OLDEST ones — must NOT fire, since
+  // the most recent 5 (which include the reflexive distractor) are not all
+  // deliberate+.
+  const ids = checkNewMilestones(
+    buildV3MilestoneCheckData({
+      earnedMilestoneIds: [],
+      hasBaseline: false,
+      evaluations: [
+        evalRow(day(1), { katorthoma_proximity: 'deliberate' }), // oldest
+        evalRow(day(2), { katorthoma_proximity: 'deliberate' }),
+        evalRow(day(3), { katorthoma_proximity: 'deliberate' }),
+        evalRow(day(4), { katorthoma_proximity: 'deliberate' }),
+        evalRow(day(5), { katorthoma_proximity: 'deliberate' }),
+        evalRow(day(6), { katorthoma_proximity: 'reflexive' }), // newest — distractor
+      ],
+      reflectionCount: 0,
+      journalEntries: [],
+    })
+  )
+  assert(
+    !ids.includes('consistent_deliberate'),
+    'E2E-13: consistent_deliberate does NOT fire when the most recent evaluation breaks the streak, even with 5 older deliberate+ evaluations (the mirror of E2E-12 — defeats the opposite slice(-5) failure mode)',
+  )
+}
+
+{
+  // passion_reduction: the 5 MOST RECENT evaluations carry fewer passions
+  // than the preceding 5 — a genuine reduction, must fire.
+  const passion = { name: 'anxiety', root_passion: 'phobos' }
+  const evaluations = [
+    ...Array.from({ length: 5 }, (_, i) => evalRow(day(i + 1), { passions_detected: [passion, passion] })), // days 1-5 (older): 2 each
+    ...Array.from({ length: 5 }, (_, i) => evalRow(day(i + 6), { passions_detected: [] })), // days 6-10 (recent): 0 each
+  ]
+  const ids = checkNewMilestones(
+    buildV3MilestoneCheckData({
+      earnedMilestoneIds: [],
+      hasBaseline: false,
+      evaluations,
+      reflectionCount: 0,
+      journalEntries: [],
+    })
+  )
+  assert(
+    ids.includes('passion_reduction'),
+    'E2E-14: passion_reduction fires when the 5 MOST RECENT evaluations average fewer passions than the preceding 5 (defeats a slice(-5) or recent/older-swap mutant)',
+  )
+}
+{
+  // Mirror of E2E-14: passions have INCREASED (recent 5 carry more than the
+  // preceding 5) — must NOT fire. Defeats both an order-reversal mutant and a
+  // comparison-direction-inverted (`>` for `<`) mutant.
+  const passion = { name: 'anxiety', root_passion: 'phobos' }
+  const evaluations = [
+    ...Array.from({ length: 5 }, (_, i) => evalRow(day(i + 1), { passions_detected: [] })), // days 1-5 (older): 0 each
+    ...Array.from({ length: 5 }, (_, i) => evalRow(day(i + 6), { passions_detected: [passion, passion] })), // days 6-10 (recent): 2 each
+  ]
+  const ids = checkNewMilestones(
+    buildV3MilestoneCheckData({
+      earnedMilestoneIds: [],
+      hasBaseline: false,
+      evaluations,
+      reflectionCount: 0,
+      journalEntries: [],
+    })
+  )
+  assert(
+    !ids.includes('passion_reduction'),
+    'E2E-15: passion_reduction does NOT fire when the most recent evaluations average MORE passions than the preceding 5 (the mirror of E2E-14)',
+  )
+}
+
 // =====================================================================
 // E. Wiring pins — the defect Phase 0 exists to fix was that nothing called POST.
 //    Source-grep, because these live in client components a unit test cannot mount.
