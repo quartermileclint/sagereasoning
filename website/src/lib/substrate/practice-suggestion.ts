@@ -82,19 +82,26 @@
  *  BD-2 — B5 IS SILENT IN V1. A row is one CONSULT, not one session —
  *     EvaluatedAction carries no session identifier (verified field-by-field) —
  *     so a "sustained decline across 2–3 consecutive sessions" is not derivable
- *     from what the delta serves. `dimension_trends` is gated by
- *     `meetsFloorSegment` (trajectory-delta.ts — `input_count - empty_count >=
- *     EVIDENCE_FLOOR`, i.e. ≥3 non-empty across the WHOLE segment, NOT ≥3 per
- *     half; the per-half gate `meetsFloorBothHalves` serves the sub-species,
- *     kathekon-quality, obligation and domain signals instead), and the trend
- *     itself is computed inside `computeWindowSnapshot`'s own half-split, not by
- *     the delta's `rows.slice` (which produces the BASIS only). Consequence:
- *     `judgement_quality` and `disposition_stability` feed on `() => true`, so
- *     THREE consults minutes apart — unambiguously one session — already yield a
- *     served `declining`. (All three corrections from the PR19 review; the
- *     original header cited a per-half floor and a six-consult minimum, which
- *     UNDERSTATED the exposure. The conclusion is unchanged and better
- *     supported.) NAMED FOLLOW-UP (evidence gap, out of scope here): a
+ *     from what the delta serves; this is the primary reason B5 stays silent,
+ *     and it is unaffected by anything below. `dimension_trends` is gated by
+ *     `meetsFloorBothHalves` (trajectory-delta.ts — ≥3 non-empty in EACH
+ *     compared half, the same gate the sub-species/kathekon-quality/
+ *     obligation/domain signals already used), and the trend itself is
+ *     computed inside `computeWindowSnapshot`'s own half-split, not by the
+ *     delta's `rows.slice` (which produces the BASIS only). CORRECTED
+ *     2026-07-29: an independent review of AE-1 found `dimension_trends` and
+ *     `passions_persisted_in_window` were floored on the segment TOTAL
+ *     (`input_count - empty_count >= EVIDENCE_FLOOR`, via a since-deleted
+ *     `meetsFloorSegment`) rather than per half — fixed at the root in
+ *     `trajectory-delta.ts`. Consequence for THIS reasoning: `judgement_quality`
+ *     and `disposition_stability` still feed on `() => true`, so a trend now
+ *     requires ≥3 rows in EACH half (≥6 total, evenly split) rather than the
+ *     pre-fix ≥3 total — SIX consults minutes apart, still unambiguously one
+ *     session, can still yield a served `declining`. The exposure has shrunk
+ *     but is not closed, because the fix targeted evidence-floor honesty, not
+ *     the missing session-identifier concept. The conclusion (B5 silent) is
+ *     unchanged; only the magnitude of this secondary, reinforcing argument
+ *     has changed. NAMED FOLLOW-UP (evidence gap, out of scope here): a
  *     per-session-granularity sustained-decline signal is a delta change.
  *     `deepen_examination` stays in the locked vocabulary — the vetted table's
  *     row is deferred, not dropped — and the battery pins that no path emits it.

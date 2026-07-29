@@ -428,10 +428,6 @@ function meetsFloorBothHalves(basis: SignalBasis): boolean {
   )
 }
 
-function meetsFloorSegment(basis: SignalBasis): boolean {
-  return basis.input_count - basis.empty_count >= basis.floor
-}
-
 /** Between-half frequency deltas for a keyed occurrence field. The rate
  *  denominator is the half's FULL row count (the aggregator's occurrence_rate
  *  convention); the floor gates on non-empty feeding rows per half. */
@@ -581,7 +577,7 @@ export function computeTrajectoryDelta(
   for (const dim of dimensionIds) {
     const basis = makeBasis(rows, baseline, current, DIMENSION_FEED[dim])
     dimensionBasis[dim] = basis
-    if (!meetsFloorSegment(basis)) {
+    if (!meetsFloorBothHalves(basis)) {
       dimensionTrends[dim] = 'insufficient_extraction'
       continue
     }
@@ -596,7 +592,7 @@ export function computeTrajectoryDelta(
   // --- persisting passions (aggregator's >20% rule), passion-floored ---
   const passionsBasis = makeBasis(rows, baseline, current, hasPassions)
   const passionsPersisted: PersistingPassion[] | 'insufficient_extraction' =
-    meetsFloorSegment(passionsBasis)
+    meetsFloorBothHalves(passionsBasis)
       ? snapshot.persisting_passions.map((p) => ({ ...p }))
       : 'insufficient_extraction'
 

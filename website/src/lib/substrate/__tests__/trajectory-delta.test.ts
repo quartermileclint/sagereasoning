@@ -248,6 +248,43 @@ function postRows(n: number, per?: (i: number) => Partial<EvaluatedAction>): Eva
       dTiny.sub_species_frequency_basis.empty_count === 0,
     '§2 two-row window: basis distinguishes sparsity (2 inputs, 0 empty) from starvation',
   )
+
+  // Independent-review regression (2026-07-29): dimension_trends and
+  // passions_persisted_in_window were floored on the SEGMENT total
+  // (input_count - empty_count >= floor) rather than on EACH half, so a
+  // baseline half with ZERO evidence and a current half alone supplying the
+  // floor produced a confidently-labelled trend/level from a starved half —
+  // exactly the laundering §1 exists to prevent, just not caught there
+  // because §1 only exercised uniformly-starved windows. 5 rows: 2 baseline
+  // rows carry no passion (0 non-empty), 3 current rows all do (3 non-empty)
+  // — segment total is 3 (floor met) but the baseline half is entirely empty.
+  const asymmetric = [
+    mkAction(isoAt(POST, 0), { passions_detected: [] }),
+    mkAction(isoAt(POST, 1), { passions_detected: [] }),
+    mkAction(isoAt(POST, 2), {
+      passions_detected: [{ root_passion: 'phobos', sub_species: 'anxiety' }],
+    }),
+    mkAction(isoAt(POST, 3), {
+      passions_detected: [{ root_passion: 'phobos', sub_species: 'anxiety' }],
+    }),
+    mkAction(isoAt(POST, 4), {
+      passions_detected: [{ root_passion: 'phobos', sub_species: 'anxiety' }],
+    }),
+  ]
+  const dAsym = delta(asymmetric)
+  assert(
+    dAsym.dimension_trends_basis.passion_reduction.baseline_non_empty === 0 &&
+      dAsym.dimension_trends_basis.passion_reduction.current_non_empty === 3,
+    '§2 asymmetric-half regression: basis confirms the starved-baseline shape (0 baseline / 3 current)',
+  )
+  assert(
+    dAsym.dimension_trends.passion_reduction === 'insufficient_extraction',
+    '§2 asymmetric-half regression: passion_reduction floors on a starved baseline half, never certifies a trend from zero evidence',
+  )
+  assert(
+    dAsym.passions_persisted_in_window === 'insufficient_extraction',
+    '§2 asymmetric-half regression: passions_persisted_in_window floors on a starved baseline half, never certifies a persisting passion from zero evidence',
+  )
 }
 
 // ============================================================================
