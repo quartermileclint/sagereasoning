@@ -124,7 +124,13 @@ export async function POST(request: NextRequest) {
 
 // GET - check if user has a baseline and when retake is eligible
 export async function GET(request: NextRequest) {
-  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  // Named follow-up from the Phase 1 independent review (PR19, 2026-07-27):
+  // this read-only status check shared /api/reason's scoring bucket while
+  // firing on every dashboard mount. Isolated to `analytics` (the same
+  // bucket /api/mentor/practice-status and GET/POST /api/milestones now use).
+  // POST (the actual baseline scoring assessment, a deliberate LLM call, not
+  // mount-triggered) deliberately stays on `scoring` — unaffected by this fix.
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.analytics)
   if (rateLimitError) return rateLimitError
 
   const auth = await requireAuth(request)

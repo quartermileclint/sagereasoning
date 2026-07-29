@@ -201,6 +201,13 @@ export default function ScoreActionPage() {
           ruling_faculty_state: evalResult.virtue_quality.ruling_faculty_state,
           philosophical_reflection: evalResult.philosophical_reflection,
           improvement_path: evalResult.improvement_path,
+          // Named follow-up from Phase 0 (2026-07-26): oikeiosis_context is
+          // computed by the engine and already rendered above (line ~605),
+          // but was never included in the insert — oikeiosis_community and
+          // oikeiosis_humanity were consequently unearnable regardless of
+          // practice. The column already exists (supabase-v3-migration.sql);
+          // this is additive only.
+          oikeiosis_context: evalResult.oikeiosis_context,
         })
         if (error) {
           // Fail LOUD. This branch did not exist before 2026-07-26: the insert

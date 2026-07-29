@@ -4,6 +4,21 @@ import { checkNewMilestones } from '@/lib/milestones'
 import { buildV3MilestoneCheckData } from '@/lib/milestone-check-data'
 import { checkRateLimit, RATE_LIMITS, requireAuth } from '@/lib/security'
 
+/** True when the error means "this table does not exist yet" — the same
+ *  missing-table-benign / missing-column-never-benign discipline used
+ *  throughout substrate (agent-assessment-history-store.ts, trust-core-store.ts,
+ *  collaboration-store.ts). Copied rather than imported: those are substrate
+ *  modules, this route isn't, and this repo's established convention is a
+ *  local copy per module, not a shared cross-domain export. */
+function isMissingTableError(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false
+  if (error.code === '42703' || error.code === 'PGRST204') return false
+  const msg = error.message ?? ''
+  if (/column/i.test(msg)) return false
+  if (error.code === '42P01' || error.code === 'PGRST205') return true
+  return /does not exist|could not find the table|schema cache/i.test(msg)
+}
+
 /**
  * GET /api/milestones
  * Returns the user's earned milestones.
@@ -24,7 +39,13 @@ import { checkRateLimit, RATE_LIMITS, requireAuth } from '@/lib/security'
  */
 
 export async function GET(request: NextRequest) {
-  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  // Named follow-up from the Phase 1 independent review (PR19, 2026-07-27):
+  // this route shared /api/reason's scoring bucket while firing on every
+  // dashboard mount (a read) and every evaluation save (an award check) —
+  // neither is a scoring call, so ordinary browsing could throttle the
+  // measured instrument. Isolated to `analytics`, the same bucket
+  // /api/mentor/practice-status already uses for the identical reason.
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.analytics)
   if (rateLimitError) return rateLimitError
   const auth = await requireAuth(request)
   if (auth.error) return auth.error
@@ -38,15 +59,31 @@ export async function GET(request: NextRequest) {
     .order('earned_at', { ascending: true })
 
   if (error) {
-    // Table might not exist yet — return empty array gracefully
-    return NextResponse.json({ milestones: [] })
+    if (isMissingTableError(error)) {
+      // Table might not exist yet — return empty array gracefully
+      return NextResponse.json({ milestones: [] })
+    }
+    // Independent-review fold (HIGH, 2026-07-29): a genuine DB error (transient
+    // network failure, RLS misconfiguration, connection-pool exhaustion, ...)
+    // used to degrade to the same 200 { milestones: [] } as a missing table —
+    // indistinguishable from an honest zero-earned new user, and it defeated
+    // MilestonesDisplay's own loadFailed state (res.ok was true). Fail honest,
+    // matching the POST handler's already-correct discipline three lines below.
+    console.error('Failed to read milestones:', error)
+    return NextResponse.json({ error: 'Failed to load milestones' }, { status: 500 })
   }
 
   return NextResponse.json({ milestones: milestones || [] })
 }
 
 export async function POST(request: NextRequest) {
-  const rateLimitError = checkRateLimit(request, RATE_LIMITS.scoring)
+  // Named follow-up from the Phase 1 independent review (PR19, 2026-07-27):
+  // this route shared /api/reason's scoring bucket while firing on every
+  // dashboard mount (a read) and every evaluation save (an award check) —
+  // neither is a scoring call, so ordinary browsing could throttle the
+  // measured instrument. Isolated to `analytics`, the same bucket
+  // /api/mentor/practice-status already uses for the identical reason.
+  const rateLimitError = checkRateLimit(request, RATE_LIMITS.analytics)
   if (rateLimitError) return rateLimitError
   const auth = await requireAuth(request)
   if (auth.error) return auth.error
