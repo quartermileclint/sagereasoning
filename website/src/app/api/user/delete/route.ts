@@ -86,6 +86,7 @@ export async function DELETE(request: NextRequest) {
     'morning_preparation_entries', // R17b intimate — Remaining Principles #8 (FK-independent of the others)
     'circle_extension_entries',  // R17b intimate — Remaining Principles #6 + #15 (FK-independent of the others)
     'sage_compass_entries',      // R17b intimate — Remaining Principles #14 (FK-independent of the others)
+    'milestones',                // earned virtue milestones (was missing from R17c coverage)
     'premeditatio_entries',      // R17b intimate; → passion_events
     'oikeiosis_reflections',     // R17b intimate; → passion_events
     'passion_events',            // R17b intimate; → realtime_journal_entries

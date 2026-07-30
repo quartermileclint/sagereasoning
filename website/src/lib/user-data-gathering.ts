@@ -98,6 +98,8 @@ export async function gatherUserPersonalData(
     { key: 'circle_extension_entries', table: 'circle_extension_entries' },
     // Remaining Principles #14 — the sage-compass decision-support tool.
     { key: 'sage_compass_entries', table: 'sage_compass_entries' },
+    // Earned virtue milestones — user_id-scoped (was missing from R17 coverage).
+    { key: 'milestones', table: 'milestones' },
   ]
 
   for (const { key, table } of tables) {
