@@ -119,6 +119,29 @@ export function isTrajectoryDeltaEnabled(): boolean {
   return process.env[TRAJECTORY_DELTA_ENV_VAR] === 'true'
 }
 
+// ============================================================================
+// FLAG (SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED) — UNSET = byte-identical
+// ============================================================================
+//
+// B5 (practice reminders, 2026-07-29 mentor verdict — "B5 — Session Boundary
+// and the Adequacy of Inferred Evidence", binding). Gates THREE seams as one
+// unit, mirroring the layer1_source precedent: (a) the session_marker column
+// in the windowed-read select (exists only after the founder-walked
+// migration); (b) the write-side session_marker stamp (the route passes the
+// field only flag-on AND when the caller supplied a valid value, so a
+// flag-off write row carries no unknown column key); (c) the B5
+// session-decline signal computation at the route, which requires this same
+// flag. UNSET ⇒ all three absent ⇒ byte-identical to pre-B5. NOTE: like the
+// delta flag, this consumes the M7 window — activation requires
+// SUBSTRATE_TRAJECTORY_READ_ENABLED already on.
+
+export const SESSION_DECLINE_ENV_VAR = 'SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED'
+
+/** True only when the flag is the exact string 'true'. Read at call time. */
+export function isSessionDeclineSignalEnabled(): boolean {
+  return process.env[SESSION_DECLINE_ENV_VAR] === 'true'
+}
+
 // D17 prior-state windowing defaults (progression-delta.md §"Window parameters").
 export const TRAJECTORY_DEFAULT_WINDOW_DAYS = 90
 export const TRAJECTORY_DEFAULT_MAX_INSTANCES = 30
@@ -153,6 +176,13 @@ export interface AssessmentHistoryInput {
    *  deployment never sends an unknown column (the PGRST204
    *  build-dark-migrate-later class). */
   layer1Source?: 'supplied' | 'server'
+  /** B5 (2026-07-29): the calling agent's OWN declared session boundary for
+   *  this consult. OPTIONAL — the route passes it ONLY when
+   *  SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED is on AND the caller supplied a
+   *  valid value; absent ⇒ the insert row carries NO session_marker key (the
+   *  layer1_source precedent). NEVER inferred by this store or by the B5
+   *  signal that reads it back — see session-decline-signal.ts. */
+  sessionMarker?: 'session_open' | 'session_close' | 'mid_session'
 }
 
 /** The flat agent_assessment_history row shape (mirrors the migration). */
@@ -178,6 +208,10 @@ export interface AssessmentHistoryRow {
    *  — flag-gated at the route). Optional so a flag-off insert row is
    *  byte-identical to pre-AE-1 (no unknown column key sent). */
   layer1_source?: 'supplied' | 'server'
+  /** B5: present ONLY when the input supplied it (see
+   *  AssessmentHistoryInput.sessionMarker). Optional so a flag-off insert row
+   *  is byte-identical to pre-B5. */
+  session_marker?: 'session_open' | 'session_close' | 'mid_session'
 }
 
 /** The columns the M7 windowed read selects — the EvaluatedAction-shaped
@@ -206,6 +240,10 @@ export interface AssessmentHistoryReadRow {
   candidates_considered: number
   depth_tier: string | null
   layer1_source?: 'supplied' | 'server' | null
+  /** B5: the row's declared session boundary, flag-gated read (absent when
+   *  SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED is off or the column predates
+   *  the migration). NULL = undeclared (this row carries no marker). */
+  session_marker?: 'session_open' | 'session_close' | 'mid_session' | null
 }
 
 /** The result of one windowed trajectory read (M7). `actions` are OLDEST-FIRST
@@ -242,9 +280,10 @@ const TRAJECTORY_SELECT_COLS =
  *  500 — the read fails honest and the route omits the overlay — but the walk
  *  doc forbids that order). Exported for the battery's byte-identity pin. */
 export function trajectorySelectCols(): string {
-  return isTrajectoryDeltaEnabled()
-    ? TRAJECTORY_SELECT_COLS + ', layer1_source'
-    : TRAJECTORY_SELECT_COLS
+  let cols = TRAJECTORY_SELECT_COLS
+  if (isTrajectoryDeltaEnabled()) cols += ', layer1_source'
+  if (isSessionDeclineSignalEnabled()) cols += ', session_marker'
+  return cols
 }
 
 // ============================================================================
@@ -282,6 +321,9 @@ export function assessmentHistoryInputToRow(
     candidates_considered: a.candidates_considered,
     ...(input.layer1Source !== undefined
       ? { layer1_source: input.layer1Source }
+      : {}),
+    ...(input.sessionMarker !== undefined
+      ? { session_marker: input.sessionMarker }
       : {}),
   }
 }

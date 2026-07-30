@@ -164,7 +164,13 @@ import {
   // layer1_source write stamp, no extra select column (byte-identical). The
   // delta consumes the SAME M7 window (no second windowed query — KG1).
   isTrajectoryDeltaEnabled,
+  // B5 (practice reminders, 2026-07-29 mentor verdict): the declared
+  // session-boundary marker. Flag-gated by SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED;
+  // UNSET → no session_marker write stamp, no extra select column, no B5
+  // signal (byte-identical). Consumes the SAME M7 window (no second query).
+  isSessionDeclineSignalEnabled,
 } from '@/lib/substrate/agent-assessment-history-store'
+import { computeSessionDeclineSignal, SESSION_MARKER_VALUES, type SessionMarker } from '@/lib/substrate/session-decline-signal'
 import {
   computeTrajectoryOverlay,
   type TrajectoryOverlay,
@@ -937,6 +943,13 @@ export async function POST(request: NextRequest) {
       // `input` + the `continuation_token` (the input hash binding is preserved
       // — Design A; the answer is NOT folded into `input`).
       clarification_response,
+      // B5 (practice reminders, 2026-07-29 mentor verdict): the calling
+      // agent's OWN declared session boundary for this consult — one of
+      // 'session_open' | 'session_close' | 'mid_session'. Read ONLY when
+      // SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED is on; ignored entirely
+      // otherwise (byte-identity with the flag unset). NEVER inferred by the
+      // server — an absent field means B5 stays silent for this credential.
+      session_marker,
     } = body
 
     // Validate required input
@@ -989,6 +1002,29 @@ export async function POST(request: NextRequest) {
           isBillable: false,  // Pre-substrate validation error — no LLM cost incurred.
         })
       }
+    }
+
+    // B5: validate session_marker's shape before it reaches persistence.
+    // Flag off → never read (byte-identical). A malformed value is a plain
+    // 400 (pre-substrate — no LLM cost incurred), never silently dropped or
+    // coerced — a caller opting into declared sessions must get it right.
+    const sessionDeclineEnabled = isSessionDeclineSignalEnabled()
+    let validatedSessionMarker: SessionMarker | undefined
+    if (sessionDeclineEnabled && session_marker !== undefined && session_marker !== null) {
+      if (
+        typeof session_marker !== 'string' ||
+        !(SESSION_MARKER_VALUES as readonly string[]).includes(session_marker)
+      ) {
+        return await respond({
+          body: {
+            error: 'session_marker must be one of: ' + SESSION_MARKER_VALUES.join(', '),
+          },
+          status: 400,
+          headers: {},
+          isBillable: false,  // Pre-substrate validation error — no LLM cost incurred.
+        })
+      }
+      validatedSessionMarker = session_marker as SessionMarker
     }
 
     // R20a — Vulnerable user detection (before any LLM call)
@@ -1554,6 +1590,14 @@ export async function POST(request: NextRequest) {
     // R17a: scoped to this credential's own rows; user-JWT consults carry no
     // credential_ref → no overlay (as they write no M6 row).
     let trajectoryOverlay: TrajectoryOverlay | undefined
+    // B5 (2026-07-29): the declared-session decline signal, computed from the
+    // SAME window read below (no second query). Undefined only when the flag
+    // is off or the window read fails; otherwise a real block whose per-
+    // dimension trend is 'insufficient_extraction' until the caller has
+    // declared enough qualifying sessions — B5's candidate only ever matches
+    // an actual 'declining' trend, so an opted-out or under-evidenced caller
+    // still gets B7's protected silence.
+    let sessionDeclineSignal: ReturnType<typeof computeSessionDeclineSignal>
     // AE-1 (KG1): when the delta block resolves the credential context, the M6
     // write block below REUSES it instead of issuing a second PK read. Null
     // whenever the delta path did not run (any flag off / non-api_key auth) —
@@ -1613,6 +1657,22 @@ export async function POST(request: NextRequest) {
               console.warn(
                 '[/api/reason] trajectory delta computation failed (delta omitted, response unaffected):',
                 deltaErr instanceof Error ? deltaErr.message : deltaErr,
+              )
+            }
+          }
+          // B5 (2026-07-29): the declared-session decline signal. Reuses the
+          // SAME window (no second query). Fail-honest: a compute failure
+          // omits the signal, never the response.
+          if (sessionDeclineEnabled) {
+            try {
+              sessionDeclineSignal = computeSessionDeclineSignal(
+                windowResult.value.actions,
+                windowResult.value.readRows?.map((r) => r.session_marker ?? null) ?? [],
+              )
+            } catch (sessionErr) {
+              console.warn(
+                '[/api/reason] session-decline signal computation failed (signal omitted, response unaffected):',
+                sessionErr instanceof Error ? sessionErr.message : sessionErr,
               )
             }
           }
@@ -1706,6 +1766,12 @@ export async function POST(request: NextRequest) {
                   ? 'supplied'
                   : 'server') as 'supplied' | 'server',
               }
+            : {}),
+          // B5: the caller's OWN declared session_marker — passed ONLY when
+          // the flag is on AND the caller supplied a validated value (never
+          // inferred, never defaulted).
+          ...(sessionDeclineEnabled && validatedSessionMarker !== undefined
+            ? { sessionMarker: validatedSessionMarker }
             : {}),
         })
         if (!trajectoryWrite.ok) {
@@ -1917,6 +1983,7 @@ export async function POST(request: NextRequest) {
         examinationOpen:
           typeof output.examination_open === 'boolean' ? output.examination_open : undefined,
         delta: trajectoryOverlay?.delta,
+        sessionDecline: sessionDeclineSignal,
       })
       if (suggestion !== undefined) {
         output.practice = { ...PRACTICE_CYCLE_HINT, suggestion }

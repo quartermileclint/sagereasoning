@@ -38,7 +38,9 @@
  *     CANDIDATE ORDER below is the precedence; the FIRST match wins.
  *  3. B1 NARROWED to a loop genuinely not closed — see BD-1a/BD-1b.
  *  4. B5 needs a decline sustained across 2–3 consecutive sessions, never a
- *     single-session dip — see BD-2 (B5 is SILENT in v1).
+ *     single-session dip — see BD-2 (WIRED 2026-07-29, dark, requiring a
+ *     positively DECLARED session boundary per the mentor's binding verdict
+ *     on that question; silent for any caller that never declares one).
  *  5. B7'S SILENCE IS PROTECTED: no default suggestion for completeness, ever.
  *     No basis ⇒ NO `suggestion` field at all (absent, not null).
  *
@@ -101,10 +103,23 @@
  *     but is not closed, because the fix targeted evidence-floor honesty, not
  *     the missing session-identifier concept. The conclusion (B5 silent) is
  *     unchanged; only the magnitude of this secondary, reinforcing argument
- *     has changed. NAMED FOLLOW-UP (evidence gap, out of scope here): a
- *     per-session-granularity sustained-decline signal is a delta change.
- *     `deepen_examination` stays in the locked vocabulary — the vetted table's
- *     row is deferred, not dropped — and the battery pins that no path emits it.
+ *     has changed. NAMED FOLLOW-UP (evidence gap, out of scope here, AT THE
+ *     TIME): a per-session-granularity sustained-decline signal is a delta
+ *     change. `deepen_examination` stays in the locked vocabulary — the
+ *     vetted table's row is deferred, not dropped.
+ *     CLOSED 2026-07-29 (same day, a later session): the founder put the
+ *     missing session-identifier concept to the mentor ("B5 — Session
+ *     Boundary and the Adequacy of Inferred Evidence"). Binding verdict: an
+ *     INFERRED (timing-based) boundary is never adequate evidence for this
+ *     claim; B5 requires a POSITIVELY DECLARED one and stays silent
+ *     otherwise. Built as `session-decline-signal.ts` — a NEW, separate
+ *     module (not a `trajectory-delta.ts` change, so the fixed-evidence-floor
+ *     reasoning above is UNCHANGED and still governs `dimension_trends`;
+ *     that field is NOT B5's source) — reading a NEW, request-declared
+ *     `session_marker` field the calling agent supplies per consult, gated
+ *     behind `SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED` (dark until its own
+ *     founder-walked activation). `deepen_examination` is WIRED via
+ *     `b5SessionDecline` below.
  *  BD-3 — THE SUGGESTION RIDES ONLY AN EMITTED `practice` BLOCK. It is a member
  *     of the CI-13 carrier, so SUBSTRATE_PRACTICE_CYCLE_HINT_ENABLED stays the
  *     carrier's master switch (it is live in production). Flag-on-without-carrier
@@ -161,7 +176,8 @@ import type {
 } from '@/lib/translation-sandwich/layer1-extractor'
 import type { TrajectoryDeltaBlock } from './trajectory-delta'
 import type { LoopFoldBlock } from './trust-core/loop-fold'
-import type { PersistingPassion } from './trust-layer/types/accreditation'
+import type { PersistingPassion, ProgressDimensionId } from './trust-layer/types/accreditation'
+import type { SessionDeclineBlock } from './session-decline-signal'
 import { PROXIMITY_RANK } from './trust-core/constants'
 import {
   assessKathekonEngagement,
@@ -199,9 +215,9 @@ export function isReflectDevelopmentalEnabled(): boolean {
 
 /**
  * The locked agent examination-practice vocabulary (the vetted §4 table).
- * `deepen_examination` is RESERVED: the B5 row is deferred per BD-2 and no code
- * path emits it in v1 (battery-pinned). It is kept so the served vocabulary
- * matches the vetted table and the deferral is visible rather than silent.
+ * `deepen_examination` (B5) is now WIRED — see BD-2's 2026-07-29 update below
+ * and session-decline-signal.ts — behind SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED
+ * (dark until the founder-walked activation, same as A1's own carrier flag).
  */
 export type PracticeSuggestionPractice =
   | 'examine_obligations'
@@ -254,6 +270,10 @@ export type PracticeSuggestionBasisCode =
   | 'comparison_persisting'
   // B6 — the minimal calling analog
   | 'self_only_circles'
+  // B5 — a sustained decline across >= SESSION_DECLINE_THRESHOLD consecutive
+  // DECLARED sessions (the mentor's 2026-07-29 verdict; see BD-2's update and
+  // session-decline-signal.ts). Requires session_marker; silent otherwise.
+  | 'dimension_declining_across_sessions'
 
 /** The question clause every rendered line ends with, verbatim from the Step M
  *  verdict's proposed shape. Battery-pinned on every line (one exception below). */
@@ -369,6 +389,17 @@ export const SUGGESTION_LINES: Record<PracticeSuggestionBasisCode, string> = {
     'This record shows reasoning that identified no circle of concern beyond ' +
     'self-preservation. ' +
     SUGGESTION_QUESTION,
+  // B5 — the mentor confirmed the TRIGGER concept ("any measured dimension
+  // declining over time… take the next decision of that class at greater
+  // depth") but did not vet exact rendered wording the way most other rows
+  // carry verbatim clauses. This line follows the established "This record
+  // shows X. [question]" form and names the record fact only (a sustained
+  // decline across declared sessions); a NAMED FOLLOW-UP if wording review is
+  // wanted before activation.
+  dimension_declining_across_sessions:
+    'This record shows a measured dimension declining across consecutive ' +
+    'declared sessions. ' +
+    SUGGESTION_QUESTION,
 }
 
 /** The practice each basis points at (machine-readable target; the LINE never
@@ -392,6 +423,7 @@ const BASIS_PRACTICE: Record<PracticeSuggestionBasisCode, PracticeSuggestionPrac
   epithumia_persisting: 'reserve_clause_examination',
   comparison_persisting: 'examine_obligations',
   self_only_circles: 'calling_purpose',
+  dimension_declining_across_sessions: 'deepen_examination',
 }
 
 /**
@@ -460,6 +492,12 @@ export interface PracticeSuggestionSnapshot {
   delta?: TrajectoryDeltaBlock
   /** The accreditation write's loop_fold (AE-2) when served. */
   loopFold?: LoopFoldBlock
+  /** B5 (2026-07-29) — the declared-session decline signal, computed ONLY
+   *  when SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED is on and the caller has
+   *  declared at least SESSION_DECLINE_THRESHOLD qualifying sessions (see
+   *  session-decline-signal.ts). Undefined ⇒ B5 stays silent, same as any
+   *  other absent block. */
+  sessionDecline?: SessionDeclineBlock
   /**
    * A2 (2026-07-28) — an ALTERNATE, HONEST source for the persisting-passion
    * legs, for a surface (the reflect completion) that has no `delta` block at
@@ -836,9 +874,36 @@ const b6SelfOnlyCircles: Candidate = (s) => {
 }
 
 /**
- * THE PRECEDENCE. B2's four legs, then B1, then B3, then B4, then B6.
- * B5 is absent by BD-2 — the deferral is here, in the order, where a reader
- * looking for it will find it.
+ * B5 — a sustained decline in a measured dimension across >=
+ * SESSION_DECLINE_THRESHOLD consecutive DECLARED sessions (the mentor's
+ * 2026-07-29 verdict; session-decline-signal.ts does the actual bucketing +
+ * evidence-flooring — this candidate only reads its output). Iterates the
+ * fixed dimension order so the result is deterministic; the FIRST declining
+ * dimension wins (never a menu of several).
+ */
+const B5_DIMENSION_ORDER: readonly ProgressDimensionId[] = [
+  'passion_reduction',
+  'judgement_quality',
+  'disposition_stability',
+  'oikeiosis_extension',
+]
+const b5SessionDecline: Candidate = (s) => {
+  const trends = s.sessionDecline?.dimension_trends
+  if (trends === undefined) return undefined
+  for (const dim of B5_DIMENSION_ORDER) {
+    if (trends[dim] === 'declining') {
+      return {
+        code: 'dimension_declining_across_sessions',
+        signal: `sessionDecline.dimension_trends.${dim}`,
+        observed: 'declining',
+      }
+    }
+  }
+  return undefined
+}
+
+/**
+ * THE PRECEDENCE. B2's four legs, then B1, then B3, then B4, then B5, then B6.
  */
 const CANDIDATE_ORDER: readonly Candidate[] = [
   // B2 — obligations FIRST (the Step M reversal).
@@ -863,7 +928,8 @@ const CANDIDATE_ORDER: readonly Candidate[] = [
   b4EpithumiaPersisting,
   // The lupe comparison pair (Item 2).
   comparisonPersisting,
-  // B5 — SILENT in v1 (BD-2): no detector exists.
+  // B5 — the declared-session decline signal (2026-07-29).
+  b5SessionDecline,
   // B6 — the minimal calling analog.
   b6SelfOnlyCircles,
 ]

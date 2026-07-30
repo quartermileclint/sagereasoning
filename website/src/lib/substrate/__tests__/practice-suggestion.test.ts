@@ -22,8 +22,10 @@
  *       SILENT) and BD-1a (the fold's open loops are silent).
  *   §6  B3 / B4 — family reads off the root-qualified key prefix and off
  *       PersistingPassion.root_passion; other families never fire.
- *   §7  B5 is SILENT in v1 (BD-2) and `deepen_examination` is emitted by NO
- *       path — the deferral is asserted, not merely commented.
+ *   §7  B5 (2026-07-29): fires ONLY from `sessionDecline`, never from
+ *       `delta.dimension_trends` (a row-half signal, not B5's source); every
+ *       dimension is independently reachable; undeclared/under-evidenced
+ *       (`insufficient_extraction` / absent) stays silent, never a guess.
  *   §8  B7's PROTECTED SILENCE: no basis ⇒ undefined ⇒ the field is ABSENT
  *       (never present-and-null), and every floored/`insufficient_extraction`
  *       signal is skipped rather than degraded into a basis.
@@ -53,6 +55,7 @@ import {
 } from '../practice-suggestion'
 import type { TrajectoryDeltaBlock } from '../trajectory-delta'
 import { EVIDENCE_FLOOR, SETTLED_REGIME_BOUNDARIES } from '../trajectory-delta'
+import type { SessionDeclineBlock } from '../session-decline-signal'
 import type { LoopFoldBlock } from '../trust-core/loop-fold'
 import { NARROWED_ARM_BOUNDS } from '../trust-core/kathekon-engagement'
 import type { LongitudinalIdentity } from '../longitudinal-identity'
@@ -211,6 +214,33 @@ function delta(overrides: Partial<TrajectoryDeltaBlock> = {}): TrajectoryDeltaBl
   }
 }
 
+/** A complete, TYPED session-decline block. `dim` names which dimension
+ *  reads 'declining'; every other dimension reads 'insufficient_extraction'
+ *  (an all-declining fixture would obscure the FIRST-match ordering test). */
+function sessionDecline(
+  dim: keyof SessionDeclineBlock['dimension_trends'] = 'judgement_quality',
+): SessionDeclineBlock {
+  const insufficientBasis = {
+    ...basis(),
+    qualifying_sessions: 0,
+    threshold: 3,
+  }
+  const decliningBasis = { ...basis(), qualifying_sessions: 3, threshold: 3 }
+  const dims: (keyof SessionDeclineBlock['dimension_trends'])[] = [
+    'passion_reduction',
+    'judgement_quality',
+    'disposition_stability',
+    'oikeiosis_extension',
+  ]
+  const trends = {} as SessionDeclineBlock['dimension_trends']
+  const bases = {} as SessionDeclineBlock['dimension_trends_basis']
+  for (const d of dims) {
+    trends[d] = d === dim ? 'declining' : 'insufficient_extraction'
+    bases[d] = d === dim ? decliningBasis : insufficientBasis
+  }
+  return { dimension_trends: trends, dimension_trends_basis: bases, note: 'fixture' }
+}
+
 const NO_LOOPS = {
   verdict: 'closed' as const,
   redirections: 0,
@@ -307,6 +337,7 @@ const ALL_CODES: PracticeSuggestionBasisCode[] = [
   'epithumia_persisting',
   'comparison_persisting',
   'self_only_circles',
+  'dimension_declining_across_sessions',
 ]
 
 /** The 2026-07-28 differentiated mapping (both verbatim records binding):
@@ -1311,7 +1342,7 @@ const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'u
 }
 
 // ============================================================================
-// §7 — B5 is SILENT in v1 (BD-2)
+// §7 — B5: the declared-session decline signal (2026-07-29)
 // ============================================================================
 {
   const declining = { level: 'developing' as const, trend: 'declining' as const, indicators: [] }
@@ -1327,12 +1358,60 @@ const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'u
       }),
     }),
     null,
-    '§7 BD-2: every dimension declining produces NO suggestion (the served label is a row-half comparison, not a multi-session pattern)',
+    '§7 delta.dimension_trends declining produces NO suggestion — it is a row-half comparison, ' +
+      'NOT B5\'s source (session-decline-signal.ts is a separate, session-bucketed module)',
   )
-  // The vocabulary keeps the deferred row visible, but NO path emits it.
+  // B5 fires from `sessionDecline`, never from `delta`.
+  eq(
+    codeOf({ sessionDecline: sessionDecline('judgement_quality') }),
+    'dimension_declining_across_sessions',
+    '§7 a declaring sessionDecline block fires B5',
+  )
+  eq(
+    codeOf({ sessionDecline: sessionDecline() }),
+    'dimension_declining_across_sessions',
+    '§7 default fixture (judgement_quality declining) fires B5',
+  )
+  for (const dim of ['passion_reduction', 'disposition_stability', 'oikeiosis_extension'] as const) {
+    eq(
+      codeOf({ sessionDecline: sessionDecline(dim) }),
+      'dimension_declining_across_sessions',
+      `§7 B5 fires when ${dim} alone is declining (every dimension is reachable)`,
+    )
+  }
+  // Insufficient evidence (no dimension declining) → silence, never a guess.
+  const noSignal: SessionDeclineBlock = {
+    dimension_trends: {
+      passion_reduction: 'insufficient_extraction',
+      judgement_quality: 'insufficient_extraction',
+      disposition_stability: 'insufficient_extraction',
+      oikeiosis_extension: 'insufficient_extraction',
+    },
+    dimension_trends_basis: sessionDecline().dimension_trends_basis,
+    note: 'fixture',
+  }
+  eq(
+    codeOf({ sessionDecline: noSignal }),
+    null,
+    '§7 an insufficient_extraction sessionDecline block (undeclared / under-evidenced) is silent',
+  )
+  eq(
+    codeOf({}),
+    null,
+    '§7 an absent sessionDecline block is silent (a caller that never opted in)',
+  )
+  const fired = composePracticeSuggestion({ sessionDecline: sessionDecline('oikeiosis_extension') })
+  eq(
+    fired?.basis.signal,
+    'sessionDecline.dimension_trends.oikeiosis_extension',
+    '§7 the fired basis names the exact declining dimension (auditable)',
+  )
+  eq(fired?.endpoint_hint, undefined, '§7 deepen_examination carries no endpoint hint (not mid-task-callable)')
+
   const emitted = new Set<string>()
   const snapshots: PracticeSuggestionSnapshot[] = [
     { assessment: VIOLATED_OTHER },
+    { sessionDecline: sessionDecline('judgement_quality') },
     { assessment: assessment({ domains: ['dikaiosyne'], circles: [{ circle: 'household', status: 'indeterminate' }] }) },
     { delta: delta({ first_circle_obligation_trend: 'declining' }) },
     { assessment: assessment({ floors: { base: 'principled', dikaiosyne: 'habitual', aggregate: 'habitual' } }) },
@@ -1357,13 +1436,13 @@ const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'u
     if (out !== undefined) emitted.add(out.practice)
   }
   assert(
-    !emitted.has('deepen_examination'),
-    '§7 BD-2: no path emits deepen_examination (the B5 row is deferred, not live)',
+    emitted.has('deepen_examination'),
+    '§7 the sweep\'s sessionDecline snapshot reaches deepen_examination (B5 wired 2026-07-29)',
   )
   eq(
     emitted.size,
-    6,
-    '§7 the sweep reaches six of the seven locked practices (B5/deepen_examination deferred)',
+    7,
+    '§7 the sweep reaches all seven locked practices',
   )
   assert(
     emitted.has('control_filter_examination'),
@@ -1616,6 +1695,7 @@ const MODULE_SRC = readFileSync(join(__dirname, '../practice-suggestion.ts'), 'u
     `assessment: output.assessment, ` +
     `examinationOpen: typeof output.examination_open === 'boolean' ? output.examination_open : undefined, ` +
     `delta: trajectoryOverlay?.delta, ` +
+    `sessionDecline: sessionDeclineSignal, ` +
     `}) ` +
     `if (suggestion !== undefined) { ` +
     `output.practice = { ...PRACTICE_CYCLE_HINT, suggestion } ` +
