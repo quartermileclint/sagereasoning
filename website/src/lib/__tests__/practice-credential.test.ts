@@ -20,8 +20,11 @@ import {
   capabilitiesIncludeWriteClass,
   l1SupplyRefused,
   WRITE_CLASS_CAPABILITIES,
+  isCredentialLookupRetryEnabled,
+  lookupCredentialRowWithRetry,
   type PracticeCredentialRow,
   type PracticeCapability,
+  type CredentialLookupOutcome,
 } from '@/lib/practice-credential'
 
 let passed = 0
@@ -31,6 +34,16 @@ const failures: string[] = []
 function test(name: string, fn: () => void): void {
   try {
     fn()
+    passed++
+  } catch (e) {
+    failed++
+    failures.push(`${name}: ${e instanceof Error ? e.message : String(e)}`)
+  }
+}
+
+async function testAsync(name: string, fn: () => Promise<void>): Promise<void> {
+  try {
+    await fn()
     passed++
   } catch (e) {
     failed++
@@ -321,11 +334,97 @@ test('l1SupplyRefused: flag on + l1_supply ABSENT → REFUSE (403, fail-closed)'
   assert(l1SupplyRefused({ upcEnabled: true, capabilities: ['accreditation_write', 'calling'] }), 'write-class without l1_supply ⇒ 403')
 })
 
-console.log('')
-console.log(`Total: ${passed + failed}  Pass: ${passed}  Fail: ${failed}`)
-if (failed > 0) {
-  console.error('')
-  console.error('Failures:')
-  for (const f of failures) console.error(`  - ${f}`)
-  process.exit(1)
+// ── isCredentialLookupRetryEnabled — the consult-lookup resilience flag ────────
+test('retry flag: unset → false', () => {
+  delete process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED
+  assert(isCredentialLookupRetryEnabled() === false, 'unset false')
+})
+test('retry flag: "true" → true', () => {
+  process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED = 'true'
+  assert(isCredentialLookupRetryEnabled() === true, 'true')
+  delete process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED
+})
+test('retry flag: "false" → false (strict === "true")', () => {
+  process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED = 'false'
+  assert(isCredentialLookupRetryEnabled() === false, 'false')
+  delete process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED
+})
+
+// ── lookupCredentialRowWithRetry — Item A of the 2026-07-19 consult-lookup
+//    resilience follow-up. Injectable lookup fn — no Supabase I/O. ─────────────
+function callCounter(outcomes: CredentialLookupOutcome[]): { fn: () => Promise<CredentialLookupOutcome>; calls: number[] } {
+  let i = 0
+  const calls: number[] = []
+  const fn = async () => {
+    calls.push(Date.now())
+    const outcome = outcomes[Math.min(i, outcomes.length - 1)]
+    i++
+    return outcome
+  }
+  return { fn, calls }
 }
+
+async function runRetryTests(): Promise<void> {
+  await testAsync('retry: flag off + unknown-key (no error, no row) → one attempt, no retry', async () => {
+    delete process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED
+    const { fn, calls } = callCounter([{ row: null, error: null }])
+    const result = await lookupCredentialRowWithRetry(fn)
+    assert(calls.length === 1, `expected 1 call, got ${calls.length}`)
+    assert(result.row === null && result.error === null, 'unknown-key outcome unchanged')
+  })
+
+  await testAsync('retry: flag off + persistent error → one attempt, fail-closed (byte-identical to pre-retry behaviour)', async () => {
+    delete process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED
+    const { fn, calls } = callCounter([{ row: null, error: { message: 'network error' } }])
+    const result = await lookupCredentialRowWithRetry(fn)
+    assert(calls.length === 1, `expected 1 call (flag off), got ${calls.length}`)
+    assert(result.error !== null, 'error surfaced (caller fails closed → invalid_token)')
+  })
+
+  await testAsync('retry: flag on + unknown-key (no error, no row) → still one attempt (never retries a genuine miss)', async () => {
+    process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED = 'true'
+    const { fn, calls } = callCounter([{ row: null, error: null }])
+    const result = await lookupCredentialRowWithRetry(fn)
+    delete process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED
+    assert(calls.length === 1, `expected 1 call, got ${calls.length}`)
+    assert(result.row === null && result.error === null, 'unknown-key outcome unchanged')
+  })
+
+  await testAsync('retry: flag on + transient error then success → retries once, returns the row', async () => {
+    process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED = 'true'
+    const goodRow = mkRow({ id: 'cred-retry-ok' })
+    const { fn, calls } = callCounter([
+      { row: null, error: { message: 'timeout' } },
+      { row: goodRow, error: null },
+    ])
+    const result = await lookupCredentialRowWithRetry(fn)
+    delete process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED
+    assert(calls.length === 2, `expected 2 calls (retry once), got ${calls.length}`)
+    assert(result.error === null && result.row?.id === 'cred-retry-ok', 'the retried success is returned')
+  })
+
+  await testAsync('retry: flag on + persistent error across both attempts → still fails closed after the retry', async () => {
+    process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED = 'true'
+    const { fn, calls } = callCounter([
+      { row: null, error: { message: 'timeout' } },
+      { row: null, error: { message: 'timeout again' } },
+    ])
+    const result = await lookupCredentialRowWithRetry(fn)
+    delete process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED
+    assert(calls.length === 2, `expected exactly 2 calls (one retry, not a loop), got ${calls.length}`)
+    assert(result.error !== null, 'persistent error still fails closed (invalid_token)')
+  })
+}
+
+void (async () => {
+  await runRetryTests()
+
+  console.log('')
+  console.log(`Total: ${passed + failed}  Pass: ${passed}  Fail: ${failed}`)
+  if (failed > 0) {
+    console.error('')
+    console.error('Failures:')
+    for (const f of failures) console.error(`  - ${f}`)
+    process.exit(1)
+  }
+})()

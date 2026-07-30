@@ -97,6 +97,54 @@ export function l1SupplyRefused(args: {
 /** The new UPC prefix for newly-minted unified practice credentials (cosmetic/diagnostic). */
 export const UNIFIED_PRACTICE_CREDENTIAL_PREFIX = 'sr_prac_'
 
+// =============================================================================
+// CREDENTIAL-LOOKUP RESILIENCE (2026-07-29 — the consult-lookup resilience
+// follow-up, Item A: operations/handoffs/founder/2026-07-19-consult-lookup-
+// resilience-and-latency-NEXT-SESSION-PROMPT.md)
+// =============================================================================
+
+/** The row lookup's outcome shape — mirrors Supabase's { data, error }. A row of
+ *  `null` with `error: null` is the genuine "unknown key" case (never retried).
+ *  A non-null `error` is a real query failure (network/timeout/5xx) — the only
+ *  case this module retries. */
+export interface CredentialLookupOutcome {
+  row: PracticeCredentialRow | null
+  error: { message?: string } | null
+}
+
+export type CredentialLookupFn = () => Promise<CredentialLookupOutcome>
+
+/**
+ * The flag. UNSET (or any value !== 'true') = byte-identical: one lookup
+ * attempt, fail-closed on any error exactly as before. Read at call time (never
+ * cached), mirroring isUpcCapabilityAuthEnabled.
+ */
+export function isCredentialLookupRetryEnabled(): boolean {
+  return process.env.SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED === 'true'
+}
+
+/**
+ * Runs `lookup` once. On a genuine query error (never on a clean "no row"), and
+ * only when the flag is on, retries ONCE more before returning. This does not
+ * change what authenticates — a persistent query error still fails closed after
+ * the retry, and an unknown key (row: null, error: null) is never retried (it
+ * was never ambiguous with a transient failure). It only removes the *spurious*
+ * 401 a one-off DB hiccup would otherwise cause under load (the dominant failure
+ * class diagnosed against the s9-loop dogfood credential, 2026-07-19).
+ *
+ * No backoff delay — an immediate retry is enough to smooth a one-off blip
+ * without adding latency on top of the already-tight 28s hook timeout the
+ * composed-consult path is fighting (Item B of the same follow-up).
+ */
+export async function lookupCredentialRowWithRetry(
+  lookup: CredentialLookupFn,
+): Promise<CredentialLookupOutcome> {
+  const first = await lookup()
+  if (!first.error) return first
+  if (!isCredentialLookupRetryEnabled()) return first
+  return lookup()
+}
+
 /** The four prefixes the widened extractors recognise (all keep validating). */
 export const ALL_CREDENTIAL_PREFIXES = [
   'sr_live_',
@@ -278,7 +326,12 @@ export function evaluatePracticeCredentialRow(
  * The caller is responsible for transport extraction + the prefix check (so the
  * per-capability transport narrowing stays at the call-site — constraint 7).
  *
- * KG1 rule 2: the read is awaited; a query error is fail-closed (invalid_token).
+ * KG1 rule 2: the read is awaited; a persistent query error is fail-closed
+ * (invalid_token). A TRANSIENT query error (network/timeout/5xx) is retried
+ * once when SUBSTRATE_CREDENTIAL_LOOKUP_RETRY_ENABLED is set — see
+ * lookupCredentialRowWithRetry; flag-off is a single attempt, byte-identical to
+ * the pre-2026-07-29 behaviour. The genuine "unknown key" case (no error, no
+ * row) is never retried either way — it was never the ambiguous case.
  * The Supabase client is constructed inside the function (not at module load) so
  * pure-function tests import this module without real credentials.
  */
@@ -294,19 +347,18 @@ export async function validatePracticeCredential(
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   )
 
-  const { data: row, error } = await admin
-    .from('api_keys')
-    .select(PRACTICE_CREDENTIAL_SELECT)
-    .eq('key_hash', keyHash)
-    .maybeSingle()
+  const { row, error } = await lookupCredentialRowWithRetry(async () => {
+    const { data, error } = await admin
+      .from('api_keys')
+      .select(PRACTICE_CREDENTIAL_SELECT)
+      .eq('key_hash', keyHash)
+      .maybeSingle()
+    return { row: (data as unknown as PracticeCredentialRow | null) ?? null, error }
+  })
 
   if (error) {
     return { valid: false, reason: 'invalid_token' }
   }
 
-  return evaluatePracticeCredentialRow(
-    (row as unknown as PracticeCredentialRow | null) ?? null,
-    requiredCapability,
-    ctx,
-  )
+  return evaluatePracticeCredentialRow(row, requiredCapability, ctx)
 }
