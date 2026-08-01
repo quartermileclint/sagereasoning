@@ -15,7 +15,7 @@
 
 **Do not re-read the full agent-circles build plan, the earlier verbatim mentor records (Q1–Q9, L1–L4), or the PR19 raw journal** unless one of the three scoping tasks below specifically requires citing something from them — the two files above already extract everything you need.
 
-**Build status:** committed on `main` at `dec9ead` ("PR19 exhaustive resolution + mentor ruling on five fidelity questions (agent-circles C1)"). Not yet pushed as of this prompt's authoring — the founder pushes via GitHub Desktop on their own schedule; do not assume push state, check `git log` / `git status` fresh at session start. `SUBSTRATE_AGENT_CIRCLES_ENABLED` is unset everywhere; nothing from this arc is live.
+**Build status:** committed on `main` at `ee6c3f8` ("C1e calibration probe run (both legs, clean) + stale-doc reconciliation"), on top of `dec9ead` ("PR19 exhaustive resolution + mentor ruling on five fidelity questions"), on top of `cfc3d7c` (the original build). Both `dec9ead` and the commit before it are pushed as of this prompt's authoring; `ee6c3f8` is not yet pushed — the founder pushes via GitHub Desktop on their own schedule, do not assume push state, check `git log`/`git status` fresh at session start regardless of what this line says. `SUBSTRATE_AGENT_CIRCLES_ENABLED` is unset everywhere; nothing from this arc is live. **Not relevant to this session's task, but for orientation:** `ee6c3f8` also ran C1e's calibration probe (clean, both legs — see the close doc §4d if curious) and cleared C2's gate condition; C2 itself is still not started and is not part of this session's scope either.
 
 ## The three items to scope
 
