@@ -1,11 +1,11 @@
 -- ============================================================
 -- SageReasoning — agent_assessment_history session_marker column (B5 build)
 -- Run in: Supabase Dashboard → SQL Editor → New Query.  TEST first, then prod.
--- AUTHORED 2026-07-29. NOT YET APPLIED — the founder-walked activation arm
--- (its own step) lands this migration BEFORE
--- SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED is set, mirroring the layer1_source
--- precedent (flag-before-migration would fail the windowed read honest —
--- signal omitted, never a 500 — but the walk forbids that order).
+-- AUTHORED 2026-07-29. APPLIED 2026-07-30 (founder-walked) to TEST and then
+-- PRODUCTION, BEFORE SUBSTRATE_SESSION_DECLINE_SIGNAL_ENABLED was set, per the
+-- layer1_source precedent — §VERIFY confirmed the column, the CHECK constraint,
+-- and every pre-existing row correctly unmarked
+-- (D-B5-SESSION-DECLINE-SIGNAL-BUILT-ACTIVATED-LIVE-2026-07-30).
 -- ============================================================
 -- Adds the DECLARED session-boundary marker per trajectory row — the evidence
 -- B5's "sustained decline across sessions" claim rests on (the mentor's
