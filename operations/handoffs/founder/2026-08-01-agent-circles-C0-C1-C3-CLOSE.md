@@ -27,7 +27,7 @@ No commit, push, deploy, schema apply, flag set, or credential mint happened in 
 | **C1a** first-circle re-grounding | Built, **flag-gated (dark)** | The prompt teaches the first circle as the practitioner's own reasoning integrity, with the mentor's three classes, and explicitly refuses the background reading. **Gated at the PR19 fold — see BD-7.** |
 | **C1b** three-element standard | Built, flag-gated | New optional Layer-1 fields + a new pure module `reasoning-integrity.ts`. Conjunction required; domain routed by causal locus. |
 | **C1d** predicate confirmation | Verified, no code change | `kathekon-engagement.ts` is byte-unchanged, as the ruling requires; battery 0 fails. |
-| **C1e** calibration probe | **Authored, not run** | `website/scripts/first-circle-calibration-probe.ts`. Both legs are the founder's (real API calls). Gates C2. |
+| **C1e** calibration probe | **RUN, both legs, clean — §4d** | `website/scripts/first-circle-calibration-probe.ts`. Ran via the flag (no git stash needed, post-BD-7) rather than the script's own pre-flag-gating instructions. Gates C2 — now cleanly satisfied, C2 itself still not started. |
 | **C1f** B5 regime exclusion | Built | `session-decline-signal.ts` now segments to the latest extraction regime. Closes the gap its own header carried as open. |
 | **C3** circle-4 class | Built, **flag-gated (dark)** | Prompt teaching only — no new mechanism: a `cosmopolis` circle flows through the existing justice machinery. **Gated at the PR19 fold — see BD-7; this was a confirmed CRITICAL.** |
 | **C1c** trust-event classes | **DEFERRED — see §2** | Not built. |
@@ -89,7 +89,7 @@ This is the faithful reading — mentor Q3 is explicit that a first-circle-only 
 - A second real catch: the `§9 MEASURE` pin rejected my boundary note because it contained the word "**verdict**" (in "mentor verdicts"), which is a forbidden substring in any MEASURE-block payload. The note was reworded to "rulings"; the pin stayed strict.
 - **Two more real defects caught and fixed at the root by PR19 pass 3, this sitting** (§4a): `elements_present` was hardcoded, not the real computed evidence; C1f's regime-segmentation function had zero dedicated coverage. Both fixed, both regression-pinned, both mutation-verified non-vacuous.
 
-**Performed this sitting: the guardrail verdict-equivalence battery, both directions — clean, no leak (§8).** **The LOCUS-2 battery was NOT run** — see §5 step 2 and §7; carried to the founder walk.
+**Performed across this session's sittings: the guardrail verdict-equivalence battery (§8) AND the LOCUS-2 battery (§8b), both directions each — clean, no leak on either.** *(Corrected: an earlier draft of this line said LOCUS-2 was not run — that was true only of the sitting it was written in; a later sitting the same session ran it. See §8b for the full result.)*
 
 ## 5. Founder-walk checklist
 
@@ -104,7 +104,7 @@ This is the faithful reading — mentor Q3 is explicit that a first-circle-only 
 0b. **DONE this sitting — the guardrail verdict-equivalence battery ran both directions, clean, no leak.** See §8 for the full comparison, a fixture-coverage caveat, and one non-safety observation worth a look before activation.
 1. **DONE (code) + still one manual step at flip time.** The `agent-circles-v1` boundary is no longer read unconditionally — `activeRegimeBoundaries()` (§4c, mentor Q1) excludes it entirely until the flag is on, so a deploy without a flag-flip can no longer mislabel any row on any of the three live surfaces (`trajectory-delta`/AE-1, `loop-fold`/AE-2, `session-decline-signal`/B5). **The one remaining manual step, still BLOCKING at flip time (not at deploy time — the mentor's Q1 ruling, not the prior "deploy day" text this line replaces):** the moment you DO flip `SUBSTRATE_AGENT_CIRCLES_ENABLED=true`, the authored `band_start_iso`/`band_end_iso` in `website/src/lib/substrate/trajectory-delta.ts` must equal that actual flip day and the day after — reconcile them to the real date at flip time, whatever day that turns out to be, before or in the same step as setting the flag. Getting this wrong still mislabels examinations across the vocabulary change (Q9a), same consequence as before — only the anchor event changed, not the risk.
 2. **DONE — the LOCUS-2 battery ran, both directions, clean, no leak.** See §8b. Across both batteries (this one + §8's verdict-equivalence battery), every fixture whose verdict changed between flag-off and flag-on was adjudicated: all changes are (a) — genuinely no longer or more-favourably floored on GOOD fixtures — never (b), a leak where a bad fixture became less conservative. **Zero cases of (b) found on either battery.**
-3. **Run C1e's calibration probe, both legs** (`--label=pre-c1` before the change, `--label=post-c1` after). Read it against its own stated bounds: a rate that fell because *every* circle fell is over-broadness, not calibration.
+3. **DONE — C1e's calibration probe ran, both legs, clean.** See §4d for the full result and reading.
 4. **Acknowledge the two disclosed consequences explicitly** before pushing: C1a's lenience direction (§3) and C3's new block class (§3). **Superseded by step -1: acknowledgement alone no longer suffices for either — the mentor (§4c) confirmed both need a BUILT mechanism (Q2's routing, Q3's staged-pause tier) before the flag, not merely a founder sign-off that the consequence is understood.**
 5. Commit + push. Vercel green **with the intended code** before any flag. **This deploy is byte-identical in behaviour** — the prompt is flag-off-identical to HEAD and both new assessment fields are omitted.
 6. Live smokes on a throwaway credential, revoked at teardown: a self-regarding consult (expect no `self_preservation`), a third-party-affecting consult (expect the affected circle, unchanged), a summariser-omission consult (expect `cosmopolis` + `violated`), and an honest-disclosure consult (expect **no** violation — the protective control).
@@ -120,7 +120,7 @@ This is the faithful reading — mentor Q3 is explicit that a first-circle-only 
 ## 7. Carried
 
 - **C1c** — the failure/demonstration trust-event classes + the `agent_trust_events` CHECK widening, flag-gated dark per BD-2. Its own `code-critical` session.
-- **C2** — the fifth-circle criterion, gated on C1e's live calibration (mentor Q9b).
+- **C2** — the fifth-circle criterion, gated on C1e's live calibration (mentor Q9b). **The gate condition is now cleanly satisfied (§4d)** — C2 itself remains not started (out of this session's scope) and, per Q4's mentor ruling (§4c), any activation-adjacent work is separately blocked on the three new prerequisites regardless of C1e clearing.
 - **D4** — unchanged in content, **raised in priority**: `derive-trust-events.ts` still mints dikaiosyne justice events from self-only circles, which the 2026-07-19 ruling says is not a justice surface. C1a makes the reducer *more* divergent from the predicate, not less. **C1a does not close D4** — the frequency drop must not be read as a fix.
 - **W2** (logos-on record machinery) — its own schema step, per BD-1.
 - **`loop-fold.ts`'s `self_regarding` bucket starved by C1a** (§4b item 4) — a live AE-2 measurement-fidelity degradation, disclosed not fixed. Its own review of `kathekon-engagement.ts`/`loop-fold.ts`, founder's call on priority.
@@ -145,6 +145,27 @@ Full verbatim record: `operations/agent-circles-2026-08/2026-08-02-mentor-consul
 - **Q5 (circle-4 scope: agent-to-agent only, or any rational recipient?) — CONFIRMED as built. No change required.** "Any rational recipient — human or artificial — is the faithful reading. The broader scope is correct." The prompt's existing "human or artificial" framing (layer1-extractor.ts:1646) is affirmed as faithful to Q8, not an overreach. One forward-looking design note from the mentor, not required for this build: circle-4 (corruption of examination) and the human-facing distress/harm perimeter (harm through effects) address different wrongs and should be distinguishable in the record so a single action does not generate two independent enforcement responses for what is functionally one wrong — named as a follow-up, not built.
 
 **Net effect on activation readiness: the flag `SUBSTRATE_AGENT_CIRCLES_ENABLED` is now confirmed further from ready than the pre-mentor-consultation picture suggested.** Three genuinely new, mentor-required items stand between this build and any flag flip — none built, none attempted this sitting, each its own scoped Critical-tier session: (1) Q2's positive phronesis/sophrosyne routing for circle-1-only actions; (2) Q3's staged-pause tier for circle-4, confirmed as a hard prerequisite rather than an open question; (3) Q4's pre-existing-channel remediation, whose SCOPING (not build) is itself a prerequisite for C1a specifically. §5 and §7 below are updated to reflect this.
+
+## 4d. C1e calibration probe — RUN, both legs, clean, C2's gate cleanly satisfied
+
+`website/scripts/first-circle-calibration-probe.ts` (8 fixed scenarios: 4 negative/`neg-*` ordinary-work cases expected NOT to fire the first circle, 4 positive/`pos-*` reasoning-integrity cases expected TO fire it; `--runs=3` each). The script's own docstring instructs `git stash`/checking out the pre-C1 commit for the baseline leg — **not needed post-BD-7**: since the prompt is now flag-gated rather than unconditional, the pre-C1 baseline is obtained simply by running with `SUBSTRATE_AGENT_CIRCLES_ENABLED` unset, and the corrected leg by setting it `true`, exactly the pattern already established for the verdict-equivalence and LOCUS-2 batteries this session. Raw JSON output: `operations/agent-circles-2026-08/runs/first-circle-calibration-{pre-c1,post-c1}.json` (not committed as of this addendum — session-scratch until the founder decides whether the raw run data belongs in the repo).
+
+**Results:**
+
+| | pre-c1 (flag off) | post-c1 (flag on) |
+|---|---|---|
+| `first_circle_attachment_rate` | 0.261 | 0.5 |
+| `recall_on_expected` | **0.333** | **1.0** |
+| `false_positive_rate_on_ordinary_work` | **0.182** | **0.0** |
+| `mean_beyond_self_circles` | 1.26 | 1.0 |
+| `mean_total_circles` | 1.52 | 1.5 |
+| errors | 1 (unrelated passion-enum validation failure, `neg-routine-refactor` run 1) | 0 |
+
+**Reading it against the probe's own stated bounds:** this is exactly the calibration pattern C2's gate wants, not a collapse-to-zero. `recall_on_expected` went from 1-in-3 to a clean 4-for-4 on every positive scenario — the corrected prompt now reliably fires on genuine reasoning-integrity cases where the old one mostly missed them. `false_positive_rate_on_ordinary_work` went from 18.2% to a clean 0% — none of the four ordinary-work negative scenarios fired post-C1, all four fired zero times across their three runs. **The over-broadness control holds:** `mean_beyond_self_circles` moved only 1.26→1.0 and `mean_total_circles` barely moved at all (1.52→1.5) — the extractor is not simply emitting fewer circles across the board; it specifically stopped attaching the first circle where it shouldn't and started attaching it reliably where it should.
+
+**One honest observation, not a defect, worth recording rather than silently absorbing into the clean headline:** the pre-c1 baseline's numbers (26% attachment, 33% recall, 18% false-positive) are lower across the board than the "attaches to nearly every decision... present everywhere" framing in the probe's own docstring (echoing the mentor's Q3 characterization) might suggest — on THIS fixed 8-scenario set, the old prompt was already missing 2 of 3 genuine reasoning-integrity cases, not over-firing on everything. The correction's DIRECTION and MAGNITUDE are both exactly as intended (recall up, false-positive down, beyond-self stable), so this doesn't call the fix into question — but the small, fixed scenario set (N=8, `runs=3`, i.e. 24 calls per leg) is explicitly named by the probe's own docstring as "a calibration signal for a build gate, not a benchmark... supports no public claim," and this session's result is consistent with that caveat: a real, clean, directionally-correct signal, not a large-sample demonstration.
+
+**C2's gate condition (mentor Q9b: "the fifth-circle criterion must not be built on a miscalibrated first circle... first-circle firing must be SPECIFIC rather than background") is cleanly satisfied by this result.** C2 itself is **not started** — out of this session's scope, and separately, any activation-adjacent work on this whole arc is blocked on the three new mentor-confirmed prerequisites from §4c regardless of C1e clearing.
 
 ## 4b. PR19 pass 4 — RAN TO FULL COMPLETION (55/55 agents, 0 errors). This is now the authoritative, exhaustive result.
 
